@@ -158,10 +158,13 @@ https://www.pinksale.finance/pinklock
   https://klineodyssey.github.io/kline-odyssey/
 
 - 📺 YouTube  
-  （填入你的頻道）
+https://youtube.com/@klineodyssey
 
-- 🎵 TikTok  
-  （填入你的 TikTok）
+- 🎵 TikTok
+tiktok.com/@klineodyssey
+
+  Facebook
+https://www.facebook.com/le.tian.di.2025
 
 ---
 
