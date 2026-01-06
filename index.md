@@ -34,6 +34,10 @@
 🌐 官網  
 https://klineodyssey.github.io/kline-odyssey/
 
+📲 官方修行入口（唯一）
+加入《K線西遊記》LINE 官方帳號
+👉 https://lin.ee/b8X18F7
+
 📺 YouTube  
 https://www.youtube.com/@klineodyssey
 
