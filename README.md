@@ -161,7 +161,7 @@ https://www.pinksale.finance/pinklock
 https://youtube.com/@klineodyssey
 
 - 🎵 TikTok
-tiktok.com/@klineodyssey
+https://www.tiktok.com/@klineodyssey
 
   Facebook
 https://www.facebook.com/le.tian.di.2025
