@@ -1,16 +1,12 @@
-name: TX Auto Transfer (V8.8.2_pro)
+name: TAIFEX Auto Transfer (subdir)
 
 on:
   push:
     paths:
-      - "raw/*.csv"
-      - "scripts/*.py"
-      - ".github/workflows/auto_transfer.yml"
+      - "K線西遊記/kline-taifex/raw/*.csv"
+      - "K線西遊記/kline-taifex/scripts/*.py"
+      - ".github/workflows/taifex_auto_transfer.yml"
   workflow_dispatch:
-
-# 若你想每天固定時間也自動跑（即使沒 push），打開下面 schedule
-#  schedule:
-#    - cron: "0 1 * * *"   # UTC 01:00 = 台灣 09:00
 
 jobs:
   build:
@@ -30,9 +26,12 @@ jobs:
           pip install -U pip
           pip install pandas openpyxl numpy
 
-      - name: Run transfer pipeline (merge into master/台指近全.xlsx)
+      - name: Run pipeline in subdir
         run: |
+          cd "K線西遊記/kline-taifex"
           python scripts/tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master master/台指近全.xlsx
+
+          # 取最新輸出的台指近全YYYYMMDD.xlsx（若你的 pipeline 輸出在此資料夾）
           latest=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
           if [ -n "$latest" ]; then
             cp "$latest" master/台指近全.xlsx
@@ -44,7 +43,9 @@ jobs:
         run: |
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
-          git add master/ master/history/ *.xlsx 2>/dev/null || true
+
+          git add "K線西遊記/kline-taifex/master" "K線西遊記/kline-taifex/master/history" || true
           git diff --cached --quiet && echo "No changes to commit." && exit 0
-          git commit -m "auto: update 台指近全 (V8.8.2_pro)"
+
+          git commit -m "auto: update 台指近全 (subdir)"
           git push
