@@ -155,7 +155,9 @@ https://www.pinksale.finance/pinklock
 ## 九、官方入口
 
 - 🌐 官網 / 白皮書  
-  https://klineodyssey.github.io/kline-odyssey/
+https://klineodyssey.github.io/kline-odyssey/
+
+📲 LINE 官方帳號（唯一入口） https://lin.ee/b8X18F7
 
 - 📺 YouTube  
 https://youtube.com/@klineodyssey
