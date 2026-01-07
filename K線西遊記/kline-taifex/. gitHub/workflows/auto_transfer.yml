@@ -1,37 +1,50 @@
-name: TX Auto Transfer
+name: TX Auto Transfer (V8.8.2_pro)
 
 on:
   push:
     paths:
       - "raw/*.csv"
-  schedule:
-    - cron: "0 1 * * *"   # 每天 UTC 01:00（台灣 09:00）
+      - "scripts/*.py"
+      - ".github/workflows/auto_transfer.yml"
+  workflow_dispatch:
+
+# 若你想每天固定時間也自動跑（即使沒 push），打開下面 schedule
+#  schedule:
+#    - cron: "0 1 * * *"   # UTC 01:00 = 台灣 09:00
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
+          pip install -U pip
           pip install pandas openpyxl numpy
 
-      - name: Run transfer
+      - name: Run transfer pipeline (merge into master/台指近全.xlsx)
         run: |
           python scripts/tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master master/台指近全.xlsx
+          latest=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
+          if [ -n "$latest" ]; then
+            cp "$latest" master/台指近全.xlsx
+            mkdir -p master/history
+            cp "$latest" "master/history/$latest"
+          fi
 
-      - name: Commit result
+      - name: Commit results
         run: |
-          git config --global user.name "kline-bot"
-          git config --global user.email "bot@kline.odyssey"
-          git add master/*.xlsx
-          git commit -m "auto: update 台指近全"
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
+          git add master/ master/history/ *.xlsx 2>/dev/null || true
+          git diff --cached --quiet && echo "No changes to commit." && exit 0
+          git commit -m "auto: update 台指近全 (V8.8.2_pro)"
           git push
-          
