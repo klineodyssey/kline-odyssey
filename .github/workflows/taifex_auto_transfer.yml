@@ -29,7 +29,7 @@ jobs:
           python -m pip install -U pip
           python -m pip install pandas openpyxl numpy
 
-      - name: Run pipeline in subdir
+      - name: Run pipeline (batch raw/*.csv)
         shell: bash
         run: |
           set -e
@@ -41,13 +41,10 @@ jobs:
           echo "=== list master ==="
           ls -al master || true
 
-          latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
-          echo "latest_csv=$latest_csv"
+          # 批次：一次吃掉 raw/*.csv（程式已支援 nargs='+')
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master "master/台指近全.xlsx"
 
-          # 先跑轉檔；就算 exit=2 也先不直接讓 workflow 掛掉
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master "master/台指近全.xlsx" || true
-
-          # 只要 master 有產出就算成功；沒有才 fail
+          # 找 master 目錄中最新輸出的台指近全YYYYMMDD.xlsx，並同步覆蓋 master/台指近全.xlsx
           latest_out=$(ls -1 master/台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
           echo "latest_out=$latest_out"
 
@@ -70,5 +67,5 @@ jobs:
           git add "K線西遊記/kline-taifex/master" "K線西遊記/kline-taifex/master/history" || true
           git diff --cached --quiet && echo "No changes to commit." && exit 0
 
-          git commit -m "auto: update 台指近全 (subdir)"
+          git commit -m "auto: update 台指近全 (batch raw/*.csv)"
           git push
