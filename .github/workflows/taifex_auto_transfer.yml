@@ -44,7 +44,20 @@ jobs:
           latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
           echo "latest_csv=$latest_csv"
 
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master master/台指近全.xlsx
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master master/台指近全.xlsx || true
+
+# 只要 master 有產出，就繼續；沒有才 fail
+latest_out=$(ls -1 master/台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
+echo "latest_out=$latest_out"
+if [ -z "$latest_out" ]; then
+  echo "ERROR: master output not found"
+  exit 1
+fi
+
+cp "$latest_out" master/台指近全.xlsx
+mkdir -p master/history
+cp "$latest_out" "master/history/$(basename "$latest_out")"
+
 
           latest_xlsx=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
           echo "latest_xlsx=$latest_xlsx"
