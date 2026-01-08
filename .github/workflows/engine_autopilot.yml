@@ -1,0 +1,87 @@
+name: TX Engine Autopilot (safe)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      - "K線西遊記/kline-engine-public/**"
+      - ".github/workflows/engine_autopilot.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  run-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        shell: bash
+        run: |
+          set -e
+          python -m pip install -U pip
+          python -m pip install pandas openpyxl numpy requests
+
+      # 下載「核心引擎」（放在 Release，不進 repo）
+      - name: Fetch engine artifact
+        shell: bash
+        env:
+          ENGINE_URL: ${{ secrets.ENGINE_URL }}
+          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+        run: |
+          set -e
+          mkdir -p engine_bin
+          if [ -z "$ENGINE_URL" ]; then
+            echo "ENGINE_URL is empty. Please set secrets.ENGINE_URL"
+            exit 1
+          fi
+
+          # 若你 Release 是公開，可不需要 token
+          if [ -n "$ENGINE_TOKEN" ]; then
+            curl -L -H "Authorization: Bearer $ENGINE_TOKEN" -o engine_bin/engine.zip "$ENGINE_URL"
+          else
+            curl -L -o engine_bin/engine.zip "$ENGINE_URL"
+          fi
+
+          unzip -o engine_bin/engine.zip -d engine_bin
+          ls -al engine_bin
+
+      - name: Run engine (public entry)
+        shell: bash
+        env:
+          KLINE_ENGINE_KEY: ${{ secrets.KLINE_ENGINE_KEY }}
+        run: |
+          set -e
+          cd "K線西遊記/kline-engine-public"
+
+          # 讀取最新台指近全主檔
+          MASTER="../kline-taifex/master/台指近全.xlsx"
+          if [ ! -f "$MASTER" ]; then
+            echo "MASTER not found: $MASTER"
+            exit 1
+          fi
+
+          # 你公開的入口：run_public.py
+          # engine_bin 內含核心執行檔或 wheel
+          python run_public.py --master "$MASTER" --engine_dir "../../engine_bin" --outdir "./output"
+
+      - name: Commit outputs
+        shell: bash
+        run: |
+          set -e
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
+
+          git add "K線西遊記/kline-engine-public/output" || true
+          git diff --cached --quiet && echo "No changes." && exit 0
+          git commit -m "auto: engine output update"
+          git push
+          
