@@ -8,6 +8,9 @@ on:
       - ".github/workflows/taifex_auto_transfer.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,24 +22,25 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          pip install -U pip
-          pip install pandas openpyxl numpy
+          python -m pip install -U pip
+          pip install -r "K線西遊記/kline-taifex/requirements.txt"
 
       - name: Run pipeline in subdir
         run: |
           cd "K線西遊記/kline-taifex"
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master master/台指近全.xlsx
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py
 
-          # 取最新輸出的台指近全YYYYMMDD.xlsx（若你的 pipeline 輸出在此資料夾）
-          latest=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
+          latest=$(find . -maxdepth 3 -name "台指近全*.xlsx" | sort | tail -n 1)
+          echo "latest=$latest"
+
           if [ -n "$latest" ]; then
             cp "$latest" master/台指近全.xlsx
             mkdir -p master/history
-            cp "$latest" "master/history/$latest"
+            cp "$latest" "master/history/$(basename "$latest")"
           fi
 
       - name: Commit results
