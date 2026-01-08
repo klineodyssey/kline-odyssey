@@ -28,46 +28,31 @@ jobs:
         run: |
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-taifex/requirements.txt"
-          
-      - name: Run pipeline in subdir
-        shell: bash
+
+          - name: Run pipeline in subdir
         run: |
-          set -u  # 不要用 -e，避免 ls / glob 無檔就整個炸掉
           cd "K線西遊記/kline-taifex"
 
-          echo "PWD=$(pwd)"
           echo "=== list raw ==="
           ls -al raw || true
-          echo "=== list scripts ==="
-          ls -al scripts || true
+
           echo "=== list master ==="
           ls -al master || true
 
-          # 1) 先確認 raw 裡真的有 csv（沒有就直接結束，但不算失敗）
-          shopt -s nullglob
-          csvs=(raw/*.csv)
-          if [ ${#csvs[@]} -eq 0 ]; then
-            echo "No CSV found in raw/. Skip."
-            exit 0
+          latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
+          echo "latest_csv=$latest_csv"
+
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master "master/台指近全.xlsx"
+
+          # 取最新輸出的台指近全YYYYMMDD.xlsx
+          latest=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
+          echo "latest_output=$latest"
+
+          if [ -n "$latest" ]; then
+            cp "$latest" "master/台指近全.xlsx"
+            mkdir -p master/history
+            cp "$latest" "master/history/$latest"
           fi
-
-          # 2) 跑轉檔（這一步如果真的出錯，才應該失敗）
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "${csvs[@]}" --master master/台指近全.xlsx
-
-          # 3) 找最新輸出檔（找不到也不算失敗）
-          outs=(台指近全*.xlsx)
-          if [ ${#outs[@]} -eq 0 ]; then
-            echo "Pipeline produced no 台指近全*.xlsx. Skip copy."
-            exit 0
-          fi
-
-          latest=$(printf "%s\n" "${outs[@]}" | sort | tail -n 1)
-          echo "Latest output: $latest"
-
-          cp "$latest" master/台指近全.xlsx
-          mkdir -p master/history
-          cp "$latest" "master/history/$latest"
-          
 
       - name: Commit results
         run: |
