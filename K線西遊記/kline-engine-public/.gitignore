@@ -1,0 +1,4 @@
+output/
+engine_bin/
+__pycache__/
+*.pyc
