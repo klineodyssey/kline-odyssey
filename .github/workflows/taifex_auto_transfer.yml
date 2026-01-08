@@ -44,64 +44,26 @@ jobs:
           latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
           echo "latest_csv=$latest_csv"
 
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master master/台指近全.xlsx || true
+          # 先跑轉檔；就算 exit=2 也先不直接讓 workflow 掛掉
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master "master/台指近全.xlsx" || true
 
-# 只要 master 有產出，就繼續；沒有才 fail
-latest_out=$(ls -1 master/台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
-echo "latest_out=$latest_out"
-if [ -z "$latest_out" ]; then
-  echo "ERROR: master output not found"
-  exit 1
-fi
+          # 只要 master 有產出就算成功；沒有才 fail
+          latest_out=$(ls -1 master/台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
+          echo "latest_out=$latest_out"
 
-cp "$latest_out" master/台指近全.xlsx
-mkdir -p master/history
-cp "$latest_out" "master/history/$(basename "$latest_out")"
-
-
-          latest_xlsx=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
-          echo "latest_xlsx=$latest_xlsx"
-
-          if [ -n "$latest_xlsx" ]; then
-            cp "$latest_xlsx" master/台指近全.xlsx
-            mkdir -p master/history
-            cp "$latest_xlsx" "master/history/$latest_xlsx"
+          if [ -z "$latest_out" ]; then
+            echo "ERROR: master output not found"
+            exit 1
           fi
+
+          cp "$latest_out" "master/台指近全.xlsx"
+          mkdir -p master/history
+          cp "$latest_out" "master/history/$(basename "$latest_out")"
 
       - name: Commit results
         shell: bash
         run: |
           set -e
-          git config user.name "kline-bot"
-          git config user.email "bot@kline.odyssey"
-
-          git add "K線西遊記/kline-taifex/master" "K線西遊記/kline-taifex/master/history" || true
-          git diff --cached --quiet && echo "No changes to commit." && exit 0
-
-          git commit -m "auto: update 台指近全 (subdir)"
-          git push
-          ls -al raw || true
-
-          echo "=== list master ==="
-          ls -al master || true
-
-          latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
-          echo "latest_csv=$latest_csv"
-
-          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py "$latest_csv" --master "master/台指近全.xlsx"
-
-          # 取最新輸出的台指近全YYYYMMDD.xlsx
-          latest=$(ls -1 台指近全*.xlsx 2>/dev/null | sort | tail -n 1)
-          echo "latest_output=$latest"
-
-          if [ -n "$latest" ]; then
-            cp "$latest" "master/台指近全.xlsx"
-            mkdir -p master/history
-            cp "$latest" "master/history/$latest"
-          fi
-
-      - name: Commit results
-        run: |
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
