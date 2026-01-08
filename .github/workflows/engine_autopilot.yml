@@ -1,4 +1,4 @@
-name: TX Engine Autopilot (safe)
+name: TX Engine Autopilot (方案2-安全版)
 
 on:
   workflow_dispatch:
@@ -24,31 +24,25 @@ jobs:
           python-version: "3.10"
 
       - name: Install deps
-        shell: bash
         run: |
           set -e
           python -m pip install -U pip
-          python -m pip install pandas openpyxl numpy requests
+          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Fetch engine artifact
+      # 方案2：核心引擎不進 repo，放在 Secrets（Base64）
+      - name: Restore private engine zip from secret
         shell: bash
         env:
-          ENGINE_URL: ${{ secrets.ENGINE_URL }}
-          ENGINE_TOKEN: ${{ secrets.ENGINE_TOKEN }}
+          ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
         run: |
           set -e
-          mkdir -p engine_bin
-          if [ -z "$ENGINE_URL" ]; then
-            echo "ENGINE_URL is empty. Please set secrets.ENGINE_URL"
+          if [ -z "$ENGINE_ZIP_B64" ]; then
+            echo "ENGINE_ZIP_B64 is empty. Please set repo secret ENGINE_ZIP_B64."
+            echo "You can generate it locally:  base64 -w 0 engine.zip"
             exit 1
           fi
-
-          if [ -n "$ENGINE_TOKEN" ]; then
-            curl -L -H "Authorization: Bearer $ENGINE_TOKEN" -o engine_bin/engine.zip "$ENGINE_URL"
-          else
-            curl -L -o engine_bin/engine.zip "$ENGINE_URL"
-          fi
-
+          mkdir -p engine_bin
+          echo "$ENGINE_ZIP_B64" | base64 -d > engine_bin/engine.zip
           unzip -o engine_bin/engine.zip -d engine_bin
           echo "=== engine_bin ==="
           ls -al engine_bin
@@ -57,18 +51,19 @@ jobs:
         shell: bash
         env:
           KLINE_ENGINE_KEY: ${{ secrets.KLINE_ENGINE_KEY }}
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -e
-          cd "K線西遊記/kline-engine-public"
-
-          MASTER="../kline-taifex/master/台指近全.xlsx"
+          MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
           if [ ! -f "$MASTER" ]; then
             echo "MASTER not found: $MASTER"
             exit 1
           fi
 
-          mkdir -p output
-          python run_public.py --master "$MASTER" --engine_dir "../../engine_bin" --outdir "./output"
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "$MASTER" \
+            --engine_dir "engine_bin" \
+            --outdir "K線西遊記/kline-engine-public/output"
 
       - name: Commit outputs
         shell: bash
@@ -81,4 +76,3 @@ jobs:
           git diff --cached --quiet && echo "No changes." && exit 0
           git commit -m "auto: engine output update"
           git push
-          
