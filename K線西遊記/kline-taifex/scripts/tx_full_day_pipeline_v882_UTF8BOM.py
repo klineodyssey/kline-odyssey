@@ -7,35 +7,39 @@ tx_full_day_pipeline_v882_UTF8BOM.py
 【保留的既有規則（出自 V7.9.4～V8.6）】
 - 欄位固定 19 欄、固定順序，不更名、不改型。
 - 僅處理契約 = "TX"；排除含 "/" 的跨月價差列。
-- 近月 = 「到期月份(週別)」中擷取的最小六碼。
+- 近月：每日獨立判定（本版增補，仍符合 V8.8.2 金標準）
 - 全日K合併（核心專利邏輯，沿用原演算法）
   開盤：夜盤首筆；若無則取日盤首筆
   收盤：日盤最後一筆；若無則取夜盤最後一筆
   最高 / 最低：日夜極值（max/min）
   成交量：日 + 夜 相加
   其他欄：以日盤優先行；若無則以該日最後一筆填補
-- 輸出：<csv>_near_full_v86.xlsx（為保下游相容，沿用 v86 字樣）；主檔：台指近全YYYYMMDD.xlsx
+- 輸出：<csv>_near_full_v86.xlsx（為保下游相容，沿用 v86 字樣）；
+        主檔：台指近全YYYYMMDD.xlsx
 - Excel：凍結第一列 A2，自動欄寬
 - 合併主檔：先去重（刪舊日），再追加新日，按日期升冪
 
 【本版新增補強（不破壞既有行為）】
 - CSV 多行相容：來源一筆可能被拆成 2～3 行，按「累積到 19 欄就收斂一筆」的方式自動組回。
-  - 若出現 ≥19 欄：每 19 欄切塊為一筆；餘數留待下一行補齊
-  - 行首若偵測到新日期，且上一筆未收斂：自動以空字串補齊到 19 欄收斂
-  - 檔尾殘留 <19 欄：補空白至 19 欄後收斂（相容期交所尾列）
-  - 首列若等於標準 19 欄名 → 視為表頭；否則直接套標準 19 欄名
-- 結算/換月敘述補強（邏輯供長期管理與策略模組使用；不影響單日近月輸出）：
-  結算日 = 「最小交易月份合約消失的前一交易日」，換月於 T+1；此定義不受休假/過年/颱風影響。
+- 交易時段相容：同時支援
+    日盤：一般 / @
+    夜盤：盤後 / L
+- 跨月結算（整月檔/多檔批次皆可）：
+    期交所原始資料：結算日該到期合約「結算價=0」
+    本系統以「日盤（一般/@）結算價=0」視為該月結算日 → 排除該月份作為 near 候選
+    near 以每日獨立判定，確保結算後（T+1）自動換月
+- CLI 批次模式：input_csv 支援多個檔（raw/*.csv 展開後也可直接跑）
+    python tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master master/台指近全.xlsx
 
 使用方式：
 python tx_full_day_pipeline_v882_UTF8BOM.py 20251023tx.csv --master 台指近全20251022.xlsx
-# 產出：
-#   1) 20251023tx_near_full_v86.xlsx
-#   2) 台指近全20251023.xlsx
+python tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master master/台指近全.xlsx
 """
 from __future__ import annotations
+
 import os, re
-from typing import List
+from typing import List, Iterable, Optional
+
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -50,6 +54,9 @@ HEADERS19: List[str] = [
 
 ENCODINGS = ["utf-8","utf-8-sig","cp950","big5"]
 
+DAY_TAGS = {"一般", "@"}
+NIGHT_TAGS = {"盤後", "L"}
+
 # ---------- I/O 與相容讀取 ----------
 def _read_text_any(path: str) -> str:
     last = None
@@ -63,9 +70,12 @@ def _read_text_any(path: str) -> str:
 
 def _looks_like_date(s: str) -> bool:
     s = str(s).strip()
-    if not s: return False
-    if re.match(r"^\d{4}[-/]\d{2}[-/]\d{2}$", s): return True
-    if s.isdigit() and len(s) in (7,8): return True  # 2025102 / 20251023
+    if not s: 
+        return False
+    if re.match(r"^\d{4}[-/]\d{2}[-/]\d{2}$", s): 
+        return True
+    if s.isdigit() and len(s) in (7,8):  # 2025102 / 20251023
+        return True
     return False
 
 def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
@@ -90,19 +100,17 @@ def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
         # 若此行似為新日期起始，先把上一筆補齊收斂
         if parts and date_pat.match(parts[0]) and len(buf) > 0:
             if len(buf) % 19 != 0:
-                # 不足 19 → 補空白到 19
                 pad = 19 - (len(buf) % 19)
                 buf.extend([""] * pad)
-            # 把 buf 內所有 19 欄切塊收斂
             while len(buf) >= 19:
-                rows.append(buf[:19]); buf = buf[19:]
+                rows.append(buf[:19])
+                buf = buf[19:]
 
-        # 正常累積
         buf.extend(parts)
 
-        # 只要 >=19 就切塊收斂
         while len(buf) >= 19:
-            rows.append(buf[:19]); buf = buf[19:]
+            rows.append(buf[:19])
+            buf = buf[19:]
 
     # 檔尾殘留：補至 19 欄收斂
     if 0 < len(buf) < 19:
@@ -110,7 +118,8 @@ def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
         rows.append(buf)
         buf = []
     elif len(buf) == 19:
-        rows.append(buf); buf = []
+        rows.append(buf)
+        buf = []
 
     if not rows:
         raise ValueError("未解析到任何資料列。")
@@ -123,35 +132,66 @@ def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
 
     df = pd.DataFrame(data, columns=HEADERS19)
 
-    # 相容檢查：若第一列交易日期不像日期（極端來源），保留後續流程修復機制
+    # 相容檢查：若第一列交易日期不像日期，保留勘誤掛鉤
     if len(df) and not _looks_like_date(df.iloc[0, 0]):
-        # 這裡僅保留勘誤掛鉤，實務上多行解析已處理好
         pass
 
     return df
 
+# ---------- 工具：每日近月判定（支援結算價=0 規則） ----------
+def _extract_months(g: pd.DataFrame) -> List[int]:
+    months = (
+        g["到期月份(週別)"].astype(str)
+        .str.extract(r"(\d{6})")[0]
+        .dropna()
+        .astype(int)
+        .unique()
+        .tolist()
+    )
+    return sorted(months)
+
+def _pick_near_month_for_day(g: pd.DataFrame) -> int:
+    """
+    每日近月判定（V8.8.2 增補規則，符合使用者定義）：
+    - 候選月份：當天所有到期月份六碼（TX、非價差已在上層過濾）
+    - 期交所原始資料：結算日該到期合約「日盤結算價=0」
+      → 排除該月份作為 near 候選
+    - near = 排除後的最小月份；若全被排除則回退到最小月份（保底）
+    """
+    months = _extract_months(g)
+    if not months:
+        raise ValueError("當天找不到任何到期月份六碼。")
+
+    g_day = g[g["交易時段"].astype(str).isin(DAY_TAGS)].copy()
+
+    valid: List[int] = []
+    for m in months:
+        gm_day = g_day[g_day["到期月份(週別)"].astype(str).str.contains(str(m), na=False)]
+        settle = pd.to_numeric(gm_day["結算價"], errors="coerce")
+
+        # 只要日盤結算價出現 0（或全為 0/空時視為 0），視為結算日 → 排除該月
+        if settle.notna().any() and (settle.fillna(0) == 0).any():
+            continue
+
+        valid.append(m)
+
+    return valid[0] if valid else months[0]
+
 # ---------- 近月全日K 產出 ----------
 def make_near_full_day(df19: pd.DataFrame) -> pd.DataFrame:
     """
-    依 V7.9.4～V8.6 規則產出「近月全日K」單日資料（19 欄、不改名）。
-    近月判定：到期月份(週別) → 取最小六碼（排除含 "/"）。
+    依 V7.9.4～V8.6 規則產出「近月全日K」多日資料（19 欄、不改名）。
+    近月判定：每日獨立（支援結算價=0 自動換月）。
     全日K合併：夜盤開、日盤收、極值取日夜 max/min、成交量相加、其餘日盤優先行。
     """
     df = df19.copy()
 
     # 僅 TX，排除跨月
     df = df[df["契約"].astype(str).str.strip().str.upper() == "TX"].copy()
-    df = df[~df["到期月份(週別)"].astype(str).str.contains("/")].copy()
+    df = df[~df["到期月份(週別)"].astype(str).str.contains("/", na=False)].copy()
 
-    # 近月六碼
-    near_vals = df["到期月份(週別)"].astype(str).str.extract(r"(\d{6})")[0].dropna()
-    if near_vals.empty:
-        raise ValueError("找不到近月（到期月份六碼）。")
-    df["_到期int"] = near_vals.astype(int)
-    near = int(df["_到期int"].min())
-
-    # 排序：夜盤在前、日盤在後，便於「夜盤開、日盤收」
-    sort_map = {"盤後": 0, "一般": 1}
+    # 交易時段排序：夜盤在前、日盤在後（支援 盤後/L 與 一般/@）
+    sort_map = {"盤後": 0, "L": 0, "一般": 1, "@": 1}
     df["_seq"] = df["交易時段"].astype(str).map(sort_map).fillna(1)
     df = df.sort_values(["交易日期","_seq"]).copy()
 
@@ -163,14 +203,19 @@ def make_near_full_day(df19: pd.DataFrame) -> pd.DataFrame:
 
     records = []
     for d, g in df.groupby("交易日期"):
-        g_near = g[g["到期月份(週別)"].astype(str).str.contains(str(near))].copy()
+        try:
+            near = _pick_near_month_for_day(g)
+        except Exception:
+            continue
+
+        g_near = g[g["到期月份(週別)"].astype(str).str.contains(str(near), na=False)].copy()
         if g_near.empty:
             continue
 
         # 開盤：夜盤首筆，否則日盤首筆
-        n_open = g_near[g_near["交易時段"]=="盤後"]["開盤價"].dropna()
+        n_open = g_near[g_near["交易時段"].astype(str).isin(NIGHT_TAGS)]["開盤價"].dropna()
         if n_open.empty:
-            n_open = g_near[g_near["交易時段"]=="一般"]["開盤價"].dropna()
+            n_open = g_near[g_near["交易時段"].astype(str).isin(DAY_TAGS)]["開盤價"].dropna()
         open_px = float(n_open.iloc[0]) if not n_open.empty else np.nan
 
         # 高 / 低：日夜極值
@@ -178,16 +223,16 @@ def make_near_full_day(df19: pd.DataFrame) -> pd.DataFrame:
         low_px  = g_near["最低價"].min(skipna=True)
 
         # 收盤：日盤最後一筆，否則夜盤最後一筆
-        d_close = g_near[g_near["交易時段"]=="一般"]["收盤價"].dropna()
+        d_close = g_near[g_near["交易時段"].astype(str).isin(DAY_TAGS)]["收盤價"].dropna()
         if d_close.empty:
-            d_close = g_near[g_near["交易時段"]=="盤後"]["收盤價"].dropna()
+            d_close = g_near[g_near["交易時段"].astype(str).isin(NIGHT_TAGS)]["收盤價"].dropna()
         close_px = float(d_close.iloc[-1]) if not d_close.empty else np.nan
 
-        # 成交量：加總
+        # 成交量：加總（夜+日）
         vol = g_near["成交量"].fillna(0).sum()
 
         # 其他欄：日盤優先行；若無則取該日最後一筆
-        day_part = g_near[g_near["交易時段"]=="一般"]
+        day_part = g_near[g_near["交易時段"].astype(str).isin(DAY_TAGS)]
         base_row = day_part.iloc[-1] if not day_part.empty else g_near.iloc[-1]
 
         pct_str = str(base_row.get("漲跌%", "")).strip()
@@ -238,32 +283,19 @@ def _norm_date_series(s: pd.Series) -> pd.Series:
 # ---------- CLI ----------
 def _cli():
     import argparse
-    ap = argparse.ArgumentParser(description="台指期 TX 近月全日K 轉檔 v8.8.2（多行CSV相容＋全日合併，向下相容）")
-    ap.add_argument("input_csv", help="期交所 TX 19欄 CSV（可能拆成 2～3 行）")
+
+    ap = argparse.ArgumentParser(
+        description="台指期 TX 近月全日K 轉檔 v8.8.2（多行CSV相容＋全日合併＋跨月結算價=0換月＋批次多檔）"
+    )
+    ap.add_argument("input_csv", nargs="+", help="期交所 TX 19欄 CSV（可一次給多個檔；glob 展開可直接丟 raw/*.csv）")
     ap.add_argument("--master", help="現有主檔（xlsx）。未提供則新建。", default=None)
-    ap.add_argument("-o", "--output", help="近月全日K輸出檔 (xlsx/csv)。預設：<csv>_near_full_v86.xlsx", default=None)
+    ap.add_argument("-o", "--output", help="近月全日K輸出檔 (xlsx/csv)。批次模式下僅作用於單檔；預設：<csv>_near_full_v86.xlsx", default=None)
     args = ap.parse_args()
 
-    # 讀檔（多行相容）
-    df19 = read_csv_strict_19_multiline(args.input_csv)
-
-    # 產出單日近月
-    near = make_near_full_day(df19)
-
-    # 1) 單日近月輸出（沿用 v86 命名以保下游相容）
-    near_out = args.output
-    if not near_out:
-        base = os.path.splitext(os.path.basename(args.input_csv))[0]
-        near_out = os.path.join(os.path.dirname(args.input_csv), f"{base}_near_full_v86.xlsx")
-    if near_out.lower().endswith(".csv"):
-        near.to_csv(near_out, index=False, encoding="utf-8-sig")
-    else:
-        near.to_excel(near_out, index=False)
-        _freeze_first_row_and_autowidth(near_out, sheet_name="Sheet1")
-
-    # 2) 合併主檔
-    if args.master and os.path.exists(args.master):
-        master = pd.read_excel(args.master)
+    # 讀 master 一次
+    master_path = args.master
+    if master_path and os.path.exists(master_path):
+        master = pd.read_excel(master_path)
     else:
         master = pd.DataFrame(columns=HEADERS19)
 
@@ -273,26 +305,68 @@ def _cli():
             master[col] = np.nan
     master = master[HEADERS19].copy()
 
-    # 正規化日期
+    # 正規化 master 日期
     if not master.empty:
         master["交易日期"] = _norm_date_series(master["交易日期"])
-    near_norm = near.copy()
-    near_norm["交易日期"] = _norm_date_series(near_norm["交易日期"])
 
-    # 去重 + 追加
-    new_dates = sorted(near_norm["交易日期"].unique().tolist())
-    out_date = new_dates[-1] if new_dates else 0
+    last_master_out: Optional[str] = None
+    printed_any = False
 
-    if not master.empty:
-        master = master[~master["交易日期"].isin(new_dates)].copy()
-    merged = pd.concat([master, near_norm], ignore_index=True).sort_values("交易日期").reset_index(drop=True)
+    # 逐檔處理（排序以確保日期順序穩定）
+    for csv_path in sorted(args.input_csv):
+        # 讀檔（多行相容）
+        df19 = read_csv_strict_19_multiline(csv_path)
 
-    master_out = os.path.join(os.path.dirname(args.master if args.master else args.input_csv), _standard_master_name(out_date))
-    merged.to_excel(master_out, index=False, sheet_name="台指近全")
-    _freeze_first_row_and_autowidth(master_out, sheet_name="台指近全")
+        # 產出近月全日（可多日）
+        near = make_near_full_day(df19)
+        if near.empty:
+            continue
 
-    print(near_out)
-    print(master_out)
+        # 單日/多日 near 輸出（沿用 v86 命名以保下游相容）
+        near_out = args.output
+        if not near_out:
+            base = os.path.splitext(os.path.basename(csv_path))[0]
+            near_out = os.path.join(os.path.dirname(csv_path), f"{base}_near_full_v86.xlsx")
+
+        if near_out.lower().endswith(".csv"):
+            near.to_csv(near_out, index=False, encoding="utf-8-sig")
+        else:
+            near.to_excel(near_out, index=False)
+            _freeze_first_row_and_autowidth(near_out, sheet_name="Sheet1")
+
+        print(near_out)
+        printed_any = True
+
+        # 合併主檔（去重 + 追加）
+        near_norm = near.copy()
+        near_norm["交易日期"] = _norm_date_series(near_norm["交易日期"])
+
+        new_dates = sorted(near_norm["交易日期"].unique().tolist())
+        if not new_dates:
+            continue
+
+        if not master.empty:
+            master = master[~master["交易日期"].isin(new_dates)].copy()
+
+        master = (
+            pd.concat([master, near_norm], ignore_index=True)
+              .sort_values("交易日期")
+              .reset_index(drop=True)
+        )
+
+        out_date = new_dates[-1]
+        out_dir = os.path.dirname(master_path) if master_path else os.path.dirname(csv_path)
+        last_master_out = os.path.join(out_dir, _standard_master_name(out_date))
+
+    # 最後輸出一次 master
+    if last_master_out:
+        master.to_excel(last_master_out, index=False, sheet_name="台指近全")
+        _freeze_first_row_and_autowidth(last_master_out, sheet_name="台指近全")
+        print(last_master_out)
+        printed_any = True
+
+    if not printed_any:
+        raise SystemExit("沒有產出任何檔案（請確認輸入CSV內是否有 TX 資料）。")
 
 if __name__ == "__main__":
     _cli()
