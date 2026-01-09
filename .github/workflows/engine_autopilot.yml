@@ -15,8 +15,11 @@ jobs:
   run-engine:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -29,7 +32,6 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      # 方案2：核心引擎不進 repo，放在 Secrets（Base64）
       - name: Restore private engine zip from secret
         shell: bash
         env:
@@ -38,7 +40,6 @@ jobs:
           set -e
           if [ -z "$ENGINE_ZIP_B64" ]; then
             echo "ENGINE_ZIP_B64 is empty. Please set repo secret ENGINE_ZIP_B64."
-            echo "You can generate it locally:  base64 -w 0 engine.zip"
             exit 1
           fi
           mkdir -p engine_bin
@@ -65,14 +66,21 @@ jobs:
             --engine_dir "engine_bin" \
             --outdir "K線西遊記/kline-engine-public/output"
 
-      - name: Commit outputs
+      - name: Commit outputs (fix detached HEAD push)
         shell: bash
         run: |
           set -e
+          BRANCH="${GITHUB_REF_NAME}"
+
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
           git add "K線西遊記/kline-engine-public/output" || true
-          git diff --cached --quiet && echo "No changes." && exit 0
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+
           git commit -m "auto: engine output update"
-          git push
+          git push origin "HEAD:${BRANCH}"
