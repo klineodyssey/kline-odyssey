@@ -101,10 +101,10 @@ BNB Smart Chain（BSC）
 
 - 鎖倉標的：KGEN / WBNB LP  
 - 鎖倉期限：**至 2027 / 01 / 01（UTC）**  
-- 鎖倉狀態：鎖倉中，期間內不可撤回  
+- 鎖倉狀態：鎖倉中，期間內不可撤回
 
 👉 KGEN 鎖倉官方查驗頁（直達 PinkLock）：
-[https://www.pinksale.finance/pinklock/bsc/record/1427003](https://www.pinksale.finance/pinklock/bsc/record/1427003)
+[點我開啟鎖倉頁（Unlock 倒數）](https://www.pinksale.finance/pinklock/bsc/record/1427003)
 
 > 點擊後可直接看到：  
 > Unlock 倒數時間、KGEN / WBNB LP、鎖倉狀態（PinkLock 官方畫面）
