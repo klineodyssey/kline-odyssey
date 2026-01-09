@@ -170,6 +170,7 @@ BNB Smart Chain（BSC）
 - 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
 - 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
 
+- 🐦 [X（Twitter）](https://x.com/klineodyssey)
 ---
 
 🌕 **花果山台灣・信念不滅・市場無界**  
