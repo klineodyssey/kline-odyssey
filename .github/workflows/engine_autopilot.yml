@@ -1,4 +1,4 @@
-name: TX Engine Autopilot (方案2-Release資產版)
+name: TX Engine Autopilot (Release Asset版-定稿)
 
 on:
   workflow_dispatch:
@@ -27,12 +27,11 @@ jobs:
         run: |
           set -e
           python -m pip install -U pip
-          # 若你 repo 內有 public entry 的 requirements，裝它
           if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
             pip install -r "K線西遊記/kline-engine-public/requirements.txt"
           fi
 
-      - name: Restore private engine zip from GitHub Release asset
+      - name: Download engine zip from GitHub Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -40,44 +39,30 @@ jobs:
           rm -rf engine_bin
           mkdir -p engine_bin
 
-          # 從 Release 下載你放在 Assets 的 zip（tag = engine-v1.0，檔名 = ENGINE_ZIP_B64.zip）
-          gh release download "engine-v1.0" -p "ENGINE_ZIP_B64.zip" -D .
+          # 你的 Release tag（若不是 engine-v1.0，改這行）
+          TAG="engine-v1.0"
+          ASSET="ENGINE_ZIP_B64.zip"
 
-          # 解壓到 engine_bin
-          unzip -q "ENGINE_ZIP_B64.zip" -d engine_bin
+          # 下載 Release asset
+          gh release download "$TAG" -p "$ASSET" -D .
+
+          # 解壓
+          unzip -q "$ASSET" -d engine_bin
 
           echo "=== engine_bin tree ==="
           ls -la engine_bin
           echo "======================="
 
-          # 如果 zip 內有 requirements.txt，就裝它（引擎自己的依賴）
+          # 引擎若自帶 requirements.txt，就裝它
           if [ -f "engine_bin/requirements.txt" ]; then
             pip install -r "engine_bin/requirements.txt"
           fi
 
-      - name: Write secret model json (optional)
-        if: ${{ secrets.ENGINE_MODEL_B64 != '' }}
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import os, base64, pathlib
-          b64 = os.environ.get("ENGINE_MODEL_B64","").strip()
-          p = pathlib.Path("engine_bin/_secret_model.json")
-          p.write_bytes(base64.b64decode(b64))
-          print("wrote", p, "bytes=", p.stat().st_size)
-          PY
-
       - name: Run engine (public entry)
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
-
           MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
           OUTDIR="K線西遊記/kline-engine-public/output"
-
           mkdir -p "$OUTDIR"
 
           python "K線西遊記/kline-engine-public/run_public.py" \
