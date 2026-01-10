@@ -1,54 +1,18 @@
-# KLINE ODYSSEY  
+🌐 官網／白皮書  
+https://klineodyssey.github.io/kline-odyssey/
 
-<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+# KLINE ODYSSEY  
+<div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;">
   <iframe
-    src="https://www.youtube.com/embed/95LccqD_MsE?autoplay=1&mute=1&playsinline=1"
+    src="https://www.youtube.com/embed/95LccqD_MsE?autoplay=1&playsinline=1"
     title="KLINE ODYSSEY"
     frameborder="0"
-    allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen
     style="position:absolute;top:0;left:0;width:100%;height:100%;">
   </iframe>
 </div>
-
 ## 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
-
----
-
-## 🔗 官方入口（唯一有效）
-
-- 🌐 官網／白皮書  
-  https://klineodyssey.github.io/kline-odyssey/
-
-- 📦 GitHub 原始資料庫  
-  https://github.com/klineodyssey/kline-odyssey
-
-- 🧾 KGEN 合約（BSC）  
-  https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
-
-- 🥞 PancakeSwap（KGEN / WBNB）  
-  https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
-
-- 🔒 LP 鎖倉（PinkLock｜官方直連）  
-  👉 https://www.pinksale.finance/pinklock/bsc/record/1427003
-
-- 📲 LINE 官方帳號  
-  https://lin.ee/b8X18F7
-
-- 📡 Telegram 官方通道  
-  https://t.me/klineodyssey
-
-- 📺 YouTube  
-  https://www.youtube.com/@klineodyssey
-
-- 🎵 TikTok  
-  https://www.tiktok.com/@klineodyssey
-
-- 📘 Facebook  
-  https://www.facebook.com/le.tian.di.2025
-
-- 🐦 X（Twitter）  
-  https://x.com/klineodyssey
 
 ---
 
@@ -85,10 +49,10 @@
 
 ### KGEN 的核心定位
 
-- 質量單位（Existence Weight）  
-- 治理權重（Governance Power）  
-- 分潤憑證（Reward Share）  
-- 系統能量（System Fuel）  
+- 質量單位（Existence Weight）
+- 治理權重（Governance Power）
+- 分潤憑證（Reward Share）
+- 系統能量（System Fuel）
 
 **持有即存在，存在即有位置。**
 
@@ -107,11 +71,11 @@
 
 ### 核心機制
 
-- 交易與觀察產生經驗值  
-- 紀律決定升級速度  
-- 達標後啟動 GA（Genetic Algorithm）演化  
-- 高等級玩家可被系統視為「銀行級操作者」  
-- 可參與分紅、治理與策略權限  
+- 📈 交易與觀察產生經驗值  
+- 🧠 紀律決定升級速度  
+- 🧬 達標後啟動 GA（Genetic Algorithm）演化  
+- 🏦 高等級玩家可被系統視為「銀行級操作者」  
+- 💰 可參與分紅、治理與策略權限  
 
 ---
 
@@ -138,22 +102,22 @@
 BNB Smart Chain（BSC）
 
 ### Token Contract（唯一）
-https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+[0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be](https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
 
 ### 官方交易（PancakeSwap）
-https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+[KGEN / WBNB 交易頁](https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
 
 ### LP Pair（KGEN / WBNB）
-https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+[LP Pair（BscScan）](https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2)
 
-### 🔒 LP 鎖倉（PinkLock｜KGEN 官方直連）
+### 🔒 LP 鎖倉（PinkLock｜KGEN 專屬直連）
 
 - 鎖倉標的：KGEN / WBNB LP  
 - 鎖倉期限：**至 2027 / 01 / 01（UTC）**  
-- 鎖倉狀態：鎖倉中，期間內不可撤回  
+- 鎖倉狀態：鎖倉中，期間內不可撤回
 
-👉 KGEN 鎖倉官方查驗頁（直達 PinkLock）  
-https://www.pinksale.finance/pinklock/bsc/record/1427003
+👉 KGEN 鎖倉官方查驗頁（直達 PinkLock）：
+[點我開啟鎖倉頁（Unlock 倒數）](https://www.pinksale.finance/pinklock/bsc/record/1427003)
 
 > 點擊後可直接看到：  
 > Unlock 倒數時間、KGEN / WBNB LP、鎖倉狀態（PinkLock 官方畫面）
@@ -205,8 +169,20 @@ https://www.pinksale.finance/pinklock/bsc/record/1427003
 
 不構成投資建議，  
 不涉及政治立場，  
-不承諾任何報酬。
+不承諾任何報酬。  
 
+---
+
+## 九、官方入口（唯一有效）
+
+- 🌐 [官網／白皮書](https://klineodyssey.github.io/kline-odyssey/)
+- 📦 [GitHub 原始資料庫](https://github.com/klineodyssey/kline-odyssey)
+- 📲 [LINE 官方帳號](https://lin.ee/b8X18F7)
+- 📡 [Telegram 官方通道](https://t.me/klineodyssey)
+- 📺 [YouTube](https://www.youtube.com/@klineodyssey)
+- 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
+- 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
+- 🐦 [X（Twitter）](https://x.com/klineodyssey)
 ---
 
 🌕 **花果山台灣・信念不滅・市場無界**  
