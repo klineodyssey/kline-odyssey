@@ -1,33 +1,29 @@
-name: TX Engine Autopilot (方案2-安全版)
+name: TX Engine Autopilot (chained + hardened)
 
 on:
+  workflow_run:
+    workflows: ["TAIFEX Auto Transfer (subdir)"]
+    types: [completed]
   workflow_dispatch:
-  push:
-    paths:
-      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      - "K線西遊記/kline-engine-public/**"
-      - ".github/workflows/engine_autopilot.yml"
 
 permissions:
   contents: write
 
+concurrency:
+  group: tx-engine-autopilot
+  cancel-in-progress: true
+
 jobs:
   run-engine:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-
-    # 防呆 1：避免 bot 自己 commit output 後又觸發（或你未來把 output 加進 paths）
-    # 防呆 2：避免同一個 commit message 循環
-    if: |
-      github.actor != 'github-actions[bot]' &&
-      !contains(github.event.head_commit.message, 'auto: engine output update')
 
     steps:
       - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: main
           fetch-depth: 0
-          persist-credentials: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -40,30 +36,94 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      # 方案2：核心引擎不進 repo，放在 Secrets（Base64）
-      - name: Restore private engine zip from secret
+      # ===== 方案 A：從 Secrets 還原（最穩，預設啟用）=====
+      - name: Restore private engine zip from secret (validated)
         shell: bash
         env:
           ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
         run: |
-          set -e
-          if [ -z "$ENGINE_ZIP_B64" ]; then
+          set -euo pipefail
+          if [ -z "${ENGINE_ZIP_B64:-}" ]; then
             echo "ENGINE_ZIP_B64 is empty. Please set repo secret ENGINE_ZIP_B64."
             exit 1
           fi
+
           mkdir -p engine_bin
           echo "$ENGINE_ZIP_B64" | base64 -d > engine_bin/engine.zip
-          unzip -o engine_bin/engine.zip -d engine_bin
-          echo "=== engine_bin ==="
-          ls -al engine_bin
 
-      - name: Run engine (public entry)
+          echo "== file(engine.zip) =="
+          file engine_bin/engine.zip || true
+
+          echo "== unzip test =="
+          unzip -t engine_bin/engine.zip >/dev/null
+
+          unzip -o engine_bin/engine.zip -d engine_bin
+
+          echo "== engine_bin tree (top 3 levels) =="
+          find engine_bin -maxdepth 3 -type f | sed 's/^/  /' | head -n 200
+
+      # ===== 方案 B：從 Release 下載（如要用，請把上面方案A註解掉，改啟用此段）=====
+      # - name: Download engine zip from GitHub Release (validated)
+      #   shell: bash
+      #   env:
+      #     GH_TOKEN: ${{ secrets.ENGINE_RELEASE_TOKEN || github.token }}
+      #     OWNER: ${{ github.repository_owner }}
+      #     REPO: ${{ github.event.repository.name }}
+      #     ENGINE_TAG: "engine-v3.1"        # 改成你的 tag
+      #     ENGINE_ASSET: "engine.zip"       # 改成你的 asset 檔名
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p engine_bin
+      #
+      #     api="https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${ENGINE_TAG}"
+      #     release_json="$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "$api")"
+      #
+      #     export RELEASE_JSON="$release_json"
+      #     export ENGINE_ASSET="$ENGINE_ASSET"
+      #     asset_id="$(python - <<'PY'
+      # import json, os, sys
+      # data=json.loads(os.environ["RELEASE_JSON"])
+      # name=os.environ["ENGINE_ASSET"]
+      # for a in data.get("assets", []):
+      #   if a.get("name")==name:
+      #     print(a.get("id"))
+      #     sys.exit(0)
+      # print("")
+      # sys.exit(1)
+      # PY
+      #     )"
+      #
+      #     echo "asset_id=$asset_id"
+      #     curl -fL \
+      #       -H "Authorization: Bearer ${GH_TOKEN}" \
+      #       -H "Accept: application/octet-stream" \
+      #       "https://api.github.com/repos/${OWNER}/${REPO}/releases/assets/${asset_id}" \
+      #       -o "engine_bin/engine.zip"
+      #
+      #     file engine_bin/engine.zip || true
+      #     unzip -t engine_bin/engine.zip >/dev/null
+      #     unzip -o engine_bin/engine.zip -d engine_bin
+
+      - name: Write secret model json (optional)
+        shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -n "${ENGINE_MODEL_B64:-}" ]; then
+            echo "$ENGINE_MODEL_B64" | base64 -d > engine_bin/_secret_model.json
+            echo "secret model written: engine_bin/_secret_model.json"
+            ls -al engine_bin/_secret_model.json
+          else
+            echo "ENGINE_MODEL_B64 not set (ok)."
+          fi
+
+      - name: Run engine (public entry) + verify output
         shell: bash
         env:
           KLINE_ENGINE_KEY: ${{ secrets.KLINE_ENGINE_KEY }}
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
-          set -e
+          set -euo pipefail
           MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
           OUTDIR="K線西遊記/kline-engine-public/output"
 
@@ -74,21 +134,26 @@ jobs:
 
           mkdir -p "$OUTDIR"
 
+          echo "== run_public =="
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "$MASTER" \
             --engine_dir "engine_bin" \
             --outdir "$OUTDIR"
 
+          echo "== output list =="
+          ls -al "$OUTDIR" || true
+          if [ -z "$(ls -A "$OUTDIR" 2>/dev/null)" ]; then
+            echo "ERROR: output dir is empty. Engine ran but produced no outputs."
+            exit 1
+          fi
+
       - name: Commit outputs
         shell: bash
         run: |
-          set -e
-          BRANCH="${GITHUB_REF_NAME}"
-
+          set -euo pipefail
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
-          # 只 add output，避免把不該 commit 的東西推上去
           git add "K線西遊記/kline-engine-public/output" || true
 
           if git diff --cached --quiet; then
@@ -97,4 +162,4 @@ jobs:
           fi
 
           git commit -m "auto: engine output update"
-          git push origin "HEAD:${BRANCH}"
+          git push origin HEAD:main
