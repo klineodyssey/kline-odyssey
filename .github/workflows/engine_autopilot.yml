@@ -1,4 +1,4 @@
-name: TX Engine Autopilot (Release-Asset版・最穩)
+name: TX Engine Autopilot (方案2-Release資產版)
 
 on:
   workflow_dispatch:
@@ -12,30 +12,8 @@ permissions:
   contents: write
 
 jobs:
-  sanity-check:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Hello"
-
   run-engine:
     runs-on: ubuntu-latest
-    needs: sanity-check
-
-    env:
-      # 你 Release 的 tag（你截圖是 engine-v1.0）
-      ENGINE_RELEASE_TAG: "engine-v1.0"
-      # 你 Release asset 檔名（你截圖就是這個）
-      ENGINE_ASSET_NAME: "ENGINE_ZIP_B64.zip"
-
-      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      ENGINE_DIR: "engine_bin"
-      OUTDIR: "output"
-
-      # 可選：模型（建議用「純 JSON」secret，別再用 base64）
-      # Settings → Secrets and variables → Actions → New repository secret
-      # Name: ENGINE_MODEL_JSON
-      ENGINE_MODEL_JSON: ${{ secrets.ENGINE_MODEL_JSON }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,118 +27,73 @@ jobs:
         run: |
           set -e
           python -m pip install -U pip
-          python -m pip install pandas openpyxl
+          # 若你 repo 內有 public entry 的 requirements，裝它
+          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
+            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          fi
 
-      - name: Download engine zip from GitHub Release asset
-        shell: bash
+      - name: Restore private engine zip from GitHub Release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          rm -rf engine_bin
+          mkdir -p engine_bin
 
-          echo "[info] repo=${GITHUB_REPOSITORY}"
-          echo "[info] release tag=${ENGINE_RELEASE_TAG}"
-          echo "[info] asset name=${ENGINE_ASSET_NAME}"
+          # 從 Release 下載你放在 Assets 的 zip（tag = engine-v1.0，檔名 = ENGINE_ZIP_B64.zip）
+          gh release download "engine-v1.0" -p "ENGINE_ZIP_B64.zip" -D .
 
+          # 解壓到 engine_bin
+          unzip -q "ENGINE_ZIP_B64.zip" -d engine_bin
+
+          echo "=== engine_bin tree ==="
+          ls -la engine_bin
+          echo "======================="
+
+          # 如果 zip 內有 requirements.txt，就裝它（引擎自己的依賴）
+          if [ -f "engine_bin/requirements.txt" ]; then
+            pip install -r "engine_bin/requirements.txt"
+          fi
+
+      - name: Write secret model json (optional)
+        if: ${{ secrets.ENGINE_MODEL_B64 != '' }}
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+        run: |
+          set -euo pipefail
           python - <<'PY'
-          import json, os, sys, urllib.request
-
-          repo = os.environ["GITHUB_REPOSITORY"]
-          tag  = os.environ["ENGINE_RELEASE_TAG"]
-          want = os.environ["ENGINE_ASSET_NAME"]
-
-          url = f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
-          req = urllib.request.Request(url, headers={
-              "Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN','')}",
-              "Accept": "application/vnd.github+json",
-              "User-Agent": "kline-odyssey-engine-autopilot",
-          })
-          with urllib.request.urlopen(req) as r:
-              data = json.loads(r.read().decode("utf-8"))
-
-          assets = data.get("assets", [])
-          hit = None
-          for a in assets:
-              if a.get("name") == want:
-                  hit = a
-                  break
-
-          if not hit:
-              names = [a.get("name") for a in assets]
-              raise SystemExit(f"Asset not found: {want}. Assets={names}")
-
-          # 用 API 的 asset url 才能配合 Accept: application/octet-stream 下載（私有 repo 也穩）
-          print(hit["url"])
+          import os, base64, pathlib
+          b64 = os.environ.get("ENGINE_MODEL_B64","").strip()
+          p = pathlib.Path("engine_bin/_secret_model.json")
+          p.write_bytes(base64.b64decode(b64))
+          print("wrote", p, "bytes=", p.stat().st_size)
           PY
-          ASSET_API_URL="$(python - <<'PY'
-          import json, os, sys, urllib.request
-          repo = os.environ["GITHUB_REPOSITORY"]
-          tag  = os.environ["ENGINE_RELEASE_TAG"]
-          want = os.environ["ENGINE_ASSET_NAME"]
-          url = f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
-          req = urllib.request.Request(url, headers={
-              "Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN','')}",
-              "Accept": "application/vnd.github+json",
-              "User-Agent": "kline-odyssey-engine-autopilot",
-          })
-          with urllib.request.urlopen(req) as r:
-              data = json.loads(r.read().decode("utf-8"))
-          for a in data.get("assets", []):
-              if a.get("name") == want:
-                  print(a["url"]); sys.exit(0)
-          raise SystemExit(1)
-          PY
-          )"
-
-          echo "[info] asset_api_url=${ASSET_API_URL}"
-
-          curl -L \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "Accept: application/octet-stream" \
-            "${ASSET_API_URL}" \
-            -o engine.zip
-
-          echo "[info] engine.zip size:"
-          ls -lh engine.zip
-
-          rm -rf "${ENGINE_DIR}"
-          mkdir -p "${ENGINE_DIR}"
-          unzip -q engine.zip -d "${ENGINE_DIR}"
-
-          echo "[info] engine files:"
-          find "${ENGINE_DIR}" -maxdepth 3 -type f | sed -n '1,120p'
-
-      - name: Write model json from secret (optional)
-        if: ${{ env.ENGINE_MODEL_JSON != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # 寫入引擎資料夾，讓 run_public.py 自己帶入
-          echo "${ENGINE_MODEL_JSON}" > "${ENGINE_DIR}/_secret_model.json"
-          echo "[info] wrote ${ENGINE_DIR}/_secret_model.json"
 
       - name: Run engine (public entry)
-        shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
-          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
 
-          mkdir -p "${OUTDIR}"
+          MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          OUTDIR="K線西遊記/kline-engine-public/output"
 
-          # 你 repo 內的公開入口 run_public.py（你之前貼的那支）
+          mkdir -p "$OUTDIR"
+
           python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${MASTER_XLSX}" \
-            --engine_dir "${ENGINE_DIR}" \
-            --outdir "${OUTDIR}"
+            --master "$MASTER" \
+            --engine_dir "engine_bin" \
+            --outdir "$OUTDIR"
 
       - name: Commit outputs
-        shell: bash
         run: |
-          set -euo pipefail
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "[info] no changes"
-            exit 0
-          fi
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
           git commit -m "engine: update outputs"
           git push
