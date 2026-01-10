@@ -1,4 +1,4 @@
-name: TX Engine Autopilot (方案2-安全版)
+name: TX Engine Autopilot (方案2・Release版)
 
 on:
   workflow_dispatch:
@@ -14,6 +14,7 @@ permissions:
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
@@ -32,7 +33,7 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Restore private engine zip from Release (asset)
+      - name: Restore private engine zip from Release
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,41 +42,43 @@ jobs:
 
           mkdir -p engine_bin
 
-          # 下載 Release 的 asset（檔名要完全一致）
-          # 這裡用 GitHub API 找最新 release 的 asset download url
           api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
-          asset_url=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                           -H "Accept: application/vnd.github+json" \
-                           "$api" | \
-                     python - <<'PY'
-          import json,sys
-          j=json.load(sys.stdin)
-          name="ENGINE_ZIP_B64.zip"
-          for a in j.get("assets",[]):
-          if a.get("name")==name:
-          print(a.get("url",""))
-          sys.exit(0)
-          print("")
-          sys.exit(0)
-          PY
+
+          asset_url=$(curl -s \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "$api" | python - <<'PY'
+import json, sys
+
+data = json.load(sys.stdin)
+target = "ENGINE_ZIP_B64.zip"
+
+for a in data.get("assets", []):
+    if a.get("name") == target:
+        print(a.get("url", ""))
+        sys.exit(0)
+
+print("")
+sys.exit(0)
+PY
           )
 
           if [ -z "$asset_url" ]; then
-            echo "ERROR: cannot find asset ENGINE_ZIP_B64.zip in latest release"
+            echo "ERROR: ENGINE_ZIP_B64.zip not found in latest release"
             exit 1
           fi
 
-          echo "asset_url=$asset_url"
-
-          # GitHub asset download needs Accept: application/octet-stream
-          curl -L -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                 -H "Accept: application/octet-stream" \
-                 "$asset_url" -o engine_bin/engine.zip
+          echo "Downloading engine from release asset..."
+          curl -L \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "$asset_url" \
+            -o engine_bin/engine.zip
 
           unzip -o engine_bin/engine.zip -d engine_bin
 
           echo "=== engine_bin ==="
-          ls -al engine_bin   
+          ls -al engine_bin
 
       - name: Run engine (public entry)
         shell: bash
@@ -84,7 +87,10 @@ jobs:
           ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -e
+
           MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          OUTDIR="K線西遊記/kline-engine-public/output"
+
           if [ ! -f "$MASTER" ]; then
             echo "MASTER not found: $MASTER"
             exit 1
@@ -93,12 +99,13 @@ jobs:
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "$MASTER" \
             --engine_dir "engine_bin" \
-            --outdir "K線西遊記/kline-engine-public/output"
+            --outdir "$OUTDIR"
 
-      - name: Commit outputs (fix detached HEAD push)
+      - name: Commit outputs (fix detached HEAD)
         shell: bash
         run: |
           set -e
+
           BRANCH="${GITHUB_REF_NAME}"
 
           git config user.name "kline-bot"
