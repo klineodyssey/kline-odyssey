@@ -14,12 +14,20 @@ permissions:
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+
+    # 防呆 1：避免 bot 自己 commit output 後又觸發（或你未來把 output 加進 paths）
+    # 防呆 2：避免同一個 commit message 循環
+    if: |
+      github.actor != 'github-actions[bot]' &&
+      !contains(github.event.head_commit.message, 'auto: engine output update')
+
     steps:
       - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -32,6 +40,7 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
+      # 方案2：核心引擎不進 repo，放在 Secrets（Base64）
       - name: Restore private engine zip from secret
         shell: bash
         env:
@@ -56,17 +65,21 @@ jobs:
         run: |
           set -e
           MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          OUTDIR="K線西遊記/kline-engine-public/output"
+
           if [ ! -f "$MASTER" ]; then
             echo "MASTER not found: $MASTER"
             exit 1
           fi
 
+          mkdir -p "$OUTDIR"
+
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "$MASTER" \
             --engine_dir "engine_bin" \
-            --outdir "K線西遊記/kline-engine-public/output"
+            --outdir "$OUTDIR"
 
-      - name: Commit outputs (fix detached HEAD push)
+      - name: Commit outputs
         shell: bash
         run: |
           set -e
@@ -75,6 +88,7 @@ jobs:
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
+          # 只 add output，避免把不該 commit 的東西推上去
           git add "K線西遊記/kline-engine-public/output" || true
 
           if git diff --cached --quiet; then
