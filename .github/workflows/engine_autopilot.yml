@@ -32,41 +32,27 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Restore private engine zip from secret (hardened)
+      - name: Restore private engine zip from GitHub Release
         shell: bash
         env:
-          ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-
-          if [ -z "${ENGINE_ZIP_B64:-}" ]; then
-            echo "ENGINE_ZIP_B64 is empty. Please set repo secret ENGINE_ZIP_B64."
-            exit 1
-          fi
-
           mkdir -p engine_bin
 
-          # 1) write secret into file (avoid shell issues)
-          printf "%s" "$ENGINE_ZIP_B64" > engine_bin/engine.b64
+          echo "Downloading engine from Release asset..."
+          gh release download engine-v1.0 \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "ENGINE_ZIP_B64.zip" \
+            --dir engine_bin
 
-          # 2) sanitize: remove ALL whitespace/newlines just in case
-          tr -d ' \t\r\n' < engine_bin/engine.b64 > engine_bin/engine.clean.b64
+          echo "=== engine_bin ==="
+          ls -al engine_bin
 
-          # 3) decode
-          if ! base64 -d engine_bin/engine.clean.b64 > engine_bin/engine.zip 2>engine_bin/base64.err; then
-            echo "base64 decode failed. Showing first 200 chars of cleaned b64:"
-            head -c 200 engine_bin/engine.clean.b64 || true
-            echo ""
-            echo "base64 error:"
-            cat engine_bin/base64.err || true
-            exit 1
-          fi
-
-          # 4) unzip
-          unzip -o engine_bin/engine.zip -d engine_bin
+          unzip -o engine_bin/ENGINE_ZIP_B64.zip -d engine_bin
 
           echo "=== engine_bin tree (top) ==="
-          find engine_bin -maxdepth 3 -type f | sed 's#^#- #' | head -n 200
+          find engine_bin -maxdepth 3 -type f | head -n 200
 
       - name: Run engine (public entry)
         shell: bash
