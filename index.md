@@ -7,10 +7,9 @@ description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
 # KLINE ODYSSEY  
 ## 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
 
-# KLINE ODYSSEY  
-<div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;">
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
   <iframe
-    src="https://www.youtube.com/embed/95LccqD_MsE"
+    src="https://www.youtube.com/embed/95LccqD_MsE?rel=0&modestbranding=1"
     title="KLINE ODYSSEY"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -18,7 +17,6 @@ description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
     style="position:absolute;top:0;left:0;width:100%;height:100%;">
   </iframe>
 </div>
-## 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
 
 ---
 
@@ -77,11 +75,11 @@ description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
 
 ### 核心機制
 
-- 📈 交易與觀察產生經驗值  
-- 🧠 紀律決定升級速度  
-- 🧬 達標後啟動 GA（Genetic Algorithm）演化  
-- 🏦 高等級玩家可被系統視為「銀行級操作者」  
-- 💰 可參與分紅、治理與策略權限  
+- 交易與觀察產生經驗值  
+- 紀律決定升級速度  
+- 達標後啟動 GA（Genetic Algorithm）演化  
+- 高等級玩家可被系統視為「銀行級操作者」  
+- 可參與分紅、治理與策略權限  
 
 ---
 
@@ -97,7 +95,6 @@ description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
    穩定績效，建立紀律模型  
 
 4. **銀行級玩家（Bank-Level）**  
-   可被聘為系統操盤角色，  
    參與分紅與治理  
 
 ---
@@ -108,28 +105,22 @@ description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
 BNB Smart Chain（BSC）
 
 ### Token Contract（唯一）
-[0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be](https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
+https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
 
 ### 官方交易（PancakeSwap）
-[KGEN / WBNB 交易頁](https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
+https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
 
 ### LP Pair（KGEN / WBNB）
-[LP Pair（BscScan）](https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2)
+https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 
-### 🔒 LP 鎖倉（PinkLock｜KGEN 專屬直連）
+### 🔒 LP 鎖倉（PinkLock｜官方查驗）
 
 - 鎖倉標的：KGEN / WBNB LP  
 - 鎖倉期限：**至 2027 / 01 / 01（UTC）**  
-- 鎖倉狀態：鎖倉中，期間內不可撤回
+- 狀態：鎖倉中，不可撤回  
 
-👉 KGEN 鎖倉官方查驗頁（直達 PinkLock）：
-[點我開啟鎖倉頁（Unlock 倒數）](https://www.pinksale.finance/pinklock/bsc/record/1427003)
-
-> 點擊後可直接看到：  
-> Unlock 倒數時間、KGEN / WBNB LP、鎖倉狀態（PinkLock 官方畫面）
-
-⚠️ 請只認合約地址，不認名稱  
-⚠️ 鎖倉屬風險控管與透明化設計，不代表價格或報酬保證  
+👉 **KGEN 鎖倉官方查驗頁（直達 PinkLock）**  
+https://www.pinksale.finance/pinklock/bsc/record/1427003
 
 ---
 
@@ -149,47 +140,43 @@ BNB Smart Chain（BSC）
 
 ## 七、路線圖（Roadmap）
 
-### Phase 1｜Genesis（已完成）
-- 合約部署  
-- 初始流動性  
-- 官網白皮書  
+**Phase 1｜Genesis（已完成）**  
+合約部署、初始流動性、官網白皮書  
 
-### Phase 2｜App MVP
-- KLINE App Game 上線  
-- 經驗值與 GA 系統  
+**Phase 2｜App MVP**  
+KLINE App Game、經驗值與 GA 系統  
 
-### Phase 3｜銀行級治理
-- 高等玩家聘任  
-- 分紅模組啟動  
+**Phase 3｜銀行級治理**  
+高等玩家聘任、分紅模組  
 
-### Phase 4｜長期航程
-- 1 萬年系統規則  
-- 自演化金融生命體  
+**Phase 4｜長期航程**  
+自演化金融生命體  
 
 ---
 
 ## 八、品牌聲明
 
-《花果山台灣・K線西遊記》  
+《K線西遊記／花果山台灣》  
 為文化 × 金融 × AI 敘事創作。
 
 不構成投資建議，  
 不涉及政治立場，  
-不承諾任何報酬。  
+不承諾任何報酬。
 
 ---
 
 ## 九、官方入口（唯一有效）
 
-- 🌐 [官網／白皮書](https://klineodyssey.github.io/kline-odyssey/)
-- 📦 [GitHub 原始資料庫](https://github.com/klineodyssey/kline-odyssey)
-- 📲 [LINE 官方帳號](https://lin.ee/b8X18F7)
-- 📡 [Telegram 官方通道](https://t.me/klineodyssey)
-- 📺 [YouTube](https://www.youtube.com/@klineodyssey)
-- 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
-- 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
-- 🐦 [X（Twitter）](https://x.com/klineodyssey)
+- 官網／白皮書：https://klineodyssey.github.io/kline-odyssey/  
+- GitHub：https://github.com/klineodyssey/kline-odyssey  
+- LINE：https://lin.ee/b8X18F7  
+- Telegram：https://t.me/klineodyssey  
+- YouTube：https://www.youtube.com/@klineodyssey  
+- TikTok：https://www.tiktok.com/@klineodyssey  
+- Facebook：https://www.facebook.com/le.tian.di.2025  
+- X：https://x.com/klineodyssey  
+
 ---
 
-🌕 **花果山台灣・信念不滅・市場無界**  
-**Where the Market Becomes the Myth.**
+花果山台灣・信念不滅・市場無界  
+Where the Market Becomes the Myth.
