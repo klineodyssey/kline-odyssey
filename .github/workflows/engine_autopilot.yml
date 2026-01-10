@@ -32,27 +32,50 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Restore private engine zip from GitHub Release
+      - name: Restore private engine zip from Release (asset)
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+
           mkdir -p engine_bin
 
-          echo "Downloading engine from Release asset..."
-          gh release download engine-v1.0 \
-            --repo "${GITHUB_REPOSITORY}" \
-            --pattern "ENGINE_ZIP_B64.zip" \
-            --dir engine_bin
+          # 下載 Release 的 asset（檔名要完全一致）
+          # 這裡用 GitHub API 找最新 release 的 asset download url
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
+          asset_url=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                           -H "Accept: application/vnd.github+json" \
+                           "$api" | \
+                     python - <<'PY'
+          import json,sys
+          j=json.load(sys.stdin)
+          name="ENGINE_ZIP_B64.zip"
+          for a in j.get("assets",[]):
+          if a.get("name")==name:
+          print(a.get("url",""))
+          sys.exit(0)
+          print("")
+          sys.exit(0)
+          PY
+          )
+
+          if [ -z "$asset_url" ]; then
+            echo "ERROR: cannot find asset ENGINE_ZIP_B64.zip in latest release"
+            exit 1
+          fi
+
+          echo "asset_url=$asset_url"
+
+          # GitHub asset download needs Accept: application/octet-stream
+          curl -L -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                 -H "Accept: application/octet-stream" \
+                 "$asset_url" -o engine_bin/engine.zip
+
+          unzip -o engine_bin/engine.zip -d engine_bin
 
           echo "=== engine_bin ==="
-          ls -al engine_bin
-
-          unzip -o engine_bin/ENGINE_ZIP_B64.zip -d engine_bin
-
-          echo "=== engine_bin tree (top) ==="
-          find engine_bin -maxdepth 3 -type f | head -n 200
+          ls -al engine_bin   
 
       - name: Run engine (public entry)
         shell: bash
