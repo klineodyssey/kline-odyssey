@@ -1,3 +1,11 @@
 title: KLINE ODYSSEY
 description: 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
-theme: jekyll-theme-cayman
+
+url: https://klineodyssey.github.io
+baseurl: /kline-odyssey
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /kline-odyssey/assets/og-cover.jpg
