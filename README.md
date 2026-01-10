@@ -1,5 +1,7 @@
 🌐 官網／白皮書  
+<a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
 https://klineodyssey.github.io/kline-odyssey/
+</a>
 
 # KLINE ODYSSEY  
 <div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;">
