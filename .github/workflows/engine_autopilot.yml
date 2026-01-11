@@ -1,11 +1,12 @@
-name: TX Engine Autopilot
+name: TX Engine Autopilot (final-safe)
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      - "engine_bin/**"
       - ".github/workflows/engine_autopilot.yml"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,46 +29,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas numpy openpyxl
 
-      - name: Download engine zip from GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Force remove all UTF-8 BOM (binary)
         run: |
-          mkdir -p engine_bin
-          gh release download --repo ${{ github.repository }} \
-            --pattern "ENGINE_ZIP_B64.zip" \
-            --output engine_bin/ENGINE_ZIP_B64.zip
-
-      - name: Unzip engine
-        run: |
-          cd engine_bin
-          unzip -o ENGINE_ZIP_B64.zip
-
-      # 🔥 關鍵修復：強制移除 UTF-8 BOM
-      - name: Force remove all UTF-8 BOM
-  run: |
-    python - << 'EOF'
-    from pathlib import Path
-
-    p = Path("engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py")
-    data = p.read_bytes()
-
-    # 移除所有 UTF-8 BOM (EF BB BF)
-    cleaned = data.replace(b'\xef\xbb\xbf', b'')
-
-    p.write_bytes(cleaned)
-    print("BOM fully removed")
-    EOF
+          python -c "
+          from pathlib import Path
+          p = Path('engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py')
+          b = p.read_bytes()
+          b = b.replace(b'\xef\xbb\xbf', b'')
+          p.write_bytes(b)
+          print('BOM fully removed')
+          "
 
       - name: Run engine (public entry)
         run: |
-          python engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py \
-            --input K線西遊記/kline-taifex/master/台指近全.xlsx \
-            --outdir K線西遊記/kline-engine-public/output
+          python engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py
 
       - name: Commit outputs
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add K線西遊記/kline-engine-public/output || true
-          git commit -m "engine: auto run result" || true
+          git add -A
+          git commit -m "engine: auto run outputs" || echo "No changes"
           git push
