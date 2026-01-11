@@ -33,12 +33,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p engine_bin
-          gh release download --repo ${{ github.repository }} --pattern "ENGINE_ZIP_B64.zip" --output engine_bin/ENGINE_ZIP_B64.zip
+          gh release download --repo ${{ github.repository }} \
+            --pattern "ENGINE_ZIP_B64.zip" \
+            --output engine_bin/ENGINE_ZIP_B64.zip
 
       - name: Unzip engine
         run: |
           cd engine_bin
           unzip -o ENGINE_ZIP_B64.zip
+
+      # 🔥 關鍵修復：強制移除 UTF-8 BOM
+      - name: Fix BOM in python entry
+        run: |
+          sed -i '1s/^\xEF\xBB\xBF//' engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py
 
       - name: Run engine (public entry)
         run: |
