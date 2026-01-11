@@ -11,9 +11,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: tx-engine-autopilot
+  cancel-in-progress: true
+
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,60 +30,149 @@ jobs:
 
       - name: Install deps
         run: |
-          set -e
+          set -euo pipefail
           python -m pip install -U pip
-          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
-            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
-          fi
+          # 你的引擎如果需要額外套件就加在這裡（例如 pandas openpyxl）
+          python -m pip install -U pandas openpyxl numpy
 
+      # === 下載引擎 zip（Release Assets）並解壓到 engine_bin ===
+      # 你現在 repo 已經有把 ENGINE_ZIP_B64.zip 放在 Release Assets，
+      # 這裡用 GitHub API 下載「同名資產」。
       - name: Download engine zip from GitHub Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSET_NAME: "ENGINE_ZIP_B64.zip"
         run: |
           set -euo pipefail
-          rm -rf engine_bin
-          mkdir -p engine_bin
 
-          # 你的 Release tag（若不是 engine-v1.0，改這行）
-          TAG="engine-v1.0"
-          ASSET="ENGINE_ZIP_B64.zip"
+          repo="${GITHUB_REPOSITORY}"
+          echo "[dl] repo=$repo"
+          echo "[dl] asset=$ASSET_NAME"
 
-          # 下載 Release asset
-          gh release download "$TAG" -p "$ASSET" -D .
+          # 取最新 release 的資產列表（你若不是最新 release，也可改成指定 tag）
+          release_json="$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${repo}/releases/latest")"
 
-          # 解壓
-          unzip -q "$ASSET" -d engine_bin
+          asset_id="$(python - <<'PY'
+import json, os, sys
+data=json.loads(os.environ["RELEASE_JSON"])
+name=os.environ["ASSET_NAME"]
+for a in data.get("assets", []):
+    if a.get("name")==name:
+        print(a.get("id"))
+        sys.exit(0)
+print("")
+sys.exit(0)
+PY
+          )" || true
 
-          echo "=== engine_bin tree ==="
-          ls -la engine_bin
-          echo "======================="
-
-          # 引擎若自帶 requirements.txt，就裝它
-          if [ -f "engine_bin/requirements.txt" ]; then
-            pip install -r "engine_bin/requirements.txt"
+          if [ -z "$asset_id" ]; then
+            echo "::error::Release asset not found: ${ASSET_NAME} (in latest release)."
+            echo "::error::請確認你把 ${ASSET_NAME} 上傳在「最新 Release」的 Assets。"
+            exit 1
           fi
 
+          echo "[dl] asset_id=$asset_id"
+
+          mkdir -p engine_bin
+          # 下載資產（注意要用 api.github.com 的 assets endpoint 並指定 accept octet-stream）
+          curl -L -sS \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${repo}/releases/assets/${asset_id}" \
+            -o engine_bin/ENGINE_ZIP_B64.zip
+
+          echo "[dl] downloaded: engine_bin/ENGINE_ZIP_B64.zip"
+          ls -al engine_bin
+
+          # 解壓縮：引擎 zip 內部如果含 engine_bin 資料夾，會出現 engine_bin/engine_bin
+          # 所以先解壓到暫存，再把內容搬到 engine_bin 根目錄
+          mkdir -p _engine_tmp
+          unzip -o engine_bin/ENGINE_ZIP_B64.zip -d _engine_tmp
+
+          echo "[dl] tmp tree:"
+          find _engine_tmp -maxdepth 2 -type f -print || true
+
+          # 若 zip 裡最上層就是 engine_bin/，則把裡面的檔案搬出來
+          if [ -d "_engine_tmp/engine_bin" ]; then
+            echo "[dl] detected nested _engine_tmp/engine_bin -> flatten to engine_bin/"
+            rsync -a _engine_tmp/engine_bin/ engine_bin/
+          else
+            echo "[dl] no nested engine_bin -> copy all to engine_bin/"
+            rsync -a _engine_tmp/ engine_bin/
+          fi
+
+          rm -rf _engine_tmp
+          echo "[dl] final engine_bin tree:"
+          find engine_bin -maxdepth 2 -type f -print || true
+
+      # === (可選) 從 secret 寫入模型 json（如果你有設 MODEL_JSON_B64） ===
+      - name: Write model json from secret (optional)
+        env:
+          MODEL_JSON_B64: ${{ secrets.MODEL_JSON_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -n "${MODEL_JSON_B64:-}" ]; then
+            echo "[model] writing model json from secret..."
+            mkdir -p engine_bin
+            echo "$MODEL_JSON_B64" | base64 -d > engine_bin/K線西遊記_模型_最高報酬版.json
+            ls -al engine_bin | sed -n '1,200p'
+          else
+            echo "[model] MODEL_JSON_B64 not set, skip."
+          fi
+
+      # === 跑引擎（public entry）===
       - name: Run engine (public entry)
         run: |
           set -euo pipefail
-          MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
-          OUTDIR="K線西遊記/kline-engine-public/output"
-          mkdir -p "$OUTDIR"
 
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "$MASTER" \
-            --engine_dir "engine_bin" \
-            --outdir "$OUTDIR"
+          master="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          engine_dir="engine_bin"
 
+          # ✅ 重要：entry 不要再寫 engine_bin/xxx.py
+          entry="K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py"
+
+          outdir="K線西遊記/kline-engine-public/output"
+
+          echo "[run_public] master=$master"
+          echo "[run_public] engine_dir=$engine_dir"
+          echo "[run_public] entry=$entry"
+          echo "[run_public] full_entry=$engine_dir/$entry"
+          echo "[run_public] outdir=$outdir"
+
+          if [ ! -f "$master" ]; then
+            echo "::error::Master file not found: $master"
+            echo "::error::請確認 repo 路徑內真的存在台指近全.xlsx"
+            exit 2
+          fi
+
+          if [ ! -f "$engine_dir/$entry" ]; then
+            echo "::error::Entry not found: $engine_dir/$entry"
+            echo "::error::請確認引擎 zip 解壓後 entry 檔案名稱一致。"
+            echo "[debug] list engine_bin:"
+            ls -al "$engine_dir" || true
+            echo "[debug] find py:"
+            find "$engine_dir" -maxdepth 2 -type f -name "*.py" -print || true
+            exit 2
+          fi
+
+          mkdir -p "$outdir"
+          python "$engine_dir/$entry" --input "$master" --outdir "$outdir"
+
+      # === Commit outputs（只有有變更才 commit，避免失敗）===
       - name: Commit outputs
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git status --porcelain | grep -q .; then
+            git add -A
+            git commit -m "Autopilot: update engine outputs"
+            git push
+            echo "[commit] pushed."
+          else
+            echo "[commit] no changes, skip."
           fi
-          git commit -m "engine: update outputs"
-          git push
