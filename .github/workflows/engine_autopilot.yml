@@ -1,22 +1,19 @@
-name: TX Engine Autopilot (Release Asset版-定稿)
+name: TX Engine Autopilot
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - "K線西遊記/kline-taifex/master/台指近全.xlsx"
       - ".github/workflows/engine_autopilot.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: tx-engine-autopilot
-  cancel-in-progress: true
-
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,134 +25,31 @@ jobs:
 
       - name: Install deps
         run: |
-          set -e
-          python -m pip install -U pip
-          # 依你的引擎需要再加（沒有就留空也沒關係）
-          python -m pip install -U pandas openpyxl numpy
+          python -m pip install --upgrade pip
+          pip install pandas numpy openpyxl
 
-      # 這一步是你之前 401 的核心修正：用 gh + GITHUB_TOKEN 正規下載 Release Asset（不會 Unauthorized）
-      - name: Download engine zip from GitHub Release (latest)
+      - name: Download engine zip from GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
-          rm -rf engine_bin
           mkdir -p engine_bin
-          gh --version
-          # 下載最新 Release 裡的引擎壓縮檔（檔名用你 repo 目前的：ENGINE_ZIP_B64.zip）
-          gh release download \
-            --repo "$GITHUB_REPOSITORY" \
-            --pattern "ENGINE_ZIP_B64.zip" \
-            --dir engine_bin
+          gh release download --repo ${{ github.repository }} --pattern "ENGINE_ZIP_B64.zip" --output engine_bin/ENGINE_ZIP_B64.zip
 
-          ls -lah engine_bin
-
-      - name: Unzip engine and flatten folder
+      - name: Unzip engine
         run: |
-          set -euo pipefail
           cd engine_bin
-          unzip -q ENGINE_ZIP_B64.zip -d _unz
-          rm -f ENGINE_ZIP_B64.zip
-
-          # 把「可能多包一層資料夾」的情況攤平，避免出現 engine_bin/engine_bin/xxx.py
-          # 情況A：_unz 下面只有一個資料夾 → 把那個資料夾內容搬上來
-          # 情況B：_unz 下面就是檔案 → 直接搬上來
-          shopt -s dotglob
-          entries=(_unz/*)
-          if [ ${#entries[@]} -eq 1 ] && [ -d "${entries[0]}" ]; then
-            mv "${entries[0]}"/* .
-          else
-            mv _unz/* .
-          fi
-          rm -rf _unz
-
-          echo "[engine_bin] after unzip:"
-          ls -lah
-
-      - name: Resolve entry script path
-        id: resolve_entry
-        run: |
-          set -euo pipefail
-          # 你指定的 entry 檔名（最穩）
-          ENTRY_CANDIDATE="K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py"
-
-          if [ -f "engine_bin/$ENTRY_CANDIDATE" ]; then
-            echo "entry=engine_bin/$ENTRY_CANDIDATE" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # 找不到就自動找最像的 step1 多空運算（保底）
-          FOUND="$(find engine_bin -maxdepth 3 -type f -name "*Tplus1*pm500*step1*多空運算*.py" | head -n 1 || true)"
-          if [ -z "$FOUND" ]; then
-            echo "ERROR: entry script not found in engine_bin"
-            echo "engine_bin tree:"
-            find engine_bin -maxdepth 3 -type f -print
-            exit 2
-          fi
-          echo "entry=$FOUND" >> $GITHUB_OUTPUT
-
-      # 可選：如果你有把模型 json 存成 Secret（例如 MODEL_JSON），就會寫入到固定位置供引擎讀
-      - name: Write model json from secret (optional)
-        env:
-          MODEL_JSON: ${{ secrets.MODEL_JSON }}
-        run: |
-          set -euo pipefail
-          if [ -z "${MODEL_JSON:-}" ]; then
-            echo "MODEL_JSON secret not set, skip."
-            exit 0
-          fi
-          mkdir -p K線西遊記/kline-engine-public/model
-          python - <<'PY'
-import os, json, pathlib
-p = pathlib.Path("K線西遊記/kline-engine-public/model/K線西遊記_模型_最高報酬版.json")
-p.parent.mkdir(parents=True, exist_ok=True)
-raw = os.environ["MODEL_JSON"]
-try:
-    obj = json.loads(raw)
-    p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
-except Exception:
-    # 如果你 secret 放的是「純文字內容」但不是 json，原樣寫入也行（你自己控）
-    p.write_text(raw, encoding="utf-8")
-print("Wrote:", p)
-PY
+          unzip -o ENGINE_ZIP_B64.zip
 
       - name: Run engine (public entry)
         run: |
-          set -euo pipefail
+          python engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py \
+            --input K線西遊記/kline-taifex/master/台指近全.xlsx \
+            --outdir K線西遊記/kline-engine-public/output
 
-          MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
-          OUTDIR="K線西遊記/kline-engine-public/output"
-          ENTRY="${{ steps.resolve_entry.outputs.entry }}"
-
-          if [ ! -f "$MASTER" ]; then
-            echo "ERROR: master not found: $MASTER"
-            echo "Repo tree (top):"
-            ls -lah
-            echo "K線西遊記/kline-taifex/master:"
-            ls -lah "K線西遊記/kline-taifex/master" || true
-            exit 2
-          fi
-
-          mkdir -p "$OUTDIR"
-
-          echo "[run_public] master=$MASTER"
-          echo "[run_public] entry=$ENTRY"
-          echo "[run_public] outdir=$OUTDIR"
-          python "$ENTRY" --input "$MASTER" --outdir "$OUTDIR"
-
-      - name: Commit outputs (if changed)
+      - name: Commit outputs
         run: |
-          set -euo pipefail
-          git config user.name "klineodyssey-bot"
-          git config user.email "actions@users.noreply.github.com"
-
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add K線西遊記/kline-engine-public/output || true
-          git add K線西遊記/kline-engine-public/model || true
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "engine: update outputs"
+          git commit -m "engine: auto run result" || true
           git push
