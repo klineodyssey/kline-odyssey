@@ -1,4 +1,4 @@
-name: TX Engine Autopilot (Release Engine v1.0 - Final)
+name: TX Engine Autopilot (Release Latest - Stable)
 
 on:
   workflow_dispatch:
@@ -18,12 +18,10 @@ jobs:
     env:
       OWNER: klineodyssey
       REPO: kline-odyssey
-      RELEASE_TAG: engine-v1.0
       RELEASE_ASSET: ENGINE_ZIP_B64.zip
 
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
-
       ENGINE_DIR: "engine_bin"
 
     steps:
@@ -37,171 +35,89 @@ jobs:
 
       - name: Install deps
         run: |
-          set -e
           python -m pip install -U pip
           python -m pip install -U pandas openpyxl numpy
 
-      - name: Download engine asset from Release
+      - name: Download engine asset from latest Release
         shell: bash
         run: |
           set -euo pipefail
-          echo "Fetching release asset URL: ${OWNER}/${REPO} tag=${RELEASE_TAG} asset=${RELEASE_ASSET}"
+          mkdir -p "${ENGINE_DIR}"
 
           python - <<'PY'
-          import json, sys, urllib.request
+          import json, urllib.request, sys
           owner = "${OWNER}"
           repo  = "${REPO}"
-          tag   = "${RELEASE_TAG}"
           want  = "${RELEASE_ASSET}"
 
-          url = f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}"
-          req = urllib.request.Request(url, headers={"Accept":"application/vnd.github+json","User-Agent":"actions"})
+          url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+          req = urllib.request.Request(
+              url,
+              headers={"Accept":"application/vnd.github+json","User-Agent":"actions"}
+          )
           with urllib.request.urlopen(req) as r:
-            data = json.loads(r.read().decode("utf-8"))
+              data = json.loads(r.read().decode("utf-8"))
 
-          assets = data.get("assets", [])
-          hit = None
-          for a in assets:
-            if a.get("name") == want:
-              hit = a.get("browser_download_url")
-              break
-
-          if not hit:
-            print("Release assets:", [a.get("name") for a in assets])
-            raise SystemExit(f"ERROR: asset not found: {want}")
-
-          print(hit)
-          PY
-
-          ASSET_URL="$(python - <<'PY'
-          import json, urllib.request
-          owner = "${OWNER}"
-          repo  = "${REPO}"
-          tag   = "${RELEASE_TAG}"
-          want  = "${RELEASE_ASSET}"
-          url = f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}"
-          req = urllib.request.Request(url, headers={"Accept":"application/vnd.github+json","User-Agent":"actions"})
-          with urllib.request.urlopen(req) as r:
-            data = json.loads(r.read().decode("utf-8"))
           for a in data.get("assets", []):
-            if a.get("name") == want:
-              print(a.get("browser_download_url"))
-              break
-          PY
-          )"
+              if a.get("name") == want:
+                  print(a.get("browser_download_url"))
+                  sys.exit(0)
 
-          echo "ASSET_URL=$ASSET_URL"
-          mkdir -p "${ENGINE_DIR}"
-          curl -L "$ASSET_URL" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
+          raise SystemExit(f"ERROR: asset not found in latest release: {want}")
+          PY > asset_url.txt
+
+          curl -L "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
 
       - name: Unzip engine asset
-        shell: bash
         run: |
-          set -euo pipefail
           cd "${ENGINE_DIR}"
-          ls -la
-          unzip -o "${RELEASE_ASSET}" -d .
-          echo "After unzip:"
-          find . -maxdepth 2 -type f -print
+          unzip -o "${RELEASE_ASSET}"
 
-      - name: Decode B64 layer if present (zip-in-zip)
-        shell: bash
+      - name: Decode B64 if present
         run: |
-          set -euo pipefail
-
           cd "${ENGINE_DIR}"
+          python - <<'PY'
+          import base64, pathlib, re
+          for p in pathlib.Path(".").rglob("*"):
+              if p.suffix.lower() in (".txt", ".b64"):
+                  s = p.read_text(errors="ignore")
+                  b = re.sub(r"[^A-Za-z0-9+/=]", "", s)
+                  if len(b) > 200:
+                      out = pathlib.Path("ENGINE_DECODED.zip")
+                      out.write_bytes(base64.b64decode(b))
+                      print("decoded:", out)
+          PY
+          if [ -f ENGINE_DECODED.zip ]; then unzip -o ENGINE_DECODED.zip; fi
 
-          # 找可能的 b64 檔（有些人會把真正的 engine.zip 轉 b64 存成 txt/b64）
-          B64_FILE="$(find . -maxdepth 3 -type f \( -iname "*.b64" -o -iname "*b64*.txt" -o -iname "*.txt" \) | head -n 1 || true)"
-
-          if [ -n "${B64_FILE}" ]; then
-            echo "Found possible B64 file: ${B64_FILE}"
-            python - <<'PY'
-            import base64, pathlib, re, sys
-            p = pathlib.Path("${B64_FILE}")
-            s = p.read_text(encoding="utf-8", errors="ignore")
-            # 把可能混入的空白/換行去掉，只留下 base64 字元
-            b64 = re.sub(r"[^A-Za-z0-9+/=]", "", s)
-            if len(b64) < 100:
-              print("B64 content too short; skip decode.")
-              sys.exit(0)
-            out = pathlib.Path("ENGINE_DECODED.zip")
-            out.write_bytes(base64.b64decode(b64))
-            print("Decoded to", out)
-            PY
-
-            if [ -f "ENGINE_DECODED.zip" ]; then
-              unzip -o "ENGINE_DECODED.zip" -d .
-              echo "After decode+unzip:"
-              find . -maxdepth 3 -type f -print
-            fi
-          else
-            echo "No B64 file found. Assume asset already contains engine sources."
-          fi
-
-      - name: Force remove UTF-8 BOM from all .py in engine_dir
-        shell: bash
+      - name: Remove UTF-8 BOM
         run: |
-          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          root = Path("${ENGINE_DIR}")
-          py_files = list(root.rglob("*.py"))
-          fixed = 0
-          for f in py_files:
-            b = f.read_bytes()
-            if b.startswith(b"\xef\xbb\xbf"):
-              f.write_bytes(b[3:])
-              fixed += 1
-          print(f"Scanned {len(py_files)} .py files, removed BOM from {fixed}.")
+          for f in Path("${ENGINE_DIR}").rglob("*.py"):
+              b = f.read_bytes()
+              if b.startswith(b"\xef\xbb\xbf"):
+                  f.write_bytes(b[3:])
           PY
 
       - name: Find engine entry
-        id: find_entry
-        shell: bash
+        id: entry
         run: |
-          set -euo pipefail
-          echo "Searching engine entry..."
-          # 你指定的入口檔名模式
-          ENTRY="$(find "${ENGINE_DIR}" -type f -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1 || true)"
-
-          if [ -z "${ENTRY}" ]; then
-            echo "Not found by primary pattern. Listing top files:"
-            find "${ENGINE_DIR}" -maxdepth 3 -type f -name "*.py" -print
-            echo "ENTRY=" >> $GITHUB_OUTPUT
-            exit 1
+          ENTRY=$(find "${ENGINE_DIR}" -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1)
+          if [ -z "$ENTRY" ]; then
+            echo "Engine entry not found"; exit 1
           fi
-
-          echo "ENTRY=${ENTRY}"
-          echo "ENTRY=${ENTRY}" >> $GITHUB_OUTPUT
+          echo "ENTRY=$ENTRY" >> $GITHUB_OUTPUT
 
       - name: Run engine
-        shell: bash
         run: |
-          set -euo pipefail
-          python "${{ steps.find_entry.outputs.ENTRY }}" \
+          python "${{ steps.entry.outputs.ENTRY }}" \
             --input "${MASTER_XLSX}" \
             --outdir "${OUTDIR}"
 
       - name: Commit outputs
-        shell: bash
         run: |
-          set -euo pipefail
-          git config user.name  "klineodyssey-bot"
+          git config user.name "klineodyssey-bot"
           git config user.email "actions@users.noreply.github.com"
-
-          # 如果沒有輸出就不要 commit
-          if [ ! -d "${OUTDIR}" ]; then
-            echo "No output dir: ${OUTDIR}"
-            exit 0
-          fi
-
           git add "${OUTDIR}" || true
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "engine: update outputs"
-          git push
+          git diff --cached --quiet || git commit -m "engine: update outputs"
+          git push || true
