@@ -1,11 +1,10 @@
-name: TX Engine Autopilot (final-safe)
+name: TX Engine Autopilot (final-path-safe)
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      - "engine_bin/**"
+      - "**/*.py"
       - ".github/workflows/engine_autopilot.yml"
 
 permissions:
@@ -29,20 +28,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas numpy openpyxl
 
-      - name: Force remove all UTF-8 BOM (binary)
+      - name: Find engine entry
+        id: find_engine
         run: |
-          python -c "
-          from pathlib import Path
-          p = Path('engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py')
-          b = p.read_bytes()
-          b = b.replace(b'\xef\xbb\xbf', b'')
-          p.write_bytes(b)
-          print('BOM fully removed')
-          "
+          echo "Searching engine entry..."
+          ENTRY=$(find . -type f -name "*Tplus1*pm500*多空運算*.py" | head -n 1)
+          echo "ENTRY=$ENTRY"
+          if [ -z "$ENTRY" ]; then
+            echo "Engine entry not found"
+            exit 1
+          fi
+          echo "entry=$ENTRY" >> $GITHUB_OUTPUT
 
-      - name: Run engine (public entry)
+      - name: Remove BOM safely
         run: |
-          python engine_bin/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py
+          python - << 'PY'
+          from pathlib import Path
+          p = Path("${{ steps.find_engine.outputs.entry }}")
+          b = p.read_bytes()
+          if b.startswith(b'\xef\xbb\xbf'):
+              p.write_bytes(b.replace(b'\xef\xbb\xbf', b''))
+              print("BOM removed:", p)
+          else:
+              print("No BOM:", p)
+          PY
+
+      - name: Run engine
+        run: |
+          python "${{ steps.find_engine.outputs.entry }}"
 
       - name: Commit outputs
         run: |
