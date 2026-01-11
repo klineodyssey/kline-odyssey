@@ -1,66 +1,25 @@
-name: TX Engine Autopilot (final-path-safe)
+name: TX Engine Autopilot (diagnose)
 
 on:
   workflow_dispatch:
   push:
-    paths:
-      - "**/*.py"
-      - ".github/workflows/engine_autopilot.yml"
 
 permissions:
   contents: write
 
 jobs:
-  run-engine:
+  diagnose:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install deps
+      - name: Show repo tree (top)
         run: |
-          python -m pip install --upgrade pip
-          pip install pandas numpy openpyxl
-
-      - name: Find engine entry
-        id: find_engine
-        run: |
-          echo "Searching engine entry..."
-          ENTRY=$(find . -type f -name "*Tplus1*pm500*多空運算*.py" | head -n 1)
-          echo "ENTRY=$ENTRY"
-          if [ -z "$ENTRY" ]; then
-            echo "Engine entry not found"
-            exit 1
-          fi
-          echo "entry=$ENTRY" >> $GITHUB_OUTPUT
-
-      - name: Remove BOM safely
-        run: |
-          python - << 'PY'
-          from pathlib import Path
-          p = Path("${{ steps.find_engine.outputs.entry }}")
-          b = p.read_bytes()
-          if b.startswith(b'\xef\xbb\xbf'):
-              p.write_bytes(b.replace(b'\xef\xbb\xbf', b''))
-              print("BOM removed:", p)
-          else:
-              print("No BOM:", p)
-          PY
-
-      - name: Run engine
-        run: |
-          python "${{ steps.find_engine.outputs.entry }}"
-
-      - name: Commit outputs
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add -A
-          git commit -m "engine: auto run outputs" || echo "No changes"
-          git push
+          echo "=== REPO ROOT ==="
+          ls -al
+          echo "=== FIND ALL PY FILES ==="
+          find . -type f -name "*.py"
+          echo "=== FIND ALL ZIP FILES ==="
+          find . -type f -name "*.zip"
