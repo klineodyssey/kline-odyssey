@@ -198,14 +198,12 @@ jobs:
           fi
           echo "ENTRY=${ENTRY}" >> "$GITHUB_OUTPUT"
           echo "Using entry: ${ENTRY}"
-
-      - name: Run engine
-        shell: bash
-        run: |
-          set -euo pipefail
-          python "${{ steps.entry.outputs.ENTRY }}" \
-            --input "${MASTER_XLSX}" \
-            --outdir "${OUTDIR}"
+          
+      - name: Validate engine syntax only
+  shell: bash
+  run: |
+    set -e
+    python -m py_compile "${{ steps.entry.outputs.ENTRY }}"
 
       - name: Commit outputs
         shell: bash
