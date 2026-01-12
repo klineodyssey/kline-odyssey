@@ -14,13 +14,6 @@ permissions:
 jobs:
   run-engine:
     runs-on: ubuntu-latest
-
-    env:
-      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      OUTDIR: "K線西遊記/kline-engine-public/output"
-      ENGINE_DIR: "engine_bin"
-      ASSET_NAME: "ENGINE_ZIP_B64.zip"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,115 +28,53 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install -U pip
-          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
-            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
-          else
-            pip install pandas openpyxl numpy requests
-          fi
+          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          pip install matplotlib
 
-      - name: Prepare engine_bin from latest release asset
+      - name: Prepare engine_bin from ENGINE_ZIP_B64
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
         run: |
           set -euo pipefail
-          rm -rf "${ENGINE_DIR}"
-          mkdir -p "${ENGINE_DIR}"
+          test -n "${ENGINE_ZIP_B64}" || (echo "Missing secret: ENGINE_ZIP_B64" && exit 1)
+          echo "${ENGINE_ZIP_B64}" | base64 -d > engine.zip
+          unzip -o engine.zip -d .
+          test -d "engine_bin" || (echo "engine_bin not found after unzip" && ls -la && exit 1)
+          ls -la engine_bin
 
-          python - <<'PY'
-          import json, os, sys, urllib.request
-
-          repo = os.environ["GITHUB_REPOSITORY"]
-          token = os.environ.get("GH_TOKEN", "")
-          asset_name = os.environ["ASSET_NAME"]
-
-          api = f"https://api.github.com/repos/{repo}/releases/latest"
-          req = urllib.request.Request(api, headers={
-              "Accept": "application/vnd.github+json",
-              "Authorization": f"Bearer {token}",
-              "User-Agent": "kline-engine-autopilot"
-          })
-          with urllib.request.urlopen(req) as r:
-              rel = json.loads(r.read().decode("utf-8"))
-
-          assets = rel.get("assets", [])
-          target = None
-          for a in assets:
-              if a.get("name") == asset_name:
-                  target = a
-                  break
-          if not target:
-              names = [a.get("name") for a in assets]
-              raise SystemExit(f"Latest release has no asset '{asset_name}'. assets={names}")
-
-          url = target["browser_download_url"]
-          out = asset_name
-
-          req2 = urllib.request.Request(url, headers={
-              "Authorization": f"Bearer {token}",
-              "User-Agent": "kline-engine-autopilot"
-          })
-          with urllib.request.urlopen(req2) as r:
-              data = r.read()
-          open(out, "wb").write(data)
-          print("Downloaded", out, "bytes=", len(data))
-          PY
-
-          unzip -q "${ASSET_NAME}" -d "${ENGINE_DIR}"
-          echo "Engine extracted to ${ENGINE_DIR}"
-          ls -la "${ENGINE_DIR}" | head -n 200
-
-      - name: Strip BOM for all engine python files (hardening)
+      - name: Debug list (make sure master exists)
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-
-          engine = Path("engine_bin")
-          n = 0
-          for p in engine.rglob("*.py"):
-              raw = p.read_bytes()
-              changed = False
-              if raw.startswith(b"\xef\xbb\xbf"):
-                  raw = raw[3:]
-                  changed = True
-              try:
-                  txt = raw.decode("utf-8", errors="strict")
-                  if "\ufeff" in txt:
-                      txt = txt.replace("\ufeff", "")
-                      raw = txt.encode("utf-8")
-                      changed = True
-              except Exception:
-                  continue
-              if changed:
-                  p.write_bytes(raw)
-                  n += 1
-          print("sanitized_py_count=", n)
-          PY
+          ls -la "K線西遊記/kline-taifex/master" || true
+          test -f "K線西遊記/kline-taifex/master/台指近全.xlsx" || (echo "MASTER missing" && exit 1)
 
       - name: Run public entry
         shell: bash
+        env:
+          MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+          ENGINE_DIR: "engine_bin"
+          OUTDIR: "K線西遊記/kline-engine-public/output"
         run: |
           set -euo pipefail
-          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
-
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "${MASTER_XLSX}" \
             --engine_dir "${ENGINE_DIR}" \
             --outdir "${OUTDIR}"
 
-      - name: Commit outputs (if changed)
+      - name: Commit outputs
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add "${OUTDIR}" || true
+          git add "K線西遊記/kline-engine-public/output" || true
+
           if git diff --cached --quiet; then
-            echo "No output changes."
+            echo "No output changes to commit."
             exit 0
           fi
 
