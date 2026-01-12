@@ -15,18 +15,9 @@ jobs:
   run-engine:
     runs-on: ubuntu-latest
 
-    env:
-      RELEASE_ASSET: ENGINE_ZIP_B64.zip
-      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      OUTDIR: "K線西遊記/kline-engine-public/output"
-      ENGINE_DIR: "engine_bin"
-
     steps:
-      - name: Checkout (on branch)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -39,73 +30,113 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Download engine asset from latest Release
+      - name: Prepare engine_bin from latest release asset
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: klineodyssey
+          REPO: kline-odyssey
+          ASSET_NAME: ENGINE_ZIP_B64.zip
         run: |
           set -euo pipefail
-          mkdir -p "${ENGINE_DIR}"
 
-          OWNER="${GITHUB_REPOSITORY%%/*}"
-          REPO="${GITHUB_REPOSITORY##*/}"
-          WANT="${RELEASE_ASSET}"
-          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
+          rm -rf engine_bin
+          mkdir -p engine_bin
 
-          echo "[dl] owner=${OWNER} repo=${REPO} asset=${WANT}"
-          echo "[dl] api=${API}"
+          echo "[prep] find latest release asset url..."
+          python - <<'PY'
+          import os, json, urllib.request
 
-          curl -fsSL "${API}" -o release.json
+          owner=os.environ["OWNER"]
+          repo=os.environ["REPO"]
+          asset_name=os.environ["ASSET_NAME"]
+          token=os.environ.get("GITHUB_TOKEN","")
 
-          ASSET_URL="$(python - <<'PY'
-          import json
-          d=json.load(open("release.json","r",encoding="utf-8"))
-          want = __import__("os").environ.get("RELEASE_ASSET","")
-          url=""
-          for a in d.get("assets",[]) or []:
-              if a.get("name")==want:
-                  url=a.get("browser_download_url","")
+          api=f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+          req=urllib.request.Request(api, headers={
+              "Accept":"application/vnd.github+json",
+              **({"Authorization": f"Bearer {token}"} if token else {})
+          })
+          with urllib.request.urlopen(req) as r:
+              data=json.load(r)
+
+          assets=data.get("assets",[])
+          url=None
+          for a in assets:
+              if a.get("name")==asset_name:
+                  url=a.get("url")
                   break
-          print(url)
+
+          if not url:
+              raise SystemExit(f"asset not found in latest release: {asset_name}")
+
+          open("asset_api_url.txt","w",encoding="utf-8").write(url)
+          print("[prep] ok: asset_api_url.txt written")
           PY
-          )"
 
-          if [ -z "${ASSET_URL}" ]; then
-            echo "ERROR: asset not found in latest release: ${WANT}"
-            echo "TIP: 去 Release 檢查 asset 名稱必須剛好叫：${WANT}"
-            exit 1
-          fi
+          echo "[prep] download asset bytes..."
+          ASSET_API_URL="$(cat asset_api_url.txt)"
+          curl -L \
+            -H "Accept: application/octet-stream" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "${ASSET_API_URL}" \
+            -o engine_asset.zip
 
-          echo "[dl] asset_url=${ASSET_URL}"
-          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
+          echo "[prep] unzip to engine_bin..."
+          unzip -o engine_asset.zip -d engine_bin
 
-      - name: Unzip engine asset
+      - name: Debug list (make sure engine exists)
         shell: bash
         run: |
-          set -euo pipefail
-          cd "${ENGINE_DIR}"
-          unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_bin tree (maxdepth 4) ==="
-          find . -maxdepth 4 -type f | sed 's|^\./||'
+          set -e
+          echo "[debug] engine_bin tree:"
+          find engine_bin -maxdepth 3 -type f | sed 's/^/ - /'
 
-      - name: Strip UTF-8 BOM for all engine .py
+      # ✅ 修正1：砍「檔案開頭」BOM
+      - name: Strip UTF-8 BOM (file header) for all engine .py
         shell: bash
         run: |
           set -e
           python - <<'PY'
           from pathlib import Path
           root = Path("engine_bin")
-          n=0
+          fixed = 0
           for f in root.rglob("*.py"):
               b = f.read_bytes()
               if b.startswith(b"\xef\xbb\xbf"):
                   f.write_bytes(b[3:])
-                  n += 1
-          print(f"BOM strip done. files_fixed={n}")
+                  fixed += 1
+                  print(f"[bom-header] stripped: {f}")
+          print(f"[bom-header] total stripped: {fixed}")
+          PY
+
+      # ✅ 修正2：砍「檔案中間混入」的 U+FEFF（你現在炸的就是這個）
+      - name: Remove hidden U+FEFF chars inside engine .py
+        shell: bash
+        run: |
+          set -e
+          python - <<'PY'
+          from pathlib import Path
+          root = Path("engine_bin")
+          fixed = 0
+          for f in root.rglob("*.py"):
+              txt = f.read_text(encoding="utf-8", errors="ignore")
+              if "\ufeff" in txt:
+                  f.write_text(txt.replace("\ufeff", ""), encoding="utf-8")
+                  fixed += 1
+                  print(f"[ufeef] removed inside: {f}")
+          print(f"[ufeef] total cleaned: {fixed}")
           PY
 
       - name: Run public entry
         shell: bash
         run: |
           set -euo pipefail
+
+          MASTER_XLSX="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          OUTDIR="K線西遊記/kline-engine-public/output"
+          ENGINE_DIR="engine_bin"
+
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
 
@@ -118,15 +149,9 @@ jobs:
         shell: bash
         run: |
           set -e
-          git config user.name "kline-bot"
-          git config user.email "bot@kline.odyssey"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add "${OUTDIR}" || true
+          git add "K線西遊記/kline-engine-public/output" || true
 
-          if git diff --cached --quiet; then
-            echo "No changes."
-            exit 0
-          fi
-
-          git commit -m "auto: engine output update"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          if git diff --cached
