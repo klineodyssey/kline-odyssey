@@ -149,6 +149,41 @@ jobs:
           print(f"indent normalized files: {fixed}")
           PY
 
+      - name: Fix orphan indented blocks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path("engine_bin")
+          fixed = 0
+
+          for f in root.rglob("*.py"):
+              lines = f.read_text(errors="ignore").splitlines()
+              out = []
+              for i, ln in enumerate(lines):
+                  stripped = ln.lstrip()
+                  indent = len(ln) - len(stripped)
+
+                  if (
+                      indent >= 8
+                      and stripped.startswith(("for ", "if ", "while ", "def "))
+                      and i > 0
+                      and not lines[i-1].rstrip().endswith(":")
+                  ):
+                      # 強制左移一層（4 spaces）
+                      ln = ln[4:]
+                      fixed += 1
+
+                  out.append(ln)
+
+              f.write_text("\n".join(out) + "\n")
+
+          print(f"orphan indent fixed lines: {fixed}")
+          PY
+
       - name: Find engine entry
         id: entry
         shell: bash
