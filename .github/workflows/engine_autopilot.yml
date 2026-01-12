@@ -15,6 +15,12 @@ jobs:
   run-engine:
     runs-on: ubuntu-latest
 
+    env:
+      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      OUTDIR: "K線西遊記/kline-engine-public/output"
+      ENGINE_DIR: "engine_bin"
+      ASSET_NAME: "ENGINE_ZIP_B64.zip"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,132 +31,101 @@ jobs:
           python-version: "3.10"
 
       - name: Install deps
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python -m pip install -U pip
-          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
+            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          else
+            pip install pandas openpyxl numpy requests
+          fi
 
       - name: Prepare engine_bin from latest release asset
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: klineodyssey
-          REPO: kline-odyssey
-          ASSET_NAME: ENGINE_ZIP_B64.zip
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          rm -rf engine_bin
-          mkdir -p engine_bin
+          rm -rf "${ENGINE_DIR}"
+          mkdir -p "${ENGINE_DIR}"
 
           python - <<'PY'
-          import os, json, urllib.request
+          import json, os, sys, urllib.request
 
-          owner=os.environ["OWNER"]
-          repo=os.environ["REPO"]
-          asset_name=os.environ["ASSET_NAME"]
-          token=os.environ.get("GITHUB_TOKEN","")
+          repo = os.environ["GITHUB_REPOSITORY"]
+          token = os.environ.get("GH_TOKEN", "")
+          asset_name = os.environ["ASSET_NAME"]
 
-          api=f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
-          req=urllib.request.Request(api, headers={
-              "Accept":"application/vnd.github+json",
-              **({"Authorization": f"Bearer {token}"} if token else {})
+          api = f"https://api.github.com/repos/{repo}/releases/latest"
+          req = urllib.request.Request(api, headers={
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "User-Agent": "kline-engine-autopilot"
           })
           with urllib.request.urlopen(req) as r:
-              data=json.load(r)
+              rel = json.loads(r.read().decode("utf-8"))
 
-          assets=data.get("assets",[])
-          url=None
+          assets = rel.get("assets", [])
+          target = None
           for a in assets:
-              if a.get("name")==asset_name:
-                  url=a.get("url")
+              if a.get("name") == asset_name:
+                  target = a
                   break
+          if not target:
+              names = [a.get("name") for a in assets]
+              raise SystemExit(f"Latest release has no asset '{asset_name}'. assets={names}")
 
-          if not url:
-              raise SystemExit(f"asset not found in latest release: {asset_name}")
+          url = target["browser_download_url"]
+          out = asset_name
 
-          open("asset_api_url.txt","w",encoding="utf-8").write(url)
-          print("[prep] ok: asset_api_url.txt written")
+          req2 = urllib.request.Request(url, headers={
+              "Authorization": f"Bearer {token}",
+              "User-Agent": "kline-engine-autopilot"
+          })
+          with urllib.request.urlopen(req2) as r:
+              data = r.read()
+          open(out, "wb").write(data)
+          print("Downloaded", out, "bytes=", len(data))
           PY
 
-          ASSET_API_URL="$(cat asset_api_url.txt)"
-          curl -L \
-            -H "Accept: application/octet-stream" \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            "${ASSET_API_URL}" \
-            -o engine_asset.zip
+          unzip -q "${ASSET_NAME}" -d "${ENGINE_DIR}"
+          echo "Engine extracted to ${ENGINE_DIR}"
+          ls -la "${ENGINE_DIR}" | head -n 200
 
-          unzip -o engine_asset.zip -d engine_bin
-
-      - name: Debug list (make sure engine exists)
+      - name: Strip BOM for all engine python files (hardening)
         shell: bash
         run: |
-          set -e
-          echo "[debug] engine_bin tree:"
-          find engine_bin -maxdepth 3 -type f | sed 's/^/ - /'
-
-      # ✅ 最終穩定：清 BOM / 清 U+FEFF / 轉 CRLF->LF / 修「前導縮排」Tab & NBSP
-      - name: Sanitize engine .py (BOM/U+FEFF/CRLF/TAB/NBSP)
-        shell: bash
-        run: |
-          set -e
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
 
-          root = Path("engine_bin")
-          total = 0
-          changed = 0
-
-          def fix_leading_ws(line: str) -> str:
-              # 只修「前導空白」：TAB->4空白、NBSP->空白
-              i = 0
-              while i < len(line) and line[i] in (" ", "\t", "\u00a0", "\ufeff"):
-                  i += 1
-              lead = line[:i]
-              rest = line[i:]
-              lead = lead.replace("\ufeff", "")
-              lead = lead.replace("\u00a0", " ")
-              lead = lead.replace("\t", "    ")
-              return lead + rest
-
-          for f in root.rglob("*.py"):
-              total += 1
-              b = f.read_bytes()
-
-              # 1) 去檔頭 BOM
-              if b.startswith(b"\xef\xbb\xbf"):
-                  b = b[3:]
-
-              # 2) 讀成文字（保守：忽略無法解碼）
-              txt = b.decode("utf-8", errors="ignore")
-
-              # 3) CRLF -> LF
-              txt2 = txt.replace("\r\n", "\n").replace("\r", "\n")
-
-              # 4) 全檔移除 U+FEFF（有些會混在第3行）
-              txt2 = txt2.replace("\ufeff", "")
-
-              # 5) 逐行修前導縮排（TAB/NBSP）
-              lines = txt2.split("\n")
-              lines2 = [fix_leading_ws(line) for line in lines]
-              out = "\n".join(lines2)
-
-              if out != txt:
-                  f.write_text(out, encoding="utf-8")
-                  changed += 1
-                  print(f"[sanitize] fixed: {f}")
-
-          print(f"[sanitize] total_py={total}, changed={changed}")
+          engine = Path("engine_bin")
+          n = 0
+          for p in engine.rglob("*.py"):
+              raw = p.read_bytes()
+              changed = False
+              if raw.startswith(b"\xef\xbb\xbf"):
+                  raw = raw[3:]
+                  changed = True
+              try:
+                  txt = raw.decode("utf-8", errors="strict")
+                  if "\ufeff" in txt:
+                      txt = txt.replace("\ufeff", "")
+                      raw = txt.encode("utf-8")
+                      changed = True
+              except Exception:
+                  continue
+              if changed:
+                  p.write_bytes(raw)
+                  n += 1
+          print("sanitized_py_count=", n)
           PY
 
       - name: Run public entry
         shell: bash
         run: |
           set -euo pipefail
-
-          MASTER_XLSX="K線西遊記/kline-taifex/master/台指近全.xlsx"
-          OUTDIR="K線西遊記/kline-engine-public/output"
-          ENGINE_DIR="engine_bin"
-
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
 
@@ -159,19 +134,18 @@ jobs:
             --engine_dir "${ENGINE_DIR}" \
             --outdir "${OUTDIR}"
 
-      - name: Commit outputs
+      - name: Commit outputs (if changed)
         shell: bash
         run: |
-          set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add "K線西遊記/kline-engine-public/output" || true
-
+          git add "${OUTDIR}" || true
           if git diff --cached --quiet; then
-            echo "[commit] no output changes"
+            echo "No output changes."
             exit 0
           fi
 
-          git commit -m "engine: update outputs"
+          git commit -m "chore(engine): update outputs"
           git push
