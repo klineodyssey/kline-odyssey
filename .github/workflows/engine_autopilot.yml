@@ -22,10 +22,9 @@ jobs:
       ENGINE_DIR: "engine_bin"
 
     steps:
-      - name: Checkout (on branch, not detached)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Setup Python
@@ -34,15 +33,20 @@ jobs:
           python-version: "3.10"
 
       - name: Install deps
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python -m pip install -U pip
-          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
+            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          else
+            pip install -U pandas openpyxl numpy matplotlib
+          fi
 
-      - name: Download engine asset from latest Release (AUTH SAFE)
+      - name: Download engine asset (latest release)
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
@@ -53,72 +57,70 @@ jobs:
 
           echo "owner=${OWNER} repo=${REPO} asset=${WANT}"
 
-          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
-          echo "api=${API}"
+          python - <<'PY'
+          import json, os, sys, urllib.request
 
-          # 取 asset 的 API url（不是 browser_download_url）
-          ASSET_API_URL="$(curl -fsSL \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            "${API}" | python - <<'PY'
-import sys, json
-want = "${WANT}"
-d = json.load(sys.stdin)
-u = ""
-for a in d.get("assets", []):
-    if a.get("name") == want:
-        u = a.get("url", "")
-        break
-print(u)
-PY
-          )"
+          owner = os.environ["GITHUB_REPOSITORY"].split("/")[0]
+          repo  = os.environ["GITHUB_REPOSITORY"].split("/")[1]
+          want  = os.environ["RELEASE_ASSET"]
+          token = os.environ.get("GH_TOKEN","")
 
-          if [ -z "${ASSET_API_URL}" ]; then
-            echo "ERROR: asset not found in latest release: ${WANT}"
-            exit 1
-          fi
+          url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+          req = urllib.request.Request(
+              url,
+              headers={
+                  "Accept":"application/vnd.github+json",
+                  "User-Agent":"actions",
+                  **({"Authorization": f"Bearer {token}"} if token else {})
+              }
+          )
+          data = json.loads(urllib.request.urlopen(req).read().decode("utf-8"))
 
-          echo "asset_api_url=${ASSET_API_URL}"
+          asset_url = ""
+          for a in data.get("assets", []):
+              if a.get("name") == want:
+                  asset_url = a.get("browser_download_url","")
+                  break
 
-          # 用 asset API url 下載真正檔案（octet-stream）
-          curl -fL \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/octet-stream" \
-            "${ASSET_API_URL}" \
-            -o "${ENGINE_DIR}/${WANT}"
+          if not asset_url:
+              print(f"ERROR: asset not found in latest release: {want}", file=sys.stderr)
+              sys.exit(2)
 
-          echo "downloaded: ${ENGINE_DIR}/${WANT}"
-          ls -al "${ENGINE_DIR}"
+          print(asset_url)
+          PY > asset_url.txt
 
-      - name: Unzip engine asset
+          echo "asset_url=$(cat asset_url.txt)"
+          curl -fL "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
+
+      - name: Unzip engine
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_dir tree (top 3 levels) ==="
+          echo "=== engine_bin tree (maxdepth 3) ==="
           find . -maxdepth 3 -type f | sed 's|^\./||'
 
-      - name: Remove UTF-8 BOM (py only)
+      - name: Strip UTF-8 BOM for all .py (engine only)
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python - <<'PY'
-from pathlib import Path
-root = Path("engine_bin")
-fixed = 0
-for f in root.rglob("*.py"):
-    b = f.read_bytes()
-    if b.startswith(b"\xef\xbb\xbf"):
-        f.write_bytes(b[3:])
-        fixed += 1
-print("BOM stripped files:", fixed)
-PY
+          from pathlib import Path
+          root = Path("engine_bin")
+          cnt = 0
+          for f in root.rglob("*.py"):
+              b = f.read_bytes()
+              if b.startswith(b"\xef\xbb\xbf"):
+                  f.write_bytes(b[3:])
+                  cnt += 1
+          print("BOM stripped files:", cnt)
+          PY
 
       - name: Run public entry
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
 
@@ -130,16 +132,15 @@ PY
       - name: Commit outputs
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "kline-bot"
-          git config user.email "bot@kline.odyssey"
+          git config user.email "actions@users.noreply.github.com"
 
           git add "${OUTDIR}" || true
-
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
 
           git commit -m "auto: engine output update"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push
