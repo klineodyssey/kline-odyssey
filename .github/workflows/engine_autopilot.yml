@@ -16,19 +16,23 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RELEASE_ASSET: ENGINE_ZIP_B64.zip
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
       ENGINE_DIR: "engine_bin"
-
-      # run_public.py 目前期待的固定檔名（你 log 裡顯示就是這個）
-      EXPECTED_ENTRY: "K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py"
+      ENGINE_REF: "engine-v1.0"   # 這裡就是你的 Tag 名稱
 
     steps:
-      - name: Checkout (on branch, not detached)
+      - name: Checkout main (public + workflow)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Checkout engine tag into engine_bin
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ENGINE_REF }}
+          path: ${{ env.ENGINE_DIR }}
           fetch-depth: 0
 
       - name: Setup Python
@@ -42,88 +46,19 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Download engine asset (latest release)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p "${ENGINE_DIR}"
-
-          OWNER="${GITHUB_REPOSITORY%%/*}"
-          REPO="${GITHUB_REPOSITORY##*/}"
-          WANT="${RELEASE_ASSET}"
-
-          echo "owner=${OWNER} repo=${REPO} asset=${WANT}"
-
-          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
-
-          ASSET_URL=$(curl -fsSL \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            "${API}" \
-            | jq -r ".assets[] | select(.name==\"${WANT}\") | .browser_download_url")
-
-          if [ -z "${ASSET_URL}" ] || [ "${ASSET_URL}" = "null" ]; then
-            echo "ERROR: asset not found in latest release: ${WANT}"
-            exit 1
-          fi
-
-          echo "asset_url=${ASSET_URL}"
-          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
-
-      - name: Unzip engine asset
-        shell: bash
-        run: |
-          set -e
-          cd "${ENGINE_DIR}"
-          unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_dir tree (after unzip) ==="
-          find . -maxdepth 6 -type f | sed 's|^\./||'
-
-      # ✅ 這步是關鍵：把引擎主程式「自動找出來」並放到 engine_bin/ 根目錄，檔名固定成 EXPECTED_ENTRY
-      - name: Normalize engine entry location
+      - name: Debug list (make sure engine exists)
         shell: bash
         run: |
           set -euo pipefail
+          echo "=== ENGINE_DIR tree ==="
+          find "${ENGINE_DIR}" -maxdepth 3 -type f | sed 's|^\./||'
+          echo "=== MASTER exists? ==="
+          ls -la "${MASTER_XLSX}" || true
 
-          WANT_PATH="${ENGINE_DIR}/${EXPECTED_ENTRY}"
-          if [ -f "${WANT_PATH}" ]; then
-            echo "OK: entry already exists: ${WANT_PATH}"
-            exit 0
-          fi
-
-          echo "Entry not found at ${WANT_PATH}"
-          echo "Searching engine entry under ${ENGINE_DIR} ..."
-
-          # 1) 先找完全相同檔名（可能在子資料夾）
-          FOUND="$(find "${ENGINE_DIR}" -type f -name "${EXPECTED_ENTRY}" -print -quit || true)"
-
-          # 2) 找不到就用模糊匹配（避免 V3.4.3 或字尾不同）
-          if [ -z "${FOUND}" ]; then
-            FOUND="$(find "${ENGINE_DIR}" -type f \
-              \( -name "*Tplus1*pm500*step1*多空運算*.py" -o -name "*Tplus1*pm500*多空運算*.py" \) \
-              -print -quit || true)"
-          fi
-
-          if [ -z "${FOUND}" ]; then
-            echo "ERROR: cannot locate engine entry .py in ${ENGINE_DIR}"
-            echo "Dump files:"
-            find "${ENGINE_DIR}" -maxdepth 6 -type f | sed 's|^\./||'
-            exit 1
-          fi
-
-          echo "FOUND entry: ${FOUND}"
-          echo "Copy -> ${WANT_PATH}"
-          cp -f "${FOUND}" "${WANT_PATH}"
-
-          echo "=== engine_dir root ==="
-          ls -la "${ENGINE_DIR}" | sed 's/^/  /'
-
-      - name: Remove UTF-8 BOM (py only)
+      - name: Strip UTF-8 BOM for engine .py
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           root = Path("engine_bin")
@@ -139,7 +74,7 @@ jobs:
       - name: Run public entry
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
 
@@ -151,16 +86,14 @@ jobs:
       - name: Commit outputs
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
           git add "${OUTDIR}" || true
-
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
-
           git commit -m "auto: engine output update"
           git push origin "HEAD:${GITHUB_REF_NAME}"
