@@ -16,9 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # 這兩個不用寫死：用 GITHUB_REPOSITORY 自動抓 owner/repo
       RELEASE_ASSET: ENGINE_ZIP_B64.zip
-
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
       ENGINE_DIR: "engine_bin"
@@ -41,8 +39,10 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
-      - name: Download engine asset from latest Release
+      - name: Download engine asset from latest Release (AUTH SAFE)
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
@@ -56,23 +56,39 @@ jobs:
           API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
           echo "api=${API}"
 
-          ASSET_URL="$(curl -fsSL "${API}" \
-            | python -c "import sys,json; d=json.load(sys.stdin); 
-                        want='${WANT}';
-                        assets=d.get('assets',[]);
-                        url=None
-                        for a in assets:
-                          if a.get('name')==want:
-                            url=a.get('browser_download_url'); break
-                        print(url or '')")"
+          # 取 asset 的 API url（不是 browser_download_url）
+          ASSET_API_URL="$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "${API}" | python - <<'PY'
+import sys, json
+want = "${WANT}"
+d = json.load(sys.stdin)
+u = ""
+for a in d.get("assets", []):
+    if a.get("name") == want:
+        u = a.get("url", "")
+        break
+print(u)
+PY
+          )"
 
-          if [ -z "${ASSET_URL}" ]; then
+          if [ -z "${ASSET_API_URL}" ]; then
             echo "ERROR: asset not found in latest release: ${WANT}"
             exit 1
           fi
 
-          echo "asset_url=${ASSET_URL}"
-          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
+          echo "asset_api_url=${ASSET_API_URL}"
+
+          # 用 asset API url 下載真正檔案（octet-stream）
+          curl -fL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "${ASSET_API_URL}" \
+            -o "${ENGINE_DIR}/${WANT}"
+
+          echo "downloaded: ${ENGINE_DIR}/${WANT}"
+          ls -al "${ENGINE_DIR}"
 
       - name: Unzip engine asset
         shell: bash
@@ -80,7 +96,7 @@ jobs:
           set -e
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_dir tree ==="
+          echo "=== engine_dir tree (top 3 levels) ==="
           find . -maxdepth 3 -type f | sed 's|^\./||'
 
       - name: Remove UTF-8 BOM (py only)
@@ -88,14 +104,16 @@ jobs:
         run: |
           set -e
           python - <<'PY'
-          from pathlib import Path
-          root = Path("engine_bin")
-          for f in root.rglob("*.py"):
-              b = f.read_bytes()
-              if b.startswith(b"\xef\xbb\xbf"):
-                  f.write_bytes(b[3:])
-          print("BOM strip done.")
-          PY
+from pathlib import Path
+root = Path("engine_bin")
+fixed = 0
+for f in root.rglob("*.py"):
+    b = f.read_bytes()
+    if b.startswith(b"\xef\xbb\xbf"):
+        f.write_bytes(b[3:])
+        fixed += 1
+print("BOM stripped files:", fixed)
+PY
 
       - name: Run public entry
         shell: bash
