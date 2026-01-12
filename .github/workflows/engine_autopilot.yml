@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RELEASE_ASSET: ENGINE_ZIP_B64.zip
+      RELEASE_ASSET: "ENGINE_ZIP_B64.zip"
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
       ENGINE_DIR: "engine_bin"
@@ -33,22 +33,16 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install deps (public runner)
-        shell: bash
+      - name: Install deps
         run: |
           set -e
           python -m pip install -U pip
-          # 如果你有 requirements.txt 就用它；沒有也不會壞
-          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
-            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
-          else
-            pip install -U pandas openpyxl numpy matplotlib
-          fi
+          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
       - name: Download engine asset from latest Release
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
@@ -56,77 +50,85 @@ jobs:
           OWNER="${GITHUB_REPOSITORY%%/*}"
           REPO="${GITHUB_REPOSITORY##*/}"
           WANT="${RELEASE_ASSET}"
+          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
 
           echo "owner=${OWNER} repo=${REPO} asset=${WANT}"
+          echo "api=${API}"
 
-          python - <<'PY'
-          import json, os, sys, urllib.request
+          ASSET_URL="$(
+            curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${API}" \
+            | python - <<'PY'
+import sys, json
+d = json.load(sys.stdin)
+want = sys.argv[1] if len(sys.argv) > 1 else ""
+url = ""
+for a in d.get("assets", []):
+    if a.get("name") == want:
+        url = a.get("browser_download_url") or ""
+        break
+print(url)
+PY
+            "${WANT}"
+          )"
 
-          owner = os.environ["GITHUB_REPOSITORY"].split("/")[0]
-          repo  = os.environ["GITHUB_REPOSITORY"].split("/")[1]
-          want  = os.environ["RELEASE_ASSET"]
-          token = os.environ.get("GH_TOKEN","")
+          if [ -z "${ASSET_URL}" ]; then
+            echo "ERROR: asset not found in latest release: ${WANT}"
+            echo "TIP: Please check Release assets name exactly matches: ${WANT}"
+            exit 1
+          fi
 
-          api = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
-          headers = {
-              "Accept": "application/vnd.github+json",
-              "User-Agent": "actions",
-          }
-          if token:
-              headers["Authorization"] = f"Bearer {token}"
-
-          req = urllib.request.Request(api, headers=headers)
-          with urllib.request.urlopen(req) as r:
-              data = json.loads(r.read().decode("utf-8"))
-
-          url = ""
-          for a in data.get("assets", []):
-              if a.get("name") == want:
-                  url = a.get("browser_download_url") or ""
-                  break
-
-          if not url:
-              raise SystemExit(f"ERROR: asset not found in latest release: {want}")
-
-          print(url)
-          PY > asset_url.txt
-
-          echo "asset_url=$(cat asset_url.txt)"
-          curl -fL "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
+          echo "asset_url=${ASSET_URL}"
+          curl -fL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${ASSET_URL}" \
+            -o "${ENGINE_DIR}/${WANT}"
 
       - name: Unzip engine asset
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_dir tree (top 4 levels) ==="
-          find . -maxdepth 4 -type f | sed 's|^\./||' || true
+          echo "=== engine_dir tree (maxdepth 5) ==="
+          find . -maxdepth 5 -type f | sed 's|^\./||'
 
-      - name: Remove UTF-8 BOM (py only)
+      - name: Strip UTF-8 BOM (engine .py only)
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python - <<'PY'
-          from pathlib import Path
-          root = Path("engine_bin")
-          fixed = 0
-          for f in root.rglob("*.py"):
-              b = f.read_bytes()
-              if b.startswith(b"\xef\xbb\xbf"):
-                  f.write_bytes(b[3:])
-                  fixed += 1
-          print(f"BOM strip done. fixed={fixed}")
-          PY
+from pathlib import Path
+root = Path("engine_bin")
+count = 0
+for f in root.rglob("*.py"):
+    b = f.read_bytes()
+    if b.startswith(b"\xef\xbb\xbf"):
+        f.write_bytes(b[3:])
+        count += 1
+print(f"BOM strip done. fixed={count}")
+PY
 
-      - name: Run public entry (run_public.py)
+      - name: Debug list (public + master)
         shell: bash
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
-          KLINE_ENGINE_KEY: ${{ secrets.KLINE_ENGINE_KEY }}
+        run: |
+          set -euo pipefail
+          echo "=== master ==="
+          ls -al "K線西遊記/kline-taifex/master" || true
+          echo "=== public ==="
+          ls -al "K線西遊記/kline-engine-public" || true
+          echo "=== engine_bin ==="
+          ls -al "engine_bin" || true
+
+      - name: Run public entry
+        shell: bash
         run: |
           set -euo pipefail
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          test -f "K線西遊記/kline-engine-public/run_public.py" || (echo "run_public.py not found" && exit 1)
           mkdir -p "${OUTDIR}"
 
           python "K線西遊記/kline-engine-public/run_public.py" \
@@ -134,10 +136,10 @@ jobs:
             --engine_dir "${ENGINE_DIR}" \
             --outdir "${OUTDIR}"
 
-      - name: Commit outputs (push back to same branch)
+      - name: Commit outputs
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
