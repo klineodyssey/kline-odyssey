@@ -1,110 +1,78 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-kline-engine-public/run_public.py
-
+K線西遊記 · 引擎公開入口（最終穩定版）
 用途：
-- GitHub Actions 下載並解壓引擎 zip 到 engine_dir 後
-- 本腳本會自動尋找「引擎入口 .py」並執行
-- 把 master xlsx 當作 --input 傳入，引擎輸出到 outdir
+- Repo 公開：只放這支入口與 output
+- 私有引擎：放在 Release 資產 ENGINE_ZIP_B64.zip（Actions 下載解壓到 engine_bin）
+- 本入口會在 engine_dir 內自動找「真正引擎入口檔」並以參數方式執行
 
-設計重點：
-- 不依賴固定檔名（因為你引擎檔名一直在變）
-- 只要 zip 裡有可執行的入口 .py 就能跑起來
+入口偵測優先順序：
+1) K線西遊記_Tplus1_pm500_step1_多空運算*.py
+2) 啟動西遊記運算*.py
+3) 其他：報錯（避免跑錯檔）
 """
 
+from __future__ import annotations
 import argparse
+import base64
 import os
+import re
 import sys
 import subprocess
 from pathlib import Path
 
 
-def eprint(*a):
-    print(*a, file=sys.stderr)
+ENTRY_PATTERNS = [
+    "K線西遊記_Tplus1_pm500_step1_多空運算*.py",
+    "啟動西遊記運算*.py",
+]
 
 
-def list_tree(root: Path, max_lines: int = 250):
-    """印出資料夾樹狀（最多 max_lines 行）"""
-    lines = []
-    if not root.exists():
-        return ["(missing)"]
-    for p in sorted(root.rglob("*")):
-        if p.is_file():
-            rel = p.relative_to(root).as_posix()
-            lines.append(rel)
-            if len(lines) >= max_lines:
-                lines.append("... (truncated)")
-                break
-    return lines
+def _strip_py_bom(root: Path) -> int:
+    fixed = 0
+    for f in root.rglob("*.py"):
+        b = f.read_bytes()
+        if b.startswith(b"\xef\xbb\xbf"):
+            f.write_bytes(b[3:])
+            fixed += 1
+    return fixed
 
 
-def pick_entry(engine_dir: Path) -> Path:
+def _write_model_from_secret(engine_dir: Path) -> Path | None:
     """
-    入口挑選規則（由強到弱）：
-    1) 檔名含 step1 / launcher / entry / main
-    2) 檔名含 Tplus1 或 pm500 或 多空運算
-    3) 任何 .py（排除 __init__.py、測試檔、run_public.py）
+    若有 ENGINE_MODEL_B64，會寫成 engine_dir/_secret_model.json
     """
-    if not engine_dir.exists():
-        raise FileNotFoundError(f"engine_dir not found: {engine_dir}")
+    b64 = os.environ.get("ENGINE_MODEL_B64", "").strip()
+    if not b64:
+        return None
 
-    py_files = []
-    for p in engine_dir.rglob("*.py"):
-        name = p.name.lower()
-        if name in {"__init__.py"}:
-            continue
-        if "test" in name or "tests" in p.parts:
-            continue
-        py_files.append(p)
+    # 清掉非 base64 字元（防止貼入換行空白）
+    b64_clean = re.sub(r"[^A-Za-z0-9+/=]", "", b64)
+    if len(b64_clean) < 50:
+        return None
 
-    if not py_files:
-        raise FileNotFoundError("No .py found under engine_dir")
-
-    def score(p: Path) -> int:
-        n = p.name.lower()
-        s = 0
-        # 強關鍵字
-        for kw in ["step1", "launcher", "entry", "main"]:
-            if kw in n:
-                s += 50
-        # 你的引擎常見關鍵字
-        for kw in ["tplus1", "pm500", "多空", "運算"]:
-            if kw in n:
-                s += 20
-        # 越靠近根目錄越高分（避免被深層雜檔干擾）
-        depth = len(p.relative_to(engine_dir).parts)
-        s += max(0, 10 - depth)
-        return s
-
-    py_files.sort(key=lambda p: (score(p), -p.stat().st_mtime), reverse=True)
-    return py_files[0]
+    out = engine_dir / "_secret_model.json"
+    out.write_bytes(base64.b64decode(b64_clean))
+    return out
 
 
-def run_entry(entry: Path, master: Path, outdir: Path):
-    """
-    用最通用的方式呼叫引擎：
-    - 優先用 --input（你提供的引擎就是 --input/--outdir）
-    - 若引擎不吃 --input，會回傳 exit code !=0，你再看 log 改參數
-    """
-    cmd = [
-        sys.executable,
-        str(entry),
-        "--input", str(master),
-        "--outdir", str(outdir),
-    ]
-    print(f"[run_public] entry={entry}")
-    print(f"[run_public] master={master}")
-    print(f"[run_public] outdir={outdir}")
-    print(f"[run_public] cmd: {' '.join(cmd)}")
-    subprocess.check_call(cmd)
+def _find_entry(engine_dir: Path) -> Path | None:
+    hits_all: list[Path] = []
+    for pat in ENTRY_PATTERNS:
+        hits = list(engine_dir.rglob(pat))
+        if hits:
+            hits_all = hits
+            # 取「路徑最短」通常就是你要的那支
+            hits_all.sort(key=lambda p: (len(str(p)), str(p)))
+            return hits_all[0]
+    return None
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--master", required=True, help="主檔 xlsx 路徑")
-    ap.add_argument("--engine_dir", required=True, help="引擎解壓後資料夾（engine_bin）")
-    ap.add_argument("--outdir", required=True, help="輸出資料夾")
+    ap.add_argument("--master", required=True, help="台指近全.xlsx 路徑")
+    ap.add_argument("--engine_dir", required=True, help="已解壓的引擎資料夾（例如 engine_bin）")
+    ap.add_argument("--outdir", required=True, help="輸出資料夾（repo 內 output）")
     args = ap.parse_args()
 
     master = Path(args.master)
@@ -112,30 +80,48 @@ def main():
     outdir = Path(args.outdir)
 
     if not master.exists():
-        raise FileNotFoundError(f"MASTER not found: {master}")
+        print(f"[run_public] MASTER not found: {master}", file=sys.stderr)
+        return 2
+    if not engine_dir.exists():
+        print(f"[run_public] engine_dir not found: {engine_dir}", file=sys.stderr)
+        return 2
 
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # Debug tree（你每次 zip 內容不同，先印出來最保險）
-    print("[run_public] engine_dir tree (files):")
-    for line in list_tree(engine_dir):
-        print("  -", line)
+    # 再做一次 BOM strip（雙保險：就算 workflow 忘了做也能救）
+    fixed = _strip_py_bom(engine_dir)
+    if fixed:
+        print(f"[run_public] BOM stripped: {fixed} file(s)")
 
-    # 找入口
-    try:
-        entry = pick_entry(engine_dir)
-    except Exception as e:
-        eprint("找不到引擎入口檔：請確認 ENGINE_ZIP_B64.zip 解壓後有 .py 檔")
-        eprint(str(e))
-        sys.exit(1)
+    model_path = _write_model_from_secret(engine_dir)
+    entry = _find_entry(engine_dir)
+    if not entry:
+        print("[run_public] 找不到引擎入口檔，請確認 Release ZIP 內含：", file=sys.stderr)
+        for p in ENTRY_PATTERNS:
+            print(f"  - {p}", file=sys.stderr)
+        return 3
 
-    # 跑
-    try:
-        run_entry(entry, master, outdir)
-    except subprocess.CalledProcessError as e:
-        eprint(f"引擎執行失敗，exit code={e.returncode}")
-        sys.exit(e.returncode)
+    print(f"[run_public] master  : {master}")
+    print(f"[run_public] engine  : {engine_dir}")
+    print(f"[run_public] outdir  : {outdir}")
+    print(f"[run_public] entry   : {entry}")
+    if model_path:
+        print(f"[run_public] model(secret) : {model_path}")
+
+    # 組命令：盡量用統一參數（step1/launcher 都吃得到最好）
+    cmd = [sys.executable, str(entry), "--input", str(master), "--outdir", str(outdir)]
+    if model_path:
+        cmd += ["--model", str(model_path)]
+
+    # 讓引擎自己讀 key（若有用到）
+    # os.environ.get("KLINE_ENGINE_KEY") 會由 Actions env 帶入，這裡不干涉。
+
+    print("[run_public] cmd:", " ".join(cmd))
+
+    # 重要：cwd 用 entry 所在資料夾，避免引擎用相對路徑找不到資源
+    proc = subprocess.run(cmd, cwd=str(entry.parent))
+    return proc.returncode
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
