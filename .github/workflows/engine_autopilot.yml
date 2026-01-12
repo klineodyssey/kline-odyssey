@@ -123,6 +123,32 @@ jobs:
           print(f"global BOM cleaned: {removed} files")
           PY
 
+      - name: Normalize Python indentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path("engine_bin")
+          fixed = 0
+
+          for f in root.rglob("*.py"):
+              lines = f.read_text(errors="ignore").splitlines()
+              new_lines = []
+              for ln in lines:
+                  # Tab → 4 spaces
+                  ln2 = ln.replace("\t", "    ")
+                  # 移除行首多餘空白（不破壞 block，只清異常）
+                  new_lines.append(ln2.rstrip())
+              new = "\n".join(new_lines) + "\n"
+              if new != f.read_text(errors="ignore"):
+                  f.write_text(new)
+                  fixed += 1
+
+          print(f"indent normalized files: {fixed}")
+          PY
+
       - name: Find engine entry
         id: entry
         shell: bash
