@@ -117,6 +117,61 @@ jobs:
               b = f.read_bytes()
 
               # 1) 去檔頭 BOM
-              if b          git add "K線西遊記/kline-engine-public/output" || true
+              if b.startswith(b"\xef\xbb\xbf"):
+                  b = b[3:]
 
-          if git diff --cached
+              # 2) 讀成文字（保守：忽略無法解碼）
+              txt = b.decode("utf-8", errors="ignore")
+
+              # 3) CRLF -> LF
+              txt2 = txt.replace("\r\n", "\n").replace("\r", "\n")
+
+              # 4) 全檔移除 U+FEFF（有些會混在第3行）
+              txt2 = txt2.replace("\ufeff", "")
+
+              # 5) 逐行修前導縮排（TAB/NBSP）
+              lines = txt2.split("\n")
+              lines2 = [fix_leading_ws(line) for line in lines]
+              out = "\n".join(lines2)
+
+              if out != txt:
+                  f.write_text(out, encoding="utf-8")
+                  changed += 1
+                  print(f"[sanitize] fixed: {f}")
+
+          print(f"[sanitize] total_py={total}, changed={changed}")
+          PY
+
+      - name: Run public entry
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MASTER_XLSX="K線西遊記/kline-taifex/master/台指近全.xlsx"
+          OUTDIR="K線西遊記/kline-engine-public/output"
+          ENGINE_DIR="engine_bin"
+
+          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          mkdir -p "${OUTDIR}"
+
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "${MASTER_XLSX}" \
+            --engine_dir "${ENGINE_DIR}" \
+            --outdir "${OUTDIR}"
+
+      - name: Commit outputs
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "K線西遊記/kline-engine-public/output" || true
+
+          if git diff --cached --quiet; then
+            echo "[commit] no output changes"
+            exit 0
+          fi
+
+          git commit -m "engine: update outputs"
+          git push
