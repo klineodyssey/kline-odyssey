@@ -1,182 +1,125 @@
-# K線西遊記/kline-engine-public/run_public.py
-# Public entry (safe): find engine entry inside engine_dir, sanitize BOM, pre-compile, then run.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import argparse
 import os
-import re
-import subprocess
 import sys
+import subprocess
 from pathlib import Path
 
 
-def _sanitize_bom_for_py(py_path: Path) -> bool:
+def _strip_utf8_bom_file(p: Path) -> bool:
     """
-    Remove UTF-8 BOM / U+FEFF from a .py file safely.
+    Remove UTF-8 BOM (0xEF,0xBB,0xBF) if present at file head.
     Return True if modified.
     """
     try:
-        raw = py_path.read_bytes()
+        b = p.read_bytes()
     except Exception:
         return False
-
-    changed = False
-
-    # Remove UTF-8 BOM at file start
-    if raw.startswith(b"\xef\xbb\xbf"):
-        raw = raw[3:]
-        changed = True
-
-    # Remove any stray U+FEFF in text (rare)
-    try:
-        txt = raw.decode("utf-8", errors="strict")
-        if "\ufeff" in txt:
-            txt = txt.replace("\ufeff", "")
-            raw = txt.encode("utf-8")
-            changed = True
-    except Exception:
-        # If decoding fails, don't touch it further.
-        return changed
-
-    if changed:
-        py_path.write_bytes(raw)
-    return changed
+    bom = b"\xef\xbb\xbf"
+    if b.startswith(bom):
+        p.write_bytes(b[len(bom):])
+        return True
+    return False
 
 
-def _sanitize_all_py(engine_dir: Path) -> int:
-    n = 0
-    for p in engine_dir.rglob("*.py"):
-        if _sanitize_bom_for_py(p):
-            n += 1
-    return n
-
-
-def _py_compile_check(py_path: Path) -> tuple[bool, str]:
+def _find_engine_entry(engine_dir: Path) -> Path:
     """
-    Compile check without executing. Return (ok, err_text).
+    Priority:
+      1) engine_bin/launcher.py
+      2) any *.py contains 'step1' in filename
+      3) any *.py under engine_dir (fallback)
     """
-    try:
-        import py_compile
+    if not engine_dir.exists():
+        raise FileNotFoundError(f"engine_dir not found: {engine_dir}")
 
-        py_compile.compile(str(py_path), doraise=True)
-        return True, ""
-    except Exception as e:
-        return False, str(e)
+    # (1) launcher
+    launcher = engine_dir / "launcher.py"
+    if launcher.exists():
+        return launcher
 
+    # (2) step1 in name
+    step1 = sorted(engine_dir.glob("*step1*.py"))
+    if step1:
+        return step1[0]
 
-def _pick_engine_entry(engine_dir: Path) -> Path:
-    """
-    Strategy:
-    1) launcher.py (or similar)
-    2) any file contains 'step1' and '多空運算'
-    3) fallback: newest (by name) file contains 'Tplus1' and endswith .py
-    """
-    candidates: list[Path] = []
+    # (3) any py
+    any_py = sorted(engine_dir.glob("*.py"))
+    if any_py:
+        return any_py[0]
 
-    # 1) explicit launcher
-    for name in ["launcher.py", "launch.py", "run_engine.py", "engine.py"]:
-        p = engine_dir / name
-        if p.exists():
-            return p
-
-    # 2) step1 多空運算
-    for p in engine_dir.rglob("*.py"):
-        s = p.name
-        if ("step1" in s.lower()) and ("多空運算" in s):
-            candidates.append(p)
-
-    if candidates:
-        # prefer "NO_BOM" or "UTF8" in filename, then lexicographically last
-        def score(x: Path):
-            n = x.name
-            return (
-                1 if "NO_BOM" in n.upper() else 0,
-                1 if "UTF8" in n.upper() else 0,
-                n,
-            )
-
-        candidates.sort(key=score)
-        return candidates[-1]
-
-    # 3) fallback: Tplus1
-    for p in engine_dir.rglob("*.py"):
-        s = p.name
-        if ("Tplus1" in s) or ("tplus1" in s.lower()):
-            candidates.append(p)
-
-    if candidates:
-        candidates.sort(key=lambda x: x.name)
-        return candidates[-1]
-
-    raise FileNotFoundError("找不到引擎入口檔：請確認 engine_dir 內含 launcher 或 step1 多空運算程式。")
+    raise FileNotFoundError(f"no runnable entry found in engine_dir: {engine_dir}")
 
 
-def _run_subprocess(cmd: list[str]) -> int:
-    print("[run_public] cmd:")
-    print(" ".join(cmd))
-    p = subprocess.run(cmd)
-    return p.returncode
+def _run_cmd(cmd: list[str], tries: int = 4) -> None:
+    last_err = None
+    for t in range(1, tries + 1):
+        try:
+            p = subprocess.run(cmd, check=True, text=True)
+            return
+        except subprocess.CalledProcessError as e:
+            last_err = e
+            print(f"[run_public] engine failed (try={t}/{tries}), exit={e.returncode}", file=sys.stderr)
+    raise last_err  # type: ignore
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--master", required=True, help="path to 台指近全.xlsx")
-    ap.add_argument("--engine_dir", required=True, help="path to engine_bin directory")
-    ap.add_argument("--outdir", required=True, help="output directory")
-    ap.add_argument("--tries", type=int, default=4, help="retry times")
+    ap.add_argument("--master", required=True, help="Path to master xlsx (ONLY this file is consumed)")
+    ap.add_argument("--engine_dir", required=True, help="Path to extracted engine_bin directory")
+    ap.add_argument("--outdir", required=True, help="Output directory to write results")
+    ap.add_argument("--model", default="", help="Optional model json path (if you want)")
     args = ap.parse_args()
 
     master = Path(args.master)
     engine_dir = Path(args.engine_dir)
     outdir = Path(args.outdir)
+    model = Path(args.model) if args.model else None
 
     print(f"[run_public] master={master}")
     print(f"[run_public] engine_dir={engine_dir}")
-    outdir.mkdir(parents=True, exist_ok=True)
+    print(f"[run_public] outdir={outdir}")
+    if model:
+        print(f"[run_public] model={model}")
 
     if not master.exists():
-        raise SystemExit(f"MASTER not found: {master}")
-    if not engine_dir.exists():
-        raise SystemExit(f"ENGINE_DIR not found: {engine_dir}")
+        print(f"[run_public] MASTER not found: {master}", file=sys.stderr)
+        return 2
 
-    # sanitize BOM for all python files (best effort)
-    n = _sanitize_all_py(engine_dir)
-    print(f"[run_public] sanitized_py_count={n}")
+    outdir.mkdir(parents=True, exist_ok=True)
 
-    entry = _pick_engine_entry(engine_dir)
+    entry = _find_engine_entry(engine_dir)
     print(f"[run_public] entry={entry}")
 
-    # pre-compile check (after sanitize)
-    ok, err = _py_compile_check(entry)
-    if not ok:
-        print("[run_public] py_compile failed:", err)
-        # still allow retries because sanitize/runner can differ
-    else:
-        print("[run_public] py_compile OK")
+    # extra safety: strip BOM in entry (and all *.py in engine_dir)
+    modified = False
+    for py in engine_dir.glob("*.py"):
+        if _strip_utf8_bom_file(py):
+            modified = True
+    if modified:
+        print("[run_public] stripped UTF-8 BOM on some engine files")
 
-    # run with retry
-    last_code = 1
-    for t in range(1, args.tries + 1):
-        cmd = [
-            sys.executable,
-            str(entry),
-            "--input",
-            str(master),
-            "--outdir",
-            str(outdir),
-        ]
-        code = _run_subprocess(cmd)
-        last_code = code
-        if code == 0:
-            print("[run_public] OK")
-            return 0
+    cmd = [sys.executable, str(entry)]
+    # Our engine step1 supports: --input, --outdir, --model
+    # launcher.py forwards args to step1.
+    cmd += ["--input", str(master), "--outdir", str(outdir)]
+    if model and model.exists():
+        cmd += ["--model", str(model)]
 
-        print(f"[run_public] engine failed (try={t}) exit_code={code}")
+    print("[run_public] cmd:")
+    print(" ".join(cmd))
 
-        # If error is BOM-related, sanitize again and retry
-        _sanitize_bom_for_py(entry)
+    try:
+        _run_cmd(cmd, tries=4)
+    except Exception as e:
+        # print a tiny context if it is a syntax/indent error
+        print(f"[run_public] ERROR: {e}", file=sys.stderr)
+        return 1
 
-    raise SystemExit(f"[run_public] engine failed after {args.tries} tries. last_exit_code={last_code}")
+    print("[run_public] OK")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
