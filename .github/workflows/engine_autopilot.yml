@@ -35,6 +35,7 @@ jobs:
 
       - name: Install deps
         run: |
+          set -e
           python -m pip install -U pip
           python -m pip install -U pandas openpyxl numpy
 
@@ -44,11 +45,12 @@ jobs:
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
 
-          python - <<'PY'
-          import json, urllib.request, sys
-          owner = "${OWNER}"
-          repo  = "${REPO}"
-          want  = "${RELEASE_ASSET}"
+          # 取 latest release 中指定 asset 的下載網址
+          python - <<'PY' > asset_url.txt
+          import json, urllib.request, sys, os
+          owner = os.environ["OWNER"]
+          repo  = os.environ["REPO"]
+          want  = os.environ["RELEASE_ASSET"]
 
           url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
           req = urllib.request.Request(
@@ -64,60 +66,90 @@ jobs:
                   sys.exit(0)
 
           raise SystemExit(f"ERROR: asset not found in latest release: {want}")
-          PY > asset_url.txt
+          PY
 
+          # 下載 asset
           curl -L "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
 
       - name: Unzip engine asset
+        shell: bash
         run: |
+          set -euo pipefail
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
 
-      - name: Decode B64 if present
+      - name: Decode B64 layer if present
+        shell: bash
         run: |
+          set -euo pipefail
           cd "${ENGINE_DIR}"
+
+          # 若裡面有 .b64/.txt 的 base64 zip，解出成 ENGINE_DECODED.zip 再 unzip
           python - <<'PY'
           import base64, pathlib, re
+          decoded = False
           for p in pathlib.Path(".").rglob("*"):
-              if p.suffix.lower() in (".txt", ".b64"):
+              if p.is_file() and p.suffix.lower() in (".txt", ".b64"):
                   s = p.read_text(errors="ignore")
                   b = re.sub(r"[^A-Za-z0-9+/=]", "", s)
                   if len(b) > 200:
                       out = pathlib.Path("ENGINE_DECODED.zip")
                       out.write_bytes(base64.b64decode(b))
                       print("decoded:", out)
+                      decoded = True
+                      break
+          if not decoded:
+              print("no b64 layer found")
           PY
-          if [ -f ENGINE_DECODED.zip ]; then unzip -o ENGINE_DECODED.zip; fi
 
-      - name: Remove UTF-8 BOM
+          if [ -f ENGINE_DECODED.zip ]; then
+            unzip -o ENGINE_DECODED.zip
+          fi
+
+      - name: Remove UTF-8 BOM (all .py)
+        shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          for f in Path("${ENGINE_DIR}").rglob("*.py"):
+          root = Path("engine_bin")
+          for f in root.rglob("*.py"):
               b = f.read_bytes()
               if b.startswith(b"\xef\xbb\xbf"):
                   f.write_bytes(b[3:])
+          print("BOM strip done")
           PY
 
       - name: Find engine entry
         id: entry
+        shell: bash
         run: |
-          ENTRY=$(find "${ENGINE_DIR}" -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1)
-          if [ -z "$ENTRY" ]; then
-            echo "Engine entry not found"; exit 1
+          set -euo pipefail
+          ENTRY=$(find "${ENGINE_DIR}" -type f -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1 || true)
+          if [ -z "${ENTRY}" ]; then
+            echo "Engine entry not found under ${ENGINE_DIR}"
+            echo "----- listing ${ENGINE_DIR} -----"
+            find "${ENGINE_DIR}" -maxdepth 3 -type f | sed -n '1,200p'
+            exit 1
           fi
-          echo "ENTRY=$ENTRY" >> $GITHUB_OUTPUT
+          echo "ENTRY=${ENTRY}" >> "$GITHUB_OUTPUT"
+          echo "Using entry: ${ENTRY}"
 
       - name: Run engine
+        shell: bash
         run: |
+          set -euo pipefail
           python "${{ steps.entry.outputs.ENTRY }}" \
             --input "${MASTER_XLSX}" \
             --outdir "${OUTDIR}"
 
       - name: Commit outputs
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "klineodyssey-bot"
           git config user.email "actions@users.noreply.github.com"
           git add "${OUTDIR}" || true
           git diff --cached --quiet || git commit -m "engine: update outputs"
           git push || true
+```0
