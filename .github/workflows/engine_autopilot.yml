@@ -45,7 +45,6 @@ jobs:
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
 
-          # 取 latest release 中指定 asset 的下載網址
           python - <<'PY' > asset_url.txt
           import json, urllib.request, sys, os
           owner = os.environ["OWNER"]
@@ -68,7 +67,6 @@ jobs:
           raise SystemExit(f"ERROR: asset not found in latest release: {want}")
           PY
 
-          # 下載 asset
           curl -L "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
 
       - name: Unzip engine asset
@@ -84,7 +82,6 @@ jobs:
           set -euo pipefail
           cd "${ENGINE_DIR}"
 
-          # 若裡面有 .b64/.txt 的 base64 zip，解出成 ENGINE_DECODED.zip 再 unzip
           python - <<'PY'
           import base64, pathlib, re
           decoded = False
@@ -129,7 +126,7 @@ jobs:
           if [ -z "${ENTRY}" ]; then
             echo "Engine entry not found under ${ENGINE_DIR}"
             echo "----- listing ${ENGINE_DIR} -----"
-            find "${ENGINE_DIR}" -maxdepth 3 -type f | sed -n '1,200p'
+            find "${ENGINE_DIR}" -maxdepth 4 -type f | sed -n '1,200p'
             exit 1
           fi
           echo "ENTRY=${ENTRY}" >> "$GITHUB_OUTPUT"
@@ -152,4 +149,3 @@ jobs:
           git add "${OUTDIR}" || true
           git diff --cached --quiet || git commit -m "engine: update outputs"
           git push || true
-```0
