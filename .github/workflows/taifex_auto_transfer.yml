@@ -1,0 +1,88 @@
+name: TAIFEX Auto Transfer (subdir)
+
+on:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/raw/*.csv"
+      - "K線西遊記/kline-taifex/scripts/*.py"
+      - ".github/workflows/taifex_auto_transfer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          set -e
+          python -m pip install -U pip
+          python -m pip install pandas openpyxl numpy
+
+      - name: Run pipeline (batch raw/*.csv)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "K線西遊記/kline-taifex"
+
+          echo "=== list raw ==="
+          ls -al raw || true
+
+          echo "=== list master(before) ==="
+          ls -al master || true
+
+          # 轉檔（你的腳本會在 master/ 產出 台指近全YYYYMMDD.xlsx）
+          python scripts/tx_full_day_pipeline_v882_UTF8BOM.py raw/*.csv --master "master/台指近全.xlsx"
+
+          # 找 master 目錄中最新輸出的台指近全YYYYMMDD.xlsx
+          latest_out=$(ls -1 master/台指近全*.xlsx 2>/dev/null | sort | tail -n 1 || true)
+          echo "latest_out=$latest_out"
+
+          if [ -z "${latest_out}" ]; then
+            echo "ERROR: master output not found"
+            exit 1
+          fi
+
+          # 確保 history 目錄存在
+          mkdir -p history
+
+          # 1) 用最新日期檔覆蓋 master/台指近全.xlsx（引擎只吃這份）
+          cp "${latest_out}" "master/台指近全.xlsx"
+
+          # 2) 日期檔搬去 history（避免 master 重複堆日期檔）
+          #    先 copy 進 history，再刪掉 master 那份日期檔（確保 master 只留台指近全.xlsx）
+          cp "${latest_out}" "history/$(basename "${latest_out}")"
+
+          # 3) 清除 master 裡「所有帶日期」的台指近全YYYYMMDD.xlsx，只保留台指近全.xlsx
+          #    這行是關鍵：避免 master 多一份日期檔
+          find master -maxdepth 1 -type f -name "台指近全*.xlsx" ! -name "台指近全.xlsx" -print -delete || true
+
+          echo "=== list master(after) ==="
+          ls -al master || true
+
+          echo "=== list history(after) ==="
+          ls -al history || true
+
+      - name: Commit results
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
+
+          git add "K線西遊記/kline-taifex/master/台指近全.xlsx" "K線西遊記/kline-taifex/history" || true
+          git diff --cached --quiet && echo "No changes to commit." && exit 0
+
+          git commit -m "auto: update 台指近全 (raw->master + history)"
+          git push
