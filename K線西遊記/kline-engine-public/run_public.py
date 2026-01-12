@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path
 
 def find_entry(engine_dir: Path) -> Path:
-    # 你的引擎常見入口命名：step1 / launcher
     candidates = []
     for p in engine_dir.rglob("*.py"):
         name = p.name.lower()
@@ -14,9 +13,40 @@ def find_entry(engine_dir: Path) -> Path:
     if not candidates:
         raise FileNotFoundError("找不到引擎入口檔：請確認 engine_dir 內含 step1 或 launcher 的 .py")
 
-    # 優先選 step1（你現在的就是這支）
     candidates.sort(key=lambda x: (0 if "step1" in x.name.lower() else 1, len(str(x))))
     return candidates[0]
+
+def show_context(path: Path, lineno: int, radius: int = 3) -> None:
+    try:
+        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except Exception as e:
+        print(f"[run_public] cannot read for context: {e}")
+        return
+
+    start = max(1, lineno - radius)
+    end = min(len(lines), lineno + radius)
+    print(f"[run_public] ---- error context: {path} (line {lineno}) ----")
+    for i in range(start, end + 1):
+        marker = ">>" if i == lineno else "  "
+        # 顯示可見化（把 tab 顯示成 \t）
+        raw = lines[i-1].replace("\t", "\\t")
+        print(f"{marker} {i:4d}: {raw}")
+    print("[run_public] -------------------------------------------")
+
+def preflight_compile(entry: Path) -> None:
+    src = entry.read_text(encoding="utf-8", errors="ignore")
+    try:
+        compile(src, str(entry), "exec")
+    except IndentationError as e:
+        print(f"[run_public] IndentationError: {e}")
+        if getattr(e, "lineno", None):
+            show_context(entry, e.lineno)
+        raise
+    except SyntaxError as e:
+        print(f"[run_public] SyntaxError: {e}")
+        if getattr(e, "lineno", None):
+            show_context(entry, e.lineno)
+        raise
 
 def main():
     ap = argparse.ArgumentParser()
@@ -38,21 +68,23 @@ def main():
 
     entry = find_entry(engine_dir)
 
+    print(f"[run_public] master={master}")
+    print(f"[run_public] engine_dir={engine_dir}")
+    print(f"[run_public] entry={entry}")
+
+    # ✅ 先預編譯：如果縮排/語法炸，會印出「錯誤行上下文」
+    preflight_compile(entry)
+
     cmd = [
         "python",
         str(entry),
         "--input", str(master),
         "--outdir", str(outdir),
     ]
-
-    print(f"[run_public] master={master}")
-    print(f"[run_public] engine_dir={engine_dir}")
-    print(f"[run_public] entry={entry}")
     print("[run_public] cmd:")
     print(" ".join(cmd))
 
-    # 直接跑，讓 workflow 的 BOM 清理先做完
-    r = subprocess.run(cmd, capture_output=False)
+    r = subprocess.run(cmd)
     if r.returncode != 0:
         raise SystemExit(r.returncode)
 
