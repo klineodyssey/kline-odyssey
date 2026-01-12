@@ -14,9 +14,19 @@ permissions:
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+
+    env:
+      RELEASE_ASSET: ENGINE_ZIP_B64.zip
+      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      OUTDIR: "K線西遊記/kline-engine-public/output"
+      ENGINE_DIR: "engine_bin"
+
     steps:
-      - name: Checkout
+      - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -24,41 +34,63 @@ jobs:
           python-version: "3.10"
 
       - name: Install deps
-        shell: bash
         run: |
-          set -euo pipefail
+          set -e
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
-          pip install matplotlib
 
-      - name: Prepare engine_bin from ENGINE_ZIP_B64
+      - name: Download engine asset from latest Release
         shell: bash
         env:
-          ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "${ENGINE_ZIP_B64}" || (echo "Missing secret: ENGINE_ZIP_B64" && exit 1)
-          echo "${ENGINE_ZIP_B64}" | base64 -d > engine.zip
-          unzip -o engine.zip -d .
-          test -d "engine_bin" || (echo "engine_bin not found after unzip" && ls -la && exit 1)
-          ls -la engine_bin
+          mkdir -p "${ENGINE_DIR}"
 
-      - name: Debug list (make sure master exists)
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          WANT="${RELEASE_ASSET}"
+
+          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
+          echo "api=${API}"
+
+          ASSET_URL="$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "${API}" \
+            | python -c "import sys,json; d=json.load(sys.stdin); want='${WANT}'; 
+                         url=''; 
+                         for a in d.get('assets',[]):
+                           if a.get('name')==want:
+                             url=a.get('browser_download_url',''); break
+                         print(url)")"
+
+          if [ -z "${ASSET_URL}" ]; then
+            echo "ERROR: asset not found in latest release: ${WANT}"
+            exit 1
+          fi
+
+          echo "asset_url=${ASSET_URL}"
+          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
+
+      - name: Unzip engine asset
         shell: bash
         run: |
-          set -euo pipefail
-          ls -la "K線西遊記/kline-taifex/master" || true
-          test -f "K線西遊記/kline-taifex/master/台指近全.xlsx" || (echo "MASTER missing" && exit 1)
+          set -e
+          cd "${ENGINE_DIR}"
+          unzip -o "${RELEASE_ASSET}"
+          echo "=== engine_dir tree ==="
+          find . -maxdepth 3 -type f | sed 's|^\./||'
 
       - name: Run public entry
         shell: bash
         env:
-          MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
-          ENGINE_DIR: "engine_bin"
-          OUTDIR: "K線西遊記/kline-engine-public/output"
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
+          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
           mkdir -p "${OUTDIR}"
+
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "${MASTER_XLSX}" \
             --engine_dir "${ENGINE_DIR}" \
@@ -67,16 +99,15 @@ jobs:
       - name: Commit outputs
         shell: bash
         run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          set -e
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
 
-          git add "K線西遊記/kline-engine-public/output" || true
-
+          git add "${OUTDIR}" || true
           if git diff --cached --quiet; then
-            echo "No output changes to commit."
+            echo "No changes."
             exit 0
           fi
 
-          git commit -m "chore(engine): update outputs"
-          git push
+          git commit -m "auto: engine output update"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
