@@ -16,23 +16,16 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      RELEASE_ASSET: ENGINE_ZIP_B64.zip
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
       ENGINE_DIR: "engine_bin"
-      ENGINE_REF: "engine-v1.0"   # 這裡就是你的 Tag 名稱
 
     steps:
-      - name: Checkout main (public + workflow)
+      - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
-          fetch-depth: 0
-
-      - name: Checkout engine tag into engine_bin
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.ENGINE_REF }}
-          path: ${{ env.ENGINE_DIR }}
           fetch-depth: 0
 
       - name: Setup Python
@@ -40,39 +33,97 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install deps
+      - name: Install deps (public runner)
+        shell: bash
         run: |
           set -e
           python -m pip install -U pip
-          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          # 如果你有 requirements.txt 就用它；沒有也不會壞
+          if [ -f "K線西遊記/kline-engine-public/requirements.txt" ]; then
+            pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          else
+            pip install -U pandas openpyxl numpy matplotlib
+          fi
 
-      - name: Debug list (make sure engine exists)
+      - name: Download engine asset from latest Release
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          echo "=== ENGINE_DIR tree ==="
-          find "${ENGINE_DIR}" -maxdepth 3 -type f | sed 's|^\./||'
-          echo "=== MASTER exists? ==="
-          ls -la "${MASTER_XLSX}" || true
+          mkdir -p "${ENGINE_DIR}"
 
-      - name: Strip UTF-8 BOM for engine .py
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          WANT="${RELEASE_ASSET}"
+
+          echo "owner=${OWNER} repo=${REPO} asset=${WANT}"
+
+          python - <<'PY'
+          import json, os, sys, urllib.request
+
+          owner = os.environ["GITHUB_REPOSITORY"].split("/")[0]
+          repo  = os.environ["GITHUB_REPOSITORY"].split("/")[1]
+          want  = os.environ["RELEASE_ASSET"]
+          token = os.environ.get("GH_TOKEN","")
+
+          api = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "User-Agent": "actions",
+          }
+          if token:
+              headers["Authorization"] = f"Bearer {token}"
+
+          req = urllib.request.Request(api, headers=headers)
+          with urllib.request.urlopen(req) as r:
+              data = json.loads(r.read().decode("utf-8"))
+
+          url = ""
+          for a in data.get("assets", []):
+              if a.get("name") == want:
+                  url = a.get("browser_download_url") or ""
+                  break
+
+          if not url:
+              raise SystemExit(f"ERROR: asset not found in latest release: {want}")
+
+          print(url)
+          PY > asset_url.txt
+
+          echo "asset_url=$(cat asset_url.txt)"
+          curl -fL "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
+
+      - name: Unzip engine asset
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
+          cd "${ENGINE_DIR}"
+          unzip -o "${RELEASE_ASSET}"
+          echo "=== engine_dir tree (top 4 levels) ==="
+          find . -maxdepth 4 -type f | sed 's|^\./||' || true
+
+      - name: Remove UTF-8 BOM (py only)
+        shell: bash
+        run: |
+          set -e
           python - <<'PY'
           from pathlib import Path
           root = Path("engine_bin")
-          cnt = 0
+          fixed = 0
           for f in root.rglob("*.py"):
               b = f.read_bytes()
               if b.startswith(b"\xef\xbb\xbf"):
                   f.write_bytes(b[3:])
-                  cnt += 1
-          print(f"BOM strip done. fixed={cnt}")
+                  fixed += 1
+          print(f"BOM strip done. fixed={fixed}")
           PY
 
-      - name: Run public entry
+      - name: Run public entry (run_public.py)
         shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+          KLINE_ENGINE_KEY: ${{ secrets.KLINE_ENGINE_KEY }}
         run: |
           set -euo pipefail
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
@@ -83,17 +134,19 @@ jobs:
             --engine_dir "${ENGINE_DIR}" \
             --outdir "${OUTDIR}"
 
-      - name: Commit outputs
+      - name: Commit outputs (push back to same branch)
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
           git add "${OUTDIR}" || true
+
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
+
           git commit -m "auto: engine output update"
           git push origin "HEAD:${GITHUB_REF_NAME}"
