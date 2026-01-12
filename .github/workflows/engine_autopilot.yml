@@ -1,0 +1,132 @@
+name: TX Engine Autopilot (Release Latest - Stable)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      - "K線西遊記/kline-engine-public/**"
+      - ".github/workflows/engine_autopilot.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  run-engine:
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_ASSET: ENGINE_ZIP_B64.zip
+      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      OUTDIR: "K線西遊記/kline-engine-public/output"
+      ENGINE_DIR: "engine_bin"
+
+    steps:
+      - name: Checkout (on branch)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: |
+          set -e
+          python -m pip install -U pip
+          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+
+      - name: Download engine asset from latest Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${ENGINE_DIR}"
+
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          WANT="${RELEASE_ASSET}"
+          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
+
+          echo "[dl] owner=${OWNER} repo=${REPO} asset=${WANT}"
+          echo "[dl] api=${API}"
+
+          curl -fsSL "${API}" -o release.json
+
+          ASSET_URL="$(python - <<'PY'
+          import json
+          d=json.load(open("release.json","r",encoding="utf-8"))
+          want = __import__("os").environ.get("RELEASE_ASSET","")
+          url=""
+          for a in d.get("assets",[]) or []:
+              if a.get("name")==want:
+                  url=a.get("browser_download_url","")
+                  break
+          print(url)
+          PY
+          )"
+
+          if [ -z "${ASSET_URL}" ]; then
+            echo "ERROR: asset not found in latest release: ${WANT}"
+            echo "TIP: 去 Release 檢查 asset 名稱必須剛好叫：${WANT}"
+            exit 1
+          fi
+
+          echo "[dl] asset_url=${ASSET_URL}"
+          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
+
+      - name: Unzip engine asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${ENGINE_DIR}"
+          unzip -o "${RELEASE_ASSET}"
+          echo "=== engine_bin tree (maxdepth 4) ==="
+          find . -maxdepth 4 -type f | sed 's|^\./||'
+
+      - name: Strip UTF-8 BOM for all engine .py
+        shell: bash
+        run: |
+          set -e
+          python - <<'PY'
+          from pathlib import Path
+          root = Path("engine_bin")
+          n=0
+          for f in root.rglob("*.py"):
+              b = f.read_bytes()
+              if b.startswith(b"\xef\xbb\xbf"):
+                  f.write_bytes(b[3:])
+                  n += 1
+          print(f"BOM strip done. files_fixed={n}")
+          PY
+
+      - name: Run public entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          mkdir -p "${OUTDIR}"
+
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "${MASTER_XLSX}" \
+            --engine_dir "${ENGINE_DIR}" \
+            --outdir "${OUTDIR}"
+
+      - name: Commit outputs
+        shell: bash
+        run: |
+          set -e
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
+
+          git add "${OUTDIR}" || true
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git commit -m "auto: engine output update"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
