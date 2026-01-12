@@ -39,11 +39,9 @@ jobs:
           ASSET_NAME: ENGINE_ZIP_B64.zip
         run: |
           set -euo pipefail
-
           rm -rf engine_bin
           mkdir -p engine_bin
 
-          echo "[prep] find latest release asset url..."
           python - <<'PY'
           import os, json, urllib.request
 
@@ -74,7 +72,6 @@ jobs:
           print("[prep] ok: asset_api_url.txt written")
           PY
 
-          echo "[prep] download asset bytes..."
           ASSET_API_URL="$(cat asset_api_url.txt)"
           curl -L \
             -H "Accept: application/octet-stream" \
@@ -82,7 +79,6 @@ jobs:
             "${ASSET_API_URL}" \
             -o engine_asset.zip
 
-          echo "[prep] unzip to engine_bin..."
           unzip -o engine_asset.zip -d engine_bin
 
       - name: Debug list (make sure engine exists)
@@ -92,66 +88,35 @@ jobs:
           echo "[debug] engine_bin tree:"
           find engine_bin -maxdepth 3 -type f | sed 's/^/ - /'
 
-      # ✅ 修正1：砍「檔案開頭」BOM
-      - name: Strip UTF-8 BOM (file header) for all engine .py
+      # ✅ 最終穩定：清 BOM / 清 U+FEFF / 轉 CRLF->LF / 修「前導縮排」Tab & NBSP
+      - name: Sanitize engine .py (BOM/U+FEFF/CRLF/TAB/NBSP)
         shell: bash
         run: |
           set -e
           python - <<'PY'
           from pathlib import Path
+
           root = Path("engine_bin")
-          fixed = 0
+          total = 0
+          changed = 0
+
+          def fix_leading_ws(line: str) -> str:
+              # 只修「前導空白」：TAB->4空白、NBSP->空白
+              i = 0
+              while i < len(line) and line[i] in (" ", "\t", "\u00a0", "\ufeff"):
+                  i += 1
+              lead = line[:i]
+              rest = line[i:]
+              lead = lead.replace("\ufeff", "")
+              lead = lead.replace("\u00a0", " ")
+              lead = lead.replace("\t", "    ")
+              return lead + rest
+
           for f in root.rglob("*.py"):
+              total += 1
               b = f.read_bytes()
-              if b.startswith(b"\xef\xbb\xbf"):
-                  f.write_bytes(b[3:])
-                  fixed += 1
-                  print(f"[bom-header] stripped: {f}")
-          print(f"[bom-header] total stripped: {fixed}")
-          PY
 
-      # ✅ 修正2：砍「檔案中間混入」的 U+FEFF（你現在炸的就是這個）
-      - name: Remove hidden U+FEFF chars inside engine .py
-        shell: bash
-        run: |
-          set -e
-          python - <<'PY'
-          from pathlib import Path
-          root = Path("engine_bin")
-          fixed = 0
-          for f in root.rglob("*.py"):
-              txt = f.read_text(encoding="utf-8", errors="ignore")
-              if "\ufeff" in txt:
-                  f.write_text(txt.replace("\ufeff", ""), encoding="utf-8")
-                  fixed += 1
-                  print(f"[ufeef] removed inside: {f}")
-          print(f"[ufeef] total cleaned: {fixed}")
-          PY
-
-      - name: Run public entry
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          MASTER_XLSX="K線西遊記/kline-taifex/master/台指近全.xlsx"
-          OUTDIR="K線西遊記/kline-engine-public/output"
-          ENGINE_DIR="engine_bin"
-
-          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
-          mkdir -p "${OUTDIR}"
-
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${MASTER_XLSX}" \
-            --engine_dir "${ENGINE_DIR}" \
-            --outdir "${OUTDIR}"
-
-      - name: Commit outputs
-        shell: bash
-        run: |
-          set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add "K線西遊記/kline-engine-public/output" || true
+              # 1) 去檔頭 BOM
+              if b          git add "K線西遊記/kline-engine-public/output" || true
 
           if git diff --cached
