@@ -1,0 +1,154 @@
+name: TX Engine Autopilot (Release Latest - Stable)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      - "K線西遊記/kline-engine-public/**"
+      - ".github/workflows/engine_autopilot.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  run-engine:
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_ASSET: "ENGINE_ZIP_B64.zip"
+      MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      OUTDIR: "K線西遊記/kline-engine-public/output"
+      ENGINE_DIR: "engine_bin"
+
+    steps:
+      - name: Checkout (on branch, not detached)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: |
+          set -e
+          python -m pip install -U pip
+          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+
+      - name: Download engine asset from latest Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "${ENGINE_DIR}"
+
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          WANT="${RELEASE_ASSET}"
+          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
+
+          echo "owner=${OWNER} repo=${REPO} asset=${WANT}"
+          echo "api=${API}"
+
+          ASSET_URL="$(
+            curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${API}" \
+            | python - <<'PY'
+import sys, json
+d = json.load(sys.stdin)
+want = sys.argv[1] if len(sys.argv) > 1 else ""
+url = ""
+for a in d.get("assets", []):
+    if a.get("name") == want:
+        url = a.get("browser_download_url") or ""
+        break
+print(url)
+PY
+            "${WANT}"
+          )"
+
+          if [ -z "${ASSET_URL}" ]; then
+            echo "ERROR: asset not found in latest release: ${WANT}"
+            echo "TIP: Please check Release assets name exactly matches: ${WANT}"
+            exit 1
+          fi
+
+          echo "asset_url=${ASSET_URL}"
+          curl -fL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${ASSET_URL}" \
+            -o "${ENGINE_DIR}/${WANT}"
+
+      - name: Unzip engine asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${ENGINE_DIR}"
+          unzip -o "${RELEASE_ASSET}"
+          echo "=== engine_dir tree (maxdepth 5) ==="
+          find . -maxdepth 5 -type f | sed 's|^\./||'
+
+      - name: Strip UTF-8 BOM (engine .py only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+from pathlib import Path
+root = Path("engine_bin")
+count = 0
+for f in root.rglob("*.py"):
+    b = f.read_bytes()
+    if b.startswith(b"\xef\xbb\xbf"):
+        f.write_bytes(b[3:])
+        count += 1
+print(f"BOM strip done. fixed={count}")
+PY
+
+      - name: Debug list (public + master)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== master ==="
+          ls -al "K線西遊記/kline-taifex/master" || true
+          echo "=== public ==="
+          ls -al "K線西遊記/kline-engine-public" || true
+          echo "=== engine_bin ==="
+          ls -al "engine_bin" || true
+
+      - name: Run public entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          test -f "K線西遊記/kline-engine-public/run_public.py" || (echo "run_public.py not found" && exit 1)
+          mkdir -p "${OUTDIR}"
+
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "${MASTER_XLSX}" \
+            --engine_dir "${ENGINE_DIR}" \
+            --outdir "${OUTDIR}"
+
+      - name: Commit outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "kline-bot"
+          git config user.email "bot@kline.odyssey"
+
+          git add "${OUTDIR}" || true
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git commit -m "auto: engine output update"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
