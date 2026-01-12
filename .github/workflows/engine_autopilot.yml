@@ -34,8 +34,9 @@ jobs:
           python-version: "3.10"
 
       - name: Install deps
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           python -m pip install -U pip
           python -m pip install -U pandas openpyxl numpy
 
@@ -45,29 +46,30 @@ jobs:
           set -euo pipefail
           mkdir -p "${ENGINE_DIR}"
 
-          python - <<'PY' > asset_url.txt
-          import json, urllib.request, sys, os
-          owner = os.environ["OWNER"]
-          repo  = os.environ["REPO"]
-          want  = os.environ["RELEASE_ASSET"]
+          ASSET_URL="$(python - <<'PY'
+import os, json, urllib.request
+owner = os.environ["OWNER"]
+repo  = os.environ["REPO"]
+want  = os.environ["RELEASE_ASSET"]
 
-          url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
-          req = urllib.request.Request(
-              url,
-              headers={"Accept":"application/vnd.github+json","User-Agent":"actions"}
-          )
-          with urllib.request.urlopen(req) as r:
-              data = json.loads(r.read().decode("utf-8"))
+url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+req = urllib.request.Request(
+    url,
+    headers={"Accept":"application/vnd.github+json","User-Agent":"actions"}
+)
+with urllib.request.urlopen(req) as r:
+    data = json.loads(r.read().decode("utf-8"))
 
-          for a in data.get("assets", []):
-              if a.get("name") == want:
-                  print(a.get("browser_download_url"))
-                  sys.exit(0)
+for a in data.get("assets", []):
+    if a.get("name") == want:
+        print(a.get("browser_download_url"))
+        raise SystemExit(0)
 
-          raise SystemExit(f"ERROR: asset not found in latest release: {want}")
-          PY
-
-          curl -L "$(cat asset_url.txt)" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
+raise SystemExit(f"ERROR: asset not found in latest release: {want}")
+PY
+)"
+          echo "Asset URL: ${ASSET_URL}"
+          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${RELEASE_ASSET}"
 
       - name: Unzip engine asset
         shell: bash
@@ -76,134 +78,69 @@ jobs:
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
 
-      - name: Decode B64 layer if present
+      - name: Decode B64 if present
         shell: bash
         run: |
           set -euo pipefail
           cd "${ENGINE_DIR}"
-
           python - <<'PY'
-          import base64, pathlib, re
-          decoded = False
-          for p in pathlib.Path(".").rglob("*"):
-              if p.is_file() and p.suffix.lower() in (".txt", ".b64"):
-                  s = p.read_text(errors="ignore")
-                  b = re.sub(r"[^A-Za-z0-9+/=]", "", s)
-                  if len(b) > 200:
-                      out = pathlib.Path("ENGINE_DECODED.zip")
-                      out.write_bytes(base64.b64decode(b))
-                      print("decoded:", out)
-                      decoded = True
-                      break
-          if not decoded:
-              print("no b64 layer found")
-          PY
+import base64, pathlib, re
 
+out = pathlib.Path("ENGINE_DECODED.zip")
+for p in pathlib.Path(".").rglob("*"):
+    if p.is_file() and p.suffix.lower() in (".txt", ".b64"):
+        s = p.read_text(errors="ignore")
+        b = re.sub(r"[^A-Za-z0-9+/=]", "", s)
+        if len(b) > 200:
+            out.write_bytes(base64.b64decode(b))
+            print("decoded:", out)
+            break
+PY
           if [ -f ENGINE_DECODED.zip ]; then
             unzip -o ENGINE_DECODED.zip
           fi
 
-      - name: Remove UTF-8 BOM (global)
+      - name: Remove UTF-8 BOM from all .py
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          from pathlib import Path
-
-          root = Path("engine_bin")
-          removed = 0
-
-          for f in root.rglob("*.py"):
-              b = f.read_bytes()
-              b2 = b.replace(b"\xef\xbb\xbf", b"")  # UTF-8 BOM bytes (可能出現在檔內任何位置)
-              if b2 != b:
-                  f.write_bytes(b2)
-                  removed += 1
-
-          print(f"global BOM cleaned: {removed} files")
-          PY
-
-      - name: Normalize Python indentation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-
-          root = Path("engine_bin")
-          fixed = 0
-
-          for f in root.rglob("*.py"):
-              lines = f.read_text(errors="ignore").splitlines()
-              new_lines = []
-              for ln in lines:
-                  # Tab → 4 spaces
-                  ln2 = ln.replace("\t", "    ")
-                  # 移除行首多餘空白（不破壞 block，只清異常）
-                  new_lines.append(ln2.rstrip())
-              new = "\n".join(new_lines) + "\n"
-              if new != f.read_text(errors="ignore"):
-                  f.write_text(new)
-                  fixed += 1
-
-          print(f"indent normalized files: {fixed}")
-          PY
-
-      - name: Fix orphan indented blocks
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          root = Path("engine_bin")
-          fixed = 0
-
-          for f in root.rglob("*.py"):
-              lines = f.read_text(errors="ignore").splitlines()
-              out = []
-              for i, ln in enumerate(lines):
-                  stripped = ln.lstrip()
-                  indent = len(ln) - len(stripped)
-
-                  if (
-                      indent >= 8
-                      and stripped.startswith(("for ", "if ", "while ", "def "))
-                      and i > 0
-                      and not lines[i-1].rstrip().endswith(":")
-                  ):
-                      # 強制左移一層（4 spaces）
-                      ln = ln[4:]
-                      fixed += 1
-
-                  out.append(ln)
-
-              f.write_text("\n".join(out) + "\n")
-
-          print(f"orphan indent fixed lines: {fixed}")
-          PY
+from pathlib import Path
+root = Path("engine_bin")
+for f in root.rglob("*.py"):
+    b = f.read_bytes()
+    if b.startswith(b"\xef\xbb\xbf"):
+        f.write_bytes(b[3:])
+PY
 
       - name: Find engine entry
         id: entry
         shell: bash
         run: |
           set -euo pipefail
-          ENTRY=$(find "${ENGINE_DIR}" -type f -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1 || true)
+          ENTRY="$(find "${ENGINE_DIR}" -name "K線西遊記_Tplus1_pm500_step1_多空運算_*.py" | head -n 1)"
           if [ -z "${ENTRY}" ]; then
-            echo "Engine entry not found under ${ENGINE_DIR}"
-            echo "----- listing ${ENGINE_DIR} -----"
-            find "${ENGINE_DIR}" -maxdepth 4 -type f | sed -n '1,200p'
+            echo "Engine entry not found"
+            echo "---- listing ${ENGINE_DIR} ----"
+            find "${ENGINE_DIR}" -maxdepth 4 -type f | sed 's/^/ - /'
             exit 1
           fi
-          echo "ENTRY=${ENTRY}" >> "$GITHUB_OUTPUT"
           echo "Using entry: ${ENTRY}"
-          
-      - name: Validate engine syntax only
-  shell: bash
-  run: |
-    set -e
-    python -m py_compile "${{ steps.entry.outputs.ENTRY }}"
+          echo "ENTRY=${ENTRY}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate engine syntax (py_compile)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile "${{ steps.entry.outputs.ENTRY }}"
+
+      - name: Run engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "${{ steps.entry.outputs.ENTRY }}" \
+            --input "${MASTER_XLSX}" \
+            --outdir "${OUTDIR}"
 
       - name: Commit outputs
         shell: bash
@@ -212,5 +149,9 @@ jobs:
           git config user.name "klineodyssey-bot"
           git config user.email "actions@users.noreply.github.com"
           git add "${OUTDIR}" || true
-          git diff --cached --quiet || git commit -m "engine: update outputs"
-          git push || true
+          if git diff --cached --quiet; then
+            echo "No output changes to commit."
+            exit 0
+          fi
+          git commit -m "engine: update outputs"
+          git push
