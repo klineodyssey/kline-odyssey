@@ -103,18 +103,24 @@ jobs:
             unzip -o ENGINE_DECODED.zip
           fi
 
-      - name: Remove UTF-8 BOM (all .py)
+      - name: Remove UTF-8 BOM (global)
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+
           root = Path("engine_bin")
+          removed = 0
+
           for f in root.rglob("*.py"):
               b = f.read_bytes()
-              if b.startswith(b"\xef\xbb\xbf"):
-                  f.write_bytes(b[3:])
-          print("BOM strip done")
+              b2 = b.replace(b"\xef\xbb\xbf", b"")  # UTF-8 BOM bytes (可能出現在檔內任何位置)
+              if b2 != b:
+                  f.write_bytes(b2)
+                  removed += 1
+
+          print(f"global BOM cleaned: {removed} files")
           PY
 
       - name: Find engine entry
