@@ -1,11 +1,11 @@
-name: TX Engine Autopilot (Release Latest - Stable)
+name: TX Engine Autopilot (Stable In-Repo Engine)
 
 on:
   workflow_dispatch:
   push:
     paths:
       - "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      - "K線西遊記/kline-engine-public/**"
+      - "K線西遊記/engine-v1.0/**"
       - ".github/workflows/engine_autopilot.yml"
 
 permissions:
@@ -16,98 +16,39 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RELEASE_ASSET: ENGINE_ZIP_B64.zip
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+      ENGINE_ENTRY: "K線西遊記/engine-v1.0/K線西遊記_Tplus1_pm500_step1_多空運算_V3.4.3_UTF8_NO_BOM.py"
       OUTDIR: "K線西遊記/kline-engine-public/output"
-      ENGINE_DIR: "engine_bin"
 
     steps:
-      - name: Checkout (on branch, not detached)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           set -e
           python -m pip install -U pip
-          pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          pip install -r "K線西遊記/engine-v1.0/requirements.txt"
 
-      - name: Prepare engine dir
-        shell: bash
+      - name: Run TX Engine
         run: |
           set -e
-          mkdir -p "${ENGINE_DIR}"
-
-      - name: Download engine asset from latest Release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
-          echo "[debug] api=$api"
-
-          json="$(curl -sL \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$api")"
-
-          ASSET_NAME="${RELEASE_ASSET}"
-
-          asset_api_url="$(echo "$json" | jq -r --arg n "$ASSET_NAME" '.assets[] | select(.name==$n) | .url')"
-
-          if [ -z "$asset_api_url" ] || [ "$asset_api_url" = "null" ]; then
-            echo "::error::Asset not found in latest release: ${ASSET_NAME}"
-            echo "Assets list:"
-            echo "$json" | jq -r '.assets[].name'
-            exit 1
-          fi
-
-          echo "[debug] asset_api_url=$asset_api_url"
-
-          curl -sSL \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/octet-stream" \
-            "$asset_api_url" -o "${ENGINE_DIR}/${ASSET_NAME}"
-
-          ls -lh "${ENGINE_DIR}/${ASSET_NAME}"
-
-      - name: Unzip engine asset
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "${ENGINE_DIR}"
-          unzip -o "${RELEASE_ASSET}"
-          echo "=== engine_dir tree ==="
-          find . -maxdepth 3 -type f | sed 's|^\./||'
-
-      - name: Run public entry
-        shell: bash
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
-        run: |
-          set -euo pipefail
-          test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          test -f "${MASTER_XLSX}" || (echo "MASTER not found" && exit 1)
           mkdir -p "${OUTDIR}"
 
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${MASTER_XLSX}" \
-            --engine_dir "${ENGINE_DIR}" \
+          python "${ENGINE_ENTRY}" \
+            --input "${MASTER_XLSX}" \
             --outdir "${OUTDIR}"
 
-      - name: Commit outputs
-        shell: bash
+      - name: Commit output
         run: |
           set -e
-          git config user.name "kline-bot"
+          git config user.name "kline-autopilot"
           git config user.email "bot@kline.odyssey"
 
           git add "${OUTDIR}" || true
@@ -116,5 +57,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "auto: engine output update"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git commit -m "auto: TX engine output update"
+          git push
