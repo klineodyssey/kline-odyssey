@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-K線西遊記 · TX 引擎公開入口（Release Latest 版）
+K線西遊記 · TX 引擎公開入口（Autopilot Stable）
 - 用 master/台指近全.xlsx 當 input
 - 去 engine_dir 找 step1 入口檔並執行
-- 重要：一律用「絕對路徑」呼叫引擎，避免 cwd 改變導致相對路徑失效
+- 修正：全部改用「絕對路徑」，避免 cwd 造成 input/outdir 找不到（exit code 2）
 """
 
 from __future__ import annotations
@@ -39,18 +39,21 @@ def _find_entry(engine_dir: Path) -> Path:
         if hits:
             hits.sort(key=lambda p: (len(str(p)), str(p)))
             return hits[0]
-    raise SystemExit("找不到引擎入口檔：請確認 Release zip 內含 step1 或 啟動器。")
+    raise SystemExit("找不到引擎入口檔：請確認引擎包內含 step1 或 啟動器。")
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--master", required=True, help="台指近全.xlsx 路徑（master/台指近全.xlsx）")
-    ap.add_argument("--engine_dir", required=True, help="已解壓的引擎資料夾（例如 K線西遊記/engine_bin）")
-    ap.add_argument("--outdir", required=True, help="輸出資料夾（repo 內 output）")
+    ap.add_argument("--master", required=True, help="台指近全.xlsx 路徑（K線西遊記/kline-taifex/master/台指近全.xlsx）")
+    ap.add_argument("--engine_dir", required=True, help="已解壓的引擎資料夾（例如 engine_bin）")
+    ap.add_argument("--outdir", required=True, help="輸出資料夾（K線西遊記/kline-engine-public/output）")
     args = ap.parse_args()
 
-    master = Path(args.master).resolve()
-    engine_dir = Path(args.engine_dir).resolve()
-    outdir = Path(args.outdir).resolve()
+    # 轉成絕對路徑（核心修正）
+    repo_root = Path(os.environ.get("GITHUB_WORKSPACE", Path.cwd())).resolve()
+
+    master = (repo_root / args.master).resolve() if not Path(args.master).is_absolute() else Path(args.master).resolve()
+    engine_dir = (repo_root / args.engine_dir).resolve() if not Path(args.engine_dir).is_absolute() else Path(args.engine_dir).resolve()
+    outdir = (repo_root / args.outdir).resolve() if not Path(args.outdir).is_absolute() else Path(args.outdir).resolve()
 
     if not master.exists():
         raise SystemExit(f"MASTER not found: {master}")
@@ -63,9 +66,11 @@ def main():
     model_path = _write_model_from_secret(engine_dir)
     entry = _find_entry(engine_dir)
 
+    print(f"[run_public] repo_root={repo_root}")
     print(f"[run_public] master={master}")
     print(f"[run_public] engine_dir={engine_dir}")
     print(f"[run_public] entry={entry}")
+    print(f"[run_public] outdir={outdir}")
     if model_path:
         print(f"[run_public] model(from secret)={model_path}")
 
@@ -74,7 +79,9 @@ def main():
         cmd += ["--model", str(model_path)]
 
     print("[run_public] cmd:", " ".join(cmd))
-    proc = subprocess.run(cmd, cwd=str(entry.parent))
+
+    # 不要改 cwd（保持在 repo root）
+    proc = subprocess.run(cmd, cwd=str(repo_root))
     raise SystemExit(proc.returncode)
 
 if __name__ == "__main__":
