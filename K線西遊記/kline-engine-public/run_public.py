@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-K線西遊記 · TX 引擎公開入口（Release Latest 版）
+K線西遊記 · TX 引擎公開入口（Release Latest - Stable）
 - 只負責：用 master/台指近全.xlsx 當 input，去 engine_dir 找 step1 入口檔並執行
 - 引擎本體放在 Release 的 zip 裡，不放 repo
 """
@@ -13,6 +13,7 @@ import sys
 import subprocess
 from pathlib import Path
 
+
 def _write_model_from_secret(engine_dir: Path) -> Path | None:
     b64 = os.environ.get("ENGINE_MODEL_B64", "").strip()
     if not b64:
@@ -21,12 +22,14 @@ def _write_model_from_secret(engine_dir: Path) -> Path | None:
     out.write_bytes(base64.b64decode(b64))
     return out
 
+
 def _strip_bom_py(engine_dir: Path) -> None:
     bom = b"\xef\xbb\xbf"
     for f in engine_dir.rglob("*.py"):
         b = f.read_bytes()
         if b.startswith(bom):
             f.write_bytes(b[len(bom):])
+
 
 def _find_entry(engine_dir: Path) -> Path:
     patterns = [
@@ -38,7 +41,8 @@ def _find_entry(engine_dir: Path) -> Path:
         if hits:
             hits.sort(key=lambda p: (len(str(p)), str(p)))
             return hits[0]
-    raise SystemExit("找不到引擎入口檔：請確認 Release zip 內含 step1 或 啟動器。")
+    raise SystemExit("找不到引擎入口檔：請確認 Release 的 engine.zip 內含 step1 或 啟動器。")
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -75,6 +79,7 @@ def main():
     print("[run_public] cmd:", " ".join(cmd))
     proc = subprocess.run(cmd, cwd=str(entry.parent))
     raise SystemExit(proc.returncode)
+
 
 if __name__ == "__main__":
     main()
