@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-K線西遊記 · TX 引擎公開入口（Release Latest - Stable）
-- 只負責：用 master/台指近全.xlsx 當 input，去 engine_dir 找 step1 入口檔並執行
-- 引擎本體放在 Release 的 zip 裡，不放 repo
+K線西遊記 · 公開入口（Stable）
+- 只做一件事：拿 master xlsx 當 input，去 engine_dir 內找 step1 入口執行，輸出到 outdir
+- 引擎本體不在 repo：由 workflow 從 Secret 還原到 engine_bin
 """
 
 from __future__ import annotations
@@ -41,14 +41,14 @@ def _find_entry(engine_dir: Path) -> Path:
         if hits:
             hits.sort(key=lambda p: (len(str(p)), str(p)))
             return hits[0]
-    raise SystemExit("找不到引擎入口檔：請確認 Release 的 engine.zip 內含 step1 或 啟動器。")
+    raise SystemExit("找不到引擎入口檔：engine.zip 內必須含 step1 或 啟動器。")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--master", required=True, help="台指近全.xlsx 路徑（master/台指近全.xlsx）")
-    ap.add_argument("--engine_dir", required=True, help="已解壓的引擎資料夾（例如 engine_bin）")
-    ap.add_argument("--outdir", required=True, help="輸出資料夾（repo 內 output）")
+    ap.add_argument("--master", required=True, help="master xlsx path")
+    ap.add_argument("--engine_dir", required=True, help="engine_bin directory")
+    ap.add_argument("--outdir", required=True, help="output directory")
     args = ap.parse_args()
 
     master = Path(args.master)
@@ -69,8 +69,6 @@ def main():
     print(f"[run_public] master={master}")
     print(f"[run_public] engine_dir={engine_dir}")
     print(f"[run_public] entry={entry}")
-    if model_path:
-        print(f"[run_public] model(from secret)={model_path}")
 
     cmd = [sys.executable, str(entry), "--input", str(master), "--outdir", str(outdir)]
     if model_path:
