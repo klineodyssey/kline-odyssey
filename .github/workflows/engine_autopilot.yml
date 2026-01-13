@@ -16,16 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      RELEASE_ASSET: ENGINE_ZIP_B64.zip
       MASTER_XLSX: "K線西遊記/kline-taifex/master/台指近全.xlsx"
       OUTDIR: "K線西遊記/kline-engine-public/output"
-      ENGINE_DIR: "engine_bin"
-      ASSET_NAME: "engine.zip"
+      ENGINE_DIR: "K線西遊記/engine_bin"
 
     steps:
-      - name: Checkout (on branch, not detached)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Setup Python
@@ -33,86 +32,55 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install deps
-        shell: bash
+      - name: Install deps (public wrapper)
         run: |
           set -e
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
+          # jq 用來解析 release JSON
+          sudo apt-get update -y
+          sudo apt-get install -y jq unzip
 
-      - name: Prepare folders (auto mkdir)
-        shell: bash
-        run: |
-          set -e
-          mkdir -p "${ENGINE_DIR}"
-          mkdir -p "${OUTDIR}"
-          ls -al "K線西遊記/kline-taifex/master" || true
-          ls -al "K線西遊記/kline-engine-public" || true
-
-      - name: Download engine.zip from latest Release (no jq)
-        shell: bash
+      - name: Download engine asset from latest Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json, os, sys, urllib.request
 
-          repo = os.environ["GITHUB_REPOSITORY"]
-          token = os.environ["GH_TOKEN"]
-          asset_name = os.environ["ASSET_NAME"]
-          out_path = os.path.join(os.environ["ENGINE_DIR"], asset_name)
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
+          echo "[debug] api=$api"
 
-          api = f"https://api.github.com/repos/{repo}/releases/latest"
-          req = urllib.request.Request(
-              api,
-              headers={
-                  "Accept": "application/vnd.github+json",
-                  "Authorization": f"Bearer {token}",
-                  "X-GitHub-Api-Version": "2022-11-28",
-                  "User-Agent": "kline-actions",
-              },
-          )
-          with urllib.request.urlopen(req) as r:
-              data = json.loads(r.read().decode("utf-8"))
+          json="$(curl -sL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$api")"
 
-          assets = data.get("assets", [])
-          asset_api_url = None
-          for a in assets:
-              if a.get("name") == asset_name:
-                  asset_api_url = a.get("url")
-                  break
+          asset_api_url="$(echo "$json" | jq -r --arg n "${RELEASE_ASSET}" '.assets[] | select(.name==$n) | .url')"
 
-          if not asset_api_url:
-              names = [a.get("name") for a in assets]
-              raise SystemExit(f"ERROR: asset not found: {asset_name}. assets={names}")
+          if [ -z "$asset_api_url" ] || [ "$asset_api_url" = "null" ]; then
+            echo "::error::Asset not found in latest release: ${RELEASE_ASSET}"
+            echo "Assets list:"
+            echo "$json" | jq -r '.assets[].name'
+            exit 1
+          fi
 
-          # GitHub asset download: use API url + Accept: application/octet-stream
-          req2 = urllib.request.Request(
-              asset_api_url,
-              headers={
-                  "Accept": "application/octet-stream",
-                  "Authorization": f"Bearer {token}",
-                  "X-GitHub-Api-Version": "2022-11-28",
-                  "User-Agent": "kline-actions",
-              },
-          )
-          with urllib.request.urlopen(req2) as r:
-              blob = r.read()
+          echo "[debug] asset_api_url=$asset_api_url"
 
-          open(out_path, "wb").write(blob)
-          print("downloaded:", out_path, "bytes=", len(blob))
-          PY
+          curl -sSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "$asset_api_url" -o "${RELEASE_ASSET}"
 
-      - name: Unzip engine
+          ls -lh "${RELEASE_ASSET}"
+
+      - name: Unzip engine asset
         shell: bash
         run: |
-          set -e
-          cd "${ENGINE_DIR}"
-          ls -lh
-          unzip -o "${ASSET_NAME}"
-          echo "=== engine dir tree (maxdepth 4) ==="
-          find . -maxdepth 4 -type f | sed 's|^\./||'
+          set -euo pipefail
+          mkdir -p "${ENGINE_DIR}"
+          unzip -o "${RELEASE_ASSET}" -d "${ENGINE_DIR}"
+          echo "=== engine_dir tree ==="
+          find "${ENGINE_DIR}" -maxdepth 3 -type f | sed 's|^\./||'
 
       - name: Run public entry
         shell: bash
@@ -121,6 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f "${MASTER_XLSX}" || (echo "MASTER not found: ${MASTER_XLSX}" && exit 1)
+          mkdir -p "${OUTDIR}"
 
           python "K線西遊記/kline-engine-public/run_public.py" \
             --master "${MASTER_XLSX}" \
@@ -130,16 +99,15 @@ jobs:
       - name: Commit outputs
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           git config user.name "kline-bot"
           git config user.email "bot@kline.odyssey"
 
           git add "${OUTDIR}" || true
-
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
 
           git commit -m "auto: engine output update"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push
