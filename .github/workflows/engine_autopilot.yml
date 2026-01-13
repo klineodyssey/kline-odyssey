@@ -40,38 +40,39 @@ jobs:
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
       - name: Download engine asset from latest Release
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSET_NAME: engine.zip
         run: |
           set -euo pipefail
-          mkdir -p "${ENGINE_DIR}"
 
-          OWNER="${GITHUB_REPOSITORY%%/*}"
-          REPO="${GITHUB_REPOSITORY##*/}"
-          WANT="${RELEASE_ASSET}"
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
+          echo "[debug] api=$api"
 
-          API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
-          echo "api=${API}"
-
-          ASSET_URL="$(curl -fsSL \
-            -H "Accept: application/vnd.github+json" \
+          json="$(curl -sL \
             -H "Authorization: Bearer ${GH_TOKEN}" \
-            "${API}" \
-            | python -c "import sys,json; d=json.load(sys.stdin); want='${WANT}'; 
-                         url=''; 
-                         for a in d.get('assets',[]):
-                           if a.get('name')==want:
-                             url=a.get('browser_download_url',''); break
-                         print(url)")"
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$api")"
 
-          if [ -z "${ASSET_URL}" ]; then
-            echo "ERROR: asset not found in latest release: ${WANT}"
+          # 取指定資產的 API url（注意：這不是 browser_download_url）
+          asset_api_url="$(echo "$json" | jq -r --arg n "$ASSET_NAME" '.assets[] | select(.name==$n) | .url')"
+
+          if [ -z "$asset_api_url" ] || [ "$asset_api_url" = "null" ]; then
+            echo "::error::Asset not found in latest release: ${ASSET_NAME}"
+            echo "Assets list:"
+            echo "$json" | jq -r '.assets[].name'
             exit 1
           fi
 
-          echo "asset_url=${ASSET_URL}"
-          curl -fL "${ASSET_URL}" -o "${ENGINE_DIR}/${WANT}"
+          echo "[debug] asset_api_url=$asset_api_url"
+
+          # 用 Accept: application/octet-stream 下載資產內容
+          curl -sSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "$asset_api_url" -o "$ASSET_NAME"
+
+          ls -lh "$ASSET_NAME"
 
       - name: Unzip engine asset
         shell: bash
