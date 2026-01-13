@@ -1,0 +1,59 @@
+name: TX Engine Autopilot (Stable)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-engine:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Download engine from latest Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest"
+          json=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" "$api")
+
+          asset_url=$(echo "$json" | jq -r '.assets[] | select(.name=="ENGINE_ZIP_B64.zip") | .url')
+
+          if [ -z "$asset_url" ] || [ "$asset_url" = "null" ]; then
+            echo "::error::ENGINE_ZIP_B64.zip not found in Release"
+            exit 1
+          fi
+
+          curl -L \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "$asset_url" -o engine.zip
+
+          unzip engine.zip -d engine
+          ls -R engine
+
+      - name: Run engine (black box)
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+        run: |
+          set -euo pipefail
+
+          ENTRY=$(find engine -name "K線西遊記_Tplus1_pm500_step1_多空運算*.py" | head -n 1)
+
+          if [ -z "$ENTRY" ]; then
+            echo "::error::Engine entry not found"
+            exit 1
+          fi
+
+          python "$ENTRY"
