@@ -39,10 +39,16 @@ jobs:
           python -m pip install -U pip
           pip install -r "K線西遊記/kline-engine-public/requirements.txt"
 
+      - name: Prepare engine dir
+        shell: bash
+        run: |
+          set -e
+          mkdir -p "${ENGINE_DIR}"
+
       - name: Download engine asset from latest Release
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ASSET_NAME: engine.zip
         run: |
           set -euo pipefail
 
@@ -54,7 +60,8 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$api")"
 
-          # 取指定資產的 API url（注意：這不是 browser_download_url）
+          ASSET_NAME="${RELEASE_ASSET}"
+
           asset_api_url="$(echo "$json" | jq -r --arg n "$ASSET_NAME" '.assets[] | select(.name==$n) | .url')"
 
           if [ -z "$asset_api_url" ] || [ "$asset_api_url" = "null" ]; then
@@ -66,18 +73,17 @@ jobs:
 
           echo "[debug] asset_api_url=$asset_api_url"
 
-          # 用 Accept: application/octet-stream 下載資產內容
           curl -sSL \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/octet-stream" \
-            "$asset_api_url" -o "$ASSET_NAME"
+            "$asset_api_url" -o "${ENGINE_DIR}/${ASSET_NAME}"
 
-          ls -lh "$ASSET_NAME"
+          ls -lh "${ENGINE_DIR}/${ASSET_NAME}"
 
       - name: Unzip engine asset
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cd "${ENGINE_DIR}"
           unzip -o "${RELEASE_ASSET}"
           echo "=== engine_dir tree ==="
