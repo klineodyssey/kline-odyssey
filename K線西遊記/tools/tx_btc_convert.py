@@ -1,121 +1,112 @@
 # -*- coding: utf-8 -*-
 """
-TX + BTC 轉檔總控（Autopilot 用）
-- TX：批次處理 kline-taifex/raw/*.csv → 更新 master/台指近全.xlsx（呼叫你既有的 tx_full_day_pipeline_v882_UTF8BOM.py）
-- BTC：若 raw 裡有檔（xlsx/csv）就合併；若沒有，就自動從 Binance 抓 1d K 線更新 master/BTCUSDT_1d_1000.xlsx
+TX + BTC 轉檔總控（Stable）
 
-注意：這個檔是「工具層」，可公開。私有策略/模型不要放這裡。
+目標：
+- TX：把 K線西遊記/kline-taifex/raw/*.csv 用你現有的 pipeline 併進 master/台指近全.xlsx
+- BTC：兩種來源（二選一）
+  A) 若 K線西遊記/kline-btc/raw/ 放了 CSV / XLSX（你自己丟資料），就合併進 master
+  B) 若 raw 目錄沒有任何檔，就自動從 Binance 公開 API 抓 BTCUSDT 1d（需要 requests）
+
+注意：
+- 這支只做「資料準備」，不做運算。
+- 產出檔案只寫到 master 指定路徑（避免多 copy 多檔名）。
 """
+
 from __future__ import annotations
 
 import argparse
-import glob
+import subprocess
 from pathlib import Path
 import pandas as pd
-import subprocess
-import sys
 
-HERE = Path(__file__).resolve().parent
-BTC_FETCH = HERE / "btc_fetch_binance.py"
-
-def run_tx_pipeline(tx_raw_dir: Path, tx_master: Path):
-    # 你的既有 pipeline 路徑（repo 內）
-    pipeline = Path("K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py")
-    if not pipeline.exists():
-        raise FileNotFoundError(f"TX pipeline not found: {pipeline}")
-
+def run_tx_pipeline(tx_pipeline: Path, tx_raw_dir: Path, tx_master: Path) -> None:
     tx_raw_dir.mkdir(parents=True, exist_ok=True)
     tx_master.parent.mkdir(parents=True, exist_ok=True)
 
-    csvs = sorted(glob.glob(str(tx_raw_dir / "*.csv")))
+    csvs = sorted(tx_raw_dir.glob("*.csv"))
     if not csvs:
-        print("[convert] TX: no raw csv, skip.")
+        print("[tx_btc_convert] TX raw empty -> skip TX pipeline")
         return
 
-    cmd = [sys.executable, str(pipeline), *csvs, "--master", str(tx_master)]
-    print("[convert] TX cmd:", " ".join(cmd))
-    subprocess.check_call(cmd)
+    cmd = ["python", str(tx_pipeline)] + [str(p) for p in csvs] + ["--master", str(tx_master)]
+    print("[tx_btc_convert] run TX pipeline:", " ".join(cmd))
+    subprocess.check_call(cmd, cwd=str(tx_pipeline.parent))
 
-def _read_btc_raw_any(path: Path) -> pd.DataFrame:
+    # pipeline 可能吐出 台指近全YYYYMMDD.xlsx：我們不做搬移（你的 taifex workflow 已處理）
+    # 這裡只確保 master/台指近全.xlsx 存在即可
+
+def _read_any(path: Path) -> pd.DataFrame:
     if path.suffix.lower() in (".xlsx", ".xls"):
         return pd.read_excel(path)
-    if path.suffix.lower() == ".csv":
-        return pd.read_csv(path)
-    raise ValueError(f"Unsupported BTC raw: {path}")
+    return pd.read_csv(path)
 
-def merge_btc_master_from_raw(btc_raw_dir: Path, btc_master: Path):
+def _normalize_btc(df: pd.DataFrame) -> pd.DataFrame:
+    """把各種 BTC 來源整理成標準欄位：date, open, high, low, close, volume"""
+    cols = {c.lower(): c for c in df.columns}
+    # Binance klines downloader 會有 open_time
+    if "open_time" in cols:
+        out = df.copy()
+        out["date"] = pd.to_datetime(out[cols["open_time"]]).dt.date.astype(str)
+        for k in ["open","high","low","close","volume"]:
+            out[k] = pd.to_numeric(out[cols.get(k,k)], errors="coerce")
+        return out[["date","open","high","low","close","volume"]].dropna(subset=["date"])
+    # 常見：date 或 日期
+    if "date" in cols:
+        dcol = cols["date"]
+    elif "日期" in df.columns:
+        dcol = "日期"
+    else:
+        raise ValueError("BTC raw 檔找不到 date/日期 欄位")
+    out = df.rename(columns={dcol:"date"}).copy()
+    out["date"] = pd.to_datetime(out["date"], errors="coerce").dt.date.astype(str)
+    for k in ["open","high","low","close","volume"]:
+        if k in df.columns:
+            out[k] = pd.to_numeric(out[k], errors="coerce")
+        elif k.upper() in df.columns:
+            out[k] = pd.to_numeric(out[k.upper()], errors="coerce")
+        else:
+            out[k] = pd.to_numeric(out.get(k, None), errors="coerce")
+    return out[["date","open","high","low","close","volume"]].dropna(subset=["date"])
+
+def update_btc_master(btc_raw_dir: Path, btc_master: Path) -> None:
     btc_raw_dir.mkdir(parents=True, exist_ok=True)
     btc_master.parent.mkdir(parents=True, exist_ok=True)
 
-    raws = sorted(list(btc_raw_dir.glob("*.xlsx"))) + sorted(list(btc_raw_dir.glob("*.csv")))
-    if not raws:
-        return False
-
-    # 取最新檔名（你也可以改成全部合併）
-    raw = raws[-1]
-    df = _read_btc_raw_any(raw)
-
-    # 期望欄位：日期/開高低收量（容錯：英文字欄位）
-    colmap = {}
-    for c in df.columns:
-        lc = str(c).strip().lower()
-        if lc in ("date","日期","time"):
-            colmap[c] = "日期"
-        elif lc in ("open","開","開盤","開盤價"):
-            colmap[c] = "開盤"
-        elif lc in ("high","最高","最高價"):
-            colmap[c] = "最高"
-        elif lc in ("low","最低","最低價"):
-            colmap[c] = "最低"
-        elif lc in ("close","收","收盤","收盤價"):
-            colmap[c] = "收盤"
-        elif lc in ("volume","量","成交量"):
-            colmap[c] = "成交量"
-    df = df.rename(columns=colmap)
-
-    need = ["日期","開盤","最高","最低","收盤","成交量"]
-    for n in need:
-        if n not in df.columns:
-            raise ValueError(f"BTC raw missing column: {n} in {raw}")
-
-    df = df[need].copy()
-    df["日期"] = pd.to_numeric(df["日期"].astype(str).str.replace(r"[^\d]","", regex=True).str.slice(0,8), errors="coerce").astype("Int64")
+    raw_files = sorted(list(btc_raw_dir.glob("*.csv")) + list(btc_raw_dir.glob("*.xlsx")) + list(btc_raw_dir.glob("*.xls")))
+    if raw_files:
+        newest = raw_files[-1]
+        print(f"[tx_btc_convert] BTC raw detected: {newest.name}")
+        df_new = _normalize_btc(_read_any(newest))
+    else:
+        # 沒 raw：改用 Binance 抓
+        from K線西遊記.tools.btc_fetch_binance import fetch_binance_klines_1d  # type: ignore
+        print("[tx_btc_convert] BTC raw empty -> fetch Binance BTCUSDT 1d")
+        df_new = fetch_binance_klines_1d(symbol="BTCUSDT", interval="1d", limit=1000)
+        df_new = _normalize_btc(df_new)
 
     if btc_master.exists():
-        old = pd.read_excel(btc_master)
+        df_old = _normalize_btc(pd.read_excel(btc_master))
     else:
-        old = pd.DataFrame(columns=need)
-    for n in need:
-        if n not in old.columns:
-            old[n] = pd.NA
-    old = old[need].copy()
-    old["日期"] = pd.to_numeric(old["日期"], errors="coerce").astype("Int64")
+        df_old = pd.DataFrame(columns=["date","open","high","low","close","volume"])
 
-    new_dates = set(df["日期"].dropna().astype(int).tolist())
-    old = old[~old["日期"].astype("Int64").isin(new_dates)]
-    merged = pd.concat([old, df], ignore_index=True).sort_values("日期").reset_index(drop=True)
-    merged.to_excel(btc_master, index=False)
-    print(f"[convert] BTC merged from raw={raw.name} rows={len(merged)}")
-    return True
-
-def update_btc_master_from_binance(btc_master: Path):
-    cmd = [sys.executable, str(BTC_FETCH), "--master", str(btc_master), "--symbol", "BTCUSDT", "--interval", "1d", "--limit", "1000"]
-    print("[convert] BTC fetch cmd:", " ".join(cmd))
-    subprocess.check_call(cmd)
+    # merge by date (keep newest)
+    df = pd.concat([df_old, df_new], ignore_index=True)
+    df = df.dropna(subset=["date"]).drop_duplicates(subset=["date"], keep="last").sort_values("date")
+    df.to_excel(btc_master, index=False)
+    print(f"[tx_btc_convert] BTC master updated: {btc_master} rows={len(df)}")
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tx_raw_dir", required=True)
+    ap.add_argument("--tx_pipeline", required=True)
     ap.add_argument("--tx_master", required=True)
     ap.add_argument("--btc_raw_dir", required=True)
     ap.add_argument("--btc_master", required=True)
     args = ap.parse_args()
 
-    run_tx_pipeline(Path(args.tx_raw_dir), Path(args.tx_master))
-
-    ok = merge_btc_master_from_raw(Path(args.btc_raw_dir), Path(args.btc_master))
-    if not ok:
-        update_btc_master_from_binance(Path(args.btc_master))
+    run_tx_pipeline(Path(args.tx_pipeline), Path(args.tx_raw_dir), Path(args.tx_master))
+    update_btc_master(Path(args.btc_raw_dir), Path(args.btc_master))
 
 if __name__ == "__main__":
     main()
