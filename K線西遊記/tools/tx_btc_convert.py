@@ -1,108 +1,107 @@
 # -*- coding: utf-8 -*-
+"""
+TX + BTC 轉檔總控（Autopilot 用）
+- TX：批次處理 kline-taifex/raw/*.csv → 更新 master/台指近全.xlsx（呼叫你既有的 tx_full_day_pipeline_v882_UTF8BOM.py）
+- BTC：若 raw 裡有檔（xlsx/csv）就合併；若沒有，就自動從 Binance 抓 1d K 線更新 master/BTCUSDT_1d_1000.xlsx
+
+注意：這個檔是「工具層」，可公開。私有策略/模型不要放這裡。
+"""
 from __future__ import annotations
+
 import argparse
+import glob
 from pathlib import Path
 import pandas as pd
+import subprocess
+import sys
 
-def newest_file(folder: Path) -> Path | None:
-    if not folder.exists():
-        return None
-    files = [p for p in folder.rglob("*") if p.is_file()]
-    if not files:
-        return None
-    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    return files[0]
+HERE = Path(__file__).resolve().parent
+BTC_FETCH = HERE / "btc_fetch_binance.py"
 
-def convert_tx_raw_to_master(raw_path: Path, master_path: Path) -> None:
-    """
-    先做「最小可運行」：支援你目前已在用的格式：
-    - 若 raw 是你已經整理好的 xlsx/csv（含 交易日期/開盤價/最高價/最低價/收盤價/成交量/台指近...）
-      就直接規範化欄名後輸出 master
-    真正的「期交所原始 CSV 日盤+夜盤 合併全日K + 近月判定」你已經有規則，
-    下一版我會把完整 V8.8.2_pro 規則塞進來（但先讓 Autopilot 100% 跑起來）。
-    """
-    if raw_path.suffix.lower() in [".xlsx", ".xls"]:
-        df = pd.read_excel(raw_path, dtype=object)
-    else:
-        df = pd.read_csv(raw_path, dtype=object)
+def run_tx_pipeline(tx_raw_dir: Path, tx_master: Path):
+    # 你的既有 pipeline 路徑（repo 內）
+    pipeline = Path("K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py")
+    if not pipeline.exists():
+        raise FileNotFoundError(f"TX pipeline not found: {pipeline}")
 
-    # 允許你原欄名：交易日期/開盤價/最高價/最低價/收盤價
-    rename = {
-        "交易日期": "交易日期",
-        "日期": "交易日期",
-        "開盤價": "開盤價",
-        "最高價": "最高價",
-        "最低價": "最低價",
-        "收盤價": "收盤價",
-        "成交量": "成交量",
-        "未平倉量": "未平倉量",
-        "結算價": "結算價",
-        "台指近": "台指近",
-    }
-    # 只保留有的欄
-    cols = [c for c in rename.keys() if c in df.columns]
-    df = df[cols].copy()
+    tx_raw_dir.mkdir(parents=True, exist_ok=True)
+    tx_master.parent.mkdir(parents=True, exist_ok=True)
 
-    # 日期統一成 YYYYMMDD（整數）
-    dcol = "交易日期"
-    d = df[dcol].astype(str).str.replace(r"\.0$", "", regex=True).str.slice(0, 8)
-    df[dcol] = pd.to_numeric(d, errors="coerce").astype("Int64")
+    csvs = sorted(glob.glob(str(tx_raw_dir / "*.csv")))
+    if not csvs:
+        print("[convert] TX: no raw csv, skip.")
+        return
 
-    master_path.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(master_path, engine="openpyxl") as w:
-        df.to_excel(w, index=False, sheet_name="TX")
-    print("[TX] master updated:", master_path)
+    cmd = [sys.executable, str(pipeline), *csvs, "--master", str(tx_master)]
+    print("[convert] TX cmd:", " ".join(cmd))
+    subprocess.check_call(cmd)
 
-def convert_btc_raw_to_master(raw_path: Path, master_path: Path) -> None:
-    """
-    BTC 最小可運行：
-    - 接受 csv/xlsx
-    - 需要欄位至少包含：date/open/high/low/close/volume（或常見交易所欄名）
-    - 輸出固定 master 檔：BTCUSDT_1d_1000.xlsx
-    """
-    if raw_path.suffix.lower() in [".xlsx", ".xls"]:
-        df = pd.read_excel(raw_path, dtype=object)
-    else:
-        df = pd.read_csv(raw_path, dtype=object)
+def _read_btc_raw_any(path: Path) -> pd.DataFrame:
+    if path.suffix.lower() in (".xlsx", ".xls"):
+        return pd.read_excel(path)
+    if path.suffix.lower() == ".csv":
+        return pd.read_csv(path)
+    raise ValueError(f"Unsupported BTC raw: {path}")
 
-    # 嘗試對齊常見欄名
+def merge_btc_master_from_raw(btc_raw_dir: Path, btc_master: Path):
+    btc_raw_dir.mkdir(parents=True, exist_ok=True)
+    btc_master.parent.mkdir(parents=True, exist_ok=True)
+
+    raws = sorted(list(btc_raw_dir.glob("*.xlsx"))) + sorted(list(btc_raw_dir.glob("*.csv")))
+    if not raws:
+        return False
+
+    # 取最新檔名（你也可以改成全部合併）
+    raw = raws[-1]
+    df = _read_btc_raw_any(raw)
+
+    # 期望欄位：日期/開高低收量（容錯：英文字欄位）
     colmap = {}
     for c in df.columns:
-        lc = str(c).lower()
-        if lc in ["date", "datetime", "time", "timestamp"]:
-            colmap[c] = "date"
-        elif lc in ["open", "o"]:
-            colmap[c] = "open"
-        elif lc in ["high", "h"]:
-            colmap[c] = "high"
-        elif lc in ["low", "l"]:
-            colmap[c] = "low"
-        elif lc in ["close", "c"]:
-            colmap[c] = "close"
-        elif lc in ["volume", "vol", "v"]:
-            colmap[c] = "volume"
-    df = df.rename(columns=colmap).copy()
+        lc = str(c).strip().lower()
+        if lc in ("date","日期","time"):
+            colmap[c] = "日期"
+        elif lc in ("open","開","開盤","開盤價"):
+            colmap[c] = "開盤"
+        elif lc in ("high","最高","最高價"):
+            colmap[c] = "最高"
+        elif lc in ("low","最低","最低價"):
+            colmap[c] = "最低"
+        elif lc in ("close","收","收盤","收盤價"):
+            colmap[c] = "收盤"
+        elif lc in ("volume","量","成交量"):
+            colmap[c] = "成交量"
+    df = df.rename(columns=colmap)
 
-    need = ["date","open","high","low","close"]
-    miss = [c for c in need if c not in df.columns]
-    if miss:
-        raise SystemExit(f"[BTC] missing columns: {miss}. got={list(df.columns)}")
+    need = ["日期","開盤","最高","最低","收盤","成交量"]
+    for n in need:
+        if n not in df.columns:
+            raise ValueError(f"BTC raw missing column: {n} in {raw}")
 
-    # date 統一成 YYYYMMDD int（若你是 yyyy-mm-dd 也能吃）
-    d = df["date"].astype(str)
-    d = d.str.replace("-", "", regex=False).str.replace("/", "", regex=False).str.slice(0, 8)
-    df["date"] = pd.to_numeric(d, errors="coerce").astype("Int64")
+    df = df[need].copy()
+    df["日期"] = pd.to_numeric(df["日期"].astype(str).str.replace(r"[^\d]","", regex=True).str.slice(0,8), errors="coerce").astype("Int64")
 
-    for c in ["open","high","low","close","volume"]:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
+    if btc_master.exists():
+        old = pd.read_excel(btc_master)
+    else:
+        old = pd.DataFrame(columns=need)
+    for n in need:
+        if n not in old.columns:
+            old[n] = pd.NA
+    old = old[need].copy()
+    old["日期"] = pd.to_numeric(old["日期"], errors="coerce").astype("Int64")
 
-    df = df.dropna(subset=["date","open","high","low","close"]).sort_values("date").reset_index(drop=True)
+    new_dates = set(df["日期"].dropna().astype(int).tolist())
+    old = old[~old["日期"].astype("Int64").isin(new_dates)]
+    merged = pd.concat([old, df], ignore_index=True).sort_values("日期").reset_index(drop=True)
+    merged.to_excel(btc_master, index=False)
+    print(f"[convert] BTC merged from raw={raw.name} rows={len(merged)}")
+    return True
 
-    master_path.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(master_path, engine="openpyxl") as w:
-        df.to_excel(w, index=False, sheet_name="BTC")
-    print("[BTC] master updated:", master_path)
+def update_btc_master_from_binance(btc_master: Path):
+    cmd = [sys.executable, str(BTC_FETCH), "--master", str(btc_master), "--symbol", "BTCUSDT", "--interval", "1d", "--limit", "1000"]
+    print("[convert] BTC fetch cmd:", " ".join(cmd))
+    subprocess.check_call(cmd)
 
 def main():
     ap = argparse.ArgumentParser()
@@ -112,23 +111,11 @@ def main():
     ap.add_argument("--btc_master", required=True)
     args = ap.parse_args()
 
-    tx_raw_dir = Path(args.tx_raw_dir)
-    btc_raw_dir = Path(args.btc_raw_dir)
+    run_tx_pipeline(Path(args.tx_raw_dir), Path(args.tx_master))
 
-    tx_master = Path(args.tx_master)
-    btc_master = Path(args.btc_master)
-
-    tx_latest = newest_file(tx_raw_dir)
-    if tx_latest:
-        convert_tx_raw_to_master(tx_latest, tx_master)
-    else:
-        print("[TX] no raw found, skip")
-
-    btc_latest = newest_file(btc_raw_dir)
-    if btc_latest:
-        convert_btc_raw_to_master(btc_latest, btc_master)
-    else:
-        print("[BTC] no raw found, skip")
+    ok = merge_btc_master_from_raw(Path(args.btc_raw_dir), Path(args.btc_master))
+    if not ok:
+        update_btc_master_from_binance(Path(args.btc_master))
 
 if __name__ == "__main__":
     main()
