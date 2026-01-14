@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-K線西遊記 · 公開入口（Stable）
-- 只負責：用 master 檔當 input，去 engine_dir 找引擎入口檔並執行
-- 引擎本體放在 GitHub Secrets 的 ENGINE_ZIP_B64（或 Release），repo 不放引擎
+K線西遊記 · TX 引擎公開入口（Stable）
+- 只負責：用 master/台指近全.xlsx 當 input，去 engine_dir 找入口並執行
+- 引擎本體：由 workflow 從 Secret 還原成 engine_bin/（不放 repo）
 """
 
 from __future__ import annotations
+
 import argparse
 import base64
 import os
@@ -13,7 +14,6 @@ import sys
 import subprocess
 from pathlib import Path
 
-BOM = b"\xef\xbb\xbf"
 
 def _write_model_from_secret(engine_dir: Path) -> Path | None:
     b64 = os.environ.get("ENGINE_MODEL_B64", "").strip()
@@ -23,37 +23,34 @@ def _write_model_from_secret(engine_dir: Path) -> Path | None:
     out.write_bytes(base64.b64decode(b64))
     return out
 
-def _strip_bom_py(root: Path) -> None:
-    for f in root.rglob("*.py"):
+
+def _strip_bom_py(engine_dir: Path) -> None:
+    bom = b"\xef\xbb\xbf"
+    for f in engine_dir.rglob("*.py"):
         b = f.read_bytes()
-        if b.startswith(BOM):
-            f.write_bytes(b[len(BOM):])
+        if b.startswith(bom):
+            f.write_bytes(b[len(bom):])
+
 
 def _find_entry(engine_dir: Path) -> Path:
-    """找引擎入口（最穩：用 pattern + 避免抓到測試檔）。"""
+    # 優先順序：你現在 engine.zip 裡最常見的入口
     patterns = [
         "K線西遊記_Tplus1_pm500_step1_多空運算*.py",
+        "launcher.py",
         "啟動西遊記運算*.py",
-        "kline_engine_main*.py",
     ]
-    hits: list[Path] = []
     for pat in patterns:
-        hits += list(engine_dir.rglob(pat))
-    if not hits:
-        raise SystemExit("找不到引擎入口檔：請確認 engine.zip 內含 step1 或 啟動器。")
+        hits = list(engine_dir.rglob(pat))
+        if hits:
+            hits.sort(key=lambda p: (len(str(p)), str(p)))
+            return hits[0]
+    raise SystemExit("找不到引擎入口檔：請確認 engine.zip 內含 step1 / launcher / 啟動器。")
 
-    # 避免抓到 __pycache__/tests/venv 之類
-    def score(p: Path):
-        s = str(p).lower()
-        bad = any(x in s for x in ["__pycache__", "/tests/", "\\tests\\", "/venv/", "\\venv\\"])
-        return (bad, len(str(p)), str(p))
-    hits.sort(key=score)
-    return hits[0]
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--master", required=True, help="輸入 master xlsx 路徑")
-    ap.add_argument("--engine_dir", required=True, help="已解壓的引擎資料夾（例如 engine_bin）")
+    ap.add_argument("--master", required=True, help="master/台指近全.xlsx 路徑")
+    ap.add_argument("--engine_dir", required=True, help="引擎解壓資料夾（例如 engine_bin）")
     ap.add_argument("--outdir", required=True, help="輸出資料夾（repo 內 output）")
     args = ap.parse_args()
 
@@ -78,6 +75,7 @@ def main():
     if model_path:
         print(f"[run_public] model(from secret)={model_path}")
 
+    # 你的 step1(V3.4.3) 本身支援：--input --outdir --model
     cmd = [sys.executable, str(entry), "--input", str(master), "--outdir", str(outdir)]
     if model_path:
         cmd += ["--model", str(model_path)]
@@ -85,6 +83,7 @@ def main():
     print("[run_public] cmd:", " ".join(cmd))
     proc = subprocess.run(cmd, cwd=str(entry.parent))
     raise SystemExit(proc.returncode)
+
 
 if __name__ == "__main__":
     main()
