@@ -6,14 +6,16 @@ on:
     paths:
       - "K線西遊記/kline-taifex/raw/**"
       - "K線西遊記/kline-btc/raw/**"
-      - "K線西遊記/kline-taifex/master/台指近全.xlsx"
-      - "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx"
-      - "K線西遊記/kline-engine-public/**"
+      - "K線西遊記/kline-taifex/scripts/**"
       - "K線西遊記/tools/**"
       - ".github/workflows/autopilot_all.yml"
 
 permissions:
   contents: write
+
+concurrency:
+  group: kline-autopilot-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   autopilot:
@@ -32,7 +34,7 @@ jobs:
       ENGINE_DIR: "engine_bin"
 
     steps:
-      - name: Checkout (on branch, not detached)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
@@ -48,7 +50,7 @@ jobs:
         run: |
           set -e
           python -m pip install -U pip
-          pip install pandas openpyxl numpy matplotlib
+          pip install pandas openpyxl numpy matplotlib requests
 
       - name: Auto mkdir required folders
         shell: bash
@@ -61,7 +63,6 @@ jobs:
           mkdir -p "K線西遊記/kline-engine-public"
           mkdir -p "K線西遊記/tools"
 
-      # ====== (A) 引擎：從 Secret 還原 engine.zip（你不用上傳 release） ======
       - name: Restore engine.zip from Secret (ENGINE_ZIP_B64)
         shell: bash
         env:
@@ -99,7 +100,6 @@ jobs:
           print("BOM fixed files:", fixed)
           PY
 
-      # ====== (B) 轉檔：TX + BTC 原始檔 → master ======
       - name: Convert RAW -> MASTER (TX + BTC)
         shell: bash
         run: |
@@ -110,11 +110,8 @@ jobs:
             --btc_raw_dir "${BTC_RAW_DIR}" \
             --btc_master "${BTC_MASTER}"
 
-      # ====== (C) 運算：TX + BTC（同一引擎入口 run_public.py 兩次） ======
       - name: Run Engine (TX)
         shell: bash
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
           test -f "${TX_MASTER}" || (echo "TX master not found: ${TX_MASTER}" && exit 1)
@@ -125,8 +122,6 @@ jobs:
 
       - name: Run Engine (BTC)
         shell: bash
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
           test -f "${BTC_MASTER}" || (echo "BTC master not found: ${BTC_MASTER}" && exit 1)
@@ -135,7 +130,6 @@ jobs:
             --engine_dir "${ENGINE_DIR}" \
             --outdir "${OUTDIR_BTC}"
 
-      # ====== (D) Commit 回推：master + output 都保存（官網讀 output） ======
       - name: Commit & Push (master + output)
         shell: bash
         run: |
@@ -152,4 +146,4 @@ jobs:
           fi
 
           git commit -m "autopilot: update master + outputs"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push
