@@ -8,14 +8,11 @@ on:
       - "K線西遊記/kline-btc/raw/**"
       - "K線西遊記/kline-taifex/scripts/**"
       - "K線西遊記/tools/**"
+      - "K線西遊記/kline-engine-public/**"
       - ".github/workflows/autopilot_all.yml"
 
 permissions:
   contents: write
-
-concurrency:
-  group: kline-autopilot-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   autopilot:
@@ -23,6 +20,7 @@ jobs:
 
     env:
       TX_RAW_DIR: "K線西遊記/kline-taifex/raw"
+      TX_PIPELINE: "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
       TX_MASTER: "K線西遊記/kline-taifex/master/台指近全.xlsx"
 
       BTC_RAW_DIR: "K線西遊記/kline-btc/raw"
@@ -34,7 +32,7 @@ jobs:
       ENGINE_DIR: "engine_bin"
 
     steps:
-      - name: Checkout
+      - name: Checkout (on branch, not detached)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
@@ -63,6 +61,7 @@ jobs:
           mkdir -p "K線西遊記/kline-engine-public"
           mkdir -p "K線西遊記/tools"
 
+      # ====== (A) 引擎：從 Secret 還原 engine.zip（repo 不放引擎） ======
       - name: Restore engine.zip from Secret (ENGINE_ZIP_B64)
         shell: bash
         env:
@@ -82,6 +81,8 @@ jobs:
           PY
           cd "${ENGINE_DIR}"
           unzip -o engine.zip
+          echo "=== engine dir tree (top 3 levels) ==="
+          find . -maxdepth 3 -type f | sed 's|^\./||' || true
 
       - name: Strip UTF-8 BOM in engine python files
         shell: bash
@@ -100,36 +101,33 @@ jobs:
           print("BOM fixed files:", fixed)
           PY
 
+      # ====== (B) 轉檔：TX raw/*.csv -> master/台指近全.xlsx；BTC -> master/BTCUSDT_1d_1000.xlsx ======
       - name: Convert RAW -> MASTER (TX + BTC)
         shell: bash
         run: |
           set -euo pipefail
-          python "K線西遊記/tools/tx_btc_convert.py" \
-            --tx_raw_dir "${TX_RAW_DIR}" \
-            --tx_master "${TX_MASTER}" \
-            --btc_raw_dir "${BTC_RAW_DIR}" \
-            --btc_master "${BTC_MASTER}"
+          python "K線西遊記/tools/tx_btc_convert.py"             --tx_raw_dir "${TX_RAW_DIR}"             --tx_pipeline "${TX_PIPELINE}"             --tx_master "${TX_MASTER}"             --btc_raw_dir "${BTC_RAW_DIR}"             --btc_master "${BTC_MASTER}"
 
+      # ====== (C) 運算：TX + BTC（同一公開入口 run_public.py 各跑一次） ======
       - name: Run Engine (TX)
         shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
           test -f "${TX_MASTER}" || (echo "TX master not found: ${TX_MASTER}" && exit 1)
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${TX_MASTER}" \
-            --engine_dir "${ENGINE_DIR}" \
-            --outdir "${OUTDIR_TX}"
+          python "K線西遊記/kline-engine-public/run_public.py"             --master "${TX_MASTER}"             --engine_dir "${ENGINE_DIR}"             --outdir "${OUTDIR_TX}"
 
       - name: Run Engine (BTC)
         shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
         run: |
           set -euo pipefail
           test -f "${BTC_MASTER}" || (echo "BTC master not found: ${BTC_MASTER}" && exit 1)
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${BTC_MASTER}" \
-            --engine_dir "${ENGINE_DIR}" \
-            --outdir "${OUTDIR_BTC}"
+          python "K線西遊記/kline-engine-public/run_public.py"             --master "${BTC_MASTER}"             --engine_dir "${ENGINE_DIR}"             --outdir "${OUTDIR_BTC}"
 
+      # ====== (D) Commit 回推：master + output 都保存（官網讀 output） ======
       - name: Commit & Push (master + output)
         shell: bash
         run: |
