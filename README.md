@@ -60,6 +60,24 @@ https://klineodyssey.github.io/kline-odyssey/
 
 ---
 
+## 📦 KGEN 制度白皮書（唯一現行）
+
+KGEN（K-Line Genesis Energy Node）  
+是《KLINE Odyssey》宇宙的 **制度核心與能量基礎**。
+
+- 五指山（Galactic Bank）運作規則
+- 500 年 Epoch 文明週期說明
+- 分潤、治理、建設的制度邏輯
+- 與鏈上合約 **V7.5.2** 完全對齊
+
+👉 **KGEN 白皮書直達：**  
+https://github.com/klineodyssey/kline-odyssey/tree/main/KGEN/whitepaper
+
+👉 **正式白皮書文件：**  
+https://github.com/klineodyssey/kline-odyssey/blob/main/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md
+
+---
+
 ## 三、KLINE App Game 是什麼？
 
 **KLINE App Game** 不是娛樂遊戲，  
