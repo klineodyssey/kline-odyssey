@@ -16,8 +16,8 @@
 - 闡明 500 年 Epoch 並非鎖死，而是文明週期
 - 與鏈上合約 V7.5.2 完全對齊
 
-👉 **直達白皮書：**  
-[`/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md`](../KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md)
+👉 直達白皮書（官網直達）：
+[KGEN Whitepaper V7.5.2（點我開啟）](https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html)
 
 ---
 
