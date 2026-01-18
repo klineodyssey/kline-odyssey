@@ -70,11 +70,11 @@ KGEN（K-Line Genesis Energy Node）
 - 分潤、治理、建設的制度邏輯
 - 與鏈上合約 **V7.5.2** 完全對齊
 
-👉 **KGEN 白皮書直達：**  
-https://github.com/klineodyssey/kline-odyssey/tree/main/KGEN/whitepaper
+👉 KGEN 白皮書（官網直達）：
+https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/
 
-👉 **正式白皮書文件：**  
-https://github.com/klineodyssey/kline-odyssey/blob/main/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md
+👉 正式制度白皮書（V7.5.2）：
+https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html
 
 ---
 
