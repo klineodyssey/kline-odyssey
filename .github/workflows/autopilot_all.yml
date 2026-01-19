@@ -60,7 +60,14 @@ jobs:
           mkdir -p "${ENGINE_DIR}"
           mkdir -p "K線西遊記/kline-engine-public"
           mkdir -p "K線西遊記/tools"
-
+          
+      - name: Fix pipeline path (workaround duplicated path bug)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p "K線西遊記/kline-taifex/scripts/K線西遊記/kline-taifex/scripts"
+          cp -f "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py" \
+                "K線西遊記/kline-taifex/scripts/K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py" || true
       # ====== (B) 轉檔先跑：永遠不被 engine 擋住 ======
       - name: Convert RAW -> MASTER (TX + BTC)
         shell: bash
