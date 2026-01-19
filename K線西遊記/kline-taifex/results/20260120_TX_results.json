@@ -1,0 +1,18 @@
+{
+  "date": "20260120",
+  "market": "TX",
+  "session": "full",
+  "ohlc": { "open": 0, "high": 0, "low": 0, "close": 0, "volume": 0 },
+  "key_levels": [
+    { "name": "support", "price": 0 },
+    { "name": "resistance", "price": 0 }
+  ],
+  "bias": "range",
+  "signals": [
+    { "id": "S1", "name": "tug_of_war", "value": 0, "note": "" }
+  ],
+  "events": [
+    { "event": "HEARTBEAT", "level": 0, "timestamp": "2026-01-20T00:00:00+08:00" }
+  ],
+  "notes_zh": ""
+}
