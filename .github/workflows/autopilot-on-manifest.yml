@@ -1,0 +1,17 @@
+name: Autopilot on Manifest
+on:
+  push:
+    paths:
+      - "K線西遊記/autopilot/inbox/*.json"
+
+jobs:
+  log-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Show manifest list
+        run: ls -l "K線西遊記/autopilot/inbox"
+      - name: Print latest manifest
+        run: |
+          ls -t "K線西遊記/autopilot/inbox" | head -n 1 | xargs -I {} cat "K線西遊記/autopilot/inbox/{}"
