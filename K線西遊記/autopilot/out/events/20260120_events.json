@@ -1,0 +1,13 @@
+[
+  {
+    "event": "GATE_HIT",
+    "level": 511111,
+    "timestamp": "2026-01-20T00:00:00+08:00",
+    "action": "render_gate_video",
+    "assets": {
+      "subtitle_srt": "K線西遊記/autopilot/out/subtitles_en/20260120_subs_en.srt",
+      "voice_audio": "external://you_will_generate_voice",
+      "bgm": "template://low_freq_heartbeat"
+    }
+  }
+]
