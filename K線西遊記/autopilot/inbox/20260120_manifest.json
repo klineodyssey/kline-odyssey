@@ -1,0 +1,13 @@
+{
+  "date": "20260120",
+  "market": "TX",
+  "source_results": "K線西遊記/kline-taifex/results/20260120_TX_results.json",
+  "language": { "post": "zh", "voice": "en", "subs": "en" },
+  "brand_outro": "PrimeForge 以母機之名，開啟金融生命。花果山台灣・信念不滅・市場無界。Where the Market Becomes the Myth.—— 樂天帝",
+  "outputs": {
+    "post_zh": "K線西遊記/autopilot/out/posts_zh/20260120_post_zh.md",
+    "voice_en": "K線西遊記/autopilot/out/voice_en/20260120_voice_en.txt",
+    "subs_en": "K線西遊記/autopilot/out/subtitles_en/20260120_subs_en.srt",
+    "events": "K線西遊記/autopilot/out/events/20260120_events.json"
+  }
+}
