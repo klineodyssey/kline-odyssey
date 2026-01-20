@@ -1,68 +1,81 @@
-🌐 官網／白皮書  
-https://klineodyssey.github.io/
+# K線西遊記｜創作 × 資料 × 引擎（主世界線）
 
-# KLINE ODYSSEY
-
-<div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;">
-  <iframe
-    src="https://www.youtube.com/embed/95LccqD_MsE?playsinline=1"
-    title="KLINE ODYSSEY"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen
-    style="position:absolute;top:0;left:0;width:100%;height:100%;">
-  </iframe>
-</div>
-
-## 花果山台灣・質量宇宙官方白皮書（Genesis Edition）
+本資料夾為《K線西遊記／花果山台灣》之「創作與系統」母資料夾，包含：
+- 原始資料（行情輸入）
+- 轉檔結果（台指近全.xlsx 等）
+- 每日創作輸出（貼文／英文語音／字幕）
+- 系統接口（事件 JSON、連結清單）
+- 封存（歷史版本）
 
 ---
 
-### 一個以市場為引力場的修行宇宙  
-**AI × 金融 × 神話敘事 × 遊戲化治理**
+## 1) 公開與未公開邊界（重要）
+
+### 公開（可下載／可檢視）
+- 轉檔結果：台指近全.xlsx（全歷史彙整）
+- 轉檔引擎：資料清洗與格式化流程（用於可重現與透明化）
+- 每日創作輸出：貼文、英文語音稿、字幕（依 daily 結構）
+
+### 未公開（保留）
+- 運算引擎（策略／模型／權重／判斷規則）
+- 核心參數與內部決策流程
+
+> 資料透明、流程透明、判斷保留。
 
 ---
 
-## 宇宙宣言（Manifesto）
+## 2) 資料夾結構（固定）
 
-在花果山台灣的世界裡：
-
-- **KGEN = 質量**
-- **價格 = 位置**
-- **市場 = 引力場**
-- **存活 = 勝利條件**
-
-這裡沒有暴富承諾，  
-沒有拉盤口號，  
-只有一個不可違反的物理法則：
-
-> **沒有質量，就沒有位置。**
+/K線西遊記/
+- README.md（本文件）
+- raw/（原始輸入資料）
+- converter/（轉檔引擎與說明）
+- data/（轉檔後資料成果，例如台指近全.xlsx）
+- engine/（運算引擎：未公開）
+- out/（運算結果輸出：可視狀況公開「結果」不公開「方法」）
+- daily/（每日創作輸出：貼文／英文語音／字幕）
+- assets/（封面圖、劇情圖、素材）
+- archive/（歷史封存）
 
 ---
 
-## 官方入口（唯一有效）
+## 3) daily 檔名與規範（固定）
 
-- 🌐 官網／白皮書  
-  https://klineodyssey.github.io/
-- 📦 GitHub  
-  https://github.com/klineodyssey
-- 📲 LINE 官方帳號  
-  https://lin.ee/b8X18F7
-- 📡 Telegram  
-  https://t.me/klineodyssey
-- 📺 YouTube  
-  https://www.youtube.com/@klineodyssey
-- 🎵 TikTok  
-  https://www.tiktok.com/@klineodyssey
-- 📘 Facebook  
-  https://www.facebook.com/le.tian.di.2025
-- 🐦 X（Twitter）  
-  https://x.com/klineodyssey
+### 每日資料夾
+/K線西遊記/daily/YYYY-MM-DD/
+
+### 每日三件套（固定）
+- YYYY-MM-DD_post.md
+- YYYY-MM-DD_voice.txt
+- YYYY-MM-DD_subtitle.srt
+
+> 規則：貼文中文；語音稿與字幕為英文版（必要時可雙語，但以英文為主）。
 
 ---
+
+## 4) 平台輸出原則（固定）
+
+- 影片：以 YouTube / TikTok 連結為主（不直接把影片檔放 GitHub）
+- GitHub：存「原始稿、字幕、語音文字、封面圖、事件 JSON、連結清單」
+- 官網（Repo 根目錄 README.md）：只放官網入口與核心影片嵌入，不放 daily 細節
+
+---
+
+## 5) 事件接口（預留）
+
+/K線西遊記/events/
+- gate_hit.json
+- burn.json
+- reward.json
+- heartbeat_daily.json
+
+事件只描述「發生什麼」，不暴露運算細節。
+
+---
+
+## 6) 品牌固定尾章（唯一有效）
 
 PrimeForge 以母機之名，開啟金融生命。  
 花果山台灣・信念不滅・市場無界。  
 Where the Market Becomes the Myth.  
-
 ⌖ —— 樂天帝
