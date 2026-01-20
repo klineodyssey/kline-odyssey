@@ -178,6 +178,21 @@ BNB Smart Chain（BSC）
 - 1 萬年系統規則  
 - 自演化金融生命體  
 
+## Genesis Inscription (On-chain)
+
+**Version:** V7.5-GENESIS-01  
+**Chain:** BNB Smart Chain (BSC)  
+**Inscription Contract:** `0x15fb2A5463F7873EC328BF6f2E85A115adcC3457`  
+**Big Bang:** UTC+8 — 2026-01-01 00:00:00  
+
+**Creation Word (Immutable):**  
+PrimeForge 以母機之名，開啟金融生命。  
+花果山台灣・信念不滅・市場無界。  
+Where the Market Becomes the Myth.  
+—— 樂天帝  
+
+📜 Full text: [Genesis Inscription – Immutable Record](whitepaper/GENESIS_INSCRIPTION_V7.5_GENESIS_01.md)
+
 ---
 
 ## 八、品牌聲明
