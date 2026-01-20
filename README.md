@@ -117,29 +117,27 @@ https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_Gal
 
 ## 五、鏈上資訊（唯一正確）
 
-### Network  
+## Network
 BNB Smart Chain（BSC）
 
-### Token Contract（唯一）  
-https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+## Token Contract（唯一）
+[https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be](https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
 
-### 官方交易（PancakeSwap）  
-https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+## 官方交易（PancakeSwap）
+[https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be](https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be)
 
-### LP Pair（KGEN / WBNB）  
-https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+## LP Pair（KGEN / WBNB）
+[https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2](https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2)
 
-### 🔒 LP 鎖倉（PinkLock）
+## 🔒 LP 鎖倉（PinkLock）
+- 鎖倉標的：KGEN / WBNB LP
+- 鎖倉期限：至 2027 / 01 / 01（UTC）
+- 鎖倉狀態：鎖倉中
 
-- 鎖倉標的：KGEN / WBNB LP  
-- 鎖倉期限：至 **2027 / 01 / 01（UTC）**  
-- 鎖倉狀態：鎖倉中  
+👉 官方查驗頁：
+[https://www.pinksale.finance/pinklock/bsc/record/1427003](https://www.pinksale.finance/pinklock/bsc/record/1427003)
 
-👉 官方查驗頁：  
-https://www.pinksale.finance/pinklock/bsc/record/1427003
-
-⚠️ 請只認合約地址，不認名稱  
-⚠️ 鎖倉不代表價格或報酬保證  
+⚠️ 請只認合約地址，不認名稱
 
 ---
 
@@ -191,22 +189,14 @@ https://www.pinksale.finance/pinklock/bsc/record/1427003
 
 ## 九、官方入口（唯一有效）
 
-- 官網／白皮書  
-  https://klineodyssey.github.io/kline-odyssey/
-- GitHub  
-  https://github.com/klineodyssey/kline-odyssey
-- LINE 官方帳號  
-  https://lin.ee/b8X18F7
-- Telegram  
-  https://t.me/klineodyssey
-- YouTube  
-  https://www.youtube.com/@klineodyssey
-- TikTok  
-  https://www.tiktok.com/@klineodyssey
-- Facebook  
-  https://www.facebook.com/le.tian.di.2025
-- X（Twitter）  
-  https://x.com/klineodyssey
+- [官網／白皮書](https://klineodyssey.github.io/kline-odyssey/)
+- [GitHub](https://github.com/klineodyssey/kline-odyssey)
+- [LINE 官方帳號](https://lin.ee/b8X18F7)
+- [Telegram](https://t.me/klineodyssey)
+- [YouTube](https://www.youtube.com/@klineodyssey)
+- [TikTok](https://www.tiktok.com/@klineodyssey)
+- [Facebook](https://www.facebook.com/le.tian.di.2025)
+- [X（Twitter）](https://x.com/klineodyssey)
 
 ---
 
