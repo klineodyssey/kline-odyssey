@@ -1,3 +1,5 @@
+> Last archived: 2026-01-20
+
 # Archive（歷史文件封存區）
 
 本資料夾為《KLINE ODYSSEY / 花果山台灣》專案之  
