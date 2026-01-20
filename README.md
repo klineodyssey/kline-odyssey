@@ -2,16 +2,10 @@
 https://klineodyssey.github.io/kline-odyssey/
 
 # KLINE ODYSSEY  
-
-## ▶ Genesis Launch Video（Official）
-
-▶️ YouTube Shorts  
-https://youtube.com/shorts/prduCt2Pr-g
-
 <div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;">
   <iframe
-    src="https://www.youtube.com/embed/prduCt2Pr-g?playsinline=1"
-    title="KLINE ODYSSEY Genesis"
+    src="https://www.youtube.com/embed/akp4K_uzJ28"
+    title="KLINE ODYSSEY"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen
