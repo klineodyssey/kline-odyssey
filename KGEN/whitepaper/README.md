@@ -42,5 +42,14 @@
 
 ---
 
+## 🫀 KGEN 宇宙生命體徵（Vitals）
+
+- 宇宙體溫（CTI）
+- 宇宙心跳（CHR）
+- 宇宙血壓（CBP）
+
+👉 規範文件（SOP）  
+[KGEN_Cosmic_Vitals_SOP_V1_0](whitepaper/SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md)
+
 🌕 花果山台灣・信念不滅・市場無界  
 Where the Market Becomes the Myth.
