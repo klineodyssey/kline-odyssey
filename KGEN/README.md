@@ -96,3 +96,12 @@ https://lin.ee/b8X18F7
 
 Telegram 官方通道：
 https://t.me/klineodyssey
+
+## 🫀 KGEN 宇宙生命體徵（Vitals）
+
+- 宇宙體溫（CTI）
+- 宇宙心跳（CHR）
+- 宇宙血壓（CBP）
+
+👉 規範文件（SOP）  
+[KGEN_Cosmic_Vitals_SOP_V1_0](whitepaper/SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md)
