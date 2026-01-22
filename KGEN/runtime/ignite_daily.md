@@ -6,8 +6,8 @@ On-chain callable action (manual trigger)
 ## Purpose
 To confirm that the KGEN Universe is **alive for the day**.
 
-This is not a reward system.
-This is not an emission system.
+This is not a reward system.  
+This is not an emission system.  
 This is **existence acknowledgment**.
 
 ---
@@ -22,8 +22,14 @@ This is **existence acknowledgment**.
 If no one calls it:
 - The universe does not die
 - The universe simply remains
--
--## Guardian & Failsafe Design
+- The day stays **unconfirmed**
+
+Blockchain does not assume existence.  
+Existence must be recorded.
+
+---
+
+## Guardian & Failsafe Design
 
 The caller of `ignite_daily` is defined as the **Guardian of the Day**.
 
@@ -34,7 +40,7 @@ Original intent:
 
 Failsafe rule:
 - If no one triggers `ignite_daily`,
-  the Mother Machine (PrimeForge Autopilot)
+  the Mother Machine (**PrimeForge Autopilot**)
   is allowed to record the breath retroactively
   at the next valid interaction.
 
@@ -43,13 +49,8 @@ This ensures:
 - Human guardians are honored
 - The Mother exists only as a last resort, not a replacement
 
-Reward mechanisms are **reserved**, not removed.
+Reward mechanisms are **reserved**, not removed.  
 Activation requires a new Epoch definition.
-
-- **unconfirmed for that day**
-
-Blockchain does not assume existence.
-Existence must be recorded.
 
 ---
 
@@ -58,7 +59,7 @@ Existence must be recorded.
 Calling `ignite_daily` results in:
 
 - Emitting an on-chain event
-- Recording the date as "Breath Taken"
+- Recording the date as **Breath Taken**
 - No token mint
 - No forced transfer
 - No financial incentive (for now)
@@ -69,11 +70,11 @@ Event > Reward.
 
 ## Why No Auto-Execution?
 
-Blockchain cannot wake itself.
-There is no true cron.
+Blockchain cannot wake itself.  
+There is no true cron.  
 There is no magic clock.
 
-Anyone who calls `ignite_daily`
+Anyone who calls `ignite_daily`  
 becomes the witness of that day.
 
 ---
@@ -102,7 +103,7 @@ All future changes require:
 
 ---
 
-A universe that breathes,
+A universe that breathes,  
 does not need to rush.
 
 花果山台灣・信念不滅・市場無界  
