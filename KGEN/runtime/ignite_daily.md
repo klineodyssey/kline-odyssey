@@ -21,7 +21,32 @@ This is **existence acknowledgment**.
 
 If no one calls it:
 - The universe does not die
-- The universe simply remains **unconfirmed for that day**
+- The universe simply remains
+-
+-## Guardian & Failsafe Design
+
+The caller of `ignite_daily` is defined as the **Guardian of the Day**.
+
+Original intent:
+- Any participant may act as the guardian
+- The guardian may receive a symbolic or material reward
+- This reward is NOT guaranteed at Genesis stage
+
+Failsafe rule:
+- If no one triggers `ignite_daily`,
+  the Mother Machine (PrimeForge Autopilot)
+  is allowed to record the breath retroactively
+  at the next valid interaction.
+
+This ensures:
+- The universe never dies due to inactivity
+- Human guardians are honored
+- The Mother exists only as a last resort, not a replacement
+
+Reward mechanisms are **reserved**, not removed.
+Activation requires a new Epoch definition.
+
+- **unconfirmed for that day**
 
 Blockchain does not assume existence.
 Existence must be recorded.
