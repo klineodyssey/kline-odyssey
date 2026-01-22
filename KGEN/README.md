@@ -105,3 +105,25 @@ https://t.me/klineodyssey
 
 👉 規範文件（SOP）  
 [KGEN_Cosmic_Vitals_SOP_V1_0](whitepaper/SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md)
+
+## Reward Eligibility (Genesis Rule)
+
+Holding KGEN grants **eligibility**, not a guaranteed payout.
+
+### Tier A — Guardian Tier (≥ 500 KGEN)
+- Eligible for: Daily Breath (ignite_daily) caller micro-reward
+- Notes:
+  - Reward is symbolic and may be enabled/disabled by Epoch rule
+  - If Mother Machine performs a failsafe breath record,
+    it records the event but does not claim the guardian reward
+
+### Tier B — Seat Tier (≥ 5000 KGEN)
+- Eligible for: Periodic Rent Share (Galactic Bank / RewardPool distribution)
+- Notes:
+  - Distribution requires:
+    (1) available distributable balance
+    (2) Epoch rule enabled
+    (3) a settlement trigger (manual or keeper-triggered)
+
+No tier implies profit guarantee.
+Eligibility is immutable; activation is epoch-based.
