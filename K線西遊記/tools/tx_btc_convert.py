@@ -39,8 +39,8 @@ def run_tx_pipeline(tx_pipeline: Path, tx_raw_dir: Path, tx_master: Path) -> Non
         return
 
     cmd = [sys.executable, str(tx_pipeline)] + [str(p) for p in csvs] + ["--master", str(tx_master)]
-    print("[tx_btc_convert] run TX pipeline:", " ".join(cmd))
-    subprocess.check_call(cmd, cwd=str(tx_pipeline.parent))
+print("[tx_btc_convert] run TX pipeline:", " ".join(cmd))
+subprocess.check_call(cmd)
 
 
 def _read_any(path: Path) -> pd.DataFrame:
