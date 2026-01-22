@@ -218,6 +218,11 @@ Where the Market Becomes the Myth.
 - 🐦 [X（Twitter）](https://x.com/klineodyssey)
 ---
 
+## Investor Documents
+
+- 📘 KGEN × Kline App｜Investor Whitepaper (v1.0)  
+  https://klineodyssey.github.io/kline-odyssey/archive/investor/KGEN_KlineApp_InvestorWhitepaper_v1.0
+
 ⌖  
 PrimeForge 以母機之名，開啟金融生命。  
 花果山台灣・信念不滅・市場無界。  
