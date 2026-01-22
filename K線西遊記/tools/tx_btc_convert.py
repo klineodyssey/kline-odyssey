@@ -29,18 +29,23 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 
-def run_tx_pipeline(tx_pipeline: Path, tx_raw_dir: Path, tx_master: Path) -> None:
-    tx_raw_dir.mkdir(parents=True, exist_ok=True)
-    tx_master.parent.mkdir(parents=True, exist_ok=True)
-
+# ===== TX pipeline =====
+if tx_pipeline and tx_pipeline.exists():
     csvs = sorted(tx_raw_dir.glob("*.csv"))
     if not csvs:
-        print("[tx_btc_convert] TX raw empty -> skip TX pipeline")
-        return
+        print("[tx_btc_convert] no TX raw csv found, skip TX")
+    else:
+        cmd = (
+            [sys.executable, str(tx_pipeline)]
+            + [str(p) for p in csvs]
+            + ["--master", str(tx_master)]
+        )
+        print("[tx_btc_convert] run TX pipeline:")
+        print(" ", " ".join(cmd))
 
-    cmd = [sys.executable, str(tx_pipeline)] + [str(p) for p in csvs] + ["--master", str(tx_master)]
-print("[tx_btc_convert] run TX pipeline:", " ".join(cmd))
-subprocess.check_call(cmd)
+        subprocess.check_call(cmd)
+else:
+    print("[tx_btc_convert] TX pipeline not found, skip TX")
 
 
 def _read_any(path: Path) -> pd.DataFrame:
