@@ -38,7 +38,6 @@ def _strip_bom_py(engine_dir: Path) -> None:
 
 
 def _find_entry(engine_dir: Path) -> Path:
-    # 優先順序：你現在 engine.zip 裡最常見的入口
     patterns = [
         "K線西遊記_Tplus1_pm500_step1_多空運算*.py",
         "launcher.py",
@@ -53,10 +52,6 @@ def _find_entry(engine_dir: Path) -> Path:
 
 
 def _run_once(cmd: List[str], cwd: Path) -> Tuple[int, str]:
-    """
-    回傳 (returncode, tag)
-    tag 用來在 log 上辨識是哪一套參數組合。
-    """
     print("[run_public] cmd:", " ".join(cmd))
     proc = subprocess.run(
         cmd,
@@ -74,17 +69,13 @@ def _run_once(cmd: List[str], cwd: Path) -> Tuple[int, str]:
 def _candidate_cmds(entry: Path, master: Path, outdir: Path, model_path: Optional[Path]) -> List[List[str]]:
     py = sys.executable
     base = [py, str(entry)]
-
-    # 常見參數組合：依你引擎演進版本做「兼容嘗試」
     candidates: List[List[str]] = []
 
-    # A) 你目前假設的（最常見）
     cmd = base + ["--input", str(master), "--outdir", str(outdir)]
     if model_path:
         cmd += ["--model", str(model_path)]
     candidates.append(cmd)
 
-    # B) 有些版本叫 master/output
     cmd = base + ["--master", str(master), "--outdir", str(outdir)]
     if model_path:
         cmd += ["--model", str(model_path)]
@@ -95,22 +86,18 @@ def _candidate_cmds(entry: Path, master: Path, outdir: Path, model_path: Optiona
         cmd += ["--model", str(model_path)]
     candidates.append(cmd)
 
-    # C) 有些版本叫 input/output
     cmd = base + ["--input", str(master), "--output", str(outdir)]
     if model_path:
         cmd += ["--model", str(model_path)]
     candidates.append(cmd)
 
-    # D) 有些版本用短參數
     cmd = base + ["-i", str(master), "-o", str(outdir)]
     if model_path:
         cmd += ["--model", str(model_path)]
     candidates.append(cmd)
 
-    # E) 最後保底：不帶參數（讓引擎用自己的預設路徑）
     candidates.append(base)
 
-    # 去重（避免重複跑）
     uniq: List[List[str]] = []
     seen = set()
     for c in candidates:
@@ -152,7 +139,6 @@ def main() -> None:
     else:
         print("[run_public] model(from secret)=<none> (ENGINE_MODEL_B64 empty)")
 
-    # 依序嘗試多套參數，成功就停
     cmds = _candidate_cmds(entry, master, outdir, model_path)
     last_rc = 1
 
