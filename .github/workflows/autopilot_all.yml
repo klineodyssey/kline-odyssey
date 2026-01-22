@@ -1,0 +1,185 @@
+name: KLINE Autopilot (TX + BTC) - Stable
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/raw/**"
+      - "K線西遊記/kline-btc/raw/**"
+      - "K線西遊記/kline-taifex/scripts/**"
+      - "K線西遊記/tools/**"
+      - "K線西遊記/kline-engine-public/**"
+      - ".github/workflows/autopilot_all.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+
+    env:
+      TX_RAW_DIR: "K線西遊記/kline-taifex/raw"
+      TX_PIPELINE: "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
+      TX_MASTER: "K線西遊記/kline-taifex/master/台指近全.xlsx"
+
+      BTC_RAW_DIR: "K線西遊記/kline-btc/raw"
+      BTC_MASTER: "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx"
+
+      OUTDIR_TX: "K線西遊記/kline-engine-public/output/tx"
+      OUTDIR_BTC: "K線西遊記/kline-engine-public/output/btc"
+
+      ENGINE_DIR: "engine_bin"
+
+    steps:
+      - name: Checkout (on branch, not detached)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        shell: bash
+        run: |
+          set -e
+          python -m pip install -U pip
+          pip install pandas openpyxl numpy matplotlib requests
+
+      - name: Auto mkdir required folders
+        shell: bash
+        run: |
+          set -e
+          mkdir -p "${TX_RAW_DIR}" "$(dirname "${TX_MASTER}")"
+          mkdir -p "${BTC_RAW_DIR}" "$(dirname "${BTC_MASTER}")"
+          mkdir -p "${OUTDIR_TX}" "${OUTDIR_BTC}"
+          mkdir -p "${ENGINE_DIR}"
+          mkdir -p "K線西遊記/kline-engine-public"
+          mkdir -p "K線西遊記/tools"
+
+      # ====== (B) 轉檔先跑：永遠不被 engine 擋住 ======
+      - name: Convert RAW -> MASTER (TX + BTC)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "K線西遊記/tools/tx_btc_convert.py" \
+            --tx_raw_dir "${TX_RAW_DIR}" \
+            --tx_pipeline "${TX_PIPELINE}" \
+            --tx_master "${TX_MASTER}" \
+            --btc_raw_dir "${BTC_RAW_DIR}" \
+            --btc_master "${BTC_MASTER}"
+
+      # ====== (A) 引擎：可失敗，但不能擋轉檔 ======
+      - name: Restore engine.zip from Secret (ENGINE_ZIP_B64)
+        id: restore_engine
+        continue-on-error: true
+        shell: bash
+        env:
+          ENGINE_ZIP_B64: ${{ secrets.ENGINE_ZIP_B64 }}
+        run: |
+          set -euo pipefail
+
+          # default: engine not ready
+          echo "engine_ok=0" >> "$GITHUB_OUTPUT"
+
+          if [ -z "${ENGINE_ZIP_B64:-}" ]; then
+            echo "::warning::Missing secret ENGINE_ZIP_B64. Engine will be skipped; Convert/Commit still runs."
+            exit 0
+          fi
+
+          python - <<'PY'
+          import os, base64, pathlib, sys
+          b64 = os.environ["ENGINE_ZIP_B64"].strip()
+          out = pathlib.Path("engine_bin/engine.zip")
+          try:
+            out.write_bytes(base64.b64decode(b64))
+          except Exception as e:
+            print("base64 decode failed:", e)
+            sys.exit(2)
+          print("engine.zip bytes:", out.stat().st_size)
+          PY
+
+          cd "${ENGINE_DIR}"
+
+          # validate zip first
+          unzip -t engine.zip >/dev/null
+
+          unzip -o engine.zip >/dev/null
+          echo "=== engine dir tree (top 3 levels) ==="
+          find . -maxdepth 3 -type f | sed 's|^\./||' || true
+
+          # mark OK
+          echo "engine_ok=1" >> "$GITHUB_OUTPUT"
+
+      - name: Strip UTF-8 BOM in engine python files
+        if: steps.restore_engine.outputs.engine_ok == '1'
+        shell: bash
+        run: |
+          set -e
+          python - <<'PY'
+          from pathlib import Path
+          root = Path("engine_bin")
+          bom = b"\xef\xbb\xbf"
+          fixed = 0
+          for f in root.rglob("*.py"):
+              b = f.read_bytes()
+              if b.startswith(bom):
+                  f.write_bytes(b[len(bom):])
+                  fixed += 1
+          print("BOM fixed files:", fixed)
+          PY
+
+      # ====== (C) 運算：只有 engine_ok 才跑 ======
+      - name: Run Engine (TX)
+        if: steps.restore_engine.outputs.engine_ok == '1'
+        shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+        run: |
+          set -euo pipefail
+          test -f "${TX_MASTER}" || (echo "TX master not found: ${TX_MASTER}" && exit 1)
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "${TX_MASTER}" \
+            --engine_dir "${ENGINE_DIR}" \
+            --outdir "${OUTDIR_TX}"
+
+      - name: Run Engine (BTC)
+        if: steps.restore_engine.outputs.engine_ok == '1'
+        shell: bash
+        env:
+          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+        run: |
+          set -euo pipefail
+          test -f "${BTC_MASTER}" || (echo "BTC master not found: ${BTC_MASTER}" && exit 1)
+          python "K線西遊記/kline-engine-public/run_public.py" \
+            --master "${BTC_MASTER}" \
+            --engine_dir "${ENGINE_DIR}" \
+            --outdir "${OUTDIR_BTC}"
+
+      # ====== (D) Commit 回推：master 永遠推；output 有就推 ======
+      - name: Commit & Push (master + output)
+        shell: bash
+        run: |
+          set -e
+          git config user.name "kline-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          # always add masters
+          git add "${TX_MASTER}" "${BTC_MASTER}" || true
+
+          # add outputs only if exists
+          if [ -d "K線西遊記/kline-engine-public/output" ]; then
+            git add "K線西遊記/kline-engine-public/output" || true
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+
+          git commit -m "autopilot: update master + outputs"
+          git push
