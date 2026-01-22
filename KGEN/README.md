@@ -127,3 +127,31 @@ Holding KGEN grants **eligibility**, not a guaranteed payout.
 
 No tier implies profit guarantee.
 Eligibility is immutable; activation is epoch-based.
+
+## Monthly Settlement & Reward Schedule
+
+### Settlement Date
+- **Monthly Settlement Date:** 5th of each month (UTC+8)
+- The settlement date defines the accounting cutoff,
+  not a guaranteed payout date.
+
+### Eligibility Tiers
+- **Guardian Tier (≥ 500 KGEN)**
+  - Eligible for symbolic participation rewards
+  - May receive micro-rewards if Epoch rules enable distribution
+
+- **Seat Tier (≥ 5000 KGEN)**
+  - Eligible for Galactic Bank rent-share distribution
+  - Represents long-term residence and governance weight
+
+### Distribution Conditions
+Rewards may be distributed only if all conditions are met:
+1. Distributable balance exists in RewardPool / Bank
+2. Current Epoch enables reward distribution
+3. A settlement trigger is executed (human or Mother Machine failsafe)
+
+If conditions are not met, settlement is recorded with **zero distribution**.
+
+### Important Notice
+Holding KGEN grants **eligibility**, not income guarantees.
+All rewards follow on-chain records, Epoch rules, and irreversible logs.
