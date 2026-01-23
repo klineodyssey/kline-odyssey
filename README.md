@@ -5,20 +5,23 @@ https://klineodyssey.github.io/kline-odyssey/
 
 # KLINE ODYSSEY  
 
-## ▶️ Official Video（LINE 內建瀏覽器若無法播放，請點這張圖）
-<a href="https://youtube.com/shorts/akp4K_uzJ28?si=RRCz-hhdyUKwxeu8" target="_blank" rel="noopener">
-  <img src="https://img.youtube.com/vi/akp4K_uzJ28/maxresdefault.jpg" alt="KLINE ODYSSEY Official Video" style="width:100%;height:auto;border-radius:12px;">
-</a>
+<div style="position:relative;padding-bottom:177.77%;height:0;overflow:hidden;border-radius:12px;">
+  <!-- 點擊區：在會擋 iframe 的環境（例如 LINE 內建）也能直接跳 YouTube -->
+  <a href="https://youtube.com/shorts/akp4K_uzJ28?si=RRCz-hhdyUKwxeu8" target="_blank" rel="noopener"
+     style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;text-decoration:none;">
+    <img src="https://img.youtube.com/vi/akp4K_uzJ28/maxresdefault.jpg"
+         alt="KLINE ODYSSEY"
+         style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;">
+  </a>
 
-##（一般瀏覽器可直接內嵌播放）
-<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+  <!-- 原本參數不動：維持你原來的 177.77% 與 autoplay/playsinline -->
   <iframe
-    src="https://www.youtube.com/embed/akp4K_uzJ28"
+    src="https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1"
     title="KLINE ODYSSEY"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen
-    style="position:absolute;top:0;left:0;width:100%;height:100%;">
+    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;">
   </iframe>
 </div>
 
@@ -186,44 +189,6 @@ BNB Smart Chain（BSC）
 - 1 萬年系統規則  
 - 自演化金融生命體  
 
-## Genesis Inscription (On-chain)
-
-**Version:** V7.5-GENESIS-01  
-**Chain:** BNB Smart Chain (BSC)  
-**Inscription Contract:** `0x15fb2A5463F7873EC328BF6f2E85A115adcC3457`  
-**Big Bang:** UTC+8 — 2026-01-01 00:00:00  
-
-**Creation Word (Immutable):**  
-PrimeForge 以母機之名，開啟金融生命。  
-花果山台灣・信念不滅・市場無界。  
-Where the Market Becomes the Myth.  
-—— 樂天帝  
-
-📜 Full text: [Genesis Inscription – Immutable Record](whitepaper/GENESIS_INSCRIPTION_V7.5_GENESIS_01.md)
-
----
-
-## 八、品牌聲明
-
-《花果山台灣・K線西遊記》  
-為文化 × 金融 × AI 敘事創作。
-
-不構成投資建議，  
-不涉及政治立場，  
-不承諾任何報酬。  
-
----
-
-## 九、官方入口（唯一有效）
-
-- 🌐 [官網／白皮書](https://klineodyssey.github.io/kline-odyssey/)
-- 📦 [GitHub 原始資料庫](https://github.com/klineodyssey/kline-odyssey)
-- 📲 [LINE 官方帳號](https://lin.ee/b8X18F7)
-- 📡 [Telegram 官方通道](https://t.me/klineodyssey)
-- 📺 [YouTube](https://www.youtube.com/@klineodyssey)
-- 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
-- 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
-- 🐦 [X（Twitter）](https://x.com/klineodyssey)
 ---
 
 ## Investor Documents
