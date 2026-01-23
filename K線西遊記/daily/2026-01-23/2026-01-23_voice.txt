@@ -1,78 +1,113 @@
-This video is not market analysis.
-It is not investment advice.
-And it is not telling you to buy any token.
+This is not about asking merchants to accept crypto.
 
-This is an explanation of a system.
+It is about helping you keep more customers,
+at a lower cost,
+without changing your existing payment flow.
 
-KGEN is not designed to replace fiat currency.
-Merchants do not need to change their payment flow.
-Customers still pay with cash, credit cards, or LINE Pay.
-Invoices stay the same.
-Accounting stays the same.
+KGEN is not designed to replace New Taiwan Dollars.
+It exists as a reward and settlement layer.
 
-The system works in the background.
+Here is how it works in practice.
 
-KGEN functions as a reward and settlement layer.
+Customers continue to pay with cash,
+credit cards,
+or LINE Pay.
 
-For merchants, nothing changes.
-For customers, rewards become something that can be used,
-transferred,
-and upgraded inside the system.
+Merchants continue issuing invoices
+and reporting taxes as usual.
 
-Why would merchants consider this?
+Behind the scenes,
+the system converts part of the reward value
+into KGEN
+and delivers it to customers.
 
-Traditional card fees range from two to three percent.
-KGEN on-chain transaction tax is only zero point three percent.
+For merchants,
+nothing changes.
 
-As the system evolves,
-KGEN can be used to offset fees,
-as a marketing reward,
-and as a mechanism to retain returning customers.
+For customers,
+rewards become something usable,
+transferable,
+and upgradable.
+
+Why would merchants use this system?
+
+Traditional card fees are around two to three percent.
+
+KGEN’s on-chain transaction fee is only zero point three percent.
+
+In the future,
+KGEN can be used to offset processing fees,
+serve as marketing rewards,
+and retain returning customers.
 
 Merchants using KGEN
-can be listed on the Flower Fruit Mountain and Mars merchant map,
+are listed on the Flower Fruit Mountain and Mars merchant map,
 gain exposure through the KLINE App and community,
-and become certified ecosystem nodes.
+and become officially recognized ecosystem nodes.
 
-What we will not do is very clear.
+What we will not do is equally important.
+
 We do not require KGEN for invoicing.
-We do not touch existing cash flow.
-And we do not ask merchants to take token price risk.
+We do not touch your existing cash flow.
+And we do not ask merchants to bear token price risk.
 
-KGEN exists because it occupies a position
-that cannot be removed from the system.
+In one sentence:
 
-As long as the system operates,
-KGEN is used.
+You continue running your business as usual.
+We help you keep customers
+at a lower cost.
 
-Data processing consumes KGEN.
+Now, why is KGEN worth serious attention?
+
+KGEN does not exist because it might go up in price.
+
+It exists because it occupies a position
+that cannot be replaced.
+
+Its value does not come from imagination.
+
+It comes from being embedded
+in a system that continuously generates behavior,
+transactions,
+and content.
+
+As long as the system operates:
+
+Data processing uses KGEN.
 Game evolution consumes KGEN.
-Transactions return KGEN.
-Content and IP revenue can flow back into KGEN.
+Transactions generate KGEN flow.
+IP monetization can route back into KGEN.
 
-This is not an option.
-It is structural.
+KGEN is not an option.
+It is part of the structure.
 
-Every transaction generates a zero point three percent system tax.
-Zero point one percent is permanently burned.
-Zero point one percent flows into the system bank.
+Every transaction produces a zero point three percent system fee.
+
+Zero point one percent is burned permanently.
+Zero point one percent goes into the system bank.
 Zero point zero five percent supports liquidity.
-And zero point zero five percent enters the reward pool.
+Zero point zero five percent flows into the reward pool.
 
-If the system is used,
-cash flow exists.
+As long as people use the system,
+cash flow appears.
 
-Only five hundred seats exist on the Five-Finger Mountain.
-Entry requires locking five thousand KGEN.
+There is also a threshold for those who stay.
+
+Five hundred seats only.
+Locking five thousand KGEN.
 Unlocking means exit.
-There are no gifts.
+No giveaways.
 No airdrops.
 No guarantees.
 
 This is not a reward.
-It is proof that you are willing to bear the time cost of the system.
 
-The real question is not whether KGEN will rise.
+It is proof of whether
+you are willing to bear the cost of time.
+
+So the real question is not:
+Will KGEN go up?
+
 The real question is:
 If this system runs for ten years,
 will you be inside it?
@@ -85,6 +120,6 @@ Flower Fruit Mountain Taiwan.
 Faith unbroken.
 Markets without boundaries.
 
-Where the Market Becomes the Myth.
+Where the market becomes the myth.
 
 Rakuten Emperor.
