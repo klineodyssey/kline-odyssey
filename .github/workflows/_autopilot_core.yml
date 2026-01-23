@@ -1,0 +1,50 @@
+name: _autopilot_core
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autopilot-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps (if any)
+        run: |
+          python -m pip install --upgrade pip
+          # 如果你有 requirements.txt 就打開這行
+          # pip install -r requirements.txt
+
+      - name: Run Autopilot Pipeline
+        run: |
+          # 這裡放你原本 autopilot 真正執行的命令
+          # 例如：
+          # python K線西遊記/kline-taifex/scripts/啟動西遊記運算.py
+          echo "TODO: run pipeline here"
+
+      - name: Commit & Push (if changed)
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "klineodyssey"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "autopilot: update outputs"
+          git push
