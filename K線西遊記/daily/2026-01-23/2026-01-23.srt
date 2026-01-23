@@ -1,87 +1,62 @@
 1
-00:00:00,000 --> 00:00:04,000
-This is not about whether something will go up or not.
+00:00:00,000 --> 00:00:06,000
+This is not about asking merchants to accept crypto.
 
 2
-00:00:04,000 --> 00:00:09,000
-It has never been about buying or selling.
+00:00:06,000 --> 00:00:13,000
+It is about helping you keep more customers,
+at a lower cost.
 
 3
-00:00:09,000 --> 00:00:14,000
-It is about whether you chose to stand in the right position early enough.
+00:00:13,000 --> 00:00:21,000
+KGEN is not designed to replace New Taiwan Dollars.
+It exists as a reward and settlement layer.
 
 4
-00:00:14,000 --> 00:00:20,000
-Most people enter the market asking one question.
+00:00:21,000 --> 00:00:33,000
+Customers pay as usual.
+Merchants operate as usual.
+The system handles rewards in the background.
 
 5
-00:00:20,000 --> 00:00:24,000
-Will this go up?
+00:00:33,000 --> 00:00:45,000
+For merchants, nothing changes.
+For customers, rewards become usable and transferable.
 
 6
-00:00:24,000 --> 00:00:31,000
-But those who stay long enough ask a different one.
+00:00:45,000 --> 00:01:00,000
+Traditional card fees are two to three percent.
+KGEN’s system fee is only zero point three percent.
 
 7
-00:00:31,000 --> 00:00:36,000
-Will this system continue to exist?
+00:01:00,000 --> 00:01:16,000
+KGEN is not a token for speculation.
+It is embedded in system operations.
 
 8
-00:00:36,000 --> 00:00:42,000
-KGEN does not exist to replace fiat money.
+00:01:16,000 --> 00:01:32,000
+Data, games, transactions, and IP
+all route through KGEN.
 
 9
-00:00:42,000 --> 00:00:49,000
-It is not designed to change how merchants receive payments.
+00:01:32,000 --> 00:01:52,000
+Every transaction produces system flow.
+Burn, liquidity, banking, and rewards.
 
 10
-00:00:49,000 --> 00:00:55,000
-Customers still pay with cash, credit cards, or digital wallets.
+00:01:52,000 --> 00:02:10,000
+Five hundred seats.
+Five thousand KGEN locked.
+Unlock means exit.
 
 11
-00:00:55,000 --> 00:01:02,000
-Merchants still issue invoices and handle accounting as usual.
+00:02:10,000 --> 00:02:25,000
+This is not about whether KGEN goes up.
+It is about whether you are inside.
 
 12
-00:01:02,000 --> 00:01:09,000
-What changes happens behind the scenes.
-
-13
-00:01:09,000 --> 00:01:15,000
-KGEN functions as a reward and settlement layer.
-
-14
-00:01:15,000 --> 00:01:22,000
-Every transaction generates real system flow.
-
-15
-00:01:22,000 --> 00:01:31,000
-Zero point three percent system fee is applied.
-
-16
-00:01:31,000 --> 00:01:40,000
-This is not speculation. This is structural cash flow.
-
-17
-00:01:40,000 --> 00:01:47,000
-The system will continue to run.
-
-18
-00:01:47,000 --> 00:01:54,000
-The only difference is whether you are inside it.
-
-19
-00:01:54,000 --> 00:02:02,000
+00:02:25,000 --> 00:02:40,000
 PrimeForge 以母機之名，開啟金融生命。
-
-20
-00:02:02,000 --> 00:02:10,000
 花果山台灣・信念不滅・市場無界。
-
-21
-00:02:10,000 --> 00:02:16,000
 Where the Market Becomes the Myth.
-
-22
-00:02:16,000 --> 00:02:20,000
 —— 樂天帝 ⌖
