@@ -34,3 +34,13 @@ KGEN（K-Line Genesis Energy Node）
 - 其他舊版文件
 
 （保留在本資料夾，供參考）
+
+---
+
+## 🧾 投資人文件（說明用，非制度依據）
+
+以下文件僅用於投資人理解系統結構，
+**不構成制度規則的一部分**：
+
+- 📄 Kline App × KGEN｜募資白皮書（50M 正式版）
+  /whitepaper/KlineApp_KGEN_募資白皮書_5000萬正式版.md
