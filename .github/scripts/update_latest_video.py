@@ -3,7 +3,7 @@ import re
 import feedparser
 
 # 你的 YouTube RSS（免登入、免 cookie）
-RSS_URL = "https://www.youtube.com/feeds/videos.xml?user=klineodyssey"
+RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UC2UE0sZXbKnvR-N0Ew6Z6NA"
 
 README_PATH = "README.md"
 
