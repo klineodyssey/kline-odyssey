@@ -195,23 +195,14 @@ BNB Smart Chain（BSC）
 
 - 📘 [KGEN × Kline App｜Investor Whitepaper (v1.0)](https://klineodyssey.github.io/kline-odyssey/archive/investor/KGEN_KlineApp_InvestorWhitepaper_v1.0)
 
-<!-- LATEST_VIDEO:START -->
----
+<!-- LATEST_VIDEO_START -->
+🔥 Latest Video｜最新發布
 
-## 🔥 Latest Video｜最新發布
+▶ 最新影片（YouTube）
+👉 https://youtu.be/akp4K_uzJ28
 
-<div>
-  <a href="https://www.youtube.com/watch?v=akp4K_uzJ28" target="_blank" rel="noopener">
-    ▶ 最新影片（YouTube）｜點我開啟
-  </a>
-</div>
-
-<div>
-  https://www.youtube.com/watch?v=akp4K_uzJ28
-</div>
-
-> 本區由 GitHub Actions 自動更新  
-> 主影片（首頁 iframe）維持固定世界觀主軸影片
+（本區由 GitHub Actions 自動更新，會依 @klineodyssey 頻道最新上傳影片替換）
+<!-- LATEST_VIDEO_END -->
 
 ⌖  
 PrimeForge 以母機之名，開啟金融生命。  
