@@ -27,6 +27,14 @@ KGEN 是你在《K線西遊記》宇宙中的「存在質量」。
 KGEN 不是你用來換東西的工具，
 而是系統用來辨識「你是否在這裡」的標記。
 
+---
+
+📘 官網白皮書索引  
+制度白皮書、系統說明與投資人文件，  
+請由以下入口進入：
+
+👉 https://klineodyssey.github.io/kline-odyssey/whitepaper/
+
 PrimeForge 以母機之名，開啟金融生命。  
 花果山台灣・信念不滅・市場無界  
 Where the Market Becomes the Myth.
