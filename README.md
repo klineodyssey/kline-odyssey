@@ -223,12 +223,16 @@ Where the Market Becomes the Myth.
 - 📘 [KGEN × Kline App｜Investor Whitepaper (v1.0)](https://klineodyssey.github.io/kline-odyssey/archive/investor/KGEN_KlineApp_InvestorWhitepaper_v1.0)
 
 <!-- LATEST_VIDEO_START -->
-🔥 Latest Video｜最新發布
+---
+
+## 🔥 Latest Video｜最新發布
 
 ▶ 最新影片（YouTube）
-👉 https://youtu.be/akp4K_uzJ28
+https://www.youtube.com/@klineodyssey
 
-（本區由 GitHub Actions 自動更新，會依 @klineodyssey 頻道最新上傳影片替換）
+（本區由 GitHub Actions 自動更新  
+首頁主影片 iframe 保持固定世界觀主軸，不更動）
+
 <!-- LATEST_VIDEO_END -->
 
 ⌖  
