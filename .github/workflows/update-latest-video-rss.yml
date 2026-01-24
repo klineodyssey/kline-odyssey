@@ -1,0 +1,35 @@
+name: Update Latest Video (RSS)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"   # 每小時一次（UTC）
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install feedparser
+
+      - name: Update README latest video block
+        run: python .github/scripts/update_latest_video.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "chore: auto-update latest YouTube video (RSS)" || echo "No changes to commit"
+          git push
