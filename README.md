@@ -225,13 +225,21 @@ Where the Market Becomes the Myth.
 <!-- LATEST_VIDEO_START -->
 ---
 
-## 🔥 Latest Video｜最新發布
+## 🔥 Latest Video | 最新發布
 
-▶ 最新影片（YouTube）
-https://www.youtube.com/@klineodyssey
+<div>
+  <a href="https://www.youtube.com/@klineodyssey" target="_blank" rel="noopener">
+    ▶ 最新影片（YouTube）｜點我開啟
+  </a>
+</div>
 
-（本區由 GitHub Actions 自動更新  
-首頁主影片 iframe 保持固定世界觀主軸，不更動）
+<div style="margin-top:6px;">
+  <a href="https://youtu.be/7sDgPOoMG48" target="_blank" rel="noopener">
+    👉 本集直達（短連結）｜點我開啟
+  </a>
+</div>
+
+（本區由 GitHub Actions 自動更新；首頁主影片 iframe 保持固定世界觀主軸，不更動）
 
 <!-- LATEST_VIDEO_END -->
 
