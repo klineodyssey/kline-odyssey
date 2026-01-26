@@ -1,29 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-K線西遊記/tools/tx_btc_convert.py
-TX + BTC 轉檔總控（Stable FINAL｜貼上就能跑）
+TX + BTC 轉檔總控（Stable+++）
+檔案：K線西遊記/tools/tx_btc_convert.py
 
-✅ 目標（你要的規則）
-- TX：
-  - 讀：K線西遊記/kline-taifex/raw/*.csv
-  - 呼叫你既有的 TX pipeline
-  - 更新：K線西遊記/kline-taifex/master/台指近全.xlsx
-  - TX pipeline 找不到 / raw 沒檔 → 只印訊息，略過，不讓 workflow 掛掉
+【做什麼】
+- TX：把 K線西遊記/kline-taifex/raw/*.csv 交給既有 pipeline（V8.8.2）處理，更新：
+  K線西遊記/kline-taifex/master/台指近全.xlsx
+- BTC：優先吃 raw（你手機手動抓的 6cols xlsx/csv）
+  例如：BTCUSDT_1d_1000_6cols_20260126.xlsx
+  raw 沒檔 → 自動從 Binance 公開 API 抓 BTCUSDT 1d（limit=1000）
+  API 抓失敗 → BTC 直接略過（不擋 TX）
 
-- BTC：
-  - BTC raw 路徑：K線西遊記/kline-btc/raw/
-  - BTC master 固定檔名：K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx（檔名固定，但內容可累加不限 1000 根）
-  - 規則：優先吃 raw（你手機手動抓的 6cols xlsx/csv，例如 BTCUSDT_1d_1000_6cols_20260126.xlsx）
-  - raw 沒檔 → 自動抓 Binance BTCUSDT 1d（limit=1000）
-  - Binance 抓不到（例如 451）→ 只印訊息，略過 BTC，不影響 TX
+【輸出】
+- BTC master 固定寫入（檔名固定、內容不限 1000 根）：
+  K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx
 
-✅ 用法（Actions / 本機都一致）
-python K線西遊記/tools/tx_btc_convert.py \
-  --tx_raw_dir K線西遊記/kline-taifex/raw \
-  --tx_pipeline K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py \
-  --tx_master K線西遊記/kline-taifex/master/台指近全.xlsx \
-  --btc_raw_dir K線西遊記/kline-btc/raw \
-  --btc_master K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx
+【關聯到】
+- workflow：.github/workflows/autopilot_all.yml
+- TX pipeline：K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py
+
+【注意】
+- 這支只做「資料準備」，不做引擎運算。
 """
 
 from __future__ import annotations
@@ -37,32 +34,25 @@ from typing import Optional
 import pandas as pd
 
 
-# ---------------- TX ----------------
+# ===== TX pipeline =====
 def run_tx_pipeline(tx_pipeline: Path, tx_raw_dir: Path, tx_master: Path) -> None:
-    try:
-        tx_raw_dir.mkdir(parents=True, exist_ok=True)
-        tx_master.parent.mkdir(parents=True, exist_ok=True)
+    tx_raw_dir.mkdir(parents=True, exist_ok=True)
+    tx_master.parent.mkdir(parents=True, exist_ok=True)
 
-        csvs = sorted(tx_raw_dir.glob("*.csv"))
-        if not csvs:
-            print("[tx_btc_convert] TX raw empty -> skip TX")
-            return
+    csvs = sorted(tx_raw_dir.glob("*.csv"))
+    if not csvs:
+        print("[tx_btc_convert] TX raw empty -> skip TX")
+        return
 
-        if not tx_pipeline.exists():
-            print(f"[tx_btc_convert] TX pipeline not found: {tx_pipeline} -> skip TX")
-            return
+    if not tx_pipeline.exists():
+        raise FileNotFoundError(f"TX pipeline not found: {tx_pipeline}")
 
-        cmd = [sys.executable, str(tx_pipeline)] + [str(p) for p in csvs] + ["--master", str(tx_master)]
-        print("[tx_btc_convert] run TX pipeline:")
-        print(" ", " ".join(cmd))
-        subprocess.check_call(cmd)
-
-    except Exception as e:
-        # TX 任何錯誤都不讓整條掛掉（Stable）
-        print(f"[tx_btc_convert] TX failed -> skip. err={e}")
+    cmd = [sys.executable, str(tx_pipeline)] + [str(p) for p in csvs] + ["--master", str(tx_master)]
+    print("[tx_btc_convert] run TX pipeline:", " ".join(cmd))
+    subprocess.check_call(cmd)
 
 
-# ---------------- BTC helpers ----------------
+# ===== BTC helpers =====
 def _read_any(path: Path) -> pd.DataFrame:
     if path.suffix.lower() in (".xlsx", ".xls"):
         return pd.read_excel(path)
@@ -71,11 +61,11 @@ def _read_any(path: Path) -> pd.DataFrame:
 
 def _normalize_btc(df: pd.DataFrame) -> pd.DataFrame:
     """
-    輸出固定 6 欄：date, open, high, low, close, volume
+    標準化 BTC 欄位：date, open, high, low, close, volume
     支援：
-    - 你手機 6cols 檔（date/open/high/low/close/volume）
-    - Binance klines（open_time/open/high/low/close/volume）
-    - 其他自備（date/日期 + OHLCV）
+    - 6cols：date/open/high/low/close/volume
+    - binance klines：open_time/open/high/low/close/volume
+    - 一般資料：date/日期 + OHLCV
     """
     cols = {str(c).lower(): c for c in df.columns}
 
@@ -87,15 +77,10 @@ def _normalize_btc(df: pd.DataFrame) -> pd.DataFrame:
             out[k] = pd.to_numeric(out[cols[k]], errors="coerce")
         return out[["date", "open", "high", "low", "close", "volume"]].dropna(subset=["date"])
 
-    # (2) open_time（Binance klines）
+    # (2) binance klines open_time
     if "open_time" in cols and all(k in cols for k in ["open", "high", "low", "close", "volume"]):
         out = df.copy()
-        # open_time 可能是 ms 或字串時間
-        s = df[cols["open_time"]]
-        if pd.api.types.is_numeric_dtype(s):
-            out["date"] = pd.to_datetime(s, unit="ms", utc=True, errors="coerce").dt.strftime("%Y-%m-%d")
-        else:
-            out["date"] = pd.to_datetime(s, errors="coerce").dt.strftime("%Y-%m-%d")
+        out["date"] = pd.to_datetime(out[cols["open_time"]], errors="coerce").dt.strftime("%Y-%m-%d")
         for k in ["open", "high", "low", "close", "volume"]:
             out[k] = pd.to_numeric(out[cols[k]], errors="coerce")
         return out[["date", "open", "high", "low", "close", "volume"]].dropna(subset=["date"])
@@ -129,34 +114,6 @@ def _normalize_btc(df: pd.DataFrame) -> pd.DataFrame:
     return out[["date", "open", "high", "low", "close", "volume"]].dropna(subset=["date"])
 
 
-def _pick_latest_raw_file(btc_raw_dir: Path) -> Optional[Path]:
-    """
-    取最新 raw 檔：
-    - 支援你手動檔名：BTCUSDT_1d_1000_6cols_YYYYMMDD.xlsx / csv
-    - 若檔名有 YYYYMMDD → 以日期優先
-    - 否則以 mtime
-    """
-    files: list[Path] = []
-    for ext in ("*.xlsx", "*.xls", "*.csv"):
-        files += list(btc_raw_dir.glob(ext))
-    if not files:
-        return None
-
-    import re
-
-    def key(p: Path):
-        m = re.search(r"(\d{8})", p.name)
-        ymd = int(m.group(1)) if m else 0
-        try:
-            mt = p.stat().st_mtime
-        except Exception:
-            mt = 0
-        return (ymd, mt, p.name)
-
-    files.sort(key=key)
-    return files[-1]
-
-
 def _fetch_binance_1d_1000(symbol: str = "BTCUSDT", limit: int = 1000) -> pd.DataFrame:
     import requests
 
@@ -171,58 +128,69 @@ def _fetch_binance_1d_1000(symbol: str = "BTCUSDT", limit: int = 1000) -> pd.Dat
         "taker_buy_base", "taker_buy_quote", "ignore"
     ]
     df = pd.DataFrame(data, columns=cols)
-    # normalize 會處理 open_time
+    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
+    for c in ["open", "high", "low", "close", "volume"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
     return df
 
 
+def _pick_latest_raw_file(btc_raw_dir: Path) -> Optional[Path]:
+    files = []
+    for ext in ("*.xlsx", "*.xls", "*.csv"):
+        files += list(btc_raw_dir.glob(ext))
+    if not files:
+        return None
+
+    # 以檔名 YYYYMMDD 優先，其次 mtime
+    def key(p: Path):
+        import re
+        m = re.search(r"(\d{8})", p.name)
+        ymd = int(m.group(1)) if m else 0
+        mt = p.stat().st_mtime if p.exists() else 0
+        return (ymd, mt, p.name)
+
+    files.sort(key=key)
+    return files[-1]
+
+
 def update_btc_master(btc_raw_dir: Path, btc_master: Path) -> None:
-    try:
-        btc_raw_dir.mkdir(parents=True, exist_ok=True)
-        btc_master.parent.mkdir(parents=True, exist_ok=True)
+    btc_raw_dir.mkdir(parents=True, exist_ok=True)
+    btc_master.parent.mkdir(parents=True, exist_ok=True)
 
-        df_new: Optional[pd.DataFrame] = None
+    raw = _pick_latest_raw_file(btc_raw_dir)
+    df_new: Optional[pd.DataFrame] = None
 
-        # 1) 先吃 raw
-        raw = _pick_latest_raw_file(btc_raw_dir)
-        if raw is not None:
-            print(f"[tx_btc_convert] BTC raw detected: {raw.name}")
-            df_new = _normalize_btc(_read_any(raw))
-        else:
-            # 2) raw 沒檔 → 抓 Binance
-            try:
-                print("[tx_btc_convert] BTC raw empty -> fetch Binance BTCUSDT 1d (limit=1000)")
-                df_api = _fetch_binance_1d_1000("BTCUSDT", 1000)
-                df_new = _normalize_btc(df_api)
-            except Exception as e:
-                print(f"[tx_btc_convert] Binance fetch failed -> skip BTC. err={e}")
-                return
-
-        if df_new is None or df_new.empty:
-            print("[tx_btc_convert] BTC new data empty -> skip BTC")
+    if raw is not None:
+        print(f"[tx_btc_convert] BTC raw detected: {raw.name}")
+        df_new = _normalize_btc(_read_any(raw))
+    else:
+        try:
+            print("[tx_btc_convert] BTC raw empty -> fetch Binance BTCUSDT 1d (limit=1000)")
+            df_api = _fetch_binance_1d_1000(symbol="BTCUSDT", limit=1000)
+            df_new = _normalize_btc(df_api)
+        except Exception as e:
+            print(f"[tx_btc_convert] Binance fetch failed -> skip BTC. err={e}")
             return
 
-        # 3) 讀舊 master（沒有也沒關係）
-        if btc_master.exists():
-            try:
-                df_old = _normalize_btc(pd.read_excel(btc_master))
-            except Exception:
-                df_old = pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume"])
-        else:
+    if df_new is None or df_new.empty:
+        print("[tx_btc_convert] BTC new data empty -> skip BTC")
+        return
+
+    if btc_master.exists():
+        try:
+            df_old = _normalize_btc(pd.read_excel(btc_master))
+        except Exception:
             df_old = pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume"])
+    else:
+        df_old = pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume"])
 
-        # 4) 合併：累加不限 1000 根、去重、排序
-        df = pd.concat([df_old, df_new], ignore_index=True)
-        df = df.dropna(subset=["date"]).drop_duplicates(subset=["date"], keep="last").sort_values("date")
+    df = pd.concat([df_old, df_new], ignore_index=True)
+    df = df.dropna(subset=["date"]).drop_duplicates(subset=["date"], keep="last").sort_values("date")
 
-        df.to_excel(btc_master, index=False)
-        print(f"[tx_btc_convert] BTC master updated: {btc_master} rows={len(df)}")
-
-    except Exception as e:
-        # BTC 任何錯誤都不讓整條掛掉（Stable）
-        print(f"[tx_btc_convert] BTC failed -> skip. err={e}")
+    df.to_excel(btc_master, index=False)
+    print(f"[tx_btc_convert] BTC master updated: {btc_master} rows={len(df)}")
 
 
-# ---------------- main ----------------
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tx_raw_dir", required=True)
@@ -238,4 +206,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-```0
