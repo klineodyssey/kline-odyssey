@@ -1,0 +1,62 @@
+{
+  "schema": "kline-autopilot-status-v1",
+  "generated_utc": "2026-01-26T08:46:32Z",
+  "overall": "ok",
+  "data_ok": true,
+  "engine": {
+    "enabled": false,
+    "ok": false
+  },
+  "update_flags": {
+    "tx_updated": "1",
+    "btc_updated": "1",
+    "btc_source": "auto"
+  },
+  "masters": {
+    "tx": {
+      "kind": "TX",
+      "path": "K線西遊記/kline-taifex/master/台指近全.xlsx",
+      "file": {
+        "exists": true,
+        "size_bytes": 553195,
+        "mtime_utc": "2026-01-26T08:46:30Z"
+      },
+      "rows": 6825,
+      "last_date": "1970-01-01",
+      "date_col": "交易日期"
+    },
+    "btc": {
+      "kind": "BTC",
+      "path": "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx",
+      "file": {
+        "exists": true,
+        "size_bytes": 50687,
+        "mtime_utc": "2026-01-26T08:46:30Z"
+      },
+      "rows": 1000,
+      "last_date": "2026-01-26",
+      "date_col": "date"
+    }
+  },
+  "outputs": {
+    "tx": {
+      "path": "K線西遊記/kline-engine-public/output/tx",
+      "exists": true,
+      "latest_file": null,
+      "latest_file_stat": null
+    },
+    "btc": {
+      "path": "K線西遊記/kline-engine-public/output/btc",
+      "exists": true,
+      "latest_file": null,
+      "latest_file_stat": null
+    }
+  },
+  "interfaces": {
+    "status_json": "K線西遊記/kline-engine-public/status/status.json",
+    "tx_master": "K線西遊記/kline-taifex/master/台指近全.xlsx",
+    "btc_master": "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx",
+    "outdir_tx": "K線西遊記/kline-engine-public/output/tx",
+    "outdir_btc": "K線西遊記/kline-engine-public/output/btc"
+  }
+}
