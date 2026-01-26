@@ -22,33 +22,32 @@ permalink: /whitepaper/Donation_Wallet.html
 
 ---
 
-## 一鍵捐款（EVM / MetaMask）
+## 💖 一鍵捐款（EVM / MetaMask）
 
 請使用 MetaMask（或任何 EVM 錢包）進行捐款：  
-- 支援：BNB Chain / Ethereum / Arbitrum / Base / Linea
+**支援鏈別：** BNB Chain / Ethereum / Arbitrum / Base / Linea  
 
-EVM 主地址：
-0xb73d6716005b37bec742d64482fa26033ee1a4e1
+**EVM 主地址（點擊可複製/查詢）：**  
+[0xb73d6716005b37bec742d64482fa26033ee1a4e1](https://bscscan.com/address/0xb73d6716005b37bec742d64482fa26033ee1a4e1)
 
-MetaMask 一鍵開啟（送出前請自行填金額並確認鏈別）：
-https://metamask.app.link/send/0xb73d6716005b37bec742d64482fa26033ee1a4e1
+**MetaMask 一鍵開啟（點擊直接跳轉）：**  
+[https://metamask.app.link/send/0xb73d6716005b37bec742d64482fa26033ee1a4e1](https://metamask.app.link/send/0xb73d6716005b37bec742d64482fa26033ee1a4e1)
 
 ---
 
-## 多鏈捐款地址（完整列表）
+## 🌍 多鏈捐款地址（完整列表｜皆可點）
 
-BNB Chain / Ethereum（EVM 同一地址）：
-0xb73d6716005b37bec742d64482fa26033ee1a4e1
+**BNB Chain / Ethereum（EVM 同一地址）：**  
+[0xb73d6716005b37bec742d64482fa26033ee1a4e1](https://bscscan.com/address/0xb73d6716005b37bec742d64482fa26033ee1a4e1)
 
-Bitcoin（BTC）：
-bc1qc5l582p2ckzqp9sftn30shcn6g0g5mxlzrpsnf
+**Bitcoin（BTC）：**  
+[bc1qc5l582p2ckzqp9sftn30shcn6g0g5mxlzrpsnf](https://www.blockchain.com/btc/address/bc1qc5l582p2ckzqp9sftn30shcn6g0g5mxlzrpsnf)
 
-Solana（SOL）：
-4TK4jqWu2xZTNLHiAQL7yv9Wm2fVSZvLmN7AoxXNBmqv
+**Solana（SOL）：**  
+[4TK4jqWu2xZTNLHiAQL7yv9Wm2fVSZvLmN7AoxXNBmqv](https://solscan.io/account/4TK4jqWu2xZTNLHiAQL7yv9Wm2fVSZvLmN7AoxXNBmqv)
 
-Tron（TRX / USDT）：
-TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk
-
+**Tron（TRX / USDT）：**  
+[TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk](https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk)
 ---
 
 PrimeForge 以母機之名，開啟金融生命。
