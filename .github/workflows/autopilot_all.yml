@@ -173,10 +173,10 @@ jobs:
             --tx_updated "1" \
             --btc_updated "1" \
             --btc_source "auto" \
-            --engine_enabled "${{ steps.restore_engine.outputs.engine_ok == '1' && '1' || '0' }}" \
+            --engine_enabled "${{ steps.restore_engine.outputs.engine_ok }}" \
             --engine_ok "${{ steps.restore_engine.outputs.engine_ok }}"
 
-      # ====== (D) Commit 回推：master 永遠推；output 有就推 ======
+      # ====== (D) Commit 回推：master 永遠推；output/status 有就推 ======
       - name: Commit & Push (master + output + status)
         shell: bash
         run: |
@@ -187,7 +187,7 @@ jobs:
           # always add masters
           git add "${TX_MASTER}" "${BTC_MASTER}" || true
 
-          # add outputs only if exists
+          # add outputs if exist
           if [ -d "K線西遊記/kline-engine-public/output" ]; then
             git add "K線西遊記/kline-engine-public/output" || true
           fi
