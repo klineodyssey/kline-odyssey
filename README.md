@@ -225,7 +225,12 @@ Where the Market Becomes the Myth.
 
 👉 **官方捐款入口（多鏈支援）**  
 https://klineodyssey.github.io/kline-odyssey/whitepaper/Donation_Wallet.html
-
+<a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/Donation_Wallet.html"
+   target="_blank" rel="noopener"
+   style="display:inline-block;padding:12px 18px;border-radius:12px;
+          font-weight:700;text-decoration:none;border:1px solid #111;">
+  💖 一鍵捐款｜支持花果山台灣
+</a>
 > 本捐款不構成投資行為，  
 > 不代表任何收益、分潤或權利承諾，  
 > 純屬公益與創作支持。
