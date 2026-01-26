@@ -44,3 +44,10 @@ KGEN（K-Line Genesis Energy Node）
 
 - 📄 Kline App × KGEN｜募資白皮書（50M 正式版）
   /whitepaper/KlineApp_KGEN_募資白皮書_5000萬正式版.md
+
+---
+
+💖 支持花果山台灣（公益 × 創作）  
+👉 https://klineodyssey.github.io/kline-odyssey/whitepaper/Donation_Wallet.html
+
+---
