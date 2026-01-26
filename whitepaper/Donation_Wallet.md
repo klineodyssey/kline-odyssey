@@ -1,3 +1,9 @@
+---
+layout: default
+title: Donation Wallet
+permalink: /whitepaper/Donation_Wallet.html
+---
+
 # 花果山台灣｜官方捐款地址（Donation Wallet）
 
 本頁為《花果山台灣》官方「公益 × 創作支持」捐款入口。  
