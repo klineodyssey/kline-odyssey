@@ -224,18 +224,44 @@ Where the Market Becomes the Myth.
 歡迎透過官方捐款入口，自由支持。
 
 👉 **官方捐款入口（多鏈支援）**  
-https://klineodyssey.github.io/kline-odyssey/whitepaper/Donation_Wallet.html
-<a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/Donation_Wallet.html"
-   target="_blank" rel="noopener"
-   style="display:inline-block;padding:12px 18px;border-radius:12px;
-          font-weight:700;text-decoration:none;border:1px solid #111;">
-  💖 一鍵捐款｜支持花果山台灣
-</a>
-> 本捐款不構成投資行為，  
-> 不代表任何收益、分潤或權利承諾，  
+https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
+
+<div style="margin:12px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/"
+     target="_blank" rel="noopener"
+     style="display:inline-block;padding:12px 18px;border-radius:12px;
+            font-weight:700;text-decoration:none;border:1px solid #111;">
+    💖 一鍵捐款｜支持花果山台灣
+  </a>
+</div>
+
+> 本捐款為自願性支持，  
+> 不構成投資行為，  
+> 不代表任何收益、分潤或制度權利，  
 > 純屬公益與創作支持。
 
----
+## 🤍 公益與社會支持（Foundation-style）
+
+《花果山台灣》同時承擔  
+**創作 × 公益 × 社會支持** 的長期責任。
+
+本計畫採用「基金化運作模式（Foundation-style）」，
+將部分資源用於下列公益方向（包含但不限於）：
+
+- 孤兒院與弱勢兒童支持  
+- 震災與重大社會事件緊急援助  
+- 教育、文化與創作型公益合作  
+- 非營利內容、紀錄片與公共議題創作  
+
+### 運作原則
+- 專款專用  
+- 公開揭露（鏈上交易可查）  
+- 不承諾任何回報  
+- 不構成投資或權益交換  
+
+⚠️ 本計畫目前尚未成立法定慈善基金會，  
+所有公益行動皆以 **專案制、公開透明** 方式執行，  
+未來若成立正式公益法人，將另行公告。
 
 ## 九、官方入口（唯一有效）
 
