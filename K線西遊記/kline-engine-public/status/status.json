@@ -1,6 +1,6 @@
 {
   "schema": "kline-autopilot-status-v1",
-  "generated_utc": "2026-01-26T08:48:15Z",
+  "generated_utc": "2026-01-26T09:14:16Z",
   "overall": "ok",
   "data_ok": true,
   "engine": {
@@ -19,7 +19,7 @@
       "file": {
         "exists": true,
         "size_bytes": 553195,
-        "mtime_utc": "2026-01-26T08:48:13Z"
+        "mtime_utc": "2026-01-26T09:14:14Z"
       },
       "rows": 6825,
       "last_date": "1970-01-01",
@@ -31,7 +31,7 @@
       "file": {
         "exists": true,
         "size_bytes": 50687,
-        "mtime_utc": "2026-01-26T08:48:14Z"
+        "mtime_utc": "2026-01-26T09:14:14Z"
       },
       "rows": 1000,
       "last_date": "2026-01-26",
