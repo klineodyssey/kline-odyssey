@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>BTC 日K（6欄）一鍵下載</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 16px; background: #0b1220; color: #e5e7eb; }
+    h1 { font-size: 20px; margin-bottom: 12px; text-align: center; }
+    .card { background: #020617; border-radius: 12px; padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    label { display: block; margin-top: 12px; margin-bottom: 4px; font-size: 14px; }
+    input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #1f2937;
+      background: #020617; color: #e5e7eb; font-size: 14px; }
+    button { margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 999px;
+      background: #22c55e; color: #020617; font-weight: 600; font-size: 16px; }
+    button:active { opacity: 0.85; }
+    .hint { margin-top: 10px; font-size: 12px; color: #9ca3af; line-height: 1.5; }
+    .status { margin-top: 8px; font-size: 13px; }
+    code { background:#0b1220; padding:2px 6px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <h1>BTCUSDT 日K（6欄）一鍵下載</h1>
+
+  <div class="card">
+    <div>
+      <label>商品（固定）</label>
+      <div>BTCUSDT（Binance 現貨）</div>
+    </div>
+
+    <div>
+      <label>時間週期（固定）</label>
+      <div>日K <code>1d</code>（避免 1h/15m 在你的系統內被「砍時間」造成資料撞日）</div>
+    </div>
+
+    <div>
+      <label for="limit">筆數 limit（1–1000）</label>
+      <input id="limit" type="number" min="1" max="1000" value="1000" />
+    </div>
+
+    <button onclick="downloadKlines()">下載 6欄 CSV</button>
+
+    <div class="hint">
+      下載格式完全符合你的轉檔器可吃的欄位：<code>date,open,high,low,close,volume</code><br/>
+      下載後請把 CSV 放到：<code>K線西遊記/kline-btc/raw/</code> 再 push，Autopilot 會自動更新 master。
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    const BINANCE_BASE = "https://api.binance.com";
+
+    function csvEscape(v) {
+      const s = String(v ?? "");
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+
+    function toCsvRow(arr) {
+      return arr.map(csvEscape).join(",");
+    }
+
+    function fmtDateUTC(ms) {
+      const d = new Date(ms);
+      const pad = (n) => String(n).padStart(2, "0");
+      return d.getUTCFullYear() + "-" +
+             pad(d.getUTCMonth() + 1) + "-" +
+             pad(d.getUTCDate());
+    }
+
+    async function downloadKlines() {
+      const statusEl = document.getElementById("status");
+      statusEl.textContent = "正在向 Binance 讀取日K資料…";
+
+      const symbol = "BTCUSDT";
+      const interval = "1d"; // 固定 1d
+      let limit = document.getElementById("limit").value || "1000";
+      limit = Math.max(1, Math.min(1000, parseInt(limit, 10) || 1000));
+
+      const url = BINANCE_BASE + "/api/v3/klines?symbol=" + symbol +
+                  "&interval=" + interval +
+                  "&limit=" + encodeURIComponent(limit);
+
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+
+        const data = await resp.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          statusEl.textContent = "沒有拿到任何 K 線資料。";
+          return;
+        }
+
+        // 轉成你系統要的 6 欄
+        const header = ["date","open","high","low","close","volume"];
+        const rows = data.map(k => ([
+          fmtDateUTC(k[0]), // open time -> YYYY-MM-DD (UTC)
+          k[1], k[2], k[3], k[4], k[5]
+        ]));
+
+        const csv = toCsvRow(header) + "\r\n" + rows.map(toCsvRow).join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const urlObj = URL.createObjectURL(blob);
+
+        const ymd = (new Date()).toISOString().slice(0,10).replace(/-/g,"");
+        const a = document.createElement("a");
+        a.href = urlObj;
+        a.download = symbol + "_" + interval + "_" + limit + "_6cols_" + ymd + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(urlObj);
+
+        statusEl.textContent = "已下載（6欄）" + data.length + " 筆：" + symbol + " / " + interval;
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "讀取失敗：" + err.message + "（若你在 GitHub Actions 會遇到 451，改用這個手動下載再丟 raw）";
+      }
+    }
+  </script>
+</body>
+</html>
