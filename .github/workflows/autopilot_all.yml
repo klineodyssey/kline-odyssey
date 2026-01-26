@@ -148,17 +148,20 @@ jobs:
             --outdir "${OUTDIR_TX}"
 
       - name: Run Engine (BTC)
-        if: steps.restore_engine.outputs.engine_ok == '1'
-        shell: bash
-        env:
-          ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
-        run: |
-          set -euo pipefail
-          test -f "${BTC_MASTER}" || (echo "BTC master not found: ${BTC_MASTER}" && exit 1)
-          python "K線西遊記/kline-engine-public/run_public.py" \
-            --master "${BTC_MASTER}" \
-            --engine_dir "${ENGINE_DIR}" \
-            --outdir "${OUTDIR_BTC}"
+  if: steps.restore_engine.outputs.engine_ok == '1'
+  shell: bash
+  env:
+    ENGINE_MODEL_B64: ${{ secrets.ENGINE_MODEL_B64 }}
+  run: |
+    set -euo pipefail
+    if [ ! -f "${BTC_MASTER}" ]; then
+      echo "BTC master not found -> skip BTC engine"
+      exit 0
+    fi
+    python "K線西遊記/kline-engine-public/run_public.py" \
+      --master "${BTC_MASTER}" \
+      --engine_dir "${ENGINE_DIR}" \
+      --outdir "${OUTDIR_BTC}"
 
       # ====== (D) Commit 回推：master 永遠推；output 有就推 ======
       - name: Commit & Push (master + output)
