@@ -284,8 +284,8 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 【不是每個專案，都值得募資】但有些結構，一旦錯過，就再也站不進去。#K線西遊記 #花果山台灣  #KGEN #WhereTheMarketBecomesTheMyth  
-👉 https://www.youtube.com/shorts/0BGr5Tdzjt4
+▶ #K線西遊記 #花果山台灣 #悟空新文 #KGEN #KlineAppGame#klineodyssey⌖ 花果山台灣・信念不滅・市場無界  
+👉 https://www.youtube.com/watch?v=hRP7V06i06M
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
