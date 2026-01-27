@@ -1,3 +1,15 @@
+<!-- Donate Button (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    💛 Donate
+  </a>
+</div>
+
 🌐 官網／白皮書  
 <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
 https://klineodyssey.github.io/kline-odyssey/
