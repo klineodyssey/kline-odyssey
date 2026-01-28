@@ -296,8 +296,8 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山台灣 #悟空新文 #KGEN #KlineAppGame#klineodyssey⌖ 花果山台灣・信念不滅・市場無界  
-👉 https://www.youtube.com/watch?v=hRP7V06i06M
+▶ 悟空新文｜KGEN 宇宙正在呼吸，不急著心跳。https://klineodyssey.github.io/kline-odyssey/  
+👉 https://www.youtube.com/watch?v=bwpAdJyPxz8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
