@@ -1,3 +1,7 @@
+https://klineodyssey.github.io/kline-odyssey/
+
+#K線西遊記 #花果山台灣 #悟空新文 #KGEN #KlineAppGame
+
 # KGEN 宇宙生命結構定義  
 ## 呼吸 × 心跳 × 時間節奏（官方版）
 
