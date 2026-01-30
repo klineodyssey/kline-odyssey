@@ -296,8 +296,8 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記#花果山台灣#宇宙呼西#宇宙心跳#宇宙生命  
-👉 https://www.youtube.com/watch?v=OUaiVAmUKUo
+▶ #k線西遊記 #花果山台灣 #悟空新文  
+👉 https://www.youtube.com/shorts/a-9JMU6uS6g
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
