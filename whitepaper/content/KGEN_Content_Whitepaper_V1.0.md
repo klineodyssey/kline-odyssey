@@ -156,3 +156,25 @@ Where the Market Becomes the Myth.
 
 #KGEN #KlineAppGame #klineodyssey  
 #AI修行 #市場宇宙 #自我演化金融生命體
+
+<!-- Floating Donate Button | Bottom Right -->
+<a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/"
+   target="_blank" rel="noopener"
+   style="
+     position: fixed;
+     right: 16px;
+     bottom: 16px;
+     z-index: 99999;
+     display: inline-flex;
+     align-items: center;
+     gap: 8px;
+     padding: 12px 16px;
+     border-radius: 999px;
+     font-weight: 900;
+     text-decoration: none;
+     border: 1px solid #111;
+     background: #ffffff;
+     color: #111;
+   ">
+  💛 Donate
+</a>
