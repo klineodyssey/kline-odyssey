@@ -84,8 +84,7 @@ TRON（TRC20）地址：
 `TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk`
 
 Tronscan 查驗：  
-https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk
-
+[https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk](https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk)
 ---
 
 ## ✅ 到帳確認（最簡單）
