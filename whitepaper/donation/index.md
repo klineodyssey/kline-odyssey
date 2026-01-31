@@ -15,14 +15,16 @@ permalink: /whitepaper/donation/
 ## ✅ 目前只開放：USDT（TRC20 / TRON）
 
 ---
-
 ## 🔥 一鍵捐款（開啟 Tronscan）
 
 <a href="https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk" target="_blank" rel="noopener"
 style="display:inline-block;padding:14px 18px;border-radius:12px;font-weight:800;text-decoration:none;border:1px solid #111;">
 💛 一鍵捐款｜USDT（TRC20）
-> 🔁 電子書未收到或需補領？請來信 **klineodyssey.io@gmail.com**（主旨：花果山台灣｜電子書補領）
 </a>
+
+<div style="margin-top:8px;">
+🔁 電子書未收到或需補領？請來信 <strong>klineodyssey.io@gmail.com</strong>（主旨：花果山台灣｜電子書補領）
+</div>
 
 <span style="display:inline-block;margin-left:10px;font-size:12px;opacity:.85;">
 （點擊後可直接查驗地址與收款紀錄）
