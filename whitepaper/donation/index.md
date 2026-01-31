@@ -83,8 +83,38 @@ KGEN 可作為《花果山台灣》內部使用之「創作內容兌換單位」
 TRON（TRC20）地址：  
 `TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk`
 
-Tronscan 查驗：  
-[https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk](https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk)
+<a class="btn-one-tap" href="https://tronscan.org/#/address/TTn9M7d4NS7csTHMieFz4B4RqrhenDa4tk" target="_blank" rel="noopener">
+  🔎 一鍵查驗（Tronscan）
+  <span class="btn-sub">查看捐款地址鏈上紀錄</span>
+</a>
+
+<style>
+  .btn-one-tap{
+    display:block;
+    width:100%;
+    max-width:520px;
+    margin:14px 0;
+    padding:14px 16px;
+    border:2px solid #111;
+    border-radius:14px;
+    text-decoration:none;
+    color:#111;
+    background:#fff;
+    font-weight:700;
+    line-height:1.2;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-one-tap:active{
+    transform:scale(0.99);
+  }
+  .btn-one-tap .btn-sub{
+    display:block;
+    margin-top:8px;
+    font-weight:500;
+    font-size:14px;
+    opacity:0.75;
+  }
+</style>
 ---
 
 ## ✅ 到帳確認（最簡單）
