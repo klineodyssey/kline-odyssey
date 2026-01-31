@@ -1,5 +1,3 @@
----
-
 ## 💛 Support & Donation｜支持創作與公益
 
 《花果山台灣 / KLINE ODYSSEY》是一項  
