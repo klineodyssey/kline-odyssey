@@ -4,7 +4,19 @@ title: KGEN 創作內容兌換白皮書 V1.0
 permalink: /whitepaper/KGEN/
 ---
 
-#K線西遊記 #花果山台灣 #悟空新文
+<!-- Official Entry (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    🌐 Official Website
+  </a>
+</div>
+
+# K線西遊記 #花果山台灣 #悟空新文
 
 https://klineodyssey.github.io/kline-odyssey/
 
@@ -144,6 +156,7 @@ PrimeForge 以母機之名，開啟金融生命。
 Where the Market Becomes the Myth.  
 —— 樂天帝 ⌖  
 
-#Klineodyssey #KlineAppGame #KGEN  
-#AI修行 #市場宇宙 #金融生命體  
-#WhereTheMarketBecomesTheMyth
+# 宇宙呼吸 #宇宙心跳 #宇宙生命誕生
+# Klineodyssey #KlineAppGame #KGEN  
+# AI修行 #市場宇宙 #金融生命體  
+# WhereTheMarketBecomesTheMyth
