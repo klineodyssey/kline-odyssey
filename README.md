@@ -291,16 +291,27 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 
 - 📘 [KGEN × Kline App｜Investor Whitepaper (v1.0)](https://klineodyssey.github.io/kline-odyssey/archive/investor/KGEN_KlineApp_InvestorWhitepaper_v1.0)
 
-<!-- LATEST_VIDEO_START -->
----
+<h2>🔥 Latest Video｜最新發布</h2>
 
-## 🔥 Latest Video｜最新發布
+<div style="max-width:420px;margin:12px 0;">
+  <iframe
+    width="100%"
+    height="740"
+    src="https://www.youtube.com/embed/a-9JMU6uS6g?autoplay=1&mute=1&playsinline=1&rel=0"
+    title="Latest Video"
+    frameborder="0"
+    allow="autoplay; encrypted-media; picture-in-picture"
+    allowfullscreen>
+  </iframe>
+</div>
 
-▶ #k線西遊記 #花果山台灣 #悟空新文  
-👉 https://www.youtube.com/shorts/a-9JMU6uS6g
+<p>
+  👉 若要有聲播放：請點一下影片取消靜音（手機/FB 內建瀏覽器規則會擋自動有聲）。
+</p>
 
-（本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
-<!-- LATEST_VIDEO_END -->
+<p>
+  🔗 直接開啟：<a href="https://www.youtube.com/shorts/a-9JMU6uS6g" target="_blank" rel="noopener">YouTube Shorts</a>
+</p>
 
 ⌖  
 PrimeForge 以母機之名，開啟金融生命。  
