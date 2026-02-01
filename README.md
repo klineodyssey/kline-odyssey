@@ -1,3 +1,111 @@
+<!-- =========================
+花果山台灣 × K線西遊記 × KLINE ODYSSEY
+Homepage Quick Actions (Production Block)
+貼到根目錄 README.md 或首頁 index.md 任何位置即可
+========================= -->
+
+<div style="margin:14px 0 6px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+
+  <a href="/kline-odyssey/whitepaper/KGEN/"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    ⚖️ KGEN 白皮書
+  </a>
+
+  <a href="/kline-odyssey/whitepaper/donation/"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    💛 捐款（USDT・TRC20）
+  </a>
+
+  <a href="/kline-odyssey/whitepaper/"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    📚 白皮書總覽
+  </a>
+
+  <a href="https://www.youtube.com/@klineodyssey"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    ▶️ 影片（YouTube）
+  </a>
+
+  <a href="https://www.facebook.com/profile.php?id=61583248810891"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🔥 粉絲專頁
+  </a>
+
+  <a href="https://lin.ee/b8X18F7"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    💬 LINE 官方
+  </a>
+
+  <a href="https://t.me/klineodyssey"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    📢 Telegram
+  </a>
+
+</div>
+
+<div style="margin:8px 0 16px 0; padding:14px; border:1px solid #111; border-radius:14px; background:#fff;">
+  <div style="font-weight:900; margin-bottom:8px;">🧭 股期資訊｜Market Watch</div>
+  <div style="line-height:1.75;">
+
+    <div style="font-weight:800; margin-top:6px;">市場時間（開門時間）</div>
+    <ul style="margin:6px 0 10px 18px;">
+      <li>台指早 / 電子期：08:45 - 13:45</li>
+      <li>台指全：15:00 - 隔日 05:00</li>
+      <li>上海期：09:00 - 16:35</li>
+      <li>日經期：07:45 - 14:15</li>
+      <li>滬深期：09:30 - 11:30 / 13:00 - 15:00</li>
+      <li>恒指期：09:15 - 12:00 / 13:00 - 16:30</li>
+      <li>德國期：冬令 15:00 - 隔日 05:00 / 夏令 14:00 - 隔日 04:00</li>
+      <li>歐元期 / S&P500 / 道瓊 / NASDAQ / 輕原油 / 黃金 / 白銀：冬令 07:00 - 隔日 06:00 / 夏令 06:00 - 隔日 05:00</li>
+    </ul>
+
+    <div style="font-weight:800; margin-top:6px;">宇宙回音源（公開新聞）</div>
+    <ul style="margin:6px 0 0 18px;">
+      <li><a href="https://udn.com/news/index" target="_blank" rel="noopener">聯合新聞網</a></li>
+      <li><a href="https://money.udn.com/money/cate/11111" target="_blank" rel="noopener">經濟日報</a></li>
+      <li><a href="https://fund.megabank.com.tw/ETFWeb/HTML/ETNEWS.DJHTM#TYPE=1&DATE=&PAGE=1" target="_blank" rel="noopener">國際新聞（DJ / ETF）</a></li>
+      <li><a href="https://www.wantgoo.com/" target="_blank" rel="noopener">WantGoo 玩股網</a></li>
+      <li><a href="https://news.ustv.com.tw/" target="_blank" rel="noopener">非凡新聞台</a></li>
+      <li><a href="https://fnc.ebc.net.tw/" target="_blank" rel="noopener">東森財經新聞</a></li>
+    </ul>
+  </div>
+</div>
+
+<div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+  <a href="/kline-odyssey/kline-taifex/"
+     style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🥋 台指期貨篇
+  </a>
+  <a href="/kline-odyssey/nasdaq/"
+     style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🌌 NASDAQ 篇
+  </a>
+  <a href="/kline-odyssey/bitcoin/"
+     style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🪐 比特幣篇
+  </a>
+  <a href="mailto:klineodyssey.io@gmail.com?subject=KGEN%20%E9%96%8B%E6%88%B6%20/%20%E5%90%88%E4%BD%9C%20%E8%A9%A2%E5%95%8F&body=%E8%AB%8B%E7%95%99%E4%B8%8B%E4%BB%A5%E4%B8%8B%E8%B3%87%E8%A8%8A%EF%BC%9A%0A%0A1)%E5%90%8D%E7%A8%B1%EF%BC%9A%0A2)%E6%83%B3%E5%81%9A%E4%BB%80%E9%BA%BC%EF%BC%88%E9%96%8B%E6%88%B6%2F%E6%A8%A1%E6%93%AC%E5%B8%B3%E8%99%9F%2F%E5%90%88%E4%BD%9C%EF%BC%89%EF%BC%9A%0A3)%E8%81%AF%E7%B5%A1%E6%96%B9%E5%BC%8F%EF%BC%9A%0A"
+     style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🧾 KGEN 開戶 / 模擬帳號（Email）
+  </a>
+</div>
+
+<div style="margin-top:10px;">
+  ⌖<br/>
+  PrimeForge 以母機之名，開啟金融生命。<br/>
+  花果山台灣・信念不滅・市場無界。<br/>
+  Where the Market Becomes the Myth.<br/>
+  —— 樂天帝 ⌖<br/>
+  <br/>
+  #Klineodyssey #KlineAppGame #KGEN<br/>
+  #AI修行 #市場宇宙 #金融生命體<br/>
+  #WhereTheMarketBecomesTheMyth
+</div>
+
 <!-- Donate Button (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   <a href="https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/"
