@@ -4,10 +4,11 @@ title: 五指山・悟空財神廟｜信念與紀律
 permalink: /wukong-temple/
 ---
 
-# 🐒 五指山・悟空財神廟
+# 🏯 五指山・悟空財神廟  
 ## Mount Five-Finger · Wukong Discipline Temple
 
-## 信念不是祈求，是紀律
+信念不是祈求，  
+**是紀律。**
 
 這不是一座求財的廟。  
 這是一個**提醒你不要亂來的地方**。
@@ -38,12 +39,15 @@ permalink: /wukong-temple/
 
 ---
 
-## 為什麼叫「財神廟」？
+## 為什麼在「五指山」？
 
 因為在這個宇宙裡：
 
 > **財不是錢，是存活。**  
 > **神不是給予，是約束。**
+
+五指山不是鎮壓，  
+是**讓人學會不亂動的地方**。
 
 悟空存在的意義，  
 不是讓你贏一次，  
@@ -51,27 +55,10 @@ permalink: /wukong-temple/
 
 ---
 
-## 這裡不接受任何形式的祈求
+## 🕯️ 光明燈（存在紀錄）
 
-如果你想求：  
-- 快錢  
-- 明牌  
-- 穩賺  
-
-你來錯地方了。
-
-如果你想要的是：  
-- 長期活著  
-- 知道什麼時候不該動  
-- 在市場裡留下名字  
-
-那你來對了。
-
----
-
-## 🏯 光明燈（存在紀錄）
-
-> 本區不涉及投資、報酬、交易或承諾。僅為存在紀錄與敘事入口。
+> 本頁不涉及投資、報酬、交易或承諾。  
+> 僅為存在紀錄與敘事入口。
 
 <!-- 🏯 悟空財神廟｜光明燈系統 -->
 <section id="wukong-temple" style="max-width:680px;margin:40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
@@ -82,54 +69,6 @@ permalink: /wukong-temple/
     市場不是求快錢的地方，<br>
     是給守得住心的人通行的世界。
   </p>
-
-<!-- 🧘 悟空紀律｜每日自省（自動） -->
-<section id="wukong-discipline"
-  style="max-width:680px;margin:32px auto;padding:20px;border:1px dashed #111;border-radius:16px;">
-
-  <h3>🧘 今日悟空自省</h3>
-  <p style="font-size:15px;opacity:.85;">
-    不給建議，不給方向，只提醒你守住自己。
-  </p>
-
-  <blockquote id="dailyDiscipline"
-    style="margin:20px 0;padding-left:14px;border-left:4px solid #111;font-size:18px;line-height:1.6;">
-    載入中…
-  </blockquote>
-
-  <p style="font-size:12px;opacity:.6;">
-    每日一句，依台灣時間自動輪替。
-  </p>
-
-</section>
-
-<script>
-/* ====== 悟空紀律｜每日一句（純前端） ====== */
-
-// 七日自省語句池（固定，不碰交易）
-const disciplineTexts = [
-  "今天不是一定要出手的一天。能忍住不動，本身就是力量。",
-  "我現在的動作，是策略，還是情緒？",
-  "界線不是用來突破的，是用來保命的。",
-  "退，不是輸。亂進，才會死。",
-  "我不需要向任何人證明。市場只認結果。",
-  "沒有空間的操作，結局一定很急。",
-  "今天能安全結束，就是最好的一天。"
-];
-
-// 取得台灣日期（避免 UTC 跨日）
-function getTWDayIndex() {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const tw  = new Date(utc + 8 * 3600000);
-  const day = tw.getFullYear() * 10000 + (tw.getMonth()+1) * 100 + tw.getDate();
-  return day % disciplineTexts.length;
-}
-
-// 顯示今日一句
-document.getElementById("dailyDiscipline").innerText =
-  disciplineTexts[getTWDayIndex()];
-</script>
 
   <hr>
 
@@ -165,7 +104,7 @@ document.getElementById("dailyDiscipline").innerText =
 <script>
 /* ====== 悟空財神廟核心邏輯 ====== */
 
-// 每日 key（用台灣時區避免 UTC 跨日誤差）
+// 台灣日期（避免 UTC 跨日）
 function twDateKey() {
   const now = new Date();
   const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -184,7 +123,7 @@ localStorage.setItem(todayKey, visits);
 document.getElementById("visitCount").innerText =
   "今日來訪之光：" + visits;
 
-// 點燈功能
+// 點燈
 function lightLamp() {
   const name = document.getElementById("lampName").value || "無名者";
   const msg  = document.getElementById("lampMessage").value || "（無言）";
@@ -195,14 +134,106 @@ function lightLamp() {
     time: new Date().toLocaleString()
   };
 
-  // 存在本地（不公開）
   const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
   logs.push(record);
   localStorage.setItem("wukong_lamps", JSON.stringify(logs));
 
   document.getElementById("lampResult").innerText =
     "已為「" + name + "」點亮光明燈。";
+
+  renderMyLamps();
 }
+</script>
+
+---
+
+## 🔍 我點過的燈（只看自己的）
+
+> 只顯示你這台裝置留下的紀錄，  
+> 不上傳、不公開、不連結錢包。
+
+<!-- 🔍 我點過的燈 -->
+<section id="my-lamps" style="max-width:680px;margin:20px auto 40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+    <button onclick="renderMyLamps()"
+      style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
+      重新載入
+    </button>
+
+    <button onclick="exportMyLamps()"
+      style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
+      匯出 JSON
+    </button>
+
+    <button onclick="clearMyLamps()"
+      style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
+      清空我的紀錄
+    </button>
+  </div>
+
+  <p id="myLampStats">載入中…</p>
+  <div id="myLampList"></div>
+  <p id="myLampEmpty" style="display:none;opacity:.7;">你尚未點過任何光明燈。</p>
+
+</section>
+
+<script>
+function escapeHTML(str) {
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function renderMyLamps() {
+  const list = document.getElementById("myLampList");
+  const stats = document.getElementById("myLampStats");
+  const empty = document.getElementById("myLampEmpty");
+
+  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
+  list.innerHTML = "";
+
+  if (!logs.length) {
+    stats.innerText = "共 0 盞光明燈（僅此裝置）";
+    empty.style.display = "block";
+    return;
+  }
+
+  empty.style.display = "none";
+  stats.innerText = "共 " + logs.length + " 盞光明燈（僅此裝置）";
+
+  logs.slice().reverse().forEach(r => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #111";
+    div.style.borderRadius = "14px";
+    div.style.padding = "12px";
+    div.style.marginBottom = "10px";
+
+    div.innerHTML = `
+      <strong>🕯️ ${escapeHTML(r.name || "無名者")}</strong><br>
+      <div style="margin:6px 0;">${escapeHTML(r.msg || "（無言）")}</div>
+      <div style="font-size:12px;opacity:.7;">${escapeHTML(r.time || "")}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function exportMyLamps() {
+  const data = localStorage.getItem("wukong_lamps") || "[]";
+  navigator.clipboard.writeText(data);
+  alert("已複製 JSON 到剪貼簿");
+}
+
+function clearMyLamps() {
+  if (!confirm("確定清空本裝置的所有紀錄？")) return;
+  localStorage.removeItem("wukong_lamps");
+  renderMyLamps();
+}
+
+renderMyLamps();
 </script>
 
 ---
@@ -212,4 +243,3 @@ PrimeForge 以母機之名，開啟金融生命。
 花果山台灣・信念不滅・市場無界。  
 Where the Market Becomes the Myth.  
 —— 樂天帝 ⌖
-```0
