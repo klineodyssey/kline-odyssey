@@ -83,6 +83,54 @@ permalink: /wukong-temple/
     是給守得住心的人通行的世界。
   </p>
 
+<!-- 🧘 悟空紀律｜每日自省（自動） -->
+<section id="wukong-discipline"
+  style="max-width:680px;margin:32px auto;padding:20px;border:1px dashed #111;border-radius:16px;">
+
+  <h3>🧘 今日悟空自省</h3>
+  <p style="font-size:15px;opacity:.85;">
+    不給建議，不給方向，只提醒你守住自己。
+  </p>
+
+  <blockquote id="dailyDiscipline"
+    style="margin:20px 0;padding-left:14px;border-left:4px solid #111;font-size:18px;line-height:1.6;">
+    載入中…
+  </blockquote>
+
+  <p style="font-size:12px;opacity:.6;">
+    每日一句，依台灣時間自動輪替。
+  </p>
+
+</section>
+
+<script>
+/* ====== 悟空紀律｜每日一句（純前端） ====== */
+
+// 七日自省語句池（固定，不碰交易）
+const disciplineTexts = [
+  "今天不是一定要出手的一天。能忍住不動，本身就是力量。",
+  "我現在的動作，是策略，還是情緒？",
+  "界線不是用來突破的，是用來保命的。",
+  "退，不是輸。亂進，才會死。",
+  "我不需要向任何人證明。市場只認結果。",
+  "沒有空間的操作，結局一定很急。",
+  "今天能安全結束，就是最好的一天。"
+];
+
+// 取得台灣日期（避免 UTC 跨日）
+function getTWDayIndex() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const tw  = new Date(utc + 8 * 3600000);
+  const day = tw.getFullYear() * 10000 + (tw.getMonth()+1) * 100 + tw.getDate();
+  return day % disciplineTexts.length;
+}
+
+// 顯示今日一句
+document.getElementById("dailyDiscipline").innerText =
+  disciplineTexts[getTWDayIndex()];
+</script>
+
   <hr>
 
   <h3>🕯️ 今日來訪之光</h3>
