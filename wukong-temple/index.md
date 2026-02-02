@@ -1,86 +1,12 @@
-<!-- 🏯 悟空財神廟｜光明燈系統 -->
-<section id="wukong-temple" style="max-width:680px;margin:40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
-
-  <h2>🏯 悟空財神廟｜光明燈</h2>
-
-  <p>
-    市場不是求快錢的地方，<br>
-    是給守得住心的人通行的世界。
-  </p>
-
-  <hr>
-
-  <h3>🕯️ 今日來訪之光</h3>
-  <p id="visitCount">計算中…</p>
-
-  <hr>
-
-  <h3>🔔 點一盞光明燈（可選）</h3>
-
-  <input id="lampName" placeholder="暱稱（可留空）"
-    style="width:100%;padding:10px;margin-bottom:8px;">
-
-  <textarea id="lampMessage" placeholder="一句話，或什麼都不留"
-    style="width:100%;padding:10px;margin-bottom:8px;"></textarea>
-
-  <button onclick="lightLamp()"
-    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:700;">
-    點亮光明燈
-  </button>
-
-  <p id="lampResult" style="margin-top:12px;"></p>
-
-  <hr>
-
-  <p style="font-size:13px;opacity:.75;">
-    本頁不涉及投資、報酬、交易或承諾。<br>
-    僅為存在紀錄與敘事入口。
-  </p>
-
-</section>
-
-<script>
-/* ====== 悟空財神廟核心邏輯 ====== */
-
-// 每日 key
-const todayKey = "wukong_visit_" + new Date().toISOString().slice(0,10);
-
-// 記錄來訪
-let visits = localStorage.getItem(todayKey);
-visits = visits ? parseInt(visits) + 1 : 1;
-localStorage.setItem(todayKey, visits);
-
-// 顯示來訪數
-document.getElementById("visitCount").innerText =
-  "今日來訪之光：" + visits;
-
-// 點燈功能
-function lightLamp() {
-  const name = document.getElementById("lampName").value || "無名者";
-  const msg  = document.getElementById("lampMessage").value || "（無言）";
-
-  const record = {
-    name,
-    msg,
-    time: new Date().toLocaleString()
-  };
-
-  // 存在本地（不公開）
-  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
-  logs.push(record);
-  localStorage.setItem("wukong_lamps", JSON.stringify(logs));
-
-  document.getElementById("lampResult").innerText =
-    "已為「" + name + "」點亮光明燈。";
-}
-</script>
 ---
 layout: default
-title: 悟空財神廟｜信念與紀律
+title: 五指山・悟空財神廟｜信念與紀律
 permalink: /wukong-temple/
 ---
 
-# 🐒 悟空財神廟
+# 🐒 五指山・悟空財神廟
+## Mount Five-Finger · Wukong Discipline Temple
+
 ## 信念不是祈求，是紀律
 
 這不是一座求財的廟。  
@@ -143,8 +69,99 @@ permalink: /wukong-temple/
 
 ---
 
+## 🏯 光明燈（存在紀錄）
+
+> 本區不涉及投資、報酬、交易或承諾。僅為存在紀錄與敘事入口。
+
+<!-- 🏯 悟空財神廟｜光明燈系統 -->
+<section id="wukong-temple" style="max-width:680px;margin:40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
+
+  <h2>🏯 五指山・悟空財神廟｜光明燈</h2>
+
+  <p>
+    市場不是求快錢的地方，<br>
+    是給守得住心的人通行的世界。
+  </p>
+
+  <hr>
+
+  <h3>🕯️ 今日來訪之光</h3>
+  <p id="visitCount">計算中…</p>
+
+  <hr>
+
+  <h3>🔔 點一盞光明燈（可選）</h3>
+
+  <input id="lampName" placeholder="暱稱（可留空）"
+    style="width:100%;padding:10px;margin-bottom:8px;">
+
+  <textarea id="lampMessage" placeholder="一句話，或什麼都不留"
+    style="width:100%;padding:10px;margin-bottom:8px;"></textarea>
+
+  <button onclick="lightLamp()"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:700;">
+    點亮光明燈
+  </button>
+
+  <p id="lampResult" style="margin-top:12px;"></p>
+
+  <hr>
+
+  <p style="font-size:13px;opacity:.75;">
+    本頁不涉及投資、報酬、交易或承諾。<br>
+    僅為存在紀錄與敘事入口。
+  </p>
+
+</section>
+
+<script>
+/* ====== 悟空財神廟核心邏輯 ====== */
+
+// 每日 key（用台灣時區避免 UTC 跨日誤差）
+function twDateKey() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const tw  = new Date(utc + 8 * 3600000);
+  return tw.toISOString().slice(0,10);
+}
+
+const todayKey = "wukong_visit_" + twDateKey();
+
+// 記錄來訪
+let visits = localStorage.getItem(todayKey);
+visits = visits ? parseInt(visits, 10) + 1 : 1;
+localStorage.setItem(todayKey, visits);
+
+// 顯示來訪數
+document.getElementById("visitCount").innerText =
+  "今日來訪之光：" + visits;
+
+// 點燈功能
+function lightLamp() {
+  const name = document.getElementById("lampName").value || "無名者";
+  const msg  = document.getElementById("lampMessage").value || "（無言）";
+
+  const record = {
+    name,
+    msg,
+    time: new Date().toLocaleString()
+  };
+
+  // 存在本地（不公開）
+  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
+  logs.push(record);
+  localStorage.setItem("wukong_lamps", JSON.stringify(logs));
+
+  document.getElementById("lampResult").innerText =
+    "已為「" + name + "」點亮光明燈。";
+}
+</script>
+
+---
+
 ⌖  
 PrimeForge 以母機之名，開啟金融生命。  
 花果山台灣・信念不滅・市場無界。  
 Where the Market Becomes the Myth.  
 —— 樂天帝 ⌖
+```0
