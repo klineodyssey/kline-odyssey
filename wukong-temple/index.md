@@ -7,60 +7,13 @@ permalink: /wukong-temple/
 # 🏯 五指山・悟空財神廟  
 ## Mount Five-Finger · Wukong Discipline Temple
 
-信念不是祈求，  
-**是紀律。**
-
-這不是一座求財的廟。  
-這是一個**提醒你不要亂來的地方**。
-
-在《K線西遊記》的宇宙中——  
-悟空從來不保證你賺錢，  
-他只提醒你一件事：
-
-> **市場只獎勵守紀律的人。**
-
 ---
 
-## 悟空不給你什麼？
-
-- 不給明牌  
-- 不給保證  
-- 不給暴富  
-- 不替你承擔風險  
-
----
-
-## 悟空提醒你什麼？
-
-- 方向錯了要停  
-- 情緒來了要退  
-- 貪念出現要斷  
-- 紀律破了會被市場處決  
-
----
-
-## 為什麼在「五指山」？
-
-因為在這個宇宙裡：
-
-> **財不是錢，是存活。**  
-> **神不是給予，是約束。**
-
-五指山不是鎮壓，  
-是**讓人學會不亂動的地方**。
-
-悟空存在的意義，  
-不是讓你贏一次，  
-而是讓你不要死在半路。
-
----
-
-## 🕯️ 光明燈（存在紀錄）
+## 🏯 光明燈（存在紀錄）
 
 > 本頁不涉及投資、報酬、交易或承諾。  
 > 僅為存在紀錄與敘事入口。
 
-<!-- 🏯 悟空財神廟｜光明燈系統 -->
 <section id="wukong-temple" style="max-width:680px;margin:40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
 
   <h2>🏯 五指山・悟空財神廟｜光明燈</h2>
@@ -101,69 +54,27 @@ permalink: /wukong-temple/
 
 </section>
 
-<script>
-/* ====== 悟空財神廟核心邏輯 ====== */
-
-// 台灣日期（避免 UTC 跨日）
-function twDateKey() {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const tw  = new Date(utc + 8 * 3600000);
-  return tw.toISOString().slice(0,10);
-}
-
-const todayKey = "wukong_visit_" + twDateKey();
-
-// 記錄來訪
-let visits = localStorage.getItem(todayKey);
-visits = visits ? parseInt(visits, 10) + 1 : 1;
-localStorage.setItem(todayKey, visits);
-
-// 顯示來訪數
-document.getElementById("visitCount").innerText =
-  "今日來訪之光：" + visits;
-
-// 點燈
-function lightLamp() {
-  const name = document.getElementById("lampName").value || "無名者";
-  const msg  = document.getElementById("lampMessage").value || "（無言）";
-
-  const record = {
-    name,
-    msg,
-    time: new Date().toLocaleString()
-  };
-
-  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
-  logs.push(record);
-  localStorage.setItem("wukong_lamps", JSON.stringify(logs));
-
-  document.getElementById("lampResult").innerText =
-    "已為「" + name + "」點亮光明燈。";
-
-  renderMyLamps();
-}
-</script>
-
 ---
 
-## 🔍 我點過的燈（只看自己的）
+## 🔍 光明燈查證（只查自己的）
 
-> 只顯示你這台裝置留下的紀錄，  
-> 不上傳、不公開、不連結錢包。
+> 你可以用 **Lamp ID** 來查證：  
+> 「我有沒有點過」「是哪一筆」「什麼時間點的」。  
+> *僅此裝置可查。*
 
-<!-- 🔍 我點過的燈 -->
-<section id="my-lamps" style="max-width:680px;margin:20px auto 40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
+<section style="max-width:680px;margin:20px auto 40px auto;padding:24px;border:1px solid #111;border-radius:18px;">
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+  <h3>✅ 查證區</h3>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;">
     <button onclick="renderMyLamps()"
       style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
-      重新載入
+      重新載入我的燈
     </button>
 
     <button onclick="exportMyLamps()"
       style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
-      匯出 JSON
+      匯出 JSON（複製）
     </button>
 
     <button onclick="clearMyLamps()"
@@ -173,12 +84,45 @@ function lightLamp() {
   </div>
 
   <p id="myLampStats">載入中…</p>
+
+  <hr>
+
+  <h4>🔎 用 Lamp ID 查證</h4>
+  <input id="verifyId" placeholder="貼上 Lamp ID（例如：WF-20260202-8F3A1C）"
+    style="width:100%;padding:10px;margin:8px 0;">
+
+  <button onclick="verifyLamp()"
+    style="padding:8px 14px;border-radius:999px;border:1px solid #111;font-weight:700;">
+    查證
+  </button>
+
+  <p id="verifyResult" style="margin-top:12px;"></p>
+
+  <hr>
+
+  <h4>🕯️ 我點過的燈（列表）</h4>
   <div id="myLampList"></div>
   <p id="myLampEmpty" style="display:none;opacity:.7;">你尚未點過任何光明燈。</p>
 
 </section>
 
 <script>
+/* ====== 台灣日期（避免 UTC 跨日） ====== */
+function twDateKey() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const tw  = new Date(utc + 8 * 3600000);
+  return tw.toISOString().slice(0,10);
+}
+
+/* ====== 來訪計數（本地） ====== */
+const todayKey = "wukong_visit_" + twDateKey();
+let visits = localStorage.getItem(todayKey);
+visits = visits ? parseInt(visits, 10) + 1 : 1;
+localStorage.setItem(todayKey, visits);
+document.getElementById("visitCount").innerText = "今日來訪之光：" + visits;
+
+/* ====== 工具：安全顯示 ====== */
 function escapeHTML(str) {
   return String(str)
     .replaceAll("&","&amp;")
@@ -188,6 +132,45 @@ function escapeHTML(str) {
     .replaceAll("'","&#039;");
 }
 
+/* ====== 產生 Lamp ID（短碼＋日期） ====== */
+function genLampId() {
+  // 例：WF-20260202-8F3A1C
+  const d = twDateKey().replaceAll("-","");
+  const rand = Math.random().toString(16).slice(2, 8).toUpperCase();
+  return "WF-" + d + "-" + rand;
+}
+
+/* ====== 點燈 ====== */
+function lightLamp() {
+  const name = document.getElementById("lampName").value || "無名者";
+  const msg  = document.getElementById("lampMessage").value || "（無言）";
+
+  const record = {
+    id: genLampId(),
+    name,
+    msg,
+    time: new Date().toLocaleString()
+  };
+
+  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
+  logs.push(record);
+  localStorage.setItem("wukong_lamps", JSON.stringify(logs));
+
+  document.getElementById("lampResult").innerHTML =
+    "已為「" + escapeHTML(name) + "」點亮光明燈。<br>" +
+    "Lamp ID：<code style='user-select:all;'>" + escapeHTML(record.id) + "</code> " +
+    "<button onclick=\"copyText('" + record.id + "')\" style='margin-left:6px;padding:2px 10px;border-radius:999px;border:1px solid #111;font-weight:700;'>複製</button>";
+
+  renderMyLamps();
+}
+
+/* ====== 複製 ====== */
+function copyText(t) {
+  navigator.clipboard.writeText(t);
+  alert("已複製：" + t);
+}
+
+/* ====== 列表 ====== */
 function renderMyLamps() {
   const list = document.getElementById("myLampList");
   const stats = document.getElementById("myLampStats");
@@ -216,11 +199,43 @@ function renderMyLamps() {
       <strong>🕯️ ${escapeHTML(r.name || "無名者")}</strong><br>
       <div style="margin:6px 0;">${escapeHTML(r.msg || "（無言）")}</div>
       <div style="font-size:12px;opacity:.7;">${escapeHTML(r.time || "")}</div>
+      <div style="margin-top:8px;font-size:12px;">
+        Lamp ID：<code style="user-select:all;">${escapeHTML(r.id || "")}</code>
+        <button onclick="copyText('${escapeHTML(r.id || "")}')"
+          style="margin-left:6px;padding:2px 10px;border-radius:999px;border:1px solid #111;font-weight:700;">
+          複製
+        </button>
+      </div>
     `;
     list.appendChild(div);
   });
 }
 
+/* ====== 用 Lamp ID 查證 ====== */
+function verifyLamp() {
+  const id = (document.getElementById("verifyId").value || "").trim();
+  const out = document.getElementById("verifyResult");
+  if (!id) {
+    out.innerHTML = "請貼上 Lamp ID。";
+    return;
+  }
+
+  const logs = JSON.parse(localStorage.getItem("wukong_lamps") || "[]");
+  const hit = logs.find(r => r.id === id);
+
+  if (!hit) {
+    out.innerHTML = "❌ 查無此 Lamp ID（僅能查本裝置的紀錄）。";
+    return;
+  }
+
+  out.innerHTML =
+    "✅ 查證成功：<br>" +
+    "暱稱：" + escapeHTML(hit.name || "無名者") + "<br>" +
+    "留言：" + escapeHTML(hit.msg || "（無言）") + "<br>" +
+    "時間：" + escapeHTML(hit.time || "");
+}
+
+/* ====== 匯出 / 清空 ====== */
 function exportMyLamps() {
   const data = localStorage.getItem("wukong_lamps") || "[]";
   navigator.clipboard.writeText(data);
@@ -231,8 +246,10 @@ function clearMyLamps() {
   if (!confirm("確定清空本裝置的所有紀錄？")) return;
   localStorage.removeItem("wukong_lamps");
   renderMyLamps();
+  document.getElementById("verifyResult").innerHTML = "";
 }
 
+/* 初始載入 */
 renderMyLamps();
 </script>
 
