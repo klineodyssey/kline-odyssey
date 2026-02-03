@@ -38,20 +38,40 @@ permalink: /wukong-temple/
 ---
 
 <!-- 右上角浮動視窗：總訪客 / 今日訪客 -->
-<div id="wt-floating"
-  style="position:fixed;top:16px;right:16px;z-index:9999;
-  background:#fff;border:1px solid #111;border-radius:14px;
-  padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.08);
-  font-size:13px;min-width:190px;">
-  <div style="font-weight:900;">五指山・悟空財神廟</div>
-  <div style="opacity:.85;margin-top:6px;">
-    今日來訪：<span id="wt-today">-</span><br>
-    總來訪：<span id="wt-total">-</span>
-  </div>
-  <div style="margin-top:8px;opacity:.65;">
-    你的識別：<span id="wt-device">-</span>
-  </div>
+<div id="wt-float">
+  <div class="wt-title">五指山・悟空財神廟</div>
+  <div class="wt-row">今日：<span id="wt-today">-</span></div>
+  <div class="wt-row">總計：<span id="wt-total">-</span></div>
 </div>
+
+<style>
+#wt-float{
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  width: auto;
+  min-width: 120px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+#wt-float .wt-title{
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+#wt-float .wt-row{
+  font-size: 11px;
+  color: #333;
+}
+</style>
 
 <hr>
 
