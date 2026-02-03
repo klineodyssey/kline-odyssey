@@ -19,133 +19,67 @@ permalink: /wukong-temple/
 ---
 
 ## 宇宙定義：發財金＝質量
-在這裡，發財金不是迷信。
-
 - 1 公斤（Kg） = 1 KGEN = 1 新台幣（NTD）
 - KGEN 代表「質量」，不是承諾
-- 任何行為只做「紀錄」與「申請」，不做自動轉帳、不碰私鑰
+- 所有流程皆為「紀錄」與「儀式入口」
 
 ---
 
 ## 你在這裡能做什麼
 - 公開：點光明燈（全宇宙可見）
 - 私密：放天燈（只有自己可見）
-- 擲筊：聖盃（正正）才可申請發財金
-- 申請：KGEN 發財金（只登記，等待審核與人工發放）
-- 還願：歸還發財金（只登記，附 TxHash 方便查核）
-- 查證：我點過的燈、我放過的天燈、我擲過的筊、我的申請狀態
+- 擲筊：聖盃（擲到聖杯後，今日解鎖發財金申請）
+- 申請：KGEN 發財金（系統自動記錄）
+- 還願：歸還登記（神話故事線）
 
 ---
 
-<!-- =============================
-  五指山・悟空財神廟｜右上角迷你統計
-============================= -->
-
-<div id="wt-float">
-  <div class="wt-head">
-    <div class="wt-title">五指山</div>
-    <button id="wt-toggle">▾</button>
-  </div>
-  <div class="wt-body">
-    <div>今日：<span id="wt-today">0</span></div>
-    <div>總計：<span id="wt-total">0</span></div>
-  </div>
+<!-- 右上角浮動視窗：總訪客 / 今日訪客（小徽章） -->
+<div id="wt-float" class="wt-pill" aria-label="visitor-stats">
+  <span class="wt-dot"></span>
+  <span>今日 <b id="wt-today">…</b></span>
+  <span class="wt-sep"></span>
+  <span>總計 <b id="wt-total">…</b></span>
 </div>
 
 <style>
-#wt-float{
+#wt-float.wt-pill{
   position: fixed;
-  top: 72px;
+  top: 64px;
   right: 10px;
   z-index: 9999;
-  background: rgba(255,255,255,.9);
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(6px);
   font-size: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  max-width: calc(100vw - 20px);
 }
-
-.wt-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+#wt-float .wt-dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.7);
+  display: inline-block;
 }
-
-.wt-title{
-  font-weight:700;
-}
-
-#wt-toggle{
-  border:none;
-  background:none;
-  font-size:12px;
-}
-
-.wt-hide .wt-body{
-  display:none;
+#wt-float .wt-sep{
+  width: 1px;
+  height: 14px;
+  background: rgba(0,0,0,.15);
+  display: inline-block;
 }
 </style>
-
-<script>
-/* ====== 基本設定 ====== */
-const GAS_URL =
-"https://script.google.com/macros/s/AKfycbwn_3DB91DK9VJV48EE-5--4zjrwd1qWjHQkgHptlJ4xdPIKufNhgsZOxgkyScHmumSxw/exec";
-
-/* ====== 裝置識別 ====== */
-function getDeviceId(){
-  let id = localStorage.getItem("wt_device");
-  if(!id){
-    id = "wt_" + Math.random().toString(16).slice(2);
-    localStorage.setItem("wt_device", id);
-  }
-  return id;
-}
-const DEVICE_ID = getDeviceId();
-
-/* ====== JSONP 呼叫 ====== */
-function jsonp(action, params, cb){
-  const fn = "cb_" + Math.random().toString(16).slice(2);
-  window[fn] = (res)=>{
-    cb && cb(res);
-    delete window[fn];
-    script.remove();
-  };
-
-  const q = new URLSearchParams({
-    action,
-    device_id: DEVICE_ID,
-    callback: fn,
-    ...params
-  });
-
-  const script = document.createElement("script");
-  script.src = GAS_URL + "?" + q.toString();
-  document.body.appendChild(script);
-}
-
-/* ====== 統計 ====== */
-function refreshStats(){
-  jsonp("stats", {}, (r)=>{
-    if(!r || !r.ok) return;
-    document.getElementById("wt-today").innerText = r.today_visits;
-    document.getElementById("wt-total").innerText = r.total_visits;
-  });
-}
-
-jsonp("visit", {}, refreshStats);
-
-/* ====== 收合 ====== */
-document.getElementById("wt-toggle").onclick = ()=>{
-  document.getElementById("wt-float").classList.toggle("wt-hide");
-};
-</script>
 
 <hr>
 
 ## 光明燈（公開｜全宇宙可見）
-> 本區不涉及投資、報酬、交易或承諾。僅為存在紀錄與敘事入口。
-
 <section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
   <h3 style="margin-top:0;">點一盞光明燈</h3>
 
@@ -189,18 +123,13 @@ document.getElementById("wt-toggle").onclick = ()=>{
 
   <hr style="margin:16px 0;">
 
-  <h3 style="margin:0 0 8px 0;">🔍 我放過的天燈（只看自己）</h3>
+  <h3 style="margin:0 0 8px 0;">我放過的天燈（只看自己）</h3>
   <div id="lanternList" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
 
 ---
 
-## 擲筊（聖盃規則）
-規則（定稿）：
-- 正正＝聖杯（同意）
-- 反反＝笑杯（不同意／不莊重）
-- 正反＝陰杯（不確定／再問）
-
+## 擲筊（聖盃）
 <section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
   <h3 style="margin-top:0;">擲筊</h3>
 
@@ -215,31 +144,20 @@ document.getElementById("wt-toggle").onclick = ()=>{
   <span id="grailResult" style="margin-left:10px;font-weight:900;"></span>
 
   <hr style="margin:16px 0;">
-
-  <h3 style="margin:0 0 8px 0;">🔍 我擲過的筊（只看自己）</h3>
+  <h3 style="margin:0 0 8px 0;">我擲過的筊（只看自己）</h3>
   <div id="grailList" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
 
 ---
 
 ## KGEN 發財金（申請 / 還願）
-定義（定稿）：
-1) 申請發財金是「登記」，不是保證  
-2) 聖杯才可送出申請（儀式門檻）  
-3) 本頁不自動發幣、不存私鑰  
-4) 實際發放：由你（管理端）用錢包或腳本人工轉帳  
-5) 出金地址＝歸還地址（你申請時填的地址）
-
 <section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
-  <h3 style="margin-top:0;">申請發財金（需聖杯）</h3>
+  <h3 style="margin-top:0;">申請發財金（需當日聖杯）</h3>
 
-  <input id="fortuneEmail" placeholder="Email（可留空）"
+  <input id="fortuneWallet" placeholder="收款地址（EVM）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
-  <input id="fortuneWallet" placeholder="0xb73d6716005b37bec742d64482fa26033ee1a4e1"
-    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
-
-  <input id="fortuneAmount" placeholder="申請數量（KGEN）例：10"
+  <input id="fortuneAmount" placeholder="申請數量（例：10）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
   <textarea id="fortunePurpose" placeholder="用途（簡短即可）"
@@ -247,43 +165,36 @@ document.getElementById("wt-toggle").onclick = ()=>{
 
   <button id="btnFortuneApply"
     style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
-    送出申請（需聖杯）
+    送出申請
   </button>
 
   <span id="fortuneApplyResult" style="margin-left:10px;font-weight:900;"></span>
 
   <hr style="margin:16px 0;">
 
-  <h3 style="margin:0 0 8px 0;">還願歸還（登記）</h3>
+  <h3 style="margin:0 0 8px 0;">還願登記</h3>
 
-  <input id="returnWallet" placeholder="0xb73d6716005b37bec742d64482fa26033ee1a4e1"
+  <input id="returnWallet" placeholder="你的地址（EVM）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
-  <input id="returnAmount" placeholder="歸還數量（KGEN）例：10"
+  <input id="returnAmount" placeholder="還願數量（例：1）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
-  <input id="returnTx" placeholder="TxHash（可留空，但建議填）"
+  <input id="returnTx" placeholder="TxHash（可留空）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;">
 
-  <button id="btnFortuneReturn"
+  <button id="btnVowReturn"
     style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
     登記還願
   </button>
 
-  <span id="fortuneReturnResult" style="margin-left:10px;font-weight:900;"></span>
+  <span id="vowReturnResult" style="margin-left:10px;font-weight:900;"></span>
 
   <hr style="margin:16px 0;">
 
-  <h3 style="margin:0 0 8px 0;">🔍 我的申請狀態（只看自己）</h3>
+  <h3 style="margin:0 0 8px 0;">我的狀態（只看自己）</h3>
   <div id="fortuneStatus" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
-
----
-
-## 重要提醒
-- 本頁不構成投資建議，不提供收益承諾  
-- 所有功能僅為敘事、紀錄、申請入口  
-- 若你需要支持創作與公益，請走官網捐款頁（USDT-TRC20）
 
 ---
 
@@ -295,13 +206,27 @@ Where the Market Becomes the Myth.
 
 <script>
 /* =============================
-   五指山・悟空財神廟 前端母機
-   - 使用 JSONP 呼叫 GAS（避免 CORS）
-   - 你的 GAS URL（如部署變更就改這行）
+   Wukong Temple Frontend V2
+   - JSONP 呼叫 GAS
+   - 回傳 speak 直接語音播報
 ============================= */
+
+/* 改成你最新 GAS 部署 URL */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwn_3DB91DK9VJV48EE-5--4zjrwd1qWjHQkgHptlJ4xdPIKufNhgsZOxgkyScHmumSxw/exec";
 
-/* ---------- Device ID（固定一台裝置） ---------- */
+/* 語音播報 */
+function speak(text){
+  try{
+    if(!text) return;
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = "zh-TW";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* Device ID（固定一台裝置） */
 function getDeviceId(){
   const k = "wt_device_id";
   let v = localStorage.getItem(k);
@@ -312,34 +237,39 @@ function getDeviceId(){
   return v;
 }
 const DEVICE_ID = getDeviceId();
-document.getElementById("wt-device").innerText = DEVICE_ID;
 
-/* ---------- JSONP Helper ---------- */
+/* JSONP */
 function jsonp(action, params, cb){
   const callbackName = "wt_cb_" + Math.random().toString(16).slice(2);
+  const s = document.createElement("script");
   window[callbackName] = function(data){
-    try { cb && cb(data); } finally {
-      delete window[callbackName];
+    try{
+      if(data && data.speak) speak(data.speak);
+      cb && cb(data);
+    } finally {
+      try{ delete window[callbackName]; }catch(e){}
       s.remove();
     }
   };
   const q = new URLSearchParams(Object.assign({}, params || {}, {
     action,
     device_id: DEVICE_ID,
+    ua_hint: navigator.userAgent.slice(0,140),
     callback: callbackName
   }));
-  const s = document.createElement("script");
   s.src = GAS_URL + "?" + q.toString();
   document.body.appendChild(s);
 }
 
-/* ---------- UI Render Helpers ---------- */
+/* Escape */
 function esc(s){
   return String(s || "")
     .replaceAll("&","&amp;").replaceAll("<","&lt;")
     .replaceAll(">","&gt;").replaceAll('"',"&quot;")
     .replaceAll("'","&#39;");
 }
+
+/* Render lists */
 function renderList(el, items, type){
   if (!items || !items.length){
     el.innerHTML = "<div style='opacity:.7;'>（目前沒有紀錄）</div>";
@@ -362,44 +292,48 @@ function renderList(el, items, type){
     }
     if (type === "grail"){
       return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
-        <div style="font-weight:900;">結果：${esc(it.result || "")}</div>
+        <div style="font-weight:900;">${esc(it.toss || "")}｜${esc(it.result || "")}</div>
         <div style="opacity:.75;margin-top:4px;">${esc(it.note || "")}</div>
         <div style="opacity:.55;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
       </div>`;
     }
     if (type === "fortune"){
       return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
-        <div style="font-weight:900;">狀態：${esc(it.status || "")}</div>
+        <div style="font-weight:900;">${esc(it.status || "")}</div>
         <div style="opacity:.9;margin-top:4px;">${esc(it.amount_kgen || "")} KGEN → ${esc(it.wallet || "")}</div>
         <div style="opacity:.75;margin-top:4px;">${esc(it.purpose || "")}</div>
         <div style="opacity:.65;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
-        ${it.paid_tx ? `<div style="opacity:.75;font-size:12px;margin-top:6px;">Tx: ${esc(it.paid_tx)}</div>` : ""}
-        ${it.admin_note ? `<div style="opacity:.75;font-size:12px;margin-top:6px;">Note: ${esc(it.admin_note)}</div>` : ""}
+      </div>`;
+    }
+    if (type === "vow"){
+      return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">還願：${esc(it.amount_kgen || "")} KGEN</div>
+        <div style="opacity:.85;margin-top:4px;">${esc(it.note || "")}</div>
+        <div style="opacity:.75;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
+        ${it.tx ? `<div style="opacity:.7;font-size:12px;margin-top:6px;">Tx: ${esc(it.tx)}</div>` : ``}
       </div>`;
     }
     return "";
   }).join("");
 }
 
-/* ---------- Boot ---------- */
-let HAS_HOLY_GRAIL = false;
-
+/* Loaders */
 function refreshStats(){
   jsonp("stats", {}, (r) => {
     if (r && r.ok){
-      document.getElementById("wt-today").innerText = r.today_visits;
-      document.getElementById("wt-total").innerText = r.total_visits;
+      document.getElementById("wt-today").textContent = r.today_visits;
+      document.getElementById("wt-total").textContent = r.total_visits;
     }
   });
 }
-
 function recordVisit(){
-  jsonp("visit", { ua_hint: navigator.userAgent.slice(0,120) }, (r) => {
-    // visit 成功會回 total/today，順便刷新
-    refreshStats();
+  jsonp("visit", { src:"wukong-temple", ref: location.href.slice(0,180) }, (r) => {
+    if (r && r.ok){
+      document.getElementById("wt-today").textContent = r.today_visits;
+      document.getElementById("wt-total").textContent = r.total_visits;
+    }
   });
 }
-
 function loadPublicLamps(){
   jsonp("lamp_list", { limit: 20 }, (r) => {
     const el = document.getElementById("lampList");
@@ -407,7 +341,6 @@ function loadPublicLamps(){
     renderList(el, r.items || [], "lamp");
   });
 }
-
 function loadMyLanterns(){
   jsonp("lantern_list", { limit: 20 }, (r) => {
     const el = document.getElementById("lanternList");
@@ -415,7 +348,6 @@ function loadMyLanterns(){
     renderList(el, r.items || [], "lantern");
   });
 }
-
 function loadMyGrails(){
   jsonp("grail_list", { limit: 20 }, (r) => {
     const el = document.getElementById("grailList");
@@ -423,26 +355,54 @@ function loadMyGrails(){
     renderList(el, r.items || [], "grail");
   });
 }
-
-function loadMyFortuneStatus(){
+function loadMyStatus(){
   jsonp("fortune_status", {}, (r) => {
     const el = document.getElementById("fortuneStatus");
     if (!r || !r.ok) { el.innerHTML = "<div style='opacity:.7;'>載入失敗</div>"; return; }
-    renderList(el, r.items || [], "fortune");
+
+    const top = `
+      <div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">今日聖杯：${r.holy_today ? "已解鎖" : "未解鎖"}</div>
+        <div style="opacity:.85;margin-top:6px;">已領：${r.borrowed_total}｜已還願：${r.returned_total}｜未還願：${r.outstanding}</div>
+      </div>
+    `;
+    el.innerHTML = top;
+
+    if (r.items && r.items.length){
+      const box = document.createElement("div");
+      el.appendChild(box);
+      renderList(box, r.items, "fortune");
+    } else {
+      el.innerHTML += "<div style='opacity:.7;padding-top:10px;'>（目前沒有發財金紀錄）</div>";
+    }
+
+    // 另外拉還願清單
+    jsonp("vow_list", { limit: 10 }, (rv) => {
+      if(rv && rv.ok && rv.items){
+        const h = document.createElement("div");
+        h.style.marginTop = "14px";
+        h.innerHTML = `<div style="font-weight:900;">還願紀錄</div>`;
+        el.appendChild(h);
+
+        const box2 = document.createElement("div");
+        el.appendChild(box2);
+        renderList(box2, rv.items, "vow");
+      }
+    });
   });
 }
 
-/* ---------- Actions ---------- */
+/* Buttons */
 document.getElementById("btnLamp").addEventListener("click", () => {
   const nickname = document.getElementById("lampNickname").value || "無名者";
   const message  = document.getElementById("lampMessage").value || "（無言）";
   jsonp("lamp_add", { nickname, message }, (r) => {
     const out = document.getElementById("lampResult");
+    out.textContent = (r && r.ok) ? "已點亮" : "失敗";
     if (r && r.ok){
-      out.innerText = "已點亮（公開）";
       document.getElementById("lampMessage").value = "";
       loadPublicLamps();
-    } else out.innerText = "失敗";
+    }
   });
 });
 
@@ -451,11 +411,11 @@ document.getElementById("btnLantern").addEventListener("click", () => {
   const wish  = document.getElementById("lanternWish").value || "（無言）";
   jsonp("lantern_add", { title, wish }, (r) => {
     const out = document.getElementById("lanternResult");
+    out.textContent = (r && r.ok) ? "已送出" : "失敗";
     if (r && r.ok){
-      out.innerText = "已放天燈（私密）";
       document.getElementById("lanternWish").value = "";
       loadMyLanterns();
-    } else out.innerText = (r && r.error) ? r.error : "失敗";
+    }
   });
 });
 
@@ -464,59 +424,40 @@ document.getElementById("btnGrail").addEventListener("click", () => {
   jsonp("grail_cast", { note }, (r) => {
     const out = document.getElementById("grailResult");
     if (r && r.ok){
-      out.innerText = `擲出：${r.toss}｜${r.result}`;
-      HAS_HOLY_GRAIL = (r.result === "聖杯");
+      out.textContent = `${r.toss}｜${r.result}`;
       loadMyGrails();
-    } else out.innerText = "失敗";
+      loadMyStatus();
+    } else out.textContent = "失敗";
   });
 });
 
 document.getElementById("btnFortuneApply").addEventListener("click", () => {
   const out = document.getElementById("fortuneApplyResult");
-  if (!HAS_HOLY_GRAIL){
-    out.innerText = "需先擲到聖杯（正正）";
-    return;
-  }
-  const email = document.getElementById("fortuneEmail").value || "";
   const wallet = document.getElementById("fortuneWallet").value || "";
   const amount_kgen = document.getElementById("fortuneAmount").value || "";
-  const purpose = document.getElementById("fortunePurpose").value || "發財金申請";
-  if (!wallet){
-    out.innerText = "請填錢包地址";
-    return;
-  }
-  jsonp("fortune_apply", { email, wallet, amount_kgen, purpose }, (r) => {
-    if (r && r.ok){
-      out.innerText = "已登記，等待審核";
-      loadMyFortuneStatus();
-    } else {
-      out.innerText = (r && (r.message || r.error)) ? (r.message || r.error) : "失敗";
-    }
+  const purpose = document.getElementById("fortunePurpose").value || "發財金";
+  jsonp("fortune_apply", { wallet, amount_kgen, purpose }, (r) => {
+    out.textContent = (r && r.ok) ? "已記錄" : "未通過";
+    loadMyStatus();
   });
 });
 
-document.getElementById("btnFortuneReturn").addEventListener("click", () => {
-  const out = document.getElementById("fortuneReturnResult");
+document.getElementById("btnVowReturn").addEventListener("click", () => {
+  const out = document.getElementById("vowReturnResult");
   const wallet = document.getElementById("returnWallet").value || "";
   const amount_kgen = document.getElementById("returnAmount").value || "";
   const tx = document.getElementById("returnTx").value || "";
-  if (!wallet){
-    out.innerText = "請填地址";
-    return;
-  }
-  jsonp("fortune_return", { wallet, amount_kgen, tx, note: "還願歸還" }, (r) => {
-    if (r && r.ok){
-      out.innerText = "已登記還願";
-      loadMyFortuneStatus();
-    } else out.innerText = (r && r.error) ? r.error : "失敗";
+  jsonp("vow_return", { wallet, amount_kgen, tx, note:"還願" }, (r) => {
+    out.textContent = (r && r.ok) ? "已記錄" : "未通過";
+    loadMyStatus();
   });
 });
 
-/* ---------- Start ---------- */
+/* Start */
 refreshStats();
 recordVisit();
 loadPublicLamps();
 loadMyLanterns();
 loadMyGrails();
-loadMyFortuneStatus();
+loadMyStatus();
 </script>
