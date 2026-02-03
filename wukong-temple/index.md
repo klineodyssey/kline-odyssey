@@ -38,40 +38,78 @@ permalink: /wukong-temple/
 ---
 
 <!-- 右上角浮動視窗：總訪客 / 今日訪客 -->
-<div id="wt-float">
-  <div class="wt-title">五指山・悟空財神廟</div>
-  <div class="wt-row">今日：<span id="wt-today">-</span></div>
-  <div class="wt-row">總計：<span id="wt-total">-</span></div>
+<!-- Wukong Temple Mini Widget -->
+<div id="wt-float" class="wt-min">
+  <div class="wt-head">
+    <div class="wt-title">五指山・悟空財神廟</div>
+    <button id="wt-toggle" type="button" aria-label="toggle">▾</button>
+  </div>
+
+  <div class="wt-body" id="wt-body">
+    <div class="wt-row">今日：<span id="wt-today">…</span></div>
+    <div class="wt-row">總計：<span id="wt-total">…</span></div>
+  </div>
 </div>
 
 <style>
 #wt-float{
   position: fixed;
-  top: 12px;
+  top: 84px;              /* 先避開你上面 header/LOGO，手機最安全 */
   right: 12px;
   z-index: 9999;
   background: rgba(255,255,255,0.92);
   border: 1px solid #ddd;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 8px 10px;
   font-size: 12px;
   line-height: 1.4;
-  width: auto;
-  min-width: 120px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  min-width: 150px;
+  max-width: 180px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+}
+
+#wt-float .wt-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 #wt-float .wt-title{
-  font-weight: 600;
+  font-weight: 700;
   font-size: 12px;
-  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+#wt-toggle{
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
 }
 
 #wt-float .wt-row{
   font-size: 11px;
-  color: #333;
+  margin-top: 4px;
 }
+
+/* 收合 */
+#wt-float.wt-min #wt-body{ display: block; } /* 預設展開，你要預設收合就改 none */
+#wt-float.wt-hide #wt-body{ display: none; }
 </style>
+
+<script>
+(() => {
+  const box = document.getElementById('wt-float');
+  const btn = document.getElementById('wt-toggle');
+  btn.addEventListener('click', () => {
+    box.classList.toggle('wt-hide');
+    btn.textContent = box.classList.contains('wt-hide') ? '▸' : '▾';
+  });
+})();
+</script>
 
 <hr>
 
