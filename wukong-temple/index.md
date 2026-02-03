@@ -68,37 +68,25 @@ permalink: /wukong-temple/
   box-shadow: 0 6px 16px rgba(0,0,0,0.10);
 }
 
-#wt-float .wt-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+#wt-float{
+  position: fixed;
+  top: 64px;          /* 再往下躲一點 */
+  right: 8px;
+  z-index: 9999;
 
-#wt-float .wt-title{
-  font-weight: 700;
-  font-size: 12px;
-  white-space: nowrap;
-}
+  background: rgba(255,255,255,0.88);
+  border: 1px solid #ddd;
+  border-radius: 999px;   /* 圓角徽章 */
+  padding: 6px 10px;
 
-#wt-toggle{
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 0 2px;
-}
-
-#wt-float .wt-row{
   font-size: 11px;
-  margin-top: 4px;
-}
+  line-height: 1.2;
 
-/* 收合 */
-#wt-float.wt-min #wt-body{ display: block; } /* 預設展開，你要預設收合就改 none */
-#wt-float.wt-hide #wt-body{ display: none; }
-</style>
+  min-width: unset;       /* 關鍵：不要卡片寬度 */
+  max-width: unset;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
 
 <script>
 (() => {
