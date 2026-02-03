@@ -37,8 +37,7 @@ permalink: /wukong-temple/
 
 ---
 
-<!-- 右上角浮動視窗：總訪客 / 今日訪客 -->
-<!-- Wukong Temple Mini Widget -->
+<!-- 右上角浮動視窗：總訪客 / 今日訪客（迷你版） -->
 <div id="wt-float" class="wt-min">
   <div class="wt-head">
     <div class="wt-title">五指山・悟空財神廟</div>
@@ -54,44 +53,65 @@ permalink: /wukong-temple/
 <style>
 #wt-float{
   position: fixed;
-  top: 84px;              /* 先避開你上面 header/LOGO，手機最安全 */
-  right: 12px;
-  z-index: 9999;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 8px 10px;
-  font-size: 12px;
-  line-height: 1.4;
-  min-width: 150px;
-  max-width: 180px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.10);
-}
-
-#wt-float{
-  position: fixed;
-  top: 64px;          /* 再往下躲一點 */
-  right: 8px;
+  top: 72px;
+  right: 10px;
   z-index: 9999;
 
   background: rgba(255,255,255,0.88);
   border: 1px solid #ddd;
-  border-radius: 999px;   /* 圓角徽章 */
-  padding: 6px 10px;
+  border-radius: 12px;
+  padding: 6px 8px;
 
-  font-size: 11px;
-  line-height: 1.2;
+  font-size: 12px;
+  line-height: 1.35;
 
-  min-width: unset;       /* 關鍵：不要卡片寬度 */
-  max-width: unset;
-
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  max-width: 160px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
 }
+
+.wt-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 8px;
+}
+
+.wt-title{
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#wt-toggle{
+  border: 1px solid #ddd;
+  background: transparent;
+  border-radius: 8px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wt-body{
+  margin-top: 6px;
+}
+
+.wt-row{
+  display:flex;
+  justify-content:space-between;
+  gap: 8px;
+}
+
+.wt-hide .wt-body{
+  display:none;
+}
+</style>
 
 <script>
 (() => {
   const box = document.getElementById('wt-float');
   const btn = document.getElementById('wt-toggle');
+  if (!box || !btn) return;
+
   btn.addEventListener('click', () => {
     box.classList.toggle('wt-hide');
     btn.textContent = box.classList.contains('wt-hide') ? '▸' : '▾';
