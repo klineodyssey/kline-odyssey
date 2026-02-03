@@ -4,456 +4,198 @@ title: 五指山・悟空財神廟｜信念與紀律
 permalink: /wukong-temple/
 ---
 
-<!-- ✅ 五指山・悟空財神廟（定稿版）｜最新 commit 續寫：直接覆蓋這份 index.md 即可 -->
-<!-- 檔案建議路徑：/wukong-temple/index.md -->
+# 五指山・悟空財神廟
+## Mount Five-Finger · Wukong Discipline Temple
 
-<!-- =========================
-     右上角浮動視窗：總訪客 / 今日訪客
-     ========================= -->
-<div id="wm-float"
-  style="position:fixed; top:14px; right:14px; z-index:9999;
-         width:min(320px, 92vw);
-         border:1px solid #111; border-radius:14px;
-         background:#fff; padding:12px 14px;
-         box-shadow:0 10px 30px rgba(0,0,0,.12);">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-    <div style="font-weight:900; letter-spacing:.3px;">Mount Five-Finger · Wukong Discipline Temple</div>
-    <button id="wm-float-toggle"
-      style="border:1px solid #111; background:#fff; border-radius:999px;
-             padding:6px 10px; font-weight:800; cursor:pointer;">
-      Hide
-    </button>
-  </div>
+這不是一座求快錢的廟。  
+這是一個提醒你「不要亂來」的地方。
 
-  <div id="wm-float-body" style="margin-top:10px;">
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <div style="flex:1; min-width:130px; border:1px solid #111; border-radius:12px; padding:10px;">
-        <div style="font-size:12px; opacity:.75;">Total Visitors</div>
-        <div id="wm-total" style="font-size:22px; font-weight:900;">...</div>
-      </div>
-      <div style="flex:1; min-width:130px; border:1px solid #111; border-radius:12px; padding:10px;">
-        <div style="font-size:12px; opacity:.75;">Today Visitors</div>
-        <div id="wm-today" style="font-size:22px; font-weight:900;">...</div>
-      </div>
-    </div>
-
-    <div style="margin-top:10px; font-size:12px; opacity:.75; line-height:1.35;">
-      This counter works in two modes:
-      <br>• Default: local-only (per device).
-      <br>• Global mode: connect a Google Apps Script Web App URL (optional).
-    </div>
-  </div>
-</div>
-
-<script>
-/* =========================================
-   五指山・悟空財神廟｜核心設定（可改一個地方就好）
-   1) GAS_WEBAPP_URL 留空 => 本機計數與本機燈牆（不會影響 GitHub Pages）
-   2) 填入 GAS Web App URL => 全站「總訪客/今日訪客」與「公共光明燈牆」可變成全球共享
-   ========================================= */
-const GAS_WEBAPP_URL = ""; // 例: "https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec"
-
-/* ========= 時區：台灣 UTC+8，避免 UTC 跨日 ========= */
-function twISODate() {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const tw  = new Date(utc + 8 * 3600000);
-  return tw.toISOString().slice(0, 10);
-}
-
-/* ========= 浮窗：顯示/隱藏 ========= */
-(function initFloat(){
-  const btn = document.getElementById("wm-float-toggle");
-  const body = document.getElementById("wm-float-body");
-  const key = "wm_float_hidden";
-  const hidden = localStorage.getItem(key) === "1";
-  if (hidden) { body.style.display = "none"; btn.innerText = "Show"; }
-
-  btn.addEventListener("click", () => {
-    const isHidden = body.style.display === "none";
-    body.style.display = isHidden ? "block" : "none";
-    btn.innerText = isHidden ? "Hide" : "Show";
-    localStorage.setItem(key, isHidden ? "0" : "1");
-  });
-})();
-
-/* ========= 訪客計數：本機模式 ========= */
-function localVisitTick() {
-  const day = twISODate();
-  const totalKey = "wm_total_visits";
-  const todayKey = "wm_today_visits_" + day;
-
-  let total = parseInt(localStorage.getItem(totalKey) || "0", 10);
-  let today = parseInt(localStorage.getItem(todayKey) || "0", 10);
-
-  total += 1;
-  today += 1;
-
-  localStorage.setItem(totalKey, String(total));
-  localStorage.setItem(todayKey, String(today));
-
-  return { total, today };
-}
-
-/* ========= 訪客計數：GAS 模式（可選） ========= */
-async function gasVisitTick() {
-  const day = twISODate();
-  const url = GAS_WEBAPP_URL + "?action=visit&day=" + encodeURIComponent(day);
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) throw new Error("GAS visit failed");
-  return await res.json(); // { total, today }
-}
-
-/* ========= 更新浮窗數字 ========= */
-async function updateCounters() {
-  let data;
-  try {
-    if (GAS_WEBAPP_URL) data = await gasVisitTick();
-    else data = localVisitTick();
-  } catch (e) {
-    data = localVisitTick();
-  }
-  document.getElementById("wm-total").innerText = data.total ?? "0";
-  document.getElementById("wm-today").innerText = data.today ?? "0";
-}
-
-updateCounters();
-</script>
-
-# 🏯 五指山・悟空財神廟
-## 信念不是祈求，是紀律
-
-這不是一座求財的廟。  
-這是一個提醒你不要亂來的地方。
-
-在《K線西遊記》的宇宙中，悟空不保證你賺錢。  
+在《K線西遊記》的宇宙中——  
+悟空從來不保證你賺錢，  
 他只提醒你一件事：
 
 > 市場只獎勵守紀律的人。
 
 ---
 
-## KGEN 的定義（定稿）
-在五指山系統裡，KGEN 被定義為「質量發財金」。
+## 宇宙定義：發財金＝質量
+在這裡，發財金不是迷信。
 
-- 1 KGEN = 1 NTD = 1 kg  
-- KGEN 是「質量」，不是承諾  
-- 質量不等於獲利，質量只代表你能承受多少重力與速度  
-- 這裡不談投資回報，只談秩序與存在
-
----
-
-## 悟空不給你什麼
-- 不給明牌  
-- 不給保證  
-- 不給暴富  
-- 不替你承擔風險  
+- 1 公斤（Kg） = 1 KGEN = 1 新台幣（NTD）
+- KGEN 代表「質量」，不是承諾
+- 任何行為只做「紀錄」與「申請」，不做自動轉帳、不碰私鑰
 
 ---
 
-## 悟空提醒你什麼
-- 方向錯了要停  
-- 情緒來了要退  
-- 貪念出現要斷  
-- 紀律破了會被市場處決  
+## 你在這裡能做什麼
+- 公開：點光明燈（全宇宙可見）
+- 私密：放天燈（只有自己可見）
+- 擲筊：聖盃（正正）才可申請發財金
+- 申請：KGEN 發財金（只登記，等待審核與人工發放）
+- 還願：歸還發財金（只登記，附 TxHash 方便查核）
+- 查證：我點過的燈、我放過的天燈、我擲過的筊、我的申請狀態
 
 ---
 
-# 🕯️ 光明燈（公共）
-光明燈是「可被全宇宙看見」的燈牆。  
-若你尚未接 GAS 全域儲存，系統會先以「本機模式」運作（只在你的裝置可見）。  
-當你提供 GAS Web App URL 後，燈牆即可升級為全球共享。
-
-<!-- =========================
-     光明燈：公共燈牆（預設本機 / 可升級 GAS）
-     ========================= -->
-<section style="max-width:760px;margin:22px auto;padding:18px 18px;border:1px solid #111;border-radius:18px;">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-    <div>
-      <div style="font-size:18px;font-weight:900;">Public Lamp Wall</div>
-      <div style="font-size:12px;opacity:.75;">Leave a name or stay anonymous.</div>
-    </div>
-    <div style="font-size:12px;opacity:.75;">
-      Mode: <span id="wm-lamp-mode">...</span>
-    </div>
+<!-- 右上角浮動視窗：總訪客 / 今日訪客 -->
+<div id="wt-floating"
+  style="position:fixed;top:16px;right:16px;z-index:9999;
+  background:#fff;border:1px solid #111;border-radius:14px;
+  padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.08);
+  font-size:13px;min-width:190px;">
+  <div style="font-weight:900;">五指山・悟空財神廟</div>
+  <div style="opacity:.85;margin-top:6px;">
+    今日來訪：<span id="wt-today">-</span><br>
+    總來訪：<span id="wt-total">-</span>
   </div>
+  <div style="margin-top:8px;opacity:.65;">
+    你的識別：<span id="wt-device">-</span>
+  </div>
+</div>
 
-  <hr style="border:none;border-top:1px solid #111; margin:14px 0;">
+<hr>
 
-  <input id="wmLampName" placeholder="暱稱（可留空）"
+## 光明燈（公開｜全宇宙可見）
+> 本區不涉及投資、報酬、交易或承諾。僅為存在紀錄與敘事入口。
+
+<section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
+  <h3 style="margin-top:0;">點一盞光明燈</h3>
+
+  <input id="lampNickname" placeholder="暱稱（可留空）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
-  <textarea id="wmLampMsg" placeholder="一句話（可留空）"
-    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;min-height:88px;margin-bottom:10px;"></textarea>
+  <textarea id="lampMessage" placeholder="一句話（建議 50 字內）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;min-height:90px;"></textarea>
 
-  <button id="wmLampBtn"
-    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;cursor:pointer;">
-    點亮光明燈
+  <button id="btnLamp"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
+    點亮光明燈（公開）
   </button>
 
-  <span id="wmLampStatus" style="margin-left:10px;font-size:12px;opacity:.8;"></span>
+  <span id="lampResult" style="margin-left:10px;font-weight:800;"></span>
 
-  <hr style="border:none;border-top:1px solid #111; margin:14px 0;">
+  <hr style="margin:16px 0;">
 
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-    <div style="font-weight:900;">Latest Lamps</div>
-    <button id="wmRefreshLamps"
-      style="padding:8px 12px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;cursor:pointer;">
-      Refresh
-    </button>
-  </div>
-
-  <div id="wmLampList" style="margin-top:10px; display:grid; gap:10px;"></div>
-
-  <div style="margin-top:12px;font-size:12px;opacity:.75;line-height:1.45;">
-    Disclaimer: no investment advice, no ROI promise, no trading service. This is narrative and presence record only.
-  </div>
+  <h3 style="margin:0 0 8px 0;">最新光明燈（公開清單）</h3>
+  <div id="lampList" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
-
-<script>
-/* ========= 光明燈：資料結構 ========= */
-function lampPayload(kind) {
-  const name = (document.getElementById("wmLampName").value || "").trim() || "Anonymous";
-  const msg  = (document.getElementById("wmLampMsg").value || "").trim() || "(silent)";
-  return {
-    kind, // "public"
-    name,
-    msg,
-    day: twISODate(),
-    ts: Date.now()
-  };
-}
-
-/* ========= 本機：光明燈存取 ========= */
-const LOCAL_PUBLIC_KEY = "wm_public_lamps";
-function localLoadPublic() {
-  return JSON.parse(localStorage.getItem(LOCAL_PUBLIC_KEY) || "[]");
-}
-function localSavePublic(item) {
-  const arr = localLoadPublic();
-  arr.unshift(item);
-  localStorage.setItem(LOCAL_PUBLIC_KEY, JSON.stringify(arr.slice(0, 50)));
-}
-
-/* ========= GAS：光明燈存取（可選） ========= */
-async function gasPostLamp(item) {
-  const res = await fetch(GAS_WEBAPP_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "lamp_post", data: item })
-  });
-  if (!res.ok) throw new Error("GAS lamp_post failed");
-  return await res.json(); // ok
-}
-async function gasGetLamps() {
-  const url = GAS_WEBAPP_URL + "?action=lamp_list";
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) throw new Error("GAS lamp_list failed");
-  return await res.json(); // { items: [...] }
-}
-
-/* ========= UI：渲染燈牆 ========= */
-function renderLampList(items) {
-  const box = document.getElementById("wmLampList");
-  box.innerHTML = "";
-  const safe = (s) => String(s).replace(/[<>]/g, "");
-  if (!items || items.length === 0) {
-    box.innerHTML = '<div style="border:1px dashed #111;border-radius:14px;padding:12px;opacity:.75;">No lamps yet.</div>';
-    return;
-  }
-  items.slice(0, 12).forEach(it => {
-    const d = new Date(it.ts || Date.now());
-    const card = document.createElement("div");
-    card.style.border = "1px solid #111";
-    card.style.borderRadius = "14px";
-    card.style.padding = "12px";
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:900;">${safe(it.name || "Anonymous")}</div>
-        <div style="font-size:12px;opacity:.7;">${safe(d.toLocaleString())}</div>
-      </div>
-      <div style="margin-top:6px;line-height:1.5;">${safe(it.msg || "")}</div>
-    `;
-    box.appendChild(card);
-  });
-}
-
-/* ========= 讀取/刷新 ========= */
-async function refreshPublicLamps() {
-  try {
-    if (GAS_WEBAPP_URL) {
-      document.getElementById("wm-lamp-mode").innerText = "Global (GAS)";
-      const data = await gasGetLamps();
-      renderLampList(data.items || []);
-    } else {
-      document.getElementById("wm-lamp-mode").innerText = "Local (device)";
-      renderLampList(localLoadPublic());
-    }
-  } catch (e) {
-    document.getElementById("wm-lamp-mode").innerText = "Local (fallback)";
-    renderLampList(localLoadPublic());
-  }
-}
-
-document.getElementById("wmRefreshLamps").addEventListener("click", refreshPublicLamps);
-
-/* ========= 點亮光明燈 ========= */
-document.getElementById("wmLampBtn").addEventListener("click", async () => {
-  const status = document.getElementById("wmLampStatus");
-  status.innerText = "Submitting...";
-  const item = lampPayload("public");
-
-  try {
-    if (GAS_WEBAPP_URL) await gasPostLamp(item);
-    else localSavePublic(item);
-
-    status.innerText = "Done.";
-    document.getElementById("wmLampMsg").value = "";
-    await refreshPublicLamps();
-  } catch (e) {
-    localSavePublic(item);
-    status.innerText = "Saved locally (fallback).";
-    await refreshPublicLamps();
-  }
-});
-
-refreshPublicLamps();
-</script>
 
 ---
 
-# 🎈 天燈（只看自己的）
-天燈是「只屬於你自己」的紀錄，不公開。  
-你可以寫願望、寫約束、寫誓言，只有你看得到。
+## 天燈（私密｜只有自己看得到）
+<section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
+  <h3 style="margin-top:0;">放一盞天燈（只存你的）</h3>
 
-<section style="max-width:760px;margin:22px auto;padding:18px 18px;border:1px solid #111;border-radius:18px;">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-    <div>
-      <div style="font-size:18px;font-weight:900;">Sky Lantern (Private)</div>
-      <div style="font-size:12px;opacity:.75;">Only visible on your device.</div>
-    </div>
-    <button id="wmSkyListBtn"
-      style="padding:8px 12px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;cursor:pointer;">
-      🔍 我點過的燈
-    </button>
-  </div>
-
-  <hr style="border:none;border-top:1px solid #111; margin:14px 0;">
-
-  <input id="wmSkyTitle" placeholder="標題（可留空）"
+  <input id="lanternTitle" placeholder="天燈標題（可留空）"
     style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
 
-  <textarea id="wmSkyText" placeholder="寫下你的願望或紀律（可留空）"
-    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;min-height:110px;margin-bottom:10px;"></textarea>
+  <textarea id="lanternWish" placeholder="願望（只你自己看得到）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;min-height:90px;"></textarea>
 
-  <button id="wmSkyBtn"
-    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;cursor:pointer;">
-    放天燈
+  <button id="btnLantern"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
+    放天燈（私密）
   </button>
 
-  <span id="wmSkyStatus" style="margin-left:10px;font-size:12px;opacity:.8;"></span>
+  <span id="lanternResult" style="margin-left:10px;font-weight:800;"></span>
 
-  <div id="wmSkyPanel" style="display:none;margin-top:14px;">
-    <hr style="border:none;border-top:1px solid #111; margin:14px 0;">
-    <div style="font-weight:900;">My Sky Lanterns</div>
-    <div id="wmSkyList" style="margin-top:10px; display:grid; gap:10px;"></div>
-  </div>
+  <hr style="margin:16px 0;">
+
+  <h3 style="margin:0 0 8px 0;">🔍 我放過的天燈（只看自己）</h3>
+  <div id="lanternList" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
-
-<script>
-const SKY_KEY = "wm_sky_lanterns";
-
-function loadSky() {
-  return JSON.parse(localStorage.getItem(SKY_KEY) || "[]");
-}
-function saveSky(item) {
-  const arr = loadSky();
-  arr.unshift(item);
-  localStorage.setItem(SKY_KEY, JSON.stringify(arr.slice(0, 80)));
-}
-function renderSky() {
-  const list = document.getElementById("wmSkyList");
-  const items = loadSky();
-  list.innerHTML = "";
-  const safe = (s) => String(s).replace(/[<>]/g, "");
-  if (!items.length) {
-    list.innerHTML = '<div style="border:1px dashed #111;border-radius:14px;padding:12px;opacity:.75;">No sky lanterns yet.</div>';
-    return;
-  }
-  items.slice(0, 20).forEach(it => {
-    const d = new Date(it.ts || Date.now());
-    const card = document.createElement("div");
-    card.style.border = "1px solid #111";
-    card.style.borderRadius = "14px";
-    card.style.padding = "12px";
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:900;">${safe(it.title || "Untitled")}</div>
-        <div style="font-size:12px;opacity:.7;">${safe(d.toLocaleString())}</div>
-      </div>
-      <div style="margin-top:6px;line-height:1.5;">${safe(it.text || "")}</div>
-    `;
-    list.appendChild(card);
-  });
-}
-
-document.getElementById("wmSkyBtn").addEventListener("click", () => {
-  const status = document.getElementById("wmSkyStatus");
-  const title = (document.getElementById("wmSkyTitle").value || "").trim() || "Untitled";
-  const text  = (document.getElementById("wmSkyText").value || "").trim() || "(silent)";
-  saveSky({ title, text, ts: Date.now(), day: twISODate() });
-  document.getElementById("wmSkyText").value = "";
-  status.innerText = "Saved.";
-});
-
-document.getElementById("wmSkyListBtn").addEventListener("click", () => {
-  const p = document.getElementById("wmSkyPanel");
-  const open = p.style.display !== "none";
-  p.style.display = open ? "none" : "block";
-  if (!open) renderSky();
-});
-</script>
 
 ---
 
-# 🏆 聖盃（誠意按鈕）
-這是一個「誠意」動作，不是資格審核。  
-按下去，只是提醒自己：你不是來求快錢的。
+## 擲筊（聖盃規則）
+規則（定稿）：
+- 正正＝聖杯（同意）
+- 反反＝笑杯（不同意／不莊重）
+- 正反＝陰杯（不確定／再問）
 
-<section style="max-width:760px;margin:22px auto;padding:18px 18px;border:1px solid #111;border-radius:18px;">
-  <div style="font-size:18px;font-weight:900;">Holy Cup</div>
-  <div style="font-size:12px;opacity:.75;">A discipline ritual. No promises.</div>
+<section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
+  <h3 style="margin-top:0;">擲筊</h3>
 
-  <hr style="border:none;border-top:1px solid #111; margin:14px 0;">
+  <input id="grailNote" placeholder="你想問的事（可留空）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;">
 
-  <button id="wmCupBtn"
-    style="padding:12px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;cursor:pointer;">
-    Press the Holy Cup
+  <button id="btnGrail"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
+    擲筊
   </button>
 
-  <span id="wmCupStatus" style="margin-left:10px;font-size:12px;opacity:.8;"></span>
+  <span id="grailResult" style="margin-left:10px;font-weight:900;"></span>
 
-  <div style="margin-top:12px;font-size:12px;opacity:.75;line-height:1.45;">
-    This action creates a proof on your device only (no wallet, no money, no tracking).
-  </div>
+  <hr style="margin:16px 0;">
+
+  <h3 style="margin:0 0 8px 0;">🔍 我擲過的筊（只看自己）</h3>
+  <div id="grailList" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
 </section>
-
-<script>
-const CUP_KEY = "wm_holy_cup_count";
-document.getElementById("wmCupBtn").addEventListener("click", () => {
-  let c = parseInt(localStorage.getItem(CUP_KEY) || "0", 10);
-  c += 1;
-  localStorage.setItem(CUP_KEY, String(c));
-  document.getElementById("wmCupStatus").innerText = "Count: " demonstrate? + c;
-});
-</script>
 
 ---
 
-# 💛 重要聲明
-- 本頁不涉及投資、報酬、交易或承諾  
-- 不提供任何「穩賺」或「保證」  
-- 所有互動功能僅為敘事與存在紀錄用途  
+## KGEN 發財金（申請 / 還願）
+定義（定稿）：
+1) 申請發財金是「登記」，不是保證  
+2) 聖杯才可送出申請（儀式門檻）  
+3) 本頁不自動發幣、不存私鑰  
+4) 實際發放：由你（管理端）用錢包或腳本人工轉帳  
+5) 出金地址＝歸還地址（你申請時填的地址）
+
+<section style="max-width:720px;margin:18px 0;padding:18px;border:1px solid #111;border-radius:18px;">
+  <h3 style="margin-top:0;">申請發財金（需聖杯）</h3>
+
+  <input id="fortuneEmail" placeholder="Email（可留空）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
+
+  <input id="fortuneWallet" placeholder="0xb73d6716005b37bec742d64482fa26033ee1a4e1"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
+
+  <input id="fortuneAmount" placeholder="申請數量（KGEN）例：10"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
+
+  <textarea id="fortunePurpose" placeholder="用途（簡短即可）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;min-height:70px;"></textarea>
+
+  <button id="btnFortuneApply"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
+    送出申請（需聖杯）
+  </button>
+
+  <span id="fortuneApplyResult" style="margin-left:10px;font-weight:900;"></span>
+
+  <hr style="margin:16px 0;">
+
+  <h3 style="margin:0 0 8px 0;">還願歸還（登記）</h3>
+
+  <input id="returnWallet" placeholder="0xb73d6716005b37bec742d64482fa26033ee1a4e1"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
+
+  <input id="returnAmount" placeholder="歸還數量（KGEN）例：10"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:8px;">
+
+  <input id="returnTx" placeholder="TxHash（可留空，但建議填）"
+    style="width:100%;padding:10px;border:1px solid #111;border-radius:12px;margin-bottom:10px;">
+
+  <button id="btnFortuneReturn"
+    style="padding:10px 16px;border-radius:999px;border:1px solid #111;font-weight:900;background:#fff;">
+    登記還願
+  </button>
+
+  <span id="fortuneReturnResult" style="margin-left:10px;font-weight:900;"></span>
+
+  <hr style="margin:16px 0;">
+
+  <h3 style="margin:0 0 8px 0;">🔍 我的申請狀態（只看自己）</h3>
+  <div id="fortuneStatus" style="font-size:14px;line-height:1.5;opacity:.92;">載入中…</div>
+</section>
+
+---
+
+## 重要提醒
+- 本頁不構成投資建議，不提供收益承諾  
+- 所有功能僅為敘事、紀錄、申請入口  
+- 若你需要支持創作與公益，請走官網捐款頁（USDT-TRC20）
 
 ---
 
@@ -462,3 +204,231 @@ PrimeForge 以母機之名，開啟金融生命。
 花果山台灣・信念不滅・市場無界。  
 Where the Market Becomes the Myth.  
 —— 樂天帝 ⌖
+
+<script>
+/* =============================
+   五指山・悟空財神廟 前端母機
+   - 使用 JSONP 呼叫 GAS（避免 CORS）
+   - 你的 GAS URL（如部署變更就改這行）
+============================= */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwn_3DB91DK9VJV48EE-5--4zjrwd1qWjHQkgHptlJ4xdPIKufNhgsZOxgkyScHmumSxw/exec";
+
+/* ---------- Device ID（固定一台裝置） ---------- */
+function getDeviceId(){
+  const k = "wt_device_id";
+  let v = localStorage.getItem(k);
+  if (!v){
+    v = "wt_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+    localStorage.setItem(k, v);
+  }
+  return v;
+}
+const DEVICE_ID = getDeviceId();
+document.getElementById("wt-device").innerText = DEVICE_ID;
+
+/* ---------- JSONP Helper ---------- */
+function jsonp(action, params, cb){
+  const callbackName = "wt_cb_" + Math.random().toString(16).slice(2);
+  window[callbackName] = function(data){
+    try { cb && cb(data); } finally {
+      delete window[callbackName];
+      s.remove();
+    }
+  };
+  const q = new URLSearchParams(Object.assign({}, params || {}, {
+    action,
+    device_id: DEVICE_ID,
+    callback: callbackName
+  }));
+  const s = document.createElement("script");
+  s.src = GAS_URL + "?" + q.toString();
+  document.body.appendChild(s);
+}
+
+/* ---------- UI Render Helpers ---------- */
+function esc(s){
+  return String(s || "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
+function renderList(el, items, type){
+  if (!items || !items.length){
+    el.innerHTML = "<div style='opacity:.7;'>（目前沒有紀錄）</div>";
+    return;
+  }
+  el.innerHTML = items.map(it => {
+    if (type === "lamp"){
+      return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">${esc(it.nickname || "無名者")}</div>
+        <div style="opacity:.9;margin-top:4px;">${esc(it.message || "")}</div>
+        <div style="opacity:.55;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
+      </div>`;
+    }
+    if (type === "lantern"){
+      return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">${esc(it.title || "天燈")}</div>
+        <div style="opacity:.9;margin-top:4px;">${esc(it.wish || "")}</div>
+        <div style="opacity:.55;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
+      </div>`;
+    }
+    if (type === "grail"){
+      return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">結果：${esc(it.result || "")}</div>
+        <div style="opacity:.75;margin-top:4px;">${esc(it.note || "")}</div>
+        <div style="opacity:.55;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
+      </div>`;
+    }
+    if (type === "fortune"){
+      return `<div style="padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.2);">
+        <div style="font-weight:900;">狀態：${esc(it.status || "")}</div>
+        <div style="opacity:.9;margin-top:4px;">${esc(it.amount_kgen || "")} KGEN → ${esc(it.wallet || "")}</div>
+        <div style="opacity:.75;margin-top:4px;">${esc(it.purpose || "")}</div>
+        <div style="opacity:.65;font-size:12px;margin-top:6px;">${esc(it.ts || "")}</div>
+        ${it.paid_tx ? `<div style="opacity:.75;font-size:12px;margin-top:6px;">Tx: ${esc(it.paid_tx)}</div>` : ""}
+        ${it.admin_note ? `<div style="opacity:.75;font-size:12px;margin-top:6px;">Note: ${esc(it.admin_note)}</div>` : ""}
+      </div>`;
+    }
+    return "";
+  }).join("");
+}
+
+/* ---------- Boot ---------- */
+let HAS_HOLY_GRAIL = false;
+
+function refreshStats(){
+  jsonp("stats", {}, (r) => {
+    if (r && r.ok){
+      document.getElementById("wt-today").innerText = r.today_visits;
+      document.getElementById("wt-total").innerText = r.total_visits;
+    }
+  });
+}
+
+function recordVisit(){
+  jsonp("visit", { ua_hint: navigator.userAgent.slice(0,120) }, (r) => {
+    // visit 成功會回 total/today，順便刷新
+    refreshStats();
+  });
+}
+
+function loadPublicLamps(){
+  jsonp("lamp_list", { limit: 20 }, (r) => {
+    const el = document.getElementById("lampList");
+    if (!r || !r.ok) { el.innerHTML = "<div style='opacity:.7;'>載入失敗</div>"; return; }
+    renderList(el, r.items || [], "lamp");
+  });
+}
+
+function loadMyLanterns(){
+  jsonp("lantern_list", { limit: 20 }, (r) => {
+    const el = document.getElementById("lanternList");
+    if (!r || !r.ok) { el.innerHTML = "<div style='opacity:.7;'>載入失敗</div>"; return; }
+    renderList(el, r.items || [], "lantern");
+  });
+}
+
+function loadMyGrails(){
+  jsonp("grail_list", { limit: 20 }, (r) => {
+    const el = document.getElementById("grailList");
+    if (!r || !r.ok) { el.innerHTML = "<div style='opacity:.7;'>載入失敗</div>"; return; }
+    renderList(el, r.items || [], "grail");
+  });
+}
+
+function loadMyFortuneStatus(){
+  jsonp("fortune_status", {}, (r) => {
+    const el = document.getElementById("fortuneStatus");
+    if (!r || !r.ok) { el.innerHTML = "<div style='opacity:.7;'>載入失敗</div>"; return; }
+    renderList(el, r.items || [], "fortune");
+  });
+}
+
+/* ---------- Actions ---------- */
+document.getElementById("btnLamp").addEventListener("click", () => {
+  const nickname = document.getElementById("lampNickname").value || "無名者";
+  const message  = document.getElementById("lampMessage").value || "（無言）";
+  jsonp("lamp_add", { nickname, message }, (r) => {
+    const out = document.getElementById("lampResult");
+    if (r && r.ok){
+      out.innerText = "已點亮（公開）";
+      document.getElementById("lampMessage").value = "";
+      loadPublicLamps();
+    } else out.innerText = "失敗";
+  });
+});
+
+document.getElementById("btnLantern").addEventListener("click", () => {
+  const title = document.getElementById("lanternTitle").value || "天燈";
+  const wish  = document.getElementById("lanternWish").value || "（無言）";
+  jsonp("lantern_add", { title, wish }, (r) => {
+    const out = document.getElementById("lanternResult");
+    if (r && r.ok){
+      out.innerText = "已放天燈（私密）";
+      document.getElementById("lanternWish").value = "";
+      loadMyLanterns();
+    } else out.innerText = (r && r.error) ? r.error : "失敗";
+  });
+});
+
+document.getElementById("btnGrail").addEventListener("click", () => {
+  const note = document.getElementById("grailNote").value || "";
+  jsonp("grail_cast", { note }, (r) => {
+    const out = document.getElementById("grailResult");
+    if (r && r.ok){
+      out.innerText = `擲出：${r.toss}｜${r.result}`;
+      HAS_HOLY_GRAIL = (r.result === "聖杯");
+      loadMyGrails();
+    } else out.innerText = "失敗";
+  });
+});
+
+document.getElementById("btnFortuneApply").addEventListener("click", () => {
+  const out = document.getElementById("fortuneApplyResult");
+  if (!HAS_HOLY_GRAIL){
+    out.innerText = "需先擲到聖杯（正正）";
+    return;
+  }
+  const email = document.getElementById("fortuneEmail").value || "";
+  const wallet = document.getElementById("fortuneWallet").value || "";
+  const amount_kgen = document.getElementById("fortuneAmount").value || "";
+  const purpose = document.getElementById("fortunePurpose").value || "發財金申請";
+  if (!wallet){
+    out.innerText = "請填錢包地址";
+    return;
+  }
+  jsonp("fortune_apply", { email, wallet, amount_kgen, purpose }, (r) => {
+    if (r && r.ok){
+      out.innerText = "已登記，等待審核";
+      loadMyFortuneStatus();
+    } else {
+      out.innerText = (r && (r.message || r.error)) ? (r.message || r.error) : "失敗";
+    }
+  });
+});
+
+document.getElementById("btnFortuneReturn").addEventListener("click", () => {
+  const out = document.getElementById("fortuneReturnResult");
+  const wallet = document.getElementById("returnWallet").value || "";
+  const amount_kgen = document.getElementById("returnAmount").value || "";
+  const tx = document.getElementById("returnTx").value || "";
+  if (!wallet){
+    out.innerText = "請填地址";
+    return;
+  }
+  jsonp("fortune_return", { wallet, amount_kgen, tx, note: "還願歸還" }, (r) => {
+    if (r && r.ok){
+      out.innerText = "已登記還願";
+      loadMyFortuneStatus();
+    } else out.innerText = (r && r.error) ? r.error : "失敗";
+  });
+});
+
+/* ---------- Start ---------- */
+refreshStats();
+recordVisit();
+loadPublicLamps();
+loadMyLanterns();
+loadMyGrails();
+loadMyFortuneStatus();
+</script>
