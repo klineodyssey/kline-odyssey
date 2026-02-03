@@ -37,16 +37,18 @@ permalink: /wukong-temple/
 
 ---
 
-<!-- 右上角浮動視窗：總訪客 / 今日訪客（迷你版） -->
-<div id="wt-float" class="wt-min">
-  <div class="wt-head">
-    <div class="wt-title">五指山・悟空財神廟</div>
-    <button id="wt-toggle" type="button" aria-label="toggle">▾</button>
-  </div>
+<!-- =============================
+  五指山・悟空財神廟｜右上角迷你統計
+============================= -->
 
-  <div class="wt-body" id="wt-body">
-    <div class="wt-row">今日：<span id="wt-today">…</span></div>
-    <div class="wt-row">總計：<span id="wt-total">…</span></div>
+<div id="wt-float">
+  <div class="wt-head">
+    <div class="wt-title">五指山</div>
+    <button id="wt-toggle">▾</button>
+  </div>
+  <div class="wt-body">
+    <div>今日：<span id="wt-today">0</span></div>
+    <div>總計：<span id="wt-total">0</span></div>
   </div>
 </div>
 
@@ -56,49 +58,28 @@ permalink: /wukong-temple/
   top: 72px;
   right: 10px;
   z-index: 9999;
-
-  background: rgba(255,255,255,0.88);
+  background: rgba(255,255,255,.9);
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 6px 8px;
-
   font-size: 12px;
-  line-height: 1.35;
-
-  max-width: 160px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
 }
 
 .wt-head{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap: 8px;
+  align-items:center;
 }
 
 .wt-title{
-  font-weight: 700;
-  font-size: 12px;
-  white-space: nowrap;
+  font-weight:700;
 }
 
 #wt-toggle{
-  border: 1px solid #ddd;
-  background: transparent;
-  border-radius: 8px;
-  padding: 2px 6px;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.wt-body{
-  margin-top: 6px;
-}
-
-.wt-row{
-  display:flex;
-  justify-content:space-between;
-  gap: 8px;
+  border:none;
+  background:none;
+  font-size:12px;
 }
 
 .wt-hide .wt-body{
@@ -107,16 +88,57 @@ permalink: /wukong-temple/
 </style>
 
 <script>
-(() => {
-  const box = document.getElementById('wt-float');
-  const btn = document.getElementById('wt-toggle');
-  if (!box || !btn) return;
+/* ====== 基本設定 ====== */
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbwn_3DB91DK9VJV48EE-5--4zjrwd1qWjHQkgHptlJ4xdPIKufNhgsZOxgkyScHmumSxw/exec";
 
-  btn.addEventListener('click', () => {
-    box.classList.toggle('wt-hide');
-    btn.textContent = box.classList.contains('wt-hide') ? '▸' : '▾';
+/* ====== 裝置識別 ====== */
+function getDeviceId(){
+  let id = localStorage.getItem("wt_device");
+  if(!id){
+    id = "wt_" + Math.random().toString(16).slice(2);
+    localStorage.setItem("wt_device", id);
+  }
+  return id;
+}
+const DEVICE_ID = getDeviceId();
+
+/* ====== JSONP 呼叫 ====== */
+function jsonp(action, params, cb){
+  const fn = "cb_" + Math.random().toString(16).slice(2);
+  window[fn] = (res)=>{
+    cb && cb(res);
+    delete window[fn];
+    script.remove();
+  };
+
+  const q = new URLSearchParams({
+    action,
+    device_id: DEVICE_ID,
+    callback: fn,
+    ...params
   });
-})();
+
+  const script = document.createElement("script");
+  script.src = GAS_URL + "?" + q.toString();
+  document.body.appendChild(script);
+}
+
+/* ====== 統計 ====== */
+function refreshStats(){
+  jsonp("stats", {}, (r)=>{
+    if(!r || !r.ok) return;
+    document.getElementById("wt-today").innerText = r.today_visits;
+    document.getElementById("wt-total").innerText = r.total_visits;
+  });
+}
+
+jsonp("visit", {}, refreshStats);
+
+/* ====== 收合 ====== */
+document.getElementById("wt-toggle").onclick = ()=>{
+  document.getElementById("wt-float").classList.toggle("wt-hide");
+};
 </script>
 
 <hr>
