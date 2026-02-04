@@ -45,7 +45,7 @@ Homepage Quick Actions (Production Block)
     📢 Telegram
   </a>
 
-<a href="/kline-odyssey/wukong-temple/"
+<a href="/kline-odyssey/wukong-temple/index.html"
    style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
   🐒 悟空財神廟｜信念與紀律
 </a>
