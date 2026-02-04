@@ -11,7 +11,7 @@ Homepage Quick Actions (Production Block)
     ⚖️ KGEN 白皮書
   </a>
 
-  <a href="/kline-odyssey/whitepaper/donation/"
+  <a href="./whitepaper/donation/"
      style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     💛 捐款（USDT・TRC20）
   </a>
