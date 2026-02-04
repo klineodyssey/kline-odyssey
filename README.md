@@ -6,7 +6,7 @@ Homepage Quick Actions (Production Block)
 
 <div style="margin:14px 0 6px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
 
-  <a href="/kline-odyssey/whitepaper/KGEN/"
+  <a href="./whitepaper/KGEN/"
      style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     ⚖️ KGEN 白皮書
   </a>
