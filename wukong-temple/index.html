@@ -1,5 +1,5 @@
 <!--
-悟空財神廟｜互動循環 V0.1（可回饋・可記錄）
+悟空財神廟｜互動循環 V0.2（可回饋・可記錄・三還願地址）
 File: /kline-odyssey/wukong-temple/index.html
 Deploy: GitHub Pages
 -->
@@ -59,7 +59,7 @@ Deploy: GitHub Pages
     <div id="toast" style="margin-top:10px;font-weight:900;"></div>
   </div>
 
-  <!-- Main Action Buttons (All-in-one) -->
+  <!-- Main Action Buttons -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;">
 
     <button id="btnVisit"
@@ -82,7 +82,7 @@ Deploy: GitHub Pages
       style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
       <div style="font-weight:900;font-size:16px;">🧧 領發財金（遊戲事件）</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        一次性事件｜同地址冷卻（本機）
+        一天一次｜同地址冷卻（本機）
       </div>
     </button>
 
@@ -96,9 +96,9 @@ Deploy: GitHub Pages
 
     <button id="btnBurn"
       style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🔥 燒幣／還願</div>
+      <div style="font-weight:900;font-size:16px;">🔥 還願（選三個地址之一）</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        感恩與轉換（只記錄行為）
+        感恩與轉換｜顯示地址＋一鍵複製＋各自冷卻
       </div>
     </button>
 
@@ -112,24 +112,120 @@ Deploy: GitHub Pages
 
   </div>
 
-  <!-- AI Voice Service (Chinese script, ready to record / TTS) -->
+  <!-- Vow Panel: 3 address options + copy + cooldown -->
+  <div id="vowPanel"
+       style="display:none;border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
+
+    <div style="font-weight:900;margin-bottom:8px;">
+      🔥 請選擇還願去向（必選）
+    </div>
+
+    <div style="opacity:.9;line-height:1.7;margin-bottom:10px;">
+      這是<strong>感恩</strong>與<strong>能量轉換</strong>的敘事行為。<br/>
+      系統只記錄「你選了哪一個去向」，不保證、不承諾、不上鏈。
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+
+      <!-- Blackhole -->
+      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
+        <div style="font-weight:900;">🕳 黑洞燃燒</div>
+        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
+          進黑洞・轉化完成（故事節點）
+        </div>
+        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
+          地址：<span id="addr_blackhole" style="font-weight:900;"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button type="button" data-copy="blackhole"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            複製地址
+          </button>
+          <button type="button" data-vow="blackhole"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            選這個還願
+          </button>
+        </div>
+        <div id="cool_blackhole" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
+      </div>
+
+      <!-- Engine -->
+      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
+        <div style="font-weight:900;">🚀 引擎補油</div>
+        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
+          補油到引擎室・推動 KUFO 前進
+        </div>
+        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
+          地址：<span id="addr_engine" style="font-weight:900;"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button type="button" data-copy="engine"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            複製地址
+          </button>
+          <button type="button" data-vow="engine"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            選這個還願
+          </button>
+        </div>
+        <div id="cool_engine" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
+      </div>
+
+      <!-- Public Good -->
+      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
+        <div style="font-weight:900;">🤲 社會還願</div>
+        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
+          公益・震災・自由民主（故事用途）
+        </div>
+        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
+          地址：<span id="addr_public_good" style="font-weight:900;"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button type="button" data-copy="public_good"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            複製地址
+          </button>
+          <button type="button" data-vow="public_good"
+            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+            選這個還願
+          </button>
+        </div>
+        <div id="cool_public_good" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button type="button" id="btnVowCancel"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        取消
+      </button>
+    </div>
+
+    <div style="margin-top:10px;opacity:.85;line-height:1.7;">
+      （提示：冷卻與紀錄只存在你的瀏覽器本機，不上鏈、不上傳。）
+    </div>
+  </div>
+
+  <!-- AI Voice Service -->
   <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
     <div style="font-weight:900;">🎧 AI 語音客服（中文台詞｜可直接照唸）</div>
     <div style="margin-top:8px;line-height:1.85;">
       歡迎來到五指山悟空財神廟。<br/>
-      這裡不是銀行，也不是投資平台。<br/>
+      這裡是互動式遊戲入口，不是投資平台。<br/>
       你可以參觀、選擇、體驗，然後離開。<br/><br/>
-      發財金是遊戲事件，一次性完成，不保留、不回收，也不保證價值。<br/>
-      燒幣與還願代表感恩與轉換，是故事行為，不是回報承諾。<br/><br/>
+      發財金是遊戲事件，一天一次，完成就冷卻。<br/>
+      還願代表感恩與轉換，你會看到三個去向地址，選一個就完成記錄。<br/>
+      所有紀錄只在本機，不上鏈、不上傳、不承諾任何回報。<br/><br/>
       想開始就按「登入參拜」。想離開就按「登出離開」。
     </div>
   </div>
 
-  <!-- Physics metaphor (short, non-promissory) -->
+  <!-- Physics metaphor -->
   <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
     <div style="font-weight:900;">⚙️ 世界觀提示（隱喻，不是承諾）</div>
     <div style="margin-top:8px;line-height:1.85;">
-      在 KLINE Odyssey 敘事裡，K G E N 被視為「質量」的象徵。<br/>
+      在 Kline Odyssey 敘事裡，K G E N 被視為「質量」的象徵。<br/>
       E = m c² 與 W = m g h 是世界觀隱喻，用來描述「選擇造成能量轉換」。<br/>
       公式不代表現實保證、不代表收益、不代表兌換。
     </div>
@@ -142,7 +238,7 @@ Deploy: GitHub Pages
       style="margin-top:10px;white-space:pre-wrap;word-break:break-word;line-height:1.6;background:#fafafa;border:1px solid #ddd;border-radius:12px;padding:10px;"></pre>
   </div>
 
-  <!-- Footer signature -->
+  <!-- Footer signature (固定章) -->
   <div style="margin-top:14px;padding-top:12px;border-top:1px solid #111;line-height:1.8;">
     悟空不保證你得到什麼，<br/>
     只陪你走過一次選擇。<br/><br/>
@@ -159,7 +255,15 @@ Deploy: GitHub Pages
   "use strict";
 
   // ====== Storage Key ======
-  const KEY = "klineodyssey_wukongTemple_v0_1";
+  const KEY = "klineodyssey_wukongTemple_v0_2";
+
+  // ====== Addresses (replace these 3 if you have real ones) ======
+  // 你若要換成真地址：直接改這三行就好
+  const VOW_ADDR = {
+    blackhole: "0x000000000000000000000000000000000000dEaD",
+    engine: "0x0000000000000000000000000000000000000000",
+    public_good: "0x0000000000000000000000000000000000000000"
+  };
 
   // ====== Helpers ======
   const nowISO = () => new Date().toISOString();
@@ -179,11 +283,26 @@ Deploy: GitHub Pages
     wukongTemple: {
       lastVisit: null,
       visitCount: 0,
+
+      // fortune: once per day
       fortuneTaken: false,
-      fortuneDate: null,          // YYYY-MM-DD (local)
+      fortuneDate: null, // YYYY-MM-DD (local)
+
+      // divination
       divinationStreak: 0,
+
+      // vows
       burnCount: 0,
+      vowLastDate: { // each address has its own cooldown date
+        blackhole: null,
+        engine: null,
+        public_good: null
+      },
+
+      // exits
       exitCount: 0,
+
+      // logs
       log: []
     }
   });
@@ -192,15 +311,20 @@ Deploy: GitHub Pages
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? safeParse(raw) : null;
     if (!parsed || !parsed.wukongTemple) return defaultState();
-    // Backward-safe merge
+
     const base = defaultState();
-    return {
+    const merged = {
       wukongTemple: {
         ...base.wukongTemple,
         ...parsed.wukongTemple,
+        vowLastDate: {
+          ...base.wukongTemple.vowLastDate,
+          ...(parsed.wukongTemple.vowLastDate || {})
+        },
         log: Array.isArray(parsed.wukongTemple.log) ? parsed.wukongTemple.log : []
       }
     };
+    return merged;
   };
 
   const save = (state) => {
@@ -210,13 +334,12 @@ Deploy: GitHub Pages
   const pushLog = (state, type, meta = {}) => {
     const entry = { type, time: nowISO(), ...meta };
     state.wukongTemple.log.push(entry);
-    // keep log capped (avoid infinite growth)
-    if (state.wukongTemple.log.length > 300) {
-      state.wukongTemple.log = state.wukongTemple.log.slice(-300);
+    if (state.wukongTemple.log.length > 400) {
+      state.wukongTemple.log = state.wukongTemple.log.slice(-400);
     }
   };
 
-  const chance = (p) => Math.random() < p; // p in [0,1)
+  const chance = (p) => Math.random() < p;
 
   const downloadJSON = (obj, filename) => {
     const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
@@ -230,19 +353,62 @@ Deploy: GitHub Pages
     URL.revokeObjectURL(url);
   };
 
+  const copyText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // fallback
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        return ok;
+      } catch {
+        return false;
+      }
+    }
+  };
+
   // ====== UI ======
   const $status = document.getElementById("statusText");
   const $toast = document.getElementById("toast");
   const $logPreview = document.getElementById("logPreview");
+
+  const vowPanel = document.getElementById("vowPanel");
+  const btnVowCancel = document.getElementById("btnVowCancel");
+
+  // address spans
+  document.getElementById("addr_blackhole").textContent = VOW_ADDR.blackhole;
+  document.getElementById("addr_engine").textContent = VOW_ADDR.engine;
+  document.getElementById("addr_public_good").textContent = VOW_ADDR.public_good;
+
+  const $cool = {
+    blackhole: document.getElementById("cool_blackhole"),
+    engine: document.getElementById("cool_engine"),
+    public_good: document.getElementById("cool_public_good")
+  };
 
   const toast = (msg) => {
     $toast.textContent = msg;
     setTimeout(() => { if ($toast.textContent === msg) $toast.textContent = ""; }, 2800);
   };
 
+  const cooldownText = (lastDate) => {
+    const t = todayLocal();
+    if (lastDate === t) return "今日已完成（冷卻中）";
+    return "今日可還願";
+  };
+
   const render = (state) => {
     const s = state.wukongTemple;
 
+    // fortune status
     const fortuneStatus = (() => {
       const t = todayLocal();
       if (s.fortuneTaken && s.fortuneDate === t) return "今日：已完成（冷卻中）";
@@ -255,6 +421,7 @@ Deploy: GitHub Pages
       : `聖筊連勝 ${streakN} 次（約 1 / 2^${streakN}）`;
 
     const last = s.lastVisit ? s.lastVisit : "尚無";
+
     $status.innerHTML = `
       <div>🏮 參拜次數：<strong>${s.visitCount}</strong></div>
       <div>🧧 發財金：<strong>${fortuneStatus}</strong></div>
@@ -265,15 +432,22 @@ Deploy: GitHub Pages
       <div style="margin-top:8px;opacity:.85;">（提示：所有紀錄只存在你的瀏覽器本機，不上鏈、不上傳。）</div>
     `;
 
+    // per-address cooldown display
+    $cool.blackhole.textContent = `冷卻：${cooldownText(s.vowLastDate.blackhole)}`;
+    $cool.engine.textContent = `冷卻：${cooldownText(s.vowLastDate.engine)}`;
+    $cool.public_good.textContent = `冷卻：${cooldownText(s.vowLastDate.public_good)}`;
+
+    // log preview
     const lastLogs = s.log.slice(-20).reverse();
     $logPreview.textContent = lastLogs.length
       ? lastLogs.map((x) => JSON.stringify(x)).join("\n")
       : "（尚無日誌）";
   };
 
+  // ====== Init ======
+  render(load());
+
   // ====== Actions ======
-  const state = load();
-  render(state);
 
   // 登入參拜
   document.getElementById("btnVisit").addEventListener("click", () => {
@@ -286,7 +460,7 @@ Deploy: GitHub Pages
     toast(`✅ 已完成參拜：第 ${s.wukongTemple.visitCount} 次`);
   });
 
-  // 領發財金（本機冷卻：每天一次）
+  // 領發財金（每天一次）
   document.getElementById("btnFortune").addEventListener("click", () => {
     const s = load();
     const t = todayLocal();
@@ -305,7 +479,7 @@ Deploy: GitHub Pages
     toast("🧧 發財金事件完成：一次性體驗已記錄");
   });
 
-  // 搏杯（50% 聖筊；連勝 N → 1/2^N 節奏）
+  // 搏杯（50% 聖筊；連勝 N → 1/2^N）
   document.getElementById("btnDivination").addEventListener("click", () => {
     const s = load();
     const ok = chance(0.5);
@@ -324,14 +498,64 @@ Deploy: GitHub Pages
     }
   });
 
-  // 燒幣／還願（只記錄行為：感恩）
+  // 打開還願面板
   document.getElementById("btnBurn").addEventListener("click", () => {
+    vowPanel.style.display = "block";
+    render(load()); // refresh cooldown text
+    toast("請選擇還願去向");
+    vowPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // 取消還願
+  btnVowCancel.addEventListener("click", () => {
+    vowPanel.style.display = "none";
+    toast("已取消還願選擇");
+  });
+
+  // 面板內：複製地址 / 選擇還願
+  vowPanel.addEventListener("click", async (e) => {
+    const copyBtn = e.target.closest("button[data-copy]");
+    if (copyBtn) {
+      const k = copyBtn.getAttribute("data-copy");
+      const ok = await copyText(VOW_ADDR[k] || "");
+      toast(ok ? "✅ 已複製地址" : "❌ 複製失敗（瀏覽器限制）");
+      return;
+    }
+
+    const vowBtn = e.target.closest("button[data-vow]");
+    if (!vowBtn) return;
+
+    const vowType = vowBtn.getAttribute("data-vow"); // blackhole/engine/public_good
     const s = load();
+    const t = todayLocal();
+
+    // per-address cooldown: once per day
+    if (s.wukongTemple.vowLastDate[vowType] === t) {
+      pushLog(s, "vow_blocked", { to: vowType, reason: "cooldown_today" });
+      save(s);
+      render(s);
+      toast("今日此去向已完成（冷卻中）");
+      return;
+    }
+
     s.wukongTemple.burnCount += 1;
-    pushLog(s, "vow_gratitude"); // 用「感恩」語意，不用「燒幣」字眼當主名
+    s.wukongTemple.vowLastDate[vowType] = t;
+
+    pushLog(s, "vow", {
+      to: vowType,
+      addr: VOW_ADDR[vowType] || null
+    });
+
     save(s);
     render(s);
-    toast("🔥 感恩已記錄：能量完成轉換（敘事）");
+    vowPanel.style.display = "none";
+
+    const msgMap = {
+      blackhole: "🕳 還願完成：黑洞轉化已記錄",
+      engine: "🚀 還願完成：引擎補油已記錄",
+      public_good: "🤲 還願完成：社會還願已記錄"
+    };
+    toast(msgMap[vowType] || "🔥 還願完成：已記錄");
   });
 
   // 登出離開
@@ -342,7 +566,6 @@ Deploy: GitHub Pages
     save(s);
     render(s);
     toast("🚪 已登出離開：本次行為已記錄");
-    // optional: scroll to top so user sees status
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -359,8 +582,7 @@ Deploy: GitHub Pages
     const ok = confirm("確定要清除本機紀錄？這只會清你的瀏覽器，不影響任何鏈上或外部資料。");
     if (!ok) return;
     localStorage.removeItem(KEY);
-    const s = load(); // reload default
-    render(s);
+    render(load());
     toast("🧹 已清除本機紀錄");
   });
 
