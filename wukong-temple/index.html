@@ -1,7 +1,13 @@
 <!--
-悟空財神廟｜互動循環 V0.2（可回饋・可記錄・三還願地址）
+悟空財神廟｜互動循環 V0.3（可回饋・可記錄・可驗證・有呼吸心跳）
 File: /kline-odyssey/wukong-temple/index.html
 Deploy: GitHub Pages
+
+✅ 鏈上資產：KGEN（BSC 主網）
+✅ 還願三地址：往生 / KUFO 引擎 / 公益 Treasury（同時也是發財金發放池）
+✅ 來訪人數：今日 + 總累計（用 CountAPI 當後端計數器，可直接在 GitHub Pages 跑）
+✅ 語音客服：Web Speech API（中文發聲），按鈕即可說話
+✅ 錢包互動：MetaMask / EVM Wallet（不自動出金，所有交易都由錢包確認）
 -->
 
 <!doctype html>
@@ -18,18 +24,11 @@ Deploy: GitHub Pages
 
   <!-- Brand Header -->
   <div style="margin-bottom:10px;">
-    <div style="font-weight:900;font-size:22px;line-height:1.2;">
-      🐒 悟空財神廟｜Wukong Temple
-    </div>
-    <div style="margin-top:6px;font-weight:800;">
-      #悟空新文 #K線西遊記 #花果山台灣
-    </div>
+    <div style="font-weight:900;font-size:22px;line-height:1.2;">🐒 悟空財神廟｜Wukong Temple</div>
+    <div style="margin-top:6px;font-weight:800;">#悟空新文 #K線西遊記 #花果山台灣</div>
     <div style="margin-top:8px;">
-      <a href="https://klineodyssey.github.io/kline-odyssey/"
-         target="_blank" rel="noopener"
-         style="text-decoration:none;font-weight:900;">
-        https://klineodyssey.github.io/kline-odyssey/
-      </a>
+      <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener"
+         style="text-decoration:none;font-weight:900;">https://klineodyssey.github.io/kline-odyssey/</a>
     </div>
   </div>
 
@@ -38,13 +37,160 @@ Deploy: GitHub Pages
     <div style="font-weight:900;">規則一句話</div>
     <div style="line-height:1.75;margin-top:6px;">
       這裡是<strong>互動式遊戲入口</strong>：參觀、選擇、體驗，然後離開。<br/>
-      不承諾收益、不提供投資建議、不做回報保證。
+      不承諾收益、不提供投資建議、不做回報保證。所有鏈上動作必須由你在錢包中按確認。
     </div>
   </div>
 
-  <!-- Live Status Panel -->
+  <!-- Visitor Panel (Today / Total) -->
   <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
-    <div style="font-weight:900;">📜 你的參拜紀錄（本機瀏覽器）</div>
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">👣 來訪人數（今日 / 總計）</div>
+      <button id="btnRefreshStats"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        重新整理
+      </button>
+    </div>
+    <div id="visitorInfo" style="margin-top:10px;line-height:1.9;"></div>
+    <div style="opacity:.85;margin-top:6px;">
+      說明：本頁用外部計數器（CountAPI）記錄「今日」與「總累計」訪問次數，能證明不是假載入文字。
+    </div>
+  </div>
+
+  <!-- Wallet Panel -->
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">🪪 錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnConnect"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          連線錢包
+        </button>
+        <button id="btnSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ▶️ 語音客服
+        </button>
+        <button id="btnStopSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ⏹️ 停止
+        </button>
+      </div>
+    </div>
+    <div id="walletInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+      <div style="font-weight:900;">🔎 鏈上驗證（BscScan）</div>
+      <div style="margin-top:6px;">
+        KGEN Token：
+        <a id="linkToken" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+      <div style="margin-top:4px;">
+        公益 Treasury：
+        <a id="linkTreasury" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+      <div style="margin-top:4px;">
+        KUFO 引擎室：
+        <a id="linkKufo" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+      <div style="margin-top:6px;opacity:.85;">
+        本頁不會替你自動出金，所有鏈上動作都必須由你在錢包中按確認。
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Options -->
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🏦 還願地址（3 選 1）</div>
+    <div style="margin-top:8px;line-height:1.8;">
+      <div style="opacity:.9;">
+        第三個地址 = 公益 Treasury（同時也是發財金發放池）。
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;">
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="blackhole" />
+          <div>
+            <div style="font-weight:900;">往生地址（Blackhole / 0x000…0000）</div>
+            <div style="opacity:.85;">不可逆（送出即永久失去）。</div>
+          </div>
+        </label>
+
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="kufo_engine" checked />
+          <div>
+            <div style="font-weight:900;">KUFO 引擎室（Engine Room）</div>
+            <div style="opacity:.85;">補油推進（敘事核心地址）。</div>
+          </div>
+        </label>
+
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="public_good_treasury" />
+          <div>
+            <div style="font-weight:900;">公益 Treasury（發財金發放池）</div>
+            <div style="opacity:.85;">震災、孤兒院、自由民主、花果山孤兒基金池。</div>
+          </div>
+        </label>
+      </div>
+
+      <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+        <div style="font-weight:900;">地址確認</div>
+        <pre id="addrPreview" style="white-space:pre-wrap;margin:8px 0 0;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amount -->
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🧮 還願數量（K G E N）</div>
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="inpAmount" value="1" inputmode="decimal"
+        style="flex:1;min-width:220px;padding:10px;border:1px solid #111;border-radius:12px;font-weight:900;"
+        placeholder="例如：1 或 0.5" />
+      <div style="opacity:.85;">提示：本頁預設 1（你可改）。</div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;">
+
+    <button id="btnVisit"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🏮 登入參拜</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次參拜（可匯出）</div>
+    </button>
+
+    <a href="/kline-odyssey/bookstore/"
+       style="display:block;padding:14px;border:1px solid #111;border-radius:14px;text-decoration:none;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">📘 領書｜悟空書城</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">連結到書城／內容兌換</div>
+    </a>
+
+    <button id="btnFortune"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🧧 領發財金（正常發放模式）</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
+        需要「發放合約」才可從 Treasury 真正發出（沒有就會提示）
+      </div>
+    </button>
+
+    <button id="btnVow"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🙏 還願（鏈上送出交易）</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
+        由你在錢包確認，把 K G E N 送到選定地址（可驗證 tx）
+      </div>
+    </button>
+
+    <button id="btnExit"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🚪 登出離開</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次離開（可匯出）</div>
+    </button>
+
+  </div>
+
+  <!-- Status -->
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">📜 本機紀錄（可回饋・可記錄）</div>
     <div id="statusText" style="margin-top:8px;line-height:1.9;"></div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
       <button id="btnExport"
@@ -59,189 +205,20 @@ Deploy: GitHub Pages
     <div id="toast" style="margin-top:10px;font-weight:900;"></div>
   </div>
 
-  <!-- Main Action Buttons -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;">
-
-    <button id="btnVisit"
-      style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🏮 登入參拜</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        確認存在 → 進入前庭（會記錄）
-      </div>
-    </button>
-
-    <a href="/kline-odyssey/bookstore/"
-       style="display:block;padding:14px 14px;border:1px solid #111;border-radius:14px;text-decoration:none;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">📘 領書｜悟空書城</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        連結到書城／內容兌換
-      </div>
-    </a>
-
-    <button id="btnFortune"
-      style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🧧 領發財金（遊戲事件）</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        一天一次｜同地址冷卻（本機）
-      </div>
-    </button>
-
-    <button id="btnDivination"
-      style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🥢 搏杯</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        聖筊連勝 → 2 的 N 次方節奏
-      </div>
-    </button>
-
-    <button id="btnBurn"
-      style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🔥 還願（選三個地址之一）</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        感恩與轉換｜顯示地址＋一鍵複製＋各自冷卻
-      </div>
-    </button>
-
-    <button id="btnExit"
-      style="text-align:left;cursor:pointer;padding:14px 14px;border:1px solid #111;border-radius:14px;background:#fff;">
-      <div style="font-weight:900;font-size:16px;">🚪 登出離開</div>
-      <div style="opacity:.85;margin-top:6px;line-height:1.6;">
-        結束參拜｜完成紀錄
-      </div>
-    </button>
-
-  </div>
-
-  <!-- Vow Panel: 3 address options + copy + cooldown -->
-  <div id="vowPanel"
-       style="display:none;border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
-
-    <div style="font-weight:900;margin-bottom:8px;">
-      🔥 請選擇還願去向（必選）
-    </div>
-
-    <div style="opacity:.9;line-height:1.7;margin-bottom:10px;">
-      這是<strong>感恩</strong>與<strong>能量轉換</strong>的敘事行為。<br/>
-      系統只記錄「你選了哪一個去向」，不保證、不承諾、不上鏈。
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
-
-      <!-- Blackhole -->
-      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
-        <div style="font-weight:900;">🕳 黑洞燃燒</div>
-        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
-          進黑洞・轉化完成（故事節點）
-        </div>
-        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
-          地址：<span id="addr_blackhole" style="font-weight:900;"></span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-          <button type="button" data-copy="blackhole"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            複製地址
-          </button>
-          <button type="button" data-vow="blackhole"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            選這個還願
-          </button>
-        </div>
-        <div id="cool_blackhole" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
-      </div>
-
-      <!-- Engine -->
-      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
-        <div style="font-weight:900;">🚀 引擎補油</div>
-        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
-          補油到引擎室・推動 KUFO 前進
-        </div>
-        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
-          地址：<span id="addr_engine" style="font-weight:900;"></span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-          <button type="button" data-copy="engine"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            複製地址
-          </button>
-          <button type="button" data-vow="engine"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            選這個還願
-          </button>
-        </div>
-        <div id="cool_engine" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
-      </div>
-
-      <!-- Public Good -->
-      <div style="border:1px solid #111;border-radius:14px;padding:12px;">
-        <div style="font-weight:900;">🤲 社會還願</div>
-        <div style="opacity:.85;font-size:13px;line-height:1.6;margin-top:6px;">
-          公益・震災・自由民主（故事用途）
-        </div>
-        <div style="margin-top:8px;font-size:13px;word-break:break-all;">
-          地址：<span id="addr_public_good" style="font-weight:900;"></span>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-          <button type="button" data-copy="public_good"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            複製地址
-          </button>
-          <button type="button" data-vow="public_good"
-            style="cursor:pointer;padding:8px 10px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-            選這個還願
-          </button>
-        </div>
-        <div id="cool_public_good" style="margin-top:8px;opacity:.85;font-size:13px;"></div>
-      </div>
-
-    </div>
-
-    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button type="button" id="btnVowCancel"
-        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-        取消
-      </button>
-    </div>
-
-    <div style="margin-top:10px;opacity:.85;line-height:1.7;">
-      （提示：冷卻與紀錄只存在你的瀏覽器本機，不上鏈、不上傳。）
-    </div>
-  </div>
-
-  <!-- AI Voice Service -->
+  <!-- Voice -->
   <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
-    <div style="font-weight:900;">🎧 AI 語音客服（中文台詞｜可直接照唸）</div>
+    <div style="font-weight:900;">🎧 AI 語音客服（中文｜按上面「語音客服」即可說話）</div>
     <div style="margin-top:8px;line-height:1.85;">
-      歡迎來到五指山悟空財神廟。<br/>
-      這裡是互動式遊戲入口，不是投資平台。<br/>
-      你可以參觀、選擇、體驗，然後離開。<br/><br/>
-      發財金是遊戲事件，一天一次，完成就冷卻。<br/>
-      還願代表感恩與轉換，你會看到三個去向地址，選一個就完成記錄。<br/>
-      所有紀錄只在本機，不上鏈、不上傳、不承諾任何回報。<br/><br/>
-      想開始就按「登入參拜」。想離開就按「登出離開」。
+      歡迎來到五指山悟空財神廟。這裡是互動式遊戲入口，不是投資平台。<br/><br/>
+      發財金要能正常發放，必須由「發放合約」從公益 Treasury 出金。<br/>
+      還願是感恩，也是補油，你可以選：往生地址、KUFO 引擎室、或回補公益 Treasury。<br/><br/>
+      在本頁所有鏈上動作，都必須由你在錢包中按確認。<br/>
+      想開始就按「登入參拜」，想離開就按「登出離開」。
     </div>
   </div>
 
-  <!-- Physics metaphor -->
-  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
-    <div style="font-weight:900;">⚙️ 世界觀提示（隱喻，不是承諾）</div>
-    <div style="margin-top:8px;line-height:1.85;">
-      在 Kline Odyssey 敘事裡，K G E N 被視為「質量」的象徵。<br/>
-      E = m c² 與 W = m g h 是世界觀隱喻，用來描述「選擇造成能量轉換」。<br/>
-      公式不代表現實保證、不代表收益、不代表兌換。
-    </div>
-  </div>
-
-  <!-- Log Preview -->
-  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
-    <div style="font-weight:900;">🧾 行為日誌（最近 20 筆）</div>
-    <pre id="logPreview"
-      style="margin-top:10px;white-space:pre-wrap;word-break:break-word;line-height:1.6;background:#fafafa;border:1px solid #ddd;border-radius:12px;padding:10px;"></pre>
-  </div>
-
-  <!-- Footer signature (固定章) -->
+  <!-- Footer -->
   <div style="margin-top:14px;padding-top:12px;border-top:1px solid #111;line-height:1.8;">
-    悟空不保證你得到什麼，<br/>
-    只陪你走過一次選擇。<br/><br/>
     PrimeForge 以母機之名，開啟金融生命。<br/>
     花果山台灣・信念不滅・市場無界。<br/>
     Where the Market Becomes the Myth.<br/>
@@ -250,96 +227,91 @@ Deploy: GitHub Pages
 
 </div>
 
+<!-- ethers v5 CDN (works on GitHub Pages) -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
 <script>
 (() => {
   "use strict";
 
-  // ====== Storage Key ======
-  const KEY = "klineodyssey_wukongTemple_v0_2";
-
-  // ====== Addresses (replace these 3 if you have real ones) ======
-  // 你若要換成真地址：直接改這三行就好
+  // =========================================================
+  // 鏈上資產與地址（已鎖死：你提供的真地址）
+  // =========================================================
   const VOW_ADDR = {
-    blackhole: "0x000000000000000000000000000000000000dEaD",
-    engine: "0x0000000000000000000000000000000000000000",
-    public_good: "0x0000000000000000000000000000000000000000"
+    blackhole: "0x0000000000000000000000000000000000000000",
+    kufo_engine: "0xef83804c264B47378FCf150086943B53fB90A90b",
+    public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1"
   };
 
-  // ====== Helpers ======
-  const nowISO = () => new Date().toISOString();
-  const todayLocal = () => {
+  // 發財金出金池 = 公益 Treasury（同地址也可當還願第三選項）
+  const FORTUNE_TREASURY = VOW_ADDR.public_good_treasury;
+
+  // ✅ 你已上鏈的 KGEN Token（BSC）
+  const CHAIN_ID_DEC = 56; // BSC 主網=56
+  const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"; // 你的 KGEN_Token_V7_5_2
+  const KGEN_DECIMALS = 18;
+
+  // ⚠️ 發放合約（如果你已部署 Faucet/Reward 發放合約，填在這裡）
+  // 沒部署也能跑（會提示「尚未設定」）
+  const FAUCET_CONTRACT = ""; // 例如："0xYourFaucetContractHere";
+
+  // =========================================================
+  // 後端計數器（CountAPI：可直接在 GitHub Pages 使用）
+  // 你要「今日 + 總人數」：這就是真正的後端接口
+  // =========================================================
+  const COUNT_NS = "klineodyssey-wukong-temple"; // 命名空間（你可改，但改了會重算）
+  const dayKey = () => {
     const d = new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    return `day_${yyyy}${mm}${dd}`;
   };
 
-  const safeParse = (s) => {
-    try { return JSON.parse(s); } catch { return null; }
+  const countapi = {
+    hit: async (key) => {
+      const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("countapi_hit_failed");
+      return await r.json(); // {value: number}
+    },
+    get: async (key) => {
+      const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("countapi_get_failed");
+      return await r.json(); // {value: number}
+    }
   };
+
+  // =========================================================
+  // 本機紀錄（可回饋、可記錄、可匯出）
+  // =========================================================
+  const KEY = "klineodyssey_wukongTemple_v0_3";
+  const safeParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+  const nowISO = () => new Date().toISOString();
 
   const defaultState = () => ({
-    wukongTemple: {
-      lastVisit: null,
-      visitCount: 0,
-
-      // fortune: once per day
-      fortuneTaken: false,
-      fortuneDate: null, // YYYY-MM-DD (local)
-
-      // divination
-      divinationStreak: 0,
-
-      // vows
-      burnCount: 0,
-      vowLastDate: { // each address has its own cooldown date
-        blackhole: null,
-        engine: null,
-        public_good: null
-      },
-
-      // exits
-      exitCount: 0,
-
-      // logs
-      log: []
-    }
+    visitCount: 0,
+    exitCount: 0,
+    vowCount: 0,
+    fortuneCount: 0,
+    log: []
   });
 
   const load = () => {
     const raw = localStorage.getItem(KEY);
-    const parsed = raw ? safeParse(raw) : null;
-    if (!parsed || !parsed.wukongTemple) return defaultState();
-
-    const base = defaultState();
-    const merged = {
-      wukongTemple: {
-        ...base.wukongTemple,
-        ...parsed.wukongTemple,
-        vowLastDate: {
-          ...base.wukongTemple.vowLastDate,
-          ...(parsed.wukongTemple.vowLastDate || {})
-        },
-        log: Array.isArray(parsed.wukongTemple.log) ? parsed.wukongTemple.log : []
-      }
-    };
-    return merged;
+    const p = raw ? safeParse(raw) : null;
+    return p && typeof p === "object"
+      ? { ...defaultState(), ...p, log: Array.isArray(p.log) ? p.log : [] }
+      : defaultState();
   };
 
-  const save = (state) => {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  };
+  const save = (s) => localStorage.setItem(KEY, JSON.stringify(s));
 
-  const pushLog = (state, type, meta = {}) => {
-    const entry = { type, time: nowISO(), ...meta };
-    state.wukongTemple.log.push(entry);
-    if (state.wukongTemple.log.length > 400) {
-      state.wukongTemple.log = state.wukongTemple.log.slice(-400);
-    }
+  const pushLog = (s, type, meta = {}) => {
+    s.log.push({ type, time: nowISO(), ...meta });
+    if (s.log.length > 400) s.log = s.log.slice(-400);
   };
-
-  const chance = (p) => Math.random() < p;
 
   const downloadJSON = (obj, filename) => {
     const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
@@ -353,241 +325,212 @@ Deploy: GitHub Pages
     URL.revokeObjectURL(url);
   };
 
-  const copyText = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // fallback
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        const ok = document.execCommand("copy");
-        ta.remove();
-        return ok;
-      } catch {
-        return false;
-      }
-    }
-  };
-
-  // ====== UI ======
+  // =========================================================
+  // UI
+  // =========================================================
+  const $addrPreview = document.getElementById("addrPreview");
+  const $walletInfo = document.getElementById("walletInfo");
+  const $visitorInfo = document.getElementById("visitorInfo");
   const $status = document.getElementById("statusText");
   const $toast = document.getElementById("toast");
-  const $logPreview = document.getElementById("logPreview");
+  const $inpAmount = document.getElementById("inpAmount");
 
-  const vowPanel = document.getElementById("vowPanel");
-  const btnVowCancel = document.getElementById("btnVowCancel");
-
-  // address spans
-  document.getElementById("addr_blackhole").textContent = VOW_ADDR.blackhole;
-  document.getElementById("addr_engine").textContent = VOW_ADDR.engine;
-  document.getElementById("addr_public_good").textContent = VOW_ADDR.public_good;
-
-  const $cool = {
-    blackhole: document.getElementById("cool_blackhole"),
-    engine: document.getElementById("cool_engine"),
-    public_good: document.getElementById("cool_public_good")
-  };
+  const $linkToken = document.getElementById("linkToken");
+  const $linkTreasury = document.getElementById("linkTreasury");
+  const $linkKufo = document.getElementById("linkKufo");
 
   const toast = (msg) => {
     $toast.textContent = msg;
-    setTimeout(() => { if ($toast.textContent === msg) $toast.textContent = ""; }, 2800);
+    setTimeout(() => { if ($toast.textContent === msg) $toast.textContent = ""; }, 3000);
   };
 
-  const cooldownText = (lastDate) => {
-    const t = todayLocal();
-    if (lastDate === t) return "今日已完成（冷卻中）";
-    return "今日可還願";
+  const getSelectedVowKey = () => {
+    const el = document.querySelector('input[name="vowTarget"]:checked');
+    return el ? el.value : "kufo_engine";
   };
 
-  const render = (state) => {
-    const s = state.wukongTemple;
+  $addrPreview.textContent =
+`blackhole (往生): ${VOW_ADDR.blackhole}
+kufo_engine: ${VOW_ADDR.kufo_engine}
+public_good_treasury (發財金池): ${VOW_ADDR.public_good_treasury}
+fortune_treasury: ${FORTUNE_TREASURY}`;
 
-    // fortune status
-    const fortuneStatus = (() => {
-      const t = todayLocal();
-      if (s.fortuneTaken && s.fortuneDate === t) return "今日：已完成（冷卻中）";
-      return "今日：尚未完成";
-    })();
+  // BscScan links
+  const mkBsc = (addr) => `https://bscscan.com/address/${addr}`;
+  $linkToken.textContent = KGEN_TOKEN;
+  $linkToken.href = mkBsc(KGEN_TOKEN);
+  $linkTreasury.textContent = FORTUNE_TREASURY;
+  $linkTreasury.href = mkBsc(FORTUNE_TREASURY);
+  $linkKufo.textContent = VOW_ADDR.kufo_engine;
+  $linkKufo.href = mkBsc(VOW_ADDR.kufo_engine);
 
-    const streakN = s.divinationStreak || 0;
-    const oddsText = (streakN <= 0)
-      ? "尚未連勝"
-      : `聖筊連勝 ${streakN} 次（約 1 / 2^${streakN}）`;
+  // =========================================================
+  // Voice客服（Web Speech API）
+  // =========================================================
+  const speakText = (text) => {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
 
-    const last = s.lastVisit ? s.lastVisit : "尚無";
+  const stopSpeak = () => {
+    try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch {}
+  };
 
-    $status.innerHTML = `
-      <div>🏮 參拜次數：<strong>${s.visitCount}</strong></div>
-      <div>🧧 發財金：<strong>${fortuneStatus}</strong></div>
-      <div>🥢 搏杯：<strong>${oddsText}</strong></div>
-      <div>🔥 還願記錄：<strong>${s.burnCount}</strong> 次</div>
-      <div>🚪 登出次數：<strong>${s.exitCount}</strong> 次</div>
-      <div>🕒 最近一次：<strong>${last}</strong></div>
-      <div style="margin-top:8px;opacity:.85;">（提示：所有紀錄只存在你的瀏覽器本機，不上鏈、不上傳。）</div>
+  document.getElementById("btnSpeak").addEventListener("click", () => {
+    const text =
+      "歡迎來到五指山悟空財神廟。這裡是互動式遊戲入口，不是投資平台。"+
+      "發財金若要正常發放，必須由發放合約從公益 Treasury 出金。"+
+      "還願是感恩，也是補油。你可以選：往生地址、KUFO 引擎室、或回補公益 Treasury。"+
+      "所有鏈上動作，都必須由你在錢包中按確認。";
+    speakText(text);
+    toast("🎧 語音客服已啟動");
+  });
+
+  document.getElementById("btnStopSpeak").addEventListener("click", () => {
+    stopSpeak();
+    toast("⏹️ 已停止語音");
+  });
+
+  // =========================================================
+  // Wallet / Chain
+  // =========================================================
+  let provider = null;
+  let signer = null;
+  let userAddr = null;
+
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function transfer(address to, uint256 amount) returns (bool)"
+  ];
+
+  // 若你有 Faucet 合約，用 claim()（需你部署，非本頁假做）
+  const FAUCET_ABI = [
+    "function claim() external",
+    "function treasury() view returns (address)",
+    "function token() view returns (address)"
+  ];
+
+  const fmt = (bn) => {
+    try { return ethers.utils.formatUnits(bn, KGEN_DECIMALS); } catch { return String(bn); }
+  };
+
+  const ensureChain = async () => {
+    if (!window.ethereum) throw new Error("no_wallet");
+    const wantHex = "0x" + CHAIN_ID_DEC.toString(16);
+    const cur = await window.ethereum.request({ method: "eth_chainId" });
+    if (cur !== wantHex) {
+      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: wantHex }] });
+    }
+  };
+
+  const renderWallet = async () => {
+    if (!userAddr) {
+      $walletInfo.innerHTML = `<div>未連線</div><div style="opacity:.85;">提示：請用 MetaMask / 內建錢包瀏覽器開啟本頁。</div>`;
+      return;
+    }
+    const lines = [];
+    lines.push(`<div>已連線：<strong>${userAddr}</strong></div>`);
+
+    try {
+      const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, provider);
+      const [uBal, tBal, kBal] = await Promise.all([
+        token.balanceOf(userAddr),
+        token.balanceOf(FORTUNE_TREASURY),
+        token.balanceOf(VOW_ADDR.kufo_engine)
+      ]);
+      lines.push(`<div>K G E N 餘額（你）：<strong>${fmt(uBal)}</strong></div>`);
+      lines.push(`<div>K G E N 餘額（公益 Treasury）：<strong>${fmt(tBal)}</strong></div>`);
+      lines.push(`<div>K G E N 餘額（KUFO 引擎室）：<strong>${fmt(kBal)}</strong></div>`);
+      lines.push(`<div style="opacity:.85;margin-top:6px;">（這些數字可鏈上驗證，不是記念幣假頁面。）</div>`);
+    } catch (e) {
+      lines.push(`<div style="opacity:.85;">K G E N 餘額讀取失敗：請確認在 BSC 主網。</div>`);
+    }
+
+    $walletInfo.innerHTML = lines.join("");
+  };
+
+  document.getElementById("btnConnect").addEventListener("click", async () => {
+    try {
+      if (!window.ethereum) {
+        toast("找不到錢包：請用 MetaMask 或錢包瀏覽器打開");
+        speakText("找不到錢包。請用 MetaMask 或錢包瀏覽器打開。");
+        return;
+      }
+      await ensureChain();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddr = await signer.getAddress();
+      toast("✅ 錢包已連線（BSC 主網）");
+      speakText("錢包已連線。");
+      await renderWallet();
+    } catch (e) {
+      toast("連線失敗或未授權");
+      speakText("連線失敗或未授權。");
+    }
+  });
+
+  // =========================================================
+  // Visitor Stats (Today / Total)
+  // =========================================================
+  const renderVisitors = (todayVal, totalVal) => {
+    $visitorInfo.innerHTML = `
+      <div>📅 今日來訪：<strong>${todayVal}</strong></div>
+      <div>🌍 總來訪：<strong>${totalVal}</strong></div>
+      <div style="margin-top:6px;opacity:.85;">（每次載入本頁會自動 +1；你也可按「重新整理」更新。）</div>
     `;
-
-    // per-address cooldown display
-    $cool.blackhole.textContent = `冷卻：${cooldownText(s.vowLastDate.blackhole)}`;
-    $cool.engine.textContent = `冷卻：${cooldownText(s.vowLastDate.engine)}`;
-    $cool.public_good.textContent = `冷卻：${cooldownText(s.vowLastDate.public_good)}`;
-
-    // log preview
-    const lastLogs = s.log.slice(-20).reverse();
-    $logPreview.textContent = lastLogs.length
-      ? lastLogs.map((x) => JSON.stringify(x)).join("\n")
-      : "（尚無日誌）";
   };
 
-  // ====== Init ======
-  render(load());
+  const refreshVisitors = async (doHit) => {
+    try {
+      const dk = dayKey();
+      let todayVal = 0;
+      let totalVal = 0;
 
-  // ====== Actions ======
+      if (doHit) {
+        const [t1, t2] = await Promise.all([
+          countapi.hit(dk),
+          countapi.hit("total")
+        ]);
+        todayVal = t1.value ?? 0;
+        totalVal = t2.value ?? 0;
+      } else {
+        const [g1, g2] = await Promise.all([
+          countapi.get(dk),
+          countapi.get("total")
+        ]);
+        todayVal = g1.value ?? 0;
+        totalVal = g2.value ?? 0;
+      }
 
-  // 登入參拜
-  document.getElementById("btnVisit").addEventListener("click", () => {
-    const s = load();
-    s.wukongTemple.visitCount += 1;
-    s.wukongTemple.lastVisit = nowISO();
-    pushLog(s, "visit");
-    save(s);
-    render(s);
-    toast(`✅ 已完成參拜：第 ${s.wukongTemple.visitCount} 次`);
-  });
-
-  // 領發財金（每天一次）
-  document.getElementById("btnFortune").addEventListener("click", () => {
-    const s = load();
-    const t = todayLocal();
-    if (s.wukongTemple.fortuneTaken && s.wukongTemple.fortuneDate === t) {
-      pushLog(s, "fortune_blocked", { reason: "cooldown_today" });
-      save(s);
-      render(s);
-      toast("🧧 今日已完成發財金事件（冷卻中）");
-      return;
+      renderVisitors(todayVal, totalVal);
+    } catch (e) {
+      $visitorInfo.innerHTML = `<div style="opacity:.85;">來訪統計暫時無法取得（可能被瀏覽器阻擋或網路問題）。</div>`;
     }
-    s.wukongTemple.fortuneTaken = true;
-    s.wukongTemple.fortuneDate = t;
-    pushLog(s, "fortune");
-    save(s);
-    render(s);
-    toast("🧧 發財金事件完成：一次性體驗已記錄");
+  };
+
+  document.getElementById("btnRefreshStats").addEventListener("click", async () => {
+    await refreshVisitors(false);
+    toast("已更新來訪統計");
   });
 
-  // 搏杯（50% 聖筊；連勝 N → 1/2^N）
-  document.getElementById("btnDivination").addEventListener("click", () => {
+  // 首次進入：直接 hit（這就是「呼吸」）
+  refreshVisitors(true);
+
+  // =========================================================
+  // Local Status
+  // =========================================================
+  const renderLocal = () => {
     const s = load();
-    const ok = chance(0.5);
-    if (ok) {
-      s.wukongTemple.divinationStreak += 1;
-      pushLog(s, "divination_yes", { streak: s.wukongTemple.divinationStreak });
-      save(s);
-      render(s);
-      toast(`🥢 聖筊！連勝 ${s.wukongTemple.divinationStreak} 次`);
-    } else {
-      s.wukongTemple.divinationStreak = 0;
-      pushLog(s, "divination_no");
-      save(s);
-      render(s);
-      toast("🥢 笑筊… 連勝歸零");
-    }
-  });
-
-  // 打開還願面板
-  document.getElementById("btnBurn").addEventListener("click", () => {
-    vowPanel.style.display = "block";
-    render(load()); // refresh cooldown text
-    toast("請選擇還願去向");
-    vowPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  // 取消還願
-  btnVowCancel.addEventListener("click", () => {
-    vowPanel.style.display = "none";
-    toast("已取消還願選擇");
-  });
-
-  // 面板內：複製地址 / 選擇還願
-  vowPanel.addEventListener("click", async (e) => {
-    const copyBtn = e.target.closest("button[data-copy]");
-    if (copyBtn) {
-      const k = copyBtn.getAttribute("data-copy");
-      const ok = await copyText(VOW_ADDR[k] || "");
-      toast(ok ? "✅ 已複製地址" : "❌ 複製失敗（瀏覽器限制）");
-      return;
-    }
-
-    const vowBtn = e.target.closest("button[data-vow]");
-    if (!vowBtn) return;
-
-    const vowType = vowBtn.getAttribute("data-vow"); // blackhole/engine/public_good
-    const s = load();
-    const t = todayLocal();
-
-    // per-address cooldown: once per day
-    if (s.wukongTemple.vowLastDate[vowType] === t) {
-      pushLog(s, "vow_blocked", { to: vowType, reason: "cooldown_today" });
-      save(s);
-      render(s);
-      toast("今日此去向已完成（冷卻中）");
-      return;
-    }
-
-    s.wukongTemple.burnCount += 1;
-    s.wukongTemple.vowLastDate[vowType] = t;
-
-    pushLog(s, "vow", {
-      to: vowType,
-      addr: VOW_ADDR[vowType] || null
-    });
-
-    save(s);
-    render(s);
-    vowPanel.style.display = "none";
-
-    const msgMap = {
-      blackhole: "🕳 還願完成：黑洞轉化已記錄",
-      engine: "🚀 還願完成：引擎補油已記錄",
-      public_good: "🤲 還願完成：社會還願已記錄"
-    };
-    toast(msgMap[vowType] || "🔥 還願完成：已記錄");
-  });
-
-  // 登出離開
-  document.getElementById("btnExit").addEventListener("click", () => {
-    const s = load();
-    s.wukongTemple.exitCount += 1;
-    pushLog(s, "exit");
-    save(s);
-    render(s);
-    toast("🚪 已登出離開：本次行為已記錄");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  // 匯出 JSON
-  document.getElementById("btnExport").addEventListener("click", () => {
-    const s = load();
-    const filename = `wukong-temple-log_${todayLocal()}.json`;
-    downloadJSON(s, filename);
-    toast("⬇️ 已匯出 JSON（下載檔案）");
-  });
-
-  // 清除本機紀錄
-  document.getElementById("btnClear").addEventListener("click", () => {
-    const ok = confirm("確定要清除本機紀錄？這只會清你的瀏覽器，不影響任何鏈上或外部資料。");
-    if (!ok) return;
-    localStorage.removeItem(KEY);
-    render(load());
-    toast("🧹 已清除本機紀錄");
-  });
-
-})();
-</script>
-
-</body>
-</html>
+    $status.innerHTML = `
+      <div>🏮 參拜：<strong>${s.visitCount}</strong> 次</div>
+      <div>🧧 發財金（按鈕觸發）：<strong>${s.fortuneCount}</strong> 次</div>
+      <div>🙏 還願（按鈕觸發）：<strong>${s.vowCount}</strong> 次</div>
+      <div>🚪 登出
