@@ -1,9 +1,9 @@
+
 <!--
-悟空財神廟｜互動循環 V0.4（補回：來訪 + 搏杯 + 三次聖筊門檻）
+悟空財神廟｜互動循環 V0.4（完整修正版）
 File: /kline-odyssey/wukong-temple/index.html
 Deploy: GitHub Pages
 -->
-
 <!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -14,7 +14,7 @@ Deploy: GitHub Pages
 </head>
 
 <body>
-<div style="max-width:760px;margin:22px auto;padding:16px;">
+<div style="max-width:760px;margin:22px auto;padding:16px;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;">
 
   <div style="margin-bottom:10px;">
     <div style="font-weight:900;font-size:22px;line-height:1.2;">🐒 悟空財神廟｜Wukong Temple</div>
@@ -39,13 +39,9 @@ Deploy: GitHub Pages
       <div style="font-weight:900;">👣 來訪人數（今日 / 總計）</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button id="btnRefreshStats"
-          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-          重新整理
-        </button>
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">重新整理</button>
         <button id="btnReHit"
-          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-          重新計一次（測試）
-        </button>
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">重新計一次（測試）</button>
       </div>
     </div>
     <div id="visitorInfo" style="margin-top:10px;line-height:1.9;">載入中…</div>
@@ -58,17 +54,11 @@ Deploy: GitHub Pages
       <div style="font-weight:900;">🪪 錢包狀態（BSC 主網）</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button id="btnConnect"
-          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-          連線錢包
-        </button>
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">連線錢包</button>
         <button id="btnSpeak"
-          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-          ▶️ 語音客服
-        </button>
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">▶️ 語音客服</button>
         <button id="btnStopSpeak"
-          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-          ⏹️ 停止
-        </button>
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">⏹️ 停止</button>
       </div>
     </div>
 
@@ -88,9 +78,7 @@ Deploy: GitHub Pages
     <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
       <div style="font-weight:900;">🥢 搏杯（需要連續 3 次聖筊才能領發財金）</div>
       <button id="btnDivination"
-        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-        搏杯
-      </button>
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">搏杯</button>
     </div>
     <div id="divinationInfo" style="margin-top:10px;line-height:1.9;"></div>
     <div style="opacity:.85;margin-top:6px;">規則：聖筊機率 50%。失敗歸零。連勝達 3 才開啟發財金。</div>
@@ -148,39 +136,30 @@ Deploy: GitHub Pages
 
   <!-- Actions -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;">
-
-    <button id="btnVisit"
-      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+    <button id="btnVisit" style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
       <div style="font-weight:900;font-size:16px;">🏮 登入參拜</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次參拜</div>
     </button>
 
-    <a href="/kline-odyssey/bookstore/"
-       style="display:block;padding:14px;border:1px solid #111;border-radius:14px;text-decoration:none;background:#fff;">
+    <a href="/kline-odyssey/bookstore/" style="display:block;padding:14px;border:1px solid #111;border-radius:14px;text-decoration:none;background:#fff;">
       <div style="font-weight:900;font-size:16px;">📘 領書｜悟空書城</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">連結到書城／內容兌換</div>
     </a>
 
-    <button id="btnFortune"
-      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+    <button id="btnFortune" style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
       <div style="font-weight:900;font-size:16px;">🧧 領發財金（需 3 次聖筊）</div>
-      <div id="fortuneGateHint" style="opacity:.85;margin-top:6px;line-height:1.6;">
-        未達門檻：請先搏杯連勝 3 次
-      </div>
+      <div id="fortuneGateHint" style="opacity:.85;margin-top:6px;line-height:1.6;">未達門檻：請先搏杯連勝 3 次</div>
     </button>
 
-    <button id="btnVow"
-      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+    <button id="btnVow" style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
       <div style="font-weight:900;font-size:16px;">🙏 還願（鏈上送出交易）</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">由你在錢包確認，把 K G E N 送到選定地址</div>
     </button>
 
-    <button id="btnExit"
-      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+    <button id="btnExit" style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
       <div style="font-weight:900;font-size:16px;">🚪 登出離開</div>
       <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次離開</div>
     </button>
-
   </div>
 
   <!-- Local Status -->
@@ -188,14 +167,8 @@ Deploy: GitHub Pages
     <div style="font-weight:900;">📜 本機紀錄</div>
     <div id="statusText" style="margin-top:8px;line-height:1.9;"></div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
-      <button id="btnExport"
-        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-        ⬇️ 匯出紀錄 JSON
-      </button>
-      <button id="btnClear"
-        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
-        🧹 清除本機紀錄
-      </button>
+      <button id="btnExport" style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">⬇️ 匯出紀錄 JSON</button>
+      <button id="btnClear" style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">🧹 清除本機紀錄</button>
     </div>
     <div id="toast" style="margin-top:10px;font-weight:900;"></div>
   </div>
@@ -240,7 +213,7 @@ Deploy: GitHub Pages
   const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
   const KGEN_DECIMALS = 18;
 
-  // ⚠️ 發放合約（你若還沒部署 Faucet/Reward Claim 合約，先留空）
+  // ⚠️ 發放合約：你若還沒部署 Faucet/Reward Claim 合約，先留空
   const FAUCET_CONTRACT = ""; // 例："0x...."
 
   // ========= 來訪後端（CountAPI）=========
@@ -323,6 +296,14 @@ Deploy: GitHub Pages
     setTimeout(() => { if ($toast.textContent === msg) $toast.textContent = ""; }, 3000);
   };
 
+  // 全域錯誤：至少你看得到原因
+  window.addEventListener("error", (e) => {
+    toast("JS 錯誤：" + (e.message || "unknown"));
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    toast("Promise 錯誤：" + (e.reason ? String(e.reason) : "unknown"));
+  });
+
   $addrPreview.textContent =
 `blackhole (往生): ${VOW_ADDR.blackhole}
 kufo_engine: ${VOW_ADDR.kufo_engine}
@@ -353,22 +334,22 @@ fortune_treasury: ${FORTUNE_TREASURY}`;
   document.getElementById("btnSpeak").addEventListener("click", () => {
     const s = load();
     const text =
-      "歡迎來到五指山悟空財神廟。你需要連續三次聖筊，才能領發財金。"+
-      "還願是感恩，也是補油。所有鏈上動作，都必須由你在錢包中按確認。"+
-      `你目前聖筊連勝是 ${s.divinationStreak} 次。`;
+      "歡迎來到五指山悟空財神廟。你需要連續三次聖筊，才能領發財金。" +
+      "還願是感恩，也是補油。所有鏈上動作，都必須由你在錢包中按確認。" +
+      "你目前聖筊連勝是 " + (s.divinationStreak || 0) + " 次。";
     speakText(text);
-    toast("🎧 語音客服已啟動");
+    toast("語音客服已啟動");
   });
   document.getElementById("btnStopSpeak").addEventListener("click", () => {
     stopSpeak();
-    toast("⏹️ 已停止語音");
+    toast("已停止語音");
   });
 
-  // ========= Visitors: show + fallback =========
+  // ========= Visitors: CountAPI + fallback =========
   const renderVisitors = (todayVal, totalVal, note) => {
     $visitorInfo.innerHTML = `
-      <div>📅 今日來訪：<strong>${todayVal}</strong></div>
-      <div>🌍 總來訪：<strong>${totalVal}</strong></div>
+      <div>今日來訪：<strong>${todayVal}</strong></div>
+      <div>總來訪：<strong>${totalVal}</strong></div>
     `;
     $visitorHint.textContent = note || "";
   };
@@ -381,7 +362,7 @@ fortune_treasury: ${FORTUNE_TREASURY}`;
     let day = get(kDay);
     let total = get(kTotal);
     if (doHit) { day += 1; total += 1; set(kDay, day); set(kTotal, total); }
-    renderVisitors(day, total, "（提示：外部統計被阻擋，已改用本機統計 fallback。）");
+    renderVisitors(day, total, "提示：外部統計被阻擋，已改用本機統計 fallback。");
   };
 
   const refreshVisitors = async (doHit) => {
@@ -398,7 +379,7 @@ fortune_treasury: ${FORTUNE_TREASURY}`;
         todayVal = g1.value ?? 0;
         totalVal = g2.value ?? 0;
       }
-      renderVisitors(todayVal, totalVal, "（來源：CountAPI 後端統計）");
+      renderVisitors(todayVal, totalVal, "來源：CountAPI 後端統計");
     } catch (e) {
       localVisitorFallback(doHit);
     }
@@ -457,11 +438,11 @@ fortune_treasury: ${FORTUNE_TREASURY}`;
         token.balanceOf(userAddr),
         token.balanceOf(FORTUNE_TREASURY)
       ]);
-      lines.push(`<div>K G E N 餘額（你）：<strong>${fmt(uBal)}</strong></div>`);
-      lines.push(`<div>K G E N 餘額（公益 Treasury）：<strong>${fmt(tBal)}</strong></div>`);
+      lines.push(`<div>KGEN 餘額（你）：<strong>${fmt(uBal)}</strong></div>`);
+      lines.push(`<div>KGEN 餘額（公益 Treasury）：<strong>${fmt(tBal)}</strong></div>`);
       lines.push(`<div style="opacity:.85;margin-top:6px;">（可鏈上驗證：不是假頁面。）</div>`);
     } catch {
-      lines.push(`<div style="opacity:.85;">K G E N 餘額讀取失敗：請確認在 BSC 主網。</div>`);
+      lines.push(`<div style="opacity:.85;">KGEN 餘額讀取失敗：請確認在 BSC 主網。</div>`);
     }
     $walletInfo.innerHTML = lines.join("");
   };
@@ -477,34 +458,204 @@ fortune_treasury: ${FORTUNE_TREASURY}`;
       await provider.send("eth_requestAccounts", []);
       signer = provider.getSigner();
       userAddr = await signer.getAddress();
-      toast("✅ 錢包已連線（BSC 主網）");
+      toast("錢包已連線（BSC 主網）");
       await renderWallet();
     } catch {
       toast("連線失敗或未授權");
     }
   });
 
+  
   // ========= Divination + Fortune Gate =========
   const renderDivination = () => {
     const s = load();
     const n = s.divinationStreak || 0;
     const need = 3;
     const left = Math.max(0, need - n);
+
     $divInfo.innerHTML = `
       <div>目前連續聖筊：<strong>${n}</strong> 次</div>
       <div>領發財金門檻：<strong>${need}</strong> 次</div>
-      <div style="margin-top:6px;opacity:.85;">${left === 0 ? "✅ 已達門檻：可以領發財金" : `距離門檻：還差 ${left} 次`}</div>
+      <div style="margin-top:6px;opacity:.85;">${left === 0 ? "已達門檻：可以領發財金" : `距離門檻：還差 ${left} 次`}</div>
     `;
-    $fortuneGateHint.textContent = (left === 0)
-      ? "已達門檻：可領發財金（若有發放合約才會出金）"
-      : "未達門檻：請先搏杯連勝 3 次";
+
+    $fortuneGateHint.textContent =
+      (left === 0)
+        ? "已達門檻：可領發財金（若有發放合約才會出金）"
+        : "未達門檻：請先搏杯連勝 3 次";
   };
 
-  const chance = (p) => Math.random() < p;
+   const chance = (p) => Math.random() < p;
 
   document.getElementById("btnDivination").addEventListener("click", () => {
     const s = load();
     const ok = chance(0.5);
+
     if (ok) {
       s.divinationStreak = (s.divinationStreak || 0) + 1;
-      pushLog(s, "divination_yes", { streak: s.divinationStreak, 
+      pushLog(s, "divination_yes", { streak: s.divinationStreak });
+      toast("聖筊 +1");
+    } else {
+      s.divinationStreak = 0;
+      pushLog(s, "divination_no", { streak: 0 });
+      toast("失敗歸零");
+    }
+
+    save(s);
+    renderDivination();
+  });
+
+  // ========= Fortune (needs 3 streak) =========
+  document.getElementById("btnFortune").addEventListener("click", async () => {
+    const s = load();
+    s.fortuneCount += 1;
+    pushLog(s, "fortune_click", { addr: userAddr || null, streak: s.divinationStreak || 0 });
+    save(s);
+    renderLocal();
+    renderDivination();
+
+    if ((s.divinationStreak || 0) < 3) {
+      toast("未達門檻：請先連續 3 次聖筊");
+      return;
+    }
+    if (!signer || !userAddr) {
+      toast("先連線錢包，才能領發財金");
+      return;
+    }
+    if (!FAUCET_CONTRACT || !FAUCET_CONTRACT.startsWith("0x") || FAUCET_CONTRACT.length !== 42) {
+      toast("尚未設定發放合約（FAUCET_CONTRACT），目前只做門檻與紀錄");
+      return;
+    }
+
+    try {
+      await ensureChain();
+      const faucet = new ethers.Contract(FAUCET_CONTRACT, FAUCET_ABI, signer);
+      const tx = await faucet.claim();
+      toast("已送出發放交易（請到錢包確認）");
+
+      const s2 = load();
+      pushLog(s2, "fortune_claim_tx", { hash: tx.hash });
+      save(s2);
+      renderLocal();
+      await renderWallet();
+    } catch {
+      toast("發放失敗（可能合約未部署/未授權/鏈不對）");
+    }
+  });
+
+  // ========= Vow transfer =========
+  const getSelectedVowKey = () => {
+    const el = document.querySelector('input[name="vowTarget"]:checked');
+    return el ? el.value : "kufo_engine";
+  };
+
+  const parseAmount = (s) => {
+    const t = String(s || "").trim();
+    if (!t) return null;
+    const n = Number(t);
+    if (!isFinite(n) || n <= 0) return null;
+    try { return ethers.utils.parseUnits(t, KGEN_DECIMALS); } catch { return null; }
+  };
+
+  document.getElementById("btnVow").addEventListener("click", async () => {
+    const s = load();
+    s.vowCount += 1;
+    save(s);
+    renderLocal();
+
+    if (!signer || !userAddr) {
+      toast("先連線錢包，才能還願（鏈上交易）");
+      return;
+    }
+
+    const amt = parseAmount($inpAmount.value);
+    if (!amt) {
+      toast("還願數量格式錯誤（例如 1 或 0.5）");
+      return;
+    }
+
+    const key = getSelectedVowKey();
+    const to = VOW_ADDR[key];
+
+    try {
+      await ensureChain();
+      const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, signer);
+      const tx = await token.transfer(to, amt);
+      toast("已送出還願交易（請到錢包確認）");
+
+      const s2 = load();
+      pushLog(s2, "vow_tx", {
+        addr: userAddr,
+        to_key: key,
+        to,
+        amount: String($inpAmount.value).trim(),
+        hash: tx.hash
+      });
+      save(s2);
+
+      renderLocal();
+      await renderWallet();
+    } catch {
+      toast("還願失敗（可能餘額不足/未授權/鏈不對）");
+    }
+  });
+
+  // ========= Local actions =========
+  const renderLocal = () => {
+    const s = load();
+    $status.innerHTML = `
+      <div>參拜：<strong>${s.visitCount}</strong> 次</div>
+      <div>發財金按鈕：<strong>${s.fortuneCount}</strong> 次</div>
+      <div>還願按鈕：<strong>${s.vowCount}</strong> 次</div>
+      <div>登出：<strong>${s.exitCount}</strong> 次</div>
+      <div style="margin-top:6px;opacity:.85;">（本機紀錄可匯出；鏈上交易以錢包確認為準。）</div>
+    `;
+  };
+
+  document.getElementById("btnVisit").addEventListener("click", () => {
+    const s = load();
+    s.visitCount += 1;
+    pushLog(s, "visit", { addr: userAddr || null });
+    save(s);
+    renderLocal();
+    toast("已參拜（本機已記錄）");
+  });
+
+  document.getElementById("btnExit").addEventListener("click", () => {
+    const s = load();
+    s.exitCount += 1;
+    pushLog(s, "exit", { addr: userAddr || null });
+    save(s);
+    renderLocal();
+    toast("已登出（本機已記錄）");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  document.getElementById("btnExport").addEventListener("click", () => {
+    const s = load();
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    downloadJSON(s, `wukong-temple-log_${yyyy}${mm}${dd}.json`);
+    toast("已匯出 JSON");
+  });
+
+  document.getElementById("btnClear").addEventListener("click", () => {
+    const ok = confirm("確定清除本機紀錄？只會清你的瀏覽器。");
+    if (!ok) return;
+    localStorage.removeItem(KEY);
+    renderLocal();
+    renderDivination();
+    toast("已清除本機紀錄");
+  });
+
+  // ========= init =========
+  renderLocal();
+  renderDivination();
+  renderWallet();
+
+})();
+</script>
+</body>
+</html>                                    
