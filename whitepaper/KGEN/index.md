@@ -1,6 +1,6 @@
 ---
 layout: default
-title: KGEN 創作內容兌換白皮書 V1.0
+title: KGEN 創作內容兌換白皮書 V1.1
 permalink: /whitepaper/KGEN/
 ---
 
@@ -22,7 +22,7 @@ https://klineodyssey.github.io/kline-odyssey/
 
 # KGEN 創作內容兌換白皮書
 KGEN Content Credit Whitepaper  
-Version：V1.0  
+Version：V1.1  
 Status：Public / Content Use Only  
 Project：K線西遊記・花果山台灣  
 Last Update：2026-01  
@@ -130,22 +130,36 @@ KGEN 不代表擁有權，僅代表：
 
 ---
 
-## 七、總結聲明（Final Statement）
+## 七、創作內容取得方式（One-Click Email）
+本體系不設即時購物車、不導入金流系統。  
+所有「創作內容兌換／索取」統一採用單一入口：官方信箱。
+
+### 📩 一鍵寄信（點一下就會把內容填好）
+<a href="mailto:klineodyssey.io@gmail.com?subject=KGEN%20%E5%89%B5%E4%BD%9C%E5%85%A7%E5%AE%B9%E5%85%8C%E6%8F%9B%EF%BC%8F%E7%B4%A2%E5%8F%96%20%28V1.1%29&body=%E6%82%A8%E5%A5%BD%EF%BC%8C%E8%AB%8B%E5%95%8F%E6%9C%89%E5%93%AA%E8%A3%A1%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8B%99%E7%9A%84%E5%91%A2%0A%0A%E8%AB%8B%E6%8C%91%E9%81%B8%E4%B8%80%E5%80%8B%E5%93%81%E9%A0%85%EF%BC%88%E8%AB%8B%E5%9B%9E%E8%A6%86%20A%2FB%2FC%2FD%EF%BC%89%EF%BC%9A%0A%0AA%EF%BD%9C%E9%9B%BB%E5%AD%90%E6%9B%B8%20%28168%20KGEN%29%0AB%EF%BD%9C%E9%87%91%E8%9E%8D%E5%9C%B0%E5%9C%96%20%28588%20KGEN%29%0AC%EF%BD%9C%E5%AE%8C%E6%95%B4%E5%90%88%E9%9B%86%20%28888%20KGEN%29%0AD%EF%BD%9C%E5%89%B5%E4%BD%9C%E5%85%B8%E8%97%8F%E7%89%88%20%281688%20KGEN%29%0A%0A%E8%AB%8B%E8%A3%9C%E5%85%85%E8%B3%87%E8%A8%8A%EF%BC%88%E5%8F%AF%E7%A9%BA%EF%BC%89%EF%BC%9A%0A1%29%20%E6%9A%B1%E7%A8%B1%EF%BC%9A%0A2%29%20%E4%BD%BF%E7%94%A8%E6%94%AF%E6%8C%81%E6%96%B9%E5%BC%8F%EF%BC%9A%E2%96%A1%20KGEN%20%E2%96%A1%20NTD%0A3%29%20%E7%95%99%E8%A8%80%EF%BC%88%E5%8F%AF%E7%A9%BA%EF%BC%89%EF%BC%9A%0A" 
+   style="display:inline-block;padding:12px 16px;border-radius:12px;font-weight:900;text-decoration:none;border:1px solid #111;">
+📩 一鍵寄信｜兌換 / 索取創作內容
+</a>
+
+> 說明：本按鈕會自動開啟你的 Email 並填入內容模板。  
+> 你只要按「送出」，即可完成兌換 / 索取流程的啟動。
+
+---
+
+## 八、總結聲明（Final Statement）
 KGEN 是《花果山台灣》的創作內容兌換單位，
 用來支持作品本身，而非取得工具、資料或系統權限。  
 創作公開，系統保留，界線清楚。
 
 ---
 
-## 八、版本紀錄（Version History）
-V1.0  
-初版發佈：定義 KGEN 為創作內容兌換單位  
-明確區分「可兌換內容」與「不可販售系統」
+## 九、版本紀錄（Version History）
+V1.1  
+新增「一鍵寄信」固定流程，統一內容兌換入口。  
+維持原定義：KGEN 為創作內容兌換單位，並明確區分不可販售系統。
 
 ---
 
 ## 官方聯絡
-KLINE ODYSSEY / KLINE App Game  
 klineodyssey.io@gmail.com
 
 ---
