@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Fortune Hall</title>
+  <meta name="description" content="悟空財神殿｜互動式遊戲入口：參觀、選擇、體驗，然後離開。" />
+</head>
+
+<body>
+<div style="max-width:860px;margin:22px auto;padding:16px;">
+
+  <div style="margin-bottom:10px;">
+    <div style="font-weight:900;font-size:22px;line-height:1.2;">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
+    <div style="margin-top:6px;font-weight:800;">#悟空新文 #K線西遊記 #花果山台灣</div>
+    <div style="margin-top:8px;">
+      <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener"
+         style="text-decoration:none;font-weight:900;">https://klineodyssey.github.io/kline-odyssey/</a>
+    </div>
+    <div id="envHint" style="margin-top:8px;opacity:.9;line-height:1.7;"></div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">規則一句話</div>
+    <div style="line-height:1.8;margin-top:6px;">
+      這裡是<strong>互動式遊戲入口</strong>：參觀、選擇、體驗，然後離開。<br/>
+      不承諾收益、不提供投資建議、不做回報保證。所有鏈上動作必須由你在錢包中按確認。
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🫀 生命體徵（Autopilot Pulse）</div>
+    <div id="pulseInfo" style="margin-top:8px;line-height:1.9;"></div>
+    <div style="opacity:.85;margin-top:6px;">
+      說明：本頁載入即「呼吸+1」，每小時自動「心跳回報」。即使沒有錢包也一定會動。
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">👣 來訪人數（今日 / 總計）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnRefreshStats"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          重新整理
+        </button>
+        <button id="btnReHit"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          再呼吸一次（測試）
+        </button>
+      </div>
+    </div>
+    <div id="visitorInfo" style="margin-top:10px;line-height:1.9;">（已啟動）</div>
+    <div id="visitorHint" style="opacity:.85;margin-top:6px;"></div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">🥢 搏杯（連續 3 次聖筊才開啟領發財金）</div>
+      <button id="btnDivination"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        搏杯
+      </button>
+    </div>
+    <div id="divinationInfo" style="margin-top:10px;line-height:1.9;"></div>
+    <div style="opacity:.85;margin-top:6px;">
+      規則：聖筊機率 50%。失敗歸零。連勝達 3 才開啟「領發財金」按鈕。
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">🪪 錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnConnect"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          連線錢包
+        </button>
+        <button id="btnSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ▶️ 語音客服
+        </button>
+        <button id="btnStopSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ⏹️ 停止
+        </button>
+      </div>
+    </div>
+
+    <div id="walletInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+      <div style="font-weight:900;">🔎 鏈上驗證（BscScan / PancakeSwap / PinkLock）</div>
+
+      <div style="margin-top:6px;">
+        KGEN（KLINE GENESIS）Token：
+        <a id="linkToken" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+
+      <div style="margin-top:4px;">
+        PancakeSwap（官方交易）：
+        <a id="linkSwap" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;">KGEN / WBNB</a>
+      </div>
+
+      <div style="margin-top:4px;">
+        LP Pair（KGEN / WBNB）：
+        <a id="linkLP" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+
+      <div style="margin-top:4px;">
+        🔒 PinkLock（LP 鎖倉查驗）：
+        <a id="linkPink" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;">Unlock 倒數頁</a>
+      </div>
+
+      <div style="margin-top:6px;opacity:.85;">
+        本頁不會替你自動出金，所有鏈上動作都必須由你在錢包中按確認。
+      </div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🏦 還願地址（3 選 1）</div>
+    <div style="margin-top:8px;line-height:1.8;">
+      <div style="opacity:.9;">第三個地址 = 公益 Treasury（同時也是發財金發放池）。</div>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;">
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="blackhole" />
+          <div>
+            <div style="font-weight:900;">往生地址（0x000…0000）</div>
+            <div style="opacity:.85;">
+              不是消失，是<strong>質能轉換</strong>：E=mc²；m 下降，結構能量上升。<br/>
+              也可視為「把質量帶去極樂世界」，不可逆。
+            </div>
+          </div>
+        </label>
+
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="kufo_engine" checked />
+          <div>
+            <div style="font-weight:900;">KUFO 引擎室（補油推進）</div>
+            <div style="opacity:.85;">敘事核心地址。</div>
+          </div>
+        </label>
+
+        <label style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="radio" name="vowTarget" value="public_good_treasury" />
+          <div>
+            <div style="font-weight:900;">公益 Treasury（發財金發放池）</div>
+            <div style="opacity:.85;">震災、孤兒院、自由民主、花果山孤兒基金池。</div>
+          </div>
+        </label>
+      </div>
+
+      <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+        <div style="font-weight:900;">地址確認</div>
+        <pre id="addrPreview" style="white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;margin:8px 0 0;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🧮 還願數量（KGEN）</div>
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="inpAmount" value="1" inputmode="decimal"
+        style="flex:1;min-width:220px;padding:10px;border:1px solid #111;border-radius:12px;font-weight:900;"
+        placeholder="例如：1 或 0.5" />
+      <div style="opacity:.85;">提示：你可改數量。</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;">
+
+    <button id="btnVisit"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🏮 登入參拜</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次參拜</div>
+    </button>
+
+    <a href="/kline-odyssey/bookstore/"
+       style="display:block;padding:14px;border:1px solid #111;border-radius:14px;text-decoration:none;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">📘 領書｜悟空書城</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">連結到書城／內容兌換</div>
+    </a>
+
+    <button id="btnFortune"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🧧 領發財金（需 3 次聖筊）</div>
+      <div id="fortuneGateHint" style="opacity:.85;margin-top:6px;line-height:1.6;">
+        未達門檻：請先搏杯連勝 3 次
+      </div>
+    </button>
+
+    <button id="btnVow"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🙏 還願（鏈上送出交易）</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">由你在錢包確認，把 KGEN 送到選定地址</div>
+    </button>
+
+    <button id="btnExit"
+      style="text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff;">
+      <div style="font-weight:900;font-size:16px;">🚪 登出離開</div>
+      <div style="opacity:.85;margin-top:6px;line-height:1.6;">本機記錄一次離開</div>
+    </button>
+
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">📜 本機紀錄</div>
+    <div id="statusText" style="margin-top:8px;line-height:1.9;"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+      <button id="btnExport"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        ⬇️ 匯出紀錄 JSON
+      </button>
+      <button id="btnClear"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🧹 清除本機紀錄
+      </button>
+    </div>
+    <div id="toast" style="margin-top:10px;font-weight:900;"></div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:14px 0;">
+    <div style="font-weight:900;">🎧 AI 語音客服（中文）</div>
+    <div style="margin-top:8px;line-height:1.85;">
+      歡迎來到五指山悟空財神殿。這裡是互動式遊戲入口，不是投資平台。<br/><br/>
+      你需要連續三次聖筊，才能領發財金。<br/>
+      發財金若要正常發放，必須由發放合約出金。<br/>
+      還願可選：往生地址（質能轉換 E=mc² / w=mgh）、KUFO 引擎室、或回補公益 Treasury。<br/>
+      所有鏈上動作，都必須由你在錢包中按確認。
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #111;line-height:1.8;">
+    PrimeForge 以母機之名，開啟金融生命。<br/>
+    花果山台灣・信念不滅・市場無界。<br/>
+    Where the Market Becomes the Myth.<br/>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<script src="./ethers-5.7.2.umd.min.js"></script>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const safeParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+  const nowISO = () => new Date().toISOString();
+
+  const CHAIN_ID_DEC = 56;
+  const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const KGEN_SYMBOL = "KGEN";
+  const KGEN_NAME = "KLINE GENESIS";
+  const KGEN_DECIMALS = 18;
+
+  const LP_PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+  const PINKLOCK_URL = "https://www.pinksale.finance/pinklock/bsc/record/1427003";
+
+  const VOW_ADDR = {
+    blackhole: "0x0000000000000000000000000000000000000000",
+    kufo_engine: "0xef83804c264B47378FCf150086943B53fB90A90b",
+    public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1"
+  };
+  const FORTUNE_TREASURY = VOW_ADDR.public_good_treasury;
+
+  // 這個就是你問的 FAUCET_CONTRACT（發放合約地址）：沒部署就留空
+  const FAUCET_CONTRACT = "";
+
+  const COUNT_NS = "klineodyssey-wukong-temple";
+  const PULSE_KEY = "klineodyssey_wukongTemple_pulse_v0_6";
+
+  const dayKey = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `day_${yyyy}${mm}${dd}`;
+  };
+
+  const countapi = {
+    hit: async (key) => {
+      const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_hit_failed");
+      return await r.json();
+    },
+    get: async (key) => {
+      const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_get_failed");
+      return await r.json();
+    }
+  };
+
+  const renderVisitors = (todayVal, totalVal, note) => {
+    $("visitorInfo").innerHTML = `
+      <div>📅 今日來訪：<strong>${todayVal}</strong></div>
+      <div>🌍 總來訪：<strong>${totalVal}</strong></div>
+    `;
+    $("visitorHint").textContent = note || "";
+  };
+
+  const localVisitorFallback = (doHit) => {
+    const kDay = "local_visit_" + dayKey();
+    const kTotal = "local_visit_total";
+    const get = (k) => Number(localStorage.getItem(k) || "0");
+    const set = (k, v) => localStorage.setItem(k, String(v));
+    let day = get(kDay);
+    let total = get(kTotal);
+    if (doHit) { day += 1; total += 1; set(kDay, day); set(kTotal, total); }
+    renderVisitors(day, total, "（提示：外部統計被阻擋，已改用本機統計 fallback。）");
+  };
+
+  const refreshVisitors = async (doHit) => {
+    try {
+      const dk = dayKey();
+      let todayVal = 0;
+      let totalVal = 0;
+      if (doHit) {
+        const [t1, t2] = await Promise.all([countapi.hit(dk), countapi.hit("total")]);
+        todayVal = t1.value ?? 0;
+        totalVal = t2.value ?? 0;
+      } else {
+        const [g1, g2] = await Promise.all([countapi.get(dk), countapi.get("total")]);
+        todayVal = g1.value ?? 0;
+        totalVal = g2.value ?? 0;
+      }
+      renderVisitors(todayVal, totalVal, "（來源：CountAPI 後端統計）");
+    } catch {
+      localVisitorFallback(doHit);
+    }
+  };
+
+  const pulseDefault = () => ({ bootCount: 0, lastBootAt: null, heartbeatCount: 0, lastHeartbeatAt: null });
+  const pulseLoad = () => {
+    const raw = localStorage.getItem(PULSE_KEY);
+    const p = raw ? safeParse(raw) : null;
+    return p && typeof p === "object" ? { ...pulseDefault(), ...p } : pulseDefault();
+  };
+  const pulseSave = (p) => localStorage.setItem(PULSE_KEY, JSON.stringify(p));
+  const renderPulse = () => {
+    const p = pulseLoad();
+    $("pulseInfo").innerHTML = `
+      <div>呼吸（Boot/Load）：<strong>${p.bootCount}</strong> 次</div>
+      <div>上次呼吸：<strong>${p.lastBootAt || "-"}</strong></div>
+      <div>心跳（Hourly）：<strong>${p.heartbeatCount}</strong> 次</div>
+      <div>上次心跳：<strong>${p.lastHeartbeatAt || "-"}</strong></div>
+    `;
+  };
+  const doBreath = () => { const p = pulseLoad(); p.bootCount += 1; p.lastBootAt = nowISO(); pulseSave(p); renderPulse(); };
+  const doHeartbeat = () => { const p = pulseLoad(); p.heartbeatCount += 1; p.lastHeartbeatAt = nowISO(); pulseSave(p); renderPulse(); };
+
+  const KEY = "klineodyssey_wukongTemple_v0_6";
+  const defaultState = () => ({ visitCount: 0, exitCount: 0, vowCount: 0, fortuneCount: 0, divinationStreak: 0, log: [] });
+  const load = () => {
+    const raw = localStorage.getItem(KEY);
+    const p = raw ? safeParse(raw) : null;
+    return p && typeof p === "object" ? { ...defaultState(), ...p, log: Array.isArray(p.log) ? p.log : [] } : defaultState();
+  };
+  const save = (s) => localStorage.setItem(KEY, JSON.stringify(s));
+  const pushLog = (s, type, meta = {}) => {
+    s.log.push({ type, time: nowISO(), ...meta });
+    if (s.log.length > 400) s.log = s.log.slice(-400);
+  };
+  const downloadJSON = (obj, filename) => {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const toast = (msg) => {
+    $("toast").textContent = msg;
+    setTimeout(() => { if ($("toast").textContent === msg) $("toast").textContent = ""; }, 2500);
+  };
+
+  const renderLocal = () => {
+    const s = load();
+    $("statusText").innerHTML = `
+      <div>登入參拜：<strong>${s.visitCount}</strong> 次</div>
+      <div>登出離開：<strong>${s.exitCount}</strong> 次</div>
+      <div>還願交易：<strong>${s.vowCount}</strong> 次</div>
+      <div>領發財金：<strong>${s.fortuneCount}</strong> 次</div>
+      <div>聖筊連勝：<strong>${s.divinationStreak || 0}</strong> 次</div>
+      <div style="opacity:.85;margin-top:6px;">（紀錄只存在你的瀏覽器，可匯出 JSON）</div>
+    `;
+  };
+
+  const renderDivination = () => {
+    const s = load();
+    const n = s.divinationStreak || 0;
+    const need = 3;
+    const left = Math.max(0, need - n);
+    $("divinationInfo").innerHTML = `
+      <div>目前連續聖筊：<strong>${n}</strong> 次</div>
+      <div>領發財金門檻：<strong>${need}</strong> 次</div>
+      <div style="margin-top:6px;opacity:.85;">${left === 0 ? "✅ 已達門檻：可以領發財金" : `距離門檻：還差 ${left} 次`}</div>
+    `;
+    $("fortuneGateHint").textContent = (left === 0)
+      ? "已達門檻：可領發財金（若有發放合約才會出金）"
+      : "未達門檻：請先搏杯連勝 3 次";
+  };
+
+  const speakText = (text) => {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
+  const stopSpeak = () => { try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch {} };
+
+  const chance = (p) => Math.random() < p;
+
+  let provider = null;
+  let signer = null;
+  let userAddr = null;
+
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function transfer(address to, uint256 amount) returns (bool)"
+  ];
+  const FAUCET_ABI = ["function igniteAndClaim() external"];
+
+  const ensureChain = async () => {
+    if (!window.ethereum) throw new Error("no_wallet");
+    const wantHex = "0x" + CHAIN_ID_DEC.toString(16);
+    const cur = await window.ethereum.request({ method: "eth_chainId" });
+    if (cur !== wantHex) {
+      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: wantHex }] });
+    }
+  };
+
+  const fmt = (bn) => { try { return ethers.utils.formatUnits(bn, KGEN_DECIMALS); } catch { return String(bn); } };
+
+  const renderWallet = async () => {
+    if (!userAddr) {
+      $("walletInfo").innerHTML = `<div>未連線</div><div style="opacity:.85;">提示：請用 MetaMask / 內建錢包瀏覽器開啟本頁。</div>`;
+      return;
+    }
+    const lines = [];
+    lines.push(`<div>已連線：<strong style="word-break:break-all;overflow-wrap:anywhere;">${userAddr}</strong></div>`);
+    lines.push(`<div>代幣：<strong>${KGEN_SYMBOL}</strong>（${KGEN_NAME}）</div>`);
+    try {
+      const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, provider);
+      const [uBal, tBal] = await Promise.all([token.balanceOf(userAddr), token.balanceOf(FORTUNE_TREASURY)]);
+      lines.push(`<div>${KGEN_SYMBOL} 餘額（你）：<strong>${fmt(uBal)}</strong></div>`);
+      lines.push(`<div>${KGEN_SYMBOL} 餘額（公益 Treasury）：<strong>${fmt(tBal)}</strong></div>`);
+      lines.push(`<div style="opacity:.85;margin-top:6px;">（可鏈上驗證：不是假頁面。）</div>`);
+    } catch {
+      lines.push(`<div style="opacity:.85;">餘額讀取失敗：請確認在 BSC 主網，且 ethers 檔案可載入。</div>`);
+    }
+    $("walletInfo").innerHTML = lines.join("");
+  };
+
+  const getSelectedVow = () => {
+    const nodes = document.querySelectorAll('input[name="vowTarget"]');
+    for (const n of nodes) if (n.checked) return n.value;
+    return "kufo_engine";
+  };
+
+  const parseAmount = () => {
+    const raw = ($("inpAmount").value || "").trim();
+    const n = Number(raw);
+    if (!raw || !Number.isFinite(n) || n <= 0) return null;
+    return raw;
+  };
+
+  $("addrPreview").textContent =
+`blackhole (往生): ${VOW_ADDR.blackhole}
+kufo_engine: ${VOW_ADDR.kufo_engine}
+public_good_treasury (發財金池): ${VOW_ADDR.public_good_treasury}
+fortune_treasury: ${FORTUNE_TREASURY}`;
+
+  const mkBscAddr = (addr) => `https://bscscan.com/address/${addr}`;
+  const mkBscToken = (addr) => `https://bscscan.com/token/${addr}`;
+
+  $("linkToken").textContent = KGEN_TOKEN;
+  $("linkToken").href = mkBscToken(KGEN_TOKEN);
+  $("linkSwap").href = `https://pancakeswap.finance/swap?outputCurrency=${KGEN_TOKEN}`;
+  $("linkLP").textContent = LP_PAIR;
+  $("linkLP").href = mkBscAddr(LP_PAIR);
+  $("linkPink").href = PINKLOCK_URL;
+
+  const env = [];
+  env.push(`Network：BSC Mainnet（ChainId ${CHAIN_ID_DEC}）`);
+  env.push(`Token：${KGEN_SYMBOL}（${KGEN_NAME}）`);
+  env.push(`Web3：${window.ethereum ? "偵測到錢包" : "未偵測到錢包（仍可用非鏈上功能）"}`);
+  env.push(`Ethers：${(typeof ethers !== "undefined") ? "OK" : "未載入（請確認 ethers 檔同資料夾）"}`);
+  $("envHint").textContent = env.join("｜");
+
+  $("btnSpeak").addEventListener("click", () => {
+    const s = load();
+    speakText(`歡迎來到五指山悟空財神殿。你目前聖筊連勝是 ${s.divinationStreak || 0} 次。`);
+    toast("語音客服已啟動");
+  });
+  $("btnStopSpeak").addEventListener("click", () => { stopSpeak(); toast("已停止語音"); });
+
+  $("btnRefreshStats").addEventListener("click", async () => { await refreshVisitors(false); toast("已更新來訪統計"); });
+  $("btnReHit").addEventListener("click", async () => { await refreshVisitors(true); toast("已再呼吸一次（測試）"); });
+
+  $("btnDivination").addEventListener("click", () => {
+    const s = load();
+    const ok = chance(0.5);
+    if (ok) { s.divinationStreak = (s.divinationStreak || 0) + 1; pushLog(s, "divination_yes", { streak: s.divinationStreak }); save(s); toast("聖筊"); }
+    else { s.divinationStreak = 0; pushLog(s, "divination_no", {}); save(s); toast("陰筊"); }
+    renderDivination(); renderLocal();
+  });
+
+  $("btnVisit").addEventListener("click", () => { const s = load(); s.visitCount += 1; pushLog(s, "visit", {}); save(s); renderLocal(); toast("已記錄：登入參拜"); });
+  $("btnExit").addEventListener("click", () => { const s = load(); s.exitCount += 1; pushLog(s, "exit", {}); save(s); renderLocal(); toast("已記錄：登出離開"); });
+
+  $("btnExport").addEventListener("click", () => { downloadJSON(load(), `wukong_temple_log_${dayKey()}.json`); toast("已匯出 JSON"); });
+  $("btnClear").addEventListener("click", () => { if (!confirm("確定清除本機紀錄？")) return; localStorage.removeItem(KEY); renderLocal(); renderDivination(); toast("已清除"); });
+
+  $("btnConnect").addEventListener("click", async () => {
+    try {
+      if (!window.ethereum) { toast("找不到錢包"); return; }
+      await ensureChain();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddr = await signer.getAddress();
+      toast("錢包已連線（BSC 主網）");
+      await renderWallet();
+    } catch { toast("連線失敗或未授權"); }
+  });
+
+  $("btnVow").addEventListener("click", async () => {
+    const amtStr = parseAmount();
+    if (!amtStr) { toast("請輸入正確數量"); return; }
+    const key = getSelectedVow();
+    const to = VOW_ADDR[key] || VOW_ADDR.kufo_engine;
+
+    if (!window.ethereum || !signer) { toast("請先連線錢包"); return; }
+    try {
+      const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, signer);
+      const amountWei = ethers.utils.parseUnits(amtStr, KGEN_DECIMALS);
+      toast("請在錢包確認交易");
+      const tx = await token.transfer(to, amountWei);
+      const s = load();
+      s.vowCount += 1;
+      pushLog(s, "vow_transfer", { to, amount: amtStr, txHash: tx.hash });
+      save(s);
+      renderLocal();
+      toast("已送出交易（等待鏈上確認）");
+    } catch { toast("交易取消或失敗"); }
+  });
+
+  $("btnFortune").addEventListener("click", async () => {
+    const s = load();
+    if ((s.divinationStreak || 0) < 3) { toast("未達門檻：請先連勝 3 次"); return; }
+
+    if (!FAUCET_CONTRACT) {
+      const s2 = load();
+      s2.fortuneCount += 1;
+      pushLog(s2, "fortune_gate_pass_no_contract", {});
+      save(s2);
+      renderLocal();
+      toast("已達門檻（但尚未部署發放合約）");
+      return;
+    }
+
+    if (!window.ethereum || !signer) { toast("請先連線錢包"); return; }
+    try {
+      const faucet = new ethers.Contract(FAUCET_CONTRACT, FAUCET_ABI, signer);
+      toast("請在錢包確認領取");
+      const tx = await faucet.igniteAndClaim();
+      const s3 = load();
+      s3.fortuneCount += 1;
+      pushLog(s3, "fortune_claim", { txHash: tx.hash });
+      save(s3);
+      renderLocal();
+      toast("已送出領取（等待鏈上確認）");
+    } catch { toast("領取取消或失敗"); }
+  });
+
+  doBreath();
+  doHeartbeat();
+  setInterval(doHeartbeat, 60 * 60 * 1000);
+
+  refreshVisitors(true);
+  renderLocal();
+  renderDivination();
+  renderWallet();
+})();
+</script>
+
+</body>
+</html>
