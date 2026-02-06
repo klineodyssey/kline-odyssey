@@ -1,13 +1,18 @@
+---
+layout: default
+title: KGEN五指山悟空財神殿
+permalink: /whitepaper/KGEN/
+---
 
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
-  <a href="https://klineodyssey.github.io/kline-odyssey/wukong-temple/index.html"
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
      target="_blank" rel="noopener"
      style="display:inline-flex; align-items:center; gap:8px;
             padding:10px 14px; border-radius:999px;
             font-weight:800; text-decoration:none;
             border:1px solid #111; background:#fff;">
-    🌐 悟空財神殿｜宇宙呼吸心跳與生命 🐒 
+    💖 宇宙細包｜呼吸｜心跳｜生命🐒🔥 
   </a>
 </div>
 
