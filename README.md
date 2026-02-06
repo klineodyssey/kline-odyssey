@@ -16,7 +16,7 @@ Homepage Quick Actions (Production Block)
     💛 捐款（USDT・TRC20）
   </a>
 
-  <a href="/./whitepaper/"
+  <a href="whitepaper/"
      style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     📚 白皮書總覽
   </a>
