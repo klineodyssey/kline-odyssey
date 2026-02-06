@@ -1,9 +1,3 @@
----
-layout: default
-title: KGEN五指山悟空財神殿
-permalink: /wukong-temple/index.html/
----
-
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   <a href="https://klineodyssey.github.io/kline-odyssey/"
