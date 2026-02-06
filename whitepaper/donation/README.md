@@ -1,3 +1,16 @@
+
+<!-- Official Entry (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/wukong-temple/index.html"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    🌐 悟空財神殿｜宇宙呼吸心跳與生命 🐒 
+  </a>
+</div>
+
 ## 💛 Support & Donation｜支持創作與公益
 
 《花果山台灣 / KLINE ODYSSEY》是一項  
