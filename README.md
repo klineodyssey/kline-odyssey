@@ -93,11 +93,11 @@ Homepage Quick Actions (Production Block)
 </div>
 
 <div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
-  <a href="/kline-odyssey/kline-taifex/"
+  <a href="/kline-odyssey/k線西遊記/taifex/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🥋 台指期貨篇
   </a>
-  <a href="/kline-odyssey/nasdaq/"
+  <a href="/kline-odyssey/k線西遊記/nasdaq/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🌌 NASDAQ 篇
   </a>
