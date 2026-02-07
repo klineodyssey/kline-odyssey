@@ -92,25 +92,29 @@ Homepage Quick Actions (Production Block)
   </div>
 </div>
 
-<div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
-  <a href="/k線西遊記/kline-taifex/"
+<div style="margin:0 0 16px 0; <div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+
+  <a href="/kline-odyssey/K線西遊記/kline-taifex/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🥋 台指期貨篇
   </a>
-  <a href="/k線西遊記/kline-nasdaq/"
+
+  <a href="/kline-odyssey/K線西遊記/kline-nasdaq/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🌌 NASDAQ 篇
   </a>
-  <a href="/kline-btc/"
+
+  <a href="/kline-odyssey/kline-btc/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🪐 比特幣篇
   </a>
+
   <a href="mailto:klineodyssey.io@gmail.com?subject=KGEN%20%E9%96%8B%E6%88%B6%20/%20%E5%90%88%E4%BD%9C%20%E8%A9%A2%E5%95%8F&body=%E8%AB%8B%E7%95%99%E4%B8%8B%E4%BB%A5%E4%B8%8B%E8%B3%87%E8%A8%8A%EF%BC%9A%0A%0A1)%E5%90%8D%E7%A8%B1%EF%BC%9A%0A2)%E6%83%B3%E5%81%9A%E4%BB%80%E9%BA%BC%EF%BC%88%E9%96%8B%E6%88%B6%2F%E6%A8%A1%E6%93%AC%E5%B8%B3%E8%99%9F%2F%E5%90%88%E4%BD%9C%EF%BC%89%EF%BC%9A%0A3)%E8%81%AF%E7%B5%A1%E6%96%B9%E5%BC%8F%EF%BC%9A%0A"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
-    🧾 KGEN 開戶 / 模擬帳號（Email）
+    ✉️ KGEN 開戶 / 合作
   </a>
-</div>
 
+</div>
 <div style="margin-top:10px;">
   ⌖<br/>
   PrimeForge 以母機之名，開啟金融生命。<br/>
@@ -216,7 +220,7 @@ KGEN（K-Line Genesis Energy Node）
 ## 三、KLINE App Game 是什麼？
 
 **KLINE App Game** 不是娛樂遊戲，  
-而是一套 **「高等銀行 × 市場模擬 × 人才篩選系統」**。
+而是一套 **「高等銀行 × 市場模擬 × 人才篩選系統」**。 ??
 
 在這裡：
 
