@@ -451,8 +451,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #k線西遊記 #花果山台灣 #悟空新文  
-👉 https://www.youtube.com/shorts/a-9JMU6uS6g
+▶ 這不是遊戲，是行為宇宙。OHLC 是選擇，不是價格。台灣是秤，天下同秤。 #K線西遊記 #花果山台灣 #悟空新文 #宇宙呼吸心跳生命  
+👉 https://www.youtube.com/shorts/IQO9t9br9Sc
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
