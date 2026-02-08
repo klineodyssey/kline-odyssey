@@ -1,0 +1,682 @@
+<!-- Official Entry (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    🌐 Official Website
+  </a>
+</div>
+
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Fortune Hall</title>
+  <meta name="description" content="悟空財神殿｜互動式遊戲入口：參觀、選擇、體驗，然後離開。" />
+  <style>
+  a, .addr, .wrap-any { overflow-wrap:anywhere; word-break:break-word; }
+  .addr-2line{
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+  </style>
+</head>
+
+<body>
+<div style="max-width:860px;margin:22px auto;padding:16px;">
+
+  <div style="margin-bottom:10px;">
+    <div style="font-weight:900;font-size:22px;line-height:1.2;">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
+    <div style="margin-top:6px;font-weight:800;">#悟空新文 #K線西遊記 #花果山台灣</div>
+    <div style="margin-top:8px;">
+      <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener"
+         style="text-decoration:none;font-weight:900;border:1px solid #111;border-radius:999px;padding:10px 14px;display:inline-block;">
+        回到官網總覽
+      </a>
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;">
+    <div style="font-weight:900;">🫁 宇宙生命徵象｜心跳・呼吸・血壓（Cosmic Vitals）</div>
+    <div style="margin-top:8px;line-height:1.8;">
+      這裡是「悟空財神殿」入口，不是一般廟。<br/>
+      你每一次參拜，都會觸發一次宇宙生命徵象：心跳、呼吸、血壓。<br/>
+      （若你尚未部署發放合約，發財金功能會保持鎖定。）
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="btnHeartbeat"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        ❤️ 心跳
+      </button>
+      <button id="btnBreath"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🫁 呼吸
+      </button>
+      <button id="btnPressure"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🩸 血壓
+      </button>
+      <button id="btnFortune" disabled
+        style="cursor:not-allowed;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#f3f3f3;font-weight:900;">
+        🧧 領發財金（需合約）
+      </button>
+    </div>
+
+    <div id="vitalsInfo" style="margin-top:10px;line-height:1.9;"></div>
+    <div style="opacity:.85;margin-top:6px;">
+      規則：聖筊機率 50%。失敗歸零。連勝達 3 才開啟「領發財金」按鈕。
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">🪪 錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnConnect"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          連線錢包
+        </button>
+        <button id="btnSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ▶️ 語音客服
+        </button>
+        <button id="btnStopSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ⏹️ 停止
+        </button>
+      </div>
+    </div>
+
+    <div id="aiConsole" style="margin-top:10px;border:1px solid #111;border-radius:14px;padding:12px;background:#fafafa;">
+      <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="width:88px;min-width:88px;">
+          <img id="avatarImg" src="./wukong-avatar.png" alt="Wukong AI" style="width:88px;height:88px;border-radius:18px;border:1px solid #111;object-fit:cover;background:#fff;"/>
+          <div style="margin-top:6px;font-size:12px;opacity:.85;line-height:1.4;">
+            提示：若未顯示，請在同資料夾放一張 wukong-avatar.png
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <div style="font-weight:900;">AI 語音客服（悟空財神殿）</div>
+          <div style="margin-top:6px;font-size:14px;line-height:1.7;">
+            <div style="font-weight:900;">即時文字（AI 說話字幕）</div>
+            <div id="aiCaption" style="margin-top:6px;min-height:46px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fff;white-space:pre-wrap;"></div>
+
+            <div style="margin-top:10px;font-weight:900;">即時文字（你的麥克風轉文字）</div>
+            <div id="userTranscript" style="margin-top:6px;min-height:46px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fff;white-space:pre-wrap;opacity:.95;"></div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button id="btnMic"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                🎤 開始說話
+              </button>
+              <button id="btnStopMic"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                📴 停止聽你
+              </button>
+              <button id="btnAutoStart"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                ⚡ 一鍵啟動（語音＋字幕）
+              </button>
+            </div>
+
+            <div style="margin-top:8px;font-size:12px;opacity:.85;line-height:1.5;">
+              注意：多數瀏覽器禁止「無互動自動播放聲音」。第一次請按「一鍵啟動」或任意按鍵，之後才可連續播報。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="walletInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+      <div style="font-weight:900;">🔎 鏈上驗證（BscScan / PancakeSwap / PinkLock）</div>
+
+      <div style="margin-top:6px;">
+        KGEN（KLINE GENESIS）Token：
+        <a id="linkToken" class="addr addr-2line" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+
+      <div style="margin-top:4px;">
+        PancakeSwap（官方交易）：
+        <a id="linkSwap" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;">KGEN / WBNB</a>
+      </div>
+
+      <div style="margin-top:4px;">
+        LP Pair：
+        <a id="linkLP" class="addr addr-2line" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;"></a>
+      </div>
+
+      <div style="margin-top:4px;">
+        PinkLock：
+        <a id="linkPink" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;">查看鎖倉</a>
+      </div>
+
+      <div id="envHint" style="margin-top:8px;opacity:.85;"></div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🧿 參拜紀錄（本機 localStorage）</div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="btnVisit"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🙏 登入參拜
+      </button>
+      <button id="btnDivination"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🧿 擲筊（50%）
+      </button>
+      <button id="btnExit"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🚪 登出離開
+      </button>
+      <button id="btnExport"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        ⬇️ 匯出 JSON
+      </button>
+      <button id="btnClear"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🧹 清除紀錄
+      </button>
+    </div>
+
+    <div id="localInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;border-top:1px solid #111;padding-top:10px;">
+      <div style="font-weight:900;">📊 來訪統計（CountAPI / fallback）</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnRefreshStats"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          🔄 更新統計
+        </button>
+        <button id="btnReHit"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          🫁 再呼吸一次（測試 hit）
+        </button>
+      </div>
+      <div id="visitorInfo" style="margin-top:10px;line-height:1.9;"></div>
+      <div id="visitorHint" style="opacity:.85;margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #111;line-height:1.8;">
+    PrimeForge 以母機之名，開啟金融生命。<br/>
+    花果山台灣・信念不滅・市場無界。<br/>
+    Where the Market Becomes the Myth.<br/>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<script src="./ethers-5.7.2.umd.min.js"></script>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const safeParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+  const nowISO = () => new Date().toISOString();
+
+  const CHAIN_ID_DEC = 56;
+  const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const KGEN_SYMBOL = "KGEN";
+  const KGEN_NAME = "KLINE GENESIS";
+  const KGEN_DECIMALS = 18;
+
+  const LP_PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+  const PINKLOCK_URL = "https://www.pinksale.finance/pinklock/bsc/record/1427003";
+
+  const VOW_ADDR = {
+    blackhole: "0x0000000000000000000000000000000000000000",
+    kufo_engine: "0xef83804c264B47378FCf150086943B53fB90A90b",
+    public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1"
+  };
+  const FORTUNE_TREASURY = VOW_ADDR.public_good_treasury;
+
+  // 這個就是你問的 FAUCET_CONTRACT（發放合約地址）：沒部署就留空
+  const FAUCET_CONTRACT = "REPLACE_WITH_DEPLOYED_FAUCET_CONTRACT";
+  const COUNT_NS = "klineodyssey-wukong-temple";
+  const PULSE_KEY = "klineodyssey_wukongTemple_pulse_v0_6";
+
+  const dayKey = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `day_${yyyy}${mm}${dd}`;
+  };
+
+  const countapi = {
+    hit: async (key) => {
+      const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_hit_failed");
+      return await r.json();
+    },
+    get: async (key) => {
+      const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_get_failed");
+      return await r.json();
+    }
+  };
+
+  const renderVisitors = (todayVal, totalVal, note) => {
+    $("visitorInfo").innerHTML = `
+      <div>📅 今日來訪：<strong>${todayVal}</strong></div>
+      <div>🌍 總來訪：<strong>${totalVal}</strong></div>
+    `;
+    $("visitorHint").textContent = note || "";
+  };
+
+  const localVisitorFallback = (doHit) => {
+    const kDay = "local_visit_" + dayKey();
+    const kTotal = "local_visit_total";
+    const get = (k) => Number(localStorage.getItem(k) || "0");
+    const set = (k, v) => localStorage.setItem(k, String(v));
+    let day = get(kDay);
+    let total = get(kTotal);
+    if (doHit) { day += 1; total += 1; set(kDay, day); set(kTotal, total); }
+    renderVisitors(day, total, "（提示：外部統計被阻擋，已改用本機統計 fallback。）");
+  };
+
+  const refreshVisitors = async (doHit) => {
+    try {
+      const dk = dayKey();
+      let todayVal = 0;
+      let totalVal = 0;
+      if (doHit) {
+        const [t1, t2] = await Promise.all([countapi.hit(dk), countapi.hit("total")]);
+        todayVal = t1.value ?? 0;
+        totalVal = t2.value ?? 0;
+      } else {
+        const [g1, g2] = await Promise.all([countapi.get(dk), countapi.get("total")]);
+        todayVal = g1.value ?? 0;
+        totalVal = g2.value ?? 0;
+      }
+      renderVisitors(todayVal, totalVal, "（來源：CountAPI 後端統計）");
+    } catch {
+      localVisitorFallback(doHit);
+    }
+  };
+
+  const KEY = "klineodyssey_wukongTemple_state_v0_6";
+  const load = () => {
+    const s = safeParse(localStorage.getItem(KEY) || "");
+    const base = { visitCount: 0, exitCount: 0, divinationStreak: 0, vitals: { heartbeat: 0, breath: 0, pressure: 0 }, logs: [] };
+    return Object.assign(base, s || {});
+  };
+  const save = (s) => localStorage.setItem(KEY, JSON.stringify(s));
+
+  const pushLog = (s, type, data) => {
+    s.logs = s.logs || [];
+    s.logs.push({ t: nowISO(), type, data: data || {} });
+    if (s.logs.length > 300) s.logs = s.logs.slice(-300);
+  };
+
+  const renderLocal = () => {
+    const s = load();
+    $("localInfo").innerHTML = `
+      <div>🙏 參拜次數：<strong>${s.visitCount}</strong></div>
+      <div>🚪 離開次數：<strong>${s.exitCount}</strong></div>
+      <div>🧿 聖筊連勝：<strong>${s.divinationStreak}</strong></div>
+    `;
+    const btn = $("btnFortune");
+    if (s.divinationStreak >= 3) {
+      btn.disabled = false;
+      btn.style.cursor = "pointer";
+      btn.style.background = "#fff";
+    } else {
+      btn.disabled = true;
+      btn.style.cursor = "not-allowed";
+      btn.style.background = "#f3f3f3";
+    }
+  };
+
+  const renderDivination = () => {
+    const s = load();
+    const v = s.divinationStreak || 0;
+    $("vitalsInfo").innerHTML = `
+      <div>❤️ 心跳次數：<strong>${s.vitals.heartbeat || 0}</strong></div>
+      <div>🫁 呼吸次數：<strong>${s.vitals.breath || 0}</strong></div>
+      <div>🩸 血壓次數：<strong>${s.vitals.pressure || 0}</strong></div>
+      <div style="margin-top:8px;">🧿 聖筊連勝：<strong>${v}</strong>（達 3 才開啟領發財金）</div>
+    `;
+  };
+
+  const toast = (msg) => {
+    const el = document.createElement("div");
+    el.textContent = msg;
+    el.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-weight:900;z-index:99999;max-width:92vw;text-align:center;";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1600);
+  };
+
+  const chance = (p) => Math.random() < p;
+
+  const setAICaption = (t) => { const el = $("aiCaption"); if (el) el.textContent = t || ""; };
+
+  // 文字→語音（同時逐字更新「即時文字」）
+  const speakText = (text) => {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+
+      // 逐字字幕：用 boundary 的 charIndex（不同瀏覽器支援度不一；不支援就一次顯示全文）
+      let lastIdx = 0;
+      setAICaption("");
+      u.onstart = () => { setAICaption(""); lastIdx = 0; };
+      u.onboundary = (ev) => {
+        try {
+          if (typeof ev.charIndex === "number") {
+            const idx = Math.max(0, ev.charIndex);
+            if (idx !== lastIdx) {
+              lastIdx = idx;
+              setAICaption(text.slice(0, idx));
+            }
+          }
+        } catch {}
+      };
+      u.onend = () => { setAICaption(text); };
+
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
+
+  const stopSpeak = () => { try { window.speechSynthesis.cancel(); } catch {} };
+
+  let provider = null;
+  let signer = null;
+  let userAddr = null;
+
+  const ensureChain = async () => {
+    const hex = "0x" + CHAIN_ID_DEC.toString(16);
+    const curr = await window.ethereum.request({ method: "eth_chainId" });
+    if (curr === hex) return;
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: hex }]
+      });
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const fmtAddr = (a) => a ? (a.slice(0, 6) + "…" + a.slice(-4)) : "";
+  const fmt = (n) => {
+    try { return new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(n); }
+    catch { return String(n); }
+  };
+
+ const renderWallet = async () => {
+    const lines = [];
+    if (!window.ethereum) {
+      lines.push(`<div>錢包：<strong>未偵測到</strong>（你仍可使用「非鏈上」互動）</div>`);
+      $("walletInfo").innerHTML = lines.join("");
+      return;
+    }
+    try {
+      if (!provider || !signer) {
+        lines.push(`<div>錢包：<strong>尚未連線</strong></div>`);
+      } else {
+        lines.push(`<div>錢包：<strong>${fmtAddr(userAddr)}</strong></div>`);
+        const erc20Abi = [
+          "function symbol() view returns (string)",
+          "function name() view returns (string)",
+          "function decimals() view returns (uint8)",
+          "function balanceOf(address) view returns (uint256)"
+        ];
+        const kgen = new ethers.Contract(KGEN_TOKEN, erc20Abi, provider);
+        const bal = await kgen.balanceOf(userAddr);
+        const human = Number(ethers.utils.formatUnits(bal, KGEN_DECIMALS));
+        lines.push(`<div>KGEN 餘額：<strong>${fmt(human)}</strong></div>`);
+      }
+    } catch {
+      lines.push(`<div style="opacity:.85;">餘額讀取失敗：請確認在 BSC 主網，且 ethers 檔案可載入。</div>`);
+    }
+    $("walletInfo").innerHTML = lines.join("");
+  };
+
+  const mkBscAddr = (addr) => `https://bscscan.com/address/${addr}`;
+  const mkBscToken = (addr) => `https://bscscan.com/token/${addr}`;
+
+  $("linkToken").textContent = KGEN_TOKEN;
+  $("linkToken").href = mkBscToken(KGEN_TOKEN);
+  $("linkSwap").href = `https://pancakeswap.finance/swap?outputCurrency=${KGEN_TOKEN}`;
+  $("linkLP").textContent = LP_PAIR;
+  $("linkLP").href = mkBscAddr(LP_PAIR);
+  $("linkPink").href = PINKLOCK_URL;
+
+  const env = [];
+  env.push(`Network：BSC Mainnet（ChainId ${CHAIN_ID_DEC}）`);
+  env.push(`Token：${KGEN_SYMBOL}（${KGEN_NAME}）`);
+  env.push(`Web3：${window.ethereum ? "偵測到錢包" : "未偵測到錢包（仍可用非鏈上功能）"}`);
+  env.push(`Ethers：${(typeof ethers !== "undefined") ? "OK" : "未載入（請確認 ethers 檔同資料夾）"}`);
+  $("envHint").textContent = env.join("｜");
+
+  const startAssistant = () => {
+    const s = load();
+    const line1 = `歡迎來到五指山悟空財神殿。`;
+    const line2 = `你目前聖筊連勝是 ${s.divinationStreak || 0} 次。`;
+    const line3 = `今天先做三件事：心跳，呼吸，血壓。準備好了就跟我說：啟動。`;
+    speakText(`${line1}${line2}${line3}`);
+    toast("悟空財神殿：語音客服啟動");
+  };
+
+<button id="btnGuide"
+ style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+  🧭 新手導覽
+</button>
+  
+function wukongNewbieGuide(){
+  const t =
+  "你現在在悟空財神殿。沒有錢包也沒關係，我帶你一步一步做。"+
+  "第一步，先安裝錢包，建議用MetaMask或Trust Wallet。"+
+  "第二步，建立錢包並保存助記詞，這是你的生命線。"+
+  "第三步，切到BSC主網。"+
+  "第四步，KGEN搜尋不到是正常的，你要用自訂代幣加入。"+
+  "把KGEN合約地址貼進Import或Custom Token。"+
+  "完成後回到財神殿，按連線錢包。"+
+  "最後，擲筊連勝三次，才會開啟領發財金。";
+  speakText(t);
+  setAICaption(t);
+}
+document.getElementById("btnGuide")?.addEventListener("click", wukongNewbieGuide);
+  
+  $("btnSpeak").addEventListener("click", () => startAssistant());
+  $("btnAutoStart")?.addEventListener("click", () => startAssistant());
+  $("btnStopSpeak").addEventListener("click", () => { stopSpeak(); toast("已停止語音"); });
+
+  // 麥克風轉文字（可用可不用；不支援就提示）
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  const startMic = () => {
+    const out = $("userTranscript");
+    if (!SR) { if (out) out.textContent = "此瀏覽器不支援 SpeechRecognition（建議用 Chrome / Edge）。"; toast("麥克風轉文字不支援"); return; }
+    rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = true;
+
+    let finalText = "";
+    if (out) out.textContent = "";
+    rec.onresult = (ev) => {
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const res = ev.results[i];
+        const t = res[0]?.transcript || "";
+        if (res.isFinal) finalText += t;
+        else interim += t;
+      }
+      if (out) out.textContent = finalText + interim;
+    };
+    rec.onerror = () => { toast("麥克風錯誤或未授權"); };
+    rec.onend = () => {};
+    try { rec.start(); toast("開始聽你說話"); } catch { toast("無法啟動麥克風"); }
+  };
+  const stopMic = () => { try { rec && rec.stop(); } catch {} rec = null; toast("已停止聽你"); };
+
+  $("btnMic")?.addEventListener("click", () => startMic());
+  $("btnStopMic")?.addEventListener("click", () => stopMic());
+
+  // 盡量「自動開始」：第一次互動後自動播報（符合瀏覽器政策）
+  let _autoStarted = false;
+  const autoStartOnce = () => {
+    if (_autoStarted) return;
+    _autoStarted = true;
+    startAssistant();
+  };
+  window.addEventListener("pointerdown", autoStartOnce, { once: true });
+  window.addEventListener("keydown", autoStartOnce, { once: true });
+
+  $("btnRefreshStats").addEventListener("click", async () => { await refreshVisitors(false); toast("已更新來訪統計"); });
+  $("btnReHit").addEventListener("click", async () => { await refreshVisitors(true); toast("已再呼吸一次（測試）"); });
+
+  $("btnDivination").addEventListener("click", () => {
+    const s = load();
+    const ok = chance(0.5);
+    if (ok) { s.divinationStreak = (s.divinationStreak || 0) + 1; pushLog(s, "divination_yes", { streak: s.divinationStreak }); save(s); toast("聖筊"); }
+    else { s.divinationStreak = 0; pushLog(s, "divination_no", {}); save(s); toast("陰筊"); }
+    renderDivination(); renderLocal();
+  });
+
+  $("btnVisit").addEventListener("click", () => { const s = load(); s.visitCount += 1; pushLog(s, "visit", {}); save(s); renderLocal(); toast("已記錄：登入參拜"); });
+  $("btnExit").addEventListener("click", () => { const s = load(); s.exitCount += 1; pushLog(s, "exit", {}); save(s); renderLocal(); toast("已記錄：登出離開"); });
+
+  const downloadJSON = (obj, filename) => {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  };
+
+  $("btnExport").addEventListener("click", () => { downloadJSON(load(), `wukong_temple_log_${dayKey()}.json`); toast("已匯出 JSON"); });
+  $("btnClear").addEventListener("click", () => { if (!confirm("確定清除本機紀錄？")) return; localStorage.removeItem(KEY); renderLocal(); renderDivination(); toast("已清除"); });
+
+  $("btnConnect").addEventListener("click", async () => {
+    try {
+      if (!window.ethereum) { toast("找不到錢包"); return; }
+      await ensureChain();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddr = await signer.getAddress();
+      toast("錢包已連線（BSC 主網）");
+      await renderWallet();
+    } catch { toast("連線失敗或未授權"); }
+  });
+
+  // Vitals：心跳 / 呼吸 / 血壓（本機計數 + 日誌）
+  const doHeartbeat = () => {
+    const s = load();
+    s.vitals.heartbeat = (s.vitals.heartbeat || 0) + 1;
+    pushLog(s, "heartbeat", { n: s.vitals.heartbeat });
+    save(s);
+    renderDivination();
+  };
+  const doBreath = () => {
+    const s = load();
+    s.vitals.breath = (s.vitals.breath || 0) + 1;
+    pushLog(s, "breath", { n: s.vitals.breath });
+    save(s);
+    renderDivination();
+  };
+  const doPressure = () => {
+    const s = load();
+    s.vitals.pressure = (s.vitals.pressure || 0) + 1;
+    pushLog(s, "pressure", { n: s.vitals.pressure });
+    save(s);
+    renderDivination();
+  };
+
+  $("btnHeartbeat").addEventListener("click", () => { doHeartbeat(); toast("心跳已記錄"); });
+  $("btnBreath").addEventListener("click", () => { doBreath(); toast("呼吸已記錄"); });
+  $("btnPressure").addEventListener("click", () => { doPressure(); toast("血壓已記錄"); });
+
+  // 發財金：目前只做「檢查是否有部署合約」的鎖定機制
+  $("btnFortune").addEventListener("click", async () => {
+    const s = load();
+    if ((s.divinationStreak || 0) < 3) { toast("聖筊連勝未達 3"); return; }
+    if (!FAUCET_CONTRACT || FAUCET_CONTRACT.includes("REPLACE_WITH")) {
+      toast("尚未部署發放合約：FAUCET_CONTRACT 未設定");
+      speakText("發財金尚未啟動。因為你還沒把發放合約地址填入。等合約部署好，悟空才會把發財金送出去。");
+      return;
+    }
+    toast("發放合約已設定，但你尚未接上合約 ABI 與發放函式。下一步再做。");
+    speakText("我感受到發放合約地址已存在。但還缺少合約介面與實際發放動作。下一步我們會把發財金真正發出去。");
+  });
+
+ // 每小時心跳一次（象徵宇宙心跳節奏）
+  setInterval(doHeartbeat, 60 * 60 * 1000);
+
+  // 初始刷新
+  refreshVisitors(true);
+  renderLocal();
+  renderDivination();
+  renderWallet();
+})();
+</script>
+
+<script>
+(function(){
+  const ua = navigator.userAgent || "";
+  const isFB = /FBAN|FBAV|Instagram/i.test(ua);
+  const hasEth = typeof window.ethereum !== "undefined";
+
+  if (isFB && !hasEth) {
+    const bar = document.createElement("div");
+    bar.style.cssText =
+      "position:fixed;left:0;right:0;bottom:0;z-index:9999;" +
+      "background:#111;color:#fff;padding:12px 14px;" +
+      "display:flex;gap:10px;align-items:center;justify-content:space-between;" +
+      "font-size:14px;line-height:1.4;";
+    bar.innerHTML = `
+      <div style="flex:1;">
+        ⚠️ 目前在 Facebook 內建瀏覽器，可能無法連接錢包。<br/>
+        建議改用 <b>Chrome</b> 或 <b>錢包內建瀏覽器</b> 開啟悟空財神殿。
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="openExternal"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #fff;background:#fff;color:#111;font-weight:900;">
+          用瀏覽器開
+        </button>
+        <button id="dismissBar"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #555;background:#111;color:#fff;">
+          關閉
+        </button>
+      </div>
+    `;
+    document.body.appendChild(bar);
+
+    document.getElementById("openExternal").onclick = () => {
+      // 嘗試跳外部瀏覽器
+      window.open(window.location.href, "_blank");
+    };
+    document.getElementById("dismissBar").onclick = () => {
+      bar.remove();
+    };
+  }
+})();
+</script>
+  
+</body>
+</html>
