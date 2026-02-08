@@ -851,6 +851,62 @@ try {
   });
 })();
 </script>
+
+<script>
+(function(){
+  const STEP_B =
+    "下一步，悟空教你把錢包接上BSC主網。若你在錢包裡搜尋不到KGEN，這是正常的。"+
+    "KGEN需要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去，按匯入即可。"+
+    "完成後回到悟空財神殿，再按連線錢包。";
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function setCaption(text){
+    // 你已確認字幕在上方那格，所以直接找「最上方那個 textarea」
+    const ta = document.querySelector("textarea");
+    if (!ta) return;
+    ta.value = text;
+    ta.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+
+  function ensureNextButton(){
+    // 找到 AI字幕框外層，插入按鈕
+    const ta = document.querySelector("textarea");
+    if (!ta) return;
+
+    if (document.getElementById("WUKONG_NEXT_BTN")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "WUKONG_NEXT_BTN";
+    btn.textContent = "🧭 下一步：切BSC＋加入KGEN";
+    btn.style.cssText =
+      "margin:10px 0 0 0;padding:10px 12px;border-radius:999px;" +
+      "border:1px solid #111;background:#fff;font-weight:900;cursor:pointer;width:100%;";
+
+    btn.onclick = function(){
+      setCaption(STEP_B);
+      speak(STEP_B);
+    };
+
+    // 放在字幕框下面
+    ta.parentElement.appendChild(btn);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有沒錢包時才顯示下一步按鈕
+    if (typeof window.ethereum === "undefined") {
+      ensureNextButton();
+    }
+  });
+})();
+</script>
   
 </body>
 </html>
