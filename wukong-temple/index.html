@@ -607,5 +607,47 @@
 })();
 </script>
 
+<script>
+(function(){
+  const ua = navigator.userAgent || "";
+  const isFB = /FBAN|FBAV|Instagram/i.test(ua);
+  const hasEth = typeof window.ethereum !== "undefined";
+
+  if (isFB && !hasEth) {
+    const bar = document.createElement("div");
+    bar.style.cssText =
+      "position:fixed;left:0;right:0;bottom:0;z-index:9999;" +
+      "background:#111;color:#fff;padding:12px 14px;" +
+      "display:flex;gap:10px;align-items:center;justify-content:space-between;" +
+      "font-size:14px;line-height:1.4;";
+    bar.innerHTML = `
+      <div style="flex:1;">
+        ⚠️ 目前在 Facebook 內建瀏覽器，可能無法連接錢包。<br/>
+        建議改用 <b>Chrome</b> 或 <b>錢包內建瀏覽器</b> 開啟悟空財神殿。
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="openExternal"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #fff;background:#fff;color:#111;font-weight:900;">
+          用瀏覽器開
+        </button>
+        <button id="dismissBar"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #555;background:#111;color:#fff;">
+          關閉
+        </button>
+      </div>
+    `;
+    document.body.appendChild(bar);
+
+    document.getElementById("openExternal").onclick = () => {
+      // 嘗試跳外部瀏覽器
+      window.open(window.location.href, "_blank");
+    };
+    document.getElementById("dismissBar").onclick = () => {
+      bar.remove();
+    };
+  }
+})();
+</script>
+  
 </body>
 </html>
