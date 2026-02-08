@@ -751,6 +751,80 @@ try {
   });
 })();
 </script>
+
+<script>
+(function(){
+  // 你頁面上有兩個字幕框，名字可能不一樣
+  // 我用「自動偵測」找出最像字幕框的元素，不用你記 id
+  function findCaptionBox(){
+    // 優先找你原本可能用的 id（若有）
+    const candidates = [
+      "aiCaption","aiSubtitles","captionBox","liveCaption","txtAICaption","aiText",
+      "sttBox","sttText","youSaid","micText"
+    ];
+    for (const id of candidates){
+      const el = document.getElementById(id);
+      if (el) return el;
+    }
+    // 再用類名/屬性猜（你的框多半是 textarea 或 div）
+    const els = Array.from(document.querySelectorAll("textarea, div"));
+    // 找有「即時文字」附近的 textarea/div
+    for (const el of els){
+      const t = (el.innerText || el.value || "").trim();
+      // 空的也可能是字幕框，所以不靠內容判斷
+      const label = el.closest("section,div,fieldset")?.innerText || "";
+      if (label.includes("即時文字") && (el.tagName === "TEXTAREA" || el.getAttribute("contenteditable")==="true" || el.tagName==="DIV")){
+        return el;
+      }
+    }
+    // 最後：找第一個 textarea（很多頁面字幕框就是 textarea）
+    const ta = document.querySelector("textarea");
+    if (ta) return ta;
+    return null;
+  }
+
+  function setCaption(text){
+    const box = findCaptionBox();
+    if (!box) return;
+    if (box.tagName === "TEXTAREA" || box.tagName === "INPUT"){
+      box.value = text;
+      box.dispatchEvent(new Event("input", {bubbles:true}));
+    } else {
+      box.textContent = text;
+    }
+  }
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // 這段是「A：沒錢包新手導覽」精簡版
+  const GUIDE_A =
+    "凡人莫急，悟空在此。你現在站在悟空財神殿門前。若你還沒有錢包，不是錯，也不是晚。"+
+    "錢包不是投資工具，是你在鏈上世界的身分證。"+
+    "請到應用程式商店搜尋MetaMask並安裝。建立新錢包後，助記詞請抄寫保存，不要交給任何人。"+
+    "完成後回到悟空財神殿，悟空會繼續帶你走。";
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有在「未偵測到錢包」時才自動播＋顯示字幕
+    if (typeof window.ethereum === "undefined") {
+      setCaption(GUIDE_A);
+      speak(GUIDE_A);
+    }
+  });
+
+  // 你也可以手動呼叫：window.wukongGuideA()
+  window.wukongGuideA = function(){
+    setCaption(GUIDE_A);
+    speak(GUIDE_A);
+  };
+})();
+</script>
   
 </body>
 </html>
