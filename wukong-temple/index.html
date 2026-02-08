@@ -477,6 +477,26 @@
     toast("悟空財神殿：語音客服啟動");
   };
 
+<button id="btnGuide"
+ style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+  🧭 新手導覽
+</button>
+  
+function wukongNewbieGuide(){
+  const t =
+  "你現在在悟空財神殿。沒有錢包也沒關係，我帶你一步一步做。"+
+  "第一步，先安裝錢包，建議用MetaMask或Trust Wallet。"+
+  "第二步，建立錢包並保存助記詞，這是你的生命線。"+
+  "第三步，切到BSC主網。"+
+  "第四步，KGEN搜尋不到是正常的，你要用自訂代幣加入。"+
+  "把KGEN合約地址貼進Import或Custom Token。"+
+  "完成後回到財神殿，按連線錢包。"+
+  "最後，擲筊連勝三次，才會開啟領發財金。";
+  speakText(t);
+  setAICaption(t);
+}
+document.getElementById("btnGuide")?.addEventListener("click", wukongNewbieGuide);
+  
   $("btnSpeak").addEventListener("click", () => startAssistant());
   $("btnAutoStart")?.addEventListener("click", () => startAssistant());
   $("btnStopSpeak").addEventListener("click", () => { stopSpeak(); toast("已停止語音"); });
