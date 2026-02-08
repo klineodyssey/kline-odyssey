@@ -986,6 +986,158 @@ try {
   };
 })();
 </script>
+
+<script>
+(function(){
+  // === 找框：上方 AI 字幕框 & 下方 麥克風轉文字框 ===
+  function findBoxByLabel(labelText){
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const label = nodes.find(el => (el.innerText || "").includes(labelText));
+    if (!label) return null;
+    let root = label.closest("div") || label.parentElement;
+    if (!root) root = document.body;
+
+    // 找虛線/虛框 div
+    const divs = Array.from(root.querySelectorAll("div"));
+    let box = divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    });
+    if (box) return box;
+
+    // fallback
+    return divs.find(d => d.offsetHeight > 50) || null;
+  }
+
+  function getAIBOX(){ return findBoxByLabel("即時文字（AI"); }
+  function getYOUBOX(){ return findBoxByLabel("即時文字（你的"); }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  // === 語音播報 ===
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // === 規則式回覆（先確保一定能一問一答）===
+  function wukongReply(userText){
+    const t = (userText || "").trim();
+
+    if (!t) return "我有聽到，但你還沒說出問題。你可以問我：沒有錢包怎麼辦？KGEN怎麼加？";
+
+    if (t.includes("沒有錢包") || t.includes("怎麼開戶") || t.includes("怎麼下載")) {
+      return "沒有錢包很正常。請到應用程式商店下載 MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回來按連線錢包。";
+    }
+
+    if (t.includes("BSC") || t.includes("主網") || t.includes("怎麼切")) {
+      return "請在錢包裡新增或切換網路到 BSC 主網。若你用的是 MetaMask，我可以一步一步帶你點選路徑。";
+    }
+
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN 搜不到是正常的，因為它需要自訂代幣加入，也就是 Custom Token。把 KGEN 合約地址貼進去匯入，就會顯示在你的錢包資產清單。";
+    }
+
+    if (t.includes("發財金") || t.includes("領取")) {
+      return "發財金功能目前仍鎖定在『已連線錢包』狀態。先把錢包裝好並接上 BSC，再回來按連線，我就能帶你完成領取。";
+    }
+
+    return "我有聽懂你的方向。你可以更直接問：你現在卡在哪一步？下載錢包、切 BSC、還是把 KGEN 用 Custom Token 加進去？";
+  }
+
+  // === Web Speech API：聽你說話（STT）===
+  let rec = null;
+  function initSpeech(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.lang = "zh-TW";
+    r.interimResults = true;
+    r.continuous = false; // 一問一答：一次只聽一段
+    return r;
+  }
+
+  function startListen(){
+    const youBox = getYOUBOX();
+    const aiBox  = getAIBOX();
+
+    if (!rec) rec = initSpeech();
+    if (!rec){
+      setBox(aiBox, "你的瀏覽器不支援語音辨識。建議用 Chrome，或用錢包內建瀏覽器再試一次。");
+      speak("你的瀏覽器不支援語音辨識。建議用 Chrome，或用錢包內建瀏覽器再試一次。");
+      return;
+    }
+
+    setBox(youBox, "正在聽你說話…");
+    setBox(aiBox, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(youBox, (finalText + interim).trim());
+    };
+
+    rec.onerror = function(e){
+      setBox(aiBox, "語音辨識出錯：" + (e.error || "unknown") + "。請再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      if (!userText){
+        setBox(aiBox, "我沒聽清楚。再按一次開始說話，或換一個安靜的地方。");
+        speak("我沒聽清楚。再按一次開始說話。");
+        return;
+      }
+      const reply = wukongReply(userText);
+      setBox(aiBox, reply);
+      speak(reply);
+    };
+
+    try{ rec.start(); }catch(e){
+      setBox(aiBox, "麥克風啟動失敗。請確認瀏覽器已允許麥克風權限，然後再按一次開始說話。");
+      speak("麥克風啟動失敗。請允許麥克風權限後再試一次。");
+    }
+  }
+
+  // === 綁定按鈕：找「開始說話」那顆，掛上一問一答 ===
+  function bindTalkButton(){
+    const btns = Array.from(document.querySelectorAll("button, a, div"));
+    const talkBtn = btns.find(b => (b.innerText || "").includes("開始說話"));
+    if (!talkBtn) return;
+
+    // 避免重綁
+    if (talkBtn.getAttribute("data-wukong-bound") === "1") return;
+    talkBtn.setAttribute("data-wukong-bound","1");
+
+    talkBtn.addEventListener("click", function(){
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bindTalkButton();
+    // 保險：延遲再綁一次（有些 DOM 晚渲染）
+    setTimeout(bindTalkButton, 800);
+    setTimeout(bindTalkButton, 1600);
+  });
+
+  // 手動測試：網址列 javascript:wukongListen()
+  window.wukongListen = startListen;
+})();
+  </script>
   
 </body>
 </html>
