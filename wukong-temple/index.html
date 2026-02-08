@@ -1127,18 +1127,6 @@ try {
     }, true);
   }
 
-  document.addEventListener("DOMContentLoaded", function(){
-    bindTalkButton();
-    // 保險：延遲再綁一次（有些 DOM 晚渲染）
-    setTimeout(bindTalkButton, 800);
-    setTimeout(bindTalkButton, 1600);
-  });
-
-  // 手動測試：網址列 javascript:wukongListen()
-  window.wukongListen = startListen;
-})();
-  </script>
-
 <script>
 (function(){
   // ====== 精準抓框：依標題定位，抓到同一區塊內的虛線框 ======
