@@ -899,6 +899,93 @@ try {
   });
 })();
 </script>
+
+<script>
+(function(){
+  const STEP_B =
+    "下一步，悟空教你把錢包接上BSC主網。若你在錢包裡搜尋不到KGEN，這是正常的。"+
+    "KGEN需要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去，按匯入即可。"+
+    "完成後回到悟空財神殿，再按連線錢包。";
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // 找到「即時文字（AI 說話字幕）」那一區，並返回字幕框元素（虛線框）
+  function findAICaptionBox(){
+    // 1) 先找包含該標題文字的元素
+    const all = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label"));
+    const labelEl = all.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("AI"));
+    if (!labelEl) return null;
+
+    // 2) 往下找同一個卡片/區塊內的「虛線框」(通常是下一個有邊框的div)
+    let root = labelEl.closest("div") || labelEl.parentElement;
+    if (!root) root = document.body;
+
+    // 在 root 附近找最像字幕框的元素：有虛線邊框/或是空白框
+    const candidates = Array.from(root.querySelectorAll("div"));
+    // 優先挑有 dotted/dashed border 的
+    let box = candidates.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle && (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")))
+             && d.offsetHeight > 40;
+    });
+    if (box) return box;
+
+    // 找不到虛線就退而求其次：找高度較高的空白內容區塊
+    box = candidates.find(d => d.offsetHeight > 60 && (d.innerText || "").trim().length < 400);
+    return box || null;
+  }
+
+  function setCaption(text){
+    const box = findAICaptionBox();
+    if (!box) return;
+    box.textContent = text;
+  }
+
+  function ensureNextButton(){
+    if (document.getElementById("WUKONG_NEXT_BTN")) return;
+
+    const box = findAICaptionBox();
+    if (!box) return;
+
+    const btn = document.createElement("button");
+    btn.id = "WUKONG_NEXT_BTN";
+    btn.textContent = "🧭 下一步：切BSC＋加入KGEN";
+    btn.style.cssText =
+      "margin:10px 0 0 0;padding:10px 12px;border-radius:999px;" +
+      "border:1px solid #111;background:#fff;font-weight:900;cursor:pointer;width:100%;";
+
+    btn.onclick = function(){
+      setCaption(STEP_B);
+      speak(STEP_B);
+    };
+
+    // 插在字幕框正下方
+    box.insertAdjacentElement("afterend", btn);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有沒錢包時才顯示按鈕
+    if (typeof window.ethereum === "undefined") {
+      ensureNextButton();
+      // 另外：若未來 DOM 延遲渲染，再補一次（保險）
+      setTimeout(ensureNextButton, 800);
+      setTimeout(ensureNextButton, 1600);
+    }
+  });
+
+  // 手動測試用：在網址列 javascript:wukongNext()
+  window.wukongNext = function(){
+    ensureNextButton();
+  };
+})();
+</script>
   
 </body>
 </html>
