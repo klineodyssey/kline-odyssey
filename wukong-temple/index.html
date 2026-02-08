@@ -689,6 +689,46 @@ try {
   alert("語音模組錯誤：" + e.message);
 }
 </script>
+
+<script>
+(function(){
+  function box(){
+    var el = document.getElementById("WUKONG_DEBUG");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "WUKONG_DEBUG";
+    el.style.cssText =
+      "position:fixed;left:10px;right:10px;top:10px;z-index:99999;" +
+      "background:#111;color:#fff;padding:10px 12px;border-radius:12px;" +
+      "font-size:12px;line-height:1.4;max-height:40vh;overflow:auto;" +
+      "box-shadow:0 10px 30px rgba(0,0,0,.35)";
+    el.innerHTML = "<b>Wukong Debug</b><div id='WUKONG_DEBUG_LOG' style='margin-top:6px;white-space:pre-wrap;'></div>";
+    document.body.appendChild(el);
+    return el;
+  }
+  function log(msg){
+    try{
+      box();
+      var area = document.getElementById("WUKONG_DEBUG_LOG");
+      area.textContent += (msg + "\n");
+    }catch(e){}
+  }
+
+  window.addEventListener("error", function(e){
+    log("ERROR: " + (e.message || e.error || "unknown") + " @ " + (e.filename||"") + ":" + (e.lineno||"") );
+  });
+  window.addEventListener("unhandledrejection", function(e){
+    log("PROMISE: " + (e.reason && (e.reason.message || e.reason)) );
+  });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    log("DOM OK");
+    log("ethers loaded: " + (!!window.ethers));
+    log("speechSynthesis: " + ("speechSynthesis" in window));
+    log("has ethereum: " + (typeof window.ethereum !== "undefined"));
+  });
+})();
+</script>
   
 </body>
 </html>
