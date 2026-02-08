@@ -104,7 +104,7 @@ Homepage Quick Actions (Production Block)
     🌌 NASDAQ 篇
   </a>
 
-  <a href="./kline-btc/"
+  <a href="./K線西遊記/kline-btc/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🪐 比特幣篇
   </a>
