@@ -729,6 +729,28 @@ try {
   });
 })();
 </script>
+
+<script>
+(function(){
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    if (typeof window.ethereum === "undefined") {
+      speak(
+        "凡人莫急，悟空在此。你現在站在悟空財神殿門前。若你還沒有錢包，不是錯，也不是晚。錢包不是投資工具，是你在鏈上世界的身分證。請到應用程式商店搜尋 MetaMask 並安裝。完成後再回到悟空財神殿，悟空會繼續帶你走。"
+      );
+    }
+  });
+})();
+</script>
   
 </body>
 </html>
