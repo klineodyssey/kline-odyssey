@@ -1138,6 +1138,159 @@ try {
   window.wukongListen = startListen;
 })();
   </script>
+
+<script>
+(function(){
+  // ====== 精準抓框：依標題定位，抓到同一區塊內的虛線框 ======
+  function findDottedBoxByHeading(headingText){
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes(headingText));
+    if (!head) return null;
+
+    // 往上找到該段落容器
+    let root = head.closest("div");
+    if (!root) root = head.parentElement;
+    if (!root) root = document.body;
+
+    // 在 root 往下找「虛線框」
+    const divs = Array.from(root.querySelectorAll("div"));
+    const box = divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    });
+    return box || null;
+  }
+
+  function AIBOX(){ return findDottedBoxByHeading("即時文字（AI 說話字幕）"); }
+  function YOUBOX(){ return findDottedBoxByHeading("即時文字（你的麥克風轉文字）"); }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  // ====== 語音播報（TTS）======
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // ====== 離線問答回覆 ======
+  function reply(userText){
+    const t = (userText || "").trim();
+    if (!t) return "我沒聽清楚。請再說一次：你現在卡在哪一步？下載錢包、切BSC、或是把KGEN用Custom Token加進去？";
+
+    if (t.includes("下載") || t.includes("沒有錢包") || t.includes("開戶")) {
+      return "請到應用程式商店下載MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回到悟空財神殿按連線錢包。";
+    }
+    if (t.toLowerCase().includes("bsc") || t.includes("主網") || t.includes("切")) {
+      return "請在錢包內切換到BSC主網。若你用MetaMask，我可以一步一步帶你點選：設定、網路、新增BSC。";
+    }
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN搜尋不到是正常的。你必須用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去匯入，就會顯示在資產清單。";
+    }
+    return "我有聽懂你的方向。你可以直接說：我卡在下載錢包、切BSC、或加KGEN這三步的哪一步？";
+  }
+
+  // ====== SpeechRecognition：麥克風轉文字 ======
+  let rec = null;
+  function supportSR(){
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  function startListen(){
+    const ai = AIBOX();
+    const you = YOUBOX();
+
+    // 先顯示診斷（你就知道是不是瀏覽器不支援）
+    if (!supportSR()){
+      setBox(ai, "此瀏覽器不支援語音辨識（SpeechRecognition）。請用Chrome，或用MetaMask內建瀏覽器開啟，再按開始說話。");
+      speak("此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試一次。");
+      return;
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    setBox(you, "正在聽你說話…");
+    setBox(ai, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(you, (finalText + interim).trim() || "…");
+    };
+
+    rec.onerror = function(e){
+      setBox(ai, "麥克風/辨識錯誤：" + (e.error || "unknown") + "。請確認已允許麥克風權限，然後再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      // 無論有沒有聽到，先把你框留著（避免看起來像沒反應）
+      if (!userText){
+        // 若仍顯示「正在聽…」就改成提示
+        if ((you.textContent || "").includes("正在聽")) setBox(you, "");
+        const msg = "我沒聽清楚。請再按一次開始說話，並靠近麥克風說慢一點。";
+        setBox(ai, msg);
+        speak(msg);
+        return;
+      }
+      const ans = reply(userText);
+      setBox(ai, ans);
+      speak(ans);
+    };
+
+    try { rec.start(); }
+    catch(e){
+      const msg = "麥克風啟動失敗。請先允許麥克風權限，或改用Chrome再試。";
+      setBox(ai, msg);
+      speak(msg);
+    }
+  }
+
+  // ====== 綁定「開始說話」按鈕 ======
+  function bind(){
+    const btns = Array.from(document.querySelectorAll("button, a, div"));
+    const talk = btns.find(b => (b.innerText || "").includes("開始說話"));
+    if (!talk) return;
+
+    if (talk.getAttribute("data-wukong-bound") === "1") return;
+    talk.setAttribute("data-wukong-bound","1");
+
+    talk.addEventListener("click", function(){
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bind();
+    setTimeout(bind, 800);
+    setTimeout(bind, 1600);
+
+    // 啟動時先把兩個框抓到一次，避免抓不到
+    const ai = AIBOX(), you = YOUBOX();
+    if (ai && !ai.textContent.trim()) setBox(ai, "悟空在此。按「開始說話」即可一問一答。");
+    if (you && !you.textContent.trim()) setBox(you, "");
+  });
+
+  // 手動測試：javascript:wukongListen()
+  window.wukongListen = startListen;
+})();
+      </script>
   
 </body>
 </html>
