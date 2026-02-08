@@ -1279,6 +1279,143 @@ try {
   window.wukongListen = startListen;
 })();
       </script>
+
+<script>
+(function(){
+  function AIBOX(){
+    // 找「即時文字（AI 說話字幕）」下面那個虛線框
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("AI"));
+    if (!head) return null;
+    let root = head.closest("div") || head.parentElement || document.body;
+    const divs = Array.from(root.querySelectorAll("div"));
+    return divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    }) || null;
+  }
+
+  function YOUBOX(){
+    // 找「即時文字（你的麥克風轉文字）」下面那個虛線框
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("你的麥克風"));
+    if (!head) return null;
+    let root = head.closest("div") || head.parentElement || document.body;
+    const divs = Array.from(root.querySelectorAll("div"));
+    return divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    }) || null;
+  }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function reply(userText){
+    const t = (userText || "").trim();
+    if (!t) return "我沒聽清楚。你再說一次：你卡在下載錢包、切BSC、還是加入KGEN？";
+
+    if (t.includes("沒有錢包") || t.includes("下載") || t.includes("開戶")) {
+      return "請到應用程式商店下載MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回來按連線錢包。";
+    }
+    if (t.toLowerCase().includes("bsc") || t.includes("主網") || t.includes("切")) {
+      return "請在錢包內切換到BSC主網。切好再回來按連線錢包。";
+    }
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN搜尋不到是正常的。你要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去匯入，就會顯示在資產清單。";
+    }
+    return "你可以直接說：我卡在下載錢包、切BSC、或加入KGEN這三步的哪一步？";
+  }
+
+  function startListen(){
+    const ai = AIBOX();
+    const you = YOUBOX();
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR){
+      setBox(ai, "此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      speak("此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    setBox(you, "正在聽你說話…");
+    setBox(ai, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(you, (finalText + interim).trim() || "…");
+    };
+
+    rec.onerror = function(e){
+      setBox(ai, "麥克風/辨識錯誤：" + (e.error || "unknown") + "。請允許麥克風權限後再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      if (!userText){
+        setBox(ai, "我沒聽清楚。再按一次開始說話，靠近麥克風慢慢說。");
+        speak("我沒聽清楚。再按一次開始說話。");
+        return;
+      }
+      const ans = reply(userText);
+      setBox(ai, ans);
+      speak(ans);
+    };
+
+    try { rec.start(); }
+    catch(e){
+      setBox(ai, "麥克風啟動失敗。請先允許麥克風權限，然後再試一次。");
+      speak("麥克風啟動失敗。請允許麥克風權限後再試。");
+    }
+  }
+
+  function bindTalkButton(){
+    const els = Array.from(document.querySelectorAll("button, a, div"));
+    const talk = els.find(el => (el.innerText || "").includes("開始說話"));
+    if (!talk) return;
+
+    if (talk.getAttribute("data-wukong-mic") === "1") return;
+    talk.setAttribute("data-wukong-mic","1");
+
+    talk.addEventListener("click", function(e){
+      e.preventDefault();
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bindTalkButton();
+    setTimeout(bindTalkButton, 800);
+    setTimeout(bindTalkButton, 1600);
+  });
+
+  // 讓你也能手動測：javascript:wukongListen()
+  window.wukongListen = startListen;
+})();
+</script>
   
 </body>
 </html>
