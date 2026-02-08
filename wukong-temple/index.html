@@ -677,6 +677,18 @@ document.getElementById("btnGuide")?.addEventListener("click", wukongNewbieGuide
   }
 })();
 </script>
+
+<script>
+try {
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance("悟空在此，語音系統已恢復。");
+    u.lang = "zh-TW";
+    window.speechSynthesis.speak(u);
+  }
+} catch (e) {
+  alert("語音模組錯誤：" + e.message);
+}
+</script>
   
 </body>
 </html>
