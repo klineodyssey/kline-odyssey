@@ -92,8 +92,7 @@ Homepage Quick Actions (Production Block)
   </div>
 </div>
 
-<div style="margin:0 0 16px 0; <div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
-
+<div style="margin:0 0 16px 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
   <a href="./K線西遊記/kline-taifex/"
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🥋 台指期貨篇
@@ -113,8 +112,8 @@ Homepage Quick Actions (Production Block)
      style="display:block;padding:12px 14px;border-radius:14px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     ✉️ KGEN 開戶 / 合作
   </a>
-
 </div>
+
 <div style="margin-top:10px;">
   ⌖<br/>
   PrimeForge 以母機之名，開啟金融生命。<br/>
