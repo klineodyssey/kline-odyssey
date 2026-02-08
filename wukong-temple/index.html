@@ -825,6 +825,32 @@ try {
   };
 })();
 </script>
+
+<script>
+(function(){
+  // 等 debug 面板出現後，補上一顆關閉鍵
+  document.addEventListener("DOMContentLoaded", function(){
+    var box = document.getElementById("WUKONG_DEBUG");
+    if (!box) return;
+
+    // 避免重複加
+    if (document.getElementById("WUKONG_DEBUG_CLOSE")) return;
+
+    var btn = document.createElement("button");
+    btn.id = "WUKONG_DEBUG_CLOSE";
+    btn.textContent = "關閉";
+    btn.style.cssText =
+      "position:absolute;right:10px;top:8px;" +
+      "padding:4px 10px;border-radius:999px;" +
+      "border:1px solid #555;background:#111;color:#fff;cursor:pointer;";
+    btn.onclick = function(){ box.remove(); };
+
+    box.style.position = "fixed";
+    box.style.paddingTop = "28px";
+    box.appendChild(btn);
+  });
+})();
+</script>
   
 </body>
 </html>
