@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Temple</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC",Arial;background:#f7f7f7;color:#111}
+    .wrap{max-width:880px;margin:18px auto;padding:16px}
+    .card{border:1px solid #111;border-radius:14px;background:#fff;padding:12px;margin:12px 0}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .btn{cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900}
+    .tile{border:1px solid #111;border-radius:14px;background:#fff;padding:14px;cursor:pointer;text-align:left}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Courier New",monospace}
+    .muted{opacity:.85;line-height:1.75}
+    .box{border:1px solid #111;border-radius:12px;background:#fafafa;padding:10px}
+    .scroll{max-height:220px;overflow:auto}
+    .avatar{width:120px;height:120px;border-radius:18px;border:1px solid #111;object-fit:cover}
+    .ok{background:#f1fff1}
+    .warn{background:#fff7e6}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <div style="font-weight:900;font-size:22px;">悟空財神殿｜Wukong Temple</div>
+        <div style="font-weight:900;margin-top:6px;">#K線西遊記 #花果山台灣</div>
+        <div class="muted" style="margin-top:6px;">
+          不承諾收益、不提供投資建議。所有鏈上動作必須由你在錢包按確認。<br>
+          出金與還願同一地址記憶原則：public_good_treasury 為主血管（你已指定）。
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <img class="avatar" src="./wukong-avatar.png" alt="wukong avatar">
+        <a class="btn" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">Official Website</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card ok">
+    <div style="font-weight:900;margin-bottom:6px;">字幕（Top）</div>
+    <div id="subtitleTop" style="font-weight:900;line-height:1.6;"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:900;">錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnConnect" class="btn">連線錢包</button>
+        <button id="btnSpeakRules" class="btn">語音客服</button>
+        <button id="btnStopSpeak" class="btn">停止</button>
+      </div>
+    </div>
+    <div id="walletInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div class="box" style="margin-top:10px;line-height:1.9;">
+      <div style="font-weight:900;">固定地址（你指定）</div>
+      <div style="margin-top:8px;">
+        <div>public_good_treasury（出入金／還願同址）：<span class="mono" id="treasuryAddr"></span></div>
+        <div>kufo_engine：<span class="mono" id="kufoAddr"></span></div>
+        <div>KGEN Token：<span class="mono" id="kgenAddr"></span></div>
+      </div>
+      <div class="muted" style="margin-top:8px;">
+        若錢包找不到 KGEN：自訂代幣 → 貼上 KGEN 合約地址 → 確認在 BSC 主網。
+      </div>
+    </div>
+  </div>
+
+  <div class="card warn">
+    <div style="font-weight:900;">神殿心臟（Faucet/Heart 合約地址）</div>
+    <div class="muted" style="margin-top:6px;">
+      你貼上「心臟合約」後，本頁才能呼叫：igniteAndClaim、vowAndRecord、vowTotal。<br>
+      合約地址本身無私鑰，因此「沒私鑰不能出金」的自動化模式成立：要動用規則只能升版本重新部署。
+    </div>
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="inpFaucet" class="mono" placeholder="貼上心臟合約地址（BSC）"
+             style="flex:1;min-width:260px;padding:10px;border:1px solid #111;border-radius:12px;font-weight:900;">
+      <button id="btnSaveFaucet" class="btn">儲存</button>
+      <span style="border:1px solid #111;border-radius:999px;padding:6px 10px;font-weight:900;">門檻：5000 KGEN 還願</span>
+    </div>
+    <div id="heartInfo" style="margin-top:10px;line-height:1.9;"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:900;">還願目標（三選一）</div>
+    <div class="muted" style="margin-top:6px;">
+      你已要求「出金與還願同一地址」才會記得還，故 public_good_treasury 為主血管。
+    </div>
+
+    <div style="display:grid;gap:10px;margin-top:10px;">
+      <label style="display:flex;gap:10px;align-items:flex-start;">
+        <input type="radio" name="vowTarget" value="blackhole">
+        <div>
+          <div style="font-weight:900;">0x000... 黑洞（不可逆通縮）</div>
+          <div class="muted mono">0x0000000000000000000000000000000000000000</div>
+        </div>
+      </label>
+
+      <label style="display:flex;gap:10px;align-items:flex-start;">
+        <input type="radio" name="vowTarget" value="kufo_engine" checked>
+        <div>
+          <div style="font-weight:900;">KUFO 引擎（質能轉換）</div>
+          <div class="muted mono">0xef83804c264B47378FCf150086943B53fB90A90b</div>
+        </div>
+      </label>
+
+      <label style="display:flex;gap:10px;align-items:flex-start;">
+        <input type="radio" name="vowTarget" value="public_good_treasury">
+        <div>
+          <div style="font-weight:900;">public_good_treasury（出入金／還願同址）</div>
+          <div class="muted mono">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:900;">數量（KGEN）</div>
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="inpAmount" value="1" inputmode="decimal"
+             style="flex:1;min-width:220px;padding:10px;border:1px solid #111;border-radius:12px;font-weight:900;">
+      <div class="muted">豪宅只看鏈上累積 vowTotal(address) 是否 >= 5000。</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="tile" id="btnFortune">
+      <div style="font-weight:900;">領發財金（合約）</div>
+      <div class="muted">igniteAndClaim（需要心臟合約）</div>
+    </div>
+
+    <div class="tile" id="btnVow">
+      <div style="font-weight:900;">還願並記帳（合約）</div>
+      <div class="muted">vowAndRecord(amount,targetId)（累積豪宅門檻）</div>
+    </div>
+
+    <div class="tile" id="btnCheckVilla">
+      <div style="font-weight:900;">檢查豪宅資格</div>
+      <div class="muted">讀取 vowTotal(address) 決定是否開門</div>
+    </div>
+
+    <a class="tile" id="btnPortal" href="/kline-odyssey/mars-villa/" style="display:none;text-decoration:none;color:#111;">
+      <div style="font-weight:900;">前往 花果山火星・齊天豪宅</div>
+      <div class="muted">傳送門已開啟</div>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:900;">悟空影像語音客服（字幕＋對話＋即時文字）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnMic" class="btn">開始說話</button>
+        <button id="btnStopMic" class="btn">停止聽</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <input id="inpAsk" placeholder="文字問：豪宅怎麼進？錢包找不到KGEN？"
+             style="flex:1;min-width:260px;padding:10px;border:1px solid #111;border-radius:12px;font-weight:900;">
+      <button id="btnAsk" class="btn">送出</button>
+    </div>
+
+    <div style="margin-top:10px;display:grid;gap:10px;">
+      <div class="box">
+        <div style="font-weight:900;margin-bottom:6px;">對話框</div>
+        <div id="chatBox" class="scroll"></div>
+      </div>
+      <div class="box">
+        <div style="font-weight:900;margin-bottom:6px;">即時文字</div>
+        <div id="liveText" class="scroll"></div>
+      </div>
+    </div>
+
+    <div id="toast" style="margin-top:10px;font-weight:900;"></div>
+  </div>
+
+  <div class="card" style="line-height:1.8;">
+    PrimeForge 以母機之名，開啟金融生命。<br>
+    花果山台灣・信念不滅・市場無界。<br>
+    Where the Market Becomes the Myth.<br>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const CHAIN_ID_DEC = 56;
+  const KGEN_DECIMALS = 18;
+
+  const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const KUFO_ENGINE = "0xef83804c264B47378FCf150086943B53fB90A90b";
+  const PUBLIC_GOOD_TREASURY = "0xB73D6716005B37BEC742D64482fA26033eE1A4E1";
+  const BLACKHOLE = "0x0000000000000000000000000000000000000000";
+
+  const VILLA_THRESHOLD = ethers.utils.parseUnits("5000", KGEN_DECIMALS);
+
+  // localStorage: heart address
+  const LS_FAUCET = "klineodyssey_wukongTemple_faucet_v1";
+  const getHeart = () => (localStorage.getItem(LS_FAUCET) || "").trim();
+  const setHeart = (a) => localStorage.setItem(LS_FAUCET, (a||"").trim());
+
+  // UI refs
+  const $subtitleTop = document.getElementById("subtitleTop");
+  const $chatBox = document.getElementById("chatBox");
+  const $liveText = document.getElementById("liveText");
+  const $toast = document.getElementById("toast");
+  const $walletInfo = document.getElementById("walletInfo");
+  const $heartInfo = document.getElementById("heartInfo");
+  const $inpFaucet = document.getElementById("inpFaucet");
+  const $inpAmount = document.getElementById("inpAmount");
+  const $inpAsk = document.getElementById("inpAsk");
+  const $btnPortal = document.getElementById("btnPortal");
+
+  document.getElementById("treasuryAddr").textContent = PUBLIC_GOOD_TREASURY;
+  document.getElementById("kufoAddr").textContent = KUFO_ENGINE;
+  document.getElementById("kgenAddr").textContent = KGEN_TOKEN;
+
+  function appendLine(el, text){
+    const d = document.createElement("div");
+    d.textContent = text;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function toast(msg){
+    $toast.textContent = msg;
+    setTimeout(()=>{ if($toast.textContent===msg) $toast.textContent=""; }, 3200);
+  }
+
+  function say(text){
+    $subtitleTop.textContent = text;
+    appendLine($chatBox, "悟空： " + text);
+    appendLine($liveText, text);
+
+    try{
+      if(!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    }catch{}
+  }
+
+  function stopSpeak(){
+    try{ window.speechSynthesis.cancel(); }catch{}
+  }
+
+  // wallet
+  let provider=null, signer=null, userAddr=null;
+
+  const HEART_ABI = [
+    "function igniteAndClaim() external",
+    "function vowAndRecord(uint256 amount, uint8 target) external",
+    "function vowTotal(address user) view returns (uint256)"
+  ];
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address,address) view returns (uint256)",
+    "function approve(address,uint256) returns (bool)"
+  ];
+
+  const fmt = (bn) => {
+    try{ return ethers.utils.formatUnits(bn, KGEN_DECIMALS); }catch{ return String(bn); }
+  };
+
+  async function ensureChain(){
+    if(!window.ethereum) throw new Error("no_wallet");
+    const wantHex = "0x" + CHAIN_ID_DEC.toString(16);
+    const cur = await window.ethereum.request({ method:"eth_chainId" });
+    if(cur !== wantHex){
+      await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId: wantHex }] });
+    }
+  }
+
+  async function renderWallet(){
+    if(!userAddr){
+      $walletInfo.innerHTML = `<div>未連線</div><div class="muted">請用 MetaMask 或錢包瀏覽器開啟本頁。</div>`;
+      return;
+    }
+    const token = new ethers.Contract(KGEN_TOKEN, ["function balanceOf(address) view returns (uint256)"], provider);
+    const uBal = await token.balanceOf(userAddr);
+    $walletInfo.innerHTML = `
+      <div>已連線：<strong class="mono">${userAddr}</strong></div>
+      <div>KGEN 餘額：<strong>${fmt(uBal)}</strong></div>
+    `;
+  }
+
+  document.getElementById("btnConnect").addEventListener("click", async ()=>{
+    try{
+      if(!window.ethereum){ say("找不到錢包。"); return; }
+      await ensureChain();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddr = await signer.getAddress();
+      toast("錢包已連線");
+      say("錢包已連線。");
+      await renderWallet();
+      refreshHeart(false);
+    }catch{
+      say("連線失敗或未授權。");
+    }
+  });
+
+  // heart save
+  $inpFaucet.value = getHeart();
+  function refreshHeart(speakIt){
+    const a = getHeart();
+    if(!a){
+      $heartInfo.innerHTML = `<div class="muted">尚未設定心臟合約地址。</div>`;
+      if(speakIt) say("尚未設定心臟合約地址。");
+      return;
+    }
+    $heartInfo.innerHTML = `<div>心臟合約：<span class="mono">${a}</span></div>`;
+    if(speakIt) say("心臟合約已設定。");
+  }
+  document.getElementById("btnSaveFaucet").addEventListener("click", ()=>{
+    const a = ($inpFaucet.value||"").trim();
+    if(!ethers.utils.isAddress(a)){ say("合約地址格式不正確。"); return; }
+    setHeart(a);
+    toast("已儲存心臟合約");
+    refreshHeart(true);
+  });
+
+  // vow target mapping
+  function vowTargetKey(){
+    const el = document.querySelector('input[name="vowTarget"]:checked');
+    return el ? el.value : "kufo_engine";
+  }
+  // 0 blackhole, 1 kufo_engine, 2 public_good_treasury
+  function vowTargetId(){
+    const k = vowTargetKey();
+    if(k==="blackhole") return 0;
+    if(k==="kufo_engine") return 1;
+    return 2;
+  }
+
+  function parseAmt(){
+    const raw = String($inpAmount.value||"").trim();
+    const amt = ethers.utils.parseUnits(raw, KGEN_DECIMALS);
+    if(amt.lte(0)) throw new Error("bad_amount");
+    return amt;
+  }
+
+  async function heartContract(){
+    const a = getHeart();
+    if(!a) throw new Error("no_heart");
+    if(!signer) throw new Error("no_signer");
+    return new ethers.Contract(a, HEART_ABI, signer);
+  }
+
+  // Fortune
+  document.getElementById("btnFortune").addEventListener("click", async ()=>{
+    try{
+      if(!userAddr){ say("請先連線錢包。"); return; }
+      const heart = await heartContract();
+      const tx = await heart.igniteAndClaim();
+      say("已送出發財金交易，請到錢包確認。");
+      toast(tx.hash);
+    }catch{
+      say("發財金呼叫失敗。請確認心臟合約已部署且地址已填。");
+    }
+  });
+
+  // Vow (approve + vowAndRecord)
+  document.getElementById("btnVow").addEventListener("click", async ()=>{
+    try{
+      if(!userAddr){ say("請先連線錢包。"); return; }
+      const heartAddr = getHeart();
+      if(!heartAddr){ say("尚未設定心臟合約地址。"); return; }
+      const amount = parseAmt();
+
+      const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, signer);
+      const allow = await token.allowance(userAddr, heartAddr);
+      if(allow.lt(amount)){
+        say("需要先授權 KGEN 給心臟合約。請到錢包確認授權。");
+        const txA = await token.approve(heartAddr, ethers.constants.MaxUint256);
+        await txA.wait();
+      }
+
+      const heart = await heartContract();
+      const tx = await heart.vowAndRecord(amount, vowTargetId());
+      say("已送出還願並記帳交易，請到錢包確認。");
+      toast(tx.hash);
+    }catch{
+      say("還願呼叫失敗。請確認心臟合約支援 vowAndRecord 與 vowTotal。");
+    }
+  });
+
+  // Villa check
+  async function checkVilla(speakIt){
+    try{
+      if(!userAddr){ if(speakIt) say("請先連線錢包。"); return; }
+      const heart = await heartContract();
+      const vt = await heart.vowTotal(userAddr);
+      if(vt.gte(VILLA_THRESHOLD)){
+        $btnPortal.style.display = "block";
+        if(speakIt) say("傳送門已開啟。你已達成 5000 KGEN 還願。");
+      }else{
+        $btnPortal.style.display = "none";
+        if(speakIt) say("門未開。你目前累積 " + fmt(vt) + " KGEN。");
+      }
+    }catch{
+      $btnPortal.style.display = "none";
+      if(speakIt) say("尚未能讀取豪宅資格。請先設定心臟合約地址。");
+    }
+  }
+  document.getElementById("btnCheckVilla").addEventListener("click", ()=>checkVilla(true));
+
+  // Voice rules (客服說清楚)
+  const RULE_TEXT =
+"歡迎來到五指山悟空財神殿。這裡不是投資平台，不承諾收益，不提供投資建議。"+
+"發財金是小額自助點火，證明宇宙仍在呼吸與心跳。"+
+"還願是把能量送回宇宙，出入金與還願同一地址 public_good_treasury，才會記得還。"+
+"花果山火星齊天豪宅只認一件事，同一地址，鏈上還願累積滿五千 KGEN。"+
+"公益池同時承擔震災、孤兒院、自由民主、花果山孤兒基金。所有鏈上動作都必須由你在錢包確認。";
+
+  document.getElementById("btnSpeakRules").addEventListener("click", ()=>{ say(RULE_TEXT); toast("語音客服啟動"); });
+  document.getElementById("btnStopSpeak").addEventListener("click", ()=>{ stopSpeak(); toast("已停止"); });
+
+  // Simple Q&A brain
+  function answer(q){
+    const t = (q||"").trim();
+    if(!t) return "你可以問：豪宅怎麼進，發財金怎麼領，還願怎麼做，錢包找不到KGEN。";
+    if(t.includes("豪宅") || t.includes("火星") || t.includes("5000")) return "豪宅只看同一地址的鏈上還願累積 vowTotal 是否滿 5000 KGEN。";
+    if(t.includes("發財金")) return "發財金是點火小額，不等於還願累積。需要心臟合約已設定。";
+    if(t.includes("還願") || t.includes("kufo") || t.includes("公益") || t.includes("黑洞")) return "還願請選目標，輸入數量，按還願並記帳。只有記帳的還願才會累積豪宅門檻。";
+    if(t.includes("找不到") || t.toLowerCase().includes("metamask")) return "錢包找不到KGEN：自訂代幣貼KGEN合約地址，並確認在BSC主網。";
+    return "我聽見了。這裡只看鏈上規則與事實。";
+  }
+
+  document.getElementById("btnAsk").addEventListener("click", ()=>{
+    const q = ($inpAsk.value||"").trim();
+    if(q) appendLine($chatBox, "你： " + q);
+    say(answer(q));
+  });
+
+  // Speech Recognition
+  let rec=null;
+  function setupRec(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return null;
+    const r = new SR();
+    r.lang = "zh-TW";
+    r.interimResults = true;
+    r.continuous = false;
+    r.onresult = (ev)=>{
+      let finalText="", interim="";
+      for(let i=ev.resultIndex;i<ev.results.length;i++){
+        const res=ev.results[i];
+        const txt=res[0].transcript;
+        if(res.isFinal) finalText += txt;
+        else interim += txt;
+      }
+      if(interim) $subtitleTop.textContent = interim;
+      if(finalText){
+        appendLine($chatBox, "你： " + finalText);
+        appendLine($liveText, finalText);
+        say(answer(finalText));
+      }
+    };
+    r.onerror = ()=>{ say("語音辨識失敗或未授權，請改用文字輸入。"); };
+    return r;
+  }
+  document.getElementById("btnMic").addEventListener("click", ()=>{
+    rec = rec || setupRec();
+    if(!rec){ say("此瀏覽器不支援語音辨識。"); return; }
+    try{ rec.start(); toast("開始聽"); }catch{}
+  });
+  document.getElementById("btnStopMic").addEventListener("click", ()=>{ try{ if(rec) rec.stop(); }catch{} });
+
+  // boot
+  refreshHeart(false);
+  say("悟空在此。你可以先連線錢包，或按語音客服聽規則。");
+
+})();
+</script>
+</body>
+</html>
