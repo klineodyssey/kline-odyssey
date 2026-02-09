@@ -646,39 +646,6 @@
 
 })();
 </script>
-
-<script>
-(function(){
-  const btn = document.getElementById("btnSpeak");
-  const btnStop = document.getElementById("btnStopSpeak");
-  if(!btn) return;
-
-  const voiceScript =
-"歡迎來到五指山・悟空財神殿。這裡是互動式遊戲入口，不是投資平台。\n" +
-"公益 Treasury 是出金與回金同一池，也是震災、孤兒院、自由民主、花果山孤兒基金池。\n" +
-"你可以領發財金成長，不強制先還願。但想進花果山火星齊天豪宅，唯一硬門檻是一筆五千 KGEN 的還願事實。\n" +
-"還願三方向：往生代表通縮，KUFO 代表補油與質能轉換，公益 Treasury 代表回金與再分配。\n" +
-"所有鏈上動作都必須由你在錢包中按確認。";
-
-  function speak(){
-    try{
-      if(!("speechSynthesis" in window)) { alert("此瀏覽器不支援語音"); return; }
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(voiceScript);
-      u.lang = "zh-TW";
-      window.speechSynthesis.speak(u);
-    }catch(e){
-      alert("語音失敗：" + (e && e.message ? e.message : e));
-    }
-  }
-  function stop(){
-    try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
-  }
-
-  btn.onclick = speak;
-  if(btnStop) btnStop.onclick = stop;
-})();
-      </script>
   
 </body>
 </html>
