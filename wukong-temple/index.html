@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜五指山</title>
+  <meta name="description" content="悟空財神殿｜呼吸、心跳、語音客服、錢包互動、還願與發財金（BSC）" />
+  <style>
+    :root{
+      --bg:#0b1020; --card:#0f1730cc; --line:#ffffff26; --text:#e9ecff; --muted:#b8c0ffcc;
+      --gold:#ffd36a; --ok:#6affc2; --shadow:0 20px 60px rgba(0,0,0,.45); --r:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;color:var(--text);
+      font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(255,211,106,.18), transparent 55%),
+        radial-gradient(900px 700px at 90% 20%, rgba(106,255,194,.12), transparent 55%),
+        linear-gradient(180deg,#060913,#0b1020 55%,#060913);
+    }
+    a{color:inherit}
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 56px}
+    .topbar{position:sticky;top:0;z-index:9;padding:10px 0 12px;background:linear-gradient(180deg,rgba(11,16,32,.92),rgba(11,16,32,.55),transparent);backdrop-filter:blur(10px)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .badge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:900;color:var(--gold);
+      background:linear-gradient(135deg,rgba(255,211,106,.30),rgba(255,211,106,.06));border:1px solid var(--line);box-shadow:var(--shadow)}
+    h1{margin:0;font-size:18px}
+    .sub{margin-top:3px;color:var(--muted);font-weight:800;font-size:12px}
+    .pill{border:1px solid var(--line);background:rgba(255,255,255,.04);padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer;text-decoration:none}
+    .pill:hover{background:rgba(255,255,255,.07)}
+    .pill.gold{border-color:rgba(255,211,106,.35);background:linear-gradient(135deg,rgba(255,211,106,.22),rgba(255,211,106,.06));color:var(--gold)}
+    .grid{margin-top:14px;display:grid;grid-template-columns:1.12fr .88fr;gap:12px}
+    @media(max-width:920px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+    .muted{color:var(--muted);line-height:1.75}
+    .divider{height:1px;background:var(--line);margin:12px 0}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    @media(max-width:520px){.kpi{grid-template-columns:1fr}}
+    .box{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(255,255,255,.03)}
+    .label{font-size:12px;color:var(--muted);font-weight:900}
+    .val{margin-top:6px;font-size:16px;font-weight:1000}
+    .btnGrid{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+    .btn{width:100%;min-height:44px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-weight:1000;cursor:pointer}
+    .btn:hover{background:rgba(255,255,255,.08)}
+    .btn.ok{border-color:rgba(106,255,194,.35);background:linear-gradient(135deg,rgba(106,255,194,.18),rgba(255,255,255,.04))}
+    .btn.gold{border-color:rgba(255,211,106,.35);background:linear-gradient(135deg,rgba(255,211,106,.22),rgba(255,255,255,.04));color:var(--gold)}
+    .toast{margin-top:10px;padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-weight:900}
+    .addr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;overflow-wrap:anywhere}
+    .addr2{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .chat{margin-top:10px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.03)}
+    .chatHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+    .chatBody{max-height:320px;overflow:auto;padding:12px;line-height:1.7}
+    .msg{border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin:0 0 10px 0;background:rgba(15,23,48,.35)}
+    .msg.ai{border-color:rgba(255,211,106,.25);background:rgba(255,211,106,.06)}
+    .msg.me{border-color:rgba(106,255,194,.25);background:rgba(106,255,194,.06)}
+    .who{font-size:12px;color:var(--muted);font-weight:1000;margin-bottom:6px}
+    .inputRow{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+    input{flex:1;min-width:220px;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.20);color:var(--text);font-weight:900;outline:none}
+    .smallBtn{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-weight:1000;cursor:pointer}
+    .smallBtn:hover{background:rgba(255,255,255,.07)}
+    .foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);line-height:1.8;font-weight:900}
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="row">
+        <div class="brand">
+          <div class="badge">⌖</div>
+          <div>
+            <h1>悟空財神殿・五指山</h1>
+            <div class="sub">呼吸｜心跳｜點火事件｜語音客服｜錢包互動（BSC）</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 官網入口</a>
+          <button class="pill" id="btnBlueprint">🗺️ 建殿藍圖</button>
+          <button class="pill" id="btnIntro">🔊 語音導覽</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 8px 0">主殿公告</h2>
+        <div class="muted">
+          這裡是互動式遊戲入口，不是投資平台。所有鏈上動作都必須由你在錢包中按確認。<br>
+          若你找不到 KGEN，請用錢包的「自訂代幣」新增合約地址。
+        </div>
+
+        <div class="divider"></div>
+
+        <h2 style="margin:0 0 8px 0">呼吸與心跳（可驗證）</h2>
+        <div class="muted">來訪人數（今日/總計）用 CountAPI 記錄。發財金與點火事件需要 Faucet 合約部署後才能真正出金。</div>
+
+        <div class="kpi">
+          <div class="box"><div class="label">👣 今日來訪</div><div class="val" id="kpiToday">—</div></div>
+          <div class="box"><div class="label">🌍 總來訪</div><div class="val" id="kpiTotal">—</div></div>
+          <div class="box"><div class="label">🔥 心跳狀態</div><div class="val" id="kpiIgnite">未部署 Faucet</div></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h2 style="margin:0 0 8px 0">錢包與地址（BSC）</h2>
+        <div class="btnGrid">
+          <button class="btn ok" id="btnConnect">🪪 連線錢包</button>
+          <button class="btn" id="btnAddToken">➕ 新增 KGEN（提示）</button>
+          <button class="btn gold" id="btnFortune">🧧 領發財金</button>
+          <button class="btn" id="btnVow">🙏 還願（送出 KGEN）</button>
+          <button class="btn" id="btnBoBei">🎴 博杯（互動遊戲）</button>
+          <a class="btn" href="../bookstore/" style="display:flex;align-items:center;justify-content:center;text-decoration:none">📘 悟空書城</a>
+        </div>
+
+        <div class="toast" id="panel">
+          <div><b>錢包狀態：</b><span id="walletState">未連線</span></div>
+          <div style="margin-top:6px"><b>你的地址：</b><span class="addr" id="meAddr">—</span></div>
+          <div style="margin-top:6px"><b>KGEN：</b><span class="addr addr2" id="kgenAddr"></span></div>
+          <div style="margin-top:6px"><b>Faucet（心臟）：</b><span class="addr addr2" id="faucetAddr"></span></div>
+          <div style="margin-top:8px;opacity:.9" id="balances">（連線後顯示餘額）</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h2 style="margin:0 0 8px 0">還願三道（避免誤會）</h2>
+        <div class="muted">A Faucet（心臟・出入循環） B 無人銀行（制度儲備） C 往生地址（燃燒・不可逆）</div>
+        <div style="margin-top:10px">
+          <label style="display:flex;gap:10px;margin:8px 0;align-items:flex-start">
+            <input type="radio" name="vowTarget" value="faucet" checked>
+            <div><b>Faucet（心臟）</b><div class="muted">推薦：避免忘記回補地址</div></div>
+          </label>
+          <label style="display:flex;gap:10px;margin:8px 0;align-items:flex-start">
+            <input type="radio" name="vowTarget" value="bank">
+            <div><b>無人銀行（Bank）</b><div class="muted">長期建殿/制度資金池</div></div>
+          </label>
+          <label style="display:flex;gap:10px;margin:8px 0;align-items:flex-start">
+            <input type="radio" name="vowTarget" value="burn">
+            <div><b>往生地址（燃燒）</b><div class="muted">不可逆・質能轉換</div></div>
+          </label>
+        </div>
+
+        <div class="toast" id="sys">系統訊息：就緒</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px 0">悟空語音客服（一問一答）</h2>
+        <div class="muted">你可以打字或用麥克風。客服會顯示文字並用語音說出來（需要瀏覽器授權）。</div>
+
+        <div class="chat">
+          <div class="chatHead">
+            <b>接待台</b>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="smallBtn" id="btnMic">🎙️ 麥克風</button>
+              <button class="smallBtn" id="btnStop">⏹️ 停止</button>
+              <button class="smallBtn" id="btnClear">🧹 清空</button>
+            </div>
+          </div>
+          <div class="chatBody" id="chatBody"></div>
+          <div class="inputRow">
+            <input id="chatInput" placeholder="輸入：怎麼領發財金？怎麼新增 KGEN？怎麼還願？" />
+            <button class="smallBtn" id="btnSend">送出</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h2 style="margin:0 0 8px 0">鏈上驗證入口（BscScan）</h2>
+        <div class="muted">地址太長自動兩行顯示。</div>
+        <div style="margin-top:10px;display:grid;gap:8px">
+          <div><b>KGEN</b>：<a class="addr addr2" id="lnkKgen" target="_blank" rel="noopener"></a></div>
+          <div><b>Faucet</b>：<a class="addr addr2" id="lnkFaucet" target="_blank" rel="noopener"></a></div>
+          <div><b>Bank</b>：<a class="addr addr2" id="lnkBank" target="_blank" rel="noopener"></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      PrimeForge 以母機之名，開啟金融生命。<br>
+      花果山台灣・信念不滅・市場無界。<br>
+      Where the Market Becomes the Myth.<br>
+      —— 樂天帝 ⌖
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+  (() => {
+    // ====== 固定真地址（不亂改）======
+    const CHAIN_ID_DEC = 56; // BSC
+    const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+    const BANK = "0xfc522243e988a837700CaD600D6f030f5932681F";
+
+    // Faucet = 悟空心臟（部署後填入）
+    const FAUCET = ""; // TODO: deploy then fill
+
+    const $ = (id)=>document.getElementById(id);
+    const say = (t)=>{
+      try{
+        if(!("speechSynthesis" in window)) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang="zh-TW";
+        speechSynthesis.speak(u);
+      }catch{}
+    };
+    const toast=(t)=>$("sys").textContent="系統訊息："+t;
+
+    $("kgenAddr").textContent = KGEN;
+    $("faucetAddr").textContent = FAUCET ? FAUCET : "（尚未設定）";
+
+    // BscScan links
+    const bsc = (a)=>`https://bscscan.com/address/${a}`;
+    $("lnkKgen").textContent=KGEN; $("lnkKgen").href=bsc(KGEN);
+    $("lnkFaucet").textContent=FAUCET?FAUCET:"（尚未設定）";
+    $("lnkFaucet").href=FAUCET?bsc(FAUCET):"https://bscscan.com/";
+    $("lnkBank").textContent=BANK; $("lnkBank").href=bsc(BANK);
+
+    // CountAPI breathing
+    const NS="klineodyssey-wukong-temple";
+    const dayKey=()=>{
+      const d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
+      return `day_${y}${m}${dd}`;
+    };
+    const hit = async(key)=>{
+      const r=await fetch(`https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`);
+      if(!r.ok) throw new Error("countapi");
+      return await r.json();
+    };
+    (async()=>{
+      try{
+        const [a,b]=await Promise.all([hit(dayKey()),hit("total")]);
+        $("kpiToday").textContent=String(a.value??0);
+        $("kpiTotal").textContent=String(b.value??0);
+      }catch{
+        $("kpiToday").textContent="—"; $("kpiTotal").textContent="—";
+      }
+    })();
+
+    // Chat concierge (scripted)
+    const chat=$("chatBody");
+    const esc=(s)=>String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    const add=(who,text)=>{
+      const div=document.createElement("div");
+      div.className="msg "+(who==="你"?"me":"ai");
+      div.innerHTML=`<div class="who">${esc(who)}</div><div>${esc(text).replace(/\n/g,"<br>")}</div>`;
+      chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+    };
+    const answer=(q)=>{
+      const s=q.trim();
+      const has=(...k)=>k.some(x=>s.includes(x));
+      if(has("發財金","領錢","怎麼領")) return "發財金由 Faucet（心臟合約）出金。現在 Faucet 尚未填入地址，所以先做導覽與錢包連線。部署 Faucet 後，我會把『領發財金』接到合約方法（你在錢包按確認）。";
+      if(has("找不到","自訂","代幣","新增","KGEN")) return "找不到 KGEN：用錢包『自訂代幣』新增，貼上 KGEN 合約地址即可。";
+      if(has("還願","捐")) return "還願三道：A Faucet（心臟・出入循環）B Bank（制度儲備）C 燃燒（不可逆）。選好後按『還願』，錢包會跳出確認。";
+      if(has("心跳","呼吸","點火")) return "呼吸＝來訪計數。心跳＝點火事件（需要 Faucet 合約）。00:00 事件與母機救援應寫在 Faucet 合約並留下鏈上事件。";
+      return "你可以問：怎麼領發財金？怎麼新增 KGEN？怎麼還願？心跳呼吸是什麼？";
+    };
+    const reply=(q)=>{
+      const a=answer(q);
+      add("你",q); add("悟空客服",a); say(a);
+    };
+    $("btnSend").onclick=()=>{
+      const v=$("chatInput").value.trim(); if(!v) return;
+      $("chatInput").value=""; reply(v);
+    };
+    $("chatInput").addEventListener("keydown",(e)=>{ if(e.key==="Enter") $("btnSend").click(); });
+    $("btnClear").onclick=()=>{ chat.innerHTML=""; toast("已清空對話"); };
+    $("btnStop").onclick=()=>{ try{ speechSynthesis.cancel(); }catch{} toast("已停止語音"); };
+
+    // Mic
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    let rec=null;
+    if(SR){
+      rec=new SR(); rec.lang="zh-TW"; rec.interimResults=false; rec.maxAlternatives=1;
+      rec.onresult=(e)=>{ const t=e.results?.[0]?.[0]?.transcript||""; if(t) reply(t); else toast("聽不清楚"); };
+      rec.onerror=()=>toast("麥克風錯誤或未授權");
+      rec.onend=()=>{ $("btnMic").textContent="🎙️ 麥克風"; };
+    }
+    $("btnMic").onclick=()=>{
+      if(!rec){ toast("此瀏覽器不支援語音辨識"); return; }
+      try{ $("btnMic").textContent="🎙️ 聆聽中…"; rec.start(); toast("請說話"); }catch{ toast("無法啟動麥克風"); }
+    };
+
+    // Blueprint + Intro
+    $("btnBlueprint").onclick=()=>{
+      add("悟空客服","建殿藍圖：\n1 主殿裝修與客服 ✅\n2 呼吸（來訪統計）✅\n3 心跳/發財金（Faucet 部署後接上）⏳\n4 還願三道 ✅\n5 博杯互動 ✅\n6 書城入口 ✅\n下一階段：月老殿/解籤/多殿心臟 ⏳");
+      toast("藍圖已顯示"); say("建殿藍圖已顯示在對話框。");
+    };
+    $("btnIntro").onclick=()=>{
+      say("歡迎來到五指山悟空財神殿。這裡是互動式遊戲入口，不是投資平台。你可以先連線錢包，查看 K G E N，並選擇還願的道路。");
+      toast("語音導覽已播放");
+    };
+
+    // Wallet + ERC20
+    let provider=null, signer=null, me=null;
+    const ERC20_ABI=["function balanceOf(address) view returns (uint256)","function transfer(address,uint256) returns (bool)"];
+    const ensureChain=async()=>{
+      if(!window.ethereum) throw new Error("NO_WALLET");
+      const want="0x"+CHAIN_ID_DEC.toString(16);
+      const cur=await ethereum.request({method:"eth_chainId"});
+      if(cur!==want) await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:want}]});
+    };
+    const fmt=(bn)=>{ try{return ethers.utils.formatUnits(bn,18);}catch{return String(bn);} };
+
+    const render=async()=>{
+      if(!provider||!me) return;
+      try{
+        const token=new ethers.Contract(KGEN,ERC20_ABI,provider);
+        const my=await token.balanceOf(me);
+        const bank=await token.balanceOf(BANK);
+        let line=`你：${fmt(my)} KGEN ｜ 銀行：${fmt(bank)} KGEN`;
+        if(FAUCET){
+          const f=await token.balanceOf(FAUCET);
+          line += ` ｜ Faucet：${fmt(f)} KGEN`;
+          $("kpiIgnite").textContent="待接上鏈查詢";
+        }
+        $("balances").textContent=line;
+      }catch{
+        $("balances").textContent="餘額讀取失敗：請確認已在 BSC 主網";
+      }
+    };
+
+    $("btnConnect").onclick=async()=>{
+      try{
+        if(!window.ethereum){ toast("找不到錢包：請用 MetaMask 或錢包瀏覽器"); return; }
+        await ensureChain();
+        provider=new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts",[]);
+        signer=provider.getSigner();
+        me=await signer.getAddress();
+        $("walletState").textContent="已連線（BSC）";
+        $("meAddr").textContent=me;
+        toast("錢包已連線");
+        await render();
+      }catch{ toast("連線失敗或未授權"); }
+    };
+
+    $("btnAddToken").onclick=()=>{
+      add("悟空客服","新增 KGEN：到錢包的自訂代幣，貼上 KGEN 合約地址即可。\n"+KGEN);
+      toast("已顯示提示"); say("請用自訂代幣新增 K G E N。");
+    };
+
+    const target=()=>{
+      const v=document.querySelector('input[name="vowTarget"]:checked')?.value||"faucet";
+      if(v==="bank") return BANK;
+      if(v==="burn") return "0x0000000000000000000000000000000000000000";
+      return FAUCET||"";
+    };
+
+    $("btnVow").onclick=async()=>{
+      try{
+        if(!signer||!me){ toast("請先連線錢包"); return; }
+        const to=target();
+        if(!to){ toast("Faucet 尚未設定：目前無法回補心臟地址"); return; }
+        const amt=prompt("輸入還願數量（KGEN），例如 1 或 0.5","1");
+        if(!amt) return;
+        const value=ethers.utils.parseUnits(String(amt),18);
+        const token=new ethers.Contract(KGEN,ERC20_ABI,signer);
+        const tx=await token.transfer(to,value);
+        toast("交易已送出：等待鏈上確認");
+        await tx.wait();
+        toast("還願完成（已上鏈）");
+        await render();
+      }catch{ toast("還願取消或失敗"); }
+    };
+
+    $("btnFortune").onclick=()=>{
+      if(!FAUCET){
+        add("悟空客服","發財金需要 Faucet（心臟合約）部署並填入地址，才會真正出金。");
+        toast("尚未設定 Faucet"); say("發財金需要 Faucet 合約部署後才能出金。");
+        return;
+      }
+      add("悟空客服","Faucet 已設定。下一步要把 Faucet ABI 與方法名稱確認，我就能把按鈕接到 igniteAndClaim。");
+      toast("Faucet 已設定（待接 ABI）");
+    };
+
+    // BoBei mini-game
+    const KEY="wukong_boBei_v2_2";
+    const st=JSON.parse(localStorage.getItem(KEY)||'{"wins":0,"tries":0}');
+    const save=()=>localStorage.setItem(KEY,JSON.stringify(st));
+    const boBei=()=>{
+      const a=Math.random()<.5?0:1,b=Math.random()<.5?0:1;
+      if(a===1&&b===1) return "聖筊";
+      if(a===0&&b===0) return "笑筊";
+      return "陰筊";
+    };
+    $("btnBoBei").onclick=()=>{
+      const r=boBei();
+      st.tries++; if(r==="聖筊") st.wins++; save();
+      const msg=`博杯結果：${r}（累計：${st.wins} 聖筊 / ${st.tries} 次）`;
+      add("悟空客服",msg); toast(msg); say(msg);
+    };
+
+    add("悟空客服","歡迎來到五指山悟空財神殿。先按『連線錢包』，或直接問我：怎麼領發財金？");
+  })();
+  </script>
+</body>
+</html>
