@@ -1,0 +1,1652 @@
+<!-- Official Entry (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    🌐 Official Website
+  </a>
+</div>
+
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Fortune Hall</title>
+  <meta name="description" content="悟空財神殿｜互動式遊戲入口：參觀、選擇、體驗，然後離開。" />
+ 
+</head>
+
+<body>
+<div style="max-width:860px;margin:22px auto;padding:16px;">
+
+  <div style="margin-bottom:10px;">
+    <div style="font-weight:900;font-size:22px;line-height:1.2;">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
+    <div style="margin-top:6px;font-weight:800;">#悟空新文 #K線西遊記 #花果山台灣</div>
+    <div style="margin-top:8px;">
+      <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener"
+         style="text-decoration:none;font-weight:900;border:1px solid #111;border-radius:999px;padding:10px 14px;display:inline-block;">
+        回到官網總覽
+      </a>
+    </div>
+  </div>
+  <!-- =========================
+       建殿進度 / 總藍圖（V1.0）
+       ========================= -->
+  <div style="margin:10px 0 16px 0; border:1px solid #111; border-radius:16px; padding:12px; background:#fff;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-weight:900;">🏗️ 建殿進度（Wukong Temple Build）</div>
+        <div id="buildMeta" style="margin-top:6px; font-size:14px; line-height:1.6; white-space:pre-wrap;"></div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnBlueprint" type="button" class="btn">📘 一鍵查看總藍圖</button>
+        <button id="btnToggleDebug" class="btn">🧪 Debug 開關</button>
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <div style="height:12px; border:1px solid #111; border-radius:999px; overflow:hidden; background:#f7f7f7;">
+        <div id="buildBar" style="height:100%; width:0%; background:#111;"></div>
+      </div>
+      <div id="buildPct" style="margin-top:8px; font-weight:900;"></div>
+    </div>
+
+    <details id="blueprintBox" style="margin-top:12px; border-top:1px dashed #111; padding-top:12px;">
+      <summary style="cursor:pointer; font-weight:900;">📘 建殿總藍圖（點開 / 收起）</summary>
+      <div style="margin-top:10px; font-size:14px; line-height:1.75; white-space:pre-wrap;">
+【總目標】悟空財神殿＝「錢包導覽＋KGEN 上鏈憑證＋發財金（合約）＋AI 語音客服＋即時字幕」的一站式入口。
+
+【Phase 0｜已完成】
+- 合約、石碑、宇宙銀行：已部署
+- 神殿頁面：已上線（GitHub Pages）
+
+【Phase 1｜入口體驗（最優先）】
+- 連線錢包（MetaMask / WalletConnect）
+- 沒錢包：一步一步教學（下載→建立→備份助記詞→切 BSC→加自訂代幣 KGEN）
+- 地址顯示：兩行換行＋可一鍵複製＋可點去 BscScan
+
+【Phase 2｜參拜系統（本機紀錄）】
+- 登入參拜 / 登出離開 / 擲筊（50%）/ 匯出 JSON / 清除紀錄
+- 參拜紀錄留在 localStorage（不碰使用者隱私）
+
+【Phase 3｜發財金（合約發放）】
+- 需錢包已連線
+- 觸發條件：連勝 3 次才開啟領取（你規則）
+- 交易完成：清楚提示「錢包可能搜尋不到 → 必須用 Custom Token」
+
+【Phase 4｜AI 語音客服（導覽模式）】
+- 一鍵啟動：先播一段導覽（瀏覽器限制必須先點）
+- 一問一答：優先用麥克風（SpeechRecognition），不支援就改用「文字輸入」替代
+- 即時字幕：AI 字幕在上方框；你的語音轉文字在下方框
+
+【Phase 5｜擴建（完工 100% 之後）】
+- 200%：月老廟（情感解籤）
+- 300%：即時 AI 悟空聊天（接 API / 自建模型）
+      </div>
+    </details>
+  </div>
+
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;">
+    <div style="font-weight:900;">🫁 宇宙生命徵象｜心跳・呼吸・血壓（Cosmic Vitals）</div>
+    <div style="margin-top:8px;line-height:1.8;">
+      這裡是「悟空財神殿」入口，不是一般廟。<br/>
+      你每一次參拜，都會觸發一次宇宙生命徵象：心跳、呼吸、血壓。<br/>
+      （若你尚未部署發放合約，發財金功能會保持鎖定。）
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="btnHeartbeat"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        ❤️ 心跳
+      </button>
+      <button id="btnBreath"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🫁 呼吸
+      </button>
+      <button id="btnPressure"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🩸 血壓
+      </button>
+      <button id="btnFortune" disabled
+        style="cursor:not-allowed;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#f3f3f3;font-weight:900;">
+        🧧 領發財金（需合約）
+      </button>
+    </div>
+
+    <div id="vitalsInfo" style="margin-top:10px;line-height:1.9;"></div>
+    <div style="opacity:.85;margin-top:6px;">
+      規則：聖筊機率 50%。失敗歸零。連勝達 3 才開啟「領發財金」按鈕。
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-weight:900;">🪪 錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnConnect"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          連線錢包
+        </button>
+        <button id="btnSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ▶️ 語音客服
+        </button>
+        <button id="btnStopSpeak"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          ⏹️ 停止
+        </button>
+      </div>
+    </div>
+
+    <div id="aiConsole" style="margin-top:10px;border:1px solid #111;border-radius:14px;padding:12px;background:#fafafa;">
+      <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="width:88px;min-width:88px;">
+          <img id="avatarImg" src="./wukong-avatar.png" alt="Wukong AI" style="width:88px;height:88px;border-radius:18px;border:1px solid #111;object-fit:cover;background:#fff;"/>
+          <div style="margin-top:6px;font-size:12px;opacity:.85;line-height:1.4;">
+            提示：若未顯示，請在同資料夾放一張 wukong-avatar.png
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <div style="font-weight:900;">AI 語音客服（悟空財神殿）</div>
+          <div style="margin-top:6px;font-size:14px;line-height:1.7;">
+            <div style="font-weight:900;">即時文字（AI 說話字幕）</div>
+            <div id="aiCaption" style="margin-top:6px;min-height:46px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fff;white-space:pre-wrap;"></div>
+
+            <div style="margin-top:10px;font-weight:900;">即時文字（你的麥克風轉文字）</div>
+            <div id="userTranscript" style="margin-top:6px;min-height:46px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fff;white-space:pre-wrap;opacity:.95;"></div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button id="btnMic"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                🎤 開始說話
+              </button>
+              <button id="btnStopMic"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                📴 停止聽你
+              </button>
+              <button id="btnAutoStart"
+                style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+                ⚡ 一鍵啟動（語音＋字幕）
+              </button>
+            </div>
+
+            <div style="margin-top:8px;font-size:12px;opacity:.85;line-height:1.5;">
+              注意：多數瀏覽器禁止「無互動自動播放聲音」。第一次請按「一鍵啟動」或任意按鍵，之後才可連續播報。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="walletInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;padding:10px;border:1px dashed #111;border-radius:12px;background:#fafafa;line-height:1.8;">
+      <div style="font-weight:900;">🔎 鏈上驗證（BscScan / PancakeSwap / PinkLock）</div>
+
+      <div style="margin-top:6px;">
+        KGEN（KLINE GENESIS）Token：
+        <a id="linkToken" class="addr addr-2line" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be">0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</a>
+      </div>
+
+      <div style="margin-top:4px;">
+        PancakeSwap（官方交易）：
+        <a id="linkSwap" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;">KGEN / WBNB</a>
+      </div>
+
+      <div style="margin-top:4px;">
+        LP Pair：
+        <a id="linkLP" class="addr addr-2line" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;" href="https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2">0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2</a>
+      </div>
+
+      <div style="margin-top:4px;">
+        PinkLock：
+        <a id="linkPink" target="_blank" rel="noopener" style="font-weight:900;text-decoration:none;" href="https://www.pinksale.finance/pinklock/bsc/record/1427003">查看鎖倉</a>
+      </div>
+
+      <div id="envHint" style="margin-top:8px;opacity:.85;"></div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #111;border-radius:14px;padding:12px;background:#fff;margin:12px 0;">
+    <div style="font-weight:900;">🧿 參拜紀錄（本機 localStorage）</div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="btnVisit"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🙏 登入參拜
+      </button>
+      <button id="btnDivination"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🧿 擲筊（50%）
+      </button>
+      <button id="btnExit"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🚪 登出離開
+      </button>
+      <button id="btnExport"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        ⬇️ 匯出 JSON
+      </button>
+      <button id="btnClear"
+        style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+        🧹 清除紀錄
+      </button>
+    </div>
+
+    <div id="localInfo" style="margin-top:10px;line-height:1.9;"></div>
+
+    <div style="margin-top:10px;border-top:1px solid #111;padding-top:10px;">
+      <div style="font-weight:900;">📊 來訪統計（CountAPI / fallback）</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnRefreshStats"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          🔄 更新統計
+        </button>
+        <button id="btnReHit"
+          style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+          🫁 再呼吸一次（測試 hit）
+        </button>
+      </div>
+      <div id="visitorInfo" style="margin-top:10px;line-height:1.9;"></div>
+      <div id="visitorHint" style="opacity:.85;margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #111;line-height:1.8;">
+    PrimeForge 以母機之名，開啟金融生命。<br/>
+    花果山台灣・信念不滅・市場無界。<br/>
+    Where the Market Becomes the Myth.<br/>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<script src="./ethers-5.7.2.umd.min.js"></script>
+<script>window.$ = window.$ || ((id)=>document.getElementById(id));</script>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const safeParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+  const nowISO = () => new Date().toISOString();
+
+  const CHAIN_ID_DEC = 56;
+  const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const KGEN_SYMBOL = "KGEN";
+  const KGEN_NAME = "KLINE GENESIS";
+  const KGEN_DECIMALS = 18;
+
+  const LP_PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+  const PINKLOCK_URL = "https://www.pinksale.finance/pinklock/bsc/record/1427003";
+
+  const VOW_ADDR = {
+    blackhole: "0x0000000000000000000000000000000000000000",
+    kufo_engine: "0xef83804c264B47378FCf150086943B53fB90A90b",
+    public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1"
+  };
+  const FORTUNE_TREASURY = VOW_ADDR.public_good_treasury;
+
+  // 這個就是你問的 FAUCET_CONTRACT（發放合約地址）：沒部署就留空
+  const FAUCET_CONTRACT = "REPLACE_WITH_DEPLOYED_FAUCET_CONTRACT";
+  const COUNT_NS = "klineodyssey-wukong-temple";
+  const PULSE_KEY = "klineodyssey_wukongTemple_pulse_v0_6";
+
+  const dayKey = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `day_${yyyy}${mm}${dd}`;
+  };
+
+  const countapi = {
+    hit: async (key) => {
+      const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_hit_failed");
+      return await r.json();
+    },
+    get: async (key) => {
+      const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("countapi_get_failed");
+      return await r.json();
+    }
+  };
+
+  const renderVisitors = (todayVal, totalVal, note) => {
+    $("visitorInfo").innerHTML = `
+      <div>📅 今日來訪：<strong>${todayVal}</strong></div>
+      <div>🌍 總來訪：<strong>${totalVal}</strong></div>
+    `;
+    $("visitorHint").textContent = note || "";
+  };
+
+  const localVisitorFallback = (doHit) => {
+    const kDay = "local_visit_" + dayKey();
+    const kTotal = "local_visit_total";
+    const get = (k) => Number(localStorage.getItem(k) || "0");
+    const set = (k, v) => localStorage.setItem(k, String(v));
+    let day = get(kDay);
+    let total = get(kTotal);
+    if (doHit) { day += 1; total += 1; set(kDay, day); set(kTotal, total); }
+    renderVisitors(day, total, "（提示：外部統計被阻擋，已改用本機統計 fallback。）");
+  };
+
+  const refreshVisitors = async (doHit) => {
+    try {
+      const dk = dayKey();
+      let todayVal = 0;
+      let totalVal = 0;
+      if (doHit) {
+        const [t1, t2] = await Promise.all([countapi.hit(dk), countapi.hit("total")]);
+        todayVal = t1.value ?? 0;
+        totalVal = t2.value ?? 0;
+      } else {
+        const [g1, g2] = await Promise.all([countapi.get(dk), countapi.get("total")]);
+        todayVal = g1.value ?? 0;
+        totalVal = g2.value ?? 0;
+      }
+      renderVisitors(todayVal, totalVal, "（來源：CountAPI 後端統計）");
+    } catch {
+      localVisitorFallback(doHit);
+    }
+  };
+
+  const KEY = "klineodyssey_wukongTemple_state_v0_6";
+  const load = () => {
+    const s = safeParse(localStorage.getItem(KEY) || "");
+    const base = { visitCount: 0, exitCount: 0, divinationStreak: 0, vitals: { heartbeat: 0, breath: 0, pressure: 0 }, logs: [] };
+    return Object.assign(base, s || {});
+  };
+  const save = (s) => localStorage.setItem(KEY, JSON.stringify(s));
+
+  const pushLog = (s, type, data) => {
+    s.logs = s.logs || [];
+    s.logs.push({ t: nowISO(), type, data: data || {} });
+    if (s.logs.length > 300) s.logs = s.logs.slice(-300);
+  };
+
+  const renderLocal = () => {
+    const s = load();
+    $("localInfo").innerHTML = `
+      <div>🙏 參拜次數：<strong>${s.visitCount}</strong></div>
+      <div>🚪 離開次數：<strong>${s.exitCount}</strong></div>
+      <div>🧿 聖筊連勝：<strong>${s.divinationStreak}</strong></div>
+    `;
+    const btn = $("btnFortune");
+    if (s.divinationStreak >= 3) {
+      btn.disabled = false;
+      btn.style.cursor = "pointer";
+      btn.style.background = "#fff";
+    } else {
+      btn.disabled = true;
+      btn.style.cursor = "not-allowed";
+      btn.style.background = "#f3f3f3";
+    }
+  };
+
+  const renderDivination = () => {
+    const s = load();
+    const v = s.divinationStreak || 0;
+    $("vitalsInfo").innerHTML = `
+      <div>❤️ 心跳次數：<strong>${s.vitals.heartbeat || 0}</strong></div>
+      <div>🫁 呼吸次數：<strong>${s.vitals.breath || 0}</strong></div>
+      <div>🩸 血壓次數：<strong>${s.vitals.pressure || 0}</strong></div>
+      <div style="margin-top:8px;">🧿 聖筊連勝：<strong>${v}</strong>（達 3 才開啟領發財金）</div>
+    `;
+  };
+
+  const toast = (msg) => {
+    const el = document.createElement("div");
+    el.textContent = msg;
+    el.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-weight:900;z-index:99999;max-width:92vw;text-align:center;";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1600);
+  };
+
+  const chance = (p) => Math.random() < p;
+
+  const setAICaption = (t) => { const el = $("aiCaption"); if (el) el.textContent = t || ""; };
+
+  // 文字→語音（同時逐字更新「即時文字」）
+  const speakText = (text) => {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+
+      // 逐字字幕：用 boundary 的 charIndex（不同瀏覽器支援度不一；不支援就一次顯示全文）
+      let lastIdx = 0;
+      setAICaption("");
+      u.onstart = () => { setAICaption(""); lastIdx = 0; };
+      u.onboundary = (ev) => {
+        try {
+          if (typeof ev.charIndex === "number") {
+            const idx = Math.max(0, ev.charIndex);
+            if (idx !== lastIdx) {
+              lastIdx = idx;
+              setAICaption(text.slice(0, idx));
+            }
+          }
+        } catch {}
+      };
+      u.onend = () => { setAICaption(text); };
+
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
+
+  const stopSpeak = () => { try { window.speechSynthesis.cancel(); } catch {} };
+
+  let provider = null;
+  let signer = null;
+  let userAddr = null;
+
+  const ensureChain = async () => {
+    const hex = "0x" + CHAIN_ID_DEC.toString(16);
+    const curr = await window.ethereum.request({ method: "eth_chainId" });
+    if (curr === hex) return;
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: hex }]
+      });
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const fmtAddr = (a) => a ? (a.slice(0, 6) + "…" + a.slice(-4)) : "";
+  const fmt = (n) => {
+    try { return new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(n); }
+    catch { return String(n); }
+  };
+
+ const renderWallet = async () => {
+    const lines = [];
+    if (!window.ethereum) {
+      lines.push(`<div>錢包：<strong>未偵測到</strong>（你仍可使用「非鏈上」互動）</div>`);
+      $("walletInfo").innerHTML = lines.join("");
+      return;
+    }
+    try {
+      if (!provider || !signer) {
+        lines.push(`<div>錢包：<strong>尚未連線</strong></div>`);
+      } else {
+        lines.push(`<div>錢包：<strong>${fmtAddr(userAddr)}</strong></div>`);
+        const erc20Abi = [
+          "function symbol() view returns (string)",
+          "function name() view returns (string)",
+          "function decimals() view returns (uint8)",
+          "function balanceOf(address) view returns (uint256)"
+        ];
+        const kgen = new ethers.Contract(KGEN_TOKEN, erc20Abi, provider);
+        const bal = await kgen.balanceOf(userAddr);
+        const human = Number(ethers.utils.formatUnits(bal, KGEN_DECIMALS));
+        lines.push(`<div>KGEN 餘額：<strong>${fmt(human)}</strong></div>`);
+      }
+    } catch {
+      lines.push(`<div style="opacity:.85;">餘額讀取失敗：請確認在 BSC 主網，且 ethers 檔案可載入。</div>`);
+    }
+    $("walletInfo").innerHTML = lines.join("");
+  };
+
+  const mkBscAddr = (addr) => `https://bscscan.com/address/${addr}`;
+  const mkBscToken = (addr) => `https://bscscan.com/token/${addr}`;
+
+  $("linkToken").textContent = KGEN_TOKEN;
+  $("linkToken").href = mkBscToken(KGEN_TOKEN);
+  $("linkSwap").href = `https://pancakeswap.finance/swap?outputCurrency=${KGEN_TOKEN}`;
+  $("linkLP").textContent = LP_PAIR;
+  $("linkLP").href = mkBscAddr(LP_PAIR);
+  $("linkPink").href = PINKLOCK_URL;
+
+  const env = [];
+  env.push(`Network：BSC Mainnet（ChainId ${CHAIN_ID_DEC}）`);
+  env.push(`Token：${KGEN_SYMBOL}（${KGEN_NAME}）`);
+  env.push(`Web3：${window.ethereum ? "偵測到錢包" : "未偵測到錢包（仍可用非鏈上功能）"}`);
+  env.push(`Ethers：${(typeof ethers !== "undefined") ? "OK" : "未載入（請確認 ethers 檔同資料夾）"}`);
+  $("envHint").textContent = env.join("｜");
+
+  const startAssistant = () => {
+    const s = load();
+    const line1 = `歡迎來到五指山悟空財神殿。`;
+    const line2 = `你目前聖筊連勝是 ${s.divinationStreak || 0} 次。`;
+    const line3 = `今天先做三件事：心跳，呼吸，血壓。準備好了就跟我說：啟動。`;
+    speakText(`${line1}${line2}${line3}`);
+    toast("悟空財神殿：語音客服啟動");
+  };
+
+<button id="btnGuide"
+ style="cursor:pointer;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;">
+  🧭 新手導覽
+</button>
+  
+function wukongNewbieGuide(){
+  const t =
+  "你現在在悟空財神殿。沒有錢包也沒關係，我帶你一步一步做。"+
+  "第一步，先安裝錢包，建議用MetaMask或Trust Wallet。"+
+  "第二步，建立錢包並保存助記詞，這是你的生命線。"+
+  "第三步，切到BSC主網。"+
+  "第四步，KGEN搜尋不到是正常的，你要用自訂代幣加入。"+
+  "把KGEN合約地址貼進Import或Custom Token。"+
+  "完成後回到財神殿，按連線錢包。"+
+  "最後，擲筊連勝三次，才會開啟領發財金。";
+  speakText(t);
+  setAICaption(t);
+}
+document.getElementById("btnGuide")?.addEventListener("click", wukongNewbieGuide);
+  
+  $("btnSpeak").addEventListener("click", () => startAssistant());
+  $("btnAutoStart")?.addEventListener("click", () => startAssistant());
+  $("btnStopSpeak").addEventListener("click", () => { stopSpeak(); toast("已停止語音"); });
+
+  // 麥克風轉文字（可用可不用；不支援就提示）
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  const startMic = () => {
+    const out = $("userTranscript");
+    if (!SR) { if (out) out.textContent = "此瀏覽器不支援 SpeechRecognition（建議用 Chrome / Edge）。"; toast("麥克風轉文字不支援"); return; }
+    rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = true;
+
+    let finalText = "";
+    if (out) out.textContent = "";
+    rec.onresult = (ev) => {
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const res = ev.results[i];
+        const t = res[0]?.transcript || "";
+        if (res.isFinal) finalText += t;
+        else interim += t;
+      }
+      if (out) out.textContent = finalText + interim;
+    };
+    rec.onerror = () => { toast("麥克風錯誤或未授權"); };
+    rec.onend = () => {};
+    try { rec.start(); toast("開始聽你說話"); } catch { toast("無法啟動麥克風"); }
+  };
+  const stopMic = () => { try { rec && rec.stop(); } catch {} rec = null; toast("已停止聽你"); };
+
+  $("btnMic")?.addEventListener("click", () => startMic());
+  $("btnStopMic")?.addEventListener("click", () => stopMic());
+
+  // 盡量「自動開始」：第一次互動後自動播報（符合瀏覽器政策）
+  let _autoStarted = false;
+  const autoStartOnce = () => {
+    if (_autoStarted) return;
+    _autoStarted = true;
+    startAssistant();
+  };
+  window.addEventListener("pointerdown", autoStartOnce, { once: true });
+  window.addEventListener("keydown", autoStartOnce, { once: true });
+
+  $("btnRefreshStats").addEventListener("click", async () => { await refreshVisitors(false); toast("已更新來訪統計"); });
+  $("btnReHit").addEventListener("click", async () => { await refreshVisitors(true); toast("已再呼吸一次（測試）"); });
+
+  $("btnDivination").addEventListener("click", () => {
+    const s = load();
+    const ok = chance(0.5);
+    if (ok) { s.divinationStreak = (s.divinationStreak || 0) + 1; pushLog(s, "divination_yes", { streak: s.divinationStreak }); save(s); toast("聖筊"); }
+    else { s.divinationStreak = 0; pushLog(s, "divination_no", {}); save(s); toast("陰筊"); }
+    renderDivination(); renderLocal();
+  });
+
+  $("btnVisit").addEventListener("click", () => { const s = load(); s.visitCount += 1; pushLog(s, "visit", {}); save(s); renderLocal(); toast("已記錄：登入參拜"); });
+  $("btnExit").addEventListener("click", () => { const s = load(); s.exitCount += 1; pushLog(s, "exit", {}); save(s); renderLocal(); toast("已記錄：登出離開"); });
+
+  const downloadJSON = (obj, filename) => {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  };
+
+  $("btnExport").addEventListener("click", () => { downloadJSON(load(), `wukong_temple_log_${dayKey()}.json`); toast("已匯出 JSON"); });
+  $("btnClear").addEventListener("click", () => { if (!confirm("確定清除本機紀錄？")) return; localStorage.removeItem(KEY); renderLocal(); renderDivination(); toast("已清除"); });
+
+  $("btnConnect").addEventListener("click", async () => {
+    try {
+      if (!window.ethereum) { toast("找不到錢包"); return; }
+      await ensureChain();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddr = await signer.getAddress();
+      toast("錢包已連線（BSC 主網）");
+      await renderWallet();
+    } catch { toast("連線失敗或未授權"); }
+  });
+
+  // Vitals：心跳 / 呼吸 / 血壓（本機計數 + 日誌）
+  const doHeartbeat = () => {
+    const s = load();
+    s.vitals.heartbeat = (s.vitals.heartbeat || 0) + 1;
+    pushLog(s, "heartbeat", { n: s.vitals.heartbeat });
+    save(s);
+    renderDivination();
+  };
+  const doBreath = () => {
+    const s = load();
+    s.vitals.breath = (s.vitals.breath || 0) + 1;
+    pushLog(s, "breath", { n: s.vitals.breath });
+    save(s);
+    renderDivination();
+  };
+  const doPressure = () => {
+    const s = load();
+    s.vitals.pressure = (s.vitals.pressure || 0) + 1;
+    pushLog(s, "pressure", { n: s.vitals.pressure });
+    save(s);
+    renderDivination();
+  };
+
+  $("btnHeartbeat").addEventListener("click", () => { doHeartbeat(); toast("心跳已記錄"); });
+  $("btnBreath").addEventListener("click", () => { doBreath(); toast("呼吸已記錄"); });
+  $("btnPressure").addEventListener("click", () => { doPressure(); toast("血壓已記錄"); });
+
+  // 發財金：目前只做「檢查是否有部署合約」的鎖定機制
+  $("btnFortune").addEventListener("click", async () => {
+    const s = load();
+    if ((s.divinationStreak || 0) < 3) { toast("聖筊連勝未達 3"); return; }
+    if (!FAUCET_CONTRACT || FAUCET_CONTRACT.includes("REPLACE_WITH")) {
+      toast("尚未部署發放合約：FAUCET_CONTRACT 未設定");
+      speakText("發財金尚未啟動。因為你還沒把發放合約地址填入。等合約部署好，悟空才會把發財金送出去。");
+      return;
+    }
+    toast("發放合約已設定，但你尚未接上合約 ABI 與發放函式。下一步再做。");
+    speakText("我感受到發放合約地址已存在。但還缺少合約介面與實際發放動作。下一步我們會把發財金真正發出去。");
+  });
+
+ // 每小時心跳一次（象徵宇宙心跳節奏）
+  setInterval(doHeartbeat, 60 * 60 * 1000);
+
+  // 初始刷新
+  refreshVisitors(true);
+  renderLocal();
+  renderDivination();
+  renderWallet();
+})();
+</script>
+
+<script>
+(function(){
+  const ua = navigator.userAgent || "";
+  const isFB = /FBAN|FBAV|Instagram/i.test(ua);
+  const hasEth = typeof window.ethereum !== "undefined";
+
+  if (isFB && !hasEth) {
+    const bar = document.createElement("div");
+    bar.style.cssText =
+      "position:fixed;left:0;right:0;bottom:0;z-index:9999;" +
+      "background:#111;color:#fff;padding:12px 14px;" +
+      "display:flex;gap:10px;align-items:center;justify-content:space-between;" +
+      "font-size:14px;line-height:1.4;";
+    bar.innerHTML = `
+      <div style="flex:1;">
+        ⚠️ 目前在 Facebook 內建瀏覽器，可能無法連接錢包。<br/>
+        建議改用 <b>Chrome</b> 或 <b>錢包內建瀏覽器</b> 開啟悟空財神殿。
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="openExternal"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #fff;background:#fff;color:#111;font-weight:900;">
+          用瀏覽器開
+        </button>
+        <button id="dismissBar"
+          style="padding:8px 10px;border-radius:999px;border:1px solid #555;background:#111;color:#fff;">
+          關閉
+        </button>
+      </div>
+    `;
+    document.body.appendChild(bar);
+
+    document.getElementById("openExternal").onclick = () => {
+      // 嘗試跳外部瀏覽器
+      window.open(window.location.href, "_blank");
+    };
+    document.getElementById("dismissBar").onclick = () => {
+      bar.remove();
+    };
+  }
+})();
+</script>
+
+<script>
+try {
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance("悟空在此，語音系統已恢復。");
+    u.lang = "zh-TW";
+    window.speechSynthesis.speak(u);
+  }
+} catch (e) {
+  alert("語音模組錯誤：" + e.message);
+}
+</script>
+
+<script>
+(function(){
+  function box(){
+    var el = document.getElementById("WUKONG_DEBUG");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "WUKONG_DEBUG";
+    el.style.cssText =
+      "position:fixed;left:10px;right:10px;top:10px;z-index:99999;" +
+      "background:#111;color:#fff;padding:10px 12px;border-radius:12px;" +
+      "font-size:12px;line-height:1.4;max-height:40vh;overflow:auto;" +
+      "box-shadow:0 10px 30px rgba(0,0,0,.35)";
+    el.innerHTML = "<b>Wukong Debug</b><div id='WUKONG_DEBUG_LOG' style='margin-top:6px;white-space:pre-wrap;'></div>";
+    document.body.appendChild(el);
+    return el;
+  }
+  function log(msg){
+    try{
+      box();
+      var area = document.getElementById("WUKONG_DEBUG_LOG");
+      area.textContent += (msg + "\n");
+    }catch(e){}
+  }
+
+  window.addEventListener("error", function(e){
+    log("ERROR: " + (e.message || e.error || "unknown") + " @ " + (e.filename||"") + ":" + (e.lineno||"") );
+  });
+  window.addEventListener("unhandledrejection", function(e){
+    log("PROMISE: " + (e.reason && (e.reason.message || e.reason)) );
+  });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    log("DOM OK");
+    log("ethers loaded: " + (!!window.ethers));
+    log("speechSynthesis: " + ("speechSynthesis" in window));
+    log("has ethereum: " + (typeof window.ethereum !== "undefined"));
+  });
+})();
+</script>
+
+<script>
+(function(){
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    if (typeof window.ethereum === "undefined") {
+      speak(
+        "凡人莫急，悟空在此。你現在站在悟空財神殿門前。若你還沒有錢包，不是錯，也不是晚。錢包不是投資工具，是你在鏈上世界的身分證。請到應用程式商店搜尋 MetaMask 並安裝。完成後再回到悟空財神殿，悟空會繼續帶你走。"
+      );
+    }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  // 你頁面上有兩個字幕框，名字可能不一樣
+  // 我用「自動偵測」找出最像字幕框的元素，不用你記 id
+  function findCaptionBox(){
+    // 優先找你原本可能用的 id（若有）
+    const candidates = [
+      "aiCaption","aiSubtitles","captionBox","liveCaption","txtAICaption","aiText",
+      "sttBox","sttText","youSaid","micText"
+    ];
+    for (const id of candidates){
+      const el = document.getElementById(id);
+      if (el) return el;
+    }
+    // 再用類名/屬性猜（你的框多半是 textarea 或 div）
+    const els = Array.from(document.querySelectorAll("textarea, div"));
+    // 找有「即時文字」附近的 textarea/div
+    for (const el of els){
+      const t = (el.innerText || el.value || "").trim();
+      // 空的也可能是字幕框，所以不靠內容判斷
+      const label = el.closest("section,div,fieldset")?.innerText || "";
+      if (label.includes("即時文字") && (el.tagName === "TEXTAREA" || el.getAttribute("contenteditable")==="true" || el.tagName==="DIV")){
+        return el;
+      }
+    }
+    // 最後：找第一個 textarea（很多頁面字幕框就是 textarea）
+    const ta = document.querySelector("textarea");
+    if (ta) return ta;
+    return null;
+  }
+
+  function setCaption(text){
+    const box = findCaptionBox();
+    if (!box) return;
+    if (box.tagName === "TEXTAREA" || box.tagName === "INPUT"){
+      box.value = text;
+      box.dispatchEvent(new Event("input", {bubbles:true}));
+    } else {
+      box.textContent = text;
+    }
+  }
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // 這段是「A：沒錢包新手導覽」精簡版
+  const GUIDE_A =
+    "凡人莫急，悟空在此。你現在站在悟空財神殿門前。若你還沒有錢包，不是錯，也不是晚。"+
+    "錢包不是投資工具，是你在鏈上世界的身分證。"+
+    "請到應用程式商店搜尋MetaMask並安裝。建立新錢包後，助記詞請抄寫保存，不要交給任何人。"+
+    "完成後回到悟空財神殿，悟空會繼續帶你走。";
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有在「未偵測到錢包」時才自動播＋顯示字幕
+    if (typeof window.ethereum === "undefined") {
+      setCaption(GUIDE_A);
+      speak(GUIDE_A);
+    }
+  });
+
+  // 你也可以手動呼叫：window.wukongGuideA()
+  window.wukongGuideA = function(){
+    setCaption(GUIDE_A);
+    speak(GUIDE_A);
+  };
+})();
+</script>
+
+<script>
+(function(){
+  // 等 debug 面板出現後，補上一顆關閉鍵
+  document.addEventListener("DOMContentLoaded", function(){
+    var box = document.getElementById("WUKONG_DEBUG");
+    if (!box) return;
+
+    // 避免重複加
+    if (document.getElementById("WUKONG_DEBUG_CLOSE")) return;
+
+    var btn = document.createElement("button");
+    btn.id = "WUKONG_DEBUG_CLOSE";
+    btn.textContent = "關閉";
+    btn.style.cssText =
+      "position:absolute;right:10px;top:8px;" +
+      "padding:4px 10px;border-radius:999px;" +
+      "border:1px solid #555;background:#111;color:#fff;cursor:pointer;";
+    btn.onclick = function(){ box.remove(); };
+
+    box.style.position = "fixed";
+    box.style.paddingTop = "28px";
+    box.appendChild(btn);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const STEP_B =
+    "下一步，悟空教你把錢包接上BSC主網。若你在錢包裡搜尋不到KGEN，這是正常的。"+
+    "KGEN需要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去，按匯入即可。"+
+    "完成後回到悟空財神殿，再按連線錢包。";
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function setCaption(text){
+    // 你已確認字幕在上方那格，所以直接找「最上方那個 textarea」
+    const ta = document.querySelector("textarea");
+    if (!ta) return;
+    ta.value = text;
+    ta.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+
+  function ensureNextButton(){
+    // 找到 AI字幕框外層，插入按鈕
+    const ta = document.querySelector("textarea");
+    if (!ta) return;
+
+    if (document.getElementById("WUKONG_NEXT_BTN")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "WUKONG_NEXT_BTN";
+    btn.textContent = "🧭 下一步：切BSC＋加入KGEN";
+    btn.style.cssText =
+      "margin:10px 0 0 0;padding:10px 12px;border-radius:999px;" +
+      "border:1px solid #111;background:#fff;font-weight:900;cursor:pointer;width:100%;";
+
+    btn.onclick = function(){
+      setCaption(STEP_B);
+      speak(STEP_B);
+    };
+
+    // 放在字幕框下面
+    ta.parentElement.appendChild(btn);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有沒錢包時才顯示下一步按鈕
+    if (typeof window.ethereum === "undefined") {
+      ensureNextButton();
+    }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const STEP_B =
+    "下一步，悟空教你把錢包接上BSC主網。若你在錢包裡搜尋不到KGEN，這是正常的。"+
+    "KGEN需要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去，按匯入即可。"+
+    "完成後回到悟空財神殿，再按連線錢包。";
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // 找到「即時文字（AI 說話字幕）」那一區，並返回字幕框元素（虛線框）
+  function findAICaptionBox(){
+    // 1) 先找包含該標題文字的元素
+    const all = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label"));
+    const labelEl = all.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("AI"));
+    if (!labelEl) return null;
+
+    // 2) 往下找同一個卡片/區塊內的「虛線框」(通常是下一個有邊框的div)
+    let root = labelEl.closest("div") || labelEl.parentElement;
+    if (!root) root = document.body;
+
+    // 在 root 附近找最像字幕框的元素：有虛線邊框/或是空白框
+    const candidates = Array.from(root.querySelectorAll("div"));
+    // 優先挑有 dotted/dashed border 的
+    let box = candidates.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle && (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")))
+             && d.offsetHeight > 40;
+    });
+    if (box) return box;
+
+    // 找不到虛線就退而求其次：找高度較高的空白內容區塊
+    box = candidates.find(d => d.offsetHeight > 60 && (d.innerText || "").trim().length < 400);
+    return box || null;
+  }
+
+  function setCaption(text){
+    const box = findAICaptionBox();
+    if (!box) return;
+    box.textContent = text;
+  }
+
+  function ensureNextButton(){
+    if (document.getElementById("WUKONG_NEXT_BTN")) return;
+
+    const box = findAICaptionBox();
+    if (!box) return;
+
+    const btn = document.createElement("button");
+    btn.id = "WUKONG_NEXT_BTN";
+    btn.textContent = "🧭 下一步：切BSC＋加入KGEN";
+    btn.style.cssText =
+      "margin:10px 0 0 0;padding:10px 12px;border-radius:999px;" +
+      "border:1px solid #111;background:#fff;font-weight:900;cursor:pointer;width:100%;";
+
+    btn.onclick = function(){
+      setCaption(STEP_B);
+      speak(STEP_B);
+    };
+
+    // 插在字幕框正下方
+    box.insertAdjacentElement("afterend", btn);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 只有沒錢包時才顯示按鈕
+    if (typeof window.ethereum === "undefined") {
+      ensureNextButton();
+      // 另外：若未來 DOM 延遲渲染，再補一次（保險）
+      setTimeout(ensureNextButton, 800);
+      setTimeout(ensureNextButton, 1600);
+    }
+  });
+
+  // 手動測試用：在網址列 javascript:wukongNext()
+  window.wukongNext = function(){
+    ensureNextButton();
+  };
+})();
+</script>
+
+<script>
+(function(){
+  // === 找框：上方 AI 字幕框 & 下方 麥克風轉文字框 ===
+  function findBoxByLabel(labelText){
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const label = nodes.find(el => (el.innerText || "").includes(labelText));
+    if (!label) return null;
+    let root = label.closest("div") || label.parentElement;
+    if (!root) root = document.body;
+
+    // 找虛線/虛框 div
+    const divs = Array.from(root.querySelectorAll("div"));
+    let box = divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    });
+    if (box) return box;
+
+    // fallback
+    return divs.find(d => d.offsetHeight > 50) || null;
+  }
+
+  function getAIBOX(){ return findBoxByLabel("即時文字（AI"); }
+  function getYOUBOX(){ return findBoxByLabel("即時文字（你的"); }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  // === 語音播報 ===
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // === 規則式回覆（先確保一定能一問一答）===
+  function wukongReply(userText){
+    const t = (userText || "").trim();
+
+    if (!t) return "我有聽到，但你還沒說出問題。你可以問我：沒有錢包怎麼辦？KGEN怎麼加？";
+
+    if (t.includes("沒有錢包") || t.includes("怎麼開戶") || t.includes("怎麼下載")) {
+      return "沒有錢包很正常。請到應用程式商店下載 MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回來按連線錢包。";
+    }
+
+    if (t.includes("BSC") || t.includes("主網") || t.includes("怎麼切")) {
+      return "請在錢包裡新增或切換網路到 BSC 主網。若你用的是 MetaMask，我可以一步一步帶你點選路徑。";
+    }
+
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN 搜不到是正常的，因為它需要自訂代幣加入，也就是 Custom Token。把 KGEN 合約地址貼進去匯入，就會顯示在你的錢包資產清單。";
+    }
+
+    if (t.includes("發財金") || t.includes("領取")) {
+      return "發財金功能目前仍鎖定在『已連線錢包』狀態。先把錢包裝好並接上 BSC，再回來按連線，我就能帶你完成領取。";
+    }
+
+    return "我有聽懂你的方向。你可以更直接問：你現在卡在哪一步？下載錢包、切 BSC、還是把 KGEN 用 Custom Token 加進去？";
+  }
+
+  // === Web Speech API：聽你說話（STT）===
+  let rec = null;
+  function initSpeech(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.lang = "zh-TW";
+    r.interimResults = true;
+    r.continuous = false; // 一問一答：一次只聽一段
+    return r;
+  }
+
+  function startListen(){
+    const youBox = getYOUBOX();
+    const aiBox  = getAIBOX();
+
+    if (!rec) rec = initSpeech();
+    if (!rec){
+      setBox(aiBox, "你的瀏覽器不支援語音辨識。建議用 Chrome，或用錢包內建瀏覽器再試一次。");
+      speak("你的瀏覽器不支援語音辨識。建議用 Chrome，或用錢包內建瀏覽器再試一次。");
+      return;
+    }
+
+    setBox(youBox, "正在聽你說話…");
+    setBox(aiBox, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(youBox, (finalText + interim).trim());
+    };
+
+    rec.onerror = function(e){
+      setBox(aiBox, "語音辨識出錯：" + (e.error || "unknown") + "。請再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      if (!userText){
+        setBox(aiBox, "我沒聽清楚。再按一次開始說話，或換一個安靜的地方。");
+        speak("我沒聽清楚。再按一次開始說話。");
+        return;
+      }
+      const reply = wukongReply(userText);
+      setBox(aiBox, reply);
+      speak(reply);
+    };
+
+    try{ rec.start(); }catch(e){
+      setBox(aiBox, "麥克風啟動失敗。請確認瀏覽器已允許麥克風權限，然後再按一次開始說話。");
+      speak("麥克風啟動失敗。請允許麥克風權限後再試一次。");
+    }
+  }
+
+  // === 綁定按鈕：找「開始說話」那顆，掛上一問一答 ===
+  function bindTalkButton(){
+    const btns = Array.from(document.querySelectorAll("button, a, div"));
+    const talkBtn = btns.find(b => (b.innerText || "").includes("開始說話"));
+    if (!talkBtn) return;
+
+    // 避免重綁
+    if (talkBtn.getAttribute("data-wukong-bound") === "1") return;
+    talkBtn.setAttribute("data-wukong-bound","1");
+
+    talkBtn.addEventListener("click", function(){
+      startListen();
+    }, true);
+  }
+
+</script>
+<script>
+(function(){
+  // ====== 精準抓框：依標題定位，抓到同一區塊內的虛線框 ======
+  function findDottedBoxByHeading(headingText){
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes(headingText));
+    if (!head) return null;
+
+    // 往上找到該段落容器
+    let root = head.closest("div");
+    if (!root) root = head.parentElement;
+    if (!root) root = document.body;
+
+    // 在 root 往下找「虛線框」
+    const divs = Array.from(root.querySelectorAll("div"));
+    const box = divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    });
+    return box || null;
+  }
+
+  function AIBOX(){ return findDottedBoxByHeading("即時文字（AI 說話字幕）"); }
+  function YOUBOX(){ return findDottedBoxByHeading("即時文字（你的麥克風轉文字）"); }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  // ====== 語音播報（TTS）======
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // ====== 離線問答回覆 ======
+  function reply(userText){
+    const t = (userText || "").trim();
+    if (!t) return "我沒聽清楚。請再說一次：你現在卡在哪一步？下載錢包、切BSC、或是把KGEN用Custom Token加進去？";
+
+    if (t.includes("下載") || t.includes("沒有錢包") || t.includes("開戶")) {
+      return "請到應用程式商店下載MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回到悟空財神殿按連線錢包。";
+    }
+    if (t.toLowerCase().includes("bsc") || t.includes("主網") || t.includes("切")) {
+      return "請在錢包內切換到BSC主網。若你用MetaMask，我可以一步一步帶你點選：設定、網路、新增BSC。";
+    }
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN搜尋不到是正常的。你必須用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去匯入，就會顯示在資產清單。";
+    }
+    return "我有聽懂你的方向。你可以直接說：我卡在下載錢包、切BSC、或加KGEN這三步的哪一步？";
+  }
+
+  // ====== SpeechRecognition：麥克風轉文字 ======
+  let rec = null;
+  function supportSR(){
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  function startListen(){
+    const ai = AIBOX();
+    const you = YOUBOX();
+
+    // 先顯示診斷（你就知道是不是瀏覽器不支援）
+    if (!supportSR()){
+      setBox(ai, "此瀏覽器不支援語音辨識（SpeechRecognition）。請用Chrome，或用MetaMask內建瀏覽器開啟，再按開始說話。");
+      speak("此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試一次。");
+      return;
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    setBox(you, "正在聽你說話…");
+    setBox(ai, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(you, (finalText + interim).trim() || "…");
+    };
+
+    rec.onerror = function(e){
+      setBox(ai, "麥克風/辨識錯誤：" + (e.error || "unknown") + "。請確認已允許麥克風權限，然後再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      // 無論有沒有聽到，先把你框留著（避免看起來像沒反應）
+      if (!userText){
+        // 若仍顯示「正在聽…」就改成提示
+        if ((you.textContent || "").includes("正在聽")) setBox(you, "");
+        const msg = "我沒聽清楚。請再按一次開始說話，並靠近麥克風說慢一點。";
+        setBox(ai, msg);
+        speak(msg);
+        return;
+      }
+      const ans = reply(userText);
+      setBox(ai, ans);
+      speak(ans);
+    };
+
+    try { rec.start(); }
+    catch(e){
+      const msg = "麥克風啟動失敗。請先允許麥克風權限，或改用Chrome再試。";
+      setBox(ai, msg);
+      speak(msg);
+    }
+  }
+
+  // ====== 綁定「開始說話」按鈕 ======
+  function bind(){
+    const btns = Array.from(document.querySelectorAll("button, a, div"));
+    const talk = btns.find(b => (b.innerText || "").includes("開始說話"));
+    if (!talk) return;
+
+    if (talk.getAttribute("data-wukong-bound") === "1") return;
+    talk.setAttribute("data-wukong-bound","1");
+
+    talk.addEventListener("click", function(){
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bind();
+    setTimeout(bind, 800);
+    setTimeout(bind, 1600);
+
+    // 啟動時先把兩個框抓到一次，避免抓不到
+    const ai = AIBOX(), you = YOUBOX();
+    if (ai && !ai.textContent.trim()) setBox(ai, "悟空在此。按「開始說話」即可一問一答。");
+    if (you && !you.textContent.trim()) setBox(you, "");
+  });
+
+  // 手動測試：javascript:wukongListen()
+  window.wukongListen = startListen;
+})();
+      </script>
+
+<script>
+(function(){
+  function AIBOX(){
+    // 找「即時文字（AI 說話字幕）」下面那個虛線框
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("AI"));
+    if (!head) return null;
+    let root = head.closest("div") || head.parentElement || document.body;
+    const divs = Array.from(root.querySelectorAll("div"));
+    return divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    }) || null;
+  }
+
+  function YOUBOX(){
+    // 找「即時文字（你的麥克風轉文字）」下面那個虛線框
+    const nodes = Array.from(document.querySelectorAll("div, p, h1, h2, h3, h4, label, span"));
+    const head = nodes.find(el => (el.innerText || "").includes("即時文字") && (el.innerText || "").includes("你的麥克風"));
+    if (!head) return null;
+    let root = head.closest("div") || head.parentElement || document.body;
+    const divs = Array.from(root.querySelectorAll("div"));
+    return divs.find(d => {
+      const cs = window.getComputedStyle(d);
+      return (cs.borderStyle.includes("dotted") || cs.borderStyle.includes("dashed")) && d.offsetHeight > 40;
+    }) || null;
+  }
+
+  function setBox(el, text){
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  function speak(text){
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function reply(userText){
+    const t = (userText || "").trim();
+    if (!t) return "我沒聽清楚。你再說一次：你卡在下載錢包、切BSC、還是加入KGEN？";
+
+    if (t.includes("沒有錢包") || t.includes("下載") || t.includes("開戶")) {
+      return "請到應用程式商店下載MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回來按連線錢包。";
+    }
+    if (t.toLowerCase().includes("bsc") || t.includes("主網") || t.includes("切")) {
+      return "請在錢包內切換到BSC主網。切好再回來按連線錢包。";
+    }
+    if (t.toLowerCase().includes("kgen") || t.includes("看不到") || t.includes("不見") || t.includes("custom")) {
+      return "KGEN搜尋不到是正常的。你要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去匯入，就會顯示在資產清單。";
+    }
+    return "你可以直接說：我卡在下載錢包、切BSC、或加入KGEN這三步的哪一步？";
+  }
+
+  function startListen(){
+    const ai = AIBOX();
+    const you = YOUBOX();
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR){
+      setBox(ai, "此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      speak("此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    setBox(you, "正在聽你說話…");
+    setBox(ai, "悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const txt = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      setBox(you, (finalText + interim).trim() || "…");
+    };
+
+    rec.onerror = function(e){
+      setBox(ai, "麥克風/辨識錯誤：" + (e.error || "unknown") + "。請允許麥克風權限後再按一次開始說話。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText || "").trim();
+      if (!userText){
+        setBox(ai, "我沒聽清楚。再按一次開始說話，靠近麥克風慢慢說。");
+        speak("我沒聽清楚。再按一次開始說話。");
+        return;
+      }
+      const ans = reply(userText);
+      setBox(ai, ans);
+      speak(ans);
+    };
+
+    try { rec.start(); }
+    catch(e){
+      setBox(ai, "麥克風啟動失敗。請先允許麥克風權限，然後再試一次。");
+      speak("麥克風啟動失敗。請允許麥克風權限後再試。");
+    }
+  }
+
+  function bindTalkButton(){
+    const els = Array.from(document.querySelectorAll("button, a, div"));
+    const talk = els.find(el => (el.innerText || "").includes("開始說話"));
+    if (!talk) return;
+
+    if (talk.getAttribute("data-wukong-mic") === "1") return;
+    talk.setAttribute("data-wukong-mic","1");
+
+    talk.addEventListener("click", function(e){
+      e.preventDefault();
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bindTalkButton();
+    setTimeout(bindTalkButton, 800);
+    setTimeout(bindTalkButton, 1600);
+  });
+
+  // 讓你也能手動測：javascript:wukongListen()
+  window.wukongListen = startListen;
+})();
+</script>
+
+<script>
+(function(){
+  function aiBox(){ return document.getElementById("aiSubtitles"); }
+  function youBox(){ return document.getElementById("userSpeech"); }
+
+  function set(el, text){ if(el) el.textContent = text; }
+
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function reply(t){
+    t = (t||"").trim();
+    if(!t) return "我沒聽清楚。你再說一次：你卡在下載錢包、切BSC、還是加入KGEN？";
+    if(t.includes("沒有錢包")||t.includes("下載")||t.includes("開戶"))
+      return "請到應用程式商店下載MetaMask。建立新錢包後，助記詞抄寫保存，不要交給任何人。完成後回來按連線錢包。";
+    if(t.toLowerCase().includes("bsc")||t.includes("主網")||t.includes("切"))
+      return "請在錢包內切換到BSC主網。切好再回來按連線錢包。";
+    if(t.toLowerCase().includes("kgen")||t.includes("看不到")||t.includes("不見")||t.includes("custom"))
+      return "KGEN搜尋不到是正常的。你要用自訂代幣加入，也叫Custom Token。把KGEN合約地址貼進去匯入，就會顯示在資產清單。";
+    return "你可以直接說：我卡在下載錢包、切BSC、或加入KGEN這三步的哪一步？";
+  }
+
+  function startListen(){
+    const ai = aiBox(), you = youBox();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!ai || !you){
+      // 找不到框就直接提示（避免靜默失效）
+      alert("找不到 aiSubtitles 或 userSpeech。請先在兩個虛線框加上 id。");
+      return;
+    }
+
+    if(!SR){
+      set(ai,"此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      speak("此瀏覽器不支援語音辨識。請用Chrome或MetaMask內建瀏覽器再試。");
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = true;
+    rec.continuous = false;
+
+    set(you,"正在聽你說話…");
+    set(ai,"悟空在聽。你說一句，我回一句。");
+
+    let finalText = "";
+
+    rec.onresult = function(ev){
+      let interim = "";
+      for(let i=ev.resultIndex;i<ev.results.length;i++){
+        const txt = ev.results[i][0].transcript;
+        if(ev.results[i].isFinal) finalText += txt;
+        else interim += txt;
+      }
+      set(you,(finalText+interim).trim() || "…"); // ✅ 永遠寫下方
+    };
+
+    rec.onerror = function(e){
+      set(ai,"麥克風/辨識錯誤：" + (e.error || "unknown") + "。請允許麥克風權限後再試。");
+    };
+
+    rec.onend = function(){
+      const userText = (finalText||"").trim();
+      if(!userText){
+        set(ai,"我沒聽清楚。再按一次開始說話，靠近麥克風慢慢說。");
+        speak("我沒聽清楚。再按一次開始說話。");
+        return;
+      }
+      const ans = reply(userText);
+      set(ai, ans);          // ✅ 永遠寫上方
+      speak(ans);
+    };
+
+    try{ rec.start(); }catch(e){
+      set(ai,"麥克風啟動失敗。請先允許麥克風權限，然後再試一次。");
+      speak("麥克風啟動失敗。請允許麥克風權限後再試。");
+    }
+  }
+
+  function bindTalkButton(){
+    const els = Array.from(document.querySelectorAll("button,a,div"));
+    const talk = els.find(el => (el.innerText||"").includes("開始說話"));
+    if(!talk) return;
+    if(talk.getAttribute("data-wukong-mic")==="1") return;
+    talk.setAttribute("data-wukong-mic","1");
+    talk.addEventListener("click", function(e){
+      e.preventDefault();
+      startListen();
+    }, true);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bindTalkButton();
+    setTimeout(bindTalkButton, 800);
+    setTimeout(bindTalkButton, 1600);
+  });
+
+  window.wukongListen = startListen;
+
+  // =========================
+  // Temple Build Progress (UI only)
+  // =========================
+  const BUILD_START_DATE = "2026-02-01";   // 凡間日期（可改）
+  const BUILD_TARGET_DATE = "2026-03-31";  // 預計完工（可改）
+  const BUILD_PERCENT = 35;               // 0~100（完工後可用 200/300 表示擴建版本）
+
+  function daysBetween(a, b){
+    const A = new Date(a+"T00:00:00");
+    const B = new Date(b+"T00:00:00");
+    return Math.round((B - A) / 86400000);
+  }
+
+  function renderBuildStatus(){
+    const meta = $("buildMeta");
+    const bar = $("buildBar");
+    const pct = $("buildPct");
+    if(!meta || !bar || !pct) return;
+
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth()+1).padStart(2,"0");
+    const d = String(today.getDate()).padStart(2,"0");
+    const todayStr = `${y}-${m}-${d}`;
+
+    const tPlus = daysBetween(BUILD_START_DATE, todayStr); // 宇宙相對時間（T+日）
+    meta.textContent =
+      `凡間起造：${BUILD_START_DATE}\n`+
+      `凡間預計完工：${BUILD_TARGET_DATE}\n`+
+      `宇宙相對時間：T+${tPlus} 日`;
+
+    // 100% 以內用進度條；超過 100% 視為「擴建版本」
+    const shown = Math.max(0, Math.min(100, BUILD_PERCENT));
+    bar.style.width = shown + "%";
+    pct.textContent = (BUILD_PERCENT <= 100)
+      ? `目前完成度：${BUILD_PERCENT}%`
+      : `目前版本：${BUILD_PERCENT}%（擴建中）`;
+  }
+
+  function setupBlueprintUI(){
+    const btn = $("btnBlueprint");
+    const box = $("blueprintBox");
+    if(btn && box){
+      btn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        box.open = true;
+        // 強制捲到藍圖區
+        box.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    }
+
+    const btnDbg = $("btnToggleDebug");
+    if(btnDbg){
+      btnDbg.addEventListener("click", ()=>{
+        const dbg = document.querySelector(".wk-debug");
+        if(!dbg) return toast("Debug 尚未生成");
+        dbg.style.display = (dbg.style.display === "none") ? "block" : "none";
+      });
+    }
+  }
+
+  renderBuildStatus();
+  setupBlueprintUI();
+})();
+</script>
+  
+</body>
+</html>
