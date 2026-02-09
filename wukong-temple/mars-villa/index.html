@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>花果山火星・齊天豪宅｜Mars Villa</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC",Arial;background:#0f0f12;color:#f5f5f5}
+    .wrap{max-width:880px;margin:18px auto;padding:16px}
+    .card{border:1px solid #f5f5f5;border-radius:14px;background:rgba(255,255,255,.04);padding:12px;margin:12px 0}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .btn{cursor:pointer;padding:10px 12px;border:1px solid #f5f5f5;border-radius:999px;background:transparent;color:#f5f5f5;font-weight:900}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Courier New",monospace}
+    .ok{background:rgba(0,255,160,.08)}
+    .warn{background:rgba(255,210,80,.08)}
+    .muted{opacity:.85;line-height:1.75}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <div style="font-weight:900;font-size:22px;">花果山火星・齊天豪宅</div>
+        <div style="font-weight:900;margin-top:6px;">Mars Villa Portal</div>
+        <div class="muted" style="margin-top:8px;">
+          豪宅只認一件事：同一地址，鏈上還願累積滿 5000 KGEN。<br>
+          本頁會讀取心臟合約的 vowTotal(address) 判定是否達標。
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn" href="/kline-odyssey/wukong-temple/">返回悟空財神殿</a>
+        <button id="btnRefresh" class="btn">重新整理</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card ok">
+    <div style="font-weight:900;">席位狀態（限 500 席｜500 年）</div>
+    <div id="seatInfo" style="margin-top:10px;line-height:1.9;"></div>
+  </div>
+
+  <div class="card warn">
+    <div style="font-weight:900;">每月 5 日發薪水／除夕跨年倒數</div>
+    <div class="muted" style="margin-top:6px;">
+      這兩個活動屬下一階段合約啟用（你要求：全自動化、無人能手動動用，動用要升版重部署）。<br>
+      本頁先把入口留好，等你把「薪水合約/規則」上鏈後再接。
+    </div>
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" id="btnSalary">領本月薪水（待啟用）</button>
+      <button class="btn" id="btnNY">除夕/跨年倒數（待啟用）</button>
+    </div>
+    <div id="actionInfo" class="muted" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card" style="line-height:1.8;">
+    PrimeForge 以母機之名，開啟金融生命。<br>
+    花果山台灣・信念不滅・市場無界。<br>
+    Where the Market Becomes the Myth.<br>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const CHAIN_ID_DEC = 56;
+  const KGEN_DECIMALS = 18;
+  const VILLA_THRESHOLD = ethers.utils.parseUnits("5000", KGEN_DECIMALS);
+
+  // 同一把心臟合約地址：由主頁 localStorage 保存
+  const LS_FAUCET = "klineodyssey_wukongTemple_faucet_v1";
+  const getHeart = () => (localStorage.getItem(LS_FAUCET) || "").trim();
+
+  const HEART_ABI = [
+    "function vowTotal(address user) view returns (uint256)"
+  ];
+
+  const $seatInfo = document.getElementById("seatInfo");
+  const $actionInfo = document.getElementById("actionInfo");
+
+  const fmt = (bn) => {
+    try{ return ethers.utils.formatUnits(bn, KGEN_DECIMALS); }catch{ return String(bn); }
+  };
+
+  async function ensureChain(){
+    if(!window.ethereum) throw new Error("no_wallet");
+    const wantHex = "0x" + CHAIN_ID_DEC.toString(16);
+    const cur = await window.ethereum.request({ method:"eth_chainId" });
+    if(cur !== wantHex){
+      await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId: wantHex }] });
+    }
+  }
+
+  async function refresh(){
+    try{
+      if(!window.ethereum){
+        $seatInfo.innerHTML = "未偵測到錢包。請用 MetaMask 或錢包瀏覽器開啟。";
+        return;
+      }
+
+      const heartAddr = getHeart();
+      if(!heartAddr){
+        $seatInfo.innerHTML = "尚未設定心臟合約地址。請回主頁貼上並儲存心臟合約地址。";
+        return;
+      }
+
+      await ensureChain();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const user = await signer.getAddress();
+
+      const heart = new ethers.Contract(heartAddr, HEART_ABI, provider);
+      const vt = await heart.vowTotal(user);
+
+      if(vt.gte(VILLA_THRESHOLD)){
+        $seatInfo.innerHTML = `
+          <div>地址：<strong class="mono">${user}</strong></div>
+          <div>鏈上還願累積：<strong>${fmt(vt)}</strong> KGEN</div>
+          <div style="margin-top:6px;">傳送門狀態：<strong>已開啟</strong></div>
+          <div class="muted" style="margin-top:6px;">席位編號、500年期限、月薪規則：等下一合約上鏈再顯示。</div>
+        `;
+      }else{
+        const diff = VILLA_THRESHOLD.sub(vt);
+        $seatInfo.innerHTML = `
+          <div>地址：<strong class="mono">${user}</strong></div>
+          <div>鏈上還願累積：<strong>${fmt(vt)}</strong> KGEN</div>
+          <div>尚差：<strong>${fmt(diff)}</strong> KGEN</div>
+          <div style="margin-top:6px;">傳送門狀態：<strong>未開啟</strong></div>
+          <div class="muted" style="margin-top:6px;">請回主頁用「還願並記帳」累積到 5000。</div>
+        `;
+      }
+    }catch{
+      $seatInfo.innerHTML = "無法讀取狀態。請確認在 BSC 主網並授權錢包。";
+    }
+  }
+
+  document.getElementById("btnRefresh").addEventListener("click", refresh);
+  document.getElementById("btnSalary").addEventListener("click", ()=>{ $actionInfo.textContent="薪水合約待啟用（你要全自動化，需升版重部署規則）。"; });
+  document.getElementById("btnNY").addEventListener("click", ()=>{ $actionInfo.textContent="除夕/跨年倒數待啟用（每分鐘事件與燒幣規則需合約化）。"; });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
