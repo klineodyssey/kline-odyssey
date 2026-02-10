@@ -259,19 +259,50 @@ const FORTUNE_HEART = FAUCET_CONTRACT;
   };
 
   const countapi = {
-    hit: async (key) => {
-      const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      if (!r.ok) throw new Error("countapi_hit_failed");
+  _timeout: (ms) => new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")), ms)),
+  _lsKey: (key) => `wukong_count_${key}`,
+  _lsHit: (key) => {
+    const k = countapi._lsKey(key);
+    const v = Number(localStorage.getItem(k) || "0") + 1;
+    localStorage.setItem(k, String(v));
+    return { value: v, _fallback: "localStorage" };
+  },
+  _lsGet: (key) => {
+    const k = countapi._lsKey(key);
+    const v = Number(localStorage.getItem(k) || "0");
+    return { value: v, _fallback: "localStorage" };
+  },
+  hit: async (key) => {
+    const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+    try{
+      const r = await Promise.race([
+        fetch(url, { cache: "no-store" }),
+        countapi._timeout(4500)
+      ]);
+      if (!r.ok) throw new Error(`countapi_hit_failed_${r.status}`);
+      const ct = (r.headers.get("content-type") || "").toLowerCase();
+      if (!ct.includes("application/json")) throw new Error("countapi_hit_bad_content_type");
       return await r.json();
-    },
-    get: async (key) => {
-      const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
-      const r = await fetch(url, { cache: "no-store" });
-      if (!r.ok) throw new Error("countapi_get_failed");
-      return await r.json();
+    }catch(e){
+      return countapi._lsHit(key);
     }
-  };
+  },
+  get: async (key) => {
+    const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+    try{
+      const r = await Promise.race([
+        fetch(url, { cache: "no-store" }),
+        countapi._timeout(4500)
+      ]);
+      if (!r.ok) throw new Error(`countapi_get_failed_${r.status}`);
+      const ct = (r.headers.get("content-type") || "").toLowerCase();
+      if (!ct.includes("application/json")) throw new Error("countapi_get_bad_content_type");
+      return await r.json();
+    }catch(e){
+      return countapi._lsGet(key);
+    }
+  }
+};
 
   const renderVisitors = (todayVal, totalVal, note) => {
     $("visitorInfo").innerHTML = `
@@ -1528,6 +1559,19 @@ try {
 
   window.wukongListen = startListen;
 })();
+// ====== Global error trap for Debug panel ======
+window.addEventListener('error', function(ev){
+  try{
+    const msg = ev && ev.message ? ev.message : String(ev);
+    debugLog("JS_ERROR: " + msg);
+    if (ev && ev.filename) debugLog("at " + ev.filename + ":" + (ev.lineno||0));
+  }catch(_){}
+});
+window.addEventListener('unhandledrejection', function(ev){
+  try{
+    debugLog("PROMISE_REJECT: " + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)));
+  }catch(_){}
+});
 </script>
   
 </body>
