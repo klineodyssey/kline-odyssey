@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>生命鍛造｜12生肖 Forge</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#111;background:#fff}
+.wrap{max-width:920px;margin:20px auto;padding:16px}
+.card{border:1px solid #111;border-radius:16px;padding:14px;background:#fff}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select,textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #111;border-radius:12px;font-weight:700}
+textarea{min-height:140px;resize:vertical}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;cursor:pointer;text-decoration:none}
+.small{font-size:13px;line-height:1.7}
+.muted{color:#666}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div style="font-weight:900;font-size:20px">🐲 生命鍛造（12生肖）</div>
+    <div class="small muted" style="margin-top:8px">
+      這裡只做一件事：把「名字 + 生肖 + 心率」轉成可再現的 DNA JSON。<br/>
+      上鏈/NFT/席位由後續合約版本決定，此頁不承諾任何權益。
+    </div>
+    <div class="row" style="margin-top:12px">
+      <a class="pill" href="./index.html">← 回悟空財神殿</a>
+      <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 官網</a>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <div class="card">
+      <div style="font-weight:900">輸入</div>
+      <div class="small muted" style="margin-top:6px">心率單位 bpm。Pulsar 可填任何識別字串。</div>
+      <div style="margin-top:10px">
+        <div class="small muted">生命名字</div>
+        <input id="name" placeholder="例如：花果山·虎"/>
+      </div>
+      <div style="margin-top:10px">
+        <div class="small muted">生肖</div>
+        <select id="zodiac">
+          <option>鼠</option><option>牛</option><option>虎</option><option>兔</option><option>龍</option><option>蛇</option>
+          <option>馬</option><option>羊</option><option>猴</option><option>雞</option><option>狗</option><option>豬</option>
+        </select>
+      </div>
+      <div style="margin-top:10px">
+        <div class="small muted">心率（bpm）</div>
+        <input id="bpm" inputmode="numeric" value="72"/>
+      </div>
+      <div style="margin-top:10px">
+        <div class="small muted">Pulsar 脈沖星代號</div>
+        <input id="pulsar" placeholder="例如：PSR-J1748-2446ad"/>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="pill" id="btnGen">生成 DNA</button>
+        <button class="pill" id="btnDownload">下載 JSON</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900">輸出（可再現 DNA）</div>
+      <textarea id="out" class="small mono" spellcheck="false"></textarea>
+      <div class="small muted" style="margin-top:8px">
+        Transformer Heart 已內建在 heart 模組：heartbeat_per_hour=1、breath_window_utc8=00:00~00:10。<br/>
+        你可以把這份 JSON 交給未來 GA600 引擎當「生命種子」。
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div style="font-weight:900">⌖ 固定尾段</div>
+    <div class="small" style="margin-top:8px;line-height:1.8">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const base = () => ({
+    schema: "KLINE_UNIVERSE_DNA_V2_1_TRANSFORMER_HEART",
+    created_at: new Date().toISOString(),
+    life: { name: "", zodiac: "", bpm: 72, pulsar: "" },
+    heart: {
+      type: "TransformerHeart",
+      heartbeat_per_hour: 1,
+      breath_window_utc8: { start: "00:00", end: "00:10" },
+      notes: "Faucet heart will be the onchain source of truth after deployment."
+    },
+    permissions: { owner_mode: "self-evolving", mother_machine: "rescue-only" }
+  });
+
+  function gen(){
+    const o=base();
+    o.life.name = $("name").value.trim() || "Unnamed Life";
+    o.life.zodiac = $("zodiac").value;
+    o.life.bpm = Number($("bpm").value||72);
+    o.life.pulsar = $("pulsar").value.trim();
+    $("out").value = JSON.stringify(o,null,2);
+  }
+
+  function dl(){
+    if(!$("out").value.trim()) gen();
+    const blob = new Blob([$("out").value], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    const safe = ($("name").value.trim()||"life").replace(/[^一-鿿A-Za-z0-9_-]+/g,"_");
+    a.download = `life_${safe}_dna_v2_1.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $("btnGen").addEventListener("click", gen);
+  $("btnDownload").addEventListener("click", dl);
+  gen();
+})();
+</script>
+</body>
+</html>

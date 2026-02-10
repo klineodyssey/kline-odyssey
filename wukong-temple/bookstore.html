@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>悟空書城｜Bookstore</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#111;background:#fff}
+.wrap{max-width:920px;margin:20px auto;padding:16px}
+.card{border:1px solid #111;border-radius:16px;padding:14px;background:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #111;border-radius:999px;background:#fff;font-weight:900;cursor:pointer;text-decoration:none}
+.small{font-size:13px;line-height:1.7}
+.muted{color:#666}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.btn{width:100%;text-align:left;cursor:pointer;padding:14px;border:1px solid #111;border-radius:14px;background:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div style="font-weight:900;font-size:20px">📘 悟空書城</div>
+    <div class="small muted" style="margin-top:8px">
+      書城是內容入口：章節、白皮書、世界觀、客服話術。此頁先做「可用」與「可擴充」。
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="pill" href="./index.html">← 回悟空財神殿</a>
+      <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 官網</a>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <button class="btn" onclick="window.open('https://klineodyssey.github.io/kline-odyssey/','_blank')">
+      <div style="font-weight:900">🌐 世界入口（官網）</div>
+      <div class="small muted" style="margin-top:6px">所有內容的唯一入口</div>
+    </button>
+
+    <button class="btn" onclick="alert('此處預留：未來接上「書籍兌換/序號/席位」合約或後端。')">
+      <div style="font-weight:900">🔑 兌換碼／席位（預留）</div>
+      <div class="small muted" style="margin-top:6px">目前先保留架構，不承諾</div>
+    </button>
+
+    <button class="btn" onclick="copyText()">
+      <div style="font-weight:900">📌 複製固定尾段</div>
+      <div class="small muted" style="margin-top:6px">給貼文、影片、客服一致用</div>
+    </button>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div style="font-weight:900">⌖ 固定尾段</div>
+    <pre id="brand" class="small" style="white-space:pre-wrap;margin-top:10px">PrimeForge 以母機之名，開啟金融生命。
+花果山台灣・信念不滅・市場無界。
+Where the Market Becomes the Myth.
+—— 樂天帝 ⌖</pre>
+    <div id="msg" class="small muted"></div>
+  </div>
+</div>
+
+<script>
+function copyText(){
+  const t=document.getElementById("brand").textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    document.getElementById("msg").textContent="已複製";
+    setTimeout(()=>document.getElementById("msg").textContent="",2000);
+  }).catch(()=>alert("複製失敗：請手動選取"));
+}
+</script>
+</body>
+</html>
