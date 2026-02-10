@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Fortune Temple V2.2</title>
+  <meta name="description" content="五指山悟空財神殿：有心跳、有呼吸、可驗證、可參拜、可還願、可領發財金（需上鏈心臟合約）。" />
+  <style>
+    :root {
+      --ink:#111;
+      --bg:#fff;
+      --soft:#fafafa;
+      --muted:rgba(0,0,0,.66);
+      --card-radius:16px;
+    }
+    body {
+      margin:0; background:#f7f7f7; color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
+    .topbar { position: sticky; top: 10px; z-index: 9999; display:flex; justify-content:flex-end; margin:10px 0; }
+    .pill {
+      display:inline-flex; align-items:center; gap:10px; padding:10px 14px;
+      border-radius:999px; font-weight:900; text-decoration:none;
+      border:1px solid var(--ink); background:var(--bg); color:var(--ink);
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+    }
+    .h1 { font-weight: 950; font-size: 26px; line-height: 1.15; }
+    .sub { margin-top:8px; font-weight:900; opacity:.95; }
+    .grid { display:grid; grid-template-columns: 1.15fr .85fr; gap: 12px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      border: 1px solid var(--ink); border-radius: var(--card-radius);
+      padding: 12px; background: var(--bg);
+      box-shadow: 0 10px 26px rgba(0,0,0,.06);
+    }
+    .soft { background: var(--soft); }
+    .row { display:flex; gap:10px; align-items:center; justify-content: space-between; flex-wrap: wrap; }
+    .btn {
+      cursor:pointer; padding:10px 12px; border:1px solid var(--ink);
+      border-radius:999px; background: var(--bg); font-weight: 950;
+    }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .btn2 {
+      cursor:pointer; padding:12px 14px; border:1px solid var(--ink);
+      border-radius:14px; background: var(--bg); font-weight: 950; text-align:left;
+    }
+    .btn2 small { display:block; opacity:.75; margin-top:6px; line-height:1.5; font-weight:800; }
+    .muted { color:var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .addr {
+      display:inline-block; max-width: 100%;
+      overflow:hidden; text-overflow: ellipsis; vertical-align: bottom;
+      white-space: nowrap;
+    }
+    .addr-2line {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      white-space: normal;
+      word-break: break-all;
+    }
+    .kpi { display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top:10px; }
+    @media (max-width: 640px) { .kpi { grid-template-columns: 1fr; } }
+    .kpi .item {
+      border:1px solid var(--ink); border-radius:14px; padding:10px; background:var(--bg);
+    }
+    .kpi .v { font-weight: 950; font-size: 18px; margin-top:4px; }
+    .progress {
+      height: 10px; border: 1px solid var(--ink); border-radius: 999px; overflow:hidden; background:#fff;
+    }
+    .progress > i { display:block; height:100%; background:#111; width: 0%; }
+    .toast {
+      margin-top:10px; font-weight: 950;
+    }
+    .modal {
+      position: fixed; inset: 0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.4); padding: 20px; z-index: 99999;
+    }
+    .modal .panel {
+      width: min(920px, 96vw); max-height: 90vh; overflow:auto;
+      border: 1px solid var(--ink); border-radius: 18px; background: #fff; padding: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .modal pre { white-space: pre-wrap; margin: 0; line-height: 1.75; }
+    .tag {
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--ink); border-radius: 999px;
+      padding: 6px 10px; font-weight: 950; background: #fff;
+    }
+    .bubble {
+      border:1px solid var(--ink); border-radius: 16px; padding: 10px; background:#fff;
+      line-height: 1.75;
+    }
+    .bubble.soft { background: #fafafa; }
+    .split {
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+    .textarea {
+      width:100%; min-height: 96px; resize: vertical;
+      border:1px solid var(--ink); border-radius: 14px; padding: 10px; font-weight: 800;
+      background:#fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Official Entry -->
+  <div class="wrap">
+    <div class="topbar">
+      <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 Official Website</a>
+    </div>
+
+    <!-- Header -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="h1">🐒 悟空財神殿｜Wukong Fortune Temple</div>
+          <div class="sub">#悟空新文 #K線西遊記 #花果山台灣 #宇宙細胞呼吸心跳生命</div>
+          <div class="muted" style="margin-top:8px;">
+            版本：<span class="mono">V2.2</span>｜建殿啟始：<span class="mono" id="buildStart">2026-02-10</span>｜建殿完成度：<span class="mono" id="buildPct">0%</span>
+          </div>
+        </div>
+        <div class="row" style="gap:8px;">
+          <span class="tag">心跳 <span class="mono" id="hb">—</span></span>
+          <span class="tag">呼吸 <span class="mono" id="breath">—</span></span>
+          <span class="tag">血壓 <span class="mono" id="bp">—</span></span>
+          <button class="btn" id="btnBlueprint">建殿總藍圖</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;" class="progress" aria-label="build-progress"><i id="buildBar"></i></div>
+
+      <div class="grid" style="margin-top:12px;">
+        <div class="card soft">
+          <div class="row">
+            <div style="font-weight:950;">悟空影像</div>
+            <div class="muted">（wukong-avatar.png 放在同資料夾即可）</div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+            <img id="avatar" src="./wukong-avatar.png" alt="Wukong Avatar" style="width:140px; height:140px; object-fit:cover; border-radius:18px; border:1px solid var(--ink); background:#fff;" />
+            <div style="flex:1; min-width:240px;">
+              <div class="bubble soft">
+                <div style="font-weight:950;">悟空值班台</div>
+                <div class="muted" style="margin-top:6px;">
+                  這裡是互動式入口，不是投資平台。所有鏈上動作都必須由你在錢包按確認。
+                </div>
+              </div>
+              <div class="row" style="margin-top:10px;">
+                <button class="btn" id="btnVoiceIntro">▶️ 讓悟空說話</button>
+                <button class="btn" id="btnStopTTS">⏹️ 停止</button>
+                <button class="btn" id="btnToggleDebug">🧪 Debug</button>
+              </div>
+              <div class="toast" id="toast"></div>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="item">
+              <div class="muted">今日來訪</div>
+              <div class="v mono" id="visToday">—</div>
+            </div>
+            <div class="item">
+              <div class="muted">總來訪</div>
+              <div class="v mono" id="visTotal">—</div>
+            </div>
+            <div class="item">
+              <div class="muted">鏈上心跳</div>
+              <div class="v mono" id="chainBeat">未部署</div>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:10px; line-height:1.75;">
+            說明：<br/>
+            1) 「今日/總來訪」使用 CountAPI（GitHub Pages 可跑）。<br/>
+            2) 「鏈上心跳」需要部署 Faucet Heart 合約後才會顯示（可驗證事件）。<br/>
+            3) 本頁把「呼吸/心跳/血壓」做成可視化指標：有前端節奏，也可接上鏈上事件。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <div style="font-weight:950;">🪪 錢包狀態（BSC 主網）</div>
+            <button class="btn" id="btnConnect">連線錢包</button>
+          </div>
+          <div id="walletBox" style="margin-top:10px; line-height:1.85;"></div>
+
+          <div class="card soft" style="margin-top:12px;">
+            <div style="font-weight:950;">🔎 鏈上驗證（BscScan）</div>
+
+            <div style="margin-top:8px; line-height:1.8;">
+              <div>Token：<a id="aToken" class="addr addr-2line mono" target="_blank" rel="noopener"></a></div>
+              <div>宇宙銀行：<a id="aBank" class="addr addr-2line mono" target="_blank" rel="noopener"></a></div>
+              <div>稅收/薪水：<a id="aReward" class="addr addr-2line mono" target="_blank" rel="noopener"></a></div>
+            </div>
+
+            <div class="muted" style="margin-top:8px;">
+              注意：錢包要用 MetaMask 或錢包瀏覽器開本頁，才看得到連線與交易確認。
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Temple Actions -->
+    <div class="card" style="margin-top:12px;">
+      <div style="font-weight:950; font-size:18px;">主殿功能（只能多不能少）</div>
+      <div class="muted" style="margin-top:6px; line-height:1.75;">
+        先把殿蓋穩：按鈕必須有反應、必須可驗證、必須可回收、必須可升級。<br/>
+        「發財金」= Faucet Heart 合約出金；「還願」= 你主動轉出 KGEN 到指定地址（或合約）。<br/>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px;">
+        <button class="btn2" id="btnBobei">
+          🎲 擲筊（互動遊戲）
+          <small>三次聖筊後才啟用「求發財金」；資料先存在本機（可匯出）。</small>
+        </button>
+
+        <button class="btn2" id="btnClaim" disabled>
+          🧧 求發財金（Faucet Heart）
+          <small>需要已部署 Faucet 合約；未部署會顯示缺少什麼。</small>
+        </button>
+
+        <button class="btn2" id="btnVow">
+          🙏 還願（你主動送出交易）
+          <small>選擇：水龍頭心臟 / 無人銀行 / 質能轉換黑洞（燒幣）。</small>
+        </button>
+
+        <a class="btn2" href="/kline-odyssey/bookstore/" style="text-decoration:none;color:inherit;">
+          📘 悟空書城
+          <small>內容兌換／領書（不導入金流；統一用 email 模板）。</small>
+        </a>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="card soft">
+          <div class="row">
+            <div style="font-weight:950;">還願地址（3 選 1）</div>
+            <button class="btn" id="btnCopySel">複製選中地址</button>
+          </div>
+
+          <div style="margin-top:10px; line-height:1.9;">
+            <label style="display:flex;gap:10px;align-items:flex-start;">
+              <input type="radio" name="vowTarget" value="faucet" checked />
+              <div>
+                <div style="font-weight:950;">水龍頭心臟 Faucet（發放/回收）</div>
+                <div class="muted">尚未部署時，此處顯示「待上鏈」。</div>
+                <div class="mono addr addr-2line" id="addrFaucet">（待上鏈）</div>
+              </div>
+            </label>
+
+            <label style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;">
+              <input type="radio" name="vowTarget" value="bank" />
+              <div>
+                <div style="font-weight:950;">無人銀行（Wukong Bank）</div>
+                <div class="muted">席位/薪水/豪宅等高階規則在這裡生長。</div>
+                <div class="mono addr addr-2line" id="addrBank">0xfc522243e988a837700CaD600D6f030f5932681F</div>
+              </div>
+            </label>
+
+            <label style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;">
+              <input type="radio" name="vowTarget" value="blackhole" />
+              <div>
+                <div style="font-weight:950;">質能轉換黑洞（0x000…0000）</div>
+                <div class="muted">不可逆，送出即燒幣（通縮）。</div>
+                <div class="mono addr addr-2line" id="addrBlackhole">0x0000000000000000000000000000000000000000</div>
+              </div>
+            </label>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div style="font-weight:950;">還願數量（K G E N）</div>
+            <input id="inpAmount" value="1" inputmode="decimal" class="textarea" style="min-height:auto;" />
+            <div class="muted" style="margin-top:8px;">
+              提示：還願金額由你決定；「求發財金」是合約規則決定。兩者要分清楚。
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:950;">即時文字（你說/悟空說）</div>
+          <div class="muted" style="margin-top:6px; line-height:1.75;">
+            下方是「一問一答」用的即時文字欄。若你刪了某段 JS，麥克風功能會消失，這裡會提示原因。
+          </div>
+          <div style="margin-top:10px;">
+            <div class="bubble soft">
+              <div style="font-weight:950;">你說</div>
+              <div class="mono" id="liveUser">—</div>
+            </div>
+            <div class="bubble" style="margin-top:10px;">
+              <div style="font-weight:950;">悟空回</div>
+              <div class="mono" id="liveAI">—</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px; justify-content:flex-start;">
+            <button class="btn" id="btnMic">🎙️ 開始說話</button>
+            <button class="btn" id="btnMicStop">🛑 停止</button>
+            <button class="btn" id="btnSubTop">字幕置頂：切換</button>
+          </div>
+
+          <div class="card soft" style="margin-top:10px;">
+            <div style="font-weight:950;">字幕（可置頂）</div>
+            <div class="mono" id="subtitle">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card soft" style="margin-top:12px;">
+        <div style="font-weight:950;">本機紀錄（可匯出）</div>
+        <div id="localLog" style="margin-top:10px; line-height:1.9;"></div>
+        <div class="row" style="margin-top:10px; justify-content:flex-start;">
+          <button class="btn" id="btnExport">⬇️ 匯出 JSON</button>
+          <button class="btn" id="btnClear">🧹 清除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="card" style="margin-top:12px; line-height:1.8;">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="card" id="debugPanel" style="margin-top:12px; display:none;">
+      <div class="row">
+        <div style="font-weight:950;">🧪 Debug Panel（全部沒反應時先看這裡）</div>
+        <button class="btn" id="btnHideDebug">關閉</button>
+      </div>
+      <div class="muted" style="margin-top:8px; line-height:1.75;">
+        這裡會顯示：JS 是否載入、錢包是否存在、錯誤訊息、最後一筆事件。
+      </div>
+      <pre class="mono" id="debugText" style="margin-top:10px; white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <!-- Blueprint Modal -->
+  <div class="modal" id="modalBlueprint" role="dialog" aria-modal="true">
+    <div class="panel">
+      <div class="row">
+        <div style="font-weight:950; font-size:18px;">悟空財神殿｜建殿總藍圖（V2.2）</div>
+        <button class="btn" id="btnCloseBlueprint">關閉</button>
+      </div>
+      <div class="muted" style="margin-top:8px; line-height:1.75;">
+        這份藍圖是「驗收清單」，未完成就不算蓋好。每次升版只能新增、不能刪減。
+      </div>
+      <pre class="mono" style="margin-top:10px;" id="blueprintText"></pre>
+    </div>
+  </div>
+
+  <!-- ethers v5 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <script>
+  (() => {
+    "use strict";
+
+    // =========================
+    // CONFIG（固定真值）
+    // =========================
+    const VERSION = "V2.2";
+    const CHAIN_ID_DEC = 56; // BSC mainnet
+    const ADDR = {"KGEN_TOKEN": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", "BANK": "0xfc522243e988a837700CaD600D6f030f5932681F", "INSCRIPTION": "0x15fb2A5463F7873EC328BF6f2E85A115adcC3457", "REWARD": "0x0fd21cf643211d067a18a416da219827da26e288", "DEPLOYER": "0xb3c54ca96de0ded4ca0151f629ff9781506ba261", "MOTHER": "0xcd60bf474e691f2484950a0276eaf507616ca4b9", "PUBLIC_GOOD_TREASURY": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1", "KUFO_ENGINE": "0xef83804c264B47378FCf150086943B53fB90A90b", "BLACKHOLE": "0x0000000000000000000000000000000000000000"};
+
+    // Faucet Heart（尚未部署先留空）
+    // 部署後把地址貼到這裡：會同時當「出金池」與「回收地址（還願）」。
+    const FAUCET_HEART = ""; // e.g. 0x...
+
+    // 規則（前端展示 + 語音客服用）
+    const RULES = {
+      monthlyCapPerUser: 888,     // 每人每月最多領 888（顯示用；最終以合約為準）
+      monthlyWinners: 500,        // 每月最多 500 名（顯示用；最終以合約為準）
+      bobeiNeedHoly: 3,           // 三次聖筊
+      igniteWindowUTC: "00:00 ~ 00:10 (UTC)",
+      heartbeatEveryHour: true,
+      breathAtUTC0: true
+    };
+
+    // CountAPI namespace
+    const COUNT_NS = "klineodyssey-wukong-temple-v2";
+    const dayKey = () => {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `day_${yyyy}${mm}${dd}`;
+    };
+    const countapi = {
+      hit: async (key) => {
+        const url = `https://api.countapi.xyz/hit/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error("countapi_hit_failed");
+        return await r.json();
+      },
+      get: async (key) => {
+        const url = `https://api.countapi.xyz/get/${encodeURIComponent(COUNT_NS)}/${encodeURIComponent(key)}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error("countapi_get_failed");
+        return await r.json();
+      }
+    };
+
+    // =========================
+    // STATE（本機）
+    // =========================
+    const KEY = "wukong_temple_state_v2_2";
+    const safeParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+    const nowISO = () => new Date().toISOString();
+
+    const defaultState = () => ({
+      visit: 0,
+      exit: 0,
+      bobei: { total:0, holy:0, log:[] },
+      vow: 0,
+      claim: 0,
+      lastUser: "",
+      lastAI: "",
+      log: []
+    });
+
+    const load = () => {
+      const raw = localStorage.getItem(KEY);
+      const p = raw ? safeParse(raw) : null;
+      if (!p || typeof p !== "object") return defaultState();
+      const s = { ...defaultState(), ...p };
+      if (!Array.isArray(s.log)) s.log = [];
+      if (!s.bobei) s.bobei = defaultState().bobei;
+      if (!Array.isArray(s.bobei.log)) s.bobei.log = [];
+      return s;
+    };
+    const save = (s) => localStorage.setItem(KEY, JSON.stringify(s));
+    const pushLog = (s, type, meta={}) => {
+      s.log.push({ type, time: nowISO(), ...meta });
+      if (s.log.length > 600) s.log = s.log.slice(-600);
+    };
+
+    // =========================
+    // UI refs
+    // =========================
+    const $ = (id) => document.getElementById(id);
+    const $toast = $("toast");
+    const $debugPanel = $("debugPanel");
+    const $debugText = $("debugText");
+
+    const toast = (msg) => {
+      $toast.textContent = msg;
+      setTimeout(() => { if ($toast.textContent === msg) $toast.textContent = ""; }, 3500);
+    };
+
+    const setDebug = (obj) => {
+      $debugText.textContent = JSON.stringify(obj, null, 2);
+    };
+
+    // Top chain links
+    const mkBsc = (addr) => `https://bscscan.com/address/${addr}`;
+    $("aToken").textContent = ADDR.KGEN_TOKEN;
+    $("aToken").href = mkBsc(ADDR.KGEN_TOKEN);
+    $("aBank").textContent = ADDR.BANK;
+    $("aBank").href = mkBsc(ADDR.BANK);
+    $("aReward").textContent = ADDR.REWARD;
+    $("aReward").href = mkBsc(ADDR.REWARD);
+
+    // Vow address labels
+    $("addrBank").textContent = ADDR.BANK;
+    $("addrBlackhole").textContent = ADDR.BLACKHOLE;
+
+    // Faucet address placeholder
+    const renderFaucetAddr = () => {
+      $("addrFaucet").textContent = FAUCET_HEART ? FAUCET_HEART : "（待上鏈：部署 Faucet Heart 後填入）";
+    };
+    renderFaucetAddr();
+
+    // =========================
+    // Build progress (fixed baseline)
+    // =========================
+    const BUILD = {
+      start: "2026-02-10",
+      pct: 66, // V2.2：殿體 + 語音 + 錢包 + 互動 + Debug + 記錄
+      next: [
+        "部署 Faucet Heart 合約（上鏈心臟）",
+        "把 FAUCET_HEART 填回本頁，啟用求發財金按鈕",
+        "把擲筊 gate 與合約 claim 規則對齊（每月 500 名 / 888 上限）",
+        "無人銀行 KUFO 合約化（不再使用私鑰地址）"
+      ]
+    };
+    $("buildPct").textContent = BUILD.pct + "%";
+    $("buildBar").style.width = BUILD.pct + "%";
+
+    const BLUEPRINT = `
+[必做｜殿體驗收]
+- 按鈕必須有反應：擲筊 / 求發財金 / 還願 / 連錢包 / 語音 / 麥克風 / 匯出
+- Debug Panel 必須能顯示錯誤原因（JS 壞、錢包不存在、鏈不對）
+- 長地址必須不超出頁面（兩行顯示）
+
+[呼吸/心跳/血壓]
+- 前端：心跳（每小時一次）+ 呼吸（每日 00:00 UTC）
+- 鏈上：Faucet Heart 每日點火窗口 00:00~00:10 UTC（事件可驗證）
+
+[擲筊（互動遊戲）]
+- 三次聖筊 gate：達標才啟用「求發財金」
+- 後續可升級：三次聖筊才給 8.88 / 88.88 / 888 隨機禮
+
+[求發財金（合約出金）]
+- Faucet Heart 部署後才啟用
+- 規則：每月最多 500 名 + 每人每月上限 888（以合約為準）
+
+[還願（回收/補血）]
+- 3 地址：Faucet Heart（回收）/ 無人銀行 / 黑洞燒幣
+- 還願金額由香客自行決定（與求發財金規則分離）
+
+[未來擴建（只能加不能刪）]
+- 花果山火星齊天豪宅：500 席位，入住條件 5000 KGEN（需合約化）
+- 每月 5 日發薪：由無人銀行合約發放（需合約化）
+- GA600 大腦：接上運算引擎後才開啟高階權限
+`.trim();
+
+    // Blueprint modal
+    const openModal = () => {
+      $("blueprintText").textContent = BLUEPRINT;
+      $("modalBlueprint").style.display = "flex";
+    };
+    const closeModal = () => $("modalBlueprint").style.display = "none";
+    $("btnBlueprint").addEventListener("click", openModal);
+    $("btnCloseBlueprint").addEventListener("click", closeModal);
+    $("modalBlueprint").addEventListener("click", (e) => { if (e.target.id === "modalBlueprint") closeModal(); });
+
+    // =========================
+    // Visitors
+    // =========================
+    const renderVisitors = (todayVal, totalVal) => {
+      $("visToday").textContent = String(todayVal ?? "—");
+      $("visTotal").textContent = String(totalVal ?? "—");
+    };
+
+    const refreshVisitors = async (doHit) => {
+      try {
+        const dk = dayKey();
+        let todayVal = 0, totalVal = 0;
+        if (doHit) {
+          const [t1, t2] = await Promise.all([countapi.hit(dk), countapi.hit("total")]);
+          todayVal = t1.value ?? 0;
+          totalVal = t2.value ?? 0;
+        } else {
+          const [g1, g2] = await Promise.all([countapi.get(dk), countapi.get("total")]);
+          todayVal = g1.value ?? 0;
+          totalVal = g2.value ?? 0;
+        }
+        renderVisitors(todayVal, totalVal);
+      } catch (e) {
+        renderVisitors("—", "—");
+      }
+    };
+    refreshVisitors(true);
+
+    // =========================
+    // Breathing / Heartbeat / Blood pressure (visual)
+    // =========================
+    const setVitals = (hb, breath, bp) => {
+      $("hb").textContent = hb;
+      $("breath").textContent = breath;
+      $("bp").textContent = bp;
+    };
+
+    const calcBP = () => {
+      // simulate based on local activity + time
+      const s = load();
+      const t = Date.now()/1000;
+      const baseSys = 108 + Math.round(6*Math.sin(t/180));
+      const baseDia = 72 + Math.round(4*Math.cos(t/210));
+      const pulse = 66 + Math.round(6*Math.sin(t/90) + Math.min(12, s.bobei.total/2));
+      return `${baseSys}/${baseDia}  脈搏${pulse}`;
+    };
+
+    const tickVitals = () => {
+      const now = new Date();
+      const mins = now.getMinutes();
+      const secs = now.getSeconds();
+      // heartbeat: show "每小時" anchor
+      const hb = `每小時·${String(now.getHours()).padStart(2,"0")}:00`;
+      // breath: show UTC 00:00 anchor
+      const breath = `每日·UTC00:00`;
+      const bp = calcBP();
+      setVitals(hb, breath, bp);
+    };
+    tickVitals();
+    setInterval(tickVitals, 15000);
+
+    // =========================
+    // Voice (TTS) + Mic (SpeechRecognition)
+    // =========================
+    const canTTS = "speechSynthesis" in window;
+    const speak = (text) => {
+      try {
+        if (!canTTS) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "zh-TW";
+        u.rate = 1.0;
+        u.pitch = 1.0;
+        window.speechSynthesis.speak(u);
+      } catch {}
+    };
+    const stopTTS = () => { try { if (canTTS) window.speechSynthesis.cancel(); } catch {} };
+
+    const setSubtitle = (text) => {
+      $("subtitle").textContent = text || "—";
+      // also mirror to AI bubble by default
+      $("liveAI").textContent = text || "—";
+    };
+
+    const wukongAnswer = (q) => {
+      const s = load();
+      const text = (q||"").trim();
+      const lower = text.toLowerCase();
+
+      const base = "我在五指山下，心跳已復甦。這裡不是投資平台。你要做的每一筆鏈上動作，都由你在錢包按確認。";
+      if (!text) return "你還沒說話。按開始說話，再問我一次。";
+      if (lower.includes("發財金") || lower.includes("領")) {
+        if (!FAUCET_HEART) return "發財金心臟合約尚未上鏈。先部署 Faucet Heart，填入地址後，才會啟用求發財金。";
+        return "求發財金：先擲筊達到三次聖筊，才會開啟。發放規則以合約為準，每月 500 名、每人每月上限 888。";
+      }
+      if (lower.includes("錢包") || lower.includes("metamask")) {
+        return "請用 MetaMask 或錢包瀏覽器打開本頁，按連線錢包。若找不到幣，請用 Custom Token 加入 KGEN 合約地址。";
+      }
+      if (lower.includes("還願") || lower.includes("地址")) {
+        return "還願有三個選項：水龍頭心臟回收、無人銀行增能、黑洞燒幣通縮。金額由你決定，還願不是強制。";
+      }
+      if (lower.includes("心跳") || lower.includes("呼吸") || lower.includes("血壓")) {
+        return "心跳是每小時的節奏，呼吸是每日零點的重置。血壓代表今天的壓力與波動，我會用紀錄與事件把它顯示出來。";
+      }
+      if (lower.includes("豪宅") || lower.includes("5000") || lower.includes("500席")) {
+        return "花果山火星齊天豪宅屬於下一段擴建：500席位、5000 KGEN 入住。要做成合約，不靠任何私鑰地址。";
+      }
+      return base;
+    };
+
+    $("btnVoiceIntro").addEventListener("click", () => {
+      const intro = "歡迎來到五指山悟空財神殿。這裡是互動式入口，不是投資平台。發財金必須由心臟合約出金。還願有三個地址，請看清楚再確認。";
+      speak(intro);
+      setSubtitle(intro);
+      toast("悟空開始說話");
+    });
+    $("btnStopTTS").addEventListener("click", () => { stopTTS(); toast("已停止"); });
+
+    // Speech Recognition
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    let recOn = false;
+
+    const updateButtons = () => {
+      $("btnMic").disabled = !SR;
+      $("btnMicStop").disabled = !SR;
+    };
+    updateButtons();
+
+    const setLiveUser = (t) => $("liveUser").textContent = t || "—";
+    const setLiveAI = (t) => $("liveAI").textContent = t || "—";
+
+    const doAnswer = (userText) => {
+      const s = load();
+      s.lastUser = userText || "";
+      const ans = wukongAnswer(userText);
+      s.lastAI = ans;
+      pushLog(s, "qa", { q:userText, a:ans });
+      save(s);
+      setLiveUser(userText);
+      setLiveAI(ans);
+      setSubtitle(ans);
+      speak(ans);
+      renderLocal();
+    };
+
+    if (SR) {
+      rec = new SR();
+      rec.lang = "zh-TW";
+      rec.interimResults = true;
+      rec.continuous = false;
+
+      rec.onresult = (ev) => {
+        let finalText = "";
+        let interim = "";
+        for (let i=0; i<ev.results.length; i++) {
+          const r = ev.results[i];
+          if (r.isFinal) finalText += r[0].transcript;
+          else interim += r[0].transcript;
+        }
+        const show = (finalText || interim || "").trim();
+        if (show) {
+          setLiveUser(show);
+          $("subtitle").textContent = show;
+        }
+        if (finalText && finalText.trim()) {
+          recOn = false;
+          doAnswer(finalText.trim());
+        }
+      };
+      rec.onerror = (e) => {
+        recOn = false;
+        toast("麥克風錯誤：" + (e.error || "unknown"));
+        setDebug({ lastError: e, hasWallet: !!window.ethereum, hasSR: !!SR });
+      };
+      rec.onend = () => { recOn = false; };
+    }
+
+    $("btnMic").addEventListener("click", () => {
+      if (!SR || !rec) {
+        toast("此瀏覽器不支援語音辨識。請改用 Chrome / Android Chrome / Edge。");
+        return;
+      }
+      try {
+        recOn = true;
+        rec.start();
+        toast("🎙️ 開始說話（講完會自動回覆）");
+      } catch (e) {
+        toast("麥克風啟動失敗（可能已在錄音）");
+      }
+    });
+    $("btnMicStop").addEventListener("click", () => {
+      try { if (rec && recOn) rec.stop(); } catch {}
+      recOn = false;
+      toast("已停止麥克風");
+    });
+
+    // subtitle top toggle
+    let subTop = true;
+    $("btnSubTop").addEventListener("click", () => {
+      subTop = !subTop;
+      const el = $("subtitle").parentElement.parentElement;
+      if (subTop) {
+        el.style.order = "-1";
+        toast("字幕置頂：是");
+      } else {
+        el.style.order = "0";
+        toast("字幕置頂：否");
+      }
+    });
+
+    // =========================
+    // Debug toggles
+    // =========================
+    $("btnToggleDebug").addEventListener("click", () => {
+      $debugPanel.style.display = ($debugPanel.style.display === "none") ? "block" : "none";
+      setDebug({
+        VERSION,
+        hasWallet: !!window.ethereum,
+        hasEthers: !!window.ethers,
+        hasSpeechRecognition: !!SR,
+        hasTTS: canTTS,
+        chainIdWant: CHAIN_ID_DEC,
+        faucetHeartSet: !!FAUCET_HEART
+      });
+    });
+    $("btnHideDebug").addEventListener("click", () => { $debugPanel.style.display = "none"; });
+
+    // =========================
+    // Wallet / balances / vow transfer
+    // =========================
+    let provider = null;
+    let signer = null;
+    let userAddr = null;
+
+    const ERC20_ABI = [
+      "function balanceOf(address) view returns (uint256)",
+      "function transfer(address to, uint256 amount) returns (bool)"
+    ];
+
+    const fmt = (bn) => {
+      try { return ethers.utils.formatUnits(bn, 18); } catch { return String(bn); }
+    };
+
+    const ensureChain = async () => {
+      if (!window.ethereum) throw new Error("no_wallet");
+      const wantHex = "0x" + CHAIN_ID_DEC.toString(16);
+      const cur = await window.ethereum.request({ method: "eth_chainId" });
+      if (cur !== wantHex) {
+        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: wantHex }] });
+      }
+    };
+
+    const renderWallet = async () => {
+      if (!userAddr) {
+        $("walletBox").innerHTML = `
+          <div style="font-weight:950;">未連線</div>
+          <div class="muted">請用 MetaMask / 錢包瀏覽器開本頁，按「連線錢包」。</div>
+        `;
+        return;
+      }
+      const lines = [];
+      lines.push(`<div>已連線：<span class="mono addr addr-2line">${userAddr}</span></div>`);
+      try {
+        const token = new ethers.Contract(ADDR.KGEN_TOKEN, ERC20_ABI, provider);
+        const [uBal, rBal, bBal] = await Promise.all([
+          token.balanceOf(userAddr),
+          token.balanceOf(ADDR.REWARD),
+          token.balanceOf(ADDR.BANK)
+        ]);
+        lines.push(`<div>KGEN 你的餘額：<strong class="mono">${fmt(uBal)}</strong></div>`);
+        lines.push(`<div>稅收/薪水地址餘額：<strong class="mono">${fmt(rBal)}</strong></div>`);
+        lines.push(`<div>無人銀行地址餘額：<strong class="mono">${fmt(bBal)}</strong></div>`);
+      } catch (e) {
+        lines.push(`<div class="muted">讀取餘額失敗：請確認在 BSC 主網。</div>`);
+      }
+      $("walletBox").innerHTML = lines.join("");
+    };
+
+    $("btnConnect").addEventListener("click", async () => {
+      try {
+        if (!window.ethereum) {
+          toast("找不到錢包：請用 MetaMask 或錢包瀏覽器");
+          speak("找不到錢包。請用 MetaMask 或錢包瀏覽器。");
+          return;
+        }
+        await ensureChain();
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddr = await signer.getAddress();
+        toast("✅ 錢包已連線（BSC）");
+        await renderWallet();
+      } catch (e) {
+        toast("連線失敗或未授權");
+        setDebug({ lastError: String(e) });
+      }
+    });
+
+    // Vow address select
+    const selectedVow = () => {
+      const el = document.querySelector('input[name="vowTarget"]:checked');
+      const v = el ? el.value : "faucet";
+      if (v === "bank") return ADDR.BANK;
+      if (v === "blackhole") return ADDR.BLACKHOLE;
+      return FAUCET_HEART || ""; // faucet
+    };
+
+    $("btnCopySel").addEventListener("click", async () => {
+      const addr = selectedVow() || "";
+      if (!addr) {
+        toast("水龍頭心臟尚未上鏈，現在無法複製 faucet 地址");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(addr);
+        toast("已複製：" + addr.slice(0,6) + "…" + addr.slice(-4));
+      } catch {
+        toast("複製失敗：請手動選取地址");
+      }
+    });
+
+    // Vow transfer
+    $("btnVow").addEventListener("click", async () => {
+      const amountStr = ($("inpAmount").value || "").trim();
+      const to = selectedVow();
+      if (!to) {
+        toast("水龍頭心臟尚未上鏈：先部署 Faucet Heart，或改選無人銀行/黑洞。");
+        speak("水龍頭心臟尚未上鏈。請先部署合約，或改選無人銀行或黑洞。");
+        return;
+      }
+      if (!amountStr || isNaN(Number(amountStr)) || Number(amountStr) <= 0) {
+        toast("還願數量不正確");
+        return;
+      }
+      if (!window.ethereum || !signer) {
+        toast("請先連線錢包");
+        return;
+      }
+      try {
+        await ensureChain();
+        const token = new ethers.Contract(ADDR.KGEN_TOKEN, ERC20_ABI, signer);
+        const amt = ethers.utils.parseUnits(amountStr, 18);
+        const tx = await token.transfer(to, amt);
+        toast("交易送出，等待確認…");
+        speak("還願交易已送出，等待鏈上確認。");
+        const s = load();
+        s.vow += 1;
+        pushLog(s, "vow", { to, amount: amountStr, tx: tx.hash });
+        save(s);
+        await tx.wait();
+        toast("✅ 還願完成（可上鏈查 tx）");
+        await renderWallet();
+        renderLocal();
+      } catch (e) {
+        toast("交易失敗或取消");
+        setDebug({ lastError: String(e) });
+      }
+    });
+
+    // =========================
+    // Bobei game (3 holy cups gate)
+    // =========================
+    const rollBobei = () => {
+      // 0=笑杯, 1=陰杯, 2=聖杯
+      const r = Math.random();
+      if (r < 0.2) return 0;
+      if (r < 0.5) return 1;
+      return 2;
+    };
+    const bobeiName = (x) => x===2 ? "聖筊" : (x===1 ? "陰筊" : "笑筊");
+
+    const renderLocal = () => {
+      const s = load();
+      const holyNeed = RULES.bobeiNeedHoly;
+      const holyNow = s.bobei.holy;
+      $("localLog").innerHTML = `
+        <div>擲筊：<strong class="mono">${s.bobei.total}</strong> 次｜聖筊：<strong class="mono">${holyNow}</strong> / ${holyNeed}</div>
+        <div>還願：<strong class="mono">${s.vow}</strong> 次｜求發財金：<strong class="mono">${s.claim}</strong> 次</div>
+        <div class="muted" style="margin-top:8px;">（提示：達到三次聖筊後，才會開啟求發財金按鈕。）</div>
+      `;
+      // enable claim only if gate pass and faucet set
+      const gateOk = holyNow >= holyNeed;
+      $("btnClaim").disabled = !(gateOk && !!FAUCET_HEART);
+    };
+    renderLocal();
+
+    $("btnBobei").addEventListener("click", () => {
+      const s = load();
+      const r = rollBobei();
+      s.bobei.total += 1;
+      if (r === 2) s.bobei.holy += 1;
+      s.bobei.log.push({ t: nowISO(), r, name: bobeiName(r) });
+      if (s.bobei.log.length > 120) s.bobei.log = s.bobei.log.slice(-120);
+      pushLog(s, "bobei", { r, name: bobeiName(r) });
+      save(s);
+      const msg = `擲筊結果：${bobeiName(r)}（聖筊 ${s.bobei.holy}/${RULES.bobeiNeedHoly}）`;
+      toast(msg);
+      speak(msg);
+      setSubtitle(msg);
+      renderLocal();
+    });
+
+    // =========================
+    // Claim (placeholder until faucet deployed)
+    // =========================
+    $("btnClaim").addEventListener("click", async () => {
+      if (!FAUCET_HEART) {
+        toast("缺少 Faucet Heart 合約地址：先部署合約，再填回本頁");
+        speak("缺少 Faucet Heart 合約地址。先部署合約，再填回本頁。");
+        return;
+      }
+      toast("已啟用求發財金：下一版將接上 igniteAndClaim()");
+      speak("求發財金按鈕已啟用。下一版會接上合約出金。");
+      const s = load();
+      s.claim += 1;
+      pushLog(s, "claim_click", { faucet: FAUCET_HEART });
+      save(s);
+      renderLocal();
+    });
+
+    // =========================
+    // Export / Clear
+    // =========================
+    const downloadJSON = (obj, filename) => {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    $("btnExport").addEventListener("click", () => {
+      const s = load();
+      downloadJSON(s, `wukong_temple_state_${VERSION}.json`);
+      toast("已匯出 JSON");
+    });
+    $("btnClear").addEventListener("click", () => {
+      localStorage.removeItem(KEY);
+      toast("已清除本機紀錄");
+      renderLocal();
+    });
+
+    // =========================
+    // Final: initial debug snapshot
+    // =========================
+    setDebug({
+      VERSION,
+      hasWallet: !!window.ethereum,
+      hasEthers: !!window.ethers,
+      hasSpeechRecognition: !!SR,
+      hasTTS: canTTS,
+      faucetHeartSet: !!FAUCET_HEART,
+      note: "若按鈕都沒反應，打開 Debug Panel 看 lastError。"
+    });
+
+    // Try render wallet (if already connected)
+    renderWallet();
+
+  })();
+  </script>
+</body>
+</html>
