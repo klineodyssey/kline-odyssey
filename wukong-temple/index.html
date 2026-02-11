@@ -233,6 +233,25 @@
 
 </div>
 
+
+<!-- Sound Settings -->
+<div class="card">
+  <h3>🔊 聲音（TTS / 叮）</h3>
+  <div class="row">
+    <label class="lbl">模式</label>
+    <select id="soundMode" class="input" style="max-width:260px">
+      <option value="auto" selected>Auto（有 TTS 用 TTS，否則叮）</option>
+      <option value="tts">TTS（需要裝置支援）</option>
+      <option value="beep">叮（WebAudio）</option>
+      <option value="off">關閉</option>
+    </select>
+    <button class="btn" id="btnTestSound" style="margin-left:8px">測試</button>
+  </div>
+  <div class="muted" style="margin-top:6px;line-height:1.6">
+    你的 MetaMask WebView 常會顯示 <code>speechSynthesis=false</code>，這時會自動改用「叮」聲。若要真人語音，可改用 Chrome 開啟（但可能失去錢包注入）。
+  </div>
+</div>
+
 <!-- Debug Panel -->
 <div class="debug" id="debug" style="display:block">
   <header>
@@ -249,7 +268,7 @@
 <script>
 (function(){
   // ===== Version =====
-  const BOOT_VERSION = "v2.8.1-zodiac-wishpool-hotfix1";
+  const BOOT_VERSION = "v2.8.0-zodiac-wishpool";
   document.getElementById('bootVer').textContent = BOOT_VERSION;
 
   // ===== Debug =====
@@ -287,68 +306,14 @@
   }
 
   // ===== Selfcheck =====
-  
-  // ====== Ether.js loader (hotfix) ======
-  function ensureEthers(timeoutMs){
-    timeoutMs = timeoutMs || 8000;
-    return new Promise((resolve)=>{
-      if (window.ethers) return resolve(true);
-      const urls = [
-        "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js",
-        "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"
-      ];
-      let done = false;
-      const finish = (ok)=>{ if(done) return; done=true; resolve(!!ok); };
-      let i = 0;
-      function tryNext(){
-        if (i >= urls.length) return finish(false);
-        const s = document.createElement("script");
-        s.src = urls[i++];
-        s.async = true;
-        s.onload = ()=>finish(!!window.ethers);
-        s.onerror = ()=>tryNext();
-        document.head.appendChild(s);
-      }
-      tryNext();
-      setTimeout(()=>finish(!!window.ethers), timeoutMs);
-    });
-  }
-
-async function selfCheck(){
+  function selfCheck(){
     hookGlobalErrors();
     log('selfcheck_start');
     log('userAgent: ' + (navigator.userAgent || '(none)'));
-
-    // Voice environment
     log('speechSynthesis: ' + ('speechSynthesis' in window));
     log('speechRecognition: ' + (!!(window.SpeechRecognition || window.webkitSpeechRecognition)));
-
-    // Wallet / libraries
-    let hasEthers = !!window.ethers;
-    const hasInjected = !!window.ethereum;
-
-    log('ethers_loaded: ' + hasEthers);
-    log('ethereum_injected: ' + hasInjected);
-
-    // Try to load ethers if missing (common on GitHub Pages / in-app browsers)
-    if(!hasEthers){
-      log('ethers_load_attempt');
-      const ok = await ensureEthers(8000);
-      hasEthers = ok && !!window.ethers;
-      log('ethers_loaded_after: ' + hasEthers);
-    }
-
-    // Guidance (never block the whole UI)
-    if(!hasInjected){
-      toast('toastEnv','bad','No wallet detected. Please open this page inside MetaMask (in-app browser) or a wallet browser.');
-    }
-    if(!hasEthers){
-      toast('toastEnv','bad','Ethers.js failed to load (network/CSP). Try MetaMask browser, or allow external CDN scripts.');
-    }
-
-    // Ready flag
-    window.__WUKONG_ENV__ = { hasEthers, hasInjected };
+    log('ethers_loaded: ' + (typeof window.ethers !== 'undefined'));
+    log('ethereum_injected: ' + (typeof window.ethereum !== 'undefined'));
   }
 
   // ===== UI helpers =====
@@ -508,6 +473,7 @@ async function selfCheck(){
   const assistantText = document.getElementById('assistantText');
   function assistantStart(){
     log('assistant_start');
+    wukongSound('悟空客服啟動');
     const cfg = loadCfg();
     const lines = [
       '悟空心臟由 Faucet 合約自動跳動；母機只救援，不擁有。',
@@ -646,6 +612,7 @@ async function selfCheck(){
 
   function wishSubmit(){
     log('wish_submit');
+    wukongSound('許願已投下');
     const obj = makeWishObject();
     if(!obj.wish.text){
       toast('wishOut','bad','請先寫下願望內容。');
@@ -775,6 +742,19 @@ async function selfCheck(){
     if(cfg.faucet) document.getElementById('inFaucet').value = cfg.faucet;
     if(cfg.kufo) document.getElementById('inKUFO').value = cfg.kufo;
 
+
+    // sound ui
+    try{
+      const sm = document.getElementById('soundMode');
+      const bt = document.getElementById('btnTestSound');
+      if(sm){
+        sm.value = getSoundMode();
+        sm.addEventListener('change', ()=>{ setSoundMode(sm.value); log('sound_mode=' + sm.value); }, true);
+      }
+      if(bt){
+        bt.addEventListener('click', ()=>{ wukongSound('悟空在此'); log('sound_test'); }, true);
+      }
+    }catch(e){}
     // first selfcheck
     selfCheck();
   })();
@@ -782,7 +762,5 @@ async function selfCheck(){
 })();
 </script>
 
-
-  <div id="toastEnv" class="toastWrap"></div>
 </body>
 </html>
