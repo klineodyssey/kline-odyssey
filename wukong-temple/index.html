@@ -282,6 +282,74 @@
     const lines = logEl.textContent.split(/\n/);
     if(lines.length>450) logEl.textContent = lines.slice(lines.length-450).join("\n");
   }
+
+  // ====== 音效引擎（本機 Beep，不依賴 speechSynthesis） ======
+  // 用於：按鈕回饋、杯擲、許願成功等。WebView 無 TTS 也能有聲音。
+  let __wkAudioCtx = null;
+  let __wkAudioUnlocked = false;
+
+  function __wkGetAudioCtx(){
+    if (!__wkAudioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      __wkAudioCtx = new AC();
+    }
+    return __wkAudioCtx;
+  }
+
+  async function __wkUnlockAudio(){
+    const ctx = __wkGetAudioCtx();
+    if (!ctx) return false;
+    try{
+      if (ctx.state === "suspended") await ctx.resume();
+      __wkAudioUnlocked = (ctx.state === "running");
+      return __wkAudioUnlocked;
+    }catch(e){
+      return false;
+    }
+  }
+
+  function __wkBeep(freq=523.25, dur=0.12, vol=0.06){
+    const ctx = __wkGetAudioCtx();
+    if (!ctx) return false;
+
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+    return true;
+  }
+
+  // ✅ 全站統一音效入口：避免出現 wukongSound 未定義
+  function wukongSound(tag){
+    // 需要使用者手勢解鎖：通常會在按鈕 click 時觸發
+    if (!__wkAudioUnlocked){
+      __wkUnlockAudio().then(()=>{ __wkBeep(); }).catch(()=>{});
+      return;
+    }
+    // 不同事件給不同音高（可擴充）
+    const map = {
+      "ok": 659.25,
+      "warn": 392.00,
+      "error": 220.00,
+      "wish": 523.25,
+      "cup": 587.33,
+      "heartbeat": 440.00
+    };
+    __wkBeep(map[tag] || 523.25);
+  }
+
   window.__WK_LOG__ = log;
 
   // ===== Errors Hook =====
