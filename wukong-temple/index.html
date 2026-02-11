@@ -233,25 +233,6 @@
 
 </div>
 
-
-<!-- Sound Settings -->
-<div class="card">
-  <h3>🔊 聲音（TTS / 叮）</h3>
-  <div class="row">
-    <label class="lbl">模式</label>
-    <select id="soundMode" class="input" style="max-width:260px">
-      <option value="auto" selected>Auto（有 TTS 用 TTS，否則叮）</option>
-      <option value="tts">TTS（需要裝置支援）</option>
-      <option value="beep">叮（WebAudio）</option>
-      <option value="off">關閉</option>
-    </select>
-    <button class="btn" id="btnTestSound" style="margin-left:8px">測試</button>
-  </div>
-  <div class="muted" style="margin-top:6px;line-height:1.6">
-    你的 MetaMask WebView 常會顯示 <code>speechSynthesis=false</code>，這時會自動改用「叮」聲。若要真人語音，可改用 Chrome 開啟（但可能失去錢包注入）。
-  </div>
-</div>
-
 <!-- Debug Panel -->
 <div class="debug" id="debug" style="display:block">
   <header>
@@ -473,7 +454,6 @@
   const assistantText = document.getElementById('assistantText');
   function assistantStart(){
     log('assistant_start');
-    wukongSound('悟空客服啟動');
     const cfg = loadCfg();
     const lines = [
       '悟空心臟由 Faucet 合約自動跳動；母機只救援，不擁有。',
@@ -612,7 +592,6 @@
 
   function wishSubmit(){
     log('wish_submit');
-    wukongSound('許願已投下');
     const obj = makeWishObject();
     if(!obj.wish.text){
       toast('wishOut','bad','請先寫下願望內容。');
@@ -742,19 +721,6 @@
     if(cfg.faucet) document.getElementById('inFaucet').value = cfg.faucet;
     if(cfg.kufo) document.getElementById('inKUFO').value = cfg.kufo;
 
-
-    // sound ui
-    try{
-      const sm = document.getElementById('soundMode');
-      const bt = document.getElementById('btnTestSound');
-      if(sm){
-        sm.value = getSoundMode();
-        sm.addEventListener('change', ()=>{ setSoundMode(sm.value); log('sound_mode=' + sm.value); }, true);
-      }
-      if(bt){
-        bt.addEventListener('click', ()=>{ wukongSound('悟空在此'); log('sound_test'); }, true);
-      }
-    }catch(e){}
     // first selfcheck
     selfCheck();
   })();
