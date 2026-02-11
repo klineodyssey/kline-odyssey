@@ -268,7 +268,7 @@
 <script>
 (function(){
   // ===== Version =====
-  const BOOT_VERSION = "v2.8.0-zodiac-wishpool";
+  const BOOT_VERSION = "v2.8.4-ethretry-soundfix";
   document.getElementById('bootVer').textContent = BOOT_VERSION;
 
   // ===== Debug =====
@@ -282,74 +282,6 @@
     const lines = logEl.textContent.split(/\n/);
     if(lines.length>450) logEl.textContent = lines.slice(lines.length-450).join("\n");
   }
-
-  // ====== 音效引擎（本機 Beep，不依賴 speechSynthesis） ======
-  // 用於：按鈕回饋、杯擲、許願成功等。WebView 無 TTS 也能有聲音。
-  let __wkAudioCtx = null;
-  let __wkAudioUnlocked = false;
-
-  function __wkGetAudioCtx(){
-    if (!__wkAudioCtx){
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return null;
-      __wkAudioCtx = new AC();
-    }
-    return __wkAudioCtx;
-  }
-
-  async function __wkUnlockAudio(){
-    const ctx = __wkGetAudioCtx();
-    if (!ctx) return false;
-    try{
-      if (ctx.state === "suspended") await ctx.resume();
-      __wkAudioUnlocked = (ctx.state === "running");
-      return __wkAudioUnlocked;
-    }catch(e){
-      return false;
-    }
-  }
-
-  function __wkBeep(freq=523.25, dur=0.12, vol=0.06){
-    const ctx = __wkGetAudioCtx();
-    if (!ctx) return false;
-
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, t0);
-
-    gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.02);
-    return true;
-  }
-
-  // ✅ 全站統一音效入口：避免出現 wukongSound 未定義
-  function wukongSound(tag){
-    // 需要使用者手勢解鎖：通常會在按鈕 click 時觸發
-    if (!__wkAudioUnlocked){
-      __wkUnlockAudio().then(()=>{ __wkBeep(); }).catch(()=>{});
-      return;
-    }
-    // 不同事件給不同音高（可擴充）
-    const map = {
-      "ok": 659.25,
-      "warn": 392.00,
-      "error": 220.00,
-      "wish": 523.25,
-      "cup": 587.33,
-      "heartbeat": 440.00
-    };
-    __wkBeep(map[tag] || 523.25);
-  }
-
   window.__WK_LOG__ = log;
 
   // ===== Errors Hook =====
@@ -382,7 +314,45 @@
     log('speechRecognition: ' + (!!(window.SpeechRecognition || window.webkitSpeechRecognition)));
     log('ethers_loaded: ' + (typeof window.ethers !== 'undefined'));
     log('ethereum_injected: ' + (typeof window.ethereum !== 'undefined'));
+  
+    // Re-check late injections (MetaMask WebView)
+    ensureEthers().then(()=>ensureEthereum()).then(()=>{
+      try{
+        log("ethers_loaded_now: " + (!!window.ethers));
+        log("ethereum_injected_now: " + (!!window.ethereum));
+      }catch(e){}
+    });
+
+}
+
+  // ====== Lazy loaders (MetaMask WebView sometimes injects late) ======
+  function ensureEthers(maxWaitMs=3500){
+    return new Promise((resolve)=>{
+      if (window.ethers) { resolve(true); return; }
+      log("ethers_load_attempt");
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
+      s.async = true;
+      s.onload = () => { log("ethers_loaded_after: " + (!!window.ethers)); resolve(!!window.ethers); };
+      s.onerror = () => { log("ethers_load_failed"); resolve(false); };
+      document.head.appendChild(s);
+      setTimeout(()=>{ if(!window.ethers){ log("ethers_load_timeout"); resolve(false);} }, maxWaitMs);
+    });
   }
+
+  function ensureEthereum(maxWaitMs=3500, stepMs=120){
+    return new Promise((resolve)=>{
+      const t0 = Date.now();
+      function tick(){
+        const ok = !!window.ethereum;
+        if (ok){ log("ethereum_injected_after: true"); resolve(true); return; }
+        if (Date.now() - t0 >= maxWaitMs){ log("ethereum_injected_after: false"); resolve(false); return; }
+        setTimeout(tick, stepMs);
+      }
+      tick();
+    });
+  }
+
 
   // ===== UI helpers =====
   function toast(targetId, kind, html){
