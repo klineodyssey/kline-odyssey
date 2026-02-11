@@ -268,7 +268,7 @@
 <script>
 (function(){
   // ===== Version =====
-  const BOOT_VERSION = "v2.8.4-ethretry-soundfix";
+  const BOOT_VERSION = "v2.8.5-ttsfix3";
   document.getElementById('bootVer').textContent = BOOT_VERSION;
 
   // ===== Debug =====
@@ -305,7 +305,106 @@
     });
   }
 
-  // ===== Selfcheck =====
+  
+  // ===== Sound Engine (TTS / Ding) =====
+  // Modes: 'auto' | 'tts' | 'ding' | 'off'
+  const SOUND_KEY = 'wukong_sound_mode_v1';
+  let _soundMode = (localStorage.getItem(SOUND_KEY) || 'auto').toLowerCase();
+  let _audioCtx = null;
+
+  function getSoundMode(){ return _soundMode; }
+  function setSoundMode(m){
+    _soundMode = (String(m||'auto')).toLowerCase();
+    localStorage.setItem(SOUND_KEY, _soundMode);
+    log('sound_mode=' + _soundMode);
+  }
+
+  function _canTTS(){
+    try { return !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'); }
+    catch(e){ return false; }
+  }
+
+  function _speakTTS(text){
+    if(!_canTTS()) return false;
+    try{
+      // cancel any pending speech to keep it snappy
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(String(text||''));
+      u.lang = 'zh-TW';
+      u.rate = 1.0;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      window.speechSynthesis.speak(u);
+      return true;
+    }catch(e){
+      log('tts_failed: ' + (e && e.message ? e.message : String(e)));
+      return false;
+    }
+  }
+
+  function _beep(){
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      if(!_audioCtx) _audioCtx = new AC();
+      // On mobile, audio may be suspended until user gesture.
+      if(_audioCtx.state === 'suspended') _audioCtx.resume().catch(()=>{});
+      const osc = _audioCtx.createOscillator();
+      const gain = _audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(_audioCtx.destination);
+      const now = _audioCtx.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.20);
+      osc.start(now);
+      osc.stop(now + 0.22);
+      return true;
+    }catch(e){
+      log('ding_failed: ' + (e && e.message ? e.message : String(e)));
+      return false;
+    }
+  }
+
+  // Public: safe sound helper for all UI events
+  function wukongSound(text){
+    const mode = getSoundMode();
+    if(mode === 'off'){ log('sound_off'); return; }
+
+    // auto: prefer TTS if available, else ding
+    if(mode === 'auto'){
+      const ok = _speakTTS(text || '叮');
+      if(!ok) _beep();
+      return;
+    }
+    if(mode === 'tts'){ _speakTTS(text || ''); return; }
+    if(mode === 'ding'){ _beep(); return; }
+
+    // fallback
+    const ok = _speakTTS(text || '叮');
+    if(!ok) _beep();
+  }
+
+  // Bind sound controls if present in DOM
+  function bindSoundUI(){
+    const sel = document.getElementById('soundMode');
+    const btn = document.getElementById('btnTestSound');
+    if(sel){
+      try{ sel.value = getSoundMode(); }catch(e){}
+      sel.addEventListener('change', ()=> setSoundMode(sel.value));
+    }
+    if(btn){
+      btn.addEventListener('click', ()=>{
+        // a user gesture here unlocks audio on mobile
+        wukongSound('悟空在聽');
+        log('sound_test');
+      });
+    }
+  }
+// ===== Selfcheck =====
   function selfCheck(){
     hookGlobalErrors();
     log('selfcheck_start');
