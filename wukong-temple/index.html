@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>悟空財神殿｜Wukong Fortune Hall</title>
+  <meta name="description" content="悟空財神殿｜心跳・呼吸・發財金・七仙女許願池｜自動化宇宙生命體入口" />
+  <style>
+    :root{--b:#111;--bg:#fff;--muted:#666;--soft:#f3f3f3;--ok:#0a7;--bad:#c33;}
+    *{box-sizing:border-box}
+    body{margin:0;background:#fafafa;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;}
+    a{color:inherit}
+    .wrap{max-width:920px;margin:18px auto;padding:14px;}
+    .topbar{position:sticky;top:10px;z-index:50;display:flex;justify-content:flex-end;margin:10px 0;}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid var(--b);background:var(--bg);}
+    .h1{font-weight:1000;font-size:22px;line-height:1.2;}
+    .tag{margin-top:6px;font-weight:900;}
+    .card{border:1px solid var(--b);border-radius:16px;background:var(--bg);padding:12px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.04)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .btn{cursor:pointer;padding:10px 12px;border:1px solid var(--b);border-radius:999px;background:var(--bg);font-weight:900;}
+    .btn:disabled{cursor:not-allowed;background:var(--soft);opacity:.75}
+    .btn.small{padding:8px 10px;font-weight:900}
+    .muted{color:var(--muted)}
+    .kvs{display:grid;grid-template-columns:140px 1fr;gap:6px 10px;align-items:start}
+    .k{font-weight:900}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;word-break:break-all}
+    .hr{height:1px;background:#eee;margin:10px 0}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}}
+
+    .zodiacGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    @media (max-width:820px){.zodiacGrid{grid-template-columns:1fr}}
+    .node{border:1px dashed #999;border-radius:14px;padding:10px;background:#fff;}
+    .node h3{margin:0;font-size:16px}
+
+    .toast{padding:10px 12px;border-radius:12px;border:1px solid #ddd;background:#fff;}
+    .ok{border-color:rgba(0,160,110,.35);background:rgba(0,160,110,.06)}
+    .bad{border-color:rgba(200,50,50,.35);background:rgba(200,50,50,.06)}
+
+    .debug{position:fixed;right:10px;bottom:10px;z-index:60;width:min(520px,calc(100vw - 20px));max-height:42vh;overflow:auto;border:1px solid var(--b);border-radius:14px;background:#fff;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+    .debug header{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff}
+    .debug header .title{font-weight:1000}
+    .debug pre{margin:0;padding:10px 12px;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.35}
+
+    .input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:12px;font-size:14px;}
+    .select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:12px;font-size:14px;background:#fff;}
+
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #ddd;background:#fff;font-weight:900;font-size:12px;}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 Official Website</a>
+</div>
+
+<div class="wrap">
+
+  <div>
+    <div class="h1">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
+    <div class="tag">#悟空新文 #K線西遊記 #花果山台灣</div>
+    <div style="margin-top:8px" class="muted">boot_version=<span class="mono" id="bootVer"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:1000">🫁 宇宙生命徵象｜心跳・呼吸・血壓（Cosmic Vitals）</div>
+      <div class="badge" id="cupBadge">聖筊連勝：0 / 3</div>
+    </div>
+
+    <div style="margin-top:8px;line-height:1.75">
+      這裡不是一般廟。悟空心臟將由 <b>Faucet 合約</b> 自動跳動。<br/>
+      人類不再直接持有核心資金；母機只負責救援，不擁有。<br/>
+      你每一次參拜，都會觸發一次「生命徵象」與「聖筊」記錄。
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="btnHeartbeat">❤️ 心跳</button>
+      <button class="btn" id="btnBreath">🫁 呼吸</button>
+      <button class="btn" id="btnPressure">🩸 血壓</button>
+      <button class="btn" id="btnCup">🥢 擲筊</button>
+      <button class="btn" id="btnFortune" disabled>🧧 領發財金（需合約）</button>
+    </div>
+
+    <div id="vitalsOut" style="margin-top:10px"></div>
+    <div class="muted" style="margin-top:8px;line-height:1.65">
+      規則：聖筊機率 50%。失敗連勝歸零。連勝達 3 才解鎖「領發財金」。<br/>
+      發財金規則（預設）：每月最多 <b>500 名</b>，每名最高 <b>888 KGEN</b>（真正發放以 Faucet 合約參數為準）。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:1000">🪪 錢包狀態（BSC 主網）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="btnConnect">連線錢包</button>
+        <button class="btn" id="btnDisconnect">斷開</button>
+        <button class="btn" id="btnExport">匯出狀態 JSON</button>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="kvs">
+      <div class="k">Wallet</div>
+      <div class="mono" id="walletAddr">(not connected)</div>
+
+      <div class="k">Chain</div>
+      <div class="mono" id="chainInfo">(unknown)</div>
+
+      <div class="k">Faucet Contract</div>
+      <div class="mono" id="faucetAddr">(to be set after deploy)</div>
+
+      <div class="k">KUFO Bank Contract</div>
+      <div class="mono" id="kufoAddr">(to be set after deploy)</div>
+
+      <div class="k">Public Good Treasury</div>
+      <div class="mono" id="treasuryAddr">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</div>
+    </div>
+
+    <div class="muted" style="margin-top:10px;line-height:1.6">
+      若你尚未部署 Faucet / KUFO，請先把合約地址貼到「設定面板」。地址一旦上鏈就不可變更（除非升版再部署新器官）。
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="grid">
+      <div>
+        <div style="font-weight:1000;margin-bottom:6px">⚙️ 設定面板（本機儲存，不上鏈）</div>
+        <div class="muted" style="margin-bottom:8px">用來把「已部署合約地址」接到神殿按鍵，不會改變鏈上權限。</div>
+
+        <label class="muted">Faucet 合約地址</label>
+        <input id="inFaucet" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <label class="muted">KUFO 無人銀行合約地址</label>
+        <input id="inKUFO" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <button class="btn" id="btnSaveCfg">保存</button>
+        <button class="btn" id="btnClearCfg">清除</button>
+      </div>
+
+      <div>
+        <div style="font-weight:1000;margin-bottom:6px">🎧 影像語音客服（本機）</div>
+        <div class="muted" style="margin-bottom:8px">你的環境顯示 speechSynthesis=false（WebView 可能不支援 TTS）。我們仍提供文字客服＋語音輸入（若允許）。</div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="btnAssistant">▶️ 啟動客服</button>
+          <button class="btn" id="btnSTT">🎙️ 語音輸入</button>
+          <button class="btn" id="btnStopSTT">⏹️ 停止</button>
+        </div>
+
+        <div style="margin-top:10px" class="toast" id="assistantBox">
+          <div style="font-weight:1000">悟空客服</div>
+          <div id="assistantText" style="margin-top:6px;line-height:1.65" class="muted">按「啟動客服」會顯示規則解說。你也可以用語音輸入問問題（若裝置支援）。</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:1000">✨ 七仙女星座盤｜七星守護（Seven Fairies Constellation）</div>
+      <button class="btn small" id="btnLoadFairies">載入到許願池</button>
+    </div>
+
+    <div class="muted" style="margin-top:8px;line-height:1.65">
+      這是悟空財神殿的「祈願路由」。每位仙女對應一個座標點，並有各自的守護職責與多空氣脈。
+      <b>新增：七仙女許願池</b>（下方）—— 讓香客能選擇守護仙女、寫下願望、留下誓言。
+    </div>
+
+    <div class="zodiacGrid" style="margin-top:10px" id="fairyGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:1000">💧 七仙女許願池（Wish Pool）</div>
+      <div class="badge" id="wishCount">今日許願：0</div>
+    </div>
+
+    <div class="muted" style="margin-top:8px;line-height:1.65">
+      規則（神殿版）：許願不等於保證；發財金是「借你去做生意」的禮物，不是強索回收。<br/>
+      你可自行選擇是否「還願」。若你願意住進花果山火星齊天豪宅，需完成 <b>5000 KGEN 還願</b>（以 KUFO 無人銀行規則為準）。
+    </div>
+
+    <div class="grid" style="margin-top:10px">
+      <div>
+        <label class="muted">選擇守護仙女</label>
+        <select id="wishFairy" class="select"></select>
+
+        <div style="height:8px"></div>
+        <label class="muted">願望內容（不要留個資）</label>
+        <textarea id="wishText" class="input" rows="5" placeholder="例如：求事業運通、家庭美滿、身體健康…"></textarea>
+
+        <div style="height:8px"></div>
+        <label class="muted">誓言（選填）</label>
+        <input id="wishVow" class="input" placeholder="例如：若成，將回殿還願。" />
+
+        <div style="height:10px"></div>
+        <button class="btn" id="btnWish">投下許願</button>
+        <button class="btn" id="btnWishExport">匯出許願 JSON</button>
+      </div>
+
+      <div>
+        <div class="toast" id="wishBox">
+          <div style="font-weight:1000">許願回響</div>
+          <div id="wishOut" style="margin-top:6px;line-height:1.65" class="muted">選好仙女，寫下願望，按下「投下許願」。</div>
+        </div>
+
+        <div style="margin-top:10px" class="toast">
+          <div style="font-weight:1000">豪宅 500 席（概念）</div>
+          <div class="muted" style="margin-top:6px;line-height:1.65">
+            住進「花果山火星齊天豪宅」：以 <b>5000 KGEN</b> 還願作為席位門檻。<br/>
+            是否綁「領過發財金地址」：交由 KUFO 合約規則決定（上鏈後不可臨時改口）。
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div style="font-weight:1000">📜 品牌固定尾段</div>
+    <div style="margin-top:8px;line-height:1.75">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
+    </div>
+  </div>
+
+</div>
+
+<!-- Debug Panel -->
+<div class="debug" id="debug" style="display:block">
+  <header>
+    <div class="title">Debug Console</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn small" id="btnSelfcheck">Selfcheck</button>
+      <button class="btn small" id="btnClearLog">Clear</button>
+      <button class="btn small" id="btnHideDbg">Hide</button>
+    </div>
+  </header>
+  <pre id="log"></pre>
+</div>
+
+<script>
+(function(){
+  // ===== Version =====
+  const BOOT_VERSION = "v2.8.0-zodiac-wishpool";
+  document.getElementById('bootVer').textContent = BOOT_VERSION;
+
+  // ===== Debug =====
+  const logEl = document.getElementById('log');
+  function nowISO(){ try{return new Date().toISOString();}catch(e){return ''} }
+  function log(msg){
+    const line = `[${nowISO()}] ${msg}`;
+    console.log(line);
+    logEl.textContent = (logEl.textContent ? (logEl.textContent + "\n") : "") + line;
+    // keep last ~400 lines
+    const lines = logEl.textContent.split(/\n/);
+    if(lines.length>450) logEl.textContent = lines.slice(lines.length-450).join("\n");
+  }
+  window.__WK_LOG__ = log;
+
+  // ===== Errors Hook =====
+  function hookGlobalErrors(){
+    if (window.__wukongErrorsHooked) return;
+    window.__wukongErrorsHooked = true;
+    window.addEventListener('error', function(ev){
+      try{
+        const msg = ev && ev.message ? ev.message : 'Unknown error';
+        const src = ev && ev.filename ? ev.filename : '';
+        const ln = ev && ev.lineno ? ev.lineno : '';
+        const col = ev && ev.colno ? ev.colno : '';
+        log(`ERROR: ${msg}${src?(' @ '+src+':'+ln+':'+col):''}`);
+      }catch(e){}
+    });
+    window.addEventListener('unhandledrejection', function(ev){
+      try{
+        const r = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Unknown rejection';
+        log('PROMISE_REJECT: ' + r);
+      }catch(e){}
+    });
+  }
+
+  // ===== Selfcheck =====
+  function selfCheck(){
+    hookGlobalErrors();
+    log('selfcheck_start');
+    log('userAgent: ' + (navigator.userAgent || '(none)'));
+    log('speechSynthesis: ' + ('speechSynthesis' in window));
+    log('speechRecognition: ' + (!!(window.SpeechRecognition || window.webkitSpeechRecognition)));
+    log('ethers_loaded: ' + (typeof window.ethers !== 'undefined'));
+    log('ethereum_injected: ' + (typeof window.ethereum !== 'undefined'));
+  }
+
+  // ===== UI helpers =====
+  function toast(targetId, kind, html){
+    const el = document.getElementById(targetId);
+    el.classList.remove('ok','bad');
+    if(kind==='ok') el.classList.add('ok');
+    if(kind==='bad') el.classList.add('bad');
+    el.innerHTML = html;
+  }
+
+  // ===== Storage =====
+  const CFG_KEY = 'WK_TEMPLE_CFG_V2';
+  function loadCfg(){
+    try{ return JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; }catch(e){ return {}; }
+  }
+  function saveCfg(cfg){
+    localStorage.setItem(CFG_KEY, JSON.stringify(cfg||{}));
+  }
+
+  // ===== Wallet =====
+  const walletAddrEl = document.getElementById('walletAddr');
+  const chainInfoEl = document.getElementById('chainInfo');
+  let connectedAddr = null;
+
+  async function connectWallet(){
+    if(!window.ethereum){
+      log('wallet_connect_failed: no ethereum');
+      toast('assistantText','bad','找不到錢包注入（window.ethereum）。請用 MetaMask 內建瀏覽器開啟。');
+      return;
+    }
+    try{
+      const accounts = await window.ethereum.request({method:'eth_requestAccounts'});
+      connectedAddr = accounts && accounts[0] ? accounts[0] : null;
+      walletAddrEl.textContent = connectedAddr || '(no account)';
+      const chainId = await window.ethereum.request({method:'eth_chainId'});
+      chainInfoEl.textContent = chainId ? `${chainId}` : '(unknown)';
+      log('wallet_connected=' + connectedAddr);
+    }catch(e){
+      log('wallet_connect_error: ' + (e && e.message ? e.message : String(e)));
+    }
+  }
+
+  function disconnectWallet(){
+    // EIP-1193 has no true disconnect from dapp side; we just clear UI
+    connectedAddr = null;
+    walletAddrEl.textContent = '(not connected)';
+    chainInfoEl.textContent = '(unknown)';
+    log('wallet_ui_disconnected');
+  }
+
+  // avoid spam reconnect logs
+  let accHandlerBound = false;
+  function bindEthEvents(){
+    if(!window.ethereum || accHandlerBound) return;
+    accHandlerBound = true;
+    window.ethereum.on('accountsChanged', function(accs){
+      const a = accs && accs[0] ? accs[0] : null;
+      connectedAddr = a;
+      walletAddrEl.textContent = a || '(not connected)';
+      log('accountsChanged=' + (a||'(none)'));
+    });
+    window.ethereum.on('chainChanged', function(cid){
+      chainInfoEl.textContent = cid ? `${cid}` : '(unknown)';
+      log('chainChanged=' + cid);
+    });
+  }
+
+  // ===== Vitals + Cup =====
+  const vitalsOut = document.getElementById('vitalsOut');
+  const cupBadge = document.getElementById('cupBadge');
+  const btnFortune = document.getElementById('btnFortune');
+
+  let cupStreak = 0;
+  const CUP_MAX = 3;
+  const ST_KEY = 'WK_CUP_STREAK';
+  try{ cupStreak = parseInt(localStorage.getItem(ST_KEY)||'0',10) || 0; }catch(e){ cupStreak = 0; }
+
+  function updateCupUI(){
+    cupBadge.textContent = `聖筊連勝：${cupStreak} / ${CUP_MAX}`;
+    if(cupStreak>=CUP_MAX){
+      btnFortune.disabled = false;
+      btnFortune.style.cursor = 'pointer';
+    }else{
+      btnFortune.disabled = true;
+      btnFortune.style.cursor = 'not-allowed';
+    }
+  }
+  updateCupUI();
+
+  function renderVitals(title, lines){
+    const html = `
+      <div class="toast ok">
+        <div style="font-weight:1000">${title}</div>
+        <div style="margin-top:6px;line-height:1.7">${lines.join('<br/>')}</div>
+      </div>`;
+    vitalsOut.innerHTML = html;
+  }
+
+  function doHeartbeat(){
+    log('heartbeat');
+    const bpm = 60 + Math.floor(Math.random()*33); // 60~92
+    renderVitals('心跳回響', [
+      `Pulsar BPM：<b>${bpm}</b>`,
+      '悟空心臟：由 Faucet 合約跳動（未部署時僅記錄）',
+      '提示：你可以先用「設定面板」貼上 Faucet 地址。'
+    ]);
+  }
+  function doBreath(){
+    log('breath');
+    const breath = 12 + Math.floor(Math.random()*9); // 12~20
+    renderVitals('呼吸回響', [
+      `Breath/min：<b>${breath}</b>`,
+      '轉日窗口：00:00~00:10（UTC+8）屬於宇宙重置呼吸帶。'
+    ]);
+  }
+  function doPressure(){
+    log('pressure');
+    const s = 100 + Math.floor(Math.random()*31);
+    const d = 60 + Math.floor(Math.random()*21);
+    renderVitals('血壓回響', [
+      `BP：<b>${s}/${d}</b>`,
+      '血管：未來由 KUFO 無人銀行供血（資金流）與 Faucet 心臟共振。'
+    ]);
+  }
+
+  function doCup(){
+    log('cup_throw');
+    const ok = Math.random() < 0.5;
+    if(ok){
+      cupStreak += 1;
+      localStorage.setItem(ST_KEY, String(cupStreak));
+      updateCupUI();
+      toast('assistantText','ok',`聖筊成立。連勝 ${cupStreak}/${CUP_MAX}。`);
+      vitalsOut.innerHTML = `<div class="toast ok"><div style="font-weight:1000">聖筊：成立</div><div class="muted" style="margin-top:6px">你離「領發財金」更近一步。</div></div>`;
+    }else{
+      cupStreak = 0;
+      localStorage.setItem(ST_KEY, '0');
+      updateCupUI();
+      toast('assistantText','bad','笑筊或陰筊。連勝歸零。再來一次。');
+      vitalsOut.innerHTML = `<div class="toast bad"><div style="font-weight:1000">聖筊：未成</div><div class="muted" style="margin-top:6px">歸零重來，這就是修行。</div></div>`;
+    }
+  }
+
+  function fortuneClaim(){
+    log('fortune_click');
+    const cfg = loadCfg();
+    if(!cfg.faucet){
+      toast('assistantText','bad','尚未設定 Faucet 合約地址。請先在設定面板貼上 Faucet 地址並保存。');
+      return;
+    }
+    // UI-only placeholder: on-chain call will be wired after deploy
+    toast('assistantText','ok',`已解鎖發財金。Faucet=${cfg.faucet}（尚未執行鏈上交易，這裡先做介面驗收）。`);
+  }
+
+  // ===== Assistant (text + STT) =====
+  const assistantText = document.getElementById('assistantText');
+  function assistantStart(){
+    log('assistant_start');
+    const cfg = loadCfg();
+    const lines = [
+      '悟空心臟由 Faucet 合約自動跳動；母機只救援，不擁有。',
+      '你可以：心跳、呼吸、血壓、擲筊三連勝解鎖發財金。',
+      `目前設定：Faucet=${cfg.faucet||'(未設定)'}；KUFO=${cfg.kufo||'(未設定)'}.`,
+      '新增：七仙女許願池（選仙女、寫願望、匯出 JSON）。'
+    ];
+    assistantText.innerHTML = lines.join('<br/>');
+  }
+
+  let rec = null;
+  function sttStart(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      log('stt_unsupported');
+      toast('assistantText','bad','本裝置不支援語音辨識（SpeechRecognition）。');
+      return;
+    }
+    if(rec){ try{rec.stop();}catch(e){} rec=null; }
+    rec = new SR();
+    rec.lang = 'zh-TW';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onstart = function(){ log('stt_start'); toast('assistantText','ok','我在聽。說完會自動停。'); };
+    rec.onerror = function(e){ log('stt_error: ' + (e && e.error ? e.error : 'unknown')); };
+    rec.onresult = function(ev){
+      try{
+        const t = ev.results && ev.results[0] && ev.results[0][0] ? ev.results[0][0].transcript : '';
+        log('stt_text: ' + t);
+        // simple router
+        const txt = (t||'').trim();
+        if(!txt){ toast('assistantText','bad','沒有聽到內容。'); return; }
+        if(txt.includes('心跳')) doHeartbeat();
+        else if(txt.includes('呼吸')) doBreath();
+        else if(txt.includes('血壓')) doPressure();
+        else if(txt.includes('擲') || txt.includes('筊')) doCup();
+        else if(txt.includes('許願')) document.getElementById('wishText').focus();
+        else toast('assistantText','ok','收到：' + txt + '<br/>你可以說：心跳、呼吸、血壓、擲筊、許願。');
+      }catch(e){}
+    };
+    rec.onend = function(){ log('stt_stop'); };
+    try{ rec.start(); }catch(e){ log('stt_start_fail: ' + (e && e.message ? e.message : String(e))); }
+  }
+  function sttStop(){ try{ if(rec) rec.stop(); }catch(e){} log('stt_stop_btn'); }
+
+  // ===== Seven Fairies Data =====
+  const FAIRIES = [
+    {id:'f1', name:'大仙女（巧雲）', star:'天樞', mode:'做空', point:14520, duty:'風調雨順'},
+    {id:'f2', name:'二仙女（巧虹）', star:'天璇', mode:'做多', point:14866, duty:'家庭美滿'},
+    {id:'f3', name:'三仙女（巧芝）', star:'天璣', mode:'做空', point:16184, duty:'育子收驚'},
+    {id:'f4', name:'四仙女（巧仙）', star:'天權', mode:'做多', point:16888, duty:'事業運通'},
+    {id:'f5', name:'五仙女（巧蘭）', star:'天衡', mode:'做空', point:17347, duty:'長命百歲'},
+    {id:'f6', name:'六仙女（巧梅）', star:'闓陽', mode:'做多', point:18056, duty:'身體健康'},
+    {id:'f7', name:'七仙女（巧靈）', star:'瑤光', mode:'多單退', point:18459, duty:'感情圓滿'}
+  ];
+
+  function renderFairies(){
+    const grid = document.getElementById('fairyGrid');
+    grid.innerHTML = '';
+    FAIRIES.forEach(f=>{
+      const el = document.createElement('div');
+      el.className = 'node';
+      el.innerHTML = `
+        <h3>⭐ ${f.star}｜${f.name}</h3>
+        <div class="muted" style="margin-top:6px;line-height:1.65">
+          座標點：<b>${f.point}</b><br/>
+          專掌：<b>${f.duty}</b><br/>
+          氣脈：<b>${f.mode}</b>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn small" data-wish="${f.id}">投向許願池</button>
+        </div>
+      `;
+      grid.appendChild(el);
+    });
+
+    // bind wish buttons
+    grid.querySelectorAll('button[data-wish]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-wish');
+        const sel = document.getElementById('wishFairy');
+        sel.value = id;
+        document.getElementById('wishText').focus();
+        log('wish_route=' + id);
+      });
+    });
+  }
+
+  function fillWishSelect(){
+    const sel = document.getElementById('wishFairy');
+    sel.innerHTML = '';
+    FAIRIES.forEach(f=>{
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = `${f.star}｜${f.name}｜${f.duty}｜${f.mode}｜${f.point}`;
+      sel.appendChild(opt);
+    });
+  }
+
+  // ===== Wish Pool =====
+  const WISH_KEY = 'WK_WISH_POOL_V1';
+  function loadWishes(){
+    try{ return JSON.parse(localStorage.getItem(WISH_KEY)||'[]') || []; }catch(e){ return []; }
+  }
+  function saveWishes(arr){ localStorage.setItem(WISH_KEY, JSON.stringify(arr||[])); }
+  function updateWishCount(){
+    const arr = loadWishes();
+    // count today
+    const today = new Date();
+    const ymd = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,'0')+"-"+String(today.getDate()).padStart(2,'0');
+    const n = arr.filter(x=> (x && x.ymd===ymd)).length;
+    document.getElementById('wishCount').textContent = `今日許願：${n}`;
+  }
+
+  function makeWishObject(){
+    const fid = document.getElementById('wishFairy').value;
+    const f = FAIRIES.find(x=>x.id===fid) || FAIRIES[0];
+    const text = (document.getElementById('wishText').value||'').trim();
+    const vow = (document.getElementById('wishVow').value||'').trim();
+    const t = new Date();
+    const ymd = t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,'0')+"-"+String(t.getDate()).padStart(2,'0');
+    return {
+      boot_version: BOOT_VERSION,
+      at: t.toISOString(),
+      ymd,
+      wallet: connectedAddr,
+      fairy: {
+        id: f.id, name: f.name, star: f.star, duty: f.duty, mode: f.mode, point: f.point
+      },
+      wish: {
+        text,
+        vow
+      }
+    };
+  }
+
+  function wishSubmit(){
+    log('wish_submit');
+    const obj = makeWishObject();
+    if(!obj.wish.text){
+      toast('wishOut','bad','請先寫下願望內容。');
+      return;
+    }
+    const arr = loadWishes();
+    arr.push(obj);
+    saveWishes(arr);
+    updateWishCount();
+    toast('wishOut','ok',`已投下許願。<br/>守護：<b>${obj.fairy.star}</b>｜${obj.fairy.name}<br/>願望：${escapeHtml(obj.wish.text)}`);
+  }
+
+  function exportWish(){
+    log('wish_export');
+    const obj = makeWishObject();
+    if(!obj.wish.text){
+      toast('wishOut','bad','請先寫下願望內容後再匯出。');
+      return;
+    }
+    downloadJson(`wish_${obj.fairy.id}_${Date.now()}.json`, obj);
+    toast('wishOut','ok','已匯出 JSON（下載或分享給母機）。');
+  }
+
+  // ===== Export State =====
+  function downloadJson(filename, obj){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1200);
+  }
+
+  function exportState(){
+    log('export_json');
+    const cfg = loadCfg();
+    const state = {
+      boot_version: BOOT_VERSION,
+      at: new Date().toISOString(),
+      wallet: connectedAddr,
+      chain: chainInfoEl.textContent,
+      cup_streak: cupStreak,
+      cfg,
+      wish_today_count: document.getElementById('wishCount').textContent,
+    };
+    downloadJson(`wukong_temple_state_${Date.now()}.json`, state);
+  }
+
+  // ===== Small utils =====
+  function escapeHtml(str){
+    return String(str||'')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
+  }
+
+  // ===== Bind UI =====
+  document.getElementById('btnSelfcheck').addEventListener('click', selfCheck);
+  document.getElementById('btnClearLog').addEventListener('click', ()=>{ logEl.textContent=''; log('log_cleared'); });
+  document.getElementById('btnHideDbg').addEventListener('click', ()=>{ document.getElementById('debug').style.display='none'; });
+
+  document.getElementById('btnHeartbeat').addEventListener('click', doHeartbeat);
+  document.getElementById('btnBreath').addEventListener('click', doBreath);
+  document.getElementById('btnPressure').addEventListener('click', doPressure);
+  document.getElementById('btnCup').addEventListener('click', doCup);
+  document.getElementById('btnFortune').addEventListener('click', fortuneClaim);
+
+  document.getElementById('btnConnect').addEventListener('click', ()=>{ bindEthEvents(); connectWallet(); });
+  document.getElementById('btnDisconnect').addEventListener('click', disconnectWallet);
+  document.getElementById('btnExport').addEventListener('click', exportState);
+
+  document.getElementById('btnAssistant').addEventListener('click', assistantStart);
+  document.getElementById('btnSTT').addEventListener('click', sttStart);
+  document.getElementById('btnStopSTT').addEventListener('click', sttStop);
+
+  document.getElementById('btnSaveCfg').addEventListener('click', ()=>{
+    const faucet = (document.getElementById('inFaucet').value||'').trim();
+    const kufo = (document.getElementById('inKUFO').value||'').trim();
+    const cfg = loadCfg();
+    if(faucet) cfg.faucet = faucet;
+    if(kufo) cfg.kufo = kufo;
+    saveCfg(cfg);
+    applyCfgToUI(cfg);
+    log('cfg_saved');
+    toast('assistantText','ok','設定已保存（本機）。');
+  });
+
+  document.getElementById('btnClearCfg').addEventListener('click', ()=>{
+    saveCfg({});
+    applyCfgToUI({});
+    document.getElementById('inFaucet').value='';
+    document.getElementById('inKUFO').value='';
+    log('cfg_cleared');
+    toast('assistantText','ok','已清除設定（本機）。');
+  });
+
+  document.getElementById('btnLoadFairies').addEventListener('click', ()=>{
+    fillWishSelect();
+    toast('wishOut','ok','已載入七仙女到許願池。');
+    log('fairies_loaded_to_wishpool');
+  });
+
+  document.getElementById('btnWish').addEventListener('click', wishSubmit);
+  document.getElementById('btnWishExport').addEventListener('click', exportWish);
+
+  function applyCfgToUI(cfg){
+    document.getElementById('faucetAddr').textContent = cfg.faucet || '(to be set after deploy)';
+    document.getElementById('kufoAddr').textContent = cfg.kufo || '(to be set after deploy)';
+  }
+
+  // ===== Boot init =====
+  (function init(){
+    log('boot_version=' + BOOT_VERSION);
+    // render fairies + wish select
+    renderFairies();
+    fillWishSelect();
+    updateWishCount();
+
+    // load cfg
+    const cfg = loadCfg();
+    applyCfgToUI(cfg);
+    if(cfg.faucet) document.getElementById('inFaucet').value = cfg.faucet;
+    if(cfg.kufo) document.getElementById('inKUFO').value = cfg.kufo;
+
+    // first selfcheck
+    selfCheck();
+  })();
+
+})();
+</script>
+
+</body>
+</html>
