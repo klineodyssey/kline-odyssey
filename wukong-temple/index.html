@@ -137,6 +137,32 @@
         <input id="inKUFO" class="input mono" placeholder="0x..." />
 
         <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #1（選填）</label>
+        <input id="inRecycle1" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #2（選填）</label>
+        <input id="inRecycle2" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #3（選填）</label>
+        <input id="inRecycle3" class="input mono" placeholder="0x..." />
+
+
+
+        <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #1（選填）</label>
+        <input id="inRecycle1" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #2（選填）</label>
+        <input id="inRecycle2" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
+        <label class="muted">發財金回收地址 #3（選填）</label>
+        <input id="inRecycle3" class="input mono" placeholder="0x..." />
+
+        <div style="height:8px"></div>
         <button class="btn" id="btnSaveCfg">保存</button>
         <button class="btn" id="btnClearCfg">清除</button>
       </div>
@@ -339,7 +365,112 @@
 
 
   <div class="card">
-    <div style="font-weight:1000">📜 品牌固定尾段</div>
+    <div style="font-weight:1000">
+  <section class="section">
+    <div class="card">
+      <div class="h1">🧬 宇宙細包（Microcell）｜商店紅利回路</div>
+      <div class="muted">
+        你可以把「人類商店」接進 KGEN：顧客消費→獲得 KGEN 紅利；商家定期繳款→由 KUFO/回收地址形成回路；回路完成後可觸發「生命誕生」。
+        目前此區為 <b>本機原型</b>：只記錄、不上鏈。上鏈後由 KUFO/Tax Router 接管結算。
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="grid2">
+        <div>
+          <label class="muted">細包名稱（商店名）</label>
+          <input id="mc_name" class="input" placeholder="例如：悟空猴毛服飾店" />
+        </div>
+        <div>
+          <label class="muted">類別（可自訂）</label>
+          <input id="mc_category" class="input" placeholder="例如：服飾 / 餐飲 / 心臟工坊 / 外星科技" />
+        </div>
+        <div>
+          <label class="muted">物種（第13生肖，可自訂）</label>
+          <input id="mc_species" class="input" placeholder="例如：變型金鋼 / 大象 / 蟑螂 / 猿人 / 新人類 / 無機生命" />
+        </div>
+        <div>
+          <label class="muted">座標（出生地 / 地點，可自訂）</label>
+          <input id="mc_location" class="input mono" placeholder="例如：11520 / 8888 / 18888 / 你自訂" />
+        </div>
+        <div>
+          <label class="muted">紅利比例（bps，100=1%）</label>
+          <input id="mc_reward_bps" class="input mono" placeholder="例如：88" />
+        </div>
+        <div>
+          <label class="muted">繳款路由（回收地址）</label>
+          <select id="mc_route" class="input">
+            <option value="KUFO">KUFO 無人銀行</option>
+            <option value="PG">公益金庫（Public Good Treasury）</option>
+            <option value="R1">回收地址 #1</option>
+            <option value="R2">回收地址 #2</option>
+            <option value="R3">回收地址 #3</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <button class="btn" id="btnMcCreate">建立細包</button>
+      <button class="btn ghost" id="btnMcExport">匯出細包 JSON</button>
+      <button class="btn ghost" id="btnMcClear">清除細包</button>
+
+      <div style="height:10px"></div>
+      <div class="mono small" id="mc_stats">細包：0</div>
+      <div class="mono small" id="mc_list"></div>
+    </div>
+
+    <div class="card">
+      <div class="h1">🏭 生命工廠（Life Factory）｜生命誕生（概念）</div>
+      <div class="muted">
+        當你完成：點光明燈 / 七仙女許願 / 聖筊解鎖發財金 / 細包回路（可選）—— 就能在「生命工廠」生成一個宇宙生命體的出生證明。
+        目前為本機 JSON，未上鏈；未來上鏈後可由 KUFO 鑄造「生命證」或開啟器官合約。
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="grid2">
+        <div>
+          <label class="muted">生命名稱</label>
+          <input id="lf_name" class="input" placeholder="例如：豬八戒 / 蜘蛛機 / 你的超光速飛碟機" />
+        </div>
+        <div>
+          <label class="muted">生命物種（任意）</label>
+          <input id="lf_species" class="input" placeholder="例如：豬 / 猴毛 / 變型金鋼 / 蟻人 / 外星人" />
+        </div>
+        <div>
+          <label class="muted">出生地（地圖座標）</label>
+          <select id="lf_birthplace" class="input">
+            <option value="11520">11520｜花果山台灣</option>
+            <option value="8888">8888｜高老莊</option>
+            <option value="18888">18888｜凌霄寶殿</option>
+            <option value="511111">511111｜齊天大聖宮</option>
+            <option value="custom">自訂</option>
+          </select>
+        </div>
+        <div>
+          <label class="muted">自訂出生地（選填）</label>
+          <input id="lf_birthplace_custom" class="input mono" placeholder="例如：你自訂座標" />
+        </div>
+        <div>
+          <label class="muted">Pulsar 心跳頻率（Hz，可自訂）</label>
+          <input id="lf_pulsar_hz" class="input mono" placeholder="例如：1.388 / 11.5 / 你自訂" />
+        </div>
+        <div>
+          <label class="muted">時光載具（選填）</label>
+          <input id="lf_ship" class="input" placeholder="例如：超光速口袋型時光隱形飛碟機" />
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <button class="btn" id="btnLfCheck">檢查誕生條件</button>
+      <button class="btn" id="btnLfBirth">生成生命蛋 JSON</button>
+      <button class="btn ghost" id="btnLfExport">匯出生命工廠 JSON</button>
+
+      <div style="height:10px"></div>
+      <div class="mono small" id="lf_status">狀態：未檢查</div>
+      <div class="mono small" id="lf_echo">（這裡會回報誕生條件）</div>
+    </div>
+  </section>
+
+📜 品牌固定尾段</div>
     <div style="margin-top:8px;line-height:1.75">
       PrimeForge 以母機之名，開啟金融生命。<br/>
       花果山台灣・信念不滅・市場無界。<br/>
@@ -950,9 +1081,15 @@
   document.getElementById('btnSaveCfg').addEventListener('click', ()=>{
     const faucet = (document.getElementById('inFaucet').value||'').trim();
     const kufo = (document.getElementById('inKUFO').value||'').trim();
+    const r1 = (document.getElementById('inRecycle1')?.value||'').trim();
+    const r2 = (document.getElementById('inRecycle2')?.value||'').trim();
+    const r3 = (document.getElementById('inRecycle3')?.value||'').trim();
     const cfg = loadCfg();
     if(faucet) cfg.faucet = faucet;
     if(kufo) cfg.kufo = kufo;
+    if(r1) cfg.recycle1 = r1; else delete cfg.recycle1;
+    if(r2) cfg.recycle2 = r2; else delete cfg.recycle2;
+    if(r3) cfg.recycle3 = r3; else delete cfg.recycle3;
     saveCfg(cfg);
     applyCfgToUI(cfg);
     log('cfg_saved');
@@ -997,6 +1134,12 @@
     applyCfgToUI(cfg);
     if(cfg.faucet) document.getElementById('inFaucet').value = cfg.faucet;
     if(cfg.kufo) document.getElementById('inKUFO').value = cfg.kufo;
+    if(cfg.recycle1 && document.getElementById('inRecycle1')) document.getElementById('inRecycle1').value = cfg.recycle1;
+    if(cfg.recycle2 && document.getElementById('inRecycle2')) document.getElementById('inRecycle2').value = cfg.recycle2;
+    if(cfg.recycle3 && document.getElementById('inRecycle3')) document.getElementById('inRecycle3').value = cfg.recycle3;
+    if(cfg.recycle1 && document.getElementById('inRecycle1')) document.getElementById('inRecycle1').value = cfg.recycle1;
+    if(cfg.recycle2 && document.getElementById('inRecycle2')) document.getElementById('inRecycle2').value = cfg.recycle2;
+    if(cfg.recycle3 && document.getElementById('inRecycle3')) document.getElementById('inRecycle3').value = cfg.recycle3;
 
 
     // sound ui
@@ -1380,3 +1523,257 @@
 
 </body>
 </html>
+
+  // ------------------------------
+  // Microcell Shop (local prototype)
+  // ------------------------------
+  const MC_KEY = 'wukong_microcells_v1';
+
+  function mcLoad(){
+    try{
+      const raw = localStorage.getItem(MC_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function mcSave(arr){
+    try{ localStorage.setItem(MC_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+  function mcResolveRoute(route, cfg){
+    if(route === 'KUFO') return cfg.kufo || '';
+    if(route === 'PG') return STATE.publicGood || '';
+    if(route === 'R1') return cfg.recycle1 || '';
+    if(route === 'R2') return cfg.recycle2 || '';
+    if(route === 'R3') return cfg.recycle3 || '';
+    return '';
+  }
+  function mcRender(){
+    const listEl = document.getElementById('mc_list');
+    const statsEl = document.getElementById('mc_stats');
+    if(!listEl || !statsEl) return;
+    const arr = mcLoad();
+    statsEl.textContent = '細包：' + arr.length;
+    if(arr.length === 0){
+      listEl.textContent = '（尚無細包）';
+      return;
+    }
+    const lines = arr.slice().reverse().map(x=>{
+      const pay = x.payAddress ? (' -> ' + x.payAddress) : '';
+      return `• ${x.name}｜${x.category||'-'}｜${x.species||'-'}｜座標 ${x.location||'-'}｜reward ${x.rewardBps||0}bps｜${x.route||'-'}${pay}`;
+    });
+    listEl.textContent = lines.join('\n');
+  }
+  function mcInitUI(){
+    const btnCreate = document.getElementById('btnMcCreate');
+    const btnExport = document.getElementById('btnMcExport');
+    const btnClear = document.getElementById('btnMcClear');
+    if(btnCreate){
+      btnCreate.addEventListener('click', ()=>{
+        const name = (document.getElementById('mc_name')?.value||'').trim();
+        const category = (document.getElementById('mc_category')?.value||'').trim();
+        const species = (document.getElementById('mc_species')?.value||'').trim();
+        const location = (document.getElementById('mc_location')?.value||'').trim();
+        const rewardBps = parseInt((document.getElementById('mc_reward_bps')?.value||'').trim()||'0', 10) || 0;
+        const route = (document.getElementById('mc_route')?.value||'KUFO').trim();
+
+        if(!name){
+          wukongSpeak('請先輸入細包名稱。');
+          log('mc_create_failed: no_name');
+          return;
+        }
+
+        const cfg = loadCfg();
+        const payAddress = mcResolveRoute(route, cfg);
+        const arr = mcLoad();
+        const rec = {
+          id: 'mc_' + Math.random().toString(16).slice(2,10),
+          ts: new Date().toISOString(),
+          owner: (STATE.wallet||''),
+          name, category, species, location,
+          rewardBps,
+          route,
+          payAddress
+        };
+        arr.push(rec);
+        mcSave(arr);
+        mcRender();
+        wukongSpeak('細包已建立。');
+        log('mc_created=' + rec.id);
+      });
+    }
+    if(btnExport){
+      btnExport.addEventListener('click', ()=>{
+        const cfg = loadCfg();
+        const payload = {
+          boot_version: BOOT_VERSION,
+          exported_at: new Date().toISOString(),
+          wallet: STATE.wallet || null,
+          config: {
+            kufo: cfg.kufo || null,
+            publicGood: STATE.publicGood || null,
+            recycle1: cfg.recycle1 || null,
+            recycle2: cfg.recycle2 || null,
+            recycle3: cfg.recycle3 || null
+          },
+          microcells: mcLoad()
+        };
+        downloadJson('wukong_microcells.json', payload);
+        wukongSpeak('已匯出細包 JSON。');
+        log('mc_export');
+      });
+    }
+    if(btnClear){
+      btnClear.addEventListener('click', ()=>{
+        mcSave([]);
+        mcRender();
+        wukongSpeak('細包已清除。');
+        log('mc_clear');
+      });
+    }
+    mcRender();
+  }
+
+  // ------------------------------
+  // Life Factory (local prototype)
+  // ------------------------------
+  const LF_KEY = 'wukong_lifefactory_v1';
+
+  function lfLoad(){
+    try{
+      const raw = localStorage.getItem(LF_KEY);
+      if(!raw) return { births: [] };
+      const obj = JSON.parse(raw);
+      if(!obj || typeof obj !== 'object') return { births: [] };
+      if(!Array.isArray(obj.births)) obj.births = [];
+      return obj;
+    }catch(e){ return { births: [] }; }
+  }
+  function lfSave(obj){
+    try{ localStorage.setItem(LF_KEY, JSON.stringify(obj)); }catch(e){}
+  }
+  function lfGetPrereq(){
+    const lamps = lampLoad();
+    const wishes = wishLoad();
+    const microcells = mcLoad();
+    const cup = STATE.cupStreak || 0;
+
+    return {
+      cupStreak: cup,
+      lamps: lamps.length,
+      wishes: wishes.items?.length || 0,
+      microcells: microcells.length
+    };
+  }
+  function lfCheckAndExplain(){
+    const p = lfGetPrereq();
+    const okCup = p.cupStreak >= 3;
+    const okLamp = p.lamps >= 1;
+    const okWish = p.wishes >= 1;
+    // microcell is optional, but recommended
+    const ok = okCup && okLamp && okWish;
+
+    const lines = [
+      `聖筊連勝：${p.cupStreak}（需 >= 3） => ${okCup ? 'OK' : '未達'}`,
+      `光明燈：${p.lamps}（需 >= 1） => ${okLamp ? 'OK' : '未達'}`,
+      `許願：${p.wishes}（需 >= 1） => ${okWish ? 'OK' : '未達'}`,
+      `細包：${p.microcells}（選配）`
+    ];
+    return { ok, lines, p };
+  }
+  function lfInitUI(){
+    const btnCheck = document.getElementById('btnLfCheck');
+    const btnBirth = document.getElementById('btnLfBirth');
+    const btnExport = document.getElementById('btnLfExport');
+    const elStatus = document.getElementById('lf_status');
+    const elEcho = document.getElementById('lf_echo');
+
+    function paintCheck(){
+      const r = lfCheckAndExplain();
+      if(elStatus) elStatus.textContent = '狀態：' + (r.ok ? '可誕生' : '條件未齊');
+      if(elEcho) elEcho.textContent = r.lines.join('｜');
+      return r;
+    }
+
+    if(btnCheck){
+      btnCheck.addEventListener('click', ()=>{
+        const r = paintCheck();
+        wukongSpeak(r.ok ? '條件已齊，可以生成生命蛋。' : '條件未齊，請先完成參拜流程。');
+        log('lf_check');
+      });
+    }
+
+    if(btnBirth){
+      btnBirth.addEventListener('click', ()=>{
+        const r = paintCheck();
+        if(!r.ok){
+          wukongSpeak('條件未齊，暫不可誕生。');
+          log('lf_birth_blocked');
+          return;
+        }
+
+        const name = (document.getElementById('lf_name')?.value||'').trim();
+        const species = (document.getElementById('lf_species')?.value||'').trim();
+        const bp = (document.getElementById('lf_birthplace')?.value||'11520').trim();
+        const bpCustom = (document.getElementById('lf_birthplace_custom')?.value||'').trim();
+        const pulsarHz = (document.getElementById('lf_pulsar_hz')?.value||'').trim();
+        const ship = (document.getElementById('lf_ship')?.value||'').trim();
+
+        if(!name || !species){
+          wukongSpeak('請輸入生命名稱與物種。');
+          log('lf_birth_failed: missing_fields');
+          return;
+        }
+
+        const cfg = loadCfg();
+        const birthPlace = (bp === 'custom') ? (bpCustom || 'custom') : bp;
+
+        const egg = {
+          id: 'life_' + Math.random().toString(16).slice(2,10),
+          boot_version: BOOT_VERSION,
+          created_at: new Date().toISOString(),
+          owner_wallet: STATE.wallet || null,
+          name,
+          species,
+          birth_place: birthPlace,
+          pulsar_hz: pulsarHz || null,
+          ship: ship || null,
+          prerequisite_snapshot: r.p,
+          linked: {
+            faucet: cfg.faucet || null,
+            kufo: cfg.kufo || null,
+            publicGood: STATE.publicGood || null
+          },
+          organs_needed: ['heart', 'brain', 'lungs', 'blood', 'skin', 'memory']
+        };
+
+        const store = lfLoad();
+        store.births.push(egg);
+        lfSave(store);
+
+        downloadJson('wukong_life_egg.json', egg);
+        wukongSpeak('生命蛋已生成。');
+        log('lf_birth=' + egg.id);
+      });
+    }
+
+    if(btnExport){
+      btnExport.addEventListener('click', ()=>{
+        const payload = lfLoad();
+        downloadJson('wukong_life_factory.json', {
+          boot_version: BOOT_VERSION,
+          exported_at: new Date().toISOString(),
+          wallet: STATE.wallet || null,
+          data: payload
+        });
+        wukongSpeak('已匯出生命工廠 JSON。');
+        log('lf_export');
+      });
+    }
+
+    // initial paint
+    paintCheck();
+  }
+
+
+
