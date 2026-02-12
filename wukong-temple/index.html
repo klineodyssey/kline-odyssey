@@ -221,6 +221,123 @@
 
   </div>
 
+<!-- =========================
+🕯️ Zodiac Lamps + Free Species Registry (Local / Future On-chain)
+========================= -->
+<section class="card" id="zodiacLampsCard">
+  <h2>🕯️ 12 生肖光明燈 × 第13肖自由物種（Prototype）</h2>
+  <p class="muted">
+    這一區是「點燈登記」的標準化模板：先用本機儲存做可再現原型，等合約部署後再把按鍵接上鏈上 mint / renew。
+    <br/>規則（預設）：12 生肖每生肖 <b>72</b> 席；第13肖（自由物種）<b>108</b> 席。每筆登記為「一年期」（可續）。
+  </p>
+
+  <div class="grid2">
+    <div class="box">
+      <h3>🧾 合約（可選）</h3>
+      <div class="row">
+        <label>🕯️ Lamp Contract（可留空）</label>
+        <input id="inLamp" type="text" placeholder="0x...（部署後貼上）" />
+        <div class="btnRow">
+          <button class="btn small" id="btnLampSave">保存</button>
+          <button class="btn small ghost" id="btnLampClear">清除</button>
+        </div>
+        <p class="hint">此欄位僅影響「上鏈點燈」按鍵是否啟用，不改變鏈上權限。</p>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>📊 名額狀態</h3>
+      <div class="kv">
+        <div><b>年度</b></div><div><span id="lampYear"></span></div>
+        <div><b>12生肖剩餘總席</b></div><div><span id="lampRemain12"></span></div>
+        <div><b>自由物種剩餘席</b></div><div><span id="lampRemainFree"></span></div>
+      </div>
+      <div class="btnRow">
+        <button class="btn small" id="btnLampResetYear">新年度重置（本機）</button>
+        <button class="btn small ghost" id="btnLampExport">匯出登記 JSON</button>
+      </div>
+      <p class="hint">本機版本不收費；「點燈要用電要收錢」會在合約版透過 mint/renew 費用處理。</p>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>🧬 點燈登記</h3>
+    <div class="grid3">
+      <div class="row">
+        <label>選擇類型</label>
+        <select id="lampType">
+          <option value="zodiac">12生肖（固定）</option>
+          <option value="free">第13肖・自由物種（自定）</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>生肖 / 類別</label>
+        <select id="lampZodiac"></select>
+      </div>
+      <div class="row">
+        <label>席位（Slot）</label>
+        <div class="inline">
+          <input id="lampSlot" type="number" min="1" step="1" placeholder="留空=自動配位" />
+          <button class="btn small ghost" id="btnLampAutoSlot">自動配位</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>名字（可用暱稱）</label>
+        <input id="lampName" type="text" placeholder="例如：巧雲 / 阿斗 / 旅人001" />
+      </div>
+      <div class="row">
+        <label>物種（自由物種才需填）</label>
+        <input id="lampSpecies" type="text" placeholder="例如：蟑螂、螞蟻、變形金剛、大象、外星人、超人、蟻人、悟空猴毛…" />
+      </div>
+      <div class="row">
+        <label>Pulsar 心率（每小時脈衝）</label>
+        <input id="lampPulsar" type="number" min="1" step="1" value="72" />
+      </div>
+
+      <div class="row">
+        <label>願望 / 使命（不要留個資）</label>
+        <input id="lampWish" type="text" placeholder="例如：平安、健康、事業運通、回到過去與未來…" />
+      </div>
+      <div class="row">
+        <label>KUFO 旅票（可選）</label>
+        <select id="lampKUFO">
+          <option value="0">不搭乘</option>
+          <option value="1">搭乘 KUFO（超光速口袋型時光隱型飛碟）</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>期限</label>
+        <select id="lampTerm">
+          <option value="1y">一年期</option>
+          <option value="5y">五年期（概念）</option>
+          <option value="500y">五百年（五指山模式・概念）</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btnRow">
+      <button class="btn" id="btnLampRegister">點亮光明燈（本機測試）</button>
+      <button class="btn ghost" id="btnLampOnchain" disabled>上鏈點燈（需要合約＋錢包）</button>
+      <button class="btn ghost" id="btnLampLookup">查詢席位</button>
+      <button class="btn danger ghost" id="btnLampClearLocal">清除本機登記</button>
+    </div>
+
+    <div class="box inner">
+      <h4>📜 登記回饋</h4>
+      <pre id="lampEcho" class="pre">尚未點燈。</pre>
+    </div>
+
+    <div class="box inner">
+      <h4>🗺️ 已點亮清單（本機）</h4>
+      <div class="muted" id="lampListHint">選擇類型/生肖後按「查詢席位」或點燈後會自動刷新。</div>
+      <div id="lampList" class="tableWrap"></div>
+    </div>
+  </div>
+</section>
+
+
+
   <div class="card">
     <div style="font-weight:1000">📜 品牌固定尾段</div>
     <div style="margin-top:8px;line-height:1.75">
@@ -268,7 +385,7 @@
 <script>
 (function(){
   // ===== Version =====
-  const BOOT_VERSION = "v2.8.5-ttsfix3";
+  const BOOT_VERSION = "v2.9.0-lamps-v1";
   document.getElementById('bootVer').textContent = BOOT_VERSION;
 
   // ===== Debug =====
@@ -872,6 +989,8 @@
     renderFairies();
     fillWishSelect();
     updateWishCount();
+    // lamps
+    try{ lampInitUI(); }catch(e){ log('lamp_init_fail '+(e&&e.message?e.message:String(e))); }
 
     // load cfg
     const cfg = loadCfg();
@@ -892,7 +1011,367 @@
         bt.addEventListener('click', ()=>{ wukongSound('悟空在此'); log('sound_test'); }, true);
       }
     }catch(e){}
-    // first selfcheck
+    
+  // =========================
+  // 🕯️ Zodiac Lamps + Free Species Registry (Local-first)
+  // =========================
+  const LS_LAMP_KEY = "wukong_lamps_v1";
+  const LS_LAMP_CFG = "wukong_lamps_cfg_v1";
+
+  const ZODIAC_LIST = [
+    {key:"rat",   name:"鼠"},
+    {key:"ox",    name:"牛"},
+    {key:"tiger", name:"虎"},
+    {key:"rabbit",name:"兔"},
+    {key:"dragon",name:"龍"},
+    {key:"snake", name:"蛇"},
+    {key:"horse", name:"馬"},
+    {key:"goat",  name:"羊"},
+    {key:"monkey",name:"猴"},
+    {key:"rooster",name:"雞"},
+    {key:"dog",   name:"狗"},
+    {key:"pig",   name:"豬"},
+  ];
+  const FREE_SPECIES = {key:"free", name:"第13肖・自由物種"};
+
+  function lampNowYear(){
+    try { return new Date().getFullYear(); } catch(e){ return 2026; }
+  }
+
+  function lampLoadCfg(){
+    try { return JSON.parse(localStorage.getItem(LS_LAMP_CFG) || "{}") || {}; }
+    catch(e){ return {}; }
+  }
+  function lampSaveCfg(cfg){
+    localStorage.setItem(LS_LAMP_CFG, JSON.stringify(cfg||{}));
+  }
+
+  function lampLoadState(){
+    const year = lampNowYear();
+    let st;
+    try { st = JSON.parse(localStorage.getItem(LS_LAMP_KEY) || "null"); } catch(e){ st=null; }
+    if(!st || typeof st!=="object") st = {year, zodiac:{}, free:{}};
+    if(!st.year) st.year = year;
+
+    // 年度不同：不自動抹除，讓使用者手動 reset（避免意外消失）
+    if(!st.zodiac) st.zodiac = {};
+    if(!st.free) st.free = {};
+    return st;
+  }
+
+  function lampSaveState(st){
+    localStorage.setItem(LS_LAMP_KEY, JSON.stringify(st||{}));
+  }
+
+  function lampMaxSlots(type){
+    return (type==="free") ? 108 : 72;
+  }
+
+  function lampKey(type, zodiacKey){
+    return (type==="free") ? "free" : (zodiacKey || "rat");
+  }
+
+  function lampCountUsed(st, type, zodiacKey){
+    const key = lampKey(type, zodiacKey);
+    const bucket = (type==="free") ? (st.free||{}) : (st.zodiac||{});
+    const rec = bucket[key] || {};
+    return Object.keys(rec).length;
+  }
+
+  function lampRemain(st){
+    // total remain for 12 zodiac
+    let used12=0;
+    for(const z of ZODIAC_LIST){
+      used12 += lampCountUsed(st, "zodiac", z.key);
+    }
+    const total12 = 72 * ZODIAC_LIST.length;
+    const remain12 = Math.max(0, total12 - used12);
+
+    const usedFree = lampCountUsed(st, "free", "free");
+    const totalFree = 108;
+    const remainFree = Math.max(0, totalFree - usedFree);
+    return {remain12, remainFree, used12, usedFree, total12, totalFree};
+  }
+
+  function lampFindNextFreeSlot(st, type, zodiacKey){
+    const key = lampKey(type, zodiacKey);
+    const bucket = (type==="free") ? (st.free||{}) : (st.zodiac||{});
+    const rec = bucket[key] || {};
+    const max = lampMaxSlots(type);
+    for(let i=1;i<=max;i++){
+      if(!rec[String(i)]) return i;
+    }
+    return null;
+  }
+
+  function lampEnsureBucket(st, type, zodiacKey){
+    const key = lampKey(type, zodiacKey);
+    if(type==="free"){
+      st.free = st.free || {};
+      st.free[key] = st.free[key] || {};
+      return st.free[key];
+    }else{
+      st.zodiac = st.zodiac || {};
+      st.zodiac[key] = st.zodiac[key] || {};
+      return st.zodiac[key];
+    }
+  }
+
+  function lampRenderSelect(){
+    const typeSel = document.getElementById("lampType");
+    const zSel = document.getElementById("lampZodiac");
+    if(!typeSel || !zSel) return;
+
+    const type = typeSel.value || "zodiac";
+    zSel.innerHTML = "";
+    if(type==="free"){
+      const opt = document.createElement("option");
+      opt.value = "free";
+      opt.textContent = FREE_SPECIES.name;
+      zSel.appendChild(opt);
+    }else{
+      for(const z of ZODIAC_LIST){
+        const opt = document.createElement("option");
+        opt.value = z.key;
+        opt.textContent = `${z.name}（每生肖72席）`;
+        zSel.appendChild(opt);
+      }
+    }
+
+    // 顯示/隱藏自由物種輸入
+    const sp = document.getElementById("lampSpecies");
+    if(sp){
+      sp.disabled = (type!=="free");
+      sp.placeholder = (type==="free")
+        ? "例如：蟑螂、螞蟻、變形金剛、大象、外星人、超人、蟻人、悟空猴毛…"
+        : "（自由物種才需填）";
+    }
+  }
+
+  function lampRefreshStats(){
+    const st = lampLoadState();
+    const yearEl = document.getElementById("lampYear");
+    const r12 = document.getElementById("lampRemain12");
+    const rf = document.getElementById("lampRemainFree");
+    if(yearEl) yearEl.textContent = String(st.year || lampNowYear());
+    const r = lampRemain(st);
+    if(r12) r12.textContent = `${r.remain12} / ${r.total12}`;
+    if(rf) rf.textContent = `${r.remainFree} / ${r.totalFree}`;
+  }
+
+  function lampTableHTML(rows){
+    if(!rows.length) return `<div class="muted">尚無登記。</div>`;
+    let out = `<table class="tbl"><thead><tr>
+      <th>Slot</th><th>名字</th><th>物種</th><th>Pulsar</th><th>KUFO</th><th>期限</th><th>建立時間</th><th>願望</th>
+    </tr></thead><tbody>`;
+    for(const r of rows){
+      const dt = (r.createdAt) ? new Date(r.createdAt).toISOString().slice(0,19).replace("T"," ") : "";
+      out += `<tr>
+        <td>${esc(r.slot)}</td>
+        <td>${esc(r.name||"")}</td>
+        <td>${esc(r.species||"")}</td>
+        <td>${esc(r.pulsar||"")}</td>
+        <td>${r.kufo ? "✅" : "—"}</td>
+        <td>${esc(r.term||"")}</td>
+        <td>${esc(dt)}</td>
+        <td>${esc(r.wish||"")}</td>
+      </tr>`;
+    }
+    out += `</tbody></table>`;
+    return out;
+  }
+
+  function lampLookup(){
+    const type = (document.getElementById("lampType")||{}).value || "zodiac";
+    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
+    const st = lampLoadState();
+    const bucket = lampEnsureBucket(st, type, zodiacKey);
+    const rows = Object.keys(bucket)
+      .map(k=>bucket[k])
+      .sort((a,b)=>Number(a.slot)-Number(b.slot));
+    const list = document.getElementById("lampList");
+    if(list) list.innerHTML = lampTableHTML(rows);
+
+    log(`lamp_lookup type=${type} key=${zodiacKey} rows=${rows.length}`);
+    lampRefreshStats();
+  }
+
+  function lampRegisterLocal(){
+    const type = (document.getElementById("lampType")||{}).value || "zodiac";
+    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
+    const name = (document.getElementById("lampName")||{}).value || "";
+    const species = (document.getElementById("lampSpecies")||{}).value || "";
+    const pulsar = Number((document.getElementById("lampPulsar")||{}).value || 72);
+    const wish = (document.getElementById("lampWish")||{}).value || "";
+    const kufo = ((document.getElementById("lampKUFO")||{}).value || "0") === "1";
+    const term = (document.getElementById("lampTerm")||{}).value || "1y";
+
+    const st = lampLoadState();
+    const max = lampMaxSlots(type);
+    const slotInput = (document.getElementById("lampSlot")||{}).value;
+    let slot = slotInput ? Number(slotInput) : null;
+    if(!slot || slot<1 || slot>max){
+      slot = lampFindNextFreeSlot(st, type, zodiacKey);
+    }
+    if(!slot){
+      toast("名額已滿。");
+      log("lamp_register_failed full");
+      return;
+    }
+
+    const bucket = lampEnsureBucket(st, type, zodiacKey);
+    const slotKey = String(slot);
+    if(bucket[slotKey]){
+      toast("此席位已被占用，請換一個或用自動配位。");
+      log("lamp_register_failed occupied");
+      return;
+    }
+
+    const rec = {
+      type, zodiacKey, slot,
+      name: String(name).slice(0,64),
+      species: (type==="free") ? String(species).slice(0,64) : "",
+      pulsar: isFinite(pulsar) ? pulsar : 72,
+      wish: String(wish).slice(0,120),
+      kufo,
+      term,
+      createdAt: Date.now(),
+      wallet: (STATE && STATE.wallet) ? STATE.wallet : null,
+      chainId: (STATE && STATE.chainId) ? STATE.chainId : null,
+      boot: BOOT_VERSION
+    };
+    bucket[slotKey] = rec;
+    lampSaveState(st);
+
+    const echo = document.getElementById("lampEcho");
+    if(echo) echo.textContent = JSON.stringify(rec, null, 2);
+
+    log(`lamp_register type=${type} key=${zodiacKey} slot=${slot}`);
+    if(typeof wukongSound!=="undefined" && wukongSound && wukongSound.ding){ wukongSound.ding(); }
+    lampLookup();
+  }
+
+  function lampExport(){
+    const st = lampLoadState();
+    const blob = new Blob([JSON.stringify(st, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wukong_lamps_${st.year||lampNowYear()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    log("lamp_export");
+  }
+
+  function lampResetYear(){
+    const year = lampNowYear();
+    const st = {year, zodiac:{}, free:{}};
+    lampSaveState(st);
+    log("lamp_reset_year");
+    lampRefreshStats();
+    lampLookup();
+  }
+
+  function lampClearLocal(){
+    localStorage.removeItem(LS_LAMP_KEY);
+    log("lamp_clear_local");
+    lampRefreshStats();
+    lampLookup();
+    toast("已清除本機登記。");
+  }
+
+  function lampAutoSlot(){
+    const type = (document.getElementById("lampType")||{}).value || "zodiac";
+    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
+    const st = lampLoadState();
+    const slot = lampFindNextFreeSlot(st, type, zodiacKey);
+    const inp = document.getElementById("lampSlot");
+    if(inp) inp.value = slot ? String(slot) : "";
+    log(`lamp_autoslot type=${type} key=${zodiacKey} slot=${slot||0}`);
+    toast(slot ? `已配位：${slot}` : "名額已滿。");
+  }
+
+  function lampSaveContract(){
+    const cfg = lampLoadCfg();
+    cfg.lamp = (document.getElementById("inLamp")||{}).value || "";
+    lampSaveCfg(cfg);
+    toast("已保存（本機）。");
+    log("lamp_cfg_saved");
+    lampRefreshStats();
+  }
+
+  function lampClearContract(){
+    const cfg = lampLoadCfg();
+    cfg.lamp = "";
+    lampSaveCfg(cfg);
+    const inp = document.getElementById("inLamp");
+    if(inp) inp.value = "";
+    toast("已清除（本機）。");
+    log("lamp_cfg_cleared");
+  }
+
+  function lampInitUI(){
+    // inject into settings panel too (keep backward compatible if inputs exist)
+    const cfg = lampLoadCfg();
+    const inp = document.getElementById("inLamp");
+    if(inp) inp.value = cfg.lamp || "";
+
+    lampRenderSelect();
+    lampRefreshStats();
+
+    const typeSel = document.getElementById("lampType");
+    if(typeSel){
+      typeSel.addEventListener("change", ()=>{
+        lampRenderSelect();
+        lampAutoSlot();
+        lampLookup();
+      });
+    }
+    const zSel = document.getElementById("lampZodiac");
+    if(zSel){
+      zSel.addEventListener("change", ()=>{
+        lampAutoSlot();
+        lampLookup();
+      });
+    }
+
+    const bind = (id, fn)=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener("click", (e)=>{ e.preventDefault(); try{ fn(); }catch(err){ log("lamp_err "+(err&&err.message?err.message:String(err))); } }, true);
+    };
+
+    bind("btnLampRegister", lampRegisterLocal);
+    bind("btnLampLookup", lampLookup);
+    bind("btnLampExport", lampExport);
+    bind("btnLampResetYear", lampResetYear);
+    bind("btnLampClearLocal", lampClearLocal);
+    bind("btnLampAutoSlot", lampAutoSlot);
+    bind("btnLampSave", lampSaveContract);
+    bind("btnLampClear", lampClearContract);
+
+    // on-chain button: just gate & log for now
+    const btnOn = document.getElementById("btnLampOnchain");
+    if(btnOn){
+      const cfg2 = lampLoadCfg();
+      const hasContract = !!(cfg2.lamp && cfg2.lamp.startsWith("0x") && cfg2.lamp.length>=42);
+      const canWallet = !!(window.ethereum && typeof window.ethereum.request==="function");
+      btnOn.disabled = !(hasContract && canWallet);
+      btnOn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        toast("合約版點燈：等你部署 Lamp Contract 後再接上 mint/renew。");
+        log("lamp_onchain_clicked");
+      }, true);
+    }
+
+    // initial list
+    lampLookup();
+  }
+
+
+// first selfcheck
     selfCheck();
   })();
 
