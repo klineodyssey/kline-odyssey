@@ -1,1779 +1,724 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>悟空財神殿｜Wukong Fortune Hall</title>
-  <meta name="description" content="悟空財神殿｜心跳・呼吸・發財金・七仙女許願池｜自動化宇宙生命體入口" />
-  <style>
-    :root{--b:#111;--bg:#fff;--muted:#666;--soft:#f3f3f3;--ok:#0a7;--bad:#c33;}
-    *{box-sizing:border-box}
-    body{margin:0;background:#fafafa;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;}
-    a{color:inherit}
-    .wrap{max-width:920px;margin:18px auto;padding:14px;}
-    .topbar{position:sticky;top:10px;z-index:50;display:flex;justify-content:flex-end;margin:10px 0;}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid var(--b);background:var(--bg);}
-    .h1{font-weight:1000;font-size:22px;line-height:1.2;}
-    .tag{margin-top:6px;font-weight:900;}
-    .card{border:1px solid var(--b);border-radius:16px;background:var(--bg);padding:12px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.04)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    .btn{cursor:pointer;padding:10px 12px;border:1px solid var(--b);border-radius:999px;background:var(--bg);font-weight:900;}
-    .btn:disabled{cursor:not-allowed;background:var(--soft);opacity:.75}
-    .btn.small{padding:8px 10px;font-weight:900}
-    .muted{color:var(--muted)}
-    .kvs{display:grid;grid-template-columns:140px 1fr;gap:6px 10px;align-items:start}
-    .k{font-weight:900}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;word-break:break-all}
-    .hr{height:1px;background:#eee;margin:10px 0}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-    @media (max-width:720px){.grid{grid-template-columns:1fr}}
-
-    .zodiacGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-    @media (max-width:820px){.zodiacGrid{grid-template-columns:1fr}}
-    .node{border:1px dashed #999;border-radius:14px;padding:10px;background:#fff;}
-    .node h3{margin:0;font-size:16px}
-
-    .toast{padding:10px 12px;border-radius:12px;border:1px solid #ddd;background:#fff;}
-    .ok{border-color:rgba(0,160,110,.35);background:rgba(0,160,110,.06)}
-    .bad{border-color:rgba(200,50,50,.35);background:rgba(200,50,50,.06)}
-
-    .debug{position:fixed;right:10px;bottom:10px;z-index:60;width:min(520px,calc(100vw - 20px));max-height:42vh;overflow:auto;border:1px solid var(--b);border-radius:14px;background:#fff;box-shadow:0 12px 30px rgba(0,0,0,.12)}
-    .debug header{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff}
-    .debug header .title{font-weight:1000}
-    .debug pre{margin:0;padding:10px 12px;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.35}
-
-    .input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:12px;font-size:14px;}
-    .select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:12px;font-size:14px;background:#fff;}
-
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #ddd;background:#fff;font-weight:900;font-size:12px;}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>五指山・悟空財神殿｜Wukong Fortune Hall</title>
+<style>
+  :root { --bg:#0b0f14; --card:#111827; --muted:#9ca3af; --txt:#e5e7eb; --acc:#f59e0b; --ok:#10b981; --bad:#ef4444; --line:#1f2937; }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#070a0f,#0b0f14 30%,#070a0f);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans TC",sans-serif}
+  a{color:#93c5fd;text-decoration:none}
+  .wrap{max-width:980px;margin:0 auto;padding:16px}
+  .hero{padding:12px 14px;border:1px solid var(--line);background:rgba(17,24,39,.65);border-radius:16px}
+  .row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+  @media (min-width:860px){.row{grid-template-columns:1.1fr .9fr}}
+  .card{padding:12px 14px;border:1px solid var(--line);background:rgba(17,24,39,.55);border-radius:16px}
+  .h{font-weight:800;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;line-height:1.4}
+  .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);font-size:12px;color:var(--muted)}
+  .btn{cursor:pointer;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);padding:10px 12px;border-radius:12px;font-weight:700}
+  .btn:hover{border-color:#334155}
+  .btn.acc{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35)}
+  .btn.ok{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35)}
+  .btn.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .k{color:var(--muted);font-size:12px}
+  input,select,textarea{width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt)}
+  textarea{min-height:84px;resize:vertical}
+  pre{white-space:pre-wrap;background:rgba(0,0,0,.35);padding:10px;border-radius:12px;border:1px solid var(--line);color:#d1d5db}
+  .hr{height:1px;background:var(--line);margin:12px 0}
+  .tagok{color:var(--ok);font-weight:800}
+  .tagbad{color:var(--bad);font-weight:800}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  details>summary{cursor:pointer;color:#cbd5e1;font-weight:800}
+  .mini{font-size:12px;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<div class="topbar">
-  <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 Official Website</a>
-</div>
-
 <div class="wrap">
-
-  <div>
-    <div class="h1">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
-    <div class="tag">#悟空新文 #K線西遊記 #花果山台灣</div>
-    <div style="margin-top:8px" class="muted">boot_version=<span class="mono" id="bootVer"></span></div>
+  <div class="hero">
+    <div class="h">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
+    <div class="sub">
+      <span class="pill mono">boot_version=<span id="bootVer">v3.0.0-modular</span></span>
+      <span class="pill mono" id="envPill">env: ...</span>
+      <span class="pill">🌐 <a href="../" target="_blank" rel="noopener">Official Website</a></span>
+    </div>
+    <div class="hr"></div>
+    <div class="sub">這裡不是一般廟。心跳・呼吸・血壓・擲筊・許願池・光明燈・宇宙細包・生命工廠，都以「本機原型」先建好，等 Faucet / KUFO 上鏈後再接地址。</div>
   </div>
 
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:1000">🫁 宇宙生命徵象｜心跳・呼吸・血壓（Cosmic Vitals）</div>
-      <div class="badge" id="cupBadge">聖筊連勝：0 / 3</div>
-    </div>
+  <div class="row">
+    <div class="card">
+      <div class="h">🫁 宇宙生命徵象｜Cosmic Vitals</div>
+      <div class="sub">（本機記錄）每次按鍵都會寫入 Debug Console，方便你貼回來定位問題。</div>
+      <div class="hr"></div>
+      <div class="grid3">
+        <button class="btn acc" id="btnHeartbeat">❤️ 心跳</button>
+        <button class="btn acc" id="btnBreath">🫁 呼吸</button>
+        <button class="btn acc" id="btnPressure">🩸 血壓</button>
+      </div>
+      <div style="margin-top:10px" class="grid2">
+        <button class="btn" id="btnCup">🥢 擲筊</button>
+        <button class="btn ok" id="btnFortune">🧧 領發財金（需合約）</button>
+      </div>
+      <div style="margin-top:10px" class="sub">
+        聖筊連勝：<span class="mono" id="cupStreak">0</span> / 3　
+        <span id="cupResult" class="mono"></span>
+      </div>
 
-    <div style="margin-top:8px;line-height:1.75">
-      這裡不是一般廟。悟空心臟將由 <b>Faucet 合約</b> 自動跳動。<br/>
-      人類不再直接持有核心資金；母機只負責救援，不擁有。<br/>
-      你每一次參拜，都會觸發一次「生命徵象」與「聖筊」記錄。
-    </div>
+      <div class="hr"></div>
 
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn" id="btnHeartbeat">❤️ 心跳</button>
-      <button class="btn" id="btnBreath">🫁 呼吸</button>
-      <button class="btn" id="btnPressure">🩸 血壓</button>
-      <button class="btn" id="btnCup">🥢 擲筊</button>
-      <button class="btn" id="btnFortune" disabled>🧧 領發財金（需合約）</button>
-    </div>
-
-    <div id="vitalsOut" style="margin-top:10px"></div>
-    <div class="muted" style="margin-top:8px;line-height:1.65">
-      規則：聖筊機率 50%。失敗連勝歸零。連勝達 3 才解鎖「領發財金」。<br/>
-      發財金規則（預設）：每月最多 <b>500 名</b>，每名最高 <b>888 KGEN</b>（真正發放以 Faucet 合約參數為準）。
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:1000">🪪 錢包狀態（BSC 主網）</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn" id="btnConnect">連線錢包</button>
-        <button class="btn" id="btnDisconnect">斷開</button>
-        <button class="btn" id="btnExport">匯出狀態 JSON</button>
+      <div class="h">🔊 聲音（TTS / 叮）</div>
+      <div class="sub">Auto：有 TTS 就用 TTS，否則用叮聲。MetaMask WebView 常會 speechSynthesis=false。</div>
+      <div class="grid2" style="margin-top:10px">
+        <select id="soundMode">
+          <option value="auto">Auto</option>
+          <option value="tts">TTS</option>
+          <option value="beep">叮（WebAudio）</option>
+          <option value="off">關閉</option>
+        </select>
+        <button class="btn" id="btnSoundTest">測試</button>
       </div>
     </div>
 
-    <div class="hr"></div>
+    <div class="card">
+      <div class="h">🪪 錢包狀態（BSC 主網）</div>
+      <div class="sub">Chrome 開啟可能有 TTS，但可能沒有錢包注入；MetaMask 內建 WebView 反之。</div>
+      <div class="hr"></div>
+      <div class="grid2">
+        <button class="btn ok" id="btnConnect">連線錢包</button>
+        <button class="btn" id="btnDisconnect">斷開（UI）</button>
+      </div>
+      <div style="margin-top:10px" class="grid2">
+        <button class="btn" id="btnExportState">匯出狀態 JSON</button>
+        <button class="btn bad" id="btnClearState">清除本機狀態</button>
+      </div>
 
-    <div class="kvs">
-      <div class="k">Wallet</div>
+      <div class="hr"></div>
+      <div class="mini mono">Wallet</div>
       <div class="mono" id="walletAddr">(not connected)</div>
+      <div class="mini mono" style="margin-top:8px">Chain</div>
+      <div class="mono" id="chainId">(unknown)</div>
 
-      <div class="k">Chain</div>
-      <div class="mono" id="chainInfo">(unknown)</div>
+      <div class="hr"></div>
+      <div class="h">⚙️ 設定面板（本機儲存，不上鏈）</div>
+      <div class="sub">把已部署合約地址貼上來，讓按鍵知道要打哪個合約。</div>
+      <div class="hr"></div>
+      <div class="k">Faucet 合約地址</div>
+      <input id="cfgFaucet" placeholder="0x..."/>
+      <div class="k" style="margin-top:8px">KUFO 無人銀行合約地址</div>
+      <input id="cfgKufo" placeholder="0x..."/>
+      <div class="k" style="margin-top:8px">回收地址（R1/R2/R3）</div>
+      <div class="grid3">
+        <input id="cfgR1" placeholder="R1 0x..."/>
+        <input id="cfgR2" placeholder="R2 0x..."/>
+        <input id="cfgR3" placeholder="R3 0x..."/>
+      </div>
+      <div class="k" style="margin-top:8px">公益國庫（預設）</div>
+      <input id="cfgPG" value="0xB73D6716005B37BEC742D64482fA26033eE1A4E1"/>
 
-      <div class="k">Faucet Contract</div>
-      <div class="mono" id="faucetAddr">(to be set after deploy)</div>
-
-      <div class="k">KUFO Bank Contract</div>
-      <div class="mono" id="kufoAddr">(to be set after deploy)</div>
-
-      <div class="k">Public Good Treasury</div>
-      <div class="mono" id="treasuryAddr">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</div>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn ok" id="btnCfgSave">保存</button>
+        <button class="btn" id="btnCfgClear">清除</button>
+      </div>
     </div>
+  </div>
 
-    <div class="muted" style="margin-top:10px;line-height:1.6">
-      若你尚未部署 Faucet / KUFO，請先把合約地址貼到「設定面板」。地址一旦上鏈就不可變更（除非升版再部署新器官）。
-    </div>
-
+  <div class="card" style="margin-top:12px">
+    <div class="h">🎧 影像語音客服（本機）</div>
+    <div class="sub">按「啟動客服」會朗讀規則（TTS 或叮）。也可語音輸入（裝置支援才會有 STT）。</div>
     <div class="hr"></div>
-
-    <div class="grid">
-      <div>
-        <div style="font-weight:1000;margin-bottom:6px">⚙️ 設定面板（本機儲存，不上鏈）</div>
-        <div class="muted" style="margin-bottom:8px">用來把「已部署合約地址」接到神殿按鍵，不會改變鏈上權限。</div>
-
-        <label class="muted">Faucet 合約地址</label>
-        <input id="inFaucet" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">KUFO 無人銀行合約地址</label>
-        <input id="inKUFO" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #1（選填）</label>
-        <input id="inRecycle1" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #2（選填）</label>
-        <input id="inRecycle2" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #3（選填）</label>
-        <input id="inRecycle3" class="input mono" placeholder="0x..." />
-
-
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #1（選填）</label>
-        <input id="inRecycle1" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #2（選填）</label>
-        <input id="inRecycle2" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <label class="muted">發財金回收地址 #3（選填）</label>
-        <input id="inRecycle3" class="input mono" placeholder="0x..." />
-
-        <div style="height:8px"></div>
-        <button class="btn" id="btnSaveCfg">保存</button>
-        <button class="btn" id="btnClearCfg">清除</button>
-      </div>
-
-      <div>
-        <div style="font-weight:1000;margin-bottom:6px">🎧 影像語音客服（本機）</div>
-        <div class="muted" style="margin-bottom:8px">你的環境顯示 speechSynthesis=false（WebView 可能不支援 TTS）。我們仍提供文字客服＋語音輸入（若允許）。</div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn" id="btnAssistant">▶️ 啟動客服</button>
-          <button class="btn" id="btnSTT">🎙️ 語音輸入</button>
-          <button class="btn" id="btnStopSTT">⏹️ 停止</button>
-        </div>
-
-        <div style="margin-top:10px" class="toast" id="assistantBox">
-          <div style="font-weight:1000">悟空客服</div>
-          <div id="assistantText" style="margin-top:6px;line-height:1.65" class="muted">按「啟動客服」會顯示規則解說。你也可以用語音輸入問問題（若裝置支援）。</div>
-        </div>
-      </div>
+    <div class="grid3">
+      <button class="btn acc" id="btnAssistantStart">▶️ 啟動客服</button>
+      <button class="btn" id="btnSttStart">🎙️ 語音輸入</button>
+      <button class="btn" id="btnSttStop">⏹️ 停止</button>
     </div>
-
+    <div class="hr"></div>
+    <div class="mono" id="assistantBox">悟空客服：按「啟動客服」會顯示規則解說。</div>
   </div>
 
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:1000">✨ 七仙女星座盤｜七星守護（Seven Fairies Constellation）</div>
-      <button class="btn small" id="btnLoadFairies">載入到許願池</button>
+  <div class="row" style="margin-top:12px">
+    <div class="card">
+      <div class="h">✨ 七仙女星座盤｜七星守護</div>
+      <div class="sub">載入後可直接投向許願池。</div>
+      <div class="hr"></div>
+      <button class="btn" id="btnLoadFairies">載入到許願池</button>
+      <div class="hr"></div>
+      <div id="fairyList"></div>
     </div>
 
-    <div class="muted" style="margin-top:8px;line-height:1.65">
-      這是悟空財神殿的「祈願路由」。每位仙女對應一個座標點，並有各自的守護職責與多空氣脈。
-      <b>新增：七仙女許願池</b>（下方）—— 讓香客能選擇守護仙女、寫下願望、留下誓言。
-    </div>
-
-    <div class="zodiacGrid" style="margin-top:10px" id="fairyGrid"></div>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:1000">💧 七仙女許願池（Wish Pool）</div>
-      <div class="badge" id="wishCount">今日許願：0</div>
-    </div>
-
-    <div class="muted" style="margin-top:8px;line-height:1.65">
-      規則（神殿版）：許願不等於保證；發財金是「借你去做生意」的禮物，不是強索回收。<br/>
-      你可自行選擇是否「還願」。若你願意住進花果山火星齊天豪宅，需完成 <b>5000 KGEN 還願</b>（以 KUFO 無人銀行規則為準）。
-    </div>
-
-    <div class="grid" style="margin-top:10px">
-      <div>
-        <label class="muted">選擇守護仙女</label>
-        <select id="wishFairy" class="select"></select>
-
-        <div style="height:8px"></div>
-        <label class="muted">願望內容（不要留個資）</label>
-        <textarea id="wishText" class="input" rows="5" placeholder="例如：求事業運通、家庭美滿、身體健康…"></textarea>
-
-        <div style="height:8px"></div>
-        <label class="muted">誓言（選填）</label>
-        <input id="wishVow" class="input" placeholder="例如：若成，將回殿還願。" />
-
-        <div style="height:10px"></div>
-        <button class="btn" id="btnWish">投下許願</button>
+    <div class="card">
+      <div class="h">💧 七仙女許願池（Wish Pool）</div>
+      <div class="sub">本機記錄。上鏈後可接 KUFO / 回收地址決定還願與席位。</div>
+      <div class="hr"></div>
+      <div class="sub">今日許願：<span class="mono" id="wishCount">0</span></div>
+      <div class="hr"></div>
+      <div class="k">選擇守護仙女</div>
+      <select id="wishSelect"></select>
+      <div class="k" style="margin-top:8px">願望內容（不要留個資）</div>
+      <textarea id="wishText" placeholder="寫下你的願望..."></textarea>
+      <div class="k" style="margin-top:8px">誓言（選填）</div>
+      <input id="wishOath" placeholder="我願意..."/>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn acc" id="btnWishSubmit">投下許願</button>
         <button class="btn" id="btnWishExport">匯出許願 JSON</button>
       </div>
+      <div class="hr"></div>
+      <div class="mono" id="wishEcho">選好仙女，寫下願望，按下「投下許願」。</div>
+    </div>
+  </div>
 
+  <div class="card" style="margin-top:12px">
+    <div class="h">🕯️ 12 生肖光明燈（每生肖 72 名）＋第13肖（任意物種）</div>
+    <div class="sub">這是「廟的有限額」玩法：12×72 = 864 盞。第 13 肖是擴充槽：任意物種（變形金剛、大象、蟻人、外星人、孫悟空猴毛…）。</div>
+    <div class="hr"></div>
+    <div class="grid2">
+      <button class="btn" id="btnLampInit">初始化名冊</button>
+      <button class="btn" id="btnLampExport">匯出名冊 JSON</button>
+    </div>
+    <div class="hr"></div>
+    <div class="grid2">
       <div>
-        <div class="toast" id="wishBox">
-          <div style="font-weight:1000">許願回響</div>
-          <div id="wishOut" style="margin-top:6px;line-height:1.65" class="muted">選好仙女，寫下願望，按下「投下許願」。</div>
-        </div>
-
-        <div style="margin-top:10px" class="toast">
-          <div style="font-weight:1000">豪宅 500 席（概念）</div>
-          <div class="muted" style="margin-top:6px;line-height:1.65">
-            住進「花果山火星齊天豪宅」：以 <b>5000 KGEN</b> 還願作為席位門檻。<br/>
-            是否綁「領過發財金地址」：交由 KUFO 合約規則決定（上鏈後不可臨時改口）。
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-<!-- =========================
-🕯️ Zodiac Lamps + Free Species Registry (Local / Future On-chain)
-========================= -->
-<section class="card" id="zodiacLampsCard">
-  <h2>🕯️ 12 生肖光明燈 × 第13肖自由物種（Prototype）</h2>
-  <p class="muted">
-    這一區是「點燈登記」的標準化模板：先用本機儲存做可再現原型，等合約部署後再把按鍵接上鏈上 mint / renew。
-    <br/>規則（預設）：12 生肖每生肖 <b>72</b> 席；第13肖（自由物種）<b>108</b> 席。每筆登記為「一年期」（可續）。
-  </p>
-
-  <div class="grid2">
-    <div class="box">
-      <h3>🧾 合約（可選）</h3>
-      <div class="row">
-        <label>🕯️ Lamp Contract（可留空）</label>
-        <input id="inLamp" type="text" placeholder="0x...（部署後貼上）" />
-        <div class="btnRow">
-          <button class="btn small" id="btnLampSave">保存</button>
-          <button class="btn small ghost" id="btnLampClear">清除</button>
-        </div>
-        <p class="hint">此欄位僅影響「上鏈點燈」按鍵是否啟用，不改變鏈上權限。</p>
-      </div>
-    </div>
-
-    <div class="box">
-      <h3>📊 名額狀態</h3>
-      <div class="kv">
-        <div><b>年度</b></div><div><span id="lampYear"></span></div>
-        <div><b>12生肖剩餘總席</b></div><div><span id="lampRemain12"></span></div>
-        <div><b>自由物種剩餘席</b></div><div><span id="lampRemainFree"></span></div>
-      </div>
-      <div class="btnRow">
-        <button class="btn small" id="btnLampResetYear">新年度重置（本機）</button>
-        <button class="btn small ghost" id="btnLampExport">匯出登記 JSON</button>
-      </div>
-      <p class="hint">本機版本不收費；「點燈要用電要收錢」會在合約版透過 mint/renew 費用處理。</p>
-    </div>
-  </div>
-
-  <div class="box">
-    <h3>🧬 點燈登記</h3>
-    <div class="grid3">
-      <div class="row">
-        <label>選擇類型</label>
-        <select id="lampType">
-          <option value="zodiac">12生肖（固定）</option>
-          <option value="free">第13肖・自由物種（自定）</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>生肖 / 類別</label>
+        <div class="k">選擇生肖/第13肖</div>
         <select id="lampZodiac"></select>
       </div>
-      <div class="row">
-        <label>席位（Slot）</label>
-        <div class="inline">
-          <input id="lampSlot" type="number" min="1" step="1" placeholder="留空=自動配位" />
-          <button class="btn small ghost" id="btnLampAutoSlot">自動配位</button>
-        </div>
+      <div>
+        <div class="k">你的名字（不要留個資）</div>
+        <input id="lampName" placeholder="例如：巧雲"/>
       </div>
-
-      <div class="row">
-        <label>名字（可用暱稱）</label>
-        <input id="lampName" type="text" placeholder="例如：巧雲 / 阿斗 / 旅人001" />
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div>
+        <div class="k">第13肖物種（選填）</div>
+        <input id="lampSpecies" placeholder="例如：變形金剛 / 大象 / 猿人 / 猴毛..."/>
       </div>
-      <div class="row">
-        <label>物種（自由物種才需填）</label>
-        <input id="lampSpecies" type="text" placeholder="例如：蟑螂、螞蟻、變形金剛、大象、外星人、超人、蟻人、悟空猴毛…" />
-      </div>
-      <div class="row">
-        <label>Pulsar 心率（每小時脈衝）</label>
-        <input id="lampPulsar" type="number" min="1" step="1" value="72" />
-      </div>
-
-      <div class="row">
-        <label>願望 / 使命（不要留個資）</label>
-        <input id="lampWish" type="text" placeholder="例如：平安、健康、事業運通、回到過去與未來…" />
-      </div>
-      <div class="row">
-        <label>KUFO 旅票（可選）</label>
-        <select id="lampKUFO">
-          <option value="0">不搭乘</option>
-          <option value="1">搭乘 KUFO（超光速口袋型時光隱型飛碟）</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>期限</label>
+      <div>
+        <div class="k">年期（預設 1 年）</div>
         <select id="lampTerm">
-          <option value="1y">一年期</option>
-          <option value="5y">五年期（概念）</option>
-          <option value="500y">五百年（五指山模式・概念）</option>
+          <option value="365">365 天</option>
+          <option value="30">30 天（測試）</option>
+          <option value="500">500 天（五指山）</option>
         </select>
       </div>
     </div>
-
-    <div class="btnRow">
-      <button class="btn" id="btnLampRegister">點亮光明燈（本機測試）</button>
-      <button class="btn ghost" id="btnLampOnchain" disabled>上鏈點燈（需要合約＋錢包）</button>
-      <button class="btn ghost" id="btnLampLookup">查詢席位</button>
-      <button class="btn danger ghost" id="btnLampClearLocal">清除本機登記</button>
+    <div class="grid2" style="margin-top:10px">
+      <button class="btn acc" id="btnLampRegister">點燈登記</button>
+      <button class="btn bad" id="btnLampClear">清除名冊（本機）</button>
     </div>
-
-    <div class="box inner">
-      <h4>📜 登記回饋</h4>
-      <pre id="lampEcho" class="pre">尚未點燈。</pre>
-    </div>
-
-    <div class="box inner">
-      <h4>🗺️ 已點亮清單（本機）</h4>
-      <div class="muted" id="lampListHint">選擇類型/生肖後按「查詢席位」或點燈後會自動刷新。</div>
-      <div id="lampList" class="tableWrap"></div>
-    </div>
+    <div class="hr"></div>
+    <div class="mono" id="lampStats">尚未初始化</div>
+    <pre class="mono" id="lampPreview">（尚無資料）</pre>
   </div>
-</section>
 
-
-
-  <div class="card">
-    <div style="font-weight:1000">
-  <section class="section">
+  <div class="row" style="margin-top:12px">
     <div class="card">
-      <div class="h1">🧬 宇宙細包（Microcell）｜商店紅利回路</div>
-      <div class="muted">
-        你可以把「人類商店」接進 KGEN：顧客消費→獲得 KGEN 紅利；商家定期繳款→由 KUFO/回收地址形成回路；回路完成後可觸發「生命誕生」。
-        目前此區為 <b>本機原型</b>：只記錄、不上鏈。上鏈後由 KUFO/Tax Router 接管結算。
-      </div>
-
-      <div style="height:10px"></div>
+      <div class="h">🧬 宇宙細包（Microcell Shop）</div>
+      <div class="sub">讓信眾建立自己的 KGEN 細包商店：付款路由可選 KUFO / 公益國庫 / 回收 R1~R3。這只是本機原型，等合約上鏈再接。</div>
+      <div class="hr"></div>
       <div class="grid2">
-        <div>
-          <label class="muted">細包名稱（商店名）</label>
-          <input id="mc_name" class="input" placeholder="例如：悟空猴毛服飾店" />
-        </div>
-        <div>
-          <label class="muted">類別（可自訂）</label>
-          <input id="mc_category" class="input" placeholder="例如：服飾 / 餐飲 / 心臟工坊 / 外星科技" />
-        </div>
-        <div>
-          <label class="muted">物種（第13生肖，可自訂）</label>
-          <input id="mc_species" class="input" placeholder="例如：變型金鋼 / 大象 / 蟑螂 / 猿人 / 新人類 / 無機生命" />
-        </div>
-        <div>
-          <label class="muted">座標（出生地 / 地點，可自訂）</label>
-          <input id="mc_location" class="input mono" placeholder="例如：11520 / 8888 / 18888 / 你自訂" />
-        </div>
-        <div>
-          <label class="muted">紅利比例（bps，100=1%）</label>
-          <input id="mc_reward_bps" class="input mono" placeholder="例如：88" />
-        </div>
-        <div>
-          <label class="muted">繳款路由（回收地址）</label>
-          <select id="mc_route" class="input">
+        <div><div class="k">細包名稱</div><input id="mcName" placeholder="例如：花果山服飾店"/></div>
+        <div><div class="k">分類</div><input id="mcCategory" placeholder="服飾 / 餐飲 / 心臟紅利..."/></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div><div class="k">物種（任意）</div><input id="mcSpecies" placeholder="人類 / 變形金剛 / 大象..."/></div>
+        <div><div class="k">座標（可填 8888/11520/18888 或自定）</div><input id="mcLoc" placeholder="例如：11520"/></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div><div class="k">紅利（bps，例 888=8.88%）</div><input id="mcBps" placeholder="例如：888"/></div>
+        <div><div class="k">付款路由</div>
+          <select id="mcRoute">
             <option value="KUFO">KUFO 無人銀行</option>
-            <option value="PG">公益金庫（Public Good Treasury）</option>
-            <option value="R1">回收地址 #1</option>
-            <option value="R2">回收地址 #2</option>
-            <option value="R3">回收地址 #3</option>
+            <option value="PG">公益國庫</option>
+            <option value="R1">回收 R1</option>
+            <option value="R2">回收 R2</option>
+            <option value="R3">回收 R3</option>
           </select>
         </div>
       </div>
-
-      <div style="height:10px"></div>
-      <button class="btn" id="btnMcCreate">建立細包</button>
-      <button class="btn ghost" id="btnMcExport">匯出細包 JSON</button>
-      <button class="btn ghost" id="btnMcClear">清除細包</button>
-
-      <div style="height:10px"></div>
-      <div class="mono small" id="mc_stats">細包：0</div>
-      <div class="mono small" id="mc_list"></div>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn acc" id="btnMcCreate">建立細包</button>
+        <button class="btn" id="btnMcExport">匯出細包 JSON</button>
+      </div>
+      <div class="hr"></div>
+      <div class="mono" id="mcStats">細包：0</div>
+      <pre class="mono" id="mcList">（尚無細包）</pre>
+      <button class="btn bad" id="btnMcClear" style="margin-top:10px">清除細包（本機）</button>
     </div>
 
     <div class="card">
-      <div class="h1">🏭 生命工廠（Life Factory）｜生命誕生（概念）</div>
-      <div class="muted">
-        當你完成：點光明燈 / 七仙女許願 / 聖筊解鎖發財金 / 細包回路（可選）—— 就能在「生命工廠」生成一個宇宙生命體的出生證明。
-        目前為本機 JSON，未上鏈；未來上鏈後可由 KUFO 鑄造「生命證」或開啟器官合約。
-      </div>
-
-      <div style="height:10px"></div>
+      <div class="h">🏭 生命工廠（Life Factory｜宇宙細胞誕生）</div>
+      <div class="sub">完成流程（點燈/許願/擲筊/還願）後可生成「生命藍圖 JSON」。上鏈版本可由 KUFO / Faucet 驗證條件。</div>
+      <div class="hr"></div>
       <div class="grid2">
-        <div>
-          <label class="muted">生命名稱</label>
-          <input id="lf_name" class="input" placeholder="例如：豬八戒 / 蜘蛛機 / 你的超光速飛碟機" />
-        </div>
-        <div>
-          <label class="muted">生命物種（任意）</label>
-          <input id="lf_species" class="input" placeholder="例如：豬 / 猴毛 / 變型金鋼 / 蟻人 / 外星人" />
-        </div>
-        <div>
-          <label class="muted">出生地（地圖座標）</label>
-          <select id="lf_birthplace" class="input">
-            <option value="11520">11520｜花果山台灣</option>
-            <option value="8888">8888｜高老莊</option>
-            <option value="18888">18888｜凌霄寶殿</option>
-            <option value="511111">511111｜齊天大聖宮</option>
-            <option value="custom">自訂</option>
-          </select>
-        </div>
-        <div>
-          <label class="muted">自訂出生地（選填）</label>
-          <input id="lf_birthplace_custom" class="input mono" placeholder="例如：你自訂座標" />
-        </div>
-        <div>
-          <label class="muted">Pulsar 心跳頻率（Hz，可自訂）</label>
-          <input id="lf_pulsar_hz" class="input mono" placeholder="例如：1.388 / 11.5 / 你自訂" />
-        </div>
-        <div>
-          <label class="muted">時光載具（選填）</label>
-          <input id="lf_ship" class="input" placeholder="例如：超光速口袋型時光隱形飛碟機" />
-        </div>
+        <div><div class="k">生命名稱</div><input id="lfName" placeholder="例如：豬八戒 / 新人類 / 猿人"/></div>
+        <div><div class="k">物種</div><input id="lfSpecies" placeholder="有機/無機/任意"/></div>
       </div>
-
-      <div style="height:10px"></div>
-      <button class="btn" id="btnLfCheck">檢查誕生條件</button>
-      <button class="btn" id="btnLfBirth">生成生命蛋 JSON</button>
-      <button class="btn ghost" id="btnLfExport">匯出生命工廠 JSON</button>
-
-      <div style="height:10px"></div>
-      <div class="mono small" id="lf_status">狀態：未檢查</div>
-      <div class="mono small" id="lf_echo">（這裡會回報誕生條件）</div>
-    </div>
-  </section>
-
-📜 品牌固定尾段</div>
-    <div style="margin-top:8px;line-height:1.75">
-      PrimeForge 以母機之名，開啟金融生命。<br/>
-      花果山台灣・信念不滅・市場無界。<br/>
-      Where the Market Becomes the Myth.<br/>
-      —— 樂天帝 ⌖
+      <div class="grid2" style="margin-top:10px">
+        <div><div class="k">出生地（座標）</div><input id="lfBirth" placeholder="例如：8888 / 11520 / 18888"/></div>
+        <div><div class="k">Pulsar 心率（Hz，可真實或自定）</div><input id="lfPulsar" placeholder="例如：1.337"/></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn acc" id="btnLfMint">生成生命藍圖</button>
+        <button class="btn" id="btnLfExport">匯出藍圖 JSON</button>
+      </div>
+      <div class="hr"></div>
+      <pre class="mono" id="lfOut">（尚未生成）</pre>
     </div>
   </div>
 
-</div>
-
-
-<!-- Sound Settings -->
-<div class="card">
-  <h3>🔊 聲音（TTS / 叮）</h3>
-  <div class="row">
-    <label class="lbl">模式</label>
-    <select id="soundMode" class="input" style="max-width:260px">
-      <option value="auto" selected>Auto（有 TTS 用 TTS，否則叮）</option>
-      <option value="tts">TTS（需要裝置支援）</option>
-      <option value="beep">叮（WebAudio）</option>
-      <option value="off">關閉</option>
-    </select>
-    <button class="btn" id="btnTestSound" style="margin-left:8px">測試</button>
+  <div class="card" style="margin-top:12px">
+    <div class="h">📜 品牌固定尾段</div>
+    <div class="sub">PrimeForge 以母機之名，開啟金融生命。花果山台灣・信念不滅・市場無界。Where the Market Becomes the Myth.—— 樂天帝 ⌖</div>
   </div>
-  <div class="muted" style="margin-top:6px;line-height:1.6">
-    你的 MetaMask WebView 常會顯示 <code>speechSynthesis=false</code>，這時會自動改用「叮」聲。若要真人語音，可改用 Chrome 開啟（但可能失去錢包注入）。
-  </div>
-</div>
 
-<!-- Debug Panel -->
-<div class="debug" id="debug" style="display:block">
-  <header>
-    <div class="title">Debug Console</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn small" id="btnSelfcheck">Selfcheck</button>
-      <button class="btn small" id="btnClearLog">Clear</button>
-      <button class="btn small" id="btnHideDbg">Hide</button>
-    </div>
-  </header>
-  <pre id="log"></pre>
+  <div class="card" style="margin-top:12px">
+    <details open>
+      <summary>Debug Console</summary>
+      <div class="hr"></div>
+      <div class="grid3">
+        <button class="btn" id="btnLogSelfcheck">Selfcheck</button>
+        <button class="btn" id="btnLogClear">Clear</button>
+        <button class="btn" id="btnLogCopy">Copy</button>
+      </div>
+      <pre class="mono" id="logBox" style="margin-top:10px">（尚無紀錄）</pre>
+    </details>
+  </div>
 </div>
 
 <script>
 (function(){
-  // ===== Version =====
-  const BOOT_VERSION = "v2.9.0-lamps-v1";
-  document.getElementById('bootVer').textContent = BOOT_VERSION;
+  'use strict';
+  const BOOT_VERSION = "v3.0.0-modular";
+  const NOW_ISO = () => new Date().toISOString();
 
-  // ===== Debug =====
-  const logEl = document.getElementById('log');
-  function nowISO(){ try{return new Date().toISOString();}catch(e){return ''} }
-  function log(msg){
-    const line = `[${nowISO()}] ${msg}`;
-    console.log(line);
-    logEl.textContent = (logEl.textContent ? (logEl.textContent + "\n") : "") + line;
-    // keep last ~400 lines
-    const lines = logEl.textContent.split(/\n/);
-    if(lines.length>450) logEl.textContent = lines.slice(lines.length-450).join("\n");
-  }
-  window.__WK_LOG__ = log;
-
-  // ===== Errors Hook =====
-  function hookGlobalErrors(){
-    if (window.__wukongErrorsHooked) return;
-    window.__wukongErrorsHooked = true;
-    window.addEventListener('error', function(ev){
-      try{
-        const msg = ev && ev.message ? ev.message : 'Unknown error';
-        const src = ev && ev.filename ? ev.filename : '';
-        const ln = ev && ev.lineno ? ev.lineno : '';
-        const col = ev && ev.colno ? ev.colno : '';
-        log(`ERROR: ${msg}${src?(' @ '+src+':'+ln+':'+col):''}`);
-      }catch(e){}
-    });
-    window.addEventListener('unhandledrejection', function(ev){
-      try{
-        const r = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Unknown rejection';
-        log('PROMISE_REJECT: ' + r);
-      }catch(e){}
-    });
-  }
-
-  
-  // ===== Sound Engine (TTS / Ding) =====
-  // Modes: 'auto' | 'tts' | 'ding' | 'off'
-  const SOUND_KEY = 'wukong_sound_mode_v1';
-  let _soundMode = (localStorage.getItem(SOUND_KEY) || 'auto').toLowerCase();
-  let _audioCtx = null;
-
-  function getSoundMode(){ return _soundMode; }
-  function setSoundMode(m){
-    _soundMode = (String(m||'auto')).toLowerCase();
-    localStorage.setItem(SOUND_KEY, _soundMode);
-    log('sound_mode=' + _soundMode);
-  }
-
-  function _canTTS(){
-    try { return !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'); }
-    catch(e){ return false; }
-  }
-
-  function _speakTTS(text){
-    if(!_canTTS()) return false;
-    try{
-      // cancel any pending speech to keep it snappy
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(String(text||''));
-      u.lang = 'zh-TW';
-      u.rate = 1.0;
-      u.pitch = 1.0;
-      u.volume = 1.0;
-      window.speechSynthesis.speak(u);
-      return true;
-    }catch(e){
-      log('tts_failed: ' + (e && e.message ? e.message : String(e)));
-      return false;
+  const Log = (function(){
+    const KEY = 'wukong_log_v1';
+    const box = () => document.getElementById('logBox');
+    function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } }
+    function save(arr){ try{ localStorage.setItem(KEY, JSON.stringify(arr.slice(-800))); }catch(e){} }
+    function line(msg){
+      const arr = load();
+      const s = `[${NOW_ISO()}] ${msg}`;
+      arr.push(s);
+      save(arr);
+      const el = box();
+      if(el) el.textContent = arr.join('\n');
     }
-  }
-
-  function _beep(){
-    try{
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if(!AC) return false;
-      if(!_audioCtx) _audioCtx = new AC();
-      // On mobile, audio may be suspended until user gesture.
-      if(_audioCtx.state === 'suspended') _audioCtx.resume().catch(()=>{});
-      const osc = _audioCtx.createOscillator();
-      const gain = _audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.value = 0.0001;
-      osc.connect(gain);
-      gain.connect(_audioCtx.destination);
-      const now = _audioCtx.currentTime;
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.20);
-      osc.start(now);
-      osc.stop(now + 0.22);
-      return true;
-    }catch(e){
-      log('ding_failed: ' + (e && e.message ? e.message : String(e)));
-      return false;
+    function clear(){ save([]); const el=box(); if(el) el.textContent='（已清除）'; line('log_cleared'); }
+    function render(){ const el=box(); if(!el) return; el.textContent = load().join('\n') || '（尚無紀錄）'; }
+    function copy(){
+      const txt = load().join('\n');
+      navigator.clipboard?.writeText(txt).then(()=>line('log_copied')).catch(()=>line('log_copy_failed'));
     }
-  }
-
-  // Public: safe sound helper for all UI events
-  function wukongSound(text){
-    const mode = getSoundMode();
-    if(mode === 'off'){ log('sound_off'); return; }
-
-    // auto: prefer TTS if available, else ding
-    if(mode === 'auto'){
-      const ok = _speakTTS(text || '叮');
-      if(!ok) _beep();
-      return;
-    }
-    if(mode === 'tts'){ _speakTTS(text || ''); return; }
-    if(mode === 'ding'){ _beep(); return; }
-
-    // fallback
-    const ok = _speakTTS(text || '叮');
-    if(!ok) _beep();
-  }
-
-  // Bind sound controls if present in DOM
-  function bindSoundUI(){
-    const sel = document.getElementById('soundMode');
-    const btn = document.getElementById('btnTestSound');
-    if(sel){
-      try{ sel.value = getSoundMode(); }catch(e){}
-      sel.addEventListener('change', ()=> setSoundMode(sel.value));
-    }
-    if(btn){
-      btn.addEventListener('click', ()=>{
-        // a user gesture here unlocks audio on mobile
-        wukongSound('悟空在聽');
-        log('sound_test');
-      });
-    }
-  }
-// ===== Selfcheck =====
-  function selfCheck(){
-    hookGlobalErrors();
-    log('selfcheck_start');
-    log('userAgent: ' + (navigator.userAgent || '(none)'));
-    log('speechSynthesis: ' + ('speechSynthesis' in window));
-    log('speechRecognition: ' + (!!(window.SpeechRecognition || window.webkitSpeechRecognition)));
-    log('ethers_loaded: ' + (typeof window.ethers !== 'undefined'));
-    log('ethereum_injected: ' + (typeof window.ethereum !== 'undefined'));
-  
-    // Re-check late injections (MetaMask WebView)
-    ensureEthers().then(()=>ensureEthereum()).then(()=>{
-      try{
-        log("ethers_loaded_now: " + (!!window.ethers));
-        log("ethereum_injected_now: " + (!!window.ethereum));
-      }catch(e){}
-    });
-
-}
-
-  // ====== Lazy loaders (MetaMask WebView sometimes injects late) ======
-  function ensureEthers(maxWaitMs=3500){
-    return new Promise((resolve)=>{
-      if (window.ethers) { resolve(true); return; }
-      log("ethers_load_attempt");
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
-      s.async = true;
-      s.onload = () => { log("ethers_loaded_after: " + (!!window.ethers)); resolve(!!window.ethers); };
-      s.onerror = () => { log("ethers_load_failed"); resolve(false); };
-      document.head.appendChild(s);
-      setTimeout(()=>{ if(!window.ethers){ log("ethers_load_timeout"); resolve(false);} }, maxWaitMs);
-    });
-  }
-
-  function ensureEthereum(maxWaitMs=3500, stepMs=120){
-    return new Promise((resolve)=>{
-      const t0 = Date.now();
-      function tick(){
-        const ok = !!window.ethereum;
-        if (ok){ log("ethereum_injected_after: true"); resolve(true); return; }
-        if (Date.now() - t0 >= maxWaitMs){ log("ethereum_injected_after: false"); resolve(false); return; }
-        setTimeout(tick, stepMs);
-      }
-      tick();
-    });
-  }
-
-
-  // ===== UI helpers =====
-  function toast(targetId, kind, html){
-    const el = document.getElementById(targetId);
-    el.classList.remove('ok','bad');
-    if(kind==='ok') el.classList.add('ok');
-    if(kind==='bad') el.classList.add('bad');
-    el.innerHTML = html;
-  }
-
-  // ===== Storage =====
-  const CFG_KEY = 'WK_TEMPLE_CFG_V2';
-  function loadCfg(){
-    try{ return JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; }catch(e){ return {}; }
-  }
-  function saveCfg(cfg){
-    localStorage.setItem(CFG_KEY, JSON.stringify(cfg||{}));
-  }
-
-  // ===== Wallet =====
-  const walletAddrEl = document.getElementById('walletAddr');
-  const chainInfoEl = document.getElementById('chainInfo');
-  let connectedAddr = null;
-
-  async function connectWallet(){
-    if(!window.ethereum){
-      log('wallet_connect_failed: no ethereum');
-      toast('assistantText','bad','找不到錢包注入（window.ethereum）。請用 MetaMask 內建瀏覽器開啟。');
-      return;
-    }
-    try{
-      const accounts = await window.ethereum.request({method:'eth_requestAccounts'});
-      connectedAddr = accounts && accounts[0] ? accounts[0] : null;
-      walletAddrEl.textContent = connectedAddr || '(no account)';
-      const chainId = await window.ethereum.request({method:'eth_chainId'});
-      chainInfoEl.textContent = chainId ? `${chainId}` : '(unknown)';
-      log('wallet_connected=' + connectedAddr);
-    }catch(e){
-      log('wallet_connect_error: ' + (e && e.message ? e.message : String(e)));
-    }
-  }
-
-  function disconnectWallet(){
-    // EIP-1193 has no true disconnect from dapp side; we just clear UI
-    connectedAddr = null;
-    walletAddrEl.textContent = '(not connected)';
-    chainInfoEl.textContent = '(unknown)';
-    log('wallet_ui_disconnected');
-  }
-
-  // avoid spam reconnect logs
-  let accHandlerBound = false;
-  function bindEthEvents(){
-    if(!window.ethereum || accHandlerBound) return;
-    accHandlerBound = true;
-    window.ethereum.on('accountsChanged', function(accs){
-      const a = accs && accs[0] ? accs[0] : null;
-      connectedAddr = a;
-      walletAddrEl.textContent = a || '(not connected)';
-      log('accountsChanged=' + (a||'(none)'));
-    });
-    window.ethereum.on('chainChanged', function(cid){
-      chainInfoEl.textContent = cid ? `${cid}` : '(unknown)';
-      log('chainChanged=' + cid);
-    });
-  }
-
-  // ===== Vitals + Cup =====
-  const vitalsOut = document.getElementById('vitalsOut');
-  const cupBadge = document.getElementById('cupBadge');
-  const btnFortune = document.getElementById('btnFortune');
-
-  let cupStreak = 0;
-  const CUP_MAX = 3;
-  const ST_KEY = 'WK_CUP_STREAK';
-  try{ cupStreak = parseInt(localStorage.getItem(ST_KEY)||'0',10) || 0; }catch(e){ cupStreak = 0; }
-
-  function updateCupUI(){
-    cupBadge.textContent = `聖筊連勝：${cupStreak} / ${CUP_MAX}`;
-    if(cupStreak>=CUP_MAX){
-      btnFortune.disabled = false;
-      btnFortune.style.cursor = 'pointer';
-    }else{
-      btnFortune.disabled = true;
-      btnFortune.style.cursor = 'not-allowed';
-    }
-  }
-  updateCupUI();
-
-  function renderVitals(title, lines){
-    const html = `
-      <div class="toast ok">
-        <div style="font-weight:1000">${title}</div>
-        <div style="margin-top:6px;line-height:1.7">${lines.join('<br/>')}</div>
-      </div>`;
-    vitalsOut.innerHTML = html;
-  }
-
-  function doHeartbeat(){
-    log('heartbeat');
-    const bpm = 60 + Math.floor(Math.random()*33); // 60~92
-    renderVitals('心跳回響', [
-      `Pulsar BPM：<b>${bpm}</b>`,
-      '悟空心臟：由 Faucet 合約跳動（未部署時僅記錄）',
-      '提示：你可以先用「設定面板」貼上 Faucet 地址。'
-    ]);
-  }
-  function doBreath(){
-    log('breath');
-    const breath = 12 + Math.floor(Math.random()*9); // 12~20
-    renderVitals('呼吸回響', [
-      `Breath/min：<b>${breath}</b>`,
-      '轉日窗口：00:00~00:10（UTC+8）屬於宇宙重置呼吸帶。'
-    ]);
-  }
-  function doPressure(){
-    log('pressure');
-    const s = 100 + Math.floor(Math.random()*31);
-    const d = 60 + Math.floor(Math.random()*21);
-    renderVitals('血壓回響', [
-      `BP：<b>${s}/${d}</b>`,
-      '血管：未來由 KUFO 無人銀行供血（資金流）與 Faucet 心臟共振。'
-    ]);
-  }
-
-  function doCup(){
-    log('cup_throw');
-    const ok = Math.random() < 0.5;
-    if(ok){
-      cupStreak += 1;
-      localStorage.setItem(ST_KEY, String(cupStreak));
-      updateCupUI();
-      toast('assistantText','ok',`聖筊成立。連勝 ${cupStreak}/${CUP_MAX}。`);
-      vitalsOut.innerHTML = `<div class="toast ok"><div style="font-weight:1000">聖筊：成立</div><div class="muted" style="margin-top:6px">你離「領發財金」更近一步。</div></div>`;
-    }else{
-      cupStreak = 0;
-      localStorage.setItem(ST_KEY, '0');
-      updateCupUI();
-      toast('assistantText','bad','笑筊或陰筊。連勝歸零。再來一次。');
-      vitalsOut.innerHTML = `<div class="toast bad"><div style="font-weight:1000">聖筊：未成</div><div class="muted" style="margin-top:6px">歸零重來，這就是修行。</div></div>`;
-    }
-  }
-
-  function fortuneClaim(){
-    log('fortune_click');
-    const cfg = loadCfg();
-    if(!cfg.faucet){
-      toast('assistantText','bad','尚未設定 Faucet 合約地址。請先在設定面板貼上 Faucet 地址並保存。');
-      return;
-    }
-    // UI-only placeholder: on-chain call will be wired after deploy
-    toast('assistantText','ok',`已解鎖發財金。Faucet=${cfg.faucet}（尚未執行鏈上交易，這裡先做介面驗收）。`);
-  }
-
-  // ===== Assistant (text + STT) =====
-  const assistantText = document.getElementById('assistantText');
-  function assistantStart(){
-    log('assistant_start');
-    wukongSound('悟空客服啟動');
-    const cfg = loadCfg();
-    const lines = [
-      '悟空心臟由 Faucet 合約自動跳動；母機只救援，不擁有。',
-      '你可以：心跳、呼吸、血壓、擲筊三連勝解鎖發財金。',
-      `目前設定：Faucet=${cfg.faucet||'(未設定)'}；KUFO=${cfg.kufo||'(未設定)'}.`,
-      '新增：七仙女許願池（選仙女、寫願望、匯出 JSON）。'
-    ];
-    assistantText.innerHTML = lines.join('<br/>');
-  }
-
-  let rec = null;
-  function sttStart(){
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){
-      log('stt_unsupported');
-      toast('assistantText','bad','本裝置不支援語音辨識（SpeechRecognition）。');
-      return;
-    }
-    if(rec){ try{rec.stop();}catch(e){} rec=null; }
-    rec = new SR();
-    rec.lang = 'zh-TW';
-    rec.interimResults = false;
-    rec.maxAlternatives = 1;
-    rec.onstart = function(){ log('stt_start'); toast('assistantText','ok','我在聽。說完會自動停。'); };
-    rec.onerror = function(e){ log('stt_error: ' + (e && e.error ? e.error : 'unknown')); };
-    rec.onresult = function(ev){
-      try{
-        const t = ev.results && ev.results[0] && ev.results[0][0] ? ev.results[0][0].transcript : '';
-        log('stt_text: ' + t);
-        // simple router
-        const txt = (t||'').trim();
-        if(!txt){ toast('assistantText','bad','沒有聽到內容。'); return; }
-        if(txt.includes('心跳')) doHeartbeat();
-        else if(txt.includes('呼吸')) doBreath();
-        else if(txt.includes('血壓')) doPressure();
-        else if(txt.includes('擲') || txt.includes('筊')) doCup();
-        else if(txt.includes('許願')) document.getElementById('wishText').focus();
-        else toast('assistantText','ok','收到：' + txt + '<br/>你可以說：心跳、呼吸、血壓、擲筊、許願。');
-      }catch(e){}
-    };
-    rec.onend = function(){ log('stt_stop'); };
-    try{ rec.start(); }catch(e){ log('stt_start_fail: ' + (e && e.message ? e.message : String(e))); }
-  }
-  function sttStop(){ try{ if(rec) rec.stop(); }catch(e){} log('stt_stop_btn'); }
-
-  // ===== Seven Fairies Data =====
-  const FAIRIES = [
-    {id:'f1', name:'大仙女（巧雲）', star:'天樞', mode:'做空', point:14520, duty:'風調雨順'},
-    {id:'f2', name:'二仙女（巧虹）', star:'天璇', mode:'做多', point:14866, duty:'家庭美滿'},
-    {id:'f3', name:'三仙女（巧芝）', star:'天璣', mode:'做空', point:16184, duty:'育子收驚'},
-    {id:'f4', name:'四仙女（巧仙）', star:'天權', mode:'做多', point:16888, duty:'事業運通'},
-    {id:'f5', name:'五仙女（巧蘭）', star:'天衡', mode:'做空', point:17347, duty:'長命百歲'},
-    {id:'f6', name:'六仙女（巧梅）', star:'闓陽', mode:'做多', point:18056, duty:'身體健康'},
-    {id:'f7', name:'七仙女（巧靈）', star:'瑤光', mode:'多單退', point:18459, duty:'感情圓滿'}
-  ];
-
-  function renderFairies(){
-    const grid = document.getElementById('fairyGrid');
-    grid.innerHTML = '';
-    FAIRIES.forEach(f=>{
-      const el = document.createElement('div');
-      el.className = 'node';
-      el.innerHTML = `
-        <h3>⭐ ${f.star}｜${f.name}</h3>
-        <div class="muted" style="margin-top:6px;line-height:1.65">
-          座標點：<b>${f.point}</b><br/>
-          專掌：<b>${f.duty}</b><br/>
-          氣脈：<b>${f.mode}</b>
-        </div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn small" data-wish="${f.id}">投向許願池</button>
-        </div>
-      `;
-      grid.appendChild(el);
-    });
-
-    // bind wish buttons
-    grid.querySelectorAll('button[data-wish]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const id = btn.getAttribute('data-wish');
-        const sel = document.getElementById('wishFairy');
-        sel.value = id;
-        document.getElementById('wishText').focus();
-        log('wish_route=' + id);
-      });
-    });
-  }
-
-  function fillWishSelect(){
-    const sel = document.getElementById('wishFairy');
-    sel.innerHTML = '';
-    FAIRIES.forEach(f=>{
-      const opt = document.createElement('option');
-      opt.value = f.id;
-      opt.textContent = `${f.star}｜${f.name}｜${f.duty}｜${f.mode}｜${f.point}`;
-      sel.appendChild(opt);
-    });
-  }
-
-  // ===== Wish Pool =====
-  const WISH_KEY = 'WK_WISH_POOL_V1';
-  function loadWishes(){
-    try{ return JSON.parse(localStorage.getItem(WISH_KEY)||'[]') || []; }catch(e){ return []; }
-  }
-  function saveWishes(arr){ localStorage.setItem(WISH_KEY, JSON.stringify(arr||[])); }
-  function updateWishCount(){
-    const arr = loadWishes();
-    // count today
-    const today = new Date();
-    const ymd = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,'0')+"-"+String(today.getDate()).padStart(2,'0');
-    const n = arr.filter(x=> (x && x.ymd===ymd)).length;
-    document.getElementById('wishCount').textContent = `今日許願：${n}`;
-  }
-
-  function makeWishObject(){
-    const fid = document.getElementById('wishFairy').value;
-    const f = FAIRIES.find(x=>x.id===fid) || FAIRIES[0];
-    const text = (document.getElementById('wishText').value||'').trim();
-    const vow = (document.getElementById('wishVow').value||'').trim();
-    const t = new Date();
-    const ymd = t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,'0')+"-"+String(t.getDate()).padStart(2,'0');
-    return {
-      boot_version: BOOT_VERSION,
-      at: t.toISOString(),
-      ymd,
-      wallet: connectedAddr,
-      fairy: {
-        id: f.id, name: f.name, star: f.star, duty: f.duty, mode: f.mode, point: f.point
-      },
-      wish: {
-        text,
-        vow
-      }
-    };
-  }
-
-  function wishSubmit(){
-    log('wish_submit');
-    wukongSound('許願已投下');
-    const obj = makeWishObject();
-    if(!obj.wish.text){
-      toast('wishOut','bad','請先寫下願望內容。');
-      return;
-    }
-    const arr = loadWishes();
-    arr.push(obj);
-    saveWishes(arr);
-    updateWishCount();
-    toast('wishOut','ok',`已投下許願。<br/>守護：<b>${obj.fairy.star}</b>｜${obj.fairy.name}<br/>願望：${escapeHtml(obj.wish.text)}`);
-  }
-
-  function exportWish(){
-    log('wish_export');
-    const obj = makeWishObject();
-    if(!obj.wish.text){
-      toast('wishOut','bad','請先寫下願望內容後再匯出。');
-      return;
-    }
-    downloadJson(`wish_${obj.fairy.id}_${Date.now()}.json`, obj);
-    toast('wishOut','ok','已匯出 JSON（下載或分享給母機）。');
-  }
-
-  // ===== Export State =====
-  function downloadJson(filename, obj){
-    const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1200);
-  }
-
-  function exportState(){
-    log('export_json');
-    const cfg = loadCfg();
-    const state = {
-      boot_version: BOOT_VERSION,
-      at: new Date().toISOString(),
-      wallet: connectedAddr,
-      chain: chainInfoEl.textContent,
-      cup_streak: cupStreak,
-      cfg,
-      wish_today_count: document.getElementById('wishCount').textContent,
-    };
-    downloadJson(`wukong_temple_state_${Date.now()}.json`, state);
-  }
-
-  // ===== Small utils =====
-  function escapeHtml(str){
-    return String(str||'')
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'",'&#39;');
-  }
-
-  // ===== Bind UI =====
-  document.getElementById('btnSelfcheck').addEventListener('click', selfCheck);
-  document.getElementById('btnClearLog').addEventListener('click', ()=>{ logEl.textContent=''; log('log_cleared'); });
-  document.getElementById('btnHideDbg').addEventListener('click', ()=>{ document.getElementById('debug').style.display='none'; });
-
-  document.getElementById('btnHeartbeat').addEventListener('click', doHeartbeat);
-  document.getElementById('btnBreath').addEventListener('click', doBreath);
-  document.getElementById('btnPressure').addEventListener('click', doPressure);
-  document.getElementById('btnCup').addEventListener('click', doCup);
-  document.getElementById('btnFortune').addEventListener('click', fortuneClaim);
-
-  document.getElementById('btnConnect').addEventListener('click', ()=>{ bindEthEvents(); connectWallet(); });
-  document.getElementById('btnDisconnect').addEventListener('click', disconnectWallet);
-  document.getElementById('btnExport').addEventListener('click', exportState);
-
-  document.getElementById('btnAssistant').addEventListener('click', assistantStart);
-  document.getElementById('btnSTT').addEventListener('click', sttStart);
-  document.getElementById('btnStopSTT').addEventListener('click', sttStop);
-
-  document.getElementById('btnSaveCfg').addEventListener('click', ()=>{
-    const faucet = (document.getElementById('inFaucet').value||'').trim();
-    const kufo = (document.getElementById('inKUFO').value||'').trim();
-    const r1 = (document.getElementById('inRecycle1')?.value||'').trim();
-    const r2 = (document.getElementById('inRecycle2')?.value||'').trim();
-    const r3 = (document.getElementById('inRecycle3')?.value||'').trim();
-    const cfg = loadCfg();
-    if(faucet) cfg.faucet = faucet;
-    if(kufo) cfg.kufo = kufo;
-    if(r1) cfg.recycle1 = r1; else delete cfg.recycle1;
-    if(r2) cfg.recycle2 = r2; else delete cfg.recycle2;
-    if(r3) cfg.recycle3 = r3; else delete cfg.recycle3;
-    saveCfg(cfg);
-    applyCfgToUI(cfg);
-    log('cfg_saved');
-    toast('assistantText','ok','設定已保存（本機）。');
-  });
-
-  document.getElementById('btnClearCfg').addEventListener('click', ()=>{
-    saveCfg({});
-    applyCfgToUI({});
-    document.getElementById('inFaucet').value='';
-    document.getElementById('inKUFO').value='';
-    log('cfg_cleared');
-    toast('assistantText','ok','已清除設定（本機）。');
-  });
-
-  document.getElementById('btnLoadFairies').addEventListener('click', ()=>{
-    fillWishSelect();
-    toast('wishOut','ok','已載入七仙女到許願池。');
-    log('fairies_loaded_to_wishpool');
-  });
-
-  document.getElementById('btnWish').addEventListener('click', wishSubmit);
-  document.getElementById('btnWishExport').addEventListener('click', exportWish);
-
-  function applyCfgToUI(cfg){
-    document.getElementById('faucetAddr').textContent = cfg.faucet || '(to be set after deploy)';
-    document.getElementById('kufoAddr').textContent = cfg.kufo || '(to be set after deploy)';
-  }
-
-  // ===== Boot init =====
-  (function init(){
-    log('boot_version=' + BOOT_VERSION);
-    // render fairies + wish select
-    renderFairies();
-    fillWishSelect();
-    updateWishCount();
-    // lamps
-    try{ lampInitUI(); }catch(e){ log('lamp_init_fail '+(e&&e.message?e.message:String(e))); }
-
-    // load cfg
-    const cfg = loadCfg();
-    applyCfgToUI(cfg);
-    if(cfg.faucet) document.getElementById('inFaucet').value = cfg.faucet;
-    if(cfg.kufo) document.getElementById('inKUFO').value = cfg.kufo;
-    if(cfg.recycle1 && document.getElementById('inRecycle1')) document.getElementById('inRecycle1').value = cfg.recycle1;
-    if(cfg.recycle2 && document.getElementById('inRecycle2')) document.getElementById('inRecycle2').value = cfg.recycle2;
-    if(cfg.recycle3 && document.getElementById('inRecycle3')) document.getElementById('inRecycle3').value = cfg.recycle3;
-    if(cfg.recycle1 && document.getElementById('inRecycle1')) document.getElementById('inRecycle1').value = cfg.recycle1;
-    if(cfg.recycle2 && document.getElementById('inRecycle2')) document.getElementById('inRecycle2').value = cfg.recycle2;
-    if(cfg.recycle3 && document.getElementById('inRecycle3')) document.getElementById('inRecycle3').value = cfg.recycle3;
-
-
-    // sound ui
-    try{
-      const sm = document.getElementById('soundMode');
-      const bt = document.getElementById('btnTestSound');
-      if(sm){
-        sm.value = getSoundMode();
-        sm.addEventListener('change', ()=>{ setSoundMode(sm.value); log('sound_mode=' + sm.value); }, true);
-      }
-      if(bt){
-        bt.addEventListener('click', ()=>{ wukongSound('悟空在此'); log('sound_test'); }, true);
-      }
-    }catch(e){}
-    
-  // =========================
-  // 🕯️ Zodiac Lamps + Free Species Registry (Local-first)
-  // =========================
-  const LS_LAMP_KEY = "wukong_lamps_v1";
-  const LS_LAMP_CFG = "wukong_lamps_cfg_v1";
-
-  const ZODIAC_LIST = [
-    {key:"rat",   name:"鼠"},
-    {key:"ox",    name:"牛"},
-    {key:"tiger", name:"虎"},
-    {key:"rabbit",name:"兔"},
-    {key:"dragon",name:"龍"},
-    {key:"snake", name:"蛇"},
-    {key:"horse", name:"馬"},
-    {key:"goat",  name:"羊"},
-    {key:"monkey",name:"猴"},
-    {key:"rooster",name:"雞"},
-    {key:"dog",   name:"狗"},
-    {key:"pig",   name:"豬"},
-  ];
-  const FREE_SPECIES = {key:"free", name:"第13肖・自由物種"};
-
-  function lampNowYear(){
-    try { return new Date().getFullYear(); } catch(e){ return 2026; }
-  }
-
-  function lampLoadCfg(){
-    try { return JSON.parse(localStorage.getItem(LS_LAMP_CFG) || "{}") || {}; }
-    catch(e){ return {}; }
-  }
-  function lampSaveCfg(cfg){
-    localStorage.setItem(LS_LAMP_CFG, JSON.stringify(cfg||{}));
-  }
-
-  function lampLoadState(){
-    const year = lampNowYear();
-    let st;
-    try { st = JSON.parse(localStorage.getItem(LS_LAMP_KEY) || "null"); } catch(e){ st=null; }
-    if(!st || typeof st!=="object") st = {year, zodiac:{}, free:{}};
-    if(!st.year) st.year = year;
-
-    // 年度不同：不自動抹除，讓使用者手動 reset（避免意外消失）
-    if(!st.zodiac) st.zodiac = {};
-    if(!st.free) st.free = {};
-    return st;
-  }
-
-  function lampSaveState(st){
-    localStorage.setItem(LS_LAMP_KEY, JSON.stringify(st||{}));
-  }
-
-  function lampMaxSlots(type){
-    return (type==="free") ? 108 : 72;
-  }
-
-  function lampKey(type, zodiacKey){
-    return (type==="free") ? "free" : (zodiacKey || "rat");
-  }
-
-  function lampCountUsed(st, type, zodiacKey){
-    const key = lampKey(type, zodiacKey);
-    const bucket = (type==="free") ? (st.free||{}) : (st.zodiac||{});
-    const rec = bucket[key] || {};
-    return Object.keys(rec).length;
-  }
-
-  function lampRemain(st){
-    // total remain for 12 zodiac
-    let used12=0;
-    for(const z of ZODIAC_LIST){
-      used12 += lampCountUsed(st, "zodiac", z.key);
-    }
-    const total12 = 72 * ZODIAC_LIST.length;
-    const remain12 = Math.max(0, total12 - used12);
-
-    const usedFree = lampCountUsed(st, "free", "free");
-    const totalFree = 108;
-    const remainFree = Math.max(0, totalFree - usedFree);
-    return {remain12, remainFree, used12, usedFree, total12, totalFree};
-  }
-
-  function lampFindNextFreeSlot(st, type, zodiacKey){
-    const key = lampKey(type, zodiacKey);
-    const bucket = (type==="free") ? (st.free||{}) : (st.zodiac||{});
-    const rec = bucket[key] || {};
-    const max = lampMaxSlots(type);
-    for(let i=1;i<=max;i++){
-      if(!rec[String(i)]) return i;
-    }
-    return null;
-  }
-
-  function lampEnsureBucket(st, type, zodiacKey){
-    const key = lampKey(type, zodiacKey);
-    if(type==="free"){
-      st.free = st.free || {};
-      st.free[key] = st.free[key] || {};
-      return st.free[key];
-    }else{
-      st.zodiac = st.zodiac || {};
-      st.zodiac[key] = st.zodiac[key] || {};
-      return st.zodiac[key];
-    }
-  }
-
-  function lampRenderSelect(){
-    const typeSel = document.getElementById("lampType");
-    const zSel = document.getElementById("lampZodiac");
-    if(!typeSel || !zSel) return;
-
-    const type = typeSel.value || "zodiac";
-    zSel.innerHTML = "";
-    if(type==="free"){
-      const opt = document.createElement("option");
-      opt.value = "free";
-      opt.textContent = FREE_SPECIES.name;
-      zSel.appendChild(opt);
-    }else{
-      for(const z of ZODIAC_LIST){
-        const opt = document.createElement("option");
-        opt.value = z.key;
-        opt.textContent = `${z.name}（每生肖72席）`;
-        zSel.appendChild(opt);
-      }
-    }
-
-    // 顯示/隱藏自由物種輸入
-    const sp = document.getElementById("lampSpecies");
-    if(sp){
-      sp.disabled = (type!=="free");
-      sp.placeholder = (type==="free")
-        ? "例如：蟑螂、螞蟻、變形金剛、大象、外星人、超人、蟻人、悟空猴毛…"
-        : "（自由物種才需填）";
-    }
-  }
-
-  function lampRefreshStats(){
-    const st = lampLoadState();
-    const yearEl = document.getElementById("lampYear");
-    const r12 = document.getElementById("lampRemain12");
-    const rf = document.getElementById("lampRemainFree");
-    if(yearEl) yearEl.textContent = String(st.year || lampNowYear());
-    const r = lampRemain(st);
-    if(r12) r12.textContent = `${r.remain12} / ${r.total12}`;
-    if(rf) rf.textContent = `${r.remainFree} / ${r.totalFree}`;
-  }
-
-  function lampTableHTML(rows){
-    if(!rows.length) return `<div class="muted">尚無登記。</div>`;
-    let out = `<table class="tbl"><thead><tr>
-      <th>Slot</th><th>名字</th><th>物種</th><th>Pulsar</th><th>KUFO</th><th>期限</th><th>建立時間</th><th>願望</th>
-    </tr></thead><tbody>`;
-    for(const r of rows){
-      const dt = (r.createdAt) ? new Date(r.createdAt).toISOString().slice(0,19).replace("T"," ") : "";
-      out += `<tr>
-        <td>${esc(r.slot)}</td>
-        <td>${esc(r.name||"")}</td>
-        <td>${esc(r.species||"")}</td>
-        <td>${esc(r.pulsar||"")}</td>
-        <td>${r.kufo ? "✅" : "—"}</td>
-        <td>${esc(r.term||"")}</td>
-        <td>${esc(dt)}</td>
-        <td>${esc(r.wish||"")}</td>
-      </tr>`;
-    }
-    out += `</tbody></table>`;
-    return out;
-  }
-
-  function lampLookup(){
-    const type = (document.getElementById("lampType")||{}).value || "zodiac";
-    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
-    const st = lampLoadState();
-    const bucket = lampEnsureBucket(st, type, zodiacKey);
-    const rows = Object.keys(bucket)
-      .map(k=>bucket[k])
-      .sort((a,b)=>Number(a.slot)-Number(b.slot));
-    const list = document.getElementById("lampList");
-    if(list) list.innerHTML = lampTableHTML(rows);
-
-    log(`lamp_lookup type=${type} key=${zodiacKey} rows=${rows.length}`);
-    lampRefreshStats();
-  }
-
-  function lampRegisterLocal(){
-    const type = (document.getElementById("lampType")||{}).value || "zodiac";
-    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
-    const name = (document.getElementById("lampName")||{}).value || "";
-    const species = (document.getElementById("lampSpecies")||{}).value || "";
-    const pulsar = Number((document.getElementById("lampPulsar")||{}).value || 72);
-    const wish = (document.getElementById("lampWish")||{}).value || "";
-    const kufo = ((document.getElementById("lampKUFO")||{}).value || "0") === "1";
-    const term = (document.getElementById("lampTerm")||{}).value || "1y";
-
-    const st = lampLoadState();
-    const max = lampMaxSlots(type);
-    const slotInput = (document.getElementById("lampSlot")||{}).value;
-    let slot = slotInput ? Number(slotInput) : null;
-    if(!slot || slot<1 || slot>max){
-      slot = lampFindNextFreeSlot(st, type, zodiacKey);
-    }
-    if(!slot){
-      toast("名額已滿。");
-      log("lamp_register_failed full");
-      return;
-    }
-
-    const bucket = lampEnsureBucket(st, type, zodiacKey);
-    const slotKey = String(slot);
-    if(bucket[slotKey]){
-      toast("此席位已被占用，請換一個或用自動配位。");
-      log("lamp_register_failed occupied");
-      return;
-    }
-
-    const rec = {
-      type, zodiacKey, slot,
-      name: String(name).slice(0,64),
-      species: (type==="free") ? String(species).slice(0,64) : "",
-      pulsar: isFinite(pulsar) ? pulsar : 72,
-      wish: String(wish).slice(0,120),
-      kufo,
-      term,
-      createdAt: Date.now(),
-      wallet: (STATE && STATE.wallet) ? STATE.wallet : null,
-      chainId: (STATE && STATE.chainId) ? STATE.chainId : null,
-      boot: BOOT_VERSION
-    };
-    bucket[slotKey] = rec;
-    lampSaveState(st);
-
-    const echo = document.getElementById("lampEcho");
-    if(echo) echo.textContent = JSON.stringify(rec, null, 2);
-
-    log(`lamp_register type=${type} key=${zodiacKey} slot=${slot}`);
-    if(typeof wukongSound!=="undefined" && wukongSound && wukongSound.ding){ wukongSound.ding(); }
-    lampLookup();
-  }
-
-  function lampExport(){
-    const st = lampLoadState();
-    const blob = new Blob([JSON.stringify(st, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `wukong_lamps_${st.year||lampNowYear()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-    log("lamp_export");
-  }
-
-  function lampResetYear(){
-    const year = lampNowYear();
-    const st = {year, zodiac:{}, free:{}};
-    lampSaveState(st);
-    log("lamp_reset_year");
-    lampRefreshStats();
-    lampLookup();
-  }
-
-  function lampClearLocal(){
-    localStorage.removeItem(LS_LAMP_KEY);
-    log("lamp_clear_local");
-    lampRefreshStats();
-    lampLookup();
-    toast("已清除本機登記。");
-  }
-
-  function lampAutoSlot(){
-    const type = (document.getElementById("lampType")||{}).value || "zodiac";
-    const zodiacKey = (document.getElementById("lampZodiac")||{}).value || (type==="free"?"free":"rat");
-    const st = lampLoadState();
-    const slot = lampFindNextFreeSlot(st, type, zodiacKey);
-    const inp = document.getElementById("lampSlot");
-    if(inp) inp.value = slot ? String(slot) : "";
-    log(`lamp_autoslot type=${type} key=${zodiacKey} slot=${slot||0}`);
-    toast(slot ? `已配位：${slot}` : "名額已滿。");
-  }
-
-  function lampSaveContract(){
-    const cfg = lampLoadCfg();
-    cfg.lamp = (document.getElementById("inLamp")||{}).value || "";
-    lampSaveCfg(cfg);
-    toast("已保存（本機）。");
-    log("lamp_cfg_saved");
-    lampRefreshStats();
-  }
-
-  function lampClearContract(){
-    const cfg = lampLoadCfg();
-    cfg.lamp = "";
-    lampSaveCfg(cfg);
-    const inp = document.getElementById("inLamp");
-    if(inp) inp.value = "";
-    toast("已清除（本機）。");
-    log("lamp_cfg_cleared");
-  }
-
-  function lampInitUI(){
-    // inject into settings panel too (keep backward compatible if inputs exist)
-    const cfg = lampLoadCfg();
-    const inp = document.getElementById("inLamp");
-    if(inp) inp.value = cfg.lamp || "";
-
-    lampRenderSelect();
-    lampRefreshStats();
-
-    const typeSel = document.getElementById("lampType");
-    if(typeSel){
-      typeSel.addEventListener("change", ()=>{
-        lampRenderSelect();
-        lampAutoSlot();
-        lampLookup();
-      });
-    }
-    const zSel = document.getElementById("lampZodiac");
-    if(zSel){
-      zSel.addEventListener("change", ()=>{
-        lampAutoSlot();
-        lampLookup();
-      });
-    }
-
-    const bind = (id, fn)=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener("click", (e)=>{ e.preventDefault(); try{ fn(); }catch(err){ log("lamp_err "+(err&&err.message?err.message:String(err))); } }, true);
-    };
-
-    bind("btnLampRegister", lampRegisterLocal);
-    bind("btnLampLookup", lampLookup);
-    bind("btnLampExport", lampExport);
-    bind("btnLampResetYear", lampResetYear);
-    bind("btnLampClearLocal", lampClearLocal);
-    bind("btnLampAutoSlot", lampAutoSlot);
-    bind("btnLampSave", lampSaveContract);
-    bind("btnLampClear", lampClearContract);
-
-    // on-chain button: just gate & log for now
-    const btnOn = document.getElementById("btnLampOnchain");
-    if(btnOn){
-      const cfg2 = lampLoadCfg();
-      const hasContract = !!(cfg2.lamp && cfg2.lamp.startsWith("0x") && cfg2.lamp.length>=42);
-      const canWallet = !!(window.ethereum && typeof window.ethereum.request==="function");
-      btnOn.disabled = !(hasContract && canWallet);
-      btnOn.addEventListener("click", (e)=>{
-        e.preventDefault();
-        toast("合約版點燈：等你部署 Lamp Contract 後再接上 mint/renew。");
-        log("lamp_onchain_clicked");
-      }, true);
-    }
-
-    // initial list
-    lampLookup();
-  }
-
-
-// first selfcheck
-    selfCheck();
+    return { line, clear, render, copy };
   })();
 
+  const U = { qs:(id)=>document.getElementById(id), clamp:(n,a,b)=>Math.max(a,Math.min(b,n)) };
+
+  const Sound = (function(){
+    let ctx = null;
+    const modeEl = () => U.qs('soundMode');
+    function hasTTS(){ return !!window.speechSynthesis; }
+    function beep(){
+      try{
+        ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.001;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+        o.stop(ctx.currentTime + 0.2);
+      }catch(e){ Log.line('beep_fail ' + (e?.message||e)); }
+    }
+    function tts(text){
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'zh-TW'; u.rate = 1.02;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }catch(e){ Log.line('tts_fail ' + (e?.message||e)); }
+    }
+    function speak(text){
+      const mode = (modeEl()?.value)||'auto';
+      if(mode==='off') return;
+      if(mode==='beep') return beep();
+      if(mode==='tts') return hasTTS() ? tts(text) : beep();
+      return hasTTS() ? tts(text) : beep();
+    }
+    function test(){ Log.line('sound_test'); speak('悟空財神殿，聲音測試。'); }
+    function init(){
+      const m = localStorage.getItem('wukong_sound_mode_v1');
+      if(m && modeEl()) modeEl().value = m;
+      modeEl()?.addEventListener('change', ()=>{
+        const v = modeEl().value;
+        localStorage.setItem('wukong_sound_mode_v1', v);
+        Log.line('sound_mode=' + v);
+      });
+      U.qs('btnSoundTest')?.addEventListener('click', test);
+    }
+    window.wukongSound = speak; window.wukongSpeak = speak;
+    return { speak, init };
+  })();
+
+  const Cfg = (function(){
+    const KEY='wukong_cfg_v2';
+    function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)||'{}'); return (d&&typeof d==='object')?d:{}; }catch(e){ return {}; } }
+    function save(d){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+    function applyToUI(d){
+      U.qs('cfgFaucet').value = d.faucet||'';
+      U.qs('cfgKufo').value = d.kufo||'';
+      U.qs('cfgR1').value = d.recycle1||'';
+      U.qs('cfgR2').value = d.recycle2||'';
+      U.qs('cfgR3').value = d.recycle3||'';
+      if(d.publicGood) U.qs('cfgPG').value = d.publicGood;
+    }
+    function readFromUI(){
+      return {
+        faucet: (U.qs('cfgFaucet').value||'').trim(),
+        kufo: (U.qs('cfgKufo').value||'').trim(),
+        recycle1: (U.qs('cfgR1').value||'').trim(),
+        recycle2: (U.qs('cfgR2').value||'').trim(),
+        recycle3: (U.qs('cfgR3').value||'').trim(),
+        publicGood: (U.qs('cfgPG').value||'').trim(),
+      };
+    }
+    function init(){
+      const d=load(); applyToUI(d);
+      U.qs('btnCfgSave')?.addEventListener('click', ()=>{ save(readFromUI()); Log.line('cfg_saved'); Sound.speak('設定已保存。'); });
+      U.qs('btnCfgClear')?.addEventListener('click', ()=>{ save({}); applyToUI({}); Log.line('cfg_cleared'); Sound.speak('設定已清除。'); });
+      return d;
+    }
+    return { load, init };
+  })();
+
+  const Ethers = (function(){
+    function loadOnce(){ return new Promise((resolve)=>{ if(window.ethers) return resolve(true);
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
+      s.onload=()=>resolve(!!window.ethers); s.onerror=()=>resolve(false);
+      document.head.appendChild(s);
+    });}
+    async function ensure(){ if(window.ethers) return true; Log.line('ethers_load_attempt'); const ok=await loadOnce(); Log.line('ethers_loaded_after: '+ok); return ok; }
+    return { ensure };
+  })();
+
+  const Wallet = (function(){
+    const st={addr:'',chain:''};
+    function setUI(){ U.qs('walletAddr').textContent=st.addr||'(not connected)'; U.qs('chainId').textContent=st.chain||'(unknown)'; }
+    async function connect(){
+      await Ethers.ensure();
+      const eth=window.ethereum;
+      if(!eth){ Log.line('wallet_connect_failed: no ethereum'); Sound.speak('沒有偵測到錢包注入。'); return; }
+      try{
+        const accs=await eth.request({method:'eth_requestAccounts'});
+        st.addr=(accs&&accs[0])?accs[0].toLowerCase():'';
+        st.chain=await eth.request({method:'eth_chainId'});
+        setUI(); Log.line('wallet_connected='+st.addr); Sound.speak('錢包已連線。');
+      }catch(e){ Log.line('wallet_connect_failed: '+(e?.message||e)); }
+    }
+    function disconnectUI(){ st.addr=''; st.chain=''; setUI(); Log.line('wallet_ui_disconnected'); }
+    function bindEvents(){
+      const eth=window.ethereum; if(!eth) return;
+      eth.on?.('accountsChanged',(a)=>{ st.addr=(a&&a[0])?a[0].toLowerCase():''; Log.line('accountsChanged='+(st.addr||'(empty)')); setUI(); });
+      eth.on?.('chainChanged',(c)=>{ st.chain=c; Log.line('chainChanged='+c); setUI(); });
+    }
+    function init(){ U.qs('btnConnect')?.addEventListener('click',connect); U.qs('btnDisconnect')?.addEventListener('click',disconnectUI); bindEvents(); setUI(); }
+    return { init, state:st };
+  })();
+
+  const Vitals = (function(){
+    const KEY='wukong_vitals_v1'; const S={cupStreak:0};
+    function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)||'{}'); if(d&&typeof d==='object') S.cupStreak=d.cupStreak||0; }catch(e){} U.qs('cupStreak').textContent=String(S.cupStreak); }
+    function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+    function heartbeat(){ Log.line('heartbeat'); Sound.speak('心跳。'); }
+    function breath(){ Log.line('breath'); Sound.speak('呼吸。'); }
+    function pressure(){ Log.line('pressure'); Sound.speak('血壓。'); }
+    function cupThrow(){
+      Log.line('cup_throw');
+      const ok=Math.random()<0.5;
+      if(ok){ S.cupStreak=Math.min(3,S.cupStreak+1); U.qs('cupResult').innerHTML='<span class="tagok">聖筊：成立</span>'; Sound.speak('聖筊成立。'); }
+      else { S.cupStreak=0; U.qs('cupResult').innerHTML='<span class="tagbad">聖筊：未成</span>'; Sound.speak('未成。'); }
+      U.qs('cupStreak').textContent=String(S.cupStreak); save();
+    }
+    function fortune(){ Log.line('fortune_click'); if(S.cupStreak<3){ Sound.speak('聖筊連勝不足三次。'); return; } Sound.speak('已解鎖。等待 Faucet 上鏈後啟用。'); }
+    function init(){ load(); U.qs('btnHeartbeat')?.addEventListener('click',heartbeat); U.qs('btnBreath')?.addEventListener('click',breath); U.qs('btnPressure')?.addEventListener('click',pressure); U.qs('btnCup')?.addEventListener('click',cupThrow); U.qs('btnFortune')?.addEventListener('click',fortune); }
+    return { init };
+  })();
+
+  const Assistant = (function(){
+    let rec=null;
+    function setBox(t){ U.qs('assistantBox').textContent=t; }
+    function start(){
+      Log.line('assistant_start');
+      const t='規則：許願不等於保證。發財金是借你去做生意的禮物，不是強索回收。若要住進花果山火星齊天豪宅，門檻為五千 KGEN 還願，實際以 KUFO 無人銀行合約為準。';
+      setBox('悟空客服：'+t);
+      Sound.speak(t);
+    }
+    function sttStart(){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){ Log.line('stt_unavailable'); setBox('悟空客服：此裝置不支援語音輸入。'); return; }
+      if(rec){ try{ rec.stop(); }catch(e){} rec=null; }
+      rec=new SR(); rec.lang='zh-TW'; rec.interimResults=false; rec.maxAlternatives=1;
+      rec.onstart=()=>Log.line('stt_start');
+      rec.onend=()=>Log.line('stt_stop');
+      rec.onerror=(e)=>Log.line('stt_error '+(e?.error||e?.message||e));
+      rec.onresult=(e)=>{ const txt=e.results?.[0]?.[0]?.transcript||''; Log.line('stt_text='+txt); setBox('你說：'+txt); Sound.speak('我收到。'); };
+      rec.start();
+    }
+    function sttStop(){ Log.line('stt_stop_btn'); try{ rec?.stop(); }catch(e){} rec=null; }
+    function init(){ U.qs('btnAssistantStart')?.addEventListener('click',start); U.qs('btnSttStart')?.addEventListener('click',sttStart); U.qs('btnSttStop')?.addEventListener('click',sttStop); }
+    return { init };
+  })();
+
+  const Fairies = (function(){
+    const LIST=[
+      {id:'f1', star:'天樞', name:'大仙女（巧雲）', point:14520, duty:'風調雨順', flow:'做空'},
+      {id:'f2', star:'天璇', name:'二仙女（巧虹）', point:14866, duty:'家庭美滿', flow:'做多'},
+      {id:'f3', star:'天璣', name:'三仙女（巧芝）', point:16184, duty:'育子收驚', flow:'做空'},
+      {id:'f4', star:'天權', name:'四仙女（巧仙）', point:16888, duty:'事業運通', flow:'做多'},
+      {id:'f5', star:'天衡', name:'五仙女（巧蘭）', point:17347, duty:'長命百歲', flow:'做空'},
+      {id:'f6', star:'闓陽', name:'六仙女（巧梅）', point:18056, duty:'身體健康', flow:'做多'},
+      {id:'f7', star:'瑤光', name:'七仙女（巧靈）', point:18459, duty:'感情圓滿', flow:'多單退'}
+    ];
+    const WKEY='wukong_wishpool_v1';
+    function wishLoad(){ try{ return JSON.parse(localStorage.getItem(WKEY)||'[]')||[]; }catch(e){ return []; } }
+    function wishSave(a){ try{ localStorage.setItem(WKEY, JSON.stringify(a.slice(-500))); }catch(e){} }
+    function renderFairies(){
+      const el=U.qs('fairyList'); if(!el) return;
+      el.innerHTML='';
+      LIST.forEach(f=>{
+        const d=document.createElement('div'); d.className='card'; d.style.margin='10px 0';
+        d.innerHTML=`<div class="h">⭐ ${f.star}｜${f.name}</div>
+          <div class="sub">座標點：<span class="mono">${f.point}</span>　專掌：<b>${f.duty}</b>　氣脈：<b>${f.flow}</b></div>
+          <button class="btn" style="margin-top:10px">投向許願池</button>`;
+        d.querySelector('button')?.addEventListener('click', ()=>{ U.qs('wishSelect').value=f.id; Log.line('wish_route='+f.id); Sound.speak('已選擇守護仙女。'); });
+        el.appendChild(d);
+      });
+    }
+    function renderWishUI(){
+      const sel=U.qs('wishSelect'); sel.innerHTML='';
+      LIST.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=`${f.star}｜${f.name}｜${f.duty}｜${f.flow}｜${f.point}`; sel.appendChild(o); });
+      U.qs('wishCount').textContent=String(wishLoad().length);
+    }
+    function submitWish(){
+      const who=U.qs('wishSelect').value;
+      const txt=(U.qs('wishText').value||'').trim();
+      const oath=(U.qs('wishOath').value||'').trim();
+      if(!txt){ U.qs('wishEcho').textContent='請先寫下願望內容。'; Sound.speak('請先寫下願望內容。'); return; }
+      const f=LIST.find(x=>x.id===who)||LIST[0];
+      const a=wishLoad(); a.push({ts:NOW_ISO(), fairy:f, wish:txt, oath:oath}); wishSave(a);
+      U.qs('wishCount').textContent=String(a.length);
+      U.qs('wishEcho').textContent=`許願已投下：${f.name}｜${f.duty}。`;
+      Log.line('wish_submit'); Sound.speak('許願已投下。');
+    }
+    function exportWish(){
+      const a=wishLoad();
+      const blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement('a');
+      link.href=url; link.download=`wishpool_${BOOT_VERSION}.json`; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      Log.line('export_wish_json');
+    }
+    function init(){
+      U.qs('btnLoadFairies')?.addEventListener('click', ()=>{ renderFairies(); renderWishUI(); Log.line('fairies_loaded_to_wishpool'); Sound.speak('七仙女已載入。'); });
+      U.qs('btnWishSubmit')?.addEventListener('click', submitWish);
+      U.qs('btnWishExport')?.addEventListener('click', exportWish);
+      renderWishUI();
+    }
+    return { init };
+  })();
+
+  const Lamps=(function(){
+    const KEY='wukong_lamps_v1';
+    const Z=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','第13肖（任意物種）'];
+    function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+    function save(d){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+    function initRoster(){
+      const d={boot:BOOT_VERSION,ts:NOW_ISO(),slots:{}}; Z.forEach(z=>d.slots[z]=[]);
+      save(d); Log.line('lamp_init'); Sound.speak('光明燈名冊已初始化。'); render();
+    }
+    function render(){
+      const d=load(); const stats=U.qs('lampStats'); const prev=U.qs('lampPreview');
+      if(!d.slots){ stats.textContent='尚未初始化'; prev.textContent='（尚無資料）'; return; }
+      let total=0; const lines=[];
+      Z.forEach(z=>{
+        const a=d.slots[z]||[]; total+=a.length; const cap=(z==='第13肖（任意物種）')?'∞':'72';
+        lines.push(`${z}：${a.length} / ${cap}`);
+        a.slice(-3).forEach(x=>lines.push(`  - ${x.name}｜term=${x.termDays}d｜exp=${x.exp}` + (x.species?`｜species=${x.species}`:'')));
+      });
+      stats.textContent=`已登記：${total} 盞（12×72=864 + 第13肖擴充）`;
+      prev.textContent=lines.join('\n');
+    }
+    function register(){
+      const d=load(); if(!d.slots){ Sound.speak('請先初始化名冊。'); return; }
+      const z=U.qs('lampZodiac').value;
+      const name=(U.qs('lampName').value||'').trim();
+      const species=(U.qs('lampSpecies').value||'').trim();
+      const termDays=parseInt(U.qs('lampTerm').value||'365',10);
+      if(!name){ Sound.speak('請先填名字。'); return; }
+      const a=d.slots[z]||[];
+      if(z!=='第13肖（任意物種）' && a.length>=72){ Sound.speak('此生肖名額已滿。'); return; }
+      const exp=new Date(Date.now()+termDays*86400*1000).toISOString().slice(0,10);
+      a.push({name, species: z==='第13肖（任意物種）'?species:'', termDays, exp, ts:NOW_ISO()});
+      d.slots[z]=a; save(d); Log.line('lamp_register '+z); Sound.speak('點燈登記完成。'); render();
+    }
+    function exportJson(){
+      const d=load(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const link=document.createElement('a');
+      link.href=url; link.download=`lamps_${BOOT_VERSION}.json`; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_lamps_json');
+    }
+    function clear(){ localStorage.removeItem(KEY); Log.line('lamp_cleared'); Sound.speak('光明燈名冊已清除。'); render(); }
+    function init(){
+      const sel=U.qs('lampZodiac'); sel.innerHTML=''; Z.forEach(z=>{ const o=document.createElement('option'); o.value=z; o.textContent=z; sel.appendChild(o); });
+      U.qs('btnLampInit')?.addEventListener('click',initRoster);
+      U.qs('btnLampRegister')?.addEventListener('click',register);
+      U.qs('btnLampExport')?.addEventListener('click',exportJson);
+      U.qs('btnLampClear')?.addEventListener('click',clear);
+      render();
+    }
+    return { init };
+  })();
+
+  const Microcell=(function(){
+    const KEY='wukong_microcells_v1';
+    function load(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+    function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a.slice(-500))); }catch(e){} }
+    function resolveRoute(route,cfg){
+      if(route==='KUFO') return cfg.kufo||'';
+      if(route==='PG') return cfg.publicGood||'';
+      if(route==='R1') return cfg.recycle1||'';
+      if(route==='R2') return cfg.recycle2||'';
+      if(route==='R3') return cfg.recycle3||'';
+      return '';
+    }
+    function render(cfg){
+      const a=load(); U.qs('mcStats').textContent='細包：'+a.length;
+      if(a.length===0){ U.qs('mcList').textContent='（尚無細包）'; return; }
+      const lines=a.slice().reverse().map(x=>{
+        const pay=resolveRoute(x.route,cfg);
+        return `• ${x.name}｜${x.category||'-'}｜${x.species||'-'}｜座標 ${x.location||'-'}｜reward ${x.rewardBps||0}bps｜${x.route}` + (pay?` -> ${pay}`:'');
+      });
+      U.qs('mcList').textContent=lines.join('\n');
+    }
+    function create(cfg){
+      const name=(U.qs('mcName').value||'').trim();
+      const category=(U.qs('mcCategory').value||'').trim();
+      const species=(U.qs('mcSpecies').value||'').trim();
+      const location=(U.qs('mcLoc').value||'').trim();
+      const rewardBps=parseInt((U.qs('mcBps').value||'0').trim(),10)||0;
+      const route=U.qs('mcRoute').value;
+      if(!name){ Sound.speak('請先填細包名稱。'); return; }
+      const a=load(); a.push({ts:NOW_ISO(),name,category,species,location,rewardBps:U.clamp(rewardBps,0,5000),route});
+      save(a); Log.line('mc_create'); Sound.speak('細包已建立。'); render(cfg);
+    }
+    function exportJson(){
+      const a=load(); const blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const link=document.createElement('a');
+      link.href=url; link.download=`microcells_${BOOT_VERSION}.json`; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_microcells_json');
+    }
+    function clear(cfg){ localStorage.removeItem(KEY); Log.line('mc_cleared'); Sound.speak('細包已清除。'); render(cfg); }
+    function init(cfg){
+      U.qs('btnMcCreate')?.addEventListener('click',()=>create(cfg));
+      U.qs('btnMcExport')?.addEventListener('click',exportJson);
+      U.qs('btnMcClear')?.addEventListener('click',()=>clear(cfg));
+      render(cfg);
+    }
+    return { init };
+  })();
+
+  const LifeFactory=(function(){
+    const KEY='wukong_life_blueprints_v1';
+    function load(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+    function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a.slice(-200))); }catch(e){} }
+    function make(){
+      const name=(U.qs('lfName').value||'').trim();
+      const species=(U.qs('lfSpecies').value||'').trim();
+      const birth=(U.qs('lfBirth').value||'').trim();
+      const pulsar=(U.qs('lfPulsar').value||'').trim();
+      if(!name||!birth){ Sound.speak('請先填生命名稱與出生地。'); return null; }
+      return { boot:BOOT_VERSION, ts:NOW_ISO(), name, species:species||'unspecified', birth, pulsarHz:pulsar||'auto',
+        organs:{heart:'FaucetHeart',brain:'AutopilotBrain',bank:'KUFO',ufo:'KUFO-PocketTimeUFO'},
+        rulesHint:{lamp72:true,wishpool:true,cup3:true,vow5000:true} };
+    }
+    function render(bp){ U.qs('lfOut').textContent=bp?JSON.stringify(bp,null,2):'（尚未生成）'; }
+    function mint(){ const bp=make(); if(!bp) return; const a=load(); a.push(bp); save(a); render(bp); Log.line('life_blueprint_minted'); Sound.speak('生命藍圖已生成。'); }
+    function exportJson(){
+      const a=load(); const blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const link=document.createElement('a');
+      link.href=url; link.download=`life_blueprints_${BOOT_VERSION}.json`; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_life_json');
+    }
+    function init(){ U.qs('btnLfMint')?.addEventListener('click',mint); U.qs('btnLfExport')?.addEventListener('click',exportJson); render(null); }
+    return { init };
+  })();
+
+  const State=(function(){
+    function exportAll(){
+      const payload={ boot:BOOT_VERSION, ts:NOW_ISO(), ua:navigator.userAgent,
+        speechSynthesis:!!window.speechSynthesis, speechRecognition:!!(window.SpeechRecognition||window.webkitSpeechRecognition),
+        ethers_loaded:!!window.ethers, ethereum_injected:!!window.ethereum, wallet:Wallet.state, cfg:Cfg.load() };
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const link=document.createElement('a');
+      link.href=url; link.download=`wukong_state_${BOOT_VERSION}.json`; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_json');
+    }
+    function clearAll(){
+      ['wukong_log_v1','wukong_cfg_v2','wukong_vitals_v1','wukong_wishpool_v1','wukong_lamps_v1','wukong_microcells_v1','wukong_life_blueprints_v1']
+        .forEach(k=>localStorage.removeItem(k));
+      Log.line('clear_state'); Sound.speak('本機狀態已清除。'); location.reload();
+    }
+    function init(){ U.qs('btnExportState')?.addEventListener('click',exportAll); U.qs('btnClearState')?.addEventListener('click',clearAll); }
+    return { init };
+  })();
+
+  async function selfcheck(){
+    Log.line('boot_version='+BOOT_VERSION);
+    Log.line('selfcheck_start');
+    Log.line('userAgent: '+navigator.userAgent);
+    Log.line('speechSynthesis: '+(!!window.speechSynthesis));
+    Log.line('speechRecognition: '+(!!(window.SpeechRecognition||window.webkitSpeechRecognition)));
+    const ethersOk=await Ethers.ensure();
+    Log.line('ethers_loaded_now: '+ethersOk);
+    Log.line('ethereum_injected_now: '+(!!window.ethereum));
+    const pill=U.qs('envPill');
+    if(pill){
+      pill.textContent = `env: TTS=${!!window.speechSynthesis} | ETH=${!!window.ethereum} | ethers=${ethersOk}`;
+    }
+  }
+
+  function bindDebugButtons(){
+    U.qs('btnLogSelfcheck')?.addEventListener('click',selfcheck);
+    U.qs('btnLogClear')?.addEventListener('click',()=>Log.clear());
+    U.qs('btnLogCopy')?.addEventListener('click',()=>Log.copy());
+  }
+
+  function boot(){
+    U.qs('bootVer').textContent=BOOT_VERSION;
+    Log.render();
+    bindDebugButtons();
+    Sound.init();
+    const cfg=Cfg.init();
+    Wallet.init();
+    Vitals.init();
+    Assistant.init();
+    Fairies.init();
+    Lamps.init();
+    Microcell.init(cfg);
+    LifeFactory.init();
+    State.init();
+    selfcheck();
+  }
+
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',boot,{once:true}); }
+  else { boot(); }
 })();
 </script>
-
 </body>
 </html>
-
-  // ------------------------------
-  // Microcell Shop (local prototype)
-  // ------------------------------
-  const MC_KEY = 'wukong_microcells_v1';
-
-  function mcLoad(){
-    try{
-      const raw = localStorage.getItem(MC_KEY);
-      if(!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    }catch(e){ return []; }
-  }
-  function mcSave(arr){
-    try{ localStorage.setItem(MC_KEY, JSON.stringify(arr)); }catch(e){}
-  }
-  function mcResolveRoute(route, cfg){
-    if(route === 'KUFO') return cfg.kufo || '';
-    if(route === 'PG') return STATE.publicGood || '';
-    if(route === 'R1') return cfg.recycle1 || '';
-    if(route === 'R2') return cfg.recycle2 || '';
-    if(route === 'R3') return cfg.recycle3 || '';
-    return '';
-  }
-  function mcRender(){
-    const listEl = document.getElementById('mc_list');
-    const statsEl = document.getElementById('mc_stats');
-    if(!listEl || !statsEl) return;
-    const arr = mcLoad();
-    statsEl.textContent = '細包：' + arr.length;
-    if(arr.length === 0){
-      listEl.textContent = '（尚無細包）';
-      return;
-    }
-    const lines = arr.slice().reverse().map(x=>{
-      const pay = x.payAddress ? (' -> ' + x.payAddress) : '';
-      return `• ${x.name}｜${x.category||'-'}｜${x.species||'-'}｜座標 ${x.location||'-'}｜reward ${x.rewardBps||0}bps｜${x.route||'-'}${pay}`;
-    });
-    listEl.textContent = lines.join('\n');
-  }
-  function mcInitUI(){
-    const btnCreate = document.getElementById('btnMcCreate');
-    const btnExport = document.getElementById('btnMcExport');
-    const btnClear = document.getElementById('btnMcClear');
-    if(btnCreate){
-      btnCreate.addEventListener('click', ()=>{
-        const name = (document.getElementById('mc_name')?.value||'').trim();
-        const category = (document.getElementById('mc_category')?.value||'').trim();
-        const species = (document.getElementById('mc_species')?.value||'').trim();
-        const location = (document.getElementById('mc_location')?.value||'').trim();
-        const rewardBps = parseInt((document.getElementById('mc_reward_bps')?.value||'').trim()||'0', 10) || 0;
-        const route = (document.getElementById('mc_route')?.value||'KUFO').trim();
-
-        if(!name){
-          wukongSpeak('請先輸入細包名稱。');
-          log('mc_create_failed: no_name');
-          return;
-        }
-
-        const cfg = loadCfg();
-        const payAddress = mcResolveRoute(route, cfg);
-        const arr = mcLoad();
-        const rec = {
-          id: 'mc_' + Math.random().toString(16).slice(2,10),
-          ts: new Date().toISOString(),
-          owner: (STATE.wallet||''),
-          name, category, species, location,
-          rewardBps,
-          route,
-          payAddress
-        };
-        arr.push(rec);
-        mcSave(arr);
-        mcRender();
-        wukongSpeak('細包已建立。');
-        log('mc_created=' + rec.id);
-      });
-    }
-    if(btnExport){
-      btnExport.addEventListener('click', ()=>{
-        const cfg = loadCfg();
-        const payload = {
-          boot_version: BOOT_VERSION,
-          exported_at: new Date().toISOString(),
-          wallet: STATE.wallet || null,
-          config: {
-            kufo: cfg.kufo || null,
-            publicGood: STATE.publicGood || null,
-            recycle1: cfg.recycle1 || null,
-            recycle2: cfg.recycle2 || null,
-            recycle3: cfg.recycle3 || null
-          },
-          microcells: mcLoad()
-        };
-        downloadJson('wukong_microcells.json', payload);
-        wukongSpeak('已匯出細包 JSON。');
-        log('mc_export');
-      });
-    }
-    if(btnClear){
-      btnClear.addEventListener('click', ()=>{
-        mcSave([]);
-        mcRender();
-        wukongSpeak('細包已清除。');
-        log('mc_clear');
-      });
-    }
-    mcRender();
-  }
-
-  // ------------------------------
-  // Life Factory (local prototype)
-  // ------------------------------
-  const LF_KEY = 'wukong_lifefactory_v1';
-
-  function lfLoad(){
-    try{
-      const raw = localStorage.getItem(LF_KEY);
-      if(!raw) return { births: [] };
-      const obj = JSON.parse(raw);
-      if(!obj || typeof obj !== 'object') return { births: [] };
-      if(!Array.isArray(obj.births)) obj.births = [];
-      return obj;
-    }catch(e){ return { births: [] }; }
-  }
-  function lfSave(obj){
-    try{ localStorage.setItem(LF_KEY, JSON.stringify(obj)); }catch(e){}
-  }
-  function lfGetPrereq(){
-    const lamps = lampLoad();
-    const wishes = wishLoad();
-    const microcells = mcLoad();
-    const cup = STATE.cupStreak || 0;
-
-    return {
-      cupStreak: cup,
-      lamps: lamps.length,
-      wishes: wishes.items?.length || 0,
-      microcells: microcells.length
-    };
-  }
-  function lfCheckAndExplain(){
-    const p = lfGetPrereq();
-    const okCup = p.cupStreak >= 3;
-    const okLamp = p.lamps >= 1;
-    const okWish = p.wishes >= 1;
-    // microcell is optional, but recommended
-    const ok = okCup && okLamp && okWish;
-
-    const lines = [
-      `聖筊連勝：${p.cupStreak}（需 >= 3） => ${okCup ? 'OK' : '未達'}`,
-      `光明燈：${p.lamps}（需 >= 1） => ${okLamp ? 'OK' : '未達'}`,
-      `許願：${p.wishes}（需 >= 1） => ${okWish ? 'OK' : '未達'}`,
-      `細包：${p.microcells}（選配）`
-    ];
-    return { ok, lines, p };
-  }
-  function lfInitUI(){
-    const btnCheck = document.getElementById('btnLfCheck');
-    const btnBirth = document.getElementById('btnLfBirth');
-    const btnExport = document.getElementById('btnLfExport');
-    const elStatus = document.getElementById('lf_status');
-    const elEcho = document.getElementById('lf_echo');
-
-    function paintCheck(){
-      const r = lfCheckAndExplain();
-      if(elStatus) elStatus.textContent = '狀態：' + (r.ok ? '可誕生' : '條件未齊');
-      if(elEcho) elEcho.textContent = r.lines.join('｜');
-      return r;
-    }
-
-    if(btnCheck){
-      btnCheck.addEventListener('click', ()=>{
-        const r = paintCheck();
-        wukongSpeak(r.ok ? '條件已齊，可以生成生命蛋。' : '條件未齊，請先完成參拜流程。');
-        log('lf_check');
-      });
-    }
-
-    if(btnBirth){
-      btnBirth.addEventListener('click', ()=>{
-        const r = paintCheck();
-        if(!r.ok){
-          wukongSpeak('條件未齊，暫不可誕生。');
-          log('lf_birth_blocked');
-          return;
-        }
-
-        const name = (document.getElementById('lf_name')?.value||'').trim();
-        const species = (document.getElementById('lf_species')?.value||'').trim();
-        const bp = (document.getElementById('lf_birthplace')?.value||'11520').trim();
-        const bpCustom = (document.getElementById('lf_birthplace_custom')?.value||'').trim();
-        const pulsarHz = (document.getElementById('lf_pulsar_hz')?.value||'').trim();
-        const ship = (document.getElementById('lf_ship')?.value||'').trim();
-
-        if(!name || !species){
-          wukongSpeak('請輸入生命名稱與物種。');
-          log('lf_birth_failed: missing_fields');
-          return;
-        }
-
-        const cfg = loadCfg();
-        const birthPlace = (bp === 'custom') ? (bpCustom || 'custom') : bp;
-
-        const egg = {
-          id: 'life_' + Math.random().toString(16).slice(2,10),
-          boot_version: BOOT_VERSION,
-          created_at: new Date().toISOString(),
-          owner_wallet: STATE.wallet || null,
-          name,
-          species,
-          birth_place: birthPlace,
-          pulsar_hz: pulsarHz || null,
-          ship: ship || null,
-          prerequisite_snapshot: r.p,
-          linked: {
-            faucet: cfg.faucet || null,
-            kufo: cfg.kufo || null,
-            publicGood: STATE.publicGood || null
-          },
-          organs_needed: ['heart', 'brain', 'lungs', 'blood', 'skin', 'memory']
-        };
-
-        const store = lfLoad();
-        store.births.push(egg);
-        lfSave(store);
-
-        downloadJson('wukong_life_egg.json', egg);
-        wukongSpeak('生命蛋已生成。');
-        log('lf_birth=' + egg.id);
-      });
-    }
-
-    if(btnExport){
-      btnExport.addEventListener('click', ()=>{
-        const payload = lfLoad();
-        downloadJson('wukong_life_factory.json', {
-          boot_version: BOOT_VERSION,
-          exported_at: new Date().toISOString(),
-          wallet: STATE.wallet || null,
-          data: payload
-        });
-        wukongSpeak('已匯出生命工廠 JSON。');
-        log('lf_export');
-      });
-    }
-
-    // initial paint
-    paintCheck();
-  }
-
-
-
