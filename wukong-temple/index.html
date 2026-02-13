@@ -851,5 +851,215 @@ const Microcell=(function(){
   else { boot(); }
 })();
 </script>
+
+
+<!-- =========================
+     🧠 Brain Foundry On-chain Panel (V3.2.0 add-on)
+     ========================= -->
+<section class="card" id="brain_onchain">
+  <h2>🧠 悟空大腦｜Brain Foundry（鏈上）</h2>
+  <p class="muted">需要已部署 Brain 合約地址；在有錢包注入（MetaMask WebView）時才會可按。<br/>提示：Chrome 一般沒有錢包注入；MetaMask WebView 常見 <code>speechSynthesis=false</code> 但錢包可用。</p>
+
+  <div class="grid2">
+    <div>
+      <label>Brain 合約地址</label>
+      <input id="cfg_brain" placeholder="0x..." />
+    </div>
+    <div>
+      <label>受益人（可留空=自己）</label>
+      <input id="brain_beneficiary" placeholder="0x..." />
+    </div>
+    <div>
+      <label>投入（KGEN）</label>
+      <input id="brain_amount" placeholder="例如 100" inputmode="decimal" />
+    </div>
+    <div>
+      <label>提領路由</label>
+      <select id="brain_route">
+        <option value="0">自訂地址</option>
+        <option value="1">KUFO</option>
+        <option value="2">Public Good</option>
+        <option value="3">Recycle1</option>
+        <option value="4">Recycle2</option>
+        <option value="5">Recycle3</option>
+      </select>
+    </div>
+    <div>
+      <label>自訂提領地址（route=自訂）</label>
+      <input id="brain_to" placeholder="0x..." />
+    </div>
+    <div>
+      <label>狀態</label>
+      <pre id="brain_status" class="pre">(not loaded)</pre>
+    </div>
+  </div>
+
+  <div class="row">
+    <button id="btnBrainSave" class="btn">保存 Brain 地址</button>
+    <button id="btnBrainRefresh" class="btn">刷新狀態</button>
+    <button id="btnBrainDeposit" class="btn primary">投入大腦（deposit）</button>
+    <button id="btnBrainWithdraw" class="btn danger">提領（withdraw）</button>
+  </div>
+
+  <details style="margin-top:10px;">
+    <summary>合約 ABI / 注意事項</summary>
+    <div class="muted" style="margin-top:8px; line-height:1.6;">
+      這裡只呼叫大腦合約的 <code>deposit</code> / <code>withdraw</code> / <code>withdrawToRoute</code> / <code>credits</code>。
+      若未部署 Faucet / KUFO，仍可先測 UI。地址上鏈後不建議頻繁改動。
+    </div>
+  </details>
+</section>
+
+<script>
+// ------------------------------
+// Brain Foundry On-chain (V3.2.0)
+// ------------------------------
+(function(){
+  try{
+    // bump boot version (UI uses BOOT_VERSION already, but keep a visible log)
+    if(window.__wukong_log) window.__wukong_log('brain_panel_loaded');
+  }catch(e){}
+
+  const BRAIN_CFG_KEY = 'wukong_brain_v1';
+
+  function loadBrainCfg(){
+    try{ return JSON.parse(localStorage.getItem(BRAIN_CFG_KEY)||'{}') || {}; }catch(e){ return {}; }
+  }
+  function saveBrainCfg(cfg){
+    try{ localStorage.setItem(BRAIN_CFG_KEY, JSON.stringify(cfg||{})); }catch(e){}
+  }
+
+  function q(id){ return document.getElementById(id); }
+
+  function bootFill(){
+    const cfg = loadBrainCfg();
+    if(q('cfg_brain')) q('cfg_brain').value = cfg.brain || '';
+  }
+
+  const BRAIN_ABI = [
+    'function VERSION() view returns (string)',
+    'function KGEN() view returns (address)',
+    'function CAP() view returns (uint256)',
+    'function totalCredits() view returns (uint256)',
+    'function credits(address) view returns (uint256)',
+    'function routes() view returns (tuple(address kufo,address publicGood,address recycle1,address recycle2,address recycle3))',
+    'function deposit(uint256 amount, address beneficiary)',
+    'function withdraw(uint256 amount, address to)',
+    'function withdrawToRoute(uint8 routeId, uint256 amount)'
+  ];
+
+  async function brainContract(){
+    const addr = (q('cfg_brain')?.value||'').trim();
+    if(!addr || !addr.startsWith('0x') || addr.length < 42) throw new Error('Brain address missing');
+    if(!window.ethers) throw new Error('ethers not loaded');
+    if(!window.ethereum) throw new Error('no ethereum');
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    return { c: new ethers.Contract(addr, BRAIN_ABI, signer), provider, signer };
+  }
+
+  function fmtU(x){
+    try{ return ethers.formatUnits(x, 18); }catch(e){ return String(x); }
+  }
+
+  async function refreshBrain(){
+    const out = q('brain_status');
+    if(!out) return;
+    try{
+      const {c, signer} = await brainContract();
+      const me = await signer.getAddress();
+      const [ver,kgen,cap,total,route,credit] = await Promise.all([
+        c.VERSION(), c.KGEN(), c.CAP(), c.totalCredits(), c.routes(), c.credits(me)
+      ]);
+      const lines = [];
+      lines.push('VERSION: ' + ver);
+      lines.push('KGEN: ' + kgen);
+      lines.push('CAP: ' + fmtU(cap));
+      lines.push('totalCredits: ' + fmtU(total));
+      lines.push('myCredits: ' + fmtU(credit));
+      lines.push('routes.KUFO: ' + route.kufo);
+      lines.push('routes.PG: ' + route.publicGood);
+      lines.push('routes.R1: ' + route.recycle1);
+      lines.push('routes.R2: ' + route.recycle2);
+      lines.push('routes.R3: ' + route.recycle3);
+      out.textContent = lines.join('
+');
+      if(window.__wukong_log) window.__wukong_log('brain_refresh_ok');
+    }catch(err){
+      out.textContent = 'ERROR: ' + (err?.message || err);
+      if(window.__wukong_log) window.__wukong_log('brain_refresh_err ' + (err?.message||err));
+    }
+  }
+
+  async function depositBrain(){
+    try{
+      const {c, signer} = await brainContract();
+      const me = await signer.getAddress();
+      const amountStr = (q('brain_amount')?.value||'').trim();
+      if(!amountStr) throw new Error('amount empty');
+      const amt = ethers.parseUnits(amountStr, 18);
+      const ben = (q('brain_beneficiary')?.value||'').trim() || me;
+      const tx = await c.deposit(amt, ben);
+      if(window.__wukong_log) window.__wukong_log('brain_deposit_tx ' + tx.hash);
+      await tx.wait();
+      if(window.__wukong_log) window.__wukong_log('brain_deposit_ok');
+      await refreshBrain();
+    }catch(err){
+      if(window.__wukong_log) window.__wukong_log('brain_deposit_err ' + (err?.message||err));
+      alert('Deposit failed: ' + (err?.message||err));
+    }
+  }
+
+  async function withdrawBrain(){
+    try{
+      const {c, signer} = await brainContract();
+      const me = await signer.getAddress();
+      const amountStr = (q('brain_amount')?.value||'').trim();
+      if(!amountStr) throw new Error('amount empty');
+      const amt = ethers.parseUnits(amountStr, 18);
+      const routeId = parseInt(q('brain_route')?.value||'0',10) || 0;
+      if(routeId === 0){
+        const to = (q('brain_to')?.value||'').trim() || me;
+        const tx = await c.withdraw(amt, to);
+        if(window.__wukong_log) window.__wukong_log('brain_withdraw_tx ' + tx.hash);
+        await tx.wait();
+      }else{
+        const tx = await c.withdrawToRoute(routeId, amt);
+        if(window.__wukong_log) window.__wukong_log('brain_withdrawRoute_tx ' + tx.hash);
+        await tx.wait();
+      }
+      if(window.__wukong_log) window.__wukong_log('brain_withdraw_ok');
+      await refreshBrain();
+    }catch(err){
+      if(window.__wukong_log) window.__wukong_log('brain_withdraw_err ' + (err?.message||err));
+      alert('Withdraw failed: ' + (err?.message||err));
+    }
+  }
+
+  function saveBrain(){
+    const cfg = loadBrainCfg();
+    cfg.brain = (q('cfg_brain')?.value||'').trim();
+    saveBrainCfg(cfg);
+    if(window.__wukong_log) window.__wukong_log('brain_cfg_saved');
+    alert('Brain address saved (local).');
+  }
+
+  // hook buttons
+  function hook(){
+    bootFill();
+    q('btnBrainSave')?.addEventListener('click', saveBrain);
+    q('btnBrainRefresh')?.addEventListener('click', refreshBrain);
+    q('btnBrainDeposit')?.addEventListener('click', depositBrain);
+    q('btnBrainWithdraw')?.addEventListener('click', withdrawBrain);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', hook);
+  }else{
+    hook();
+  }
+})();
+</script>
+
 </body>
 </html>
