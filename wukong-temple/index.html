@@ -126,16 +126,6 @@
     </div>
   </div>
 
-<div class="row">
-  <label>KGEN Token（BSC）</label>
-  <input id="cfgKgenToken" placeholder="0x...（KGEN 合約地址）" />
-</div>
-
-<div class="row">
-  <label>悟空大腦 Brain 合約（WBE）</label>
-  <input id="cfgBrain" placeholder="0x...（BrainEngine 合約地址，上鏈後再填）" />
-</div>
-
   <div class="card" style="margin-top:12px">
     <div class="h">🎧 影像語音客服（本機）</div>
     <div class="sub">按「啟動客服」會朗讀規則（TTS 或叮）。也可語音輸入（裝置支援才會有 STT）。</div>
@@ -258,7 +248,47 @@
     </div>
 
     <div class="card">
-      <div class="h">🏭 生命工廠（Life Factory｜宇宙細胞誕生）</div>
+      <div class="h">🏭 
+  <!-- =========================
+       🧠 Wukong Brain Foundry (Local Prototype)
+       ========================= -->
+  <div class="card" id="brain">
+    <div class="card-hd">
+      <div class="title">🧠 悟空大腦｜Brain Foundry</div>
+      <div class="sub">腦容量上限：<b id="brainCap">50,000,000</b> KGEN（募資/鎖倉概念；未上鏈前只做本機紀錄）</div>
+    </div>
+
+    <div class="grid2">
+      <div class="kv">
+        <div class="k">目前淨投入（本機）</div>
+        <div class="v"><b id="brainNet">0</b> KGEN</div>
+      </div>
+      <div class="kv">
+        <div class="k">進度</div>
+        <div class="v"><b id="brainPct">0%</b></div>
+      </div>
+    </div>
+
+    <div class="note">
+      規則（神殿版）：大腦不是保證報酬；它是「Kline App Game」未來研發的能量池。
+      你可以投入（視為開發能量），也可以提領（視為能量撤回／往生）。
+      上鏈後是否允許提領，由 Brain 合約的天條決定；本頁先提供可提領的原型流程。
+    </div>
+
+    <div class="row">
+      <input id="brainAmount" class="inp" inputmode="decimal" placeholder="輸入 KGEN 數量（原型）" />
+      <button class="btn" id="btnBrainDeposit">投入</button>
+      <button class="btn" id="btnBrainWithdraw">提領</button>
+    </div>
+
+    <div class="row">
+      <button class="btn ghost" id="btnBrainExport">匯出 Brain JSON</button>
+      <button class="btn ghost" id="btnBrainClear">清除本機紀錄</button>
+    </div>
+
+    <pre class="mono" id="brainList">(尚無紀錄)</pre>
+  </div>
+生命工廠（Life Factory｜宇宙細胞誕生）</div>
       <div class="sub">完成流程（點燈/許願/擲筊/還願）後可生成「生命藍圖 JSON」。上鏈版本可由 KUFO / Faucet 驗證條件。</div>
       <div class="hr"></div>
       <div class="grid2">
@@ -278,410 +308,10 @@
     </div>
   </div>
 
-<section class="card" id="cardBrain">
-  <h2>🧠 悟空大腦｜Wukong Brain Engine（WBE）</h2>
-  <div class="muted">
-    這是「腦力開發募資池」的本機原型。先不承諾分潤，不碰投資宣告。
-    你可把宇宙細包、許願、光明燈、發財金回收導流到這裡，等上鏈後再接合約。
-  </div>
-
-  <div class="grid2">
-    <div>
-      <div><b>腦容量上限（Cap）</b></div>
-      <div class="row">
-        <input id="brainCap" value="50000000" />
-        <button id="btnBrainSetCap">保存 Cap</button>
-      </div>
-      <div class="muted">單位：KGEN（概念容量）。</div>
-    </div>
-
-    <div>
-      <div><b>目前累積（本機）</b></div>
-      <div id="brainProgressText">0 / 50,000,000</div>
-      <progress id="brainProgress" value="0" max="50000000" style="width:100%"></progress>
-      <div class="muted">上鏈後會改讀合約狀態；現在先做原型驗收。</div>
-    </div>
-  </div>
-
-  <hr/>
-
-  <h3>存入路由（導流選擇）</h3>
-  <div class="row">
-    <select id="brainRoute">
-      <option value="KUFO">KUFO 無人銀行</option>
-      <option value="R1">發財金回收地址 R1</option>
-      <option value="R2">發財金回收地址 R2</option>
-      <option value="R3">發財金回收地址 R3</option>
-      <option value="PG">公益金庫 Public Good</option>
-      <option value="ANY">任意地址（自由輸入）</option>
-    </select>
-    <input id="brainAnyAddress" placeholder="若選任意地址，在此填 0x..." />
-  </div>
-
-  <div class="row">
-    <input id="brainAmount" placeholder="要存入的 KGEN（本機記帳）" />
-    <button id="btnBrainDeposit">存入（本機）</button>
-    <button id="btnBrainExport">匯出 Brain JSON</button>
-    <button id="btnBrainClear">清除 Brain（本機）</button>
-  </div>
-
-  <div class="muted" id="brainRouteResolved"></div>
-
-  <hr/>
-
-  <h3>Kline App Game｜角度判定（0–170 多｜170–190 休｜190–360 空）</h3>
-  <div class="row">
-    <input id="gameAngle" placeholder="輸入角度 0~360" />
-    <button id="btnGameJudge">判定</button>
-    <button id="btnGamePing">叮（測試）</button>
-  </div>
-  <div id="gameJudgeResult" class="muted">尚未判定。</div>
-
-</section>
-
   <div class="card" style="margin-top:12px">
     <div class="h">📜 品牌固定尾段</div>
     <div class="sub">PrimeForge 以母機之名，開啟金融生命。花果山台灣・信念不滅・市場無界。Where the Market Becomes the Myth.—— 樂天帝 ⌖</div>
   </div>
-
-// ==============================
-// SoundBus (single exit)
-// - Fix: wukongSound is not defined
-// - Any module should call SoundBus.play()
-// ==============================
-window.SoundBus = (function(){
-  let mode = 'auto'; // auto | tts | beep | off
-  let lastTTS = 0;
-
-  function log(msg){ try{ dbg(msg); }catch(e){} }
-
-  function hasTTS(){
-    try { return !!window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'; }
-    catch(e){ return false; }
-  }
-
-  function beep(){
-    try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.frequency.value = 880;
-      o.connect(g); g.connect(ctx.destination);
-      g.gain.value = 0.08;
-      o.start();
-      setTimeout(()=>{ o.stop(); ctx.close(); }, 120);
-      return true;
-    }catch(e){
-      return false;
-    }
-  }
-
-  function tts(text){
-    try{
-      if(!hasTTS()) return false;
-      // avoid spam overlap
-      const now = Date.now();
-      if(now - lastTTS < 350) return true;
-      lastTTS = now;
-
-      const u = new SpeechSynthesisUtterance(text || 'OK');
-      u.lang = 'zh-TW';
-      u.rate = 1.0;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-      return true;
-    }catch(e){
-      return false;
-    }
-  }
-
-  function play(text){
-    const m = mode;
-    if(m === 'off') return;
-    if(m === 'tts'){
-      if(!tts(text)) beep();
-      return;
-    }
-    if(m === 'beep'){ beep(); return; }
-    // auto
-    if(hasTTS()) { tts(text); }
-    else { beep(); }
-  }
-
-  function setMode(m){
-    mode = m || 'auto';
-    log('sound_mode=' + mode);
-  }
-
-  function getMode(){ return mode; }
-
-  return { play, setMode, getMode, hasTTS };
-})();
-
-
-// ==============================
-// Config patch: add cfgKgenToken + cfgBrain
-// ==============================
-(function(){
-  try{
-    const _read = window.readCfgFromUI;
-    const _apply = window.applyCfgToUI;
-
-    window.readCfgFromUI = function(){
-      const cfg = _read ? _read() : {};
-      cfg.kgenToken = (document.getElementById('cfgKgenToken')?.value || '').trim();
-      cfg.brain = (document.getElementById('cfgBrain')?.value || '').trim();
-      return cfg;
-    };
-
-    window.applyCfgToUI = function(cfg){
-      if(_apply) _apply(cfg);
-      if(cfg){
-        const a = document.getElementById('cfgKgenToken'); if(a) a.value = cfg.kgenToken || '';
-        const b = document.getElementById('cfgBrain'); if(b) b.value = cfg.brain || '';
-      }
-    };
-  }catch(e){}
-})();
-
-
-// ==============================
-// BrainEngine (local prototype)
-// - Cap default 50,000,000
-// - Route: KUFO / R1/2/3 / PG / ANY
-// - Deposit: local ledger (no chain promise)
-// ==============================
-window.BrainEngine = (function(){
-  const KEY = 'wukong_brain_v1';
-  const CAP_KEY = 'wukong_brain_cap_v1';
-
-  function load(){
-    try{
-      const raw = localStorage.getItem(KEY);
-      if(!raw) return { total: 0, items: [] };
-      const obj = JSON.parse(raw);
-      if(!obj || typeof obj.total !== 'number' || !Array.isArray(obj.items)) return { total: 0, items: [] };
-      return obj;
-    }catch(e){
-      return { total: 0, items: [] };
-    }
-  }
-
-  function save(obj){
-    try{ localStorage.setItem(KEY, JSON.stringify(obj)); }catch(e){}
-  }
-
-  function loadCap(){
-    try{
-      const raw = localStorage.getItem(CAP_KEY);
-      const n = raw ? Number(raw) : 50000000;
-      return Number.isFinite(n) && n > 0 ? n : 50000000;
-    }catch(e){
-      return 50000000;
-    }
-  }
-
-  function saveCap(n){
-    try{ localStorage.setItem(CAP_KEY, String(n)); }catch(e){}
-  }
-
-  function resolveRoute(cfg){
-    const route = (document.getElementById('brainRoute')?.value || '').trim();
-    const any = (document.getElementById('brainAnyAddress')?.value || '').trim();
-    if(route === 'KUFO') return cfg.kufo || '';
-    if(route === 'R1') return cfg.recycle1 || '';
-    if(route === 'R2') return cfg.recycle2 || '';
-    if(route === 'R3') return cfg.recycle3 || '';
-    if(route === 'PG') return (window.STATE?.publicGood) || '';
-    if(route === 'ANY') return any;
-    return '';
-  }
-
-  function render(){
-    const capEl = document.getElementById('brainCap');
-    const prog = document.getElementById('brainProgress');
-    const txt = document.getElementById('brainProgressText');
-    const resolved = document.getElementById('brainRouteResolved');
-
-    const cfg = window.loadCfg ? window.loadCfg() : {};
-    const cap = loadCap();
-    const st = load();
-
-    if(capEl) capEl.value = String(cap);
-    if(prog){
-      prog.max = cap;
-      prog.value = Math.max(0, Math.min(cap, st.total));
-    }
-    if(txt){
-      txt.textContent = `${st.total.toLocaleString()} / ${cap.toLocaleString()} KGEN`;
-    }
-    if(resolved){
-      const addr = resolveRoute(cfg);
-      resolved.textContent = addr ? (`路由地址：${addr}`) : '路由地址：尚未設定（或選了任意地址但未填）';
-    }
-  }
-
-  function deposit(){
-    const cfg = window.loadCfg ? window.loadCfg() : {};
-    const cap = loadCap();
-    const st = load();
-    const amt = Number((document.getElementById('brainAmount')?.value || '').trim());
-    const addr = resolveRoute(cfg);
-
-    if(!Number.isFinite(amt) || amt <= 0){
-      SoundBus.play('金額錯誤');
-      try{ dbg('brain_deposit_fail amount'); }catch(e){}
-      return;
-    }
-    if(st.total + amt > cap){
-      SoundBus.play('超過腦容量上限');
-      try{ dbg('brain_deposit_fail cap'); }catch(e){}
-      return;
-    }
-    st.total += amt;
-    st.items.push({
-      ts: new Date().toISOString(),
-      amount: amt,
-      route: (document.getElementById('brainRoute')?.value || '').trim(),
-      to: addr || ''
-    });
-    save(st);
-    try{ dbg('brain_deposit ' + amt); }catch(e){}
-    SoundBus.play('存入成功');
-    render();
-  }
-
-  function exportJSON(){
-    const st = load();
-    const payload = {
-      boot_version: (window.BOOT_VERSION || 'unknown'),
-      ts: new Date().toISOString(),
-      cap: loadCap(),
-      brain: st
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `wukong_brain_${Date.now()}.json`;
-    a.click();
-    try{ dbg('export_brain_json'); }catch(e){}
-    SoundBus.play('匯出完成');
-  }
-
-  function clearAll(){
-    try{ localStorage.removeItem(KEY); }catch(e){}
-    try{ dbg('brain_cleared'); }catch(e){}
-    SoundBus.play('已清除');
-    render();
-  }
-
-  function bindUI(){
-    const setCap = document.getElementById('btnBrainSetCap');
-    const dep = document.getElementById('btnBrainDeposit');
-    const exp = document.getElementById('btnBrainExport');
-    const clr = document.getElementById('btnBrainClear');
-    const routeSel = document.getElementById('brainRoute');
-    const anyAddr = document.getElementById('brainAnyAddress');
-
-    if(setCap){
-      setCap.addEventListener('click', ()=>{
-        const n = Number((document.getElementById('brainCap')?.value || '').trim());
-        if(!Number.isFinite(n) || n <= 0){
-          SoundBus.play('Cap 錯誤');
-          return;
-        }
-        saveCap(Math.floor(n));
-        try{ dbg('brain_cap_saved'); }catch(e){}
-        SoundBus.play('Cap 已保存');
-        render();
-      });
-    }
-    if(dep) dep.addEventListener('click', deposit);
-    if(exp) exp.addEventListener('click', exportJSON);
-    if(clr) clr.addEventListener('click', clearAll);
-    if(routeSel) routeSel.addEventListener('change', render);
-    if(anyAddr) anyAddr.addEventListener('input', render);
-  }
-
-  function init(){
-    bindUI();
-    render();
-  }
-
-  return { init, render };
-})();
-
-
-// ==============================
-// Kline App Game Angle Judge
-// 0-170 LONG, 170-190 REST, 190-360 SHORT
-// ==============================
-window.GameAngle = (function(){
-  function norm(a){
-    let x = Number(a);
-    if(!Number.isFinite(x)) return null;
-    x = x % 360;
-    if(x < 0) x += 360;
-    return x;
-  }
-
-  function judge(angle){
-    const a = norm(angle);
-    if(a === null) return { ok:false, msg:'角度錯誤' };
-    if(a >= 0 && a < 170) return { ok:true, zone:'LONG', msg:`角度 ${a.toFixed(2)}：做多區（0–170）` };
-    if(a >= 170 && a < 190) return { ok:true, zone:'REST', msg:`角度 ${a.toFixed(2)}：休息區（170–190）` };
-    return { ok:true, zone:'SHORT', msg:`角度 ${a.toFixed(2)}：做空區（190–360）` };
-  }
-
-  function bindUI(){
-    const btn = document.getElementById('btnGameJudge');
-    const ping = document.getElementById('btnGamePing');
-    if(btn){
-      btn.addEventListener('click', ()=>{
-        const val = document.getElementById('gameAngle')?.value;
-        const r = judge(val);
-        const out = document.getElementById('gameJudgeResult');
-        if(out) out.textContent = r.ok ? r.msg : r.msg;
-        SoundBus.play(r.ok ? r.zone : '錯誤');
-        try{ dbg('game_judge ' + (r.zone||'fail')); }catch(e){}
-      });
-    }
-    if(ping){
-      ping.addEventListener('click', ()=>{
-        SoundBus.play('叮');
-        try{ dbg('game_ping'); }catch(e){}
-      });
-    }
-  }
-
-  function init(){ bindUI(); }
-
-  return { init, judge };
-})();
-
-
-// ==============================
-// Auto-init hooks (safe)
-// ==============================
-(function(){
-  // call after existing boot
-  try{
-    const _oldBoot = window.boot;
-    if(typeof _oldBoot === 'function'){
-      window.boot = function(){
-        _oldBoot();
-        try{ BrainEngine.init(); }catch(e){}
-        try{ GameAngle.init(); }catch(e){}
-      };
-    }else{
-      // if no boot, init on DOMContentLoaded
-      document.addEventListener('DOMContentLoaded', ()=>{
-        try{ BrainEngine.init(); }catch(e){}
-        try{ GameAngle.init(); }catch(e){}
-      });
-    }
-  }catch(e){}
-})();
 
   <div class="card" style="margin-top:12px">
     <details open>
@@ -700,7 +330,7 @@ window.GameAngle = (function(){
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.0.0-modular";
+  const BOOT_VERSION="v3.1.0-brainfoundry";
   const NOW_ISO = () => new Date().toISOString();
 
   const Log = (function(){
@@ -995,7 +625,97 @@ window.GameAngle = (function(){
     return { init };
   })();
 
-  const Microcell=(function(){
+  
+  const Brain=(function(){
+    const KEY='wukong_brain_v1';
+    const CAP=50000000; // 50,000,000 KGEN cap (concept)
+    function load(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+    function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
+    function fmt(n){ try{ return (Number(n)||0).toLocaleString('en-US'); }catch(e){ return String(n||0); } }
+    function getAddr(){ return (STATE.wallet && STATE.wallet.address) ? STATE.wallet.address : '(not connected)'; }
+
+    function net(){
+      const arr=load();
+      let v=0;
+      for(const x of arr){
+        const amt=Number(x.amount)||0;
+        if(x.type==='deposit') v+=amt;
+        if(x.type==='withdraw') v-=amt;
+      }
+      return Math.max(0, v);
+    }
+
+    function render(){
+      const arr=load();
+      const netv=net();
+      U.text('brainCap', fmt(CAP));
+      U.text('brainNet', fmt(netv));
+      const pct = CAP>0 ? Math.min(100, (netv/CAP)*100) : 0;
+      U.text('brainPct', (pct.toFixed(2)+'%'));
+      const el = U.el('brainList');
+      if(!el) return;
+      if(arr.length===0){ el.textContent='(尚無紀錄)'; return; }
+      const lines = arr.slice().reverse().slice(0,80).map(x=>{
+        const t=new Date(x.ts||Date.now()).toISOString().replace('T',' ').slice(0,19);
+        return `• ${t}｜${x.type}｜${fmt(x.amount)} KGEN｜${x.addr||'-'}｜note:${x.note||''}`;
+      });
+      el.textContent = lines.join('\n');
+    }
+
+    function deposit(){
+      const amt = Number((U.val('brainAmount')||'').trim());
+      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      const arr=load();
+      arr.push({ts:Date.now(), type:'deposit', amount:amt, addr:getAddr(), note:'local-prototype'});
+      save(arr);
+      log('brain_deposit '+amt);
+      Sound.ping('已紀錄投入');
+      render();
+    }
+
+    function withdraw(){
+      const amt = Number((U.val('brainAmount')||'').trim());
+      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      const netv=net();
+      if(amt>netv){ Sound.ping('超過可提領餘額'); return; }
+      const arr=load();
+      arr.push({ts:Date.now(), type:'withdraw', amount:amt, addr:getAddr(), note:'local-prototype'});
+      save(arr);
+      log('brain_withdraw '+amt);
+      Sound.ping('已紀錄提領');
+      render();
+    }
+
+    function exportJson(){
+      const payload = { version:'brain_v1', cap:CAP, net:net(), records:load(), cfg:STATE.cfg||{}, wallet:STATE.wallet||{} };
+      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'wukong_brain_export.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+      log('export_brain_json');
+      Sound.ping('已匯出 Brain JSON');
+    }
+
+    function clear(){
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      log('brain_cleared');
+      Sound.ping('已清除');
+      render();
+    }
+
+    function init(){
+      U.on('btnBrainDeposit','click',deposit);
+      U.on('btnBrainWithdraw','click',withdraw);
+      U.on('btnBrainExport','click',exportJson);
+      U.on('btnBrainClear','click',clear);
+      U.on('brainAmount','keydown',(e)=>{ if(e.key==='Enter') deposit(); });
+      render();
+    }
+    return { init, render, net };
+  })();
+const Microcell=(function(){
     const KEY='wukong_microcells_v1';
     function load(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
     function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a.slice(-500))); }catch(e){} }
@@ -1120,6 +840,7 @@ window.GameAngle = (function(){
     Assistant.init();
     Fairies.init();
     Lamps.init();
+    Brain.init();
     Microcell.init(cfg);
     LifeFactory.init();
     State.init();
