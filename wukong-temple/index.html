@@ -428,6 +428,10 @@ const NOW_ISO = () => new Date().toISOString();
     }
     return { line, clear, render, copy };
   })();
+  // expose logger for other modules
+  window.__wukong_log = (msg)=>Log.line(String(msg));
+  window.log = window.__wukong_log;
+
 
   const U = { qs:(id)=>document.getElementById(id), clamp:(n,a,b)=>Math.max(a,Math.min(b,n)) };
 
@@ -701,13 +705,29 @@ const NOW_ISO = () => new Date().toISOString();
 
   
   const Brain=(function(){
-    const KEY='wukong_brain_v1';
+    // local-only Brain ledger (does NOT touch chain)
+    const KEY='wukong_brain_records_v1';
     const CAP=50000000; // 50,000,000 KGEN cap (concept)
-    function load(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-    function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
-    function fmt(n){ try{ return (Number(n)||0).toLocaleString('en-US'); }catch(e){ return String(n||0); } }
-    function getAddr(){ return (STATE.wallet && STATE.wallet.address) ? STATE.wallet.address : '(not connected)'; }
 
+    function load(){
+      try{
+        const a=JSON.parse(localStorage.getItem(KEY)||'[]');
+        return Array.isArray(a)?a:[];
+      }catch(e){ return []; }
+    }
+    function save(a){
+      try{ localStorage.setItem(KEY, JSON.stringify(a.slice(-2000))); }catch(e){}
+    }
+    function fmt(n){
+      const x=Number(n)||0;
+      try{ return x.toLocaleString('en-US'); }catch(e){ return String(x); }
+    }
+    function walletAddr(){
+      try{
+        const a = Wallet?.state?.addr || '';
+        return a ? a : '(not connected)';
+      }catch(e){ return '(not connected)'; }
+    }
     function net(){
       const arr=load();
       let v=0;
@@ -718,73 +738,80 @@ const NOW_ISO = () => new Date().toISOString();
       }
       return Math.max(0, v);
     }
-
     function render(){
-      const arr=load();
       const netv=net();
-      U.text('brainCap', fmt(CAP));
-      U.text('brainNet', fmt(netv));
+      const capEl=U.qs('brainCap'); if(capEl) capEl.textContent=fmt(CAP);
+      const netEl=U.qs('brainNet'); if(netEl) netEl.textContent=fmt(netv);
+      const pctEl=U.qs('brainPct');
       const pct = CAP>0 ? Math.min(100, (netv/CAP)*100) : 0;
-      U.text('brainPct', (pct.toFixed(2)+'%'));
-      const el = U.el('brainList');
-      if(!el) return;
-      if(arr.length===0){ el.textContent='(尚無紀錄)'; return; }
-      const lines = arr.slice().reverse().slice(0,80).map(x=>{
-        const t=new Date(x.ts||Date.now()).toISOString().replace('T',' ').slice(0,19);
+      if(pctEl) pctEl.textContent = pct.toFixed(2)+'%';
+
+      const listEl=U.qs('brainList');
+      if(!listEl) return;
+      const arr=load();
+      if(arr.length===0){ listEl.textContent='(尚無紀錄)'; return; }
+      const lines = arr.slice().reverse().slice(0,120).map(x=>{
+        const t = new Date(x.ts||Date.now()).toISOString().replace('T',' ').slice(0,19);
         return `• ${t}｜${x.type}｜${fmt(x.amount)} KGEN｜${x.addr||'-'}｜note:${x.note||''}`;
       });
-      el.textContent = lines.join('\n');
+      listEl.textContent = lines.join('
+');
+    }
+
+    function readAmount(){
+      const v=(U.qs('brainAmount')?.value||'').trim();
+      const n=Number(v);
+      return Number.isFinite(n)?n:0;
     }
 
     function deposit(){
-      const amt = Number((U.val('brainAmount')||'').trim());
-      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      const amt=readAmount();
+      if(!(amt>0)){ Log.line('brain_deposit_invalid'); Sound.speak('請輸入正確數量。'); return; }
       const arr=load();
-      arr.push({ts:Date.now(), type:'deposit', amount:amt, addr:getAddr(), note:'local-prototype'});
+      arr.push({ts:Date.now(), type:'deposit', amount:amt, addr:walletAddr(), note:'local-prototype'});
       save(arr);
-      log('brain_deposit '+amt);
-      Sound.ping('已紀錄投入');
+      Log.line('brain_deposit '+amt);
+      Sound.speak('已紀錄投入。');
       render();
     }
 
     function withdraw(){
-      const amt = Number((U.val('brainAmount')||'').trim());
-      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      const amt=readAmount();
+      if(!(amt>0)){ Log.line('brain_withdraw_invalid'); Sound.speak('請輸入正確數量。'); return; }
       const netv=net();
-      if(amt>netv){ Sound.ping('超過可提領餘額'); return; }
+      if(amt>netv){ Log.line('brain_withdraw_over'); Sound.speak('超過可提領餘額。'); return; }
       const arr=load();
-      arr.push({ts:Date.now(), type:'withdraw', amount:amt, addr:getAddr(), note:'local-prototype'});
+      arr.push({ts:Date.now(), type:'withdraw', amount:amt, addr:walletAddr(), note:'local-prototype'});
       save(arr);
-      log('brain_withdraw '+amt);
-      Sound.ping('已紀錄提領');
+      Log.line('brain_withdraw '+amt);
+      Sound.speak('已紀錄提領。');
       render();
     }
 
     function exportJson(){
-      const payload = { version:'brain_v1', cap:CAP, net:net(), records:load(), cfg:STATE.cfg||{}, wallet:STATE.wallet||{} };
-      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'wukong_brain_export.json';
+      const payload = { version:'brain_records_v1', cap:CAP, net:net(), records:load(), cfg:Cfg.load(), wallet:Wallet.state };
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=`brain_records_${BOOT_VERSION}.json`;
       a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-      log('export_brain_json');
-      Sound.ping('已匯出 Brain JSON');
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      Log.line('export_brain_records_json');
     }
 
     function clear(){
       try{ localStorage.removeItem(KEY); }catch(e){}
-      log('brain_cleared');
-      Sound.ping('已清除');
+      Log.line('brain_records_cleared');
+      Sound.speak('已清除本機紀錄。');
       render();
     }
 
     function init(){
-      U.on('btnBrainDeposit','click',deposit);
-      U.on('btnBrainWithdraw','click',withdraw);
-      U.on('btnBrainExport','click',exportJson);
-      U.on('btnBrainClear','click',clear);
-      U.on('brainAmount','keydown',(e)=>{ if(e.key==='Enter') deposit(); });
+      U.qs('btnBrainDeposit')?.addEventListener('click', deposit);
+      U.qs('btnBrainWithdraw')?.addEventListener('click', withdraw);
+      U.qs('btnBrainExport')?.addEventListener('click', exportJson);
+      U.qs('btnBrainClear')?.addEventListener('click', clear);
+      U.qs('brainAmount')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') deposit(); });
       render();
     }
     return { init, render, net };
@@ -969,10 +996,10 @@ const Microcell=(function(){
   </div>
 
   <div class="row">
-    <button id="btnBrainSave" class="btn">保存 Brain 地址</button>
-    <button id="btnBrainRefresh" class="btn">刷新狀態</button>
-    <button id="btnBrainDeposit" class="btn primary">投入大腦（deposit）</button>
-    <button id="btnBrainWithdraw" class="btn danger">提領（withdraw）</button>
+    <button id="btnBrainChainSave" class="btn">保存 Brain 地址</button>
+    <button id="btnBrainChainRefresh" class="btn">刷新狀態</button>
+    <button id="btnBrainChainDeposit" class="btn primary">投入大腦（deposit）</button>
+    <button id="btnBrainChainWithdraw" class="btn danger">提領（withdraw）</button>
   </div>
 
   <details style="margin-top:10px;">
@@ -994,7 +1021,7 @@ const Microcell=(function(){
     if(window.__wukong_log) window.__wukong_log('brain_panel_loaded');
   }catch(e){}
 
-  const BRAIN_CFG_KEY = 'wukong_brain_v1';
+  const BRAIN_CFG_KEY = 'wukong_brain_cfg_v1';
 
   function loadBrainCfg(){
     try{ return JSON.parse(localStorage.getItem(BRAIN_CFG_KEY)||'{}') || {}; }catch(e){ return {}; }
@@ -1027,13 +1054,13 @@ const Microcell=(function(){
     if(!addr || !addr.startsWith('0x') || addr.length < 42) throw new Error('Brain address missing');
     if(!window.ethers) throw new Error('ethers not loaded');
     if(!window.ethereum) throw new Error('no ethereum');
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
     return { c: new ethers.Contract(addr, BRAIN_ABI, signer), provider, signer };
   }
 
   function fmtU(x){
-    try{ return ethers.formatUnits(x, 18); }catch(e){ return String(x); }
+    try{ return ethers.utils.formatUnits(x, 18); }catch(e){ return String(x); }
   }
 
   async function refreshBrain(){
@@ -1056,8 +1083,7 @@ const Microcell=(function(){
       lines.push('routes.R1: ' + route.recycle1);
       lines.push('routes.R2: ' + route.recycle2);
       lines.push('routes.R3: ' + route.recycle3);
-      out.textContent = lines.join('
-');
+      out.textContent = lines.join('\n');
       if(window.__wukong_log) window.__wukong_log('brain_refresh_ok');
     }catch(err){
       out.textContent = 'ERROR: ' + (err?.message || err);
@@ -1071,7 +1097,7 @@ const Microcell=(function(){
       const me = await signer.getAddress();
       const amountStr = (q('brain_amount')?.value||'').trim();
       if(!amountStr) throw new Error('amount empty');
-      const amt = ethers.parseUnits(amountStr, 18);
+      const amt = ethers.utils.parseUnits(amountStr, 18);
       const ben = (q('brain_beneficiary')?.value||'').trim() || me;
       const tx = await c.deposit(amt, ben);
       if(window.__wukong_log) window.__wukong_log('brain_deposit_tx ' + tx.hash);
@@ -1090,7 +1116,7 @@ const Microcell=(function(){
       const me = await signer.getAddress();
       const amountStr = (q('brain_amount')?.value||'').trim();
       if(!amountStr) throw new Error('amount empty');
-      const amt = ethers.parseUnits(amountStr, 18);
+      const amt = ethers.utils.parseUnits(amountStr, 18);
       const routeId = parseInt(q('brain_route')?.value||'0',10) || 0;
       if(routeId === 0){
         const to = (q('brain_to')?.value||'').trim() || me;
@@ -1121,10 +1147,10 @@ const Microcell=(function(){
   // hook buttons
   function hook(){
     bootFill();
-    q('btnBrainSave')?.addEventListener('click', saveBrain);
-    q('btnBrainRefresh')?.addEventListener('click', refreshBrain);
-    q('btnBrainDeposit')?.addEventListener('click', depositBrain);
-    q('btnBrainWithdraw')?.addEventListener('click', withdrawBrain);
+    q('btnBrainChainSave')?.addEventListener('click', saveBrain);
+    q('btnBrainChainRefresh')?.addEventListener('click', refreshBrain);
+    q('btnBrainChainDeposit')?.addEventListener('click', depositBrain);
+    q('btnBrainChainWithdraw')?.addEventListener('click', withdrawBrain);
   }
 
   if(document.readyState === 'loading'){
