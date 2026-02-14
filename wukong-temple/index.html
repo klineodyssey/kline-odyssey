@@ -1,15 +1,3 @@
-<!-- Official Entry (Top-Right) -->
-<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
-  <a href="https://klineodyssey.github.io/kline-odyssey/"
-     target="_blank" rel="noopener"
-     style="display:inline-flex; align-items:center; gap:8px;
-            padding:10px 14px; border-radius:999px;
-            font-weight:800; text-decoration:none;
-            border:1px solid #111; background:#fff;">
-    💖 宇宙細包｜呼吸｜心跳｜生命🔥 
-  </a>
-</div>
-
 <!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -53,7 +41,7 @@
   <div class="hero">
     <div class="h">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
     <div class="sub">
-      <span class="pill mono">boot_version=<span id="bootVer">v3.0.0-modular</span></span>
+      <span class="pill mono">boot_version=<span id="bootVer">v3.3.0-klinegame-mvp</span></span>
       <span class="pill mono" id="envPill">env: ...</span>
       <span class="pill">🌐 <a href="../" target="_blank" rel="noopener">Official Website</a></span>
     </div>
@@ -300,7 +288,79 @@
 
     <pre class="mono" id="brainList">(尚無紀錄)</pre>
   </div>
-生命工廠（Life Factory｜宇宙細胞誕生）</div>
+生命工廠（
+  <!-- =========================
+       Kline App Game MVP (local prototype)
+       ========================= -->
+  <div class="card" id="klineGameMVP">
+    <h2>🎮 Kline App Game｜MVP（本機原型）</h2>
+    <div class="muted" style="margin-top:6px">
+      玩法（你定的世界線）：0–170 做多；170–190 休息；190–360 做空。<br/>
+      這版先做「可玩可記帳」：選日期→選多/空→輸入入場/出場→用 KGEN 當能量值→立即結算（或先存為待結算）。
+    </div>
+
+    <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap">
+      <div style="min-width:160px">
+        <div class="label">市場</div>
+        <select id="kg_market" class="input">
+          <option value="TX">TX（台指）</option>
+          <option value="BTC">BTC</option>
+          <option value="NASDAQ">NASDAQ</option>
+        </select>
+      </div>
+
+      <div style="min-width:160px">
+        <div class="label">日期（YYYYMMDD）</div>
+        <input id="kg_date" class="input" placeholder="20260213" />
+      </div>
+
+      <div style="min-width:160px">
+        <div class="label">入場價</div>
+        <input id="kg_entry" class="input" placeholder="0" inputmode="decimal"/>
+      </div>
+
+      <div style="min-width:160px">
+        <div class="label">出場價（可空白＝待結算）</div>
+        <input id="kg_exit" class="input" placeholder="" inputmode="decimal"/>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap; align-items:flex-end">
+      <div style="min-width:160px">
+        <div class="label">投入 KGEN（能量）</div>
+        <input id="kg_stake" class="input" placeholder="100" inputmode="decimal"/>
+      </div>
+
+      <div style="min-width:260px; flex:1">
+        <div class="label">槓桿（1～150）</div>
+        <input id="kg_lev" type="range" min="1" max="150" value="10" style="width:100%"/>
+        <div class="muted">目前：<span id="kg_lev_v">10</span>x</div>
+      </div>
+
+      <div style="min-width:260px">
+        <div class="label">選擇世界線</div>
+        <div class="row" style="gap:8px; flex-wrap:wrap">
+          <button class="btn" id="kg_btn_long">做多（0–170）</button>
+          <button class="btn" id="kg_btn_rest">休息（170–190）</button>
+          <button class="btn" id="kg_btn_short">做空（190–360）</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap">
+      <button class="btn primary" id="kg_btn_settle">開局 / 結算（本機）</button>
+      <button class="btn" id="kg_btn_export">匯出 Game JSON</button>
+      <button class="btn danger" id="kg_btn_clear">清除本機紀錄</button>
+    </div>
+
+    <div class="muted" style="margin-top:10px">
+      ✅ 若已連錢包 + 設定 Brain 合約：可把「投入 KGEN」改成鏈上鎖倉（下一版啟用）。本版先把邏輯與資料格式定住。
+    </div>
+
+    <pre id="kg_out" class="pre" style="margin-top:10px; max-height:240px; overflow:auto">(尚未開局)</pre>
+  </div>
+
+Life Factory｜宇宙細胞誕生）</div>
       <div class="sub">完成流程（點燈/許願/擲筊/還願）後可生成「生命藍圖 JSON」。上鏈版本可由 KUFO / Faucet 驗證條件。</div>
       <div class="hr"></div>
       <div class="grid2">
@@ -342,7 +402,7 @@
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.2.0-temple-brainfoundry";
+  const BOOT_VERSION = "v3.3.0-klinegame-mvp";
   
 const BUILD_HASH = "9b24af81c494";
 const NOW_ISO = () => new Date().toISOString();
@@ -1073,6 +1133,168 @@ const Microcell=(function(){
     hook();
   }
 })();
+
+// ------------------------------
+// Kline App Game MVP (local)
+// ------------------------------
+(function(){
+  const KG_KEY = 'kline_game_sessions_v1';
+  function kgLoad(){ try{ const a=JSON.parse(localStorage.getItem(KG_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function kgSave(a){ try{ localStorage.setItem(KG_KEY, JSON.stringify(a)); }catch(e){} }
+  function now(){ return new Date().toISOString(); }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+  function asNum(v){ const n=Number(String(v).trim()); return Number.isFinite(n)?n:0; }
+  function asStr(v){ return String(v||'').trim(); }
+  function validYYYYMMDD(s){ return /^\d{8}$/.test(s); }
+
+  let choice = 'LONG'; // default
+
+  function ui(){
+    return {
+      market: document.getElementById('kg_market'),
+      date: document.getElementById('kg_date'),
+      entry: document.getElementById('kg_entry'),
+      exit: document.getElementById('kg_exit'),
+      stake: document.getElementById('kg_stake'),
+      lev: document.getElementById('kg_lev'),
+      levV: document.getElementById('kg_lev_v'),
+      out: document.getElementById('kg_out'),
+      btnLong: document.getElementById('kg_btn_long'),
+      btnRest: document.getElementById('kg_btn_rest'),
+      btnShort: document.getElementById('kg_btn_short'),
+      btnSettle: document.getElementById('kg_btn_settle'),
+      btnExport: document.getElementById('kg_btn_export'),
+      btnClear: document.getElementById('kg_btn_clear'),
+    };
+  }
+
+  function setChoice(c){
+    choice=c;
+    const u=ui();
+    if(!u.btnLong) return;
+    u.btnLong.classList.toggle('primary', c==='LONG');
+    u.btnRest.classList.toggle('primary', c==='REST');
+    u.btnShort.classList.toggle('primary', c==='SHORT');
+    try{ log('game_choice=' + c); }catch(e){}
+  }
+
+  function settle(){
+    const u=ui(); if(!u.out) return;
+    const market = asStr(u.market?.value||'TX');
+    const date = asStr(u.date?.value||'');
+    const entry = asNum(u.entry?.value||0);
+    const exitV = asStr(u.exit?.value||'');
+    const exit = exitV==='' ? null : asNum(exitV);
+    const stake = asNum(u.stake?.value||0);
+    const lev = clamp(asNum(u.lev?.value||10), 1, 150);
+
+    if(!validYYYYMMDD(date)){
+      u.out.textContent = '日期格式錯誤：請輸入 YYYYMMDD（例如 20260213）';
+      return;
+    }
+    if(stake<=0){
+      u.out.textContent = '投入 KGEN 必須 > 0';
+      return;
+    }
+    if(choice!=='REST' && entry<=0){
+      u.out.textContent = '入場價必須 > 0（做多/做空需要）';
+      return;
+    }
+
+    const rec = {
+      id: 'G' + Date.now(),
+      ts: now(),
+      market,
+      date,
+      action: choice,
+      entry: entry || 0,
+      exit: exit===null? null : exit,
+      stake,
+      leverage: lev,
+      status: 'PENDING',
+      pnl: 0
+    };
+
+    if(choice==='REST'){
+      rec.status='REST';
+      rec.pnl=0;
+    }else if(exit===null){
+      rec.status='PENDING';
+      rec.pnl=0;
+    }else{
+      let r = (exit - entry) / entry;
+      if(choice==='SHORT') r = -r;
+      let pnl = stake * lev * r;
+      pnl = clamp(pnl, -stake, stake*lev); // 最多輸光，最多贏 stake*lev
+      rec.status='SETTLED';
+      rec.pnl = Number(pnl.toFixed(8));
+    }
+
+    const arr = kgLoad();
+    arr.push(rec);
+    kgSave(arr);
+
+    const last = rec;
+    const summary = {
+      ok: true,
+      note: '本機 MVP 結算完成（或待結算）',
+      last,
+      stats: {
+        total: arr.length,
+        settled: arr.filter(x=>x.status==='SETTLED').length,
+        pending: arr.filter(x=>x.status==='PENDING').length
+      }
+    };
+    u.out.textContent = JSON.stringify(summary, null, 2);
+    try{ log('game_settle ' + last.action + ' ' + last.market + ' ' + last.date); }catch(e){}
+  }
+
+  function exportJSON(){
+    const arr = kgLoad();
+    const blob = new Blob([JSON.stringify(arr, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kline_game_sessions.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+    try{ log('export_game_json'); }catch(e){}
+  }
+
+  function clearAll(){
+    localStorage.removeItem(KG_KEY);
+    const u=ui(); if(u.out) u.out.textContent='（已清除本機 Game 紀錄）';
+    try{ log('game_cleared'); }catch(e){}
+  }
+
+  function init(){
+    const u=ui();
+    if(!u.btnSettle) return; // section may not exist
+    // lev
+    if(u.lev){
+      u.lev.addEventListener('input', ()=>{ if(u.levV) u.levV.textContent = String(u.lev.value); });
+      if(u.levV) u.levV.textContent = String(u.lev.value);
+    }
+    // choice
+    u.btnLong?.addEventListener('click', ()=>setChoice('LONG'));
+    u.btnRest?.addEventListener('click', ()=>setChoice('REST'));
+    u.btnShort?.addEventListener('click', ()=>setChoice('SHORT'));
+    setChoice('LONG');
+
+    u.btnSettle?.addEventListener('click', settle);
+    u.btnExport?.addEventListener('click', exportJSON);
+    u.btnClear?.addEventListener('click', clearAll);
+  }
+
+  // wait DOM ready
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  }else{
+    init();
+  }
+})();
+
 </script>
 
 </body>
