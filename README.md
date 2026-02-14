@@ -454,8 +454,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 市場不是價格，是行為。KLINE 宇宙，以 O H L C 記錄人性呼吸。#KlineOdyssey #K線西遊記 #花果山台灣 #悟空新文 #宇宙細胞呼吸心跳生命  
-👉 https://www.youtube.com/shorts/MDwvsy8hvBY
+▶ #悟空新文 #花果山台灣 #K線西遊記悟空之腦正式啟動，質量開始流動。KGEN 不只是數字，而是你在宇宙中的位置。Where the Market Becomes the Myth.  
+👉 https://www.youtube.com/shorts/kB2K-GcKTDI
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
