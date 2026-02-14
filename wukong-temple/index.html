@@ -327,7 +327,7 @@
 
     <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap; align-items:flex-end">
       <div style="min-width:160px">
-        <div class="label">投入 KGEN（能量）</div>
+        <div class="label">能量（Energy）</div>
         <input id="kg_stake" class="input" placeholder="100" inputmode="decimal"/>
       </div>
 
@@ -354,7 +354,7 @@
     </div>
 
     <div class="muted" style="margin-top:10px">
-      ✅ 若已連錢包 + 設定 Brain 合約：可把「投入 KGEN」改成鏈上鎖倉（下一版啟用）。本版先把邏輯與資料格式定住。
+      ✅ 宇宙規則：KGEN=質量（Mass）；能量（Energy）是行動力。1 指數點 = 1 KGEN（跨市場一致）。上鏈後可把能量改成鏈上鎖倉。本版先把邏輯與資料格式定住。
     </div>
 
     <pre id="kg_out" class="pre" style="margin-top:10px; max-height:240px; overflow:auto">(尚未開局)</pre>
@@ -393,6 +393,10 @@ Life Factory｜宇宙細胞誕生）</div>
         <button class="btn" id="btnLogSelfcheck">Selfcheck</button>
         <button class="btn" id="btnLogClear">Clear</button>
         <button class="btn" id="btnLogCopy">Copy</button>
+      </div>
+      <div style="margin-top:10px" class="grid2">
+        <button class="btn acc" id="btnRunSelfTest">一鍵全測（All Buttons）</button>
+        <button class="btn" id="btnUnlockAudio">解鎖音訊</button>
       </div>
       <pre class="mono" id="logBox" style="margin-top:10px">（尚無紀錄）</pre>
     </details>
@@ -913,7 +917,43 @@ const Microcell=(function(){
     U.qs('btnLogSelfcheck')?.addEventListener('click',selfcheck);
     U.qs('btnLogClear')?.addEventListener('click',()=>Log.clear());
     U.qs('btnLogCopy')?.addEventListener('click',()=>Log.copy());
+  
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  async function runSelfTest(){
+    Log.line('SELFTEST_START ' + now());
+    // 1) environment
+    try{ selfcheck(); }catch(e){ Log.line('selfcheck_fail ' + (e?.message||e)); }
+
+    // 2) try unlock audio (gesture still required on some browsers)
+    try{ Log.line('audio_unlock_try'); Sound.speak('Audio unlock test'); }catch(e){ Log.line('audio_unlock_fail ' + (e?.message||e)); }
+
+    // 3) sequentially click all known buttons
+    const ids = [
+      'btnHeartbeat','btnBreath','btnPressure','btnCup','btnAssistantStart',
+      'btnSoundTest','btnKGENVerify','btnBrainPing','btnBrainRead',
+      'kg_long','kg_short','kg_rest','kg_settle','kg_copy',
+      'btnLifeMint','btnLifePulse','btnLifeBurn'
+    ];
+    for(const id of ids){
+      const el = U.qs(id);
+      if(!el){ Log.line('selftest_miss ' + id); continue; }
+      try{
+        Log.line('selftest_click ' + id);
+        el.click();
+      }catch(e){
+        Log.line('selftest_click_fail ' + id + ' ' + (e?.message||e));
+      }
+      await sleep(220);
+    }
+    Log.line('SELFTEST_DONE ' + now());
   }
+
+  function unlockAudio(){
+    Log.line('audio_unlock_manual ' + now());
+    try{ Sound.speak('Audio unlock'); }catch(e){ Log.line('audio_unlock_fail ' + (e?.message||e)); }
+  }
+}
 
   function boot(){
     U.qs('bootVer').textContent=BOOT_VERSION;
@@ -1204,8 +1244,8 @@ const Microcell=(function(){
       u.out.textContent = '日期格式錯誤：請輸入 YYYYMMDD（例如 20260213）';
       return;
     }
-    if(stake<=0){
-      u.out.textContent = '投入 KGEN 必須 > 0';
+    if(energy<=0){
+      u.out.textContent = '能量（Energy）必須 > 0';
       return;
     }
     if(choice!=='REST' && entry<=0){
@@ -1221,8 +1261,11 @@ const Microcell=(function(){
       action: choice,
       entry: entry || 0,
       exit: exit===null? null : exit,
-      stake,
+      energy,
+      stake: energy, // backward-compat alias
       leverage: lev,
+      unit: 'KGEN_per_point',
+      rule: '1point=1KGEN',
       status: 'PENDING',
       pnl: 0
     };
@@ -1234,10 +1277,16 @@ const Microcell=(function(){
       rec.status='PENDING';
       rec.pnl=0;
     }else{
-      let r = (exit - entry) / entry;
-      if(choice==='SHORT') r = -r;
-      let pnl = stake * lev * r;
-      pnl = clamp(pnl, -stake, stake*lev); // 最多輸光，最多贏 stake*lev
+      let diff = (exit - entry);
+      if(choice==='SHORT') diff = -diff;
+      // Universe rule: 1 point = 1 KGEN (cross-market). Energy is your action mass->energy budget.
+      let pnl = diff * lev;
+      // Risk cap: lose at most -energy, win up to energy*lev
+      pnl = clamp(pnl, -energy, energy*lev);
+      rec.pnl_points = Number(diff.toFixed ? diff.toFixed(8) : diff);
+      rec.pnl_kgen = Number(pnl.toFixed(8));
+      // Keep rec.pnl for backward compatibility
+      rec.pnl = rec.pnl_kgen;
       rec.status='SETTLED';
       rec.pnl = Number(pnl.toFixed(8));
     }
@@ -1249,7 +1298,7 @@ const Microcell=(function(){
     const last = rec;
     const summary = {
       ok: true,
-      note: '本機 MVP 結算完成（或待結算）',
+      note: '本機 MVP 結算完成（跨市場：1點=1KGEN）',
       last,
       stats: {
         total: arr.length,
