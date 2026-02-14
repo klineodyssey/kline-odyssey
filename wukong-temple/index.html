@@ -406,9 +406,9 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.3.1-voicefix";
+  const BOOT_VERSION = "v3.3.3-autopilot-stable";
   
-const BUILD_HASH = "9b24af81c494";
+const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
 
   const Log = (function(){
@@ -953,6 +953,10 @@ const Microcell=(function(){
     Log.line('audio_unlock_manual ' + now());
     try{ Sound.speak('Audio unlock'); }catch(e){ Log.line('audio_unlock_fail ' + (e?.message||e)); }
   }
+
+  // Bind self-test & audio unlock buttons
+  U.qs('btnRunSelfTest')?.addEventListener('click',()=>runSelfTest());
+  U.qs('btnUnlockAudio')?.addEventListener('click',()=>unlockAudio());
 }
 
   function boot(){
