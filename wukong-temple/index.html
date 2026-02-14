@@ -51,7 +51,7 @@
   <div class="hero">
     <div class="h">🐒 五指山・悟空財神殿｜Wukong Fortune Hall</div>
     <div class="sub">
-      <span class="pill mono">boot_version=<span id="bootVer">v3.4.0-mass2energy-orderdesk</span></span>
+      <span class="pill mono">boot_version=<span id="bootVer">v3.3.1-voicefix</span></span>
       <span class="pill mono" id="envPill">env: ...</span>
       <span class="pill">🌐 <a href="../" target="_blank" rel="noopener">Official Website</a></span>
     </div>
@@ -133,115 +133,6 @@
         <button class="btn ok" id="btnCfgSave">保存</button>
         <button class="btn" id="btnCfgClear">清除</button>
       </div>
-    </div>
-  </div>
-
-
-  <div class="card" style="margin-top:12px">
-    <div class="h">🧾 神算天機下單（交易日T+2｜本機模擬）</div>
-    <div class="sub">目前不做即時下單；你用模型/直覺先「登記」交易日T+2 訂單。到期依規則結算（本機）。</div>
-    <div class="hr"></div>
-
-    <div class="k">交易日期（下單日）</div>
-    <input id="ordDate" type="date"/>
-
-    <div class="grid2" style="margin-top:10px">
-      <div>
-        <div class="k">方向</div>
-        <select id="ordSide">
-          <option value="LONG">做多 LONG</option>
-          <option value="SHORT">做空 SHORT</option>
-        </select>
-      </div>
-      <div>
-        <div class="k">是否結算日</div>
-        <select id="ordSettle">
-          <option value="0">否</option>
-          <option value="1">是（結算日）</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:10px">
-      <div>
-        <div class="k">進場點位（Entry）</div>
-        <input id="ordEntry" inputmode="decimal" placeholder="例如 27500"/>
-      </div>
-      <div>
-        <div class="k">停利點位（TP）</div>
-        <input id="ordTP" inputmode="decimal" placeholder="例如 27600"/>
-      </div>
-      <div>
-        <div class="k">停損點位（SL）</div>
-        <input id="ordSL" inputmode="decimal" placeholder="例如 27450"/>
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-top:10px">
-      <div>
-        <div class="k">ATR14（最大贏虧上限）</div>
-        <input id="ordATR" inputmode="decimal" placeholder="例如 120"/>
-      </div>
-      <div>
-        <div class="k">桿桿（1～150）</div>
-        <input id="ordLev" inputmode="decimal" placeholder="例如 20"/>
-      </div>
-    </div>
-
-    <div class="hr"></div>
-    <div class="sub">
-      規則：最大贏虧 = ±ATR14。若「結算日」同一日 TP 與 SL 同時到（視為同時觸發），則此單判定為 0（不算輸贏）。
-      交易日T+2：到期日 = 下單日 + 2 日（自然日，先用原型；日後可改交易日曆）。
-    </div>
-
-    <div class="grid2" style="margin-top:10px">
-      <button class="btn ok" id="btnOrderAdd">新增訂單</button>
-      <button class="btn" id="btnOrdersExport">匯出訂單 JSON</button>
-    </div>
-
-    <div class="hr"></div>
-    <div class="k">已登記訂單（本機）</div>
-    <div class="mono" id="ordersBox">(尚無)</div>
-    <div class="grid2" style="margin-top:10px">
-      <button class="btn bad" id="btnOrdersClear">清空訂單</button>
-      <button class="btn" id="btnOrdersRecalc">重新計算</button>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="h">⚡ 做功（質量 → 能量）</div>
-    <div class="sub">做功 W = F × X = m a × CT。此處先用原型：m=KGEN 質量；F≈ m×(1點200台幣×槓桿)；再乘 CT（現加/位置）。</div>
-    <div class="hr"></div>
-    <div class="grid3">
-      <div>
-        <div class="k">KGEN 質量 m</div>
-        <input id="workMass" inputmode="decimal" placeholder="例如 5"/>
-      </div>
-      <div>
-        <div class="k">槓桿（1～150）</div>
-        <input id="workLev" inputmode="decimal" placeholder="例如 20"/>
-      </div>
-      <div>
-        <div class="k">CT（現加/位置）</div>
-        <input id="workCT" inputmode="decimal" placeholder="例如 1.0"/>
-      </div>
-    </div>
-    <div class="hr"></div>
-    <div class="mono" id="workOut">W = 0</div>
-    <div class="grid2" style="margin-top:10px">
-      <button class="btn acc" id="btnWorkCalc">計算</button>
-      <button class="btn" id="btnWorkExport">匯出做功 JSON</button>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="h">🧭 錢包客服（從 0 到能下單）</div>
-    <div class="sub">偵測到 Chrome 沒有錢包注入（ethereum=false）時，這裡會給你一條龍步驟。</div>
-    <div class="hr"></div>
-    <div class="mono" id="walletHelpBox">(尚未檢測)</div>
-    <div class="grid2" style="margin-top:10px">
-      <button class="btn" id="btnHelpRefresh">重新檢測</button>
-      <button class="btn" id="btnHelpExport">匯出客服步驟 JSON</button>
     </div>
   </div>
 
@@ -524,21 +415,9 @@ Life Factory｜宇宙細胞誕生）</div>
 </div>
 
 <script>
-// === Universe Settlement Rule: Trading Day 交易日T+2 (skip weekends; no 交易日T+2 trading day settlement) ===
-function __isWeekend(d){ const day=d.getDay(); return day===0||day===6; }
-function addTradingDays(dateObj,n){
-  const d=new Date(dateObj.getTime());
-  let added=0;
-  while(added<n){
-    d.setDate(d.getDate()+1);
-    if(!__isWeekend(d)) added++;
-  }
-  return d;
-}
-
 (function(){
   'use strict';
-  const BOOT_VERSION="v3.4.3-universe-t2-stable";
+  const BOOT_VERSION="v3.3.7-mass2energy-exportfix2";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -586,7 +465,15 @@ const NOW_ISO = () => new Date().toISOString();
     return { toast };
   })();
 
-  const U = { qs:(id)=>document.getElementById(id), clamp:(n,a,b)=>Math.max(a,Math.min(b,n)) };
+  const U = {
+  qs:(id)=>document.getElementById(id),
+  clamp:(n,a,b)=>Math.max(a,Math.min(b,n)),
+  el:(id)=>document.getElementById(id),
+  val:(id)=>{ const e=document.getElementById(id); return e? (e.value??'') : ''; },
+  text:(id,txt)=>{ const e=document.getElementById(id); if(e!=null) e.textContent = (txt==null?'':String(txt)); },
+  on:(id,ev,fn)=>{ const e=document.getElementById(id); if(e) e.addEventListener(ev, fn); },
+  toast:(msg)=>{ try{ Log.line(String(msg)); }catch(e){} try{ alert(String(msg)); }catch(e){} }
+};
 
   const Sound = (function(){
     let ctx = null;
@@ -652,33 +539,16 @@ const NOW_ISO = () => new Date().toISOString();
         Log.line('sound_mode=' + v);
       });
       U.qs('btnSoundTest')?.addEventListener('click', test);
-    
-    // === v3.4 additions ===
-    try{
-      // default date = today
-      const d = new Date();
-      const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
-      const iso = `${yyyy}-${mm}-${dd}`;
-      const ordDate = U.qs("#ordDate"); if(ordDate && !ordDate.value) ordDate.value = iso;
-    }catch(e){}
-
-    Orders.init();
-
-    U.on("#btnOrderAdd","click",()=>Orders.addFromUI());
-    U.on("#btnOrdersClear","click",()=>Orders.clear());
-    U.on("#btnOrdersRecalc","click",()=>Orders.recalc());
-    U.on("#btnOrdersExport","click",()=>Orders.exportOrders());
-
-    U.on("#btnWorkCalc","click",()=>{ calcWork(); logEvent("work_calc"); });
-    U.on("#btnWorkExport","click",()=>{ const w = calcWork(); exportJson("work_mass2energy.json", {ts:new Date().toISOString(), ...w}, "export_work_json"); });
-
-    renderWalletHelp();
-    U.on("#btnHelpRefresh","click",()=>{ renderWalletHelp(); toast("已重新檢測"); });
-    U.on("#btnHelpExport","click",()=>exportWalletHelp());
-}
+    }
     window.wukongSound = speak; window.wukongSpeak = speak;
     return { speak, init };
-  })();
+  })()
+// --- compatibility aliases (older modules) ---
+const log = (...a)=>Log.line(a.join(' '));
+const now = ()=>Date.now();
+if(!Sound.ping) Sound.ping = (msg)=>Sound.speak(msg);
+window.__wukong_export_last = window.__wukong_export_last || {name:'', text:''};
+;
 
   const Cfg = (function(){
     const KEY='wukong_cfg_v2';
@@ -995,25 +865,25 @@ const NOW_ISO = () => new Date().toISOString();
 
     function deposit(){
       const amt = Number((U.val('brainAmount')||'').trim());
-      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      if(!amt || amt<=0){ Sound.speak('請輸入正確數量'); return; }
       const arr=load();
       arr.push({ts:Date.now(), type:'deposit', amount:amt, addr:getAddr(), note:'local-prototype'});
       save(arr);
       log('brain_deposit '+amt);
-      Sound.ping('已紀錄投入');
+      Sound.speak('已紀錄投入');
       render();
     }
 
     function withdraw(){
       const amt = Number((U.val('brainAmount')||'').trim());
-      if(!amt || amt<=0){ Sound.ping('請輸入正確數量'); return; }
+      if(!amt || amt<=0){ Sound.speak('請輸入正確數量'); return; }
       const netv=net();
-      if(amt>netv){ Sound.ping('超過可提領餘額'); return; }
+      if(amt>netv){ Sound.speak('超過可提領餘額'); return; }
       const arr=load();
       arr.push({ts:Date.now(), type:'withdraw', amount:amt, addr:getAddr(), note:'local-prototype'});
       save(arr);
       log('brain_withdraw '+amt);
-      Sound.ping('已紀錄提領');
+      Sound.speak('已紀錄提領');
       render();
     }
 
@@ -1026,13 +896,13 @@ const NOW_ISO = () => new Date().toISOString();
       a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
       log('export_brain_json');
-      Sound.ping('已匯出 Brain JSON');
+      Sound.speak('已匯出 Brain JSON');
     }
 
     function clear(){
       try{ localStorage.removeItem(KEY); }catch(e){}
       log('brain_cleared');
-      Sound.ping('已清除');
+      Sound.speak('已清除');
       render();
     }
 
@@ -1155,7 +1025,7 @@ const Microcell=(function(){
   const ExportUI=(()=>{
     let last={name:'',text:''};
     function show(name,text){
-      last={name,text};
+      last={name,text}; window.__wukong_export_last={name,text};
       const m=U.qs('exportModal'); const box=U.qs('exportBox');
       if(!m||!box){ return; }
       U.qs('exportMeta').textContent=`檔名：${name}｜字元：${text.length}`;
@@ -1192,55 +1062,26 @@ const Microcell=(function(){
       }
     }
     function exportJson(filename,obj,logTag){
-    try{
-      const text = JSON.stringify(obj, null, 2);
-      // 1) Try Blob download (works in most browsers)
-      let downloaded = false;
+      const text=JSON.stringify(obj,null,2);
+      // attempt download first (user gesture)
       try{
-        const blob = new Blob([text], {type:"application/json;charset=utf-8"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename || ("export_"+Date.now()+".json");
-        a.rel = "noopener";
-        a.style.display = "none";
+        const blob=new Blob([text],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url), 1500);
-        downloaded = true;
+        setTimeout(()=>URL.revokeObjectURL(url),1200);
+        Log.line(logTag||'export_json');
+        // also open modal as a fallback guide in WebView environments
+        show(filename,text);
       }catch(e){
-        downloaded = false;
+        Log.line('export_fail '+(e?.message||e));
+        show(filename,text);
       }
-
-      // 2) Always show modal with copyable text (WebView safe)
-      ExportUI.show(filename || "export.json", text);
-
-      // 3) WebView / no-download fallback: open as data URL in new tab
-      const ua = navigator.userAgent || "";
-      const isWebView = /\bwv\b|WebView/i.test(ua);
-      const isMetaMask = !!(window.ethereum && window.ethereum.isMetaMask);
-      if(!downloaded || isWebView || isMetaMask){
-        try{
-          const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(text);
-          window.open(dataUrl, "_blank");
-        }catch(e){}
-      }
-
-      // 4) Clipboard fallback (best effort)
-      try{
-        navigator.clipboard && navigator.clipboard.writeText(text);
-      }catch(e){}
-
-      if(logTag) logEvent(logTag);
-      toast("已匯出：" + (filename||"export.json") + "（若未下載，請用彈窗複製或開新分頁）");
-    }catch(e){
-      console.error(e);
-      toast("匯出失敗");
     }
-  }
-
-  function openTab(){
+    function openTab(){
       try{
         const text=(last.text||'');
         const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
@@ -1288,7 +1129,8 @@ const State=(function(){
   })();
 
   async function selfcheck(){
-    Log.line('boot_version='v3.4.3-universe-t2-stable'selfcheck_start');
+    Log.line('boot_version='+BOOT_VERSION);
+    Log.line('selfcheck_start');
     Log.line('userAgent: '+navigator.userAgent);
     Log.line('speechSynthesis: '+(!!window.speechSynthesis));
     Log.line('speechRecognition: '+(!!(window.SpeechRecognition||window.webkitSpeechRecognition)));
@@ -1754,205 +1596,6 @@ const State=(function(){
     u.btnExport?.addEventListener('click', exportJSON);
     u.btnClear?.addEventListener('click', clearAll);
   }
-
-  
-  // =========================
-  // 交易日T+2 Order Engine (local)
-  // =========================
-  const Orders = (() => {
-    const LS_KEY = "wukong_orders_v1";
-    const state = { list: [] };
-
-    const toISO = (d) => {
-      const z = new Date(d);
-      if (Number.isNaN(z.getTime())) return null;
-      const yyyy = z.getFullYear();
-      const mm = String(z.getMonth()+1).padStart(2,"0");
-      const dd = String(z.getDate()).padStart(2,"0");
-      return `${yyyy}-${mm}-${dd}`;
-    };
-
-    const addDays = (iso, n) => {
-      const d = new Date(iso+"T00:00:00");
-      d.setDate(d.getDate()+n);
-      return toISO(d);
-    };
-
-    const load = () => {
-      try{
-        const raw = localStorage.getItem(LS_KEY);
-        state.list = raw ? JSON.parse(raw) : [];
-      }catch(e){
-        state.list = [];
-      }
-    };
-
-    const save = () => {
-      try{ localStorage.setItem(LS_KEY, JSON.stringify(state.list)); }catch(e){}
-    };
-
-    const nnum = (v) => {
-      const x = Number(String(v).replace(/,/g,"").trim());
-      return Number.isFinite(x) ? x : null;
-    };
-
-    const calc = (o) => {
-      const entry = nnum(o.entry);
-      const tp = nnum(o.tp);
-      const sl = nnum(o.sl);
-      const atr = nnum(o.atr14);
-      const lev = nnum(o.lev) ?? 1;
-
-      const res = {
-        entry, tp, sl, atr14: atr, lev,
-        maxWinPts: null, maxLosePts: null,
-        status: "ok",
-        note: ""
-      };
-
-      if(entry===null || tp===null || sl===null || atr===null){
-        res.status = "bad";
-        res.note = "請填 Entry/TP/SL/ATR14";
-        return res;
-      }
-
-      // clamp leverage
-      res.lev = Math.min(150, Math.max(1, lev));
-
-      // points distance
-      const tpDist = Math.abs(tp-entry);
-      const slDist = Math.abs(sl-entry);
-
-      res.maxWinPts = Math.min(tpDist, atr);
-      res.maxLosePts = Math.min(slDist, atr);
-
-      // Settlement-day special rule: TP & SL both reachable => void
-      // Heuristic: if TP is above entry and SL below entry (or reverse) AND both distances <= ATR14
-      const bothSides = (tp-entry)*(sl-entry) < 0; // opposite sides
-      const bothWithin = tpDist <= atr && slDist <= atr;
-      if(o.isSettle && bothSides && bothWithin){
-        res.status = "void";
-        res.maxWinPts = 0;
-        res.maxLosePts = 0;
-        res.note = "結算日 TP/SL 同時到（原型判定）→ 0";
-        return res;
-      }
-
-      return res;
-    };
-
-    const render = () => {
-      const box = U.qs("#ordersBox");
-      if(!box) return;
-      if(!state.list.length){
-        box.textContent = "(尚無)";
-        return;
-      }
-      const lines = state.list.map((o, i) => {
-        const c = o.calc || {};
-        return [
-          `#${i+1} ${o.side} | 下單日 ${o.date} | 到期 ${o.mature} | 結算日 ${o.isSettle? "是":"否"}`,
-          `Entry ${o.entry} | TP ${o.tp} | SL ${o.sl} | ATR14 ${o.atr14} | Lev ${o.lev}`,
-          `狀態 ${c.status||"?"} | MaxWin ${c.maxWinPts??"?"} pts | MaxLose ${c.maxLosePts??"?"} pts | ${c.note||""}`
-        ].join("\n");
-      });
-      box.textContent = lines.join("\n\n");
-    };
-
-    const addFromUI = () => {
-      const date = U.qs("#ordDate")?.value || toISO(new Date());
-      const side = U.qs("#ordSide")?.value || "LONG";
-      const isSettle = (U.qs("#ordSettle")?.value === "1");
-      const entry = U.qs("#ordEntry")?.value;
-      const tp = U.qs("#ordTP")?.value;
-      const sl = U.qs("#ordSL")?.value;
-      const atr14 = U.qs("#ordATR")?.value;
-      const lev = U.qs("#ordLev")?.value;
-
-      const mature = addDays(date, 2);
-      const o = { id: "O_"+Date.now(), date, mature, side, isSettle, entry, tp, sl, atr14, lev };
-      o.calc = calc(o);
-      state.list.unshift(o);
-      save();
-      render();
-      logEvent("order_added");
-      toast("已新增訂單（交易日T+2）");
-    };
-
-    const clear = () => {
-      state.list = [];
-      save();
-      render();
-      logEvent("orders_cleared");
-      toast("已清空訂單");
-    };
-
-    const recalc = () => {
-      state.list = state.list.map(o => ({...o, calc: calc(o)}));
-      save();
-      render();
-      toast("已重新計算");
-    };
-
-    const exportOrders = () => {
-      exportJson("orders_Tplus2.json", { version:"orders_v1", ts: nowISO(), orders: state.list }, "export_orders_json");
-    };
-
-    const nowISO = () => new Date().toISOString();
-
-    const init = () => { load(); render(); };
-
-    return { init, addFromUI, clear, recalc, exportOrders, state, calc };
-  })();
-
-  // =========================
-  // Work (Mass -> Energy) helper
-  // =========================
-  function calcWork(){
-    const m = Number((U.qs("#workMass")?.value || "0").replace(/,/g,"").trim()) || 0;
-    const lev = Math.min(150, Math.max(1, Number((U.qs("#workLev")?.value || "1").replace(/,/g,"").trim()) || 1));
-    const ct = Number((U.qs("#workCT")?.value || "1").replace(/,/g,"").trim()) || 1;
-    const pointTWD = 200; // prototype constant
-    const W = m * (pointTWD * lev) * ct;
-    const out = U.qs("#workOut");
-    if(out) out.textContent = `W = ${W.toLocaleString()}  （m=${m} KGEN, 200TWD/pt, lev=${lev}, CT=${ct})`;
-    return { m, lev, ct, pointTWD, W };
-  }
-
-  // =========================
-  // Wallet onboarding help
-  // =========================
-  function renderWalletHelp(){
-    const box = U.qs("#walletHelpBox");
-    if(!box) return;
-    const ua = navigator.userAgent || "";
-    const hasEth = !!window.ethereum;
-    const isMM = !!(window.ethereum && window.ethereum.isMetaMask);
-    const isWebView = /\bwv\b|WebView/i.test(ua);
-
-    const steps = [];
-    steps.push(`偵測：ethereum=${hasEth} | MetaMask=${isMM} | WebView=${isWebView}`);
-    steps.push("");
-    steps.push("從 0 到能下單（BSC 主網）流程：");
-    steps.push("1) 安裝 MetaMask（App）或用 Trust Wallet（擇一即可）");
-    steps.push("2) 在錢包加入 BSC 主網（若錢包沒自動帶）");
-    steps.push("3) 用錢包內建瀏覽器開啟本頁（github.io），避免一般 Chrome 沒注入錢包");
-    steps.push("4) 點『連線錢包』→ 授權連線");
-    steps.push("5) 確認鏈為 BSC（chainId 56）");
-    steps.push("6) 之後才會開放合約互動按鍵（現在原型可先用本機下單/匯出）");
-    steps.push("");
-    steps.push("若你現在是在 Chrome：請改用 MetaMask 內建瀏覽器開啟（Chrome 通常沒有錢包注入）。");
-
-    box.textContent = steps.join("\n");
-
-    return { hasEth, isMM, isWebView, steps };
-  }
-
-  function exportWalletHelp(){
-    const info = renderWalletHelp() || {};
-    exportJson("wallet_support.json", { ts: new Date().toISOString(), ...info }, "export_wallet_help_json");
-  }
-
 
   // wait DOM ready
   if(document.readyState==='loading'){
