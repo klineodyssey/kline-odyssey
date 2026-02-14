@@ -34,6 +34,16 @@
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   details>summary{cursor:pointer;color:#cbd5e1;font-weight:800}
   .mini{font-size:12px;color:var(--muted)}
+
+  /* toast */
+  #toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:9999;max-width:min(92vw,520px);padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:none}
+  #toast.show{display:block}
+  #toast .t{font-weight:900}
+  #toast .m{color:var(--txt);opacity:.95;margin-top:4px;line-height:1.3}
+  #toast.ok{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.10)}
+  #toast.bad{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.10)}
+  #toast.acc{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.10)}
+
 </style>
 </head>
 <body>
@@ -276,7 +286,7 @@
     </div>
 
     <div class="row">
-      <input id="brainAmount" class="inp" inputmode="decimal" placeholder="輸入 KGEN 數量（原型）" />
+      <input id="brainAmount" class="inp" inputmode="decimal" placeholder="輸入能量（Energy，原型）" />
       <button class="btn" id="btnBrainDeposit">投入</button>
       <button class="btn" id="btnBrainWithdraw">提領</button>
     </div>
@@ -406,7 +416,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.3.3-autopilot-stable";
+  const BOOT_VERSION = "v3.3.4-autopilot-stable";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -431,6 +441,27 @@ const NOW_ISO = () => new Date().toISOString();
       navigator.clipboard?.writeText(txt).then(()=>line('log_copied')).catch(()=>line('log_copy_failed'));
     }
     return { line, clear, render, copy };
+  })();
+
+
+  const UI = (function(){
+    let timer = null;
+    function toast(msg, kind='acc', title='悟空提示'){
+      try{
+        const el = document.getElementById('toast');
+        const t = document.getElementById('toastTitle');
+        const m = document.getElementById('toastMsg');
+        if(!el||!t||!m) return;
+        el.classList.remove('ok','bad','acc','show');
+        el.classList.add(kind);
+        t.textContent = title;
+        m.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(()=>{ el.classList.remove('show'); }, 2400);
+      }catch(e){}
+    }
+    return { toast };
   })();
 
   const U = { qs:(id)=>document.getElementById(id), clamp:(n,a,b)=>Math.max(a,Math.min(b,n)) };
@@ -570,11 +601,11 @@ const NOW_ISO = () => new Date().toISOString();
     function cupThrow(){
       Log.line('cup_throw');
       const ok=Math.random()<0.5;
-      if(ok){ S.cupStreak=Math.min(3,S.cupStreak+1); U.qs('cupResult').innerHTML='<span class="tagok">聖筊：成立</span>'; Sound.speak('聖筊成立。'); }
-      else { S.cupStreak=0; U.qs('cupResult').innerHTML='<span class="tagbad">聖筊：未成</span>'; Sound.speak('未成。'); }
+      if(ok){ S.cupStreak=Math.min(3,S.cupStreak+1); U.qs('cupResult').innerHTML='<span class="tagok">聖筊：成立</span>'; UI.toast('聖筊成立，連勝 '+S.cupStreak+' / 3','ok','擲筊'); Sound.speak('聖筊成立。'); }
+      else { S.cupStreak=0; U.qs('cupResult').innerHTML='<span class="tagbad">聖筊：未成</span>'; UI.toast('未成，連勝歸零','bad','擲筊'); Sound.speak('未成。'); }
       U.qs('cupStreak').textContent=String(S.cupStreak); save();
     }
-    function fortune(){ Log.line('fortune_click'); if(S.cupStreak<3){ Sound.speak('聖筊連勝不足三次。'); return; } Sound.speak('已解鎖。等待 Faucet 上鏈後啟用。'); }
+    function fortune(){ Log.line('fortune_click'); if(S.cupStreak<3){ UI.toast('需要聖筊連勝 3 次才可解鎖（目前 '+S.cupStreak+' / 3）','acc','發財金'); Sound.speak('聖筊連勝不足三次。'); return; } UI.toast('已解鎖。等待 Faucet 上鏈後啟用。','ok','發財金'); Sound.speak('已解鎖。等待 Faucet 上鏈後啟用。'); }
     function init(){ load(); U.qs('btnHeartbeat')?.addEventListener('click',heartbeat); U.qs('btnBreath')?.addEventListener('click',breath); U.qs('btnPressure')?.addEventListener('click',pressure); U.qs('btnCup')?.addEventListener('click',cupThrow); U.qs('btnFortune')?.addEventListener('click',fortune); }
     return { init };
   })();
@@ -922,11 +953,12 @@ const Microcell=(function(){
 
   async function runSelfTest(){
     Log.line('SELFTEST_START ' + now());
+    try{ const sm=U.qs('soundMode'); if(sm && sm.value==='off'){ sm.value='auto'; localStorage.setItem('wukong_sound_mode_v1','auto'); Log.line('selftest_force_sound_mode=auto'); } }catch(e){}
     // 1) environment
     try{ selfcheck(); }catch(e){ Log.line('selfcheck_fail ' + (e?.message||e)); }
 
     // 2) try unlock audio (gesture still required on some browsers)
-    try{ Log.line('audio_unlock_try'); Sound.speak('Audio unlock test'); }catch(e){ Log.line('audio_unlock_fail ' + (e?.message||e)); }
+    try{ Log.line('audio_unlock_try'); UI.toast('開始一鍵全測（若在 MetaMask WebView，TTS 會自動改用叮聲）','acc','SELFTEST'); Sound.speak('Audio unlock test'); }catch(e){ Log.line('audio_unlock_fail ' + (e?.message||e)); }
 
     // 3) sequentially click all known buttons
     const ids = [
@@ -938,6 +970,8 @@ const Microcell=(function(){
     for(const id of ids){
       const el = U.qs(id);
       if(!el){ Log.line('selftest_miss ' + id); continue; }
+      const disabled = !!(el.disabled || el.getAttribute('aria-disabled')==='true' || el.classList.contains('disabled'));
+      if(disabled){ Log.line('selftest_disabled ' + id); continue; }
       try{
         Log.line('selftest_click ' + id);
         el.click();
@@ -947,6 +981,7 @@ const Microcell=(function(){
       await sleep(220);
     }
     Log.line('SELFTEST_DONE ' + now());
+    UI.toast('一鍵全測完成，請在 Log 內找 selftest_miss / selftest_disabled / selftest_click_fail','ok','SELFTEST');
   }
 
   function unlockAudio(){
@@ -1000,7 +1035,7 @@ const Microcell=(function(){
       <input id="brain_beneficiary" placeholder="0x..." />
     </div>
     <div>
-      <label>投入（KGEN）</label>
+      <label>能量（Energy）</label>
       <input id="brain_amount" placeholder="例如 100" inputmode="decimal" />
     </div>
     <div>
@@ -1361,6 +1396,12 @@ const Microcell=(function(){
 })();
 
 </script>
+
+
+<div id="toast" role="status" aria-live="polite">
+  <div class="t" id="toastTitle">提示</div>
+  <div class="m" id="toastMsg"></div>
+</div>
 
 </body>
 </html>
