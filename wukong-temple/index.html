@@ -1,3 +1,25 @@
+
+// === Universe Settlement Rule: Trading Day 交易日T+2 (skip weekends) ===
+function isWeekend(d){
+  const day = d.getDay(); // 0 Sun, 6 Sat
+  return day === 0 || day === 6;
+}
+function addTradingDays(dateObj, n){
+  const d = new Date(dateObj.getTime());
+  let added = 0;
+  while(added < n){
+    d.setDate(d.getDate() + 1);
+    if(!isWeekend(d)) added += 1;
+  }
+  return d;
+}
+function toISODate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+
 <!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -138,8 +160,8 @@
 
 
   <div class="card" style="margin-top:12px">
-    <div class="h">🧾 神算天機下單（T+2｜本機模擬）</div>
-    <div class="sub">目前不做即時下單；你用模型/直覺先「登記」T+2 訂單。到期依規則結算（本機）。</div>
+    <div class="h">🧾 神算天機下單（交易日T+2｜本機模擬）</div>
+    <div class="sub">目前不做即時下單；你用模型/直覺先「登記」交易日T+2 訂單。到期依規則結算（本機）。</div>
     <div class="hr"></div>
 
     <div class="k">交易日期（下單日）</div>
@@ -191,7 +213,7 @@
     <div class="hr"></div>
     <div class="sub">
       規則：最大贏虧 = ±ATR14。若「結算日」同一日 TP 與 SL 同時到（視為同時觸發），則此單判定為 0（不算輸贏）。
-      T+2：到期日 = 下單日 + 2 日（自然日，先用原型；日後可改交易日曆）。
+      交易日T+2：到期日 = 下單日 + 2 日（自然日，先用原型；日後可改交易日曆）。
     </div>
 
     <div class="grid2" style="margin-top:10px">
@@ -526,7 +548,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION="v3.4.0-mass2energy-orderdesk";
+  const BOOT_VERSION="v3.4.1-universe-t2-final";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -1746,7 +1768,7 @@ const State=(function(){
 
   
   // =========================
-  // T+2 Order Engine (local)
+  // 交易日T+2 Order Engine (local)
   // =========================
   const Orders = (() => {
     const LS_KEY = "wukong_orders_v1";
@@ -1865,7 +1887,7 @@ const State=(function(){
       save();
       render();
       logEvent("order_added");
-      toast("已新增訂單（T+2）");
+      toast("已新增訂單（交易日T+2）");
     };
 
     const clear = () => {
