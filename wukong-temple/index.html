@@ -286,8 +286,9 @@
     </div>
 
     <div class="row">
-      <input id="brainAmount" class="inp" inputmode="decimal" placeholder="輸入能量（Energy，原型）" />
-      <button class="btn" id="btnBrainDeposit">投入</button>
+      <input id="brainAmount" class="inp" inputmode="decimal" placeholder="輸入質量（KGEN，Mass）" />
+            <div class="sub" id="brainEnergyPreview">能量（Energy）= 質量 × c²（c=1）→ 0</div>
+<button class="btn" id="btnBrainDeposit">投入</button>
       <button class="btn" id="btnBrainWithdraw">提領</button>
     </div>
 
@@ -416,7 +417,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.3.4-autopilot-stable";
+  const BOOT_VERSION = "v3.3.5-mass2energy-stable";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -831,8 +832,18 @@ const NOW_ISO = () => new Date().toISOString();
       U.on('btnBrainWithdraw','click',withdraw);
       U.on('btnBrainExport','click',exportJson);
       U.on('btnBrainClear','click',clear);
-      U.on('brainAmount','keydown',(e)=>{ if(e.key==='Enter') deposit(); });
+            // Energy = Mass × c². MVP uses c=1 (so c²=1). Keep mass as KGEN in records.
+      const C2 = 1;
+      function updateEnergyPreview(){
+        const m = Number((U.val('brainAmount')||'').trim()) || 0;
+        const e = m * C2;
+        const el = document.getElementById('brainEnergyPreview');
+        if(el) el.textContent = `能量（Energy）= 質量 × c²（c=1）→ ${fmt(e)} （由 ${fmt(m)} KGEN 轉換）`;
+      }
+      U.on('brainAmount','input',updateEnergyPreview);
+U.on('brainAmount','keydown',(e)=>{ if(e.key==='Enter') deposit(); });
       render();
+      updateEnergyPreview();
     }
     return { init, render, net };
   })();
