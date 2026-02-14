@@ -417,7 +417,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.3.5-mass2energy-stable";
+  const BOOT_VERSION = "v3.3.6-mass2energy-exportfix";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -679,12 +679,7 @@ const NOW_ISO = () => new Date().toISOString();
     }
     function exportWish(){
       const a=wishLoad();
-      const blob=new Blob([JSON.stringify(a,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const link=document.createElement('a');
-      link.href=url; link.download=`wishpool_${BOOT_VERSION}.json`; link.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-      Log.line('export_wish_json');
+      ExportUI.exportJson(`wishpool_${BOOT_VERSION}.json`, a, 'export_wish_json');
     }
     function init(){
       U.qs('btnLoadFairies')?.addEventListener('click', ()=>{ renderFairies(); renderWishUI(); Log.line('fairies_loaded_to_wishpool'); Sound.speak('七仙女已載入。'); });
@@ -921,15 +916,81 @@ const Microcell=(function(){
     return { init };
   })();
 
-  const State=(function(){
+  
+  // ExportUI: resilient JSON export for WebView (download may be blocked)
+  const ExportUI=(()=>{
+    let last={name:'',text:''};
+    function show(name,text){
+      last={name,text};
+      const m=U.qs('exportModal'); const box=U.qs('exportBox');
+      if(!m||!box){ return; }
+      U.qs('exportMeta').textContent=`檔名：${name}｜字元：${text.length}`;
+      box.value=text;
+      m.style.display='flex';
+      try{ box.focus(); box.setSelectionRange(0,0); }catch(_){}
+    }
+    function hide(){ const m=U.qs('exportModal'); if(m) m.style.display='none'; }
+    async function copy(){
+      try{
+        await navigator.clipboard.writeText(last.text||'');
+        U.toast('已複製','JSON 已複製到剪貼簿。');
+        Log.line('export_copy_ok');
+      }catch(e){
+        U.toast('複製失敗','此環境不允許自動複製，請長按 textarea 全選複製。');
+        Log.line('export_copy_fail '+(e?.message||e));
+      }
+    }
+    function download(){
+      try{
+        const blob=new Blob([last.text||''],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=last.name||('export_'+BOOT_VERSION+'.json');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1200);
+        Log.line('export_download_try');
+      }catch(e){
+        Log.line('export_download_fail '+(e?.message||e));
+      }
+    }
+    function exportJson(filename,obj,logTag){
+      const text=JSON.stringify(obj,null,2);
+      // attempt download first (user gesture)
+      try{
+        const blob=new Blob([text],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1200);
+        Log.line(logTag||'export_json');
+        // also open modal as a fallback guide in WebView environments
+        show(filename,text);
+      }catch(e){
+        Log.line('export_fail '+(e?.message||e));
+        show(filename,text);
+      }
+    }
+    function init(){
+      U.qs('btnExportClose')?.addEventListener('click',hide);
+      U.qs('btnExportCopy')?.addEventListener('click',copy);
+      U.qs('btnExportDownload')?.addEventListener('click',download);
+      // click outside closes
+      U.qs('exportModal')?.addEventListener('click',(ev)=>{ if(ev.target?.id==='exportModal') hide(); });
+    }
+    return {init,exportJson,show,hide};
+  })();
+
+const State=(function(){
     function exportAll(){
       const payload={ boot:BOOT_VERSION, ts:NOW_ISO(), ua:navigator.userAgent,
         speechSynthesis:!!window.speechSynthesis, speechRecognition:!!(window.SpeechRecognition||window.webkitSpeechRecognition),
         ethers_loaded:!!window.ethers, ethereum_injected:!!window.ethereum, wallet:Wallet.state, cfg:Cfg.load() };
-      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob); const link=document.createElement('a');
-      link.href=url; link.download=`wukong_state_${BOOT_VERSION}.json`; link.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_json');
+      ExportUI.exportJson(`wukong_state_${BOOT_VERSION}.json`, payload, 'export_json');
     }
     function clearAll(){
       ['wukong_log_v1','wukong_cfg_v2','wukong_vitals_v1','wukong_wishpool_v1','wukong_lamps_v1','wukong_microcells_v1','wukong_life_blueprints_v1']
@@ -1010,6 +1071,7 @@ const Microcell=(function(){
     Log.render();
     bindDebugButtons();
     Sound.init();
+    ExportUI.init();
     const cfg=Cfg.init();
     Wallet.init();
     Vitals.init();
@@ -1408,6 +1470,26 @@ const Microcell=(function(){
 
 </script>
 
+
+
+<div id="exportModal" style="position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);padding:14px">
+  <div style="width:min(94vw,720px);max-height:86vh;overflow:auto;border:1px solid var(--line);background:rgba(17,24,39,.98);border-radius:18px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.55)">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div class="h" style="margin:0">匯出 JSON（備援）</div>
+        <div class="sub" id="exportHint" style="margin-top:4px">若下載被 WebView 擋住，請用「複製」或長按全選。</div>
+      </div>
+      <button class="btn" id="btnExportClose" style="min-width:92px">關閉</button>
+    </div>
+    <div class="row">
+      <button class="btn ok" id="btnExportCopy">複製 JSON</button>
+      <button class="btn" id="btnExportDownload">再試下載</button>
+    </div>
+    <div class="hr"></div>
+    <textarea id="exportBox" class="mono" style="width:100%;min-height:44vh;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);padding:10px;outline:none"></textarea>
+    <div class="mini" id="exportMeta" style="margin-top:8px;color:var(--muted)"></div>
+  </div>
+</div>
 
 <div id="toast" role="status" aria-live="polite">
   <div class="t" id="toastTitle">提示</div>
