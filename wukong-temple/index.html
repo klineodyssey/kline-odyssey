@@ -417,7 +417,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.3.6-mass2energy-exportfix";
+  const BOOT_VERSION="v3.3.7-mass2energy-exportfix2";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -511,6 +511,16 @@ const NOW_ISO = () => new Date().toISOString();
       document.addEventListener('touchend', once, {once:true, passive:true});
       document.addEventListener('click', once, {once:true});
     }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){
       unlockOnGesture();
       const m = localStorage.getItem('wukong_sound_mode_v1');
@@ -547,6 +557,16 @@ const NOW_ISO = () => new Date().toISOString();
         recycle3: (U.qs('cfgR3').value||'').trim(),
         publicGood: (U.qs('cfgPG').value||'').trim(),
       };
+    }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
     }
     function init(){
       const d=load(); applyToUI(d);
@@ -588,6 +608,16 @@ const NOW_ISO = () => new Date().toISOString();
       eth.on?.('accountsChanged',(a)=>{ st.addr=(a&&a[0])?a[0].toLowerCase():''; Log.line('accountsChanged='+(st.addr||'(empty)')); setUI(); });
       eth.on?.('chainChanged',(c)=>{ st.chain=c; Log.line('chainChanged='+c); setUI(); });
     }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){ U.qs('btnConnect')?.addEventListener('click',connect); U.qs('btnDisconnect')?.addEventListener('click',disconnectUI); bindEvents(); setUI(); }
     return { init, state:st };
   })();
@@ -607,6 +637,16 @@ const NOW_ISO = () => new Date().toISOString();
       U.qs('cupStreak').textContent=String(S.cupStreak); save();
     }
     function fortune(){ Log.line('fortune_click'); if(S.cupStreak<3){ UI.toast('需要聖筊連勝 3 次才可解鎖（目前 '+S.cupStreak+' / 3）','acc','發財金'); Sound.speak('聖筊連勝不足三次。'); return; } UI.toast('已解鎖。等待 Faucet 上鏈後啟用。','ok','發財金'); Sound.speak('已解鎖。等待 Faucet 上鏈後啟用。'); }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){ load(); U.qs('btnHeartbeat')?.addEventListener('click',heartbeat); U.qs('btnBreath')?.addEventListener('click',breath); U.qs('btnPressure')?.addEventListener('click',pressure); U.qs('btnCup')?.addEventListener('click',cupThrow); U.qs('btnFortune')?.addEventListener('click',fortune); }
     return { init };
   })();
@@ -632,6 +672,16 @@ const NOW_ISO = () => new Date().toISOString();
       rec.start();
     }
     function sttStop(){ Log.line('stt_stop_btn'); try{ rec?.stop(); }catch(e){} rec=null; }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){ U.qs('btnAssistantStart')?.addEventListener('click',start); U.qs('btnSttStart')?.addEventListener('click',sttStart); U.qs('btnSttStop')?.addEventListener('click',sttStop); }
     return { init };
   })();
@@ -680,6 +730,16 @@ const NOW_ISO = () => new Date().toISOString();
     function exportWish(){
       const a=wishLoad();
       ExportUI.exportJson(`wishpool_${BOOT_VERSION}.json`, a, 'export_wish_json');
+    }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
     }
     function init(){
       U.qs('btnLoadFairies')?.addEventListener('click', ()=>{ renderFairies(); renderWishUI(); Log.line('fairies_loaded_to_wishpool'); Sound.speak('七仙女已載入。'); });
@@ -731,6 +791,16 @@ const NOW_ISO = () => new Date().toISOString();
       setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_lamps_json');
     }
     function clear(){ localStorage.removeItem(KEY); Log.line('lamp_cleared'); Sound.speak('光明燈名冊已清除。'); render(); }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){
       const sel=U.qs('lampZodiac'); sel.innerHTML=''; Z.forEach(z=>{ const o=document.createElement('option'); o.value=z; o.textContent=z; sel.appendChild(o); });
       U.qs('btnLampInit')?.addEventListener('click',initRoster);
@@ -822,6 +892,16 @@ const NOW_ISO = () => new Date().toISOString();
       render();
     }
 
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){
       U.on('btnBrainDeposit','click',deposit);
       U.on('btnBrainWithdraw','click',withdraw);
@@ -912,6 +992,16 @@ const Microcell=(function(){
       link.href=url; link.download=`life_blueprints_${BOOT_VERSION}.json`; link.click();
       setTimeout(()=>URL.revokeObjectURL(url),1000); Log.line('export_life_json');
     }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){ U.qs('btnLfMint')?.addEventListener('click',mint); U.qs('btnLfExport')?.addEventListener('click',exportJson); render(null); }
     return { init };
   })();
@@ -953,6 +1043,8 @@ const Microcell=(function(){
         Log.line('export_download_try');
       }catch(e){
         Log.line('export_download_fail '+(e?.message||e));
+        try{ openTab(); }catch(_){}
+        try{ window.prompt('下載被阻擋，請手動複製 JSON（全選→複製）', last.text||''); }catch(_){}
       }
     }
     function exportJson(filename,obj,logTag){
@@ -975,10 +1067,21 @@ const Microcell=(function(){
         show(filename,text);
       }
     }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
     function init(){
       U.qs('btnExportClose')?.addEventListener('click',hide);
       U.qs('btnExportCopy')?.addEventListener('click',copy);
       U.qs('btnExportDownload')?.addEventListener('click',download);
+      U.qs('btnExportOpen')?.addEventListener('click',openTab);
       // click outside closes
       U.qs('exportModal')?.addEventListener('click',(ev)=>{ if(ev.target?.id==='exportModal') hide(); });
     }
@@ -996,6 +1099,16 @@ const State=(function(){
       ['wukong_log_v1','wukong_cfg_v2','wukong_vitals_v1','wukong_wishpool_v1','wukong_lamps_v1','wukong_microcells_v1','wukong_life_blueprints_v1']
         .forEach(k=>localStorage.removeItem(k));
       Log.line('clear_state'); Sound.speak('本機狀態已清除。'); location.reload();
+    }
+    function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
     }
     function init(){ U.qs('btnExportState')?.addEventListener('click',exportAll); U.qs('btnClearState')?.addEventListener('click',clearAll); }
     return { init };
@@ -1441,7 +1554,17 @@ const State=(function(){
     try{ log('game_cleared'); }catch(e){}
   }
 
-  function init(){
+  function openTab(){
+      try{
+        const text=(last.text||'');
+        const url='data:application/json;charset=utf-8,'+encodeURIComponent(text);
+        window.open(url,'_blank');
+        Log.line('export_open_tab');
+      }catch(e){
+        Log.line('export_open_tab_fail '+(e?.message||e));
+      }
+    }
+    function init(){
     const u=ui();
     if(!u.btnSettle) return; // section may not exist
     // lev
@@ -1484,6 +1607,7 @@ const State=(function(){
     <div class="row">
       <button class="btn ok" id="btnExportCopy">複製 JSON</button>
       <button class="btn" id="btnExportDownload">再試下載</button>
+      <button class="btn" id="btnExportOpen">開啟新分頁</button>
     </div>
     <div class="hr"></div>
     <textarea id="exportBox" class="mono" style="width:100%;min-height:44vh;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);padding:10px;outline:none"></textarea>
