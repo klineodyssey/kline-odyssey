@@ -1,1102 +1,1060 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>五指山悟空財神殿 · V4.1 FULLPACK</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>悟空宇宙神殿飛碟 V4.3 FULL</title>
 <style>
-/* WuzhiShan V4 Modular */
-:root{
-  --bg:#0b0f14;
-  --card:#111827;
-  --card2:#0f172a;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --line:#1f2937;
-  --accent:#38bdf8;
-  --ok:#34d399;
-  --warn:#fbbf24;
-  --bad:#fb7185;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans TC",sans-serif}
-a{color:var(--accent);text-decoration:none}
-.container{max-width:980px;margin:0 auto;padding:16px}
-.header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
-.brand{display:flex;flex-direction:column}
-.brand .title{font-weight:900;font-size:18px}
-.brand .sub{font-size:12px;color:var(--muted)}
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{border:1px solid var(--line);background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:999px;font-weight:700;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-.card{grid-column:span 12;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid var(--line);border-radius:16px;padding:14px}
-@media(min-width:860px){
-  .card.span6{grid-column:span 6}
-  .card.span4{grid-column:span 4}
-  .card.span8{grid-column:span 8}
-}
-.card h2{margin:0 0 8px 0;font-size:16px}
-.card p{margin:6px 0;color:var(--muted);line-height:1.4}
-.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-button,.btn{
-  appearance:none;border:1px solid var(--line);
-  background:rgba(255,255,255,0.04);
-  color:var(--text);padding:10px 12px;border-radius:12px;
-  font-weight:800;cursor:pointer;
-}
-button:hover,.btn:hover{border-color:rgba(56,189,248,0.55)}
-button.primary{border-color:rgba(56,189,248,0.6);background:rgba(56,189,248,0.1)}
-small{color:var(--muted)}
-textarea#logBox{width:100%;height:180px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;font-size:12px}
-.hr{height:1px;background:var(--line);margin:12px 0}
-.kv{display:grid;grid-template-columns:140px 1fr;gap:8px;font-size:13px}
-.kv div:nth-child(odd){color:var(--muted)}
-.toast{
-  position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
-  padding:10px 14px;border:1px solid var(--line);border-radius:999px;
-  background:rgba(17,24,39,0.95);opacity:0;transition:opacity .25s;
-  max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.range{width:100%}
-.dial{
-  width:100%;height:220px;border-radius:16px;border:1px solid var(--line);
-  background:radial-gradient(circle at 30% 30%, rgba(56,189,248,0.12), rgba(0,0,0,0));
-  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
-}
-.needle{
-  width:3px;height:92px;background:var(--accent);border-radius:999px;
-  position:absolute;left:50%;top:34px;transform-origin:50% 86px;
-}
-.dial .label{
-  position:absolute;bottom:10px;left:10px;color:var(--muted);font-size:12px
-}
-.badge{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:800}
-.badge.ok{border-color:rgba(52,211,153,0.5);color:var(--ok)}
-.badge.warn{border-color:rgba(251,191,36,0.5);color:var(--warn)}
-.badge.bad{border-color:rgba(251,113,133,0.5);color:var(--bad)}
-
+  :root{
+    --bg:#0b1220;
+    --panel:#0f1b33;
+    --panel2:#0b162c;
+    --line:#24324f;
+    --txt:#e8eefc;
+    --muted:#a9b7d6;
+    --ok:#2dd4bf;
+    --warn:#fbbf24;
+    --bad:#fb7185;
+    --btn:#ffffff;
+    --btnTxt:#000000;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", Arial, sans-serif;
+    background: radial-gradient(1000px 700px at 20% 0%, #172554 0%, rgba(23,37,84,0) 55%),
+                radial-gradient(900px 650px at 90% 10%, #134e4a 0%, rgba(19,78,74,0) 55%),
+                var(--bg);
+    color:var(--txt);
+    padding:16px 14px 90px;
+  }
+  a{color:inherit}
+  .topbar{
+    position:sticky; top:0; z-index:9990;
+    backdrop-filter: blur(10px);
+    background: linear-gradient(to bottom, rgba(11,18,32,.92), rgba(11,18,32,.70));
+    border-bottom:1px solid rgba(36,50,79,.6);
+    padding:10px 2px 10px;
+    margin:-16px -14px 14px;
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; padding:0 12px;
+  }
+  .brand{
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .brand b{font-size:14px; letter-spacing:.6px}
+  .brand span{font-size:12px; color:var(--muted)}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 12px; border-radius:999px;
+    border:1px solid rgba(17,17,17,.2);
+    background: #fff;
+    color:#000;
+    font-weight:900;
+    text-decoration:none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    white-space:nowrap;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:12px;
+  }
+  @media (min-width: 900px){
+    .grid{grid-template-columns: 1.05fr .95fr;}
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(15,27,51,.94), rgba(11,22,44,.94));
+    border:1px solid rgba(36,50,79,.9);
+    border-radius:16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .card-h{
+    padding:14px 14px 10px;
+    border-bottom:1px solid rgba(36,50,79,.75);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .card-h h2{
+    margin:0; font-size:14px; letter-spacing:.4px;
+  }
+  .card-h .sub{font-size:12px; color:var(--muted)}
+  .card-b{padding:14px}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .row > *{flex:1}
+  .mini{
+    background: rgba(11,22,44,.6);
+    border:1px solid rgba(36,50,79,.75);
+    border-radius:14px;
+    padding:12px;
+  }
+  .mini h3{margin:0 0 6px; font-size:12px; color:var(--muted); font-weight:700}
+  .big{
+    font-size:18px; font-weight:900; letter-spacing:.3px;
+  }
+  .small{font-size:12px; color:var(--muted)}
+  .btn{
+    appearance:none;
+    border:none;
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:900;
+    cursor:pointer;
+    background:var(--btn);
+    color:var(--btnTxt);
+  }
+  .btn2{
+    appearance:none;
+    border:1px solid rgba(36,50,79,.9);
+    background: rgba(11,22,44,.65);
+    color: var(--txt);
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .btn:disabled,.btn2:disabled{opacity:.45; cursor:not-allowed}
+  .tabs{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .tab{
+    padding:9px 10px; border-radius:999px;
+    border:1px solid rgba(36,50,79,.9);
+    background: rgba(11,22,44,.65);
+    color: var(--txt);
+    font-weight:900; cursor:pointer;
+  }
+  .tab.active{
+    background:#fff; color:#000; border-color: rgba(17,17,17,.2);
+  }
+  .hidden{display:none !important}
+  input[type="range"]{width:100%}
+  input[type="number"], input[type="text"], textarea, select{
+    width:100%;
+    border-radius:12px;
+    border:1px solid rgba(36,50,79,.85);
+    background: rgba(7,14,28,.7);
+    color: var(--txt);
+    padding:10px 12px;
+    outline:none;
+  }
+  textarea{min-height:80px; resize:vertical}
+  .sep{height:1px; background: rgba(36,50,79,.75); margin:12px 0}
+  .meter{
+    width:100%;
+    height:12px;
+    border-radius:999px;
+    border:1px solid rgba(36,50,79,.9);
+    background: rgba(7,14,28,.75);
+    overflow:hidden;
+  }
+  .meter > div{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, #22c55e, #eab308, #fb7185);
+  }
+  .log{
+    background: rgba(7,14,28,.75);
+    border:1px solid rgba(36,50,79,.9);
+    border-radius:14px;
+    padding:10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size:11px;
+    max-height:190px;
+    overflow:auto;
+    line-height:1.55;
+  }
+  .kpi{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
+  @media (min-width: 900px){
+    .kpi{grid-template-columns: repeat(4, 1fr);}
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px;
+    border:1px solid rgba(36,50,79,.9);
+    background: rgba(11,22,44,.65);
+    font-size:12px; color:var(--muted); font-weight:800;
+  }
+  .badge.ok{color: #a7f3d0}
+  .badge.warn{color:#fde68a}
+  .badge.bad{color:#fecdd3}
+  .avatar{
+    width:96px; height:96px; border-radius:999px;
+    display:grid; place-items:center;
+    margin: 6px auto 12px;
+    background: radial-gradient(circle at 30% 30%, rgba(45,212,191,.8), rgba(45,212,191,0) 55%),
+                radial-gradient(circle at 70% 70%, rgba(59,130,246,.8), rgba(59,130,246,0) 55%),
+                rgba(255,255,255,.06);
+    border:1px solid rgba(36,50,79,.9);
+    box-shadow: 0 0 30px rgba(45,212,191,.15);
+  }
+  .avatar svg{opacity:.95}
+  .sticky-actions{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background: linear-gradient(to top, rgba(11,18,32,.96), rgba(11,18,32,.55));
+    border-top:1px solid rgba(36,50,79,.75);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    z-index:9991;
+  }
+  .sticky-actions .row{gap:8px}
+  .hint{font-size:12px; color:var(--muted); margin-top:8px}
 </style>
-<script>
-// WuzhiShan V4 Modular Config
-// build: 2026-02-15 15:26:17
-// boot_version: v4.0.0-wuzhishan-modular
+</head>
+<body>
 
-window.WUZHISHAN_CONFIG = {
-  bootVersion: "v4.0.0-wuzhishan-modular",
-  chain: {
-    name: "BNB Chain (BSC)",
-    chainIdHex: "0x38"
-  },
-  economics: {
-    kgenIsMassAndPoint: true,
-    pointEqualsKgen: true,
-    leverageMin: 1,
-    leverageMax: 150,
-    seatPriceKgen: 5000
-  },
-  cockpit: {
-    longMinDeg: 0,
-    longMaxDeg: 170,
-    restMinDeg: 170,
-    restMaxDeg: 190,
-    shortMinDeg: 190,
-    shortMaxDeg: 360
-  },
-  ui: {
-    enableSpeech: true, // will auto-fallback based on env
-    enableDownload: true
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <b>悟空宇宙神殿飛碟｜駕駛艙 + 下單桌 + AI客服</b>
+      <span id="bootLine">boot_version=v4.3-ufo-fullpack</span>
+    </div>
+
+    <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
+      💖 宇宙細包｜呼吸｜心跳｜生命🔥
+    </a>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- LEFT: Cockpit + Order Desk -->
+  <div class="card">
+    <div class="card-h">
+      <div>
+        <h2>KUFO 駕駛艙（儀表版）</h2>
+        <div class="sub">方向盤 + 槓桿 + 燃料血量（KGEN） + 多空扇區</div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="cockpit">駕駛艙</button>
+        <button class="tab" data-tab="orderdesk">下單桌</button>
+        <button class="tab" data-tab="temple">外殿</button>
+      </div>
+    </div>
+
+    <div class="card-b">
+      <!-- Cockpit -->
+      <div id="tab_cockpit">
+        <div class="kpi">
+          <div class="mini">
+            <h3>質量（KGEN）</h3>
+            <div class="big"><span id="massKgen">30000</span> KGEN</div>
+            <div class="small">規則：1 指數點 = 1 KGEN（跨市場通用）</div>
+          </div>
+          <div class="mini">
+            <h3>能量（E = m c²）</h3>
+            <div class="big"><span id="energyE">30000</span> E</div>
+            <div class="small">UI 顯示：投入後才反映（目前以 m 作為基礎）</div>
+          </div>
+          <div class="mini">
+            <h3>槓桿（1–150）</h3>
+            <div class="big"><span id="lev">10</span>x</div>
+            <div class="small">橫桿調整，影響模擬輸贏倍率</div>
+          </div>
+          <div class="mini">
+            <h3>方向盤（0–360）</h3>
+            <div class="big"><span id="deg">120</span>°</div>
+            <div class="small">0–170 多｜170–190 休息｜190–360 空</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="mini">
+            <h3>質量（KGEN）輸入</h3>
+            <input id="massInput" type="number" min="0" step="1" value="30000" />
+            <div class="hint">台指 30000 點 = 30000 KGEN；BTC 同理。</div>
+          </div>
+          <div class="mini">
+            <h3>槓桿滑桿</h3>
+            <input id="levRange" type="range" min="1" max="150" value="10" />
+            <div class="small">目前：<b id="levRangeLabel">10</b>x</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="mini">
+            <h3>方向盤滑桿</h3>
+            <input id="degRange" type="range" min="0" max="360" value="120" />
+            <div class="small">
+              目前：<b id="degRangeLabel">120</b>°｜
+              狀態：<b id="stanceLabel">多</b>
+            </div>
+          </div>
+          <div class="mini">
+            <h3>燃料 / 血量（用 KGEN 表示）</h3>
+            <div class="meter"><div id="fuelBar"></div></div>
+            <div class="small" style="margin-top:8px">
+              <b id="fuelLabel">60%</b>｜
+              上限：<span id="fuelMaxLabel">50000</span> KGEN｜
+              現在：<span id="fuelNowLabel">30000</span> KGEN
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="btn" id="btnHeartbeat">心跳</button>
+          <button class="btn" id="btnBreath">呼吸</button>
+          <button class="btn" id="btnPressure">壓力</button>
+          <button class="btn" id="btnCup">擲筊</button>
+          <button class="btn" id="btnFortune">求籤</button>
+        </div>
+        <div class="hint">以上為 UI 事件回路測試（每顆按鍵必有反應 + log）。</div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="btn2" id="btnSelfTest">一鍵自我檢測</button>
+          <button class="btn2" id="btnExportState">匯出狀態（JSON）</button>
+          <button class="btn2" id="btnImportState">匯入狀態（JSON）</button>
+          <button class="btn2" id="btnCopyLog">複製 Log</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="log" id="log"></div>
+      </div>
+
+      <!-- Order Desk -->
+      <div id="tab_orderdesk" class="hidden">
+        <div class="mini">
+          <h3>下單桌（T+2）</h3>
+          <div class="small">
+            交易日採 T+2 結算。無週三結算概念。<br>
+            規則：停利與停損同一結算日同時觸發 → 視為 0（不算輸贏）。
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="mini">
+            <h3>交易日</h3>
+            <input id="tradeDate" type="text" placeholder="YYYY-MM-DD" />
+            <div class="small">預設今日（本機）。</div>
+          </div>
+          <div class="mini">
+            <h3>T+2 結算日（自動）</h3>
+            <input id="settleDate" type="text" disabled />
+            <div class="small">以「交易日 + 2 天」計（簡化版）。</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="mini">
+            <h3>停損（KGEN 點）</h3>
+            <input id="sl" type="number" step="1" value="200" />
+            <div class="small">最大建議：± ATR14</div>
+          </div>
+          <div class="mini">
+            <h3>停利（KGEN 點）</h3>
+            <input id="tp" type="number" step="1" value="300" />
+            <div class="small">最大建議：± ATR14</div>
+          </div>
+          <div class="mini">
+            <h3>ATR14（上限）</h3>
+            <input id="atr14" type="number" step="1" value="500" />
+            <div class="small">本版為手動填入（之後可接資料）。</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="mini">
+            <h3>模擬結果（KGEN）</h3>
+            <div class="big"><span id="pnlKgen">0</span></div>
+            <div class="small">基於方向盤（多/空） + 槓桿 + SL/TP/ATR14 上限</div>
+          </div>
+          <div class="mini">
+            <h3>說明（客服口徑）</h3>
+            <textarea id="csNote"></textarea>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="btn" id="btnSimWin">模擬贏</button>
+          <button class="btn" id="btnSimLose">模擬輸</button>
+          <button class="btn2" id="btnSaveOrder">保存這筆單</button>
+          <button class="btn2" id="btnExportOrders">匯出訂單（JSON）</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="log" id="ordersLog"></div>
+      </div>
+
+      <!-- Temple -->
+      <div id="tab_temple" class="hidden">
+        <div class="mini">
+          <h3>外殿（觀光/留念/香油錢）</h3>
+          <div class="small">
+            13 生肖 / 光明燈 / 七仙女許願 / 還願 / 發財金紀錄：屬於外殿文化層。<br>
+            與交易分層隔離，不讓「廟變交易所」。
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="mini">
+            <h3>生肖</h3>
+            <select id="zodiac">
+              <option>鼠</option><option>牛</option><option>虎</option><option>兔</option><option>龍</option><option>蛇</option>
+              <option>馬</option><option>羊</option><option>猴</option><option>雞</option><option>狗</option><option>豬</option>
+              <option>第13生肖（宇宙）</option>
+            </select>
+            <div class="small">點燈留念不等於交易等級。</div>
+          </div>
+          <div class="mini">
+            <h3>光明燈金額（KGEN）</h3>
+            <input id="lampFee" type="number" value="5" min="0" step="1" />
+            <div class="small">觀光客點燈費用（示意）。</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="mini">
+            <h3>七仙女許願</h3>
+            <textarea id="wish" placeholder="寫下你的願望（留念用）"></textarea>
+          </div>
+          <div class="mini">
+            <h3>還願（備註）</h3>
+            <textarea id="vow" placeholder="還願說明（留念用）"></textarea>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="btn" id="btnLamp">點光明燈</button>
+          <button class="btn" id="btnWish">送出許願</button>
+          <button class="btn" id="btnVow">送出還願</button>
+          <button class="btn2" id="btnExportTemple">匯出外殿（JSON）</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="log" id="templeLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: AI Customer Service -->
+  <div class="card">
+    <div class="card-h">
+      <div>
+        <h2>AI 影像語音客服</h2>
+        <div class="sub">自動偵測 STT/TTS｜不支援時自動降級</div>
+      </div>
+      <div class="row" style="flex-wrap:nowrap; gap:8px">
+        <span class="badge" id="bTTS">TTS</span>
+        <span class="badge" id="bSTT">STT</span>
+        <span class="badge" id="bETH">Wallet</span>
+      </div>
+    </div>
+
+    <div class="card-b">
+      <div class="avatar" id="aiAvatar" aria-label="AI Avatar">
+        <svg width="62" height="62" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M32 6C22 6 14 14 14 24v10c0 10 8 18 18 18s18-8 18-18V24C50 14 42 6 32 6Z" stroke="rgba(232,238,252,.92)" stroke-width="2.6"/>
+          <path d="M22 28c3-4 17-4 20 0" stroke="rgba(45,212,191,.92)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M23 39c6 6 12 6 18 0" stroke="rgba(59,130,246,.92)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="25" cy="25" r="2.8" fill="rgba(232,238,252,.9)"/>
+          <circle cx="39" cy="25" r="2.8" fill="rgba(232,238,252,.9)"/>
+        </svg>
+      </div>
+
+      <div class="mini">
+        <h3>客服輸入</h3>
+        <textarea id="aiInput" placeholder="你可以打字問：錢包怎麼裝？怎麼下單？T+2 怎麼算？"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btnAsk">送出</button>
+          <button class="btn2" id="btnTTS">語音唸出</button>
+          <button class="btn" id="btnSTT">語音輸入</button>
+          <button class="btn2" id="btnStopSTT">停止</button>
+        </div>
+        <div class="hint" id="aiHint"></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="mini">
+        <h3>客服回覆</h3>
+        <div id="aiAnswer" class="small" style="text-align:left; line-height:1.7"></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="mini">
+        <h3>錢包教學（從 0 到能下單）</h3>
+        <div class="small" style="text-align:left; line-height:1.7">
+          1) 先準備 EVM 錢包（MetaMask）。<br>
+          2) 切到 BNB Chain（BSC / BEP20）。<br>
+          3) 匯入 KGEN 代幣合約地址（你已部署的 KGEN）。<br>
+          4) 準備少量 BNB 作 gas。<br>
+          5) 本版下單桌為 T+2 模擬；要上鏈真下單需要接「心臟/無人銀行/大腦」血管，分工清楚才不排斥。
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="sticky-actions">
+  <div class="row">
+    <button class="btn" id="btnModeCockpit">回駕駛艙</button>
+    <button class="btn" id="btnModeOrder">回下單桌</button>
+    <button class="btn2" id="btnModeTemple">回外殿</button>
+    <button class="btn2" id="btnClearLog">清空 Log</button>
+  </div>
+</div>
+
+<script>
+/* =========================
+   V4.3 FULLPACK Core
+   - Self detection (TTS/STT/Wallet)
+   - Cross-environment safe downloads
+   - No external deps
+========================= */
+
+const BOOT_VERSION = "v4.3-ufo-fullpack";
+const logEl = document.getElementById("log");
+const bootLine = document.getElementById("bootLine");
+bootLine.textContent = "boot_version=" + BOOT_VERSION;
+
+function nowISO(){ return new Date().toISOString(); }
+function log(msg){
+  if(!logEl) return;
+  logEl.innerHTML += `[${nowISO()}] ${msg}<br>`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function safeBool(v){ return v ? "true" : "false"; }
+
+function badge(el, state){
+  el.classList.remove("ok","warn","bad");
+  if(state === "ok") el.classList.add("ok");
+  if(state === "warn") el.classList.add("warn");
+  if(state === "bad") el.classList.add("bad");
+}
+
+function setBadgeText(el, txt){ el.textContent = txt; }
+
+log("selfcheck_start");
+log("userAgent: " + (navigator.userAgent || ""));
+const hasTTS = !!window.speechSynthesis;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const hasSTT = !!SR;
+const hasWallet = !!window.ethereum;
+
+log("speechSynthesis: " + safeBool(hasTTS));
+log("speechRecognition: " + safeBool(hasSTT));
+log("ethereum_injected_now: " + safeBool(hasWallet));
+
+const bTTS = document.getElementById("bTTS");
+const bSTT = document.getElementById("bSTT");
+const bETH = document.getElementById("bETH");
+
+setBadgeText(bTTS, "TTS " + (hasTTS ? "ON" : "OFF"));
+badge(bTTS, hasTTS ? "ok" : "bad");
+
+setBadgeText(bSTT, "STT " + (hasSTT ? "ON" : "OFF"));
+badge(bSTT, hasSTT ? "ok" : "bad");
+
+setBadgeText(bETH, "Wallet " + (hasWallet ? "ON" : "OFF"));
+badge(bETH, hasWallet ? "ok" : "warn");
+
+/* ========== Tabs ========== */
+const tabs = Array.from(document.querySelectorAll(".tab"));
+function showTab(key){
+  document.getElementById("tab_cockpit").classList.toggle("hidden", key !== "cockpit");
+  document.getElementById("tab_orderdesk").classList.toggle("hidden", key !== "orderdesk");
+  document.getElementById("tab_temple").classList.toggle("hidden", key !== "temple");
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === key));
+  log("tab=" + key);
+}
+tabs.forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+document.getElementById("btnModeCockpit").onclick = () => showTab("cockpit");
+document.getElementById("btnModeOrder").onclick = () => showTab("orderdesk");
+document.getElementById("btnModeTemple").onclick = () => showTab("temple");
+
+/* ========== Cockpit state ========== */
+const massInput = document.getElementById("massInput");
+const massKgen = document.getElementById("massKgen");
+const energyE = document.getElementById("energyE");
+const levRange = document.getElementById("levRange");
+const levRangeLabel = document.getElementById("levRangeLabel");
+const lev = document.getElementById("lev");
+const degRange = document.getElementById("degRange");
+const degRangeLabel = document.getElementById("degRangeLabel");
+const deg = document.getElementById("deg");
+const stanceLabel = document.getElementById("stanceLabel");
+
+const fuelMaxLabel = document.getElementById("fuelMaxLabel");
+const fuelNowLabel = document.getElementById("fuelNowLabel");
+const fuelLabel = document.getElementById("fuelLabel");
+const fuelBar = document.getElementById("fuelBar");
+
+let state = {
+  massKgen: 30000,
+  leverage: 10,
+  directionDeg: 120,
+  fuelMax: 50000, // UI max cap; can be changed later
+  lastEvents: [],
+  temple: { lamps: [], wishes: [], vows: [] },
+  orders: []
+};
+
+function stanceFromDeg(d){
+  if(d >= 0 && d < 170) return "多";
+  if(d >= 170 && d <= 190) return "休息";
+  return "空";
+}
+
+function clamp(n, a, b){ return Math.min(b, Math.max(a, n)); }
+
+function renderCockpit(){
+  state.massKgen = clamp(parseInt(massInput.value || "0",10) || 0, 0, 10_000_000);
+  massKgen.textContent = String(state.massKgen);
+  // Energy: keep proportional for now (user wants mass visible; energy reflects after input)
+  energyE.textContent = String(state.massKgen);
+
+  state.leverage = clamp(parseInt(levRange.value || "1",10) || 1, 1, 150);
+  levRangeLabel.textContent = String(state.leverage);
+  lev.textContent = String(state.leverage);
+
+  state.directionDeg = clamp(parseInt(degRange.value || "0",10) || 0, 0, 360);
+  degRangeLabel.textContent = String(state.directionDeg);
+  deg.textContent = String(state.directionDeg);
+  const st = stanceFromDeg(state.directionDeg);
+  stanceLabel.textContent = st;
+
+  const fuelNow = clamp(state.massKgen, 0, state.fuelMax);
+  const pct = state.fuelMax <= 0 ? 0 : Math.round((fuelNow / state.fuelMax) * 100);
+  fuelMaxLabel.textContent = String(state.fuelMax);
+  fuelNowLabel.textContent = String(fuelNow);
+  fuelLabel.textContent = pct + "%";
+  fuelBar.style.width = pct + "%";
+}
+
+massInput.addEventListener("input", () => { renderCockpit(); log("mass_changed=" + massInput.value); });
+levRange.addEventListener("input", () => { renderCockpit(); log("leverage=" + levRange.value); });
+degRange.addEventListener("input", () => { renderCockpit(); log("direction=" + degRange.value); });
+
+renderCockpit();
+
+/* ========== Event buttons (must always respond) ========== */
+function pushEvent(name){
+  state.lastEvents.push({t: nowISO(), e: name});
+  if(state.lastEvents.length > 50) state.lastEvents.shift();
+  log(name);
+}
+
+document.getElementById("btnHeartbeat").onclick = () => pushEvent("heartbeat");
+document.getElementById("btnBreath").onclick = () => pushEvent("breath");
+document.getElementById("btnPressure").onclick = () => pushEvent("pressure");
+document.getElementById("btnCup").onclick = () => pushEvent("cup_throw");
+document.getElementById("btnFortune").onclick = () => pushEvent("fortune_click");
+
+/* ========== Selftest ========== */
+document.getElementById("btnSelfTest").onclick = () => {
+  log("selftest_run");
+  const checks = [
+    ["TTS", hasTTS],
+    ["STT", hasSTT],
+    ["Wallet", hasWallet],
+    ["Clipboard", !!navigator.clipboard],
+    ["DownloadAnchor", true]
+  ];
+  checks.forEach(([k,v]) => log(`selftest_${k}=${v ? "OK":"FAIL"}`));
+  // Probe user interaction chain: create a tiny toast via log
+  log("selftest_done");
+};
+
+/* ========== Robust JSON export/download ========== */
+function downloadText(filename, text){
+  try{
+    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    log("export_download_try");
+    return true;
+  }catch(e){
+    log("export_download_fail " + (e && e.message ? e.message : String(e)));
+    return false;
+  }
+}
+
+async function copyToClipboard(text){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      log("clipboard_copied");
+      return true;
+    }
+  }catch(e){
+    log("clipboard_copy_fail " + (e && e.message ? e.message : String(e)));
+  }
+  return false;
+}
+
+function exportStatePayload(){
+  return {
+    boot_version: BOOT_VERSION,
+    exported_at: nowISO(),
+    userAgent: navigator.userAgent || "",
+    state: state
+  };
+}
+
+document.getElementById("btnExportState").onclick = async () => {
+  const payload = exportStatePayload();
+  const text = JSON.stringify(payload, null, 2);
+  const ok = downloadText(`wuzhishan_state_${new Date().toISOString().slice(0,10)}.json`, text);
+  if(!ok){
+    await copyToClipboard(text);
+    alert("此環境可能阻擋下載；已改用剪貼簿備援。請貼到記事本/雲端存檔。");
   }
 };
 
-</script>
-<script>
-// WuzhiShan V4 Modular Utilities (no frameworks)
-(function(){
-  const pad2 = (n)=> String(n).padStart(2,'0');
-  const nowIso = ()=> new Date().toISOString();
-  const el = (id)=> document.getElementById(id);
-
-  function log(msg){
-    const box = el('logBox');
-    const line = `[${nowIso()}] ${msg}`;
-    if(box){
-      box.value = (box.value ? box.value + "\n" : "") + line;
-      box.scrollTop = box.scrollHeight;
-    }
-    console.log(line);
+document.getElementById("btnImportState").onclick = async () => {
+  const input = prompt("請貼上 JSON（狀態匯入）");
+  if(!input) return;
+  try{
+    const obj = JSON.parse(input);
+    if(!obj || !obj.state) throw new Error("bad_format");
+    state = obj.state;
+    // Apply to UI
+    massInput.value = String(state.massKgen || 0);
+    levRange.value = String(state.leverage || 1);
+    degRange.value = String(state.directionDeg || 0);
+    renderCockpit();
+    renderOrdersLog();
+    renderTempleLog();
+    log("import_ok");
+  }catch(e){
+    log("import_fail " + (e && e.message ? e.message : String(e)));
+    alert("JSON 格式錯誤或不相容。");
   }
-
-  function clearLog(){
-    const box = el('logBox');
-    if(box) box.value = "";
-    log("log_cleared");
-  }
-
-  function envSelfCheck(){
-    const ua = navigator.userAgent || "";
-    const speechSynthesisOk = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
-    const speechRecognitionOk = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-    const ethereumInjected = !!window.ethereum;
-    const ethersLoaded = !!window.ethers;
-    log(`boot_version=${(window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || "unknown"}`);
-    log("selfcheck_start");
-    log(`userAgent: ${ua}`);
-    log(`speechSynthesis: ${speechSynthesisOk}`);
-    log(`speechRecognition: ${speechRecognitionOk}`);
-    log(`ethers_loaded_now: ${ethersLoaded}`);
-    log(`ethereum_injected_now: ${ethereumInjected}`);
-    return {ua, speechSynthesisOk, speechRecognitionOk, ethereumInjected, ethersLoaded};
-  }
-
-  function safeSpeak(text){
-    const cfg = window.WUZHISHAN_CONFIG;
-    const allow = cfg && cfg.ui && cfg.ui.enableSpeech;
-    const ok = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
-    if(!allow || !ok){
-      log("tts_unavailable_fallback_text");
-      // fallback: show in a toast-like area
-      const t = el('toast');
-      if(t){
-        t.textContent = text;
-        t.style.opacity = "1";
-        setTimeout(()=>{ t.style.opacity="0"; }, 2500);
-      }
-      return;
-    }
-    try{
-      const u = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-      log("tts_speak");
-    }catch(e){
-      log(`tts_error ${String(e && e.message || e)}`);
-    }
-  }
-
-  async function connectWallet(){
-    if(!window.ethereum){
-      log("wallet_connect_failed: no ethereum");
-      return null;
-    }
-    try{
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const acc = accounts && accounts[0] ? accounts[0] : null;
-      if(acc) log(`wallet_connected=${acc.toLowerCase()}`);
-      return acc;
-    }catch(e){
-      log(`wallet_connect_failed: ${String(e && e.message || e)}`);
-      return null;
-    }
-  }
-
-  function downloadText(filename, text){
-    log("export_download_try");
-    try{
-      const blob = new Blob([text], {type: "application/json;charset=utf-8"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      // Some WebViews block programmatic clicks unless user-initiated; still best effort.
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url), 5000);
-      log(`export_download_ok ${filename}`);
-      return true;
-    }catch(e){
-      log(`export_download_failed ${String(e && e.message || e)}`);
-      return false;
-    }
-  }
-
-  function saveCfg(key, val){
-    try{
-      localStorage.setItem(key, JSON.stringify(val));
-      log("cfg_saved");
-    }catch(e){
-      log(`cfg_save_failed ${String(e && e.message || e)}`);
-    }
-  }
-
-  function loadCfg(key, defVal){
-    try{
-      const s = localStorage.getItem(key);
-      return s ? JSON.parse(s) : defVal;
-    }catch(e){
-      return defVal;
-    }
-  }
-
-  function clearCfg(){
-    try{
-      localStorage.clear();
-      log("cfg_cleared");
-    }catch(e){
-      log(`cfg_clear_failed ${String(e && e.message || e)}`);
-    }
-  }
-
-  window.WUZ = {
-    el, log, clearLog, envSelfCheck, safeSpeak,
-    connectWallet, downloadText,
-    saveCfg, loadCfg, clearCfg,
-    pad2
-  };
-})();
-</script>
-</head>
-<body>
-<div class="app">
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-title">五指山悟空財神殿 · V4.1 FULLPACK</div>
-      <div class="brand-sub">外殿（點燈/許願/發財金）｜內艙（駕駛艙/下單桌）｜器官儀表（心臟/大腦/KUFO）</div>
-    </div>
-    <div class="nav">
-      <button class="btn" data-view="home">入口</button>
-      <button class="btn" data-view="temple">外殿</button>
-      <button class="btn" data-view="cockpit">駕駛艙</button>
-      <button class="btn" data-view="orderdesk">下單桌</button>
-      <button class="btn" data-view="kufo">豪宅 KUFO</button>
-      <button class="btn" data-view="brain">大腦</button>
-      <button class="btn" data-view="heart">心臟</button>
-      <button class="btn ghost" id="btnSelfCheck">自我檢測</button>
-    </div>
-  </header>
-
-  <main class="main">
-    <section class="view" id="view-home">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
-
-<div class="grid">
-  <div class="card span6">
-    <h2>外殿（觀光・留念）</h2>
-    <p>13 生肖 / 光明燈 / 七仙女許願 / 還願 / 發財金。這裡不牽動輸贏，只留紀錄。</p>
-    <div class="btnrow">
-      <a class="btn primary" href="./temple.html">進入外殿</a>
-      <button onclick="WUZ.safeSpeak('外殿啟動。點燈留念，不保證財富。')">殿內口白</button>
-    </div>
-  </div>
-
-  <div class="card span6">
-    <h2>內艙（悟空宇宙神殿飛碟）</h2>
-    <p>方向盤 0～360。0～170 多，170～190 休息，190～360 空。槓桿 1～150。燃料/血量以 KGEN 質量顯示。</p>
-    <div class="btnrow">
-      <a class="btn primary" href="./cockpit.html">進入駕駛艙</a>
-      <a class="btn" href="./orderdesk.html">進入下單桌（模擬）</a>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>豪宅席位（股東層）</h2>
-    <p>花果山火星・齊天豪宅：5000 KGEN 入住，取得分紅資格。遊戲人人可玩，豪宅是分紅層。</p>
-    <div class="btnrow">
-      <a class="btn primary" href="./kufo.html">進入豪宅大廳</a>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>大腦（治理・分潤層）</h2>
-    <p>分潤、供血、路由、公益比例、庫存狀態。這一頁不做操控，只做透明儀表。</p>
-    <div class="btnrow">
-      <a class="btn" href="./brain.html">查看大腦儀表</a>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>心臟（發放・心跳）</h2>
-    <p>發財金、心跳節律、供血狀態與紀錄。先以模擬為主，鏈上接管再升級。</p>
-    <div class="btnrow">
-      <a class="btn" href="./heart.html">查看心臟儀表</a>
-    </div>
-  </div>
-</div>
-
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-temple" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
-
-<div class="grid">
-  <div class="card span8">
-    <h2>外殿：13 生肖・光明燈（留念）</h2>
-    <p>點燈會記錄在本機與可匯出 JSON。這是文化留念，不影響交易輸贏。</p>
-
-    <div class="kv">
-      <div>選擇生肖</div>
-      <div>
-        <select id="zodiacSel" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)">
-          <option value="rat">鼠</option><option value="ox">牛</option><option value="tiger">虎</option><option value="rabbit">兔</option>
-          <option value="dragon">龍</option><option value="snake">蛇</option><option value="horse">馬</option><option value="goat">羊</option>
-          <option value="monkey" selected>猴</option><option value="rooster">雞</option><option value="dog">狗</option><option value="pig">豬</option>
-          <option value="cat">貓（第13生肖）</option>
-        </select>
-      </div>
-
-      <div>點燈費（KGEN）</div>
-      <div><input id="lampFee" type="number" min="0" step="1" value="5" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>留名</div>
-      <div><input id="nickname" type="text" placeholder="觀光客暱稱" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-    </div>
-
-    <div class="btnrow">
-      <button class="primary" onclick="templeLamp()">點光明燈</button>
-      <button onclick="exportLamps()">匯出點燈紀錄 JSON</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
-
-    <div class="hr"></div>
-    <h2>七仙女許願池（不影響輸贏）</h2>
-    <p>許願/還願只記錄，不承諾結果。你可以把它當作修行日誌。</p>
-    <textarea id="wishText" style="width:100%;height:90px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text)" placeholder="寫下你的願望..."></textarea>
-    <div class="btnrow">
-      <button class="primary" onclick="wishSubmit()">送出許願</button>
-      <button onclick="exportWish()">匯出許願紀錄 JSON</button>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>外殿狀態</h2>
-    <div id="templeStatus"></div>
-  </div>
-</div>
-
-<script>
-  const LAMPS_KEY = "wuz_lamps_v4";
-  const WISH_KEY  = "wuz_wish_v4";
-
-  function render(){
-    const lamps = WUZ.loadCfg(LAMPS_KEY, []);
-    const wishes = WUZ.loadCfg(WISH_KEY, []);
-    const s = document.getElementById('templeStatus');
-    s.innerHTML = `
-      <div class="kv">
-        <div>點燈筆數</div><div>${lamps.length}</div>
-        <div>許願筆數</div><div>${wishes.length}</div>
-      </div>
-      <div class="hr"></div>
-      <div class="badge ok">外殿運作正常</div>
-    `;
-  }
-
-  function templeLamp(){
-    const zodiac = document.getElementById('zodiacSel').value;
-    const fee = Number(document.getElementById('lampFee').value || 0);
-    const nick = (document.getElementById('nickname').value || "").trim();
-    const lamps = WUZ.loadCfg(LAMPS_KEY, []);
-    lamps.push({ts: Date.now(), zodiac, feeKgen: fee, nickname: nick});
-    WUZ.saveCfg(LAMPS_KEY, lamps);
-    WUZ.log("lamp_init");
-    WUZ.safeSpeak("光明燈已點。留下的是信念，不是保證。");
-    render();
-  }
-
-  function exportLamps(){
-    const lamps = WUZ.loadCfg(LAMPS_KEY, []);
-    WUZ.log("export_lamps_json");
-    WUZ.downloadText("wuz_lamps_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, lamps}, null, 2));
-  }
-
-  function wishSubmit(){
-    const txt = (document.getElementById('wishText').value || "").trim();
-    if(!txt){ WUZ.safeSpeak("請先寫下願望。"); return; }
-    const wishes = WUZ.loadCfg(WISH_KEY, []);
-    wishes.push({ts: Date.now(), text: txt});
-    WUZ.saveCfg(WISH_KEY, wishes);
-    document.getElementById('wishText').value = "";
-    WUZ.log("wish_submit");
-    WUZ.safeSpeak("願望已封存。修行從紀律開始。");
-    render();
-  }
-
-  function exportWish(){
-    const wishes = WUZ.loadCfg(WISH_KEY, []);
-    WUZ.log("export_wish_json");
-    WUZ.downloadText("wuz_wish_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, wishes}, null, 2));
-  }
-
-  render();
-  WUZ.log("fairies_loaded_to_wishpool");
-</script>
-
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-cockpit" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
-
-<div class="grid">
-  <div class="card span8">
-    <h2>悟空宇宙神殿飛碟（操控艙）</h2>
-    <p>KGEN 質量＝燃料/血量。方向盤決定多空扇區。槓桿只影響「做功」顯示（目前為模擬）。</p>
-
-    <div class="kv">
-      <div>方向盤（度）</div>
-      <div><input class="range" id="dirRange" type="range" min="0" max="360" value="120" oninput="updateDial()"></div>
-
-      <div>槓桿（倍）</div>
-      <div><input class="range" id="levRange" type="range" min="1" max="150" value="10" oninput="updateDial()"></div>
-
-      <div>投入質量（KGEN）</div>
-      <div><input id="massInput" type="number" min="0" step="1" value="30000" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)" oninput="updateDial()"/></div>
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="dial" id="dial">
-      <div class="needle" id="needle"></div>
-      <div class="label" id="zoneLabel"></div>
-    </div>
-
-    <div class="btnrow">
-      <button class="primary" onclick="heartbeat()">心跳</button>
-      <button onclick="breath()">呼吸</button>
-      <button onclick="pressure()">壓力</button>
-      <button onclick="cupThrow()">杯筊</button>
-      <button onclick="fortune()">發財金（模擬）</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>儀表</h2>
-    <div id="meter"></div>
-    <div class="hr"></div>
-    <button onclick="exportFlight()">匯出航行紀錄 JSON</button>
-  </div>
-</div>
-
-<script>
-  const FLIGHT_KEY="wuz_flight_v4";
-
-  function zoneFromDeg(d){
-    const c=WUZHISHAN_CONFIG.cockpit;
-    if(d>=c.longMinDeg && d<c.longMaxDeg) return {zone:"LONG", badge:"ok"};
-    if(d>=c.restMinDeg && d<=c.restMaxDeg) return {zone:"REST", badge:"warn"};
-    return {zone:"SHORT", badge:"bad"};
-  }
-
-  function workValue(massKgen, lev){
-    // User formula idea (display only):
-    // 做功 = (KGEN) * (1點200台幣*槓桿) * (CT)
-    // CT as normalized control time / position -> we show CT=1 for now.
-    const ct = 1;
-    const twdPerPoint = 200;
-    return massKgen * (twdPerPoint * lev) * ct;
-  }
-
-  function updateDial(){
-    const deg = Number(document.getElementById('dirRange').value);
-    const lev = Number(document.getElementById('levRange').value);
-    const mass = Number(document.getElementById('massInput').value || 0);
-
-    document.getElementById('needle').style.transform = `translateX(-50%) rotate(${deg}deg)`;
-    const z = zoneFromDeg(deg);
-    document.getElementById('zoneLabel').textContent = `Zone: ${z.zone} ｜ deg=${deg} ｜ lev=${lev}x`;
-
-    const w = workValue(mass, lev);
-    const fuel = mass; // fuel=mass for now
-    const m = document.getElementById('meter');
-    m.innerHTML = `
-      <div class="kv">
-        <div>燃料/血量（KGEN）</div><div>${fuel.toLocaleString()}</div>
-        <div>做功（TWD顯示）</div><div>${w.toLocaleString()}</div>
-      </div>
-      <div class="hr"></div>
-      <div class="badge ${z.badge}">${z.zone}</div>
-    `;
-
-    // save last state
-    WUZ.saveCfg(FLIGHT_KEY+"_last", {deg, lev, mass});
-  }
-
-  function pushEvent(type){
-    const ev = {ts: Date.now(), type};
-    const log = WUZ.loadCfg(FLIGHT_KEY, []);
-    log.push(ev);
-    WUZ.saveCfg(FLIGHT_KEY, log);
-  }
-
-  function heartbeat(){ WUZ.log("heartbeat"); pushEvent("heartbeat"); WUZ.safeSpeak("心跳。"); }
-  function breath(){ WUZ.log("breath"); pushEvent("breath"); }
-  function pressure(){ WUZ.log("pressure"); pushEvent("pressure"); }
-  function cupThrow(){ WUZ.log("cup_throw"); pushEvent("cup_throw"); }
-  function fortune(){ WUZ.log("fortune_click"); pushEvent("fortune_click"); WUZ.safeSpeak("發財金已記錄。"); }
-
-  function exportFlight(){
-    const log = WUZ.loadCfg(FLIGHT_KEY, []);
-    WUZ.downloadText("wuz_flight_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, flight: log}, null, 2));
-  }
-
-  // init
-  const last = WUZ.loadCfg(FLIGHT_KEY+"_last", {deg:120, lev:10, mass:30000});
-  document.getElementById('dirRange').value = last.deg;
-  document.getElementById('levRange').value = last.lev;
-  document.getElementById('massInput').value = last.mass;
-  updateDial();
-</script>
-
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-orderdesk" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
-
-<div class="grid">
-  <div class="card span8">
-    <h2>下單桌（T+2 模擬）</h2>
-    <p>目前不做即時鏈上下單。你用「神算天機」決策，這裡負責紀錄：日期、方向、槓桿、停利/停損、ATR14 上限。</p>
-
-    <div class="kv">
-      <div>交易日</div>
-      <div><input id="tradeDate" type="date" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>方向</div>
-      <div>
-        <select id="sideSel" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)">
-          <option value="LONG">多</option>
-          <option value="REST">休息</option>
-          <option value="SHORT">空</option>
-        </select>
-      </div>
-
-      <div>槓桿</div>
-      <div><input id="lev" type="number" min="1" max="150" value="10" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>投入（KGEN）</div>
-      <div><input id="mass" type="number" min="0" step="1" value="1000" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>ATR14（點）</div>
-      <div><input id="atr" type="number" min="1" step="1" value="144" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>停損（點）</div>
-      <div><input id="sl" type="number" min="0" step="1" value="72" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-
-      <div>停利（點）</div>
-      <div><input id="tp" type="number" min="0" step="1" value="72" style="width:100%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--text)"/></div>
-    </div>
-
-    <div class="btnrow">
-      <button class="primary" onclick="submitOrder()">送出（模擬）</button>
-      <button onclick="exportOrders()">匯出下單紀錄 JSON</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
-
-    <div class="hr"></div>
-    <div id="ruleBox" class="card" style="background:rgba(255,255,255,0.02)">
-      <h2>規則（可讀客服版）</h2>
-      <p>1) 全市場統一：沒有週三結算，採交易日 T+2 結算。</p>
-      <p>2) 最大贏虧限制：±ATR14 點（預設 144）。</p>
-      <p>3) 若停利與停損在同一結算日同時觸發：記為 0（不算輸贏）。</p>
-    </div>
-  </div>
-
-  <div class="card span4">
-    <h2>下單狀態</h2>
-    <div id="orderStatus"></div>
-  </div>
-</div>
-
-<script>
-  const ORDERS_KEY="wuz_orders_v4";
-
-  function submitOrder(){
-    const date = document.getElementById('tradeDate').value;
-    const side = document.getElementById('sideSel').value;
-    const lev = Number(document.getElementById('lev').value||1);
-    const mass = Number(document.getElementById('mass').value||0);
-    const atr = Number(document.getElementById('atr').value||144);
-    const sl = Number(document.getElementById('sl').value||0);
-    const tp = Number(document.getElementById('tp').value||0);
-
-    if(!date){ WUZ.safeSpeak("請選擇交易日。"); return; }
-
-    // validations
-    const max = atr;
-    const sl2 = Math.min(sl, max);
-    const tp2 = Math.min(tp, max);
-
-    const o = {ts: Date.now(), date, side, lev, mass, atr14: atr, sl: sl2, tp: tp2, settle: "T+2"};
-    const orders = WUZ.loadCfg(ORDERS_KEY, []);
-    orders.push(o);
-    WUZ.saveCfg(ORDERS_KEY, orders);
-
-    WUZ.log("order_submit");
-    WUZ.safeSpeak("下單已封存。記住，交易是修行。");
-    render();
-  }
-
-  function exportOrders(){
-    const orders = WUZ.loadCfg(ORDERS_KEY, []);
-    WUZ.downloadText("wuz_orders_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, orders}, null, 2));
-  }
-
-  function render(){
-    const orders = WUZ.loadCfg(ORDERS_KEY, []);
-    const s = document.getElementById('orderStatus');
-    s.innerHTML = `
-      <div class="kv">
-        <div>紀錄筆數</div><div>${orders.length}</div>
-        <div>結算規則</div><div>T+2</div>
-      </div>
-      <div class="hr"></div>
-      <div class="badge ok">模擬下單正常</div>
-    `;
-  }
-  // init date to today
+};
+
+document.getElementById("btnCopyLog").onclick = async () => {
+  const text = (logEl.innerText || "").trim();
+  const ok = await copyToClipboard(text);
+  if(!ok) alert("此環境不支援剪貼簿。請手動長按複製。");
+};
+
+document.getElementById("btnClearLog").onclick = () => {
+  logEl.innerHTML = "";
+  log("log_cleared");
+};
+
+/* ========== Order desk ========== */
+const tradeDate = document.getElementById("tradeDate");
+const settleDate = document.getElementById("settleDate");
+const sl = document.getElementById("sl");
+const tp = document.getElementById("tp");
+const atr14 = document.getElementById("atr14");
+const pnlKgen = document.getElementById("pnlKgen");
+const ordersLog = document.getElementById("ordersLog");
+const csNote = document.getElementById("csNote");
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+function todayStr(){
   const d = new Date();
-  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-  document.getElementById('tradeDate').value = `${yyyy}-${mm}-${dd}`;
-  render();
-</script>
+  return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+}
+tradeDate.value = todayStr();
 
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-kufo" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
+function addDays(yyyy_mm_dd, days){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(yyyy_mm_dd);
+  if(!m) return "";
+  const d = new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+  d.setDate(d.getDate() + days);
+  return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+}
+function refreshSettle(){
+  settleDate.value = addDays(tradeDate.value, 2) || "";
+}
+tradeDate.addEventListener("input", ()=>{ refreshSettle(); pushEvent("tradeDate=" + tradeDate.value); });
+refreshSettle();
 
-<div class="grid">
-  <div class="card span8">
-    <h2>花果山火星・齊天豪宅（席位）</h2>
-    <p>豪宅不是遊戲門票，而是分紅資格層。入住門檻：<b>5000 KGEN</b>（可調整，但建議鎖定後不改）。</p>
+function capByATR(x, atr){
+  const a = Math.max(0, parseInt(atr,10) || 0);
+  const v = parseInt(x,10) || 0;
+  return clamp(v, -a, a);
+}
 
-    <div class="kv">
-      <div>席位價格</div><div><span id="seatPrice"></span> KGEN</div>
-      <div>我的席位狀態</div><div id="seatStatus">未連接錢包</div>
-      <div>分紅說明</div><div>豪宅層可分配宇宙回流收益（不保證、需透明規則）。</div>
-    </div>
+function computePnL(sign){
+  const atr = parseInt(atr14.value,10) || 0;
+  let _sl = parseInt(sl.value,10) || 0;
+  let _tp = parseInt(tp.value,10) || 0;
 
-    <div class="btnrow">
-      <button class="primary" onclick="buySeatMock()">繳 5000 KGEN 入住（模擬）</button>
-      <button onclick="exportSeats()">匯出席位紀錄 JSON</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
+  // Enforce ATR cap
+  _sl = clamp(_sl, 0, atr);
+  _tp = clamp(_tp, 0, atr);
+  sl.value = String(_sl);
+  tp.value = String(_tp);
 
-    <div class="hr"></div>
-    <h2>客服指引（新手）</h2>
-    <p>1) 若你沒有錢包：先安裝 MetaMask 或 Trust Wallet。</p>
-    <p>2) 選擇鏈：BNB Chain（BSC / BEP20）。</p>
-    <p>3) 取得 KGEN：透過 LP 或轉帳取得（注意鏈必須一致）。</p>
-  </div>
+  // direction sign based on stance (多/空/休息)
+  const st = stanceFromDeg(state.directionDeg);
+  let dir = 0;
+  if(st === "多") dir = 1;
+  if(st === "空") dir = -1;
 
-  <div class="card span4">
-    <h2>豪宅狀態</h2>
-    <div id="kufoStatus"></div>
-    <div class="hr"></div>
-    <button onclick="(async()=>{const a=await WUZ.connectWallet(); if(a) render(a);})()">連接錢包並更新</button>
-  </div>
-</div>
-
-<script>
-  const SEATS_KEY="wuz_seats_v4";
-  document.getElementById('seatPrice').textContent = WUZHISHAN_CONFIG.economics.seatPriceKgen;
-
-  function buySeatMock(){
-    // mock: mark local seat for current address (or anonymous)
-    const addr = (window.__wuz_addr || "anonymous");
-    const seats = WUZ.loadCfg(SEATS_KEY, {});
-    seats[addr.toLowerCase()] = {ts: Date.now(), paidKgen: WUZHISHAN_CONFIG.economics.seatPriceKgen, status:"ACTIVE"};
-    WUZ.saveCfg(SEATS_KEY, seats);
-    WUZ.log("kufo_seat_buy_mock");
-    WUZ.safeSpeak("豪宅席位已記錄。分紅是資格，不是承諾。");
-    render(addr);
+  // If resting, pnl 0
+  if(dir === 0){
+    pnlKgen.textContent = "0";
+    return 0;
   }
 
-  function exportSeats(){
-    const seats = WUZ.loadCfg(SEATS_KEY, {});
-    WUZ.downloadText("wuz_seats_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, seats}, null, 2));
+  // sign = "win" or "lose"
+  let raw = (sign === "win" ? _tp : -_sl);
+
+  // Multiply by leverage and direction
+  let pnl = raw * state.leverage * dir;
+
+  // Rule: if both hit same settle day, pnl 0 (simulate by special case if _sl==_tp and sign=="both")
+  pnlKgen.textContent = String(pnl);
+  return pnl;
+}
+
+document.getElementById("btnSimWin").onclick = () => { const v=computePnL("win"); pushEvent("simulate_win pnl=" + v); };
+document.getElementById("btnSimLose").onclick = () => { const v=computePnL("lose"); pushEvent("simulate_lose pnl=" + v); };
+
+function renderOrdersLog(){
+  const lines = state.orders.map((o,i)=>`#${i+1} ${o.tradeDate} settle=${o.settleDate} stance=${o.stance} lev=${o.leverage} sl=${o.sl} tp=${o.tp} atr14=${o.atr14} pnl=${o.pnl}`);
+  ordersLog.innerHTML = lines.length ? lines.join("<br>") : "(尚無訂單)";
+}
+
+document.getElementById("btnSaveOrder").onclick = () => {
+  const atr = parseInt(atr14.value,10) || 0;
+  const _sl = clamp(parseInt(sl.value,10) || 0, 0, atr);
+  const _tp = clamp(parseInt(tp.value,10) || 0, 0, atr);
+  const st = stanceFromDeg(state.directionDeg);
+  const pnl = parseInt(pnlKgen.textContent,10) || 0;
+
+  const order = {
+    id: "O" + Date.now(),
+    tradeDate: tradeDate.value,
+    settleDate: settleDate.value,
+    stance: st,
+    leverage: state.leverage,
+    massKgen: state.massKgen,
+    sl: _sl,
+    tp: _tp,
+    atr14: atr,
+    pnl: pnl,
+    note: (csNote.value || "").trim(),
+    created_at: nowISO()
+  };
+  state.orders.push(order);
+  if(state.orders.length > 200) state.orders.shift();
+  renderOrdersLog();
+  pushEvent("order_saved " + order.id);
+};
+
+document.getElementById("btnExportOrders").onclick = async () => {
+  const payload = {
+    boot_version: BOOT_VERSION,
+    exported_at: nowISO(),
+    orders: state.orders
+  };
+  const text = JSON.stringify(payload, null, 2);
+  const ok = downloadText(`wuzhishan_orders_${new Date().toISOString().slice(0,10)}.json`, text);
+  if(!ok){
+    await copyToClipboard(text);
+    alert("此環境可能阻擋下載；已改用剪貼簿備援。");
   }
+};
 
-  async function render(addr){
-    window.__wuz_addr = addr;
-    const seats = WUZ.loadCfg(SEATS_KEY, {});
-    const s = seats[(addr||"").toLowerCase()];
-    document.getElementById('seatStatus').textContent = s ? "已入住（模擬）" : "未入住（模擬）";
-    document.getElementById('kufoStatus').innerHTML = `
-      <div class="kv">
-        <div>地址</div><div>${addr}</div>
-        <div>席位</div><div>${s? "ACTIVE" : "NONE"}</div>
-      </div>
-    `;
+renderOrdersLog();
+
+/* ========== Temple (13 zodiac / lamps / wishes) ========== */
+const templeLog = document.getElementById("templeLog");
+function tlog(msg){
+  templeLog.innerHTML += `[${nowISO()}] ${msg}<br>`;
+  templeLog.scrollTop = templeLog.scrollHeight;
+}
+function renderTempleLog(){
+  const lastLamp = state.temple.lamps[state.temple.lamps.length-1];
+  const lastWish = state.temple.wishes[state.temple.wishes.length-1];
+  const lastVow = state.temple.vows[state.temple.vows.length-1];
+  const lines = [];
+  if(lastLamp) lines.push("lamp: " + lastLamp.zodiac + " fee=" + lastLamp.fee);
+  if(lastWish) lines.push("wish: " + (lastWish.text||"").slice(0,40));
+  if(lastVow) lines.push("vow: " + (lastVow.text||"").slice(0,40));
+  templeLog.innerHTML = lines.length ? lines.join("<br>") : "(外殿尚無紀錄)";
+}
+renderTempleLog();
+
+document.getElementById("btnLamp").onclick = () => {
+  const z = document.getElementById("zodiac").value;
+  const fee = parseInt(document.getElementById("lampFee").value,10) || 0;
+  state.temple.lamps.push({t: nowISO(), zodiac: z, fee: fee});
+  if(state.temple.lamps.length > 200) state.temple.lamps.shift();
+  tlog("lamp_init zodiac=" + z + " fee=" + fee);
+  pushEvent("lamp_init");
+  renderTempleLog();
+};
+
+document.getElementById("btnWish").onclick = () => {
+  const text = (document.getElementById("wish").value || "").trim();
+  state.temple.wishes.push({t: nowISO(), text});
+  if(state.temple.wishes.length > 200) state.temple.wishes.shift();
+  tlog("wish_submit");
+  pushEvent("wish_submit");
+  renderTempleLog();
+};
+
+document.getElementById("btnVow").onclick = () => {
+  const text = (document.getElementById("vow").value || "").trim();
+  state.temple.vows.push({t: nowISO(), text});
+  if(state.temple.vows.length > 200) state.temple.vows.shift();
+  tlog("vow_submit");
+  pushEvent("vow_submit");
+  renderTempleLog();
+};
+
+document.getElementById("btnExportTemple").onclick = async () => {
+  const payload = {
+    boot_version: BOOT_VERSION,
+    exported_at: nowISO(),
+    temple: state.temple
+  };
+  const text = JSON.stringify(payload, null, 2);
+  const ok = downloadText(`wuzhishan_temple_${new Date().toISOString().slice(0,10)}.json`, text);
+  if(!ok){
+    await copyToClipboard(text);
+    alert("此環境可能阻擋下載；已改用剪貼簿備援。");
   }
+};
 
-  // auto render anonymous
-  render("anonymous");
-</script>
+/* ========== AI Customer Service (local rules, no internet) ========== */
+const aiInput = document.getElementById("aiInput");
+const aiAnswer = document.getElementById("aiAnswer");
+const aiHint = document.getElementById("aiHint");
+const btnAsk = document.getElementById("btnAsk");
+const btnTTS = document.getElementById("btnTTS");
+const btnSTT = document.getElementById("btnSTT");
+const btnStopSTT = document.getElementById("btnStopSTT");
 
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-brain" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
+function ttsSpeak(text){
+  if(!hasTTS){
+    log("tts_not_supported");
+    return false;
+  }
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+    log("tts_spoken");
+    return true;
+  }catch(e){
+    log("tts_fail " + (e && e.message ? e.message : String(e)));
+    return false;
+  }
+}
 
-<div class="grid">
-  <div class="card span8">
-    <h2>大腦儀表（治理/分潤）</h2>
-    <p>這一頁不直接操控交易，只呈現透明資訊與路由規則（目前以模擬資料展示，鏈上接管後改讀合約）。</p>
-
-    <div class="kv" id="brainKv"></div>
-
-    <div class="btnrow">
-      <button onclick="brainRefresh()">刷新</button>
-      <button onclick="exportBrain()">匯出大腦狀態 JSON</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
-
-    <div class="hr"></div>
-    <h2>分潤原則（你已定義）</h2>
-    <p>profit 來源：外部真實轉入的 KGEN（稅收/收入/回流）。</p>
-    <p>分配：90% 回到持有人/計畫池，10% 進 GalacticBank（宇宙國庫）。</p>
-  </div>
-
-  <div class="card span4">
-    <h2>提示</h2>
-    <p>大腦不要跟駕駛艙重複。駕駛艙只管操控；大腦只管分潤與路由。</p>
-    <div class="badge ok">分層完成</div>
-  </div>
-</div>
-
-<script>
-  const BRAIN_KEY="wuz_brain_v4";
-
-  function brainRefresh(){
-    const state = {
-      ts: Date.now(),
-      profitKgen: 0,
-      split: {toHoldersBps: 9000, toBankBps: 1000},
-      routes: {bank: "KGEN_GalacticBank_V7.5.2", kufo: "KUFO_UnmannedBank", heart: "KGEN_FortuneFaucet"},
-      note: "目前為模擬儀表。鏈上接管後由合約讀取。"
+let rec = null;
+function sttStart(){
+  if(!hasSTT){
+    log("stt_not_supported");
+    return;
+  }
+  try{
+    rec = new SR();
+    rec.lang = "zh-TW";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (ev) => {
+      const text = ev.results && ev.results[0] && ev.results[0][0] ? ev.results[0][0].transcript : "";
+      log("stt_text=" + text);
+      aiInput.value = text;
+      answerAI(text);
     };
-    WUZ.saveCfg(BRAIN_KEY, state);
-    render();
-    WUZ.log("brain_refresh");
+    rec.onerror = (e) => {
+      log("stt_error " + (e && e.error ? e.error : "unknown"));
+      aiHint.textContent = "語音輸入在此環境可能被中斷（WebView/權限/手勢限制）。可改用打字。";
+    };
+    rec.onend = () => { log("stt_stop"); };
+    rec.start();
+    log("stt_start");
+  }catch(e){
+    log("stt_fail " + (e && e.message ? e.message : String(e)));
+  }
+}
+function sttStop(){
+  try{
+    if(rec){ rec.stop(); }
+  }catch(e){}
+}
+
+function answerAI(q){
+  const text = (q || "").trim();
+  if(!text){
+    aiAnswer.innerHTML = "請輸入問題。";
+    return;
+  }
+  const lower = text.toLowerCase();
+
+  // Minimal deterministic local "customer service"
+  let a = "";
+  if(lower.includes("錢包") || lower.includes("metamask") || lower.includes("怎麼裝")){
+    a = "錢包教學：一，安裝 MetaMask。二，切到 BNB Chain。三，匯入 KGEN 代幣合約地址。四，準備少量 BNB 作 gas。五，本版下單桌目前是 T+2 模擬；要真上鏈下單，需要把下單訊息送進 KUFO 或心臟合約，再由大腦做結算規則。";
+  } else if(lower.includes("t+2") || lower.includes("結算")){
+    a = "本宇宙規則：所有 K 線交易以交易日 T+2 結算，不用週三結算。停利與停損若在同一結算日同時觸發，視為 0（不算輸贏）。";
+  } else if(lower.includes("槓桿") || lower.includes("倍數")){
+    a = "槓桿 1 到 150 倍。槓桿只影響模擬輸贏倍率，不改變你投入的質量（KGEN）。";
+  } else if(lower.includes("方向") || lower.includes("多空") || lower.includes("方向盤")){
+    a = "方向盤 0 到 170 度是多方扇區，170 到 190 度是休息區，190 到 360 度是空方扇區。休息區視為不下單，輸贏為 0。";
+  } else if(lower.includes("匯出") || lower.includes("下載")){
+    a = "若你在 WebView（例如 MetaMask 內建瀏覽器）遇到下載阻擋，本系統會自動改用剪貼簿備援。你也可以用『複製 Log』把內容貼到記事本保存。";
+  } else if(lower.includes("atr14") || lower.includes("最大") || lower.includes("停損") || lower.includes("停利")){
+    a = "風控規則：最大贏虧建議限制在 ±ATR14。下單桌會把停利停損自動限制在 ATR14 範圍內，避免超標。";
+  } else {
+    a = "我收到你的問題。你可以直接問：錢包怎麼裝、T+2 怎麼算、槓桿怎麼調、方向盤怎麼判多空、如何匯出狀態。";
   }
 
-  function render(){
-    const s = WUZ.loadCfg(BRAIN_KEY, null) || {};
-    const kv = document.getElementById('brainKv');
-    kv.innerHTML = `
-      <div>profit（KGEN）</div><div>${(s.profitKgen||0).toLocaleString()}</div>
-      <div>分潤</div><div>90% / 10%（國庫）</div>
-      <div>路由</div><div>bank / kufo / heart</div>
-      <div>備註</div><div>${s.note||""}</div>
-    `;
-  }
+  aiAnswer.innerHTML = a;
+  aiHint.textContent = hasTTS ? "可按『語音唸出』讓客服用聲音回覆。" : "此環境不支援語音唸出（TTS OFF），已自動降級為文字客服。";
+  pushEvent("assistant_answer");
+  if(hasTTS) ttsSpeak(a);
+}
 
-  function exportBrain(){
-    const s = WUZ.loadCfg(BRAIN_KEY, {});
-    WUZ.downloadText("wuz_brain_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, brain: s}, null, 2));
-  }
+btnAsk.onclick = () => answerAI(aiInput.value);
+btnTTS.onclick = () => ttsSpeak(aiAnswer.innerText || "悟空宇宙客服在線。");
+btnSTT.onclick = () => sttStart();
+btnStopSTT.onclick = () => sttStop();
 
-  brainRefresh();
+// Disable buttons based on support
+btnTTS.disabled = !hasTTS;
+btnSTT.disabled = !hasSTT;
+
+// Initial greet
+aiAnswer.innerHTML = "你好，我是悟空宇宙 AI 客服。你可以問：錢包怎麼裝、T+2 結算、槓桿、方向盤、多空規則、匯出下載。";
+aiHint.textContent = "系統會自動偵測環境，不同瀏覽器會自動降級。";
+
+/* ========== End ========== */
+log("ready");
 </script>
-
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-    <section class="view" id="view-heart" style="display:none">
-<div class="toast" id="toast"></div>
-<div class="container">
-  <div class="header">
-    <div class="brand">
-      <div class="title">五指山・悟空財神殿（V4 模組宇宙）</div>
-      <div class="sub">boot_version: <span id="bootVer"></span> ｜ KGEN = 質量 = 指數點數</div>
-    </div>
-    <div class="pills">
-      <div class="pill">外殿：點燈・許願・留念</div>
-      <div class="pill">內艙：飛碟操控・模擬交易</div>
-      <div class="pill">豪宅：5000 KGEN 入住・分紅</div>
-    </div>
-  </div>
-
-<div class="grid">
-  <div class="card span8">
-    <h2>心臟儀表（發財金/心跳）</h2>
-    <p>心臟只做發放與節律紀錄，不做交易結算。這樣才不會「器官反噬」。</p>
-
-    <div class="btnrow">
-      <button class="primary" onclick="heartBeat()">心跳</button>
-      <button onclick="ignite()">點火</button>
-      <button onclick="fortune()">發放發財金（模擬）</button>
-      <button onclick="exportHeart()">匯出心臟紀錄 JSON</button>
-      <a class="btn" href="./index.html">回主殿</a>
-    </div>
-
-    <div class="hr"></div>
-    <div id="heartStatus"></div>
-  </div>
-
-  <div class="card span4">
-    <h2>說明</h2>
-    <p>你要的「質量→能量」顯示，可以在心臟頁呈現轉換，但帳務仍以 KGEN 質量為準。</p>
-    <div class="badge warn">帳務以質量為準</div>
-  </div>
-</div>
-
-<script>
-  const HEART_KEY="wuz_heart_v4";
-
-  function push(t){
-    const log = WUZ.loadCfg(HEART_KEY, []);
-    log.push({ts: Date.now(), type:t});
-    WUZ.saveCfg(HEART_KEY, log);
-    render();
-  }
-
-  function heartBeat(){ WUZ.log("heartbeat"); push("heartbeat"); WUZ.safeSpeak("心跳。"); }
-  function ignite(){ WUZ.log("ignite"); push("ignite"); WUZ.safeSpeak("點火。"); }
-  function fortune(){ WUZ.log("fortune_click"); push("fortune"); WUZ.safeSpeak("發財金已記錄。"); }
-
-  function render(){
-    const log = WUZ.loadCfg(HEART_KEY, []);
-    const last = log[log.length-1];
-    document.getElementById('heartStatus').innerHTML = `
-      <div class="kv">
-        <div>事件筆數</div><div>${log.length}</div>
-        <div>最近事件</div><div>${last? last.type : "-"}</div>
-      </div>
-      <div class="hr"></div>
-      <div class="badge ok">心臟運作正常（模擬）</div>
-    `;
-  }
-
-  function exportHeart(){
-    const log = WUZ.loadCfg(HEART_KEY, []);
-    WUZ.downloadText("wuz_heart_v4_"+Date.now()+".json", JSON.stringify({boot: WUZHISHAN_CONFIG.bootVersion, heart: log}, null, 2));
-  }
-
-  render();
-</script>
-
-  <div class="card">
-    <h2>系統日誌</h2>
-    <div class="btnrow">
-      <button onclick="WUZ.clearLog()">清空</button>
-      <button onclick="WUZ.envSelfCheck()">自我檢測</button>
-      <button onclick="(async()=>{await WUZ.connectWallet();})()">連接錢包</button>
-      <button onclick="WUZ.downloadText('wuzhishan_log_'+Date.now()+'.txt', document.getElementById('logBox').value)">下載日誌</button>
-      <button onclick="WUZ.clearCfg()">清除本機設定</button>
-    </div>
-    <div class="hr"></div>
-    <textarea id="logBox" placeholder="log..."></textarea>
-    <p><small>提示：MetaMask WebView 常見 speechSynthesis=false，會自動改用文字提示，不算故障。</small></p>
-  </div>
-</div>
-<script>
-  document.getElementById('bootVer').textContent = (window.WUZHISHAN_CONFIG && window.WUZHISHAN_CONFIG.bootVersion) || 'unknown';
-  // boot selfcheck
-  WUZ.envSelfCheck();
-</script>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div>boot_version=v4.1-fullpack</div>
-  </footer>
-</div>
-
-<script>
-(function(){
-  const log = (window.PF && window.PF.log) ? window.PF.log : function(){};
-  function show(view){
-    document.querySelectorAll('.view').forEach(v=>v.style.display='none');
-    const el=document.getElementById('view-'+view);
-    if(el) el.style.display='';
-    log('nav_view='+view);
-  }
-  document.querySelectorAll('[data-view]').forEach(btn=>{
-    btn.addEventListener('click', ()=>show(btn.getAttribute('data-view')));
-  });
-  document.getElementById('btnSelfCheck')?.addEventListener('click', ()=>{
-    try{
-      window.PF?.selfcheck?.run?.();
-    }catch(e){
-      console.warn(e);
-    }
-  });
-  show('home');
-  window.PF = window.PF || {};
-  window.PF.nav = {show};
-})();
-</script>
-
 </body>
 </html>
