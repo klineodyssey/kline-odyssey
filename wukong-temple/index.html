@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>悟空宇宙神殿飛碟 V4.3 FULL</title>
+<title>悟空財神殿・五指山神殿 V4.4.3 CHAIN</title>
 <style>
   :root{
     --bg:#0b1220;
@@ -227,7 +227,37 @@
   .slot.filled{ border-color: rgba(45,212,191,.55); }
   .slot.sel{ outline:2px solid rgba(59,130,246,.85); outline-offset:2px; }
 
+
+  .grid72{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:10px;
+    margin-top:10px;
+  }
+  .slot{
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    border-radius:14px;
+    padding:10px;
+  }
+  .slot .n{font-weight:900; font-size:14px; margin-bottom:6px}
+  .slot input, .slot textarea{
+    width:100%;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,0.25);
+    color:var(--txt);
+    border-radius:10px;
+    padding:8px;
+    outline:none;
+    font-size:14px;
+  }
+  .slot textarea{min-height:58px; resize:vertical}
+  @media (max-width:520px){
+    .grid72{grid-template-columns: 1fr;}
+  }
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
 
@@ -441,7 +471,22 @@
               <button class="btn2" id="btnSaveZ13">保存</button>
             </div>
             <div class="small">每生肖 72 名額登記（觀光留念 / 點燈），不等於交易等級。</div>
+            <div class="small">點光明燈香油錢：<b><span id="lampFeeKgen">108</span> KGEN</b>（未接鏈前僅展示；接鏈後才會扣款）</div>
+          
+        <div class="mini" style="margin-top:10px">
+          <h3>生肖 72 名額登記簿</h3>
+          <div class="small">切換生肖後可直接登記 1–72 名額（本機保存）。支援匯出 JSON / 匯入 JSON。</div>
+          <div class="row" style="margin-top:8px; flex-wrap:wrap">
+            <button class="btn2" id="btnZodiacRender">刷新名冊</button>
+            <button class="btn2" id="btnZodiacExport">匯出名冊JSON</button>
+            <label class="btn2" style="cursor:pointer">
+              匯入名冊JSON<input id="zodiacImportFile" type="file" accept="application/json" style="display:none" />
+            </label>
+            <button class="btn2" id="btnZodiacClear">清空本生肖名冊</button>
           </div>
+          <div id="zodiacSlots" class="grid72"></div>
+        </div>
+</div>
 
           <div class="mini">
             <h3>光明燈費用（KGEN）</h3>
@@ -501,6 +546,11 @@
               <input id="fairyName6" placeholder="f6 名稱" style="min-width:160px" />
               <input id="fairyName7" placeholder="f7 名稱" style="min-width:160px" />
               <button class="btn2" id="btnSaveFairies">保存七仙女名稱</button>
+            </div>
+
+            <div class="mini" style="margin-top:10px">
+              <h3>七仙女座標（固定）</h3>
+              <div id="fairyMeta" class="small"></div>
             </div>
 
             <div class="row" style="margin-top:10px">
@@ -605,7 +655,19 @@
    - No external deps
 ========================= */
 
-const BOOT_VERSION = "v4.4.0-ufo-fullpack-zodiac72-fairies7";
+const BOOT_VERSION = "v4.4.1-templefull-zodiac72-fairies7-fix";
+const LAMP_FEE_KGEN = 108; // 光明燈香油錢（質量）
+
+// ---- 七仙女（固定星座座標/職司/多空）預設表 ----
+const FAIRIES_META_V1 = [
+  {id:"f1", point:14520, name:"巧雲", star:"天樞", mode:"做空", duty:"風調雨順"},
+  {id:"f2", point:14866, name:"巧虹", star:"天璇", mode:"做多", duty:"家庭美滿"},
+  {id:"f3", point:16184, name:"巧芝", star:"天璣", mode:"做空", duty:"育子收驚"},
+  {id:"f4", point:16888, name:"巧仙", star:"天權", mode:"做多", duty:"事業運通"},
+  {id:"f5", point:17347, name:"巧蘭", star:"天衡", mode:"做空", duty:"長命百歲"},
+  {id:"f6", point:18056, name:"巧梅", star:"闓陽", mode:"做多", duty:"身體健康"},
+  {id:"f7", point:18459, name:"巧靈", star:"瑤光", mode:"多退", duty:"感情圓滿"}
+];
 const logEl = document.getElementById("log");
 const bootLine = document.getElementById("bootLine");
 bootLine.textContent = "boot_version=" + BOOT_VERSION;
@@ -1438,11 +1500,563 @@ btnTTS.disabled = !hasTTS;
 btnSTT.disabled = !hasSTT;
 
 // Initial greet
-aiAnswer.innerHTML = "你好，我是悟空宇宙 AI 客服。你可以問：錢包怎麼裝、T+2 結算、槓桿、方向盤、多空規則、匯出下載。";
+aiAnsw
+/* ===========================
+   Temple FULL: Zodiac72 + Fairies Meta + Export Fallback
+   =========================== */
+function _lsGet(k, d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function _lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+function downloadText(filename, text){
+  try{
+    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    log("export_download_try");
+    return true;
+  }catch(e){
+    // Fallback: open new tab with data URL
+    try{
+      const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(text);
+      window.open(dataUrl, "_blank");
+      log("export_fallback_open");
+      return true;
+    }catch(e2){
+      // Final fallback: copy to clipboard
+      navigator.clipboard?.writeText(text).then(()=>log("export_fallback_copied")).catch(()=>log("export_failed"));
+      return false;
+    }
+  }
+}
+
+function getCurrentZodiacKey(){
+  const sel = document.getElementById("zodiac13Sel");
+  const custom = document.getElementById("zodiac13Name");
+  let z = (sel && sel.value) ? sel.value : "鼠";
+  if(z === "自定"){
+    const name = (custom?.value||"").trim();
+    z = name ? name : "自定";
+  }
+  return "zodiacRoster_"+z;
+}
+
+function renderZodiac72(){
+  const box = document.getElementById("zodiacSlots");
+  if(!box) return;
+  const key = getCurrentZodiacKey();
+  const roster = _lsGet(key, Array.from({length:72}, ()=>({name:"", note:""})));
+  // normalize
+  while(roster.length<72) roster.push({name:"", note:""});
+  if(roster.length>72) roster.length=72;
+
+  box.innerHTML = "";
+  for(let i=0;i<72;i++){
+    const it = roster[i] || {name:"", note:""};
+    const div = document.createElement("div");
+    div.className = "slot";
+    div.innerHTML = `
+      <div class="n">名額 #${i+1}</div>
+      <input data-i="${i}" class="zName" placeholder="登記姓名 / 暱稱" value="${escapeHtml(it.name||"")}" />
+      <textarea data-i="${i}" class="zNote" placeholder="備註（可留願望/還願/聯絡方式）">${escapeHtml(it.note||"")}</textarea>
+    `;
+    box.appendChild(div);
+  }
+
+  let t=null;
+  function scheduleSave(){
+    clearTimeout(t);
+    t=setTimeout(()=>{
+      const names = box.querySelectorAll(".zName");
+      const notes = box.querySelectorAll(".zNote");
+      const out = Array.from({length:72}, (_,idx)=>({
+        name: (names[idx]?.value||"").trim(),
+        note: (notes[idx]?.value||"").trim()
+      }));
+      _lsSet(key, out);
+      log("cfg_saved");
+    }, 250);
+  }
+  box.querySelectorAll(".zName,.zNote").forEach(el=>{
+    el.addEventListener("input", scheduleSave, {passive:true});
+  });
+
+  log("zodiac72_rendered");
+}
+
+function exportZodiac72(){
+  const key = getCurrentZodiacKey();
+  const roster = _lsGet(key, []);
+  const payload = {
+    boot: BOOT_VERSION,
+    zodiac_key: key,
+    exported_at: new Date().toISOString(),
+    roster72: roster
+  };
+  const txt = JSON.stringify(payload, null, 2);
+  downloadText(key+".json", txt);
+}
+
+function importZodiac72(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const obj = JSON.parse(String(reader.result||"{}"));
+      if(!obj || !Array.isArray(obj.roster72)) throw new Error("bad format");
+      const key = getCurrentZodiacKey();
+      _lsSet(key, obj.roster72);
+      renderZodiac72();
+      log("zodiac72_imported");
+    }catch(e){
+      log("zodiac72_import_failed");
+      toast("匯入失敗：JSON 格式不正確");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearZodiac72(){
+  const key = getCurrentZodiacKey();
+  _lsSet(key, Array.from({length:72}, ()=>({name:"", note:""})));
+  renderZodiac72();
+  log("zodiac72_cleared");
+}
+
+function applyFairiesDefaults(){
+  // If empty, inject default names from FAIRIES_META_V1
+  const keys = [1,2,3,4,5,6,7].map(n=>"fairyName"+n);
+  const inputs = keys.map(id=>document.getElementById(id)).filter(Boolean);
+  const hasAny = inputs.some(i=> (i.value||"").trim().length>0);
+  if(!hasAny){
+    inputs.forEach((inp, idx)=>{
+      const meta = FAIRIES_META_V1[idx];
+      inp.value = `${meta.name}（${meta.star}）`;
+    });
+  }
+  // meta display
+  const metaBox = document.getElementById("fairyMeta");
+  if(metaBox){
+    metaBox.innerHTML = FAIRIES_META_V1.map(m=>`<div><b>${m.id.toUpperCase()}</b>　${m.point}　${m.name}｜${m.star}｜${m.duty}｜${m.mode}</div>`).join("");
+  }
+}
+
+(function templeFullBoot(){
+  // Wire buttons (safe even if missing)
+  const btnR = document.getElementById("btnZodiacRender");
+  const btnE = document.getElementById("btnZodiacExport");
+  const btnC = document.getElementById("btnZodiacClear");
+  const fileI = document.getElementById("zodiacImportFile");
+  btnR && btnR.addEventListener("click", renderZodiac72);
+  btnE && btnE.addEventListener("click", exportZodiac72);
+  btnC && btnC.addEventListener("click", clearZodiac72);
+  fileI && fileI.addEventListener("change", (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(f) importZodiac72(f);
+    e.target.value = "";
+  });
+
+  // When zodiac selector changes, rerender
+  const sel = document.getElementById("zodiac13Sel");
+  const custom = document.getElementById("zodiac13Name");
+  sel && sel.addEventListener("change", ()=>setTimeout(renderZodiac72, 50));
+  custom && custom.addEventListener("input", ()=>setTimeout(renderZodiac72, 200));
+
+  // Apply fairies defaults and render meta
+  setTimeout(()=>{
+    const feeSpan=document.getElementById("lampFeeKgen"); if(feeSpan) feeSpan.textContent=String(LAMP_FEE_KGEN);
+    applyFairiesDefaults();
+    renderZodiac72();
+  }, 60);
+})();
+er.innerHTML = "你好，我是悟空宇宙 AI 客服。你可以問：錢包怎麼裝、T+2 結算、槓桿、方向盤、多空規則、匯出下載。";
 aiHint.textContent = "系統會自動偵測環境，不同瀏覽器會自動降級。";
 
 /* ========== End ========== */
 log("ready");
+</script>
+
+<!-- Floating Chain Panel Button -->
+<button id="chainBtn" style="position:fixed; right:14px; bottom:14px; z-index:9999;
+  padding:12px 14px; border-radius:999px; border:1px solid #111; background:#fff; font-weight:900;">
+  ⚡鏈上・心臟
+</button>
+
+<!-- Chain Modal -->
+<div id="chainModal" style="position:fixed; inset:0; z-index:10000; display:none; background:rgba(0,0,0,.55);">
+  <div style="max-width:720px; margin:5vh auto; background:#fff; border:1px solid #111; border-radius:18px; padding:14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div style="font-weight:900;">悟空財神殿｜鏈上心臟與點燈</div>
+      <button id="chainClose" style="border:1px solid #111; background:#fff; border-radius:10px; padding:6px 10px; font-weight:900;">關閉</button>
+    </div>
+
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr; gap:10px;">
+      <div style="border:1px solid #ddd; border-radius:14px; padding:10px;">
+        <div style="font-weight:900; margin-bottom:6px;">A. 連線狀態</div>
+        <div id="chainStatus" style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; white-space:pre-wrap;"></div>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnConnect" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">連結錢包</button>
+          <button id="btnRefresh" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">更新餘額</button>
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd; border-radius:14px; padding:10px;">
+        <div style="font-weight:900; margin-bottom:6px;">B. 合約地址設定（可留空＝先離線玩）</div>
+        <div style="display:grid; grid-template-columns:1fr; gap:6px;">
+          <label style="display:grid; grid-template-columns:120px 1fr; gap:8px; align-items:center;">
+            <div style="font-weight:800;">KGEN</div>
+            <input id="cfgKGEN" placeholder="0x..." style="padding:8px; border:1px solid #111; border-radius:10px;" />
+          </label>
+          <label style="display:grid; grid-template-columns:120px 1fr; gap:8px; align-items:center;">
+            <div style="font-weight:800;">心臟(發財金)</div>
+            <input id="cfgHeart" placeholder="0x... (FortuneFaucet)" style="padding:8px; border:1px solid #111; border-radius:10px;" />
+          </label>
+          <label style="display:grid; grid-template-columns:120px 1fr; gap:8px; align-items:center;">
+            <div style="font-weight:800;">公庫(收點燈)</div>
+            <input id="cfgTreasury" placeholder="0x... (花果山台灣)" style="padding:8px; border:1px solid #111; border-radius:10px;" />
+          </label>
+          <label style="display:grid; grid-template-columns:120px 1fr; gap:8px; align-items:center;">
+            <div style="font-weight:800;">KUFO</div>
+            <input id="cfgKUFO" placeholder="0x... (UnmannedBank)" style="padding:8px; border:1px solid #111; border-radius:10px;" />
+          </label>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnSaveCfg" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">儲存設定</button>
+          <button id="btnResetCfg" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">重置設定</button>
+        </div>
+        <div style="margin-top:8px; font-size:12px; opacity:.85;">
+          點燈費固定 <b>108 KGEN</b>（不是 107）。若沒錢包或未部署心臟，依然可離線點燈留念與匯出紀錄。
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd; border-radius:14px; padding:10px;">
+        <div style="font-weight:900; margin-bottom:6px;">C. 點光明燈（鏈上扣款）</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnLampPay" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">支付 108 KGEN 點燈</button>
+          <button id="btnLampOffline" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">離線點燈(不扣款)</button>
+        </div>
+        <div style="margin-top:6px; font-size:12px; opacity:.85;">
+          鏈上模式：KGEN 直接轉到「公庫地址」。這樣不需要額外燈合約，也不會跟心臟功能打架。
+        </div>
+      </div>
+
+      <div style="border:1px solid #ddd; border-radius:14px; padding:10px;">
+        <div style="font-weight:900; margin-bottom:6px;">D. 心臟（發財金 / 還願）</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <button id="btnHeartHeartbeat" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">整點心跳領取</button>
+          <button id="btnHeartIgnite" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">零點點火領取</button>
+          <button id="btnHeartSalary" style="border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">月俸領取</button>
+        </div>
+
+        <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="border:1px dashed #bbb; border-radius:12px; padding:8px;">
+            <div style="font-weight:900;">還願（Vow）</div>
+            <input id="inpVow" type="number" min="0" step="0.01" placeholder="輸入 KGEN 數量" style="width:100%; padding:8px; border:1px solid #111; border-radius:10px; margin-top:6px;" />
+            <button id="btnVow" style="margin-top:8px; width:100%; border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">送出還願</button>
+          </div>
+          <div style="border:1px dashed #bbb; border-radius:12px; padding:8px;">
+            <div style="font-weight:900;">補血（Fund Heart）</div>
+            <input id="inpFund" type="number" min="0" step="0.01" placeholder="輸入 KGEN 數量" style="width:100%; padding:8px; border:1px solid #111; border-radius:10px; margin-top:6px;" />
+            <button id="btnFund" style="margin-top:8px; width:100%; border:1px solid #111; background:#fff; border-radius:12px; padding:8px 10px; font-weight:900;">授權並補血</button>
+          </div>
+        </div>
+
+        <div style="margin-top:8px; font-size:12px; opacity:.85;">
+          注意：心臟合約尚未部署時，這區按鈕會提示「未設定心臟地址」。部署後把地址貼進來即可。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===============================
+   Chain Bridge (KGEN / Heart / KUFO)
+   =============================== */
+const BOOT_VERSION = "v4.4.3-temple-chain-heart-lamp108";
+try{ if(typeof log === "function"){ log("boot_version=" + BOOT_VERSION); } }catch(_){}
+
+const CHAIN_CFG_KEY = "wukong_chain_cfg_v1";
+const DEFAULT_CFG = {
+  kgen: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  heart: "",
+  treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  kufo: ""
+};
+
+const ERC20_ABI = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)",
+  "function transfer(address,uint256) returns (bool)"
+];
+
+const HEART_ABI = [
+  "function heartbeatClaim() external",
+  "function igniteAndClaim() external",
+  "function claimSalary() external",
+  "function fund(uint256 amount) external",
+  "function vow(uint256 amount) external"
+];
+
+let chainCfg = loadChainCfg();
+let provider = null, signer = null, walletAddr = null;
+
+function loadChainCfg(){
+  try{
+    const raw = localStorage.getItem(CHAIN_CFG_KEY);
+    if(!raw) return {...DEFAULT_CFG};
+    const obj = JSON.parse(raw);
+    return {...DEFAULT_CFG, ...obj};
+  }catch(_){ return {...DEFAULT_CFG}; }
+}
+function saveChainCfg(){
+  localStorage.setItem(CHAIN_CFG_KEY, JSON.stringify(chainCfg));
+}
+
+function setStatus(text){
+  const el = document.getElementById("chainStatus");
+  if(el) el.textContent = text;
+}
+function envSummary(){
+  const hasMM = !!window.ethereum;
+  const hasEthers = !!window.ethers;
+  return [
+    "wallet=" + (walletAddr || "(not connected)"),
+    "ethereum_injected=" + hasMM,
+    "ethers_loaded=" + hasEthers,
+    "kgen=" + (chainCfg.kgen || "(empty)"),
+    "heart=" + (chainCfg.heart || "(empty)"),
+    "treasury=" + (chainCfg.treasury || "(empty)"),
+    "kufo=" + (chainCfg.kufo || "(empty)")
+  ].join("\n");
+}
+
+async function connectWallet(){
+  if(!window.ethereum){
+    toast("找不到錢包（MetaMask / 錢包瀏覽器）");
+    return;
+  }
+  if(!window.ethers){
+    toast("ethers 尚未載入");
+    return;
+  }
+  try{
+    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    walletAddr = await signer.getAddress();
+    try{ if(typeof log==="function"){ log("wallet_connected=" + walletAddr); } }catch(_){}
+    setStatus(envSummary());
+    toast("錢包已連結");
+  }catch(e){
+    toast("錢包連結失敗");
+    try{ if(typeof log==="function"){ log("wallet_connect_failed " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+
+async function refreshBalances(){
+  try{
+    setStatus(envSummary());
+    if(!signer || !chainCfg.kgen) return;
+    const kgen = new ethers.Contract(chainCfg.kgen, ERC20_ABI, signer);
+    const dec = await kgen.decimals();
+    const bal = await kgen.balanceOf(walletAddr);
+    const balFmt = ethers.utils.formatUnits(bal, dec);
+    let extra = "\nKGEN_balance=" + balFmt;
+    if(chainCfg.heart){
+      const allow = await kgen.allowance(walletAddr, chainCfg.heart);
+      extra += "\nallow_to_heart=" + ethers.utils.formatUnits(allow, dec);
+    }
+    setStatus(envSummary() + extra);
+  }catch(e){
+    toast("更新餘額失敗");
+    try{ if(typeof log==="function"){ log("balance_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+
+async function lampPay108(){
+  if(!signer){ toast("請先連結錢包"); return; }
+  if(!chainCfg.kgen || !chainCfg.treasury){ toast("請先設定 KGEN 與公庫地址"); return; }
+  try{
+    const kgen = new ethers.Contract(chainCfg.kgen, ERC20_ABI, signer);
+    const dec = await kgen.decimals();
+    const amt = ethers.utils.parseUnits("108", dec);
+    const tx = await kgen.transfer(chainCfg.treasury, amt);
+    toast("已送出點燈交易");
+    try{ if(typeof log==="function"){ log("lamp_pay_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("點燈完成（鏈上）");
+    // record locally too
+    try{ if(typeof addLampRecord==="function"){ addLampRecord({mode:"onchain", amount:108, treasury:chainCfg.treasury, tx:tx.hash}); } }catch(_){}
+    await refreshBalances();
+  }catch(e){
+    toast("點燈失敗");
+    try{ if(typeof log==="function"){ log("lamp_pay_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+
+function lampOffline(){
+  try{
+    if(typeof addLampRecord==="function"){ addLampRecord({mode:"offline", amount:108, treasury:"(offline)", tx:""}); }
+    toast("離線點燈已記錄");
+  }catch(e){
+    toast("離線點燈失敗");
+  }
+}
+
+function requireHeart(){
+  if(!chainCfg.heart){ toast("未設定心臟地址"); return null; }
+  if(!signer){ toast("請先連結錢包"); return null; }
+  return new ethers.Contract(chainCfg.heart, HEART_ABI, signer);
+}
+
+async function heartHeartbeat(){
+  const heart = requireHeart(); if(!heart) return;
+  try{
+    const tx = await heart.heartbeatClaim();
+    toast("心跳交易已送出");
+    try{ if(typeof log==="function"){ log("heart_heartbeat_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("已領取心跳發財金");
+    await refreshBalances();
+  }catch(e){
+    toast("心跳領取失敗");
+    try{ if(typeof log==="function"){ log("heart_heartbeat_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+async function heartIgnite(){
+  const heart = requireHeart(); if(!heart) return;
+  try{
+    const tx = await heart.igniteAndClaim();
+    toast("點火交易已送出");
+    try{ if(typeof log==="function"){ log("heart_ignite_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("已領取點火發財金");
+    await refreshBalances();
+  }catch(e){
+    toast("點火領取失敗");
+    try{ if(typeof log==="function"){ log("heart_ignite_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+async function heartSalary(){
+  const heart = requireHeart(); if(!heart) return;
+  try{
+    const tx = await heart.claimSalary();
+    toast("月俸交易已送出");
+    try{ if(typeof log==="function"){ log("heart_salary_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("已領取月俸");
+    await refreshBalances();
+  }catch(e){
+    toast("月俸領取失敗");
+    try{ if(typeof log==="function"){ log("heart_salary_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+async function heartVow(){
+  const heart = requireHeart(); if(!heart) return;
+  const v = document.getElementById("inpVow")?.value || "";
+  const amtNum = Number(v);
+  if(!amtNum || amtNum<=0){ toast("請輸入還願數量"); return; }
+  try{
+    const kgen = new ethers.Contract(chainCfg.kgen, ERC20_ABI, signer);
+    const dec = await kgen.decimals();
+    const amt = ethers.utils.parseUnits(String(amtNum), dec);
+    // approve heart
+    const allow = await kgen.allowance(walletAddr, chainCfg.heart);
+    if(allow.lt(amt)){
+      const tx1 = await kgen.approve(chainCfg.heart, amt);
+      toast("授權中…");
+      await tx1.wait();
+    }
+    const tx = await heart.vow(amt);
+    toast("還願交易已送出");
+    try{ if(typeof log==="function"){ log("heart_vow_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("還願完成");
+    await refreshBalances();
+  }catch(e){
+    toast("還願失敗");
+    try{ if(typeof log==="function"){ log("heart_vow_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+async function heartFund(){
+  const heart = requireHeart(); if(!heart) return;
+  const v = document.getElementById("inpFund")?.value || "";
+  const amtNum = Number(v);
+  if(!amtNum || amtNum<=0){ toast("請輸入補血數量"); return; }
+  try{
+    const kgen = new ethers.Contract(chainCfg.kgen, ERC20_ABI, signer);
+    const dec = await kgen.decimals();
+    const amt = ethers.utils.parseUnits(String(amtNum), dec);
+    const allow = await kgen.allowance(walletAddr, chainCfg.heart);
+    if(allow.lt(amt)){
+      const tx1 = await kgen.approve(chainCfg.heart, amt);
+      toast("授權中…");
+      await tx1.wait();
+    }
+    const tx = await heart.fund(amt);
+    toast("補血交易已送出");
+    try{ if(typeof log==="function"){ log("heart_fund_tx " + tx.hash); } }catch(_){}
+    await tx.wait();
+    toast("補血完成");
+    await refreshBalances();
+  }catch(e){
+    toast("補血失敗");
+    try{ if(typeof log==="function"){ log("heart_fund_fail " + (e?.message||String(e))); } }catch(_){}
+  }
+}
+
+// UI wiring
+(function initChainUI(){
+  const $ = (id)=>document.getElementById(id);
+  $("cfgKGEN").value = chainCfg.kgen || "";
+  $("cfgHeart").value = chainCfg.heart || "";
+  $("cfgTreasury").value = chainCfg.treasury || "";
+  $("cfgKUFO").value = chainCfg.kufo || "";
+
+  $("chainBtn").onclick = ()=>{ $("chainModal").style.display="block"; setStatus(envSummary()); };
+  $("chainClose").onclick = ()=>{ $("chainModal").style.display="none"; };
+
+  $("btnConnect").onclick = connectWallet;
+  $("btnRefresh").onclick = refreshBalances;
+
+  $("btnSaveCfg").onclick = ()=>{
+    chainCfg.kgen = $("cfgKGEN").value.trim();
+    chainCfg.heart = $("cfgHeart").value.trim();
+    chainCfg.treasury = $("cfgTreasury").value.trim();
+    chainCfg.kufo = $("cfgKUFO").value.trim();
+    saveChainCfg();
+    toast("設定已儲存");
+    setStatus(envSummary());
+  };
+  $("btnResetCfg").onclick = ()=>{
+    chainCfg = {...DEFAULT_CFG};
+    saveChainCfg();
+    $("cfgKGEN").value = chainCfg.kgen;
+    $("cfgHeart").value = chainCfg.heart;
+    $("cfgTreasury").value = chainCfg.treasury;
+    $("cfgKUFO").value = chainCfg.kufo;
+    toast("設定已重置");
+    setStatus(envSummary());
+  };
+
+  $("btnLampPay").onclick = lampPay108;
+  $("btnLampOffline").onclick = lampOffline;
+
+  $("btnHeartHeartbeat").onclick = heartHeartbeat;
+  $("btnHeartIgnite").onclick = heartIgnite;
+  $("btnHeartSalary").onclick = heartSalary;
+  $("btnVow").onclick = heartVow;
+  $("btnFund").onclick = heartFund;
+
+  // Auto update status
+  setStatus(envSummary());
+})();
 </script>
 </body>
 </html>
