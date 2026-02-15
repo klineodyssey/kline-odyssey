@@ -44,6 +44,16 @@
   #toast.bad{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.10)}
   #toast.acc{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.10)}
 
+  /* 🛸 UFO Cockpit */
+  .ufo_dial{position:relative;aspect-ratio:1/1;width:min(260px, 80vw);margin:0 auto;border-radius:999px;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.12),rgba(0,0,0,.15) 55%, rgba(0,0,0,.35));border:1px solid var(--line);overflow:hidden;touch-action:none}
+  .ufo_ring{position:absolute;inset:10px;border-radius:999px;border:1px dashed rgba(148,163,184,.35)}
+  .ufo_center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:999px;background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.55)}
+  .ufo_needle{position:absolute;left:50%;top:50%;width:2px;height:44%;transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);background:linear-gradient(180deg, rgba(16,185,129,.0), rgba(16,185,129,.85));border-radius:2px}
+  .ufo_readout{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);text-align:center}
+  .ufo_readout .mono{font-weight:900}
+  .ufo_gauge{height:12px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);overflow:hidden}
+  .ufo_gauge_in{height:100%;width:0%;background:linear-gradient(90deg, rgba(16,185,129,.65), rgba(245,158,11,.65), rgba(239,68,68,.65))}
+
 </style>
 </head>
 <body>
@@ -94,6 +104,53 @@
     </div>
 
     
+
+  <div class="card" style="margin-top:12px" id="ufoCockpitCard">
+    <div class="h">🛸 悟空宇宙神殿飛碟｜UFO Cockpit</div>
+    <div class="sub">KGEN＝質量＝點數。只用 KGEN 結算，不考慮跨市場黑洞引力差。方向盤：0～170 多；170～190 休息；190～360 空。</div>
+    <div class="hr"></div>
+
+    <div class="grid2">
+      <div>
+        <div class="k">加油箱（Fuel / 血量）</div>
+        <div class="mono" id="ufoFuelText">(loading)</div>
+        <div class="ufo_gauge"><div class="ufo_gauge_in" id="ufoFuelBar"></div></div>
+      </div>
+      <div>
+        <div class="k">桿桿（1～150）</div>
+        <input id="ufoLev" type="range" min="1" max="150" value="20" />
+        <div class="mono" id="ufoLevText">20x</div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px">
+      <div>
+        <div class="k">投入 KGEN（質量）</div>
+        <input id="ufoMass" inputmode="decimal" placeholder="例如 5" />
+        <div class="mini mono">Work = Mass * (200 TWD * Lev) * CT</div>
+      </div>
+      <div>
+        <div class="k">方向盤（0～360）</div>
+        <div class="ufo_dial" id="ufoDial" aria-label="direction dial">
+          <div class="ufo_ring"></div>
+          <div class="ufo_needle" id="ufoNeedle"></div>
+          <div class="ufo_center"></div>
+          <div class="ufo_readout">
+            <div class="mono" id="ufoDeg">0°</div>
+            <div class="mono" id="ufoMode">LONG</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="grid2">
+      <button class="btn ok" id="btnUfoSyncToOrder">同步到下單桌</button>
+      <button class="btn" id="btnUfoSave">保存飛碟設定</button>
+    </div>
+  </div>
+
 
 <div class="card" style="margin-top:12px">
     <div class="h">🧾 神算天機下單（T+2｜本機模擬）</div>
@@ -492,7 +549,7 @@ Life Factory｜宇宙細胞誕生）</div>
 <script>
 (function(){
   'use strict';
-  const BOOT_VERSION = "v3.4.5-mass2energy-orderdesk-merge";
+  const BOOT_VERSION = "v3.4.6-ufo-cockpit-stable";
   
 const BUILD_HASH = "c1704d7632c2";
 const NOW_ISO = () => new Date().toISOString();
@@ -1130,10 +1187,12 @@ const Microcell=(function(){
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');
         a.href=url; a.download=filename;
+        a.style.display='none';
+        a.rel='noopener';
         document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url),1200);
+        requestAnimationFrame(()=>{ try{ a.click(); }catch(_){ /* ignore */ } });
+        // WebView/部分瀏覽器會延遲觸發下載，太快 revoke 會導致 0 bytes 或完全無檔案
+        setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(_){ } try{ a.remove(); }catch(_){ } }, 8000);
         Log.line(logTag||'export_json');
         // also open modal as a fallback guide in WebView environments
         show(filename,text);
@@ -1403,6 +1462,103 @@ const Orders = (() => {
     return { init, addFromUI, clear, recalc, exportOrders, state, calc };
   })()
 
+  // 🛸 悟空宇宙神殿飛碟（Kline App Game 同款操控儀表）
+  const UFO = (()=>{
+    const KEY = 'wukong_ufo_cfg_v1';
+    const state = { mass: 5, lev: 20, deg: 0, fuelMax: 100 };
+    const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+    const modeOfDeg = (deg)=>{
+      const d = ((deg%360)+360)%360;
+      if(d>=170 && d<=190) return 'REST';
+      if(d<170) return 'LONG';
+      return 'SHORT';
+    };
+
+    const load = ()=>{ try{ const o=JSON.parse(localStorage.getItem(KEY)||'null'); if(o&&typeof o==='object') Object.assign(state,o);}catch{} };
+    const save = ()=>{ try{ localStorage.setItem(KEY, JSON.stringify(state)); logEvent('ufo_cfg_saved'); }catch{} };
+
+    const render = ()=>{
+      const levEl = U.qs('#ufoLev');
+      const massEl = U.qs('#ufoMass');
+      const needle = U.qs('#ufoNeedle');
+      const degEl = U.qs('#ufoDeg');
+      const modeEl = U.qs('#ufoMode');
+      const levText = U.qs('#ufoLevText');
+      const fuelText = U.qs('#ufoFuelText');
+      const fuelBar = U.qs('#ufoFuelBar');
+      if(levEl) levEl.value = String(state.lev);
+      if(massEl) massEl.value = String(state.mass);
+      if(needle) needle.style.transform = `translate(-50%,-100%) rotate(${state.deg}deg)`;
+      if(degEl) degEl.textContent = `${Math.round(state.deg)}°`;
+      const m = modeOfDeg(state.deg);
+      if(modeEl) modeEl.textContent = m;
+      if(levText) levText.textContent = `${state.lev}x`;
+
+      const fuel = Math.max(0, Number(state.mass||0) * Number(state.lev||0));
+      const pct = clamp((fuel / (state.fuelMax||100)) * 100, 0, 100);
+      if(fuelText) fuelText.textContent = `Fuel = Mass(${state.mass}) × Lev(${state.lev}) = ${fuel.toFixed(2)} | Gauge ${pct.toFixed(0)}%`;
+      if(fuelBar) fuelBar.style.width = `${pct}%`;
+    };
+
+    const setDegFromPointer = (evt)=>{
+      const dial = U.qs('#ufoDial');
+      if(!dial) return;
+      const rect = dial.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+      const p = evt.touches?.[0] || evt;
+      const x = (p.clientX ?? 0) - cx;
+      const y = (p.clientY ?? 0) - cy;
+      const rad = Math.atan2(x, -y);
+      let deg = rad * 180/Math.PI;
+      if(deg<0) deg += 360;
+      state.deg = deg;
+      render();
+    };
+
+    const bind = ()=>{
+      const levEl = U.qs('#ufoLev');
+      const massEl = U.qs('#ufoMass');
+      const dial = U.qs('#ufoDial');
+      const btnSync = U.qs('#btnUfoSyncToOrder');
+      const btnSave = U.qs('#btnUfoSave');
+
+      levEl?.addEventListener('input', ()=>{ state.lev = clamp(Number(levEl.value||20),1,150); render(); });
+      massEl?.addEventListener('input', ()=>{ state.mass = Math.max(0, Number(massEl.value||0)); render(); });
+
+      let dragging = false;
+      const start = (e)=>{ dragging=true; setDegFromPointer(e); e.preventDefault?.(); };
+      const move = (e)=>{ if(!dragging) return; setDegFromPointer(e); e.preventDefault?.(); };
+      const end = ()=>{ if(!dragging) return; dragging=false; save(); };
+      dial?.addEventListener('pointerdown', start);
+      dial?.addEventListener('pointermove', move);
+      dial?.addEventListener('pointerup', end);
+      dial?.addEventListener('pointercancel', end);
+      dial?.addEventListener('touchstart', start, {passive:false});
+      dial?.addEventListener('touchmove', move, {passive:false});
+      dial?.addEventListener('touchend', end);
+
+      btnSave?.addEventListener('click', ()=>{ save(); toast('已保存飛碟設定'); });
+      btnSync?.addEventListener('click', ()=>{
+        const side = modeOfDeg(state.deg);
+        if(side==='REST'){ toast('方向盤在休息區（170～190），不同步下單'); return; }
+        const ordSide = U.qs('#ordSide');
+        const ordLev = U.qs('#ordLev');
+        const ordEntry = U.qs('#ordEntry');
+        if(ordSide) ordSide.value = side;
+        if(ordLev) ordLev.value = String(state.lev);
+        if(ordEntry && !String(ordEntry.value||'').trim()) ordEntry.value = String(state.mass);
+        save();
+        logEvent('ufo_sync_to_order');
+        toast('已同步到下單桌（方向/桿桿/質量）');
+      });
+    };
+
+    const init = ()=>{ load(); render(); bind(); };
+    return { init, state, modeOfDeg, render };
+  })();
+
 function boot(){
     U.qs('bootVer').textContent=BOOT_VERSION;
     Log.render();
@@ -1420,6 +1576,7 @@ function boot(){
     LifeFactory.init();
     State.init();
     try{ if (window.Orders && Orders.init) Orders.init(); }catch(e){}
+    try{ if (window.UFO && UFO.init) UFO.init(); }catch(e){}
     selfcheck();
   }
 
