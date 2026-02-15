@@ -205,6 +205,28 @@
   }
   .sticky-actions .row{gap:8px}
   .hint{font-size:12px; color:var(--muted); margin-top:8px}
+
+  .grid72{
+    display:grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap:6px;
+    margin-top:10px;
+  }
+  .slot{
+    border:1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    border-radius:10px;
+    padding:8px 6px;
+    text-align:center;
+    font-weight:800;
+    cursor:pointer;
+    user-select:none;
+    font-size:12px;
+  }
+  .slot.empty{ opacity:.75; }
+  .slot.filled{ border-color: rgba(45,212,191,.55); }
+  .slot.sel{ outline:2px solid rgba(59,130,246,.85); outline-offset:2px; }
+
 </style>
 </head>
 <body>
@@ -394,7 +416,7 @@
       </div>
 
       <!-- Temple -->
-      <div id="tab_temple" class="hidden">
+            <div id="tab_temple" class="hidden">
         <div class="mini">
           <h3>外殿（觀光/留念/香油錢）</h3>
           <div class="small">
@@ -407,46 +429,103 @@
 
         <div class="row">
           <div class="mini">
-            <h3>生肖</h3>
+            <h3>生肖（可自定第 13 生肖）</h3>
             <select id="zodiac">
-              <option>鼠</option><option>牛</option><option>虎</option><option>兔</option><option>龍</option><option>蛇</option>
-              <option>馬</option><option>羊</option><option>猴</option><option>雞</option><option>狗</option><option>豬</option>
-              <option>第13生肖（宇宙）</option>
+              <option value="鼠">鼠</option><option value="牛">牛</option><option value="虎">虎</option><option value="兔">兔</option>
+              <option value="龍">龍</option><option value="蛇">蛇</option><option value="馬">馬</option><option value="羊">羊</option>
+              <option value="猴">猴</option><option value="雞">雞</option><option value="狗">狗</option><option value="豬">豬</option>
+              <option value="Z13">第 13 生肖（宇宙）</option>
             </select>
-            <div class="small">點燈留念不等於交易等級。</div>
+            <div class="row" style="margin-top:8px; gap:8px; flex-wrap:nowrap">
+              <input id="zodiac13Name" placeholder="第13生肖自定名稱（例：鯨 / 鳳凰 / 黑洞）" />
+              <button class="btn2" id="btnSaveZ13">保存</button>
+            </div>
+            <div class="small">每生肖 72 名額登記（觀光留念 / 點燈），不等於交易等級。</div>
           </div>
+
           <div class="mini">
-            <h3>光明燈金額（KGEN）</h3>
+            <h3>光明燈費用（KGEN）</h3>
             <input id="lampFee" type="number" value="5" min="0" step="1" />
-            <div class="small">觀光客點燈費用（示意）。</div>
+            <div class="small">示意：點燈費用（可用於觀光/留念收費）。</div>
           </div>
         </div>
 
-        <div class="row" style="margin-top:10px">
-          <div class="mini">
-            <h3>七仙女許願</h3>
-            <textarea id="wish" placeholder="寫下你的願望（留念用）"></textarea>
-          </div>
-          <div class="mini">
-            <h3>還願（備註）</h3>
-            <textarea id="vow" placeholder="還願說明（留念用）"></textarea>
+        <div class="sep"></div>
+
+        <div class="mini">
+          <h3>72 名額登記（選一格 → 填資料 → 送出）</h3>
+          <div class="small">點格子可指定名額；不點則自動使用下一個空位。</div>
+
+          <div id="slotGrid" class="grid72" aria-label="72 slots"></div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="mini" style="flex:1">
+              <h3>登記資料</h3>
+              <div class="row" style="gap:8px">
+                <input id="regSlot" type="number" min="1" max="72" placeholder="名額(1-72)" />
+                <input id="regName" placeholder="名字 / 暱稱" />
+              </div>
+              <div class="row" style="gap:8px; margin-top:8px">
+                <input id="regWallet" placeholder="錢包地址（可留空）" />
+                <input id="regNote" placeholder="留念 / 祝福（可留空）" />
+              </div>
+
+              <div class="row" style="margin-top:10px; gap:10px">
+                <button class="btn" id="btnRegister">登記名額</button>
+                <button class="btn" id="btnLamp">點光明燈（留念）</button>
+                <button class="btn2" id="btnClearReg">清空輸入</button>
+              </div>
+              <div class="small" id="regHint" style="margin-top:8px">提示：請先選生肖。</div>
+            </div>
           </div>
         </div>
 
         <div class="sep"></div>
 
         <div class="row">
-          <button class="btn" id="btnLamp">點光明燈</button>
-          <button class="btn" id="btnWish">送出許願</button>
-          <button class="btn" id="btnVow">送出還願</button>
-          <button class="btn2" id="btnExportTemple">匯出外殿（JSON）</button>
+          <div class="mini" style="flex:1">
+            <h3>七仙女系統（許願 / 還願）</h3>
+            <div class="small">留念用：七仙女路徑 f1~f7。每筆許願可匯出 JSON 存檔。</div>
+
+            <div class="row" style="gap:10px; flex-wrap:wrap">
+              <select id="fairySel" style="min-width:180px">
+                <option value="f1">f1</option><option value="f2">f2</option><option value="f3">f3</option><option value="f4">f4</option>
+                <option value="f5">f5</option><option value="f6">f6</option><option value="f7">f7</option>
+              </select>
+
+              <input id="fairyName1" placeholder="f1 名稱" style="min-width:160px" />
+              <input id="fairyName2" placeholder="f2 名稱" style="min-width:160px" />
+              <input id="fairyName3" placeholder="f3 名稱" style="min-width:160px" />
+              <input id="fairyName4" placeholder="f4 名稱" style="min-width:160px" />
+              <input id="fairyName5" placeholder="f5 名稱" style="min-width:160px" />
+              <input id="fairyName6" placeholder="f6 名稱" style="min-width:160px" />
+              <input id="fairyName7" placeholder="f7 名稱" style="min-width:160px" />
+              <button class="btn2" id="btnSaveFairies">保存七仙女名稱</button>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+              <div class="mini" style="flex:1">
+                <h3>許願內容</h3>
+                <textarea id="wish" placeholder="寫下你的願望（留念用）"></textarea>
+              </div>
+              <div class="mini" style="flex:1">
+                <h3>還願（備註）</h3>
+                <textarea id="vow" placeholder="還願說明（留念用）"></textarea>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px; gap:10px">
+              <button class="btn" id="btnWish">送出許願</button>
+              <button class="btn" id="btnVow">送出還願</button>
+              <button class="btn2" id="btnExportTemple">匯出外殿（JSON）</button>
+              <button class="btn2" id="btnResetTemple">重置外殿資料（本機）</button>
+            </div>
+          </div>
         </div>
 
         <div class="sep"></div>
         <div class="log" id="templeLog"></div>
       </div>
-    </div>
-  </div>
 
   <!-- RIGHT: AI Customer Service -->
   <div class="card">
@@ -526,7 +605,7 @@
    - No external deps
 ========================= */
 
-const BOOT_VERSION = "v4.3-ufo-fullpack";
+const BOOT_VERSION = "v4.4.0-ufo-fullpack-zodiac72-fairies7";
 const logEl = document.getElementById("log");
 const bootLine = document.getElementById("bootLine");
 bootLine.textContent = "boot_version=" + BOOT_VERSION;
@@ -888,64 +967,373 @@ document.getElementById("btnExportOrders").onclick = async () => {
 renderOrdersLog();
 
 /* ========== Temple (13 zodiac / lamps / wishes) ========== */
+/* ========== Temple (Zodiac 72 slots + 7 Fairies) ========== */
 const templeLog = document.getElementById("templeLog");
+const slotGrid  = document.getElementById("slotGrid");
+const zodiacSel = document.getElementById("zodiac");
+const z13Name   = document.getElementById("zodiac13Name");
+const btnSaveZ13= document.getElementById("btnSaveZ13");
+
+const regSlot   = document.getElementById("regSlot");
+const regName   = document.getElementById("regName");
+const regWallet = document.getElementById("regWallet");
+const regNote   = document.getElementById("regNote");
+const regHint   = document.getElementById("regHint");
+
+const btnRegister = document.getElementById("btnRegister");
+const btnLamp     = document.getElementById("btnLamp");
+const btnClearReg = document.getElementById("btnClearReg");
+
+const fairySel = document.getElementById("fairySel");
+const btnSaveFairies = document.getElementById("btnSaveFairies");
+const wish = document.getElementById("wish");
+const vow  = document.getElementById("vow");
+const btnWish = document.getElementById("btnWish");
+const btnVow  = document.getElementById("btnVow");
+const btnExportTemple = document.getElementById("btnExportTemple");
+const btnResetTemple  = document.getElementById("btnResetTemple");
+const lampFee = document.getElementById("lampFee");
+
 function tlog(msg){
-  templeLog.innerHTML += `[${nowISO()}] ${msg}<br>`;
-  templeLog.scrollTop = templeLog.scrollHeight;
+  const ts = new Date().toISOString();
+  templeLog.textContent = `[${ts}] ${msg}\n` + (templeLog.textContent || "");
 }
-function renderTempleLog(){
-  const lastLamp = state.temple.lamps[state.temple.lamps.length-1];
-  const lastWish = state.temple.wishes[state.temple.wishes.length-1];
-  const lastVow = state.temple.vows[state.temple.vows.length-1];
-  const lines = [];
-  if(lastLamp) lines.push("lamp: " + lastLamp.zodiac + " fee=" + lastLamp.fee);
-  if(lastWish) lines.push("wish: " + (lastWish.text||"").slice(0,40));
-  if(lastVow) lines.push("vow: " + (lastVow.text||"").slice(0,40));
-  templeLog.innerHTML = lines.length ? lines.join("<br>") : "(外殿尚無紀錄)";
+
+const TEMPLE_KEY = "WUKONG_TEMPLE_V44_STATE";
+const DEFAULT_FAIRIES = {
+  f1:"七仙女一", f2:"七仙女二", f3:"七仙女三", f4:"七仙女四",
+  f5:"七仙女五", f6:"七仙女六", f7:"七仙女七"
+};
+
+function templeLoad(){
+  try{
+    const raw = localStorage.getItem(TEMPLE_KEY);
+    if(!raw) return {
+      z13Name:"",
+      fairies:{...DEFAULT_FAIRIES},
+      registries:{},   // key -> { "1": entry, ... }
+      lamps:[],
+      wishes:[],
+      vows:[]
+    };
+    const obj = JSON.parse(raw);
+    if(!obj.fairies) obj.fairies = {...DEFAULT_FAIRIES};
+    if(!obj.registries) obj.registries = {};
+    if(!obj.lamps) obj.lamps = [];
+    if(!obj.wishes) obj.wishes = [];
+    if(!obj.vows) obj.vows = [];
+    if(typeof obj.z13Name !== "string") obj.z13Name = "";
+    return obj;
+  }catch(e){
+    return {
+      z13Name:"",
+      fairies:{...DEFAULT_FAIRIES},
+      registries:{},
+      lamps:[],
+      wishes:[],
+      vows:[]
+    };
+  }
 }
-renderTempleLog();
 
-document.getElementById("btnLamp").onclick = () => {
-  const z = document.getElementById("zodiac").value;
-  const fee = parseInt(document.getElementById("lampFee").value,10) || 0;
-  state.temple.lamps.push({t: nowISO(), zodiac: z, fee: fee});
-  if(state.temple.lamps.length > 200) state.temple.lamps.shift();
-  tlog("lamp_init zodiac=" + z + " fee=" + fee);
-  pushEvent("lamp_init");
-  renderTempleLog();
-};
+function templeSave(){
+  try{
+    localStorage.setItem(TEMPLE_KEY, JSON.stringify(TEMPLE));
+    log("cfg_saved");
+  }catch(e){
+    log("cfg_save_fail " + (e && e.message ? e.message : String(e)));
+  }
+}
 
-document.getElementById("btnWish").onclick = () => {
-  const text = (document.getElementById("wish").value || "").trim();
-  state.temple.wishes.push({t: nowISO(), text});
-  if(state.temple.wishes.length > 200) state.temple.wishes.shift();
-  tlog("wish_submit");
-  pushEvent("wish_submit");
-  renderTempleLog();
-};
+let TEMPLE = templeLoad();
 
-document.getElementById("btnVow").onclick = () => {
-  const text = (document.getElementById("vow").value || "").trim();
-  state.temple.vows.push({t: nowISO(), text});
-  if(state.temple.vows.length > 200) state.temple.vows.shift();
-  tlog("vow_submit");
-  pushEvent("vow_submit");
-  renderTempleLog();
-};
+function zodiacKey(){
+  const v = zodiacSel.value;
+  if(v !== "Z13") return v;
+  const n = (TEMPLE.z13Name || "").trim() || "宇宙";
+  return "13:" + n;
+}
 
-document.getElementById("btnExportTemple").onclick = async () => {
+function zodiacLabel(){
+  const v = zodiacSel.value;
+  if(v !== "Z13") return v;
+  return (TEMPLE.z13Name || "").trim() || "宇宙";
+}
+
+function ensureRegistry(key){
+  if(!TEMPLE.registries[key]) TEMPLE.registries[key] = {};
+  return TEMPLE.registries[key];
+}
+
+let selectedSlot = null;
+
+function renderSlots(){
+  const key = zodiacKey();
+  const reg = ensureRegistry(key);
+
+  slotGrid.innerHTML = "";
+  for(let i=1;i<=72;i++){
+    const div = document.createElement("div");
+    div.className = "slot " + (reg[String(i)] ? "filled" : "empty");
+    if(selectedSlot === i) div.className += " sel";
+    div.textContent = i;
+    div.title = reg[String(i)] ? ("已登記：" + (reg[String(i)].name || "")) : "空位";
+    div.addEventListener("click", ()=>{
+      selectedSlot = i;
+      regSlot.value = String(i);
+      const e = reg[String(i)];
+      if(e){
+        regName.value = e.name || "";
+        regWallet.value = e.wallet || "";
+        regNote.value = e.note || "";
+        regHint.textContent = `已選名額 ${i}（已登記）`;
+      }else{
+        regHint.textContent = `已選名額 ${i}（空位）`;
+      }
+      renderSlots();
+    });
+    slotGrid.appendChild(div);
+  }
+}
+
+function syncFairyInputs(){
+  const ids = ["fairyName1","fairyName2","fairyName3","fairyName4","fairyName5","fairyName6","fairyName7"];
+  const keys = ["f1","f2","f3","f4","f5","f6","f7"];
+  for(let i=0;i<7;i++){
+    const el = document.getElementById(ids[i]);
+    if(!el) continue;
+    el.value = TEMPLE.fairies[keys[i]] || DEFAULT_FAIRIES[keys[i]];
+  }
+}
+
+function pullFairyInputs(){
+  const ids = ["fairyName1","fairyName2","fairyName3","fairyName4","fairyName5","fairyName6","fairyName7"];
+  const keys = ["f1","f2","f3","f4","f5","f6","f7"];
+  for(let i=0;i<7;i++){
+    const el = document.getElementById(ids[i]);
+    if(!el) continue;
+    const v = (el.value || "").trim();
+    if(v) TEMPLE.fairies[keys[i]] = v;
+  }
+}
+
+function nextEmptySlot(key){
+  const reg = ensureRegistry(key);
+  for(let i=1;i<=72;i++){
+    if(!reg[String(i)]) return i;
+  }
+  return null;
+}
+
+btnSaveZ13.addEventListener("click", ()=>{
+  TEMPLE.z13Name = (z13Name.value || "").trim();
+  templeSave();
+  selectedSlot = null;
+  tlog("z13_saved=" + (TEMPLE.z13Name || "宇宙"));
+  renderSlots();
+});
+
+zodiacSel.addEventListener("change", ()=>{
+  selectedSlot = null;
+  renderSlots();
+  regHint.textContent = `已切換生肖：${zodiacLabel()}`;
+});
+
+btnClearReg.addEventListener("click", ()=>{
+  regSlot.value = "";
+  regName.value = "";
+  regWallet.value = "";
+  regNote.value = "";
+  selectedSlot = null;
+  renderSlots();
+  tlog("reg_cleared");
+});
+
+btnRegister.addEventListener("click", ()=>{
+  const key = zodiacKey();
+  const reg = ensureRegistry(key);
+
+  const name = (regName.value || "").trim();
+  if(!name){ alert("請輸入名字/暱稱"); return; }
+
+  let slot = parseInt((regSlot.value || "").trim(), 10);
+  if(!slot || slot<1 || slot>72){
+    slot = nextEmptySlot(key);
+  }
+  if(!slot){ alert("此生肖 72 名額已滿"); return; }
+
+  if(reg[String(slot)]){
+    const ok = confirm(`名額 ${slot} 已有登記，是否覆蓋？`);
+    if(!ok) return;
+  }
+
+  reg[String(slot)] = {
+    slot,
+    zodiac: zodiacLabel(),
+    name,
+    wallet: (regWallet.value || "").trim(),
+    note: (regNote.value || "").trim(),
+    ts: new Date().toISOString()
+  };
+
+  templeSave();
+  selectedSlot = slot;
+  renderSlots();
+  tlog(`registered zodiac=${key} slot=${slot} name=${name}`);
+});
+
+btnLamp.addEventListener("click", ()=>{
+  const key = zodiacKey();
+  const fee = Number(lampFee.value || 0);
+  const slot = selectedSlot || parseInt((regSlot.value||"").trim(),10) || null;
+  const name = (regName.value || "").trim() || "(未填)";
+  const rec = {
+    ts: new Date().toISOString(),
+    zodiac: zodiacLabel(),
+    zodiacKey: key,
+    slot,
+    name,
+    feeKGEN: isFinite(fee) ? fee : 0,
+    wallet: (regWallet.value || "").trim()
+  };
+  TEMPLE.lamps.unshift(rec);
+  templeSave();
+  tlog(`lamp_added zodiac=${key} slot=${slot||"-"} fee=${rec.feeKGEN}KGEN`);
+});
+
+btnSaveFairies.addEventListener("click", ()=>{
+  pullFairyInputs();
+  templeSave();
+  tlog("fairies_saved");
+});
+
+function fairyName(fid){
+  return TEMPLE.fairies && TEMPLE.fairies[fid] ? TEMPLE.fairies[fid] : fid;
+}
+
+btnWish.addEventListener("click", ()=>{
+  const fid = fairySel.value;
+  const text = (wish.value || "").trim();
+  if(!text){ alert("請輸入願望"); return; }
+  const rec = {
+    ts: new Date().toISOString(),
+    type: "wish",
+    route: fid,
+    fairy: fairyName(fid),
+    zodiac: zodiacLabel(),
+    text,
+    wallet: currentAccount || ""
+  };
+  TEMPLE.wishes.unshift(rec);
+  templeSave();
+  tlog(`wish_route=${fid} fairy=${rec.fairy}`);
+  log("wish_route=" + fid);
+  log("export_wish_json");
+});
+
+btnVow.addEventListener("click", ()=>{
+  const fid = fairySel.value;
+  const text = (vow.value || "").trim();
+  if(!text){ alert("請輸入還願內容"); return; }
+  const rec = {
+    ts: new Date().toISOString(),
+    type: "vow",
+    route: fid,
+    fairy: fairyName(fid),
+    zodiac: zodiacLabel(),
+    text,
+    wallet: currentAccount || ""
+  };
+  TEMPLE.vows.unshift(rec);
+  templeSave();
+  tlog(`vow_route=${fid} fairy=${rec.fairy}`);
+});
+
+function showExportOverlay(title, text){
+  const wrap = document.createElement("div");
+  wrap.style.position = "fixed";
+  wrap.style.inset = "0";
+  wrap.style.background = "rgba(0,0,0,.65)";
+  wrap.style.zIndex = "99999";
+  wrap.style.display = "flex";
+  wrap.style.alignItems = "center";
+  wrap.style.justifyContent = "center";
+  wrap.innerHTML = `
+    <div style="width:min(860px,92vw); background:#0b0d10; border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div style="font-weight:900; font-size:14px;">${title}</div>
+        <button id="exClose" class="btn2">關閉</button>
+      </div>
+      <div class="small" style="margin-top:6px; opacity:.85">若環境阻擋下載，請改用複製/手動存檔。</div>
+      <textarea id="exTa" style="width:100%; height:320px; margin-top:10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f1318; color:#e7eaf0; padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${text.replace(/</g,"&lt;")}</textarea>
+      <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+        <button id="exCopy" class="btn">複製 JSON</button>
+        <button id="exDl" class="btn">下載 JSON</button>
+        <span class="small" id="exHint"></span>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  const exTa = wrap.querySelector("#exTa");
+  const exHint = wrap.querySelector("#exHint");
+  wrap.querySelector("#exClose").onclick = ()=> wrap.remove();
+  wrap.querySelector("#exCopy").onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(exTa.value);
+      exHint.textContent = "已複製";
+      log("log_copied");
+    }catch(e){
+      exHint.textContent = "複製失敗（請長按全選複製）";
+    }
+  };
+  wrap.querySelector("#exDl").onclick = ()=>{
+    try{
+      downloadText("wukong_temple_export.json", exTa.value);
+      exHint.textContent = "已嘗試下載";
+      log("export_download_try");
+    }catch(e){
+      exHint.textContent = "下載失敗（請用複製）";
+    }
+  };
+}
+
+btnExportTemple.addEventListener("click", ()=>{
   const payload = {
     boot_version: BOOT_VERSION,
-    exported_at: nowISO(),
-    temple: state.temple
+    exported_at: new Date().toISOString(),
+    zodiac13: TEMPLE.z13Name || "",
+    fairies: TEMPLE.fairies,
+    registries: TEMPLE.registries,
+    lamps: TEMPLE.lamps,
+    wishes: TEMPLE.wishes,
+    vows: TEMPLE.vows
   };
   const text = JSON.stringify(payload, null, 2);
-  const ok = downloadText(`wuzhishan_temple_${new Date().toISOString().slice(0,10)}.json`, text);
-  if(!ok){
-    await copyToClipboard(text);
-    alert("此環境可能阻擋下載；已改用剪貼簿備援。");
-  }
-};
+  showExportOverlay("外殿資料匯出（JSON）", text);
+  tlog("export_temple_json");
+  log("export_lamps_json");
+});
+
+btnResetTemple.addEventListener("click", ()=>{
+  const ok = confirm("確認重置外殿資料？（僅清本機 localStorage）");
+  if(!ok) return;
+  localStorage.removeItem(TEMPLE_KEY);
+  TEMPLE = templeLoad();
+  z13Name.value = TEMPLE.z13Name || "";
+  syncFairyInputs();
+  selectedSlot = null;
+  renderSlots();
+  wish.value = "";
+  vow.value = "";
+  tlog("temple_reset");
+  log("cfg_cleared");
+});
+
+/* init */
+z13Name.value = TEMPLE.z13Name || "";
+syncFairyInputs();
+renderSlots();
+regHint.textContent = `已載入外殿資料。生肖：${zodiacLabel()}`;
 
 /* ========== AI Customer Service (local rules, no internet) ========== */
 const aiInput = document.getElementById("aiInput");
