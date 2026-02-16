@@ -282,6 +282,18 @@
     .grid72{grid-template-columns: 1fr;}
   }
 
+
+/* v4.5.4 HOTFIX UI */
+.modal.hidden{display:none;}
+.modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:16px; z-index:99999;}
+.modal-card{width:min(720px, 100%); background:rgba(10,16,32,.95); border:1px solid rgba(255,255,255,.12); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.55); overflow:hidden;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; padding:14px; border-bottom:1px solid rgba(255,255,255,.08);}
+.modal-title{font-weight:900;}
+.modal-body{padding:14px;}
+.checklist .item{display:flex; align-items:flex-start; gap:10px; padding:10px; border:1px solid rgba(255,255,255,.08); border-radius:14px; margin:10px 0; background:rgba(255,255,255,.03);}
+.checklist .item input{margin-top:3px;}
+.safe-bottom{padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px) !important;}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
@@ -291,7 +303,8 @@
   <div class="topbar-inner">
     <div class="brand">
       <b>悟空宇宙神殿飛碟｜駕駛艙 + 下單桌 + AI客服</b>
-      <span id="bootLine">boot_version=v4.5.0-wuzhishan12345-temple</span>
+      <span id="bootLine">boot_version=v4.5.4-wuzhishan12345-temple-vitals-ai-smarthelp-counter</span>
+      <span id="visitLine" class="muted">到訪：--</span>
     </div>
 
     <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
@@ -2922,6 +2935,378 @@ function setIfEmpty(id, val) {
   </div>
   <div class="body" id="klineHelpBody"></div>
   <div class="actions" id="klineHelpActions"></div>
+</div>
+
+
+
+<script id="hotfix-v4-5-4">
+(() => {
+  const BOOT = "v4.5.4-wuzhishan12345-temple-vitals-ai-smarthelp-counter";
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const nowIso = () => new Date().toISOString();
+  const log = (msg) => { const box = $("#debugBox"); if (box){ box.textContent += `[${nowIso()}] ${msg}\n`; box.scrollTop = box.scrollHeight; } };
+
+  function bumpVisit() {
+    const k = "wuzhishan_visit_count";
+    const n = (parseInt(localStorage.getItem(k) || "0", 10) || 0) + 1;
+    localStorage.setItem(k, String(n));
+    const v = $("#visitLine");
+    if (v) v.textContent = `到訪：${n}`;
+  }
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    try{
+      const u = new SpeechSynthesisUtterance(text.replace(/\n+/g, ". "));
+      u.lang = "zh-TW";
+      u.rate = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch(e){ log("speech_failed"); }
+  }
+
+  function setAi(text, say=true) {
+    const box = $("#aiReply");
+    if (box) { box.textContent = text; box.dataset.last = nowIso(); }
+    if (say) speak(text);
+  }
+
+  const HELP = {
+    welcome:
+`歡迎來到五指山悟空財神殿（座標 12345）。
+你現在在 v${BOOT}。
+
+我不是啶一聲，我會把你從「沒有錢包」帶到「能點燈、能領發財金」。
+
+今天先把神殿基礎設施裝璜好：
+1) 生命跡象（呼吸 / 心跳 / 血壓）
+2) 三聖杯（領發財金前的儀式驗證）
+3) 點燈（108 KGEN）與說明
+4) 宇宙細包（錢包教學）與宇宙商店（商家紅利入口）
+
+你點任何按鍵，我都會在這裡即時解說。`,
+    wallet:
+`宇宙細包（錢包）從 0 開始：
+1) 安裝 MetaMask（或 Trust Wallet）
+2) 切到 BNB Chain（BSC / BEP20）
+3) 匯入 KGEN 代幣合約（你已部署的那個）
+4) 準備少量 BNB 當 gas
+
+完成後回來按「鏈上・心臟」→ 連線錢包。`,
+    shop:
+`宇宙商店是「現實商家 × KGEN 紅利」入口。
+服飾店、飯店、餐飲都能用 KGEN 當紅利回饋顧客。
+顧客回神殿點燈、還願、或進 KUFO 遊玩。
+這裡不限制你只能交易金融商品。`,
+    vitals:
+`生命跡象（呼吸 / 心跳 / 血壓）：
+- 目前先做 UI 模擬（讓神殿「有生命」）
+- 心臟合約上鏈後：改成讀取鏈上事件（心跳/發放/點燈）
+
+如果你希望「一進頁就有聲音」：手機瀏覽器可能會擋自動語音，
+你只要第一次輕觸畫面，我就能開始朗讀。`,
+    plaques:
+`三聖杯（擲筊）：
+領發財金前，先連續擲出三次「聖杯」才放行。
+本版先做前端儀式（本機存檔），後續接鏈上會把結果寫入心臟合約。`,
+    fortune:
+`發財金流程：
+1) 連錢包（宇宙細包）
+2) 三聖杯放行
+3) 由「心臟合約」發放到你的錢包
+
+目前這版先把流程與介面做對；等你給合約地址後，就能接真實發放。`,
+    lamp:
+`點光明燈（108 KGEN）：
+點燈費固定 108 KGEN。
+未連錢包：先教你連線與準備 KGEN。
+接上鏈後：點燈會走鏈上轉帳並留下紀錄。`,
+    fairies:
+`七仙女（許願 / 還願）節點：
+14520 大仙女（巧雲）天樞：風調雨順｜做空
+14866 二仙女（巧虹）天璇：家庭美滿｜做多
+16184 三仙女（巧芝）天璣：育子收驚｜做空
+16888 四仙女（巧仙）天權：事業運通｜做多
+17347 五仙女（巧蘭）天衡：長命百歲｜做空
+18056 六仙女（巧梅）闓陽：身體健康｜做多
+18459 七仙女（巧靈）瑤光：感情圓滿｜多單退
+
+選一位仙女，就是把願望寫入對應節點（本機 JSON → 之後可上鏈）。`,
+    progress:
+`工程進度：
+按「查看完工清單」會打開進度面板。
+你可以勾選每一項，進度條會更新。
+這樣你不用一個一個點名，我會自己先自檢。`
+  };
+
+  function smart(topic) {
+    setAi(HELP[topic] || HELP.welcome, true);
+    log("smart:" + topic);
+  }
+
+  // Inject mini panels if missing
+  function ensurePanels() {
+    const aiReply = $("#aiReply");
+    const hostCard = aiReply ? aiReply.closest(".card") : null;
+    if (!hostCard) return;
+
+    const insertAfter = (node) => hostCard.parentNode.insertBefore(node, hostCard.nextSibling);
+
+    if (!$("#vitalsMini")) {
+      const wrap = document.createElement("div");
+      wrap.className = "card";
+      wrap.style.marginTop = "12px";
+      wrap.innerHTML = `
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <div style="font-weight:900;">生命跡象</div>
+          <button class="btn ghost" id="btnVitalsMini">解說</button>
+        </div>
+        <div id="vitalsMini" class="row" style="gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <div class="pill" style="padding:10px 12px;">呼吸：<b id="vBreath">穩定</b></div>
+          <div class="pill" style="padding:10px 12px;">心跳：<b id="vHeart">每小時</b></div>
+          <div class="pill" style="padding:10px 12px;">血壓：<b id="vBP">120/80</b></div>
+        </div>
+        <div class="small muted" style="margin-top:8px;">提示：若沒有立刻出聲，請先輕觸一次畫面解鎖語音。</div>
+      `;
+      insertAfter(wrap);
+      $("#btnVitalsMini").addEventListener("click", () => smart("vitals"));
+    }
+
+    if (!$("#plaquesStatus")) {
+      const wrap = document.createElement("div");
+      wrap.className = "card";
+      wrap.style.marginTop = "12px";
+      wrap.innerHTML = `
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <div style="font-weight:900;">三聖杯（領發財金前）</div>
+          <button class="btn ghost" id="btnPlaquesHelp">解說</button>
+        </div>
+        <div class="small muted" style="margin-top:6px;">連續三次聖杯才放行（本機儀式版）。</div>
+        <div class="row" style="gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn btnPlaque">擲筊 1</button>
+          <button class="btn btnPlaque">擲筊 2</button>
+          <button class="btn btnPlaque">擲筊 3</button>
+          <button class="btn ghost" id="btnResetPlaques">重置</button>
+        </div>
+        <div id="plaquesStatus" class="pill" style="margin-top:10px; padding:10px 12px;">三聖杯：0/3</div>
+        <div class="row" style="gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn" id="btnClaimFortune" disabled>放行後領發財金</button>
+          <button class="btn ghost" id="btnLamp108">點燈 108 KGEN</button>
+        </div>
+      `;
+      hostCard.parentNode.insertBefore(wrap, hostCard.nextSibling);
+      $("#btnPlaquesHelp").addEventListener("click", () => smart("plaques"));
+      $("#btnLamp108").addEventListener("click", () => smart("lamp"));
+    }
+
+    if (!$("#btnGoWalletX")) {
+      const wrap = document.createElement("div");
+      wrap.className = "card";
+      wrap.style.marginTop = "12px";
+      wrap.innerHTML = `
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <div style="font-weight:900;">宇宙細包 & 宇宙商店</div>
+          <button class="btn ghost" id="btnShopHelp">解說</button>
+        </div>
+        <div class="row" style="gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn" id="btnGoWalletX">宇宙細包（錢包教學）</button>
+          <button class="btn" id="btnGoShopX">宇宙商店（商家入口）</button>
+          <button class="btn ghost" id="btnFortune">發財金流程</button>
+        </div>
+        <div class="small muted" style="margin-top:8px;">商家可用 KGEN 做紅利回饋；顧客回神殿點燈與互動。</div>
+      `;
+      hostCard.parentNode.insertBefore(wrap, hostCard.nextSibling);
+      $("#btnShopHelp").addEventListener("click", () => smart("shop"));
+      $("#btnGoWalletX").addEventListener("click", () => smart("wallet"));
+      $("#btnGoShopX").addEventListener("click", () => smart("shop"));
+      $("#btnFortune").addEventListener("click", () => smart("fortune"));
+    }
+  }
+
+  function initPlaquesLogic() {
+    const key = "wuzhishan_plaques_state";
+    const getS = () => { try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; } };
+    const setS = (s) => localStorage.setItem(key, JSON.stringify(s));
+    let s = getS(); if (typeof s.streak !== "number") s.streak = 0; setS(s);
+
+    const render = () => {
+      const s2 = getS();
+      const t = $("#plaquesStatus");
+      if (t) t.textContent = `三聖杯：${s2.streak}/3（${s2.last || "尚未擲筊"}）`;
+      const claim = $("#btnClaimFortune");
+      if (claim) claim.disabled = s2.streak < 3;
+    };
+    render();
+
+    $$(".btnPlaque").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const holy = Math.random() > 0.5;
+        const s3 = getS();
+        if (holy) s3.streak += 1; else s3.streak = 0;
+        s3.last = holy ? "聖杯" : "笑杯";
+        setS(s3);
+        render();
+        setAi(`三聖杯結果：${s3.last}\n\n${holy ? "再來一次。連續三次聖杯就放行。" : "別急，重新來。心要定。"}\n`, true);
+      });
+    });
+
+    const reset = $("#btnResetPlaques");
+    if (reset) reset.addEventListener("click", () => { setS({streak:0,last:null}); render(); smart("plaques"); });
+
+    const claim = $("#btnClaimFortune");
+    if (claim) claim.addEventListener("click", () => {
+      const s4 = getS();
+      if (s4.streak < 3) return smart("plaques");
+      smart("fortune");
+    });
+  }
+
+  // checklist modal
+  const CHECKS = [
+    {key:"temple_nav", label:"每個按鍵都有客服解說"},
+    {key:"vitals", label:"呼吸/心跳/血壓顯示"},
+    {key:"plaques", label:"三聖杯放行流程"},
+    {key:"lamp", label:"點燈 108 KGEN 說明"},
+    {key:"fortune", label:"發財金流程說明"},
+    {key:"wallet", label:"宇宙細包錢包教學"},
+    {key:"shop", label:"宇宙商店入口說明"},
+    {key:"counter", label:"到訪人數顯示"},
+    {key:"progress", label:"工程進度面板可用"}
+  ];
+  const progKey = "wuzhishan_build_progress_v454";
+  const loadP = () => { try { return JSON.parse(localStorage.getItem(progKey) || "{}") || {}; } catch { return {}; } };
+  const saveP = (p) => localStorage.setItem(progKey, JSON.stringify(p));
+  const pct = (p) => Math.round(Object.values(p).filter(Boolean).length * 100 / CHECKS.length);
+
+  function updateBar() {
+    const p = loadP();
+    const bar = $("#buildProgress");
+    if (bar) bar.value = pct(p);
+    const lab = $("#buildProgressLabel");
+    if (lab) lab.textContent = `${pct(p)}%`;
+  }
+  function renderChecklist() {
+    const p = loadP();
+    const wrap = $("#buildChecklistList");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    for (const c of CHECKS) {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <input type="checkbox" ${p[c.key] ? "checked":""} data-k="${c.key}">
+        <div>
+          <div style="font-weight:800;">${c.label}</div>
+          <div class="small muted">${c.key}</div>
+        </div>
+      `;
+      wrap.appendChild(row);
+    }
+    wrap.onchange = (e) => {
+      const k = e.target && e.target.dataset ? e.target.dataset.k : null;
+      if (!k) return;
+      const p2 = loadP();
+      p2[k] = !!e.target.checked;
+      saveP(p2);
+      updateBar();
+    };
+  }
+  function openChecklist() {
+    const m = $("#buildChecklistModal");
+    if (!m) return;
+    m.classList.remove("hidden");
+    renderChecklist();
+    updateBar();
+    smart("progress");
+  }
+  function closeChecklist() {
+    const m = $("#buildChecklistModal");
+    if (!m) return;
+    m.classList.add("hidden");
+  }
+
+  function bindEcho() {
+    // existing nav buttons if any
+    ["btnGoWallet","btnGoShop","btnShowBuildChecklist"].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (id==="btnGoWallet") el.addEventListener("click", () => smart("wallet"));
+      if (id==="btnGoShop") el.addEventListener("click", () => smart("shop"));
+      if (id==="btnShowBuildChecklist") el.addEventListener("click", openChecklist);
+    });
+
+    // fallback
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const t = (b.textContent || "").trim();
+      if (t.includes("宇宙細包")) return smart("wallet");
+      if (t.includes("宇宙商店")) return smart("shop");
+      if (t.includes("點燈")) return smart("lamp");
+      if (t.includes("發財金")) return smart("fortune");
+      if (t.includes("七仙女")) return smart("fairies");
+      if (t.includes("生命") || t.includes("呼吸") || t.includes("心跳") || t.includes("血壓")) return smart("vitals");
+      if (t.includes("完工") || t.includes("進度")) return smart("progress");
+    });
+  }
+
+  function applySafeBottom() {
+    const main = $("#main") || document.body;
+    if (main) main.classList.add("safe-bottom");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    bumpVisit();
+    applySafeBottom();
+    ensurePanels();
+    initPlaquesLogic();
+    bindEcho();
+
+    const btn = $("#btnShowBuildChecklist");
+    if (btn) btn.addEventListener("click", openChecklist);
+    const close = $("#btnCloseBuildChecklist");
+    if (close) close.addEventListener("click", closeChecklist);
+    const modal = $("#buildChecklistModal");
+    if (modal) modal.addEventListener("click", (e) => { if (e.target === modal) closeChecklist(); });
+
+    const markAll = $("#btnMarkAllDone");
+    if (markAll) markAll.addEventListener("click", () => {
+      const p = {}; CHECKS.forEach(c => p[c.key]=true);
+      saveP(p); renderChecklist(); updateBar();
+      setAi("已全部標記完成（本機）。等你給我鏈上地址後，我會改成讀鏈上狀態自動更新。", true);
+    });
+    const reset = $("#btnResetProgress");
+    if (reset) reset.addEventListener("click", () => { saveP({}); renderChecklist(); updateBar(); smart("progress"); });
+
+    updateBar();
+
+    // greet: try to speak; may need user gesture on mobile
+    setTimeout(() => smart("welcome"), 350);
+
+    log("boot:" + BOOT);
+    log("speechSynthesis:" + ("speechSynthesis" in window));
+    log("ethereum_injected_now:" + (typeof window.ethereum !== "undefined"));
+  });
+})();
+</script>
+
+<!-- Build Checklist Modal -->
+<div id="buildChecklistModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="完工清單">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">五指山悟空財神殿｜完工清單</div>
+      <button class="btn ghost" id="btnCloseBuildChecklist">關閉</button>
+    </div>
+    <div class="modal-body">
+      <div class="small muted">此清單為本機紀錄（localStorage）。未來接後端/鏈上後可改為全域。</div>
+      <div id="buildChecklistList" class="checklist"></div>
+      <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
+        <button class="btn" id="btnMarkAllDone">全部標記完成</button>
+        <button class="btn ghost" id="btnResetProgress">重置進度</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 </body>
