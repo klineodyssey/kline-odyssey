@@ -265,7 +265,7 @@
   <div class="topbar-inner">
     <div class="brand">
       <b>悟空宇宙神殿飛碟｜駕駛艙 + 下單桌 + AI客服</b>
-      <span id="bootLine">boot_version=v4.3-ufo-fullpack</span>
+      <span id="bootLine">boot_version=v4.5.0-wuzhishan12345-temple</span>
     </div>
 
     <a class="pill" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
@@ -273,6 +273,37 @@
     </a>
   </div>
 </div>
+<!-- =========================
+WUZHISHAN 12345 · BUILD PROGRESS
+========================= -->
+<section id="buildProgress" class="card" style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:16px; background:#fff;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:900; font-size:16px;">五指山悟空財神殿 · 座標 12345</div>
+      <div style="opacity:.75; font-weight:700; font-size:12px;">建築狀態：先完成神殿基礎設施（許願／點燈／發財金／客服／錢包引導）→ 再接鏈上心臟與無人銀行 → 最後接交易室下單結算。</div>
+    </div>
+    <button id="btnShowBuildChecklist" class="btn" style="padding:10px 12px; border-radius:12px; border:1px solid #111; background:#fff; font-weight:900;">查看完工清單</button>
+  </div>
+
+  <div style="margin-top:10px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; font-weight:800; font-size:12px;">
+      <span>完工進度</span>
+      <span id="buildPctText">0%</span>
+    </div>
+    <div style="height:14px; border-radius:999px; border:1px solid #111; overflow:hidden; background:#f6f6f6; margin-top:6px;">
+      <div id="buildPctBar" style="height:100%; width:0%; background:#111;"></div>
+    </div>
+  </div>
+
+  <div id="buildChecklist" style="display:none; margin-top:12px; padding-top:10px; border-top:1px dashed #111;">
+    <div style="font-weight:900; margin-bottom:8px;">基礎設施清單（UI 已完成／鏈上待接）</div>
+    <div id="buildChecklistRows" style="display:grid; grid-template-columns:1fr; gap:6px;"></div>
+    <div style="margin-top:10px; font-size:12px; opacity:.8; font-weight:700;">
+      註：本頁會自動自檢（瀏覽器能力／錢包注入／語音／鏡頭）。偵測到缺件會在客服區提醒使用者怎麼補齊。
+    </div>
+  </div>
+</section>
+
 
 <div class="grid">
 
@@ -655,7 +686,7 @@
    - No external deps
 ========================= */
 
-const BOOT_VERSION = "v4.4.1-templefull-zodiac72-fairies7-fix";
+const BOOT_VERSION = "v4.5.0-wuzhishan12345-temple";
 const LAMP_FEE_KGEN = 108; // 光明燈香油錢（質量）
 
 // ---- 七仙女（固定星座座標/職司/多空）預設表 ----
@@ -1774,7 +1805,7 @@ log("ready");
 /* ===============================
    Chain Bridge (KGEN / Heart / KUFO)
    =============================== */
-const BOOT_VERSION = "v4.4.3-temple-chain-heart-lamp108";
+const BOOT_VERSION = "v4.5.0-wuzhishan12345-temple";
 try{ if(typeof log === "function"){ log("boot_version=" + BOOT_VERSION); } }catch(_){}
 
 const CHAIN_CFG_KEY = "wukong_chain_cfg_v1";
@@ -2058,5 +2089,139 @@ async function heartFund(){
   setStatus(envSummary());
 })();
 </script>
+
+<script>
+/* =========================
+   WUZHISHAN BUILD PROGRESS · v4.5.0-wuzhishan12345-temple
+========================= */
+(function() {
+  const BUILD_ITEMS = [
+    { key:"selfcheck",  name:"自我檢測（語音/錢包/鏡頭）", done:true },
+    { key:"walletGuide",name:"錢包引導（從沒錢包到可連線）", done:true },
+    { key:"fortuneUI",  name:"發財金介面（可操作/可解說）", done:true },
+    { key:"lampUI",     name:"光明燈介面（108 KGEN）", done:true },
+    { key:"zodiac72",   name:"13 生肖登記（每生肖 72 名額）", done:true },
+    { key:"fairies7",   name:"七仙女許願/還願（14520~18459）", done:true },
+    { key:"shopUI",     name:"宇宙商店（商家上架/金流說明）", done:true },
+    { key:"cellUI",     name:"宇宙細包（呼吸/心跳/生命入口）", done:true },
+    { key:"ufoUI",      name:"飛碟駕駛艙（玩家介面）", done:true },
+    { key:"chainHeart", name:"鏈上心臟合約接線（發放/還願）", done:false },
+    { key:"chainKUFO",  name:"KUFO 無人銀行接線（收稅/分流）", done:false },
+    { key:"chainBrain", name:"悟空大腦募資合約接線（分紅/投資）", done:false },
+    { key:"orderdesk",  name:"交易室鏈上下單結算（T+2 / ATR14 風控）", done:false },
+  ];
+
+  function calcPct() {
+    const done = BUILD_ITEMS.filter(x=>x.done).length;
+    const total = BUILD_ITEMS.length;
+    return Math.round((done/Math.max(1,total))*100);
+  }
+
+  function renderChecklist() {
+    const box = document.getElementById("buildChecklistRows");
+    if (!box) return;
+    box.innerHTML = "";
+    BUILD_ITEMS.forEach(it => {
+      const row = document.createElement("div");
+      row.style.display="flex";
+      row.style.alignItems="center";
+      row.style.justifyContent="space-between";
+      row.style.gap="10px";
+      row.style.padding="8px 10px";
+      row.style.border="1px solid #111";
+      row.style.borderRadius="12px";
+      row.style.background="#fff";
+      const left = document.createElement("div");
+      left.style.fontWeight="800";
+      left.style.fontSize="13px";
+      left.textContent = it.name;
+      const right = document.createElement("div");
+      right.style.fontWeight="900";
+      right.style.fontSize="12px";
+      right.style.padding="6px 10px";
+      right.style.border="1px solid #111";
+      right.style.borderRadius="999px";
+      right.style.background= it.done ? "#111" : "#fff";
+      right.style.color= it.done ? "#fff" : "#111";
+      right.textContent = it.done ? "已完成" : "待接鏈";
+      row.appendChild(left);
+      row.appendChild(right);
+      box.appendChild(row);
+    });
+  }
+
+  function renderPct() {
+    const pct = calcPct();
+    const t = document.getElementById("buildPctText");
+    const b = document.getElementById("buildPctBar");
+    if (t) t.textContent = pct + "%";
+    if (b) b.style.width = pct + "%";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btnShowBuildChecklist");
+    const panel = document.getElementById("buildChecklist");
+    if (btn && panel) {
+      btn.addEventListener("click", () => {
+        const open = panel.style.display !== "none";
+        panel.style.display = open ? "none" : "block";
+        btn.textContent = open ? "查看完工清單" : "收起完工清單";
+      });
+    }
+    renderChecklist();
+    renderPct();
+  });
+})();
+
+/* =========================
+   AI VIDEO SERVICE (LOCAL PREVIEW)
+========================= */
+(function(){
+  let stream = null;
+  async function startCam(){
+    const v = document.getElementById("camPreview");
+    if (!v) return;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+      v.srcObject = stream;
+      if (window.__klog) window.__klog("cam_started");
+    } catch (e) {
+      if (window.__klog) window.__klog("cam_error " + (e && e.name ? e.name : "unknown"));
+      alert("鏡頭無法啟用：請確認瀏覽器權限或裝置是否支援。");
+    }
+  }
+  function stopCam(){
+    if (stream) {
+      stream.getTracks().forEach(t=>t.stop());
+      stream = null;
+      if (window.__klog) window.__klog("cam_stopped");
+    }
+    const v = document.getElementById("camPreview");
+    if (v) v.srcObject = null;
+  }
+  document.addEventListener("DOMContentLoaded", ()=>{
+    const a=document.getElementById("btnCamStart");
+    const b=document.getElementById("btnCamStop");
+    if (a) a.addEventListener("click", startCam);
+    if (b) b.addEventListener("click", stopCam);
+  });
+})();
+</script>
+
 </body>
 </html>
+
+
+<section id="aiVideoService" class="card" style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:16px; background:#fff;">
+  <div style="font-weight:900; font-size:16px;">AI 客服影像＋語音（本地預覽）</div>
+  <div style="opacity:.75; font-weight:700; font-size:12px; margin-top:4px;">
+    影像為本地鏡頭預覽（不會上傳）；AI 回覆以文字＋語音。若裝置不支援鏡頭或權限被拒，會自動降級成純文字／語音客服。
+  </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+    <button id="btnCamStart" class="btn" style="padding:10px 12px; border-radius:12px; border:1px solid #111; background:#fff; font-weight:900;">開啟鏡頭</button>
+    <button id="btnCamStop" class="btn" style="padding:10px 12px; border-radius:12px; border:1px solid #111; background:#fff; font-weight:900;">關閉鏡頭</button>
+  </div>
+  <div style="margin-top:10px; border-radius:14px; overflow:hidden; border:1px solid #111; background:#000; max-width:520px;">
+    <video id="camPreview" playsinline autoplay muted style="width:100%; height:auto; display:block;"></video>
+  </div>
+</section>
