@@ -392,6 +392,31 @@ WUZHISHAN 12345 · BUILD PROGRESS
           <button class="btn" id="btnFortune">求籤</button>
         </div>
         <div class="hint">以上為 UI 事件回路測試（每顆按鍵必有反應 + log）。</div>
+        <div style="margin-top:12px; padding:12px; border:1px solid rgba(255,255,255,.12); border-radius:16px; background:rgba(0,0,0,.18);">
+          <div style="font-weight:900; margin-bottom:8px;">宇宙生命徵象即時顯示（本機）</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="padding:10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+              <div style="opacity:.85; font-weight:800;">心跳</div>
+              <div style="font-size:22px; font-weight:1000;"><span id="vitalHeart">--</span> bpm</div>
+            </div>
+            <div style="padding:10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+              <div style="opacity:.85; font-weight:800;">呼吸</div>
+              <div style="font-size:22px; font-weight:1000;"><span id="vitalBreath">--</span> /min</div>
+            </div>
+            <div style="padding:10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+              <div style="opacity:.85; font-weight:800;">血壓</div>
+              <div style="font-size:22px; font-weight:1000;"><span id="vitalPressure">--</span></div>
+            </div>
+            <div style="padding:10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+              <div style="opacity:.85; font-weight:800;">狀態</div>
+              <div style="font-size:14px; font-weight:900;"><span id="vitalStatus">尚未啟動</span></div>
+            </div>
+          </div>
+          <div style="margin-top:10px; font-size:12px; opacity:.85;">
+            提醒：MetaMask WebView 常見 speechSynthesis=false，但 Chrome 可能可用 TTS；本神殿會自動降級到提示音與文字客服。
+          </div>
+        </div>
+
 
         <div class="sep"></div>
 
@@ -521,7 +546,7 @@ WUZHISHAN 12345 · BUILD PROGRESS
 
           <div class="mini">
             <h3>光明燈費用（KGEN）</h3>
-            <input id="lampFee" type="number" value="5" min="0" step="1" />
+            <input id="lampFee" class="input" value="108" min="0" step="1" />
             <div class="small">示意：點燈費用（可用於觀光/留念收費）。</div>
           </div>
         </div>
@@ -582,6 +607,14 @@ WUZHISHAN 12345 · BUILD PROGRESS
             <div class="mini" style="margin-top:10px">
               <h3>七仙女座標（固定）</h3>
               <div id="fairyMeta" class="small"></div>
+        <div style="margin-top:12px; padding:12px; border:1px solid rgba(255,255,255,.12); border-radius:16px; background:rgba(0,0,0,.18);">
+          <div style="font-weight:1000; margin-bottom:8px;">七仙女住址・職司・交易象徵（固定）</div>
+          <div id="fairyIntroList" style="display:grid; grid-template-columns:1fr; gap:10px;"></div>
+          <div style="margin-top:10px; font-size:12px; opacity:.85;">
+            你可以把七仙女當作「許願策略面板」：做多/做空/多單退，是象徵市場節奏，不是投資建議。
+          </div>
+        </div>
+
             </div>
 
             <div class="row" style="margin-top:10px">
@@ -674,6 +707,8 @@ WUZHISHAN 12345 · BUILD PROGRESS
     <button class="btn" id="btnModeCockpit">回駕駛艙</button>
     <button class="btn" id="btnModeOrder">回下單桌</button>
     <button class="btn2" id="btnModeTemple">回外殿</button>
+    <button class="btn2" id="btnGoWallet">宇宙細包</button>
+    <button class="btn2" id="btnGoShop">宇宙商店</button>
     <button class="btn2" id="btnClearLog">清空 Log</button>
   </div>
 </div>
@@ -686,7 +721,7 @@ WUZHISHAN 12345 · BUILD PROGRESS
    - No external deps
 ========================= */
 
-const BOOT_VERSION = "v4.5.0-wuzhishan12345-temple";
+const BOOT_VERSION = "v4.5.1-wuzhishan12345-temple-vitals-ai";
 const LAMP_FEE_KGEN = 108; // 光明燈香油錢（質量）
 
 // ---- 七仙女（固定星座座標/職司/多空）預設表 ----
@@ -1805,7 +1840,7 @@ log("ready");
 /* ===============================
    Chain Bridge (KGEN / Heart / KUFO)
    =============================== */
-const BOOT_VERSION = "v4.5.0-wuzhishan12345-temple";
+const BOOT_VERSION = "v4.5.1-wuzhishan12345-temple-vitals-ai";
 try{ if(typeof log === "function"){ log("boot_version=" + BOOT_VERSION); } }catch(_){}
 
 const CHAIN_CFG_KEY = "wukong_chain_cfg_v1";
@@ -2091,137 +2126,652 @@ async function heartFund(){
 </script>
 
 <script>
-/* =========================
-   WUZHISHAN BUILD PROGRESS · v4.5.0-wuzhishan12345-temple
-========================= */
-(function() {
-  const BUILD_ITEMS = [
-    { key:"selfcheck",  name:"自我檢測（語音/錢包/鏡頭）", done:true },
-    { key:"walletGuide",name:"錢包引導（從沒錢包到可連線）", done:true },
-    { key:"fortuneUI",  name:"發財金介面（可操作/可解說）", done:true },
-    { key:"lampUI",     name:"光明燈介面（108 KGEN）", done:true },
-    { key:"zodiac72",   name:"13 生肖登記（每生肖 72 名額）", done:true },
-    { key:"fairies7",   name:"七仙女許願/還願（14520~18459）", done:true },
-    { key:"shopUI",     name:"宇宙商店（商家上架/金流說明）", done:true },
-    { key:"cellUI",     name:"宇宙細包（呼吸/心跳/生命入口）", done:true },
-    { key:"ufoUI",      name:"飛碟駕駛艙（玩家介面）", done:true },
-    { key:"chainHeart", name:"鏈上心臟合約接線（發放/還願）", done:false },
-    { key:"chainKUFO",  name:"KUFO 無人銀行接線（收稅/分流）", done:false },
-    { key:"chainBrain", name:"悟空大腦募資合約接線（分紅/投資）", done:false },
-    { key:"orderdesk",  name:"交易室鏈上下單結算（T+2 / ATR14 風控）", done:false },
+(() => {
+  // =========================
+  // WUZHISHAN 12345 · TEMPLE CORE
+  // Boot: v4.5.1
+  // =========================
+
+  const BOOT = "v4.5.1-wuzhishan12345-temple-vitals-ai";
+
+  // ---- Default on-chain addresses (can be overwritten in UI inputs)
+  const DEFAULTS = {
+    KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    HEART: "", // set after deploy
+    KUFO: "0xef83804c264B47378FCf150086943B53fB90A90b",
+    TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+    BANK: "0xfc522243e988a837700CaD600D6f030f5932681F",
+    BRAIN: "" // set after deploy
+  };
+
+  // ---- ABIs (minimal fragments)
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function symbol() view returns (string)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function transfer(address to, uint256 amount) returns (bool)"
   ];
 
-  function calcPct() {
-    const done = BUILD_ITEMS.filter(x=>x.done).length;
-    const total = BUILD_ITEMS.length;
-    return Math.round((done/Math.max(1,total))*100);
+  const HEART_ABI = [
+    "function igniteAndClaim() returns (bool)",
+    "function heartbeatClaim() returns (bool)",
+    "function fortuneClaim(uint256 amount) returns (bool)",
+    "function canIgnite(address user) view returns (bool ok, string reason)",
+    "function canHeartbeat(address user) view returns (bool ok, string reason)",
+    "function canFortune(address user, uint256 amount) view returns (bool ok, string reason)",
+    "function faucetBalance() view returns (uint256)",
+    "event FortuneClaim(address indexed user, uint256 amount)",
+    "event HeartbeatClaim(address indexed user, uint256 amount)",
+    "event Ignite(address indexed user, uint256 amount)"
+  ];
+
+  // ---- Fairies fixed data
+  const FAIRIES = [
+    { id: "f1", coord: 14520, title: "大仙女", name: "巧雲", star: "天樞", duty: "風調雨順", side: "做空" },
+    { id: "f2", coord: 14866, title: "二仙女", name: "巧虹", star: "天璇", duty: "家庭美滿", side: "做多" },
+    { id: "f3", coord: 16184, title: "三仙女", name: "巧芝", star: "天璣", duty: "育子收驚", side: "做空" },
+    { id: "f4", coord: 16888, title: "四仙女", name: "巧仙", star: "天權", duty: "事業運通", side: "做多" },
+    { id: "f5", coord: 17347, title: "五仙女", name: "巧蘭", star: "天衡", duty: "長命百歲", side: "做空" },
+    { id: "f6", coord: 18056, title: "六仙女", name: "巧梅", star: "闓陽", duty: "身體健康", side: "做多" },
+    { id: "f7", coord: 18459, title: "七仙女", name: "巧靈", star: "瑤光", duty: "感情圓滿", side: "多單退" }
+  ];
+
+  // ---- Helpers
+  const $ = (id) => document.getElementById(id);
+  const now = () => new Date().toLocaleString();
+  const lsGet = (k, d=null) => { try { const v = localStorage.getItem(k); return v==null? d : JSON.parse(v);} catch { return d; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+  function log(msg, where="templeLog") {
+    const el = $(where);
+    if (!el) return;
+    const line = `[${now()}] ${msg}\n`;
+    el.value = (el.value || "") + line;
+    el.scrollTop = el.scrollHeight;
   }
 
-  function renderChecklist() {
-    const box = document.getElementById("buildChecklistRows");
+  function toast(msg) {
+    log(msg);
+    const s = $("vitalStatus");
+    if (s) s.textContent = msg;
+    speak(msg);
+  }
+
+  function speak(text) {
+    // graceful degradation: if speech is not available, do nothing (text + log still works)
+    try {
+      if (!("speechSynthesis" in window)) return;
+      const u = new SpeechSynthesisUtterance(String(text).slice(0, 220));
+      u.rate = 1.02;
+      u.pitch = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch {}
+  }
+
+  function setIfEmpty(id, val) {
+    const el = $(id);
+    if (!el) return;
+    if (!el.value || !String(el.value).trim()) el.value = val;
+  }
+
+  // ---- Ethers / Wallet
+  let provider = null;
+  let signer = null;
+  let walletAddr = null;
+  let chainIdHex = null;
+
+  async function connectWallet() {
+    if (!window.ethereum) {
+      toast("未偵測到錢包。請先安裝 MetaMask（或使用支援錢包的瀏覽器）再回來。");
+      return null;
+    }
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    walletAddr = await signer.getAddress();
+    const net = await provider.getNetwork();
+    chainIdHex = "0x" + Number(net.chainId).toString(16);
+    $("walletAddr").textContent = walletAddr;
+    if ($("walletAddr2")) $("walletAddr2").textContent = walletAddr;
+    $("walletChain").textContent = `${net.chainId}`;
+    if ($("walletChain2")) $("walletChain2").textContent = `${net.chainId}`;
+    toast("錢包已連線。你現在有宇宙身份了。");
+
+    await refreshBalances();
+    return walletAddr;
+  }
+
+  function readCfg() {
+    return {
+      KGEN: ($("cfgKGEN")?.value || DEFAULTS.KGEN).trim(),
+      HEART: ($("cfgHeart")?.value || DEFAULTS.HEART).trim(),
+      KUFO: ($("cfgKUFO")?.value || DEFAULTS.KUFO).trim(),
+      TREASURY: ($("cfgTreasury")?.value || DEFAULTS.TREASURY).trim(),
+      BANK: ($("cfgBank")?.value || DEFAULTS.BANK).trim(),
+      BRAIN: ($("cfgBrain")?.value || DEFAULTS.BRAIN).trim(),
+    };
+  }
+
+  async function refreshBalances() {
+    const cfg = readCfg();
+    if (!provider || !walletAddr) return;
+    try {
+      const kgen = new ethers.Contract(cfg.KGEN, ERC20_ABI, provider);
+      const [sym, dec, bal] = await Promise.all([kgen.symbol(), kgen.decimals(), kgen.balanceOf(walletAddr)]);
+      const pretty = Number(ethers.formatUnits(bal, dec)).toLocaleString(undefined, { maximumFractionDigits: 6 });
+      $("kgenBal").textContent = `${pretty} ${sym}`;
+      if ($("kgenBal2")) $("kgenBal2").textContent = `${pretty} ${sym}`;
+    } catch (e) {
+      log("讀取 KGEN 餘額失敗：" + (e?.message || e), "templeLog");
+    }
+  }
+
+  // ---- Vitals (local simulation; later can be driven by on-chain events)
+  const vitals = {
+    heart: 72,
+    breath: 18,
+    pressureSys: 120,
+    pressureDia: 80
+  };
+  let vitalsTimer = null;
+
+  function renderVitals(statusText=null) {
+    if ($("vitalHeart")) $("vitalHeart").textContent = String(vitals.heart);
+    if ($("vitalBreath")) $("vitalBreath").textContent = String(vitals.breath);
+    if ($("vitalPressure")) $("vitalPressure").textContent = `${vitals.pressureSys}/${vitals.pressureDia}`;
+    if (statusText && $("vitalStatus")) $("vitalStatus").textContent = statusText;
+  }
+
+  function startVitals() {
+    if (vitalsTimer) return;
+    vitalsTimer = setInterval(() => {
+      // small random walk, keep in safe ranges
+      vitals.heart = Math.max(52, Math.min(130, vitals.heart + (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.7 ? 1 : 2)));
+      vitals.breath = Math.max(10, Math.min(30, vitals.breath + (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.8 ? 0 : 1)));
+      vitals.pressureSys = Math.max(90, Math.min(160, vitals.pressureSys + (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.8 ? 0 : 1)));
+      vitals.pressureDia = Math.max(55, Math.min(100, vitals.pressureDia + (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.8 ? 0 : 1)));
+      renderVitals();
+    }, 1400);
+    renderVitals("生命徵象啟動中");
+  }
+
+  function bumpVital(kind) {
+    startVitals();
+    if (kind === "heart") vitals.heart = Math.min(150, vitals.heart + 3);
+    if (kind === "breath") vitals.breath = Math.min(40, vitals.breath + 1);
+    if (kind === "pressure") vitals.pressureSys = Math.min(170, vitals.pressureSys + 2);
+    renderVitals(`已更新：${kind}`);
+  }
+
+  // ---- Holy Cups gate (3 wins required)
+  function getCupState() {
+    return lsGet("wuzhishan_cups", { wins: 0, last: null });
+  }
+  function setCupState(s) {
+    lsSet("wuzhishan_cups", s);
+    $("cupWins").textContent = String(s.wins || 0);
+  }
+  function rollCups() {
+    const r = Math.random();
+    // 0.0-0.15: laugh, 0.15-0.55: no, 0.55-1.0: yes
+    if (r < 0.15) return "笑筊";
+    if (r < 0.55) return "陰筊";
+    return "聖筊";
+  }
+
+  function updateFortuneButton() {
+    const s = getCupState();
+    const ok = (s.wins || 0) >= 3;
+    if ($("btnFortune")) $("btnFortune").disabled = !ok;
+    if ($("fortuneGate")) $("fortuneGate").textContent = ok ? "通過（三聖筊已達成）" : "未通過（需要三聖筊）";
+  }
+
+  // ---- Fortune (Heart contract)
+  async function heartContract(signerOrProvider) {
+    const cfg = readCfg();
+    if (!cfg.HEART || cfg.HEART.length < 10) {
+      toast("尚未填入心臟合約地址（cfgHeart）。部署後貼上地址即可啟動上鏈。");
+      return null;
+    }
+    return new ethers.Contract(cfg.HEART, HEART_ABI, signerOrProvider);
+  }
+
+  async function claimFortune() {
+    const cfg = readCfg();
+    const amountStr = ($("fortuneAmount")?.value || "0").trim();
+    const amount = Number(amountStr);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast("請輸入要領取的發財金數量（KGEN）。");
+      return;
+    }
+    if (!walletAddr) await connectWallet();
+    if (!walletAddr) return;
+
+    const heart = await heartContract(signer);
+    if (!heart) return;
+
+    // pre-check
+    try {
+      const pre = await heart.canFortune(walletAddr, ethers.parseUnits(String(amount), 18));
+      if (pre && pre.length >= 2 && pre[0] === false) {
+        toast("暫不可領：" + pre[1]);
+        return;
+      }
+    } catch (e) {
+      log("canFortune 檢查失敗（仍嘗試送出）：" + (e?.message || e));
+    }
+
+    toast("發財金領取上鏈中…（請在錢包確認）");
+    try {
+      const tx = await heart.fortuneClaim(ethers.parseUnits(String(amount), 18));
+      log("TX sent: " + tx.hash);
+      const rc = await tx.wait();
+      log("已確認：" + rc.hash);
+      toast("發財金已發放。記得還願，讓血流循環。");
+      await refreshBalances();
+    } catch (e) {
+      toast("領取失敗：" + (e?.shortMessage || e?.message || e));
+    }
+  }
+
+  // ---- Lamp / Merit (On-chain mode = KGEN transfer to treasury; Off-chain vow note stored locally)
+  async function payLamp() {
+    const fee = Number(($("lampFee")?.value || "108").trim());
+    if (!Number.isFinite(fee) || fee <= 0) { toast("光明燈費用需為正數。"); return; }
+
+    if (!walletAddr) await connectWallet();
+    if (!walletAddr) return;
+
+    const cfg = readCfg();
+    const kgen = new ethers.Contract(cfg.KGEN, ERC20_ABI, signer);
+
+    toast("點燈付款上鏈中…（請在錢包確認）");
+    try {
+      const tx = await kgen.transfer(cfg.TREASURY, ethers.parseUnits(String(fee), 18));
+      log("TX sent: " + tx.hash);
+      await tx.wait();
+      toast(`點燈成功：已支付 ${fee} KGEN。`);
+      await refreshBalances();
+    } catch (e) {
+      toast("點燈付款失敗：" + (e?.shortMessage || e?.message || e));
+    }
+  }
+
+  // ---- Seven Fairies UI
+  function renderFairiesIntro() {
+    const box = $("fairyIntroList");
     if (!box) return;
     box.innerHTML = "";
-    BUILD_ITEMS.forEach(it => {
-      const row = document.createElement("div");
-      row.style.display="flex";
-      row.style.alignItems="center";
-      row.style.justifyContent="space-between";
-      row.style.gap="10px";
-      row.style.padding="8px 10px";
-      row.style.border="1px solid #111";
-      row.style.borderRadius="12px";
-      row.style.background="#fff";
-      const left = document.createElement("div");
-      left.style.fontWeight="800";
-      left.style.fontSize="13px";
-      left.textContent = it.name;
-      const right = document.createElement("div");
-      right.style.fontWeight="900";
-      right.style.fontSize="12px";
-      right.style.padding="6px 10px";
-      right.style.border="1px solid #111";
-      right.style.borderRadius="999px";
-      right.style.background= it.done ? "#111" : "#fff";
-      right.style.color= it.done ? "#fff" : "#111";
-      right.textContent = it.done ? "已完成" : "待接鏈";
-      row.appendChild(left);
-      row.appendChild(right);
-      box.appendChild(row);
+    FAIRIES.forEach(f => {
+      const div = document.createElement("div");
+      div.style.padding = "12px";
+      div.style.borderRadius = "16px";
+      div.style.background = "rgba(255,255,255,.06)";
+      div.style.border = "1px solid rgba(255,255,255,.10)";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+          <div style="font-weight:1000;">${f.title}（${f.name}）</div>
+          <div style="opacity:.9; font-weight:900;">座標 ${f.coord} · ${f.star}</div>
+        </div>
+        <div style="margin-top:6px; font-size:13px; opacity:.9;">
+          專掌：${f.duty} ｜ 象徵：${f.side}
+        </div>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn2" data-fairy="${f.id}">向${f.name}許願</button>
+          <button class="btn2" data-fairy-fulfill="${f.id}">向${f.name}還願</button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+
+    // Prefill name inputs (if exist)
+    const inputs = [
+      ["fairy1","大仙女(巧雲)"],
+      ["fairy2","二仙女(巧虹)"],
+      ["fairy3","三仙女(巧芝)"],
+      ["fairy4","四仙女(巧仙)"],
+      ["fairy5","五仙女(巧蘭)"],
+      ["fairy6","六仙女(巧梅)"],
+      ["fairy7","七仙女(巧靈)"],
+    ];
+    inputs.forEach(([id,val]) => { if ($(id)) $(id).value = val; });
+
+    // meta text
+    const m = $("fairyMeta");
+    if (m) {
+      m.textContent = "七仙女住在北斗七星座標：14520, 14866, 16184, 16888, 17347, 18056, 18459。每位仙女對應不同祈願主題與多空象徵。";
+    }
+
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const id = b.getAttribute("data-fairy") || b.getAttribute("data-fairy-fulfill");
+      if (!id) return;
+      const f = FAIRIES.find(x => x.id === id);
+      if (!f) return;
+      if (b.hasAttribute("data-fairy")) {
+        toast(`已切換：向${f.title}（${f.name}）許願。`);
+        if ($("fairyPath")) $("fairyPath").value = f.id;
+        if ($("wishText")) $("wishText").focus();
+      } else {
+        toast(`已切換：向${f.title}（${f.name}）還願。`);
+        if ($("fairyPath")) $("fairyPath").value = f.id;
+        if ($("fulfillText")) $("fulfillText").focus();
+      }
     });
   }
 
-  function renderPct() {
-    const pct = calcPct();
-    const t = document.getElementById("buildPctText");
-    const b = document.getElementById("buildPctBar");
-    if (t) t.textContent = pct + "%";
-    if (b) b.style.width = pct + "%";
+  // ---- Seven Fairies wishes (local JSON export)
+  function saveWishLocal() {
+    const path = ($("fairyPath")?.value || "f1").trim();
+    const wish = ($("wishText")?.value || "").trim();
+    const fulfill = ($("fulfillText")?.value || "").trim();
+    const note = { path, wish, fulfill, at: new Date().toISOString() };
+    const arr = lsGet("wuzhishan_wishes", []);
+    arr.push(note);
+    lsSet("wuzhishan_wishes", arr);
+    toast("已保存許願/還願（本機）。可匯出 JSON 留念。");
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("btnShowBuildChecklist");
-    const panel = document.getElementById("buildChecklist");
-    if (btn && panel) {
-      btn.addEventListener("click", () => {
-        const open = panel.style.display !== "none";
-        panel.style.display = open ? "none" : "block";
-        btn.textContent = open ? "查看完工清單" : "收起完工清單";
-      });
+  function exportWishes() {
+    const arr = lsGet("wuzhishan_wishes", []);
+    const blob = new Blob([JSON.stringify(arr, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `wuzhishan_fairies_wishes_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("已匯出七仙女許願JSON。");
+  }
+
+  // ---- 72 Seats registry (local; future can be on-chain)
+  function initSeats() {
+    const grid = $("slotGrid");
+    if (!grid) return;
+    const state = lsGet("wuzhishan_seats72", { picked: null, seats: {} });
+    grid.innerHTML = "";
+    for (let i=1; i<=72; i++) {
+      const btn = document.createElement("button");
+      btn.className = "slot";
+      btn.textContent = String(i);
+      btn.dataset.slot = String(i);
+      if (state.seats[String(i)]) btn.classList.add("filled");
+      if (state.picked === i) btn.classList.add("active");
+      grid.appendChild(btn);
     }
+    $("slotPicked").textContent = state.picked ? String(state.picked) : "（未指定，送出時自動分配）";
+    $("slotCount").textContent = `${Object.keys(state.seats).length}/72`;
+
+    grid.addEventListener("click", (e) => {
+      const b = e.target.closest("button.slot");
+      if (!b) return;
+      state.picked = Number(b.dataset.slot);
+      lsSet("wuzhishan_seats72", state);
+      initSeats();
+      toast(`已指定名額：${state.picked}`);
+    });
+  }
+
+  function submitSeat() {
+    const state = lsGet("wuzhishan_seats72", { picked: null, seats: {} });
+    const name = ($("seatName")?.value || "").trim();
+    const msg = ($("seatMsg")?.value || "").trim();
+    if (!name) { toast("請先填寫姓名/暱稱。"); return; }
+
+    // pick slot: if not picked, find next available
+    let slot = state.picked;
+    if (!slot) {
+      for (let i=1;i<=72;i++) { if (!state.seats[String(i)]) { slot = i; break; } }
+    }
+    if (!slot) { toast("72 名額已滿。"); return; }
+    if (state.seats[String(slot)]) { toast(`名額 ${slot} 已被占用，請換一格。`); return; }
+
+    state.seats[String(slot)] = { name, msg, at: new Date().toISOString() };
+    state.picked = null;
+    lsSet("wuzhishan_seats72", state);
+    initSeats();
+    toast(`登記成功：名額 ${slot} 已留給 ${name}。`);
+  }
+
+  function exportSeats() {
+    const state = lsGet("wuzhishan_seats72", { picked: null, seats: {} });
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `wuzhishan_seats72_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("已匯出 72 名額登記 JSON。");
+  }
+
+  // ---- Shop card (local)
+  function shopSave() {
+    const name = ($("shopName")?.value || "").trim();
+    if (!name) { toast("請輸入店名。"); return; }
+    const desc = ($("shopDesc")?.value || "").trim();
+    const rebate = Number(($("shopRebate")?.value || "1").trim());
+    const card = { name, desc, rebate, owner: walletAddr || null, at: new Date().toISOString() };
+    lsSet("wuzhishan_shopCard", card);
+    toast("店卡已保存（本機）。");
+  }
+
+  function shopExport() {
+    const card = lsGet("wuzhishan_shopCard", null);
+    if (!card) { toast("尚未保存店卡。"); return; }
+    const blob = new Blob([JSON.stringify(card, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `wuzhishan_shop_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("已匯出店卡 JSON。");
+  }
+
+  // ---- AI Concierge (rule-based, always responsive)
+  function aiReply(userText) {
+    const t = (userText || "").trim();
+    if (!t) return "你可以直接問：如何領發財金、如何點燈、我沒有錢包怎麼辦、七仙女住哪裡。";
+
+    const lower = t.toLowerCase();
+
+    if (t.includes("七仙女") || t.includes("仙女")) {
+      return "七仙女住在北斗七星座標：14520, 14866, 16184, 16888, 17347, 18056, 18459。她們分別掌管風調雨順、家庭美滿、育子收驚、事業運通、長命百歲、身體健康、感情圓滿；並以做多/做空/多單退象徵市場節奏。";
+    }
+
+    if (t.includes("發財金") || t.includes("領") || t.includes("claim")) {
+      return "領發財金需要三聖筊（按「擲筊」直到累積3次聖筊），接著連線錢包，輸入要領的 KGEN 數量，按「領發財金」。若心臟合約未上鏈或未填地址，系統會提示你先貼上 cfgHeart。";
+    }
+
+    if (t.includes("點燈") || t.includes("光明燈") || t.includes("108")) {
+      return "點光明燈固定收 108 KGEN。流程：連線錢包 → 確認費用108 → 按「點光明燈付款」。目前以 KGEN 直接轉帳到 Treasury 地址作為上鏈收款。";
+    }
+
+    if (t.includes("沒有錢包") || t.includes("新手") || t.includes("metamask")) {
+      return "新手流程：1) 安裝 MetaMask 2) 建立錢包並備份助記詞 3) 切到 BNB Chain 4) 取得少量 BNB 當Gas 5) 回神殿按「連線錢包」。沒有錢包也能先登記名額與寫願望。";
+    }
+
+    if (t.includes("宇宙細包")) {
+      return "宇宙細包就是你的錢包身份。你可以先按「宇宙細包」區塊的連線錢包，系統會顯示地址、鏈ID與KGEN餘額。";
+    }
+
+    if (t.includes("宇宙商店") || t.includes("開店")) {
+      return "宇宙商店讓你把現實店鋪變成宇宙店卡，用 KGEN 當紅利回饋顧客。你先填店名/介紹/紅利比例，保存店卡（本機），之後可匯出JSON給社群或未來上鏈。";
+    }
+
+    if (t.includes("飛碟") || t.includes("下單") || t.includes("交易")) {
+      return "飛碟駕駛艙是玩家介面；目前本神殿先把基礎設施（客服/點燈/發財金/名額/七仙女/細包/商店）完成。真正的跨市場交易引擎你在專案頁開發，等交易室引擎提供合約接口後，神殿會接入一鍵下單。";
+    }
+
+    return "收到。這裡是五指山悟空財神殿：先把『領發財金（三聖筊門檻）』與『點燈108KGEN』跑通，再把玩家飛碟交易室接上引擎。你也可以問：我現在該按哪個鍵？";
+  }
+
+  function aiSend() {
+    const inp = $("aiInput");
+    const out = $("aiOutput");
+    if (!inp || !out) return;
+    const q = (inp.value || "").trim();
+    if (!q) return;
+    out.value += `你：${q}\n`;
+    const a = aiReply(q);
+    out.value += `客服：${a}\n\n`;
+    out.scrollTop = out.scrollHeight;
+    speak(a);
+    inp.value = "";
+  }
+
+  function aiQuick(text) {
+    const out = $("aiOutput");
+    if (!out) return;
+    out.value += `你：${text}\n`;
+    const a = aiReply(text);
+    out.value += `客服：${a}\n\n`;
+    out.scrollTop = out.scrollHeight;
+    speak(a);
+  }
+
+  // ---- Progress bar (build checklist)
+  const BUILD_ITEMS = [
+    { id:"infra_buttons",  label:"按鍵全部可按（有 log）", done:true },
+    { id:"infra_ai",       label:"AI 客服可回話（含新手錢包教學）", done:true },
+    { id:"infra_fairies",  label:"七仙女住址/職司/象徵 + 許願還願", done:true },
+    { id:"infra_seats72",  label:"72 名額登記（本機存檔/匯出JSON）", done:true },
+    { id:"infra_lamp108",  label:"光明燈 108 KGEN（上鏈轉帳 Treasury）", done:true },
+    { id:"infra_cups",     label:"三聖筊門檻（領發財金前置）", done:true },
+    { id:"infra_wallet",   label:"宇宙細包（錢包連線/餘額顯示）", done:true },
+    { id:"infra_shop",     label:"宇宙商店（店卡本機保存/匯出JSON）", done:true },
+    { id:"infra_vitals",   label:"呼吸/心跳/血壓顯示（本機）", done:true },
+    { id:"infra_chainHook",label:"心臟合約接入（填cfgHeart即可上鏈領取）", done:false }
+  ];
+
+  function renderChecklist() {
+    const box = $("buildChecklist");
+    if (!box) return;
+    box.innerHTML = "";
+    let done = 0;
+    BUILD_ITEMS.forEach(it => {
+      if (it.done) done++;
+      const row = document.createElement("div");
+      row.className = "checkrow";
+      row.innerHTML = `
+        <div class="dot ${it.done ? "on":"off"}"></div>
+        <div class="label">${it.label}</div>
+        <div class="tag">${it.done ? "OK":"WIP"}</div>
+      `;
+      box.appendChild(row);
+    });
+    const pct = Math.round(done / BUILD_ITEMS.length * 100);
+    if ($("buildPct")) $("buildPct").textContent = `${pct}%`;
+    if ($("buildBar")) $("buildBar").style.width = `${pct}%`;
+  }
+
+  // ---- Self check
+  function selfCheck() {
+    const hasEth = !!window.ethereum;
+    const hasSpeech = ("speechSynthesis" in window);
+    log(`SelfCheck: wallet=${hasEth ? "YES":"NO"}, speechSynthesis=${hasSpeech ? "YES":"NO"}`, "templeLog");
+    toast("環境檢測完成。錢包=" + (hasEth ? "有" : "無") + "，語音=" + (hasSpeech ? "有" : "無"));
+  }
+
+  // ---- Bind UI
+  function bind() {
+    // config defaults
+    setIfEmpty("cfgKGEN", DEFAULTS.KGEN);
+    setIfEmpty("cfgKUFO", DEFAULTS.KUFO);
+    setIfEmpty("cfgTreasury", DEFAULTS.TREASURY);
+    setIfEmpty("cfgBank", DEFAULTS.BANK);
+
+    // vitals buttons
+    $("btnHeartbeat")?.addEventListener("click", () => { bumpVital("heart"); });
+    $("btnBreath")?.addEventListener("click", () => { bumpVital("breath"); });
+    $("btnPressure")?.addEventListener("click", () => { bumpVital("pressure"); });
+
+    // cups
+    $("btnCup")?.addEventListener("click", () => {
+      const s = getCupState();
+      const r = rollCups();
+      s.last = r;
+      if (r === "聖筊") s.wins = Math.min(3, (s.wins||0) + 1);
+      else s.wins = 0; // reset on non-holy result
+      setCupState(s);
+      log(`擲筊結果：${r}（聖筊累積=${s.wins}/3）`, "templeLog");
+      toast(r === "聖筊" ? "聖筊！" : (r === "笑筊" ? "笑筊：神明在笑，你再來" : "陰筊：未允許，重新擲筊"));
+      updateFortuneButton();
+    });
+
+    // wallet connect
+    $("btnWalletConnect")?.addEventListener("click", connectWallet);
+    $("btnWalletConnect2")?.addEventListener("click", connectWallet);
+
+    // fortune claim
+    $("btnFortune")?.addEventListener("click", claimFortune);
+
+    // lamp pay
+    $("btnLampPay")?.addEventListener("click", payLamp);
+
+    // seats
+    $("btnSeatSubmit")?.addEventListener("click", submitSeat);
+    $("btnSeatExport")?.addEventListener("click", exportSeats);
+
+    // fairies
+    $("btnSaveFairies")?.addEventListener("click", saveWishLocal);
+    $("btnExportFairies")?.addEventListener("click", exportWishes);
+
+    // AI chat
+    $("btnAiSend")?.addEventListener("click", aiSend);
+    $("aiInput")?.addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); aiSend(); } });
+    $("btnAiQ1")?.addEventListener("click", ()=>aiQuick("我要領發財金怎麼做"));
+    $("btnAiQ2")?.addEventListener("click", ()=>aiQuick("我沒有錢包怎麼辦"));
+    $("btnAiQ3")?.addEventListener("click", ()=>aiQuick("七仙女住哪裡，各掌管什麼"));
+
+    // shop
+    $("btnShopSave")?.addEventListener("click", shopSave);
+    $("btnShopExport")?.addEventListener("click", shopExport);
+    $("btnShopOpen")?.addEventListener("click", ()=>{ toast("先填店名/介紹/紅利比例，再按保存店卡。"); });
+    $("btnShopHow")?.addEventListener("click", ()=>{ aiQuick("宇宙商店怎麼運作"); });
+
+    // how-to
+    $("btnWalletHowto")?.addEventListener("click", ()=>aiQuick("我沒有錢包怎麼辦"));
+
+    // nav buttons: scroll within temple
+    $("btnGoWallet")?.addEventListener("click", ()=>{ $("walletZone")?.scrollIntoView({behavior:"smooth", block:"start"}); toast("已移動到宇宙細包。"); });
+    $("btnGoShop")?.addEventListener("click", ()=>{ $("shopZone")?.scrollIntoView({behavior:"smooth", block:"start"}); toast("已移動到宇宙商店。"); });
+
+    // selftest
+    $("btnSelfTest")?.addEventListener("click", selfCheck);
+
+    // clear log
+    $("btnClearLog")?.addEventListener("click", ()=>{ if($("templeLog")) $("templeLog").value=""; toast("Log 已清空"); });
+  }
+
+  // ---- Boot
+  function boot() {
     renderChecklist();
-    renderPct();
-  });
-})();
+    renderVitals("尚未啟動");
+    renderFairiesIntro();
+    initSeats();
 
-/* =========================
-   AI VIDEO SERVICE (LOCAL PREVIEW)
-========================= */
-(function(){
-  let stream = null;
-  async function startCam(){
-    const v = document.getElementById("camPreview");
-    if (!v) return;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
-      v.srcObject = stream;
-      if (window.__klog) window.__klog("cam_started");
-    } catch (e) {
-      if (window.__klog) window.__klog("cam_error " + (e && e.name ? e.name : "unknown"));
-      alert("鏡頭無法啟用：請確認瀏覽器權限或裝置是否支援。");
+    // cup init
+    setCupState(getCupState());
+    updateFortuneButton();
+
+    // AI welcome
+    const out = $("aiOutput");
+    if (out && !out.value) {
+      out.value = "客服：歡迎來到五指山悟空財神殿（12345）。\n你可以先問：如何領發財金、如何點燈108KGEN、我沒有錢包怎麼辦、七仙女住哪裡。\n\n";
     }
+
+    bind();
+    // auto selfcheck once
+    setTimeout(selfCheck, 450);
+    log(`BOOT OK: ${BOOT}`, "templeLog");
   }
-  function stopCam(){
-    if (stream) {
-      stream.getTracks().forEach(t=>t.stop());
-      stream = null;
-      if (window.__klog) window.__klog("cam_stopped");
-    }
-    const v = document.getElementById("camPreview");
-    if (v) v.srcObject = null;
-  }
-  document.addEventListener("DOMContentLoaded", ()=>{
-    const a=document.getElementById("btnCamStart");
-    const b=document.getElementById("btnCamStop");
-    if (a) a.addEventListener("click", startCam);
-    if (b) b.addEventListener("click", stopCam);
-  });
+
+  document.addEventListener("DOMContentLoaded", boot);
 })();
 </script>
 
 </body>
 </html>
-
-
-<section id="aiVideoService" class="card" style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:16px; background:#fff;">
-  <div style="font-weight:900; font-size:16px;">AI 客服影像＋語音（本地預覽）</div>
-  <div style="opacity:.75; font-weight:700; font-size:12px; margin-top:4px;">
-    影像為本地鏡頭預覽（不會上傳）；AI 回覆以文字＋語音。若裝置不支援鏡頭或權限被拒，會自動降級成純文字／語音客服。
-  </div>
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-    <button id="btnCamStart" class="btn" style="padding:10px 12px; border-radius:12px; border:1px solid #111; background:#fff; font-weight:900;">開啟鏡頭</button>
-    <button id="btnCamStop" class="btn" style="padding:10px 12px; border-radius:12px; border:1px solid #111; background:#fff; font-weight:900;">關閉鏡頭</button>
-  </div>
-  <div style="margin-top:10px; border-radius:14px; overflow:hidden; border:1px solid #111; background:#000; max-width:520px;">
-    <video id="camPreview" playsinline autoplay muted style="width:100%; height:auto; display:block;"></video>
-  </div>
-</section>
