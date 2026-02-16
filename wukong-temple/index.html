@@ -5,6 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>悟空財神殿・五指山神殿 V4.4.3 CHAIN</title>
 <style>
+
+/* === V4.5.3 UX HOTFIX: Help Drawer + Safe Areas === */
+:root{ --safe-bottom: env(safe-area-inset-bottom, 0px); }
+.kline-bottombar{ padding-bottom: calc(10px + var(--safe-bottom)); }
+.kline-fab{ bottom: calc(14px + var(--safe-bottom)); }
+#klineHelpDrawer{ position: fixed; left:0; right:0; bottom:0; z-index:99999;
+  transform: translateY(110%); transition: transform .22s ease;
+  background: rgba(15,18,30,.96); border-top:1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  padding: 14px 14px calc(14px + var(--safe-bottom));
+  box-shadow: 0 -20px 60px rgba(0,0,0,.45);
+}
+#klineHelpDrawer.open{ transform: translateY(0%); }
+#klineHelpDrawer .hd{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#klineHelpDrawer .title{ font-weight:900; letter-spacing:.3px; }
+#klineHelpDrawer .sub{ opacity:.85; font-size:13px; margin-top:6px; line-height:1.4; }
+#klineHelpDrawer .body{ margin-top:10px; font-size:14px; line-height:1.55; white-space:pre-wrap; }
+#klineHelpDrawer .actions{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+#klineHelpDrawer .btn{ border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06);
+  color:#fff; padding:10px 12px; border-radius:14px; font-weight:800; }
+#klineHelpDrawer .btn.primary{ background: rgba(255,255,255,.92); color:#111; border-color:#fff; }
+#klineHelpDrawer .btn.danger{ background: rgba(255,80,80,.14); border-color: rgba(255,80,80,.35); }
+#klineHelpScrim{ position:fixed; inset:0; z-index:99998; background: rgba(0,0,0,.35);
+  opacity:0; pointer-events:none; transition: opacity .18s ease; }
+#klineHelpScrim.open{ opacity:1; pointer-events:auto; }
+
   :root{
     --bg:#0b1220;
     --panel:#0f1b33;
@@ -2884,5 +2910,333 @@ function setIfEmpty(id, val) {
 })();
 </script>
 
+
+<div id="klineHelpScrim" aria-hidden="true"></div>
+<div id="klineHelpDrawer" role="dialog" aria-label="AI客服">
+  <div class="hd">
+    <div>
+      <div class="title">AI 客服｜悟空神殿接待處</div>
+      <div class="sub" id="klineHelpSub">按任何按鍵，這裡會用人話解釋你剛剛做了什麼，以及下一步。</div>
+    </div>
+    <button class="btn" id="klineHelpClose" type="button">關閉</button>
+  </div>
+  <div class="body" id="klineHelpBody"></div>
+  <div class="actions" id="klineHelpActions"></div>
+</div>
+
 </body>
+
+<script>
+// === V4.5.3 UX HOTFIX: Smart Help + SelfCheck + Button Echo ===
+(function(){
+  const $ = (q,el=document)=>el.querySelector(q);
+  const $$ = (q,el=document)=>Array.from(el.querySelectorAll(q));
+
+  const scrim = $('#klineHelpScrim');
+  const drawer = $('#klineHelpDrawer');
+  const body = $('#klineHelpBody');
+  const sub = $('#klineHelpSub');
+  const actions = $('#klineHelpActions');
+  const closeBtn = $('#klineHelpClose');
+
+  function speak(text){
+    try{
+      if(!window.speechSynthesis) return;
+      const sel = window.__kline_tts_mode || 'auto';
+      if(sel==='off') return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-TW';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function openHelp(payload){
+    const {title, subtitle, message, ctas=[] , tts=true} = payload||{};
+    if(title) drawer.querySelector('.title').textContent = title;
+    sub.textContent = subtitle || '我在。告訴我你想做什麼，我會帶你一步一步完成。';
+    body.textContent = message || '';
+    actions.innerHTML = '';
+    ctas.forEach(c=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='btn'+(c.primary?' primary':'')+(c.danger?' danger':'');
+      b.textContent=c.label;
+      b.addEventListener('click', ()=>{ try{c.onClick && c.onClick();}catch(e){} });
+      actions.appendChild(b);
+    });
+    scrim.classList.add('open');
+    drawer.classList.add('open');
+    if(tts && message) speak(message.replace(/
++/g,' '));
+  }
+  function closeHelp(){
+    scrim.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+  scrim && scrim.addEventListener('click', closeHelp);
+  closeBtn && closeBtn.addEventListener('click', closeHelp);
+
+  // Map help topics
+  const HELP = {
+    heartbeat: {
+      title:'心跳｜悟空生命跡象',
+      message:'你剛按的是「心跳」。
+
+這是神殿的生命基礎設施：用來確認系統有在運作、狀態有更新。
+
+下一步：如果你要領發財金，請先連錢包，然後完成三聖筊（0/3 會顯示在神殿）。',
+      ctas:[
+        {label:'去連錢包', primary:true, onClick:()=>clickByText('連線錢包')},
+        {label:'看三聖筊規則', onClick:()=>openHelp(HELP.saintcups)},
+      ]
+    },
+    breathe:{
+      title:'呼吸｜宇宙細胞',
+      message:'你按的是「呼吸」。
+
+呼吸代表「宇宙細包」開始記錄你的互動：許願、點燈、領發財金、下單桌動作都會留下足跡（本機/上鏈視模式）。
+
+下一步：想把資料帶走？用「匯出狀態 JSON」。',
+      ctas:[{label:'匯出狀態 JSON', primary:true, onClick:()=>clickByText('匯出狀態 JSON')}]
+    },
+    blood:{
+      title:'血壓｜能量壓力',
+      message:'你按的是「血壓」。
+
+血壓用來提醒你目前的「槓桿/方向盤」是否處在危險區。
+規則：最大贏虧以 ATR14 為上限（你定義的宇宙風控）。
+
+下一步：先把槓桿調到 1x 或 5x 做測試，再進下單桌。',
+      ctas:[{label:'回下單桌', primary:true, onClick:()=>clickByText('下單桌')}]
+    },
+    saintcups:{
+      title:'三聖筊｜領發財金門檻',
+      message:'領發財金之前，需要完成「三聖筊 0/3」。
+
+它是防刷機制：每次擲筊會記錄在本機狀態；上鏈模式會由心臟合約驗證。
+
+沒錢包也能先逛神殿：但要「領」或「點燈/還願」就需要錢包。',
+      ctas:[
+        {label:'去擲筊', primary:true, onClick:()=>clickByText('擲筊')},
+        {label:'去連錢包', onClick:()=>clickByText('連線錢包')}
+      ]
+    },
+    lamp:{
+      title:'光明燈｜108 KGEN 供養',
+      message:'你按的是「點光明燈」。
+
+規則：每次點燈收 108 KGEN（象徵 108 原子）。
+本機模式會先記錄點燈資料；上鏈模式會由 KUFO 無人銀行收款、留下鏈上收據。
+
+下一步：若你還沒有錢包，我可以一步一步帶你裝 MetaMask。',
+      ctas:[
+        {label:'新手：沒錢包怎麼開始', primary:true, onClick:()=>openHelp(HELP.nowallet)},
+        {label:'我已經有錢包→連線', onClick:()=>clickByText('連線錢包')},
+      ]
+    },
+    nowallet:{
+      title:'新手導覽｜從 0 到能下單',
+      message:'步驟一：安裝 MetaMask（Chrome 或 App）。
+步驟二：切到 BNB Chain（BSC / BEP20）。
+步驟三：準備少量 BNB 當 gas。
+步驟四：把 KGEN 代幣合約加入錢包（你已部署）。
+
+完成後回神殿按「連線錢包」。',
+      ctas:[
+        {label:'我知道了，回神殿', primary:true, onClick:()=>closeHelp()}
+      ],
+      tts:false
+    },
+    orderdesk:{
+      title:'下單桌｜T+2 交易室',
+      message:'你進入「下單桌」。
+
+目前神殿有兩種模式：
+1) 本機模擬：可練習槓桿、方向盤、停利停損、T+2 結算流程。
+2) 上鏈成交：需要把交易引擎接到「心臟/ KUFO/ 大腦」三器官，才會有鏈上記錄與結算。
+
+下一步：先用 1x 走一筆流程，確認你看得懂風控與結算。',
+      ctas:[
+        {label:'教我設定停損停利', primary:true, onClick:()=>openHelp(HELP.risk)},
+        {label:'回駕駛艙', onClick:()=>clickByText('駕駛艙')}
+      ]
+    },
+    risk:{
+      title:'風控｜停利停損與 ATR14',
+      message:'規則（你定義）：最大贏虧以 ±ATR14 為界。
+
+停利 / 停損：
+- 到價即記錄（模擬）或觸發結算（上鏈）。
+- 若結算日同時觸發停利與停損：判定「不算輸贏」。
+
+建議：新手先用 1x～5x。',
+      ctas:[{label:'回下單桌', primary:true, onClick:()=>clickByText('下單桌')}]
+    },
+    zodiac:{
+      title:'13 生肖｜72 名額留念',
+      message:'你進入「13 生肖 / 光明燈」區。
+
+用途：觀光客留名、點燈留念、還願紀錄。
+每生肖 72 名額（可選格→填資料→送出）。
+
+下一步：想把登記資料帶走，按「匯出狀態 JSON」。',
+      ctas:[{label:'匯出狀態 JSON', primary:true, onClick:()=>clickByText('匯出狀態 JSON')}]
+    },
+    fairies:{
+      title:'七仙女｜北斗七星座標系',
+      message:'七仙女住在「北斗七星」的 7 個座標點，負責不同的許願路徑：
+
+14520 大仙女 巧雲｜天樞｜風調雨順（做空）
+14866 二仙女 巧虹｜天璇｜家庭美滿（做多）
+16184 三仙女 巧芝｜天璣｜育子收驚（做空）
+16888 四仙女 巧仙｜天權｜事業運通（做多）
+17347 五仙女 巧蘭｜天衡｜長命百歲（做空）
+18056 六仙女 巧梅｜闓陽｜身體健康（做多）
+18459 七仙女 巧靈｜瑤光｜感情圓滿（多單退）
+
+你可以：選 f1～f7 → 寫願望 → 寫還願 → 匯出 JSON 留念。',
+      ctas:[{label:'帶我去七仙女', primary:true, onClick:()=>scrollToText('七仙女系統')}] ,
+      tts:false
+    },
+    pocket:{
+      title:'宇宙細包｜你的身份與足跡',
+      message:'宇宙細包是「客戶」入口：
+- 記錄你的點燈/許願/還願/發財金/下單桌操作
+- 可匯出 JSON 當作宇宙護照
+
+下一步：按「匯出狀態 JSON」把護照保存。',
+      ctas:[{label:'匯出狀態 JSON', primary:true, onClick:()=>clickByText('匯出狀態 JSON')}] 
+    },
+    shop:{
+      title:'宇宙商店｜現實商店上鏈紅利',
+      message:'宇宙商店是「客戶開的店」。
+你可以把現實店（服飾/飯店/餐飲）接進來，用 KGEN 當紅利回饋消費者。
+
+目前：先完成「店鋪資料」與「收款地址」登記；未來可由 KUFO 走金流。',
+      ctas:[{label:'開店登記', primary:true, onClick:()=>scrollToText('宇宙商店')}] ,
+      tts:false
+    }
+  };
+
+  function clickByText(txt){
+    const btn = $$('button, a').find(el=> (el.textContent||'').replace(/\s+/g,'').includes(txt.replace(/\s+/g,'')));
+    btn && btn.click();
+  }
+  function scrollToText(txt){
+    const el = $$('*').find(n=> (n.childNodes && n.childNodes.length===1 && n.childNodes[0].nodeType===3 && (n.textContent||'').includes(txt)));
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // Attach help to ALL clickable elements with heuristics
+  function topicFor(el){
+    const t=(el.getAttribute('data-help')||el.textContent||'').trim();
+    if(/心跳/.test(t)) return 'heartbeat';
+    if(/呼吸/.test(t)) return 'breathe';
+    if(/血壓/.test(t)) return 'blood';
+    if(/擲筊|聖筊|三聖/.test(t)) return 'saintcups';
+    if(/光明燈|點燈|108/.test(t)) return 'lamp';
+    if(/下單桌|交易/.test(t)) return 'orderdesk';
+    if(/生肖/.test(t)) return 'zodiac';
+    if(/七仙女/.test(t)) return 'fairies';
+    if(/宇宙細包/.test(t)) return 'pocket';
+    if(/宇宙商店/.test(t)) return 'shop';
+    return null;
+  }
+
+  function wireButtons(){
+    const clickables = $$('button, a, [role="button"], .btn');
+    clickables.forEach(el=>{
+      if(el.__kline_wired) return;
+      el.__kline_wired = true;
+      el.addEventListener('click', ()=>{
+        const k = topicFor(el);
+        if(k && HELP[k]){
+          // tiny delay so original handlers still run
+          setTimeout(()=>openHelp(HELP[k]), 30);
+        }
+      }, true);
+    });
+  }
+
+  // Selfcheck + auto-fix hints
+  function runSelfCheck(){
+    const r = {
+      ua: navigator.userAgent,
+      speechSynthesis: !!window.speechSynthesis,
+      speechRecognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+      ethereumInjected: !!window.ethereum,
+      isMetaMask: !!(window.ethereum && window.ethereum.isMetaMask),
+      https: location.protocol === 'https:',
+      ok: true,
+      issues: []
+    };
+    if(!r.https) r.issues.push('目前不是 HTTPS：某些錢包/語音功能可能被限制。');
+    if(!r.speechSynthesis) r.issues.push('這個瀏覽器沒有 TTS：我會改用「文字客服」提示。');
+    if(!r.ethereumInjected) r.issues.push('偵測不到錢包注入（ethereum_injected_now=false）：若你是用一般 Chrome，請改用 MetaMask 內建瀏覽器，或在手機啟用錢包瀏覽器開啟神殿。');
+    r.ok = r.issues.length===0;
+    try{ console.log('[selfcheck]', r); }catch(e){}
+    return r;
+  }
+
+  // Progress button fix: if a button says 查看完工清單, always open help with check list
+  function wireProgress(){
+    const btn = $$('button').find(b=>(b.textContent||'').includes('查看完工清單'));
+    if(!btn || btn.__kline_progress) return;
+    btn.__kline_progress = true;
+    btn.addEventListener('click', ()=>{
+      const sc = runSelfCheck();
+      const msg = [
+        '完工清單（基礎設施）',
+        '1) 生命跡象：心跳 / 呼吸 / 血壓（按鍵有回聲 + 有解說）',
+        '2) 客服：按鍵即出現「下一步」引導（本面板）',
+        '3) 三聖筊：0/3 → 3/3 後才可領發財金（上鏈需心臟合約）',
+        '4) 光明燈：108 KGEN 收費（上鏈收款走 KUFO）',
+        '5) 13 生肖：每生肖 72 名額（可匯出 JSON）',
+        '6) 七仙女：f1~f7 許願/還願 + 座標介紹',
+        '7) 宇宙細包：足跡/護照（JSON 匯出）',
+        '8) 宇宙商店：店鋪登記（之後接 KUFO 金流）',
+        '9) 錢包導覽：從 0 到能連線',
+        '10) 下單桌：目前模擬可用，上鏈成交待「交易引擎」接器官',
+        '',
+        sc.issues.length?('自我檢測：
+- '+sc.issues.join('
+- ')):'自我檢測：目前沒有偵測到重大問題。'
+      ].join('
+');
+      openHelp({title:'完工進度｜五指山 12345', message:msg, ctas:[{label:'關閉', primary:true, onClick:closeHelp}] , tts:false});
+    });
+  }
+
+  // Initial
+  wireButtons();
+  wireProgress();
+  const sc = runSelfCheck();
+  // Auto show helpful note only when wallet missing
+  if(sc.issues.length){
+    openHelp({
+      title:'自我檢測｜我先把問題講清楚',
+      message: '我已完成自我檢測，發現以下狀態：
+- ' + sc.issues.join('
+- ') + '
+
+你不用一個一個點名，我會用「按鍵回聲客服」把每一步帶完。',
+      ctas:[
+        {label:'新手：沒錢包怎麼開始', primary:true, onClick:()=>openHelp(HELP.nowallet)},
+        {label:'我已經有錢包→連線', onClick:()=>clickByText('連線錢包')},
+        {label:'先逛神殿', onClick:()=>closeHelp()},
+      ],
+      tts:false
+    });
+  }
+
+  // Observe DOM changes (some UI render later)
+  const mo = new MutationObserver(()=>{ wireButtons(); wireProgress(); });
+  mo.observe(document.documentElement, {childList:true, subtree:true});
+
+  // expose
+  window.__klineHelp = {openHelp, closeHelp, runSelfCheck};
+})();
+</script>
+
 </html>
