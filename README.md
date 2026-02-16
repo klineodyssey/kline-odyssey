@@ -454,8 +454,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文 #花果山台灣 #K線西遊記悟空之腦正式啟動，質量開始流動。KGEN 不只是數字，而是你在宇宙中的位置。Where the Market Becomes the Myth.  
-👉 https://www.youtube.com/shorts/kB2K-GcKTDI
+▶ 五指山悟空財神殿啟動宇宙細包心跳上鏈GA600升級與金融生命體誕生花果山台灣鏈上神殿全面開門  
+👉 https://www.youtube.com/shorts/PhzcXnriy5Q
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
