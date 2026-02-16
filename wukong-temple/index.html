@@ -26,7 +26,7 @@
                 radial-gradient(900px 650px at 90% 10%, #134e4a 0%, rgba(19,78,74,0) 55%),
                 var(--bg);
     color:var(--txt);
-    padding:16px 14px 90px;
+    padding:16px 14px 140px;
   }
   a{color:inherit}
   .topbar{
@@ -1736,7 +1736,7 @@ function applyFairiesDefaults(){
     renderZodiac72();
   }, 60);
 })();
-er.innerHTML = "你好，我是悟空宇宙 AI 客服。你可以問：錢包怎麼裝、T+2 結算、槓桿、方向盤、多空規則、匯出下載。";
+aiAnswer.innerHTML = "你好，我是悟空宇宙 AI 客服。你可以問：錢包怎麼裝、T+2 結算、槓桿、方向盤、多空規則、匯出下載。";
 aiHint.textContent = "系統會自動偵測環境，不同瀏覽器會自動降級。";
 
 /* ========== End ========== */
@@ -1744,7 +1744,7 @@ log("ready");
 </script>
 
 <!-- Floating Chain Panel Button -->
-<button id="chainBtn" style="position:fixed; right:14px; bottom:14px; z-index:9999;
+<button id="chainBtn" style="position:fixed; right:14px; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:9999;
   padding:12px 14px; border-radius:999px; border:1px solid #111; background:#fff; font-weight:900;">
   ⚡鏈上・心臟
 </button>
@@ -2211,7 +2211,108 @@ async function heartFund(){
     } catch {}
   }
 
-  function setIfEmpty(id, val) {
+  
+// --- Click Echo (sound) & Button Voice ---
+let __audioCtx = null;
+function beep(freq=880, duration=0.06, volume=0.03){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!__audioCtx) __audioCtx = new AC();
+    const ctx = __audioCtx;
+    if(ctx.state === "suspended"){ ctx.resume().catch(()=>{}); }
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.value = volume;
+    o.connect(g); g.connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + duration);
+  }catch(e){ /* ignore */ }
+}
+
+function getLabel(el){
+  if(!el) return "";
+  const ds = el.getAttribute && el.getAttribute("data-say");
+  if(ds) return ds.trim();
+  const aria = el.getAttribute && el.getAttribute("aria-label");
+  if(aria) return aria.trim();
+  const t = (el.textContent || "").replace(/\s+/g," ").trim();
+  return t.slice(0, 24);
+}
+
+// Any click on button/link -> beep + (optional) speak.
+function attachClickEcho(){
+  document.addEventListener("click", (ev)=>{
+    const el = ev.target && ev.target.closest ? ev.target.closest("button, a, .pill, .tab, .chip") : null;
+    if(!el) return;
+    // Always beep for "按鍵有回聲"
+    beep(880, 0.05, 0.025);
+
+    // Optional voice echo: only when TTS is ON and speechSynthesis is available
+    const v = (ttsModeSel && ttsModeSel.value) ? ttsModeSel.value : "auto";
+    const allowVoice = (v === "tts") || (v === "auto" && !!window.speechSynthesis);
+    if(allowVoice){
+      const label = getLabel(el);
+      if(label) speak("已按 " + label);
+    }
+  }, true);
+}
+
+// --- Self Check: detect missing bindings & layout issues ---
+function runSelfCheck(){
+  const issues = [];
+
+  // Critical elements
+  const must = [
+    ["btnProgress", "工程進度按鍵"],
+    ["progressBar", "進度橫桿"],
+    ["chainBtn", "鏈上·心臟按鍵"],
+    ["tabTemple", "財神殿分頁"],
+    ["tabCockpit", "駕駛艙分頁"],
+    ["tabShop", "宇宙商店分頁"],
+    ["tabWallet", "宇宙細包分頁"],
+  ];
+  for(const [id,label] of must){
+    if(!document.getElementById(id)) issues.push("缺少 " + label + " ("+id+")");
+  }
+
+  // Feature availability
+  if(!window.speechSynthesis) issues.push("此環境無 speechSynthesis（TTS 可能不可用）");
+  if(!window.SpeechRecognition && !window.webkitSpeechRecognition) issues.push("此環境無 SpeechRecognition（語音輸入可能不可用）");
+  if(!window.ethereum) {
+    // 這不是錯，只是提醒
+    pushEvent("selfcheck_note", { ethereum_injected_now:false });
+  }
+
+  // Layout overlap: ensure chain button not covering bottom actions
+  try{
+    const chain = document.getElementById("chainBtn");
+    const sticky = document.querySelector(".sticky-actions");
+    if(chain && sticky){
+      const r1 = chain.getBoundingClientRect();
+      const r2 = sticky.getBoundingClientRect();
+      const overlap = !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
+      if(overlap) issues.push("右下角『鏈上·心臟』遮到下方按鍵（已自動避讓，若仍遮擋請回報）");
+    }
+  }catch(e){}
+
+  if(issues.length){
+    pushEvent("selfcheck_fail", { issues });
+    // Show one-line toast; details go to Debug Console
+    toast("自我檢測：發現 " + issues.length + " 項需修正（已寫入 Debug Console）");
+    log("[SELF-CHECK] " + issues.join(" | "));
+  } else {
+    pushEvent("selfcheck_ok", { ok:true });
+    log("[SELF-CHECK] OK");
+  }
+
+  // Always ensure click echo is attached (some environments require user gesture first)
+  attachClickEcho();
+}
+
+function setIfEmpty(id, val) {
     const el = $(id);
     if (!el) return;
     if (!el.value || !String(el.value).trim()) el.value = val;
@@ -2303,7 +2404,17 @@ async function heartFund(){
     if (kind === "heart") vitals.heart = Math.min(150, vitals.heart + 3);
     if (kind === "breath") vitals.breath = Math.min(40, vitals.breath + 1);
     if (kind === "pressure") vitals.pressureSys = Math.min(170, vitals.pressureSys + 2);
-    renderVitals(`已更新：${kind}`);
+
+    const label = (kind==="heart") ? "心跳" : (kind==="breath") ? "呼吸" : "血壓";
+    const value = (kind==="pressure") ? `${vitals.pressureSys}/${vitals.pressureDia}` : (kind==="heart") ? `${vitals.heart}` : `${vitals.breath}`;
+
+    renderVitals(`已更新：${label} ${value}`);
+    // Button echo
+    beep(990, 0.05, 0.03);
+    // Speak result (if allowed)
+    const v = (ttsModeSel && ttsModeSel.value) ? ttsModeSel.value : "auto";
+    const allowVoice = (v === "tts") || (v === "auto" && !!window.speechSynthesis);
+    if (allowVoice) speak(`${label} ${value}`);
   }
 
   // ---- Holy Cups gate (3 wins required)
@@ -2740,7 +2851,7 @@ async function heartFund(){
     $("btnGoShop")?.addEventListener("click", ()=>{ $("shopZone")?.scrollIntoView({behavior:"smooth", block:"start"}); toast("已移動到宇宙商店。"); });
 
     // selftest
-    $("btnSelfTest")?.addEventListener("click", selfCheck);
+    $("btnSelfTest")?.addEventListener("click", runSelfCheck);
 
     // clear log
     $("btnClearLog")?.addEventListener("click", ()=>{ if($("templeLog")) $("templeLog").value=""; toast("Log 已清空"); });
@@ -2765,7 +2876,7 @@ async function heartFund(){
 
     bind();
     // auto selfcheck once
-    setTimeout(selfCheck, 450);
+    setTimeout(runSelfCheck, 450);
     log(`BOOT OK: ${BOOT}`, "templeLog");
   }
 
