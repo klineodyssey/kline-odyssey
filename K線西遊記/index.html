@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>K線西遊記｜銀河宇宙入口</title>
+  <style>
+    :root{
+      --bg:#06070b;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --line: rgba(255,255,255,.14);
+      --accent: rgba(255,255,255,.9);
+      --btn: rgba(255,255,255,.12);
+      --btnh: rgba(255,255,255,.18);
+      --shadow: 0 12px 40px rgba(0,0,0,.45);
+      --r: 18px;
+      --r2: 999px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
+                  radial-gradient(1000px 700px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding: 10px 0 14px;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .brand .h{
+      font-weight: 900;
+      letter-spacing:.5px;
+      font-size: 18px;
+    }
+    .brand .s{
+      font-size: 12px; color: var(--muted);
+    }
+    .pillrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .pill{
+      display:flex; gap:8px; align-items:center;
+      padding: 9px 12px;
+      border:1px solid var(--line);
+      border-radius: var(--r2);
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .pill b{color:var(--text); font-weight:800}
+    .hero{
+      position:relative;
+      border:1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding: 18px;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px){
+      .heroGrid{grid-template-columns: 1fr}
+    }
+    .title{
+      font-size: 26px;
+      font-weight: 950;
+      letter-spacing: .8px;
+      margin: 4px 0 8px;
+    }
+    .subtitle{
+      color: var(--muted);
+      line-height:1.55;
+      margin: 0 0 14px;
+      font-size: 13px;
+    }
+    .ctaRow{display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding: 10px 14px;
+      border-radius: var(--r2);
+      border:1px solid var(--line);
+      background: var(--btn);
+      text-decoration:none;
+      font-weight:850;
+      font-size: 13px;
+      transition:.15s;
+      user-select:none;
+    }
+    .btn:hover{background:var(--btnh)}
+    .btn.small{padding:8px 12px; font-weight:800}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 900px){ .grid{grid-template-columns: 1fr 1fr} }
+    @media (max-width: 520px){ .grid{grid-template-columns: 1fr} }
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-height: 96px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card .k{
+      font-size:12px; color:var(--muted);
+      margin-bottom: 6px;
+      letter-spacing:.2px;
+    }
+    .card .v{
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing:.6px;
+    }
+    .card .t{
+      margin-top: 10px;
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .mono{font-family: var(--mono)}
+    .map{
+      margin-top: 14px;
+      border:1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(0,0,0,.20);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .mapHead{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+      margin-bottom: 10px;
+    }
+    .mapHead .h{
+      font-weight: 950;
+      letter-spacing:.6px;
+      font-size: 16px;
+    }
+    .mapHead .s{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .nodes{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 900px){ .nodes{grid-template-columns: repeat(2, 1fr)} }
+    @media (max-width: 520px){ .nodes{grid-template-columns: 1fr} }
+    .node{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      padding: 12px;
+      text-decoration:none;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      transition:.15s;
+      min-height: 92px;
+    }
+    .node:hover{background: rgba(255,255,255,.10)}
+    .node .n{font-weight: 950; letter-spacing:.5px}
+    .node .p{color: var(--muted); font-size: 12px; line-height:1.35}
+    .node .id{color: rgba(255,255,255,.75); font-size: 12px; font-family: var(--mono)}
+    .footer{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 14px;
+      line-height:1.55;
+      padding-bottom: 6px;
+    }
+
+    /* starfield canvas */
+    canvas#stars{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:.85;
+      pointer-events:none;
+    }
+
+    /* simple chat box (placeholder UI) */
+    .chat{
+      margin-top: 14px;
+      border:1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .chatTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px 14px;
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.14);
+    }
+    .chatTop .h{font-weight:950}
+    .chatTop .s{color:var(--muted); font-size:12px}
+    .chatBody{
+      height: 240px;
+      overflow:auto;
+      padding: 12px 14px;
+    }
+    .msg{
+      margin: 0 0 10px;
+      display:flex;
+      gap:10px;
+    }
+    .msg .who{
+      width: 62px;
+      flex: 0 0 62px;
+      color: var(--muted);
+      font-size:12px;
+      padding-top: 2px;
+    }
+    .msg .bubble{
+      flex:1;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: 10px 12px;
+      line-height:1.5;
+      font-size: 13px;
+    }
+    .chatInput{
+      display:flex; gap:10px;
+      padding: 12px 14px;
+      border-top:1px solid var(--line);
+    }
+    .chatInput input{
+      flex:1;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="h">K線西遊記｜銀河宇宙入口</div>
+        <div class="s">KLINE Odyssey · Map Portal · GitHub Pages</div>
+      </div>
+
+      <div class="pillrow">
+        <div class="pill">KGEN 總量：<b class="mono" id="supply">72,000,000</b></div>
+        <div class="pill">今日參訪：<b class="mono" id="today">0</b></div>
+        <div class="pill">總參訪：<b class="mono" id="total">0</b></div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <canvas id="stars"></canvas>
+
+      <div class="heroGrid">
+        <div>
+          <div class="title">宇宙不需要解釋，只需要入口。</div>
+          <p class="subtitle">
+            這裡是《K線西遊記》的地圖門戶。<br/>
+            你可以從五指山 12345 走進悟空財神殿，也可以通往靈霄寶殿 18888、斬妖台、花果山台灣 11520、花果山火星、七仙女許願宮殿等宇宙節點。
+          </p>
+
+          <div class="ctaRow">
+            <a class="btn" href="#map">🗺️ 進入宇宙地圖</a>
+            <a class="btn" href="./README.md">📘 查看資料說明</a>
+            <a class="btn small" href="https://t.me/klineodyssey" target="_blank" rel="noreferrer">Telegram</a>
+            <a class="btn small" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方</a>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="k">當前節律（本機）</div>
+            <div class="v mono" id="clock">--:--:--</div>
+            <div class="t">
+              <span class="btn small" id="pingBtn" href="javascript:void(0)">🔔 心跳打點</span>
+              <span class="btn small" id="resetBtn">♻️ 重置本機統計</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="k">今日節點提示</div>
+            <div class="v" style="font-size:14px;font-weight:900;">00:00–00:10 呼吸窗口</div>
+            <div class="t">
+              <span class="mono" style="font-size:12px;color:var(--muted);">後續可接 Heart 合約 igniteAndClaim()</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="k">系統狀態</div>
+            <div class="v" style="font-size:14px;font-weight:900;" id="status">Portal V1.0 / UI Ready</div>
+            <div class="t">
+              <span class="mono" style="font-size:12px;color:var(--muted);">目前：前端統計（localStorage）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="map" id="map">
+      <div class="mapHead">
+        <div>
+          <div class="h">宇宙節點導航</div>
+          <div class="s">先把入口做穩，再把每個殿做成各自的 index.html</div>
+        </div>
+        <div class="s mono" id="pathHint">/K線西遊記/index.html</div>
+      </div>
+
+      <div class="nodes">
+        <!-- 你可把 href 改成各殿的相對路徑，例如 ./temples/12345/index.html -->
+        <a class="node" href="javascript:void(0)" data-node="12345">
+          <div class="n">五指山・悟空財神殿</div>
+          <div class="id">12345</div>
+          <div class="p">Heart / 發財金 / 呼吸心跳 / 還願</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18888">
+          <div class="n">靈霄寶殿・玉帝金庫</div>
+          <div class="id">18888</div>
+          <div class="p">神明制度 / 0.1% 稅養活神明（頁面待接）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18921">
+          <div class="n">斬妖台・AutoLP/蒸發引擎</div>
+          <div class="id">18921</div>
+          <div class="p">0.05% AutoLP 稅 / 活動節律與獎勵（頁面待接）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="11520">
+          <div class="n">花果山台灣</div>
+          <div class="id">11520</div>
+          <div class="p">主宇宙本源 / 內容與世界觀入口</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="MARS">
+          <div class="n">花果山火星（MARS）</div>
+          <div class="id">MARS</div>
+          <div class="p">0.05% Reward 稅收 / 悟空自力更生之路</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="8888">
+          <div class="n">高老莊・仙女許願點</div>
+          <div class="id">8888</div>
+          <div class="p">許願池 / 任務與婚約敘事（頁面待接）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18459">
+          <div class="n">七仙女許願宮殿</div>
+          <div class="id">18459</div>
+          <div class="p">許願規則 / 代禮回家（頁面待接）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="16888">
+          <div class="n">廣寒宮・月球許願門檻</div>
+          <div class="id">16888</div>
+          <div class="p">集滿門檻後的高階許願（頁面待接）</div>
+        </a>
+      </div>
+
+      <div class="footer">
+        這是一個入口頁（Portal）。<br/>
+        下一步你只需要決定：每個殿要不要獨立一個頁面（各自 index.html），入口只負責導航與統計。
+      </div>
+    </section>
+
+    <section class="chat">
+      <div class="chatTop">
+        <div>
+          <div class="h">銀河客服（前端示範）</div>
+          <div class="s">先做 UI，後續再接 code.gs 做真正一問一答</div>
+        </div>
+        <div class="s mono" id="chatMode">MODE: LOCAL</div>
+      </div>
+      <div class="chatBody" id="chatBody">
+        <div class="msg">
+          <div class="who">系統</div>
+          <div class="bubble">歡迎來到銀河宇宙入口。你可以先點節點，或問我：「五指山是什麼？」</div>
+        </div>
+      </div>
+      <div class="chatInput">
+        <input id="chatInput" placeholder="輸入問題（示範：五指山 / 靈霄寶殿 / 斬妖台 / 花果山台灣）" />
+        <button class="btn" id="sendBtn" type="button">送出</button>
+      </div>
+    </section>
+
+    <div class="footer" style="margin-top:14px;">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
+    </div>
+  </div>
+
+<script>
+  // ========= Counters (localStorage) =========
+  const KEY_TOTAL = "KLINE_PORTAL_TOTAL_VISITS";
+  const KEY_TODAY = "KLINE_PORTAL_TODAY_VISITS";
+  const KEY_DATE  = "KLINE_PORTAL_TODAY_DATE";
+  const todayStr = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const da = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${da}`;
+  };
+
+  function incVisits(){
+    const d = todayStr();
+    const last = localStorage.getItem(KEY_DATE);
+    if(last !== d){
+      localStorage.setItem(KEY_DATE, d);
+      localStorage.setItem(KEY_TODAY, "0");
+    }
+    const total = Number(localStorage.getItem(KEY_TOTAL) || "0") + 1;
+    const today = Number(localStorage.getItem(KEY_TODAY) || "0") + 1;
+    localStorage.setItem(KEY_TOTAL, String(total));
+    localStorage.setItem(KEY_TODAY, String(today));
+    document.getElementById("total").textContent = String(total);
+    document.getElementById("today").textContent = String(today);
+  }
+
+  function loadVisits(){
+    const d = todayStr();
+    const last = localStorage.getItem(KEY_DATE);
+    if(last !== d){
+      localStorage.setItem(KEY_DATE, d);
+      localStorage.setItem(KEY_TODAY, "0");
+    }
+    document.getElementById("total").textContent = localStorage.getItem(KEY_TOTAL) || "0";
+    document.getElementById("today").textContent = localStorage.getItem(KEY_TODAY) || "0";
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    localStorage.removeItem(KEY_TOTAL);
+    localStorage.removeItem(KEY_TODAY);
+    localStorage.removeItem(KEY_DATE);
+    loadVisits();
+    addMsg("系統","已重置本機統計。");
+  });
+
+  // ========= Clock =========
+  function tick(){
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    const ss = String(d.getSeconds()).padStart(2,"0");
+    document.getElementById("clock").textContent = `${hh}:${mm}:${ss}`;
+  }
+  setInterval(tick, 500); tick();
+
+  // ========= Starfield =========
+  const canvas = document.getElementById("stars");
+  const ctx = canvas.getContext("2d");
+  let W=0,H=0,stars=[];
+  function resize(){
+    W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+    H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+    const count = Math.floor((canvas.offsetWidth*canvas.offsetHeight)/12000);
+    stars = new Array(Math.max(60, Math.min(220, count))).fill(0).map(()=>({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: (Math.random()*1.4+0.4)*devicePixelRatio,
+      v: (Math.random()*0.25+0.05)*devicePixelRatio,
+      a: Math.random()*0.7+0.15
+    }));
+  }
+  window.addEventListener("resize", resize);
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    for(const s of stars){
+      s.y += s.v;
+      if(s.y > H) { s.y = -10; s.x = Math.random()*W; }
+      ctx.globalAlpha = s.a;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // ========= Map click behavior (placeholder) =========
+  document.querySelectorAll(".node").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const id = el.getAttribute("data-node");
+      addMsg("系統", `你點了節點：${id}。目前是入口示範，等你把各殿頁面放好，我就把這裡的 href 直接接上去。`);
+    });
+  });
+
+  // ========= Heartbeat ping (front-end only) =========
+  document.getElementById("pingBtn").addEventListener("click", ()=>{
+    addMsg("系統", "已記錄一次心跳打點（前端示範）。之後可改成呼叫合約 heartbeatClaim() 或後台記錄。");
+  });
+
+  // ========= Chat (local demo) =========
+  function addMsg(who, text){
+    const box = document.getElementById("chatBody");
+    const row = document.createElement("div");
+    row.className = "msg";
+    row.innerHTML = `<div class="who">${who}</div><div class="bubble"></div>`;
+    row.querySelector(".bubble").textContent = text;
+    box.appendChild(row);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function localAnswer(q){
+    const s = q.trim();
+    if(!s) return "你還沒輸入問題。";
+    if(s.includes("五指山") || s.includes("12345")) return "五指山 12345：悟空財神殿入口。定位：心臟（Heart）/ 發財金 / 呼吸心跳 / 還願。";
+    if(s.includes("靈霄") || s.includes("18888")) return "靈霄寶殿 18888：玉帝金庫與神明制度。定位：0.1% 稅養活神明（頁面待接）。";
+    if(s.includes("斬妖") || s.includes("18921")) return "斬妖台 18921：AutoLP/蒸發引擎節律。定位：0.05% AutoLP 稅與活動節奏（頁面待接）。";
+    if(s.includes("花果山台灣") || s.includes("11520")) return "花果山台灣 11520：主宇宙本源與內容總入口。";
+    if(s.toLowerCase().includes("mars") || s.includes("火星")) return "MARS：悟空自力更生的外循環（0.05% Reward 稅收故事線）。";
+    if(s.includes("仙女") || s.includes("許願")) return "七仙女/許願：先做成獨立頁面與規則，入口只負責導航與統計。";
+    return "收到。這題我可以回答，但建議你先指定要連到哪個殿的頁面，我再把入口連結接好。";
+  }
+
+  function send(){
+    const input = document.getElementById("chatInput");
+    const q = input.value;
+    input.value = "";
+    addMsg("你", q);
+    addMsg("系統", localAnswer(q));
+  }
+  document.getElementById("sendBtn").addEventListener("click", send);
+  document.getElementById("chatInput").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") send();
+  });
+
+  // init
+  loadVisits();
+  incVisits(); // count this page load as a visit
+</script>
+</body>
+</html>
