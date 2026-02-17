@@ -1,25 +1,12 @@
-<div style="margin:14px 0 10px 0;">
-  <a href="./K線西遊記/index.html"
-     style="display:inline-block;
-            padding:10px 18px;
-            border-radius:999px;
-            font-weight:900;
-            text-decoration:none;
-            border:1px solid #111;
-            background:#fff;">
-    🗺️ 進入銀河宇宙入口
-  </a>
-</div>
-
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
-  <a href="https://klineodyssey.github.io/kline-odyssey/"
+  <a href="https://klineodyssey.github.io/kline-odyssey/index.html"
      target="_blank" rel="noopener"
      style="display:inline-flex; align-items:center; gap:8px;
             padding:10px 14px; border-radius:999px;
             font-weight:800; text-decoration:none;
             border:1px solid #111; background:#fff;">
-    💖 宇宙細包｜呼吸｜心跳｜生命🔥 
+    🗺️ 進入銀河宇宙入口🔥 
   </a>
 </div>
 
