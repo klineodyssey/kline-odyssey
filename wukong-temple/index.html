@@ -283,7 +283,7 @@
   }
 
 
-/* v4.5.4 HOTFIX UI */
+/* v4.5.5 HOTFIX UI */
 .modal.hidden{display:none;}
 .modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:16px; z-index:99999;}
 .modal-card{width:min(720px, 100%); background:rgba(10,16,32,.95); border:1px solid rgba(255,255,255,.12); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.55); overflow:hidden;}
@@ -303,7 +303,7 @@
   <div class="topbar-inner">
     <div class="brand">
       <b>悟空宇宙神殿飛碟｜駕駛艙 + 下單桌 + AI客服</b>
-      <span id="bootLine">boot_version=v4.5.4-wuzhishan12345-temple-vitals-ai-smarthelp-counter</span>
+      <span id="bootLine">boot_version=v4.5.5-wuzhishan12345-temple-vitals-ai-smarthelp-counter</span>
       <span id="visitLine" class="muted">到訪：--</span>
     </div>
 
@@ -545,7 +545,85 @@ WUZHISHAN 12345 · BUILD PROGRESS
         <div class="mini">
           <h3>外殿（觀光/留念/香油錢）</h3>
           <div class="small">
-            13 生肖 / 光明燈 / 七仙女許願 / 還願 / 發財金紀錄：屬於外殿文化層。<br>
+            13 生肖 / 光明燈 / 七仙女許願
+<div class="card" style="margin-top:12px">
+  <div class="h3">七仙女住處與自我介紹（星門座標）</div>
+  <div class="muted" style="margin-top:6px">
+    七仙女不是裝飾，是神殿的「客服神官」。每位仙女都有一個星門座標與專掌祝福，
+    也對應一個「多／空」節奏提醒——讓信眾在許願時，同步學會守心與風控。
+  </div>
+
+  <div class="grid" style="margin-top:10px">
+    <div class="card" style="padding:12px">
+      <div class="h4">14520｜大仙女 巧雲</div>
+      <div class="muted">天樞專掌：風調雨順｜做空</div>
+      <button class="btn" data-topic="fairy_14520" style="margin-top:10px">呼叫巧雲・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">14866｜二仙女 巧虹</div>
+      <div class="muted">天璇專掌：家庭美滿｜做多</div>
+      <button class="btn" data-topic="fairy_14866" style="margin-top:10px">呼叫巧虹・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">16184｜三仙女 巧芝</div>
+      <div class="muted">天璣專掌：育子收驚｜做空</div>
+      <button class="btn" data-topic="fairy_16184" style="margin-top:10px">呼叫巧芝・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">16888｜四仙女 巧仙</div>
+      <div class="muted">天權專掌：事業運通｜做多</div>
+      <button class="btn" data-topic="fairy_16888" style="margin-top:10px">呼叫巧仙・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">17347｜五仙女 巧蘭</div>
+      <div class="muted">天衡專掌：長命百歲｜做空</div>
+      <button class="btn" data-topic="fairy_17347" style="margin-top:10px">呼叫巧蘭・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">18056｜六仙女 巧梅</div>
+      <div class="muted">闓陽專掌：身體健康｜做多</div>
+      <button class="btn" data-topic="fairy_18056" style="margin-top:10px">呼叫巧梅・請她說明</button>
+    </div>
+    <div class="card" style="padding:12px">
+      <div class="h4">18459｜七仙女 巧靈</div>
+      <div class="muted">瑤光專掌：感情圓滿｜多單退（保本退場）</div>
+      <button class="btn" data-topic="fairy_18459" style="margin-top:10px">呼叫巧靈・請她說明</button>
+    </div>
+  </div>
+
+  <div class="muted" style="margin-top:10px">
+    七仙女住處：瑤池星門（神殿內駐點），並可在許願、發財金、還願、豪宅席位、與宇宙細包／商店流程中隨時介入協助。
+  </div>
+</div>
+
+<div class="card" style="margin-top:12px" id="marsSeatsCard">
+  <div class="h3">MARS 火星聖庫（0.05% Reward 稅）｜500 席位</div>
+  <div class="muted" style="margin-top:6px">
+    這裡不是心臟。心臟（Heart）負責呼吸與發財金；<b>MARS</b> 才是「席位」制度：
+    <b>一次還願 5000 KGEN → 取得 1 席</b>（總上限 500 席）。席位用來分配 MARS 稅收回流（0.05%）。
+  </div>
+
+  <div class="grid" style="margin-top:10px">
+    <div class="card" style="padding:12px">
+      <div class="h4">席位剩餘</div>
+      <div style="font-size:28px;font-weight:900" id="marsSeatsRemaining">—</div>
+      <div class="muted">上限：500 席（前端暫以「鏈上事件／或本機紀錄」顯示；正式版可改成鏈上查詢）</div>
+      <button class="btn" id="btnMarsRefresh" data-topic="mars_refresh" style="margin-top:10px">刷新席位</button>
+    </div>
+
+    <div class="card" style="padding:12px">
+      <div class="h4">一次還願 5000 KGEN</div>
+      <div class="muted">目標地址（MARS / KUFO Vault）：<span class="mono" id="addrMARS">（尚未設定）</span></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px">
+        <button class="btn" id="btnCopyMARS" data-topic="copy_mars">一鍵複製地址</button>
+        <button class="btn" id="btnMarsVow5000" data-topic="mars_vow">我已還願 5000（記錄席位）</button>
+      </div>
+      <div class="muted" style="margin-top:8px">提醒：真正的席位憑證以「鏈上轉帳紀錄」為準；此按鈕只做前端引導與顯示。</div>
+    </div>
+  </div>
+</div>
+
+ / 還願 / 發財金紀錄：屬於外殿文化層。<br>
             與交易分層隔離，不讓「廟變交易所」。
           </div>
         </div>
@@ -1783,7 +1861,7 @@ log("ready");
 </script>
 
 <!-- Floating Chain Panel Button -->
-<button id="chainBtn" style="position:fixed; right:14px; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:9999;
+<button id="chainBtn" style="position:fixed; left:14px; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:9999;
   padding:12px 14px; border-radius:999px; border:1px solid #111; background:#fff; font-weight:900;">
   ⚡鏈上・心臟
 </button>
@@ -2732,7 +2810,7 @@ function setIfEmpty(id, val) {
     }
 
     if (t.includes("發財金") || t.includes("領") || t.includes("claim")) {
-      return "領發財金需要三聖筊（按「擲筊」直到累積3次聖筊），接著連線錢包，輸入要領的 KGEN 數量，按「領發財金」。若心臟合約未上鏈或未填地址，系統會提示你先貼上 cfgHeart。";
+      return "領發財金需要完成三聖碑（同一天最多擲筊3次；只要出現至少1次聖筊即可通關），接著連線錢包，輸入要領的 KGEN 數量，按「領發財金」。若心臟合約未上鏈或未填地址，系統會提示你先貼上 cfgHeart。";
     }
 
     if (t.includes("點燈") || t.includes("光明燈") || t.includes("108")) {
@@ -2941,7 +3019,7 @@ function setIfEmpty(id, val) {
 
 <script id="hotfix-v4-5-4">
 (() => {
-  const BOOT = "v4.5.4-wuzhishan12345-temple-vitals-ai-smarthelp-counter";
+  const BOOT = "v4.5.5-wuzhishan12345-temple-vitals-ai-smarthelp-counter";
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
   const nowIso = () => new Date().toISOString();
@@ -2981,7 +3059,7 @@ function setIfEmpty(id, val) {
 
 今天先把神殿基礎設施裝璜好：
 1) 生命跡象（呼吸 / 心跳 / 血壓）
-2) 三聖杯（領發財金前的儀式驗證）
+2) 三聖碑（領發財金前的儀式驗證）
 3) 點燈（108 KGEN）與說明
 4) 宇宙細包（錢包教學）與宇宙商店（商家紅利入口）
 
@@ -3007,13 +3085,13 @@ function setIfEmpty(id, val) {
 如果你希望「一進頁就有聲音」：手機瀏覽器可能會擋自動語音，
 你只要第一次輕觸畫面，我就能開始朗讀。`,
     plaques:
-`三聖杯（擲筊）：
+`三聖碑（擲筊）：
 領發財金前，先連續擲出三次「聖杯」才放行。
 本版先做前端儀式（本機存檔），後續接鏈上會把結果寫入心臟合約。`,
     fortune:
 `發財金流程：
 1) 連錢包（宇宙細包）
-2) 三聖杯放行
+2) 三聖碑放行
 3) 由「心臟合約」發放到你的錢包
 
 目前這版先把流程與介面做對；等你給合約地址後，就能接真實發放。`,
@@ -3038,7 +3116,77 @@ function setIfEmpty(id, val) {
 按「查看完工清單」會打開進度面板。
 你可以勾選每一項，進度條會更新。
 這樣你不用一個一個點名，我會自己先自檢。`
-  };
+  
+  ,
+    fortune_gate:
+`領發財金前置條件：
+1) 先完成「三聖碑」：同一天最多擲筊 3 次，只要出現至少 1 次「聖筊」即通關。
+2) 上鏈領取仍需要錢包（MetaMask / TrustWallet）。
+
+你現在看到的按鈕會依通關狀態自動解鎖。`,
+    plaques_holy:
+`聖筊｜今日通關。
+你已取得今日「三聖碑」通行。
+接下來可以去領發財金（仍受 1/日、月上限、500 名等限制）。`,
+    plaques_laugh:
+`笑筊｜提醒：別急。
+市場的笑，是要你慢一拍。
+你還有剩下的碑可以再立一次。`,
+    plaques_yin:
+`陰筊｜提醒：守心。
+今天的氣脈偏保守，先觀望再出手。
+你仍可完成剩餘碑，或明日再來。`,
+    mars_refresh_done:
+`已刷新席位顯示。
+正式席位憑證以「鏈上還願轉帳」為準；目前前端只做引導與視覺化。`,
+    mars_recorded:
+`已在本機記錄 +1 席。
+下一步：請在鏈上完成 5000 KGEN 還願轉帳到 MARS / KUFO Vault，才算真正入席。`,
+    mars_full:
+`500 席位已滿。
+此時可改走一般持有分潤（或等待未來擴座）。`,
+    copy_mars_done:
+`MARS 地址已複製。
+貼到錢包「轉帳」即可。`,
+    addr_missing:
+`地址尚未設定。
+請先在「鏈上配置」面板把 KUFO / MARS 地址填好。`,
+    fairy_14520:
+`大仙女 巧雲（14520｜天樞）
+主祝福：風調雨順
+節奏提醒：偏空，先守後攻。
+願望適用：事業轉機、天氣與行程、避險保平安。`,
+    fairy_14866:
+`二仙女 巧虹（14866｜天璇）
+主祝福：家庭美滿
+節奏提醒：偏多，但不追價。
+願望適用：家運、和解、長期修復。`,
+    fairy_16184:
+`三仙女 巧芝（16184｜天璣）
+主祝福：育子收驚
+節奏提醒：偏空，先排雷。
+願望適用：孩子、睡眠、焦慮與驚嚇化解。`,
+    fairy_16888:
+`四仙女 巧仙（16888｜天權）
+主祝福：事業運通
+節奏提醒：偏多，步步為營。
+願望適用：升遷、談判、專案推進。`,
+    fairy_17347:
+`五仙女 巧蘭（17347｜天衡）
+主祝福：長命百歲
+節奏提醒：偏空，先守命。
+願望適用：體能、復原、長期保健。`,
+    fairy_18056:
+`六仙女 巧梅（18056｜闓陽）
+主祝福：身體健康
+節奏提醒：偏多，但要守節律。
+願望適用：康復、訓練、戒壞習慣。`,
+    fairy_18459:
+`七仙女 巧靈（18459｜瑤光）
+主祝福：感情圓滿
+節奏提醒：多單退（保本退場）。
+願望適用：修復關係、告別執念、回到平衡。`
+};
 
   function smart(topic) {
     setAi(HELP[topic] || HELP.welcome, true);
@@ -3079,7 +3227,7 @@ function setIfEmpty(id, val) {
       wrap.style.marginTop = "12px";
       wrap.innerHTML = `
         <div class="row" style="justify-content:space-between; align-items:center;">
-          <div style="font-weight:900;">三聖杯（領發財金前）</div>
+          <div style="font-weight:900;">三聖碑（領發財金前）</div>
           <button class="btn ghost" id="btnPlaquesHelp">解說</button>
         </div>
         <div class="small muted" style="margin-top:6px;">連續三次聖杯才放行（本機儀式版）。</div>
@@ -3089,7 +3237,7 @@ function setIfEmpty(id, val) {
           <button class="btn btnPlaque">擲筊 3</button>
           <button class="btn ghost" id="btnResetPlaques">重置</button>
         </div>
-        <div id="plaquesStatus" class="pill" style="margin-top:10px; padding:10px 12px;">三聖杯：0/3</div>
+        <div id="plaquesStatus" class="pill" style="margin-top:10px; padding:10px 12px;">三聖碑：0/3</div>
         <div class="row" style="gap:10px; flex-wrap:wrap; margin-top:10px;">
           <button class="btn" id="btnClaimFortune" disabled>放行後領發財金</button>
           <button class="btn ghost" id="btnLamp108">點燈 108 KGEN</button>
@@ -3125,56 +3273,161 @@ function setIfEmpty(id, val) {
   }
 
   function initPlaquesLogic() {
-    const key = "wuzhishan_plaques_state";
-    const getS = () => { try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; } };
-    const setS = (s) => localStorage.setItem(key, JSON.stringify(s));
-    let s = getS(); if (typeof s.streak !== "number") s.streak = 0; setS(s);
+  // 三聖碑（擲筊）— 每日最多 3 次，只要出現至少 1 次「聖筊」即可通關
+  const key = "WUZHISHAN_PLAQUES_V1";
+  const nowDayId = () => Math.floor((Date.now() + 8*3600*1000) / 86400000);
 
-    const render = () => {
-      const s2 = getS();
-      const t = $("#plaquesStatus");
-      if (t) t.textContent = `三聖杯：${s2.streak}/3（${s2.last || "尚未擲筊"}）`;
-      const claim = $("#btnClaimFortune");
-      if (claim) claim.disabled = s2.streak < 3;
-    };
+  const defaultState = () => ({
+    dayId: nowDayId(),
+    throws: 0,
+    holy: 0,
+    last: "",
+    passed: false
+  });
+
+  const load = () => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return defaultState();
+      const s = JSON.parse(raw);
+      if (!s || typeof s !== "object") return defaultState();
+      // reset on new day
+      if (s.dayId !== nowDayId()) return defaultState();
+      s.passed = (s.holy || 0) >= 1; // pass rule
+      return s;
+    } catch (_) {
+      return defaultState();
+    }
+  };
+
+  const save = (s) => localStorage.setItem(key, JSON.stringify(s));
+
+  const roll = () => {
+    // Simple weighted roll: 聖 20%, 笑 20%, 陰 60%
+    const r = Math.random();
+    if (r < 0.20) return "聖筊";
+    if (r < 0.40) return "笑筊";
+    return "陰筊";
+  };
+
+  const render = () => {
+    const s = load();
+
+    const label = document.getElementById("cupStatus");
+    if (label) {
+      const passText = s.passed ? "✅ 今日通關" : "⛔ 尚未通關";
+      label.textContent = `三聖碑：${s.throws}/3｜今日聖筊=${s.holy}｜${passText}（${s.last || "尚未擲筊"}）`;
+    }
+
+    const btns = ["btnCup1", "btnCup2", "btnCup3"].map(id => document.getElementById(id)).filter(Boolean);
+    btns.forEach((b, i) => {
+      const n = i + 1;
+      if (s.throws >= n) {
+        b.disabled = true;
+        b.textContent = `第${n}碑已立`;
+      } else {
+        b.disabled = false;
+        b.textContent = `立第${n}碑（擲筊）`;
+      }
+    });
+
+    // Fortune button gate (front-end)
+    const fortuneBtn = document.getElementById("btnFortune");
+    if (fortuneBtn) {
+      fortuneBtn.disabled = !s.passed;
+      fortuneBtn.dataset.topic = "fortune_gate";
+    }
+  };
+
+  const doThrow = () => {
+    const s = load();
+    if (s.throws >= 3) return;
+
+    const res = roll();
+    s.throws += 1;
+    s.last = res;
+    if (res === "聖筊") s.holy += 1;
+
+    s.passed = s.holy >= 1;
+    save(s);
+
+    // Smart help / toast
+    smartHelp(res === "聖筊" ? "plaques_holy" : (res === "笑筊" ? "plaques_laugh" : "plaques_yin"), {res, state: s});
     render();
+  };
 
-    $$(".btnPlaque").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const holy = Math.random() > 0.5;
-        const s3 = getS();
-        if (holy) s3.streak += 1; else s3.streak = 0;
-        s3.last = holy ? "聖杯" : "笑杯";
-        setS(s3);
-        render();
-        setAi(`三聖杯結果：${s3.last}\n\n${holy ? "再來一次。連續三次聖杯就放行。" : "別急，重新來。心要定。"}\n`, true);
-      });
-    });
+  ["btnCup1", "btnCup2", "btnCup3"].forEach((id) => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    b.addEventListener("click", doThrow);
+  });
 
-    const reset = $("#btnResetPlaques");
-    if (reset) reset.addEventListener("click", () => { setS({streak:0,last:null}); render(); smart("plaques"); });
+  render();
+}
 
-    const claim = $("#btnClaimFortune");
-    if (claim) claim.addEventListener("click", () => {
-      const s4 = getS();
-      if (s4.streak < 3) return smart("plaques");
-      smart("fortune");
-    });
-  }
+// ===================== MARS Seats (Front-end display) =====================
+function initMarsSeats() {
+  const SEATS_TOTAL = 500;
+  const key = "WUZHISHAN_MARS_SEATS_V1";
+  const elRemain = document.getElementById("marsSeatsRemaining");
+  const elAddr = document.getElementById("addrMARS");
+  const btnCopy = document.getElementById("btnCopyMARS");
+  const btnVow = document.getElementById("btnMarsVow5000");
+  const btnRef = document.getElementById("btnMarsRefresh");
 
-  // checklist modal
-  const CHECKS = [
-    {key:"temple_nav", label:"每個按鍵都有客服解說"},
-    {key:"vitals", label:"呼吸/心跳/血壓顯示"},
-    {key:"plaques", label:"三聖杯放行流程"},
-    {key:"lamp", label:"點燈 108 KGEN 說明"},
-    {key:"fortune", label:"發財金流程說明"},
-    {key:"wallet", label:"宇宙細包錢包教學"},
-    {key:"shop", label:"宇宙商店入口說明"},
-    {key:"counter", label:"到訪人數顯示"},
-    {key:"progress", label:"工程進度面板可用"}
-  ];
-  const progKey = "wuzhishan_build_progress_v454";
+  const get = () => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return {count:0};
+      const s = JSON.parse(raw);
+      if (!s || typeof s.count !== "number") return {count:0};
+      return s;
+    } catch (_) { return {count:0}; }
+  };
+  const set = (s) => localStorage.setItem(key, JSON.stringify(s));
+
+  const render = () => {
+    const s = get();
+    const remain = Math.max(0, SEATS_TOTAL - s.count);
+    if (elRemain) elRemain.textContent = String(remain);
+    const marsAddr = (window.WUZHISHAN_CFG && (WUZHISHAN_CFG.mars || WUZHISHAN_CFG.kufo)) || "";
+    if (elAddr) elAddr.textContent = marsAddr || "（尚未設定）";
+  };
+
+  const copyAddr = async () => {
+    const marsAddr = (window.WUZHISHAN_CFG && (WUZHISHAN_CFG.mars || WUZHISHAN_CFG.kufo)) || "";
+    if (!marsAddr) { smartHelp("addr_missing"); return; }
+    try {
+      await navigator.clipboard.writeText(marsAddr);
+      toast("已複製 MARS 地址");
+    } catch (_) {
+      toast("無法自動複製，請手動長按複製");
+    }
+    smartHelp("copy_mars_done");
+  };
+
+  const recordSeat = () => {
+    const s = get();
+    if (s.count >= SEATS_TOTAL) {
+      toast("席位已滿（500/500）");
+      smartHelp("mars_full");
+      return;
+    }
+    s.count += 1;
+    set(s);
+    toast("已在本機記錄：+1 席（正式以鏈上轉帳為準）");
+    smartHelp("mars_recorded");
+    render();
+  };
+
+  if (btnCopy) btnCopy.addEventListener("click", copyAddr);
+  if (btnVow) btnVow.addEventListener("click", recordSeat);
+  if (btnRef) btnRef.addEventListener("click", () => { render(); smartHelp("mars_refresh_done"); });
+
+  render();
+}
+
+const progKey = "wuzhishan_build_progress_v455";
   const loadP = () => { try { return JSON.parse(localStorage.getItem(progKey) || "{}") || {}; } catch { return {}; } };
   const saveP = (p) => localStorage.setItem(progKey, JSON.stringify(p));
   const pct = (p) => Math.round(Object.values(p).filter(Boolean).length * 100 / CHECKS.length);
@@ -3261,6 +3514,7 @@ function setIfEmpty(id, val) {
     applySafeBottom();
     ensurePanels();
     initPlaquesLogic();
+    initMarsSeats();
     bindEcho();
 
     const btn = $("#btnShowBuildChecklist");
