@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>五指山悟空財神殿 12345</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:black;
+  color:#fff;
+  font-family:Arial, Helvetica, sans-serif;
+  text-align:center;
+}
+
+header{
+  padding:30px;
+  font-size:28px;
+  letter-spacing:2px;
+}
+
+.sub{
+  color:#aaa;
+  font-size:14px;
+  margin-bottom:30px;
+}
+
+.panel{
+  border:1px solid #333;
+  padding:20px;
+  margin:20px auto;
+  width:90%;
+  max-width:700px;
+  border-radius:8px;
+  background:#111;
+}
+
+.button{
+  padding:10px 20px;
+  background:#222;
+  color:white;
+  border:1px solid #444;
+  cursor:pointer;
+  margin:10px;
+}
+
+.button:hover{
+  background:#333;
+}
+
+.address{
+  font-size:12px;
+  word-break:break-all;
+  color:#66ffcc;
+}
+
+.counter{
+  font-size:18px;
+  margin:10px 0;
+  color:#ffcc00;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+五指山悟空財神殿 12345
+</header>
+
+<div class="sub">
+悟空被壓五指山。  
+心臟尚在跳動。  
+信眾可還願、可領發財金。
+</div>
+
+<div class="panel">
+<h3>🔥 今日心跳狀態</h3>
+<div id="heartbeatStatus">尚未讀取</div>
+<button class="button" onclick="heartbeat()">心跳</button>
+</div>
+
+<div class="panel">
+<h3>💰 發財金領取</h3>
+<div class="counter">
+本月最多 500 名  
+每人 1 ~ 888 KGEN
+</div>
+<input type="number" id="fortuneAmount" placeholder="輸入 1~888">
+<br>
+<button class="button" onclick="fortune()">領發財金</button>
+</div>
+
+<div class="panel">
+<h3>🙏 還願入口</h3>
+
+<div>① 心臟合約地址</div>
+<div class="address" id="heartAddress">0xYourHeartAddress</div>
+
+<br>
+
+<div>② MARS（0.05% Reward 稅收）</div>
+<div class="address" id="marsAddress">0xYourMarsAddress</div>
+
+<br>
+
+<div>③ 靈霄寶殿（0.1% 稅收）</div>
+<div class="address" id="jadeAddress">0xYourLingXiaoAddress</div>
+
+<br>
+
+<div>④ 黑洞蒸發引擎（AutoLP 0.05%）</div>
+<div class="address" id="blackholeAddress">0xYourBlackholeAddress</div>
+
+</div>
+
+<div class="panel">
+<h3>📊 神殿數據</h3>
+<div>宇宙總量：72,000,000 KGEN</div>
+<div>今日參訪人數：<span id="todayVisitors">0</span></div>
+<div>總參訪人數：<span id="totalVisitors">0</span></div>
+</div>
+
+<div style="margin:40px;">
+<a href="../../index.html" style="color:#999;">← 返回宇宙入口</a>
+</div>
+
+<script>
+
+// ===== 模擬區（未接 Web3 前使用） =====
+
+function heartbeat(){
+    document.getElementById("heartbeatStatus").innerText =
+        "心跳成功 · " + new Date().toLocaleTimeString();
+}
+
+function fortune(){
+    let amt = document.getElementById("fortuneAmount").value;
+    if(amt < 1 || amt > 888){
+        alert("金額需在 1~888 之間");
+        return;
+    }
+    alert("發財金申請：" + amt + " KGEN");
+}
+
+// ===== 簡易訪客統計（前端示範版） =====
+
+let total = localStorage.getItem("totalVisitors");
+if(!total){ total = 0; }
+total++;
+localStorage.setItem("totalVisitors", total);
+document.getElementById("totalVisitors").innerText = total;
+
+let today = new Date().toDateString();
+let todayCount = localStorage.getItem(today);
+if(!todayCount){ todayCount = 0; }
+todayCount++;
+localStorage.setItem(today, todayCount);
+document.getElementById("todayVisitors").innerText = todayCount;
+
+</script>
+
+</body>
+  </html>
