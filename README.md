@@ -1,6 +1,6 @@
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
-  <a href="https://klineodyssey.github.io/kline-odyssey/index.html"
+  <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
      target="_blank" rel="noopener"
      style="display:inline-flex; align-items:center; gap:8px;
             padding:10px 14px; border-radius:999px;
