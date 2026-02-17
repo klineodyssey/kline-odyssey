@@ -6,7 +6,7 @@
             padding:10px 14px; border-radius:999px;
             font-weight:800; text-decoration:none;
             border:1px solid #111; background:#fff;">
-    🗺️ 進入銀河宇宙入口🔥 
+    🗺️ 進入銀河宇宙入口 
   </a>
 </div>
 
