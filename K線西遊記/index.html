@@ -343,7 +343,7 @@
 
       <div class="nodes">
         <!-- 你可把 href 改成各殿的相對路徑，例如 ./temples/12345/index.html -->
-        <a class="node" href="javascript:void(0)" data-node="12345">
+        <a class="node" href="./temples/12345/index.html" data-node="12345">
           <div class="n">五指山・悟空財神殿</div>
           <div class="id">12345</div>
           <div class="p">Heart / 發財金 / 呼吸心跳 / 還願</div>
@@ -516,13 +516,20 @@
   }
   draw();
 
-  // ========= Map click behavior (placeholder) =========
-  document.querySelectorAll(".node").forEach(el=>{
-    el.addEventListener("click", ()=>{
-      const id = el.getAttribute("data-node");
-      addMsg("系統", `你點了節點：${id}。目前是入口示範，等你把各殿頁面放好，我就把這裡的 href 直接接上去。`);
-    });
+  // ========= Map click behavior (only placeholder when no href) =========
+document.querySelectorAll(".node").forEach(el=>{
+  el.addEventListener("click", (e)=>{
+    const href = (el.getAttribute("href") || "").trim();
+    const id = el.getAttribute("data-node");
+
+    // 有接頁面：讓瀏覽器照 href 正常跳轉
+    if (href && !href.startsWith("javascript")) return;
+
+    // 沒接頁面：阻止跳轉，改用提示
+    e.preventDefault();
+    addMsg("系統", `你點了節點：${id}。這個節點尚未接頁面。等你放好 ./temples/${id}/index.html，我就能直接跳轉。`);
   });
+});
 
   // ========= Heartbeat ping (front-end only) =========
   document.getElementById("pingBtn").addEventListener("click", ()=>{
