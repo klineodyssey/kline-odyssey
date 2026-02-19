@@ -1,0 +1,5 @@
+把 ethers-5.7.2.umd.min.js 放在這個資料夾：
+/K線西遊記/assets/js/ethers-5.7.2.umd.min.js
+
+12345 神殿頁已用相對路徑載入：
+../../assets/js/ethers-5.7.2.umd.min.js
