@@ -577,6 +577,165 @@
   // initial
   $("heart").textContent = HEART_ADDRESS;
   $("timeHint").textContent = `本機時間 ${nowLocal()}`;
+
+
+// ===== Web3 (Ethers v5) =====
+// 放置位置：/K線西遊記/assets/ethers-5.7.2.umd.min.js
+// 此頁引用：../../assets/ethers-5.7.2.umd.min.js
+
+const CFG = {
+  chainIdHex: "0x38", // BSC mainnet
+  kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  heart: "0xYourHeartContract", // 部署後回填
+};
+
+let provider, signer, user, heart;
+
+// Heart ABI（只放本頁需要的函式）
+const HEART_ABI = [
+  "function igniteAndClaim()",
+  "function heartbeatClaim()",
+  "function fortuneClaim(uint256 amount)",
+  "function vowTo(uint8 option, uint256 amount)",
+  "function lightLamp(uint16 daysToAdd, uint256 amount) returns (uint256)",
+  "function makeWish(bytes32 wishHash)",
+  "function token() view returns (address)",
+  "function getConfig() view returns (address,address,address,address,uint32,uint32,uint256,uint256,uint256,uint256,uint16,uint16)",
+  "event Heartbeat(address indexed user, uint256 indexed hourId, uint256 amount, uint256 timestamp)",
+  "event Fortune(address indexed user, uint256 indexed dayId, uint256 indexed monthId, uint256 amount, uint256 timestamp)",
+  "event WishMade(address indexed user, uint256 indexed dayId, bytes32 indexed wishHash, uint256 timestamp)"
+];
+
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)"
+];
+
+async function connectWallet(){
+  try{
+    if(!window.ethereum){
+      alert("找不到錢包（MetaMask / OKX / TrustWallet）。請先安裝或改用內建錢包瀏覽器。");
+      return;
+    }
+    await ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    user = await signer.getAddress();
+
+    // check chain
+    const net = await provider.getNetwork();
+    if(net.chainId !== 56){
+      document.getElementById("walletStatus").innerText = "已連線，但不是 BSC 主網（chainId=" + net.chainId + "）。請切換到 BNB Chain。";
+    }else{
+      document.getElementById("walletStatus").innerText = "已連線：" + user;
+    }
+
+    heart = new ethers.Contract(CFG.heart, HEART_ABI, signer);
+  }catch(e){
+    console.error(e);
+    alert("連線失敗：" + (e && e.message ? e.message : e));
+  }
+}
+
+async function ensureConnected(){
+  if(!signer || !user){
+    await connectWallet();
+  }
+  if(!signer || !user) throw new Error("not connected");
+}
+
+function toWeiKGEN(n){
+  // KGEN decimals = 18
+  return ethers.utils.parseUnits(String(n), 18);
+}
+
+async function lightLamp(){
+  try{
+    await ensureConnected();
+    const amt = Number(document.getElementById("lampAmount").value || "0");
+    if(!(amt > 0)) { alert("請輸入上香金額"); return; }
+
+    const token = new ethers.Contract(CFG.kgenToken, ERC20_ABI, signer);
+    const wei = toWeiKGEN(amt);
+
+    // approve heart to pull KGEN
+    const alw = await token.allowance(user, CFG.heart);
+    if(alw.lt(wei)){
+      const txa = await token.approve(CFG.heart, wei);
+      await txa.wait();
+    }
+
+    // daysToAdd：預設 1 天（你可改成 UI 選項）
+    const tx = await heart.lightLamp(1, wei);
+    const rc = await tx.wait();
+    document.getElementById("lampStatus").innerText = "點燈成功 · tx=" + rc.transactionHash;
+  }catch(e){
+    console.error(e);
+    document.getElementById("lampStatus").innerText = "點燈失敗：" + (e && e.message ? e.message : e);
+  }
+}
+
+async function makeWish(){
+  try{
+    await ensureConnected();
+    const text = (document.getElementById("wishText").value || "").trim();
+    if(!text){ alert("請輸入願望"); return; }
+
+    // store local
+    const key = "KLINE_WISH_" + new Date().toISOString().slice(0,10);
+    localStorage.setItem(key, text);
+
+    // hash for chain proof
+    const wishHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(text));
+    const tx = await heart.makeWish(wishHash);
+    const rc = await tx.wait();
+    document.getElementById("wishStatus").innerText = "許願成功（鏈上哈希）· tx=" + rc.transactionHash;
+  }catch(e){
+    console.error(e);
+    document.getElementById("wishStatus").innerText = "許願失敗：" + (e && e.message ? e.message : e);
+  }
+}
+
+// Camera
+async function startCam(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+    const v = document.getElementById("cam");
+    v.srcObject = stream;
+    document.getElementById("camStatus").innerText = "鏡頭已啟動（本機顯示，不上傳）";
+  }catch(e){
+    console.error(e);
+    document.getElementById("camStatus").innerText = "鏡頭啟動失敗：" + (e && e.message ? e.message : e);
+  }
+}
+function snap(){
+  const v = document.getElementById("cam");
+  if(!v.srcObject){ alert("請先開啟鏡頭"); return; }
+  const c = document.getElementById("snapCanvas");
+  c.width = v.videoWidth || 640;
+  c.height = v.videoHeight || 480;
+  const ctx = c.getContext("2d");
+  ctx.drawImage(v,0,0,c.width,c.height);
+  const img = document.getElementById("snapImg");
+  img.src = c.toDataURL("image/png");
+  img.style.display = "block";
+}
+
+// Voice guide (TTS)
+function speakGuide(){
+  try{
+    const t = "歡迎來到五指山悟空財神殿。先連線錢包，再點光明燈，然後每日一次在許願池留下你的願望。所有操作都可以在鏈上驗證。";
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = "zh-TW";
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){
+    alert("你的瀏覽器不支援語音。");
+  }
+}
+
 </script>
 
 </body>
