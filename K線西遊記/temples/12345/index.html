@@ -1,519 +1,214 @@
-<!doctype html>
+<!-- Official Entry (Top-Right) -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank" rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px;
+            padding:10px 14px; border-radius:999px;
+            font-weight:800; text-decoration:none;
+            border:1px solid #111; background:#fff;">
+    🌐 Official Website
+  </a>
+</div>
+
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>五指山・悟空財神殿 12345｜Temple V2.0</title>
+<meta charset="UTF-8">
+<title>五指山・悟空財神殿 12345</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="kline:temple" content="WUZHISHAN-12345" />
-  <meta name="kline:version" content="TempleUI-V2.0.0-STABLE" />
+<!-- VERSION: WuzhiShan-12345 Temple V2.0.0 -->
+<!-- MODE: DEMO (切換 LIVE 需填入 Heart 合約地址) -->
 
-  <style>
-    :root{
-      --bg:#000;
-      --panel:#111;
-      --line:#2b2b2b;
-      --text:#fff;
-      --muted:#a9a9a9;
-      --accent:#66ffcc;
-      --warn:#ffcc00;
-      --danger:#ff5a5a;
-      --r:12px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
-    }
-    *{box-sizing:border-box}
-    body{ margin:0; background:var(--bg); color:var(--text); font-family:var(--sans); text-align:center; }
-    header{ padding:26px 14px 8px; font-size:26px; letter-spacing:1px; font-weight:900; }
-    .sub{ color:var(--muted); font-size:13px; margin:0 auto 16px; max-width:820px; line-height:1.6; padding:0 14px; }
-    .ver{ color:#7d7d7d; font-size:12px; margin-top:6px; font-family:var(--mono); }
+<style>
+body{
+  margin:0;
+  background:#050505;
+  color:#fff;
+  font-family:Arial, Helvetica, sans-serif;
+  text-align:center;
+}
 
-    .wrap{ max-width:860px; margin:0 auto; padding:0 14px 36px; }
-    .panel{
-      border:1px solid var(--line);
-      padding:16px;
-      margin:14px auto;
-      border-radius:var(--r);
-      background:var(--panel);
-      text-align:left;
-    }
-    .panel h3{ margin:0 0 10px; font-size:16px; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    .btn{
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid #3a3a3a;
-      background:#1b1b1b;
-      color:var(--text);
-      cursor:pointer;
-      font-weight:800;
-    }
-    .btn:hover{ background:#242424; }
-    .btn:disabled{ opacity:.45; cursor:not-allowed; }
-    .btn.danger{ border-color:#4a2222; }
-    .btn.ghost{ background:transparent; }
-    .mono{ font-family:var(--mono); }
-    .kv{ margin-top:10px; font-size:12px; color:var(--muted); line-height:1.6; }
-    .kv b{ color:var(--text); }
-    .addr{ color:var(--accent); word-break:break-all; font-family:var(--mono); font-size:12px; }
-    .badge{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:999px; background:#0b0b0b; color:var(--muted); font-size:12px; }
-    .badge b{ color:var(--text); }
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    @media (max-width:760px){ .grid{ grid-template-columns:1fr; } }
-    input[type="number"], input[type="text"]{
-      width:100%;
-      padding:12px 12px;
-      border-radius:10px;
-      border:1px solid var(--line);
-      background:#0b0b0b;
-      color:var(--text);
-      outline:none;
-      font-family:var(--mono);
-    }
-    .hint{ color:var(--muted); font-size:12px; line-height:1.6; }
-    .ok{ color:var(--accent); }
-    .warn{ color:var(--warn); }
-    .dangerText{ color:var(--danger); }
-    a{ color:#9d9d9d; text-decoration:none; }
-    a:hover{ color:#cfcfcf; }
-    .footer{ color:var(--muted); font-size:12px; line-height:1.6; margin-top:18px; text-align:center; }
-    .hr{ height:1px; background:var(--line); margin:12px 0; }
-  </style>
+header{
+  padding:30px 10px;
+  font-size:24px;
+  font-weight:900;
+}
+
+.sub{
+  color:#aaa;
+  font-size:13px;
+  margin-bottom:25px;
+}
+
+.panel{
+  border:1px solid #333;
+  padding:20px;
+  margin:20px auto;
+  width:90%;
+  max-width:720px;
+  border-radius:12px;
+  background:#111;
+}
+
+button{
+  padding:10px 18px;
+  background:#222;
+  color:white;
+  border:1px solid #444;
+  cursor:pointer;
+  margin:8px;
+  border-radius:8px;
+}
+
+button:hover{ background:#333; }
+
+input{
+  padding:8px;
+  margin:8px;
+  border-radius:6px;
+  border:1px solid #444;
+  background:#000;
+  color:white;
+}
+
+.version{
+  font-size:12px;
+  color:#888;
+  margin-top:20px;
+}
+
+.status{
+  font-size:14px;
+  color:#66ffcc;
+  margin-top:10px;
+}
+</style>
 </head>
 
 <body>
-  <header>
-    五指山・悟空財神殿 12345
-    <div class="ver" id="verLine">TempleUI-V2.0.0-STABLE</div>
-  </header>
 
-  <div class="sub">
-    悟空被壓五指山，心臟仍在跳。<br>
-    這裡只做四件事：連錢包、心跳、呼吸、發財金。<br>
-    還願先以「回 Heart 同一地址回血」為主，其他器官等合約下好再接通。
-  </div>
+<header>
+五指山・悟空財神殿 12345
+</header>
 
-  <div class="wrap">
+<div class="sub">
+悟空被壓五指山。<br>
+心臟尚在跳動。<br>
+宇宙呼吸不可中斷。
+</div>
 
-    <!-- A) System / Wallet -->
-    <div class="panel">
-      <h3>一、通電狀態</h3>
-      <div class="row">
-        <div class="badge">模式：<b id="modeTxt">DEMO</b></div>
-        <div class="badge">鏈：<b id="chainTxt" class="mono">--</b></div>
-        <div class="badge">錢包：<b id="acctTxt" class="mono">未連線</b></div>
-      </div>
+<div class="panel">
+<h3>🌬 呼吸窗口（00:00–00:10 UTC+8）</h3>
+<div id="breathCountdown">計算中...</div>
+</div>
 
-      <div class="hr"></div>
+<div class="panel">
+<h3>💓 每小時心跳</h3>
+<div id="heartbeatInfo">尚未觸發</div>
+<button onclick="heartbeat()">心跳</button>
+</div>
 
-      <div class="grid">
-        <div>
-          <div class="hint">Address Registry（地址石碑）</div>
-          <input id="REGISTRY" type="text" placeholder="0x...（可先留空，DEMO 也能跑）">
-          <div class="hint">建議：之後只改 Registry，不改每座神殿。</div>
-        </div>
-        <div>
-          <div class="hint">Heart（心臟合約）</div>
-          <input id="HEART" type="text" placeholder="0x...（可先留空，DEMO 也能跑）">
-          <div class="hint">Heart 未部署前：此頁先做 UI 與教學。</div>
-        </div>
-      </div>
+<div class="panel">
+<h3>💰 發財金</h3>
+<div>每月最多 500 名 / 每人 1~888 KGEN</div>
+<input type="number" id="fortuneAmount" placeholder="1~888">
+<br>
+<button onclick="claimFortune()">領發財金</button>
+</div>
 
-      <div style="margin-top:12px" class="row">
-        <button class="btn" id="btnConnect">連接錢包</button>
-        <button class="btn ghost" id="btnSave">保存設定（本機）</button>
-        <button class="btn ghost" id="btnReset">清除設定</button>
-      </div>
+<div class="panel">
+<h3>🙏 還願（回收血）</h3>
+<div>目前：單一心臟地址</div>
+<div id="heartAddress">尚未設定</div>
+</div>
 
-      <div class="kv">
-        <div>本頁路徑：<b class="mono">K線西遊記/temples/12345/index.html</b></div>
-        <div>返回入口：<a href="../../index.html">← 回銀河宇宙入口</a></div>
-      </div>
-    </div>
+<div class="panel">
+<h3>⚙ 系統模式</h3>
+<div id="modeStatus">MODE: DEMO</div>
+<button onclick="connectWallet()">連接錢包</button>
+</div>
 
-    <!-- B) Rhythm -->
-    <div class="panel">
-      <h3>二、節律（呼吸 / 心跳）</h3>
+<div style="margin:40px;">
+<a href="../../index.html" style="color:#888;">← 返回宇宙入口</a>
+</div>
 
-      <div class="row">
-        <div class="badge">本機時間：<b class="mono" id="clock">--:--:--</b></div>
-        <div class="badge">呼吸窗口：<b class="mono">00:00–00:10（UTC+8）</b></div>
-      </div>
+<div class="version">
+WuzhiShan Temple V2.0.0
+</div>
 
-      <div class="hr"></div>
-
-      <div class="grid">
-        <div class="panel" style="margin:0">
-          <h3 style="margin:0 0 8px">呼吸（Ignite）</h3>
-          <div class="hint">呼叫：<span class="mono">igniteAndClaim()</span>（每天一次，00:00–00:10）</div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnIgnite">點火呼吸</button>
-            <span class="hint">狀態：<b id="igniteStatus" class="warn">尚未操作</b></span>
-          </div>
-        </div>
-
-        <div class="panel" style="margin:0">
-          <h3 style="margin:0 0 8px">心跳（Heartbeat）</h3>
-          <div class="hint">呼叫：<span class="mono">heartbeatClaim()</span>（每小時一次）</div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnHeartbeat">心跳打點</button>
-            <span class="hint">狀態：<b id="heartbeatStatus" class="warn">尚未操作</b></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="kv">
-        <div class="warn">提醒：你要的「±10 分鐘」不適合放在每小時心跳，因為合約已用 hourId 控制最穩。</div>
-        <div>若你硬要「±10 分鐘」，應該是給「跨日點火」而不是每小時心跳。</div>
-      </div>
-    </div>
-
-    <!-- C) Fortune -->
-    <div class="panel">
-      <h3>三、發財金（Fortune Faucet）</h3>
-      <div class="hint">
-        每月最多 500 名得主、每人每月最多 888 KGEN。硬上限由 Heart 合約控制。<br>
-        呼叫：<span class="mono">fortuneClaim(amount)</span>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="grid">
-        <div>
-          <div class="hint">輸入金額（1~888）</div>
-          <input type="number" id="fortuneAmt" min="1" max="888" placeholder="例如：1 / 88 / 888">
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnFortune">領發財金</button>
-            <span class="hint">狀態：<b id="fortuneStatus" class="warn">尚未操作</b></span>
-          </div>
-        </div>
-        <div>
-          <div class="hint">本機參訪統計（先用 localStorage）</div>
-          <div class="kv">
-            今日參訪：<b class="mono" id="todayVisitors">0</b><br>
-            總參訪：<b class="mono" id="totalVisitors">0</b>
-          </div>
-          <button class="btn ghost" id="btnResetVisits">重置本機參訪</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- D) Vow -->
-    <div class="panel">
-      <h3>四、還願（Vow / 回血）</h3>
-      <div class="hint">
-        V2 定案：先只開「還願回 Heart 同一地址回血」。<br>
-        呼叫：<span class="mono">vowTo(option, amount)</span>（需先 approve）
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="grid">
-        <div>
-          <div class="hint">還願金額（KGEN）</div>
-          <input type="number" id="vowAmt" min="1" placeholder="例如：1 / 88 / 5000">
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnVowHeart">還願回血到 Heart（option=0）</button>
-            <span class="hint">狀態：<b id="vowStatus" class="warn">尚未操作</b></span>
-          </div>
-          <div class="kv">
-            Heart 地址：<div class="addr" id="heartAddr">（待填）</div>
-          </div>
-        </div>
-
-        <div>
-          <div class="hint">其他器官（待接通，先不要亂開）</div>
-          <div class="kv">
-            KUFO/MARS：<div class="addr">（待部署 / 待填）</div>
-            玉帝靈霄：<div class="addr">（待部署 / 待填）</div>
-            AutoLP：<div class="addr">（待部署 / 待填）</div>
-            黑洞：<div class="addr mono">0x0000000000000000000000000000000000000000</div>
-          </div>
-          <div class="hint warn">等合約真的下好，再打開按鈕。先求穩，不要器官排斥。</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- E) Help -->
-    <div class="panel">
-      <h3>五、無人客服（先給你「教到會」的固定話術）</h3>
-      <div class="kv">
-        <b>Q：我沒錢包怎麼用？</b><br>
-        A：先裝 MetaMask，建立錢包，切到 BNB Chain（BSC）。再回來按「連接錢包」。<br><br>
-
-        <b>Q：領到的發財金去哪裡找？</b><br>
-        A：到錢包的「代幣」頁，新增代幣，貼上 KGEN 合約地址（你已部署的 Token）。<br><br>
-
-        <b>Q：為什麼按了沒反應？</b><br>
-        A：現在可能是 DEMO 模式（合約地址未填）。等你把 Heart 地址貼上，就會變成 LIVE。<br>
-      </div>
-    </div>
-
-    <div class="footer">
-      PrimeForge 以母機之名，開啟金融生命。<br>
-      花果山台灣・信念不滅・市場無界。<br>
-      Where the Market Becomes the Myth.<br>
-      —— 樂天帝 ⌖
-    </div>
-
-  </div>
-
-  <!-- 建議把 ethers 檔案放到：K線西遊記/assets/ethers-5.7.2.umd.min.js -->
-  <!-- <script src="../../assets/ethers-5.7.2.umd.min.js"></script> -->
+<script src="./assets/ethers-5.7.2.umd.min.js"></script>
 
 <script>
-/* ===========================
-   Temple UI V2.0.0 STABLE
-   - DEMO mode first
-   - LIVE when HEART is set & ethers loaded
-=========================== */
+/* ========= CONFIG ========= */
 
-const VERSION = "TempleUI-V2.0.0-STABLE";
-document.getElementById("verLine").textContent = VERSION;
+let MODE = "DEMO"; // DEMO / LIVE
+let HEART_CONTRACT = ""; // LIVE 時填入 Heart 地址
 
-/* ---------- Local settings ---------- */
-const LS_KEY = "KLINE_TEMPLE_12345_CFG_V2";
-function loadCfg(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return {};
-    return JSON.parse(raw);
-  }catch(e){ return {}; }
-}
-function saveCfg(cfg){
-  localStorage.setItem(LS_KEY, JSON.stringify(cfg));
-}
-function setMode(text){ document.getElementById("modeTxt").textContent = text; }
+/* ========= 呼吸倒數 ========= */
 
-/* ---------- Visit counters (localStorage) ---------- */
-const KEY_TOTAL="KLINE_TEMPLE_12345_TOTAL";
-const KEY_TODAY="KLINE_TEMPLE_12345_TODAY";
-const KEY_DATE ="KLINE_TEMPLE_12345_DATE";
-function todayStr(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function visitsInit(){
-  const d=todayStr();
-  if(localStorage.getItem(KEY_DATE)!==d){
-    localStorage.setItem(KEY_DATE,d);
-    localStorage.setItem(KEY_TODAY,"0");
+function updateBreath(){
+  const now = new Date();
+  const utc8 = new Date(now.getTime() + 8*60*60*1000);
+  const sec = utc8.getHours()*3600 + utc8.getMinutes()*60 + utc8.getSeconds();
+
+  const start = 0;
+  const end = 600;
+
+  if(sec >= start && sec <= end){
+    document.getElementById("breathCountdown").innerText =
+      "🌬 呼吸進行中";
+  }else{
+    const next = 86400 - sec;
+    document.getElementById("breathCountdown").innerText =
+      "距離下一次呼吸約 " + Math.floor(next/60) + " 分鐘";
   }
-  const total=String(Number(localStorage.getItem(KEY_TOTAL)||"0")+1);
-  const today=String(Number(localStorage.getItem(KEY_TODAY)||"0")+1);
-  localStorage.setItem(KEY_TOTAL,total);
-  localStorage.setItem(KEY_TODAY,today);
-  document.getElementById("totalVisitors").textContent=total;
-  document.getElementById("todayVisitors").textContent=today;
 }
-function visitsLoad(){
-  const d=todayStr();
-  if(localStorage.getItem(KEY_DATE)!==d){
-    localStorage.setItem(KEY_DATE,d);
-    localStorage.setItem(KEY_TODAY,"0");
+
+setInterval(updateBreath,1000);
+updateBreath();
+
+/* ========= 心跳 ========= */
+
+function heartbeat(){
+  const now = new Date().toLocaleTimeString();
+  document.getElementById("heartbeatInfo").innerText =
+    "💓 心跳觸發於 " + now;
+
+  if(MODE === "LIVE"){
+    // 這裡未來接 Heart 合約 heartbeatClaim()
   }
-  document.getElementById("totalVisitors").textContent=localStorage.getItem(KEY_TOTAL)||"0";
-  document.getElementById("todayVisitors").textContent=localStorage.getItem(KEY_TODAY)||"0";
-}
-document.getElementById("btnResetVisits").addEventListener("click",()=>{
-  localStorage.removeItem(KEY_TOTAL);
-  localStorage.removeItem(KEY_TODAY);
-  localStorage.removeItem(KEY_DATE);
-  visitsLoad();
-});
-
-/* ---------- Clock ---------- */
-function tick(){
-  const d=new Date();
-  document.getElementById("clock").textContent =
-    `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
-}
-setInterval(tick,500); tick();
-
-/* ---------- Config inputs ---------- */
-const REGISTRY = document.getElementById("REGISTRY");
-const HEART    = document.getElementById("HEART");
-const heartAddrLine = document.getElementById("heartAddr");
-
-function applyCfg(cfg){
-  REGISTRY.value = cfg.registry || "";
-  HEART.value    = cfg.heart || "";
-  heartAddrLine.textContent = (cfg.heart || "（待填）");
-}
-const cfg0 = loadCfg();
-applyCfg(cfg0);
-visitsLoad();
-visitsInit();
-
-/* ---------- Buttons: save / reset ---------- */
-document.getElementById("btnSave").addEventListener("click",()=>{
-  const cfg = { registry: REGISTRY.value.trim(), heart: HEART.value.trim() };
-  saveCfg(cfg);
-  applyCfg(cfg);
-  alert("已保存（本機）");
-});
-document.getElementById("btnReset").addEventListener("click",()=>{
-  localStorage.removeItem(LS_KEY);
-  REGISTRY.value="";
-  HEART.value="";
-  heartAddrLine.textContent="（待填）";
-  alert("已清除設定");
-});
-
-/* ===========================
-   Web3 (optional)
-   - LIVE only if ethers loaded + HEART set
-=========================== */
-let provider=null, signer=null, account=null, chainId=null;
-
-function setChainText(){
-  document.getElementById("chainTxt").textContent = chainId ? String(chainId) : "--";
-}
-function setAcctText(){
-  document.getElementById("acctTxt").textContent = account ? account.slice(0,6)+"..."+account.slice(-4) : "未連線";
 }
 
-function isEthersReady(){
-  return (typeof window.ethers !== "undefined");
-}
-function hasHeart(){
-  return /^0x[a-fA-F0-9]{40}$/.test(HEART.value.trim());
-}
-function updateMode(){
-  if(isEthersReady() && hasHeart()) setMode("LIVE");
-  else setMode("DEMO");
-}
-updateMode();
-HEART.addEventListener("input", updateMode);
+/* ========= 發財金 ========= */
 
-/* ---------- Minimal Heart ABI (only what we call) ---------- */
-const HEART_ABI = [
-  "function igniteAndClaim()",
-  "function heartbeatClaim()",
-  "function fortuneClaim(uint256 amount)",
-  "function vowTo(uint8 option, uint256 amount)"
-];
+function claimFortune(){
+  const val = parseInt(document.getElementById("fortuneAmount").value);
+  if(!val || val < 1 || val > 888){
+    alert("金額需 1~888");
+    return;
+  }
 
-function fmtStatus(id, txt, cls){
-  const el=document.getElementById(id);
-  el.textContent=txt;
-  el.className = cls || "warn";
+  if(MODE === "DEMO"){
+    alert("DEMO 模式：申請 " + val + " KGEN");
+  }else{
+    // LIVE 模式呼叫合約
+  }
 }
+
+/* ========= 錢包連接 ========= */
 
 async function connectWallet(){
-  if(!window.ethereum){
-    alert("找不到錢包（MetaMask）。先安裝錢包再回來。");
+  if(typeof window.ethereum === "undefined"){
+    alert("請安裝 MetaMask");
     return;
   }
-  if(!isEthersReady()){
-    alert("ethers 尚未載入。請把 ethers 檔案放到 K線西遊記/assets 並在本頁 script 引入。");
-    return;
-  }
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
-  account = await signer.getAddress();
-  const net = await provider.getNetwork();
-  chainId = net.chainId;
-  setAcctText(); setChainText();
-  updateMode();
+
+  await window.ethereum.request({ method: "eth_requestAccounts" });
+  document.getElementById("modeStatus").innerText =
+    "錢包已連接（仍為 DEMO 模式）";
 }
-document.getElementById("btnConnect").addEventListener("click", connectWallet);
-
-/* ---------- DEMO action helper ---------- */
-function demoPing(which){
-  const now = new Date().toLocaleTimeString();
-  if(which==="ignite") fmtStatus("igniteStatus", "DEMO：點火成功 · "+now, "ok");
-  if(which==="heartbeat") fmtStatus("heartbeatStatus", "DEMO：心跳成功 · "+now, "ok");
-  if(which==="fortune") fmtStatus("fortuneStatus", "DEMO：已送出申請（尚未上鏈） · "+now, "ok");
-  if(which==="vow") fmtStatus("vowStatus", "DEMO：已送出還願（尚未上鏈） · "+now, "ok");
-}
-
-/* ---------- LIVE call helper ---------- */
-async function getHeartContract(){
-  if(!signer) throw new Error("wallet not connected");
-  const addr = HEART.value.trim();
-  if(!/^0x[a-fA-F0-9]{40}$/.test(addr)) throw new Error("bad HEART address");
-  return new ethers.Contract(addr, HEART_ABI, signer);
-}
-
-document.getElementById("btnIgnite").addEventListener("click", async ()=>{
-  updateMode();
-  if(document.getElementById("modeTxt").textContent==="DEMO"){
-    demoPing("ignite"); return;
-  }
-  try{
-    fmtStatus("igniteStatus","送出交易中...","warn");
-    const c = await getHeartContract();
-    const tx = await c.igniteAndClaim();
-    fmtStatus("igniteStatus","等待上鏈...","warn");
-    await tx.wait();
-    fmtStatus("igniteStatus","上鏈成功","ok");
-  }catch(e){
-    fmtStatus("igniteStatus","失敗："+(e?.message||e),"dangerText");
-  }
-});
-
-document.getElementById("btnHeartbeat").addEventListener("click", async ()=>{
-  updateMode();
-  if(document.getElementById("modeTxt").textContent==="DEMO"){
-    demoPing("heartbeat"); return;
-  }
-  try{
-    fmtStatus("heartbeatStatus","送出交易中...","warn");
-    const c = await getHeartContract();
-    const tx = await c.heartbeatClaim();
-    fmtStatus("heartbeatStatus","等待上鏈...","warn");
-    await tx.wait();
-    fmtStatus("heartbeatStatus","上鏈成功","ok");
-  }catch(e){
-    fmtStatus("heartbeatStatus","失敗："+(e?.message||e),"dangerText");
-  }
-});
-
-document.getElementById("btnFortune").addEventListener("click", async ()=>{
-  const v = Number(document.getElementById("fortuneAmt").value);
-  if(!(v>=1 && v<=888)){
-    alert("金額需在 1~888 之間"); return;
-  }
-  updateMode();
-  if(document.getElementById("modeTxt").textContent==="DEMO"){
-    demoPing("fortune"); return;
-  }
-  try{
-    fmtStatus("fortuneStatus","送出交易中...","warn");
-    const c = await getHeartContract();
-    const amt = ethers.utils.parseUnits(String(v), 18);
-    const tx = await c.fortuneClaim(amt);
-    fmtStatus("fortuneStatus","等待上鏈...","warn");
-    await tx.wait();
-    fmtStatus("fortuneStatus","上鏈成功","ok");
-  }catch(e){
-    fmtStatus("fortuneStatus","失敗："+(e?.message||e),"dangerText");
-  }
-});
-
-document.getElementById("btnVowHeart").addEventListener("click", async ()=>{
-  const v = Number(document.getElementById("vowAmt").value);
-  if(!(v>0)){
-    alert("請輸入還願金額"); return;
-  }
-  updateMode();
-  if(document.getElementById("modeTxt").textContent==="DEMO"){
-    demoPing("vow"); return;
-  }
-  try{
-    fmtStatus("vowStatus","送出交易中...（需先 approve）","warn");
-    const c = await getHeartContract();
-    const amt = ethers.utils.parseUnits(String(v), 18);
-    const tx = await c.vowTo(0, amt); // option=0 => Heart itself
-    fmtStatus("vowStatus","等待上鏈...","warn");
-    await tx.wait();
-    fmtStatus("vowStatus","上鏈成功","ok");
-  }catch(e){
-    fmtStatus("vowStatus","失敗："+(e?.message||e),"dangerText");
-  }
-});
 </script>
+
 </body>
-  </html>
+</html>
