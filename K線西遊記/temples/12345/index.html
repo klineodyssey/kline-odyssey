@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>五指山・悟空財神殿 12345｜Heart V3</title>
+  <title>五指山・悟空財神殿 12345｜Heart V3.1.0</title>
 
-  <!-- IMPORTANT: put ethers file inside repo at: /K線西遊記/assets/js/ethers-5.7.2.umd.min.js -->
-  <!-- For this page (K線西遊記/temples/12345/index.html), use ../../assets/js/... -->
+  <!-- 放置位置：K線西遊記/assets/js/ethers-5.7.2.umd.min.js -->
   <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
 
   <style>
     :root{
       --bg:#05060a;
       --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.65);
       --line: rgba(255,255,255,.14);
@@ -27,7 +25,6 @@
       --r: 16px;
       --shadow: 0 12px 40px rgba(0,0,0,.45);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -39,19 +36,14 @@
       color: var(--text);
       min-height:100vh;
     }
-
     a{color:inherit}
-
     .wrap{max-width:980px;margin:0 auto;padding:18px 14px 44px;}
-
     header{
       display:flex; gap:12px; align-items:flex-end; justify-content:space-between;
       padding: 10px 0 14px;
     }
-
     .brand .h{font-weight:950;letter-spacing:.6px;font-size:18px;}
     .brand .s{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45;}
-
     .pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
       display:flex; gap:8px; align-items:center;
@@ -65,7 +57,6 @@
       white-space:nowrap;
     }
     .pill b{color:var(--text);font-weight:900}
-
     .hero{
       border:1px solid var(--line);
       border-radius: 24px;
@@ -74,20 +65,14 @@
       padding: 16px;
       overflow:hidden;
     }
-
     .grid{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
       gap: 12px;
     }
-
-    @media (max-width: 900px){
-      .grid{grid-template-columns:1fr}
-    }
-
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
     .title{font-size:24px;font-weight:950;letter-spacing:.8px;margin: 6px 0 8px;}
     .subtitle{color:var(--muted);line-height:1.55;font-size:13px;margin: 0 0 10px;}
-
     .panel{
       border:1px solid var(--line);
       border-radius: var(--r);
@@ -96,9 +81,7 @@
       padding: 14px;
       margin-top: 12px;
     }
-
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-
     .btn{
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
       padding: 10px 14px;
@@ -115,16 +98,12 @@
     }
     .btn:hover{background: var(--btnh)}
     .btn.small{padding:8px 12px; font-weight:850}
-
     .mono{font-family: var(--mono)}
-
     .kv{display:grid;grid-template-columns: 140px 1fr; gap: 8px 10px; align-items:center;}
     @media (max-width: 520px){ .kv{grid-template-columns: 1fr; } }
-
     .k{color:var(--muted);font-size:12px}
     .v{font-size:13px;line-height:1.4;word-break:break-all}
-
-    input, select{
+    input, select, textarea{
       padding: 12px 12px;
       border-radius: 14px;
       border: 1px solid var(--line);
@@ -134,19 +113,17 @@
       width: 100%;
       max-width: 360px;
     }
-
+    textarea{max-width: 100%; min-height: 88px; resize: vertical;}
     .status{font-size:12px;color:var(--muted);line-height:1.5}
     .ok{color: var(--ok)}
     .warn{color: var(--warn)}
     .bad{color: var(--bad)}
-
     .footer{
       color: var(--muted);
       font-size: 12px;
       margin-top: 14px;
       line-height:1.55;
     }
-
     .help{
       border:1px solid var(--line);
       border-radius: 24px;
@@ -155,23 +132,30 @@
       padding: 14px;
       margin-top: 14px;
     }
-
     .help h3{margin:0 0 8px;font-size:14px;letter-spacing:.4px}
     .help ol{margin:8px 0 0 18px;color:var(--muted);line-height:1.6;font-size:13px}
-
-    code{font-family: var(--mono)}
+    .camRow{display:grid;grid-template-columns: 1fr 1fr;gap:12px;align-items:start;}
+    @media (max-width: 900px){ .camRow{grid-template-columns:1fr} }
+    video, canvas, img{
+      width:100%;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.25);
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
 
     <header>
       <div class="brand">
         <div class="h">五指山・悟空財神殿 12345</div>
-        <div class="s">Heart Contract · Faucet / Vow / Lamp · <span class="mono">V3.0.0</span></div>
+        <div class="s">Heart Contract · Faucet / Vow / Lamp / Wish / Camera · <span class="mono">V3.1.0</span></div>
       </div>
 
       <div class="pills">
+        <div class="pill">版本：<b class="mono">V3.1.0</b></div>
         <div class="pill">KGEN 總量：<b class="mono">72,000,000</b></div>
         <div class="pill">今日參訪：<b class="mono" id="todayVisitors">0</b></div>
         <div class="pill">總參訪：<b class="mono" id="totalVisitors">0</b></div>
@@ -180,17 +164,17 @@
 
     <section class="hero">
       <div class="grid">
-
         <div>
           <div class="title">悟空被壓五指山，心臟仍在跳。</div>
           <p class="subtitle">
             這裡只做一件事：<b>讓心臟活著</b>。<br/>
-            呼吸（00:00–00:10）、心跳（每小時 ±10 分）、發財金（每日 1 次）、還願補血、光明燈上鏈。
+            呼吸（00:00–00:10）、心跳（每小時 ±10 分）、發財金（每日 1 次）、還願補血、光明燈上鏈、許願留證、信眾自拍留念與語音導引。
           </p>
 
           <div class="panel">
             <div class="row">
               <button class="btn" id="connectBtn">連接錢包（MetaMask）</button>
+              <button class="btn small" id="voiceBtn">語音導引</button>
               <a class="btn small" href="../../index.html">← 返回宇宙入口</a>
             </div>
             <div class="status" style="margin-top:10px" id="walletStatus">尚未連接</div>
@@ -206,7 +190,7 @@
               <div class="v mono" id="addr">--</div>
 
               <div class="k">Heart 合約</div>
-              <div class="v mono" id="heart">(請填入你的 Heart 合約地址)</div>
+              <div class="v mono" id="heart">--</div>
 
               <div class="k">你的 KGEN</div>
               <div class="v mono" id="balUser">--</div>
@@ -216,6 +200,36 @@
             </div>
             <div class="status" style="margin-top:10px">
               狀態：<span id="timeHint" class="mono">--</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">許願池（留證）</div>
+            <div class="row">
+              <textarea id="wishText" placeholder="輸入你的願望（只留哈希上鏈，本機會保存原文）"></textarea>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn" id="wishBtn">許願上鏈（哈希）</button>
+            </div>
+            <div class="status" style="margin-top:10px" id="wishStatus">尚未許願</div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">信眾影像（本機顯示，不上傳）</div>
+            <div class="camRow">
+              <div>
+                <video id="cam" autoplay playsinline muted></video>
+                <div class="row" style="margin-top:10px">
+                  <button class="btn" id="camBtn">開啟鏡頭</button>
+                  <button class="btn" id="snapBtn">拍照留念</button>
+                </div>
+                <div class="status" style="margin-top:10px" id="camStatus">尚未啟動鏡頭</div>
+              </div>
+              <div>
+                <canvas id="snapCanvas" style="display:none"></canvas>
+                <img id="snapImg" alt="snapshot" style="display:none" />
+                <div class="status" style="margin-top:10px">拍照結果會顯示在右側（手機會在下方）。</div>
+              </div>
             </div>
           </div>
 
@@ -237,7 +251,7 @@
               <input id="fortuneAmt" type="number" min="1" max="888" placeholder="輸入 1 ~ 888" />
               <button class="btn" id="fortuneBtn">領發財金</button>
             </div>
-            <div class="status" style="margin-top:10px" id="fortuneStatus">每月最多 500 名得主 · 每人每月 ≤ 888 KGEN</div>
+            <div class="status" style="margin-top:10px" id="fortuneStatus">每日 1 次 · 建議先確保 Heart 有血（有 KGEN）</div>
           </div>
 
           <div class="panel">
@@ -245,15 +259,12 @@
             <div class="row" style="gap:10px">
               <select id="vowOption" style="max-width:220px">
                 <option value="0">0：回心臟（推薦）</option>
-                <option value="1">1：MARS（未部署可先留空）</option>
-                <option value="2">2：BRAIN（未部署可先留空）</option>
-                <option value="3">3：JADE（未部署可先留空）</option>
                 <option value="4">4：BLACKHOLE（往生）</option>
               </select>
               <input id="vowAmt" type="number" min="1" placeholder="還願金額（KGEN）" />
               <button class="btn" id="vowBtn">還願</button>
             </div>
-            <div class="status" style="margin-top:10px" id="vowStatus">還願會走 transferFrom（需先 approve）。</div>
+            <div class="status" style="margin-top:10px" id="vowStatus">還願會先自動 approve，再呼叫 vowTo().</div>
           </div>
 
           <div class="panel">
@@ -262,21 +273,19 @@
               <input id="lampDays" type="number" min="1" placeholder="點燈天數（例：7）" />
               <button class="btn" id="lampBtn">點光明燈</button>
             </div>
-            <div class="status" style="margin-top:10px" id="lampStatus">點燈會扣款並把到期日寫上鏈。</div>
+            <div class="status" style="margin-top:10px" id="lampStatus">尚未點燈</div>
           </div>
         </div>
-
       </div>
     </section>
 
     <section class="help">
-      <h3>影像 AI 無人客服（先把教學做成「能照著做」）</h3>
+      <h3>無人客服（把流程寫到照著做就會）</h3>
       <ol>
-        <li>手機先裝 MetaMask，建立/匯入錢包。</li>
-        <li>MetaMask 切到 <b>BNB Chain（BSC）</b>，錢包要有少量 BNB 當 gas。</li>
-        <li>按「連接錢包」。成功後會顯示你的地址與餘額。</li>
-        <li>如果「Heart 血量」為 0：代表心臟沒血，任何領取都會失敗。你需要把 KGEN 轉進 Heart 地址（補血）。</li>
-        <li>還願要先 approve：我已把 approve 做成自動流程（按還願會先要求授權）。</li>
+        <li>手機請用 MetaMask 內建瀏覽器打開神殿頁。</li>
+        <li>切到 BNB Chain（BSC），錢包保留少量 BNB 當 gas。</li>
+        <li>按「連接錢包」，看到 Wallet 地址後再操作。</li>
+        <li>若 Heart 血量為 0：代表心臟沒血，任何領取都會失敗，需先把 KGEN 轉進 Heart 合約地址。</li>
       </ol>
     </section>
 
@@ -290,22 +299,19 @@
   </div>
 
 <script>
-  // ================== CONFIG: fill these ==================
-  // 1) Your deployed Heart contract address (V3)
-  const HEART_ADDRESS = "0xYourHeartContractAddress";
-  // 2) Your KGEN token address
-  const KGEN_ADDRESS  = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
-
-  // Optional: BSC mainnet chainId
-  const BSC_CHAIN_ID_HEX = "0x38"; // 56
+  // ================== CONFIG（部署後只改這裡） ==================
+  const CFG = {
+    chainIdHex: "0x38", // BSC mainnet
+    kgenToken:  "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    heart:     "0xYourHeartContractAddress"
+  };
 
   // ================== ABIs ==================
   const ERC20_ABI = [
     "function decimals() view returns (uint8)",
-    "function symbol() view returns (string)",
     "function balanceOf(address) view returns (uint256)",
     "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
+    "function approve(address spender, uint256 amount) returns (bool)"
   ];
 
   const HEART_ABI = [
@@ -320,42 +326,24 @@
     "function fortuneClaim(uint256 amount)",
     "function vowTo(uint8 option, uint256 amount)",
     "function lightLamp(uint16 daysToAdd)",
-    "function lampExpireDayId(address user) view returns (uint256)",
-    "function lampIsLit(address user) view returns (bool)",
-    "function mars() view returns (address)",
-    "function brain() view returns (address)",
-    "function jade() view returns (address)",
+    "function makeWish(bytes32 wishHash)"
   ];
 
-  // ================== State ==================
-  let provider, signer, user, kgen, heart;
-  let kgenDecimals = 18;
-
+  // ================== Helpers ==================
   function $(id){ return document.getElementById(id); }
-
-  function fmtUnits(x){
-    try{ return ethers.utils.formatUnits(x, kgenDecimals); }catch(e){ return "--"; }
-  }
-
-  function toUnits(v){
-    return ethers.utils.parseUnits(String(v), kgenDecimals);
-  }
-
   function nowLocal(){
-    // display local time (browser)
     const d = new Date();
     const hh = String(d.getHours()).padStart(2,'0');
     const mm = String(d.getMinutes()).padStart(2,'0');
     const ss = String(d.getSeconds()).padStart(2,'0');
     return `${hh}:${mm}:${ss}`;
   }
-
   function setStatus(el, text, cls){
     el.textContent = text;
     el.className = "status" + (cls ? (" " + cls) : "");
   }
 
-  // ================== Visit counters (localStorage) ==================
+  // ================== Visit counters ==================
   (function visitCounter(){
     const KEY_TOTAL = "KLINE_TEMPLE_12345_TOTAL";
     const KEY_TODAY_DATE = "KLINE_TEMPLE_12345_TODAY_DATE";
@@ -383,15 +371,25 @@
     $("todayVisitors").textContent = String(today);
   })();
 
-  // ================== Connect wallet ==================
+  // ================== Web3 State ==================
+  let provider, signer, user;
+  let kgen, heart;
+  let kgenDecimals = 18;
+
+  function fmtUnits(x){
+    try{ return ethers.utils.formatUnits(x, kgenDecimals); }catch(e){ return "--"; }
+  }
+  function toUnits(v){
+    return ethers.utils.parseUnits(String(v), kgenDecimals);
+  }
+
   async function ensureBSC(){
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    if(chainId === BSC_CHAIN_ID_HEX) return true;
-    // prompt switch
+    if(chainId === CFG.chainIdHex) return true;
     try{
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: BSC_CHAIN_ID_HEX }],
+        params: [{ chainId: CFG.chainIdHex }],
       });
       return true;
     }catch(err){
@@ -401,15 +399,14 @@
 
   async function connect(){
     if(!window.ethereum){
-      setStatus($("walletStatus"), "未偵測到錢包。請安裝 MetaMask（手機/電腦皆可）。", "warn");
+      setStatus($("walletStatus"), "未偵測到錢包。請使用 MetaMask 內建瀏覽器開啟本頁。", "warn");
       return;
     }
-
     await window.ethereum.request({ method: 'eth_requestAccounts' });
 
     const ok = await ensureBSC();
     if(!ok){
-      setStatus($("walletStatus"), "請把錢包切到 BNB Chain（BSC）。", "warn");
+      setStatus($("walletStatus"), "請切到 BNB Chain（BSC）。", "warn");
       return;
     }
 
@@ -417,23 +414,17 @@
     signer = provider.getSigner();
     user = await signer.getAddress();
 
-    heart = new ethers.Contract(HEART_ADDRESS, HEART_ABI, signer);
-    kgen  = new ethers.Contract(KGEN_ADDRESS, ERC20_ABI, signer);
+    heart = new ethers.Contract(CFG.heart, HEART_ABI, signer);
+    kgen  = new ethers.Contract(CFG.kgenToken, ERC20_ABI, signer);
 
-    try{
-      kgenDecimals = await kgen.decimals();
-    }catch(e){
-      kgenDecimals = 18;
-    }
+    try{ kgenDecimals = await kgen.decimals(); }catch(e){ kgenDecimals = 18; }
 
     const net = await provider.getNetwork();
-
-    $("heart").textContent = HEART_ADDRESS;
+    $("heart").textContent = CFG.heart;
     $("net").textContent = `${net.name} (chainId=${net.chainId})`;
     $("addr").textContent = user;
 
     setStatus($("walletStatus"), "已連接。", "ok");
-
     await refresh();
 
     if(window.ethereum.on){
@@ -442,7 +433,6 @@
     }
   }
 
-  // ================== Refresh UI ==================
   async function refresh(){
     if(!provider || !signer) return;
 
@@ -454,7 +444,6 @@
     $("balUser").textContent = fmtUnits(balU);
     $("balHeart").textContent = fmtUnits(balH);
 
-    // time hints
     try{
       const [inIgnite, inBeat, effHour, dayId, monthId] = await Promise.all([
         heart.inIgniteWindow(),
@@ -463,26 +452,12 @@
         heart.localDayIdNow(),
         heart.localMonthIdNow(),
       ]);
-
-      $("timeHint").textContent = `本機時間 ${nowLocal()} | inIgnite=${inIgnite} | inHeartbeat=${inBeat} | hourId=${effHour} | dayId=${dayId} | monthId=${monthId}`;
-
-      // lamp
-      const lit = await heart.lampIsLit(user);
-      const exp = await heart.lampExpireDayId(user);
-      setStatus($("lampStatus"), `光明燈：${lit ? "已點亮" : "未點"}（expireDayId=${exp}）`, lit ? "ok" : "");
+      $("timeHint").textContent = `本機 ${nowLocal()} | ignite=${inIgnite} | heartbeat=${inBeat} | hourId=${effHour} | dayId=${dayId} | monthId=${monthId}`;
     }catch(e){
-      // ignore
+      $("timeHint").textContent = `本機 ${nowLocal()}`;
     }
-
-    // show target addresses (optional)
-    try{
-      const [mars, brain, jade] = await Promise.all([heart.mars(), heart.brain(), heart.jade()]);
-      // just log for now
-      console.log({mars, brain, jade});
-    }catch(e){}
   }
 
-  // ================== Actions ==================
   async function txWrap(fn, statusEl){
     try{
       setStatus(statusEl, "送出交易中…請在錢包確認。", "warn");
@@ -492,21 +467,20 @@
       setStatus(statusEl, `成功：${tx.hash}`, "ok");
       await refresh();
     }catch(e){
-      console.error(e);
       const msg = (e && e.data && e.data.message) ? e.data.message : (e && e.message ? e.message : String(e));
       setStatus(statusEl, `失敗：${msg}`, "bad");
     }
   }
 
-  async function ignite(){
-    if(!heart) return;
-    await txWrap(()=>heart.igniteAndClaim(), $("beatStatus"));
+  async function ensureApprove(needAmount){
+    const allow = await kgen.allowance(user, CFG.heart);
+    if(allow.gte(needAmount)) return;
+    const tx = await kgen.approve(CFG.heart, needAmount);
+    await tx.wait();
   }
 
-  async function heartbeat(){
-    if(!heart) return;
-    await txWrap(()=>heart.heartbeatClaim(), $("beatStatus"));
-  }
+  async function ignite(){ if(!heart) return; await txWrap(()=>heart.igniteAndClaim(), $("beatStatus")); }
+  async function heartbeat(){ if(!heart) return; await txWrap(()=>heart.heartbeatClaim(), $("beatStatus")); }
 
   async function fortune(){
     if(!heart) return;
@@ -519,13 +493,6 @@
     await txWrap(()=>heart.fortuneClaim(amt), $("fortuneStatus"));
   }
 
-  async function ensureApprove(spender, needAmount){
-    const allow = await kgen.allowance(user, spender);
-    if(allow.gte(needAmount)) return;
-    const tx = await kgen.approve(spender, needAmount);
-    await tx.wait();
-  }
-
   async function vow(){
     if(!heart || !kgen) return;
     const opt = Number($("vowOption").value);
@@ -535,10 +502,8 @@
       return;
     }
     const amt = toUnits(v);
-
     await txWrap(async ()=>{
-      // approve Heart to pull tokens
-      await ensureApprove(HEART_ADDRESS, amt);
+      await ensureApprove(amt);
       return heart.vowTo(opt, amt);
     }, $("vowStatus"));
   }
@@ -550,14 +515,61 @@
       setStatus($("lampStatus"), "請輸入點燈天數。", "warn");
       return;
     }
-
-    // Worst-case approve: days * 1 KGEN (default). If你改價格，前端就改這裡。
-    const est = toUnits(d); // 1 KGEN/day default
-
+    const est = toUnits(d); // 1 KGEN/day 假設
     await txWrap(async ()=>{
-      await ensureApprove(HEART_ADDRESS, est);
+      await ensureApprove(est);
       return heart.lightLamp(d);
     }, $("lampStatus"));
+  }
+
+  async function makeWish(){
+    if(!heart) return;
+    const text = ($("wishText").value || "").trim();
+    if(!text){
+      setStatus($("wishStatus"), "請先輸入願望。", "warn");
+      return;
+    }
+    const key = "KLINE_WISH_" + new Date().toISOString().slice(0,10);
+    localStorage.setItem(key, text);
+    const wishHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(text));
+    await txWrap(()=>heart.makeWish(wishHash), $("wishStatus"));
+  }
+
+  // ================== Camera (local only) ==================
+  async function startCam(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+      $("cam").srcObject = stream;
+      setStatus($("camStatus"), "鏡頭已啟動（本機顯示，不上傳）", "ok");
+    }catch(e){
+      setStatus($("camStatus"), "鏡頭啟動失敗（請確認瀏覽器權限）", "bad");
+    }
+  }
+  function snap(){
+    const v = $("cam");
+    if(!v.srcObject){
+      setStatus($("camStatus"), "請先開啟鏡頭。", "warn");
+      return;
+    }
+    const c = $("snapCanvas");
+    c.width = v.videoWidth || 640;
+    c.height = v.videoHeight || 480;
+    c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+    const img = $("snapImg");
+    img.src = c.toDataURL("image/png");
+    img.style.display = "block";
+    setStatus($("camStatus"), "已拍照留念（本機）", "ok");
+  }
+
+  // ================== Voice guide ==================
+  function speakGuide(){
+    try{
+      const t = "歡迎來到五指山悟空財神殿。第一步，連接錢包並切到 BNB Chain。第二步，確認心臟血量有 KGEN。第三步，呼吸在零點到零點十分。心跳每小時正負十分。每日一次可領發財金。可還願補血，點光明燈上鏈，並在許願池留下你的願望。";
+      const u = new SpeechSynthesisUtterance(t);
+      u.lang = "zh-TW";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }catch(e){}
   }
 
   // ================== Bind ==================
@@ -567,175 +579,15 @@
   $("fortuneBtn").addEventListener("click", fortune);
   $("vowBtn").addEventListener("click", vow);
   $("lampBtn").addEventListener("click", lamp);
+  $("wishBtn").addEventListener("click", makeWish);
+  $("camBtn").addEventListener("click", startCam);
+  $("snapBtn").addEventListener("click", snap);
+  $("voiceBtn").addEventListener("click", speakGuide);
 
-  setInterval(()=>{
-    if(provider) refresh();
-    // update time hint even if no wallet
-    if(!provider) $("timeHint").textContent = `本機時間 ${nowLocal()}`;
-  }, 2000);
-
-  // initial
-  $("heart").textContent = HEART_ADDRESS;
-  $("timeHint").textContent = `本機時間 ${nowLocal()}`;
-
-
-// ===== Web3 (Ethers v5) =====
-// 放置位置：/K線西遊記/assets/ethers-5.7.2.umd.min.js
-// 此頁引用：../../assets/ethers-5.7.2.umd.min.js
-
-const CFG = {
-  chainIdHex: "0x38", // BSC mainnet
-  kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-  heart: "0xYourHeartContract", // 部署後回填
-};
-
-let provider, signer, user, heart;
-
-// Heart ABI（只放本頁需要的函式）
-const HEART_ABI = [
-  "function igniteAndClaim()",
-  "function heartbeatClaim()",
-  "function fortuneClaim(uint256 amount)",
-  "function vowTo(uint8 option, uint256 amount)",
-  "function lightLamp(uint16 daysToAdd, uint256 amount) returns (uint256)",
-  "function makeWish(bytes32 wishHash)",
-  "function token() view returns (address)",
-  "function getConfig() view returns (address,address,address,address,uint32,uint32,uint256,uint256,uint256,uint256,uint16,uint16)",
-  "event Heartbeat(address indexed user, uint256 indexed hourId, uint256 amount, uint256 timestamp)",
-  "event Fortune(address indexed user, uint256 indexed dayId, uint256 indexed monthId, uint256 amount, uint256 timestamp)",
-  "event WishMade(address indexed user, uint256 indexed dayId, bytes32 indexed wishHash, uint256 timestamp)"
-];
-
-const ERC20_ABI = [
-  "function approve(address spender, uint256 amount) returns (bool)",
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function balanceOf(address owner) view returns (uint256)",
-  "function decimals() view returns (uint8)"
-];
-
-async function connectWallet(){
-  try{
-    if(!window.ethereum){
-      alert("找不到錢包（MetaMask / OKX / TrustWallet）。請先安裝或改用內建錢包瀏覽器。");
-      return;
-    }
-    await ethereum.request({ method: "eth_requestAccounts" });
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    user = await signer.getAddress();
-
-    // check chain
-    const net = await provider.getNetwork();
-    if(net.chainId !== 56){
-      document.getElementById("walletStatus").innerText = "已連線，但不是 BSC 主網（chainId=" + net.chainId + "）。請切換到 BNB Chain。";
-    }else{
-      document.getElementById("walletStatus").innerText = "已連線：" + user;
-    }
-
-    heart = new ethers.Contract(CFG.heart, HEART_ABI, signer);
-  }catch(e){
-    console.error(e);
-    alert("連線失敗：" + (e && e.message ? e.message : e));
-  }
-}
-
-async function ensureConnected(){
-  if(!signer || !user){
-    await connectWallet();
-  }
-  if(!signer || !user) throw new Error("not connected");
-}
-
-function toWeiKGEN(n){
-  // KGEN decimals = 18
-  return ethers.utils.parseUnits(String(n), 18);
-}
-
-async function lightLamp(){
-  try{
-    await ensureConnected();
-    const amt = Number(document.getElementById("lampAmount").value || "0");
-    if(!(amt > 0)) { alert("請輸入上香金額"); return; }
-
-    const token = new ethers.Contract(CFG.kgenToken, ERC20_ABI, signer);
-    const wei = toWeiKGEN(amt);
-
-    // approve heart to pull KGEN
-    const alw = await token.allowance(user, CFG.heart);
-    if(alw.lt(wei)){
-      const txa = await token.approve(CFG.heart, wei);
-      await txa.wait();
-    }
-
-    // daysToAdd：預設 1 天（你可改成 UI 選項）
-    const tx = await heart.lightLamp(1, wei);
-    const rc = await tx.wait();
-    document.getElementById("lampStatus").innerText = "點燈成功 · tx=" + rc.transactionHash;
-  }catch(e){
-    console.error(e);
-    document.getElementById("lampStatus").innerText = "點燈失敗：" + (e && e.message ? e.message : e);
-  }
-}
-
-async function makeWish(){
-  try{
-    await ensureConnected();
-    const text = (document.getElementById("wishText").value || "").trim();
-    if(!text){ alert("請輸入願望"); return; }
-
-    // store local
-    const key = "KLINE_WISH_" + new Date().toISOString().slice(0,10);
-    localStorage.setItem(key, text);
-
-    // hash for chain proof
-    const wishHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(text));
-    const tx = await heart.makeWish(wishHash);
-    const rc = await tx.wait();
-    document.getElementById("wishStatus").innerText = "許願成功（鏈上哈希）· tx=" + rc.transactionHash;
-  }catch(e){
-    console.error(e);
-    document.getElementById("wishStatus").innerText = "許願失敗：" + (e && e.message ? e.message : e);
-  }
-}
-
-// Camera
-async function startCam(){
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
-    const v = document.getElementById("cam");
-    v.srcObject = stream;
-    document.getElementById("camStatus").innerText = "鏡頭已啟動（本機顯示，不上傳）";
-  }catch(e){
-    console.error(e);
-    document.getElementById("camStatus").innerText = "鏡頭啟動失敗：" + (e && e.message ? e.message : e);
-  }
-}
-function snap(){
-  const v = document.getElementById("cam");
-  if(!v.srcObject){ alert("請先開啟鏡頭"); return; }
-  const c = document.getElementById("snapCanvas");
-  c.width = v.videoWidth || 640;
-  c.height = v.videoHeight || 480;
-  const ctx = c.getContext("2d");
-  ctx.drawImage(v,0,0,c.width,c.height);
-  const img = document.getElementById("snapImg");
-  img.src = c.toDataURL("image/png");
-  img.style.display = "block";
-}
-
-// Voice guide (TTS)
-function speakGuide(){
-  try{
-    const t = "歡迎來到五指山悟空財神殿。先連線錢包，再點光明燈，然後每日一次在許願池留下你的願望。所有操作都可以在鏈上驗證。";
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = "zh-TW";
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  }catch(e){
-    alert("你的瀏覽器不支援語音。");
-  }
-}
-
+  // initial UI
+  $("heart").textContent = CFG.heart;
+  $("timeHint").textContent = `本機 ${nowLocal()}`;
+  setInterval(()=>{ if(provider) refresh(); else $("timeHint").textContent = `本機 ${nowLocal()}`; }, 2000);
 </script>
 
 </body>
