@@ -295,6 +295,10 @@
     color: rgba(255,211,106,0.9);
     white-space: pre-line;
   }
+
+.steps{margin:0;padding-left:18px}
+.steps li{margin:8px 0;line-height:1.45}
+button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
 </style>
 </head>
 
@@ -514,7 +518,7 @@ Where the Market Becomes the Myth.
 <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
 
 <script>
-const UI_VERSION = "V6.1";
+const UI_VERSION = "V6.2";
 const UI_BUILD = "COSMIC_CHAINREADY";
 const BSC_CHAIN_ID_HEX = "0x38";
 const BSC_CHAIN_ID_DEC = 56;
@@ -625,6 +629,99 @@ function downloadAll(){
   downloadText("wuzhishan_12345_export.json", JSON.stringify(payload, null, 2));
   logLine("已下載全部紀錄（JSON）");
 }
+
+// ===== 三次聖盃（前端解鎖）=====
+function cupKey(){ return "KLINE_TEMPLE_12345_CUP_V6_2"; }
+function todayKey(){ return Math.floor(Date.now()/86400000); } // local day index
+function loadCup(){
+  const raw = localStorage.getItem(cupKey());
+  let st = {day: todayKey(), streak:0, unlocked:false};
+  try{ if(raw){ st = Object.assign(st, JSON.parse(raw)); } }catch(e){}
+  if(st.day !== todayKey()){ st.day = todayKey(); st.streak = 0; st.unlocked = false; }
+  state.cup = st;
+  renderCup();
+  enforceFortuneGate();
+}
+function saveCup(){
+  localStorage.setItem(cupKey(), JSON.stringify(state.cup||{}));
+  renderCup();
+  enforceFortuneGate();
+}
+function renderCup(){
+  const st = state.cup || {streak:0, unlocked:false};
+  $("cupStreak") && ($("cupStreak").textContent = `${st.streak||0} / 3`);
+  $("cupUnlocked") && ($("cupUnlocked").textContent = st.unlocked ? "是" : "否");
+}
+function enforceFortuneGate(){
+  const btn = $("btnFortune");
+  if(!btn) return;
+  const ok = !!(state.cup && state.cup.unlocked);
+  btn.disabled = !ok;
+  btn.classList.toggle("disabled", !ok);
+  btn.title = ok ? "" : "需先完成三次聖盃解鎖";
+}
+function tossCup(){
+  const p = 0.5; // 聖盃機率（公平版）
+  const win = Math.random() < p;
+  const st = state.cup || {day: todayKey(), streak:0, unlocked:false};
+  if(st.unlocked){
+    $("cupResult") && ($("cupResult").textContent = "已解鎖（今日）");
+    return;
+  }
+  if(win){
+    st.streak = (st.streak||0) + 1;
+    $("cupResult") && ($("cupResult").textContent = "聖盃 ✅");
+    if(st.streak >= 3){
+      st.unlocked = true;
+      $("cupResult") && ($("cupResult").textContent = "三聖盃達成 · 已解鎖 🎉");
+      logLine("三次聖盃完成：已解鎖今日發財金");
+    }
+  }else{
+    st.streak = 0;
+    $("cupResult") && ($("cupResult").textContent = "笑杯 ❌（連勝歸零）");
+  }
+  state.cup = st;
+  saveCup();
+}
+function resetCup(){
+  state.cup = {day: todayKey(), streak:0, unlocked:false};
+  $("cupResult") && ($("cupResult").textContent = "—");
+  saveCup();
+}
+
+// ===== 新手導覽工具 =====
+function tutorialCheck(){
+  const parts = [];
+  parts.push(`錢包：${state.account ? "已連線" : "未連線"}`);
+  parts.push(`鏈：${state.chainId===56 ? "BSC 56 ✅" : (state.chainId?("chainId="+state.chainId+" ❌"):"未偵測")}`);
+  parts.push(`Heart：${($("heartAddr").value||"").trim() ? "已填" : "未填"}`);
+  parts.push(`ethers：${state.ethersOk ? "OK" : "未載入"}`);
+  const gate = (state.cup && state.cup.unlocked) ? "已解鎖 ✅" : "未解鎖（需三聖盃）";
+  parts.push(`發財金解鎖：${gate}`);
+  const s = parts.join(" · ");
+  $("tutorialStatus") && ($("tutorialStatus").textContent = s);
+  logLine("新手檢查：" + s);
+}
+function tutorialCopy(){
+  const txt = [
+    "五指山12345悟空財神殿｜新手教學（照做就會）",
+    "1) 安裝 MetaMask 建立錢包並備份助記詞（不要給任何人）",
+    "2) 切到 BSC 主網（chainId 56 / 0x38）",
+    "3) 準備少量 BNB 當 Gas",
+    "4) 連接錢包",
+    "5) 貼上 Heart 合約地址並刷新狀態",
+    "6) 先完成三次聖盃解鎖（擲筊連續 3 次聖盃）",
+    "7) 輸入 1～888 自填金額 → 領發財金（上鏈交易）",
+    "8) 拍照留念並下載（有版本/時間/錢包短碼浮印）"
+  ].join("\n");
+  navigator.clipboard.writeText(txt).then(()=>{
+    logLine("已複製新手教學");
+    $("tutorialStatus") && ($("tutorialStatus").textContent = "已複製到剪貼簿");
+  }).catch(()=>{
+    alert("無法寫入剪貼簿，請手動複製");
+  });
+}
+
 
 function loadCfg(){
   try{
@@ -745,6 +842,7 @@ function isAddr(a){ try{ return ethers.utils.isAddress(a); }catch(e){ return fal
 async function connect(){
   if(typeof ethers === "undefined") return;
   if(!window.ethereum){ alert("找不到錢包（window.ethereum）。請用手機/瀏覽器錢包打開。"); return; }
+  state.ethersOk = true;
   state.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
   await state.provider.send("eth_requestAccounts", []);
   state.signer = state.provider.getSigner();
@@ -1048,7 +1146,7 @@ async function updateSupervisor(){
   }
 }
 
-function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6_1"; }
+function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6_2"; }
 function loadMsg(){ $("msgText").value = localStorage.getItem(msgKey()) || ""; }
 function saveMsg(){ localStorage.setItem(msgKey(), $("msgText").value || ""); logLine("留言已儲存（本機）"); }
 function clearMsg(){ localStorage.removeItem(msgKey()); $("msgText").value = ""; logLine("留言已清空"); }
@@ -1256,6 +1354,11 @@ $("btnChatSpeak").addEventListener("click", speakGoddess);
 $("btnChatDownload").addEventListener("click", downloadChat);
 $("btnChatClear").addEventListener("click", clearChat);
 $("btnDownloadAll").addEventListener("click", downloadAll);
+$("btnCup") && $("btnCup").addEventListener("click", tossCup);
+$("btnCupReset") && $("btnCupReset").addEventListener("click", resetCup);
+$("btnTutorialCheck") && $("btnTutorialCheck").addEventListener("click", tutorialCheck);
+$("btnTutorialCopy") && $("btnTutorialCopy").addEventListener("click", tutorialCopy);
+
 
 $("btnCam").addEventListener("click", openCam);
 $("btnShot").addEventListener("click", takeShot);
@@ -1270,6 +1373,7 @@ $("uiVer").textContent = UI_VERSION;
 loadCfg();
 loadMsg();
 loadChat();
+loadCup();
 applyQueryConfig();
 setNetHint();
 logLine("UI 啟動：" + UI_VERSION + " · " + UI_BUILD);
