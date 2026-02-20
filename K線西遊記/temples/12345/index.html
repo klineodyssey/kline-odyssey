@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p13 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p14 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -508,11 +508,11 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p13 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p14 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6p13</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p14</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -1978,3 +1978,99 @@ setInterval(()=>{ syncCupUI(); }, 900);
 </script>
 </body>
 </html>
+
+<script>
+
+  // -------------------------
+  // Countdown Engine (fix for missing tickCountdowns in p13)
+  // - Works even when wallet not connected.
+  // - Heartbeat: 1 per hour (default 3600s) from lastHB (ms epoch) in localStorage.
+  // - Ignite: UTC 00:00-00:10 window, 1 per UTC day from lastIGDay (YYYYMMDD) in localStorage.
+  // -------------------------
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const fmtHHMMSS = (sec) => {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  };
+  const utcYMD = (d) => {
+    const y = d.getUTCFullYear();
+    const m = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    return `${y}${pad2(m)}${pad2(day)}`;
+  };
+  const nextUtcWindowStart = (now, startMin=0, windowMin=10) => {
+    // returns Date for next window start (UTC)
+    const d = new Date(now.getTime());
+    const curMin = d.getUTCMinutes();
+    const curH = d.getUTCHours();
+    // window is at 00:00 - 00:10 UTC
+    // If before 00:00 => today 00:00 (not possible since minutes/hours in UTC),
+    // If within day but past window => tomorrow 00:00
+    const inWindow = (curH === 0) && (curMin >= startMin) && (curMin < windowMin);
+    if (curH === 0 && curMin < startMin) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    if (inWindow) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    // tomorrow
+    d.setUTCDate(d.getUTCDate() + 1);
+    d.setUTCHours(0, startMin, 0, 0);
+    return d;
+  };
+
+  function tickCountdowns(){
+    try{
+      const now = new Date();
+
+      // Update top clock
+      const nowEl = $("nowTxt");
+      if (nowEl) nowEl.textContent = `${now.getFullYear()}/${pad2(now.getMonth()+1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+
+      // ---------- Heartbeat countdown ----------
+      const hbEl = $("hbCountdown");
+      const hbCooldownEl = $("hbCooldownSeconds"); // optional
+      const cooldownSec = (typeof window.heartbeatCooldownSeconds === "number" && window.heartbeatCooldownSeconds>0)
+        ? window.heartbeatCooldownSeconds
+        : (hbCooldownEl && Number(hbCooldownEl.textContent)) ? Number(hbCooldownEl.textContent) : 3600;
+
+      const lastHB = Number(LS.get("lastHB", 0)) || 0;
+      const nextHB = lastHB + cooldownSec * 1000;
+      const hbRemainSec = (lastHB>0) ? Math.max(0, (nextHB - now.getTime())/1000) : 0; // never claimed -> ready
+      if (hbEl) hbEl.textContent = fmtHHMMSS(hbRemainSec);
+
+      // ---------- Ignite countdown ----------
+      const igEl = $("igCountdown");
+      const lastIGDay = String(LS.get("lastIGDay", "")) || "";
+      const todayUTC = utcYMD(now);
+
+      const utcH = now.getUTCHours();
+      const utcM = now.getUTCMinutes();
+      const inIgniteWindow = (utcH === 0) && (utcM >= 0) && (utcM < 10);
+
+      let igRemainSec = 0;
+      const alreadyClaimedToday = (lastIGDay === todayUTC);
+
+      if (inIgniteWindow && !alreadyClaimedToday){
+        // ready now inside window
+        igRemainSec = 0;
+      } else {
+        // count down to next eligible window start
+        const nextStart = nextUtcWindowStart(now, 0, 10);
+        // if we are before nextStart but tomorrow start and already claimed today doesn't matter, still tomorrow
+        igRemainSec = Math.max(0, (nextStart.getTime() - now.getTime())/1000);
+      }
+      if (igEl) igEl.textContent = fmtHHMMSS(igRemainSec);
+
+    }catch(e){
+      // Never crash the page for timers
+      console.warn("tickCountdowns error:", e);
+    }
+  }
+
+</script>
