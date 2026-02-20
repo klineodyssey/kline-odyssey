@@ -474,6 +474,27 @@
     .toast.show{display:block}
   
 .soft-disabled{opacity:0.78; filter:saturate(0.8);}
+
+/* ===== Shrine Art ===== */
+.shrine-art .art-wrap{
+  margin-top:12px;
+  border:1px solid rgba(255,210,120,.22);
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(0,0,0,.28);
+}
+.shrine-art .art-img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+.shrine-art .art-hint{
+  padding:14px 14px;
+  color:rgba(255,255,255,.82);
+  font-size:14px;
+  line-height:1.45;
+}
+
 </style>
 </head>
 
@@ -568,6 +589,23 @@
         </div>
       </div>
     </div>
+  <!-- Shrine Art (single image; replace src with your own file) -->
+  <section class="card shrine-art" aria-label="Shrine Art">
+    <div class="card-hd">
+      <div class="card-title">悟空財神聖像</div>
+      <div class="pill">供奉圖</div>
+    </div>
+    <div class="art-wrap">
+      <!-- 建議放在 repo: /kline-odyssey/assets/wukong_caishen.png -->
+      <img class="art-img" src="./assets/wukong_caishen.png" alt="悟空財神聖像（請將圖片放到 assets/wukong_caishen.png）"
+           onerror="this.style.display='none'; document.getElementById('artHint').style.display='block';"/>
+      <div id="artHint" class="art-hint" style="display:none;">
+        圖片尚未放置。請把你的悟空財神圖存成：<b>assets/wukong_caishen.png</b><br/>
+        或把 img 的 src 改成你的圖片路徑/網址。
+      </div>
+    </div>
+  </section>
+
 
     <div class="grid" style="margin-top:12px">
       <div class="card">
@@ -840,6 +878,9 @@
   <div class="toast" id="toast"></div>
 
 <script>
+// UI version (patched)
+const UI_VERSION = 'V6.6p6';
+
 /* ===============================
    V6.6 — Wukong Temple UI
    - Single title (no duplication)
@@ -1660,38 +1701,98 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function drawWatermark(){
-  const t = getOverlayText();
-  // dark gradient at bottom for readability
-  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
-  g.addColorStop(0, "rgba(0,0,0,0)");
-  g.addColorStop(1, "rgba(0,0,0,.55)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
+function drawWatermark(ctx, w, h){
+    // ===== Watermark Layout (mobile-safe; avoid overlap) =====
+    const pad = Math.max(14, Math.round(Math.min(w, h) * 0.03));
+    const safeBottom = pad + Math.round(h * 0.02);
 
-  const pad = Math.max(16, Math.round(canvas.width*0.02));
-  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
-  ctx.fillStyle = "rgba(255,210,125,.95)";
-  ctx.shadowColor = "rgba(0,0,0,.55)";
-  ctx.shadowBlur = 10;
-  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
+    // gradient veil at bottom
+    const g = ctx.createLinearGradient(0, h*0.62, 0, h);
+    g.addColorStop(0, "rgba(0,0,0,0.00)");
+    g.addColorStop(1, "rgba(0,0,0,0.55)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, h*0.62, w, h*0.38);
 
-  ctx.shadowBlur = 0;
-  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
-  ctx.fillStyle = "rgba(255,255,255,.92)";
-  let y = canvas.height - pad*2.3;
-  if (t.mid){
-    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+    // title (top)
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 6;
+
+    const titleSize = Math.max(18, Math.round(w * 0.045));
+    ctx.font = `800 ${titleSize}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
+    ctx.fillStyle = "rgba(255,210,120,0.96)";
+    const title = `五指山 12345 悟空財神殿  ${UI_VERSION}`;
+    ctx.fillText(title, pad, pad);
+
+    // bottom info block (left) + footer (right)
+    const infoSize = Math.max(13, Math.round(w * 0.034));
+    const lineH = Math.round(infoSize * 1.35);
+
+    const lines = [];
+    if (state.comment && String(state.comment).trim()) lines.push(`留言：${String(state.comment).trim()}`);
+    if (state.wish && String(state.wish).trim()) lines.push(`許願：${String(state.wish).trim()}`);
+
+    // timestamp line always last (avoid overlap)
+    const ts = new Date();
+    const tsText = `${pad2(ts.getMonth()+1)}/${pad2(ts.getDate())} ${pad2(ts.getHours())}:${pad2(ts.getMinutes())}:${pad2(ts.getSeconds())} ・ ${state.addr ? shortAddr(state.addr) : "no-wallet"}`;
+
+    // reserve bottom area: max 2 custom lines + 1 timestamp line
+    const maxCustom = 2;
+    const showCustom = lines.slice(0, maxCustom);
+
+    // Compute startY so the block fits above safe bottom
+    const totalLines = showCustom.length + 1;
+    const blockH = totalLines * lineH;
+    const startY = h - safeBottom - blockH;
+
+    // background chip for readability
+    const chipPad = Math.max(10, Math.round(pad*0.55));
+    const chipW = Math.min(w - pad*2, Math.round(w*0.92));
+    const chipH = blockH + chipPad*1.2;
+    const chipX = pad;
+    const chipY = startY - Math.round(chipPad*0.6);
+
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    roundRect(ctx, chipX, chipY, chipW, chipH, 14);
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.font = `700 ${infoSize}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
+
+    let y = startY;
+    for(const L of showCustom){
+      y = wrapLine(ctx, L, pad + chipPad, y, chipW - chipPad*2, lineH);
+    }
+
+    // timestamp at the bottom-most line
+    ctx.fillStyle = "rgba(255,255,255,0.86)";
+    ctx.font = `600 ${Math.max(12, Math.round(w*0.030))}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
+    wrapLine(ctx, tsText, pad + chipPad, y, chipW - chipPad*2, lineH);
+
+    // reset shadow
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
   }
-  if (t.bot){
-    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+
+  function wrapLine(ctx, text, x, y, maxWidth, lineH){
+    // single-line clamp with ellipsis (prevents overlap)
+    const t = String(text || "");
+    if(!t){ return y; }
+    let s = t;
+    while(ctx.measureText(s).width > maxWidth && s.length > 1){
+      s = s.slice(0, -1);
+    }
+    if(s !== t){
+      if(s.length > 1) s = s.slice(0, -1) + "…";
+    }
+    ctx.fillText(s, x, y);
+    return y + lineH;
   }
-  ctx.fillStyle = "rgba(255,255,255,.70)";
-  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
-  ctx.fillText(t.foot, pad, canvas.height - pad);
-}
 
 function wrapText(text, x, y, maxW, lineH){
   const words = text.split("");
