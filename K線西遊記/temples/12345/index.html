@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p5 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p7 Cosmic Living Temple</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -475,26 +475,8 @@
   
 .soft-disabled{opacity:0.78; filter:saturate(0.8);}
 
-/* ===== Shrine Art ===== */
-.shrine-art .art-wrap{
-  margin-top:12px;
-  border:1px solid rgba(255,210,120,.22);
-  border-radius:18px;
-  overflow:hidden;
-  background:rgba(0,0,0,.28);
-}
-.shrine-art .art-img{
-  display:block;
-  width:100%;
-  height:auto;
-}
-.shrine-art .art-hint{
-  padding:14px 14px;
-  color:rgba(255,255,255,.82);
-  font-size:14px;
-  line-height:1.45;
-}
-
+    .heroWrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:8px}
+    .heroWrap img{width:100%;max-width:720px;aspect-ratio:1/1;object-fit:cover;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);box-shadow:var(--shadow)}
 </style>
 </head>
 
@@ -519,7 +501,7 @@
             <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p5 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p7 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
@@ -539,6 +521,15 @@
           </div>
         </div>
       </div>
+      <div class="card">
+        <div class="h">悟空財神聖像（assets/wukong_caishen.png）</div>
+        <div class="heroWrap">
+          <img id="heroImg" alt="悟空財神" loading="lazy" />
+          <div class="muted" style="margin-top:10px">若未顯示：請重整、或清除瀏覽器快取（GitHub Pages 有時會卡舊檔）。</div>
+        </div>
+      </div>
+
+
 
       <div class="card">
         <div class="rightInfo">
@@ -589,23 +580,6 @@
         </div>
       </div>
     </div>
-  <!-- Shrine Art (single image; replace src with your own file) -->
-  <section class="card shrine-art" aria-label="Shrine Art">
-    <div class="card-hd">
-      <div class="card-title">悟空財神聖像</div>
-      <div class="pill">供奉圖</div>
-    </div>
-    <div class="art-wrap">
-      <!-- 建議放在 repo: /kline-odyssey/assets/wukong_caishen.png -->
-      <img class="art-img" src="./assets/wukong_caishen.png" alt="悟空財神聖像（請將圖片放到 assets/wukong_caishen.png）"
-           onerror="this.style.display='none'; document.getElementById('artHint').style.display='block';"/>
-      <div id="artHint" class="art-hint" style="display:none;">
-        圖片尚未放置。請把你的悟空財神圖存成：<b>assets/wukong_caishen.png</b><br/>
-        或把 img 的 src 改成你的圖片路徑/網址。
-      </div>
-    </div>
-  </section>
-
 
     <div class="grid" style="margin-top:12px">
       <div class="card">
@@ -878,9 +852,6 @@
   <div class="toast" id="toast"></div>
 
 <script>
-// UI version (patched)
-const UI_VERSION = 'V6.6p6';
-
 /* ===============================
    V6.6 — Wukong Temple UI
    - Single title (no duplication)
@@ -1701,112 +1672,69 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function drawWatermark(ctx, w, h){
-    // ===== Watermark Layout (mobile-safe; avoid overlap) =====
-    const pad = Math.max(14, Math.round(Math.min(w, h) * 0.03));
-    const safeBottom = pad + Math.round(h * 0.02);
-
-    // gradient veil at bottom
-    const g = ctx.createLinearGradient(0, h*0.62, 0, h);
-    g.addColorStop(0, "rgba(0,0,0,0.00)");
-    g.addColorStop(1, "rgba(0,0,0,0.55)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, h*0.62, w, h*0.38);
-
-    // title (top)
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.shadowColor = "rgba(0,0,0,0.55)";
-    ctx.shadowBlur = 6;
-
-    const titleSize = Math.max(18, Math.round(w * 0.045));
-    ctx.font = `800 ${titleSize}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
-    ctx.fillStyle = "rgba(255,210,120,0.96)";
-    const title = `五指山 12345 悟空財神殿  ${UI_VERSION}`;
-    ctx.fillText(title, pad, pad);
-
-    // bottom info block (left) + footer (right)
-    const infoSize = Math.max(13, Math.round(w * 0.034));
-    const lineH = Math.round(infoSize * 1.35);
-
-    const lines = [];
-    if (state.comment && String(state.comment).trim()) lines.push(`留言：${String(state.comment).trim()}`);
-    if (state.wish && String(state.wish).trim()) lines.push(`許願：${String(state.wish).trim()}`);
-
-    // timestamp line always last (avoid overlap)
-    const ts = new Date();
-    const tsText = `${pad2(ts.getMonth()+1)}/${pad2(ts.getDate())} ${pad2(ts.getHours())}:${pad2(ts.getMinutes())}:${pad2(ts.getSeconds())} ・ ${state.addr ? shortAddr(state.addr) : "no-wallet"}`;
-
-    // reserve bottom area: max 2 custom lines + 1 timestamp line
-    const maxCustom = 2;
-    const showCustom = lines.slice(0, maxCustom);
-
-    // Compute startY so the block fits above safe bottom
-    const totalLines = showCustom.length + 1;
-    const blockH = totalLines * lineH;
-    const startY = h - safeBottom - blockH;
-
-    // background chip for readability
-    const chipPad = Math.max(10, Math.round(pad*0.55));
-    const chipW = Math.min(w - pad*2, Math.round(w*0.92));
-    const chipH = blockH + chipPad*1.2;
-    const chipX = pad;
-    const chipY = startY - Math.round(chipPad*0.6);
-
-    ctx.save();
-    ctx.globalAlpha = 0.55;
-    roundRect(ctx, chipX, chipY, chipW, chipH, 14);
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fill();
-    ctx.restore();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = `700 ${infoSize}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
-
-    let y = startY;
-    for(const L of showCustom){
-      y = wrapLine(ctx, L, pad + chipPad, y, chipW - chipPad*2, lineH);
-    }
-
-    // timestamp at the bottom-most line
-    ctx.fillStyle = "rgba(255,255,255,0.86)";
-    ctx.font = `600 ${Math.max(12, Math.round(w*0.030))}px system-ui, -apple-system, 'Noto Sans TC', sans-serif`;
-    wrapLine(ctx, tsText, pad + chipPad, y, chipW - chipPad*2, lineH);
-
-    // reset shadow
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = "transparent";
-  }
-
-  function wrapLine(ctx, text, x, y, maxWidth, lineH){
-    // single-line clamp with ellipsis (prevents overlap)
-    const t = String(text || "");
-    if(!t){ return y; }
-    let s = t;
-    while(ctx.measureText(s).width > maxWidth && s.length > 1){
-      s = s.slice(0, -1);
-    }
-    if(s !== t){
-      if(s.length > 1) s = s.slice(0, -1) + "…";
-    }
-    ctx.fillText(s, x, y);
-    return y + lineH;
-  }
-
-function wrapText(text, x, y, maxW, lineH){
-  const words = text.split("");
-  let line = "";
-  for (let i=0;i<words.length;i++){
-    const test = line + words[i];
-    const w = ctx.measureText(test).width;
-    if (w > maxW && i>0){
-      ctx.fillText(line, x, y);
-      line = words[i];
-      y += lineH;
-    }else{
+function getTextLines(ctx, text, maxWidth){
+  const words = String(text||"").split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  const lines = [];
+  let line = words[0];
+  for(let i=1;i<words.length;i++){
+    const test = line + " " + words[i];
+    if(ctx.measureText(test).width <= maxWidth){
       line = test;
+    }else{
+      lines.push(line);
+      line = words[i];
     }
+  }
+  lines.push(line);
+  return lines;
+}
+
+function drawWatermark(){
+  // Draw current video frame already rendered; now add watermark text safely (no overlap)
+  const pad = 26;
+  const maxW = canvas.width - pad*2;
+
+  const title = `五指山 12345 悟空財神殿  V6.6`;
+  const msg = `留言：${(wishText.value||"").trim()||"（未填）"}`;
+  const meta = `${new Date().toLocaleString()}  ·  ${walletAddress? walletAddress.slice(0,6)+"…"+walletAddress.slice(-4) : "no-wallet"}`;
+
+  // Top title
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = "#f5d37a";
+  ctx.shadowColor = "rgba(0,0,0,.55)";
+  ctx.shadowBlur = 10;
+  ctx.font = "bold 36px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+  ctx.fillText(title, pad, pad+34);
+
+  // Bottom block (msg + meta) — compute line layout to avoid overlap
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  const lineH = 30;
+  ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+  const msgLines = getTextLines(ctx, msg, maxW);
+  const metaLines = getTextLines(ctx, meta, maxW);
+
+  const blockLines = msgLines.length + metaLines.length;
+  const blockH = blockLines*lineH + (metaLines.length? 6:0);
+
+  let y = canvas.height - pad - blockH + 22; // start baseline
+  for(const ln of msgLines){
+    ctx.fillText(ln, pad, y);
+    y += lineH;
+  }
+  if(metaLines.length){
+    y += 6;
+    ctx.fillStyle = "rgba(255,255,255,.78)";
+    for(const ln of metaLines){
+      ctx.fillText(ln, pad, y);
+      y += lineH;
+    }
+  }
+  ctx.restore();
+}
   }
   ctx.fillText(line, x, y);
 }
@@ -2018,6 +1946,30 @@ $("heartAddr").addEventListener("change", async ()=>{
 $("orphanAddr").addEventListener("change", ()=>LS.set("kgen_orphan_addr", $("orphanAddr").value.trim()));
 $("wishText").addEventListener("change", ()=>LS.set("kgen_wish_text", $("wishText").value));
 $("noteText").addEventListener("change", ()=>LS.set("kgen_note_text", $("noteText").value));
+
+// ===== Hero Image Loader (GitHub Pages path-safe) =====
+(function(){
+  const img = document.getElementById('heroImg');
+  if(!img) return;
+
+  const repoBase = location.pathname.includes('/kline-odyssey/') ? '/kline-odyssey' : '';
+  const candidates = [
+    repoBase + '/assets/wukong_caishen.png',
+    'assets/wukong_caishen.png',
+    '../assets/wukong_caishen.png',
+    '../../assets/wukong_caishen.png',
+    '../../../assets/wukong_caishen.png',
+    '/assets/wukong_caishen.png'
+  ];
+
+  let i = 0;
+  const tryNext = () => {
+    if(i >= candidates.length) return;
+    img.src = candidates[i++];
+  };
+  img.onerror = tryNext;
+  tryNext();
+})();
 
 // keep fortune button state synced with wallet/heart/cup
 setInterval(()=>{ syncCupUI(); }, 900);
