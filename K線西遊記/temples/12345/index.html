@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p10 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p12 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -126,7 +126,8 @@
       display:flex;
       gap:14px;flex-wrap:nowrap;
       align-items:flex-start;
-    }
+      position:relative;
+}
     .pillar{
       width:8px;
       border-radius:99px;
@@ -474,6 +475,10 @@
   width:46px;height:46px;border-radius:14px;object-fit:cover;
   border:1px solid rgba(255,209,125,.35);
   box-shadow:0 10px 26px rgba(0,0,0,.35);
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:2;
 }
 @media (max-width:420px){ .caishenIcon{width:40px;height:40px;border-radius:12px;} }
 
@@ -502,11 +507,11 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p10 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p12 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6p10</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p12</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -844,6 +849,7 @@
   <div class="toast" id="toast"></div>
 
 <script>
+const $ = (id) => document.getElementById(id);
 /* ===============================
    V6.6 — Wukong Temple UI
    - Single title (no duplication)
