@@ -299,6 +299,14 @@
 .steps{margin:0;padding-left:18px}
 .steps li{margin:8px 0;line-height:1.45}
 button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
+
+/* V6.3: header alignment */
+.brandTitle{display:flex;flex-direction:column;gap:6px;align-items:flex-start;line-height:1}
+.brandTitle .t1,.brandTitle .t2,.brandTitle .t3{font-size:28px;font-weight:900;letter-spacing:.6px}
+.brandSub{max-width:300px}
+/* V6.3: force-show key sections */
+#cardTutorial{display:block !important}
+#cupHint{display:block}
 </style>
 </head>
 
@@ -309,7 +317,13 @@ button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
 <header>
   <div class="topbar">
     <div class="brand">
-      <div class="seal" aria-hidden="true"></div>
+  <div class="brandTitle">
+    <div class="t1">五指山</div>
+    <div class="t2"><span class="mono">12345</span> ·</div>
+    <div class="t3">悟空財神殿</div>
+  </div>
+  <div class="brandSub">心跳/點火/發財金/點燈/還願/許願｜上鏈·拍照/留言/許願可下載</div>
+</div>
       <div>
         <h1>五指山 12345 · 悟空財神殿</h1>
         <div class="sub">V6.1 Cosmic Living Temple · 心跳/點火/發財金/點燈/還願/許願 上鏈 · 拍照/留言/許願可下載</div>
@@ -518,7 +532,7 @@ Where the Market Becomes the Myth.
 <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
 
 <script>
-const UI_VERSION = "V6.2";
+const UI_VERSION = "V6.3";
 const UI_BUILD = "COSMIC_CHAINREADY";
 const BSC_CHAIN_ID_HEX = "0x38";
 const BSC_CHAIN_ID_DEC = 56;
@@ -631,7 +645,7 @@ function downloadAll(){
 }
 
 // ===== 三次聖盃（前端解鎖）=====
-function cupKey(){ return "KLINE_TEMPLE_12345_CUP_V6_2"; }
+function cupKey(){ return "KLINE_TEMPLE_12345_CUP_V6_3"; }
 function todayKey(){ return Math.floor(Date.now()/86400000); } // local day index
 function loadCup(){
   const raw = localStorage.getItem(cupKey());
@@ -1146,7 +1160,7 @@ async function updateSupervisor(){
   }
 }
 
-function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6_2"; }
+function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6_3"; }
 function loadMsg(){ $("msgText").value = localStorage.getItem(msgKey()) || ""; }
 function saveMsg(){ localStorage.setItem(msgKey(), $("msgText").value || ""); logLine("留言已儲存（本機）"); }
 function clearMsg(){ localStorage.removeItem(msgKey()); $("msgText").value = ""; logLine("留言已清空"); }
@@ -1374,12 +1388,52 @@ loadCfg();
 loadMsg();
 loadChat();
 loadCup();
+startCountdowns();
 applyQueryConfig();
 setNetHint();
 logLine("UI 啟動：" + UI_VERSION + " · " + UI_BUILD);
 
 setInterval(()=>{ if(state.account && $("supervisorBox").classList.contains("show")) updateSupervisor(); }, 2000);
 setInterval(()=>{ if(state.account) refreshStatus(); }, 3500);
+
+// ===== 倒數（UI）=====
+function pad2(n){ return String(n).padStart(2,"0"); }
+function fmtHMS(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec/3600); sec%=3600;
+  const m = Math.floor(sec/60); const s = sec%60;
+  return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+}
+function nextTopOfHourMs(){
+  const d = new Date();
+  d.setMinutes(59,59,999);
+  return d.getTime()+1;
+}
+function utcSecondsOfDayNow(){
+  const d = new Date();
+  return d.getUTCHours()*3600 + d.getUTCMinutes()*60 + d.getUTCSeconds();
+}
+function startCountdowns(){
+  function tick(){
+    const t = Date.now();
+    const hb = Math.max(0, (nextTopOfHourMs() - t)/1000);
+    const hbEl = $("heartbeatCountdown");
+    if(hbEl) hbEl.textContent = fmtHMS(hb);
+
+    const sod = utcSecondsOfDayNow();
+    const winStart = 0, winEnd = 600;
+    let msg = "";
+    if(sod>=winStart && sod<=winEnd){
+      msg = `窗口中 ✅  剩餘 ${fmtHMS(winEnd - sod)}`;
+    }else{
+      msg = `距離窗口 ${fmtHMS(86400 - sod + winStart)}`;
+    }
+    const igEl = $("igniteCountdown");
+    if(igEl) igEl.textContent = msg;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
 </script>
 </body>
 </html>
