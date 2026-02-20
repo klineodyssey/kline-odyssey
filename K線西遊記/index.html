@@ -2,230 +2,172 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>K線西遊記｜銀河宇宙入口（Portal V1.1）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>K線西遊記｜宇宙入口 Portal v1.2（Repo版）</title>
+  <meta name="description" content="K線西遊記｜花果山台灣｜宇宙入口。通往五指山12345悟空財神殿與各宮殿的傳送門。" />
   <style>
     :root{
       --bg:#06070b;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
-      --line: rgba(255,255,255,.14);
-      --btn: rgba(255,255,255,.12);
-      --btnh: rgba(255,255,255,.18);
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
-      --r: 18px;
-      --r2: 999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --line:rgba(255,255,255,.14);
+      --shadow: 0 14px 50px rgba(0,0,0,.45);
+      --r:18px; --r2:999px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0;
-      font-family: var(--sans);
-      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
-                  radial-gradient(1000px 700px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
-                  var(--bg);
-      color: var(--text);
-      min-height:100vh;
-      overflow-x:hidden;
+      margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(120,160,255,.13), transparent 60%),
+        radial-gradient(900px 650px at 80% 20%, rgba(255,160,120,.09), transparent 55%),
+        radial-gradient(900px 900px at 55% 90%, rgba(180,255,200,.06), transparent 60%),
+        var(--bg);
     }
-    a{color:inherit}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 40px;}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0 14px;}
-    .brand{display:flex;flex-direction:column;gap:4px;}
-    .brand .h{font-weight:900;letter-spacing:.5px;font-size:18px;}
-    .brand .s{font-size:12px;color:var(--muted);}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 16px 40px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .brand{display:flex;gap:12px;align-items:center}
+    .sig{
+      width:44px;height:44px;border-radius:14px;
+      background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+      border:1px solid var(--line); box-shadow:var(--shadow);
+      display:grid;place-items:center;font-weight:900;
+    }
+    h1{margin:0;font-size:18px;letter-spacing:.6px}
+    .sub{margin:2px 0 0 0;color:var(--muted);font-size:13px}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap}
     .pill{
-      display:flex;gap:8px;align-items:center;
-      padding:9px 12px;border:1px solid var(--line);border-radius:var(--r2);
-      background:rgba(255,255,255,.05);backdrop-filter:blur(8px);box-shadow:var(--shadow);
-      font-size:12px;color:var(--muted);white-space:nowrap;
+      border:1px solid var(--line); background:rgba(0,0,0,.20);
+      padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px
     }
-    .pill b{color:var(--text);font-weight:800}
-    .mono{font-family:var(--mono)}
-    .hero{
-      position:relative;border:1px solid var(--line);border-radius:24px;
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow:var(--shadow);overflow:hidden;padding:18px;
-    }
-    canvas#stars{position:absolute;inset:0;width:100%;height:100%;opacity:.85;pointer-events:none;}
-    .heroGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;}
-    @media (max-width:900px){.heroGrid{grid-template-columns:1fr}}
-    .title{font-size:26px;font-weight:950;letter-spacing:.8px;margin:4px 0 8px;}
-    .subtitle{color:var(--muted);line-height:1.55;margin:0 0 14px;font-size:13px;}
-    .ctaRow{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:var(--r2);border:1px solid var(--line);
-      background:var(--btn);text-decoration:none;font-weight:850;font-size:13px;transition:.15s;user-select:none;
-      cursor:pointer;
-    }
-    .btn:hover{background:var(--btnh)}
-    .btn.small{padding:8px 12px;font-weight:800}
-    .grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-top:14px;}
-    @media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    @media (max-width:520px){.grid{grid-template-columns:1fr}}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:18px}
     .card{
-      border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
-      box-shadow:var(--shadow);padding:14px;min-height:110px;position:relative;overflow:hidden;
+      grid-column:span 12;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border-radius:var(--r); box-shadow:var(--shadow);
+      padding:16px;
     }
-    .card .k{font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.2px}
-    .card .v{font-size:18px;font-weight:950;letter-spacing:.6px}
-    .card .t{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-    .smallText{font-size:12px;color:var(--muted);line-height:1.35}
-    .map{
-      margin-top:14px;border:1px solid var(--line);border-radius:24px;background:rgba(0,0,0,.20);
-      box-shadow:var(--shadow);padding:16px;position:relative;overflow:hidden;
+    @media(min-width:880px){
+      .card.half{grid-column:span 6}
+      .card.third{grid-column:span 4}
     }
-    .mapHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px;}
-    .mapHead .h{font-weight:950;letter-spacing:.6px;font-size:16px;}
-    .mapHead .s{color:var(--muted);font-size:12px;}
-    .nodes{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-top:10px;}
-    @media (max-width:900px){.nodes{grid-template-columns:repeat(2, 1fr)}}
-    @media (max-width:520px){.nodes{grid-template-columns:1fr}}
-    .node{
-      border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.06);
-      padding:12px;text-decoration:none;display:flex;flex-direction:column;gap:6px;transition:.15s;min-height:110px;
+    .title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .title h2{margin:0;font-size:15px}
+    .title .tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
+    .desc{margin:10px 0 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    a.btn,button.btn{
+      appearance:none;border:1px solid var(--line); background:rgba(255,255,255,.08);
+      color:var(--text); padding:10px 12px; border-radius:14px;
+      text-decoration:none; cursor:pointer; font-weight:800;
+      display:inline-flex;align-items:center;gap:8px;
     }
-    .node:hover{background:rgba(255,255,255,.10)}
-    .node .n{font-weight:950;letter-spacing:.5px}
-    .node .p{color:var(--muted);font-size:12px;line-height:1.35}
-    .node .id{color:rgba(255,255,255,.75);font-size:12px;font-family:var(--mono)}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)}
-    .ok{color:#9fffd9}
-    .warn{color:#ffd28c}
-    .err{color:#ff9fb2}
-
-    .footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.55;padding-bottom:6px;}
-    .hr{height:1px;background:var(--line);margin:10px 0}
+    a.btn:hover,button.btn:hover{background:rgba(255,255,255,.12)}
+    .btn.ghost{background:transparent}
+    .btn.warn{border-color:rgba(255,220,120,.35)}
+    .mono{font-family:var(--mono)}
+    .footer{
+      margin-top:18px;border-top:1px solid var(--line);
+      padding-top:14px;color:var(--muted);font-size:12px;line-height:1.7
+    }
+    .small{font-size:11px;color:var(--muted)}
+    .copy{
+      border:1px dashed var(--line);background:rgba(0,0,0,.20);
+      padding:10px;border-radius:14px;font-family:var(--mono);
+      overflow:auto; white-space:pre; max-height:140px;
+    }
   </style>
-
-  <!-- Ethers v5.7.2 (你需自行放檔) -->
-  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
 </head>
-
 <body>
   <div class="wrap">
-    <header>
+    <div class="top">
       <div class="brand">
-        <div class="h">K線西遊記｜銀河宇宙入口</div>
-        <div class="s">KLINE Odyssey · Map Portal · Portal V1.1</div>
+        <div class="sig">⌖</div>
+        <div>
+          <h1>K線西遊記｜宇宙入口</h1>
+          <div class="sub">Portal v1.2（GitHub Pages Repo 模式）</div>
+        </div>
       </div>
-
       <div class="pillrow">
-        <div class="pill">KGEN 總量：<b class="mono" id="supply">72,000,000</b></div>
-        <div class="pill">今日參訪：<b class="mono" id="today">0</b></div>
-        <div class="pill">總參訪：<b class="mono" id="total">0</b></div>
+        <div class="pill">主站：kline-odyssey</div>
+        <div class="pill">路徑：/K線西遊記/</div>
+        <div class="pill">鏈：BSC Mainnet（0x38）</div>
       </div>
-    </header>
+    </div>
 
-    <section class="hero">
-      <canvas id="stars"></canvas>
-
-      <div class="heroGrid">
-        <div>
-          <div class="title">宇宙不需要解釋，只需要入口。</div>
-          <p class="subtitle">
-            這裡是《K線西遊記》的地圖門戶。<br/>
-            Portal V1.1：新增「五指山 12345 心臟狀態」讀鏈面板（血量 / 呼吸窗口 / 今日是否點火）。
-          </p>
-
-          <div class="ctaRow">
-            <a class="btn" href="#map">🗺️ 進入宇宙地圖</a>
-            <a class="btn" href="./README.md">📘 查看資料說明</a>
-            <a class="btn small" href="https://t.me/klineodyssey" target="_blank" rel="noreferrer">Telegram</a>
-            <a class="btn small" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方</a>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="smallText">
-            RPC 模式：預設用公開 RPC 讀鏈（不需要錢包）。<br/>
-            連錢包只是為了後續要在 Portal 上做「一鍵跳轉＋快速點火」才需要；本版先做讀鏈穩定。
-          </div>
+    <div class="grid">
+      <section class="card half">
+        <div class="title">
+          <h2>五指山 12345｜悟空財神殿</h2>
+          <div class="tag">temples/12345</div>
         </div>
-
-        <div class="grid">
-          <div class="card">
-            <div class="k">當前節律（本機）</div>
-            <div class="v mono" id="clock">--:--:--</div>
-            <div class="t">
-              <span class="btn small" id="pingBtn">🔔 心跳打點</span>
-              <span class="btn small" id="resetBtn">♻️ 重置統計</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="k">鏈上連線</div>
-            <div class="v" style="font-size:14px;font-weight:900;" id="rpcStatus">尚未檢測</div>
-            <div class="t">
-              <span class="badge">CHAIN: <b class="mono" id="chainId">--</b></span>
-              <span class="badge">BLOCK: <b class="mono" id="blockNum">--</b></span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="k">五指山 12345｜Heart 狀態</div>
-            <div class="v" style="font-size:14px;font-weight:900;" id="heartStatus">尚未讀取</div>
-            <div class="t">
-              <span class="badge">血量: <b class="mono" id="heartBal">--</b> <span class="mono">KGEN</span></span>
-              <span class="badge">今日點火: <b class="mono" id="ignitedToday">--</b></span>
-              <span class="badge">窗口: <b class="mono" id="igniteWindow">--</b></span>
-            </div>
-            <div class="smallText" style="margin-top:10px;">
-              Heart: <span class="mono" id="heartAddr">未設定</span>
-            </div>
-          </div>
+        <p class="desc">
+          神殿本體入口。擲筊、點火、心跳、發財金、還願、許願、客服影像/語音、拍照與收據下載。
+          合約尚未部署前，仍可先完成全流程演練（不會卡死）。
+        </p>
+        <div class="btnrow">
+          <a class="btn" href="./temples/12345/">進入 12345 神殿</a>
+          <a class="btn ghost" href="./temples/12345/#help">神殿說明</a>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="map" id="map">
-      <div class="mapHead">
-        <div>
-          <div class="h">宇宙節點導航</div>
-          <div class="s">每個殿各自 index.html；入口只做導航＋讀鏈狀態</div>
+      <section class="card half">
+        <div class="title">
+          <h2>宇宙施工告示</h2>
+          <div class="tag">三殿一台｜已定案</div>
         </div>
-        <div class="s mono" id="pathHint">/K線西遊記/index.html</div>
-      </div>
+        <p class="desc">
+          18888 靈霄寶殿銀行（Bank 0.10%）、Mars/KUFO 豪宅（Reward 0.05%）、
+          AutoLP 斬妖台（AutoLP 0.05% 並作其他血管/活動分流唯一出口；先模式B只分流）。
+          目前優先：先把 12345 通殿整修到高規格，再下心臟合約。
+        </p>
+        <div class="btnrow">
+          <a class="btn warn" href="./temples/12345/#receipt">先做本地收據演練</a>
+          <a class="btn ghost" href="./temples/12345/#device">手機相容檢查</a>
+        </div>
+      </section>
 
-      <div class="nodes">
-        <a class="node" href="./temples/12345/index.html" data-node="12345">
-          <div class="n">五指山・悟空財神殿</div>
-          <div class="id">12345</div>
-          <div class="p">Heart / 發財金 / 呼吸心跳 / 還願 / 許願 / 光明燈 / 影像自看</div>
-          <div class="p mono" id="node12345Hint">Heart 未設定</div>
-        </a>
+      <section class="card third">
+        <div class="title">
+          <h2>快速路徑</h2>
+          <div class="tag mono">Repo 模式</div>
+        </div>
+        <div class="copy" id="paths"></div>
+        <div class="btnrow">
+          <button class="btn" id="copyPaths">複製</button>
+        </div>
+        <div class="small">提示：若你改 repo 名稱，這裡也要一起換。</div>
+      </section>
 
-        <a class="node" href="javascript:void(0)" data-node="18888">
-          <div class="n">靈霄寶殿・玉帝金庫</div>
-          <div class="id">18888</div>
-          <div class="p">人民銀行 / 存款利息 / 貸款 / 0.1% 稅（另殿另合約）</div>
-        </a>
+      <section class="card third">
+        <div class="title">
+          <h2>官方入口</h2>
+          <div class="tag">Links</div>
+        </div>
+        <p class="desc">LINE / Telegram / 粉專等官方入口，請以你既定連結為準（避免失效入口）。</p>
+        <div class="btnrow">
+          <a class="btn" href="https://lin.ee/b8X18F7" target="_blank" rel="noopener">LINE OA</a>
+          <a class="btn ghost" href="https://t.me/klineodyssey" target="_blank" rel="noopener">Telegram</a>
+        </div>
+      </section>
 
-        <a class="node" href="javascript:void(0)" data-node="18921">
-          <div class="n">斬妖台・AutoLP/蒸發引擎</div>
-          <div class="id">18921</div>
-          <div class="p">0.05% AutoLP 稅 / 節日活動（另殿另合約）</div>
-        </a>
+      <section class="card third">
+        <div class="title">
+          <h2>安全提醒</h2>
+          <div class="tag">No Advice</div>
+        </div>
+        <p class="desc">
+          這是文化×金融×AI敘事創作與修行分享。區塊鏈轉帳不可逆，務必選對鏈與地址。
+        </p>
+      </section>
+    </div>
 
-        <a class="node" href="javascript:void(0)" data-node="MARS">
-          <div class="n">花果山火星（MARS）</div>
-          <div class="id">MARS</div>
-          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / 0.05% Reward 稅（另殿另合約）</div>
-        </a>
-      </div>
-
-      <div class="footer">
-        Portal V1.1 只新增：讀取 Heart 血量與今日點火狀態。<br/>
-        之後要做「影像 AI 無人客服」會放在 Portal 的客服區（但不擠進 12345 神殿）。
-      </div>
-    </section>
-
-    <div class="footer" style="margin-top:14px;">
+    <div class="footer">
       PrimeForge 以母機之名，開啟金融生命。<br/>
       花果山台灣・信念不滅・市場無界。<br/>
       Where the Market Becomes the Myth.<br/>
@@ -233,277 +175,26 @@
     </div>
   </div>
 
-<script>
-/* =========================
-   Portal V1.1 — On-chain Read Panel (BSC)
-   - No wallet required (default JsonRpcProvider)
-   - Heart address is configured in CFG
-   ========================= */
+  <script>
+    (function(){
+      const base = location.origin + "/kline-odyssey/K線西遊記/";
+      const lines = [
+        "宇宙入口: " + base,
+        "12345 神殿: " + base + "temples/12345/",
+        "ethers 檔: " + base + "assets/ethers-5.7.2.umd.min.js"
+      ].join("\n");
+      document.getElementById("paths").textContent = lines;
 
-const CFG = {
-  chain: {
-    name: "BSC",
-    chainIdExpected: 56,
-    // 可自行換成你偏好的 RPC；這裡留多個，會自動嘗試
-    rpcUrls: [
-      "https://bsc-dataseed.binance.org/",
-      "https://bsc-dataseed1.binance.org/",
-      "https://bsc-dataseed2.binance.org/"
-    ]
-  },
-  addresses: {
-    // 已部署（你提供）
-    kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    // 你部署 Heart 後把地址貼在這裡
-    heart12345: "0x0000000000000000000000000000000000000000"
-  }
-};
-
-// Minimal ABIs
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)"
-];
-
-// Heart ABI (read-only subset)
-const HEART_ABI = [
-  "function token() view returns (address)",
-  "function windowStartSec() view returns (uint32)",
-  "function windowEndSec() view returns (uint32)",
-  "function inIgniteWindow() view returns (bool)",
-  "function localDayIdNow() view returns (uint256)",
-  "function dayIgnited(uint256) view returns (bool)",
-  "function igniteReward() view returns (uint256)",
-  "function heartbeatReward() view returns (uint256)"
-];
-
-function $(id){ return document.getElementById(id); }
-function setText(id, v){ $(id).textContent = v; }
-
-function fmtNum(n){
-  try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); }
-}
-
-function shortAddr(a){
-  if(!a || a.length < 10) return a || "";
-  return a.slice(0,6) + "…" + a.slice(-4);
-}
-
-function statusBadge(el, kind, text){
-  el.className = "v " + (kind==="ok"?"ok":kind==="warn"?"warn":"err");
-  el.textContent = text;
-}
-
-async function makeProvider(){
-  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
-  let lastErr = null;
-  for(const url of CFG.chain.rpcUrls){
-    try{
-      const p = new ethers.providers.JsonRpcProvider(url);
-      // probe
-      await p.getBlockNumber();
-      return p;
-    }catch(e){
-      lastErr = e;
-    }
-  }
-  throw lastErr || new Error("No RPC works");
-}
-
-async function refreshChain(provider){
-  try{
-    const net = await provider.getNetwork();
-    setText("chainId", String(net.chainId));
-    const bn = await provider.getBlockNumber();
-    setText("blockNum", String(bn));
-    if(net.chainId === CFG.chain.chainIdExpected){
-      statusBadge($("rpcStatus"), "ok", "RPC OK（讀鏈正常）");
-    }else{
-      statusBadge($("rpcStatus"), "warn", `RPC OK（chainId=${net.chainId}）`);
-    }
-  }catch(e){
-    statusBadge($("rpcStatus"), "err", "RPC 失敗（無法讀鏈）");
-    throw e;
-  }
-}
-
-async function refreshHeart(provider){
-  const heart = CFG.addresses.heart12345;
-  setText("heartAddr", heart);
-  setText("node12345Hint", heart && heart !== ethers.constants.AddressZero ? `Heart: ${shortAddr(heart)}` : "Heart 未設定");
-
-  if(!heart || heart === ethers.constants.AddressZero){
-    statusBadge($("heartStatus"), "warn", "Heart 未設定（先部署/填入地址）");
-    setText("heartBal", "--");
-    setText("ignitedToday", "--");
-    setText("igniteWindow", "--");
-    return;
-  }
-
-  const heartC = new ethers.Contract(heart, HEART_ABI, provider);
-
-  // token balance
-  const tokenAddr = CFG.addresses.kgenToken;
-  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
-
-  const [dec, sym, bal] = await Promise.all([
-    token.decimals().catch(()=>18),
-    token.symbol().catch(()=> "KGEN"),
-    token.balanceOf(heart).catch(()=> ethers.BigNumber.from(0))
-  ]);
-
-  const balFmt = ethers.utils.formatUnits(bal, dec);
-  setText("heartBal", fmtNum(Number(balFmt).toFixed(2)));
-
-  // ignite window + ignited today
-  const [ws, we, inWin, dayId] = await Promise.all([
-    heartC.windowStartSec(),
-    heartC.windowEndSec(),
-    heartC.inIgniteWindow(),
-    heartC.localDayIdNow()
-  ]);
-
-  const ignited = await heartC.dayIgnited(dayId);
-  setText("ignitedToday", ignited ? "YES" : "NO");
-
-  const hhmm = (sec)=>{
-    const h = Math.floor(sec/3600);
-    const m = Math.floor((sec%3600)/60);
-    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
-  };
-  setText("igniteWindow", `${hhmm(ws)}–${hhmm(we)}（TW）${inWin ? " · NOW" : ""}`);
-
-  // status line
-  if(Number(balFmt) <= 0){
-    statusBadge($("heartStatus"), "warn", `缺氧：血量 0 ${sym}（任何出金都會失敗）`);
-  }else if(!ignited){
-    statusBadge($("heartStatus"), "warn", inWin ? "呼吸窗口開啟（尚未點火）" : "今日尚未點火（窗口未開）");
-  }else{
-    statusBadge($("heartStatus"), "ok", "心臟運作中（今日已點火）");
-  }
-}
-
-/* ========= local counters ========= */
-const KEY_TOTAL="KLINE_PORTAL_TOTAL_VISITS";
-const KEY_TODAY="KLINE_PORTAL_TODAY_VISITS";
-const KEY_DATE ="KLINE_PORTAL_TODAY_DATE";
-
-const todayStr=()=>{
-  const d=new Date();
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,"0");
-  const da=String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${da}`;
-};
-
-function loadVisits(){
-  const d=todayStr();
-  const last=localStorage.getItem(KEY_DATE);
-  if(last!==d){
-    localStorage.setItem(KEY_DATE,d);
-    localStorage.setItem(KEY_TODAY,"0");
-  }
-  setText("total", localStorage.getItem(KEY_TOTAL)||"0");
-  setText("today", localStorage.getItem(KEY_TODAY)||"0");
-}
-function incVisits(){
-  const d=todayStr();
-  const last=localStorage.getItem(KEY_DATE);
-  if(last!==d){
-    localStorage.setItem(KEY_DATE,d);
-    localStorage.setItem(KEY_TODAY,"0");
-  }
-  const total=Number(localStorage.getItem(KEY_TOTAL)||"0")+1;
-  const today=Number(localStorage.getItem(KEY_TODAY)||"0")+1;
-  localStorage.setItem(KEY_TOTAL,String(total));
-  localStorage.setItem(KEY_TODAY,String(today));
-  setText("total", String(total));
-  setText("today", String(today));
-}
-
-$("resetBtn").addEventListener("click", ()=>{
-  localStorage.removeItem(KEY_TOTAL);
-  localStorage.removeItem(KEY_TODAY);
-  localStorage.removeItem(KEY_DATE);
-  loadVisits();
-});
-
-$("pingBtn").addEventListener("click", ()=>{
-  // Portal 只示範，不上鏈
-  $("rpcStatus").textContent = $("rpcStatus").textContent + " · ping";
-});
-
-/* ========= clock ========= */
-function tick(){
-  const d=new Date();
-  const hh=String(d.getHours()).padStart(2,"0");
-  const mm=String(d.getMinutes()).padStart(2,"0");
-  const ss=String(d.getSeconds()).padStart(2,"0");
-  setText("clock", `${hh}:${mm}:${ss}`);
-}
-setInterval(tick, 500); tick();
-
-/* ========= starfield ========= */
-const canvas=$("stars");
-const ctx=canvas.getContext("2d");
-let W=0,H=0,stars=[];
-function resize(){
-  W=canvas.width=canvas.offsetWidth*devicePixelRatio;
-  H=canvas.height=canvas.offsetHeight*devicePixelRatio;
-  const count=Math.floor((canvas.offsetWidth*canvas.offsetHeight)/12000);
-  stars=new Array(Math.max(60, Math.min(220, count))).fill(0).map(()=>({
-    x:Math.random()*W,y:Math.random()*H,
-    r:(Math.random()*1.4+0.4)*devicePixelRatio,
-    v:(Math.random()*0.25+0.05)*devicePixelRatio,
-    a:Math.random()*0.7+0.15
-  }));
-}
-window.addEventListener("resize", resize); resize();
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle="rgba(255,255,255,0.9)";
-  for(const s of stars){
-    s.y += s.v;
-    if(s.y>H){ s.y=-10; s.x=Math.random()*W; }
-    ctx.globalAlpha=s.a;
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-
-/* ========= node click placeholder ========= */
-document.querySelectorAll(".node").forEach(el=>{
-  el.addEventListener("click", (e)=>{
-    const href=(el.getAttribute("href")||"").trim();
-    if(href && !href.startsWith("javascript")) return;
-    e.preventDefault();
-    alert("此節點尚未接頁面。");
-  });
-});
-
-/* ========= boot ========= */
-(async function boot(){
-  loadVisits(); incVisits();
-
-  try{
-    const provider = await makeProvider();
-    await refreshChain(provider);
-    await refreshHeart(provider);
-
-    // refresh periodically
-    setInterval(async ()=>{
-      try{
-        await refreshChain(provider);
-        await refreshHeart(provider);
-      }catch(e){ /* ignore */ }
-    }, 15000);
-  }catch(e){
-    statusBadge($("rpcStatus"), "err", "缺 ethers 或 RPC 無法連線");
-    console.error(e);
-  }
-})();
-</script>
+      document.getElementById("copyPaths").addEventListener("click", async () => {
+        try{
+          await navigator.clipboard.writeText(lines);
+          document.getElementById("copyPaths").textContent = "已複製";
+          setTimeout(()=>document.getElementById("copyPaths").textContent="複製", 900);
+        }catch(e){
+          alert("無法複製，請手動長按選取。");
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
