@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p3 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -493,11 +493,11 @@
             <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p3 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p3</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -836,7 +836,7 @@
 
 <script>
 /* ===============================
-   V6.6 — Wukong Temple UI
+   V6.6p3 — Wukong Temple UI
    - Single title (no duplication)
    - Sticky official website button
    - Countdown: heartbeat + ignite window
@@ -848,7 +848,7 @@
 ================================ */
 
 const UI = {
-  ver: "V6.6",
+  ver: "V6.6p3",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -1263,10 +1263,25 @@ function tickCountdown(){
   $("nowTxt").textContent = fmtDateTime(new Date());
 
   // Heartbeat
-  const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : 0);
-  const hbLeft = hbNext>0 ? (hbNext - now) : 0;
-  $("hbCountdown").textContent = (hbNext===0) ? "00:00:00" : fmtHMS(hbLeft);
-  $("hbNextAt").textContent = hbNext===0 ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
+  const hbNext = (lastHB||0) ? (lastHB + (rules.heartbeatCooldownSeconds||3600)*1000) : 0;
+  if (!lastHB){
+    // 尚未心跳過：顯示到「下一個整點」的倒數（更有儀式感），但仍可直接領
+    const nowD = new Date();
+    const nextH = new Date(nowD);
+    nextH.setMinutes(60,0,0); // 下一個整點
+    const left = nextH.getTime() - now;
+    $("hbCountdown").textContent = fmtHMS(left);
+    $("hbNextAt").textContent = `可直接領｜下一次整點 @ ${nextH.toLocaleString()}`;
+  } else {
+    const hbLeft = hbNext - now;
+    $("hbCountdown").textContent = fmtHMS(hbLeft);
+    $("hbNextAt").textContent = hbLeft>0 ? ("下一次可領 @ " + new Date(hbNext).toLocaleString()) : "可領（冷卻已結束）";
+    $("btnHeartbeat").disabled = !(account && heartAddr) || hbLeft>0;
+  }
+  // 若從未領過，仍允許直接領
+  if (!lastHB){
+    $("btnHeartbeat").disabled = !(account && heartAddr);
+  }
 
   // Ignite window (UTC)
   const tod = currentUTCSecondsOfDay();
@@ -1634,37 +1649,75 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function drawWatermark(){
-  const t = getOverlayText();
-  // dark gradient at bottom for readability
-  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
+function drawWatermark(canvas, t){
+  const ctx = canvas.getContext("2d");
+  const pad = Math.max(18, Math.round(canvas.width*0.035));
+  const titleSize = Math.max(18, Math.round(canvas.width*0.040));
+  const lineSize  = Math.max(20, Math.round(canvas.width*0.028));
+  const lineH     = Math.round(lineSize * 1.28);
+  const footSize  = Math.max(13, Math.round(canvas.width*0.018));
+
+  // subtle vignette
+  const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.width*0.2, canvas.width/2, canvas.height/2, canvas.width*0.9);
   g.addColorStop(0, "rgba(0,0,0,0)");
-  g.addColorStop(1, "rgba(0,0,0,.55)");
+  g.addColorStop(1, "rgba(0,0,0,0.55)");
   ctx.fillStyle = g;
-  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  const pad = Math.max(16, Math.round(canvas.width*0.02));
-  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
-  ctx.fillStyle = "rgba(255,210,125,.95)";
-  ctx.shadowColor = "rgba(0,0,0,.55)";
+  // helper: split into lines by width
+  function splitLines(str, maxW){
+    const lines = [];
+    let line = "";
+    for (const ch of (str||"")){
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxW && line){
+        lines.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  // TOP title
+  ctx.fillStyle = "rgba(255,215,130,.92)";
+  ctx.font = `800 ${titleSize}px "Microsoft JhengHei", system-ui`;
+  ctx.textBaseline = "top";
+  ctx.shadowColor = "rgba(255,210,120,.45)";
   ctx.shadowBlur = 10;
-  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
+  ctx.fillText(t.top, pad, pad);
 
+  // BOTTOM block (ensure no overlap): lines first, then footer
   ctx.shadowBlur = 0;
-  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
-  ctx.fillStyle = "rgba(255,255,255,.92)";
-  let y = canvas.height - pad*2.3;
-  if (t.mid){
-    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
-  }
-  if (t.bot){
-    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
-  }
+  const maxW = canvas.width - pad*2;
+  ctx.font = `700 ${lineSize}px "Microsoft JhengHei", system-ui`;
+  ctx.fillStyle = "rgba(255,255,255,.80)";
+
+  const lines = [];
+  if (t.mid) lines.push(...splitLines(t.mid, maxW));
+  if (t.bot) lines.push(...splitLines(t.bot, maxW));
+
+  // footer fixed at very bottom
+  const footY = canvas.height - pad;
   ctx.fillStyle = "rgba(255,255,255,.70)";
-  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
-  ctx.fillText(t.foot, pad, canvas.height - pad);
+  ctx.font = `${footSize}px ui-monospace, SFMono-Regular`;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(t.foot, pad, footY);
+
+  // draw mid/bot lines above footer with safe gap
+  const gap = Math.max(10, Math.round(pad*0.55));
+  const areaBottom = footY - gap;
+  const totalH = lines.length * lineH;
+  let y = Math.max(pad + titleSize + 12, areaBottom - totalH); // don't go above title area
+  ctx.fillStyle = "rgba(255,255,255,.80)";
+  ctx.font = `700 ${lineSize}px "Microsoft JhengHei", system-ui`;
+  ctx.textBaseline = "top";
+  for (const ln of lines){
+    ctx.fillText(ln, pad, y);
+    y += lineH;
+  }
 }
 
 function wrapText(text, x, y, maxW, lineH){
