@@ -1,897 +1,292 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>五指山・悟空財神殿 12345｜Heart V3.1.0</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五指山12345悟空財神殿 V5</title>
 
-  <!-- 放置位置：K線西遊記/assets/js/ethers-5.7.2.umd.min.js -->
-  <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
+<style>
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei",sans-serif;
+    background:black;
+    color:#ffd700;
+    overflow-x:hidden;
+    text-align:center;
+}
 
-  <style>
-    :root{
-      --bg:#05060a;
-      --panel: rgba(255,255,255,.06);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
-      --line: rgba(255,255,255,.14);
-      --btn: rgba(255,255,255,.10);
-      --btnh: rgba(255,255,255,.18);
-      --ok: rgba(120,255,200,.95);
-      --warn: rgba(255,210,120,.95);
-      --bad: rgba(255,120,120,.95);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
-      --r: 16px;
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: var(--sans);
-      background:
-        radial-gradient(1200px 900px at 30% 10%, rgba(120,170,255,.10), transparent 60%),
-        radial-gradient(1000px 700px at 70% 70%, rgba(255,160,220,.08), transparent 55%),
-        var(--bg);
-      color: var(--text);
-      min-height:100vh;
-    }
-    a{color:inherit}
-    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 44px;}
-    header{
-      display:flex; gap:12px; align-items:flex-end; justify-content:space-between;
-      padding: 10px 0 14px;
-    }
-    .brand .h{font-weight:950;letter-spacing:.6px;font-size:18px;}
-    .brand .s{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45;}
-    .pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      display:flex; gap:8px; align-items:center;
-      padding: 9px 12px;
-      border:1px solid var(--line);
-      border-radius:999px;
-      background: rgba(255,255,255,.05);
-      box-shadow: var(--shadow);
-      font-size:12px;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .pill b{color:var(--text);font-weight:900}
-    .hero{
-      border:1px solid var(--line);
-      border-radius: 24px;
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      padding: 16px;
-      overflow:hidden;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 12px;
-    }
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
-    .title{font-size:24px;font-weight:950;letter-spacing:.8px;margin: 6px 0 8px;}
-    .subtitle{color:var(--muted);line-height:1.55;font-size:13px;margin: 0 0 10px;}
-    .panel{
-      border:1px solid var(--line);
-      border-radius: var(--r);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      padding: 14px;
-      margin-top: 12px;
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border:1px solid var(--line);
-      background: var(--btn);
-      color: var(--text);
-      font-weight: 900;
-      font-size: 13px;
-      text-decoration:none;
-      cursor:pointer;
-      user-select:none;
-      transition: .15s;
-    }
-    .btn:hover{background: var(--btnh)}
-    .btn.small{padding:8px 12px; font-weight:850}
-    .mono{font-family: var(--mono)}
-    .kv{display:grid;grid-template-columns: 140px 1fr; gap: 8px 10px; align-items:center;}
-    @media (max-width: 520px){ .kv{grid-template-columns: 1fr; } }
-    .k{color:var(--muted);font-size:12px}
-    .v{font-size:13px;line-height:1.4;word-break:break-all}
-    input, select, textarea{
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.20);
-      color: var(--text);
-      outline:none;
-      width: 100%;
-      max-width: 360px;
-    }
-    textarea{max-width: 100%; min-height: 88px; resize: vertical;}
-    .status{font-size:12px;color:var(--muted);line-height:1.5}
-    .ok{color: var(--ok)}
-    .warn{color: var(--warn)}
-    .bad{color: var(--bad)}
-    .footer{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 14px;
-      line-height:1.55;
-    }
-    .help{
-      border:1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(255,255,255,.05);
-      box-shadow: var(--shadow);
-      padding: 14px;
-      margin-top: 14px;
-    }
-    .help h3{margin:0 0 8px;font-size:14px;letter-spacing:.4px}
-    .help ol{margin:8px 0 0 18px;color:var(--muted);line-height:1.6;font-size:13px}
-    .camRow{display:grid;grid-template-columns: 1fr 1fr;gap:12px;align-items:start;}
-    @media (max-width: 900px){ .camRow{grid-template-columns:1fr} }
-    video, canvas, img{
-      width:100%;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.25);
-    }
-  </style>
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:-1;
+}
 
-  <style>
-    /* ===== Temple UI V3.2.0 additions ===== */
-    .hero{ position:relative; overflow:hidden; }
-    #cosmos{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      z-index:0;
-      opacity:.55;
-    }
-    .hero .grid{ position:relative; z-index:1; }
-    .topRight{
-      position:fixed; right:14px; top:14px; z-index:60;
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
-    }
-    .miniPill{
-      background: rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.18);
-      padding:8px 10px;
-      border-radius:999px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.45);
-      font-size:12px;
-      color: var(--text);
-      backdrop-filter: blur(8px);
-    }
-    .miniPill b{ font-family: var(--mono); }
-    .supervisorBtn{
-      cursor:pointer; user-select:none;
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.18);
-      padding:8px 12px; border-radius:999px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.45);
-      font-weight:850;
-      color: var(--text);
-    }
-    .overlay{
-      position:fixed; inset:0; z-index:90;
-      background: rgba(0,0,0,.72);
-      display:none;
-    }
-    .overlay.on{ display:block; }
-    .overlayCard{
-      position:absolute; right:14px; top:64px;
-      width:min(560px, calc(100vw - 28px));
-      background: rgba(10,10,16,.86);
-      border:1px solid rgba(255,215,0,.30);
-      border-radius: 18px;
-      box-shadow: 0 18px 70px rgba(0,0,0,.65);
-      padding:14px;
-      backdrop-filter: blur(10px);
-      color: var(--text);
-    }
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:5px 10px; border-radius:999px; font-size:12px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.35);
-      color: var(--text);
-      white-space:nowrap;
-    }
-    .progressBar{
-      width:100%; height:14px; border-radius:999px;
-      background: rgba(255,255,255,.10);
-      overflow:hidden; border:1px solid rgba(255,255,255,.14);
-    }
-    .progressFill{
-      height:100%; width:0%;
-      background: linear-gradient(90deg, rgba(255,215,0,.95), rgba(255,160,0,.95));
-      transition: width .6s ease;
-    }
-    .chkGrid{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap:8px 10px;
-      margin-top:10px;
-      font-size:13px;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:999px;
-      background: rgba(255,255,255,.25);
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow: 0 0 10px rgba(255,255,255,.10);
-      justify-self:end;
-      margin-top:4px;
-    }
-    .dot.ok{ background: rgba(120,255,200,.95); box-shadow:0 0 14px rgba(120,255,200,.45); }
-    .dot.warn{ background: rgba(255,210,120,.95); box-shadow:0 0 14px rgba(255,210,120,.45); }
-    .dot.bad{ background: rgba(255,120,120,.95); box-shadow:0 0 14px rgba(255,120,120,.45); }
-  </style>
+h1{
+    margin-top:20px;
+    text-shadow:0 0 20px gold;
+}
 
-</head></head>
+.version{
+    position:fixed;
+    top:10px;
+    right:20px;
+    font-size:12px;
+    color:#aaa;
+}
+
+.panel{
+    margin:20px auto;
+    padding:20px;
+    width:90%;
+    max-width:900px;
+    background:rgba(0,0,0,0.6);
+    border:1px solid gold;
+    border-radius:15px;
+    box-shadow:0 0 30px rgba(255,215,0,0.3);
+}
+
+button{
+    background:black;
+    color:gold;
+    border:1px solid gold;
+    padding:8px 16px;
+    margin:5px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:gold;
+    color:black;
+}
+
+textarea{
+    width:90%;
+    height:70px;
+    background:#111;
+    color:gold;
+    border:1px solid gold;
+    border-radius:10px;
+    padding:10px;
+}
+
+.progress-bar{
+    width:100%;
+    height:20px;
+    background:#222;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,gold,orange);
+    width:0%;
+    transition:width 1s;
+}
+
+.ai-avatar{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:radial-gradient(circle,gold,#333);
+    margin:10px auto;
+    box-shadow:0 0 25px gold;
+    animation:pulse 3s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 10px gold;}
+    50%{box-shadow:0 0 40px gold;}
+    100%{box-shadow:0 0 10px gold;}
+}
+</style>
+</head>
 
 <body>
 
-  <div class="topRight">
-    <div class="miniPill">版本：<b class="mono" id="uiVersion">Temple UI V3.2.0</b></div>
-    <div class="miniPill">時間：<b class="mono" id="nowClock">--</b></div>
-    <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
-  </div>
+<canvas id="stars"></canvas>
 
-  <div class="overlay" id="supervisorOverlay" aria-hidden="true">
-    <div class="overlayCard">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜五指山 12345</div>
-        <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
-      </div>
+<div class="version">
+V5 Eternal Heart · <span id="clock"></span>
+</div>
 
-      <div style="margin-top:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div style="color:var(--muted);font-size:12px;">工程進度（自動檢查）</div>
-          <div class="badge" id="supPct">0%</div>
-        </div>
-        <div class="progressBar"><div class="progressFill" id="supFill"></div></div>
-      </div>
+<h1>五指山 12345 悟空財神殿</h1>
 
-      <div class="chkGrid" id="supChecks">
-        <div>頁面載入</div><div class="dot" id="chkLoaded"></div>
-        <div>Cosmos 背景引擎（Canvas）</div><div class="dot" id="chkCosmos"></div>
-        <div>ethers 載入</div><div class="dot" id="chkEthers"></div>
-        <div>錢包連線（provider）</div><div class="dot" id="chkProvider"></div>
-        <div>BSC chainId=56 / 0x38</div><div class="dot" id="chkChain"></div>
-        <div>Heart 地址格式</div><div class="dot" id="chkHeartAddr"></div>
-        <div>相機可用</div><div class="dot" id="chkCam"></div>
-        <div>麥克風可用</div><div class="dot" id="chkMic"></div>
-        <div>錯誤監看（Console 捕捉）</div><div class="dot" id="chkErrors"></div>
-      </div>
+<div class="panel">
+<h2>🫀 悟空心臟血量</h2>
+<div id="heartDisplay"></div>
+<div class="progress-bar">
+<div class="progress-fill" id="heartBar"></div>
+</div>
+<p>下次心跳倒數：<span id="heartbeatCountdown"></span></p>
+<p>下次點火倒數：<span id="igniteCountdown"></span></p>
+</div>
 
-      <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6;">
-        說明：監工模式只做檢查與提示，不會更動你的資產或送出交易。鏈上事件（心跳/點火/發財金/還願）仍以你原本按鈕送交易為準。
-      </div>
-    </div>
-  </div>
+<div class="panel">
+<h2>📸 神殿留影</h2>
+<video id="video" width="300" autoplay></video><br>
+<button onclick="takePhoto()">拍照</button>
+<canvas id="photoCanvas" width="300" height="225"></canvas><br>
+<button onclick="downloadPhoto()">下載照片</button>
+</div>
 
-  <div class="wrap">
+<div class="panel">
+<h2>✨ 許願星辰</h2>
+<textarea id="wishInput" placeholder="寫下你的願望"></textarea><br>
+<button onclick="generateWishCertificate()">生成願望證書</button>
+<canvas id="wishCanvas" width="500" height="300"></canvas><br>
+<button onclick="downloadWish()">下載願望證書</button>
+</div>
 
-    <header>
-      <div class="brand">
-        <div class="h">五指山・悟空財神殿 12345</div>
-        <div class="s">Heart Contract · Faucet / Vow / Lamp / Wish / Camera · UI <span class="mono">V3.2.0</span> · Heart <span class="mono">V3.1.0</span></div>
-      </div>
-
-      <div class="pills">
-        <div class="pill">版本：<b class="mono">UI V3.2.0</b></div>
-        <div class="pill">KGEN 總量：<b class="mono">72,000,000</b></div>
-        <div class="pill">今日參訪：<b class="mono" id="todayVisitors">0</b></div>
-        <div class="pill">總參訪：<b class="mono" id="totalVisitors">0</b></div>
-      </div>
-    </header>
-
-    <section class="hero">
-      <canvas id="cosmos"></canvas>
-      <div class="grid">
-        <div>
-          <div class="title">悟空被壓五指山，心臟仍在跳。</div>
-          <p class="subtitle">
-            這裡只做一件事：<b>讓心臟活著</b>。<br/>
-            呼吸（00:00–00:10）、心跳（每小時 ±10 分）、發財金（每日 1 次）、還願補血、光明燈上鏈、許願留證、信眾自拍留念與語音導引。
-          </p>
-
-          <div class="panel">
-            <div class="row">
-              <button class="btn" id="connectBtn">連接錢包（MetaMask）</button>
-              <button class="btn small" id="voiceBtn">語音導引</button>
-              <a class="btn small" href="../../index.html">← 返回宇宙入口</a>
-            </div>
-            <div class="status" style="margin-top:10px" id="walletStatus">尚未連接</div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:8px;">鏈上資訊</div>
-            <div class="kv">
-              <div class="k">Network</div>
-              <div class="v mono" id="net">--</div>
-
-              <div class="k">Wallet</div>
-              <div class="v mono" id="addr">--</div>
-
-              <div class="k">Heart 合約</div>
-              <div class="v mono" id="heart">--</div>
-
-              <div class="k">你的 KGEN</div>
-              <div class="v mono" id="balUser">--</div>
-
-              <div class="k">Heart 血量</div>
-              <div class="v mono" id="balHeart">--</div>
-            </div>
-            <div class="status" style="margin-top:10px">
-              狀態：<span id="timeHint" class="mono">--</span>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">許願池（留證）</div>
-            <div class="row">
-              <textarea id="wishText" placeholder="輸入你的願望（只留哈希上鏈，本機會保存原文）"></textarea>
-            </div>
-            <div class="row" style="margin-top:10px">
-              <button class="btn" id="wishBtn">許願上鏈（哈希）</button>
-            </div>
-            <div class="status" style="margin-top:10px" id="wishStatus">尚未許願</div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">信眾影像（本機顯示，不上傳）</div>
-            <div class="camRow">
-              <div>
-                <video id="cam" autoplay playsinline muted></video>
-                <div class="row" style="margin-top:10px">
-                  <button class="btn" id="camBtn">開啟鏡頭</button>
-                  <button class="btn" id="snapBtn">拍照留念</button>
-                </div>
-                <div class="status" style="margin-top:10px" id="camStatus">尚未啟動鏡頭</div>
-              </div>
-              <div>
-                <canvas id="snapCanvas" style="display:none"></canvas>
-                <img id="snapImg" alt="snapshot" style="display:none" />
-                <div class="status" style="margin-top:10px">拍照結果會顯示在右側（手機會在下方）。</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div>
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">呼吸 / 心跳</div>
-            <div class="row" style="margin-bottom:10px">
-              <button class="btn" id="igniteBtn">00:00–00:10 呼吸（ignite）</button>
-              <button class="btn" id="beatBtn">每小時 ±10 分 心跳（heartbeat）</button>
-            </div>
-            <div class="status" id="beatStatus">尚未操作</div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">發財金（每日 1 次）</div>
-            <div class="row">
-              <input id="fortuneAmt" type="number" min="1" max="888" placeholder="輸入 1 ~ 888" />
-              <button class="btn" id="fortuneBtn">領發財金</button>
-            </div>
-            <div class="status" style="margin-top:10px" id="fortuneStatus">每日 1 次 · 建議先確保 Heart 有血（有 KGEN）</div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">還願（補血）</div>
-            <div class="row" style="gap:10px">
-              <select id="vowOption" style="max-width:220px">
-                <option value="0">0：回心臟（推薦）</option>
-                <option value="4">4：BLACKHOLE（往生）</option>
-              </select>
-              <input id="vowAmt" type="number" min="1" placeholder="還願金額（KGEN）" />
-              <button class="btn" id="vowBtn">還願</button>
-            </div>
-            <div class="status" style="margin-top:10px" id="vowStatus">還願會先自動 approve，再呼叫 vowTo().</div>
-          </div>
-
-          <div class="panel">
-            <div style="font-weight:950;letter-spacing:.4px;margin-bottom:10px;">光明燈（上鏈）</div>
-            <div class="row">
-              <input id="lampDays" type="number" min="1" placeholder="點燈天數（例：7）" />
-              <button class="btn" id="lampBtn">點光明燈</button>
-            </div>
-            <div class="status" style="margin-top:10px" id="lampStatus">尚未點燈</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="help">
-      <h3>無人客服（把流程寫到照著做就會）</h3>
-      <ol>
-        <li>手機請用 MetaMask 內建瀏覽器打開神殿頁。</li>
-        <li>切到 BNB Chain（BSC），錢包保留少量 BNB 當 gas。</li>
-        <li>按「連接錢包」，看到 Wallet 地址後再操作。</li>
-        <li>若 Heart 血量為 0：代表心臟沒血，任何領取都會失敗，需先把 KGEN 轉進 Heart 合約地址。</li>
-      </ol>
-    </section>
-
-    <div class="footer">
-      PrimeForge 以母機之名，開啟金融生命。<br/>
-      花果山台灣・信念不滅・市場無界。<br/>
-      Where the Market Becomes the Myth.<br/>
-      —— 樂天帝 ⌖
-    </div>
-
-  </div>
+<div class="panel">
+<h2>👩‍🚀 AI 仙女客服</h2>
+<div class="ai-avatar"></div>
+<button onclick="speak()">語音問候</button>
+<textarea id="chatInput" placeholder="輸入你的問題"></textarea><br>
+<button onclick="chat()">送出</button>
+<div id="chatLog"></div>
+</div>
 
 <script>
-  // ================== CONFIG（部署後只改這裡） ==================
-  const CFG = {
-    chainIdHex: "0x38", // BSC mainnet
-    kgenToken:  "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    heart:     "0xYourHeartContractAddress"
-  };
+/* ===== 星辰動畫 ===== */
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-  // ================== ABIs ==================
-  const ERC20_ABI = [
-    "function decimals() view returns (uint8)",
-    "function balanceOf(address) view returns (uint256)",
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)"
-  ];
+let stars = [];
+for(let i=0;i<200;i++){
+    stars.push({x:Math.random()*canvas.width,
+                y:Math.random()*canvas.height,
+                r:Math.random()*2});
+}
 
-  const HEART_ABI = [
-    "function heartBalance() view returns (uint256)",
-    "function inIgniteWindow() view returns (bool)",
-    "function inHeartbeatWindow() view returns (bool)",
-    "function heartbeatEffectiveHourIdNow() view returns (uint256)",
-    "function localDayIdNow() view returns (uint256)",
-    "function localMonthIdNow() view returns (uint256)",
-    "function igniteAndClaim()",
-    "function heartbeatClaim()",
-    "function fortuneClaim(uint256 amount)",
-    "function vowTo(uint8 option, uint256 amount)",
-    "function lightLamp(uint16 daysToAdd)",
-    "function makeWish(bytes32 wishHash)"
-  ];
-
-  // ================== Helpers ==================
-  function $(id){ return document.getElementById(id); }
-  function nowLocal(){
-    const d = new Date();
-    const hh = String(d.getHours()).padStart(2,'0');
-    const mm = String(d.getMinutes()).padStart(2,'0');
-    const ss = String(d.getSeconds()).padStart(2,'0');
-    return `${hh}:${mm}:${ss}`;
-  }
-  function setStatus(el, text, cls){
-    el.textContent = text;
-    el.className = "status" + (cls ? (" " + cls) : "");
-  }
-
-  // ================== Visit counters ==================
-  (function visitCounter(){
-    const KEY_TOTAL = "KLINE_TEMPLE_12345_TOTAL";
-    const KEY_TODAY_DATE = "KLINE_TEMPLE_12345_TODAY_DATE";
-    const KEY_TODAY = "KLINE_TEMPLE_12345_TODAY";
-
-    const todayStr = () => {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const da = String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${da}`;
-    };
-
-    const t = todayStr();
-    const last = localStorage.getItem(KEY_TODAY_DATE);
-    if(last !== t){
-      localStorage.setItem(KEY_TODAY_DATE, t);
-      localStorage.setItem(KEY_TODAY, "0");
-    }
-    const total = Number(localStorage.getItem(KEY_TOTAL) || "0") + 1;
-    const today = Number(localStorage.getItem(KEY_TODAY) || "0") + 1;
-    localStorage.setItem(KEY_TOTAL, String(total));
-    localStorage.setItem(KEY_TODAY, String(today));
-    $("totalVisitors").textContent = String(total);
-    $("todayVisitors").textContent = String(today);
-  })();
-
-  // ================== Web3 State ==================
-  let provider, signer, user;
-  let kgen, heart;
-  let kgenDecimals = 18;
-
-  function fmtUnits(x){
-    try{ return ethers.utils.formatUnits(x, kgenDecimals); }catch(e){ return "--"; }
-  }
-  function toUnits(v){
-    return ethers.utils.parseUnits(String(v), kgenDecimals);
-  }
-
-  async function ensureBSC(){
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    if(chainId === CFG.chainIdHex) return true;
-    try{
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: CFG.chainIdHex }],
-      });
-      return true;
-    }catch(err){
-      return false;
-    }
-  }
-
-  async function connect(){
-    if(!window.ethereum){
-      setStatus($("walletStatus"), "未偵測到錢包。請使用 MetaMask 內建瀏覽器開啟本頁。", "warn");
-      return;
-    }
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-    const ok = await ensureBSC();
-    if(!ok){
-      setStatus($("walletStatus"), "請切到 BNB Chain（BSC）。", "warn");
-      return;
-    }
-
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    user = await signer.getAddress();
-
-    heart = new ethers.Contract(CFG.heart, HEART_ABI, signer);
-    kgen  = new ethers.Contract(CFG.kgenToken, ERC20_ABI, signer);
-
-    try{ kgenDecimals = await kgen.decimals(); }catch(e){ kgenDecimals = 18; }
-
-    const net = await provider.getNetwork();
-    $("heart").textContent = CFG.heart;
-    $("net").textContent = `${net.name} (chainId=${net.chainId})`;
-    $("addr").textContent = user;
-
-    setStatus($("walletStatus"), "已連接。", "ok");
-    await refresh();
-
-    if(window.ethereum.on){
-      window.ethereum.on('accountsChanged', ()=>location.reload());
-      window.ethereum.on('chainChanged', ()=>location.reload());
-    }
-  }
-
-  async function refresh(){
-    if(!provider || !signer) return;
-
-    const [balU, balH] = await Promise.all([
-      kgen.balanceOf(user),
-      heart.heartBalance(),
-    ]);
-
-    $("balUser").textContent = fmtUnits(balU);
-    $("balHeart").textContent = fmtUnits(balH);
-
-    try{
-      const [inIgnite, inBeat, effHour, dayId, monthId] = await Promise.all([
-        heart.inIgniteWindow(),
-        heart.inHeartbeatWindow(),
-        heart.heartbeatEffectiveHourIdNow(),
-        heart.localDayIdNow(),
-        heart.localMonthIdNow(),
-      ]);
-      $("timeHint").textContent = `本機 ${nowLocal()} | ignite=${inIgnite} | heartbeat=${inBeat} | hourId=${effHour} | dayId=${dayId} | monthId=${monthId}`;
-    }catch(e){
-      $("timeHint").textContent = `本機 ${nowLocal()}`;
-    }
-  }
-
-  async function txWrap(fn, statusEl){
-    try{
-      setStatus(statusEl, "送出交易中…請在錢包確認。", "warn");
-      const tx = await fn();
-      setStatus(statusEl, `已送出：${tx.hash}（等待確認）`, "warn");
-      await tx.wait();
-      setStatus(statusEl, `成功：${tx.hash}`, "ok");
-      await refresh();
-    }catch(e){
-      const msg = (e && e.data && e.data.message) ? e.data.message : (e && e.message ? e.message : String(e));
-      setStatus(statusEl, `失敗：${msg}`, "bad");
-    }
-  }
-
-  async function ensureApprove(needAmount){
-    const allow = await kgen.allowance(user, CFG.heart);
-    if(allow.gte(needAmount)) return;
-    const tx = await kgen.approve(CFG.heart, needAmount);
-    await tx.wait();
-  }
-
-  async function ignite(){ if(!heart) return; await txWrap(()=>heart.igniteAndClaim(), $("beatStatus")); }
-  async function heartbeat(){ if(!heart) return; await txWrap(()=>heart.heartbeatClaim(), $("beatStatus")); }
-
-  async function fortune(){
-    if(!heart) return;
-    const v = Number($("fortuneAmt").value);
-    if(!v || v<1 || v>888){
-      setStatus($("fortuneStatus"), "金額需在 1~888 之間。", "warn");
-      return;
-    }
-    const amt = toUnits(v);
-    await txWrap(()=>heart.fortuneClaim(amt), $("fortuneStatus"));
-  }
-
-  async function vow(){
-    if(!heart || !kgen) return;
-    const opt = Number($("vowOption").value);
-    const v = Number($("vowAmt").value);
-    if(!v || v<=0){
-      setStatus($("vowStatus"), "請輸入還願金額（KGEN）。", "warn");
-      return;
-    }
-    const amt = toUnits(v);
-    await txWrap(async ()=>{
-      await ensureApprove(amt);
-      return heart.vowTo(opt, amt);
-    }, $("vowStatus"));
-  }
-
-  async function lamp(){
-    if(!heart || !kgen) return;
-    const d = Number($("lampDays").value);
-    if(!d || d<=0){
-      setStatus($("lampStatus"), "請輸入點燈天數。", "warn");
-      return;
-    }
-    const est = toUnits(d); // 1 KGEN/day 假設
-    await txWrap(async ()=>{
-      await ensureApprove(est);
-      return heart.lightLamp(d);
-    }, $("lampStatus"));
-  }
-
-  async function makeWish(){
-    if(!heart) return;
-    const text = ($("wishText").value || "").trim();
-    if(!text){
-      setStatus($("wishStatus"), "請先輸入願望。", "warn");
-      return;
-    }
-    const key = "KLINE_WISH_" + new Date().toISOString().slice(0,10);
-    localStorage.setItem(key, text);
-    const wishHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(text));
-    await txWrap(()=>heart.makeWish(wishHash), $("wishStatus"));
-  }
-
-  // ================== Camera (local only) ==================
-  async function startCam(){
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
-      $("cam").srcObject = stream;
-      setStatus($("camStatus"), "鏡頭已啟動（本機顯示，不上傳）", "ok");
-    }catch(e){
-      setStatus($("camStatus"), "鏡頭啟動失敗（請確認瀏覽器權限）", "bad");
-    }
-  }
-  function snap(){
-    const v = $("cam");
-    if(!v.srcObject){
-      setStatus($("camStatus"), "請先開啟鏡頭。", "warn");
-      return;
-    }
-    const c = $("snapCanvas");
-    c.width = v.videoWidth || 640;
-    c.height = v.videoHeight || 480;
-    c.getContext("2d").drawImage(v,0,0,c.width,c.height);
-    const img = $("snapImg");
-    img.src = c.toDataURL("image/png");
-    img.style.display = "block";
-    setStatus($("camStatus"), "已拍照留念（本機）", "ok");
-  }
-
-  // ================== Voice guide ==================
-  function speakGuide(){
-    try{
-      const t = "歡迎來到五指山悟空財神殿。第一步，連接錢包並切到 BNB Chain。第二步，確認心臟血量有 KGEN。第三步，呼吸在零點到零點十分。心跳每小時正負十分。每日一次可領發財金。可還願補血，點光明燈上鏈，並在許願池留下你的願望。";
-      const u = new SpeechSynthesisUtterance(t);
-      u.lang = "zh-TW";
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-    }catch(e){}
-  }
-
-  // ================== Bind ==================
-  $("connectBtn").addEventListener("click", connect);
-  $("igniteBtn").addEventListener("click", ignite);
-  $("beatBtn").addEventListener("click", heartbeat);
-  $("fortuneBtn").addEventListener("click", fortune);
-  $("vowBtn").addEventListener("click", vow);
-  $("lampBtn").addEventListener("click", lamp);
-  $("wishBtn").addEventListener("click", makeWish);
-  $("camBtn").addEventListener("click", startCam);
-  $("snapBtn").addEventListener("click", snap);
-  $("voiceBtn").addEventListener("click", speakGuide);
-
-  // initial UI
-  $("heart").textContent = CFG.heart;
-  $("timeHint").textContent = `本機 ${nowLocal()}`;
-  setInterval(()=>{ if(provider) refresh(); else $("timeHint").textContent = `本機 ${nowLocal()}`; }, 2000);
-</script>
-
-
-<script>
-/* ===== Temple UI V3.2.0 Cosmos + Supervisor ===== */
-(function(){
-  const elClock = document.getElementById("nowClock");
-  const overlay = document.getElementById("supervisorOverlay");
-  const btn = document.getElementById("btnSupervisor");
-  const close = document.getElementById("supClose");
-  const supFill = document.getElementById("supFill");
-  const supPct = document.getElementById("supPct");
-
-  const chk = (id, cls)=>{ const e=document.getElementById(id); if(!e) return; e.classList.remove("ok","warn","bad"); if(cls) e.classList.add(cls); };
-
-  // Clock
-  function tick(){
-    const d = new Date();
-    const pad = n=>String(n).padStart(2,"0");
-    const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    if(elClock) elClock.textContent = s;
-  }
-  tick(); setInterval(tick, 1000);
-
-  // Supervisor toggle
-  function setOverlay(on){
-    if(!overlay) return;
-    overlay.classList.toggle("on", !!on);
-    overlay.setAttribute("aria-hidden", on ? "false" : "true");
-    if(on) runChecks();
-  }
-  if(btn) btn.addEventListener("click", ()=>setOverlay(true));
-  if(close) close.addEventListener("click", ()=>setOverlay(false));
-  if(overlay) overlay.addEventListener("click", (e)=>{ if(e.target===overlay) setOverlay(false); });
-
-  // Error capture
-  let errorCount = 0;
-  window.addEventListener("error", ()=>{ errorCount++; });
-  window.addEventListener("unhandledrejection", ()=>{ errorCount++; });
-
-  // Cosmos canvas
-  const c = document.getElementById("cosmos");
-  function startCosmos(){
-    if(!c) return false;
-    const ctx = c.getContext("2d");
-    let w=0,h=0, stars=[];
-    function resize(){
-      w = c.width = c.clientWidth * (window.devicePixelRatio||1);
-      h = c.height = c.clientHeight * (window.devicePixelRatio||1);
-      const n = Math.max(120, Math.floor((w*h)/60000));
-      stars = Array.from({length:n}, ()=>({
-        x: Math.random()*w,
-        y: Math.random()*h,
-        z: Math.random()*1.0 + 0.2,
-        r: Math.random()*1.2 + 0.4,
-        p: Math.random()*Math.PI*2
-      }));
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    function frame(){
-      ctx.clearRect(0,0,w,h);
-      // vignette
-      const g = ctx.createRadialGradient(w*0.5,h*0.5,0,w*0.5,h*0.5,Math.max(w,h)*0.7);
-      g.addColorStop(0,"rgba(255,215,120,0.06)");
-      g.addColorStop(1,"rgba(0,0,0,0.85)");
-      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-
-      for(const s of stars){
-        s.p += 0.003*s.z;
-        const tw = (Math.sin(s.p)+1)*0.5;
-        const a = 0.10 + tw*0.35;
+function animateStars(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="white";
+    stars.forEach(s=>{
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 215, 120, ${a})`;
-        ctx.arc(s.x, s.y, s.r*(1+tw*0.6), 0, Math.PI*2);
+        ctx.arc(s.x,s.y,s.r,0,2*Math.PI);
         ctx.fill();
-        // drift
-        s.y += 0.05*s.z;
-        if(s.y>h+10){ s.y=-10; s.x=Math.random()*w; }
-      }
+        s.y+=0.1;
+        if(s.y>canvas.height)s.y=0;
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
 
-      // subtle beams
-      ctx.save();
-      ctx.globalAlpha = 0.16;
-      ctx.fillStyle = "rgba(255,215,0,0.10)";
-      ctx.fillRect(w*0.12,0,w*0.02,h);
-      ctx.fillRect(w*0.78,0,w*0.015,h);
-      ctx.restore();
+/* ===== 時鐘 ===== */
+setInterval(()=>{
+    document.getElementById("clock").innerText=
+    new Date().toLocaleString();
+},1000);
 
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    return true;
-  }
-  const cosmosOK = startCosmos();
+/* ===== 心臟機制 ===== */
+let heartCurrent=108000;
+let heartMax=720000;
 
-  // Checks
-  function isValidAddr(a){
-    return typeof a==="string" && /^0x[a-fA-F0-9]{40}$/.test(a);
-  }
-  function getHeartAddr(){
-    const el = document.getElementById("heart");
-    const txt = el ? (el.textContent||"").trim() : "";
-    // your UI may show "--" or "0x.."
-    const m = txt.match(/0x[a-fA-F0-9]{40}/);
-    return m ? m[0] : "";
-  }
+function updateHeart(){
+    document.getElementById("heartDisplay").innerText=
+    heartCurrent+" / "+heartMax;
+    let percent=(heartCurrent/heartMax)*100;
+    document.getElementById("heartBar").style.width=percent+"%";
+}
+updateHeart();
 
-  async function checkCamera(){
-    try{
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-    }catch(e){ return false; }
-  }
-  async function checkMic(){
-    try{
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-    }catch(e){ return false; }
-  }
+/* ===== 心跳每小時倒數 ===== */
+function updateHeartbeatCountdown(){
+    let now=new Date();
+    let next=new Date();
+    next.setMinutes(60);
+    next.setSeconds(0);
+    let diff=(next-now)/1000;
+    let m=Math.floor(diff/60);
+    let s=Math.floor(diff%60);
+    document.getElementById("heartbeatCountdown").innerText=
+    m+"分"+s+"秒";
+}
+setInterval(updateHeartbeatCountdown,1000);
 
-  async function runChecks(){
-    chk("chkLoaded","ok");
-    chk("chkCosmos", cosmosOK ? "ok" : "warn");
-    chk("chkEthers", (typeof window.ethers !== "undefined") ? "ok" : "bad");
+/* ===== 點火每日倒數 ===== */
+function updateIgniteCountdown(){
+    let now=new Date();
+    let next=new Date();
+    next.setHours(24,0,0,0);
+    let diff=(next-now)/1000;
+    let h=Math.floor(diff/3600);
+    let m=Math.floor((diff%3600)/60);
+    let s=Math.floor(diff%60);
+    document.getElementById("igniteCountdown").innerText=
+    h+"時"+m+"分"+s+"秒";
+}
+setInterval(updateIgniteCountdown,1000);
 
-    // provider: depends on your connect button; we only detect presence
-    const hasEth = typeof window.ethereum !== "undefined";
-    chk("chkProvider", hasEth ? "warn" : "bad"); // warn until connected
+/* ===== 相機 ===== */
+navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>{
+    document.getElementById("video").srcObject=stream;
+});
 
-    // chain: we can read if already connected; otherwise warn
-    let chainOK = false;
-    try{
-      if(hasEth && window.ethereum && window.ethereum.request){
-        const cid = await window.ethereum.request({ method:"eth_chainId" });
-        chainOK = (cid === "0x38");
-      }
-    }catch(e){}
-    chk("chkChain", chainOK ? "ok" : "warn");
+function takePhoto(){
+    let video=document.getElementById("video");
+    let canvas=document.getElementById("photoCanvas");
+    let ctx=canvas.getContext("2d");
+    ctx.drawImage(video,0,0,300,225);
+    ctx.fillStyle="gold";
+    ctx.font="14px Arial";
+    ctx.fillText("五指山12345悟空財神殿",
+    10,20);
+    ctx.fillText(new Date().toLocaleString(),
+    10,40);
+}
 
-    const ha = getHeartAddr();
-    chk("chkHeartAddr", isValidAddr(ha) ? "ok" : "warn");
+function downloadPhoto(){
+    let link=document.createElement("a");
+    link.download="temple_photo.png";
+    link.href=document.getElementById("photoCanvas")
+    .toDataURL();
+    link.click();
+}
 
-    const camOK = await checkCamera();
-    chk("chkCam", camOK ? "ok" : "warn");
+/* ===== 願望證書 ===== */
+function generateWishCertificate(){
+    let wish=document.getElementById("wishInput").value;
+    let canvas=document.getElementById("wishCanvas");
+    let ctx=canvas.getContext("2d");
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,500,300);
+    ctx.fillStyle="gold";
+    ctx.font="20px Arial";
+    ctx.fillText("五指山願望證書",150,50);
+    ctx.font="16px Arial";
+    ctx.fillText(wish,50,150);
+    ctx.fillText(new Date().toLocaleString(),
+    50,200);
+}
 
-    const micOK = await checkMic();
-    chk("chkMic", micOK ? "ok" : "warn");
+function downloadWish(){
+    let link=document.createElement("a");
+    link.download="wish_certificate.png";
+    link.href=document.getElementById("wishCanvas")
+    .toDataURL();
+    link.click();
+}
 
-    chk("chkErrors", errorCount===0 ? "ok" : "warn");
+/* ===== AI 客服 ===== */
+function speak(){
+    let msg=new SpeechSynthesisUtterance(
+    "悟空祝你盆滿缽滿");
+    speechSynthesis.speak(msg);
+}
 
-    // score
-    const items = [
-      true,
-      cosmosOK,
-      (typeof window.ethers !== "undefined"),
-      hasEth,
-      chainOK,
-      isValidAddr(ha),
-      camOK,
-      micOK,
-      (errorCount===0)
-    ];
-    const total = items.length;
-    const score = items.reduce((a,b)=>a+(b?1:0),0);
-    const pct = Math.round((score/total)*100);
-    if(supFill) supFill.style.width = pct + "%";
-    if(supPct) supPct.textContent = pct + "%";
-  }
-
-  // run once after load
-  setTimeout(()=>{ if(overlay && overlay.classList.contains("on")) runChecks(); }, 800);
-})();
+function chat(){
+    let input=document.getElementById("chatInput").value;
+    document.getElementById("chatLog").innerText=
+    "仙女回應：悟空聽見了 → "+input;
+}
 </script>
 
-</body></body>
+</body>
 </html>
