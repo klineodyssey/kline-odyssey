@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>五指山12345悟空財神殿 · V6.0 Cosmic Living Temple</title>
+<title>五指山12345悟空財神殿 · V6.4 Cosmic Living Temple</title>
 
 <!--
   五指山 12345 悟空財神殿（前端單檔）
-  V6.0 Cosmic Living Temple (LIVE)
+  V6.4 Cosmic Living Temple (LIVE)
   - 只增不減：保留「拍照/下載、許願/留言下載、宇宙動畫、監工檢查、工程進度、版本+時間常駐」
   - 對接 Heart 合約（KGEN_TempleHeart_V3_2_2）：heartBalanceWhole/effectiveCapWhole/effectiveFloorWhole/heartbeatClaim/igniteAndClaim/fortuneClaim/vowTo/lightLamp/makeWish
   - 注意：鏈上事件一定要送出交易。合約不會自己「每小時自動」；要用守門人腳本或人工按鈕送交易。
@@ -300,13 +300,22 @@
 .steps li{margin:8px 0;line-height:1.45}
 button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
 
-/* V6.3: header alignment */
+/* V6.4: header alignment */
 .brandTitle{display:flex;flex-direction:column;gap:6px;align-items:flex-start;line-height:1}
 .brandTitle .t1,.brandTitle .t2,.brandTitle .t3{font-size:28px;font-weight:900;letter-spacing:.6px}
 .brandSub{max-width:300px}
-/* V6.3: force-show key sections */
+/* V6.4: force-show key sections */
 #cardTutorial{display:block !important}
 #cupHint{display:block}
+
+  /* V6.4 mobile hero fix: keep title block single-column earlier */
+  @media (max-width:1100px){
+    .hero{ grid-template-columns:1fr !important; }
+    .heroRight{ justify-self:start !important; }
+  }
+  /* V6.4 camera sizing: captured photo matches preview */
+  #video, #photo, #wishCanvas{ width:100%; height:auto; }
+
 </style>
 </head>
 
@@ -330,7 +339,7 @@ button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
       </div>
     </div>
     <div class="pill">
-      <span>版本 <b id="uiVer">V6.0</b></span>
+      <span>版本 <b id="uiVer">V6.4</b></span>
       <span class="mono" id="clock"></span>
     </div>
   </div>
@@ -350,6 +359,42 @@ button.disabled{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
       </div>
 
       <div class="hr"></div>
+
+      <div class="row" style="margin-top:10px;">
+        <div class="stat">
+          <div class="k">心跳倒數（下一次可領）</div>
+          <div class="v mono" id="hbCountdown">—</div>
+          <div class="k" style="margin-top:8px;">點火倒數（UTC 00:00–00:10）</div>
+          <div class="v mono" id="igCountdown">—</div>
+        </div>
+        <div class="stat">
+          <div class="k">三次聖盃（防 Bot）</div>
+          <div class="v"><span id="cupState" class="mono">0 / 3</span>　<span id="cupHint" class="muted">連續成功三次才可領發財金</span></div>
+          <div class="btnrow" style="margin-top:8px;">
+            <button id="btnCup">搏杯一次</button>
+            <button class="ghost" id="btnCupReset">重置</button>
+          </div>
+          <div class="k" style="margin-top:8px;">結果</div>
+          <div class="v" id="cupLog">—</div>
+        </div>
+      </div>
+
+      <details style="margin-top:10px;">
+        <summary class="muted">新手導覽（從沒錢包到領到發財金）</summary>
+        <div style="margin-top:10px; line-height:1.7;">
+          <ol class="muted" style="padding-left:18px;">
+            <li>先安裝錢包：手機建議 MetaMask。</li>
+            <li>點「連接錢包」→ 允許連線。</li>
+            <li>點「切換到 BSC (0x38)」。如果錢包提示新增網路，照著同意。</li>
+            <li>把 Heart 合約地址貼到下面欄位，按「保存地址」。</li>
+            <li>先按「搏杯一次」，連續成功三次（0/3 → 3/3）。</li>
+            <li>回到「發財金」區，輸入要領的數量（1–888），再按「領發財金」。</li>
+            <li>如果要還願補血：到「還願」區輸入數量→ 先按「Approve」→ 再按「還願」。</li>
+            <li>拍照：點「開啟相機」→「拍照（浮印）」→「下載照片」。</li>
+          </ol>
+        </div>
+      </details>
+
 
       <div class="row">
         <div>
@@ -532,7 +577,7 @@ Where the Market Becomes the Myth.
 <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
 
 <script>
-const UI_VERSION = "V6.3";
+const UI_VERSION = "V6.4";
 const UI_BUILD = "COSMIC_CHAINREADY";
 const BSC_CHAIN_ID_HEX = "0x38";
 const BSC_CHAIN_ID_DEC = 56;
@@ -1237,7 +1282,7 @@ function takeShot(){
   const dx = (w-dw)/2, dy = (h-dh)/2;
   ctx.drawImage(v, dx, dy, dw, dh);
 
-  drawStamp(ctx, w, h, "五指山 12345 悟空財神殿", `V6.0 · ${new Date().toLocaleString()} · ${state.account?shortAddr(state.account):"no-wallet"}`);
+  drawStamp(ctx, w, h, "五指山 12345 悟空財神殿", `V6.4 · ${new Date().toLocaleString()} · ${state.account?shortAddr(state.account):"no-wallet"}`);
   pulse();
   logLine("拍照完成（已加浮印）");
 }
@@ -1434,6 +1479,95 @@ function startCountdowns(){
   tick();
   setInterval(tick, 1000);
 }
+
+// ===== V6.4: countdown + cup gate + better photo capture =====
+let cupStreak = 0;
+function renderCup(){
+  const el = document.getElementById('cupState');
+  if(el) el.textContent = `${cupStreak} / 3`;
+  const ok = cupStreak >= 3;
+  const fbtn = document.getElementById('btnFortuneClaim');
+  if(fbtn){ fbtn.disabled = !ok; fbtn.classList.toggle('disabled', !ok); }
+  const elig = document.getElementById('stEligibility');
+  if(elig) elig.textContent = ok ? '可領發財金（聖盃通過）' : '需三次聖盃（防Bot）';
+}
+function cupOnce(){
+  // 50/50 正反（可日後上鏈改成可驗證亂數）
+  const ok = Math.random() < 0.5;
+  const log = document.getElementById('cupLog');
+  if(ok){
+    cupStreak = Math.min(3, cupStreak + 1);
+    if(log) log.textContent = `聖盃：正（成功）→ streak ${cupStreak}/3`;
+  }else{
+    cupStreak = 0;
+    if(log) log.textContent = '聖盃：反（失敗）→ streak 重置 0/3';
+  }
+  renderCup();
+}
+function cupReset(){
+  cupStreak = 0;
+  const log = document.getElementById('cupLog');
+  if(log) log.textContent = '已重置（0/3）';
+  renderCup();
+}
+document.getElementById('btnCup')?.addEventListener('click', cupOnce);
+document.getElementById('btnCupReset')?.addEventListener('click', cupReset);
+
+// countdowns (UI-only; 鏈上仍以 cooldown + window 判定)
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmt(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec/3600); sec%=3600;
+  const m = Math.floor(sec/60); const s = sec%60;
+  return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+}
+function tickCountdowns(){
+  const now = new Date();
+  // next local hour boundary (for UI heartbeat)
+  const next = new Date(now);
+  next.setMinutes(60,0,0);
+  const hbSec = (next.getTime() - now.getTime())/1000;
+  const hb = document.getElementById('hbCountdown');
+  if(hb) hb.textContent = fmt(hbSec);
+
+  // ignite: UTC 00:00 window start
+  const nowUtc = new Date(now.getTime() + now.getTimezoneOffset()*60000);
+  const startUtc = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate(), 0,0,0));
+  let igSec = (startUtc.getTime() - nowUtc.getTime())/1000;
+  if(igSec < 0) igSec += 86400; // to next day
+  const ig = document.getElementById('igCountdown');
+  if(ig) ig.textContent = `${fmt(igSec)}（到UTC 00:00）`;
+}
+setInterval(tickCountdowns, 1000);
+tickCountdowns();
+
+// photo capture: make canvas same size as video frame to avoid "small" look
+(function(){
+  const v = document.getElementById('video');
+  const c = document.getElementById('photo');
+  const btn = document.getElementById('btnShot');
+  if(!v || !c || !btn) return;
+  btn.addEventListener('click', ()=>{
+    const w = v.videoWidth || 1280;
+    const h = v.videoHeight || 720;
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(v, 0, 0, w, h);
+    // watermark
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "#ffd36a";
+    ctx.font = "bold 28px ui-sans-serif, system-ui, -apple-system, 'Microsoft JhengHei'";
+    ctx.fillText("五指山 12345 悟空財神殿", 22, 42);
+    ctx.font = "16px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.fillText(`V6.4 · ${new Date().toLocaleString('zh-TW')}`, 22, 70);
+    ctx.restore();
+  }, {capture:true});
+})();
+
+// init
+renderCup();
+
 </script>
 </body>
 </html>
