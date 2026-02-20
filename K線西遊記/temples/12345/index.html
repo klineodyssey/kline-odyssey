@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p20p20 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p17p1</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -124,7 +124,7 @@
     /* Title block - single (no duplication) */
     .title{
       display:flex;
-      gap:14px;
+      gap:14px;flex-wrap:nowrap;
       align-items:flex-start;
     }
     .pillar{
@@ -470,9 +470,15 @@
     }
     .toast.show{display:block}
   
-    .headerBar{ position:relative; }
-    .wukongIcon{ position:absolute; right:14px; top:10px; width:56px; height:auto; opacity:.95; filter: drop-shadow(0 10px 18px rgba(243,210,122,.25)); }
-    @media (max-width:480px){ .wukongIcon{ width:48px; top:8px; right:10px; } }
+.caishenIcon{width:76px;height:76px;border-radius:16px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
+@media (max-width:420px){ .caishenIcon{width:56px;height:56px;border-radius:14px;} }
+
+
+    .title{display:flex;align-items:flex-start;gap:12px}
+    .title .pillar{order:1}
+    .title .ttext{order:2;flex:1;min-width:0}
+    .title .caishenIcon{order:3;margin-left:auto}
+
 </style>
 </head>
 
@@ -494,15 +500,15 @@
         <div class="inner">
           <div class="title">
             <div class="pillar"></div>
-            <div class="ttext">
+            <img class="caishenIcon" src="/kline-odyssey/assets/wukong_caishen.png?v=1" alt="Wukong Caishen" onerror="this.style.display=\'none\'"/>
+<div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
-<img src="assets/wukong_caishen.png" class="wukongIcon" alt="悟空財神">
               <div class="tagline">
-                V6.6p20 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p17 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p17p1</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -770,7 +776,15 @@
             <div class="field">
               <label>客服對話（本機保存）</label>
               <textarea id="chatBox" placeholder="仙女會在這裡一步一步教你…"></textarea>
-              <div class="btns">
+              
+          <div class="row" style="display:flex; gap:10px; margin-top:10px; align-items:stretch;">
+            <input id="chatInput" type="text" placeholder="輸入你的問題（一次一題）…" style="flex:1; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.25); color:#f5f5f5; outline:none;">
+            <button class="btn" id="btnAskChat" style="min-width:110px;">送出</button>
+            <button class="btn btnGhost" id="btnMic" style="min-width:110px;">🎤 語音</button>
+            <button class="btn btnGhost" id="btnStopChat" style="min-width:110px;">停止</button>
+          </div>
+<div id="micStatus" style="margin-top:8px; font-size:12px; color:#b9c2ff; opacity:.9;"></div>
+<div class="btns">
                 <button class="ghost" id="btnCopyChat">複製</button>
                 <button class="ghost" id="btnClearChat">清空</button>
               </div>
@@ -840,10 +854,6 @@
   <div class="toast" id="toast"></div>
 
 <script>
-function safe$(id){ return document.getElementById(id); }
-function setText(id, val){ const el = safe$(id); if(el) el.textContent = val; }
-
-
 /* ===============================
    V6.6 — Wukong Temple UI
    - Single title (no duplication)
@@ -857,7 +867,7 @@ function setText(id, val){ const el = safe$(id); if(el) el.textContent = val; }
 ================================ */
 
 const UI = {
-  ver: "V6.6",
+  ver: "V6.6p17p1",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -1264,23 +1274,33 @@ function currentUTCSecondsOfDay(){
 }
 function currentUTCDayIndex(){
   const now = Date.now();
-  return Math.floor(now/86400000); // epofunction tickCountdown(){
+  return Math.floor(now/86400000); // epoch days; matches solidity block.timestamp/1 days in UTC
+}
+
+function tickCountdown(){
   const now = Date.now();
-  setText("nowTxt", fmtDateTime(new Date()));
+  $("nowTxt").textContent = fmtDateTime(new Date());
 
-  // Heartbeat (Local top-of-hour)
-// Rule confirmed: heartbeat aligns to the next local clock hour (HH:00:00),
-// independent from on-chain lastHB. We still keep lastHB for button gating if desired.
-const nowDt = new Date();
-const nextHour = new Date(nowDt);
-nextHour.setHours(nowDt.getHours() + 1);
-nextHour.setMinutes(0, 0, 0);
-const hbNext = nextHour.getTime();
-const hbLeft = hbNext - now;
-setText("hbCountdown", = fmtHMS(hbLeft);
-setText("hbNextAt", = "next @ " + nextHour.toLocaleString();
+  // Heartbeat（整點倒數）：固定對齊「每小時整點」顯示倒數（與鏈上 cooldown 無關）
+  // 使用「本機時間」的整點，使用者體感最直覺。
+  let hbNext = 0;
+  const dNow = new Date(now);
+  const atTop = (dNow.getMinutes()===0 && dNow.getSeconds()===0);
+  const dNext = new Date(dNow);
+  dNext.setMilliseconds(0);
+  if (atTop){
+    hbNext = now; // 已在整點
+  }else{
+    dNext.setMinutes(0,0,0);
+    dNext.setHours(dNext.getHours()+1);
+    hbNext = dNext.getTime();
+  }
 
-// Ignite window (UTC)
+  const hbLeft = Math.max(0, hbNext - now);
+  $("hbCountdown").textContent = fmtHMS(hbLeft);
+  $("hbNextAt").textContent = (hbLeft===0) ? "整點到，可領" : ("整點 @ " + new Date(hbNext).toLocaleTimeString());
+
+  // Ignite window (UTC)
   const tod = currentUTCSecondsOfDay();
   const start = UI.defaults.igStart;
   const end = UI.defaults.igEnd;
@@ -1297,9 +1317,9 @@ setText("hbNextAt", = "next @ " + nextHour.toLocaleString();
   // if we're before today's start, target is today's start; if inside window, countdown shows time to end
   if (inWindow){
     const winEnd = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0,0,0,0) + end*1000).getTime();
-    setText("igCountdown", = "視窗中 " + fmtHMS(winEnd-now);
+    $("igCountdown").textContent = "視窗中 " + fmtHMS(winEnd-now);
   }else{
-    setText("igCountdown", = fmtHMS(target-now);
+    $("igCountdown").textContent = fmtHMS(target-now);
   }
 
   // Buttons enable
@@ -1307,10 +1327,7 @@ setText("hbNextAt", = "next @ " + nextHour.toLocaleString();
   // ignite allowed only in window & once per day
   const dayIdx = currentUTCDayIndex();
   const alreadyToday = (lastIGDay === dayIdx);
-  $("btnIgnite").disabled = (!inWindow) || alreadyToday || (!account || !heart);
-
-  requestAnimationFrame(()=>{});
-}| (!account || !heart);
+  $("btnIgnite").disabled = (!account) || (!inWindow) || alreadyToday;
 
   requestAnimationFrame(()=>{});
 }
@@ -1668,18 +1685,25 @@ function drawWatermark(){
   ctx.shadowBlur = 0;
   ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
   ctx.fillStyle = "rgba(255,255,255,.92)";
-  let y = canvas.height - pad*2.3;
+  const lineH = Math.max(22, Math.round(canvas.width*0.028));
+  const footY = canvas.height - pad;
+
+  // Start the bottom block ABOVE the footer line to avoid overlap on mobile
+  const lines = (t.mid ? 1 : 0) + (t.bot ? 1 : 0);
+  let y = footY - (lines * lineH) - Math.round(lineH * 0.6);
+
   if (t.mid){
-    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+    wrapText(t.mid, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
   }
   if (t.bot){
-    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+    wrapText(t.bot, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
   }
+
   ctx.fillStyle = "rgba(255,255,255,.70)";
   ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
-  ctx.fillText(t.foot, pad, canvas.height - pad);
+  ctx.fillText(t.foot, pad, footY);
 }
 
 function wrapText(text, x, y, maxW, lineH){
@@ -1898,6 +1922,14 @@ function blobToImage(blob){
 $("igWindowTxt").textContent = fmtUTCWindow(UI.defaults.igStart, UI.defaults.igEnd);
 setWalletUI(false);
 
+  // Always run local clock + countdown (works even without wallet)
+  try {
+    tickCountdowns();
+    setInterval(tickCountdowns, 1000);
+  } catch (e) {
+    console.warn("countdown init failed", e);
+  }
+
 // Auto-bind refresh when heartAddr changes
 $("heartAddr").addEventListener("change", async ()=>{
   LS.set("kgen_heart_addr", $("heartAddr").value.trim());
@@ -1927,6 +1959,318 @@ setInterval(()=>{ syncCupUI(); }, 900);
     }catch(_){}
   }
 })();
+
+// ---- Countdown bootstrap (must work even if wallet/boot fails) ----
+(function(){
+  if (window.__TEMPLE_COUNTDOWN_STARTED__) return;
+  window.__TEMPLE_COUNTDOWN_STARTED__ = true;
+  const start = () => {
+    try{
+      tickCountdown();
+      if(!window.__TEMPLE_COUNTDOWN_INTERVAL__){ window.__TEMPLE_COUNTDOWN_INTERVAL__ = setInterval(tickCountdown, 1000); }
+    }catch(e){
+      console.warn('countdown start failed', e);
+    }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
 </script>
+
+<script>
+/* =========================================================
+   V6.6p17 HOTFIX
+   - Heartbeat countdown aligned to top-of-hour (local time)
+   - Ignite countdown kept to UTC 00:00-00:10 window
+   - Support chat: one-question-one-answer + stop button
+   ========================================================= */
+(function(){
+  const $id = (id)=>document.getElementById(id);
+
+  // -------- Countdown (always available, even if chain read fails) --------
+  function pad2(n){ n=Math.max(0, Math.floor(n)); return (n<10?'0':'')+n; }
+  function fmtHMS(sec){
+    if (!isFinite(sec)) return '--:--:--';
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = sec%60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  }
+  function secondsToNextTopOfHourLocal(now){
+    const next = new Date(now);
+    next.setMinutes(0,0,0);
+    next.setHours(next.getHours()+1);
+    return (next.getTime() - now.getTime())/1000;
+  }
+  function secondsToIgniteWindowUTC(now){
+    // ignite window: UTC 00:00:00 ~ 00:10:00
+    const y = now.getUTCFullYear(), mo = now.getUTCMonth(), d = now.getUTCDate();
+    const start = Date.UTC(y, mo, d, 0, 0, 0);
+    const end   = Date.UTC(y, mo, d, 0,10, 0);
+    const t = now.getTime();
+    if (t < start) return (start - t)/1000;          // countdown to today's window
+    if (t >= start && t < end) return 0;             // in-window (can claim now)
+    // after window: countdown to tomorrow start
+    const tomorrow = Date.UTC(y, mo, d+1, 0,0,0);
+    return (tomorrow - t)/1000;
+  }
+
+  window.tickCountdowns = function tickCountdowns(){
+    try{
+      const now = new Date();
+      const hb = $id('hbCountdown');
+      const ig = $id('igCountdown');
+
+      if (hb) hb.textContent = fmtHMS(secondsToNextTopOfHourLocal(now));
+      if (ig){
+        const s = secondsToIgniteWindowUTC(now);
+        ig.textContent = (s===0) ? '00:00:00' : fmtHMS(s);
+      }
+    }catch(e){ /* silent */ }
+  }
+
+  // -------- Support Chat (one Q one A) --------
+  let typingTimer = null;
+  let typingAbort = false;
+
+  // -------- Voice Input (SpeechRecognition) --------
+  let speechRec = null;
+  let speechListening = false;
+  function setMicStatus(msg){
+    const el = $id('micStatus');
+    if (el) el.textContent = msg || '';
+  }
+
+  function appendLine(text){
+    const box = $id('chatBox');
+    if (!box) return;
+    box.value += (box.value ? '\n' : '') + text;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function genReply(q){
+    const s = String(q||'').trim();
+    const low = s.toLowerCase();
+
+    // quick keyword routing (offline客服，不連網)
+    if (!s) return '請先輸入問題。';
+    if (low.includes('倒數') || s.includes('心跳') || s.includes('點火')) {
+      return '已確認：心跳倒數以「本地時間整點」計算；點火倒數以「UTC 00:00-00:10」計算。若仍顯示 --:--:--，請先強制重新整理或清除快取再測。';
+    }
+    if (low.includes('拍照') || s.includes('照片') || s.includes('許願') || s.includes('留言')) {
+      return '拍照流程：1) 允許相機權限 2) 拍照後按「下載存證」 3) 若下方文字重疊，請回報你使用的瀏覽器/手機型號，我會調整版面行距與遮罩高度。';
+    }
+    if (low.includes('按鍵') || s.includes('不能按') || s.includes('沒功能')) {
+      return '按鍵無反應通常是：未連錢包/未切到 BSC/合約參數讀取失敗。請先按「監工檢查」看錯誤訊息，再把畫面截圖貼給我。';
+    }
+    if (low.includes('版本') || s.includes('版號')) {
+      return '版本號以頁面標題與內部標記同步；若 GitHub Pages 仍顯示舊版，請清除瀏覽器快取或改用無痕模式測試。';
+    }
+    return '收到。請用一句話描述你要達成的結果（例如：按哪個鍵 → 想看到什麼），我會用「一問一答」方式帶你排查。';
+  }
+
+  function startTyping(reply){
+    // stop previous
+    if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+    typingAbort = false;
+
+    const prefix = '客服：';
+    let i = 0;
+    // we print the prefix first as a line, then type the message after it
+    appendLine(prefix);
+
+    const box = $id('chatBox');
+    if (!box) return;
+
+    // remove the last line prefix (we will rewrite it as we type)
+    const lines = box.value.split('\n');
+    lines[lines.length-1] = prefix + ' ';
+    box.value = lines.join('\n');
+
+    typingTimer = setInterval(()=>{
+      if (typingAbort){
+        clearInterval(typingTimer); typingTimer=null;
+        // dump the rest immediately
+        const l = box.value.split('\n');
+        l[l.length-1] = prefix + ' ' + reply;
+        box.value = l.join('\n');
+        box.scrollTop = box.scrollHeight;
+        enableAsk(true);
+        return;
+      }
+      i++;
+      const part = reply.slice(0, i);
+      const l = box.value.split('\n');
+      l[l.length-1] = prefix + ' ' + part;
+      box.value = l.join('\n');
+      box.scrollTop = box.scrollHeight;
+      if (i >= reply.length){
+        clearInterval(typingTimer); typingTimer=null;
+        enableAsk(true);
+      }
+    }, 18);
+  }
+
+  function enableAsk(on){
+    const btnAsk = $id('btnAskChat');
+    const inp = $id('chatInput');
+    if (btnAsk) btnAsk.disabled = !on;
+    if (inp) inp.disabled = !on;
+  }
+
+  function ask(){
+    const inp = $id('chatInput');
+    if (!inp) return;
+    const q = inp.value.trim();
+    if (!q) return;
+    inp.value = '';
+    appendLine('你：' + q);
+    enableAsk(false);
+    startTyping(genReply(q));
+  }
+
+  function stop(){
+    typingAbort = true;
+    try{ if (typingTimer){ clearInterval(typingTimer); typingTimer=null; } }catch(e){}
+    try{ if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
+    try{ if (speechRec && speechListening){ speechRec.stop(); } }catch(e){}
+    speechListening = false;
+    try{ const bm=$id('btnMic'); if (bm) bm.textContent='🎤 語音'; }catch(e){}
+    setMicStatus('');
+    try{ enableAsk(true); }catch(e){}
+  }
+
+  function bind(){
+    // countdown tick (safe)
+    const safeTick = ()=>{ try{ if (typeof window.tickCountdowns==='function') window.tickCountdowns(); }catch(e){} };
+    safeTick();
+    setInterval(safeTick, 250);
+
+    // chat bind
+    const btnAsk = $id('btnAskChat');
+    const btnStop = $id('btnStopChat');
+    const inp = $id('chatInput');
+    if (btnAsk) btnAsk.addEventListener('click', ask);
+    if (btnStop) btnStop.addEventListener('click', stop);
+    if (inp){
+      inp.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          ask();
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
 </body>
 </html>
+
+<script>
+
+  // -------------------------
+  // Countdown Engine (fix for missing tickCountdowns in p13)
+  // - Works even when wallet not connected.
+  // - Heartbeat: 1 per hour (default 3600s) from lastHB (ms epoch) in localStorage.
+  // - Ignite: UTC 00:00-00:10 window, 1 per UTC day from lastIGDay (YYYYMMDD) in localStorage.
+  // -------------------------
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const fmtHHMMSS = (sec) => {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  };
+  const utcYMD = (d) => {
+    const y = d.getUTCFullYear();
+    const m = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    return `${y}${pad2(m)}${pad2(day)}`;
+  };
+  const nextUtcWindowStart = (now, startMin=0, windowMin=10) => {
+    // returns Date for next window start (UTC)
+    const d = new Date(now.getTime());
+    const curMin = d.getUTCMinutes();
+    const curH = d.getUTCHours();
+    // window is at 00:00 - 00:10 UTC
+    // If before 00:00 => today 00:00 (not possible since minutes/hours in UTC),
+    // If within day but past window => tomorrow 00:00
+    const inWindow = (curH === 0) && (curMin >= startMin) && (curMin < windowMin);
+    if (curH === 0 && curMin < startMin) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    if (inWindow) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    // tomorrow
+    d.setUTCDate(d.getUTCDate() + 1);
+    d.setUTCHours(0, startMin, 0, 0);
+    return d;
+  };
+
+  function tickCountdowns(){
+    try{
+      const now = new Date();
+
+      // Update top clock
+      const nowEl = $("nowTxt");
+      if (nowEl) nowEl.textContent = `${now.getFullYear()}/${pad2(now.getMonth()+1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+
+      // ---------- Heartbeat countdown（每小時整點） ----------
+      // 依照使用者需求：心跳以「整點」為節奏，倒數到下一個整點（本機時間）。
+      const hbEl = $("hbCountdown");
+      let hbRemainSec = 0;
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      if (m===0 && s===0){
+        hbRemainSec = 0;
+      } else {
+        hbRemainSec = (59 - m) * 60 + (60 - s);
+      }
+      if (hbEl) hbEl.textContent = fmtHHMMSS(hbRemainSec);
+
+      // ---------- Ignite countdown ----------
+      const igEl = $("igCountdown");
+      const lastIGDay = String(LS.get("lastIGDay", "")) || "";
+      const todayUTC = utcYMD(now);
+
+      const utcH = now.getUTCHours();
+      const utcM = now.getUTCMinutes();
+      const inIgniteWindow = (utcH === 0) && (utcM >= 0) && (utcM < 10);
+
+      let igRemainSec = 0;
+      const alreadyClaimedToday = (lastIGDay === todayUTC);
+
+      if (inIgniteWindow && !alreadyClaimedToday){
+        // ready now inside window
+        igRemainSec = 0;
+      } else {
+        // count down to next eligible window start
+        const nextStart = nextUtcWindowStart(now, 0, 10);
+        // if we are before nextStart but tomorrow start and already claimed today doesn't matter, still tomorrow
+        igRemainSec = Math.max(0, (nextStart.getTime() - now.getTime())/1000);
+      }
+      if (igEl) igEl.textContent = fmtHHMMSS(igRemainSec);
+
+    }catch(e){
+      // Never crash the page for timers
+      console.warn("tickCountdowns error:", e);
+    }
+  }
+
+</script>
