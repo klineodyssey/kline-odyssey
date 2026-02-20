@@ -1,200 +1,459 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>K線西遊記｜宇宙入口 Portal v1.2（Repo版）</title>
-  <meta name="description" content="K線西遊記｜花果山台灣｜宇宙入口。通往五指山12345悟空財神殿與各宮殿的傳送門。" />
-  <style>
-    :root{
-      --bg:#06070b;
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.10);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.70);
-      --line:rgba(255,255,255,.14);
-      --shadow: 0 14px 50px rgba(0,0,0,.45);
-      --r:18px; --r2:999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:var(--sans); color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(120,160,255,.13), transparent 60%),
-        radial-gradient(900px 650px at 80% 20%, rgba(255,160,120,.09), transparent 55%),
-        radial-gradient(900px 900px at 55% 90%, rgba(180,255,200,.06), transparent 60%),
-        var(--bg);
-    }
-    .wrap{max-width:980px;margin:0 auto;padding:28px 16px 40px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .brand{display:flex;gap:12px;align-items:center}
-    .sig{
-      width:44px;height:44px;border-radius:14px;
-      background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
-      border:1px solid var(--line); box-shadow:var(--shadow);
-      display:grid;place-items:center;font-weight:900;
-    }
-    h1{margin:0;font-size:18px;letter-spacing:.6px}
-    .sub{margin:2px 0 0 0;color:var(--muted);font-size:13px}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap}
-    .pill{
-      border:1px solid var(--line); background:rgba(0,0,0,.20);
-      padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px
-    }
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:18px}
-    .card{
-      grid-column:span 12;
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      border-radius:var(--r); box-shadow:var(--shadow);
-      padding:16px;
-    }
-    @media(min-width:880px){
-      .card.half{grid-column:span 6}
-      .card.third{grid-column:span 4}
-    }
-    .title{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .title h2{margin:0;font-size:15px}
-    .title .tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
-    .desc{margin:10px 0 0 0;color:var(--muted);font-size:13px;line-height:1.6}
-    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    a.btn,button.btn{
-      appearance:none;border:1px solid var(--line); background:rgba(255,255,255,.08);
-      color:var(--text); padding:10px 12px; border-radius:14px;
-      text-decoration:none; cursor:pointer; font-weight:800;
-      display:inline-flex;align-items:center;gap:8px;
-    }
-    a.btn:hover,button.btn:hover{background:rgba(255,255,255,.12)}
-    .btn.ghost{background:transparent}
-    .btn.warn{border-color:rgba(255,220,120,.35)}
-    .mono{font-family:var(--mono)}
-    .footer{
-      margin-top:18px;border-top:1px solid var(--line);
-      padding-top:14px;color:var(--muted);font-size:12px;line-height:1.7
-    }
-    .small{font-size:11px;color:var(--muted)}
-    .copy{
-      border:1px dashed var(--line);background:rgba(0,0,0,.20);
-      padding:10px;border-radius:14px;font-family:var(--mono);
-      overflow:auto; white-space:pre; max-height:140px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>K線西遊記・宇宙入口 Portal 時光隧道</title>
+
+<style>
+  :root{
+    --bg0:#050814; --bg1:#060b1f;
+    --cyan: rgba(120,220,255,.92);
+    --gold: rgba(255,215,120,.92);
+    --vio: rgba(180,120,255,.92);
+    --red: rgba(255,80,80,.92);
+    --text: rgba(235,245,255,.92);
+    --sub: rgba(235,245,255,.70);
+    --panel: rgba(10,14,22,.55);
+    --panel2: rgba(12,18,28,.78);
+    --border: rgba(180,220,255,.20);
+    --border2: rgba(255,215,120,.18);
+    --glow: 0 0 18px rgba(120,180,255,.22), 0 0 56px rgba(120,180,255,.12);
+  }
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+                 "Noto Sans TC","PingFang TC","Microsoft JhengHei", Arial;
+    color:var(--text);
+    background: radial-gradient(1200px 800px at 30% 20%, rgba(120,220,255,.08), transparent 55%),
+                radial-gradient(900px 700px at 70% 40%, rgba(255,215,120,.06), transparent 60%),
+                radial-gradient(1200px 900px at 50% 100%, rgba(180,120,255,.06), transparent 60%),
+                linear-gradient(180deg, var(--bg0), var(--bg1));
+    overflow-x:hidden;
+  }
+
+  .stars,.stars2,.nebula{position:fixed; inset:0; pointer-events:none; z-index:0;}
+  .stars{
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.55) 40%, transparent 41%),
+      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,.45) 40%, transparent 41%),
+      radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,.55) 40%, transparent 41%),
+      radial-gradient(1px 1px at 75% 80%, rgba(255,255,255,.45) 40%, transparent 41%),
+      radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,.55) 40%, transparent 41%),
+      radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,.35) 40%, transparent 41%);
+    opacity:.35; animation:drift 90s linear infinite;
+  }
+  .stars2{
+    background-image:
+      radial-gradient(1px 1px at 15% 35%, rgba(120,220,255,.55) 40%, transparent 41%),
+      radial-gradient(1px 1px at 35% 55%, rgba(255,215,120,.45) 40%, transparent 41%),
+      radial-gradient(1px 1px at 75% 45%, rgba(180,120,255,.40) 40%, transparent 41%),
+      radial-gradient(1px 1px at 65% 15%, rgba(120,220,255,.35) 40%, transparent 41%);
+    opacity:.22; animation:drift2 140s linear infinite;
+  }
+  .nebula{
+    background:
+      radial-gradient(800px 600px at 20% 35%, rgba(120,220,255,.12), transparent 60%),
+      radial-gradient(700px 500px at 70% 30%, rgba(255,215,120,.08), transparent 60%),
+      radial-gradient(900px 700px at 55% 75%, rgba(180,120,255,.10), transparent 62%);
+    filter: blur(2px); opacity:.7; animation:breathe 8s ease-in-out infinite;
+  }
+  @keyframes drift{from{transform:translate3d(0,0,0);} to{transform:translate3d(-240px,120px,0);}}
+  @keyframes drift2{from{transform:translate3d(0,0,0);} to{transform:translate3d(180px,-140px,0);}}
+  @keyframes breathe{0%,100%{transform:scale(1);} 50%{transform:scale(1.04);}}
+
+  .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:28px 18px 92px;}
+  .title{margin-top:10px; display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px;}
+  .brand{display:flex; flex-direction:column; gap:6px;}
+  .brand h1{margin:0; font-size:clamp(28px,4vw,46px); letter-spacing:2px; text-shadow:0 0 18px rgba(120,220,255,.18);}
+  .brand .sub{color:var(--sub); font-weight:900; letter-spacing:.6px;}
+  .clock{
+    text-align:right; background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+    box-shadow:var(--glow); backdrop-filter: blur(10px); min-width: 320px;
+  }
+  .clock .t{font-weight:1100; color:var(--cyan); letter-spacing:.6px;}
+  .clock .d{margin-top:6px; color:var(--sub); font-size:13px; line-height:1.35;}
+
+  .hud{
+    position:fixed; right:14px; top:14px; z-index:99999;
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+    box-shadow:var(--glow); backdrop-filter: blur(10px); min-width: 320px;
+  }
+  .hud .row{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .hud .tag{
+    font-weight:1100; font-size:12px; padding:3px 8px; border-radius:999px;
+    border:1px solid var(--border2); color:var(--gold); background:rgba(255,215,120,.06);
+    letter-spacing:.6px;
+  }
+  .hud .ver{font-weight:1100; font-size:12px; color:var(--cyan);}
+  .hud .sub{margin-top:4px; font-size:12px; color:var(--sub); display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .hud .btn{
+    margin-left:auto;
+    border-radius:999px; border:1px solid rgba(180,220,255,.18);
+    background:rgba(255,255,255,.06); color:var(--text);
+    padding:4px 10px; font-weight:1100; font-size:12px; cursor:pointer;
+  }
+  .hud .btn:hover{background:rgba(255,255,255,.10);}
+  .progress{margin-top:10px; height:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08); border:1px solid rgba(180,220,255,.14);}
+  .progress>div{height:100%; width:0%; background:linear-gradient(90deg, rgba(120,220,255,.9), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(120,220,255,.25); transition:width 520ms ease;}
+  .hud .label{margin-top:6px; font-size:12px; color:var(--sub); display:flex; justify-content:space-between; align-items:center;}
+
+  .grid{margin-top:26px; display:grid; grid-template-columns:repeat(12,1fr); gap:14px;}
+  .card{
+    grid-column:span 12;
+    background:linear-gradient(180deg, rgba(10,14,22,.42), rgba(12,18,28,.72));
+    border:1px solid rgba(180,220,255,.18);
+    border-radius:18px; box-shadow:var(--glow); backdrop-filter: blur(10px);
+    padding:16px 16px 14px; overflow:hidden; position:relative;
+    cursor:pointer; user-select:none;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+  }
+  .card:hover{
+    transform: translateY(-2px);
+    border-color: rgba(180,220,255,.28);
+    background:linear-gradient(180deg, rgba(10,14,22,.55), rgba(12,18,28,.82));
+  }
+  .card.disabled{
+    cursor:not-allowed;
+    opacity:.72;
+    filter: saturate(.85);
+  }
+  .card.disabled:hover{
+    transform:none;
+    border-color: rgba(180,220,255,.18);
+    background:linear-gradient(180deg, rgba(10,14,22,.42), rgba(12,18,28,.72));
+  }
+  @media (min-width:760px){ .card{grid-column:span 6;} }
+  @media (min-width:1060px){ .card{grid-column:span 4;} }
+
+  .ring{
+    position:absolute; inset:-40px -60px auto auto;
+    width:220px; height:220px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, rgba(120,220,255,.25), transparent 55%),
+                radial-gradient(circle at 70% 70%, rgba(255,215,120,.18), transparent 60%),
+                radial-gradient(circle at 40% 80%, rgba(180,120,255,.14), transparent 62%);
+    border:1px solid rgba(180,220,255,.18);
+    animation:spin 10s linear infinite;
+    opacity:.85;
+  }
+  .ring::after{
+    content:""; position:absolute; inset:18px; border-radius:50%;
+    border:1px dashed rgba(255,255,255,.18);
+    box-shadow: inset 0 0 30px rgba(120,220,255,.10);
+    animation:spin2 18s linear infinite reverse;
+  }
+  @keyframes spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes spin2{from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .node{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; position:relative; z-index:1;}
+  .node .left{display:flex; flex-direction:column; gap:8px;}
+  .node .name{font-size:18px; font-weight:1200; letter-spacing:.6px; display:flex; align-items:center; gap:8px;}
+  .badge{
+    font-size:11px; font-weight:1200; letter-spacing:.5px;
+    padding:3px 8px; border-radius:999px;
+    border:1px solid rgba(180,220,255,.18);
+    background:rgba(255,255,255,.06);
+    color:var(--sub);
+    white-space:nowrap;
+  }
+  .badge.ok{ border-color: rgba(120,220,255,.26); color: var(--cyan); background: rgba(120,220,255,.06); }
+  .badge.build{ border-color: rgba(255,215,120,.26); color: var(--gold); background: rgba(255,215,120,.06); }
+  .node .desc{font-size:13px; color:var(--sub); line-height:1.45;}
+  .node .meta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
+  .pill{
+    font-size:12px; font-weight:1200; letter-spacing:.5px;
+    padding:4px 9px; border-radius:999px;
+    border:1px solid rgba(180,220,255,.18);
+    background:rgba(255,255,255,.06);
+    color:var(--text);
+  }
+  .pill.gold{border-color:rgba(255,215,120,.22); color:var(--gold); background:rgba(255,215,120,.06);}
+  .pill.cyan{border-color:rgba(120,220,255,.22); color:var(--cyan); background:rgba(120,220,255,.06);}
+  .pill.vio{border-color:rgba(180,120,255,.22); color:var(--vio); background:rgba(180,120,255,.06);}
+  .pill.red{border-color:rgba(255,80,80,.22); color:var(--red); background:rgba(255,80,80,.06);}
+  .go{font-weight:1200; color:var(--cyan); white-space:nowrap; opacity:.9;}
+
+  .footer{margin-top:24px; color:var(--sub); font-size:12px; line-height:1.55; opacity:.92;}
+
+  .drawer{
+    position:fixed; inset:auto 14px 14px auto;
+    z-index:999999;
+    width:min(620px, calc(100vw - 28px));
+    background:rgba(10,14,22,.86);
+    border:1px solid rgba(180,220,255,.20);
+    border-radius:16px;
+    box-shadow:var(--glow);
+    padding:12px 12px;
+    display:none;
+  }
+  .drawer .h{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .drawer .h .t{font-weight:1200; letter-spacing:.4px;}
+  .drawer .h .x{cursor:pointer; font-weight:1200; opacity:.85;}
+  .drawer pre{
+    margin:10px 0 0;
+    padding:10px 10px;
+    border-radius:12px;
+    border:1px solid rgba(180,220,255,.14);
+    background:rgba(0,0,0,.20);
+    color:rgba(235,245,255,.86);
+    font-size:12px;
+    line-height:1.5;
+    white-space:pre-wrap;
+  }
+
+  .toast{
+    position: fixed; left: 14px; bottom: 14px;
+    z-index: 999999;
+    background: rgba(10,14,22,.82);
+    border: 1px solid rgba(180,220,255,.18);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: var(--glow);
+    max-width: min(720px, calc(100vw - 28px));
+    display:none;
+  }
+  .toast .t{ font-weight: 1200; letter-spacing:.4px; }
+  .toast .m{ margin-top: 6px; color: var(--sub); font-size: 13px; white-space: pre-wrap; line-height:1.45; }
+  .toast .x{ float:right; cursor:pointer; font-weight:1200; opacity:.85; }
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <div class="sig">⌖</div>
-        <div>
-          <h1>K線西遊記｜宇宙入口</h1>
-          <div class="sub">Portal v1.2（GitHub Pages Repo 模式）</div>
-        </div>
-      </div>
-      <div class="pillrow">
-        <div class="pill">主站：kline-odyssey</div>
-        <div class="pill">路徑：/K線西遊記/</div>
-        <div class="pill">鏈：BSC Mainnet（0x38）</div>
-      </div>
+  <div class="nebula"></div>
+  <div class="stars"></div>
+  <div class="stars2"></div>
+
+  <div class="hud">
+    <div class="row">
+      <div class="tag">Portal 時光隧道</div>
+      <div class="ver" id="ver"></div>
     </div>
-
-    <div class="grid">
-      <section class="card half">
-        <div class="title">
-          <h2>五指山 12345｜悟空財神殿</h2>
-          <div class="tag">temples/12345</div>
-        </div>
-        <p class="desc">
-          神殿本體入口。擲筊、點火、心跳、發財金、還願、許願、客服影像/語音、拍照與收據下載。
-          合約尚未部署前，仍可先完成全流程演練（不會卡死）。
-        </p>
-        <div class="btnrow">
-          <a class="btn" href="./temples/12345/">進入 12345 神殿</a>
-          <a class="btn ghost" href="./temples/12345/#help">神殿說明</a>
-        </div>
-      </section>
-
-      <section class="card half">
-        <div class="title">
-          <h2>宇宙施工告示</h2>
-          <div class="tag">三殿一台｜已定案</div>
-        </div>
-        <p class="desc">
-          18888 靈霄寶殿銀行（Bank 0.10%）、Mars/KUFO 豪宅（Reward 0.05%）、
-          AutoLP 斬妖台（AutoLP 0.05% 並作其他血管/活動分流唯一出口；先模式B只分流）。
-          目前優先：先把 12345 通殿整修到高規格，再下心臟合約。
-        </p>
-        <div class="btnrow">
-          <a class="btn warn" href="./temples/12345/#receipt">先做本地收據演練</a>
-          <a class="btn ghost" href="./temples/12345/#device">手機相容檢查</a>
-        </div>
-      </section>
-
-      <section class="card third">
-        <div class="title">
-          <h2>快速路徑</h2>
-          <div class="tag mono">Repo 模式</div>
-        </div>
-        <div class="copy" id="paths"></div>
-        <div class="btnrow">
-          <button class="btn" id="copyPaths">複製</button>
-        </div>
-        <div class="small">提示：若你改 repo 名稱，這裡也要一起換。</div>
-      </section>
-
-      <section class="card third">
-        <div class="title">
-          <h2>官方入口</h2>
-          <div class="tag">Links</div>
-        </div>
-        <p class="desc">LINE / Telegram / 粉專等官方入口，請以你既定連結為準（避免失效入口）。</p>
-        <div class="btnrow">
-          <a class="btn" href="https://lin.ee/b8X18F7" target="_blank" rel="noopener">LINE OA</a>
-          <a class="btn ghost" href="https://t.me/klineodyssey" target="_blank" rel="noopener">Telegram</a>
-        </div>
-      </section>
-
-      <section class="card third">
-        <div class="title">
-          <h2>安全提醒</h2>
-          <div class="tag">No Advice</div>
-        </div>
-        <p class="desc">
-          這是文化×金融×AI敘事創作與修行分享。區塊鏈轉帳不可逆，務必選對鏈與地址。
-        </p>
-      </section>
+    <div class="sub">
+      <div id="build"></div>
+      <button class="btn" id="btnLog">更新紀錄</button>
     </div>
-
-    <div class="footer">
-      PrimeForge 以母機之名，開啟金融生命。<br/>
-      花果山台灣・信念不滅・市場無界。<br/>
-      Where the Market Becomes the Myth.<br/>
-      —— 樂天帝 ⌖
+    <div class="progress"><div id="bar"></div></div>
+    <div class="label">
+      <div>工程進度 <b id="pct">0%</b></div>
+      <div style="opacity:.85;" id="readyLabel">偵測中...</div>
     </div>
   </div>
 
-  <script>
-    (function(){
-      const base = location.origin + "/kline-odyssey/K線西遊記/";
-      const lines = [
-        "宇宙入口: " + base,
-        "12345 神殿: " + base + "temples/12345/",
-        "ethers 檔: " + base + "assets/ethers-5.7.2.umd.min.js"
-      ].join("\n");
-      document.getElementById("paths").textContent = lines;
+  <div class="wrap">
+    <div class="title">
+      <div class="brand">
+        <h1>K線西遊記・宇宙入口</h1>
+        <div class="sub">Portal 時光隧道｜偵測各殿施工狀態，準備好才開門</div>
+      </div>
+      <div class="clock">
+        <div class="t" id="clockT">時間校準中...</div>
+        <div class="d">BSC 主網請選 chainId 56（0x38）。入口只負責轉接，功能留在各殿。</div>
+      </div>
+    </div>
 
-      document.getElementById("copyPaths").addEventListener("click", async () => {
-        try{
-          await navigator.clipboard.writeText(lines);
-          document.getElementById("copyPaths").textContent = "已複製";
-          setTimeout(()=>document.getElementById("copyPaths").textContent="複製", 900);
-        }catch(e){
-          alert("無法複製，請手動長按選取。");
+    <div class="grid" id="grid"></div>
+
+    <div class="footer">
+      規則：入口「只轉接」。各殿未施工完成時，入口會顯示「施工準備中」並阻止 404。<br>
+      進度：工程進度會依「偵測到該殿 index.html」自動計算。
+    </div>
+  </div>
+
+  <div class="drawer" id="drawer">
+    <div class="h">
+      <div class="t">Portal 更新紀錄（只增不刪）</div>
+      <div class="x" id="drawerX">✕</div>
+    </div>
+    <pre id="logText"></pre>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="x" id="toastX">✕</span>
+    <div class="t" id="toastT">系統訊息</div>
+    <div class="m" id="toastM"></div>
+  </div>
+
+<script>
+(() => {
+  // ============================================================
+  // ✅ 版本化區（升版只改這三行）
+  // ============================================================
+  const PORTAL_VERSION = "V6.1.0-PORTAL-AUTO-DETECT";
+  const BUILD_DATE     = "2026-02-20";
+  const CHANGELOG = `
+[${BUILD_DATE}] ${PORTAL_VERSION}
+- 新增：自動偵測各殿 index.html 是否存在（存在才開門）
+- 施工中：點擊不 404，改為提示「施工準備中」
+- 工程進度：依偵測結果自動計算
+
+[2026-02-20] V6.0.0-PORTAL-FULL
+- 全節點 Portal 時光隧道卡片化與版本化
+`.trim();
+
+  // ============================================================
+  // ✅ 入口節點（路徑請依你的 temples 目錄調整）
+  // ============================================================
+  const PORTALS = [
+    { id:"12345", name:"五指山・悟空財神殿", tone:"red",
+      desc:"神殿心臟。心跳、點火、發財金、還願補血。悟空在五指山下，脈動不滅。",
+      pills:["12345","Heart","Temple"], href:"./temples/12345/index.html" },
+
+    { id:"11520", name:"花果山台灣・悟空交易所", tone:"cyan",
+      desc:"保證金與交易中樞。花果山台灣主線節點，悟空大腦與市場節奏樞紐。",
+      pills:["11520","Exchange","Brain"], href:"./temples/11520/index.html" },
+
+    { id:"108000", name:"Mars・花果山火星齊天豪宅", tone:"gold",
+      desc:"108000 點石成金。500 席位豪宅節點，承接火星線的能量與回流。",
+      pills:["108000","Mars","KUFO"], href:"./temples/108000/index.html" },
+
+    { id:"8888", name:"高老莊・七仙女許願", tone:"gold",
+      desc:"七仙女香爐與許願系統。願力上鏈，回饋以儀式而非賭徒。",
+      pills:["8888","Wish","7Fairies"], href:"./temples/8888/index.html" },
+
+    { id:"18888", name:"靈霄寶殿・神明銀行", tone:"gold",
+      desc:"玉帝金庫與稅流中樞。神明薪水與宇宙秩序之所在。",
+      pills:["18888","Bank","Heaven"], href:"./temples/18888/index.html" },
+
+    { id:"88888", name:"美州大陸・新世界戰區", tone:"vio",
+      desc:"88888 節點。跨洲戰區與資金潮汐的另一端，映射全球節奏。",
+      pills:["88888","America","Continent"], href:"./temples/88888/index.html" },
+
+    { id:"LEIYIN", name:"雷音寺・如來掌界", tone:"vio",
+      desc:"掌界觀測與因果審判之地。不是入口的終點，是宇宙的天條。",
+      pills:["LeiYin","Tathagata","Law"], href:"./temples/leiyin/index.html" },
+
+    { id:"ZAOYAOTAI", name:"斬妖台・血管出口", tone:"cyan",
+      desc:"血管分流與活動出口。所有神明妖怪活動血路，從此分流而不混殿。",
+      pills:["AutoLP","Vessel","Outlet"], href:"./temples/zhan-yao-tai/index.html" }
+  ];
+
+  // ===== Helpers =====
+  const $ = (id)=>document.getElementById(id);
+
+  function toast(title, msg){
+    $("toastT").textContent = title || "系統訊息";
+    $("toastM").textContent = msg || "";
+    $("toast").style.display = "block";
+  }
+  $("toastX").addEventListener("click", () => $("toast").style.display = "none");
+
+  function clockTick(){
+    const now = new Date();
+    $("clockT").textContent = now.toLocaleString("zh-TW", { hour12:false });
+  }
+
+  function pillHtml(p, tone){
+    const cls = tone==="gold" ? "pill gold" : tone==="red" ? "pill red" : tone==="vio" ? "pill vio" : "pill cyan";
+    return `<span class="${cls}">${p}</span>`;
+  }
+
+  function cardHtml(item){
+    const pills = (item.pills||[]).map(p => pillHtml(p, item.tone)).join("");
+    const badge = item._ready === true
+      ? `<span class="badge ok">已開殿</span>`
+      : item._ready === false
+        ? `<span class="badge build">施工準備中</span>`
+        : `<span class="badge">偵測中</span>`;
+
+    const disabled = item._ready === false ? "disabled" : "";
+    return `
+      <div class="card ${disabled}" data-href="${item.href}" data-ready="${item._ready}">
+        <div class="ring"></div>
+        <div class="node">
+          <div class="left">
+            <div class="name">${item.name} ${badge}</div>
+            <div class="desc">${item.desc}</div>
+            <div class="meta">${pills}</div>
+          </div>
+          <div class="go">${item._ready === false ? "施工中" : "進入 →"}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGrid(){
+    const grid = $("grid");
+    grid.innerHTML = PORTALS.map(cardHtml).join("");
+    grid.querySelectorAll(".card").forEach(card => {
+      card.addEventListener("click", () => {
+        const ready = card.getAttribute("data-ready");
+        const href  = card.getAttribute("data-href");
+
+        if(ready === "false"){
+          toast("施工準備中", "此節點尚未偵測到 index.html。\n等你把該殿的 index.html 上傳後，入口會自動開門並納入工程進度。");
+          return;
         }
+        if(ready === "null" || ready === "undefined"){
+          toast("偵測中", "正在偵測節點狀態，請稍候再點一次。");
+          return;
+        }
+        window.location.href = href;
       });
-    })();
-  </script>
+    });
+  }
+
+  // ============================================================
+  // ✅ 核心：偵測檔案是否存在
+  // - 使用 fetch 讀取該 href
+  // - 只要 response.ok 就視為存在（GitHub Pages 404 會 ok=false）
+  // - 加上 cache: "no-store" 避免快取誤判
+  // ============================================================
+  async function detectOne(url){
+    try{
+      const r = await fetch(url, { method: "GET", cache: "no-store" });
+      return !!r.ok;
+    }catch(e){
+      return false;
+    }
+  }
+
+  async function detectAll(){
+    $("readyLabel").textContent = "偵測中...";
+    // 先標成偵測中
+    PORTALS.forEach(p => p._ready = null);
+    renderGrid();
+
+    // 逐個偵測（穩定，不爆請求）
+    let okCount = 0;
+    for(let i=0;i<PORTALS.length;i++){
+      const p = PORTALS[i];
+      const ok = await detectOne(p.href);
+      p._ready = ok;
+      if(ok) okCount++;
+      renderGrid();
+    }
+
+    // 工程進度 = (已開殿數 / 總節點) * 100
+    const pct = Math.round((okCount / PORTALS.length) * 100);
+    $("bar").style.width = pct + "%";
+    $("pct").textContent = pct + "%";
+    $("readyLabel").textContent = `已開殿 ${okCount}/${PORTALS.length}`;
+  }
+
+  // Changelog drawer
+  function openLog(){ $("logText").textContent = CHANGELOG; $("drawer").style.display = "block"; }
+  function closeLog(){ $("drawer").style.display = "none"; }
+
+  // Boot
+  $("ver").textContent = PORTAL_VERSION;
+  $("build").textContent = "Build: " + BUILD_DATE;
+
+  renderGrid();
+  clockTick();
+  setInterval(clockTick, 1000);
+
+  $("btnLog").addEventListener("click", openLog);
+  $("drawerX").addEventListener("click", closeLog);
+
+  // Start detect
+  detectAll();
+
+  // Export debug
+  window.__KLINE_PORTAL__ = { PORTAL_VERSION, BUILD_DATE, PORTALS, CHANGELOG };
+})();
+</script>
 </body>
 </html>
