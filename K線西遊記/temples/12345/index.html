@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p1 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p2 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -469,12 +469,7 @@
       text-overflow:ellipsis;
     }
     .toast.show{display:block}
-  
-/* V6.6p1 PATCH: camera output full-width */
-#shotCanvas, #shotImg{ width:100% !important; height:auto !important; display:block; border-radius:18px; }
-.photoWrap{ overflow:hidden; }
-
-</style>
+  </style>
 </head>
 
 <body>
@@ -498,11 +493,11 @@
             <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p1 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p2 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6p1</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p2</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -841,7 +836,7 @@
 
 <script>
 /* ===============================
-   V6.6p1 — Wukong Temple UI
+   V6.6p2 — Wukong Temple UI
    - Single title (no duplication)
    - Sticky official website button
    - Countdown: heartbeat + ignite window
@@ -853,7 +848,7 @@
 ================================ */
 
 const UI = {
-  ver: "V6.6p1",
+  ver: "V6.6p2",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -865,17 +860,6 @@ const UI = {
     fortuneMax: 888,
   }
 };
-// === V6.6p1 PATCH: persistent timers (heartbeat) ===
-const LSKEY = {
-  lastHB: "kgen_temple_lastHB",
-  lastIgnDay: "kgen_temple_lastIgniteDay"
-};
-function lsGetNum(k, d=0){ const v = Number(localStorage.getItem(k)); return Number.isFinite(v)? v : d; }
-function lsSetNum(k, v){ try{ localStorage.setItem(k, String(Math.floor(v))); }catch(e){} }
-
-let __lastHB_local = lsGetNum(LSKEY.lastHB, 0);           // seconds
-let __lastIgnDay_local = lsGetNum(LSKEY.lastIgnDay, 0);   // dayIndex
-
 
 const $ = (id)=>document.getElementById(id);
 const toast = (msg)=>{
@@ -1263,11 +1247,6 @@ async function refreshUserTimers(){
     lastFT = parseInt(LS.get("local_last_ft","0"),10) || 0;
     lastIGDay = parseInt(LS.get("local_last_ig","-1"),10) || -1;
   }
-
-  // V6.6p1 PATCH: persist chain timers for countdown reliability
-  if (Number.isFinite(lastHB) && lastHB > 0) { __lastHB_local = lastHB; lsSetNum(LSKEY.lastHB, lastHB); }
-  if (Number.isFinite(lastIgniteDay) && lastIgniteDay > 0) { __lastIgnDay_local = lastIgniteDay; lsSetNum(LSKEY.lastIgnDay, lastIgniteDay); }
-
 }
 
 function currentUTCSecondsOfDay(){
@@ -1281,17 +1260,24 @@ function currentUTCDayIndex(){
 
 function tickCountdown(){
   const now = Date.now();
-  // V6.6p1 PATCH: robust cooldown values
-  const hbCd = (Number.isFinite(heartbeatCooldownSeconds) && heartbeatCooldownSeconds>0) ? heartbeatCooldownSeconds : 3600;
-  const lastHB_eff = (Number.isFinite(lastHB) && lastHB>0) ? lastHB : (__lastHB_local||0);
-
   $("nowTxt").textContent = fmtDateTime(new Date());
 
   // Heartbeat
-  const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : 0);
-  const hbLeft = hbNext>0 ? (hbNext - now) : 0;
-  $("hbCountdown").textContent = (hbNext===0) ? "00:00:00" : fmtHMS(hbLeft);
-  $("hbNextAt").textContent = hbNext===0 ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
+  // If lastHB is 0 (new user / no-wallet), still show a meaningful countdown to the next top-of-hour (game feel),
+  // while keeping "can claim now" semantics.
+  const nextTopHour = (()=>{
+    const ms = Date.now();
+    const mod = ms % 3600000;
+    return ms + (3600000 - mod);
+  })();
+
+  const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : nextTopHour);
+  const hbLeft = Math.max(0, hbNext - now);
+
+  $("hbCountdown").textContent = fmtHMS(hbLeft);
+  $("hbNextAt").textContent = (lastHB>0)
+    ? ("next @ " + new Date(hbNext).toLocaleString())
+    : ("本小時可領｜下次重置 @ " + new Date(hbNext).toLocaleString());
 
   // Ignite window (UTC)
   const tod = currentUTCSecondsOfDay();
@@ -1388,8 +1374,6 @@ $("btnHeartbeat").onclick = async ()=>{
     $("hbIgOut").textContent = "心跳已送出交易：" + tx.hash;
     toast("心跳上鏈中…");
     await tx.wait();
-      const nowSec=Math.floor(Date.now()/1000); __lastHB_local=nowSec; lsSetNum(LSKEY.lastHB, nowSec);
-
     $("hbIgOut").textContent = "心跳成功（鏈上已記錄事件）";
     toast("心跳成功");
     await refreshUserTimers();
@@ -1406,8 +1390,6 @@ $("btnIgnite").onclick = async ()=>{
     $("hbIgOut").textContent = "點火已送出交易：" + tx.hash;
     toast("點火上鏈中…");
     await tx.wait();
-      const dayIdx=Math.floor(Date.now()/86400000); __lastIgnDay_local=dayIdx; lsSetNum(LSKEY.lastIgnDay, dayIdx);
-
     $("hbIgOut").textContent = "點火成功（鏈上已記錄事件）";
     toast("點火成功");
     await refreshUserTimers();
@@ -1663,38 +1645,153 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function drawWatermark(){
-  const t = getOverlayText();
-  // dark gradient at bottom for readability
-  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
-  g.addColorStop(0, "rgba(0,0,0,0)");
-  g.addColorStop(1, "rgba(0,0,0,.55)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
+function drawWatermark(canvas, baseImg, overlay){
+  const ctx = canvas.getContext("2d");
 
-  const pad = Math.max(16, Math.round(canvas.width*0.02));
-  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
-  ctx.fillStyle = "rgba(255,210,125,.95)";
-  ctx.shadowColor = "rgba(0,0,0,.55)";
-  ctx.shadowBlur = 10;
-  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
+  // base
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
 
+  // --- style helpers ---
+  const pad = Math.max(18, Math.round(canvas.width*0.03));
+  const lineGap = 6;
+
+  function rgba(a){ return `rgba(0,0,0,${a})`; }
+  function roundRect(x,y,w,h,r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  function wrap(text, maxW, font){
+    ctx.font = font;
+    const words = (text||"").replace(/\s+/g," ").trim().split(" ");
+    const out = [];
+    let line = "";
+    for(const w of words){
+      const test = line ? (line + " " + w) : w;
+      if(ctx.measureText(test).width <= maxW){
+        line = test;
+      }else{
+        if(line) out.push(line);
+        line = w;
+      }
+    }
+    if(line) out.push(line);
+    return out.length ? out : [""];
+  }
+
+  // --- content ---
+  const title = overlay.title || "五指山 12345 悟空財神殿";
+  const mid = overlay.mid || "";
+  const bot = overlay.bot || "";
+  const foot = overlay.foot || "";
+
+  // Fonts
+  const titleSize = Math.max(26, Math.round(canvas.width*0.055));
+  const bodySize  = Math.max(18, Math.round(canvas.width*0.038));
+  const footSize  = Math.max(14, Math.round(canvas.width*0.032));
+
+  const titleFont = `900 ${titleSize}px "Microsoft JhengHei", system-ui, sans-serif`;
+  const bodyFont  = `700 ${bodySize}px "Microsoft JhengHei", system-ui, sans-serif`;
+  const footFont  = `600 ${footSize}px "Microsoft JhengHei", system-ui, sans-serif`;
+
+  const maxW = canvas.width - pad*2;
+
+  // Bottom box lines (wrap with truncation to avoid overlap)
+  const midLinesAll = wrap(mid, maxW, bodyFont).filter(Boolean);
+  const botLinesAll = wrap(bot, maxW, bodyFont).filter(Boolean);
+
+  const maxBodyLines = 6; // total for mid+bot
+  let midLines = midLinesAll;
+  let botLines = botLinesAll;
+
+  if(midLines.length + botLines.length > maxBodyLines){
+    const keepBot = Math.min(botLines.length, Math.ceil(maxBodyLines*0.6));
+    const keepMid = Math.max(0, maxBodyLines - keepBot);
+    botLines = botLines.slice(0, keepBot);
+    midLines = midLines.slice(0, keepMid);
+    if(midLinesAll.length > midLines.length && midLines.length){
+      midLines[midLines.length-1] += " …";
+    }
+    if(botLinesAll.length > botLines.length && botLines.length){
+      botLines[botLines.length-1] += " …";
+    }
+  }
+
+  const bodyLineH = Math.round(bodySize*1.25);
+  const footLineH = Math.round(footSize*1.25);
+
+  const bodyCount = (midLines.filter(l=>l.trim()).length) + (botLines.filter(l=>l.trim()).length);
+  const boxH = Math.max(
+    Math.round(canvas.height*0.18),
+    (bodyCount*bodyLineH) + footLineH + pad + 18
+  );
+
+  const boxX = pad;
+  const boxY = canvas.height - pad - boxH;
+  const boxW = canvas.width - pad*2;
+
+  // Bottom box background
+  ctx.save();
+  ctx.fillStyle = rgba(0.42);
+  roundRect(boxX, boxY, boxW, boxH, 18);
+  ctx.fill();
+
+  // Title (top-left) glow
+  ctx.font = titleFont;
+  ctx.fillStyle = "#ffd46a";
+  ctx.shadowColor = "rgba(255,190,80,0.55)";
+  ctx.shadowBlur = 18;
+  ctx.textBaseline = "top";
+  ctx.fillText(title, pad, pad);
   ctx.shadowBlur = 0;
-  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
-  ctx.fillStyle = "rgba(255,255,255,.92)";
-  let y = canvas.height - pad*2.3;
-  if (t.mid){
-    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+
+  // Body lines in box
+  ctx.shadowColor = "transparent";
+  ctx.font = bodyFont;
+  ctx.fillStyle = "rgba(255,230,160,0.92)";
+  ctx.textBaseline = "top";
+
+  let y = boxY + 16;
+
+  for(const line of midLines){
+    if(!line.trim()) continue;
+    ctx.fillText(line, boxX + 16, y);
+    y += bodyLineH;
   }
-  if (t.bot){
-    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+  if(midLines.length && botLines.length) y += lineGap;
+
+  for(const line of botLines){
+    if(!line.trim()) continue;
+    ctx.fillText(line, boxX + 16, y);
+    y += bodyLineH;
   }
-  ctx.fillStyle = "rgba(255,255,255,.70)";
-  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
-  ctx.fillText(t.foot, pad, canvas.height - pad);
+
+  // Footer bottom-right with mini bg (never collides)
+  ctx.font = footFont;
+  const footText = foot || "";
+  const footW = ctx.measureText(footText).width;
+  const fx = Math.max(boxX + 16, boxX + boxW - 16 - footW);
+  const fy = boxY + boxH - 16;
+
+  ctx.fillStyle = rgba(0.35);
+  const footPadX = 10, footPadY = 8;
+  roundRect(fx-footPadX, fy-footLineH-footPadY, footW+footPadX*2, footLineH+footPadY*2, 12);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,230,160,0.9)";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(footText, fx, fy);
+
+  ctx.restore();
 }
+
 
 function wrapText(text, x, y, maxW, lineH){
   const words = text.split("");
