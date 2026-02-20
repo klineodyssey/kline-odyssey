@@ -3,10 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p7 Cosmic Living Temple</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <title>五指山 12345・悟空財神殿｜V6.6p8 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -473,10 +470,13 @@
     }
     .toast.show{display:block}
   
-.soft-disabled{opacity:0.78; filter:saturate(0.8);}
+.caishenIcon{
+  width:46px;height:46px;border-radius:14px;object-fit:cover;
+  border:1px solid rgba(255,209,125,.35);
+  box-shadow:0 10px 26px rgba(0,0,0,.35);
+}
+@media (max-width:420px){ .caishenIcon{width:40px;height:40px;border-radius:12px;} }
 
-    .heroWrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:8px}
-    .heroWrap img{width:100%;max-width:720px;aspect-ratio:1/1;object-fit:cover;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);box-shadow:var(--shadow)}
 </style>
 </head>
 
@@ -498,10 +498,11 @@
         <div class="inner">
           <div class="title">
             <div class="pillar"></div>
-            <div class="ttext">
+            <img class="caishenIcon" src="/kline-odyssey/assets/wukong_caishen.png?v=1" alt="Wukong Caishen" onerror="this.style.display=\'none\'"/>
+<div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p7 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p8 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
@@ -521,15 +522,6 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="h">悟空財神聖像（assets/wukong_caishen.png）</div>
-        <div class="heroWrap">
-          <img id="heroImg" alt="悟空財神" loading="lazy" />
-          <div class="muted" style="margin-top:10px">若未顯示：請重整、或清除瀏覽器快取（GitHub Pages 有時會卡舊檔）。</div>
-        </div>
-      </div>
-
-
 
       <div class="card">
         <div class="rightInfo">
@@ -1282,18 +1274,8 @@ function tickCountdown(){
   // Heartbeat
   const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : 0);
   const hbLeft = hbNext>0 ? (hbNext - now) : 0;
-
-  // UI fallback: even if on-chain params are not readable, still show a meaningful countdown (next local hour)
-  let hbNextUI = hbNext;
-  if (hbNextUI===0){
-    const d = new Date(now);
-    d.setMinutes(0,0,0);
-    d.setHours(d.getHours()+1);
-    hbNextUI = d.getTime();
-  }
-  const hbLeftUI = Math.max(0, hbNextUI - now);
-  $("hbCountdown").textContent = fmtHMS(hbLeftUI);
-  $("hbNextAt").textContent = hbNext===0 ? ("預估 next @ " + new Date(hbNextUI).toLocaleString()) : ("next @ " + new Date(hbNext).toLocaleString());
+  $("hbCountdown").textContent = (hbNext===0) ? "00:00:00" : fmtHMS(hbLeft);
+  $("hbNextAt").textContent = hbNext===0 ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
 
   // Ignite window (UTC)
   const tod = currentUTCSecondsOfDay();
@@ -1318,11 +1300,11 @@ function tickCountdown(){
   }
 
   // Buttons enable
-  $("btnHeartbeat").disabled = (hbNext!==0 && hbLeft>0); // allow click without wallet; handler will guide
+  $("btnHeartbeat").disabled = (hbNext!==0 && hbLeft>0) || (!account || !heart);
   // ignite allowed only in window & once per day
   const dayIdx = currentUTCDayIndex();
   const alreadyToday = (lastIGDay === dayIdx);
-  $("btnIgnite").disabled = (!inWindow) || alreadyToday; // allow click without wallet; handler will guide
+  $("btnIgnite").disabled = (!account) || (!inWindow) || alreadyToday;
 
   requestAnimationFrame(()=>{});
 }
@@ -1339,7 +1321,7 @@ let cupUnlocked = (LS.get("kgen_cup_unlocked","0")==="1");
 function syncCupUI(){
   $("cupProg").textContent = `${cupProg} / 3`;
   $("cupStreak").textContent = String(cupStreak);
-  $("btnFortune").disabled = !cupUnlocked;
+  $("btnFortune").disabled = !(cupUnlocked && heart && account);
   if (cupUnlocked && (!heart || !account)){
     $("fortuneOut").textContent = "已完成三次聖盃：接下來連接錢包並貼上 Heart 地址就能上鏈領發財金。";
   }
@@ -1644,17 +1626,6 @@ function getOverlayText(){
 }
 
 // fit cover from video to canvas, no shrinking
-
-function blobFromDataURL(dataURL){
-  const parts = dataURL.split(',');
-  const mime = (parts[0].match(/:(.*?);/)||[])[1] || 'image/png';
-  const bstr = atob(parts[1]);
-  let n = bstr.length;
-  const u8 = new Uint8Array(n);
-  while(n--){ u8[n] = bstr.charCodeAt(n); }
-  return new Blob([u8], {type:mime});
-}
-
 function drawFrameToCanvas(video){
   const vw = video.videoWidth || 1280;
   const vh = video.videoHeight || 720;
@@ -1672,69 +1643,52 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function getTextLines(ctx, text, maxWidth){
-  const words = String(text||"").split(/\s+/).filter(Boolean);
-  if(!words.length) return [];
-  const lines = [];
-  let line = words[0];
-  for(let i=1;i<words.length;i++){
-    const test = line + " " + words[i];
-    if(ctx.measureText(test).width <= maxWidth){
-      line = test;
-    }else{
-      lines.push(line);
-      line = words[i];
-    }
-  }
-  lines.push(line);
-  return lines;
-}
-
 function drawWatermark(){
-  // Draw current video frame already rendered; now add watermark text safely (no overlap)
-  const pad = 26;
-  const maxW = canvas.width - pad*2;
+  const t = getOverlayText();
+  // dark gradient at bottom for readability
+  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
+  g.addColorStop(0, "rgba(0,0,0,0)");
+  g.addColorStop(1, "rgba(0,0,0,.55)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
 
-  const title = `五指山 12345 悟空財神殿  V6.6`;
-  const msg = `留言：${(wishText.value||"").trim()||"（未填）"}`;
-  const meta = `${new Date().toLocaleString()}  ·  ${walletAddress? walletAddress.slice(0,6)+"…"+walletAddress.slice(-4) : "no-wallet"}`;
-
-  // Top title
-  ctx.save();
-  ctx.globalAlpha = 0.92;
-  ctx.fillStyle = "#f5d37a";
+  const pad = Math.max(16, Math.round(canvas.width*0.02));
+  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
+  ctx.fillStyle = "rgba(255,210,125,.95)";
   ctx.shadowColor = "rgba(0,0,0,.55)";
   ctx.shadowBlur = 10;
-  ctx.font = "bold 36px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
-  ctx.fillText(title, pad, pad+34);
+  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
 
-  // Bottom block (msg + meta) — compute line layout to avoid overlap
   ctx.shadowBlur = 0;
+  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
   ctx.fillStyle = "rgba(255,255,255,.92)";
-  const lineH = 30;
-  ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
-
-  const msgLines = getTextLines(ctx, msg, maxW);
-  const metaLines = getTextLines(ctx, meta, maxW);
-
-  const blockLines = msgLines.length + metaLines.length;
-  const blockH = blockLines*lineH + (metaLines.length? 6:0);
-
-  let y = canvas.height - pad - blockH + 22; // start baseline
-  for(const ln of msgLines){
-    ctx.fillText(ln, pad, y);
-    y += lineH;
+  let y = canvas.height - pad*2.3;
+  if (t.mid){
+    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
+    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
   }
-  if(metaLines.length){
-    y += 6;
-    ctx.fillStyle = "rgba(255,255,255,.78)";
-    for(const ln of metaLines){
-      ctx.fillText(ln, pad, y);
-      y += lineH;
-    }
+  if (t.bot){
+    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
+    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
   }
-  ctx.restore();
+  ctx.fillStyle = "rgba(255,255,255,.70)";
+  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
+  ctx.fillText(t.foot, pad, canvas.height - pad);
 }
+
+function wrapText(text, x, y, maxW, lineH){
+  const words = text.split("");
+  let line = "";
+  for (let i=0;i<words.length;i++){
+    const test = line + words[i];
+    const w = ctx.measureText(test).width;
+    if (w > maxW && i>0){
+      ctx.fillText(line, x, y);
+      line = words[i];
+      y += lineH;
+    }else{
+      line = test;
+    }
   }
   ctx.fillText(line, x, y);
 }
@@ -1946,30 +1900,6 @@ $("heartAddr").addEventListener("change", async ()=>{
 $("orphanAddr").addEventListener("change", ()=>LS.set("kgen_orphan_addr", $("orphanAddr").value.trim()));
 $("wishText").addEventListener("change", ()=>LS.set("kgen_wish_text", $("wishText").value));
 $("noteText").addEventListener("change", ()=>LS.set("kgen_note_text", $("noteText").value));
-
-// ===== Hero Image Loader (GitHub Pages path-safe) =====
-(function(){
-  const img = document.getElementById('heroImg');
-  if(!img) return;
-
-  const repoBase = location.pathname.includes('/kline-odyssey/') ? '/kline-odyssey' : '';
-  const candidates = [
-    repoBase + '/assets/wukong_caishen.png',
-    'assets/wukong_caishen.png',
-    '../assets/wukong_caishen.png',
-    '../../assets/wukong_caishen.png',
-    '../../../assets/wukong_caishen.png',
-    '/assets/wukong_caishen.png'
-  ];
-
-  let i = 0;
-  const tryNext = () => {
-    if(i >= candidates.length) return;
-    img.src = candidates[i++];
-  };
-  img.onerror = tryNext;
-  tryNext();
-})();
 
 // keep fortune button state synced with wallet/heart/cup
 setInterval(()=>{ syncCupUI(); }, 900);
