@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.9 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p1 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -469,7 +469,12 @@
       text-overflow:ellipsis;
     }
     .toast.show{display:block}
-  </style>
+  
+/* V6.6p1 PATCH: camera output full-width */
+#shotCanvas, #shotImg{ width:100% !important; height:auto !important; display:block; border-radius:18px; }
+.photoWrap{ overflow:hidden; }
+
+</style>
 </head>
 
 <body>
@@ -493,11 +498,11 @@
             <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.9 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p1 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.9</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p1</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -836,7 +841,7 @@
 
 <script>
 /* ===============================
-   V6.9 — Wukong Temple UI
+   V6.6p1 — Wukong Temple UI
    - Single title (no duplication)
    - Sticky official website button
    - Countdown: heartbeat + ignite window
@@ -848,7 +853,7 @@
 ================================ */
 
 const UI = {
-  ver: "V6.9",
+  ver: "V6.6p1",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -860,6 +865,17 @@ const UI = {
     fortuneMax: 888,
   }
 };
+// === V6.6p1 PATCH: persistent timers (heartbeat) ===
+const LSKEY = {
+  lastHB: "kgen_temple_lastHB",
+  lastIgnDay: "kgen_temple_lastIgniteDay"
+};
+function lsGetNum(k, d=0){ const v = Number(localStorage.getItem(k)); return Number.isFinite(v)? v : d; }
+function lsSetNum(k, v){ try{ localStorage.setItem(k, String(Math.floor(v))); }catch(e){} }
+
+let __lastHB_local = lsGetNum(LSKEY.lastHB, 0);           // seconds
+let __lastIgnDay_local = lsGetNum(LSKEY.lastIgnDay, 0);   // dayIndex
+
 
 const $ = (id)=>document.getElementById(id);
 const toast = (msg)=>{
@@ -1247,6 +1263,11 @@ async function refreshUserTimers(){
     lastFT = parseInt(LS.get("local_last_ft","0"),10) || 0;
     lastIGDay = parseInt(LS.get("local_last_ig","-1"),10) || -1;
   }
+
+  // V6.6p1 PATCH: persist chain timers for countdown reliability
+  if (Number.isFinite(lastHB) && lastHB > 0) { __lastHB_local = lastHB; lsSetNum(LSKEY.lastHB, lastHB); }
+  if (Number.isFinite(lastIgniteDay) && lastIgniteDay > 0) { __lastIgnDay_local = lastIgniteDay; lsSetNum(LSKEY.lastIgnDay, lastIgniteDay); }
+
 }
 
 function currentUTCSecondsOfDay(){
@@ -1260,6 +1281,10 @@ function currentUTCDayIndex(){
 
 function tickCountdown(){
   const now = Date.now();
+  // V6.6p1 PATCH: robust cooldown values
+  const hbCd = (Number.isFinite(heartbeatCooldownSeconds) && heartbeatCooldownSeconds>0) ? heartbeatCooldownSeconds : 3600;
+  const lastHB_eff = (Number.isFinite(lastHB) && lastHB>0) ? lastHB : (__lastHB_local||0);
+
   $("nowTxt").textContent = fmtDateTime(new Date());
 
   // Heartbeat
@@ -1363,6 +1388,8 @@ $("btnHeartbeat").onclick = async ()=>{
     $("hbIgOut").textContent = "心跳已送出交易：" + tx.hash;
     toast("心跳上鏈中…");
     await tx.wait();
+      const nowSec=Math.floor(Date.now()/1000); __lastHB_local=nowSec; lsSetNum(LSKEY.lastHB, nowSec);
+
     $("hbIgOut").textContent = "心跳成功（鏈上已記錄事件）";
     toast("心跳成功");
     await refreshUserTimers();
@@ -1379,6 +1406,8 @@ $("btnIgnite").onclick = async ()=>{
     $("hbIgOut").textContent = "點火已送出交易：" + tx.hash;
     toast("點火上鏈中…");
     await tx.wait();
+      const dayIdx=Math.floor(Date.now()/86400000); __lastIgnDay_local=dayIdx; lsSetNum(LSKEY.lastIgnDay, dayIdx);
+
     $("hbIgOut").textContent = "點火成功（鏈上已記錄事件）";
     toast("點火成功");
     await refreshUserTimers();
@@ -1634,125 +1663,54 @@ function drawFrameToCanvas(video){
   drawWatermark();
 }
 
-function drawWatermark(srcCanvas, noteText, wishText){
-  // Returns a new canvas with watermark + note/wish safely laid out (mobile-safe)
-  const c = document.createElement("canvas");
-  c.width = srcCanvas.width;
-  c.height = srcCanvas.height;
-  const ctx = c.getContext("2d");
-
-  // base image
-  ctx.drawImage(srcCanvas, 0, 0);
-
-  // safe strings
-  const now = new Date();
-  const ts = now.toLocaleString("zh-TW", { hour12:false });
-  const account = (window.__PF && __PF.account) ? String(__PF.account) : "";
-  const walletShort = account ? (account.slice(0,6)+"…"+account.slice(-4)) : "no-wallet";
-  const v = UI && UI.ver ? UI.ver : "V6.9";
-  const title = "五指山 12345 · 悟空財神殿";
-
-  const pad = Math.round(c.width * 0.035);
-  const topH = Math.round(c.height * 0.14);
-  const botH = Math.round(c.height * 0.22);
-
-  // top gradient band
-  let g = ctx.createLinearGradient(0,0,0,topH);
-  g.addColorStop(0,"rgba(0,0,0,0.75)");
-  g.addColorStop(1,"rgba(0,0,0,0.00)");
+function drawWatermark(){
+  const t = getOverlayText();
+  // dark gradient at bottom for readability
+  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
+  g.addColorStop(0, "rgba(0,0,0,0)");
+  g.addColorStop(1, "rgba(0,0,0,.55)");
   ctx.fillStyle = g;
-  ctx.fillRect(0,0,c.width,topH);
+  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
 
-  // bottom gradient band
-  let g2 = ctx.createLinearGradient(0,c.height-botH,0,c.height);
-  g2.addColorStop(0,"rgba(0,0,0,0.00)");
-  g2.addColorStop(1,"rgba(0,0,0,0.80)");
-  ctx.fillStyle = g2;
-  ctx.fillRect(0,c.height-botH,c.width,botH);
+  const pad = Math.max(16, Math.round(canvas.width*0.02));
+  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
+  ctx.fillStyle = "rgba(255,210,125,.95)";
+  ctx.shadowColor = "rgba(0,0,0,.55)";
+  ctx.shadowBlur = 10;
+  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
 
-  // typography
-  const gold = "rgba(255, 214, 90, 0.95)";
-  const gray = "rgba(220,220,220,0.85)";
-  ctx.textBaseline = "top";
-  ctx.shadowColor = "rgba(0,0,0,0.6)";
-  ctx.shadowBlur = Math.round(c.width*0.01);
-
-  // top-left title
-  ctx.fillStyle = gold;
-  ctx.font = `700 ${Math.max(18, Math.round(c.width*0.05))}px "Microsoft JhengHei", system-ui`;
-  wrapText(ctx, title, pad, pad, c.width*0.70, Math.round(c.width*0.06), 2);
-
-  // top-right meta (version/time/wallet)
-  ctx.textAlign = "right";
-  ctx.fillStyle = gray;
   ctx.shadowBlur = 0;
-  ctx.font = `600 ${Math.max(14, Math.round(c.width*0.035))}px "Microsoft JhengHei", system-ui`;
-  const meta1 = `${v}  ·  ${ts}`;
-  const meta2 = `${walletShort}`;
-  ctx.fillText(meta1, c.width-pad, pad);
-  ctx.fillText(meta2, c.width-pad, pad + Math.round(c.width*0.05));
-  ctx.textAlign = "left";
-
-  // bottom note/wish area (clamped, no overlap)
-  const note = String(noteText||"").trim();
-  const wish = String(wishText||"").trim();
-
-  const baseY = c.height - botH + Math.round(c.width*0.02);
-  ctx.shadowBlur = Math.round(c.width*0.008);
-  ctx.fillStyle = "rgba(255, 214, 90, 0.90)";
-  ctx.font = `700 ${Math.max(16, Math.round(c.width*0.04))}px "Microsoft JhengHei", system-ui`;
-  ctx.fillText("願望／留言存證", pad, baseY);
-
-  ctx.fillStyle = gray;
-  ctx.shadowBlur = 0;
-  ctx.font = `500 ${Math.max(14, Math.round(c.width*0.034))}px "Microsoft JhengHei", system-ui`;
-
-  const lineH = Math.round(c.width*0.05);
-  const maxW = c.width - pad*2;
-  let y = baseY + lineH;
-  if(note){
-    wrapText(ctx, "留言：" + note, pad, y, maxW, lineH, 2);
-    y += lineH*2;
+  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  let y = canvas.height - pad*2.3;
+  if (t.mid){
+    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
+    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
   }
-  if(wish){
-    wrapText(ctx, "許願：" + wish, pad, y, maxW, lineH, 2);
+  if (t.bot){
+    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
+    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
   }
-
-  // tiny footer brand
-  ctx.fillStyle = "rgba(255,255,255,0.65)";
-  ctx.font = `600 ${Math.max(11, Math.round(c.width*0.028))}px "Microsoft JhengHei", system-ui`;
-  ctx.fillText("花果山台灣・信念不滅・市場無界  Where the Market Becomes the Myth. —— 樂天帝 ⌖", pad, c.height - Math.round(c.width*0.04));
-
-  return c;
+  ctx.fillStyle = "rgba(255,255,255,.70)";
+  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
+  ctx.fillText(t.foot, pad, canvas.height - pad);
 }
 
-function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
-  const words = String(text||"").replace(/\s+/g," ").trim().split(" ");
-  let line = "", lines = 0;
-  for(let n=0;n<words.length;n++){
-    const testLine = line ? (line + " " + words[n]) : words[n];
-    const metrics = ctx.measureText(testLine);
-    if(metrics.width > maxWidth && line){
+function wrapText(text, x, y, maxW, lineH){
+  const words = text.split("");
+  let line = "";
+  for (let i=0;i<words.length;i++){
+    const test = line + words[i];
+    const w = ctx.measureText(test).width;
+    if (w > maxW && i>0){
       ctx.fillText(line, x, y);
-      line = words[n];
-      y += lineHeight;
-      lines++;
-      if(maxLines && lines >= maxLines-1){
-        // last line with ellipsis
-        let last = line;
-        while(ctx.measureText(last + "…").width > maxWidth && last.length>0){
-          last = last.slice(0,-1);
-        }
-        ctx.fillText(last + "…", x, y);
-        return;
-      }
+      line = words[i];
+      y += lineH;
     }else{
-      line = testLine;
+      line = test;
     }
   }
-  if(line){
-    ctx.fillText(line, x, y);
-  }
+  ctx.fillText(line, x, y);
 }
 
 async function camOn(){
