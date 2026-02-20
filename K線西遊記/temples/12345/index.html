@@ -1322,6 +1322,10 @@ function tickCountdown(){
   requestAnimationFrame(()=>{});
 }
 
+
+// Compatibility alias (some patches call tickCountdowns)
+function tickCountdowns(){ try{ tickCountdown(); }catch(e){ console.warn('tickCountdown failed', e); } }
+
 setInterval(tickCountdown, 350);
 setInterval(refreshUserTimers, 8000);
 refreshUserTimers();
@@ -1914,8 +1918,8 @@ setWalletUI(false);
 
   // Always run local clock + countdown (works even without wallet)
   try {
-    tickCountdowns();
-    setInterval(tickCountdowns, 1000);
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
   } catch (e) {
     console.warn("countdown init failed", e);
   }
