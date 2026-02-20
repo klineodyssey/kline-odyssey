@@ -308,7 +308,7 @@
       <div class="seal" aria-hidden="true"></div>
       <div>
         <h1>五指山 12345 · 悟空財神殿</h1>
-        <div class="sub">V6.0 Cosmic Living Temple · 心跳與點火上鏈 · 拍照與願望可下載</div>
+        <div class="sub">V6.1 Cosmic Living Temple · 心跳/點火/發財金/點燈/還願/許願 上鏈 · 拍照/留言/許願可下載</div>
       </div>
     </div>
     <div class="pill">
@@ -478,6 +478,23 @@
         <span class="dot" id="dotEthers"></span><span>ethers.js</span><span class="mono" id="ethersVer">—</span>
       </div>
 
+      <div class="hr"></div>
+      <h2 style="margin-top:0;">AI 客服仙女（本機語音＋留言存檔） <small>上鏈交易由你按儀式按鈕</small></h2>
+      <label>客服對話（本機保存，可下載）</label>
+      <textarea id="chatText" placeholder="輸入你想對仙女說的話…（本機保存）"></textarea>
+      <div class="btnrow" style="margin-top:8px;">
+        <button id="btnChatSave">儲存客服對話</button>
+        <button class="primary" id="btnChatSpeak">仙女語音回覆</button>
+        <button id="btnChatDownload">下載客服對話 TXT</button>
+        <button class="danger" id="btnChatClear">清空客服對話</button>
+      </div>
+
+      <div class="hr"></div>
+      <div class="btnrow">
+        <button class="ghost" id="btnDownloadAll">下載神殿全部紀錄（JSON）</button>
+      </div>
+
+
     </section>
   </div>
 </div>
@@ -497,7 +514,8 @@ Where the Market Becomes the Myth.
 <script src="../../assets/js/ethers-5.7.2.umd.min.js"></script>
 
 <script>
-const UI_VERSION = "V6.0";
+const UI_VERSION = "V6.1";
+const UI_BUILD = "COSMIC_CHAINREADY";
 const BSC_CHAIN_ID_HEX = "0x38";
 const BSC_CHAIN_ID_DEC = 56;
 
@@ -513,11 +531,15 @@ const state = {
   log: []
 };
 
+function linkifyTx(s){
+  return String(s || "").replace(/(0x[a-fA-F0-9]{64})/g, (m)=>`${m} (BscScan: https://bscscan.com/tx/${m})`);
+}
 function logLine(msg){
   const t = new Date().toLocaleString();
-  state.log.unshift(`[${t}] ${msg}`);
+  const line = `[${t}] ${linkifyTx(msg)}`;
+  state.log.unshift(line);
   const el = $("log");
-  if(el) el.textContent = state.log.slice(0,80).join("\n");
+  if(el) el.textContent = state.log.slice(0,120).join("\n");
 }
 
 (function hookConsole(){
@@ -548,9 +570,65 @@ function shortAddr(a){
   return a.slice(0,6) + "…" + a.slice(-4);
 }
 
+
+function applyQueryConfig(){
+  try{
+    const u = new URL(location.href);
+    const h = (u.searchParams.get("heart") || "").trim();
+    const o = (u.searchParams.get("orphan") || "").trim();
+    let changed = false;
+    if(h && $("heartAddr") && $("heartAddr").value !== h){ $("heartAddr").value = h; changed = true; }
+    if(o && $("orphanAddr") && $("orphanAddr").value !== o){ $("orphanAddr").value = o; changed = true; }
+    if(changed){
+      saveCfg();
+      logLine("已套用網址參數（heart/orphan）");
+    }
+  }catch(e){}
+}
+
+function chatKey(){ return "KLINE_TEMPLE_12345_CHAT_V6_1"; }
+function loadChat(){ const v = localStorage.getItem(chatKey()) || ""; const el = $("chatText"); if(el) el.value = v; }
+function saveChat(){ localStorage.setItem(chatKey(), $("chatText").value || ""); logLine("客服對話已儲存（本機）"); }
+function clearChat(){ localStorage.removeItem(chatKey()); $("chatText").value=""; logLine("客服對話已清空"); }
+function downloadChat(){
+  const content = $("chatText").value || "";
+  const header = `五指山12345悟空財神殿｜AI客服對話\n時間: ${new Date().toLocaleString()}\n錢包: ${state.account||"未連線"}\nUI: ${UI_VERSION} (${UI_BUILD})\n\n`;
+  downloadText("wuzhishan_12345_ai_service_chat.txt", header + content);
+}
+function speakGoddess(){
+  const text = ($("chatText").value || "").trim();
+  const base = text ? `我聽見了。${text}` : "歡迎回到五指山悟空財神殿。請先連接錢包，再進行心跳與點火。";
+  if(!("speechSynthesis" in window)){ alert("此瀏覽器不支援語音"); return; }
+  const u = new SpeechSynthesisUtterance(base);
+  u.lang = "zh-TW";
+  u.rate = 1.0;
+  u.pitch = 1.1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+  logLine("仙女語音已播放（本機）");
+}
+
+function downloadAll(){
+  const payload = {
+    temple: "wuzhishan_12345",
+    uiVersion: UI_VERSION,
+    uiBuild: UI_BUILD,
+    exportedAt: new Date().toISOString(),
+    wallet: state.account || null,
+    chainId: state.chainId || null,
+    config: { heartAddr: ($("heartAddr").value||"").trim(), orphanAddr: ($("orphanAddr").value||"").trim() },
+    message: $("msgText")?.value || "",
+    chat: $("chatText")?.value || "",
+    wishText: $("wishText")?.value || "",
+    logs: state.log.slice(0,400)
+  };
+  downloadText("wuzhishan_12345_export.json", JSON.stringify(payload, null, 2));
+  logLine("已下載全部紀錄（JSON）");
+}
+
 function loadCfg(){
   try{
-    const raw = localStorage.getItem("KLINE_TEMPLE_12345_CFG_V6");
+    const raw = localStorage.getItem("KLINE_TEMPLE_12345_CFG_V6_1");
     if(raw){
       const obj = JSON.parse(raw);
       state.cfg.heartAddr = obj.heartAddr || "";
@@ -563,11 +641,11 @@ function loadCfg(){
 function saveCfg(){
   state.cfg.heartAddr = ($("heartAddr").value || "").trim();
   state.cfg.orphanAddr = ($("orphanAddr").value || "").trim();
-  localStorage.setItem("KLINE_TEMPLE_12345_CFG_V6", JSON.stringify(state.cfg));
+  localStorage.setItem("KLINE_TEMPLE_12345_CFG_V6_1", JSON.stringify(state.cfg));
   logLine("已保存本機設定");
 }
 function clearCfg(){
-  localStorage.removeItem("KLINE_TEMPLE_12345_CFG_V6");
+  localStorage.removeItem("KLINE_TEMPLE_12345_CFG_V6_1");
   state.cfg.heartAddr = ""; state.cfg.orphanAddr="";
   $("heartAddr").value = ""; $("orphanAddr").value = "";
   logLine("已清除本機設定");
@@ -970,7 +1048,7 @@ async function updateSupervisor(){
   }
 }
 
-function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6"; }
+function msgKey(){ return "KLINE_TEMPLE_12345_MSG_V6_1"; }
 function loadMsg(){ $("msgText").value = localStorage.getItem(msgKey()) || ""; }
 function saveMsg(){ localStorage.setItem(msgKey(), $("msgText").value || ""); logLine("留言已儲存（本機）"); }
 function clearMsg(){ localStorage.removeItem(msgKey()); $("msgText").value = ""; logLine("留言已清空"); }
@@ -1173,6 +1251,12 @@ $("btnMsgSave").addEventListener("click", saveMsg);
 $("btnMsgDownload").addEventListener("click", downloadMsg);
 $("btnMsgClear").addEventListener("click", clearMsg);
 
+$("btnChatSave").addEventListener("click", saveChat);
+$("btnChatSpeak").addEventListener("click", speakGoddess);
+$("btnChatDownload").addEventListener("click", downloadChat);
+$("btnChatClear").addEventListener("click", clearChat);
+$("btnDownloadAll").addEventListener("click", downloadAll);
+
 $("btnCam").addEventListener("click", openCam);
 $("btnShot").addEventListener("click", takeShot);
 $("btnShotDownload").addEventListener("click", downloadShot);
@@ -1185,8 +1269,10 @@ $("btnSupervisor").addEventListener("click", ()=>{
 $("uiVer").textContent = UI_VERSION;
 loadCfg();
 loadMsg();
+loadChat();
+applyQueryConfig();
 setNetHint();
-logLine("UI 啟動：" + UI_VERSION);
+logLine("UI 啟動：" + UI_VERSION + " · " + UI_BUILD);
 
 setInterval(()=>{ if(state.account && $("supervisorBox").classList.contains("show")) updateSupervisor(); }, 2000);
 setInterval(()=>{ if(state.account) refreshStatus(); }, 3500);
