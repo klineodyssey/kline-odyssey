@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p8 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p9 Cosmic Living Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -124,7 +124,7 @@
     /* Title block - single (no duplication) */
     .title{
       display:flex;
-      gap:14px;
+      gap:14px;flex-wrap:nowrap;
       align-items:flex-start;
     }
     .pillar{
@@ -502,7 +502,7 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p8 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p9 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
@@ -1271,11 +1271,24 @@ function tickCountdown(){
   const now = Date.now();
   $("nowTxt").textContent = fmtDateTime(new Date());
 
-  // Heartbeat
-  const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : 0);
-  const hbLeft = hbNext>0 ? (hbNext - now) : 0;
-  $("hbCountdown").textContent = (hbNext===0) ? "00:00:00" : fmtHMS(hbLeft);
-  $("hbNextAt").textContent = hbNext===0 ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
+  // Heartbeat (always show countdown, even before wallet connect)
+  const hbCdSec = (UI.chain.params && UI.chain.params.heartbeatCooldownSeconds)
+    ? Number(UI.chain.params.heartbeatCooldownSeconds)
+    : UI.defaults.hbCooldownSec;
+  const hbCooldownMs = Math.max(1, hbCdSec) * 1000;
+
+  // If we already have lastHB from chain, use it; otherwise align to the next global cooldown boundary
+  let hbNext = 0;
+  if (lastHB > 0) {
+    hbNext = lastHB * 1000 + hbCooldownMs;
+  } else {
+    const nowSec = Math.floor(now / 1000);
+    hbNext = (Math.floor(nowSec / hbCdSec) + 1) * hbCdSec * 1000;
+  }
+
+  const hbLeft = Math.max(0, hbNext - now);
+  $("hbCountdown").textContent = fmtHMS(hbLeft);
+  $("hbNextAt").textContent = (hbLeft===0) ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
 
   // Ignite window (UTC)
   const tod = currentUTCSecondsOfDay();
@@ -1662,18 +1675,25 @@ function drawWatermark(){
   ctx.shadowBlur = 0;
   ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
   ctx.fillStyle = "rgba(255,255,255,.92)";
-  let y = canvas.height - pad*2.3;
+  const lineH = Math.max(22, Math.round(canvas.width*0.028));
+  const footY = canvas.height - pad;
+
+  // Start the bottom block ABOVE the footer line to avoid overlap on mobile
+  const lines = (t.mid ? 1 : 0) + (t.bot ? 1 : 0);
+  let y = footY - (lines * lineH) - Math.round(lineH * 0.6);
+
   if (t.mid){
-    wrapText(t.mid, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+    wrapText(t.mid, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
   }
   if (t.bot){
-    wrapText(t.bot, pad, y, canvas.width - pad*2, Math.max(22, Math.round(canvas.width*0.028)));
-    y += Math.max(22, Math.round(canvas.width*0.028)) * 1.2;
+    wrapText(t.bot, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
   }
+
   ctx.fillStyle = "rgba(255,255,255,.70)";
   ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
-  ctx.fillText(t.foot, pad, canvas.height - pad);
+  ctx.fillText(t.foot, pad, footY);
 }
 
 function wrapText(text, x, y, maxW, lineH){
