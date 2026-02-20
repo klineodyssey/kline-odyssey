@@ -1259,45 +1259,46 @@ function currentUTCDayIndex(){
 }
 
 function tickCountdown(){
-  const now = Date.now();
-  $("nowTxt").textContent = fmtDateTime(new Date());
+  const hbEl = $("hbCountdown");
+  const igEl = $("igniteCountdown");
+  if(!hbEl || !igEl) return;
 
-  // Heartbeat
-  const hbNext = (lastHB>0 ? (lastHB*1000 + UI.defaults.hbCooldownSec*1000) : 0);
-  const hbLeft = hbNext>0 ? (hbNext - now) : 0;
-  $("hbCountdown").textContent = (hbNext===0) ? "00:00:00" : fmtHMS(hbLeft);
-  $("hbNextAt").textContent = hbNext===0 ? "可直接領" : ("next @ " + new Date(hbNext).toLocaleString());
+  const now = Math.floor(Date.now()/1000);
 
-  // Ignite window (UTC)
-  const tod = currentUTCSecondsOfDay();
-  const start = UI.defaults.igStart;
-  const end = UI.defaults.igEnd;
-  const inWindow = (tod>=start && tod<=end);
+  // Heartbeat：有錢包 → 依 lastHeartbeatAt/冷卻；沒錢包 → 用「下個整點」倒數，讓畫面有生命感
+  const hbCooldown = (cfgOnchain && cfgOnchain.hbCooldownSec) ? cfgOnchain.hbCooldownSec : CFG.defaults.hbCooldownSec;
 
-  // next window start time
-  const nowUTC = new Date();
-  const nextStart = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0,0,0,0) + start*1000);
-  let target = nextStart.getTime();
-  if (now > target + end*1000) {
-    // already passed today window end -> tomorrow start
-    target += 86400000;
-  }
-  // if we're before today's start, target is today's start; if inside window, countdown shows time to end
-  if (inWindow){
-    const winEnd = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0,0,0,0) + end*1000).getTime();
-    $("igCountdown").textContent = "視窗中 " + fmtHMS(winEnd-now);
+  let hbRemain;
+  if(account){
+    const lastHB = (userTimers && userTimers.lastHB) ? userTimers.lastHB : 0;
+    hbRemain = hbCooldown - (now - lastHB);
+    if(hbRemain < 0) hbRemain = 0;
   }else{
-    $("igCountdown").textContent = fmtHMS(target-now);
+    // 下個整點（本地時間）倒數：每小時一次的「宇宙心跳鐘」
+    const d = new Date();
+    const next = new Date(d);
+    next.setMinutes(60,0,0);
+    hbRemain = Math.max(0, Math.floor((next.getTime() - d.getTime())/1000));
   }
+  hbEl.textContent = fmtCountdown(hbRemain);
 
-  // Buttons enable
-  $("btnHeartbeat").disabled = (hbNext!==0 && hbLeft>0) || (!account || !heart);
-  // ignite allowed only in window & once per day
-  const dayIdx = currentUTCDayIndex();
-  const alreadyToday = (lastIGDay === dayIdx);
-  $("btnIgnite").disabled = (!inWindow) || alreadyToday || (!account || !heart);
+  // Ignite：依 UTC 00:00–00:10 窗口倒數
+  const tod = now % 86400;
+  const start = (cfgOnchain && cfgOnchain.igniteStart) ? cfgOnchain.igniteStart : CFG.defaults.igniteStart;
+  const end   = (cfgOnchain && cfgOnchain.igniteEnd)   ? cfgOnchain.igniteEnd   : CFG.defaults.igniteEnd;
 
-  requestAnimationFrame(()=>{});
+  let igRemain;
+  if(tod < start){
+    igRemain = start - tod;
+    $("igniteHint").textContent = "未到點火窗口（UTC 00:00–00:10）";
+  }else if(tod <= end){
+    igRemain = end - tod;
+    $("igniteHint").textContent = "點火窗口開啟中";
+  }else{
+    igRemain = (86400 - tod) + start;
+    $("igniteHint").textContent = "今日點火窗口已關閉，等待下一日";
+  }
+  igEl.textContent = fmtCountdown(igRemain);
 }
 
 setInterval(tickCountdown, 350);
@@ -1608,11 +1609,12 @@ function getOverlayText(){
   const wish = ($("wishText").value || "").trim();
   const wallet = account ? (account.slice(0,6)+"…"+account.slice(-4)) : "no-wallet";
   const ts = new Date().toLocaleString();
+  // 將時間/錢包移到右上角，避免與留言/許願長文互相覆蓋
   return {
-    top: `五指山 12345 悟空財神殿  ${UI.ver}`,
-    mid: note ? `留言：${note}` : "",
-    bot: wish ? `許願：${wish}` : "",
-    foot: `${ts}  ·  ${wallet}`
+    title: `五指山 12345 悟空財神殿  ${UI.ver}`,
+    meta: `${ts}  ·  ${wallet}`,
+    note,
+    wish
   };
 }
 
@@ -1667,21 +1669,33 @@ function drawWatermark(){
   ctx.fillText(t.foot, pad, canvas.height - pad);
 }
 
-function wrapText(text, x, y, maxW, lineH){
-  const words = text.split("");
+function wrapText(text, x, y, maxW, lineH, maxLines){
+  const chars = (text || "").split("");
   let line = "";
-  for (let i=0;i<words.length;i++){
-    const test = line + words[i];
+  let lines = 0;
+
+  for (let i=0;i<chars.length;i++){
+    const test = line + chars[i];
     const w = ctx.measureText(test).width;
-    if (w > maxW && i>0){
+    if (w > maxW && line.length>0){
       ctx.fillText(line, x, y);
-      line = words[i];
+      lines += 1;
+      if (maxLines && lines >= maxLines){
+        // 以省略號收尾
+        const ell = "…";
+        const trimmed = line.slice(0, Math.max(1, line.length-1)) + ell;
+        ctx.fillText(trimmed, x, y);
+        return lines;
+      }
+      line = chars[i];
       y += lineH;
     }else{
       line = test;
     }
   }
   ctx.fillText(line, x, y);
+  lines += 1;
+  return lines;
 }
 
 async function camOn(){
