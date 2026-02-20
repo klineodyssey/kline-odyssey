@@ -1,459 +1,815 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>K線西遊記・宇宙入口 Portal 時光隧道</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>K線西遊記｜銀河宇宙入口（Portal V1.2）</title>
+  <style>
+    :root{
+      --bg:#06070b;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --line: rgba(255,255,255,.14);
+      --btn: rgba(255,255,255,.12);
+      --btnh: rgba(255,255,255,.18);
+      --shadow: 0 12px 40px rgba(0,0,0,.45);
+      --r: 18px;
+      --r2: 999px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
+                  radial-gradient(1000px 700px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 40px;}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0 14px;}
+    .brand{display:flex;flex-direction:column;gap:4px;}
+    .brand .h{font-weight:900;letter-spacing:.5px;font-size:18px;}
+    .brand .s{font-size:12px;color:var(--muted);}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .pill{
+      display:flex;gap:8px;align-items:center;
+      padding:9px 12px;border:1px solid var(--line);border-radius:var(--r2);
+      background:rgba(255,255,255,.05);backdrop-filter:blur(8px);box-shadow:var(--shadow);
+      font-size:12px;color:var(--muted);white-space:nowrap;
+    }
+    .pill b{color:var(--text);font-weight:800}
+    .mono{font-family:var(--mono)}
+    .hero{
+      position:relative;border:1px solid var(--line);border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);overflow:hidden;padding:18px;
+    }
+    canvas#stars{position:absolute;inset:0;width:100%;height:100%;opacity:.85;pointer-events:none;}
+    .heroGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;}
+    @media (max-width:900px){.heroGrid{grid-template-columns:1fr}}
+    .title{font-size:26px;font-weight:950;letter-spacing:.8px;margin:4px 0 8px;}
+    .subtitle{color:var(--muted);line-height:1.55;margin:0 0 14px;font-size:13px;}
+    .ctaRow{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:var(--r2);border:1px solid var(--line);
+      background:var(--btn);text-decoration:none;font-weight:850;font-size:13px;transition:.15s;user-select:none;
+      cursor:pointer;
+    }
+    .btn:hover{background:var(--btnh)}
+    .btn.small{padding:8px 12px;font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-top:14px;}
+    @media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:520px){.grid{grid-template-columns:1fr}}
+    .card{
+      border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
+      box-shadow:var(--shadow);padding:14px;min-height:110px;position:relative;overflow:hidden;
+    }
+    .card .k{font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.2px}
+    .card .v{font-size:18px;font-weight:950;letter-spacing:.6px}
+    .card .t{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .smallText{font-size:12px;color:var(--muted);line-height:1.35}
+    .map{
+      margin-top:14px;border:1px solid var(--line);border-radius:24px;background:rgba(0,0,0,.20);
+      box-shadow:var(--shadow);padding:16px;position:relative;overflow:hidden;
+    }
+    .mapHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px;}
+    .mapHead .h{font-weight:950;letter-spacing:.6px;font-size:16px;}
+    .mapHead .s{color:var(--muted);font-size:12px;}
+    .nodes{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-top:10px;}
+    @media (max-width:900px){.nodes{grid-template-columns:repeat(2, 1fr)}}
+    @media (max-width:520px){.nodes{grid-template-columns:1fr}}
+    .node{
+      border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.06);
+      padding:12px;text-decoration:none;display:flex;flex-direction:column;gap:6px;transition:.15s;min-height:110px;
+    }
+    .node:hover{background:rgba(255,255,255,.10)}
+    .node .n{font-weight:950;letter-spacing:.5px}
+    .node .p{color:var(--muted);font-size:12px;line-height:1.35}
+    .node .id{color:rgba(255,255,255,.75);font-size:12px;font-family:var(--mono)}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)}
+    .ok{color:#9fffd9}
+    .warn{color:#ffd28c}
+    .err{color:#ff9fb2}
 
-<style>
-  :root{
-    --bg0:#050814; --bg1:#060b1f;
-    --cyan: rgba(120,220,255,.92);
-    --gold: rgba(255,215,120,.92);
-    --vio: rgba(180,120,255,.92);
-    --red: rgba(255,80,80,.92);
-    --text: rgba(235,245,255,.92);
-    --sub: rgba(235,245,255,.70);
-    --panel: rgba(10,14,22,.55);
-    --panel2: rgba(12,18,28,.78);
-    --border: rgba(180,220,255,.20);
-    --border2: rgba(255,215,120,.18);
-    --glow: 0 0 18px rgba(120,180,255,.22), 0 0 56px rgba(120,180,255,.12);
-  }
-  html,body{height:100%;}
-  body{
-    margin:0;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-                 "Noto Sans TC","PingFang TC","Microsoft JhengHei", Arial;
-    color:var(--text);
-    background: radial-gradient(1200px 800px at 30% 20%, rgba(120,220,255,.08), transparent 55%),
-                radial-gradient(900px 700px at 70% 40%, rgba(255,215,120,.06), transparent 60%),
-                radial-gradient(1200px 900px at 50% 100%, rgba(180,120,255,.06), transparent 60%),
-                linear-gradient(180deg, var(--bg0), var(--bg1));
-    overflow-x:hidden;
-  }
+    .footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.55;padding-bottom:6px;}
+    .hr{height:1px;background:var(--line);margin:10px 0}
+  </style>
 
-  .stars,.stars2,.nebula{position:fixed; inset:0; pointer-events:none; z-index:0;}
-  .stars{
-    background-image:
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.55) 40%, transparent 41%),
-      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,.45) 40%, transparent 41%),
-      radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,.55) 40%, transparent 41%),
-      radial-gradient(1px 1px at 75% 80%, rgba(255,255,255,.45) 40%, transparent 41%),
-      radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,.55) 40%, transparent 41%),
-      radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,.35) 40%, transparent 41%);
-    opacity:.35; animation:drift 90s linear infinite;
-  }
-  .stars2{
-    background-image:
-      radial-gradient(1px 1px at 15% 35%, rgba(120,220,255,.55) 40%, transparent 41%),
-      radial-gradient(1px 1px at 35% 55%, rgba(255,215,120,.45) 40%, transparent 41%),
-      radial-gradient(1px 1px at 75% 45%, rgba(180,120,255,.40) 40%, transparent 41%),
-      radial-gradient(1px 1px at 65% 15%, rgba(120,220,255,.35) 40%, transparent 41%);
-    opacity:.22; animation:drift2 140s linear infinite;
-  }
-  .nebula{
-    background:
-      radial-gradient(800px 600px at 20% 35%, rgba(120,220,255,.12), transparent 60%),
-      radial-gradient(700px 500px at 70% 30%, rgba(255,215,120,.08), transparent 60%),
-      radial-gradient(900px 700px at 55% 75%, rgba(180,120,255,.10), transparent 62%);
-    filter: blur(2px); opacity:.7; animation:breathe 8s ease-in-out infinite;
-  }
-  @keyframes drift{from{transform:translate3d(0,0,0);} to{transform:translate3d(-240px,120px,0);}}
-  @keyframes drift2{from{transform:translate3d(0,0,0);} to{transform:translate3d(180px,-140px,0);}}
-  @keyframes breathe{0%,100%{transform:scale(1);} 50%{transform:scale(1.04);}}
+  <!-- Ethers v5.7.2 (你需自行放檔) -->
+  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
 
-  .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:28px 18px 92px;}
-  .title{margin-top:10px; display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px;}
-  .brand{display:flex; flex-direction:column; gap:6px;}
-  .brand h1{margin:0; font-size:clamp(28px,4vw,46px); letter-spacing:2px; text-shadow:0 0 18px rgba(120,220,255,.18);}
-  .brand .sub{color:var(--sub); font-weight:900; letter-spacing:.6px;}
-  .clock{
-    text-align:right; background:linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid var(--border); border-radius:14px; padding:10px 12px;
-    box-shadow:var(--glow); backdrop-filter: blur(10px); min-width: 320px;
-  }
-  .clock .t{font-weight:1100; color:var(--cyan); letter-spacing:.6px;}
-  .clock .d{margin-top:6px; color:var(--sub); font-size:13px; line-height:1.35;}
+  <style>
+    /* ===== Portal V1.2 additions ===== */
+    .topRight{
+      position:fixed; right:14px; top:14px; z-index:50;
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .miniPill{
+      background: rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.18);
+      padding:8px 10px;
+      border-radius:999px;
+      box-shadow: var(--shadow);
+      font-size:12px;
+      color: var(--text);
+      backdrop-filter: blur(8px);
+    }
+    .miniPill b{ font-family: var(--mono); }
+    .progressWrap{ margin-top:10px; }
+    .progressBar{
+      width:100%; height:14px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden; border:1px solid rgba(255,255,255,.14);
+    }
+    .progressFill{
+      height:100%; width:0%;
+      background: linear-gradient(90deg, rgba(255,215,0,.95), rgba(255,160,0,.95));
+      transition: width .6s ease;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 10px; border-radius:999px; font-size:12px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35);
+      color: var(--text);
+      white-space:nowrap;
+    }
+    .badge.ok{ border-color: rgba(120,255,200,.35); }
+    .badge.warn{ border-color: rgba(255,210,120,.35); }
+    .badge.bad{ border-color: rgba(255,120,120,.35); }
+    .supervisorBtn{
+      cursor:pointer; user-select:none;
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.18);
+      padding:8px 12px; border-radius:999px;
+      box-shadow: var(--shadow);
+      font-weight:800;
+    }
+    .overlay{
+      position:fixed; inset:0; z-index:80;
+      background: rgba(0,0,0,.72);
+      display:none;
+    }
+    .overlay.on{ display:block; }
+    .overlayCard{
+      position:absolute; right:14px; top:64px;
+      width:min(520px, calc(100vw - 28px));
+      background: rgba(10,10,16,.85);
+      border:1px solid rgba(255,215,0,.30);
+      border-radius: var(--r);
+      box-shadow: 0 18px 70px rgba(0,0,0,.65);
+      padding:14px;
+      backdrop-filter: blur(10px);
+      color: var(--text);
+    }
+    .chkGrid{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:8px 10px;
+      margin-top:10px;
+      font-size:13px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 0 10px rgba(255,255,255,.10);
+      justify-self:end;
+      margin-top:4px;
+    }
+    .dot.ok{ background: rgba(120,255,200,.95); box-shadow:0 0 14px rgba(120,255,200,.45); }
+    .dot.warn{ background: rgba(255,210,120,.95); box-shadow:0 0 14px rgba(255,210,120,.45); }
+    .dot.bad{ background: rgba(255,120,120,.95); box-shadow:0 0 14px rgba(255,120,120,.45); }
+    .nodesGrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 760px){ .nodesGrid{ grid-template-columns:1fr; } }
+    .nodeCard{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: var(--r);
+      padding:12px;
+      box-shadow: var(--shadow);
+    }
+    .nodeTitle{ font-weight:950; letter-spacing:.3px; }
+    .nodeSub{ color: var(--muted); margin-top:6px; font-size:12px; line-height:1.5; }
+    .nodeRow{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
+    .nodeRow a{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:9px 12px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.16);
+      text-decoration:none; color: var(--text);
+      font-weight:850;
+    }
+    .nodeRow a:hover{ background: rgba(255,255,255,.16); }
+  </style>
 
-  .hud{
-    position:fixed; right:14px; top:14px; z-index:99999;
-    background:linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid var(--border); border-radius:14px; padding:10px 12px;
-    box-shadow:var(--glow); backdrop-filter: blur(10px); min-width: 320px;
-  }
-  .hud .row{display:flex; justify-content:space-between; align-items:center; gap:10px;}
-  .hud .tag{
-    font-weight:1100; font-size:12px; padding:3px 8px; border-radius:999px;
-    border:1px solid var(--border2); color:var(--gold); background:rgba(255,215,120,.06);
-    letter-spacing:.6px;
-  }
-  .hud .ver{font-weight:1100; font-size:12px; color:var(--cyan);}
-  .hud .sub{margin-top:4px; font-size:12px; color:var(--sub); display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-  .hud .btn{
-    margin-left:auto;
-    border-radius:999px; border:1px solid rgba(180,220,255,.18);
-    background:rgba(255,255,255,.06); color:var(--text);
-    padding:4px 10px; font-weight:1100; font-size:12px; cursor:pointer;
-  }
-  .hud .btn:hover{background:rgba(255,255,255,.10);}
-  .progress{margin-top:10px; height:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08); border:1px solid rgba(180,220,255,.14);}
-  .progress>div{height:100%; width:0%; background:linear-gradient(90deg, rgba(120,220,255,.9), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(120,220,255,.25); transition:width 520ms ease;}
-  .hud .label{margin-top:6px; font-size:12px; color:var(--sub); display:flex; justify-content:space-between; align-items:center;}
-
-  .grid{margin-top:26px; display:grid; grid-template-columns:repeat(12,1fr); gap:14px;}
-  .card{
-    grid-column:span 12;
-    background:linear-gradient(180deg, rgba(10,14,22,.42), rgba(12,18,28,.72));
-    border:1px solid rgba(180,220,255,.18);
-    border-radius:18px; box-shadow:var(--glow); backdrop-filter: blur(10px);
-    padding:16px 16px 14px; overflow:hidden; position:relative;
-    cursor:pointer; user-select:none;
-    transition: transform .18s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
-  }
-  .card:hover{
-    transform: translateY(-2px);
-    border-color: rgba(180,220,255,.28);
-    background:linear-gradient(180deg, rgba(10,14,22,.55), rgba(12,18,28,.82));
-  }
-  .card.disabled{
-    cursor:not-allowed;
-    opacity:.72;
-    filter: saturate(.85);
-  }
-  .card.disabled:hover{
-    transform:none;
-    border-color: rgba(180,220,255,.18);
-    background:linear-gradient(180deg, rgba(10,14,22,.42), rgba(12,18,28,.72));
-  }
-  @media (min-width:760px){ .card{grid-column:span 6;} }
-  @media (min-width:1060px){ .card{grid-column:span 4;} }
-
-  .ring{
-    position:absolute; inset:-40px -60px auto auto;
-    width:220px; height:220px; border-radius:50%;
-    background: radial-gradient(circle at 30% 30%, rgba(120,220,255,.25), transparent 55%),
-                radial-gradient(circle at 70% 70%, rgba(255,215,120,.18), transparent 60%),
-                radial-gradient(circle at 40% 80%, rgba(180,120,255,.14), transparent 62%);
-    border:1px solid rgba(180,220,255,.18);
-    animation:spin 10s linear infinite;
-    opacity:.85;
-  }
-  .ring::after{
-    content:""; position:absolute; inset:18px; border-radius:50%;
-    border:1px dashed rgba(255,255,255,.18);
-    box-shadow: inset 0 0 30px rgba(120,220,255,.10);
-    animation:spin2 18s linear infinite reverse;
-  }
-  @keyframes spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-  @keyframes spin2{from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-
-  .node{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; position:relative; z-index:1;}
-  .node .left{display:flex; flex-direction:column; gap:8px;}
-  .node .name{font-size:18px; font-weight:1200; letter-spacing:.6px; display:flex; align-items:center; gap:8px;}
-  .badge{
-    font-size:11px; font-weight:1200; letter-spacing:.5px;
-    padding:3px 8px; border-radius:999px;
-    border:1px solid rgba(180,220,255,.18);
-    background:rgba(255,255,255,.06);
-    color:var(--sub);
-    white-space:nowrap;
-  }
-  .badge.ok{ border-color: rgba(120,220,255,.26); color: var(--cyan); background: rgba(120,220,255,.06); }
-  .badge.build{ border-color: rgba(255,215,120,.26); color: var(--gold); background: rgba(255,215,120,.06); }
-  .node .desc{font-size:13px; color:var(--sub); line-height:1.45;}
-  .node .meta{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
-  .pill{
-    font-size:12px; font-weight:1200; letter-spacing:.5px;
-    padding:4px 9px; border-radius:999px;
-    border:1px solid rgba(180,220,255,.18);
-    background:rgba(255,255,255,.06);
-    color:var(--text);
-  }
-  .pill.gold{border-color:rgba(255,215,120,.22); color:var(--gold); background:rgba(255,215,120,.06);}
-  .pill.cyan{border-color:rgba(120,220,255,.22); color:var(--cyan); background:rgba(120,220,255,.06);}
-  .pill.vio{border-color:rgba(180,120,255,.22); color:var(--vio); background:rgba(180,120,255,.06);}
-  .pill.red{border-color:rgba(255,80,80,.22); color:var(--red); background:rgba(255,80,80,.06);}
-  .go{font-weight:1200; color:var(--cyan); white-space:nowrap; opacity:.9;}
-
-  .footer{margin-top:24px; color:var(--sub); font-size:12px; line-height:1.55; opacity:.92;}
-
-  .drawer{
-    position:fixed; inset:auto 14px 14px auto;
-    z-index:999999;
-    width:min(620px, calc(100vw - 28px));
-    background:rgba(10,14,22,.86);
-    border:1px solid rgba(180,220,255,.20);
-    border-radius:16px;
-    box-shadow:var(--glow);
-    padding:12px 12px;
-    display:none;
-  }
-  .drawer .h{display:flex; justify-content:space-between; align-items:center; gap:10px;}
-  .drawer .h .t{font-weight:1200; letter-spacing:.4px;}
-  .drawer .h .x{cursor:pointer; font-weight:1200; opacity:.85;}
-  .drawer pre{
-    margin:10px 0 0;
-    padding:10px 10px;
-    border-radius:12px;
-    border:1px solid rgba(180,220,255,.14);
-    background:rgba(0,0,0,.20);
-    color:rgba(235,245,255,.86);
-    font-size:12px;
-    line-height:1.5;
-    white-space:pre-wrap;
-  }
-
-  .toast{
-    position: fixed; left: 14px; bottom: 14px;
-    z-index: 999999;
-    background: rgba(10,14,22,.82);
-    border: 1px solid rgba(180,220,255,.18);
-    border-radius: 14px;
-    padding: 10px 12px;
-    box-shadow: var(--glow);
-    max-width: min(720px, calc(100vw - 28px));
-    display:none;
-  }
-  .toast .t{ font-weight: 1200; letter-spacing:.4px; }
-  .toast .m{ margin-top: 6px; color: var(--sub); font-size: 13px; white-space: pre-wrap; line-height:1.45; }
-  .toast .x{ float:right; cursor:pointer; font-weight:1200; opacity:.85; }
-</style>
-</head>
+</head></head>
 
 <body>
-  <div class="nebula"></div>
-  <div class="stars"></div>
-  <div class="stars2"></div>
 
-  <div class="hud">
-    <div class="row">
-      <div class="tag">Portal 時光隧道</div>
-      <div class="ver" id="ver"></div>
-    </div>
-    <div class="sub">
-      <div id="build"></div>
-      <button class="btn" id="btnLog">更新紀錄</button>
-    </div>
-    <div class="progress"><div id="bar"></div></div>
-    <div class="label">
-      <div>工程進度 <b id="pct">0%</b></div>
-      <div style="opacity:.85;" id="readyLabel">偵測中...</div>
+  <div class="topRight">
+    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.2</b></div>
+    <div class="miniPill">時間：<b id="nowClock" class="mono">--</b></div>
+    <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
+  </div>
+
+  <div class="overlay" id="supervisorOverlay" aria-hidden="true">
+    <div class="overlayCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.2</div>
+        <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
+      </div>
+      <div class="progressWrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="color:var(--muted);font-size:12px;">工程進度（自動檢查）</div>
+          <div class="badge" id="supPct">0%</div>
+        </div>
+        <div class="progressBar"><div class="progressFill" id="supFill"></div></div>
+      </div>
+
+      <div class="chkGrid" id="supChecks">
+        <div>頁面載入</div><div class="dot" id="chkLoaded"></div>
+        <div>星空引擎（Canvas）</div><div class="dot" id="chkStars"></div>
+        <div>節點偵測（各殿 index.html）</div><div class="dot" id="chkNodes"></div>
+        <div>Heart 面板可用</div><div class="dot" id="chkHeartPanel"></div>
+        <div>錯誤監看（Console 捕捉）</div><div class="dot" id="chkErrors"></div>
+      </div>
+
+      <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6;">
+        說明：Portal 會嘗試以 <span class="mono">fetch</span> 偵測各點位是否已完工（存在 index.html）。未完工顯示「施工準備中」。
+      </div>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="title">
+    <header>
       <div class="brand">
-        <h1>K線西遊記・宇宙入口</h1>
-        <div class="sub">Portal 時光隧道｜偵測各殿施工狀態，準備好才開門</div>
+        <div class="h">K線西遊記｜銀河宇宙入口</div>
+        <div class="s">KLINE Odyssey · Map Portal · Portal V1.2</div>
       </div>
-      <div class="clock">
-        <div class="t" id="clockT">時間校準中...</div>
-        <div class="d">BSC 主網請選 chainId 56（0x38）。入口只負責轉接，功能留在各殿。</div>
+
+      <div class="pillrow">
+        <div class="pill">KGEN 總量：<b class="mono" id="supply">72,000,000</b></div>
+        <div class="pill">今日參訪：<b class="mono" id="today">0</b></div>
+        <div class="pill">總參訪：<b class="mono" id="total">0</b></div>
       </div>
+    </header>
+
+    <section class="hero">
+      <canvas id="stars"></canvas>
+
+      <div class="heroGrid">
+        <div>
+          <div class="title">宇宙不需要解釋，只需要入口。</div>
+          <p class="subtitle">
+            這裡是《K線西遊記》的地圖門戶。<br/>
+            Portal V1.2：新增「五指山 12345 心臟狀態」讀鏈面板（血量 / 呼吸窗口 / 今日是否點火）。
+          </p>
+
+          <div class="ctaRow">
+            <a class="btn" href="#map">🗺️ 進入宇宙地圖</a>
+            <a class="btn" href="./README.md">📘 查看資料說明</a>
+            <a class="btn small" href="https://t.me/klineodyssey" target="_blank" rel="noreferrer">Telegram</a>
+            <a class="btn small" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方</a>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="smallText">
+            RPC 模式：預設用公開 RPC 讀鏈（不需要錢包）。<br/>
+            連錢包只是為了後續要在 Portal 上做「一鍵跳轉＋快速點火」才需要；本版先做讀鏈穩定。
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="k">當前節律（本機）</div>
+            <div class="v mono" id="clock">--:--:--</div>
+            <div class="t">
+              <span class="btn small" id="pingBtn">🔔 心跳打點</span>
+              <span class="btn small" id="resetBtn">♻️ 重置統計</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="k">鏈上連線</div>
+            <div class="v" style="font-size:14px;font-weight:900;" id="rpcStatus">尚未檢測</div>
+            <div class="t">
+              <span class="badge">CHAIN: <b class="mono" id="chainId">--</b></span>
+              <span class="badge">BLOCK: <b class="mono" id="blockNum">--</b></span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="k">五指山 12345｜Heart 狀態</div>
+            <div class="v" style="font-size:14px;font-weight:900;" id="heartStatus">尚未讀取</div>
+            <div class="t">
+              <span class="badge">血量: <b class="mono" id="heartBal">--</b> <span class="mono">KGEN</span></span>
+              <span class="badge">今日點火: <b class="mono" id="ignitedToday">--</b></span>
+              <span class="badge">窗口: <b class="mono" id="igniteWindow">--</b></span>
+            </div>
+            <div class="smallText" style="margin-top:10px;">
+              Heart: <span class="mono" id="heartAddr">未設定</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:950;letter-spacing:.35px;">時光隧道｜宇宙入口列表</div>
+        <div class="badge warn" id="nodesStatus">偵測中…</div>
+      </div>
+      <div class="nodeSub">點位尚未施工完成時，入口會顯示「施工準備中」。偵測到檔案後自動亮燈。</div>
+
+      <div class="nodesGrid" id="nodesGrid" style="margin-top:12px;"></div>
+    </section>
+
+
+    <section class="map" id="map">
+      <div class="mapHead">
+        <div>
+          <div class="h">宇宙節點導航</div>
+          <div class="s">每個殿各自 index.html；入口只做導航＋讀鏈狀態</div>
+        </div>
+        <div class="s mono" id="pathHint">/K線西遊記/index.html</div>
+      </div>
+
+      <div class="nodes">
+        <a class="node" href="./temples/12345/index.html" data-node="12345">
+          <div class="n">五指山・悟空財神殿</div>
+          <div class="id">12345</div>
+          <div class="p">Heart / 發財金 / 呼吸心跳 / 還願 / 許願 / 光明燈 / 影像自看</div>
+          <div class="p mono" id="node12345Hint">Heart 未設定</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18888">
+          <div class="n">靈霄寶殿・玉帝金庫</div>
+          <div class="id">18888</div>
+          <div class="p">人民銀行 / 存款利息 / 貸款 / 0.1% 稅（另殿另合約）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18921">
+          <div class="n">斬妖台・AutoLP/蒸發引擎</div>
+          <div class="id">18921</div>
+          <div class="p">0.05% AutoLP 稅 / 節日活動（另殿另合約）</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="MARS">
+          <div class="n">花果山火星（MARS）</div>
+          <div class="id">MARS</div>
+          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / 0.05% Reward 稅（另殿另合約）</div>
+        </a>
+      </div>
+
+      <div class="footer">
+        Portal V1.2 只新增：讀取 Heart 血量與今日點火狀態。<br/>
+        之後要做「影像 AI 無人客服」會放在 Portal 的客服區（但不擠進 12345 神殿）。
+      </div>
+    </section>
+
+    <div class="footer" style="margin-top:14px;">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
     </div>
-
-    <div class="grid" id="grid"></div>
-
-    <div class="footer">
-      規則：入口「只轉接」。各殿未施工完成時，入口會顯示「施工準備中」並阻止 404。<br>
-      進度：工程進度會依「偵測到該殿 index.html」自動計算。
-    </div>
-  </div>
-
-  <div class="drawer" id="drawer">
-    <div class="h">
-      <div class="t">Portal 更新紀錄（只增不刪）</div>
-      <div class="x" id="drawerX">✕</div>
-    </div>
-    <pre id="logText"></pre>
-  </div>
-
-  <div class="toast" id="toast">
-    <span class="x" id="toastX">✕</span>
-    <div class="t" id="toastT">系統訊息</div>
-    <div class="m" id="toastM"></div>
   </div>
 
 <script>
-(() => {
-  // ============================================================
-  // ✅ 版本化區（升版只改這三行）
-  // ============================================================
-  const PORTAL_VERSION = "V6.1.0-PORTAL-AUTO-DETECT";
-  const BUILD_DATE     = "2026-02-20";
-  const CHANGELOG = `
-[${BUILD_DATE}] ${PORTAL_VERSION}
-- 新增：自動偵測各殿 index.html 是否存在（存在才開門）
-- 施工中：點擊不 404，改為提示「施工準備中」
-- 工程進度：依偵測結果自動計算
+/* =========================
+   Portal V1.2 — On-chain Read Panel (BSC)
+   - No wallet required (default JsonRpcProvider)
+   - Heart address is configured in CFG
+   ========================= */
 
-[2026-02-20] V6.0.0-PORTAL-FULL
-- 全節點 Portal 時光隧道卡片化與版本化
-`.trim();
+const CFG = {
+  chain: {
+    name: "BSC",
+    chainIdExpected: 56,
+    // 可自行換成你偏好的 RPC；這裡留多個，會自動嘗試
+    rpcUrls: [
+      "https://bsc-dataseed.binance.org/",
+      "https://bsc-dataseed1.binance.org/",
+      "https://bsc-dataseed2.binance.org/"
+    ]
+  },
+  addresses: {
+    // 已部署（你提供）
+    kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    // 你部署 Heart 後把地址貼在這裡
+    heart12345: "0x0000000000000000000000000000000000000000"
+  }
+};
 
-  // ============================================================
-  // ✅ 入口節點（路徑請依你的 temples 目錄調整）
-  // ============================================================
-  const PORTALS = [
-    { id:"12345", name:"五指山・悟空財神殿", tone:"red",
-      desc:"神殿心臟。心跳、點火、發財金、還願補血。悟空在五指山下，脈動不滅。",
-      pills:["12345","Heart","Temple"], href:"./temples/12345/index.html" },
+// Minimal ABIs
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)"
+];
 
-    { id:"11520", name:"花果山台灣・悟空交易所", tone:"cyan",
-      desc:"保證金與交易中樞。花果山台灣主線節點，悟空大腦與市場節奏樞紐。",
-      pills:["11520","Exchange","Brain"], href:"./temples/11520/index.html" },
+// Heart ABI (read-only subset)
+const HEART_ABI = [
+  "function token() view returns (address)",
+  "function windowStartSec() view returns (uint32)",
+  "function windowEndSec() view returns (uint32)",
+  "function inIgniteWindow() view returns (bool)",
+  "function localDayIdNow() view returns (uint256)",
+  "function dayIgnited(uint256) view returns (bool)",
+  "function igniteReward() view returns (uint256)",
+  "function heartbeatReward() view returns (uint256)"
+];
 
-    { id:"108000", name:"Mars・花果山火星齊天豪宅", tone:"gold",
-      desc:"108000 點石成金。500 席位豪宅節點，承接火星線的能量與回流。",
-      pills:["108000","Mars","KUFO"], href:"./temples/108000/index.html" },
+function $(id){ return document.getElementById(id); }
+function setText(id, v){ $(id).textContent = v; }
 
-    { id:"8888", name:"高老莊・七仙女許願", tone:"gold",
-      desc:"七仙女香爐與許願系統。願力上鏈，回饋以儀式而非賭徒。",
-      pills:["8888","Wish","7Fairies"], href:"./temples/8888/index.html" },
+function fmtNum(n){
+  try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); }
+}
 
-    { id:"18888", name:"靈霄寶殿・神明銀行", tone:"gold",
-      desc:"玉帝金庫與稅流中樞。神明薪水與宇宙秩序之所在。",
-      pills:["18888","Bank","Heaven"], href:"./temples/18888/index.html" },
+function shortAddr(a){
+  if(!a || a.length < 10) return a || "";
+  return a.slice(0,6) + "…" + a.slice(-4);
+}
 
-    { id:"88888", name:"美州大陸・新世界戰區", tone:"vio",
-      desc:"88888 節點。跨洲戰區與資金潮汐的另一端，映射全球節奏。",
-      pills:["88888","America","Continent"], href:"./temples/88888/index.html" },
+function statusBadge(el, kind, text){
+  el.className = "v " + (kind==="ok"?"ok":kind==="warn"?"warn":"err");
+  el.textContent = text;
+}
 
-    { id:"LEIYIN", name:"雷音寺・如來掌界", tone:"vio",
-      desc:"掌界觀測與因果審判之地。不是入口的終點，是宇宙的天條。",
-      pills:["LeiYin","Tathagata","Law"], href:"./temples/leiyin/index.html" },
+async function makeProvider(){
+  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
+  let lastErr = null;
+  for(const url of CFG.chain.rpcUrls){
+    try{
+      const p = new ethers.providers.JsonRpcProvider(url);
+      // probe
+      await p.getBlockNumber();
+      return p;
+    }catch(e){
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("No RPC works");
+}
 
-    { id:"ZAOYAOTAI", name:"斬妖台・血管出口", tone:"cyan",
-      desc:"血管分流與活動出口。所有神明妖怪活動血路，從此分流而不混殿。",
-      pills:["AutoLP","Vessel","Outlet"], href:"./temples/zhan-yao-tai/index.html" }
+async function refreshChain(provider){
+  try{
+    const net = await provider.getNetwork();
+    setText("chainId", String(net.chainId));
+    const bn = await provider.getBlockNumber();
+    setText("blockNum", String(bn));
+    if(net.chainId === CFG.chain.chainIdExpected){
+      statusBadge($("rpcStatus"), "ok", "RPC OK（讀鏈正常）");
+    }else{
+      statusBadge($("rpcStatus"), "warn", `RPC OK（chainId=${net.chainId}）`);
+    }
+  }catch(e){
+    statusBadge($("rpcStatus"), "err", "RPC 失敗（無法讀鏈）");
+    throw e;
+  }
+}
+
+async function refreshHeart(provider){
+  const heart = CFG.addresses.heart12345;
+  setText("heartAddr", heart);
+  setText("node12345Hint", heart && heart !== ethers.constants.AddressZero ? `Heart: ${shortAddr(heart)}` : "Heart 未設定");
+
+  if(!heart || heart === ethers.constants.AddressZero){
+    statusBadge($("heartStatus"), "warn", "Heart 未設定（先部署/填入地址）");
+    setText("heartBal", "--");
+    setText("ignitedToday", "--");
+    setText("igniteWindow", "--");
+    return;
+  }
+
+  const heartC = new ethers.Contract(heart, HEART_ABI, provider);
+
+  // token balance
+  const tokenAddr = CFG.addresses.kgenToken;
+  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+
+  const [dec, sym, bal] = await Promise.all([
+    token.decimals().catch(()=>18),
+    token.symbol().catch(()=> "KGEN"),
+    token.balanceOf(heart).catch(()=> ethers.BigNumber.from(0))
+  ]);
+
+  const balFmt = ethers.utils.formatUnits(bal, dec);
+  setText("heartBal", fmtNum(Number(balFmt).toFixed(2)));
+
+  // ignite window + ignited today
+  const [ws, we, inWin, dayId] = await Promise.all([
+    heartC.windowStartSec(),
+    heartC.windowEndSec(),
+    heartC.inIgniteWindow(),
+    heartC.localDayIdNow()
+  ]);
+
+  const ignited = await heartC.dayIgnited(dayId);
+  setText("ignitedToday", ignited ? "YES" : "NO");
+
+  const hhmm = (sec)=>{
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+  };
+  setText("igniteWindow", `${hhmm(ws)}–${hhmm(we)}（TW）${inWin ? " · NOW" : ""}`);
+
+  // status line
+  if(Number(balFmt) <= 0){
+    statusBadge($("heartStatus"), "warn", `缺氧：血量 0 ${sym}（任何出金都會失敗）`);
+  }else if(!ignited){
+    statusBadge($("heartStatus"), "warn", inWin ? "呼吸窗口開啟（尚未點火）" : "今日尚未點火（窗口未開）");
+  }else{
+    statusBadge($("heartStatus"), "ok", "心臟運作中（今日已點火）");
+  }
+}
+
+/* ========= local counters ========= */
+const KEY_TOTAL="KLINE_PORTAL_TOTAL_VISITS";
+const KEY_TODAY="KLINE_PORTAL_TODAY_VISITS";
+const KEY_DATE ="KLINE_PORTAL_TODAY_DATE";
+
+const todayStr=()=>{
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const da=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+};
+
+function loadVisits(){
+  const d=todayStr();
+  const last=localStorage.getItem(KEY_DATE);
+  if(last!==d){
+    localStorage.setItem(KEY_DATE,d);
+    localStorage.setItem(KEY_TODAY,"0");
+  }
+  setText("total", localStorage.getItem(KEY_TOTAL)||"0");
+  setText("today", localStorage.getItem(KEY_TODAY)||"0");
+}
+function incVisits(){
+  const d=todayStr();
+  const last=localStorage.getItem(KEY_DATE);
+  if(last!==d){
+    localStorage.setItem(KEY_DATE,d);
+    localStorage.setItem(KEY_TODAY,"0");
+  }
+  const total=Number(localStorage.getItem(KEY_TOTAL)||"0")+1;
+  const today=Number(localStorage.getItem(KEY_TODAY)||"0")+1;
+  localStorage.setItem(KEY_TOTAL,String(total));
+  localStorage.setItem(KEY_TODAY,String(today));
+  setText("total", String(total));
+  setText("today", String(today));
+}
+
+$("resetBtn").addEventListener("click", ()=>{
+  localStorage.removeItem(KEY_TOTAL);
+  localStorage.removeItem(KEY_TODAY);
+  localStorage.removeItem(KEY_DATE);
+  loadVisits();
+});
+
+$("pingBtn").addEventListener("click", ()=>{
+  // Portal 只示範，不上鏈
+  $("rpcStatus").textContent = $("rpcStatus").textContent + " · ping";
+});
+
+/* ========= clock ========= */
+function tick(){
+  const d=new Date();
+  const hh=String(d.getHours()).padStart(2,"0");
+  const mm=String(d.getMinutes()).padStart(2,"0");
+  const ss=String(d.getSeconds()).padStart(2,"0");
+  setText("clock", `${hh}:${mm}:${ss}`);
+}
+setInterval(tick, 500); tick();
+
+/* ========= starfield ========= */
+const canvas=$("stars");
+const ctx=canvas.getContext("2d");
+let W=0,H=0,stars=[];
+function resize(){
+  W=canvas.width=canvas.offsetWidth*devicePixelRatio;
+  H=canvas.height=canvas.offsetHeight*devicePixelRatio;
+  const count=Math.floor((canvas.offsetWidth*canvas.offsetHeight)/12000);
+  stars=new Array(Math.max(60, Math.min(220, count))).fill(0).map(()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    r:(Math.random()*1.4+0.4)*devicePixelRatio,
+    v:(Math.random()*0.25+0.05)*devicePixelRatio,
+    a:Math.random()*0.7+0.15
+  }));
+}
+window.addEventListener("resize", resize); resize();
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="rgba(255,255,255,0.9)";
+  for(const s of stars){
+    s.y += s.v;
+    if(s.y>H){ s.y=-10; s.x=Math.random()*W; }
+    ctx.globalAlpha=s.a;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ========= node click placeholder ========= */
+document.querySelectorAll(".node").forEach(el=>{
+  el.addEventListener("click", (e)=>{
+    const href=(el.getAttribute("href")||"").trim();
+    if(href && !href.startsWith("javascript")) return;
+    e.preventDefault();
+    alert("此節點尚未接頁面。");
+  });
+});
+
+/* ========= boot ========= */
+(async function boot(){
+  loadVisits(); incVisits();
+
+  try{
+    const provider = await makeProvider();
+    await refreshChain(provider);
+    await refreshHeart(provider);
+
+    // refresh periodically
+    setInterval(async ()=>{
+      try{
+        await refreshChain(provider);
+        await refreshHeart(provider);
+      }catch(e){ /* ignore */ }
+    }, 15000);
+  }catch(e){
+    statusBadge($("rpcStatus"), "err", "缺 ethers 或 RPC 無法連線");
+    console.error(e);
+  }
+})();
+</script>
+
+<script>
+/* ===== Portal V1.2 Supervisor + Nodes ===== */
+(function(){
+  const uiVersion = "Portal V1.2";
+  const elClock = document.getElementById("nowClock");
+  const overlay = document.getElementById("supervisorOverlay");
+  const btn = document.getElementById("btnSupervisor");
+  const close = document.getElementById("supClose");
+  const supFill = document.getElementById("supFill");
+  const supPct = document.getElementById("supPct");
+  const nodesGrid = document.getElementById("nodesGrid");
+  const nodesStatus = document.getElementById("nodesStatus");
+  const chk = (id, cls)=>{ const e=document.getElementById(id); if(!e) return; e.classList.remove("ok","warn","bad"); if(cls) e.classList.add(cls); };
+
+  // Clock
+  function tick(){
+    const d = new Date();
+    const pad = n=>String(n).padStart(2,"0");
+    const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    if(elClock) elClock.textContent = s;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Supervisor toggle
+  function setOverlay(on){
+    if(!overlay) return;
+    overlay.classList.toggle("on", !!on);
+    overlay.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+  if(btn) btn.addEventListener("click", ()=>setOverlay(true));
+  if(close) close.addEventListener("click", ()=>setOverlay(false));
+  if(overlay) overlay.addEventListener("click", (e)=>{ if(e.target===overlay) setOverlay(false); });
+
+  // Error capture
+  let errorCount = 0;
+  window.addEventListener("error", ()=>{ errorCount++; });
+  window.addEventListener("unhandledrejection", ()=>{ errorCount++; });
+
+  // Nodes config
+  const nodes = [
+    { id:"12345", name:"五指山 12345｜悟空財神殿", path:"./temples/12345/index.html", note:"心臟補血、點火、許願、留證、自拍留念" },
+    { id:"11520", name:"花果山台灣 11520｜悟空大腦（交易所）", path:"./temples/11520/index.html", note:"施工準備中（偵測到檔案自動開放）" },
+    { id:"18888", name:"靈霄寶殿 18888｜人民/神明銀行", path:"./temples/18888/index.html", note:"0.10% 稅收承接（施工準備中）" },
+    { id:"108000", name:"Mars 108000｜花果山火星齊天豪宅（KUFO）", path:"./temples/108000/index.html", note:"Reward 0.05% 承接（施工準備中）" },
+    { id:"AUTO-LP", name:"斬妖台｜AutoLP", path:"./temples/autolp/index.html", note:"AutoLP 0.05% 承接（施工準備中）" },
+    { id:"8888", name:"高老莊 8888｜後續宮殿", path:"./temples/8888/index.html", note:"施工準備中" },
+    { id:"88888", name:"美洲大陸 88888｜跨洲傳送門", path:"./temples/88888/index.html", note:"施工準備中" },
+    { id:"雷音寺", name:"雷音寺｜如來系統", path:"./temples/leiyin/index.html", note:"施工準備中" },
   ];
 
-  // ===== Helpers =====
-  const $ = (id)=>document.getElementById(id);
-
-  function toast(title, msg){
-    $("toastT").textContent = title || "系統訊息";
-    $("toastM").textContent = msg || "";
-    $("toast").style.display = "block";
-  }
-  $("toastX").addEventListener("click", () => $("toast").style.display = "none");
-
-  function clockTick(){
-    const now = new Date();
-    $("clockT").textContent = now.toLocaleString("zh-TW", { hour12:false });
+  function makeBadge(state, text){
+    const span = document.createElement("span");
+    span.className = "badge " + (state==="ok"?"ok":state==="bad"?"bad":"warn");
+    span.textContent = text;
+    return span;
   }
 
-  function pillHtml(p, tone){
-    const cls = tone==="gold" ? "pill gold" : tone==="red" ? "pill red" : tone==="vio" ? "pill vio" : "pill cyan";
-    return `<span class="${cls}">${p}</span>`;
-  }
-
-  function cardHtml(item){
-    const pills = (item.pills||[]).map(p => pillHtml(p, item.tone)).join("");
-    const badge = item._ready === true
-      ? `<span class="badge ok">已開殿</span>`
-      : item._ready === false
-        ? `<span class="badge build">施工準備中</span>`
-        : `<span class="badge">偵測中</span>`;
-
-    const disabled = item._ready === false ? "disabled" : "";
-    return `
-      <div class="card ${disabled}" data-href="${item.href}" data-ready="${item._ready}">
-        <div class="ring"></div>
-        <div class="node">
-          <div class="left">
-            <div class="name">${item.name} ${badge}</div>
-            <div class="desc">${item.desc}</div>
-            <div class="meta">${pills}</div>
-          </div>
-          <div class="go">${item._ready === false ? "施工中" : "進入 →"}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderGrid(){
-    const grid = $("grid");
-    grid.innerHTML = PORTALS.map(cardHtml).join("");
-    grid.querySelectorAll(".card").forEach(card => {
-      card.addEventListener("click", () => {
-        const ready = card.getAttribute("data-ready");
-        const href  = card.getAttribute("data-href");
-
-        if(ready === "false"){
-          toast("施工準備中", "此節點尚未偵測到 index.html。\n等你把該殿的 index.html 上傳後，入口會自動開門並納入工程進度。");
-          return;
-        }
-        if(ready === "null" || ready === "undefined"){
-          toast("偵測中", "正在偵測節點狀態，請稍候再點一次。");
-          return;
-        }
-        window.location.href = href;
-      });
-    });
-  }
-
-  // ============================================================
-  // ✅ 核心：偵測檔案是否存在
-  // - 使用 fetch 讀取該 href
-  // - 只要 response.ok 就視為存在（GitHub Pages 404 會 ok=false）
-  // - 加上 cache: "no-store" 避免快取誤判
-  // ============================================================
-  async function detectOne(url){
+  async function probe(url){
     try{
-      const r = await fetch(url, { method: "GET", cache: "no-store" });
-      return !!r.ok;
+      const r = await fetch(url, { method:"GET", cache:"no-store" });
+      return r && r.ok;
     }catch(e){
       return false;
     }
   }
 
-  async function detectAll(){
-    $("readyLabel").textContent = "偵測中...";
-    // 先標成偵測中
-    PORTALS.forEach(p => p._ready = null);
-    renderGrid();
+  async function buildNodes(){
+    if(!nodesGrid) return;
+    nodesGrid.innerHTML = "";
+    nodesStatus.textContent = "偵測中…";
+    nodesStatus.className = "badge warn";
 
-    // 逐個偵測（穩定，不爆請求）
     let okCount = 0;
-    for(let i=0;i<PORTALS.length;i++){
-      const p = PORTALS[i];
-      const ok = await detectOne(p.href);
-      p._ready = ok;
-      if(ok) okCount++;
-      renderGrid();
+    for(const n of nodes){
+      const card = document.createElement("div");
+      card.className = "nodeCard";
+
+      const title = document.createElement("div");
+      title.className = "nodeTitle";
+      title.textContent = n.name;
+
+      const sub = document.createElement("div");
+      sub.className = "nodeSub";
+      sub.textContent = n.note;
+
+      const row = document.createElement("div");
+      row.className = "nodeRow";
+
+      const state = document.createElement("div");
+      state.appendChild(makeBadge("warn","偵測中"));
+
+      const a = document.createElement("a");
+      a.href = n.path;
+      a.textContent = "進入";
+
+      row.appendChild(state);
+      row.appendChild(a);
+
+      card.appendChild(title);
+      card.appendChild(sub);
+      card.appendChild(row);
+
+      nodesGrid.appendChild(card);
+
+      const ok = await probe(n.path);
+      if(ok){
+        okCount++;
+        state.innerHTML = "";
+        state.appendChild(makeBadge("ok","已完工"));
+        a.style.opacity = "1";
+      }else{
+        state.innerHTML = "";
+        state.appendChild(makeBadge("warn","施工準備中"));
+        a.style.opacity = ".55";
+      }
     }
 
-    // 工程進度 = (已開殿數 / 總節點) * 100
-    const pct = Math.round((okCount / PORTALS.length) * 100);
-    $("bar").style.width = pct + "%";
-    $("pct").textContent = pct + "%";
-    $("readyLabel").textContent = `已開殿 ${okCount}/${PORTALS.length}`;
+    // Update supervisor checks + progress
+    chk("chkLoaded","ok");
+    chk("chkStars", document.getElementById("stars") ? "ok" : "warn");
+    chk("chkNodes", okCount>0 ? "ok" : "warn");
+    chk("chkHeartPanel", document.getElementById("heartHp") ? "ok" : "warn");
+    chk("chkErrors", errorCount===0 ? "ok" : "warn");
+
+    const total = 5;
+    let score = 0;
+    score += 1; // loaded
+    score += document.getElementById("stars") ? 1 : 0;
+    score += okCount>0 ? 1 : 0;
+    score += document.getElementById("heartHp") ? 1 : 0;
+    score += errorCount===0 ? 1 : 0;
+
+    const pct = Math.round((score/total)*100);
+    if(supFill) supFill.style.width = pct + "%";
+    if(supPct) supPct.textContent = pct + "%";
+
+    if(okCount>0){
+      nodesStatus.textContent = `完成節點：${okCount}/${nodes.length}`;
+      nodesStatus.className = "badge ok";
+    }else{
+      nodesStatus.textContent = "目前皆施工準備中";
+      nodesStatus.className = "badge warn";
+    }
   }
 
-  // Changelog drawer
-  function openLog(){ $("logText").textContent = CHANGELOG; $("drawer").style.display = "block"; }
-  function closeLog(){ $("drawer").style.display = "none"; }
-
-  // Boot
-  $("ver").textContent = PORTAL_VERSION;
-  $("build").textContent = "Build: " + BUILD_DATE;
-
-  renderGrid();
-  clockTick();
-  setInterval(clockTick, 1000);
-
-  $("btnLog").addEventListener("click", openLog);
-  $("drawerX").addEventListener("click", closeLog);
-
-  // Start detect
-  detectAll();
-
-  // Export debug
-  window.__KLINE_PORTAL__ = { PORTAL_VERSION, BUILD_DATE, PORTALS, CHANGELOG };
+  // initial run
+  setTimeout(buildNodes, 700);
 })();
 </script>
-</body>
+
+</body></body>
 </html>
