@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>花果山火星齊天豪宅 108000｜Mars Seats V2.2（Temple UI V1.0）</title>
+
+  <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾，並命名為 ethers-5.7.2.umd.min.js -->
+  <script src="./ethers-5.7.2.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#0b0f1a;
+      --gold:#ffd56a;
+      --gold2:#ffb74a;
+      --cyan:#7cf6ff;
+      --muted:rgba(255,255,255,.72);
+      --card:rgba(255, 213, 106, .06);
+      --card2:rgba(124, 246, 255, .06);
+      --line:rgba(255, 213, 106, .28);
+      --shadow: 0 14px 60px rgba(0,0,0,.55);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Microsoft JhengHei", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 20%, #121a2e 0%, var(--bg0) 55%) , radial-gradient(900px 600px at 80% 70%, #1a1133 0%, var(--bg0) 55%);
+      color: #fff;
+      overflow-x:hidden;
+    }
+
+    /* Starfield */
+    .stars, .stars2, .stars3{
+      position:fixed; inset:0;
+      background-repeat:repeat;
+      pointer-events:none;
+      z-index:-1;
+      opacity:.75;
+    }
+    .stars{ background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 140px 140px; animation: drift 120s linear infinite;}
+    .stars2{ background-image: radial-gradient(#7cf6ff 1px, transparent 1px); background-size: 220px 220px; opacity:.35; animation: drift 180s linear infinite reverse;}
+    .stars3{ background-image: radial-gradient(#ffd56a 1px, transparent 1px); background-size: 320px 320px; opacity:.20; animation: drift 240s linear infinite;}
+    @keyframes drift { from{ transform: translate3d(0,0,0)} to{ transform: translate3d(-800px, -600px, 0)} }
+
+    .wrap{ max-width: 1080px; margin: 0 auto; padding: 18px 14px 60px; }
+
+    /* Top bar */
+    .topbar{
+      position: sticky; top: 10px; z-index: 9999;
+      display:flex; gap:10px; justify-content: space-between; align-items:center;
+      padding: 10px 10px;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      text-decoration:none;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:hover{ background: rgba(255,255,255,.10); }
+    .pill.gold{ border-color: rgba(255,213,106,.45); }
+    .pill.cyan{ border-color: rgba(124,246,255,.45); }
+    .right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .tag{
+      font-weight:900; letter-spacing:.6px;
+      color: var(--gold);
+      padding: 8px 12px;
+      border: 1px solid rgba(255,213,106,.25);
+      border-radius: 999px;
+      background: rgba(255,213,106,.06);
+    }
+
+    header{ padding: 18px 0 6px; text-align:left; }
+    h1{
+      margin: 10px 0 8px;
+      font-size: 30px;
+      color: var(--gold);
+      text-shadow: 0 0 24px rgba(255,213,106,.28);
+      letter-spacing: .8px;
+      line-height: 1.15;
+    }
+    .sub{
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .sub b{ color: var(--cyan); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(0,0,0,.14) 100%);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .card.gold{ border-color: rgba(255,213,106,.22); }
+    .card.cyan{ border-color: rgba(124,246,255,.22); }
+
+    .card h2{
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: #fff;
+      letter-spacing:.5px;
+    }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .kpi{
+      flex: 1 1 200px;
+      background: rgba(255,213,106,.06);
+      border: 1px solid rgba(255,213,106,.18);
+      border-radius: 14px;
+      padding: 12px;
+      min-width: 220px;
+    }
+    .kpi .label{ font-size:12px; color: rgba(255,255,255,.72); }
+    .kpi .value{ font-size:20px; font-weight:900; color: var(--gold); margin-top:6px; }
+    .kpi .hint{ font-size:12px; color: rgba(255,255,255,.68); margin-top:6px; line-height:1.4; }
+    .kpi.cyanish{
+      background: rgba(124,246,255,.06);
+      border-color: rgba(124,246,255,.18);
+    }
+    .kpi.cyanish .value{ color: var(--cyan); }
+
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,213,106,.35);
+      background: rgba(255,213,106,.10);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .btn:hover{ background: rgba(255,213,106,.16); }
+    .btn.cyan{ border-color: rgba(124,246,255,.35); background: rgba(124,246,255,.10); }
+    .btn.cyan:hover{ background: rgba(124,246,255,.16); }
+    .btn.danger{ border-color: rgba(255,80,80,.35); background: rgba(255,80,80,.10); }
+    .btn.danger:hover{ background: rgba(255,80,80,.16); }
+
+    input, textarea, select{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+    }
+    textarea{ min-height: 86px; resize: vertical; }
+
+    .small{ font-size:12px; color: rgba(255,255,255,.72); line-height:1.5; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .sep{ height: 1px; background: rgba(255,255,255,.10); margin: 12px 0; }
+
+    .addr{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .addr code{
+      font-size: 12px;
+      word-break: break-all;
+      color: rgba(255,255,255,.86);
+    }
+    .toast{
+      position: fixed; right: 12px; bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.75);
+      border: 1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-size: 12px;
+      max-width: 360px;
+      display:none;
+      z-index: 99999;
+      backdrop-filter: blur(10px);
+    }
+
+    .footer{
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      color: rgba(255,255,255,.72);
+      line-height: 1.7;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stars"></div><div class="stars2"></div><div class="stars3"></div>
+
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="left">
+        <span class="tag">MARS 108000｜500 席位豪宅</span>
+      </div>
+      <div class="right">
+        <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 Official Website</a>
+        <button class="pill cyan" id="btnConnect">🪐 連接錢包</button>
+        <button class="pill" id="btnRefresh">🔄 重新整理</button>
+      </div>
+    </div>
+
+    <header>
+      <h1>花果山火星齊天豪宅 108000</h1>
+      <div class="sub">
+        合約：<b>MarsSeats V2.2</b>｜席位：<b>500</b>｜入住：<b>5000 K G E N</b><br/>
+        這裡是「席位系統」：入住取得席位 NFT-like（seatId），月結算分潤用 <b>claim</b> 自領，不會一次群發爆炸。<br/>
+        重要：本頁僅提供鏈上互動，不提供投資承諾與收益保證。
+      </div>
+    </header>
+
+    <div class="grid">
+
+      <div class="card gold">
+        <h2>合約與狀態</h2>
+
+        <div class="row">
+          <div class="kpi">
+            <div class="label">錢包</div>
+            <div class="value mono" id="wallet">未連線</div>
+            <div class="hint">請用 MetaMask（BSC Mainnet / chainId 56）</div>
+          </div>
+          <div class="kpi cyanish">
+            <div class="label">席位剩餘</div>
+            <div class="value" id="remain">—</div>
+            <div class="hint">500 - totalMinted</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="kpi">
+            <div class="label">我的席位</div>
+            <div class="value" id="mySeats">—</div>
+            <div class="hint">查詢你的 seatIds（簡化顯示：數量 + 前 10 個 seatId）</div>
+          </div>
+          <div class="kpi cyanish">
+            <div class="label">可領分潤</div>
+            <div class="value" id="pending">—</div>
+            <div class="hint">pendingReward(user)（單位：KGEN）</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>快速操作</h2>
+
+        <div class="row">
+          <button class="btn cyan" id="btnApprove">1) 授權 5000 KGEN</button>
+          <button class="btn" id="btnBuy">2) 入住（鑄造席位）</button>
+          <button class="btn cyan" id="btnClaim">3) 領分潤（Claim）</button>
+        </div>
+
+        <div class="small" style="margin-top:10px;">
+          你會看到鏈上事件：<span class="mono">SeatMinted</span> / <span class="mono">RewardNotified</span> / <span class="mono">RewardClaimed</span>。<br/>
+          若你想把「入住款」打進交易所（11520 Brain），請把 MarsSeats 的 <span class="mono">treasury</span> 設為 BrainExchange 合約地址（更乾淨），不要把「Mars 合約地址」當成交易所地址。
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>地址（可一鍵複製）</h2>
+
+        <div class="addr">
+          <div class="small" style="min-width:80px;">KGEN</div>
+          <code class="mono" id="addrKGEN">（填入你的 KGEN Token）</code>
+          <button class="btn" data-copy="#addrKGEN">Copy</button>
+        </div>
+
+        <div class="addr" style="margin-top:10px;">
+          <div class="small" style="min-width:80px;">MarsSeats</div>
+          <code class="mono" id="addrMARS">（填入你部署後的 MarsSeats）</code>
+          <button class="btn" data-copy="#addrMARS">Copy</button>
+        </div>
+
+        <div class="addr" style="margin-top:10px;">
+          <div class="small" style="min-width:80px;">Treasury</div>
+          <code class="mono" id="addrTREAS">（可設為 BrainExchange 或公益庫）</code>
+          <button class="btn" data-copy="#addrTREAS">Copy</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>新手導覽（從沒錢包到入住）</h2>
+        <ol class="small">
+          <li>手機/電腦安裝 MetaMask，新增網路 BNB Chain（BSC / chainId 56）。</li>
+          <li>錢包裡準備少量 BNB 作為 Gas（交易手續費）。</li>
+          <li>把 KGEN 加入錢包（自訂代幣：貼上 KGEN Token 地址）。</li>
+          <li>按「連接錢包」，再按「授權 5000 KGEN」，MetaMask 會跳出確認。</li>
+          <li>授權成功後按「入住」，成功會鑄造席位（seatId）。</li>
+          <li>之後每月分潤由交易所大腦撥款到 MarsSeats，你按「領分潤」自領。</li>
+        </ol>
+      </div>
+
+      <div class="card cyan">
+        <h2>設定區（部署後必填）</h2>
+
+        <div class="small">把你部署後的地址貼上來，本頁就能直接對接（前端不需要改程式）。</div>
+
+        <div class="sep"></div>
+
+        <label class="small">KGEN Token Address</label>
+        <input class="mono" id="inKGEN" placeholder="0x..." />
+
+        <label class="small" style="margin-top:10px;">MarsSeats Contract Address</label>
+        <input class="mono" id="inMARS" placeholder="0x..." />
+
+        <label class="small" style="margin-top:10px;">Treasury Address（入住款流向）</label>
+        <input class="mono" id="inTREAS" placeholder="0x..." />
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn cyan" id="btnApply">套用設定</button>
+          <button class="btn danger" id="btnReset">重置</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>常見問題：你剛問的那題</h2>
+        <div class="small">
+          <b>Q：如果把 treasury 設為交易所地址，那繳 5000 KGEN 交易所怎麼知道是住豪宅的錢還是保證金？</b><br/><br/>
+          <b>正解做法（推薦）：</b><br/>
+          1) 讓 MarsSeats 的 treasury 直接是 BrainExchange 合約地址。<br/>
+          2) BrainExchange 增加一個專用入口：<span class="mono">depositFromMars(address user, uint256 amount)</span>，只允許 msg.sender == MarsSeats 呼叫。<br/>
+          3) MarsSeats 在 mintSeat 時不直接把錢「轉」進 Brain，而是：<br/>
+          - 先收錢到 MarsSeats，再呼叫 Brain 的 <span class="mono">depositFromMars</span>（帶上 user），讓 Brain 在帳本上把這筆記成「MarsSeatFunds」，不混保證金。<br/><br/>
+          <b>你現在如果只做「純轉帳到 Brain」：</b><br/>
+          Brain 會看到它收到了 KGEN，但鏈上難以在合約內把「備註」寫進去；你只能靠事件追蹤或額外函式做分類。<br/><br/>
+          所以：<b>不要把 Mars 合約地址當交易所地址；要用「專用函式」分類資金。</b>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="footer">
+      PrimeForge 以母機之名，開啟金融生命。<br/>
+      花果山台灣・信念不滅・市場無界。<br/>
+      Where the Market Becomes the Myth.<br/>
+      —— 樂天帝 ⌖
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/** ===============================
+ *  Mars Seats Temple UI V1.0
+ *  - 單檔可部署到 GitHub Pages
+ *  - 地址可由 UI 輸入，儲存在 localStorage
+ *  - 需要 ethers 5.7.2
+ * =============================== */
+
+const LS_KEY = "KLINE_MARS_SEATS_UI_V1";
+const DEFAULTS = {
+  kgen: "",
+  mars: "",
+  treasury: ""
+};
+
+let provider, signer, walletAddress = "";
+let KGEN, MARS;
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> t.style.display="none", 2600);
+}
+
+function isAddr(x){
+  try{ return ethers.utils.isAddress((x||"").trim()); }catch(e){ return false; }
+}
+
+function loadCfg(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? Object.assign({}, DEFAULTS, JSON.parse(raw)) : {...DEFAULTS};
+  }catch(e){
+    return {...DEFAULTS};
+  }
+}
+function saveCfg(cfg){
+  localStorage.setItem(LS_KEY, JSON.stringify(cfg));
+}
+
+function applyCfgToUI(cfg){
+  document.getElementById("inKGEN").value = cfg.kgen || "";
+  document.getElementById("inMARS").value = cfg.mars || "";
+  document.getElementById("inTREAS").value = cfg.treasury || "";
+  document.getElementById("addrKGEN").textContent = cfg.kgen || "（填入你的 KGEN Token）";
+  document.getElementById("addrMARS").textContent = cfg.mars || "（填入你部署後的 MarsSeats）";
+  document.getElementById("addrTREAS").textContent = cfg.treasury || "（可設為 BrainExchange 或公益庫）";
+}
+
+function requireCfgReady(cfg){
+  if(!isAddr(cfg.kgen)) throw new Error("KGEN 地址未填或不合法");
+  if(!isAddr(cfg.mars)) throw new Error("MarsSeats 地址未填或不合法");
+}
+
+const ABI_KGEN = [
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)"
+];
+
+const ABI_MARS = [
+  "function MAX_SEATS() view returns (uint256)",
+  "function totalMinted() view returns (uint256)",
+  "function remainingSeats() view returns (uint256)",
+  "function seatPrice() view returns (uint256)",
+  "function seatPriceWhole() view returns (uint256)",
+  "function treasury() view returns (address)",
+  "function pendingReward(address user) view returns (uint256)",
+  "function mintSeat()",
+  "function claimReward()",
+  "function seatsOf(address user) view returns (uint256[] memory)"
+];
+
+async function connect(){
+  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  signer = provider.getSigner();
+  walletAddress = await signer.getAddress();
+  document.getElementById("wallet").textContent = walletAddress;
+  toast("錢包已連線");
+}
+
+async function bindContracts(){
+  const cfg = loadCfg();
+  requireCfgReady(cfg);
+  if(!provider || !signer) throw new Error("請先連接錢包");
+  KGEN = new ethers.Contract(cfg.kgen, ABI_KGEN, signer);
+  MARS = new ethers.Contract(cfg.mars, ABI_MARS, signer);
+}
+
+function fmt18(x){
+  // KGEN is 18 decimals in your token; we keep generic but format as 18
+  try{ return ethers.utils.formatUnits(x, 18); }catch(e){ return String(x); }
+}
+function fmtKgen(x){
+  const n = Number(fmt18(x));
+  if(Number.isNaN(n)) return "—";
+  return n.toLocaleString(undefined, {maximumFractionDigits: 6});
+}
+
+async function refresh(){
+  const cfg = loadCfg();
+  applyCfgToUI(cfg);
+  if(!provider || !signer || !walletAddress) return;
+
+  await bindContracts();
+
+  const [remain, minted, priceWhole, pending] = await Promise.all([
+    MARS.remainingSeats(),
+    MARS.totalMinted(),
+    MARS.seatPriceWhole().catch(()=>ethers.BigNumber.from(5000)),
+    MARS.pendingReward(walletAddress).catch(()=>ethers.BigNumber.from(0))
+  ]);
+
+  document.getElementById("remain").textContent = `${remain.toString()} / 500`;
+  document.getElementById("pending").textContent = `${fmtKgen(pending)} KGEN`;
+
+  // seats
+  let seats = [];
+  try{ seats = await MARS.seatsOf(walletAddress); }catch(e){ seats = []; }
+  const seatIds = (seats||[]).map(s=>s.toString());
+  const preview = seatIds.slice(0,10).join(", ");
+  document.getElementById("mySeats").textContent = seatIds.length ? `${seatIds.length} 席（${preview}${seatIds.length>10?"…":""}）` : "0 席";
+
+  // treasury in chain
+  try{
+    const treas = await MARS.treasury();
+    document.getElementById("addrTREAS").textContent = treas;
+  }catch(e){}
+
+  // show configured price (info only)
+  if(priceWhole){
+    // no direct UI field; just toast on refresh
+  }
+}
+
+async function approve5000(){
+  const cfg = loadCfg();
+  await bindContracts();
+  const amount = ethers.utils.parseUnits("5000", 18);
+  const allowance = await KGEN.allowance(walletAddress, cfg.mars);
+  if(allowance.gte(amount)){
+    toast("已授權足夠（5000 KGEN）");
+    return;
+  }
+  const tx = await KGEN.approve(cfg.mars, amount);
+  toast("送出授權交易…");
+  await tx.wait();
+  toast("授權完成");
+}
+
+async function buySeat(){
+  await bindContracts();
+  const tx = await MARS.mintSeat();
+  toast("送出入住交易…");
+  await tx.wait();
+  toast("入住成功（席位已鑄造）");
+  await refresh();
+}
+
+async function claim(){
+  await bindContracts();
+  const tx = await MARS.claimReward();
+  toast("送出領分潤交易…");
+  await tx.wait();
+  toast("領取完成");
+  await refresh();
+}
+
+/* Copy buttons */
+document.addEventListener("click", async (e)=>{
+  const el = e.target;
+  if(el && el.dataset && el.dataset.copy){
+    const sel = el.dataset.copy;
+    const node = document.querySelector(sel);
+    const text = (node && node.textContent) ? node.textContent.trim() : "";
+    if(!text) return toast("沒有可複製內容");
+    try{
+      await navigator.clipboard.writeText(text);
+      toast("已複製");
+    }catch(err){
+      toast("複製失敗（瀏覽器限制）");
+    }
+  }
+});
+
+document.getElementById("btnConnect").addEventListener("click", async ()=>{
+  try{ await connect(); await refresh(); }catch(e){ toast(e.message || String(e)); }
+});
+document.getElementById("btnRefresh").addEventListener("click", async ()=>{
+  try{ await refresh(); }catch(e){ toast(e.message || String(e)); }
+});
+
+document.getElementById("btnApply").addEventListener("click", async ()=>{
+  const cfg = loadCfg();
+  const k = document.getElementById("inKGEN").value.trim();
+  const m = document.getElementById("inMARS").value.trim();
+  const t = document.getElementById("inTREAS").value.trim();
+
+  if(k && !isAddr(k)) return toast("KGEN 地址不合法");
+  if(m && !isAddr(m)) return toast("MarsSeats 地址不合法");
+  if(t && !isAddr(t)) return toast("Treasury 地址不合法");
+
+  cfg.kgen = k || cfg.kgen;
+  cfg.mars = m || cfg.mars;
+  cfg.treasury = t || cfg.treasury;
+
+  saveCfg(cfg);
+  applyCfgToUI(cfg);
+  toast("設定已套用");
+  try{ await refresh(); }catch(e){}
+});
+
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  localStorage.removeItem(LS_KEY);
+  applyCfgToUI({...DEFAULTS});
+  toast("已重置");
+});
+
+document.getElementById("btnApprove").addEventListener("click", async ()=>{
+  try{ await approve5000(); }catch(e){ toast(e.message || String(e)); }
+});
+document.getElementById("btnBuy").addEventListener("click", async ()=>{
+  try{ await buySeat(); }catch(e){ toast(e.message || String(e)); }
+});
+document.getElementById("btnClaim").addEventListener("click", async ()=>{
+  try{ await claim(); }catch(e){ toast(e.message || String(e)); }
+});
+
+(function init(){
+  const cfg = loadCfg();
+  applyCfgToUI(cfg);
+  // If already connected in wallet, user can hit refresh after connect.
+})();
+</script>
+
+</body>
+                                                   </html>
