@@ -1,0 +1,15 @@
+{
+  "name": "悟空財神殿 12345",
+  "short_name": "悟空神殿",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#05060a",
+  "theme_color": "#f3d27a",
+  "icons": [
+    {
+      "src": "https://klineodyssey.github.io/kline-odyssey/assets/wukong_caishen.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
