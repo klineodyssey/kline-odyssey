@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p17p2 Cosmic Living Temple</title>
+  <title>五指山 12345・悟空財神殿｜V6.6p17p3 Cosmic Voice Stable</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -470,7 +470,7 @@
     }
     .toast.show{display:block}
   
-.caishenIcon{width:92px;height:92px;border-radius:14px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
+.caishenIcon{width:120px;height:120px;border-radius:14px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
 @media (max-width:420px){ .caishenIcon{width:72px;height:72px;border-radius:12px;} }
 
 
@@ -504,11 +504,11 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p17p2 Cosmic Living Temple · ChainReady UI<br/>
+                V6.6p17p3 Cosmic Living Temple · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6p17p2</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V6.6p17p3</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
                 <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
               </div>
@@ -777,13 +777,16 @@
               <label>客服對話（本機保存）</label>
               <textarea id="chatBox" placeholder="仙女會在這裡一步一步教你…"></textarea>
               
-          <div class="row" style="display:flex; gap:10px; margin-top:10px; align-items:stretch; flex-wrap:wrap;">
-            <input id="chatInput" type="text" placeholder="輸入你的問題（一次一題）…" style="flex:1; min-width:180px; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.25); color:#f5f5f5; outline:none;">
-            <button class="btn" id="btnAskChat" style="min-width:110px;">送出</button>
-            <button class="btn btnGhost" id="btnStopChat" style="min-width:110px;">停止</button>
-            <button class="btn btnGhost" id="btnMicChat" style="min-width:110px;">語音</button>
-          </div>
-          <div id="micStatus" class="muted" style="margin-top:8px; font-size:12px; opacity:.8;"></div>
+          <div class="chatRow">
+                <input id="chatInput" type="text" inputmode="text" autocomplete="off"
+                       placeholder="輸入你的問題（一次一題）…">
+                <div class="btns" style="margin-top:0;">
+                  <button class="primary" id="btnAskChat" type="button">送出</button>
+                  <button class="ghost" id="btnStopChat" type="button">停止</button>
+                  <button class="ghost" id="btnMicChat" type="button">語音輸入</button>
+                </div>
+              </div>
+              <div id="micStatus" class="muted" style="margin-top:8px; font-size:12px; opacity:.85;"></div>
 <div class="btns">
                 <button class="ghost" id="btnCopyChat">複製</button>
                 <button class="ghost" id="btnClearChat">清空</button>
@@ -1983,7 +1986,7 @@ setInterval(()=>{ syncCupUI(); }, 900);
 
 <script>
 /* =========================================================
-   V6.6p17p2 HOTFIX
+   V6.6p17p3 HOTFIX
    - Heartbeat countdown aligned to top-of-hour (local time)
    - Ignite countdown kept to UTC 00:00-00:10 window
    - Support chat: one-question-one-answer + stop button
@@ -2110,9 +2113,8 @@ setInterval(()=>{ syncCupUI(); }, 900);
 
   function enableAsk(on){
     const btnAsk = $id('btnAskChat');
-    const inp = $id('chatInput');
     if (btnAsk) btnAsk.disabled = !on;
-    if (inp) inp.disabled = !on;
+    // 不鎖輸入框：避免「不能打字」
   }
 
   function ask(){
