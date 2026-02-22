@@ -2,17 +2,12 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>K線西遊記｜銀河宇宙入口（Portal V1.3 · Global Ignite）</title>
-
-  <!-- 你需要把 ethers 放在：/K線西遊記/assets/ethers-5.7.2.umd.min.js -->
-  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>K線西遊記｜銀河宇宙入口（Portal V1.4 Multi-Nodes）</title>
   <style>
     :root{
       --bg:#06070b;
       --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.65);
       --line: rgba(255,255,255,.14);
@@ -23,10 +18,9 @@
       --r2: 999px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
-      --gold: rgba(255,215,0,.95);
-      --ok: rgba(120,255,200,.95);
-      --warn: rgba(255,210,120,.95);
-      --bad: rgba(255,120,120,.95);
+      --ok:#9fffd9;
+      --warn:#ffd28c;
+      --bad:#ff9fb2;
     }
     *{box-sizing:border-box}
     body{
@@ -103,15 +97,12 @@
     .node .p{color:var(--muted);font-size:12px;line-height:1.35}
     .node .id{color:rgba(255,255,255,.75);font-size:12px;font-family:var(--mono)}
     .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)}
-    .badge strong{color:var(--text)}
-    .badge.ok{border-color: rgba(120,255,200,.35); color: rgba(210,255,235,.92)}
-    .badge.warn{border-color: rgba(255,210,120,.35); color: rgba(255,238,210,.92)}
-    .badge.bad{border-color: rgba(255,120,120,.35); color: rgba(255,210,220,.92)}
-
+    .badge.ok{color:var(--ok)}
+    .badge.warn{color:var(--warn)}
+    .badge.bad{color:var(--bad)}
     .footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.55;padding-bottom:6px;}
     .hr{height:1px;background:var(--line);margin:10px 0}
 
-    /* ===== Supervisor overlay ===== */
     .topRight{
       position:fixed; right:14px; top:14px; z-index:50;
       display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
@@ -178,72 +169,65 @@
       justify-self:end;
       margin-top:4px;
     }
-    .dot.ok{ background: var(--ok); box-shadow:0 0 14px rgba(120,255,200,.45); }
-    .dot.warn{ background: var(--warn); box-shadow:0 0 14px rgba(255,210,120,.45); }
-    .dot.bad{ background: var(--bad); box-shadow:0 0 14px rgba(255,120,120,.45); }
+    .dot.ok{ background: rgba(120,255,200,.95); box-shadow:0 0 14px rgba(120,255,200,.45); }
+    .dot.warn{ background: rgba(255,210,120,.95); box-shadow:0 0 14px rgba(255,210,120,.45); }
+    .dot.bad{ background: rgba(255,120,120,.95); box-shadow:0 0 14px rgba(255,120,120,.45); }
 
-    /* ===== Global Ignite panel ===== */
-    .global{
-      margin-top:12px;
-      border:1px solid rgba(255,215,0,.20);
-      background: rgba(0,0,0,.18);
-      border-radius: 18px;
-      padding: 12px;
+    .drawerScrim{
+      position:fixed; inset:0; z-index:90;
+      background: rgba(0,0,0,.55);
+      display:none;
     }
-    .globalHead{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-    }
-    .globalTitle{
-      font-weight:950; letter-spacing:.4px;
-      display:flex; align-items:center; gap:10px;
-    }
-    .globalGrid{
-      margin-top:10px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-    }
-    .gRow{
-      border:1px solid rgba(255,255,255,.12);
-      border-radius: 16px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,.04);
-      display:flex; flex-direction:column; gap:6px;
-    }
-    .gTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-    }
-    .gName{font-weight:950; letter-spacing:.3px;}
-    .gMeta{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .gAddr{font-family:var(--mono); font-size:12px; color: rgba(255,255,255,.78)}
-    .copyBtn{
+    .drawerScrim.on{ display:block; }
+    .drawer{
+      position:fixed; right:14px; bottom:14px; top:14px; z-index:91;
+      width:min(560px, calc(100vw - 28px));
       border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      padding:6px 10px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight:850;
-      font-size:12px;
-      user-select:none;
+      background: rgba(10,10,16,.86);
+      border-radius: 20px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.65);
+      backdrop-filter: blur(12px);
+      padding:14px;
+      display:none;
+      overflow:auto;
     }
-    .copyBtn:hover{ background: rgba(255,255,255,.12); }
-    .gBadges{display:flex; gap:8px; flex-wrap:wrap}
+    .drawer.on{ display:block; }
+    .drawer h3{ margin:0 0 8px; font-size:14px; letter-spacing:.35px; }
+    .drawer .muted{ color: var(--muted); font-size:12px; line-height:1.55; }
+    .field{ margin-top:10px; }
+    .field label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
+    .field input, .field textarea{
+      width:100%; border-radius:14px; border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35); color: var(--text);
+      padding:10px 12px; outline:none; font-family: var(--mono); font-size:12px;
+    }
+    .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .rowBtns .btn{ padding:9px 12px; }
+    .sectionLine{ height:1px; background: rgba(255,255,255,.12); margin:12px 0; }
+    .table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
+    .table td{ font-size:12px; color: var(--muted); padding:8px 10px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
+    .table td:first-child{ border-radius:12px 0 0 12px; }
+    .table td:last-child{ border-radius:0 12px 12px 0; }
+    .kTag{ color: var(--text); font-weight:850; }
+    .warnText{ color: var(--warn); }
+    .okText{ color: var(--ok); }
   </style>
+
+  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
 </head>
 
 <body>
-
   <div class="topRight">
-    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.3</b></div>
+    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.4</b></div>
     <div class="miniPill">時間：<b id="nowClock" class="mono">--</b></div>
     <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
+    <div class="supervisorBtn" id="btnSettings">設定</div>
   </div>
 
   <div class="overlay" id="supervisorOverlay" aria-hidden="true">
     <div class="overlayCard">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.3</div>
+        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.4</div>
         <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
       </div>
       <div class="progressWrap">
@@ -258,13 +242,88 @@
         <div>頁面載入</div><div class="dot" id="chkLoaded"></div>
         <div>星空引擎（Canvas）</div><div class="dot" id="chkStars"></div>
         <div>節點偵測（各殿 index.html）</div><div class="dot" id="chkNodes"></div>
-        <div>讀鏈面板（Global Ignite）</div><div class="dot" id="chkGlobal"></div>
+        <div>全域點火（Multi-Heart）</div><div class="dot" id="chkGlobalIgnite"></div>
+        <div>11520 Brain 面板</div><div class="dot" id="chkBrainPanel"></div>
         <div>錯誤監看（Console 捕捉）</div><div class="dot" id="chkErrors"></div>
       </div>
 
       <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6;">
-        說明：Portal 會以 <span class="mono">fetch</span> 檢查各點位是否存在 <span class="mono">index.html</span>，並用公開 RPC 讀鏈，不需要錢包。
+        說明：Portal 只做「導航＋讀鏈」。地址未設定或合約未部署時，面板會顯示「未部署/未設定」但不會壞。
       </div>
+    </div>
+  </div>
+
+  <div class="drawerScrim" id="drawerScrim"></div>
+  <div class="drawer" id="drawer">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <h3>Portal 設定（多殿 / 多 Heart / 11520 / 16888）</h3>
+        <div class="muted">
+          這裡只改「讀鏈/導航」用的地址，不會動到合約。<br/>
+          你部署後把地址貼上，Portal 就會自動亮燈與讀鏈。
+        </div>
+      </div>
+      <div class="badge" id="btnCloseDrawer" style="cursor:pointer;">關閉</div>
+    </div>
+
+    <div class="sectionLine"></div>
+
+    <div class="field">
+      <label>KGEN Token（已部署）</label>
+      <input id="inKgenToken" placeholder="0x..." />
+    </div>
+
+    <div class="field">
+      <label>Heart 列表（每行：座標,0x地址）</label>
+      <textarea id="inHearts" placeholder="12345,0x...\n23456,0x..."></textarea>
+      <div class="muted">你現在可先放 12345；未來新增殿就加一行。</div>
+    </div>
+
+    <div class="field">
+      <label>11520 BrainExchange（大腦交易所）</label>
+      <input id="inBrain11520" placeholder="0x..." />
+      <div class="muted">容量顯示固定 50,000,000 KGEN（悟空腦容量）。</div>
+    </div>
+
+    <div class="field">
+      <label>108000 MarsSeats（豪宅）</label>
+      <input id="inMars108000" placeholder="0x..." />
+    </div>
+
+    <div class="field">
+      <label>18888 靈霄寶殿（DeityBank）</label>
+      <input id="inBank18888" placeholder="0x..." />
+    </div>
+
+    <div class="field">
+      <label>18921 斬妖台（TaxSplitter / AutoLP 分流）</label>
+      <input id="inZhanyao18921" placeholder="0x..." />
+    </div>
+
+    <div class="field">
+      <label>16888 廣寒宮（七仙女許願池）</label>
+      <input id="inWish16888" placeholder="0x..." />
+      <div class="muted">先建點位；等你部署許願池合約再點亮。</div>
+    </div>
+
+    <div class="field">
+      <label>七仙女地址（每行一個 0x 地址，共 7 行）</label>
+      <textarea id="inFairies7" placeholder="0x...\n0x...\n..."></textarea>
+      <div class="muted">Portal 會顯示「已登記幾位」。</div>
+    </div>
+
+    <div class="rowBtns">
+      <div class="btn" id="btnSaveCfg">儲存設定</div>
+      <div class="btn" id="btnResetCfg">重置</div>
+      <div class="btn" id="btnApplyAndRefresh">套用並刷新</div>
+    </div>
+
+    <div class="sectionLine"></div>
+
+    <div class="muted">
+      GitHub 路徑：<span class="mono">K線西遊記/index.html</span><br/>
+      ethers 路徑：<span class="mono">K線西遊記/assets/ethers-5.7.2.umd.min.js</span><br/>
+      設定存在 localStorage（不會上鏈）。
     </div>
   </div>
 
@@ -272,11 +331,11 @@
     <header>
       <div class="brand">
         <div class="h">K線西遊記｜銀河宇宙入口</div>
-        <div class="s">KLINE Odyssey · Map Portal · Portal V1.3（新增：全域點火面板）</div>
+        <div class="s">KLINE Odyssey · Map Portal · Portal V1.4（Multi-Heart + 11520）</div>
       </div>
 
       <div class="pillrow">
-        <div class="pill">KGEN 總量：<b class="mono" id="supply">72,000,000</b></div>
+        <div class="pill">KGEN Token：<b class="mono" id="kgenAddrTop">--</b></div>
         <div class="pill">今日參訪：<b class="mono" id="today">0</b></div>
         <div class="pill">總參訪：<b class="mono" id="total">0</b></div>
       </div>
@@ -289,8 +348,8 @@
         <div>
           <div class="title">宇宙不需要解釋，只需要入口。</div>
           <p class="subtitle">
-            這裡是《K線西遊記》的地圖門戶。<br/>
-            Portal V1.3：新增「全域點火（Global Ignite）」面板，對齊最新 Heart 讀取介面（血量 / 點火 / 窗口 / 獎勵參數）。
+            Portal V1.4：新增「全域點火 Multi‑Heart」＋「11520 悟空大腦（5000萬容量）」。<br/>
+            未部署點位先保留座標、先上地圖，等合約上鏈自動亮燈。
           </p>
 
           <div class="ctaRow">
@@ -303,26 +362,8 @@
           <div class="hr"></div>
 
           <div class="smallText">
-            RPC 模式：預設用公開 RPC 讀鏈（不需要錢包）。<br/>
-            之後若要在 Portal 直接做「一鍵點火 / 心跳」，再改成連錢包模式（本版先保讀鏈穩定）。
-          </div>
-
-          <div class="global" id="globalPanel">
-            <div class="globalHead">
-              <div class="globalTitle">🔥 全域點火（Global Ignite）</div>
-              <div class="gBadges">
-                <span class="badge" id="globalChain">CHAIN: <strong class="mono" id="chainId">--</strong></span>
-                <span class="badge" id="globalBlock">BLOCK: <strong class="mono" id="blockNum">--</strong></span>
-                <span class="badge warn" id="globalIgnite">GLOBAL: <strong class="mono" id="globalIgniteText">--</strong></span>
-              </div>
-            </div>
-
-            <div class="globalGrid" id="globalGrid"></div>
-
-            <div class="smallText" style="margin-top:10px;">
-              設定：請在本檔案最下方 <span class="mono">CFG.addresses</span> 填上已部署的合約地址。<br/>
-              若 Heart 尚未上鏈或地址未填，該列會顯示「未設定」並不影響其他點位讀取。
-            </div>
+            RPC 模式：公開 RPC 讀鏈（不需要錢包）。<br/>
+            連錢包只在未來「一鍵點火 / 一鍵呼吸」才需要；本版先把讀鏈穩定做好。
           </div>
         </div>
 
@@ -340,20 +381,85 @@
             <div class="k">鏈上連線</div>
             <div class="v" style="font-size:14px;font-weight:900;" id="rpcStatus">尚未檢測</div>
             <div class="t">
-              <span class="badge">RPC: <b class="mono" id="rpcNow">--</b></span>
-              <span class="badge">STATUS: <b class="mono" id="rpcCode">--</b></span>
+              <span class="badge">CHAIN: <b class="mono" id="chainId">--</b></span>
+              <span class="badge">BLOCK: <b class="mono" id="blockNum">--</b></span>
             </div>
           </div>
 
           <div class="card">
-            <div class="k">快速提示</div>
-            <div class="v" style="font-size:14px;font-weight:900;">入口只做導航＋讀鏈</div>
+            <div class="k">全域點火（Multi‑Heart）</div>
+            <div class="v" style="font-size:14px;font-weight:900;" id="globalIgniteStatus">尚未讀取</div>
             <div class="t">
-              <span class="badge">Temple: <b class="mono">/K線西遊記/temples/</b></span>
-              <span class="badge">Assets: <b class="mono">/K線西遊記/assets/</b></span>
+              <span class="badge">HEARTS: <b class="mono" id="heartCount">0</b></span>
+              <span class="badge">IN WINDOW: <b class="mono" id="inWindowCount">0</b></span>
+              <span class="badge">IGNITED TODAY: <b class="mono" id="ignitedCount">0</b></span>
+            </div>
+            <div class="smallText" style="margin-top:10px;">
+              <span class="mono" id="globalIgniteHint">—</span>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:950;letter-spacing:.35px;">全域點火清單（Heart 狀態）</div>
+        <div class="badge" id="igniteTableStatus">偵測中…</div>
+      </div>
+      <div class="smallText" style="margin-top:8px;">
+        顯示每個 Heart：血量（KGEN）、是否在點火窗口、今日是否點火。
+      </div>
+      <div style="margin-top:12px; overflow:auto;">
+        <table class="table" style="min-width:720px">
+          <thead>
+            <tr>
+              <td class="kTag">座標</td>
+              <td class="kTag">地址</td>
+              <td class="kTag">血量（KGEN）</td>
+              <td class="kTag">窗口</td>
+              <td class="kTag">今日點火</td>
+            </tr>
+          </thead>
+          <tbody id="igniteRows">
+            <tr><td colspan="5">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:950;letter-spacing:.35px;">11520｜花果山台灣・悟空大腦交易所（BrainExchange）</div>
+        <div class="badge" id="brainStatusBadge">尚未讀取</div>
+      </div>
+
+      <div class="smallText" style="margin-top:8px;">
+        腦容量顯示固定 <span class="mono">50,000,000 KGEN</span>（悟空腦容量）。
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-top:12px;">
+        <div class="card" style="min-height:auto;">
+          <div class="k">Brain 地址</div>
+          <div class="v" style="font-size:13px;" id="brainAddr">未設定</div>
+          <div class="smallText" style="margin-top:8px;">座標：<span class="mono">11520</span></div>
+        </div>
+
+        <div class="card" style="min-height:auto;">
+          <div class="k">腦內 KGEN（餘額）</div>
+          <div class="v mono" id="brainBal">--</div>
+          <div class="smallText" style="margin-top:8px;">讀取：<span class="mono">KGEN.balanceOf(Brain)</span></div>
+        </div>
+
+        <div class="card" style="min-height:auto;">
+          <div class="k">容量（VaultCap）</div>
+          <div class="v mono" id="brainCap">50,000,000</div>
+          <div class="smallText" style="margin-top:8px;">填充率：<span class="mono" id="brainFill">--</span></div>
+        </div>
+      </div>
+
+      <div class="smallText" style="margin-top:12px;">
+        Brain 尚未部署時，這區顯示「未部署」，不影響 Portal 其他功能。
       </div>
     </section>
 
@@ -363,11 +469,10 @@
         <div class="badge warn" id="nodesStatus">偵測中…</div>
       </div>
       <div class="smallText" style="margin-top:8px;">
-        點位尚未施工完成時，入口會顯示「施工準備中」。偵測到檔案後自動亮燈。
+        12345 會用 <span class="mono">fetch</span> 偵測是否存在 index.html；其他殿目前先用「地址是否已填」顯示狀態。
       </div>
 
-      <div id="nodesGrid" style="margin-top:12px;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;">
-      </div>
+      <div id="nodesGrid" style="margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;"></div>
     </section>
 
     <section class="map" id="map">
@@ -380,38 +485,54 @@
       </div>
 
       <div class="nodes">
-        <a class="node" href="./temples/12345/index.html" data-node="12345">
+
+        <a class="node" href="./temples/12345/index.html" data-node="12345" id="nodeLink12345">
           <div class="n">五指山・悟空財神殿</div>
           <div class="id">12345</div>
           <div class="p">Heart / 發財金 / 呼吸心跳 / 還願 / 許願 / 光明燈 / 影像自看</div>
           <div class="p mono" id="node12345Hint">Heart 未設定</div>
         </a>
 
-        <a class="node" href="javascript:void(0)" data-node="18888">
+        <a class="node" href="javascript:void(0)" data-node="11520" id="nodeLink11520">
+          <div class="n">花果山台灣・悟空大腦交易所</div>
+          <div class="id">11520</div>
+          <div class="p">Reward 0.05% 稅流 / 保證金池 / 月結算</div>
+          <div class="p mono" id="node11520Hint">Brain 未設定</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="16888" id="nodeLink16888">
+          <div class="n">廣寒宮・七仙女許願池</div>
+          <div class="id">16888</div>
+          <div class="p">許願 / 點燈影像留言 / 七仙女分潤</div>
+          <div class="p mono" id="node16888Hint">未部署</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="18888" id="nodeLink18888">
           <div class="n">靈霄寶殿・玉帝金庫</div>
           <div class="id">18888</div>
-          <div class="p">神明銀行 / 0.1% 稅接收 / Pull Claim / 每月 5 日結算</div>
-          <div class="p mono" id="node18888Hint">施工準備中</div>
+          <div class="p">Deity Bank / 0.1% 稅收接收</div>
+          <div class="p mono" id="node18888Hint">未部署</div>
         </a>
 
-        <a class="node" href="javascript:void(0)" data-node="18921">
-          <div class="n">斬妖台・AutoLP/分流</div>
+        <a class="node" href="javascript:void(0)" data-node="18921" id="nodeLink18921">
+          <div class="n">斬妖台・AutoLP/分流引擎</div>
           <div class="id">18921</div>
-          <div class="p">AutoLP 0.05% / 斬妖分流 splitter / 活動引擎</div>
-          <div class="p mono" id="node18921Hint">施工準備中</div>
+          <div class="p">0.05% AutoLP 稅 / 分流引擎</div>
+          <div class="p mono" id="node18921Hint">未部署</div>
         </a>
 
-        <a class="node" href="javascript:void(0)" data-node="108000">
+        <a class="node" href="javascript:void(0)" data-node="108000" id="nodeLink108000">
           <div class="n">花果山火星（MARS）</div>
           <div class="id">108000</div>
-          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / Brain 月撥付分潤</div>
-          <div class="p mono" id="node108000Hint">施工準備中</div>
+          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / 月分潤自領</div>
+          <div class="p mono" id="node108000Hint">未部署</div>
         </a>
+
       </div>
 
       <div class="footer">
-        Portal V1.3 新增：全域點火面板（可同時追蹤多個 Heart）。<br/>
-        本頁不放「客服／相機／許願」避免擠爆入口；那些留在各 Temple。
+        Portal V1.4：Multi‑Heart 全域點火 + 11520 Brain（腦容量 5000萬）已加上。<br/>
+        16888 廣寒宮先納入座標與入口（待你部署許願池合約後再點亮）。<br/>
       </div>
     </section>
 
@@ -424,13 +545,8 @@
   </div>
 
 <script>
-/* =========================
-   Portal V1.3 — Global Ignite (BSC)
-   - No wallet required (default JsonRpcProvider)
-   - Multi-heart support
-   ========================= */
-
-const CFG = {
+const LS_KEY = "KLINE_PORTAL_V1_4_CFG";
+const DEFAULT_CFG = {
   chain: {
     name: "BSC",
     chainIdExpected: 56,
@@ -441,32 +557,101 @@ const CFG = {
     ]
   },
   addresses: {
-    // 已部署（你提供）
     kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    // Heart（部署後填）
-    heart12345: "0x0000000000000000000000000000000000000000",
-
-    // 未上鏈者先留空或 0x0（不影響讀取）
+    hearts: [
+      { id: "12345", addr: "0x0000000000000000000000000000000000000000" }
+    ],
+    brain11520: "0x0000000000000000000000000000000000000000",
+    wish16888: "0x0000000000000000000000000000000000000000",
     bank18888: "0x0000000000000000000000000000000000000000",
+    zhanyao18921: "0x0000000000000000000000000000000000000000",
     mars108000: "0x0000000000000000000000000000000000000000",
-    splitter18921: "0x0000000000000000000000000000000000000000"
+    fairies7: []
   },
-  nodesToProbe: [
-    { id:"12345", name:"五指山・悟空財神殿", path:"./temples/12345/index.html" },
-    { id:"108000", name:"花果山火星・齊天豪宅", path:"./temples/108000/index.html" },
-    { id:"18888", name:"靈霄寶殿・玉帝金庫", path:"./temples/18888/index.html" },
-    { id:"18921", name:"斬妖台・AutoLP/分流", path:"./temples/18921/index.html" },
-  ]
+  brain: { capWhole: 50000000 }
 };
+function loadCfg(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return structuredClone(DEFAULT_CFG);
+    const parsed = JSON.parse(raw);
+    const cfg = structuredClone(DEFAULT_CFG);
+    cfg.chain = Object.assign({}, cfg.chain, parsed.chain || {});
+    cfg.addresses = Object.assign({}, cfg.addresses, parsed.addresses || {});
+    if(Array.isArray(parsed.addresses?.hearts)) cfg.addresses.hearts = parsed.addresses.hearts;
+    if(Array.isArray(parsed.addresses?.fairies7)) cfg.addresses.fairies7 = parsed.addresses.fairies7;
+    cfg.brain = Object.assign({}, cfg.brain, parsed.brain || {});
+    return cfg;
+  }catch(e){
+    return structuredClone(DEFAULT_CFG);
+  }
+}
+function saveCfg(cfg){ localStorage.setItem(LS_KEY, JSON.stringify(cfg)); }
+function $(id){ return document.getElementById(id); }
+function setText(id, v){ $(id).textContent = v; }
+function fmtNum(n){ try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); } }
+function shortAddr(a){ if(!a||a.length<10) return a||""; return a.slice(0,6)+"…"+a.slice(-4); }
+function isZeroAddr(a){ return !a || a.toLowerCase()==="0x0000000000000000000000000000000000000000"; }
+function isAddr(a){ try{ return ethers.utils.isAddress(a); }catch(e){ return false; } }
+function badgeSet(el, kind, text){
+  el.className = "badge " + (kind==="ok"?"ok":kind==="warn"?"warn":"bad");
+  el.textContent = text;
+}
+let __errors = [];
+window.addEventListener("error", (e)=>{ __errors.push(String(e.message||e.error||e)); });
+window.addEventListener("unhandledrejection", (e)=>{ __errors.push(String(e.reason||e)); });
 
-// Minimal ABIs
+function startStars(){
+  const c = document.getElementById("stars");
+  const ctx = c.getContext("2d");
+  const resize = ()=>{
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    c.width = Math.floor(c.clientWidth*dpr);
+    c.height = Math.floor(c.clientHeight*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  };
+  const rand = (a,b)=> a + Math.random()*(b-a);
+  let stars = [];
+  const init = ()=>{
+    const w = c.clientWidth, h=c.clientHeight;
+    stars = Array.from({length: 120}, ()=>({x:rand(0,w), y:rand(0,h), r:rand(.3,1.4), v:rand(.08,.32)}));
+  };
+  const loop = ()=>{
+    const w = c.clientWidth, h=c.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    ctx.globalAlpha = .9;
+    for(const s of stars){
+      s.y += s.v;
+      if(s.y > h+10){ s.y=-10; s.x=rand(0,w); }
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  };
+  resize(); init(); loop();
+  window.addEventListener("resize", ()=>{ resize(); init(); });
+}
+
+async function makeProvider(cfg){
+  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
+  let lastErr = null;
+  for(const url of cfg.chain.rpcUrls){
+    try{
+      const p = new ethers.providers.JsonRpcProvider(url);
+      await p.getBlockNumber();
+      return p;
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error("No RPC works");
+}
+
 const ERC20_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function decimals() view returns (uint8)",
   "function symbol() view returns (string)"
 ];
-
-// Heart ABI (read-only subset aligned to your Portal V1.2)
 const HEART_ABI = [
   "function token() view returns (address)",
   "function windowStartSec() view returns (uint32)",
@@ -478,390 +663,417 @@ const HEART_ABI = [
   "function heartbeatReward() view returns (uint256)"
 ];
 
-function $(id){ return document.getElementById(id); }
-function setText(id, v){ const el=$(id); if(el) el.textContent = v; }
-
-function fmtNum(n){
-  try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); }
+function initCounters(){
+  const kToday = "KLINE_PORTAL_TODAY_" + new Date().toISOString().slice(0,10);
+  const kTotal = "KLINE_PORTAL_TOTAL";
+  const today = Number(localStorage.getItem(kToday)||"0") + 1;
+  localStorage.setItem(kToday, String(today));
+  const total = Number(localStorage.getItem(kTotal)||"0") + 1;
+  localStorage.setItem(kTotal, String(total));
+  setText("today", String(today));
+  setText("total", String(total));
+  $("resetBtn").onclick = ()=>{
+    localStorage.removeItem(kToday);
+    localStorage.removeItem(kTotal);
+    setText("today", "0");
+    setText("total", "0");
+  };
+  $("pingBtn").onclick = ()=>{
+    try{ navigator.vibrate?.(30); }catch(e){}
+    const now = new Date();
+    setText("clock", now.toLocaleTimeString());
+  };
 }
-function shortAddr(a){
-  if(!a || a.length < 10) return a || "";
-  return a.slice(0,6) + "…" + a.slice(-4);
-}
-function isZero(a){
-  return !a || a.toLowerCase() === "0x0000000000000000000000000000000000000000";
-}
-function setBadge(el, kind, text){
-  if(!el) return;
-  el.classList.remove("ok","warn","bad");
-  if(kind) el.classList.add(kind);
-  el.textContent = text;
-}
-
-function copyText(text){
-  const t = String(text || "");
-  if(!t) return;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).catch(()=>{});
-  }else{
-    const ta = document.createElement("textarea");
-    ta.value = t; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand("copy"); }catch(e){}
-    document.body.removeChild(ta);
-  }
+function startClock(){
+  const tick = ()=>{
+    const now = new Date();
+    setText("clock", now.toLocaleTimeString());
+    setText("nowClock", now.toLocaleTimeString());
+  };
+  tick();
+  setInterval(tick, 1000);
 }
 
-/* ===== Supervisor ===== */
-const SUP = { loaded:false, stars:false, nodes:false, global:false, errors:false };
-function setDot(id, kind){
-  const el = $(id);
-  if(!el) return;
-  el.classList.remove("ok","warn","bad");
-  el.classList.add(kind);
+async function detectNodeFile(path){
+  try{
+    const res = await fetch(path, { method:"GET", cache:"no-store" });
+    return res.ok;
+  }catch(e){ return false; }
 }
-function updateSupervisor(){
-  const checks = [
-    ["chkLoaded", SUP.loaded ? "ok":"bad"],
-    ["chkStars",  SUP.stars  ? "ok":"warn"],
-    ["chkNodes",  SUP.nodes  ? "ok":"warn"],
-    ["chkGlobal", SUP.global ? "ok":"warn"],
-    ["chkErrors", SUP.errors ? "warn":"ok"],
-  ];
-  let okCount = 0;
-  for(const [id, kind] of checks){
-    setDot(id, kind);
-    if(kind === "ok") okCount++;
-  }
-  const pct = Math.round((okCount / checks.length) * 100);
-  setText("supPct", `${pct}%`);
-  const fill = $("supFill"); if(fill) fill.style.width = `${pct}%`;
-}
-
-/* ===== Starfield ===== */
-function startStars(){
-  const c = $("stars");
-  if(!c) return false;
-  const ctx = c.getContext("2d");
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  let w=0,h=0, stars=[];
-  function resize(){
-    w = c.clientWidth; h = c.clientHeight;
-    c.width = Math.floor(w*dpr);
-    c.height = Math.floor(h*dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    stars = [];
-    const n = Math.min(140, Math.floor((w*h)/9000));
-    for(let i=0;i<n;i++){
-      stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.6+0.2, a:Math.random()*0.75+0.1, s:Math.random()*0.3+0.05});
-    }
-  }
-  function tick(){
-    ctx.clearRect(0,0,w,h);
-    for(const s of stars){
-      s.y += s.s; if(s.y > h) s.y = 0;
-      ctx.globalAlpha = s.a;
-      ctx.fillStyle = "white";
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    requestAnimationFrame(tick);
-  }
-  window.addEventListener("resize", resize);
-  resize(); tick();
-  return true;
+function nodeCardHTML(n){
+  return `
+    <div class="card" style="min-height:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-weight:950;letter-spacing:.35px;">${n.name}</div>
+          <div class="smallText" style="margin-top:6px;">${n.desc}</div>
+        </div>
+        <div class="badge" id="nodeStatus_${n.id}">偵測中…</div>
+      </div>
+      <div class="smallText" style="margin-top:10px;">座標：<span class="mono">${n.id}</span></div>
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn small" href="${n.href}" ${n.href.startsWith("http")?'target="_blank" rel="noreferrer"':''}>開啟</a>
+        <span class="badge" id="nodeHint_${n.id}">—</span>
+      </div>
+    </div>
+  `;
 }
 
-/* ===== Provider ===== */
-let provider = null;
-let providerUrl = "";
-async function makeProvider(){
-  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
-  let lastErr = null;
-  for(const url of CFG.chain.rpcUrls){
-    try{
-      const p = new ethers.providers.JsonRpcProvider(url);
-      await p.getBlockNumber();
-      providerUrl = url;
-      return p;
-    }catch(e){
-      lastErr = e;
-    }
-  }
-  throw lastErr || new Error("No RPC works");
-}
-
-async function refreshChain(){
+async function refreshChain(provider, cfg){
   const net = await provider.getNetwork();
-  const bn = await provider.getBlockNumber();
   setText("chainId", String(net.chainId));
+  const bn = await provider.getBlockNumber();
   setText("blockNum", String(bn));
-  setText("rpcNow", providerUrl ? shortAddr(providerUrl) : "--");
-  setText("rpcCode", "OK");
-  if(net.chainId === CFG.chain.chainIdExpected){
-    $("rpcStatus").textContent = "RPC OK（讀鏈正常）";
-    $("rpcStatus").style.color = "rgba(210,255,235,.92)";
-  }else{
-    $("rpcStatus").textContent = `RPC OK（chainId=${net.chainId}）`;
-    $("rpcStatus").style.color = "rgba(255,238,210,.92)";
-  }
+  $("rpcStatus").textContent = (net.chainId === cfg.chain.chainIdExpected) ? "RPC OK（讀鏈正常）" : `RPC OK（chainId=${net.chainId}）`;
 }
 
-/* ===== Global Ignite ===== */
-function heartsList(){
-  return [
-    { id:"12345", name:"五指山 Heart（12345）", addr: CFG.addresses.heart12345 }
-    // 之後要加新 Heart，只要在這裡多加一列即可：
-    // { id:"xxxxx", name:"某某 Heart（xxxxx）", addr:"0x..." }
-  ];
+async function readTokenMeta(provider, tokenAddr){
+  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+  const [dec, sym] = await Promise.all([
+    token.decimals().catch(()=>18),
+    token.symbol().catch(()=> "KGEN"),
+  ]);
+  return { token, dec, sym };
 }
-
 function hhmm(sec){
-  const s = Number(sec || 0);
-  const h = Math.floor(s/3600);
-  const m = Math.floor((s%3600)/60);
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
   return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
 }
 
-async function readHeartRow(h){
-  const grid = $("globalGrid");
-  const rowId = `heartRow_${h.id}`;
-  let row = $(rowId);
+async function refreshGlobalIgnite(provider, cfg){
+  const hearts = Array.isArray(cfg.addresses.hearts) ? cfg.addresses.hearts : [];
+  setText("heartCount", String(hearts.length));
+  $("igniteRows").innerHTML = "";
 
-  if(!row){
-    row = document.createElement("div");
-    row.className = "gRow";
-    row.id = rowId;
-    row.innerHTML = `
-      <div class="gTop">
-        <div>
-          <div class="gName" id="${rowId}_name"></div>
-          <div class="gAddr" id="${rowId}_addr"></div>
-        </div>
-        <div class="gMeta">
-          <span class="copyBtn" id="${rowId}_copy">Copy</span>
-          <span class="badge warn" id="${rowId}_state">待檢測</span>
-        </div>
-      </div>
-      <div class="gBadges">
-        <span class="badge" id="${rowId}_bal">血量: <strong class="mono">--</strong> KGEN</span>
-        <span class="badge" id="${rowId}_ignite">今日點火: <strong class="mono">--</strong></span>
-        <span class="badge" id="${rowId}_window">窗口: <strong class="mono">--</strong></span>
-        <span class="badge" id="${rowId}_inwin">inWindow: <strong class="mono">--</strong></span>
-        <span class="badge" id="${rowId}_reward">ignite/heartbeat: <strong class="mono">--</strong></span>
-      </div>
-    `;
-    grid.appendChild(row);
-    $( `${rowId}_copy`).addEventListener("click", ()=> copyText(h.addr));
+  if(!hearts.length){
+    $("igniteTableStatus").textContent = "沒有 Heart（請在設定加入）";
+    $("globalIgniteStatus").textContent = "沒有 Heart";
+    $("globalIgniteHint").textContent = "請按右上角【設定】加入 Heart 地址。";
+    return { ok:false, inWindow:0, ignited:0, total:0 };
   }
 
-  setText(`${rowId}_name`, h.name);
-  setText(`${rowId}_addr`, isZero(h.addr) ? "未設定（請填合約地址）" : h.addr);
-
-  if(isZero(h.addr)){
-    setBadge($( `${rowId}_state`), "warn", "未設定");
-    setText(`${rowId}_bal`, "血量: -- KGEN");
-    setText(`${rowId}_ignite`, "今日點火: --");
-    setText(`${rowId}_window`, "窗口: --");
-    setText(`${rowId}_inwin`, "inWindow: --");
-    setText(`${rowId}_reward`, "ignite/heartbeat: --");
-    return { ok:false, ignited:false };
+  const tokenAddr = cfg.addresses.kgenToken;
+  if(!isAddr(tokenAddr) || isZeroAddr(tokenAddr)){
+    $("igniteTableStatus").textContent = "KGEN 未設定";
+    $("globalIgniteStatus").textContent = "KGEN 未設定";
+    $("globalIgniteHint").textContent = "請在設定填 KGEN Token 地址。";
+    return { ok:false, inWindow:0, ignited:0, total:hearts.length };
   }
 
-  const tokenAddr = CFG.addresses.kgenToken;
-  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
-  const heartC = new ethers.Contract(h.addr, HEART_ABI, provider);
+  const meta = await readTokenMeta(provider, tokenAddr);
 
-  try{
-    const [dec, bal, ws, we, inWin, dayId, ignited, ir, hr] = await Promise.all([
-      token.decimals().catch(()=>18),
-      token.balanceOf(h.addr).catch(()=> ethers.BigNumber.from(0)),
-      heartC.windowStartSec(),
-      heartC.windowEndSec(),
-      heartC.inIgniteWindow(),
-      heartC.localDayIdNow(),
-      heartC.localDayIdNow().then(d=>heartC.dayIgnited(d)).catch(()=>false),
-      heartC.igniteReward().catch(()=> ethers.BigNumber.from(0)),
-      heartC.heartbeatReward().catch(()=> ethers.BigNumber.from(0))
-    ]);
+  let inWin = 0, ignited = 0, okCount = 0;
 
-    const balFmt = Number(ethers.utils.formatUnits(bal, dec));
-    setText(`${rowId}_bal`, `血量: ${fmtNum(balFmt.toFixed(2))} KGEN`);
-    setText(`${rowId}_ignite`, `今日點火: ${ignited ? "YES" : "NO"}`);
-    setText(`${rowId}_window`, `窗口: ${hhmm(ws)}-${hhmm(we)}`);
-    setText(`${rowId}_inwin`, `inWindow: ${inWin ? "YES" : "NO"}`);
+  for(const h of hearts){
+    const id = String(h.id || "").trim() || "????";
+    const addr = String(h.addr || "").trim();
+    const tr = document.createElement("tr");
 
-    const irFmt = Number(ethers.utils.formatUnits(ir, dec));
-    const hrFmt = Number(ethers.utils.formatUnits(hr, dec));
-    setText(`${rowId}_reward`, `ignite/heartbeat: ${fmtNum(irFmt)} / ${fmtNum(hrFmt)} KGEN`);
-
-    setBadge($( `${rowId}_state`), ignited ? "ok" : (inWin ? "warn" : "warn"), ignited ? "已點火" : (inWin ? "窗口中" : "未點火"));
-    return { ok:true, ignited: !!ignited, inWin: !!inWin, dayId: String(dayId) };
-  }catch(e){
-    setBadge($( `${rowId}_state`), "bad", "讀取失敗");
-    return { ok:false, ignited:false, err: e };
-  }
-}
-
-async function refreshGlobalIgnite(){
-  const hs = heartsList();
-  $("globalGrid").innerHTML = "";
-  let anyIgnited = false;
-  let allOk = true;
-  let dayIdRef = null;
-  for(const h of hs){
-    const r = await readHeartRow(h);
-    if(!r.ok) allOk = false;
-    if(r.ignited) anyIgnited = true;
-    if(!dayIdRef && r.dayId) dayIdRef = r.dayId;
-  }
-
-  // Global ignite logic: 只要任一 Heart 今日已點火 => GLOBAL=YES
-  if(anyIgnited){
-    setBadge($("globalIgnite"), "ok", "GLOBAL: YES");
-    setText("globalIgniteText", "YES");
-  }else{
-    setBadge($("globalIgnite"), "warn", "GLOBAL: NO");
-    setText("globalIgniteText", "NO");
-  }
-
-  SUP.global = allOk;
-}
-
-/* ===== Nodes probe ===== */
-async function probeNodes(){
-  const grid = $("nodesGrid");
-  grid.innerHTML = "";
-  const results = [];
-  for(const n of CFG.nodesToProbe){
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="k">${n.name}</div>
-      <div class="v mono">${n.id}</div>
-      <div class="t">
-        <span class="badge warn" id="probe_${n.id}">偵測中…</span>
-        <a class="btn small" href="${n.path}" target="_blank" rel="noreferrer">開啟</a>
-      </div>
-      <div class="smallText mono" style="margin-top:10px;opacity:.85;">${n.path}</div>
-    `;
-    grid.appendChild(card);
+    if(!isAddr(addr) || isZeroAddr(addr)){
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td class="mono">${addr ? shortAddr(addr) : "未設定"}</td>
+        <td>--</td>
+        <td class="warnText">未部署/未設定</td>
+        <td class="warnText">--</td>
+      `;
+      $("igniteRows").appendChild(tr);
+      continue;
+    }
 
     try{
-      const res = await fetch(n.path, { method:"GET", cache:"no-store" });
-      if(res.ok){
-        setBadge($( `probe_${n.id}` ), "ok", "已施工（index.html OK）");
-        results.push(true);
-        // update node hint lines
-        if(n.id === "12345") setText("node12345Hint", "入口可用");
-        if(n.id === "108000") setText("node108000Hint", "入口可用");
-        if(n.id === "18888") setText("node18888Hint", "入口可用");
-        if(n.id === "18921") setText("node18921Hint", "入口可用");
-      }else{
-        setBadge($( `probe_${n.id}` ), "warn", "施工準備中");
-        results.push(false);
-      }
+      const heartC = new ethers.Contract(addr, HEART_ABI, provider);
+      const [bal, ws, we, inWindow, dayId] = await Promise.all([
+        meta.token.balanceOf(addr).catch(()=> ethers.BigNumber.from(0)),
+        heartC.windowStartSec(),
+        heartC.windowEndSec(),
+        heartC.inIgniteWindow(),
+        heartC.localDayIdNow()
+      ]);
+      const ign = await heartC.dayIgnited(dayId).catch(()=>false);
+
+      const balFmt = Number(ethers.utils.formatUnits(bal, meta.dec));
+      const balTxt = Number.isFinite(balFmt) ? fmtNum(balFmt.toFixed(2)) : "--";
+
+      if(inWindow) inWin++;
+      if(ign) ignited++;
+      okCount++;
+
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td class="mono" title="${addr}">${shortAddr(addr)}</td>
+        <td class="mono">${balTxt}</td>
+        <td class="${inWindow ? "okText" : "warnText"}">${hhmm(ws)}–${hhmm(we)} ${inWindow ? "(IN)" : ""}</td>
+        <td class="${ign ? "okText" : "warnText"}">${ign ? "YES" : "NO"}</td>
+      `;
+      $("igniteRows").appendChild(tr);
+
     }catch(e){
-      setBadge($( `probe_${n.id}` ), "bad", "偵測失敗");
-      results.push(false);
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td class="mono" title="${addr}">${shortAddr(addr)}</td>
+        <td>--</td>
+        <td class="warnText">讀取失敗</td>
+        <td class="warnText">--</td>
+      `;
+      $("igniteRows").appendChild(tr);
     }
   }
-  const okCount = results.filter(Boolean).length;
-  if(okCount === results.length){
-    setBadge($("nodesStatus"), "ok", `全部亮燈（${okCount}/${results.length}）`);
+
+  setText("inWindowCount", String(inWin));
+  setText("ignitedCount", String(ignited));
+
+  if(okCount > 0){
+    $("igniteTableStatus").textContent = "讀取完成";
+    $("globalIgniteStatus").textContent = `OK（${okCount}/${hearts.length} 可讀）`;
+    $("globalIgniteHint").textContent = `多殿全域監看：共 ${hearts.length} 殿。`;
   }else{
-    setBadge($("nodesStatus"), "warn", `部分施工（${okCount}/${results.length}）`);
+    $("igniteTableStatus").textContent = "未可讀（地址未設定或未部署）";
+    $("globalIgniteStatus").textContent = "未可讀";
+    $("globalIgniteHint").textContent = "請在設定填入 Heart 合約地址。";
   }
-  SUP.nodes = okCount > 0;
+  return { ok: okCount>0, inWindow: inWin, ignited: ignited, total: hearts.length };
 }
 
-/* ===== Visit counters ===== */
-const VISIT_KEY = "KLINE_PORTAL_VISITS_V1";
-function getDayKey(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  return `${y}${m}${dd}`;
-}
-function loadVisits(){
+async function refreshBrain(provider, cfg){
+  const brain = String(cfg.addresses.brain11520||"").trim();
+  setText("brainAddr", brain && !isZeroAddr(brain) ? brain : "未設定");
+  setText("node11520Hint", brain && !isZeroAddr(brain) ? `Brain: ${shortAddr(brain)}` : "Brain 未設定");
+
+  const cap = Number(cfg.brain?.capWhole || 50000000);
+  setText("brainCap", fmtNum(cap));
+
+  if(!isAddr(brain) || isZeroAddr(brain)){
+    badgeSet($("brainStatusBadge"), "warn", "未部署/未設定");
+    setText("brainBal", "--");
+    setText("brainFill", "--");
+    return false;
+  }
+
+  const tokenAddr = String(cfg.addresses.kgenToken||"").trim();
+  if(!isAddr(tokenAddr) || isZeroAddr(tokenAddr)){
+    badgeSet($("brainStatusBadge"), "warn", "KGEN 未設定");
+    setText("brainBal", "--");
+    setText("brainFill", "--");
+    return false;
+  }
+
   try{
-    const raw = localStorage.getItem(VISIT_KEY);
-    return raw ? JSON.parse(raw) : { total:0, daily:{} };
+    const meta = await readTokenMeta(provider, tokenAddr);
+    const bal = await meta.token.balanceOf(brain);
+    const balFmt = Number(ethers.utils.formatUnits(bal, meta.dec));
+    const balTxt = Number.isFinite(balFmt) ? fmtNum(balFmt.toFixed(2)) : "--";
+    setText("brainBal", balTxt);
+
+    const fill = (Number.isFinite(balFmt) && cap>0) ? (balFmt / cap * 100) : NaN;
+    setText("brainFill", Number.isFinite(fill) ? (fill.toFixed(2) + "%") : "--");
+
+    badgeSet($("brainStatusBadge"), "ok", "讀取完成");
+    return true;
   }catch(e){
-    return { total:0, daily:{} };
+    badgeSet($("brainStatusBadge"), "warn", "讀取失敗");
+    setText("brainBal", "--");
+    setText("brainFill", "--");
+    return false;
   }
 }
-function saveVisits(v){ localStorage.setItem(VISIT_KEY, JSON.stringify(v)); }
-function bumpVisits(){
-  const v = loadVisits();
-  v.total = (v.total||0) + 1;
-  const dk = getDayKey();
-  v.daily[dk] = (v.daily[dk]||0) + 1;
-  saveVisits(v);
-  setText("total", String(v.total));
-  setText("today", String(v.daily[dk]));
+
+function applyNodeHints(cfg){
+  const a = cfg.addresses;
+  const heart0 = (a.hearts||[]).find(x=>String(x.id||"")==="12345");
+  setText("node12345Hint", (heart0?.addr && !isZeroAddr(heart0.addr) && isAddr(heart0.addr)) ? `Heart: ${shortAddr(heart0.addr)}` : "Heart 未設定");
+  setText("node16888Hint", (!isZeroAddr(a.wish16888) && isAddr(a.wish16888)) ? `Wish: ${shortAddr(a.wish16888)}` : `未部署（仙女 ${String((a.fairies7||[]).length)}/7）`);
+  setText("node18888Hint", (!isZeroAddr(a.bank18888) && isAddr(a.bank18888)) ? `Bank: ${shortAddr(a.bank18888)}` : "未部署");
+  setText("node18921Hint", (!isZeroAddr(a.zhanyao18921) && isAddr(a.zhanyao18921)) ? `Zhanyao: ${shortAddr(a.zhanyao18921)}` : "未部署");
+  setText("node108000Hint", (!isZeroAddr(a.mars108000) && isAddr(a.mars108000)) ? `Mars: ${shortAddr(a.mars108000)}` : "未部署");
 }
 
-/* ===== Clock ===== */
-function startClock(){
-  function tick(){
-    const d = new Date();
-    const t = d.toLocaleTimeString("en-GB");
-    setText("clock", t);
-    setText("nowClock", t);
+function cfgToTextHearts(hearts){ return (hearts||[]).map(h=>`${String(h.id||"").trim()},${String(h.addr||"").trim()}`).join("\n"); }
+function textToHearts(text){
+  const lines = String(text||"").split("\n").map(s=>s.trim()).filter(Boolean);
+  const out = [];
+  for(const line of lines){
+    const parts = line.split(",").map(s=>s.trim()).filter(Boolean);
+    if(parts.length<2) continue;
+    out.push({ id: parts[0], addr: parts[1] });
   }
-  tick(); setInterval(tick, 1000);
+  return out;
+}
+function openDrawer(){ $("drawerScrim").classList.add("on"); $("drawer").classList.add("on"); }
+function closeDrawer(){ $("drawerScrim").classList.remove("on"); $("drawer").classList.remove("on"); }
+function renderDrawer(cfg){
+  $("inKgenToken").value = cfg.addresses.kgenToken || "";
+  $("inHearts").value = cfgToTextHearts(cfg.addresses.hearts||[]);
+  $("inBrain11520").value = cfg.addresses.brain11520 || "";
+  $("inMars108000").value = cfg.addresses.mars108000 || "";
+  $("inBank18888").value = cfg.addresses.bank18888 || "";
+  $("inZhanyao18921").value = cfg.addresses.zhanyao18921 || "";
+  $("inWish16888").value = cfg.addresses.wish16888 || "";
+  $("inFairies7").value = (cfg.addresses.fairies7||[]).join("\n");
+}
+function readDrawerToCfg(cfg){
+  const next = structuredClone(cfg);
+  const kgen = $("inKgenToken").value.trim();
+  const heartsText = $("inHearts").value;
+  const brain = $("inBrain11520").value.trim();
+  const mars = $("inMars108000").value.trim();
+  const bank = $("inBank18888").value.trim();
+  const zh = $("inZhanyao18921").value.trim();
+  const wish = $("inWish16888").value.trim();
+  const fairiesText = $("inFairies7").value;
+
+  if(kgen) next.addresses.kgenToken = kgen;
+  const hearts = textToHearts(heartsText);
+  if(hearts.length) next.addresses.hearts = hearts;
+  if(brain) next.addresses.brain11520 = brain;
+  if(mars) next.addresses.mars108000 = mars;
+  if(bank) next.addresses.bank18888 = bank;
+  if(zh) next.addresses.zhanyao18921 = zh;
+  if(wish) next.addresses.wish16888 = wish;
+
+  const fairies = String(fairiesText||"").split("\n").map(s=>s.trim()).filter(Boolean);
+  next.addresses.fairies7 = fairies.slice(0,7);
+  return next;
 }
 
-/* ===== Init ===== */
-window.addEventListener("error", (e)=>{ SUP.errors = true; updateSupervisor(); });
+function setDot(id, state){
+  const el = $(id);
+  el.classList.remove("ok","warn","bad");
+  el.classList.add(state);
+}
+function setProgress(pct){
+  setText("supPct", pct + "%");
+  $("supFill").style.width = pct + "%";
+}
+function openSupervisor(){ $("supervisorOverlay").classList.add("on"); }
+function closeSupervisor(){ $("supervisorOverlay").classList.remove("on"); }
+function runSupervisor(result){
+  setDot("chkLoaded", result.loaded ? "ok" : "bad");
+  setDot("chkStars", result.stars ? "ok" : "warn");
+  setDot("chkNodes", result.nodes ? "ok" : "warn");
+  setDot("chkGlobalIgnite", result.globalIgnite ? "ok" : "warn");
+  setDot("chkBrainPanel", result.brain ? "ok" : "warn");
+  setDot("chkErrors", result.errors ? "ok" : "warn");
+  const score = [result.loaded,result.stars,result.nodes,result.globalIgnite,result.brain,result.errors].filter(Boolean).length;
+  setProgress(Math.round(score/6*100));
+}
 
-$("btnSupervisor").addEventListener("click", ()=>{
-  $("supervisorOverlay").classList.add("on");
-  updateSupervisor();
-});
-$("supClose").addEventListener("click", ()=>{
-  $("supervisorOverlay").classList.remove("on");
-});
-$("supervisorOverlay").addEventListener("click", (e)=>{
-  if(e.target === $("supervisorOverlay")) $("supervisorOverlay").classList.remove("on");
-});
-
-$("pingBtn").addEventListener("click", ()=> bumpVisits());
-$("resetBtn").addEventListener("click", ()=>{
-  localStorage.removeItem(VISIT_KEY);
-  bumpVisits();
-});
-
-(async function boot(){
-  SUP.loaded = true;
-
+(async function main(){
+  initCounters();
   startClock();
-  bumpVisits();
+  startStars();
 
-  // Stars
-  SUP.stars = !!startStars();
+  $("btnSupervisor").onclick = ()=> openSupervisor();
+  $("supClose").onclick = ()=> closeSupervisor();
+  $("supervisorOverlay").onclick = (e)=>{ if(e.target === $("supervisorOverlay")) closeSupervisor(); };
 
-  // Provider + chain + global
+  $("btnSettings").onclick = ()=>{
+    const cfg = loadCfg();
+    renderDrawer(cfg);
+    openDrawer();
+  };
+  $("btnCloseDrawer").onclick = closeDrawer;
+  $("drawerScrim").onclick = closeDrawer;
+
+  $("btnSaveCfg").onclick = ()=>{
+    const cfg = loadCfg();
+    const next = readDrawerToCfg(cfg);
+    saveCfg(next);
+    renderDrawer(next);
+    alert("已儲存設定");
+  };
+  $("btnResetCfg").onclick = ()=>{
+    localStorage.removeItem(LS_KEY);
+    renderDrawer(loadCfg());
+    alert("已重置");
+  };
+  $("btnApplyAndRefresh").onclick = async ()=>{
+    const cfg = loadCfg();
+    const next = readDrawerToCfg(cfg);
+    saveCfg(next);
+    closeDrawer();
+    await boot();
+  };
+
+  await boot();
+})();
+
+async function boot(){
+  const cfg = loadCfg();
+  setText("kgenAddrTop", shortAddr(cfg.addresses.kgenToken));
+  applyNodeHints(cfg);
+
+  let provider=null, chainOk=false;
   try{
-    provider = await makeProvider();
-    await refreshChain();
-    SUP.global = true;
-    setText("rpcNow", providerUrl ? shortAddr(providerUrl) : "--");
-    await refreshGlobalIgnite();
+    provider = await makeProvider(cfg);
+    await refreshChain(provider, cfg);
+    chainOk=true;
   }catch(e){
     $("rpcStatus").textContent = "RPC 失敗（無法讀鏈）";
-    $("rpcStatus").style.color = "rgba(255,210,220,.92)";
-    setText("rpcCode", "FAIL");
-    SUP.global = false;
   }
 
-  // Nodes
-  await probeNodes();
+  const nodes = [
+    { id:"12345", name:"五指山・悟空財神殿", desc:"已上線：temples/12345/index.html", href:"./temples/12345/index.html", detect:"./temples/12345/index.html" },
+    { id:"11520", name:"花果山台灣・悟空大腦交易所", desc:"合約待部署；入口頁待施工（本 Portal 已有讀鏈面板）", href:"javascript:void(0)", detect:null },
+    { id:"16888", name:"廣寒宮・七仙女許願池", desc:"座標已預留；許願池合約待部署", href:"javascript:void(0)", detect:null },
+    { id:"18888", name:"靈霄寶殿・玉帝金庫", desc:"DeityBank 合約待部署", href:"javascript:void(0)", detect:null },
+    { id:"18921", name:"斬妖台・分流引擎", desc:"TaxSplitter 合約待部署", href:"javascript:void(0)", detect:null },
+    { id:"108000", name:"花果山火星（MARS）", desc:"你已有 Mars Seats UI（另檔）", href:"javascript:void(0)", detect:null },
+  ];
+  $("nodesGrid").innerHTML = nodes.map(nodeCardHTML).join("");
 
-  updateSupervisor();
-})();
+  let nodeOkAny=false;
+  for(const n of nodes){
+    const badge = $("nodeStatus_"+n.id);
+    const hint = $("nodeHint_"+n.id);
+
+    if(n.id==="11520"){
+      const a = cfg.addresses.brain11520;
+      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Brain: "+shortAddr(a)) : "未部署";
+    }else if(n.id==="16888"){
+      const a = cfg.addresses.wish16888;
+      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Wish: "+shortAddr(a)) : ("仙女 "+String((cfg.addresses.fairies7||[]).length)+"/7");
+    }else if(n.id==="18888"){
+      const a = cfg.addresses.bank18888;
+      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Bank: "+shortAddr(a)) : "未部署";
+    }else if(n.id==="18921"){
+      const a = cfg.addresses.zhanyao18921;
+      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Zhanyao: "+shortAddr(a)) : "未部署";
+    }else if(n.id==="108000"){
+      const a = cfg.addresses.mars108000;
+      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Mars: "+shortAddr(a)) : "未部署";
+    }else{
+      hint.textContent = "—";
+    }
+
+    if(n.detect){
+      const ok = await detectNodeFile(n.detect);
+      if(ok){ badgeSet(badge,"ok","已完工"); nodeOkAny=true; }
+      else { badgeSet(badge,"warn","施工準備中"); }
+    }else{
+      badgeSet(badge,"warn","待施工");
+    }
+  }
+  badgeSet($("nodesStatus"), nodeOkAny ? "ok" : "warn", nodeOkAny ? "部分完工" : "偵測完成");
+
+  let globalIgniteOk=false, brainOk=false;
+  if(chainOk && provider){
+    try{ globalIgniteOk = (await refreshGlobalIgnite(provider, cfg)).ok; }catch(e){
+      $("globalIgniteStatus").textContent="讀取失敗";
+      $("igniteTableStatus").textContent="讀取失敗";
+    }
+    try{ brainOk = await refreshBrain(provider, cfg); }catch(e){}
+  }else{
+    $("globalIgniteStatus").textContent="RPC 失敗（無法讀鏈）";
+    $("igniteTableStatus").textContent="RPC 失敗";
+    badgeSet($("brainStatusBadge"),"warn","RPC 失敗");
+  }
+
+  runSupervisor({
+    loaded:true, stars:true, nodes:nodeOkAny, globalIgnite:globalIgniteOk, brain:brainOk, errors:__errors.length===0
+  });
+}
 </script>
 
 </body>
