@@ -1,0 +1,20 @@
+{
+  "version": "V1.0.0",
+  "baseRange": 300,
+  "weights": { "ct": 0.6, "flow": 0.4 },
+  "volatility": { "kV": 1.0, "kN": 0.6 },
+  "wick": { "min": 0.12, "max": 0.55 },
+  "drift": { "maxAbs": 0.85 },
+  "payout": {
+    "bonusClamp": { "min": 0.30, "max": 0.90 },
+    "lossClamp":  { "min": 0.60, "max": 1.00 },
+    "drawRefund": 0.90
+  },
+  "volatilityWeights": {
+    "ignite": 0.15,
+    "heartbeat": 0.05,
+    "rollPayroll": 0.10,
+    "split": 0.08,
+    "wishTrigger": 0.25
+  }
+}
