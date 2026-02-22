@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.0 (Local AI Concierge)</title>
+  <title>廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.1 (Local AI Concierge)</title>
   <style>
     :root{
       --bg:#070812;
@@ -285,7 +285,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="h">廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.0</div>
+      <div class="h">廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.1</div>
       <div class="s">
         <span class="badge"><span class="dot" id="dotLoaded"></span>頁面</span>
         <span class="badge"><span class="dot" id="dotCam"></span>鏡頭</span>
@@ -296,7 +296,7 @@
       </div>
     </div>
     <div class="pillrow">
-      <div class="pill gold">版本：<span class="mono" id="ver">V1.0</span></div>
+      <div class="pill gold">版本：<span class="mono" id="ver">V1.1</span></div>
       <div class="pill cyan">時間：<span class="mono" id="clock">--:--:--</span></div>
       <button class="pill pink" id="btnSelfTest">監工自檢</button>
     </div>
@@ -543,7 +543,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const VER = "V1.0";
+const VER = "V1.1";
 const LS_KEY = "KLINE_FAIRY_UFO_COCKPIT_V1";
 const LS_MEDIA = "KLINE_FAIRY_UFO_MEDIA_V1";
 const gConst = 1;
@@ -577,9 +577,12 @@ function nowHHMMSS(){
 function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
 function stanceFromDeg(deg){
-  if(deg < 170) return "多";
-  if(deg <= 190) return "休息";
-  return "空";
+  deg = Number(deg);
+  if(deg >= 350 || deg <= 10) return "休息";
+  if(deg > 10 && deg < 170) return "多";
+  if(deg >= 170 && deg <= 190) return "休息";
+  if(deg > 190 && deg < 350) return "空";
+  return "休息";
 }
 
 function computeEnergy(m, ct){
@@ -1136,7 +1139,7 @@ setInterval(()=>{ $("clock").textContent = nowHHMMSS(); }, 250);
   bind();
   updateUI();
   renderThumbs();
-  appendLog("啟動完成：UFO Cockpit V1.0");
+  appendLog("啟動完成：UFO Cockpit V1.1");
 })();
 </script>
 </body>
