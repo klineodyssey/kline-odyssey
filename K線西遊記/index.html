@@ -215,20 +215,6 @@
 
   <!-- Ethers v5.7.2 (你需自行放檔) -->
   <script src="./assets/ethers-5.7.2.umd.min.js"></script>
-
-<script>
-/* Portal V1.2.x — ethers loader fallback (do not remove local file usage)
-   - tries local ./assets/ethers-5.7.2.umd.min.js first
-   - falls back to jsDelivr CDN if local missing
-*/
-(function(){
-  if (window.ethers) return;
-  var s = document.createElement('script');
-  s.src = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
-  s.defer = true;
-  document.head.appendChild(s);
-})();
-</script>
 </head>
 
 <body>
@@ -383,9 +369,9 @@
           <div class="p">0.05% AutoLP 稅 / 節日活動（另殿另合約）</div>
         </a>
 
-        <a class="node" href="./temples/108000/index.html" data-node="MARS">
-          <div class="n">花果山火星（MARS）</div>
-          <div class="id">MARS</div>
+        <a class="node" href="./temples/108000/index.html" data-node="108000">
+          <div class="n">花果山火星齊天豪宅（MARS）</div>
+          <div class="id">108000</div>
           <div class="p">豪宅 500 席 / 5000 KGEN 入住 / Brain 每月撥款分潤</div>
         </a>
       </div>
