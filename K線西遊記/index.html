@@ -211,6 +211,31 @@
     .kTag{ color: var(--text); font-weight:850; }
     .warnText{ color: var(--warn); }
     .okText{ color: var(--ok); }
+  
+    /* ===== Player Trigger Mode (Guanghan Palace 16888) ===== */
+    .wishCard{ margin-top:14px; }
+    .wishGrid{ display:grid; grid-template-columns: 1.1fr .9fr; gap:12px; margin-top:12px; }
+    @media (max-width:900px){ .wishGrid{ grid-template-columns:1fr; } }
+    .wishBox{ border:1px solid rgba(255,255,255,.14); border-radius:18px; background:rgba(255,255,255,.05); padding:12px; box-shadow: var(--shadow); }
+    .wishTitle{ font-weight:950; letter-spacing:.35px; font-size:15px; margin-bottom:8px; }
+    .wishRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .wishRow > *{ flex:1; min-width: 140px; }
+    .wishLabel{ font-size:12px; color: var(--muted); margin-bottom:6px; }
+    .seg{ display:flex; gap:8px; }
+    .seg button{ flex:1; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08); color: var(--text); font-weight:900; cursor:pointer; }
+    .seg button.active{ background: rgba(255,215,0,.20); border-color: rgba(255,215,0,.35); }
+    .monoBox{ font-family: var(--mono); }
+    .candles{ max-height: 240px; overflow:auto; font-family: var(--mono); font-size:12px;
+      border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:10px; background:rgba(0,0,0,.20); }
+    .cRow{ display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.10); }
+    .cRow:last-child{ border-bottom:none; }
+    .tiny{ font-size:12px; color: var(--muted); line-height:1.55; }
+    .kpiLine{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .kpiPill{ padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.22);
+      font-size:12px; color: var(--text); }
+    .kpiPill b{ font-family: var(--mono); }
+
   </style>
 
   <script src="./assets/ethers-5.7.2.umd.min.js"></script>
@@ -536,7 +561,88 @@
       </div>
     </section>
 
-    <div class="footer" style="margin-top:14px;">
+    
+    <section class="card wishCard" id="wish16888" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:950;letter-spacing:.35px;">廣寒宮 16888｜七仙女許願池（即時玩家觸發模式）</div>
+        <div class="badge" id="wishModeBadge">LIVE SIM</div>
+      </div>
+      <div class="nodeSub">
+        規則（Portal 先做可視化／本機模擬，之後再對接 16888 合約）：有人玩就有行情。每次許願會觸發 1 根「宇宙 K 線」並結算多空。
+      </div>
+
+      <div class="wishGrid">
+        <div class="wishBox">
+          <div class="wishTitle">許願下單</div>
+
+          <div class="wishRow" style="margin-top:10px;">
+            <div>
+              <div class="wishLabel">方向（CT）</div>
+              <div class="seg">
+                <button id="wishSideLong" class="active">多</button>
+                <button id="wishSideShort">空</button>
+              </div>
+              <div class="tiny" style="margin-top:8px;">
+                CT=Cosmic Tick（宇宙即時節律）。此版先用「玩家觸發」產生 CT+1 的 K 線。
+              </div>
+            </div>
+
+            <div>
+              <div class="wishLabel">押注金額（KGEN，1–1000）</div>
+              <input id="wishBet" class="mono" type="number" min="1" max="1000" step="1" value="100" />
+              <div class="tiny" style="margin-top:8px;">
+                贏：0.8～1.0 倍獎勵（本機模擬）；輸：全額進獎池累積。
+              </div>
+            </div>
+          </div>
+
+          <div class="wishRow" style="margin-top:10px;">
+            <div>
+              <div class="wishLabel">玩家名稱（可選）</div>
+              <input id="wishName" class="mono" type="text" placeholder="例如：阿斗 / 來福 / 0795" />
+            </div>
+            <div>
+              <div class="wishLabel">操作</div>
+              <div class="wishRow" style="gap:8px;">
+                <button class="btn" id="btnWishPlay">許願觸發（生成 K 線）</button>
+                <button class="btn small" id="btnWishReset">重置本機獎池</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpiLine">
+            <div class="kpiPill">本輪獎池：<b id="wishPot">0</b> KGEN / 16888</div>
+            <div class="kpiPill">本輪玩家：<b id="wishPlayers">0</b></div>
+            <div class="kpiPill">多/空：<b id="wishLS">0 / 0</b></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="tiny">
+            滿池觸發（當獎池 ≥ 16888 KGEN）：<br/>
+            60% 隨機抽一名玩家（本輪參與者）｜30% 轉公益（顯示）｜10% 留池延續。<br/>
+            註：此版為前端模擬；未上鏈前不涉及真實資金轉移。
+          </div>
+        </div>
+
+        <div class="wishBox">
+          <div class="wishTitle">即時 K 線（玩家觸發）</div>
+          <div class="kpiLine">
+            <div class="kpiPill">CT：<b id="ctNow">0</b></div>
+            <div class="kpiPill">最新收盤：<b id="ctPrice">18888</b></div>
+            <div class="kpiPill">本輪結算：<b id="ctResult">--</b></div>
+          </div>
+          <div class="candles" id="candleLog" style="margin-top:10px;"></div>
+          <div class="tiny" style="margin-top:10px;">
+            生成器原則（可調）：依「玩家多空比」做微偏置，避免單邊穩贏；以小波動為主，偶爾放大波動做「神明誤導」。<br/>
+            等 11520/16888 合約上鏈後，Portal 會改成讀鏈結算。
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+<div class="footer" style="margin-top:14px;">
       PrimeForge 以母機之名，開啟金融生命。<br/>
       花果山台灣・信念不滅・市場無界。<br/>
       Where the Market Becomes the Myth.<br/>
@@ -1074,6 +1180,239 @@ async function boot(){
     loaded:true, stars:true, nodes:nodeOkAny, globalIgnite:globalIgniteOk, brain:brainOk, errors:__errors.length===0
   });
 }
+
+/* =========================
+   Guanghan Palace 16888 — Player Trigger Mode (Front-end SIM)
+   - Local-only state stored in localStorage
+   - Each play generates one candle (CT+1) and settles LONG/SHORT
+   - Pool reaches 16888 => random draw (60% winner / 30% public good / 10% carry)
+   ========================= */
+
+const WISH_LS_KEY = "KLINE_WISH_16888_PLAYER_TRIGGER_V1";
+const WISH_CFG = {
+  potTarget: 16888,
+  betMin: 1,
+  betMax: 1000,
+  winMultMin: 0.8,
+  winMultMax: 1.0,
+  // price engine
+  basePrice: 18888,
+  stepMin: 6,
+  stepMax: 88,
+  shockChance: 0.08,     // occasional bigger move
+  shockMul: 4.0,
+  crowdBias: 0.35        // bias weight vs crowded side
+};
+
+let wishState = null;
+let wishSide = "LONG";
+
+function wishLoad(){
+  try{
+    const raw = localStorage.getItem(WISH_LS_KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s && typeof s === "object") return s;
+    }
+  }catch(e){}
+  return {
+    ct: 0,
+    lastClose: WISH_CFG.basePrice,
+    pot: 0,
+    players: [], // {name, side, bet, pnl, ts}
+    longCount: 0,
+    shortCount: 0,
+    candles: []  // {ct, o,h,l,c, sideWin, ts}
+  };
+}
+function wishSave(){
+  try{ localStorage.setItem(WISH_LS_KEY, JSON.stringify(wishState)); }catch(e){}
+}
+
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function rnd(a,b){ return a + Math.random()*(b-a); }
+function rndInt(a,b){ return Math.floor(rnd(a,b+1)); }
+
+function wishSetSide(s){
+  wishSide = s;
+  const a = $("wishSideLong"), b = $("wishSideShort");
+  if(!a || !b) return;
+  if(s==="LONG"){ a.classList.add("active"); b.classList.remove("active"); }
+  else{ b.classList.add("active"); a.classList.remove("active"); }
+}
+
+function wishFmt(n){
+  try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); }
+}
+
+function wishRender(){
+  if(!wishState) return;
+  setText("wishPot", wishFmt(wishState.pot));
+  setText("wishPlayers", String(wishState.players.length));
+  setText("wishLS", `${wishState.longCount} / ${wishState.shortCount}`);
+  setText("ctNow", String(wishState.ct));
+  setText("ctPrice", String(wishState.lastClose));
+
+  const log = $("candleLog");
+  if(log){
+    const items = wishState.candles.slice(-30).reverse();
+    if(items.length===0){
+      log.innerHTML = `<div class="tiny">尚未有人許願。按「許願觸發」就會生成第一根 K 線。</div>`;
+    }else{
+      log.innerHTML = items.map(c=>{
+        const dir = c.sideWin==="LONG" ? "多勝" : "空勝";
+        return `<div class="cRow">
+          <div>CT+${c.ct}</div>
+          <div>O:${c.o} H:${c.h} L:${c.l} C:${c.c}</div>
+          <div>${dir}</div>
+        </div>`;
+      }).join("");
+    }
+  }
+}
+
+function wishGenCandle(){
+  // Crowd bias: if long crowded, slightly more chance to go down, and vice versa.
+  const total = wishState.longCount + wishState.shortCount;
+  let crowd = 0; // positive => long crowded
+  if(total>0) crowd = (wishState.longCount - wishState.shortCount)/total;
+
+  const o = wishState.lastClose;
+  let step = rndInt(WISH_CFG.stepMin, WISH_CFG.stepMax);
+  if(Math.random() < WISH_CFG.shockChance) step = Math.floor(step * WISH_CFG.shockMul);
+
+  // base direction
+  let sign = Math.random() < 0.5 ? -1 : 1;
+
+  // apply crowd bias against crowded side
+  // if crowd>0 (more longs), push sign negative a bit; if crowd<0, push sign positive a bit
+  const bias = -crowd * WISH_CFG.crowdBias; // crowd>0 => bias<0
+  if(Math.random() < Math.abs(bias)){
+    sign = bias > 0 ? 1 : -1;
+  }
+
+  const c = Math.max(1, Math.round(o + sign*step));
+  const h = Math.max(o,c) + rndInt(0, Math.max(3, Math.floor(step*0.35)));
+  const l = Math.min(o,c) - rndInt(0, Math.max(3, Math.floor(step*0.35)));
+
+  const sideWin = (c >= o) ? "LONG" : "SHORT";
+  wishState.ct += 1;
+  wishState.lastClose = c;
+
+  wishState.candles.push({ct:wishState.ct, o, h, l, c, sideWin, ts: Date.now()});
+  if(wishState.candles.length > 200) wishState.candles.shift();
+
+  return sideWin;
+}
+
+function wishSettlePlay(playerSide, bet, name){
+  const winSide = wishGenCandle();
+
+  const isWin = (playerSide === winSide);
+  let pnl = 0;
+
+  if(isWin){
+    const mult = rnd(WISH_CFG.winMultMin, WISH_CFG.winMultMax);
+    pnl = Math.round(bet * mult);        // reward (not including principal; sim as net payout)
+    // payout reduces pot, but not below 0
+    wishState.pot = Math.max(0, wishState.pot - pnl);
+  }else{
+    pnl = -bet;
+    wishState.pot += bet;
+  }
+
+  // counts for crowd stats
+  if(playerSide==="LONG") wishState.longCount += 1;
+  else wishState.shortCount += 1;
+
+  wishState.players.push({
+    name: (name||"匿名").slice(0,24),
+    side: playerSide,
+    bet,
+    pnl,
+    ct: wishState.ct,
+    ts: Date.now()
+  });
+  if(wishState.players.length > 500) wishState.players.shift();
+
+  // UI
+  const resEl = $("ctResult");
+  if(resEl){
+    const txt = isWin ? `WIN +${pnl}` : `LOSE ${pnl}`;
+    resEl.textContent = `${winSide==="LONG"?"多勝":"空勝"}｜${txt}｜池=${wishFmt(wishState.pot)}`;
+  }
+
+  // draw if pot hits target
+  if(wishState.pot >= WISH_CFG.potTarget){
+    wishDraw();
+  }
+
+  wishSave();
+  wishRender();
+}
+
+function wishDraw(){
+  const participants = wishState.players.slice(-300); // last 300 plays as eligible
+  if(participants.length === 0) return;
+
+  const winner = participants[rndInt(0, participants.length-1)];
+  const pot = wishState.pot;
+
+  const winAmt = Math.floor(pot * 0.60);
+  const goodAmt = Math.floor(pot * 0.30);
+  const carry = pot - winAmt - goodAmt; // ~10%
+
+  wishState.pot = carry;
+
+  // Append "draw event" candle log as message row (reuse candleLog)
+  const log = $("candleLog");
+  if(log){
+    const msg = document.createElement("div");
+    msg.className = "cRow";
+    msg.innerHTML = `<div>🎉 16888 觸發</div><div>Winner: ${winner.name}｜+${wishFmt(winAmt)}｜公益:${wishFmt(goodAmt)}｜留池:${wishFmt(carry)}</div><div>完成</div>`;
+    log.prepend(msg);
+  }
+
+  // reset crowd stats for new round (optional)
+  wishState.longCount = 0;
+  wishState.shortCount = 0;
+  wishState.players = []; // start a fresh round
+}
+
+function wishInit(){
+  // only if section exists
+  if(!$("wish16888")) return;
+
+  wishState = wishLoad();
+  wishRender();
+  wishSetSide("LONG");
+
+  $("wishSideLong")?.addEventListener("click", ()=> wishSetSide("LONG"));
+  $("wishSideShort")?.addEventListener("click", ()=> wishSetSide("SHORT"));
+
+  $("btnWishPlay")?.addEventListener("click", ()=>{
+    const betRaw = Number($("wishBet")?.value || 0);
+    const bet = clamp(Math.floor(betRaw), WISH_CFG.betMin, WISH_CFG.betMax);
+    if($("wishBet")) $("wishBet").value = String(bet);
+    const name = ($("wishName")?.value || "").trim();
+    wishSettlePlay(wishSide, bet, name);
+  });
+
+  $("btnWishReset")?.addEventListener("click", ()=>{
+    if(!confirm("確定要重置本機獎池與玩家紀錄？（只影響你這台裝置）")) return;
+    localStorage.removeItem(WISH_LS_KEY);
+    wishState = wishLoad();
+    wishSave();
+    wishRender();
+    setText("ctResult", "--");
+  });
+}
+
+// hook into existing init
+try{ wishInit(); }catch(e){ console.warn("wishInit failed:", e); }
+
+
 </script>
 
 </body>
