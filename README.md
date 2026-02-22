@@ -57,9 +57,9 @@ Homepage Quick Actions (Production Block)
     📢 Telegram
   </a>
 
-<a href="https://klineodyssey.github.io/kline-odyssey/wukong-temple/index.html"
+<a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/index.html"
    style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
-  🐒 悟空財神殿｜信念與紀律
+  🐒廣寒宮 16888｜七仙女飛碟駕駛艙 
 </a>
 
 </div>
