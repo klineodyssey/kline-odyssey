@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.0 (Local AI Concierge)</title>
+  <style>
+    :root{
+      --bg:#070812;
+      --panel: rgba(255,255,255,.06);
+      --line: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --gold: rgba(255,215,120,.98);
+      --cyan: rgba(124,246,255,.98);
+      --pink: rgba(255,160,220,.95);
+      --ok: rgba(120,255,200,.95);
+      --warn: rgba(255,210,120,.95);
+      --bad: rgba(255,120,120,.95);
+      --r: 18px;
+      --r2: 999px;
+      --shadow: 0 14px 60px rgba(0,0,0,.55);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
+      --safeB: env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 25% 18%, rgba(124,246,255,.10), transparent 58%),
+        radial-gradient(1100px 820px at 75% 68%, rgba(255,160,220,.08), transparent 55%),
+        radial-gradient(900px 700px at 60% 10%, rgba(255,215,120,.08), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+      padding: 14px 12px calc(110px + var(--safeB));
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;}
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: var(--r2);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    }
+    .brand{display:flex; flex-direction:column; gap:3px;}
+    .brand .h{font-weight:950; letter-spacing:.6px; font-size:14px;}
+    .brand .s{font-size:12px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .pillrow{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; align-items:center;}
+    .pill{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      padding:9px 12px;
+      border-radius: var(--r2);
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+      font-weight:850;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+    }
+    .pill:hover{ background: rgba(255,255,255,.10); }
+    .pill.gold{ border-color: rgba(255,215,120,.28); }
+    .pill.cyan{ border-color: rgba(124,246,255,.28); }
+    .pill.pink{ border-color: rgba(255,160,220,.28); }
+    .mono{font-family:var(--mono)}
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+
+    .card{
+      border:1px solid var(--line);
+      background: var(--panel);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding: 12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .cardHead .t{
+      font-weight:950; letter-spacing:.4px;
+      display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+    }
+    .cardHead .t small{color:var(--muted); font-weight:800;}
+    .cardBody{ padding: 14px; }
+
+    .kpiGrid{
+      display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:10px;
+    }
+    @media (max-width: 980px){ .kpiGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    .kpi{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .kpi .k{ font-size:12px; color:var(--muted); font-weight:800; }
+    .kpi .v{ font-size:18px; font-weight:1000; letter-spacing:.4px; margin-top:6px; }
+    .kpi .v .u{ font-size:12px; color:var(--muted); font-weight:900; margin-left:6px; }
+    .kpi .sub{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35; }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:stretch; }
+    .row > *{ flex: 1 1 240px; }
+    .box{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .box h3{ margin:0 0 10px; font-size:13px; letter-spacing:.2px; }
+    .muted{color:var(--muted)}
+    .sep{ height:1px; background: rgba(255,255,255,.12); margin: 12px 0; }
+
+    input[type="range"]{ width:100%; }
+    input[type="number"], textarea, select{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    textarea{ min-height: 86px; resize: vertical; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,.12); }
+    .btn.gold{ border-color: rgba(255,215,120,.28); }
+    .btn.cyan{ border-color: rgba(124,246,255,.28); }
+    .btn.pink{ border-color: rgba(255,160,220,.28); }
+    .btn.danger{ border-color: rgba(255,120,120,.30); background: rgba(255,120,120,.10); }
+    .btn.danger:hover{ background: rgba(255,120,120,.14); }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: var(--r2);
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      white-space:nowrap;
+    }
+    .dot{ width:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.25); border:1px solid rgba(255,255,255,.16); }
+    .dot.ok{ background: var(--ok); }
+    .dot.warn{ background: var(--warn); }
+    .dot.bad{ background: var(--bad); }
+
+    .meter{
+      width:100%; height:12px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+    }
+    .meter > div{
+      height:100%; width:0%;
+      background: linear-gradient(90deg, rgba(124,246,255,.95), rgba(255,215,120,.95), rgba(255,160,220,.95));
+      transition: width .25s ease;
+    }
+
+    .chat{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .chatLog{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      border-radius: 18px;
+      padding: 12px;
+      max-height: 320px;
+      overflow:auto;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+    .msg{ margin: 8px 0; }
+    .msg .who{ font-weight:1000; letter-spacing:.2px; }
+    .msg .who.user{ color: var(--cyan); }
+    .msg .who.ai{ color: var(--gold); }
+    .msg .txt{ color: var(--text); white-space: pre-wrap; margin-top:4px; }
+
+    .chatInputRow{ display:flex; gap:10px; flex-wrap:wrap; }
+    .chatInputRow textarea{ flex: 1 1 320px; min-height: 64px; }
+
+    .mediaGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 680px){ .mediaGrid{ grid-template-columns:1fr; } }
+    video, canvas, img{
+      width:100%;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+    }
+    .thumbs{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width: 680px){ .thumbs{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    .thumb{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .thumb img{
+      border:none; border-radius:0;
+      display:block; width:100%; height:140px; object-fit:cover;
+    }
+    .thumb .meta{
+      padding:10px;
+      font-size:12px;
+      color: var(--muted);
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .footer{
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      border-radius: 22px;
+      padding: 12px 14px;
+    }
+
+    .sticky{
+      position: fixed; left:0; right:0; bottom:0; z-index:60;
+      background: linear-gradient(180deg, rgba(7,8,18,0), rgba(7,8,18,.86), rgba(7,8,18,.96));
+      padding: 10px 12px calc(12px + var(--safeB));
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+    }
+    .stickyInner{ max-width:1180px; margin:0 auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    .stickyInner .left{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .stickyInner .right{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .toast{
+      position: fixed; right:12px; bottom: calc(92px + var(--safeB));
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      max-width: 420px;
+      font-size: 12px;
+      color: var(--text);
+      display:none;
+      z-index: 9999;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="h">廣寒宮・七仙女飛碟駕駛艙｜UFO Cockpit V1.0</div>
+      <div class="s">
+        <span class="badge"><span class="dot" id="dotLoaded"></span>頁面</span>
+        <span class="badge"><span class="dot" id="dotCam"></span>鏡頭</span>
+        <span class="badge"><span class="dot" id="dotMic"></span>麥克風</span>
+        <span class="badge"><span class="dot" id="dotTTS"></span>TTS</span>
+        <span class="badge"><span class="dot" id="dotASR"></span>語音辨識</span>
+        <span class="badge"><span class="dot" id="dotStore"></span>本機存檔</span>
+      </div>
+    </div>
+    <div class="pillrow">
+      <div class="pill gold">版本：<span class="mono" id="ver">V1.0</span></div>
+      <div class="pill cyan">時間：<span class="mono" id="clock">--:--:--</span></div>
+      <button class="pill pink" id="btnSelfTest">監工自檢</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <section class="card">
+      <div class="cardHead">
+        <div class="t">飛碟駕駛艙（0–360°）<small>多｜休息｜空</small></div>
+        <div class="badge">模式：<span class="mono" id="modeLabel">多</span></div>
+      </div>
+      <div class="cardBody">
+
+        <div class="kpiGrid">
+          <div class="kpi">
+            <div class="k">方向盤</div>
+            <div class="v"><span id="deg">120</span><span class="u">°</span></div>
+            <div class="sub">0–170 多｜170–190 休息｜190–360 空</div>
+          </div>
+          <div class="kpi">
+            <div class="k">曲速引擎</div>
+            <div class="v"><span id="warp">10</span><span class="u">×</span></div>
+            <div class="sub">1–150｜Warp 等級＝駕照上限</div>
+          </div>
+          <div class="kpi">
+            <div class="k">質量</div>
+            <div class="v"><span id="mass">1000</span><span class="u">KGEN</span></div>
+            <div class="sub mono">m = KGEN</div>
+          </div>
+          <div class="kpi">
+            <div class="k">勢能</div>
+            <div class="v"><span id="energy">--</span><span class="u">W</span></div>
+            <div class="sub mono">W = m × g × h（h=CT）</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="box">
+            <h3>方向盤（0–360）</h3>
+            <input type="range" id="degRange" min="0" max="360" value="120" />
+            <div class="muted" style="margin-top:8px;">
+              目前：<b class="mono" id="degLabel">120</b>°｜
+              狀態：<b id="stanceLabel">多</b>
+            </div>
+          </div>
+          <div class="box">
+            <h3>曲速引擎（1–150）</h3>
+            <input type="range" id="warpRange" min="1" max="150" value="10" />
+            <div class="muted" style="margin-top:8px;">
+              目前：<b class="mono" id="warpLabel">10</b>x｜
+              駕照上限：<b class="mono" id="licenseCap">150</b>x
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div class="box">
+            <h3>質量（KGEN）與 CT（高度）</h3>
+            <div class="row" style="gap:10px;">
+              <div style="flex:1 1 180px;">
+                <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">投入質量 m（KGEN）</div>
+                <input type="number" id="massInput" min="1" step="1" value="1000" />
+              </div>
+              <div style="flex:1 1 180px;">
+                <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">高度 h（CT 現價）</div>
+                <input type="number" id="ctInput" min="0" step="1" value="30000" />
+              </div>
+            </div>
+            <div class="muted" style="margin-top:10px;">
+              口訣：<span class="mono">1 KGEN = 1 點 = 1 斤 = 1 口</span>（跨市場通用）
+            </div>
+            <div style="margin-top:10px;">
+              <div class="muted" style="display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:900;">
+                <span>燃料 / 血量（視覺）</span><span class="mono" id="fuelPct">--%</span>
+              </div>
+              <div class="meter"><div id="fuelFill"></div></div>
+              <div class="muted" style="margin-top:8px;font-size:12px;">
+                上限（示意）：<span class="mono" id="fuelMax">13500</span>｜現在：<span class="mono" id="fuelNow">1000</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="box">
+            <h3>一鍵動作（本機事件回路）</h3>
+            <div class="row" style="gap:10px;">
+              <button class="btn cyan" id="btnIgnite">全域點火（Local）</button>
+              <button class="btn gold" id="btnBreath">呼吸</button>
+              <button class="btn pink" id="btnHeartbeat">心跳</button>
+              <button class="btn" id="btnCup">擲筊</button>
+              <button class="btn" id="btnFortune">求籤</button>
+              <button class="btn danger" id="btnResetRun">重置本次航行</button>
+            </div>
+            <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.6;">
+              註：本頁先做「設計完整 + 全功能 UI」；後續接 11520 / 12345 / 16888 上鏈再補 ABI 與地址即可。
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <div class="box">
+            <h3>航行日誌（可匯出 JSON）</h3>
+            <textarea id="log" readonly></textarea>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn" id="btnCopyLog">複製</button>
+              <button class="btn" id="btnExportState">匯出狀態（JSON）</button>
+              <label class="btn" for="importFile" style="cursor:pointer;">匯入狀態（JSON）</label>
+              <input id="importFile" type="file" accept="application/json" style="display:none;" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="cardHead">
+        <div class="t">拍照・影像・留言｜AI 客服（本機）<small>無外部依賴</small></div>
+        <div class="badge">仙女：<span class="mono" id="fairyName">巧仙（16888）</span></div>
+      </div>
+      <div class="cardBody">
+
+        <div class="row">
+          <div class="box">
+            <h3>選擇仙女（7 位）</h3>
+            <select id="fairySelect">
+              <option value="14520">14520｜巧雲｜天樞｜做空｜風調雨順</option>
+              <option value="14866">14866｜巧虹｜天璇｜做多｜家庭美滿</option>
+              <option value="16184">16184｜巧芝｜天璣｜做空｜育子收驚</option>
+              <option value="16888" selected>16888｜巧仙｜天權｜做多｜事業運通</option>
+              <option value="17347">17347｜巧蘭｜天衡｜做空｜長命百歲</option>
+              <option value="18056">18056｜巧梅｜闓陽｜做多｜身體健康</option>
+              <option value="18459">18459｜巧靈｜瑤光｜多退｜感情圓滿</option>
+            </select>
+            <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.6;">
+              仙女不是妖怪。她們是「事件節點」與「祝福介面」，用來承接許願池與分潤敘事。
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="mediaGrid">
+          <div class="box">
+            <h3>鏡頭（自看留念）</h3>
+            <video id="cam" playsinline autoplay muted></video>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn cyan" id="btnCamStart">開啟鏡頭</button>
+              <button class="btn" id="btnSnap">拍照</button>
+              <button class="btn pink" id="btnRec">錄影</button>
+              <button class="btn danger" id="btnCamStop">關閉</button>
+            </div>
+            <div class="muted" style="margin-top:10px; font-size:12px;">
+              手機請用 Chrome 或 MetaMask 內建瀏覽器；若權限被拒，請到瀏覽器設定開啟「相機/麥克風」。
+            </div>
+          </div>
+          <div class="box">
+            <h3>拍照結果 / 錄影下載</h3>
+            <canvas id="snapCanvas" width="1280" height="720" style="display:none;"></canvas>
+            <img id="snapImg" alt="snapshot" />
+            <div class="row" style="margin-top:10px;">
+              <a class="btn" id="btnDownloadSnap" download="ufo_snapshot.png" href="javascript:void(0)">下載照片</a>
+              <a class="btn" id="btnDownloadVid" download="ufo_video.webm" href="javascript:void(0)">下載錄影</a>
+            </div>
+            <div class="muted" style="margin-top:10px; font-size:12px;">
+              本頁不會把影像上傳任何地方；都在你裝置本機。
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="box">
+          <h3>留言（許願）</h3>
+          <textarea id="wishText" placeholder="寫下你的許願：想要什麼、原因、願意付出的修行。"></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn gold" id="btnSaveWish">保存留言（本機）</button>
+            <button class="btn" id="btnExportWish">匯出留言（JSON）</button>
+            <button class="btn danger" id="btnClearWish">清空</button>
+          </div>
+          <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.6;">
+            後續接上鏈時：留言可以做 hash 存證（不曝露內容），或上鏈存「摘要＋時間戳」。
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="box chat">
+          <h3>AI 客服（語音＋文字）</h3>
+
+          <div class="row" style="gap:10px;">
+            <button class="btn cyan" id="btnMic">語音輸入</button>
+            <button class="btn" id="btnStopMic">停止</button>
+            <button class="btn pink" id="btnSpeak">朗讀客服回覆</button>
+            <span class="badge"><span class="dot" id="dotListening"></span><span id="asrStatus">ASR: idle</span></span>
+          </div>
+
+          <div class="chatLog" id="chatLog"></div>
+
+          <div class="chatInputRow">
+            <textarea id="chatText" placeholder="問客服：怎麼許願？怎麼切多空？Warp 代表什麼？怎麼拍照留念？"></textarea>
+            <button class="btn gold" id="btnSend">送出</button>
+          </div>
+
+          <div class="muted" style="font-size:12px; line-height:1.6;">
+            客服模式：本機規則引擎（可離線）。日後要接真正 AI，可把 reply() 換成呼叫你的服務端或鏈上事件摘要。
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="thumbs" id="thumbs"></div>
+
+      </div>
+    </section>
+  </div>
+
+  <div class="footer">
+    PrimeForge 以母機之名，開啟金融生命。<br/>
+    花果山台灣・信念不滅・市場無界。<br/>
+    Where the Market Becomes the Myth.<br/>
+    —— 樂天帝 ⌖
+  </div>
+
+</div>
+
+<div class="sticky">
+  <div class="stickyInner">
+    <div class="left">
+      <span class="badge">全域點火：<span class="mono" id="igniteCount">0</span></span>
+      <span class="badge">航行狀態：<span class="mono" id="runState">READY</span></span>
+    </div>
+    <div class="right">
+      <button class="btn gold" id="btnSaveAll">保存整頁狀態</button>
+      <button class="btn danger" id="btnFactoryReset">清除本機資料</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const VER = "V1.0";
+const LS_KEY = "KLINE_FAIRY_UFO_COCKPIT_V1";
+const LS_MEDIA = "KLINE_FAIRY_UFO_MEDIA_V1";
+const gConst = 1;
+
+const FAIRIES = {
+  "14520": {name:"巧雲", star:"天樞", stance:"做空", bless:"風調雨順"},
+  "14866": {name:"巧虹", star:"天璇", stance:"做多", bless:"家庭美滿"},
+  "16184": {name:"巧芝", star:"天璣", stance:"做空", bless:"育子收驚"},
+  "16888": {name:"巧仙", star:"天權", stance:"做多", bless:"事業運通"},
+  "17347": {name:"巧蘭", star:"天衡", stance:"做空", bless:"長命百歲"},
+  "18056": {name:"巧梅", star:"闓陽", stance:"做多", bless:"身體健康"},
+  "18459": {name:"巧靈", star:"瑤光", stance:"多退", bless:"感情圓滿"},
+};
+
+function $(id){ return document.getElementById(id); }
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> t.style.display="none", 2600);
+}
+
+function nowHHMMSS(){
+  const d = new Date();
+  const pad = (n)=> String(n).padStart(2,"0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+function stanceFromDeg(deg){
+  if(deg < 170) return "多";
+  if(deg <= 190) return "休息";
+  return "空";
+}
+
+function computeEnergy(m, ct){
+  const w = Number(m) * gConst * Number(ct);
+  if(!Number.isFinite(w)) return "--";
+  if(w >= 1e12) return (w/1e12).toFixed(2)+"T";
+  if(w >= 1e9) return (w/1e9).toFixed(2)+"B";
+  if(w >= 1e6) return (w/1e6).toFixed(2)+"M";
+  return Math.round(w).toLocaleString();
+}
+
+function safeJSONParse(x, fallback){
+  try{ return JSON.parse(x); }catch(e){ return fallback; }
+}
+
+function loadState(){
+  const raw = localStorage.getItem(LS_KEY);
+  const st = raw ? safeJSONParse(raw, {}) : {};
+  return {
+    deg: Number(st.deg ?? 120),
+    warp: Number(st.warp ?? 10),
+    mass: Number(st.mass ?? 1000),
+    ct: Number(st.ct ?? 30000),
+    licenseCap: Number(st.licenseCap ?? 150),
+    igniteCount: Number(st.igniteCount ?? 0),
+    runState: String(st.runState ?? "READY"),
+    fairyId: String(st.fairyId ?? "16888"),
+    wishText: String(st.wishText ?? ""),
+    chat: Array.isArray(st.chat) ? st.chat : [],
+    log: String(st.log ?? ""),
+  };
+}
+
+function saveState(st){
+  localStorage.setItem(LS_KEY, JSON.stringify(st));
+}
+
+function appendLog(line){
+  const st = loadState();
+  const ts = nowHHMMSS();
+  st.log = (st.log ? st.log + "\n" : "") + `[${ts}] ${line}`;
+  saveState(st);
+  $("log").value = st.log;
+}
+
+function setDot(id, kind){
+  const el = $(id);
+  el.classList.remove("ok","warn","bad");
+  el.classList.add(kind);
+}
+
+function updateUI(){
+  const st = loadState();
+
+  $("deg").textContent = String(Math.round(st.deg));
+  $("warp").textContent = String(Math.round(st.warp));
+  $("mass").textContent = String(Math.round(st.mass));
+  $("degLabel").textContent = String(Math.round(st.deg));
+  $("warpLabel").textContent = String(Math.round(st.warp));
+  $("licenseCap").textContent = String(Math.round(st.licenseCap));
+
+  $("degRange").value = String(clamp(st.deg, 0, 360));
+  $("warpRange").value = String(clamp(st.warp, 1, st.licenseCap));
+
+  $("massInput").value = String(Math.max(1, Math.round(st.mass)));
+  $("ctInput").value = String(Math.max(0, Math.round(st.ct)));
+
+  const stance = stanceFromDeg(st.deg);
+  $("stanceLabel").textContent = stance;
+  $("modeLabel").textContent = stance;
+
+  $("energy").textContent = computeEnergy(st.mass, st.ct);
+
+  const maxFuel = 13500;
+  $("fuelMax").textContent = String(maxFuel);
+  $("fuelNow").textContent = String(Math.round(st.mass));
+  const pct = clamp((st.mass / maxFuel) * 100, 0, 100);
+  $("fuelPct").textContent = pct.toFixed(0) + "%";
+  $("fuelFill").style.width = pct.toFixed(2) + "%";
+
+  $("igniteCount").textContent = String(st.igniteCount);
+  $("runState").textContent = st.runState;
+
+  const f = FAIRIES[st.fairyId] || FAIRIES["16888"];
+  $("fairyName").textContent = `${f.name}（${st.fairyId}）`;
+  $("fairySelect").value = st.fairyId;
+
+  $("log").value = st.log || "";
+  $("wishText").value = st.wishText || "";
+
+  renderChat(st.chat || []);
+}
+
+function renderChat(chat){
+  const log = $("chatLog");
+  log.innerHTML = "";
+  for(const m of chat){
+    const div = document.createElement("div");
+    div.className = "msg";
+    const who = document.createElement("div");
+    who.className = "who " + (m.role === "user" ? "user" : "ai");
+    who.textContent = (m.role === "user" ? "你" : "AI客服") + " · " + (m.ts || "");
+    const txt = document.createElement("div");
+    txt.className = "txt";
+    txt.textContent = m.text || "";
+    div.appendChild(who); div.appendChild(txt);
+    log.appendChild(div);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function pushChat(role, text){
+  const st = loadState();
+  const msg = { role, text, ts: nowHHMMSS() };
+  st.chat = Array.isArray(st.chat) ? st.chat : [];
+  st.chat.push(msg);
+  if(st.chat.length > 120) st.chat = st.chat.slice(st.chat.length - 120);
+  saveState(st);
+  renderChat(st.chat);
+  return msg;
+}
+
+function reply(userText){
+  const st = loadState();
+  const f = FAIRIES[st.fairyId] || FAIRIES["16888"];
+  const deg = Math.round(st.deg);
+  const stance = stanceFromDeg(deg);
+  const warp = Math.round(st.warp);
+  const m = Math.round(st.mass);
+  const ct = Math.round(st.ct);
+  const t = (userText||"").trim().toLowerCase();
+
+  const base =
+`仙女：${f.name}｜${f.star}｜${f.bless}
+駕駛艙：方向=${deg}°（${stance}）｜Warp=${warp}×
+宇宙物理：m=${m}KGEN｜h=CT=${ct}｜W=m×g×h`;
+
+  if(/(怎麼|如何).*(許願|留言)|許願|留言/.test(userText)){
+    return `${base}\n\n許願流程（本機版）：\n1) 在「留言（許願）」寫下願望。\n2) 可先拍照/錄影留念。\n3) 按「保存留言」完成本機存檔。\n\n上鏈版：留言可 hash 存證＋許願金入 16888 獎池。`;
+  }
+  if(/(方向盤|0-360|多空|休息|角度)/.test(userText)){
+    return `${base}\n\n方向盤規則：\n- 0–170°：多（前進）\n- 170–190°：休息（床上睡覺）\n- 190–360°：空（後退）\n\n提示：仙女的「做多/做空」可當故事導航。`;
+  }
+  if(/(warp|槓桿|曲速|1-150|倍)/.test(t)){
+    return `${base}\n\nWarp=曲速引擎（1–150）\n- Warp 是駕照等級上限，不是借貸。\n- 等級不下降，但能量不足時無法長時間滿檔。\n\n口訣：Warp 決定你能扛的時空曲率；m 決定你真正的能量。`;
+  }
+  if(/(拍照|錄影|相機|鏡頭|影像)/.test(userText)){
+    return `${base}\n\n影像功能：\n- 開啟鏡頭 → 自看畫面\n- 拍照 → 右側出現照片，可下載\n- 錄影 → 再按一次停止，產生可下載影片\n\n若無法使用：請允許相機/麥克風權限。`;
+  }
+  if(/(語音|麥克風|辨識|asr|tts|朗讀)/.test(t)){
+    return `${base}\n\n語音模式：\n- 語音輸入：Web Speech API（Chrome 較穩）\n- 朗讀：speechSynthesis（部分 WebView 可能不支援）\n\n若 ASR 失效：改用文字輸入即可。`;
+  }
+  if(/(全域點火|點火|ignite)/.test(t)){
+    return `${base}\n\n全域點火（本機版）：\n- 標記 runState=IGNITED\n- 累加點火次數（可匯出 JSON）\n\n上鏈版會改成：呼叫 Heart / 全域 ignite 事件中心。`;
+  }
+  if(/(清除|重置|刪除|factory)/.test(t)){
+    return `${base}\n\n你可以：\n- 重置本次航行：只清 runState\n- 工廠重置：清除本機所有存檔（留言/聊天/照片索引）`;
+  }
+
+  return `${base}\n\n我能幫你：\n- 許願與留言（含拍照/錄影留念）\n- 多/空/休息規則解釋\n- Warp（1–150）曲速駕照說明\n- 匯出/匯入狀態（JSON）\n\n你先告訴我：你要「做多」、「做空」，還是「休息」？`;
+}
+
+let camStream = null;
+let rec = null;
+let recChunks = [];
+
+async function startCamera(){
+  if(camStream) return;
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+    $("cam").srcObject = camStream;
+    setDot("dotCam", "ok");
+    setDot("dotMic", "ok");
+    appendLog("鏡頭已開啟（含麥克風）");
+    toast("鏡頭已開啟");
+  }catch(e){
+    setDot("dotCam", "bad");
+    setDot("dotMic", "warn");
+    appendLog("鏡頭開啟失敗：" + (e.message || String(e)));
+    toast("鏡頭/麥克風權限失敗");
+  }
+}
+
+function stopCamera(){
+  try{
+    if(rec && rec.state !== "inactive") rec.stop();
+  }catch(e){}
+  if(camStream){
+    camStream.getTracks().forEach(t=>t.stop());
+    camStream = null;
+    $("cam").srcObject = null;
+  }
+  setDot("dotCam", "warn");
+  setDot("dotMic", "warn");
+  appendLog("鏡頭已關閉");
+  toast("鏡頭已關閉");
+}
+
+function loadMediaIndex(){
+  const raw = localStorage.getItem(LS_MEDIA);
+  const arr = raw ? safeJSONParse(raw, []) : [];
+  return Array.isArray(arr) ? arr : [];
+}
+function saveMediaIndex(arr){
+  localStorage.setItem(LS_MEDIA, JSON.stringify(arr));
+}
+function storeMedia(meta){
+  const arr = loadMediaIndex();
+  arr.unshift(meta);
+  if(arr.length > 18) arr.length = 18;
+  saveMediaIndex(arr);
+}
+function renderThumbs(){
+  const box = $("thumbs");
+  const arr = loadMediaIndex();
+  box.innerHTML = "";
+  for(const it of arr){
+    const div = document.createElement("div");
+    div.className = "thumb";
+    const img = document.createElement("img");
+    if(it.type === "snap" && it.dataUrl){
+      img.src = it.dataUrl;
+    }else{
+      const svg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='500'>
+        <defs><linearGradient id='g' x1='0' x2='1'>
+          <stop stop-color='rgba(124,246,255,.8)'/><stop offset='1' stop-color='rgba(255,215,120,.8)'/>
+        </linearGradient></defs>
+        <rect width='100%' height='100%' fill='rgba(0,0,0,.35)'/>
+        <circle cx='400' cy='250' r='90' fill='url(#g)' opacity='0.8'/>
+        <polygon points='380,210 380,290 450,250' fill='rgba(0,0,0,.55)'/>
+        <text x='50%' y='78%' font-size='34' text-anchor='middle' fill='rgba(255,255,255,.85)'>VIDEO</text>
+      </svg>`);
+      img.src = `data:image/svg+xml,${svg}`;
+    }
+    div.appendChild(img);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const d = new Date(it.ts || Date.now());
+    const f = FAIRIES[String(it.fairyId||"16888")] || FAIRIES["16888"];
+    meta.textContent = `${(it.type||"").toUpperCase()} · ${d.toLocaleString()}\n仙女 ${f.name}(${it.fairyId}) · deg ${Math.round(it.deg||0)}° · Warp ${Math.round(it.warp||1)}×`;
+    div.appendChild(meta);
+
+    box.appendChild(div);
+  }
+}
+
+function snap(){
+  if(!camStream){
+    toast("請先開啟鏡頭");
+    return;
+  }
+  const v = $("cam");
+  const c = $("snapCanvas");
+  const ctx = c.getContext("2d");
+  const w = v.videoWidth || 1280;
+  const h = v.videoHeight || 720;
+  c.width = w; c.height = h;
+  ctx.drawImage(v, 0, 0, w, h);
+
+  const st = loadState();
+  const f = FAIRIES[st.fairyId] || FAIRIES["16888"];
+  ctx.fillStyle = "rgba(0,0,0,.35)";
+  ctx.fillRect(18, 18, 560, 132);
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  ctx.font = "bold 26px system-ui, -apple-system, Segoe UI, sans-serif";
+  ctx.fillText("七仙女飛碟駕駛艙", 34, 54);
+  ctx.font = "bold 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  ctx.fillText(`Fairy ${f.name} (${st.fairyId})`, 34, 84);
+  ctx.fillText(`deg ${Math.round(st.deg)}° | Warp ${Math.round(st.warp)}x`, 34, 110);
+  ctx.fillText(`m ${Math.round(st.mass)} KGEN | CT ${Math.round(st.ct)}`, 34, 134);
+
+  const dataUrl = c.toDataURL("image/png");
+  $("snapImg").src = dataUrl;
+  $("btnDownloadSnap").href = dataUrl;
+
+  storeMedia({ type:"snap", ts: Date.now(), fairyId: st.fairyId, deg: st.deg, warp: st.warp, mass: st.mass, ct: st.ct, dataUrl });
+  renderThumbs();
+
+  appendLog("拍照完成（本機）");
+  toast("拍照完成");
+}
+
+function startOrStopRec(){
+  if(!camStream){ toast("請先開啟鏡頭"); return; }
+  if(!window.MediaRecorder){ toast("此瀏覽器不支援錄影"); return; }
+
+  if(rec && rec.state !== "inactive"){
+    rec.stop();
+    return;
+  }
+  recChunks = [];
+  try{
+    rec = new MediaRecorder(camStream, { mimeType: "video/webm;codecs=vp8,opus" });
+  }catch(e){
+    rec = new MediaRecorder(camStream);
+  }
+  rec.ondataavailable = (ev)=>{ if(ev.data && ev.data.size>0) recChunks.push(ev.data); };
+  rec.onstop = ()=>{
+    const blob = new Blob(recChunks, { type: rec.mimeType || "video/webm" });
+    const url = URL.createObjectURL(blob);
+    $("btnDownloadVid").href = url;
+
+    const st = loadState();
+    storeMedia({ type:"video", ts: Date.now(), fairyId: st.fairyId, deg: st.deg, warp: st.warp, mass: st.mass, ct: st.ct });
+    renderThumbs();
+
+    appendLog("錄影完成（可下載）");
+    toast("錄影完成，可下載");
+    $("btnRec").textContent = "錄影";
+    $("btnRec").classList.remove("danger");
+  };
+  rec.start();
+  $("btnRec").textContent = "停止錄影";
+  $("btnRec").classList.add("danger");
+  appendLog("開始錄影");
+  toast("開始錄影");
+}
+
+let recognition = null;
+function initASR(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ setDot("dotASR","warn"); return null; }
+  const r = new SR();
+  r.lang = "zh-TW";
+  r.continuous = false;
+  r.interimResults = true;
+  r.onstart = ()=>{
+    $("asrStatus").textContent = "ASR: listening";
+    setDot("dotListening","ok");
+  };
+  r.onend = ()=>{
+    $("asrStatus").textContent = "ASR: idle";
+    setDot("dotListening","warn");
+  };
+  r.onerror = (e)=>{
+    appendLog("ASR 錯誤：" + (e.error || "unknown"));
+    toast("語音辨識失敗（改用文字）");
+  };
+  r.onresult = (event)=>{
+    let finalText = "";
+    let interim = "";
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      const res = event.results[i];
+      const txt = res[0]?.transcript || "";
+      if(res.isFinal) finalText += txt;
+      else interim += txt;
+    }
+    if(interim){ $("chatText").value = interim; }
+    if(finalText){ $("chatText").value = finalText; sendChat(); }
+  };
+  return r;
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)){ toast("此環境不支援朗讀"); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "zh-TW";
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+function selfTest(){
+  setDot("dotLoaded","ok");
+  try{ localStorage.setItem("__kline_test","1"); localStorage.removeItem("__kline_test"); setDot("dotStore","ok"); }catch(e){ setDot("dotStore","bad"); }
+  setDot("dotTTS", ("speechSynthesis" in window) ? "ok" : "warn");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  setDot("dotASR", SR ? "ok" : "warn");
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    setDot("dotCam", camStream ? "ok" : "warn");
+    setDot("dotMic", camStream ? "ok" : "warn");
+  }else{
+    setDot("dotCam","bad");
+    setDot("dotMic","bad");
+  }
+  appendLog("監工自檢完成");
+  toast("監工自檢完成");
+}
+
+function setStatePatch(patch){
+  const st = loadState();
+  const next = Object.assign({}, st, patch);
+  saveState(next);
+  updateUI();
+}
+
+function doIgnite(){
+  const st = loadState();
+  setStatePatch({ igniteCount: st.igniteCount + 1, runState: "IGNITED" });
+  appendLog("全域點火（Local）");
+  toast("全域點火");
+}
+function doBreath(){ appendLog("呼吸：穩定節律"); toast("呼吸：穩定節律"); }
+function doHeartbeat(){ appendLog("心跳：確認生命徵象"); toast("心跳：確認生命徵象"); }
+function doCup(){ const r = Math.random() < 0.5 ? "聖筊" : "笑筊"; appendLog("擲筊：" + r); toast("擲筊：" + r); }
+function doFortune(){
+  const fortunes = [
+    "上上籤：守心者得道，躁者為祭。",
+    "上籤：順勢不貪，逆勢不扛。",
+    "中籤：多空皆可，重在節奏。",
+    "中下籤：休息不是退場，是蓄能。",
+    "下籤：別追價，先守樞。",
+  ];
+  const pick = fortunes[Math.floor(Math.random()*fortunes.length)];
+  appendLog("求籤：" + pick);
+  toast(pick);
+}
+function resetRun(){ setStatePatch({ runState: "READY" }); appendLog("重置本次航行"); toast("已重置"); }
+
+function saveWish(){ setStatePatch({ wishText: $("wishText").value || "" }); appendLog("保存留言（許願）"); toast("留言已保存"); }
+function exportWish(){
+  const st = loadState();
+  const payload = { ver: VER, ts: Date.now(), fairyId: st.fairyId, wishText: st.wishText || "", cockpit: { deg: st.deg, warp: st.warp, mass: st.mass, ct: st.ct } };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `wish_${st.fairyId}_${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  appendLog("匯出留言 JSON"); toast("已匯出留言 JSON");
+}
+function clearWish(){ $("wishText").value=""; setStatePatch({ wishText:"" }); appendLog("清空留言"); toast("已清空"); }
+
+async function copyLog(){
+  const txt = $("log").value || "";
+  if(!txt) return toast("沒有可複製內容");
+  try{ await navigator.clipboard.writeText(txt); toast("已複製"); }catch(e){ toast("複製失敗（瀏覽器限制）"); }
+}
+function exportState(){
+  const st = loadState();
+  const payload = { ver: VER, ts: Date.now(), state: st, mediaIndex: loadMediaIndex() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `ufo_cockpit_state_${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  appendLog("匯出狀態 JSON"); toast("已匯出狀態 JSON");
+}
+function importState(file){
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    const obj = safeJSONParse(fr.result, null);
+    if(!obj || !obj.state){ toast("JSON 格式不正確"); return; }
+    saveState(obj.state);
+    if(Array.isArray(obj.mediaIndex)) saveMediaIndex(obj.mediaIndex);
+    updateUI(); renderThumbs();
+    appendLog("匯入狀態 JSON"); toast("匯入完成");
+  };
+  fr.readAsText(file);
+}
+
+function sendChat(){
+  const text = ($("chatText").value || "").trim();
+  if(!text) return;
+  $("chatText").value = "";
+  pushChat("user", text);
+  appendLog("客服提問：" + text);
+  const ans = reply(text);
+  pushChat("ai", ans);
+  appendLog("客服回覆：" + ans.split("\n")[0] + "…");
+}
+function speakLastAI(){
+  const st = loadState();
+  const chat = st.chat || [];
+  for(let i = chat.length - 1; i >= 0; i--){
+    if(chat[i].role === "ai"){ speak(chat[i].text || ""); return; }
+  }
+  toast("沒有可朗讀的客服回覆");
+}
+function startASR(){
+  if(!recognition) recognition = initASR();
+  if(!recognition){ toast("此環境不支援語音辨識"); return; }
+  try{ recognition.start(); }catch(e){}
+}
+function stopASR(){ if(recognition){ try{ recognition.stop(); }catch(e){} } }
+
+function saveAll(){ const st = loadState(); saveState(st); appendLog("保存整頁狀態"); toast("已保存"); }
+function factoryReset(){
+  if(!confirm("確定清除本機資料？（留言/聊天/照片索引都會清掉）")) return;
+  localStorage.removeItem(LS_KEY);
+  localStorage.removeItem(LS_MEDIA);
+  stopCamera();
+  try{ recognition && recognition.abort && recognition.abort(); }catch(e){}
+  location.reload();
+}
+
+function bind(){
+  $("ver").textContent = VER;
+  $("degRange").addEventListener("input", (e)=> setStatePatch({ deg: Number(e.target.value) }));
+  $("warpRange").addEventListener("input", (e)=>{
+    const st = loadState();
+    setStatePatch({ warp: clamp(Number(e.target.value), 1, st.licenseCap) });
+  });
+  $("massInput").addEventListener("input", (e)=> setStatePatch({ mass: Math.max(1, Number(e.target.value || 1)) }));
+  $("ctInput").addEventListener("input", (e)=> setStatePatch({ ct: Math.max(0, Number(e.target.value || 0)) }));
+
+  $("fairySelect").addEventListener("change", (e)=>{
+    const v = String(e.target.value);
+    const f = FAIRIES[v];
+    setStatePatch({ fairyId: v });
+    appendLog(`切換仙女：${f?.name||"?"}（${v}）`);
+    toast(`切換：${f?.name||"仙女"}（${v}）`);
+  });
+
+  $("btnSelfTest").addEventListener("click", selfTest);
+  $("btnIgnite").addEventListener("click", doIgnite);
+  $("btnBreath").addEventListener("click", doBreath);
+  $("btnHeartbeat").addEventListener("click", doHeartbeat);
+  $("btnCup").addEventListener("click", doCup);
+  $("btnFortune").addEventListener("click", doFortune);
+  $("btnResetRun").addEventListener("click", resetRun);
+
+  $("btnCopyLog").addEventListener("click", copyLog);
+  $("btnExportState").addEventListener("click", exportState);
+  $("importFile").addEventListener("change", (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(f) importState(f);
+    e.target.value = "";
+  });
+
+  $("btnCamStart").addEventListener("click", startCamera);
+  $("btnCamStop").addEventListener("click", stopCamera);
+  $("btnSnap").addEventListener("click", snap);
+  $("btnRec").addEventListener("click", startOrStopRec);
+
+  $("btnSaveWish").addEventListener("click", saveWish);
+  $("btnExportWish").addEventListener("click", exportWish);
+  $("btnClearWish").addEventListener("click", clearWish);
+
+  $("btnSend").addEventListener("click", sendChat);
+  $("btnSpeak").addEventListener("click", speakLastAI);
+  $("btnMic").addEventListener("click", startASR);
+  $("btnStopMic").addEventListener("click", stopASR);
+
+  $("btnSaveAll").addEventListener("click", saveAll);
+  $("btnFactoryReset").addEventListener("click", factoryReset);
+
+  $("chatText").addEventListener("keydown", (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key === "Enter") sendChat();
+  });
+}
+
+setInterval(()=>{ $("clock").textContent = nowHHMMSS(); }, 250);
+
+(function init(){
+  setDot("dotLoaded","ok");
+  setDot("dotStore","warn");
+  setDot("dotCam","warn");
+  setDot("dotMic","warn");
+  setDot("dotTTS", ("speechSynthesis" in window) ? "ok" : "warn");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  setDot("dotASR", SR ? "ok" : "warn");
+  setDot("dotListening","warn");
+  try{ localStorage.setItem("__kline_test","1"); localStorage.removeItem("__kline_test"); setDot("dotStore","ok"); }catch(e){ setDot("dotStore","bad"); }
+  bind();
+  updateUI();
+  renderThumbs();
+  appendLog("啟動完成：UFO Cockpit V1.0");
+})();
+</script>
+</body>
+</html>
