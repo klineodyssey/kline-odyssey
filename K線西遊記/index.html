@@ -2,8 +2,12 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>K線西遊記｜銀河宇宙入口（Portal V1.2.1 GLOBAL-IGNITE）</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>K線西遊記｜銀河宇宙入口（Portal V1.3 · Global Ignite）</title>
+
+  <!-- 你需要把 ethers 放在：/K線西遊記/assets/ethers-5.7.2.umd.min.js -->
+  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
+
   <style>
     :root{
       --bg:#06070b;
@@ -19,6 +23,10 @@
       --r2: 999px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
+      --gold: rgba(255,215,0,.95);
+      --ok: rgba(120,255,200,.95);
+      --warn: rgba(255,210,120,.95);
+      --bad: rgba(255,120,120,.95);
     }
     *{box-sizing:border-box}
     body{
@@ -94,18 +102,16 @@
     .node .n{font-weight:950;letter-spacing:.5px}
     .node .p{color:var(--muted);font-size:12px;line-height:1.35}
     .node .id{color:rgba(255,255,255,.75);font-size:12px;font-family:var(--mono)}
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)
-    }
-    .ok{color:#9fffd9}
-    .warn{color:#ffd28c}
-    .err{color:#ff9fb2}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)}
+    .badge strong{color:var(--text)}
+    .badge.ok{border-color: rgba(120,255,200,.35); color: rgba(210,255,235,.92)}
+    .badge.warn{border-color: rgba(255,210,120,.35); color: rgba(255,238,210,.92)}
+    .badge.bad{border-color: rgba(255,120,120,.35); color: rgba(255,210,220,.92)}
 
     .footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.55;padding-bottom:6px;}
     .hr{height:1px;background:var(--line);margin:10px 0}
 
-    /* ===== Portal V1.2+ additions ===== */
+    /* ===== Supervisor overlay ===== */
     .topRight{
       position:fixed; right:14px; top:14px; z-index:50;
       display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
@@ -121,28 +127,6 @@
       backdrop-filter: blur(8px);
     }
     .miniPill b{ font-family: var(--mono); }
-    .progressWrap{ margin-top:10px; }
-    .progressBar{
-      width:100%; height:14px; border-radius:999px;
-      background: rgba(255,255,255,.10);
-      overflow:hidden; border:1px solid rgba(255,255,255,.14);
-    }
-    .progressFill{
-      height:100%; width:0%;
-      background: linear-gradient(90deg, rgba(255,215,0,.95), rgba(255,160,0,.95));
-      transition: width .6s ease;
-    }
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:5px 10px; border-radius:999px; font-size:12px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.35);
-      color: var(--text);
-      white-space:nowrap;
-    }
-    .badge.ok{ border-color: rgba(120,255,200,.35); }
-    .badge.warn{ border-color: rgba(255,210,120,.35); }
-    .badge.bad{ border-color: rgba(255,120,120,.35); }
     .supervisorBtn{
       cursor:pointer; user-select:none;
       background: rgba(255,255,255,.10);
@@ -159,7 +143,7 @@
     .overlay.on{ display:block; }
     .overlayCard{
       position:absolute; right:14px; top:64px;
-      width:min(520px, calc(100vw - 28px));
+      width:min(560px, calc(100vw - 28px));
       background: rgba(10,10,16,.85);
       border:1px solid rgba(255,215,0,.30);
       border-radius: var(--r);
@@ -167,6 +151,17 @@
       padding:14px;
       backdrop-filter: blur(10px);
       color: var(--text);
+    }
+    .progressWrap{ margin-top:10px; }
+    .progressBar{
+      width:100%; height:14px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden; border:1px solid rgba(255,255,255,.14);
+    }
+    .progressFill{
+      height:100%; width:0%;
+      background: linear-gradient(90deg, rgba(255,215,0,.95), rgba(255,160,0,.95));
+      transition: width .6s ease;
     }
     .chkGrid{
       display:grid;
@@ -183,44 +178,64 @@
       justify-self:end;
       margin-top:4px;
     }
-    .dot.ok{ background: rgba(120,255,200,.95); box-shadow:0 0 14px rgba(120,255,200,.45); }
-    .dot.warn{ background: rgba(255,210,120,.95); box-shadow:0 0 14px rgba(255,210,120,.45); }
-    .dot.bad{ background: rgba(255,120,120,.95); box-shadow:0 0 14px rgba(255,120,120,.45); }
-    .nodesGrid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:12px;
-    }
-    @media (max-width: 760px){ .nodesGrid{ grid-template-columns:1fr; } }
-    .nodeCard{
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: var(--r);
-      padding:12px;
-      box-shadow: var(--shadow);
-    }
-    .nodeTitle{ font-weight:950; letter-spacing:.3px; }
-    .nodeSub{ color: var(--muted); margin-top:6px; font-size:12px; line-height:1.5; }
-    .nodeRow{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
-    .nodeRow a{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:9px 12px; border-radius:999px;
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.16);
-      text-decoration:none; color: var(--text);
-      font-weight:850;
-    }
-    .nodeRow a:hover{ background: rgba(255,255,255,.16); }
-  </style>
+    .dot.ok{ background: var(--ok); box-shadow:0 0 14px rgba(120,255,200,.45); }
+    .dot.warn{ background: var(--warn); box-shadow:0 0 14px rgba(255,210,120,.45); }
+    .dot.bad{ background: var(--bad); box-shadow:0 0 14px rgba(255,120,120,.45); }
 
-  <!-- Ethers v5.7.2 (你需自行放檔) -->
-  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
+    /* ===== Global Ignite panel ===== */
+    .global{
+      margin-top:12px;
+      border:1px solid rgba(255,215,0,.20);
+      background: rgba(0,0,0,.18);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .globalHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    }
+    .globalTitle{
+      font-weight:950; letter-spacing:.4px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .globalGrid{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .gRow{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.04);
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .gTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    }
+    .gName{font-weight:950; letter-spacing:.3px;}
+    .gMeta{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+    .gAddr{font-family:var(--mono); font-size:12px; color: rgba(255,255,255,.78)}
+    .copyBtn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      padding:6px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight:850;
+      font-size:12px;
+      user-select:none;
+    }
+    .copyBtn:hover{ background: rgba(255,255,255,.12); }
+    .gBadges{display:flex; gap:8px; flex-wrap:wrap}
+  </style>
 </head>
 
 <body>
 
   <div class="topRight">
-    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.2.1</b></div>
+    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.3</b></div>
     <div class="miniPill">時間：<b id="nowClock" class="mono">--</b></div>
     <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
   </div>
@@ -228,7 +243,7 @@
   <div class="overlay" id="supervisorOverlay" aria-hidden="true">
     <div class="overlayCard">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.2.1 GLOBAL-IGNITE</div>
+        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.3</div>
         <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
       </div>
       <div class="progressWrap">
@@ -243,14 +258,12 @@
         <div>頁面載入</div><div class="dot" id="chkLoaded"></div>
         <div>星空引擎（Canvas）</div><div class="dot" id="chkStars"></div>
         <div>節點偵測（各殿 index.html）</div><div class="dot" id="chkNodes"></div>
-        <div>Heart 面板可用（讀鏈）</div><div class="dot" id="chkHeartPanel"></div>
-        <div>全域點火（事件/函式偵測）</div><div class="dot" id="chkIgniteGlobal"></div>
+        <div>讀鏈面板（Global Ignite）</div><div class="dot" id="chkGlobal"></div>
         <div>錯誤監看（Console 捕捉）</div><div class="dot" id="chkErrors"></div>
       </div>
 
       <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6;">
-        說明：Portal 會嘗試以 <span class="mono">fetch</span> 偵測各點位是否已完工（存在 index.html）。未完工顯示「施工準備中」。<br/>
-        全域點火：優先用 Heart 的全域函式（若存在），否則回退掃描近 24 小時事件（近似全域）並以 UTC 當日判斷。
+        說明：Portal 會以 <span class="mono">fetch</span> 檢查各點位是否存在 <span class="mono">index.html</span>，並用公開 RPC 讀鏈，不需要錢包。
       </div>
     </div>
   </div>
@@ -259,7 +272,7 @@
     <header>
       <div class="brand">
         <div class="h">K線西遊記｜銀河宇宙入口</div>
-        <div class="s">KLINE Odyssey · Map Portal · Portal V1.2.1 (GLOBAL-IGNITE)</div>
+        <div class="s">KLINE Odyssey · Map Portal · Portal V1.3（新增：全域點火面板）</div>
       </div>
 
       <div class="pillrow">
@@ -277,7 +290,7 @@
           <div class="title">宇宙不需要解釋，只需要入口。</div>
           <p class="subtitle">
             這裡是《K線西遊記》的地圖門戶。<br/>
-            Portal V1.2.1：讀取 Heart 血量 / 呼吸窗口 / 今日「全域點火」狀態（函式優先＋事件回退）。
+            Portal V1.3：新增「全域點火（Global Ignite）」面板，對齊最新 Heart 讀取介面（血量 / 點火 / 窗口 / 獎勵參數）。
           </p>
 
           <div class="ctaRow">
@@ -291,7 +304,25 @@
 
           <div class="smallText">
             RPC 模式：預設用公開 RPC 讀鏈（不需要錢包）。<br/>
-            連錢包只是為了後續要在 Portal 上做「一鍵跳轉＋快速點火」；本版先做讀鏈穩定＋全域狀態。
+            之後若要在 Portal 直接做「一鍵點火 / 心跳」，再改成連錢包模式（本版先保讀鏈穩定）。
+          </div>
+
+          <div class="global" id="globalPanel">
+            <div class="globalHead">
+              <div class="globalTitle">🔥 全域點火（Global Ignite）</div>
+              <div class="gBadges">
+                <span class="badge" id="globalChain">CHAIN: <strong class="mono" id="chainId">--</strong></span>
+                <span class="badge" id="globalBlock">BLOCK: <strong class="mono" id="blockNum">--</strong></span>
+                <span class="badge warn" id="globalIgnite">GLOBAL: <strong class="mono" id="globalIgniteText">--</strong></span>
+              </div>
+            </div>
+
+            <div class="globalGrid" id="globalGrid"></div>
+
+            <div class="smallText" style="margin-top:10px;">
+              設定：請在本檔案最下方 <span class="mono">CFG.addresses</span> 填上已部署的合約地址。<br/>
+              若 Heart 尚未上鏈或地址未填，該列會顯示「未設定」並不影響其他點位讀取。
+            </div>
           </div>
         </div>
 
@@ -309,21 +340,17 @@
             <div class="k">鏈上連線</div>
             <div class="v" style="font-size:14px;font-weight:900;" id="rpcStatus">尚未檢測</div>
             <div class="t">
-              <span class="badge">CHAIN: <b class="mono" id="chainId">--</b></span>
-              <span class="badge">BLOCK: <b class="mono" id="blockNum">--</b></span>
+              <span class="badge">RPC: <b class="mono" id="rpcNow">--</b></span>
+              <span class="badge">STATUS: <b class="mono" id="rpcCode">--</b></span>
             </div>
           </div>
 
           <div class="card">
-            <div class="k">五指山 12345｜Heart 狀態</div>
-            <div class="v" style="font-size:14px;font-weight:900;" id="heartStatus">尚未讀取</div>
+            <div class="k">快速提示</div>
+            <div class="v" style="font-size:14px;font-weight:900;">入口只做導航＋讀鏈</div>
             <div class="t">
-              <span class="badge">血量: <b class="mono" id="heartBal">--</b> <span class="mono">KGEN</span></span>
-              <span class="badge">全域點火: <b class="mono" id="ignitedToday">--</b></span>
-              <span class="badge">窗口: <b class="mono" id="igniteWindow">--</b></span>
-            </div>
-            <div class="smallText" style="margin-top:10px;">
-              Heart: <span class="mono" id="heartAddr">未設定</span>
+              <span class="badge">Temple: <b class="mono">/K線西遊記/temples/</b></span>
+              <span class="badge">Assets: <b class="mono">/K線西遊記/assets/</b></span>
             </div>
           </div>
         </div>
@@ -335,9 +362,12 @@
         <div style="font-weight:950;letter-spacing:.35px;">時光隧道｜宇宙入口列表</div>
         <div class="badge warn" id="nodesStatus">偵測中…</div>
       </div>
-      <div class="nodeSub">點位尚未施工完成時，入口會顯示「施工準備中」。偵測到檔案後自動亮燈。</div>
+      <div class="smallText" style="margin-top:8px;">
+        點位尚未施工完成時，入口會顯示「施工準備中」。偵測到檔案後自動亮燈。
+      </div>
 
-      <div class="nodesGrid" id="nodesGrid" style="margin-top:12px;"></div>
+      <div id="nodesGrid" style="margin-top:12px;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;">
+      </div>
     </section>
 
     <section class="map" id="map">
@@ -360,25 +390,28 @@
         <a class="node" href="javascript:void(0)" data-node="18888">
           <div class="n">靈霄寶殿・玉帝金庫</div>
           <div class="id">18888</div>
-          <div class="p">人民銀行 / 存款分紅 / 0.1% 稅（另殿另合約）</div>
+          <div class="p">神明銀行 / 0.1% 稅接收 / Pull Claim / 每月 5 日結算</div>
+          <div class="p mono" id="node18888Hint">施工準備中</div>
         </a>
 
         <a class="node" href="javascript:void(0)" data-node="18921">
-          <div class="n">斬妖台・AutoLP/分流引擎</div>
+          <div class="n">斬妖台・AutoLP/分流</div>
           <div class="id">18921</div>
-          <div class="p">0.05% AutoLP 稅 / 節日活動（另殿另合約）</div>
+          <div class="p">AutoLP 0.05% / 斬妖分流 splitter / 活動引擎</div>
+          <div class="p mono" id="node18921Hint">施工準備中</div>
         </a>
 
-        <a class="node" href="./temples/108000/index.html" data-node="108000">
-          <div class="n">花果山火星齊天豪宅（MARS）</div>
+        <a class="node" href="javascript:void(0)" data-node="108000">
+          <div class="n">花果山火星（MARS）</div>
           <div class="id">108000</div>
-          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / Brain 每月撥款分潤</div>
+          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / Brain 月撥付分潤</div>
+          <div class="p mono" id="node108000Hint">施工準備中</div>
         </a>
       </div>
 
       <div class="footer">
-        Portal V1.2.1：讀取 Heart 血量 / 窗口 / 今日全域點火狀態。<br/>
-        之後要做「影像 AI 無人客服」會放在 Portal 的客服區（但不擠進 12345 神殿）。
+        Portal V1.3 新增：全域點火面板（可同時追蹤多個 Heart）。<br/>
+        本頁不放「客服／相機／許願」避免擠爆入口；那些留在各 Temple。
       </div>
     </section>
 
@@ -392,10 +425,9 @@
 
 <script>
 /* =========================
-   Portal V1.2.1 — On-chain Read Panel (BSC)
+   Portal V1.3 — Global Ignite (BSC)
    - No wallet required (default JsonRpcProvider)
-   - Heart address configured in CFG
-   - GLOBAL ignite status: function-first, event-fallback
+   - Multi-heart support
    ========================= */
 
 const CFG = {
@@ -405,20 +437,26 @@ const CFG = {
     rpcUrls: [
       "https://bsc-dataseed.binance.org/",
       "https://bsc-dataseed1.binance.org/",
-      "https://bsc-dataseed2.binance.org/",
-      "https://bsc.publicnode.com"
+      "https://bsc-dataseed2.binance.org/"
     ]
   },
   addresses: {
     // 已部署（你提供）
     kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    // 你部署 Heart 後把地址貼在這裡
-    heart12345: "0x0000000000000000000000000000000000000000"
+    // Heart（部署後填）
+    heart12345: "0x0000000000000000000000000000000000000000",
+
+    // 未上鏈者先留空或 0x0（不影響讀取）
+    bank18888: "0x0000000000000000000000000000000000000000",
+    mars108000: "0x0000000000000000000000000000000000000000",
+    splitter18921: "0x0000000000000000000000000000000000000000"
   },
-  // 若 Heart 是「每人各自點火」：Portal 無錢包模式仍可用「觀測者」地址推斷是否有人點火（事件回退）
-  observers: {
-    keeperOrOwner: "0x0000000000000000000000000000000000000000"
-  }
+  nodesToProbe: [
+    { id:"12345", name:"五指山・悟空財神殿", path:"./temples/12345/index.html" },
+    { id:"108000", name:"花果山火星・齊天豪宅", path:"./temples/108000/index.html" },
+    { id:"18888", name:"靈霄寶殿・玉帝金庫", path:"./temples/18888/index.html" },
+    { id:"18921", name:"斬妖台・AutoLP/分流", path:"./temples/18921/index.html" },
+  ]
 };
 
 // Minimal ABIs
@@ -428,42 +466,16 @@ const ERC20_ABI = [
   "function symbol() view returns (string)"
 ];
 
-/**
- * Heart read-only ABI (兼容：會用 callStatic/try-catch 偵測哪個存在)
- * 你的最新 Heart（V3.2.3）常見：
- * - kgen() / token()
- * - igniteWindowStart()/igniteWindowEnd() 或 windowStartSec/windowEndSec
- * - currentDayIndex()/localDayIdNow()
- * - dayIgnited(dayId)（全域）或 lastIgniteDay(user)（個體）
- */
-const HEART_READ_ABI = [
-  "function kgen() view returns (address)",
+// Heart ABI (read-only subset aligned to your Portal V1.2)
+const HEART_ABI = [
   "function token() view returns (address)",
-  "function igniteWindowStart() view returns (uint256)",
-  "function igniteWindowEnd() view returns (uint256)",
   "function windowStartSec() view returns (uint32)",
   "function windowEndSec() view returns (uint32)",
   "function inIgniteWindow() view returns (bool)",
-  "function currentDayIndex() view returns (uint256)",
   "function localDayIdNow() view returns (uint256)",
   "function dayIgnited(uint256) view returns (bool)",
-  "function lastIgniteDay(address) view returns (uint256)",
   "function igniteReward() view returns (uint256)",
-  "function heartbeatReward() view returns (uint256)",
-  // 若你合約有這個（你之前版本提到）
-  "function heartBalanceWhole() view returns (uint256)"
-];
-
-// Event fallback candidates (we'll probe multiple; parse if matches)
-const HEART_EVENT_SIGS = [
-  // very common patterns
-  "event Ignited(address indexed user, uint256 indexed dayId, uint256 rewardWei)",
-  "event Ignite(address indexed user, uint256 indexed dayId, uint256 rewardWei)",
-  "event IgniteAndClaim(address indexed user, uint256 indexed dayId, uint256 rewardWei)",
-  "event IgniteClaimed(address indexed user, uint256 indexed dayId, uint256 rewardWei)",
-  // alternative ordering
-  "event Ignited(uint256 indexed dayId, address indexed user, uint256 rewardWei)",
-  "event Ignite(uint256 indexed dayId, address indexed user, uint256 rewardWei)"
+  "function heartbeatReward() view returns (uint256)"
 ];
 
 function $(id){ return document.getElementById(id); }
@@ -476,63 +488,101 @@ function shortAddr(a){
   if(!a || a.length < 10) return a || "";
   return a.slice(0,6) + "…" + a.slice(-4);
 }
-function statusBadge(el, kind, text){
-  // kind: ok/warn/err
-  el.className = "v " + (kind==="ok"?"ok":kind==="warn"?"warn":"err");
+function isZero(a){
+  return !a || a.toLowerCase() === "0x0000000000000000000000000000000000000000";
+}
+function setBadge(el, kind, text){
+  if(!el) return;
+  el.classList.remove("ok","warn","bad");
+  if(kind) el.classList.add(kind);
   el.textContent = text;
 }
 
+function copyText(text){
+  const t = String(text || "");
+  if(!t) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).catch(()=>{});
+  }else{
+    const ta = document.createElement("textarea");
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+
+/* ===== Supervisor ===== */
+const SUP = { loaded:false, stars:false, nodes:false, global:false, errors:false };
 function setDot(id, kind){
   const el = $(id);
   if(!el) return;
   el.classList.remove("ok","warn","bad");
-  if(kind==="ok") el.classList.add("ok");
-  else if(kind==="warn") el.classList.add("warn");
-  else el.classList.add("bad");
+  el.classList.add(kind);
+}
+function updateSupervisor(){
+  const checks = [
+    ["chkLoaded", SUP.loaded ? "ok":"bad"],
+    ["chkStars",  SUP.stars  ? "ok":"warn"],
+    ["chkNodes",  SUP.nodes  ? "ok":"warn"],
+    ["chkGlobal", SUP.global ? "ok":"warn"],
+    ["chkErrors", SUP.errors ? "warn":"ok"],
+  ];
+  let okCount = 0;
+  for(const [id, kind] of checks){
+    setDot(id, kind);
+    if(kind === "ok") okCount++;
+  }
+  const pct = Math.round((okCount / checks.length) * 100);
+  setText("supPct", `${pct}%`);
+  const fill = $("supFill"); if(fill) fill.style.width = `${pct}%`;
 }
 
-// ===== Stars canvas =====
-function bootStars(){
+/* ===== Starfield ===== */
+function startStars(){
   const c = $("stars");
   if(!c) return false;
   const ctx = c.getContext("2d");
-  let w=0,h=0,stars=[];
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  let w=0,h=0, stars=[];
   function resize(){
-    w = c.width = c.offsetWidth * devicePixelRatio;
-    h = c.height = c.offsetHeight * devicePixelRatio;
-    stars = Array.from({length:120}, ()=>({
-      x: Math.random()*w,
-      y: Math.random()*h,
-      r: (Math.random()*1.6+0.4)*devicePixelRatio,
-      v: (Math.random()*0.5+0.15)*devicePixelRatio
-    }));
+    w = c.clientWidth; h = c.clientHeight;
+    c.width = Math.floor(w*dpr);
+    c.height = Math.floor(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    stars = [];
+    const n = Math.min(140, Math.floor((w*h)/9000));
+    for(let i=0;i<n;i++){
+      stars.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.6+0.2, a:Math.random()*0.75+0.1, s:Math.random()*0.3+0.05});
+    }
   }
-  resize();
-  window.addEventListener("resize", resize);
-  (function tick(){
+  function tick(){
     ctx.clearRect(0,0,w,h);
-    ctx.globalAlpha = 0.9;
     for(const s of stars){
-      s.y += s.v;
-      if(s.y > h){ s.y = -10; s.x = Math.random()*w; }
+      s.y += s.s; if(s.y > h) s.y = 0;
+      ctx.globalAlpha = s.a;
+      ctx.fillStyle = "white";
       ctx.beginPath();
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle = "rgba(255,255,255,0.75)";
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
       ctx.fill();
     }
     requestAnimationFrame(tick);
-  })();
+  }
+  window.addEventListener("resize", resize);
+  resize(); tick();
   return true;
 }
 
-// ===== Provider =====
+/* ===== Provider ===== */
+let provider = null;
+let providerUrl = "";
 async function makeProvider(){
-  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into ./assets/");
+  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
   let lastErr = null;
   for(const url of CFG.chain.rpcUrls){
     try{
       const p = new ethers.providers.JsonRpcProvider(url);
       await p.getBlockNumber();
+      providerUrl = url;
       return p;
     }catch(e){
       lastErr = e;
@@ -541,417 +591,277 @@ async function makeProvider(){
   throw lastErr || new Error("No RPC works");
 }
 
-async function refreshChain(provider){
+async function refreshChain(){
   const net = await provider.getNetwork();
-  setText("chainId", String(net.chainId));
   const bn = await provider.getBlockNumber();
+  setText("chainId", String(net.chainId));
   setText("blockNum", String(bn));
+  setText("rpcNow", providerUrl ? shortAddr(providerUrl) : "--");
+  setText("rpcCode", "OK");
   if(net.chainId === CFG.chain.chainIdExpected){
-    statusBadge($("rpcStatus"), "ok", "RPC OK（讀鏈正常）");
+    $("rpcStatus").textContent = "RPC OK（讀鏈正常）";
+    $("rpcStatus").style.color = "rgba(210,255,235,.92)";
   }else{
-    statusBadge($("rpcStatus"), "warn", `RPC OK（chainId=${net.chainId}）`);
+    $("rpcStatus").textContent = `RPC OK（chainId=${net.chainId}）`;
+    $("rpcStatus").style.color = "rgba(255,238,210,.92)";
   }
-  return {net, bn};
 }
 
-function utcDayStartTs(nowTs){
-  // nowTs in seconds (UTC)
-  const d = new Date(nowTs*1000);
-  const y = d.getUTCFullYear();
-  const m = d.getUTCMonth();
-  const day = d.getUTCDate();
-  const start = Date.UTC(y,m,day,0,0,0)/1000;
-  return start;
-}
-
-async function callIfExists(contract, method){
-  try{
-    if(!contract.functions[method]) return {ok:false, v:null};
-    const v = await contract[method]();
-    return {ok:true, v};
-  }catch(e){
-    return {ok:false, v:null};
-  }
-}
-async function callIfExists1(contract, method, arg1){
-  try{
-    if(!contract.functions[method]) return {ok:false, v:null};
-    const v = await contract[method](arg1);
-    return {ok:true, v};
-  }catch(e){
-    return {ok:false, v:null};
-  }
+/* ===== Global Ignite ===== */
+function heartsList(){
+  return [
+    { id:"12345", name:"五指山 Heart（12345）", addr: CFG.addresses.heart12345 }
+    // 之後要加新 Heart，只要在這裡多加一列即可：
+    // { id:"xxxxx", name:"某某 Heart（xxxxx）", addr:"0x..." }
+  ];
 }
 
 function hhmm(sec){
-  const s = Number(sec);
+  const s = Number(sec || 0);
   const h = Math.floor(s/3600);
   const m = Math.floor((s%3600)/60);
   return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
 }
 
-async function detectGlobalIgnite(provider, heartAddr, heartC, bn){
-  // 1) function-first: dayIgnited(dayId)
-  // Determine dayId using currentDayIndex()/localDayIdNow()
-  let dayIdRes = await callIfExists(heartC, "currentDayIndex");
-  if(!dayIdRes.ok) dayIdRes = await callIfExists(heartC, "localDayIdNow");
+async function readHeartRow(h){
+  const grid = $("globalGrid");
+  const rowId = `heartRow_${h.id}`;
+  let row = $(rowId);
 
-  if(dayIdRes.ok){
-    const dayId = dayIdRes.v;
-    const di = await callIfExists1(heartC, "dayIgnited", dayId);
-    if(di.ok){
-      return {kind:"func", ignited: !!di.v, detail: `dayId=${dayId.toString()}`};
-    }
-  }
-
-  // 2) event-fallback (near-24h scan)
-  // We'll scan last ~36k blocks (approx >24h on BSC) and then filter by UTC day start using block timestamps.
-  const fromBlock = Math.max(0, bn - 36000);
-  const toBlock = bn;
-
-  const iface = new ethers.utils.Interface(HEART_EVENT_SIGS);
-  const topics = [];
-  for(const frag of Object.values(iface.events)){
-    topics.push(iface.getEventTopic(frag));
-  }
-
-  // getLogs for each topic (some nodes cap results; we chunk topics)
-  let logs = [];
-  for(const t of topics){
-    try{
-      const got = await provider.getLogs({address: heartAddr, fromBlock, toBlock, topics:[t]});
-      logs = logs.concat(got || []);
-    }catch(e){
-      // ignore per-topic failures
-    }
-  }
-  if(!logs.length){
-    return {kind:"event", ignited:false, detail:`no logs (from ${fromBlock})`};
-  }
-
-  // Sort newest first
-  logs.sort((a,b)=> (b.blockNumber - a.blockNumber) || (b.logIndex - a.logIndex));
-
-  // Determine UTC day window [start, start+86400)
-  const nowTs = Math.floor(Date.now()/1000);
-  const start = utcDayStartTs(nowTs);
-  const end = start + 86400;
-
-  // Walk newest logs; fetch blocks until we find one in today's window
-  const blockCache = new Map();
-  for(const lg of logs){
-    let blk = blockCache.get(lg.blockNumber);
-    if(!blk){
-      try{
-        blk = await provider.getBlock(lg.blockNumber);
-        blockCache.set(lg.blockNumber, blk);
-      }catch(e){
-        continue;
-      }
-    }
-    const ts = Number(blk.timestamp);
-    if(ts >= start && ts < end){
-      // parse to show dayId if present
-      let parsed = null;
-      try{ parsed = iface.parseLog(lg); }catch(e){}
-      const who = parsed && parsed.args && parsed.args.user ? String(parsed.args.user) : (parsed && parsed.args && parsed.args[0] && String(parsed.args[0]).startsWith("0x") ? String(parsed.args[0]) : "");
-      const dayId = parsed && parsed.args && (parsed.args.dayId ?? parsed.args[1]) ? (parsed.args.dayId ?? parsed.args[1]).toString() : "";
-      return {kind:"event", ignited:true, detail:`log@${lg.blockNumber} ${who?shortAddr(who):""} ${dayId?("dayId="+dayId):""}`};
-    }
-    if(ts < start){
-      // older than today; we can stop
-      break;
-    }
-  }
-  return {kind:"event", ignited:false, detail:`no today's ignite logs`};
-}
-
-async function refreshHeart(provider, bn){
-  const heart = CFG.addresses.heart12345;
-  setText("heartAddr", heart);
-  setText("node12345Hint", heart && heart !== ethers.constants.AddressZero ? `Heart: ${shortAddr(heart)}` : "Heart 未設定");
-
-  if(!heart || heart === ethers.constants.AddressZero){
-    statusBadge($("heartStatus"), "warn", "Heart 未設定（先部署/填入地址）");
-    setText("heartBal", "--");
-    setText("ignitedToday", "--");
-    setText("igniteWindow", "--");
-    return {ok:false, igniteOk:false};
-  }
-
-  const heartC = new ethers.Contract(heart, HEART_READ_ABI, provider);
-
-  // Token info (use CFG token as canonical)
-  const tokenAddr = CFG.addresses.kgenToken;
-  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
-
-  const [dec, sym, bal] = await Promise.all([
-    token.decimals().catch(()=>18),
-    token.symbol().catch(()=> "KGEN"),
-    token.balanceOf(heart).catch(()=> ethers.BigNumber.from(0))
-  ]);
-
-  // Prefer heartBalanceWhole() if exists (more "建築驗收" friendly)
-  let balWhole = null;
-  try{
-    if(heartC.functions["heartBalanceWhole"]){
-      balWhole = await heartC.heartBalanceWhole();
-    }
-  }catch(e){ balWhole = null; }
-
-  if(balWhole !== null){
-    setText("heartBal", fmtNum(balWhole.toString()));
-  }else{
-    const balFmt = ethers.utils.formatUnits(bal, dec);
-    // avoid NaN issues
-    const n = Number(balFmt);
-    setText("heartBal", Number.isFinite(n) ? fmtNum(n.toFixed(2)) : balFmt);
-  }
-
-  // Window: support both igniteWindowStart/End and windowStartSec/windowEndSec
-  let ws = null, we = null, inWin = null;
-
-  const ws1 = await callIfExists(heartC, "igniteWindowStart");
-  const we1 = await callIfExists(heartC, "igniteWindowEnd");
-  if(ws1.ok && we1.ok){
-    ws = ws1.v; we = we1.v;
-  }else{
-    const ws2 = await callIfExists(heartC, "windowStartSec");
-    const we2 = await callIfExists(heartC, "windowEndSec");
-    if(ws2.ok && we2.ok){
-      ws = ws2.v; we = we2.v;
-    }
-  }
-  const in1 = await callIfExists(heartC, "inIgniteWindow");
-  if(in1.ok) inWin = !!in1.v;
-
-  if(ws!==null && we!==null){
-    setText("igniteWindow", `${hhmm(ws)}–${hhmm(we)}${inWin===null?"":(inWin?" (IN)":" (OUT)")}`);
-  }else{
-    setText("igniteWindow", inWin===null ? "--" : (inWin?"IN":"OUT"));
-  }
-
-  // Global ignite (function-first, event-fallback)
-  let igniteRes = {kind:"none", ignited:false, detail:""};
-  try{
-    igniteRes = await detectGlobalIgnite(provider, heart, heartC, bn);
-    setText("ignitedToday", igniteRes.ignited ? "YES" : "NO");
-  }catch(e){
-    setText("ignitedToday", "--");
-  }
-
-  // Status line
-  statusBadge($("heartStatus"), "ok", `Heart OK（${sym} 血量已讀取）`);
-  return {ok:true, igniteOk:true, igniteRes};
-}
-
-// ===== Node detection =====
-const NODES = [
-  { key:"12345", name:"五指山・悟空財神殿", href:"./temples/12345/index.html", path:"./temples/12345/index.html" },
-  { key:"18888", name:"靈霄寶殿・玉帝金庫", href:"./temples/18888/index.html", path:"./temples/18888/index.html" },
-  { key:"18921", name:"斬妖台・AutoLP/分流引擎", href:"./temples/18921/index.html", path:"./temples/18921/index.html" },
-  { key:"MARS",  name:"花果山火星（MARS）", href:"./temples/MARS/index.html",  path:"./temples/MARS/index.html" }
-];
-
-async function probeNode(url){
-  // fetch HEAD may be blocked on GH pages sometimes; use GET with cache-bust and small response
-  const u = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-  try{
-    const r = await fetch(u, {method:"GET", cache:"no-store"});
-    // GH Pages returns 200 for found; 404 for not found
-    return r && r.ok;
-  }catch(e){
-    return false;
-  }
-}
-
-async function refreshNodes(){
-  const grid = $("nodesGrid");
-  if(!grid) return {ok:false, done:0, total:0};
-  grid.innerHTML = "";
-  let done = 0;
-
-  for(const n of NODES){
-    const ok = await probeNode(n.path);
-    const card = document.createElement("div");
-    card.className = "nodeCard";
-    card.innerHTML = `
-      <div class="nodeTitle">${n.name}</div>
-      <div class="nodeSub">${ok ? "已施工完成（入口可用）" : "施工準備中（未偵測到 index.html）"}</div>
-      <div class="nodeRow">
-        <div class="badge ${ok?"ok":"warn"}">${ok ? "OK" : "PENDING"}</div>
-        <a href="${ok ? n.href : "javascript:void(0)"}" ${ok ? "" : "onclick=\"alert('施工準備中：尚未偵測到該點位 index.html')\""}>${ok ? "進入" : "尚未開放"}</a>
+  if(!row){
+    row = document.createElement("div");
+    row.className = "gRow";
+    row.id = rowId;
+    row.innerHTML = `
+      <div class="gTop">
+        <div>
+          <div class="gName" id="${rowId}_name"></div>
+          <div class="gAddr" id="${rowId}_addr"></div>
+        </div>
+        <div class="gMeta">
+          <span class="copyBtn" id="${rowId}_copy">Copy</span>
+          <span class="badge warn" id="${rowId}_state">待檢測</span>
+        </div>
+      </div>
+      <div class="gBadges">
+        <span class="badge" id="${rowId}_bal">血量: <strong class="mono">--</strong> KGEN</span>
+        <span class="badge" id="${rowId}_ignite">今日點火: <strong class="mono">--</strong></span>
+        <span class="badge" id="${rowId}_window">窗口: <strong class="mono">--</strong></span>
+        <span class="badge" id="${rowId}_inwin">inWindow: <strong class="mono">--</strong></span>
+        <span class="badge" id="${rowId}_reward">ignite/heartbeat: <strong class="mono">--</strong></span>
       </div>
     `;
+    grid.appendChild(row);
+    $( `${rowId}_copy`).addEventListener("click", ()=> copyText(h.addr));
+  }
+
+  setText(`${rowId}_name`, h.name);
+  setText(`${rowId}_addr`, isZero(h.addr) ? "未設定（請填合約地址）" : h.addr);
+
+  if(isZero(h.addr)){
+    setBadge($( `${rowId}_state`), "warn", "未設定");
+    setText(`${rowId}_bal`, "血量: -- KGEN");
+    setText(`${rowId}_ignite`, "今日點火: --");
+    setText(`${rowId}_window`, "窗口: --");
+    setText(`${rowId}_inwin`, "inWindow: --");
+    setText(`${rowId}_reward`, "ignite/heartbeat: --");
+    return { ok:false, ignited:false };
+  }
+
+  const tokenAddr = CFG.addresses.kgenToken;
+  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+  const heartC = new ethers.Contract(h.addr, HEART_ABI, provider);
+
+  try{
+    const [dec, bal, ws, we, inWin, dayId, ignited, ir, hr] = await Promise.all([
+      token.decimals().catch(()=>18),
+      token.balanceOf(h.addr).catch(()=> ethers.BigNumber.from(0)),
+      heartC.windowStartSec(),
+      heartC.windowEndSec(),
+      heartC.inIgniteWindow(),
+      heartC.localDayIdNow(),
+      heartC.localDayIdNow().then(d=>heartC.dayIgnited(d)).catch(()=>false),
+      heartC.igniteReward().catch(()=> ethers.BigNumber.from(0)),
+      heartC.heartbeatReward().catch(()=> ethers.BigNumber.from(0))
+    ]);
+
+    const balFmt = Number(ethers.utils.formatUnits(bal, dec));
+    setText(`${rowId}_bal`, `血量: ${fmtNum(balFmt.toFixed(2))} KGEN`);
+    setText(`${rowId}_ignite`, `今日點火: ${ignited ? "YES" : "NO"}`);
+    setText(`${rowId}_window`, `窗口: ${hhmm(ws)}-${hhmm(we)}`);
+    setText(`${rowId}_inwin`, `inWindow: ${inWin ? "YES" : "NO"}`);
+
+    const irFmt = Number(ethers.utils.formatUnits(ir, dec));
+    const hrFmt = Number(ethers.utils.formatUnits(hr, dec));
+    setText(`${rowId}_reward`, `ignite/heartbeat: ${fmtNum(irFmt)} / ${fmtNum(hrFmt)} KGEN`);
+
+    setBadge($( `${rowId}_state`), ignited ? "ok" : (inWin ? "warn" : "warn"), ignited ? "已點火" : (inWin ? "窗口中" : "未點火"));
+    return { ok:true, ignited: !!ignited, inWin: !!inWin, dayId: String(dayId) };
+  }catch(e){
+    setBadge($( `${rowId}_state`), "bad", "讀取失敗");
+    return { ok:false, ignited:false, err: e };
+  }
+}
+
+async function refreshGlobalIgnite(){
+  const hs = heartsList();
+  $("globalGrid").innerHTML = "";
+  let anyIgnited = false;
+  let allOk = true;
+  let dayIdRef = null;
+  for(const h of hs){
+    const r = await readHeartRow(h);
+    if(!r.ok) allOk = false;
+    if(r.ignited) anyIgnited = true;
+    if(!dayIdRef && r.dayId) dayIdRef = r.dayId;
+  }
+
+  // Global ignite logic: 只要任一 Heart 今日已點火 => GLOBAL=YES
+  if(anyIgnited){
+    setBadge($("globalIgnite"), "ok", "GLOBAL: YES");
+    setText("globalIgniteText", "YES");
+  }else{
+    setBadge($("globalIgnite"), "warn", "GLOBAL: NO");
+    setText("globalIgniteText", "NO");
+  }
+
+  SUP.global = allOk;
+}
+
+/* ===== Nodes probe ===== */
+async function probeNodes(){
+  const grid = $("nodesGrid");
+  grid.innerHTML = "";
+  const results = [];
+  for(const n of CFG.nodesToProbe){
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="k">${n.name}</div>
+      <div class="v mono">${n.id}</div>
+      <div class="t">
+        <span class="badge warn" id="probe_${n.id}">偵測中…</span>
+        <a class="btn small" href="${n.path}" target="_blank" rel="noreferrer">開啟</a>
+      </div>
+      <div class="smallText mono" style="margin-top:10px;opacity:.85;">${n.path}</div>
+    `;
     grid.appendChild(card);
-    if(ok) done++;
+
+    try{
+      const res = await fetch(n.path, { method:"GET", cache:"no-store" });
+      if(res.ok){
+        setBadge($( `probe_${n.id}` ), "ok", "已施工（index.html OK）");
+        results.push(true);
+        // update node hint lines
+        if(n.id === "12345") setText("node12345Hint", "入口可用");
+        if(n.id === "108000") setText("node108000Hint", "入口可用");
+        if(n.id === "18888") setText("node18888Hint", "入口可用");
+        if(n.id === "18921") setText("node18921Hint", "入口可用");
+      }else{
+        setBadge($( `probe_${n.id}` ), "warn", "施工準備中");
+        results.push(false);
+      }
+    }catch(e){
+      setBadge($( `probe_${n.id}` ), "bad", "偵測失敗");
+      results.push(false);
+    }
   }
-  const total = NODES.length;
-  const status = $("nodesStatus");
-  if(status){
-    status.classList.remove("warn","ok","bad");
-    status.classList.add(done===total ? "ok" : "warn");
-    status.textContent = done===total ? "全部完工" : `已偵測 ${done}/${total}`;
+  const okCount = results.filter(Boolean).length;
+  if(okCount === results.length){
+    setBadge($("nodesStatus"), "ok", `全部亮燈（${okCount}/${results.length}）`);
+  }else{
+    setBadge($("nodesStatus"), "warn", `部分施工（${okCount}/${results.length}）`);
   }
-  return {ok:true, done, total};
+  SUP.nodes = okCount > 0;
 }
 
-// ===== Visit counters (local) =====
-function loadCounters(){
-  const key = "kline_portal_stats_v1_2_1";
-  let s = null;
-  try{ s = JSON.parse(localStorage.getItem(key)||"null"); }catch(e){}
-  if(!s) s = { total:0, today:0, dayKey:"" };
-  const todayKey = new Date().toISOString().slice(0,10);
-  if(s.dayKey !== todayKey){
-    s.dayKey = todayKey;
-    s.today = 0;
+/* ===== Visit counters ===== */
+const VISIT_KEY = "KLINE_PORTAL_VISITS_V1";
+function getDayKey(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${y}${m}${dd}`;
+}
+function loadVisits(){
+  try{
+    const raw = localStorage.getItem(VISIT_KEY);
+    return raw ? JSON.parse(raw) : { total:0, daily:{} };
+  }catch(e){
+    return { total:0, daily:{} };
   }
-  s.total += 1;
-  s.today += 1;
-  localStorage.setItem(key, JSON.stringify(s));
-  setText("today", String(s.today));
-  setText("total", String(s.total));
-  return {key, s};
+}
+function saveVisits(v){ localStorage.setItem(VISIT_KEY, JSON.stringify(v)); }
+function bumpVisits(){
+  const v = loadVisits();
+  v.total = (v.total||0) + 1;
+  const dk = getDayKey();
+  v.daily[dk] = (v.daily[dk]||0) + 1;
+  saveVisits(v);
+  setText("total", String(v.total));
+  setText("today", String(v.daily[dk]));
 }
 
-function resetCounters(){
-  const key = "kline_portal_stats_v1_2_1";
-  localStorage.removeItem(key);
-  setText("today","0");
-  setText("total","0");
-}
-
-// ===== Supervisor overlay =====
-function bindSupervisor(){
-  const btn = $("btnSupervisor");
-  const ov = $("supervisorOverlay");
-  const close = $("supClose");
-  function open(){ ov.classList.add("on"); ov.setAttribute("aria-hidden","false"); }
-  function shut(){ ov.classList.remove("on"); ov.setAttribute("aria-hidden","true"); }
-  btn && btn.addEventListener("click", open);
-  close && close.addEventListener("click", shut);
-  ov && ov.addEventListener("click", (e)=>{ if(e.target===ov) shut(); });
-}
-
-function setProgress(pct){
-  pct = Math.max(0, Math.min(100, pct));
-  setText("supPct", pct.toFixed(0) + "%");
-  const fill = $("supFill");
-  if(fill) fill.style.width = pct + "%";
-}
-
-// ===== Clock =====
-function bootClock(){
+/* ===== Clock ===== */
+function startClock(){
   function tick(){
     const d = new Date();
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mm = String(d.getMinutes()).padStart(2,"0");
-    const ss = String(d.getSeconds()).padStart(2,"0");
-    setText("clock", `${hh}:${mm}:${ss}`);
-    setText("nowClock", `${hh}:${mm}:${ss}`);
+    const t = d.toLocaleTimeString("en-GB");
+    setText("clock", t);
+    setText("nowClock", t);
   }
-  tick();
-  setInterval(tick, 1000);
+  tick(); setInterval(tick, 1000);
 }
 
-// ===== Error watcher =====
-let consoleErrors = 0;
-(function(){
-  const orig = console.error;
-  console.error = function(){
-    consoleErrors++;
-    try{ orig.apply(console, arguments); }catch(e){}
-  };
-  window.addEventListener("error", ()=>{ consoleErrors++; });
-  window.addEventListener("unhandledrejection", ()=>{ consoleErrors++; });
-})();
+/* ===== Init ===== */
+window.addEventListener("error", (e)=>{ SUP.errors = true; updateSupervisor(); });
 
-async function main(){
-  // Supervisor baseline
-  setDot("chkLoaded","ok");
+$("btnSupervisor").addEventListener("click", ()=>{
+  $("supervisorOverlay").classList.add("on");
+  updateSupervisor();
+});
+$("supClose").addEventListener("click", ()=>{
+  $("supervisorOverlay").classList.remove("on");
+});
+$("supervisorOverlay").addEventListener("click", (e)=>{
+  if(e.target === $("supervisorOverlay")) $("supervisorOverlay").classList.remove("on");
+});
+
+$("pingBtn").addEventListener("click", ()=> bumpVisits());
+$("resetBtn").addEventListener("click", ()=>{
+  localStorage.removeItem(VISIT_KEY);
+  bumpVisits();
+});
+
+(async function boot(){
+  SUP.loaded = true;
+
+  startClock();
+  bumpVisits();
 
   // Stars
-  const starsOk = bootStars();
-  setDot("chkStars", starsOk ? "ok" : "warn");
+  SUP.stars = !!startStars();
 
-  // Clock + counters
-  bootClock();
-  loadCounters();
-
-  // Buttons
-  bindSupervisor();
-  $("pingBtn")?.addEventListener("click", ()=> alert("心跳打點完成（本機事件）"));
-  $("resetBtn")?.addEventListener("click", ()=> { resetCounters(); alert("已重置統計"); });
-
-  // Nodes
-  let nodeRes = {ok:false, done:0, total:NODES.length};
-  try{
-    nodeRes = await refreshNodes();
-    setDot("chkNodes", nodeRes.ok ? "ok" : "warn");
-  }catch(e){
-    setDot("chkNodes","warn");
-  }
-
-  // Chain/Heart
-  let provider = null;
-  let chainOk = false;
-  let heartOk = false;
-  let igniteGlobalOk = false;
-
+  // Provider + chain + global
   try{
     provider = await makeProvider();
-    const {bn} = await refreshChain(provider);
-    chainOk = true;
-
-    const h = await refreshHeart(provider, bn);
-    heartOk = !!h.ok;
-
-    // global ignite check mark
-    igniteGlobalOk = heartOk && !!h.igniteOk;
-    setDot("chkIgniteGlobal", igniteGlobalOk ? "ok" : (heartOk ? "warn" : "bad"));
-    setDot("chkHeartPanel", heartOk ? "ok" : "bad");
-
+    await refreshChain();
+    SUP.global = true;
+    setText("rpcNow", providerUrl ? shortAddr(providerUrl) : "--");
+    await refreshGlobalIgnite();
   }catch(e){
-    setDot("chkHeartPanel","bad");
-    setDot("chkIgniteGlobal","bad");
-    statusBadge($("rpcStatus"), "err", "RPC 失敗（無法讀鏈）");
-    statusBadge($("heartStatus"), "warn", "Heart 未讀取（等待 RPC/地址）");
+    $("rpcStatus").textContent = "RPC 失敗（無法讀鏈）";
+    $("rpcStatus").style.color = "rgba(255,210,220,.92)";
+    setText("rpcCode", "FAIL");
+    SUP.global = false;
   }
 
-  // Error dot
-  setDot("chkErrors", consoleErrors===0 ? "ok" : "warn");
+  // Nodes
+  await probeNodes();
 
-  // Progress %
-  // We weight: loaded 10, stars 10, nodes 20, chain 20, heart 30, global ignite 10
-  let pct = 0;
-  pct += 10; // loaded
-  pct += (starsOk ? 10 : 5);
-  pct += (nodeRes.ok ? 20 : 5);
-  pct += (chainOk ? 20 : 0);
-  pct += (heartOk ? 30 : 0);
-  pct += (igniteGlobalOk ? 10 : 0);
-  setProgress(pct);
-
-  // periodic refresh (light)
-  setInterval(async ()=>{
-    try{
-      await refreshNodes();
-    }catch(e){}
-  }, 60_000);
-
-  // periodic on-chain refresh
-  setInterval(async ()=>{
-    try{
-      if(!provider) provider = await makeProvider();
-      const {bn} = await refreshChain(provider);
-      await refreshHeart(provider, bn);
-      setDot("chkErrors", consoleErrors===0 ? "ok" : "warn");
-    }catch(e){}
-  }, 30_000);
-}
-
-document.addEventListener("DOMContentLoaded", main);
+  updateSupervisor();
+})();
 </script>
 
 </body>
