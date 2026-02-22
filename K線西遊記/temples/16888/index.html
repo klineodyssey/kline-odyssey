@@ -1,175 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女・飛碟駕駛艙 V1.4（即時玩家觸發）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.5（即時玩家觸發）</title>
 
-  <!-- 依你的路徑：K線西遊記/assets/ethers-5.7.2.umd.min.js -->
+  <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾 /assets 皆可。 -->
   <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
 
   <style>
     :root{
-      --bg:#070810;
+      --bg:#06070b;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.10);
-      --line: rgba(255,255,255,.14);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.68);
-      --gold: #ffd56a;
-      --cyan: #7cf6ff;
-      --pink: #ff9fd2;
-      --good: #9fffd9;
-      --warn: #ffd28c;
-      --bad:  #ff9fb2;
-      --shadow: 0 16px 70px rgba(0,0,0,.55);
+      --line: rgba(255,255,255,.14);
+      --gold: rgba(255,215,120,.95);
+      --pink: rgba(255,170,220,.95);
+      --cyan: rgba(120,255,220,.95);
+      --shadow: 0 16px 70px rgba(0,0,0,.60);
       --r: 18px;
       --r2: 999px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: var(--sans);
       background:
-        radial-gradient(1100px 780px at 22% 15%, rgba(120,170,255,.10), transparent 60%),
-        radial-gradient(980px 720px at 78% 66%, rgba(255,160,220,.08), transparent 55%),
+        radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
+        radial-gradient(1000px 700px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
         var(--bg);
       color: var(--text);
       min-height:100vh;
       overflow-x:hidden;
-      padding-bottom: calc(88px + var(--safe-bottom));
     }
     a{color:inherit}
-    .wrap{max-width:1120px;margin:0 auto;padding:16px 14px 20px;}
-    .topbar{
-      position:sticky; top:0; z-index:60;
-      background: linear-gradient(to bottom, rgba(7,8,16,.92), rgba(7,8,16,.65));
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      padding: 10px 10px;
-      margin: -16px -14px 14px;
+
+    /* ===== Top Right Quick ===== */
+    .topRight{
+      position:fixed; right:12px; top:calc(12px + var(--safe-top)); z-index:90;
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
     }
-    .topbarIn{
-      max-width:1120px;margin:0 auto;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      padding: 0 4px;
-    }
-    .brand{display:flex;flex-direction:column;gap:2px}
-    .brand .h{font-weight:950;letter-spacing:.6px}
-    .brand .s{font-size:12px;color:var(--muted)}
-    .btnRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
     .pill{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:9px 12px;border-radius:var(--r2);
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
+      display:inline-flex; align-items:center; gap:8px;
+      padding:9px 12px; border:1px solid var(--line);
+      border-radius: var(--r2);
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(10px);
       box-shadow: var(--shadow);
-      text-decoration:none;
+      font-size:12px; color: var(--text);
+      text-decoration:none; font-weight:850;
+      user-select:none; cursor:pointer;
+    }
+    .pill:hover{ background: rgba(255,255,255,.10); }
+    .pill b{font-family:var(--mono); font-weight:900}
+    .pill.gold{ border-color: rgba(255,215,120,.32); }
+    .pill.cyan{ border-color: rgba(120,255,220,.30); }
+
+    .wrap{ max-width:1100px; margin:0 auto; padding:16px 14px calc(120px + var(--safe-bottom)); }
+    header{
+      padding-top: 54px;
+      display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+    }
+    .brand .h{ font-weight:950; letter-spacing:.6px; font-size:18px; }
+    .brand .s{ font-size:12px; color: var(--muted); line-height:1.55; margin-top:6px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
       font-size:12px;
-      font-weight:900;
-      user-select:none;
-      cursor:pointer;
       white-space:nowrap;
     }
-    .pill:hover{background: rgba(255,255,255,.10)}
-    .pill.gold{border-color: rgba(255,213,106,.40)}
-    .pill.cyan{border-color: rgba(124,246,255,.40)}
-    .pill.pink{border-color: rgba(255,159,210,.40)}
+    .badge.ok{ border-color: rgba(120,255,220,.30); color: rgba(170,255,230,.95); }
+    .badge.warn{ border-color: rgba(255,210,120,.30); color: rgba(255,230,170,.95); }
+    .badge.bad{ border-color: rgba(255,120,120,.30); color: rgba(255,180,190,.95); }
+
     .grid{
+      margin-top:14px;
       display:grid;
       grid-template-columns: 1.15fr .85fr;
-      gap: 14px;
+      gap:12px;
     }
-    @media (max-width: 960px){ .grid{grid-template-columns:1fr} }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+
     .card{
       border:1px solid var(--line);
-      border-radius: 22px;
+      border-radius: 24px;
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .cardH{
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    .cardHead{
+      padding:14px 14px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
     }
-    .cardH .t{font-weight:950;letter-spacing:.5px}
-    .cardH .sub{font-size:12px;color:var(--muted);line-height:1.4}
-    .cardB{padding:14px}
-    .kpiRow{display:grid;grid-template-columns: repeat(4, 1fr); gap:10px}
-    @media (max-width: 960px){ .kpiRow{grid-template-columns: repeat(2, 1fr)} }
+    .cardHead .t{ font-weight:950; letter-spacing:.35px; }
+    .cardHead .sub{ color: var(--muted); font-size:12px; }
+    .cardBody{ padding:14px; }
+
+    /* ===== Cockpit Core ===== */
+    .cockpit{
+      position:relative;
+      min-height: 520px;
+      background: radial-gradient(900px 600px at 50% 25%, rgba(255,170,220,.11), transparent 65%),
+                  radial-gradient(900px 600px at 65% 60%, rgba(120,255,220,.08), transparent 60%);
+    }
+    canvas#fx{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      opacity:.95;
+    }
+    .cockpitGrid{
+      position:relative;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media (max-width:760px){ .cockpitGrid{ grid-template-columns:1fr; } }
+
+    /* ===== Fairy Wheel ===== */
+    .fairyWrap{
+      position:relative;
+      width: 280px;
+      height: 280px;
+      margin: 4px auto 0;
+      border-radius: 50%;
+      overflow:hidden;
+      border:1px solid rgba(255,215,120,.25);
+      box-shadow:
+        0 0 42px rgba(255,170,220,.22),
+        0 0 70px rgba(120,255,220,.12);
+      background: rgba(0,0,0,.25);
+      transform: translateZ(0);
+    }
+    .fairyWrap::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,215,120,.55), transparent 45%),
+                  radial-gradient(circle at 70% 70%, rgba(255,170,220,.45), transparent 45%),
+                  radial-gradient(circle at 50% 50%, rgba(120,255,220,.20), transparent 55%);
+      filter: blur(10px);
+      opacity: .55;
+      animation: auraSpin 10s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes auraSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
+
+    img#fairy{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      transform-origin: 50% 50%;
+      will-change: transform, filter;
+      transition: transform .45s ease, filter .45s ease;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    /* Sleep overlay */
+    .sleepMask{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      pointer-events:none;
+      opacity:0;
+      transition: opacity .35s ease;
+      background: radial-gradient(circle at 50% 55%, rgba(0,0,0,.08), rgba(0,0,0,.55));
+      backdrop-filter: blur(2px);
+    }
+    .sleepMask.on{ opacity:1; }
+    .sleepText{
+      text-align:center;
+      font-weight:950;
+      letter-spacing:.8px;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 0 30px rgba(255,215,120,.18);
+    }
+    .sleepText .z{
+      font-family: var(--mono);
+      color: rgba(255,215,120,.95);
+      font-size: 16px;
+      margin-bottom:6px;
+    }
+    .sleepText .s{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top:6px;
+      line-height:1.55;
+    }
+
+    /* ===== Controls ===== */
+    .kpiGrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width:520px){ .kpiGrid{ grid-template-columns:1fr; } }
+
     .kpi{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      border-radius: 16px;
-      padding: 12px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      padding:12px;
     }
-    .kpi .k{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .kpi .v{font-size:18px;font-weight:950;letter-spacing:.3px}
-    .kpi .v.mono{font-family:var(--mono);font-size:14px}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.20);
-      font-size:12px;color: var(--muted);
-      user-select:none;
-      white-space:nowrap;
-    }
-    .badge b{color:var(--text)}
-    .badge.ok{border-color: rgba(120,255,200,.25); color: rgba(120,255,200,.90)}
-    .badge.warn{border-color: rgba(255,210,120,.25); color: rgba(255,210,120,.95)}
-    .badge.bad{border-color: rgba(255,120,120,.25); color: rgba(255,160,180,.95)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .row > *{flex:1}
-    .mini{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      border-radius: 16px;
-      padding: 12px;
-      min-width: 220px;
-    }
-    .mini h3{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.3px}
-    .mini .hint{font-size:12px;color:var(--muted);line-height:1.45}
-    input[type="range"]{width:100%}
-    input[type="number"], input[type="text"], textarea, select{
+    .kpi .k{ font-size:12px; color: var(--muted); }
+    .kpi .v{ font-size:18px; font-weight:950; letter-spacing:.4px; margin-top:6px; }
+    .kpi .v .mono{ font-family: var(--mono); }
+    .kpi .hint{ font-size:12px; color: var(--muted); margin-top:6px; line-height:1.45; }
+
+    .rangeRow{ margin-top:12px; }
+    .rangeRow label{ display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:12px; color: var(--muted); }
+    input[type="range"]{ width:100%; margin-top:8px; }
+    input[type="number"], input[type="text"], textarea{
       width:100%;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.26);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
       color: var(--text);
-      padding: 10px 12px;
+      padding:10px 12px;
       outline:none;
     }
-    textarea{min-height:90px;resize:vertical}
+    textarea{ min-height:84px; resize:vertical; }
+
+    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
     .btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.18);
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.08);
       color: var(--text);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight:950;
+      font-weight:900;
       cursor:pointer;
       user-select:none;
     }
-    .btn:hover{background: rgba(255,255,255,.12)}
-    .btn.primary{background: rgba(255,255,255,.92); color:#111; border-color:#fff}
-    .btn.primary:hover{background: rgba(255,255,255,.86)}
-    .btn.gold{border-color: rgba(255,213,106,.35)}
-    .btn.cyan{border-color: rgba(124,246,255,.35)}
-    .btn.pink{border-color: rgba(255,159,210,.35)}
-    .btn.danger{border-color: rgba(255,120,120,.35); background: rgba(255,120,120,.12)}
-    .btn.danger:hover{background: rgba(255,120,120,.18)}
-    .sep{height:1px;background: rgba(255,255,255,.10); margin:12px 0}
-    .log{
+    .btn:hover{ background: rgba(255,255,255,.13); }
+    .btn.gold{ border-color: rgba(255,215,120,.28); }
+    .btn.cyan{ border-color: rgba(120,255,220,.26); }
+    .btn.bad{ border-color: rgba(255,120,120,.26); }
+
+    /* ===== Camera / Photo ===== */
+    .cameraBox{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      padding:12px;
+      overflow:hidden;
+    }
+    video#cam{
+      width:100%;
+      border-radius: 14px;
       background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius: 16px;
-      padding: 10px 12px;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    canvas#snap{
+      width:100%;
+      border-radius: 14px;
+      display:none;
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    /* ===== Log ===== */
+    .log{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      padding:10px 12px;
       font-family: var(--mono);
       font-size: 11px;
       line-height: 1.55;
@@ -178,317 +283,200 @@
       white-space: pre-wrap;
     }
 
-    /* ===== Cockpit Visual ===== */
-    .visualWrap{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .ufoFrame{
-      position:relative;
-      width:min(460px, 100%);
-      margin: 0 auto;
-      aspect-ratio: 1/1;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      box-shadow: 0 18px 80px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
-    canvas#beauty{
-      width:100%;
-      height:100%;
-      display:block;
-      filter: saturate(1.06) contrast(1.02);
-      transform: translateZ(0);
-    }
-    canvas#stars{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      opacity:.9;
-      pointer-events:none;
-      mix-blend-mode: screen;
-      transform: translateZ(0);
-    }
-    canvas#warp{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      opacity:.85;
-      pointer-events:none;
-      mix-blend-mode: lighten;
-      transform: translateZ(0);
-    }
-    .hud{
-      position:absolute; left:12px; right:12px; bottom:12px;
-      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      pointer-events:none;
-    }
-    .hud .chip{
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.35);
-      font-size:12px;
-      color: rgba(255,255,255,.88);
-      box-shadow: 0 12px 40px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-      font-family: var(--mono);
-    }
-    .stancePill{
-      position:absolute; top:12px; left:12px;
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.35);
-      font-weight:950;
-      letter-spacing:.4px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
-    .stanceDot{
-      width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.35);
-      box-shadow: 0 0 18px rgba(255,255,255,.20);
-    }
-    .stanceDot.long{background: rgba(120,255,200,.95); box-shadow:0 0 18px rgba(120,255,200,.40)}
-    .stanceDot.short{background: rgba(255,120,120,.95); box-shadow:0 0 18px rgba(255,120,120,.40)}
-    .stanceDot.rest{background: rgba(255,210,120,.95); box-shadow:0 0 18px rgba(255,210,120,.40)}
-
-    /* sticky bottom actions */
-    .bottomBar{
-      position:fixed; left:0; right:0; bottom:0; z-index:80;
-      padding: 10px 12px calc(10px + var(--safe-bottom));
-      background: linear-gradient(to top, rgba(7,8,16,.96), rgba(7,8,16,.60));
+    /* ===== Sticky bottom ===== */
+    .sticky{
+      position:fixed; left:0; right:0; bottom:0; z-index:95;
+      padding:10px 12px calc(10px + var(--safe-bottom));
+      background: linear-gradient(to top, rgba(6,7,11,.96), rgba(6,7,11,.55));
       border-top:1px solid rgba(255,255,255,.10);
       backdrop-filter: blur(10px);
     }
-    .bottomIn{
-      max-width:1120px;margin:0 auto;
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    .sticky .row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+    .sticky .row .left{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .sticky .row .right{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+    .toast{
+      position:fixed; left:12px; bottom: calc(72px + var(--safe-bottom)); z-index:999;
+      background: rgba(0,0,0,.78);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius: 14px;
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      display:none;
+      max-width: min(520px, calc(100vw - 24px));
+      backdrop-filter: blur(10px);
     }
-    .bottomIn .left{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .bottomIn .right{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-    .mono{font-family:var(--mono)}
-    .foot{
-      margin-top:14px;
-      color: var(--muted);
-      font-size:12px;
-      line-height:1.6;
-      text-align:center;
-      padding: 10px 10px 4px;
+
+    /* subtle breathing for whole cockpit when rest */
+    .breath{
+      animation: breath 3.4s ease-in-out infinite;
+    }
+    @keyframes breath{
+      0%{ transform: scale(1.000); }
+      50%{ transform: scale(1.012); }
+      100%{ transform: scale(1.000); }
     }
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="topbarIn">
-      <div class="brand">
-        <div class="h">廣寒宮 16888｜七仙女・飛碟駕駛艙 <span class="mono">V1.4</span></div>
-        <div class="s">即時玩家觸發模式｜0–360° 方向盤｜1–150 倍曲速｜拍照留念｜語音 AI 客服</div>
-      </div>
-      <div class="btnRow">
-        <a class="pill gold" id="btnPortal" href="../../index.html">🗺️ 宇宙入口</a>
-        <a class="pill cyan" id="btnHome" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 官網</a>
-        <a class="pill pink" id="btnTemple12345" href="../12345/index.html">🧿 五指山 12345</a>
-        <button class="pill cyan" id="btnConnect">🪐 連接錢包</button>
-      </div>
-    </div>
+  <div class="topRight">
+    <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
+    <a class="pill cyan" href="../../index.html" rel="noreferrer">🗺️ 宇宙入口</a>
+    <div class="pill">版本：<b>16888 V1.5</b></div>
   </div>
 
   <div class="wrap">
-    <div class="grid">
+    <header>
+      <div class="brand">
+        <div class="h">廣寒宮 16888｜七仙女飛碟駕駛艙</div>
+        <div class="s">
+          角度區間：<b>350–10 休息</b>｜<b>10–170 多</b>｜<b>170–190 休息</b>｜<b>190–350 空</b><br/>
+          曲速：<b>1–150</b>（1 = 光速一倍，150 = 曲速一百五十倍）｜即時玩家觸發：有人玩就有節律。
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
+        <span class="badge" id="modeBadge">狀態：偵測中</span>
+        <span class="badge">錢包：<span class="mono" id="wallet">未連線</span></span>
+      </div>
+    </header>
 
+    <div class="grid">
       <!-- LEFT: Cockpit -->
       <section class="card">
-        <div class="cardH">
+        <div class="cardHead">
           <div>
-            <div class="t">仙女飛碟視窗（圓形）</div>
-            <div class="sub">多：10–170｜休息：170–190｜空：190–350｜休息：350–10</div>
+            <div class="t">飛碟駕駛艙（V1.5 特效）</div>
+            <div class="sub">多：金光粒子流｜空：星塵倒流｜休息：呼吸 + 睡眠罩</div>
           </div>
-          <div class="row" style="flex:0 0 auto; gap:8px;">
-            <span class="badge" id="badgeMode"><b>MODE</b> PLAYER-TRIGGER</span>
-            <span class="badge" id="badgeVoice"><b>VOICE</b> READY</span>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span class="badge">方向盤：<b class="mono" id="degText">120</b>°</span>
+            <span class="badge">曲速：<b class="mono" id="warpText">10</b>x</span>
           </div>
         </div>
 
-        <div class="cardB">
-          <div class="visualWrap">
-            <div class="ufoFrame" aria-label="仙女飛碟圓形視窗">
-              <canvas id="beauty"></canvas>
-              <canvas id="stars"></canvas>
-              <canvas id="warp"></canvas>
+        <div class="cardBody cockpit" id="cockpit">
+          <canvas id="fx"></canvas>
 
-              <div class="stancePill">
-                <span class="stanceDot" id="stanceDot"></span>
-                <span id="stanceText">休息</span>
-              </div>
-
-              <div class="hud">
-                <div class="chip">DEG <span id="hudDeg">0</span>°</div>
-                <div class="chip">WARP <span id="hudWarp">1</span>x</div>
-                <div class="chip">FAIRY <span id="hudFairy">巧仙</span></div>
-              </div>
-            </div>
-
-            <div class="kpiRow">
-              <div class="kpi">
-                <div class="k">方向盤（0–360）</div>
-                <div class="v"><span id="deg">0</span>°</div>
-                <div class="sub" style="margin-top:6px;color:var(--muted);font-size:12px;">多：10–170｜空：190–350</div>
-              </div>
-              <div class="kpi">
-                <div class="k">曲速引擎（1–150）</div>
-                <div class="v"><span id="warpMul">1</span>x</div>
-                <div class="sub" style="margin-top:6px;color:var(--muted);font-size:12px;">1=光速｜150=超光速</div>
-              </div>
-              <div class="kpi">
-                <div class="k">即時行情（宇宙生成）</div>
-                <div class="v mono">CT=<span id="ctNow">16888</span></div>
-                <div class="sub" style="margin-top:6px;color:var(--muted);font-size:12px;">有人玩 → 就有行情</div>
-              </div>
-              <div class="kpi">
-                <div class="k">玩家觸發</div>
-                <div class="v"><span id="triggers">0</span></div>
-                <div class="sub" style="margin-top:6px;color:var(--muted);font-size:12px;">每次操作都記錄在本機</div>
-              </div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="row">
-              <div class="mini">
-                <h3>方向盤滑桿</h3>
-                <input id="degRange" type="range" min="0" max="360" value="0" />
-                <div class="hint">0–360°｜休息區：350–10、170–190</div>
-              </div>
-              <div class="mini">
-                <h3>曲速滑桿</h3>
-                <input id="warpRange" type="range" min="1" max="150" value="1" />
-                <div class="hint">Warp x1–x150（越高越亮、越多光速線）</div>
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:10px">
-              <div class="mini">
-                <h3>七仙女選擇</h3>
-                <select id="fairySel"></select>
-                <div class="hint">仙女隨角度顯色（多/空/休息）</div>
-              </div>
-              <div class="mini">
-                <h3>許願單（即時玩家觸發）</h3>
-                <div class="hint">下注 1–1000 KGEN｜方向：多/空｜結算：下一根宇宙 K（CT+1）</div>
-                <div class="row" style="margin-top:10px">
-                  <div style="flex:1">
-                    <select id="sideSel">
-                      <option value="LONG">多（10–170）</option>
-                      <option value="SHORT">空（190–350）</option>
-                    </select>
-                  </div>
-                  <div style="flex:1">
-                    <input id="betAmt" type="number" min="1" max="1000" step="1" value="10" />
+          <div class="cockpitGrid">
+            <div>
+              <div class="fairyWrap" id="fairyWrap">
+                <img id="fairy" src="./assets/fairy.png" alt="fairy" />
+                <div class="sleepMask" id="sleepMask">
+                  <div class="sleepText">
+                    <div class="z">Z Z Z</div>
+                    <div>休息中</div>
+                    <div class="s">觀望｜睡覺｜等下一位玩家觸發</div>
                   </div>
                 </div>
-                <div class="row" style="margin-top:10px">
-                  <button class="btn primary" id="btnWish">送出許願（觸發）</button>
-                  <button class="btn" id="btnSimTick">生成下一根 K（本機）</button>
+              </div>
+
+              <div class="kpiGrid">
+                <div class="kpi">
+                  <div class="k">姿態</div>
+                  <div class="v" id="stance">—</div>
+                  <div class="hint">多：面朝前｜空：轉向駕駛座｜休息：睡覺</div>
                 </div>
-                <div class="hint" style="margin-top:8px">
-                  設計：猜對 → 0.8～1.5 倍（隨曲速倍率提高上限）｜猜錯 → 進獎池。滿池 16888 → 抽一名 60%。
+                <div class="kpi">
+                  <div class="k">引擎亮度（由曲速決定）</div>
+                  <div class="v"><span class="mono" id="glow">—</span></div>
+                  <div class="hint">曲速越高，仙女光暈越強（不降級）</div>
                 </div>
               </div>
             </div>
 
-            <div class="sep"></div>
-
-            <div class="row">
-              <button class="btn gold" id="btnSpeak">語音解說</button>
-              <button class="btn cyan" id="btnPhoto">拍照留念</button>
-              <button class="btn" id="btnSaveNote">保存留言</button>
-              <button class="btn danger" id="btnResetLocal">重置本機資料</button>
-            </div>
-
-            <div class="row" style="margin-top:10px">
-              <div class="mini" style="flex:1.3">
-                <h3>留言（會存本機）</h3>
-                <textarea id="note" placeholder="許願內容/留言…（可寫：多/空/曲速/心情/故事）"></textarea>
+            <div>
+              <div class="rangeRow">
+                <label>
+                  <span>方向盤（0–360）</span>
+                  <span class="mono" id="degLabel">120°</span>
+                </label>
+                <input id="degRange" type="range" min="0" max="360" value="120" />
               </div>
-              <div class="mini" style="flex:.7">
-                <h3>拍照預覽</h3>
-                <div style="border:1px solid rgba(255,255,255,.12); border-radius:16px; overflow:hidden; background:rgba(0,0,0,.25);">
-                  <video id="cam" autoplay playsinline muted style="width:100%; display:none;"></video>
-                  <img id="photoPrev" alt="photo" style="width:100%; display:block;" />
+
+              <div class="rangeRow">
+                <label>
+                  <span>曲速引擎（1–150）</span>
+                  <span class="mono" id="warpLabel">10x</span>
+                </label>
+                <input id="warpRange" type="range" min="1" max="150" value="10" />
+              </div>
+
+              <div class="kpiGrid">
+                <div class="kpi">
+                  <div class="k">質量 m（KGEN）</div>
+                  <div class="v"><span class="mono" id="massText">100</span></div>
+                  <div class="hint">1 KGEN = 1 點 = 1 斤 = 1 口（跨市場通用）</div>
                 </div>
-                <div class="hint" style="margin-top:8px">第一次會請求相機權限</div>
+                <div class="kpi">
+                  <div class="k">能量 E = m c²（視覺化）</div>
+                  <div class="v"><span class="mono" id="energyText">—</span></div>
+                  <div class="hint">曲速視為 c 倍率（遊戲能量表徵）</div>
+                </div>
               </div>
-            </div>
 
-            <div class="sep"></div>
-            <div class="log" id="log"></div>
+              <div style="margin-top:12px;">
+                <label class="badge">玩家留言（許願口令 / 客服備註）</label>
+                <textarea id="wish" placeholder="例如：巧仙・事業運通・我願用 100 KGEN 觸發宇宙…"></textarea>
+              </div>
+
+              <div class="btnRow">
+                <button class="btn gold" id="btnTrigger">即時觸發（玩家點火）</button>
+                <button class="btn cyan" id="btnConnect">連接錢包</button>
+                <button class="btn" id="btnSpeak">語音導覽</button>
+                <button class="btn bad" id="btnClear">清空狀態</button>
+              </div>
+
+              <div class="log" id="log" style="margin-top:12px;"></div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- RIGHT: Wallet + Help -->
+      <!-- RIGHT: Camera + Guide -->
       <section class="card">
-        <div class="cardH">
+        <div class="cardHead">
           <div>
-            <div class="t">錢包與客服</div>
-            <div class="sub">沒錢包也能玩本機模式；連錢包才可呼叫鏈上交易（之後接合約）</div>
+            <div class="t">拍照｜影像｜留念（先做本機）</div>
+            <div class="sub">相機可用就讓玩家看到自己（神殿配備）</div>
           </div>
-          <span class="badge" id="netBadge"><b>CHAIN</b> 未連線</span>
+          <div class="badge">AI 客服：<span class="mono" id="aiState">READY</span></div>
         </div>
 
-        <div class="cardB">
-          <div class="mini">
-            <h3>錢包狀態</h3>
-            <div class="row" style="gap:8px">
-              <span class="badge"><b>ADDR</b> <span class="mono" id="walletAddr">--</span></span>
-              <span class="badge"><b>BNB</b> <span class="mono" id="bnbBal">--</span></span>
+        <div class="cardBody">
+          <div class="cameraBox">
+            <video id="cam" autoplay playsinline muted></video>
+            <canvas id="snap"></canvas>
+            <div class="btnRow" style="margin-top:10px;">
+              <button class="btn" id="btnCam">開啟相機</button>
+              <button class="btn" id="btnShot">拍照</button>
+              <button class="btn cyan" id="btnDownload">下載照片</button>
             </div>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" id="btnConnect2">連接 MetaMask</button>
-              <button class="btn" id="btnAddBSC">新增 BSC 網路</button>
-            </div>
-            <div class="sep"></div>
-            <div class="hint" style="font-size:12px;color:var(--muted);line-height:1.55">
-              若你還沒有錢包：<br/>
-              1) 安裝 MetaMask → 建錢包<br/>
-              2) 切到 BNB Chain（chainId 56）<br/>
-              3) 準備少量 BNB 當 Gas<br/>
-              4) 回來按「連接」即可開始鏈上互動
+            <div class="small" style="margin-top:8px;color:var(--muted);font-size:12px;line-height:1.55;">
+              若瀏覽器限制相機/語音，系統會自動改成文字客服，不會當機。
             </div>
           </div>
 
-          <div class="sep"></div>
-
-          <div class="mini">
-            <h3>AI 客服（語音 + 文字）</h3>
-            <div class="row">
-              <button class="btn cyan" id="btnCSQuick">一鍵教學</button>
-              <button class="btn" id="btnCSExplain">解釋規則</button>
-              <button class="btn" id="btnCSWallet">教我裝錢包</button>
-            </div>
-            <div class="sep"></div>
-            <textarea id="csBox" placeholder="客服訊息會顯示在這裡…（也會用語音播報）"></textarea>
-          </div>
-
-          <div class="sep"></div>
-
-          <div class="mini">
-            <h3>七仙女設定（點位/神職）</h3>
-            <div class="hint" style="line-height:1.65">
-              14520 巧雲｜天樞｜做空｜風調雨順<br/>
-              14866 巧虹｜天璇｜做多｜家庭美滿<br/>
-              16184 巧芝｜天璣｜做空｜育子收驚<br/>
-              16888 巧仙｜天權｜做多｜事業運通<br/>
-              17347 巧蘭｜天衡｜做空｜長命百歲<br/>
-              18056 巧梅｜闓陽｜做多｜身體健康<br/>
-              18459 巧靈｜瑤光｜多退｜感情圓滿
+          <div style="margin-top:12px;">
+            <div class="badge warn">新手客服（無錢包時）</div>
+            <div class="small" style="margin-top:8px;">
+              1) 先安裝 MetaMask（BSC / chainId 56）。<br/>
+              2) 錢包準備少量 BNB 當 gas。<br/>
+              3) 按「連接錢包」。<br/>
+              4) 再按「即時觸發」進入遊戲節律。<br/>
+              5) 之後才會接上鏈上許願池與結算合約。
             </div>
           </div>
 
-          <div class="foot">
+          <div style="margin-top:12px;">
+            <div class="badge">宇宙公式（遊戲規則）</div>
+            <div class="small" style="margin-top:8px;">
+              m = KGEN｜E = m c²｜W = m g h（h = CT 現價高度）<br/>
+              黑洞能量守恆：m 小，h 大（高價位高能量）。
+            </div>
+          </div>
+
+          <div style="margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6;">
             PrimeForge 以母機之名，開啟金融生命。<br/>
             花果山台灣・信念不滅・市場無界。<br/>
             Where the Market Becomes the Myth.<br/>
@@ -496,813 +484,483 @@
           </div>
         </div>
       </section>
-
     </div>
   </div>
 
-  <div class="bottomBar">
-    <div class="bottomIn">
+  <div class="toast" id="toast"></div>
+
+  <div class="sticky">
+    <div class="row">
       <div class="left">
-        <span class="badge ok"><b>RANGE</b> 10–170 多</span>
-        <span class="badge bad"><b>RANGE</b> 190–350 空</span>
-        <span class="badge warn"><b>REST</b> 350–10 / 170–190</span>
+        <span class="badge">即時玩家：<b class="mono" id="players">0</b></span>
+        <span class="badge">本機節律：<b class="mono" id="clock">--:--:--</b></span>
       </div>
       <div class="right">
-        <button class="btn primary" id="btnAutoVoice">進頁自動語音：ON</button>
-        <span class="badge"><b>LOCAL</b> <span class="mono" id="localKey">KLINE_16888_V1_4</span></span>
+        <input id="massInput" type="number" min="1" step="1" value="100" style="width:140px" />
+        <span class="badge">m（KGEN）</span>
       </div>
     </div>
   </div>
 
 <script>
-/* =========================
-   16888 Fairy UFO Cockpit V1.4
-   - Player-trigger real-time mode (local)
-   - Visual: circular portrait + star parallax + warp streaks
-   - Voice: auto on enter (if allowed), and on actions
-   - Wallet: connect + add BSC helper
-   ========================= */
+/* =========================================
+   16888 Fairy UFO Cockpit V1.5
+   - Particle engine: long = forward gold stream, short = backward stardust
+   - Rest: breathing + sleep mask
+   - Warp affects glow + particle speed/intensity
+   - Player-trigger: local instant mode (can later be wired to on-chain events)
+   ========================================= */
 
-const LS_KEY = "KLINE_16888_V1_4";
 const CFG = {
-  ranges: {
-    restA: [350, 360],
-    restB: [0, 10],
-    long:  [10, 170],
-    restC: [170, 190],
+  stanceRanges: {
+    rest1: [350, 360],
+    rest1b: [0, 10],
+    long: [10, 170],
+    rest2: [170, 190],
     short: [190, 350]
   },
-  wish: {
-    poolCap: 16888,
-    betMin: 1,
-    betMax: 1000,
-    // payout multiplier ranges; max increases with warp
-    baseWinMin: 0.8,
-    baseWinMax: 1.0,
-    warpWinMax: 1.5
-  },
-  chain: {
-    bscChainIdHex: "0x38",
-    bscChainIdDec: 56,
-    bscParams: {
-      chainId: "0x38",
-      chainName: "BNB Smart Chain (BSC)",
-      nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-      rpcUrls: ["https://bsc-dataseed.binance.org/"],
-      blockExplorerUrls: ["https://bscscan.com/"]
-    }
+  voice: {
+    enabled: true,
+    lang: "zh-TW"
   }
 };
 
-const FAIRIES = [
-  { id:14520, name:"巧雲", star:"天樞", side:"空", role:"風調雨順做空", theme:"cyan" },
-  { id:14866, name:"巧虹", star:"天璇", side:"多", role:"家庭美滿做多", theme:"pink" },
-  { id:16184, name:"巧芝", star:"天璣", side:"空", role:"育子收驚做空", theme:"cyan" },
-  { id:16888, name:"巧仙", star:"天權", side:"多", role:"事業運通做多", theme:"gold" },
-  { id:17347, name:"巧蘭", star:"天衡", side:"空", role:"長命百歲做空", theme:"cyan" },
-  { id:18056, name:"巧梅", star:"闓陽", side:"多", role:"身體健康做多", theme:"pink" },
-  { id:18459, name:"巧靈", star:"瑤光", side:"多退", role:"感情圓滿多單退", theme:"gold" }
-];
+const $ = (id)=>document.getElementById(id);
+const logEl = $("log");
+const toastEl = $("toast");
 
-function $(id){ return document.getElementById(id); }
-function now(){ return new Date().toISOString(); }
-function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-function rnd(a,b){ return a + Math.random()*(b-a); }
+function nowStr(){
+  const d=new Date();
+  const pad=(n)=>String(n).padStart(2,"0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(()=>{ $("clock").textContent = nowStr(); }, 250);
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(e){ return null; }
-}
-function saveState(s){
-  localStorage.setItem(LS_KEY, JSON.stringify(s));
-}
-function defaultState(){
-  return {
-    version: "1.4",
-    deg: 0,
-    warp: 1,
-    ct: 16888,
-    triggers: 0,
-    wishPool: 0,
-    orders: [],
-    notes: "",
-    fairyId: 16888,
-    autoVoice: true
-  };
+function log(msg){
+  const line = `[${nowStr()}] ${msg}\n`;
+  logEl.textContent = (line + logEl.textContent).slice(0, 5000);
 }
 
-let S = loadState() || defaultState();
-
-/* ===== Voice ===== */
-let voiceOk = false;
-function canSpeak(){ return !!window.speechSynthesis && S.autoVoice; }
-function speak(text){
-  // Always write to CS box too
-  $("csBox").value = text;
-  if(!canSpeak()) return;
-  try{
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "zh-TW";
-    u.rate = 1.0;
-    u.pitch = 1.0;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-    voiceOk = true;
-    $("badgeVoice").className = "badge ok";
-    $("badgeVoice").innerHTML = "<b>VOICE</b> ON";
-  }catch(e){
-    $("badgeVoice").className = "badge warn";
-    $("badgeVoice").innerHTML = "<b>VOICE</b> BLOCKED";
-  }
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.style.display = "block";
+  clearTimeout(window.__t);
+  window.__t = setTimeout(()=>toastEl.style.display="none", 2400);
 }
 
-/* ===== Stance logic (new ranges) ===== */
-function stanceByDeg(d){
-  d = (d%360+360)%360;
-  const inR = (x, a, b)=> x>=a && x<=b;
-  const r = CFG.ranges;
-  if(inR(d, r.long[0], r.long[1])) return "LONG";
-  if(inR(d, r.short[0], r.short[1])) return "SHORT";
-  // rest zones: 350-360, 0-10, 170-190
+function inRange(angle, a, b){
+  // inclusive, a<=angle<=b, angle already normalized 0..360
+  return angle >= a && angle <= b;
+}
+
+function stanceOf(angle){
+  if(inRange(angle, CFG.stanceRanges.rest1[0], CFG.stanceRanges.rest1[1]) || inRange(angle, CFG.stanceRanges.rest1b[0], CFG.stanceRanges.rest1b[1])) return "REST";
+  if(inRange(angle, CFG.stanceRanges.long[0], CFG.stanceRanges.long[1])) return "LONG";
+  if(inRange(angle, CFG.stanceRanges.rest2[0], CFG.stanceRanges.rest2[1])) return "REST";
+  if(inRange(angle, CFG.stanceRanges.short[0], CFG.stanceRanges.short[1])) return "SHORT";
   return "REST";
 }
 
-/* ===== Fairy selection ===== */
-function currentFairy(){
-  return FAIRIES.find(f=>f.id===S.fairyId) || FAIRIES[3];
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+function normAngle(a){
+  let x = a % 360;
+  if(x < 0) x += 360;
+  return x;
 }
 
-/* ===== Visual engine ===== */
-const cvsBeauty = $("beauty");
-const ctxB = cvsBeauty.getContext("2d");
-const cvsStars = $("stars");
-const ctxS = cvsStars.getContext("2d");
-const cvsWarp = $("warp");
-const ctxW = cvsWarp.getContext("2d");
+let STATE = {
+  deg: 120,
+  warp: 10,
+  players: 0,
+  wallet: "",
+  lastTriggerAt: 0
+};
 
-let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-function resizeCanvases(){
-  const rect = cvsBeauty.getBoundingClientRect();
-  const w = Math.floor(rect.width * DPR);
-  const h = Math.floor(rect.height * DPR);
-  [cvsBeauty, cvsStars, cvsWarp].forEach(c=>{
-    c.width = w; c.height = h;
-  });
-}
-window.addEventListener("resize", ()=>{ resizeCanvases(); initStars(); });
-
-let stars = [];
-function initStars(){
-  const w = cvsStars.width, h = cvsStars.height;
-  stars = [];
-  const n = Math.floor((w*h)/22000); // density
-  for(let i=0;i<n;i++){
-    stars.push({
-      x: Math.random()*w,
-      y: Math.random()*h,
-      z: Math.random()*1 + 0.2,
-      r: Math.random()*1.6 + 0.3
-    });
-  }
+function computeEnergy(m, warp){
+  // visual model: E = m * (warp^2)
+  const E = m * (warp*warp);
+  return E;
 }
 
-function drawStars(parallaxX, parallaxY){
-  const w = cvsStars.width, h = cvsStars.height;
-  ctxS.clearRect(0,0,w,h);
-  ctxS.save();
-  // vignette
-  const vg = ctxS.createRadialGradient(w/2,h/2, w*0.05, w/2,h/2, w*0.62);
-  vg.addColorStop(0, "rgba(255,255,255,0.08)");
-  vg.addColorStop(1, "rgba(0,0,0,0.55)");
-  ctxS.fillStyle = vg;
-  ctxS.fillRect(0,0,w,h);
+function applyUI(){
+  const a = normAngle(STATE.deg);
+  const warp = clamp(STATE.warp, 1, 150);
+  const s = stanceOf(a);
 
-  for(const s of stars){
-    const x = (s.x + parallaxX * 18 * s.z + w) % w;
-    const y = (s.y + parallaxY * 18 * s.z + h) % h;
-    ctxS.beginPath();
-    ctxS.fillStyle = `rgba(255,255,255,${0.35*s.z})`;
-    ctxS.arc(x,y,s.r,0,Math.PI*2);
-    ctxS.fill();
-  }
-  ctxS.restore();
-}
+  $("degText").textContent = String(a);
+  $("degLabel").textContent = `${a}°`;
+  $("warpText").textContent = String(warp);
+  $("warpLabel").textContent = `${warp}x`;
 
-function drawWarp(deg, warp){
-  const w = cvsWarp.width, h = cvsWarp.height;
-  ctxW.clearRect(0,0,w,h);
-  const stance = stanceByDeg(deg);
+  const m = clamp(Number($("massInput").value || 100), 1, 999999999);
+  $("massText").textContent = String(m);
+  $("energyText").textContent = String(computeEnergy(m, warp));
 
-  // warp intensity
-  const t = (warp-1)/149; // 0..1
-  const streaks = Math.floor(20 + t*160);
-  const alpha = 0.08 + t*0.42;
+  // stance label
+  let stanceText = "觀望";
+  if(s==="LONG") stanceText = "多｜仙女面朝前（往前飛）";
+  else if(s==="SHORT") stanceText = "空｜仙女轉向駕駛座（回頭飛）";
+  else stanceText = "休息｜睡覺（左右皆觀望）";
+  $("stance").textContent = stanceText;
 
-  if(stance==="REST" && warp<8) return; // rest calm
+  // mode badge
+  if(s==="LONG") $("modeBadge").className="badge ok";
+  else if(s==="SHORT") $("modeBadge").className="badge bad";
+  else $("modeBadge").className="badge warn";
+  $("modeBadge").textContent = `狀態：${s}`;
 
-  ctxW.save();
-  ctxW.globalAlpha = alpha;
-  ctxW.translate(w/2, h/2);
+  // fairy rotation + glow
+  const img = $("fairy");
+  const sleep = $("sleepMask");
+  const cockpit = $("cockpit");
+  const glow = (warp/150);
+  const glowText = `${Math.round(glow*100)}%`;
+  $("glow").textContent = glowText;
 
-  // direction: long => forward, short => backward
-  const dir = stance==="SHORT" ? -1 : 1;
-  const ang = (deg*Math.PI/180) * dir;
+  // Brightness is warp-driven, plus stance tint
+  const baseSat = 1.02 + glow*0.18;
+  const baseBright = 1.00 + glow*0.30;
+  const baseContrast = 1.02 + glow*0.08;
 
-  ctxW.rotate(ang);
-
-  for(let i=0;i<streaks;i++){
-    const len = rnd(w*0.06, w*0.55) * (0.35 + t);
-    const y = rnd(-h/2, h/2);
-    const x0 = rnd(-w*0.15, w*0.15);
-    const x1 = x0 + len;
-    const width = rnd(0.6, 1.8) * DPR * (0.9 + t*1.1);
-
-    const g = ctxW.createLinearGradient(x0,y, x1,y);
-    g.addColorStop(0, "rgba(255,255,255,0.00)");
-    g.addColorStop(0.5, "rgba(255,220,120,0.55)");
-    g.addColorStop(1, "rgba(255,255,255,0.00)");
-    ctxW.strokeStyle = g;
-    ctxW.lineWidth = width;
-    ctxW.beginPath();
-    ctxW.moveTo(x0,y);
-    ctxW.lineTo(x1,y);
-    ctxW.stroke();
-  }
-
-  ctxW.restore();
-}
-
-function drawBeauty(deg, warp){
-  const w = cvsBeauty.width, h = cvsBeauty.height;
-  ctxB.clearRect(0,0,w,h);
-
-  const stance = stanceByDeg(deg);
-  const t = (warp-1)/149;
-
-  // background
-  const bg = ctxB.createRadialGradient(w*0.35,h*0.30, w*0.08, w/2,h/2, w*0.72);
-  bg.addColorStop(0, "rgba(255,160,220,0.16)");
-  bg.addColorStop(0.35, "rgba(124,246,255,0.10)");
-  bg.addColorStop(1, "rgba(0,0,0,0.70)");
-  ctxB.fillStyle = bg;
-  ctxB.fillRect(0,0,w,h);
-
-  // portrait transform: rotate slowly with deg
-  const rot = (deg*Math.PI/180) * 0.55;
-  ctxB.save();
-  ctxB.translate(w/2, h/2);
-  ctxB.rotate(rot);
-  ctxB.translate(-w/2, -h/2);
-
-  // brightness by stance
-  let bright = 1.0;
-  let sat = 1.0;
-  if(stance==="LONG"){ bright = 1.06 + t*0.12; sat = 1.10; }
-  if(stance==="SHORT"){ bright = 0.92 - t*0.10; sat = 0.95; }
-  if(stance==="REST"){ bright = 0.80; sat = 0.25; }
-
-  // face (stylized vector)
-  const fx = w*0.50, fy = h*0.48;
-  const faceR = Math.min(w,h)*0.22;
-
-  // hair gradient
-  const hairG = ctxB.createRadialGradient(fx-faceR*0.5, fy-faceR*0.8, faceR*0.1, fx, fy, faceR*1.6);
-  hairG.addColorStop(0, `rgba(30,20,60,${0.95})`);
-  hairG.addColorStop(1, `rgba(5,5,12,${0.95})`);
-
-  // glow halo (warp)
-  const halo = ctxB.createRadialGradient(fx, fy-faceR*0.7, faceR*0.1, fx, fy, faceR*2.2);
-  halo.addColorStop(0, `rgba(255,213,106,${0.10 + t*0.22})`);
-  halo.addColorStop(1, "rgba(0,0,0,0)");
-  ctxB.fillStyle = halo;
-  ctxB.beginPath();
-  ctxB.arc(fx, fy, faceR*2.0, 0, Math.PI*2);
-  ctxB.fill();
-
-  // hair
-  ctxB.fillStyle = hairG;
-  ctxB.beginPath();
-  ctxB.ellipse(fx, fy-faceR*0.35, faceR*1.05, faceR*1.10, 0, 0, Math.PI*2);
-  ctxB.fill();
-
-  // face gradient
-  const faceG = ctxB.createRadialGradient(fx-faceR*0.3, fy-faceR*0.2, faceR*0.2, fx, fy, faceR*1.3);
-  faceG.addColorStop(0, "rgba(255,235,225,0.98)");
-  faceG.addColorStop(1, "rgba(245,205,205,0.92)");
-
-  ctxB.fillStyle = faceG;
-  ctxB.beginPath();
-  ctxB.ellipse(fx, fy, faceR*0.95, faceR*1.08, 0, 0, Math.PI*2);
-  ctxB.fill();
-
-  // cheeks
-  ctxB.fillStyle = `rgba(255,120,170,${0.10 + (stance==="LONG"?0.08:0.02)})`;
-  ctxB.beginPath();
-  ctxB.ellipse(fx-faceR*0.45, fy+faceR*0.10, faceR*0.28, faceR*0.20, 0, 0, Math.PI*2); ctxB.fill();
-  ctxB.beginPath();
-  ctxB.ellipse(fx+faceR*0.45, fy+faceR*0.10, faceR*0.28, faceR*0.20, 0, 0, Math.PI*2); ctxB.fill();
-
-  // eyes (stance influences)
-  const eyeOpen = stance==="REST" ? 0.08 : (stance==="SHORT" ? 0.18 : 0.26);
-  const eyeTilt = stance==="SHORT" ? -0.12 : (stance==="LONG" ? 0.06 : 0.0);
-  ctxB.fillStyle = "rgba(15,18,30,0.92)";
-  function eye(cx){
-    ctxB.save();
-    ctxB.translate(cx, fy-faceR*0.08);
-    ctxB.rotate(eyeTilt);
-    ctxB.beginPath();
-    ctxB.ellipse(0, 0, faceR*0.22, faceR*eyeOpen, 0, 0, Math.PI*2);
-    ctxB.fill();
-    // highlight
-    ctxB.fillStyle = `rgba(255,255,255,${stance==="REST"?0.18:0.35})`;
-    ctxB.beginPath();
-    ctxB.arc(faceR*0.08, -faceR*0.03, faceR*0.05, 0, Math.PI*2);
-    ctxB.fill();
-    ctxB.restore();
-    ctxB.fillStyle = "rgba(15,18,30,0.92)";
-  }
-  eye(fx-faceR*0.33);
-  eye(fx+faceR*0.33);
-
-  // mouth (rest => sleep)
-  ctxB.strokeStyle = "rgba(120,40,70,0.65)";
-  ctxB.lineWidth = Math.max(2, DPR*1.6);
-  ctxB.beginPath();
-  if(stance==="REST"){
-    ctxB.moveTo(fx-faceR*0.18, fy+faceR*0.48);
-    ctxB.quadraticCurveTo(fx, fy+faceR*0.54, fx+faceR*0.18, fy+faceR*0.48);
-  }else if(stance==="LONG"){
-    ctxB.moveTo(fx-faceR*0.20, fy+faceR*0.46);
-    ctxB.quadraticCurveTo(fx, fy+faceR*0.58, fx+faceR*0.20, fy+faceR*0.46);
-  }else{ // short
-    ctxB.moveTo(fx-faceR*0.20, fy+faceR*0.50);
-    ctxB.quadraticCurveTo(fx, fy+faceR*0.44, fx+faceR*0.20, fy+faceR*0.50);
-  }
-  ctxB.stroke();
-
-  // frame gloss
-  const gloss = ctxB.createLinearGradient(0,0,w,h);
-  gloss.addColorStop(0, "rgba(255,255,255,0.16)");
-  gloss.addColorStop(0.3, "rgba(255,255,255,0.03)");
-  gloss.addColorStop(1, "rgba(0,0,0,0.20)");
-  ctxB.fillStyle = gloss;
-  ctxB.fillRect(0,0,w,h);
-
-  // apply stance brightness/sat by overlay
-  ctxB.restore();
-
-  // post color adjustments using globalCompositeOperation
-  ctxB.save();
-  // saturation/brightness approximations
-  if(stance==="REST"){
-    ctxB.globalAlpha = 0.55;
-    ctxB.fillStyle = "rgba(0,0,0,0.25)";
-    ctxB.fillRect(0,0,w,h);
-  }else if(stance==="SHORT"){
-    ctxB.globalAlpha = 0.35;
-    ctxB.fillStyle = "rgba(0,0,0,0.18)";
-    ctxB.fillRect(0,0,w,h);
+  // rotate factor subtle
+  const k = 0.35;
+  if(s==="LONG"){
+    sleep.classList.remove("on");
+    cockpit.classList.remove("breath");
+    img.style.transform = `rotate(${a*k}deg) scale(1.02)`;
+    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(255,215,120,.35))`;
+  }else if(s==="SHORT"){
+    sleep.classList.remove("on");
+    cockpit.classList.remove("breath");
+    img.style.transform = `rotate(${-(a-180)*k}deg) scale(1.02)`;
+    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(120,255,220,.30))`;
   }else{
-    ctxB.globalAlpha = 0.18;
-    ctxB.fillStyle = "rgba(255,255,255,0.10)";
-    ctxB.fillRect(0,0,w,h);
-  }
-  ctxB.restore();
-
-  // vignette
-  ctxB.save();
-  const vg = ctxB.createRadialGradient(w/2,h/2, w*0.10, w/2,h/2, w*0.62);
-  vg.addColorStop(0, "rgba(0,0,0,0)");
-  vg.addColorStop(1, "rgba(0,0,0,0.55)");
-  ctxB.fillStyle = vg;
-  ctxB.fillRect(0,0,w,h);
-  ctxB.restore();
-}
-
-function renderAll(){
-  const d = Number(S.deg)||0;
-  const w = Number(S.warp)||1;
-
-  const stance = stanceByDeg(d);
-  const fairy = currentFairy();
-
-  $("deg").textContent = String(d);
-  $("hudDeg").textContent = String(d);
-  $("warpMul").textContent = String(w);
-  $("hudWarp").textContent = String(w);
-  $("ctNow").textContent = String(S.ct);
-  $("triggers").textContent = String(S.triggers);
-  $("hudFairy").textContent = fairy.name;
-
-  // stance UI
-  let stanceText = "休息";
-  $("stanceDot").className = "stanceDot rest";
-  if(stance==="LONG"){ stanceText="多"; $("stanceDot").className="stanceDot long"; }
-  if(stance==="SHORT"){ stanceText="空"; $("stanceDot").className="stanceDot short"; }
-  $("stanceText").textContent = stanceText;
-
-  // parallax based on angle
-  const rad = d*Math.PI/180;
-  const px = Math.cos(rad);
-  const py = Math.sin(rad);
-  drawStars(px, py);
-  drawWarp(d, w);
-  drawBeauty(d, w);
-
-  // log hint line
-  const pool = S.wishPool || 0;
-  const poolLine = `WishPool=${pool.toFixed(2)} / ${CFG.wish.poolCap} KGEN`;
-  const modeLine = `Stance=${stance} | Fairy=${fairy.id} ${fairy.name}｜${fairy.star}｜${fairy.role}`;
-  $("badgeMode").className = "badge ok";
-  $("badgeMode").innerHTML = `<b>MODE</b> PLAYER-TRIGGER`;
-  addLog(`Render | DEG=${d} WARP=${w} | ${poolLine} | ${modeLine}`, true);
-}
-
-/* ===== Real-time player trigger mode =====
-   Rule: actions generate "ticks" (universe candles). CT updates on each trigger.
-*/
-function nextCT(){
-  // Make CT drift based on aggregate bias: deg stance + last 10 orders.
-  const stance = stanceByDeg(S.deg);
-  let bias = 0;
-  if(stance==="LONG") bias += 0.6;
-  if(stance==="SHORT") bias -= 0.6;
-
-  const last = (S.orders || []).slice(-10);
-  for(const o of last){
-    bias += (o.side==="LONG" ? 0.15 : -0.15) * clamp(o.warp/150, 0.1, 1.0);
+    sleep.classList.add("on");
+    cockpit.classList.add("breath");
+    img.style.transform = `rotate(0deg) scale(1.00)`;
+    img.style.filter = `saturate(${baseSat}) brightness(${1.00+glow*0.12}) contrast(${baseContrast}) drop-shadow(0 0 ${14+glow*18}px rgba(255,170,220,.18))`;
   }
 
-  // volatility from warp (higher warp => more movement)
-  const vol = 1 + (S.warp-1)/149 * 8; // 1..9
-  const step = Math.round((rnd(-2.2, 2.2) + bias) * vol);
-  // Keep within a friendly range around 16888 for now
-  S.ct = clamp((S.ct || 16888) + step, 14520, 18459);
-  return S.ct;
+  // drive particle engine
+  FX.setMode(s, warp);
 }
 
-/* ===== Wish engine ===== */
-function calcWinMultiplier(warp){
-  // win multiplier max scales from 1.0 to 1.5
-  const t = (warp-1)/149;
-  const max = CFG.wish.baseWinMax + t*(CFG.wish.warpWinMax - CFG.wish.baseWinMax);
-  const min = CFG.wish.baseWinMin;
-  return rnd(min, max);
+/* ===== Voice (auto speak on enter) ===== */
+function canSpeak(){
+  return !!window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined";
+}
+function speak(text){
+  if(!CFG.voice.enabled) return;
+  if(!canSpeak()) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = CFG.voice.lang;
+    u.rate = 1.02;
+    u.pitch = 1.02;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
 }
 
-function placeWish(){
-  const side = $("sideSel").value;
-  const amt = Number($("betAmt").value || 0);
-  if(!Number.isFinite(amt) || amt < CFG.wish.betMin || amt > CFG.wish.betMax){
-    speak(`下注金額需在 ${CFG.wish.betMin} 到 ${CFG.wish.betMax} 之間。`);
-    return;
-  }
-
-  // Trigger
-  S.triggers += 1;
-
-  // Generate next candle (CT+1 concept)
-  const prev = S.ct;
-  const next = nextCT();
-  const correct = (side==="LONG" && next>prev) || (side==="SHORT" && next<prev);
-
-  let outcome = "LOSE";
-  let payout = 0;
-  if(next===prev){
-    // tie -> treat as rest, partial refund
-    outcome = "TIE";
-    payout = amt * 0.95;
-  }else if(correct){
-    outcome = "WIN";
-    const mul = calcWinMultiplier(S.warp);
-    payout = amt * mul;
-  }else{
-    outcome = "LOSE";
-    payout = 0;
-  }
-
-  // pool accounting
-  if(outcome==="LOSE"){
-    S.wishPool = (S.wishPool||0) + amt;
-  }else{
-    // payout is virtual (local)
-    // keep pool unchanged on win; this is "house edge = 0" fantasy mode
-  }
-
-  const fairy = currentFairy();
-  const stance = stanceByDeg(S.deg);
-
-  const order = {
-    at: Date.now(),
-    iso: now(),
-    fairyId: fairy.id,
-    fairyName: fairy.name,
-    side,
-    amt,
-    deg: S.deg,
-    warp: S.warp,
-    ct0: prev,
-    ct1: next,
-    stance,
-    outcome,
-    payout: Number(payout.toFixed(4))
-  };
-  S.orders = S.orders || [];
-  S.orders.push(order);
-
-  // jackpot when pool reaches cap
-  if((S.wishPool||0) >= CFG.wish.poolCap){
-    // pick a winner from last 30 orders
-    const cand = (S.orders||[]).slice(-30);
-    const winPick = cand.length ? cand[Math.floor(Math.random()*cand.length)] : order;
-    const total = S.wishPool||0;
-    const winner = total * 0.60;
-    const good = total * 0.30;
-    const remain = total - winner - good;
-
-    addLog(`JACKPOT! Pool=${total.toFixed(2)} 抽中：${winPick.fairyName} 的玩家（${winPick.side} ${winPick.amt}）｜得 ${winner.toFixed(2)}｜公益 ${good.toFixed(2)}｜留池 ${remain.toFixed(2)}`);
-    speak(`滿池觸發。抽中一位玩家獲得獎池六成。公益三成。其餘留在獎池。`);
-
-    // reset pool to remain (carry)
-    S.wishPool = Number(remain.toFixed(4));
-  }
-
-  saveState(S);
-
-  const msg = `許願：${fairy.name}｜${side==="LONG"?"多":"空"} ${amt}｜CT ${prev}→${next}｜結果：${outcome}${outcome==="WIN" ? `｜獎勵≈${payout.toFixed(2)}` : outcome==="TIE" ? `｜退回≈${payout.toFixed(2)}` : ""}｜獎池=${(S.wishPool||0).toFixed(2)}`;
-  addLog(msg);
-  speak(msg);
-  renderAll();
+/* ===== Wallet connect (optional now) ===== */
+async function connectWallet(){
+  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
+  const p = new ethers.providers.Web3Provider(window.ethereum);
+  await p.send("eth_requestAccounts", []);
+  const s = p.getSigner();
+  const addr = await s.getAddress();
+  STATE.wallet = addr;
+  $("wallet").textContent = addr;
+  toast("錢包已連線");
+  log("Wallet connected: " + addr);
 }
 
-function manualTick(){
-  S.triggers += 1;
-  const prev = S.ct;
-  const next = nextCT();
-  saveState(S);
-  const msg = `生成下一根宇宙K：CT ${prev}→${next}｜（玩家觸發）`;
-  addLog(msg);
-  speak(msg);
-  renderAll();
-}
+/* ===== Player trigger (local realtime) ===== */
+function playerTrigger(){
+  STATE.players += 1;
+  $("players").textContent = String(STATE.players);
+  STATE.lastTriggerAt = Date.now();
 
-/* ===== Logging ===== */
-let lastLog = "";
-function addLog(line, quiet=false){
-  // avoid spamming repeated render logs
-  if(quiet){
-    if(line===lastLog) return;
-    lastLog = line;
-  }
-  const el = $("log");
-  const ts = new Date().toLocaleTimeString("zh-TW",{hour12:false});
-  el.textContent = `[${ts}] ${line}\n` + el.textContent;
-}
+  // A trigger nudges warp/angle for "live rhythm"
+  const a = normAngle(STATE.deg + (Math.random()*18 - 9));
+  STATE.deg = a;
 
-/* ===== Notes ===== */
-function saveNote(){
-  S.notes = $("note").value || "";
-  saveState(S);
-  speak("留言已保存在本機。");
-  addLog("Note saved.");
+  const warp = clamp(STATE.warp + (Math.random()*6 - 3), 1, 150);
+  STATE.warp = warp;
+
+  $("degRange").value = String(STATE.deg);
+  $("warpRange").value = String(STATE.warp);
+
+  applyUI();
+  log("玩家觸發：節律已更新（本機即時模式）");
+  toast("已觸發：宇宙開始呼吸");
+
+  // optional: speak short
+  speak("已觸發。請調整方向盤與曲速。多空由角度決定。");
 }
 
 /* ===== Camera ===== */
 let camStream = null;
-async function ensureCamera(){
-  const v = $("cam");
-  if(camStream) return camStream;
+async function openCam(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    speak("你的瀏覽器不支援相機。");
-    return null;
+    throw new Error("此瀏覽器不支援相機");
   }
-  try{
-    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}, audio:false});
-    v.srcObject = camStream;
-    v.style.display = "block";
-    return camStream;
-  }catch(e){
-    speak("相機權限被拒絕或不可用。");
-    return null;
-  }
+  camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+  $("cam").srcObject = camStream;
+  toast("相機已開啟");
+  log("Camera started");
 }
-async function takePhoto(){
-  const s = await ensureCamera();
-  if(!s) return;
+function shot(){
   const v = $("cam");
-  // draw video frame into canvas then export
-  const c = document.createElement("canvas");
-  const w = v.videoWidth || 720;
-  const h = v.videoHeight || 720;
-  c.width = w; c.height = h;
-  const cx = c.getContext("2d");
-  cx.drawImage(v,0,0,w,h);
-  const data = c.toDataURL("image/jpeg", 0.86);
-  $("photoPrev").src = data;
-  addLog("Photo captured (local).");
-  speak("拍照完成。照片已顯示在右側。");
+  if(!v.videoWidth) throw new Error("相機尚未就緒");
+  const c = $("snap");
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  const ctx = c.getContext("2d");
+  ctx.drawImage(v, 0, 0, c.width, c.height);
+
+  // stamp
+  ctx.fillStyle = "rgba(0,0,0,.45)";
+  ctx.fillRect(12, 12, 320, 54);
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  ctx.font = "16px ui-monospace, Menlo, Consolas, monospace";
+  ctx.fillText("GUANGHAN 16888 · UFO COCKPIT", 22, 34);
+  ctx.font = "13px ui-monospace, Menlo, Consolas, monospace";
+  ctx.fillText("TIME: " + nowStr(), 22, 56);
+
+  $("snap").style.display = "block";
+  toast("已拍照");
+  log("Snapshot captured");
+}
+function downloadSnap(){
+  const c = $("snap");
+  if(c.style.display === "none") throw new Error("尚未拍照");
+  const a = document.createElement("a");
+  a.download = "KLINE_16888_SNAPSHOT.png";
+  a.href = c.toDataURL("image/png");
+  a.click();
+  toast("下載中");
 }
 
-/* ===== Wallet ===== */
-let provider=null, signer=null, wallet="";
-async function connectWallet(){
-  if(!window.ethereum){
-    speak("未偵測到 MetaMask。請先安裝錢包。");
-    $("netBadge").className = "badge bad"; $("netBadge").innerHTML = "<b>CHAIN</b> NO WALLET";
-    return;
-  }
-  try{
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    wallet = await signer.getAddress();
-    $("walletAddr").textContent = shortAddr(wallet);
+/* ===== FX Particle Engine (canvas) ===== */
+const FX = (function(){
+  const canvas = $("fx");
+  const ctx = canvas.getContext("2d");
+  let W=0, H=0, DPR=1;
+  let mode="REST"; // LONG / SHORT / REST
+  let warp=10;
 
-    const net = await provider.getNetwork();
-    if(net.chainId !== CFG.chain.bscChainIdDec){
-      $("netBadge").className = "badge warn";
-      $("netBadge").innerHTML = `<b>CHAIN</b> chainId=${net.chainId}（請切 BSC）`;
-      speak("錢包已連線，但不是 BSC。請切換到 BNB Chain。");
-    }else{
-      $("netBadge").className = "badge ok";
-      $("netBadge").innerHTML = `<b>CHAIN</b> BSC OK`;
-      speak("錢包已連線。你已在 BSC。");
+  const particles = [];
+  const MAX = 520;
+
+  function resize(){
+    DPR = Math.max(1, Math.min(2, window.devicePixelRatio||1));
+    const rect = canvas.getBoundingClientRect();
+    W = Math.floor(rect.width);
+    H = Math.floor(rect.height);
+    canvas.width = Math.floor(W*DPR);
+    canvas.height = Math.floor(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener("resize", resize);
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function spawn(){
+    const intensity = clamp(warp/150, 0.06, 1.0);
+    const count = Math.floor(2 + intensity*6);
+
+    for(let i=0;i<count;i++){
+      if(particles.length > MAX) particles.shift();
+
+      const p = {
+        x: rand(0, W),
+        y: rand(0, H),
+        vx: 0,
+        vy: 0,
+        r: rand(0.6, 2.2) + intensity*1.6,
+        life: rand(0.6, 1.35),
+        age: 0,
+        a: rand(0.25, 0.95),
+        kind: mode
+      };
+
+      // stream direction based on mode
+      if(mode==="LONG"){
+        p.x = rand(0.10*W, 0.90*W);
+        p.y = rand(0.15*H, 0.80*H);
+        p.vx = rand(1.6, 3.3) + intensity*6.5; // forward
+        p.vy = rand(-0.3, 0.3);
+      }else if(mode==="SHORT"){
+        p.x = rand(0.10*W, 0.90*W);
+        p.y = rand(0.15*H, 0.80*H);
+        p.vx = - (rand(1.2, 2.8) + intensity*5.6); // backward
+        p.vy = rand(-0.3, 0.3);
+      }else{
+        // rest: float softly
+        p.x = rand(0.10*W, 0.90*W);
+        p.y = rand(0.15*H, 0.80*H);
+        p.vx = rand(-0.35, 0.35);
+        p.vy = rand(-0.18, 0.18);
+        p.r *= 0.85;
+        p.a *= 0.65;
+      }
+
+      particles.push(p);
+    }
+  }
+
+  function draw(dt){
+    // clear
+    ctx.clearRect(0,0,W,H);
+
+    // subtle vignette
+    ctx.fillStyle = "rgba(0,0,0,.12)";
+    ctx.fillRect(0,0,W,H);
+
+    // spawn
+    spawn();
+
+    // draw particles
+    const intensity = clamp(warp/150, 0.06, 1.0);
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.age += dt;
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+
+      const t = 1 - (p.age / p.life);
+      if(t<=0 || p.x<-80 || p.x>W+80 || p.y<-80 || p.y>H+80){
+        particles.splice(i,1);
+        continue;
+      }
+
+      // color by mode
+      let col = "rgba(255,255,255,";
+      if(mode==="LONG"){
+        col = `rgba(255,215,120,${p.a*t})`;
+      }else if(mode==="SHORT"){
+        col = `rgba(120,255,220,${p.a*t})`;
+      }else{
+        col = `rgba(255,170,220,${p.a*t})`;
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = col;
+      ctx.arc(p.x, p.y, p.r * (0.6 + intensity*0.65), 0, Math.PI*2);
+      ctx.fill();
+
+      // streaks for higher warp
+      if(intensity > 0.35 && mode!=="REST"){
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - p.vx*0.38, p.y - p.vy*0.38);
+        ctx.stroke();
+      }
     }
 
-    const bal = await provider.getBalance(wallet);
-    $("bnbBal").textContent = Number(ethers.utils.formatEther(bal)).toFixed(4);
-
-    addLog(`Wallet connected: ${wallet}`);
-  }catch(e){
-    speak("連接錢包失敗。");
+    // center glow
+    const cx=W*0.32, cy=H*0.36;
+    const g=ctx.createRadialGradient(cx,cy,10,cx,cy, 220+intensity*180);
+    if(mode==="LONG"){
+      g.addColorStop(0, `rgba(255,215,120,${0.18+intensity*0.22})`);
+      g.addColorStop(1, "rgba(255,215,120,0)");
+    }else if(mode==="SHORT"){
+      g.addColorStop(0, `rgba(120,255,220,${0.16+intensity*0.20})`);
+      g.addColorStop(1, "rgba(120,255,220,0)");
+    }else{
+      g.addColorStop(0, `rgba(255,170,220,${0.12+intensity*0.12})`);
+      g.addColorStop(1, "rgba(255,170,220,0)");
+    }
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
   }
-}
-function shortAddr(a){
-  if(!a || a.length<10) return a||"--";
-  return a.slice(0,6)+"…"+a.slice(-4);
-}
-async function addBSC(){
-  if(!window.ethereum){
-    speak("未偵測到 MetaMask。");
-    return;
+
+  let last = performance.now();
+  function loop(){
+    const now = performance.now();
+    const dt = Math.min(0.033, (now-last)/1000);
+    last = now;
+    draw(dt);
+    requestAnimationFrame(loop);
   }
-  try{
-    await window.ethereum.request({ method:"wallet_addEthereumChain", params:[CFG.chain.bscParams] });
-    speak("已送出新增 BSC 網路請求。");
-  }catch(e){
-    speak("新增 BSC 失敗或被取消。");
+
+  function setMode(m, w){
+    mode = m;
+    warp = w;
   }
-}
 
-/* ===== AI Customer Service ===== */
-function csTeach(){
-  const t = [
-    "你現在在廣寒宮 16888 七仙女飛碟駕駛艙。",
-    "先用方向盤選角度：十到一百七十是多， 一百九十到三百五十是空。",
-    "曲速一到一百五十，越高越刺激。",
-    "沒錢包也能玩本機許願。要鏈上互動再連接 MetaMask。"
-  ].join(" ");
-  speak(t);
-  addLog("CS teach played.");
-}
-function csRules(){
-  const t = [
-    "許願玩法：下注一到一千 KGEN，選多或空。",
-    "你按下許願，就會觸發下一根宇宙K，也就是 CT 的下一步。",
-    "猜對會得到零點八到一點五倍的獎勵上限，跟曲速有關。",
-    "猜錯會進獎池，獎池滿一萬六千八百八十八會抽中一名玩家領六成，公益三成，其餘留池。"
-  ].join(" ");
-  speak(t);
-}
-function csWallet(){
-  const t = [
-    "錢包教學：下載 MetaMask，建立錢包，切換到 BNB Chain。",
-    "準備少量 BNB 當 Gas。",
-    "回到這頁按連接錢包。",
-    "如果不是 BSC，按新增 BSC 或到錢包切換網路。"
-  ].join(" ");
-  speak(t);
-}
+  resize();
+  requestAnimationFrame(loop);
 
-/* ===== UI bind ===== */
-function initFairySelect(){
-  const sel = $("fairySel");
-  sel.innerHTML = "";
-  for(const f of FAIRIES){
-    const o = document.createElement("option");
-    o.value = String(f.id);
-    o.textContent = `${f.id}｜${f.name}｜${f.star}｜${f.role}`;
-    sel.appendChild(o);
-  }
-  sel.value = String(S.fairyId);
-  sel.addEventListener("change", ()=>{
-    S.fairyId = Number(sel.value);
-    saveState(S);
-    addLog(`Fairy set: ${S.fairyId}`);
-    renderAll();
-  });
-}
+  return { setMode };
+})();
 
-function initSliders(){
-  $("degRange").value = String(S.deg);
-  $("warpRange").value = String(S.warp);
-
-  $("degRange").addEventListener("input", (e)=>{
-    S.deg = Number(e.target.value);
-    S.triggers += 1;
-    saveState(S);
-    renderAll();
-  });
-  $("warpRange").addEventListener("input", (e)=>{
-    S.warp = Number(e.target.value);
-    S.triggers += 1;
-    saveState(S);
-    renderAll();
-  });
-}
-
-/* ===== Auto voice toggle ===== */
-function syncAutoVoiceBtn(){
-  $("btnAutoVoice").textContent = `進頁自動語音：${S.autoVoice ? "ON" : "OFF"}`;
-}
-$("btnAutoVoice").addEventListener("click", ()=>{
-  S.autoVoice = !S.autoVoice;
-  saveState(S);
-  syncAutoVoiceBtn();
-  speak(S.autoVoice ? "自動語音已開啟。" : "自動語音已關閉。");
+/* ===== Events ===== */
+$("degRange").addEventListener("input", (e)=>{
+  STATE.deg = Number(e.target.value||0);
+  applyUI();
+});
+$("warpRange").addEventListener("input", (e)=>{
+  STATE.warp = Number(e.target.value||10);
+  applyUI();
+});
+$("massInput").addEventListener("input", ()=>{
+  applyUI();
 });
 
-/* ===== Buttons ===== */
-$("btnSpeak").addEventListener("click", csTeach);
-$("btnCSQuick").addEventListener("click", csTeach);
-$("btnCSExplain").addEventListener("click", csRules);
-$("btnCSWallet").addEventListener("click", csWallet);
-
-$("btnWish").addEventListener("click", placeWish);
-$("btnSimTick").addEventListener("click", manualTick);
-$("btnSaveNote").addEventListener("click", saveNote);
-$("btnPhoto").addEventListener("click", takePhoto);
-
-$("btnConnect").addEventListener("click", connectWallet);
-$("btnConnect2").addEventListener("click", connectWallet);
-$("btnAddBSC").addEventListener("click", addBSC);
-
-$("btnResetLocal").addEventListener("click", ()=>{
-  localStorage.removeItem(LS_KEY);
-  S = defaultState();
-  $("note").value = "";
-  $("fairySel").value = String(S.fairyId);
-  $("degRange").value = "0";
-  $("warpRange").value = "1";
-  $("photoPrev").src = "";
-  addLog("Local state reset.");
-  speak("本機資料已重置。");
-  saveState(S);
-  renderAll();
+$("btnConnect").addEventListener("click", async ()=>{
+  try{ await connectWallet(); }catch(e){ toast(e.message || String(e)); log("Wallet connect error: " + (e.message||e)); }
 });
 
-/* ===== init ===== */
-(function init(){
-  resizeCanvases();
-  initStars();
-  initFairySelect();
-  initSliders();
-  $("note").value = S.notes || "";
-  syncAutoVoiceBtn();
+$("btnTrigger").addEventListener("click", ()=>{
+  playerTrigger();
+});
 
-  // initial render
-  renderAll();
+$("btnSpeak").addEventListener("click", ()=>{
+  const msg = "廣寒宮一六八八八。方向盤十到一七零為多。一九零到三五零為空。三五零到一零與一七零到一九零為休息。曲速一到一五零。按即時觸發開始節律。";
+  speak(msg);
+  toast("語音導覽已播放");
+  log("Voice guide played");
+});
 
-  // auto voice on enter (must be user gesture in some browsers; we also show CTA)
-  if(S.autoVoice){
-    // attempt soft speak; may be blocked until user clicks something
-    speak("廣寒宮一六八八八，七仙女飛碟駕駛艙已開啟。請先選角度與曲速。需要錢包可按右上連接。");
-  }else{
-    $("badgeVoice").className = "badge warn";
-    $("badgeVoice").innerHTML = "<b>VOICE</b> OFF";
-  }
+$("btnClear").addEventListener("click", ()=>{
+  STATE.players = 0;
+  $("players").textContent = "0";
+  $("wish").value = "";
+  toast("已清空");
+  log("State cleared");
+});
 
-  // gentle loop for visual drift (stars/warp) without changing state
-  let t0 = performance.now();
-  function anim(t){
-    const dt = (t - t0) / 1000;
-    t0 = t;
-    // small parallax drift by time + angle
-    const d = Number(S.deg)||0;
-    const rad = d*Math.PI/180;
-    const px = Math.cos(rad) + Math.cos(t/1200)*0.06;
-    const py = Math.sin(rad) + Math.sin(t/1200)*0.06;
-    drawStars(px, py);
-    drawWarp(d, Number(S.warp)||1);
-    drawBeauty(d, Number(S.warp)||1);
-    requestAnimationFrame(anim);
-  }
-  requestAnimationFrame(anim);
+$("btnCam").addEventListener("click", async ()=>{
+  try{ await openCam(); }catch(e){ toast(e.message||String(e)); log("Camera error: "+(e.message||e)); }
+});
+$("btnShot").addEventListener("click", ()=>{
+  try{ shot(); }catch(e){ toast(e.message||String(e)); log("Shot error: "+(e.message||e)); }
+});
+$("btnDownload").addEventListener("click", ()=>{
+  try{ downloadSnap(); }catch(e){ toast(e.message||String(e)); log("Download error: "+(e.message||e)); }
+});
 
-  addLog("Boot OK | 16888 V1.4 loaded.");
+/* ===== Boot ===== */
+(function boot(){
+  $("players").textContent = "0";
+  $("wallet").textContent = "未連線";
+  $("modeBadge").className = "badge warn";
+  $("modeBadge").textContent = "狀態：READY";
+
+  applyUI();
+
+  // auto voice once
+  setTimeout(()=>{
+    speak("廣寒宮一六八八八。七仙女飛碟駕駛艙已啟動。若尚未有錢包，請先連接錢包。按即時觸發開始節律。");
+  }, 650);
+
+  log("Boot OK: 16888 V1.5");
+  toast("16888 V1.5 已啟動");
 })();
 </script>
 
