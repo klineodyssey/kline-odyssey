@@ -215,6 +215,20 @@
 
   <!-- Ethers v5.7.2 (你需自行放檔) -->
   <script src="./assets/ethers-5.7.2.umd.min.js"></script>
+
+<script>
+/* Portal V1.2.x — ethers loader fallback (do not remove local file usage)
+   - tries local ./assets/ethers-5.7.2.umd.min.js first
+   - falls back to jsDelivr CDN if local missing
+*/
+(function(){
+  if (window.ethers) return;
+  var s = document.createElement('script');
+  s.src = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
+  s.defer = true;
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 
 <body>
