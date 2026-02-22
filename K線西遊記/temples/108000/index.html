@@ -5,8 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>花果山火星齊天豪宅 108000｜Mars Seats V2.2（Temple UI V1.0）</title>
 
-  <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾，並命名為 ethers-5.7.2.umd.min.js -->
-  <script src="./ethers-5.7.2.umd.min.js"></script>
+  <!-- Ethers v5.7.2：優先本地檔 ./ethers-5.7.2.umd.min.js，若缺少則自動 CDN 備援 -->
+  <script>
+    (function(){
+      function add(src){
+        return new Promise((res, rej)=>{
+          var s=document.createElement('script');
+          s.src=src; s.async=true;
+          s.onload=res; s.onerror=rej;
+          document.head.appendChild(s);
+        });
+      }
+      var local = "./ethers-5.7.2.umd.min.js";
+      var cdn   = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
+      add(local).catch(()=>add(cdn)).catch(()=>console.warn("ethers load failed"));
+    })();
+  </script>
 
   <style>
     :root{
@@ -341,17 +355,14 @@
 
         <div class="sep"></div>
 
-        <h2>常見問題：你剛問的那題</h2>
+        <h2>常見問題</h2>
         <div class="small">
           <b>Q：如果把 treasury 設為交易所地址，那繳 5000 KGEN 交易所怎麼知道是住豪宅的錢還是保證金？</b><br/><br/>
-          <b>正解做法（推薦）：</b><br/>
+          <b>推薦做法：</b><br/>
           1) 讓 MarsSeats 的 treasury 直接是 BrainExchange 合約地址。<br/>
-          2) BrainExchange 增加一個專用入口：<span class="mono">depositFromMars(address user, uint256 amount)</span>，只允許 msg.sender == MarsSeats 呼叫。<br/>
-          3) MarsSeats 在 mintSeat 時不直接把錢「轉」進 Brain，而是：<br/>
-          - 先收錢到 MarsSeats，再呼叫 Brain 的 <span class="mono">depositFromMars</span>（帶上 user），讓 Brain 在帳本上把這筆記成「MarsSeatFunds」，不混保證金。<br/><br/>
-          <b>你現在如果只做「純轉帳到 Brain」：</b><br/>
-          Brain 會看到它收到了 KGEN，但鏈上難以在合約內把「備註」寫進去；你只能靠事件追蹤或額外函式做分類。<br/><br/>
-          所以：<b>不要把 Mars 合約地址當交易所地址；要用「專用函式」分類資金。</b>
+          2) BrainExchange 增加專用入口：<span class="mono">depositFromMars(address user, uint256 amount)</span>，只允許 msg.sender == MarsSeats。<br/>
+          3) MarsSeats 在 mintSeat 後由合約呼叫 Brain 入口，讓 Brain 帳本可分類，不混保證金。<br/><br/>
+          若你暫時只做「純轉帳到 Brain」，也可以靠事件追蹤，但鏈上帳本分類會不乾淨。
         </div>
 
       </div>
@@ -372,17 +383,10 @@
 <script>
 /** ===============================
  *  Mars Seats Temple UI V1.0
- *  - 單檔可部署到 GitHub Pages
- *  - 地址可由 UI 輸入，儲存在 localStorage
- *  - 需要 ethers 5.7.2
  * =============================== */
 
 const LS_KEY = "KLINE_MARS_SEATS_UI_V1";
-const DEFAULTS = {
-  kgen: "",
-  mars: "",
-  treasury: ""
-};
+const DEFAULTS = { kgen:"", mars:"", treasury:"" };
 
 let provider, signer, walletAddress = "";
 let KGEN, MARS;
@@ -407,9 +411,7 @@ function loadCfg(){
     return {...DEFAULTS};
   }
 }
-function saveCfg(cfg){
-  localStorage.setItem(LS_KEY, JSON.stringify(cfg));
-}
+function saveCfg(cfg){ localStorage.setItem(LS_KEY, JSON.stringify(cfg)); }
 
 function applyCfgToUI(cfg){
   document.getElementById("inKGEN").value = cfg.kgen || "";
@@ -426,20 +428,14 @@ function requireCfgReady(cfg){
 }
 
 const ABI_KGEN = [
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
   "function approve(address spender, uint256 amount) returns (bool)"
 ];
 
 const ABI_MARS = [
-  "function MAX_SEATS() view returns (uint256)",
-  "function totalMinted() view returns (uint256)",
   "function remainingSeats() view returns (uint256)",
-  "function seatPrice() view returns (uint256)",
-  "function seatPriceWhole() view returns (uint256)",
-  "function treasury() view returns (address)",
   "function pendingReward(address user) view returns (uint256)",
+  "function treasury() view returns (address)",
   "function mintSeat()",
   "function claimReward()",
   "function seatsOf(address user) view returns (uint256[] memory)"
@@ -464,7 +460,6 @@ async function bindContracts(){
 }
 
 function fmt18(x){
-  // KGEN is 18 decimals in your token; we keep generic but format as 18
   try{ return ethers.utils.formatUnits(x, 18); }catch(e){ return String(x); }
 }
 function fmtKgen(x){
@@ -480,10 +475,8 @@ async function refresh(){
 
   await bindContracts();
 
-  const [remain, minted, priceWhole, pending] = await Promise.all([
+  const [remain, pending] = await Promise.all([
     MARS.remainingSeats(),
-    MARS.totalMinted(),
-    MARS.seatPriceWhole().catch(()=>ethers.BigNumber.from(5000)),
     MARS.pendingReward(walletAddress).catch(()=>ethers.BigNumber.from(0))
   ]);
 
@@ -502,11 +495,6 @@ async function refresh(){
     const treas = await MARS.treasury();
     document.getElementById("addrTREAS").textContent = treas;
   }catch(e){}
-
-  // show configured price (info only)
-  if(priceWhole){
-    // no direct UI field; just toast on refresh
-  }
 }
 
 async function approve5000(){
@@ -605,9 +593,8 @@ document.getElementById("btnClaim").addEventListener("click", async ()=>{
 (function init(){
   const cfg = loadCfg();
   applyCfgToUI(cfg);
-  // If already connected in wallet, user can hit refresh after connect.
 })();
 </script>
 
 </body>
-                                                   </html>
+</html>
