@@ -327,7 +327,10 @@
   <div class="topRight">
     <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
     <a class="pill cyan" href="../../index.html" rel="noreferrer">🗺️ 宇宙入口</a>
-    <div class="pill">版本：<b>16888 V1.7.2</b></div>
+          <button class="pill" id="btnSpeak">🔊 語音導覽</button>
+          <button class="pill" id="btnStopVoice">🔇 停止</button>
+
+    <div class="pill">版本：<b>16888 V1.8</b></div>
   </div>
 
   <div class="wrap">
@@ -785,7 +788,7 @@ const FX = (function(){
   function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
 
   function spawn(){
-    const nBase = 2 + Math.floor(warp/12); // higher warp => more particles
+    const nBase = (mode==="REST"?2:6) + Math.floor(warp/10); // warp 1..150 => density/brightness
     for(let i=0;i<nBase;i++){
       const p={};
       p.x = rnd(0,W);
@@ -796,15 +799,15 @@ const FX = (function(){
       if(mode==="LONG"){
         // 多：上往下，由遠到近（越來越大）
         p.y  = rnd(-H*0.25, 0);
-        p.vy = rnd(40, 110) * (0.8 + warp/120);
-        p.z  = rnd(0.06, 0.25);
-        p.dz = rnd(0.20, 0.55);
+        p.vy = rnd(55, 150) * (0.85 + warp/110);
+        p.z  = rnd(0.08, 0.30);
+        p.dz = rnd(0.25, 0.75);
       }else if(mode==="SHORT"){
         // 空：下往上，由近到遠（越來越小）
         p.y  = rnd(H, H*1.25);
-        p.vy = -rnd(40, 110) * (0.8 + warp/120);
-        p.z  = rnd(0.78, 0.98);
-        p.dz = -rnd(0.20, 0.55);
+        p.vy = -rnd(55, 150) * (0.85 + warp/110);
+        p.z  = rnd(0.98, 1.15);
+        p.dz = -rnd(0.25, 0.75);
       }else{
         // 休息：慢飄
         p.y  = rnd(0,H);
@@ -941,8 +944,8 @@ $("btnDownload").addEventListener("click", ()=>{
     speak("廣寒宮一六八八八。七仙女飛碟駕駛艙已啟動。若尚未有錢包，請先連接錢包。按即時觸發開始節律。");
   }, 650);
 
-  log("Boot OK: 16888 V1.7.2");
-  toast("16888 V1.7.2 已啟動");
+  log("Boot OK: 16888 V1.8");
+  toast("16888 V1.8 已啟動");
 })();
 </script>
 
