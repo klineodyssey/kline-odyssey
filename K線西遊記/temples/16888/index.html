@@ -156,7 +156,7 @@
     }
     @keyframes auraSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
 
-    img#fairy{
+    img#fairySprite{
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:cover;
@@ -164,7 +164,11 @@
       will-change: transform, filter;
       transition: transform .45s ease, filter .45s ease;
       filter: saturate(1.05) contrast(1.02);
-    }
+      background-image:url("./assets/fairy_sprite_36.png");
+  background-repeat:no-repeat;
+  background-size:600% 600%;
+  background-position:0% 0%;
+}
 
     /* Sleep overlay */
     .sleepMask{
@@ -323,7 +327,7 @@
   <div class="topRight">
     <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
     <a class="pill cyan" href="../../index.html" rel="noreferrer">🗺️ 宇宙入口</a>
-    <div class="pill">版本：<b>16888 V1.5</b></div>
+    <div class="pill">版本：<b>16888 V1.6</b></div>
   </div>
 
   <div class="wrap">
@@ -361,7 +365,7 @@
           <div class="cockpitGrid">
             <div>
               <div class="fairyWrap" id="fairyWrap">
-                <img id="fairy" src="./assets/fairy.png" alt="fairy" />
+                <div id="fairySprite" role="img" aria-label="Fairy sprite"></div>
                 <div class="sleepMask" id="sleepMask">
                   <div class="sleepText">
                     <div class="z">Z Z Z</div>
@@ -504,7 +508,7 @@
 
 <script>
 /* =========================================
-   16888 Fairy UFO Cockpit V1.5
+   16888 Fairy UFO Cockpit V1.6
    - Particle engine: long = forward gold stream, short = backward stardust
    - Rest: breathing + sleep mask
    - Warp affects glow + particle speed/intensity
@@ -582,6 +586,17 @@ function computeEnergy(m, warp){
   return E;
 }
 
+
+function setSpriteFrameByAngle(deg){
+  // 36 frames, 10 degrees per frame
+  const d = ((deg%360)+360)%360;
+  const frame = Math.floor(d/10) % 36;
+  const col = frame % 6;
+  const row = Math.floor(frame / 6);
+  // With background-size 600% 600%, stepping -100% moves one tile.
+  spr.style.backgroundPosition = `${-col*100}% ${-row*100}%`;
+}
+
 function applyUI(){
   const a = normAngle(STATE.deg);
   const warp = clamp(STATE.warp, 1, 150);
@@ -610,7 +625,7 @@ function applyUI(){
   $("modeBadge").textContent = `狀態：${s}`;
 
   // fairy rotation + glow
-  const img = $("fairy");
+  const spr = $("fairySprite");
   const sleep = $("sleepMask");
   const cockpit = $("cockpit");
   const glow = (warp/150);
@@ -629,20 +644,20 @@ function applyUI(){
     cockpit.classList.remove("breath");
     const yaw = ((a-90)/90)*18;
       const pitch = 14;
-      img.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${a*0.08}deg) scale(1.06)`;
-    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(255,215,120,.35))`;
+      spr.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${a*0.08}deg) scale(1.06)`;
+    spr.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(255,215,120,.35))`;
   }else if(s==="SHORT"){
     sleep.classList.remove("on");
     cockpit.classList.remove("breath");
     const yaw = 180 + ((a-270)/80)*18;
       const pitch = -10;
-      img.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${-(a-180)*0.06}deg) scale(1.04)`;
-    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(120,255,220,.30))`;
+      spr.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${-(a-180)*0.06}deg) scale(1.04)`;
+    spr.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(120,255,220,.30))`;
   }else{
     sleep.classList.add("on");
     cockpit.classList.add("breath");
-    img.style.transform = `perspective(900px) rotateX(-2deg) rotateY(0deg) scale(1.00)`;
-    img.style.filter = `saturate(${baseSat}) brightness(${1.00+glow*0.12}) contrast(${baseContrast}) drop-shadow(0 0 ${14+glow*18}px rgba(255,170,220,.18))`;
+    spr.style.transform = `perspective(900px) rotateX(-2deg) rotateY(0deg) scale(1.00)`;
+    spr.style.filter = `saturate(${baseSat}) brightness(${1.00+glow*0.12}) contrast(${baseContrast}) drop-shadow(0 0 ${14+glow*18}px rgba(255,170,220,.18))`;
   }
 
   // drive particle engine
@@ -770,7 +785,7 @@ const FX = (function(){
   function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
 
   function spawn(){
-    const nBase = 1 + Math.floor(warp/18); // higher warp => more particles
+    const nBase = 2 + Math.floor(warp/12); // higher warp => more particles
     for(let i=0;i<nBase;i++){
       const p={};
       p.x = rnd(0,W);
@@ -926,8 +941,8 @@ $("btnDownload").addEventListener("click", ()=>{
     speak("廣寒宮一六八八八。七仙女飛碟駕駛艙已啟動。若尚未有錢包，請先連接錢包。按即時觸發開始節律。");
   }, 650);
 
-  log("Boot OK: 16888 V1.5");
-  toast("16888 V1.5 已啟動");
+  log("Boot OK: 16888 V1.6");
+  toast("16888 V1.6 已啟動");
 })();
 </script>
 
