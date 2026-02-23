@@ -2,7 +2,7 @@
   "name": "廣寒宮 16888 駕駛艙",
   "short_name": "廣寒宮",
   "description": "七仙女飛碟駕駛艙 - KLINE Odyssey 宇宙入口",
-  "start_url": "index.html",
+  "start_url": "./index.html?v=16888_v1_6_1",
   "display": "standalone",
   "background_color": "#06070b",
   "theme_color": "#ffd778",
