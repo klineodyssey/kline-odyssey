@@ -115,4 +115,529 @@
     }
     .log{
       font-family:var(--mono); font-size:10px; background:rgba(0,0,0,0.30);
-      padding:10px; height:150px; overflow:auto;
+      padding:10px; height:150px; overflow:auto; margin-top:10px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    video#cam{ width:100%; border-radius:12px; background:#000; }
+    .toast{
+      position:fixed; bottom:110px; left:50%; transform:translateX(-50%);
+      background:rgba(255,215,120,.95); color:#000; padding:8px 18px; border-radius:999px;
+      display:none; z-index:100; font-weight:950;
+    }
+    .sticky{
+      position:fixed; bottom:0; left:0; width:100%;
+      background:rgba(0,0,0,0.82); padding:14px; backdrop-filter:blur(10px);
+      border-top:1px solid var(--line); z-index:80;
+    }
+    .stickyInner{
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      max-width:1100px; margin:0 auto; color:var(--muted); font-size:12px;
+    }
+    .stickyInner b{ color: var(--text); }
+
+    .small{ font-size:12px; color: var(--muted); }
+    .sep{ height:1px; background:rgba(255,255,255,.08); margin:12px 0; }
+  </style>
+</head>
+
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="topRight">
+    <a class="pill" href="../../index.html" title="返回官網/宇宙官網">🌐 官網</a>
+    <a class="pill" href="../../portal/index.html" title="回宇宙入口">🗺️ 宇宙入口</a>
+    <div class="pill gold">廣寒宮 16888 V1.6.1</div>
+    <div class="pill" id="clock">00:00:00</div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="h">廣寒宮 16888｜七仙女飛碟駕駛艙</div>
+        <div class="sub">
+          多：金雨「由上往下」(遠→近) ｜ 空：翠雲「由下往上」(近→遠) ｜ 休息：粒子停止
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" id="btnVoice">🔊 語音導覽</button>
+        <button class="btn danger" id="btnStopVoice">⛔ 停止</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- 左：駕駛艙 -->
+      <section class="card">
+        <div class="cardHead">
+          <div style="font-weight:950">飛碟駕駛艙</div>
+          <div class="small">方向盤 0–360｜曲速 1–150</div>
+        </div>
+
+        <div class="cardBody cockpit" id="cockpit">
+          <canvas id="fx"></canvas>
+
+          <div style="position:relative; z-index:10;">
+            <div class="fairyWrap">
+              <!-- ✅ 單張圖：強制刷新避免快取 -->
+              <img id="fairyImg" src="./assets/fairy.png?v=20260224" alt="fairy"
+                   onerror="this.src='https://via.placeholder.com/600x600/000000/FFD700?text=FAIRY'"/>
+              <div class="sleepMask" id="sleepMask">休息中…</div>
+            </div>
+
+            <div class="kpiGrid">
+              <div class="kpi">
+                <div class="t">姿態</div>
+                <div class="v" id="stance">REST</div>
+              </div>
+              <div class="kpi">
+                <div class="t">曲速 Warp</div>
+                <div class="v cyan" id="warpVal">10x</div>
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="small">方向盤（0–360°）</div>
+            <input id="degRange" type="range" min="0" max="360" value="120" />
+
+            <div class="small" style="margin-top:12px;">曲速引擎（1–150）</div>
+            <input id="warpRange" type="range" min="1" max="150" value="10" />
+
+            <div class="sep"></div>
+
+            <div class="small">玩家留言（許願口令 / 客服備註）</div>
+            <textarea id="wish" placeholder="例：我願用 1 K G E N 觸發廣寒宮…"></textarea>
+
+            <div class="row" style="margin-top:12px;">
+              <button class="btn gold" id="btnConnect">連線錢包</button>
+              <button class="btn gold" id="btnTrigger">呼叫錢包｜轉 1 K G E N 觸發</button>
+              <button class="btn" id="btnClear">清空狀態</button>
+            </div>
+
+            <div class="log" id="log">系統啟動中…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：拍照 -->
+      <section class="card">
+        <div class="cardHead">
+          <div style="font-weight:950">拍照留念</div>
+          <div class="small">本機相機</div>
+        </div>
+        <div class="cardBody">
+          <video id="cam" autoplay playsinline muted></video>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="btnOpenCam">開啟相機</button>
+            <button class="btn" id="btnShot">拍照</button>
+          </div>
+          <canvas id="snap" style="display:none; width:100%; margin-top:10px; border-radius:12px;"></canvas>
+
+          <div class="sep"></div>
+          <div class="small">
+            錢包觸發規則：必須成功轉出 ≥ 1 K G E N 才算有效。<br>
+            未部署 16888 池合約前，請先把合約地址填進程式的 <b>POOL_16888</b>。
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="sticky">
+    <div class="stickyInner">
+      <div>錢包：<b id="walletAddr">未連線</b></div>
+      <div>即時玩家：<b id="playerCount">0</b></div>
+      <div>本機節律：<b id="tick">--:--:--</b></div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   16888｜V1.6.1 旗艦 UI
+   - 單張 fairy.png
+   - 粒子上下流：LONG 上→下(遠→近) / SHORT 下→上(近→遠) / REST 停
+   - 曲速 1~150 控制強弱(速度/數量/光影)
+   - 語音導覽可停
+   - 錢包連線 + 轉 1 K G E N 觸發（需填 16888 池合約地址）
+========================= */
+
+const $ = (id) => document.getElementById(id);
+
+/* ====== 重要常數（你已部署的 Token）====== */
+const KGEN_TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+
+/* ★★ 這裡要填：16888 池(合約)地址 ★★
+   你部署 16888 MoonTrust 合約後，把地址貼到這裡
+*/
+const POOL_16888 = ""; // 例："0x1234....";
+
+/* ====== ERC20 ABI (最小可用：transfer/decimals/balanceOf) ====== */
+const ERC20_ABI = [
+  "function transfer(address to, uint256 value) returns (bool)",
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address owner) view returns (uint256)"
+];
+
+/* ====== UI 狀態 ====== */
+let STATE = {
+  deg: 120,
+  warp: 10,
+  players: 0,
+  stance: "REST",
+  wallet: null,
+  provider: null,
+  signer: null,
+  voiceOn: false
+};
+
+/* ====== Toast / Log ====== */
+function toast(m){
+  const t=$("toast");
+  t.textContent=m;
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none", 2200);
+}
+function log(m){
+  const l=$("log");
+  l.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}<br>` + l.innerHTML;
+}
+
+/* ====== 姿態判斷（你定的區間）====== */
+function calcStance(deg){
+  const d = Number(deg);
+  // 350-10 REST, 10-170 LONG, 170-190 REST, 190-350 SHORT
+  if((d>=10 && d<=170)) return "LONG";
+  if((d>=190 && d<=350)) return "SHORT";
+  return "REST";
+}
+
+/* ====== 粒子引擎：上下流 + 近遠感 ====== */
+const FX = (function(){
+  const canvas = $("fx");
+  const ctx = canvas.getContext("2d");
+  let W=0, H=0;
+  let mode="REST";
+  let warp=10;
+  let particles=[];
+  let last=performance.now();
+
+  function resize(){
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function spawn(){
+    if(mode==="REST") return;
+
+    const intensity = warp / 150; // 0~1
+    const n = Math.floor(2 + intensity*10); // 數量
+
+    for(let i=0;i<n;i++){
+      const x = Math.random()*W;
+      const isLong = mode==="LONG";
+
+      // LONG：上→下（遠→近）= 起始小、越往下越大
+      // SHORT：下→上（近→遠）= 起始大、越往上越小
+      const y0 = isLong ? -20 : (H+20);
+      const speed = (2 + intensity*14) * (isLong ? 1 : -1);
+
+      particles.push({
+        x,
+        y: y0,
+        vy: speed,
+        drift: (Math.random()-0.5) * (0.6 + intensity*1.6),
+        life: 1,
+        baseR: isLong ? (0.8 + Math.random()*1.2) : (2.2 + Math.random()*1.8),
+        color: isLong ? "255,215,120" : "120,255,220",
+        isLong
+      });
+    }
+  }
+
+  function draw(p){
+    // 近遠感：依 y 位置做半徑變化
+    // LONG：越往下越近 => 半徑變大
+    // SHORT：越往上越遠 => 半徑變小
+    let t;
+    if(p.isLong){
+      t = Math.min(1, Math.max(0, p.y / H));   // 0(上) -> 1(下)
+    }else{
+      t = Math.min(1, Math.max(0, 1 - (p.y / H))); // 1(下) -> 0(上)
+    }
+
+    const intensity = warp/150;
+    const r = p.baseR + t*(2.2 + intensity*3.8);  // 半徑
+    const a = p.life * (0.20 + intensity*0.55);   // 透明度
+
+    // 光晕
+    ctx.fillStyle = `rgba(${p.color},${a})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+    ctx.fill();
+
+    // 小亮点
+    ctx.fillStyle = `rgba(${p.color},${Math.min(1,a+0.15)})`;
+    ctx.beginPath();
+    ctx.arc(p.x+0.4, p.y-0.2, Math.max(0.8, r*0.45), 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function loop(now){
+    const dt = Math.min(40, now-last);
+    last = now;
+
+    ctx.clearRect(0,0,W,H);
+
+    spawn();
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.y += p.vy * (dt/16.7);
+      p.x += p.drift * (dt/16.7);
+
+      // life 衰減：曲速越高衰減越慢（更長尾）
+      const intensity = warp/150;
+      p.life -= (0.010 - intensity*0.004);
+
+      // 邊界移除
+      const out = (p.isLong && p.y>H+30) || (!p.isLong && p.y<-30) || p.life<=0;
+      if(out){ particles.splice(i,1); continue; }
+
+      draw(p);
+    }
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  return {
+    set(m,w){
+      mode=m;
+      warp=Number(w);
+    },
+    clear(){
+      particles.length=0;
+    }
+  };
+})();
+
+/* ====== 單張圖「角度感」：用 transform + 光影 ====== */
+function updateVisual(){
+  const d = Number(STATE.deg);
+  const w = Number(STATE.warp);
+  const s = calcStance(d);
+  STATE.stance = s;
+
+  $("stance").textContent = s;
+  $("warpVal").textContent = `${w}x`;
+  $("sleepMask").className = (s==="REST") ? "sleepMask on" : "sleepMask";
+
+  const img = $("fairyImg");
+  const glow = w/150;
+
+  // 單張圖的「轉向感」：小角度旋轉 + scale
+  img.style.transform = `scale(${1 + (w/420)}) rotate(${(d-120)*0.10}deg)`;
+
+  // 光影：LONG/SHORT 強化，REST 降亮 + 模糊
+  if(s==="REST"){
+    img.style.filter = "brightness(0.62) contrast(0.98) blur(1.6px)";
+  }else if(s==="LONG"){
+    img.style.filter = `saturate(${1.15+glow}) brightness(${1.05+glow*0.65}) contrast(1.10)`;
+  }else{
+    img.style.filter = `saturate(${1.08+glow}) brightness(${1.00+glow*0.55}) contrast(1.12) hue-rotate(6deg)`;
+  }
+
+  // 粒子模式
+  FX.set(s, w);
+}
+
+/* ====== 錢包連線 ====== */
+async function connectWallet(){
+  try{
+    if(!window.ethereum){
+      toast("未偵測到錢包（請安裝/開啟 MetaMask）");
+      log("Wallet connect error: window.ethereum missing");
+      return;
+    }
+    STATE.provider = new ethers.providers.Web3Provider(window.ethereum);
+    await STATE.provider.send("eth_requestAccounts", []);
+    STATE.signer = STATE.provider.getSigner();
+    const addr = await STATE.signer.getAddress();
+    STATE.wallet = addr;
+    $("walletAddr").textContent = addr.slice(0,6)+"..."+addr.slice(-4);
+    toast("錢包已連線");
+    log("Wallet connected: " + addr);
+  }catch(e){
+    toast("錢包連線失敗");
+    log("Wallet connect error: " + (e?.message || e));
+  }
+}
+
+/* ====== 轉 1 K G E N 觸發（必須成功 tx） ====== */
+async function triggerWith1KGEN(){
+  try{
+    if(!STATE.signer){
+      toast("請先連線錢包");
+      return;
+    }
+    if(!POOL_16888 || POOL_16888.length !== 42){
+      toast("尚未設定 16888 池合約地址（POOL_16888）");
+      log("Blocked: POOL_16888 not set");
+      return;
+    }
+
+    const token = new ethers.Contract(KGEN_TOKEN, ERC20_ABI, STATE.signer);
+    const dec = await token.decimals();
+
+    const amount = ethers.utils.parseUnits("1", dec); // 1 KGEN
+    const bal = await token.balanceOf(STATE.wallet);
+    if(bal.lt(amount)){
+      toast("K G E N 餘額不足（至少要 1）");
+      log("Balance insufficient");
+      return;
+    }
+
+    toast("發送交易中…");
+    log("Trigger: transfer 1 KGEN -> " + POOL_16888);
+
+    const tx = await token.transfer(POOL_16888, amount);
+    log("TX sent: " + tx.hash);
+
+    const receipt = await tx.wait();
+    if(receipt && receipt.status === 1){
+      STATE.players++;
+      $("playerCount").textContent = STATE.players;
+      toast("觸發成功：已轉 1 K G E N");
+      log("Trigger success (confirmed).");
+
+      // 成功後短暫提升曲速視覺
+      const oldWarp = STATE.warp;
+      STATE.warp = Math.min(150, Number(oldWarp) + 12);
+      $("warpRange").value = STATE.warp;
+      updateVisual();
+      setTimeout(()=>{
+        STATE.warp = oldWarp;
+        $("warpRange").value = oldWarp;
+        updateVisual();
+      }, 1200);
+    }else{
+      toast("交易失敗或被拒絕");
+      log("Trigger failed: receipt.status != 1");
+    }
+  }catch(e){
+    const msg = (e?.data?.message || e?.message || String(e));
+    if(msg.toLowerCase().includes("user denied") || msg.toLowerCase().includes("rejected")){
+      toast("你取消了交易");
+    }else{
+      toast("交易失敗");
+    }
+    log("Trigger error: " + msg);
+  }
+}
+
+/* ====== 語音導覽（可停） ====== */
+function speak(text){
+  try{
+    if(!("speechSynthesis" in window)){
+      toast("此瀏覽器不支援語音");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    log("TTS error: " + (e?.message||e));
+  }
+}
+function startVoiceGuide(){
+  STATE.voiceOn = true;
+  $("btnVoice").classList.add("on");
+  const s = calcStance(STATE.deg);
+  const w = STATE.warp;
+  const guide =
+`這裡是廣寒宮，一六八八八，七仙女飛碟駕駛艙。
+方向盤零到三百六十度。
+十到一百七十度是多單航向。
+一百九十到三百五十度是空單航向。
+其餘角度是休息，粒子停止。
+曲速一到一百五十，曲速越高，能量越強。
+要觸發，必須連線錢包並轉出一枚K G E N到一六八八八池合約地址。
+現在姿態是${s}，曲速是${w}倍。`;
+  speak(guide);
+  log("Voice guide started.");
+}
+function stopVoice(){
+  try{
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }catch(_){}
+  STATE.voiceOn = false;
+  $("btnVoice").classList.remove("on");
+  toast("已停止語音");
+  log("Voice stopped.");
+}
+
+/* ====== 相機 ====== */
+async function openCam(){
+  try{
+    const s = await navigator.mediaDevices.getUserMedia({video:true});
+    $("cam").srcObject = s;
+    toast("相機已開啟");
+    log("Camera opened.");
+  }catch(e){
+    toast("相機開啟失敗");
+    log("Camera error: " + (e?.message||e));
+  }
+}
+function takeShot(){
+  const c = $("snap"); const v = $("cam");
+  if(!v.srcObject){ toast("請先開啟相機"); return; }
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext("2d").drawImage(v, 0, 0);
+  c.style.display = "block";
+  toast("拍照成功");
+  log("Snapshot taken.");
+}
+
+/* ====== 清空狀態 ====== */
+function clearState(){
+  STATE.players = 0;
+  $("playerCount").textContent = "0";
+  $("wish").value = "";
+  FX.clear();
+  toast("狀態已清空");
+  log("State cleared");
+}
+
+/* ====== 綁定事件 ====== */
+$("degRange").addEventListener("input", (e)=>{ STATE.deg = e.target.value; updateVisual(); });
+$("warpRange").addEventListener("input", (e)=>{ STATE.warp = e.target.value; updateVisual(); });
+
+$("btnConnect").addEventListener("click", connectWallet);
+$("btnTrigger").addEventListener("click", triggerWith1KGEN);
+$("btnClear").addEventListener("click", clearState);
+
+$("btnVoice").addEventListener("click", startVoiceGuide);
+$("btnStopVoice").addEventListener("click", stopVoice);
+
+$("btnOpenCam").addEventListener("click", openCam);
+$("btnShot").addEventListener("click", takeShot);
+
+/* ====== 時鐘 ====== */
+setInterval(()=> {
+  $("clock").textContent = new Date().toLocaleTimeString();
+  $("tick").textContent  = new Date().toLocaleTimeString();
+}, 1000);
+
+/* ====== 首次啟動 ====== */
+updateVisual();
+log("廣寒宮 V1.6.1 就緒。");
+log("提示：部署 16888 池合約後，請把地址填入 POOL_16888。");
+</script>
+</body>
+</html>
