@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜仙女飛碟駕駛艙（Cockpit V1.7.2）</title>
+  <title>廣寒宮 16888｜仙女飛碟駕駛艙（Cockpit V1.9）</title>
 
   <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾 /assets 皆可。 -->
   <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
@@ -330,7 +330,7 @@
           <button class="pill" id="btnSpeak">🔊 語音導覽</button>
           <button class="pill" id="btnStopVoice">🔇 停止</button>
 
-    <div class="pill">版本：<b>16888 V1.8</b></div>
+    <div class="pill">版本：<b>16888 V1.9</b></div>
   </div>
 
   <div class="wrap">
@@ -338,7 +338,7 @@
       <div class="brand">
         <div class="h">廣寒宮 16888｜七仙女飛碟駕駛艙</div>
         <div class="s">
-          角度區間：<b>350–10 休息</b>｜<b>10–170 多</b>｜<b>170–190 休息</b>｜<b>190–350 空</b><br/>
+          角度區間：<b>350–10 休息</b>｜<b>10–170 多</b>｜<b>170–190 休息</b>｜<b><span id="rangeHint">—</span></b><br/>
           曲速：<b>1–150</b>（1 = 光速一倍，150 = 曲速一百五十倍）｜即時玩家觸發：有人玩就有節律。
         </div>
       </div>
@@ -353,7 +353,7 @@
       <section class="card">
         <div class="cardHead">
           <div>
-            <div class="t">飛碟駕駛艙（V1.5 特效）</div>
+            <div class="t">飛碟駕駛艙（V1.9 特效）</div>
             <div class="sub">多：金光粒子流｜空：星塵倒流｜休息：呼吸 + 睡眠罩</div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -788,7 +788,7 @@ const FX = (function(){
   function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
 
   function spawn(){
-    const nBase = (mode==="REST"?2:6) + Math.floor(warp/10); // warp 1..150 => density/brightness
+    const nBase = (mode==="SHORT"?0:((mode==="REST"?2:6) + Math.floor(warp/10))); // SHORT: no particles; warp boosts LONG/REST
     for(let i=0;i<nBase;i++){
       const p={};
       p.x = rnd(0,W);
@@ -809,9 +809,9 @@ const FX = (function(){
         p.z  = rnd(0.98, 1.15);
         p.dz = -rnd(0.25, 0.75);
       }else{
-        // 休息：慢飄
+        // 休息：粒子停止（睡覺）
         p.y  = rnd(0,H);
-        p.vy = rnd(-18,18);
+        p.vy = 0;
         p.z  = rnd(0.25,0.55);
         p.dz = rnd(-0.06,0.06);
       }
@@ -930,6 +930,37 @@ $("btnDownload").addEventListener("click", ()=>{
   try{ downloadSnap(); }catch(e){ toast(e.message||String(e)); log("Download error: "+(e.message||e)); }
 });
 
+
+/* ===== Voice Controls ===== */
+function updateVoiceUI(){
+  const stopped = !CFG.voice.enabled;
+  const btnStop = $("btnStopVoice");
+  const btnGuide = $("btnVoiceGuide");
+  if(btnStop){
+    btnStop.className = "pill" + (stopped ? "" : " active");
+    btnStop.innerHTML = stopped ? "🔇 已靜音" : "🛑 停止";
+  }
+  if(btnGuide){
+    btnGuide.className = "pill" + (stopped ? "" : " active");
+  }
+}
+
+function stopVoice(){
+  try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
+}
+
+$("btnVoiceGuide").addEventListener("click", ()=>{
+  CFG.voice.enabled = true;
+  updateVoiceUI();
+  speak("語音導覽：一，連接錢包。二，調整方向盤與曲速。三，按即時觸發開始節律。多在十到一七零度；空在一九零到三五零度；休息在一七零到一九零，以及三五零到十度。");
+});
+
+$("btnStopVoice").addEventListener("click", ()=>{
+  CFG.voice.enabled = !CFG.voice.enabled;
+  stopVoice();
+  updateVoiceUI();
+  toast(CFG.voice.enabled ? "語音已開啟" : "語音已停止");
+});
 /* ===== Boot ===== */
 (function boot(){
   $("players").textContent = "0";
@@ -944,8 +975,8 @@ $("btnDownload").addEventListener("click", ()=>{
     speak("廣寒宮一六八八八。七仙女飛碟駕駛艙已啟動。若尚未有錢包，請先連接錢包。按即時觸發開始節律。");
   }, 650);
 
-  log("Boot OK: 16888 V1.8");
-  toast("16888 V1.8 已啟動");
+  log("Boot OK: 16888 V1.9");
+  toast("16888 V1.9 已啟動");
 })();
 </script>
 
