@@ -6,7 +6,7 @@
   <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.5（即時玩家觸發）</title>
 
   <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾 /assets 皆可。 -->
-  <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
+  <script src="https://klineodyssey.github.io/kline-odyssey/assets/ethers-5.7.2.umd.min.js"></script>
 
   <style>
     :root{
@@ -61,6 +61,7 @@
     .pill b{font-family:var(--mono); font-weight:900}
     .pill.gold{ border-color: rgba(255,215,120,.32); }
     .pill.cyan{ border-color: rgba(120,255,220,.30); }
+    .pill.warn{ border-color: rgba(255,210,120,.30); }
 
     .wrap{ max-width:1100px; margin:0 auto; padding:16px 14px calc(120px + var(--safe-bottom)); }
     header{
@@ -322,7 +323,8 @@
 <body>
   <div class="topRight">
     <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
-    <a class="pill cyan" href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html" rel="noreferrer">🗺️ 宇宙入口</a>
+    <a class="pill cyan" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" rel="noreferrer">🗺️ 宇宙入口</a>
+    <div class="pill warn" id="btnHardRefresh">🔄 強制更新</div>
     <div class="pill">版本：<b>16888 V1.5</b></div>
   </div>
 
@@ -361,7 +363,7 @@
           <div class="cockpitGrid">
             <div>
               <div class="fairyWrap" id="fairyWrap">
-                <img id="fairy" src="./assets/fairy.png" alt="fairy" />
+                <img id="fairy" src="https://klineodyssey.github.io/kline-odyssey/assets/fairy.png" alt="fairy" />
                 <div class="sleepMask" id="sleepMask">
                   <div class="sleepText">
                     <div class="z">Z Z Z</div>
@@ -525,75 +527,6 @@ const CFG = {
   }
 };
 
-
-// ===== On-chain Ignite (new) =====
-// Requirement: "即時觸發" 必須鏈上轉出 >= 1 KGEN，才算有效觸發
-const IGNITE = {
-  chainId: 56, // BSC Mainnet
-  token: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", // KGEN Token
-  to: "0xfc522243e988a837700CaD600D6f030f5932681F",    // 18888 DeityBank (receiver)
-  minKgen: "1" // >= 1 KGEN
-};
-
-// Minimal ERC20 ABI
-const ERC20_ABI = [
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address to, uint256 value) returns (bool)"
-];
-
-let __kgenDecimals = null;
-
-async function getKgenDecimals(provider){
-  if(__kgenDecimals !== null) return __kgenDecimals;
-  const token = new ethers.Contract(IGNITE.token, ERC20_ABI, provider);
-  __kgenDecimals = await token.decimals();
-  return __kgenDecimals;
-}
-
-async function igniteByTransfer(){
-  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const net = await provider.getNetwork();
-  if(Number(net.chainId) !== Number(IGNITE.chainId)){
-    throw new Error("請切換到 BSC 主網（chainId 56）再點火");
-  }
-  const signer = provider.getSigner();
-  const from = await signer.getAddress();
-
-  const dec = await getKgenDecimals(provider);
-  const token = new ethers.Contract(IGNITE.token, ERC20_ABI, signer);
-
-  const amt = ethers.utils.parseUnits(String(IGNITE.minKgen), dec);
-
-  const bal = await token.balanceOf(from);
-  if(bal.lt(amt)){
-    throw new Error(`KGEN 餘額不足（需要 >= ${IGNITE.minKgen} KGEN）`);
-  }
-
-  log(`鏈上點火：準備轉出 ${IGNITE.minKgen} KGEN → ${IGNITE.to}`);
-  toast("鏈上點火中…（送出交易）");
-
-  const tx = await token.transfer(IGNITE.to, amt);
-  log("TX sent: " + tx.hash);
-  toast("交易已送出，等待確認…");
-
-  // wait 1 confirmation (best effort)
-  try{
-    await tx.wait(1);
-    log("TX confirmed ✅");
-    toast("點火成功 ✅");
-  }catch(e){
-    // some wallets/providers may not support wait; still allow trigger if tx hash exists
-    log("TX wait skipped/failed: " + (e?.message || e));
-    toast("已送出點火交易");
-  }
-
-  return tx.hash;
-}
-
-
-
 const $ = (id)=>document.getElementById(id);
 const logEl = $("log");
 const toastEl = $("toast");
@@ -615,6 +548,28 @@ function toast(msg){
   toastEl.style.display = "block";
   clearTimeout(window.__t);
   window.__t = setTimeout(()=>toastEl.style.display="none", 2400);
+}
+
+/* ===== 強制更新（清 cache + unregister SW）===== */
+async function hardRefresh(){
+  try{
+    if("serviceWorker" in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs){ try{ await r.unregister(); }catch(e){} }
+    }
+    if("caches" in window){
+      const keys = await caches.keys();
+      for(const k of keys){ try{ await caches.delete(k); }catch(e){} }
+    }
+    toast("已清除快取，重新載入中…");
+    log("Hard refresh: caches cleared + SW unregistered");
+    const u = new URL(location.href);
+    u.searchParams.set("v", String(Date.now()));
+    location.replace(u.toString());
+  }catch(e){
+    toast("強制更新失敗：" + (e.message||String(e)));
+    log("Hard refresh error: " + (e.message||e));
+  }
 }
 
 function inRange(angle, a, b){
@@ -985,18 +940,10 @@ $("btnConnect").addEventListener("click", async ()=>{
   try{ await connectWallet(); }catch(e){ toast(e.message || String(e)); log("Wallet connect error: " + (e.message||e)); }
 });
 
-$("btnTrigger").addEventListener("click", async ()=>{
-  try{
-    if(!STATE.wallet){
-      await connectWallet();
-    }
-    await igniteByTransfer();
-    playerTrigger();
-  }catch(e){
-    toast(e.message || String(e));
-    log("Ignite/Trigger error: " + (e.message || e));
-  }
+$("btnTrigger").addEventListener("click", ()=>{
+  playerTrigger();
 });
+
 $("btnSpeak").addEventListener("click", ()=>{
   const msg = "廣寒宮一六八八八。方向盤十到一七零為多。一九零到三五零為空。三五零到一零與一七零到一九零為休息。曲速一到一五零。按即時觸發開始節律。";
   speak(msg);
@@ -1022,6 +969,10 @@ $("btnDownload").addEventListener("click", ()=>{
   try{ downloadSnap(); }catch(e){ toast(e.message||String(e)); log("Download error: "+(e.message||e)); }
 });
 
+$("btnHardRefresh").addEventListener("click", ()=>{
+  hardRefresh();
+});
+
 /* ===== Boot ===== */
 (function boot(){
   $("players").textContent = "0";
@@ -1037,7 +988,6 @@ $("btnDownload").addEventListener("click", ()=>{
   }, 650);
 
   log("Boot OK: 16888 V1.5");
-  log("新規則：即時觸發需鏈上轉出 >= 1 KGEN（點火才有效）");
   toast("16888 V1.5 已啟動");
 })();
 </script>
