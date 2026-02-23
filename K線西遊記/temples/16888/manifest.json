@@ -1,0 +1,16 @@
+{
+  "name": "廣寒宮 16888 駕駛艙",
+  "short_name": "廣寒宮",
+  "description": "七仙女飛碟駕駛艙 - KLINE Odyssey 宇宙入口",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#06070b",
+  "theme_color": "#ffd778",
+  "icons": [
+    {
+      "src": "https://klineodyssey.github.io/kline-odyssey/assets/fairy.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
