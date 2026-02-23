@@ -6,10 +6,11 @@
   <title>廣寒宮 16888｜七仙女飛碟駕駛艙（Cockpit V1.10）</title>
 
   <!-- Prefer shared ethers in /K線西遊記/assets/ -->
-  <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
+  
 
   <style>
     :root{
+      --sprite-url: url('fairy_sprite_36.png');
       --bg:#05060a;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.10);
@@ -144,7 +145,7 @@
       background-image: var(--sprite-url);
       background-repeat:no-repeat;
       background-size: 600% 600%; /* 6x6 */
-      background-position: 0% 0%;
+      background-position: var(--sprite-pos, 0% 0%);
       transform: translateZ(0);
       filter: saturate(1.02) contrast(1.02);
     }
@@ -352,427 +353,299 @@
 
   </div>
 
+
+
+
+
 <script>
-/* ============================
-   16888 Cockpit V1.10
-   Fixes requested:
-   - Voice button + mute toggle actually controls speech
-   - LONG and SHORT both have particles:
-     LONG: top->bottom (far->near)
-     SHORT: bottom->top (near->far)
-   - Warp (1..150) controls particle speed/intensity + glow
-   - Rest zones freeze particles
-   - 36-frame sprite (6x6) driven by angle (0..360)
-   ============================ */
+/* KLINE 16888 Cockpit V1.11 — Sprite36 + Particle Logic + Voice (mobile-safe) */
+const VERSION="16888 V1.12";
 
-const UI = {
-  angle: document.getElementById("angle"),
-  warp: document.getElementById("warp"),
-  angleShow: document.getElementById("angleShow"),
-  warpShow: document.getElementById("warpShow"),
-  angleText: document.getElementById("angleText"),
-  warpText: document.getElementById("warpText"),
-  stateText: document.getElementById("stateText"),
-  circle: document.getElementById("circle"),
-  fx: document.getElementById("fx"),
-  sprite: document.getElementById("sprite"),
-  playersNow: document.getElementById("playersNow"),
-  clock: document.getElementById("clock"),
-  mass: document.getElementById("mass"),
-  energy: document.getElementById("energy"),
-  memo: document.getElementById("memo"),
-  log: document.getElementById("log"),
-  btnTrigger: document.getElementById("btnTrigger"),
-  btnConnect: document.getElementById("btnConnect"),
-  btnClear: document.getElementById("btnClear"),
-  btnVoice: document.getElementById("btnVoice"),
-  btnMute: document.getElementById("btnMute"),
-  muteText: document.getElementById("muteText"),
-  btnHome: document.getElementById("btnHome"),
-  btnPortal: document.getElementById("btnPortal")
-};
+// Angle zones
+const LONG_RANGE = [10,170];
+const SHORT_RANGE = [190,350];
+const REST_RANGES = [[350,360],[0,10],[170,190]];
 
-const LS_KEY = "KLINE_16888_COCKPIT_V1_10";
-const SPRITE_URL = "url('./assets/sprite36.png')";
+const $ = (id)=>document.getElementById(id);
+function normAngle(a){ a=Number(a); if(!isFinite(a)) a=0; return ((a%360)+360)%360; }
+function inRange(a,lo,hi){ return a>=lo && a<=hi; }
+function getMode(a){
+  a=normAngle(a);
+  if(inRange(a,LONG_RANGE[0],LONG_RANGE[1])) return "LONG";
+  for(const [lo,hi] of REST_RANGES){
+    if(lo<=hi && inRange(a,lo,hi)) return "REST";
+    if(lo>hi && (a>=lo || a<=hi)) return "REST";
+  }
+  if(inRange(a,SHORT_RANGE[0],SHORT_RANGE[1])) return "SHORT";
+  return "REST";
+}
 
-let muted = false;
-let saidOnce = false;
-
-// --- routing buttons
-UI.btnHome.addEventListener("click", ()=> window.open("https://klineodyssey.github.io/kline-odyssey/", "_blank", "noopener"));
-UI.btnPortal.addEventListener("click", ()=> window.open("../../index.html#map", "_blank", "noopener"));
-
-// --- logging
+function nowHHMMSS(){ return new Date().toTimeString().split(" ")[0]; }
 function log(msg){
-  const t = new Date();
-  const hh = String(t.getHours()).padStart(2,"0");
-  const mm = String(t.getMinutes()).padStart(2,"0");
-  const ss = String(t.getSeconds()).padStart(2,"0");
-  UI.log.textContent = `[${hh}:${mm}:${ss}] ${msg}\n` + UI.log.textContent;
+  const box=$("log"); if(!box) return;
+  const div=document.createElement("div");
+  div.textContent=`[${nowHHMMSS()}] ${msg}`;
+  box.prepend(div);
 }
 
-// --- persist
-function loadState(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(e){ return null; }
+// State
+const state = { angle:0, warp:4, mode:"REST", account:"", restFrozen:false };
+
+// --- Sprite36 control (CSS var on #sprite) ---
+function angleToFrame(a){ return Math.floor(normAngle(a)/10) % 36; }
+function setSpriteFrame(frame){
+  const el=$("sprite"); if(!el) return;
+  const cols=6;
+  const x = frame % cols;
+  const y = Math.floor(frame/cols);
+  // background-position in percent for 6x6: 0%,20%,40%,60%,80%,100%
+  const px = (x*20) + "%";
+  const py = (y*20) + "%";
+  el.style.setProperty("--sprite-pos", `${px} ${py}`);
 }
-function saveState(){
-  const s = {
-    angle: Number(UI.angle.value),
-    warp: Number(UI.warp.value),
-    mass: UI.mass.value,
-    memo: UI.memo.value,
-    muted
+
+// --- Particles canvas ---
+const fx=$("fx");
+const ctx=fx?fx.getContext("2d"):null;
+let particles=[];
+let raf=null;
+
+function resizeFx(){
+  if(!fx||!ctx) return;
+  const dpr=window.devicePixelRatio||1;
+  fx.width=Math.floor(fx.clientWidth*dpr);
+  fx.height=Math.floor(fx.clientHeight*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener("resize", ()=>{ resizeFx(); });
+
+function makeP(w,h,mode){
+  const isShort = (mode==="SHORT");
+  // LONG: from top(far) to bottom(near): small->big (遠到近)
+  // SHORT: from bottom(near) to top(far): big->small (近到遠)
+  const y0 = isShort ? (h + 20 + Math.random()*h*0.2) : (-20 - Math.random()*h*0.2);
+  const r0 = isShort ? (1.8 + Math.random()*2.6) : (0.8 + Math.random()*1.6);
+  const vy = isShort ? -(0.6 + Math.random()*2.0) : (0.6 + Math.random()*2.0);
+  const vr = isShort ? -(0.015 + Math.random()*0.045) : (0.01 + Math.random()*0.03);
+  return {
+    x: Math.random()*w,
+    y: y0,
+    r: r0,
+    vy: vy,
+    vr: vr,
+    a: 0.16 + Math.random()*0.32
   };
-  localStorage.setItem(LS_KEY, JSON.stringify(s));
+}
+function ensureCount(cnt){
+  const w=fx.clientWidth, h=fx.clientHeight;
+  while(particles.length<cnt) particles.push(makeP(w,h,state.mode));
+  if(particles.length>cnt) particles.length=cnt;
 }
 
-// --- state mapping
-function normAngle(a){
-  let x = a % 360;
-  if(x < 0) x += 360;
-  return x;
-}
-function getMode(angle){
-  const a = normAngle(angle);
-  // rest 350-360 or 0-10
-  if(a >= 350 || a < 10) return "REST";
-  if(a >= 170 && a < 190) return "REST";
-  if(a >= 10 && a < 170) return "LONG";
-  return "SHORT"; // 190-350
-}
-function modeLabel(mode){
-  if(mode==="LONG") return "多｜仙女面朝前（由遠到近）";
-  if(mode==="SHORT") return "空｜仙女轉回駕駛座（回頭飛）";
-  return "休息｜呼吸 + 睡眠罩";
-}
+function draw(){
+  if(!fx||!ctx) return;
+  const w=fx.clientWidth, h=fx.clientHeight;
 
-// --- 36-frame sprite selection (6x6)
-function spriteFrameFromAngle(angle){
-  // 36 frames around 360 -> 10 degrees per frame
-  const a = normAngle(angle);
-  const idx = Math.floor((a / 360) * 36) % 36;
-  const row = Math.floor(idx / 6);
-  const col = idx % 6;
-  const x = (col / 5) * 100; // 0..100
-  const y = (row / 5) * 100;
-  return {idx, row, col, x, y};
-}
-function applySprite(angle){
-  UI.sprite.style.setProperty("--sprite-url", SPRITE_URL);
-  const f = spriteFrameFromAngle(angle);
-  const el = UI.sprite;
-  // background-position in percent
-  el.style.setProperty("--bx", f.x + "%");
-  el.style.setProperty("--by", f.y + "%");
-  // apply to ::before via inline style hack: set on element and use CSS var
-  el.style.setProperty("--pos", `${f.x}% ${f.y}%`);
-  // update actual pseudo by setting style attribute on element: we use CSS var in stylesheet? easiest: set on element and read in CSS not possible for ::before background-position unless we use var.
-  // We'll set a data-attr and use inline style on a child div instead.
-}
-(function patchSpriteDom(){
-  // replace pseudo approach with a real div so background-position can be set safely
-  UI.sprite.innerHTML = '<div id="spriteImg" style="width:96%;height:96%;border-radius:999px;background-image:'+SPRITE_URL+';background-repeat:no-repeat;background-size:600% 600%;background-position:0% 0%;"></div>';
-})();
-
-function setSpritePos(angle){
-  const f = spriteFrameFromAngle(angle);
-  const img = document.getElementById("spriteImg");
-  if(!img) return;
-  img.style.backgroundPosition = `${f.x}% ${f.y}%`;
-}
-
-// --- FX particles
-const canvas = UI.fx;
-const ctx = canvas.getContext("2d");
-let W=0, H=0, DPR=1;
-let particles = [];
-let lastT = 0;
-
-function resize(){
-  const rect = UI.circle.getBoundingClientRect();
-  DPR = Math.max(1, Math.min(2.2, window.devicePixelRatio || 1));
-  W = Math.max(200, Math.floor(rect.width * DPR));
-  H = Math.max(200, Math.floor(rect.height * DPR));
-  canvas.width = W;
-  canvas.height = H;
-}
-window.addEventListener("resize", resize, {passive:true});
-
-function rand(min,max){ return min + Math.random()*(max-min); }
-
-function desiredParticleCount(warp){
-  // 1..150 -> 40..260
-  return Math.round(40 + (warp-1) * (220/149));
-}
-function speedFactor(warp){
-  // 1..150 -> 0.35..3.4 (visual)
-  return 0.35 + (warp-1) * (3.05/149);
-}
-function glowStrength(warp){
-  // 1..150 -> 0.18..0.85
-  return 0.18 + (warp-1) * (0.67/149);
-}
-
-function spawnParticle(mode){
-  const r = rand(1.5, 4.4) * DPR;
-  const x = rand(r, W-r);
-  let y, vy;
-  if(mode === "LONG"){
-    // from top (far) to bottom (near)
-    y = rand(-H*0.2, H*0.05);
-    vy = rand(10, 28) * DPR; // base velocity downward
-  }else if(mode === "SHORT"){
-    // from bottom (near) to top (far)
-    y = rand(H*0.95, H*1.2);
-    vy = -rand(10, 28) * DPR; // upward
-  }else{
-    y = rand(r, H-r);
-    vy = 0;
+  if(state.mode==="SHORT"){
+    // 空：星塵倒流（由近到遠） bottom->top, big->small
+    state.restFrozen=false;
+    // continue to particle render with reversed params
   }
-  const vx = rand(-6, 6) * DPR;
-  const a = rand(0.18, 0.65);
-  return {x, y, vx, vy, r, a, tw: rand(0, Math.PI*2), tws: rand(0.8, 2.2)};
-}
 
-function ensureParticles(mode, warp){
-  const want = desiredParticleCount(warp);
-  while(particles.length < want) particles.push(spawnParticle(mode));
-  while(particles.length > want) particles.pop();
-  // on mode change, gently re-seed some
-  if(mode==="REST"){
-    // keep as-is; no need
+  if(state.mode==="REST"){
+    // 休息：停止動（保留畫面），但第一次進休息時要留下淡淡遮罩讓使用者確定停住
+    if(!state.restFrozen){
+      ctx.fillStyle="rgba(0,0,0,0.35)";
+      ctx.fillRect(0,0,w,h);
+      state.restFrozen=true;
+    }
+    return;
   }
-}
 
-function step(t){
-  if(!lastT) lastT = t;
-  const dt = Math.min(0.05, (t - lastT) / 1000);
-  lastT = t;
+  // LONG
+  state.restFrozen=false;
+  // trail
+  ctx.fillStyle="rgba(0,0,0,0.18)";
+  ctx.fillRect(0,0,w,h);
 
-  const angle = Number(UI.angle.value);
-  const warp = Number(UI.warp.value);
-  const mode = getMode(angle);
+  const warp=state.warp; // 1..150
+  const sp = 0.35 + (warp/150)*3.8;     // speed multiplier
+  const br = 0.55 + (warp/150)*0.95;    // brightness multiplier
+  const cnt = Math.min(240, 70 + Math.floor(warp*1.1));
 
-  ensureParticles(mode, warp);
+  ensureCount(cnt);
 
-  // glow
-  const glow = glowStrength(warp);
-  canvas.style.opacity = String(0.88 + glow*0.12);
+  for(const p of particles){
+    p.y += p.vy * sp;
+    p.r += p.vr * sp * 0.9;
 
-  ctx.clearRect(0,0,W,H);
-
-  const s = speedFactor(warp);
-  const freeze = (mode === "REST");
-
-  // draw particles
-  for(let p of particles){
-    if(!freeze){
-      p.x += p.vx * s * dt;
-      p.y += p.vy * s * dt;
-    }
-    // wrap & respawn based on mode
-    if(p.x < -20 || p.x > W+20){
-      p.x = rand(0, W);
-    }
-    if(mode === "LONG"){
-      if(p.y > H+30) Object.assign(p, spawnParticle(mode));
-    }else if(mode === "SHORT"){
-      if(p.y < -30) Object.assign(p, spawnParticle(mode));
-    }
-
-    // twinkle
-    p.tw += p.tws * dt;
-    const aa = p.a * (0.72 + 0.28*Math.sin(p.tw));
-
+    const alpha = Math.min(0.98, p.a * br);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    // color: golden for LONG, cool for SHORT, dim for REST
-    if(mode==="LONG"){
-      ctx.fillStyle = `rgba(255, 215, 120, ${aa})`;
-    }else if(mode==="SHORT"){
-      ctx.fillStyle = `rgba(124, 246, 255, ${aa})`;
-    }else{
-      ctx.fillStyle = `rgba(255, 255, 255, ${aa*0.45})`;
-    }
+    ctx.fillStyle=`rgba(255,215,120,${alpha})`;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fill();
+
+    if(p.y - p.r > h+30){
+      Object.assign(p, makeP(w,h));
+    }
   }
-
-  requestAnimationFrame(step);
 }
 
-// --- UI updates
-function updateUI(){
-  const a = Number(UI.angle.value);
-  const w = Number(UI.warp.value);
-  const mode = getMode(a);
-
-  UI.angleShow.textContent = `${a}°`;
-  UI.warpShow.textContent = `${w}×`;
-  UI.angleText.textContent = `${a}°`;
-  UI.warpText.textContent = `${w}×`;
-  UI.stateText.textContent = modeLabel(mode);
-
-  setSpritePos(a);
-
-  // energy (visual)
-  const m = Number(String(UI.mass.value||"").replace(/[^\d.]/g,"")) || 0;
-  const c = w; // visual c
-  const E = m * c * c;
-  UI.energy.textContent = isFinite(E) ? E.toFixed(6) : "—";
-
-  // particles visibility: both LONG & SHORT show; REST shows but frozen (already)
-  saveState();
+function tick(){
+  draw();
+  raf=requestAnimationFrame(tick);
 }
 
-UI.angle.addEventListener("input", updateUI, {passive:true});
-UI.warp.addEventListener("input", updateUI, {passive:true});
-UI.mass.addEventListener("input", updateUI, {passive:true});
-UI.memo.addEventListener("input", saveState, {passive:true});
-
-// --- clock
-function tickClock(){
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2,"0");
-  const mm = String(d.getMinutes()).padStart(2,"0");
-  const ss = String(d.getSeconds()).padStart(2,"0");
-  UI.clock.textContent = `${hh}:${mm}:${ss}`;
+function startFX(){
+  resizeFx();
+  if(!raf) tick();
+  log("FX running");
 }
-setInterval(tickClock, 500);
 
-// --- voice
+// --- Voice ---
+let voiceArmed=false;
+let muted=false;
+
+function cancelVoice(){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+
 function speak(text){
   if(muted) return;
-  if(!("speechSynthesis" in window)) { log("SpeechSynthesis not supported"); return; }
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-TW";
-  u.rate = 1.02;
-  u.pitch = 1.05;
-  u.volume = 1;
+  if(!("speechSynthesis" in window)){ log("SpeechSynthesis not supported"); return; }
+  cancelVoice();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="zh-TW";
+  u.rate=1.0; u.pitch=1.0; u.volume=1.0;
+  u.onerror=(e)=>log("Voice error: "+(e.error||"unknown"));
   window.speechSynthesis.speak(u);
 }
-function guideText(){
-  const a = Number(UI.angle.value);
-  const w = Number(UI.warp.value);
-  const mode = getMode(a);
-  const m = UI.mass.value || "100";
-  const memo = (UI.memo.value||"").trim();
-  const modeS = mode==="LONG" ? "多" : mode==="SHORT" ? "空" : "休息";
-  let t = `廣寒宮一六八八八，七仙女飛碟駕駛艙已啟動。現在模式：${modeS}。方向盤 ${a} 度。曲速 ${w} 倍。質量 ${m} K G E N。`;
-  t += " 玩法：先連接錢包，再輸入質量與許願口令，按即時觸發。";
-  t += " 曲速越高，粒子越強，代表引擎越亮，但休息區會停止粒子。";
-  t += " 多區間是一零到一七零度，空區間是一九零到三五零度；三五零到一零度與一七零到一九零度為休息。";
-  if(!memo) t += " 你可以在留言欄輸入：巧仙，事業運通。我願用一百 K G E N 觸發宇宙。";
-  t += " 若你沒有錢包，請先安裝 MetaMask，選擇 B N B Chain，chain I D 五六。";
-  return t;
+
+function guide(){
+  const a=Math.round(state.angle);
+  const w=state.warp;
+  const m=state.mode;
+
+  let modeLine="";
+  if(m==="LONG") modeLine="現在是多。金光粒子由遠到近，從上往下落。";
+  if(m==="SHORT") modeLine="現在是空。這一段沒有粒子，代表回頭飛行。";
+  if(m==="REST") modeLine="現在休息。粒子停止，先觀望再出手。";
+
+  const msg = `廣寒宮一六八八八駕駛艙。方向盤 ${a} 度，曲速 ${w} 倍。${modeLine}
+第一步，按「連接錢包」。第二步，至少轉一顆 KGEN 才算表態。曲速越高，光影越強。你可以按停止關閉語音，再按語音導覽重播。`;
+  speak(msg);
 }
 
-UI.btnVoice.addEventListener("click", ()=>{
-  speak(guideText());
-  log("Voice guide started.");
-});
+function armVoice(){
+  if(voiceArmed) return;
+  voiceArmed=true;
+  log("Voice armed. (Mobile requires user gesture)");
+}
 
-UI.btnMute.addEventListener("click", ()=>{
-  muted = !muted;
-  UI.muteText.textContent = `靜音：${muted ? "ON" : "OFF"}`;
-  if(muted){
-    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
-    log("Muted. Speech stopped.");
-  }else{
-    log("Unmuted.");
+// arm on first gesture to satisfy mobile autoplay restrictions
+document.addEventListener("pointerdown", armVoice, { once:true });
+
+// --- Wallet connect ---
+async function connectWallet(){
+  if(!window.ethereum){
+    log("Wallet connect error: 未偵測到錢包（請安裝 MetaMask）");
+    return;
   }
-  saveState();
-});
-
-// Auto voice on first user interaction (mobile safe)
-function armAutoVoice(){
-  const handler = ()=>{
-    if(!saidOnce){
-      saidOnce = true;
-      if(!muted) speak(guideText());
-      log("Auto voice fired (first interaction).");
-    }
-    window.removeEventListener("pointerdown", handler);
-    window.removeEventListener("touchstart", handler);
-  };
-  window.addEventListener("pointerdown", handler, {once:true});
-  window.addEventListener("touchstart", handler, {once:true, passive:true});
-}
-armAutoVoice();
-
-// --- player trigger mode (local-only visualization for now)
-let playersNow = 0;
-function bumpPlayers(){
-  playersNow = Math.min(9999, playersNow + 1);
-  UI.playersNow.textContent = String(playersNow);
-}
-UI.btnTrigger.addEventListener("click", ()=>{
-  bumpPlayers();
-  log("Player trigger fired.");
-  // small visual boost: temporarily spike warp glow by nudging CSS filter
-  UI.circle.style.transform = "scale(1.005)";
-  setTimeout(()=> UI.circle.style.transform = "scale(1)", 220);
-  // speak short cue
-  speak("已觸發。請調整方向盤與曲速，進入你的宇宙航線。");
-});
-
-// --- wallet connect (placeholder, no on-chain tx yet)
-UI.btnConnect.addEventListener("click", async ()=>{
   try{
-    if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const addr = await signer.getAddress();
-    log("Wallet connected: " + addr);
-    speak("錢包已連接。你可以開始觸發。");
+    const acc = await window.ethereum.request({ method:"eth_requestAccounts" });
+    state.account = acc && acc[0] ? acc[0] : "";
+    const ws=$("walletStatus");
+    if(ws) ws.textContent = state.account ? ("已連接: "+state.account.slice(0,6)+"…"+state.account.slice(-4)) : "未連接";
+    log("Wallet connected");
   }catch(e){
-    log("Wallet connect error: " + (e.message || String(e)));
-    speak("未偵測到錢包。請先安裝 MetaMask。");
+    log("Wallet connect rejected");
   }
-});
+}
 
-UI.btnClear.addEventListener("click", ()=>{
-  localStorage.removeItem(LS_KEY);
-  playersNow = 0;
-  UI.playersNow.textContent = "0";
-  UI.memo.value = "";
-  UI.mass.value = "100";
-  UI.angle.value = "0";
-  UI.warp.value = "1";
-  muted = false;
-  UI.muteText.textContent = "靜音：OFF";
+// --- UI updates ---
+function updateUI(){
+  const angleText=$("angleText"); if(angleText) angleText.textContent = `${Math.round(state.angle)}°`;
+  const warpText=$("warpText"); if(warpText) warpText.textContent = `${state.warp}×`;
+
+  const modeEl=$("stateText"); if(modeEl) modeEl.textContent = state.mode;
+
+  setSpriteFrame(angleToFrame(state.angle));
+
+  // energy display (visual only)
+  const mInput=$("mass");
+  const mVal = Math.max(1, Number(mInput?mInput.value:100)||100);
+  const e = mVal * (state.warp*state.warp);
+  const eEl=$("energy"); if(eEl) eEl.textContent = e.toFixed(2);
+}
+
+function setAngle(v){
+  state.angle = normAngle(v);
+  state.mode = getMode(state.angle);
+  updateUI();
+}
+function setWarp(v){
+  v = Math.max(1, Math.min(150, Number(v)||1));
+  state.warp = v;
+  updateUI();
+}
+
+function clearAll(){
+  cancelVoice();
+  muted=false;
+  const btnMute=$("btnMute"); if(btnMute) btnMute.classList.remove("muted");
+  state.account="";
+  const ws=$("walletStatus"); if(ws) ws.textContent="未連接";
+  state.restFrozen=false;
+  particles=[];
   log("State cleared");
-  updateUI();
-});
+  setAngle(0);
+  setWarp(4);
+}
 
-// --- init
-(function init(){
-  // set sprite url
-  UI.sprite.style.setProperty("--sprite-url", SPRITE_URL);
+function bind(){
+  const ver=$("ver"); if(ver) ver.textContent = VERSION;
 
-  resize();
-  requestAnimationFrame(step);
+  const angle=$("angle");
+  const warp=$("warp");
+  if(angle) angle.addEventListener("input", e=>setAngle(e.target.value));
+  if(warp) warp.addEventListener("input", e=>setWarp(e.target.value));
 
-  const s = loadState();
-  if(s){
-    if(Number.isFinite(s.angle)) UI.angle.value = String(s.angle);
-    if(Number.isFinite(s.warp)) UI.warp.value = String(s.warp);
-    if(s.mass) UI.mass.value = s.mass;
-    if(s.memo) UI.memo.value = s.memo;
-    if(typeof s.muted === "boolean"){ muted = s.muted; UI.muteText.textContent = `靜音：${muted ? "ON" : "OFF"}`; }
-    log("State restored.");
-  }else{
-    log("Ready.");
-  }
+  const btnVoice=$("btnVoice");
+  const btnMute=$("btnMute");
+  const btnConnect=$("btnConnect");
+  const btnClear=$("btnClear");
+  const btnTrigger=$("btnTrigger");
 
-  tickClock();
-  updateUI();
-})();
+  if(btnVoice) btnVoice.addEventListener("click", ()=>{
+    // ensure armed then speak
+    armVoice();
+    muted=false;
+    if(btnMute) btnMute.classList.remove("muted");
+    guide();
+  });
+
+  if(btnMute) btnMute.addEventListener("click", ()=>{
+    muted = !muted;
+    if(muted){ cancelVoice(); btnMute.classList.add("muted"); log("Voice muted"); }
+    else { btnMute.classList.remove("muted"); log("Voice unmuted"); }
+  });
+
+  if(btnConnect) btnConnect.addEventListener("click", connectWallet);
+  if(btnClear) btnClear.addEventListener("click", clearAll);
+
+  if(btnTrigger) btnTrigger.addEventListener("click", ()=>{
+    log("即時觸發：玩家點火（需錢包轉 1 KGEN 以上才算有效）");
+    // visual kick
+    setWarp(Math.min(150, state.warp + 5));
+  });
+
+  // init
+  setAngle(angle ? angle.value : 0);
+  setWarp(warp ? warp.value : 4);
+  startFX();
+
+  log("Boot OK: LONG 10-170, REST 350-10 & 170-190, SHORT 190-350.");
+}
+
+window.addEventListener("DOMContentLoaded", bind);
 </script>
 
 </body>
