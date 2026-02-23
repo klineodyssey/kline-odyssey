@@ -639,5 +639,39 @@ updateVisual();
 log("廣寒宮 V1.6.1 就緒。");
 log("提示：部署 16888 池合約後，請把地址填入 POOL_16888。");
 </script>
+
+  <script>
+  // Service Worker 註冊
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('./sw.js');
+        console.log('SW registered', reg);
+
+        // 若有新 SW，提示並可強制更新
+        if (reg.waiting) console.log('SW waiting (new version ready)');
+      } catch (e) {
+        console.log('SW register failed', e);
+      }
+    });
+  }
+
+  // 一鍵清快取（除錯用）
+  async function clear16888Cache() {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => k.startsWith('gh-16888-') ? caches.delete(k) : null));
+      if (navigator.serviceWorker?.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR' });
+      }
+      alert('16888 快取已清除，請重新整理頁面');
+    } catch (e) {
+      alert('清除失敗：' + (e?.message || e));
+    }
+  }
+          </script>
+  
+  <button onclick="clear16888Cache()" class="btn">清除快取</button>
+  
 </body>
 </html>
