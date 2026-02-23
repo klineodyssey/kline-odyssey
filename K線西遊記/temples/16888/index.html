@@ -1,339 +1,237 @@
 <!doctype html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.5.1 (垂直流動版)</title>
+
+<html lang="zh-Hant">  
+<head>  
+  <meta charset="utf-8" />  
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />  
+  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.5 (垂直流動版)</title>    <link rel="manifest" href="manifest.json">  
+  <meta name="apple-mobile-web-app-capable" content="yes">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>    <style>  
+    :root{  
+      --bg:#06070b;  
+      --panel: rgba(255,255,255,.06);  
+      --text: rgba(255,255,255,.92);  
+      --muted: rgba(255,255,255,.68);  
+      --line: rgba(255,255,255,.14);  
+      --gold: rgba(255,215,120,.95);  
+      --pink: rgba(255,170,220,.95);  
+      --cyan: rgba(120,255,220,.95);  
+      --shadow: 0 16px 70px rgba(0,0,0,.60);  
+      --r2: 999px;  
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;  
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;  
+      --safe-bottom: env(safe-area-inset-bottom, 0px);  
+      --safe-top: env(safe-area-inset-top, 0px);  
+    }  
+    *{box-sizing:border-box}  
+    body{  
+      margin:0; font-family: var(--sans);  
+      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%), var(--bg);  
+      color: var(--text); min-height:100vh; overflow-x:hidden;  
+    }  
+    .topRight{ position:fixed; right:12px; top:calc(12px + var(--safe-top)); z-index:90; display:flex; gap:10px; }  
+    .pill{  
+      display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--line);  
+      border-radius: var(--r2); background: rgba(0,0,0,.38); backdrop-filter: blur(10px);  
+      font-size:12px; text-decoration:none; font-weight:850; cursor:pointer;  
+    }  
+    .wrap{ max-width:1100px; margin:0 auto; padding:16px 14px calc(120px + var(--safe-bottom)); }  
+    header{ padding-top: 54px; display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }  
+    .brand .h{ font-weight:950; font-size:18px; }  
+    .grid{ margin-top:14px; display:grid; grid-template-columns: 1.15fr .85fr; gap:12px; }  
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }  
+    .card{ border:1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.05); box-shadow: var(--shadow); overflow:hidden; }  
+    .cardHead{ padding:14px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; }  
+    .cockpit{ position:relative; min-height: 520px; background: rgba(0,0,0,0.2); }  
+    canvas#fx{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }  
+    .fairyWrap{  
+      position:relative; width: 260px; height: 260px; margin: 20px auto; border-radius: 50%;  
+      overflow:hidden; border:1px solid rgba(255,215,120,.25); background: rgba(0,0,0,.2);  
+    }  
+    img#fairy{ width:100%; height:100%; object-fit:cover; transition: transform .45s ease; }  
+    .sleepMask{ position:absolute; inset:0; background:rgba(0,0,0,0.5); display:none; place-items:center; }  
+    .sleepMask.on{ display:grid; }  
+    .kpiGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }  
+    .kpi{ border:1px solid rgba(255,255,255,.1); border-radius: 18px; padding:12px; background:rgba(0,0,0,0.2); }  
+    .btn{ padding:10px 16px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; font-weight:bold; }  
+    .btn.gold{ border-color: var(--gold); color: var(--gold); }  
+    input[type="range"]{ width:100%; accent-color: var(--gold); }  
+    textarea{ width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--line); color:#fff; border-radius:12px; padding:10px; }  
+    .log{ font-family:var(--mono); font-size:10px; background:rgba(0,0,0,0.3); padding:10px; height:120px; overflow:auto; margin-top:10px; border-radius:12px; }  
+    video#cam{ width:100%; border-radius:12px; background:#000; }  
+    .toast{ position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:gold; color:#000; padding:8px 20px; border-radius:20px; display:none; z-index:100; font-weight:bold;}  
+    .sticky{ position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.8); padding:15px; backdrop-filter:blur(10px); border-top:1px solid var(--line); }  
+  </style>  </head>  <body>  
+  <div id="toast" class="toast"></div>  
+  <div class="topRight">  
+    <div class="pill gold">廣寒宮 V1.5</div>  
+    <div class="pill" id="clock">00:00:00</div>  
+  </div>    <div class="wrap">  
+    <header>  
+      <div class="brand">  
+        <div class="h">七仙女飛碟駕駛艙</div>  
+        <div style="font-size:12px; color:var(--muted)">多：金雨下落｜空：翠雲上升｜休息：Zzz</div>  
+      </div>  
+    </header>  <div class="grid">  
+  <section class="card">  
+    <div class="cardBody cockpit" id="cockpit">  
+      <canvas id="fx"></canvas>  
+      <div style="position:relative; z-index:10; padding:14px;">  
+        <div class="fairyWrap">  
+          <img id="fairy" src="./assets/fairy.png" onerror="this.src='https://via.placeholder.com/300/000000/FFD700?text=FAIRY'" />  
+          <div class="sleepMask" id="sleepMask">休息中...</div>  
+        </div>  
+          
+        <div class="kpiGrid">  
+          <div class="kpi"><div>姿態</div><div id="stance" style="font-weight:950">REST</div></div>  
+          <div class="kpi"><div>曲速</div><div id="warpVal" style="font-weight:950">10x</div></div>  
+        </div>  
+
+        <div style="margin-top:20px">  
+          <label>方向盤 (0-360°)</label>  
+          <input id="degRange" type="range" min="0" max="360" value="120" />  
+          <label>曲速引擎 (1-150)</label>  
+          <input id="warpRange" type="range" min="1" max="150" value="10" />  
+        </div>  
+
+        <div style="margin-top:15px">  
+          <textarea id="wish" placeholder="輸入許願口令..."></textarea>  
+        </div>  
+
+        <div style="margin-top:15px; display:flex; gap:10px;">  
+          <button class="btn gold" id="btnTrigger">即時觸發</button>  
+          <button class="btn" id="btnConnect">連線錢包</button>  
+        </div>  
+        <div class="log" id="log">系統啟動中...</div>  
+      </div>  
+    </div>  
+  </section>  
+
+  <section class="card">  
+    <div class="cardHead">拍照留念</div>  
+    <div class="cardBody">  
+      <video id="cam" autoplay playsinline muted></video>  
+      <div style="margin-top:10px; display:flex; gap:10px;">  
+        <button class="btn" onclick="openCam()">開啟相機</button>  
+        <button class="btn" onclick="takeShot()">拍照</button>  
+      </div>  
+      <canvas id="snap" style="display:none; width:100%; margin-top:10px; border-radius:12px;"></canvas>  
+    </div>  
+  </section>  
+</div>
+
+  </div>    <div class="sticky">  
+    <div style="display:flex; justify-content:space-between; max-width:1100px; margin:0 auto;">  
+      <span>錢包：<b id="walletAddr">未連線</b></span>  
+      <span>即時玩家：<b id="playerCount">0</b></span>  
+    </div>  
+  </div>  <script>  
+const $ = (id) => document.getElementById(id);  
   
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-
-  <style>
-    :root{
-      --bg:#06070b;
-      --panel: rgba(255,255,255,.06);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-      --line: rgba(255,255,255,.14);
-      --gold: rgba(255,215,120,.95);
-      --pink: rgba(255,170,220,.95);
-      --cyan: rgba(120,255,220,.95);
-      --shadow: 0 16px 70px rgba(0,0,0,.60);
-      --r2: 999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: var(--sans);
-      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%), var(--bg);
-      color: var(--text); min-height:100vh; overflow-x:hidden;
-    }
-    .topRight{ position:fixed; right:12px; top:calc(12px + var(--safe-top)); z-index:90; display:flex; gap:10px; }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--line);
-      border-radius: var(--r2); background: rgba(0,0,0,.38); backdrop-filter: blur(10px);
-      font-size:12px; text-decoration:none; font-weight:850; cursor:pointer;
-    }
-    .wrap{ max-width:1100px; margin:0 auto; padding:16px 14px calc(120px + var(--safe-bottom)); }
-    header{ padding-top: 54px; display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
-    .brand .h{ font-weight:950; font-size:18px; }
-    .grid{ margin-top:14px; display:grid; grid-template-columns: 1.15fr .85fr; gap:12px; }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
-    .card{ border:1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.05); box-shadow: var(--shadow); overflow:hidden; }
-    .cardHead{ padding:14px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; }
-    .cockpit{ position:relative; min-height: 520px; background: rgba(0,0,0,0.2); }
-    canvas#fx{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
-    .fairyWrap{
-      position:relative; width: 260px; height: 260px; margin: 20px auto; border-radius: 50%;
-      overflow:hidden; border:1px solid rgba(255,215,120,.25); background: rgba(0,0,0,.2);
-    }
-    img#fairy{ width:100%; height:100%; object-fit:cover; transition: transform .45s ease; }
-    .sleepMask{ position:absolute; inset:0; background:rgba(0,0,0,0.5); display:none; place-items:center; }
-    .sleepMask.on{ display:grid; }
-    .kpiGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }
-    .kpi{ border:1px solid rgba(255,255,255,.1); border-radius: 18px; padding:12px; background:rgba(0,0,0,0.2); }
-    .btn{ padding:10px 16px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,0.1); color:#fff; cursor:pointer; font-weight:bold; }
-    .btn.gold{ border-color: var(--gold); color: var(--gold); }
-    input[type="range"]{ width:100%; accent-color: var(--gold); }
-    textarea{ width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--line); color:#fff; border-radius:12px; padding:10px; }
-    .log{ font-family:var(--mono); font-size:10px; background:rgba(0,0,0,0.3); padding:10px; height:120px; overflow:auto; margin-top:10px; border-radius:12px; }
-    video#cam{ width:100%; border-radius:12px; background:#000; }
-    .toast{ position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:gold; color:#000; padding:8px 20px; border-radius:20px; display:none; z-index:100; font-weight:bold;}
-    .sticky{ position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.8); padding:15px; backdrop-filter:blur(10px); border-top:1px solid var(--line); }
-  </style>
-</head>
-
-<body>
-  <div id="toast" class="toast"></div>
-  <div class="topRight">
-    <div class="pill gold">廣寒宮 V1.5.1</div>
-    <div class="pill" id="clock">00:00:00</div>
-  </div>
-
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="h">七仙女飛碟駕駛艙</div>
-        <div style="font-size:12px; color:var(--muted)">多：金雨下落｜空：翠雲上升｜休息：Zzz</div>
-      </div>
-    </header>
-
-    <div class="grid">
-      <section class="card">
-        <div class="cardBody cockpit" id="cockpit">
-          <canvas id="fx"></canvas>
-          <div style="position:relative; z-index:10; padding:14px;">
-            <div class="fairyWrap">
-              <img id="fairy" src="./assets/fairy.png" onerror="this.src='https://via.placeholder.com/300/000000/FFD700?text=FAIRY'" />
-              <div class="sleepMask" id="sleepMask">休息中...</div>
-            </div>
-            
-            <div class="kpiGrid">
-              <div class="kpi"><div>姿態</div><div id="stance" style="font-weight:950">REST</div></div>
-              <div class="kpi"><div>曲速</div><div id="warpVal" style="font-weight:950">10x</div></div>
-            </div>
-
-            <div style="margin-top:20px">
-              <label>方向盤 (0-360°)</label>
-              <input id="degRange" type="range" min="0" max="360" value="120" />
-              <label>曲速引擎 (1-150)</label>
-              <input id="warpRange" type="range" min="1" max="150" value="10" />
-            </div>
-
-            <div style="margin-top:15px">
-              <textarea id="wish" placeholder="輸入許願口令..."></textarea>
-            </div>
-
-            <div style="margin-top:15px; display:flex; gap:10px;">
-              <button class="btn gold" id="btnTrigger">即時觸發</button>
-              <button class="btn" id="btnConnect">連線錢包</button>
-            </div>
-            <div class="log" id="log">系統啟動中...</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="cardHead">拍照留念</div>
-        <div class="cardBody">
-          <video id="cam" autoplay playsinline muted></video>
-          <div style="margin-top:10px; display:flex; gap:10px;">
-            <button class="btn" onclick="openCam()">開啟相機</button>
-            <button class="btn" onclick="takeShot()">拍照</button>
-          </div>
-          <canvas id="snap" style="display:none; width:100%; margin-top:10px; border-radius:12px;"></canvas>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <div class="sticky">
-    <div style="display:flex; justify-content:space-between; max-width:1100px; margin:0 auto;">
-      <span>錢包：<b id="walletAddr">未連線</b></span>
-      <span>即時玩家：<b id="playerCount">0</b></span>
-    </div>
-  </div>
-
-<script>
-const $ = (id) => document.getElementById(id);
-
-// --- 邏輯與狀態 ---
-let STATE = { deg: 120, warp: 10, players: 0 };
-
-function toast(m){ 
-  const t=$("toast"); t.textContent=m; t.style.display="block"; 
-  setTimeout(()=>t.style.display="none", 2000); 
-}
-
-function log(m){ 
-  const l=$("log"); l.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}<br>` + l.innerHTML; 
-}
-
-// --- 粒子引擎 (垂直單向版｜去除左右漂移) ---
-const FX = (function(){
-  const canvas = $("fx");
-  const ctx = canvas.getContext("2d");
-  let W, H, mode="REST", warp=10, particles = [];
-
-  function resize(){
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  function rand(a,b){ return a + Math.random()*(b-a); }
-
-  // 生成：REST 不生成；LONG 從上方進；SHORT 從下方進
-  function spawn(){
-    if(mode === "REST") return;
-
-    const t = warp / 150;                  // 0..1
-    const count = Math.floor(3 + t*10);    // 曲速越高，密度越高
-
-    for(let i=0; i<count; i++){
-      const x = Math.random() * W;
-      let y, vy, r, rGrow, alpha, alphaFade, color;
-
-      if(mode === "LONG"){
-        // 上→下（由遠到近）：越往下越大、越亮
-        y = rand(-40, -10);
-        vy = 1.2 + t * 10;
-        r = 0.8;
-        rGrow = 0.02 + t * 0.08;           // 越快越像靠近
-        alpha = 0.15 + t * 0.20;
-        alphaFade = 0.0025;
-        color = "255,215,120";
-      }else{
-        // 下→上（由近到遠）：越往上越小、越淡
-        y = rand(H+10, H+40);
-        vy = -(1.2 + t * 10);
-        r = 3.2;
-        rGrow = -(0.015 + t * 0.06);       // 往上逐漸變小
-        alpha = 0.22 + t * 0.18;
-        alphaFade = 0.0030;
-        color = "120,255,220";
-      }
-
-      particles.push({
-        x,
-        y,
-        vy,
-        r,
-        rGrow,
-        a: alpha,
-        aFade: alphaFade,
-        color
-      });
-    }
-  }
-
-  function loop(){
-    ctx.clearRect(0,0,W,H);
-
-    // REST：完全停止（不生成、不移動）
-    if(mode === "REST"){
-      particles.length = 0;
-      requestAnimationFrame(loop);
-      return;
-    }
-
-    spawn();
-
-    for(let i=particles.length-1; i>=0; i--){
-      const p = particles[i];
-
-      // 垂直單向（不做 x 位移）
-      p.y += p.vy;
-
-      // 由遠到近 / 由近到遠（半徑與透明度變化）
-      p.r += p.rGrow;
-      p.a -= p.aFade;
-
-      // 畫
-      const rr = Math.max(0.3, Math.min(6.0, p.r));
-      const aa = Math.max(0.0, Math.min(1.0, p.a));
-      if(aa <= 0){
-        particles.splice(i,1);
-        continue;
-      }
-
-      ctx.fillStyle = `rgba(${p.color},${aa})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, rr, 0, Math.PI*2);
-      ctx.fill();
-
-      // 出界回收
-      if(mode === "LONG" && p.y > H + 60) { particles.splice(i,1); continue; }
-      if(mode === "SHORT" && p.y < -60)     { particles.splice(i,1); continue; }
-    }
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-
-  return {
-    set: (m, w) => { 
-      mode = m; 
-      warp = Number(w) || 1; 
-    }
-  };
-})();
-
-// --- UI 更新 ---
-function update(){
-  const d = Number(STATE.deg);
-  let s = "REST";
-  if((d>=10 && d<=170)) s = "LONG";
-  else if((d>=190 && d<=350)) s = "SHORT";
-
-  $("stance").textContent = s;
-  $("warpVal").textContent = STATE.warp + "x";
-  $("fairy").style.transform = `rotate(${d*0.2}deg) scale(${1 + STATE.warp/500})`;
-  $("sleepMask").className = (s === "REST") ? "sleepMask on" : "sleepMask";
+// --- 邏輯與狀態 ---  
+let STATE = { deg: 120, warp: 10, players: 0 };  
   
-  FX.set(s, STATE.warp);
-}
-
-// --- 事件 ---
-$("degRange").addEventListener("input", (e) => { STATE.deg = e.target.value; update(); });
-$("warpRange").addEventListener("input", (e) => { STATE.warp = e.target.value; update(); });
-
-$("btnTrigger").onclick = () => {
-  STATE.players++;
-  $("playerCount").textContent = STATE.players;
-  toast("🚀 宇宙能量激發！");
-  log("玩家點火，曲速微調中...");
-};
-
-$("btnConnect").onclick = async () => {
-  try{
-    if(window.ethereum){
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      $("walletAddr").textContent = accounts[0].slice(0,6)+"..."+accounts[0].slice(-4);
-      toast("錢包已連接");
-      log("Wallet connected: " + accounts[0]);
-    } else { 
-      toast("請安裝 MetaMask"); 
-      log("Wallet connect error: 未偵測到錢包（請安裝 MetaMask）");
-    }
-  }catch(err){
-    toast("錢包連線失敗");
-    log("Wallet connect error: " + (err?.message || err));
-  }
-};
-
-async function openCam(){
-  try{
-    const s = await navigator.mediaDevices.getUserMedia({video:true});
-    $("cam").srcObject = s;
-    toast("相機已開啟");
-    log("Camera started.");
-  }catch(err){
-    toast("相機啟動失敗");
-    log("Camera error: " + (err?.message || err));
-  }
-}
-
-function takeShot(){
-  const c = $("snap"); const v = $("cam");
-  if(!v.srcObject){ toast("請先開啟相機"); return; }
-  c.width = v.videoWidth; c.height = v.videoHeight;
-  c.getContext("2d").drawImage(v, 0, 0);
-  c.style.display = "block";
-  toast("📸 拍照成功");
-  log("Snapshot captured.");
-}
-
-setInterval(() => { $("clock").textContent = new Date().toLocaleTimeString(); }, 1000);
-update();
-log("廣寒宮系統就緒（V1.5.1｜粒子垂直單向）。");
-</script>
-</body>
+function toast(m){   
+  const t=$("toast"); t.textContent=m; t.style.display="block";   
+  setTimeout(()=>t.style.display="none", 2000);   
+}  
+  
+function log(m){   
+  const l=$("log"); l.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}<br>` + l.innerHTML;   
+}  
+  
+// --- 粒子引擎 (垂直版) ---  
+const FX = (function(){  
+  const canvas = $("fx");  
+  const ctx = canvas.getContext("2d");  
+  let W, H, mode="REST", warp=10, particles = [];  
+  
+  function resize(){  
+    W = canvas.width = canvas.offsetWidth;  
+    H = canvas.height = canvas.offsetHeight;  
+  }  
+  window.onresize = resize;  
+  resize();  
+  
+  function spawn(){  
+    const intensity = warp / 150;  
+    for(let i=0; i < 2 + intensity*5; i++){  
+      particles.push({  
+        x: Math.random() * W,  
+        y: mode === "LONG" ? -20 : (mode === "SHORT" ? H + 20 : Math.random()*H),  
+        vy: mode === "LONG" ? (2 + intensity*10) : (mode === "SHORT" ? -(2 + intensity*10) : Math.random()-0.5),  
+        vx: Math.random() - 0.5,  
+        life: 1,  
+        color: mode === "LONG" ? "255,215,120" : (mode === "SHORT" ? "120,255,220" : "255,170,220")  
+      });  
+    }  
+  }  
+  
+  function loop(){  
+    ctx.clearRect(0,0,W,H);  
+    spawn();  
+    for(let i=particles.length-1; i>=0; i--){  
+      let p = particles[i];  
+      p.y += p.vy; p.x += p.vx; p.life -= 0.01;  
+      if(p.life <= 0) { particles.splice(i,1); continue; }  
+      ctx.fillStyle = `rgba(${p.color},${p.life})`;  
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill();  
+    }  
+    requestAnimationFrame(loop);  
+  }  
+  loop();  
+  return { set: (m, w) => { mode=m; warp=w; } };  
+})();  
+  
+// --- UI 更新 ---  
+function update(){  
+  const d = STATE.deg;  
+  let s = "REST";  
+  if((d>=10 && d<=170)) s = "LONG";  
+  else if((d>=190 && d<=350)) s = "SHORT";  
+  
+  $("stance").textContent = s;  
+  $("warpVal").textContent = STATE.warp + "x";  
+  $("fairy").style.transform = `rotate(${d*0.2}deg) scale(${1 + STATE.warp/500})`;  
+  $("sleepMask").className = (s === "REST") ? "sleepMask on" : "sleepMask";  
+    
+  FX.set(s, STATE.warp);  
+}  
+  
+// --- 事件 ---  
+$("degRange").oninput = (e) => { STATE.deg = e.target.value; update(); };  
+$("warpRange").oninput = (e) => { STATE.warp = e.target.value; update(); };  
+  
+$("btnTrigger").onclick = () => {  
+  STATE.players++;  
+  $("playerCount").textContent = STATE.players;  
+  toast("🚀 宇宙能量激發！");  
+  log("玩家點火，曲速微調中...");  
+};  
+  
+$("btnConnect").onclick = async () => {  
+  if(window.ethereum){  
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });  
+    $("walletAddr").textContent = accounts[0].slice(0,6)+"..."+accounts[0].slice(-4);  
+    toast("錢包已連接");  
+  } else { toast("請安裝 MetaMask"); }  
+};  
+  
+async function openCam(){  
+  const s = await navigator.mediaDevices.getUserMedia({video:true});  
+  $("cam").srcObject = s;  
+}  
+  
+function takeShot(){  
+  const c = $("snap"); const v = $("cam");  
+  c.width = v.videoWidth; c.height = v.videoHeight;  
+  c.getContext("2d").drawImage(v, 0, 0);  
+  c.style.display = "block";  
+  toast("📸 拍照成功");  
+}  
+  
+setInterval(() => { $("clock").textContent = new Date().toLocaleTimeString(); }, 1000);  
+update();  
+log("廣寒宮系統就緒。");  
+</script>  </body>  
 </html>
