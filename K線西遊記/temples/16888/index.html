@@ -3,281 +3,82 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜嫦娥駕駛艙 V1.6（功能全開版）</title>
-
-  <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
-
+  <title>廣寒宮 16888｜嫦娥駕駛艙 V1.6</title>
   <style>
     :root{
-      --bg:#06070b;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-      --line: rgba(255,255,255,.14);
-      --gold: rgba(255,215,120,.95);
-      --pink: rgba(255,170,220,.95);
-      --cyan: rgba(120,255,220,.95);
-      --shadow: 0 16px 70px rgba(0,0,0,.60);
-      --r: 18px;
-      --r2: 999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --sans: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
+      --bg:#06070b; --text: rgba(255,255,255,.92); --gold: rgba(255,215,120,.95); --line: rgba(255,255,255,.14);
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: var(--sans);
-      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%), var(--bg);
-      color: var(--text); min-height:100vh; overflow-x:hidden;
-    }
-    a{color:inherit}
-
-    .topRight{
-      position:fixed; right:12px; top:calc(12px + var(--safe-top)); z-index:90;
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--line);
-      border-radius: var(--r2); background: rgba(0,0,0,.38); backdrop-filter: blur(10px);
-      font-size:12px; color: var(--text); text-decoration:none; font-weight:850; cursor:pointer;
-    }
-    .pill b{font-family:var(--mono); font-weight:900}
-
-    .wrap{ max-width:1100px; margin:0 auto; padding:16px 14px calc(120px + var(--safe-bottom)); }
-    header{ padding-top: 54px; display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
-
-    .grid{ margin-top:14px; display:grid; grid-template-columns: 1.15fr .85fr; gap:12px; }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
-
-    .card{ border:1px solid var(--line); border-radius: 24px; background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)); box-shadow: var(--shadow); overflow:hidden; }
-    .cardHead{ padding:14px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:space-between; }
-    .cardHead .t{ font-weight:950; letter-spacing:.35px; }
-
-    /* ===== Fairy Visual Core ===== */
-    .cockpit{ position:relative; min-height: 520px; background: #000; }
-    canvas#fx{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:.95; z-index:5; }
+    body{ margin:0; font-family: system-ui; background: var(--bg); color: var(--text); overflow-x:hidden; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:20px 14px 100px; }
+    .card{ border:1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.05); overflow:hidden; }
     
+    /* 核心視窗：確保單圖置中不碎裂 */
     .fairyWrap{
-      position:relative; width: 280px; height: 280px; margin: 4px auto 0;
-      border-radius: 50%; overflow:hidden; border:2px solid rgba(255,215,120,.4);
-      box-shadow: 0 0 42px rgba(255,215,120,.3); background: #000; z-index:1;
+      position:relative; width: 300px; height: 300px; margin: 30px auto; 
+      border-radius: 50%; overflow:hidden; border: 2px solid var(--gold);
+      box-shadow: 0 0 50px rgba(255,215,120,0.3); background: #000;
     }
-    /* 這裡改成背景圖模式 */
-    #fairy {
-      position:absolute; inset:0; width:100%; height:100%;
-      background-image: url('./assets/fairy.png');
-      background-size: cover;
-      background-position: center 20%; /* 臉與胸部中心點 */
+    #fairyImg {
+      width: 100%; height: 100%;
+      background-image: url('./assets/fairy.png'); 
+      background-size: cover;      /* 關鍵：填滿容器 */
+      background-position: center 20%; /* 關鍵：對齊臉部與重點 */
       background-repeat: no-repeat;
-      will-change: transform, filter;
-      transition: transform .45s ease, filter .45s ease;
+      transition: transform 0.4s ease-out, filter 0.4s;
     }
 
-    .sleepMask{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition: .35s; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); z-index:10; }
-    .sleepMask.on{ opacity:1; }
-    
-    /* 其他 UI 元件 (繼承原版) */
-    .kpiGrid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-top:12px; }
-    .kpi{ border:1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(0,0,0,.18); padding:12px; }
-    .kpi .v{ font-size:18px; font-weight:950; color:var(--gold); }
-    .rangeRow{ margin-top:12px; }
+    .sleepMask{ position:absolute; inset:0; background:rgba(0,0,0,0.5); display:none; place-items:center; z-index:5; backdrop-filter: blur(4px); color: var(--gold); }
+    .sleepMask.on{ display:grid; }
+    .kpiGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:20px; }
+    .kpi{ border:1px solid var(--line); border-radius: 18px; padding:15px; background:rgba(0,0,0,0.3); text-align:center; }
+    .kpi b { font-size: 24px; color: var(--gold); display:block; }
     input[type="range"]{ width:100%; accent-color: var(--gold); }
-    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    .btn{ padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.08); color: #fff; font-weight:900; cursor:pointer; }
-    .btn.gold{ border-color: var(--gold); color:var(--gold); }
-    .cameraBox{ border:1px solid rgba(255,255,255,.1); border-radius:18px; background:rgba(0,0,0,.18); padding:12px; }
-    video#cam{ width:100%; border-radius:14px; background:#000; }
-    canvas#snap{ width:100%; border-radius:14px; display:none; }
-    .log{ border:1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(0,0,0,.22); padding:10px; font-family: var(--mono); font-size: 11px; max-height: 200px; overflow:auto; }
-    .badge{ padding:4px 8px; border-radius:999px; border:1px solid var(--line); font-size:11px; }
   </style>
 </head>
-
 <body>
-  <div class="topRight">
-    <a class="pill" href="../../index.html">🗺️ 宇宙入口</a>
-    <div class="pill">版本：<b>16888 V1.6</b></div>
-  </div>
-
   <div class="wrap">
-    <header>
-      <div class="brand">
-        <div style="font-size:20px; font-weight:950;">廣寒宮 16888｜嫦娥駕駛艙</div>
-        <div style="font-size:12px; color:var(--muted); margin-top:4px;">
-          即時角度觸發｜曲速引擎連動｜拍照錄像功能
-        </div>
+    <div class="card">
+      <div style="padding:20px; text-align:center;">
+        <h2 style="margin:0;">廣寒宮 16888 駕駛艙</h2>
       </div>
-      <div style="display:flex;gap:10px;">
-        <span class="badge" id="modeBadge">狀態：偵測中</span>
-        <span class="badge">錢包：<span id="wallet">未連線</span></span>
+      <div class="fairyWrap">
+        <div id="fairyImg"></div>
+        <div class="sleepMask" id="sleepMask">嫦娥正在休息...</div>
       </div>
-    </header>
-
-    <div class="grid">
-      <section class="card">
-        <div class="cardHead">
-          <div class="t">飛碟監視器</div>
-          <div class="badge">曲速：<b id="warpText">10</b>x</div>
+      <div style="padding:0 20px 20px;">
+        <div class="kpiGrid">
+          <div class="kpi">姿態 <b id="stance">REST</b></div>
+          <div class="kpi">曲速 <b id="warpVal">10x</b></div>
         </div>
-        <div class="cardBody cockpit" id="cockpit">
-          <canvas id="fx"></canvas>
-          <div class="fairyWrap">
-            <div id="fairy"></div>
-            <div class="sleepMask" id="sleepMask">
-              <div style="text-align:center;">
-                <div style="color:var(--gold); font-size:24px; font-weight:900;">Z Z Z</div>
-                <div style="font-weight:900;">嫦娥正在休息</div>
-              </div>
-            </div>
-          </div>
-          <div class="kpiGrid">
-            <div class="kpi"><div>姿態</div><div class="v" id="stance">—</div></div>
-            <div class="kpi"><div>引擎亮度</div><div class="v" id="glow">—</div></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="cardBody">
-          <div class="rangeRow">
-            <label>方向盤 (0–360) <span id="degLabel">120°</span></label>
-            <input id="degRange" type="range" min="0" max="360" value="120" />
-          </div>
-          <div class="rangeRow">
-            <label>曲速引擎 (1–150) <span id="warpLabel">10x</span></label>
-            <input id="warpRange" type="range" min="1" max="150" value="10" />
-          </div>
-          <div class="btnRow">
-            <button class="btn gold" id="btnTrigger">即時觸發</button>
-            <button class="btn" id="btnConnect">連接錢包</button>
-            <button class="btn" id="btnSpeak">語音導覽</button>
-          </div>
-
-          <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:20px 0;">
-
-          <div class="cameraBox">
-            <video id="cam" autoplay playsinline muted></video>
-            <canvas id="snap"></canvas>
-            <div class="btnRow">
-              <button class="btn" id="btnCam">開啟相機</button>
-              <button class="btn" id="btnShot">拍照</button>
-              <button class="btn gold" id="btnDownload">下載</button>
-            </div>
-          </div>
-          <div class="log" id="log" style="margin-top:12px;"></div>
-        </div>
-      </section>
+        <label>方向盤 (角度)</label>
+        <input id="degRange" type="range" min="0" max="360" value="120" />
+        <label style="display:block; margin-top:15px;">曲速引擎</label>
+        <input id="warpRange" type="range" min="1" max="150" value="10" />
+      </div>
     </div>
   </div>
-
 <script>
-/* 核心引擎邏輯 (由 V1.5 完整移植並針對新視覺優化) */
-const $ = (id)=>document.getElementById(id);
-let STATE = { deg: 120, warp: 10, players: 0 };
+  const $ = (id) => document.getElementById(id);
+  function update() {
+    const d = parseInt($("degRange").value);
+    const w = parseInt($("warpRange").value);
+    let s = "REST";
+    if (d >= 10 && d <= 170) s = "LONG";
+    else if (d >= 190 && d <= 350) s = "SHORT";
 
-// 粒子引擎 FX
-const FX = (function(){
-  const canvas = $("fx");
-  const ctx = canvas.getContext("2d");
-  let mode="REST", warp=10, W, H;
-  const particles = [];
+    $("stance").textContent = s;
+    $("warpVal").textContent = w + "x";
+    $("sleepMask").className = (s === "REST") ? "sleepMask on" : "sleepMask";
 
-  function resize(){
-    const rect = canvas.getBoundingClientRect();
-    W = canvas.width = rect.width;
-    H = canvas.height = rect.height;
+    const img = $("fairyImg");
+    const glow = w / 150;
+    // 根據角度輕微旋轉圖片，而不是切換幀
+    img.style.transform = `scale(${1 + (w/400)}) rotate(${(d-120)*0.1}deg)`;
+    img.style.filter = s === "REST" ? "brightness(0.6) blur(2px)" : `saturate(${1.2+glow}) brightness(${1.1+glow}) contrast(1.1)`;
   }
-  window.onresize = resize; resize();
-
-  function loop(){
-    ctx.clearRect(0,0,W,H);
-    const count = mode==="REST" ? 1 : Math.floor(warp/10);
-    if(particles.length < 200) {
-      for(let i=0; i<count; i++) {
-        particles.push({
-          x: Math.random()*W, y: Math.random()*H,
-          vx: mode==="LONG"? 5+warp/10 : (mode==="SHORT"? -5-warp/10 : Math.random()-0.5),
-          vy: Math.random()-0.5,
-          life: 1, color: mode==="LONG"?"#ffd778":"#78ffdc"
-        });
-      }
-    }
-    for(let i=particles.length-1; i>=0; i--){
-      let p = particles[i];
-      p.x += p.vx; p.y += p.vy; p.life -= 0.01;
-      if(p.life<=0) particles.splice(i,1);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = p.life;
-      ctx.fillRect(p.x, p.y, 2, 2);
-    }
-    requestAnimationFrame(loop);
-  }
-  loop();
-  return { setMode:(m,w)=>{mode=m; warp=w;} };
-})();
-
-function applyUI(){
-  const a = parseInt($("degRange").value);
-  const w = parseInt($("warpRange").value);
-  let s = "REST";
-  if(a>=10 && a<=170) s="LONG"; else if(a>=190 && a<=350) s="SHORT";
-
-  $("degLabel").textContent = a+"°";
-  $("warpLabel").textContent = w+"x";
-  $("warpText").textContent = w;
-  $("stance").textContent = s;
-  $("glow").textContent = Math.round((w/150)*100)+"%";
-
-  const img = $("fairy");
-  const sleep = $("sleepMask");
-  const glow = w/150;
-
-  if(s==="REST"){
-    sleep.classList.add("on");
-    img.style.filter = "brightness(0.7) blur(1px)";
-    img.style.transform = "scale(1)";
-  } else {
-    sleep.classList.remove("on");
-    // 加強視覺：隨曲速變亮的金光濾鏡
-    img.style.filter = `saturate(${1.2+glow}) brightness(${1.1+glow}) drop-shadow(0 0 ${20+glow*30}px gold)`;
-    img.style.transform = `scale(${1 + (w/400)}) rotate(${(a-120)*0.1}deg)`;
-  }
-  FX.setMode(s, w);
-}
-
-/* 相機與拍照功能 (原版功能) */
-async function openCam(){
-  const s = await navigator.mediaDevices.getUserMedia({video:true});
-  $("cam").srcObject = s;
-}
-function shot(){
-  const v = $("cam"), c = $("snap");
-  c.width = v.videoWidth; c.height = v.videoHeight;
-  c.getContext("2d").drawImage(v, 0, 0);
-  c.style.display = "block"; v.style.display = "none";
-}
-
-/* 事件監聽 */
-$("degRange").oninput = applyUI;
-$("warpRange").oninput = applyUI;
-$("btnCam").onclick = openCam;
-$("btnShot").onclick = shot;
-$("btnDownload").onclick = ()=>{
-  const a = document.createElement("a");
-  a.download="shang-e.png"; a.href=$("snap").toDataURL(); a.click();
-};
-$("btnTrigger").onclick = ()=>{
-  $("log").textContent = `[${new Date().toLocaleTimeString()}] 節律已觸發！`;
-  applyUI();
-};
-$("btnSpeak").onclick = ()=>{
-  const u = new SpeechSynthesisUtterance("廣寒宮駕駛艙已啟動，請機長指示方向。");
-  u.lang = "zh-TW"; window.speechSynthesis.speak(u);
-};
-
-applyUI();
+  $("degRange").oninput = update;
+  $("warpRange").oninput = update;
+  update();
 </script>
 </body>
 </html>
