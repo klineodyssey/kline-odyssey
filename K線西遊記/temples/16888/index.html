@@ -627,17 +627,21 @@ function applyUI(){
   if(s==="LONG"){
     sleep.classList.remove("on");
     cockpit.classList.remove("breath");
-    img.style.transform = `rotate(${a*k}deg) scale(1.02)`;
+    const yaw = ((a-90)/90)*18;
+      const pitch = 14;
+      img.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${a*0.08}deg) scale(1.06)`;
     img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(255,215,120,.35))`;
   }else if(s==="SHORT"){
     sleep.classList.remove("on");
     cockpit.classList.remove("breath");
-    img.style.transform = `rotate(${-(a-180)*k}deg) scale(1.02)`;
+    const yaw = 180 + ((a-270)/80)*18;
+      const pitch = -10;
+      img.style.transform = `perspective(900px) rotateX(${pitch}deg) rotateY(${yaw}deg) rotateZ(${-(a-180)*0.06}deg) scale(1.04)`;
     img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(120,255,220,.30))`;
   }else{
     sleep.classList.add("on");
     cockpit.classList.add("breath");
-    img.style.transform = `rotate(0deg) scale(1.00)`;
+    img.style.transform = `perspective(900px) rotateX(-2deg) rotateY(0deg) scale(1.00)`;
     img.style.filter = `saturate(${baseSat}) brightness(${1.00+glow*0.12}) contrast(${baseContrast}) drop-shadow(0 0 ${14+glow*18}px rgba(255,170,220,.18))`;
   }
 
@@ -742,161 +746,124 @@ function downloadSnap(){
   toast("下載中");
 }
 
-/* ===== FX Particle Engine (canvas) ===== */
+/* ===== FX Particle Engine (canvas) =====
 const FX = (function(){
-  const canvas = $("fx");
-  const ctx = canvas.getContext("2d");
-  let W=0, H=0, DPR=1;
+  const c = document.getElementById("fx");
+  const ctx = c.getContext("2d");
+  let W=0,H=0,DPR=1;
+  let particles=[];
   let mode="REST"; // LONG / SHORT / REST
-  let warp=10;
-
-  const particles = [];
-  const MAX = 520;
+  let warp=1;      // 1..150
+  let last=performance.now();
 
   function resize(){
-    DPR = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-    const rect = canvas.getBoundingClientRect();
-    W = Math.floor(rect.width);
-    H = Math.floor(rect.height);
-    canvas.width = Math.floor(W*DPR);
-    canvas.height = Math.floor(H*DPR);
+    DPR = Math.max(1, Math.min(2.5, window.devicePixelRatio||1));
+    W = c.clientWidth; H = c.clientHeight;
+    c.width = Math.floor(W*DPR);
+    c.height = Math.floor(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
   }
   window.addEventListener("resize", resize);
+  resize();
 
-  function rand(a,b){ return a + Math.random()*(b-a); }
+  function rnd(a,b){ return a + Math.random()*(b-a); }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
 
   function spawn(){
-    const intensity = clamp(warp/150, 0.06, 1.0);
-    const count = Math.floor(2 + intensity*6);
+    const nBase = 1 + Math.floor(warp/18); // higher warp => more particles
+    for(let i=0;i<nBase;i++){
+      const p={};
+      p.x = rnd(0,W);
+      p.life = rnd(0.9, 2.2);
+      p.age = 0;
 
-    for(let i=0;i<count;i++){
-      if(particles.length > MAX) particles.shift();
-
-      const p = {
-        x: rand(0, W),
-        y: rand(0, H),
-        vx: 0,
-        vy: 0,
-        r: rand(0.6, 2.2) + intensity*1.6,
-        life: rand(0.6, 1.35),
-        age: 0,
-        a: rand(0.25, 0.95),
-        kind: mode
-      };
-
-      // stream direction based on mode
+      // Depth z: 0 far (small), 1 near (big)
       if(mode==="LONG"){
-        p.x = rand(0.10*W, 0.90*W);
-        p.y = rand(0.15*H, 0.80*H);
-        p.vx = rand(1.6, 3.3) + intensity*6.5; // forward
-        p.vy = rand(-0.3, 0.3);
+        // 多：上往下，由遠到近（越來越大）
+        p.y  = rnd(-H*0.25, 0);
+        p.vy = rnd(40, 110) * (0.8 + warp/120);
+        p.z  = rnd(0.06, 0.25);
+        p.dz = rnd(0.20, 0.55);
       }else if(mode==="SHORT"){
-        p.x = rand(0.10*W, 0.90*W);
-        p.y = rand(0.15*H, 0.80*H);
-        p.vx = - (rand(1.2, 2.8) + intensity*5.6); // backward
-        p.vy = rand(-0.3, 0.3);
+        // 空：下往上，由近到遠（越來越小）
+        p.y  = rnd(H, H*1.25);
+        p.vy = -rnd(40, 110) * (0.8 + warp/120);
+        p.z  = rnd(0.78, 0.98);
+        p.dz = -rnd(0.20, 0.55);
       }else{
-        // rest: float softly
-        p.x = rand(0.10*W, 0.90*W);
-        p.y = rand(0.15*H, 0.80*H);
-        p.vx = rand(-0.35, 0.35);
-        p.vy = rand(-0.18, 0.18);
-        p.r *= 0.85;
-        p.a *= 0.65;
+        // 休息：慢飄
+        p.y  = rnd(0,H);
+        p.vy = rnd(-18,18);
+        p.z  = rnd(0.25,0.55);
+        p.dz = rnd(-0.06,0.06);
       }
 
+      p.vx = rnd(-12,12) * (0.4 + warp/180);
+      p.r  = rnd(1.0, 2.8);
+      p.hue= rnd(36, 58); // warm gold
       particles.push(p);
     }
+    // cap
+    const cap = 520 + Math.floor(warp*6);
+    if(particles.length > cap) particles.splice(0, particles.length-cap);
   }
 
-  function draw(dt){
-    // clear
+  function draw(now){
+    const dt = clamp((now-last)/1000, 0.001, 0.033);
+    last = now;
+
     ctx.clearRect(0,0,W,H);
 
-    // subtle vignette
-    ctx.fillStyle = "rgba(0,0,0,.12)";
-    ctx.fillRect(0,0,W,H);
-
-    // spawn
     spawn();
 
-    // draw particles
-    const intensity = clamp(warp/150, 0.06, 1.0);
-
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i];
-      p.age += dt;
-      p.x += p.vx * dt * 60;
-      p.y += p.vy * dt * 60;
-
-      const t = 1 - (p.age / p.life);
-      if(t<=0 || p.x<-80 || p.x>W+80 || p.y<-80 || p.y>H+80){
-        particles.splice(i,1);
-        continue;
-      }
-
-      // color by mode
-      let col = "rgba(255,255,255,";
-      if(mode==="LONG"){
-        col = `rgba(255,215,120,${p.a*t})`;
-      }else if(mode==="SHORT"){
-        col = `rgba(120,255,220,${p.a*t})`;
-      }else{
-        col = `rgba(255,170,220,${p.a*t})`;
-      }
-
-      ctx.beginPath();
-      ctx.fillStyle = col;
-      ctx.arc(p.x, p.y, p.r * (0.6 + intensity*0.65), 0, Math.PI*2);
-      ctx.fill();
-
-      // streaks for higher warp
-      if(intensity > 0.35 && mode!=="REST"){
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - p.vx*0.38, p.y - p.vy*0.38);
-        ctx.stroke();
-      }
-    }
-
-    // center glow
-    const cx=W*0.32, cy=H*0.36;
-    const g=ctx.createRadialGradient(cx,cy,10,cx,cy, 220+intensity*180);
-    if(mode==="LONG"){
-      g.addColorStop(0, `rgba(255,215,120,${0.18+intensity*0.22})`);
-      g.addColorStop(1, "rgba(255,215,120,0)");
-    }else if(mode==="SHORT"){
-      g.addColorStop(0, `rgba(120,255,220,${0.16+intensity*0.20})`);
-      g.addColorStop(1, "rgba(120,255,220,0)");
-    }else{
-      g.addColorStop(0, `rgba(255,170,220,${0.12+intensity*0.12})`);
-      g.addColorStop(1, "rgba(255,170,220,0)");
-    }
+    // subtle vignette
+    const g = ctx.createRadialGradient(W*0.5,H*0.55, 20, W*0.5,H*0.55, Math.max(W,H)*0.75);
+    g.addColorStop(0, "rgba(255,255,255,0.00)");
+    g.addColorStop(1, "rgba(0,0,0,0.18)");
     ctx.fillStyle=g;
     ctx.fillRect(0,0,W,H);
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.age += dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.z += p.dz * dt;
+
+      const z = clamp(p.z, 0.0, 1.2);
+      const size = p.r * (0.55 + 2.25*z);
+      const alpha = clamp(0.05 + 0.28*z, 0.05, 0.42);
+
+      // wrap X
+      if(p.x < -30) p.x = W+30;
+      if(p.x > W+30) p.x = -30;
+
+      // cull
+      const outY = (p.y < -60) || (p.y > H+60);
+      const dead = (p.age > p.life) || outY || (p.z < -0.2) || (p.z > 1.4);
+      if(dead){ particles.splice(i,1); continue; }
+
+      // glow
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${p.hue}, 95%, 70%, ${alpha})`;
+      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+      ctx.fill();
+
+      // tiny core
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,255,255,${alpha*0.75})`;
+      ctx.arc(p.x, p.y, Math.max(0.8, size*0.28), 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
   }
+  requestAnimationFrame(draw);
 
-  let last = performance.now();
-  function loop(){
-    const now = performance.now();
-    const dt = Math.min(0.033, (now-last)/1000);
-    last = now;
-    draw(dt);
-    requestAnimationFrame(loop);
-  }
-
-  function setMode(m, w){
-    mode = m;
-    warp = w;
-  }
-
-  resize();
-  requestAnimationFrame(loop);
-
-  return { setMode };
+  return {
+    setMode: function(m){ mode = m||"REST"; },
+    setWarp: function(w){ warp = Math.max(1, Math.min(150, Number(w)||1)); }
+  };
 })();
 
 /* ===== Events ===== */
