@@ -322,7 +322,7 @@
 <body>
   <div class="topRight">
     <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
-    <a class="pill cyan" href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html" rel="noreferrer">🗺️ 宇宙入口</a>
+    <a class="pill cyan" href="../../index.html" rel="noreferrer">🗺️ 宇宙入口</a>
     <div class="pill">版本：<b>16888 V1.5</b></div>
   </div>
 
@@ -524,75 +524,6 @@ const CFG = {
     lang: "zh-TW"
   }
 };
-
-
-// ===== On-chain Ignite (new) =====
-// Requirement: "即時觸發" 必須鏈上轉出 >= 1 KGEN，才算有效觸發
-const IGNITE = {
-  chainId: 56, // BSC Mainnet
-  token: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", // KGEN Token
-  to: "0xfc522243e988a837700CaD600D6f030f5932681F",    // 18888 DeityBank (receiver)
-  minKgen: "1" // >= 1 KGEN
-};
-
-// Minimal ERC20 ABI
-const ERC20_ABI = [
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address to, uint256 value) returns (bool)"
-];
-
-let __kgenDecimals = null;
-
-async function getKgenDecimals(provider){
-  if(__kgenDecimals !== null) return __kgenDecimals;
-  const token = new ethers.Contract(IGNITE.token, ERC20_ABI, provider);
-  __kgenDecimals = await token.decimals();
-  return __kgenDecimals;
-}
-
-async function igniteByTransfer(){
-  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const net = await provider.getNetwork();
-  if(Number(net.chainId) !== Number(IGNITE.chainId)){
-    throw new Error("請切換到 BSC 主網（chainId 56）再點火");
-  }
-  const signer = provider.getSigner();
-  const from = await signer.getAddress();
-
-  const dec = await getKgenDecimals(provider);
-  const token = new ethers.Contract(IGNITE.token, ERC20_ABI, signer);
-
-  const amt = ethers.utils.parseUnits(String(IGNITE.minKgen), dec);
-
-  const bal = await token.balanceOf(from);
-  if(bal.lt(amt)){
-    throw new Error(`KGEN 餘額不足（需要 >= ${IGNITE.minKgen} KGEN）`);
-  }
-
-  log(`鏈上點火：準備轉出 ${IGNITE.minKgen} KGEN → ${IGNITE.to}`);
-  toast("鏈上點火中…（送出交易）");
-
-  const tx = await token.transfer(IGNITE.to, amt);
-  log("TX sent: " + tx.hash);
-  toast("交易已送出，等待確認…");
-
-  // wait 1 confirmation (best effort)
-  try{
-    await tx.wait(1);
-    log("TX confirmed ✅");
-    toast("點火成功 ✅");
-  }catch(e){
-    // some wallets/providers may not support wait; still allow trigger if tx hash exists
-    log("TX wait skipped/failed: " + (e?.message || e));
-    toast("已送出點火交易");
-  }
-
-  return tx.hash;
-}
-
-
 
 const $ = (id)=>document.getElementById(id);
 const logEl = $("log");
@@ -985,18 +916,10 @@ $("btnConnect").addEventListener("click", async ()=>{
   try{ await connectWallet(); }catch(e){ toast(e.message || String(e)); log("Wallet connect error: " + (e.message||e)); }
 });
 
-$("btnTrigger").addEventListener("click", async ()=>{
-  try{
-    if(!STATE.wallet){
-      await connectWallet();
-    }
-    await igniteByTransfer();
-    playerTrigger();
-  }catch(e){
-    toast(e.message || String(e));
-    log("Ignite/Trigger error: " + (e.message || e));
-  }
+$("btnTrigger").addEventListener("click", ()=>{
+  playerTrigger();
 });
+
 $("btnSpeak").addEventListener("click", ()=>{
   const msg = "廣寒宮一六八八八。方向盤十到一七零為多。一九零到三五零為空。三五零到一零與一七零到一九零為休息。曲速一到一五零。按即時觸發開始節律。";
   speak(msg);
@@ -1037,7 +960,6 @@ $("btnDownload").addEventListener("click", ()=>{
   }, 650);
 
   log("Boot OK: 16888 V1.5");
-  log("新規則：即時觸發需鏈上轉出 >= 1 KGEN（點火才有效）");
   toast("16888 V1.5 已啟動");
 })();
 </script>
