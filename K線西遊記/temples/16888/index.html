@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.5（即時玩家觸發）</title>
+  <title>廣寒宮 16888｜仙女飛碟駕駛艙（Cockpit V1.7.2）</title>
 
   <!-- 建議：把 ethers-5.7.2.umd.min.js 放在同資料夾 /assets 皆可。 -->
   <script src="../../assets/ethers-5.7.2.umd.min.js"></script>
@@ -156,7 +156,7 @@
     }
     @keyframes auraSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
 
-    img#fairySprite{
+    #fairySprite{
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:cover;
@@ -164,7 +164,7 @@
       will-change: transform, filter;
       transition: transform .45s ease, filter .45s ease;
       filter: saturate(1.05) contrast(1.02);
-      background-image:url("./assets/fairy_sprite_36.png");
+      background-image:url("./assets/fairy_sprite_36.png?v=172");
   background-repeat:no-repeat;
   background-size:600% 600%;
   background-position:0% 0%;
@@ -327,7 +327,7 @@
   <div class="topRight">
     <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">🌐 官網</a>
     <a class="pill cyan" href="../../index.html" rel="noreferrer">🗺️ 宇宙入口</a>
-    <div class="pill">版本：<b>16888 V1.6</b></div>
+    <div class="pill">版本：<b>16888 V1.7.2</b></div>
   </div>
 
   <div class="wrap">
@@ -761,7 +761,7 @@ function downloadSnap(){
   toast("下載中");
 }
 
-/* ===== FX Particle Engine (canvas) =====
+/* ===== FX Particle Engine (canvas) ===== */
 const FX = (function(){
   const c = document.getElementById("fx");
   const ctx = c.getContext("2d");
@@ -941,8 +941,8 @@ $("btnDownload").addEventListener("click", ()=>{
     speak("廣寒宮一六八八八。七仙女飛碟駕駛艙已啟動。若尚未有錢包，請先連接錢包。按即時觸發開始節律。");
   }, 650);
 
-  log("Boot OK: 16888 V1.6");
-  toast("16888 V1.6 已啟動");
+  log("Boot OK: 16888 V1.7.2");
+  toast("16888 V1.7.2 已啟動");
 })();
 </script>
 
