@@ -3,49 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.8</title>
+    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', 'Noto Sans TC', sans-serif; overflow: hidden; }
         
-        /* 頂部品牌與血量 */
-        .header { position: fixed; top: 0; width: 100%; padding: 10px; text-align: center; z-index: 300; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
-        .fuel-bar { width: 80%; height: 10px; background: #222; border: 1px solid var(--gold); border-radius: 5px; margin: 5px auto; overflow: hidden; }
+        /* 品牌字與時間在上 */
+        .brand-header { position: fixed; top: 5px; width: 100%; text-align: center; z-index: 1000; font-size: 11px; color: var(--gold); letter-spacing: 2px; font-weight: 900; }
+
+        /* 血量即油量容量顯示 */
+        .hud { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); width: 70%; z-index: 900; }
+        .fuel-text { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 3px; color: var(--gold); }
+        .bar { width: 100%; height: 8px; background: #222; border: 1px solid var(--gold); border-radius: 4px; overflow: hidden; }
         #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: 0.3s; }
 
-        /* 側邊操縱桿：完全靠邊 */
-        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 400; display: flex; flex-direction: column; align-items: center; width: 50px; }
-        .l-stick { left: 5px; } 
-        .r-stick { right: 5px; }
+        /* 側邊操縱桿：完全靠邊不擋圖 */
+        .stick { position: fixed; top: 55%; transform: translateY(-50%); z-index: 800; display: flex; flex-direction: column; align-items: center; }
+        .l-stick { left: 2px; } .r-stick { right: 2px; }
         input[type=range].vert { width: 220px; transform: rotate(-90deg); margin: 100px 0; accent-color: var(--gold); cursor: pointer; }
-        .stick-label { font-size: 10px; color: var(--gold); text-shadow: 0 0 5px #000; white-space: nowrap; font-weight: 900; }
+        .stick-label { font-size: 10px; color: var(--gold); font-weight: 900; text-shadow: 2px 2px #000; }
 
-        /* 相機預覽層 */
-        #cam-layer { position: fixed; inset: 0; z-index: 5; display: none; object-fit: cover; width: 100vw; height: 100vh; }
+        /* 相機預覽 */
+        #video-bg { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; display: none; }
         #canvas-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 
-        /* AI 客服頭像 (影象與聲音) */
-        #ai-mentor { position: fixed; top: 80px; right: 60px; width: 100px; height: 100px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 350; display: none; background: #000; overflow: hidden; box-shadow: 0 0 20px var(--cyan); }
-        .ai-wave { position: absolute; bottom: 0; width: 100%; height: 20px; background: var(--cyan); opacity: 0.5; animation: wave 1s infinite; }
+        /* AI 客服 (影象聲音波動) */
+        #ai-mentor { position: fixed; top: 80px; right: 20px; width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 950; display: none; background: #000; overflow: hidden; box-shadow: 0 0 15px var(--cyan); }
+        #ai-mentor img { width: 100%; height: 100%; object-fit: cover; }
+        .ai-active { animation: pulse 1.5s infinite; }
 
         /* 控制面板 */
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 500; padding: 15px; text-align: center; }
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .btn { padding: 10px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; font-weight: 900; cursor: pointer; }
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); border-top: 1px solid var(--gold); z-index: 1100; padding: 10px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .btn { padding: 10px 5px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
         
-        #wish-stamp { position: fixed; bottom: 150px; left: 20px; z-index: 100; font-size: 16px; color: var(--gold); font-weight: 900; text-shadow: 2px 2px #000; }
+        /* 許願字在圖左下 */
+        #wish-stamp { position: fixed; bottom: 120px; left: 15px; z-index: 900; font-size: 14px; color: var(--gold); font-weight: 900; text-shadow: 2px 2px #000; max-width: 60%; }
 
-        @keyframes wave { 0% { height: 10px; } 50% { height: 30px; } 100% { height: 10px; } }
+        @keyframes pulse { 0% { transform: scale(1); border-color: var(--cyan); } 50% { transform: scale(1.1); border-color: #fff; } 100% { transform: scale(1); border-color: var(--cyan); } }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-size:12px; font-weight:900;">KGEN ODYSSEY V1.9.8</div>
-    <div class="fuel-bar"><div id="fuel-fill"></div></div>
-    <div id="clock" style="font-size:9px;">LOADING...</div>
+<div class="brand-header">KGEN ODYSSEY SUPERLUMINAL <span id="clock">00:00:00</span></div>
+
+<div class="hud">
+    <div class="fuel-text"><span>飛碟油量/血量</span> <span id="fuel-val">100% / 16888L</span></div>
+    <div class="bar"><div id="fuel-fill"></div></div>
 </div>
 
 <div class="stick l-stick">
@@ -60,24 +66,23 @@
     <div class="stick-label" id="v-angle">180°</div>
 </div>
 
-<video id="cam-layer" autoplay playsinline></video>
+<video id="video-bg" autoplay playsinline></video>
 <div id="canvas-layer"></div>
 
 <div id="ai-mentor">
-    <img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" width="100%">
-    <div class="ai-wave"></div>
+    <img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 </div>
 
 <div id="wish-stamp"></div>
 
 <div class="panel">
-    <div id="status" style="color:var(--cyan); font-size:12px; margin-bottom:5px;">飛碟待機中...</div>
+    <div id="status" style="color:var(--cyan); font-size:10px; margin-bottom:5px; text-align:center;">飛碟已就緒，等待指令...</div>
     <div class="btn-grid">
-        <button class="btn" onclick="app.trade('LONG')">做多 (上往下)</button>
-        <button class="btn" onclick="app.trade('SHORT')">做空 (下往上)</button>
+        <button class="btn" onclick="app.callWallet('LONG')">做多 下單</button>
+        <button class="btn" onclick="app.callWallet('SHORT')">做空 下單</button>
         <button class="btn" onclick="app.showLamp()">🏮 13生肖燈</button>
         <button class="btn" onclick="app.takePhoto()">📷 拍照下載</button>
-        <button class="btn" onclick="app.toggleCam()">🎬 錄影音切換</button>
+        <button class="btn" onclick="app.toggleCam()">🎬 影音切換</button>
         <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
     </div>
 </div>
@@ -108,7 +113,7 @@ const app = {
     createStars() {
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for(let i=0; i<1200; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
         this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1}));
         this.scene.add(this.stars);
@@ -121,13 +126,13 @@ const app = {
         document.getElementById('v-angle').innerText = ang + "°";
         document.getElementById('v-curv').innerText = crv + "x";
 
-        let flow = 0;
-        if (ang >= 30 && ang <= 150) flow = -1; // 做多
-        else if (ang >= 210 && ang <= 330) flow = 1; // 做空
+        let flow = 0; // 0-30, 150-210, 330-360 靜止
+        if (ang >= 30 && ang <= 150) flow = -1; // 做多：上往下
+        else if (ang >= 210 && ang <= 330) flow = 1; // 做空：下往上
 
         const p = this.stars.geometry.attributes.position.array;
         for(let i=1; i<p.length; i+=3) {
-            p[i] += flow * (crv / 150);
+            p[i] += flow * (crv / 150 * 0.5);
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
@@ -135,50 +140,54 @@ const app = {
         this.renderer.render(this.scene, this.camera);
     },
 
-    trade(type) {
-        document.getElementById('status').innerText = `正在連線錢包進行 ${type} 交易...`;
+    callWallet(type) {
+        document.getElementById('status').innerText = `正在連結錢包進行 ${type} 下單...`;
         setTimeout(() => {
-            this.showAI(`偵測到錢包餘額不足！我是你的 AI 客服，別擔心，我教你如何從轉帳到成交。請先點擊合約授權...`);
-        }, 1500);
+            this.speakAI(`偵測到錢包餘額不足！我是你的 AI 聊天客服。別擔心，我會教你如何從轉帳到成交。請先進行合約授權，確保油量充足。`);
+        }, 1200);
     },
 
-    showAI(msg) {
+    speakAI(msg) {
         const mentor = document.getElementById('ai-mentor');
         mentor.style.display = "block";
-        const synth = window.speechSynthesis;
+        mentor.classList.add('ai-active');
+        
         const utter = new SpeechSynthesisUtterance(msg);
         utter.lang = 'zh-TW';
-        synth.speak(utter);
-        document.getElementById('status').innerText = "AI 導師引導中...";
+        utter.onend = () => mentor.classList.remove('ai-active');
+        window.speechSynthesis.speak(utter);
+        document.getElementById('status').innerText = "AI 客服引導中...";
     },
 
     async toggleCam() {
-        const video = document.getElementById('cam-layer');
-        if(video.style.display === "block") {
-            video.style.display = "none";
+        const v = document.getElementById('video-bg');
+        if(v.style.display === "block") {
+            v.style.display = "none";
+            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
         } else {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            video.srcObject = stream;
-            video.style.display = "block";
-            this.showAI("已切換相機模式，飛碟進入 AR 實體導航狀態。");
+            v.srcObject = stream;
+            v.style.display = "block";
+            this.speakAI("切換影音模式。現在影象已與廣寒宮同步，準備錄製導航記錄。");
         }
     },
 
     setWish() {
         const w = prompt("請輸入您的許願或還願內容：");
-        document.getElementById('wish-stamp').innerText = w ? "願力戳印：" + w : "";
+        document.getElementById('wish-stamp').innerText = w ? "願力： " + w : "";
     },
 
     takePhoto() {
+        // 合併 3D 內容與截圖
         const link = document.createElement('a');
-        link.download = `KGEN_DISK_${Date.now()}.png`;
+        link.download = `KGEN_FS_${Date.now()}.png`;
         link.href = this.renderer.domElement.toDataURL();
         link.click();
-        this.showAI("照片已存入您的終端設備。");
+        this.speakAI("影象記錄已成功存入本地磁區。");
     },
     
     showLamp() {
-        alert("13生肖光明燈系統：每個生肖限額100名，1 KGEN/天。已記錄您的資料。");
+        alert("13生肖光明燈：每個生肖限額100名，記錄中... 1 KGEN/天。請選擇生肖後進行轉帳。");
     }
 };
 
