@@ -2,84 +2,91 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜廣寒宮物理引擎 V2.1.7</title>
+    <title>KGEN 16888｜質能反物質引擎 V2.1.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 物理能量監控 */
-        .top-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
+        /* 頂部能量監控 */
+        .hud-top { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
         .bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); margin: 4px 0 10px; border-radius: 3px; overflow: hidden; }
-        #power-fill { width: 90%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); }
+        .bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 2px; overflow: hidden; }
+        #warp-fill { width: 50%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        #mass-fill { width: 100%; height: 100%; background: var(--red); }
 
-        /* 中央仙女圖 (強化清晰 + 逆時針同步) */
-        #fairy-ufo {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        /* 中央仙女圖 (強化清晰 + 逆時針修正) */
+        #fairy-vessel {
+            position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%);
             width: 380px; height: 380px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.6; border-radius: 50%; z-index: 2;
-            border: 4px solid var(--gold);
-            box-shadow: 0 0 50px rgba(255,215,120,0.5);
+            opacity: 0.65; border-radius: 50%; z-index: 2; border: 4px solid var(--gold);
+            box-shadow: 0 0 50px rgba(255,215,120,0.4);
             transition: transform 0.1s linear;
         }
 
-        #bridge { position: fixed; top: 20%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #physics-info { font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); background: rgba(0,0,0,0.8); padding: 5px 20px; border: 1px solid var(--cyan); border-radius: 20px; }
-        #price { font-family: 'Orbitron'; font-size: 55px; text-shadow: 0 0 25px var(--cyan); margin: 10px 0; }
+        #bridge { position: fixed; top: 22%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #price { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 20px var(--cyan); margin: 5px 0; }
+        #ai-log { background: rgba(0,0,0,0.8); padding: 5px 15px; border: 1px solid var(--cyan); border-radius: 20px; color: var(--cyan); font-size: 12px; }
 
-        /* 橫向飛碟控制 */
-        .ctrl-panel { position: fixed; bottom: 130px; width: 100%; z-index: 1000; padding: 0 30px; box-sizing: border-box; }
-        .steer-box { width: 100%; text-align: center; }
-        input[type=range].h-steer { width: 100%; max-width: 400px; accent-color: var(--gold); cursor: pointer; height: 20px; }
-        .steer-markers { display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto; color: var(--gold); font-size: 12px; font-weight: 900; }
+        /* 操作面板 */
+        .ctrl-grid { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; align-items: flex-end; }
+        .v-box { text-align: center; }
+        input[type=range].warp-engine { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
+        input[type=range].steer-ufo { width: 220px; accent-color: var(--gold); }
 
-        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 20px 5px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
         .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
 
         #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #cam-bg { position: fixed; inset: 0; z-index: 1; opacity: 0.4; object-fit: cover; }
+        #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
     </style>
 </head>
 <body>
 
-<div id="fairy-ufo"></div>
-<video id="cam-bg" autoplay playsinline></video>
+<div id="fairy-vessel"></div>
+<video id="cam-feed" autoplay playsinline></video>
 <div id="three-canvas"></div>
 
-<div class="top-hud">
-    <div class="bar-label"><span>質量能量 E = MC^2</span><span id="mass-txt">推力: 90 KGEN</span></div>
-    <div class="bar-bg"><div id="power-fill"></div></div>
-    <div class="bar-label"><span>黑洞重力變數 g</span><span>W = mgh</span></div>
-    <div class="bar-bg"><div style="width:100%; height:100%; background:var(--cyan);"></div></div>
+<div class="hud-top">
+    <div class="bar-label"><span>曲速倍率 WARP DRIVE (1-150x)</span><span id="warp-val">1x</span></div>
+    <div class="bar-bg"><div id="warp-fill"></div></div>
+    <div class="bar-label"><span>質能狀態 (E=mc^2)</span><span id="mass-val">90 KGEN</span></div>
+    <div class="bar-bg"><div id="mass-fill"></div></div>
 </div>
 
 <div id="bridge">
-    <div id="physics-info">引擎啟動：等待指令</div>
+    <div id="ai-log">AI 診斷啟動中...</div>
     <div id="price">16888.88</div>
-    <div id="stats" style="color:var(--gold); font-size:12px;">質量: 90口 | 角度: 0°</div>
+    <div id="physics-hud" style="color:var(--gold); font-size:11px; font-family:'Orbitron';">F = m * a | MODE: NEUTRAL</div>
 </div>
 
-<div class="ctrl-panel">
-    <div class="steer-box">
-        <div class="steer-markers"><span>做空 (-90°)</span><span>做多 (0°)</span><span>做空 (90°)</span></div>
-        <input type="range" id="steer" class="h-steer" min="-90" max="90" value="0">
+<div class="ctrl-grid">
+    <div class="v-box">
+        <div style="font-size:10px; color:var(--cyan);">曲速</div>
+        <input type="range" id="warp" class="warp-engine" min="1" max="150" value="1">
+    </div>
+    <div class="v-box">
+        <div style="font-size:10px; color:var(--gold); margin-bottom:5px;">飛碟方向盤 (質能極性)</div>
+        <div style="display:flex; justify-content:space-between; width:220px; font-size:9px; color:var(--gold);">
+            <span>空 (-180°)</span><span>多 (0°)</span><span>空 (180°)</span>
+        </div>
+        <input type="range" id="steer" class="steer-ufo" min="-180" max="180" value="0">
     </div>
 </div>
 
 <div class="console">
     <div class="grid">
-        <button class="btn" onclick="app.scan()">🔍 合約/錢包分析</button>
-        <button class="btn" onclick="app.trade('CT')">📈 CT 現價下單</button>
-        <button class="btn" onclick="app.trade('CLOSE')">📉 結算平倉</button>
+        <button class="btn" onclick="app.scan()">🔍 合約診斷</button>
+        <button class="btn" onclick="app.trade('CT')">📈 CT 下單</button>
+        <button class="btn" onclick="app.trade('CLOSE')">📉 結算</button>
         <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
         <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
-        <button class="btn" onclick="app.connect()">🦊 連結神明銀行</button>
-        <button class="btn" onclick="app.speak('質能引擎物理同步完成')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.toggleCam()">📸 影像開關</button>
+        <button class="btn" onclick="app.connect()">🦊 銀行連結</button>
+        <button class="btn" onclick="app.speak('質能轉換系統就緒，準備躍遷')">🎙️ 客服語音</button>
     </div>
 </div>
 
@@ -96,84 +103,93 @@ const app = {
         const pos = [];
         for (let i = 0; i < 1500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.particles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
-        this.scene.add(this.particles);
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.scene.add(this.stars);
 
         this.camera.position.z = 15;
         this.animate();
-        setInterval(() => {
-            document.getElementById('price').innerText = (16888 + (Math.random()-0.5)*10).toFixed(2);
-        }, 1500);
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
+        const warp = parseInt(document.getElementById('warp').value);
         const steer = parseInt(document.getElementById('steer').value);
-        
-        // 1. 物理引擎：90KGEN 隨角度遞減
-        const mass = 90 - Math.abs(steer);
-        document.getElementById('mass-txt').innerText = `推力: ${mass} KGEN`;
-        document.getElementById('power-fill').style.width = (mass / 90 * 100) + "%";
-        
-        // 2. 旋轉邏輯修正：角度大要【逆時針】
-        // 角度為正 (右偏) -> 旋轉為負 (逆時針)
-        document.getElementById('fairy-ufo').style.transform = `translate(-50%, -50%) rotate(${-steer}deg)`;
 
-        // 3. 粒子導航流向
+        // 1. 物理邏輯：0度正向90KGEN, 90度為0, 180度反向-90KGEN
+        // 使用餘弦函數模擬效率轉換：cos(0)=1, cos(90)=0, cos(180)=-1
+        const efficiency = Math.cos(steer * Math.PI / 180);
+        const currentKgen = (90 * efficiency).toFixed(2);
+        
+        // 2. 視覺同步：方向盤角度增大 (右拉) -> 圖逆時針轉 (-steer)
+        document.getElementById('fairy-vessel').style.transform = `translate(-50%, -50%) rotate(${-steer}deg)`;
+
+        // 3. UI 更新
+        document.getElementById('warp-val').innerText = `${warp}x`;
+        document.getElementById('warp-fill').style.width = (warp / 150 * 100) + "%";
+        document.getElementById('mass-val').innerText = `${currentKgen} KGEN`;
+        document.getElementById('mass-fill').style.width = Math.abs(efficiency * 100) + "%";
+        document.getElementById('mass-fill').style.background = currentKgen >= 0 ? "var(--cyan)" : "var(--red)";
+
+        // 4. 粒子流向 (F = m * a)
+        const speed = (warp / 500) * Math.abs(efficiency);
+        const p = this.stars.geometry.attributes.position.array;
         const rad = (steer * Math.PI) / 180;
-        const speed = mass / 500; // 推力決定曲速
-        const p = this.particles.geometry.attributes.position.array;
+
         for(let i=0; i<p.length; i+=3) {
             p[i] += Math.sin(rad) * speed;
-            p[i+1] -= Math.cos(rad) * speed; 
+            p[i+1] -= Math.cos(rad) * speed * (currentKgen >= 0 ? 1 : -1);
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
         }
-        this.particles.geometry.attributes.position.needsUpdate = true;
+        this.stars.geometry.attributes.position.needsUpdate = true;
 
-        document.getElementById('physics-info').innerText = steer === 0 ? "🚀 最大質量做多模式" : (Math.abs(steer) > 60 ? "📉 高偏角俯衝做空" : "🛸 向量航行中");
-        document.getElementById('stats').innerText = `質量: ${mass}口 | 角度: ${steer}°`;
+        const mode = currentKgen > 10 ? "LONG (質能正向)" : currentKgen < -10 ? "SHORT (反物質負向)" : "STABLE (觀望)";
+        document.getElementById('physics-hud').innerText = `OUTPUT: ${(warp * currentKgen).toFixed(0)} | MODE: ${mode}`;
+        
         this.renderer.render(this.scene, this.camera);
     },
 
     scan() {
-        const addr = prompt("輸入掃描地址：");
-        const isContract = addr && addr.length > 35;
-        const msg = isContract ? "判定：【神明/仙女池】分紅地址" : "判定：【百姓/一般錢包】存貸地址";
-        document.getElementById('physics-info').innerText = msg;
-        this.speak(msg);
+        const addr = prompt("請輸入診斷地址：");
+        if(!addr) return;
+        let result = "";
+        // 精確診斷邏輯
+        if(addr.toLowerCase().includes("kgen") || addr.length > 40) {
+            result = "診斷：【神明/仙女級合約】具備自動分紅資質";
+        } else if (addr.startsWith("0x") && addr.length === 42) {
+            result = "診斷：【一般百姓錢包】享有存貸計息權利";
+        } else {
+            result = "診斷：未知生命體地址";
+        }
+        document.getElementById('ai-log').innerText = result;
+        this.speak(result);
     },
 
-    trade(t) { this.speak(t === 'CT' ? "推力全開，執行下單" : "回收能量，結算平倉"); },
-
-    setWish() {
-        const w = prompt("輸入許願：");
-        if(w) document.getElementById('physics-info').innerText = `【願】：${w}`;
+    trade(t) { this.speak(t==='CT' ? "質能引擎全開，下單" : "回收燃燒殘渣，結算"); },
+    setWish() { 
+        const w = prompt("輸入留言："); 
+        if(w) document.getElementById('ai-log').innerText = `【願】：${w}`;
     },
-
     async toggleCam() {
-        const v = document.getElementById('cam-bg');
+        const v = document.getElementById('cam-feed');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { const s = await navigator.mediaDevices.getUserMedia({video: true}); v.srcObject = s; }
     },
-
     capture() {
         const out = document.createElement('canvas'); out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1920);
-        if(document.getElementById('cam-bg').srcObject) ctx.drawImage(document.getElementById('cam-bg'), 0,0,1080,1920);
+        if(document.getElementById('cam-feed').srcObject) ctx.drawImage(document.getElementById('cam-feed'), 0,0,1080,1920);
         ctx.drawImage(this.renderer.domElement, 0,0,1080,1920);
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 物理日誌", 50, 150);
+        ctx.fillText("16888 廣寒宮 質能日誌", 50, 150);
         ctx.font = "40px Noto Sans TC";
-        ctx.fillText(`能量推力: ${document.getElementById('mass-txt').innerText}`, 50, 1850);
+        ctx.fillText(document.getElementById('ai-log').innerText, 50, 1850);
         const link = document.createElement('a');
-        link.download = "KGEN_PHYSICS.png"; link.href = out.toDataURL(); link.click();
+        link.download = "UFO_PHYSICS_V218.png"; link.href = out.toDataURL(); link.click();
     },
-
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
-
 window.onload = () => app.init();
 </script>
 </body>
