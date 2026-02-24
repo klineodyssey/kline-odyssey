@@ -3,72 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜時光飛碟 V2.0.0</title>
+    <title>K線西遊記｜花果山台灣 V2.0.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
         /* 左右操作桿：貼死邊緣 */
         .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .l-stick { left: 0px; } .r-stick { right: 0px; }
-        input[type=range].vert { width: 250px; transform: rotate(-90deg); margin: 100px -80px; accent-color: var(--gold); }
-        .label { font-size: 10px; color: var(--gold); font-weight: 900; text-shadow: 1px 1px 2px #000; }
+        input[type=range].vert { width: 200px; transform: rotate(-90deg); margin: 80px -70px; accent-color: var(--gold); }
 
-        /* 背景層級 */
-        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; }
+        /* 相機與 3D 層 */
+        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         #three-container { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 
-        /* 頂部血量/油量 */
-        .header { position: fixed; top: 0; width: 100%; padding: 10px; z-index: 500; text-align: center; background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent); }
-        .fuel-bar { width: 70%; height: 12px; background: #222; border: 1px solid var(--gold); border-radius: 6px; margin: 5px auto; overflow: hidden; }
-        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff3c00, var(--gold)); }
+        /* 品牌浮水印 (左下角) */
+        .watermark-group { position: fixed; bottom: 180px; left: 20px; z-index: 500; text-shadow: 2px 2px 4px #000; pointer-events: none; }
+        .brand-text { font-size: 24px; color: var(--gold); font-weight: 900; margin-bottom: 5px; }
+        .info-text { font-size: 14px; color: #fff; }
+
+        /* 仙女小圖控制 (右上角) */
+        #fairy-thumb { position: fixed; top: 20px; right: 20px; width: 100px; height: 100px; border: 2px solid var(--gold); border-radius: 10px; z-index: 600; display: none; background-size: cover; background-position: center; }
 
         /* 控制面板 */
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .btn { padding: 12px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; font-weight: 900; cursor: pointer; }
-
-        #wish-stamp { position: fixed; bottom: 160px; left: 20px; z-index: 500; font-family: 'Noto Sans TC'; color: var(--gold); font-size: 20px; text-shadow: 2px 2px 5px #000; font-weight: 900; }
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .btn { padding: 10px 5px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-size:12px; color:var(--gold); letter-spacing: 2px;">KGEN ODYSSEY V2.0.0</div>
-    <div class="fuel-bar"><div id="fuel-fill"></div></div>
-    <div id="status" style="font-size:10px; color:var(--cyan);">系統就緒</div>
-</div>
-
 <video id="cam-video" autoplay playsinline></video>
 <div id="three-container"></div>
-<div id="wish-stamp"></div>
+<div id="fairy-thumb"></div>
+
+<div class="watermark-group">
+    <div class="brand-text">K線西遊記 花果山台灣</div>
+    <div id="live-time" class="info-text"></div>
+    <div id="wish-text" class="info-text" style="color: var(--cyan); margin-top: 5px;"></div>
+</div>
 
 <div class="stick l-stick">
-    <div class="label">曲率</div>
     <input type="range" id="curv" class="vert" min="0" max="150" value="75">
 </div>
 <div class="stick r-stick">
-    <div class="label">方向</div>
     <input type="range" id="angle" class="vert" min="0" max="360" value="180">
 </div>
 
 <div class="panel">
     <div class="btn-grid">
-        <button class="btn" onclick="app.trade('LONG')">做多交易</button>
-        <button class="btn" onclick="app.trade('SHORT')">做空交易</button>
-        <button class="btn" onclick="app.toggleCam()">🎬 切換相機</button>
-        <button class="btn" onclick="app.capture()">📷 拍下合照</button>
+        <button class="btn" onclick="app.toggleCam()">📸 開相機</button>
+        <button class="btn" onclick="app.toggleFairy()">🧚 仙女合照</button>
         <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
-        <button class="btn" onclick="app.speak('歡迎進入廣寒宮，我是您的 AI 導師。')">🎙️ AI 客服</button>
+        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
+        <button class="btn" onclick="app.trade('LONG')">做多</button>
+        <button class="btn" onclick="app.trade('SHORT')">做空</button>
+        <button class="btn" onclick="app.speak('西遊修行開始')">🎙️ 客服</button>
+        <button class="btn" onclick="alert('光明燈: 1 KGEN/天')">🏮 點燈</button>
     </div>
 </div>
 
 <script>
 const app = {
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    
+    showFairy: false,
+
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -76,22 +77,25 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-container').appendChild(this.renderer.domElement);
 
-        const loader = new THREE.TextureLoader();
-        loader.crossOrigin = "anonymous";
-        this.fairy = new THREE.Mesh(new THREE.CircleGeometry(4, 32), new THREE.MeshBasicMaterial({ map: loader.load(this.fairyImg), transparent: true }));
-        this.scene.add(this.fairy);
-
         this.createStars();
         this.camera.position.z = 10;
+        
+        // 預載仙女小圖
+        document.getElementById('fairy-thumb').style.backgroundImage = `url(${this.fairyImg})`;
+
         this.animate();
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-time').innerText = now.toLocaleString('zh-TW', { hour12: false });
+        }, 1000);
     },
 
     createStars() {
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for(let i=0; i<800; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for(let i=0; i<500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1}));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true, opacity: 0.5}));
         this.scene.add(this.stars);
     },
 
@@ -103,46 +107,76 @@ const app = {
         
         const p = this.stars.geometry.attributes.position.array;
         for(let i=1; i<p.length; i+=3) {
-            p[i] += flow * (crv / 150);
+            p[i] += flow * (crv / 200);
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
-        this.fairy.rotation.y = (ang-180)*0.01;
         this.renderer.render(this.scene, this.camera);
     },
 
     async toggleCam() {
-        const v = document.getElementById('cam-video');
-        if(v.style.display === "block") return v.style.display = "none";
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            v.srcObject = stream;
-            v.style.display = "block";
-        } catch(e) { alert("無法開啟相機，請確認權限。"); }
+            document.getElementById('cam-video').srcObject = stream;
+        } catch(e) { alert("請允許相機權限"); }
+    },
+
+    toggleFairy() {
+        this.showFairy = !this.showFairy;
+        document.getElementById('fairy-thumb').style.display = this.showFairy ? 'block' : 'none';
+    },
+
+    setWish() {
+        const w = prompt("請輸入您的許願或還願：");
+        document.getElementById('wish-text').innerText = w ? `願望：${w}` : "";
     },
 
     capture() {
         const v = document.getElementById('cam-video');
         const c3d = this.renderer.domElement;
         const out = document.createElement('canvas');
-        out.width = c3d.width; out.height = c3d.height;
+        out.width = v.videoWidth || window.innerWidth;
+        out.height = v.videoHeight || window.innerHeight;
         const ctx = out.getContext('2d');
 
-        if(v.style.display === "block") ctx.drawImage(v, 0, 0, out.width, out.height);
-        ctx.drawImage(c3d, 0, 0); // 疊加 3D
+        // 1. 底圖：相機自拍
+        ctx.drawImage(v, 0, 0, out.width, out.height);
         
-        // 疊加文字
+        // 2. 疊加 3D 星辰
+        ctx.drawImage(c3d, 0, 0, out.width, out.height);
+
+        // 3. 疊加右上角仙女 (如果有開)
+        if(this.showFairy) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = this.fairyImg;
+            img.onload = () => {
+                ctx.drawImage(img, out.width - 160, 40, 120, 120);
+                this.drawText(ctx, out);
+            };
+        } else {
+            this.drawText(ctx, out);
+        }
+    },
+
+    drawText(ctx, out) {
         ctx.fillStyle = "#ffd778";
-        ctx.font = "bold 30px Orbitron";
-        ctx.fillText("KGEN V2.0.0", 30, 50);
-        const wish = document.getElementById('wish-stamp').innerText;
+        ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("K線西遊記 花果山台灣", 40, out.height - 120);
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "24px Orbitron";
+        ctx.fillText(new Date().toLocaleString(), 40, out.height - 80);
+        
+        const wish = document.getElementById('wish-text').innerText;
         if(wish) {
-            ctx.font = "bold 24px Noto Sans TC";
-            ctx.fillText(wish, 30, out.height - 100);
+            ctx.fillStyle = "#00f2ff";
+            ctx.font = "bold 30px Noto Sans TC";
+            ctx.fillText(wish, 40, out.height - 40);
         }
 
         const link = document.createElement('a');
-        link.download = "KGEN_MEMORABLE.png";
+        link.download = `KGEN_SELFI_${Date.now()}.png`;
         link.href = out.toDataURL();
         link.click();
     },
@@ -154,13 +188,8 @@ const app = {
     },
 
     trade(t) {
-        this.speak(`啟動錢包連線中，目前環境為${t === 'LONG' ? '做多' : '做空'}。`);
-        alert(`呼叫錢包執行 ${t} 交易...`);
-    },
-
-    setWish() {
-        const w = prompt("請輸入您的許願或還願：");
-        document.getElementById('wish-stamp').innerText = w || "";
+        this.speak(`連線錢包進行${t === 'LONG' ? '做多' : '做空'}交易`);
+        alert(`呼叫錢包執行 ${t}`);
     }
 };
 
