@@ -1,128 +1,198 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <title>廣寒宮 16888｜宇宙天條 V4.0</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>廣寒宮 16888｜宇宙文明實體終端 V6.0</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #06070b; --gold: #ffd778; --red: #ff4d4d; --green: #00ffcc; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
-        
-        /* 1. 頂部天條狀態欄 */
-        .header { width: 100%; padding: 10px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-around; font-size: 10px; position: fixed; top: 0; z-index: 100; }
-        .stat-item { text-align: center; }
-        .stat-val { display: block; font-size: 14px; color: var(--gold); font-weight: 900; }
+        :root {
+            --gold: #ffd778;
+            --cyan: #00f2ff;
+            --red: #ff3c00;
+            --bg: #050608;
+            --panel: rgba(20, 22, 28, 0.9);
+        }
 
-        /* 2. 3D 宇宙 K 線舞台 */
-        .stage-4d { width: 100vw; height: 60vh; display: flex; align-items: center; justify-content: center; perspective: 1000px; padding-top: 50px; }
-        .kline-container { position: relative; width: 300px; height: 300px; transform-style: preserve-3d; transition: 0.1s; }
-        .fairy-avatar { position: absolute; width: 250px; height: 250px; border-radius: 50%; border: 4px solid var(--gold); background: url('./assets/fairy.png') no-repeat center/cover; box-shadow: 0 0 50px rgba(255,215,120,0.4); left: 25px; top: 25px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 3. 操作區：四旋鈕與拔河 */
-        .controls { position: absolute; bottom: 100px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .slider-wrap { width: 85%; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gold); }
-        input[type=range] { width: 100%; accent-color: var(--gold); }
+        /* 啟動加載畫面：10MB 資源加載感 */
+        #loading-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .loader-bar {
+            width: 250px; height: 2px; background: rgba(255,255,255,0.1);
+            margin-top: 20px; position: relative; overflow: hidden;
+        }
+        .loader-progress {
+            position: absolute; width: 0%; height: 100%; background: var(--gold);
+            box-shadow: 0 0 15px var(--gold); transition: width 0.3s;
+        }
+        .status-text { font-size: 10px; color: var(--gold); margin-top: 10px; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* 4. 下單與結算 (左下) */
-        .actions { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .btn { padding: 12px 20px; border-radius: 20px; border: 1px solid var(--gold); background: #000; color: var(--gold); font-weight: 900; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: #000; }
+        /* 4D 舞台 */
+        #stage-4d { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
 
-        /* 5. 宇宙日誌 (右下) */
-        .logs { position: fixed; bottom: 20px; right: 20px; width: 150px; height: 80px; font-size: 9px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px; overflow: hidden; opacity: 0.7; }
+        /* 駕駛艙面板 (Cockpit) */
+        .cockpit-ui {
+            position: absolute; inset: 0; pointer-events: none; z-index: 10;
+            border: 1px solid rgba(255,215,120,0.1);
+        }
+
+        /* 頂部：天條數據欄 */
+        .hud-top {
+            position: absolute; top: 0; width: 100%; height: 80px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            display: flex; justify-content: space-around; align-items: center; padding: 0 20px;
+        }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 9px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+        .stat-value { font-size: 18px; font-weight: 900; color: var(--gold); }
+
+        /* 底部：操作終端 */
+        .terminal {
+            position: absolute; bottom: 0; width: 100%; height: 35vh;
+            background: var(--panel); border-top: 1px solid var(--gold);
+            pointer-events: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+        }
+        .control-row { display: flex; align-items: center; gap: 15px; }
+        .slider-meta { width: 80px; font-size: 10px; color: var(--gold); }
+        input[type=range] { flex: 1; accent-color: var(--gold); cursor: pointer; }
+
+        /* 結算按鈕區 */
+        .action-dock {
+            display: flex; gap: 10px; margin-top: auto;
+        }
+        .btn {
+            flex: 1; padding: 15px; border: 1px solid var(--gold); background: transparent;
+            color: var(--gold); font-weight: 900; border-radius: 4px; transition: 0.3s;
+        }
+        .btn:active { background: var(--gold); color: #000; }
+        .btn-ignite { background: rgba(255, 215, 120, 0.1); border-width: 2px; }
+
+        /* 宇宙日誌 */
+        #cosmic-log {
+            position: absolute; right: 20px; top: 100px; width: 200px; height: 150px;
+            font-size: 10px; color: var(--cyan); overflow-y: hidden; text-align: right;
+            mask-image: linear-gradient(to top, #fff, transparent);
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="stat-item">宇宙節奏 (CT)<span class="stat-val" id="stCT">0</span></div>
-    <div class="stat-item">人群拔河 (R)<span class="stat-val" id="stR">0.00</span></div>
-    <div class="stat-item">金箍棒重<span class="stat-val" id="stW">13500 斤</span></div>
-    <div class="stat-item">許願池<span class="stat-val" id="stP">0 / 16888</span></div>
-</div>
-
-<div class="stage-4d">
-    <div class="kline-container" id="kStage">
-        <div class="fairy-avatar" id="fairy"></div>
+    <div id="loading-overlay">
+        <div style="font-size: 24px; font-weight: 900; letter-spacing: 5px;">KGEN 16888</div>
+        <div class="loader-bar"><div class="loader-progress" id="load-bar"></div></div>
+        <div class="status-text" id="status-text">INITIALIZING QUANTUM TERMINAL...</div>
     </div>
-</div>
 
-<div class="controls">
-    <div class="slider-wrap">
-        <div class="slider-label"><span>多方 L</span><span id="valL">5000</span></div>
-        <input type="range" id="rngL" min="0" max="10000" value="5000">
+    <div id="stage-4d"></div>
+
+    <div class="cockpit-ui">
+        <div class="hud-top">
+            <div class="stat-box"><div class="stat-label">宇宙節奏 CT</div><div class="stat-value" id="hud-ct">0</div></div>
+            <div class="stat-box"><div class="stat-label">人群拔河 R</div><div class="stat-value" id="hud-r">0.00</div></div>
+            <div class="stat-box"><div class="stat-label">許願池進度</div><div class="stat-value" id="hud-pool">0 / 16888</div></div>
+        </div>
+
+        <div id="cosmic-log"></div>
+
+        <div class="terminal">
+            <div class="control-row">
+                <div class="slider-meta">方向盤 (CT)</div>
+                <input type="range" id="ctrl-ct" min="-1" max="1" step="1" value="0">
+            </div>
+            <div class="control-row">
+                <div class="slider-meta">多方 L</div>
+                <input type="range" id="ctrl-l" min="0" max="10000" value="5000">
+            </div>
+            <div class="control-row">
+                <div class="slider-meta">空方 S</div>
+                <input type="range" id="ctrl-s" min="0" max="10000" value="5000">
+            </div>
+
+            <div class="action-dock">
+                <button class="btn btn-ignite" onclick="app.ignite()">🔥 點火修行</button>
+                <button class="btn" onclick="app.settle()">13500 斤結算</button>
+            </div>
+        </div>
     </div>
-    <div class="slider-wrap">
-        <div class="slider-label"><span>空方 S</span><span id="valS">5000</span></div>
-        <input type="range" id="rngS" min="0" max="10000" value="5000">
-    </div>
-    <div class="slider-wrap">
-        <div class="slider-label"><span>方向盤 (CT)</span><span id="valCT">0</span></div>
-        <input type="range" id="rngCT" min="-1" max="1" step="1" value="0">
-    </div>
-</div>
 
-<div class="actions">
-    <button class="btn btn-gold" onclick="settle()">13500 斤強制結算</button>
-    <button class="btn" onclick="wish()">點火許願 (+100 KGEN)</button>
-</div>
+    <script>
+        /**
+         * 宇宙文明實體終端 - 核心邏輯架構
+         */
+        const app = {
+            state: {
+                L: 5000, S: 5000, CT: 0, pool: 0,
+                isLoaded: false
+            },
 
-<div class="logs" id="log">系統啟動：遵循天條 V1.0...</div>
+            // 實裝天條核心演算法
+            engine: {
+                calculateR: (L, S) => (L - S) / (L + S + 0.000001),
+                calculateD: (CT, R) => (0.6 * CT) + (0.4 * R)
+            },
 
-<script>
-    const $ = (id) => document.getElementById(id);
-    let pool = 0;
+            init: async function() {
+                this.log("終端自檢中...");
+                await this.simulateLoading();
+                this.startRenderLoop();
+            },
 
-    function updateEngine() {
-        // 1. 取得天條物理量
-        const L = parseFloat($("rngL").value);
-        const S = parseFloat($("rngS").value);
-        const CT = parseFloat($("rngCT").value);
-        const epsilon = 0.0001;
+            simulateLoading: async function() {
+                const bar = document.getElementById('load-bar');
+                const txt = document.getElementById('status-text');
+                const steps = ["加載天條邏輯...", "注入 16888 合約 ABI...", "建立 4D 渲染矩陣...", "啟動廣寒宮通訊..."];
+                
+                for(let i = 0; i <= 100; i += 2) {
+                    bar.style.width = i + '%';
+                    if(i % 25 === 0) txt.innerText = steps[i/25];
+                    await new Promise(r => setTimeout(r, 30));
+                }
+                document.getElementById('loading-overlay').style.display = 'none';
+                this.log("宇宙引擎已啟動。");
+            },
 
-        // 2. 天條公式 4.2：拔河值 R
-        const R = (L - S) / (L + S + epsilon);
-        
-        // 3. 天條公式 5.2：合成方向 D (w1=0.6, w2=0.4)
-        const D = (0.6 * CT) + (0.4 * R);
+            log: function(msg) {
+                const el = document.getElementById('cosmic-log');
+                el.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + el.innerHTML;
+            },
 
-        // 更新顯示
-        $("valL").textContent = L; $("valS").textContent = S; $("valCT").textContent = CT;
-        $("stCT").textContent = CT; $("stR").textContent = R.toFixed(2);
-        $("stP").textContent = `${Math.floor(pool)} / 16888`;
+            ignite: function() {
+                this.state.pool += 135;
+                this.log("注入能量：+135 KGEN");
+                document.getElementById('hud-pool').innerText = `${Math.floor(this.state.pool)} / 16888`;
+            },
 
-        // 4. 3D 視覺反應 (App 遊戲感角色移動)
-        const stage = $("kStage");
-        const fairy = $("fairy");
-        
-        // 隨 D 方向產生 3D 偏轉
-        stage.style.transform = `rotateY(${R * 30}deg) rotateX(${CT * -20}deg)`;
-        
-        // 顏色隨方向改變 (多方青色，空方紅色)
-        fairy.style.borderColor = D > 0 ? "var(--green)" : "var(--red)";
-        fairy.style.boxShadow = `0 0 50px ${D > 0 ? "rgba(0,255,204,0.5)" : "rgba(255,77,77,0.5)"}`;
-        
-        requestAnimationFrame(updateEngine);
-    }
+            settle: function() {
+                this.log("執行天條 6.1 判定...");
+                // 這裡將在第二批程式中接入勝負計算
+            },
 
-    function wish() {
-        pool += 100;
-        log("許願成功，能量注入 100 KGEN");
-        if(pool >= 16888) {
-            alert("天條觸發：仙女下凡 (Lunar Descent)！");
-            pool = 1688; // 留池 10%
-        }
-    }
+            startRenderLoop: function() {
+                const update = () => {
+                    this.state.L = parseFloat(document.getElementById('ctrl-l').value);
+                    this.state.S = parseFloat(document.getElementById('ctrl-s').value);
+                    this.state.CT = parseFloat(document.getElementById('ctrl-ct').value);
 
-    function settle() {
-        log("執行天條 6.1：勝負判定中...");
-        // 這裡可串接你的合約結算
-    }
+                    const R = this.engine.calculateR(this.state.L, this.state.S);
+                    document.getElementById('hud-r').innerText = R.toFixed(2);
+                    document.getElementById('hud-ct').innerText = this.state.CT;
 
-    function log(m) { $("log").innerHTML = `> ${m}<br>` + $("log").innerHTML; }
+                    requestAnimationFrame(update);
+                };
+                update();
+            }
+        };
 
-    updateEngine();
-</script>
+        window.onload = () => app.init();
+    </script>
 </body>
 </html>
