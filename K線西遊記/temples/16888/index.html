@@ -2,105 +2,103 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜13生肖光明燈版 V2.2.4</title>
+    <title>KGEN 16888｜神電神宮・花果山交易所 V2.2.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 頂部 HUD：金庫與腦容量 */
-        .hud-v2 { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
-        .hud-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; }
-        .bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 2px; }
-        #vault-f { width: 80%; height: 100%; background: var(--gold); }
-        #brain-f { width: 60%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        /* 神殿 HUD */
+        .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; }
+        .hud-title { font-size: 14px; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin-bottom: 5px; }
+        .bar-wrap { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; border: 1px solid #444; }
+        #vault-f { width: 85%; height: 100%; background: linear-gradient(90deg, #b8860b, var(--gold)); }
+        #brain-f { width: 40%; height: 100%; background: linear-gradient(90deg, #008b8b, var(--cyan)); box-shadow: 0 0 15px var(--cyan); }
 
-        /* 13 生肖光明燈 */
-        .zodiac-panel { position: fixed; right: 10px; top: 100px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
-        .lamp { width: 45px; height: 45px; border: 1px solid var(--gold); border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: var(--gold); cursor: pointer; }
-        .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
+        /* 席位實時監控 */
+        .seat-monitor { position: fixed; top: 120px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid var(--gold); border-radius: 10px; box-shadow: 0 0 20px rgba(255,215,120,0.3); }
+        .seat-item { margin-bottom: 8px; font-size: 13px; font-family: 'Orbitron'; }
+        .seat-item span { color: var(--gold); font-weight: bold; }
 
-        /* 席位與血量 */
-        .status-left { position: fixed; top: 100px; left: 15px; font-size: 10px; color: var(--cyan); z-index: 1000; }
-        .hp-box { width: 150px; height: 15px; border: 1px solid #fff; margin-top: 5px; overflow: hidden; }
-        #hp-fill { height: 100%; width: 100%; background: #0f0; transition: 0.3s; }
+        /* 13生肖光明燈 (神宮版) */
+        .altar-lamps { position: fixed; right: 15px; top: 110px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .god-lamp { width: 50px; height: 50px; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .god-lamp:hover { box-shadow: 0 0 20px var(--gold); transform: scale(1.1); }
+        .god-lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 30px var(--gold); }
 
-        /* 中央仙女圖 */
-        #fairy-vessel {
-            position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%);
-            width: 360px; height: 360px;
+        /* 飛碟核心 */
+        #ufo-core {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 380px; height: 380px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.8; border-radius: 50%; z-index: 2; border: 4px solid var(--gold);
-            box-shadow: 0 0 50px rgba(255, 215, 120, 0.5);
+            opacity: 0.9; border-radius: 50%; z-index: 2; border: 5px solid var(--gold);
+            box-shadow: 0 0 60px rgba(255, 215, 120, 0.6);
         }
 
-        #bridge { position: fixed; top: 22%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #price { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 25px var(--cyan); }
+        /* 操控系統 */
+        .bridge { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #price { font-family: 'Orbitron'; font-size: 60px; text-shadow: 0 0 30px var(--cyan); }
+        #hp-label { color: #ff3c00; font-size: 14px; font-weight: bold; }
 
-        /* 操控桿 */
-        .controls { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
-        .tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 14px; }
-        input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 220px; accent-color: var(--gold); }
+        .cockpit-ctrls { position: fixed; bottom: 130px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; }
+        .ctrl-tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 16px; text-shadow: 0 0 10px var(--cyan); }
+        input[type=range].god-v { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
+        input[type=range].god-h { width: 250px; accent-color: var(--gold); }
 
-        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
+        .bottom-altar { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 3px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .btn-god { padding: 14px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        #three-box { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #cam { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
+        #starfield { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="fairy-vessel"></div>
-<video id="cam" autoplay playsinline></video>
-<div id="three-box"></div>
+<div id="ufo-core"></div>
+<div id="starfield"></div>
 
-<div class="hud-v2">
-    <div class="hud-row"><span>靈霄殿金庫: 50,000,000 KGEN</span><span>蒸發率 0.1%</span></div>
-    <div class="bar-bg"><div id="vault-f"></div></div>
-    <div class="hud-row"><span>悟空大腦保證金: 50,000,000 KGEN</span><span>腦容量 100%</span></div>
-    <div class="bar-bg"><div id="brain-f"></div></div>
+<div class="god-hud">
+    <div class="hud-title">🏛️ 靈霄寶殿金庫 (50M KGEN) ｜ 交易稅 0.3% ｜ 黑洞蒸發 0.1%</div>
+    <div class="bar-wrap"><div id="vault-f"></div></div>
+    <div class="hud-title">🧠 悟空大腦 (花果山台灣交易所) ｜ 保證金: 50,000,000 KGEN</div>
+    <div class="bar-wrap"><div id="brain-f"></div></div>
 </div>
 
-<div class="status-left">
-    <div>🐒 花果山席位: 500 | 🙏 神明: 500</div>
-    <div style="margin-top:5px;">血量 HP:</div>
-    <div class="hp-box"><div id="hp-fill"></div></div>
-    <div style="color:var(--gold); margin-top:5px;">2s K線引擎 (質能守恆)</div>
+<div class="seat-monitor">
+    <div class="seat-item">🐒 花果山席位: <span id="seat-1">342</span> / 500</div>
+    <div class="seat-item">🙏 神明席位: <span id="seat-2">128</span> / 500</div>
+    <div id="hp-label">HP 質量守恆: 100%</div>
 </div>
 
-<div class="zodiac-panel" id="lamps">
-    </div>
+<div class="altar-lamps" id="lamps"></div>
 
-<div id="bridge">
+<div class="bridge">
     <div id="price">16888.88</div>
-    <div id="ai-log" style="color:var(--cyan); font-size:12px;">客服：點擊生肖燈賺取利潤分紅</div>
+    <div id="god-msg" style="color:var(--gold); font-size:14px; background:rgba(0,0,0,0.6); display:inline-block; padding:5px 20px; border-radius:20px;">歡迎進入神電神宮</div>
 </div>
 
-<div class="controls">
+<div class="cockpit-ctrls">
     <div style="text-align:center;">
-        <div id="w-val" class="tag">1x</div>
-        <input type="range" id="warp" class="v-warp" min="1" max="150" value="1">
+        <div id="w-txt" class="ctrl-tag">1x</div>
+        <input type="range" id="warp" class="god-v" min="1" max="150" value="1">
     </div>
     <div style="text-align:center;">
-        <div id="s-val" class="tag">0°</div>
-        <input type="range" id="steer" class="h-steer" min="-180" max="180" value="0">
+        <div id="s-txt" class="ctrl-tag">0°</div>
+        <input type="range" id="steer" class="god-h" min="-180" max="180" value="0">
     </div>
 </div>
 
-<div class="console">
+<div class="bottom-altar">
     <div class="grid">
-        <button class="btn" onclick="app.searchToken()">🔍 查 Token 地址</button>
-        <button class="btn" onclick="app.trade('CT')">📈 CT 現價下單</button>
-        <button class="btn" onclick="app.trade('CLOSE')">📉 結算平倉</button>
-        <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
-        <button class="btn" onclick="app.capture()">📷 截圖日誌</button>
-        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
-        <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.speak('星球流向校準完成。13生肖光明燈已點亮。')">🎙️ 客服語音</button>
+        <button class="btn-god" onclick="app.search()">🔍 查 Token 地址</button>
+        <button class="btn-god" onclick="app.trade('CT')">📈 CT 現價交易</button>
+        <button class="btn-god" onclick="app.trade('CLOSE')">📉 結算平倉</button>
+        <button class="btn-god" onclick="app.speakIntro()">🎙️ 神宮介紹</button>
+        <button class="btn-god" onclick="app.setWish()">🙏 許願留言</button>
+        <button class="btn-god" onclick="app.capture()">📷 下載神蹟</button>
+        <button class="btn-god" onclick="app.connect()">🦊 連結錢包</button>
+        <button class="btn-god" onclick="app.speak('星球軌道已校準，天道巡航開啟')">🎙️ 客服語音</button>
     </div>
 </div>
 
@@ -108,49 +106,56 @@
 const app = {
     hp: 100,
     zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','🐱'],
+    
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('three-box').appendChild(this.renderer.domElement);
+        document.getElementById('starfield').appendChild(this.renderer.domElement);
 
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 1500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for (let i = 0; i < 2000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.12 }));
         this.scene.add(this.stars);
 
         this.camera.position.z = 15;
         this.initLamps();
         this.animate();
+        this.speakIntro(); // 開頁高品質介紹
         setInterval(() => this.kEngine(), 2000);
+    },
+
+    speakIntro() {
+        const msg = "大聖吉祥！此處為廣寒宮神電神宮。花果山台灣交易所已上線，悟空大腦保證金上限五千萬 KGEN 質能穩定。靈霄寶殿席位有限，轉帳免稅，交易僅收零點三。請點選光明燈，開啟您的天道投資。";
+        this.speak(msg);
+        document.getElementById('god-msg').innerText = "客服：正在介紹花果山交易所...";
     },
 
     initLamps() {
         const wrap = document.getElementById('lamps');
         this.zodiacs.forEach(z => {
             const l = document.createElement('div');
-            l.className = 'lamp';
+            l.className = 'god-lamp';
             l.innerText = z;
             l.onclick = () => {
                 l.classList.toggle('active');
-                this.speak(`點亮${z}生肖燈，貢獻JGEN獲取分紅。`);
+                this.speak(`已點亮${z}年光明燈。功德加持，席位利潤增加。`);
             };
             wrap.appendChild(l);
         });
     },
 
     kEngine() {
-        const diff = (Math.random() - 0.5) * 15;
+        const diff = (Math.random() - 0.5) * 20;
         const newPrice = 16888 + diff;
         document.getElementById('price').innerText = newPrice.toFixed(2);
         const steer = parseInt(document.getElementById('steer').value);
-        if(Math.abs(steer) > 90 && diff > 0) { // 錯向扣血
-            this.hp -= 2;
-            if(this.hp < 0) this.hp = 0;
-            document.getElementById('hp-fill').style.width = this.hp + "%";
+        if(Math.abs(steer) > 100 && diff > 0) { // 做空價格卻漲，扣血
+            this.hp -= 1;
+            document.getElementById('hp-label').innerText = `HP 質量損耗: ${this.hp}%`;
         }
     },
 
@@ -158,26 +163,25 @@ const app = {
         requestAnimationFrame(() => this.animate());
         const warp = parseInt(document.getElementById('warp').value);
         const steer = parseInt(document.getElementById('steer').value);
-        document.getElementById('w-val').innerText = warp + "x";
-        document.getElementById('s-val').innerText = steer + "°";
+        document.getElementById('w-txt').innerText = warp + "x";
+        document.getElementById('s-txt').innerText = steer + "°";
 
+        // 美女圖對齊：右移順轉
+        document.getElementById('ufo-core').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
+
+        // 星球軌道對齊 (絕對邏輯)
         const rad = (steer * Math.PI) / 180;
-        const efficiency = Math.cos(rad);
-
-        // 美女圖旋轉：右移(正) -> 順時針(正)
-        document.getElementById('fairy-vessel').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
-
-        // 星球物理流向修正 (絕對對齊)
+        const cosVal = Math.cos(rad);
         const p = this.stars.geometry.attributes.position.array;
-        const speed = (warp / 400);
+        const speed = (warp / 500);
 
         for(let i=0; i<p.length; i+=3) {
-            p[i] += Math.sin(rad) * speed; // X軸跟隨轉向
+            // 右移時強制順時針軌跡
+            p[i] += Math.sin(rad) * speed; 
             
-            // Y軸流向校準：
-            // 0度(efficiency>0) -> 上往下(減法)
-            // 180度(efficiency<0) -> 下往上(加法)
-            p[i+1] -= speed * efficiency; 
+            // 0度(cos>0) 由上往下流 (y減少)
+            // 180度(cos<0) 由下往上流 (y增加)
+            p[i+1] -= speed * cosVal;
 
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
@@ -186,40 +190,35 @@ const app = {
         this.renderer.render(this.scene, this.camera);
     },
 
-    searchToken() {
-        const addr = prompt("輸入 Token 地址查詢：");
+    search() {
+        const addr = prompt("輸入 Token 地址：");
         if(addr) {
-            this.speak("掃描代碼成功。此為百姓資產，稅率 0.3% 已同步。");
-            document.getElementById('ai-log').innerText = "診斷：百姓 Token 代碼 1:1 對齊。";
+            this.speak("掃描神宮資料庫中...地址讀取成功，身份：一般百姓。");
+            document.getElementById('god-msg').innerText = "診斷：百姓 Token 地址解析完成";
         }
     },
 
     trade(t) {
-        this.speak(t==='CT' ? "進入 K 線實時成交，黑洞蒸發 0.1% 啟動。" : "平倉結算，利潤已存入花果山席位。");
+        if(t==='CT') this.speak("執行現價成交，交易稅零點三已扣除，黑洞開始蒸發。");
+        else this.speak("平倉大吉，利潤已歸入靈霄金庫。");
     },
 
     connect() {
-        this.speak("接入 MetaMask 成功。歡迎進入悟空大腦交易所。");
-        alert("錢包連結成功");
-    },
-
-    async toggleCam() {
-        const v = document.getElementById('cam');
-        if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
-        else { const s = await navigator.mediaDevices.getUserMedia({video: true}); v.srcObject = s; }
+        this.speak("神經連結完成，歡迎登入悟空大腦交易所。");
+        alert("MetaMask 連結成功");
     },
 
     capture() {
         const link = document.createElement('a');
-        link.download = "KGEN_FINAL_V224.png";
+        link.download = "GOD_宮_V225.png";
         link.href = this.renderer.domElement.toDataURL();
         link.click();
     },
 
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
     setWish() {
-        const w = prompt("留言內容：");
-        if(w) document.getElementById('ai-log').innerText = `【願】：${w}`;
+        const w = prompt("向神明許願：");
+        if(w) document.getElementById('god-msg').innerText = `【願】：${w}`;
     }
 };
 window.onload = () => app.init();
