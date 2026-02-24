@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.4（受孕宇宙引擎）</title>
+  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.1（受孕宇宙引擎）</title>
 
   <!-- Ethers (optional / graceful) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -343,33 +343,10 @@
     .small{ color: var(--muted); font-size:12px; line-height:1.55; }
     .hr{ height:1px; background: rgba(255,255,255,.10); margin:10px 0; }
   
-    /* ===== V1.9.4 FIX: 仙女不再遮擋文字 ===== */
+    /* ===== V1.9.1 FIX: 仙女不再遮擋文字 ===== */
     .fairyWrap{ z-index:1; opacity:.92; }
     .screenHud{ position:relative; z-index:3; }
     .panelMini{ position:relative; z-index:4; }
-
-
-    /* ===== V1.9.4 Pilot Dock (手機視野優先) ===== */
-    .fairyWrap{ position:relative; }
-    .dockTop{ position:absolute; left:12px; right:12px; top:12px; z-index:25; }
-    .dockSide{ position:absolute; top:70px; bottom:16px; width:64px; z-index:25; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:10px; }
-    .dockSide.left{ left:10px; }
-    .dockSide.right{ right:10px; }
-
-    .vWrap{ width:64px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:8px 6px; border:1px solid rgba(255,255,255,.12); border-radius:18px; background: rgba(0,0,0,.30); backdrop-filter: blur(10px); }
-    .vLabel{ font-size:11px; color: var(--muted); writing-mode: vertical-rl; text-orientation: mixed; letter-spacing:.3px; }
-    .vVal{ font-family: var(--mono); font-weight:950; font-size:12px; }
-    input.vRange{ width:210px; height:30px; transform: rotate(-90deg); accent-color: var(--gold); }
-
-    .hpWrap{ width:100%; padding:10px 10px; border:1px solid rgba(255,255,255,.12); border-radius:18px; background: rgba(0,0,0,.30); backdrop-filter: blur(10px); }
-    .hpWrap label{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color: var(--muted); }
-    #hpBar{ width:100%; margin-top:8px; accent-color: var(--gold); }
-
-    @media (max-width:420px){
-      input.vRange{ width:190px; }
-      .dockSide{ top:62px; width:58px; }
-      .vWrap{ width:58px; }
-    }
 </style>
 </head>
 
@@ -405,25 +382,6 @@
                     <div class="k">保證金餘額</div>
                     <div class="v"><span class="mono" id="margin">0</span></div>
                   </div>
-
-        <div class="panelMini">
-          <div class="k">油箱容量（Fuel）</div>
-          <div class="v"><span class="mono" id="fuelNow">—</span> / <span class="mono" id="fuelCap">—</span> <span class="muted">(m)</span></div>
-          <div class="hint">血量＝油箱燃料（本機）｜日後可升級曲率等級、飛碟零件成為可買賣商品</div>
-          <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
-            <span class="pill" style="padding:6px 10px;">DNA·GA 等級</span>
-            <select id="gaLevel" class="input" style="max-width:220px">
-              <option value="GA1">GA1（新手）</option>
-              <option value="GA600" selected>GA600（標準）</option>
-              <option value="GA1000">GA1000（高階）</option>
-            </select>
-          </div>
-          <div class="rangeRow" style="margin-top:10px;">
-            <label><span>油箱燃料（可調）</span><span class="mono" id="fuelLabel">—</span></label>
-            <input id="fuelRange" type="range" min="0" max="600" value="300" />
-          </div>
-        </div>
-
                 </div>
                 <div class="right">
                   <div class="panelMini">
@@ -456,9 +414,6 @@
             </div>
 
             <div class="fairyWrap" id="fairyWrap">
-              <div id="dockTop" class="dockTop"></div>
-              <div id="dockLeft" class="dockSide left"></div>
-              <div id="dockRight" class="dockSide right"></div>
               <img id="fairy" src="./assets/fairy.png" alt="fairy"
                    onerror="this.src='https://via.placeholder.com/500/000000/FFD700?text=FAIRY'"/>
               <div class="sleepMask" id="sleepMask">
@@ -545,7 +500,6 @@
               <input type="checkbox" id="stampWish" checked />
               照片左下角加註「許願／還願」摘要
             </label>
-              <label class="chip" style="margin-left:8px;"><input id="coPhoto" type="checkbox" checked /> 與仙女合照</label>
 
 
             <div class="btnRow" style="margin-top:10px;">
@@ -894,48 +848,6 @@ const DEFAULT = {
 };
 
 let STATE = loadState() || structuredClone(DEFAULT);
-
-// ===== V1.9.4 裝備 / 油箱 / 等級（本機） =====
-const GA_PROFILE = {
-  GA1:   { fuelCap: 100,  maxLots: 30 },
-  GA600: { fuelCap: 600,  maxLots: 150 },
-  GA1000:{ fuelCap: 1000, maxLots: 150 }
-};
-
-function applyGA(){
-  const sel = $("gaLevel");
-  const ga = sel ? sel.value : (STATE.ga || 'GA600');
-  STATE.ga = ga;
-  const p = GA_PROFILE[ga] || GA_PROFILE.GA600;
-  STATE.fuelCap = p.fuelCap;
-  const fr = $("fuelRange");
-  if(fr){ fr.max = String(p.fuelCap); }
-  if(typeof STATE.fuel !== 'number') STATE.fuel = Math.round(p.fuelCap*0.5);
-  STATE.fuel = Math.max(0, Math.min(STATE.fuel, p.fuelCap));
-  if(fr){ fr.value = String(STATE.fuel); }
-}
-
-function applyFuelUI(){
-  const cap = Number(STATE.fuelCap || 600);
-  const now = Number(STATE.fuel || 0);
-  const pct = cap ? Math.round(now/cap*100) : 0;
-  if($("fuelNow")) $("fuelNow").textContent = String(now);
-  if($("fuelCap")) $("fuelCap").textContent = String(cap);
-  if($("fuelLabel")) $("fuelLabel").textContent = `${now}/${cap}`;
-  if($("hpBar")) $("hpBar").value = String(pct);
-  if($("hpLabel")) $("hpLabel").textContent = `${pct}%`;
-}
-
-function pickAudioMime(){
-  const cand = ['audio/webm;codecs=opus','audio/webm','audio/mp4',''];
-  for(const t of cand){
-    try{ if(!t) return '';
-      if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
-    }catch(e){}
-  }
-  return '';
-}
-
 
 /* ---------- Console (narrative客服) ---------- */
 function pushStory(line){
@@ -1857,9 +1769,6 @@ function applyUI(){
   }
 
   FX.setMode(s, warp);
-  if($("degLabelV")) $("degLabelV").textContent = String(a) + '°';
-  if($("warpLabelV")) $("warpLabelV").textContent = String(warp) + '口';
-  applyFuelUI();
 
   saveState();
 }
@@ -1951,53 +1860,6 @@ function boot(){
   setInterval(()=>{ $("clock").textContent = nowStr(); }, 250);
 
   applyUI();
-
-  // V1.9.4: 把滑桿移到仙女圖左右（垂直操作），上方血量顯示
-  try{
-    if($("dockTop") && !$("hpBar")){
-      const wrap = document.createElement('div');
-      wrap.className='hpWrap';
-      wrap.innerHTML = `<label><span>血量｜油箱（Fuel Tank）</span><span class="mono" id="hpLabel">--%</span></label><input id="hpBar" type="range" min="0" max="100" value="50" />`;
-      $("dockTop").appendChild(wrap);
-    }
-
-    const degRow = document.querySelector('#degRange')?.closest('.rangeRow');
-    const warpRow = document.querySelector('#warpRange')?.closest('.rangeRow');
-
-    if($("dockRight") && degRow){
-      const v=document.createElement('div'); v.className='vWrap';
-      v.innerHTML = `<div class="vLabel">方向盤</div>`;
-      degRow.querySelector('label')?.remove();
-      const input=degRow.querySelector('input');
-      if(input){ input.classList.add('vRange'); }
-      v.appendChild(input);
-      const val=document.createElement('div'); val.className='vVal mono'; val.id='degLabelV';
-      v.appendChild(val);
-      $("dockRight").appendChild(v);
-      degRow.remove();
-    }
-
-    if($("dockLeft") && warpRow){
-      const v=document.createElement('div'); v.className='vWrap';
-      v.innerHTML = `<div class="vLabel">曲率（口數）</div>`;
-      warpRow.querySelector('label')?.remove();
-      const input=warpRow.querySelector('input');
-      if(input){ input.classList.add('vRange'); }
-      v.appendChild(input);
-      const val=document.createElement('div'); val.className='vVal mono'; val.id='warpLabelV';
-      v.appendChild(val);
-      $("dockLeft").appendChild(v);
-      warpRow.remove();
-    }
-  }catch(e){}
-
-  applyGA();
-  applyFuelUI();
-
-  // V1.9.4 GA/Fuel events
-  if($("gaLevel")) $("gaLevel").addEventListener('change', ()=>{ applyGA(); applyFuelUI(); saveState(); toast('GA 等級已更新'); });
-  if($("fuelRange")) $("fuelRange").addEventListener('input', (e)=>{ STATE.fuel = Number(e.target.value||0); applyFuelUI(); saveState(); });
-
 
   setTimeout(()=>{ narrateByPhase(); }, 700);
 }
