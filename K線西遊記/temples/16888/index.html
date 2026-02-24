@@ -3,79 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.9.1</title>
+    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.9.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', 'Noto Sans TC', sans-serif; overflow: hidden; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
         
-        /* 品牌與油量 */
-        .brand-header { position: fixed; top: 5px; width: 100%; text-align: center; z-index: 1000; font-size: 10px; color: var(--gold); letter-spacing: 2px; }
-        .hud { position: fixed; top: 25px; left: 50%; transform: translateX(-50%); width: 70%; z-index: 900; }
-        .bar { width: 100%; height: 6px; background: #222; border: 0.5px solid var(--gold); border-radius: 3px; overflow: hidden; }
-        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: 0.3s; }
+        /* 側邊桿：完全透明背景並貼邊 */
+        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 2000; width: 20px; }
+        .l-stick { left: 0; } .r-stick { right: 0; }
+        input[type=range].vert { 
+            width: 280px; height: 10px; transform: rotate(-90deg); 
+            margin-left: -130px; /* 這裡微調位移確保完全靠邊 */
+            accent-color: var(--gold); cursor: pointer; opacity: 0.6;
+        }
 
-        /* 側邊操縱桿：完全貼邊 */
-        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1200; width: 30px; display: flex; flex-direction: column; align-items: center; }
-        .l-stick { left: 0px; } 
-        .r-stick { right: 0px; }
-        input[type=range].vert { width: 250px; transform: rotate(-90deg); margin: 110px 0; accent-color: var(--gold); cursor: pointer; }
-        .stick-label { font-size: 9px; color: var(--gold); font-weight: 900; writing-mode: vertical-lr; text-orientation: mixed; margin: 10px 0; }
-
-        /* 相機與 3D 層 */
+        /* 頂部資訊 */
+        .header { position: fixed; top: 0; width: 100%; text-align: center; z-index: 1000; padding: 5px; font-size: 10px; color: var(--gold); background: rgba(0,0,0,0.5); }
+        
+        /* 相機與畫布層 */
         #video-bg { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; display: none; }
         #canvas-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 
-        /* AI 客服頭像 */
-        #ai-mentor { position: fixed; top: 70px; right: 40px; width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 950; display: none; background: #000; overflow: hidden; }
-        #ai-mentor img { width: 100%; height: 100%; object-fit: cover; }
-        .ai-active { animation: pulse 1.2s infinite; }
+        /* AI 客服 */
+        #ai-box { position: fixed; top: 60px; right: 20px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 1500; display: none; overflow: hidden; box-shadow: 0 0 15px var(--cyan); }
+        #ai-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 控制面板 */
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); border-top: 1px solid var(--gold); z-index: 1100; padding: 10px 5px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-        .btn { padding: 12px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
+        /* 下方控制板 */
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); border-top: 1px solid var(--gold); z-index: 1800; padding: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 0 10px; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
         
-        #wish-stamp { position: fixed; bottom: 130px; left: 40px; z-index: 900; font-size: 14px; color: var(--gold); font-weight: 900; text-shadow: 2px 2px #000; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); box-shadow: 0 0 20px var(--cyan); } 100% { transform: scale(1); } }
+        #wish-text { position: fixed; bottom: 120px; left: 20px; z-index: 1600; font-size: 14px; color: var(--gold); text-shadow: 2px 2px #000; }
     </style>
 </head>
 <body>
 
-<div class="brand-header">KGEN V1.9.9.1 | <span id="clock">00:00:00</span></div>
+<div class="header">KGEN ODYSSEY V1.9.9.2 | <span id="clock">00:00:00</span></div>
 
-<div class="hud">
-    <div class="bar"><div id="fuel-fill"></div></div>
-</div>
-
-<div class="stick l-stick">
-    <div class="stick-label">光速曲率 LEVERAGE</div>
-    <input type="range" id="curv" class="vert" min="0" max="150" value="75">
-</div>
-
-<div class="stick r-stick">
-    <div class="stick-label">導航方向 WHEEL</div>
-    <input type="range" id="angle" class="vert" min="0" max="360" value="180">
-</div>
+<div class="stick l-stick"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
+<div class="stick r-stick"><input type="range" id="angle" class="vert" min="0" max="360" value="180"></div>
 
 <video id="video-bg" autoplay playsinline muted></video>
 <div id="canvas-layer"></div>
-
-<div id="ai-mentor">
-    <img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
-</div>
-
-<div id="wish-stamp"></div>
+<div id="ai-box"><img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png"></div>
+<div id="wish-text"></div>
 
 <div class="panel">
-    <div id="status" style="color:var(--cyan); font-size:10px; margin-bottom:5px; text-align:center;">飛碟自檢中...</div>
-    <div class="btn-grid">
+    <div class="grid">
         <button class="btn" onclick="app.trade('LONG')">做多 下單</button>
         <button class="btn" onclick="app.trade('SHORT')">做空 下單</button>
-        <button class="btn" onclick="app.takePhoto()">📷 拍照下載</button>
-        <button class="btn" id="record-btn" onclick="app.toggleRecord()">🎬 錄影/相機</button>
+        <button class="btn" onclick="app.takeSnap()">📷 拍照下載</button>
+        <button class="btn" id="cam-btn" onclick="app.toggleCam()">🎬 相機/錄製</button>
         <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
         <button class="btn" onclick="app.showLamp()">🏮 13生肖燈</button>
     </div>
@@ -83,124 +63,32 @@
 
 <script>
 const app = {
-    isRecording: false,
-    mediaRecorder: null,
-    recordedChunks: [],
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
     
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        // 重要修復：preserveDrawingBuffer 設為 true 才能截圖
+        this.renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true, 
+            preserveDrawingBuffer: true 
+        });
+        
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-layer').appendChild(this.renderer.domElement);
 
         const loader = new THREE.TextureLoader();
         loader.crossOrigin = "anonymous";
-        this.fairy = new THREE.Mesh(new THREE.CircleGeometry(4, 32), new THREE.MeshBasicMaterial({ map: loader.load(this.fairyImg), transparent: true }));
+        this.fairy = new THREE.Mesh(
+            new THREE.CircleGeometry(4, 32), 
+            new THREE.MeshBasicMaterial({ map: loader.load(this.fairyImg), transparent: true })
+        );
         this.scene.add(this.fairy);
 
         this.createStars();
         this.camera.position.z = 12;
         this.animate();
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-    },
-
-    createStars() {
-        const geo = new THREE.BufferGeometry();
-        const pos = [];
-        for(let i=0; i<800; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
-        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1}));
-        this.scene.add(this.stars);
-    },
-
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        const ang = parseInt(document.getElementById('angle').value);
-        const crv = document.getElementById('curv').value;
-
-        let flow = 0;
-        if (ang >= 30 && ang <= 150) flow = -1; 
-        else if (ang >= 210 && ang <= 330) flow = 1; 
-
-        const p = this.stars.geometry.attributes.position.array;
-        for(let i=1; i<p.length; i+=3) {
-            p[i] += flow * (crv / 150 * 0.4);
-            if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
-        }
-        this.stars.geometry.attributes.position.needsUpdate = true;
-        this.fairy.rotation.y = (ang-180)*0.01;
-        this.renderer.render(this.scene, this.camera);
-    },
-
-    async toggleRecord() {
-        const v = document.getElementById('video-bg');
-        const btn = document.getElementById('record-btn');
-
-        if(!this.isRecording) {
-            // 啟動相機並開始錄製
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
-                v.srcObject = stream;
-                v.style.display = "block";
-                
-                this.mediaRecorder = new MediaRecorder(stream);
-                this.recordedChunks = [];
-                this.mediaRecorder.ondataavailable = e => { if(e.data.size > 0) this.recordedChunks.push(e.data); };
-                this.mediaRecorder.onstop = () => {
-                    const blob = new Blob(this.recordedChunks, { type: "video/webm" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url; a.download = `KGEN_LOG_${Date.now()}.webm`; a.click();
-                };
-                
-                this.mediaRecorder.start();
-                this.isRecording = true;
-                btn.innerText = "🛑 停止錄製";
-                this.speakAI("影音引擎啟動，正在記錄飛碟航行數據。");
-            } catch(e) { alert("無法存取相機"); }
-        } else {
-            // 停止錄製
-            this.mediaRecorder.stop();
-            v.srcObject.getTracks().forEach(t => t.stop());
-            v.style.display = "none";
-            this.isRecording = false;
-            btn.innerText = "🎬 錄影/相機";
-            this.speakAI("記錄已完成，正在生成下載檔案。");
-        }
-    },
-
-    trade(type) {
-        this.speakAI(`正在呼叫 Web3 錢包進行 ${type} 交易。若出現轉帳問題，請遵照我的引導。`);
-    },
-
-    speakAI(msg) {
-        const m = document.getElementById('ai-mentor');
-        m.style.display = "block"; m.classList.add('ai-active');
-        const utter = new SpeechSynthesisUtterance(msg);
-        utter.lang = 'zh-TW';
-        utter.onend = () => m.classList.remove('ai-active');
-        window.speechSynthesis.speak(utter);
-        document.getElementById('status').innerText = "AI 引導中...";
-    },
-
-    takePhoto() {
-        const link = document.createElement('a');
-        link.download = `KGEN_PIC_${Date.now()}.png`;
-        link.href = this.renderer.domElement.toDataURL();
-        link.click();
-    },
-
-    setWish() {
-        const w = prompt("請輸入您的許願或還願：");
-        document.getElementById('wish-stamp').innerText = w ? "願力戳： " + w : "";
-    },
-    
-    showLamp() { alert("13生肖光明燈：記錄已開啟，每個生肖名額100。"); }
-};
-
-window.onload = () => app.init();
-</script>
-</body>
-</html>
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString();
