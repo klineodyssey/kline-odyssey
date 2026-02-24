@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.8（受孕宇宙引擎）</title>
+  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.1（受孕宇宙引擎）</title>
 
   <!-- Ethers (optional / graceful) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -342,7 +342,12 @@
     /* Tiny */
     .small{ color: var(--muted); font-size:12px; line-height:1.55; }
     .hr{ height:1px; background: rgba(255,255,255,.10); margin:10px 0; }
-  </style>
+  
+    /* ===== V1.9.1 FIX: 仙女不再遮擋文字 ===== */
+    .fairyWrap{ z-index:1; opacity:.92; }
+    .screenHud{ position:relative; z-index:3; }
+    .panelMini{ position:relative; z-index:4; }
+</style>
 </head>
 
 <body>
@@ -362,42 +367,7 @@
       </div>
 
       <!-- Sliders moved near screen (top) -->
-      <div class="hudRow" style="margin-top:10px;">
-        <div class="hudLeft" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>方向盤（0–360）</span><span class="mono" id="degLabel">120°</span></label>
-            <input id="degRange" type="range" min="0" max="360" value="120" />
-          </div>
-        </div>
-        <div class="hudRight" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>曲速引擎（1–150）</span><span class="mono" id="warpLabel">10x</span></label>
-            <input id="warpRange" type="range" min="1" max="150" value="10" />
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="wrap">
-    <div class="grid">
-      <!-- LEFT: Screen + core -->
-      <section class="card">
-        <div class="cardHead">
-          <div>
-            <div class="t">飛碟主螢幕（交易 × 受孕 × K線）</div>
-            <div class="sub">做多：金雨下落｜做空：翠雲上升（靠近螢幕上緣即消失，不遮路）｜休息：Zzz</div>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <span class="badge">姿態：<b class="mono" id="stance">REST</b></span>
-            <span class="badge">曲速：<b class="mono" id="warpText">10</b>x</span>
-            <span class="badge">方向：<b class="mono" id="degText">120</b>°</span>
-          </div>
-        </div>
-
-        <div class="cardBody cockpit" id="cockpit">
-          <div class="screen" id="screen">
+      id="screen">
             <canvas id="fx"></canvas>
             <canvas id="kline"></canvas>
 
@@ -526,6 +496,11 @@
             <div class="k">影像 / 錄影 / 錄音（本機留念）</div>
             <video id="cam" autoplay playsinline muted></video>
             <canvas id="snap"></canvas>
+            <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted);">
+              <input type="checkbox" id="stampWish" checked />
+              照片左下角加註「許願／還願」摘要
+            </label>
+
 
             <div class="btnRow" style="margin-top:10px;">
               <button class="btn" id="btnCam">開啟相機</button>
@@ -569,7 +544,47 @@
   <div class="toast" id="toast"></div>
 
   <!-- Dock (controls & trading) -->
-  <div class="dock">
+  
+
+        <!-- 操作橫桿（移到營幕正下方，方便看路） -->
+<div class="hudRow" style="margin-top:10px;">
+        <div class="hudLeft" style="flex:1; min-width:260px;">
+          <div class="rangeRow" style="width:min(520px,100%);">
+            <label><span>方向盤（0–360）</span><span class="mono" id="degLabel">120°</span></label>
+            <input id="degRange" type="range" min="0" max="360" value="120" />
+          </div>
+        </div>
+        <div class="hudRight" style="flex:1; min-width:260px;">
+          <div class="rangeRow" style="width:min(520px,100%);">
+            <label><span>曲速引擎（1–150）</span><span class="mono" id="warpLabel">10x</span></label>
+            <input id="warpRange" type="range" min="1" max="150" value="10" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT: Screen + core -->
+      <section class="card">
+        <div class="cardHead">
+          <div>
+            <div class="t">飛碟主螢幕（交易 × 受孕 × K線）</div>
+            <div class="sub">做多：金雨下落｜做空：翠雲上升（靠近螢幕上緣即消失，不遮路）｜休息：Zzz</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <span class="badge">姿態：<b class="mono" id="stance">REST</b></span>
+            <span class="badge">曲速：<b class="mono" id="warpText">10</b>x</span>
+            <span class="badge">方向：<b class="mono" id="degText">120</b>°</span>
+          </div>
+        </div>
+
+        <div class="cardBody cockpit" id="cockpit">
+          <div class="screen"
+
+<div class="dock">
     <div class="dockRow">
       <div class="dockLeft">
         <button class="btn ghost" id="btnDock">控制台（收納/展開）</button>
@@ -1420,6 +1435,8 @@ const FX = (function(){
       p.y += p.vy * dt * 60;
 
       const t = 1 - (p.age / p.life);
+      const cutoffTop = H*0.28;
+      if(mode==="SHORT" && p.y < cutoffTop){ particles.splice(i,1); continue; }
       if(t<=0 || p.x<-80 || p.x>W+80 || p.y<-120 || p.y>H+120){
         particles.splice(i,1);
         continue;
@@ -1588,6 +1605,10 @@ async function startAudio(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     throw new Error("此瀏覽器不支援麥克風");
   }
+
+  if(typeof MediaRecorder === "undefined"){
+    throw new Error("此瀏覽器不支援錄音（可能為 iOS Safari）。可改用語音客服文字模式。");
+  }
   audioChunks = [];
   audioBlob = null;
 
@@ -1596,6 +1617,10 @@ async function startAudio(){
   let options = {};
   if(MediaRecorder.isTypeSupported("audio/webm;codecs=opus")){
     options.mimeType = "audio/webm;codecs=opus";
+  }else if(MediaRecorder.isTypeSupported("audio/mp4")){
+    options.mimeType = "audio/mp4";
+  }else if(MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")){
+    options.mimeType = "audio/ogg;codecs=opus";
   }else if(MediaRecorder.isTypeSupported("audio/webm")){
     options.mimeType = "audio/webm";
   }
