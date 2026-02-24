@@ -3,31 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K線西遊記｜花果山台灣 V2.0.1</title>
+    <title>K線西遊記｜花果山台灣 V2.0.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 左右操作桿：貼死邊緣 */
+        /* 錢包狀態標籤 */
+        #wallet-info { position: fixed; top: 10px; left: 10px; z-index: 700; font-size: 10px; color: var(--cyan); background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; border: 1px solid var(--cyan); }
+
         .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .l-stick { left: 0px; } .r-stick { right: 0px; }
         input[type=range].vert { width: 200px; transform: rotate(-90deg); margin: 80px -70px; accent-color: var(--gold); }
 
-        /* 相機與 3D 層 */
         #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         #three-container { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 
-        /* 品牌浮水印 (左下角) */
         .watermark-group { position: fixed; bottom: 180px; left: 20px; z-index: 500; text-shadow: 2px 2px 4px #000; pointer-events: none; }
-        .brand-text { font-size: 24px; color: var(--gold); font-weight: 900; margin-bottom: 5px; }
-        .info-text { font-size: 14px; color: #fff; }
+        .brand-text { font-size: 24px; color: var(--gold); font-weight: 900; }
 
-        /* 仙女小圖控制 (右上角) */
         #fairy-thumb { position: fixed; top: 20px; right: 20px; width: 100px; height: 100px; border: 2px solid var(--gold); border-radius: 10px; z-index: 600; display: none; background-size: cover; background-position: center; }
 
-        /* 控制面板 */
         .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .btn { padding: 10px 5px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
@@ -35,161 +33,121 @@
 </head>
 <body>
 
+<div id="wallet-info">錢包未連接</div>
 <video id="cam-video" autoplay playsinline></video>
 <div id="three-container"></div>
 <div id="fairy-thumb"></div>
 
 <div class="watermark-group">
     <div class="brand-text">K線西遊記 花果山台灣</div>
-    <div id="live-time" class="info-text"></div>
-    <div id="wish-text" class="info-text" style="color: var(--cyan); margin-top: 5px;"></div>
+    <div id="live-time" style="font-size:12px;"></div>
+    <div id="wish-text" style="color:var(--cyan); font-size:14px;"></div>
 </div>
 
-<div class="stick l-stick">
-    <input type="range" id="curv" class="vert" min="0" max="150" value="75">
-</div>
-<div class="stick r-stick">
-    <input type="range" id="angle" class="vert" min="0" max="360" value="180">
-</div>
+<div class="stick l-stick"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
+<div class="stick r-stick"><input type="range" id="angle" class="vert" min="0" max="360" value="180"></div>
 
 <div class="panel">
     <div class="btn-grid">
+        <button class="btn" onclick="app.connectWallet()">🦊 連接錢包</button>
         <button class="btn" onclick="app.toggleCam()">📸 開相機</button>
         <button class="btn" onclick="app.toggleFairy()">🧚 仙女合照</button>
-        <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
         <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.trade('LONG')">做多</button>
-        <button class="btn" onclick="app.trade('SHORT')">做空</button>
-        <button class="btn" onclick="app.speak('西遊修行開始')">🎙️ 客服</button>
-        <button class="btn" onclick="alert('光明燈: 1 KGEN/天')">🏮 點燈</button>
+        <button class="btn" onclick="app.trade('LONG')">📈 做多</button>
+        <button class="btn" onclick="app.trade('SHORT')">📉 做空</button>
+        <button class="btn" onclick="app.setWish()">🙏 許願</button>
+        <button class="btn" onclick="app.speak('西遊修行中')">🎙️ AI客服</button>
     </div>
 </div>
 
 <script>
 const app = {
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    showFairy: false,
-
+    userAddr: null,
+    
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-container').appendChild(this.renderer.domElement);
-
-        this.createStars();
         this.camera.position.z = 10;
-        
-        // 預載仙女小圖
         document.getElementById('fairy-thumb').style.backgroundImage = `url(${this.fairyImg})`;
-
+        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
         this.animate();
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('live-time').innerText = now.toLocaleString('zh-TW', { hour12: false });
-        }, 1000);
     },
 
-    createStars() {
-        const geo = new THREE.BufferGeometry();
-        const pos = [];
-        for(let i=0; i<500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
-        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true, opacity: 0.5}));
-        this.scene.add(this.stars);
+    async connectWallet() {
+        if (window.ethereum) {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                this.userAddr = await signer.getAddress();
+                const balance = await provider.getBalance(this.userAddr);
+                const ethStr = ethers.utils.formatEther(balance).substring(0, 6);
+                document.getElementById('wallet-info').innerText = `${this.userAddr.substring(0,6)}... | ${ethStr} ETH`;
+                this.speak("錢包已連接，花果山能量注入成功。");
+            } catch (e) { this.speak("錢包連線失敗。"); }
+        } else {
+            this.speak("未偵測到錢包。請安裝 MetaMask、Trust 或 OKX 錢包。");
+            window.open("https://metamask.io/", "_blank");
+        }
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const ang = parseInt(document.getElementById('angle').value);
         const crv = document.getElementById('curv').value;
-        let flow = (ang >= 30 && ang <= 150) ? -1 : (ang >= 210 && ang <= 330 ? 1 : 0);
-        
-        const p = this.stars.geometry.attributes.position.array;
-        for(let i=1; i<p.length; i+=3) {
-            p[i] += flow * (crv / 200);
-            if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
-        }
-        this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
 
     async toggleCam() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            document.getElementById('cam-video').srcObject = stream;
-        } catch(e) { alert("請允許相機權限"); }
+        const v = document.getElementById('cam-video');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        v.srcObject = stream;
     },
 
     toggleFairy() {
-        this.showFairy = !this.showFairy;
-        document.getElementById('fairy-thumb').style.display = this.showFairy ? 'block' : 'none';
-    },
-
-    setWish() {
-        const w = prompt("請輸入您的許願或還願：");
-        document.getElementById('wish-text').innerText = w ? `願望：${w}` : "";
+        const f = document.getElementById('fairy-thumb');
+        f.style.display = (f.style.display === 'none' || !f.style.display) ? 'block' : 'none';
     },
 
     capture() {
         const v = document.getElementById('cam-video');
         const c3d = this.renderer.domElement;
         const out = document.createElement('canvas');
-        out.width = v.videoWidth || window.innerWidth;
-        out.height = v.videoHeight || window.innerHeight;
+        out.width = v.videoWidth || 800; out.height = v.videoHeight || 600;
         const ctx = out.getContext('2d');
-
-        // 1. 底圖：相機自拍
         ctx.drawImage(v, 0, 0, out.width, out.height);
-        
-        // 2. 疊加 3D 星辰
         ctx.drawImage(c3d, 0, 0, out.width, out.height);
-
-        // 3. 疊加右上角仙女 (如果有開)
-        if(this.showFairy) {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = this.fairyImg;
-            img.onload = () => {
-                ctx.drawImage(img, out.width - 160, 40, 120, 120);
-                this.drawText(ctx, out);
-            };
-        } else {
-            this.drawText(ctx, out);
-        }
-    },
-
-    drawText(ctx, out) {
-        ctx.fillStyle = "#ffd778";
-        ctx.font = "bold 40px Noto Sans TC";
-        ctx.fillText("K線西遊記 花果山台灣", 40, out.height - 120);
         
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "24px Orbitron";
-        ctx.fillText(new Date().toLocaleString(), 40, out.height - 80);
-        
-        const wish = document.getElementById('wish-text').innerText;
-        if(wish) {
-            ctx.fillStyle = "#00f2ff";
-            ctx.font = "bold 30px Noto Sans TC";
-            ctx.fillText(wish, 40, out.height - 40);
-        }
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText("K線西遊記 花果山台灣", 30, out.height - 100);
+        ctx.fillStyle = "#fff"; ctx.font = "20px Orbitron";
+        ctx.fillText(new Date().toLocaleString(), 30, out.height - 60);
 
         const link = document.createElement('a');
-        link.download = `KGEN_SELFI_${Date.now()}.png`;
+        link.download = "KGEN_MEMO.png";
         link.href = out.toDataURL();
         link.click();
+    },
+
+    trade(t) {
+        if(!this.userAddr) return this.connectWallet();
+        this.speak(`準備發起${t === 'LONG' ? '做多' : '做空'}合約，請在錢包點擊確認。`);
+        alert(`發送交易指令到錢包: ${t}`);
+    },
+
+    setWish() {
+        const w = prompt("輸入許願內容：");
+        document.getElementById('wish-text').innerText = w ? `願：${w}` : "";
     },
 
     speak(m) {
         const u = new SpeechSynthesisUtterance(m);
         u.lang = 'zh-TW';
         window.speechSynthesis.speak(u);
-    },
-
-    trade(t) {
-        this.speak(`連線錢包進行${t === 'LONG' ? '做多' : '做空'}交易`);
-        alert(`呼叫錢包執行 ${t}`);
     }
 };
 
