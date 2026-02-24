@@ -196,6 +196,93 @@
             }
         };
 
+/**
+         * 宇宙文明 3D 渲染器 - 基於 Three.js
+         * 負責將天條 D, R 數值投影到 4D 空間位移
+         */
+        app.renderer = {
+            scene: null, camera: null, randerer: null,
+            fairy: null, stars: null,
+            
+            init: function() {
+                const container = document.getElementById('stage-4d');
+                
+                // 1. 建立場景與相機
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.65), 0.1, 1000);
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight * 0.65);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                container.appendChild(this.renderer.domElement);
+
+                // 2. 建立「廣寒宮核心面板」（仙女載體）
+                const geometry = new THREE.PlaneGeometry(5, 7);
+                // 暫時使用金屬質感材質，直到注入 10MB 資源
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: 0xffd778, 
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.8,
+                    emissive: 0x443300
+                });
+                this.fairy = new THREE.Mesh(geometry, material);
+                this.scene.add(this.fairy);
+
+                // 3. 宇宙背景粒子（象徵 KGEN 能量流）
+                const starGeo = new THREE.BufferGeometry();
+                const starCoords = [];
+                for(let i=0; i<2000; i++) {
+                    starCoords.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+                }
+                starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+                const starMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.05 });
+                this.stars = new THREE.Points(starGeo, starMat);
+                this.scene.add(this.stars);
+
+                // 4. 燈光系統
+                const light = new THREE.PointLight(0xffffff, 1, 100);
+                light.position.set(5, 5, 5);
+                this.scene.add(light);
+                this.scene.add(new THREE.AmbientLight(0x404040));
+
+                this.camera.position.z = 10;
+                app.log("3D 渲染矩陣初始化完成。");
+            },
+
+            /**
+             * 根據天條數據更新 3D 姿態
+             * @param {Object} k - 來自 engine.tick 的數據
+             */
+            updateFairy: function(k) {
+                if(!this.fairy) return;
+
+                // A. 角色隨拔河值 R 產生 3D 側身移動 (左右旋轉)
+                const targetRotationY = k.r * (Math.PI / 3); // 最大旋轉 60 度
+                this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, targetRotationY, 0.1);
+
+                // B. 角色隨合成方向 D 產生 3D 深淺移動 (前後推進)
+                const targetZ = k.d * 5; 
+                this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, targetZ, 0.05);
+
+                // C. 隨波動率 V 產生高頻震動
+                this.fairy.position.x = (Math.random() - 0.5) * (k.v - 1) * 0.2;
+
+                // D. 宇宙背景跟隨旋轉
+                this.stars.rotation.y += 0.001;
+                this.stars.rotation.x += k.d * 0.01;
+
+                this.renderer.render(this.scene, this.camera);
+            }
+        };
+
+        // 修改啟動邏輯以包含 3D 初始化
+        const oldInit = app.init;
+        app.init = async function() {
+            await oldInit.call(this);
+            this.renderer.init();
+        };
+        
         // 強化渲染循環中的數據連動
         app.startRenderLoop = function() {
             const update = () => {
