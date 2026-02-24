@@ -2,109 +2,109 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜黑洞質能引擎 V2.2.1</title>
+    <title>KGEN 16888｜物理軌道校準 V2.2.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 駕駛艙儀表板 */
-        .cockpit-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
-        .bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; }
-        .bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 2px; overflow: hidden; border: 0.5px solid #444; }
-        #warp-fill { width: 1%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width 0.1s; }
-        #mass-fill { width: 100%; height: 100%; background: var(--gold); transition: 0.1s; }
+        /* 儀表板數據 */
+        .cockpit { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
+        .hud-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; }
+        .progress-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 2px; overflow: hidden; }
+        #warp-fill { width: 1%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        #mass-fill { width: 100%; height: 100%; background: var(--gold); }
 
-        /* 中央仙女圖 (座標同步：右移順轉) */
+        /* 中央仙女圖 */
         #fairy-vessel {
             position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%);
             width: 380px; height: 380px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.7; border-radius: 50%; z-index: 2; border: 4px solid var(--gold);
-            box-shadow: 0 0 50px rgba(255, 215, 120, 0.4);
+            opacity: 0.75; border-radius: 50%; z-index: 2; border: 4px solid var(--gold);
+            box-shadow: 0 0 50px rgba(255, 215, 120, 0.5);
+            transition: transform 0.05s linear;
         }
 
-        #bridge { position: fixed; top: 20%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #price { font-family: 'Orbitron'; font-size: 55px; text-shadow: 0 0 25px var(--cyan); }
-        #ai-log { background: rgba(0,0,0,0.8); padding: 5px 15px; border: 1px solid var(--cyan); border-radius: 20px; color: var(--cyan); font-size: 12px; display: inline-block; }
+        #bridge { position: fixed; top: 18%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #price { font-family: 'Orbitron'; font-size: 58px; text-shadow: 0 0 30px var(--cyan); }
+        #ai-log { background: rgba(0,0,0,0.8); padding: 5px 20px; border: 1px solid var(--cyan); border-radius: 20px; color: var(--cyan); font-size: 13px; display: inline-block; }
 
-        /* 飛碟操縱桿標記 */
-        .controls { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; }
-        .stick-wrap { text-align: center; position: relative; }
-        .value-tag { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron'; color: var(--cyan); font-size: 14px; }
+        /* 操控桿 */
+        .ctrl-panel { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
+        .stick-box { text-align: center; position: relative; }
+        .digital-tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 16px; margin-bottom: 5px; }
         input[type=range].v-warp { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 250px; accent-color: var(--gold); }
+        input[type=range].h-steer { width: 260px; accent-color: var(--gold); }
 
-        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
+        .bottom-console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
 
-        #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
+        #canvas-wrap { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+        #cam-bg { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
     </style>
 </head>
 <body>
 
 <div id="fairy-vessel"></div>
-<video id="cam-feed" autoplay playsinline></video>
-<div id="three-canvas"></div>
+<video id="cam-bg" autoplay playsinline></video>
+<div id="canvas-wrap"></div>
 
-<div class="cockpit-hud">
-    <div class="bar-label"><span>黑洞質量: 72,000,000 KGEN</span><span>蒸發率: 0.3%</span></div>
-    <div class="bar-bg"><div id="mass-fill"></div></div>
-    <div class="bar-label"><span>悟空大腦容量: 50,000,000</span><span id="warp-val-top">WARP: 1x</span></div>
-    <div class="bar-bg"><div id="warp-fill"></div></div>
+<div class="cockpit">
+    <div class="hud-row"><span>黑洞質量: 72M KGEN</span><span>蒸發率: 0.1% | 交易稅: 0.3%</span></div>
+    <div class="progress-bar"><div id="mass-fill"></div></div>
+    <div class="hud-row"><span>悟空大腦: 50M</span><span id="warp-hud">WARP: 1x</span></div>
+    <div class="progress-bar"><div id="warp-fill"></div></div>
 </div>
 
 <div id="bridge">
-    <div id="ai-log">宇宙大爆炸質能守恆模式</div>
+    <div id="ai-log">質能守恆：轉帳 0% 稅率已激活</div>
     <div id="price">16888.88</div>
-    <div id="physics-data" style="color:var(--gold); font-family:'Orbitron'; font-size:12px;">W=mgh | J-LINE RECORDING...</div>
+    <div id="stats" style="color:var(--gold); font-family:'Orbitron'; font-size:12px;">W=mgh | J-TRACK ACTIVE</div>
 </div>
 
-<div class="controls">
-    <div class="stick-wrap">
-        <div id="warp-tag" class="value-tag">1x</div>
-        <div style="font-size:10px; color:var(--cyan); margin-top:10px;">曲速倍率</div>
+<div class="ctrl-panel">
+    <div class="stick-box">
+        <div id="warp-val" class="digital-tag">1x</div>
+        <div style="font-size:10px; color:var(--cyan);">曲速引擎</div>
         <input type="range" id="warp" class="v-warp" min="1" max="150" value="1">
     </div>
-    <div class="stick-wrap">
-        <div id="steer-tag" class="value-tag">0°</div>
-        <div style="font-size:10px; color:var(--gold); margin-top:10px;">方向盤 (J軌道)</div>
+    <div class="stick-box">
+        <div id="steer-val" class="digital-tag">0°</div>
+        <div style="font-size:10px; color:var(--gold);">飛碟方向盤 (X)</div>
         <input type="range" id="steer" class="h-steer" min="-180" max="180" value="0">
     </div>
 </div>
 
-<div class="console">
-    <div class="grid">
-        <button class="btn" onclick="app.analyzeContract()">🔍 讀取合約代碼</button>
-        <button class="btn" onclick="app.trade('CT')">📈 CT 現價下單</button>
+<div class="bottom-console">
+    <div class="btn-grid">
+        <button class="btn" onclick="app.readContract()">🔍 讀取合約代碼</button>
+        <button class="btn" onclick="app.trade('CT')">📈 CT 現價交易</button>
         <button class="btn" onclick="app.trade('CLOSE')">📉 結算平倉</button>
         <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
+        <button class="btn" onclick="app.capture()">📷 截圖日誌</button>
         <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
-        <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.speak('J線記錄器已啟動，黑洞質量同步中')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
+        <button class="btn" onclick="app.speak('星球軌道校準完成，進入J線記錄模式')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
-    jLine: [],
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('three-canvas').appendChild(this.renderer.domElement);
+        document.getElementById('canvas-wrap').appendChild(this.renderer.domElement);
 
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 1200; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for (let i = 0; i < 1500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.14 }));
-        this.scene.add(this.stars);
+        this.particles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.scene.add(this.particles);
 
         this.camera.position.z = 15;
         this.animate();
@@ -115,102 +115,91 @@ const app = {
         const warp = parseInt(document.getElementById('warp').value);
         const steer = parseInt(document.getElementById('steer').value);
 
-        // 1. 數值標示更新
-        document.getElementById('warp-tag').innerText = warp + "x";
-        document.getElementById('warp-val-top').innerText = "WARP: " + warp + "x";
-        document.getElementById('steer-tag').innerText = steer + "°";
+        // 1. UI 數值同步
+        document.getElementById('warp-val').innerText = warp + "x";
+        document.getElementById('warp-hud').innerText = "WARP: " + warp + "x";
+        document.getElementById('steer-val').innerText = steer + "°";
         document.getElementById('warp-fill').style.width = (warp/150*100) + "%";
 
-        // 2. 物理計算 (W=mgh)
+        // 2. 物理公式校準
         const rad = (steer * Math.PI) / 180;
-        const efficiency = Math.cos(rad);
-        const kgenThrust = 90 * efficiency;
+        const efficiency = Math.cos(rad); // 0度=1(多), 180度=-1(空)
         
-        // 3. 美女圖與粒子流向同步 (右移順時針)
+        // 3. 美女圖旋轉：右移(正) -> 順時針(正)
         document.getElementById('fairy-vessel').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
 
-        const p = this.stars.geometry.attributes.position.array;
+        // 4. 星球氣泡 (粒子) 物理引擎校準
+        const p = this.particles.geometry.attributes.position.array;
         const speed = (warp / 400);
-        
+
         for(let i=0; i<p.length; i+=3) {
-            // 星球氣泡偏轉校準：隨方向盤角度同步偏轉
+            // X 軸偏轉：右移時粒子順時針偏轉
             p[i] += Math.sin(rad) * speed; 
-            p[i+1] -= Math.cos(rad) * speed * (efficiency >= 0 ? 1 : -1);
             
+            // Y 軸流向：
+            // 0度(efficiency > 0) -> 上到下流 (減去 Y)
+            // 180度(efficiency < 0) -> 下到上流 (增加 Y)
+            p[i+1] -= speed * efficiency; 
+
+            // 邊界重置
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
         }
-        this.stars.geometry.attributes.position.needsUpdate = true;
+        this.particles.geometry.attributes.position.needsUpdate = true;
 
-        // 4. J線自動生成記錄 (模擬)
-        if(Math.random() > 0.95) {
-            this.jLine.push({t: Date.now(), w: kgenThrust * warp});
-            if(this.jLine.length > 50) this.jLine.shift();
-        }
-
-        document.getElementById('physics-data').innerText = `W: ${(kgenThrust * warp).toFixed(0)} | J-TRACK: ${this.jLine.length} pts`;
+        document.getElementById('stats').innerText = `W: ${(90 * efficiency * warp).toFixed(0)} | J-LINE SYNC`;
         this.renderer.render(this.scene, this.camera);
     },
 
-    analyzeContract() {
-        const addr = prompt("請輸入合約地址進行代碼讀取：");
+    readContract() {
+        const addr = prompt("請輸入 Token 或官方合約地址：");
         if(!addr) return;
+        this.speak("正在解析合約質能結構");
         
-        this.speak("正在進入靈霄寶殿掃描合約底層");
-        let result = "";
-        
-        // 修正判斷邏輯
-        if(addr.length > 42 || addr.includes("0x")) {
-            if(addr.length > 45 || addr.toLowerCase().includes("kgen")) {
-                result = "讀取成功：【KGEN 官方合約】偵測到 0.1% 銷毀與 9 妖怪地址分配機制。";
-            } else {
-                result = "讀取成功：【標準 Token 合約】判斷為百姓錢包，具備基礎轉帳功能。";
-            }
+        let report = "";
+        const isOfficial = addr.toLowerCase().includes("kgen") || addr.length > 45;
+        const isContract = addr.startsWith("0x") && addr.length > 30;
+
+        if (isOfficial) {
+            report = "【KGEN 官方合約】讀取成功：偵測到黑洞蒸發 0.1% 及 9 妖怪分配邏輯。";
+        } else if (isContract) {
+            report = "【Token 合約】解析完畢：普通代幣結構，判斷為百姓財產。";
         } else {
-            result = "診斷：【仙女池地址】J線數據穩定。";
+            report = "【地址無效】無法讀取合約代碼。";
         }
-        
-        document.getElementById('ai-log').innerText = result;
-        this.speak(result);
+        document.getElementById('ai-log').innerText = report;
+        this.speak(report);
     },
 
     trade(t) { 
         if(t==='CT') {
-            this.speak("現價下單成功，質能守恆啟動");
-            console.log("J-Line Record At Trade:", this.jLine);
+            this.speak("執行交易，扣除 0.3% 交易稅，黑洞蒸發 0.1% 中");
         } else {
-            this.speak("結算平倉，黑洞蒸發完成");
+            this.speak("轉帳中，0% 稅率，質量完整傳輸");
         }
     },
 
     connect() {
-        alert("正在連結悟空大腦交易所 (50M KGEN 腦容量)...");
-        this.speak("錢包連結成功，已接入台灣花果山交易所");
+        this.speak("正在連結錢包，接入花果山交易所");
+        alert("錢包連結成功！");
     },
 
-    setWish() { 
-        const w = prompt("輸入許願內容："); 
+    setWish() {
+        const w = prompt("留言內容：");
         if(w) document.getElementById('ai-log').innerText = `【願】：${w}`;
     },
 
     async toggleCam() {
-        const v = document.getElementById('cam-feed');
+        const v = document.getElementById('cam-bg');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { const s = await navigator.mediaDevices.getUserMedia({video: true}); v.srcObject = s; }
     },
 
     capture() {
-        const out = document.createElement('canvas'); out.width = 1080; out.height = 1920;
-        const ctx = out.getContext('2d');
-        ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1920);
-        if(document.getElementById('cam-feed').srcObject) ctx.drawImage(document.getElementById('cam-feed'), 0,0,1080,1920);
-        ctx.drawImage(this.renderer.domElement, 0,0,1080,1920);
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
-        ctx.fillText("KGEN 16888 J-LINE 日誌", 50, 150);
-        ctx.font = "35px Noto Sans TC";
-        ctx.fillText(document.getElementById('ai-log').innerText, 50, 1850);
         const link = document.createElement('a');
-        link.download = "KGEN_JLINE_V221.png"; link.href = out.toDataURL(); link.click();
+        link.download = "KGEN_V222_LOG.png";
+        link.href = this.renderer.domElement.toDataURL();
+        link.click();
     },
 
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
