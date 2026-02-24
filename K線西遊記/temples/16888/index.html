@@ -3,205 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>廣寒宮 16888｜宇宙文明實體終端 V6.0</title>
-    
+    <title>KGEN 16888｜廣寒宮實體終端</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00;
-            --bg: #050608; --panel: rgba(20, 22, 28, 0.95);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; height: 100vh; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #050608; --panel: rgba(20, 22, 28, 0.9); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        
+        /* 10MB 資源加載模擬器 */
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .bar-container { width: 200px; height: 2px; background: #333; margin-top: 20px; }
+        #bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
 
-        /* 加載畫面 */
-        #loading-overlay {
-            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .loader-bar { width: 250px; height: 2px; background: rgba(255,255,255,0.1); margin-top: 20px; position: relative; }
-        .loader-progress { position: absolute; width: 0%; height: 100%; background: var(--gold); box-shadow: 0 0 15px var(--gold); }
+        #stage { width: 100vw; height: 100vh; }
+        
+        /* HUD 駕駛艙介面 */
+        .hud { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content:间; padding: 20px; }
+        .top-stats { display: flex; justify-content: space-around; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding: 20px; }
+        .stat-val { color: var(--gold); font-size: 20px; font-weight: 900; display: block; text-align: center; }
+        .stat-lab { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
 
-        /* 3D 舞台容器 */
-        #stage-4d { width: 100vw; height: 65vh; background: radial-gradient(circle, #1a1a2e 0%, #050608 100%); }
-
-        /* UI 面板 */
-        .cockpit-ui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-        .hud-top {
-            position: absolute; top: 0; width: 100%; height: 80px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            display: flex; justify-content: space-around; align-items: center;
-        }
-        .stat-value { font-size: 20px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,120,0.5); }
-        .stat-label { font-size: 10px; opacity: 0.6; text-align: center; }
-
-        .terminal {
-            position: absolute; bottom: 0; width: 100%; height: 35vh;
-            background: var(--panel); border-top: 1px solid rgba(255,215,120,0.3);
-            pointer-events: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;
-        }
-        .control-row { display: flex; align-items: center; gap: 15px; }
-        .slider-meta { width: 90px; font-size: 11px; color: var(--gold); }
+        .terminal { pointer-events: auto; background: var(--panel); border: 1px solid var(--gold); padding: 20px; border-radius: 8px; align-self: center; width: 90%; max-width: 500px; margin-bottom: 20px; }
+        .ctrl-group { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .ctrl-group label { width: 100px; font-size: 12px; color: var(--gold); }
         input[type=range] { flex: 1; accent-color: var(--gold); }
-
-        #cosmic-log {
-            position: absolute; right: 20px; top: 90px; width: 220px; height: 120px;
-            font-size: 10px; color: var(--cyan); overflow: hidden; text-align: right;
-            line-height: 1.5; pointer-events: none;
-        }
-        .btn {
-            flex: 1; padding: 15px; border: 1px solid var(--gold); background: transparent;
-            color: var(--gold); font-weight: 900; cursor: pointer;
-        }
-        .btn:hover { background: rgba(255,215,120,0.1); }
+        
+        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .btn:active { background: var(--gold); color: #000; }
+        
+        #log { position: absolute; right: 20px; top: 120px; width: 200px; height: 150px; font-size: 10px; color: var(--cyan); text-align: right; overflow: hidden; }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay">
-    <div style="font-size: 24px; font-weight: 900; letter-spacing: 5px;">KGEN ENGINE V6.0</div>
-    <div class="loader-bar"><div class="loader-progress" id="load-bar"></div></div>
-    <div class="status-text" id="status-text" style="margin-top:10px; font-size:10px; color:var(--gold);">INITIALIZING...</div>
+<div id="loader">
+    <div style="letter-spacing: 8px; font-weight: 900;">KGEN V6.0</div>
+    <div class="bar-container"><div id="bar"></div></div>
+    <div id="status" style="font-size: 10px; margin-top: 10px; color: var(--gold);">BOOTING...</div>
 </div>
 
-<div id="stage-4d"></div>
+<div id="stage"></div>
 
-<div class="cockpit-ui">
-    <div class="hud-top">
-        <div class="stat-box"><div class="stat-label">宇宙節奏 CT</div><div id="hud-ct" class="stat-value">0</div></div>
-        <div class="stat-box"><div class="stat-label">人群拔河 R</div><div id="hud-r" class="stat-value">0.00</div></div>
-        <div class="stat-box"><div class="stat-label">合成方向 D</div><div id="hud-d" class="stat-value">0.00</div></div>
+<div class="hud">
+    <div class="top-stats">
+        <div><span class="stat-lab">Universe CT</span><span id="v-ct" class="stat-val">0</span></div>
+        <div><span class="stat-lab">Tug of War R</span><span id="v-r" class="stat-val">0.00</span></div>
+        <div><span class="stat-lab">Wishing Pool</span><span id="v-pool" class="stat-val">0 / 16888</span></div>
     </div>
-    <div id="cosmic-log"></div>
+    
+    <div id="log"></div>
+
     <div class="terminal">
-        <div class="control-row">
-            <div class="slider-meta">方向盤 (CT)</div>
-            <input type="range" id="ctrl-ct" min="-1" max="1" step="1" value="0">
+        <div class="ctrl-group">
+            <label>Cosmic CT</label>
+            <input type="range" id="in-ct" min="-1" max="1" step="1" value="0">
         </div>
-        <div class="control-row">
-            <div class="slider-meta">多方勢能 (L)</div>
-            <input type="range" id="ctrl-l" min="0" max="10000" value="5000">
+        <div class="ctrl-group">
+            <label>Long (L)</label>
+            <input type="range" id="in-l" min="0" max="10000" value="5000">
         </div>
-        <div class="control-row">
-            <div class="slider-meta">空方勢能 (S)</div>
-            <input type="range" id="ctrl-s" min="0" max="10000" value="5000">
+        <div class="ctrl-group">
+            <label>Short (S)</label>
+            <input type="range" id="in-s" min="0" max="10000" value="5000">
         </div>
-        <div style="display:flex; gap:10px; margin-top:auto;">
-            <button class="btn" onclick="app.ignite()">🔥 注入能量 (13500 斤)</button>
-            <button class="btn" onclick="app.log('啟動 16888 結算程序...')">🏛️ 進入廣寒宮</button>
-        </div>
+        <button class="btn" onclick="game.vow()">🔥 執行天條結算仪式</button>
     </div>
 </div>
 
 <script>
-const app = {
-    state: { L: 5000, S: 5000, CT: 0, pool: 0 },
-    
-    // --- 第一批與第二批：天條引擎核心 ---
-    engine: {
-        config: { w1: 0.6, w2: 0.4, lastClose: 30000 },
-        tick: function(ct, l, s) {
-            const r = (l - s) / (l + s + 0.000001);
-            const d = (0.6 * ct) + (0.4 * r);
-            const v = 1.0 + (Math.abs(r) * 0.5); // 波動率隨拔河劇烈程度增加
-            return { r, d, v };
-        }
+const game = {
+    // 1. 初始化 3D 舞台
+    init3D() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('stage').appendChild(this.renderer.domElement);
+
+        // 核心載體：仙女靈體面板
+        const geometry = new THREE.BoxGeometry(4, 6, 0.1);
+        const material = new THREE.MeshPhongMaterial({ color: 0xffd778, emissive: 0x332200, shininess: 100, transparent: true, opacity: 0.9 });
+        this.fairy = new THREE.Mesh(geometry, material);
+        this.scene.add(this.fairy);
+
+        // 粒子背景
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = [];
+        for(let i=0; i<1000; i++) pPos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPos, 3));
+        this.particles = new THREE.Points(pGeo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.05}));
+        this.scene.add(this.particles);
+
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(5, 5, 5);
+        this.scene.add(light, new THREE.AmbientLight(0x404040));
+        this.camera.position.z = 10;
     },
 
-    // --- 第三批：THREE.JS 3D 渲染矩陣 ---
-    renderer: {
-        scene: null, camera: null, randerer: null, fairy: null,
-        init: function() {
-            const container = document.getElementById('stage-4d');
-            this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.65), 0.1, 1000);
-            this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            this.renderer.setSize(window.innerWidth, window.innerHeight * 0.65);
-            container.appendChild(this.renderer.domElement);
-
-            // 建立仙女載體（暫用金色發光面板）
-            const geo = new THREE.BoxGeometry(4, 6, 0.2);
-            const mat = new THREE.MeshPhongMaterial({ color: 0xffd778, emissive: 0x332200, shininess: 100 });
-            this.fairy = new THREE.Mesh(geo, mat);
-            this.scene.add(this.fairy);
-
-            // 建立宇宙粒子
-            const starGeo = new THREE.BufferGeometry();
-            const positions = [];
-            for(let i=0; i<1500; i++) positions.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
-            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            this.stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.05}));
-            this.scene.add(this.stars);
-
-            this.scene.add(new THREE.PointLight(0xffffff, 1, 100).clone().set(5,5,5));
-            this.scene.add(new THREE.AmbientLight(0x404040));
-            this.camera.position.z = 12;
-        },
-        update: function(data) {
-            // 角色隨 R 左右側身轉向
-            this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, data.r * Math.PI/3, 0.1);
-            // 角色隨 D 前後位移
-            this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, data.d * 4, 0.05);
-            // 隨 V 產生微小震動
-            this.fairy.position.x = (Math.random()-0.5) * (data.v - 1) * 0.3;
-            this.stars.rotation.y += 0.001;
-            this.renderer.render(this.scene, this.camera);
-        }
-    },
-
-    // --- 啟動與循環 ---
-    init: async function() {
-        // 模擬加載 10MB 資源的儀式
-        const bar = document.getElementById('load-bar');
-        for(let i=0; i<=100; i+=5) {
-            bar.style.width = i + '%';
-            await new Promise(r => setTimeout(r, 50));
-        }
-        document.getElementById('loading-overlay').style.display = 'none';
+    // 2. 啟動與循環
+    async run() {
+        this.init3D();
+        this.pool = 0;
         
-        this.renderer.init();
-        this.startLoop();
-        this.log("廣寒宮終端已連線。");
+        // 模擬加載
+        const bar = document.getElementById('bar');
+        const status = document.getElementById('status');
+        const tasks = ["天條 V1.0 加載...", "11520 大腦同步...", "16888 廣寒宮定位...", "4D 渲染就緒..."];
+        for(let i=0; i<=100; i+=2) {
+            bar.style.width = i + '%';
+            if(i%25==0) status.innerText = tasks[i/25];
+            await new Promise(r => setTimeout(r, 20));
+        }
+        document.getElementById('loader').style.display = 'none';
+
+        this.loop();
     },
 
-    startLoop: function() {
-        const run = () => {
-            const l = parseFloat(document.getElementById('ctrl-l').value);
-            const s = parseFloat(document.getElementById('ctrl-s').value);
-            const ct = parseFloat(document.getElementById('ctrl-ct').value);
-            
-            const k = this.engine.tick(ct, l, s);
-            
-            document.getElementById('hud-r').innerText = k.r.toFixed(2);
-            document.getElementById('hud-ct').innerText = ct;
-            document.getElementById('hud-d').innerText = k.d.toFixed(2);
-            
-            this.renderer.update(k);
-            requestAnimationFrame(run);
+    loop() {
+        const update = () => {
+            const L = parseFloat(document.getElementById('in-l').value);
+            const S = parseFloat(document.getElementById('in-s').value);
+            const CT = parseFloat(document.getElementById('in-ct').value);
+
+            // 天條公式：R = (L-S)/(L+S)
+            const R = (L - S) / (L + S + 0.001);
+            const D = (0.6 * CT) + (0.4 * R);
+
+            // 更新 UI
+            document.getElementById('v-ct').innerText = CT;
+            document.getElementById('v-r').innerText = R.toFixed(2);
+            document.getElementById('v-pool').innerText = `${Math.floor(this.pool)} / 16888`;
+
+            // 3D 物理連動
+            this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, R * Math.PI/3, 0.1);
+            this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, D * 5, 0.05);
+            this.particles.rotation.y += 0.002;
+
+            this.renderer.render(this.scene, this.camera);
+            requestAnimationFrame(update);
         };
-        run();
+        update();
     },
 
-    log: function(m) {
-        const l = document.getElementById('cosmic-log');
+    log(m) {
+        const l = document.getElementById('log');
         l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
     },
 
-    ignite: function() {
-        this.log("金箍棒能量注入...");
-        this.state.pool += 135;
+    vow() {
+        this.pool += 1350;
+        this.log(`注入願力: +1350 KGEN`);
+        if(this.pool >= 16888) {
+            this.log("!!! 觸發廣寒宮結算 !!!");
+            this.log("分配: 30% 靈霄 / 60% 玩家 / 10% 留池");
+            this.pool = 0;
+        }
     }
 };
 
-window.onload = () => app.init();
-window.onresize = () => {
-    app.renderer.camera.aspect = window.innerWidth / (window.innerHeight * 0.65);
-    app.renderer.camera.updateProjectionMatrix();
-    app.renderer.renderer.setSize(window.innerWidth, window.innerHeight * 0.65);
-};
+window.onload = () => game.run();
 </script>
 </body>
 </html>
