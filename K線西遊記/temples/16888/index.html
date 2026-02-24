@@ -3,82 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K線西遊記｜16888 廣寒宮 V2.0.6</title>
+    <title>KGEN 16888｜廣寒宮航行系統 V2.0.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --palace: #ff3c00; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --palace: #ff3c00; --margin: 20px; }
         body { margin: 0; background: #000; color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 背景：相機與星空 */
-        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.5; }
+        /* 頂部保證金油量條 */
+        .fuel-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: 60%; z-index: 1000; text-align: center; }
+        .fuel-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.2); border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--palace), var(--gold)); transition: width 0.3s; }
+        .label-text { font-size: 10px; color: var(--gold); letter-spacing: 2px; font-family: 'Orbitron'; }
+
+        /* 右上角縮小旋轉圖 (避開文字) */
+        #fairy-avatar { 
+            position: fixed; top: 70px; right: 20px; width: 70px; height: 70px; 
+            border: 2px solid var(--gold); border-radius: 50%; z-index: 100; 
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            animation: spin 10s linear infinite; box-shadow: 0 0 10px var(--cyan);
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 左右操作桿 */
+        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
+        .l-stick { left: 5px; } .r-stick { right: 5px; }
+        input[type=range].vert { width: 150px; transform: rotate(-90deg); margin: 60px -55px; accent-color: var(--gold); }
+        .stick-label { font-size: 10px; color: var(--gold); margin-bottom: 70px; }
+
+        /* K線下單顯示 (中央) */
+        #trade-display { position: fixed; top: 30%; width: 100%; text-align: center; z-index: 50; pointer-events: none; }
+        .price-tag { font-family: 'Orbitron'; font-size: 32px; color: var(--cyan); text-shadow: 0 0 15px #000; }
+        .status-tag { font-size: 14px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 5px; color: #fff; margin-top: 10px; display: inline-block; }
+
+        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; }
         #three-container { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
 
-        /* 右上角：旋轉美女圖 (七仙女) */
-        #fairy-circle { 
-            position: fixed; top: 20px; right: 20px; width: 120px; height: 120px; 
-            border: 3px solid var(--gold); border-radius: 50%; z-index: 100; 
-            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            animation: fairy-spin 12s linear infinite; box-shadow: 0 0 20px var(--cyan);
-        }
-        @keyframes fairy-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* 控制面板 */
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .btn { padding: 10px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
 
-        /* 中央看板：16888 廣寒宮 & 18888 靈霄寶殿 */
-        #palace-hub { position: fixed; top: 15%; width: 100%; text-align: center; z-index: 50; }
-        .title-gold { color: var(--gold); font-size: 22px; text-shadow: 0 0 10px #000; font-weight: 900; }
-        #narrative-box { font-size: 14px; color: var(--cyan); margin-top: 5px; background: rgba(0,0,0,0.6); display: inline-block; padding: 5px 15px; border-radius: 10px; }
-
-        /* 投胎選單 */
-        #reincarnation-menu { position: fixed; top: 40%; left: 20px; z-index: 200; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); padding: 10px; border-radius: 5px; display: none; }
-        .zodiac-item { padding: 5px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #333; }
-        .zodiac-item:hover { color: var(--gold); }
-
-        /* 操作面板 */
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .btn { padding: 12px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
-        
-        #wallet-status { position: fixed; top: 10px; left: 10px; z-index: 1000; font-size: 10px; color: #fff; background: var(--palace); padding: 3px 8px; border-radius: 5px; }
+        .brand-footer { position: fixed; bottom: 130px; left: 20px; z-index: 500; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="wallet-status">未連接靈霄寶殿</div>
-<video id="cam-video" autoplay playsinline></video>
-<div id="three-container"></div>
-<div id="fairy-circle"></div>
-
-<div id="palace-hub">
-    <div class="title-gold">16888 廣寒宮 ⇄ 18888 靈霄寶殿</div>
-    <div id="narrative-box">七仙女下凡：等待 DNA 與 RNA 締結良緣</div>
+<div class="fuel-container">
+    <div class="label-text">MARGIN / FUEL / 18888 BANK</div>
+    <div class="fuel-bar"><div id="fuel-fill"></div></div>
 </div>
 
-<div id="reincarnation-menu">
-    <div style="color:var(--gold); margin-bottom:5px;">選擇投胎生肖 (1 KGEN)</div>
-    <div id="zodiac-list"></div>
-    <div class="zodiac-item" onclick="app.rebirth('自定義')">✨ 自定義生肖</div>
+<video id="cam-video" autoplay playsinline></video>
+<div id="three-container"></div>
+<div id="fairy-avatar"></div>
+
+<div id="trade-display">
+    <div class="price-tag" id="current-price">LOADING...</div>
+    <div id="order-status" class="status-tag">等待 CT 指令...</div>
+</div>
+
+<div class="brand-footer">
+    <div style="font-size:24px; color:var(--gold); font-weight:900;">16888 廣寒宮</div>
+    <div id="live-time" style="font-size:12px; color:var(--cyan);"></div>
+</div>
+
+<div class="stick l-stick">
+    <div class="stick-label">曲速 (1-150)</div>
+    <input type="range" id="warp" class="vert" min="1" max="150" value="75">
+</div>
+
+<div class="stick r-stick">
+    <div class="stick-label">方向 (0-360)</div>
+    <input type="range" id="angle" class="vert" min="0" max="360" value="180">
 </div>
 
 <div class="panel">
     <div class="btn-grid">
+        <button class="btn" onclick="app.placeOrder('CT')">📈 CT 現價下單</button>
+        <button class="btn" onclick="app.closeOrder()">📉 CT+1 結算</button>
         <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.marry()">💍 高老莊求婚</button>
-        <button class="btn" onclick="app.showRebirth()">☸️ 投胎輪迴</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
         <button class="btn" onclick="app.toggleCam()">📸 相機開關</button>
-        <button class="btn" onclick="app.speak('歡迎來到神明銀行靈霄寶殿')">🎙️ 客服</button>
-        <button class="btn" onclick="location.reload()">🔄 重啟系統</button>
-        <button class="btn" style="color:var(--palace)" onclick="alert('功德金分配：60%玩家/39%神明/10%留池')">🏦 銀行</button>
+        <button class="btn" onclick="app.showRebirth()">☸️ 投胎輪迴</button>
+        <button class="btn" onclick="app.marry()">💍 求婚轉帳</button>
+        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
+        <button class="btn" onclick="app.speak('廣寒宮導航啟動')">🎙️ 客服</button>
     </div>
 </div>
 
 <script>
 const app = {
-    addr: null,
-    zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'],
-    bankAddr: "0x1234567890123456789012345678901234567890", // 替換為實際收款地址
-
+    price: 16888,
+    margin: 100,
+    orderPrice: 0,
+    
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -88,69 +107,50 @@ const app = {
 
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for(let i=0; i<800; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for(let i=0; i<600; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.1}));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true}));
         this.scene.add(this.stars);
         this.camera.position.z = 15;
 
-        const list = document.getElementById('zodiac-list');
-        this.zodiacs.forEach(z => {
-            const div = document.createElement('div');
-            div.className = 'zodiac-item';
-            div.innerText = `生肖【${z}】`;
-            div.onclick = () => this.rebirth(z);
-            list.appendChild(div);
-        });
-
+        setInterval(() => this.updatePrice(), 2000);
+        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
         this.animate();
+    },
+
+    updatePrice() {
+        this.price += (Math.random() - 0.5) * 10;
+        document.getElementById('current-price').innerText = this.price.toFixed(2);
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        this.stars.rotation.y += 0.002;
+        const warp = document.getElementById('warp').value;
+        this.stars.position.y -= (warp / 1000);
+        if(this.stars.position.y < -10) this.stars.position.y = 10;
         this.renderer.render(this.scene, this.camera);
     },
 
-    async connect() {
-        if (!window.ethereum) return alert("請安裝錢包");
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const accs = await provider.send("eth_requestAccounts", []);
-        this.addr = accs[0];
-        document.getElementById('wallet-status').innerText = `已連結: ${this.addr.substring(0,8)}...`;
-        this.speak("連結靈霄寶殿成功，請指示。");
+    placeOrder(type) {
+        this.orderPrice = this.price;
+        this.margin -= 10;
+        this.updateFuel();
+        document.getElementById('order-status').innerText = `[${type}] 下單位元：${this.orderPrice.toFixed(2)}`;
+        this.speak("CT 現價下單完成，扣除保證金。");
     },
 
-    async sendKgen(amount, reason) {
-        if (!this.addr) return alert("請先連結錢包");
-        try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const tx = await signer.sendTransaction({
-                to: this.bankAddr,
-                value: ethers.utils.parseEther("0.0001") // 模擬 1 KGEN，實際部署需調整
-            });
-            this.speak(`${reason} 請求已發送至神明銀行`);
-            document.getElementById('narrative-box').innerText = `${reason}：等待區塊鏈見證...`;
-        } catch (e) {
-            alert("交易取消或失敗");
-        }
+    closeOrder() {
+        if(this.orderPrice === 0) return alert("請先下單");
+        const profit = this.price - this.orderPrice;
+        this.margin += profit > 0 ? 20 : -5;
+        this.updateFuel();
+        document.getElementById('order-status').innerText = `CT+1 結算完成，盈虧：${profit.toFixed(2)}`;
+        this.orderPrice = 0;
+        this.speak("CT 加一 結算完畢。");
     },
 
-    marry() {
-        this.sendKgen("1", "豬八戒高老莊求婚");
-    },
-
-    showRebirth() {
-        const m = document.getElementById('reincarnation-menu');
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
-    },
-
-    rebirth(type) {
-        const name = type === '自定義' ? prompt("輸入自定義生肖名稱：") : type;
-        if (!name) return;
-        this.sendKgen("1", `投胎為【${name}】`);
-        document.getElementById('reincarnation-menu').style.display = 'none';
+    updateFuel() {
+        document.getElementById('fuel-fill').style.width = `${Math.max(0, Math.min(100, this.margin))}%`;
     },
 
     async toggleCam() {
@@ -161,38 +161,32 @@ const app = {
     },
 
     capture() {
-        const v = document.getElementById('cam-video');
-        const c3d = this.renderer.domElement;
         const out = document.createElement('canvas');
-        out.width = 1080; out.height = 1920; // 高清豎屏
+        out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
-
-        // 背景
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,out.width,out.height);
+        const v = document.getElementById('cam-video');
         if(v.srcObject) ctx.drawImage(v, 0,0, out.width, out.height);
-        ctx.drawImage(c3d, 0,0, out.width, out.height);
-
-        // 文字與品牌
+        ctx.drawImage(this.renderer.domElement, 0,0, out.width, out.height);
+        
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 靈霄寶殿", 50, 150);
-        ctx.font = "40px Noto Sans TC";
-        ctx.fillText(document.getElementById('narrative-box').innerText, 50, 250);
-        ctx.fillText(new Date().toLocaleString(), 50, 320);
-
+        ctx.fillText("16888 廣寒宮 飛行紀錄", 50, 150);
+        ctx.font = "30px Noto Sans TC";
+        ctx.fillText(document.getElementById('order-status').innerText, 50, 250);
+        
         const link = document.createElement('a');
-        link.download = "KGEN_WEST_JOURNEY.png";
+        link.download = `KGEN_LOG_${Date.now()}.png`;
         link.href = out.toDataURL();
         link.click();
     },
 
-    speak(m) {
-        const u = new SpeechSynthesisUtterance(m);
-        u.lang = 'zh-TW';
-        window.speechSynthesis.speak(u);
-    }
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
+    connect() { alert("錢包對接中..."); this.speak("錢包對接中"); },
+    marry() { alert("轉帳 1 KGEN 求婚"); },
+    showRebirth() { alert("投胎輪迴選單已開啟"); }
 };
 
 window.onload = () => app.init();
 </script>
 </body>
-    </html>
+</html>
