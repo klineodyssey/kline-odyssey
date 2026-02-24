@@ -3,100 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮航行系統 V2.0.7</title>
+    <title>KGEN 16888｜廣寒宮智能建築 V2.0.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --palace: #ff3c00; --margin: 20px; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; }
         body { margin: 0; background: #000; color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 頂部保證金油量條 */
-        .fuel-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: 60%; z-index: 1000; text-align: center; }
-        .fuel-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.2); border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--palace), var(--gold)); transition: width 0.3s; }
-        .label-text { font-size: 10px; color: var(--gold); letter-spacing: 2px; font-family: 'Orbitron'; }
+        /* 頂部：完工進度與保證金 */
+        .top-monitor { position: fixed; top: 10px; width: 100%; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .bar-wrap { width: 70%; height: 8px; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 4px; overflow: hidden; }
+        #build-progress { width: 85%; height: 100%; background: var(--red); box-shadow: 0 0 10px var(--red); transition: 0.5s; }
+        #margin-fuel { width: 100%; height: 100%; background: var(--gold); transition: 0.3s; }
+        .monitor-label { font-size: 9px; color: #aaa; font-family: 'Orbitron'; letter-spacing: 1px; }
 
-        /* 右上角縮小旋轉圖 (避開文字) */
+        /* 右上角：旋轉美女圖 (縮小避開字) */
         #fairy-avatar { 
-            position: fixed; top: 70px; right: 20px; width: 70px; height: 70px; 
+            position: fixed; top: 80px; right: 20px; width: 60px; height: 60px; 
             border: 2px solid var(--gold); border-radius: 50%; z-index: 100; 
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            animation: spin 10s linear infinite; box-shadow: 0 0 10px var(--cyan);
+            animation: spin 15s linear infinite; box-shadow: 0 0 15px var(--cyan);
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 左右操作桿 */
-        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
+        /* 操作桿 */
+        .stick { position: fixed; top: 55%; transform: translateY(-50%); z-index: 1000; }
         .l-stick { left: 5px; } .r-stick { right: 5px; }
-        input[type=range].vert { width: 150px; transform: rotate(-90deg); margin: 60px -55px; accent-color: var(--gold); }
-        .stick-label { font-size: 10px; color: var(--gold); margin-bottom: 70px; }
+        input[type=range].vert { width: 140px; transform: rotate(-90deg); margin: 60px -50px; accent-color: var(--gold); }
+        .stick-tag { font-size: 9px; color: var(--gold); margin-bottom: 60px; text-align: center; }
 
-        /* K線下單顯示 (中央) */
-        #trade-display { position: fixed; top: 30%; width: 100%; text-align: center; z-index: 50; pointer-events: none; }
-        .price-tag { font-family: 'Orbitron'; font-size: 32px; color: var(--cyan); text-shadow: 0 0 15px #000; }
-        .status-tag { font-size: 14px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 5px; color: #fff; margin-top: 10px; display: inline-block; }
+        /* 中央：AI對話與價格 */
+        #ai-hub { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 50; }
+        #ai-text { font-size: 14px; color: var(--cyan); background: rgba(0,0,0,0.6); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--cyan); display: inline-block; max-width: 80%; }
+        #price-val { font-family: 'Orbitron'; font-size: 36px; color: #fff; margin: 10px 0; }
 
-        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; }
+        /* 底層與面板 */
+        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.3; }
         #three-container { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-
-        /* 控制面板 */
         .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .btn { padding: 10px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
 
-        .brand-footer { position: fixed; bottom: 130px; left: 20px; z-index: 500; pointer-events: none; }
+        /* 左下品牌 */
+        .brand-seal { position: fixed; bottom: 130px; left: 20px; z-index: 500; }
     </style>
 </head>
 <body>
 
-<div class="fuel-container">
-    <div class="label-text">MARGIN / FUEL / 18888 BANK</div>
-    <div class="fuel-bar"><div id="fuel-fill"></div></div>
+<div class="top-monitor">
+    <div class="monitor-label">BUILD PROGRESS: 85%</div>
+    <div class="bar-wrap"><div id="build-progress"></div></div>
+    <div class="monitor-label">MARGIN FUEL</div>
+    <div class="bar-wrap"><div id="margin-fuel"></div></div>
 </div>
 
 <video id="cam-video" autoplay playsinline></video>
 <div id="three-container"></div>
 <div id="fairy-avatar"></div>
 
-<div id="trade-display">
-    <div class="price-tag" id="current-price">LOADING...</div>
-    <div id="order-status" class="status-tag">等待 CT 指令...</div>
+<div id="ai-hub">
+    <div id="ai-text">我是廣寒宮 AI 監工，系統自檢正常。</div>
+    <div id="price-val">16888.00</div>
+    <div id="sys-report" style="font-size: 10px; color: var(--red);">[監工報告] 結構穩定，無海砂隱患</div>
 </div>
 
-<div class="brand-footer">
+<div class="brand-seal">
     <div style="font-size:24px; color:var(--gold); font-weight:900;">16888 廣寒宮</div>
-    <div id="live-time" style="font-size:12px; color:var(--cyan);"></div>
+    <div id="live-time" style="font-size:11px; color:var(--cyan);"></div>
 </div>
 
 <div class="stick l-stick">
-    <div class="stick-label">曲速 (1-150)</div>
+    <div class="stick-tag">曲速</div>
     <input type="range" id="warp" class="vert" min="1" max="150" value="75">
 </div>
 
 <div class="stick r-stick">
-    <div class="stick-label">方向 (0-360)</div>
+    <div class="stick-tag">方向</div>
     <input type="range" id="angle" class="vert" min="0" max="360" value="180">
 </div>
 
 <div class="panel">
     <div class="btn-grid">
-        <button class="btn" onclick="app.placeOrder('CT')">📈 CT 現價下單</button>
-        <button class="btn" onclick="app.closeOrder()">📉 CT+1 結算</button>
+        <button class="btn" onclick="app.startListen()">🎙️ 語音輸入</button>
+        <button class="btn" onclick="app.trade('CT')">📈 CT下單</button>
+        <button class="btn" onclick="app.trade('CLOSE')">📉 CT+1結算</button>
+        <button class="btn" onclick="app.selfCheck()">🔍 系統自檢</button>
         <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.toggleCam()">📸 相機開關</button>
-        <button class="btn" onclick="app.showRebirth()">☸️ 投胎輪迴</button>
-        <button class="btn" onclick="app.marry()">💍 求婚轉帳</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.speak('廣寒宮導航啟動')">🎙️ 客服</button>
+        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
+        <button class="btn" onclick="app.capture()">📷 完工拍照</button>
+        <button class="btn" onclick="app.speak('廣寒宮監工中，進度百分之八十五')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
-    price: 16888,
+    progress: 85,
     margin: 100,
-    orderPrice: 0,
     
     init() {
         this.scene = new THREE.Scene();
@@ -105,58 +108,86 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-container').appendChild(this.renderer.domElement);
 
-        const geo = new THREE.BufferGeometry();
-        const pos = [];
-        for(let i=0; i<600; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
-        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true}));
-        this.scene.add(this.stars);
-        this.camera.position.z = 15;
-
-        setInterval(() => this.updatePrice(), 2000);
-        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
+        // 建立星球與星雲
+        const geo = new THREE.SphereGeometry(2, 32, 32);
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00f2ff, emissive: 0x002233 });
+        this.planet = new THREE.Mesh(geo, mat);
+        this.scene.add(this.planet);
+        this.scene.add(new THREE.PointLight(0xffffff, 1, 100));
+        
+        this.camera.position.z = 10;
+        
+        setInterval(() => this.tick(), 1000);
         this.animate();
     },
 
-    updatePrice() {
-        this.price += (Math.random() - 0.5) * 10;
-        document.getElementById('current-price').innerText = this.price.toFixed(2);
+    tick() {
+        document.getElementById('live-time').innerText = new Date().toLocaleString();
+        const p = (16888 + (Math.random()-0.5)*20).toFixed(2);
+        document.getElementById('price-val').innerText = p;
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const warp = document.getElementById('warp').value;
-        this.stars.position.y -= (warp / 1000);
-        if(this.stars.position.y < -10) this.stars.position.y = 10;
+        const angle = document.getElementById('angle').value;
+        
+        this.planet.rotation.y = (angle * Math.PI) / 180;
+        this.planet.scale.setScalar(0.5 + warp/150);
+        
         this.renderer.render(this.scene, this.camera);
     },
 
-    placeOrder(type) {
-        this.orderPrice = this.price;
-        this.margin -= 10;
-        this.updateFuel();
-        document.getElementById('order-status').innerText = `[${type}] 下單位元：${this.orderPrice.toFixed(2)}`;
-        this.speak("CT 現價下單完成，扣除保證金。");
+    // AI 語音輸入 (一問一答)
+    startListen() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("瀏覽器不支持語音辨識");
+        
+        const rec = new SpeechRecognition();
+        rec.lang = 'zh-TW';
+        document.getElementById('ai-text').innerText = "聆聽中...";
+        rec.start();
+
+        rec.onresult = (e) => {
+            const msg = e.results[0][0].transcript;
+            document.getElementById('ai-text').innerText = `問：${msg}`;
+            this.aiReply(msg);
+        };
     },
 
-    closeOrder() {
-        if(this.orderPrice === 0) return alert("請先下單");
-        const profit = this.price - this.orderPrice;
-        this.margin += profit > 0 ? 20 : -5;
-        this.updateFuel();
-        document.getElementById('order-status').innerText = `CT+1 結算完成，盈虧：${profit.toFixed(2)}`;
-        this.orderPrice = 0;
-        this.speak("CT 加一 結算完畢。");
+    aiReply(msg) {
+        let reply = "監工收到。工程一切正常，請放心操盤。";
+        if (msg.includes("進度")) reply = `報告，目前完工進度為 ${this.progress}%。`;
+        if (msg.includes("下單")) reply = "遵命，已準備好 CT 現價下單。";
+        
+        setTimeout(() => {
+            document.getElementById('ai-text').innerText = `答：${reply}`;
+            this.speak(reply);
+        }, 800);
     },
 
-    updateFuel() {
-        document.getElementById('fuel-fill').style.width = `${Math.max(0, Math.min(100, this.margin))}%`;
+    selfCheck() {
+        this.speak("啟動系統自檢");
+        const report = document.getElementById('sys-report');
+        report.style.color = "#00ff00";
+        report.innerText = "[監工報告] 3D引擎正常、保證金充足、鋼筋無鏽蝕";
+    },
+
+    trade(type) {
+        if(type === 'CT') {
+            this.margin -= 10;
+            this.speak("CT 下單成功，扣除保證金。");
+        } else {
+            this.margin += 15;
+            this.speak("CT 加一 結算完成。");
+        }
+        document.getElementById('margin-fuel').style.width = `${this.margin}%`;
     },
 
     async toggleCam() {
         const v = document.getElementById('cam-video');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; return; }
-        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        const s = await navigator.mediaDevices.getUserMedia({ video: true });
         v.srcObject = s;
     },
 
@@ -165,25 +196,16 @@ const app = {
         out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,out.width,out.height);
-        const v = document.getElementById('cam-video');
-        if(v.srcObject) ctx.drawImage(v, 0,0, out.width, out.height);
-        ctx.drawImage(this.renderer.domElement, 0,0, out.width, out.height);
-        
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 飛行紀錄", 50, 150);
-        ctx.font = "30px Noto Sans TC";
-        ctx.fillText(document.getElementById('order-status').innerText, 50, 250);
+        ctx.drawImage(document.getElementById('three-container').firstChild, 0,0,1080,1920);
         
         const link = document.createElement('a');
-        link.download = `KGEN_LOG_${Date.now()}.png`;
+        link.download = "GUANG_HAN_BUILD.png";
         link.href = out.toDataURL();
         link.click();
     },
 
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
-    connect() { alert("錢包對接中..."); this.speak("錢包對接中"); },
-    marry() { alert("轉帳 1 KGEN 求婚"); },
-    showRebirth() { alert("投胎輪迴選單已開啟"); }
+    connect() { alert("連結錢包中..."); }
 };
 
 window.onload = () => app.init();
