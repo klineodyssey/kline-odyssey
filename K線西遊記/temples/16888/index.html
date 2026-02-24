@@ -3,165 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮實體終端</title>
+    <title>KGEN 16888｜廣寒宮七仙女飛碟駕駛艙 V1.9.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #050608; --panel: rgba(20, 22, 28, 0.9); }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        
-        /* 10MB 資源加載模擬器 */
-        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .bar-container { width: 200px; height: 2px; background: #333; margin-top: 20px; }
-        #bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #050608; --glass: rgba(20, 22, 28, 0.85); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Orbitron', 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        #stage { width: 100vw; height: 100vh; }
-        
-        /* HUD 駕駛艙介面 */
-        .hud { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content:间; padding: 20px; }
-        .top-stats { display: flex; justify-content: space-around; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding: 20px; }
-        .stat-val { color: var(--gold); font-size: 20px; font-weight: 900; display: block; text-align: center; }
-        .stat-lab { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
+        /* 頂部血量/油箱 */
+        .top-hud { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 90%; z-index: 100; pointer-events: none; }
+        .bar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,215,120,0.3); }
+        #health-bar { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: width 0.3s; }
+        .bar-label { font-size: 10px; color: var(--gold); text-align: center; margin-bottom: 4px; letter-spacing: 2px; }
 
-        .terminal { pointer-events: auto; background: var(--panel); border: 1px solid var(--gold); padding: 20px; border-radius: 8px; align-self: center; width: 90%; max-width: 500px; margin-bottom: 20px; }
-        .ctrl-group { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .ctrl-group label { width: 100px; font-size: 12px; color: var(--gold); }
-        input[type=range] { flex: 1; accent-color: var(--gold); }
+        /* 3D 舞台 */
+        #stage-canvas { position: absolute; inset: 0; z-index: 1; }
+
+        /* 左右垂直滑桿佈局 */
+        .side-slider { position: fixed; top: 50%; transform: translateY(-50%); height: 250px; width: 40px; z-index: 150; display: flex; flex-direction: column; align-items: center; }
+        .slider-left { left: 10px; }
+        .slider-right { right: 10px; }
+        input[type=range].vertical { width: 200px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--gold); cursor: pointer; }
+        .slider-tag { font-size: 9px; color: var(--gold); text-align: center; white-space: nowrap; margin-bottom: 10px; }
+
+        /* 中央圓形資訊窗 (不擋字處理) */
+        .center-portal { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; pointer-events: none; z-index: 50; border: 1px solid rgba(0,242,255,0.2); border-radius: 50%; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+
+        /* 控制台 (可收納) */
+        .terminal { position: fixed; bottom: 0; width: 100%; background: var(--glass); border-top: 1px solid var(--gold); z-index: 200; transition: transform 0.3s; padding: 15px; }
+        .terminal.collapsed { transform: translateY(calc(100% - 40px)); }
+        .toggle-btn { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; padding: 5px 20px; font-size: 10px; font-weight: 900; border-radius: 5px 5px 0 0; cursor: pointer; pointer-events: auto; }
+
+        /* 資訊卡片 */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .card { background: rgba(0,0,0,0.5); padding: 8px; border: 1px solid rgba(255,215,120,0.2); font-size: 11px; }
+        .card-title { color: var(--cyan); font-size: 9px; margin-bottom: 4px; }
         
-        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.2s; }
-        .btn:active { background: var(--gold); color: #000; }
+        /* 13 生肖 & 媒體功能 */
+        .btn-row { display: flex; overflow-x: auto; gap: 8px; margin-top: 10px; padding-bottom: 5px; }
+        .btn { flex: 0 0 auto; padding: 6px 12px; border: 1px solid var(--gold); background: transparent; color: var(--gold); font-size: 10px; cursor: pointer; }
         
-        #log { position: absolute; right: 20px; top: 120px; width: 200px; height: 150px; font-size: 10px; color: var(--cyan); text-align: right; overflow: hidden; }
+        #boot-log { position: fixed; left: 20px; top: 100px; width: 180px; height: 120px; font-size: 9px; color: var(--cyan); overflow: hidden; pointer-events: none; opacity: 0.7; }
+        .version-tag { position: fixed; right: 10px; top: 40px; font-size: 10px; color: var(--gold); opacity: 0.5; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <div style="letter-spacing: 8px; font-weight: 900;">KGEN V6.0</div>
-    <div class="bar-container"><div id="bar"></div></div>
-    <div id="status" style="font-size: 10px; margin-top: 10px; color: var(--gold);">BOOTING...</div>
-</div>
-
-<div id="stage"></div>
-
-<div class="hud">
-    <div class="top-stats">
-        <div><span class="stat-lab">Universe CT</span><span id="v-ct" class="stat-val">0</span></div>
-        <div><span class="stat-lab">Tug of War R</span><span id="v-r" class="stat-val">0.00</span></div>
-        <div><span class="stat-lab">Wishing Pool</span><span id="v-pool" class="stat-val">0 / 16888</span></div>
-    </div>
+    <div class="version-tag">KGEN TERMINAL V1.9.5</div>
     
-    <div id="log"></div>
-
-    <div class="terminal">
-        <div class="ctrl-group">
-            <label>Cosmic CT</label>
-            <input type="range" id="in-ct" min="-1" max="1" step="1" value="0">
-        </div>
-        <div class="ctrl-group">
-            <label>Long (L)</label>
-            <input type="range" id="in-l" min="0" max="10000" value="5000">
-        </div>
-        <div class="ctrl-group">
-            <label>Short (S)</label>
-            <input type="range" id="in-s" min="0" max="10000" value="5000">
-        </div>
-        <button class="btn" onclick="game.vow()">🔥 執行天條結算仪式</button>
+    <div class="top-hud">
+        <div class="bar-label">DNA/RNA 能量穩定度 (生命值)</div>
+        <div class="bar-container"><div id="health-bar"></div></div>
     </div>
-</div>
+
+    <div id="boot-log"></div>
+
+    <div class="side-slider slider-left">
+        <div class="slider-tag">曲率口數 (150)</div>
+        <input type="range" id="ctrl-curv" class="vertical" min="1" max="150" value="1">
+    </div>
+
+    <div class="side-slider slider-right">
+        <div class="slider-tag">方向盤 (360°)</div>
+        <input type="range" id="ctrl-angle" class="vertical" min="0" max="360" value="180">
+    </div>
+
+    <div id="stage-canvas"></div>
+    <div class="center-portal"></div>
+
+    <div class="terminal" id="main-terminal">
+        <div class="toggle-btn" onclick="ui.toggleTerminal()">CONSOLE PANEL</div>
+        
+        <div class="info-grid">
+            <div class="card">
+                <div class="card-title">受孕池狀態 (PREGNANCY POOL)</div>
+                <div id="val-pool">0 / 16888 KGEN</div>
+                <div style="font-size:8px; margin-top:4px; opacity:0.6;">目標仙女：四仙女 巧仙</div>
+            </div>
+            <div class="card">
+                <div class="card-title">天條物理 (K-LOG)</div>
+                <div id="val-physics">R: 0.00 | D: 0.00</div>
+                <div id="val-kline" style="color:var(--gold);">等待 K 線生成...</div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn" onclick="game.vow()">🔥 點火修行</button>
+            <button class="btn" onclick="game.settle()">🏛️ 廣寒宮結算</button>
+            <button class="btn" onclick="ui.lightLamp()">🏮 13生肖點燈</button>
+            <button class="btn" onclick="ui.takePhoto()">📷 拍照 (存許願)</button>
+            <button class="btn" onclick="ui.record()">🎤 錄音/影</button>
+        </div>
+
+        <div class="info-grid" style="grid-template-columns: 1fr;">
+            <div class="card" style="border-color: var(--cyan);">
+                <div class="card-title">敘事客服：月光算帳</div>
+                <div id="narrative-msg" style="font-size:10px;">「下單即是仙女接令，請謹慎調整方向盤...」</div>
+            </div>
+        </div>
+    </div>
 
 <script>
+/**
+ * KGEN V1.9.5 核心驅動程式
+ */
 const game = {
-    // 1. 初始化 3D 舞台
+    state: { pool: 0, health: 100, l: 5000, s: 5000, ct: 0 },
+    
+    init() {
+        this.engine.init3D();
+        this.loop();
+        this.log("廣寒宮終端 V1.9.5 已連線...");
+        this.log("粒子系統：DNA/RNA 定向調整完成。");
+    },
+
+    log(m) {
+        const l = document.getElementById('boot-log');
+        l.innerHTML = `<div>[SYS] ${m}</div>` + l.innerHTML;
+    },
+
+    vow() {
+        this.state.pool += 1350;
+        this.log(`注入 DNA 精子願力: +1350`);
+        if(this.state.pool >= 16888) this.triggerPregnancy();
+    },
+
+    triggerPregnancy() {
+        this.log("!!! 16888 受孕門檻達成 !!!");
+        this.log("啟動下凡流程：抽籤幸運地址 A/B...");
+        this.state.pool = 0;
+    },
+
+    loop() {
+        const run = () => {
+            // 讀取滑桿
+            const curv = document.getElementById('ctrl-curv').value;
+            const angle = document.getElementById('ctrl-angle').value;
+            
+            // 天條轉換邏輯 (180度為中性)
+            const ct = (angle - 180) / 180; 
+            const r = (curv / 150) * (ct > 0 ? 1 : -1);
+            const d = 0.6 * ct + 0.4 * r;
+
+            document.getElementById('val-pool').innerText = `${this.state.pool} / 16888 KGEN`;
+            document.getElementById('val-physics').innerText = `R: ${r.toFixed(2)} | D: ${d.toFixed(2)}`;
+            
+            this.engine.update(r, d);
+            requestAnimationFrame(run);
+        };
+        run();
+    }
+};
+
+game.engine = {
+    scene: null, camera: null, renderer: null,
+    fairy: null, rnaParticles: null, dnaParticles: null,
+
     init3D() {
+        const container = document.getElementById('stage-canvas');
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('stage').appendChild(this.renderer.domElement);
+        container.appendChild(this.renderer.domElement);
 
-        // 核心載體：仙女靈體面板
-        const geometry = new THREE.BoxGeometry(4, 6, 0.1);
-        const material = new THREE.MeshPhongMaterial({ color: 0xffd778, emissive: 0x332200, shininess: 100, transparent: true, opacity: 0.9 });
-        this.fairy = new THREE.Mesh(geometry, material);
+        // 仙女圓圖載體
+        const geo = new THREE.CircleGeometry(3, 32);
+        const mat = new THREE.MeshPhongMaterial({ color: 0xffd778, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+        this.fairy = new THREE.Mesh(geo, mat);
         this.scene.add(this.fairy);
 
-        // 粒子背景
-        const pGeo = new THREE.BufferGeometry();
-        const pPos = [];
-        for(let i=0; i<1000; i++) pPos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
-        pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPos, 3));
-        this.particles = new THREE.Points(pGeo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.05}));
-        this.scene.add(this.particles);
-
-        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        // 粒子系統：RNA (上到下) & DNA (下到上)
+        this.dnaParticles = this.createParticles(0x00f2ff, 1); // 做空：由下往上
+        this.rnaParticles = this.createParticles(0xffd778, -1); // 做多：由上往下
+        
+        const light = new THREE.PointLight(0xffffff, 1, 100);
         light.position.set(5, 5, 5);
         this.scene.add(light, new THREE.AmbientLight(0x404040));
         this.camera.position.z = 10;
     },
 
-    // 2. 啟動與循環
-    async run() {
-        this.init3D();
-        this.pool = 0;
-        
-        // 模擬加載
-        const bar = document.getElementById('bar');
-        const status = document.getElementById('status');
-        const tasks = ["天條 V1.0 加載...", "11520 大腦同步...", "16888 廣寒宮定位...", "4D 渲染就緒..."];
-        for(let i=0; i<=100; i+=2) {
-            bar.style.width = i + '%';
-            if(i%25==0) status.innerText = tasks[i/25];
-            await new Promise(r => setTimeout(r, 20));
-        }
-        document.getElementById('loader').style.display = 'none';
-
-        this.loop();
+    createParticles(color, dir) {
+        const geo = new THREE.BufferGeometry();
+        const pos = [];
+        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        const p = new THREE.Points(geo, new THREE.PointsMaterial({color, size: 0.1, transparent: true}));
+        p.userData = { direction: dir };
+        this.scene.add(p);
+        return p;
     },
 
-    loop() {
-        const update = () => {
-            const L = parseFloat(document.getElementById('in-l').value);
-            const S = parseFloat(document.getElementById('in-s').value);
-            const CT = parseFloat(document.getElementById('in-ct').value);
+    update(r, d) {
+        // 角色旋轉與推進
+        this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, r * Math.PI, 0.05);
+        this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, d * 5, 0.05);
 
-            // 天條公式：R = (L-S)/(L+S)
-            const R = (L - S) / (L + S + 0.001);
-            const D = (0.6 * CT) + (0.4 * R);
+        // 粒子動力學：遵守 Handover 規則
+        [this.dnaParticles, this.rnaParticles].forEach(p => {
+            const positions = p.geometry.attributes.position.array;
+            for(let i=1; i<positions.length; i+=3) {
+                positions[i] += 0.1 * p.userData.direction;
+                // 循環與消失邏輯
+                if(p.userData.direction > 0 && positions[i] > 15) positions[i] = -15; // DNA 下到上
+                if(p.userData.direction < 0 && positions[i] < -15) positions[i] = 15; // RNA 上到下
+            }
+            p.geometry.attributes.position.needsUpdate = true;
+        });
 
-            // 更新 UI
-            document.getElementById('v-ct').innerText = CT;
-            document.getElementById('v-r').innerText = R.toFixed(2);
-            document.getElementById('v-pool').innerText = `${Math.floor(this.pool)} / 16888`;
-
-            // 3D 物理連動
-            this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, R * Math.PI/3, 0.1);
-            this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, D * 5, 0.05);
-            this.particles.rotation.y += 0.002;
-
-            this.renderer.render(this.scene, this.camera);
-            requestAnimationFrame(update);
-        };
-        update();
-    },
-
-    log(m) {
-        const l = document.getElementById('log');
-        l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
-    },
-
-    vow() {
-        this.pool += 1350;
-        this.log(`注入願力: +1350 KGEN`);
-        if(this.pool >= 16888) {
-            this.log("!!! 觸發廣寒宮結算 !!!");
-            this.log("分配: 30% 靈霄 / 60% 玩家 / 10% 留池");
-            this.pool = 0;
-        }
+        this.renderer.render(this.scene, this.camera);
     }
 };
 
-window.onload = () => game.run();
+const ui = {
+    toggleTerminal() {
+        document.getElementById('main-terminal').classList.toggle('collapsed');
+    },
+    lightLamp() {
+        const animal = prompt("請輸入第 13 生肖物種：", "變形金剛");
+        game.log(`已為 [${animal}] 點亮光明燈，護佑宇宙。`);
+    },
+    takePhoto() {
+        game.log("拍照儲存中... 已蓋上 V1.9.5 時間戳印與許願詞。");
+    }
+};
+
+window.onload = () => game.init();
 </script>
 </body>
 </html>
