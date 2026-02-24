@@ -2,101 +2,102 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮精確導航 V2.1.5</title>
+    <title>KGEN 16888｜廣寒宮飛碟航行 V2.1.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 頂部進度監控 */
-        .top-ui { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
-        .bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 8px; border: 0.5px solid #444; overflow: hidden; }
-        #prog-fill { width: 99%; height: 100%; background: var(--red); box-shadow: 0 0 10px var(--red); }
-        #fuel-fill { width: 100%; height: 100%; background: var(--cyan); }
+        /* 進度條監修 */
+        .top-monitor { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
+        .bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 5px 0 10px; border-radius: 3px; overflow: hidden; }
+        #prog-bar { width: 99.5%; height: 100%; background: var(--red); box-shadow: 0 0 10px var(--red); }
+        #fuel-bar { width: 100%; height: 100%; background: var(--cyan); }
 
-        /* 中央仙女圖 (明顯化 + 逆時針聯動) */
-        #fairy-focus {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 360px; height: 360px;
+        /* 中央仙女圖：呼吸燈 + 翻轉特效 */
+        #fairy-ufo {
+            position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%);
+            width: 380px; height: 380px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.45; border-radius: 50%; z-index: 2; pointer-events: none;
-            border: 3px solid var(--gold);
-            box-shadow: inset 0 0 50px var(--gold), 0 0 30px rgba(255,215,120,0.5);
-            transition: transform 0.1s linear;
+            opacity: 0.5; border-radius: 50%; z-index: 2;
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 40px rgba(255,215,120,0.6);
+            transition: transform 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
 
-        #bridge { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #ai-report { background: rgba(0,0,0,0.8); padding: 6px 20px; border: 1px solid var(--cyan); border-radius: 20px; color: var(--cyan); font-size: 13px; }
-        #price { font-family: 'Orbitron'; font-size: 48px; text-shadow: 0 0 15px var(--cyan); margin: 10px 0; }
+        #bridge { position: fixed; top: 22%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #price { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 20px var(--cyan); }
 
-        .stick { position: fixed; top: 55%; transform: translateY(-50%); z-index: 1000; text-align: center; }
-        .l-stick { left: 15px; } .r-stick { right: 15px; }
-        .stick-tag { font-size: 10px; color: var(--gold); margin-bottom: 80px; font-weight: bold; }
-        input[type=range].vert { width: 170px; transform: rotate(-90deg); margin: 70px -65px; accent-color: var(--gold); }
+        /* 操作桿佈局 */
+        .ctrl-panel { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; }
+        .stick-box { text-align: center; }
+        
+        /* 左側：垂直曲速 */
+        input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 60px; accent-color: var(--gold); }
+        
+        /* 右側：橫向方向盤 (飛碟模式) */
+        input[type=range].h-steer { width: 220px; accent-color: var(--cyan); margin-top: 20px; }
+        .steer-label { color: var(--cyan); font-size: 10px; font-weight: 900; margin-top: 5px; }
+
+        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
 
         #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #bg-video { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
-
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
-
-        .brand-wish { position: fixed; bottom: 125px; left: 20px; z-index: 500; text-align: left; }
+        #cam { position: fixed; inset: 0; z-index: 1; opacity: 0.3; object-fit: cover; }
     </style>
 </head>
 <body>
 
-<div id="fairy-focus"></div>
-<video id="bg-video" autoplay playsinline></video>
+<div id="fairy-ufo"></div>
+<video id="cam" autoplay playsinline></video>
 <div id="three-canvas"></div>
 
-<div class="top-ui">
-    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--gold);"><span>廣寒宮工程進度</span><span>99%</span></div>
-    <div class="bar-wrap"><div id="prog-fill"></div></div>
-    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--cyan);"><span>神明銀行保證金</span><span id="fuel-txt">100%</span></div>
-    <div class="bar-wrap"><div id="fuel-fill"></div></div>
+<div class="top-monitor">
+    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--gold);"><span>廣寒宮金融飛碟進度</span><span>99.5%</span></div>
+    <div class="bar-bg"><div id="prog-bar"></div></div>
+    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--cyan);"><span>神明銀行能量</span><span id="fuel-txt">100%</span></div>
+    <div class="bar-bg"><div id="fuel-bar"></div></div>
 </div>
 
 <div id="bridge">
-    <div id="ai-report">AI 系統待命：偵測環境中...</div>
+    <div id="ai-status" style="color:var(--cyan); background:rgba(0,0,0,0.7); display:inline-block; padding:5px 20px; border-radius:20px; border:1px solid var(--cyan);">AI 導航初始化...</div>
     <div id="price">16888.88</div>
-    <div id="vector-hud" style="font-size:11px; color:var(--gold); font-family:'Orbitron';">WARP: 0 | DIR: 0°</div>
+    <div id="hud-stats" style="font-family:'Orbitron'; font-size:11px; color:var(--gold);">WARP: 0 | STEER: 0° (CENTER)</div>
 </div>
 
-<div class="brand-wish">
-    <div style="font-size:28px; color:var(--gold); font-weight:900; text-shadow:2px 2px #000;">16888 廣寒宮</div>
-    <div id="wish-txt" style="color:var(--cyan); font-weight:bold; font-size:16px;">【願】：萬事如意</div>
+<div class="ctrl-panel">
+    <div class="stick-box">
+        <div style="color:var(--gold); font-size:10px;">曲速引擎</div>
+        <input type="range" id="warp" class="v-warp" min="0" max="150" value="0">
+    </div>
+    <div class="stick-box" style="align-self: flex-end;">
+        <div class="steer-label">【飛碟方向盤】</div>
+        <div style="display:flex; justify-content:space-between; width:220px; color:var(--cyan); font-size:10px;">
+            <span>空 (-180°)</span><span>多 (0°)</span><span>空 (180°)</span>
+        </div>
+        <input type="range" id="steer" class="h-steer" min="-180" max="180" value="0">
+    </div>
 </div>
 
-<div class="stick l-stick">
-    <div class="stick-tag">曲速引擎</div>
-    <input type="range" id="warp" class="vert" min="0" max="150" value="0">
-</div>
-
-<div class="stick r-stick">
-    <div class="stick-tag">方向盤</div>
-    <input type="range" id="angle" class="vert" min="0" max="360" value="0">
-</div>
-
-<div class="panel">
+<div class="console">
     <div class="grid">
-        <button class="btn" onclick="app.scan()">🔍 合約/錢包判定</button>
-        <button class="btn" onclick="app.trade('CT')">📈 CT 現價下單</button>
-        <button class="btn" onclick="app.trade('CLOSE')">📉 手動結算</button>
+        <button class="btn" onclick="app.scan()">🔍 合約判定</button>
+        <button class="btn" onclick="app.trade('CT')">📈 CT 現價</button>
+        <button class="btn" onclick="app.trade('CLOSE')">📉 結算</button>
         <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
         <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
+        <button class="btn" onclick="app.toggleCam()">📸 影像開關</button>
         <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
-        <button class="btn" onclick="app.speak('導航重校準完成，仙女圖已強化')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.speak('飛碟控制系統已就緒')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
-    fuel: 100,
     hasPos: false,
+    fuel: 100,
 
     init() {
         this.scene = new THREE.Scene();
@@ -109,81 +110,81 @@ const app = {
         const pos = [];
         for (let i = 0; i < 1500; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.14, transparent:true, opacity:0.8 }));
-        this.scene.add(this.stars);
+        this.particles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.scene.add(this.particles);
 
         this.camera.position.z = 15;
         this.animate();
         setInterval(() => {
             document.getElementById('price').innerText = (16888 + (Math.random()-0.5)*10).toFixed(2);
-        }, 1200);
+        }, 1000);
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const warp = parseInt(document.getElementById('warp').value);
-        const angle = parseInt(document.getElementById('angle').value);
+        const steer = parseInt(document.getElementById('steer').value);
 
-        // 1. 曲速觀望平倉邏輯
+        // 核心邏輯：越靠近 0 越做多，越靠近 180/-180 越做空
+        let mode = "";
+        let flowDir = 0; // 控制視覺流向
+
+        if (Math.abs(steer) < 30) {
+            mode = "🚀 飛碟拉升：做多"; flowDir = 1;
+        } else if (Math.abs(steer) > 150) {
+            mode = "📉 飛碟俯衝：做空"; flowDir = -1;
+        } else {
+            mode = "🛸 側向平移：觀望"; flowDir = 0.2;
+        }
+
+        // 瞬間切換判斷：如果曲速歸零則強制平倉
         if (warp === 0 && this.hasPos) {
             this.hasPos = false;
-            this.speak("曲速歸零，系統自動平倉觀望");
+            this.speak("動力切斷，平倉觀望");
         }
 
-        // 2. 仙女圖旋轉：角度增大 -> 逆時針轉 (-angle)
-        document.getElementById('fairy-focus').style.transform = `translate(-50%, -50%) rotate(${-angle}deg)`;
-
-        // 3. 全向量流向引擎
-        const rad = (angle * Math.PI) / 180;
+        // 仙女圖聯動：角度增大圖逆時針轉 (-steer)
+        document.getElementById('fairy-ufo').style.transform = `translate(-50%, -50%) rotate(${-steer}deg)`;
+        
+        // 向量粒子引擎
+        const rad = (steer * Math.PI) / 180;
         const speed = warp / 600;
-        const vx = Math.sin(rad) * speed;
-        const vy = Math.cos(rad) * speed;
-
-        const p = this.stars.geometry.attributes.position.array;
-        for(let i=0; i<p.length; i+=3) {
-            p[i] += vx;
-            p[i+1] -= vy;
-            if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
-            if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
+        const positions = this.particles.geometry.attributes.position.array;
+        
+        for(let i=0; i<positions.length; i+=3) {
+            positions[i] += Math.sin(rad) * speed; 
+            positions[i+1] -= Math.cos(rad) * speed * flowDir; 
+            if(positions[i] > 25) positions[i] = -25; if(positions[i] < -25) positions[i] = 25;
+            if(positions[i+1] > 25) positions[i+1] = -25; if(positions[i+1] < -25) positions[i+1] = 25;
         }
-        this.stars.geometry.attributes.position.needsUpdate = true;
-        
-        // 4. HUD 顯示與方向定義 (0度多, 180度空)
-        let dirLabel = (angle < 45 || angle > 315) ? "正前方：做多航道" : (angle > 135 && angle < 225) ? "正後方：做空航道" : "側向航行";
-        document.getElementById('vector-hud').innerText = `WARP: ${warp} | DIR: ${angle}° | ${dirLabel}`;
-        
+        this.particles.geometry.attributes.position.needsUpdate = true;
+
+        document.getElementById('ai-status').innerText = mode;
+        document.getElementById('hud-stats').innerText = `WARP: ${warp} | STEER: ${steer}°`;
         this.renderer.render(this.scene, this.camera);
     },
 
     scan() {
-        const addr = prompt("輸入掃描地址 (合約或一般錢包)：");
-        if(!addr) return;
-        this.speak("開始分析地址生命體特徵");
-        
-        let report = "";
-        if(addr.length > 35) { // 模擬判斷
-            report = addr.includes("0x") ? "判斷：【神明合約】可領 0.1% 稅金分紅" : "判斷：【仙女池】具備 30% 盈餘投報";
-        } else {
-            report = "判斷：【一般錢包/百姓】功能：提存、計息貸款";
-        }
-        document.getElementById('ai-report').innerText = report;
-        this.speak(report);
+        const addr = prompt("輸入掃描地址：");
+        let res = (addr && addr.length > 30) ? "判斷：【神明/仙女合約】領分紅" : "判斷：【百姓錢包】領貸款";
+        document.getElementById('ai-status').innerText = res;
+        this.speak(res);
     },
 
-    trade(type) {
-        if(type === 'CT') { this.hasPos = true; this.fuel -= 5; this.speak("執行下單"); }
-        else { this.hasPos = false; this.fuel += 8; this.speak("平倉結算"); }
-        document.getElementById('fuel-fill').style.width = Math.min(100, this.fuel) + "%";
+    trade(t) {
+        if(t==='CT'){ this.hasPos=true; this.fuel-=5; this.speak("多空切換成功"); }
+        else { this.hasPos=false; this.fuel+=10; this.speak("全艦平倉"); }
+        document.getElementById('fuel-bar').style.width = Math.min(100, this.fuel) + "%";
         document.getElementById('fuel-txt').innerText = this.fuel + "%";
     },
 
     setWish() {
-        const w = prompt("輸入許願：");
-        if(w) document.getElementById('wish-txt').innerText = `【願】：${w}`;
+        const w = prompt("留言內容：");
+        if(w) document.getElementById('ai-status').innerText = `【願】：${w}`;
     },
 
     async toggleCam() {
-        const v = document.getElementById('bg-video');
+        const v = document.getElementById('cam');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { const s = await navigator.mediaDevices.getUserMedia({video: true}); v.srcObject = s; }
     },
@@ -192,15 +193,14 @@ const app = {
         const out = document.createElement('canvas'); out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1920);
-        if(document.getElementById('bg-video').srcObject) ctx.drawImage(document.getElementById('bg-video'), 0,0,1080,1920);
+        if(document.getElementById('cam').srcObject) ctx.drawImage(document.getElementById('cam'), 0,0,1080,1920);
         ctx.drawImage(this.renderer.domElement, 0,0,1080,1920);
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 55px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 向量紀錄", 50, 150);
-        ctx.fillStyle = "#fff"; ctx.font = "40px Noto Sans TC";
-        ctx.fillText(document.getElementById('wish-txt').innerText, 50, 1850);
-        ctx.fillText(document.getElementById('ai-report').innerText, 50, 1780);
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
+        ctx.fillText("16888 廣寒宮 飛碟日誌", 50, 150);
+        ctx.font = "40px Noto Sans TC";
+        ctx.fillText(document.getElementById('ai-status').innerText, 50, 1850);
         const link = document.createElement('a');
-        link.download = "GUANGHAN_V215.png"; link.href = out.toDataURL(); link.click();
+        link.download = "UFO_LOG.png"; link.href = out.toDataURL(); link.click();
     },
 
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
