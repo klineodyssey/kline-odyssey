@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮光明燈萬全版 V2.1.1</title>
+    <title>KGEN 16888｜廣寒宮金融生命體 V2.1.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
@@ -11,107 +11,75 @@
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 中央圓形底圖 (月亮嫦娥) */
-        #fairy-circle-bg {
+        /* 中央圓形美女底圖 (隨方向盤旋轉) */
+        #fairy-central {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 320px; height: 320px;
+            width: 350px; height: 350px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.2; border-radius: 50%; z-index: 2; pointer-events: none;
-            box-shadow: 0 0 50px rgba(0,242,255,0.3);
+            opacity: 0.15; border-radius: 50%; z-index: 2; pointer-events: none;
+            box-shadow: 0 0 60px rgba(255, 215, 120, 0.2);
+            transition: transform 0.1s linear;
         }
 
-        /* 頂部監控 */
-        .top-info { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; }
-        .bar-label { display: flex; justify-content: space-between; font-size: 9px; color: var(--gold); font-family: 'Orbitron'; }
-        .bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; overflow: hidden; }
-        #prog-bar { width: 98%; height: 100%; background: var(--red); box-shadow: 0 0 8px var(--red); }
-        #fuel-bar { width: 100%; height: 100%; background: var(--cyan); }
+        /* 頂部金融監修 */
+        .monitor { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; }
+        .label { font-size: 10px; color: var(--gold); font-family: 'Orbitron'; display: flex; justify-content: space-between; }
+        .bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; overflow: hidden; }
+        #bank-bar { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); }
 
-        /* 點燈選單 */
-        #lamp-menu {
-            position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
-            width: 80%; max-height: 50%; background: rgba(0,0,0,0.9);
-            border: 2px solid var(--gold); z-index: 2000; display: none;
-            overflow-y: auto; padding: 15px; border-radius: 10px;
-        }
-        .zodiac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .lamp-btn { background: none; border: 1px solid var(--cyan); color: var(--cyan); padding: 10px 0; font-size: 12px; }
-
-        /* 操作與資訊 */
-        #bridge { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #nav-status { background: rgba(0,0,0,0.7); padding: 5px 20px; border: 1px solid var(--gold); display: inline-block; color: var(--gold); }
+        /* 操作桿 */
         .stick { position: fixed; top: 55%; transform: translateY(-50%); z-index: 1000; }
         .l-stick { left: 10px; } .r-stick { right: 10px; }
-        input[type=range].vert { width: 140px; transform: rotate(-90deg); margin: 60px -50px; accent-color: var(--gold); }
+        input[type=range].vert { width: 150px; transform: rotate(-90deg); margin: 60px -55px; accent-color: var(--gold); }
 
-        #player-cam { position: fixed; inset: 0; z-index: 1; opacity: 0.35; object-fit: cover; }
+        /* 資訊看板 */
+        #info-hub { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #identity-tag { background: rgba(0,255,255,0.15); border: 1px solid var(--cyan); padding: 5px 15px; border-radius: 20px; font-size: 12px; color: var(--cyan); }
+        #price { font-family: 'Orbitron'; font-size: 45px; margin: 10px 0; text-shadow: 0 0 20px var(--cyan); }
+
         #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+        #player-cam { position: fixed; inset: 0; z-index: 1; opacity: 0.3; object-fit: cover; }
 
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
+        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
         .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
-        
-        /* 品牌與許願位置 */
-        .brand-footer { position: fixed; bottom: 120px; left: 20px; z-index: 500; text-align: left; pointer-events: none; }
-        #wish-display { color: var(--cyan); font-size: 16px; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div id="fairy-circle-bg"></div>
+<div id="fairy-central"></div>
 <video id="player-cam" autoplay playsinline></video>
 <div id="three-canvas"></div>
 
-<div id="lamp-menu">
-    <div style="color:var(--gold); text-align:center; margin-bottom:15px; font-weight:bold;">廣寒宮光明燈 (1 KGEN)</div>
-    <div class="zodiac-grid" id="zodiac-list"></div>
-    <button class="btn" style="width:100%; margin-top:10px;" onclick="app.rebirth('自定')">✨ 自定義生肖點燈</button>
-    <button class="btn" style="width:100%; margin-top:5px; border-color:var(--red);" onclick="document.getElementById('lamp-menu').style.display='none'">關閉</button>
+<div class="monitor">
+    <div class="label"><span>玉帝金庫容量 (5000萬 KGEN)</span><span id="seat-count">神明席位: 0/500</span></div>
+    <div class="bar"><div id="bank-bar"></div></div>
 </div>
 
-<div class="top-info">
-    <div class="bar-label"><span>GUANGHAN PALACE PROGRESS</span><span>98%</span></div>
-    <div class="bar-wrap"><div id="prog-bar"></div></div>
-    <div class="bar-label"><span>BANK MARGIN</span><span id="fuel-val">100%</span></div>
-    <div class="bar-wrap"><div id="fuel-bar"></div></div>
+<div id="info-hub">
+    <div id="identity-tag">身分判斷：掃描錢包中...</div>
+    <div id="price">16888.88</div>
 </div>
 
-<div id="bridge">
-    <div id="nav-status">系統掃描中...</div>
-    <div id="price-val" style="font-family:'Orbitron'; font-size:40px; margin:10px 0;">16888.88</div>
-</div>
+<div class="stick l-stick"><input type="range" id="warp" class="vert" min="1" max="150" value="75"></div>
+<div class="stick r-stick"><input type="range" id="angle" class="vert" min="0" max="360" value="180"></div>
 
-<div class="brand-footer">
-    <div style="font-size:24px; color:var(--gold); font-weight:900;">16888 廣寒宮</div>
-    <div id="wish-display">【願】：等待輸入...</div>
-</div>
-
-<div class="stick l-stick">
-    <input type="range" id="warp" class="vert" min="1" max="150" value="75">
-</div>
-<div class="stick r-stick">
-    <input type="range" id="angle" class="vert" min="0" max="360" value="180">
-</div>
-
-<div class="panel">
+<div class="console">
     <div class="grid">
-        <button class="btn" onclick="app.showLamps()">🏮 點光明燈</button>
-        <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
+        <button class="btn" onclick="app.checkIdentity()">🔍 身分演化判斷</button>
+        <button class="btn" onclick="app.invest()">🏦 仙女池回禮投資</button>
         <button class="btn" onclick="app.trade('CT')">📈 CT下單</button>
         <button class="btn" onclick="app.trade('CLOSE')">📉 CT+1結算</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.toggleCam()">📸 影像開關</button>
-        <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
-        <button class="btn" onclick="app.speak('廣寒宮點燈祈福中')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.capture()">📷 拍照存證</button>
+        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
+        <button class="btn" onclick="app.connect()">🦊 連結神明銀行</button>
+        <button class="btn" onclick="app.speak('廣寒宮金融系統啟動')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
-    zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'],
-    lampData: {}, // 紀錄燈座資訊
-    wishMsg: "",
-
+    balance: 0,
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -119,30 +87,17 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-canvas').appendChild(this.renderer.domElement);
 
-        // 氣泡星空
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 800; i++) pos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        for (let i = 0; i < 1000; i++) pos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.1 }));
+        this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.12 }));
         this.scene.add(this.bubbles);
-
-        // 初始化生肖點燈列表
-        const list = document.getElementById('zodiac-list');
-        this.zodiacs.forEach(z => {
-            const b = document.createElement('button');
-            b.className = 'lamp-btn';
-            b.innerText = z;
-            b.onclick = () => this.rebirth(z);
-            list.appendChild(b);
-            this.lampData[z] = []; // 100個位置預留
-        });
 
         this.camera.position.z = 12;
         this.animate();
         setInterval(() => {
-            const p = (16888 + (Math.random()-0.5)*10).toFixed(2);
-            document.getElementById('price-val').innerText = p;
+            document.getElementById('price').innerText = (16888 + (Math.random()-0.5)*10).toFixed(2);
         }, 1500);
     },
 
@@ -151,14 +106,15 @@ const app = {
         const warp = document.getElementById('warp').value;
         const angle = parseInt(document.getElementById('angle').value);
 
-        // 多空判斷
-        let flow = 0;
-        if (angle >= 30 && angle < 150) { flow = 1; document.getElementById('nav-status').innerText = "🚀 做多航道"; }
-        else if (angle >= 210 && angle < 330) { flow = -1; document.getElementById('nav-status').innerText = "📉 做空航道"; }
-        else { flow = 0; document.getElementById('nav-status').innerText = "休息觀望"; }
+        // 美女圖聯動旋轉
+        document.getElementById('fairy-central').style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
-        // 氣泡星球聯動
+        // 星球移動邏輯
         const p = this.bubbles.geometry.attributes.position.array;
+        let flow = 0;
+        if (angle >= 30 && angle < 150) flow = 1; // 多
+        else if (angle >= 210 && angle < 330) flow = -1; // 空
+
         for(let i=1; i<p.length; i+=3) {
             p[i] -= flow * (warp / 800);
             if(p[i] < -20) p[i] = 20; if(p[i] > 20) p[i] = -20;
@@ -167,26 +123,24 @@ const app = {
         this.renderer.render(this.scene, this.camera);
     },
 
-    showLamps() { document.getElementById('lamp-menu').style.display = 'block'; },
-
-    rebirth(type) {
-        const name = type === '自定' ? prompt("請輸入自定義生肖：") : type;
-        if(!name) return;
-        const seat = Math.floor(Math.random() * 100) + 1; // 模擬隨機燈座編號
-        this.speak(`${name} 生肖點燈成功，位置編號第 ${seat} 號`);
-        alert(`已支付 1 KGEN，為【${name}】點亮第 ${seat} 盞燈`);
-        document.getElementById('lamp-menu').style.display = 'none';
-    },
-
-    setWish() {
-        const msg = prompt("輸入您的許願或留言：");
-        if(msg) {
-            this.wishMsg = msg;
-            document.getElementById('wish-display').innerText = `【願】：${msg}`;
+    checkIdentity() {
+        const bal = prompt("輸入 KGEN 持有量進行系統演化判斷：");
+        this.balance = parseInt(bal);
+        let tag = "";
+        if(this.balance >= 100000) {
+            tag = "身分：【靈霄寶殿神明席位】可領交易稅分紅";
+            this.speak("恭喜位列仙班，享有分紅權利");
+        } else {
+            tag = "身分：【百姓人民】享有存貸計息功能";
+            this.speak("百姓安居樂業，系統提供穩健貸款");
         }
+        document.getElementById('identity-tag').innerText = tag;
     },
 
-    trade(type) { this.speak(type === 'CT' ? "現價下單" : "結算出場"); },
+    invest() {
+        this.speak("啟動仙女池地址自動判斷，執行 30% 回禮投資玉帝金庫");
+        alert("仙女自動投資判斷：偵測盈餘，已回流投資神明銀行。");
+    },
 
     async toggleCam() {
         const v = document.getElementById('player-cam');
@@ -195,29 +149,22 @@ const app = {
     },
 
     capture() {
-        const out = document.createElement('canvas');
-        out.width = 1080; out.height = 1920;
+        const out = document.createElement('canvas'); out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1920);
         if(document.getElementById('player-cam').srcObject) ctx.drawImage(document.getElementById('player-cam'), 0,0,1080,1920);
         ctx.drawImage(this.renderer.domElement, 0,0,1080,1920);
-
-        // 左下角：品牌與許願/留言
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 祈福誌", 50, 150);
-        ctx.fillStyle = "#00f2ff"; ctx.font = "40px Noto Sans TC";
-        ctx.fillText(`【留言】：${this.wishMsg || "大吉大利"}`, 50, 1850);
-        ctx.fillStyle = "#fff"; ctx.font = "30px Orbitron";
-        ctx.fillText(new Date().toLocaleString(), 50, 1800);
-
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 50px Noto Sans TC";
+        ctx.fillText("16888 廣寒宮 金融演化日誌", 50, 150);
+        ctx.font = "30px Noto Sans TC";
+        ctx.fillText(document.getElementById('identity-tag').innerText, 50, 1850);
         const link = document.createElement('a');
-        link.download = `GUANGHAN_BLESS_${Date.now()}.png`;
-        link.href = out.toDataURL();
-        link.click();
+        link.download = "KGEN_FIN_LIFE.png"; link.href = out.toDataURL(); link.click();
     },
 
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
-    connect() { alert("連結靈霄寶殿錢包..."); }
+    trade(t) { this.speak(t === 'CT' ? "下單中" : "結算中"); },
+    connect() { alert("連結 Web3 金融中..."); }
 };
 
 window.onload = () => app.init();
