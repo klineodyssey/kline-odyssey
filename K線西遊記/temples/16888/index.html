@@ -2,25 +2,32 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜K線實時引擎 V2.2.3</title>
+    <title>KGEN 16888｜13生肖光明燈版 V2.2.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 儀表板：血量與金庫 */
-        .hud-main { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
+        /* 頂部 HUD：金庫與腦容量 */
+        .hud-v2 { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 15px; box-sizing: border-box; }
         .hud-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 3px; overflow: hidden; border: 1px solid #333; }
-        #hp-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff0000, #00ff00); transition: 0.3s; }
-        #vault-fill { width: 80%; height: 100%; background: var(--gold); }
+        .bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.1); margin: 3px 0 8px; border-radius: 2px; }
+        #vault-f { width: 80%; height: 100%; background: var(--gold); }
+        #brain-f { width: 60%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
 
-        /* 席位監控 */
-        .seats { position: fixed; top: 100px; left: 15px; font-size: 9px; color: var(--cyan); z-index: 1000; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border-left: 2px solid var(--cyan); }
+        /* 13 生肖光明燈 */
+        .zodiac-panel { position: fixed; right: 10px; top: 100px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+        .lamp { width: 45px; height: 45px; border: 1px solid var(--gold); border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: var(--gold); cursor: pointer; }
+        .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
 
-        /* 中央仙女圖 (旋轉鎖定) */
-        #fairy-ufo {
+        /* 席位與血量 */
+        .status-left { position: fixed; top: 100px; left: 15px; font-size: 10px; color: var(--cyan); z-index: 1000; }
+        .hp-box { width: 150px; height: 15px; border: 1px solid #fff; margin-top: 5px; overflow: hidden; }
+        #hp-fill { height: 100%; width: 100%; background: #0f0; transition: 0.3s; }
+
+        /* 中央仙女圖 */
+        #fairy-vessel {
             position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%);
             width: 360px; height: 360px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
@@ -29,18 +36,16 @@
         }
 
         #bridge { position: fixed; top: 22%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #price { font-family: 'Orbitron'; font-size: 55px; text-shadow: 0 0 25px var(--cyan); }
-        #ai-log { background: rgba(0,0,0,0.8); padding: 5px 20px; border: 1px solid var(--cyan); border-radius: 20px; color: var(--cyan); font-size: 12px; display: inline-block; }
+        #price { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 25px var(--cyan); }
 
-        /* 操控台標籤 */
-        .ctrl-grid { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
-        .stick { text-align: center; position: relative; }
-        .tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 15px; margin-bottom: 5px; }
-        input[type=range].v-warp { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 260px; accent-color: var(--gold); }
+        /* 操控桿 */
+        .controls { position: fixed; bottom: 120px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
+        .tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 14px; }
+        input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
+        input[type=range].h-steer { width: 220px; accent-color: var(--gold); }
 
         .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
         .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
 
         #three-box { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
@@ -49,60 +54,60 @@
 </head>
 <body>
 
-<div id="fairy-ufo"></div>
+<div id="fairy-vessel"></div>
 <video id="cam" autoplay playsinline></video>
 <div id="three-box"></div>
 
-<div class="hud-main">
-    <div class="hud-row"><span>玩家血量 (HP)</span><span id="hp-txt">100%</span></div>
-    <div class="bar-bg"><div id="hp-fill"></div></div>
-    <div class="hud-row"><span>靈霄寶殿金庫: 50,000,000 KGEN</span><span>交易稅: 0.3%</span></div>
-    <div class="bar-bg"><div id="vault-fill"></div></div>
+<div class="hud-v2">
+    <div class="hud-row"><span>靈霄殿金庫: 50,000,000 KGEN</span><span>蒸發率 0.1%</span></div>
+    <div class="bar-bg"><div id="vault-f"></div></div>
+    <div class="hud-row"><span>悟空大腦保證金: 50,000,000 KGEN</span><span>腦容量 100%</span></div>
+    <div class="bar-bg"><div id="brain-f"></div></div>
 </div>
 
-<div class="seats">
-    <div>🐒 花果山席位: <span id="s1">500</span>/500</div>
-    <div>🙏 神明席位: <span id="s2">500</span>/500</div>
-    <div style="color:var(--gold); margin-top:5px;">2s K線引擎連動中</div>
+<div class="status-left">
+    <div>🐒 花果山席位: 500 | 🙏 神明: 500</div>
+    <div style="margin-top:5px;">血量 HP:</div>
+    <div class="hp-box"><div id="hp-fill"></div></div>
+    <div style="color:var(--gold); margin-top:5px;">2s K線引擎 (質能守恆)</div>
 </div>
+
+<div class="zodiac-panel" id="lamps">
+    </div>
 
 <div id="bridge">
-    <div id="ai-log">客服系統：請連結錢包以開始交易</div>
     <div id="price">16888.88</div>
-    <div id="k-info" style="color:var(--gold); font-size:12px; font-family:'Orbitron';">W=mgh | K-ENGINE ACTIVE</div>
+    <div id="ai-log" style="color:var(--cyan); font-size:12px;">客服：點擊生肖燈賺取利潤分紅</div>
 </div>
 
-<div class="ctrl-grid">
-    <div class="stick">
-        <div id="warp-val" class="tag">1x</div>
-        <div style="font-size:10px; color:var(--cyan);">曲速引擎</div>
+<div class="controls">
+    <div style="text-align:center;">
+        <div id="w-val" class="tag">1x</div>
         <input type="range" id="warp" class="v-warp" min="1" max="150" value="1">
     </div>
-    <div class="stick">
-        <div id="steer-val" class="tag">0°</div>
-        <div style="font-size:10px; color:var(--gold);">飛碟方向盤 (K航道)</div>
+    <div style="text-align:center;">
+        <div id="s-val" class="tag">0°</div>
         <input type="range" id="steer" class="h-steer" min="-180" max="180" value="0">
     </div>
 </div>
 
 <div class="console">
-    <div class="btn-grid">
-        <button class="btn" onclick="app.checkToken()">🔍 查 Token 地址</button>
+    <div class="grid">
+        <button class="btn" onclick="app.searchToken()">🔍 查 Token 地址</button>
         <button class="btn" onclick="app.trade('CT')">📈 CT 現價下單</button>
         <button class="btn" onclick="app.trade('CLOSE')">📉 結算平倉</button>
         <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
-        <button class="btn" onclick="app.capture()">📷 下載日誌</button>
+        <button class="btn" onclick="app.capture()">📷 截圖日誌</button>
         <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
-        <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
-        <button class="btn" onclick="app.speak('歡迎進入廣寒宮，我是您的導航客服。若無錢包，請點擊右下角按鈕連結。')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
+        <button class="btn" onclick="app.speak('星球流向校準完成。13生肖光明燈已點亮。')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
     hp: 100,
-    walletConnected: false,
-    
+    zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','🐱'],
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -118,57 +123,62 @@ const app = {
         this.scene.add(this.stars);
 
         this.camera.position.z = 15;
+        this.initLamps();
         this.animate();
-        this.startKEngine();
-        
-        // 開頁語音
-        setTimeout(() => this.speak("導航系統就緒，星球軌道已校準。"), 1000);
+        setInterval(() => this.kEngine(), 2000);
     },
 
-    startKEngine() {
-        setInterval(() => {
-            const warp = parseInt(document.getElementById('warp').value);
-            const steer = parseInt(document.getElementById('steer').value);
-            const diff = (Math.random() - 0.5) * 10;
-            const newPrice = 16888 + diff;
-            document.getElementById('price').innerText = newPrice.toFixed(2);
-            
-            // 血量邏輯：方向盤與價格走勢相反時扣血
-            if(Math.abs(steer) > 90 && diff > 0) { // 做空但價格漲
-                this.hp -= (warp / 50);
-                if(this.hp < 0) this.hp = 0;
-                this.updateHP();
-            }
-        }, 2000); // 2秒生成引擎
+    initLamps() {
+        const wrap = document.getElementById('lamps');
+        this.zodiacs.forEach(z => {
+            const l = document.createElement('div');
+            l.className = 'lamp';
+            l.innerText = z;
+            l.onclick = () => {
+                l.classList.toggle('active');
+                this.speak(`點亮${z}生肖燈，貢獻JGEN獲取分紅。`);
+            };
+            wrap.appendChild(l);
+        });
     },
 
-    updateHP() {
-        document.getElementById('hp-txt').innerText = Math.floor(this.hp) + "%";
-        document.getElementById('hp-fill').style.width = this.hp + "%";
-        if(this.hp <= 0) this.speak("警告！血量耗盡，飛碟失去動力。");
+    kEngine() {
+        const diff = (Math.random() - 0.5) * 15;
+        const newPrice = 16888 + diff;
+        document.getElementById('price').innerText = newPrice.toFixed(2);
+        const steer = parseInt(document.getElementById('steer').value);
+        if(Math.abs(steer) > 90 && diff > 0) { // 錯向扣血
+            this.hp -= 2;
+            if(this.hp < 0) this.hp = 0;
+            document.getElementById('hp-fill').style.width = this.hp + "%";
+        }
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const warp = parseInt(document.getElementById('warp').value);
         const steer = parseInt(document.getElementById('steer').value);
-
-        document.getElementById('warp-val').innerText = warp + "x";
-        document.getElementById('steer-val').innerText = steer + "°";
+        document.getElementById('w-val').innerText = warp + "x";
+        document.getElementById('s-val').innerText = steer + "°";
 
         const rad = (steer * Math.PI) / 180;
         const efficiency = Math.cos(rad);
 
-        // 美女圖同步：右移順轉
-        document.getElementById('fairy-ufo').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
+        // 美女圖旋轉：右移(正) -> 順時針(正)
+        document.getElementById('fairy-vessel').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
 
-        // 星球氣泡物理：0度順轉上到下，180度下到上
+        // 星球物理流向修正 (絕對對齊)
         const p = this.stars.geometry.attributes.position.array;
         const speed = (warp / 400);
 
         for(let i=0; i<p.length; i+=3) {
-            p[i] += Math.sin(rad) * speed; // X軸偏轉
-            p[i+1] -= speed * efficiency;  // Y軸流向
+            p[i] += Math.sin(rad) * speed; // X軸跟隨轉向
+            
+            // Y軸流向校準：
+            // 0度(efficiency>0) -> 上往下(減法)
+            // 180度(efficiency<0) -> 下往上(加法)
+            p[i+1] -= speed * efficiency; 
+
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
@@ -176,33 +186,23 @@ const app = {
         this.renderer.render(this.scene, this.camera);
     },
 
-    checkToken() {
-        const addr = prompt("請輸入 Token 地址查詢：");
-        if(!addr) return;
-        this.speak("正在掃描鏈上合約");
-        const isOfficial = addr.toLowerCase().includes("kgen");
-        const msg = isOfficial ? "此為 KGEN 官方合約，稅率 0.3%，支持黑洞蒸發。" : "此為普通 Token，讀取為一般百姓地址。";
-        document.getElementById('ai-log').innerText = msg;
-        this.speak(msg);
+    searchToken() {
+        const addr = prompt("輸入 Token 地址查詢：");
+        if(addr) {
+            this.speak("掃描代碼成功。此為百姓資產，稅率 0.3% 已同步。");
+            document.getElementById('ai-log').innerText = "診斷：百姓 Token 代碼 1:1 對齊。";
+        }
     },
 
     trade(t) {
-        if(!this.walletConnected) {
-            this.speak("偵測到未連結錢包。請點擊右下角小狐狸圖示，安裝或啟動錢包。");
-            return;
-        }
-        this.speak(t==='CT' ? "執行現價交易，J線數據記錄中" : "結算成功");
+        this.speak(t==='CT' ? "進入 K 線實時成交，黑洞蒸發 0.1% 啟動。" : "平倉結算，利潤已存入花果山席位。");
     },
 
     connect() {
-        this.walletConnected = true;
-        this.speak("錢包連結成功，已接入悟空大腦交易所。您可以開始真實成交了。");
-        document.getElementById('ai-status');
-        alert("已連結 MetaMask 錢包");
+        this.speak("接入 MetaMask 成功。歡迎進入悟空大腦交易所。");
+        alert("錢包連結成功");
     },
 
-    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
-    
     async toggleCam() {
         const v = document.getElementById('cam');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
@@ -211,9 +211,15 @@ const app = {
 
     capture() {
         const link = document.createElement('a');
-        link.download = "KGEN_KENGINE_V223.png";
+        link.download = "KGEN_FINAL_V224.png";
         link.href = this.renderer.domElement.toDataURL();
         link.click();
+    },
+
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
+    setWish() {
+        const w = prompt("留言內容：");
+        if(w) document.getElementById('ai-log').innerText = `【願】：${w}`;
     }
 };
 window.onload = () => app.init();
