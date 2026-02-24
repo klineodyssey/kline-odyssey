@@ -3,80 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮七仙女駕駛艙 V1.9.5</title>
+    <title>KGEN 16888｜超光速口袋時光飛碟機 V1.9.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #050608; --glass: rgba(20, 22, 28, 0.9); }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #050608; --glass: rgba(20, 22, 28, 0.9); }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
         
-        /* 頂部血量條 */
-        .top-hud { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 85%; z-index: 100; text-align: center; }
-        .bar { width: 100%; height: 8px; background: #222; border: 1px solid var(--gold); border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        #health-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff3c00, var(--gold)); }
+        /* 頂部品牌與時間 */
+        .brand-header { position: fixed; top: 5px; width: 100%; text-align: center; z-index: 250; font-size: 10px; color: var(--gold); letter-spacing: 3px; }
 
-        /* 側邊垂直滑桿 */
-        .side-ctrl { position: fixed; top: 50%; transform: translateY(-50%); z-index: 150; display: flex; flex-direction: column; align-items: center; }
-        .left-ctrl { left: 15px; }
-        .right-ctrl { right: 15px; }
+        /* 血量即油量監控 */
+        .top-hud { position: fixed; top: 25px; left: 50%; transform: translateX(-50%); width: 85%; z-index: 100; }
+        .fuel-meta { display: flex; justify-content: space-between; font-size: 9px; color: var(--gold); margin-bottom: 2px; }
+        .bar { width: 100%; height: 10px; background: #222; border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; }
+        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: width 0.3s; }
+
+        /* 左側光速曲率 (槓桿) */
+        .left-ctrl { position: fixed; left: 15px; top: 50%; transform: translateY(-50%); z-index: 150; display: flex; flex-direction: column; align-items: center; }
+        /* 右側方向盤 */
+        .right-ctrl { position: fixed; right: 15px; top: 50%; transform: translateY(-50%); z-index: 150; display: flex; flex-direction: column; align-items: center; }
+        
         input[type=range].vert { width: 180px; transform: rotate(-90deg); margin: 80px 0; accent-color: var(--gold); }
-        .tag { font-size: 10px; color: var(--gold); text-shadow: 0 0 5px #000; }
+        .tag { font-size: 10px; color: var(--gold); text-shadow: 0 0 5px #000; text-align: center; }
 
-        /* 中央 3D 容器 */
         #stage { width: 100vw; height: 100vh; position: absolute; z-index: 10; }
 
-        /* 底部控制面板 */
+        /* 控制面板 */
         .terminal { position: fixed; bottom: 0; width: 100%; background: var(--glass); border-top: 2px solid var(--gold); z-index: 200; padding: 15px; transition: 0.3s; }
         .terminal.hide { transform: translateY(calc(100% - 40px)); }
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; }
-        .btn { padding: 8px 15px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; white-space: nowrap; cursor: pointer; }
-        .stat-card { background: rgba(0,0,0,0.4); padding: 10px; border: 1px solid rgba(255,215,120,0.2); flex: 1; }
+        .btn-row { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 5px; }
+        .btn { padding: 8px 12px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; cursor: pointer; white-space: nowrap; }
+        
+        /* 浮水印文字 (預覽) */
+        #watermark { position: fixed; bottom: 120px; left: 20px; z-index: 50; font-size: 12px; color: rgba(255,215,120,0.8); pointer-events: none; display: none; }
     </style>
 </head>
 <body>
 
+<div class="brand-header">KGEN ODYSSEY - <span id="clock">00:00:00</span></div>
+
 <div class="top-hud">
-    <div class="tag">DNA / RNA 穩定度</div>
-    <div class="bar"><div id="health-fill"></div></div>
+    <div class="fuel-meta">
+        <span>飛碟血量即油量</span>
+        <span id="fuel-pct">CAPACITY: 100%</span>
+    </div>
+    <div class="bar"><div id="fuel-fill"></div></div>
 </div>
 
-<div class="side-ctrl left-ctrl">
-    <div class="tag">曲率 (口數)</div>
-    <input type="range" id="curv" class="vert" min="1" max="150" value="75">
+<div class="left-ctrl">
+    <div class="tag">光速曲率<br>(槓桿倍數)</div>
+    <input type="range" id="curv" class="vert" min="0" max="150" value="75">
+    <div id="v-curv" class="tag">75x</div>
 </div>
 
-<div class="side-ctrl right-ctrl">
-    <div class="tag">方向盤 (360°)</div>
+<div class="right-ctrl">
+    <div class="tag">導航方向盤<br>(角度)</div>
     <input type="range" id="angle" class="vert" min="0" max="360" value="180">
+    <div id="v-angle" class="tag">180°</div>
 </div>
 
 <div id="stage"></div>
+<div id="watermark"></div>
 
 <div class="terminal" id="term">
-    <div style="text-align:center; color:var(--gold); cursor:pointer; margin-bottom:10px;" onclick="document.getElementById('term').classList.toggle('hide')">▲ 控制台選單 (V1.9.5)</div>
-    <div style="display:flex; gap:10px;">
-        <div class="stat-card">
-            <div class="tag" style="color:var(--cyan)">受孕池進度</div>
-            <div id="v-pool">0 / 16888</div>
-        </div>
-        <div class="stat-card">
-            <div class="tag" style="color:var(--cyan)">宇宙坐標 (R/D)</div>
-            <div id="v-physics">0.00 / 0.00</div>
-        </div>
-    </div>
+    <div style="text-align:center; color:var(--gold); cursor:pointer; font-size:12px;" onclick="document.getElementById('term').classList.toggle('hide')">🛸 飛碟操作終端 (V1.9.6)</div>
+    
     <div class="btn-row">
-        <button class="btn" onclick="app.vow()">🔥 點火修行</button>
-        <button class="btn" onclick="alert('第 13 生肖點燈成功！')">🏮 13生肖點燈</button>
-        <button class="btn" onclick="app.takePhoto()">📷 拍照 (蓋許願戳印)</button>
-        <button class="btn" onclick="app.log('啟動錄音引擎...')">🎤 錄音/錄影</button>
+        <button class="btn" onclick="app.vow()">🔥 注入願力</button>
+        <button class="btn" onclick="app.lamp()">🏮 13生肖光明燈</button>
+        <button class="btn" onclick="app.media('photo')">📷 拍照</button>
+        <button class="btn" onclick="app.media('record')">🎤 錄音/影</button>
+        <button class="btn" onclick="app.wish()">🙏 許願/還願</button>
     </div>
+    <div id="status-msg" style="font-size:10px; color:var(--cyan); margin-top:10px; height:15px;">系統已就緒...</div>
 </div>
 
 <script>
 const app = {
-    pool: 0,
+    fuel: 100,
+    wishText: "",
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    
+
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -84,72 +92,83 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('stage').appendChild(this.renderer.domElement);
 
-        // 載入指定仙女圖
+        // 仙女核心
         const loader = new THREE.TextureLoader();
         loader.crossOrigin = "anonymous";
         const texture = loader.load(this.fairyImg);
-        
-        const geometry = new THREE.CircleGeometry(4, 32);
-        const material = new THREE.MeshBasicMaterial({ 
-            map: texture, 
-            transparent: true, 
-            side: THREE.DoubleSide 
-        });
-        this.fairy = new THREE.Mesh(geometry, material);
+        this.fairy = new THREE.Mesh(new THREE.CircleGeometry(4, 32), new THREE.MeshBasicMaterial({ map: texture, transparent: true }));
         this.scene.add(this.fairy);
 
-        // 粒子系統 (DNA 由下往上)
-        this.createParticles();
+        // 行星粒子系統
+        this.createPlanets();
         
         this.camera.position.z = 12;
         this.animate();
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
     },
 
-    createParticles() {
-        const pGeo = new THREE.BufferGeometry();
-        const pPos = [];
-        for(let i=0; i<1500; i++) pPos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
-        pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPos, 3));
-        this.pts = new THREE.Points(pGeo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.08, transparent: true, opacity: 0.5}));
-        this.scene.add(this.pts);
+    createPlanets() {
+        const geo = new THREE.BufferGeometry();
+        const pos = [];
+        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        this.planets = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true}));
+        this.scene.add(this.planets);
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        
-        const curv = document.getElementById('curv').value;
-        const angle = document.getElementById('angle').value;
-        const r = (angle - 180) / 180;
-        const d = (curv / 150) * r;
+        const ang = parseInt(document.getElementById('angle').value);
+        const crv = document.getElementById('curv').value;
+        document.getElementById('v-angle').innerText = ang + "°";
+        document.getElementById('v-curv').innerText = crv + "x";
 
-        document.getElementById('v-physics').innerText = `${r.toFixed(2)} / ${d.toFixed(2)}`;
-        document.getElementById('v-pool').innerText = `${this.pool} / 16888`;
+        let mode = "REST"; // 休息
+        let flowDir = 0;
 
-        // 仙女隨方向盤旋轉與前後位移
-        this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, r * Math.PI/2, 0.05);
-        this.fairy.position.z = THREE.MathUtils.lerp(this.fairy.position.z, d * 8, 0.05);
-
-        // DNA 粒子由下往上 (做空方向)
-        const pos = this.pts.geometry.attributes.position.array;
-        for(let i=1; i<pos.length; i+=3) {
-            pos[i] += 0.1; 
-            if(pos[i] > 20) pos[i] = -20;
+        // 天條判定邏輯
+        if ((ang >= 350 || ang <= 10) || (ang >= 19 && ang <= 170)) {
+            mode = "LONG"; flowDir = -1; // 做多：上往下
+        } else if (ang >= 190 && ang <= 350) {
+            mode = "SHORT"; flowDir = 1; // 做空：下往上
         }
-        this.pts.geometry.attributes.position.needsUpdate = true;
 
+        const msg = mode === "LONG" ? "▲ 做多模式：行星降落" : (mode === "SHORT" ? "▼ 做空模式：行星升騰" : "— 休息區：引擎待機");
+        document.getElementById('status-msg').innerText = msg;
+
+        // 粒子流動
+        const p = this.planets.geometry.attributes.position.array;
+        for(let i=1; i<p.length; i+=3) {
+            p[i] += flowDir * (crv / 150 + 0.05); 
+            if(p[i] > 25) p[i] = -25;
+            if(p[i] < -25) p[i] = 25;
+        }
+        this.planets.geometry.attributes.position.needsUpdate = true;
+
+        this.fairy.rotation.y = THREE.MathUtils.lerp(this.fairy.rotation.y, (ang-180)*0.01, 0.05);
         this.renderer.render(this.scene, this.camera);
     },
 
     vow() {
-        this.pool += 1350;
-        if(this.pool >= 16888) {
-            alert("16888 達成！啟動下凡發財金流程。");
-            this.pool = 0;
-        }
+        this.fuel = Math.max(0, this.fuel - 5);
+        document.getElementById('fuel-fill').style.width = this.fuel + "%";
+        document.getElementById('fuel-pct').innerText = `CAPACITY: ${this.fuel}%`;
     },
-    
-    takePhoto() {
-        alert("照片已生成！左下角已蓋印 V1.9.5 與許願字樣。");
+
+    lamp() {
+        const custom = prompt("請輸入第 13 生肖名稱：", "超人");
+        alert(`已為 12 生肖與第 13 生肖【${custom}】點亮光明燈！`);
+    },
+
+    wish() {
+        this.wishText = prompt("請輸入許願或還願內容：");
+        const wm = document.getElementById('watermark');
+        wm.innerText = "願力： " + this.wishText;
+        wm.style.display = "block";
+    },
+
+    media(type) {
+        alert(`${type === 'photo' ? '📷 拍照成功！' : '🎤 錄製中...'} \n左下角已蓋印願力：${this.wishText || "無"} \n頂部品牌：KGEN ODYSSEY`);
     }
 };
 
