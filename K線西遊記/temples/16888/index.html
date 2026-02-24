@@ -2,230 +2,165 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜靈霄寶殿自動分帳終端 V2.8.0</title>
+    <title>KGEN 16888｜靈霄寶殿 × 火星豪宅實時成交終端</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --dna: #ff00ff; --rna: #00ffaa; --bg: #000; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100%; width: 100%; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100%; }
 
-        /* 🏛️ 靈霄寶殿頂部 HUD (30/10/60 天條) */
-        .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; pointer-events: none; }
-        .hud-container { display: flex; flex-direction: column; gap: 5px; pointer-events: auto; }
-        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; text-shadow: 0 0 5px #000; }
-        .tax-indicator { background: var(--red); color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.4s; }
+        /* 📊 K 線報價區 */
+        .chart-panel { position: fixed; top: 120px; right: 15px; width: 320px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); border-radius: 10px; padding: 10px; z-index: 1000; }
+        .price-row { display: flex; justify-content: space-between; font-family: 'Orbitron'; font-size: 20px; color: var(--cyan); }
+        .k-line-container { height: 120px; display: flex; align-items: flex-end; gap: 3px; margin-top: 10px; border-bottom: 1px solid #444; }
+        .k-bar { flex: 1; background: var(--red); min-height: 5px; transition: 0.3s; }
+        .k-bar.up { background: var(--rna); }
 
-        /* 🧬 DNA/RNA 自動判定與求婚窗口 */
-        .info-panel { position: fixed; top: 120px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.92); border: 2px solid var(--gold); padding: 18px; border-radius: 15px; width: 340px; box-shadow: 0 0 30px rgba(0,0,0,1); }
-        .pool-display { text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .pool-num { font-size: 42px; font-family: 'Orbitron'; color: #fff; text-shadow: 0 0 20px var(--gold); }
-        .addr-box { font-size: 10px; font-family: 'Courier New'; padding: 8px; background: #111; margin: 8px 0; border: 1px solid #333; border-radius: 5px; }
-        
-        /* 表態公告欄 */
-        .proposal-ui { background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); padding: 12px; border-radius: 10px; }
-        .proposal-status { font-size: 12px; color: var(--cyan); text-align: center; margin-bottom: 10px; font-weight: bold; }
-        .btn-trade { width: 100%; padding: 12px; margin: 5px 0; font-weight: 900; cursor: pointer; border: none; border-radius: 6px; font-size: 12px; transition: 0.3s; }
-        .btn-dna { background: var(--dna); color: #fff; box-shadow: 0 0 10px var(--dna); }
-        .btn-rna { background: var(--rna); color: #000; box-shadow: 0 0 10px var(--rna); }
-        .btn-refuse { background: #444; color: #fff; }
-        .btn-trade:hover { transform: scale(1.02); filter: brightness(1.2); }
+        /* 🐒 雙席位監控 (500/500) */
+        .seat-panel { position: fixed; top: 10px; left: 15px; width: 340px; z-index: 1000; }
+        .seat-card { background: rgba(0,0,0,0.8); border-left: 4px solid var(--gold); padding: 8px; margin-bottom: 5px; }
+        .seat-title { font-size: 11px; color: var(--gold); display: flex; justify-content: space-between; }
+        .seat-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; margin-top: 5px; }
+        .dot { width: 5px; height: 5px; background: #333; border-radius: 1px; }
+        .dot.active { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
 
-        /* 🌀 天道星球物理層 */
-        #ufo-core { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; border-radius: 50%; border: 6px solid var(--gold); z-index: 2; opacity: 0.9; box-shadow: 0 0 80px rgba(255, 215, 120, 0.4); }
+        /* 🧬 DNA/RNA 成交窗口 */
+        .trade-panel { position: fixed; bottom: 150px; left: 15px; width: 340px; background: rgba(0,0,0,0.9); border: 2px solid var(--dna); padding: 15px; border-radius: 12px; z-index: 1000; }
+        .log-box { height: 80px; background: #111; font-size: 10px; color: #aaa; overflow-y: auto; padding: 5px; margin-top: 10px; font-family: 'Courier New'; }
+
+        /* 漩渦物理軌道 */
+        #ufo-core { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; border-radius: 50%; border: 5px solid var(--gold); z-index: 2; }
         #canvas-3d { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #camera-layer { position: fixed; inset: 0; z-index: 1; object-fit: cover; opacity: 0.45; background: #000; pointer-events: none; }
 
-        /* 🎛️ 操控台 */
-        .controls { position: fixed; bottom: 145px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 60px; box-sizing: border-box; }
-        .gauge-label { color: var(--cyan); font-family: 'Orbitron'; font-size: 14px; text-align: center; margin-bottom: 5px; }
-        input[type=range].v-warp { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 260px; accent-color: var(--gold); }
-
-        /* 底部導覽 */
-        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 4px solid var(--gold); z-index: 1010; padding: 15px 10px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 1200px; margin: 0 auto; }
-        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 14px 5px; font-weight: 900; font-size: 11px; cursor: pointer; border-radius: 5px; transition: 0.2s; }
-        .nav-btn:hover { background: rgba(255,215,120,0.1); }
-        .btn-stop { background: var(--red); color: white; border: none; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 3px solid var(--gold); z-index: 1010; padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 10px 0; font-size: 10px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<video id="camera-layer" autoplay playsinline></video>
 <div id="ufo-core"></div>
 <div id="canvas-3d"></div>
 
-<div class="god-hud">
-    <div class="hud-container">
-        <div class="hud-row">
-            <span>🏛️ 靈霄寶殿合約地址: 0xTREASURY_MAIN</span>
-            <span class="tax-indicator" id="tax-display">天條: 30% 殿 | 10% 池 | 60% 雙核</span>
-        </div>
-        <div class="bar-bg"><div class="bar-fill" style="width: 100%; background: linear-gradient(90deg, var(--gold), var(--red));"></div></div>
-        
-        <div class="hud-row">
-            <span>🧠 悟空大腦 (50M 保證金)</span>
-            <span>🐒 神明席位: 500 / 500</span>
-        </div>
-        <div class="bar-bg"><div class="bar-fill" style="width: 100%; background: var(--cyan);"></div></div>
+<div class="seat-panel">
+    <div class="seat-card">
+        <div class="seat-title">🏛️ 靈霄神明席位 <span>500 / 500</span></div>
+        <div class="seat-grid" id="god-seats"></div>
+    </div>
+    <div class="seat-card" style="border-color: var(--cyan);">
+        <div class="seat-title" style="color:var(--cyan);">🐒 火星齊天豪宅 <span>500 / 500</span></div>
+        <div class="seat-grid" id="mars-seats"></div>
     </div>
 </div>
 
-<div class="info-panel">
-    <div class="pool-display">
-        <div style="color:var(--gold); font-size:12px; font-weight:bold;">🧬 仙女受孕獎池 (16888 臨界)</div>
-        <div class="pool-num" id="pool-val">16888</div>
+<div class="chart-panel">
+    <div class="price-row">
+        <span>KGEN/USDT</span>
+        <span id="price">1.6888</span>
     </div>
-    
-    <div class="addr-box">♂️ DNA 地址 (精子): <br><span id="dna-addr" style="color:var(--dna)">0xDNA_HEART_777_ACTIVE</span></div>
-    <div class="addr-box">♀️ RNA 地址 (女子): <br><span id="rna-addr" style="color:var(--rna)">0xRNA_VAULT_888_ACTIVE</span></div>
-
-    <div class="proposal-ui">
-        <div class="proposal-status" id="prop-status">💍 求婚成交表態窗口 (1 KGEN)</div>
-        <button class="btn-trade btn-dna" onclick="app.autoDecide('DNA')">DNA 轉帳 1 KGEN (表態求婚)</button>
-        <button class="btn-trade btn-rna" onclick="app.autoDecide('RNA')">RNA 轉帳 1 KGEN (應婚成交)</button>
-        <button class="btn-trade btn-refuse" onclick="app.autoDecide('REFUSE')">拒絕表態 (30% 分配自動回流獎池)</button>
-    </div>
+    <div class="k-line-container" id="k-line"></div>
+    <div style="font-size:10px; color:var(--gold); margin-top:5px;">30% 殿 | 10% 池 | 60% 雙核自動分配執行中...</div>
 </div>
 
-<div class="controls">
-    <div style="display:flex; flex-direction:column; align-items:center;">
-        <div id="w-label" class="gauge-label">WARP: 1x</div>
-        <input type="range" id="warp" class="v-warp" min="1" max="150" value="1">
-    </div>
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
-        <div id="s-label" class="gauge-label">STEER: 0°</div>
-        <input type="range" id="steer" class="h-steer" min="-180" max="180" value="0">
+<div class="trade-panel">
+    <div style="text-align:center; color:var(--gold); font-size:14px; font-weight:bold;">🧬 仙女獎池: <span id="pool">16888</span></div>
+    <div class="log-box" id="trade-log">>> 系統初始化...<br>>> 連結靈霄寶殿合約...</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+        <button class="nav-btn" style="background:var(--dna); color:white; border:none;" onclick="app.trade('DNA')">DNA 求婚成交</button>
+        <button class="nav-btn" style="background:var(--rna); color:black; border:none;" onclick="app.trade('RNA')">RNA 應婚成交</button>
     </div>
 </div>
 
 <div class="footer">
-    <div class="btn-grid">
-        <button class="nav-btn" onclick="app.toggleCamera()">📸 開起相機</button>
-        <button class="nav-btn" onclick="app.callWallet()">🦊 呼叫錢包</button>
-        <button class="nav-btn" onclick="app.executeTrade()">📈 真實成交</button>
-        <button class="nav-btn" onclick="app.applyGold()">🧧 申請發財金</button>
-        <button class="nav-btn btn-stop" onclick="app.stopSpeech()">🔇 停止語音</button>
-    </div>
-    <div class="btn-grid" style="margin-top:8px;">
-        <button class="nav-btn" onclick="app.speakIntro()">🎙️ 合約介紹</button>
-        <button class="nav-btn" onclick="app.searchAddr()">🔍 查地址</button>
-        <button class="nav-btn" onclick="app.returnGift()">🙏 還願補血</button>
-        <button class="nav-btn" style="border-color:var(--dna)" onclick="app.speak('仙女下凡臨界點達成，啟動自動分帳天條。')">🧚 仙女活動</button>
-        <button class="nav-btn" onclick="app.speak('玩家請轉帳一K金進行自動表態成交，否則分配將沒收回流。')">🎙️ 客服語音</button>
-    </div>
+    <button class="nav-btn" onclick="app.callWallet()">🦊 呼叫錢包</button>
+    <button class="nav-btn" onclick="app.toggleAuto()">🔄 自動交易</button>
+    <button class="nav-btn" onclick="app.speak('分紅已入帳')">🎙️ 客服語音</button>
+    <button class="nav-btn" style="background:var(--red); color:white; border:none;" onclick="app.stopSpeech()">🔇 停止</button>
+    <button class="nav-btn" onclick="app.capture()">📷 截圖</button>
 </div>
 
 <script>
 const app = {
+    price: 1.6888,
     pool: 16888,
+    kData: Array(25).fill(20),
     init() {
+        this.initThree();
+        this.renderSeats('god-seats');
+        this.renderSeats('mars-seats');
+        this.startKLine();
+        this.speak("大聖，K線報價已對接，500席位分紅自動判定啟動。");
+    },
+
+    renderSeats(id) {
+        const el = document.getElementById(id);
+        for(let i=0; i<100; i++) { // 簡化顯示 100 個代表 500 席
+            const d = document.createElement('div');
+            d.className = 'dot ' + (Math.random() > 0.2 ? 'active' : '');
+            el.appendChild(d);
+        }
+    },
+
+    startKLine() {
+        setInterval(() => {
+            const change = (Math.random() - 0.48) * 0.1;
+            this.price += change;
+            document.getElementById('price').innerText = this.price.toFixed(4);
+            this.kData.shift();
+            this.kData.push(Math.max(10, Math.min(100, this.kData[this.kData.length-1] + change * 100)));
+            this.drawK();
+        }, 1000);
+    },
+
+    drawK() {
+        const container = document.getElementById('k-line');
+        container.innerHTML = '';
+        this.kData.forEach((h, i) => {
+            const b = document.createElement('div');
+            b.className = 'k-bar' + (h > this.kData[i-1] ? ' up' : '');
+            b.style.height = h + 'px';
+            container.appendChild(b);
+        });
+    },
+
+    trade(type) {
+        this.pool += 1;
+        const log = document.getElementById('trade-log');
+        log.innerHTML += `<br>[成交] ${type} 地址表態，1 KGEN 已轉帳，30% 分紅鎖定...`;
+        log.scrollTop = log.scrollHeight;
+        document.getElementById('pool').innerText = Math.floor(this.pool);
+    },
+
+    initThree() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-3d').appendChild(this.renderer.domElement);
-
+        
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 2200; i++) {
-            pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
-        }
+        for (let i = 0; i < 2000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.12 }));
         this.scene.add(this.stars);
-
         this.camera.position.z = 15;
         this.animate();
-        this.speakIntro();
-    },
-
-    autoDecide(type) {
-        if(type === 'REFUSE') {
-            const returned = 5066; // 模擬 30% 分配額
-            this.pool += returned;
-            this.speak("拒絕表態。根據天條，原定百分之三十分配自動沒收，回流至仙女獎池。");
-            document.getElementById('prop-status').innerText = "❌ 已拒絕，資金回流";
-        } else {
-            this.speak(`檢測到 ${type} 地址轉帳 1 KGEN。系統自動判定為成交表態，百分之三十獎勵鎖定分配。`);
-            document.getElementById('prop-status').innerText = `✅ ${type} 已表態成交`;
-            this.callWallet();
-        }
-        this.updateUI();
-    },
-
-    executeTrade() {
-        const amt = 5000;
-        const taxPool = amt * 0.001 * 0.5; // 0.1% 稅的一半入池
-        this.pool += taxPool;
-        this.speak(`成交指令執行成功。零點一交易稅已自動分配：三成歸殿、一成留池、六成撥付地址。`);
-        this.updateUI();
-    },
-
-    callWallet() {
-        if (window.ethereum) {
-            this.speak("呼叫錢包接口，請確認轉帳指令。");
-            window.ethereum.request({ method: 'eth_requestAccounts' });
-        } else {
-            alert("未偵測到錢包插件，無法執行真實成交。");
-        }
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        const warp = document.getElementById('warp').value;
-        const steer = document.getElementById('steer').value;
-        document.getElementById('w-label').innerText = `WARP: ${warp}x`;
-        document.getElementById('s-label').innerText = `STEER: ${steer}°`;
-
-        // 正確軌道：右移 = 順時針轉
-        document.getElementById('ufo-core').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
-
-        const rad = (steer * Math.PI) / 180;
-        const cosV = Math.cos(rad);
-        const sinV = Math.sin(rad);
+        // 軌道物理校準：0度 = 由上往下 (注入)
         const p = this.stars.geometry.attributes.position.array;
-        const speed = warp / 400;
-
         for(let i=0; i<p.length; i+=3) {
-            p[i] += sinV * speed;   // 右移順時針偏轉
-            p[i+1] -= speed * cosV; // 0度 = 上往下流
-            if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
-            if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
+            p[i+1] -= 0.1; // 預設由上往下流動
+            if(p[i+1] < -25) p[i+1] = 25;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
 
-    updateUI() {
-        document.getElementById('pool-val').innerText = Math.floor(this.pool);
-    },
-
-    async toggleCamera() {
-        const v = document.getElementById('camera-layer');
-        if(v.srcObject) {
-            v.srcObject.getTracks().forEach(t => t.stop());
-            v.srcObject = null;
-        } else {
-            try {
-                v.srcObject = await navigator.mediaDevices.getUserMedia({video: true});
-            } catch(e) { alert("相機開啟失敗"); }
-        }
-    },
-
-    applyGold() {
-        const a = prompt("申請發財金 (1-888):", "168");
-        if(a) { this.pool -= a; this.updateUI(); this.speak(`申請成功，仙女獎池撥付 ${a} 金。`); }
-    },
-
+    callWallet() { if(window.ethereum) window.ethereum.request({method:'eth_requestAccounts'}); else alert("未偵測到錢包"); },
     stopSpeech() { window.speechSynthesis.cancel(); },
-    speakIntro() { this.speak("大聖，靈霄寶殿合約成交系統 V2.8 啟動。三十、十、六十自動分帳天條已掛載。轉帳一K金即可自動成交。"); },
-    searchAddr() { prompt("輸入地址查詢鏈上資產："); },
-    returnGift() { this.pool += 200; this.updateUI(); this.speak("信眾還願。"); },
-    capture() { alert("神蹟截圖已保存。"); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
 window.onload = () => app.init();
