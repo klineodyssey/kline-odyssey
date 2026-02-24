@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.1（受孕宇宙引擎）</title>
+  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.3（受孕宇宙引擎）</title>
 
   <!-- Ethers (optional / graceful) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -170,10 +170,9 @@
 
     /* ===== Fairy wheel ===== */
     .fairyWrap{
-      position:absolute;
-      left: 14px;
-      top: 88px;
+      position:relative;
       width: 240px; height: 240px;
+      margin: 10px auto 10px;
       border-radius:50%;
       overflow:hidden;
       border:1px solid rgba(255,215,120,.25);
@@ -343,248 +342,117 @@
     .small{ color: var(--muted); font-size:12px; line-height:1.55; }
     .hr{ height:1px; background: rgba(255,255,255,.10); margin:10px 0; }
   
-    /* ===== V1.9.1 FIX: 仙女不再遮擋文字 ===== */
+    /* ===== V1.9.3 FIX: 仙女不再遮擋文字 ===== */
     .fairyWrap{ z-index:1; opacity:.92; }
     .screenHud{ position:relative; z-index:3; }
     .panelMini{ position:relative; z-index:4; }
+
+/* ===== V1.9.3 Stage Controls (near screen) ===== */
+.stageWrap{ position:relative; z-index:10; padding:14px; }
+.stage{ display:grid; grid-template-columns: 110px 1fr 110px; gap:10px; align-items:center; }
+@media (max-width:520px){ .stage{ grid-template-columns: 92px 1fr 92px; } }
+.hpBar{ display:grid; grid-template-columns: 90px 1fr 60px; gap:10px; align-items:center;
+  padding:10px 12px; border:1px solid rgba(255,255,255,.10); border-radius:16px;
+  background: rgba(0,0,0,.22); margin-bottom:10px;
+}
+.hpLabel{ font-size:12px; color: var(--muted); font-weight:850; }
+.hpVal{ text-align:right; font-weight:950; }
+.sideCtrl{ border:1px solid rgba(255,255,255,.10); border-radius:18px; background: rgba(0,0,0,.22);
+  padding:10px 8px; display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+.sideTitle{ font-size:12px; color: var(--muted); font-weight:850; }
+.sideVal{ font-weight:950; }
+.sideHint{ font-size:11px; color: var(--muted); text-align:center; line-height:1.3; }
+.vRange{
+  width: 210px;
+  height: 34px;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+@media (max-width:520px){
+  .vRange{ width: 185px; }
+}
+.miniKPI{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px; }
+@media (max-width:760px){ .miniKPI{ grid-template-columns:1fr; } }
+.dockHint{ margin-top:10px; font-size:12px; color: var(--muted); line-height:1.5; }
+
 </style>
 </head>
 
 <body>
   <div class="hud">
     <div class="wrap" style="padding-bottom:0;">
-      <div class="hudRow">
-        <div class="hudLeft">
-          <div class="pill gold">廣寒宮 16888 <b>V1.8</b></div>
-          <div class="badge" id="phaseBadge">Phase：READY</div>
-          <div class="badge mono">Clock：<span id="clock">--:--:--</span></div>
-        </div>
-        <div class="hudRight">
-          <div class="badge">錢包：<span class="mono" id="walletShort">未連線</span></div>
-          <button class="pill cyan" id="btnConnect">連接錢包</button>
-          <button class="pill ghost" id="btnReset">重置（本機）</button>
+      
+<div class="stageWrap">
+  <div class="hpBar">
+    <div class="hpLabel">血量（0–100）</div>
+    <input id="hpRange" type="range" min="0" max="100" value="80" />
+    <div class="hpVal"><span class="mono" id="hpText">80</span>%</div>
+  </div>
+
+  <div class="stage">
+    <div class="sideCtrl left">
+      <div class="sideTitle">曲率（口數）</div>
+      <div class="sideVal"><span class="mono" id="warpLabel">10</span><span class="mono">x</span></div>
+      <input id="warpRange" class="vRange" type="range" min="1" max="150" value="10" />
+      <div class="sideHint">max 150 口</div>
+    </div>
+
+    <div class="fairyWrap">
+      <img id="fairy" src="./assets/fairy.png" alt="fairy" />
+      <div class="sleepMask" id="sleepMask">
+        <div class="sleepText">
+          <div class="z">Z Z Z</div>
+          <div>休息中</div>
+          <div class="s">觀望｜睡覺｜等下一位玩家觸發</div>
         </div>
       </div>
+    </div>
 
-      <!-- Sliders moved near screen (top) -->
-      id="screen">
-            <canvas id="fx"></canvas>
-            <canvas id="kline"></canvas>
-
-            <div class="screenHud">
-              <div class="screenTop">
-                <div class="left">
-                  <div class="panelMini">
-                    <div class="k">獎金池（受孕總池）</div>
-                    <div class="v"><span class="mono" id="poolTotal">0</span> KGEN</div>
-                  </div>
-                  <div class="panelMini">
-                    <div class="k">保證金餘額</div>
-                    <div class="v"><span class="mono" id="margin">0</span></div>
-                  </div>
-                </div>
-                <div class="right">
-                  <div class="panelMini">
-                    <div class="k">本輪仙女</div>
-                    <div class="v"><span class="mono" id="fairyName">—</span></div>
-                    <div class="k" style="margin-top:6px;">門檻</div>
-                    <div class="v"><span class="mono" id="fairyTarget">—</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="screenBottom">
-                <div class="left">
-                  <div class="panelMini">
-                    <div class="k">發財金已發放</div>
-                    <div class="v"><span class="mono" id="paidOut">0</span> / <span class="mono" id="paidTarget">—</span></div>
-                  </div>
-                  <div class="panelMini">
-                    <div class="k">即時玩家</div>
-                    <div class="v"><span class="mono" id="players">0</span> / 60</div>
-                  </div>
-                </div>
-                <div class="right">
-                  <div class="panelMini">
-                    <div class="k">公告</div>
-                    <div class="v" style="font-size:12px;font-weight:900;line-height:1.35;" id="announce">系統就緒</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="fairyWrap" id="fairyWrap">
-              <img id="fairy" src="./assets/fairy.png" alt="fairy"
-                   onerror="this.src='https://via.placeholder.com/500/000000/FFD700?text=FAIRY'"/>
-              <div class="sleepMask" id="sleepMask">
-                <div class="sleepText">
-                  <div class="z">Z Z Z</div>
-                  <div>休息中</div>
-                  <div class="s">等待玩家點火｜等待受孕儀式</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">結算引擎</div>
-              <div class="v"><span class="mono" id="settleState">READY</span></div>
-              <div class="small" id="settleHint">本機模擬：下單 → 保證金扣押 → 平倉/結算 → 釋放。</div>
-            </div>
-            <div class="kpi">
-              <div class="k">K線生成引擎</div>
-              <div class="v"><span class="mono" id="klineState">ON</span></div>
-              <div class="small">本機即時生成（示意）：每 2 秒推進一根 K 線。</div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- RIGHT: console + media + lamps -->
-      <section class="card">
-        <div class="cardHead">
-          <div>
-            <div class="t">客服敘事（PrimeForge）</div>
-            <div class="sub">會隨狀態自動講故事：累積、啟動、推進、下凡、求婚、回流。</div>
-          </div>
-          <div class="badge mono">AI：<span id="aiState">READY</span></div>
-        </div>
-
-        <div class="cardBody">
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">許願 / 還願</div>
-              <textarea id="wish" placeholder="許願口令（例如：巧仙・事業運通・我願用 100 KGEN 點火宇宙…）"></textarea>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn gold" id="btnWish">送出許願（+100 KGEN）</button>
-                <button class="btn" id="btnVow">還願（自填金額）</button>
-              </div>
-              <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-                <input id="vowAmt" type="number" min="1" step="1" value="888" style="width:140px;" />
-                <span class="badge">KGEN</span>
-              </div>
-            </div>
-            <div class="kpi">
-              <div class="k">光明燈（十二生肖 + 第13自定）</div>
-              <select id="lampPick">
-                <option value="rat">鼠</option><option value="ox">牛</option><option value="tiger">虎</option>
-                <option value="rabbit">兔</option><option value="dragon">龍</option><option value="snake">蛇</option>
-                <option value="horse">馬</option><option value="goat">羊</option><option value="monkey">猴</option>
-                <option value="rooster">雞</option><option value="dog">狗</option><option value="pig">豬</option>
-                <option value="x13">第13生肖（自定）</option>
-              </select>
-              <input id="lampCustom" type="text" placeholder="第13生肖名稱（例如：變形金鋼 / 超人 / 蝙蝠俠…）" style="margin-top:10px; display:none;" />
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn cyan" id="btnLamp">點光明燈（1 KGEN / 日）</button>
-                <button class="btn ghost" id="btnLampInfo">燈位狀況</button>
-              </div>
-              <div class="small" style="margin-top:10px;">
-                每盞 1 KGEN（本機示意：每日限制以本機時間計）。<br/>
-                燈位：12生肖各 888、 第13生肖 1688（可累計）。
-              </div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpi">
-            <div class="k">影像 / 錄影 / 錄音（本機留念）</div>
-            <video id="cam" autoplay playsinline muted></video>
-            <canvas id="snap"></canvas>
-            <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted);">
-              <input type="checkbox" id="stampWish" checked />
-              照片左下角加註「許願／還願」摘要
-            </label>
-
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnCam">開啟相機</button>
-              <button class="btn" id="btnShot">拍照</button>
-              <button class="btn cyan" id="btnDownloadShot">下載照片</button>
-            </div>
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnRecVideo">開始錄影</button>
-              <button class="btn red" id="btnStopVideo" disabled>停止錄影</button>
-              <button class="btn cyan" id="btnDownloadVideo" disabled>下載錄影</button>
-            </div>
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnRecAudio">開始錄音</button>
-              <button class="btn red" id="btnStopAudio" disabled>停止錄音</button>
-              <button class="btn cyan" id="btnDownloadAudio" disabled>下載錄音</button>
-            </div>
-
-            <div class="small" style="margin-top:10px;">
-              若瀏覽器限制麥克風/相機，系統會自動退回文字敘事客服，不會當機。
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="console" id="console"></div>
-
-          <div style="margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6;">
-            PrimeForge 以母機之名，開啟金融生命。<br/>
-            花果山台灣・信念不滅・市場無界。<br/>
-            Where the Market Becomes the Myth.<br/>
-            —— 樂天帝 ⌖
-          </div>
-
-        </div>
-      </section>
+    <div class="sideCtrl right">
+      <div class="sideTitle">方向盤</div>
+      <div class="sideVal"><span class="mono" id="degLabel">120</span><span class="mono">°</span></div>
+      <input id="degRange" class="vRange" type="range" min="0" max="360" value="120" />
+      <div class="sideHint">靠近螢幕：看得到路</div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <!-- Dock (controls & trading) -->
-  
-
-        <!-- 操作橫桿（移到營幕正下方，方便看路） -->
-<div class="hudRow" style="margin-top:10px;">
-        <div class="hudLeft" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>方向盤（0–360）</span><span class="mono" id="degLabel">120°</span></label>
-            <input id="degRange" type="range" min="0" max="360" value="120" />
-          </div>
-        </div>
-        <div class="hudRight" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>曲速引擎（1–150）</span><span class="mono" id="warpLabel">10x</span></label>
-            <input id="warpRange" type="range" min="1" max="150" value="10" />
-          </div>
-        </div>
+  <div class="miniKPI">
+    <div class="kpi">
+      <div class="k">姿態</div>
+      <div class="v" id="stance">—</div>
+      <div class="hint">多：金雨下落｜空：翠雲上升｜休息：Zzz</div>
+    </div>
+    <div class="kpi">
+      <div class="k">質量 m（KGEN）</div>
+      <div class="v"><input id="massInput" type="number" min="1" step="1" value="100" style="width:100%"></div>
+      <div class="hint">1 KGEN = 1 點 = 1 斤 = 1 口（跨市場通用）｜目前 m：<span class="mono" id="massText">100</span></div>
+    </div>
+    <div class="kpi">
+      <div class="k">能量 E = m c²（視覺化）</div>
+      <div class="v"><span class="mono" id="energyText">—</span></div>
+      <div class="hint">c 以曲率倍率表徵（口數）</div>
+    </div>
+    <div class="kpi">
+      <div class="k">合照模式</div>
+      <div class="v">
+        <select id="selfieMode" style="width:100%;margin-top:6px;">
+          <option value="none">不合照</option>
+          <option value="watermark" selected>水印（仙女漂浮）</option>
+          <option value="floating">漂浮（較清晰）</option>
+          <option value="bubble">氣泡（右下角圓形）</option>
+          <option value="shadow">底影（背後守護）</option>
+        </select>
       </div>
-
+      <div class="hint">拍照/錄影時，仙女會依模式疊上畫面</div>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="grid">
-      <!-- LEFT: Screen + core -->
-      <section class="card">
-        <div class="cardHead">
-          <div>
-            <div class="t">飛碟主螢幕（交易 × 受孕 × K線）</div>
-            <div class="sub">做多：金雨下落｜做空：翠雲上升（靠近螢幕上緣即消失，不遮路）｜休息：Zzz</div>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <span class="badge">姿態：<b class="mono" id="stance">REST</b></span>
-            <span class="badge">曲速：<b class="mono" id="warpText">10</b>x</span>
-            <span class="badge">方向：<b class="mono" id="degText">120</b>°</span>
-          </div>
-        </div>
-
-        <div class="cardBody cockpit" id="cockpit">
-          <div class="screen"
-
-<div class="dock">
+  <div class="dockHint">
+    下方控制台可收納；螢幕上方只留「方向盤 / 曲率 / 血量」看路用。
+  </div>
+</div>
+<div <div class="dock">
     <div class="dockRow">
       <div class="dockLeft">
         <button class="btn ghost" id="btnDock">控制台（收納/展開）</button>
@@ -600,106 +468,12 @@
       </div>
     </div>
 
-    <div class="dockPanel" id="dockPanel">
-      <div class="dockGrid">
-        <div class="kpi">
-          <div class="k">受孕引擎（16888 → 本輪仙女 → 發財金推進 → 下凡）</div>
-          <div class="kpiGrid" style="margin-top:10px;">
-            <div class="kpi">
-              <div class="k">Lingxiao（30%）</div>
-              <div class="v"><span class="mono" id="vaultLingxiao">0</span></div>
-            </div>
-            <div class="kpi">
-              <div class="k">源池（10%）</div>
-              <div class="v"><span class="mono" id="vaultSource">0</span></div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="small">
-            60% → 受孕池（本輪發財金推進）；<br/>
-            達標後抽出兩位幸運地址 A / B：各 15% 鎖定；30% 進入求婚判斷池。<br/>
-          </div>
-
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn gold" id="btnArmNow">強制啟動本輪（測試）</button>
-            <button class="btn" id="btnPickFairy">本輪改票選仙女</button>
-          </div>
-
-          <div style="margin-top:10px;">
-            <select id="fairyPick" style="display:none;">
-              <option value="random">隨機</option>
-              <option value="14520">14520 巧雲（天樞做空）</option>
-              <option value="14866">14866 巧虹（天璇做多）</option>
-              <option value="16184">16184 巧芝（天璣做空）</option>
-              <option value="16888">16888 巧仙（天權做多）</option>
-              <option value="17347">17347 巧蘭（天衡做空）</option>
-              <option value="18056">18056 巧梅（闓陽做多）</option>
-              <option value="18459">18459 巧靈（瑤光多退）</option>
-            </select>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">幸運地址 A</div>
-              <div class="v"><span class="mono" id="luckyA">—</span></div>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn" id="btnProposeA">A 求婚 → B</button>
-              </div>
-            </div>
-            <div class="kpi">
-              <div class="k">幸運地址 B</div>
-              <div class="v"><span class="mono" id="luckyB">—</span></div>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn" id="btnProposeB">B 求婚 → A</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="small" style="margin-top:10px;" id="engageHint">求婚狀態：未開始</div>
-        </div>
-
-        <div class="kpi">
-          <div class="k">保證金 / 風控（本機）</div>
-          <div class="kpiGrid" style="margin-top:10px;">
-            <div class="kpi">
-              <div class="k">帳戶保證金</div>
-              <div class="v"><span class="mono" id="acctMargin">200000</span></div>
-            </div>
-            <div class="kpi">
-              <div class="k">維持率</div>
-              <div class="v"><span class="mono" id="mgnRate">100%</span></div>
-            </div>
-          </div>
-          <div class="small" style="margin-top:10px;">
-            下單每口扣押 20000；曲速越高視覺越亮（不影響風控）。<br/>
-            這裡是示意：之後可接真合約 / 真報價。
-          </div>
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn" id="btnTopUp">補保證金 +50000</button>
-            <button class="btn red" id="btnForceSettle">強制結算</button>
-          </div>
-        </div>
-
-        <div class="kpi">
-          <div class="k">K線輸出（示意）</div>
-          <div class="small">本機已在主螢幕疊加生成 K 線。你要拿去做影片時，可用「匯出 K 線 JSON」。</div>
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn" id="btnExportKline">匯出 K 線 JSON</button>
-            <button class="btn" id="btnSpeak">語音導覽</button>
-          </div>
-          <div class="console" id="klineJson" style="margin-top:10px; max-height:160px;"></div>
-        </div>
-      </div>
-    </div>
+    
   </div>
 
 <script>
 /* ============================================================
-   廣寒宮 16888｜七仙女飛碟駕駛艙 V1.8
+   廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.3
    - HUD: sliders moved near top (visible while driving)
    - Visual: LONG gold rain down / SHORT cyan up; stop near top edge to keep road clear
    - Engine: 16888 trigger → split 30/60/10 → choose fairy → fortune payout target = fairy threshold
@@ -714,7 +488,7 @@
 const $ = (id)=>document.getElementById(id);
 
 /* ---------- Constants ---------- */
-const VERSION = "V1.8";
+const VERSION = "V1.9.3";
 const FAIRIES = [
   {k:14520, name:"巧雲", star:"天樞", side:"做空", power:"風調雨順做空"},
   {k:14866, name:"巧虹", star:"天璇", side:"做多", power:"家庭美滿做多"},
@@ -1108,6 +882,7 @@ function resolveEngagement(mutual){
 function submitWish(){
   addParticipant(currentAddr());
   const text = ($("wish").value||"").trim();
+  window.__vowState = text ? ("WISH:"+text) : "WISH:—";
   inflowKGEN(100, "許願：" + (text ? text.slice(0,40) : "未填"));
   toast("許願已送出（+100 KGEN）");
 }
@@ -1535,13 +1310,83 @@ function shot(){
   const ctx = c.getContext("2d");
   ctx.drawImage(v, 0, 0, c.width, c.height);
 
-  ctx.fillStyle = "rgba(0,0,0,.45)";
-  ctx.fillRect(12, 12, 360, 58);
+  // === 合照疊圖（仙女）===
+  try{
+    const mode = ($("selfieMode")?.value || "none");
+    const fairyImg = $("fairy");
+    if(mode !== "none" && fairyImg && fairyImg.complete){
+      const alphaMap = { watermark: 0.32, floating: 0.55, bubble: 0.75, shadow: 0.22 };
+      const a = alphaMap[mode] ?? 0.35;
+      ctx.save();
+      if(mode === "shadow"){
+        ctx.globalAlpha = a;
+        ctx.filter = "blur(2px) brightness(0.9)";
+      }else{
+        ctx.globalAlpha = a;
+      }
+
+      if(mode === "bubble"){
+        // 右下角圓形氣泡
+        const r = Math.min(c.width, c.height) * 0.18;
+        const cx = c.width - r - 18;
+        const cy = c.height - r - 18;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        ctx.drawImage(fairyImg, cx-r, cy-r, r*2, r*2);
+        ctx.restore();
+        // bubble stroke
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,215,120,.55)";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+        ctx.restore();
+      }else{
+        // 漂浮 / 水印 / 底影：放在右側，避免擋字
+        const w = c.width * 0.30;
+        const h = w;
+        const x = c.width - w - 14;
+        const y = c.height*0.12;
+        ctx.drawImage(fairyImg, x, y, w, h);
+        ctx.restore();
+      }
+    }
+  }catch(e){}
+
+  // === 底部左下角章（不遮文字）===
+  const pad = 12;
+  const boxH = 92;
+  const boxW = Math.min(520, c.width - pad*2);
+  const y0 = c.height - boxH - pad;
+  ctx.fillStyle = "rgba(0,0,0,.52)";
+  ctx.fillRect(pad, y0, boxW, boxH);
+
   ctx.fillStyle = "rgba(255,255,255,.92)";
-  ctx.font = "16px ui-monospace, Menlo, Consolas, monospace";
-  ctx.fillText("GUANGHAN 16888 · V1.8", 22, 34);
+  ctx.font = "15px ui-monospace, Menlo, Consolas, monospace";
+  ctx.fillText("GUANGHAN 16888 · V1.9.3", pad+10, y0+26);
   ctx.font = "13px ui-monospace, Menlo, Consolas, monospace";
-  ctx.fillText("TIME: " + nowStr(), 22, 56);
+  const meta = `TIME: ${nowStr()}  |  DEG:${String(normAngle(STATE.deg)).padStart(3," ")}  |  CURV:${String(STATE.warp).padStart(3," ")} 口  |  HP:${String($("hpRange")?.value||80)}%`;
+  ctx.fillText(meta, pad+10, y0+48);
+
+  // optional wish/vow stamp
+  const wantStamp = document.getElementById("stampWish")?.checked;
+  if(wantStamp){
+    const wish = (document.getElementById("wish")?.value || "").trim();
+    const vow = (window.__vowState || "—");
+    const lines = [];
+    if(wish) lines.push("WISH: " + wish.slice(0, 42));
+    if(vow && vow!=="—") lines.push("VOW: " + String(vow).slice(0, 42));
+    if(lines.length){
+      const pad=12;
+      const boxW = Math.min(540, c.width - pad*2);
+      const boxH = 16*lines.length + 22;
+      const x = pad;
+      const y = c.height - boxH - pad;
+      ctx.fillStyle = "rgba(0,0,0,.48)";
+      ctx.fillRect(x, y, boxW, boxH);
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.font = "14px ui-monospace, Menlo, Consolas, monospace";
+      lines.forEach((t, k)=>{ ctx.fillText(t, x+10, y+22 + k*16); });
+    }
+  }
 
   c.style.display = "block";
   toast("已拍照");
@@ -1695,9 +1540,9 @@ function applyUI(){
   STATE.warp = warp;
 
   $("degText").textContent = String(a);
-  $("degLabel").textContent = `${a}°`;
+  $("degLabel").textContent = String(a);
   $("warpText").textContent = String(warp);
-  $("warpLabel").textContent = `${warp}x`;
+  $("warpLabel").textContent = String(warp);
 
   const s = stanceOf(a);
   STATE.stance = s;
@@ -1776,6 +1621,10 @@ function applyUI(){
 /* ---------- Events binding ---------- */
 $("degRange").addEventListener("input", (e)=>{ STATE.deg = Number(e.target.value||0); applyUI(); });
 $("warpRange").addEventListener("input", (e)=>{ STATE.warp = Number(e.target.value||10); applyUI(); });
+
+$("hpRange").addEventListener("input", ()=>{ applyUI(); });
+$("massInput").addEventListener("input", ()=>{ applyUI(); });
+$("selfieMode").addEventListener("change", ()=>{ toast("合照模式已切換"); });
 
 $("btnConnect").addEventListener("click", async ()=>{
   try{ await connectWallet(); }catch(e){ toast(e.message || String(e)); pushStory("Wallet error: " + (e.message||e)); }
@@ -1867,4 +1716,6 @@ boot();
 </script>
 
 </body>
-</html>
+</html>  const hp = clamp(Number($("hpRange")?.value || 80), 0, 100);
+  if($("hpText")) $("hpText").textContent = String(hp);
+
