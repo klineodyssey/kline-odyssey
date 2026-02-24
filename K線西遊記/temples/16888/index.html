@@ -2,47 +2,50 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜悟空財神廟發財金 V2.2.8</title>
+    <title>KGEN 16888｜雙核地址版 V2.3.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --heart: #ff0044; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 神殿 HUD */
+        /* 雙核 HUD */
         .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; }
-        .hud-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--gold); font-family: 'Orbitron'; margin-bottom: 2px; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 8px; border: 0.5px solid #444; }
-        #vault-f { width: 100%; height: 100%; background: var(--gold); }
-        #brain-f { width: 100%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; }
+        .heart-monitor { color: var(--heart); text-shadow: 0 0 10px var(--heart); font-weight: bold; animation: beat 1s infinite; }
+        @keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; border: 0.5px solid #444; }
+        #heart-bar { width: 100%; height: 100%; background: linear-gradient(90deg, #ff0044, #ff5588); }
 
-        /* 左側：財神廟獎池面板 */
-        .info-panel { position: fixed; top: 120px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 12px; border-radius: 12px; min-width: 220px; box-shadow: 0 0 20px rgba(255,215,120,0.2); }
-        .pool-header { color: var(--gold); font-weight: 900; font-size: 16px; text-align: center; border-bottom: 2px solid var(--gold); margin-bottom: 8px; padding-bottom: 5px; }
-        .pool-val { font-size: 24px; color: #fff; text-align: center; font-family: 'Orbitron'; text-shadow: 0 0 10px var(--gold); }
-        .fairy-info { font-size: 11px; color: var(--cyan); background: rgba(0,242,255,0.1); padding: 8px; margin: 8px 0; border-radius: 5px; line-height: 1.4; }
+        /* 左側：仙女地址獎池 */
+        .info-panel { position: fixed; top: 115px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 12px; border-radius: 12px; width: 260px; }
+        .address-tag { font-size: 10px; color: var(--cyan); background: rgba(0,242,255,0.1); padding: 2px 5px; border-radius: 4px; display: block; margin-bottom: 5px; }
+        .pool-val { font-size: 30px; color: #fff; text-align: center; font-family: 'Orbitron'; text-shadow: 0 0 15px var(--gold); }
+        
+        .fairy-table { font-size: 10px; color: #ccc; margin-top: 10px; border-top: 1px solid #444; padding-top: 5px; }
+        .fairy-row { display: flex; justify-content: space-between; padding: 2px; }
+        .fairy-row.active { background: rgba(255, 215, 120, 0.3); color: #fff; border-left: 3px solid var(--gold); }
 
-        /* 右側：13生肖燈 */
+        /* 13生肖燈 */
         .lamps { position: fixed; right: 15px; top: 100px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 45px); gap: 8px; }
         .lamp { width: 45px; height: 45px; border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); cursor: pointer; font-size: 14px; }
-        .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 25px var(--gold); }
+        .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold); }
 
-        /* 中央及相機 */
-        #ufo { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 360px; height: 360px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; opacity: 0.85; border-radius: 50%; z-index: 2; border: 5px solid var(--gold); box-shadow: 0 0 60px rgba(255,215,120,0.5); }
+        /* 中央物理與相機 */
+        #ufo { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 360px; height: 360px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; opacity: 0.85; border-radius: 50%; z-index: 2; border: 4px solid var(--gold); }
         #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.4; object-fit: cover; }
+        #canvas-3d { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
 
-        /* 控制器 */
-        .controls { position: fixed; bottom: 130px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 35px; box-sizing: border-box; }
-        .tag { font-family: 'Orbitron'; color: var(--cyan); font-size: 14px; }
+        /* 操控台 */
+        .ctrls { position: fixed; bottom: 135px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 35px; box-sizing: border-box; }
         input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
         input[type=range].h-steer { width: 220px; accent-color: var(--gold); }
 
         .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 3px solid var(--gold); z-index: 1000; padding: 15px 5px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; font-weight: 900; cursor: pointer; }
-        .btn-red { color: var(--red); border-color: var(--red); }
-
-        #canvas-3d { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
+        .btn-heart { color: var(--heart); border-color: var(--heart); }
     </style>
 </head>
 <body>
@@ -52,55 +55,60 @@
 <div id="canvas-3d"></div>
 
 <div class="god-hud">
-    <div class="hud-row"><span>🏛️ 靈霄寶殿金庫: 50M KGEN</span><span>席位剩餘: 500/500</span></div>
-    <div class="bar-bg"><div id="vault-f"></div></div>
-    <div class="hud-row"><span>🧠 悟空大腦交易所: 50M 保證金</span><span>13生肖光明燈連動中</span></div>
-    <div class="bar-bg"><div id="brain-f"></div></div>
+    <div class="hud-row">
+        <span>❤️ 悟空心臟地址 (財神廟動力源)</span>
+        <span class="heart-monitor" id="bpm">BPM: 72</span>
+    </div>
+    <div class="bar-bg"><div id="heart-bar"></div></div>
+    <div class="hud-row">
+        <span>🧠 悟空大腦 (交易所保證金: 50M)</span>
+        <span>席位: 500/500</span>
+    </div>
+    <div class="bar-bg"><div style="width:100%; height:100%; background:var(--cyan);"></div></div>
 </div>
 
 <div class="info-panel">
-    <div class="pool-header">📿 悟空財神廟獎池</div>
+    <div class="address-tag">仙女地址: 16888_Fairy_Vault</div>
+    <div style="text-align:center; color:var(--gold); font-weight:bold;">受孕獎池水位</div>
     <div class="pool-val" id="pool-txt">16888</div>
-    <div class="fairy-info" id="fairy-txt">
-        <b>當前狀態：等待受孕</b><br>
-        目標仙女：巧仙(四仙女) 16888<br>
-        專掌：事業運通做多
-    </div>
-    <button class="btn btn-red" style="width:100%" onclick="app.giveMoney()">🧧 發送發財金(獎池失血)</button>
-    <button class="btn" style="width:100%; margin-top:5px; color:#0f0; border-color:#0f0;" onclick="app.returnWish()">🙏 信眾還願捐池</button>
+    <button class="btn btn-heart" style="width:100%; margin-top:8px;" onclick="app.giveGold()">🧧 心臟發送發財金 (獎池失血)</button>
+    
+    <div class="fairy-table" id="fairy-list">
+        </div>
 </div>
 
 <div class="lamps" id="lamps"></div>
 
-<div class="controls">
-    <div style="text-align:center;"><div id="w-val" class="tag">WARP: 1x</div><input type="range" id="warp" class="v-warp" min="1" max="150" value="1"></div>
-    <div style="text-align:center;"><div id="s-val" class="tag">STEER: 0°</div><input type="range" id="steer" class="h-steer" min="-180" max="180" value="0"></div>
+<div class="ctrls">
+    <div style="text-align:center;"><div id="w-val" style="color:var(--cyan)">1x</div><input type="range" id="warp" class="v-warp" min="1" max="150" value="1"></div>
+    <div style="text-align:center;"><div id="s-val" style="color:var(--gold)">0°</div><input type="range" id="steer" class="h-steer" min="-180" max="180" value="0"></div>
 </div>
 
 <div class="footer">
     <div class="btn-grid">
-        <button class="btn" onclick="app.toggleCam()">📸 開起相機</button>
+        <button class="btn" onclick="app.toggleCam()">📸 開啟相機</button>
         <button class="btn" onclick="app.trade('CT')">📈 CT 交易</button>
         <button class="btn" onclick="app.trade('OFF')">📉 結算平倉</button>
         <button class="btn" onclick="app.speakIntro()">🎙️ 神宮介紹</button>
-        <button class="btn" onclick="app.search()">🔍 查地址代碼</button>
+        <button class="btn" onclick="app.search()">🔍 查 Token</button>
         <button class="btn" onclick="app.capture()">📷 截圖拍照</button>
         <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.speak('星球天道鎖定，財神廟發財金就緒')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.returnWish()">🙏 還願補血</button>
     </div>
 </div>
 
 <script>
 const app = {
     pool: 16888,
+    bpm: 72,
     fairies: [
-        {n: "巧雲", t: 14520, r: "大仙女", p: "天樞:風調雨順做空"},
-        {n: "巧虹", t: 14866, r: "二仙女", p: "天璇:家庭美滿做多"},
-        {n: "巧芝", t: 16184, r: "三仙女", p: "天璣:育子收驚做空"},
-        {n: "巧仙", t: 16888, r: "四仙女", p: "天權:事業運通做多"},
-        {n: "巧蘭", t: 17347, r: "五仙女", p: "天衡:長命百歲做空"},
-        {n: "巧梅", t: 18056, r: "六仙女", p: "闓陽:身體健康做多"},
-        {n: "巧靈", t: 18459, r: "七仙女", p: "瑤光:感情圓滿多退"}
+        {n: "巧雲", t: 14520, p: "天樞做空(風調雨順)"},
+        {n: "巧虹", t: 14866, p: "天璇做多(家庭美滿)"},
+        {n: "巧芝", t: 16184, p: "天璣做空(育子收驚)"},
+        {n: "巧仙", t: 16888, p: "天權做多(事業運通)"},
+        {n: "巧蘭", t: 17347, p: "天衡做空(長命百歲)"},
+        {n: "巧梅", t: 18056, p: "闓陽做多(身體健康)"},
+        {n: "巧靈", t: 18459, p: "瑤光多退(感情圓滿)"}
     ],
     zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','🐱'],
 
@@ -121,6 +129,7 @@ const app = {
         this.camera.position.z = 15;
         this.initLamps();
         this.animate();
+        this.updateUI();
         this.speakIntro();
     },
 
@@ -129,57 +138,58 @@ const app = {
         this.zodiacs.forEach(z => {
             const l = document.createElement('div');
             l.className = 'lamp'; l.innerText = z;
-            l.onclick = () => { l.classList.toggle('active'); this.speak(`信眾還願點亮${z}燈，獎池增加。`); this.returnWish(); };
+            l.onclick = () => { l.classList.toggle('active'); this.returnWish(); };
             wrap.appendChild(l);
         });
     },
 
-    giveMoney() {
-        const loss = Math.floor(Math.random() * 500 + 200);
+    giveGold() {
+        const loss = Math.floor(Math.random() * 400 + 200);
         this.pool -= loss;
-        this.updatePool();
-        this.speak(`財神廟發放發財金，獎池失血 ${loss} 點，利益眾生。`);
+        this.bpm = 120; // 心跳加快
+        this.speak(`悟空心臟輸出動力，發財金由獎池流向百姓，獎池失血 ${loss} 點。`);
+        setTimeout(() => this.bpm = 72, 3000);
+        this.updateUI();
     },
 
     returnWish() {
-        const gain = Math.floor(Math.random() * 300 + 100);
-        this.pool += gain;
-        this.updatePool();
-        this.speak(`信眾還願捐池 ${gain} 點，仙女獎池質量提升。`);
+        this.pool += 150;
+        this.speak(`信眾還願，資金回流仙女地址。`);
+        this.updateUI();
     },
 
-    updatePool() {
+    updateUI() {
         document.getElementById('pool-txt').innerText = Math.floor(this.pool);
-        // 檢查成婚仙女
-        const nearest = this.fairies.reduce((prev, curr) => Math.abs(curr.t - this.pool) < Math.abs(prev.t - this.pool) ? curr : prev);
-        document.getElementById('fairy-txt').innerHTML = `<b>當前狀態：${this.pool >= 16888 ? '已可受孕' : '發放發財金中'}</b><br>
-            目標仙女：${nearest.n}(${nearest.r}) ${nearest.t}<br>專掌：${nearest.p}`;
-        
-        if (Math.abs(this.pool - nearest.t) < 10) {
-            this.speak(`注意！獎池抵達 ${nearest.n} 婚位，請兩位地址持有者決定是否成婚。`);
-        }
+        document.getElementById('bpm').innerText = `BPM: ${this.bpm}`;
+        const list = document.getElementById('fairy-list');
+        list.innerHTML = "";
+        this.fairies.forEach(f => {
+            const active = Math.abs(this.pool - f.t) < 50;
+            const row = document.createElement('div');
+            row.className = `fairy-row ${active ? 'active' : ''}`;
+            row.innerHTML = `<span>${f.n} (${f.t})</span><span>${f.p}</span>`;
+            list.appendChild(row);
+            if(active && Math.abs(this.pool - f.t) < 10) this.speak(`大聖，獎池水位觸及${f.n}，成婚判定開啟。`);
+        });
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const warp = document.getElementById('warp').value;
         const steer = document.getElementById('steer').value;
-        document.getElementById('w-val').innerText = `WARP: ${warp}x`;
-        document.getElementById('s-val').innerText = `STEER: ${steer}°`;
+        document.getElementById('w-val').innerText = warp + "x";
+        document.getElementById('s-val').innerText = steer + "°";
 
         document.getElementById('ufo').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
 
         const rad = (steer * Math.PI) / 180;
         const cosVal = Math.cos(rad);
         const p = this.stars.geometry.attributes.position.array;
-        const speed = (warp / 400);
+        const speed = (warp / 450);
 
         for(let i=0; i<p.length; i+=3) {
-            // 右移順時針 (天道軌道)
-            p[i] += Math.sin(rad) * speed; 
-            // 0度(多)上到下，180度(空)下到上
-            p[i+1] -= speed * cosVal;
-
+            p[i] += Math.sin(rad) * speed; // 右移順時針
+            p[i+1] -= speed * cosVal; // 0度上到下，180度下到上
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
@@ -192,16 +202,15 @@ const app = {
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { 
             const s = await navigator.mediaDevices.getUserMedia({video: true});
-            v.srcObject = s; 
-            this.speak("相機已開啟。");
+            v.srcObject = s; this.speak("相機開啟。");
         }
     },
 
-    speakIntro() { this.speak("大聖吉祥，財神廟發財金系統就緒。獎池門檻一六八八八。點擊發送發財金可讓獎池失血，信眾還願則捐池。"); },
-    trade(t) { this.speak(t==='CT' ? "現價下單，扣除交易稅。" : "結算成功。"); },
-    search() { prompt("輸入 Token 地址："); },
-    capture() { alert("截圖拍照已存入神宮日誌"); },
-    connect() { this.speak("錢包連結成功。"); },
+    speakIntro() { this.speak("大聖，雙核地址校準完成。悟空心臟為動力，仙女地址為獎池水位。一六八八八受孕開始。"); },
+    trade(t) { this.speak("下單完成。"); },
+    search() { prompt("輸入地址："); },
+    capture() { alert("神蹟拍照成功"); },
+    connect() { this.speak("錢包連結。"); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
 window.onload = () => app.init();
