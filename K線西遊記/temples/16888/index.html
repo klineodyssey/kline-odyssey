@@ -135,10 +135,101 @@
             },
 
             // 實裝天條核心演算法
-            engine: {
-                calculateR: (L, S) => (L - S) / (L + S + 0.000001),
-                calculateD: (CT, R) => (0.6 * CT) + (0.4 * R)
+            /**
+         * 宇宙天條實體引擎 V1.0 - 深層邏輯
+         * 負責計算 D = 0.6*CT + 0.4*R 並衍生 OHLC
+         */
+        app.engine = {
+            config: {
+                w1: 0.6, // 宇宙節奏權重
+                w2: 0.4, // 人群拔河權重
+                baseScale: 100, // 基礎波動單位
+                volatility: 1.0, // 初始 V 值 (天條 4.1)
+                lastClose: 30000 // 初始 K 線位置
             },
+
+            // 存儲歷史 K 線，為後續 10MB 大數據做準備
+            history: [],
+
+            /**
+             * 核心合成方向算法 (天條 5.2)
+             */
+            getDirection: function(ct, l, s) {
+                const epsilon = 0.000001;
+                const r = (l - s) / (l + s + epsilon); // 拔河值 R
+                const d = (this.config.w1 * ct) + (this.config.w2 * r);
+                return { r, d };
+            },
+
+            /**
+             * 生成宇宙 K 線 (天條 5.5)
+             * 基於當前物理量產生一根 4D 空間的燭線數據
+             */
+            tick: function(ct, l, s) {
+                const { r, d } = this.getDirection(ct, l, s);
+                
+                // 動態 V：當拔河越激烈 (L+S 越大) 或 CT 偏移越大，V 越高
+                const activity = (l + s) / 5000;
+                this.config.volatility = 1.0 + (activity * 0.2) + (Math.abs(ct) * 0.5);
+                
+                const range = this.config.baseScale * this.config.volatility;
+                const open = this.config.lastClose;
+                
+                // 收盤價隨 D 方向移動 (Close = Open + D*Range)
+                const close = open + (d * range);
+                
+                // 影線生成 (天條 5.3)
+                const high = Math.max(open, close) + (range * Math.random() * 0.3);
+                const low = Math.min(open, close) - (range * Math.random() * 0.3);
+                
+                const kLine = {
+                    open, high, low, close,
+                    r, d, v: this.config.volatility,
+                    time: Date.now()
+                };
+
+                this.config.lastClose = close;
+                this.history.push(kLine);
+                if(this.history.length > 100) this.history.shift(); // 保持緩衝區
+                
+                return kLine;
+            }
+        };
+
+        // 強化渲染循環中的數據連動
+        app.startRenderLoop = function() {
+            const update = () => {
+                // 1. 讀取滑桿數值
+                const currentL = parseFloat(document.getElementById('ctrl-l').value);
+                const currentS = parseFloat(document.getElementById('ctrl-s').value);
+                const currentCT = parseFloat(document.getElementById('ctrl-ct').value);
+
+                // 2. 驅動天條引擎運轉
+                const currentK = this.engine.tick(currentCT, currentL, currentS);
+
+                // 3. UI 實時反饋
+                document.getElementById('hud-r').innerText = currentK.r.toFixed(3);
+                document.getElementById('hud-ct').innerText = currentCT;
+                
+                // 數值異常發光提醒 (天條 4.3：劇烈波動)
+                const rValEl = document.getElementById('hud-r');
+                if(Math.abs(currentK.r) > 0.8) {
+                    rValEl.style.color = 'var(--red)';
+                    rValEl.style.textShadow = '0 0 10px var(--red)';
+                } else {
+                    rValEl.style.color = 'var(--gold)';
+                    rValEl.style.textShadow = 'none';
+                }
+
+                // 4. 預留：將 currentK 丟入下一批的 3D 渲染器
+                if(this.renderer && this.renderer.fairy) {
+                    this.renderer.updateFairy(currentK);
+                }
+
+                setTimeout(() => requestAnimationFrame(update), 100); // 宇宙節拍：每 0.1 秒一跳
+            };
+            update();
+        };
 
             init: async function() {
                 this.log("終端自檢中...");
