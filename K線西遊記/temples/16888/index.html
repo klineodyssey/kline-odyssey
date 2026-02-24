@@ -2,98 +2,111 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜雙核地址版 V2.3.1</title>
+    <title>KGEN 16888｜廣寒宮神電神宮 V2.3.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --heart: #ff0044; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --heart: #ff0044; --bg: #000; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100%; width: 100%; }
 
-        /* 雙核 HUD */
-        .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; }
-        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; }
-        .heart-monitor { color: var(--heart); text-shadow: 0 0 10px var(--heart); font-weight: bold; animation: beat 1s infinite; }
-        @keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; border: 0.5px solid #444; }
-        #heart-bar { width: 100%; height: 100%; background: linear-gradient(90deg, #ff0044, #ff5588); }
+        /* 頂部 HUD：悟空心臟與大腦 */
+        .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; pointer-events: none; }
+        .hud-container { display: flex; flex-direction: column; gap: 5px; pointer-events: auto; }
+        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; text-shadow: 0 0 5px #000; }
+        .heart-val { color: var(--heart); animation: heartBeat 0.8s infinite; font-weight: bold; }
+        @keyframes heartBeat { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
+        .bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.4s ease-out; }
 
-        /* 左側：仙女地址獎池 */
-        .info-panel { position: fixed; top: 115px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 12px; border-radius: 12px; width: 260px; }
-        .address-tag { font-size: 10px; color: var(--cyan); background: rgba(0,242,255,0.1); padding: 2px 5px; border-radius: 4px; display: block; margin-bottom: 5px; }
-        .pool-val { font-size: 30px; color: #fff; text-align: center; font-family: 'Orbitron'; text-shadow: 0 0 15px var(--gold); }
-        
-        .fairy-table { font-size: 10px; color: #ccc; margin-top: 10px; border-top: 1px solid #444; padding-top: 5px; }
-        .fairy-row { display: flex; justify-content: space-between; padding: 2px; }
-        .fairy-row.active { background: rgba(255, 215, 120, 0.3); color: #fff; border-left: 3px solid var(--gold); }
+        /* 左側：仙女地址獎池與名單 */
+        .info-panel { position: fixed; top: 120px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; border-radius: 15px; width: 280px; box-shadow: 0 0 30px rgba(0,0,0,1); }
+        .addr-box { font-size: 10px; color: var(--cyan); border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px; font-family: 'Orbitron'; }
+        .pool-display { text-align: center; margin-bottom: 15px; }
+        .pool-num { font-size: 36px; font-family: 'Orbitron'; color: #fff; text-shadow: 0 0 20px var(--gold); }
+        .fairy-table { font-size: 11px; max-height: 250px; overflow-y: auto; }
+        .fairy-item { display: flex; justify-content: space-between; padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #bbb; }
+        .fairy-item.active { background: rgba(255, 215, 120, 0.2); color: #fff; border-left: 4px solid var(--gold); }
 
-        /* 13生肖燈 */
-        .lamps { position: fixed; right: 15px; top: 100px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 45px); gap: 8px; }
-        .lamp { width: 45px; height: 45px; border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); cursor: pointer; font-size: 14px; }
-        .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold); }
+        /* 右側：13生肖燈 */
+        .lamps-grid { position: fixed; right: 20px; top: 110px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 50px); gap: 10px; }
+        .lamp-btn { width: 50px; height: 50px; border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: var(--gold); cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .lamp-btn.active { background: var(--gold); color: #000; box-shadow: 0 0 25px var(--gold); transform: scale(1.1); }
 
-        /* 中央物理與相機 */
-        #ufo { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 360px; height: 360px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; opacity: 0.85; border-radius: 50%; z-index: 2; border: 4px solid var(--gold); }
-        #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.4; object-fit: cover; }
-        #canvas-3d { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+        /* 背景與相機層 */
+        #camera-layer { position: fixed; inset: 0; z-index: 1; object-fit: cover; opacity: 0.5; background: #000; pointer-events: none; }
+        #ufo-cockpit { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; border-radius: 50%; border: 6px solid var(--gold); z-index: 2; opacity: 0.9; box-shadow: 0 0 80px rgba(255, 215, 120, 0.3); }
+        #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
 
         /* 操控台 */
-        .ctrls { position: fixed; bottom: 135px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 35px; box-sizing: border-box; }
-        input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 220px; accent-color: var(--gold); }
+        .cockpit-controls { position: fixed; bottom: 140px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 50px; box-sizing: border-box; }
+        .gauge-label { color: var(--cyan); font-family: 'Orbitron'; font-size: 14px; margin-bottom: 5px; text-align: center; }
+        input[type=range].vertical { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
+        input[type=range].horizontal { width: 250px; accent-color: var(--gold); }
 
-        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 3px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
-        .btn-heart { color: var(--heart); border-color: var(--heart); }
+        /* 底部功能區 */
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 4px solid var(--gold); z-index: 1010; padding: 15px 10px; }
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 1200px; margin: 0 auto; }
+        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 12px 5px; font-weight: 900; font-size: 11px; cursor: pointer; transition: 0.2s; border-radius: 4px; }
+        .nav-btn:hover { background: rgba(255,215,120,0.1); }
+        .nav-btn.blood { border-color: var(--red); color: var(--red); }
     </style>
 </head>
 <body>
 
-<video id="cam-feed" autoplay playsinline></video>
-<div id="ufo"></div>
-<div id="canvas-3d"></div>
+<video id="camera-layer" autoplay playsinline></video>
+<div id="ufo-cockpit"></div>
+<div id="three-canvas"></div>
 
 <div class="god-hud">
-    <div class="hud-row">
-        <span>❤️ 悟空心臟地址 (財神廟動力源)</span>
-        <span class="heart-monitor" id="bpm">BPM: 72</span>
+    <div class="hud-container">
+        <div class="hud-row">
+            <span>❤️ 悟空心臟地址 (財神廟動力源)</span>
+            <span class="heart-val" id="heart-bpm">BPM: 72</span>
+        </div>
+        <div class="bar-bg"><div id="heart-fill" class="bar-fill" style="width: 100%; background: var(--heart);"></div></div>
+        
+        <div class="hud-row">
+            <span>🧠 悟空大腦交易所 (保證金: 50,000,000 KGEN)</span>
+            <span id="seat-display">席位: 500 / 500</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width: 100%; background: var(--cyan);"></div></div>
     </div>
-    <div class="bar-bg"><div id="heart-bar"></div></div>
-    <div class="hud-row">
-        <span>🧠 悟空大腦 (交易所保證金: 50M)</span>
-        <span>席位: 500/500</span>
-    </div>
-    <div class="bar-bg"><div style="width:100%; height:100%; background:var(--cyan);"></div></div>
 </div>
 
 <div class="info-panel">
-    <div class="address-tag">仙女地址: 16888_Fairy_Vault</div>
-    <div style="text-align:center; color:var(--gold); font-weight:bold;">受孕獎池水位</div>
-    <div class="pool-val" id="pool-txt">16888</div>
-    <button class="btn btn-heart" style="width:100%; margin-top:8px;" onclick="app.giveGold()">🧧 心臟發送發財金 (獎池失血)</button>
-    
+    <div class="addr-box">仙女地址: 16888_FAIRY_VAULT</div>
+    <div class="pool-display">
+        <div style="color:var(--gold); font-size:12px; font-weight:bold;">受孕獎池水位</div>
+        <div class="pool-num" id="pool-val">16888</div>
+    </div>
+    <button class="nav-btn blood" style="width:100%; margin-bottom:10px;" onclick="app.giveBlood()">🧧 啟動發財金 (獎池失血)</button>
     <div class="fairy-table" id="fairy-list">
         </div>
 </div>
 
-<div class="lamps" id="lamps"></div>
+<div class="lamps-grid" id="zodiac-lamps"></div>
 
-<div class="ctrls">
-    <div style="text-align:center;"><div id="w-val" style="color:var(--cyan)">1x</div><input type="range" id="warp" class="v-warp" min="1" max="150" value="1"></div>
-    <div style="text-align:center;"><div id="s-val" style="color:var(--gold)">0°</div><input type="range" id="steer" class="h-steer" min="-180" max="180" value="0"></div>
+<div class="cockpit-controls">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+        <div id="w-label" class="gauge-label">WARP: 1x</div>
+        <input type="range" id="warp-slider" class="vertical" min="1" max="150" value="1">
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+        <div id="s-label" class="gauge-label">STEER: 0°</div>
+        <input type="range" id="steer-slider" class="horizontal" min="-180" max="180" value="0">
+    </div>
 </div>
 
-<div class="footer">
-    <div class="btn-grid">
-        <button class="btn" onclick="app.toggleCam()">📸 開啟相機</button>
-        <button class="btn" onclick="app.trade('CT')">📈 CT 交易</button>
-        <button class="btn" onclick="app.trade('OFF')">📉 結算平倉</button>
-        <button class="btn" onclick="app.speakIntro()">🎙️ 神宮介紹</button>
-        <button class="btn" onclick="app.search()">🔍 查 Token</button>
-        <button class="btn" onclick="app.capture()">📷 截圖拍照</button>
-        <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
-        <button class="btn" onclick="app.returnWish()">🙏 還願補血</button>
+<div class="footer-nav">
+    <div class="nav-grid">
+        <button class="nav-btn" onclick="app.toggleCamera()">📸 開起相機</button>
+        <button class="nav-btn" onclick="app.trade('CT')">📈 CT 現價交易</button>
+        <button class="nav-btn" onclick="app.trade('OFF')">📉 結算平倉</button>
+        <button class="nav-btn" onclick="app.speakIntro()">🎙️ 神宮介紹</button>
+        <button class="nav-btn" onclick="app.searchToken()">🔍 查地址代碼</button>
+        <button class="nav-btn" onclick="app.captureShot()">📷 截圖拍照</button>
+        <button class="nav-btn" onclick="app.connectWallet()">🦊 連結錢包</button>
+        <button class="nav-btn" style="color:#0f0; border-color:#0f0;" onclick="app.returnGift()">🙏 信眾還願補血</button>
     </div>
 </div>
 
@@ -102,118 +115,160 @@ const app = {
     pool: 16888,
     bpm: 72,
     fairies: [
-        {n: "巧雲", t: 14520, p: "天樞做空(風調雨順)"},
-        {n: "巧虹", t: 14866, p: "天璇做多(家庭美滿)"},
-        {n: "巧芝", t: 16184, p: "天璣做空(育子收驚)"},
-        {n: "巧仙", t: 16888, p: "天權做多(事業運通)"},
-        {n: "巧蘭", t: 17347, p: "天衡做空(長命百歲)"},
-        {n: "巧梅", t: 18056, p: "闓陽做多(身體健康)"},
-        {n: "巧靈", t: 18459, p: "瑤光多退(感情圓滿)"}
+        {id: "巧雲", val: 14520, desc: "天樞專掌:風調雨順(做空)"},
+        {id: "巧虹", val: 14866, desc: "天璇專掌:家庭美滿(做多)"},
+        {id: "巧芝", val: 16184, desc: "天璣專掌:育子收驚(做空)"},
+        {id: "巧仙", val: 16888, desc: "天權專掌:事業運通(做多)"},
+        {id: "巧蘭", val: 17347, desc: "天衡專掌:長命百歲(做空)"},
+        {id: "巧梅", val: 18056, desc: "闓陽專掌:身體健康(做多)"},
+        {id: "巧靈", val: 18459, desc: "瑤光專掌:感情圓滿(多退)"}
     ],
     zodiacs: ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','🐱'],
 
     init() {
+        // 3D 引擎初始化 (星球粒子軌道)
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-3d').appendChild(this.renderer.domElement);
+        document.getElementById('three-canvas').appendChild(this.renderer.domElement);
 
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 2000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for (let i = 0; i < 2200; i++) {
+            pos.push((Math.random()-0.5)*60, (Math.random()-0.5)*60, (Math.random()-0.5)*60);
+        }
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.14 }));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
         this.scene.add(this.stars);
+        this.camera.position.z = 20;
 
-        this.camera.position.z = 15;
         this.initLamps();
+        this.updateFairyDisplay();
         this.animate();
-        this.updateUI();
         this.speakIntro();
     },
 
     initLamps() {
-        const wrap = document.getElementById('lamps');
+        const wrap = document.getElementById('zodiac-lamps');
         this.zodiacs.forEach(z => {
-            const l = document.createElement('div');
-            l.className = 'lamp'; l.innerText = z;
-            l.onclick = () => { l.classList.toggle('active'); this.returnWish(); };
-            wrap.appendChild(l);
+            const btn = document.createElement('div');
+            btn.className = 'lamp-btn'; btn.innerText = z;
+            btn.onclick = () => { 
+                btn.classList.toggle('active'); 
+                this.speak(`為${z}年信眾點燃光明燈，功德注入心臟。`); 
+                this.returnGift();
+            };
+            wrap.appendChild(btn);
         });
     },
 
-    giveGold() {
+    giveBlood() {
         const loss = Math.floor(Math.random() * 400 + 200);
         this.pool -= loss;
-        this.bpm = 120; // 心跳加快
-        this.speak(`悟空心臟輸出動力，發財金由獎池流向百姓，獎池失血 ${loss} 點。`);
-        setTimeout(() => this.bpm = 72, 3000);
-        this.updateUI();
+        this.bpm = 135; // 心臟加速
+        this.speak(`悟空心臟地址噴發動力！撥放發財金，獎池地址失血 ${loss} 點。`);
+        setTimeout(() => this.bpm = 72, 2500);
+        this.updateFairyDisplay();
     },
 
-    returnWish() {
-        this.pool += 150;
-        this.speak(`信眾還願，資金回流仙女地址。`);
-        this.updateUI();
+    returnGift() {
+        const gain = 150;
+        this.pool += gain;
+        this.speak(`信眾還願，資金回流仙女獎池。`);
+        this.updateFairyDisplay();
     },
 
-    updateUI() {
-        document.getElementById('pool-txt').innerText = Math.floor(this.pool);
-        document.getElementById('bpm').innerText = `BPM: ${this.bpm}`;
+    updateFairyDisplay() {
+        document.getElementById('pool-val').innerText = Math.floor(this.pool);
+        document.getElementById('heart-bpm').innerText = `BPM: ${this.bpm}`;
+        
         const list = document.getElementById('fairy-list');
         list.innerHTML = "";
         this.fairies.forEach(f => {
-            const active = Math.abs(this.pool - f.t) < 50;
+            const isActive = Math.abs(this.pool - f.val) < 80;
             const row = document.createElement('div');
-            row.className = `fairy-row ${active ? 'active' : ''}`;
-            row.innerHTML = `<span>${f.n} (${f.t})</span><span>${f.p}</span>`;
+            row.className = `fairy-item ${isActive ? 'active' : ''}`;
+            row.innerHTML = `<span>${f.id} (${f.val})</span><span>${f.desc}</span>`;
             list.appendChild(row);
-            if(active && Math.abs(this.pool - f.t) < 10) this.speak(`大聖，獎池水位觸及${f.n}，成婚判定開啟。`);
+            
+            if(isActive && Math.abs(this.pool - f.val) < 15) {
+                this.speak(`注意！水位抵達 ${f.id} 門檻，地址持有者決策開啟。`);
+            }
         });
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        const warp = document.getElementById('warp').value;
-        const steer = document.getElementById('steer').value;
-        document.getElementById('w-val').innerText = warp + "x";
-        document.getElementById('s-val').innerText = steer + "°";
+        const warp = document.getElementById('warp-slider').value;
+        const steer = document.getElementById('steer-slider').value;
+        document.getElementById('w-label').innerText = `WARP: ${warp}x`;
+        document.getElementById('s-label').innerText = `STEER: ${steer}°`;
 
-        document.getElementById('ufo').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
+        // 飛碟物理：右移橫桿 = 順時針旋轉
+        document.getElementById('ufo-cockpit').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
 
+        // 星球天道物理
         const rad = (steer * Math.PI) / 180;
-        const cosVal = Math.cos(rad);
+        const cosV = Math.cos(rad);
+        const sinV = Math.sin(rad);
         const p = this.stars.geometry.attributes.position.array;
-        const speed = (warp / 450);
+        const speed = warp / 400;
 
         for(let i=0; i<p.length; i+=3) {
-            p[i] += Math.sin(rad) * speed; // 右移順時針
-            p[i+1] -= speed * cosVal; // 0度上到下，180度下到上
-            if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
-            if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
+            // 右移順時針偏轉 (X軸增加)
+            p[i] += sinV * speed;
+            // 0度(做多)上到下，180度(做空)下到上
+            p[i+1] -= speed * cosV;
+
+            // 邊界重置
+            if(p[i+1] > 30) p[i+1] = -30; if(p[i+1] < -30) p[i+1] = 30;
+            if(p[i] > 30) p[i] = -30; if(p[i] < -30) p[i] = 30;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
 
-    async toggleCam() {
-        const v = document.getElementById('cam-feed');
-        if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
-        else { 
-            const s = await navigator.mediaDevices.getUserMedia({video: true});
-            v.srcObject = s; this.speak("相機開啟。");
+    async toggleCamera() {
+        const v = document.getElementById('camera-layer');
+        if(v.srcObject) {
+            v.srcObject.getTracks().forEach(t => t.stop());
+            v.srcObject = null;
+            this.speak("關閉神宮影像監控。");
+        } else {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
+                v.srcObject = s;
+                this.speak("開啟神宮實時影像。");
+            } catch(e) { alert("無法開啟相機，請檢查權限。"); }
         }
     },
 
-    speakIntro() { this.speak("大聖，雙核地址校準完成。悟空心臟為動力，仙女地址為獎池水位。一六八八八受孕開始。"); },
-    trade(t) { this.speak("下單完成。"); },
-    search() { prompt("輸入地址："); },
-    capture() { alert("神蹟拍照成功"); },
-    connect() { this.speak("錢包連結。"); },
+    speakIntro() {
+        this.speak("大聖，廣寒宮神電神宮已全面校準。悟空心臟為動力源，仙女獎池一六八八八水位就緒。天道軌道與相機監控同步運作中。");
+    },
+
+    captureShot() {
+        alert("神蹟影像已保存至悟空大腦快照。");
+        this.speak("錄製拍照完成。");
+    },
+
+    searchToken() {
+        const a = prompt("請輸入地址查詢：");
+        if(a) this.speak("代碼讀取中，偵測到百姓資產。");
+    },
+
+    trade(t) { this.speak(t==='CT' ? "CT現價下單，扣除交易稅。" : "結算成功。"); },
+    connectWallet() { this.speak("連結錢包成功，已接入心臟地址。"); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
+
 window.onload = () => app.init();
+window.onresize = () => {
+    app.camera.aspect = window.innerWidth / window.innerHeight;
+    app.camera.updateProjectionMatrix();
+    app.renderer.setSize(window.innerWidth, window.innerHeight);
+};
 </script>
 </body>
 </html>
