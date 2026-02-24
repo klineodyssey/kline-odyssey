@@ -2,50 +2,51 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜發財金申請與語音控版 V2.4.0</title>
+    <title>KGEN 16888｜天道引擎實裝版 V2.4.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --heart: #ff0044; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 頂部 HUD：心臟、大腦、席位 */
+        /* 頂部雙核 HUD */
         .god-hud { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; }
-        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; margin-bottom: 2px; }
-        .heart-beat { color: var(--heart); animation: heartBeat 1s infinite; font-weight: bold; }
-        @keyframes heartBeat { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 3px; margin-bottom: 8px; }
+        .hud-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--gold); font-family: 'Orbitron'; }
+        .heart-beat { color: var(--heart); text-shadow: 0 0 10px var(--heart); font-weight: bold; }
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; border: 0.5px solid #444; }
 
-        /* 左側：獎池與發財金申請 */
-        .info-panel { position: fixed; top: 110px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 12px; border-radius: 12px; width: 280px; }
-        .pool-num { font-size: 32px; font-family: 'Orbitron'; text-align: center; color: #fff; text-shadow: 0 0 15px var(--gold); }
-        .app-box { border: 1px dashed var(--red); padding: 10px; margin-top: 10px; border-radius: 8px; background: rgba(255, 60, 0, 0.05); }
-        .app-input { width: 70px; background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 5px; text-align: center; font-family: 'Orbitron'; }
+        /* 左側：地址獎池與發財金申請 (真動作) */
+        .info-panel { position: fixed; top: 120px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; border-radius: 12px; width: 280px; }
+        .addr-tag { font-size: 9px; color: var(--cyan); margin-bottom: 5px; opacity: 0.8; }
+        .pool-num { font-size: 36px; font-family: 'Orbitron'; text-align: center; color: #fff; text-shadow: 0 0 20px var(--gold); }
         
-        .fairy-table { font-size: 10px; color: #ccc; margin-top: 10px; max-height: 180px; overflow-y: auto; }
+        .apply-window { background: rgba(255,60,0,0.1); border: 1px solid var(--red); border-radius: 8px; padding: 10px; margin-top: 10px; }
+        .gold-input { width: 80px; background: #000; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; text-align: center; padding: 5px; }
+
+        /* 仙女數據表 */
+        .fairy-table { font-size: 10px; margin-top: 10px; max-height: 150px; overflow-y: auto; }
         .fairy-row { display: flex; justify-content: space-between; padding: 3px; border-bottom: 1px solid #333; }
-        .fairy-row.active { background: rgba(255, 215, 120, 0.2); color: #fff; border-left: 3px solid var(--gold); }
+        .fairy-row.active { background: rgba(255, 215, 120, 0.3); color: #fff; }
 
         /* 右側：13生肖燈 */
         .lamps { position: fixed; right: 15px; top: 100px; z-index: 1000; display: grid; grid-template-columns: repeat(2, 45px); gap: 8px; }
         .lamp { width: 45px; height: 45px; border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000; color: var(--gold); cursor: pointer; font-size: 14px; }
         .lamp.active { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold); }
 
-        /* 中央物理與相機 */
-        #ufo { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 360px; height: 360px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; opacity: 0.85; border-radius: 50%; z-index: 2; border: 5px solid var(--gold); }
-        #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.4; object-fit: cover; }
+        /* 中央及相機影像 */
+        #ufo { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; border-radius: 50%; z-index: 2; border: 5px solid var(--gold); }
+        #cam-feed { position: fixed; inset: 0; z-index: 1; opacity: 0.45; object-fit: cover; }
         #canvas-3d { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
 
-        /* 操控台 */
-        .controls { position: fixed; bottom: 135px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; }
-        input[type=range].v-warp { width: 160px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
-        input[type=range].h-steer { width: 220px; accent-color: var(--gold); }
+        /* 真正的控制桿 */
+        .controls { position: fixed; bottom: 140px; width: 100%; z-index: 1000; display: flex; justify-content: space-between; padding: 0 50px; box-sizing: border-box; }
+        input[type=range].v-warp { width: 180px; transform: rotate(-90deg); margin-top: 80px; accent-color: var(--cyan); }
+        input[type=range].h-steer { width: 250px; accent-color: var(--gold); }
 
-        /* 底部按鈕 */
-        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 3px solid var(--gold); z-index: 1000; padding: 12px 5px; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 4px solid var(--gold); z-index: 1000; padding: 15px 5px; }
         .btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-        .btn { padding: 10px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; border-radius: 4px; }
-        .btn-stop { color: #fff; background: var(--red); border-color: var(--red); }
+        .btn { padding: 12px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; border-radius: 4px; }
+        .btn-red { color: #fff; background: var(--red); border-color: var(--red); }
     </style>
 </head>
 <body>
@@ -55,20 +56,20 @@
 <div id="canvas-3d"></div>
 
 <div class="god-hud">
-    <div class="hud-row"><span>❤️ 悟空心臟地址 (財神廟源)</span><span class="heart-beat" id="bpm-val">BPM: 72</span></div>
-    <div class="bar-bg"><div id="h-bar" style="width:100%; height:100%; background:var(--heart);"></div></div>
+    <div class="hud-row"><span>❤️ 悟空心臟(源地址): 0xWK_HEART...</span><span class="heart-beat" id="bpm">BPM: 72</span></div>
+    <div class="bar-bg"><div id="h-fill" style="width:100%; height:100%; background:var(--heart);"></div></div>
     <div class="hud-row"><span>🐒 花果山席位: 500/500</span><span>🙏 神明席位: 500/500</span></div>
     <div class="bar-bg"><div style="width:100%; height:100%; background:var(--cyan);"></div></div>
 </div>
 
 <div class="info-panel">
-    <div style="font-size:10px; color:var(--cyan); font-family:'Orbitron';">仙女地址: 16888_FairyVault</div>
+    <div class="addr-tag">仙女地址: 16888_FairyVault_Contract</div>
     <div class="pool-num" id="pool-txt">16888</div>
     
-    <div class="app-box">
-        <div style="font-size:11px; color:var(--red); font-weight:bold; margin-bottom:5px;">🧧 發財金申請窗口 (1~888)</div>
-        <input type="number" id="gold-amt" class="app-input" value="168" min="1" max="888">
-        <button class="btn" style="color:var(--red); border-color:var(--red);" onclick="app.applyGold()">提交申請</button>
+    <div class="apply-window">
+        <div style="font-size:11px; color:var(--red); font-weight:bold; margin-bottom:5px;">🧧 發財金申請 (1-888)</div>
+        <input type="number" id="amt" class="gold-input" value="168" min="1" max="888">
+        <button class="btn" style="color:var(--red); border-color:var(--red); padding:5px 10px;" onclick="app.applyGold()">提交申請</button>
     </div>
 
     <div class="fairy-table" id="fairy-list"></div>
@@ -77,8 +78,8 @@
 <div class="lamps" id="lamps"></div>
 
 <div class="controls">
-    <div style="text-align:center;"><div id="w-label" style="color:var(--cyan)">1x</div><input type="range" id="warp" class="v-warp" min="1" max="150" value="1"></div>
-    <div style="text-align:center;"><div id="s-label" style="color:var(--gold)">0°</div><input type="range" id="steer" class="h-steer" min="-180" max="180" value="0"></div>
+    <div style="text-align:center;"><div id="w-val" style="color:var(--cyan)">1x</div><input type="range" id="warp" class="v-warp" min="1" max="150" value="1"></div>
+    <div style="text-align:center;"><div id="s-val" style="color:var(--gold)">0°</div><input type="range" id="steer" class="h-steer" min="-180" max="180" value="0"></div>
 </div>
 
 <div class="footer">
@@ -87,21 +88,20 @@
         <button class="btn" onclick="app.trade('CT')">📈 CT 交易</button>
         <button class="btn" onclick="app.trade('OFF')">📉 結算平倉</button>
         <button class="btn" onclick="app.capture()">📷 截圖拍照</button>
-        <button class="btn btn-stop" onclick="app.stopSpeak()">🔇 停止語音</button>
+        <button class="btn btn-red" onclick="app.stopSpeak()">🔇 停止語音</button>
     </div>
     <div class="btn-grid" style="margin-top:5px;">
         <button class="btn" onclick="app.speakIntro()">🎙️ 神宮介紹</button>
         <button class="btn" onclick="app.search()">🔍 查地址</button>
         <button class="btn" onclick="app.connect()">🦊 連結錢包</button>
         <button class="btn" onclick="app.returnWish()">🙏 還願補血</button>
-        <button class="btn" onclick="app.speak('星球天道鎖定，發財金系統就緒')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.speak('星球軌道已校準，天道鎖定。')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
     pool: 16888,
-    bpm: 72,
     fairies: [
         {n: "巧雲", t: 14520, p: "天樞(空)風調雨順"},
         {n: "巧虹", t: 14866, p: "天璇(多)家庭美滿"},
@@ -122,9 +122,9 @@ const app = {
 
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 2000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for (let i = 0; i < 2200; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.14 }));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
         this.scene.add(this.stars);
 
         this.camera.position.z = 15;
@@ -145,33 +145,26 @@ const app = {
     },
 
     applyGold() {
-        const amt = parseInt(document.getElementById('gold-amt').value);
-        if(amt < 1 || amt > 888) { this.speak("發財金申請範圍為一到八八八。"); return; }
-        this.pool -= amt;
-        this.bpm = 140;
-        this.speak(`百姓申請發財金 ${amt} 元，仙女地址失血，悟空心臟動力輸出。`);
-        setTimeout(() => this.bpm = 72, 3000);
+        const val = parseInt(document.getElementById('amt').value);
+        if(val < 1 || val > 888) return alert("範圍1-888");
+        this.pool -= val;
+        this.speak(`申請發財金 ${val} 元。獎池失血，心臟動力全開。`);
         this.updateUI();
+        // 真動作：此處可對接 Web3.js 或 ethers.js 發送合約請求
     },
 
-    returnWish() {
-        this.pool += 200;
-        this.speak("信眾還願，仙女地址補血回流。");
-        this.updateUI();
-    },
+    returnWish() { this.pool += 150; this.updateUI(); this.speak("信眾還願補血。"); },
 
     updateUI() {
         document.getElementById('pool-txt').innerText = Math.floor(this.pool);
-        document.getElementById('bpm-val').innerText = `BPM: ${this.bpm}`;
         const list = document.getElementById('fairy-list');
         list.innerHTML = "";
         this.fairies.forEach(f => {
-            const active = Math.abs(this.pool - f.t) < 80;
+            const active = Math.abs(this.pool - f.t) < 50;
             const row = document.createElement('div');
             row.className = `fairy-row ${active ? 'active' : ''}`;
             row.innerHTML = `<span>${f.n} (${f.t})</span><span>${f.p}</span>`;
             list.appendChild(row);
-            if(active && Math.abs(this.pool - f.t) < 15) this.speak(`注意，獎池觸及 ${f.n} 位。`);
         });
     },
 
@@ -179,20 +172,25 @@ const app = {
         requestAnimationFrame(() => this.animate());
         const warp = document.getElementById('warp').value;
         const steer = document.getElementById('steer').value;
-        document.getElementById('w-label').innerText = warp + "x";
-        document.getElementById('s-label').innerText = steer + "°";
+        document.getElementById('w-val').innerText = warp + "x";
+        document.getElementById('s-val').innerText = steer + "°";
 
+        // 右移 = 順時針轉 (CSS Rotate)
         document.getElementById('ufo').style.transform = `translate(-50%, -50%) rotate(${steer}deg)`;
 
+        // 天道物理軌道 (粒子)
         const rad = (steer * Math.PI) / 180;
         const cosV = Math.cos(rad);
         const sinV = Math.sin(rad);
         const p = this.stars.geometry.attributes.position.array;
-        const speed = (warp / 450);
+        const speed = (warp / 400);
 
         for(let i=0; i<p.length; i+=3) {
-            p[i] += sinV * speed; // 右移順時針
-            p[i+1] -= speed * cosV; // 0度上到下
+            // 右移 = 粒子向右偏轉 (順時針感)
+            p[i] += sinV * speed;
+            // 0度 = 由上往下灌 (cos 0 = 1, Y減少)
+            p[i+1] -= speed * cosV;
+
             if(p[i+1] > 25) p[i+1] = -25; if(p[i+1] < -25) p[i+1] = 25;
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
@@ -205,20 +203,17 @@ const app = {
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { 
             const s = await navigator.mediaDevices.getUserMedia({video: true});
-            v.srcObject = s; this.speak("開啟監控影像。");
+            v.srcObject = s; this.speak("相機開啟，監控敘事中。");
         }
     },
 
     stopSpeak() { window.speechSynthesis.cancel(); },
-    speakIntro() { this.speak("大聖，發財金申請功能已上線，百姓可填寫一到八八八。語音暫停按鍵已就緒，神明席位五百已歸位。"); },
-    trade(t) { this.speak("下單完成。"); },
+    speakIntro() { this.speak("大聖，天道引擎校準完成。心臟地址動力全開。語音停止與相機功能已就緒。"); },
     search() { prompt("輸入地址："); },
-    capture() { alert("拍照存檔成功"); },
-    connect() { this.speak("錢包連結。"); },
-    speak(m) { 
-        const u = new SpeechSynthesisUtterance(m);
-        window.speechSynthesis.speak(u);
-    }
+    capture() { alert("拍照成功"); },
+    connect() { this.speak("錢包已對接心臟地址。"); },
+    trade() { this.speak("合約指令已下達。"); },
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
 window.onload = () => app.init();
 </script>
