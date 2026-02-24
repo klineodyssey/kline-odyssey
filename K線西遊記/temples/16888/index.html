@@ -1,149 +1,128 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜4D 結算引擎 V3.0</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-  <style>
-    :root { --bg:#06070b; --gold:#ffd778; --line:rgba(255,255,255,0.15); }
-    body { margin:0; background:var(--bg); color:#fff; font-family:sans-serif; overflow:hidden; }
-    
-    /* 頂部：金箍棒重量油箱 (1 KGEN = 1 斤 = 1 口) */
-    .header { width:100%; padding:15px; background:rgba(0,0,0,0.8); border-bottom:1px solid var(--line); text-align:center; position:fixed; top:0; z-index:100; }
-    .fuel-bar-wrap { width:80%; height:12px; background:rgba(255,255,255,0.1); border-radius:10px; border:1px solid var(--gold); margin:0 auto; overflow:hidden; }
-    #fuelInner { height:100%; width:0%; background:linear-gradient(90deg, #b8860b, var(--gold)); transition:0.3s; }
-    .weight-info { font-size:12px; color:var(--gold); margin-top:5px; font-weight:900; }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>廣寒宮 16888｜宇宙天條 V4.0</title>
+    <style>
+        :root { --bg: #06070b; --gold: #ffd778; --red: #ff4d4d; --green: #00ffcc; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
+        
+        /* 1. 頂部天條狀態欄 */
+        .header { width: 100%; padding: 10px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-around; font-size: 10px; position: fixed; top: 0; z-index: 100; }
+        .stat-item { text-align: center; }
+        .stat-val { display: block; font-size: 14px; color: var(--gold); font-weight: 900; }
 
-    /* 遊戲主畫面 (3D 視角) */
-    .game-viewport { width:100vw; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; perspective:1200px; }
-    .fairy-card {
-      position:relative; width:300px; height:300px; border-radius:50%;
-      border:4px solid var(--gold); overflow:hidden;
-      box-shadow:0 0 50px rgba(255,215,120,0.3);
-      transition: transform 0.1s ease-out; /* 4D 即時偏轉 */
-      z-index:10; background:#000;
-    }
-    #fairyImg { width:100%; height:100%; background:url('./assets/fairy.png') no-repeat center 20% / cover; }
+        /* 2. 3D 宇宙 K 線舞台 */
+        .stage-4d { width: 100vw; height: 60vh; display: flex; align-items: center; justify-content: center; perspective: 1000px; padding-top: 50px; }
+        .kline-container { position: relative; width: 300px; height: 300px; transform-style: preserve-3d; transition: 0.1s; }
+        .fairy-avatar { position: absolute; width: 250px; height: 250px; border-radius: 50%; border: 4px solid var(--gold); background: url('./assets/fairy.png') no-repeat center/cover; box-shadow: 0 0 50px rgba(255,215,120,0.4); left: 25px; top: 25px; }
 
-    /* 操作區 (美女圖正下方) */
-    .ui-overlay { width:90%; max-width:380px; padding:20px; background:rgba(255,255,255,0.08); border-radius:24px; border:1px solid var(--line); backdrop-filter:blur(10px); margin-top:20px; z-index:20; }
-    .slider-box { margin-bottom:15px; }
-    .slider-box label { display:flex; justify-content:space-between; color:var(--gold); font-size:13px; font-weight:900; }
-    input[type="range"] { width:100%; accent-color:var(--gold); cursor:pointer; }
+        /* 3. 操作區：四旋鈕與拔河 */
+        .controls { position: absolute; bottom: 100px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .slider-wrap { width: 85%; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gold); }
+        input[type=range] { width: 100%; accent-color: var(--gold); }
 
-    /* 左下方操作區 (相機與拍照) */
-    .dock-left { position:fixed; bottom:20px; left:15px; width:150px; display:flex; flex-direction:column; gap:8px; z-index:100; }
-    #camPreview { width:100%; height:110px; background:#000; border:1px solid var(--gold); border-radius:12px; overflow:hidden; }
-    #vWeb { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
-    .btn { padding:10px; border-radius:20px; border:1px solid var(--gold); background:rgba(0,0,0,0.8); color:var(--gold); font-size:11px; font-weight:900; cursor:pointer; }
-    .btn-trade { background:var(--gold); color:#000; height:45px; font-size:14px; }
-  </style>
+        /* 4. 下單與結算 (左下) */
+        .actions { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .btn { padding: 12px 20px; border-radius: 20px; border: 1px solid var(--gold); background: #000; color: var(--gold); font-weight: 900; cursor: pointer; }
+        .btn-gold { background: var(--gold); color: #000; }
+
+        /* 5. 宇宙日誌 (右下) */
+        .logs { position: fixed; bottom: 20px; right: 20px; width: 150px; height: 80px; font-size: 9px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px; overflow: hidden; opacity: 0.7; }
+    </style>
 </head>
 <body>
 
-  <div class="header">
-    <div class="fuel-bar-wrap"><div id="fuelInner"></div></div>
-    <div class="weight-info">金箍棒：<span id="curW">0</span> / 13500 斤 (1 KGEN = 1 口)</div>
-  </div>
+<div class="header">
+    <div class="stat-item">宇宙節奏 (CT)<span class="stat-val" id="stCT">0</span></div>
+    <div class="stat-item">人群拔河 (R)<span class="stat-val" id="stR">0.00</span></div>
+    <div class="stat-item">金箍棒重<span class="stat-val" id="stW">13500 斤</span></div>
+    <div class="stat-item">許願池<span class="stat-val" id="stP">0 / 16888</span></div>
+</div>
 
-  <div class="game-viewport">
-    <div class="fairy-card" id="fairyCard">
-      <div id="fairyImg"></div>
+<div class="stage-4d">
+    <div class="kline-container" id="kStage">
+        <div class="fairy-avatar" id="fairy"></div>
     </div>
+</div>
 
-    <div class="ui-overlay">
-      <div class="slider-box">
-        <label>方向盤角度 <span id="valD">120°</span></label>
-        <input type="range" id="rngD" min="0" max="360" value="120">
-      </div>
-      <div class="slider-box">
-        <label>曲率（口數/斤/公斤） <span id="valW">10</span> 口</label>
-        <input type="range" id="rngW" min="1" max="150" value="10">
-      </div>
-      <button class="btn btn-trade" style="width:100%" onclick="settle()">13500 斤 結算下凡</button>
+<div class="controls">
+    <div class="slider-wrap">
+        <div class="slider-label"><span>多方 L</span><span id="valL">5000</span></div>
+        <input type="range" id="rngL" min="0" max="10000" value="5000">
     </div>
-  </div>
-
-  <div class="dock-left">
-    <div id="camPreview"><video id="vWeb" autoplay playsinline muted></video></div>
-    <button class="btn" onclick="initCam()">開啟相機</button>
-    <button class="btn" style="background:var(--gold); color:#000;" onclick="takeSnap()">與仙女 4D 合照</button>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-      <button class="btn" onclick="action('許願')">許願</button>
-      <button class="btn" onclick="action('還願')">還願</button>
+    <div class="slider-wrap">
+        <div class="slider-label"><span>空方 S</span><span id="valS">5000</span></div>
+        <input type="range" id="rngS" min="0" max="10000" value="5000">
     </div>
-  </div>
+    <div class="slider-wrap">
+        <div class="slider-label"><span>方向盤 (CT)</span><span id="valCT">0</span></div>
+        <input type="range" id="rngCT" min="-1" max="1" step="1" value="0">
+    </div>
+</div>
 
-  <canvas id="cOutput" style="display:none;"></canvas>
+<div class="actions">
+    <button class="btn btn-gold" onclick="settle()">13500 斤強制結算</button>
+    <button class="btn" onclick="wish()">點火許願 (+100 KGEN)</button>
+</div>
+
+<div class="logs" id="log">系統啟動：遵循天條 V1.0...</div>
 
 <script>
-  const $ = (id) => document.getElementById(id);
-  let TOTAL_KGEN = 10000;
+    const $ = (id) => document.getElementById(id);
+    let pool = 0;
 
-  function mainLoop() {
-    const deg = parseInt($("rngD").value);
-    const warp = parseInt($("rngW").value);
-    
-    // 結算邏輯
-    const currentWeight = TOTAL_KGEN + warp;
-    $("curW").textContent = currentWeight.toLocaleString();
-    $("valD").textContent = deg + "°";
-    $("valW").textContent = warp;
-    
-    // 頂部血條
-    const pct = Math.min((currentWeight / 13500) * 100, 100);
-    $("fuelInner").style.width = pct + "%";
+    function updateEngine() {
+        // 1. 取得天條物理量
+        const L = parseFloat($("rngL").value);
+        const S = parseFloat($("rngS").value);
+        const CT = parseFloat($("rngCT").value);
+        const epsilon = 0.0001;
 
-    // 4D 空間偏轉邏輯 (模擬角色移動感)
-    const card = $("fairyCard");
-    const rotateY = (deg - 180) / 10; // 隨角度產生左右偏轉
-    const rotateX = (warp - 75) / 5;  // 隨曲率產生前後傾斜
-    card.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(${1 + warp/500})`;
-    
-    // 內層圖片動態
-    $("fairyImg").style.transform = `rotate(${(deg-120)*0.1}deg)`;
+        // 2. 天條公式 4.2：拔河值 R
+        const R = (L - S) / (L + S + epsilon);
+        
+        // 3. 天條公式 5.2：合成方向 D (w1=0.6, w2=0.4)
+        const D = (0.6 * CT) + (0.4 * R);
 
-    requestAnimationFrame(mainLoop);
-  }
+        // 更新顯示
+        $("valL").textContent = L; $("valS").textContent = S; $("valCT").textContent = CT;
+        $("stCT").textContent = CT; $("stR").textContent = R.toFixed(2);
+        $("stP").textContent = `${Math.floor(pool)} / 16888`;
 
-  async function initCam() {
-    const s = await navigator.mediaDevices.getUserMedia({video:true});
-    $("vWeb").srcObject = s;
-  }
-
-  function takeSnap() {
-    const v=$("vWeb"), c=$("cOutput"), ctx=c.getContext("2d");
-    c.width=1080; c.height=1080;
-    // 畫背景相機
-    ctx.save(); ctx.translate(1080,0); ctx.scale(-1,1);
-    ctx.drawImage(v,0,0,1080,1080); ctx.restore();
-    // 疊加仙女 (帶 4D 濾鏡感)
-    const img=new Image(); img.src='./assets/fairy.png';
-    img.onload=()=>{
-      ctx.globalAlpha=0.75;
-      ctx.shadowBlur=30; ctx.shadowColor="gold";
-      ctx.drawImage(img, 140, 140, 800, 800);
-      const a=document.createElement('a'); a.href=c.toDataURL(); a.download='廣寒宮4D結算合照.png'; a.click();
+        // 4. 3D 視覺反應 (App 遊戲感角色移動)
+        const stage = $("kStage");
+        const fairy = $("fairy");
+        
+        // 隨 D 方向產生 3D 偏轉
+        stage.style.transform = `rotateY(${R * 30}deg) rotateX(${CT * -20}deg)`;
+        
+        // 顏色隨方向改變 (多方青色，空方紅色)
+        fairy.style.borderColor = D > 0 ? "var(--green)" : "var(--red)";
+        fairy.style.boxShadow = `0 0 50px ${D > 0 ? "rgba(0,255,204,0.5)" : "rgba(255,77,77,0.5)"}`;
+        
+        requestAnimationFrame(updateEngine);
     }
-  }
 
-  function settle() {
-    const current = TOTAL_KGEN + parseInt($("rngW").value);
-    if(current >= 13500) {
-      const u=new SpeechSynthesisUtterance("13500斤金箍棒就位，啟動結算儀式");
-      u.lang='zh-TW'; window.speechSynthesis.speak(u);
-      alert("結算成功！");
-    } else { alert("重量不足 13500 斤，無法結算"); }
-  }
+    function wish() {
+        pool += 100;
+        log("許願成功，能量注入 100 KGEN");
+        if(pool >= 16888) {
+            alert("天條觸發：仙女下凡 (Lunar Descent)！");
+            pool = 1688; // 留池 10%
+        }
+    }
 
-  function action(t) {
-    TOTAL_KGEN += parseInt($("rngW").value);
-    const u=new SpeechSynthesisUtterance(t + "成功");
-    u.lang='zh-TW'; window.speechSynthesis.speak(u);
-  }
+    function settle() {
+        log("執行天條 6.1：勝負判定中...");
+        // 這裡可串接你的合約結算
+    }
 
-  mainLoop();
+    function log(m) { $("log").innerHTML = `> ${m}<br>` + $("log").innerHTML; }
+
+    updateEngine();
 </script>
 </body>
 </html>
