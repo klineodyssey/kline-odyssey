@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜廣寒宮金融生命體 V2.1.2</title>
+    <title>KGEN 16888｜廣寒宮全向量導航 V2.1.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
@@ -11,54 +11,64 @@
         :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 中央圓形美女底圖 (隨方向盤旋轉) */
-        #fairy-central {
+        /* 中央月亮底圖：隨引擎同步旋轉 */
+        #fairy-engine {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 350px; height: 350px;
+            width: 380px; height: 380px;
             background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            opacity: 0.15; border-radius: 50%; z-index: 2; pointer-events: none;
-            box-shadow: 0 0 60px rgba(255, 215, 120, 0.2);
-            transition: transform 0.1s linear;
+            opacity: 0.15; border-radius: 50%; z-index: 2; border: 2px solid rgba(255,215,120,0.1);
+            transition: transform 0.2s ease-out;
         }
 
-        /* 頂部金融監修 */
-        .monitor { position: fixed; top: 10px; width: 100%; z-index: 1000; padding: 0 20px; }
-        .label { font-size: 10px; color: var(--gold); font-family: 'Orbitron'; display: flex; justify-content: space-between; }
-        .bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 4px 0 10px; overflow: hidden; }
-        #bank-bar { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); }
+        /* 導航儀表 */
+        .hud { position: fixed; top: 15px; width: 100%; z-index: 1000; padding: 0 20px; box-sizing: border-box; }
+        .hud-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); }
 
-        /* 操作桿 */
+        /* 中心 K 線與 AI */
+        #bridge { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
+        #contract-ai { font-size: 12px; color: var(--cyan); background: rgba(0,0,0,0.8); padding: 8px 20px; border: 1px solid var(--cyan); border-radius: 30px; }
+        #price { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 20px var(--cyan); margin: 10px 0; }
+
+        /* 左右操作桿 */
         .stick { position: fixed; top: 55%; transform: translateY(-50%); z-index: 1000; }
-        .l-stick { left: 10px; } .r-stick { right: 10px; }
-        input[type=range].vert { width: 150px; transform: rotate(-90deg); margin: 60px -55px; accent-color: var(--gold); }
-
-        /* 資訊看板 */
-        #info-hub { position: fixed; top: 25%; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-        #identity-tag { background: rgba(0,255,255,0.15); border: 1px solid var(--cyan); padding: 5px 15px; border-radius: 20px; font-size: 12px; color: var(--cyan); }
-        #price { font-family: 'Orbitron'; font-size: 45px; margin: 10px 0; text-shadow: 0 0 20px var(--cyan); }
+        .l-stick { left: 15px; } .r-stick { right: 15px; }
+        input[type=range].vert { width: 180px; transform: rotate(-90deg); margin: 80px -70px; accent-color: var(--gold); cursor: pointer; }
 
         #three-canvas { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-        #player-cam { position: fixed; inset: 0; z-index: 1; opacity: 0.3; object-fit: cover; }
+        #cam-view { position: fixed; inset: 0; z-index: 1; opacity: 0.3; object-fit: cover; }
 
-        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px 5px; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 9px; font-weight: 900; }
+        /* 控制台 */
+        .console { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); border-top: 2px solid var(--gold); z-index: 1000; padding: 20px 10px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
+        
+        .wish-sign { position: fixed; bottom: 130px; left: 20px; z-index: 500; color: var(--gold); }
     </style>
 </head>
 <body>
 
-<div id="fairy-central"></div>
-<video id="player-cam" autoplay playsinline></video>
+<div id="fairy-engine"></div>
+<video id="cam-view" autoplay playsinline></video>
 <div id="three-canvas"></div>
 
-<div class="monitor">
-    <div class="label"><span>玉帝金庫容量 (5000萬 KGEN)</span><span id="seat-count">神明席位: 0/500</span></div>
-    <div class="bar"><div id="bank-bar"></div></div>
+<div class="hud">
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--gold);">
+        <span>玉帝神明銀行金庫：5000萬 KGEN</span>
+        <span id="ai-mode">模式：百姓導航</span>
+    </div>
+    <div class="hud-bar"><div id="fuel-fill"></div></div>
 </div>
 
-<div id="info-hub">
-    <div id="identity-tag">身分判斷：掃描錢包中...</div>
+<div id="bridge">
+    <div id="contract-ai">AI 合約判斷：等待地址輸入...</div>
     <div id="price">16888.88</div>
+    <div id="vector-data" style="font-size:10px; color:var(--gold);">向量方向: 180° | 曲速: 75x</div>
+</div>
+
+<div class="wish-sign">
+    <div style="font-size:28px; font-weight:900;">16888 廣寒宮</div>
+    <div id="user-msg">【願】：歲歲平安</div>
 </div>
 
 <div class="stick l-stick"><input type="range" id="warp" class="vert" min="1" max="150" value="75"></div>
@@ -66,20 +76,19 @@
 
 <div class="console">
     <div class="grid">
-        <button class="btn" onclick="app.checkIdentity()">🔍 身分演化判斷</button>
-        <button class="btn" onclick="app.invest()">🏦 仙女池回禮投資</button>
+        <button class="btn" onclick="app.scanContract()">🔍 合約自動判斷</button>
         <button class="btn" onclick="app.trade('CT')">📈 CT下單</button>
         <button class="btn" onclick="app.trade('CLOSE')">📉 CT+1結算</button>
-        <button class="btn" onclick="app.capture()">📷 拍照存證</button>
-        <button class="btn" onclick="app.toggleCam()">📸 影像監控</button>
-        <button class="btn" onclick="app.connect()">🦊 連結神明銀行</button>
-        <button class="btn" onclick="app.speak('廣寒宮金融系統啟動')">🎙️ 客服語音</button>
+        <button class="btn" onclick="app.setWish()">🙏 許願留言</button>
+        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
+        <button class="btn" onclick="app.toggleCam()">📸 影像開關</button>
+        <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
+        <button class="btn" onclick="app.speak('向量引擎已鎖定，準備曲速前進')">🎙️ 客服語音</button>
     </div>
 </div>
 
 <script>
 const app = {
-    balance: 0,
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -87,63 +96,84 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-canvas').appendChild(this.renderer.domElement);
 
+        // 氣泡星球向量粒子
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for (let i = 0; i < 1000; i++) pos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        for (let i = 0; i < 1500; i++) {
+            pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        }
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.12 }));
-        this.scene.add(this.bubbles);
+        this.particles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15, transparent: true, opacity: 0.8 }));
+        this.scene.add(this.particles);
 
-        this.camera.position.z = 12;
+        this.camera.position.z = 15;
         this.animate();
-        setInterval(() => {
-            document.getElementById('price').innerText = (16888 + (Math.random()-0.5)*10).toFixed(2);
-        }, 1500);
+        setInterval(() => this.updateMarket(), 2000);
+    },
+
+    updateMarket() {
+        const p = (16888 + (Math.random()-0.5)*15).toFixed(2);
+        document.getElementById('price').innerText = p;
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
         const warp = document.getElementById('warp').value;
         const angle = parseInt(document.getElementById('angle').value);
+        
+        // --- 核心全向量引擎 ---
+        // 將 0-360 度轉為弧度
+        const rad = (angle * Math.PI) / 180;
+        // 計算向量分量 (X 與 Y)
+        const vx = Math.sin(rad) * (warp / 500);
+        const vy = Math.cos(rad) * (warp / 500);
 
-        // 美女圖聯動旋轉
-        document.getElementById('fairy-central').style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-
-        // 星球移動邏輯
-        const p = this.bubbles.geometry.attributes.position.array;
-        let flow = 0;
-        if (angle >= 30 && angle < 150) flow = 1; // 多
-        else if (angle >= 210 && angle < 330) flow = -1; // 空
-
-        for(let i=1; i<p.length; i+=3) {
-            p[i] -= flow * (warp / 800);
-            if(p[i] < -20) p[i] = 20; if(p[i] > 20) p[i] = -20;
+        // 1. 底圖美女旋轉聯動
+        document.getElementById('fairy-engine').style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        
+        // 2. 粒子流向隨角度改變
+        const positions = this.particles.geometry.attributes.position.array;
+        for(let i=0; i<positions.length; i+=3) {
+            positions[i] += vx;     // X軸流向
+            positions[i+1] -= vy;   // Y軸流向 (反向以符合視覺習慣)
+            
+            // 邊界迴圈處理
+            if(positions[i] > 25) positions[i] = -25; if(positions[i] < -25) positions[i] = 25;
+            if(positions[i+1] > 25) positions[i+1] = -25; if(positions[i+1] < -25) positions[i+1] = 25;
         }
-        this.bubbles.geometry.attributes.position.needsUpdate = true;
+        this.particles.geometry.attributes.position.needsUpdate = true;
+        
+        document.getElementById('vector-data').innerText = `向量方向: ${angle}° | 曲速: ${warp}x`;
         this.renderer.render(this.scene, this.camera);
     },
 
-    checkIdentity() {
-        const bal = prompt("輸入 KGEN 持有量進行系統演化判斷：");
-        this.balance = parseInt(bal);
-        let tag = "";
-        if(this.balance >= 100000) {
-            tag = "身分：【靈霄寶殿神明席位】可領交易稅分紅";
-            this.speak("恭喜位列仙班，享有分紅權利");
-        } else {
-            tag = "身分：【百姓人民】享有存貸計息功能";
-            this.speak("百姓安居樂業，系統提供穩健貸款");
-        }
-        document.getElementById('identity-tag').innerText = tag;
+    scanContract() {
+        const addr = prompt("請輸入掃描地址 (合約或 EOA)：");
+        if(!addr) return;
+        this.speak("正在透過廣寒宮 AI 掃描合約特徵");
+        
+        // 模擬 AI 自動判斷合約類型邏輯
+        setTimeout(() => {
+            let res = "";
+            if(addr.length > 30) {
+                res = "AI 判定：此為【神明合約】具備自動分紅與 30% 回禮邏輯";
+                document.getElementById('ai-mode').innerText = "模式：神明分紅模式";
+                this.speak("檢測到神明生命體，已自動對接分紅接口。");
+            } else {
+                res = "AI 判定：此為【百姓地址】啟用普通金融功能";
+                document.getElementById('ai-mode').innerText = "模式：百姓導航";
+            }
+            document.getElementById('contract-ai').innerText = res;
+        }, 1500);
     },
 
-    invest() {
-        this.speak("啟動仙女池地址自動判斷，執行 30% 回禮投資玉帝金庫");
-        alert("仙女自動投資判斷：偵測盈餘，已回流投資神明銀行。");
+    setWish() {
+        const w = prompt("輸入許願/還願/留言：");
+        if(w) document.getElementById('user-msg').innerText = `【願】：${w}`;
     },
 
     async toggleCam() {
-        const v = document.getElementById('player-cam');
+        const v = document.getElementById('cam-view');
         if(v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
         else { const s = await navigator.mediaDevices.getUserMedia({video: true}); v.srcObject = s; }
     },
@@ -152,19 +182,25 @@ const app = {
         const out = document.createElement('canvas'); out.width = 1080; out.height = 1920;
         const ctx = out.getContext('2d');
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1920);
-        if(document.getElementById('player-cam').srcObject) ctx.drawImage(document.getElementById('player-cam'), 0,0,1080,1920);
+        if(document.getElementById('cam-view').srcObject) ctx.drawImage(document.getElementById('cam-view'), 0,0,1080,1920);
         ctx.drawImage(this.renderer.domElement, 0,0,1080,1920);
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 50px Noto Sans TC";
-        ctx.fillText("16888 廣寒宮 金融演化日誌", 50, 150);
-        ctx.font = "30px Noto Sans TC";
-        ctx.fillText(document.getElementById('identity-tag').innerText, 50, 1850);
+        
+        // 合成文字（左下角）
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 60px Noto Sans TC";
+        ctx.fillText("16888 廣寒宮 飛行紀錄", 50, 150);
+        ctx.fillStyle = "#fff"; ctx.font = "40px Noto Sans TC";
+        ctx.fillText(document.getElementById('user-msg').innerText, 50, 1850);
+        ctx.fillText(document.getElementById('contract-ai').innerText, 50, 1780);
+
         const link = document.createElement('a');
-        link.download = "KGEN_FIN_LIFE.png"; link.href = out.toDataURL(); link.click();
+        link.download = `GUANGHAN_VECTOR_${Date.now()}.png`;
+        link.href = out.toDataURL();
+        link.click();
     },
 
+    trade(t) { this.speak(t==='CT'?"下單":"結算"); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
-    trade(t) { this.speak(t === 'CT' ? "下單中" : "結算中"); },
-    connect() { alert("連結 Web3 金融中..."); }
+    connect() { alert("連結靈霄寶殿中..."); }
 };
 
 window.onload = () => app.init();
