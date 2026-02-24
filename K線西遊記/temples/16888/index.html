@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K線西遊記｜花果山台灣 V2.0.4</title>
+    <title>K線西遊記｜受精池 DNA V2.0.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -11,40 +11,44 @@
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 層級設定：相機底層(1), 3D中層(10), UI頂層(100+) */
-        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.5; display: none; }
+        /* 相機與 3D */
+        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; }
         #three-container { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
         
-        /* 仙女小圖：強制最高層級 */
-        #fairy-thumb { 
-            position: fixed; top: 20px; right: 20px; width: 120px; height: 120px; 
-            border: 2px solid var(--gold); border-radius: 15px; z-index: 500; 
-            background-size: cover; background-position: center; 
-            box-shadow: 0 0 20px var(--gold); display: block; /* 預設顯示 */
+        /* 美女圖：右上角旋轉 */
+        #fairy-box { 
+            position: fixed; top: 20px; right: 20px; width: 110px; height: 110px; 
+            border: 2px solid var(--gold); border-radius: 50%; z-index: 500; 
+            background-image: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png');
+            background-size: cover; box-shadow: 0 0 20px var(--gold);
+            animation: rotateImg 10s linear infinite;
         }
+        @keyframes rotateImg { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        #wallet-info { position: fixed; top: 10px; left: 10px; z-index: 600; font-size: 11px; color: var(--cyan); background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--cyan); }
+        /* 中間操作況狀 */
+        #status-hub { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 600; text-align: center; width: 80%; pointer-events: none; }
+        .pool-text { font-size: 28px; color: var(--gold); font-family: 'Orbitron'; text-shadow: 0 0 10px #000; }
+
+        #wallet-info { position: fixed; top: 10px; left: 10px; z-index: 600; font-size: 11px; color: var(--cyan); background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; }
         .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; }
         .l-stick { left: 0px; } .r-stick { right: 0px; }
-        input[type=range].vert { width: 200px; transform: rotate(-90deg); margin: 80px -70px; accent-color: var(--gold); }
+        input[type=range].vert { width: 180px; transform: rotate(-90deg); margin: 80px -60px; accent-color: var(--gold); }
 
-        .watermark { position: fixed; bottom: 180px; left: 20px; z-index: 600; text-shadow: 2px 2px 5px #000; pointer-events: none; }
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 1000; padding: 20px 10px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .btn { padding: 12px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 1000; padding: 15px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .btn { padding: 10px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
     </style>
 </head>
 <body>
 
-<div id="wallet-info">📡 掃描錢包訊號中...</div>
+<div id="wallet-info">📡 掃描 DNA 訊號...</div>
 <video id="cam-video" autoplay playsinline></video>
 <div id="three-container"></div>
-<div id="fairy-thumb"></div>
+<div id="fairy-box"></div>
 
-<div class="watermark">
-    <div style="font-size:26px; color:var(--gold); font-weight:900;">K線西遊記 花果山台灣</div>
-    <div id="live-time" style="font-size:14px; color:#fff;"></div>
-    <div id="wish-display" style="color:var(--cyan); font-weight:bold;"></div>
+<div id="status-hub">
+    <div class="pool-text">受精池: 16888 KGEN</div>
+    <div id="op-msg" style="color: var(--cyan); font-size: 14px;">等待精子 DNA 與 女子 RNA 連結...</div>
 </div>
 
 <div class="stick l-stick"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
@@ -52,21 +56,21 @@
 
 <div class="panel">
     <div class="btn-grid">
-        <button class="btn" onclick="app.connectWallet()">🦊 激活錢包</button>
-        <button class="btn" onclick="app.toggleCam()">📸 開啟自拍</button>
-        <button class="btn" onclick="app.nextScene()">🌌 變換場景</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
+        <button class="btn" onclick="app.connect('DNA')">🧬 精子(DNA)</button>
+        <button class="btn" onclick="app.connect('RNA')">🧬 女子(RNA)</button>
+        <button class="btn" onclick="app.marry()">💍 求婚 (1 KGEN)</button>
+        <button class="btn" onclick="app.capture()">📷 拍照存證</button>
         <button class="btn" onclick="app.trade('LONG')">📈 做多</button>
         <button class="btn" onclick="app.trade('SHORT')">📉 做空</button>
-        <button class="btn" onclick="app.setWish()">🙏 許願</button>
-        <button class="btn" onclick="app.speak('花果山大聖在此！')">🎙️ 客服</button>
+        <button class="btn" onclick="app.toggleCam()">📸 相機</button>
+        <button class="btn" onclick="app.speak('神明銀行靈霄寶殿歡迎您')">🎙️ 客服</button>
     </div>
 </div>
 
 <script>
 const app = {
-    fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    planets: [],
+    dnaAddr: null, rnaAddr: null,
+    dnaSent: false, rnaSent: false,
     
     init() {
         this.scene = new THREE.Scene();
@@ -75,95 +79,89 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-container').appendChild(this.renderer.domElement);
 
-        // 建立精緻 3D 星球
-        for(let i=0; i<30; i++) {
-            const g = new THREE.SphereGeometry(Math.random()*0.4+0.1, 20, 20);
-            const m = new THREE.MeshPhongMaterial({ color: Math.random()*0xffffff, shininess: 80 });
-            const p = new THREE.Mesh(g, m);
-            p.position.set((Math.random()-0.5)*30, (Math.random()-0.5)*30, (Math.random()-0.5)*30);
-            this.scene.add(p);
-            this.planets.push(p);
-        }
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        // 改回原本的小氣泡星圖 (原本最順的那種)
+        const geo = new THREE.BufferGeometry();
+        const pos = [];
+        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({color: 0x00f2ff, size: 0.15, transparent: true, opacity: 0.6}));
+        this.scene.add(this.bubbles);
+        
         this.camera.position.z = 12;
-
-        document.getElementById('fairy-thumb').style.backgroundImage = `url(${this.fairyImg})`;
-        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
         this.animate();
-        this.checkWallet();
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        const ang = parseInt(document.getElementById('angle').value);
         const crv = document.getElementById('curv').value;
-        let flow = (ang >= 30 && ang <= 150) ? -1 : (ang >= 210 && ang <= 330 ? 1 : 0);
-        
-        this.planets.forEach(p => {
-            p.position.y += flow * (crv / 150);
-            p.rotation.y += 0.01;
-            if(p.position.y > 20) p.position.y = -20;
-            if(p.position.y < -20) p.position.y = 20;
-        });
+        const p = this.bubbles.geometry.attributes.position.array;
+        for(let i=1; i<p.length; i+=3) {
+            p[i] += (crv / 200);
+            if(p[i] > 25) p[i] = -25;
+        }
+        this.bubbles.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
 
-    async checkWallet() {
-        if (window.ethereum) document.getElementById('wallet-info').innerText = "✅ 錢包環境就緒";
-        else document.getElementById('wallet-info').innerText = "❌ 未偵測到錢包插件";
+    async connect(role) {
+        if (!window.ethereum) return alert("請安裝錢包");
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const accs = await provider.send("eth_requestAccounts", []);
+        if(role === 'DNA') { this.dnaAddr = accs[0]; this.speak("精子 DNA 注入"); }
+        else { this.rnaAddr = accs[0]; this.speak("女子 RNA 連結"); }
+        document.getElementById('op-msg').innerText = `已連結: ${role} (${accs[0].substring(0,6)})`;
     },
 
-    async connectWallet() {
-        if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const accounts = await provider.send("eth_requestAccounts", []);
-            document.getElementById('wallet-info').innerText = `🛸 ${accounts[0].substring(0,8)}...`;
-            this.speak("連結成功，大聖歸位！");
-        } else {
-            alert("偵測不到錢包。若已安裝，請重新整理網頁或使用瀏覽器一般模式。");
+    marry() {
+        if(!this.dnaAddr || !this.rnaAddr) return alert("須雙方 DNA/RNA 連結");
+        // 模擬雙方求婚邏輯
+        const choice = confirm("發送 1 KGEN 求婚？");
+        if(choice) {
+            this.dnaSent = true; 
+            this.processPool();
         }
+    },
+
+    processPool() {
+        let msg = "判斷中：";
+        if(this.dnaSent && this.rnaSent) {
+            msg = "💖 結婚成功！30% 均分給雙方，10% 留池，60% 分配。";
+            this.speak("恭喜結為連理，靈霄寶殿賜福。");
+        } else if(this.dnaSent || this.rnaSent) {
+            msg = "💔 求婚單戀。15% 分配，其餘 15% 回收至受精池下次使用。";
+            this.speak("求婚未果，資金回流受精池。");
+        } else {
+            msg = "🚫 拒絕結婚。30% 全部回流受精池。";
+            this.speak("修行未成，回歸虛空。");
+        }
+        document.getElementById('op-msg').innerText = msg;
     },
 
     async toggleCam() {
         const v = document.getElementById('cam-video');
-        if(v.style.display === "block") { v.style.display = "none"; return; }
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         v.srcObject = stream;
-        v.style.display = "block";
     },
 
     capture() {
-        const v = document.getElementById('cam-video');
-        const c3d = this.renderer.domElement;
         const out = document.createElement('canvas');
-        out.width = c3d.width; out.height = c3d.height;
+        out.width = 800; out.height = 1200;
         const ctx = out.getContext('2d');
-        if(v.style.display === "block") ctx.drawImage(v, 0, 0, out.width, out.height);
-        ctx.drawImage(c3d, 0, 0);
-        
-        // 浮水印
-        ctx.fillStyle = "#ffd778"; ctx.font = "900 40px Noto Sans TC";
-        ctx.fillText("K線西遊記 花果山台灣", 40, out.height - 120);
-        
+        ctx.fillStyle = "#000"; ctx.fillRect(0,0,800,1200);
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("K線西遊記 花果山台灣", 40, 100);
+        ctx.fillText(document.getElementById('op-msg').innerText, 40, 200);
         const link = document.createElement('a');
-        link.download = `FRUIT_MOUNTAIN_${Date.now()}.png`;
+        link.download = "DNA_SMART_CONTRACT.png";
         link.href = out.toDataURL();
         link.click();
     },
 
-    trade(t) { this.speak(`發動${t === 'LONG' ? '做多' : '做空'}神功！`); alert(`呼叫錢包 ${t}`); },
-    setWish() { 
-        const w = prompt("輸入許願："); 
-        document.getElementById('wish-display').innerText = w ? `【願】：${w}` : ""; 
-    },
+    trade(t) { this.speak(`發動${t}指令`); },
     speak(m) {
         const u = new SpeechSynthesisUtterance(m);
         u.lang = 'zh-TW';
         window.speechSynthesis.speak(u);
-    },
-    nextScene() {
-        this.planets.forEach(p => p.material.color.setHex(Math.random()*0xffffff));
-        this.speak("時空扭轉，切換場景");
     }
 };
 
