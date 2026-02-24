@@ -3,144 +3,166 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜合照駕駛艙 V2.0</title>
+  <title>廣寒宮 16888｜4D 終極駕駛艙 V2.5</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <style>
-    :root{ --bg:#06070b; --gold:#ffd778; --line:rgba(255,255,255,0.14); --text:rgba(255,255,255,0.9); }
-    body{ margin:0; font-family: sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
-    .wrap{ max-width:1100px; margin:0 auto; padding:20px 14px 100px; }
+    :root {
+      --bg: #06070b; --gold: #ffd778; --line: rgba(255,255,255,0.15);
+      --red: #ff4d4d; --glow: rgba(255, 215, 120, 0.4);
+    }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow: hidden; }
     
-    /* 上方油箱/血條 */
-    .fuelBarWrap{ width: 300px; margin: 0 auto 10px; text-align:center; }
-    .fuelLabel{ font-size:12px; color:var(--gold); font-weight:900; margin-bottom:4px; }
-    .fuelBar{ height:12px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; border:1px solid var(--line); }
-    #fuelInner{ width:50%; height:100%; background:linear-gradient(90deg, #ff4d4d, var(--gold)); transition:0.5s; }
+    /* 頂部血條：金箍棒重量與油箱 */
+    .header { width: 100%; padding: 15px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--line); text-align: center; }
+    .progress-box { width: 85%; max-width: 450px; margin: 0 auto; }
+    .bar-bg { height: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid var(--gold); overflow: hidden; position: relative; }
+    #fuelBar { height: 100%; width: 0%; background: linear-gradient(90deg, #b8860b, var(--gold)); transition: width 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+    .bar-text { font-size: 11px; margin-top: 6px; color: var(--gold); font-weight: 900; letter-spacing: 1px; }
 
-    /* 仙女監視器 */
-    .cockpit{ position:relative; width: 320px; height: 320px; margin: 0 auto; border-radius: 50%; border: 3px solid var(--gold); overflow:hidden; background:#000; box-shadow: 0 0 50px rgba(255,215,120,0.3); }
-    #fairy{ width:100%; height:100%; background:url('./assets/fairy.png') no-repeat center 20% / cover; transition:0.4s; }
+    /* 4D 視覺監視器 */
+    .game-viewport { position: relative; width: 100vw; height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1000px; }
+    .fairy-shield {
+      position: relative; width: 280px; height: 280px; border-radius: 50%;
+      border: 4px solid var(--gold); overflow: hidden;
+      box-shadow: 0 0 40px var(--glow); z-index: 5;
+      transition: 0.2s; /* 用於模擬震動 */
+    }
+    #fairyImg { width: 100%; height: 100%; background: url('./assets/fairy.png') no-repeat center 20% / cover; transition: transform 0.3s ease-out; }
     
-    /* 操作橫桿 (圖下方) */
-    .controls{ width:320px; margin:20px auto; background:rgba(255,255,255,0.05); padding:15px; border-radius:20px; border:1px solid var(--line); }
-    .controls label{ display:flex; justify-content:space-between; font-size:12px; color:var(--gold); font-weight:900; }
-    input[type="range"]{ width:100%; accent-color:var(--gold); margin:8px 0 15px; }
+    /* 橫桿操作區 (美女圖正下方) */
+    .controls { width: 90%; max-width: 380px; padding: 15px; background: rgba(255,255,255,0.07); border-radius: 24px; border: 1px solid var(--line); margin-top: 15px; backdrop-filter: blur(10px); }
+    .slider-row { margin-bottom: 12px; }
+    .slider-row label { display: flex; justify-content: space-between; font-size: 13px; color: var(--gold); font-weight: 800; }
+    input[type="range"] { width: 100%; accent-color: var(--gold); margin-top: 8px; cursor: pointer; }
 
-    /* 左下方互動區 */
-    .sideButtons{ position:fixed; bottom:20px; left:14px; z-index:100; display:flex; flex-direction:column; gap:10px; width:140px; }
-    .camPreview{ width:140px; height:105px; background:#000; border-radius:12px; border:1px solid var(--gold); overflow:hidden; margin-bottom:5px; }
-    #cam{ width:100%; height:100%; object-fit:cover; transform: scaleX(-1); }
-    
-    .btn{ padding:10px; border-radius:99px; border:1px solid var(--gold); background:rgba(0,0,0,0.6); color:var(--gold); font-weight:900; font-size:11px; cursor:pointer; }
-    .btn.gold{ background:var(--gold); color:#000; }
+    /* 左下角互動區 */
+    .action-dock { position: fixed; bottom: 20px; left: 15px; width: 160px; display: flex; flex-direction: column; gap: 8px; }
+    .cam-preview { width: 100%; height: 110px; background: #000; border: 1px solid var(--gold); border-radius: 14px; overflow: hidden; }
+    #vWeb { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .btn { padding: 10px; border-radius: 20px; border: 1px solid var(--gold); background: rgba(0,0,0,0.8); color: var(--gold); font-size: 11px; font-weight: 900; cursor: pointer; }
+    .btn-main { background: var(--gold); color: #000; height: 45px; font-size: 14px; border: none; }
 
-    /* 隱藏的畫布用於合成合照 */
-    #mergeCanvas{ display:none; }
+    /* 右下角：4D 即時狀態 */
+    .status-dock { position: fixed; bottom: 20px; right: 15px; width: 160px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 14px; font-size: 10px; color: var(--gold); opacity: 0.8; border: 1px solid var(--line); }
   </style>
 </head>
 <body>
 
-  <div class="wrap">
-    <div class="fuelBarWrap">
-      <div class="fuelLabel">油箱能量 / 受孕進度 <span id="fuelText">10,000</span> / 16,888</div>
-      <div class="fuelBar"><div id="fuelInner"></div></div>
-      <div style="margin-top:8px; display:flex; justify-content:center; gap:10px;">
-        <button class="btn" onclick="alert('許願成功')">許願</button>
-        <button class="btn" onclick="alert('還願成功')">還願</button>
-      </div>
+  <div class="header">
+    <div class="progress-box">
+      <div class="bar-bg"><div id="fuelBar"></div></div>
+      <div class="bar-text">金箍棒重：<span id="curWeight">0</span> 斤 / 13,500 斤 (滿載 16,888)</div>
     </div>
+  </div>
 
-    <div class="cockpit">
-      <div id="fairy"></div>
+  <div class="game-viewport">
+    <div class="fairy-shield" id="shield">
+      <div id="fairyImg"></div>
     </div>
 
     <div class="controls">
-      <label>方向盤姿態 <span id="degVal">120°</span></label>
-      <input id="degRange" type="range" min="0" max="360" value="120">
-      
-      <label>曲率（口數） <span id="warpVal">10x</span></label>
-      <input id="warpRange" type="range" min="1" max="150" value="10">
-      
-      <button class="btn gold" style="width:100%" id="btnConnect">連接錢包 / 下幣測試</button>
+      <div class="slider-row">
+        <label>方向盤角度 <span id="txtDeg">120°</span></label>
+        <input type="range" id="rngDeg" min="0" max="360" value="120">
+      </div>
+      <div class="slider-row">
+        <label>曲率 (口數/KGEN) <span id="txtWarp">10</span> 口</label>
+        <input type="range" id="rngWarp" min="1" max="150" value="10">
+      </div>
     </div>
   </div>
 
-  <div class="sideButtons">
-    <div class="camPreview">
-      <video id="cam" autoplay playsinline muted></video>
+  <div class="action-dock">
+    <div class="cam-preview"><video id="vWeb" autoplay playsinline muted></video></div>
+    <button class="btn" onclick="initCam()">開啟 4D 鏡頭</button>
+    <button class="btn btn-main" onclick="settle()">13,500 斤 結算下凡</button>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+      <button class="btn" onclick="wish('許願')">許願</button>
+      <button class="btn" onclick="wish('還願')">還願</button>
     </div>
-    <button class="btn" id="btnCam">開啟相機</button>
-    <button class="btn gold" id="btnSelfie">與仙女合照</button>
-    <button class="btn" onclick="alert('錄影功能對接中')">錄影</button>
+    <button class="btn" onclick="selfie()">與仙女合照</button>
   </div>
 
-  <canvas id="mergeCanvas"></canvas>
+  <div class="status-dock" id="statusBox">系統同步中...</div>
+  <canvas id="cOutput" style="display:none;"></canvas>
 
 <script>
   const $ = (id) => document.getElementById(id);
+  let TOTAL_WEIGHT = 10000; // 初始重量 10000 斤
 
-  function update() {
-    const deg = parseInt($("degRange").value);
-    const warp = parseInt($("warpRange").value);
-    const energy = warp * 112; // 模擬能量計算
+  function loop() {
+    const deg = parseInt($("rngDeg").value);
+    const warp = parseInt($("rngWarp").value);
     
-    $("degVal").textContent = deg + "°";
-    $("warpVal").textContent = warp + "x";
-    $("fuelText").textContent = (10000 + energy).toLocaleString();
-    
-    // 更新血條
-    const pct = Math.min(((10000 + energy) / 16888) * 100, 100);
-    $("fuelInner").style.width = pct + "%";
+    // 4D 結算邏輯：1口 = 1KGEN = 1公斤 = 1斤
+    const currentWeight = TOTAL_WEIGHT + warp;
+    $("curWeight").textContent = currentWeight.toLocaleString();
+    $("txtDeg").textContent = deg + "°";
+    $("txtWarp").textContent = warp;
 
-    // 更新仙女縮放旋轉
-    const fairy = $("fairy");
-    fairy.style.transform = `scale(${1 + warp/500}) rotate(${(deg-120)*0.1}deg)`;
+    // 更新血條 (目標 13500)
+    const pct = Math.min((currentWeight / 13500) * 100, 100);
+    $("fuelBar").style.width = pct + "%";
+
+    // 視覺引擎：縮放、旋轉與 4D 震動
+    const fairy = $("fairyImg");
+    const shield = $("shield");
+    
+    // 模擬 4D 震動：曲率越高，震動幅度越大
+    if (warp > 80) {
+      const shake = (warp - 80) / 10;
+      shield.style.transform = `translate(${Math.random()*shake}px, ${Math.random()*shake}px)`;
+    } else {
+      shield.style.transform = `translate(0,0)`;
+    }
+
+    fairy.style.transform = `scale(${1 + warp/400}) rotate(${(deg-120)*0.1}deg)`;
+    
+    requestAnimationFrame(loop);
   }
 
-  // 與仙女合照功能 (Canvas 合成)
-  async function takeSelfie() {
-    const cam = $("cam");
-    const canvas = $("mergeCanvas");
-    const ctx = canvas.getContext("2d");
-    
-    // 設定合成尺寸 (1080p)
-    canvas.width = 1080; canvas.height = 1080;
+  function wish(type) {
+    const w = parseInt($("rngWarp").value);
+    TOTAL_WEIGHT += w;
+    const msg = `${type}成功：增加 ${w} 斤，金箍棒重 ${TOTAL_WEIGHT} 斤`;
+    speak(msg);
+    $("statusBox").innerHTML = `<div>> ${msg}</div>`;
+  }
 
-    // 1. 畫背景 (如果是全屏背景可以加在這裡)
-    ctx.fillStyle = "#06070b";
-    ctx.fillRect(0,0,1080,1080);
+  function settle() {
+    if (TOTAL_WEIGHT >= 13500) {
+      speak("金箍棒已達標，啟動結算下凡儀式");
+      alert("結算成功！13500 斤金箍棒已就位。");
+    } else {
+      speak("能量不足，尚不足 13500 斤");
+    }
+  }
 
-    // 2. 畫你的相機畫面 (置底層)
-    ctx.save();
-    ctx.translate(1080, 0); ctx.scale(-1, 1); // 鏡像處理
-    ctx.drawImage(cam, 0, 0, 1080, 1080);
-    ctx.restore();
+  async function initCam() {
+    const s = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
+    $("vWeb").srcObject = s;
+  }
 
-    // 3. 疊加仙女圖 (置上層，帶透明度或混合模式)
-    const fairyImg = new Image();
-    fairyImg.src = './assets/fairy.png'; 
-    fairyImg.onload = () => {
-      ctx.globalAlpha = 0.7; // 讓仙女有一點透明虛幻感
-      ctx.drawImage(fairyImg, 140, 140, 800, 800);
-      
-      // 4. 下載圖片
-      const link = document.createElement('a');
-      link.download = '與仙女合照.png';
-      link.href = canvas.toDataURL();
-      link.click();
+  function selfie() {
+    const v = $("vWeb"), c = $("cOutput"), ctx = c.getContext("2d");
+    c.width = 1080; c.height = 1080;
+    // 畫自拍
+    ctx.save(); ctx.translate(1080,0); ctx.scale(-1,1);
+    ctx.drawImage(v, 0, 0, 1080, 1080); ctx.restore();
+    // 疊加仙女
+    const img = new Image(); img.src = './assets/fairy.png';
+    img.onload = () => {
+      ctx.globalAlpha = 0.7;
+      ctx.drawImage(img, 140, 140, 800, 800);
+      const a = document.createElement('a'); a.href=c.toDataURL(); a.download='廣寒宮4D合照.png'; a.click();
     };
   }
 
-  // 相機開啟
-  $("btnCam").onclick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
-    $("cam").srcObject = stream;
-  };
+  function speak(t) {
+    const u = new SpeechSynthesisUtterance(t); u.lang='zh-TW'; window.speechSynthesis.speak(u);
+  }
 
-  $("btnSelfie").onclick = takeSelfie;
-  $("degRange").oninput = update;
-  $("warpRange").oninput = update;
-  
-  update();
+  loop();
 </script>
 </body>
 </html>
