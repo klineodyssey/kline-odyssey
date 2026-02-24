@@ -3,43 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K線西遊記｜花果山台灣 V2.0.3</title>
+    <title>K線西遊記｜花果山台灣 V2.0.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        #wallet-info { position: fixed; top: 10px; left: 10px; z-index: 700; font-size: 10px; color: var(--cyan); background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--cyan); backdrop-filter: blur(5px); }
-        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
-        .l-stick { left: 0px; } .r-stick { right: 0px; }
-        input[type=range].vert { width: 180px; transform: rotate(-90deg); margin: 80px -60px; accent-color: var(--gold); }
-
-        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.6; }
+        /* 層級設定：相機底層(1), 3D中層(10), UI頂層(100+) */
+        #cam-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.5; display: none; }
         #three-container { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+        
+        /* 仙女小圖：強制最高層級 */
+        #fairy-thumb { 
+            position: fixed; top: 20px; right: 20px; width: 120px; height: 120px; 
+            border: 2px solid var(--gold); border-radius: 15px; z-index: 500; 
+            background-size: cover; background-position: center; 
+            box-shadow: 0 0 20px var(--gold); display: block; /* 預設顯示 */
+        }
 
-        .watermark-group { position: fixed; bottom: 180px; left: 20px; z-index: 500; text-shadow: 2px 2px 4px #000; pointer-events: none; }
-        .brand-text { font-size: 24px; color: var(--gold); font-weight: 900; }
-        #fairy-thumb { position: fixed; top: 20px; right: 20px; width: 100px; height: 100px; border: 2px solid var(--gold); border-radius: 10px; z-index: 600; display: none; background-size: cover; background-position: center; box-shadow: 0 0 15px var(--gold); }
+        #wallet-info { position: fixed; top: 10px; left: 10px; z-index: 600; font-size: 11px; color: var(--cyan); background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--cyan); }
+        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; }
+        .l-stick { left: 0px; } .r-stick { right: 0px; }
+        input[type=range].vert { width: 200px; transform: rotate(-90deg); margin: 80px -70px; accent-color: var(--gold); }
 
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); border-top: 1px solid var(--gold); z-index: 1000; padding: 15px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .btn { padding: 10px 2px; border: 1px solid var(--gold); color: var(--gold); background: rgba(255,215,120,0.1); font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; }
-        .btn:active { background: var(--gold); color: #000; }
+        .watermark { position: fixed; bottom: 180px; left: 20px; z-index: 600; text-shadow: 2px 2px 5px #000; pointer-events: none; }
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 1000; padding: 20px 10px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .btn { padding: 12px 2px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="wallet-info">錢包未連接</div>
+<div id="wallet-info">📡 掃描錢包訊號中...</div>
 <video id="cam-video" autoplay playsinline></video>
 <div id="three-container"></div>
 <div id="fairy-thumb"></div>
 
-<div class="watermark-group">
-    <div class="brand-text">K線西遊記 花果山台灣</div>
-    <div id="live-time" style="font-size:12px; opacity: 0.8;"></div>
-    <div id="wish-text" style="color:var(--cyan); font-size:14px; margin-top: 5px; font-weight: bold;"></div>
+<div class="watermark">
+    <div style="font-size:26px; color:var(--gold); font-weight:900;">K線西遊記 花果山台灣</div>
+    <div id="live-time" style="font-size:14px; color:#fff;"></div>
+    <div id="wish-display" style="color:var(--cyan); font-weight:bold;"></div>
 </div>
 
 <div class="stick l-stick"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
@@ -47,22 +52,20 @@
 
 <div class="panel">
     <div class="btn-grid">
-        <button class="btn" onclick="app.connectWallet()">🦊 連接錢包</button>
-        <button class="btn" onclick="app.toggleCam()">📸 開相機</button>
-        <button class="btn" onclick="app.nextScene()">🌌 切換場景</button>
-        <button class="btn" onclick="app.toggleFairy()">🧚 仙女合照</button>
+        <button class="btn" onclick="app.connectWallet()">🦊 激活錢包</button>
+        <button class="btn" onclick="app.toggleCam()">📸 開啟自拍</button>
+        <button class="btn" onclick="app.nextScene()">🌌 變換場景</button>
+        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
         <button class="btn" onclick="app.trade('LONG')">📈 做多</button>
         <button class="btn" onclick="app.trade('SHORT')">📉 做空</button>
-        <button class="btn" onclick="app.capture()">📷 拍照下載</button>
-        <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
+        <button class="btn" onclick="app.setWish()">🙏 許願</button>
+        <button class="btn" onclick="app.speak('花果山大聖在此！')">🎙️ 客服</button>
     </div>
 </div>
 
 <script>
 const app = {
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    scenes: [0x000022, 0x331100, 0x110033], 
-    sceneIdx: 0,
     planets: [],
     
     init() {
@@ -72,38 +75,22 @@ const app = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('three-container').appendChild(this.renderer.domElement);
 
-        this.createGalaxy();
-        this.camera.position.z = 15;
-        document.getElementById('fairy-thumb').style.backgroundImage = `url(${this.fairyImg})`;
-        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
-        this.animate();
-    },
-
-    createGalaxy() {
-        const colors = [0xffffff, 0xffaa00, 0x00f2ff, 0xff5500];
-        for(let i=0; i<40; i++) {
-            const geom = new THREE.SphereGeometry(Math.random() * 0.5 + 0.1, 16, 16);
-            const mat = new THREE.MeshPhongMaterial({
-                color: colors[Math.floor(Math.random() * colors.length)],
-                shininess: 100
-            });
-            const p = new THREE.Mesh(geom, mat);
-            p.position.set((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        // 建立精緻 3D 星球
+        for(let i=0; i<30; i++) {
+            const g = new THREE.SphereGeometry(Math.random()*0.4+0.1, 20, 20);
+            const m = new THREE.MeshPhongMaterial({ color: Math.random()*0xffffff, shininess: 80 });
+            const p = new THREE.Mesh(g, m);
+            p.position.set((Math.random()-0.5)*30, (Math.random()-0.5)*30, (Math.random()-0.5)*30);
             this.scene.add(p);
             this.planets.push(p);
         }
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(10, 10, 10);
-        this.scene.add(light);
-        this.scene.add(new THREE.AmbientLight(0x404040));
-    },
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        this.camera.position.z = 12;
 
-    nextScene() {
-        this.sceneIdx = (this.sceneIdx + 1) % this.scenes.length;
-        const newColor = this.scenes[this.sceneIdx];
-        this.planets.forEach(p => p.material.emissive = new THREE.Color(newColor));
-        document.body.style.backgroundColor = `#${newColor.toString(16).padStart(6, '0')}`;
-        this.speak("變換時空場景");
+        document.getElementById('fairy-thumb').style.backgroundImage = `url(${this.fairyImg})`;
+        setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000);
+        this.animate();
+        this.checkWallet();
     },
 
     animate() {
@@ -114,25 +101,35 @@ const app = {
         
         this.planets.forEach(p => {
             p.position.y += flow * (crv / 150);
-            p.rotation.y += 0.02;
+            p.rotation.y += 0.01;
             if(p.position.y > 20) p.position.y = -20;
             if(p.position.y < -20) p.position.y = 20;
         });
-
         this.renderer.render(this.scene, this.camera);
+    },
+
+    async checkWallet() {
+        if (window.ethereum) document.getElementById('wallet-info').innerText = "✅ 錢包環境就緒";
+        else document.getElementById('wallet-info').innerText = "❌ 未偵測到錢包插件";
+    },
+
+    async connectWallet() {
+        if (window.ethereum) {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const accounts = await provider.send("eth_requestAccounts", []);
+            document.getElementById('wallet-info').innerText = `🛸 ${accounts[0].substring(0,8)}...`;
+            this.speak("連結成功，大聖歸位！");
+        } else {
+            alert("偵測不到錢包。若已安裝，請重新整理網頁或使用瀏覽器一般模式。");
+        }
     },
 
     async toggleCam() {
         const v = document.getElementById('cam-video');
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            v.srcObject = stream;
-        } catch(e) { alert("請授權相機"); }
-    },
-
-    toggleFairy() {
-        const f = document.getElementById('fairy-thumb');
-        f.style.display = (f.style.display === 'none' || !f.style.display) ? 'block' : 'none';
+        if(v.style.display === "block") { v.style.display = "none"; return; }
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        v.srcObject = stream;
+        v.style.display = "block";
     },
 
     capture() {
@@ -141,42 +138,32 @@ const app = {
         const out = document.createElement('canvas');
         out.width = c3d.width; out.height = c3d.height;
         const ctx = out.getContext('2d');
-        ctx.drawImage(v, 0, 0, out.width, out.height);
+        if(v.style.display === "block") ctx.drawImage(v, 0, 0, out.width, out.height);
         ctx.drawImage(c3d, 0, 0);
         
-        ctx.fillStyle = "#ffd778"; ctx.font = "900 36px Noto Sans TC";
-        ctx.fillText("K線西遊記 花果山台灣", 30, out.height - 120);
-        ctx.fillStyle = "#fff"; ctx.font = "20px Orbitron";
-        ctx.fillText(new Date().toLocaleString(), 30, out.height - 80);
-
+        // 浮水印
+        ctx.fillStyle = "#ffd778"; ctx.font = "900 40px Noto Sans TC";
+        ctx.fillText("K線西遊記 花果山台灣", 40, out.height - 120);
+        
         const link = document.createElement('a');
-        link.download = `KGEN_JOURNEY_${Date.now()}.png`;
+        link.download = `FRUIT_MOUNTAIN_${Date.now()}.png`;
         link.href = out.toDataURL();
         link.click();
     },
 
-    async connectWallet() {
-        if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const addr = await signer.getAddress();
-            document.getElementById('wallet-info').innerText = `🛸 ${addr.substring(0,6)}...已對接`;
-            this.speak("錢包已連線，準備啟航");
-        } else {
-            alert("請先安裝 MetaMask/OKX");
-        }
-    },
-
-    trade(t) { this.speak(`正在進行 ${t} 運算...`); alert(`執行 ${t} 交易中...`); },
+    trade(t) { this.speak(`發動${t === 'LONG' ? '做多' : '做空'}神功！`); alert(`呼叫錢包 ${t}`); },
     setWish() { 
         const w = prompt("輸入許願："); 
-        document.getElementById('wish-text').innerText = w ? `願力：${w}` : ""; 
+        document.getElementById('wish-display').innerText = w ? `【願】：${w}` : ""; 
     },
     speak(m) {
         const u = new SpeechSynthesisUtterance(m);
         u.lang = 'zh-TW';
         window.speechSynthesis.speak(u);
+    },
+    nextScene() {
+        this.planets.forEach(p => p.material.color.setHex(Math.random()*0xffffff));
+        this.speak("時空扭轉，切換場景");
     }
 };
 
