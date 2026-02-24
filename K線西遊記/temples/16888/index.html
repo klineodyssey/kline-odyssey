@@ -2,197 +2,179 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜齊天火星豪宅終極終端 V4.0.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KGEN 16888｜齊天金剛號終極航道終端</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; 
-            --dna: #ff00ff; --rna: #00ffaa; --bg: #050505; 
-            --panel-bg: rgba(0, 0, 0, 0.9);
+            --bar: #ffca28; --bg: #000; --panel: rgba(0, 0, 0, 0.9); 
         }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
 
         /* 🏛️ 頂部：雙 500 席位 (靈霄殿神明 & 火星豪宅租客) */
-        .god-hud { position: fixed; top: 0; width: 100%; z-index: 1000; padding: 20px; background: linear-gradient(180deg, rgba(0,0,0,1) 0%, transparent 100%); border-bottom: 1px solid rgba(255, 215, 120, 0.2); }
-        .hud-flex { display: flex; justify-content: space-between; gap: 30px; }
-        .seat-section { flex: 1; background: rgba(255, 215, 120, 0.05); padding: 10px; border-radius: 8px; border-left: 5px solid var(--gold); }
-        .seat-header { font-family: 'Orbitron'; font-size: 13px; color: var(--gold); display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .seat-grid { display: grid; grid-template-columns: repeat(25, 1fr); gap: 3px; }
-        .dot { width: 6px; height: 6px; background: #222; border-radius: 1px; transition: 0.3s; }
-        .dot.god { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
-        .dot.mars { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+        .hud-header { position: fixed; top: 0; width: 100%; z-index: 1000; padding: 20px; background: linear-gradient(180deg, #000 0%, transparent 100%); }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .seat-block { border-left: 3px solid var(--gold); padding-left: 15px; background: rgba(255, 215, 120, 0.05); border-radius: 4px; padding: 10px; }
+        .seat-title { font-family: 'Orbitron'; font-size: 13px; color: var(--gold); display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .seat-visual { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; }
+        .seat-dot { width: 5px; height: 5px; background: #222; border-radius: 1px; transition: 0.3s; }
+        .seat-dot.active { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
+        .seat-dot.god { background: var(--gold); box-shadow: 0 0 5px var(--gold); }
 
-        /* 📈 右側：K 線報價面板 */
-        .right-terminal { position: fixed; top: 120px; right: 20px; width: 350px; z-index: 1000; }
-        .glass-box { background: var(--panel-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
-        .price-hero { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .price-val { font-family: 'Orbitron'; font-size: 32px; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
-        .k-chart-container { height: 160px; display: flex; align-items: flex-end; gap: 3px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .k-bar { flex: 1; transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 1px; }
-        .up { background: var(--rna); box-shadow: 0 0 5px var(--rna); }
-        .down { background: var(--red); box-shadow: 0 0 5px var(--red); }
+        /* 🧚 仙女圓窗監控 (完全復刻截圖位置) */
+        .fairy-window {
+            position: fixed; top: 110px; left: 50%; transform: translateX(-50%);
+            width: 350px; height: 350px; border-radius: 50%; border: 8px double var(--gold);
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 60px rgba(255, 215, 120, 0.4); z-index: 2; transition: transform 0.1s linear;
+        }
 
-        /* 📜 左側：DNA/RNA 成交日誌與自動判斷 */
-        .left-terminal { position: fixed; top: 120px; left: 20px; width: 350px; z-index: 1000; }
-        .pool-info { text-align: center; margin-bottom: 15px; }
-        .pool-num { font-family: 'Orbitron'; font-size: 40px; color: #fff; text-shadow: 0 0 20px var(--gold); }
-        .trade-log { height: 150px; background: #000; border: 1px solid #222; border-radius: 5px; overflow-y: auto; padding: 10px; font-size: 11px; font-family: 'Courier New'; color: #0f0; margin: 15px 0; border-left: 2px solid var(--dna); }
-        .log-line { margin-bottom: 5px; border-bottom: 1px dotted #222; }
+        /* 🎡 飛碟方向盤 (K航道) 與 76° 顯示 */
+        .steering-system { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 1000; }
+        .angle-val { font-family: 'Orbitron'; font-size: 32px; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px; }
+        .steer-label { font-size: 13px; color: var(--gold); letter-spacing: 3px; font-weight: 900; margin-bottom: 12px; }
+        .steer-slider { 
+            width: 85%; max-width: 700px; -webkit-appearance: none; background: rgba(255,255,255,0.1); 
+            height: 10px; border-radius: 5px; outline: none; border: 1px solid #333;
+        }
+        .steer-slider::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 40px; height: 18px; background: var(--bar); 
+            border-radius: 4px; cursor: pointer; box-shadow: 0 0 15px var(--bar); border: 1px solid #000;
+        }
 
-        /* 🏎️ 中央控制：曲速引擎與方向盤 */
-        .cockpit { position: fixed; bottom: 150px; width: 100%; display: flex; justify-content: space-between; padding: 0 100px; box-sizing: border-box; z-index: 1100; pointer-events: none; }
-        .lever-box { pointer-events: auto; display: flex; flex-direction: column; align-items: center; }
-        .lever-text { font-family: 'Orbitron'; color: var(--gold); font-size: 16px; margin-bottom: 10px; text-shadow: 0 0 10px var(--gold); }
-        
-        input[type=range] { cursor: pointer; -webkit-appearance: none; background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .v-warp { width: 250px; height: 12px; transform: rotate(-90deg); margin-top: 100px; accent-color: var(--cyan); }
-        .h-steer { width: 350px; height: 12px; accent-color: var(--gold); }
+        /* 🚀 曲速引擎 (Warp Drive) 垂直動能管 */
+        .warp-panel { position: fixed; left: 35px; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
+        .v-warp { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 12px; height: 300px; accent-color: var(--cyan); }
+        .warp-info { font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); margin-top: 15px; }
 
-        /* 🛸 飛碟核心物理 */
-        #ufo-ship { position: fixed; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 450px; border: 12px double var(--gold); border-radius: 50%; z-index: 2; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; box-shadow: 0 0 100px rgba(255,215,120,0.3); transition: transform 0.1s linear; }
-        #webgl-stars { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+        /* 📈 實時 K 線報價面板 */
+        .k-line-panel { position: fixed; right: 25px; top: 120px; width: 320px; background: var(--panel); border: 2px solid var(--gold); border-radius: 12px; padding: 15px; z-index: 1000; }
+        .price-row { display: flex; justify-content: space-between; align-items: baseline; }
+        .k-container { height: 120px; display: flex; align-items: flex-end; gap: 2px; border-bottom: 1px solid #333; margin-top: 10px; }
+        .k-bar { flex: 1; background: var(--red); min-height: 2px; border-radius: 1px; }
+        .k-bar.up { background: #00ffaa; }
 
-        /* 🛠️ 底部：神宮導覽列 */
-        .footer { position: fixed; bottom: 0; width: 100%; background: var(--panel-bg); border-top: 5px solid var(--gold); z-index: 1010; padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-        .action-btn { background: none; border: 2px solid var(--gold); color: var(--gold); padding: 15px 0; font-weight: 900; cursor: pointer; border-radius: 8px; font-size: 12px; transition: 0.3s; }
-        .action-btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold); }
+        /* 🛠️ 六大金剛功能按鈕 (完全對齊截圖排版) */
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #000; padding: 15px; z-index: 1010; border-top: 3px solid var(--gold); }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 1200px; margin: 0 auto; }
+        .btn-item { 
+            background: rgba(255,255,255,0.02); border: 1px solid #333; color: #fff; padding: 18px; 
+            font-size: 14px; font-weight: 900; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.2s; border-radius: 5px; text-shadow: 0 0 5px #000;
+        }
+        .btn-item:hover { border-color: var(--gold); background: rgba(255,215,120,0.1); box-shadow: inset 0 0 10px rgba(255,215,120,0.2); }
+
+        #star-field { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="ufo-ship"></div>
-<div id="webgl-stars"></div>
+<div id="star-field"></div>
+<div class="fairy-window" id="fairy-core"></div>
 
-<div class="god-hud">
-    <div class="hud-flex">
-        <div class="seat-section">
-            <div class="seat-header">🏛️ 靈霄神明席位 <span>500 / 500</span></div>
-            <div class="seat-grid" id="god-grid"></div>
+<div class="hud-header">
+    <div class="hud-grid">
+        <div class="seat-block">
+            <div class="seat-title">🏛️ 靈霄神明席位 <span>500 / 500</span></div>
+            <div class="seat-visual" id="god-grid"></div>
         </div>
-        <div class="seat-section" style="border-color: var(--cyan);">
-            <div class="seat-header" style="color:var(--cyan);">🐒 火星齊天豪宅 <span>500 / 500</span></div>
-            <div class="seat-grid" id="mars-grid"></div>
+        <div class="seat-block" style="border-color:var(--cyan)">
+            <div class="seat-title" style="color:var(--cyan)">🐒 火星豪宅收租 <span>500 / 500</span></div>
+            <div class="seat-visual" id="mars-grid"></div>
         </div>
     </div>
 </div>
 
-<div class="left-terminal">
-    <div class="glass-box">
-        <div class="pool-info">
-            <div style="font-size:12px; color:var(--gold);">🧬 仙女獎池 (16888 臨界)</div>
-            <div class="pool-num" id="pool-disp">16888</div>
-        </div>
-        <div class="trade-log" id="log-box">>> 天道合約啟動...<br>>> 監測 500 席位收租狀態...</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="action-btn" style="border-color:var(--dna)" onclick="app.autoDecide('DNA')">DNA 求婚成交</button>
-            <button class="action-btn" style="border-color:var(--rna)" onclick="app.autoDecide('RNA')">RNA 應婚成交</button>
-        </div>
-    </div>
+<div class="warp-panel">
+    <div style="font-family:'Orbitron'; font-size:12px; color:var(--cyan); margin-bottom:10px; letter-spacing:2px;">WARP</div>
+    <input type="range" id="warp-engine" class="v-warp" min="1" max="600" value="1">
+    <div class="warp-info" id="warp-val">1x</div>
 </div>
 
-<div class="right-terminal">
-    <div class="glass-box">
-        <div class="price-hero">
-            <span style="color:var(--gold); font-size:14px;">KGEN/USDT</span>
-            <span class="price-val" id="price-disp">1.6888</span>
-        </div>
-        <div class="k-chart-container" id="k-chart"></div>
-        <div style="margin-top:15px; font-size:11px; color:#aaa; line-height:1.6;">
-            天條分配：<br>
-            ● 30% 歸靈霄殿 (500神明分紅)<br>
-            ● 10% 留存獎池 (永續經營)<br>
-            ● 60% 歸雙地址 (表態競爭)
-        </div>
+<div class="k-line-panel">
+    <div class="price-row">
+        <span style="font-family:'Orbitron'; color:var(--gold);">KGEN/USDT</span>
+        <span id="price-txt" style="font-family:'Orbitron'; font-size:28px; color:var(--cyan);">1.6888</span>
     </div>
+    <div class="k-container" id="k-chart"></div>
+    <div style="font-size:10px; color:#666; margin-top:10px;">天條：30% 殿 | 10% 池 | 60% 雙地址分紅</div>
 </div>
 
-<div class="cockpit">
-    <div class="lever-box">
-        <div class="lever-text" id="warp-txt">WARP 1x</div>
-        <input type="range" id="warp-engine" class="v-warp" min="1" max="500" value="1">
-    </div>
-    <div class="lever-box" style="justify-content: flex-end;">
-        <div class="lever-text" id="steer-txt">STEER 0°</div>
-        <input type="range" id="steer-wheel" class="h-steer" min="-180" max="180" value="0">
-    </div>
+<div class="steering-system">
+    <div class="angle-val" id="angle-txt">76°</div>
+    <div class="steer-label">飛碟方向盤 (K航道)</div>
+    <input type="range" id="steer-wheel" class="steer-slider" min="-180" max="180" value="76">
 </div>
 
-<div class="footer">
-    <button class="action-btn" onclick="app.callWallet()">🦊 呼叫錢包</button>
-    <button class="action-btn" onclick="app.speak('分紅已入帳')">🎙️ 客服語音</button>
-    <button class="action-btn" onclick="app.search()">🔍 查席位地址</button>
-    <button class="action-btn" style="border-color:var(--red)" onclick="app.stop()">🔇 停止語音</button>
-    <button class="action-btn" onclick="app.capture()">📷 降旨截圖</button>
+<div class="footer-nav">
+    <div class="btn-grid">
+        <div class="btn-item" onclick="app.trade('CT 現價下單')">📈 CT 現價下單</div>
+        <div class="btn-item" onclick="app.trade('結算平倉')">📉 結算平倉</div>
+        <div class="btn-item" onclick="app.speak('已記錄許願留言')">👤 許願留言</div>
+        <div class="btn-item" onclick="app.toggleCam()">📸 影像監控</div>
+        <div class="btn-item" onclick="app.callWallet()">🦊 錢包連結</div>
+        <div class="btn-item" onclick="app.speak('客服語音通話啟動')">🎙️ 客服語音</div>
+    </div>
 </div>
 
 <script>
 const app = {
     price: 1.6888,
-    pool: 16888,
-    kData: Array(40).fill(50),
+    kData: Array(35).fill(40),
     
     init() {
         this.initThree();
-        this.createSeats('god-grid', 'god');
-        this.createSeats('mars-grid', 'mars');
-        this.runEngine();
-        this.speak("大聖，終極神宮架構已完工。曲速引擎對接K線，方向盤校準天條，請大聖指示！");
+        this.buildSeats('god-grid', 'god');
+        this.buildSeats('mars-grid', 'mars');
+        this.runLogic();
+        this.bindControls();
+        this.speak("大聖，萬年神殿代碼加固完成。方向盤鎖定 76 度，曲速引擎對接天條，請指示。");
     },
 
-    createSeats(id, type) {
-        const grid = document.getElementById(id);
-        for(let i=0; i<125; i++) {
+    buildSeats(id, type) {
+        const el = document.getElementById(id);
+        for(let i=0; i<125; i++) { // 125*4=500席位
             const d = document.createElement('div');
-            d.className = `dot ${Math.random() > 0.3 ? type : ''}`;
-            grid.appendChild(d);
+            d.className = `seat-dot ${Math.random() > 0.3 ? (type==='god'?'god':'active') : ''}`;
+            el.appendChild(d);
         }
     },
 
-    runEngine() {
+    bindControls() {
+        const sw = document.getElementById('steer-wheel');
+        const we = document.getElementById('warp-engine');
+        sw.oninput = () => {
+            document.getElementById('angle-txt').innerText = sw.value + '°';
+            document.getElementById('fairy-core').style.transform = `translateX(-50%) rotate(${sw.value}deg)`;
+        };
+        we.oninput = () => {
+            document.getElementById('warp-val').innerText = we.value + 'x';
+        };
+    },
+
+    runLogic() {
         setInterval(() => {
             const w = document.getElementById('warp-engine').value;
-            const change = (Math.random() - 0.48) * (w / 150);
-            this.price += change;
-            document.getElementById('price-disp').innerText = this.price.toFixed(4);
-            
+            const delta = (Math.random() - 0.48) * (w / 120);
+            this.price += delta;
+            document.getElementById('price-txt').innerText = this.price.toFixed(4);
             this.kData.shift();
-            this.kData.push(Math.max(10, Math.min(150, this.kData[this.kData.length-1] + change * 200)));
-            this.drawK();
-            
-            if(Math.random() > 0.95) this.addLog(`[席位分紅] 0x${Math.random().toString(16).substr(2,6)} 已收租`);
+            this.kData.push(Math.max(10, Math.min(110, this.kData[this.kData.length-1] + delta * 250)));
+            this.updateK();
         }, 800);
     },
 
-    drawK() {
+    updateK() {
         const c = document.getElementById('k-chart');
         c.innerHTML = '';
         this.kData.forEach((h, i) => {
             const b = document.createElement('div');
-            b.className = `k-bar ${h >= this.kData[i-1] ? 'up' : 'down'}`;
+            b.className = `k-bar ${h >= this.kData[i-1] ? 'up' : ''}`;
             b.style.height = `${h}px`;
             c.appendChild(b);
         });
-    },
-
-    addLog(m) {
-        const b = document.getElementById('log-box');
-        const l = document.createElement('div');
-        l.className = 'log-line';
-        l.innerText = `[${new Date().toLocaleTimeString()}] ${m}`;
-        b.prepend(l);
-    },
-
-    autoDecide(type) {
-        if(type === 'REFUSE') {
-            this.addLog(`⚠ 表態拒絕！30% 分紅沒收，回流獎池`);
-            this.pool += 5000;
-        } else {
-            this.addLog(`✔ ${type} 表態成交！1 KGEN 轉帳中，獲 30% 分紅`);
-            this.pool += 1;
-            this.callWallet();
-        }
-        document.getElementById('pool-disp').innerText = Math.floor(this.pool);
     },
 
     initThree() {
@@ -200,14 +182,14 @@ const app = {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('webgl-stars').appendChild(this.renderer.domElement);
+        document.getElementById('star-field').appendChild(this.renderer.domElement);
         const geo = new THREE.BufferGeometry();
         const pts = [];
-        for(let i=0; i<3000; i++) pts.push((Math.random()-0.5)*70, (Math.random()-0.5)*70, (Math.random()-0.5)*70);
+        for(let i=0; i<4500; i++) pts.push((Math.random()-0.5)*90, (Math.random()-0.5)*90, (Math.random()-0.5)*90);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.16 }));
         this.scene.add(this.stars);
-        this.camera.position.z = 25;
+        this.camera.position.z = 35;
         this.animate();
     },
 
@@ -215,32 +197,25 @@ const app = {
         requestAnimationFrame(() => this.animate());
         const w = document.getElementById('warp-engine').value;
         const s = document.getElementById('steer-wheel').value;
-        document.getElementById('warp-txt').innerText = `WARP ${w}x`;
-        document.getElementById('steer-txt').innerText = `STEER ${s}°`;
-
-        // 飛碟轉向：右拉 = 順時針
-        document.getElementById('ufo-ship').style.transform = `translate(-50%, -50%) rotate(${s}deg)`;
-
         const rad = (s * Math.PI) / 180;
-        const speed = w / 400;
-        const pos = this.stars.geometry.attributes.position.array;
-        for(let i=0; i<pos.length; i+=3) {
-            pos[i] += Math.sin(rad) * speed;
-            pos[i+1] -= Math.cos(rad) * speed; // 0度由上往下
-            if(pos[i+1] < -35) pos[i+1] = 35; if(pos[i+1] > 35) pos[i+1] = -35;
-            if(pos[i] < -35) pos[i] = 35; if(pos[i] > 35) pos[i] = -35;
+        const spd = w / 450;
+        const p = this.stars.geometry.attributes.position.array;
+        for(let i=0; i<p.length; i+=3) {
+            p[i] += Math.sin(rad) * spd;
+            p[i+1] -= Math.cos(rad) * spd; // 0° = 由上往下灌注入
+            if(p[i+1] < -45) p[i+1] = 45; if(p[i+1] > 45) p[i+1] = -45;
+            if(p[i] < -45) p[i] = 45; if(p[i] > 45) p[i] = -45;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
 
+    trade(m) { this.speak(m + "，天條分紅結算中"); this.callWallet(); },
     callWallet() { if(window.ethereum) window.ethereum.request({method:'eth_requestAccounts'}); },
-    search() { prompt("輸入地址查詢分紅席位："); },
-    capture() { alert("神蹟已記錄"); },
-    stop() { window.speechSynthesis.cancel(); },
+    toggleCam() { alert("影像監控連線中..."); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
 window.onload = () => app.init();
 </script>
 </body>
-</html>
+                                                                              </html>
