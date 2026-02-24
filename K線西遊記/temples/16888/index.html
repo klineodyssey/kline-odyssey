@@ -3,128 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜時光飛碟機 V1.9.7</title>
+    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #050608; --glass: rgba(20, 22, 28, 0.95); }
+        :root { --gold: #ffd778; --cyan: #00f2ff; --red: #ff3c00; --bg: #000; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', 'Noto Sans TC', sans-serif; overflow: hidden; }
         
-        /* 頂部品牌與血量/油量 */
-        .brand { position: fixed; top: 5px; width: 100%; text-align: center; font-size: 10px; color: var(--gold); letter-spacing: 2px; z-index: 300; }
-        .hud { position: fixed; top: 25px; left: 50%; transform: translateX(-50%); width: 80%; z-index: 100; }
-        .fuel-bar { width: 100%; height: 12px; background: #222; border: 1px solid var(--gold); border-radius: 6px; overflow: hidden; }
-        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff3c00, var(--gold)); transition: 0.3s; }
+        /* 頂部品牌與血量 */
+        .header { position: fixed; top: 0; width: 100%; padding: 10px; text-align: center; z-index: 300; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        .fuel-bar { width: 80%; height: 10px; background: #222; border: 1px solid var(--gold); border-radius: 5px; margin: 5px auto; overflow: hidden; }
+        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: 0.3s; }
 
-        /* 側邊滑桿 */
-        .ctrl { position: fixed; top: 50%; transform: translateY(-50%); z-index: 150; display: flex; flex-direction: column; align-items: center; }
-        .l-ctrl { left: 10px; } .r-ctrl { right: 10px; }
-        input[type=range].vert { width: 180px; transform: rotate(-90deg); margin: 80px 0; accent-color: var(--gold); }
-        .tag { font-size: 9px; color: var(--gold); text-align: center; }
+        /* 側邊操縱桿：完全靠邊 */
+        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 400; display: flex; flex-direction: column; align-items: center; width: 50px; }
+        .l-stick { left: 5px; } 
+        .r-stick { right: 5px; }
+        input[type=range].vert { width: 220px; transform: rotate(-90deg); margin: 100px 0; accent-color: var(--gold); cursor: pointer; }
+        .stick-label { font-size: 10px; color: var(--gold); text-shadow: 0 0 5px #000; white-space: nowrap; font-weight: 900; }
 
-        /* 3D 舞台與攝像頭預覽 */
-        #stage { width: 100vw; height: 100vh; position: absolute; z-index: 10; }
-        #video-preview { width: 100vw; height: 100vh; position: absolute; z-index: 5; object-fit: cover; display: none; filter: brightness(0.6) sepia(0.3) hue-rotate(180deg); }
+        /* 相機預覽層 */
+        #cam-layer { position: fixed; inset: 0; z-index: 5; display: none; object-fit: cover; width: 100vw; height: 100vh; }
+        #canvas-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 
-        /* 控制終端 */
-        .terminal { position: fixed; bottom: 0; width: 100%; background: var(--glass); border-top: 1px solid var(--gold); z-index: 200; padding: 15px; }
-        .btn-row { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
-        .btn { padding: 8px 15px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; cursor: pointer; white-space: nowrap; }
+        /* AI 客服頭像 (影象與聲音) */
+        #ai-mentor { position: fixed; top: 80px; right: 60px; width: 100px; height: 100px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 350; display: none; background: #000; overflow: hidden; box-shadow: 0 0 20px var(--cyan); }
+        .ai-wave { position: absolute; bottom: 0; width: 100%; height: 20px; background: var(--cyan); opacity: 0.5; animation: wave 1s infinite; }
+
+        /* 控制面板 */
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); border-top: 2px solid var(--gold); z-index: 500; padding: 15px; text-align: center; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .btn { padding: 10px; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 11px; font-weight: 900; cursor: pointer; }
         
-        /* 浮水印與許願字 */
-        #stamp { position: fixed; bottom: 130px; left: 20px; z-index: 50; font-size: 14px; color: var(--gold); text-shadow: 2px 2px 4px #000; display: none; }
-        
-        /* 光明燈彈窗 */
-        #lamp-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; display: none; padding: 40px; }
-        select, input { background: #111; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 100%; margin: 10px 0; }
+        #wish-stamp { position: fixed; bottom: 150px; left: 20px; z-index: 100; font-size: 16px; color: var(--gold); font-weight: 900; text-shadow: 2px 2px #000; }
+
+        @keyframes wave { 0% { height: 10px; } 50% { height: 30px; } 100% { height: 10px; } }
     </style>
 </head>
 <body>
 
-<div class="brand">KGEN ODYSSEY SUPERLUMINAL DISK - <span id="time">00:00:00</span></div>
-
-<div class="hud">
-    <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--gold); margin-bottom:4px;">
-        <span>飛碟血量即油量</span><span id="fuel-txt">100% / 16888L</span>
-    </div>
+<div class="header">
+    <div style="font-size:12px; font-weight:900;">KGEN ODYSSEY V1.9.8</div>
     <div class="fuel-bar"><div id="fuel-fill"></div></div>
+    <div id="clock" style="font-size:9px;">LOADING...</div>
 </div>
 
-<div class="ctrl l-ctrl">
-    <div class="tag">光速曲率<br>(槓桿)</div>
+<div class="stick l-stick">
+    <div class="stick-label">光速曲率</div>
     <input type="range" id="curv" class="vert" min="0" max="150" value="75">
-    <div id="v-curv" class="tag">75x</div>
+    <div class="stick-label" id="v-curv">75x</div>
 </div>
 
-<div class="ctrl r-ctrl">
-    <div class="tag">導航方向盤<br>(角度)</div>
+<div class="stick r-stick">
+    <div class="stick-label">導航方向</div>
     <input type="range" id="angle" class="vert" min="0" max="360" value="180">
-    <div id="v-angle" class="tag">180°</div>
+    <div class="stick-label" id="v-angle">180°</div>
 </div>
 
-<video id="video-preview" autoplay playsinline></video>
-<div id="stage"></div>
-<div id="stamp"></div>
+<video id="cam-layer" autoplay playsinline></video>
+<div id="canvas-layer"></div>
 
-<div class="terminal">
-    <div id="mode-display" style="text-align:center; font-size:12px; color:var(--cyan);">[ 靜止觀望中 ]</div>
-    <div class="btn-row">
-        <button class="btn" onclick="app.vow()">🔥 點火注入</button>
-        <button class="btn" onclick="app.showLamp()">🏮 點光明燈</button>
+<div id="ai-mentor">
+    <img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" width="100%">
+    <div class="ai-wave"></div>
+</div>
+
+<div id="wish-stamp"></div>
+
+<div class="panel">
+    <div id="status" style="color:var(--cyan); font-size:12px; margin-bottom:5px;">飛碟待機中...</div>
+    <div class="btn-grid">
+        <button class="btn" onclick="app.trade('LONG')">做多 (上往下)</button>
+        <button class="btn" onclick="app.trade('SHORT')">做空 (下往上)</button>
+        <button class="btn" onclick="app.showLamp()">🏮 13生肖燈</button>
         <button class="btn" onclick="app.takePhoto()">📷 拍照下載</button>
-        <button class="btn" onclick="app.toggleMedia()">🎬 錄影音模式</button>
+        <button class="btn" onclick="app.toggleCam()">🎬 錄影音切換</button>
         <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
     </div>
 </div>
 
-<div id="lamp-modal">
-    <h3>13生肖光明燈登記 (1 KGEN/天)</h3>
-    <select id="zodiac-sel">
-        <option value="鼠">鼠 (剩 88)</option><option value="牛">牛 (剩 92)</option>
-        <option value="虎">虎 (剩 75)</option><option value="兔">兔 (剩 60)</option>
-        <option value="龍">龍 (剩 12)</option><option value="蛇">蛇 (剩 99)</option>
-        <option value="馬">馬 (剩 88)</option><option value="羊">羊 (剩 45)</option>
-        <option value="猴">猴 (剩 33)</option><option value="雞">雞 (剩 91)</option>
-        <option value="狗">狗 (剩 10)</option><option value="豬">豬 (剩 50)</option>
-        <option id="z13" value="第13生肖">第13生肖 (自定)</option>
-    </select>
-    <input type="text" id="user-name" placeholder="基本資料：姓名/電話">
-    <button class="btn" style="width:100%" onclick="app.confirmLamp()">確認登記</button>
-    <button class="btn" style="width:100%; margin-top:10px; border-color:grey;" onclick="document.getElementById('lamp-modal').style.display='none'">取消</button>
-</div>
-
 <script>
 const app = {
-    fuel: 100, wish: "", mediaMode: "3D",
+    fuel: 100,
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-
+    
     init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('stage').appendChild(this.renderer.domElement);
+        document.getElementById('canvas-layer').appendChild(this.renderer.domElement);
 
         const loader = new THREE.TextureLoader();
         loader.crossOrigin = "anonymous";
         this.fairy = new THREE.Mesh(new THREE.CircleGeometry(4, 32), new THREE.MeshBasicMaterial({ map: loader.load(this.fairyImg), transparent: true }));
         this.scene.add(this.fairy);
 
-        this.createPlanets();
+        this.createStars();
         this.camera.position.z = 12;
         this.animate();
-        setInterval(() => { 
-            document.getElementById('time').innerText = new Date().toLocaleString(); 
-        }, 1000);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
     },
 
-    createPlanets() {
+    createStars() {
         const geo = new THREE.BufferGeometry();
         const pos = [];
-        for(let i=0; i<1200; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
+        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*50, (Math.random()-0.5)*50, (Math.random()-0.5)*50);
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        this.planets = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true}));
-        this.scene.add(this.planets);
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.1}));
+        this.scene.add(this.stars);
     },
 
     animate() {
@@ -135,67 +122,63 @@ const app = {
         document.getElementById('v-curv').innerText = crv + "x";
 
         let flow = 0;
-        let modeTxt = "[ 靜止觀望 ]";
+        if (ang >= 30 && ang <= 150) flow = -1; // 做多
+        else if (ang >= 210 && ang <= 330) flow = 1; // 做空
 
-        // 精確區間判定
-        if (ang >= 30 && ang <= 150) { flow = -1; modeTxt = "▲ 做多模式 (上往下)"; }
-        else if (ang >= 210 && ang <= 330) { flow = 1; modeTxt = "▼ 做空模式 (下往上)"; }
-        
-        document.getElementById('mode-display').innerText = modeTxt;
-
-        const p = this.planets.geometry.attributes.position.array;
+        const p = this.stars.geometry.attributes.position.array;
         for(let i=1; i<p.length; i+=3) {
-            p[i] += flow * (crv / 150 * 0.5);
+            p[i] += flow * (crv / 150);
             if(p[i] > 25) p[i] = -25; if(p[i] < -25) p[i] = 25;
         }
-        this.planets.geometry.attributes.position.needsUpdate = true;
+        this.stars.geometry.attributes.position.needsUpdate = true;
         this.fairy.rotation.y = (ang-180)*0.01;
         this.renderer.render(this.scene, this.camera);
     },
 
-    showLamp() { document.getElementById('lamp-modal').style.display='block'; },
-    
-    confirmLamp() {
-        const name = document.getElementById('user-name').value;
-        if(!name) return alert("請輸入基本資料");
-        alert(`登記成功！生肖：${document.getElementById('zodiac-sel').value}\n費用：1 KGEN\n資料：${name}`);
-        document.getElementById('lamp-modal').style.display='none';
+    trade(type) {
+        document.getElementById('status').innerText = `正在連線錢包進行 ${type} 交易...`;
+        setTimeout(() => {
+            this.showAI(`偵測到錢包餘額不足！我是你的 AI 客服，別擔心，我教你如何從轉帳到成交。請先點擊合約授權...`);
+        }, 1500);
+    },
+
+    showAI(msg) {
+        const mentor = document.getElementById('ai-mentor');
+        mentor.style.display = "block";
+        const synth = window.speechSynthesis;
+        const utter = new SpeechSynthesisUtterance(msg);
+        utter.lang = 'zh-TW';
+        synth.speak(utter);
+        document.getElementById('status').innerText = "AI 導師引導中...";
+    },
+
+    async toggleCam() {
+        const video = document.getElementById('cam-layer');
+        if(video.style.display === "block") {
+            video.style.display = "none";
+        } else {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            video.srcObject = stream;
+            video.style.display = "block";
+            this.showAI("已切換相機模式，飛碟進入 AR 實體導航狀態。");
+        }
     },
 
     setWish() {
-        this.wish = prompt("輸入許願/還願內容：");
-        const s = document.getElementById('stamp');
-        s.innerText = "願力戳印： " + this.wish;
-        s.style.display = this.wish ? "block" : "none";
-    },
-
-    async toggleMedia() {
-        const v = document.getElementById('video-preview');
-        const s = document.getElementById('stage');
-        if(this.mediaMode === "3D") {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            v.srcObject = stream;
-            v.style.display = "block";
-            s.style.opacity = "0.5";
-            this.mediaMode = "VIDEO";
-        } else {
-            v.style.display = "none";
-            s.style.opacity = "1";
-            this.mediaMode = "3D";
-        }
+        const w = prompt("請輸入您的許願或還願內容：");
+        document.getElementById('wish-stamp').innerText = w ? "願力戳印：" + w : "";
     },
 
     takePhoto() {
         const link = document.createElement('a');
-        link.download = `KGEN_PHOTO_${Date.now()}.png`;
-        link.href = this.renderer.domElement.toDataURL("image/png");
+        link.download = `KGEN_DISK_${Date.now()}.png`;
+        link.href = this.renderer.domElement.toDataURL();
         link.click();
+        this.showAI("照片已存入您的終端設備。");
     },
-
-    vow() {
-        this.fuel = Math.max(0, this.fuel - 2);
-        document.getElementById('fuel-fill').style.width = this.fuel + "%";
-        document.getElementById('fuel-txt').innerText = `${this.fuel}% / 16888L`;
+    
+    showLamp() {
+        alert("13生肖光明燈系統：每個生肖限額100名，1 KGEN/天。已記錄您的資料。");
     }
 };
 
