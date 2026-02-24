@@ -3,92 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 16888｜超光速 AI 飛碟機 V1.9.9.2</title>
+    <title>KGEN 16888 V1.9.9.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: sans-serif; }
         
-        /* 側邊桿：完全透明背景並貼邊 */
-        .stick { position: fixed; top: 50%; transform: translateY(-50%); z-index: 2000; width: 20px; }
-        .l-stick { left: 0; } .r-stick { right: 0; }
+        /* 1. 桿子絕對靠邊 (不擋圖) */
+        .stick-container { position: fixed; top: 0; bottom: 0; width: 40px; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .l-side { left: 0; }
+        .r-side { right: 0; }
         input[type=range].vert { 
-            width: 280px; height: 10px; transform: rotate(-90deg); 
-            margin-left: -130px; /* 這裡微調位移確保完全靠邊 */
-            accent-color: var(--gold); cursor: pointer; opacity: 0.6;
+            appearance: none; width: 300px; height: 15px; background: rgba(255,215,120,0.1);
+            transform: rotate(-90deg); outline: none; border-radius: 10px; cursor: pointer;
         }
+        input[type=range].vert::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: var(--gold); border-radius: 50%; box-shadow: 0 0 10px var(--gold); }
 
-        /* 頂部資訊 */
-        .header { position: fixed; top: 0; width: 100%; text-align: center; z-index: 1000; padding: 5px; font-size: 10px; color: var(--gold); background: rgba(0,0,0,0.5); }
-        
-        /* 相機與畫布層 */
-        #video-bg { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; display: none; }
-        #canvas-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+        /* 2. 背景層級 */
+        #video-bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; }
+        #canvas-layer { position: fixed; inset: 0; z-index: 10; width: 100%; height: 100%; }
 
-        /* AI 客服 */
-        #ai-box { position: fixed; top: 60px; right: 20px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--cyan); z-index: 1500; display: none; overflow: hidden; box-shadow: 0 0 15px var(--cyan); }
-        #ai-box img { width: 100%; height: 100%; object-fit: cover; }
+        /* 3. 控制面板 (確保按鈕可點擊) */
+        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); border-top: 2px solid var(--gold); z-index: 3000; padding: 15px 0; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px; }
+        .btn { 
+            background: none; border: 1px solid var(--gold); color: var(--gold); 
+            padding: 12px 0; font-size: 11px; font-weight: bold; cursor: pointer; pointer-events: auto;
+        }
+        .btn:active { background: var(--gold); color: #000; }
 
-        /* 下方控制板 */
-        .panel { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); border-top: 1px solid var(--gold); z-index: 1800; padding: 10px 0; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 0 10px; }
-        .btn { padding: 12px 0; border: 1px solid var(--gold); color: var(--gold); background: none; font-size: 10px; font-weight: 900; }
-        
-        #wish-text { position: fixed; bottom: 120px; left: 20px; z-index: 1600; font-size: 14px; color: var(--gold); text-shadow: 2px 2px #000; }
+        #wish-stamp { position: fixed; bottom: 120px; left: 20px; z-index: 1500; color: var(--gold); font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div class="header">KGEN ODYSSEY V1.9.9.2 | <span id="clock">00:00:00</span></div>
-
-<div class="stick l-stick"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
-<div class="stick r-stick"><input type="range" id="angle" class="vert" min="0" max="360" value="180"></div>
-
 <video id="video-bg" autoplay playsinline muted></video>
 <div id="canvas-layer"></div>
-<div id="ai-box"><img src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png"></div>
-<div id="wish-text"></div>
+
+<div class="stick-container l-side"><input type="range" id="curv" class="vert" min="0" max="150" value="75"></div>
+<div class="stick-container r-side"><input type="range" id="angle" class="vert" min="0" max="360" value="180"></div>
+
+<div id="wish-stamp"></div>
 
 <div class="panel">
-    <div class="grid">
+    <div class="btn-grid">
         <button class="btn" onclick="app.trade('LONG')">做多 下單</button>
         <button class="btn" onclick="app.trade('SHORT')">做空 下單</button>
         <button class="btn" onclick="app.takeSnap()">📷 拍照下載</button>
-        <button class="btn" id="cam-btn" onclick="app.toggleCam()">🎬 相機/錄製</button>
+        <button class="btn" id="cam-btn" onclick="app.toggleCam()">🎬 相機切換</button>
         <button class="btn" onclick="app.setWish()">🙏 許願還願</button>
         <button class="btn" onclick="app.showLamp()">🏮 13生肖燈</button>
     </div>
 </div>
 
 <script>
+// 將 app 物件定義在最前面，確保 HTML 呼叫時已存在
 const app = {
+    isCamOn: false,
     fairyImg: "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
     
     init() {
+        console.log("初始化開始...");
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        
-        // 重要修復：preserveDrawingBuffer 設為 true 才能截圖
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.z = 10;
+
         this.renderer = new THREE.WebGLRenderer({ 
             antialias: true, 
             alpha: true, 
-            preserveDrawingBuffer: true 
+            preserveDrawingBuffer: true // 關鍵：允許截圖
         });
-        
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-layer').appendChild(this.renderer.domElement);
 
+        // 加載仙女圖
         const loader = new THREE.TextureLoader();
-        loader.crossOrigin = "anonymous";
-        this.fairy = new THREE.Mesh(
-            new THREE.CircleGeometry(4, 32), 
-            new THREE.MeshBasicMaterial({ map: loader.load(this.fairyImg), transparent: true })
-        );
-        this.scene.add(this.fairy);
+        loader.setCrossOrigin('anonymous');
+        loader.load(this.fairyImg, (texture) => {
+            console.log("圖源載入成功");
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+            const geometry = new THREE.CircleGeometry(4, 32);
+            this.fairy = new THREE.Mesh(geometry, material);
+            this.scene.add(this.fairy);
+        }, undefined, (err) => {
+            console.error("圖源載入失敗:", err);
+            // 備用方案：如果圖不見了，顯示一個發光的圓球
+            const fallback = new THREE.Mesh(new THREE.SphereGeometry(3), new THREE.MeshBasicMaterial({color: 0xffd778, wireframe: true}));
+            this.scene.add(fallback);
+        });
 
         this.createStars();
-        this.camera.position.z = 12;
         this.animate();
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        window.addEventListener('resize', () => this.onResize());
+    },
+
+    createStars() {
+        const geo = new THREE.BufferGeometry();
+        const pos = [];
+        for(let i=0; i<1000; i++) pos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xffffff, size: 0.08}));
+        this.scene.add(this.stars);
+    },
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const ang = parseInt(document.getElementById('angle').value);
+        const crv = document.getElementById('curv').value;
+
+        // 星辰流動邏輯
+        let flow = 0;
+        if (ang >= 30 && ang <= 150) flow = -1; // 做多
+        else if (ang >= 210 && ang <= 330) flow = 1; // 做空
+
+        const p = this.stars.geometry.attributes.position.array;
+        for(let i=1; i<p.length; i+=3) {
+            p[i] += flow * (crv / 150 * 0.4);
+            if(p[i] > 20) p[i] = -20; if(p[i] < -20) p[i] = 20;
+        }
+        this.stars.geometry.attributes.position.needsUpdate = true;
+
+        if(this.fairy) this.fairy.rotation.y = (ang-180)*0.01;
+        this.renderer.render(this.scene, this.camera);
+    },
+
+    onResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+
+    async toggleCam() {
+        const v = document.getElementById('video-bg');
+        if(this.isCamOn) {
+            v.style.display = "none";
+            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+            this.isCamOn = false;
+        } else {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                v.srcObject = s;
+                v.style.display = "block";
+                this.isCamOn = true;
+            } catch(e) { alert("相機啟動失敗，請檢查權限"); }
+        }
+    },
+
+    takeSnap() {
+        try {
+            const dataUrl = this.renderer.domElement.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = `KGEN_DISK_${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch(e) { alert("拍照功能受限"); }
+    },
+
+    trade(type) { alert(`已呼叫 Web3 錢包：進行 ${type} 下單...`); },
+    setWish() { 
+        const w = prompt("輸入許願："); 
+        document.getElementById('wish-stamp').innerText = w ? "願力戳：" + w : "";
+    },
+    showLamp() { alert("13生肖光明燈：已記錄您的基本資料。"); }
+};
+
+// 確保腳本載入完後執行
+window.onload = () => app.init();
+</script>
+</body>
+</html>
