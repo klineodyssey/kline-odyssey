@@ -571,8 +571,8 @@ const app = {
                 const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
                 const p = pts.geometry.attributes.position.array;
                 for(let i=0; i<p.length; i+=3) {
-                    p[i]   += Math.sin(r) * w;
-                    p[i+1] -= Math.cos(r) * w;
+                    p[i]   += (-Math.sin(r)) * w;
+                    p[i+1] += (Math.cos(r)) * w;
                     if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
                     if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
                 }
