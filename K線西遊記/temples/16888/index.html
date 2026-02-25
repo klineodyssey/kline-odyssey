@@ -1,483 +1,286 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>KGEN 16888｜錄像黑盒子生命體</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
-  <style>
-    :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --red: #ff4444; }
-    body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
+    <meta charset="UTF-8">
+    <title>KGEN 16888｜金融生命體肌肉滿血版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-    /* 🏛️ 頂部：500 席位監控 (肌肉組織) */
-    .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-    .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: rgba(0,0,0,0.6); }
-    .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
+        .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
+        .brand-name { font-size: 28px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
 
-    .monitor-data { display: flex; gap: 15px; }
-    .data-box { background: rgba(20,20,0,0.8); border: 1px solid #332200; padding: 8px; border-top: 2px solid var(--gold); }
-    .grid-500 { display: grid; grid-template-columns: repeat(20, 6px); gap: 3px; }
-    .dot { width: 6px; height: 6px; background: #1a1a00; }
-    .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
-    /* 🚀 左側：曲速引擎 (手把向上，下方填充黃色階圖) */
-    .warp-engine { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
-    .warp-rail { height: 420px; width: 28px; background: #111; border: 3px solid var(--energy); position: relative; margin: 0 auto; border-radius: 6px; overflow: hidden; }
-    #energy-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #ff6600, var(--energy), #fff); transition: height 0.1s; z-index: 5; }
-    .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
-    #warp-thumb { width: 66px; height: 32px; background: #fff; position: absolute; left: -19px; bottom: 33%; cursor: pointer; border-radius: 4px; box-shadow: 0 0 25px #fff; border: 3px solid var(--cyan); z-index: 30; }
-    .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        .warp-engine { position: fixed; left: 45px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
+        .warp-rail { 
+            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
+            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+        #energy-fill { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
+            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            z-index: 5;
+        }
+        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
+        
+        #warp-thumb { 
+            width: 70px; height: 35px; background: #fff; position: absolute; 
+            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
+            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
+            border: 3px solid var(--cyan); z-index: 30;
+        }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
 
-    /* 📹 錄影狀態指示燈 */
-    #rec-dot { width: 12px; height: 12px; background: var(--red); border-radius: 50%; display: none; margin-right: 8px; animation: blink 1s infinite; }
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
+        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { 
+            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
+            overflow: hidden; background: #000; position: relative; 
+            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
+            transition: transform 0.05s linear; /* 🎡 物理連動 */
+        }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+        #mini-thumb { 
+            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 25px var(--gold);
+        }
+        #wish-label { 
+            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
+            color: #fff; font-weight: 900; font-size: 24px; 
+            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
+        }
 
-    /* 🧚 核心圓窗 (物理連動) */
-    #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; z-index: 50; }
-    #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; background: #000; position: relative; transition: transform 0.05s linear; }
-    #fairy-img { width: 100%; height: 100%; object-fit: cover; }
-    #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-    #rec-timer { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron'; color: var(--red); font-size: 18px; z-index: 120; display: none; }
+        /* 🧬 GA 演化矩陣 (右側肌肉) */
+        .ga-matrix { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
+        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
+        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
-    /* 🎡 方向盤與底部按鈕 */
-    .steer-zone { position: fixed; bottom: 200px; width: 100%; text-align: center; z-index: 100; }
-    .footer-terminal { position: fixed; bottom: 0; width: 100%; background: #000; padding: 15px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; z-index: 100; }
-    .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 18px 2px; font-weight: 900; cursor: pointer; font-size: 13px; }
-    .btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 10px rgba(255,0,0,0.2); }
-    .btn-kgen { border-color: var(--energy); color: var(--energy); }
+        /* 🎡 方向盤 */
+        .steer-zone { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
+        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
+        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
-    canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
-  </style>
+        /* 🛠️ 控制台 */
+        .footer-terminal { 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
+            border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; z-index: 100; 
+        }
+        .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px; border-radius: 4px; }
+        .term-btn:hover { background: var(--gold); color: #000; }
+        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
+
+        canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    </style>
 </head>
 <body>
 
 <div class="hud-top">
-  <div class="brand-section">
-    <div class="brand-name">KGEN 16888 錄像版</div>
-    <div style="display:flex; align-items:center;">
-      <div id="rec-dot"></div>
-      <div id="sys-clock" style="font-family:'Orbitron'; font-size:12px; color:var(--cyan);">SYSTEM ONLINE</div>
+    <div class="brand-section">
+        <div class="brand-name">KGEN 16888 金融生命體</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
-  </div>
-  <div class="monitor-data">
-    <div class="data-box"><div class="grid-500" id="g1"></div></div>
-  </div>
+    <div class="monitor-data">
+        <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
+    </div>
 </div>
 
 <div class="warp-engine">
-  <div class="warp-rail" id="warp-rail-body">
-    <div id="energy-fill"></div>
-    <div id="warp-thumb"></div>
-    <input type="range" id="warp-slider" class="warp-range" min="0" max="100" value="33">
-  </div>
-  <div style="margin-top:20px; color:var(--energy); font-family:'Orbitron'; font-size:16px;" id="warp-txt">WARP 99x</div>
+    <div class="warp-rail" id="warp-rail-body">
+        <div id="energy-fill"></div>
+        <div id="warp-thumb"></div>
+        <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
+    </div>
+    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
+</div>
+
+<div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
 </div>
 
 <div id="core-anchor">
-  <div id="rec-timer">00:00</div>
-  <div id="core-window">
-    <div id="wish-label" style="position:absolute; bottom:50px; left:50px; z-index:85; color:#fff; font-weight:900; font-size:22px; text-shadow:0 0 10px #000;">大聖駕到，光耀廣寒</div>
-    <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
-    <video id="cam-view" autoplay playsinline></video>
-  </div>
+    <div id="core-window">
+        <div id="wish-label">大聖駕到，光耀廣寒</div>
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <video id="cam-view" autoplay playsinline></video>
+        <div id="mini-thumb"></div>
+    </div>
 </div>
 
 <canvas id="galaxy-bg"></canvas>
-<canvas id="export-canvas" style="display:none;"></canvas>
+<canvas id="snap-canvas" style="display:none;"></canvas>
 
 <div class="steer-zone">
-  <div id="ang-txt" style="font-family:'Orbitron'; font-size:48px; color:var(--cyan);">76°</div>
-  <input type="range" id="steer-slider" style="width:70%; accent-color:var(--gold);" min="-180" max="180" value="76">
+    <div class="angle-readout" id="ang-val">76°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
 </div>
 
 <div class="footer-terminal">
-  <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
-  <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🔴 啟動錄影</button>
-  <button class="term-btn btn-kgen" onclick="app.boost()">💎 KGEN 沖等</button>
-  <button class="term-btn btn-kgen" onclick="app.autoHunt()">⚔️ 巡航打怪</button>
-  <button class="term-btn" onclick="app.toggleCam()">🤳 切換鏡頭</button>
+    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
+    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
+    <button class="term-btn" onclick="app.speak('GA系統正在自動優化績效')">🧬 GA 優化</button>
+    <button class="term-btn" onclick="location.reload()">🔄 重啟系統</button>
 </div>
 
 <script>
 const app = {
-  isCam: false,
-  camMode: 'user',
-  ga: 600,
-  recorder: null,
-  chunks: [],
-  // 讓計時器用真時間
-  recStartTs: null,
-  tInt: null,
-  drawInt: null,
-  bbSampleInt: null,
-
-  // ===== 黑盒子（C版） =====
-  blackbox: {
-    sessionId: null,
-    startedAt: null,
-    endedAt: null,
-    events: [],
-    samples: [],
-    counts: {},
-    last: { angle: 0, warp: 0, ga: 600 },
-  },
-
-  init() {
-    this.initThree();
-    this.buildUI();
-    this.bind();
-
-    setInterval(() => {
-      document.getElementById('sys-clock').innerText = new Date().toLocaleString();
-      document.querySelectorAll('.dot').forEach(d => { if (Math.random() > 0.9) d.classList.toggle('on'); });
-    }, 1000);
-
-    this.updateWarp(33);
-    this.speak("錄像器官已掛載，KGEN 黑盒子系統就緒。");
-  },
-
-  buildUI() {
-    const g1 = document.getElementById('g1');
-    // 500席位
-    for (let i = 0; i < 500; i++) {
-      const d = document.createElement('div');
-      d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
-      g1.appendChild(d);
-    }
-    const rail = document.getElementById('warp-rail-body');
-    for (let i = 0; i < 22; i++) {
-      const step = document.createElement('div');
-      step.className = 'rail-step';
-      step.style.bottom = (i * 4.5) + '%';
-      rail.appendChild(step);
-    }
-  },
-
-  // ===== 黑盒子工具 =====
-  bbStart() {
-    const sid = `BBX-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    this.blackbox.sessionId = sid;
-    this.blackbox.startedAt = new Date().toISOString();
-    this.blackbox.endedAt = null;
-    this.blackbox.events = [];
-    this.blackbox.samples = [];
-    this.blackbox.counts = {};
-    this.blackbox.last = {
-      angle: parseFloat(document.getElementById('steer-slider').value || 0),
-      warp: parseFloat(document.getElementById('warp-slider').value || 0),
-      ga: this.ga
-    };
-    this.bbEvent("rec_start", { ga: this.ga, angle: this.blackbox.last.angle, warp: this.blackbox.last.warp });
-  },
-
-  bbStop() {
-    this.blackbox.endedAt = new Date().toISOString();
-    this.bbEvent("rec_stop", {});
-  },
-
-  bbCount(type) {
-    this.blackbox.counts[type] = (this.blackbox.counts[type] || 0) + 1;
-  },
-
-  bbEvent(type, payload = {}) {
-    this.bbCount(type);
-    this.blackbox.events.push({ t: Date.now(), type, ...payload });
-  },
-
-  bbSample() {
-    const angle = parseFloat(document.getElementById('steer-slider').value || 0);
-    const warp = parseFloat(document.getElementById('warp-slider').value || 0);
-    this.blackbox.last.angle = angle;
-    this.blackbox.last.warp = warp;
-    this.blackbox.last.ga = this.ga;
-    this.blackbox.samples.push({ t: Date.now(), angle, warp, ga: this.ga });
-  },
-
-  bbStats(list, key) {
-    if (!list.length) return { min: null, max: null, avg: null };
-    let min = Infinity, max = -Infinity, sum = 0, n = 0;
-    for (const it of list) {
-      const v = Number(it[key]);
-      if (!Number.isFinite(v)) continue;
-      if (v < min) min = v;
-      if (v > max) max = v;
-      sum += v; n++;
-    }
-    if (!n) return { min: null, max: null, avg: null };
-    return { min, max, avg: +(sum / n).toFixed(4) };
-  },
-
-  async bbHashSHA256(text) {
-    const enc = new TextEncoder();
-    const buf = await crypto.subtle.digest("SHA-256", enc.encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  },
-
-  async bbExportJSON() {
-    const started = this.blackbox.startedAt ? new Date(this.blackbox.startedAt).getTime() : null;
-    const ended = this.blackbox.endedAt ? new Date(this.blackbox.endedAt).getTime() : null;
-    const durationSec = (started && ended) ? Math.max(0, Math.round((ended - started) / 1000)) : null;
-
-    const angleStats = this.bbStats(this.blackbox.samples, "angle");
-    const warpStats  = this.bbStats(this.blackbox.samples, "warp");
-
-    const payload = {
-      schema: "kgen.blackbox.v1",
-      sessionId: this.blackbox.sessionId,
-      startedAt: this.blackbox.startedAt,
-      endedAt: this.blackbox.endedAt,
-      durationSec,
-      last: this.blackbox.last,
-      stats: { angle: angleStats, warp: warpStats },
-      eventCounts: this.blackbox.counts,
-      timeline: this.blackbox.events,
-      samples: this.blackbox.samples
-    };
-
-    const json = JSON.stringify(payload, null, 2);
-    const hash = await this.bbHashSHA256(json);
-    payload.hashes = { sha256: hash };
-
-    const finalJson = JSON.stringify(payload, null, 2);
-
-    const blob = new Blob([finalJson], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `KGEN_GA_BLACKBOX_${this.blackbox.sessionId}.json`;
-    a.click();
-
-    try { localStorage.setItem(`KGEN_BLACKBOX_${this.blackbox.sessionId}`, finalJson); } catch(e) {}
-  },
-
-  // ===== UI / 控制 =====
-  updateWarp(val) {
-    const v = parseFloat(val);
-    document.getElementById('energy-fill').style.height = v + '%';
-    document.getElementById('warp-thumb').style.bottom = `calc(${v}% - 16px)`;
-    document.getElementById('warp-txt').innerText = `WARP ${Math.round(v * 3)}x`;
-
-    // 記錄 warp（很密，先照記；你要我再幫你加節流）
-    this.bbEvent("warp", { warp: v });
-  },
-
-  async toggleRec() {
-    // Stop recording
-    if (this.recorder && this.recorder.state === "recording") {
-      this.recorder.stop();
-      this.stopTimer();
-
-      document.getElementById('rec-btn').innerText = "🔴 啟動錄影";
-      document.getElementById('rec-dot').style.display = "none";
-      document.getElementById('rec-timer').style.display = "none";
-
-      clearInterval(this.bbSampleInt);
-      this.bbStop();
-      await this.bbExportJSON();
-
-      this.speak("錄影結束，黑盒子數據已封裝。");
-      return;
-    }
-
-    // Start recording
-    const stream = document.getElementById('export-canvas').captureStream(30);
-
-    // mimeType fallback (iOS/Safari 防炸)
-    let mime = 'video/webm;codecs=vp9';
-    if (!window.MediaRecorder) {
-      alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
-      return;
-    }
-    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
-    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
-
-    this.recorder = new MediaRecorder(stream, { mimeType: mime });
-    this.chunks = [];
-
-    this.recorder.ondataavailable = e => { if (e.data && e.data.size) this.chunks.push(e.data); };
-
-    this.recorder.onstop = () => {
-      const blob = new Blob(this.chunks, { type: mime.includes('webm') ? 'video/webm' : 'video/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'KGEN_GA_LOG.webm';
-      a.click();
-    };
-
-    this.bbStart();
-    this.bbSample();
-    this.bbSampleInt = setInterval(() => this.bbSample(), 1000);
-
-    this.startTimer();
-    this.recorder.start();
-
-    document.getElementById('rec-btn').innerText = "⏹️ 停止錄影";
-    document.getElementById('rec-dot').style.display = "block";
-    document.getElementById('rec-timer').style.display = "block";
-    this.speak("黑盒子錄影開始，記錄演化數據。");
-  },
-
-  startTimer() {
-    this.recStartTs = performance.now();
-
-    // 200ms 更新顯示（真秒）
-    this.tInt = setInterval(() => {
-      const elapsedMs = performance.now() - this.recStartTs;
-      const sec = Math.floor(elapsedMs / 1000);
-      const m = Math.floor(sec / 60).toString().padStart(2, '0');
-      const s = (sec % 60).toString().padStart(2, '0');
-      document.getElementById('rec-timer').innerText = `${m}:${s}`;
-    }, 200);
-
-    // 30fps 繪製 export-canvas 供錄影
-    this.drawInt = setInterval(() => this.syncCanvas(), 33);
-  },
-
-  stopTimer() {
-    clearInterval(this.tInt);
-    clearInterval(this.drawInt);
-  },
-
-  syncCanvas() {
-    const cvs = document.getElementById('export-canvas');
-    const ctx = cvs.getContext('2d');
-    cvs.width = 720; cvs.height = 720;
-
-    const v = document.getElementById('cam-view');
-    const f = document.getElementById('fairy-img');
-
-    if (this.isCam) {
-      try { ctx.drawImage(v, 0, 0, 720, 720); } catch(e) { ctx.fillStyle = "#000"; ctx.fillRect(0,0,720,720); }
-    } else {
-      try { ctx.drawImage(f, 0, 0, 720, 720); } catch(e) { ctx.fillStyle = "#000"; ctx.fillRect(0,0,720,720); }
-    }
-
-    // HUD 疊加（黑盒子畫面）
-    ctx.fillStyle = "#ffd778";
-    ctx.font = "bold 30px Noto Sans TC";
-    ctx.fillText("KGEN 16888 GA-BLACKBOX", 30, 50);
-
-    ctx.fillStyle = "#00f2ff";
-    ctx.font = "bold 22px Orbitron";
-    const angle = document.getElementById('steer-slider').value;
-    const warp = document.getElementById('warp-slider').value;
-    ctx.fillText(`ANGLE ${angle}°`, 30, 85);
-    ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
-    ctx.fillText(`GA ${this.ga}`, 30, 145);
-
-    ctx.fillStyle = "#ff4444";
-    ctx.font = "bold 26px Orbitron";
-    ctx.fillText(`REC ${document.getElementById('rec-timer').innerText}`, 30, 185);
-  },
-
-  boost() {
-    this.ga += 50;
-    this.bbEvent("boost", { ga: this.ga });
-    this.speak(`進化至 GA ${this.ga}`);
-  },
-
-  autoHunt() {
-    this.bbEvent("auto_hunt", {});
-    this.speak("自動打怪中");
-    document.getElementById('wish-label').innerText = "⚔️ 打怪錄影中...";
-    setTimeout(() => document.getElementById('wish-label').innerText = "大聖駕到，光耀廣寒", 2000);
-  },
-
-  async cam(mode) {
-    const v = document.getElementById('cam-view');
-    const f = document.getElementById('fairy-img');
-
-    if (this.isCam) {
-      this.stream?.getTracks().forEach(t => t.stop());
-      v.style.opacity = 0;
-      f.style.opacity = 1;
-      this.isCam = false;
-      this.bbEvent("cam_off", {});
-      return;
-    }
-
-    this.camMode = mode || this.camMode || 'user';
-
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: this.camMode }
-    });
-
-    v.srcObject = this.stream;
-    v.style.opacity = 1;
-    f.style.opacity = 0;
-    this.isCam = true;
-    this.bbEvent("cam_on", { mode: this.camMode });
-  },
-
-  toggleCam() {
-    this.camMode = (this.camMode === 'user') ? 'environment' : 'user';
-    if (this.isCam) {
-      // 重啟串流以切鏡頭
-      this.cam(); setTimeout(() => this.cam(this.camMode), 60);
-    } else {
-      this.cam(this.camMode);
-    }
-  },
-
-  capture() {
-    this.syncCanvas();
-    this.bbEvent("capture", {});
-    const link = document.createElement('a');
-    link.download = 'KGEN_SNAP.png';
-    link.href = document.getElementById('export-canvas').toDataURL();
-    link.click();
-  },
-
-  bind() {
-    document.getElementById('steer-slider').oninput = (e) => {
-      const v = e.target.value;
-      document.getElementById('ang-txt').innerText = v + '°';
-      document.getElementById('core-window').style.transform = `rotate(${v}deg)`;
-      this.bbEvent("steer", { angle: parseFloat(v) });
-    };
-    document.getElementById('warp-slider').oninput = (e) => this.updateWarp(e.target.value);
-  },
-
-  initThree() {
-    const sc = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
-    rd.setSize(window.innerWidth, window.innerHeight);
-
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(3000 * 3);
-    for (let i = 0; i < 9000; i++) pos[i] = (Math.random() - 0.5) * 160;
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
-    sc.add(pts);
-    cam.position.z = 50;
-
-    const anim = () => {
-      requestAnimationFrame(anim);
-      const w = document.getElementById('warp-slider').value / 40;
-      if (w > 0) {
-        const r = (parseFloat(document.getElementById('steer-slider').value) * Math.PI) / 180;
-        const p = pts.geometry.attributes.position.array;
-        for (let i = 0; i < p.length; i += 3) {
-          p[i] -= Math.sin(r) * w;
-          p[i + 1] -= Math.cos(r) * w;
-          if (p[i] > 80) p[i] = -80; if (p[i] < -80) p[i] = 80;
-          if (p[i + 1] > 80) p[i + 1] = -80; if (p[i + 1] < -80) p[i + 1] = 80;
+    isCam: false, camMode: 'user', gaLevel: 600,
+    init() {
+        this.initThree(); this.buildUI(); this.bind();
+        setInterval(() => this.tick(), 1000);
+        this.updateWarp(33);
+        this.speak("KGEN 16888 肌肉滿血版啟動。大聖，這次器官全齊了！");
+    },
+    tick() {
+        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+        // 數據格閃爍 (肌肉感)
+        document.querySelectorAll('.dot').forEach(d => {
+            if(Math.random() > 0.9) d.classList.toggle('on');
+        });
+        // GA 數據波動
+        const fit = 0.9 + Math.random() * 0.1;
+        document.getElementById('f-val').innerText = fit.toFixed(3);
+        document.getElementById('f-bar').style.width = (fit * 100) + '%';
+        document.getElementById('m-bar').style.width = (Math.random() * 100) + '%';
+    },
+    buildUI() {
+        ['g1', 'g2'].forEach(id => {
+            const container = document.getElementById(id);
+            for(let i=0; i<100; i++) { // 肌肉填充
+                const d = document.createElement('div');
+                d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
+                container.appendChild(d);
+            }
+        });
+        const rail = document.getElementById('warp-rail-body');
+        for(let i=0; i<25; i++) {
+            const step = document.createElement('div');
+            step.className = 'rail-step';
+            step.style.bottom = (i * 4) + '%';
+            rail.appendChild(step);
         }
-        pts.geometry.attributes.position.needsUpdate = true;
-      }
-      rd.render(sc, cam);
-    };
-    anim();
-  },
-
-  speak(m) {
-    try { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); } catch(e) {}
-  }
+    },
+    updateWarp(val) {
+        document.getElementById('energy-fill').style.height = val + '%';
+        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
+        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
+    },
+    boost() {
+        if(this.gaLevel < 1000) {
+            this.gaLevel += 50;
+            document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
+            this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
+        }
+    },
+    autoHunt() {
+        this.speak("啟動 GA 自動打怪模式，績效演化中。");
+        const old = document.getElementById('wish-label').innerText;
+        document.getElementById('wish-label').innerText = "⚔️ KGEN 自動打怪中...";
+        setTimeout(() => document.getElementById('wish-label').innerText = old, 3000);
+    },
+    async cam(mode) {
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-thumb');
+        if (this.isCam && this.camMode === mode) {
+            this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
+            this.isCam = false; return;
+        }
+        try {
+            if(this.stream) this.stream.getTracks().forEach(t => t.stop());
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
+            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
+            v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+            this.isCam = true; this.camMode = mode;
+        } catch(e) { alert("攝像頭硬體未響應"); }
+    },
+    capture() {
+        const canvas = document.getElementById('snap-canvas'), ctx = canvas.getContext('2d');
+        canvas.width = 1000; canvas.height = 1000;
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+        if(this.isCam) {
+            if(this.camMode === 'user') { ctx.translate(1000,0); ctx.scale(-1,1); }
+            ctx.drawImage(v, 0, 0, 1000, 1000);
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.drawImage(f, 750, 50, 200, 200); // 右上角仙女
+        } else ctx.drawImage(f, 0, 0, 1000, 1000);
+        
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("KGEN 16888 金融生命體", 50, 80);
+        ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
+        ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText(document.getElementById('wish-label').innerText, 70, 930); // 左下留言
+        
+        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
+        link.href = canvas.toDataURL(); link.click();
+    },
+    setWish() {
+        const m = prompt("大聖請開金口：", "大聖駕到，光耀廣寒");
+        if(m) document.getElementById('wish-label').innerText = m;
+    },
+    bind() {
+        document.getElementById('steer-input-val').oninput = (e) => {
+            const v = e.target.value;
+            document.getElementById('ang-val').innerText = v + '°';
+            document.getElementById('core-window').style.transform = `rotate(${v}deg)`; // 🎡 物理連動
+        };
+        document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
+    },
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
+        sc.add(pts); cam.position.z = 50;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            const w = document.getElementById('warp-input-val').value / 40;
+            if(w > 0) {
+                const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
+                const p = pts.geometry.attributes.position.array;
+                for(let i=0; i<p.length; i+=3) {
+                    p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                    if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
+                    if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+                }
+                pts.geometry.attributes.position.needsUpdate = true;
+            }
+            rd.render(sc, cam);
+        };
+        anim();
+    },
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
 };
-
 window.onload = () => app.init();
 </script>
 </body>
