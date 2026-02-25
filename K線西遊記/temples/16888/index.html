@@ -168,10 +168,7 @@
 <div class="wheel-wrap" id="wheel-wrap">
     <div class="wheel" id="wheel">
         <div class="wheel-knob"></div>
-        <div class="wheel-spoke s1"></div>
-        <div class="wheel-spoke s2"></div>
-        <div class="wheel-spoke s3"></div>
-        <div class="wheel-hub"><div class="kgen-badge">KGEN</div></div>
+        <div class="wheel-hub">DRIVE</div>
     </div>
 </div>
 
@@ -197,6 +194,7 @@ const app = {
     init() {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
+        this.warpX = 0;
         this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 肌肉滿血版啟動。黑盒子已掛載。");
@@ -233,10 +231,15 @@ const app = {
     },
 
     updateWarp(val) {
-        document.getElementById('energy-fill').style.height = val + '%';
-        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
-        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
-        this.bbEvent("warp", { warp: parseFloat(val) });
+        // val is 0~100 (%). Convert to warpX based on GA level (GA1:1, GA1000:1000)
+        const pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
+        const cap = Math.max(1, this.gaLevel || 1);
+        const warpX = pct === 0 ? 0 : Math.max(1, Math.round((pct / 100) * cap));
+        this.warpX = warpX;
+        document.getElementById('energy-fill').style.height = pct + '%';
+        document.getElementById('warp-thumb').style.bottom = `calc(${pct}% - 17px)`;
+        document.getElementById('warp-txt').innerText = `WARP ${warpX}x`;
+        this.bbEvent("warp", { pct, warpX, cap });
     },
 
     applySteer(v, silent=false){
@@ -255,6 +258,8 @@ const app = {
             this.gaLevel += 50;
             document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
             this.bbEvent("boost", { ga: this.gaLevel });
+            const pct = parseFloat(document.getElementById('warp-input-val').value) || 0;
+            this.updateWarp(pct);
             this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
         }
     },
@@ -558,12 +563,16 @@ const app = {
         sc.add(pts); cam.position.z = 50;
         const anim = () => {
             requestAnimationFrame(anim);
-            const w = document.getElementById('warp-input-val').value / 40;
+            const pct = parseFloat(document.getElementById('warp-input-val').value) || 0;
+            const cap = Math.max(1, app.gaLevel || 1);
+            const warpX = pct === 0 ? 0 : Math.max(1, Math.round((pct / 100) * cap));
+            const w = warpX / 200; // speed scale (warpX up to 1000 => w up to 5)
             if(w > 0) {
                 const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
                 const p = pts.geometry.attributes.position.array;
                 for(let i=0; i<p.length; i+=3) {
-                    p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                    p[i]   += Math.sin(r) * w;
+                    p[i+1] -= Math.cos(r) * w;
                     if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
                     if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
                 }
