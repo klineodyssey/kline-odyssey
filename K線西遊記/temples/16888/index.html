@@ -2,46 +2,48 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜正名演化金融生命體</title>
+    <title>KGEN 16888｜終極演化金融生命體</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部正名：KGEN 修正 */
+        /* 🏛️ 頂部正名看板 */
         .hud-header { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .brand-box { border-left: 5px solid var(--gold); padding-left: 15px; background: rgba(0,0,0,0.5); }
-        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 2px; }
+        .brand-box { border-left: 5px solid var(--gold); padding-left: 15px; }
+        .brand-name { font-size: 24px; color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 2px; }
         .ga-tag { font-family: 'Orbitron'; color: var(--energy); font-size: 14px; margin-top: 5px; }
 
-        /* 📉 KGEN 能量階梯：黃色視覺強化 */
-        .energy-module { position: fixed; right: 40px; top: 50%; transform: translateY(-50%); z-index: 120; text-align: center; }
-        .energy-tower { display: flex; flex-direction: column-reverse; gap: 5px; margin-bottom: 10px; }
-        .energy-step { width: 50px; height: 14px; background: #221a00; border: 1px solid #443300; transition: all 0.2s; box-shadow: inset 0 0 5px #000; }
-        .energy-step.active { background: var(--energy); box-shadow: 0 0 15px var(--energy), inset 0 0 10px #fff; border-color: #fff; }
-        .energy-label { color: var(--energy); font-family: 'Orbitron'; font-size: 12px; font-weight: 700; text-shadow: 0 0 5px var(--energy); }
+        /* 🚀 左側曲速引擎：操作點往上，下方填滿黃色階圖 */
+        .warp-module { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 150; width: 80px; text-align: center; }
+        .warp-rail { height: 400px; width: 24px; background: rgba(20,20,0,0.8); border: 2px solid var(--energy); position: relative; margin: 0 auto; border-radius: 4px; overflow: hidden; }
+        /* 黃色階梯能量填充區 (在把手下方) */
+        #energy-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, var(--energy), #ffee00); transition: height 0.1s; box-shadow: 0 0 20px var(--energy); }
+        /* 刻度線條 */
+        .grid-line { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.3); z-index: 5; }
+        
+        #warp-handle { width: 60px; height: 30px; background: #fff; position: absolute; left: -18px; bottom: 33%; cursor: pointer; border-radius: 4px; box-shadow: 0 0 25px #fff; border: 2px solid var(--cyan); z-index: 20; }
+        .warp-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 30; }
+        .warp-label { margin-top: 20px; color: var(--energy); font-family: 'Orbitron'; font-size: 14px; font-weight: bold; }
 
-        /* 🚀 曲速器官：KGEN 推進感 */
-        .warp-module { position: fixed; left: 30px; top: 50%; transform: translateY(-50%); z-index: 120; width: 80px; text-align: center; }
-        .warp-rail { height: 350px; width: 14px; background: #111; border: 2px solid var(--cyan); position: relative; margin: 0 auto; border-radius: 7px; }
-        #warp-thumb { width: 50px; height: 25px; background: linear-gradient(var(--cyan), #0088ff); position: absolute; left: -18px; bottom: 33%; cursor: pointer; border-radius: 4px; box-shadow: 0 0 20px var(--cyan); border: 1px solid #fff; z-index: 10; }
-        .warp-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
-
-        /* 🧚 核心生命體 */
-        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; z-index: 50; }
-        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 10px double var(--gold); overflow: hidden; background: #000; position: relative; transition: transform 0.1s linear; }
+        /* 🧚 核心圓窗 */
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; z-index: 50; }
+        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; background: #000; position: relative; transition: transform 0.1s linear; }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
         #webcam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-        #mini-fairy { position: absolute; top: 20px; right: 20px; width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 110; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; }
-        #wish-text { position: absolute; bottom: 45px; left: 45px; z-index: 85; color: #fff; font-weight: 900; font-size: 20px; text-shadow: 0 0 10px #000; }
+        #mini-fairy { position: absolute; top: 25px; right: 25px; width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 110; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; }
+        #wish-text { position: absolute; bottom: 50px; left: 50px; z-index: 85; color: #fff; font-weight: 900; font-size: 22px; text-shadow: 0 0 10px #000; }
 
+        /* 🎡 方向盤控制 */
         .steer-panel { position: fixed; bottom: 170px; width: 100%; text-align: center; z-index: 100; }
-        .angle-val { font-family: 'Orbitron'; font-size: 48px; color: var(--cyan); }
+        .angle-val { font-family: 'Orbitron'; font-size: 48px; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
 
+        /* 🛠️ 底部控制台 */
         .footer-terminal { position: fixed; bottom: 0; width: 100%; background: #000; padding: 15px; border-top: 3px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; z-index: 100; }
-        .btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 15px 2px; font-weight: 900; cursor: pointer; font-size: 12px; }
-        .btn.kgen-boost { border-color: var(--energy); color: var(--energy); box-shadow: 0 0 10px rgba(255,204,0,0.2); }
+        .btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 15px 2px; font-weight: 900; cursor: pointer; font-size: 13px; }
+        .btn.kgen-gold { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 10px rgba(255,204,0,0.2); }
+        
         canvas#galaxy { position: fixed; inset: 0; z-index: 1; }
     </style>
 </head>
@@ -55,17 +57,13 @@
     <div style="text-align:right; font-family:'Orbitron'; color:var(--energy);" id="clock"></div>
 </div>
 
-<div class="energy-module">
-    <div class="energy-tower" id="energy-tower"></div>
-    <div class="energy-label">KGEN ENERGY</div>
-</div>
-
 <div class="warp-module">
-    <div class="warp-rail">
-        <div id="warp-thumb"></div>
-        <input type="range" id="warp-in" class="warp-input" min="0" max="300" value="100">
+    <div class="warp-rail" id="warp-rail">
+        <div id="energy-fill"></div>
+        <div id="warp-handle"></div>
+        <input type="range" id="warp-slider" class="warp-input" min="0" max="100" value="33">
     </div>
-    <div style="color:var(--cyan); font-family:'Orbitron'; font-size:14px; margin-top:15px;" id="warp-val">100x</div>
+    <div class="warp-label" id="warp-display">WARP 100x</div>
 </div>
 
 <div id="core-anchor">
@@ -89,10 +87,10 @@
     <button class="btn" onclick="app.capture()">📸 拍照存證</button>
     <button class="btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
     <button class="btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
-    <button class="btn kgen-boost" onclick="app.boost()">💎 KGEN 沖等演化</button>
-    <button class="btn kgen-boost" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="btn kgen-gold" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="btn kgen-gold" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
     <button class="btn" onclick="app.setWish()">👤 許願/還願</button>
-    <button class="btn" onclick="app.speak('KGEN 系統優化中')">🧬 GA 優化</button>
+    <button class="btn" onclick="app.speak('GA 高等玩家系統正常')">🧬 GA 優化</button>
     <button class="btn" onclick="location.reload()">🔄 重啟系統</button>
 </div>
 
@@ -100,39 +98,36 @@
 const app = {
     isCam: false, camMode: 'user', ga: 600,
     init() {
-        this.initThree(); this.buildEnergy(); this.bind();
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleString();
-            if(Math.random() > 0.8) this.updateEnergy();
-        }, 1000);
-        this.speak("KGEN 金融生命體 v3.0 已正名。GA 600 演化引擎就緒。");
+        this.initThree(); this.buildGrid(); this.bind();
+        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString(), 1000);
+        this.updateWarp(33);
+        this.speak("KGEN 終極生命體已上架，左側曲速引擎操作點就位。");
     },
-    buildEnergy() {
-        const tower = document.getElementById('energy-tower');
-        for(let i=0; i<15; i++) {
-            const step = document.createElement('div');
-            step.className = 'energy-step';
-            tower.appendChild(step);
+    buildGrid() {
+        const rail = document.getElementById('warp-rail');
+        for(let i=0; i<20; i++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line';
+            line.style.bottom = (i * 5) + '%';
+            rail.appendChild(line);
         }
-        this.updateEnergy();
     },
-    updateEnergy() {
-        const steps = document.querySelectorAll('.energy-step');
-        const activeCount = Math.floor((this.ga / 1000) * 15) + (Math.random() > 0.5 ? 1 : 0);
-        steps.forEach((s, i) => s.className = i < activeCount ? 'energy-step active' : 'energy-step');
+    updateWarp(val) {
+        document.getElementById('energy-fill').style.height = val + '%';
+        document.getElementById('warp-handle').style.bottom = `calc(${val}% - 15px)`;
+        document.getElementById('warp-display').innerText = `WARP ${val*3}x`;
     },
     boost() {
         if(this.ga < 1000) {
-            this.ga += 50; this.updateEnergy();
+            this.ga += 50;
             document.getElementById('ga-status').innerText = `EVO LEVEL: GA-${this.ga}`;
-            this.speak(`KGEN 注入成功，演化等級提升至 ${this.ga}`);
-        } else { this.speak("已達 KGEN 巔峰演化態。"); }
+            this.speak(`KGEN 注入演化成功，目前等級 GA ${this.ga}`);
+        }
     },
     autoHunt() {
-        this.speak("自動巡航打怪啟動，正在套用 GA 優化參數。");
-        const original = document.getElementById('wish-text').innerText;
+        this.speak("高等玩家自動巡航打怪啟動，優化 K 線獲利模型。");
         document.getElementById('wish-text').innerText = "⚔️ KGEN 自動打怪中...";
-        setTimeout(() => document.getElementById('wish-text').innerText = original, 3000);
+        setTimeout(() => document.getElementById('wish-text').innerText = "大聖駕到，光耀廣寒", 3000);
     },
     async cam(mode) {
         const v = document.getElementById('webcam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-fairy');
@@ -147,7 +142,7 @@ const app = {
             v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
             v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
             this.isCam = true; this.camMode = mode;
-        } catch(e) { alert("攝像頭啟動失敗"); }
+        } catch(e) { alert("攝像頭連接失敗"); }
     },
     capture() {
         const canvas = document.getElementById('export-canvas'), ctx = canvas.getContext('2d');
@@ -163,11 +158,11 @@ const app = {
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
         ctx.fillText("花果山台灣廣寒宮 16888", 50, 80);
         ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
-        ctx.fillText(`KGEN EVO: GA-${this.ga}`, 50, 120);
+        ctx.fillText(`KGEN EVO: GA-${this.ga} | ${new Date().toLocaleString()}`, 50, 120);
         ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
         ctx.fillText(document.getElementById('wish-text').innerText, 70, 930);
         
-        const link = document.createElement('a'); link.download = `KGEN_3.0_STAMP.png`;
+        const link = document.createElement('a'); link.download = `KGEN_FINAL_EVO.png`;
         link.href = canvas.toDataURL(); link.click();
     },
     setWish() {
@@ -180,11 +175,7 @@ const app = {
             document.getElementById('angle-txt').innerText = v + '°';
             document.getElementById('core-window').style.transform = `rotate(${v}deg)`;
         };
-        document.getElementById('warp-in').oninput = (e) => {
-            const v = e.target.value;
-            document.getElementById('warp-val').innerText = v + "x";
-            document.getElementById('warp-thumb').style.bottom = (v / 300 * 100) + '%';
-        };
+        document.getElementById('warp-slider').oninput = (e) => this.updateWarp(e.target.value);
     },
     initThree() {
         const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -197,7 +188,7 @@ const app = {
         sc.add(pts); cam.position.z = 50;
         const anim = () => {
             requestAnimationFrame(anim);
-            const w = document.getElementById('warp-in').value / 60;
+            const w = document.getElementById('warp-slider').value / 30;
             if(w > 0) {
                 const r = (parseFloat(document.getElementById('steer-in').value) * Math.PI) / 180;
                 const p = pts.geometry.attributes.position.array;
