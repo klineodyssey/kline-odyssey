@@ -2,8 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜金融生命體肌肉滿血版｜v1.51</title>
+    <title>KGEN 16888｜金融生命體肌肉滿血版｜v1.52</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
@@ -113,14 +114,138 @@
         }
 
         canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    
+        /* ===== Overlay / Modal ===== */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.70);
+            display:none; z-index: 500; backdrop-filter: blur(4px);
+        }
+        .modal {
+            position: fixed; left:50%; top:50%; transform: translate(-50%,-50%);
+            width: min(520px, 92vw);
+            background: rgba(10,10,0,.92);
+            border: 1px solid rgba(255,215,120,.35);
+            border-top: 3px solid var(--gold);
+            box-shadow: 0 0 40px rgba(0,242,255,.15);
+            border-radius: 10px;
+            padding: 14px 14px 16px 14px;
+            display:none; z-index: 510;
+        }
+        .modal h3{ margin:0 0 10px 0; font-family:'Orbitron'; font-size:14px; color: var(--gold); letter-spacing: .5px;}
+        .modal .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0; }
+        .pill{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:10px 12px; border-radius:999px;
+            background: rgba(0,0,0,.35);
+            border: 1px solid rgba(0,242,255,.25);
+            font-family:'Orbitron'; font-size:12px; color: var(--cyan);
+        }
+        .btn-mini{
+            background: #0a0a0a; border:1px solid #444; color:#fff;
+            padding:10px 12px; border-radius:8px; font-weight:900; cursor:pointer;
+        }
+        .btn-mini:hover{ background: var(--gold); color:#000; border-color: var(--gold); }
+        .btn-mini.kgen{ border-color: var(--energy); color: var(--energy); }
+        .btn-mini.red{ border-color: var(--red); color: var(--red); }
+        .input{
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: rgba(0,0,0,.35);
+            color:#fff;
+            outline:none;
+        }
+        .hint{ font-size:12px; color: rgba(255,255,255,.75); line-height:1.5; }
+        .tiny{ font-size:11px; color: rgba(255,255,255,.55); }
+        .top-ctl{
+            position: fixed; right: 18px; top: 16px; z-index: 200;
+            pointer-events: auto;
+            display:flex; gap:10px; align-items:center;
+        }
+        .addr{
+            font-family:'Orbitron'; font-size:11px; color: rgba(255,255,255,.85);
+            background: rgba(0,0,0,.35);
+            border:1px solid rgba(255,215,120,.25);
+            padding:8px 10px; border-radius:10px;
+        }
+
     </style>
 </head>
 <body>
 
+<div class="top-ctl">
+    <div class="addr" id="wallet-st">WALLET: DISCONNECTED</div>
+    <button class="btn-mini kgen" onclick="app.connect()">🔗 CONNECT</button>
+    <button class="btn-mini" onclick="app.openModal('settings')">⚙️</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="app.closeModal()"></div>
+
+<div class="modal" id="modal-settings" onclick="event.stopPropagation()">
+    <h3>16888｜Front-End Settings</h3>
+    <div class="row">
+        <div class="pill">KGEN TOKEN<br><span class="tiny" id="kgen-token-view"></span></div>
+    </div>
+    <div class="row">
+        <div style="width:100%">
+            <div class="tiny">懷孕池（預設：高老莊 8888）</div>
+            <input class="input" id="pool-addr" placeholder="0x..." />
+        </div>
+    </div>
+    <div class="row">
+        <div style="width:100%">
+            <div class="tiny">MoonTrust 合約地址（16888，上鏈後再填）</div>
+            <input class="input" id="moontrust-addr" placeholder="0x..." />
+        </div>
+    </div>
+    <div class="row">
+        <button class="btn-mini kgen" onclick="app.saveSettings()">💾 SAVE</button>
+        <button class="btn-mini" onclick="app.closeModal()">CLOSE</button>
+    </div>
+    <div class="hint">
+        所有按鍵預設都會把 KGEN 轉入「懷孕池」。<br>
+        月球 16888（MoonTrust）上鏈後，把合約地址貼進來即可切換成「真獎池」。
+    </div>
+</div>
+
+<div class="modal" id="modal-order" onclick="event.stopPropagation()">
+    <h3>CT 下單（簡化版）</h3>
+    <div class="row">
+        <div class="pill">保證金：<b>10 KGEN</b> / 1 單</div>
+        <div class="pill">方向：以你當下角度為准（0=多，±180=空）</div>
+    </div>
+    <div class="row" style="width:100%">
+        <button class="btn-mini kgen" onclick="app.placeCT('LONG')">📈 CT LONG</button>
+        <button class="btn-mini red" onclick="app.placeCT('SHORT')">📉 CT SHORT</button>
+        <button class="btn-mini" onclick="app.closeModal()">CLOSE</button>
+    </div>
+    <div class="hint">
+        這裡的「下單」= 真實 ERC20 轉帳 10 KGEN 進懷孕池（或 16888 合約）。<br>
+        CT+1 結算先以「記錄」為主；等 MoonTrust/Oracle 上鏈後再改為鏈上結算。
+    </div>
+</div>
+
+<div class="modal" id="modal-lamp" onclick="event.stopPropagation()">
+    <h3>點燈｜十二生肖 + 自選</h3>
+    <div class="row">
+        <div class="pill">每盞燈：<b>1 KGEN</b></div>
+        <div class="pill">全部轉入懷孕池</div>
+    </div>
+    <div class="row" id="lamp-grid"></div>
+    <div class="row" style="width:100%">
+        <button class="btn-mini" onclick="app.closeModal()">CLOSE</button>
+    </div>
+    <div class="hint">
+        自選燈可輸入名稱：變形金鋼 / 超人 / 蝙蝠俠 / 蟻人…（只做紀錄，不影響轉帳）。
+    </div>
+</div>
+
+
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v1.51</div>
+        <div class="sys-st" id="ver-st">VERSION v1.52</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -169,7 +294,7 @@
 <div class="wheel-wrap" id="wheel-wrap">
     <div class="wheel" id="wheel">
         <div class="wheel-knob"></div>
-        <div class="wheel-hub">DRIVE</div>
+        <div class="wheel-hub">K G E N</div>
     </div>
 </div>
 
@@ -182,12 +307,36 @@
     <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
     <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
     <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
+    <button class="term-btn active-kgen" onclick="app.openModal('order')">🧾 CT 下單</button>
+    <button class="term-btn" onclick="app.settleCTPlus1()">📆 CT+1 結算</button>
+    <button class="term-btn active-kgen" onclick="app.openModal('lamp')">🕯️ 生肖燈</button>
 </div>
 
 <script>
 const app = {
     isCam: false, camMode: 'user', gaLevel: 600,
     warpX: 0,
+
+    // ===== On-chain config (editable in Settings) =====
+    cfg: {
+        chainIdHex: "0x38", // BSC mainnet
+        chainName: "BNB Smart Chain",
+        rpcUrls: ["https://bsc-dataseed.binance.org/"],
+        blockExplorerUrls: ["https://bscscan.com"],
+        kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+        // default pregnancy pool = 高老莊8888
+        pregnancyPool: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
+        moonTrust: "" // 16888 MoonTrust contract (set after deploy)
+    },
+    wallet: { provider:null, signer:null, address:null, connected:false },
+
+    // Minimal ERC20 ABI
+    abiERC20: [
+        "function decimals() view returns (uint8)",
+        "function balanceOf(address) view returns (uint256)",
+        "function transfer(address to, uint256 amount) returns (bool)"
+    ],
+
  recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
     stream: null, tInt: null, drawInt: null, bbSampleInt: null,
 
@@ -195,7 +344,7 @@ const app = {
     blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
 
     init() {
-        this.initThree(); this.buildUI(); this.bind();
+        this.loadSettings(); this.initThree(); this.buildUI(); this.buildLamps(); this.bind();
         setInterval(() => this.tick(), 1000);
         this.updateWarp(33);
         this.applySteer(76, true);
@@ -336,6 +485,196 @@ const app = {
         wrap.style.display = on ? 'none' : 'block';
         this.bbEvent("wheel_toggle", { on: !on });
     },
+
+
+    // ===== Modal helpers =====
+    openModal(which){
+        document.getElementById('overlay').style.display = 'block';
+        ["settings","order","lamp"].forEach(k=>{
+            const el = document.getElementById('modal-'+k);
+            if(el) el.style.display = (k===which) ? 'block' : 'none';
+        });
+        if(which==="settings"){
+            document.getElementById('kgen-token-view').innerText = this.cfg.kgenToken;
+            document.getElementById('pool-addr').value = this.cfg.pregnancyPool || "";
+            document.getElementById('moontrust-addr').value = this.cfg.moonTrust || "";
+        }
+    },
+    closeModal(){
+        document.getElementById('overlay').style.display = 'none';
+        ["settings","order","lamp"].forEach(k=>{
+            const el = document.getElementById('modal-'+k);
+            if(el) el.style.display = 'none';
+        });
+    },
+    loadSettings(){
+        try{
+            const raw = localStorage.getItem("KGEN16888_CFG");
+            if(raw){
+                const o = JSON.parse(raw);
+                if(o && typeof o==="object"){
+                    if(o.pregnancyPool) this.cfg.pregnancyPool = o.pregnancyPool;
+                    if(o.moonTrust !== undefined) this.cfg.moonTrust = o.moonTrust;
+                }
+            }
+        }catch(e){}
+        // reflect
+        const tokenView = document.getElementById('kgen-token-view');
+        if(tokenView) tokenView.innerText = this.cfg.kgenToken;
+        const st = document.getElementById('wallet-st');
+        if(st) st.innerText = "WALLET: DISCONNECTED";
+    },
+    saveSettings(){
+        const pool = (document.getElementById('pool-addr').value || "").trim();
+        const moon = (document.getElementById('moontrust-addr').value || "").trim();
+        if(pool) this.cfg.pregnancyPool = pool;
+        this.cfg.moonTrust = moon;
+        try{ localStorage.setItem("KGEN16888_CFG", JSON.stringify({ pregnancyPool:this.cfg.pregnancyPool, moonTrust:this.cfg.moonTrust })); }catch(e){}
+        this.bbEvent("settings_save", { pregnancyPool:this.cfg.pregnancyPool, moonTrust:this.cfg.moonTrust });
+        this.speak("設定已保存。");
+        this.closeModal();
+    },
+
+    // ===== Wallet / Chain =====
+    async connect(){
+        if(!window.ethereum || !window.ethers){
+            alert("找不到錢包 / ethers。請用 Chrome + MetaMask 或安卓錢包內建瀏覽器。");
+            return;
+        }
+        try{
+            // request accounts
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            const signer = provider.getSigner();
+            const addr = await signer.getAddress();
+
+            // try switch to BSC
+            const cid = await provider.send("eth_chainId", []);
+            if(cid !== this.cfg.chainIdHex){
+                try{
+                    await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId: this.cfg.chainIdHex }] });
+                }catch(err){
+                    // add chain then switch
+                    await window.ethereum.request({
+                        method:"wallet_addEthereumChain",
+                        params:[{
+                            chainId: this.cfg.chainIdHex,
+                            chainName: this.cfg.chainName,
+                            rpcUrls: this.cfg.rpcUrls,
+                            blockExplorerUrls: this.cfg.blockExplorerUrls,
+                            nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 }
+                        }]
+                    });
+                }
+            }
+
+            this.wallet = { provider, signer, address: addr, connected:true };
+            document.getElementById('wallet-st').innerText = "WALLET: " + addr.slice(0,6) + "..." + addr.slice(-4);
+            this.bbEvent("wallet_connect", { addr });
+            this.speak("錢包已連線。");
+        }catch(e){
+            console.error(e);
+            alert("錢包連線失敗 / 使用者取消。");
+        }
+    },
+
+    getPoolAddress(){
+        // if MoonTrust is set, use it as the true pool; else default pregnancy pool
+        return (this.cfg.moonTrust && this.cfg.moonTrust.length===42) ? this.cfg.moonTrust : this.cfg.pregnancyPool;
+    },
+
+    async sendKGEN(to, amountKgen, memoType){
+        if(!this.wallet.connected) await this.connect();
+        if(!this.wallet.connected) return;
+
+        const toAddr = to;
+        const amt = ethers.utils.parseUnits(String(amountKgen), 18);
+        const token = new ethers.Contract(this.cfg.kgenToken, this.abiERC20, this.wallet.signer);
+
+        this.bbEvent("kgen_transfer_try", { to: toAddr, amountKgen, memoType });
+        const tx = await token.transfer(toAddr, amt);
+        this.speak("交易已送出。");
+        await tx.wait();
+        this.bbEvent("kgen_transfer_ok", { hash: tx.hash, to: toAddr, amountKgen, memoType });
+        return tx.hash;
+    },
+
+    // ===== Gameplay: CT Order (real transfer) =====
+    async placeCT(side){
+        const pool = this.getPoolAddress();
+        const angle = parseInt(document.getElementById('steer-input-val').value || "0", 10);
+        const warpPct = parseInt(document.getElementById('warp-input-val').value || "0", 10);
+        const warpX = this.getWarpXFromPct(warpPct);
+
+        try{
+            const hash = await this.sendKGEN(pool, 10, "CT_"+side);
+            // local record
+            const rec = { t: Date.now(), side, angle, warpX, ga: this.gaLevel, pool, hash: hash || null };
+            const list = this._loadOrders();
+            list.unshift(rec);
+            this._saveOrders(list);
+            this.bbEvent("ct_order", rec);
+            this.speak("CT 下單完成。");
+            this.closeModal();
+        }catch(e){
+            console.error(e);
+            alert("下單失敗（可能餘額不足或錢包拒絕）。");
+        }
+    },
+    _loadOrders(){
+        try{ return JSON.parse(localStorage.getItem("KGEN16888_ORDERS")||"[]"); }catch(e){ return []; }
+    },
+    _saveOrders(list){
+        try{ localStorage.setItem("KGEN16888_ORDERS", JSON.stringify(list.slice(0,50))); }catch(e){}
+    },
+    settleCTPlus1(){
+        // Placeholder: real settle requires MoonTrust/Oracle rule engine
+        const list = this._loadOrders();
+        if(!list.length){
+            this.speak("沒有可結算的 CT 記錄。");
+            return;
+        }
+        const last = list[0];
+        this.bbEvent("ct_settle_stub", { last });
+        alert("CT+1 結算（A版）：目前先做『記錄』。
+等 16888 MoonTrust 上鏈並設定 Oracle 後，再改成鏈上結算。");
+    },
+
+    // ===== Lamps: zodiac + custom (real transfer) =====
+    buildLamps(){
+        const grid = document.getElementById('lamp-grid');
+        if(!grid) return;
+        grid.innerHTML = "";
+        const z = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"];
+        z.forEach((name, idx)=>{
+            const b = document.createElement('button');
+            b.className = 'btn-mini kgen';
+            b.innerText = name + "燈";
+            b.onclick = ()=>this.lightLamp("生肖", name, 1);
+            grid.appendChild(b);
+        });
+        const custom = document.createElement('button');
+        custom.className = 'btn-mini';
+        custom.innerText = "自選燈";
+        custom.onclick = ()=>{
+            const n = prompt("自選燈名稱：", "變形金鋼");
+            if(!n) return;
+            this.lightLamp("自選", n, 1);
+        };
+        grid.appendChild(custom);
+    },
+    async lightLamp(kind, name, amountKgen){
+        const pool = this.getPoolAddress();
+        try{
+            const hash = await this.sendKGEN(pool, amountKgen, "LAMP_"+kind+"_"+name);
+            this.bbEvent("lamp", { kind, name, amountKgen, pool, hash: hash||null });
+            this.speak("點燈完成。");
+        }catch(e){
+            console.error(e);
+            alert("點燈失敗（可能餘額不足或錢包拒絕）。");
+        }
+    },
+
 
     bind() {
         document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
