@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>KGEN 16888｜廣寒宮超光速指揮中心</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
+
+        /* 🧚 仙女/監控核心 */
+        #core-display {
+            position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            width: 380px; height: 380px; border-radius: 50%; border: 12px double var(--gold);
+            overflow: hidden; z-index: 50; background: #000; box-shadow: 0 0 80px rgba(255,215,120,0.4);
+        }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #monitor-webcam { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scaleX(-1); }
+        
+        /* 📸 照片右上角仙女小圖 (合照模式) */
+        #mini-fairy {
+            position: absolute; top: 10px; right: 10px; width: 80px; height: 80px;
+            border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 70;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+        }
+
+        /* 🚀 250x 曲速引擎 (含 0x 熄火) */
+        .warp-panel { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 100; }
+        .warp-bars { display: flex; flex-direction: column-reverse; gap: 4px; border-left: 3px solid var(--cyan); padding: 5px; }
+        .bar-seg { width: 35px; height: 8px; background: #111; transition: 0.1s; }
+        .bar-seg.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        .warp-input { position: absolute; left: 0; top: 0; width: 45px; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
+
+        /* 其他介面 */
+        .steer-panel { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
+        .angle-val { font-family: 'Orbitron'; font-size: 52px; color: var(--cyan); text-shadow: 0 0 25px var(--cyan); }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; }
+        .btn { background: #111; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; }
+        canvas { position: fixed; inset: 0; z-index: 1; }
+    </style>
+</head>
+<body>
+
+<div id="core-display">
+    <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+    <video id="monitor-webcam" autoplay playsinline></video>
+    <div id="mini-fairy"></div>
+</div>
+
+<div class="warp-panel">
+    <div id="warp-bars" class="warp-bars"></div>
+    <input type="range" class="warp-input" id="warp-in" min="0" max="25" value="10">
+    <div id="warp-txt" style="color:var(--cyan); font-family:'Orbitron'; margin-top:10px; font-size:12px;">WARP 100x</div>
+</div>
+
+<div class="steer-panel">
+    <div class="angle-val" id="angle-txt">76°</div>
+    <input type="range" id="steer-in" style="width:80%;" min="-180" max="180" value="76">
+</div>
+
+<div class="footer">
+    <button class="btn" onclick="app.capture()">📸 拍照存證</button>
+    <button class="btn" onclick="app.toggleCam()">🎥 影像監控</button>
+    <button class="btn" onclick="app.speak('已記錄大聖留言並附上合照')">👤 許願留言</button>
+    <button class="btn">📈 CT 下單</button><button class="btn">🦊 錢包連結</button><button class="btn">🎙️ 客服語音</button>
+</div>
+
+<script>
+const app = {
+    init() {
+        this.initThree();
+        this.buildWarp();
+        this.bind();
+        this.speak("反物質引擎校準完畢，0至250倍速隨大聖調遣");
+    },
+    buildWarp() {
+        const c = document.getElementById('warp-bars');
+        for(let i=0; i<25; i++) {
+            const b = document.createElement('div'); b.className = 'bar-seg';
+            c.appendChild(b);
+        }
+        this.updateWarp(10);
+    },
+    updateWarp(v) {
+        document.querySelectorAll('.bar-seg').forEach((b, i) => b.className = i < v ? 'bar-seg active' : 'bar-seg');
+        document.getElementById('warp-txt').innerText = v == 0 ? "反物質熄火 0x" : "WARP " + v * 10 + "x";
+    },
+    async toggleCam() {
+        const v = document.getElementById('monitor-webcam');
+        const f = document.getElementById('fairy-img');
+        const m = document.getElementById('mini-fairy');
+        if (!this.isCamOn) {
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
+            this.isCamOn = true;
+        } else {
+            this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
+            this.isCamOn = false;
+        }
+    },
+    capture() {
+        this.speak("合影成功，已上傳廣寒宮檔案室");
+        alert("📸 [大聖合照存證]\n已捕捉即時監控畫面，右上角已嵌入仙女合影圖。");
+    },
+    bind() {
+        document.getElementById('steer-in').oninput = (e) => {
+            document.getElementById('angle-txt').innerText = e.target.value + '°';
+        };
+        document.getElementById('warp-in').oninput = (e) => this.updateWarp(e.target.value);
+    },
+    initThree() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
+        const geo = new THREE.BufferGeometry();
+        const count = 5000; const pos = new Float32Array(count * 3);
+        for(let i=0; i<count*3; i++) pos[i] = (Math.random() - 0.5) * 150;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
+        this.scene.add(this.stars); this.camera.position.z = 50;
+        this.animate();
+    },
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const warp = document.getElementById('warp-in').value / 80;
+        if (warp === 0) { this.renderer.render(this.scene, this.camera); return; } // 🚀 0倍速完全靜止
+        const steerX = parseFloat(document.getElementById('steer-in').value);
+        const rad = (steerX * Math.PI) / 180;
+        const p = this.stars.geometry.attributes.position.array;
+        for(let i=0; i<p.length; i+=3) {
+            p[i] -= (Math.sin(rad) * warp * 15);
+            p[i+1] -= (Math.cos(rad) * warp * 15);
+            if(p[i] > 75) p[i] = -75; if(p[i] < -75) p[i] = 75;
+            if(p[i+1] > 75) p[i+1] = -75; if(p[i+1] < -75) p[i+1] = 75;
+        }
+        this.stars.geometry.attributes.position.needsUpdate = true;
+        this.renderer.render(this.scene, this.camera);
+    },
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
+};
+window.onload = () => app.init();
+</script>
+</body>
+</html>
