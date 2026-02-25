@@ -2,315 +2,205 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜混沌生命演化擴張版 v6.0</title>
+    <title>KGEN 16888｜終極地府客服版 v8.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
-        /* 🧬 基因染色體樣式表 (CSS 擴張) */
         :root { 
             --gold: #ffd778; --cyan: #00f2ff; --energy: #ffcc00; --red: #ff3333; 
-            --pink: #ff66cc; --dna-blue: #4444ff; --bg-dark: #000000;
+            --dead-green: #44ff88; --kgen-mass: #77ff77; --bg: #000; 
         }
-        body, html { 
-            margin: 0; padding: 0; background: var(--bg-dark); color: #fff; 
-            font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh;
-        }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部：500神位 + 500豪宅 + 彩金池 (器官群) */
-        .hud-master-top { 
-            position: fixed; top: 0; width: 100%; height: 120px; 
-            background: linear-gradient(180deg, rgba(30,30,0,0.9) 0%, transparent 100%);
-            z-index: 1000; display: flex; justify-content: space-around; padding-top: 10px;
-        }
-        .seat-module { width: 320px; text-align: center; }
-        .grid-500-box { 
-            display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; 
-            padding: 5px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold);
-        }
-        .pixel-seat { width: 6px; height: 6px; background: #222; }
-        .pixel-seat.active { background: var(--energy); box-shadow: 0 0 5px var(--energy); }
-        
-        .jackpot-display { 
-            width: 400px; text-align: center; border-bottom: 2px solid var(--gold);
-            background: rgba(0,0,0,0.8); padding: 10px;
-        }
-        .money-val { font-family: 'Orbitron'; font-size: 32px; color: var(--gold); text-shadow: 0 0 20px var(--gold); }
+        /* 🏛️ 頂部器官：1000 席位 */
+        .hud-master-top { position: fixed; top: 0; width: 100%; height: 130px; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; justify-content: space-around; padding-top: 10px; border-bottom: 2px solid var(--gold); }
+        .seat-module { width: 300px; text-align: center; }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; padding: 5px; background: #111; border: 1px solid #333; }
+        .dot { width: 5px; height: 5px; background: #222; }
+        .dot.active { background: var(--energy); box-shadow: 0 0 5px var(--energy); }
+        .jackpot-box { width: 400px; text-align: center; }
+        .money-val { font-family: 'Orbitron'; font-size: 32px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
 
-        /* 🚀 左側：曲速引擎 (油箱 + 能量階梯) */
-        .left-organ-warp { 
-            position: fixed; left: 30px; top: 55%; transform: translateY(-50%); 
-            z-index: 500; display: flex; flex-direction: column; align-items: center;
-        }
-        .warp-rail-container { 
-            height: 450px; width: 40px; background: #111; border: 4px solid var(--gold); 
-            position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 0 30px rgba(255,215,120,0.2);
-        }
-        #fuel-energy-fill { 
-            position: absolute; bottom: 0; width: 100%; 
-            background: linear-gradient(to top, #ff0000 0%, #ffcc00 50%, #ffffff 100%);
-            transition: height 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-        }
-        .gauge-line { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.5); z-index: 10; }
-        #warp-slider-handle { 
-            width: 70px; height: 30px; background: #fff; position: absolute; 
-            left: -15px; bottom: 33%; z-index: 100; border: 3px solid var(--cyan);
-            border-radius: 5px; box-shadow: 0 0 20px #fff; cursor: pointer;
-        }
-        .invisible-input { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 110;
-        }
+        /* 🚀 左側器官：曲速引擎 (連動流速與質量) */
+        .left-panel { position: fixed; left: 30px; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; gap: 20px; align-items: flex-end; }
+        .warp-rail-box { height: 450px; width: 40px; background: #111; border: 3px solid var(--gold); position: relative; border-radius: 8px; overflow: hidden; }
+        #warp-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #f00, var(--energy), #fff); transition: height 0.1s; z-index: 5; }
+        #warp-thumb { width: 70px; height: 35px; background: #fff; position: absolute; left: -18px; bottom: 33%; z-index: 100; border: 3px solid var(--cyan); border-radius: 5px; box-shadow: 0 0 20px #fff; cursor: pointer; }
+        .v-slider { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 110; }
 
-        /* ♈ 12+1 生肖與器官狀態 */
-        .right-organ-zodiac { 
-            position: fixed; right: 20px; top: 130px; z-index: 500; 
-            background: rgba(0,0,0,0.7); padding: 15px; border: 1px solid var(--cyan);
-        }
-        .zodiac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .zodiac-item { 
-            width: 45px; height: 45px; border: 1px solid #444; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-weight: 900;
-        }
-        .zodiac-item.light-on { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 15px var(--cyan); }
+        /* 💀 死人客服器官 (新器官) */
+        .dead-service-panel { position: fixed; right: 20px; bottom: 150px; width: 220px; background: rgba(0,20,0,0.8); border: 1px solid var(--dead-green); padding: 15px; z-index: 1000; border-radius: 5px; box-shadow: 0 0 20px rgba(68, 255, 136, 0.3); }
+        .dead-avatar { width: 50px; height: 50px; border: 2px solid var(--dead-green); margin-bottom: 10px; border-radius: 50%; background: url('https://img.icons8.com/ios-filled/50/44ff88/skull.png') center/cover; }
+        .service-log { font-size: 11px; color: var(--dead-green); height: 60px; overflow-y: hidden; font-family: 'Orbitron'; line-height: 1.4; border-top: 1px solid #225522; padding-top: 5px; }
 
-        /* 🧬 DNA 生殖演化模組 */
-        .bio-reproductive-center { 
-            position: fixed; right: 20px; bottom: 150px; width: 220px;
-            border: 2px solid var(--pink); background: rgba(30,0,30,0.8); padding: 15px;
-        }
-        .dna-helix { font-family: 'Orbitron'; font-size: 11px; color: var(--pink); overflow: hidden; height: 20px; margin-bottom: 10px; }
+        /* ♈ 12+1 生肖點燈 (物理點燈按鈕) */
+        .right-panel { position: fixed; right: 20px; top: 150px; z-index: 1000; }
+        .zodiac-grid { display: grid; grid-template-columns: repeat(3, 45px); gap: 10px; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid var(--pink); border-radius: 10px; }
+        .z-lamp { width: 45px; height: 45px; border: 1px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .z-lamp.on { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 20px var(--pink); background: rgba(255, 102, 204, 0.2); }
 
-        /* 🧚 核心視窗：精子與女子結合區 */
-        #central-life-core { 
-            position: fixed; top: 50%; left: 52%; transform: translate(-50%, -50%); 
-            width: 450px; height: 450px; z-index: 100; 
-        }
-        #egg-cell-window { 
-            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
-            overflow: hidden; background: #000; position: relative; box-shadow: 0 0 100px rgba(255,215,120,0.3);
-        }
-        #fairy-avatar { width: 100%; height: 100%; object-fit: cover; }
-        .gamete-sperm { 
-            position: absolute; width: 12px; height: 4px; background: #fff; 
-            border-radius: 50% 0 0 50%; pointer-events: none;
-        }
+        /* 🎡 物理方向盤與核心 */
+        .steering-center { position: fixed; bottom: 180px; width: 100%; display: flex; justify-content: center; z-index: 1000; }
+        .wheel-body { width: 260px; height: 260px; border: 12px solid #333; border-radius: 50%; position: relative; transition: transform 0.05s linear; pointer-events: auto; box-shadow: 0 0 40px rgba(0,0,0,0.9); background: radial-gradient(circle, transparent 40%, rgba(255,215,120,0.1) 100%); }
+        .wheel-spoke { position: absolute; top: 50%; left: 50%; width: 100%; height: 8px; background: #444; transform: translate(-50%, -50%); }
+        .wheel-spoke.v { transform: translate(-50%, -50%) rotate(90deg); }
+        .wheel-hub { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid #000; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; font-size: 12px; }
 
-        /* 🛠️ 底部控制台：功能增長 */
-        .terminal-cmd-center { 
-            position: fixed; bottom: 0; width: 100%; background: #000; 
-            border-top: 5px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); 
-            padding: 20px; gap: 15px; z-index: 2000;
-        }
-        .cmd-btn { 
-            background: #111; border: 2px solid #444; color: #fff; padding: 15px;
-            font-size: 14px; font-weight: 900; cursor: pointer; transition: 0.3s;
-        }
-        .cmd-btn:hover { background: var(--gold); color: #000; }
-        .btn-evo { border-color: var(--pink); color: var(--pink); }
-        .btn-kgen { border-color: var(--energy); color: var(--energy); }
+        #core-window { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; border-radius: 50%; border: 15px double var(--gold); overflow: hidden; z-index: 500; transition: transform 0.05s linear; }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
 
-        canvas#cosmic-bg { position: fixed; inset: 0; z-index: 1; }
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 5px solid var(--gold); display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px; gap: 10px; z-index: 2000; }
+        .f-btn { background: #111; border: 2px solid #444; color: #fff; padding: 15px 5px; font-weight: 900; cursor: pointer; font-size: 12px; border-radius: 5px; }
+        .f-btn.warn { border-color: var(--red); color: var(--red); }
+
+        canvas#cosmos { position: fixed; inset: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
 <div class="hud-master-top">
-    <div class="seat-module">
-        <div style="color:var(--gold); font-size:12px;">🏛️ 齊天神明席位 (500)</div>
-        <div class="grid-500-box" id="god-seats"></div>
+    <div class="seat-module"><div>🏛️ 神明席位 (500)</div><div class="grid-500" id="god-grid"></div></div>
+    <div class="jackpot-box">
+        <div style="font-size:14px; color:var(--cyan);">KGEN 16888 混沌彩金池</div>
+        <div class="money-val" id="jack-val">$16,888,777,000</div>
+        <div style="font-size:12px; color:var(--red);">每日規費: 1 KGEN (已扣除)</div>
     </div>
-    <div class="jackpot-display">
-        <div style="font-size:14px; color:var(--cyan);">KGEN 16888 混沌生命彩金池</div>
-        <div class="money-val" id="jackpot-counter">$16,888,777,000</div>
+    <div class="seat-module"><div>🐒 豪宅席位 (500)</div><div class="grid-500" id="man-grid"></div></div>
+</div>
+
+<div class="left-panel">
+    <div class="warp-rail-box">
+        <div id="warp-fill"></div>
+        <div id="warp-thumb"></div>
+        <input type="range" id="warp-slider" class="v-slider" min="0" max="100" value="33">
     </div>
-    <div class="seat-module">
-        <div style="color:var(--gold); font-size:12px;">🐒 齊天豪宅席位 (500)</div>
-        <div class="grid-500-box" id="mansion-seats"></div>
+    <div style="width:150px; background:rgba(0,0,0,0.8); padding:10px; border:1px solid var(--cyan);">
+        <div style="font-size:10px; color:var(--cyan);">保證金 (Margin)</div>
+        <div style="height:10px; background:#222; margin:5px 0;"><div id="m-bar" style="width:85%; height:100%; background:var(--red);"></div></div>
+        <div style="font-size:10px; color:var(--kgen-mass);">KGEN 質量 (Mass)</div>
+        <div style="height:10px; background:#222; margin:5px 0;"><div id="ms-bar" style="width:33%; height:100%; background:var(--kgen-mass);"></div></div>
+        <div id="warp-txt" style="color:var(--energy); font-family:'Orbitron'; font-size:20px; text-align:center; margin-top:10px;">33x</div>
     </div>
 </div>
 
-<div class="left-organ-warp">
-    <div class="warp-rail-container">
-        <div id="fuel-energy-fill"></div>
-        <div id="warp-slider-handle"></div>
-        <input type="range" id="warp-master-control" class="invisible-input" min="0" max="100" value="33">
+<div class="right-panel">
+    <div class="zodiac-grid" id="z-box"></div>
+</div>
+
+<div class="dead-service-panel">
+    <div style="display:flex; align-items:center;">
+        <div class="dead-avatar"></div>
+        <div style="margin-left:10px; font-weight:900; color:var(--dead-green);">地府死人客服</div>
     </div>
-    <div style="color:var(--energy); font-family:'Orbitron'; margin-top:15px; font-size:20px;" id="warp-text">WARP 100x</div>
+    <div class="service-log" id="s-log">系統：已扣除 1 KGEN...<br>客服：別吵，我在投胎...</div>
 </div>
 
-<div class="right-organ-zodiac">
-    <div style="text-align:center; font-size:12px; margin-bottom:10px;">12+1 生肖位格燈</div>
-    <div class="zodiac-grid" id="zodiac-grid-container"></div>
+<div id="core-window">
+    <div id="wish-label" style="position:absolute; bottom:50px; width:100%; text-align:center; font-size:24px; font-weight:900; text-shadow:0 0 10px #000; z-index:100;">大聖駕到，光耀廣寒</div>
+    <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 </div>
 
-<div class="bio-reproductive-center">
-    <div class="dna-helix" id="dna-scroller">ATCGGCTATATACGGATCGCTATACG...</div>
-    <div style="font-size:14px; color:var(--pink);">🧬 GA 演化 DNA 轉錄中</div>
-    <div style="margin-top:10px;">
-        HP: <span id="hp-val" style="color:var(--red);">100%</span><br>
-        RNA: <span style="color:var(--cyan);">ACTIVE</span>
-    </div>
-</div>
-
-<div id="central-life-core">
-    <div id="egg-cell-window">
-        <div id="holy-wish-label" style="position:absolute; bottom:50px; width:100%; text-align:center; font-size:26px; font-weight:900; text-shadow:2px 2px 10px #000; z-index:500;">大聖駕到，光耀廣寒</div>
-        <img id="fairy-avatar" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+<div class="steering-center">
+    <div class="wheel-body" id="wheel-body">
+        <div class="wheel-spoke"></div><div class="wheel-spoke v"></div>
+        <div class="wheel-hub">KGEN</div>
+        <input type="range" id="wheel-input" min="-180" max="180" value="0" style="position:absolute; width:100%; top:50%; left:0; transform:translateY(-50%); opacity:0; cursor:pointer;">
     </div>
 </div>
 
-<canvas id="cosmic-bg"></canvas>
+<canvas id="cosmos"></canvas>
 
-<div class="terminal-cmd-center">
-    <button class="cmd-btn btn-kgen" onclick="app.autoHunt()">⚔️ 巡航打怪</button>
-    <button class="cmd-btn btn-evo" onclick="app.makeLove()">🧬 精卵結合(生殖演化)</button>
-    <button class="cmd-btn" onclick="app.setWish()">🙏 許願/還願</button>
-    <button class="cmd-btn btn-kgen" onclick="app.boost()">💎 KGEN 沖等</button>
-    <button class="cmd-btn" onclick="app.capture()">📸 拍照存證</button>
-    <button class="cmd-btn" id="rec-btn" onclick="app.toggleRec()">🔴 啟動黑盒子錄影</button>
-    <button class="cmd-btn" onclick="app.customerService()">🎧 語音客服擴充</button>
-    <button class="cmd-btn" onclick="location.reload()">🔄 器官全重組</button>
+<div class="footer-nav">
+    <button class="f-btn" onclick="app.autoHunt()">⚔️ 巡航打怪</button>
+    <button class="f-btn" onclick="app.makeLove()">🧬 生殖演化</button>
+    <button class="f-btn" onclick="app.setWish()">🙏 許願/還願</button>
+    <button class="f-btn warn" onclick="app.callDead()">💀 呼叫死人客服</button>
+    <button class="f-btn" onclick="location.reload()">🔄 重啟器官</button>
 </div>
 
 <script>
-/**
- * 🛰️ KGEN 16888 混沌生命體核心邏輯
- * 程式行數嚴格控管：只能增長，不可縮減。
- */
 const app = {
-    gaLevel: 600,
-    isRecording: false,
-    jackpot: 16888777000,
+    mass: 33, angle: 0, jackpot: 16888777000,
     init() {
-        this.initCosmos();
-        this.expandOrgans();
-        this.bindSensors();
-        this.startLifeCycle();
-        this.speak("KGEN 混沌生命體 v6.0 器官擴張完成。大聖，程式肌肉已焊死，絕不萎縮。");
+        this.initThree(); this.build(); this.bind();
+        setInterval(() => this.tick(), 100);
+        this.speak("地府客服已就位，每日1 KGEN規費已自動扣除。大聖，請駕駛！");
     },
-    expandOrgans() {
-        // 500 神明席位增殖
-        const godBox = document.getElementById('god-seats');
+    build() {
+        const g = document.getElementById('god-grid'), m = document.getElementById('man-grid');
         for(let i=0; i<500; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'pixel-seat' + (Math.random() > 0.8 ? ' active' : '');
-            godBox.appendChild(dot);
+            g.appendChild(document.createElement('div')).className = 'dot active';
+            m.appendChild(document.createElement('div')).className = 'dot active';
         }
-        // 500 豪宅席位增殖
-        const manBox = document.getElementById('mansion-seats');
-        for(let i=0; i<500; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'pixel-seat' + (Math.random() > 0.8 ? ' active' : '');
-            manBox.appendChild(dot);
-        }
-        // 12+1 生肖點燈
-        const zodiacs = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬","貓"];
-        const zGrid = document.getElementById('zodiac-grid-container');
-        zodiacs.forEach(s => {
-            const item = document.createElement('div');
-            item.className = 'zodiac-item' + (Math.random() > 0.5 ? ' light-on' : '');
-            item.innerText = s;
-            zGrid.appendChild(item);
+        const zs = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬","貓"];
+        zs.forEach(s => {
+            const l = document.createElement('div'); l.className = 'z-lamp';
+            l.innerText = s; l.onclick = () => l.classList.toggle('on');
+            document.getElementById('z-box').appendChild(l);
         });
-        // 填充曲速階梯刻度
-        const rail = document.getElementById('fuel-energy-fill').parentElement;
-        for(let i=0; i<30; i++) {
-            const line = document.createElement('div');
-            line.className = 'gauge-line';
-            line.style.bottom = (i * 3.3) + '%';
-            rail.appendChild(line);
-        }
     },
-    startLifeCycle() {
-        setInterval(() => {
-            // 彩金池滾動
-            this.jackpot += Math.floor(Math.random() * 1000);
-            document.getElementById('jackpot-counter').innerText = `$${this.jackpot.toLocaleString()}`;
-            // 隨機席位活化
-            const dots = document.querySelectorAll('.pixel-seat');
-            dots[Math.floor(Math.random()*dots.length)].classList.toggle('active');
-            // DNA 滾動
-            const scroller = document.getElementById('dna-scroller');
-            scroller.innerText = scroller.innerText.substring(1) + scroller.innerText[0];
-        }, 100);
+    tick() {
+        this.jackpot += Math.floor(Math.random()*100);
+        document.getElementById('jack-val').innerText = `$${this.jackpot.toLocaleString()}`;
+        if(Math.random()>0.9) document.querySelectorAll('.dot').forEach(d=>d.classList.toggle('active', Math.random()>0.3));
+    },
+    bind() {
+        const wi = document.getElementById('wheel-input'), wb = document.getElementById('wheel-body'), cw = document.getElementById('core-window');
+        wi.oninput = (e) => {
+            this.angle = e.target.value;
+            wb.style.transform = `rotate(${this.angle}deg)`;
+            cw.style.transform = `translate(-50%, -50%) rotate(${this.angle}deg)`;
+        };
+        document.getElementById('warp-slider').oninput = (e) => {
+            this.mass = e.target.value;
+            document.getElementById('warp-fill').style.height = this.mass + '%';
+            document.getElementById('ms-bar').style.width = this.mass + '%';
+            document.getElementById('warp-txt').innerText = this.mass + 'x';
+        };
+    },
+    callDead() {
+        const lines = ["別吵...我在數金銀錠...", "1 KGEN 就想找我？", "大聖饒命，我在奈何橋...", "死人客服現在忙線中(在投胎)"];
+        const msg = lines[Math.floor(Math.random()*lines.length)];
+        document.getElementById('s-log').innerHTML = "客服：" + msg + "<br>" + document.getElementById('s-log').innerHTML;
+        this.speak(msg);
     },
     makeLove() {
-        this.speak("GA 演化精子正在尋找受精卵，DNA 交叉重組啟動。");
-        const core = document.getElementById('egg-cell-window');
-        for(let i=0; i<30; i++) {
+        const win = document.getElementById('core-window');
+        for(let i=0; i<15; i++) {
             const s = document.createElement('div');
-            s.className = 'gamete-sperm';
-            s.style.left = '50%'; s.style.top = '50%';
-            core.appendChild(s);
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 300;
-            s.animate([
-                { transform: `rotate(${angle}rad) translate(0,0)`, opacity: 1 },
-                { transform: `rotate(${angle}rad) translate(${dist}px, 0)`, opacity: 0 }
-            ], { duration: 1500, easing: 'ease-out' }).onfinish = () => s.remove();
+            s.style.cssText = "position:absolute; width:12px; height:5px; background:#fff; border-radius:50%; left:50%; top:50%;";
+            win.appendChild(s);
+            const a = Math.random()*Math.PI*2;
+            s.animate([{transform:`rotate(${a}rad) translate(0,0)`, opacity:1},{transform:`rotate(${a}rad) translate(200px,0)`, opacity:0}], 800).onfinish = ()=>s.remove();
         }
-        this.gaLevel += 20;
-        document.getElementById('fairy-avatar').style.filter = `hue-rotate(${this.gaLevel % 360}deg) saturate(1.5)`;
     },
-    updateWarp(val) {
-        document.getElementById('fuel-energy-fill').style.height = val + '%';
-        document.getElementById('warp-slider-handle').style.bottom = `calc(${val}% - 15px)`;
-        document.getElementById('warp-text').innerText = `WARP ${val * 3}x`;
-    },
-    setWish() {
-        const m = prompt("向 KGEN 聖殿許願：", "大聖駕到，光耀廣寒");
-        if(m) document.getElementById('holy-wish-label').innerText = m;
-    },
-    autoHunt() {
-        this.speak("啟動自動巡航打怪模式，鎖定 16888 獲利參數。");
-        document.getElementById('holy-wish-label').innerText = "⚔️ KGEN 戰鬥中...";
-        setTimeout(() => document.getElementById('holy-wish-label').innerText = "大聖駕到，光耀廣寒", 3000);
-    },
-    customerService() {
-        const msg = [
-            "大聖您好，KGEN 高等客服竭誠為您服務。",
-            "目前 500 席位運作正常，彩金池正在快速擴張。",
-            "GA 演化精子活性良好，正在準備下一輪生殖演化。",
-            "您的齊天豪宅管理費已從彩金池自動扣除。"
-        ];
-        this.speak(msg[Math.floor(Math.random()*msg.length)]);
-    },
-    boost() {
-        this.gaLevel += 100;
-        this.updateWarp(100);
-        this.speak(`KGEN 強制沖等，目前演化階級 GA-${this.gaLevel}`);
-    },
-    bindSensors() {
-        document.getElementById('warp-master-control').oninput = (e) => this.updateWarp(e.target.value);
-    },
-    initCosmos() {
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cosmic-bg'), antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        const geometry = new THREE.BufferGeometry();
-        const vertices = new Float32Array(8000 * 3);
-        for(let i=0; i<24000; i++) vertices[i] = (Math.random() - 0.5) * 250;
-        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        const material = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.2 });
-        const stars = new THREE.Points(geometry, material);
-        scene.add(stars);
-        camera.position.z = 120;
-        const animate = () => {
-            requestAnimationFrame(animate);
-            stars.rotation.y += 0.001;
-            stars.rotation.x += 0.0005;
-            renderer.render(scene, camera);
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('cosmos'), antialias: true, alpha: true });
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random()-0.5)*300;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.2 }));
+        sc.add(pts); cam.position.z = 100;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            const w = this.mass / 25; // 星球流速隨曲速引擎變化
+            const r = (this.angle * Math.PI) / 180;
+            const p = pts.geometry.attributes.position.array;
+            for(let i=0; i<p.length; i+=3) {
+                p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                if(p[i]>150) p[i]=-150; if(p[i]<-150) p[i]=150;
+                if(p[i+1]>150) p[i+1]=-150; if(p[i+1]<-150) p[i+1]=150;
+            }
+            pts.geometry.attributes.position.needsUpdate = true;
+            rd.render(sc, cam);
         };
-        animate();
+        anim();
     },
     speak(t) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); },
-    capture() { alert("📸 存證照片已生成並同步至 GA 雲端"); },
-    toggleRec() {
-        this.isRecording = !this.isRecording;
-        document.getElementById('rec-btn').innerText = this.isRecording ? "⏹️ 停止黑盒子錄製" : "🔴 啟動黑盒子錄影";
-        this.speak(this.isRecording ? "錄影開始" : "錄影結束");
-    }
+    setWish() { const m = prompt("許願："); if(m) document.getElementById('wish-label').innerText = m; },
+    autoHunt() { this.speak("巡航打怪中"); }
 };
 window.onload = () => app.init();
 </script>
