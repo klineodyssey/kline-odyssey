@@ -2,71 +2,77 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜超光速口袋時光飛碟機</title>
+    <title>KGEN 16888｜廣寒宮超光速指揮中心</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --bar: #ffca28; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部：鏈上席位監控 (500/500) */
+        /* 🏛️ 頂部：500 席位監控 */
         .hud-top { position: fixed; top: 15px; width: 100%; display: flex; justify-content: space-around; z-index: 100; pointer-events: none; }
-        .seat-box { border-left: 4px solid var(--gold); padding: 8px 15px; background: rgba(0,0,0,0.8); }
+        .seat-box { border-left: 4px solid var(--gold); padding: 8px 15px; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
         .grid { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
         .dot { width: 6px; height: 6px; background: #222; border-radius: 1px; }
         .dot.on { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
 
-        /* 🧚 仙女圓窗：隨航向傾斜 */
-        #ufo-core {
+        /* 🧚 仙女/影像 複合核心圓窗 */
+        #core-display {
             position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
             width: 380px; height: 380px; border-radius: 50%; border: 12px double var(--gold);
-            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            box-shadow: 0 0 100px rgba(255,215,120,0.4); z-index: 50; transition: transform 0.1s ease-out;
+            overflow: hidden; z-index: 50; background: #000;
+            box-shadow: 0 0 80px rgba(255,215,120,0.4);
         }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s; }
+        #monitor-webcam { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scaleX(-1); }
+        .scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 255, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 60; background-size: 100% 4px, 3px 100%; pointer-events: none; opacity: 0; }
 
-        /* 🚀 曲速引擎：階梯式能量條 (左側) */
-        .warp-panel { position: fixed; left: 50px; top: 50%; transform: translateY(-50%); z-index: 100; }
-        .warp-bars { display: flex; flex-direction: column-reverse; gap: 4px; border-left: 2px solid var(--cyan); padding: 5px; }
+        /* 🚀 曲速引擎：左側 */
+        .warp-panel { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 100; }
+        .warp-bars { display: flex; flex-direction: column-reverse; gap: 4px; border-left: 3px solid var(--cyan); padding: 5px; }
         .bar-seg { width: 35px; height: 8px; background: #111; transition: 0.1s; }
         .bar-seg.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
-        .warp-input { position: absolute; left: 0; top: 0; width: 40px; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
+        .warp-input { position: absolute; left: 0; top: 0; width: 45px; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
 
-        /* 🎡 方向盤：X軸定義 (右正左負) */
+        /* 🎡 方向盤：76° 正中心導航 */
         .steer-panel { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
-        .angle-val { font-family: 'Orbitron'; font-size: 48px; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); margin-bottom: 10px; }
-        .slider-wrap { position: relative; width: 80%; max-width: 650px; margin: 0 auto; height: 40px; }
-        .track { width: 100%; height: 2px; background: var(--gold); position: absolute; top: 50%; }
+        .angle-val { font-family: 'Orbitron'; font-size: 52px; color: var(--cyan); text-shadow: 0 0 25px var(--cyan); margin-bottom: 5px; }
+        .slider-wrap { position: relative; width: 80%; max-width: 650px; margin: 0 auto; height: 30px; }
+        .track { width: 100%; height: 2px; background: var(--gold); position: absolute; top: 50%; opacity: 0.5; }
         .steer-input { -webkit-appearance: none; width: 100%; background: transparent; position: relative; z-index: 2; cursor: pointer; }
-        .steer-input::-webkit-slider-thumb { -webkit-appearance: none; width: 50px; height: 25px; background: var(--gold); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 15px var(--gold); }
+        .steer-input::-webkit-slider-thumb { -webkit-appearance: none; width: 60px; height: 20px; background: var(--gold); border: 2px solid #fff; border-radius: 2px; box-shadow: 0 0 15px var(--gold); }
 
-        /* 🛠️ 六大金剛功能：活化功能 */
-        .footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 25px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; }
-        .btn { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 6px; font-size: 14px; transition: 0.2s; }
-        .btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: inset 0 0 10px var(--cyan); }
+        /* 🛠️ 六大按鈕：功能活化 */
+        .footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; }
+        .btn { background: #111; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 14px; transition: 0.3s; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(255,215,120,0.5); }
+        .btn.active { color: var(--cyan); border-color: var(--cyan); border-width: 2px; }
 
         canvas { position: fixed; inset: 0; z-index: 1; }
-        #video-overlay { position: fixed; inset: 0; background: rgba(0,255,255,0.1); display: none; z-index: 200; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="video-overlay"></div>
-<div id="ufo-core"></div>
+<div id="core-display">
+    <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+    <video id="monitor-webcam" autoplay playsinline></video>
+    <div class="scanline" id="cam-effect"></div>
+</div>
 
 <div class="hud-top">
-    <div class="seat-box"><div>🏛️ 靈霄神明 (500)</div><div class="grid" id="g1"></div></div>
-    <div class="seat-box"><div>🐒 火星豪宅 (500)</div><div class="grid" id="g2"></div></div>
+    <div class="seat-box"><div>🏛️ 神明席位 (500)</div><div class="grid" id="g1"></div></div>
+    <div class="seat-box"><div>🐒 豪宅分紅 (500)</div><div class="grid" id="g2"></div></div>
 </div>
 
 <div class="warp-panel">
     <div id="warp-bars" class="warp-bars"></div>
     <input type="range" class="warp-input" id="warp-in" min="1" max="25" value="10">
-    <div id="warp-txt" style="color:var(--cyan); font-family:'Orbitron'; margin-top:10px;">100x</div>
+    <div id="warp-txt" style="color:var(--cyan); font-family:'Orbitron'; margin-top:10px; font-size:12px;">WARP 100x</div>
 </div>
 
 <div class="steer-panel">
     <div class="angle-val" id="angle-txt">76°</div>
-    <div style="color:var(--gold); font-size:12px; letter-spacing:5px;">飛碟方向盤 (航道角度)</div>
+    <div style="color:var(--gold); font-size:12px; letter-spacing:8px; margin-bottom:10px;">FLIGHT CONTROL</div>
     <div class="slider-wrap">
         <div class="track"></div>
         <input type="range" class="steer-input" id="steer-in" min="-180" max="180" value="76">
@@ -74,23 +80,58 @@
 </div>
 
 <div class="footer">
-    <button class="btn" onclick="app.trade()">📈 CT 現價下單</button>
-    <button class="btn" onclick="app.trade()">📉 結算平倉</button>
-    <button class="btn" onclick="app.speak('已記錄大聖許願')">👤 許願留言</button>
-    <button class="btn" onclick="app.cam()">📸 影像監控</button>
-    <button class="btn" onclick="app.connect()">🦊 錢包連結</button>
-    <button class="btn" onclick="app.speak('廣寒宮客服竭誠為大聖服務')">🎙️ 客服語音</button>
+    <button class="btn" onclick="app.action('交易執行')">📈 CT 現價下單</button>
+    <button class="btn" onclick="app.action('結算執行')">📉 結算平倉</button>
+    <button class="btn" onclick="app.speak('已為大聖存檔許願')">👤 許願留言</button>
+    <button class="btn" id="cam-btn" onclick="app.toggleCam()">📸 影像監控</button>
+    <button class="btn" onclick="app.connectWallet()">🦊 錢包連結</button>
+    <button class="btn" onclick="app.speak('廣寒宮 16888 號客服正在聽令')">🎙️ 客服語音</button>
 </div>
 
 <script>
 const app = {
+    isCamOn: false,
+    stream: null,
+    
     init() {
         this.initThree();
-        this.fillGrid('g1'); this.fillGrid('g2');
+        this.fillSeats('g1'); this.fillSeats('g2');
         this.buildWarp();
         this.bind();
-        this.speak("廣寒宮超光速終端物理校準完成。");
+        this.speak("廣寒宮系統全功能啟動，影像通道待命");
     },
+
+    // 📸 影像監控：真實錄影錄像功能
+    async toggleCam() {
+        const video = document.getElementById('monitor-webcam');
+        const fairy = document.getElementById('fairy-img');
+        const effect = document.getElementById('cam-effect');
+        const btn = document.getElementById('cam-btn');
+
+        if (!this.isCamOn) {
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = this.stream;
+                video.style.opacity = 1;
+                fairy.style.opacity = 0;
+                effect.style.opacity = 1;
+                this.isCamOn = true;
+                btn.classList.add('active');
+                this.speak("影像監控已連線，廣寒宮圓窗對外掃描中");
+            } catch (err) {
+                alert("攝影機權限遭拒：無法開啟廣寒宮外部監視器");
+            }
+        } else {
+            if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+            video.style.opacity = 0;
+            fairy.style.opacity = 1;
+            effect.style.opacity = 0;
+            this.isCamOn = false;
+            btn.classList.remove('active');
+            this.speak("影像監控關閉，恢復仙女巡航模式");
+        }
+    },
+
     buildWarp() {
         const c = document.getElementById('warp-bars');
         for(let i=0; i<25; i++) {
@@ -100,20 +141,23 @@ const app = {
         }
         this.updateWarp(10);
     },
+
     updateWarp(v) {
         document.querySelectorAll('.bar-seg').forEach((b, i) => b.className = i < v ? 'bar-seg active' : 'bar-seg');
-        document.getElementById('warp-txt').innerText = v * 10 + "x";
+        document.getElementById('warp-txt').innerText = "WARP " + v * 10 + "x";
     },
+
     bind() {
         const s = document.getElementById('steer-in');
         const w = document.getElementById('warp-in');
         s.oninput = () => {
             document.getElementById('angle-txt').innerText = s.value + '°';
-            // 飛碟傾斜補償
-            document.getElementById('ufo-core').style.transform = `translate(-50%, -50%) rotate(${s.value * 0.2}deg)`;
+            // 圓窗隨舵角輕微傾斜，模擬飛行重力
+            document.getElementById('core-display').style.transform = `translate(-50%, -50%) rotate(${s.value * 0.15}deg)`;
         };
         w.oninput = () => this.updateWarp(w.value);
     },
+
     initThree() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -124,64 +168,41 @@ const app = {
         const geo = new THREE.BufferGeometry();
         const count = 5000;
         const pos = new Float32Array(count * 3);
-        const vel = new Float32Array(count); // 隨機速度偏量
-        for(let i=0; i<count*3; i++) pos[i] = (Math.random() - 0.5) * 120;
-        for(let i=0; i<count; i++) vel[i] = Math.random() * 0.5 + 0.5;
+        for(let i=0; i<count*3; i++) pos[i] = (Math.random() - 0.5) * 150;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        
         this.stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.15 }));
-        this.vel = vel;
         this.scene.add(this.stars);
         this.camera.position.z = 50;
         this.animate();
     },
+
     animate() {
         requestAnimationFrame(() => this.animate());
-        const warp = document.getElementById('warp-in').value / 100;
+        const warp = document.getElementById('warp-in').value / 80;
         const steerX = parseFloat(document.getElementById('steer-in').value);
-        
-        // 🚀 大聖定義物理核心：方向盤右打(正)，星球從右上流向左下
-        // 將角度轉換為弧度，並修正方向盤 X 軸邏輯
         const rad = (steerX * Math.PI) / 180;
         
         const p = this.stars.geometry.attributes.position.array;
         for(let i=0; i<p.length; i+=3) {
-            const v = this.vel[i/3];
-            // 基礎流速 (垂直落下)
-            let dx = 0;
-            let dy = -warp * 10 * v;
-
-            // 方向盤 X 軸偏轉 (相對運動：方向盤往右越多，星球往左偏越多)
-            // 同時模擬順時針旋轉效果
-            const cos = Math.cos(rad);
+            // 物理流向：方向盤右打(正)，星球右上流向左下
             const sin = Math.sin(rad);
+            const cos = Math.cos(rad);
             
-            // 旋轉矩陣變換，實現場景旋轉流動
-            const nx = p[i] * cos - p[i+1] * sin;
-            const ny = p[i] * sin + p[i+1] * cos;
-            
-            p[i] -= (sin * warp * 20); // 方向盤往右(正)，星球往左移(負)
-            p[i+1] -= (cos * warp * 20); // 基礎前進感
+            p[i] -= (sin * warp * 15);   // X軸相對偏移
+            p[i+1] -= (cos * warp * 15); // Y軸前進速度感
 
-            // 邊界循環
-            if(p[i] > 70) p[i] = -70; if(p[i] < -70) p[i] = 70;
-            if(p[i+1] > 70) p[i+1] = -70; if(p[i+1] < -70) p[i+1] = 70;
+            if(p[i] > 75) p[i] = -75; if(p[i] < -75) p[i] = 75;
+            if(p[i+1] > 75) p[i+1] = -75; if(p[i+1] < -75) p[i+1] = 75;
         }
         this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
-    /* 活化功能區 */
-    trade() { this.speak("天條合約已啟動，KGEN 交易執行中"); this.connect(); },
-    cam() { 
-        const o = document.getElementById('video-overlay');
-        o.style.display = o.style.display === 'block' ? 'none' : 'block';
-        this.speak("影像監控傳輸中，已鎖定 16888 航道");
-    },
-    connect() { 
-        if(window.ethereum) window.ethereum.request({method:'eth_requestAccounts'});
-        else alert("請開啟 Metamask 連結創世合約");
-    },
+
+    action(m) { this.speak(`正在執行${m}，鏈上地址已鎖定。`); },
     speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
-    fillGrid(id) {
+    connectWallet() { if(window.ethereum) window.ethereum.request({method:'eth_requestAccounts'}); },
+    fillSeats(id) {
         const g = document.getElementById(id);
         for(let i=0; i<100; i++) {
             const d = document.createElement('div');
