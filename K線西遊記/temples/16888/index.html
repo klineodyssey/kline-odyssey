@@ -2,27 +2,30 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>花果山台灣廣寒宮16888｜終極指揮終端</title>
+    <title>花果山台灣廣寒宮16888｜佈局修正終端</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部品牌與資料顯示區 */
-        .hud-header { position: fixed; top: 15px; width: 95%; left: 2.5%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .brand-info { text-align: right; }
-        .brand-name { font-size: 24px; color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-        .real-time { font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); }
+        /* 🏛️ 頂部佈局修正：品牌左移，小圖留白 */
+        .hud-header { position: fixed; top: 15px; width: 95%; left: 2.5%; display: flex; flex-direction: column; z-index: 100; pointer-events: none; }
         
+        /* 品牌與時間 (左上方) */
+        .brand-zone { text-align: left; margin-bottom: 10px; border-left: 4px solid var(--cyan); padding-left: 15px; }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 10px var(--gold); letter-spacing: 2px; }
+        .real-time { font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); margin-top: 5px; }
+        
+        /* 席位資料 (品牌下方) */
         .seat-monitor { display: flex; gap: 20px; }
-        .seat-box { border-left: 3px solid var(--gold); padding: 5px 15px; background: rgba(0,0,0,0.6); }
+        .seat-box { border-left: 3px solid var(--gold); padding: 5px 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
         .grid { display: grid; grid-template-columns: repeat(20, 6px); gap: 3px; margin-top: 5px; }
         .dot { width: 6px; height: 6px; background: #222; }
         .dot.on { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
 
-        /* 🧚 核心圓窗與旋轉機制 */
-        #ufo-wrapper { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; z-index: 50; }
+        /* 🧚 核心圓窗 */
+        #ufo-wrapper { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; z-index: 50; }
         #core-display { 
             width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold);
             overflow: hidden; background: #000; box-shadow: 0 0 80px rgba(255,215,120,0.4);
@@ -31,13 +34,13 @@
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
         #monitor-webcam { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scaleX(-1); }
         
-        /* 💬 影像內留言顯示 (左下方) */
-        .wish-overlay { position: absolute; bottom: 40px; left: 40px; color: var(--cyan); font-weight: 900; font-size: 18px; text-shadow: 2px 2px 5px #000; z-index: 80; max-width: 250px; }
+        /* 💬 留言許願 (影像左下方) */
+        .wish-overlay { position: absolute; bottom: 50px; left: 45px; color: var(--cyan); font-weight: 900; font-size: 20px; text-shadow: 2px 2px 8px #000; z-index: 80; }
         
-        /* 📸 右上角合照小圖 */
-        #mini-fairy { position: absolute; top: 20px; right: 20px; width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 70; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; box-shadow: 0 0 15px var(--gold); }
+        /* 📸 仙女合照小圖 (右上方 - 獨立空間) */
+        #mini-fairy { position: absolute; top: 20px; right: 20px; width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; box-shadow: 0 0 20px var(--gold); }
 
-        /* 🚀 曲速與方向盤 */
+        /* 🚀 控制面板 */
         .warp-panel { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 100; }
         .warp-bars { display: flex; flex-direction: column-reverse; gap: 4px; border-left: 3px solid var(--cyan); padding: 5px; }
         .bar-seg { width: 35px; height: 8px; background: #111; }
@@ -45,23 +48,24 @@
         .warp-input { position: absolute; top: 0; left: 0; width: 45px; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
 
         .steer-panel { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
-        .angle-val { font-family: 'Orbitron'; font-size: 52px; color: var(--cyan); }
+        .angle-val { font-family: 'Orbitron'; font-size: 52px; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
 
         .footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; }
-        .btn { background: #111; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; }
+        .btn { background: #111; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; transition: 0.3s; }
+        .btn:hover { background: var(--gold); color: #000; }
         canvas#galaxy { position: fixed; inset: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
 <div class="hud-header">
+    <div class="brand-zone">
+        <div class="brand-name">花果山台灣廣寒宮16888</div>
+        <div class="real-time" id="clock">2026-02-25 00:00:00</div>
+    </div>
     <div class="seat-monitor">
         <div class="seat-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid" id="g1"></div></div>
         <div class="seat-box"><div>🐒 豪宅分紅 (500)</div><div class="grid" id="g2"></div></div>
-    </div>
-    <div class="brand-info">
-        <div class="brand-name">花果山台灣廣寒宮16888</div>
-        <div class="real-time" id="clock">2026-02-25 00:00:00</div>
     </div>
 </div>
 
@@ -92,7 +96,9 @@
     <button class="btn" onclick="app.capture()">📸 拍照存證</button>
     <button class="btn" onclick="app.toggleCam()">🎥 影像監控</button>
     <button class="btn" onclick="app.setWish()">👤 許願留言</button>
-    <button class="btn">📈 CT 下單</button><button class="btn">🦊 錢包連結</button><button class="btn" onclick="app.speak('廣寒宮客服待命')">🎙️ 客服語音</button>
+    <button class="btn" onclick="app.speak('CT 合約執行中')">📈 CT 下單</button>
+    <button class="btn" onclick="window.ethereum.request({method:'eth_requestAccounts'})">🦊 錢包連結</button>
+    <button class="btn" onclick="app.speak('廣寒宮 16888 客服在線')">🎙️ 客服語音</button>
 </div>
 
 <script>
@@ -104,8 +110,7 @@ const app = {
         this.fillGrid('g1'); this.fillGrid('g2');
     },
     updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleString();
+        document.getElementById('clock').innerText = new Date().toLocaleString();
     },
     buildWarp() {
         const c = document.getElementById('warp-bars');
@@ -119,19 +124,17 @@ const app = {
         document.getElementById('warp-txt').innerText = v == 0 ? "熄火 0x" : "WARP " + v * 10 + "x";
     },
     setWish() {
-        const msg = prompt("請大聖輸入許願留言：", "大聖駕到，光耀廣寒");
+        const msg = prompt("大聖，請輸入您的許願：", "大聖駕到，光耀廣寒");
         if(msg) document.getElementById('wish-txt').innerText = msg;
     },
     async toggleCam() {
-        const v = document.getElementById('monitor-webcam');
-        const f = document.getElementById('fairy-img');
-        const m = document.getElementById('mini-fairy');
+        const v = document.getElementById('monitor-webcam'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-fairy');
         if (!this.isCamOn) {
             try {
                 this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
-                this.isCamOn = true;
-            } catch(e) { alert("無法連線攝影機"); }
+                this.isCamOn = true; this.speak("監控已開，品牌位於左上方");
+            } catch(e) { alert("攝像頭權限未開啟"); }
         } else {
             if(this.stream) this.stream.getTracks().forEach(t => t.stop());
             v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
@@ -140,44 +143,40 @@ const app = {
     },
     capture() {
         const canvas = document.getElementById('capture-canvas');
-        const video = document.getElementById('monitor-webcam');
-        const fairy = document.getElementById('fairy-img');
+        const video = document.getElementById('monitor-webcam'), fairy = document.getElementById('fairy-img');
         const wish = document.getElementById('wish-txt').innerText;
         const ctx = canvas.getContext('2d');
-        canvas.width = 600; canvas.height = 600;
+        canvas.width = 800; canvas.height = 800;
 
-        // 1. 繪製主影像
+        // 1. 底圖
         if(this.isCamOn) {
-            ctx.translate(600, 0); ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, 600, 600);
+            ctx.translate(800, 0); ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, 800, 800);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.drawImage(fairy, 450, 20, 120, 120); // 右上仙女小圖
+            ctx.drawImage(fairy, 620, 30, 150, 150); // 右上仙女小圖
         } else {
-            ctx.drawImage(fairy, 0, 0, 600, 600);
+            ctx.drawImage(fairy, 0, 0, 800, 800);
         }
 
-        // 2. 繪製文字 (左下留言 & 右上品牌)
-        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 24px Noto Sans TC";
-        ctx.fillText(wish, 40, 550);
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 18px Orbitron";
-        ctx.fillText("花果山台灣廣寒宮 16888", 340, 50);
-        ctx.font = "14px Orbitron";
-        ctx.fillText(new Date().toLocaleString(), 340, 75);
+        // 2. 文字存證 (遵守大聖位置)
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 32px Noto Sans TC";
+        ctx.fillText("花果山台灣廣寒宮16888", 40, 60); // 左上品牌
+        ctx.fillStyle = "#00f2ff"; ctx.font = "20px Orbitron";
+        ctx.fillText(new Date().toLocaleString(), 40, 100); // 左上時間
+        
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText(wish, 60, 730); // 左下許願
 
         const link = document.createElement('a');
-        link.download = `廣寒宮存證_${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-        this.speak("存證檔案已下載至大聖寶庫");
+        link.download = `KGEN_16888_存證.png`;
+        link.href = canvas.toDataURL(); link.click();
+        this.speak("照片已存證，所有品牌與時間資訊已打印於左上方");
     },
     bind() {
-        const s = document.getElementById('steer-in');
-        const core = document.getElementById('core-display');
+        const s = document.getElementById('steer-in'), core = document.getElementById('core-display');
         s.oninput = (e) => {
-            const val = e.target.value;
-            document.getElementById('angle-txt').innerText = val + '°';
-            // 🔥 旋轉修復：確保中間圓窗會隨方向盤 1:1 轉動
-            core.style.transform = `rotate(${val}deg)`;
+            document.getElementById('angle-txt').innerText = e.target.value + '°';
+            core.style.transform = `rotate(${e.target.value}deg)`;
         };
         document.getElementById('warp-in').oninput = (e) => this.updateWarp(e.target.value);
     },
@@ -202,8 +201,7 @@ const app = {
         const rad = (steerX * Math.PI) / 180;
         const p = this.stars.geometry.attributes.position.array;
         for(let i=0; i<p.length; i+=3) {
-            p[i] -= (Math.sin(rad) * warp * 15);
-            p[i+1] -= (Math.cos(rad) * warp * 15);
+            p[i] -= (Math.sin(rad) * warp * 15); p[i+1] -= (Math.cos(rad) * warp * 15);
             if(p[i] > 75) p[i] = -75; if(p[i] < -75) p[i] = 75;
             if(p[i+1] > 75) p[i+1] = -75; if(p[i+1] < -75) p[i+1] = 75;
         }
