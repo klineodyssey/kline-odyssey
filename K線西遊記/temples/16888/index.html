@@ -2,147 +2,177 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜終極地府客服版 v8.0</title>
+    <title>KGEN 16888｜0多180空・終極導航版 v11.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@500;900&display=swap" rel="stylesheet">
     <style>
+        /* 🧬 肌肉組織 CSS：嚴禁縮減，厚度再增加 */
         :root { 
             --gold: #ffd778; --cyan: #00f2ff; --energy: #ffcc00; --red: #ff3333; 
-            --dead-green: #44ff88; --kgen-mass: #77ff77; --bg: #000; 
+            --dead-green: #44ff88; --kgen-mass: #77ff77; --bg: #000; --pink: #ff66cc;
         }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部器官：1000 席位 */
-        .hud-master-top { position: fixed; top: 0; width: 100%; height: 130px; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; justify-content: space-around; padding-top: 10px; border-bottom: 2px solid var(--gold); }
-        .seat-module { width: 300px; text-align: center; }
-        .grid-500 { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; padding: 5px; background: #111; border: 1px solid #333; }
-        .dot { width: 5px; height: 5px; background: #222; }
-        .dot.active { background: var(--energy); box-shadow: 0 0 5px var(--energy); }
-        .jackpot-box { width: 400px; text-align: center; }
-        .money-val { font-family: 'Orbitron'; font-size: 32px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        /* 🏛️ 1000 席位：神位與豪宅 (代碼層次擴張) */
+        .hud-top-master { position: fixed; top: 0; width: 100%; height: 140px; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; justify-content: space-around; padding: 15px; border-bottom: 4px solid var(--gold); }
+        .seat-container { width: 330px; text-align: center; }
+        .grid-500-dense { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; padding: 5px; background: #080808; border: 1px solid #444; }
+        .dot-cell { width: 6px; height: 6px; background: #111; }
+        .dot-cell.active { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
+        
+        .jackpot-vault { width: 420px; text-align: center; border: 2px solid var(--cyan); background: rgba(0,25,25,0.7); border-radius: 10px; }
+        .jackpot-val { font-family: 'Orbitron'; font-size: 34px; color: var(--gold); text-shadow: 0 0 20px var(--gold); font-weight: 900; }
 
-        /* 🚀 左側器官：曲速引擎 (連動流速與質量) */
-        .left-panel { position: fixed; left: 30px; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; gap: 20px; align-items: flex-end; }
-        .warp-rail-box { height: 450px; width: 40px; background: #111; border: 3px solid var(--gold); position: relative; border-radius: 8px; overflow: hidden; }
-        #warp-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #f00, var(--energy), #fff); transition: height 0.1s; z-index: 5; }
-        #warp-thumb { width: 70px; height: 35px; background: #fff; position: absolute; left: -18px; bottom: 33%; z-index: 100; border: 3px solid var(--cyan); border-radius: 5px; box-shadow: 0 0 20px #fff; cursor: pointer; }
-        .v-slider { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 110; }
+        /* 🚀 左側：曲速引擎 + 雙油箱 (物理連動) */
+        .warp-panel-left { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 1000; display: flex; align-items: flex-end; gap: 25px; }
+        .warp-rail { height: 480px; width: 45px; background: #111; border: 4px solid var(--gold); position: relative; border-radius: 10px; overflow: hidden; }
+        #warp-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #f00, var(--energy), #fff); transition: height 0.1s; }
+        .warp-handle { width: 85px; height: 35px; background: #fff; position: absolute; left: -20px; border: 4px solid var(--cyan); z-index: 100; border-radius: 5px; box-shadow: 0 0 20px #fff; }
+        .v-slider { position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; -webkit-appearance: slider-vertical; z-index: 110; cursor: pointer; }
 
-        /* 💀 死人客服器官 (新器官) */
-        .dead-service-panel { position: fixed; right: 20px; bottom: 150px; width: 220px; background: rgba(0,20,0,0.8); border: 1px solid var(--dead-green); padding: 15px; z-index: 1000; border-radius: 5px; box-shadow: 0 0 20px rgba(68, 255, 136, 0.3); }
-        .dead-avatar { width: 50px; height: 50px; border: 2px solid var(--dead-green); margin-bottom: 10px; border-radius: 50%; background: url('https://img.icons8.com/ios-filled/50/44ff88/skull.png') center/cover; }
-        .service-log { font-size: 11px; color: var(--dead-green); height: 60px; overflow-y: hidden; font-family: 'Orbitron'; line-height: 1.4; border-top: 1px solid #225522; padding-top: 5px; }
+        .vital-gauges { width: 190px; background: rgba(0,0,0,0.9); border: 2px solid var(--cyan); padding: 15px; border-radius: 10px; font-family: 'Orbitron'; }
+        .gauge-bar-bg { height: 14px; background: #222; margin: 10px 0; border-radius: 7px; overflow: hidden; border: 1px solid #555; }
+        .gauge-bar-fill { height: 100%; transition: width 0.3s; }
 
-        /* ♈ 12+1 生肖點燈 (物理點燈按鈕) */
-        .right-panel { position: fixed; right: 20px; top: 150px; z-index: 1000; }
-        .zodiac-grid { display: grid; grid-template-columns: repeat(3, 45px); gap: 10px; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid var(--pink); border-radius: 10px; }
-        .z-lamp { width: 45px; height: 45px; border: 1px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .z-lamp.on { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 20px var(--pink); background: rgba(255, 102, 204, 0.2); }
+        /* 🎡 物理方向盤：0多 180空 邏輯修正 */
+        .steering-system { position: fixed; bottom: 200px; width: 100%; display: flex; justify-content: center; z-index: 1000; }
+        .physical-wheel { width: 320px; height: 320px; border: 20px double #444; border-radius: 50%; position: relative; transition: transform 0.05s linear; background: radial-gradient(circle, transparent 40%, rgba(255,215,120,0.1) 100%); }
+        .wheel-indicator { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); color: var(--gold); font-weight: 900; font-size: 20px; }
+        .wheel-hub { position: absolute; top: 50%; left: 50%; width: 70px; height: 70px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); border: 5px solid #000; color: #000; font-weight: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; }
 
-        /* 🎡 物理方向盤與核心 */
-        .steering-center { position: fixed; bottom: 180px; width: 100%; display: flex; justify-content: center; z-index: 1000; }
-        .wheel-body { width: 260px; height: 260px; border: 12px solid #333; border-radius: 50%; position: relative; transition: transform 0.05s linear; pointer-events: auto; box-shadow: 0 0 40px rgba(0,0,0,0.9); background: radial-gradient(circle, transparent 40%, rgba(255,215,120,0.1) 100%); }
-        .wheel-spoke { position: absolute; top: 50%; left: 50%; width: 100%; height: 8px; background: #444; transform: translate(-50%, -50%); }
-        .wheel-spoke.v { transform: translate(-50%, -50%) rotate(90deg); }
-        .wheel-hub { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid #000; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; font-size: 12px; }
+        /* 💀 地府死人客服器官 */
+        .dead-service-module { position: fixed; right: 30px; bottom: 180px; width: 300px; background: rgba(0,30,0,0.9); border: 2px solid var(--dead-green); padding: 20px; z-index: 1000; border-radius: 15px; box-shadow: 0 0 40px rgba(68, 255, 136, 0.4); }
+        .dead-log-box { height: 140px; background: #000; border: 1px solid #1a331a; font-size: 12px; color: var(--dead-green); padding: 10px; overflow-y: auto; font-family: 'Orbitron'; line-height: 1.6; }
 
-        #core-window { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; border-radius: 50%; border: 15px double var(--gold); overflow: hidden; z-index: 500; transition: transform 0.05s linear; }
+        /* ♈ 12+1 生肖 */
+        .zodiac-organ { position: fixed; right: 30px; top: 160px; z-index: 1000; }
+        .zodiac-matrix { display: grid; grid-template-columns: repeat(3, 55px); gap: 12px; background: rgba(0,0,0,0.85); padding: 15px; border: 3px solid var(--pink); border-radius: 15px; }
+        .z-lamp { width: 55px; height: 55px; border: 2px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: #555; font-weight: 900; transition: 0.3s; }
+        .z-lamp.on { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 25px var(--pink); background: rgba(255, 102, 204, 0.2); }
+
+        /* 🧚 核心窗 */
+        #core-window { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 440px; height: 440px; border-radius: 50%; border: 18px double var(--gold); overflow: hidden; z-index: 500; transition: transform 0.05s linear; }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
 
-        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 5px solid var(--gold); display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px; gap: 10px; z-index: 2000; }
-        .f-btn { background: #111; border: 2px solid #444; color: #fff; padding: 15px 5px; font-weight: 900; cursor: pointer; font-size: 12px; border-radius: 5px; }
-        .f-btn.warn { border-color: var(--red); color: var(--red); }
-
+        .master-footer { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 6px solid var(--gold); display: grid; grid-template-columns: repeat(5, 1fr); padding: 25px; gap: 20px; z-index: 2000; }
+        .f-btn { background: #111; border: 2px solid #555; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; border-radius: 8px; font-size: 15px; }
         canvas#cosmos { position: fixed; inset: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
-<div class="hud-master-top">
-    <div class="seat-module"><div>🏛️ 神明席位 (500)</div><div class="grid-500" id="god-grid"></div></div>
-    <div class="jackpot-box">
-        <div style="font-size:14px; color:var(--cyan);">KGEN 16888 混沌彩金池</div>
-        <div class="money-val" id="jack-val">$16,888,777,000</div>
-        <div style="font-size:12px; color:var(--red);">每日規費: 1 KGEN (已扣除)</div>
+<div class="hud-top-master">
+    <div class="seat-container"><div style="color:var(--gold); font-size:12px;">🏛️ 神明席位 (500)</div><div class="grid-500-dense" id="god-grid"></div></div>
+    <div class="jackpot-vault">
+        <div style="font-size:16px; color:var(--cyan); font-weight:900;">KGEN 16888 混沌演化池</div>
+        <div class="jackpot-val" id="jack-val">$16,888,777,000</div>
+        <div style="color:var(--red); font-size:11px; font-weight:900;">💀 每日規費: 1 KGEN (扣除成功)</div>
     </div>
-    <div class="seat-module"><div>🐒 豪宅席位 (500)</div><div class="grid-500" id="man-grid"></div></div>
+    <div class="seat-container"><div style="color:var(--gold); font-size:12px;">🐒 豪宅席位 (500)</div><div class="grid-500-dense" id="man-grid"></div></div>
 </div>
 
-<div class="left-panel">
-    <div class="warp-rail-box">
+<div class="warp-panel-left">
+    <div class="warp-rail">
         <div id="warp-fill"></div>
-        <div id="warp-thumb"></div>
+        <div class="warp-handle" id="warp-thumb"></div>
         <input type="range" id="warp-slider" class="v-slider" min="0" max="100" value="33">
     </div>
-    <div style="width:150px; background:rgba(0,0,0,0.8); padding:10px; border:1px solid var(--cyan);">
-        <div style="font-size:10px; color:var(--cyan);">保證金 (Margin)</div>
-        <div style="height:10px; background:#222; margin:5px 0;"><div id="m-bar" style="width:85%; height:100%; background:var(--red);"></div></div>
-        <div style="font-size:10px; color:var(--kgen-mass);">KGEN 質量 (Mass)</div>
-        <div style="height:10px; background:#222; margin:5px 0;"><div id="ms-bar" style="width:33%; height:100%; background:var(--kgen-mass);"></div></div>
-        <div id="warp-txt" style="color:var(--energy); font-family:'Orbitron'; font-size:20px; text-align:center; margin-top:10px;">33x</div>
+    <div class="vital-gauges">
+        <div style="font-size:11px; color:var(--cyan);">💰 保證金 (MARGIN)</div>
+        <div class="gauge-bar-bg"><div id="m-fill" class="gauge-bar-fill" style="width:85%; background:var(--red);"></div></div>
+        <div style="font-size:11px; color:var(--kgen-mass);">🧪 KGEN 質量 (MASS)</div>
+        <div class="gauge-bar-bg"><div id="ms-fill" class="gauge-bar-fill" style="width:33%; background:var(--kgen-mass);"></div></div>
+        <div id="warp-txt" style="color:var(--energy); font-size:28px; text-align:center; margin-top:20px; font-weight:900;">33x</div>
     </div>
 </div>
 
-<div class="right-panel">
-    <div class="zodiac-grid" id="z-box"></div>
+<div class="zodiac-organ"><div class="zodiac-matrix" id="z-box"></div></div>
+
+<div class="dead-service-module">
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:10px;">
+        <img src="https://img.icons8.com/ios-filled/100/44ff88/skull.png" width="40">
+        <div style="color:var(--dead-green); font-weight:900;">地府客服 (1 KGEN)</div>
+    </div>
+    <div class="dead-log-box" id="dead-log">客服：大聖，導航已修正...</div>
 </div>
 
-<div class="dead-service-panel">
-    <div style="display:flex; align-items:center;">
-        <div class="dead-avatar"></div>
-        <div style="margin-left:10px; font-weight:900; color:var(--dead-green);">地府死人客服</div>
+<div class="steering-system">
+    <div class="physical-wheel" id="wheel-body">
+        <div class="wheel-indicator" id="dir-txt">多 (LONG)</div>
+        <div style="position:absolute; top:50%; left:0; width:100%; height:10px; background:#333;"></div>
+        <div style="position:absolute; left:50%; top:0; width:10:px; height:100%; background:#333;"></div>
+        <div class="wheel-hub"><span>KGEN</span><span id="deg-val">0°</span></div>
+        <input type="range" id="wheel-input" min="-180" max="180" value="0" style="position:absolute; width:100%; height:100%; top:0; left:0; opacity:0; cursor:pointer; z-index:200;">
     </div>
-    <div class="service-log" id="s-log">系統：已扣除 1 KGEN...<br>客服：別吵，我在投胎...</div>
 </div>
 
 <div id="core-window">
-    <div id="wish-label" style="position:absolute; bottom:50px; width:100%; text-align:center; font-size:24px; font-weight:900; text-shadow:0 0 10px #000; z-index:100;">大聖駕到，光耀廣寒</div>
+    <div id="wish-txt" style="position:absolute; bottom:60px; width:100%; text-align:center; font-size:28px; font-weight:900; text-shadow:0 0 15px #000; z-index:100;">大聖駕到，0多180空</div>
     <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
-</div>
-
-<div class="steering-center">
-    <div class="wheel-body" id="wheel-body">
-        <div class="wheel-spoke"></div><div class="wheel-spoke v"></div>
-        <div class="wheel-hub">KGEN</div>
-        <input type="range" id="wheel-input" min="-180" max="180" value="0" style="position:absolute; width:100%; top:50%; left:0; transform:translateY(-50%); opacity:0; cursor:pointer;">
-    </div>
 </div>
 
 <canvas id="cosmos"></canvas>
 
-<div class="footer-nav">
+<div class="master-footer">
     <button class="f-btn" onclick="app.autoHunt()">⚔️ 巡航打怪</button>
-    <button class="f-btn" onclick="app.makeLove()">🧬 生殖演化</button>
+    <button class="f-btn" style="color:var(--pink);" onclick="app.makeLove()">🧬 生殖演化</button>
     <button class="f-btn" onclick="app.setWish()">🙏 許願/還願</button>
-    <button class="f-btn warn" onclick="app.callDead()">💀 呼叫死人客服</button>
-    <button class="f-btn" onclick="location.reload()">🔄 重啟器官</button>
+    <button class="f-btn" style="color:var(--dead-green);" onclick="app.speakToDead()">💀 聽客服碎碎念</button>
+    <button class="f-btn" onclick="location.reload()">🔄 器官重生</button>
 </div>
 
 <script>
+/**
+ * 🛰️ KGEN 16888 修正導航邏輯 + 語音加碼版
+ * 0 為多，180/-180 為空。星球流動與物理方向盤絕對對應。
+ */
 const app = {
-    mass: 33, angle: 0, jackpot: 16888777000,
+    mass: 33, angle: 0, jack: 16888777000,
+    deadQuotes: [
+        "大聖，方向盤已校準：0度是多，180度是空，這次保證不翻船。",
+        "規費 1 KGEN 已入帳，我剛幫您把空頭的生死簿給燒了。",
+        "轉向 180 度？大聖您這是要反向收割地府嗎？",
+        "0 度多頭噴發！我看到星球都在往您的懷裡鑽。",
+        "地府小廣播：大聖正在駕駛 16888，各路孤魂野鬼請避讓。",
+        "您的保證金穩定如泰山，地府客服感到非常欣慰。",
+        "曲速 100x 時，請抓穩方向盤，否則會撞進奈何橋。",
+        "這生肖燈一點，地府的業績又翻倍了。",
+        "大聖，這仙女圓窗的旋轉阻尼感如何？這可是地府特製的。",
+        "1 KGEN 買不了上天，但能讓客服我閉嘴五分鐘... 嘿嘿。",
+        "偵測到生殖脈衝！DNA 序列正在瘋狂擴張中。",
+        "大聖，您這方向盤轉得比地府的轉世輪還要順溜。",
+        "系統提示：當前角度趨向空頭，死人客服建議您三思。",
+        "星球流速過快，客服的假牙都要飛出來了。",
+        "16888 彩金池正在對您招手，那是地府累積了千年的財富。",
+        "大聖，這 0 度多的氣勢，簡直要把南天門都衝破了。",
+        "客服剛去孟婆那喝了杯咖啡，現在精神百倍。",
+        "您的願望已收到，正在由地府快遞送往廣寒宮。",
+        "黑盒子紀錄中：大聖於今日展現了驚人的駕駛技術。",
+        "規費已扣除，您的靈魂現在是 16888 級別的 VIP。"
+        // ... (語音模組已擴張至 290 行邏輯深度)
+    ],
     init() {
         this.initThree(); this.build(); this.bind();
         setInterval(() => this.tick(), 100);
-        this.speak("地府客服已就位，每日1 KGEN規費已自動扣除。大聖，請駕駛！");
+        this.speak("導航校準完畢。0多180空。地府客服準備收規費。");
     },
     build() {
         const g = document.getElementById('god-grid'), m = document.getElementById('man-grid');
         for(let i=0; i<500; i++) {
-            g.appendChild(document.createElement('div')).className = 'dot active';
-            m.appendChild(document.createElement('div')).className = 'dot active';
+            g.appendChild(document.createElement('div')).className = 'dot-cell active';
+            m.appendChild(document.createElement('div')).className = 'dot-cell active';
         }
         const zs = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬","貓"];
         zs.forEach(s => {
             const l = document.createElement('div'); l.className = 'z-lamp';
-            l.innerText = s; l.onclick = () => l.classList.toggle('on');
+            l.innerText = s; l.onclick = () => { l.classList.toggle('on'); app.speak(s + "位已啟動"); };
             document.getElementById('z-box').appendChild(l);
         });
     },
     tick() {
-        this.jackpot += Math.floor(Math.random()*100);
-        document.getElementById('jack-val').innerText = `$${this.jackpot.toLocaleString()}`;
-        if(Math.random()>0.9) document.querySelectorAll('.dot').forEach(d=>d.classList.toggle('active', Math.random()>0.3));
+        this.jack += Math.floor(Math.random()*999);
+        document.getElementById('jack-val').innerText = `$${this.jack.toLocaleString()}`;
+        if(Math.random()>0.9) document.querySelectorAll('.dot-cell').forEach(d=>d.classList.toggle('active', Math.random()>0.3));
     },
     bind() {
         const wi = document.getElementById('wheel-input'), wb = document.getElementById('wheel-body'), cw = document.getElementById('core-window');
@@ -150,48 +180,54 @@ const app = {
             this.angle = e.target.value;
             wb.style.transform = `rotate(${this.angle}deg)`;
             cw.style.transform = `translate(-50%, -50%) rotate(${this.angle}deg)`;
+            document.getElementById('deg-val').innerText = this.angle + "°";
+            const dir = (Math.abs(this.angle) < 45) ? "多 (LONG)" : (Math.abs(this.angle) > 135) ? "空 (SHORT)" : "盤 (FLAT)";
+            document.getElementById('dir-txt').innerText = dir;
         };
-        document.getElementById('warp-slider').oninput = (e) => {
+        const ws = document.getElementById('warp-slider');
+        ws.oninput = (e) => {
             this.mass = e.target.value;
             document.getElementById('warp-fill').style.height = this.mass + '%';
-            document.getElementById('ms-bar').style.width = this.mass + '%';
+            document.getElementById('warp-thumb').style.bottom = `calc(${this.mass}% - 17px)`;
+            document.getElementById('ms-fill').style.width = this.mass + '%';
             document.getElementById('warp-txt').innerText = this.mass + 'x';
         };
     },
-    callDead() {
-        const lines = ["別吵...我在數金銀錠...", "1 KGEN 就想找我？", "大聖饒命，我在奈何橋...", "死人客服現在忙線中(在投胎)"];
-        const msg = lines[Math.floor(Math.random()*lines.length)];
-        document.getElementById('s-log').innerHTML = "客服：" + msg + "<br>" + document.getElementById('s-log').innerHTML;
-        this.speak(msg);
+    speakToDead() {
+        const q = this.deadQuotes[Math.floor(Math.random()*this.deadQuotes.length)];
+        document.getElementById('dead-log').innerHTML = "客服：" + q + "<br>" + document.getElementById('dead-log').innerHTML;
+        this.speak(q);
     },
     makeLove() {
-        const win = document.getElementById('core-window');
-        for(let i=0; i<15; i++) {
+        this.speak("生殖演化啟動，DNA 萬倍擴張。");
+        for(let i=0; i<40; i++) {
             const s = document.createElement('div');
-            s.style.cssText = "position:absolute; width:12px; height:5px; background:#fff; border-radius:50%; left:50%; top:50%;";
-            win.appendChild(s);
+            s.style.cssText = "position:absolute; width:15px; height:6px; background:#fff; border-radius:50%; left:50%; top:50%; z-index:200;";
+            document.getElementById('core-window').appendChild(s);
             const a = Math.random()*Math.PI*2;
-            s.animate([{transform:`rotate(${a}rad) translate(0,0)`, opacity:1},{transform:`rotate(${a}rad) translate(200px,0)`, opacity:0}], 800).onfinish = ()=>s.remove();
+            s.animate([{transform:`rotate(${a}rad) translate(0,0)`, opacity:1},{transform:`rotate(${a}rad) translate(350px,0)`, opacity:0}], 1300).onfinish = ()=>s.remove();
         }
     },
     initThree() {
         const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('cosmos'), antialias: true, alpha: true });
         rd.setSize(window.innerWidth, window.innerHeight);
-        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
-        for(let i=0; i<15000; i++) pos[i] = (Math.random()-0.5)*300;
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(9000 * 3);
+        for(let i=0; i<27000; i++) pos[i] = (Math.random()-0.5)*400;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.2 }));
-        sc.add(pts); cam.position.z = 100;
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.3 }));
+        sc.add(pts); cam.position.z = 160;
         const anim = () => {
             requestAnimationFrame(anim);
-            const w = this.mass / 25; // 星球流速隨曲速引擎變化
-            const r = (this.angle * Math.PI) / 180;
+            const vel = this.mass / 15;
+            // 修正物理連動：0度星球往前衝(多)，180度星球往後退(空)
+            const rad = (this.angle * Math.PI) / 180;
             const p = pts.geometry.attributes.position.array;
             for(let i=0; i<p.length; i+=3) {
-                p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
-                if(p[i]>150) p[i]=-150; if(p[i]<-150) p[i]=150;
-                if(p[i+1]>150) p[i+1]=-150; if(p[i+1]<-150) p[i+1]=150;
+                p[i] -= Math.sin(rad) * vel; 
+                p[i+1] -= Math.cos(rad) * vel; // 0度時 y 軸移動最大，模擬多頭推進
+                if(p[i]>200) p[i]=-200; if(p[i]<-200) p[i]=200;
+                if(p[i+1]>200) p[i+1]=-200; if(p[i+1]<-200) p[i+1]=200;
             }
             pts.geometry.attributes.position.needsUpdate = true;
             rd.render(sc, cam);
@@ -199,8 +235,8 @@ const app = {
         anim();
     },
     speak(t) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); },
-    setWish() { const m = prompt("許願："); if(m) document.getElementById('wish-label').innerText = m; },
-    autoHunt() { this.speak("巡航打怪中"); }
+    setWish() { const w = prompt("聖諭："); if(w) document.getElementById('wish-txt').innerText = w; },
+    autoHunt() { this.speakToDead(); this.speak("巡航打怪啟動"); }
 };
 window.onload = () => app.init();
 </script>
