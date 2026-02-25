@@ -2,49 +2,50 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜廣寒宮超光速指揮中心</title>
+    <title>花果山台灣廣寒宮16888｜終極指揮終端</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🧚 仙女/監控核心 - 修正旋轉中心點 */
-        #ufo-wrapper {
-            position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 380px; height: 380px; z-index: 50;
-        }
-        #core-display {
+        /* 🏛️ 頂部品牌與資料顯示區 */
+        .hud-header { position: fixed; top: 15px; width: 95%; left: 2.5%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-info { text-align: right; }
+        .brand-name { font-size: 24px; color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        .real-time { font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); }
+        
+        .seat-monitor { display: flex; gap: 20px; }
+        .seat-box { border-left: 3px solid var(--gold); padding: 5px 15px; background: rgba(0,0,0,0.6); }
+        .grid { display: grid; grid-template-columns: repeat(20, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #222; }
+        .dot.on { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
+
+        /* 🧚 核心圓窗與旋轉機制 */
+        #ufo-wrapper { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; z-index: 50; }
+        #core-display { 
             width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold);
             overflow: hidden; background: #000; box-shadow: 0 0 80px rgba(255,215,120,0.4);
-            position: relative; transition: transform 0.05s linear; /* 這裡控制轉動 */
+            position: relative; transition: transform 0.05s linear;
         }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
         #monitor-webcam { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scaleX(-1); }
         
+        /* 💬 影像內留言顯示 (左下方) */
+        .wish-overlay { position: absolute; bottom: 40px; left: 40px; color: var(--cyan); font-weight: 900; font-size: 18px; text-shadow: 2px 2px 5px #000; z-index: 80; max-width: 250px; }
+        
         /* 📸 右上角合照小圖 */
-        #mini-fairy {
-            position: absolute; top: 20px; right: 20px; width: 80px; height: 80px;
-            border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 70;
-            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-        }
+        #mini-fairy { position: absolute; top: 20px; right: 20px; width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--gold); display: none; z-index: 70; background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover; box-shadow: 0 0 15px var(--gold); }
 
-        /* 🚀 曲速引擎 */
+        /* 🚀 曲速與方向盤 */
         .warp-panel { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 100; }
         .warp-bars { display: flex; flex-direction: column-reverse; gap: 4px; border-left: 3px solid var(--cyan); padding: 5px; }
         .bar-seg { width: 35px; height: 8px; background: #111; }
         .bar-seg.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
         .warp-input { position: absolute; top: 0; left: 0; width: 45px; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; }
 
-        /* 🎡 方向盤 */
         .steer-panel { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
         .angle-val { font-family: 'Orbitron'; font-size: 52px; color: var(--cyan); }
-
-        /* 🖼️ 拍照存證預覽視窗 */
-        #snapshot-preview {
-            position: fixed; top: 20px; right: 20px; width: 150px; border: 2px solid var(--gold);
-            display: none; z-index: 200; background: #000;
-        }
 
         .footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; }
         .btn { background: #111; border: 1px solid #444; color: #fff; padding: 18px; font-weight: 900; cursor: pointer; }
@@ -53,15 +54,25 @@
 </head>
 <body>
 
+<div class="hud-header">
+    <div class="seat-monitor">
+        <div class="seat-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid" id="g1"></div></div>
+        <div class="seat-box"><div>🐒 豪宅分紅 (500)</div><div class="grid" id="g2"></div></div>
+    </div>
+    <div class="brand-info">
+        <div class="brand-name">花果山台灣廣寒宮16888</div>
+        <div class="real-time" id="clock">2026-02-25 00:00:00</div>
+    </div>
+</div>
+
 <div id="ufo-wrapper">
     <div id="core-display">
+        <div class="wish-overlay" id="wish-txt">大聖駕到，光耀廣寒</div>
         <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
         <video id="monitor-webcam" autoplay playsinline></video>
         <div id="mini-fairy"></div>
     </div>
 </div>
-
-<img id="snapshot-preview" title="大聖存證預覽">
 
 <canvas id="galaxy"></canvas>
 <canvas id="capture-canvas" style="display:none;"></canvas>
@@ -78,32 +89,38 @@
 </div>
 
 <div class="footer">
-    <button class="btn" onclick="app.capturePhoto()">📸 拍照存證</button>
+    <button class="btn" onclick="app.capture()">📸 拍照存證</button>
     <button class="btn" onclick="app.toggleCam()">🎥 影像監控</button>
-    <button class="btn" onclick="app.speak('已記錄留言並完成仙女合照')">👤 許願留言</button>
-    <button class="btn">📈 CT 下單</button><button class="btn">🦊 錢包連結</button><button class="btn">🎙️ 客服語音</button>
+    <button class="btn" onclick="app.setWish()">👤 許願留言</button>
+    <button class="btn">📈 CT 下單</button><button class="btn">🦊 錢包連結</button><button class="btn" onclick="app.speak('廣寒宮客服待命')">🎙️ 客服語音</button>
 </div>
 
 <script>
 const app = {
     isCamOn: false,
     init() {
-        this.initThree();
-        this.buildWarp();
-        this.bind();
-        this.speak("廣寒宮系統全線修復，請大聖轉動方向盤。");
+        this.initThree(); this.buildWarp(); this.bind(); this.updateClock();
+        setInterval(() => this.updateClock(), 1000);
+        this.fillGrid('g1'); this.fillGrid('g2');
+    },
+    updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleString();
     },
     buildWarp() {
         const c = document.getElementById('warp-bars');
         for(let i=0; i<25; i++) {
-            const b = document.createElement('div'); b.className = 'bar-seg';
-            c.appendChild(b);
+            const b = document.createElement('div'); b.className = 'bar-seg'; c.appendChild(b);
         }
         this.updateWarp(10);
     },
     updateWarp(v) {
         document.querySelectorAll('.bar-seg').forEach((b, i) => b.className = i < v ? 'bar-seg active' : 'bar-seg');
-        document.getElementById('warp-txt').innerText = v == 0 ? "反物質熄火 0x" : "WARP " + v * 10 + "x";
+        document.getElementById('warp-txt').innerText = v == 0 ? "熄火 0x" : "WARP " + v * 10 + "x";
+    },
+    setWish() {
+        const msg = prompt("請大聖輸入許願留言：", "大聖駕到，光耀廣寒");
+        if(msg) document.getElementById('wish-txt').innerText = msg;
     },
     async toggleCam() {
         const v = document.getElementById('monitor-webcam');
@@ -114,42 +131,44 @@ const app = {
                 this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
                 this.isCamOn = true;
-            } catch(e) { alert("攝像頭開啟失敗"); }
+            } catch(e) { alert("無法連線攝影機"); }
         } else {
             if(this.stream) this.stream.getTracks().forEach(t => t.stop());
             v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
             this.isCamOn = false;
         }
     },
-    // 📸 真實拍照並顯示預覽
-    capturePhoto() {
+    capture() {
         const canvas = document.getElementById('capture-canvas');
         const video = document.getElementById('monitor-webcam');
         const fairy = document.getElementById('fairy-img');
-        const preview = document.getElementById('snapshot-preview');
+        const wish = document.getElementById('wish-txt').innerText;
         const ctx = canvas.getContext('2d');
-        
-        canvas.width = 500; canvas.height = 500;
-        
-        // 1. 背景
+        canvas.width = 600; canvas.height = 600;
+
+        // 1. 繪製主影像
         if(this.isCamOn) {
-            ctx.translate(500, 0); ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, 500, 500);
+            ctx.translate(600, 0); ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, 600, 600);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.drawImage(fairy, 380, 20, 100, 100); // 合照小圖
+            ctx.drawImage(fairy, 450, 20, 120, 120); // 右上仙女小圖
         } else {
-            ctx.drawImage(fairy, 0, 0, 500, 500);
+            ctx.drawImage(fairy, 0, 0, 600, 600);
         }
 
-        const dataUrl = canvas.toDataURL('image/png');
-        preview.src = dataUrl;
-        preview.style.display = 'block';
-        
+        // 2. 繪製文字 (左下留言 & 右上品牌)
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 24px Noto Sans TC";
+        ctx.fillText(wish, 40, 550);
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 18px Orbitron";
+        ctx.fillText("花果山台灣廣寒宮 16888", 340, 50);
+        ctx.font = "14px Orbitron";
+        ctx.fillText(new Date().toLocaleString(), 340, 75);
+
         const link = document.createElement('a');
-        link.download = `KGEN_SNAPSHOT_${Date.now()}.png`;
-        link.href = dataUrl;
+        link.download = `廣寒宮存證_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
         link.click();
-        this.speak("存證檔案已生成並顯示。");
+        this.speak("存證檔案已下載至大聖寶庫");
     },
     bind() {
         const s = document.getElementById('steer-in');
@@ -157,7 +176,7 @@ const app = {
         s.oninput = (e) => {
             const val = e.target.value;
             document.getElementById('angle-txt').innerText = val + '°';
-            // 🔥 修復關鍵：直接控制旋轉
+            // 🔥 旋轉修復：確保中間圓窗會隨方向盤 1:1 轉動
             core.style.transform = `rotate(${val}deg)`;
         };
         document.getElementById('warp-in').oninput = (e) => this.updateWarp(e.target.value);
@@ -191,7 +210,13 @@ const app = {
         this.stars.geometry.attributes.position.needsUpdate = true;
         this.renderer.render(this.scene, this.camera);
     },
-    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }
+    speak(m) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); },
+    fillGrid(id) {
+        const g = document.getElementById(id);
+        for(let i=0; i<60; i++) {
+            const d = document.createElement('div'); d.className = `dot ${Math.random()>0.5?'on':''}`; g.appendChild(d);
+        }
+    }
 };
 window.onload = () => app.init();
 </script>
