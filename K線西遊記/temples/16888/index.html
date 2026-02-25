@@ -1,105 +1,390 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<title>16888 Duel Engine v1.54</title>
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<style>
-body { background:#000; color:#0f0; font-family:Arial; text-align:center; }
-button { padding:12px 20px; margin:10px; font-size:16px; cursor:pointer; }
-#log { margin-top:20px; white-space:pre-line; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KGEN 16888｜即時對賭池（單人 vs Pool）｜v1.54</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold:#ffd778; --cyan:#00f2ff; --bg:#000; --energy:#ffcc00; --panel:rgba(20,20,0,.9); --red:#ff4444; }
+    body, html { margin:0; padding:0; background:var(--bg); color:#fff; font-family:'Noto Sans TC', sans-serif; overflow:hidden; height:100vh; }
+
+    .hud-top{ position:fixed; top:15px; width:96%; left:2%; display:flex; justify-content:space-between; z-index:100; pointer-events:none; }
+    .brand-section{ border-left:5px solid var(--gold); padding-left:15px; background:linear-gradient(90deg, var(--panel), transparent); }
+    .brand-name{ font-size:28px; color:var(--gold); text-shadow:0 0 15px var(--gold); }
+    .sys-st{ font-family:'Orbitron'; font-size:12px; color:var(--cyan); letter-spacing:1px; }
+
+    .monitor-data{ display:flex; gap:20px; }
+    .data-box{ background:var(--panel); border:1px solid #332200; padding:10px; border-top:2px solid var(--gold); pointer-events:none; }
+    .grid-500{ display:grid; grid-template-columns:repeat(25, 6px); gap:3px; margin-top:5px; }
+    .dot{ width:6px; height:6px; background:#1a1a00; border-radius:1px; }
+    .dot.on{ background:var(--energy); box-shadow:0 0 8px var(--energy); }
+
+    /* 左：曲速引擎 */
+    .warp-engine{ position:fixed; left:45px; top:50%; transform:translateY(-50%); z-index:150; width:100px; text-align:center; }
+    .warp-rail{ height:450px; width:30px; background:#111; border:3px solid var(--energy); position:relative; margin:0 auto; border-radius:8px; overflow:hidden; box-shadow:0 0 20px rgba(255,204,0,.2); }
+    #energy-fill{ position:absolute; bottom:0; width:100%; background:linear-gradient(to top, #ff8800, var(--energy), #fff); transition:height .15s cubic-bezier(.17,.67,.83,.67); z-index:5; }
+    .rail-step{ position:absolute; width:100%; height:2px; background:rgba(0,0,0,.4); z-index:10; }
+    #warp-thumb{ width:70px; height:35px; background:#fff; position:absolute; left:-20px; bottom:33%; cursor:pointer; border-radius:6px; box-shadow:0 0 30px #fff, 0 0 15px var(--cyan); border:3px solid var(--cyan); z-index:30; }
+    .warp-range{ position:absolute; top:0; left:0; width:100%; height:100%; -webkit-appearance: slider-vertical; opacity:0; cursor:pointer; z-index:40; }
+    .warp-val-text{ margin-top:25px; color:var(--energy); font-family:'Orbitron'; font-size:18px; text-shadow:0 0 10px var(--energy); }
+
+    /* 中：核心 */
+    #core-anchor{ position:fixed; top:45%; left:52%; transform:translate(-50%, -50%); width:420px; height:420px; z-index:50; }
+    #core-window{ width:100%; height:100%; border-radius:50%; border:15px double var(--gold); overflow:hidden; background:#000; position:relative;
+      box-shadow:0 0 80px rgba(255,215,120,.3); transition:transform .05s linear; }
+    #fairy-img{ width:100%; height:100%; object-fit:cover; }
+    #wish-label{ position:absolute; bottom:50px; left:50px; z-index:85; color:#fff; font-weight:900; font-size:24px; text-shadow:2px 2px 10px #000, 0 0 15px var(--cyan); }
+
+    /* 右：GA */
+    .ga-matrix{ position:fixed; right:30px; top:50%; transform:translateY(-50%); width:220px; background:var(--panel); border:1px solid var(--energy); padding:15px; z-index:100; font-family:'Orbitron'; }
+    .ga-stat{ font-size:11px; margin-bottom:10px; color:var(--cyan); }
+    .ga-bar{ height:6px; background:#111; margin-top:4px; overflow:hidden; border-radius:3px; }
+    .ga-progress{ height:100%; background:var(--energy); width:0%; transition:width .5s; }
+
+    /* 方向角 */
+    .steer-zone{ position:fixed; bottom:200px; width:100%; text-align:center; z-index:100; }
+    .angle-readout{ font-family:'Orbitron'; font-size:56px; color:var(--cyan); text-shadow:0 0 30px var(--cyan); }
+    .steer-slider{ width:75%; max-width:900px; cursor:pointer; height:12px; accent-color:var(--gold); }
+
+    /* 底部控制台 */
+    .footer-terminal{ position:fixed; bottom:0; width:100%; background:#000; padding:14px 20px; border-top:4px solid var(--gold);
+      display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; z-index:100; }
+    .term-btn{ background:#0a0a0a; border:1px solid #444; color:#fff; padding:18px 5px; font-weight:900; cursor:pointer; transition:.2s; font-size:14px; border-radius:4px; }
+    .term-btn:hover{ background:var(--gold); color:#000; }
+    .term-btn.active-kgen{ border-color:var(--energy); color:var(--energy); box-shadow:inset 0 0 15px rgba(255,204,0,.2); }
+
+    /* 小面板（可點） */
+    .mini-panel{
+      position:fixed; left:50%; top:16px; transform:translateX(-50%);
+      z-index:140;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,215,120,.5);
+      padding:10px 12px;
+      border-radius:10px;
+      backdrop-filter: blur(8px);
+      width:min(720px, 92vw);
+    }
+    .mini-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ border:1px solid rgba(0,242,255,.35); color:var(--cyan); padding:6px 10px; border-radius:999px; font-family:'Orbitron'; font-size:12px; }
+    .pill strong{ color:var(--gold); font-weight:900; }
+    .mini-actions{ margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; }
+    .mini-actions button{ pointer-events:auto; }
+
+    canvas#galaxy-bg{ position:fixed; inset:0; z-index:1; }
+  </style>
 </head>
 <body>
 
-<h2>16888 對賭引擎 v1.54</h2>
+  <div class="hud-top">
+    <div class="brand-section">
+      <div class="brand-name">KGEN 16888 金融生命體</div>
+      <div class="sys-st" id="ver-st">VERSION v1.54 (PoolDuel)</div>
+      <div class="sys-st" id="sys-clock">SYSTEM ONLINE | --</div>
+    </div>
+    <div class="monitor-data">
+      <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
+      <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
+    </div>
+  </div>
 
-<button id="connectBtn">CONNECT WALLET</button>
-<button id="longBtn">開多 (10 KGEN)</button>
-<button id="shortBtn">開空 (10 KGEN)</button>
-<button id="settleBtn">CT+1 結算</button>
+  <!-- 可互動的鏈上小面板 -->
+  <div class="mini-panel">
+    <div class="mini-row">
+      <div class="pill">KGEN <strong id="kgen-addr">0xBA3d…32Be</strong></div>
+      <div class="pill">16888 合約 <strong id="duel-addr">(未填)</strong></div>
+      <div class="pill">獎池餘額 <strong id="pool-bal">--</strong> KGEN</div>
+      <div class="pill">單注 <strong id="bet-amt">10</strong> KGEN</div>
+      <div class="pill">抽成 <strong id="fee-bps">5%</strong> → 高老莊 8888</div>
+      <div class="pill">Wallet <strong id="wallet">(未連)</strong></div>
+    </div>
+    <div class="mini-actions">
+      <button class="term-btn active-kgen" id="btn-connect">🔌 連接錢包</button>
+      <button class="term-btn" id="btn-refresh">🔄 刷新獎池</button>
+      <button class="term-btn" id="btn-approve">✅ Approve 10 KGEN</button>
+      <button class="term-btn" id="btn-deposit">➕ 注入獎池 (10 KGEN)</button>
+      <button class="term-btn active-kgen" id="btn-bet-long">🟢 對賭 LONG (0°)</button>
+      <button class="term-btn active-kgen" id="btn-bet-short">🔴 對賭 SHORT (180°)</button>
+    </div>
+  </div>
 
-<div id="log"></div>
+  <div class="warp-engine">
+    <div class="warp-rail" id="warp-rail-body">
+      <div id="energy-fill"></div>
+      <div id="warp-thumb"></div>
+      <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
+    </div>
+    <div class="warp-val-text" id="warp-txt">WARP 0x</div>
+  </div>
+
+  <div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+  </div>
+
+  <div id="core-anchor">
+    <div id="core-window">
+      <div id="wish-label">大聖駕到，光耀廣寒</div>
+      <img id="fairy-img" crossorigin="anonymous" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+    </div>
+  </div>
+
+  <canvas id="galaxy-bg"></canvas>
+
+  <div class="steer-zone">
+    <div class="angle-readout" id="ang-val">0°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="0" step="1">
+  </div>
+
+  <div class="footer-terminal">
+    <button class="term-btn" id="btn-wish">👤 許願/還願</button>
+    <button class="term-btn" id="btn-ga">💎 KGEN 沖等演化</button>
+    <button class="term-btn" id="btn-mode">🎮 模式提示</button>
+    <button class="term-btn" id="btn-help">📜 說明</button>
+  </div>
 
 <script>
-let provider;
-let signer;
-let userAddress;
+  const CFG = {
+    version: "v1.54",
+    chainIdHex: "0x38", // BSC mainnet
+    kgen: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    // ⚠️ 等你部署後再填：
+    poolDuel: "",
+    decimals: 18,
+    betAmount: "10",
+  };
 
-const TOKEN_ADDRESS = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const ABI_KGEN = [
+    "function decimals() view returns (uint8)",
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+  ];
 
-// 部署16888後填入
-let MOONTRUST_ADDRESS = "";
+  const ABI_DUEL = [
+    "function poolBalance() view returns (uint256)",
+    "function betAmount() view returns (uint256)",
+    "function feeBps() view returns (uint16)",
+    "function depositToPool(uint256 amount)",
+    "function bet(uint8 side)",
+    "event BetSettled(address indexed player, uint8 side, bool win, uint256 bet, uint256 fee, uint256 payout, uint256 poolAfter)",
+  ];
 
-const ORDER_SIZE = ethers.utils.parseEther("10");
+  const state = { provider:null, signer:null, wallet:null, kgen:null, duel:null };
 
-const ERC20_ABI = [
-  "function approve(address spender, uint256 amount) public returns (bool)"
-];
+  const ui = {
+    setText(id, t){ const el=document.getElementById(id); if(el) el.textContent=t; },
+    short(addr){ return addr ? addr.slice(0,6)+"…"+addr.slice(-4) : "(未填)"; },
+    async toast(msg){ try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg)); }catch(e){} alert(msg); }
+  };
 
-const DUEL_ABI = [
-  "function openOrder(bool isLong) external",
-  "function settle() external"
-];
+  const app = {
+    gaLevel: 600,
+    warpX: 0,
 
-const log = (msg) => {
-  document.getElementById("log").innerText += msg + "\n";
-};
+    init(){
+      this.buildUI();
+      this.bind();
+      setInterval(()=>this.tick(), 1000);
+      this.updateWarp(33);
+      this.applySteer(0,true);
+      this.initThree();
+      this.reflectCfg();
+    },
 
-document.getElementById("connectBtn").addEventListener("click", async () => {
-  if (!window.ethereum) {
-    alert("請安裝 MetaMask");
-    return;
-  }
+    reflectCfg(){
+      ui.setText('kgen-addr', ui.short(CFG.kgen));
+      ui.setText('duel-addr', CFG.poolDuel ? ui.short(CFG.poolDuel) : '(未填)');
+      ui.setText('bet-amt', CFG.betAmount);
+    },
 
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
-  userAddress = await signer.getAddress();
+    tick(){
+      ui.setText('sys-clock', `SYSTEM ONLINE | ${new Date().toLocaleString()}`);
+      document.querySelectorAll('.dot').forEach(d=>{ if(Math.random()>0.9) d.classList.toggle('on'); });
+      const fit = 0.9 + Math.random()*0.1;
+      ui.setText('f-val', fit.toFixed(3));
+      document.getElementById('f-bar').style.width = (fit*100)+'%';
+      document.getElementById('m-bar').style.width = (Math.random()*100)+'%';
+    },
 
-  log("已連線: " + userAddress);
-});
+    buildUI(){
+      ['g1','g2'].forEach(id=>{
+        const c=document.getElementById(id); c.innerHTML='';
+        for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='dot'+(Math.random()>0.5?' on':''); c.appendChild(d);} 
+      });
+      const rail=document.getElementById('warp-rail-body');
+      for(let i=0;i<25;i++){ const step=document.createElement('div'); step.className='rail-step'; step.style.bottom=(i*4)+'%'; rail.appendChild(step);} 
+    },
 
-document.getElementById("longBtn").addEventListener("click", async () => {
-  await openPosition(true);
-});
+    bind(){
+      document.getElementById('steer-input-val').addEventListener('input', e=>this.applySteer(e.target.value));
+      document.getElementById('warp-input-val').addEventListener('input', e=>this.updateWarp(e.target.value));
 
-document.getElementById("shortBtn").addEventListener("click", async () => {
-  await openPosition(false);
-});
+      document.getElementById('btn-wish').addEventListener('click', ()=>{
+        const cur=document.getElementById('wish-label').innerText;
+        const m=prompt('大聖請開金口：', cur);
+        if(m) document.getElementById('wish-label').innerText=m;
+      });
+      document.getElementById('btn-ga').addEventListener('click', ()=>{
+        if(this.gaLevel<1000){ this.gaLevel+=50; ui.setText('ga-rank', `RANK: GA-${this.gaLevel}`); this.updateWarp(document.getElementById('warp-input-val').value); }
+      });
+      document.getElementById('btn-mode').addEventListener('click', ()=>ui.toast('即時對賭：你押 LONG(0°) 或 SHORT(180°)。不找人，獎池就是對手。'));
+      document.getElementById('btn-help').addEventListener('click', ()=>ui.toast('先填入 16888 PoolDuel 合約地址 → 連接錢包 → Approve 10 KGEN → 下注。'));
 
-document.getElementById("settleBtn").addEventListener("click", async () => {
-  if (!MOONTRUST_ADDRESS) {
-    alert("16888 合約尚未部署");
-    return;
-  }
+      // web3 buttons
+      document.getElementById('btn-connect').addEventListener('click', ()=>this.connect());
+      document.getElementById('btn-refresh').addEventListener('click', ()=>this.refresh());
+      document.getElementById('btn-approve').addEventListener('click', ()=>this.approve10());
+      document.getElementById('btn-deposit').addEventListener('click', ()=>this.deposit10());
+      document.getElementById('btn-bet-long').addEventListener('click', ()=>this.bet(0));
+      document.getElementById('btn-bet-short').addEventListener('click', ()=>this.bet(1));
+    },
 
-  const duel = new ethers.Contract(MOONTRUST_ADDRESS, DUEL_ABI, signer);
-  const tx = await duel.settle();
-  await tx.wait();
-  log("已結算完成");
-});
+    getWarpXFromPct(pct){
+      const p=Math.max(0, Math.min(100, Number(pct)||0));
+      const cap=Math.max(1, Number(this.gaLevel)||1);
+      if(p===0) return 0;
+      return Math.max(1, Math.round((p/100)*cap));
+    },
 
-async function openPosition(isLong) {
-  if (!MOONTRUST_ADDRESS) {
-    alert("16888 合約尚未部署");
-    return;
-  }
+    updateWarp(val){
+      const pct=Math.max(0, Math.min(100, parseFloat(val)||0));
+      const warpX=this.getWarpXFromPct(pct);
+      this.warpX=warpX;
+      document.getElementById('energy-fill').style.height=pct+'%';
+      document.getElementById('warp-thumb').style.bottom=`calc(${pct}% - 17px)`;
+      ui.setText('warp-txt', `WARP ${warpX}x`);
+    },
 
-  const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
-  const duel = new ethers.Contract(MOONTRUST_ADDRESS, DUEL_ABI, signer);
+    applySteer(v, silent=false){
+      const ang=Math.max(-180, Math.min(180, Number(v)||0));
+      ui.setText('ang-val', ang+'°');
+      document.getElementById('core-window').style.transform=`rotate(${ang}deg)`;
+      if(!silent) {
+        // nothing
+      }
+    },
 
-  log("批准 10 KGEN...");
-  let tx = await token.approve(MOONTRUST_ADDRESS, ORDER_SIZE);
-  await tx.wait();
+    // ===== Web3 =====
+    async connect(){
+      if(!window.ethereum) return ui.toast('找不到錢包：請用手機 Chrome + MetaMask/OKX 內建瀏覽器開啟');
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      const net = await provider.getNetwork();
+      if(net.chainId !== 56){
+        // try switch
+        try{ await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CFG.chainIdHex }]}); }
+        catch(e){ return ui.toast('請切到 BSC 主網再試一次'); }
+      }
+      const signer = provider.getSigner();
+      const wallet = await signer.getAddress();
 
-  log("開倉中...");
-  tx = await duel.openOrder(isLong);
-  await tx.wait();
+      state.provider=provider; state.signer=signer; state.wallet=wallet;
+      state.kgen = new ethers.Contract(CFG.kgen, ABI_KGEN, signer);
 
-  log("開倉完成");
-}
+      if(!CFG.poolDuel) {
+        ui.setText('wallet', ui.short(wallet));
+        return ui.toast('先把 16888 PoolDuel 合約地址填進 CFG.poolDuel 再刷新');
+      }
+      state.duel = new ethers.Contract(CFG.poolDuel, ABI_DUEL, signer);
+
+      ui.setText('wallet', ui.short(wallet));
+
+      // listener
+      state.duel.on('BetSettled', (player, side, win, bet, fee, payout)=>{
+        if(String(player).toLowerCase() !== String(wallet).toLowerCase()) return;
+        const msg = win ? `你贏了：${ethers.utils.formatUnits(payout, CFG.decimals)} KGEN` : '你輸了：獎池吞噬';
+        document.getElementById('wish-label').innerText = msg;
+        this.refresh();
+      });
+
+      await this.refresh();
+      ui.toast('錢包已連線');
+    },
+
+    async refresh(){
+      if(!state.duel) return;
+      const bal = await state.duel.poolBalance();
+      ui.setText('pool-bal', Number(ethers.utils.formatUnits(bal, CFG.decimals)).toFixed(4));
+      const betAmt = await state.duel.betAmount();
+      ui.setText('bet-amt', ethers.utils.formatUnits(betAmt, CFG.decimals));
+      const feeBps = await state.duel.feeBps();
+      ui.setText('fee-bps', (Number(feeBps)/100)+'%');
+    },
+
+    async approve10(){
+      if(!state.kgen || !state.duel) return ui.toast('先連線');
+      const amount = ethers.utils.parseUnits(CFG.betAmount, CFG.decimals);
+      const tx = await state.kgen.approve(CFG.poolDuel, amount);
+      document.getElementById('wish-label').innerText = 'Approve 送出…';
+      await tx.wait();
+      document.getElementById('wish-label').innerText = 'Approve 完成';
+    },
+
+    async deposit10(){
+      if(!state.duel || !state.kgen) return ui.toast('先連線');
+      const amount = ethers.utils.parseUnits(CFG.betAmount, CFG.decimals);
+      // 合約會 transferFrom：需先 approve
+      const tx = await state.duel.depositToPool(amount);
+      document.getElementById('wish-label').innerText = '注入獎池…';
+      await tx.wait();
+      document.getElementById('wish-label').innerText = '獎池已注入';
+      await this.refresh();
+    },
+
+    async bet(side){
+      if(!state.duel) return ui.toast('先連線');
+      const tx = await state.duel.bet(side);
+      document.getElementById('wish-label').innerText = side===0 ? '下注 LONG…' : '下注 SHORT…';
+      await tx.wait();
+      // 結果事件會更新
+    },
+
+    // ===== threejs background =====
+    initThree(){
+      const sc=new THREE.Scene();
+      const cam=new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+      const rd=new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias:true, alpha:true });
+      rd.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
+      rd.setSize(window.innerWidth, window.innerHeight);
+      const geo=new THREE.BufferGeometry();
+      const pos=new Float32Array(5000*3);
+      for(let i=0;i<15000;i++) pos[i]=(Math.random()-0.5)*160;
+      geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      const pts=new THREE.Points(geo, new THREE.PointsMaterial({ color:0x00f2ff, size:0.18 }));
+      sc.add(pts); cam.position.z=50;
+      const anim=()=>{
+        requestAnimationFrame(anim);
+        const pct=parseFloat(document.getElementById('warp-input-val').value)||0;
+        const warpX=this.getWarpXFromPct(pct);
+        const w=warpX/200;
+        if(w>0){
+          const r=(parseFloat(document.getElementById('steer-input-val').value)*Math.PI)/180;
+          const p=pts.geometry.attributes.position.array;
+          for(let i=0;i<p.length;i+=3){
+            p[i]-=Math.sin(r)*w; p[i+1]-=Math.cos(r)*w;
+            if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
+            if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+          }
+          pts.geometry.attributes.position.needsUpdate=true;
+        }
+        rd.render(sc, cam);
+      };
+      anim();
+      window.addEventListener('resize', ()=>{
+        cam.aspect=window.innerWidth/window.innerHeight;
+        cam.updateProjectionMatrix();
+        rd.setSize(window.innerWidth, window.innerHeight);
+      }, {passive:true});
+    }
+  };
+
+  window.addEventListener('load', ()=>app.init());
 </script>
-
 </body>
 </html>
