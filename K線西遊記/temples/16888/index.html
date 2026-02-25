@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜金融生命體肌肉滿血版</title>
+    <title>KGEN 16888｜金融生命體肌肉滿血版｜v1.51</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
@@ -120,6 +120,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 金融生命體</div>
+        <div class="sys-st" id="ver-st">VERSION v1.51</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -134,7 +135,7 @@
         <div id="warp-thumb"></div>
         <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
     </div>
-    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
+    <div class="warp-val-text" id="warp-txt">WARP 0x</div>
     <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
 </div>
 
@@ -185,7 +186,9 @@
 
 <script>
 const app = {
-    isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
+    isCam: false, camMode: 'user', gaLevel: 600,
+    warpX: 0,
+ recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
     stream: null, tInt: null, drawInt: null, bbSampleInt: null,
 
     // blackbox
@@ -228,12 +231,21 @@ const app = {
             rail.appendChild(step);
         }
     },
+    getWarpXFromPct(pct){
+        const p = Math.max(0, Math.min(100, Number(pct)||0));
+        const cap = Math.max(1, Number(this.gaLevel)||1); // GA1:1 ... GA1000:1000
+        if(p === 0) return 0;
+        return Math.max(1, Math.round((p/100) * cap));
+    },
 
     updateWarp(val) {
-        document.getElementById('energy-fill').style.height = val + '%';
-        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
-        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
-        this.bbEvent("warp", { warp: parseFloat(val) });
+        const pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
+        const warpX = this.getWarpXFromPct(pct);
+        this.warpX = warpX;
+        document.getElementById('energy-fill').style.height = pct + '%';
+        document.getElementById('warp-thumb').style.bottom = `calc(${pct}% - 17px)`;
+        document.getElementById('warp-txt').innerText = `WARP ${warpX}x`;
+        this.bbEvent("warp", { pct, warpX, ga: this.gaLevel });
     },
 
     applySteer(v, silent=false){
@@ -251,6 +263,9 @@ const app = {
         if(this.gaLevel < 1000) {
             this.gaLevel += 50;
             document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
+            // refresh warpX cap (GA changes warp cap)
+            const pctNow = parseFloat(document.getElementById('warp-input-val').value) || 0;
+            this.updateWarp(pctNow);
             this.bbEvent("boost", { ga: this.gaLevel });
             this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
         }
@@ -453,7 +468,8 @@ const app = {
 
         ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
         ctx.fillText(`ANGLE ${angle}°`, 30, 85);
-        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
+        const warpX = this.getWarpXFromPct(warp);
+        ctx.fillText(`WARP ${warpX}x`, 30, 115);
         ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
 
         ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
@@ -555,7 +571,9 @@ const app = {
         sc.add(pts); cam.position.z = 50;
         const anim = () => {
             requestAnimationFrame(anim);
-            const w = document.getElementById('warp-input-val').value / 40;
+            const pct = parseFloat(document.getElementById('warp-input-val').value) || 0;
+            const warpX = app.getWarpXFromPct(pct);
+            const w = warpX / 200;
             if(w > 0) {
                 const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
                 const p = pts.geometry.attributes.position.array;
