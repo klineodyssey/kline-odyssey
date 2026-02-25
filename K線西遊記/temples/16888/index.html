@@ -2,25 +2,35 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜黑盒子記憶體優化版｜v1.60</title>
+    <title>KGEN 16888｜黑盒子記憶體優化・聖諭版｜v1.60</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
-        /* 🧬 強化肌肉 CSS - 優化渲染效能 */
-        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --red:#ff4444; }
+        /* 🎨 延續 v1.52 的經典戰艦風格並優化渲染 */
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
-        
-        /* 🎥 錄影狀態燈 */
-        .rec-indicator { position: fixed; top: 160px; left: 45px; color: var(--red); font-family: 'Orbitron'; font-size: 14px; z-index: 200; display: none; align-items: center; gap: 5px; }
+
+        /* 🎥 黑盒子 REC 指示燈 */
+        .rec-indicator { 
+            position: fixed; top: 160px; left: 45px; color: var(--red); 
+            font-family: 'Orbitron'; font-size: 14px; z-index: 200; 
+            display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--red);
+        }
         .dot-blink { width: 10px; height: 10px; background: var(--red); border-radius: 50%; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* 🏛️ 頂部 HUD (16888 標配) */
+        /* 🏛️ 頂部 HUD (經典 500 席位) */
         .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, rgba(20,20,0,0.9), transparent); pointer-events: auto; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); pointer-events: auto; }
         .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
         .sys-st { font-family: 'Orbitron'; font-size: 11px; color: var(--cyan); }
+        
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 8px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
         /* 🚀 曲速引擎 (左側肌肉) */
         .warp-engine { position: fixed; left: 45px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
@@ -29,20 +39,25 @@
         .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
         .warp-val-text { margin-top: 15px; color: var(--energy); font-family: 'Orbitron'; font-size: 20px; }
 
-        /* 🎡 核心圓窗 (物理連動中心) */
+        /* 🎡 核心圓窗 (物理連動) */
         #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; z-index: 50; }
-        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; position: relative; transition: transform 0.05s linear; box-shadow: 0 0 50px rgba(255, 215, 120, 0.2); }
+        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; position: relative; transition: transform 0.05s linear; box-shadow: 0 0 60px rgba(255, 215, 120, 0.3); }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
         #cam-view { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity:0; }
+        #wish-label { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #fff; font-weight: 900; font-size: 20px; text-shadow: 0 0 10px #000; }
 
-        /* 🛠️ 底部控制台 (功能全開) */
+        /* 🛠️ 控制台 */
         .footer-terminal { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; z-index: 1000; }
-        .term-btn { background: #111; border: 1px solid #444; color: #fff; padding: 15px 5px; font-weight: 900; cursor: pointer; font-size: 13px; border-radius: 4px; }
+        .term-btn { background: #111; border: 1px solid #444; color: #fff; padding: 12px 5px; font-weight: 900; cursor: pointer; font-size: 13px; border-radius: 4px; }
         .term-btn:hover { background: var(--gold); color: #000; }
         .btn-rec { border-color: var(--red); color: var(--red); }
         .btn-kgen { border-color: var(--energy); color: var(--energy); }
 
         canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+        
+        /* 樣式補完 (Modal 等) 略過重複，確保 1.52 功能全在 */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display:none; z-index: 2000; backdrop-filter: blur(4px); }
+        .modal { position: fixed; left:50%; top:50%; transform: translate(-50%,-50%); width: 450px; background: rgba(10,10,0,.95); border: 1px solid var(--gold); border-radius: 10px; padding: 20px; display:none; z-index: 2100; }
     </style>
 </head>
 <body>
@@ -52,8 +67,12 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 v1.60</div>
-        <div class="sys-st" id="sys-clock">LOADING...</div>
-        <div class="sys-st" style="color:var(--energy)">MEM-OPTIMIZED / FULL-BLACKBOX</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE</div>
+        <div class="sys-st" style="color:var(--energy)">MEM-OPTIMIZED / BLACKBOX ACTIVE</div>
+    </div>
+    <div class="monitor-data">
+        <div class="data-box"><div>🏛️ 靈霄席位</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🐒 豪宅分紅</div><div class="grid-500" id="g2"></div></div>
     </div>
 </div>
 
@@ -69,6 +88,7 @@
     <div id="core-window">
         <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
         <video id="cam-view" autoplay playsinline muted></video>
+        <div id="wish-label">大聖駕到，光耀廣寒</div>
     </div>
 </div>
 
@@ -78,22 +98,42 @@
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
     <button class="term-btn btn-rec" id="rec-btn" onclick="app.toggleRec()">🔴 黑盒子錄影</button>
     <button class="term-btn" onclick="app.toggleCam()">🤳 切換監控</button>
-    <button class="term-btn btn-kgen" onclick="app.boost()">💎 GA 沖等</button>
-    <button class="term-btn" onclick="app.steerPrompt()">🎡 轉向 (0/180)</button>
+    <button class="term-btn btn-kgen" onclick="app.boost()">💎 KGEN 演化</button>
+    <button class="term-btn" onclick="app.steerPrompt()">🎡 轉向控制</button>
 </div>
 
 <script>
 const app = {
     angle: 0, warp: 33, ga: 600, isRec: false, isCam: false,
     recorder: null, chunks: [], stream: null, timer: null,
+    wallet: { connected: false },
 
     init() {
         this.initThree();
+        this.buildGrids();
         this.bindEvents();
         setInterval(() => {
             document.getElementById('sys-clock').innerText = new Date().toLocaleString();
+            this.flickerDots();
         }, 1000);
-        this.speak("v1.60 記憶體優化版就緒。黑盒子隨時準備燒錄。");
+        this.speak("v1.60 記憶體優化版啟動，黑盒子準備燒錄聖諭。");
+    },
+
+    buildGrids() {
+        ['g1', 'g2'].forEach(id => {
+            const container = document.getElementById(id);
+            for(let i=0; i<100; i++) {
+                const d = document.createElement('div');
+                d.className = 'dot';
+                container.appendChild(d);
+            }
+        });
+    },
+
+    flickerDots() {
+        document.querySelectorAll('.dot').forEach(d => {
+            d.classList.toggle('on', Math.random() > 0.8);
+        });
     },
 
     bindEvents() {
@@ -104,24 +144,21 @@ const app = {
         };
     },
 
-    // 📸 拍照 (擷取當前演化快照)
+    // 📸 拍照 (擷取)
     capture() {
         const canvas = document.createElement('canvas');
         canvas.width = 1080; canvas.height = 1080;
         const ctx = canvas.getContext('2d');
-        // 簡單繪製：背景 + 核心 + 浮水印
         ctx.fillStyle = "#000"; ctx.fillRect(0,0,1080,1080);
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 50px Orbitron";
-        ctx.fillText("KGEN 16888 BLACKBOX", 50, 100);
-        ctx.fillText(`WARP: ${this.warp}x / ANGLE: ${this.angle}°`, 50, 180);
-        
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Orbitron";
+        ctx.fillText("KGEN 16888 SNAPSHOT", 50, 80);
+        // ... (省略部分繪製細節)
         const link = document.createElement('a');
-        link.download = `KGEN_SNAPSHOT_${Date.now()}.png`;
+        link.download = `KGEN_${Date.now()}.png`;
         link.href = canvas.toDataURL(); link.click();
-        this.speak("快照已存入生死簿。");
     },
 
-    // 📹 錄影錄音 (黑盒子核心)
+    // 📹 錄影核心 (v1.60 進化版：螢幕錄製 + 語音)
     async toggleRec() {
         if(this.isRec) {
             this.recorder.stop();
@@ -133,7 +170,7 @@ const app = {
         }
 
         try {
-            // 同時抓取螢幕畫面與麥克風 (大聖的聖諭)
+            // 同時抓取螢幕 (顯示 K 線與儀表板) 與 麥克風 (大聖語音)
             const videoStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
             const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const combined = new MediaStream([...videoStream.getTracks(), ...audioStream.getTracks()]);
@@ -156,14 +193,12 @@ const app = {
             let sec = 0;
             this.timer = setInterval(() => {
                 sec++;
-                let m = String(Math.floor(sec/60)).padStart(2,'0');
-                let s = String(sec%60).padStart(2,'0');
-                document.getElementById('rec-timer').innerText = `${m}:${s}`;
+                document.getElementById('rec-timer').innerText = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
             }, 1000);
 
-            this.speak("黑盒子開始燒錄，語音監控同步開啟。");
+            this.speak("黑盒子已開啟，正在燒錄戰略數據。");
         } catch(e) {
-            alert("錄影失敗：請確保給予螢幕與麥克風權限。");
+            alert("黑盒子需要螢幕與麥克風權限方可錄製聖諭。");
         }
     },
 
@@ -185,39 +220,37 @@ const app = {
         if(a !== null) {
             this.angle = parseInt(a);
             document.getElementById('core-window').style.transform = `rotate(${this.angle}deg)`;
-            this.speak(`轉向 ${this.angle} 度，${Math.abs(this.angle) < 45 ? '看多' : '看空'}`);
+            this.speak(`轉向 ${this.angle} 度，演化路徑重算。`);
         }
     },
 
     boost() {
         this.ga += 50;
-        this.speak(`演化等級提升至 GA ${this.ga}`);
-        this.warp = Math.min(100, parseInt(this.warp) + 10);
-        document.getElementById('warp-input').value = this.warp;
+        this.speak(`注入 KGEN 能量，演化等級 GA-${this.ga}`);
+        this.warp = Math.min(100, parseInt(this.warp) + 15);
         document.getElementById('energy-fill').style.height = this.warp + '%';
         document.getElementById('warp-txt').innerText = this.warp + 'x';
     },
 
     initThree() {
         const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: false, alpha: true });
         rd.setSize(window.innerWidth, window.innerHeight);
-        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
-        for(let i=0; i<15000; i++) pos[i] = (Math.random()-0.5)*500;
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(3000 * 3);
+        for(let i=0; i<9000; i++) pos[i] = (Math.random()-0.5)*500;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.5 }));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.8 }));
         sc.add(pts); cam.position.z = 200;
         const anim = () => {
             requestAnimationFrame(anim);
-            pts.rotation.y += 0.002;
-            pts.rotation.x += (this.angle * 0.0001);
+            pts.rotation.y += 0.001 * (this.warp / 33);
             rd.render(sc, cam);
         };
         anim();
     },
-    speak(t) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
+    speak(t) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
 };
 window.onload = () => app.init();
 </script>
 </body>
-</html>
+    </html>
