@@ -1,2166 +1,590 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>廣寒宮 16888｜七仙女飛碟駕駛艙 V1.9.4（受孕宇宙引擎）</title>
+    <meta charset="UTF-8">
+    <title>KGEN 16888｜金融生命體肌肉滿血版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-  <!-- Ethers (optional / graceful) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
+        .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
+        .brand-name { font-size: 28px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
 
-  <style>
-    :root{
-      --bg:#06070b;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-      --line: rgba(255,255,255,.14);
-      --gold: rgba(255,215,120,.95);
-      --pink: rgba(255,170,220,.95);
-      --cyan: rgba(120,255,220,.95);
-      --red: rgba(255,120,120,.92);
-      --shadow: 0 16px 70px rgba(0,0,0,.60);
-      --r: 18px;
-      --r2: 999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: var(--sans);
-      background:
-        radial-gradient(1100px 720px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
-        radial-gradient(980px 720px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
-        var(--bg);
-      color: var(--text);
-      overflow-x:hidden;
-    }
-    a{color:inherit}
-    .wrap{ max-width:1180px; margin:0 auto; padding: 14px 12px calc(140px + var(--safe-bottom)); }
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
-    /* ===== HUD (top) ===== */
-    .hud{
-      position:sticky;
-      top:0;
-      z-index:200;
-      padding-top: calc(10px + var(--safe-top));
-      padding-bottom:10px;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(6,7,11,.94), rgba(6,7,11,.40));
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .hudRow{ display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
-    .hudLeft{ display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-    .hudRight{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:9px 12px; border:1px solid var(--line);
-      border-radius: var(--r2);
-      background: rgba(0,0,0,.38);
-      box-shadow: var(--shadow);
-      font-size:12px; color: var(--text);
-      text-decoration:none; font-weight:900;
-      user-select:none; cursor:pointer;
-      white-space:nowrap;
-    }
-    .pill b{font-family:var(--mono); font-weight:950}
-    .pill.gold{ border-color: rgba(255,215,120,.32); }
-    .pill.cyan{ border-color: rgba(120,255,220,.30); }
-    .pill.red{ border-color: rgba(255,120,120,.30); }
-    .pill.ghost{ background: rgba(255,255,255,.06); box-shadow:none; }
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      color: var(--muted);
-      font-size:12px;
-      white-space:nowrap;
-    }
-    .badge.ok{ border-color: rgba(120,255,220,.30); color: rgba(170,255,230,.95); }
-    .badge.warn{ border-color: rgba(255,210,120,.30); color: rgba(255,230,170,.95); }
-    .badge.bad{ border-color: rgba(255,120,120,.30); color: rgba(255,180,190,.95); }
-    .badge.mono{ font-family: var(--mono); }
+        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        .warp-engine { position: fixed; left: 45px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
+        .warp-rail { 
+            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
+            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+        #energy-fill { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
+            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            z-index: 5;
+        }
+        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
 
-    /* ===== Layout ===== */
-    .grid{
-      margin-top: 12px;
-      display:grid;
-      grid-template-columns: 1.35fr .85fr;
-      gap:12px;
-      align-items:start;
-    }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+        #warp-thumb { 
+            width: 70px; height: 35px; background: #fff; position: absolute; 
+            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
+            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
+            border: 3px solid var(--cyan); z-index: 30;
+        }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
 
-    .card{
-      border:1px solid var(--line);
-      border-radius: 24px;
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .cardHead{
-      padding:14px 14px 10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-    }
-    .cardHead .t{ font-weight:950; letter-spacing:.35px; }
-    .cardHead .sub{ color: var(--muted); font-size:12px; line-height:1.5; }
-    .cardBody{ padding:14px; }
+        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
+        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { 
+            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
+            overflow: hidden; background: #000; position: relative; 
+            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
+            transition: transform 0.05s linear; /* 🎡 物理連動 */
+        }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+        #mini-thumb { 
+            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 25px var(--gold);
+        }
+        #wish-label { 
+            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
+            color: #fff; font-weight: 900; font-size: 24px; 
+            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
+        }
 
-    /* ===== Cockpit / Screen ===== */
-    .cockpit{
-      position:relative;
-      min-height: 580px;
-      background: radial-gradient(900px 600px at 50% 25%, rgba(255,170,220,.11), transparent 65%),
-                  radial-gradient(900px 600px at 65% 60%, rgba(120,255,220,.08), transparent 60%);
-    }
-    .screen{
-      position:relative;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius: 22px;
-      overflow:hidden;
-      background: rgba(0,0,0,.28);
-      min-height: 420px;
-    }
-    canvas#fx{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      pointer-events:none;
-      opacity:.95;
-    }
-    canvas#kline{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      opacity:.95;
-      pointer-events:none;
-      mix-blend-mode: screen;
-    }
-    .screenHud{
-      position:absolute; inset:0;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      padding:12px;
-      pointer-events:none;
-    }
-    .screenTop, .screenBottom{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      pointer-events:none;
-    }
-    .screenTop .left, .screenBottom .left{ display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
-    .screenTop .right, .screenBottom .right{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
-    .panelMini{
-      pointer-events:none;
-      background: rgba(0,0,0,.42);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: 16px;
-      padding:8px 10px;
-      box-shadow: 0 10px 40px rgba(0,0,0,.55);
-      min-width: 190px;
-    }
-    .panelMini .k{ font-size:12px; color: var(--muted); }
-    .panelMini .v{ margin-top:6px; font-weight:950; letter-spacing:.3px; }
-    .panelMini .v .mono{ font-family: var(--mono); }
+        /* 🧬 GA 演化矩陣 (右側肌肉) */
+        .ga-matrix { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
+        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
+        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
+        /* 🎡 方向盤 */
+        .steer-zone { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
+        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
+        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
-    /* ===== Car steering wheel (KGEN) ===== */
-    .carWheelWrap{
-      width: 168px; height: 168px;
-      border-radius: 50%;
-      position: relative;
-      display:flex; align-items:center; justify-content:center;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.12), rgba(0,0,0,.55) 60%, rgba(0,0,0,.8));
-      border:1px solid rgba(255,215,120,.35);
-      box-shadow: 0 0 28px rgba(255,204,0,.18), inset 0 0 20px rgba(0,0,0,.55);
-      touch-action:none;
-      user-select:none;
-    }
-    .carWheel{
-      width: 148px; height: 148px;
-      border-radius: 50%;
-      position: relative;
-      border: 6px solid rgba(255,215,120,.55);
-      box-shadow: inset 0 0 18px rgba(0,0,0,.65), 0 0 18px rgba(0,242,255,.10);
-      background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.1), rgba(0,0,0,.55));
-      transform: rotate(0deg);
-      transition: transform .04s linear;
-    }
-    .carWheel:before{
-      content:"";
-      position:absolute; inset: 10px;
-      border-radius:50%;
-      border:1px solid rgba(0,242,255,.18);
-    }
-    .carSpoke{
-      position:absolute; left:50%; top:50%;
-      width:10px; height:58px;
-      background: linear-gradient(to bottom, rgba(255,215,120,.85), rgba(0,242,255,.18));
-      transform-origin: 50% 100%;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(255,215,120,.18);
-    }
-    .carSpoke.s1{ transform: translate(-50%,-100%) rotate(0deg); }
-    .carSpoke.s2{ transform: translate(-50%,-100%) rotate(120deg); }
-    .carSpoke.s3{ transform: translate(-50%,-100%) rotate(240deg); }
+        /* 🛠️ 控制台 */
+        .footer-terminal { 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
+            border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; z-index: 100; 
+        }
+        .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px; border-radius: 4px; }
+        .term-btn:hover { background: var(--gold); color: #000; }
+        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
+        .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
 
-    .kgenHub{
-      position:absolute; left:50%; top:50%;
-      width:54px; height:54px;
-      transform: translate(-50%,-50%);
-      border-radius: 50%;
-      display:flex; align-items:center; justify-content:center;
-      font-family: var(--mono);
-      font-weight: 950;
-      letter-spacing: .5px;
-      color:#0b0b0b;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--gold) 42%, rgba(255,204,0,.95) 75%, rgba(0,0,0,.85));
-      border:2px solid rgba(0,242,255,.35);
-      box-shadow: 0 0 18px rgba(255,204,0,.35), inset 0 0 12px rgba(0,0,0,.35);
-      font-size: 14px;
-      text-shadow: none;
-    }
-    .degRangeHidden{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+        /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
+        .wheel-wrap{
+            position: fixed; left: 50%; bottom: 125px; transform: translateX(-50%);
+            width: 160px; height: 160px; z-index: 120;
+            display:none;
+        }
+        .wheel{
+            width:160px; height:160px; border-radius:50%;
+            border:4px solid rgba(255,215,120,.8);
+            box-shadow:0 0 30px rgba(0,242,255,.25), inset 0 0 25px rgba(255,215,120,.15);
+            position:relative;
+            background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), rgba(0,0,0,.55) 55%, rgba(0,0,0,.85));
+            user-select:none;
+            touch-action:none;
+        }
+        .wheel::before{ content:""; position:absolute; inset:16px; border-radius:50%; border:2px dashed rgba(0,242,255,.35); opacity:.9; }
+        .wheel-hub{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%;
+            border:2px solid rgba(255,204,0,.85); box-shadow:0 0 18px rgba(255,204,0,.35); background:rgba(0,0,0,.65);
+            display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:12px; color:var(--gold);
+        }
+        .wheel-knob{ position:absolute; left:50%; top:6px; transform:translateX(-50%); width:18px; height:18px; border-radius:50%;
+            background:var(--cyan); box-shadow:0 0 18px rgba(0,242,255,.7);
+        }
 
-    /* ===== Fairy wheel ===== */
-    .fairyWrap{
-      position:absolute;
-      left: 14px;
-      top: 88px;
-      width: 240px; height: 240px;
-      border-radius:50%;
-      overflow:hidden;
-      border:1px solid rgba(255,215,120,.25);
-      box-shadow: 0 0 46px rgba(255,170,220,.22), 0 0 70px rgba(120,255,220,.12);
-      background: rgba(0,0,0,.22);
-      pointer-events:none;
-    }
-    @media (max-width: 520px){
-      .fairyWrap{ position:relative; left:auto; top:auto; margin:12px auto 0; }
-    }
-    .fairyWrap::before{
-      content:"";
-      position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,215,120,.55), transparent 45%),
-                  radial-gradient(circle at 70% 70%, rgba(255,170,220,.45), transparent 45%),
-                  radial-gradient(circle at 50% 50%, rgba(120,255,220,.20), transparent 55%);
-      filter: blur(10px);
-      opacity: .50;
-      animation: auraSpin 10s linear infinite;
-      pointer-events:none;
-    }
-    @keyframes auraSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
-    img#fairy{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      transform-origin: 50% 50%;
-      will-change: transform, filter;
-      transition: transform .25s ease, filter .25s ease;
-      filter: saturate(1.05) contrast(1.02);
-    }
-    .sleepMask{
-      position:absolute; inset:0;
-      display:grid; place-items:center;
-      pointer-events:none;
-      opacity:0;
-      transition: opacity .25s ease;
-      background: radial-gradient(circle at 50% 55%, rgba(0,0,0,.10), rgba(0,0,0,.62));
-      backdrop-filter: blur(2px);
-    }
-    .sleepMask.on{ opacity:1; }
-    .sleepText{ text-align:center; font-weight:950; letter-spacing:.6px; }
-    .sleepText .z{ font-family: var(--mono); color: var(--gold); font-size:16px; }
-    .sleepText .s{ margin-top:6px; font-size:12px; color: var(--muted); line-height:1.55; }
-
-    /* ===== Control Dock (bottom, collapsible) ===== */
-    .dock{
-      position:fixed; left:0; right:0; bottom:0; z-index:300;
-      background: linear-gradient(to top, rgba(6,7,11,.98), rgba(6,7,11,.55));
-      border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(10px);
-      padding:10px 12px calc(10px + var(--safe-bottom));
-    }
-    .dockRow{
-      max-width:1180px; margin:0 auto;
-      display:flex; gap:10px; flex-wrap:wrap;
-      align-items:center; justify-content:space-between;
-    }
-    .dockLeft, .dockRight{ display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-    .dockPanel{
-      max-width:1180px; margin:10px auto 0;
-      display:none;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 22px;
-      background: rgba(0,0,0,.22);
-      padding:12px;
-    }
-    .dockPanel.on{ display:block; }
-    .dockGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 980px){ .dockGrid{ grid-template-columns:1fr; } }
-
-    .rangeRow label{
-      display:flex; justify-content:space-between; gap:10px; align-items:center;
-      font-size:12px; color: var(--muted);
-    }
-    input[type="range"]{ width: 280px; max-width: 60vw; }
-    input[type="number"], input[type="text"], textarea, select{
-      width:100%;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.25);
-      color: var(--text);
-      padding:10px 12px;
-      outline:none;
-    }
-    textarea{ min-height:84px; resize:vertical; }
-
-    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding:10px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      font-weight:950;
-      cursor:pointer;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{ background: rgba(255,255,255,.13); }
-    .btn.gold{ border-color: rgba(255,215,120,.28); color: rgba(255,235,185,.98); }
-    .btn.cyan{ border-color: rgba(120,255,220,.26); color: rgba(190,255,240,.98); }
-    .btn.red{ border-color: rgba(255,120,120,.26); color: rgba(255,200,210,.98); }
-    .btn.ghost{ background: rgba(0,0,0,.18); }
-
-    .kpiGrid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px;
-    }
-    @media (max-width:520px){ .kpiGrid{ grid-template-columns:1fr; } }
-    .kpi{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      background: rgba(0,0,0,.18);
-      padding:12px;
-    }
-    .kpi .k{ font-size:12px; color: var(--muted); }
-    .kpi .v{ font-size:18px; font-weight:950; letter-spacing:.4px; margin-top:6px; }
-    .kpi .v .mono{ font-family: var(--mono); }
-
-    /* ===== Console / narrative客服 ===== */
-    .console{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      background: rgba(0,0,0,.22);
-      padding:10px 12px;
-      font-family: var(--mono);
-      font-size: 11px;
-      line-height: 1.55;
-      max-height: 260px;
-      overflow:auto;
-      white-space: pre-wrap;
-    }
-
-    /* ===== Media ===== */
-    video#cam{ width:100%; border-radius: 14px; background: rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.10); }
-    canvas#snap{ width:100%; border-radius: 14px; display:none; border:1px solid rgba(255,255,255,.10); }
-
-    .toast{
-      position:fixed; left:12px; bottom: calc(96px + var(--safe-bottom)); z-index:999;
-      background: rgba(0,0,0,.82);
-      border:1px solid rgba(255,255,255,.16);
-      border-radius: 14px;
-      padding:10px 12px;
-      box-shadow: var(--shadow);
-      font-size: 12px;
-      display:none;
-      max-width: min(520px, calc(100vw - 24px));
-      backdrop-filter: blur(10px);
-    }
-
-    /* Rest breathing */
-    .breath{ animation: breath 3.4s ease-in-out infinite; }
-    @keyframes breath{
-      0%{ transform: scale(1.000); }
-      50%{ transform: scale(1.012); }
-      100%{ transform: scale(1.000); }
-    }
-
-    /* Tiny */
-    .small{ color: var(--muted); font-size:12px; line-height:1.55; }
-    .hr{ height:1px; background: rgba(255,255,255,.10); margin:10px 0; }
-  
-    /* ===== V1.9.4 FIX: 仙女不再遮擋文字 ===== */
-    .fairyWrap{ z-index:1; opacity:.92; }
-    .screenHud{ position:relative; z-index:3; }
-    .panelMini{ position:relative; z-index:4; }
-
-
-    /* ===== V1.9.4 Pilot Dock (手機視野優先) ===== */
-    .fairyWrap{ position:relative; }
-    .dockTop{ position:absolute; left:12px; right:12px; top:12px; z-index:25; }
-    .dockSide{ position:absolute; top:70px; bottom:16px; width:64px; z-index:25; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:10px; }
-    .dockSide.left{ left:10px; }
-    .dockSide.right{ right:10px; }
-
-    .vWrap{ width:64px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:8px 6px; border:1px solid rgba(255,255,255,.12); border-radius:18px; background: rgba(0,0,0,.30); backdrop-filter: blur(10px); }
-    .vLabel{ font-size:11px; color: var(--muted); writing-mode: vertical-rl; text-orientation: mixed; letter-spacing:.3px; }
-    .vVal{ font-family: var(--mono); font-weight:950; font-size:12px; }
-    input.vRange{ width:210px; height:30px; transform: rotate(-90deg); accent-color: var(--gold); }
-
-    .hpWrap{ width:100%; padding:10px 10px; border:1px solid rgba(255,255,255,.12); border-radius:18px; background: rgba(0,0,0,.30); backdrop-filter: blur(10px); }
-    .hpWrap label{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color: var(--muted); }
-    #hpBar{ width:100%; margin-top:8px; accent-color: var(--gold); }
-
-    @media (max-width:420px){
-      input.vRange{ width:190px; }
-      .dockSide{ top:62px; width:58px; }
-      .vWrap{ width:58px; }
-    }
-</style>
+        canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    </style>
 </head>
-
 <body>
-  <div class="hud">
-    <div class="wrap" style="padding-bottom:0;">
-      <div class="hudRow">
-        <div class="hudLeft">
-          <div class="pill gold">廣寒宮 16888 <b>V1.8</b></div>
-          <div class="badge" id="phaseBadge">Phase：READY</div>
-          <div class="badge mono">Clock：<span id="clock">--:--:--</span></div>
-        </div>
-        <div class="hudRight">
-          <div class="badge">錢包：<span class="mono" id="walletShort">未連線</span></div>
-          <button class="pill cyan" id="btnConnect">連接錢包</button>
-          <button class="pill ghost" id="btnReset">重置（本機）</button>
-        </div>
-      </div>
 
-      <!-- Sliders moved near screen (top) -->
-      id="screen">
-            <canvas id="fx"></canvas>
-            <canvas id="kline"></canvas>
-
-            <div class="screenHud">
-              <div class="screenTop">
-                <div class="left">
-                  <div class="panelMini">
-                    <div class="k">獎金池（受孕總池）</div>
-                    <div class="v"><span class="mono" id="poolTotal">0</span> KGEN</div>
-                  </div>
-                  <div class="panelMini">
-                    <div class="k">保證金餘額</div>
-                    <div class="v"><span class="mono" id="margin">0</span></div>
-                  </div>
-
-        <div class="panelMini">
-          <div class="k">油箱容量（Fuel）</div>
-          <div class="v"><span class="mono" id="fuelNow">—</span> / <span class="mono" id="fuelCap">—</span> <span class="muted">(m)</span></div>
-          <div class="hint">血量＝油箱燃料（本機）｜日後可升級曲率等級、飛碟零件成為可買賣商品</div>
-          <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
-            <span class="pill" style="padding:6px 10px;">DNA·GA 等級</span>
-            <select id="gaLevel" class="input" style="max-width:220px">
-              <option value="GA1">GA1（新手）</option>
-              <option value="GA600" selected>GA600（標準）</option>
-              <option value="GA1000">GA1000（高階）</option>
-            </select>
-          </div>
-          <div class="rangeRow" style="margin-top:10px;">
-            <label><span>油箱燃料（可調）</span><span class="mono" id="fuelLabel">—</span></label>
-            <input id="fuelRange" type="range" min="0" max="600" value="300" />
-          </div>
-        </div>
-
-                </div>
-                <div class="right">
-                  <div class="panelMini">
-                    <div class="k">本輪仙女</div>
-                    <div class="v"><span class="mono" id="fairyName">—</span></div>
-                    <div class="k" style="margin-top:6px;">門檻</div>
-                    <div class="v"><span class="mono" id="fairyTarget">—</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="screenBottom">
-                <div class="left">
-                  <div class="panelMini">
-                    <div class="k">發財金已發放</div>
-                    <div class="v"><span class="mono" id="paidOut">0</span> / <span class="mono" id="paidTarget">—</span></div>
-                  </div>
-                  <div class="panelMini">
-                    <div class="k">即時玩家</div>
-                    <div class="v"><span class="mono" id="players">0</span> / 60</div>
-                  </div>
-                </div>
-                <div class="right">
-                  <div class="panelMini">
-                    <div class="k">公告</div>
-                    <div class="v" style="font-size:12px;font-weight:900;line-height:1.35;" id="announce">系統就緒</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="fairyWrap" id="fairyWrap">
-              <div id="dockTop" class="dockTop"></div>
-              <div id="dockLeft" class="dockSide left"></div>
-              <div id="dockRight" class="dockSide right"></div>
-              <img id="fairy" src="./assets/fairy.png" alt="fairy"
-                   onerror="this.src='https://via.placeholder.com/500/000000/FFD700?text=FAIRY'"/>
-              <div class="sleepMask" id="sleepMask">
-                <div class="sleepText">
-                  <div class="z">Z Z Z</div>
-                  <div>休息中</div>
-                  <div class="s">等待玩家點火｜等待受孕儀式</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">結算引擎</div>
-              <div class="v"><span class="mono" id="settleState">READY</span></div>
-              <div class="small" id="settleHint">本機模擬：下單 → 保證金扣押 → 平倉/結算 → 釋放。</div>
-            </div>
-            <div class="kpi">
-              <div class="k">K線生成引擎</div>
-              <div class="v"><span class="mono" id="klineState">ON</span></div>
-              <div class="small">本機即時生成（示意）：每 2 秒推進一根 K 線。</div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- RIGHT: console + media + lamps -->
-      <section class="card">
-        <div class="cardHead">
-          <div>
-            <div class="t">客服敘事（PrimeForge）</div>
-            <div class="sub">會隨狀態自動講故事：累積、啟動、推進、下凡、求婚、回流。</div>
-          </div>
-          <div class="badge mono">AI：<span id="aiState">READY</span></div>
-        </div>
-
-        <div class="cardBody">
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">許願 / 還願</div>
-              <textarea id="wish" placeholder="許願口令（例如：巧仙・事業運通・我願用 100 KGEN 點火宇宙…）"></textarea>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn gold" id="btnWish">送出許願（+100 KGEN）</button>
-                <button class="btn" id="btnVow">還願（自填金額）</button>
-              </div>
-              <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-                <input id="vowAmt" type="number" min="1" step="1" value="888" style="width:140px;" />
-                <span class="badge">KGEN</span>
-              </div>
-            </div>
-            <div class="kpi">
-              <div class="k">光明燈（十二生肖 + 第13自定）</div>
-              <select id="lampPick">
-                <option value="rat">鼠</option><option value="ox">牛</option><option value="tiger">虎</option>
-                <option value="rabbit">兔</option><option value="dragon">龍</option><option value="snake">蛇</option>
-                <option value="horse">馬</option><option value="goat">羊</option><option value="monkey">猴</option>
-                <option value="rooster">雞</option><option value="dog">狗</option><option value="pig">豬</option>
-                <option value="x13">第13生肖（自定）</option>
-              </select>
-              <input id="lampCustom" type="text" placeholder="第13生肖名稱（例如：變形金鋼 / 超人 / 蝙蝠俠…）" style="margin-top:10px; display:none;" />
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn cyan" id="btnLamp">點光明燈（1 KGEN / 日）</button>
-                <button class="btn ghost" id="btnLampInfo">燈位狀況</button>
-              </div>
-              <div class="small" style="margin-top:10px;">
-                每盞 1 KGEN（本機示意：每日限制以本機時間計）。<br/>
-                燈位：12生肖各 888、 第13生肖 1688（可累計）。
-              </div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpi">
-            <div class="k">影像 / 錄影 / 錄音（本機留念）</div>
-            <video id="cam" autoplay playsinline muted></video>
-            <canvas id="snap"></canvas>
-            <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted);">
-              <input type="checkbox" id="stampWish" checked />
-              照片左下角加註「許願／還願」摘要
-            </label>
-              <label class="chip" style="margin-left:8px;"><input id="coPhoto" type="checkbox" checked /> 與仙女合照</label>
-
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnCam">開啟相機</button>
-              <button class="btn" id="btnShot">拍照</button>
-              <button class="btn cyan" id="btnDownloadShot">下載照片</button>
-            </div>
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnRecVideo">開始錄影</button>
-              <button class="btn red" id="btnStopVideo" disabled>停止錄影</button>
-              <button class="btn cyan" id="btnDownloadVideo" disabled>下載錄影</button>
-            </div>
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="btnRecAudio">開始錄音</button>
-              <button class="btn red" id="btnStopAudio" disabled>停止錄音</button>
-              <button class="btn cyan" id="btnDownloadAudio" disabled>下載錄音</button>
-            </div>
-
-            <div class="small" style="margin-top:10px;">
-              若瀏覽器限制麥克風/相機，系統會自動退回文字敘事客服，不會當機。
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="console" id="console"></div>
-
-          <div style="margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6;">
-            PrimeForge 以母機之名，開啟金融生命。<br/>
-            花果山台灣・信念不滅・市場無界。<br/>
-            Where the Market Becomes the Myth.<br/>
-            —— 樂天帝 ⌖
-          </div>
-
-        </div>
-      </section>
+<div class="hud-top">
+    <div class="brand-section">
+        <div class="brand-name">KGEN 16888 金融生命體</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <!-- Dock (controls & trading) -->
-  
-
-        <!-- 操作橫桿（移到營幕正下方，方便看路） -->
-<div class="hudRow" style="margin-top:10px;">
-        <div class="hudLeft" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>方向盤（0–360）</span><span class="mono" id="degLabel">120°</span></label>
-            
-            <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;">
-              <div class="carWheelWrap" id="carWheelWrap" aria-label="方向盤（可拖曳旋轉）">
-                <div class="carWheel" id="carWheel">
-                  <div class="carSpoke s1"></div>
-                  <div class="carSpoke s2"></div>
-                  <div class="carSpoke s3"></div>
-                  <div class="kgenHub">KGEN</div>
-                </div>
-              </div>
-              
-            </div>
-            <input class="degRangeHidden" id="degRange" type="range" min="0" max="360" value="120" />
-          </div>
-        </div>
-        <div class="hudRight" style="flex:1; min-width:260px;">
-          <div class="rangeRow" style="width:min(520px,100%);">
-            <label><span>曲速引擎（1–150）</span><span class="mono" id="warpLabel">10x</span></label>
-            <input id="warpRange" type="range" min="1" max="150" value="10" />
-          </div>
-        </div>
-      </div>
-
+    <div class="monitor-data">
+        <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
     </div>
-  </div>
+</div>
 
-  <div class="wrap">
-    <div class="grid">
-      <!-- LEFT: Screen + core -->
-      <section class="card">
-        <div class="cardHead">
-          <div>
-            <div class="t">飛碟主螢幕（交易 × 受孕 × K線）</div>
-            <div class="sub">做多：金雨下落｜做空：翠雲上升（靠近螢幕上緣即消失，不遮路）｜休息：Zzz</div>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <span class="badge">姿態：<b class="mono" id="stance">REST</b></span>
-            <span class="badge">曲速：<b class="mono" id="warpText">10</b>x</span>
-            <span class="badge">方向：<b class="mono" id="degText">120</b>°</span>
-          </div>
-        </div>
-
-        <div class="cardBody cockpit" id="cockpit">
-          <div class="screen"
-
-<div class="dock">
-    <div class="dockRow">
-      <div class="dockLeft">
-        <button class="btn ghost" id="btnDock">控制台（收納/展開）</button>
-        <span class="badge">下單：<b class="mono" id="posText">0</b> 口</span>
-        <span class="badge">方向：<b class="mono" id="dirText">—</b></span>
-      </div>
-
-      <div class="dockRight">
-        <button class="btn gold" id="btnOrderLong">做多 +1</button>
-        <button class="btn cyan" id="btnOrderShort">做空 +1</button>
-        <button class="btn red" id="btnClose">平倉</button>
-        <button class="btn" id="btnFortune">申請發財金</button>
-      </div>
+<div class="warp-engine">
+    <div class="warp-rail" id="warp-rail-body">
+        <div id="energy-fill"></div>
+        <div id="warp-thumb"></div>
+        <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
     </div>
+    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
+    <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
+</div>
 
-    <div class="dockPanel" id="dockPanel">
-      <div class="dockGrid">
-        <div class="kpi">
-          <div class="k">受孕引擎（16888 → 本輪仙女 → 發財金推進 → 下凡）</div>
-          <div class="kpiGrid" style="margin-top:10px;">
-            <div class="kpi">
-              <div class="k">Lingxiao（30%）</div>
-              <div class="v"><span class="mono" id="vaultLingxiao">0</span></div>
-            </div>
-            <div class="kpi">
-              <div class="k">源池（10%）</div>
-              <div class="v"><span class="mono" id="vaultSource">0</span></div>
-            </div>
-          </div>
+<div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+</div>
 
-          <div class="hr"></div>
-
-          <div class="small">
-            60% → 受孕池（本輪發財金推進）；<br/>
-            達標後抽出兩位幸運地址 A / B：各 15% 鎖定；30% 進入求婚判斷池。<br/>
-          </div>
-
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn gold" id="btnArmNow">強制啟動本輪（測試）</button>
-            <button class="btn" id="btnPickFairy">本輪改票選仙女</button>
-          </div>
-
-          <div style="margin-top:10px;">
-            <select id="fairyPick" style="display:none;">
-              <option value="random">隨機</option>
-              <option value="14520">14520 巧雲（天樞做空）</option>
-              <option value="14866">14866 巧虹（天璇做多）</option>
-              <option value="16184">16184 巧芝（天璣做空）</option>
-              <option value="16888">16888 巧仙（天權做多）</option>
-              <option value="17347">17347 巧蘭（天衡做空）</option>
-              <option value="18056">18056 巧梅（闓陽做多）</option>
-              <option value="18459">18459 巧靈（瑤光多退）</option>
-            </select>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="kpiGrid">
-            <div class="kpi">
-              <div class="k">幸運地址 A</div>
-              <div class="v"><span class="mono" id="luckyA">—</span></div>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn" id="btnProposeA">A 求婚 → B</button>
-              </div>
-            </div>
-            <div class="kpi">
-              <div class="k">幸運地址 B</div>
-              <div class="v"><span class="mono" id="luckyB">—</span></div>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn" id="btnProposeB">B 求婚 → A</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="small" style="margin-top:10px;" id="engageHint">求婚狀態：未開始</div>
-        </div>
-
-        <div class="kpi">
-          <div class="k">保證金 / 風控（本機）</div>
-          <div class="kpiGrid" style="margin-top:10px;">
-            <div class="kpi">
-              <div class="k">帳戶保證金</div>
-              <div class="v"><span class="mono" id="acctMargin">200000</span></div>
-            </div>
-            <div class="kpi">
-              <div class="k">維持率</div>
-              <div class="v"><span class="mono" id="mgnRate">100%</span></div>
-            </div>
-          </div>
-          <div class="small" style="margin-top:10px;">
-            下單每口扣押 20000；曲速越高視覺越亮（不影響風控）。<br/>
-            這裡是示意：之後可接真合約 / 真報價。
-          </div>
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn" id="btnTopUp">補保證金 +50000</button>
-            <button class="btn red" id="btnForceSettle">強制結算</button>
-          </div>
-        </div>
-
-        <div class="kpi">
-          <div class="k">K線輸出（示意）</div>
-          <div class="small">本機已在主螢幕疊加生成 K 線。你要拿去做影片時，可用「匯出 K 線 JSON」。</div>
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="btn" id="btnExportKline">匯出 K 線 JSON</button>
-            <button class="btn" id="btnSpeak">語音導覽</button>
-          </div>
-          <div class="console" id="klineJson" style="margin-top:10px; max-height:160px;"></div>
-        </div>
-      </div>
+<div id="core-anchor">
+    <div id="core-window">
+        <div id="wish-label">大聖駕到，光耀廣寒</div>
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <video id="cam-view" autoplay playsinline muted></video>
+        <div id="mini-thumb"></div>
     </div>
-  </div>
+</div>
+
+<canvas id="galaxy-bg"></canvas>
+<canvas id="snap-canvas" style="display:none;"></canvas>
+<canvas id="export-canvas" style="display:none;"></canvas>
+
+<div class="steer-zone">
+    <div class="angle-readout" id="ang-val">76°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
+</div>
+
+<!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
+<div class="wheel-wrap" id="wheel-wrap">
+    <div class="wheel" id="wheel">
+        <div class="wheel-knob"></div>
+        <div class="wheel-spoke s1"></div>
+        <div class="wheel-spoke s2"></div>
+        <div class="wheel-spoke s3"></div>
+        <div class="wheel-hub"><div class="kgen-badge">KGEN</div></div>
+    </div>
+</div>
+
+<div class="footer-terminal">
+    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🔴 黑盒子錄影</button>
+    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
+    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
+    <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
+</div>
 
 <script>
-/* ============================================================
-   廣寒宮 16888｜七仙女飛碟駕駛艙 V1.8
-   - HUD: sliders moved near top (visible while driving)
-   - Visual: LONG gold rain down / SHORT cyan up; stop near top edge to keep road clear
-   - Engine: 16888 trigger → split 30/60/10 → choose fairy → fortune payout target = fairy threshold
-   - Descent: lucky A/B, propose logic, decision pool release
-   - Trading: mock margin, long/short, settlement
-   - Kline: local generator overlay
-   - Media: camera photo + video record + audio record
-   - Lamps: 12生肖+第13自定, daily 1 KGEN (local time)
-   - Narrative客服: story-driven console output
-   ============================================================ */
+const app = {
+    isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
+    stream: null, tInt: null, drawInt: null, bbSampleInt: null,
 
-const $ = (id)=>document.getElementById(id);
+    // blackbox
+    blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
 
-/* ---------- Constants ---------- */
-const VERSION = "V1.8";
-const FAIRIES = [
-  {k:14520, name:"巧雲", star:"天樞", side:"做空", power:"風調雨順做空"},
-  {k:14866, name:"巧虹", star:"天璇", side:"做多", power:"家庭美滿做多"},
-  {k:16184, name:"巧芝", star:"天璣", side:"做空", power:"育子收驚做空"},
-  {k:16888, name:"巧仙", star:"天權", side:"做多", power:"事業運通做多"},
-  {k:17347, name:"巧蘭", star:"天衡", side:"做空", power:"長命百歲做空"},
-  {k:18056, name:"巧梅", star:"闓陽", side:"做多", power:"身體健康做多"},
-  {k:18459, name:"巧靈", star:"瑤光", side:"多退", power:"感情圓滿多單退"},
-];
-const LAMP_CAP = { z12: 888, z13: 1688 };
-const MAX_PLAYERS = 60;
+    init() {
+        this.initThree(); this.buildUI(); this.bind();
+        setInterval(() => this.tick(), 1000);
+        this.updateWarp(33);
+        this.applySteer(76, true);
+        this.speak("KGEN 16888 肌肉滿血版啟動。黑盒子已掛載。");
+        window.addEventListener('resize', ()=>this.onResize(), {passive:true});
+        this.onResize();
+    },
 
-/* ---------- Local persistence ---------- */
-const LS_KEY = "KLINE_16888_V1_8_STATE";
-function loadState(){
-  try{
-    const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
-    if(!s) return null;
-    return s;
-  }catch(e){ return null; }
-}
-function saveState(){
-  localStorage.setItem(LS_KEY, JSON.stringify(STATE));
-}
+    tick() {
+        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+        document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
+        const fit = 0.9 + Math.random() * 0.1;
+        document.getElementById('f-val').innerText = fit.toFixed(3);
+        document.getElementById('f-bar').style.width = (fit * 100) + '%';
+        document.getElementById('m-bar').style.width = (Math.random() * 100) + '%';
+    },
 
-/* ---------- Utility ---------- */
-function pad(n){ return String(n).padStart(2,"0"); }
-function nowStr(){
-  const d=new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-function toast(msg){
-  const el = $("toast");
-  el.textContent = msg;
-  el.style.display = "block";
-  clearTimeout(window.__toastT);
-  window.__toastT = setTimeout(()=>{ el.style.display="none"; }, 2400);
-}
-function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-function normAngle(a){
-  let x = Number(a)||0;
-  x = x % 360;
-  if(x < 0) x += 360;
-  return x;
-}
-function shortAddr(addr){
-  if(!addr) return "—";
-  if(addr.length < 12) return addr;
-  return addr.slice(0,6)+"..."+addr.slice(-4);
-}
-function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function uniqPush(arr, v){
-  if(!arr.includes(v)) arr.push(v);
-}
+    buildUI() {
+        ['g1', 'g2'].forEach(id => {
+            const container = document.getElementById(id);
+            container.innerHTML = "";
+            for(let i=0; i<100; i++) { // 保持原始版：100格（畫面剛好）
+                const d = document.createElement('div');
+                d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
+                container.appendChild(d);
+            }
+        });
+        const rail = document.getElementById('warp-rail-body');
+        for(let i=0; i<25; i++) {
+            const step = document.createElement('div');
+            step.className = 'rail-step';
+            step.style.bottom = (i * 4) + '%';
+            rail.appendChild(step);
+        }
+    },
 
-/* ---------- Phase machine ---------- */
-const PHASE = {
-  READY: "READY",
-  ARMED: "ARMED",
-  DESCENT: "DESCENT",
-  RESOLVED: "RESOLVED"
+    updateWarp(val) {
+        document.getElementById('energy-fill').style.height = val + '%';
+        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
+        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
+        this.bbEvent("warp", { warp: parseFloat(val) });
+    },
+
+    applySteer(v, silent=false){
+        const ang = Math.max(-180, Math.min(180, Number(v)||0));
+        document.getElementById('ang-val').innerText = ang + '°';
+        document.getElementById('core-window').style.transform = `rotate(${ang}deg)`;
+        document.getElementById('steer-input-val').value = ang;
+        // wheel sync
+        const wheel = document.getElementById('wheel');
+        if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
+        if(!silent) this.bbEvent("steer", { angle: ang });
+    },
+
+    boost() {
+        if(this.gaLevel < 1000) {
+            this.gaLevel += 50;
+            document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
+            this.bbEvent("boost", { ga: this.gaLevel });
+            this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
+        }
+    },
+
+    autoHunt() {
+        this.bbEvent("auto_hunt", {});
+        this.speak("啟動 GA 自動打怪模式，績效演化中。");
+        const old = document.getElementById('wish-label').innerText;
+        document.getElementById('wish-label').innerText = "⚔️ KGEN 自動打怪中...";
+        setTimeout(() => document.getElementById('wish-label').innerText = old, 3000);
+    },
+
+    async cam(mode) {
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-thumb');
+        if (this.isCam && this.camMode === mode) {
+            this.stream && this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
+            this.isCam = false;
+            this.bbEvent("cam_off", {});
+            return;
+        }
+        try {
+            if(this.stream) this.stream.getTracks().forEach(t => t.stop());
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio:false });
+            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
+            v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+            this.isCam = true; this.camMode = mode;
+            this.bbEvent("cam_on", { mode });
+        } catch(e) { alert("攝像頭硬體未響應 / 權限被拒絕"); }
+    },
+
+    capture() {
+        const canvas = document.getElementById('snap-canvas'), ctx = canvas.getContext('2d');
+        canvas.width = 1000; canvas.height = 1000;
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+        if(this.isCam) {
+            if(this.camMode === 'user') { ctx.translate(1000,0); ctx.scale(-1,1); }
+            ctx.drawImage(v, 0, 0, 1000, 1000);
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.drawImage(f, 750, 50, 200, 200);
+        } else ctx.drawImage(f, 0, 0, 1000, 1000);
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("KGEN 16888 金融生命體", 50, 80);
+        ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
+        ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText(document.getElementById('wish-label').innerText, 70, 930);
+
+        this.bbEvent("capture", {});
+
+        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
+        link.href = canvas.toDataURL(); link.click();
+    },
+
+    setWish() {
+        const m = prompt("大聖請開金口：", document.getElementById('wish-label').innerText);
+        if(m) document.getElementById('wish-label').innerText = m;
+        this.bbEvent("wish", { text: document.getElementById('wish-label').innerText });
+    },
+
+    toggleWheel(){
+        const wrap = document.getElementById('wheel-wrap');
+        if(!wrap) return;
+        const on = (wrap.style.display === 'block');
+        wrap.style.display = on ? 'none' : 'block';
+        this.bbEvent("wheel_toggle", { on: !on });
+    },
+
+    bind() {
+        document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
+        document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
+        this.bindWheel();
+    },
+
+    // ===== Blackbox core =====
+    bbCount(type){ this.blackbox.counts[type] = (this.blackbox.counts[type] || 0) + 1; },
+    bbEvent(type, payload={}){ this.bbCount(type); this.blackbox.events.push({ t: Date.now(), type, ...payload }); },
+    bbStart(){
+        const sid = `BBX-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        this.blackbox.sessionId = sid;
+        this.blackbox.startedAt = new Date().toISOString();
+        this.blackbox.endedAt = null;
+        this.blackbox.events = [];
+        this.blackbox.samples = [];
+        this.blackbox.counts = {};
+        this.blackbox.last = {
+            angle: parseFloat(document.getElementById('steer-input-val').value || 0),
+            warp:  parseFloat(document.getElementById('warp-input-val').value || 0),
+            ga: this.gaLevel
+        };
+        this.bbEvent("rec_start", { ga:this.gaLevel, angle:this.blackbox.last.angle, warp:this.blackbox.last.warp });
+    },
+    bbStop(){ this.blackbox.endedAt = new Date().toISOString(); this.bbEvent("rec_stop", {}); },
+    bbSample(){
+        const angle = parseFloat(document.getElementById('steer-input-val').value || 0);
+        const warp  = parseFloat(document.getElementById('warp-input-val').value || 0);
+        this.blackbox.last = { angle, warp, ga:this.gaLevel };
+        this.blackbox.samples.push({ t: Date.now(), angle, warp, ga: this.gaLevel });
+    },
+    bbStats(list, key){
+        if(!list.length) return {min:null, max:null, avg:null};
+        let min=Infinity, max=-Infinity, sum=0, n=0;
+        for(const it of list){
+            const v = Number(it[key]);
+            if(!Number.isFinite(v)) continue;
+            if(v<min) min=v; if(v>max) max=v;
+            sum+=v; n++;
+        }
+        if(!n) return {min:null, max:null, avg:null};
+        return { min, max, avg: +(sum/n).toFixed(4) };
+    },
+    async bbHashSHA256(text){
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest("SHA-256", enc.encode(text));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    },
+    async bbExportJSON(){
+        const started = this.blackbox.startedAt ? new Date(this.blackbox.startedAt).getTime() : null;
+        const ended   = this.blackbox.endedAt ? new Date(this.blackbox.endedAt).getTime() : null;
+        const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
+
+        const payload = {
+            schema: "kgen.blackbox.v1",
+            sessionId: this.blackbox.sessionId,
+            startedAt: this.blackbox.startedAt,
+            endedAt: this.blackbox.endedAt,
+            durationSec,
+            last: this.blackbox.last,
+            stats: {
+                angle: this.bbStats(this.blackbox.samples, "angle"),
+                warp:  this.bbStats(this.blackbox.samples, "warp")
+            },
+            eventCounts: this.blackbox.counts,
+            timeline: this.blackbox.events,
+            samples: this.blackbox.samples
+        };
+
+        let json = JSON.stringify(payload, null, 2);
+        const hash = await this.bbHashSHA256(json);
+        payload.hashes = { sha256: hash };
+        json = JSON.stringify(payload, null, 2);
+
+        const blob = new Blob([json], { type:"application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `KGEN_GA_BLACKBOX_${this.blackbox.sessionId}.json`;
+        a.click();
+
+        try { localStorage.setItem(`KGEN_BLACKBOX_${this.blackbox.sessionId}`, json); } catch(e) {}
+    },
+
+    startRecTimer(){
+        this.recStartTs = performance.now();
+        const recInd = document.getElementById('rec-ind');
+        recInd.style.display = 'block';
+
+        this.tInt = setInterval(()=>{
+            const elapsed = performance.now() - this.recStartTs;
+            const sec = Math.floor(elapsed/1000);
+            const m = String(Math.floor(sec/60)).padStart(2,'0');
+            const s = String(sec%60).padStart(2,'0');
+            this.recMMSS = `${m}:${s}`;
+            recInd.innerText = `REC ${this.recMMSS}`;
+        }, 200);
+
+        this.drawInt = setInterval(()=>this.syncExportCanvas(), 33);
+    },
+    stopRecTimer(){
+        clearInterval(this.tInt);
+        clearInterval(this.drawInt);
+        document.getElementById('rec-ind').style.display = 'none';
+    },
+
+    syncExportCanvas(){
+        const cvs = document.getElementById('export-canvas'), ctx = cvs.getContext('2d');
+        cvs.width = 720; cvs.height = 720;
+
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+
+        if(this.isCam){
+            try{
+                if(this.camMode === 'user'){ ctx.translate(720,0); ctx.scale(-1,1); }
+                ctx.drawImage(v, 0, 0, 720, 720);
+                ctx.setTransform(1,0,0,1,0,0);
+            }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }else{
+            try{ ctx.drawImage(f, 0, 0, 720, 720); }
+            catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }
+
+        const angle = document.getElementById('steer-input-val').value;
+        const warp  = document.getElementById('warp-input-val').value;
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText("KGEN 16888 GA-BLACKBOX", 30, 50);
+
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
+        ctx.fillText(`ANGLE ${angle}°`, 30, 85);
+        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
+        ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
+
+        ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
+        ctx.fillText(`REC ${this.recMMSS || "00:00"}`, 30, 185);
+
+        ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText(document.getElementById('wish-label').innerText, 30, 690);
+        ctx.shadowBlur = 0;
+    },
+
+    async toggleRec(){
+        const btn = document.getElementById('rec-btn');
+
+        if (this.recorder && this.recorder.state === "recording") {
+            this.recorder.stop();
+            this.stopRecTimer();
+
+            clearInterval(this.bbSampleInt);
+            this.bbStop();
+            await this.bbExportJSON();
+
+            btn.innerText = "🔴 黑盒子錄影";
+            this.speak("錄影結束，黑盒子數據已封裝。");
+            return;
+        }
+
+        const stream = document.getElementById('export-canvas').captureStream(30);
+        if(!window.MediaRecorder){
+            alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
+            return;
+        }
+
+        let mime = "video/webm;codecs=vp9";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
+
+        this.recorder = new MediaRecorder(stream, { mimeType: mime });
+        this.chunks = [];
+
+        this.recorder.ondataavailable = e => { if(e.data && e.data.size) this.chunks.push(e.data); };
+        this.recorder.onstop = () => {
+            const blob = new Blob(this.chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_GA_LOG.webm'; a.click();
+        };
+
+        this.bbStart();
+        this.bbSample();
+        this.bbSampleInt = setInterval(()=>this.bbSample(), 1000);
+
+        this.startRecTimer();
+        this.syncExportCanvas();
+        this.recorder.start();
+
+        btn.innerText = "⏹️ 停止黑盒子";
+        this.speak("黑盒子錄影開始，記錄演化數據。");
+    },
+
+    bindWheel(){
+        const wheel = document.getElementById('wheel');
+        if(!wheel) return;
+
+        const getAngleFromPointer = (clientX, clientY) => {
+            const rect = wheel.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = clientX - cx;
+            const dy = clientY - cy;
+            let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+            deg = deg + 90;
+            if(deg > 180) deg -= 360;
+            return Math.max(-180, Math.min(180, deg));
+        };
+
+        let dragging = false;
+        const onDown = (x,y)=>{ dragging=true; this.applySteer(getAngleFromPointer(x,y)); };
+        const onMove = (x,y)=>{ if(!dragging) return; this.applySteer(getAngleFromPointer(x,y)); };
+        const onUp = ()=>{ dragging=false; };
+
+        wheel.addEventListener('mousedown', (e)=>{ e.preventDefault(); onDown(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e)=>onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', onUp);
+
+        wheel.addEventListener('touchstart', (e)=>{ e.preventDefault(); const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:false});
+        window.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; if(!t) return; onMove(t.clientX, t.clientY); }, {passive:true});
+        window.addEventListener('touchend', onUp, {passive:true});
+    },
+
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        rd.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
+        sc.add(pts); cam.position.z = 50;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            const w = document.getElementById('warp-input-val').value / 40;
+            if(w > 0) {
+                const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
+                const p = pts.geometry.attributes.position.array;
+                for(let i=0; i<p.length; i+=3) {
+                    p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                    if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
+                    if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+                }
+                pts.geometry.attributes.position.needsUpdate = true;
+            }
+            rd.render(sc, cam);
+        };
+        anim();
+        this._rd = rd; this._cam = cam;
+    },
+
+    onResize(){
+        if(!this._rd || !this._cam) return;
+        this._cam.aspect = window.innerWidth / window.innerHeight;
+        this._cam.updateProjectionMatrix();
+        this._rd.setSize(window.innerWidth, window.innerHeight);
+    },
+
+    speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
 };
-
-/* ---------- Core state ---------- */
-const DEFAULT = {
-  version: VERSION,
-  phase: PHASE.READY,
-
-  deg: 120,
-  warp: 10,
-  stance: "REST",
-
-  wallet: "",
-  walletGuest: "GUEST-" + Math.random().toString(16).slice(2,10).toUpperCase(),
-
-  // Pools
-  poolTotal: 0,
-  vaultLingxiao: 0,
-  vaultSource: 0,
-  poolPregnancy: 0,
-
-  // Round
-  round: {
-    id: 0,
-    fairyKey: null,
-    fairyName: "",
-    fairyStar: "",
-    fairySide: "",
-    fairyPower: "",
-    payoutTarget: 0,
-    paidOut: 0,
-    luckyA: "",
-    luckyB: "",
-    decisionPool: 0,
-    lockA: 0,
-    lockB: 0,
-    proposeA: false,
-    proposeB: false
-  },
-
-  // Participants
-  players: 0,
-  participants: [],
-  fortunesGiven: 0,
-
-  // Lamps
-  lamps: {
-    counts: {rat:0,ox:0,tiger:0,rabbit:0,dragon:0,snake:0,horse:0,goat:0,monkey:0,rooster:0,dog:0,pig:0,x13:0},
-    x13Name: "",
-    lastLampDate: ""
-  },
-
-  // Trading (mock)
-  trading: {
-    pos: 0,
-    dir: "",
-    margin: 200000,
-    marginLocked: 0,
-    lastSettleAt: 0,
-    pnl: 0
-  },
-
-  // Kline
-  kline: {
-    candles: [],
-    lastPrice: 16888,
-  },
-
-  // Narrative
-  console: []
-};
-
-let STATE = loadState() || structuredClone(DEFAULT);
-
-// ===== V1.9.4 裝備 / 油箱 / 等級（本機） =====
-const GA_PROFILE = {
-  GA1:   { fuelCap: 100,  maxLots: 30 },
-  GA600: { fuelCap: 600,  maxLots: 150 },
-  GA1000:{ fuelCap: 1000, maxLots: 150 }
-};
-
-function applyGA(){
-  const sel = $("gaLevel");
-  const ga = sel ? sel.value : (STATE.ga || 'GA600');
-  STATE.ga = ga;
-  const p = GA_PROFILE[ga] || GA_PROFILE.GA600;
-  STATE.fuelCap = p.fuelCap;
-  const fr = $("fuelRange");
-  if(fr){ fr.max = String(p.fuelCap); }
-  if(typeof STATE.fuel !== 'number') STATE.fuel = Math.round(p.fuelCap*0.5);
-  STATE.fuel = Math.max(0, Math.min(STATE.fuel, p.fuelCap));
-  if(fr){ fr.value = String(STATE.fuel); }
-}
-
-function applyFuelUI(){
-  const cap = Number(STATE.fuelCap || 600);
-  const now = Number(STATE.fuel || 0);
-  const pct = cap ? Math.round(now/cap*100) : 0;
-  if($("fuelNow")) $("fuelNow").textContent = String(now);
-  if($("fuelCap")) $("fuelCap").textContent = String(cap);
-  if($("fuelLabel")) $("fuelLabel").textContent = `${now}/${cap}`;
-  if($("hpBar")) $("hpBar").value = String(pct);
-  if($("hpLabel")) $("hpLabel").textContent = `${pct}%`;
-}
-
-function pickAudioMime(){
-  const cand = ['audio/webm;codecs=opus','audio/webm','audio/mp4',''];
-  for(const t of cand){
-    try{ if(!t) return '';
-      if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
-    }catch(e){}
-  }
-  return '';
-}
-
-
-/* ---------- Console (narrative客服) ---------- */
-function pushStory(line){
-  const s = `[${nowStr()}] ${line}`;
-  STATE.console.unshift(s);
-  STATE.console = STATE.console.slice(0, 220);
-  $("console").textContent = STATE.console.join("\n");
-}
-function narrateByPhase(){
-  const r = STATE.round;
-  if(STATE.phase === PHASE.READY){
-    $("announce").textContent = "累積中｜點火：許願/還願/點燈/下單";
-    pushStory("PrimeForge：廣寒宮待命。能量尚未滿 16888。你可以點光明燈、許願、還願，或用下單讓節律醒來。");
-  }else if(STATE.phase === PHASE.ARMED){
-    $("announce").textContent = `受孕儀式啟動｜本輪 ${r.fairyName}｜目標發放 ${r.payoutTarget}`;
-    pushStory(`PrimeForge：受孕儀式啟動。本輪由「${r.fairyName}（${r.fairyStar}｜${r.fairyPower}）」掌權。請求發財金以推進至 ${r.payoutTarget}。`);
-  }else if(STATE.phase === PHASE.DESCENT){
-    $("announce").textContent = "下凡鎖定｜等待求婚雙向確認";
-    pushStory("PrimeForge：下凡已鎖定。幸運地址 A/B 已選出。若雙向求婚成立，判斷池將釋放，仙女正式下凡成婚。");
-  }else if(STATE.phase === PHASE.RESOLVED){
-    $("announce").textContent = "本輪已結算｜可再次累積下一輪";
-    pushStory("PrimeForge：本輪結算完成。能量回流後，廣寒宮再次等待下一輪受孕儀式。");
-  }
-}
-
-/* ---------- Stance mapping ---------- */
-function stanceOf(angle){
-  const a = normAngle(angle);
-  if((a>=350 && a<=360) || (a>=0 && a<=10)) return "REST";
-  if(a>=10 && a<=170) return "LONG";
-  if(a>=170 && a<=190) return "REST";
-  if(a>=190 && a<=350) return "SHORT";
-  return "REST";
-}
-
-function formatInt(n){
-  const x = Math.round(Number(n)||0);
-  return x.toLocaleString("en-US");
-}
-
-/* ---------- Current addr ---------- */
-function currentAddr(){
-  return STATE.wallet || STATE.walletGuest;
-}
-
-/* ---------- Wallet connect (optional) ---------- */
-async function connectWallet(){
-  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
-  const p = new ethers.providers.Web3Provider(window.ethereum);
-  await p.send("eth_requestAccounts", []);
-  const s = p.getSigner();
-  const addr = await s.getAddress();
-  STATE.wallet = addr;
-  uniqPush(STATE.participants, addr);
-  toast("錢包已連線");
-  pushStory("Wallet connected: " + addr);
-  applyUI();
-}
-
-/* ---------- Participation ---------- */
-function addParticipant(addr){
-  if(!addr) return;
-  uniqPush(STATE.participants, addr);
-  STATE.players = Math.min(MAX_PLAYERS, STATE.participants.length);
-}
-
-/* ---------- Pool inflow helpers ---------- */
-function inflowKGEN(amount, reason){
-  const amt = Math.max(0, Math.round(Number(amount)||0));
-  if(amt<=0) return;
-
-  STATE.poolTotal += amt;
-
-  if(STATE.phase === PHASE.ARMED || STATE.phase === PHASE.DESCENT){
-    STATE.poolPregnancy += amt;
-  }
-
-  pushStory(`能量注入 +${amt} KGEN｜${reason}`);
-
-  if(STATE.phase === PHASE.READY && STATE.poolTotal >= 16888){
-    armRound("auto");
-  }
-
-  applyUI();
-}
-
-/* ---------- Arm round (split pools, pick fairy, pick lucky) ---------- */
-function pickFairyByValue(v){
-  if(v==="random") return randPick(FAIRIES);
-  const k = Number(v);
-  const f = FAIRIES.find(x=>x.k===k);
-  return f || randPick(FAIRIES);
-}
-function armRound(source){
-  if(STATE.phase !== PHASE.READY && source!=="force") return;
-
-  STATE.round.id += 1;
-  const r = STATE.round;
-
-  const total = STATE.poolTotal;
-  const ling = Math.floor(total * 0.30);
-  const src = Math.floor(total * 0.10);
-  const preg = total - ling - src;
-
-  STATE.vaultLingxiao += ling;
-  STATE.vaultSource += src;
-  STATE.poolPregnancy += preg;
-
-  STATE.poolTotal = STATE.poolPregnancy;
-
-  const pickVal = $("fairyPick")?.value || "random";
-  const fairy = pickFairyByValue(pickVal);
-  r.fairyKey = fairy.k;
-  r.fairyName = fairy.name;
-  r.fairyStar = fairy.star;
-  r.fairySide = fairy.side;
-  r.fairyPower = fairy.power;
-  r.payoutTarget = fairy.k;
-  r.paidOut = 0;
-  r.decisionPool = 0;
-  r.lockA = 0;
-  r.lockB = 0;
-  r.proposeA = false;
-  r.proposeB = false;
-
-  const candidates = STATE.participants.length ? STATE.participants.slice() : [STATE.walletGuest, "GUEST-"+Math.random().toString(16).slice(2,10).toUpperCase()];
-  const A = candidates[Math.floor(Math.random()*candidates.length)];
-  let B = A;
-  if(candidates.length>=2){
-    while(B===A) B = candidates[Math.floor(Math.random()*candidates.length)];
-  }else{
-    B = "GUEST-"+Math.random().toString(16).slice(2,10).toUpperCase();
-    if(B===A) B = "GUEST-"+Math.random().toString(16).slice(2,10).toUpperCase();
-  }
-  r.luckyA = A;
-  r.luckyB = B;
-
-  STATE.phase = PHASE.ARMED;
-
-  pushStory(`⚑ 受孕儀式啟動（${source}）｜分流：Lingxiao 30% / 受孕 60% / 源池 10%`);
-  pushStory(`本輪仙女：${r.fairyName}（${r.fairyStar}｜${r.fairyPower}）｜目標發放：${r.payoutTarget}`);
-  pushStory(`幸運地址 A=${shortAddr(A)}｜B=${shortAddr(B)}（等待下凡）`);
-
-  narrateByPhase();
-  applyUI();
-}
-
-/* ---------- Fortune payout engine ---------- */
-function canFortune(){
-  return STATE.phase === PHASE.ARMED;
-}
-function fortuneAmount(){
-  const w = STATE.warp;
-  const base = 20 + Math.round((w/150)*280);
-  return clamp(base + Math.round(Math.random()*30 - 15), 10, 360);
-}
-function requestFortune(){
-  addParticipant(currentAddr());
-  if(!canFortune()){
-    toast("尚未進入發財金模式（需先累積到 16888）");
-    pushStory("發財金：未啟動。請先累積至 16888。");
-    return;
-  }
-  if(STATE.players > MAX_PLAYERS){
-    toast("本輪玩家已滿 60");
-    return;
-  }
-
-  const r = STATE.round;
-  if(r.paidOut >= r.payoutTarget){
-    toast("本輪已達標，等待下凡鎖定");
-    return;
-  }
-
-  const amt = fortuneAmount();
-  const avail = Math.max(0, Math.floor(STATE.poolPregnancy));
-  if(avail <= 0){
-    toast("受孕池能量不足，請先許願/還願/點燈補能量");
-    pushStory("受孕池能量不足：等待補能量。");
-    return;
-  }
-
-  const pay = Math.min(amt, avail, r.payoutTarget - r.paidOut);
-
-  STATE.poolPregnancy -= pay;
-  STATE.poolTotal = STATE.poolPregnancy;
-  r.paidOut += pay;
-  STATE.fortunesGiven += 1;
-
-  pushStory(`發財金發放：-${pay} KGEN（推進 ${r.paidOut}/${r.payoutTarget}）`);
-  toast(`發財金已發放 ${pay} KGEN`);
-
-  if(r.paidOut >= r.payoutTarget){
-    lockDescent();
-  }
-
-  applyUI();
-}
-
-/* ---------- Descent lock + engagement ---------- */
-function lockDescent(){
-  const r = STATE.round;
-
-  const basis = Math.max(r.payoutTarget, r.paidOut);
-
-  r.lockA = Math.floor(basis * 0.15);
-  r.lockB = Math.floor(basis * 0.15);
-  const decision = Math.floor(basis * 0.30);
-  r.decisionPool = decision;
-  r.backflow = basis - r.lockA - r.lockB - decision;
-
-  STATE.phase = PHASE.DESCENT;
-
-  pushStory(`🌕 下凡鎖定：A/B 各 15%（${r.lockA}/${r.lockB}）｜判斷池 30%（${decision}）｜回流 40%（${r.backflow}）`);
-  pushStory("求婚判斷：A→B 與 B→A 皆成立，判斷池釋放；若單向/無轉，未成立部分回池。");
-
-  narrateByPhase();
-  applyUI();
-}
-
-function propose(which){
-  if(STATE.phase !== PHASE.DESCENT){
-    toast("尚未進入求婚判斷階段");
-    return;
-  }
-  if(which==="A") STATE.round.proposeA = true;
-  if(which==="B") STATE.round.proposeB = true;
-
-  pushStory(`求婚動作：${which} 已發出轉帳訊號`);
-  toast(`${which} 求婚已送出`);
-  applyUI();
-
-  if(STATE.round.proposeA && STATE.round.proposeB){
-    resolveEngagement(true);
-  }
-}
-
-function resolveEngagement(mutual){
-  const r = STATE.round;
-  if(STATE.phase !== PHASE.DESCENT) return;
-
-  if(mutual){
-    const giveA = Math.floor(r.decisionPool * 0.50);
-    const giveB = r.decisionPool - giveA;
-    pushStory(`💍 雙向同意：判斷池釋放 → A +${giveA}｜B +${giveB}`);
-    toast("雙向同意：受孕成婚成立");
-    STATE.poolPregnancy += (r.backflow || 0);
-    STATE.poolTotal = STATE.poolPregnancy;
-  }
-
-  STATE.phase = PHASE.RESOLVED;
-  pushStory("本輪結算完成：回流已入池，等待下一輪。");
-  narrateByPhase();
-  applyUI();
-}
-
-/* ---------- Wish / Vow ---------- */
-function submitWish(){
-  addParticipant(currentAddr());
-  const text = ($("wish").value||"").trim();
-  inflowKGEN(100, "許願：" + (text ? text.slice(0,40) : "未填"));
-  toast("許願已送出（+100 KGEN）");
-}
-function submitVow(){
-  addParticipant(currentAddr());
-  const amt = clamp(Number($("vowAmt").value||0), 1, 999999999);
-  const text = ($("wish").value||"").trim();
-  inflowKGEN(amt, "還願：" + (text ? text.slice(0,40) : "未填"));
-  toast(`已還願 +${amt} KGEN`);
-}
-
-/* ---------- Lamps ---------- */
-function todayStr(){
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function lampKey(){
-  return ($("lampPick").value || "rat");
-}
-function lampName(key){
-  const map = {rat:"鼠",ox:"牛",tiger:"虎",rabbit:"兔",dragon:"龍",snake:"蛇",horse:"馬",goat:"羊",monkey:"猴",rooster:"雞",dog:"狗",pig:"豬",x13:"第13生肖"};
-  return map[key] || key;
-}
-function lampCap(key){
-  return key==="x13" ? LAMP_CAP.z13 : LAMP_CAP.z12;
-}
-function lampCount(key){
-  return STATE.lamps.counts[key] || 0;
-}
-function canLampToday(){
-  return STATE.lamps.lastLampDate !== todayStr();
-}
-function lightLamp(){
-  addParticipant(currentAddr());
-  const key = lampKey();
-
-  if(key==="x13"){
-    const nm = ($("lampCustom").value||"").trim();
-    STATE.lamps.x13Name = nm || STATE.lamps.x13Name || "自定生肖";
-  }
-
-  if(!canLampToday()){
-    toast("今天已點過光明燈（本機每日一次）");
-    pushStory("光明燈：今日已點。");
-    return;
-  }
-
-  const cap = lampCap(key);
-  if(lampCount(key) >= cap){
-    toast("該生肖燈位已滿");
-    return;
-  }
-
-  STATE.lamps.counts[key] = lampCount(key) + 1;
-  STATE.lamps.lastLampDate = todayStr();
-
-  inflowKGEN(1, `光明燈：${lampName(key)}${key==="x13" ? "｜"+STATE.lamps.x13Name : ""}（1 KGEN）`);
-  toast("已點光明燈 +1 KGEN");
-  applyUI();
-}
-function lampInfo(){
-  const key = lampKey();
-  const cap = lampCap(key);
-  const cnt = lampCount(key);
-  const extra = (key==="x13") ? `｜${STATE.lamps.x13Name || "未命名"}` : "";
-  pushStory(`燈位狀況：${lampName(key)}${extra}：${cnt}/${cap}`);
-  toast(`${lampName(key)} ${cnt}/${cap}`);
-}
-
-/* ---------- Trading (mock) ---------- */
-function calcMgnRate(){
-  const m = STATE.trading.margin;
-  const lock = STATE.trading.marginLocked;
-  if(m<=0) return 0;
-  const free = Math.max(0, m - lock);
-  const rate = Math.round((free/m)*100);
-  return clamp(rate, 0, 999);
-}
-function lockPerLot(){
-  return 20000;
-}
-function order(dir){
-  addParticipant(currentAddr());
-  if(dir!=="LONG" && dir!=="SHORT") return;
-
-  const need = lockPerLot();
-  if(STATE.trading.margin - STATE.trading.marginLocked < need){
-    toast("保證金不足");
-    pushStory("風控：保證金不足，拒絕下單。");
-    return;
-  }
-
-  STATE.trading.pos += 1;
-  STATE.trading.dir = dir;
-  STATE.trading.marginLocked += need;
-
-  if(dir==="LONG"){
-    STATE.deg = clamp(STATE.deg + 6, 0, 360);
-  }else{
-    STATE.deg = clamp(STATE.deg + 14, 0, 360);
-  }
-
-  pushStory(`下單：${dir} +1 口｜扣押保證金 ${need}`);
-  toast(`${dir} +1`);
-  applyUI();
-}
-function closeAll(){
-  if(STATE.trading.pos<=0){
-    toast("目前無持倉");
-    return;
-  }
-  const dir = STATE.trading.dir;
-  const lots = STATE.trading.pos;
-  const base = Math.round((Math.random()*2-1) * 180);
-  const bias = (dir==="LONG") ? 20 : -20;
-  const pnl = (base + bias) * lots;
-
-  STATE.trading.marginLocked = 0;
-  STATE.trading.pos = 0;
-  STATE.trading.dir = "";
-  STATE.trading.pnl += pnl;
-  STATE.trading.lastSettleAt = Date.now();
-
-  pushStory(`平倉結算：PnL=${pnl}（示意）｜保證金釋放`);
-  toast("已平倉");
-  applyUI();
-}
-function forceSettle(){
-  pushStory("強制結算：系統重置持倉（示意）");
-  STATE.trading.marginLocked = 0;
-  STATE.trading.pos = 0;
-  STATE.trading.dir = "";
-  toast("強制結算完成");
-  applyUI();
-}
-function topUp(){
-  STATE.trading.margin += 50000;
-  pushStory("補保證金 +50000");
-  toast("已補保證金");
-  applyUI();
-}
-
-/* ---------- Kline generator (overlay) ---------- */
-const KLINE = (function(){
-  const canvas = $("kline");
-  const ctx = canvas.getContext("2d");
-  let W=0,H=0,DPR=1;
-
-  function resize(){
-    DPR = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-    const rect = canvas.getBoundingClientRect();
-    W = Math.floor(rect.width);
-    H = Math.floor(rect.height);
-    canvas.width = Math.floor(W*DPR);
-    canvas.height = Math.floor(H*DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-  }
-  window.addEventListener("resize", resize);
-
-  function genNext(){
-    const last = STATE.kline.lastPrice;
-    const drift = (STATE.stance==="LONG") ? 6 : (STATE.stance==="SHORT" ? -6 : 0);
-    const delta = drift + Math.round((Math.random()*2-1)*20);
-    const open = last;
-    const close = last + delta;
-    const hi = Math.max(open, close) + Math.round(Math.random()*10);
-    const lo = Math.min(open, close) - Math.round(Math.random()*10);
-
-    const c = {t: Date.now(), o:open, h:hi, l:lo, c:close};
-    STATE.kline.lastPrice = close;
-    STATE.kline.candles.push(c);
-    if(STATE.kline.candles.length > 48) STATE.kline.candles.shift();
-  }
-
-  function draw(){
-    resize();
-    ctx.clearRect(0,0,W,H);
-
-    const candles = STATE.kline.candles;
-    if(!candles.length) return;
-
-    let minP = Math.min(...candles.map(x=>x.l));
-    let maxP = Math.max(...candles.map(x=>x.h));
-    const padP = (maxP-minP)*0.12 + 1;
-    minP -= padP; maxP += padP;
-
-    function yOf(p){
-      const t = (p - minP)/(maxP - minP);
-      return H - t*H;
-    }
-
-    ctx.globalAlpha = 0.25;
-    ctx.strokeStyle = "rgba(255,255,255,.20)";
-    ctx.lineWidth = 1;
-    for(let i=1;i<6;i++){
-      const y = (H/6)*i;
-      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-
-    const n = candles.length;
-    const gap = 4;
-    const cw = Math.max(6, Math.floor((W - gap*(n+1))/n));
-    let x = gap;
-
-    for(const c of candles){
-      const yo = yOf(c.o), yc = yOf(c.c), yh = yOf(c.h), yl = yOf(c.l);
-      const up = c.c >= c.o;
-
-      ctx.globalAlpha = 0.50;
-      ctx.strokeStyle = up ? "rgba(255,215,120,.60)" : "rgba(120,255,220,.60)";
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.moveTo(x + cw/2, yh);
-      ctx.lineTo(x + cw/2, yl);
-      ctx.stroke();
-
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = up ? "rgba(255,215,120,.50)" : "rgba(120,255,220,.50)";
-      const top = Math.min(yo, yc);
-      const h = Math.max(3, Math.abs(yo - yc));
-      ctx.fillRect(x, top, cw, h);
-
-      x += cw + gap;
-    }
-
-    ctx.globalAlpha = 0.7;
-    ctx.fillStyle = "rgba(255,255,255,.88)";
-    ctx.font = "12px ui-monospace, Menlo, Consolas, monospace";
-    ctx.fillText("PX " + Math.round(STATE.kline.lastPrice), 12, 18);
-    ctx.globalAlpha = 1;
-  }
-
-  function tick(){
-    genNext();
-    draw();
-    saveState();
-  }
-
-  resize();
-  if(STATE.kline.candles.length < 6){
-    for(let i=0;i<10;i++) genNext();
-  }
-  draw();
-
-  setInterval(()=>{ tick(); }, 2000);
-  return { draw };
-})();
-
-/* ---------- Particle FX (vertical) ---------- */
-const FX = (function(){
-  const canvas = $("fx");
-  const ctx = canvas.getContext("2d");
-  let W=0,H=0,DPR=1;
-  let mode="REST";
-  let warp=10;
-
-  const particles = [];
-  const MAX = 700;
-
-  function resize(){
-    DPR = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-    const rect = canvas.getBoundingClientRect();
-    W = Math.floor(rect.width);
-    H = Math.floor(rect.height);
-    canvas.width = Math.floor(W*DPR);
-    canvas.height = Math.floor(H*DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-  }
-  window.addEventListener("resize", resize);
-
-  function rand(a,b){ return a + Math.random()*(b-a); }
-
-  function spawn(){
-    const intensity = clamp(warp/150, 0.06, 1.0);
-    const count = Math.floor(2 + intensity*7);
-
-    for(let i=0;i<count;i++){
-      if(particles.length > MAX) particles.shift();
-
-      const p = {
-        x: rand(0.05*W, 0.95*W),
-        y: rand(0.05*H, 0.95*H),
-        vx: rand(-0.15, 0.15),
-        vy: 0,
-        r: rand(0.8, 2.2) + intensity*1.4,
-        life: rand(0.6, 1.2),
-        age: 0,
-        a: rand(0.25, 0.95),
-      };
-
-      if(mode==="LONG"){
-        p.y = rand(-30, 0.15*H);
-        p.vy = rand(1.8, 3.6) + intensity*8.5;
-      }else if(mode==="SHORT"){
-        p.y = rand(0.82*H, H+30);
-        p.vy = - (rand(1.8, 3.6) + intensity*8.5);
-      }else{
-        p.y = rand(0.15*H, 0.85*H);
-        p.vy = rand(-0.25, 0.25);
-        p.vx = rand(-0.25, 0.25);
-        p.r *= 0.85;
-        p.a *= 0.65;
-      }
-
-      particles.push(p);
-    }
-  }
-
-  function draw(dt){
-    ctx.clearRect(0,0,W,H);
-
-    ctx.fillStyle = "rgba(0,0,0,.10)";
-    ctx.fillRect(0,0,W,H);
-
-    spawn();
-
-    const intensity = clamp(warp/150, 0.06, 1.0);
-    const topKill = H * 0.20;
-
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i];
-      p.age += dt;
-      p.x += p.vx * dt * 60;
-      p.y += p.vy * dt * 60;
-
-      const t = 1 - (p.age / p.life);
-      const cutoffTop = H*0.28;
-      if(mode==="SHORT" && p.y < cutoffTop){ particles.splice(i,1); continue; }
-      if(t<=0 || p.x<-80 || p.x>W+80 || p.y<-120 || p.y>H+120){
-        particles.splice(i,1);
-        continue;
-      }
-      if(mode==="SHORT" && p.y < topKill){
-        particles.splice(i,1);
-        continue;
-      }
-
-      let col = "rgba(255,255,255,";
-      if(mode==="LONG"){
-        col = `rgba(255,215,120,${p.a*t})`;
-      }else if(mode==="SHORT"){
-        col = `rgba(120,255,220,${p.a*t})`;
-      }else{
-        col = `rgba(255,170,220,${p.a*t})`;
-      }
-
-      ctx.beginPath();
-      ctx.fillStyle = col;
-      ctx.arc(p.x, p.y, p.r * (0.6 + intensity*0.65), 0, Math.PI*2);
-      ctx.fill();
-
-      if(intensity > 0.35 && mode!=="REST"){
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - p.vx*0.25, p.y - p.vy*0.08);
-        ctx.stroke();
-      }
-    }
-
-    const cx=W*0.30, cy=H*0.35;
-    const g=ctx.createRadialGradient(cx,cy,10,cx,cy, 220+intensity*220);
-    if(mode==="LONG"){
-      g.addColorStop(0, `rgba(255,215,120,${0.14+intensity*0.20})`);
-      g.addColorStop(1, "rgba(255,215,120,0)");
-    }else if(mode==="SHORT"){
-      g.addColorStop(0, `rgba(120,255,220,${0.12+intensity*0.18})`);
-      g.addColorStop(1, "rgba(120,255,220,0)");
-    }else{
-      g.addColorStop(0, `rgba(255,170,220,${0.10+intensity*0.10})`);
-      g.addColorStop(1, "rgba(255,170,220,0)");
-    }
-    ctx.fillStyle=g;
-    ctx.fillRect(0,0,W,H);
-  }
-
-  let last = performance.now();
-  function loop(){
-    const now = performance.now();
-    const dt = Math.min(0.033, (now-last)/1000);
-    last = now;
-    draw(dt);
-    requestAnimationFrame(loop);
-  }
-
-  function setMode(m, w){
-    mode = m;
-    warp = w;
-  }
-
-  resize();
-  requestAnimationFrame(loop);
-  return { setMode };
-})();
-
-/* ---------- Media (camera/photo/video/audio) ---------- */
-let camStream = null;
-let mediaRecorder = null;
-let recordedChunks = [];
-let videoBlob = null;
-
-let audioStream = null;
-let audioRecorder = null;
-let audioChunks = [];
-let audioBlob = null;
-
-async function openCam(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    throw new Error("此瀏覽器不支援相機");
-  }
-  camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
-  $("cam").srcObject = camStream;
-  toast("相機已開啟");
-  pushStory("影像：相機已開啟（含麥克風音軌）");
-}
-
-function shot(){
-  const v = $("cam");
-  if(!v.videoWidth) throw new Error("相機尚未就緒");
-  const c = $("snap");
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
-  const ctx = c.getContext("2d");
-  ctx.drawImage(v, 0, 0, c.width, c.height);
-
-  ctx.fillStyle = "rgba(0,0,0,.45)";
-  ctx.fillRect(12, 12, 360, 58);
-  ctx.fillStyle = "rgba(255,255,255,.92)";
-  ctx.font = "16px ui-monospace, Menlo, Consolas, monospace";
-  ctx.fillText("GUANGHAN 16888 · V1.8", 22, 34);
-  ctx.font = "13px ui-monospace, Menlo, Consolas, monospace";
-  ctx.fillText("TIME: " + nowStr(), 22, 56);
-
-  c.style.display = "block";
-  toast("已拍照");
-  pushStory("影像：拍照完成");
-}
-
-function downloadSnap(){
-  const c = $("snap");
-  if(c.style.display === "none") throw new Error("尚未拍照");
-  const a = document.createElement("a");
-  a.download = "KLINE_16888_SNAPSHOT_V1_8.png";
-  a.href = c.toDataURL("image/png");
-  a.click();
-  toast("下載照片");
-}
-
-function startVideo(){
-  if(!camStream) throw new Error("請先開啟相機");
-  recordedChunks = [];
-  videoBlob = null;
-
-  let options = {};
-  if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus")){
-    options.mimeType = "video/webm;codecs=vp8,opus";
-  }else if(MediaRecorder.isTypeSupported("video/webm")){
-    options.mimeType = "video/webm";
-  }
-  mediaRecorder = new MediaRecorder(camStream, options);
-  mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = ()=>{
-    videoBlob = new Blob(recordedChunks, {type: recordedChunks[0]?.type || "video/webm"});
-    $("btnDownloadVideo").disabled = false;
-    pushStory("影像：錄影完成，可下載");
-  };
-  mediaRecorder.start(200);
-  $("btnRecVideo").disabled = true;
-  $("btnStopVideo").disabled = false;
-  toast("開始錄影");
-  pushStory("影像：開始錄影");
-}
-function stopVideo(){
-  if(mediaRecorder && mediaRecorder.state !== "inactive"){
-    mediaRecorder.stop();
-  }
-  $("btnRecVideo").disabled = false;
-  $("btnStopVideo").disabled = true;
-  toast("停止錄影");
-}
-function downloadVideo(){
-  if(!videoBlob) throw new Error("尚未錄影完成");
-  const url = URL.createObjectURL(videoBlob);
-  const a = document.createElement("a");
-  a.download = "KLINE_16888_VIDEO_V1_8.webm";
-  a.href = url;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 10000);
-  toast("下載錄影");
-}
-
-async function startAudio(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    throw new Error("此瀏覽器不支援麥克風");
-  }
-
-  if(typeof MediaRecorder === "undefined"){
-    throw new Error("此瀏覽器不支援錄音（可能為 iOS Safari）。可改用語音客服文字模式。");
-  }
-  audioChunks = [];
-  audioBlob = null;
-
-  audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-
-  let options = {};
-  if(MediaRecorder.isTypeSupported("audio/webm;codecs=opus")){
-    options.mimeType = "audio/webm;codecs=opus";
-  }else if(MediaRecorder.isTypeSupported("audio/mp4")){
-    options.mimeType = "audio/mp4";
-  }else if(MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")){
-    options.mimeType = "audio/ogg;codecs=opus";
-  }else if(MediaRecorder.isTypeSupported("audio/webm")){
-    options.mimeType = "audio/webm";
-  }
-  audioRecorder = new MediaRecorder(audioStream, options);
-  audioRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) audioChunks.push(e.data); };
-  audioRecorder.onstop = ()=>{
-    audioBlob = new Blob(audioChunks, {type: audioChunks[0]?.type || "audio/webm"});
-    $("btnDownloadAudio").disabled = false;
-    pushStory("語音：錄音完成，可下載");
-  };
-  audioRecorder.start(200);
-  $("btnRecAudio").disabled = true;
-  $("btnStopAudio").disabled = false;
-  toast("開始錄音");
-  pushStory("語音：開始錄音（許願可錄下）");
-}
-function stopAudio(){
-  if(audioRecorder && audioRecorder.state !== "inactive"){
-    audioRecorder.stop();
-  }
-  if(audioStream){
-    audioStream.getTracks().forEach(t=>t.stop());
-    audioStream = null;
-  }
-  $("btnRecAudio").disabled = false;
-  $("btnStopAudio").disabled = true;
-  toast("停止錄音");
-}
-function downloadAudio(){
-  if(!audioBlob) throw new Error("尚未錄音完成");
-  const url = URL.createObjectURL(audioBlob);
-  const a = document.createElement("a");
-  a.download = "KLINE_16888_AUDIO_V1_8.webm";
-  a.href = url;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 10000);
-  toast("下載錄音");
-}
-
-/* ---------- Voice guide ---------- */
-function canSpeak(){
-  return !!window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined";
-}
-function speak(text){
-  if(!canSpeak()) return;
-  try{
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "zh-TW";
-    u.rate = 1.02;
-    u.pitch = 1.02;
-    window.speechSynthesis.speak(u);
-  }catch(e){}
-}
-
-/* ---------- Export Kline JSON ---------- */
-function exportKline(){
-  const data = STATE.kline.candles.map(c=>({t:c.t,o:c.o,h:c.h,l:c.l,c:c.c}));
-  const json = JSON.stringify({version:VERSION, candles:data}, null, 2);
-  $("klineJson").textContent = json.slice(0, 5000);
-  toast("K 線 JSON 已生成（下方）");
-  pushStory("K線：已匯出 JSON（示意）");
-}
-
-/* ---------- UI apply ---------- */
-function applyUI(){
-  $("clock").textContent = nowStr();
-
-  const a = normAngle(STATE.deg);
-  const warp = clamp(Number(STATE.warp)||10, 1, 150);
-  STATE.deg = a;
-  STATE.warp = warp;
-
-  $("degText").textContent = String(a);
-  $("degLabel").textContent = `${a}°`;
-  $("warpText").textContent = String(warp);
-  $("warpLabel").textContent = `${warp}x`;
-
-  const s = stanceOf(a);
-  STATE.stance = s;
-  $("stance").textContent = s;
-
-  const pb = $("phaseBadge");
-  pb.textContent = "Phase：" + STATE.phase;
-  pb.className = "badge " + (STATE.phase===PHASE.READY ? "warn" : (STATE.phase===PHASE.ARMED ? "ok" : (STATE.phase===PHASE.DESCENT ? "warn" : "ok")));
-
-  $("poolTotal").textContent = formatInt(STATE.poolTotal);
-  $("vaultLingxiao").textContent = formatInt(STATE.vaultLingxiao);
-  $("vaultSource").textContent = formatInt(STATE.vaultSource);
-
-  $("paidOut").textContent = formatInt(STATE.round.paidOut);
-  $("paidTarget").textContent = STATE.round.payoutTarget ? formatInt(STATE.round.payoutTarget) : "—";
-
-  $("fairyName").textContent = STATE.round.fairyName ? `${STATE.round.fairyName}｜${STATE.round.fairyStar}` : "—";
-  $("fairyTarget").textContent = STATE.round.payoutTarget ? formatInt(STATE.round.payoutTarget) : "—";
-
-  $("players").textContent = String(STATE.players);
-
-  const w = currentAddr();
-  $("walletShort").textContent = w ? shortAddr(w) : "未連線";
-
-  $("posText").textContent = String(STATE.trading.pos);
-  $("dirText").textContent = STATE.trading.dir || "—";
-  $("margin").textContent = formatInt(STATE.trading.margin - STATE.trading.marginLocked);
-  $("acctMargin").textContent = formatInt(STATE.trading.margin);
-  $("mgnRate").textContent = calcMgnRate() + "%";
-  $("settleState").textContent = (STATE.trading.pos===0 ? "READY" : "RUNNING");
-
-  $("luckyA").textContent = STATE.round.luckyA ? shortAddr(STATE.round.luckyA) : "—";
-  $("luckyB").textContent = STATE.round.luckyB ? shortAddr(STATE.round.luckyB) : "—";
-
-  const eh = $("engageHint");
-  if(STATE.phase !== PHASE.DESCENT){
-    eh.textContent = "求婚狀態：未開始";
-  }else{
-    const aOK = STATE.round.proposeA ? "A已求婚" : "A未求婚";
-    const bOK = STATE.round.proposeB ? "B已求婚" : "B未求婚";
-    eh.textContent = `求婚狀態：${aOK}｜${bOK}`;
-  }
-
-  const img = $("fairy");
-  const sleep = $("sleepMask");
-  const cockpit = $("cockpit");
-  const glow = warp/150;
-
-  const baseSat = 1.02 + glow*0.18;
-  const baseBright = 1.00 + glow*0.30;
-  const baseContrast = 1.02 + glow*0.08;
-  const k = 0.25;
-
-  if(s==="LONG"){
-    sleep.classList.remove("on");
-    cockpit.classList.remove("breath");
-    img.style.transform = `rotate(${a*k}deg) scale(${1.02 + glow*0.06})`;
-    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(255,215,120,.35))`;
-  }else if(s==="SHORT"){
-    sleep.classList.remove("on");
-    cockpit.classList.remove("breath");
-    img.style.transform = `rotate(${-(a-180)*k}deg) scale(${1.02 + glow*0.06})`;
-    img.style.filter = `saturate(${baseSat}) brightness(${baseBright}) contrast(${baseContrast}) drop-shadow(0 0 ${18+glow*26}px rgba(120,255,220,.30))`;
-  }else{
-    sleep.classList.add("on");
-    cockpit.classList.add("breath");
-    img.style.transform = `rotate(0deg) scale(${1.00 + glow*0.03})`;
-    img.style.filter = `saturate(${baseSat}) brightness(${1.00+glow*0.12}) contrast(${baseContrast}) drop-shadow(0 0 ${14+glow*18}px rgba(255,170,220,.18))`;
-  }
-
-  FX.setMode(s, warp);
-  if($("degLabelV")) $("degLabelV").textContent = String(a) + '°';
-  if($("warpLabelV")) $("warpLabelV").textContent = String(warp) + '口';
-  applyFuelUI();
-
-  saveState();
-}
-
-/* ---------- Events binding ---------- */
-$("degRange").addEventListener("input", (e)=>{ STATE.deg = Number(e.target.value||0); applyUI(); });
-$("warpRange").addEventListener("input", (e)=>{ STATE.warp = Number(e.target.value||10); applyUI(); });
-
-/* ---------- Car Wheel binding (drag to rotate) ---------- */
-(function bindCarWheel(){
-  const wrap = $("carWheelWrap");
-  const wheel = $("carWheel");
-  const range = $("degRange");
-  if(!wrap || !wheel || !range) return;
-
-  const setDeg = (deg)=>{
-    // normalize 0..360
-    let d = (deg % 360 + 360) % 360;
-    range.value = String(Math.round(d));
-    // keep UI in sync
-    STATE.deg = Number(range.value||0);
-    applyUI();
-    // wheel visuals
-    wheel.style.transform = `rotate(${d}deg)`;
-  };
-
-  // sync on init
-  setDeg(STATE.deg || Number(range.value||0));
-
-  const centerOf = ()=>{
-    const r = wrap.getBoundingClientRect();
-    return { cx: r.left + r.width/2, cy: r.top + r.height/2 };
-  };
-
-  let dragging = false;
-  let startAngle = 0;
-  let startDeg = 0;
-
-  const angleFromPoint = (x,y)=>{
-    const {cx, cy} = centerOf();
-    const a = Math.atan2(y - cy, x - cx); // -pi..pi
-    let deg = a * 180/Math.PI; // -180..180
-    deg = (deg + 360) % 360;   // 0..360
-    return deg;
-  };
-
-  const onDown = (ev)=>{
-    dragging = true;
-    const p = ev.touches ? ev.touches[0] : ev;
-    startAngle = angleFromPoint(p.clientX, p.clientY);
-    startDeg = Number(range.value||0);
-    wrap.setPointerCapture && ev.pointerId != null && wrap.setPointerCapture(ev.pointerId);
-  };
-
-  const onMove = (ev)=>{
-    if(!dragging) return;
-    const p = ev.touches ? ev.touches[0] : ev;
-    const cur = angleFromPoint(p.clientX, p.clientY);
-    // delta with shortest path
-    let delta = cur - startAngle;
-    if(delta > 180) delta -= 360;
-    if(delta < -180) delta += 360;
-    setDeg(startDeg + delta);
-    ev.preventDefault && ev.preventDefault();
-  };
-
-  const onUp = ()=>{
-    dragging = false;
-  };
-
-  // Pointer events (preferred)
-  wrap.addEventListener("pointerdown", onDown, {passive:false});
-  window.addEventListener("pointermove", onMove, {passive:false});
-  window.addEventListener("pointerup", onUp);
-
-  // Fallback touch
-  wrap.addEventListener("touchstart", onDown, {passive:false});
-  window.addEventListener("touchmove", onMove, {passive:false});
-  window.addEventListener("touchend", onUp);
-
-  // Double tap to center
-  let lastTap = 0;
-  wrap.addEventListener("click", ()=>{
-    const now = Date.now();
-    if(now - lastTap < 320){
-      setDeg(0);
-    }
-    lastTap = now;
-  });
-
-  // When range changes elsewhere, keep wheel synced
-  range.addEventListener("input", ()=>{ wheel.style.transform = `rotate(${Number(range.value||0)}deg)`; });
-})();
-
-
-$("btnConnect").addEventListener("click", async ()=>{
-  try{ await connectWallet(); }catch(e){ toast(e.message || String(e)); pushStory("Wallet error: " + (e.message||e)); }
-});
-
-$("btnReset").addEventListener("click", ()=>{
-  if(confirm("確定要重置本機狀態？（不影響鏈上）")){
-    localStorage.removeItem(LS_KEY);
-    STATE = structuredClone(DEFAULT);
-    pushStory("系統已重置（本機）");
-    toast("已重置");
-    applyUI();
-  }
-});
-
-$("btnDock").addEventListener("click", ()=> $("dockPanel").classList.toggle("on"));
-
-$("btnOrderLong").addEventListener("click", ()=>order("LONG"));
-$("btnOrderShort").addEventListener("click", ()=>order("SHORT"));
-$("btnClose").addEventListener("click", closeAll);
-
-$("btnFortune").addEventListener("click", requestFortune);
-
-$("btnWish").addEventListener("click", submitWish);
-$("btnVow").addEventListener("click", submitVow);
-
-$("lampPick").addEventListener("change", ()=>{ $("lampCustom").style.display = (lampKey()==="x13") ? "block" : "none"; });
-$("btnLamp").addEventListener("click", lightLamp);
-$("btnLampInfo").addEventListener("click", lampInfo);
-
-$("btnCam").addEventListener("click", async ()=>{ try{ await openCam(); }catch(e){ toast(e.message||String(e)); pushStory("Camera error: " + (e.message||e)); } });
-$("btnShot").addEventListener("click", ()=>{ try{ shot(); }catch(e){ toast(e.message||String(e)); pushStory("Shot error: " + (e.message||e)); } });
-$("btnDownloadShot").addEventListener("click", ()=>{ try{ downloadSnap(); }catch(e){ toast(e.message||String(e)); pushStory("Download photo error: " + (e.message||e)); } });
-
-$("btnRecVideo").addEventListener("click", ()=>{ try{ startVideo(); }catch(e){ toast(e.message||String(e)); pushStory("Video record error: " + (e.message||e)); } });
-$("btnStopVideo").addEventListener("click", stopVideo);
-$("btnDownloadVideo").addEventListener("click", ()=>{ try{ downloadVideo(); }catch(e){ toast(e.message||String(e)); pushStory("Download video error: " + (e.message||e)); } });
-
-$("btnRecAudio").addEventListener("click", async ()=>{ try{ await startAudio(); }catch(e){ toast(e.message||String(e)); pushStory("Audio record error: " + (e.message||e)); } });
-$("btnStopAudio").addEventListener("click", stopAudio);
-$("btnDownloadAudio").addEventListener("click", ()=>{ try{ downloadAudio(); }catch(e){ toast(e.message||String(e)); pushStory("Download audio error: " + (e.message||e)); } });
-
-$("btnArmNow").addEventListener("click", ()=>{
-  if(STATE.poolTotal < 16888){
-    inflowKGEN(16888 - STATE.poolTotal, "測試補能量至 16888");
-  }
-  armRound("force");
-});
-$("btnPickFairy").addEventListener("click", ()=>{
-  const sel = $("fairyPick");
-  sel.style.display = (sel.style.display==="none" || !sel.style.display) ? "block" : "none";
-});
-
-$("btnProposeA").addEventListener("click", ()=>propose("A"));
-$("btnProposeB").addEventListener("click", ()=>propose("B"));
-
-$("btnTopUp").addEventListener("click", topUp);
-$("btnForceSettle").addEventListener("click", forceSettle);
-
-$("btnExportKline").addEventListener("click", exportKline);
-
-$("btnSpeak").addEventListener("click", ()=>{
-  const msg = "廣寒宮一六八八八。方向盤十到一七零為多，一九零到三五零為空。累積到一六八八八啟動受孕儀式。發財金推進到本輪仙女門檻後下凡，雙向求婚成立則成婚。";
-  speak(msg);
-  toast("語音導覽已播放");
-  pushStory("語音導覽已播放");
-});
-
-/* ---------- Boot ---------- */
-function boot(){
-  if(!STATE.console || !Array.isArray(STATE.console)) STATE.console = [];
-  $("aiState").textContent = "READY";
-
-  addParticipant(currentAddr());
-
-  if(STATE.console.length === 0){
-    pushStory("Boot OK: 16888 " + VERSION);
-    pushStory("PrimeForge：歡迎進入廣寒宮。這裡不是抽獎，這是受孕宇宙引擎。");
-    pushStory("提示：滑桿已移到螢幕上方，行車視野清楚。做空粒子靠近上緣即消失。");
-  }
-
-  setInterval(()=>{ $("clock").textContent = nowStr(); }, 250);
-
-  applyUI();
-
-  // V1.9.4: 把滑桿移到仙女圖左右（垂直操作），上方血量顯示
-  try{
-    if($("dockTop") && !$("hpBar")){
-      const wrap = document.createElement('div');
-      wrap.className='hpWrap';
-      wrap.innerHTML = `<label><span>血量｜油箱（Fuel Tank）</span><span class="mono" id="hpLabel">--%</span></label><input id="hpBar" type="range" min="0" max="100" value="50" />`;
-      $("dockTop").appendChild(wrap);
-    }
-
-    const degRow = document.querySelector('#degRange')?.closest('.rangeRow');
-    const warpRow = document.querySelector('#warpRange')?.closest('.rangeRow');
-
-    if($("dockRight") && degRow){
-      const v=document.createElement('div'); v.className='vWrap';
-      v.innerHTML = `<div class="vLabel">方向盤</div>`;
-      degRow.querySelector('label')?.remove();
-      const input=degRow.querySelector('input');
-      if(input){ input.classList.add('vRange'); }
-      v.appendChild(input);
-      const val=document.createElement('div'); val.className='vVal mono'; val.id='degLabelV';
-      v.appendChild(val);
-      $("dockRight").appendChild(v);
-      degRow.remove();
-    }
-
-    if($("dockLeft") && warpRow){
-      const v=document.createElement('div'); v.className='vWrap';
-      v.innerHTML = `<div class="vLabel">曲率（口數）</div>`;
-      warpRow.querySelector('label')?.remove();
-      const input=warpRow.querySelector('input');
-      if(input){ input.classList.add('vRange'); }
-      v.appendChild(input);
-      const val=document.createElement('div'); val.className='vVal mono'; val.id='warpLabelV';
-      v.appendChild(val);
-      $("dockLeft").appendChild(v);
-      warpRow.remove();
-    }
-  }catch(e){}
-
-  applyGA();
-  applyFuelUI();
-
-  // V1.9.4 GA/Fuel events
-  if($("gaLevel")) $("gaLevel").addEventListener('change', ()=>{ applyGA(); applyFuelUI(); saveState(); toast('GA 等級已更新'); });
-  if($("fuelRange")) $("fuelRange").addEventListener('input', (e)=>{ STATE.fuel = Number(e.target.value||0); applyFuelUI(); saveState(); });
-
-
-  setTimeout(()=>{ narrateByPhase(); }, 700);
-}
-boot();
+window.onload = () => app.init();
 </script>
-
 </body>
 </html>
