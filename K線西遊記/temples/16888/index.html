@@ -136,8 +136,8 @@
     
 #brand-badge{
   position:fixed;
-  left: 16px;
-  top: 54px;
+  left: 26px;
+  top: 72px;
   z-index:260;
   padding:6px 10px;
   border:1px solid rgba(255,215,128,.7);
@@ -260,8 +260,35 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.11";
+const APP_VERSION = "v2.14";
 const app = {
+  // UI helpers (safe in demo/no-wallet mode)
+  setProgress(p){
+    try{
+      const v = Math.max(0, Math.min(100, Number(p)||0));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      if(fill) fill.style.width = v + '%';
+      if(txt)  txt.innerText = v.toFixed(1) + '%';
+    }catch(e){}
+  },
+  logEvent(title, detail){
+    try{
+      const t = String(title||'Event');
+      const d = detail==null? '' : String(detail);
+      const ev = { t: Date.now(), title: t, detail: d };
+      // persist small history
+      const key = 'kgen16888_events';
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.unshift(ev);
+      if(arr.length>50) arr.length=50;
+      localStorage.setItem(key, JSON.stringify(arr));
+      // update on-screen last event if exists
+      const el = document.getElementById('last-event');
+      if(el) el.innerText = d ? (t + '｜' + d) : t;
+    }catch(e){}
+  },
+
     isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
     stream: null, tInt: null, drawInt: null, bbSampleInt: null,
 
