@@ -2,8 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜金融生命體肌肉滿血版</title>
+    <title>KGEN 16888｜廣寒宮對齊合約版｜v2.01</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
@@ -172,9 +174,44 @@
     </div>
 </div>
 
+
+<!-- WEB3 控制面板（對齊合約） -->
+<div id="web3-panel" style="position:fixed; left:18px; bottom:210px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px);">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.01</div>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+  </div>
+
+  <div style="margin-top:8px; font-size:12px; color:#ddd;">
+    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
+    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ PoolDuel 合約餘額</div>
+    <div>PoolDuel: <span id="w3-pd" style="color:var(--cyan);">未設定</span></div>
+    <div>MoonTrust: <span id="w3-mt" style="color:var(--cyan);">未設定</span></div>
+    <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
+  </div>
+
+  <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
+    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.seed()">🧧 許願/還願/點燈 → 入池</button>
+  </div>
+
+  <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
+    <div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">MoonTrust 3+3（表態與紅包托管）</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
+      <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
+    </div>
+  </div>
+</div>
+
 <div class="footer-terminal">
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
-    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🔴 黑盒子錄影</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 婚紗攝影錄影</button>
     <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
     <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
     <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
@@ -196,7 +233,7 @@ const app = {
         setInterval(() => this.tick(), 1000);
         this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 肌肉滿血版啟動。黑盒子已掛載。");
+        this.speak("KGEN 16888 廣寒宮啟動。婚紗攝影已掛載。合約對齊面板已就位。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -376,7 +413,7 @@ const app = {
         const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
 
         const payload = {
-            schema: "kgen.blackbox.v1",
+            schema: "kgen.moonwedding.v1",
             sessionId: this.blackbox.sessionId,
             startedAt: this.blackbox.startedAt,
             endedAt: this.blackbox.endedAt,
@@ -400,10 +437,10 @@ const app = {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `KGEN_GA_BLACKBOX_${this.blackbox.sessionId}.json`;
+        a.download = `KGEN_MOON_WEDDING_${this.blackbox.sessionId}.json`;
         a.click();
 
-        try { localStorage.setItem(`KGEN_BLACKBOX_${this.blackbox.sessionId}`, json); } catch(e) {}
+        try { localStorage.setItem(`KGEN_MOON_WEDDING_${this.blackbox.sessionId}`, json); } catch(e) {}
     },
 
     startRecTimer(){
@@ -449,7 +486,7 @@ const app = {
         const warp  = document.getElementById('warp-input-val').value;
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
-        ctx.fillText("KGEN 16888 GA-BLACKBOX", 30, 50);
+        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
 
         ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
         ctx.fillText(`ANGLE ${angle}°`, 30, 85);
@@ -476,8 +513,8 @@ const app = {
             this.bbStop();
             await this.bbExportJSON();
 
-            btn.innerText = "🔴 黑盒子錄影";
-            this.speak("錄影結束，黑盒子數據已封裝。");
+            btn.innerText = "🎥 婚紗攝影錄影";
+            this.speak("錄影結束，婚紗攝影數據已封裝。");
             return;
         }
 
@@ -498,7 +535,7 @@ const app = {
         this.recorder.onstop = () => {
             const blob = new Blob(this.chunks, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_GA_LOG.webm'; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_MOON_WEDDING_LOG.webm'; a.click();
         };
 
         this.bbStart();
@@ -509,8 +546,8 @@ const app = {
         this.syncExportCanvas();
         this.recorder.start();
 
-        btn.innerText = "⏹️ 停止黑盒子";
-        this.speak("黑盒子錄影開始，記錄演化數據。");
+        btn.innerText = "⏹️ 停止婚紗攝影";
+        this.speak("婚紗攝影錄影開始，記錄演化數據。");
     },
 
     bindWheel(){
@@ -583,5 +620,183 @@ const app = {
 };
 window.onload = () => app.init();
 </script>
+
+<script>
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
+const web3 = {
+  provider: null,
+  signer: null,
+  addr: null,
+
+  // === 固定 Token（你給的） ===
+  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+
+  // === 先留空：你部署後填上 ===
+  POOLDUEL: "",      // KGEN_16888_PoolDuel_V3_2_0 address
+  MOONTRUST: "",     // KGEN_16888_MoonTrust_V2_0_0 address
+
+  // === ABIs（最小可用） ===
+  abiERC20: [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) external view returns (uint256)",
+    "function balanceOf(address a) external view returns (uint256)",
+    "function decimals() external view returns (uint8)"
+  ],
+  abiPoolDuel: [
+    "function placeOrder(uint8 side, uint256 amountIn) external",
+    "function seed(uint256 amount) external",
+    "function poolBalance() external view returns (uint256)",
+    "function minOrder() external view returns (uint256)",
+    "function maxOrder() external view returns (uint256)",
+    "function basePool() external view returns (uint256)"
+  ],
+  abiMoonTrust: [
+    "function deposit(uint256 amount) external",
+    "function vow(uint256 roundId, address partner, uint256 amount) external",
+    "function claimWeddingEscrow(uint256 roundId) external",
+    "function poolBalance() external view returns (uint256)"
+  ],
+
+  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cPD(){ return new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.signer); },
+  cMT(){ return new ethers.Contract(this.MOONTRUST, this.abiMoonTrust, this.signer); },
+
+  ui(){
+    document.getElementById("w3-pd").innerText = this.POOLDUEL ? this.POOLDUEL : "未設定";
+    document.getElementById("w3-mt").innerText = this.MOONTRUST ? this.MOONTRUST : "未設定";
+  },
+
+  async connect(){
+    try{
+      if(!window.ethereum){ alert("找不到錢包（請用 Chrome + MetaMask / OKX Wallet）"); return; }
+      await window.ethereum.request({ method:"eth_requestAccounts" });
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+      document.getElementById("w3-addr").innerText = this.addr;
+      this.ui();
+      await this.refresh();
+      app.speak("錢包已連線。合約對齊模式啟動。");
+    }catch(e){
+      console.error(e);
+      alert("錢包連線失敗");
+    }
+  },
+
+  parseAmt(){
+    const v = (document.getElementById("amt-in").value || "").trim();
+    if(!v) throw new Error("請輸入金額");
+    // KGEN 是 18 decimals（依你現有 Token 習慣）
+    return ethers.utils.parseUnits(v, 18);
+  },
+
+  async approve(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    try{
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.POOLDUEL, amt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+    }
+  },
+
+  async seed(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    try{
+      const amt = this.parseAmt();
+      const pd = this.cPD();
+      const tx = await pd.seed(amt); // 入池（許願/還願/點燈共用）
+      app.speak("點燈已入池。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("入池成功。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "入池失敗");
+    }
+  },
+
+  async place(side){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    try{
+      const amt = this.parseAmt();
+      const pd = this.cPD();
+      const tx = await pd.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("本次對賭已結算。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "下單失敗");
+    }
+  },
+
+  async vow(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    try{
+      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
+      const partner = (document.getElementById("mt-partner").value||"").trim();
+      if(!roundId) return alert("請填 roundId");
+      if(!ethers.utils.isAddress(partner)) return alert("對方地址格式錯誤");
+      // 固定儀式：1~2 KGEN（你選 B）
+      const amt = ethers.utils.parseUnits("1",18); // 預設 1（你要 1~2 的話可改 UI 再選）
+      const mt = this.cMT();
+      const tx = await mt.vow(roundId, partner, amt);
+      app.speak("表態轉帳已送出。");
+      await tx.wait();
+      app.speak("表態完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "表態失敗");
+    }
+  },
+
+  async claimWedding(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    try{
+      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
+      if(!roundId) return alert("請填 roundId");
+      const mt = this.cMT();
+      const tx = await mt.claimWeddingEscrow(roundId);
+      app.speak("領紅包托管已送出。");
+      await tx.wait();
+      app.speak("紅包已領取。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "領取失敗");
+    }
+  },
+
+  async refresh(){
+    try{
+      let bal = "--";
+      if(this.POOLDUEL && this.provider){
+        const pdR = new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.provider);
+        const b = await pdR.poolBalance();
+        bal = ethers.utils.formatUnits(b, 18) + " KGEN";
+      }
+      document.getElementById("w3-bal").innerText = bal;
+    }catch(e){
+      console.warn(e);
+    }
+  }
+};
+</script>
+
 </body>
 </html>
