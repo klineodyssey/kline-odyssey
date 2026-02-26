@@ -136,8 +136,8 @@
     
 #brand-badge{
   position:fixed;
-  right:16px;
-  top:10px;
+  left: 16px;
+  top: 54px;
   z-index:260;
   padding:6px 10px;
   border:1px solid rgba(255,215,128,.7);
@@ -159,7 +159,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.11</div>
+        <div class="sys-st" id="ver-st">VERSION v2.12</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -280,13 +280,13 @@ const app = {
     },
 
     tick() {
-        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+const sc=document.getElementById('sys-clock'); if(sc) sc.innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
         const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION " + APP_VERSION;
         document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
         const fit = 0.9 + Math.random() * 0.1;
-        document.getElementById('f-val').innerText = fit.toFixed(3);
-        document.getElementById('f-bar').style.width = (fit * 100) + '%';
-        document.getElementById('m-bar').style.width = (Math.random() * 100) + '%';
+const fv=document.getElementById('f-val'); if(fv) fv.innerText = fit.toFixed(3);
+const fb=document.getElementById('f-bar'); if(fb) fb.style.width = (fit * 100) + '%';
+const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random() * 100) + '%';
     },
 
     buildUI() {
@@ -309,16 +309,16 @@ const app = {
     },
 
     updateWarp(val) {
-        document.getElementById('energy-fill').style.height = val + '%';
-        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
-        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
+const ef=document.getElementById('energy-fill'); if(ef) ef.style.height = val + '%';
+const wt=document.getElementById('warp-thumb'); if(wt) wt.style.bottom = `calc(${val}% - 17px)`;
+const wtx=document.getElementById('warp-txt'); if(wtx) wtx.innerText = `WARP ${val * 3}x`;
         this.bbEvent("warp", { warp: parseFloat(val) });
     },
 
     applySteer(v, silent=false){
         const ang = Math.max(-180, Math.min(180, Number(v)||0));
-        document.getElementById('ang-val').innerText = ang + '°';
-        document.getElementById('core-window').style.transform = `rotate(${ang}deg)`;
+const av=document.getElementById('ang-val'); if(av) av.innerText = ang + '°';
+const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `rotate(${ang}deg)`;
         document.getElementById('steer-input-val').value = ang;
         // wheel sync
         const wheel = document.getElementById('wheel');
@@ -329,7 +329,7 @@ const app = {
     boost() {
         if(this.gaLevel < 1000) {
             this.gaLevel += 50;
-            document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
+const gr=document.getElementById('ga-rank'); if(gr) gr.innerText = `RANK: GA-${this.gaLevel}`;
             this.bbEvent("boost", { ga: this.gaLevel });
             this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
         }
@@ -338,9 +338,9 @@ const app = {
     autoHunt() {
         this.bbEvent("auto_hunt", {});
         this.speak("啟動 GA 自動打怪模式，績效演化中。");
-        const old = document.getElementById('wish-label').innerText;
-        document.getElementById('wish-label').innerText = "⚔️ KGEN 自動打怪中...";
-        setTimeout(() => document.getElementById('wish-label').innerText = old, 3000);
+const wl=document.getElementById('wish-label'); const old = wl ? wl.innerText : '';
+const wl2=document.getElementById('wish-label'); if(wl2) wl2.innerText = '⚔️ KGEN 自動打怪中...';
+setTimeout(() => { const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
     },
 
     async cam(mode) {
@@ -379,7 +379,7 @@ const app = {
         ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
         ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
         ctx.shadowBlur = 10; ctx.shadowColor = "#000";
-        ctx.fillText(document.getElementById('wish-label').innerText, 70, 930);
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 70, 930);
 
         this.bbEvent("capture", {});
 
@@ -388,9 +388,9 @@ const app = {
     },
 
     setWish() {
-        const m = prompt("大聖請開金口：", document.getElementById('wish-label').innerText);
-        if(m) document.getElementById('wish-label').innerText = m;
-        this.bbEvent("wish", { text: document.getElementById('wish-label').innerText });
+        const m = prompt("大聖請開金口：", (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''));
+if(m){ const wl=document.getElementById('wish-label'); if(wl) wl.innerText = m; }
+this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:'') });
     },
 
     toggleWheel(){
@@ -504,7 +504,7 @@ const app = {
     stopRecTimer(){
         clearInterval(this.tInt);
         clearInterval(this.drawInt);
-        document.getElementById('rec-ind').style.display = 'none';
+const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
     },
 
     syncExportCanvas(){
@@ -540,7 +540,7 @@ const app = {
 
         ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
         ctx.shadowBlur = 10; ctx.shadowColor = "#000";
-        ctx.fillText(document.getElementById('wish-label').innerText, 30, 690);
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 30, 690);
         ctx.shadowBlur = 0;
     },
 
@@ -788,7 +788,7 @@ const web3 = {
   },
 
   ui(){
-    document.getElementById("w3-uni").innerText = this.UNIVERSE ? this.UNIVERSE : "未設定（可先 Demo）";
+const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVERSE ? this.UNIVERSE : '未設定（可先 Demo）';
     (()=>{const el=document.getElementById("w3-mode"); if(el) el.innerText=this.demo ? "DEMO MODE" : "LIVE MODE";})();
   },
 
@@ -814,7 +814,7 @@ const web3 = {
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
-      document.getElementById("w3-addr").innerText = this.addr;
+const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
       this.ui();
       await this.refresh();
@@ -841,9 +841,9 @@ const web3 = {
     const b = this.demoState.pool;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
-    document.getElementById("w3-bal").innerText = `${b.toFixed(2)} KGEN (demo)`;
+const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
     (()=>{const el=document.getElementById("w3-prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
-    document.getElementById("w3-prog-bar").style.width = pct.toFixed(2) + "%";
+const w3b=document.getElementById('w3-prog-bar'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
   },
 
@@ -934,7 +934,7 @@ const web3 = {
         return;
       }
       if(!this.UNIVERSE || !this.provider){
-        document.getElementById("w3-bal").innerText = "--";
+const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
       const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
@@ -949,12 +949,12 @@ const web3 = {
       const t = parseFloat(ethers.utils.formatUnits(target, 18));
       const baseF = parseFloat(ethers.utils.formatUnits(base, 18));
 
-      document.getElementById("w3-bal").innerText = `${b.toFixed(4)} KGEN`;
+const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
       const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
 
       (()=>{const el=document.getElementById("w3-prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
 
-      document.getElementById("w3-prog-bar").style.width = pct.toFixed(2) + "%";
+const w3b2=document.getElementById('w3-prog-bar'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
       app.setProgress(pct/100);
     }catch(e){
       console.warn(e);
