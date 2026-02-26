@@ -383,4 +383,205 @@ const app = {
             durationSec,
             last: this.blackbox.last,
             stats: {
-                angle: this.bbStats(this.b
+                angle: this.bbStats(this.blackbox.samples, "angle"),
+                warp:  this.bbStats(this.blackbox.samples, "warp")
+            },
+            eventCounts: this.blackbox.counts,
+            timeline: this.blackbox.events,
+            samples: this.blackbox.samples
+        };
+
+        let json = JSON.stringify(payload, null, 2);
+        const hash = await this.bbHashSHA256(json);
+        payload.hashes = { sha256: hash };
+        json = JSON.stringify(payload, null, 2);
+
+        const blob = new Blob([json], { type:"application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `KGEN_GA_BLACKBOX_${this.blackbox.sessionId}.json`;
+        a.click();
+
+        try { localStorage.setItem(`KGEN_BLACKBOX_${this.blackbox.sessionId}`, json); } catch(e) {}
+    },
+
+    startRecTimer(){
+        this.recStartTs = performance.now();
+        const recInd = document.getElementById('rec-ind');
+        recInd.style.display = 'block';
+
+        this.tInt = setInterval(()=>{
+            const elapsed = performance.now() - this.recStartTs;
+            const sec = Math.floor(elapsed/1000);
+            const m = String(Math.floor(sec/60)).padStart(2,'0');
+            const s = String(sec%60).padStart(2,'0');
+            this.recMMSS = `${m}:${s}`;
+            recInd.innerText = `REC ${this.recMMSS}`;
+        }, 200);
+
+        this.drawInt = setInterval(()=>this.syncExportCanvas(), 33);
+    },
+    stopRecTimer(){
+        clearInterval(this.tInt);
+        clearInterval(this.drawInt);
+        document.getElementById('rec-ind').style.display = 'none';
+    },
+
+    syncExportCanvas(){
+        const cvs = document.getElementById('export-canvas'), ctx = cvs.getContext('2d');
+        cvs.width = 720; cvs.height = 720;
+
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+
+        if(this.isCam){
+            try{
+                if(this.camMode === 'user'){ ctx.translate(720,0); ctx.scale(-1,1); }
+                ctx.drawImage(v, 0, 0, 720, 720);
+                ctx.setTransform(1,0,0,1,0,0);
+            }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }else{
+            try{ ctx.drawImage(f, 0, 0, 720, 720); }
+            catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }
+
+        const angle = document.getElementById('steer-input-val').value;
+        const warp  = document.getElementById('warp-input-val').value;
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText("KGEN 16888 GA-BLACKBOX", 30, 50);
+
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
+        ctx.fillText(`ANGLE ${angle}°`, 30, 85);
+        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
+        ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
+
+        ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
+        ctx.fillText(`REC ${this.recMMSS || "00:00"}`, 30, 185);
+
+        ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText(document.getElementById('wish-label').innerText, 30, 690);
+        ctx.shadowBlur = 0;
+    },
+
+    async toggleRec(){
+        const btn = document.getElementById('rec-btn');
+
+        if (this.recorder && this.recorder.state === "recording") {
+            this.recorder.stop();
+            this.stopRecTimer();
+
+            clearInterval(this.bbSampleInt);
+            this.bbStop();
+            await this.bbExportJSON();
+
+            btn.innerText = "🔴 黑盒子錄影";
+            this.speak("錄影結束，黑盒子數據已封裝。");
+            return;
+        }
+
+        const stream = document.getElementById('export-canvas').captureStream(30);
+        if(!window.MediaRecorder){
+            alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
+            return;
+        }
+
+        let mime = "video/webm;codecs=vp9";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
+
+        this.recorder = new MediaRecorder(stream, { mimeType: mime });
+        this.chunks = [];
+
+        this.recorder.ondataavailable = e => { if(e.data && e.data.size) this.chunks.push(e.data); };
+        this.recorder.onstop = () => {
+            const blob = new Blob(this.chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_GA_LOG.webm'; a.click();
+        };
+
+        this.bbStart();
+        this.bbSample();
+        this.bbSampleInt = setInterval(()=>this.bbSample(), 1000);
+
+        this.startRecTimer();
+        this.syncExportCanvas();
+        this.recorder.start();
+
+        btn.innerText = "⏹️ 停止黑盒子";
+        this.speak("黑盒子錄影開始，記錄演化數據。");
+    },
+
+    bindWheel(){
+        const wheel = document.getElementById('wheel');
+        if(!wheel) return;
+
+        const getAngleFromPointer = (clientX, clientY) => {
+            const rect = wheel.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = clientX - cx;
+            const dy = clientY - cy;
+            let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+            deg = deg + 90;
+            if(deg > 180) deg -= 360;
+            return Math.max(-180, Math.min(180, deg));
+        };
+
+        let dragging = false;
+        const onDown = (x,y)=>{ dragging=true; this.applySteer(getAngleFromPointer(x,y)); };
+        const onMove = (x,y)=>{ if(!dragging) return; this.applySteer(getAngleFromPointer(x,y)); };
+        const onUp = ()=>{ dragging=false; };
+
+        wheel.addEventListener('mousedown', (e)=>{ e.preventDefault(); onDown(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e)=>onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', onUp);
+
+        wheel.addEventListener('touchstart', (e)=>{ e.preventDefault(); const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:false});
+        window.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; if(!t) return; onMove(t.clientX, t.clientY); }, {passive:true});
+        window.addEventListener('touchend', onUp, {passive:true});
+    },
+
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        rd.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
+        sc.add(pts); cam.position.z = 50;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            const w = document.getElementById('warp-input-val').value / 40;
+            if(w > 0) {
+                const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
+                const p = pts.geometry.attributes.position.array;
+                for(let i=0; i<p.length; i+=3) {
+                    p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                    if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
+                    if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+                }
+                pts.geometry.attributes.position.needsUpdate = true;
+            }
+            rd.render(sc, cam);
+        };
+        anim();
+        this._rd = rd; this._cam = cam;
+    },
+
+    onResize(){
+        if(!this._rd || !this._cam) return;
+        this._cam.aspect = window.innerWidth / window.innerHeight;
+        this._cam.updateProjectionMatrix();
+        this._rd.setSize(window.innerWidth, window.innerHeight);
+    },
+
+    speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
+};
+window.onload = () => app.init();
+</script>
+</body>
+</html>
