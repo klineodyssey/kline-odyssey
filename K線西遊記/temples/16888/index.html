@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜廣寒宮對齊合約版｜v2.02</title>
+    <title>KGEN 16888｜自我演化金融生命體｜v2.09</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -136,7 +136,8 @@
 
 <div class="hud-top">
     <div class="brand-section">
-        <div class="brand-name">KGEN 16888 金融生命體</div>
+        <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
+        <div class="sys-st" id="ver-st">VERSION v2.09</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -193,7 +194,7 @@
 <!-- WEB3 控制面板（對齊合約） -->
 <div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.08</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
   </div>
 
@@ -237,6 +238,7 @@
 </div>
 
 <script>
+const APP_VERSION = "v2.09";
 const app = {
     isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
     stream: null, tInt: null, drawInt: null, bbSampleInt: null,
@@ -255,7 +257,8 @@ const app = {
     },
 
     tick() {
-        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${app.fmtNow()}`;
+        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+        const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION "+APP_VERSION+" | "+new Date().toLocaleTimeString();
         document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
         const fit = 0.9 + Math.random() * 0.1;
         document.getElementById('f-val').innerText = fit.toFixed(3);
@@ -348,7 +351,7 @@ const app = {
         } else ctx.drawImage(f, 0, 0, 1000, 1000);
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
-        ctx.fillText("KGEN 16888 金融生命體", 50, 80);
+        ctx.fillText("KGEN 16888 自我演化金融生命體", 50, 80);
         ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
         ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
         ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
@@ -714,396 +717,205 @@ window.onload = () => app.init();
 </script>
 
 <script>
-/* =====================  WEB3 合約對齊（Universe V5.1.0｜單合約） ===================== */
-/*
-  你已定稿：
-  ✅ 只下 KGEN_16888_Universe_V5_1_0.sol 一個合約
-  - Pregnancy Pool（共用獎池）＝ Universe 合約內的 KGEN 餘額
-  - 下單 UP/DOWN：placeOrder(side, amountIn)
-  - 許願 / 還願 / 點生肖投胎燈：ritualDeposit(amount, tag)
-  - 3+3 誓約：vow(roundId, amount, partner)；claimWeddingEscrow(roundId)
-*/
-
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
 const web3 = {
-  // ==== Fill later (you said 16888 address will be available after deploy) ====
-  ADDR: {
-    KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    UNIVERSE: "" // <== 16888 Universe 合約地址（部署後填）
-  },
+  provider: null,
+  signer: null,
+  addr: null,
 
-  // minimal ABIs (no extra contracts)
-  ABI_ERC20: [
+  // === 固定 Token（你給的） ===
+  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+
+  // === 先留空：你部署後填上 ===
+  UNIVERSE: "",      // KGEN_16888_PoolDuel_V3_2_0 address
+  : "",     // KGEN_16888_MoonTrust_V2_0_0 address
+
+  // === ABIs（最小可用） ===
+  abiERC20: [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
     "function balanceOf(address a) external view returns (uint256)",
     "function decimals() external view returns (uint8)"
   ],
-
-  ABI_UNIVERSE: [
+    abiUniverse: [
+    "function placeOrder(uint8 side, uint256 amountIn) external",
+    "function ritualDeposit(uint256 amount) external",
     "function poolBalance() external view returns (uint256)",
     "function targetPool() external view returns (uint256)",
     "function basePool() external view returns (uint256)",
-    "function placeOrder(uint8 side, uint256 amountIn) external",
-    "function ritualDeposit(uint256 amount, bytes32 tag) external",
-    "function roundCount() external view returns (uint256)",
-    "function vow(uint256 roundId, uint256 amount, address partner) external",
+    "function kgen() external view returns (address)",
+    "event OrderPlaced(address indexed user,uint8 indexed side,uint256 amountIn,uint256 feeTotal,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 indexed side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 distributable,uint256 toTreasury,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint256 keepPool,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)"
+  ],
+  abiMoonTrust: [
+    "function deposit(uint256 amount) external",
+    "function vow(uint256 roundId, address partner, uint256 amount) external",
     "function claimWeddingEscrow(uint256 roundId) external",
-    "event OrderResolved(uint256 indexed orderId, address indexed user, uint8 indexed side, uint8 outcome, bool win, uint256 amountIn, uint256 stake, uint256 payout, uint256 feeTotal)",
-    "event RitualDeposit(address indexed user, uint256 amount, bytes32 tag)",
-    "event RoundSettled(uint256 indexed roundId, address indexed playerA, address indexed playerB, uint256 distributable, uint256 toTreasury, uint256 toAInstant, uint256 toBInstant, uint256 escrowA, uint256 escrowB, uint256 keepPool, uint40 settledAt, uint40 vowDeadlineAt, uint40 loveDeadlineAt)",
-    "event Vowed(uint256 indexed roundId, address indexed from, address indexed to, uint256 amount)",
-    "event WeddingEscrowClaimed(uint256 indexed roundId, address indexed user, uint256 amount)"
+    "function poolBalance() external view returns (uint256)"
   ],
 
-  provider: null,
-  signer: null,
-  addr: null,
-  kgen: null,
-  uni: null,
-
-  // UI
-  el: {
-    addr: () => document.getElementById("w3-addr"),
-    uni:  () => document.getElementById("w3-uni"),
-    bal:  () => document.getElementById("w3-bal"),
-    prog: () => document.getElementById("w3-prog"),
-    pfill:()=> document.getElementById("prog-fill"),
-    ptxt: ()=> document.getElementById("prog-txt"),
-    amt:  () => document.getElementById("amt-in"),
-    round:()=> document.getElementById("mt-round"),
-    partner:()=> document.getElementById("mt-partner"),
-  },
-
-  _fmt(n){
-    try { return Number(n).toLocaleString(); } catch(e){ return String(n); }
-  },
-
-  _weiFromInput(){
-    const raw = (this.el.amt().value || "").trim();
-    if(!raw) throw new Error("請輸入金額");
-    // allow 0.1, 10, 1000
-    return ethers.utils.parseUnits(raw, 18);
-  },
-
-  _bytes32Tag(tag){
-    // bytes32 tag: keep short + deterministic
-    const t = (tag || "RITUAL").toString().slice(0, 31);
-    return ethers.utils.formatBytes32String(t);
-  },
-
-  _toast(msg){
-    try { app.speak(msg); } catch(e){}
-    console.log(msg);
+  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+    ui(){
+    document.getElementById("w3-uni").innerText = this.UNIVERSE ? this.UNIVERSE : "未設定";
   },
 
   async connect(){
     try{
-      if(!window.ethereum){ alert("請使用錢包瀏覽器（MetaMask/OKX/TrustWallet）開啟"); return; }
+      if(!window.ethereum){ alert("找不到錢包（請用 Chrome + MetaMask / OKX Wallet）"); return; }
       await window.ethereum.request({ method:"eth_requestAccounts" });
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
-      this.el.addr().innerText = this.addr.slice(0,6)+"..."+this.addr.slice(-4);
-
-      // contracts
-      this.kgen = new ethers.Contract(this.ADDR.KGEN, this.ABI_ERC20, this.signer);
-
-      // universe address may be blank before deploy
-      if(!this.ADDR.UNIVERSE){
-        this.el.uni().innerText = "（待填地址）";
-        this._toast("已連線錢包。提醒：Universe 16888 合約地址尚未填入。");
-      }else{
-        this.uni = new ethers.Contract(this.ADDR.UNIVERSE, this.ABI_UNIVERSE, this.signer);
-        this.el.uni().innerText = this.ADDR.UNIVERSE.slice(0,6)+"..."+this.ADDR.UNIVERSE.slice(-4);
-        await this.refresh();
-        this.watchEvents();
-        this._toast("已連線錢包。Universe 合約已就位。");
-      }
-
-      // auto refresh on account / chain change
-      window.ethereum.on?.("accountsChanged", ()=>location.reload());
-      window.ethereum.on?.("chainChanged", ()=>location.reload());
+      document.getElementById("w3-addr").innerText = this.addr;
+      this.ui();
+      await this.refresh();
+      await this.bindEvents();
+      app.speak("錢包已連線。合約對齊模式啟動。");
     }catch(e){
       console.error(e);
-      alert(e?.message || "connect fail");
+      alert("錢包連線失敗");
     }
   },
 
-  async refresh(){
-    if(!this.uni) return;
-    const [balWei, targetWei, baseWei] = await Promise.all([
-      this.uni.poolBalance(),
-      this.uni.targetPool(),
-      this.uni.basePool()
-    ]);
-
-    const bal = Number(ethers.utils.formatUnits(balWei, 18));
-    const target = Number(ethers.utils.formatUnits(targetWei, 18));
-    const base = Number(ethers.utils.formatUnits(baseWei, 18));
-
-    this.el.bal().innerText = `${this._fmt(bal.toFixed(4))} KGEN`;
-    this.el.prog().innerText = `基底 ${base}｜達標 ${target}`;
-
-    const pct = (target>0) ? Math.min(100, Math.max(0, (bal/target)*100)) : 0;
-    this.el.pfill().style.width = pct.toFixed(2)+"%";
-    this.el.ptxt().innerText = pct.toFixed(1)+"%";
+  parseAmt(){
+    const v = (document.getElementById("amt-in").value || "").trim();
+    if(!v) throw new Error("請輸入金額");
+    // KGEN 是 18 decimals（依你現有 Token 習慣）
+    return ethers.utils.parseUnits(v, 18);
   },
 
   async approve(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
-      if(!this.uni) { alert("Universe 地址未填，無法 Approve"); return; }
-      const amountWei = this._weiFromInput();
-      const tx = await this.kgen.approve(this.ADDR.UNIVERSE, amountWei);
-      this._toast("Approve 已送出，等待鏈上確認。");
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, amt);
+      app.speak("Approve 已送出。");
       await tx.wait();
-      this._toast("Approve 成功。");
+      app.speak("Approve 完成。");
     }catch(e){
       console.error(e);
-      alert(e?.reason || e?.message || "approve fail");
+      alert(e.message || "Approve 失敗");
     }
   },
 
-  // side: 0=UP 1=DOWN
-  async place(side){
-    try{
-      if(!this.uni) { alert("Universe 地址未填，無法下單"); return; }
-      const amountWei = this._weiFromInput();
-      const tx = await this.uni.placeOrder(side, amountWei);
-      this._toast(side===0 ? "下單 UP 已送出。" : "下單 DOWN 已送出。");
-      await tx.wait();
-      await this.refresh();
-    }catch(e){
-      console.error(e);
-      alert(e?.reason || e?.message || "placeOrder fail");
-    }
-  },
-
-  // 你定稿：許願/還願/點燈 全部入池（Pregnancy Pool）
   async seed(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
-      if(!this.uni) { alert("Universe 地址未填，無法入池"); return; }
-      const amountWei = this._weiFromInput();
-
-      // tag selector (simple): if user typed #wish/#thanks/#lamp in input, map it
-      const raw = (this.el.amt().value || "").toString();
-      let tag = "RITUAL";
-      if(/wish/i.test(raw)) tag = "WISH";
-      if(/thanks/i.test(raw)) tag = "THANKS";
-      if(/lamp/i.test(raw) || /生肖/i.test(raw) || /投胎/i.test(raw)) tag = "ZODIAC_LAMP";
-
-      const tx = await this.uni.ritualDeposit(amountWei, this._bytes32Tag(tag));
-      this._toast("入池動作已送出。");
+      const amt = this.parseAmt();
+      const pd = this.cUNI();
+      const tx = await pd.seed(amt); // 入池（許願/還願/點燈共用）
+      app.speak("點燈已入池。");
       await tx.wait();
       await this.refresh();
+      app.speak("入池成功。");
     }catch(e){
       console.error(e);
-      alert(e?.reason || e?.message || "ritualDeposit fail");
+      alert(e.message || "入池失敗");
     }
   },
 
-  // 3+3 誓約：表態轉 1~2 KGEN 給對方（你已選 B：1~2）
-  async vow(){
+  async place(side){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
-      if(!this.uni) { alert("Universe 地址未填"); return; }
-      const rid = Number((this.el.round().value || "").trim());
-      if(!rid || rid<1) throw new Error("請填 roundId");
-      const partner = (this.el.partner().value || "").trim();
-      if(!ethers.utils.isAddress(partner)) throw new Error("對方地址格式錯誤");
-
-      // fixed to 1 KGEN by your latest rule
-      const amtWei = ethers.utils.parseUnits("1", 18);
-      const tx = await this.uni.vow(rid, amtWei, partner);
-      this._toast("表態已送出（1 KGEN）。");
+      const amt = this.parseAmt();
+      const pd = this.cUNI();
+      const tx = await pd.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
       await tx.wait();
       await this.refresh();
+      app.speak("本次對賭已結算。");
     }catch(e){
       console.error(e);
-      alert(e?.reason || e?.message || "vow fail");
+      alert(e.message || "下單失敗");
+    }
+  },
+
+  async vow(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
+    try{
+      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
+      const partner = (document.getElementById("mt-partner").value||"").trim();
+      if(!roundId) return alert("請填 roundId");
+      if(!ethers.utils.isAddress(partner)) return alert("對方地址格式錯誤");
+      // 固定儀式：1~2 KGEN（你選 B）
+      const amt = ethers.utils.parseUnits("1",18); // 預設 1（你要 1~2 的話可改 UI 再選）
+      const mt = this.cMT();
+      const tx = await mt.vow(roundId, partner, amt);
+      app.speak("表態轉帳已送出。");
+      await tx.wait();
+      app.speak("表態完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "表態失敗");
     }
   },
 
   async claimWedding(){
+    if(!this.signer) return alert("請先連結錢包");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
     try{
-      if(!this.uni) { alert("Universe 地址未填"); return; }
-      const rid = Number((this.el.round().value || "").trim());
-      if(!rid || rid<1) throw new Error("請填 roundId");
-      const tx = await this.uni.claimWeddingEscrow(rid);
-      this._toast("領紅包托管已送出。");
+      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
+      if(!roundId) return alert("請填 roundId");
+      const mt = this.cMT();
+      const tx = await mt.claimWeddingEscrow(roundId);
+      app.speak("領紅包托管已送出。");
       await tx.wait();
-      await this.refresh();
+      app.speak("紅包已領取。");
     }catch(e){
       console.error(e);
-      alert(e?.reason || e?.message || "claim fail");
+      alert(e.message || "領取失敗");
     }
   },
 
-  watchEvents(){
-    if(!this.uni) return;
-    // avoid double binding
-    if(this._watching) return;
-    this._watching = true;
-
-    const logBox = document.getElementById("event-log");
-    const pushLog = (s)=>{
-      if(!logBox) return;
-      const p = document.createElement("div");
-      p.style.padding="6px 0";
-      p.style.borderTop="1px solid rgba(255,255,255,.06)";
-      p.textContent = s;
-      logBox.prepend(p);
-    };
-
-    // order result
-    this.uni.on("OrderResolved", (orderId, user, side, outcome, win, amountIn, stake, payout, feeTotal)=>{
-      const u = (user||"").toLowerCase();
-      const me = (this.addr||"").toLowerCase();
-      const mine = (u && me && u===me);
-      const sideTxt = (Number(side)===0) ? "UP" : "DOWN";
-      const outTxt  = (Number(outcome)===0) ? "UP" : "DOWN";
-      const winTxt  = win ? "WIN" : "LOSE";
-      const pay = Number(ethers.utils.formatUnits(payout,18)).toFixed(4);
-      pushLog(`${mine?"你":"玩家"}｜Order#${orderId}｜${sideTxt} vs ${outTxt}｜${winTxt}｜payout ${pay} KGEN`);
-      if(mine){
-        app.ping(win ? "win" : "lose");
-        app.speak(win ? "恭喜，勝負已定，你贏了。" : "本輪失利，能量已回流入池。");
+  async refresh(){
+    try{
+      let balStr = "--";
+      let balNum = null;
+      if(this.UNIVERSE && this.provider){
+        const pdR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+        const b = await pdR.poolBalance();
+        balNum = parseFloat(ethers.utils.formatUnits(b, 18));
+        balStr = (Number.isFinite(balNum) ? balNum.toFixed(4) : "--") + " KGEN";
       }
-      this.refresh().catch(()=>{});
-    });
+      document.getElementById("w3-bal").innerText = balStr;
+      try{
+        const b = parseFloat(ethers.utils.formatUnits(bal,18));
+        const t = target ? parseFloat(ethers.utils.formatUnits(target,18)) : 16888;
+        const baseF = base ? parseFloat(ethers.utils.formatUnits(base,18)) : 8888;
+        const prog = Math.max(0, Math.min(1, b/t));
+        document.getElementById("w3-prog").innerText = `${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})`;
+        app.setProgress(prog);
+      }catch(_){ }
 
-    this.uni.on("RitualDeposit", (user, amount, tag)=>{
-      const a = Number(ethers.utils.formatUnits(amount,18)).toFixed(4);
-      const t = ethers.utils.parseBytes32String(tag);
-      pushLog(`入池｜${user.slice(0,6)}...｜${a} KGEN｜${t}`);
-      this.refresh().catch(()=>{});
-    });
-
-    this.uni.on("RoundSettled", (roundId, a, b)=>{
-      pushLog(`下凡投胎｜Round#${roundId}｜A ${a.slice(0,6)}...｜B ${b.slice(0,6)}...`);
-      app.ping("round");
-      this.refresh().catch(()=>{});
-    });
-
-    this.uni.on("Vowed", (roundId, from, to, amount)=>{
-      const a = Number(ethers.utils.formatUnits(amount,18)).toFixed(4);
-      pushLog(`表態｜Round#${roundId}｜${from.slice(0,6)}... → ${to.slice(0,6)}...｜${a} KGEN`);
-      app.ping("vow");
-    });
-
-    this.uni.on("WeddingEscrowClaimed", (roundId, user, amount)=>{
-      const a = Number(ethers.utils.formatUnits(amount,18)).toFixed(4);
-      pushLog(`領托管｜Round#${roundId}｜${user.slice(0,6)}...｜${a} KGEN`);
-      app.ping("claim");
-      this.refresh().catch(()=>{});
-    });
+      // progress to 16888 (pure UI, not promise of payout)
+      const target = 16888;
+      let pct = 0;
+      if(Number.isFinite(balNum) && target>0){
+        pct = Math.max(0, Math.min(100, (balNum/target)*100));
+      }
+      const bar = document.getElementById("w3-prog-bar");
+      const txt = document.getElementById("w3-prog-txt");
+      if(bar) bar.style.width = pct.toFixed(2) + "%";
+      if(txt){
+        if(Number.isFinite(balNum)) txt.innerText = `${balNum.toFixed(2)} / ${target} (${pct.toFixed(2)}%)`;
+        else txt.innerText = "--";
+      }
+    }catch(e){
+      console.warn(e);
+    }
   }
 };
-
-/* =====================  語音導覽 / Q&A（手機優先） ===================== */
-const voiceQA = {
-  enabled: ("webkitSpeechRecognition" in window) || ("SpeechRecognition" in window),
-  rec: null,
-  init(){
-    const wrap = document.getElementById("voice-wrap");
-    if(!wrap) return;
-
-    if(!this.enabled){
-      wrap.querySelector("#voice-status").textContent = "（此瀏覽器不支援語音辨識）";
-      return;
-    }
-
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    this.rec = new SR();
-    this.rec.lang = "zh-TW";
-    this.rec.interimResults = false;
-    this.rec.maxAlternatives = 1;
-
-    this.rec.onresult = (e)=>{
-      const t = (e.results?.[0]?.[0]?.transcript || "").trim();
-      const input = document.getElementById("voice-input");
-      input.value = t;
-      // ✅ 你要求：轉文字後直接送出，不要確認
-      this.ask();
-    };
-
-    this.rec.onerror = (e)=>{
-      console.warn("speech err", e);
-      app.speak("語音辨識失敗，你也可以改用文字輸入。");
-    };
-  },
-
-  start(){
-    if(!this.rec) return;
-    app.ping("mic");
-    this.rec.start();
-    app.speak("請直接說出你的問題。");
-  },
-
-  ask(){
-    const input = document.getElementById("voice-input");
-    const q = (input.value || "").trim();
-    if(!q) return;
-
-    const a = this.answer(q);
-    const out = document.getElementById("voice-answer");
-    out.textContent = a;
-    app.speak(a);
-  },
-
-  answer(q){
-    const s = q.replace(/\s+/g,"");
-    if(s.includes("search") || s.includes("找不到") || s.includes("custom") || s.includes("加資產")){
-      return "錢包的 Search 會從清單資料庫找已收錄的代幣；新代幣通常要用 Custom 自行貼上合約地址。你的 K  G  E  N 合約地址貼在 Custom 就能加入。";
-    }
-    if(s.includes("怎麼下單") || s.includes("下單") || s.includes("up") || s.includes("down")){
-      return "玩法：先連結錢包，再輸入金額，先按 Approve，之後按下單 UP 或下單 DOWN。會真實轉帳到 Universe 合約並立刻結算。";
-    }
-    if(s.includes("許願") || s.includes("還願") || s.includes("點燈") || s.includes("生肖")){
-      return "許願、還願、點生肖投胎燈，都是『入池』：會把 K  G  E  N 轉入 Universe 共用獎池，讓池子變厚。";
-    }
-    if(s.includes("池") || s.includes("餘額") || s.includes("獎池")){
-      return "Pregnancy Pool 就是共用獎池：等 Universe 地址填好並連線錢包後，面板會顯示即時池餘額與達標進度。";
-    }
-    if(s.includes("事件") || s.includes("紀錄") || s.includes("發生什麼")){
-      return "我會在下方事件紀錄顯示：下單結果、入池、下凡投胎、表態與托管領取。連上合約後會自動監聽。";
-    }
-    if(s.includes("錢包") || s.includes("連線")){
-      return "請用錢包內建瀏覽器開啟本頁，再按『連結錢包』。如果還沒部署 Universe，先把 16888 合約地址填入再連。";
-    }
-    return "我聽到了。你可以問：怎麼下單、為何 search 找不到、怎麼加資產、池餘額、或事件紀錄。";
-  }
-};
-
-/* =====================  把語音 UI 塞進面板（不破壞原布局） ===================== */
-(function injectVoiceUI(){
-  const panel = document.getElementById("web3-panel");
-  if(!panel) return;
-
-  const box = document.createElement("div");
-  box.id = "voice-wrap";
-  box.style.marginTop = "10px";
-  box.style.borderTop = "1px solid rgba(255,255,255,.08)";
-  box.style.paddingTop = "10px";
-  box.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <div style="font-family:'Orbitron'; color:var(--gold); font-size:11px;">星球語音 · 玩法問答</div>
-      <div id="voice-status" style="color:#aaa; font-size:11px;"></div>
-    </div>
-    <div style="display:flex; gap:8px; margin-top:8px;">
-      <input id="voice-input" placeholder="文字輸入問題（或按麥克風）" style="flex:1; padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-      <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="voiceQA.start()">🎙️</button>
-      <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="voiceQA.ask()">送出</button>
-    </div>
-    <div id="voice-answer" style="margin-top:8px; font-size:12px; color:#ddd; line-height:1.5; padding:8px; border:1px solid rgba(255,255,255,.08); border-radius:8px; background:rgba(0,0,0,.35);">
-      你可以問：怎麼下單｜怎麼加資產（要用 Custom）｜池餘額｜事件紀錄
-    </div>
-    <div id="event-log" style="margin-top:10px; font-size:12px; color:#bbb; max-height:160px; overflow:auto; padding-right:6px;"></div>
-  `;
-  panel.appendChild(box);
-
-  // init voice after injection
-  setTimeout(()=>voiceQA.init(), 150);
-})();
-
 </script>
 
 
