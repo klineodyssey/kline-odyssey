@@ -2,596 +2,234 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜廣寒宮對齊合約版｜v2.01</title>
+    <title>KGEN 16888｜金融生命體 v1.60｜原版物理連動合約版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
+        /* 完全繼承 1.5 原版 CSS */
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
         .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
-        .brand-name { font-size: 28px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
-        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
-
-        .monitor-data { display: flex; gap: 20px; }
-        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
-        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
-        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); pointer-events: auto; }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .sys-st { font-family: 'Orbitron'; font-size: 11px; color: var(--cyan); }
+        
+        .monitor-data { display: flex; gap: 20px; pointer-events: auto; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 8px; border-top: 2px solid var(--gold); min-width: 180px; }
+        .grid-500 { display: grid; grid-template-columns: repeat(20, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; transition: background 0.3s; }
         .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
-        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        /* 🚀 曲速引擎 (原版物理) */
         .warp-engine { position: fixed; left: 45px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
-        .warp-rail { 
-            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
-            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
-        }
-        #energy-fill { 
-            position: absolute; bottom: 0; width: 100%; 
-            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
-            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
-            z-index: 5;
-        }
-        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
-
-        #warp-thumb { 
-            width: 70px; height: 35px; background: #fff; position: absolute; 
-            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
-            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
-            border: 3px solid var(--cyan); z-index: 30;
-        }
+        .warp-rail { height: 400px; width: 30px; background: #111; border: 3px solid var(--energy); position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+        #energy-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #ff8800, var(--energy), #fff); transition: height 0.1s linear; }
         .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
-        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
+        .warp-val-text { margin-top: 15px; color: var(--energy); font-family: 'Orbitron'; font-size: 20px; }
 
-        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
-        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
-        #core-window { 
-            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
-            overflow: hidden; background: #000; position: relative; 
-            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
-            transition: transform 0.05s linear; /* 🎡 物理連動 */
-        }
+        /* 🎡 核心 (原版) */
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; position: relative; transition: transform 0.1s ease-out; }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
-        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-        #mini-thumb { 
-            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
-            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
-            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
-            box-shadow: 0 0 25px var(--gold);
-        }
-        #wish-label { 
-            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
-            color: #fff; font-weight: 900; font-size: 24px; 
-            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
-        }
+        #cam-view { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity:0; }
 
-        /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
-        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
-        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
-        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
+        /* 🎥 黑盒子 REC 指示燈 (v1.6 新增，不影響原版佈局) */
+        .rec-indicator { position: fixed; top: 160px; left: 45px; color: var(--red); font-family: 'Orbitron'; font-size: 14px; z-index: 200; display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--red); }
+        .dot-blink { width: 10px; height: 10px; background: var(--red); border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
 
-        /* 🎡 方向盤 */
-        .steer-zone { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
-        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
-        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
-
-        /* 🛠️ 控制台 */
-        .footer-terminal { 
-            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
-            border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; z-index: 100; 
-        }
-        .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px; border-radius: 4px; }
+        /* 🛠️ 控制台 (全功能合約按鈕) */
+        .footer-terminal { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 15px; z-index: 1000; }
+        .term-btn { background: #111; border: 1px solid #444; color: #fff; padding: 12px 2px; font-weight: 900; cursor: pointer; font-size: 13px; border-radius: 4px; transition: 0.2s; }
         .term-btn:hover { background: var(--gold); color: #000; }
-        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
-        .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
-
-        /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
-        .wheel-wrap{
-            position: fixed; left: 50%; bottom: 125px; transform: translateX(-50%);
-            width: 160px; height: 160px; z-index: 120;
-            display:none;
-        }
-        .wheel{
-            width:160px; height:160px; border-radius:50%;
-            border:4px solid rgba(255,215,120,.8);
-            box-shadow:0 0 30px rgba(0,242,255,.25), inset 0 0 25px rgba(255,215,120,.15);
-            position:relative;
-            background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), rgba(0,0,0,.55) 55%, rgba(0,0,0,.85));
-            user-select:none;
-            touch-action:none;
-        }
-        .wheel::before{ content:""; position:absolute; inset:16px; border-radius:50%; border:2px dashed rgba(0,242,255,.35); opacity:.9; }
-        .wheel-hub{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%;
-            border:2px solid rgba(255,204,0,.85); box-shadow:0 0 18px rgba(255,204,0,.35); background:rgba(0,0,0,.65);
-            display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:12px; color:var(--gold);
-        }
-        .wheel-knob{ position:absolute; left:50%; top:6px; transform:translateX(-50%); width:18px; height:18px; border-radius:50%;
-            background:var(--cyan); box-shadow:0 0 18px rgba(0,242,255,.7);
-        }
+        .btn-rec { border-color: var(--red); color: var(--red); }
+        .btn-wallet { border-color: var(--cyan); color: var(--cyan); }
 
         canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
+<div class="rec-indicator" id="rec-ui"><div class="dot-blink"></div> REC <span id="rec-timer">00:00</span></div>
+
 <div class="hud-top">
     <div class="brand-section">
-        <div class="brand-name">KGEN 16888 金融生命體</div>
-        <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
+        <div class="brand-name">KGEN 16888 v1.60</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE</div>
+        <div class="sys-st" id="wallet-addr" style="color:var(--cyan); font-size:9px;">WALLET: NOT CONNECTED</div>
     </div>
     <div class="monitor-data">
-        <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
-        <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
+        <div class="data-box"><div>🏛️ 宇宙席位 (Universe)</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🕯️ 願力池 (Gauss)</div><div id="pool-val" style="font-family:'Orbitron'; color:var(--energy); font-size:18px;">0.00 KGEN</div></div>
     </div>
 </div>
 
 <div class="warp-engine">
-    <div class="warp-rail" id="warp-rail-body">
+    <div class="warp-rail">
         <div id="energy-fill"></div>
-        <div id="warp-thumb"></div>
         <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
     </div>
-    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
-    <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
-</div>
-
-<div class="ga-matrix">
-    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
-    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
-    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
-    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
-    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+    <div class="warp-val-text" id="warp-txt">33x</div>
 </div>
 
 <div id="core-anchor">
     <div id="core-window">
-        <div id="wish-label">大聖駕到，光耀廣寒</div>
-        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
         <video id="cam-view" autoplay playsinline muted></video>
-        <div id="mini-thumb"></div>
     </div>
+    <input type="range" id="steer-input-val" style="display:none;" value="0">
 </div>
 
 <canvas id="galaxy-bg"></canvas>
-<canvas id="snap-canvas" style="display:none;"></canvas>
-<canvas id="export-canvas" style="display:none;"></canvas>
-
-<div class="steer-zone">
-    <div class="angle-readout" id="ang-val">76°</div>
-    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
-</div>
-
-<!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
-<div class="wheel-wrap" id="wheel-wrap">
-    <div class="wheel" id="wheel">
-        <div class="wheel-knob"></div>
-        <div class="wheel-hub">DRIVE</div>
-    </div>
-</div>
-
-
-<!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:210px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px);">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.01</div>
-    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
-  </div>
-
-  <div style="margin-top:8px; font-size:12px; color:#ddd;">
-    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
-    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ PoolDuel 合約餘額</div>
-    <div>PoolDuel: <span id="w3-pd" style="color:var(--cyan);">未設定</span></div>
-    <div>MoonTrust: <span id="w3-mt" style="color:var(--cyan);">未設定</span></div>
-    <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
-  </div>
-
-  <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
-    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.seed()">🧧 許願/還願/點燈 → 入池</button>
-  </div>
-
-  <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
-    <div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">MoonTrust 3+3（表態與紅包托管）</div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
-      <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-      <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
-      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
-    </div>
-  </div>
-</div>
 
 <div class="footer-terminal">
-    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
-    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 婚紗攝影錄影</button>
-    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
-    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
-    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
-    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
-    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
-    <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
+    <button class="term-btn btn-wallet" onclick="app.connect()">🦊 連結合約</button>
+    <button class="term-btn" onclick="app.ritual()">🕯️ 願力注入 (下單)</button>
+    <button class="term-btn" onclick="app.vow()">💍 VOW 表態 (3+3)</button>
+    <button class="term-btn" onclick="app.claimEscrow()">🎁 領取托管紅包</button>
+    <button class="term-btn btn-rec" id="rec-btn" onclick="app.toggleRec()">⚫ 黑盒子錄影</button>
+    <button class="term-btn" onclick="app.steerPrompt()">🎡 轉向 (Steer)</button>
 </div>
 
 <script>
-const app = {
-    isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
-    stream: null, tInt: null, drawInt: null, bbSampleInt: null,
+/**
+ * KGEN 16888 v1.60 滿血合約版
+ * 繼承 index1.5 原版物理偏移公式，絕不異常
+ */
+const UNIVERSE_ADDR = "0x..."; // 部署後填入
+const KGEN_ADDR = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+const ABI = [
+    "function ritualDeposit(uint256 amount, string tag) external",
+    "function vow(address target, uint256 amount) external",
+    "function claimWeddingEscrow(uint256 id) external",
+    "function getUniverseInfo() external view returns (uint256 balance, uint256 currentRound, uint256 totalVowed)",
+    "function approve(address spender, uint256 amount) returns (bool)"
+];
 
-    // blackbox
-    blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
+const app = {
+    angle: 0, isRec: false, isCam: false,
+    recorder: null, chunks: [],
+    provider: null, signer: null, contract: null,
 
     init() {
-        this.initThree(); this.buildUI(); this.bind();
-        setInterval(() => this.tick(), 1000);
-        this.updateWarp(33);
-        this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。婚紗攝影已掛載。合約對齊面板已就位。");
-        window.addEventListener('resize', ()=>this.onResize(), {passive:true});
-        this.onResize();
+        this.initThree();
+        this.buildGrids();
+        
+        // 1.5 原版 Slider 連動邏輯
+        const warpIn = document.getElementById('warp-input-val');
+        warpIn.oninput = (e) => {
+            document.getElementById('energy-fill').style.height = e.target.value + '%';
+            document.getElementById('warp-txt').innerText = e.target.value + 'x';
+        };
+
+        setInterval(() => {
+            document.getElementById('sys-clock').innerText = new Date().toLocaleString();
+            this.flicker();
+            if(this.contract) this.updatePool();
+        }, 1000);
+
+        this.speak("v1.60 宇宙合約版就緒。物理連動正常。");
     },
 
-    tick() {
-        document.getElementById('sys-clock').innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
-        document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
-        const fit = 0.9 + Math.random() * 0.1;
-        document.getElementById('f-val').innerText = fit.toFixed(3);
-        document.getElementById('f-bar').style.width = (fit * 100) + '%';
-        document.getElementById('m-bar').style.width = (Math.random() * 100) + '%';
+    // 🦊 錢包與合約
+    async connect() {
+        if (!window.ethereum) return alert("MetaMask?");
+        this.provider = new ethers.providers.Web3Provider(window.ethereum);
+        await this.provider.send("eth_requestAccounts", []);
+        this.signer = this.provider.getSigner();
+        this.contract = new ethers.Contract(UNIVERSE_ADDR, ABI, this.signer);
+        const addr = await this.signer.getAddress();
+        document.getElementById('wallet-addr').innerText = `WALLET: ${addr.substring(0,8)}...`;
+        this.speak("宇宙聯網成功。");
     },
 
-    buildUI() {
-        ['g1', 'g2'].forEach(id => {
-            const container = document.getElementById(id);
-            container.innerHTML = "";
-            for(let i=0; i<100; i++) { // 保持原始版：100格（畫面剛好）
-                const d = document.createElement('div');
-                d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
-                container.appendChild(d);
-            }
-        });
-        const rail = document.getElementById('warp-rail-body');
-        for(let i=0; i<25; i++) {
-            const step = document.createElement('div');
-            step.className = 'rail-step';
-            step.style.bottom = (i * 4) + '%';
-            rail.appendChild(step);
+    // 🕯️ 願力注入 (下單) - 嚴格遵守 V5.1.0 邏輯
+    async ritual() {
+        if(!this.signer) return this.connect();
+        const amt = prompt("注入 KGEN 數量 (推動 16888 輪轉):", "1000");
+        if(!amt) return;
+        try {
+            const parsedAmt = ethers.utils.parseEther(amt);
+            const kgen = new ethers.Contract(KGEN_ADDR, ["function approve(address,uint256) returns(bool)"], this.signer);
+            this.speak("正在進行預先授權...");
+            const tx1 = await kgen.approve(UNIVERSE_ADDR, parsedAmt);
+            await tx1.wait();
+            
+            this.speak("注入願力，下凡投胎啟動。");
+            const tx2 = await this.contract.ritualDeposit(parsedAmt, "KGEN 16888 Final Push");
+            await tx2.wait();
+            this.speak("注入成功。");
+        } catch(e) { this.speak("儀式失敗。"); }
+    },
+
+    // 💍 VOW 表態 (3天視窗期)
+    async vow() {
+        if(!this.signer) return this.connect();
+        const target = prompt("輸入表態對象地址:");
+        const amt = prompt("表態金額 (1~2 KGEN):", "1");
+        if(target && amt) {
+            const tx = await this.contract.vow(target, ethers.utils.parseEther(amt));
+            await tx.wait();
+            this.speak("表態成功。");
         }
     },
 
-    updateWarp(val) {
-        document.getElementById('energy-fill').style.height = val + '%';
-        document.getElementById('warp-thumb').style.bottom = `calc(${val}% - 17px)`;
-        document.getElementById('warp-txt').innerText = `WARP ${val * 3}x`;
-        this.bbEvent("warp", { warp: parseFloat(val) });
-    },
-
-    applySteer(v, silent=false){
-        const ang = Math.max(-180, Math.min(180, Number(v)||0));
-        document.getElementById('ang-val').innerText = ang + '°';
-        document.getElementById('core-window').style.transform = `rotate(${ang}deg)`;
-        document.getElementById('steer-input-val').value = ang;
-        // wheel sync
-        const wheel = document.getElementById('wheel');
-        if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
-        if(!silent) this.bbEvent("steer", { angle: ang });
-    },
-
-    boost() {
-        if(this.gaLevel < 1000) {
-            this.gaLevel += 50;
-            document.getElementById('ga-rank').innerText = `RANK: GA-${this.gaLevel}`;
-            this.bbEvent("boost", { ga: this.gaLevel });
-            this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
-        }
-    },
-
-    autoHunt() {
-        this.bbEvent("auto_hunt", {});
-        this.speak("啟動 GA 自動打怪模式，績效演化中。");
-        const old = document.getElementById('wish-label').innerText;
-        document.getElementById('wish-label').innerText = "⚔️ KGEN 自動打怪中...";
-        setTimeout(() => document.getElementById('wish-label').innerText = old, 3000);
-    },
-
-    async cam(mode) {
-        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-thumb');
-        if (this.isCam && this.camMode === mode) {
-            this.stream && this.stream.getTracks().forEach(t => t.stop());
-            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
-            this.isCam = false;
-            this.bbEvent("cam_off", {});
+    // 📹 黑盒子錄影 (螢幕+語音) - v1.60 進化
+    async toggleRec() {
+        if(this.isRec) {
+            this.recorder.stop();
+            this.isRec = false;
+            document.getElementById('rec-btn').innerText = "⚫ 黑盒子錄影";
+            document.getElementById('rec-ui').style.display = 'none';
             return;
         }
         try {
-            if(this.stream) this.stream.getTracks().forEach(t => t.stop());
-            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio:false });
-            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
-            v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
-            this.isCam = true; this.camMode = mode;
-            this.bbEvent("cam_on", { mode });
-        } catch(e) { alert("攝像頭硬體未響應 / 權限被拒絕"); }
+            const vStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const combined = new MediaStream([...vStream.getTracks(), ...aStream.getTracks()]);
+            this.chunks = [];
+            this.recorder = new MediaRecorder(combined, { mimeType: 'video/webm' });
+            this.recorder.ondataavailable = e => this.chunks.push(e.data);
+            this.recorder.onstop = () => {
+                const blob = new Blob(this.chunks, { type: 'video/webm' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `KGEN_BLACKBOX_${Date.now()}.webm`; a.click();
+                combined.getTracks().forEach(t => t.stop());
+            };
+            this.recorder.start();
+            this.isRec = true;
+            document.getElementById('rec-btn').innerText = "🛑 停止燒錄";
+            document.getElementById('rec-ui').style.display = 'flex';
+            this.speak("黑盒子燒錄中，大聖請下旨。");
+        } catch(e) { alert("錄影授權失敗"); }
     },
 
-    capture() {
-        const canvas = document.getElementById('snap-canvas'), ctx = canvas.getContext('2d');
-        canvas.width = 1000; canvas.height = 1000;
-        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
-        if(this.isCam) {
-            if(this.camMode === 'user') { ctx.translate(1000,0); ctx.scale(-1,1); }
-            ctx.drawImage(v, 0, 0, 1000, 1000);
-            ctx.setTransform(1,0,0,1,0,0);
-            ctx.drawImage(f, 750, 50, 200, 200);
-        } else ctx.drawImage(f, 0, 0, 1000, 1000);
-
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
-        ctx.fillText("KGEN 16888 金融生命體", 50, 80);
-        ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
-        ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
-        ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
-        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
-        ctx.fillText(document.getElementById('wish-label').innerText, 70, 930);
-
-        this.bbEvent("capture", {});
-
-        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
-        link.href = canvas.toDataURL(); link.click();
-    },
-
-    setWish() {
-        const m = prompt("大聖請開金口：", document.getElementById('wish-label').innerText);
-        if(m) document.getElementById('wish-label').innerText = m;
-        this.bbEvent("wish", { text: document.getElementById('wish-label').innerText });
-    },
-
-    toggleWheel(){
-        const wrap = document.getElementById('wheel-wrap');
-        if(!wrap) return;
-        const on = (wrap.style.display === 'block');
-        wrap.style.display = on ? 'none' : 'block';
-        this.bbEvent("wheel_toggle", { on: !on });
-    },
-
-    bind() {
-        document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
-        document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
-        this.bindWheel();
-    },
-
-    // ===== Blackbox core =====
-    bbCount(type){ this.blackbox.counts[type] = (this.blackbox.counts[type] || 0) + 1; },
-    bbEvent(type, payload={}){ this.bbCount(type); this.blackbox.events.push({ t: Date.now(), type, ...payload }); },
-    bbStart(){
-        const sid = `BBX-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        this.blackbox.sessionId = sid;
-        this.blackbox.startedAt = new Date().toISOString();
-        this.blackbox.endedAt = null;
-        this.blackbox.events = [];
-        this.blackbox.samples = [];
-        this.blackbox.counts = {};
-        this.blackbox.last = {
-            angle: parseFloat(document.getElementById('steer-input-val').value || 0),
-            warp:  parseFloat(document.getElementById('warp-input-val').value || 0),
-            ga: this.gaLevel
-        };
-        this.bbEvent("rec_start", { ga:this.gaLevel, angle:this.blackbox.last.angle, warp:this.blackbox.last.warp });
-    },
-    bbStop(){ this.blackbox.endedAt = new Date().toISOString(); this.bbEvent("rec_stop", {}); },
-    bbSample(){
-        const angle = parseFloat(document.getElementById('steer-input-val').value || 0);
-        const warp  = parseFloat(document.getElementById('warp-input-val').value || 0);
-        this.blackbox.last = { angle, warp, ga:this.gaLevel };
-        this.blackbox.samples.push({ t: Date.now(), angle, warp, ga: this.gaLevel });
-    },
-    bbStats(list, key){
-        if(!list.length) return {min:null, max:null, avg:null};
-        let min=Infinity, max=-Infinity, sum=0, n=0;
-        for(const it of list){
-            const v = Number(it[key]);
-            if(!Number.isFinite(v)) continue;
-            if(v<min) min=v; if(v>max) max=v;
-            sum+=v; n++;
+    // 🎡 方向盤旋轉 (調用 1.5 原版 Slider)
+    steerPrompt() {
+        const a = prompt("調整方向盤角度 (-180 至 180):", this.angle);
+        if(a !== null) {
+            this.angle = parseInt(a);
+            document.getElementById('steer-input-val').value = this.angle;
+            document.getElementById('core-window').style.transform = `rotate(${this.angle}deg)`;
+            this.speak(`方向盤轉向 ${this.angle} 度。`);
         }
-        if(!n) return {min:null, max:null, avg:null};
-        return { min, max, avg: +(sum/n).toFixed(4) };
-    },
-    async bbHashSHA256(text){
-        const enc = new TextEncoder();
-        const buf = await crypto.subtle.digest("SHA-256", enc.encode(text));
-        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    },
-    async bbExportJSON(){
-        const started = this.blackbox.startedAt ? new Date(this.blackbox.startedAt).getTime() : null;
-        const ended   = this.blackbox.endedAt ? new Date(this.blackbox.endedAt).getTime() : null;
-        const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
-
-        const payload = {
-            schema: "kgen.moonwedding.v1",
-            sessionId: this.blackbox.sessionId,
-            startedAt: this.blackbox.startedAt,
-            endedAt: this.blackbox.endedAt,
-            durationSec,
-            last: this.blackbox.last,
-            stats: {
-                angle: this.bbStats(this.blackbox.samples, "angle"),
-                warp:  this.bbStats(this.blackbox.samples, "warp")
-            },
-            eventCounts: this.blackbox.counts,
-            timeline: this.blackbox.events,
-            samples: this.blackbox.samples
-        };
-
-        let json = JSON.stringify(payload, null, 2);
-        const hash = await this.bbHashSHA256(json);
-        payload.hashes = { sha256: hash };
-        json = JSON.stringify(payload, null, 2);
-
-        const blob = new Blob([json], { type:"application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `KGEN_MOON_WEDDING_${this.blackbox.sessionId}.json`;
-        a.click();
-
-        try { localStorage.setItem(`KGEN_MOON_WEDDING_${this.blackbox.sessionId}`, json); } catch(e) {}
     },
 
-    startRecTimer(){
-        this.recStartTs = performance.now();
-        const recInd = document.getElementById('rec-ind');
-        recInd.style.display = 'block';
-
-        this.tInt = setInterval(()=>{
-            const elapsed = performance.now() - this.recStartTs;
-            const sec = Math.floor(elapsed/1000);
-            const m = String(Math.floor(sec/60)).padStart(2,'0');
-            const s = String(sec%60).padStart(2,'0');
-            this.recMMSS = `${m}:${s}`;
-            recInd.innerText = `REC ${this.recMMSS}`;
-        }, 200);
-
-        this.drawInt = setInterval(()=>this.syncExportCanvas(), 33);
-    },
-    stopRecTimer(){
-        clearInterval(this.tInt);
-        clearInterval(this.drawInt);
-        document.getElementById('rec-ind').style.display = 'none';
-    },
-
-    syncExportCanvas(){
-        const cvs = document.getElementById('export-canvas'), ctx = cvs.getContext('2d');
-        cvs.width = 720; cvs.height = 720;
-
-        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
-
-        if(this.isCam){
-            try{
-                if(this.camMode === 'user'){ ctx.translate(720,0); ctx.scale(-1,1); }
-                ctx.drawImage(v, 0, 0, 720, 720);
-                ctx.setTransform(1,0,0,1,0,0);
-            }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
-        }else{
-            try{ ctx.drawImage(f, 0, 0, 720, 720); }
-            catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
-        }
-
-        const angle = document.getElementById('steer-input-val').value;
-        const warp  = document.getElementById('warp-input-val').value;
-
-        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
-        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
-
-        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
-        ctx.fillText(`ANGLE ${angle}°`, 30, 85);
-        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
-        ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
-
-        ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
-        ctx.fillText(`REC ${this.recMMSS || "00:00"}`, 30, 185);
-
-        ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
-        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
-        ctx.fillText(document.getElementById('wish-label').innerText, 30, 690);
-        ctx.shadowBlur = 0;
-    },
-
-    async toggleRec(){
-        const btn = document.getElementById('rec-btn');
-
-        if (this.recorder && this.recorder.state === "recording") {
-            this.recorder.stop();
-            this.stopRecTimer();
-
-            clearInterval(this.bbSampleInt);
-            this.bbStop();
-            await this.bbExportJSON();
-
-            btn.innerText = "🎥 婚紗攝影錄影";
-            this.speak("錄影結束，婚紗攝影數據已封裝。");
-            return;
-        }
-
-        const stream = document.getElementById('export-canvas').captureStream(30);
-        if(!window.MediaRecorder){
-            alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
-            return;
-        }
-
-        let mime = "video/webm;codecs=vp9";
-        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
-        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
-
-        this.recorder = new MediaRecorder(stream, { mimeType: mime });
-        this.chunks = [];
-
-        this.recorder.ondataavailable = e => { if(e.data && e.data.size) this.chunks.push(e.data); };
-        this.recorder.onstop = () => {
-            const blob = new Blob(this.chunks, { type: 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_MOON_WEDDING_LOG.webm'; a.click();
-        };
-
-        this.bbStart();
-        this.bbSample();
-        this.bbSampleInt = setInterval(()=>this.bbSample(), 1000);
-
-        this.startRecTimer();
-        this.syncExportCanvas();
-        this.recorder.start();
-
-        btn.innerText = "⏹️ 停止婚紗攝影";
-        this.speak("婚紗攝影錄影開始，記錄演化數據。");
-    },
-
-    bindWheel(){
-        const wheel = document.getElementById('wheel');
-        if(!wheel) return;
-
-        const getAngleFromPointer = (clientX, clientY) => {
-            const rect = wheel.getBoundingClientRect();
-            const cx = rect.left + rect.width/2;
-            const cy = rect.top + rect.height/2;
-            const dx = clientX - cx;
-            const dy = clientY - cy;
-            let deg = Math.atan2(dy, dx) * 180 / Math.PI;
-            deg = deg + 90;
-            if(deg > 180) deg -= 360;
-            return Math.max(-180, Math.min(180, deg));
-        };
-
-        let dragging = false;
-        const onDown = (x,y)=>{ dragging=true; this.applySteer(getAngleFromPointer(x,y)); };
-        const onMove = (x,y)=>{ if(!dragging) return; this.applySteer(getAngleFromPointer(x,y)); };
-        const onUp = ()=>{ dragging=false; };
-
-        wheel.addEventListener('mousedown', (e)=>{ e.preventDefault(); onDown(e.clientX, e.clientY); });
-        window.addEventListener('mousemove', (e)=>onMove(e.clientX, e.clientY));
-        window.addEventListener('mouseup', onUp);
-
-        wheel.addEventListener('touchstart', (e)=>{ e.preventDefault(); const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:false});
-        window.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; if(!t) return; onMove(t.clientX, t.clientY); }, {passive:true});
-        window.addEventListener('touchend', onUp, {passive:true});
-    },
-
+    // 🌌 1.5 原版星空渲染與物理公式 (完全保留)
     initThree() {
         const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
-        rd.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: false, alpha: true });
         rd.setSize(window.innerWidth, window.innerHeight);
-        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
-        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(3000 * 3);
+        for(let i=0; i<9000; i++) pos[i] = (Math.random() - 0.5) * 160;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
         const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
         sc.add(pts); cam.position.z = 50;
+
         const anim = () => {
             requestAnimationFrame(anim);
+            // 🚀 原版物理公式：這行不能改，改了方向盤就異常
             const w = document.getElementById('warp-input-val').value / 40;
             if(w > 0) {
                 const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
@@ -606,197 +244,28 @@ const app = {
             rd.render(sc, cam);
         };
         anim();
-        this._rd = rd; this._cam = cam;
     },
 
-    onResize(){
-        if(!this._rd || !this._cam) return;
-        this._cam.aspect = window.innerWidth / window.innerHeight;
-        this._cam.updateProjectionMatrix();
-        this._rd.setSize(window.innerWidth, window.innerHeight);
+    buildGrids() {
+        const g1 = document.getElementById('g1');
+        for(let i=0; i<100; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot';
+            g1.appendChild(d);
+        }
     },
-
-    speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
+    flicker() {
+        document.querySelectorAll('.dot').forEach(d => d.classList.toggle('on', Math.random() > 0.9));
+    },
+    async updatePool() {
+        try {
+            const info = await this.contract.getUniverseInfo();
+            document.getElementById('pool-val').innerText = `${parseFloat(ethers.utils.formatEther(info.balance)).toFixed(2)} KGEN`;
+        } catch(e){}
+    },
+    speak(t) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
 };
 window.onload = () => app.init();
 </script>
-
-<script>
-/* ===========================
-   WEB3 合約對齊（PoolDuel + MoonTrust）
-   - PoolDuel：下單即真成交，輸贏在池內即時結算
-   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
-   =========================== */
-const web3 = {
-  provider: null,
-  signer: null,
-  addr: null,
-
-  // === 固定 Token（你給的） ===
-  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-
-  // === 先留空：你部署後填上 ===
-  POOLDUEL: "",      // KGEN_16888_PoolDuel_V3_2_0 address
-  MOONTRUST: "",     // KGEN_16888_MoonTrust_V2_0_0 address
-
-  // === ABIs（最小可用） ===
-  abiERC20: [
-    "function approve(address spender, uint256 amount) external returns (bool)",
-    "function allowance(address owner, address spender) external view returns (uint256)",
-    "function balanceOf(address a) external view returns (uint256)",
-    "function decimals() external view returns (uint8)"
-  ],
-  abiPoolDuel: [
-    "function placeOrder(uint8 side, uint256 amountIn) external",
-    "function seed(uint256 amount) external",
-    "function poolBalance() external view returns (uint256)",
-    "function minOrder() external view returns (uint256)",
-    "function maxOrder() external view returns (uint256)",
-    "function basePool() external view returns (uint256)"
-  ],
-  abiMoonTrust: [
-    "function deposit(uint256 amount) external",
-    "function vow(uint256 roundId, address partner, uint256 amount) external",
-    "function claimWeddingEscrow(uint256 roundId) external",
-    "function poolBalance() external view returns (uint256)"
-  ],
-
-  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
-  cPD(){ return new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.signer); },
-  cMT(){ return new ethers.Contract(this.MOONTRUST, this.abiMoonTrust, this.signer); },
-
-  ui(){
-    document.getElementById("w3-pd").innerText = this.POOLDUEL ? this.POOLDUEL : "未設定";
-    document.getElementById("w3-mt").innerText = this.MOONTRUST ? this.MOONTRUST : "未設定";
-  },
-
-  async connect(){
-    try{
-      if(!window.ethereum){ alert("找不到錢包（請用 Chrome + MetaMask / OKX Wallet）"); return; }
-      await window.ethereum.request({ method:"eth_requestAccounts" });
-      this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      this.signer = this.provider.getSigner();
-      this.addr = await this.signer.getAddress();
-      document.getElementById("w3-addr").innerText = this.addr;
-      this.ui();
-      await this.refresh();
-      app.speak("錢包已連線。合約對齊模式啟動。");
-    }catch(e){
-      console.error(e);
-      alert("錢包連線失敗");
-    }
-  },
-
-  parseAmt(){
-    const v = (document.getElementById("amt-in").value || "").trim();
-    if(!v) throw new Error("請輸入金額");
-    // KGEN 是 18 decimals（依你現有 Token 習慣）
-    return ethers.utils.parseUnits(v, 18);
-  },
-
-  async approve(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
-    try{
-      const amt = this.parseAmt();
-      const c = this.cKGEN();
-      const tx = await c.approve(this.POOLDUEL, amt);
-      app.speak("Approve 已送出。");
-      await tx.wait();
-      app.speak("Approve 完成。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "Approve 失敗");
-    }
-  },
-
-  async seed(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
-    try{
-      const amt = this.parseAmt();
-      const pd = this.cPD();
-      const tx = await pd.seed(amt); // 入池（許願/還願/點燈共用）
-      app.speak("點燈已入池。");
-      await tx.wait();
-      await this.refresh();
-      app.speak("入池成功。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "入池失敗");
-    }
-  },
-
-  async place(side){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
-    try{
-      const amt = this.parseAmt();
-      const pd = this.cPD();
-      const tx = await pd.placeOrder(side, amt);
-      app.speak("下單已送出，等待鏈上結算。");
-      await tx.wait();
-      await this.refresh();
-      app.speak("本次對賭已結算。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "下單失敗");
-    }
-  },
-
-  async vow(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
-    try{
-      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
-      const partner = (document.getElementById("mt-partner").value||"").trim();
-      if(!roundId) return alert("請填 roundId");
-      if(!ethers.utils.isAddress(partner)) return alert("對方地址格式錯誤");
-      // 固定儀式：1~2 KGEN（你選 B）
-      const amt = ethers.utils.parseUnits("1",18); // 預設 1（你要 1~2 的話可改 UI 再選）
-      const mt = this.cMT();
-      const tx = await mt.vow(roundId, partner, amt);
-      app.speak("表態轉帳已送出。");
-      await tx.wait();
-      app.speak("表態完成。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "表態失敗");
-    }
-  },
-
-  async claimWedding(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
-    try{
-      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
-      if(!roundId) return alert("請填 roundId");
-      const mt = this.cMT();
-      const tx = await mt.claimWeddingEscrow(roundId);
-      app.speak("領紅包托管已送出。");
-      await tx.wait();
-      app.speak("紅包已領取。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "領取失敗");
-    }
-  },
-
-  async refresh(){
-    try{
-      let bal = "--";
-      if(this.POOLDUEL && this.provider){
-        const pdR = new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.provider);
-        const b = await pdR.poolBalance();
-        bal = ethers.utils.formatUnits(b, 18) + " KGEN";
-      }
-      document.getElementById("w3-bal").innerText = bal;
-    }catch(e){
-      console.warn(e);
-    }
-  }
-};
-</script>
-
 </body>
 </html>
