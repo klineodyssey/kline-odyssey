@@ -226,6 +226,19 @@
 </div>
 
 <div id="toast-box" style="position:fixed; left:50%; bottom:88px; transform:translateX(-50%); background:rgba(0,0,0,.8); color:#fff; padding:10px 12px; border:1px solid rgba(255,215,120,.5); border-radius:999px; font-size:12px; opacity:0; transition:opacity .25s; z-index:999;"></div>
+
+    <!-- 🎙️ Voice Transcript (auto-send) -->
+    <div id="voice-transcript"
+         style="position:fixed; left:50%; bottom:310px; transform:translateX(-50%);
+                max-width:92vw; width:720px; padding:10px 14px; z-index:220;
+                background:rgba(0,0,0,.70); border:1px solid rgba(255,215,120,.55);
+                border-radius:10px; font-family:'Noto Sans TC',sans-serif; font-weight:900;
+                color:#fff; text-shadow:0 0 12px rgba(0,242,255,.35);
+                display:none;">
+      <span style="color:#00f2ff; font-family:'Orbitron'; font-size:12px; letter-spacing:1px;">VOICE</span>
+      <span id="voice-transcript-text" style="margin-left:10px; font-size:14px;"></span>
+    </div>
+
 <div class="footer-terminal">
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
     <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
@@ -378,7 +391,7 @@ const app = {
         setInterval(() => this.tick(), 1000);
         this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
+        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。。提示：要把 KGEN 加到錢包，請用 Custom 自訂匯入合約地址，Search 常常找不到");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -839,6 +852,29 @@ const app = {
     },
 speak(m) { try{ const mute=document.getElementById('voice-mute'); if(mute && mute.checked) return; window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(m); u.lang='zh-TW'; window.speechSynthesis.speak(u); }catch(e){} }
 };
+    ,
+    // ===== Voice Transcript (auto-send, no confirm) =====
+    showVoiceTranscript(text){
+        const box = document.getElementById('voice-transcript');
+        const t = document.getElementById('voice-transcript-text');
+        if(!box || !t) return;
+        t.textContent = (text || '').trim();
+        if(!t.textContent){ box.style.display='none'; return; }
+        box.style.display = 'block';
+        clearTimeout(this._vtTimer);
+        this._vtTimer = setTimeout(()=>{ box.style.display='none'; }, 3500);
+    },
+    autoSendVoice(text){
+        const q = (text||'').trim();
+        if(!q) return;
+        // Reuse existing QA handler if present
+        if(typeof this.askOracle === 'function'){ this.askOracle(q); return; }
+        if(typeof this.qaAsk === 'function'){ this.qaAsk(q); return; }
+        // fallback
+        const wl = document.getElementById('wish-label');
+        if(wl) wl.textContent = q;
+    }
+
 
 // ====== helpers (safe even before contract deployed) ======
 app.toast = function(msg){
