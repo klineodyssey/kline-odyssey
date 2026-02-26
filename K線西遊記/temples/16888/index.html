@@ -14,7 +14,7 @@
         /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
         .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
         .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
-        .brand-name { font-size: 28px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); white-space: nowrap; }
         .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
 
         .monitor-data { display: flex; gap: 20px; }
@@ -130,6 +130,9 @@
             background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
         .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
         .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
+    
+        @media (max-width: 520px){ .brand-name{font-size:22px;} .hud-top{top:10px;} }
+        @media (max-width: 420px){ .brand-name{font-size:20px;} }
     </style>
 </head>
 <body>
@@ -212,7 +215,7 @@
     <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
     <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
     <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
-    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.seed()">🧧 許願/還願/點燈 → 入池</button>
+    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
   </div>
 
   <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
@@ -238,7 +241,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.09";
+const APP_VERSION = "v2.10";
 const app = {
     isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
     stream: null, tInt: null, drawInt: null, bbSampleInt: null,
@@ -249,6 +252,7 @@ const app = {
     init() {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
+        web3.load();
         this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
@@ -726,73 +730,130 @@ const web3 = {
   provider: null,
   signer: null,
   addr: null,
+  demo: true,
 
-  // === 固定 Token（你給的） ===
+  // 固定 Token（你給的）
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
-  // === 先留空：你部署後填上 ===
-  UNIVERSE: "",      // KGEN_16888_PoolDuel_V3_2_0 address
-  : "",     // KGEN_16888_MoonTrust_V2_0_0 address
+  // 你部署後填上（會自動記到 localStorage）
+  UNIVERSE: "", // KGEN_16888_Universe_V5_1_0
 
-  // === ABIs（最小可用） ===
+  // 最小 ABI（對齊 Universe V5.1.0：入池 + 下單 + 查詢 + 事件）
   abiERC20: [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
     "function balanceOf(address a) external view returns (uint256)",
     "function decimals() external view returns (uint8)"
   ],
-    abiUniverse: [
-    "function placeOrder(uint8 side, uint256 amountIn) external",
+  abiUniverse: [
     "function ritualDeposit(uint256 amount) external",
+    "function placeOrder(uint8 side, uint256 amountIn) external",
     "function poolBalance() external view returns (uint256)",
     "function targetPool() external view returns (uint256)",
     "function basePool() external view returns (uint256)",
-    "function kgen() external view returns (address)",
     "event OrderPlaced(address indexed user,uint8 indexed side,uint256 amountIn,uint256 feeTotal,uint256 stake)",
     "event OrderResolved(address indexed user,uint8 indexed side,uint8 outcome,bool win,uint256 payout)",
     "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 distributable,uint256 toTreasury,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint256 keepPool,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)"
   ],
-  abiMoonTrust: [
-    "function deposit(uint256 amount) external",
-    "function vow(uint256 roundId, address partner, uint256 amount) external",
-    "function claimWeddingEscrow(uint256 roundId) external",
-    "function poolBalance() external view returns (uint256)"
-  ],
 
+  // ===== helpers =====
   cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
   cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
-    ui(){
-    document.getElementById("w3-uni").innerText = this.UNIVERSE ? this.UNIVERSE : "未設定";
+
+  load(){
+    try{
+      const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
+      if(u && ethers.utils.isAddress(u)) this.UNIVERSE = u;
+    }catch(_){}
+    this.ui();
+  },
+
+  ui(){
+    document.getElementById("w3-uni").innerText = this.UNIVERSE ? this.UNIVERSE : "未設定（可先 Demo）";
+    document.getElementById("w3-mode").innerText = this.demo ? "DEMO MODE" : "LIVE MODE";
+  },
+
+  setUniverseAddr(){
+    const v = (document.getElementById("uni-addr-input").value || "").trim();
+    if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
+    this.UNIVERSE = v;
+    try{ localStorage.setItem("KGEN_16888_UNIVERSE_ADDR", v); }catch(_){}
+    this.ui();
+    this.refresh();
+    app.speak("Universe 合約地址已設定。");
   },
 
   async connect(){
     try{
-      if(!window.ethereum){ alert("找不到錢包（請用 Chrome + MetaMask / OKX Wallet）"); return; }
+      if(!window.ethereum){
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
+        return;
+      }
       await window.ethereum.request({ method:"eth_requestAccounts" });
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
       document.getElementById("w3-addr").innerText = this.addr;
+      this.demo = false;
       this.ui();
       await this.refresh();
       await this.bindEvents();
-      app.speak("錢包已連線。合約對齊模式啟動。");
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
       console.error(e);
-      alert("錢包連線失敗");
+      this.demo = true;
+      this.ui();
+      alert("錢包連線失敗，已切回 Demo 模式");
     }
   },
 
   parseAmt(){
     const v = (document.getElementById("amt-in").value || "").trim();
     if(!v) throw new Error("請輸入金額");
-    // KGEN 是 18 decimals（依你現有 Token 習慣）
+    if(!/^\d+(\.\d+)?$/.test(v)) throw new Error("金額格式錯誤");
     return ethers.utils.parseUnits(v, 18);
   },
 
+  // ===== DEMO (no wallet) =====
+  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoRefresh(){
+    const b = this.demoState.pool;
+    const t = this.demoState.target;
+    const pct = Math.max(0, Math.min(100, (b/t)*100));
+    document.getElementById("w3-bal").innerText = `${b.toFixed(2)} KGEN (demo)`;
+    document.getElementById("w3-prog-txt").innerText = `${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;
+    document.getElementById("w3-prog-bar").style.width = pct.toFixed(2) + "%";
+    app.setProgress(pct/100);
+  },
+
+  demoDeposit(amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    this.demoState.pool += a;
+    this.demoRefresh();
+    app.logEvent(`DEMO 入池 +${a.toFixed(2)} KGEN`);
+  },
+
+  demoOrder(side, amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    // 簡化：直接 50/50
+    const win = Math.random() < 0.5;
+    const payout = win ? a*2 : 0;
+    if(win){
+      // pool pay profit portion only in demo
+      this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    }else{
+      this.demoState.pool += a;
+    }
+    this.demoRefresh();
+    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜${win?"WIN":"LOSE"}｜payout ${payout.toFixed(2)}`);
+  },
+
+  // ===== LIVE =====
   async approve(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
+    if(this.demo) return alert("Demo 模式不需要 Approve");
+    if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
     try{
       const amt = this.parseAmt();
       const c = this.cKGEN();
@@ -806,13 +867,17 @@ const web3 = {
     }
   },
 
-  async seed(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
+  async ritualDeposit(){
     try{
       const amt = this.parseAmt();
-      const pd = this.cUNI();
-      const tx = await pd.seed(amt); // 入池（許願/還願/點燈共用）
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.ritualDeposit(amt);
       app.speak("點燈已入池。");
       await tx.wait();
       await this.refresh();
@@ -824,12 +889,15 @@ const web3 = {
   },
 
   async place(side){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
       const amt = this.parseAmt();
-      const pd = this.cUNI();
-      const tx = await pd.placeOrder(side, amt);
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
       app.speak("下單已送出，等待鏈上結算。");
       await tx.wait();
       await this.refresh();
@@ -840,77 +908,62 @@ const web3 = {
     }
   },
 
-  async vow(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.) return alert("MoonTrust 合約地址未設定");
-    try{
-      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
-      const partner = (document.getElementById("mt-partner").value||"").trim();
-      if(!roundId) return alert("請填 roundId");
-      if(!ethers.utils.isAddress(partner)) return alert("對方地址格式錯誤");
-      // 固定儀式：1~2 KGEN（你選 B）
-      const amt = ethers.utils.parseUnits("1",18); // 預設 1（你要 1~2 的話可改 UI 再選）
-      const mt = this.cMT();
-      const tx = await mt.vow(roundId, partner, amt);
-      app.speak("表態轉帳已送出。");
-      await tx.wait();
-      app.speak("表態完成。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "表態失敗");
-    }
-  },
-
-  async claimWedding(){
-    if(!this.signer) return alert("請先連結錢包");
-    if(!this.) return alert("MoonTrust 合約地址未設定");
-    try{
-      const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
-      if(!roundId) return alert("請填 roundId");
-      const mt = this.cMT();
-      const tx = await mt.claimWeddingEscrow(roundId);
-      app.speak("領紅包托管已送出。");
-      await tx.wait();
-      app.speak("紅包已領取。");
-    }catch(e){
-      console.error(e);
-      alert(e.message || "領取失敗");
-    }
-  },
-
   async refresh(){
     try{
-      let balStr = "--";
-      let balNum = null;
-      if(this.UNIVERSE && this.provider){
-        const pdR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
-        const b = await pdR.poolBalance();
-        balNum = parseFloat(ethers.utils.formatUnits(b, 18));
-        balStr = (Number.isFinite(balNum) ? balNum.toFixed(4) : "--") + " KGEN";
+      if(this.demo){
+        this.demoRefresh();
+        return;
       }
-      document.getElementById("w3-bal").innerText = balStr;
-      try{
-        const b = parseFloat(ethers.utils.formatUnits(bal,18));
-        const t = target ? parseFloat(ethers.utils.formatUnits(target,18)) : 16888;
-        const baseF = base ? parseFloat(ethers.utils.formatUnits(base,18)) : 8888;
-        const prog = Math.max(0, Math.min(1, b/t));
-        document.getElementById("w3-prog").innerText = `${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})`;
-        app.setProgress(prog);
-      }catch(_){ }
+      if(!this.UNIVERSE || !this.provider){
+        document.getElementById("w3-bal").innerText = "--";
+        return;
+      }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
-      // progress to 16888 (pure UI, not promise of payout)
-      const target = 16888;
-      let pct = 0;
-      if(Number.isFinite(balNum) && target>0){
-        pct = Math.max(0, Math.min(100, (balNum/target)*100));
-      }
-      const bar = document.getElementById("w3-prog-bar");
-      const txt = document.getElementById("w3-prog-txt");
-      if(bar) bar.style.width = pct.toFixed(2) + "%";
-      if(txt){
-        if(Number.isFinite(balNum)) txt.innerText = `${balNum.toFixed(2)} / ${target} (${pct.toFixed(2)}%)`;
-        else txt.innerText = "--";
-      }
+      const [bal, target, base] = await Promise.all([
+        uniR.poolBalance(),
+        uniR.targetPool(),
+        uniR.basePool()
+      ]);
+
+      const b = parseFloat(ethers.utils.formatUnits(bal, 18));
+      const t = parseFloat(ethers.utils.formatUnits(target, 18));
+      const baseF = parseFloat(ethers.utils.formatUnits(base, 18));
+
+      document.getElementById("w3-bal").innerText = `${b.toFixed(4)} KGEN`;
+      const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
+
+      document.getElementById("w3-prog-txt").innerText =
+        `${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;
+
+      document.getElementById("w3-prog-bar").style.width = pct.toFixed(2) + "%";
+      app.setProgress(pct/100);
+    }catch(e){
+      console.warn(e);
+    }
+  },
+
+  async bindEvents(){
+    try{
+      if(this.demo) return;
+      if(!this.UNIVERSE || !this.provider) return;
+
+      // prevent double bind
+      if(this._bound) return;
+      this._bound = true;
+
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
+        const p = parseFloat(ethers.utils.formatUnits(payout, 18));
+        app.logEvent(`鏈上結算｜${user.slice(0,6)}…｜${side==0?"漲":"跌"}｜${win?"WIN":"LOSE"}｜payout ${p.toFixed(4)} KGEN`);
+        this.refresh();
+      });
+
+      uniR.on("RoundSettled", (roundId, a, b, distributable) => {
+        app.logEvent(`下凡投胎 Round #${roundId.toString()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
+        this.refresh();
+      });
     }catch(e){
       console.warn(e);
     }
