@@ -115,6 +115,21 @@
         }
 
         canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    
+        /* NAV buttons */
+        .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
+            min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#111;
+            box-shadow:0 0 18px rgba(255,215,120,.18); }
+        .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+        .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
+        .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
+    
+        .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
+            background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
+        .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
+        .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
     </style>
 </head>
 <body>
@@ -178,16 +193,17 @@
 <!-- WEB3 控制面板（對齊合約） -->
 <div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.03</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
   </div>
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
-    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ PoolDuel 合約餘額</div>
-    <div>PoolDuel: <span id="w3-pd" style="color:var(--cyan);">未設定</span></div>
-    <div>MoonTrust: <span id="w3-mt" style="color:var(--cyan);">未設定</span></div>
+    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
+    <div>Universe V5.1.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
+    <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
+    <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
   </div>
 
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
@@ -616,7 +632,83 @@ const app = {
         this._rd.setSize(window.innerWidth, window.innerHeight);
     },
 
-    speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
+    
+    // ===== Audio / Voice (mobile needs user gesture) =====
+    audioOn:false, audioCtx:null, audioNodes:[],
+    enableAudio(){
+        try{
+            const btn = document.querySelector('.nav-audio');
+            if(this.audioOn){
+                this.audioOn=false;
+                btn && btn.classList.remove('on');
+                this._stopAudio();
+                return;
+            }
+            this.audioOn=true;
+            btn && btn.classList.add('on');
+
+            // WebAudio ambient pad
+            const AC = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = this.audioCtx || new AC();
+            this.audioCtx.resume && this.audioCtx.resume();
+
+            const ctx = this.audioCtx;
+            const master = ctx.createGain();
+            master.gain.value = 0.06;
+            master.connect(ctx.destination);
+
+            const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
+            const osc2 = ctx.createOscillator(); osc2.type="triangle"; osc2.frequency.value=329.63;
+            const lfo  = ctx.createOscillator(); lfo.type="sine"; lfo.frequency.value=0.08;
+            const lfoGain = ctx.createGain(); lfoGain.gain.value=18;
+
+            const filter = ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=700; filter.Q.value=0.8;
+            const gain = ctx.createGain(); gain.gain.value=0.0;
+
+            lfo.connect(lfoGain); lfoGain.connect(osc2.frequency);
+
+            osc1.connect(filter); osc2.connect(filter); filter.connect(gain); gain.connect(master);
+
+            // fade in
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0.0, now);
+            gain.gain.linearRampToValueAtTime(1.0, now + 1.2);
+
+            osc1.start(); osc2.start(); lfo.start();
+
+            this.audioNodes = [osc1,osc2,lfo,filter,gain,master];
+
+            // Voice guide (first time)
+            this.speak("廣寒宮已開啟。請先連接錢包，然後輸入金額，選擇上或下。點燈、許願、還願都會流入共用獎池。");
+        }catch(e){
+            alert("音效啟用失敗：請用 Chrome / Android，並允許音訊播放。");
+        }
+    },
+    _stopAudio(){
+        try{
+            if(!this.audioCtx) return;
+            const ctx=this.audioCtx;
+            const nodes=this.audioNodes||[];
+            // fade out quickly
+            const gain = nodes.find(n=>n && n.gain && n.gain.setValueAtTime);
+            if(gain){
+                const t=ctx.currentTime;
+                gain.gain.cancelScheduledValues(t);
+                gain.gain.setValueAtTime(gain.gain.value, t);
+                gain.gain.linearRampToValueAtTime(0.0, t+0.4);
+            }
+            setTimeout(()=>{
+                try{
+                    for(const n of nodes){
+                        if(n && typeof n.stop==="function") try{ n.stop(); }catch(_){}
+                        if(n && typeof n.disconnect==="function") try{ n.disconnect(); }catch(_){}
+                    }
+                    this.audioNodes=[];
+                }catch(_){}
+            }, 500);
+        }catch(_){}
+    },
+speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
 };
 window.onload = () => app.init();
 </script>
@@ -636,8 +728,8 @@ const web3 = {
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
   // === 先留空：你部署後填上 ===
-  POOLDUEL: "",      // KGEN_16888_PoolDuel_V3_2_0 address
-  MOONTRUST: "",     // KGEN_16888_MoonTrust_V2_0_0 address
+  UNIVERSE: "",      // KGEN_16888_PoolDuel_V3_2_0 address
+  : "",     // KGEN_16888_MoonTrust_V2_0_0 address
 
   // === ABIs（最小可用） ===
   abiERC20: [
@@ -646,13 +738,16 @@ const web3 = {
     "function balanceOf(address a) external view returns (uint256)",
     "function decimals() external view returns (uint8)"
   ],
-  abiPoolDuel: [
+    abiUniverse: [
     "function placeOrder(uint8 side, uint256 amountIn) external",
-    "function seed(uint256 amount) external",
+    "function ritualDeposit(uint256 amount) external",
     "function poolBalance() external view returns (uint256)",
-    "function minOrder() external view returns (uint256)",
-    "function maxOrder() external view returns (uint256)",
-    "function basePool() external view returns (uint256)"
+    "function targetPool() external view returns (uint256)",
+    "function basePool() external view returns (uint256)",
+    "function kgen() external view returns (address)",
+    "event OrderPlaced(address indexed user,uint8 indexed side,uint256 amountIn,uint256 feeTotal,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 indexed side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 distributable,uint256 toTreasury,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint256 keepPool,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)"
   ],
   abiMoonTrust: [
     "function deposit(uint256 amount) external",
@@ -662,12 +757,9 @@ const web3 = {
   ],
 
   cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
-  cPD(){ return new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.signer); },
-  cMT(){ return new ethers.Contract(this.MOONTRUST, this.abiMoonTrust, this.signer); },
-
-  ui(){
-    document.getElementById("w3-pd").innerText = this.POOLDUEL ? this.POOLDUEL : "未設定";
-    document.getElementById("w3-mt").innerText = this.MOONTRUST ? this.MOONTRUST : "未設定";
+  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+    ui(){
+    document.getElementById("w3-uni").innerText = this.UNIVERSE ? this.UNIVERSE : "未設定";
   },
 
   async connect(){
@@ -680,6 +772,7 @@ const web3 = {
       document.getElementById("w3-addr").innerText = this.addr;
       this.ui();
       await this.refresh();
+      await this.bindEvents();
       app.speak("錢包已連線。合約對齊模式啟動。");
     }catch(e){
       console.error(e);
@@ -696,11 +789,11 @@ const web3 = {
 
   async approve(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
       const amt = this.parseAmt();
       const c = this.cKGEN();
-      const tx = await c.approve(this.POOLDUEL, amt);
+      const tx = await c.approve(this.UNIVERSE, amt);
       app.speak("Approve 已送出。");
       await tx.wait();
       app.speak("Approve 完成。");
@@ -712,10 +805,10 @@ const web3 = {
 
   async seed(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
       const amt = this.parseAmt();
-      const pd = this.cPD();
+      const pd = this.cUNI();
       const tx = await pd.seed(amt); // 入池（許願/還願/點燈共用）
       app.speak("點燈已入池。");
       await tx.wait();
@@ -729,10 +822,10 @@ const web3 = {
 
   async place(side){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.POOLDUEL) return alert("PoolDuel 合約地址未設定");
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
       const amt = this.parseAmt();
-      const pd = this.cPD();
+      const pd = this.cUNI();
       const tx = await pd.placeOrder(side, amt);
       app.speak("下單已送出，等待鏈上結算。");
       await tx.wait();
@@ -746,7 +839,7 @@ const web3 = {
 
   async vow(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
     try{
       const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
       const partner = (document.getElementById("mt-partner").value||"").trim();
@@ -767,7 +860,7 @@ const web3 = {
 
   async claimWedding(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
     try{
       const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
       if(!roundId) return alert("請填 roundId");
@@ -786,13 +879,21 @@ const web3 = {
     try{
       let balStr = "--";
       let balNum = null;
-      if(this.POOLDUEL && this.provider){
-        const pdR = new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.provider);
+      if(this.UNIVERSE && this.provider){
+        const pdR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
         const b = await pdR.poolBalance();
         balNum = parseFloat(ethers.utils.formatUnits(b, 18));
         balStr = (Number.isFinite(balNum) ? balNum.toFixed(4) : "--") + " KGEN";
       }
       document.getElementById("w3-bal").innerText = balStr;
+      try{
+        const b = parseFloat(ethers.utils.formatUnits(bal,18));
+        const t = target ? parseFloat(ethers.utils.formatUnits(target,18)) : 16888;
+        const baseF = base ? parseFloat(ethers.utils.formatUnits(base,18)) : 8888;
+        const prog = Math.max(0, Math.min(1, b/t));
+        document.getElementById("w3-prog").innerText = `${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})`;
+        app.setProgress(prog);
+      }catch(_){ }
 
       // progress to 16888 (pure UI, not promise of payout)
       const target = 16888;
@@ -816,43 +917,10 @@ const web3 = {
 
 
 <!-- === Universe Navigation Buttons V2.04 === -->
-<div id="universe-nav" style="
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 9999;
-">
-    <a href="https://github.com/klineodyssey/kline-odyssey/K線西遊記/index.html" target="_blank"
-       style="
-        padding: 10px 14px;
-        background: linear-gradient(135deg,#ffcc33,#ff9900);
-        color:#000;
-        font-weight:bold;
-        border-radius:8px;
-        text-decoration:none;
-        text-align:center;
-        box-shadow:0 0 12px rgba(255,200,0,0.6);
-       ">
-       返回 &gt; K線西遊記｜銀河宇宙入口
-    </a>
-
-    <a href="https://github.com/klineodyssey/kline-odyssey/README.md" target="_blank"
-       style="
-        padding: 10px 14px;
-        background: linear-gradient(135deg,#00e0ff,#0088ff);
-        color:#000;
-        font-weight:bold;
-        border-radius:8px;
-        text-decoration:none;
-        text-align:center;
-        box-shadow:0 0 12px rgba(0,200,255,0.6);
-       ">
-       官方宇宙官網入口
-    </a>
+<div id="universe-nav" style="position:fixed; right:18px; top:95px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
 </div>
-
 </body>
 </html>
