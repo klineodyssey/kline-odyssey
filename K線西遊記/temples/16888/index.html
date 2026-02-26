@@ -176,9 +176,9 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:270px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px);">
+<div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.01</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.03</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
   </div>
 
@@ -211,7 +211,7 @@
 
 <div class="footer-terminal">
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
-    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 婚紗攝影錄影</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
     <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
     <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
     <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
@@ -233,7 +233,7 @@ const app = {
         setInterval(() => this.tick(), 1000);
         this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。婚紗攝影已掛載。合約對齊面板已就位。");
+        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -513,8 +513,8 @@ const app = {
             this.bbStop();
             await this.bbExportJSON();
 
-            btn.innerText = "🎥 婚紗攝影錄影";
-            this.speak("錄影結束，婚紗攝影數據已封裝。");
+            btn.innerText = "🎥 廣寒宮誓約留影錄影";
+            this.speak("錄影結束，廣寒宮誓約留影數據已封裝。");
             return;
         }
 
@@ -546,8 +546,8 @@ const app = {
         this.syncExportCanvas();
         this.recorder.start();
 
-        btn.innerText = "⏹️ 停止婚紗攝影";
-        this.speak("婚紗攝影錄影開始，記錄演化數據。");
+        btn.innerText = "⏹️ 停止廣寒宮誓約留影";
+        this.speak("廣寒宮誓約留影錄影開始，記錄演化數據。");
     },
 
     bindWheel(){
@@ -784,13 +784,29 @@ const web3 = {
 
   async refresh(){
     try{
-      let bal = "--";
+      let balStr = "--";
+      let balNum = null;
       if(this.POOLDUEL && this.provider){
         const pdR = new ethers.Contract(this.POOLDUEL, this.abiPoolDuel, this.provider);
         const b = await pdR.poolBalance();
-        bal = ethers.utils.formatUnits(b, 18) + " KGEN";
+        balNum = parseFloat(ethers.utils.formatUnits(b, 18));
+        balStr = (Number.isFinite(balNum) ? balNum.toFixed(4) : "--") + " KGEN";
       }
-      document.getElementById("w3-bal").innerText = bal;
+      document.getElementById("w3-bal").innerText = balStr;
+
+      // progress to 16888 (pure UI, not promise of payout)
+      const target = 16888;
+      let pct = 0;
+      if(Number.isFinite(balNum) && target>0){
+        pct = Math.max(0, Math.min(100, (balNum/target)*100));
+      }
+      const bar = document.getElementById("w3-prog-bar");
+      const txt = document.getElementById("w3-prog-txt");
+      if(bar) bar.style.width = pct.toFixed(2) + "%";
+      if(txt){
+        if(Number.isFinite(balNum)) txt.innerText = `${balNum.toFixed(2)} / ${target} (${pct.toFixed(2)}%)`;
+        else txt.innerText = "--";
+      }
     }catch(e){
       console.warn(e);
     }
