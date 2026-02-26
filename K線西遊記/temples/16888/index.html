@@ -159,7 +159,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.12</div>
+        <div class="sys-st" id="ver-st">VERSION v2.11</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -734,8 +734,30 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
             }, 500);
         }catch(_){}
     },
-speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
+speak(m){
+      try{
+        if(!m) return;
+        const u = new SpeechSynthesisUtterance(String(m));
+        u.lang = 'zh-TW';
+        u.rate = 1.0;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    },
+
+    // Progress helper (fix: app.setProgress is not a function)
+    // ratio: 0..1
+    setProgress(ratio){
+      const el = document.getElementById('w3-prog');
+      if(!el) return;
+      let r = Number(ratio);
+      if(!Number.isFinite(r)) r = 0;
+      r = Math.max(0, Math.min(1, r));
+      const pct = Math.round(r * 1000) / 10; // 0.1%
+      el.innerText = `${pct}%`;
+    }
 };
+
 window.onload = () => app.init();
 </script>
 
