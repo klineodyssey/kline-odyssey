@@ -207,7 +207,7 @@
   </div>
 
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;" id="amountIn">
+    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
     <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
     <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
     <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
@@ -225,20 +225,6 @@
   </div>
 </div>
 
-<div id="toast-box" style="position:fixed; left:50%; bottom:88px; transform:translateX(-50%); background:rgba(0,0,0,.8); color:#fff; padding:10px 12px; border:1px solid rgba(255,215,120,.5); border-radius:999px; font-size:12px; opacity:0; transition:opacity .25s; z-index:999;"></div>
-
-    <!-- 🎙️ Voice Transcript (auto-send) -->
-    <div id="voice-transcript"
-         style="position:fixed; left:50%; bottom:310px; transform:translateX(-50%);
-                max-width:92vw; width:720px; padding:10px 14px; z-index:220;
-                background:rgba(0,0,0,.70); border:1px solid rgba(255,215,120,.55);
-                border-radius:10px; font-family:'Noto Sans TC',sans-serif; font-weight:900;
-                color:#fff; text-shadow:0 0 12px rgba(0,242,255,.35);
-                display:none;">
-      <span style="color:#00f2ff; font-family:'Orbitron'; font-size:12px; letter-spacing:1px;">VOICE</span>
-      <span id="voice-transcript-text" style="margin-left:10px; font-size:14px;"></span>
-    </div>
-
 <div class="footer-terminal">
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
     <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
@@ -248,39 +234,6 @@
     <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
     <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
     <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
-    <button class="term-btn" onclick="app.voice.open()">🎙️ 語音導覽 / 問答</button>
-</div>
-
-<!-- 🎙️ 語音導覽 / 問答 -->
-<div id="voice-modal" style="position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.65);">
-  <div style="width:min(520px,92vw); border:1px solid rgba(255,215,120,.55); background:rgba(20,20,0,.92); border-radius:14px; padding:14px; box-shadow:0 0 40px rgba(255,204,0,.18);">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-      <div style="font-family:'Orbitron'; color:var(--gold); font-size:14px;">GUANGHAN VOICE GUIDE</div>
-      <button class="term-btn" style="padding:10px 12px; font-size:12px;" onclick="app.voice.close()">✖ 關閉</button>
-    </div>
-    <div style="margin-top:10px; font-size:13px; line-height:1.5; color:#fff;">
-      <div style="opacity:.9;">你可以按下「播放導覽」聽完整故事與玩法，或按「語音提問」直接問。</div>
-      <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;">
-        <button class="term-btn" style="padding:12px; font-size:12px;" onclick="app.voice.intro()">▶ 播放導覽</button>
-        <button class="term-btn btn-rec" style="padding:12px; font-size:12px;" onclick="app.voice.ask()">🎤 語音提問</button>
-        <button class="term-btn" style="padding:12px; font-size:12px;" onclick="app.voice.quick('錢包為什麼顯示未連線')">錢包未連線？</button>
-        <button class="term-btn" style="padding:12px; font-size:12px;" onclick="app.voice.quick('怎麼Approve')">怎麼 Approve？</button>
-        <button class="term-btn" style="padding:12px; font-size:12px;" onclick="app.voice.quick('幣看不到怎麼辦')">幣看不到？</button>
-        <button class="term-btn" style="padding:12px; font-size:12px;" onclick="app.voice.quick('目前合約還沒下可以玩嗎')">還沒下合約？</button>
-      </div>
-    </div>
-    <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
-      <div style="font-family:'Orbitron'; font-size:11px; color:var(--cyan); letter-spacing:.6px;">SYSTEM MESSAGE</div>
-      <div id="voice-out" style="margin-top:6px; font-size:13px; line-height:1.55; min-height:88px; white-space:pre-wrap;"></div>
-      <div style="margin-top:10px; display:flex; gap:8px; align-items:center; justify-content:space-between;">
-        <label style="display:flex; gap:8px; align-items:center; font-size:12px; opacity:.9;">
-          <input type="checkbox" id="voice-mute" />
-          靜音（不唸出來）
-        </label>
-        <button class="term-btn" style="padding:10px 12px; font-size:12px;" onclick="app.voice.beep()">🔊 音效測試</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -291,107 +244,12 @@ const app = {
     // blackbox
     blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
 
-    // ===== Voice Guide =====
-    voice: {
-        open(){
-            const m = document.getElementById('voice-modal');
-            if(m) m.style.display = 'flex';
-            const out = document.getElementById('voice-out');
-            if(out && !out.innerText.trim()){
-                out.innerText = "廣寒宮已開。你可以先按「播放導覽」，或直接語音提問。";
-            }
-        },
-        close(){
-            const m = document.getElementById('voice-modal');
-            if(m) m.style.display = 'none';
-        },
-        _say(text){
-            const out = document.getElementById('voice-out');
-            if(out) out.innerText = text;
-            const mute = document.getElementById('voice-mute');
-            const isMute = mute && mute.checked;
-            if(!isMute) app.speak(text);
-        },
-        intro(){
-            const hasWallet = !!(window.ethereum);
-            const universe = (window.ADDR && window.ADDR.UNIVERSE) ? window.ADDR.UNIVERSE : "";
-            const demo = !universe || universe === "0x0000000000000000000000000000000000000000";
-            const lines = [];
-            lines.push("這裡是 K G E N 一六八八八｜廣寒宮。");
-            lines.push("你在宇宙裡扮演『投胎者』，每一次下單與點燈，都是把能量匯入同一座懷孕池。");
-            lines.push("玩法最簡：連線錢包 → Approve → 選 UP 或 DOWN → 下單。");
-            if(demo){
-                lines.push("目前合約地址尚未填入，畫面會以『演示模式』運作；等你部署後填地址，就會變成真成交。");
-            }else{
-                lines.push("合約已對齊，按下下單會真成交並進池。");
-            }
-            if(!hasWallet) lines.push("提醒：此瀏覽器偵測不到錢包外掛，請用手機 Chrome + MetaMask 內建瀏覽器打開。");
-            this._say(lines.join("\n"));
-        },
-        quick(q){ this._say(app.voice._answer(q)); },
-        _answer(q){
-            const s = String(q||"").toLowerCase();
-            if(s.includes("未連線") || s.includes("wallet")){
-                return "錢包顯示『未連線』通常有三種原因：\n1) 你不是用 MetaMask 內建瀏覽器開；\n2) 你還沒按『連結錢包』或瀏覽器擋了彈窗；\n3) 網路不是 B S C。\n做法：用 MetaMask 內建瀏覽器打開此頁，切到 B S C，然後按『連結錢包』。";
-            }
-            if(s.includes("approve")){
-                return "Approve 是授權合約可以從你錢包扣 K G E N 來下單/點燈。\n流程：先輸入金額 → 按 Approve → 錢包跳窗確認 → 等鏈上確認後，再按 UP/DOWN 下單。";
-            }
-            if(s.includes("幣") || s.includes("看不到")){
-                return "如果錢包裡看不到 K G E N：\n在 MetaMask 按『匯入代幣 / Import Tokens』，貼上 K G E N 合約地址：0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be。\n網路要在 B S C，才會顯示餘額。";
-            }
-            if(s.includes("合約") || s.includes("還沒下")){
-                return "合約還沒部署也能先玩：畫面會用演示模式跑流程（不會上鏈）。\n等你部署 Universe V5.1.0 後，把地址填進設定區，立刻變成真成交。";
-            }
-            if(s.includes("事件")){
-                return "事件包含：下單、點燈入池、許願/還願、以及（部署後）Round 結算事件。\n部署後我也能把事件監聽結果直接顯示在頁面下方的日誌區。";
-            }
-            return "你可以這樣問我：\n『錢包怎麼連？』\n『Approve 是什麼？』\n『幣看不到怎麼辦？』\n『還沒下合約可以玩嗎？』";
-        },
-        ask(){
-            // Web Speech API (Chrome/Android)
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(!SR){
-                const t = prompt("輸入你的問題：");
-                if(t) this._say(this._answer(t));
-                return;
-            }
-            const r = new SR();
-            r.lang = "zh-TW";
-            r.interimResults = false;
-            r.maxAlternatives = 1;
-            this._say("開始聽你說話，請講問題。");
-            r.onresult = (e)=>{
-                const t = e.results?.[0]?.[0]?.transcript || "";
-                if(!t) return this._say("我沒聽清楚，你可以再說一次，或用文字輸入。");
-                this._say("你問： " + t + "\n\n" + this._answer(t));
-            };
-            r.onerror = ()=> this._say("語音輸入失敗。你可以改用文字輸入。");
-            try{ r.start(); }catch(e){ this._say("語音輸入啟動失敗。"); }
-        },
-        beep(){
-            try{
-                const ctx = app._audioCtx || (app._audioCtx = new (window.AudioContext||window.webkitAudioContext)());
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.type="sine";
-                o.frequency.value=880;
-                g.gain.value=0.0001;
-                o.connect(g); g.connect(ctx.destination);
-                o.start();
-                g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime+0.02);
-                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.25);
-                o.stop(ctx.currentTime+0.26);
-            }catch(e){}
-        }
-    },
-
     init() {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
         this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。。提示：要把 KGEN 加到錢包，請用 Custom 自訂匯入合約地址，Search 常常找不到");
+        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -850,77 +708,8 @@ const app = {
             }, 500);
         }catch(_){}
     },
-speak(m) { try{ const mute=document.getElementById('voice-mute'); if(mute && mute.checked) return; window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(m); u.lang='zh-TW'; window.speechSynthesis.speak(u); }catch(e){} }
+speak(m) { try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(m)); }catch(e){} }
 };
-    ,
-    // ===== Voice Transcript (auto-send, no confirm) =====
-    showVoiceTranscript(text){
-        const box = document.getElementById('voice-transcript');
-        const t = document.getElementById('voice-transcript-text');
-        if(!box || !t) return;
-        t.textContent = (text || '').trim();
-        if(!t.textContent){ box.style.display='none'; return; }
-        box.style.display = 'block';
-        clearTimeout(this._vtTimer);
-        this._vtTimer = setTimeout(()=>{ box.style.display='none'; }, 3500);
-    },
-    autoSendVoice(text){
-        const q = (text||'').trim();
-        if(!q) return;
-        // Reuse existing QA handler if present
-        if(typeof this.askOracle === 'function'){ this.askOracle(q); return; }
-        if(typeof this.qaAsk === 'function'){ this.qaAsk(q); return; }
-        // fallback
-        const wl = document.getElementById('wish-label');
-        if(wl) wl.textContent = q;
-    }
-
-
-// ====== helpers (safe even before contract deployed) ======
-app.toast = function(msg){
-  try{
-    const el = document.getElementById('status-line') || document.getElementById('status') || null;
-    if(el) el.textContent = msg;
-  }catch(e){}
-  try{ console.log('[GUANGHAN]', msg); }catch(e){}
-  // keep it gentle on mobile: use a tiny overlay if available, else alert
-  try{
-    const box = document.getElementById('toast-box');
-    if(box){
-      box.textContent = msg;
-      box.style.opacity = '1';
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(()=>{ box.style.opacity='0'; }, 2400);
-      return;
-    }
-  }catch(e){}
-  // fallback
-  // alert(msg);
-};
-
-app.demoResolve = function(side){
-  // side: 0=UP,1=DOWN
-  const amountInEl = document.getElementById('amountIn');
-  const amountIn = amountInEl ? Number(amountInEl.value||0) : 0;
-  const min = 1;
-  const max = 1000;
-  if(!(amountIn>0)) return app.toast('請先輸入下單金額（演示模式）');
-  if(amountIn < min || amountIn > max) return app.toast('金額需在 1~1000（演示模式）');
-  const fee = amountIn * 0.05;
-  const stake = amountIn - fee;
-  const outcome = (Math.random() < 0.5) ? 0 : 1;
-  const win = (outcome === side);
-  const payout = win ? (stake * 2) : 0;
-  app.toast(win ? `演示：你贏了，回收 ${payout.toFixed(4)} KGEN（含本金）` : '演示：你輸了，金額留在池內');
-  try{
-    const log = document.getElementById('event-log');
-    if(log){
-      const line = `[DEMO] side=${side===0?'UP':'DOWN'} outcome=${outcome===0?'UP':'DOWN'} win=${win} amountIn=${amountIn} fee=${fee.toFixed(4)} stake=${stake.toFixed(4)} payout=${payout.toFixed(4)}`;
-      log.value = (line + "\n" + (log.value||"")).slice(0, 4000);
-    }
-  }catch(e){}
-};
-
 window.onload = () => app.init();
 </script>
 
@@ -940,7 +729,7 @@ const web3 = {
 
   // === 先留空：你部署後填上 ===
   UNIVERSE: "",      // KGEN_16888_PoolDuel_V3_2_0 address
-  MOONTRUST: "",     // KGEN_16888_MoonTrust_V2_0_0 address
+  : "",     // KGEN_16888_MoonTrust_V2_0_0 address
 
   // === ABIs（最小可用） ===
   abiERC20: [
@@ -1033,11 +822,7 @@ const web3 = {
 
   async place(side){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.UNIVERSE){
-      app.toast("演示模式：Universe 地址未填，尚未上鏈");
-      app.demoResolve(side);
-      return;
-    }
+    if(!this.UNIVERSE) return alert("PoolDuel 合約地址未設定");
     try{
       const amt = this.parseAmt();
       const pd = this.cUNI();
@@ -1054,7 +839,7 @@ const web3 = {
 
   async vow(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
     try{
       const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
       const partner = (document.getElementById("mt-partner").value||"").trim();
@@ -1075,7 +860,7 @@ const web3 = {
 
   async claimWedding(){
     if(!this.signer) return alert("請先連結錢包");
-    if(!this.MOONTRUST) return alert("MoonTrust 合約地址未設定");
+    if(!this.) return alert("MoonTrust 合約地址未設定");
     try{
       const roundId = parseInt((document.getElementById("mt-round").value||"").trim(),10);
       if(!roundId) return alert("請填 roundId");
