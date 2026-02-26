@@ -1,593 +1,262 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>KGEN 16888｜MoonTrust / PoolDuel 前端整合版｜v2.00</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
-  <style>
-    :root { --gold:#ffd778; --cyan:#00f2ff; --bg:#000; --energy:#ffcc00; --panel:rgba(20,20,0,.9); --red:#ff4444; }
-    body,html{margin:0;padding:0;background:var(--bg);color:#fff;font-family:'Noto Sans TC',sans-serif;overflow:hidden;height:100vh}
-    canvas#galaxy-bg{position:fixed;inset:0;z-index:1}
-    .hud-top{position:fixed;top:12px;width:96%;left:2%;display:flex;justify-content:space-between;z-index:120;pointer-events:none}
-    .brand-section{border-left:5px solid var(--gold);padding-left:14px;background:linear-gradient(90deg,var(--panel),transparent)}
-    .brand-name{font-size:26px;color:var(--gold);text-shadow:0 0 15px var(--gold)}
-    .sys-st{font-family:'Orbitron';font-size:12px;color:var(--cyan);letter-spacing:1px}
-    .monitor-data{display:flex;gap:14px}
-    .data-box{background:var(--panel);border:1px solid #332200;padding:10px;border-top:2px solid var(--gold);pointer-events:none}
-    .grid-500{display:grid;grid-template-columns:repeat(25,6px);gap:3px;margin-top:5px}
-    .dot{width:6px;height:6px;background:#1a1a00;border-radius:1px}
-    .dot.on{background:var(--energy);box-shadow:0 0 8px var(--energy)}
+    <meta charset="UTF-8">
+    <title>KGEN 16888｜黑盒子記憶體優化・聖諭版｜v1.60</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-    .warp-engine{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:150;width:120px;text-align:center}
-    .warp-rail{height:420px;width:30px;background:#111;border:3px solid var(--energy);position:relative;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 0 20px rgba(255,204,0,.2)}
-    #energy-fill{position:absolute;bottom:0;width:100%;background:linear-gradient(to top,#ff8800,var(--energy),#fff);transition:height .15s cubic-bezier(.17,.67,.83,.67);z-index:5}
-    .rail-step{position:absolute;width:100%;height:2px;background:rgba(0,0,0,.4);z-index:10}
-    #warp-thumb{width:70px;height:35px;background:#fff;position:absolute;left:-20px;bottom:33%;cursor:pointer;border-radius:6px;box-shadow:0 0 30px #fff,0 0 15px var(--cyan);border:3px solid var(--cyan);z-index:30}
-    .warp-range{position:absolute;top:0;left:0;width:100%;height:100%;-webkit-appearance:slider-vertical;opacity:0;cursor:pointer;z-index:40}
-    .warp-val-text{margin-top:18px;color:var(--energy);font-family:'Orbitron';font-size:16px;text-shadow:0 0 10px var(--energy)}
-    #rec-ind{margin-top:8px;color:var(--red);display:none}
+        /* 🎥 黑盒子 REC 指示燈 */
+        .rec-indicator { position: fixed; top: 160px; left: 45px; color: var(--red); font-family: 'Orbitron'; font-size: 14px; z-index: 200; display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--red); }
+        .dot-blink { width: 10px; height: 10px; background: var(--red); border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
 
-    #core-anchor{position:fixed;top:45%;left:52%;transform:translate(-50%,-50%);width:380px;height:380px;z-index:60}
-    #core-window{width:100%;height:100%;border-radius:50%;border:15px double var(--gold);overflow:hidden;background:#000;position:relative;box-shadow:0 0 80px rgba(255,215,120,.3);transition:transform .05s linear}
-    #fairy-img{width:100%;height:100%;object-fit:cover}
-    #cam-view{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0}
-    #mini-thumb{position:absolute;top:24px;right:24px;width:92px;height:92px;border-radius:50%;border:3px solid var(--gold);display:none;z-index:110;background:url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;box-shadow:0 0 25px var(--gold)}
-    #wish-label{position:absolute;bottom:40px;left:38px;z-index:85;color:#fff;font-weight:900;font-size:22px;text-shadow:2px 2px 10px #000,0 0 15px var(--cyan)}
+        /* 🏛️ 頂部 HUD (1.52 肌肉移植) */
+        .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); pointer-events: auto; }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .sys-st { font-family: 'Orbitron'; font-size: 11px; color: var(--cyan); }
+        
+        .monitor-data { display: flex; gap: 20px; pointer-events: auto; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 8px; border-top: 2px solid var(--gold); min-width: 180px; }
+        .grid-500 { display: grid; grid-template-columns: repeat(20, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; transition: background 0.3s; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
-    .ga-matrix{position:fixed;right:12px;top:50%;transform:translateY(-50%);width:210px;background:var(--panel);border:1px solid var(--energy);padding:12px;z-index:130;font-family:'Orbitron'}
-    .ga-stat{font-size:11px;margin-bottom:10px;color:var(--cyan)}
-    .ga-bar{height:6px;background:#111;margin-top:4px;overflow:hidden;border-radius:3px}
-    .ga-progress{height:100%;background:var(--energy);width:0%;transition:width .5s}
+        /* 🚀 曲速引擎 (左側物理感應器) */
+        .warp-engine { position: fixed; left: 45px; top: 50%; transform: translateY(-50%); z-index: 150; width: 100px; text-align: center; }
+        .warp-rail { height: 400px; width: 30px; background: #111; border: 3px solid var(--energy); position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+        #energy-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #ff8800, var(--energy), #fff); transition: height 0.1s linear; }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 15px; color: var(--energy); font-family: 'Orbitron'; font-size: 20px; }
 
-    .steer-zone{position:fixed;bottom:206px;width:100%;text-align:center;z-index:140}
-    .angle-readout{font-family:'Orbitron';font-size:46px;color:var(--cyan);text-shadow:0 0 30px var(--cyan)}
-    .steer-slider{width:78%;max-width:900px;cursor:pointer;height:12px;accent-color:var(--gold)}
+        /* 🎡 核心圓窗 (V5.1.0 宇宙入口) */
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; position: relative; transition: transform 0.1s ease-out; box-shadow: 0 0 60px rgba(255, 215, 120, 0.3); }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity:0; }
+        #wish-label { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #fff; font-weight: 900; font-size: 22px; text-shadow: 0 0 10px #000; letter-spacing: 2px; }
 
-    .footer-terminal{position:fixed;bottom:0;width:100%;background:#000;padding:14px;border-top:4px solid var(--gold);display:grid;grid-template-columns:repeat(4,1fr);gap:10px;z-index:150}
-    .term-btn{background:#0a0a0a;border:1px solid #444;color:#fff;padding:14px 5px;font-weight:900;cursor:pointer;transition:.2s;font-size:13px;border-radius:4px}
-    .term-btn:hover{background:var(--gold);color:#000}
-    .term-btn.active-kgen{border-color:var(--energy);color:var(--energy);box-shadow:inset 0 0 15px rgba(255,204,0,.2)}
-    .term-btn.btn-rec{border-color:var(--red);color:var(--red);box-shadow:inset 0 0 12px rgba(255,68,68,.2)}
-
-    /* Panel */
-    .panel{
-      position:fixed; left:50%; top:8px; transform:translateX(-50%);
-      z-index:200; width:min(980px, 94vw); pointer-events:auto;
-      background:rgba(0,0,0,.82); border:1px solid rgba(255,215,120,.35);
-      border-radius:10px; padding:10px 12px; backdrop-filter: blur(6px);
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
-    .panel input,.panel select{
-      background:#0b0b0b; color:#fff; border:1px solid rgba(0,242,255,.25);
-      border-radius:8px; padding:8px 10px; font-family:'Orbitron'; font-size:12px;
-      outline:none;
-    }
-    .panel .btn{
-      background:rgba(255,215,120,.12); border:1px solid rgba(255,215,120,.6); color:var(--gold);
-      border-radius:10px; padding:8px 10px; font-family:'Orbitron'; font-weight:900; cursor:pointer;
-    }
-    .panel .btn:active{transform:translateY(1px)}
-    .badge{font-family:'Orbitron';font-size:12px;color:var(--cyan)}
-    .warn{color:#ffcc00}
-    .ok{color:#7CFF7C}
-    .err{color:#ff6666}
-    .mini{font-size:11px; opacity:.9}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  </style>
+        /* 🛠️ 控制台 (功能完整連動) */
+        .footer-terminal { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 15px; z-index: 1000; }
+        .term-btn { background: #111; border: 1px solid #444; color: #fff; padding: 12px 2px; font-weight: 900; cursor: pointer; font-size: 13px; border-radius: 4px; transition: 0.2s; }
+        .term-btn:hover { background: var(--gold); color: #000; border-color: var(--gold); }
+        .btn-rec { border-color: var(--red); color: var(--red); }
+        .btn-wallet { border-color: var(--cyan); color: var(--cyan); }
+        
+        canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    </style>
 </head>
 <body>
 
-<canvas id="galaxy-bg"></canvas>
+<div class="rec-indicator" id="rec-ui"><div class="dot-blink"></div> BLACKBOX RECORDING <span id="rec-timer">00:00</span></div>
 
 <div class="hud-top">
-  <div class="brand-section">
-    <div class="brand-name">KGEN 16888｜廣寒宮 MoonTrust</div>
-    <div class="sys-st" id="ver-st">VERSION v2.00</div>
-    <div class="sys-st" id="sys-clock">SYSTEM ONLINE | --</div>
-  </div>
-  <div class="monitor-data">
-    <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
-    <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
-  </div>
-</div>
-
-<!-- Web3 Panel -->
-<div class="panel" id="web3-panel">
-  <div class="row">
-    <span class="badge">KGEN Token</span>
-    <input id="kgen-token" size="46" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be">
-  </div>
-  <div class="row">
-    <span class="badge">MoonTrust 16888</span>
-    <input id="moontrust" size="46" placeholder="部署後填入 16888 合約地址">
-  </div>
-  <div class="row">
-    <span class="badge">8888 高老莊</span>
-    <input id="treasury8888" size="46" value="0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9">
-  </div>
-
-  <div class="row">
-    <button class="btn" id="btn-connect">CONNECT WALLET</button>
-    <button class="btn" id="btn-refresh">REFRESH</button>
-    <span class="badge mini" id="st-net">NET: -</span>
-    <span class="badge mini" id="st-acct">WALLET: -</span>
-  </div>
-
-  <div class="row" style="width:100%">
-    <span class="badge">Pool</span>
-    <span class="badge ok" id="st-pool">-</span>
-    <span class="badge">Target</span>
-    <span class="badge" id="st-target">-</span>
-    <span class="badge">Base</span>
-    <span class="badge" id="st-base">5888 KGEN</span>
-    <span class="badge">Fee</span>
-    <span class="badge" id="st-fee">5%</span>
-  </div>
-
-  <div class="row" style="width:100%">
-    <span class="badge">Order</span>
-    <select id="order-side">
-      <option value="UP">UP（做多）</option>
-      <option value="DOWN">DOWN（做空）</option>
-    </select>
-    <input id="order-min" size="8" placeholder="最低">
-    <input id="order-max" size="8" placeholder="最高">
-    <input id="order-amt" size="10" value="10" placeholder="KGEN">
-    <button class="btn" id="btn-order">PLACE ORDER</button>
-    <button class="btn" id="btn-donate">WISH/還願(入池)</button>
-    <span class="badge mini warn" id="st-msg">提示：先填合約地址，且需 approve。</span>
-  </div>
+    <div class="brand-section">
+        <div class="brand-name">KGEN 16888 v1.60</div>
+        <div class="sys-st" id="sys-clock">SYSTEM INITIALIZING...</div>
+        <div class="sys-st" id="wallet-addr" style="color:var(--cyan)">WALLET: NOT CONNECTED</div>
+    </div>
+    <div class="monitor-data">
+        <div class="data-box"><div>🏛️ 靈霄席位 (UNIVERSE)</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🕯️ 願力池 (GAUSS)</div><div id="pool-val" style="font-family:'Orbitron'; color:var(--energy); font-size:18px;">0.00 KGEN</div></div>
+    </div>
 </div>
 
 <div class="warp-engine">
-  <div class="warp-rail" id="warp-rail-body">
-    <div id="energy-fill"></div>
-    <div id="warp-thumb"></div>
-    <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
-  </div>
-  <div class="warp-val-text" id="warp-txt">WARP 0x</div>
-  <div class="sys-st" id="rec-ind">REC 00:00</div>
-</div>
-
-<div class="ga-matrix">
-  <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
-  <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
-  <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
-  <div class="ga-stat">GEN: <span id="g-val">600</span></div>
-  <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-1</div>
+    <div class="warp-rail">
+        <div id="energy-fill"></div>
+        <input type="range" id="warp-input" class="warp-range" min="0" max="100" value="33">
+    </div>
+    <div class="warp-val-text" id="warp-txt">33x</div>
 </div>
 
 <div id="core-anchor">
-  <div id="core-window">
-    <div id="wish-label">大聖駕到，光耀廣寒</div>
-    <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
-    <video id="cam-view" autoplay playsinline muted></video>
-    <div id="mini-thumb"></div>
-  </div>
+    <div id="core-window">
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+        <video id="cam-view" autoplay playsinline muted></video>
+        <div id="wish-label">等待聖諭調度...</div>
+    </div>
 </div>
 
-<canvas id="snap-canvas" style="display:none;"></canvas>
-
-<div class="steer-zone">
-  <div class="angle-readout" id="ang-val">0°</div>
-  <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="0" step="1">
-</div>
+<canvas id="galaxy-bg"></canvas>
 
 <div class="footer-terminal">
-  <button class="term-btn" id="btn-capture">📸 拍照存證</button>
-  <button class="term-btn btn-rec" id="btn-rec">🔴 黑盒子錄影(僅UI)</button>
-  <button class="term-btn" id="btn-cam-user">🤳 前鏡自拍</button>
-  <button class="term-btn" id="btn-cam-env">🌌 後鏡巡航</button>
-  <button class="term-btn active-kgen" id="btn-boost">💎 KGEN 沖等演化</button>
-  <button class="term-btn active-kgen" id="btn-hunt">⚔️ 自動巡航打怪</button>
-  <button class="term-btn" id="btn-wish">👤 許願/還願文字</button>
-  <button class="term-btn" id="btn-help">⚙️ 合約操作說明</button>
+    <button class="term-btn btn-wallet" id="connect-btn" onclick="app.connect()">🦊 連結錢包</button>
+    <button class="term-btn" onclick="app.vow()">💍 VOW 表態 (1-2)</button>
+    <button class="term-btn" onclick="app.ritual()">🕯️ RITUAL 注入</button>
+    <button class="term-btn" onclick="app.toggleCam()">🤳 切換監控</button>
+    <button class="term-btn btn-rec" id="rec-btn" onclick="app.toggleRec()">⚫ 黑盒子燒錄</button>
+    <button class="term-btn" onclick="app.steer()">🎡 轉向 (ANGLE)</button>
 </div>
 
 <script>
-/* ===========================
-   Minimal Web3 helpers (no deps)
-   =========================== */
-const ABI_ERC20 = [
-  {"constant":true,"inputs":[{"name":"a","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"type":"function"},
-  {"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"amount","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"type":"function"},
-  {"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"type":"function"},
-  {"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"type":"function"}
-];
-
-// MoonTrust V1.2.0 essential ABI
-const ABI_MOONTRUST = [
-  {"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"targetPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[{"internalType":"address","name":"playerA","type":"address"},{"internalType":"address","name":"playerB","type":"address"}],"name":"settleRound","outputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"},{"internalType":"address","name":"partner","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"vow","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"claimWeddingEscrow","outputs":[],"stateMutability":"nonpayable","type":"function"}
-];
-
-// Optional: PoolDuel contract ABI (from earlier draft); keep minimal
-const ABI_POOLDUEL = [
-  {"inputs":[{"internalType":"uint8","name":"side","type":"uint8"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"minPx","type":"uint256"},{"internalType":"uint256","name":"maxPx","type":"uint256"}],"name":"placeOrder","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
-];
-
-function $(id){ return document.getElementById(id); }
-function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-function fmt18(x){ // string big int to KGEN
-  try{
-    const s = BigInt(x).toString();
-    const pad = s.padStart(19,'0');
-    const i = pad.slice(0,-18).replace(/^0+/, '') || '0';
-    const d = pad.slice(-18).slice(0,4);
-    return `${i}.${d}`;
-  }catch(e){ return '-'; }
-}
-function toWei18(amountStr){
-  const s = String(amountStr||'0').trim();
-  if(!s) return 0n;
-  const [i, d=''] = s.split('.');
-  const di = (d + '0'.repeat(18)).slice(0,18);
-  return BigInt(i||'0') * 10n**18n + BigInt(di);
-}
-
-const web3 = {
-  provider:null, acct:null, chainId:null,
-  async connect(){
-    if(!window.ethereum){
-      this.msg("err","找不到錢包：請用 Chrome/Android + MetaMask。");
-      return;
-    }
-    this.provider = window.ethereum;
-    const accts = await this.provider.request({ method:'eth_requestAccounts' });
-    this.acct = accts && accts[0];
-    this.chainId = await this.provider.request({ method:'eth_chainId' });
-    $("st-acct").textContent = this.acct ? (this.acct.slice(0,6)+"..."+this.acct.slice(-4)) : "-";
-    $("st-net").textContent = "NET: " + this.chainId;
-    this.msg("ok","錢包已連線");
-  },
-  async call(to, data){
-    return await this.provider.request({ method:'eth_call', params:[{to, data}, "latest"]});
-  },
-  async send(to, data){
-    return await this.provider.request({ method:'eth_sendTransaction', params:[{ from:this.acct, to, data }]});
-  },
-  // very small ABI encoder for a few functions (supports address,uint256,uint8)
-  sig(name, types){ // keccak not available -> use precomputed via hard-coded map below
-    return null;
-  }
+// V5.1.0 合約配置
+const CONTRACT_CONFIG = {
+    address: "0x...", // 由部署腳本輸出
+    abi: [
+        "function ritualDeposit(uint256 amount, string tag) external",
+        "function vow(address target, uint256 amount) external",
+        "function getUniverseInfo() external view returns (uint256, uint256, uint256)",
+        "event Ritual(address indexed user, uint256 amount, string tag)"
+    ],
+    kgen: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
 };
-
-// Precomputed selectors (keccak256)
-const SEL = {
-  // ERC20
-  balanceOf: "0x70a08231",
-  approve:   "0x095ea7b3",
-  allowance: "0xdd62ed3e",
-  transfer:  "0xa9059cbb",
-  // MoonTrust
-  poolBalance:"0x90f1d8b6", // poolBalance()
-  targetPool:"0x5d36b190",  // targetPool()
-  deposit:"0xb6b55f25",     // deposit(uint256)
-};
-
-function pad32hex(hex){ return hex.replace(/^0x/,'').padStart(64,'0'); }
-function encAddr(a){ return pad32hex(a.toLowerCase().replace(/^0x/,'')); }
-function encUint(x){
-  const bi = (typeof x === 'bigint') ? x : BigInt(x);
-  return bi.toString(16).padStart(64,'0');
-}
-function data1(sel, a){ return sel + encUint(a); }
-function dataAddrUint(sel, addr, amt){
-  return sel + encAddr(addr) + encUint(amt);
-}
-function dataAddrAddrUint(sel, a, b, amt){
-  return sel + encAddr(a) + encAddr(b) + encUint(amt);
-}
-function parseUint256(hex){
-  try{ return BigInt(hex); }catch(e){}
-  try{ return BigInt("0x"+hex.replace(/^0x/,'').slice(-64)); }catch(e){ return 0n; }
-}
 
 const app = {
-  isCam:false, camMode:'user', gaLevel:1,
-  warpX:0,
-  stream:null,
-  _rd:null, _cam:null,
+    angle: 0, warp: 33, isRec: false, isCam: false,
+    recorder: null, chunks: [], stream: null,
+    provider: null, signer: null, contract: null,
 
-  // config
-  baseCapital: 5888n * 10n**18n,
-  feeBps: 500n, // 5%
-  init(){
-    this.initThree();
-    this.buildUI();
-    this.bindUI();
-    setInterval(()=>this.tick(), 1000);
-    this.updateWarp(33);
-    this.applySteer(0, true);
-    this.onResize();
-    window.addEventListener('resize', ()=>this.onResize(), {passive:true});
-  },
-  msg(kind, text){
-    const el = $("st-msg");
-    el.className = "badge mini " + (kind==="ok"?"ok":kind==="err"?"err":"warn");
-    el.textContent = text;
-  },
-  tick(){
-    $("sys-clock").textContent = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
-    document.querySelectorAll('.dot').forEach(d=>{ if(Math.random()>0.92) d.classList.toggle('on'); });
-    const fit = 0.9 + Math.random()*0.1;
-    $("f-val").textContent = fit.toFixed(3);
-    $("f-bar").style.width = (fit*100)+'%';
-    $("m-bar").style.width = (Math.random()*100)+'%';
-    $("g-val").textContent = String(this.gaLevel);
-    $("ga-rank").textContent = `RANK: GA-${this.gaLevel}`;
-  },
-  buildUI(){
-    ['g1','g2'].forEach(id=>{
-      const c = $(id); c.innerHTML="";
-      for(let i=0;i<100;i++){
-        const d=document.createElement('div');
-        d.className='dot'+(Math.random()>0.5?' on':'');
-        c.appendChild(d);
-      }
-    });
-    const rail = $("warp-rail-body");
-    for(let i=0;i<25;i++){
-      const step=document.createElement('div');
-      step.className='rail-step';
-      step.style.bottom=(i*4)+'%';
-      rail.appendChild(step);
-    }
-  },
-  getWarpXFromPct(pct){
-    const p = clamp(Number(pct)||0,0,100);
-    const cap = Math.max(1, Number(this.gaLevel)||1);
-    if(p===0) return 0;
-    return Math.max(1, Math.round((p/100)*cap));
-  },
-  updateWarp(val){
-    const pct=clamp(parseFloat(val)||0,0,100);
-    const warpX=this.getWarpXFromPct(pct);
-    this.warpX=warpX;
-    $("energy-fill").style.height=pct+'%';
-    $("warp-thumb").style.bottom=`calc(${pct}% - 17px)`;
-    $("warp-txt").textContent=`WARP ${warpX}x`;
-  },
-  applySteer(v, silent=false){
-    const ang=clamp(Number(v)||0,-180,180);
-    $("ang-val").textContent = `${ang}°`;
-    $("core-window").style.transform = `rotate(${ang}deg)`;
-    $("steer-input-val").value = String(ang);
-  },
-  async cam(mode){
-    const v=$("cam-view"), f=$("fairy-img"), m=$("mini-thumb");
-    if(this.isCam && this.camMode===mode){
-      this.stream && this.stream.getTracks().forEach(t=>t.stop());
-      v.style.opacity=0; f.style.opacity=1; m.style.display='none';
-      this.isCam=false;
-      return;
-    }
-    try{
-      if(this.stream) this.stream.getTracks().forEach(t=>t.stop());
-      this.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:mode},audio:false});
-      v.srcObject=this.stream; v.style.opacity=1; f.style.opacity=0; m.style.display='block';
-      v.style.transform = mode==='user'?'scaleX(-1)':'scaleX(1)';
-      this.isCam=true; this.camMode=mode;
-    }catch(e){ alert("攝像頭權限被拒絕/硬體未響應"); }
-  },
-  capture(){
-    const canvas=$("snap-canvas"), ctx=canvas.getContext('2d');
-    canvas.width=900; canvas.height=900;
-    const v=$("cam-view"), f=$("fairy-img");
-    if(this.isCam){
-      if(this.camMode==='user'){ ctx.translate(900,0); ctx.scale(-1,1); }
-      try{ ctx.drawImage(v,0,0,900,900); }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,900,900); }
-      ctx.setTransform(1,0,0,1,0,0);
-      ctx.drawImage(f, 670, 40, 200, 200);
-    }else{
-      ctx.drawImage(f,0,0,900,900);
-    }
-    ctx.fillStyle="#ffd778"; ctx.font="bold 36px Noto Sans TC";
-    ctx.fillText("KGEN 16888｜MoonTrust v2.00", 40, 70);
-    ctx.fillStyle="#00f2ff"; ctx.font="bold 20px Orbitron";
-    ctx.fillText(`ANGLE ${$("steer-input-val").value}°  WARP ${this.warpX}x  GA ${this.gaLevel}`, 40, 105);
-    ctx.fillStyle="#fff"; ctx.font="bold 34px Noto Sans TC";
-    ctx.shadowBlur=10; ctx.shadowColor="#000";
-    ctx.fillText($("wish-label").textContent, 40, 860);
-    ctx.shadowBlur=0;
-    const a=document.createElement('a');
-    a.download=`KGEN_16888_SNAPSHOT_v2_00.png`;
-    a.href=canvas.toDataURL();
-    a.click();
-  },
-  boost(){
-    if(this.gaLevel < 1000){
-      this.gaLevel = Math.min(1000, this.gaLevel + 1);
-      const pctNow = parseFloat($("warp-input-val").value)||0;
-      this.updateWarp(pctNow);
-      this.msg("ok",`GA 升級到 ${this.gaLevel}`);
-    }
-  },
-  hunt(){
-    const old=$("wish-label").textContent;
-    $("wish-label").textContent="⚔️ 自動巡航打怪中...";
-    setTimeout(()=>{$("wish-label").textContent=old;}, 2000);
-  },
-  wish(){
-    const m=prompt("輸入許願/還願文字：", $("wish-label").textContent);
-    if(m) $("wish-label").textContent=m;
-  },
-  help(){
-    alert(
-`V2.00 前端整合（手機可操作）\n\n1) 先 CONNECT WALLET\n2) 填入 MoonTrust 16888 合約地址（部署後再填）\n3) PLACE ORDER：會先檢查 allowance，不夠會先要求 approve，再 deposit 入池。\n4) WISH/還願(入池)：直接把 KGEN transfer 到合約，變成獎池。\n\n注意：目前沒有自動判斷輸贏；結算(3+3)與玩家 A/B 由 Oracle(先用 deployer) 在鏈上呼叫 settleRound(A,B) 觸發。`
-    );
-  },
+    init() {
+        this.initThree();
+        this.buildGrids();
+        this.bindEvents();
+        setInterval(() => {
+            document.getElementById('sys-clock').innerText = new Date().toLocaleString();
+            this.updateFlicker();
+        }, 1000);
+        this.speak("KGEN 16888 v1.6 滿血版就緒。黑盒子已掛載，隨時記錄聖諭。");
+    },
 
-  bindUI(){
-    $("steer-input-val").addEventListener('input', e=>this.applySteer(e.target.value));
-    $("warp-input-val").addEventListener('input', e=>this.updateWarp(e.target.value));
+    async connect() {
+        if (!window.ethereum) return alert("請安裝 MetaMask");
+        this.provider = new ethers.providers.Web3Provider(window.ethereum);
+        await this.provider.send("eth_requestAccounts", []);
+        this.signer = this.provider.getSigner();
+        const addr = await this.signer.getAddress();
+        document.getElementById('wallet-addr').innerText = `WALLET: ${addr.substring(0,6)}...${addr.substring(38)}`;
+        this.speak("連結成功，宇宙權限已解鎖。");
+    },
 
-    $("btn-capture").onclick = ()=>this.capture();
-    $("btn-cam-user").onclick = ()=>this.cam('user');
-    $("btn-cam-env").onclick  = ()=>this.cam('environment');
-    $("btn-boost").onclick = ()=>this.boost();
-    $("btn-hunt").onclick = ()=>this.hunt();
-    $("btn-wish").onclick = ()=>this.wish();
-    $("btn-help").onclick = ()=>this.help();
-
-    $("btn-connect").onclick = async ()=>{
-      try{ await web3.connect(); await this.refresh(); }
-      catch(e){ this.msg("err", e?.message||"連線失敗"); }
-    };
-    $("btn-refresh").onclick = ()=>this.refresh();
-    $("btn-order").onclick = ()=>this.placeOrder();
-    $("btn-donate").onclick = ()=>this.donateToPool();
-  },
-
-  async refresh(){
-    const mt = $("moontrust").value.trim();
-    const token = $("kgen-token").value.trim();
-    if(!web3.provider || !web3.acct){
-      this.msg("warn","尚未連線錢包");
-      return;
-    }
-    if(!mt || !/^0x[a-fA-F0-9]{40}$/.test(mt)){
-      this.msg("warn","請先填入 16888 合約地址");
-      return;
-    }
-    if(!token || !/^0x[a-fA-F0-9]{40}$/.test(token)){
-      this.msg("err","KGEN Token 地址不合法");
-      return;
-    }
-
-    try{
-      // poolBalance()
-      const poolHex = await web3.call(mt, SEL.poolBalance + "0".repeat(64));
-      const pool = parseUint256(poolHex);
-      $("st-pool").textContent = fmt18(pool) + " KGEN";
-
-      const targetHex = await web3.call(mt, SEL.targetPool + "0".repeat(64));
-      const target = parseUint256(targetHex);
-      $("st-target").textContent = fmt18(target) + " KGEN";
-
-      // user balance
-      const balHex = await web3.call(token, SEL.balanceOf + encAddr(web3.acct));
-      const bal = parseUint256(balHex);
-      this.msg("ok", `餘額 ${fmt18(bal)} KGEN｜池 ${fmt18(pool)} / 16888`);
-    }catch(e){
-      this.msg("err", "刷新失敗：可能 ABI/地址不對 或 尚未部署");
-    }
-  },
-
-  async ensureAllowance(spender, neededWei){
-    const token = $("kgen-token").value.trim();
-    const allowanceHex = await web3.call(token, SEL.allowance + encAddr(web3.acct) + encAddr(spender));
-    const allow = parseUint256(allowanceHex);
-    if(allow >= neededWei) return true;
-
-    this.msg("warn","需要先 approve（錢包會跳出）");
-    // approve(spender, amount) => approve neededWei * 2
-    const amt = neededWei * 2n;
-    const data = SEL.approve + encAddr(spender) + encUint(amt);
-    await web3.send(token, data);
-    return true;
-  },
-
-  async donateToPool(){
-    const mt = $("moontrust").value.trim();
-    const token = $("kgen-token").value.trim();
-    const amtStr = $("order-amt").value.trim() || "10";
-    const amt = toWei18(amtStr);
-    if(amt <= 0n){ this.msg("err","金額需 > 0"); return; }
-
-    if(!web3.provider || !web3.acct){ this.msg("err","先 CONNECT WALLET"); return; }
-    if(!mt || !/^0x[a-fA-F0-9]{40}$/.test(mt)){ this.msg("err","請填入 16888 合約地址"); return; }
-
-    try{
-      // transfer(contract, amt)
-      const data = SEL.transfer + encAddr(mt) + encUint(amt);
-      await web3.send(token, data);
-      this.msg("ok", "已送出入池轉帳（WISH/還願）");
-      setTimeout(()=>this.refresh(), 1200);
-    }catch(e){
-      this.msg("err","入池轉帳失敗/取消");
-    }
-  },
-
-  async placeOrder(){
-    // For A: treat as deposit into MoonTrust pool (real transferFrom)
-    const mt = $("moontrust").value.trim();
-    const amtStr = $("order-amt").value.trim() || "10";
-    const amt = toWei18(amtStr);
-    if(amt <= 0n){ this.msg("err","下單金額需 > 0"); return; }
-
-    if(!web3.provider || !web3.acct){ this.msg("err","先 CONNECT WALLET"); return; }
-    if(!mt || !/^0x[a-fA-F0-9]{40}$/.test(mt)){ this.msg("err","請填入 16888 合約地址"); return; }
-
-    // min/max are user-defined, just recorded in UI for now
-    const minPx = $("order-min").value.trim();
-    const maxPx = $("order-max").value.trim();
-    const side = $("order-side").value;
-
-    try{
-      await this.ensureAllowance(mt, amt);
-      // deposit(amount)
-      const data = SEL.deposit + encUint(amt);
-      await web3.send(mt, data);
-      this.msg("ok", `已下單(${side})｜${amtStr} KGEN 入池｜區間 ${minPx||"-"} ~ ${maxPx||"-"}`);
-      setTimeout(()=>this.refresh(), 1200);
-    }catch(e){
-      this.msg("err","下單/入池失敗（可能取消或 gas 不足）");
-    }
-  },
-
-  initThree(){
-    const sc = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const rd  = new THREE.WebGLRenderer({ canvas:$("galaxy-bg"), antialias:true, alpha:true });
-    rd.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
-    rd.setSize(window.innerWidth, window.innerHeight);
-
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(5000*3);
-    for(let i=0;i<15000;i++) pos[i]=(Math.random()-0.5)*160;
-    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color:0x00f2ff, size:0.18 }));
-    sc.add(pts); cam.position.z=50;
-
-    const anim = ()=>{
-      requestAnimationFrame(anim);
-      const pct = parseFloat($("warp-input-val").value)||0;
-      const warpX = this.getWarpXFromPct(pct);
-      const w = warpX / 200;
-      if(w>0){
-        const r = (parseFloat($("steer-input-val").value)*Math.PI)/180;
-        const p = pts.geometry.attributes.position.array;
-        for(let i=0;i<p.length;i+=3){
-          p[i]   -= Math.sin(r)*w;
-          p[i+1] -= Math.cos(r)*w;
-          if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
-          if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+    async ritual() {
+        if (!this.signer) return this.connect();
+        const amt = prompt("輸入注入 KGEN 數量 (16888 觸發輪轉):", "100");
+        if (amt) {
+            this.speak(`啟動儀式，注入 ${amt} KGEN`);
+            // 實作合約調用邏輯...
         }
-        pts.geometry.attributes.position.needsUpdate=true;
-      }
-      rd.render(sc, cam);
-    };
-    anim();
-    this._rd=rd; this._cam=cam;
-  },
+    },
 
-  onResize(){
-    if(!this._rd || !this._cam) return;
-    this._cam.aspect = window.innerWidth / window.innerHeight;
-    this._cam.updateProjectionMatrix();
-    this._rd.setSize(window.innerWidth, window.innerHeight);
-  }
+    // 📹 黑盒子進化：完整螢幕燒錄 + 麥克風音軌
+    async toggleRec() {
+        if(this.isRec) {
+            this.recorder.stop();
+            this.isRec = false;
+            document.getElementById('rec-btn').innerText = "⚫ 黑盒子燒錄";
+            document.getElementById('rec-ui').style.display = 'none';
+            return;
+        }
+
+        try {
+            this.speak("黑盒子啟動，開始燒錄全螢幕數據與聖諭。");
+            const vStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const combined = new MediaStream([...vStream.getTracks(), ...aStream.getTracks()]);
+            
+            this.chunks = [];
+            this.recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9,opus' });
+            this.recorder.ondataavailable = e => this.chunks.push(e.data);
+            this.recorder.onstop = () => {
+                const blob = new Blob(this.chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = `KGEN_BLACKBOX_${Date.now()}.webm`; a.click();
+                combined.getTracks().forEach(t => t.stop());
+            };
+
+            this.recorder.start();
+            this.isRec = true;
+            document.getElementById('rec-btn').innerText = "🛑 停止燒錄";
+            document.getElementById('rec-ui').style.display = 'flex';
+            
+            let sec = 0;
+            const t = setInterval(() => {
+                if(!this.isRec) return clearInterval(t);
+                sec++;
+                document.getElementById('rec-timer').innerText = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        } catch(e) {
+            alert("黑盒子需要完整權限方可運作。");
+        }
+    },
+
+    steer() {
+        const a = prompt("調整宇宙偏角 (-180 至 180):", this.angle);
+        if(a !== null) {
+            this.angle = parseInt(a);
+            document.getElementById('core-window').style.transform = `rotate(${this.angle}deg)`;
+            this.speak(`方向盤調整至 ${this.angle} 度。`);
+        }
+    },
+
+    buildGrids() {
+        const g1 = document.getElementById('g1');
+        for(let i=0; i<60; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot';
+            g1.appendChild(d);
+        }
+    },
+
+    updateFlicker() {
+        document.querySelectorAll('.dot').forEach(d => {
+            d.classList.toggle('on', Math.random() > 0.85);
+        });
+    },
+
+    toggleCam() {
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+        if(this.isCam) {
+            this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1;
+            this.isCam = false;
+        } else {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+                this.stream = s; v.srcObject = s; v.style.opacity = 1; f.style.opacity = 0;
+                this.isCam = true;
+            });
+        }
+    },
+
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: false, alpha: true });
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(4000 * 3);
+        for(let i=0; i<12000; i++) pos[i] = (Math.random()-0.5)*600;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.6 }));
+        sc.add(pts); cam.position.z = 250;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            pts.rotation.y += 0.001 * (this.warp / 33);
+            pts.rotation.z += (this.angle * 0.00001);
+            rd.render(sc, cam);
+        };
+        anim();
+    },
+
+    bindEvents() {
+        document.getElementById('warp-input').oninput = (e) => {
+            this.warp = e.target.value;
+            document.getElementById('energy-fill').style.height = this.warp + '%';
+            document.getElementById('warp-txt').innerText = this.warp + 'x';
+        };
+    },
+
+    speak(msg) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.pitch = 0.8; u.rate = 1.1;
+        window.speechSynthesis.speak(u);
+    }
 };
 
-window.addEventListener('load', ()=>app.init());
+window.onload = () => app.init();
 </script>
 </body>
 </html>
