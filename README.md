@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 五指山悟空財神殿啟動宇宙細包心跳上鏈GA600升級與金融生命體誕生花果山台灣鏈上神殿全面開門  
-👉 https://www.youtube.com/shorts/PhzcXnriy5Q
+▶ #悟空新文 #花果山台灣 #K線西遊記  8888高老莊能量射向16888廣寒宮，  凡間慾望貫穿月宮光門。  天蓬轉世，嫦娥臨月，  宇宙點位正在重排。  
+👉 https://www.youtube.com/watch?v=Q5sJRHnANr4
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
