@@ -136,8 +136,8 @@
     
 #brand-badge{
   position:fixed;
-  left: 26px;
-  top: 72px;
+  left: 44px;
+  top: 90px;
   z-index:260;
   padding:6px 10px;
   border:1px solid rgba(255,215,128,.7);
@@ -149,6 +149,29 @@
   font-size:12px;
   text-shadow:0 0 10px rgba(255,215,128,.3);
 }
+
+
+
+    /* ==== Guide Modal ==== */
+    .guide-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9999;align-items:center;justify-content:center;padding:18px;}
+    .guide-modal.show{display:flex;}
+    .guide-card{width:min(720px,96vw);max-height:86vh;overflow:auto;background:rgba(10,14,18,.96);border:1px solid rgba(255,215,120,.35);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.55);}
+    .guide-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px 14px;border-bottom:1px solid rgba(255,215,120,.18)}
+    .guide-title{font-weight:800;letter-spacing:.5px;color:#ffd88a}
+    .guide-close{background:transparent;border:0;color:#ffd88a;font-size:18px;padding:6px 10px;border-radius:10px}
+    .guide-close:active{transform:scale(.98)}
+    .guide-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid rgba(255,215,120,.14)}
+    .guide-tab{background:rgba(255,255,255,.06);border:1px solid rgba(255,215,120,.22);color:#ffe6b8;padding:8px 10px;border-radius:12px;font-weight:700}
+    .guide-tab:active{transform:scale(.98)}
+    .guide-body{padding:14px;color:#e9eef7;line-height:1.55}
+    .guide-body h3{margin:0 0 10px 0;color:#ffd88a}
+    .guide-body h4{margin:14px 0 8px 0;color:#ffe6b8}
+    .guide-body hr{border:0;border-top:1px solid rgba(255,215,120,.14);margin:14px 0}
+    .guide-body .muted{opacity:.85}
+    .qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
+    .qa-btn:active{transform:scale(.98)}
+    @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
 
 </style>
 </head>
@@ -260,7 +283,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.14";
+const APP_VERSION = "v2.15";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -315,6 +338,137 @@ const fv=document.getElementById('f-val'); if(fv) fv.innerText = fit.toFixed(3);
 const fb=document.getElementById('f-bar'); if(fb) fb.style.width = (fit * 100) + '%';
 const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random() * 100) + '%';
     },
+
+    // ---- Safety helpers (avoid popup errors in demo) ----
+    logEvent(name, data){
+        try{ console.log('[event]', name, data||''); }catch(_){ }
+    },
+
+    setProgress(pct){
+        try{
+            const bar = document.getElementById('progress-bar');
+            const txt = document.getElementById('progress-text');
+            const v = Math.max(0, Math.min(100, Number(pct)||0));
+            if(bar) bar.style.width = v + '%';
+            if(txt) txt.innerText = v.toFixed(1) + '%';
+        }catch(_){ }
+    },
+
+    // ---- Guided concierge (story + how to play) ----
+    openGuide(section){
+        const modal = document.getElementById('guide-modal');
+        const body = document.getElementById('guide-body');
+        if(!modal || !body) return;
+        const s = (section||'intro').toLowerCase();
+        const blocks = this.getGuideBlocks();
+        body.innerHTML = blocks[s] || blocks['intro'];
+        modal.classList.add('show');
+
+        const summary = (s==='wallet') ? '如果你找不到 KGEN，記得用錢包的 Custom 匯入合約地址。' :
+                       (s==='rules')  ? '規則重點：一到一千為單筆範圍，八八八八是基底，累積到一六八八八觸發下凡事件。' :
+                       (s==='qa')     ? '你可以按麥克風提問，轉文字後會直接送出並回答。' :
+                                        '歡迎來到廣寒宮一六八八八。你可以先用無錢包的模擬模式玩。';
+        this.speak(summary);
+    },
+
+    closeGuide(){
+        const modal=document.getElementById('guide-modal');
+        if(modal) modal.classList.remove('show');
+    },
+
+    getGuideBlocks(){
+        const intro = `
+          <h3>廣寒宮 16888｜自我演化金融生命體</h3>
+          <p>這裡不是投資建議，這是一個「敘事 × 遊戲 × 合約」的宇宙入口。</p>
+          <p><b>你會看到兩個地址（A / B）像 DNA 與 RNA。</b>它們代表兩股能量在池中互動；當池從 <b>8888</b> 成長到 <b>16888</b>，就會觸發「下凡投胎」的劇情事件。</p>
+          <hr/>
+          <h4>最快開始（沒有錢包也能玩）</h4>
+          <ol>
+            <li>在下單框輸入數字（<b>1 ~ 1000</b>）。</li>
+            <li>按 <b>下單 UP</b> 或 <b>下單 DOWN</b>，系統用模擬勝負立即回饋。</li>
+            <li>你贏：拿回本金 + 獲利（模擬）。你輸：金額累積到「懷孕池 / 彩池」。</li>
+          </ol>
+          <p class='muted'>提示：模擬模式會顯示 demo Pool Balance，不需要連錢包。</p>
+        `;
+
+        const rules = `
+          <h3>玩法規則（1~1000｜8888→16888）</h3>
+          <ul>
+            <li><b>單筆範圍：</b>1 ~ 1000 KGEN（體驗用）。</li>
+            <li><b>基底：</b>8888 KGEN（下凡前必須守住的底池）。</li>
+            <li><b>目標：</b>池累積到 16888 KGEN 觸發「下凡投胎」事件。</li>
+          </ul>
+          <h4>下凡投胎是什麼？</h4>
+          <p>當池達到 16888：七仙女啟動「下凡」儀式。故事上是 <b>DNA（地址 A）</b> 與 <b>RNA（地址 B）</b> 完成誓約；世界線會進入「生肖投胎 / 結婚」段落。</p>
+          <h4>得獎與表態（誓約）</h4>
+          <p>表態需要「真的轉帳」：從自己地址轉 <b>1 ~ 2 KGEN</b> 給對方地址，代表同意誓約。</p>
+          <p>若拒絕 / 逾期：托管會回收進池（回到懷孕池）。</p>
+        `;
+
+        const wallet = `
+          <h3>錢包怎麼用？為什麼 Search 找不到？</h3>
+          <p>很多錢包（例如 MetaMask）在「Search」頁面是靠代幣清單，<b>不一定會即時收錄新代幣</b>。</p>
+          <p>所以要用 <b>Custom</b> 匯入：</p>
+          <ol>
+            <li>切到 <b>BNB Chain</b>。</li>
+            <li>點 <b>Custom</b>。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0x…）。</li>
+            <li>按下一步，確認 Symbol / Decimals 後加入。</li>
+          </ol>
+          <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
+        `;
+
+        const qa = `
+          <h3>語音客服（Q&A）</h3>
+          <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
+          <div class='qa-grid'>
+            <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
+            <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
+            <button class='qa-btn' data-q='玩法的 1 到 1000 是什麼？'>玩法的 1 到 1000 是什麼？</button>
+            <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
+            <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
+            <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
+          </div>
+          <div style='margin-top:12px;opacity:.92'>
+            <div id='qa-last' style='margin-top:8px'></div>
+            <div id='qa-last-a' style='margin-top:6px'></div>
+          </div>
+        `;
+
+        return { intro, rules, wallet, qa };
+    },
+
+    handleQuestion(q){
+        const question = String(q||'').trim();
+        if(!question) return;
+        const qaBox = document.getElementById('qa-last');
+        const aBox = document.getElementById('qa-last-a');
+        if(qaBox) qaBox.innerText = 'Q: ' + question;
+
+        const lower = question.toLowerCase();
+        let ans = '';
+        const has = (s)=> lower.indexOf(s) >= 0;
+
+        if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
+        }else if(question.includes('custom') || question.includes('找不到') || has('search')){
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
+        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
+            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
+        }else if(question.includes('8888') || question.includes('八八八八')){
+            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
+        }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
+            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+        }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
+            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+        }else{
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
+        }
+
+        if(aBox) aBox.innerText = 'A: ' + ans;
+        this.speak(ans);
+    },
+
 
     buildUI() {
         ['g1', 'g2'].forEach(id => {
@@ -432,6 +586,24 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
         document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
         document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
         this.bindWheel();
+
+        // Guide modal
+        const bg = document.getElementById('btn-guide');
+        if(bg) bg.addEventListener('click', ()=> this.openGuide('intro'));
+        const gc = document.getElementById('btn-guide-close');
+        if(gc) gc.addEventListener('click', ()=> this.closeGuide());
+        const gm = document.getElementById('guide-modal');
+        if(gm) gm.addEventListener('click', (e)=>{ if(e.target===gm) this.closeGuide(); });
+        document.querySelectorAll('.guide-tab').forEach(btn=>{
+            btn.addEventListener('click', ()=> this.openGuide(btn.getAttribute('data-sec')));
+        });
+        document.addEventListener('click', (e)=>{
+            const b = e.target && e.target.closest && e.target.closest('.qa-btn');
+            if(!b) return;
+            const q = b.getAttribute('data-q');
+            if(q) this.handleQuestion(q);
+        });
+
     },
 
     // ===== Blackbox core =====
@@ -786,6 +958,8 @@ speak(m){
 };
 
 window.onload = () => app.init();
+  // auto concierge on first visit
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
 
 <script>
@@ -1045,5 +1219,24 @@ const w3b2=document.getElementById('w3-prog-bar'); if(w3b2) w3b2.style.width = p
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
 </div>
+
+
+<!-- Guide / Concierge Modal -->
+<div id="guide-modal" class="guide-modal" aria-hidden="true">
+  <div class="guide-card">
+    <div class="guide-header">
+      <div class="guide-title">廣寒宮客服</div>
+      <button class="guide-close" id="btn-guide-close" aria-label="close">✕</button>
+    </div>
+    <div class="guide-tabs">
+      <button class="guide-tab" data-sec="intro">故事與快速開始</button>
+      <button class="guide-tab" data-sec="rules">規則與下凡</button>
+      <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+      <button class="guide-tab" data-sec="qa">語音問答</button>
+    </div>
+    <div class="guide-body" id="guide-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
