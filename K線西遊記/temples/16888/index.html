@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜自我演化金融生命體｜v2.16</title>
+    <title>KGEN 16888｜自我演化金融生命體｜v2.16.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -173,6 +173,11 @@
     .qa-btn:active{transform:scale(.98)}
     @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
 
+
+    .bar{height:14px; background:#eee; border-radius:999px; overflow:hidden; width:100%;}
+    .bar > div{height:100%; background:#111; width:0%;}
+    .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
+
 </style>
 </head>
 <body>
@@ -241,6 +246,10 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+<div class="kv" style="margin-top:10px">
+  <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
+  <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
+</div>
   </div>
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
@@ -1002,9 +1011,12 @@ const web3 = {
     "function MIN_FLOOR() external view returns (uint256)",
     "function ROUND_TOTAL() external view returns (uint256)",
     "function configLocked() external view returns (bool)",
+    "function roundId() external view returns (uint256)",
+    "function rounds(uint256) external view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)",
     "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
     "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)",
     "event RoundTriggered(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 poolBefore)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)",
     "event RitualDeposit(address indexed from,uint256 amount,bytes32 indexed tag)"
   ],
 
