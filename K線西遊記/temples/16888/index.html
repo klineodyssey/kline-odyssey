@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.10</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.12</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -190,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.10</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.12</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -308,8 +308,43 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.10";
+const APP_VERSION = "v2.16.12";
 const app = {
+  // Voice concierge (requires first user interaction on mobile)
+  voice:{
+    enabled:true,
+    _unlocked:false,
+    _once:new Set(),
+    unlock(){
+      if(this._unlocked) return;
+      this._unlocked=true;
+      try{
+        window.speechSynthesis.cancel();
+      }catch(e){}
+    },
+    clean(t){
+      return String(t||"")
+        .replace(/[\u{1F300}-\u{1FAFF}]/gu,"")
+        .replace(/[\u2600-\u27BF]/g,"")
+        .replace(/\s+/g," ")
+        .trim();
+    },
+    say(key, text){
+      if(!this.enabled) return;
+      if(!this._unlocked) return; // will speak after user gesture
+      const msg = new SpeechSynthesisUtterance(this.clean(text));
+      msg.lang = "zh-TW";
+      msg.rate = 1.0;
+      msg.pitch = 1.05;
+      try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(msg); }catch(e){}
+    },
+    sayOnce(key, text){
+      if(this._once.has(key)) return;
+      this._once.add(key);
+      this.say(key,text);
+    }
+  },
+
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
     try{
@@ -344,6 +379,37 @@ const app = {
     blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
 
     init() {
+    // unlock voice on first user gesture (mobile autoplay restriction)
+    document.addEventListener('pointerdown', ()=>app.voice.unlock(), {once:true, passive:true});
+
+    // Every button will trigger a short voice hint
+    document.addEventListener('click', (ev)=>{
+      const el = ev.target.closest('button, a');
+      if(!el) return;
+      const txt = (el.innerText || el.getAttribute('aria-label') || el.id || '').trim();
+      if(!txt) return;
+
+      const t = txt.replace(/\s+/g,' ').trim();
+
+      // per-button hints
+      const hint =
+        /下單\s*UP/i.test(t) ? "下單做多。先輸入金額，再點下單。首次會先授權一次，之後就只要一次確認。" :
+        /下單\s*DOWN/i.test(t) ? "下單做空。先輸入金額，再點下單。首次會先授權一次，之後就只要一次確認。" :
+        /許願|轉.*8888|送往8888|高老莊/i.test(t) ? "許願會把 K G E N 轉送到八八八八高老莊。請先確認金額與收款地址，再在錢包確認。" :
+        /拍照存證/i.test(t) ? "拍照存證：會把你當下畫面存成圖片，方便留存與分享。" :
+        /語音問答/i.test(t) ? "語音問答：按下後用語音提問，我會用客服仙女回覆你。" :
+        /規則|下凡/i.test(t) ? "這裡是規則與下凡說明。看完就知道怎麼從一六八八八走到一六八八。" :
+        /錢包|連結|連接/i.test(t) ? "連結錢包：請在錢包選 BNB Chain，確認後才能讀取餘額並下單。" :
+        /官方|宇宙入口/i.test(t) ? "官方宇宙入口：會開啟總入口頁面。" :
+        /返回/i.test(t) ? "返回上一層入口。" :
+        /自動巡航打怪/i.test(t) ? "自動巡航打怪：自動觸發巡航動畫，不會動到你的資產。" :
+        /KGEN\s*沖等演化/i.test(t) ? "K G E N 沖等演化：展示 GA 六百演化資訊與階段。" :
+        /市價|極簡/i.test(t) ? "這是極簡下單模式：輸入金額後直接下單。" :
+        null;
+
+      if(hint) app.voice.say('btn_'+(el.id||t), hint);
+    }, true);
+
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
         web3.load();
@@ -1163,7 +1229,23 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
   },
 
   // ===== LIVE =====
-  async approve(){
+  
+  async ensureAllowance(amount){
+    if(this.demo) return true;
+    const addr = await this.signer.getAddress();
+    const kgen = new ethers.Contract(this.KGEN, this.ERC20_ABI, this.signer);
+    const allowanceRaw = await kgen.allowance(addr, this.UNIVERSE);
+    const allowance = parseFloat(ethers.utils.formatUnits(allowanceRaw, 18));
+    if(allowance + 1e-9 >= amount) return true;
+
+    // Explain first-time authorization (cannot avoid without permit)
+    app.voice.sayOnce('first_allow','首次下單需要授權一次，之後下單就只會跳一次確認。現在請在錢包按下確認完成授權。');
+
+    const tx = await kgen.approve(this.UNIVERSE, ethers.constants.MaxUint256);
+    await tx.wait();
+    return true;
+  }
+async approve(){
     if(this.demo) return alert("Demo 模式不需要 Approve");
     if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
     try{
@@ -1184,39 +1266,57 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
       const amt = this.parseAmt();
       if(this.demo){
         this.demoDeposit(amt);
-        app.speak("Demo 入池完成。");
+        app.voice.say("demo_deposit","Demo 入池完成。");
         return;
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+
+      const amtFloat = parseFloat(ethers.utils.formatUnits(amt,18));
+      await this.ensureAllowance(amtFloat);
+
       const uni = this.cUNI();
+      app.voice.say("deposit_send","正在入池。請在錢包確認交易。");
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
-app.speak("點燈已入池。");
       await tx.wait();
       await this.refresh();
-      app.speak("入池成功。");
+      app.voice.say("deposit_done","入池成功。");
     }catch(e){
       console.error(e);
-      alert(e.message || "入池失敗");
+      alert(e?.reason || e?.shortMessage || e.message || "入池失敗");
+      app.voice.say("deposit_fail","入池失敗。請確認授權與餘額，以及錢包有足夠 BNB 手續費。");
     }
   },
 
   async place(side){
     try{
       const amt = this.parseAmt();
+
+      // basic validation
+      if(!amt || amt<=0) return alert("請輸入下單金額");
+      if(this._minOrder && amt < this._minOrder) return alert("下單金額過小（最小 "+this._minOrder+" KGEN）");
+      if(this._maxOrder && amt > this._maxOrder) return alert("下單金額過大（最大 "+this._maxOrder+" KGEN）");
+
       if(this.demo){
         this.demoOrder(side, amt);
         return;
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+
+      // auto-approve if needed (first time only)
+      await this.ensureAllowance(amt);
+
       const uni = this.cUNI();
+      app.voice.say('order_send',"已送出下單。請在錢包確認交易。");
       const tx = await uni.placeOrder(side, amt);
-      app.speak("下單已送出，等待鏈上結算。");
+
       await tx.wait();
       await this.refresh();
-      app.speak("本次對賭已結算。");
+      app.voice.say('order_done',"下單成功，鏈上已記錄。");
     }catch(e){
       console.error(e);
-      alert(e.message || "下單失敗");
+      // most common: allowance/balance/paused
+      alert(e?.reason || e?.shortMessage || e.message || "下單失敗");
+      app.voice.say('order_fail',"下單失敗。通常是授權不足、餘額不足，或合約暫停。請先確認錢包有足夠的 KGEN 與 BNB 手續費。");
     }
   },
 
@@ -1226,42 +1326,54 @@ app.speak("點燈已入池。");
         this.demoRefresh();
         return;
       }
-      if(!this.UNIVERSE || !this.provider){
-const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
+      if(!this.UNIVERSE || !this.KGEN || !this.provider){
+        const wb2=document.getElementById('w3-bal'); if(wb2) wb2.textContent='未連線';
         return;
       }
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+      const addr = await this.signer.getAddress();
 
-      const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
-        uniR.poolBalance(),
-        uniR.canTriggerRound(),
-        uniR.minOrder(),
-        uniR.maxOrder(),
-        uniR.vowWindowSec(),
-        uniR.loveWindowSec(),
-        uniR.treasury8888(),
-        uniR.TRIGGER(),
-        uniR.MIN_FLOOR(),
-        uniR.ROUND_TOTAL()
+      // contracts
+      const uni = new ethers.Contract(this.UNIVERSE, this.UNIVERSE_ABI, this.signer);
+      const kgen = new ethers.Contract(this.KGEN, this.ERC20_ABI, this.signer);
+
+      // read on-chain
+      const [poolBalRaw, userBalRaw, allowanceRaw, minOrderRaw, maxOrderRaw, minPayoutRaw, maxPayoutRaw] = await Promise.all([
+        kgen.balanceOf(this.UNIVERSE),
+        kgen.balanceOf(addr),
+        kgen.allowance(addr, this.UNIVERSE),
+        uni.minOrder(),
+        uni.maxOrder(),
+        uni.minPayout(),
+        uni.maxPayout()
       ]);
-const b = parseFloat(ethers.utils.formatUnits(bal, 18));
-      const minK = parseFloat(ethers.utils.formatUnits(minO, 18));
-      const maxK = parseFloat(ethers.utils.formatUnits(maxO, 18));
-      const trigK = parseFloat(ethers.utils.formatUnits(trig, 18));
-      const floorK = parseFloat(ethers.utils.formatUnits(floor, 18));
-      const roundK = parseFloat(ethers.utils.formatUnits(roundT, 18));
-const t = parseFloat(trigK.toFixed(2));
-      const baseF = parseFloat(floorK.toFixed(2));
 
-const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
-      const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
+      const poolBal = parseFloat(ethers.utils.formatUnits(poolBalRaw, 18));
+      const userBal = parseFloat(ethers.utils.formatUnits(userBalRaw, 18));
+      const allowance = parseFloat(ethers.utils.formatUnits(allowanceRaw, 18));
 
-      (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
+      // UI: wallet + allowance
+      const wa = document.getElementById('w3-wallet'); if(wa) wa.textContent = addr;
+      const ub = document.getElementById('w3-userbal'); if(ub) ub.textContent = userBal.toFixed(4) + ' KGEN';
+      const al = document.getElementById('w3-allow'); if(al) al.textContent = allowance.toFixed(4) + ' KGEN';
 
-const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
-      app.setProgress(pct/100);
+      // UI: pool
+      const pb = document.getElementById('w3-pool'); if(pb) pb.textContent = poolBal.toFixed(4) + ' KGEN';
+
+      // progress bar (16888 -> 1688)
+      const minPayout = parseFloat(ethers.utils.formatUnits(minPayoutRaw, 18));
+      const maxPayout = parseFloat(ethers.utils.formatUnits(maxPayoutRaw, 18));
+      const pct = (poolBal - minPayout) / Math.max(1e-9, (maxPayout - minPayout));
+      const pctClamped = Math.max(0, Math.min(1, pct));
+      const p = document.getElementById('prog'); if(p) p.style.width = (pctClamped*100).toFixed(1)+'%';
+      const pt = document.getElementById('progText'); if(pt) pt.textContent = (minPayout + (maxPayout-minPayout)*pctClamped).toFixed(2) + ' / ' + minPayout.toFixed(0) + ' → ' + maxPayout.toFixed(0) + '  ' + (pctClamped*100).toFixed(1) + '%';
+
+      // store limits for validator
+      this._minOrder = parseFloat(ethers.utils.formatUnits(minOrderRaw,18));
+      this._maxOrder = parseFloat(ethers.utils.formatUnits(maxOrderRaw,18));
+
     }catch(e){
-      console.warn(e);
+      console.error(e);
+      const pb = document.getElementById('w3-pool'); if(pb) pb.textContent='--';
     }
   },
 
