@@ -2,15 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.17</title>
-      <meta property="og:type" content="website">
-  <meta property="og:title" content="KGEN 16888 廣寒宮">
-  <meta property="og:description" content="KGEN 16888 自我演化金融生命體｜廣寒宮">
-  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.5</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -194,7 +187,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.17</div>
+        <div class="sys-st" id="ver-st">VERSION v2.11</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -262,7 +255,7 @@
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
     <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
-    <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
+    <div>Universe V5.1.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
     <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
@@ -281,19 +274,6 @@
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
       <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
       <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <div style="font-size:11px; opacity:.85;">月下老人抽籤 A / B：</div>
-        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">A</div>
-        <div id="mt-a" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('A')">用A</button>
-      </div>
-      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:-2px;">
-        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">B</div>
-        <div id="mt-b" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('B')">用B</button>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.pickAB()">重抽</button>
-      </div>
-
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
     </div>
@@ -312,7 +292,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.17";
+const APP_VERSION = "v2.16.5";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -354,21 +334,7 @@ const app = {
         this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
-        
-async function initAutoConnect() {
-  try {
-    if (!window.ethereum) return;
-    const accs = await window.ethereum.request({ method: 'eth_accounts' });
-    if (accs && accs.length) {
-      await web3.connect();
-      web3.renderMode && web3.renderMode();
-    }
-  } catch (e) {
-    console.log('autoConnect skip', e);
-  }
-}
-
-window.addEventListener('resize', ()=>this.onResize(), {passive:true});
+        window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
 
@@ -455,7 +421,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <ol>
             <li>切到 <b>BNB Chain</b>。</li>
             <li>點 <b>Custom</b>。</li>
-            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0x…）。</li>
             <li>按下一步，確認 Symbol / Decimals 後加入。</li>
           </ol>
           <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
@@ -1000,12 +966,9 @@ speak(m){
     }
 };
 
-window.onload = () => {
-  app.init();
-  initAutoConnect();
+window.onload = () => app.init();
   // auto concierge on first visit
-  try { setTimeout(() => app.openGuide('intro'), 800); } catch (_) { }
-};
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
 
 <script>
@@ -1018,15 +981,15 @@ const web3 = {
   provider: null,
   signer: null,
   addr: null,
-  demo: true,
+  demo: false,
 
   // 固定 Token（你給的）
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
   // 你部署後填上（會自動記到 localStorage）
-  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_20_0
 
-  // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
+  // 最小 ABI（對齊 Universe V5.1.0：入池 + 下單 + 查詢 + 事件）
   abiERC20: [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
@@ -1061,19 +1024,6 @@ const web3 = {
   cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
   cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
 
-      async ensureAllowance(amountBN) {
-        if (this.demo) return;
-        const cKGEN = this.cKGEN();
-        const allowance = await cKGEN.allowance(this.account, this.UNIVERSE);
-        if (allowance.gte(amountBN)) return;
-        app.speak('需要先授權一次 KGEN 給廣寒宮合約，請在錢包確認。');
-        const tx = await cKGEN.approve(this.UNIVERSE, ethers.constants.MaxUint256);
-        app.toast('Approve 已送出，等待確認…');
-        await tx.wait();
-        app.speak('授權完成。');
-      },
-
-
   load(){
     try{
       const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
@@ -1097,18 +1047,7 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
     app.speak("Universe 合約地址已設定。");
   },
 
-  renderMode() {
-      const m = document.getElementById('w3Mode');
-      const b = document.getElementById('btnMode');
-      const isDemo = !!this.demo;
-      if (m) m.textContent = isDemo ? 'DEMO' : 'LIVE';
-      if (b) b.textContent = isDemo ? '🎮 DEMO' : '🛰 LIVE';
-      // Approve button only in Live (fallback)
-      const ap = document.getElementById('btnApprove');
-      if (ap) ap.style.display = isDemo ? 'none' : 'none';
-    },
-
-    async connect(){
+  async connect(){
     try{
       if(!window.ethereum){
         this.demo = true;
@@ -1120,15 +1059,12 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
-      this.pickAB();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
-      // 不強制切到 Live；由右側模式鍵切換
-      // this.demo = false;
+      this.demo = false;
       this.ui();
-      this.renderMode();
       await this.refresh();
       await this.bindEvents();
-      app.speak("錢包已連線。預設維持 Demo 模式；若要送出鏈上交易，請切換到 Live。");
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
       console.error(e);
       this.demo = true;
@@ -1145,37 +1081,7 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState: { pool: 16888, target: 16888, base: 1688 },
-
-  // ===== 月下老人抽籤（前端 Demo / UI 輔助）=====
-  ab: { A: '-', B: '-' },
-  _demoABPool: [
-    // 這裡只是 Demo 候選池；實際上線後會逐步換成合約事件/參與者池
-    '0x1111111111111111111111111111111111111111',
-    '0x2222222222222222222222222222222222222222',
-    '0x3333333333333333333333333333333333333333',
-    '0x4444444444444444444444444444444444444444',
-    '0x5555555555555555555555555555555555555555'
-  ],
-  pickAB() {
-    // deterministic-ish seed: local time + wallet + progress
-    const seedStr = `${Date.now()}|${this.addr||'0x0'}|${this.demoState?.pool||0}`;
-    let h = 0; for (let i=0;i<seedStr.length;i++) h = (h*31 + seedStr.charCodeAt(i)) >>> 0;
-    const pool = (this.participants && this.participants.length>=2) ? this.participants : this._demoABPool;
-    const a = pool[h % pool.length];
-    const b = pool[(h * 7 + 13) % pool.length];
-    this.ab.A = a;
-    this.ab.B = (b.toLowerCase() === a.toLowerCase()) ? pool[(h * 11 + 17) % pool.length] : b;
-    const elA = document.getElementById('mt-a');
-    const elB = document.getElementById('mt-b');
-    if (elA) elA.textContent = this.ab.A;
-    if (elB) elB.textContent = this.ab.B;
-  },
-  fillPartner(which) {
-    const addr = (which==='A') ? this.ab.A : this.ab.B;
-    const inp = document.getElementById('mt-partner');
-    if (inp && addr && addr.startsWith('0x') && addr.length===42) inp.value = addr;
-  },
+  demoState: { pool: 8888, target: 16888, base: 8888 },
   demoRefresh(){
     const b = this.demoState.pool;
     const t = this.demoState.target;
@@ -1184,7 +1090,6 @@ const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2
     (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
 const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
-    this.pickAB();
   },
 
   demoDeposit(amt){
@@ -1226,17 +1131,14 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
     }
   },
 
-  async ritualDeposit() {
-      if (this.demo) {
-        app.speak('Demo 模式：許願入池只會模擬，不會送出鏈上交易。');
-        this.demoWish();
-        return;
-      }
-
+  async ritualDeposit(){
     try{
       const amt = this.parseAmt();
-      // demo 也要顯示錢包餘額（若已連錢包）
-
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
       const uni = this.cUNI();
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
@@ -1251,15 +1153,12 @@ app.speak("點燈已入池。");
   },
 
   async place(side){
-    // DEMO: 不送鏈上交易，只做模擬
-    if (this.demo) {
-      this.demoOrder(side===0?0:1);
-      return;
-    }
     try{
       const amt = this.parseAmt();
-      // demo 也要顯示錢包餘額（若已連錢包）
-
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
       const uni = this.cUNI();
       const tx = await uni.placeOrder(side, amt);
@@ -1269,14 +1168,16 @@ app.speak("點燈已入池。");
       app.speak("本次對賭已結算。");
     }catch(e){
       console.error(e);
-      app.speak('下單失敗。若要送交易，請先切換到 Live。');
+      alert(e.message || "下單失敗");
     }
   },
 
   async refresh(){
     try{
-      // demo 也要顯示錢包餘額（若已連錢包）
-
+      if(this.demo){
+        this.demoRefresh();
+        return;
+      }
       if(!this.UNIVERSE || !this.provider){
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
