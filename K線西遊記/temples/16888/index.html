@@ -5,8 +5,213 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.13</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.14</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+/* === PATCH v2.16.14: Auto-approve + user balance/allowance + voice by button + demo simulation === */
+(function(){
+  const el = (id)=>document.getElementById(id);
+  const setTxt = (id, v)=>{ const x=el(id); if(x) x.innerText = v; };
+  const fmt4 = (n)=> (isFinite(n)? Number(n).toFixed(4) : '--');
+
+  const VOICE = {
+    connect: "連結錢包。請確認你在 BNB Chain，並且錢包裡有 KLINE GENESIS，也就是 K G E N。",
+    wish: "許願轉八八八八。這是把 K G E N 放入高老莊八八八八的儀式入口。第一次需要授權，之後一鍵送出。",
+    vow: "立誓。把你的誓約刻在鏈上，這是宇宙的契約紀錄。",
+    pickab: "月下老人配對。你可以選擇 A 或 B，並把兩個地址登記為姻緣標記。",
+    fillA: "把目前錢包地址填入 A 位址。",
+    fillB: "把目前錢包地址填入 B 位址。",
+    claim: "領取姻緣結果。如果條件未到，會提示你。",
+    orderUp: "下單上。輸入你要下注的 K G E N 數量。第一次下單需要授權，之後就可以一鍵下單。",
+    orderDown: "下單下。輸入你要下注的 K G E N 數量。第一次下單需要授權，之後就可以一鍵下單。",
+    photo: "拍照存證。會把你此刻畫面保存。",
+    rec: "廣寒宮誓約留影錄影。再次點擊可停止。",
+    cam: "切換鏡頭。",
+    autohunt: "自動巡航打怪。這是演示用自動動作。",
+    wheel: "方向盤模式。切換操作方式。",
+    audio: "開啟音效與客服語音。"
+  };
+
+  window.__kline_voice = function(key){
+    try{
+      if(window.app && typeof app.speak === "function"){
+        const t = VOICE[key] || "";
+        if(t) app.speak(t);
+      }
+    }catch(e){}
+  };
+
+  if(!window.web3) return;
+
+  const _connect = web3.connect?.bind(web3);
+  const _refresh = web3.refresh?.bind(web3);
+
+  // add: read user balance + allowance
+  web3.refreshUser = async function(){
+    try{
+      if(this.demo){
+        const demoBal = Number(localStorage.getItem("KLINE_DEMO_USERBAL") || "6412.62425");
+        const demoAllow = localStorage.getItem("KLINE_DEMO_ALLOW") || "MAX";
+        setTxt("userBal", fmt4(demoBal));
+        setTxt("userAllowance", demoAllow === "MAX" ? "MAX" : fmt4(Number(demoAllow)));
+        return;
+      }
+      if(!this.cKGEN || !this.account) return;
+
+      const [ub, al] = await Promise.all([
+        this.cKGEN.balanceOf(this.account),
+        this.cKGEN.allowance(this.account, this.UNIVERSE)
+      ]);
+      const ubf = parseFloat(ethers.utils.formatUnits(ub, 18));
+      const alf = parseFloat(ethers.utils.formatUnits(al, 18));
+      setTxt("userBal", fmt4(ubf));
+      setTxt("userAllowance", (alf > 1e15) ? "MAX" : fmt4(alf));
+    }catch(e){
+      console.warn("refreshUser fail", e);
+      setTxt("userBal", "--");
+      setTxt("userAllowance", "--");
+    }
+  };
+
+  // patch connect
+  web3.connect = async function(){
+    window.__kline_voice("connect");
+    const r = await _connect();
+    try{
+      if(!this.demo && this.signer){
+        this.account = await this.signer.getAddress();
+      }
+      const ap = el("btn-approve");
+      if(ap) ap.style.display = "none";
+      await this.refresh();
+      await this.refreshUser();
+    }catch(e){}
+    return r;
+  };
+
+  // patch refresh
+  web3.refresh = async function(){
+    const r = await _refresh();
+    await this.refreshUser();
+    return r;
+  };
+
+  // approve max helper
+  web3.approveMax = async function(){
+    if(this.demo){
+      localStorage.setItem("KLINE_DEMO_ALLOW", "MAX");
+      app.toast("DEMO: 已授權 MAX");
+      return {hash:"0xDEMO", wait: async()=>({status:1})};
+    }
+    const amt = ethers.constants.MaxUint256;
+    app.toast("送出授權（只需一次）…");
+    const tx = await this.cKGEN.approve(this.UNIVERSE, amt);
+    return tx;
+  };
+
+  // override approve() to max
+  web3.approve = async function(){
+    window.__kline_voice("orderUp");
+    const tx = await this.approveMax();
+    try{ await tx.wait(); }catch(e){}
+    await this.refreshUser();
+    app.toast("✅ 授權完成");
+    return tx;
+  };
+
+  // patch place with auto-approve & friendly errors
+  web3.place = async function(side){
+    try{
+      window.__kline_voice(side===0 ? "orderUp" : "orderDown");
+
+      const amtWei = this.parseAmt();
+      const amtNum = parseFloat(ethers.utils.formatUnits(amtWei, 18));
+      if(!amtNum || amtNum<=0){
+        app.toast("請先輸入下單金額（KGEN）");
+        return;
+      }
+
+      if(this.demo){
+        // demo: simulate pool decrease but not below 1688
+        const cur = Number(localStorage.getItem("KLINE_DEMO_POOL") || "8888");
+        const nxt = Math.max(1688, cur - amtNum);
+        localStorage.setItem("KLINE_DEMO_POOL", String(nxt));
+        if(typeof this.demoRefresh === "function") this.demoRefresh();
+        app.toast(`DEMO：${side===0?"UP":"DOWN"} 下單 ${amtNum} KGEN（不送交易）`);
+        return;
+      }
+
+      if(!this.account) this.account = await this.signer.getAddress();
+
+      // balance + allowance
+      const [ub, al] = await Promise.all([
+        this.cKGEN.balanceOf(this.account),
+        this.cKGEN.allowance(this.account, this.UNIVERSE)
+      ]);
+      const ubf = parseFloat(ethers.utils.formatUnits(ub, 18));
+      const alf = parseFloat(ethers.utils.formatUnits(al, 18));
+
+      if(ubf + 1e-12 < amtNum){
+        app.toast(`餘額不足：你只有 ${fmt4(ubf)} KGEN`);
+        return;
+      }
+
+      if(alf + 1e-12 < amtNum){
+        app.toast("第一次下單需要授權（只需一次）");
+        const txA = await this.approveMax();
+        app.toast("等待授權確認…");
+        await txA.wait();
+      }
+
+      app.toast("送出下單交易…");
+      const tx = await this.c.placeOrder(side, amtWei);
+      app.toast("等待鏈上確認…");
+      await tx.wait();
+      app.toast("✅ 下單完成");
+      await this.refresh();
+    }catch(e){
+      console.warn(e);
+      const msg = (e && (e.reason || e.message)) ? String(e.reason || e.message) : "交易失敗";
+      if(msg.includes("TRANSFERFROM_FAIL") || msg.includes("insufficient allowance")){
+        app.toast("交易被拒絕：通常是未授權或授權不足。請重新下單，系統會自動先授權。");
+      }else if(msg.toLowerCase().includes("user rejected") || msg.toLowerCase().includes("rejected")){
+        app.toast("你已取消交易");
+      }else{
+        app.toast("交易失敗：" + msg.slice(0, 140));
+      }
+    }
+  };
+
+  // voice bindings
+  window.addEventListener("DOMContentLoaded", ()=>{
+    const bind = (id, key)=>{
+      const b = el(id);
+      if(!b) return;
+      b.addEventListener("click", ()=>window.__kline_voice(key), {capture:true});
+    };
+    bind("btn-connect","connect");
+    bind("btn-wish","wish");
+    bind("btn-wish-deposit","wish");
+    bind("btn-vow","vow");
+    bind("btn-pickab","pickab");
+    bind("btn-fill-a","fillA");
+    bind("btn-fill-b","fillB");
+    bind("btn-claim-wedding","claim");
+    bind("btn-up","orderUp");
+    bind("btn-down","orderDown");
+    bind("btn-photo","photo");
+    bind("btn-rec","rec");
+    bind("btn-cam-user","cam");
+    bind("btn-cam-env","cam");
+    bind("btn-autohunt","autohunt");
+    bind("btn-wheel","wheel");
+    bind("btn-audio","audio");
+
+    // also: when page loads and already in demo, show demo balances
+    setTimeout(()=>{ try{ if(window.web3) web3.refreshUser(); }catch(e){} }, 500);
+  });
+})();
+
+</script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -182,7 +387,11 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-#btn-approve{display:none;}
+/* === PATCH v2.16.14: UX + Voice + Balance === */
+#btn-approve { display:none !important; } /* auto-approve flow */
+#wallet-box, #w3-box, .w3-box { word-break: break-all; }
+#w3-addr, #w3-uni, #w3-token, #w3-wallet, #w3-bal, #w3-allow { word-break: break-all; }
+
 </style>
 </head>
 <body>
@@ -192,7 +401,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.13</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.14</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -250,7 +459,7 @@
 <div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
-    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="app.speak('正在連結錢包。請在錢包確認連線。');web3.connect()">🔌 連結錢包</button>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()" id="btn-connect">🔌 連結錢包</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -268,10 +477,10 @@
 
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
     <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
-    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.speak('下單 UP：押注能量向上。');web3.place(0)">📈 下單 UP</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.speak('下單 DOWN：押注能量向下。');web3.place(1)">📉 下單 DOWN</button>
-    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
+    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()" id="btn-approve">✅ Approve</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)" id="btn-up">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)" id="btn-down">📉 下單 DOWN</button>
+    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()" id="btn-wish-deposit">🧧 許願/還願/點燈 → 入池</button>
   </div>
 
   <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
@@ -283,34 +492,34 @@
         <div style="font-size:11px; opacity:.85;">月下老人抽籤 A / B：</div>
         <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">A</div>
         <div id="mt-a" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('A')">用A</button>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('A')" id="btn-fill-a">用A</button>
       </div>
       <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:-2px;">
         <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">B</div>
         <div id="mt-b" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('B')">用B</button>
-        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.pickAB()">重抽</button>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('B')" id="btn-fill-b">用B</button>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.pickAB()" id="btn-pickab">重抽</button>
       </div>
 
-      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
-      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()" id="btn-vow">💍 表態轉帳（1~2 KGEN）</button>
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()" id="btn-claim-wedding">🎁 領紅包托管（需雙方表態）</button>
     </div>
   </div>
 </div>
 
 <div class="footer-terminal">
-    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+    <button class="term-btn" onclick="app.capture()" id="btn-photo">📸 拍照存證</button>
     <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
-    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
-    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
+    <button class="term-btn" onclick="app.cam('user')" id="btn-cam-user">🤳 前鏡自拍</button>
+    <button class="term-btn" onclick="app.cam('environment')" id="btn-cam-env">🌌 後鏡巡航</button>
     <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
-    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
-    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
-    <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()" id="btn-autohunt">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="app.setWish()" id="btn-wish">👤 許願/還願</button>
+    <button class="term-btn" onclick="app.toggleWheel()" id="btn-wheel">🎡 方向盤模式</button>
 </div>
 
 <script>
-const APP_VERSION = "v2.16.13";
+const APP_VERSION = "v2.16.14";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -984,21 +1193,9 @@ speak(m){
     }
 };
 
-window.onload = () => {
-    app.init();
-    // auto concierge on first visit
-    try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){}
-
-    // 全按鍵語音客服：點擊任何按鈕就讀出對應說明（可用 data-voice 自訂）
-    try{
-      document.querySelectorAll('button, .btn, a.btn').forEach(el=>{
-        el.addEventListener('click', ()=>{
-          const txt = (el.getAttribute('data-voice') || el.getAttribute('aria-label') || el.innerText || '').trim();
-          if(txt) app.speak(txt);
-        }, {passive:true});
-      });
-    }catch(_){}
-  };
+window.onload = () => app.init();
+  // auto concierge on first visit
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
 
 <script>
@@ -1112,7 +1309,7 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState:{ pool:16888.0, target:16888.0, base:1688.0 },
+  demoState: { pool: 8888, target: 16888, base: 8888 },
 
   // ===== 月下老人抽籤（前端 Demo / UI 輔助）=====
   ab: { A: '-', B: '-' },
@@ -1163,11 +1360,17 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
 
   demoOrder(side, amt){
     const a = parseFloat(ethers.utils.formatUnits(amt,18));
-    // Demo 規則：每次投胎都讓池往 1688 靠近（讓玩家看到「能量下沉」）
-    this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    // 簡化：直接 50/50
+    const win = Math.random() < 0.5;
+    const payout = win ? a*2 : 0;
+    if(win){
+      // pool pay profit portion only in demo
+      this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    }else{
+      this.demoState.pool += a;
+    }
     this.demoRefresh();
-    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜POOL→${this.demoState.pool.toFixed(2)}`);
-    app.speak(`已在 Demo 模式下單 ${a.toFixed(0)} KGEN。Demo 只做演示，不上鏈。`);
+    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜${win?"WIN":"LOSE"}｜payout ${payout.toFixed(2)}`);
   },
 
   // ===== LIVE =====
@@ -1208,73 +1411,25 @@ app.speak("點燈已入池。");
     }
   },
 
-  async ensureAllowance(amtWei){
-      // 只在需要時做一次 Max 授權，之後下單只需 1 次簽名（交易）。
-      const k = this.cKGEN();
-      const cur = await k.allowance(this.addr, this.UNIVERSE_ADDR);
-      if(cur.gte(amtWei)) return;
-      app.speak("第一次下單需要授權 KGEN 給 Universe。這是一次性的設定。");
-      const tx = await k.approve(this.UNIVERSE_ADDR, ethers.constants.MaxUint256);
-      app.toast("正在授權…請在錢包確認");
-      await tx.wait();
-      app.toast("授權完成");
-    },
-
-    async place(side){
-      const amtEl = document.getElementById("orderAmt");
-      const s = (amtEl?amtEl.value:"").trim();
-      const a = this.safeParseAmt(s);
-      if(!a || a.lte(0)){
-        app.toast("請輸入下單金額（KGEN）");
-        app.speak("請先輸入下單金額。");
-        return;
-      }
-
-      // Demo：不上鏈，直接演示池下沉到 1688
+  async place(side){
+    try{
+      const amt = this.parseAmt();
       if(this.demo){
-        this.demoOrder(side, a);
+        this.demoOrder(side, amt);
         return;
       }
-
-      if(!this.signer || !this.addr){
-        app.toast("請先連結錢包");
-        app.speak("請先連結錢包，才可以下單。");
-        return;
-      }
-
-      try{
-        // 先檢查餘額
-        const k = this.cKGEN();
-        const bal = await k.balanceOf(this.addr);
-        if(bal.lt(a)){
-          app.toast("KGEN 餘額不足");
-          app.speak("你的 KGEN 餘額不足，請降低金額或先補充 KGEN。");
-          return;
-        }
-
-        // 自動授權（若已授權則不會跳第二次）
-        await this.ensureAllowance(a);
-
-        app.speak(side===0 ? "已選擇下單上漲。請在錢包確認交易。" : "已選擇下單下跌。請在錢包確認交易。");
-        const u = this.cUniverse();
-        const tx = await u.ritualDeposit(side, a);
-        app.toast("送出交易…等待鏈上確認");
-        await tx.wait();
-        app.toast("下單成功");
-        await this.refresh();
-      }catch(e){
-        const msg = (e && (e.reason || e.message)) ? String(e.reason || e.message) : "交易失敗";
-        // 常見：TRANSFERFROM_FAIL / unpredictable gas
-        if(msg.includes("TRANSFERFROM_FAIL") || msg.includes("UNPREDICTABLE_GAS_LIMIT") || msg.includes("cannot estimate gas")){
-          app.toast("下單失敗：通常是授權不足或合約條件不符");
-          app.speak("下單失敗。通常是授權不足，或合約目前不接受這筆金額。你可以先確認金額不超過餘額，並再試一次。");
-        }else{
-          app.toast("下單失敗");
-          app.speak("下單失敗，請稍後再試。");
-        }
-        console.error(e);
-      }
-    },
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("本次對賭已結算。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "下單失敗");
+    }
+  },
 
   async refresh(){
     try{
@@ -1310,26 +1465,6 @@ const t = parseFloat(trigK.toFixed(2));
       const baseF = parseFloat(floorK.toFixed(2));
 
 const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
-
-      // Wallet KGEN balance & allowance
-      const ub = document.getElementById("userBal");
-      const ua = document.getElementById("userAllowance");
-      if(this.addr && this.provider){
-        try{
-          const k = this.cKGEN();
-          const [balWei, allowWei] = await Promise.all([
-            k.balanceOf(this.addr),
-            k.allowance(this.addr, this.UNIVERSE_ADDR),
-          ]);
-          const bal = parseFloat(ethers.utils.formatUnits(balWei,18));
-          const alw = parseFloat(ethers.utils.formatUnits(allowWei,18));
-          if(ub) ub.innerText = `${bal.toFixed(4)} KGEN`;
-          if(ua) ua.innerText = `${alw.toFixed(4)} KGEN`;
-        }catch(e){
-          if(ub) ub.innerText = "—";
-          if(ua) ua.innerText = "—";
-        }
-      }
       const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
 
       (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
@@ -1374,7 +1509,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
-  <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()" id="btn-audio">🔊 開啟音效/說明</button>
 </div>
 
 
