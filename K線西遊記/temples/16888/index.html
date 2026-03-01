@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.21</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.22</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -179,15 +179,28 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 </style>
+<meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png"/>
 </head>
 <body>
+
+<div id="kgen-balance-panel" style="margin:10px 0;padding:10px;border:1px solid rgba(255,255,255,.25);border-radius:12px;">
+  <div style="font-weight:800;margin-bottom:6px;">Wallet / Pool Status</div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+    <div>Account: <span id="w3-account">-</span></div>
+    <div>KGEN Balance: <span id="w3-user-bal">-</span></div>
+    <div>Allowance: <span id="w3-user-allow">-</span></div>
+    <div>Pool Balance: <span id="w3-pool-bal">-</span></div>
+  </div>
+</div>
+
+
 
 
   <div id="brand-badge">K線西遊記・花果山台灣</div>
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.21</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.22</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -292,7 +305,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.21";
+const APP_VERSION = "v2.16.22";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1328,6 +1341,65 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     <div class="guide-body" id="guide-body"></div>
   </div>
 </div>
+
+
+<script>
+/* V2.16.22_BAL_REFRESH_PATCH */
+(function() {
+  const KGEN_ADDR = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const UNIVERSE_ADDR = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+  const FAIRY_ABS = "https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png";
+
+  function $(id) { return document.getElementById(id); }
+  function setText(id, v) { const el = $(id); if (el) el.textContent = v; }
+
+  const img = document.getElementById("fairyImg");
+  if (img) {
+    img.src = FAIRY_ABS;
+    img.onerror = () => { img.src = FAIRY_ABS; };
+  }
+
+  function fmt18(ethers, v) {
+    try { return Number(ethers.formatUnits(v, 18)).toLocaleString(undefined, { maximumFractionDigits: 4 }); }
+    catch (e) { return String(v); }
+  }
+
+  async function refreshBalances() {
+    try {
+      if (!window.ethers || !window.ethereum) return;
+      const provider = new window.ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const me = await signer.getAddress();
+      setText("w3-account", me);
+
+      const erc20 = new window.ethers.Contract(KGEN_ADDR, [
+        "function balanceOf(address) view returns (uint256)",
+        "function allowance(address,address) view returns (uint256)"
+      ], signer);
+
+      const [bal, allow, pool] = await Promise.all([
+        erc20.balanceOf(me),
+        erc20.allowance(me, UNIVERSE_ADDR),
+        erc20.balanceOf(UNIVERSE_ADDR),
+      ]);
+
+      setText("w3-user-bal", fmt18(window.ethers, bal));
+      setText("w3-user-allow", fmt18(window.ethers, allow));
+      setText("w3-pool-bal", fmt18(window.ethers, pool));
+    } catch (e) {
+      setText("w3-user-bal", "ERR");
+    }
+  }
+
+  if (window.ethereum && window.ethereum.on) {
+    window.ethereum.on("accountsChanged", refreshBalances);
+    window.ethereum.on("chainChanged", () => setTimeout(refreshBalances, 500));
+  }
+
+  refreshBalances();
+  setInterval(refreshBalances, 3000);
+})();
+</script>
 
 </body>
 </html>
