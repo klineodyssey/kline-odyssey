@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta property="og:image"
-content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" />
-    
     <meta charset="UTF-8">
-    <title>KGEN 16888｜自我演化金融生命體｜v2.09</title>
+    <title>KGEN 16888｜自我演化金融生命體｜v2.16</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -975,13 +972,13 @@ const web3 = {
   provider: null,
   signer: null,
   addr: null,
-  demo: true,
+  demo: false,
 
   // 固定 Token（你給的）
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
   // 你部署後填上（會自動記到 localStorage）
-  UNIVERSE: "", // KGEN_16888_Universe_V5_1_0
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_20_0
 
   // 最小 ABI（對齊 Universe V5.1.0：入池 + 下單 + 查詢 + 事件）
   abiERC20: [
@@ -991,14 +988,24 @@ const web3 = {
     "function decimals() external view returns (uint8)"
   ],
   abiUniverse: [
-    "function ritualDeposit(uint256 amount) external",
+    "function ritualDeposit(uint256 amount, bytes32 tag) external",
     "function placeOrder(uint8 side, uint256 amountIn) external",
     "function poolBalance() external view returns (uint256)",
-    "function targetPool() external view returns (uint256)",
-    "function basePool() external view returns (uint256)",
-    "event OrderPlaced(address indexed user,uint8 indexed side,uint256 amountIn,uint256 feeTotal,uint256 stake)",
-    "event OrderResolved(address indexed user,uint8 indexed side,uint8 outcome,bool win,uint256 payout)",
-    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 distributable,uint256 toTreasury,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint256 keepPool,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)"
+    "function canTriggerRound() external view returns (bool)",
+    "function minOrder() external view returns (uint256)",
+    "function maxOrder() external view returns (uint256)",
+    "function vowWindowSec() external view returns (uint32)",
+    "function loveWindowSec() external view returns (uint32)",
+    "function treasury8888() external view returns (address)",
+    "function kgen() external view returns (address)",
+    "function TRIGGER() external view returns (uint256)",
+    "function MIN_FLOOR() external view returns (uint256)",
+    "function ROUND_TOTAL() external view returns (uint256)",
+    "function configLocked() external view returns (bool)",
+    "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundTriggered(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 poolBefore)",
+    "event RitualDeposit(address indexed from,uint256 amount,bytes32 indexed tag)"
   ],
 
   // ===== helpers =====
@@ -1122,8 +1129,8 @@ const w3b=document.getElementById('w3-prog-bar'); if(w3b) w3b.style.width = pct.
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
       const uni = this.cUNI();
-      const tx = await uni.ritualDeposit(amt);
-      app.speak("點燈已入池。");
+      const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
+app.speak("點燈已入池。");
       await tx.wait();
       await this.refresh();
       app.speak("入池成功。");
@@ -1165,15 +1172,26 @@ const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
       }
       const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
-      const [bal, target, base] = await Promise.all([
+      const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
         uniR.poolBalance(),
-        uniR.targetPool(),
-        uniR.basePool()
+        uniR.canTriggerRound(),
+        uniR.minOrder(),
+        uniR.maxOrder(),
+        uniR.vowWindowSec(),
+        uniR.loveWindowSec(),
+        uniR.treasury8888(),
+        uniR.TRIGGER(),
+        uniR.MIN_FLOOR(),
+        uniR.ROUND_TOTAL()
       ]);
-
-      const b = parseFloat(ethers.utils.formatUnits(bal, 18));
-      const t = parseFloat(ethers.utils.formatUnits(target, 18));
-      const baseF = parseFloat(ethers.utils.formatUnits(base, 18));
+const b = parseFloat(ethers.utils.formatUnits(bal, 18));
+      const minK = parseFloat(ethers.utils.formatUnits(minO, 18));
+      const maxK = parseFloat(ethers.utils.formatUnits(maxO, 18));
+      const trigK = parseFloat(ethers.utils.formatUnits(trig, 18));
+      const floorK = parseFloat(ethers.utils.formatUnits(floor, 18));
+      const roundK = parseFloat(ethers.utils.formatUnits(roundT, 18));
+const t = parseFloat(trigK.toFixed(2));
+      const baseF = parseFloat(floorK.toFixed(2));
 
 const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
       const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
