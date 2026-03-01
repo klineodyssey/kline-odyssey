@@ -968,8 +968,6 @@ speak(m){
         speechSynthesis.speak(u);
       }catch(e){}
     },
-  voice(m){ try{ this.speak(m); }catch(e){} },
-
 
     // Progress helper (fix: app.setProgress is not a function)
     // ratio: 0..1
@@ -1166,60 +1164,59 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
 
   // ===== LIVE =====
   async approve(){
-    if(!this.signer) return;
-    const MAX = ethers.constants.MaxUint256;
-    const tx = await this.cK.approve(this.UNI, MAX);
-    app.toast('已送出授權交易（一次授權，後續下單不再重複授權）');
-    await tx.wait();
-    await this.refresh();
-  },
-  async ensureAllowance(need){
-    const alw = await this.cK.allowance(this.addr, this.UNI);
-    if(alw.gte(need)) return true;
-    await this.approve();
-    const alw2 = await this.cK.allowance(this.addr, this.UNI);
-    return alw2.gte(need);
+    if(this.demo) return alert("Demo 模式不需要 Approve");
+    if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+    try{
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, amt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+    }
   },
 
   async ritualDeposit(){
     try{
-      if(!this.addr) await this.connect();
       const amt = this.parseAmt();
-      if(amt.lte(0)) return app.toast('請先輸入許願金額');
-      const MIN = ethers.utils.parseUnits('1688', 18);
-      if(amt.lt(MIN)) return app.toast('最低許願金額為 1688 KGEN');
-      await this.ensureAllowance(amt);
-      const tx = await this.cU.ritualDeposit(amt);
-      app.toast('已送出許願交易，請等待上鏈…');
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
+app.speak("點燈已入池。");
       await tx.wait();
       await this.refresh();
+      app.speak("入池成功。");
     }catch(e){
       console.error(e);
-      const msg = (e?.error?.message || e?.data?.message || e?.reason || e?.message || '').toString();
-      if(msg.includes('TRANSFERFROM_FAIL')) app.toast('授權不足或餘額不足：請先授權一次（之後就不用再授權）。');
-      else if(msg.includes('UNPREDICTABLE_GAS_LIMIT')) app.toast('無法估算 Gas：通常是合約會 revert（時間窗/限額/授權/餘額）。');
-      else app.toast(msg.slice(0,120) || '交易失敗');
+      alert(e.message || "入池失敗");
     }
   },
 
   async place(side){
     try{
-      if(!this.addr) await this.connect();
       const amt = this.parseAmt();
-      if(amt.lte(0)) return app.toast('請先輸入下單金額');
-      const MIN = ethers.utils.parseUnits('1688', 18);
-      if(amt.lt(MIN)) return app.toast('最低下單金額為 1688 KGEN');
-      await this.ensureAllowance(amt);
-      const tx = await this.cU.place(side, amt);
-      app.toast('已送出下單交易，請在錢包確認並等待上鏈…');
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
       await tx.wait();
       await this.refresh();
+      app.speak("本次對賭已結算。");
     }catch(e){
       console.error(e);
-      const msg = (e?.error?.message || e?.data?.message || e?.reason || e?.message || '').toString();
-      if(msg.includes('TRANSFERFROM_FAIL')) app.toast('授權不足或餘額不足：請先授權一次（之後就不用再授權）。');
-      else if(msg.includes('UNPREDICTABLE_GAS_LIMIT')) app.toast('無法估算 Gas：通常是合約會 revert（時間窗/限額/授權/餘額）。');
-      else app.toast(msg.slice(0,120) || '交易失敗');
+      alert(e.message || "下單失敗");
     }
   },
 
