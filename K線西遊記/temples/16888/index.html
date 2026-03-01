@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -190,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.8</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -295,7 +295,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.7";
+const APP_VERSION = "v2.16.8";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -972,9 +972,71 @@ speak(m){
 window.onload = () => app.init();
   // auto concierge on first visit
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
+<!-- ====================
+  月下老人（16888 觸發）
+==================== -->
+<div id="moonModal" class="guide-modal" style="display:none;">
+  <div class="guide-card" style="max-width:720px;">
+    <div class="guide-top">
+      <div class="guide-title">月下老人｜紅線已落</div>
+      <button class="guide-close" id="moonCloseBtn">×</button>
+    </div>
+    <div class="guide-body">
+      <div style="font-weight:900; color:var(--gold); margin-bottom:8px;">觸發條件：Pool ≥ 16888</div>
+      <div style="opacity:.92; line-height:1.6; margin-bottom:10px;">
+        這一刻，月下老人從廣寒宮走出，抽出兩個地址（A / B）。<br/>
+        它們被記為 <b>DNA / RNA</b>，作為宇宙後續劇情與獎池路徑的「天命對位」。
+      </div>
+
+      <div style="display:grid; gap:10px; margin:12px 0;">
+        <div style="padding:10px 12px; border:1px solid rgba(255,215,119,.25); border-radius:12px; background:rgba(0,0,0,.35);">
+          <div style="font-weight:900; color:var(--cyan);">Address A（DNA）</div>
+          <div id="moonAddrA" style="word-break:break-all; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></div>
+        </div>
+        <div style="padding:10px 12px; border:1px solid rgba(255,215,119,.25); border-radius:12px; background:rgba(0,0,0,.35);">
+          <div style="font-weight:900; color:var(--cyan);">Address B（RNA）</div>
+          <div id="moonAddrB" style="word-break:break-all; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></div>
+        </div>
+      </div>
+
+      <div style="opacity:.9;">
+        • Live：會用合約事件/狀態（若尚未上鏈事件，先以畫面記錄 + 黑盒紀錄為準）<br/>
+        • Demo：會由系統隨機抽取兩個地址，供你演示劇情流程
+      </div>
+    </div>
+  </div>
+</div>
+
 </script>
 
 <script>
+
+/* ===========================
+   月下老人（16888 觸發 UI）
+=========================== */
+function randAddress(){
+  const hex = "0123456789abcdef";
+  let out = "0x";
+  for(let i=0;i<40;i++) out += hex[Math.floor(Math.random()*16)];
+  return out;
+}
+function showMoonModal(addrA, addrB){
+  const m = document.getElementById("moonModal");
+  const a = document.getElementById("moonAddrA");
+  const b = document.getElementById("moonAddrB");
+  if(!m || !a || !b) return;
+  a.textContent = addrA || "-";
+  b.textContent = addrB || "-";
+  m.style.display = "flex";
+}
+function hideMoonModal(){
+  const m = document.getElementById("moonModal");
+  if(m) m.style.display = "none";
+}
+document.addEventListener("click", (e)=>{
+  if(e.target && (e.target.id==="moonCloseBtn" || e.target.id==="moonModal")) hideMoonModal();
+});
+
 /* ===========================
    WEB3 合約對齊（PoolDuel + MoonTrust）
    - PoolDuel：下單即真成交，輸贏在池內即時結算
@@ -1084,11 +1146,23 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoState: { pool: 1688, target: 16888, base: 1688 },
   demoRefresh(){
     const b = this.demoState.pool;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
+
+    // 月下老人觸發（Demo）：池達 16888 抽兩個地址（A/B）
+    try{
+      if(!this.demoMoon){ this.demoMoon = { triggered:false, a:null, b:null }; }
+      if(!this.demoMoon.triggered && Number(this.demoState.pool) >= Number(this.demoState.target)){
+        this.demoMoon.triggered = true;
+        this.demoMoon.a = randAddress();
+        this.demoMoon.b = randAddress();
+        showMoonModal(this.demoMoon.a, this.demoMoon.b);
+        try{ this.bbEvent("moonwedding_trigger", { a:this.demoMoon.a, b:this.demoMoon.b, atPool:this.demoState.pool }); }catch(_){}
+      }
+    }catch(_){}
 const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
     (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
 const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
