@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.8</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -190,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.8</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.9</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -277,6 +277,19 @@
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
       <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
       <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div style="font-size:11px; opacity:.85;">月下老人抽籤 A / B：</div>
+        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">A</div>
+        <div id="mt-a" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('A')">用A</button>
+      </div>
+      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:-2px;">
+        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">B</div>
+        <div id="mt-b" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('B')">用B</button>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.pickAB()">重抽</button>
+      </div>
+
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
     </div>
@@ -295,7 +308,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.8";
+const APP_VERSION = "v2.16.9";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -972,71 +985,9 @@ speak(m){
 window.onload = () => app.init();
   // auto concierge on first visit
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
-<!-- ====================
-  月下老人（16888 觸發）
-==================== -->
-<div id="moonModal" class="guide-modal" style="display:none;">
-  <div class="guide-card" style="max-width:720px;">
-    <div class="guide-top">
-      <div class="guide-title">月下老人｜紅線已落</div>
-      <button class="guide-close" id="moonCloseBtn">×</button>
-    </div>
-    <div class="guide-body">
-      <div style="font-weight:900; color:var(--gold); margin-bottom:8px;">觸發條件：Pool ≥ 16888</div>
-      <div style="opacity:.92; line-height:1.6; margin-bottom:10px;">
-        這一刻，月下老人從廣寒宮走出，抽出兩個地址（A / B）。<br/>
-        它們被記為 <b>DNA / RNA</b>，作為宇宙後續劇情與獎池路徑的「天命對位」。
-      </div>
-
-      <div style="display:grid; gap:10px; margin:12px 0;">
-        <div style="padding:10px 12px; border:1px solid rgba(255,215,119,.25); border-radius:12px; background:rgba(0,0,0,.35);">
-          <div style="font-weight:900; color:var(--cyan);">Address A（DNA）</div>
-          <div id="moonAddrA" style="word-break:break-all; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></div>
-        </div>
-        <div style="padding:10px 12px; border:1px solid rgba(255,215,119,.25); border-radius:12px; background:rgba(0,0,0,.35);">
-          <div style="font-weight:900; color:var(--cyan);">Address B（RNA）</div>
-          <div id="moonAddrB" style="word-break:break-all; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></div>
-        </div>
-      </div>
-
-      <div style="opacity:.9;">
-        • Live：會用合約事件/狀態（若尚未上鏈事件，先以畫面記錄 + 黑盒紀錄為準）<br/>
-        • Demo：會由系統隨機抽取兩個地址，供你演示劇情流程
-      </div>
-    </div>
-  </div>
-</div>
-
 </script>
 
 <script>
-
-/* ===========================
-   月下老人（16888 觸發 UI）
-=========================== */
-function randAddress(){
-  const hex = "0123456789abcdef";
-  let out = "0x";
-  for(let i=0;i<40;i++) out += hex[Math.floor(Math.random()*16)];
-  return out;
-}
-function showMoonModal(addrA, addrB){
-  const m = document.getElementById("moonModal");
-  const a = document.getElementById("moonAddrA");
-  const b = document.getElementById("moonAddrB");
-  if(!m || !a || !b) return;
-  a.textContent = addrA || "-";
-  b.textContent = addrB || "-";
-  m.style.display = "flex";
-}
-function hideMoonModal(){
-  const m = document.getElementById("moonModal");
-  if(m) m.style.display = "none";
-}
-document.addEventListener("click", (e)=>{
-  if(e.target && (e.target.id==="moonCloseBtn" || e.target.id==="moonModal")) hideMoonModal();
-});
-
 /* ===========================
    WEB3 合約對齊（PoolDuel + MoonTrust）
    - PoolDuel：下單即真成交，輸贏在池內即時結算
@@ -1124,6 +1075,7 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
+      this.pickAB();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
       this.ui();
@@ -1146,27 +1098,46 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState: { pool: 1688, target: 16888, base: 1688 },
+  demoState: { pool: 8888, target: 16888, base: 8888 },
+
+  // ===== 月下老人抽籤（前端 Demo / UI 輔助）=====
+  ab: { A: '-', B: '-' },
+  _demoABPool: [
+    // 這裡只是 Demo 候選池；實際上線後會逐步換成合約事件/參與者池
+    '0x1111111111111111111111111111111111111111',
+    '0x2222222222222222222222222222222222222222',
+    '0x3333333333333333333333333333333333333333',
+    '0x4444444444444444444444444444444444444444',
+    '0x5555555555555555555555555555555555555555'
+  ],
+  pickAB() {
+    // deterministic-ish seed: local time + wallet + progress
+    const seedStr = `${Date.now()}|${this.addr||'0x0'}|${this.demoState?.pool||0}`;
+    let h = 0; for (let i=0;i<seedStr.length;i++) h = (h*31 + seedStr.charCodeAt(i)) >>> 0;
+    const pool = (this.participants && this.participants.length>=2) ? this.participants : this._demoABPool;
+    const a = pool[h % pool.length];
+    const b = pool[(h * 7 + 13) % pool.length];
+    this.ab.A = a;
+    this.ab.B = (b.toLowerCase() === a.toLowerCase()) ? pool[(h * 11 + 17) % pool.length] : b;
+    const elA = document.getElementById('mt-a');
+    const elB = document.getElementById('mt-b');
+    if (elA) elA.textContent = this.ab.A;
+    if (elB) elB.textContent = this.ab.B;
+  },
+  fillPartner(which) {
+    const addr = (which==='A') ? this.ab.A : this.ab.B;
+    const inp = document.getElementById('mt-partner');
+    if (inp && addr && addr.startsWith('0x') && addr.length===42) inp.value = addr;
+  },
   demoRefresh(){
     const b = this.demoState.pool;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
-
-    // 月下老人觸發（Demo）：池達 16888 抽兩個地址（A/B）
-    try{
-      if(!this.demoMoon){ this.demoMoon = { triggered:false, a:null, b:null }; }
-      if(!this.demoMoon.triggered && Number(this.demoState.pool) >= Number(this.demoState.target)){
-        this.demoMoon.triggered = true;
-        this.demoMoon.a = randAddress();
-        this.demoMoon.b = randAddress();
-        showMoonModal(this.demoMoon.a, this.demoMoon.b);
-        try{ this.bbEvent("moonwedding_trigger", { a:this.demoMoon.a, b:this.demoMoon.b, atPool:this.demoState.pool }); }catch(_){}
-      }
-    }catch(_){}
 const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
     (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
 const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
+    this.pickAB();
   },
 
   demoDeposit(amt){
