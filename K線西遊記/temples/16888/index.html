@@ -5,9 +5,9 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.14</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.15</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-/* === PATCH v2.16.14: Auto-approve + user balance/allowance + voice by button + demo simulation === */
+/* === PATCH v2.16.15: Auto-approve + user balance/allowance + voice by button + demo simulation === */
 (function(){
   const el = (id)=>document.getElementById(id);
   const setTxt = (id, v)=>{ const x=el(id); if(x) x.innerText = v; };
@@ -387,12 +387,21 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-/* === PATCH v2.16.14: UX + Voice + Balance === */
+/* === PATCH v2.16.15: UX + Voice + Balance === */
 #btn-approve { display:none !important; } /* auto-approve flow */
 #wallet-box, #w3-box, .w3-box { word-break: break-all; }
 #w3-addr, #w3-uni, #w3-token, #w3-wallet, #w3-bal, #w3-allow { word-break: break-all; }
 
 </style>
+
+  <!-- Open Graph / Social Preview -->
+  <meta property="og:title" content="KGEN 16888｜廣寒宮｜自我演化金融生命體" />
+  <meta property="og:description" content="KLINE ODYSSEY｜KGEN 16888 Universe Portal" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png" />
+
 </head>
 <body>
 
@@ -401,7 +410,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.14</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.15</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -519,7 +528,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.14";
+const APP_VERSION = "v2.16.15";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1194,6 +1203,8 @@ speak(m){
 };
 
 window.onload = () => app.init();
+  try{document.querySelectorAll('[data-voice]').forEach(el=>{el.addEventListener('click',()=>{try{app.speak(el.getAttribute('data-voice'));}catch(e){}},{capture:true});});}catch(e){}
+
   // auto concierge on first visit
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
@@ -1378,9 +1389,8 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
     if(this.demo) return alert("Demo 模式不需要 Approve");
     if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
     try{
-      const amt = this.parseAmt();
       const c = this.cKGEN();
-      const tx = await c.approve(this.UNIVERSE, amt);
+      const tx = await c.approve(this.UNIVERSE, ethers.constants.MaxUint256);
       app.speak("Approve 已送出。");
       await tx.wait();
       app.speak("Approve 完成。");
@@ -1416,12 +1426,24 @@ app.speak("點燈已入池。");
       const amt = this.parseAmt();
       if(this.demo){
         this.demoOrder(side, amt);
+        app.speak("Demo 下單完成。");
         return;
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+
+      // Auto-approve once: if allowance < amount, approve MAX then place the order
+      const c = this.cKGEN();
+      const al = await c.allowance(app.account, this.UNIVERSE);
+      if(al.lt(amt)){
+        app.speak("第一次下單需要授權 K G E N。請在錢包確認一次授權。");
+        const txA = await c.approve(this.UNIVERSE, ethers.constants.MaxUint256);
+        await txA.wait();
+        app.speak("授權完成，準備送出下單。");
+      }
+
       const uni = this.cUNI();
+      app.speak(side===0 ? "下單上漲，已送出。" : "下單下跌，已送出。");
       const tx = await uni.placeOrder(side, amt);
-      app.speak("下單已送出，等待鏈上結算。");
       await tx.wait();
       await this.refresh();
       app.speak("本次對賭已結算。");
