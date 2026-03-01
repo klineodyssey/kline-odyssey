@@ -5,11 +5,11 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.17</title>
       <meta property="og:type" content="website">
   <meta property="og:title" content="KGEN 16888 廣寒宮">
   <meta property="og:description" content="KGEN 16888 自我演化金融生命體｜廣寒宮">
-  <meta property="og:image" content="K線西遊記/temples/16888/assets/fairy.png">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -194,7 +194,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.16</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.17</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -312,7 +312,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.16";
+const APP_VERSION = "v2.16.17";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1061,6 +1061,19 @@ const web3 = {
   cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
   cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
 
+      async ensureAllowance(amountBN) {
+        if (this.demo) return;
+        const cKGEN = this.cKGEN();
+        const allowance = await cKGEN.allowance(this.account, this.UNIVERSE);
+        if (allowance.gte(amountBN)) return;
+        app.speak('需要先授權一次 KGEN 給廣寒宮合約，請在錢包確認。');
+        const tx = await cKGEN.approve(this.UNIVERSE, ethers.constants.MaxUint256);
+        app.toast('Approve 已送出，等待確認…');
+        await tx.wait();
+        app.speak('授權完成。');
+      },
+
+
   load(){
     try{
       const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
@@ -1132,7 +1145,7 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState: { pool: 8888, target: 16888, base: 1688 },
+  demoState: { pool: 16888, target: 16888, base: 1688 },
 
   // ===== 月下老人抽籤（前端 Demo / UI 輔助）=====
   ab: { A: '-', B: '-' },
