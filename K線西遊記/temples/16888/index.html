@@ -2,7 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜自我演化金融生命體｜v2.16.4</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -187,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.11</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -255,7 +258,7 @@
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
     <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
-    <div>Universe V5.1.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
+    <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
     <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
@@ -292,7 +295,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.15";
+const APP_VERSION = "v2.16.7";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -421,7 +424,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <ol>
             <li>切到 <b>BNB Chain</b>。</li>
             <li>點 <b>Custom</b>。</li>
-            <li>貼上 <b>KGEN 合約地址</b>（0x…）。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
             <li>按下一步，確認 Symbol / Decimals 後加入。</li>
           </ol>
           <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
@@ -987,9 +990,9 @@ const web3 = {
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
   // 你部署後填上（會自動記到 localStorage）
-  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_20_0
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
 
-  // 最小 ABI（對齊 Universe V5.1.0：入池 + 下單 + 查詢 + 事件）
+  // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
   abiERC20: [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
@@ -1087,8 +1090,8 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
 const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
-    (()=>{const el=document.getElementById("w3-prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
-const w3b=document.getElementById('w3-prog-bar'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
+    (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
+const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
   },
 
@@ -1208,9 +1211,9 @@ const t = parseFloat(trigK.toFixed(2));
 const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
       const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
 
-      (()=>{const el=document.getElementById("w3-prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
+      (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
 
-const w3b2=document.getElementById('w3-prog-bar'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
+const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
       app.setProgress(pct/100);
     }catch(e){
       console.warn(e);
