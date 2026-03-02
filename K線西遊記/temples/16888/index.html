@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.6</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -183,7 +183,7 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-        /* ===== Voice QA / AI Concierge (v2.18.6) ===== */
+        /* ===== Voice QA / AI Concierge (v2.18.7) ===== */
         .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
         .voice-ctrl{flex:1;min-width:0}
         .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
@@ -203,18 +203,43 @@
         @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
     
-/* --- GA panel float fix (V2.18.6) --- */
+/* --- GA panel float fix (V2.18.7) --- */
 50%{ transform: translateY(-8px); }
   100%{ transform: translateY(0px); }
 }
 
 
-/* --- GA bar sweep animation (V2.18.6 hotfix) --- */
+/* --- GA bar sweep animation (V2.18.7 hotfix) --- */
 .ga-progress.ga-sweep{ animation: gaSweep 2.2s linear infinite; }
 @keyframes gaSweep{
   0%{ width:0%; }
   85%{ width:100%; }
   100%{ width:0%; }
+}
+
+
+/* ===========================
+   V2.18.7 Fallback Animations
+   - Works even if main JS fails
+=========================== */
+.grid-500{ display:grid; grid-template-columns: repeat(25, 1fr); gap:2px; padding:6px 0; }
+.grid-500 .px{ width:100%; aspect-ratio:1/1; border-radius:1px; background: rgba(255,200,60,0.15); opacity: .25; }
+.grid-500 .px{ animation: pxTwinkle 1.8s steps(1,end) infinite; animation-delay: calc(var(--i) * 0.012s); }
+@keyframes pxTwinkle{
+  0%, 70%{ opacity:.22; filter: brightness(1); }
+  71%, 78%{ opacity:.95; filter: brightness(1.5); }
+  79%, 100%{ opacity:.22; filter: brightness(1); }
+}
+
+/* warp energy bar fallback (if JS not driving it) */
+body.fallback-anim #energy-fill{
+  animation: energyPulse 2.4s linear infinite;
+  transition: none !important;
+}
+@keyframes energyPulse{
+  0%{ height: 8%; }
+  80%{ height: 100%; }
+  100%{ height: 8%; }
 }
 
 </style>
@@ -230,7 +255,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.18.6</div>
+        <div class="sys-st" id="ver-st">VERSION v2.18.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -248,6 +273,64 @@
     <div class="warp-val-text" id="warp-txt">WARP 100x</div>
     <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
 </div>
+
+
+<script>
+/* ===========================
+   V2.18.7 Minimal Fallback Boot
+   Goal: clock + 500px grids + warp bar move even if main app errors.
+=========================== */
+(function(){
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmt(now){
+    return now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+" "+pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+  }
+  function startClock(){
+    var el=document.getElementById('sys-clock');
+    if(!el) return;
+    try{
+      // update immediately
+      el.textContent = "SYSTEM ONLINE | " + fmt(new Date());
+      setInterval(function(){
+        el.textContent = "SYSTEM ONLINE | " + fmt(new Date());
+      }, 1000);
+    }catch(e){}
+  }
+
+  function buildGrid(id){
+    var host=document.getElementById(id);
+    if(!host) return;
+    // If already populated, keep.
+    if(host.querySelector('.px')) return;
+    var frag=document.createDocumentFragment();
+    for(var i=0;i<500;i++){
+      var d=document.createElement('div');
+      d.className='px';
+      d.style.setProperty('--i', i);
+      frag.appendChild(d);
+    }
+    host.appendChild(frag);
+  }
+
+  // If after 1200ms grids are empty or clock unchanged, enable fallback anim mode.
+  var initialClock = (document.getElementById('sys-clock')||{}).textContent || "";
+  setTimeout(function(){
+    try{
+      buildGrid('g1'); buildGrid('g2');
+      startClock();
+      var nowClock=(document.getElementById('sys-clock')||{}).textContent || "";
+      if(!nowClock || nowClock===initialClock){
+        document.body.classList.add('fallback-anim');
+      }
+      // Also if main JS didn't set energy-fill height, fallback-anim will animate it.
+      document.body.classList.add('fallback-anim');
+    }catch(e){
+      document.body.classList.add('fallback-anim');
+    }
+  }, 200);
+
+})();
+</script>
 
 <div class="ga-matrix">
     <div class="ga-float-wrapper-disabled"><div class="ga-float-inner-disabled"><div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div></div></div>
@@ -402,7 +485,7 @@ const mb=document.getElementById('m-bar');
     },
 
 
-    // --- rAF heartbeat (V2.18.6) : keep clock/dots alive even in FB in-app ---
+    // --- rAF heartbeat (V2.18.7) : keep clock/dots alive even in FB in-app ---
     startHeartbeat(){
       let last=0;
       const loop=(t)=>{
@@ -1070,7 +1153,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 
-    // ===== Voice QA Engine (v2.18.6) =====
+    // ===== Voice QA Engine (v2.18.7) =====
     voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
 
     initSpeech(){
