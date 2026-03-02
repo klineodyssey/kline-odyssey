@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.5</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.25</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -198,7 +198,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.24</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.25</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -303,7 +303,33 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.5";
+
+/* ===== helpers (ui-safe) ===== */
+function fmtKGEN(x){
+  try{
+    const n = Number(ethers.utils.formatUnits(x||0, 18));
+    if(!isFinite(n)) return "-";
+    return n.toLocaleString(undefined,{minimumFractionDigits:4, maximumFractionDigits:4});
+  }catch(e){ return "-"; }
+}
+function shortAddr(a){
+  if(!a || typeof a!=="string") return "-";
+  return a.slice(0,6)+"…"+a.slice(-4);
+}
+function parseEthersError(e){
+  try{
+    // ethers v5: e.reason / e.error.message / e.data.message
+    const cand = [
+      e?.reason,
+      e?.error?.message,
+      e?.data?.message,
+      e?.message
+    ].filter(Boolean)[0] || "交易失敗";
+    // remove giant hex blobs
+    return String(cand).replace(/0x[a-fA-F0-9]{40,}/g,"0x…").slice(0,240);
+  }catch(_){ return "交易失敗"; }
+}
+const APP_VERSION = "v2.16.25";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -964,6 +990,22 @@ speak(m){
       }catch(e){}
     },
 
+    showGetKgen(){
+      const lines = [
+        "【如何取得 KGEN】",
+        "1) 用 BNB 在 PancakeSwap 兌換 KGEN（BSC）",
+        "2) 或到 12345 五指山悟空財神殿領『發財金』（若已開放）",
+        "",
+        "你要開哪一個？"
+      ].join("\n");
+      const goSwap = confirm(lines + "\n\n按『確定』＝開 PancakeSwap\n按『取消』＝開 12345 財神殿");
+      if(goSwap){
+        window.open("https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be","_blank");
+      }else{
+        window.open("https://klineodyssey.github.io/kline-odyssey/wukong-temple/index.html","_blank");
+      }
+    },
+
     // Progress helper (fix: app.setProgress is not a function)
     // ratio: 0..1
     setProgress(ratio){
@@ -1092,7 +1134,7 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
   },
 
   // ===== DEMO (no wallet) =====
-  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoState: { pool: 8888, target: 16888, base: 1688 },
   demoRefresh(){
     const b = this.demoState.pool;
     const t = this.demoState.target;
@@ -1138,7 +1180,7 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
       app.speak("Approve 完成。");
     }catch(e){
       console.error(e);
-      alert(e.message || "Approve 失敗");
+      alert(parseEthersError(e) || "Approve 失敗");
     }
   },
 
@@ -1159,7 +1201,7 @@ app.speak("點燈已入池。");
       app.speak("入池成功。");
     }catch(e){
       console.error(e);
-      alert(e.message || "入池失敗");
+      alert(parseEthersError(e) || "入池失敗");
     }
   },
 
@@ -1170,7 +1212,28 @@ app.speak("點燈已入池。");
         this.demoOrder(side, amt);
         return;
       }
+      if(!this.account || !this.signer){
+        return alert("請先連結錢包");
+      }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+
+      // balance / allowance check (auto-approve once)
+      const erc = this.cERC20();
+      const [ub, ua] = await Promise.all([
+        erc.balanceOf(this.account),
+        erc.allowance(this.account, this.UNIVERSE)
+      ]);
+      if(ub.lt(amt)){
+        return alert("KGEN 餘額不足：需要 "+fmtKGEN(amt)+" KGEN");
+      }
+      if(ua.lt(amt)){
+        // auto approve (MaxUint256) then continue
+        const txa = await erc.approve(this.UNIVERSE, ethers.constants.MaxUint256);
+        $("btn-approve").innerText = "Approving…";
+        await txa.wait();
+        $("btn-approve").innerText = "✓ Approved";
+      }
+
       const uni = this.cUNI();
       const tx = await uni.placeOrder(side, amt);
       app.speak("下單已送出，等待鏈上結算。");
@@ -1179,7 +1242,7 @@ app.speak("點燈已入池。");
       app.speak("本次對賭已結算。");
     }catch(e){
       console.error(e);
-      alert(e.message || "下單失敗");
+      alert(parseEthersError(e) || "下單失敗");
     }
   },
 
@@ -1223,6 +1286,32 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
       app.setProgress(pct/100);
+
+      // wallet metrics
+      try{
+        if(this.account && this.provider){
+          const ercR = new ethers.Contract(this.KGEN, this.abiErc20, this.provider);
+          const [ub, ua] = await Promise.all([
+            ercR.balanceOf(this.account),
+            ercR.allowance(this.account, this.UNIVERSE)
+          ]);
+          const elBal = document.getElementById("userBal");
+          const elAllow = document.getElementById("userAllowance");
+          if(elBal) elBal.innerText = fmtKGEN(ub) + " KGEN";
+          if(elAllow) elAllow.innerText = fmtKGEN(ua) + " KGEN";
+        }else{
+          const elBal = document.getElementById("userBal");
+          const elAllow = document.getElementById("userAllowance");
+          if(elBal) elBal.innerText = "-";
+          if(elAllow) elAllow.innerText = "-";
+        }
+      }catch(e2){
+        console.warn("wallet metrics err", e2);
+        const elBal = document.getElementById("userBal");
+        const elAllow = document.getElementById("userAllowance");
+        if(elBal) elBal.innerText = "ERR";
+        if(elAllow) elAllow.innerText = "ERR";
+      }
     }catch(e){
       console.warn(e);
     }
@@ -1261,6 +1350,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+  <button class="nav-btn nav-green" id="btn-getkgen" onclick="app.showGetKgen()">如何取得 KGEN / 發財金</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
 </div>
 
