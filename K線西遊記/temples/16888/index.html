@@ -2,166 +2,849 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888｜靈霄豪宅全修復版｜v2.19</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* 🏛️ 頂部 HUD */
+        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
         .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
-        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); pointer-events: auto; }
-        
-        /* 🏰 靈霄與豪宅疊加層 (修復關鍵) */
-        #stage-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 10; display: flex; justify-content: center; align-items: center; }
-        .stage-img { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 1.5s ease; }
-        .stage-img.active { opacity: 1; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); white-space: nowrap; }
+        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
 
-        /* 🚀 右下曲速引擎 (聖諭位置) */
-        .warp-engine { position: fixed; right: 40px; bottom: 120px; z-index: 150; width: 80px; text-align: center; }
-        .warp-rail { height: 350px; width: 28px; background: #111; border: 2px solid var(--energy); position: relative; margin: 0 auto; border-radius: 6px; overflow: hidden; }
-        #energy-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #ff8800, var(--energy), #fff); transition: height 0.1s linear; }
-        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
-        /* 🕯️ 左上合約窗 (聖諭位置) */
-        #contract-panel { 
-            position: fixed; left: 40px; top: 180px; /* 移到左上方，避開底部 */
-            width: 320px; background: var(--panel); border: 1px solid var(--gold); padding: 15px; z-index: 160;
-            box-shadow: 0 0 30px rgba(255, 215, 120, 0.2); border-left: 4px solid var(--gold);
+        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        .warp-engine { position: fixed; right: 22px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-rail { 
+            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
+            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
         }
-        
-        /* 🎭 右邊導航動畫區 (修復動畫) */
-        #universe-nav { position: fixed; right: 20px; top: 120px; z-index: 200; display: flex; flex-direction: column; gap: 12px; }
-        .nav-btn { background: rgba(0,0,0,0.7); border: 1px solid var(--cyan); color: var(--cyan); padding: 10px; font-size: 12px; cursor: pointer; transition: 0.3s; text-decoration: none; text-align: center; }
-        .nav-btn:hover { background: var(--cyan); color: #000; transform: translateX(-5px); }
+        #energy-fill { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
+            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            z-index: 5;
+        }
+        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
 
-        /* 🎡 核心圓窗 */
-        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 440px; height: 440px; z-index: 50; }
-        #core-window { width: 100%; height: 100%; border-radius: 50%; border: 12px double var(--gold); overflow: hidden; position: relative; }
+        #warp-thumb { 
+            width: 70px; height: 35px; background: #fff; position: absolute; 
+            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
+            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
+            border: 3px solid var(--cyan); z-index: 30;
+        }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
+
+        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
+        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { 
+            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
+            overflow: hidden; background: #000; position: relative; 
+            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
+            transition: transform 0.05s linear; /* 🎡 物理連動 */
+        }
         #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+        #mini-thumb { 
+            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 25px var(--gold);
+        }
+        #wish-label { 
+            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
+            color: #fff; font-weight: 900; font-size: 24px; 
+            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
+        }
+
+        /* 🧬 GA 演化矩陣 (右側肌肉) */
+        .ga-matrix { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
+        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
+        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
+
+        /* 🎡 方向盤 */
+        .steer-zone { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
+        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
+        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
+
+        /* 🛠️ 控制台 */
+        .footer-terminal { 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
+            border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; z-index: 100; 
+        }
+        .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px; border-radius: 4px; }
+        .term-btn:hover { background: var(--gold); color: #000; }
+        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
+        .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
+
+        /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
+        .wheel-wrap{
+            position: fixed; left: 50%; bottom: 125px; transform: translateX(-50%);
+            width: 160px; height: 160px; z-index: 120;
+            display:none;
+        }
+        .wheel{
+            width:160px; height:160px; border-radius:50%;
+            border:4px solid rgba(255,215,120,.8);
+            box-shadow:0 0 30px rgba(0,242,255,.25), inset 0 0 25px rgba(255,215,120,.15);
+            position:relative;
+            background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), rgba(0,0,0,.55) 55%, rgba(0,0,0,.85));
+            user-select:none;
+            touch-action:none;
+        }
+        .wheel::before{ content:""; position:absolute; inset:16px; border-radius:50%; border:2px dashed rgba(0,242,255,.35); opacity:.9; }
+        .wheel-hub{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%;
+            border:2px solid rgba(255,204,0,.85); box-shadow:0 0 18px rgba(255,204,0,.35); background:rgba(0,0,0,.65);
+            display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:12px; color:var(--gold);
+        }
+        .wheel-knob{ position:absolute; left:50%; top:6px; transform:translateX(-50%); width:18px; height:18px; border-radius:50%;
+            background:var(--cyan); box-shadow:0 0 18px rgba(0,242,255,.7);
+        }
 
         canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
-        .rec-indicator { position: fixed; top: 120px; left: 40px; color: var(--red); z-index: 200; display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--red); }
-    </style>
+    
+        /* NAV buttons */
+        .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
+            min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#111;
+            box-shadow:0 0 18px rgba(255,215,120,.18); }
+        .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+        .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
+        .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
+        .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
+    
+        .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
+            background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
+        .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
+        .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
+    
+        @media (max-width: 520px){ .brand-name{font-size:22px;} .hud-top{top:10px;} }
+        @media (max-width: 420px){ .brand-name{font-size:20px;} }
+    
+#brand-badge{
+  position:fixed;
+  left: 44px;
+  top: 90px;
+  z-index:260;
+  padding:6px 10px;
+  border:1px solid rgba(255,215,128,.7);
+  border-radius:10px;
+  background:rgba(0,0,0,.55);
+  color:#ffd79a;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:12px;
+  text-shadow:0 0 10px rgba(255,215,128,.3);
+}
+
+
+
+    /* ==== Guide Modal ==== */
+    .guide-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9999;align-items:center;justify-content:center;padding:18px;}
+    .guide-modal.show{display:flex;}
+    .guide-card{width:min(720px,96vw);max-height:86vh;overflow:auto;background:rgba(10,14,18,.96);border:1px solid rgba(255,215,120,.35);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.55);}
+    .guide-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px 14px;border-bottom:1px solid rgba(255,215,120,.18)}
+    .guide-title{font-weight:800;letter-spacing:.5px;color:#ffd88a}
+    .guide-close{background:transparent;border:0;color:#ffd88a;font-size:18px;padding:6px 10px;border-radius:10px}
+    .guide-close:active{transform:scale(.98)}
+    .guide-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid rgba(255,215,120,.14)}
+    .guide-tab{background:rgba(255,255,255,.06);border:1px solid rgba(255,215,120,.22);color:#ffe6b8;padding:8px 10px;border-radius:12px;font-weight:700}
+    .guide-tab:active{transform:scale(.98)}
+    .guide-body{padding:14px;color:#e9eef7;line-height:1.55}
+    .guide-body h3{margin:0 0 10px 0;color:#ffd88a}
+    .guide-body h4{margin:14px 0 8px 0;color:#ffe6b8}
+    .guide-body hr{border:0;border-top:1px solid rgba(255,215,120,.14);margin:14px 0}
+    .guide-body .muted{opacity:.85}
+    .qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
+    .qa-btn:active{transform:scale(.98)}
+    @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
+
+
+    .bar{height:14px; background:#eee; border-radius:999px; overflow:hidden; width:100%;}
+    .bar > div{height:100%; background:#111; width:0%;}
+    .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
+
+</style>
 </head>
 <body>
 
-<div id="stage-overlay">
-    <img id="stage-lingxiao" class="stage-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/assets/lingxiao.png">
-    <img id="stage-mansion" class="stage-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/assets/mansion.png">
-</div>
 
-<div class="rec-indicator" id="rec-ui"><div style="width:10px;height:10px;background:var(--red);border-radius:50%;animation:blink 1s infinite;"></div> REC <span id="rec-timer">00:00</span></div>
-
-<div id="contract-panel">
-    <div style="color:var(--gold); font-family:Orbitron; margin-bottom:10px;">UNIVERSE TERMINAL v2.19</div>
-    <input type="text" id="c-tag" style="width:100%; background:#000; border:1px solid #444; color:var(--energy); padding:8px; margin-bottom:10px;" value="大聖聖諭下凡">
-    <button style="width:100%; background:var(--gold); color:#000; font-weight:900; padding:10px; cursor:pointer;" onclick="app.ritual()">🕯️ 執行願力注入 (下單)</button>
-</div>
-
+  <div id="brand-badge">K線西遊記・花果山台灣</div>
 <div class="hud-top">
     <div class="brand-section">
-        <div style="font-size:24px; color:var(--gold);">KGEN 16888｜廣寒宮</div>
-        <div id="wallet-addr" style="color:var(--cyan); font-size:10px;">WALLET: DISCONNECTED</div>
+        <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
-</div>
-
-<div id="universe-nav">
-    <a class="nav-btn" href="#" onclick="app.setStage('lingxiao')">🏛️ 顯現：靈霄寶殿</a>
-    <a class="nav-btn" href="#" onclick="app.setStage('mansion')">🏡 顯現：豪宅</a>
-    <a class="nav-btn" href="#" onclick="app.setStage('none')">🌌 回歸：虛空</a>
-    <button class="nav-btn" onclick="app.toggleRec()">⚫ 黑盒子錄製</button>
+    <div class="monitor-data">
+        <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🐒 豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
+    </div>
 </div>
 
 <div class="warp-engine">
-    <div class="warp-rail">
+    <div class="warp-rail" id="warp-rail-body">
         <div id="energy-fill"></div>
+        <div id="warp-thumb"></div>
         <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
     </div>
-    <div style="color:var(--energy); font-family:Orbitron; margin-top:10px;" id="warp-txt">33x</div>
+    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
+    <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
+</div>
+
+<div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
 </div>
 
 <div id="core-anchor">
-    <div id="core-window"><img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png"></div>
+    <div id="core-window">
+        <div id="wish-label">大聖駕到，光耀廣寒</div>
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <video id="cam-view" autoplay playsinline muted></video>
+        <div id="mini-thumb"></div>
+    </div>
 </div>
 
-<input type="range" id="steer-input-val" style="display:none;" value="0">
 <canvas id="galaxy-bg"></canvas>
+<canvas id="snap-canvas" style="display:none;"></canvas>
+<canvas id="export-canvas" style="display:none;"></canvas>
 
-<div style="position:fixed; bottom:0; width:100%; background:#000; border-top:4px solid var(--gold); display:grid; grid-template-columns:repeat(4,1fr); padding:15px; z-index:1000;">
-    <button class="nav-btn" onclick="app.connect()">🦊 連結錢包</button>
-    <button class="nav-btn" onclick="app.steerPrompt()">🎡 方向盤</button>
-    <button class="nav-btn" onclick="app.vow()">💍 VOW 表態</button>
-    <button class="nav-btn" onclick="location.reload()">🔄 重啟系統</button>
+<div class="steer-zone">
+    <div class="angle-readout" id="ang-val">76°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
+</div>
+
+<!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
+<div class="wheel-wrap" id="wheel-wrap">
+    <div class="wheel" id="wheel">
+        <div class="wheel-knob"></div>
+        <div class="wheel-hub">DRIVE</div>
+    </div>
+</div>
+
+
+<!-- WEB3 控制面板（對齊合約） -->
+<div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+<div class="kv" style="margin-top:10px">
+  <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
+  <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
+</div>
+  </div>
+
+  <div style="margin-top:8px; font-size:12px; color:#ddd;">
+    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
+    <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
+    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
+    <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
+    <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
+    <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
+    <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
+  </div>
+
+  <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
+    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
+  </div>
+
+  <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
+    <div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">MoonTrust 3+3（表態與紅包托管）</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
+      <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-terminal">
+    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
+    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
+    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
+    <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
 </div>
 
 <script>
+const APP_VERSION = "v2.18.9";
 const app = {
-    angle: 0, isRec: false, 
+  // UI helpers (safe in demo/no-wallet mode)
+  setProgress(p){
+    try{
+      const v = Math.max(0, Math.min(100, Number(p)||0));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      if(fill) fill.style.width = v + '%';
+      if(txt)  txt.innerText = v.toFixed(1) + '%';
+    }catch(e){}
+  },
+  logEvent(title, detail){
+    try{
+      const t = String(title||'Event');
+      const d = detail==null? '' : String(detail);
+      const ev = { t: Date.now(), title: t, detail: d };
+      // persist small history
+      const key = 'kgen16888_events';
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.unshift(ev);
+      if(arr.length>50) arr.length=50;
+      localStorage.setItem(key, JSON.stringify(arr));
+      // update on-screen last event if exists
+      const el = document.getElementById('last-event');
+      if(el) el.innerText = d ? (t + '｜' + d) : t;
+    }catch(e){}
+  },
+
+    isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
+    stream: null, tInt: null, drawInt: null, bbSampleInt: null,
+
+    // blackbox
+    blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
+
     init() {
-        this.initThree();
-        document.getElementById('warp-input-val').oninput = (e) => {
-            document.getElementById('energy-fill').style.height = e.target.value + '%';
-            document.getElementById('warp-txt').innerText = e.target.value + 'x';
-        };
-        this.speak("大聖，靈霄寶殿與豪宅動畫已校準，右側導航系統修復完畢。");
+        this.initThree(); this.buildUI(); this.bind();
+        setInterval(() => this.tick(), 1000);
+        web3.load();
+        this.updateWarp(33);
+        this.applySteer(76, true);
+        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
+        window.addEventListener('resize', ()=>this.onResize(), {passive:true});
+        this.onResize();
     },
-    
-    // 🎭 切換靈霄/豪宅動畫 (修復點)
-    setStage(type) {
-        document.querySelectorAll('.stage-img').forEach(img => img.classList.remove('active'));
-        if(type === 'lingxiao') {
-            document.getElementById('stage-lingxiao').classList.add('active');
-            this.speak("進入靈霄寶殿。");
-        } else if(type === 'mansion') {
-            document.getElementById('stage-mansion').classList.add('active');
-            this.speak("回歸豪宅。");
-        } else {
-            this.speak("重返星海。");
+
+    tick() {
+const sc=document.getElementById('sys-clock'); if(sc) sc.innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+        const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION " + APP_VERSION;
+        document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
+        const fit = 0.9 + Math.random() * 0.1;
+const fv=document.getElementById('f-val'); if(fv) fv.innerText = fit.toFixed(3);
+const fb=document.getElementById('f-bar'); if(fb) fb.style.width = (fit * 100) + '%';
+const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random() * 100) + '%';
+    },
+
+    // ---- Safety helpers (avoid popup errors in demo) ----
+    logEvent(name, data){
+        try{ console.log('[event]', name, data||''); }catch(_){ }
+    },
+
+    setProgress(pct){
+        try{
+            const bar = document.getElementById('progress-bar');
+            const txt = document.getElementById('progress-text');
+            const v = Math.max(0, Math.min(100, Number(pct)||0));
+            if(bar) bar.style.width = v + '%';
+            if(txt) txt.innerText = v.toFixed(1) + '%';
+        }catch(_){ }
+    },
+
+    // ---- Guided concierge (story + how to play) ----
+    openGuide(section){
+        const modal = document.getElementById('guide-modal');
+        const body = document.getElementById('guide-body');
+        if(!modal || !body) return;
+        const s = (section||'intro').toLowerCase();
+        const blocks = this.getGuideBlocks();
+        body.innerHTML = blocks[s] || blocks['intro'];
+        modal.classList.add('show');
+
+        const summary = (s==='wallet') ? '如果你找不到 KGEN，記得用錢包的 Custom 匯入合約地址。' :
+                       (s==='rules')  ? '規則重點：一到一千為單筆範圍，八八八八是基底，累積到一六八八八觸發下凡事件。' :
+                       (s==='qa')     ? '你可以按麥克風提問，轉文字後會直接送出並回答。' :
+                                        '歡迎來到廣寒宮一六八八八。你可以先用無錢包的模擬模式玩。';
+        this.speak(summary);
+    },
+
+    closeGuide(){
+        const modal=document.getElementById('guide-modal');
+        if(modal) modal.classList.remove('show');
+    },
+
+    getGuideBlocks(){
+        const intro = `
+          <h3>廣寒宮 16888｜自我演化金融生命體</h3>
+          <p>這裡不是投資建議，這是一個「敘事 × 遊戲 × 合約」的宇宙入口。</p>
+          <p><b>你會看到兩個地址（A / B）像 DNA 與 RNA。</b>它們代表兩股能量在池中互動；當池從 <b>8888</b> 成長到 <b>16888</b>，就會觸發「下凡投胎」的劇情事件。</p>
+          <hr/>
+          <h4>最快開始（沒有錢包也能玩）</h4>
+          <ol>
+            <li>在下單框輸入數字（<b>1 ~ 1000</b>）。</li>
+            <li>按 <b>下單 UP</b> 或 <b>下單 DOWN</b>，系統用模擬勝負立即回饋。</li>
+            <li>你贏：拿回本金 + 獲利（模擬）。你輸：金額累積到「懷孕池 / 彩池」。</li>
+          </ol>
+          <p class='muted'>提示：模擬模式會顯示 demo Pool Balance，不需要連錢包。</p>
+        `;
+
+        const rules = `
+          <h3>玩法規則（1~1000｜8888→16888）</h3>
+          <ul>
+            <li><b>單筆範圍：</b>1 ~ 1000 KGEN（體驗用）。</li>
+            <li><b>基底：</b>8888 KGEN（下凡前必須守住的底池）。</li>
+            <li><b>目標：</b>池累積到 16888 KGEN 觸發「下凡投胎」事件。</li>
+          </ul>
+          <h4>下凡投胎是什麼？</h4>
+          <p>當池達到 16888：七仙女啟動「下凡」儀式。故事上是 <b>DNA（地址 A）</b> 與 <b>RNA（地址 B）</b> 完成誓約；世界線會進入「生肖投胎 / 結婚」段落。</p>
+          <h4>得獎與表態（誓約）</h4>
+          <p>表態需要「真的轉帳」：從自己地址轉 <b>1 ~ 2 KGEN</b> 給對方地址，代表同意誓約。</p>
+          <p>若拒絕 / 逾期：托管會回收進池（回到懷孕池）。</p>
+        `;
+
+        const wallet = `
+          <h3>錢包怎麼用？為什麼 Search 找不到？</h3>
+          <p>很多錢包（例如 MetaMask）在「Search」頁面是靠代幣清單，<b>不一定會即時收錄新代幣</b>。</p>
+          <p>所以要用 <b>Custom</b> 匯入：</p>
+          <ol>
+            <li>切到 <b>BNB Chain</b>。</li>
+            <li>點 <b>Custom</b>。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
+            <li>按下一步，確認 Symbol / Decimals 後加入。</li>
+          </ol>
+          <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
+        `;
+
+        const qa = `
+          <h3>語音客服（Q&A）</h3>
+          <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
+          <div class='qa-grid'>
+            <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
+            <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
+            <button class='qa-btn' data-q='玩法的 1 到 1000 是什麼？'>玩法的 1 到 1000 是什麼？</button>
+            <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
+            <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
+            <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
+          </div>
+          <div style='margin-top:12px;opacity:.92'>
+            <div id='qa-last' style='margin-top:8px'></div>
+            <div id='qa-last-a' style='margin-top:6px'></div>
+          </div>
+        `;
+
+        return { intro, rules, wallet, qa };
+    },
+
+    handleQuestion(q){
+        const question = String(q||'').trim();
+        if(!question) return;
+        const qaBox = document.getElementById('qa-last');
+        const aBox = document.getElementById('qa-last-a');
+        if(qaBox) qaBox.innerText = 'Q: ' + question;
+
+        const lower = question.toLowerCase();
+        let ans = '';
+        const has = (s)=> lower.indexOf(s) >= 0;
+
+        if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
+        }else if(question.includes('custom') || question.includes('找不到') || has('search')){
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
+        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
+            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
+        }else if(question.includes('8888') || question.includes('八八八八')){
+            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
+        }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
+            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+        }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
+            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+        }else{
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
+        }
+
+        if(aBox) aBox.innerText = 'A: ' + ans;
+        this.speak(ans);
+    },
+
+
+    buildUI() {
+        ['g1', 'g2'].forEach(id => {
+            const container = document.getElementById(id);
+            container.innerHTML = "";
+            for(let i=0; i<100; i++) { // 保持原始版：100格（畫面剛好）
+                const d = document.createElement('div');
+                d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
+                container.appendChild(d);
+            }
+        });
+        const rail = document.getElementById('warp-rail-body');
+        for(let i=0; i<25; i++) {
+            const step = document.createElement('div');
+            step.className = 'rail-step';
+            step.style.bottom = (i * 4) + '%';
+            rail.appendChild(step);
         }
     },
 
-    async connect() {
-        if(!window.ethereum) return alert("MetaMask?");
-        const p = new ethers.providers.Web3Provider(window.ethereum);
-        await p.send("eth_requestAccounts", []);
-        const addr = await p.getSigner().getAddress();
-        document.getElementById('wallet-addr').innerText = `WALLET: ${addr.substring(0,10)}...`;
-        this.speak("合約已聯網。");
+    updateWarp(val) {
+const ef=document.getElementById('energy-fill'); if(ef) ef.style.height = val + '%';
+const wt=document.getElementById('warp-thumb'); if(wt) wt.style.bottom = `calc(${val}% - 17px)`;
+const wtx=document.getElementById('warp-txt'); if(wtx) wtx.innerText = `WARP ${val * 3}x`;
+        this.bbEvent("warp", { warp: parseFloat(val) });
     },
 
-    async toggleRec() {
-        if(this.isRec) { location.reload(); return; }
+    applySteer(v, silent=false){
+        const ang = Math.max(-180, Math.min(180, Number(v)||0));
+const av=document.getElementById('ang-val'); if(av) av.innerText = ang + '°';
+const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `rotate(${ang}deg)`;
+        document.getElementById('steer-input-val').value = ang;
+        // wheel sync
+        const wheel = document.getElementById('wheel');
+        if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
+        if(!silent) this.bbEvent("steer", { angle: ang });
+    },
+
+    boost() {
+        if(this.gaLevel < 1000) {
+            this.gaLevel += 50;
+const gr=document.getElementById('ga-rank'); if(gr) gr.innerText = `RANK: GA-${this.gaLevel}`;
+            this.bbEvent("boost", { ga: this.gaLevel });
+            this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
+        }
+    },
+
+    autoHunt() {
+        this.bbEvent("auto_hunt", {});
+        this.speak("啟動 GA 自動打怪模式，績效演化中。");
+const wl=document.getElementById('wish-label'); const old = wl ? wl.innerText : '';
+const wl2=document.getElementById('wish-label'); if(wl2) wl2.innerText = '⚔️ KGEN 自動打怪中...';
+setTimeout(() => { const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
+    },
+
+    async cam(mode) {
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-thumb');
+        if (this.isCam && this.camMode === mode) {
+            this.stream && this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
+            this.isCam = false;
+            this.bbEvent("cam_off", {});
+            return;
+        }
         try {
-            const v = await navigator.mediaDevices.getDisplayMedia({video:true});
-            const a = await navigator.mediaDevices.getUserMedia({audio:true});
-            this.isRec = true;
-            document.getElementById('rec-ui').style.display = 'flex';
-            this.speak("黑盒子開始燒錄。");
-        } catch(e) { alert("授權失敗"); }
+            if(this.stream) this.stream.getTracks().forEach(t => t.stop());
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio:false });
+            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
+            v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+            this.isCam = true; this.camMode = mode;
+            this.bbEvent("cam_on", { mode });
+        } catch(e) { alert("攝像頭硬體未響應 / 權限被拒絕"); }
     },
 
-    steerPrompt() {
-        const a = prompt("轉向角度:", this.angle);
-        if(a !== null) {
-            this.angle = parseInt(a);
-            document.getElementById('steer-input-val').value = this.angle;
-            document.getElementById('core-window').style.transform = `rotate(${this.angle}deg)`;
+    capture() {
+        const canvas = document.getElementById('snap-canvas'), ctx = canvas.getContext('2d');
+        canvas.width = 1000; canvas.height = 1000;
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+        if(this.isCam) {
+            if(this.camMode === 'user') { ctx.translate(1000,0); ctx.scale(-1,1); }
+            ctx.drawImage(v, 0, 0, 1000, 1000);
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.drawImage(f, 750, 50, 200, 200);
+        } else ctx.drawImage(f, 0, 0, 1000, 1000);
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("KGEN 16888 自我演化金融生命體", 50, 80);
+        ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
+        ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 70, 930);
+
+        this.bbEvent("capture", {});
+
+        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
+        link.href = canvas.toDataURL(); link.click();
+    },
+
+    setWish() {
+        const m = prompt("大聖請開金口：", (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''));
+if(m){ const wl=document.getElementById('wish-label'); if(wl) wl.innerText = m; }
+this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:'') });
+    },
+
+    toggleWheel(){
+        const wrap = document.getElementById('wheel-wrap');
+        if(!wrap) return;
+        const on = (wrap.style.display === 'block');
+        wrap.style.display = on ? 'none' : 'block';
+        this.bbEvent("wheel_toggle", { on: !on });
+    },
+
+    bind() {
+        document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
+        document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
+        this.bindWheel();
+
+        // Guide modal
+        const bg = document.getElementById('btn-guide');
+        if(bg) bg.addEventListener('click', ()=> this.openGuide('intro'));
+        const gc = document.getElementById('btn-guide-close');
+        if(gc) gc.addEventListener('click', ()=> this.closeGuide());
+        const gm = document.getElementById('guide-modal');
+        if(gm) gm.addEventListener('click', (e)=>{ if(e.target===gm) this.closeGuide(); });
+        document.querySelectorAll('.guide-tab').forEach(btn=>{
+            btn.addEventListener('click', ()=> this.openGuide(btn.getAttribute('data-sec')));
+        });
+        document.addEventListener('click', (e)=>{
+            const b = e.target && e.target.closest && e.target.closest('.qa-btn');
+            if(!b) return;
+            const q = b.getAttribute('data-q');
+            if(q) this.handleQuestion(q);
+        });
+
+    },
+
+    // ===== Blackbox core =====
+    bbCount(type){ this.blackbox.counts[type] = (this.blackbox.counts[type] || 0) + 1; },
+    bbEvent(type, payload={}){ this.bbCount(type); this.blackbox.events.push({ t: Date.now(), type, ...payload }); },
+    bbStart(){
+        const sid = `BBX-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        this.blackbox.sessionId = sid;
+        this.blackbox.startedAt = new Date().toISOString();
+        this.blackbox.endedAt = null;
+        this.blackbox.events = [];
+        this.blackbox.samples = [];
+        this.blackbox.counts = {};
+        this.blackbox.last = {
+            angle: parseFloat(document.getElementById('steer-input-val').value || 0),
+            warp:  parseFloat(document.getElementById('warp-input-val').value || 0),
+            ga: this.gaLevel
+        };
+        this.bbEvent("rec_start", { ga:this.gaLevel, angle:this.blackbox.last.angle, warp:this.blackbox.last.warp });
+    },
+    bbStop(){ this.blackbox.endedAt = new Date().toISOString(); this.bbEvent("rec_stop", {}); },
+    bbSample(){
+        const angle = parseFloat(document.getElementById('steer-input-val').value || 0);
+        const warp  = parseFloat(document.getElementById('warp-input-val').value || 0);
+        this.blackbox.last = { angle, warp, ga:this.gaLevel };
+        this.blackbox.samples.push({ t: Date.now(), angle, warp, ga: this.gaLevel });
+    },
+    bbStats(list, key){
+        if(!list.length) return {min:null, max:null, avg:null};
+        let min=Infinity, max=-Infinity, sum=0, n=0;
+        for(const it of list){
+            const v = Number(it[key]);
+            if(!Number.isFinite(v)) continue;
+            if(v<min) min=v; if(v>max) max=v;
+            sum+=v; n++;
         }
+        if(!n) return {min:null, max:null, avg:null};
+        return { min, max, avg: +(sum/n).toFixed(4) };
+    },
+    async bbHashSHA256(text){
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest("SHA-256", enc.encode(text));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    },
+    async bbExportJSON(){
+        const started = this.blackbox.startedAt ? new Date(this.blackbox.startedAt).getTime() : null;
+        const ended   = this.blackbox.endedAt ? new Date(this.blackbox.endedAt).getTime() : null;
+        const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
+
+        const payload = {
+            schema: "kgen.moonwedding.v1",
+            sessionId: this.blackbox.sessionId,
+            startedAt: this.blackbox.startedAt,
+            endedAt: this.blackbox.endedAt,
+            durationSec,
+            last: this.blackbox.last,
+            stats: {
+                angle: this.bbStats(this.blackbox.samples, "angle"),
+                warp:  this.bbStats(this.blackbox.samples, "warp")
+            },
+            eventCounts: this.blackbox.counts,
+            timeline: this.blackbox.events,
+            samples: this.blackbox.samples
+        };
+
+        let json = JSON.stringify(payload, null, 2);
+        const hash = await this.bbHashSHA256(json);
+        payload.hashes = { sha256: hash };
+        json = JSON.stringify(payload, null, 2);
+
+        const blob = new Blob([json], { type:"application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `KGEN_MOON_WEDDING_${this.blackbox.sessionId}.json`;
+        a.click();
+
+        try { localStorage.setItem(`KGEN_MOON_WEDDING_${this.blackbox.sessionId}`, json); } catch(e) {}
+    },
+
+    startRecTimer(){
+        this.recStartTs = performance.now();
+        const recInd = document.getElementById('rec-ind');
+        recInd.style.display = 'block';
+
+        this.tInt = setInterval(()=>{
+            const elapsed = performance.now() - this.recStartTs;
+            const sec = Math.floor(elapsed/1000);
+            const m = String(Math.floor(sec/60)).padStart(2,'0');
+            const s = String(sec%60).padStart(2,'0');
+            this.recMMSS = `${m}:${s}`;
+            recInd.innerText = `REC ${this.recMMSS}`;
+        }, 200);
+
+        this.drawInt = setInterval(()=>this.syncExportCanvas(), 33);
+    },
+    stopRecTimer(){
+        clearInterval(this.tInt);
+        clearInterval(this.drawInt);
+const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
+    },
+
+    syncExportCanvas(){
+        const cvs = document.getElementById('export-canvas'), ctx = cvs.getContext('2d');
+        cvs.width = 720; cvs.height = 720;
+
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+
+        if(this.isCam){
+            try{
+                if(this.camMode === 'user'){ ctx.translate(720,0); ctx.scale(-1,1); }
+                ctx.drawImage(v, 0, 0, 720, 720);
+                ctx.setTransform(1,0,0,1,0,0);
+            }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }else{
+            try{ ctx.drawImage(f, 0, 0, 720, 720); }
+            catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }
+
+        const angle = document.getElementById('steer-input-val').value;
+        const warp  = document.getElementById('warp-input-val').value;
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
+
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
+        ctx.fillText(`ANGLE ${angle}°`, 30, 85);
+        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
+        ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
+
+        ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
+        ctx.fillText(`REC ${this.recMMSS || "00:00"}`, 30, 185);
+
+        ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 30, 690);
+        ctx.shadowBlur = 0;
+    },
+
+    async toggleRec(){
+        const btn = document.getElementById('rec-btn');
+
+        if (this.recorder && this.recorder.state === "recording") {
+            this.recorder.stop();
+            this.stopRecTimer();
+
+            clearInterval(this.bbSampleInt);
+            this.bbStop();
+            await this.bbExportJSON();
+
+            btn.innerText = "🎥 廣寒宮誓約留影錄影";
+            this.speak("錄影結束，廣寒宮誓約留影數據已封裝。");
+            return;
+        }
+
+        const stream = document.getElementById('export-canvas').captureStream(30);
+        if(!window.MediaRecorder){
+            alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
+            return;
+        }
+
+        let mime = "video/webm;codecs=vp9";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
+
+        this.recorder = new MediaRecorder(stream, { mimeType: mime });
+        this.chunks = [];
+
+        this.recorder.ondataavailable = e => { if(e.data && e.data.size) this.chunks.push(e.data); };
+        this.recorder.onstop = () => {
+            const blob = new Blob(this.chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_MOON_WEDDING_LOG.webm'; a.click();
+        };
+
+        this.bbStart();
+        this.bbSample();
+        this.bbSampleInt = setInterval(()=>this.bbSample(), 1000);
+
+        this.startRecTimer();
+        this.syncExportCanvas();
+        this.recorder.start();
+
+        btn.innerText = "⏹️ 停止廣寒宮誓約留影";
+        this.speak("廣寒宮誓約留影錄影開始，記錄演化數據。");
+    },
+
+    bindWheel(){
+        const wheel = document.getElementById('wheel');
+        if(!wheel) return;
+
+        const getAngleFromPointer = (clientX, clientY) => {
+            const rect = wheel.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = clientX - cx;
+            const dy = clientY - cy;
+            let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+            deg = deg + 90;
+            if(deg > 180) deg -= 360;
+            return Math.max(-180, Math.min(180, deg));
+        };
+
+        let dragging = false;
+        const onDown = (x,y)=>{ dragging=true; this.applySteer(getAngleFromPointer(x,y)); };
+        const onMove = (x,y)=>{ if(!dragging) return; this.applySteer(getAngleFromPointer(x,y)); };
+        const onUp = ()=>{ dragging=false; };
+
+        wheel.addEventListener('mousedown', (e)=>{ e.preventDefault(); onDown(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e)=>onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', onUp);
+
+        wheel.addEventListener('touchstart', (e)=>{ e.preventDefault(); const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:false});
+        window.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; if(!t) return; onMove(t.clientX, t.clientY); }, {passive:true});
+        window.addEventListener('touchend', onUp, {passive:true});
     },
 
     initThree() {
         const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), alpha: true });
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        rd.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         rd.setSize(window.innerWidth, window.innerHeight);
-        const geo = new THREE.BufferGeometry(), pos = new Float32Array(3000 * 3);
-        for(let i=0; i<9000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.2 }));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
         sc.add(pts); cam.position.z = 50;
-        
         const anim = () => {
             requestAnimationFrame(anim);
             const w = document.getElementById('warp-input-val').value / 40;
@@ -178,10 +861,521 @@ const app = {
             rd.render(sc, cam);
         };
         anim();
+        this._rd = rd; this._cam = cam;
     },
-    speak(t) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
+
+    onResize(){
+        if(!this._rd || !this._cam) return;
+        this._cam.aspect = window.innerWidth / window.innerHeight;
+        this._cam.updateProjectionMatrix();
+        this._rd.setSize(window.innerWidth, window.innerHeight);
+    },
+
+    
+    // ===== Audio / Voice (mobile needs user gesture) =====
+    audioOn:false, audioCtx:null, audioNodes:[],
+    enableAudio(){
+        try{
+            const btn = document.querySelector('.nav-audio');
+            if(this.audioOn){
+                this.audioOn=false;
+                btn && btn.classList.remove('on');
+                this._stopAudio();
+                return;
+            }
+            this.audioOn=true;
+            btn && btn.classList.add('on');
+
+            // WebAudio ambient pad
+            const AC = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = this.audioCtx || new AC();
+            this.audioCtx.resume && this.audioCtx.resume();
+
+            const ctx = this.audioCtx;
+            const master = ctx.createGain();
+            master.gain.value = 0.02;
+            master.connect(ctx.destination);
+
+            const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
+            const osc2 = ctx.createOscillator(); osc2.type="sine"; osc2.frequency.value=329.63;
+            const lfo  = ctx.createOscillator(); lfo.type="sine"; lfo.frequency.value=0.08;
+            const lfoGain = ctx.createGain(); lfoGain.gain.value=6;
+
+            const filter = ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=700; filter.Q.value=0.8;
+            const gain = ctx.createGain(); gain.gain.value=0.0;
+
+            lfo.connect(lfoGain); lfoGain.connect(osc2.frequency);
+
+            osc1.connect(filter); osc2.connect(filter); filter.connect(gain); gain.connect(master);
+
+            // fade in
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0.0, now);
+            gain.gain.linearRampToValueAtTime(1.0, now + 1.2);
+
+            osc1.start(); osc2.start(); lfo.start();
+
+            this.audioNodes = [osc1,osc2,lfo,filter,gain,master];
+
+            // Voice guide (first time)
+            this.speak("廣寒宮已開啟。請先連接錢包，然後輸入金額，選擇上或下。點燈、許願、還願都會流入共用獎池。");
+        }catch(e){
+            alert("音效啟用失敗：請用 Chrome / Android，並允許音訊播放。");
+        }
+    },
+    _stopAudio(){
+        try{
+            if(!this.audioCtx) return;
+            const ctx=this.audioCtx;
+            const nodes=this.audioNodes||[];
+            // fade out quickly
+            const gain = nodes.find(n=>n && n.gain && n.gain.setValueAtTime);
+            if(gain){
+                const t=ctx.currentTime;
+                gain.gain.cancelScheduledValues(t);
+                gain.gain.setValueAtTime(gain.gain.value, t);
+                gain.gain.linearRampToValueAtTime(0.0, t+0.4);
+            }
+            setTimeout(()=>{
+                try{
+                    for(const n of nodes){
+                        if(n && typeof n.stop==="function") try{ n.stop(); }catch(_){}
+                        if(n && typeof n.disconnect==="function") try{ n.disconnect(); }catch(_){}
+                    }
+                    this.audioNodes=[];
+                }catch(_){}
+            }, 500);
+        }catch(_){}
+    },
+speak(m){
+      try{
+        if(!m) return;
+        const u = new SpeechSynthesisUtterance(String(m));
+        u.lang = 'zh-TW';
+        u.rate = 1.0;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    },
+
+    // Progress helper (fix: app.setProgress is not a function)
+    // ratio: 0..1
+    setProgress(ratio){
+      const el = document.getElementById('w3-prog');
+      if(!el) return;
+      let r = Number(ratio);
+      if(!Number.isFinite(r)) r = 0;
+      r = Math.max(0, Math.min(1, r));
+      const pct = Math.round(r * 1000) / 10; // 0.1%
+      el.innerText = `${pct}%`;
+    }
 };
+
 window.onload = () => app.init();
+  // auto concierge on first visit
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
+
+<script>
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
+const web3 = {
+  provider: null,
+  signer: null,
+  addr: null,
+  demo: false,
+
+  // ==== chain guard (BSC) ====
+  BSC_CHAIN_ID_DEC: 56,
+  BSC_CHAIN_ID_HEX: "0x38",
+  async ensureBSC(){
+    if(!window.ethereum) return true;
+    try{
+      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const el = document.getElementById("w3-chain");
+      if(el) el.innerText = cid;
+      if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
+
+      // Try switch to BSC
+      try{
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+        });
+      }catch(swErr){
+        // If not added, try add chain then switch
+        if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: this.BSC_CHAIN_ID_HEX,
+              chainName: "BNB Smart Chain",
+              nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
+              rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc-dataseed1.ninicoin.io/"],
+              blockExplorerUrls: ["https://bscscan.com"]
+            }]
+          });
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+          });
+        }else{
+          throw swErr;
+        }
+      }
+      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const el2 = document.getElementById("w3-chain");
+      if(el2) el2.innerText = cid2;
+      return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
+    }catch(e){
+      console.warn("ensureBSC failed", e);
+      return false;
+    }
+  },
+
+
+  // 固定 Token（你給的）
+  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+
+  // 你部署後填上（會自動記到 localStorage）
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
+
+  // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
+  abiERC20: [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) external view returns (uint256)",
+    "function balanceOf(address a) external view returns (uint256)",
+    "function decimals() external view returns (uint8)"
+  ],
+  abiUniverse: [
+    "function ritualDeposit(uint256 amount, bytes32 tag) external",
+    "function placeOrder(uint8 side, uint256 amountIn) external",
+    "function poolBalance() external view returns (uint256)",
+    "function canTriggerRound() external view returns (bool)",
+    "function minOrder() external view returns (uint256)",
+    "function maxOrder() external view returns (uint256)",
+    "function vowWindowSec() external view returns (uint32)",
+    "function loveWindowSec() external view returns (uint32)",
+    "function treasury8888() external view returns (address)",
+    "function kgen() external view returns (address)",
+    "function TRIGGER() external view returns (uint256)",
+    "function MIN_FLOOR() external view returns (uint256)",
+    "function ROUND_TOTAL() external view returns (uint256)",
+    "function configLocked() external view returns (bool)",
+    "function roundId() external view returns (uint256)",
+    "function rounds(uint256) external view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)",
+    "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundTriggered(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 poolBefore)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)",
+    "event RitualDeposit(address indexed from,uint256 amount,bytes32 indexed tag)"
+  ],
+
+  // ===== helpers =====
+  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+
+  load(){
+    try{
+      const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
+      if(u && ethers.utils.isAddress(u)) this.UNIVERSE = u;
+    }catch(_){}
+    this.ui();
+  },
+
+  ui(){
+const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVERSE ? this.UNIVERSE : '未設定（可先 Demo）';
+    (()=>{const el=document.getElementById("w3-mode"); if(el) el.innerText=this.demo ? "DEMO MODE" : "LIVE MODE";})();
+  },
+
+  setUniverseAddr(){
+    const v = (document.getElementById("uni-addr-input").value || "").trim();
+    if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
+    this.UNIVERSE = v;
+    try{ localStorage.setItem("KGEN_16888_UNIVERSE_ADDR", v); }catch(_){}
+    this.ui();
+    this.refresh();
+    app.speak("Universe 合約地址已設定。");
+  },
+
+  async connect(){
+    try{
+      if(!window.ethereum){
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
+        return;
+      }
+      await window.ethereum.request({ method:"eth_requestAccounts" });
+      const okChain = await this.ensureBSC();
+      if(!okChain){
+        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        this.demo = true;
+        this.ui();
+        this.demoRefresh();
+        return;
+      }
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      this.demo = false;
+      this.ui();
+      await this.refresh();
+      await this.refreshUser();
+      await this.bindEvents();
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
+    }catch(e){
+      console.error(e);
+      this.demo = true;
+      this.ui();
+      alert("錢包連線失敗，已切回 Demo 模式");
+    }
+  },
+
+
+  async refreshUser(){
+    try{
+      // Demo 模式：不讀鏈上
+      if(this.demo){
+        const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+        return;
+      }
+      if(!this.provider || !this.addr || !this.UNIVERSE) return;
+
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      let dec = 18;
+      try{ dec = await kgenR.decimals(); }catch(_){}
+
+      const [bal, alw] = await Promise.all([
+        kgenR.balanceOf(this.addr),
+        kgenR.allowance(this.addr, this.UNIVERSE),
+      ]);
+
+      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
+
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+    }catch(e){
+      console.warn("refreshUser failed", e);
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
+    }
+  },
+
+  parseAmt(){
+    const v = (document.getElementById("amt-in").value || "").trim();
+    if(!v) throw new Error("請輸入金額");
+    if(!/^\d+(\.\d+)?$/.test(v)) throw new Error("金額格式錯誤");
+    return ethers.utils.parseUnits(v, 18);
+  },
+
+  // ===== DEMO (no wallet) =====
+  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoRefresh(){
+    const b = this.demoState.pool;
+    const t = this.demoState.target;
+    const pct = Math.max(0, Math.min(100, (b/t)*100));
+const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
+const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+    (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
+const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
+    app.setProgress(pct/100);
+  },
+
+  demoDeposit(amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    this.demoState.pool += a;
+    this.demoRefresh();
+    app.logEvent(`DEMO 入池 +${a.toFixed(2)} KGEN`);
+  },
+
+  demoOrder(side, amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    // 簡化：直接 50/50
+    const win = Math.random() < 0.5;
+    const payout = win ? a*2 : 0;
+    if(win){
+      // pool pay profit portion only in demo
+      this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    }else{
+      this.demoState.pool += a;
+    }
+    this.demoRefresh();
+    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜${win?"WIN":"LOSE"}｜payout ${payout.toFixed(2)}`);
+  },
+
+  // ===== LIVE =====
+  async approve(){
+    if(this.demo) return alert("Demo 模式不需要 Approve");
+    if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+    try{
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, amt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+    }
+  },
+
+  async ritualDeposit(){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
+      const okChain = await this.ensureBSC();
+      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
+app.speak("點燈已入池。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("入池成功。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "入池失敗");
+    }
+  },
+
+  async place(side){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("本次對賭已結算。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "下單失敗");
+    }
+  },
+
+  async refresh(){
+    try{
+      if(this.demo){
+        this.demoRefresh();
+        return;
+      }
+      if(!this.UNIVERSE || !this.provider){
+const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
+        return;
+      }
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
+        uniR.poolBalance(),
+        uniR.canTriggerRound(),
+        uniR.minOrder(),
+        uniR.maxOrder(),
+        uniR.vowWindowSec(),
+        uniR.loveWindowSec(),
+        uniR.treasury8888(),
+        uniR.TRIGGER(),
+        uniR.MIN_FLOOR(),
+        uniR.ROUND_TOTAL()
+      ]);
+const b = parseFloat(ethers.utils.formatUnits(bal, 18));
+      const minK = parseFloat(ethers.utils.formatUnits(minO, 18));
+      const maxK = parseFloat(ethers.utils.formatUnits(maxO, 18));
+      const trigK = parseFloat(ethers.utils.formatUnits(trig, 18));
+      const floorK = parseFloat(ethers.utils.formatUnits(floor, 18));
+      const roundK = parseFloat(ethers.utils.formatUnits(roundT, 18));
+const t = parseFloat(trigK.toFixed(2));
+      const baseF = parseFloat(floorK.toFixed(2));
+
+const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
+      const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
+
+      (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
+
+const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
+      app.setProgress(pct/100);
+      await this.refreshUser();
+    }catch(e){
+      console.warn(e);
+    }
+  },
+
+  async bindEvents(){
+    try{
+      if(this.demo) return;
+      if(!this.UNIVERSE || !this.provider) return;
+
+      // prevent double bind
+      if(this._bound) return;
+      this._bound = true;
+
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
+        const p = parseFloat(ethers.utils.formatUnits(payout, 18));
+        app.logEvent(`鏈上結算｜${user.slice(0,6)}…｜${side==0?"漲":"跌"}｜${win?"WIN":"LOSE"}｜payout ${p.toFixed(4)} KGEN`);
+        this.refresh();
+      });
+
+      uniR.on("RoundSettled", (roundId, a, b, distributable) => {
+        app.logEvent(`下凡投胎 Round #${roundId.toString()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
+        this.refresh();
+      });
+    }catch(e){
+      console.warn(e);
+    }
+  }
+};
+</script>
+
+
+<!-- === Universe Navigation Buttons V2.04 === -->
+<div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+
+  <a class="nav-btn nav-swap" href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">用 BNB 換 KGEN（PancakeSwap）</a>
+  <a class="nav-btn nav-swap2" href="https://pancakeswap.finance/swap?inputCurrency=0x55d398326f99059ff775485246999027b3197955&outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">用 USDT 換 KGEN（PancakeSwap）</a>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
+      <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
+</div>
+
+
+<!-- Guide / Concierge Modal -->
+<div id="guide-modal" class="guide-modal" aria-hidden="true">
+  <div class="guide-card">
+    <div class="guide-header">
+      <div class="guide-title">廣寒宮客服</div>
+      <button class="guide-close" id="btn-guide-close" aria-label="close">✕</button>
+    </div>
+    <div class="guide-tabs">
+      <button class="guide-tab" data-sec="intro">故事與快速開始</button>
+      <button class="guide-tab" data-sec="rules">規則與下凡</button>
+      <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+      <button class="guide-tab" data-sec="qa">語音問答</button>
+    </div>
+    <div class="guide-body" id="guide-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
