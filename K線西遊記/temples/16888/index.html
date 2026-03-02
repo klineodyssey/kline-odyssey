@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.4</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -183,7 +183,7 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-        /* ===== Voice QA / AI Concierge (v2.18.4) ===== */
+        /* ===== Voice QA / AI Concierge (v2.18.5) ===== */
         .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
         .voice-ctrl{flex:1;min-width:0}
         .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
@@ -203,13 +203,13 @@
         @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
     
-/* --- GA panel float fix (V2.18.4) --- */
+/* --- GA panel float fix (V2.18.5) --- */
 50%{ transform: translateY(-8px); }
   100%{ transform: translateY(0px); }
 }
 
 
-/* --- GA bar sweep animation (V2.18.4 hotfix) --- */
+/* --- GA bar sweep animation (V2.18.5 hotfix) --- */
 .ga-progress.ga-sweep{ animation: gaSweep 2.2s linear infinite; }
 @keyframes gaSweep{
   0%{ width:0%; }
@@ -230,7 +230,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.18.4</div>
+        <div class="sys-st" id="ver-st">VERSION v2.18.5</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -251,8 +251,8 @@
 
 <div class="ga-matrix">
     <div class="ga-float-wrapper-disabled"><div class="ga-float-inner-disabled"><div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div></div></div>
-    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar" class="ga-sweep"></div></div></div>
-    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar" class="ga-sweep"></div></div></div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress ga-sweep" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress ga-sweep" id="m-bar"></div></div></div>
     <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
     <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
 </div>
@@ -375,6 +375,7 @@ const app = {
     init() {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
+        this.startHeartbeat();
         web3.load();
         this.updateWarp(33);
         this.applySteer(76, true);
@@ -384,8 +385,12 @@ const app = {
     },
 
     tick() {
-const sc=document.getElementById('sys-clock'); if(sc) sc.innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
-        const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION " + APP_VERSION;
+      try{
+        const now=new Date();
+        const pad=n=>String(n).padStart(2,'0');
+        const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const sc=document.getElementById('sys-clock'); if(sc) sc.innerText = `SYSTEM ONLINE | ${ts}`;
+const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION " + APP_VERSION;
         document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
         const fit = 0.9 + Math.random() * 0.1;
 const fv=document.getElementById('f-val'); if(fv) fv.innerText = fit.toFixed(3);
@@ -393,7 +398,20 @@ const fb=document.getElementById('f-bar');
 // width handled by CSS sweep animation
 const mb=document.getElementById('m-bar');
 // width handled by CSS sweep animation
-},
+      }catch(e){ /* keep UI alive */ }
+    },
+
+
+    // --- rAF heartbeat (V2.18.5) : keep clock/dots alive even in FB in-app ---
+    startHeartbeat(){
+      let last=0;
+      const loop=(t)=>{
+        if(!last) last=t;
+        if(t-last>900){ this.tick(); last=t; }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    },
 
     // ---- Safety helpers (avoid popup errors in demo) ----
     logEvent(name, data){
@@ -1052,7 +1070,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 
-    // ===== Voice QA Engine (v2.18.4) =====
+    // ===== Voice QA Engine (v2.18.5) =====
     voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
 
     initSpeech(){
