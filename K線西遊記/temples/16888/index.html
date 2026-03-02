@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.17.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -182,7 +182,27 @@
     .bar > div{height:100%; background:#111; width:0%;}
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
-</style>
+
+        /* ===== Voice QA / AI Concierge (v2.17.0) ===== */
+        .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
+        .voice-ctrl{flex:1;min-width:0}
+        .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
+        .voice-btn.ghost{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:800}
+        .voice-status{margin-top:8px;font-weight:900;opacity:.92}
+        .voice-text{margin-top:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);min-height:44px;line-height:1.35;word-break:break-word}
+        .chat-log{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.10);max-height:220px;overflow:auto}
+        .chat-item{margin:8px 0}
+        .chat-q{font-weight:900;color:#d6f6ff}
+        .chat-a{margin-top:4px;opacity:.95}
+        .avatar{width:72px;height:72px;border-radius:999px;border:1px solid rgba(255,215,120,.35);background:radial-gradient(circle at 35% 35%, rgba(0,242,255,.35), rgba(0,0,0,.1));position:relative;overflow:hidden;box-shadow:0 0 18px rgba(0,242,255,.18)}
+        .avatar-core{position:absolute;inset:12px;border-radius:999px;background:radial-gradient(circle at 40% 40%, rgba(255,215,120,.75), rgba(0,242,255,.15));filter:blur(.2px)}
+        .avatar-mouth{position:absolute;left:16px;right:16px;bottom:16px;height:8px;border-radius:999px;background:rgba(255,255,255,.55);transform:scaleX(.25);transform-origin:center}
+        .avatar-tag{position:absolute;top:6px;right:6px;font-size:12px;font-weight:900;opacity:.92}
+        .avatar.listening{animation:avatarPulse 1s infinite}
+        .avatar.speaking{animation:avatarPulse 0.6s infinite}
+        @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+    </style>
 </head>
 <body>
 
@@ -191,7 +211,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
+        <div class="sys-st" id="ver-st">VERSION v2.17.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -435,6 +455,21 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const qa = `
           <h3>語音客服（Q&A）</h3>
           <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
+          <div class='voice-tools'>
+            <div class='avatar' id='ai-avatar' title='AI 客服影像'>
+              <div class='avatar-core'></div>
+              <div class='avatar-mouth' id='ai-mouth'></div>
+              <div class='avatar-tag'>AI</div>
+            </div>
+            <div class='voice-ctrl'>
+              <button class='voice-btn' id='btn-voiceqa'>🎙️ 開始語音問答</button>
+              <button class='voice-btn ghost' id='btn-voicestop'>停止</button>
+              <div class='voice-status' id='voice-status'>待命</div>
+              <div class='voice-text' id='voice-text'>（語音轉文字會顯示在這裡，完成後自動送出）</div>
+            </div>
+          </div>
+          <div class='chat-log' id='chat-log'></div>
+
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
@@ -463,23 +498,54 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         let ans = '';
         const has = (s)=> lower.indexOf(s) >= 0;
 
-        if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
-            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
+        // helper to read live values when possible
+        const poolBalEl = document.getElementById('pool-bal');
+        const poolBalTxt = poolBalEl ? poolBalEl.innerText : '';
+        const userBalEl = document.getElementById('userBal');
+        const userBalTxt = userBalEl ? userBalEl.innerText : '';
+        const alwEl = document.getElementById('userAllowance');
+        const alwTxt = alwEl ? alwEl.innerText : '';
+
+        if(question.includes('allowance') || question.includes('授權') || question.includes('approve') || question.includes('允許') || question.includes('扣款')){
+            ans = 'Allowance 是「你授權 Universe 合約可以從你錢包扣走 KGEN 的上限」，用在下單與入池。它不是賠付上限。賠付是合約用池子裡的 KGEN 直接轉給你。現在你的 Allowance → Universe 顯示為：' + (alwTxt||'未知') + '。如果是 0，代表還沒授權，請先按 Approve。';
+        }else if(question.includes('餘額') || question.includes('balance') || question.includes('幾顆') || question.includes('多少kgen')){
+            ans = '你目前錢包的 KGEN 餘額顯示為：' + (userBalTxt||'未知') + '。如果顯示讀取失敗，通常是還沒連錢包或不在 BNB Chain（56）。';
+        }else if(question.includes('池') || question.includes('pool') || question.includes('彩池') || question.includes('懷孕池')){
+            ans = '目前 Universe 合約池（共用獎池）顯示為：' + (poolBalTxt||'未知') + '。池子越厚，越接近 16888 事件門檻。';
+        }else if(question.includes('怎麼開始') || question.includes('開始玩') || question.includes('如何玩') || has('how to') || has('start')){
+            ans = '最快開始：沒錢包也能玩（模擬）。在下單框輸入 1~1000，按 UP 或 DOWN，立刻看到勝負與池成長。若要真上鏈：先連錢包 → 確認在 BNB Chain(56) → Approve（授權）→ 再下單或入池。';
+        }else if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入 1~1000，按上或下，就能看到勝負與池成長。等你準備好再連錢包進真宇宙。';
         }else if(question.includes('custom') || question.includes('找不到') || has('search')){
-            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
-        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
-            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN：0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be。';
+        }else if((question.includes('1') && question.includes('1000')) || question.includes('一到一千')){
+            ans = '1~1000 是單筆能量輸入範圍（體驗用）。你可以先用小額體驗，池會依勝負增減並推進到 16888 劇情事件。';
         }else if(question.includes('8888') || question.includes('八八八八')){
-            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
+            ans = '8888 是基底池，象徵廣寒宮底座能量。池子從 8888 成長到 16888 才會觸發「下凡投胎」事件。';
         }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
-            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+            ans = '當池到 16888，七仙女啟動下凡儀式：故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
         }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
-            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+            ans = '表態需要真的轉帳 1~2 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+        }else if(question.includes('bnb') || question.includes('usdt') || question.includes('換') || question.includes('買kgen')){
+            ans = '如果你手上是 BNB/USDT：最穩的做法是到 DEX（例如 PancakeSwap）換成 KGEN，再回來廣寒宮下單/入池。站內也可以做導引，但先以「先跑起來」為主，我會保留清楚提醒與安全提示。';
         }else{
-            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
+            ans = '收到。你可以直接問我：怎麼開始、Allowance 是什麼、要不要先 Approve、池子現在多少、怎麼用 Custom 匯入 KGEN、8888/16888 的意義、下凡後會發生什麼。你也可以用語音直接問，我會像聊天客服一樣回覆。';
         }
 
+        // update Q/A blocks
         if(aBox) aBox.innerText = 'A: ' + ans;
+
+        // append to chat log
+        const log = document.getElementById('chat-log');
+        if(log){
+          const item = document.createElement('div');
+          item.className = 'chat-item';
+          item.innerHTML = `<div class="chat-q">Q: ${question}</div><div class="chat-a">A: ${ans}</div>`;
+          log.prepend(item);
+          // keep last 12
+          while(log.children.length > 12) log.removeChild(log.lastChild);
+        }
+
         this.speak(ans);
     },
 
@@ -616,6 +682,14 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
             if(!b) return;
             const q = b.getAttribute('data-q');
             if(q) this.handleQuestion(q);
+        });
+
+        // Voice QA buttons inside guide (dynamic DOM)
+        modal.addEventListener('click', (e)=>{
+            const t = e.target;
+            if(!t) return;
+            if(t.id === 'btn-voiceqa'){ this.startVoiceQA(); }
+            if(t.id === 'btn-voicestop'){ this.stopVoiceQA(); }
         });
 
     },
@@ -947,12 +1021,121 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
             }, 500);
         }catch(_){}
     },
-speak(m){
+
+    // ===== Voice QA Engine (v2.17.0) =====
+    voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
+
+    initSpeech(){
+      try{
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(!SR) return false;
+        const r = new SR();
+        r.lang = 'zh-TW';
+        r.interimResults = true;
+        r.continuous = false; // auto stop after one question
+        r.onresult = (ev)=>{
+          let interim = '';
+          let finalTxt = '';
+          for(let i=ev.resultIndex;i<ev.results.length;i++){
+            const t = ev.results[i][0] && ev.results[i][0].transcript ? ev.results[i][0].transcript : '';
+            if(ev.results[i].isFinal) finalTxt += t;
+            else interim += t;
+          }
+          this.voice.lastInterim = interim.trim();
+          const vt = document.getElementById('voice-text');
+          if(vt){
+            vt.innerText = (finalTxt.trim() ? finalTxt.trim() : (this.voice.lastInterim || '…'));
+          }
+          // auto-send on final (no confirm)
+          if(finalTxt && finalTxt.trim()){
+            this.voice.lastFinal = finalTxt.trim();
+            const vs = document.getElementById('voice-status'); if(vs) vs.innerText = '已送出，客服回覆中…';
+            this.handleQuestion(this.voice.lastFinal);
+            try{ r.stop(); }catch(_){}
+          }
+        };
+        r.onerror = (e)=>{
+          const vs = document.getElementById('voice-status');
+          if(vs) vs.innerText = '語音錯誤：' + (e && e.error ? e.error : 'unknown');
+          this.setAvatarState('idle');
+          this.voice.listening = false;
+        };
+        r.onend = ()=>{
+          const vs = document.getElementById('voice-status');
+          if(vs && this.voice.listening) vs.innerText = '待命';
+          this.voice.listening = false;
+          this.setAvatarState('idle');
+        };
+        this.voice.rec = r;
+        return true;
+      }catch(e){ return false; }
+    },
+
+    startVoiceQA(){
+      const ok = this.voice.rec || this.initSpeech();
+      const vs = document.getElementById('voice-status');
+      const vt = document.getElementById('voice-text');
+      if(!ok){
+        if(vs) vs.innerText = '此瀏覽器不支援語音辨識（建議用 Chrome / Android Chrome）';
+        if(vt) vt.innerText = '不支援語音辨識：你仍可點上方問題按鈕或直接提問。';
+        return;
+      }
+      try{
+        if(vt) vt.innerText = '…';
+        if(vs) vs.innerText = '聆聽中（說完會自動送出）';
+        this.voice.listening = true;
+        this.setAvatarState('listening');
+        this.voice.rec.start();
+      }catch(e){
+        if(vs) vs.innerText = '語音啟動失敗，請再試一次';
+        this.voice.listening = false;
+        this.setAvatarState('idle');
+      }
+    },
+
+    stopVoiceQA(){
+      try{
+        if(this.voice.rec) this.voice.rec.stop();
+      }catch(_){}
+      const vs = document.getElementById('voice-status'); if(vs) vs.innerText='待命';
+      this.voice.listening=false;
+      this.setAvatarState('idle');
+    },
+
+    setAvatarState(state){
+      const av = document.getElementById('ai-avatar');
+      if(!av) return;
+      av.classList.remove('listening','speaking');
+      if(state==='listening') av.classList.add('listening');
+      if(state==='speaking') av.classList.add('speaking');
+    },
+
+    animateMouth(level){
+      const mouth = document.getElementById('ai-mouth');
+      if(!mouth) return;
+      const v = Math.max(0.15, Math.min(1.0, Number(level)||0.15));
+      mouth.style.transform = 'scaleX(' + v.toFixed(2) + ')';
+    },
+
+    speak(m){
       try{
         if(!m) return;
         const u = new SpeechSynthesisUtterance(String(m));
         u.lang = 'zh-TW';
         u.rate = 1.0;
+        u.onstart = ()=>{
+          this.setAvatarState('speaking');
+          // simple mouth animation while speaking
+          try{
+            if(this._mouthTimer) clearInterval(this._mouthTimer);
+            this._mouthTimer = setInterval(()=> this.animateMouth(0.25 + Math.random()*0.7), 120);
+          }catch(_){}
+        };
+        u.onend = ()=>{
+          try{ if(this._mouthTimer) clearInterval(this._mouthTimer); }catch(_){}
+          this.animateMouth(0.25);
+          this.setAvatarState('idle');
+        };
         speechSynthesis.cancel();
         speechSynthesis.speak(u);
       }catch(e){}
