@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.8</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -128,6 +128,7 @@
         .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
         .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
         .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
+        .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
     
         .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
             background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
@@ -296,7 +297,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.8";
+const APP_VERSION = "v2.16.9";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -892,7 +893,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
 
             const ctx = this.audioCtx;
             const master = ctx.createGain();
-            master.gain.value = 0.02; // lowered for mobile to reduce noise
+            master.gain.value = 0.02;
             master.connect(ctx.destination);
 
             const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
@@ -1136,6 +1137,38 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
     }
   },
 
+
+  async refreshUser(){
+    try{
+      // Demo 模式：不讀鏈上
+      if(this.demo){
+        const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+        return;
+      }
+      if(!this.provider || !this.addr || !this.UNIVERSE) return;
+
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      let dec = 18;
+      try{ dec = await kgenR.decimals(); }catch(_){}
+
+      const [bal, alw] = await Promise.all([
+        kgenR.balanceOf(this.addr),
+        kgenR.allowance(this.addr, this.UNIVERSE),
+      ]);
+
+      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
+
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+    }catch(e){
+      console.warn("refreshUser failed", e);
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
+    }
+  },
+
   parseAmt(){
     const v = (document.getElementById("amt-in").value || "").trim();
     if(!v) throw new Error("請輸入金額");
@@ -1150,6 +1183,8 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
 const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
+const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
     (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
 const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
@@ -1309,38 +1344,6 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       console.warn(e);
     }
   }
-  async refreshUser(){
-    try{
-      if(this.demo){
-        const ub=document.getElementById('userBal'); if(ub) ub.innerText='DEMO';
-        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText='DEMO';
-        return;
-      }
-      if(!this.addr || !this.provider || !this.UNIVERSE) return;
-
-      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
-
-      // read decimals (do not assume 18)
-      let dec = 18;
-      try{ dec = await kgenR.decimals(); }catch(_){}
-
-      const [bal, alw] = await Promise.all([
-        kgenR.balanceOf(this.addr),
-        kgenR.allowance(this.addr, this.UNIVERSE),
-      ]);
-
-      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
-      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
-
-      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
-      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
-    }catch(e){
-      console.warn("refreshUser failed", e);
-      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
-      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
-    }
-  },
-
 };
 </script>
 
@@ -1350,6 +1353,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
+      <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
 </div>
 
 
