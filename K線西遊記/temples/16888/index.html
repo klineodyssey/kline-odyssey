@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -296,7 +296,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.7";
+const APP_VERSION = "v2.16.8";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -892,13 +892,13 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
 
             const ctx = this.audioCtx;
             const master = ctx.createGain();
-            master.gain.value = 0.06;
+            master.gain.value = 0.02; // lowered for mobile to reduce noise
             master.connect(ctx.destination);
 
             const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
-            const osc2 = ctx.createOscillator(); osc2.type="triangle"; osc2.frequency.value=329.63;
+            const osc2 = ctx.createOscillator(); osc2.type="sine"; osc2.frequency.value=329.63;
             const lfo  = ctx.createOscillator(); lfo.type="sine"; lfo.frequency.value=0.08;
-            const lfoGain = ctx.createGain(); lfoGain.gain.value=18;
+            const lfoGain = ctx.createGain(); lfoGain.gain.value=6;
 
             const filter = ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=700; filter.Q.value=0.8;
             const gain = ctx.createGain(); gain.gain.value=0.0;
@@ -1125,6 +1125,7 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
       this.ui();
       await this.refresh();
+      await this.refreshUser();
       await this.bindEvents();
       app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
@@ -1277,6 +1278,7 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
       app.setProgress(pct/100);
+      await this.refreshUser();
     }catch(e){
       console.warn(e);
     }
@@ -1307,6 +1309,38 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       console.warn(e);
     }
   }
+  async refreshUser(){
+    try{
+      if(this.demo){
+        const ub=document.getElementById('userBal'); if(ub) ub.innerText='DEMO';
+        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText='DEMO';
+        return;
+      }
+      if(!this.addr || !this.provider || !this.UNIVERSE) return;
+
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+
+      // read decimals (do not assume 18)
+      let dec = 18;
+      try{ dec = await kgenR.decimals(); }catch(_){}
+
+      const [bal, alw] = await Promise.all([
+        kgenR.balanceOf(this.addr),
+        kgenR.allowance(this.addr, this.UNIVERSE),
+      ]);
+
+      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
+
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+    }catch(e){
+      console.warn("refreshUser failed", e);
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
+    }
+  },
+
 };
 </script>
 
