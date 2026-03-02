@@ -122,10 +122,10 @@
         /* NAV buttons */
         .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
             min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
-            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#111;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#fff;
             box-shadow:0 0 18px rgba(255,215,120,.18); }
         .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
-        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6);  color:#111; }
         .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
         .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
         .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
@@ -191,7 +191,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
+        <div class="sys-st" id="ver-st">VERSION v2.19.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -250,6 +250,7 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+    <button class="term-btn" id="walletconnect-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto; margin-left:6px;" onclick="web3.connectWC()">🪪 WalletConnect</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -977,12 +978,7 @@ window.onload = () => app.init();
 </script>
 
 <script>
-/* ===========================
-   WEB3 合約對齊（PoolDuel + MoonTrust）
-   - PoolDuel：下單即真成交，輸贏在池內即時結算
-   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
-   =========================== */
-const web3 = {
+/* ==============const web3 = {
   provider: null,
   signer: null,
   addr: null,
@@ -992,23 +988,23 @@ const web3 = {
   BSC_CHAIN_ID_DEC: 56,
   BSC_CHAIN_ID_HEX: "0x38",
   async ensureBSC(){
-    if(!window.ethereum) return true;
+    if(!this.raw && !window.ethereum) return true;
     try{
-      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const cid = await (this.raw||window.ethereum).request({ method:"eth_chainId" });
       const el = document.getElementById("w3-chain");
       if(el) el.innerText = cid;
       if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
 
       // Try switch to BSC
       try{
-        await window.ethereum.request({
+        await (this.raw||window.ethereum).request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
         });
       }catch(swErr){
         // If not added, try add chain then switch
         if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
-          await window.ethereum.request({
+          await (this.raw||window.ethereum).request({
             method: "wallet_addEthereumChain",
             params: [{
               chainId: this.BSC_CHAIN_ID_HEX,
@@ -1026,7 +1022,7 @@ const web3 = {
           throw swErr;
         }
       }
-      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const cid2 = await (this.raw||window.ethereum).request({ method:"eth_chainId" });
       const el2 = document.getElementById("w3-chain");
       if(el2) el2.innerText = cid2;
       return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
@@ -1101,40 +1097,141 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
     app.speak("Universe 合約地址已設定。");
   },
 
-  async connect(){
+  
+  // ==== WalletConnect (multi-wallet) ====
+    wcProjectId(){
+    // WalletConnect Project ID (from your Reown / WalletConnect Cloud dashboard)
+    // Users do NOT need to input anything; this is an app-wide identifier.
+    const key = "WC_PROJECT_ID";
+    const embedded = "ed256d3118a9c971d550ed5ee522b4d9";
+    let pid = "";
+    try{ pid = (localStorage.getItem(key) || "").trim(); }catch(_ ){}
+    if(!pid || pid === "YOUR_WC_PROJECT_ID") pid = embedded;
+    return pid;
+  },
+
+  async connectWC(){
     try{
-      if(!window.ethereum){
-        this.demo = true;
-        this.ui();
-        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
+      const WC = (window.WalletConnectEthereumProvider && (window.WalletConnectEthereumProvider.default || window.WalletConnectEthereumProvider)) || null;
+      if(!WC){
+        alert("WalletConnect 模組未載入。請檢查網路或稍後重試。");
         return;
       }
-      await window.ethereum.request({ method:"eth_requestAccounts" });
+
+      // Ensure projectId exists
+      let projectId = this.wcProjectId();
+      if(projectId === "YOUR_WC_PROJECT_ID"){
+        const input = prompt("請輸入你的 WalletConnect Project ID（只需一次，會記住在本機）");
+        if(!input) return;
+        projectId = input.trim();
+        localStorage.setItem("WC_PROJECT_ID", projectId);
+      }
+
+      // Create provider (BSC only)
+      const wc = await WC.init({
+        projectId,
+        chains: [56],
+        optionalChains: [],
+        showQrModal: true,
+        rpcMap: { 56: "https://rpc.ankr.com/bsc" },
+        methods: ["eth_sendTransaction","eth_signTransaction","eth_sign","personal_sign","eth_signTypedData","eth_signTypedData_v4"],
+        events: ["chainChanged","accountsChanged","disconnect"]
+      });
+
+      await wc.enable();
+
+      this.raw = wc;
+      this.provider = new ethers.providers.Web3Provider(wc);
+
+      // chain label
+      try{
+        const net = await this.provider.getNetwork();
+        const ch = document.getElementById("w3-chain");
+        if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--")));
+      }catch(_){}
+
       const okChain = await this.ensureBSC();
       if(!okChain){
-        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        alert("請切到 BNB Smart Chain (BSC)。");
         this.demo = true;
         this.ui();
         this.demoRefresh();
         return;
       }
-      this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
-const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+
       this.demo = false;
       this.ui();
       await this.refresh();
       await this.refreshUser();
       await this.bindEvents();
-      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
-    }catch(e){
-      console.error(e);
-      this.demo = true;
-      this.ui();
-      alert("錢包連線失敗，已切回 Demo 模式");
+
+      // listeners
+      try{
+        wc.on("accountsChanged", (accs)=>{
+          if(accs && accs[0]){
+            this.addr = accs[0];
+            const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+            this.refreshUser();
+          }
+        });
+        wc.on("chainChanged", ()=>{
+          this.refresh();
+          this.refreshUser();
+        });
+        wc.on("disconnect", ()=>{
+          this.disconnect();
+        });
+      }catch(_){}
+
+    }catch(err){
+      console.warn(err);
+      alert("WalletConnect 連線失敗，請稍後重試。");
     }
+  },
+
+async connect(){
+    // Prefer WalletConnect inside in-app browsers (Facebook/LINE/etc.) for stability
+    const ua = (navigator.userAgent||"").toLowerCase();
+    const inApp = /fban|fbav|instagram|line|micromessenger|wv|webview/.test(ua);
+
+    // If injected provider exists and not in-app, use it first
+    if(window.ethereum && !inApp){
+      try{
+        this.raw = window.ethereum;
+        this.provider = new ethers.providers.Web3Provider(window.ethereum);
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        const okChain = await this.ensureBSC();
+        if(!okChain){
+          alert("請切到 BNB Smart Chain (BSC)。");
+          this.demo = true;
+          this.ui();
+          this.demoRefresh();
+          return;
+        }
+
+        this.signer = this.provider.getSigner();
+        this.addr = await this.signer.getAddress();
+        const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+
+        this.demo = false;
+        this.ui();
+        await this.refresh();
+        await this.refreshUser();
+        await this.bindEvents();
+        return;
+      }catch(err){
+        console.warn(err);
+        // fallback to WC below
+      }
+    }
+
+    // Fallback / default: WalletConnect multi-wallet
+    await this.connectWC();
   },
 
 
@@ -1344,6 +1441,13 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       console.warn(e);
     }
   }
+};ring()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
+        this.refresh();
+      });
+    }catch(e){
+      console.warn(e);
+    }
+  }
 };
 </script>
 
@@ -1376,6 +1480,9 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     <div class="guide-body" id="guide-body"></div>
   </div>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.13.0/dist/index.umd.min.js"></script>
 
 </body>
 </html>
