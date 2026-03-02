@@ -122,12 +122,10 @@
         /* NAV buttons */
         .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
             min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
-            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#fff;
-            box-shadow:0 0 18px rgba(255,215,120,.18); 
-  width: 260px;
-  text-align: center;}
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#111;
+            box-shadow:0 0 18px rgba(255,215,120,.18); }
         .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
-        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6);  color:#111; }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
         .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
         .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
         .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
@@ -184,6 +182,14 @@
     .bar > div{height:100%; background:#111; width:0%;}
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
+
+  .nav-swap{
+    width: 100%;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,215,120,.32);
+  }
+  .nav-swap:hover{ filter: brightness(1.05); }
+
 </style>
 </head>
 <body>
@@ -193,12 +199,12 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.19.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
         <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
-        <div class="data-box"><div>🐒 齊天豪宅 (500)</div><div class="grid-500" id="g2"></div></div>
+        <div class="data-box"><div>🐒 齊天豪宅分紅 (500)</div><div class="grid-500" id="g2"></div></div>
     </div>
 </div>
 
@@ -252,7 +258,6 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
-    <button class="term-btn" id="walletconnect-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto; margin-left:6px;" onclick="web3.connectWC()">🪪 WalletConnect</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -300,7 +305,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.18.9";
+const APP_VERSION = "v2.16.9";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -980,7 +985,12 @@ window.onload = () => app.init();
 </script>
 
 <script>
-/* ==============window.web3 = {
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
+const web3 = {
   provider: null,
   signer: null,
   addr: null,
@@ -990,23 +1000,23 @@ window.onload = () => app.init();
   BSC_CHAIN_ID_DEC: 56,
   BSC_CHAIN_ID_HEX: "0x38",
   async ensureBSC(){
-    if(!this.raw && !window.ethereum) return true;
+    if(!window.ethereum) return true;
     try{
-      const cid = await (this.raw||window.ethereum).request({ method:"eth_chainId" });
+      const cid = await window.ethereum.request({ method:"eth_chainId" });
       const el = document.getElementById("w3-chain");
       if(el) el.innerText = cid;
       if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
 
       // Try switch to BSC
       try{
-        await (this.raw||window.ethereum).request({
+        await window.ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
         });
       }catch(swErr){
         // If not added, try add chain then switch
         if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
-          await (this.raw||window.ethereum).request({
+          await window.ethereum.request({
             method: "wallet_addEthereumChain",
             params: [{
               chainId: this.BSC_CHAIN_ID_HEX,
@@ -1024,7 +1034,7 @@ window.onload = () => app.init();
           throw swErr;
         }
       }
-      const cid2 = await (this.raw||window.ethereum).request({ method:"eth_chainId" });
+      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
       const el2 = document.getElementById("w3-chain");
       if(el2) el2.innerText = cid2;
       return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
@@ -1099,141 +1109,40 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
     app.speak("Universe 合約地址已設定。");
   },
 
-  
-  // ==== WalletConnect (multi-wallet) ====
-    wcProjectId(){
-    // WalletConnect Project ID (from your Reown / WalletConnect Cloud dashboard)
-    // Users do NOT need to input anything; this is an app-wide identifier.
-    const key = "WC_PROJECT_ID";
-    const embedded = "ed256d3118a9c971d550ed5ee522b4d9";
-    let pid = "";
-    try{ pid = (localStorage.getItem(key) || "").trim(); }catch(_ ){}
-    if(!pid || pid === "YOUR_WC_PROJECT_ID") pid = embedded;
-    return pid;
-  },
-
-  async connectWC(){
+  async connect(){
     try{
-      const WC = (window.WalletConnectEthereumProvider && (window.WalletConnectEthereumProvider.default || window.WalletConnectEthereumProvider)) || null;
-      if(!WC){
-        alert("WalletConnect 模組未載入。請檢查網路或稍後重試。");
+      if(!window.ethereum){
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
         return;
       }
-
-      // Ensure projectId exists
-      let projectId = this.wcProjectId();
-      if(projectId === "YOUR_WC_PROJECT_ID"){
-        const input = prompt("請輸入你的 WalletConnect Project ID（只需一次，會記住在本機）");
-        if(!input) return;
-        projectId = input.trim();
-        localStorage.setItem("WC_PROJECT_ID", projectId);
-      }
-
-      // Create provider (BSC only)
-      const wc = await WC.init({
-        projectId,
-        chains: [56],
-        optionalChains: [],
-        showQrModal: true,
-        rpcMap: { 56: "https://rpc.ankr.com/bsc" },
-        methods: ["eth_sendTransaction","eth_signTransaction","eth_sign","personal_sign","eth_signTypedData","eth_signTypedData_v4"],
-        events: ["chainChanged","accountsChanged","disconnect"]
-      });
-
-      await wc.enable();
-
-      this.raw = wc;
-      this.provider = new ethers.providers.Web3Provider(wc);
-
-      // chain label
-      try{
-        const net = await this.provider.getNetwork();
-        const ch = document.getElementById("w3-chain");
-        if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--")));
-      }catch(_){}
-
+      await window.ethereum.request({ method:"eth_requestAccounts" });
       const okChain = await this.ensureBSC();
       if(!okChain){
-        alert("請切到 BNB Smart Chain (BSC)。");
+        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
         this.demo = true;
         this.ui();
         this.demoRefresh();
         return;
       }
-
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
-      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
-
+const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
       this.ui();
       await this.refresh();
       await this.refreshUser();
       await this.bindEvents();
-
-      // listeners
-      try{
-        wc.on("accountsChanged", (accs)=>{
-          if(accs && accs[0]){
-            this.addr = accs[0];
-            const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
-            this.refreshUser();
-          }
-        });
-        wc.on("chainChanged", ()=>{
-          this.refresh();
-          this.refreshUser();
-        });
-        wc.on("disconnect", ()=>{
-          this.disconnect();
-        });
-      }catch(_){}
-
-    }catch(err){
-      console.warn(err);
-      alert("WalletConnect 連線失敗，請稍後重試。");
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
+    }catch(e){
+      console.error(e);
+      this.demo = true;
+      this.ui();
+      alert("錢包連線失敗，已切回 Demo 模式");
     }
-  },
-
-async connect(){
-    // Prefer WalletConnect inside in-app browsers (Facebook/LINE/etc.) for stability
-    const ua = (navigator.userAgent||"").toLowerCase();
-    const inApp = /fban|fbav|instagram|line|micromessenger|wv|webview/.test(ua);
-
-    // If injected provider exists and not in-app, use it first
-    if(window.ethereum && !inApp){
-      try{
-        this.raw = window.ethereum;
-        this.provider = new ethers.providers.Web3Provider(window.ethereum);
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-
-        const okChain = await this.ensureBSC();
-        if(!okChain){
-          alert("請切到 BNB Smart Chain (BSC)。");
-          this.demo = true;
-          this.ui();
-          this.demoRefresh();
-          return;
-        }
-
-        this.signer = this.provider.getSigner();
-        this.addr = await this.signer.getAddress();
-        const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
-
-        this.demo = false;
-        this.ui();
-        await this.refresh();
-        await this.refreshUser();
-        await this.bindEvents();
-        return;
-      }catch(err){
-        console.warn(err);
-        // fallback to WC below
-      }
-    }
-
-    // Fallback / default: WalletConnect multi-wallet
-    await this.connectWC();
   },
 
 
@@ -1443,13 +1352,6 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       console.warn(e);
     }
   }
-};ring()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
-        this.refresh();
-      });
-    }catch(e){
-      console.warn(e);
-    }
-  }
 };
 </script>
 
@@ -1458,10 +1360,10 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
-
-  <a class="nav-btn nav-swap" href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">用 BNB 換 KGEN（PancakeSwap）</a>
-  <a class="nav-btn nav-swap2" href="https://pancakeswap.finance/swap?inputCurrency=0x55d398326f99059ff775485246999027b3197955&outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">用 USDT 換 KGEN（PancakeSwap）</a>
-  <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
+  
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button">🟡 用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button">🟢 用 USDT 換 KGEN</button>
+<button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
       <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
 </div>
 
@@ -1484,87 +1386,26 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.13.0/dist/index.umd.min.js"></script>
-
-
-<!-- In-app browser guard (FB/IG/LINE/WeChat etc.) -->
-<div id="inappGuard" style="position:fixed;inset:0;z-index:99999;display:none;background:rgba(0,0,0,.86);backdrop-filter:blur(6px);">
-  <div style="max-width:520px;margin:8vh auto;padding:18px 16px;border:1px solid rgba(255,215,90,.55);border-radius:14px;background:rgba(10,10,12,.72);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,sans-serif;line-height:1.6;">
-    <div style="font-weight:900;font-size:18px;margin-bottom:10px;">偵測到「內建瀏覽器」</div>
-    <div style="opacity:.92;margin-bottom:12px;">
-      Facebook / Instagram / LINE / WeChat 這類內建瀏覽器常會封鎖或干擾 Web3 連線（WalletConnect）、音效、甚至動畫迴圈。
-      <br>要讓「連錢包 / 下單 / Demo」穩定，請改用：
-      <ul style="margin:10px 0 0 18px;padding:0;">
-        <li>錢包內建瀏覽器（MetaMask / Trust / OKX / Binance Web3）</li>
-        <li>或手機 Chrome / Safari（再用 WalletConnect 連接）</li>
-      </ul>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button id="btnCopyUrl" style="flex:1;min-width:140px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,215,90,.55);background:#111;color:#ffd76a;font-weight:900;">複製本頁網址</button>
-      <button id="btnCloseGuard" style="flex:1;min-width:140px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#1b1b1f;color:#fff;font-weight:800;">我知道了，繼續</button>
-    </div>
-    <div id="guardHint" style="margin-top:10px;font-size:12px;opacity:.75;"></div>
-  </div>
-</div>
-
 <script>
 (function(){
-  function isInApp(){
-    const ua = (navigator.userAgent || "").toLowerCase();
-    return (
-      ua.includes("fbav") || ua.includes("fban") || ua.includes("instagram") ||
-      ua.includes("line") || ua.includes("micromessenger") || ua.includes("wechat") ||
-      ua.includes("wv") || ua.includes("webview")
-    );
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+  function openSwap(input){
+    const url = "https://pancakeswap.finance/swap?outputCurrency=" + encodeURIComponent(KGEN) +
+                "&inputCurrency=" + encodeURIComponent(input);
+    window.open(url, "_blank", "noopener,noreferrer");
   }
-  const guard = document.getElementById("inappGuard");
-  const hint  = document.getElementById("guardHint");
-  const copyBtn = document.getElementById("btnCopyUrl");
-  const closeBtn = document.getElementById("btnCloseGuard");
+  const bnbBtn = document.getElementById("btn-swap-bnb");
+  const usdtBtn = document.getElementById("btn-swap-usdt");
+  if (bnbBtn) bnbBtn.addEventListener("click", ()=>openSwap("BNB"));
+  if (usdtBtn) usdtBtn.addEventListener("click", ()=>openSwap(USDT));
 
-  if (!guard || !copyBtn || !closeBtn) return;
-
-  function showGuard(){
-    guard.style.display = "block";
-    hint.textContent = "提示：請把剛複製的網址，貼到你的錢包 DApp 瀏覽器或 Chrome 開啟。";
-  }
-
-  // Show guard early, but allow user to continue
-  if (isInApp()){
-    // Delay a tick so layout is ready
-    setTimeout(showGuard, 300);
-  }
-
-  copyBtn.addEventListener("click", async () => {
-    const url = location.href;
-    try{
-      await navigator.clipboard.writeText(url);
-      hint.textContent = "已複製！請到錢包 DApp 瀏覽器貼上開啟。";
-    }catch(e){
-      // fallback prompt
-      window.prompt("複製這個網址：", url);
-      hint.textContent = "如果無法自動複製，已用輸入框提供網址。";
-    }
-  });
-
-  closeBtn.addEventListener("click", () => {
-    guard.style.display = "none";
-  });
-
-  // Hardening: if critical libs failed to load, surface a visible warning
-  window.addEventListener("load", () => {
-    const missing = [];
-    if (!window.THREE) missing.push("three.js");
-    if (!window.ethers) missing.push("ethers");
-    if (!window.WalletConnectEthereumProvider) missing.push("walletconnect");
-    if (missing.length){
-      const msg = "⚠ 目前環境可能封鎖外部 CDN，缺少：" + missing.join(", ") + "。請用錢包內建瀏覽器或改用可直連網路的 Chrome。";
-      console.warn(msg);
-      if (!isInApp()) return;
-      hint.textContent = msg;
-      guard.style.display = "block";
-    }
-  });
+  window.__KLINE_openInWallet = function(wallet){
+    const full = window.location.href;
+    const noProto = full.replace(/^https?:\/\//i,'');
+    if (wallet === "metamask") return window.open("https://metamask.app.link/dapp/" + noProto, "_blank");
+    if (wallet === "trust") return window.open("https://link.trustwallet.com/open_url?coin_id=60&url=" + encodeURIComponent(full), "_blank");
+  };
 })();
 </script>
 
