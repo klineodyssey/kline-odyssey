@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.17.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -128,7 +128,6 @@
         .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
         .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
         .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
-        .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
     
         .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
             background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
@@ -182,27 +181,7 @@
     .bar > div{height:100%; background:#111; width:0%;}
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
-
-        /* ===== Voice QA / AI Concierge (v2.17.0) ===== */
-        .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
-        .voice-ctrl{flex:1;min-width:0}
-        .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
-        .voice-btn.ghost{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);font-weight:800}
-        .voice-status{margin-top:8px;font-weight:900;opacity:.92}
-        .voice-text{margin-top:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);min-height:44px;line-height:1.35;word-break:break-word}
-        .chat-log{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.10);max-height:220px;overflow:auto}
-        .chat-item{margin:8px 0}
-        .chat-q{font-weight:900;color:#d6f6ff}
-        .chat-a{margin-top:4px;opacity:.95}
-        .avatar{width:72px;height:72px;border-radius:999px;border:1px solid rgba(255,215,120,.35);background:radial-gradient(circle at 35% 35%, rgba(0,242,255,.35), rgba(0,0,0,.1));position:relative;overflow:hidden;box-shadow:0 0 18px rgba(0,242,255,.18)}
-        .avatar-core{position:absolute;inset:12px;border-radius:999px;background:radial-gradient(circle at 40% 40%, rgba(255,215,120,.75), rgba(0,242,255,.15));filter:blur(.2px)}
-        .avatar-mouth{position:absolute;left:16px;right:16px;bottom:16px;height:8px;border-radius:999px;background:rgba(255,255,255,.55);transform:scaleX(.25);transform-origin:center}
-        .avatar-tag{position:absolute;top:6px;right:6px;font-size:12px;font-weight:900;opacity:.92}
-        .avatar.listening{animation:avatarPulse 1s infinite}
-        .avatar.speaking{animation:avatarPulse 0.6s infinite}
-        @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
-
-    </style>
+</style>
 </head>
 <body>
 
@@ -211,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.17.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.9</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -278,7 +257,6 @@
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
-    <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
     <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
     <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
@@ -299,6 +277,19 @@
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
       <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
       <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div style="font-size:11px; opacity:.85;">月下老人抽籤 A / B：</div>
+        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">A</div>
+        <div id="mt-a" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('A')">用A</button>
+      </div>
+      <div style="grid-column:1 / span 2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:-2px;">
+        <div style="font-family:'Orbitron'; font-size:11px; color:#ffd778;">B</div>
+        <div id="mt-b" style="font-family:monospace; font-size:11px; word-break:break-all; color:#fff; flex:1;">-</div>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.fillPartner('B')">用B</button>
+        <button class="term-btn" style="padding:6px 10px; pointer-events:auto;" onclick="web3.pickAB()">重抽</button>
+      </div>
+
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
       <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
     </div>
@@ -455,21 +446,6 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const qa = `
           <h3>語音客服（Q&A）</h3>
           <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
-          <div class='voice-tools'>
-            <div class='avatar' id='ai-avatar' title='AI 客服影像'>
-              <div class='avatar-core'></div>
-              <div class='avatar-mouth' id='ai-mouth'></div>
-              <div class='avatar-tag'>AI</div>
-            </div>
-            <div class='voice-ctrl'>
-              <button class='voice-btn' id='btn-voiceqa'>🎙️ 開始語音問答</button>
-              <button class='voice-btn ghost' id='btn-voicestop'>停止</button>
-              <div class='voice-status' id='voice-status'>待命</div>
-              <div class='voice-text' id='voice-text'>（語音轉文字會顯示在這裡，完成後自動送出）</div>
-            </div>
-          </div>
-          <div class='chat-log' id='chat-log'></div>
-
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
@@ -498,54 +474,23 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         let ans = '';
         const has = (s)=> lower.indexOf(s) >= 0;
 
-        // helper to read live values when possible
-        const poolBalEl = document.getElementById('pool-bal');
-        const poolBalTxt = poolBalEl ? poolBalEl.innerText : '';
-        const userBalEl = document.getElementById('userBal');
-        const userBalTxt = userBalEl ? userBalEl.innerText : '';
-        const alwEl = document.getElementById('userAllowance');
-        const alwTxt = alwEl ? alwEl.innerText : '';
-
-        if(question.includes('allowance') || question.includes('授權') || question.includes('approve') || question.includes('允許') || question.includes('扣款')){
-            ans = 'Allowance 是「你授權 Universe 合約可以從你錢包扣走 KGEN 的上限」，用在下單與入池。它不是賠付上限。賠付是合約用池子裡的 KGEN 直接轉給你。現在你的 Allowance → Universe 顯示為：' + (alwTxt||'未知') + '。如果是 0，代表還沒授權，請先按 Approve。';
-        }else if(question.includes('餘額') || question.includes('balance') || question.includes('幾顆') || question.includes('多少kgen')){
-            ans = '你目前錢包的 KGEN 餘額顯示為：' + (userBalTxt||'未知') + '。如果顯示讀取失敗，通常是還沒連錢包或不在 BNB Chain（56）。';
-        }else if(question.includes('池') || question.includes('pool') || question.includes('彩池') || question.includes('懷孕池')){
-            ans = '目前 Universe 合約池（共用獎池）顯示為：' + (poolBalTxt||'未知') + '。池子越厚，越接近 16888 事件門檻。';
-        }else if(question.includes('怎麼開始') || question.includes('開始玩') || question.includes('如何玩') || has('how to') || has('start')){
-            ans = '最快開始：沒錢包也能玩（模擬）。在下單框輸入 1~1000，按 UP 或 DOWN，立刻看到勝負與池成長。若要真上鏈：先連錢包 → 確認在 BNB Chain(56) → Approve（授權）→ 再下單或入池。';
-        }else if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
-            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入 1~1000，按上或下，就能看到勝負與池成長。等你準備好再連錢包進真宇宙。';
+        if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
         }else if(question.includes('custom') || question.includes('找不到') || has('search')){
-            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN：0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be。';
-        }else if((question.includes('1') && question.includes('1000')) || question.includes('一到一千')){
-            ans = '1~1000 是單筆能量輸入範圍（體驗用）。你可以先用小額體驗，池會依勝負增減並推進到 16888 劇情事件。';
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
+        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
+            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
         }else if(question.includes('8888') || question.includes('八八八八')){
-            ans = '8888 是基底池，象徵廣寒宮底座能量。池子從 8888 成長到 16888 才會觸發「下凡投胎」事件。';
+            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
         }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
-            ans = '當池到 16888，七仙女啟動下凡儀式：故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
         }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
-            ans = '表態需要真的轉帳 1~2 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
-        }else if(question.includes('bnb') || question.includes('usdt') || question.includes('換') || question.includes('買kgen')){
-            ans = '如果你手上是 BNB/USDT：最穩的做法是到 DEX（例如 PancakeSwap）換成 KGEN，再回來廣寒宮下單/入池。站內也可以做導引，但先以「先跑起來」為主，我會保留清楚提醒與安全提示。';
+            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
         }else{
-            ans = '收到。你可以直接問我：怎麼開始、Allowance 是什麼、要不要先 Approve、池子現在多少、怎麼用 Custom 匯入 KGEN、8888/16888 的意義、下凡後會發生什麼。你也可以用語音直接問，我會像聊天客服一樣回覆。';
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
         }
 
-        // update Q/A blocks
         if(aBox) aBox.innerText = 'A: ' + ans;
-
-        // append to chat log
-        const log = document.getElementById('chat-log');
-        if(log){
-          const item = document.createElement('div');
-          item.className = 'chat-item';
-          item.innerHTML = `<div class="chat-q">Q: ${question}</div><div class="chat-a">A: ${ans}</div>`;
-          log.prepend(item);
-          // keep last 12
-          while(log.children.length > 12) log.removeChild(log.lastChild);
-        }
-
         this.speak(ans);
     },
 
@@ -682,14 +627,6 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
             if(!b) return;
             const q = b.getAttribute('data-q');
             if(q) this.handleQuestion(q);
-        });
-
-        // Voice QA buttons inside guide (dynamic DOM)
-        modal.addEventListener('click', (e)=>{
-            const t = e.target;
-            if(!t) return;
-            if(t.id === 'btn-voiceqa'){ this.startVoiceQA(); }
-            if(t.id === 'btn-voicestop'){ this.stopVoiceQA(); }
         });
 
     },
@@ -967,13 +904,13 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
 
             const ctx = this.audioCtx;
             const master = ctx.createGain();
-            master.gain.value = 0.02;
+            master.gain.value = 0.06;
             master.connect(ctx.destination);
 
             const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
-            const osc2 = ctx.createOscillator(); osc2.type="sine"; osc2.frequency.value=329.63;
+            const osc2 = ctx.createOscillator(); osc2.type="triangle"; osc2.frequency.value=329.63;
             const lfo  = ctx.createOscillator(); lfo.type="sine"; lfo.frequency.value=0.08;
-            const lfoGain = ctx.createGain(); lfoGain.gain.value=6;
+            const lfoGain = ctx.createGain(); lfoGain.gain.value=18;
 
             const filter = ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=700; filter.Q.value=0.8;
             const gain = ctx.createGain(); gain.gain.value=0.0;
@@ -1021,121 +958,12 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
             }, 500);
         }catch(_){}
     },
-
-    // ===== Voice QA Engine (v2.17.0) =====
-    voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
-
-    initSpeech(){
-      try{
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if(!SR) return false;
-        const r = new SR();
-        r.lang = 'zh-TW';
-        r.interimResults = true;
-        r.continuous = false; // auto stop after one question
-        r.onresult = (ev)=>{
-          let interim = '';
-          let finalTxt = '';
-          for(let i=ev.resultIndex;i<ev.results.length;i++){
-            const t = ev.results[i][0] && ev.results[i][0].transcript ? ev.results[i][0].transcript : '';
-            if(ev.results[i].isFinal) finalTxt += t;
-            else interim += t;
-          }
-          this.voice.lastInterim = interim.trim();
-          const vt = document.getElementById('voice-text');
-          if(vt){
-            vt.innerText = (finalTxt.trim() ? finalTxt.trim() : (this.voice.lastInterim || '…'));
-          }
-          // auto-send on final (no confirm)
-          if(finalTxt && finalTxt.trim()){
-            this.voice.lastFinal = finalTxt.trim();
-            const vs = document.getElementById('voice-status'); if(vs) vs.innerText = '已送出，客服回覆中…';
-            this.handleQuestion(this.voice.lastFinal);
-            try{ r.stop(); }catch(_){}
-          }
-        };
-        r.onerror = (e)=>{
-          const vs = document.getElementById('voice-status');
-          if(vs) vs.innerText = '語音錯誤：' + (e && e.error ? e.error : 'unknown');
-          this.setAvatarState('idle');
-          this.voice.listening = false;
-        };
-        r.onend = ()=>{
-          const vs = document.getElementById('voice-status');
-          if(vs && this.voice.listening) vs.innerText = '待命';
-          this.voice.listening = false;
-          this.setAvatarState('idle');
-        };
-        this.voice.rec = r;
-        return true;
-      }catch(e){ return false; }
-    },
-
-    startVoiceQA(){
-      const ok = this.voice.rec || this.initSpeech();
-      const vs = document.getElementById('voice-status');
-      const vt = document.getElementById('voice-text');
-      if(!ok){
-        if(vs) vs.innerText = '此瀏覽器不支援語音辨識（建議用 Chrome / Android Chrome）';
-        if(vt) vt.innerText = '不支援語音辨識：你仍可點上方問題按鈕或直接提問。';
-        return;
-      }
-      try{
-        if(vt) vt.innerText = '…';
-        if(vs) vs.innerText = '聆聽中（說完會自動送出）';
-        this.voice.listening = true;
-        this.setAvatarState('listening');
-        this.voice.rec.start();
-      }catch(e){
-        if(vs) vs.innerText = '語音啟動失敗，請再試一次';
-        this.voice.listening = false;
-        this.setAvatarState('idle');
-      }
-    },
-
-    stopVoiceQA(){
-      try{
-        if(this.voice.rec) this.voice.rec.stop();
-      }catch(_){}
-      const vs = document.getElementById('voice-status'); if(vs) vs.innerText='待命';
-      this.voice.listening=false;
-      this.setAvatarState('idle');
-    },
-
-    setAvatarState(state){
-      const av = document.getElementById('ai-avatar');
-      if(!av) return;
-      av.classList.remove('listening','speaking');
-      if(state==='listening') av.classList.add('listening');
-      if(state==='speaking') av.classList.add('speaking');
-    },
-
-    animateMouth(level){
-      const mouth = document.getElementById('ai-mouth');
-      if(!mouth) return;
-      const v = Math.max(0.15, Math.min(1.0, Number(level)||0.15));
-      mouth.style.transform = 'scaleX(' + v.toFixed(2) + ')';
-    },
-
-    speak(m){
+speak(m){
       try{
         if(!m) return;
         const u = new SpeechSynthesisUtterance(String(m));
         u.lang = 'zh-TW';
         u.rate = 1.0;
-        u.onstart = ()=>{
-          this.setAvatarState('speaking');
-          // simple mouth animation while speaking
-          try{
-            if(this._mouthTimer) clearInterval(this._mouthTimer);
-            this._mouthTimer = setInterval(()=> this.animateMouth(0.25 + Math.random()*0.7), 120);
-          }catch(_){}
-        };
-        u.onend = ()=>{
-          try{ if(this._mouthTimer) clearInterval(this._mouthTimer); }catch(_){}
-          this.animateMouth(0.25);
-          this.setAvatarState('idle');
-        };
         speechSynthesis.cancel();
         speechSynthesis.speak(u);
       }catch(e){}
@@ -1170,55 +998,6 @@ const web3 = {
   signer: null,
   addr: null,
   demo: false,
-
-  // ==== chain guard (BSC) ====
-  BSC_CHAIN_ID_DEC: 56,
-  BSC_CHAIN_ID_HEX: "0x38",
-  async ensureBSC(){
-    if(!window.ethereum) return true;
-    try{
-      const cid = await window.ethereum.request({ method:"eth_chainId" });
-      const el = document.getElementById("w3-chain");
-      if(el) el.innerText = cid;
-      if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
-
-      // Try switch to BSC
-      try{
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
-        });
-      }catch(swErr){
-        // If not added, try add chain then switch
-        if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: this.BSC_CHAIN_ID_HEX,
-              chainName: "BNB Smart Chain",
-              nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
-              rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc-dataseed1.ninicoin.io/"],
-              blockExplorerUrls: ["https://bscscan.com"]
-            }]
-          });
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
-          });
-        }else{
-          throw swErr;
-        }
-      }
-      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
-      const el2 = document.getElementById("w3-chain");
-      if(el2) el2.innerText = cid2;
-      return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
-    }catch(e){
-      console.warn("ensureBSC failed", e);
-      return false;
-    }
-  },
-
 
   // 固定 Token（你給的）
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
@@ -1293,23 +1072,14 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
         return;
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
-      const okChain = await this.ensureBSC();
-      if(!okChain){
-        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
-        this.demo = true;
-        this.ui();
-        this.demoRefresh();
-        return;
-      }
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
+      this.pickAB();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
       this.ui();
       await this.refresh();
-      await this.refreshUser();
       await this.bindEvents();
       app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
@@ -1317,38 +1087,6 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = true;
       this.ui();
       alert("錢包連線失敗，已切回 Demo 模式");
-    }
-  },
-
-
-  async refreshUser(){
-    try{
-      // Demo 模式：不讀鏈上
-      if(this.demo){
-        const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
-        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
-        return;
-      }
-      if(!this.provider || !this.addr || !this.UNIVERSE) return;
-
-      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
-      let dec = 18;
-      try{ dec = await kgenR.decimals(); }catch(_){}
-
-      const [bal, alw] = await Promise.all([
-        kgenR.balanceOf(this.addr),
-        kgenR.allowance(this.addr, this.UNIVERSE),
-      ]);
-
-      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
-      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
-
-      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
-      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
-    }catch(e){
-      console.warn("refreshUser failed", e);
-      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
-      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
     }
   },
 
@@ -1361,16 +1099,45 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
 
   // ===== DEMO (no wallet) =====
   demoState: { pool: 8888, target: 16888, base: 8888 },
+
+  // ===== 月下老人抽籤（前端 Demo / UI 輔助）=====
+  ab: { A: '-', B: '-' },
+  _demoABPool: [
+    // 這裡只是 Demo 候選池；實際上線後會逐步換成合約事件/參與者池
+    '0x1111111111111111111111111111111111111111',
+    '0x2222222222222222222222222222222222222222',
+    '0x3333333333333333333333333333333333333333',
+    '0x4444444444444444444444444444444444444444',
+    '0x5555555555555555555555555555555555555555'
+  ],
+  pickAB() {
+    // deterministic-ish seed: local time + wallet + progress
+    const seedStr = `${Date.now()}|${this.addr||'0x0'}|${this.demoState?.pool||0}`;
+    let h = 0; for (let i=0;i<seedStr.length;i++) h = (h*31 + seedStr.charCodeAt(i)) >>> 0;
+    const pool = (this.participants && this.participants.length>=2) ? this.participants : this._demoABPool;
+    const a = pool[h % pool.length];
+    const b = pool[(h * 7 + 13) % pool.length];
+    this.ab.A = a;
+    this.ab.B = (b.toLowerCase() === a.toLowerCase()) ? pool[(h * 11 + 17) % pool.length] : b;
+    const elA = document.getElementById('mt-a');
+    const elB = document.getElementById('mt-b');
+    if (elA) elA.textContent = this.ab.A;
+    if (elB) elB.textContent = this.ab.B;
+  },
+  fillPartner(which) {
+    const addr = (which==='A') ? this.ab.A : this.ab.B;
+    const inp = document.getElementById('mt-partner');
+    if (inp && addr && addr.startsWith('0x') && addr.length===42) inp.value = addr;
+  },
   demoRefresh(){
     const b = this.demoState.pool;
     const t = this.demoState.target;
     const pct = Math.max(0, Math.min(100, (b/t)*100));
 const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
-const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
-const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
     (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
 const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
     app.setProgress(pct/100);
+    this.pickAB();
   },
 
   demoDeposit(amt){
@@ -1420,8 +1187,6 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
         app.speak("Demo 入池完成。");
         return;
       }
-      const okChain = await this.ensureBSC();
-      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
       const uni = this.cUNI();
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
@@ -1465,7 +1230,6 @@ app.speak("點燈已入池。");
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
@@ -1496,7 +1260,6 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
       app.setProgress(pct/100);
-      await this.refreshUser();
     }catch(e){
       console.warn(e);
     }
@@ -1536,7 +1299,6 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
-      <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
 </div>
 
 
