@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.17.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.17.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -183,7 +183,7 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-        /* ===== Voice QA / AI Concierge (v2.17.0) ===== */
+        /* ===== Voice QA / AI Concierge (v2.17.1) ===== */
         .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
         .voice-ctrl{flex:1;min-width:0}
         .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
@@ -211,7 +211,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.17.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.17.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -684,6 +684,14 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
             if(q) this.handleQuestion(q);
         });
 
+        // Global Voice QA buttons (not only inside modal)
+        document.addEventListener('click', (e)=>{
+            const t = e.target;
+            if(!t) return;
+            if(t.id === 'btn-voiceqa'){ this.startVoiceQA(); }
+            if(t.id === 'btn-voicestop'){ this.stopVoiceQA(); }
+        });
+
         // Voice QA buttons inside guide (dynamic DOM)
         modal.addEventListener('click', (e)=>{
             const t = e.target;
@@ -1022,7 +1030,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 
-    // ===== Voice QA Engine (v2.17.0) =====
+    // ===== Voice QA Engine (v2.17.1) =====
     voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
 
     initSpeech(){
@@ -1396,6 +1404,41 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
   },
 
   // ===== LIVE =====
+  async getAllowance(){
+    try{
+      if(this.demo) return ethers.constants.Zero;
+      if(!this.addr || !this.provider || !this.UNIVERSE) return ethers.constants.Zero;
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      return await kgenR.allowance(this.addr, this.UNIVERSE);
+    }catch(_){ return ethers.constants.Zero; }
+  },
+
+  async ensureAllowance(needAmt){
+    if(this.demo) return true;
+    if(!this.UNIVERSE) { alert("請先設定 Universe 合約地址"); return false; }
+    const alw = await this.getAllowance();
+    if(alw.gte(needAmt)) return true;
+
+    // Ask user, then approve exactly needAmt (安全：最小授權)
+    const ok = confirm("需要先授權 KGEN（Approve）才能下單/入池。要現在授權嗎？");
+    if(!ok) return false;
+    try{
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, needAmt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+      await this.refreshUser();
+      await this.refresh();
+      await this.refreshUser();
+      return true;
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+      return false;
+    }
+  },
+
   async approve(){
     if(this.demo) return alert("Demo 模式不需要 Approve");
     if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
@@ -1423,6 +1466,8 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
       const okChain = await this.ensureBSC();
       if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const okAlw = await this.ensureAllowance(amt);
+      if(!okAlw) return;
       const uni = this.cUNI();
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
 app.speak("點燈已入池。");
@@ -1443,6 +1488,8 @@ app.speak("點燈已入池。");
         return;
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const okAlw = await this.ensureAllowance(amt);
+      if(!okAlw) return;
       const uni = this.cUNI();
       const tx = await uni.placeOrder(side, amt);
       app.speak("下單已送出，等待鏈上結算。");
