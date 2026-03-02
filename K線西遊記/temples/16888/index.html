@@ -203,13 +203,15 @@
         @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
     
-/* --- GA panel float fix (V2.18.7) --- */
-50%{ transform: translateY(-8px); }
+/* --- GA panel float (V2.18.8 fix) --- */
+.ga-matrix{ animation: gaFloat 5.2s ease-in-out infinite; transform-origin:center; }
+@keyframes gaFloat{
+  0%{ transform: translateY(0px); }
+  50%{ transform: translateY(-8px); }
   100%{ transform: translateY(0px); }
 }
 
-
-/* --- GA bar sweep animation (V2.18.7 hotfix) --- */
+/* --- GA bar sweep animation (V2.18.8 fix) --- */
 .ga-progress.ga-sweep{ animation: gaSweep 2.2s linear infinite; }
 @keyframes gaSweep{
   0%{ width:0%; }
@@ -223,8 +225,8 @@
    - Works even if main JS fails
 =========================== */
 .grid-500{ display:grid; grid-template-columns: repeat(25, 1fr); gap:2px; padding:6px 0; }
-.grid-500 .px{ width:100%; aspect-ratio:1/1; border-radius:1px; background: rgba(255,200,60,0.15); opacity: .25; }
-.grid-500 .px{ animation: pxTwinkle 1.8s steps(1,end) infinite; animation-delay: calc(var(--i) * 0.012s); }
+.grid-500 .dot{ width:100%; aspect-ratio:1/1; border-radius:1px; background: rgba(255,200,60,0.15); opacity: .25; }
+.grid-500 .dot{ animation: pxTwinkle 1.8s steps(1,end) infinite; animation-delay: calc(var(--i) * 0.012s); }
 @keyframes pxTwinkle{
   0%, 70%{ opacity:.22; filter: brightness(1); }
   71%, 78%{ opacity:.95; filter: brightness(1.5); }
@@ -255,7 +257,7 @@ body.fallback-anim #energy-fill{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.18.7</div>
+        <div class="sys-st" id="ver-st">VERSION v2.18.8</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -420,7 +422,7 @@ body.fallback-anim #energy-fill{
 </div>
 
 <script>
-const APP_VERSION = "v2.16.9";
+const APP_VERSION = "v2.18.8";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -455,8 +457,18 @@ const app = {
     // blackbox
     blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
 
-    init() {
-        this.initThree(); this.buildUI(); this.bind();
+    
+    seedDotDelays(){
+      try{
+        const dots=[...document.querySelectorAll('.grid-500 .dot')];
+        dots.forEach((d,i)=>{
+          d.style.setProperty('--i', String(Math.floor(Math.random()*1200)));
+        });
+      }catch(e){}
+    },
+
+init() {
+        this.initThree(); this.buildUI(); this.bind(); this.seedDotDelays();
         setInterval(() => this.tick(), 1000);
         this.startHeartbeat();
         web3.load();
