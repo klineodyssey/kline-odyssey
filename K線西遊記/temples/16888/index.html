@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.17.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -183,7 +183,7 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-        /* ===== Voice QA / AI Concierge (v2.17.0) ===== */
+        /* ===== Voice QA / AI Concierge (v2.18.1) ===== */
         .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
         .voice-ctrl{flex:1;min-width:0}
         .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
@@ -202,7 +202,21 @@
         .avatar.speaking{animation:avatarPulse 0.6s infinite}
         @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
-    </style>
+    
+/* --- GA panel float fix (V2.18.1) --- */
+.ga-float-wrapper{ position:absolute; right:40px; top:45%; z-index:3; pointer-events:none; }
+.ga-float-inner{ pointer-events:auto; animation: gaFloat 3s ease-in-out infinite; will-change: transform; }
+@keyframes gaFloat{
+  0%{ transform: translateY(0px); }
+  50%{ transform: translateY(-8px); }
+  100%{ transform: translateY(0px); }
+}
+
+</style>
+
+  <!-- WalletConnect v2 (UMD) -->
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/index.umd.min.js"></script>
+
 </head>
 <body>
 
@@ -211,7 +225,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.17.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.18.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -231,7 +245,7 @@
 </div>
 
 <div class="ga-matrix">
-    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-float-wrapper"><div class="ga-float-inner"><div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div></div></div>
     <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
     <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
     <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
@@ -270,6 +284,7 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connectWC()">📱 多錢包</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -684,6 +699,14 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
             if(q) this.handleQuestion(q);
         });
 
+        // Global Voice QA buttons (not only inside modal)
+        document.addEventListener('click', (e)=>{
+            const t = e.target;
+            if(!t) return;
+            if(t.id === 'btn-voiceqa'){ this.startVoiceQA(); }
+            if(t.id === 'btn-voicestop'){ this.stopVoiceQA(); }
+        });
+
         // Voice QA buttons inside guide (dynamic DOM)
         modal.addEventListener('click', (e)=>{
             const t = e.target;
@@ -1022,7 +1045,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 
-    // ===== Voice QA Engine (v2.17.0) =====
+    // ===== Voice QA Engine (v2.18.1) =====
     voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
 
     initSpeech(){
@@ -1166,7 +1189,10 @@ window.onload = () => app.init();
    - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
    =========================== */
 const web3 = {
+  // ethers provider (EIP-1193 wrapped)
   provider: null,
+  // raw EIP-1193 provider: window.ethereum OR WalletConnect provider
+  raw: null,
   signer: null,
   addr: null,
   demo: false,
@@ -1175,23 +1201,24 @@ const web3 = {
   BSC_CHAIN_ID_DEC: 56,
   BSC_CHAIN_ID_HEX: "0x38",
   async ensureBSC(){
-    if(!window.ethereum) return true;
+    const eth = this.raw || window.ethereum;
+    if(!eth) return true;
     try{
-      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const cid = await eth.request({ method:"eth_chainId" });
       const el = document.getElementById("w3-chain");
       if(el) el.innerText = cid;
       if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
 
       // Try switch to BSC
       try{
-        await window.ethereum.request({
+        await eth.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
         });
       }catch(swErr){
         // If not added, try add chain then switch
         if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
-          await window.ethereum.request({
+          await eth.request({
             method: "wallet_addEthereumChain",
             params: [{
               chainId: this.BSC_CHAIN_ID_HEX,
@@ -1201,7 +1228,7 @@ const web3 = {
               blockExplorerUrls: ["https://bscscan.com"]
             }]
           });
-          await window.ethereum.request({
+          await eth.request({
             method: "wallet_switchEthereumChain",
             params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
           });
@@ -1209,7 +1236,7 @@ const web3 = {
           throw swErr;
         }
       }
-      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const cid2 = await eth.request({ method:"eth_chainId" });
       const el2 = document.getElementById("w3-chain");
       if(el2) el2.innerText = cid2;
       return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
@@ -1284,7 +1311,107 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
     app.speak("Universe 合約地址已設定。");
   },
 
-  async connect(){
+  
+  // ==== WalletConnect (multi-wallet) ====
+  wcProjectId(){
+    const key = "WC_PROJECT_ID";
+    let pid = localStorage.getItem(key) || "";
+    // If user has not set it yet, allow prompt
+    if(!pid || pid === "YOUR_WC_PROJECT_ID"){
+      pid = "YOUR_WC_PROJECT_ID";
+    }
+    return pid;
+  },
+  async connectWC(){
+    try{
+      // If WC library missing, fallback
+      const WC = (window.WalletConnectEthereumProvider && (window.WalletConnectEthereumProvider.default || window.WalletConnectEthereumProvider)) || null;
+      if(!WC){
+        alert("WalletConnect 模組未載入。請檢查網路或稍後重試。");
+        return;
+      }
+
+      // Ensure projectId exists
+      let projectId = this.wcProjectId();
+      if(projectId === "YOUR_WC_PROJECT_ID"){
+        const input = prompt("請輸入你的 WalletConnect Project ID（只需一次，會記住在本機）");
+        if(!input) return;
+        projectId = input.trim();
+        localStorage.setItem("WC_PROJECT_ID", projectId);
+      }
+
+      // Create provider (BSC only)
+      const wc = await WC.init({
+        projectId,
+        chains: [56],
+        optionalChains: [],
+        showQrModal: true,
+        rpcMap: { 56: "https://rpc.ankr.com/bsc" },
+        methods: ["eth_sendTransaction","eth_signTransaction","eth_sign","personal_sign","eth_signTypedData","eth_signTypedData_v4"],
+        events: ["chainChanged","accountsChanged","disconnect"]
+      });
+
+      // Connect / enable
+      await wc.enable();
+
+      this.raw = wc;
+      this.provider = new ethers.providers.Web3Provider(wc);
+      try{
+        const net = await this.provider.getNetwork();
+        const ch = document.getElementById("w3-chain");
+        if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--")));
+      }catch(_){}
+
+      const okChain = await this.ensureBSC();
+      if(!okChain){
+        alert("請切到 BNB Smart Chain (BSC)。");
+        this.demo = true;
+        this.ui();
+        this.demoRefresh();
+        return;
+      }
+
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      this.demo = false;
+      this.ui();
+      await this.refresh();
+      await this.refreshUser();
+      await this.bindEvents();
+
+      // listeners
+      try{
+        wc.on("accountsChanged", (accs)=>{
+          if(accs && accs[0]){
+            this.addr = accs[0];
+            const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+            this.refreshUser();
+          }
+        });
+        wc.on("chainChanged", ()=>{
+          this.refresh();
+          this.refreshUser();
+        });
+        wc.on("disconnect", ()=>{
+          this.raw = null;
+          this.provider = null;
+          this.signer = null;
+          this.addr = null;
+          this.demo = true;
+          this.ui();
+          this.demoRefresh();
+        });
+      }catch(_){}
+
+      app.speak("多錢包已連線。廣寒宮誓約引擎已啟動。");
+    }catch(e){
+      console.error(e);
+      alert("WalletConnect 連線失敗：" + (e && (e.message||e) ? (e.message||e) : e));
+    }
+  },
+
+async connect(){
     try{
       if(!window.ethereum){
         this.demo = true;
@@ -1292,7 +1419,7 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
         app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
         return;
       }
-      await window.ethereum.request({ method:"eth_requestAccounts" });
+      await eth.request({ method:"eth_requestAccounts" });
       const okChain = await this.ensureBSC();
       if(!okChain){
         alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
@@ -1301,7 +1428,7 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
         this.demoRefresh();
         return;
       }
-      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      this.provider = new ethers.providers.Web3Provider(this.raw);
       try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
@@ -1396,6 +1523,41 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
   },
 
   // ===== LIVE =====
+  async getAllowance(){
+    try{
+      if(this.demo) return ethers.constants.Zero;
+      if(!this.addr || !this.provider || !this.UNIVERSE) return ethers.constants.Zero;
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      return await kgenR.allowance(this.addr, this.UNIVERSE);
+    }catch(_){ return ethers.constants.Zero; }
+  },
+
+  async ensureAllowance(needAmt){
+    if(this.demo) return true;
+    if(!this.UNIVERSE) { alert("請先設定 Universe 合約地址"); return false; }
+    const alw = await this.getAllowance();
+    if(alw.gte(needAmt)) return true;
+
+    // Ask user, then approve exactly needAmt (安全：最小授權)
+    const ok = confirm("需要先授權 KGEN（Approve）才能下單/入池。要現在授權嗎？");
+    if(!ok) return false;
+    try{
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, needAmt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+      await this.refreshUser();
+      await this.refresh();
+      await this.refreshUser();
+      return true;
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+      return false;
+    }
+  },
+
   async approve(){
     if(this.demo) return alert("Demo 模式不需要 Approve");
     if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
@@ -1423,6 +1585,8 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
       const okChain = await this.ensureBSC();
       if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const okAlw = await this.ensureAllowance(amt);
+      if(!okAlw) return;
       const uni = this.cUNI();
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
 app.speak("點燈已入池。");
@@ -1443,6 +1607,8 @@ app.speak("點燈已入池。");
         return;
       }
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const okAlw = await this.ensureAllowance(amt);
+      if(!okAlw) return;
       const uni = this.cUNI();
       const tx = await uni.placeOrder(side, amt);
       app.speak("下單已送出，等待鏈上結算。");
