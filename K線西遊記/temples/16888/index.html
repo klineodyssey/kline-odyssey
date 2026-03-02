@@ -2,7 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.5</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -187,7 +190,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.16.6</div>
+        <div class="sys-st" id="ver-st">VERSION v2.16.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -254,6 +257,7 @@
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
+    <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
     <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
     <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
@@ -292,7 +296,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.5";
+const APP_VERSION = "v2.16.7";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -421,7 +425,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <ol>
             <li>切到 <b>BNB Chain</b>。</li>
             <li>點 <b>Custom</b>。</li>
-            <li>貼上 <b>KGEN 合約地址</b>（0x…）。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
             <li>按下一步，確認 Symbol / Decimals 後加入。</li>
           </ol>
           <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
@@ -983,6 +987,55 @@ const web3 = {
   addr: null,
   demo: false,
 
+  // ==== chain guard (BSC) ====
+  BSC_CHAIN_ID_DEC: 56,
+  BSC_CHAIN_ID_HEX: "0x38",
+  async ensureBSC(){
+    if(!window.ethereum) return true;
+    try{
+      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const el = document.getElementById("w3-chain");
+      if(el) el.innerText = cid;
+      if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
+
+      // Try switch to BSC
+      try{
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+        });
+      }catch(swErr){
+        // If not added, try add chain then switch
+        if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: this.BSC_CHAIN_ID_HEX,
+              chainName: "BNB Smart Chain",
+              nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
+              rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc-dataseed1.ninicoin.io/"],
+              blockExplorerUrls: ["https://bscscan.com"]
+            }]
+          });
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+          });
+        }else{
+          throw swErr;
+        }
+      }
+      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const el2 = document.getElementById("w3-chain");
+      if(el2) el2.innerText = cid2;
+      return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
+    }catch(e){
+      console.warn("ensureBSC failed", e);
+      return false;
+    }
+  },
+
+
   // 固定 Token（你給的）
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
@@ -1056,7 +1109,16 @@ const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVER
         return;
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
+      const okChain = await this.ensureBSC();
+      if(!okChain){
+        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        this.demo = true;
+        this.ui();
+        this.demoRefresh();
+        return;
+      }
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
@@ -1139,6 +1201,8 @@ const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.to
         app.speak("Demo 入池完成。");
         return;
       }
+      const okChain = await this.ensureBSC();
+      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
       if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
       const uni = this.cUNI();
       const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
@@ -1182,6 +1246,7 @@ app.speak("點燈已入池。");
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
