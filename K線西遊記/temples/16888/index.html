@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.5</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.18.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -183,7 +183,7 @@
     .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
 
 
-        /* ===== Voice QA / AI Concierge (v2.18.5) ===== */
+        /* ===== Voice QA / AI Concierge (v2.18.6) ===== */
         .voice-tools{display:flex;gap:12px;align-items:flex-start;margin:12px 0 10px 0}
         .voice-ctrl{flex:1;min-width:0}
         .voice-btn{background:rgba(255,215,120,.14);border:1px solid rgba(255,215,120,.35);color:#fff;padding:10px 12px;border-radius:12px;font-weight:900;margin-right:8px}
@@ -203,13 +203,13 @@
         @keyframes avatarPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
     
-/* --- GA panel float fix (V2.18.5) --- */
+/* --- GA panel float fix (V2.18.6) --- */
 50%{ transform: translateY(-8px); }
   100%{ transform: translateY(0px); }
 }
 
 
-/* --- GA bar sweep animation (V2.18.5 hotfix) --- */
+/* --- GA bar sweep animation (V2.18.6 hotfix) --- */
 .ga-progress.ga-sweep{ animation: gaSweep 2.2s linear infinite; }
 @keyframes gaSweep{
   0%{ width:0%; }
@@ -230,7 +230,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.18.5</div>
+        <div class="sys-st" id="ver-st">VERSION v2.18.6</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -402,7 +402,7 @@ const mb=document.getElementById('m-bar');
     },
 
 
-    // --- rAF heartbeat (V2.18.5) : keep clock/dots alive even in FB in-app ---
+    // --- rAF heartbeat (V2.18.6) : keep clock/dots alive even in FB in-app ---
     startHeartbeat(){
       let last=0;
       const loop=(t)=>{
@@ -1070,7 +1070,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 
-    // ===== Voice QA Engine (v2.18.5) =====
+    // ===== Voice QA Engine (v2.18.6) =====
     voice: { rec:null, listening:false, lastInterim:'', lastFinal:'' },
 
     initSpeech(){
