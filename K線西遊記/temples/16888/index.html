@@ -1486,5 +1486,87 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 
 <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.13.0/dist/index.umd.min.js"></script>
 
+
+<!-- In-app browser guard (FB/IG/LINE/WeChat etc.) -->
+<div id="inappGuard" style="position:fixed;inset:0;z-index:99999;display:none;background:rgba(0,0,0,.86);backdrop-filter:blur(6px);">
+  <div style="max-width:520px;margin:8vh auto;padding:18px 16px;border:1px solid rgba(255,215,90,.55);border-radius:14px;background:rgba(10,10,12,.72);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,sans-serif;line-height:1.6;">
+    <div style="font-weight:900;font-size:18px;margin-bottom:10px;">偵測到「內建瀏覽器」</div>
+    <div style="opacity:.92;margin-bottom:12px;">
+      Facebook / Instagram / LINE / WeChat 這類內建瀏覽器常會封鎖或干擾 Web3 連線（WalletConnect）、音效、甚至動畫迴圈。
+      <br>要讓「連錢包 / 下單 / Demo」穩定，請改用：
+      <ul style="margin:10px 0 0 18px;padding:0;">
+        <li>錢包內建瀏覽器（MetaMask / Trust / OKX / Binance Web3）</li>
+        <li>或手機 Chrome / Safari（再用 WalletConnect 連接）</li>
+      </ul>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="btnCopyUrl" style="flex:1;min-width:140px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,215,90,.55);background:#111;color:#ffd76a;font-weight:900;">複製本頁網址</button>
+      <button id="btnCloseGuard" style="flex:1;min-width:140px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#1b1b1f;color:#fff;font-weight:800;">我知道了，繼續</button>
+    </div>
+    <div id="guardHint" style="margin-top:10px;font-size:12px;opacity:.75;"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function isInApp(){
+    const ua = (navigator.userAgent || "").toLowerCase();
+    return (
+      ua.includes("fbav") || ua.includes("fban") || ua.includes("instagram") ||
+      ua.includes("line") || ua.includes("micromessenger") || ua.includes("wechat") ||
+      ua.includes("wv") || ua.includes("webview")
+    );
+  }
+  const guard = document.getElementById("inappGuard");
+  const hint  = document.getElementById("guardHint");
+  const copyBtn = document.getElementById("btnCopyUrl");
+  const closeBtn = document.getElementById("btnCloseGuard");
+
+  if (!guard || !copyBtn || !closeBtn) return;
+
+  function showGuard(){
+    guard.style.display = "block";
+    hint.textContent = "提示：請把剛複製的網址，貼到你的錢包 DApp 瀏覽器或 Chrome 開啟。";
+  }
+
+  // Show guard early, but allow user to continue
+  if (isInApp()){
+    // Delay a tick so layout is ready
+    setTimeout(showGuard, 300);
+  }
+
+  copyBtn.addEventListener("click", async () => {
+    const url = location.href;
+    try{
+      await navigator.clipboard.writeText(url);
+      hint.textContent = "已複製！請到錢包 DApp 瀏覽器貼上開啟。";
+    }catch(e){
+      // fallback prompt
+      window.prompt("複製這個網址：", url);
+      hint.textContent = "如果無法自動複製，已用輸入框提供網址。";
+    }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    guard.style.display = "none";
+  });
+
+  // Hardening: if critical libs failed to load, surface a visible warning
+  window.addEventListener("load", () => {
+    const missing = [];
+    if (!window.THREE) missing.push("three.js");
+    if (!window.ethers) missing.push("ethers");
+    if (!window.WalletConnectEthereumProvider) missing.push("walletconnect");
+    if (missing.length){
+      const msg = "⚠ 目前環境可能封鎖外部 CDN，缺少：" + missing.join(", ") + "。請用錢包內建瀏覽器或改用可直連網路的 Chrome。";
+      console.warn(msg);
+      if (!isInApp()) return;
+      hint.textContent = msg;
+      guard.style.display = "block";
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
