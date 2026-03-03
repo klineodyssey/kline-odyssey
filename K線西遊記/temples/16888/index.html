@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.3</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.16.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,19 +73,19 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix { position: fixed; right: 22px; top: 330px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
         /* 🎡 方向盤 */
-        .steer-zone { position: fixed; bottom: 340px; width: 100%; text-align: center; z-index: 260; }
+        .steer-zone { position: fixed; bottom: 180px; width: 100%; text-align: center; z-index: 100; }
         .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
         .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
         /* 🛠️ 控制台 */
         .footer-terminal { 
-            position: fixed; bottom: 80px; width: 100%; background: #000; padding: 20px; 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
             border-top: 4px solid var(--gold);
             display: grid; grid-template-columns: repeat(4, 1fr);
             gap: 12px; z-index: 100;
@@ -203,10 +203,7 @@
     .guide-body hr{border:0;border-top:1px solid rgba(255,215,120,.14);margin:14px 0}
     .guide-body .muted{opacity:.85}
     .qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
-    
-        .qa-mic{ width:100%; padding:12px 14px; border-radius:10px; background:#0a0a0a; border:1px solid rgba(0,242,255,.55); color:#fff; font-weight:900; cursor:pointer; }
-        .qa-mic:active{ transform:translateY(1px); }
-.qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
+    .qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
     .qa-btn:active{transform:scale(.98)}
     @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
 
@@ -241,8 +238,8 @@
 /* ===== COORD PANEL (V2.20.4) ===== */
 #coord-panel{
   position: fixed;
-  right: 150px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
-  bottom: 235px; /* 往上：不要貼到底部按鈕列 */
+  right: 220px; /* 放在曲速縱桿左側，避免壓到下單面板 */
+  bottom: 210px;
   left: auto;
   transform: none;
   width: min(360px, 92vw);
@@ -252,9 +249,6 @@
   border-radius: 10px;
   background: rgba(0,0,0,.55);
   box-shadow: 0 0 18px rgba(255,215,0,.12);
-  max-height: 220px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   z-index: 30;
 }
 #coord-panel .cp-title{
@@ -387,11 +381,6 @@
   font-weight: 800;
   display: inline-block;
 }
-
-/* ====== 手機窄螢幕：防止左下儀表板與右下駕駛艙互相碰撞 ====== */
-@media (max-width: 520px){
-  #coord-panel{ right: 12px; bottom: 420px; width: min(360px, 94vw); }
-}
 </style>
 </head>
 <body>
@@ -401,7 +390,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.22.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -431,7 +420,7 @@
 <div id="core-anchor">
     <div id="core-window">
         <div id="wish-label">大聖駕到，光耀廣寒</div>
-        <img id="fairy-img" src="./assets/fairy.png" crossorigin="anonymous">
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
         <video id="cam-view" autoplay playsinline muted></video>
         <div id="mini-thumb"></div>
     </div>
@@ -456,7 +445,7 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:360px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div id="web3-panel" style="position:fixed; left:18px; bottom:210px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:210px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
@@ -608,13 +597,11 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
 
     setProgress(pct){
         try{
+            const bar = document.getElementById('progress-bar');
+            const txt = document.getElementById('progress-text');
             const v = Math.max(0, Math.min(100, Number(pct)||0));
-            const fill = document.getElementById('prog-fill');
-            const txt  = document.getElementById('prog-txt');
-            const lab  = document.getElementById('w3-prog');
-            if(fill) fill.style.width = v + '%';
-            if(txt)  txt.innerText = v.toFixed(1) + '%';
-            if(lab)  lab.innerText = v.toFixed(1) + '%';
+            if(bar) bar.style.width = v + '%';
+            if(txt) txt.innerText = v.toFixed(1) + '%';
         }catch(_){ }
     },
 
@@ -627,18 +614,6 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const blocks = this.getGuideBlocks();
         body.innerHTML = blocks[s] || blocks['intro'];
         modal.classList.add('show');
-
-        // bind QA quick buttons + mic
-        if(s==='qa'){
-            try{
-                body.querySelectorAll('.qa-btn').forEach(btn=>{
-                    btn.onclick = ()=> this.handleUserQuestion(btn.getAttribute('data-q')||btn.innerText);
-                });
-                const micBtn = body.querySelector('#qa-mic-btn');
-                if(micBtn) micBtn.onclick = ()=> this.startVoiceQA();
-            }catch(e){}
-        }
-
 
         const summary = (s==='wallet') ? '如果你找不到 KGEN，記得用錢包的 Custom 匯入合約地址。' :
                        (s==='rules')  ? '規則重點：一到一千為單筆範圍，八八八八是基底，累積到一六八八八觸發下凡事件。' :
@@ -696,7 +671,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
 
         const qa = `
           <h3>語音客服（Q&A）</h3>
-          <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p><button class='qa-mic' id='qa-mic-btn' type='button'>🎤 開始語音提問（直接送出）</button>
+          <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
@@ -714,94 +689,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         return { intro, rules, wallet, qa };
     },
 
-    
-    // ===== Voice QA (SpeechRecognition) =====
-    voiceRec: null,
-    voiceBusy: false,
-
-    startVoiceQA(){
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if(!SR){
-            this.toast("此裝置/瀏覽器不支援語音轉文字（SpeechRecognition）。可改用打字提問。");
-            this.speak("你的瀏覽器不支援語音輸入。你可以改用打字提問。");
-            return;
-        }
-        if(this.voiceBusy) return;
-
-        const rec = new SR();
-        this.voiceRec = rec;
-        this.voiceBusy = true;
-
-        rec.lang = "zh-TW";
-        rec.interimResults = false;
-        rec.maxAlternatives = 1;
-
-        this.toast("語音輸入啟動：請說話（說完會自動送出）");
-        this.speak("語音輸入已啟動。請說話。說完我會自動送出。");
-
-        rec.onresult = (e)=>{
-            const text = (e.results && e.results[0] && e.results[0][0]) ? e.results[0][0].transcript : "";
-            const msg = (text||"").trim();
-            if(!msg){
-                this.toast("沒聽清楚，請再說一次");
-                this.speak("我沒聽清楚，請再說一次。");
-                return;
-            }
-            this.handleUserQuestion(msg);
-        };
-
-        rec.onerror = (e)=>{
-            this.toast("語音輸入錯誤：" + (e.error||"unknown"));
-        };
-
-        rec.onend = ()=>{
-            this.voiceBusy = false;
-        };
-
-        try{ rec.start(); }catch(err){
-            this.voiceBusy = false;
-            this.toast("語音啟動失敗");
-        }
-    },
-
-    handleUserQuestion(msg){
-        const q = String(msg||"").trim();
-        if(!q) return;
-        // 顯示在 QA 區
-        try{
-            const qaBox = document.getElementById('qa-last');
-            const aBox  = document.getElementById('qa-last-a');
-            if(qaBox) qaBox.innerText = 'Q: ' + q;
-            // 固定提示：找不到幣要用 custom
-            const lower = q.toLowerCase();
-            let ans = '';
-            if((/找不到|看不到|搜尋不到|search/i.test(q)) && /kgen/i.test(lower)){
-                ans = "如果你找不到 KGEN，請在錢包使用 Custom 匯入合約地址（Contract Address）。";
-            }else{
-                // 走你原本的 FAQ
-                ans = this.answerFromFAQ(q);
-            }
-            if(aBox) aBox.innerText = 'A: ' + ans;
-            this.toast(ans);
-            this.speak(ans);
-        }catch(e){
-            this.toast("已收到：" + q);
-        }
-    },
-
-    answerFromFAQ(q){
-        const question = String(q||'').trim();
-        const lower = question.toLowerCase();
-        const has = (s)=> lower.indexOf(s) >= 0;
-        if(question.includes('沒有錢包') || has('no wallet')) return "可以先看故事與操作介面，但要領取、交換或上鏈互動仍需要錢包。";
-        if(question.includes('Custom') || question.includes('找幣') || has('custom')) return "因為很多錢包不會自動列出小眾代幣，需要用 Custom 手動匯入合約地址，才能看到 KGEN。";
-        if(question.includes('1 到 1000') || question.includes('1000')) return "那是你的曲率/等級進度，代表你在宇宙裡的動能與可操作的範圍。";
-        if(question.includes('8888') || question.includes('16888')) return "8888 是人間重量，16888 是月宮門檻；抵達代表進入更高維的演化層。";
-        if(question.includes('表態') || has('pledge')) return "表態是兩邊都要完成的誓約動作，用來啟動雙方托管與宇宙事件。";
-        return "我已收到你的問題。這版先回覆最小可用，下一版我會接上完整事件庫與錢包查詢。";
-    },
-
-handleQuestion(q){
+    handleQuestion(q){
         const question = String(q||'').trim();
         if(!question) return;
         const qaBox = document.getElementById('qa-last');
@@ -1673,11 +1561,6 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
       (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
-      // ===== CT 同步（重要） =====
-      // 本頁定義：CT = 鏈上 Universe.poolBalance()（KGEN）
-      // 直接把 CT/CT+1 對齊鏈上池子狀態。
-      this._ct = b;
-      this.updateCoordPanel();
       app.setProgress(pct/100);
       await this.refreshUser();
     }catch(e){
@@ -2077,11 +1960,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
   <div class="cp-grid">
     <div class="cp-row">
-      <div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
-      <div class="cp-v"><input id="ct-in" inputmode="decimal" readonly /></div>
+      <div class="cp-k">CT（現在指數點位 / 座標）</div>
+      <div class="cp-v"><input id="ct-in" inputmode="decimal" placeholder="例如 16888 / 11520 / 21444" /></div>
     </div>
     <div class="cp-row">
-      <div class="cp-k">CT+1（依下單金額推估）</div>
+      <div class="cp-k">CT+1（UP/DOWN 猜測）</div>
       <div class="cp-v" id="cp-ct1">--</div>
     </div>
 
@@ -2096,11 +1979,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 
   <div class="cp-actions">
-    <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
-    <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
-    <button type="button" onclick="app.openTokenScan()">Token</button>
-    <button type="button" onclick="app.openPairScan()">LP Pair</button>
-    <button type="button" onclick="app.openLpLock()">LP 鎖</button>
+    <button type="button" onclick="app.openCoordModal()">點位 / 星球座標表</button>
+    <button type="button" onclick="app.syncFromWheel()">用方向盤同步(多/空)</button>
   </div>
 </div>
 
@@ -2185,19 +2065,10 @@ function sideFromDeg(deg) {
   app._ct1 = app._ct1 ?? NaN;
 
   app.setCT = (v) => {
-    // 手動指定鏈上 CT（除錯用）。正常狀態由鏈上 poolBalance 同步，不建議手動改。
     const n = toNum(v);
     if (!isFinite(n)) return;
     app._ct = n;
     if ($('ct-in')) $('ct-in').value = String(n);
-    app.updateCoordPanel();
-  };
-
-  app.setCoord = (v) => {
-    // 只改「座標點位」（地圖/星球位置），不動鏈上 CT。
-    const n = toNum(v);
-    if (!isFinite(n)) return;
-    app._coord = n;
     app.updateCoordPanel();
   };
 
@@ -2325,25 +2196,6 @@ function sideFromDeg(deg) {
   }, 300);
 })();
 
-
-// ================================
-// ✅ 一鍵直達連結（Token / LP Pair / LP 鎖 / 地圖）
-// - 以 data-url 屬性綁定
-// - 手機瀏覽器：用 window.open 另開
-// ================================
-function openUrl(url){
-  try{
-    if(!url) return;
-    window.open(url, '_blank', 'noopener');
-  }catch(e){ console.warn('openUrl failed', e); }
-}
-
-document.addEventListener('click', (ev)=>{
-  const btn = ev.target.closest('[data-url]');
-  if(!btn) return;
-  const url = btn.getAttribute('data-url');
-  if(url) openUrl(url);
-});
 </script>
 </body>
 </html>
