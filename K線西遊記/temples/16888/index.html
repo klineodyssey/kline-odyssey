@@ -126,7 +126,7 @@
         /* NAV buttons */
         .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
             min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
-            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#111;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#fff;
             box-shadow:0 0 18px rgba(255,215,120,.18); 
   width: 280px;
   max-width: 90%;
@@ -134,6 +134,17 @@
 }
         .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
         .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+  /* --- HOTFIX: ensure button text is visible on dark swap buttons (mobile/in-app) --- */
+  .nav-btn{ color:#fff; }
+  .nav-gold, .nav-cyan{ color:#111; }
+  .nav-swap{
+    background: rgba(0,0,0,.38);
+    color:#fff !important;
+    border-color: rgba(255,215,120,.38);
+    text-shadow: 0 0 10px rgba(0,0,0,.55);
+  }
+  .nav-swap .dot{ box-shadow: 0 0 12px rgba(255,215,120,.55); }
+
         .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
         .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
         .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
@@ -213,12 +224,12 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.20.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
-        <div class="data-box"><div>🏛️ 靈霄席位 (500)</div><div class="grid-500" id="g1"></div></div>
-        <div class="data-box"><div>🐒 火星齊天豪宅分紅席位（500）分紅 (500)</div><div class="grid-500" id="g2"></div></div>
+        <div class="data-box"><div>🏛️ 靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>🐒 火星齊天豪宅分紅席位（500）</div><div class="grid-500" id="g2"></div></div>
     </div>
 </div>
 
@@ -1487,6 +1498,147 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
     }
   };
+})();
+
+/* =========================
+   AUTO CRUISE / AUTO BATTLE
+   - Tied to bottom button: #btnAutoBattle
+   - Simulates long/short swing, updates direction wheel + planet flow + GA mini-panel bars
+   - Does NOT touch on-chain, does NOT auto-approve, purely UI simulation
+========================= */
+(function(){
+  const AUTO = { on:false, t:null, phase:0, dir:1 };
+
+  function qs(sel){ try{return document.querySelector(sel);}catch(e){return null;} }
+  function qsa(sel){ try{return Array.from(document.querySelectorAll(sel));}catch(e){return [];} }
+
+  function setElText(el, txt){ if(!el) return; el.textContent = txt; }
+  function setRange(el, v){
+    if(!el) return;
+    const min = ("min" in el) ? Number(el.min||0) : 0;
+    const max = ("max" in el) ? Number(el.max||100) : 100;
+    const vv = Math.max(min, Math.min(max, v));
+    el.value = String(vv);
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+    el.dispatchEvent(new Event("change", {bubbles:true}));
+  }
+
+  function pickRange(candidates){
+    for(const sel of candidates){
+      const el = qs(sel);
+      if(el && el.tagName === "INPUT" && (el.type||"").toLowerCase()==="range") return el;
+    }
+    // fallback: first visible range in page
+    const all = qsa('input[type="range"]');
+    for(const el of all){
+      const r = el.getBoundingClientRect();
+      if(r.width>40 && r.height>10) return el;
+    }
+    return null;
+  }
+
+  // likely controls (best-effort across versions)
+  const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
+  const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
+
+  // UI targets (best-effort)
+  const autoBadge = qs("#autoBadge") || (function(){
+    const b = document.createElement("div");
+    b.id="autoBadge";
+    b.style.cssText="position:fixed;left:12px;bottom:92px;z-index:99999;padding:8px 10px;border:1px solid rgba(255,215,120,.35);border-radius:12px;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;display:none;";
+    b.textContent="AUTO: OFF";
+    document.body.appendChild(b);
+    return b;
+  })();
+
+  function setAutoUI(on, mode){
+    autoBadge.style.display = on ? "block" : "none";
+    autoBadge.textContent = on ? ("AUTO: "+mode) : "AUTO: OFF";
+    autoBadge.style.boxShadow = on ? "0 0 18px rgba(255,215,120,.25)" : "none";
+  }
+
+  function syncVisuals(longMode, p){
+    // direction wheel / joystick visual
+    const wheel = qs("#directionWheel") || qs("#dirWheel") || qs(".direction-wheel") || qs(".wheel");
+    if(wheel){
+      const deg = (longMode ? 20 : -20) + (p*30);
+      wheel.style.transform = `rotate(${deg}deg)`;
+    }
+
+    // planet flow / star stream
+    const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
+    if(flow){
+      const x = (longMode ? 1 : -1) * (p*18);
+      flow.style.transform = `translateX(${x}px)`;
+      flow.style.opacity = "1";
+    }
+
+    // main beauty ring subtle drift
+    const ring = qs("#beautyRing") || qs(".beauty-ring") || qs(".main-ring");
+    if(ring){
+      ring.style.filter = longMode ? "drop-shadow(0 0 18px rgba(0,255,255,.18))" : "drop-shadow(0 0 18px rgba(255,120,120,.16))";
+    }
+
+    // GA mini bars sweep (left->right->reset)
+    const bars = qsa(".ga-bar, .gaBar, [data-ga-bar]");
+    if(bars.length){
+      const w = Math.round(100 * p);
+      bars.forEach(el=>{
+        el.style.width = w + "%";
+        el.style.opacity = "1";
+      });
+    }
+  }
+
+  function step(){
+    AUTO.phase += 1;
+    // ping-pong 0..1..0
+    const raw = (AUTO.phase % 120) / 120; // 0..0.99
+    const p = raw <= 0.5 ? raw*2 : (1-raw)*2;
+
+    const longMode = (AUTO.phase % 240) < 120; // switch every ~120 ticks
+    const modeTxt = longMode ? "LONG" : "SHORT";
+    setAutoUI(true, modeTxt);
+
+    // update ranges (if exist) so other listeners update the scene
+    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
+    if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
+
+    syncVisuals(longMode, p);
+  }
+
+  function toggleAuto(){
+    AUTO.on = !AUTO.on;
+    try{
+      const badgeEl = qs("#autoModeBadge");
+      if(badgeEl) badgeEl.textContent = AUTO.on ? "ON" : "OFF";
+    }catch(e){}
+    if(AUTO.on){
+      setAutoUI(true, "LONG");
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = setInterval(step, 250);
+    }else{
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = null;
+      setAutoUI(false, "OFF");
+    }
+  }
+
+  
+  // keep backward-compat: older onclick calls app.autoHunt()
+  try{ if(window.app){ window.app.autoHunt = toggleAuto; } }catch(e){}
+// bind
+  const btn = qs("#btnAutoBattle");
+  if(btn){
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleAuto();
+    }, {passive:false});
+  }
+
+  // expose
+  window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
 })();
 </script>
 
