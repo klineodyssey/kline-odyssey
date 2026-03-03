@@ -165,9 +165,7 @@
         .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
         .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
     
-        @media (max-width: 520px){
-    /* coord-panel mobile */
-    #coord-panel{ right: 96px; bottom: 220px; width: min(260px, calc(100vw - 120px)); } .brand-name{font-size:22px;} .hud-top{top:10px;} }
+        @media (max-width: 520px){ .brand-name{font-size:22px;} .hud-top{top:10px;} }
         @media (max-width: 420px){ .brand-name{font-size:20px;} }
     
 #brand-badge{
@@ -237,143 +235,43 @@
   text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
 }
 
-/* ===== COORD PANEL (V2.20.4) ===== */
-#coord-panel{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:220px;
-  width:min(420px, calc(100vw - 24px));
-  z-index:40;
-  border:1px solid rgba(255,200,80,.55);
-  box-shadow:0 0 18px rgba(255,190,60,.10);
-  background:rgba(0,0,0,.58);
+/* ===== Coordinate Panel (between order panel & warp) ===== */
+.coord-panel{
+  position: fixed;
+  right: 110px;
+  bottom: 210px;
+  width: 290px;
+  max-width: calc(100vw - 140px);
+  padding: 10px 12px;
+  border: 1px solid rgba(255,215,128,0.35);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.55);
   backdrop-filter: blur(6px);
-  border-radius:14px;
-  padding:10px 12px;
-  pointer-events:auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.35);
+  font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+  z-index: 30;
 }
-#coord-panel .cp-title{
-  display:flex;align-items:center;justify-content:space-between;
-  font-weight:900;letter-spacing:.5px;
-  color:#ffd27a;
-  margin-bottom:8px;
+.coord-panel .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:4px 0;}
+.coord-panel .k{color:#ffd98a; font-weight:800; font-size:12px; letter-spacing:0.5px;}
+.coord-panel .v{color:#e9f6ff; font-weight:800; font-size:13px;}
+.coord-panel input{
+  width: 92px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.35);
+  color:#e9f6ff;
+  font-weight:800;
 }
-#coord-panel .cp-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:8px 10px;
-  font-size:13px;
-  line-height:1.25;
+.coord-panel .pill{
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.25);
 }
-#coord-panel .cp-row{
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,200,80,.25);
-  background:rgba(0,0,0,.35);
-}
-#coord-panel .cp-k{
-  opacity:.85; font-size:12px;
-}
-#coord-panel .cp-v{
-  margin-top:2px;
-  font-weight:900;
-  color:#8af3ff;
-  word-break:break-word;
-}
-#coord-panel .cp-v .muted{opacity:.75; font-weight:700; color:#cfd7ff;}
-#coord-panel input{
-  width:100%;
-  border-radius:10px;
-  padding:8px 10px;
-  border:1px solid rgba(255,200,80,.35);
-  background:rgba(0,0,0,.35);
-  color:#eaf7ff;
-  outline:none;
-  font-weight:900;
-}
-#coord-panel .cp-actions{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-#coord-panel .cp-actions button{
-  flex:1;
-  border-radius:12px;
-  padding:10px 12px;
-  border:1px solid rgba(255,200,80,.45);
-  background:rgba(0,0,0,.35);
-  color:#eaf7ff;
-  font-weight:900;
-}
-#coord-panel .cp-actions button:hover{filter:brightness(1.08);}
-
-#coord-modal{
-  position:fixed; inset:0;
-  z-index:120;
-  display:none;
-  background:rgba(0,0,0,.72);
-  pointer-events:auto;
-}
-#coord-modal .cm-box{
-  position:absolute;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%);
-  width:min(720px, calc(100vw - 22px));
-  height:min(78vh, 680px);
-  border-radius:16px;
-  border:1px solid rgba(255,200,80,.55);
-  background:rgba(0,0,0,.82);
-  box-shadow:0 0 30px rgba(255,190,60,.14);
-  overflow:hidden;
-}
-#coord-modal .cm-head{
-  display:flex; align-items:center; gap:10px;
-  padding:12px 12px;
-  border-bottom:1px solid rgba(255,200,80,.25);
-}
-#coord-modal .cm-head b{color:#ffd27a;}
-#coord-modal .cm-head input{
-  flex:1;
-  border-radius:12px;
-  padding:10px 12px;
-  border:1px solid rgba(255,200,80,.35);
-  background:rgba(0,0,0,.35);
-  color:#eaf7ff;
-  outline:none;
-  font-weight:900;
-}
-#coord-modal .cm-head button{
-  border-radius:12px;
-  padding:10px 12px;
-  border:1px solid rgba(255,200,80,.35);
-  background:rgba(0,0,0,.35);
-  color:#eaf7ff;
-  font-weight:900;
-}
-#coord-modal .cm-list{
-  height:calc(100% - 56px);
-  overflow:auto;
-  padding:10px 12px;
-}
-#coord-modal .cm-item{
-  display:grid;
-  grid-template-columns: 110px 1fr;
-  gap:8px 12px;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(255,200,80,.20);
-  background:rgba(0,0,0,.30);
-  margin-bottom:10px;
-}
-#coord-modal .cm-item:hover{filter:brightness(1.08); cursor:pointer;}
-#coord-modal .cm-item .cm-v{font-weight:900; color:#8af3ff;}
-#coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
-#coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
-
-
-    /* v2.22.0: Warp=0 => 息火（畫面靜止），度數只代表方向 */
-    body.warp-off .anim{ animation-play-state: paused !important; }
+/* Make top-right swap buttons readable */
+.swap-btn{color:#e9f6ff !important; font-weight:800 !important;}
+.swap-btn .tiny, .swap-btn small, .swap-btn span{opacity:1 !important;}
 
 </style>
 </head>
@@ -384,7 +282,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.21.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -464,8 +362,8 @@
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
     <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
     <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('UP'); web3.place(0)">📈 下單 UP</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('DOWN'); web3.place(1)">📉 下單 DOWN</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
     <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
   </div>
 
@@ -531,7 +429,7 @@ const app = {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
         web3.load();
-        this.updateWarp(99);
+        this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
@@ -699,23 +597,45 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
     },
 
     updateWarp(val) {
-        const warp = Math.max(0, Math.min(300, Number(val)||0));
-        // Warp=0 => 息火（畫面靜止）；度數只代表方向
-        try{ __warpValue = warp; setWarpOff(warp===0); }catch(e){}
-
-        const pct = (warp/300)*100;
-        const ef=document.getElementById('energy-fill'); if(ef) ef.style.height = pct + '%';
-        const wt=document.getElementById('warp-thumb'); if(wt) wt.style.bottom = `calc(${pct}% - 17px)`;
-        const wtx=document.getElementById('warp-txt');
-        if(wtx) wtx.innerText = (warp===0 ? '息火 0x' : `WARP ${warp}x`);
-
-        this.bbEvent("warp", { warp });
+const ef=document.getElementById('energy-fill'); if(ef) ef.style.height = val + '%';
+const wt=document.getElementById('warp-thumb'); if(wt) wt.style.bottom = `calc(${val}% - 17px)`;
+const wtx=document.getElementById('warp-txt'); if(wtx) wtx.innerText = `WARP ${val * 3}x`;
+        this.bbEvent("warp", { warp: parseFloat(val) });
     },
-},
 
     applySteer(v, silent=false){
         const ang = Math.max(-180, Math.min(180, Number(v)||0));
 const av=document.getElementById('ang-val'); if(av) av.innerText = ang + '°';
+    // ---- Sync Coordinate Panel & LONG/SHORT display with steering degree ----
+    try{
+      const coordMode = document.getElementById('coord-mode');
+      const coordSide = document.getElementById('coord-side');
+      const coordDeg  = document.getElementById('coord-deg');
+      const coordPlanet = document.getElementById('coord-planet');
+      const coordPlanetDeg = document.getElementById('coord-planet-deg');
+      if(coordDeg) coordDeg.textContent = String(ang);
+
+      const side = sideFromSteerDeg(ang);
+      const sideTxt = (side === 'FLAT') ? 'FLAT' : (side === 'UP' ? 'LONG' : 'SHORT');
+      if(coordSide) coordSide.textContent = sideTxt;
+
+      if(coordMode) coordMode.textContent = (AUTO && AUTO.on) ? 'AUTO' : 'MANUAL';
+
+      const norm = ((Number(ang)||0) % 360 + 360) % 360;
+      const planets = ['水星','金星','地球','火星','木星','土星','天王星','海王星','冥王星','日輪','月門','星環'];
+      const seg = Math.floor(norm / 30);
+      const pName = planets[seg] || '星域';
+      const pDeg = Math.round(norm % 30);
+      if(coordPlanet) coordPlanet.textContent = pName;
+      if(coordPlanetDeg) coordPlanetDeg.textContent = pDeg + '°';
+
+      // Keep the small left badge consistent too (if exists)
+      const autoBadge = document.getElementById('auto-badge');
+      if(autoBadge){
+        autoBadge.textContent = (AUTO && AUTO.on) ? ('AUTO: ' + sideTxt) : ('AUTO: OFF');
+      }
+    }catch(_e){}
+
 const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `rotate(${ang}deg)`;
         document.getElementById('steer-input-val').value = ang;
         // wheel sync
@@ -948,7 +868,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
 
         ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
         ctx.fillText(`ANGLE ${angle}°`, 30, 85);
-        ctx.fillText(`WARP ${Math.round(warp)}x`, 30, 115);
+        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
         ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
 
         ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
@@ -1176,7 +1096,7 @@ speak(m){
 window.app = app;
 
 
-window.onload = () => { app.init(); try{ startPoolTicker(); }catch(e){} };
+window.onload = () => app.init();
   // auto concierge on first visit
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
@@ -1667,74 +1587,12 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   // 方向盤角度 → 多空（依你的規則）
   // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
   function sideFromSteerDeg(deg){
-    let a = Number(deg);
-    if(!Number.isFinite(a)) a = 0;
-    while(a > 180) a -= 360;
-    while(a < -180) a += 360;
-    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
-  }
-
-  function step(ts){
-    if(!state.on) return;
-    const t = ts/1000;
-    const a = (Math.sin(t*0.9)*0.5 + 0.5);     // 0..1
-    const b = (Math.sin(t*0.7+1.2)*0.5 + 0.5); // 0..1
-
-    // Update inputs if present
-    const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
-    const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
-
-    let steerDeg = 0;
-    if(steerInput){
-      const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
-      steerDeg = Math.round(min + a*(max-min));
-      steerInput.value = steerDeg;
-      steerInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-    if(flowInput){
-      const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
-      flowInput.value = Math.round(min + b*(max-min));
-      flowInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-
-    // Auto side tag + auto order (demo/live)
-    const side = sideFromSteerDeg(steerDeg);
-    const autoTag = document.getElementById('autoTag');
-    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; }
-
-    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
-    if(ts - state.lastOrder > 2400){
-      state.lastOrder = ts;
-      if(typeof window.placeOrder === 'function'){
-        window.placeOrder(side);
-      }
-    }
-
-    // Visual motion
-    if(wheel){ wheel.style.transform = `translateY(${Math.sin(t*1.4)*3}px) rotate(${(a*120-60).toFixed(1)}deg)`; }
-    if(flow){  flow.style.transform  = `translateY(${Math.sin(t*1.2+0.7)*3}px) rotate(${(b*120-60).toFixed(1)}deg)`; }
-    if(avatar){
-      avatar.style.transform = `translateY(${Math.sin(t*0.8)*4}px) translateX(${Math.sin(t*0.6)*2}px)`;
-      avatar.style.filter = `hue-rotate(${Math.floor(a*30-15)}deg)`;
-    }
-
-    state.raf = requestAnimationFrame(step);
-  }
-
-  window.app = window.app || {};
-  window.app.toggleAutoBattle = function(){
-    state.on = !state.on;
-    const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
-    if(state.on){
-      state.raf = requestAnimationFrame(step);
-    }else{
-      try{ cancelAnimationFrame(state.raf); }catch(e){}
-      if(wheel) wheel.style.transform='';
-      if(flow) flow.style.transform='';
-      if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
-    }
-  };
+  // deg is -180..180 (0 is neutral)
+  const d = Number(deg) || 0;
+  // dead-zone: near 0 treated as FLAT / rest
+  if (Math.abs(d) < 0.5) return "FLAT";
+  // LONG if -90..90, SHORT otherwise
+  return (d >= -90 && d <= 90) ? "UP" : "DOWN";
 })();
 
 /* =========================
@@ -1838,7 +1696,18 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     setAutoUI(true, modeTxt);
 
     // update ranges (if exist) so other listeners update the scene
-    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
+    if(steerRange) // Auto steering in degrees (-180..180)
+        let degTarget;
+        if (longMode){
+          // LONG zone: sweep -90..90
+          degTarget = -90 + (p * 180);
+        }else{
+          // SHORT zone: sweep 90..180, alternate sign to cover both 90..180 and -90..-180
+          const neg = (Math.floor(Date.now() / 12000) % 2) === 1; // flip about every ~12s
+          const base = 90 + (p * 90);
+          degTarget = neg ? -base : base;
+        }
+        setRange(steerRange, degTarget);
     if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
 
     syncVisuals(longMode, p);
@@ -1907,317 +1776,42 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 </div>
 
 
-<!-- ===== COORD PANEL (V2.20.4) ===== -->
-<div id="coord-panel" aria-label="駕駛艙座標面板">
-  <div class="cp-title">
-    <span>駕駛艙｜座標 / CT</span>
-    <span class="muted" id="cp-side">SIDE: --</span>
+  <!-- Coordinate Panel -->
+  <div id="coord-panel" class="coord-panel" aria-label="Coordinate Panel">
+    <div class="row"><div class="k">模式</div><div class="v pill" id="coord-mode">MANUAL</div></div>
+    <div class="row"><div class="k">多空</div><div class="v pill" id="coord-side">FLAT</div></div>
+    <div class="row"><div class="k">角度</div><div class="v"><span id="coord-deg">0</span>°</div></div>
+    <div class="row"><div class="k">星球座標</div><div class="v"><span id="coord-planet">水星</span> <span id="coord-planet-deg" class="pill">0°</span></div></div>
+    <div class="row"><div class="k">CT</div><div class="v"><input id="coord-ct" inputmode="decimal" placeholder="指數" /></div></div>
+    <div class="row"><div class="k">CT+1</div><div class="v"><input id="coord-ct1" inputmode="decimal" placeholder="CT+1" /></div></div>
+    <div class="row"><div class="k">距離</div><div class="v"><span id="coord-dist">--</span></div></div>
   </div>
-
-  <div class="cp-grid">
-    <div class="cp-row">
-      <div class="cp-k">CT（現在指數點位 / 座標）</div>
-      <div class="cp-v"><input id="ct-in" inputmode="decimal" placeholder="例如 16888 / 11520 / 21444" /></div>
-    </div>
-    <div class="cp-row">
-      <div class="cp-k">CT+1（UP/DOWN 猜測）</div>
-      <div class="cp-v" id="cp-ct1">--</div>
-    </div>
-
-    <div class="cp-row">
-      <div class="cp-k">最近座標</div>
-      <div class="cp-v" id="cp-nearest">--</div>
-    </div>
-    <div class="cp-row">
-      <div class="cp-k">距離（以 16888=384400km 換算）</div>
-      <div class="cp-v" id="cp-km">--</div>
-    </div>
-  </div>
-
-  <div class="cp-actions">
-    <button type="button" onclick="app.openCoordModal()">點位 / 星球座標表</button>
-    <button type="button" onclick="app.syncFromWheel()">用方向盤同步(多/空)</button>
-  </div>
-</div>
-
-<div id="coord-modal" role="dialog" aria-label="宇宙座標表">
-  <div class="cm-box">
-    <div class="cm-head">
-      <b>宇宙座標表</b>
-      <input id="cm-q" placeholder="搜尋：名稱 / 點位 (例如 月球 / 21444 / 花果山)" />
-      <button type="button" onclick="app.closeCoordModal()">關閉</button>
-    </div>
-    <div class="cm-list" id="cm-list"></div>
-  </div>
-</div>
 
 
 <script>
-
-(() => {
-  const COORDS = [{"v": 87654321, "n": "天堂", "d": "未來所有生物物種都有房子住的地方"}, {"v": 28100000.0, "n": "木星", "d": "木星軌道象徵（6.4×10^8km）"}, {"v": 6570000.0, "n": "太陽", "d": "太陽軌道象徵（1.496×10^8km）"}, {"v": 1800000.0, "n": "金星", "d": "金星軌道象徵（4.1×10^7km）"}, {"v": 1234567, "n": "變形金鋼", "d": "機械神族級別"}, {"v": 511111, "n": "齊天大聖宮", "d": "悟空自立為王的最高殿堂（2538387km）"}, {"v": 188888, "n": "地球神域", "d": "神軍與外星人分界"}, {"v": 168888, "n": "筋斗雲", "d": "無限期權象徵"}, {"v": 126588, "n": "平天大聖宮", "d": "平天大聖的宮殿"}, {"v": 126500, "n": "最重的恐龍", "d": "牛魔王坐騎避水金睛獸重量"}, {"v": 123456, "n": "時間輪盤", "d": "時間運作的根源符號"}, {"v": 111111, "n": "如來神掌", "d": "神明與神軍分界（天上50天地上50年地下一萬年）"}, {"v": 108000, "n": "點石成金", "d": "高等煉金術門檻（2458266km）"}, {"v": 100000, "n": "玉皇宮", "d": "至尊皇帝殿"}, {"v": 99999, "n": "命運之神", "d": "元宇宙道場核心"}, {"v": 99995, "n": "龍珠紅", "d": "雙龍吐珠玉璽之紅珠"}, {"v": 88895, "n": "蟠桃園", "d": "長生不老果園（2023403km）"}, {"v": 88888, "n": "美州大陸", "d": "哥倫布發現新大陸象徵"}, {"v": 77777, "n": "北海龍宮", "d": "北海龍王敖吉宮"}, {"v": 66666, "n": "西海龍宮", "d": "西海龍王敖順宮"}, {"v": 55555, "n": "東海龍宮", "d": "東海龍王敖廣宮"}, {"v": 44444, "n": "南海龍宮", "d": "南海龍王敖欽宮"}, {"v": 33333, "n": "黃金鑽石", "d": "頂級財富能量"}, {"v": 24888, "n": "佛祖金鋼殿", "d": "佛祖聖殿"}, {"v": 24449, "n": "雲端神將", "d": "高階操盤者所在之巔"}, {"v": 23333, "n": "靈山", "d": "佛門聖地"}, {"v": 22888, "n": "白龍門", "d": "白龍族之界門"}, {"v": 22400, "n": "幻市魔影之門", "d": "幻象市場入口"}, {"v": 22200, "n": "魔影之谷", "d": "貪婪恐懼之谷"}, {"v": 22188, "n": "貪婪魔影", "d": "追高殺多化身"}, {"v": 21888, "n": "恐懼女鬼", "d": "恐慌回檔象徵"}, {"v": 21777, "n": "白龍門下層", "d": "三國軍團入口"}, {"v": 21666, "n": "佛光普照之地", "d": "佛光加持區"}, {"v": 21588, "n": "如來佛", "d": "如來禪寺"}, {"v": 21520, "n": "大雄寶殿", "d": "主殿"}, {"v": 21444, "n": "五丈原界碑", "d": "多空對峙"}, {"v": 21344, "n": "參軍將", "d": "諸葛亮部下"}, {"v": 21319, "n": "雷音寺", "d": "金剛般若波羅蜜經導讀地（485257km）"}, {"v": 20888, "n": "火焰山", "d": "高風險高波動"}, {"v": 20732, "n": "創世之門", "d": "悟道閘口"}, {"v": 20000, "n": "女兒國", "d": "情感試煉"}, {"v": 18999, "n": "玉帝", "d": "北京象徵（430082km）"}, {"v": 18921, "n": "斬妖台", "d": "誅邪之台"}, {"v": 18911, "n": "煉丹爐", "d": "極端試煉"}, {"v": 18894, "n": "總兵元帥府", "d": "軍事核心"}, {"v": 18893, "n": "總卒元將府", "d": "士卒核心"}, {"v": 18892, "n": "敖吉", "d": "北海龍王"}, {"v": 18891, "n": "敖順", "d": "西海龍王"}, {"v": 18890, "n": "敖廣", "d": "東海龍王"}, {"v": 18889, "n": "敖欽", "d": "南海龍王"}, {"v": 18888, "n": "凌霄寶殿", "d": "神仙與神明分界殿"}, {"v": 18520, "n": "四大天王", "d": "四大護法"}, {"v": 18319, "n": "四大天門", "d": "東南西北天門"}, {"v": 16888, "n": "白骨洞 / 廣寒宮", "d": "嫦娥居所（384400km）"}, {"v": 13888, "n": "東土大唐", "d": "取經起點"}, {"v": 13500, "n": "金箍棒", "d": "仙級武器重量13500斤/口（台北307283km）"}, {"v": 12682, "n": "阿斗起飛", "d": "阿斗翻身點"}, {"v": 12345, "n": "五指山", "d": "悟空的房子（新竹）"}, {"v": 11520, "n": "花果山", "d": "台灣靈山"}, {"v": 11111, "n": "定海神針", "d": "黃金帥與黃金將分界（高雄）"}, {"v": 9999, "n": "北海龍房", "d": "北海龍族"}, {"v": 9995, "n": "龍珠綠", "d": "玉璽綠珠"}, {"v": 9444, "n": "黑風谷", "d": "暗勢力"}, {"v": 8895, "n": "雲棧洞", "d": "豬八戒房子（綠島）"}, {"v": 8888, "n": "高老莊", "d": "豬八戒老婆家（蘭嶼）"}, {"v": 7777, "n": "西海龍房", "d": "敖犬房子（西藏）"}, {"v": 7744, "n": "流沙河", "d": "沙悟淨房子"}, {"v": 7200, "n": "畫杆方天戟", "d": "龍兵器重量7200斤"}, {"v": 6888, "n": "靈台方寸山", "d": "悟空學道之地"}, {"v": 6666, "n": "東海龍房", "d": "東海龍族住地"}, {"v": 6128, "n": "斜月三星洞", "d": "祖師授法地"}, {"v": 5555, "n": "南海龍房", "d": "南海龍族住地"}, {"v": 5168, "n": "金山銀礦", "d": "財富礦脈"}, {"v": 5048, "n": "九齒釘耙", "d": "五戒武器"}, {"v": 5048, "n": "降妖寶杖", "d": "沙悟淨武器"}, {"v": 4444, "n": "地府", "d": "亡魂審判"}, {"v": 4168, "n": "奈何橋", "d": "無法回頭抉擇"}, {"v": 4040, "n": "暗網交易所", "d": "地下金融"}, {"v": 3141, "n": "影像迷宮", "d": "虛實交錯"}, {"v": 1852, "n": "人造衛星高度", "d": "軌道高度（42157km）"}, {"v": 1111, "n": "閻王殿", "d": "隕石帥與隕石將"}, {"v": 411, "n": "大氣層", "d": "地球保護層（9371km）"}, {"v": 280, "n": "地球表面", "d": "人類居住地（6371km）"}, {"v": 188, "n": "地嶽", "d": "閻羅王之地"}, {"v": 72, "n": "最輕恐龍", "d": "魔族最小等級72斤"}, {"v": 1, "n": "玩家創建", "d": "開局一口的人"}, {"v": 0, "n": "恐龍", "d": "史前霸主"}, {"v": -1, "n": "宇宙", "d": "宇宙誕生點"}, {"v": -37.63, "n": "石油", "d": "黑天鵝象徵"}, {"v": 14520, "n": "巧雲", "d": "天樞做空｜大仙女"}, {"v": 14866, "n": "巧虹", "d": "天璇做多｜二仙女"}, {"v": 16184, "n": "巧芝", "d": "天璣做空｜三仙女"}, {"v": 16888, "n": "巧仙", "d": "天權做多｜四仙女"}, {"v": 17347, "n": "巧蘭", "d": "天衡做空｜五仙女"}, {"v": 18056, "n": "巧梅", "d": "闓陽做多｜六仙女"}, {"v": 18459, "n": "巧靈", "d": "瑤光多退｜七仙女"}];
-  const MOON_POINT = 16888;
-  const MOON_KM = 384400;
-
-  function $(id) { return document.getElementById(id); }
-  function toNum(x) {
-    if (x === null || x === undefined) return NaN;
-    if (typeof x === 'number') return x;
-    const s = String(x).trim().replace(/,/g,'');
-    if (!s) return NaN;
-    return Number(s);
-  }
-  function fmt(x) {
-    if (!isFinite(x)) return '--';
-    // keep up to 4 decimals if small, else int
-    const ax = Math.abs(x);
-    if (ax >= 1000) return String(Math.round(x));
-    if (ax >= 10) return x.toFixed(2);
-    return x.toFixed(4);
-  }
-  function currentSteerDeg() {
-    const el = $('steer-input-val');
-    return el ? (toNum(el.textContent) || 0) : 0;
-  }
-  function sideFromDeg(deg) {
-    // User rule:
-    // 0..90 and 0..-90 => LONG
-    // 90..180 and -90..-180 => SHORT
-    if (deg >= -90 && deg <= 90) return 'LONG';
-    return 'SHORT';
-  }
-  function nearestCoord(ct) {
-    let best = null, bestDiff = Infinity;
-    for (const c of COORDS) {
-      const diff = Math.abs(c.v - ct);
-      if (diff < bestDiff) { bestDiff = diff; best = c; }
+(function(){
+  function __coordUpdateDist(){
+    const a = document.getElementById('coord-ct');
+    const b = document.getElementById('coord-ct1');
+    const d = document.getElementById('coord-dist');
+    if(!a || !b || !d) return;
+    const av = Number(String(a.value||'').trim());
+    const bv = Number(String(b.value||'').trim());
+    if(Number.isFinite(av) && Number.isFinite(bv)){
+      d.textContent = Math.abs(bv-av).toFixed(2);
+    }else{
+      d.textContent = '--';
     }
-    return best;
   }
-  function kmFromCT(ct) {
-    return (ct / MOON_POINT) * MOON_KM;
-  }
-
-  // expose helpers
-  window.app = window.app || {};
-  app._ct = app._ct ?? NaN;
-  app._ct1 = app._ct1 ?? NaN;
-
-  app.setCT = (v) => {
-    const n = toNum(v);
-    if (!isFinite(n)) return;
-    app._ct = n;
-    if ($('ct-in')) $('ct-in').value = String(n);
-    app.updateCoordPanel();
-  };
-
-  app.updateCoordPanel = () => {
-    const deg = currentSteerDeg();
-    const side = sideFromDeg(deg);
-    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
-
-    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if (isFinite(ct)) {
-      const near = nearestCoord(ct);
-      if ($('cp-nearest')) $('cp-nearest').innerHTML = near ? `${near.n} <span class="muted">({fmt(near.v)})</span>` : '--';
-      const km = kmFromCT(ct);
-      if ($('cp-km')) $('cp-km').textContent = `${fmt(km)} km`;
-    } else {
-      if ($('cp-nearest')) $('cp-nearest').textContent = '--';
-      if ($('cp-km')) $('cp-km').textContent = '--';
-    }
-
-    if ($('cp-ct1')) $('cp-ct1').textContent = isFinite(app._ct1) ? fmt(app._ct1) : '--';
-
-    // keep AUTO badge consistent if exists
-    const autoTag = document.getElementById('auto-tag');
-    if (autoTag && autoTag.textContent && autoTag.textContent.includes('AUTO')) {
-      // only update the side label part, keep styling
-      autoTag.textContent = `AUTO: ${side}`;
-    }
-  };
-
-  app.openCoordModal = () => {
-    const modal = $('coord-modal');
-    if (!modal) return;
-    modal.style.display = 'block';
-    app.renderCoordList('');
-    setTimeout(() => $('cm-q')?.focus(), 50);
-  };
-  app.closeCoordModal = () => {
-    const modal = $('coord-modal');
-    if (!modal) return;
-    modal.style.display = 'none';
-  };
-  app.renderCoordList = (q) => {
-    const list = $('cm-list');
-    if (!list) return;
-    const query = (q||'').trim().toLowerCase();
-    const filtered = !query ? COORDS : COORDS.filter(c =>
-      String(c.v).toLowerCase().includes(query) ||
-      (c.n||'').toLowerCase().includes(query) ||
-      (c.d||'').toLowerCase().includes(query)
-    );
-    list.innerHTML = filtered.map(c => `
-      <div class="cm-item" data-v="${c.v}">
-        <div class="cm-v">${fmt(c.v)}</div>
-        <div>
-          <div class="cm-n">${c.n}</div>
-          <div class="cm-d">${c.d || ''}</div>
-        </div>
-      </div>
-    `).join('') || '<div style="opacity:.75;padding:14px;">沒有符合的座標</div>';
-
-    list.querySelectorAll('.cm-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const v = toNum(el.getAttribute('data-v'));
-        app.setCT(v);
-        app.closeCoordModal();
-      });
-    });
-  };
-
-  app.syncFromWheel = () => {
-    // Use current steering direction to set CT+1 guess (sign)
-    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if (!isFinite(ct)) return;
-    const deg = currentSteerDeg();
-    const side = sideFromDeg(deg);
-    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
-    if (!isFinite(delta) || delta === 0) {
-      // fallback small step
-      app._ct1 = ct + (side === 'LONG' ? 72 : -72);
-    } else {
-      app._ct1 = ct + (side === 'LONG' ? delta : -delta);
-    }
-    app.updateCoordPanel();
-  };
-
-  app.orderGuess = (dir) => {
-    // When user presses UP/DOWN, treat the "amount" input as the delta guess for CT+1.
-    // (If user wants pure KGEN order amount, keep using it; this just updates CT+1 preview.)
-    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if (!isFinite(ct)) return;
-    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
-    const step = (isFinite(delta) && delta !== 0) ? delta : 72;
-    app._ct1 = ct + (dir === 'UP' ? step : -step);
-    app.updateCoordPanel();
-  };
-
-  // Wire up input / modal search
-  $('ct-in')?.addEventListener('input', (e) => {
-    app._ct = toNum(e.target.value);
-    app.updateCoordPanel();
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const a = document.getElementById('coord-ct');
+    const b = document.getElementById('coord-ct1');
+    if(a) a.addEventListener('input', __coordUpdateDist);
+    if(b) b.addEventListener('input', __coordUpdateDist);
+    __coordUpdateDist();
   });
-  $('cm-q')?.addEventListener('input', (e) => app.renderCoordList(e.target.value));
-  $('coord-modal')?.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'coord-modal') app.closeCoordModal();
-  });
-
-  // Patch applySteer to keep UI consistent, without breaking existing logic.
-  if (typeof window.applySteer === 'function' && !window.__applySteerPatched_v2204) {
-    window.__applySteerPatched_v2204 = true;
-    const _orig = window.applySteer;
-    window.applySteer = function(deg) {
-      _orig(deg);
-      try { app.updateCoordPanel(); } catch(_e) {}
-    };
-  }
-
-  // initial
-  setTimeout(() => {
-    // default CT = 16888 (moon) if empty
-    if ($('ct-in') && !String($('ct-in').value||'').trim()) {
-      app.setCT(16888);
-    } else {
-      app.updateCoordPanel();
-    }
-  }, 300);
 })();
-
-
-
-function shouldAnimate(){ return !document.body.classList.contains('warp-off'); }
-
-// ===== v2.22.0 Warp semantics =====
-let __warpValue = 0;
-function setWarpOff(isOff){
-  document.body.classList.toggle('warp-off', !!isOff);
-}
-
-// ===== v2.22.0 Pool quote (KGEN/WBNB pair) =====
-const WBNB_ADDR = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-const KGEN_ADDR = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
-const KGEN_WBNB_PAIR = '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2';
-const PAIR_ABI_MIN = [
-  'function token0() view returns (address)',
-  'function token1() view returns (address)',
-  'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)'
-];
-let __publicProvider = null;
-function getPublicProvider(){
-  if(__publicProvider) return __publicProvider;
-  const rpc = 'https://bsc-dataseed.binance.org/';
-  try{
-    if(window.ethers && ethers.providers && ethers.providers.JsonRpcProvider){
-      __publicProvider = new ethers.providers.JsonRpcProvider(rpc);
-    } else if(window.ethers && ethers.JsonRpcProvider){
-      __publicProvider = new ethers.JsonRpcProvider(rpc);
-    }
-  }catch(e){}
-  return __publicProvider;
-}
-async function fetchPoolBNBPerKGEN(){
-  try{
-    const prov = window.__providerForReads || getPublicProvider();
-    if(!prov || !window.ethers) return null;
-    const pair = new ethers.Contract(KGEN_WBNB_PAIR, PAIR_ABI_MIN, prov);
-    const t0 = await pair.token0();
-    const t1 = await pair.token1();
-    const res = await pair.getReserves();
-    const token0 = String(t0).toLowerCase();
-    const token1 = String(t1).toLowerCase();
-    const kgen = KGEN_ADDR.toLowerCase();
-    const wbnb = WBNB_ADDR.toLowerCase();
-    const r0 = res.reserve0;
-    const r1 = res.reserve1;
-    const fmt = (val)=>{
-      try{
-        if(ethers.utils && ethers.utils.formatUnits) return Number(ethers.utils.formatUnits(val,18));
-        if(ethers.formatUnits) return Number(ethers.formatUnits(val,18));
-      }catch(e){}
-      return Number(val);
-    };
-    let price = null;
-    if(token0===kgen && token1===wbnb){
-      const k = fmt(r0);
-      const b = fmt(r1);
-      if(k>0) price = b/k;
-    } else if(token0===wbnb && token1===kgen){
-      const b = fmt(r0);
-      const k = fmt(r1);
-      if(k>0) price = b/k;
-    }
-    return price;
-  }catch(e){
-    return null;
-  }
-}
-
-
-async function startPoolTicker(){
-  const el = document.getElementById('pool-bnb');
-  if(!el) return;
-  async function tick(){
-    const p = await fetchPoolBNBPerKGEN();
-    if(typeof p==='number' && isFinite(p)){
-      el.textContent = p.toExponential(6);
-    }
-  }
-  tick();
-  setInterval(tick, 12000);
-}
-
 </script>
+
 </body>
 </html>
