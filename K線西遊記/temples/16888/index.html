@@ -390,7 +390,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.22.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -445,7 +445,7 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:210px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:210px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div id="web3-panel" style="position:fixed; left:18px; bottom:240px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:210px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
@@ -1561,6 +1561,11 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
       (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
+      // ===== CT 同步（重要） =====
+      // 本頁定義：CT = 鏈上 Universe.poolBalance()（KGEN）
+      // 直接把 CT/CT+1 對齊鏈上池子狀態。
+      this._ct = b;
+      this.updateCoordPanel();
       app.setProgress(pct/100);
       await this.refreshUser();
     }catch(e){
@@ -1960,11 +1965,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
   <div class="cp-grid">
     <div class="cp-row">
-      <div class="cp-k">CT（現在指數點位 / 座標）</div>
-      <div class="cp-v"><input id="ct-in" inputmode="decimal" placeholder="例如 16888 / 11520 / 21444" /></div>
+      <div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
+      <div class="cp-v"><input id="ct-in" inputmode="decimal" readonly /></div>
     </div>
     <div class="cp-row">
-      <div class="cp-k">CT+1（UP/DOWN 猜測）</div>
+      <div class="cp-k">CT+1（依下單金額推估）</div>
       <div class="cp-v" id="cp-ct1">--</div>
     </div>
 
@@ -1979,8 +1984,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 
   <div class="cp-actions">
-    <button type="button" onclick="app.openCoordModal()">點位 / 星球座標表</button>
-    <button type="button" onclick="app.syncFromWheel()">用方向盤同步(多/空)</button>
+    <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
+    <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
+    <button type="button" onclick="app.openTokenScan()">Token</button>
+    <button type="button" onclick="app.openPairScan()">LP Pair</button>
+    <button type="button" onclick="app.openLpLock()">LP 鎖</button>
   </div>
 </div>
 
@@ -2065,10 +2073,19 @@ function sideFromDeg(deg) {
   app._ct1 = app._ct1 ?? NaN;
 
   app.setCT = (v) => {
+    // 手動指定鏈上 CT（除錯用）。正常狀態由鏈上 poolBalance 同步，不建議手動改。
     const n = toNum(v);
     if (!isFinite(n)) return;
     app._ct = n;
     if ($('ct-in')) $('ct-in').value = String(n);
+    app.updateCoordPanel();
+  };
+
+  app.setCoord = (v) => {
+    // 只改「座標點位」（地圖/星球位置），不動鏈上 CT。
+    const n = toNum(v);
+    if (!isFinite(n)) return;
+    app._coord = n;
     app.updateCoordPanel();
   };
 
