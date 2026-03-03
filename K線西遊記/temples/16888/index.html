@@ -215,6 +215,9 @@
 .nav-btn.swap-usdt{ background: rgba(35, 205, 120, .95) !important; color:#111 !important; border:1px solid rgba(0,0,0,.35) !important; text-shadow:none !important; }
 .nav-btn.swap-bnb:hover,.nav-btn.swap-usdt:hover{ filter: brightness(1.04); }
 
+
+/* HOTFIX: make swap button labels always readable */
+.nav-swap, .nav-swap span{color:#fff !important; opacity:1 !important; font-weight:900 !important; text-shadow:0 0 10px rgba(0,0,0,.8);} 
 </style>
 </head>
 <body>
@@ -224,7 +227,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.20.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -283,6 +286,7 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+<button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
@@ -1004,6 +1008,8 @@ speak(m){
       el.innerText = `${pct}%`;
     }
 };
+window.app = app;
+
 
 window.onload = () => app.init();
   // auto concierge on first visit
@@ -1378,7 +1384,48 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       console.warn(e);
     }
   }
+
+    ,
+    openWalletHub(){
+      const hub = document.getElementById('walletHub');
+      const inp = document.getElementById('walletHubUrl');
+      if(inp) inp.value = location.href;
+      if(hub){ hub.style.display='flex'; }
+    },
+    closeWalletHub(){
+      const hub = document.getElementById('walletHub');
+      if(hub){ hub.style.display='none'; }
+    },
+    deepLink(kind){
+      const url = location.href;
+      let link = url;
+      if(kind==='metamask'){
+        link = 'https://metamask.app.link/dapp/' + location.host + location.pathname + location.search + location.hash;
+      } else if(kind==='trust'){
+        link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
+      } else if(kind==='okx'){
+        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      }
+      window.location.href = link;
+    },
+    async copyDappUrl(){
+      const url = location.href;
+      try{
+        await navigator.clipboard.writeText(url);
+        this.toast && this.toast('已複製連結');
+      }catch(e){
+        const inp = document.getElementById('walletHubUrl');
+        if(inp){ inp.focus(); inp.select(); }
+      }
+    }
 };
+window.web3 = web3;
+// walletHub backdrop close
+setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addEventListener('click',(e)=>{if(e.target===hub) web3.closeWalletHub();});}},0);
+
+
 </script>
 
 
@@ -1641,6 +1688,33 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
   window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
 })();
 </script>
+
+
+<!-- Wallet Hub Modal -->
+<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999;">
+  <div style="width:min(520px,92vw); background:#0b0f14; border:1px solid rgba(255,215,102,.45); border-radius:14px; padding:14px 14px 12px 14px; box-shadow:0 10px 40px rgba(0,0,0,.55);">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
+      <button class="term-btn" style="padding:6px 10px; font-size:12px;" onclick="web3.closeWalletHub()">✖</button>
+    </div>
+    <div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
+      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
+    </div>
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('metamask')">MetaMask 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('trust')">Trust Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('okx')">OKX Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('bitget')">Bitget Wallet 開啟</button>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <input id="walletHubUrl" readonly style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" />
+      <button class="nav-btn" style="padding:10px 12px;" onclick="web3.copyDappUrl()">複製</button>
+    </div>
+    <div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
+      通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
