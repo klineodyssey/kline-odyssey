@@ -234,6 +234,45 @@
   font-weight:900 !important;
   text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
 }
+
+/* ===== Coordinate Panel (between order panel & warp) ===== */
+.coord-panel{
+  position: fixed;
+  right: 110px;
+  bottom: 210px;
+  width: 290px;
+  max-width: calc(100vw - 140px);
+  padding: 10px 12px;
+  border: 1px solid rgba(255,215,128,0.35);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.35);
+  font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+  z-index: 30;
+}
+.coord-panel .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:4px 0;}
+.coord-panel .k{color:#ffd98a; font-weight:800; font-size:12px; letter-spacing:0.5px;}
+.coord-panel .v{color:#e9f6ff; font-weight:800; font-size:13px;}
+.coord-panel input{
+  width: 92px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.35);
+  color:#e9f6ff;
+  font-weight:800;
+}
+.coord-panel .pill{
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.25);
+}
+/* Make top-right swap buttons readable */
+.swap-btn{color:#e9f6ff !important; font-weight:800 !important;}
+.swap-btn .tiny, .swap-btn small, .swap-btn span{opacity:1 !important;}
+
 </style>
 </head>
 <body>
@@ -243,7 +282,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.21.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -567,6 +606,36 @@ const wtx=document.getElementById('warp-txt'); if(wtx) wtx.innerText = `WARP ${v
     applySteer(v, silent=false){
         const ang = Math.max(-180, Math.min(180, Number(v)||0));
 const av=document.getElementById('ang-val'); if(av) av.innerText = ang + '°';
+    // ---- Sync Coordinate Panel & LONG/SHORT display with steering degree ----
+    try{
+      const coordMode = document.getElementById('coord-mode');
+      const coordSide = document.getElementById('coord-side');
+      const coordDeg  = document.getElementById('coord-deg');
+      const coordPlanet = document.getElementById('coord-planet');
+      const coordPlanetDeg = document.getElementById('coord-planet-deg');
+      if(coordDeg) coordDeg.textContent = String(ang);
+
+      const side = sideFromSteerDeg(ang);
+      const sideTxt = (side === 'FLAT') ? 'FLAT' : (side === 'UP' ? 'LONG' : 'SHORT');
+      if(coordSide) coordSide.textContent = sideTxt;
+
+      if(coordMode) coordMode.textContent = (AUTO && AUTO.on) ? 'AUTO' : 'MANUAL';
+
+      const norm = ((Number(ang)||0) % 360 + 360) % 360;
+      const planets = ['水星','金星','地球','火星','木星','土星','天王星','海王星','冥王星','日輪','月門','星環'];
+      const seg = Math.floor(norm / 30);
+      const pName = planets[seg] || '星域';
+      const pDeg = Math.round(norm % 30);
+      if(coordPlanet) coordPlanet.textContent = pName;
+      if(coordPlanetDeg) coordPlanetDeg.textContent = pDeg + '°';
+
+      // Keep the small left badge consistent too (if exists)
+      const autoBadge = document.getElementById('auto-badge');
+      if(autoBadge){
+        autoBadge.textContent = (AUTO && AUTO.on) ? ('AUTO: ' + sideTxt) : ('AUTO: OFF');
+      }
+    }catch(_e){}
+
 const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `rotate(${ang}deg)`;
         document.getElementById('steer-input-val').value = ang;
         // wheel sync
@@ -1518,74 +1587,12 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   // 方向盤角度 → 多空（依你的規則）
   // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
   function sideFromSteerDeg(deg){
-    let a = Number(deg);
-    if(!Number.isFinite(a)) a = 0;
-    while(a > 180) a -= 360;
-    while(a < -180) a += 360;
-    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
-  }
-
-  function step(ts){
-    if(!state.on) return;
-    const t = ts/1000;
-    const a = (Math.sin(t*0.9)*0.5 + 0.5);     // 0..1
-    const b = (Math.sin(t*0.7+1.2)*0.5 + 0.5); // 0..1
-
-    // Update inputs if present
-    const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
-    const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
-
-    let steerDeg = 0;
-    if(steerInput){
-      const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
-      steerDeg = Math.round(min + a*(max-min));
-      steerInput.value = steerDeg;
-      steerInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-    if(flowInput){
-      const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
-      flowInput.value = Math.round(min + b*(max-min));
-      flowInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-
-    // Auto side tag + auto order (demo/live)
-    const side = sideFromSteerDeg(steerDeg);
-    const autoTag = document.getElementById('autoTag');
-    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; }
-
-    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
-    if(ts - state.lastOrder > 2400){
-      state.lastOrder = ts;
-      if(typeof window.placeOrder === 'function'){
-        window.placeOrder(side);
-      }
-    }
-
-    // Visual motion
-    if(wheel){ wheel.style.transform = `translateY(${Math.sin(t*1.4)*3}px) rotate(${(a*120-60).toFixed(1)}deg)`; }
-    if(flow){  flow.style.transform  = `translateY(${Math.sin(t*1.2+0.7)*3}px) rotate(${(b*120-60).toFixed(1)}deg)`; }
-    if(avatar){
-      avatar.style.transform = `translateY(${Math.sin(t*0.8)*4}px) translateX(${Math.sin(t*0.6)*2}px)`;
-      avatar.style.filter = `hue-rotate(${Math.floor(a*30-15)}deg)`;
-    }
-
-    state.raf = requestAnimationFrame(step);
-  }
-
-  window.app = window.app || {};
-  window.app.toggleAutoBattle = function(){
-    state.on = !state.on;
-    const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
-    if(state.on){
-      state.raf = requestAnimationFrame(step);
-    }else{
-      try{ cancelAnimationFrame(state.raf); }catch(e){}
-      if(wheel) wheel.style.transform='';
-      if(flow) flow.style.transform='';
-      if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
-    }
-  };
+  // deg is -180..180 (0 is neutral)
+  const d = Number(deg) || 0;
+  // dead-zone: near 0 treated as FLAT / rest
+  if (Math.abs(d) < 0.5) return "FLAT";
+  // LONG if -90..90, SHORT otherwise
+  return (d >= -90 && d <= 90) ? "UP" : "DOWN";
 })();
 
 /* =========================
@@ -1689,7 +1696,18 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     setAutoUI(true, modeTxt);
 
     // update ranges (if exist) so other listeners update the scene
-    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
+    if(steerRange) // Auto steering in degrees (-180..180)
+        let degTarget;
+        if (longMode){
+          // LONG zone: sweep -90..90
+          degTarget = -90 + (p * 180);
+        }else{
+          // SHORT zone: sweep 90..180, alternate sign to cover both 90..180 and -90..-180
+          const neg = (Math.floor(Date.now() / 12000) % 2) === 1; // flip about every ~12s
+          const base = 90 + (p * 90);
+          degTarget = neg ? -base : base;
+        }
+        setRange(steerRange, degTarget);
     if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
 
     syncVisuals(longMode, p);
@@ -1756,6 +1774,44 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
   </div>
 </div>
+
+
+  <!-- Coordinate Panel -->
+  <div id="coord-panel" class="coord-panel" aria-label="Coordinate Panel">
+    <div class="row"><div class="k">模式</div><div class="v pill" id="coord-mode">MANUAL</div></div>
+    <div class="row"><div class="k">多空</div><div class="v pill" id="coord-side">FLAT</div></div>
+    <div class="row"><div class="k">角度</div><div class="v"><span id="coord-deg">0</span>°</div></div>
+    <div class="row"><div class="k">星球座標</div><div class="v"><span id="coord-planet">水星</span> <span id="coord-planet-deg" class="pill">0°</span></div></div>
+    <div class="row"><div class="k">CT</div><div class="v"><input id="coord-ct" inputmode="decimal" placeholder="指數" /></div></div>
+    <div class="row"><div class="k">CT+1</div><div class="v"><input id="coord-ct1" inputmode="decimal" placeholder="CT+1" /></div></div>
+    <div class="row"><div class="k">距離</div><div class="v"><span id="coord-dist">--</span></div></div>
+  </div>
+
+
+<script>
+(function(){
+  function __coordUpdateDist(){
+    const a = document.getElementById('coord-ct');
+    const b = document.getElementById('coord-ct1');
+    const d = document.getElementById('coord-dist');
+    if(!a || !b || !d) return;
+    const av = Number(String(a.value||'').trim());
+    const bv = Number(String(b.value||'').trim());
+    if(Number.isFinite(av) && Number.isFinite(bv)){
+      d.textContent = Math.abs(bv-av).toFixed(2);
+    }else{
+      d.textContent = '--';
+    }
+  }
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const a = document.getElementById('coord-ct');
+    const b = document.getElementById('coord-ct1');
+    if(a) a.addEventListener('input', __coordUpdateDist);
+    if(b) b.addEventListener('input', __coordUpdateDist);
+    __coordUpdateDist();
+  });
+})();
+</script>
 
 </body>
 </html>
