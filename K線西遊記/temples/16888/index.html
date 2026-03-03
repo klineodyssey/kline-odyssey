@@ -381,6 +381,37 @@
   font-weight: 800;
   display: inline-block;
 }
+
+/* ===== v2.22.2 UI 修正：GA 小方塊移到右上（語音客服下方） ===== */
+.ga-matrix{
+  position: relative !important;
+  right: auto !important;
+  top: auto !important;
+  margin-top: 10px !important;
+  width: 260px !important;
+}
+@media (max-width: 480px){
+  .ga-matrix{ width: 100% !important; }
+}
+
+/* ===== v2.22.2 UI 修正：左右儀表板同尺寸、留底、避免互撞 ===== */
+.dash-panel{
+  height: 220px;           /* 兩塊同高 */
+  overflow: hidden;
+  border-radius: 12px;
+}
+@media (max-width: 900px){
+  #dash-left, #coord-panel{
+    left: 20px !important;
+    width: calc(100% - 40px) !important;
+  }
+  #dash-left{ bottom: 265px !important; }   /* 上方儀表板 */
+  #coord-panel{ bottom: 20px !important; }  /* 下方儀表板（保留底部空隙） */
+}
+
+/* 方向橫桿往上調一點（避免貼到下方按鈕列） */
+.deg-wrap{ bottom: 118px !important; }
+@media (max-width: 900px){ .deg-wrap{ bottom: 128px !important; } }
 </style>
 </head>
 <body>
@@ -409,13 +440,9 @@
     <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
 </div>
 
-<div class="ga-matrix">
-    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
-    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
-    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
-    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
-    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
-</div>
+
+<!-- GA 面板已移到右上導覽區（語音客服下方） -->
+
 
 <div id="core-anchor">
     <div id="core-window">
@@ -449,6 +476,15 @@
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+
+    <div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+</div>
+
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
