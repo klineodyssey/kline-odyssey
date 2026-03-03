@@ -73,13 +73,13 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix { position: fixed; right: 22px; top: 210px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix{left:18px; position: fixed; right:auto; top:92px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
         /* 🎡 方向盤 */
-        .steer-zone { position: fixed; bottom: 205px; width: 100%; text-align: center; z-index: 100; }
+        .steer-zone{ position: fixed; bottom:225px; width: 100%; text-align: center; z-index: 100; }
         .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
         .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
@@ -238,8 +238,8 @@
 /* ===== COORD PANEL (V2.20.4) ===== */
 #coord-panel{
   position: fixed;
-  right: 150px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
-  bottom: 270px; /* 往上：不要貼到底部按鈕列 */
+  right: 90px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
+  bottom:315px; /* 往上：不要貼到底部按鈕列 */
   left: auto;
   transform: none;
   width: min(360px, 92vw);
@@ -453,7 +453,7 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:270px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
@@ -1419,6 +1419,9 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
 
       const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
       const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+
+      // 同步更新高老莊地址餘額
+      await refreshGaolao(kgen);
     }catch(e){
       console.warn("refreshUser failed", e);
       const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
