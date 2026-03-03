@@ -27,7 +27,7 @@
         .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
         /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
-        .warp-engine { position: fixed; right: 8px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-engine { position: fixed; right: 22px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
         .warp-rail { 
             height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
             position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
@@ -51,7 +51,7 @@
         .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
 
         /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
-        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
         #core-window { 
             width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
             overflow: hidden; background: #000; position: relative; 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -237,19 +237,19 @@
 
 /* ===== COORD PANEL (V2.20.4) ===== */
 #coord-panel{
-  position: fixed;
-  right: 220px; /* 放在曲速縱桿左側，避免壓到下單面板 */
-  bottom: 210px;
-  left: auto;
-  transform: none;
-  width: min(360px, 92vw);
-  max-width: 360px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 215, 0, .35);
-  border-radius: 10px;
-  background: rgba(0,0,0,.55);
-  box-shadow: 0 0 18px rgba(255,215,0,.12);
-  z-index: 30;
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:220px;
+  width:min(420px, calc(100vw - 24px));
+  z-index:40;
+  border:1px solid rgba(255,200,80,.55);
+  box-shadow:0 0 18px rgba(255,190,60,.10);
+  background:rgba(0,0,0,.58);
+  backdrop-filter: blur(6px);
+  border-radius:14px;
+  padding:10px 12px;
+  pointer-events:auto;
 }
 #coord-panel .cp-title{
   display:flex;align-items:center;justify-content:space-between;
@@ -369,18 +369,6 @@
 #coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
 #coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
 
-
-/* AUTO 狀態徽章：移入駕駛艙座標面板時改成內嵌樣式 */
-.auto-badge.in-cockpit{
-  position: static !important;
-  left: auto !important;
-  bottom: auto !important;
-  margin: 0 0 8px 0 !important;
-  padding: 6px 10px !important;
-  border-radius: 8px !important;
-  font-weight: 800;
-  display: inline-block;
-}
 </style>
 </head>
 <body>
@@ -390,7 +378,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.20.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -445,7 +433,7 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:240px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:210px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
@@ -498,43 +486,7 @@
 </div>
 
 <script>
-
-/*
-============================================================
-KGEN 16888｜廣寒宮入口 Index (GitHub Pages)
-版本：v2.22.0  （以 v2.20.4 可用原版為底，逐步加功能）
-
-【重要觀念 / 介面定義】
-1) 「方向盤(度數)」只代表多空方向：
-   - 0°~90° 以及 0°~-90° ＝ 多方（水平線上方）
-   - 90°~180° 以及 -90°~-180° ＝ 空方（水平線下方）
-   ※ 度數不是倍率、不是息火
-
-2) 「曲速引擎 WARP（0~300x）」才是槓桿/動能：
-   - WARP = 0 ＝ 息火（靜止） → 畫面/粒子/自動巡航都應停止
-   - WARP > 0 ＝ 推進 → 動畫速度、模擬步頻、視覺能量隨倍率放大
-
-3) 「AUTO 自動巡航/打怪」：
-   - 依方向盤度數判斷 LONG/SHORT
-   - 依 WARP 倍率決定每秒步頻與動畫能量
-   - AUTO 會同步：方向盤 → 星球流向/粒子 → 影像動態 → 模擬多空狀態
-
-【主要區塊】
-A. 左下 Web3/錢包面板（#web3-panel）：WalletConnect / 餘額 / 授權 / 下單
-B. 右下 駕駛艙/座標面板（#coord-panel）：SIDE、deg、CT、CT+1、距離換算、地圖彈窗
-C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
-
-【參數/常數（請集中維護）】
-- BSC 公共 RPC、合約地址（KGEN、LP Pair、Universe Pool）
-- 地球→月球基準距離 384400 km（以 16888 為月球指數基準做換算）
-
-【備註】
-這份檔案會被「越改越大」，所以必須保留中文註解。
-未來若重製（換框架/拆檔），只要看註解就能快速復原邏輯。
-============================================================
-*/
-
-const APP_VERSION = "v2.22.0";
+const APP_VERSION = "v2.20.3";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -772,17 +724,7 @@ const gr=document.getElementById('ga-rank'); if(gr) gr.innerText = `RANK: GA-${t
         this.speak("啟動 GA 自動打怪模式，績效演化中。");
 const wl=document.getElementById('wish-label'); const old = wl ? wl.innerText : '';
 const wl2=document.getElementById('wish-label'); if(wl2) wl2.innerText = '⚔️ KGEN 自動打怪中...';
-setTimeout(() => {
-  // ============================================================
-  // 【中文註解｜重要】本頁為「KGEN 16888 廣寒宮」前端單頁（純前端）
-  // - 不改合約、不改池子：此檔只做 UI/動畫/WalletConnect 連線與外部入口
-  // - 方向盤（DEG）只代表「多空方向」：水平線上方＝多；下方＝空（與倍槓無關）
-  // - 曲速引擎（WARP）代表「倍槓/速度」：WARP=0 表示息火（觀望），畫面/粒子/流向應靜止
-  // - 自動巡航打怪（AUTO）會依 DEG（方向）+ WARP（速度）去模擬多空節奏，並同步更新：
-  //   ① 左下狀態（AUTO: LONG/SHORT）② 中央角度讀數 ③ 星球/流向/粒子動畫
-  // - CT（現價）若能讀到鏈上池子報價就同步；讀不到則回退到本機模擬值（不會阻斷 UI）
-  // ============================================================
- const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
+setTimeout(() => { const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
     },
 
     async cam(mode) {
@@ -1561,11 +1503,6 @@ const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixe
       (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
 
 const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
-      // ===== CT 同步（重要） =====
-      // 本頁定義：CT = 鏈上 Universe.poolBalance()（KGEN）
-      // 直接把 CT/CT+1 對齊鏈上池子狀態。
-      this._ct = b;
-      this.updateCoordPanel();
       app.setProgress(pct/100);
       await this.refreshUser();
     }catch(e){
@@ -1965,11 +1902,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
   <div class="cp-grid">
     <div class="cp-row">
-      <div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
-      <div class="cp-v"><input id="ct-in" inputmode="decimal" readonly /></div>
+      <div class="cp-k">CT（現在指數點位 / 座標）</div>
+      <div class="cp-v"><input id="ct-in" inputmode="decimal" placeholder="例如 16888 / 11520 / 21444" /></div>
     </div>
     <div class="cp-row">
-      <div class="cp-k">CT+1（依下單金額推估）</div>
+      <div class="cp-k">CT+1（UP/DOWN 猜測）</div>
       <div class="cp-v" id="cp-ct1">--</div>
     </div>
 
@@ -1984,11 +1921,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 
   <div class="cp-actions">
-    <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
-    <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
-    <button type="button" onclick="app.openTokenScan()">Token</button>
-    <button type="button" onclick="app.openPairScan()">LP Pair</button>
-    <button type="button" onclick="app.openLpLock()">LP 鎖</button>
+    <button type="button" onclick="app.openCoordModal()">點位 / 星球座標表</button>
+    <button type="button" onclick="app.syncFromWheel()">用方向盤同步(多/空)</button>
   </div>
 </div>
 
@@ -2007,11 +1941,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <script>
 
 (() => {
-  // 宇宙座標表：v=點位(可大於16888)，n=名稱，d=說明
   const COORDS = [{"v": 87654321, "n": "天堂", "d": "未來所有生物物種都有房子住的地方"}, {"v": 28100000.0, "n": "木星", "d": "木星軌道象徵（6.4×10^8km）"}, {"v": 6570000.0, "n": "太陽", "d": "太陽軌道象徵（1.496×10^8km）"}, {"v": 1800000.0, "n": "金星", "d": "金星軌道象徵（4.1×10^7km）"}, {"v": 1234567, "n": "變形金鋼", "d": "機械神族級別"}, {"v": 511111, "n": "齊天大聖宮", "d": "悟空自立為王的最高殿堂（2538387km）"}, {"v": 188888, "n": "地球神域", "d": "神軍與外星人分界"}, {"v": 168888, "n": "筋斗雲", "d": "無限期權象徵"}, {"v": 126588, "n": "平天大聖宮", "d": "平天大聖的宮殿"}, {"v": 126500, "n": "最重的恐龍", "d": "牛魔王坐騎避水金睛獸重量"}, {"v": 123456, "n": "時間輪盤", "d": "時間運作的根源符號"}, {"v": 111111, "n": "如來神掌", "d": "神明與神軍分界（天上50天地上50年地下一萬年）"}, {"v": 108000, "n": "點石成金", "d": "高等煉金術門檻（2458266km）"}, {"v": 100000, "n": "玉皇宮", "d": "至尊皇帝殿"}, {"v": 99999, "n": "命運之神", "d": "元宇宙道場核心"}, {"v": 99995, "n": "龍珠紅", "d": "雙龍吐珠玉璽之紅珠"}, {"v": 88895, "n": "蟠桃園", "d": "長生不老果園（2023403km）"}, {"v": 88888, "n": "美州大陸", "d": "哥倫布發現新大陸象徵"}, {"v": 77777, "n": "北海龍宮", "d": "北海龍王敖吉宮"}, {"v": 66666, "n": "西海龍宮", "d": "西海龍王敖順宮"}, {"v": 55555, "n": "東海龍宮", "d": "東海龍王敖廣宮"}, {"v": 44444, "n": "南海龍宮", "d": "南海龍王敖欽宮"}, {"v": 33333, "n": "黃金鑽石", "d": "頂級財富能量"}, {"v": 24888, "n": "佛祖金鋼殿", "d": "佛祖聖殿"}, {"v": 24449, "n": "雲端神將", "d": "高階操盤者所在之巔"}, {"v": 23333, "n": "靈山", "d": "佛門聖地"}, {"v": 22888, "n": "白龍門", "d": "白龍族之界門"}, {"v": 22400, "n": "幻市魔影之門", "d": "幻象市場入口"}, {"v": 22200, "n": "魔影之谷", "d": "貪婪恐懼之谷"}, {"v": 22188, "n": "貪婪魔影", "d": "追高殺多化身"}, {"v": 21888, "n": "恐懼女鬼", "d": "恐慌回檔象徵"}, {"v": 21777, "n": "白龍門下層", "d": "三國軍團入口"}, {"v": 21666, "n": "佛光普照之地", "d": "佛光加持區"}, {"v": 21588, "n": "如來佛", "d": "如來禪寺"}, {"v": 21520, "n": "大雄寶殿", "d": "主殿"}, {"v": 21444, "n": "五丈原界碑", "d": "多空對峙"}, {"v": 21344, "n": "參軍將", "d": "諸葛亮部下"}, {"v": 21319, "n": "雷音寺", "d": "金剛般若波羅蜜經導讀地（485257km）"}, {"v": 20888, "n": "火焰山", "d": "高風險高波動"}, {"v": 20732, "n": "創世之門", "d": "悟道閘口"}, {"v": 20000, "n": "女兒國", "d": "情感試煉"}, {"v": 18999, "n": "玉帝", "d": "北京象徵（430082km）"}, {"v": 18921, "n": "斬妖台", "d": "誅邪之台"}, {"v": 18911, "n": "煉丹爐", "d": "極端試煉"}, {"v": 18894, "n": "總兵元帥府", "d": "軍事核心"}, {"v": 18893, "n": "總卒元將府", "d": "士卒核心"}, {"v": 18892, "n": "敖吉", "d": "北海龍王"}, {"v": 18891, "n": "敖順", "d": "西海龍王"}, {"v": 18890, "n": "敖廣", "d": "東海龍王"}, {"v": 18889, "n": "敖欽", "d": "南海龍王"}, {"v": 18888, "n": "凌霄寶殿", "d": "神仙與神明分界殿"}, {"v": 18520, "n": "四大天王", "d": "四大護法"}, {"v": 18319, "n": "四大天門", "d": "東南西北天門"}, {"v": 16888, "n": "白骨洞 / 廣寒宮", "d": "嫦娥居所（384400km）"}, {"v": 13888, "n": "東土大唐", "d": "取經起點"}, {"v": 13500, "n": "金箍棒", "d": "仙級武器重量13500斤/口（台北307283km）"}, {"v": 12682, "n": "阿斗起飛", "d": "阿斗翻身點"}, {"v": 12345, "n": "五指山", "d": "悟空的房子（新竹）"}, {"v": 11520, "n": "花果山", "d": "台灣靈山"}, {"v": 11111, "n": "定海神針", "d": "黃金帥與黃金將分界（高雄）"}, {"v": 9999, "n": "北海龍房", "d": "北海龍族"}, {"v": 9995, "n": "龍珠綠", "d": "玉璽綠珠"}, {"v": 9444, "n": "黑風谷", "d": "暗勢力"}, {"v": 8895, "n": "雲棧洞", "d": "豬八戒房子（綠島）"}, {"v": 8888, "n": "高老莊", "d": "豬八戒老婆家（蘭嶼）"}, {"v": 7777, "n": "西海龍房", "d": "敖犬房子（西藏）"}, {"v": 7744, "n": "流沙河", "d": "沙悟淨房子"}, {"v": 7200, "n": "畫杆方天戟", "d": "龍兵器重量7200斤"}, {"v": 6888, "n": "靈台方寸山", "d": "悟空學道之地"}, {"v": 6666, "n": "東海龍房", "d": "東海龍族住地"}, {"v": 6128, "n": "斜月三星洞", "d": "祖師授法地"}, {"v": 5555, "n": "南海龍房", "d": "南海龍族住地"}, {"v": 5168, "n": "金山銀礦", "d": "財富礦脈"}, {"v": 5048, "n": "九齒釘耙", "d": "五戒武器"}, {"v": 5048, "n": "降妖寶杖", "d": "沙悟淨武器"}, {"v": 4444, "n": "地府", "d": "亡魂審判"}, {"v": 4168, "n": "奈何橋", "d": "無法回頭抉擇"}, {"v": 4040, "n": "暗網交易所", "d": "地下金融"}, {"v": 3141, "n": "影像迷宮", "d": "虛實交錯"}, {"v": 1852, "n": "人造衛星高度", "d": "軌道高度（42157km）"}, {"v": 1111, "n": "閻王殿", "d": "隕石帥與隕石將"}, {"v": 411, "n": "大氣層", "d": "地球保護層（9371km）"}, {"v": 280, "n": "地球表面", "d": "人類居住地（6371km）"}, {"v": 188, "n": "地嶽", "d": "閻羅王之地"}, {"v": 72, "n": "最輕恐龍", "d": "魔族最小等級72斤"}, {"v": 1, "n": "玩家創建", "d": "開局一口的人"}, {"v": 0, "n": "恐龍", "d": "史前霸主"}, {"v": -1, "n": "宇宙", "d": "宇宙誕生點"}, {"v": -37.63, "n": "石油", "d": "黑天鵝象徵"}, {"v": 14520, "n": "巧雲", "d": "天樞做空｜大仙女"}, {"v": 14866, "n": "巧虹", "d": "天璇做多｜二仙女"}, {"v": 16184, "n": "巧芝", "d": "天璣做空｜三仙女"}, {"v": 16888, "n": "巧仙", "d": "天權做多｜四仙女"}, {"v": 17347, "n": "巧蘭", "d": "天衡做空｜五仙女"}, {"v": 18056, "n": "巧梅", "d": "闓陽做多｜六仙女"}, {"v": 18459, "n": "巧靈", "d": "瑤光多退｜七仙女"}];
-  // 月球基準點位（廣寒宮）：16888
   const MOON_POINT = 16888;
-  // 地球→月球距離（km）：384400
   const MOON_KM = 384400;
 
   function $(id) { return document.getElementById(id); }
@@ -2034,21 +1965,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     const el = $('steer-input-val');
     return el ? (toNum(el.textContent) || 0) : 0;
   }
-    // 由方向盤角度（deg）判斷多空：
-  // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
-  
-  // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
-  function moveAutoBadgeIntoCockpit() {
-    try{
-      const badge = document.getElementById('autoBadge');
-      const cockpit = document.getElementById('coord-panel');
-      if(!badge || !cockpit) return;
-      if(cockpit.contains(badge)) return;
-      badge.classList.add('in-cockpit');
-      cockpit.prepend(badge);
-    }catch(e){}
-  }
-function sideFromDeg(deg) {
+  function sideFromDeg(deg) {
     // User rule:
     // 0..90 and 0..-90 => LONG
     // 90..180 and -90..-180 => SHORT
@@ -2073,19 +1990,10 @@ function sideFromDeg(deg) {
   app._ct1 = app._ct1 ?? NaN;
 
   app.setCT = (v) => {
-    // 手動指定鏈上 CT（除錯用）。正常狀態由鏈上 poolBalance 同步，不建議手動改。
     const n = toNum(v);
     if (!isFinite(n)) return;
     app._ct = n;
     if ($('ct-in')) $('ct-in').value = String(n);
-    app.updateCoordPanel();
-  };
-
-  app.setCoord = (v) => {
-    // 只改「座標點位」（地圖/星球位置），不動鏈上 CT。
-    const n = toNum(v);
-    if (!isFinite(n)) return;
-    app._coord = n;
     app.updateCoordPanel();
   };
 
