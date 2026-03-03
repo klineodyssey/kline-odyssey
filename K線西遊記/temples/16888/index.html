@@ -27,7 +27,7 @@
         .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
         /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
-        .warp-engine { position: fixed; right: 60px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-engine { position: fixed; right: 24px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
         .warp-rail { 
             height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
             position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix { position: fixed; right: 60px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -237,19 +237,19 @@
 
 /* ===== COORD PANEL (V2.20.4) ===== */
 #coord-panel{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:220px;
-  width:min(420px, calc(100vw - 24px));
-  z-index:40;
-  border:1px solid rgba(255,200,80,.55);
-  box-shadow:0 0 18px rgba(255,190,60,.10);
-  background:rgba(0,0,0,.58);
-  backdrop-filter: blur(6px);
-  border-radius:14px;
-  padding:10px 12px;
-  pointer-events:auto;
+  position: fixed;
+  right: 260px; /* 放在曲速縱桿左側，避免壓到下單面板 */
+  bottom: 150px;
+  left: auto;
+  transform: none;
+  width: min(340px, 92vw);
+  max-width: 340px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 215, 0, .35);
+  border-radius: 10px;
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 0 18px rgba(255,215,0,.12);
+  z-index: 30;
 }
 #coord-panel .cp-title{
   display:flex;align-items:center;justify-content:space-between;
@@ -369,6 +369,18 @@
 #coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
 #coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
 
+
+/* AUTO 狀態徽章：移入駕駛艙座標面板時改成內嵌樣式 */
+.auto-badge.in-cockpit{
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+  margin: 0 0 8px 0 !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-weight: 800;
+  display: inline-block;
+}
 </style>
 </head>
 <body>
@@ -378,7 +390,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.22.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1980,7 +1992,19 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   }
     // 由方向盤角度（deg）判斷多空：
   // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
-  function sideFromDeg(deg) {
+  
+  // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
+  function moveAutoBadgeIntoCockpit() {
+    try{
+      const badge = document.getElementById('autoBadge');
+      const cockpit = document.getElementById('coord-panel');
+      if(!badge || !cockpit) return;
+      if(cockpit.contains(badge)) return;
+      badge.classList.add('in-cockpit');
+      cockpit.prepend(badge);
+    }catch(e){}
+  }
+function sideFromDeg(deg) {
     // User rule:
     // 0..90 and 0..-90 => LONG
     // 90..180 and -90..-180 => SHORT
