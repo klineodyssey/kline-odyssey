@@ -86,16 +86,27 @@
         /* 🛠️ 控制台 */
         .footer-terminal { 
             position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
-            border-top: 4px solid var(--gold); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; z-index: 100; 
+            border-top: 4px solid var(--gold);
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; z-index: 100;
         }
-        .term-btn { background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 14px; border-radius: 4px; 
-  width: 280px;
-  max-width: 90%;
-  text-align: center;
-}
+        .term-btn {
+            background: #0a0a0a; border: 1px solid #444; color: #fff;
+            padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s;
+            font-size: 14px; border-radius: 4px;
+            width: 100%; max-width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
         .term-btn:hover { background: var(--gold); color: #000; }
         .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
         .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
+
+        /* 手機：底部按鈕避免跑出畫面 */
+        @media (max-width: 720px) {
+          .footer-terminal{ grid-template-columns: repeat(2, 1fr); padding: 12px; gap: 10px; }
+          .term-btn{ padding: 16px 6px; font-size: 13px; }
+        }
 
         /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
         .wheel-wrap{
@@ -217,7 +228,12 @@
 
 
 /* HOTFIX: make swap button labels always readable */
-.nav-swap, .nav-swap span{color:#fff !important; opacity:1 !important; font-weight:900 !important; text-shadow:0 0 10px rgba(0,0,0,.8);} 
+.nav-swap, .nav-swap span{
+  color:#fff !important;
+  opacity:1 !important;
+  font-weight:900 !important;
+  text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
+}
 </style>
 </head>
 <body>
@@ -227,12 +243,12 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.20.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.20.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
-        <div class="data-box"><div>🏛️ 靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
-        <div class="data-box"><div>🐒 火星齊天豪宅分紅席位（500）</div><div class="grid-500" id="g2"></div></div>
+        <div class="data-box"><div>靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>火星齊天豪宅分紅席位（500）</div><div class="grid-500" id="g2"></div></div>
     </div>
 </div>
 
@@ -335,7 +351,7 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.16.9";
+const APP_VERSION = "v2.20.3";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1497,7 +1513,17 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   const flow  = qs('#flow-knob')  || qs('.flow-knob')  || qs('#flow')  || qs('.flow');
   const avatar= qs('#hero') || qs('#avatar') || qs('.hero') || qs('.avatar') || qs('img[src*="fairy"]');
 
-  const state = { on:false, raf:0 };
+  const state = { on:false, raf:0, lastOrder:0 };
+
+  // 方向盤角度 → 多空（依你的規則）
+  // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
+  function sideFromSteerDeg(deg){
+    let a = Number(deg);
+    if(!Number.isFinite(a)) a = 0;
+    while(a > 180) a -= 360;
+    while(a < -180) a += 360;
+    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
+  }
 
   function step(ts){
     if(!state.on) return;
@@ -1509,15 +1535,30 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
     const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
 
+    let steerDeg = 0;
     if(steerInput){
       const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
-      steerInput.value = Math.round(min + a*(max-min));
+      steerDeg = Math.round(min + a*(max-min));
+      steerInput.value = steerDeg;
       steerInput.dispatchEvent(new Event('input', {bubbles:true}));
     }
     if(flowInput){
       const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
       flowInput.value = Math.round(min + b*(max-min));
       flowInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+
+    // Auto side tag + auto order (demo/live)
+    const side = sideFromSteerDeg(steerDeg);
+    const autoTag = document.getElementById('autoTag');
+    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; }
+
+    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
+    if(ts - state.lastOrder > 2400){
+      state.lastOrder = ts;
+      if(typeof window.placeOrder === 'function'){
+        window.placeOrder(side);
+      }
     }
 
     // Visual motion
