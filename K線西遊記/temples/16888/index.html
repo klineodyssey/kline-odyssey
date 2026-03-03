@@ -27,7 +27,7 @@
         .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
 
         /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
-        .warp-engine { position: fixed; right: 24px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-engine { position: fixed; right: 8px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
         .warp-rail { 
             height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
             position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
@@ -51,7 +51,7 @@
         .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
 
         /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
-        #core-anchor { position: fixed; top: 45%; left: 52%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
         #core-window { 
             width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
             overflow: hidden; background: #000; position: relative; 
@@ -238,12 +238,12 @@
 /* ===== COORD PANEL (V2.20.4) ===== */
 #coord-panel{
   position: fixed;
-  right: 260px; /* 放在曲速縱桿左側，避免壓到下單面板 */
-  bottom: 150px;
+  right: 220px; /* 放在曲速縱桿左側，避免壓到下單面板 */
+  bottom: 210px;
   left: auto;
   transform: none;
-  width: min(340px, 92vw);
-  max-width: 340px;
+  width: min(360px, 92vw);
+  max-width: 360px;
   padding: 10px 12px;
   border: 1px solid rgba(255, 215, 0, .35);
   border-radius: 10px;
@@ -445,7 +445,7 @@
 
 
 <!-- WEB3 控制面板（對齊合約） -->
-<div id="web3-panel" style="position:fixed; left:18px; bottom:300px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px, calc(100vw - 36px)); max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div id="web3-panel" style="position:fixed; left:18px; bottom:210px; z-index:160; width:320px; background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:210px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
@@ -498,7 +498,43 @@
 </div>
 
 <script>
-const APP_VERSION = "v2.20.3";
+
+/*
+============================================================
+KGEN 16888｜廣寒宮入口 Index (GitHub Pages)
+版本：v2.22.0  （以 v2.20.4 可用原版為底，逐步加功能）
+
+【重要觀念 / 介面定義】
+1) 「方向盤(度數)」只代表多空方向：
+   - 0°~90° 以及 0°~-90° ＝ 多方（水平線上方）
+   - 90°~180° 以及 -90°~-180° ＝ 空方（水平線下方）
+   ※ 度數不是倍率、不是息火
+
+2) 「曲速引擎 WARP（0~300x）」才是槓桿/動能：
+   - WARP = 0 ＝ 息火（靜止） → 畫面/粒子/自動巡航都應停止
+   - WARP > 0 ＝ 推進 → 動畫速度、模擬步頻、視覺能量隨倍率放大
+
+3) 「AUTO 自動巡航/打怪」：
+   - 依方向盤度數判斷 LONG/SHORT
+   - 依 WARP 倍率決定每秒步頻與動畫能量
+   - AUTO 會同步：方向盤 → 星球流向/粒子 → 影像動態 → 模擬多空狀態
+
+【主要區塊】
+A. 左下 Web3/錢包面板（#web3-panel）：WalletConnect / 餘額 / 授權 / 下單
+B. 右下 駕駛艙/座標面板（#coord-panel）：SIDE、deg、CT、CT+1、距離換算、地圖彈窗
+C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
+
+【參數/常數（請集中維護）】
+- BSC 公共 RPC、合約地址（KGEN、LP Pair、Universe Pool）
+- 地球→月球基準距離 384400 km（以 16888 為月球指數基準做換算）
+
+【備註】
+這份檔案會被「越改越大」，所以必須保留中文註解。
+未來若重製（換框架/拆檔），只要看註解就能快速復原邏輯。
+============================================================
+*/
+
+const APP_VERSION = "v2.22.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
