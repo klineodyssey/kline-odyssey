@@ -1,4 +1,14 @@
 [
-  {"name":"UFO Theme 01","url":"music/情難枕.mp3"},
-  {"name":"UFO Theme 02","url":"music/我曾用心愛著你.mp3"}
+  {
+    "name": "UFO Theme 01",
+    "url": "music/情難枕.mp3"
+  },
+  {
+    "name": "Guanghan Drift 02",
+    "url": "music/我曾用心愛著你.mp3"
+  },
+  {
+    "name": "Moon Base Ambient 03",
+    "url": "music/我相信.mp3"
+  }
 ]
