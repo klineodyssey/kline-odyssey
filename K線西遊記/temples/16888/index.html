@@ -1,119 +1,3201 @@
-
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>16888 廣寒宮 · K線西遊記</title>
+    <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-<style>
-body{
-    margin:0;
-    font-family:Arial,Helvetica,sans-serif;
-    color:white;
-    text-align:center;
-    background:black;
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
+
+        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
+        .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); white-space: nowrap; }
+        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
+
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
+
+        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        .warp-engine { position: fixed; right: 8px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-rail { 
+            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
+            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+        #energy-fill { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
+            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            z-index: 5;
+        }
+        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
+
+        #warp-thumb { 
+            width: 70px; height: 35px; background: #fff; position: absolute; 
+            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
+            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
+            border: 3px solid var(--cyan); z-index: 30;
+        }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
+
+        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { 
+            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
+            overflow: hidden; background: #000; position: relative; 
+            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
+            transition: transform 0.05s linear; /* 🎡 物理連動 */
+        }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+        #mini-thumb { 
+            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 25px var(--gold);
+        }
+        #wish-label { 
+            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
+            color: #fff; font-weight: 900; font-size: 24px; 
+            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
+        }
+
+        /* 🧬 GA 演化矩陣 (右側肌肉) */
+        .ga-matrix{left:18px; position: fixed; right:auto; top:420px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
+        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
+        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
+
+        /* 🎡 方向盤 */
+        .steer-zone{ position: fixed; bottom:225px; width: 100%; text-align: center; z-index: 100; }
+        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
+        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
+
+        /* 🛠️ 控制台 */
+        .footer-terminal { 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
+            border-top: 4px solid var(--gold);
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; z-index: 100;
+        }
+        .term-btn {
+            background: #0a0a0a; border: 1px solid #444; color: #fff;
+            padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s;
+            font-size: 14px; border-radius: 4px;
+            width: 100%; max-width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .term-btn:hover { background: var(--gold); color: #000; }
+        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
+        .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
+
+        /* 手機：底部按鈕避免跑出畫面 */
+        @media (max-width: 720px) {
+          .footer-terminal{ grid-template-columns: repeat(2, 1fr); padding: 12px; gap: 10px; }
+          .term-btn{ padding: 16px 6px; font-size: 13px; }
+        }
+
+        /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
+        .wheel-wrap{
+            position: fixed; left: 50%; bottom: 125px; transform: translateX(-50%);
+            width: 160px; height: 160px; z-index: 120;
+            display:none;
+        }
+        .wheel{
+            width:160px; height:160px; border-radius:50%;
+            border:4px solid rgba(255,215,120,.8);
+            box-shadow:0 0 30px rgba(0,242,255,.25), inset 0 0 25px rgba(255,215,120,.15);
+            position:relative;
+            background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), rgba(0,0,0,.55) 55%, rgba(0,0,0,.85));
+            user-select:none;
+            touch-action:none;
+        }
+        .wheel::before{ content:""; position:absolute; inset:16px; border-radius:50%; border:2px dashed rgba(0,242,255,.35); opacity:.9; }
+        .wheel-hub{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%;
+            border:2px solid rgba(255,204,0,.85); box-shadow:0 0 18px rgba(255,204,0,.35); background:rgba(0,0,0,.65);
+            display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:12px; color:var(--gold);
+        }
+        .wheel-knob{ position:absolute; left:50%; top:6px; transform:translateX(-50%); width:18px; height:18px; border-radius:50%;
+            background:var(--cyan); box-shadow:0 0 18px rgba(0,242,255,.7);
+        }
+
+        canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    
+        /* NAV buttons */
+        .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
+            min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#fff;
+            box-shadow:0 0 18px rgba(255,215,120,.18); 
+  width: 280px;
+  max-width: 90%;
+  text-align: center;
+}
+        .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+  /* --- HOTFIX: ensure button text is visible on dark swap buttons (mobile/in-app) --- */
+  .nav-btn{ color:#fff; }
+  .nav-gold, .nav-cyan{ color:#111; }
+  .nav-swap{
+    background: rgba(0,0,0,.38);
+    color:#fff !important;
+    border-color: rgba(255,215,120,.38);
+    text-shadow: 0 0 10px rgba(0,0,0,.55);
+  }
+  .nav-swap .dot{ box-shadow: 0 0 12px rgba(255,215,120,.55); }
+
+        .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
+        .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
+        .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
+    
+        .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
+            background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
+        .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
+        .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
+    
+        @media (max-width: 520px){ .brand-name{font-size:22px;} .hud-top{top:10px;} }
+        @media (max-width: 420px){ .brand-name{font-size:20px;} }
+    
+#brand-badge{
+  position:fixed;
+  left: 44px;
+  top: 90px;
+  z-index:260;
+  padding:6px 10px;
+  border:1px solid rgba(255,215,128,.7);
+  border-radius:10px;
+  background:rgba(0,0,0,.55);
+  color:#ffd79a;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:12px;
+  text-shadow:0 0 10px rgba(255,215,128,.3);
 }
 
-/* 背景影片 */
-#bgVideo{
-    position:fixed;
-    right:0;
-    bottom:0;
-    min-width:100%;
-    min-height:100%;
-    object-fit:cover;
-    z-index:-1;
+
+
+    /* ==== Guide Modal ==== */
+    .guide-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9999;align-items:center;justify-content:center;padding:18px;}
+    .guide-modal.show{display:flex;}
+    .guide-card{width:min(720px,96vw);max-height:86vh;overflow:auto;background:rgba(10,14,18,.96);border:1px solid rgba(255,215,120,.35);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.55);}
+    .guide-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px 14px;border-bottom:1px solid rgba(255,215,120,.18)}
+    .guide-title{font-weight:800;letter-spacing:.5px;color:#ffd88a}
+    .guide-close{background:transparent;border:0;color:#ffd88a;font-size:18px;padding:6px 10px;border-radius:10px}
+    .guide-close:active{transform:scale(.98)}
+    .guide-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid rgba(255,215,120,.14)}
+    .guide-tab{background:rgba(255,255,255,.06);border:1px solid rgba(255,215,120,.22);color:#ffe6b8;padding:8px 10px;border-radius:12px;font-weight:700}
+    .guide-tab:active{transform:scale(.98)}
+    .guide-body{padding:14px;color:#e9eef7;line-height:1.55}
+    .guide-body h3{margin:0 0 10px 0;color:#ffd88a}
+    .guide-body h4{margin:14px 0 8px 0;color:#ffe6b8}
+    .guide-body hr{border:0;border-top:1px solid rgba(255,215,120,.14);margin:14px 0}
+    .guide-body .muted{opacity:.85}
+    .qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
+    .qa-btn:active{transform:scale(.98)}
+    @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
+
+
+    .bar{height:14px; background:#eee; border-radius:999px; overflow:hidden; width:100%;}
+    .bar > div{height:100%; background:#111; width:0%;}
+    .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
+
+
+  .nav-swap{
+    width: 100%;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,215,120,.32);
+  }
+  .nav-swap:hover{ filter: brightness(1.05); }
+
+
+/* --- Swap buttons readability (v2.20.0) --- */
+.nav-btn.swap-bnb{ background: rgba(255, 205, 0, .95) !important; color:#111 !important; border:1px solid rgba(0,0,0,.35) !important; text-shadow:none !important; }
+.nav-btn.swap-usdt{ background: rgba(35, 205, 120, .95) !important; color:#111 !important; border:1px solid rgba(0,0,0,.35) !important; text-shadow:none !important; }
+.nav-btn.swap-bnb:hover,.nav-btn.swap-usdt:hover{ filter: brightness(1.04); }
+
+
+/* HOTFIX: make swap button labels always readable */
+.nav-swap, .nav-swap span{
+  color:#fff !important;
+  opacity:1 !important;
+  font-weight:900 !important;
+  text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
 }
 
-/* 主控制面板 */
-.panel{
-    position:absolute;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,0.5);
-    padding:20px;
-    border-radius:14px;
+/* ===== COORD PANEL (V2.20.4) ===== */
+#coord-panel{
+  position: fixed;
+  right: 90px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
+  bottom:315px; /* 往上：不要貼到底部按鈕列 */
+  left: auto;
+  transform: none;
+  width: min(360px, 92vw);
+  max-width: 360px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 215, 0, .35);
+  border-radius: 10px;
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 0 18px rgba(255,215,0,.12);
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 30;
+}
+#coord-panel .cp-title{
+  display:flex;align-items:center;justify-content:space-between;
+  font-weight:900;letter-spacing:.5px;
+  color:#ffd27a;
+  margin-bottom:8px;
+}
+#coord-panel .cp-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px 10px;
+  font-size:13px;
+  line-height:1.25;
+}
+#coord-panel .cp-row{
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,200,80,.25);
+  background:rgba(0,0,0,.35);
+}
+#coord-panel .cp-k{
+  opacity:.85; font-size:12px;
+}
+#coord-panel .cp-v{
+  margin-top:2px;
+  font-weight:900;
+  color:#8af3ff;
+  word-break:break-word;
+}
+#coord-panel .cp-v .muted{opacity:.75; font-weight:700; color:#cfd7ff;}
+#coord-panel input{
+  width:100%;
+  border-radius:10px;
+  padding:8px 10px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  outline:none;
+  font-weight:900;
+}
+#coord-panel .cp-actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+#coord-panel .cp-actions button{
+  flex:1;
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.45);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  font-weight:900;
+}
+#coord-panel .cp-actions button:hover{filter:brightness(1.08);}
+
+#coord-modal{
+  position:fixed; inset:0;
+  z-index:120;
+  display:none;
+  background:rgba(0,0,0,.72);
+  pointer-events:auto;
+}
+#coord-modal .cm-box{
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:min(720px, calc(100vw - 22px));
+  height:min(78vh, 680px);
+  border-radius:16px;
+  border:1px solid rgba(255,200,80,.55);
+  background:rgba(0,0,0,.82);
+  box-shadow:0 0 30px rgba(255,190,60,.14);
+  overflow:hidden;
+}
+#coord-modal .cm-head{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 12px;
+  border-bottom:1px solid rgba(255,200,80,.25);
+}
+#coord-modal .cm-head b{color:#ffd27a;}
+#coord-modal .cm-head input{
+  flex:1;
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  outline:none;
+  font-weight:900;
+}
+#coord-modal .cm-head button{
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  font-weight:900;
+}
+#coord-modal .cm-list{
+  height:calc(100% - 56px);
+  overflow:auto;
+  padding:10px 12px;
+}
+#coord-modal .cm-item{
+  display:grid;
+  grid-template-columns: 110px 1fr;
+  gap:8px 12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,200,80,.20);
+  background:rgba(0,0,0,.30);
+  margin-bottom:10px;
+}
+#coord-modal .cm-item:hover{filter:brightness(1.08); cursor:pointer;}
+#coord-modal .cm-item .cm-v{font-weight:900; color:#8af3ff;}
+#coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
+#coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
+
+
+/* AUTO 狀態徽章：移入駕駛艙座標面板時改成內嵌樣式 */
+.auto-badge.in-cockpit{
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+  margin: 0 0 8px 0 !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-weight: 800;
+  display: inline-block;
 }
 
-button{
-    padding:10px 16px;
-    margin:6px;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    cursor:pointer;
+/* ====== 手機窄螢幕：防止左下儀表板與右下駕駛艙互相碰撞 ====== */
+@media (max-width: 520px){
+  #coord-panel{ right: 12px; bottom: 420px; width: min(360px, 94vw); }
 }
 
-.play{background:#00c853;color:white}
-.pause{background:#d50000;color:white}
+/* ====== V2.22.8 ADD: Resource bars + Toast + AutoTag ====== */
+.resource-bars{
+  position: fixed;
+  left: 18px;
+  top: 150px;
+  width: 300px;
+  max-width: 64vw;
+  z-index: 120;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  pointer-events:none;
+}
+.resource-bars .rb{
+  background: rgba(10,10,14,0.72);
+  border: 1px solid rgba(255,215,0,0.45);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.5);
+}
+
+.resource-bars .rb-note{
+  font-family: Orbitron, system-ui, -apple-system, "Segoe UI", Arial;
+  font-size: 11px;
+  opacity: .85;
+  color: rgba(255,215,0,0.85);
+  text-shadow: 0 0 10px rgba(255,215,0,0.25);
+  padding-left: 6px;
+  pointer-events:none;
+}
+
+.resource-bars .rb .row{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'Orbitron';
+  font-size:11px;
+  letter-spacing:0.4px;
+}
+.resource-bars .rb .bar{
+  height:8px; border-radius:999px;
+  background: rgba(255,255,255,0.06);
+  overflow:hidden;
+  margin-top:6px;
+}
+.resource-bars .rb .fill{
+  height:100%;
+  width:0%;
+  background: var(--cyan);
+  transition: width .45s ease;
+}
+.resource-bars .rb.kgen .fill{ background: var(--gold); }
+.resource-bars .rb small{ color:#9cc; opacity:.9; }
+
+/* Auto Tag (near steering) */
+#autoTag{
+  position: fixed;
+  left: 50%;
+  bottom: 156px;
+  transform: translateX(-50%);
+  z-index: 130;
+  font-family:'Orbitron';
+  font-weight:900;
+  font-size:12px;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,255,0.55);
+  background: rgba(0,0,0,0.55);
+  box-shadow: 0 0 18px rgba(0,255,255,0.18);
+  pointer-events:none;
+}
+#autoTag.short{
+  border-color: rgba(255,120,120,0.65);
+  box-shadow: 0 0 18px rgba(255,120,120,0.18);
+}
+
+/* Toast */
+#toast{
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: min(520px, 92vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,215,0,0.45);
+  background: rgba(0,0,0,0.68);
+  color: #fff;
+  font-family: "Noto Sans TC";
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .4px;
+  display:none;
+}
+#toast.show{ display:block; }
+
+
+/* --- UFO Music System --- */
+.nav-btn.nav-music{ border-color:#3ad6ff; box-shadow:0 0 16px rgba(58,214,255,.22); }
+.nav-btn.nav-music-ctl{ padding:10px 12px; min-width:72px; }
+.tiny-btn{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,215,80,.55);
+  color:#ffe4a1;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+.tiny-btn:active{ transform:translateY(1px); }
 </style>
-</head>
 
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
+</head>
 <body>
 
-<!-- 背景影片 -->
-<video id="bgVideo" autoplay muted loop playsinline>
-  <source src="video/guanghan.mp4" type="video/mp4">
-</video>
 
-<div class="panel">
-<h2>🌕 16888 廣寒宮</h2>
-<p>K線西遊記 · 月宮入口</p>
+  <div id="brand-badge">K線西遊記・花果山台灣</div>
+  <div class="resource-bars" aria-label="資源條">
+    <div class="rb bnb">
+      <div class="row"><span>BNB｜暗物質</span><small id="rb-bnb-txt">--</small></div>
+      <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
+    </div>
+    <div class="rb kgen">
+      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
+      <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
+    </div>
+  <div class="rb-note">E = mc²</div>
+  </div>
 
-<button class="play" onclick="playMusic()">播放音樂</button>
-<button class="pause" onclick="pauseMusic()">停止音樂</button>
+  <div id="autoTag">AUTO: --</div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+<div class="hud-top">
+    <div class="brand-section">
+        <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.1</div>
+        <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
+    </div>
+    <div class="monitor-data">
+        <div class="data-box"><div>靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
+        <div class="data-box"><div>火星齊天豪宅分紅席位（500）</div><div class="grid-500" id="g2"></div></div>
+    </div>
 </div>
 
-<audio id="bgMusic"></audio>
+<div class="warp-engine">
+    <div class="warp-rail" id="warp-rail-body">
+        <div id="energy-fill"></div>
+        <div id="warp-thumb"></div>
+        <input type="range" id="warp-input-val" class="warp-range" min="0" max="100" value="33">
+    </div>
+    <div class="warp-val-text" id="warp-txt">WARP 100x</div>
+    <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
+</div>
+
+<div class="ga-matrix">
+    <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+</div>
+
+<div id="core-anchor">
+    <div id="core-window">
+        <div id="wish-label">大聖駕到，光耀廣寒</div>
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <video id="cam-view" autoplay playsinline muted></video>
+        <div id="mini-thumb"></div>
+    </div>
+</div>
+
+<canvas id="galaxy-bg"></canvas>
+<canvas id="snap-canvas" style="display:none;"></canvas>
+<canvas id="export-canvas" style="display:none;"></canvas>
+
+<div class="steer-zone">
+    <div class="angle-readout" id="ang-val">76°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
+</div>
+
+<!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
+<div class="wheel-wrap" id="wheel-wrap">
+    <div class="wheel" id="wheel">
+        <div class="wheel-knob"></div>
+        <div class="wheel-hub">DRIVE</div>
+    </div>
+</div>
+
+
+<!-- WEB3 控制面板（對齊合約） -->
+<div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
+<button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
+    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
+<div class="kv" style="margin-top:10px">
+  <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
+  <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
+</div>
+  </div>
+
+  <div style="margin-top:8px; font-size:12px; color:#ddd;">
+    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
+    <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
+    <div>BNB: <span id="userBNB" style="color:var(--cyan);">-</span></div>
+    <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
+    <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
+    <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
+    <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
+    <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
+  </div>
+
+  <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+    <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+    <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('UP'); web3.place(0)">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('DOWN'); web3.place(1)">📉 下單 DOWN</button>
+    <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
+  </div>
+
+  <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
+    <div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">MoonTrust 3+3（表態與紅包托管）</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
+      <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <input id="mt-partner" placeholder="對方地址" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.vow()">💍 表態轉帳（1~2 KGEN）</button>
+      <button class="term-btn" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.claimWedding()">🎁 領紅包托管（需雙方表態）</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-terminal">
+    <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
+    <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
+    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
+    <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
+</div>
 
 <script>
 
-let playlist = []
-let index = 0
-const audio = document.getElementById("bgMusic")
+/*
+============================================================
+KGEN 16888｜廣寒宮入口 Index (GitHub Pages)
+版本：v2.22.0  （以 v2.20.4 可用原版為底，逐步加功能）
 
-async function loadPlaylist(){
+【重要觀念 / 介面定義】
+1) 「方向盤(度數)」只代表多空方向：
+   - 0°~90° 以及 0°~-90° ＝ 多方（水平線上方）
+   - 90°~180° 以及 -90°~-180° ＝ 空方（水平線下方）
+   ※ 度數不是倍率、不是息火
 
+2) 「曲速引擎 WARP（0~300x）」才是槓桿/動能：
+   - WARP = 0 ＝ 息火（靜止） → 畫面/粒子/自動巡航都應停止
+   - WARP > 0 ＝ 推進 → 動畫速度、模擬步頻、視覺能量隨倍率放大
+
+3) 「AUTO 自動巡航/打怪」：
+   - 依方向盤度數判斷 LONG/SHORT
+   - 依 WARP 倍率決定每秒步頻與動畫能量
+   - AUTO 會同步：方向盤 → 星球流向/粒子 → 影像動態 → 模擬多空狀態
+
+【主要區塊】
+A. 左下 Web3/錢包面板（#web3-panel）：WalletConnect / 餘額 / 授權 / 下單
+B. 右下 駕駛艙/座標面板（#coord-panel）：SIDE、deg、CT、CT+1、距離換算、地圖彈窗
+C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
+
+【參數/常數（請集中維護）】
+- BSC 公共 RPC、合約地址（KGEN、LP Pair、Universe Pool）
+- 地球→月球基準距離 384400 km（以 16888 為月球指數基準做換算）
+
+【備註】
+這份檔案會被「越改越大」，所以必須保留中文註解。
+未來若重製（換框架/拆檔），只要看註解就能快速復原邏輯。
+============================================================
+*/
+
+const APP_VERSION = "v2.26.0";
+const app = {
+  // UI helpers (safe in demo/no-wallet mode)
+  setProgress(p){
     try{
-        const res = await fetch("music/playlist.json")
-        playlist = await res.json()
+      const v = Math.max(0, Math.min(100, Number(p)||0));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      if(fill) fill.style.width = v + '%';
+      if(txt)  txt.innerText = v.toFixed(1) + '%';
+    }catch(e){}
+  },
+  logEvent(title, detail){
+    try{
+      const t = String(title||'Event');
+      const d = detail==null? '' : String(detail);
+      const ev = { t: Date.now(), title: t, detail: d };
+      // persist small history
+      const key = 'kgen16888_events';
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.unshift(ev);
+      if(arr.length>50) arr.length=50;
+      localStorage.setItem(key, JSON.stringify(arr));
+      // update on-screen last event if exists
+      const el = document.getElementById('last-event');
+      if(el) el.innerText = d ? (t + '｜' + d) : t;
+    }catch(e){}
+  },
 
-        if(playlist.length>0){
-            audio.src = playlist[0].url
+    isCam: false, camMode: 'user', gaLevel: 600, recorder: null, chunks: [], recStartTs: null, recMMSS: "00:00",
+    stream: null, tInt: null, drawInt: null, bbSampleInt: null,
+
+    // blackbox
+    blackbox: { sessionId:null, startedAt:null, endedAt:null, events:[], samples:[], counts:{}, last:{ angle:0, warp:0, ga:600 } },
+
+    init() {
+        this.initThree(); this.buildUI(); this.bind();
+        setInterval(() => this.tick(), 1000);
+        web3.load();
+        this.updateWarp(33);
+        this.applySteer(76, true);
+        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
+        window.addEventListener('resize', ()=>this.onResize(), {passive:true});
+        this.onResize();
+    },
+
+    tick() {
+const sc=document.getElementById('sys-clock'); if(sc) sc.innerText = `SYSTEM ONLINE | ${new Date().toLocaleString()}`;
+        const vs=document.getElementById("ver-st"); if(vs) vs.innerText = "VERSION " + APP_VERSION;
+        document.querySelectorAll('.dot').forEach(d => { if(Math.random() > 0.9) d.classList.toggle('on'); });
+        const fit = 0.9 + Math.random() * 0.1;
+const fv=document.getElementById('f-val'); if(fv) fv.innerText = fit.toFixed(3);
+const fb=document.getElementById('f-bar'); if(fb) fb.style.width = (fit * 100) + '%';
+const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random() * 100) + '%';
+    },
+
+    // ---- Safety helpers (avoid popup errors in demo) ----
+    logEvent(name, data){
+        try{ console.log('[event]', name, data||''); }catch(_){ }
+    },
+
+    setProgress(pct){
+        try{
+            const bar = document.getElementById('progress-bar');
+            const txt = document.getElementById('progress-text');
+            const v = Math.max(0, Math.min(100, Number(pct)||0));
+            if(bar) bar.style.width = v + '%';
+            if(txt) txt.innerText = v.toFixed(1) + '%';
+        }catch(_){ }
+    },
+
+    // ---- Guided concierge (story + how to play) ----
+    openGuide(section){
+        const modal = document.getElementById('guide-modal');
+        const body = document.getElementById('guide-body');
+        if(!modal || !body) return;
+        const s = (section||'intro').toLowerCase();
+        const blocks = this.getGuideBlocks();
+        body.innerHTML = blocks[s] || blocks['intro'];
+        modal.classList.add('show');
+
+        const summary = (s==='wallet') ? '如果你找不到 KGEN，記得用錢包的 Custom 匯入合約地址。' :
+                       (s==='rules')  ? '規則重點：一到一千為單筆範圍，八八八八是基底，累積到一六八八八觸發下凡事件。' :
+                       (s==='qa')     ? '你可以按麥克風提問，轉文字後會直接送出並回答。' :
+                                        '歡迎來到廣寒宮一六八八八。你可以先用無錢包的模擬模式玩。';
+        this.speak(summary);
+    },
+
+    closeGuide(){
+        const modal=document.getElementById('guide-modal');
+        if(modal) modal.classList.remove('show');
+    },
+
+    getGuideBlocks(){
+        const intro = `
+          <h3>廣寒宮 16888｜自我演化金融生命體</h3>
+          <p>這裡不是投資建議，這是一個「敘事 × 遊戲 × 合約」的宇宙入口。</p>
+          <p><b>你會看到兩個地址（A / B）像 DNA 與 RNA。</b>它們代表兩股能量在池中互動；當池從 <b>8888</b> 成長到 <b>16888</b>，就會觸發「下凡投胎」的劇情事件。</p>
+          <hr/>
+          <h4>最快開始（沒有錢包也能玩）</h4>
+          <ol>
+            <li>在下單框輸入數字（<b>1 ~ 1000</b>）。</li>
+            <li>按 <b>下單 UP</b> 或 <b>下單 DOWN</b>，系統用模擬勝負立即回饋。</li>
+            <li>你贏：拿回本金 + 獲利（模擬）。你輸：金額累積到「懷孕池 / 彩池」。</li>
+          </ol>
+          <p class='muted'>提示：模擬模式會顯示 demo Pool Balance，不需要連錢包。</p>
+        `;
+
+        const rules = `
+          <h3>玩法規則（1~1000｜8888→16888）</h3>
+          <ul>
+            <li><b>單筆範圍：</b>1 ~ 1000 KGEN（體驗用）。</li>
+            <li><b>基底：</b>8888 KGEN（下凡前必須守住的底池）。</li>
+            <li><b>目標：</b>池累積到 16888 KGEN 觸發「下凡投胎」事件。</li>
+          </ul>
+          <h4>下凡投胎是什麼？</h4>
+          <p>當池達到 16888：七仙女啟動「下凡」儀式。故事上是 <b>DNA（地址 A）</b> 與 <b>RNA（地址 B）</b> 完成誓約；世界線會進入「生肖投胎 / 結婚」段落。</p>
+          <h4>得獎與表態（誓約）</h4>
+          <p>表態需要「真的轉帳」：從自己地址轉 <b>1 ~ 2 KGEN</b> 給對方地址，代表同意誓約。</p>
+          <p>若拒絕 / 逾期：托管會回收進池（回到懷孕池）。</p>
+        `;
+
+        const wallet = `
+          <h3>錢包怎麼用？為什麼 Search 找不到？</h3>
+          <p>很多錢包（例如 MetaMask）在「Search」頁面是靠代幣清單，<b>不一定會即時收錄新代幣</b>。</p>
+          <p>所以要用 <b>Custom</b> 匯入：</p>
+          <ol>
+            <li>切到 <b>BNB Chain</b>。</li>
+            <li>點 <b>Custom</b>。</li>
+            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
+            <li>按下一步，確認 Symbol / Decimals 後加入。</li>
+          </ol>
+          <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
+        `;
+
+        const qa = `
+          <h3>語音客服（Q&A）</h3>
+          <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
+          <div class='qa-grid'>
+            <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
+            <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
+            <button class='qa-btn' data-q='玩法的 1 到 1000 是什麼？'>玩法的 1 到 1000 是什麼？</button>
+            <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
+            <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
+            <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
+          </div>
+          <div style='margin-top:12px;opacity:.92'>
+            <div id='qa-last' style='margin-top:8px'></div>
+            <div id='qa-last-a' style='margin-top:6px'></div>
+          </div>
+        `;
+
+        return { intro, rules, wallet, qa };
+    },
+
+    handleQuestion(q){
+        const question = String(q||'').trim();
+        if(!question) return;
+        const qaBox = document.getElementById('qa-last');
+        const aBox = document.getElementById('qa-last-a');
+        if(qaBox) qaBox.innerText = 'Q: ' + question;
+
+        const lower = question.toLowerCase();
+        let ans = '';
+        const has = (s)=> lower.indexOf(s) >= 0;
+
+        if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
+        }else if(question.includes('custom') || question.includes('找不到') || has('search')){
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
+        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
+            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
+        }else if(question.includes('8888') || question.includes('八八八八')){
+            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
+        }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
+            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+        }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
+            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+        }else{
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
         }
 
-    }catch(e){
-        console.log("playlist load error")
+        if(aBox) aBox.innerText = 'A: ' + ans;
+        this.speak(ans);
+    },
+
+
+    buildUI() {
+        ['g1', 'g2'].forEach(id => {
+            const container = document.getElementById(id);
+            container.innerHTML = "";
+            for(let i=0; i<100; i++) { // 保持原始版：100格（畫面剛好）
+                const d = document.createElement('div');
+                d.className = 'dot' + (Math.random() > 0.5 ? ' on' : '');
+                container.appendChild(d);
+            }
+        });
+        const rail = document.getElementById('warp-rail-body');
+        for(let i=0; i<25; i++) {
+            const step = document.createElement('div');
+            step.className = 'rail-step';
+            step.style.bottom = (i * 4) + '%';
+            rail.appendChild(step);
+        }
+    },
+
+    updateWarp(val) {
+const ef=document.getElementById('energy-fill'); if(ef) ef.style.height = val + '%';
+const wt=document.getElementById('warp-thumb'); if(wt) wt.style.bottom = `calc(${val}% - 17px)`;
+const wtx=document.getElementById('warp-txt'); if(wtx) wtx.innerText = `WARP ${val * 3}x`;
+        this.bbEvent("warp", { warp: parseFloat(val) });
+    },
+
+    applySteer(v, silent=false){
+        const ang = Math.max(-180, Math.min(180, Number(v)||0));
+const av=document.getElementById('ang-val'); if(av) av.innerText = ang + '°';
+const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `rotate(${ang}deg)`;
+        document.getElementById('steer-input-val').value = ang;
+        // wheel sync
+        const wheel = document.getElementById('wheel');
+        if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
+        if(!silent) this.bbEvent("steer", { angle: ang });
+    },
+
+    boost() {
+        if(this.gaLevel < 1000) {
+            this.gaLevel += 50;
+const gr=document.getElementById('ga-rank'); if(gr) gr.innerText = `RANK: GA-${this.gaLevel}`;
+            this.bbEvent("boost", { ga: this.gaLevel });
+            this.speak(`KGEN 注入能量，演化等級升至 ${this.gaLevel}`);
+        }
+    },
+
+    autoHunt() {
+        this.bbEvent("auto_hunt", {});
+        this.speak("啟動 GA 自動打怪模式，績效演化中。");
+const wl=document.getElementById('wish-label'); const old = wl ? wl.innerText : '';
+const wl2=document.getElementById('wish-label'); if(wl2) wl2.innerText = '⚔️ KGEN 自動打怪中...';
+setTimeout(() => {
+  // ============================================================
+  // 【中文註解｜重要】本頁為「KGEN 16888 廣寒宮」前端單頁（純前端）
+  // - 不改合約、不改池子：此檔只做 UI/動畫/WalletConnect 連線與外部入口
+  // - 方向盤（DEG）只代表「多空方向」：水平線上方＝多；下方＝空（與倍槓無關）
+  // - 曲速引擎（WARP）代表「倍槓/速度」：WARP=0 表示息火（觀望），畫面/粒子/流向應靜止
+  // - 自動巡航打怪（AUTO）會依 DEG（方向）+ WARP（速度）去模擬多空節奏，並同步更新：
+  //   ① 左下狀態（AUTO: LONG/SHORT）② 中央角度讀數 ③ 星球/流向/粒子動畫
+  // - CT（現價）若能讀到鏈上池子報價就同步；讀不到則回退到本機模擬值（不會阻斷 UI）
+  // ============================================================
+ const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
+    },
+
+    async cam(mode) {
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img'), m = document.getElementById('mini-thumb');
+        if (this.isCam && this.camMode === mode) {
+            this.stream && this.stream.getTracks().forEach(t => t.stop());
+            v.style.opacity = 0; f.style.opacity = 1; m.style.display = 'none';
+            this.isCam = false;
+            this.bbEvent("cam_off", {});
+            return;
+        }
+        try {
+            if(this.stream) this.stream.getTracks().forEach(t => t.stop());
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio:false });
+            v.srcObject = this.stream; v.style.opacity = 1; f.style.opacity = 0; m.style.display = 'block';
+            v.style.transform = mode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+            this.isCam = true; this.camMode = mode;
+            this.bbEvent("cam_on", { mode });
+        } catch(e) { alert("攝像頭硬體未響應 / 權限被拒絕"); }
+    },
+
+    capture() {
+        const canvas = document.getElementById('snap-canvas'), ctx = canvas.getContext('2d');
+        canvas.width = 1000; canvas.height = 1000;
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+        if(this.isCam) {
+            if(this.camMode === 'user') { ctx.translate(1000,0); ctx.scale(-1,1); }
+            ctx.drawImage(v, 0, 0, 1000, 1000);
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.drawImage(f, 750, 50, 200, 200);
+        } else ctx.drawImage(f, 0, 0, 1000, 1000);
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
+        ctx.fillText("KGEN 16888 自我演化金融生命體", 50, 80);
+        ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
+        ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 70, 930);
+
+        this.bbEvent("capture", {});
+
+        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
+        link.href = canvas.toDataURL(); link.click();
+    },
+
+    setWish() {
+        const m = prompt("大聖請開金口：", (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''));
+if(m){ const wl=document.getElementById('wish-label'); if(wl) wl.innerText = m; }
+this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.getElementById('wish-label').innerText:'') });
+    },
+
+    toggleWheel(){
+        const wrap = document.getElementById('wheel-wrap');
+        if(!wrap) return;
+        const on = (wrap.style.display === 'block');
+        wrap.style.display = on ? 'none' : 'block';
+        this.bbEvent("wheel_toggle", { on: !on });
+    },
+
+    bind() {
+        document.getElementById('steer-input-val').oninput = (e) => this.applySteer(e.target.value);
+        document.getElementById('warp-input-val').oninput = (e) => this.updateWarp(e.target.value);
+        this.bindWheel();
+
+        // Guide modal
+        const bg = document.getElementById('btn-guide');
+        if(bg) bg.addEventListener('click', ()=> this.openGuide('intro'));
+        const gc = document.getElementById('btn-guide-close');
+        if(gc) gc.addEventListener('click', ()=> this.closeGuide());
+        const gm = document.getElementById('guide-modal');
+        if(gm) gm.addEventListener('click', (e)=>{ if(e.target===gm) this.closeGuide(); });
+        document.querySelectorAll('.guide-tab').forEach(btn=>{
+            btn.addEventListener('click', ()=> this.openGuide(btn.getAttribute('data-sec')));
+        });
+  
+        // Swap buttons (PancakeSwap)
+        const sb = document.getElementById('btn-swap-bnb');
+        if(sb) sb.addEventListener('click', ()=>{ this.openPancake(); });
+        const su = document.getElementById('btn-swap-usdt');
+        if(su) su.addEventListener('click', ()=>{ this.openPancake(); this.toast('提示：在 PancakeSwap 可用 WBNB 交換；若用 USDT 請先換成 WBNB 或走路由。'); });
+
+      document.addEventListener('click', (e)=>{
+            const b = e.target && e.target.closest && e.target.closest('.qa-btn');
+            if(!b) return;
+            const q = b.getAttribute('data-q');
+            if(q) this.handleQuestion(q);
+        });
+
+    },
+
+    // ===== Blackbox core =====
+    bbCount(type){ this.blackbox.counts[type] = (this.blackbox.counts[type] || 0) + 1; },
+    bbEvent(type, payload={}){ this.bbCount(type); this.blackbox.events.push({ t: Date.now(), type, ...payload }); },
+    bbStart(){
+        const sid = `BBX-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        this.blackbox.sessionId = sid;
+        this.blackbox.startedAt = new Date().toISOString();
+        this.blackbox.endedAt = null;
+        this.blackbox.events = [];
+        this.blackbox.samples = [];
+        this.blackbox.counts = {};
+        this.blackbox.last = {
+            angle: parseFloat(document.getElementById('steer-input-val').value || 0),
+            warp:  parseFloat(document.getElementById('warp-input-val').value || 0),
+            ga: this.gaLevel
+        };
+        this.bbEvent("rec_start", { ga:this.gaLevel, angle:this.blackbox.last.angle, warp:this.blackbox.last.warp });
+    },
+    bbStop(){ this.blackbox.endedAt = new Date().toISOString(); this.bbEvent("rec_stop", {}); },
+    bbSample(){
+        const angle = parseFloat(document.getElementById('steer-input-val').value || 0);
+        const warp  = parseFloat(document.getElementById('warp-input-val').value || 0);
+        this.blackbox.last = { angle, warp, ga:this.gaLevel };
+        this.blackbox.samples.push({ t: Date.now(), angle, warp, ga: this.gaLevel });
+    },
+    bbStats(list, key){
+        if(!list.length) return {min:null, max:null, avg:null};
+        let min=Infinity, max=-Infinity, sum=0, n=0;
+        for(const it of list){
+            const v = Number(it[key]);
+            if(!Number.isFinite(v)) continue;
+            if(v<min) min=v; if(v>max) max=v;
+            sum+=v; n++;
+        }
+        if(!n) return {min:null, max:null, avg:null};
+        return { min, max, avg: +(sum/n).toFixed(4) };
+    },
+    async bbHashSHA256(text){
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest("SHA-256", enc.encode(text));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    },
+    async bbExportJSON(){
+        const started = this.blackbox.startedAt ? new Date(this.blackbox.startedAt).getTime() : null;
+        const ended   = this.blackbox.endedAt ? new Date(this.blackbox.endedAt).getTime() : null;
+        const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
+
+        const payload = {
+            schema: "kgen.moonwedding.v1",
+            sessionId: this.blackbox.sessionId,
+            startedAt: this.blackbox.startedAt,
+            endedAt: this.blackbox.endedAt,
+            durationSec,
+            last: this.blackbox.last,
+            stats: {
+                angle: this.bbStats(this.blackbox.samples, "angle"),
+                warp:  this.bbStats(this.blackbox.samples, "warp")
+            },
+            eventCounts: this.blackbox.counts,
+            timeline: this.blackbox.events,
+            samples: this.blackbox.samples
+        };
+
+        let json = JSON.stringify(payload, null, 2);
+        const hash = await this.bbHashSHA256(json);
+        payload.hashes = { sha256: hash };
+        json = JSON.stringify(payload, null, 2);
+
+        const blob = new Blob([json], { type:"application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `KGEN_MOON_WEDDING_${this.blackbox.sessionId}.json`;
+        a.click();
+
+        try { localStorage.setItem(`KGEN_MOON_WEDDING_${this.blackbox.sessionId}`, json); } catch(e) {}
+    },
+
+    startRecTimer(){
+        this.recStartTs = performance.now();
+        const recInd = document.getElementById('rec-ind');
+        recInd.style.display = 'block';
+
+        this.tInt = setInterval(()=>{
+            const elapsed = performance.now() - this.recStartTs;
+            const sec = Math.floor(elapsed/1000);
+            const m = String(Math.floor(sec/60)).padStart(2,'0');
+            const s = String(sec%60).padStart(2,'0');
+            this.recMMSS = `${m}:${s}`;
+            recInd.innerText = `REC ${this.recMMSS}`;
+        }, 200);
+
+        this.drawInt = setInterval(()=>this.syncExportCanvas(), 33);
+    },
+    stopRecTimer(){
+        clearInterval(this.tInt);
+        clearInterval(this.drawInt);
+const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
+    },
+
+    syncExportCanvas(){
+        const cvs = document.getElementById('export-canvas'), ctx = cvs.getContext('2d');
+        cvs.width = 720; cvs.height = 720;
+
+        const v = document.getElementById('cam-view'), f = document.getElementById('fairy-img');
+
+        if(this.isCam){
+            try{
+                if(this.camMode === 'user'){ ctx.translate(720,0); ctx.scale(-1,1); }
+                ctx.drawImage(v, 0, 0, 720, 720);
+                ctx.setTransform(1,0,0,1,0,0);
+            }catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }else{
+            try{ ctx.drawImage(f, 0, 0, 720, 720); }
+            catch(e){ ctx.fillStyle="#000"; ctx.fillRect(0,0,720,720); }
+        }
+
+        const angle = document.getElementById('steer-input-val').value;
+        const warp  = document.getElementById('warp-input-val').value;
+
+        ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
+        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
+
+        ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
+        ctx.fillText(`ANGLE ${angle}°`, 30, 85);
+        ctx.fillText(`WARP ${Math.round(warp*3)}x`, 30, 115);
+        ctx.fillText(`GA ${this.gaLevel}`, 30, 145);
+
+        ctx.fillStyle = "#ff4444"; ctx.font = "bold 26px Orbitron";
+        ctx.fillText(`REC ${this.recMMSS || "00:00"}`, 30, 185);
+
+        ctx.fillStyle = "#fff"; ctx.font = "bold 26px Noto Sans TC";
+        ctx.shadowBlur = 10; ctx.shadowColor = "#000";
+        ctx.fillText((document.getElementById('wish-label')?document.getElementById('wish-label').innerText:''), 30, 690);
+        ctx.shadowBlur = 0;
+    },
+
+    async toggleRec(){
+        const btn = document.getElementById('rec-btn');
+
+        if (this.recorder && this.recorder.state === "recording") {
+            this.recorder.stop();
+            this.stopRecTimer();
+
+            clearInterval(this.bbSampleInt);
+            this.bbStop();
+            await this.bbExportJSON();
+
+            btn.innerText = "🎥 廣寒宮誓約留影錄影";
+            this.speak("錄影結束，廣寒宮誓約留影數據已封裝。");
+            return;
+        }
+
+        const stream = document.getElementById('export-canvas').captureStream(30);
+        if(!window.MediaRecorder){
+            alert("此瀏覽器不支援 MediaRecorder，請用 Chrome/Android 測試。");
+            return;
+        }
+
+        let mime = "video/webm;codecs=vp9";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
+        if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
+
+        this.recorder = new MediaRecorder(stream, { mimeType: mime });
+        this.chunks = [];
+
+        this.recorder.ondataavailable = e => { if(e.data && e.data.size) this.chunks.push(e.data); };
+        this.recorder.onstop = () => {
+            const blob = new Blob(this.chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_MOON_WEDDING_LOG.webm'; a.click();
+        };
+
+        this.bbStart();
+        this.bbSample();
+        this.bbSampleInt = setInterval(()=>this.bbSample(), 1000);
+
+        this.startRecTimer();
+        this.syncExportCanvas();
+        this.recorder.start();
+
+        btn.innerText = "⏹️ 停止廣寒宮誓約留影";
+        this.speak("廣寒宮誓約留影錄影開始，記錄演化數據。");
+    },
+
+    bindWheel(){
+        const wheel = document.getElementById('wheel');
+        if(!wheel) return;
+
+        const getAngleFromPointer = (clientX, clientY) => {
+            const rect = wheel.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = clientX - cx;
+            const dy = clientY - cy;
+            let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+            deg = deg + 90;
+            if(deg > 180) deg -= 360;
+            return Math.max(-180, Math.min(180, deg));
+        };
+
+        let dragging = false;
+        const onDown = (x,y)=>{ dragging=true; this.applySteer(getAngleFromPointer(x,y)); };
+        const onMove = (x,y)=>{ if(!dragging) return; this.applySteer(getAngleFromPointer(x,y)); };
+        const onUp = ()=>{ dragging=false; };
+
+        wheel.addEventListener('mousedown', (e)=>{ e.preventDefault(); onDown(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e)=>onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', onUp);
+
+        wheel.addEventListener('touchstart', (e)=>{ e.preventDefault(); const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:false});
+        window.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; if(!t) return; onMove(t.clientX, t.clientY); }, {passive:true});
+        window.addEventListener('touchend', onUp, {passive:true});
+    },
+
+    initThree() {
+        const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const rd = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-bg'), antialias: true, alpha: true });
+        rd.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        rd.setSize(window.innerWidth, window.innerHeight);
+        const geo = new THREE.BufferGeometry(), pos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) pos[i] = (Math.random() - 0.5) * 160;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.18 }));
+        sc.add(pts); cam.position.z = 50;
+        const anim = () => {
+            requestAnimationFrame(anim);
+            const w = document.getElementById('warp-input-val').value / 40;
+            if(w > 0) {
+                const r = (parseFloat(document.getElementById('steer-input-val').value) * Math.PI) / 180;
+                const p = pts.geometry.attributes.position.array;
+                for(let i=0; i<p.length; i+=3) {
+                    p[i] -= Math.sin(r) * w; p[i+1] -= Math.cos(r) * w;
+                    if(p[i]>80) p[i]=-80; if(p[i]<-80) p[i]=80;
+                    if(p[i+1]>80) p[i+1]=-80; if(p[i+1]<-80) p[i+1]=80;
+                }
+                pts.geometry.attributes.position.needsUpdate = true;
+            }
+            rd.render(sc, cam);
+        };
+        anim();
+        this._rd = rd; this._cam = cam;
+    },
+
+    onResize(){
+        if(!this._rd || !this._cam) return;
+        this._cam.aspect = window.innerWidth / window.innerHeight;
+        this._cam.updateProjectionMatrix();
+        this._rd.setSize(window.innerWidth, window.innerHeight);
+    },
+
+    
+    // ===== Audio / Voice (mobile needs user gesture) =====
+    audioOn:false, audioCtx:null, audioNodes:[],
+    enableAudio(){
+        try{
+            const btn = document.querySelector('.nav-audio');
+            if(this.audioOn){
+                this.audioOn=false;
+                btn && btn.classList.remove('on');
+                this._stopAudio();
+                return;
+            }
+            this.audioOn=true;
+            btn && btn.classList.add('on');
+
+            // WebAudio ambient pad
+            const AC = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = this.audioCtx || new AC();
+            this.audioCtx.resume && this.audioCtx.resume();
+
+            const ctx = this.audioCtx;
+            const master = ctx.createGain();
+            master.gain.value = 0.02;
+            master.connect(ctx.destination);
+
+            const osc1 = ctx.createOscillator(); osc1.type="sine"; osc1.frequency.value=220;
+            const osc2 = ctx.createOscillator(); osc2.type="sine"; osc2.frequency.value=329.63;
+            const lfo  = ctx.createOscillator(); lfo.type="sine"; lfo.frequency.value=0.08;
+            const lfoGain = ctx.createGain(); lfoGain.gain.value=6;
+
+            const filter = ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=700; filter.Q.value=0.8;
+            const gain = ctx.createGain(); gain.gain.value=0.0;
+
+            lfo.connect(lfoGain); lfoGain.connect(osc2.frequency);
+
+            osc1.connect(filter); osc2.connect(filter); filter.connect(gain); gain.connect(master);
+
+            // fade in
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0.0, now);
+            gain.gain.linearRampToValueAtTime(1.0, now + 1.2);
+
+            osc1.start(); osc2.start(); lfo.start();
+
+            this.audioNodes = [osc1,osc2,lfo,filter,gain,master];
+
+            // Voice guide (first time)
+            this.speak("廣寒宮已開啟。請先連接錢包，然後輸入金額，選擇上或下。點燈、許願、還願都會流入共用獎池。");
+        }catch(e){
+            alert("音效啟用失敗：請用 Chrome / Android，並允許音訊播放。");
+        }
+    },
+    _stopAudio(){
+        try{
+            if(!this.audioCtx) return;
+            const ctx=this.audioCtx;
+            const nodes=this.audioNodes||[];
+            // fade out quickly
+            const gain = nodes.find(n=>n && n.gain && n.gain.setValueAtTime);
+            if(gain){
+                const t=ctx.currentTime;
+                gain.gain.cancelScheduledValues(t);
+                gain.gain.setValueAtTime(gain.gain.value, t);
+                gain.gain.linearRampToValueAtTime(0.0, t+0.4);
+            }
+            setTimeout(()=>{
+                try{
+                    for(const n of nodes){
+                        if(n && typeof n.stop==="function") try{ n.stop(); }catch(_){}
+                        if(n && typeof n.disconnect==="function") try{ n.disconnect(); }catch(_){}
+                    }
+                    this.audioNodes=[];
+                }catch(_){}
+            }, 500);
+        }catch(_){}
+    },
+speak(m){
+      try{
+        if(!m) return;
+        const u = new SpeechSynthesisUtterance(ui.sanitize(m));
+        u.lang = 'zh-TW';
+        u.rate = 1.0;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    },
+
+    // Progress helper (fix: app.setProgress is not a function)
+    // ratio: 0..1
+    setProgress(ratio){
+      const el = document.getElementById('w3-prog');
+      if(!el) return;
+      let r = Number(ratio);
+      if(!Number.isFinite(r)) r = 0;
+      r = Math.max(0, Math.min(1, r));
+      const pct = Math.round(r * 1000) / 10; // 0.1%
+      el.innerText = `${pct}%`;
     }
-}
+  ,
+  // ===== Chain info quick links =====
+  openTokenScan(){
+    try{ window.open(web3.TOKEN_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：KGEN Token（BscScan）"); }catch(e){}
+  },
+  openPairScan(){
+    try{ window.open(web3.PAIR_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：LP Pair（BscScan）"); }catch(e){}
+  },
+  openLpLock(){
+    try{ window.open(web3.LP_LOCK_URL, "_blank", "noopener"); web3.toast("已開啟：LP 鎖倉（PinkLock）"); }catch(e){}
+  },
+  openPancake(){
+    try{ window.open(web3.PANCAKE_SWAP_URL, "_blank", "noopener"); web3.toast("已開啟：PancakeSwap 交易頁"); }catch(e){}
+  }
 
-function playMusic(){
 
-    if(playlist.length==0) return
+  ,
+  /* =========================
+     UFO Music System (MP3)
+  ========================= */
+  openMusic(force){
+    try{
+      const p=document.getElementById('music-panel');
+      if(!p) return;
+      const show = (typeof force==='boolean') ? force : (p.style.display==='none' || !p.style.display);
+      p.style.display = show ? 'block' : 'none';
+      if(show) this.speak('飛碟音響已開啟。你可以載入音樂並播放。');
+    }catch(_){}
+  },
+  musicInit(){
+    try{
+      this._music = this._music || {};
+      const audio=document.getElementById('music-audio');
+      const file=document.getElementById('music-file');
+      const vol=document.getElementById('music-vol');
+      const volTxt=document.getElementById('music-vol-txt');
+      const name=document.getElementById('music-name');
+      if(!audio || !file || !vol) return;
 
-    audio.src = playlist[index].url
-    audio.play()
-}
+      this._music.audio = audio;
+      // default volume
+      audio.volume = (Number(vol.value)||60)/100;
+      if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
 
-function pauseMusic(){
-    audio.pause()
-}
+      vol.addEventListener('input', ()=>{
+        const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+        audio.volume = v/100;
+        if(volTxt) volTxt.textContent = v + '%';
+      });
 
-audio.addEventListener("ended",()=>{
+      file.addEventListener('change', ()=>{
+        const f = file.files && file.files[0];
+        if(!f){ if(name) name.textContent='未載入音檔'; return; }
+        const url = URL.createObjectURL(f);
+        // revoke old url if any
+        if(this._music.url){ try{ URL.revokeObjectURL(this._music.url);}catch(_){} }
+        this._music.url = url;
+        audio.src = url;
+        audio.load();
+        if(name) name.textContent = '已載入：' + (f.name || 'audio');
+        this.speak('音樂已安裝。');
+      });
+    }catch(_){}
+  },
 
-    index++
-    if(index>=playlist.length) index=0
+  musicSetIndex(i){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      if(!m.list || !m.list.length) return;
+      const n=m.list.length;
+      let idx = Number(i);
+      if(!Number.isFinite(idx)) idx=0;
+      idx = ((idx % n) + n) % n;
+      m.index = idx;
 
-    audio.src = playlist[index].url
-    audio.play()
+      const item = m.list[idx];
+      if(item){
+        if(item.url){
+          m.audio.src = item.url;
+        }else if(item.file){
+          m.audio.src = URL.createObjectURL(item.file);
+        }else{
+          return;
+        }
+        const nameEl=document.getElementById('music-name');
+        if(nameEl) nameEl.textContent = (item.name||'音檔') + `  (${idx+1}/${n})`;
+  
+      // === Built-in playlist from GitHub ===
 
-})
+          const tryFetchJson = async ()=>{
+            const candidates = [
+              'music/playlist.json',
+              './music/playlist.json',
+              encodeURI('music/playlist.json'),
+              new URL('music/playlist.json', window.location.href).toString()
+            ];
+            for(const u of candidates){
+              try{
+                const r = await fetch(u, {cache:'no-store'});
+                if(r && r.ok){
+                  const j = await r.json();
+                  return {ok:true, url:u, json:j};
+                }
+              }catch(e){}
+            }
+            return {ok:false, url:candidates[0], json:null};
+          };
 
-loadPlaylist()
+      // Expect a JSON file at: ./music/playlist.json
+      // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
+      const loadBuiltIn = async ()=>{
+        try{
+          const out = await tryFetchJson();
+          if(!out.ok) return false;
+          const resUrl = out.url;
+          const arr = out.json;
+          if(!res.ok) return false;
+          
+          if(!Array.isArray(arr) || !arr.length) return false;
+          // normalize
+          const list = arr.map(x=>({
+            name: String(x.name||x.title||'Track'),
+            url: String(x.url||'').trim()
+          })).map(x=>{
+            // if url is bare filename, assume it's inside /music/
+            if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
+            // ensure proper encoding for Chinese filenames
+            if(x.url && !x.url.startsWith('http')) x.url = encodeURI(x.url);
+            return x;
+          }).filter(x=>x.url);
+
+          if(!list.length) return false;
+          // If user hasn't selected local files yet, use built-in list
+          const hasLocal = (this._music.list||[]).some(it=>it.file);
+          if(!hasLocal){
+            this._music.list = list;
+            this._music.index = 0;
+            this.musicSetIndex(0);
+          }else{
+            // merge: append built-in after local
+            this._music.list = (this._music.list||[]).concat(list);
+            this.musicRenderList();
+          }
+          return true;
+        }catch(e){
+          return false;
+        }
+      };
+      // try load built-in silently
+      loadBuiltIn();
+
+
+      // === Volume (persist) ===
+      const vol = document.getElementById('music-vol');
+      const volTxt = document.getElementById('music-vol-txt');
+      const savedVol = Number(localStorage.getItem('ufo_music_vol'));
+      const v0 = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) : 70;
+      if(vol) vol.value = String(v0);
+      if(volTxt) volTxt.textContent = `${v0}%`;
+      audio.volume = v0/100;
+
+      if(vol){
+        vol.addEventListener('input', ()=>{
+          const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+          audio.volume = v/100;
+          if(volTxt) volTxt.textContent = `${v}%`;
+          localStorage.setItem('ufo_music_vol', String(v));
+        });
+      }
+
+      // === Audio unlock on first user gesture (mobile friendly) ===
+      const bgmAuto = document.getElementById('music-bgm-auto');
+      const savedAuto = localStorage.getItem('ufo_music_bgm_auto');
+      if(bgmAuto && savedAuto !== null){
+        bgmAuto.checked = (savedAuto === '1');
+      }
+      if(bgmAuto){
+        bgmAuto.addEventListener('change', ()=>{
+          localStorage.setItem('ufo_music_bgm_auto', bgmAuto.checked ? '1':'0');
+        });
+      }
+
+      const unlockOnce = async ()=>{
+        try{
+          await audio.play();
+          audio.pause();
+          audio.currentTime = 0;
+        }catch(e){}
+        try{
+          if(bgmAuto && bgmAuto.checked){
+            this.musicPlay();
+          }
+        }catch(e){}
+      };
+
+      const onFirstInteract = ()=>{
+        document.removeEventListener('pointerdown', onFirstInteract);
+        document.removeEventListener('keydown', onFirstInteract);
+        unlockOnce();
+      };
+      document.addEventListener('pointerdown', onFirstInteract, {once:true, passive:true});
+      document.addEventListener('keydown', onFirstInteract, {once:true});
+
+
+      this.musicRenderList();
+      }
+    }catch(_){}
+  },
+  musicRenderList(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const box=document.getElementById('music-list');
+      if(!box) return;
+      const list=m.list||[];
+      if(!list.length){
+        box.innerHTML = '<div style="font-size:12px; opacity:0.75;">尚未載入清單</div>';
+        return;
+      }
+      const idx = Number(m.index)||0;
+      box.innerHTML = list.map((it,i)=>{
+        const active = i===idx;
+        const bg = active ? 'rgba(255,215,0,0.12)' : 'transparent';
+        const bd = active ? '1px solid rgba(255,215,0,0.45)' : '1px solid rgba(255,255,255,0.08)';
+        const name = (it.name||('Track '+(i+1))).replace(/[<>&]/g, s=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
+        return `<button type="button" onclick="app.musicSetIndex(${i}); app.musicPlay();" style="width:100%; text-align:left; padding:8px; margin:4px 0; border-radius:10px; background:${bg}; border:${bd}; color:#e9f7ff; cursor:pointer; font-size:12px;">${name}</button>`;
+      }).join('');
+    }catch(_){}
+  },
+  musicNext(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)+1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+  musicPrev(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)-1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+
+  musicPlay(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a || !a.src){ this.speak('請先載入音檔。'); return; }
+      a.play();
+      this.speak('開始播放。');
+    }catch(_){}
+  },
+  musicPause(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      this.speak('已暫停。');
+    }catch(_){}
+  },
+  musicStop(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      a.currentTime = 0;
+      this.speak('已停止。');
+    }catch(_){}
+  }
+};
+window.app = app;
+
+
+
+/* =========================
+   V2.28.0 HOTFIX (Wallet/Balances/Pool/Side)
+   - Bridge BinanceChain -> ethereum when Binance Wallet injects it
+   - Unify balances update targets (top bars + order panel)
+   - Ensure pool progress (16888) updates even without wallet via public RPC
+   - Single source of truth for SIDE mapping from deg
+========================= */
+(function(){
+  try{
+    if(!window.ethereum && window.BinanceChain){
+      window.ethereum = window.BinanceChain;
+    }
+    // Some wallets expose ethereum.providers (multiple). Prefer the active one.
+    if(window.ethereum && Array.isArray(window.ethereum.providers) && window.ethereum.providers.length){
+      // Pick first provider that looks like Binance/MetaMask/Trust/OKX; fallback to first.
+      const pick = window.ethereum.providers.find(p=>p && (p.isBinance || p.isMetaMask || p.isTrust || p.isOKXWallet)) || window.ethereum.providers[0];
+      if(pick) window.ethereum = pick;
+    }
+  }catch(_e){}
+})();
+
+(function(){
+  if(!window.app) return;
+
+  // ---- helpers
+  window.app.__v227 = true;
+  const setText = (id, txt)=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  };
+  const setHTML = (id, html)=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  };
+  const clamp = (v, a, b)=>Math.max(a, Math.min(b, v));
+
+  // ---- Public RPC (pool progress works even when wallet not connected)
+  window.app.PUBLIC_RPC = window.app.PUBLIC_RPC || "https://bsc-dataseed.binance.org/";
+
+  // ---- SIDE mapping: 0±90 => LONG, 90~270 => SHORT (符合你定義：-90~0~90 多；90~180 空；-180~-90 空)
+  window.app.calcSideFromDeg = function(deg){
+    const d = ((Number(deg)||0)%360 + 360) % 360;
+    return (d <= 90 || d >= 270) ? "LONG" : "SHORT";
+  };
+
+  // Force-sync any SIDE labels used in UI
+  window.app.syncSideUI = function(deg){
+    const side = window.app.calcSideFromDeg(deg);
+    setText("ct-side", side);
+    // Any element that wants side can use data-side="1"
+    document.querySelectorAll("[data-side='1']").forEach(el=>{ el.textContent = side; });
+    return side;
+  };
+
+  // ---- balances (single refresh)
+  window.app.refreshUserBalances = async function(){
+    if(!window.app.web3 || !window.app.web3.provider || !window.app.web3.address){
+      // not connected
+      setText("rb-bnb-txt", "--");
+      setText("rb-kgen-txt", "--");
+      return;
+    }
+    try{
+      const prov = window.app.web3.provider;
+      const addr = window.app.web3.address;
+
+      // BNB
+      const bnbWei = await prov.getBalance(addr);
+      const bnb = Number(ethers.formatEther(bnbWei));
+      setText("rb-bnb-txt", `${bnb.toFixed(4)} BNB`);
+
+      // KGEN
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const kgen = Number(ethers.formatUnits(await token.balanceOf(addr), dec));
+      setText("rb-kgen-txt", `${kgen.toFixed(4)} KGEN`);
+
+      // Order panel (if present)
+      setText("userBal", `${kgen.toFixed(4)} KGEN`);
+    }catch(_e){
+      // keep silent; UI already shows last known values
+    }
+  };
+
+  // ---- pool progress (16888)
+  window.app.refreshPoolProgress = async function(){
+    try{
+      const prov = (window.app.web3 && window.app.web3.provider) ? window.app.web3.provider : new ethers.JsonRpcProvider(window.app.PUBLIC_RPC);
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const bal = Number(ethers.formatUnits(await token.balanceOf(window.app.UNIVERSE_POOL), dec));
+      setText("w3-bal", `${bal.toFixed(4)} KGEN`);
+
+      const target = 16888;
+      const pct = clamp((bal / target) * 100, 0, 100);
+      setText("w3-prog", `${bal.toFixed(2)} / ${target} (${pct.toFixed(1)}%)`);
+
+      const fill = document.getElementById("prog-fill");
+      if(fill) fill.style.width = `${pct.toFixed(2)}%`;
+    }catch(_e){
+      setText("w3-prog", "讀取失敗");
+    }
+  };
+
+  // ---- de-dup AUTO label: keep only one source of truth at right-bottom panel
+  window.app.setAutoStatus = function(on){
+    const txt = on ? "AUTO: ON" : "AUTO: OFF";
+    setText("autoStatus", txt);
+    // hide legacy labels if any
+    document.querySelectorAll(".legacy-auto").forEach(el=>{ el.style.display = "none"; });
+  };
+
+  // ---- Ensure the main refresh loop calls our functions (without breaking existing logic)
+  const _oldRefreshAll = window.app.refreshAll;
+  window.app.refreshAll = async function(){
+    if(typeof _oldRefreshAll === "function"){
+      try{ await _oldRefreshAll.call(window.app); }catch(_e){}
+    }
+    await window.app.refreshUserBalances();
+    await window.app.refreshPoolProgress();
+    // keep SIDE synced with current deg
+    if(typeof window.app.getDeg === "function"){
+      window.app.syncSideUI(window.app.getDeg());
+    }
+  };
+
+})();
+
+window.onload = () => app.init();
+  // auto concierge on first visit
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
+</script>
+
+<script>
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
+
+// =====================
+// UI Helper (sound + toast + sanitize speech)
+// =====================
+const ui = {
+  _toastTimer: null,
+  toast(msg, ms=2200){
+    const t = document.getElementById("toast");
+    if(!t) return;
+    t.textContent = this.sanitize(msg);
+    t.classList.add("show");
+    if(this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(()=>{ t.classList.remove("show"); }, ms);
+  },
+  beep(freq=880, dur=0.06){
+    try{
+      const ctx = this._ctx || (this._ctx = new (window.AudioContext||window.webkitAudioContext)());
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = freq;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, Math.max(20, dur*1000));
+    }catch(_){}
+  },
+  sanitize(s){
+    // remove emoji / symbols that TTS tends to read out loud
+    return String(s||"").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").trim();
+  }
+};
+
+// make all buttons click beep + hint (opt-in via data-hint)
+window.addEventListener("click", (ev)=>{
+  const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+  if(!btn) return;
+  // 全按鍵統一音效 + 客服提示（避免空白）
+  ui.beep();
+  const hint = btn.getAttribute("data-hint") || btn.getAttribute("aria-label") || btn.textContent;
+  if(hint){ ui.toast(hint); }
+}, true);
+
+
+const web3 = {
+  provider: null,
+  signer: null,
+  addr: null,
+  demo: false,
+
+  // ==== chain guard (BSC) ====
+  BSC_CHAIN_ID_DEC: 56,
+  BSC_CHAIN_ID_HEX: "0x38",
+  async ensureBSC(){
+    if(!window.ethereum) return true;
+    try{
+      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const el = document.getElementById("w3-chain");
+      if(el) el.innerText = cid;
+      if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
+
+      // Try switch to BSC
+      try{
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+        });
+      }catch(swErr){
+        // If not added, try add chain then switch
+        if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: this.BSC_CHAIN_ID_HEX,
+              chainName: "BNB Smart Chain",
+              nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
+              rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc-dataseed1.ninicoin.io/"],
+              blockExplorerUrls: ["https://bscscan.com"]
+            }]
+          });
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+          });
+        }else{
+          throw swErr;
+        }
+      }
+      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const el2 = document.getElementById("w3-chain");
+      if(el2) el2.innerText = cid2;
+      return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
+    }catch(e){
+      console.warn("ensureBSC failed", e);
+      return false;
+    }
+  },
+
+
+  // 固定 Token（你給的）
+  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+
+  // 你部署後填上（會自動記到 localStorage）
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
+
+  TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  LP_PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+
+  // 鏈上資訊（唯一正確）
+  TOKEN_SCAN_URL: "https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PANCAKE_SWAP_URL: "https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PAIR_SCAN_URL: "https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+  LP_LOCK_URL: "https://www.pinksale.finance/pinklock/bsc/record/1427003",
+  LP_LOCK_UNTIL_UTC: "2027-01-01T00:00:00Z",
+
+  // 高老莊（8888）地址：可在頁面設定，會自動記到 localStorage
+  GAOLAO: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
+
+  // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
+  abiERC20: [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) external view returns (uint256)",
+    "function balanceOf(address a) external view returns (uint256)",
+    "function decimals() external view returns (uint8)"
+  ],
+  abiUniverse: [
+    "function ritualDeposit(uint256 amount, bytes32 tag) external",
+    "function placeOrder(uint8 side, uint256 amountIn) external",
+    "function poolBalance() external view returns (uint256)",
+    "function canTriggerRound() external view returns (bool)",
+    "function minOrder() external view returns (uint256)",
+    "function maxOrder() external view returns (uint256)",
+    "function vowWindowSec() external view returns (uint32)",
+    "function loveWindowSec() external view returns (uint32)",
+    "function treasury8888() external view returns (address)",
+    "function kgen() external view returns (address)",
+    "function TRIGGER() external view returns (uint256)",
+    "function MIN_FLOOR() external view returns (uint256)",
+    "function ROUND_TOTAL() external view returns (uint256)",
+    "function configLocked() external view returns (bool)",
+    "function roundId() external view returns (uint256)",
+    "function rounds(uint256) external view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)",
+    "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundTriggered(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 poolBefore)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)",
+    "event RitualDeposit(address indexed from,uint256 amount,bytes32 indexed tag)"
+  ],
+
+  // ===== helpers =====
+  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+
+  load(){
+  try{
+    const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
+    if(u && ethers.utils.isAddress(u)) this.UNIVERSE = u;
+  }catch(_){}
+  try{
+    const g = localStorage.getItem("KGEN_16888_GAOLAO_ADDR") || "";
+    if(g && ethers.utils.isAddress(g)) this.GAOLAO = g;
+  }catch(_){}
+  this.ui();
+},
+
+ui(){
+const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVERSE ? this.UNIVERSE : '未設定（可先 Demo）';
+    const ga=document.getElementById('cp-gaolao-addr'); if(ga) ga.value = (this.GAOLAO && ethers.utils.isAddress(this.GAOLAO)) ? this.GAOLAO : ''; 
+    const gs=document.getElementById('cp-gaolao-status'); if(gs) gs.innerText = (this.GAOLAO && ethers.utils.isAddress(this.GAOLAO)) ? '已設定' : '未設定';
+    (()=>{const el=document.getElementById("w3-mode"); if(el) el.innerText=this.demo ? "DEMO MODE" : "LIVE MODE";})();
+  },
+
+setGaolaoAddr(){
+  const v = prompt("輸入高老莊地址（8888 / 合約或錢包地址）", this.GAOLAO || "");
+  if(v===null) return;
+  const vv = (v||"").trim();
+  if(vv && !ethers.utils.isAddress(vv)) return alert("地址格式錯誤");
+  this.GAOLAO = vv;
+  try{ localStorage.setItem("KGEN_16888_GAOLAO_ADDR", vv); }catch(_){}
+  this.ui();
+  this.refreshGaolao();
+  app.speak("高老莊地址已設定。");
+},
+
+copyGaolaoAddr(){
+  const v = this.GAOLAO || "";
+  if(!v) return alert("尚未設定高老莊地址");
+  navigator.clipboard?.writeText(v).then(()=>app.toast?.("已複製")).catch(()=>{});
+},
+
+async refreshGaolao(){
+  const st = document.getElementById('cp-gaolao-status');
+  const vb = document.getElementById('cp-gaolao-kgen');
+  if(!this.GAOLAO || !ethers.utils.isAddress(this.GAOLAO)){
+    if(st) st.innerText = "未設定";
+    if(vb) vb.innerText = "--";
+    return;
+  }
+  if(this.demo){
+    if(st) st.innerText = "DEMO";
+    if(vb) vb.innerText = "DEMO";
+    return;
+  }
+  if(!this.provider){
+    if(st) st.innerText = "尚未連線";
+    if(vb) vb.innerText = "--";
+    return;
+  }
+  try{
+    if(st) st.innerText = "讀取中…";
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+    let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
+    const bal = await kgenR.balanceOf(this.GAOLAO);
+    const txt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+    if(vb) vb.innerText = txt;
+    // BNB
+    try{
+      const bnb = await this.provider.getBalance(this.GAOLAO);
+      const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
+      const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText = bnbTxt;
+    }catch(_){ const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText="--"; }
+    if(st) st.innerText = "OK";
+  }catch(e){
+    console.warn("refreshGaolao failed", e);
+    if(st) st.innerText = "讀取失敗";
+    if(vb) vb.innerText = "--";
+  }
+},
+
+async refreshTreasury(){
+  const vk = document.getElementById('cp-treasury-kgen');
+  if(this.demo){ if(vk) vk.innerText = 'DEMO'; return; }
+  if(!this.provider) { if(vk) vk.innerText='--'; return; }
+  try{
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+    let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
+    const bal = await kgenR.balanceOf(this.TREASURY);
+    if(vk) vk.innerText = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+  }catch(e){
+    console.warn('refreshTreasury failed', e);
+    if(vk) vk.innerText='--';
+  }
+},
+setUniverseAddr(){
+    const v = (document.getElementById("uni-addr-input").value || "").trim();
+    if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
+    this.UNIVERSE = v;
+    try{ localStorage.setItem("KGEN_16888_UNIVERSE_ADDR", v); }catch(_){}
+    this.ui();
+    this.refresh();
+    app.speak("Universe 合約地址已設定。");
+  },
+
+  async connect(){
+    try{
+      if(!window.ethereum){
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
+        return;
+      }
+      await window.ethereum.request({ method:"eth_requestAccounts" });
+      const okChain = await this.ensureBSC();
+      if(!okChain){
+        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        this.demo = true;
+        this.ui();
+        this.demoRefresh();
+        return;
+      }
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      this.demo = false;
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
+this.ui();
+      await this.refresh();
+      await this.refreshUser();
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
+await this.bindEvents();
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
+    }catch(e){
+      console.error(e);
+      this.demo = true;
+      this.ui();
+      alert("錢包連線失敗，已切回 Demo 模式");
+    }
+  },
+
+
+  async refreshUser(){
+    try{
+      // Demo 模式：不讀鏈上
+      if(this.demo){
+        const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+        return;
+      }
+      if(!this.provider || !this.addr || !this.UNIVERSE) return;
+
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      let dec = 18;
+      try{ dec = await kgenR.decimals(); }catch(_){}
+
+      const [bal, alw] = await Promise.all([
+        kgenR.balanceOf(this.addr),
+        kgenR.allowance(this.addr, this.UNIVERSE),
+      ]);
+
+      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
+
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+
+      // BNB 餘額
+      try{
+        const bnb = await this.provider.getBalance(this.addr);
+        const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
+        const bn=document.getElementById('userBNB'); if(bn) bn.innerText = bnbTxt;
+      }catch(_){ const bn=document.getElementById('userBNB'); if(bn) bn.innerText='--'; }
+      // Resource bars (top-left)
+      try{
+        const bnb = await this.provider.getBalance(this.addr);
+        const bnbVal = parseFloat(ethers.utils.formatEther(bnb));
+        const kgenVal = parseFloat(ethers.utils.formatUnits(bal, dec));
+        const bnbTxt2 = `${bnbVal.toFixed(4)} BNB`;
+        const kgenTxt2 = `${kgenVal.toFixed(4)} KGEN`;
+        const bt = document.getElementById("rb-bnb-txt"); if(bt) bt.textContent = bnbTxt2;
+        const kt = document.getElementById("rb-kgen-txt"); if(kt) kt.textContent = kgenTxt2;
+
+        // simple normalization (no max supply known): BNB capped at 1.0 for bar, KGEN capped at 10,000
+        const bFill = document.getElementById("rb-bnb-fill"); 
+        const kFill = document.getElementById("rb-kgen-fill");
+        if(bFill) bFill.style.width = `${Math.min(100, (bnbVal/1.0)*100)}%`;
+        if(kFill) kFill.style.width = `${Math.min(100, (kgenVal/10000.0)*100)}%`;
+      }catch(_){}
+
+
+
+            // 同步更新高老莊（8888）地址餘額
+      await this.refreshGaolao();
+      await this.refreshTreasury();
+}catch(e){
+      console.warn("refreshUser failed", e);
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
+    }
+  },
+
+  parseAmt(){
+    const v = (document.getElementById("amt-in").value || "").trim();
+    if(!v) throw new Error("請輸入金額");
+    if(!/^\d+(\.\d+)?$/.test(v)) throw new Error("金額格式錯誤");
+    return ethers.utils.parseUnits(v, 18);
+  },
+
+  // ===== DEMO (no wallet) =====
+  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoRefresh(){
+    const b = this.demoState.pool;
+    const t = this.demoState.target;
+    const pct = Math.max(0, Math.min(100, (b/t)*100));
+const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
+const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+    (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
+const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
+    app.setProgress(pct/100);
+  },
+
+  demoDeposit(amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    this.demoState.pool += a;
+    this.demoRefresh();
+    app.logEvent(`DEMO 入池 +${a.toFixed(2)} KGEN`);
+  },
+
+  demoOrder(side, amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    // 簡化：直接 50/50
+    const win = Math.random() < 0.5;
+    const payout = win ? a*2 : 0;
+    if(win){
+      // pool pay profit portion only in demo
+      this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    }else{
+      this.demoState.pool += a;
+    }
+    this.demoRefresh();
+    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜${win?"WIN":"LOSE"}｜payout ${payout.toFixed(2)}`);
+  },
+
+  // ===== LIVE =====
+  async approve(){
+    if(this.demo) return alert("Demo 模式不需要 Approve");
+    if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+    try{
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, amt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+    }
+  },
+
+  async ritualDeposit(){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
+      const okChain = await this.ensureBSC();
+      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
+app.speak("點燈已入池。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("入池成功。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "入池失敗");
+    }
+  },
+
+  async place(side){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("本次對賭已結算。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "下單失敗");
+    }
+  },
+
+  async refresh(){
+    try{
+      if(this.demo){
+        this.demoRefresh();
+        return;
+      }
+      if(!this.UNIVERSE || !this.provider){
+const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
+        return;
+      }
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
+        uniR.poolBalance(),
+        uniR.canTriggerRound(),
+        uniR.minOrder(),
+        uniR.maxOrder(),
+        uniR.vowWindowSec(),
+        uniR.loveWindowSec(),
+        uniR.treasury8888(),
+        uniR.TRIGGER(),
+        uniR.MIN_FLOOR(),
+        uniR.ROUND_TOTAL()
+      ]);
+const b = parseFloat(ethers.utils.formatUnits(bal, 18));
+      const minK = parseFloat(ethers.utils.formatUnits(minO, 18));
+      const maxK = parseFloat(ethers.utils.formatUnits(maxO, 18));
+      const trigK = parseFloat(ethers.utils.formatUnits(trig, 18));
+      const floorK = parseFloat(ethers.utils.formatUnits(floor, 18));
+      const roundK = parseFloat(ethers.utils.formatUnits(roundT, 18));
+const t = parseFloat(trigK.toFixed(2));
+      const baseF = parseFloat(floorK.toFixed(2));
+
+const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
+      const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
+
+      (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
+
+const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
+      // ===== CT 同步（重要） =====
+      // 本頁定義：CT = 鏈上 Universe.poolBalance()（KGEN）
+      // 直接把 CT/CT+1 對齊鏈上池子狀態。
+      this._ct = b;
+      this.updateCoordPanel();
+      app.setProgress(pct/100);
+      await this.refreshUser();
+    }catch(e){
+      console.warn(e);
+    }
+  },
+
+  async bindEvents(){
+    try{
+      if(this.demo) return;
+      if(!this.UNIVERSE || !this.provider) return;
+
+      // prevent double bind
+      if(this._bound) return;
+      this._bound = true;
+
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
+        const p = parseFloat(ethers.utils.formatUnits(payout, 18));
+        app.logEvent(`鏈上結算｜${user.slice(0,6)}…｜${side==0?"漲":"跌"}｜${win?"WIN":"LOSE"}｜payout ${p.toFixed(4)} KGEN`);
+        this.refresh();
+      });
+
+      uniR.on("RoundSettled", (roundId, a, b, distributable) => {
+        app.logEvent(`下凡投胎 Round #${roundId.toString()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
+        this.refresh();
+      });
+    }catch(e){
+      console.warn(e);
+    }
+  }
+
+    ,
+    openWalletHub(){
+      const hub = document.getElementById('walletHub');
+      const inp = document.getElementById('walletHubUrl');
+      if(inp) inp.value = location.href;
+      if(hub){ hub.style.display='flex'; }
+    },
+    closeWalletHub(){
+      const hub = document.getElementById('walletHub');
+      if(hub){ hub.style.display='none'; }
+    },
+    deepLink(kind){
+      const url = location.href;
+      let link = url;
+      if(kind==='metamask'){
+        link = 'https://metamask.app.link/dapp/' + location.host + location.pathname + location.search + location.hash;
+      } else if(kind==='trust'){
+        link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
+      } else if(kind==='okx'){
+        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      } else if(kind==='binance'){
+        // Binance App deep link is not stable across regions; fallback to open_url
+        link = 'https://www.binance.com/en/download';
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      }
+      window.location.href = link;
+    },
+    async copyDappUrl(){
+      const url = location.href;
+      try{
+        await navigator.clipboard.writeText(url);
+        this.toast && this.toast('已複製連結');
+      }catch(e){
+        const inp = document.getElementById('walletHubUrl');
+        if(inp){ inp.focus(); inp.select(); }
+      }
+    },
+    // ===== WalletConnect v2 (Project ID) =====
+    wcProjectId: "ed256d3118a9c971d550ed5ee522b4d9",
+    wcProvider: null,
+    async connectWalletConnect(){
+      try{
+        if(!window.WalletConnectEthereumProvider){
+          this.toast && this.toast('WalletConnect 載入失敗');
+          return;
+        }
+        const provider = await window.WalletConnectEthereumProvider.init({
+          projectId: this.wcProjectId,
+          chains: [56],
+          optionalChains: [1],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+          }
+        });
+        await provider.enable();
+        this.wcProvider = provider;
+        await this.setProvider(provider, 'WalletConnect');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('WalletConnect 連線取消或失敗');
+      }
+    },
+    async connectBinance(){
+      // Binance Web3 Wallet / Binance Chain Wallet injects window.BinanceChain or window.ethereum (same as injected)
+      const p = window.BinanceChain || window.ethereum;
+      if(!p){
+        this.toast && this.toast('未偵測到幣安錢包。請用幣安 App 內建 DApp 瀏覽器開啟此頁，或安裝 Binance Wallet。');
+        return;
+      }
+      try{
+        await this.setProvider(p, 'Binance');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('幣安錢包連線失敗');
+      }
+    },
+    async setProvider(provider, label){
+      // unify with existing ethers flow
+      try{
+        this.provider = provider;
+        this.providerLabel = label || 'Injected';
+        if(provider.request){
+          await provider.request({ method:'eth_requestAccounts' });
+        }
+        // prefer existing init sequence
+        if(window.ethers){
+          this.ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
+          this.signer = this.ethersProvider.getSigner();
+          const addr = await this.signer.getAddress();
+          const net = await this.ethersProvider.getNetwork();
+          document.getElementById('w3-addr').textContent = addr;
+          document.getElementById('w3-chain').textContent = (net && net.chainId) ? ('bsc ('+net.chainId+')') : '--';
+          // hook events
+          if(provider.on){
+            provider.on('accountsChanged', ()=>this.refreshAll());
+            provider.on('chainChanged', ()=>this.refreshAll());
+            provider.on('disconnect', ()=>this.onDisconnect && this.onDisconnect());
+          }
+          this.closeWalletHub();
+          // start refresh loop
+          this.refreshAll();
+          if(!this._refreshTimer){
+            this._refreshTimer = setInterval(()=>this.refreshAll(), 6000);
+          }
+        }
+      }catch(e){
+        console.warn(e);
+        throw e;
+      }
+    },
+    async refreshAll(){
+      // refresh wallet BNB + KGEN + allowance + pool/progress if available
+      try{
+        if(!this.ethersProvider || !this.signer) return;
+        const addr = await this.signer.getAddress();
+        // native balance
+        const bnb = await this.ethersProvider.getBalance(addr);
+        const bnbFmt = ethers.utils.formatEther(bnb);
+        const elBNB = document.getElementById('userBNB'); if(elBNB) elBNB.textContent = (+bnbFmt).toFixed(6)+' BNB';
+        // top left bars
+        if(window.app && app.updateEnergyBars) app.updateEnergyBars(bnbFmt, null);
+        if(window.app && app.refreshUserToken) await app.refreshUserToken(); // updates userBal/userAllowance + KGEN bar
+        if(window.app && app.refreshPool) await app.refreshPool(); // pool balance + progress
+      }catch(e){
+        // keep silent to avoid spam
+      }
+    }
+};
+window.web3 = web3;
+// walletHub backdrop close
+setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addEventListener('click',(e)=>{if(e.target===hub) web3.closeWalletHub();});}},0);
+
 
 </script>
 
+
+<!-- === Universe Navigation Buttons V2.04 === -->
+<div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
+  <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">語音客服</button>
+  <button class="nav-btn nav-music" onclick="app.openMusic()">飛碟音響</button>
+</div>
+
+<div id="music-panel" class="hud-box" style="position:fixed; right:18px; top:410px; z-index:210; width:min(340px, 86vw); display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-weight:900; letter-spacing:0.5px;">飛碟音響（MP3）</div>
+    <button class="tiny-btn" type="button" onclick="app.openMusic(false)">關閉</button>
+  </div>
+
+  <div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
+    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
+  </div>
+
+  <div style="margin-top:10px;">
+    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
+    <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
+  </div>
+
+  
+  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
+
+  </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-shuffle" type="checkbox" checked />
+      S（隨機）
+    </label>
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-loop" type="checkbox" />
+      循環
+    </label>
+    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub /music/playlist.json 自動載入內建歌單</div>
+  </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-bgm-auto" type="checkbox" checked />
+      BGM 自動（點一下啟動）
+    </label>
+
+    <label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:0.9;">
+      音量
+      <input id="music-vol" type="range" min="0" max="100" value="70" style="width:160px;">
+      <span id="music-vol-txt" style="opacity:0.75;">70%</span>
+    </label>
+  </div>
+
+
+  <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
+    <div style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+  </div>
+
+
+  <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+    <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
+    <input id="music-vol" type="range" min="0" max="100" value="60" style="flex:1;"/>
+    <div id="music-vol-txt" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
+  </div>
+
+  <audio id="music-audio" preload="none" style="display:none;"></audio>
+</div>
+
+
+
+<!-- Guide / Concierge Modal -->
+<div id="guide-modal" class="guide-modal" aria-hidden="true">
+  <div class="guide-card">
+    <div class="guide-header">
+      <div class="guide-title">廣寒宮客服</div>
+      <button class="guide-close" id="btn-guide-close" aria-label="close">✕</button>
+    </div>
+    <div class="guide-tabs">
+      <button class="guide-tab" data-sec="intro">故事與快速開始</button>
+      <button class="guide-tab" data-sec="rules">規則與下凡</button>
+      <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+      <button class="guide-tab" data-sec="qa">語音問答</button>
+    </div>
+    <div class="guide-body" id="guide-body"></div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+  function openSwap(input){
+    const url = "https://pancakeswap.finance/swap?outputCurrency=" + encodeURIComponent(KGEN) +
+                "&inputCurrency=" + encodeURIComponent(input);
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+  const bnbBtn = document.getElementById("btn-swap-bnb");
+  const usdtBtn = document.getElementById("btn-swap-usdt");
+  if (bnbBtn) bnbBtn.addEventListener("click", ()=>openSwap("BNB"));
+  if (usdtBtn) usdtBtn.addEventListener("click", ()=>openSwap(USDT));
+
+  window.__KLINE_openInWallet = function(wallet){
+    const full = window.location.href;
+    const noProto = full.replace(/^https?:\/\//i,'');
+    if (wallet === "metamask") return window.open("https://metamask.app.link/dapp/" + noProto, "_blank");
+    if (wallet === "trust") return window.open("https://link.trustwallet.com/open_url?coin_id=60&url=" + encodeURIComponent(full), "_blank");
+  };
+})();
+</script>
+
+
+<script>
+/* =========================
+   Auto Battle Mode (v2.20.0)
+   UI-only autopilot demo:
+   - toggles auto steering/flow values if range inputs exist
+   - animates steering/flow knobs and avatar image subtly
+   Does NOT touch contract.
+========================= */
+(function(){
+  function qs(sel){ return document.querySelector(sel); }
+  const wheel = qs('#steer-knob') || qs('.steer-knob') || qs('#steer') || qs('.steer');
+  const flow  = qs('#flow-knob')  || qs('.flow-knob')  || qs('#flow')  || qs('.flow');
+  const avatar= qs('#hero') || qs('#avatar') || qs('.hero') || qs('.avatar') || qs('img[src*="fairy"]');
+
+  const state = { on:false, raf:0, lastOrder:0 };
+
+  // 方向盤角度 → 多空（依你的規則）
+  // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
+  function sideFromSteerDeg(deg){
+    let a = Number(deg);
+    if(!Number.isFinite(a)) a = 0;
+    while(a > 180) a -= 360;
+    while(a < -180) a += 360;
+    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
+  }
+
+  function step(ts){
+    if(!state.on) return;
+    const t = ts/1000;
+    const a = (Math.sin(t*0.9)*0.5 + 0.5);     // 0..1
+    const b = (Math.sin(t*0.7+1.2)*0.5 + 0.5); // 0..1
+
+    // Update inputs if present
+    const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
+    const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
+
+    let steerDeg = 0;
+    if(steerInput){
+      const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
+      steerDeg = Math.round(min + a*(max-min));
+      steerInput.value = steerDeg;
+      steerInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    if(flowInput){
+      const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
+      flowInput.value = Math.round(min + b*(max-min));
+      flowInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+
+    // Auto side tag + auto order (demo/live)
+    const side = sideFromSteerDeg(steerDeg);
+    const autoTag = document.getElementById('autoTag');
+    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; autoTag.classList.toggle('short', side!=='UP'); }
+
+    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
+    if(ts - state.lastOrder > 2400){
+      state.lastOrder = ts;
+      if(typeof window.placeOrder === 'function'){
+        window.placeOrder(side);
+      }
+    }
+
+    // Visual motion
+    if(wheel){ wheel.style.transform = `translateY(${Math.sin(t*1.4)*3}px) rotate(${(a*120-60).toFixed(1)}deg)`; }
+    if(flow){  flow.style.transform  = `translateY(${Math.sin(t*1.2+0.7)*3}px) rotate(${(b*120-60).toFixed(1)}deg)`; }
+    if(avatar){
+      avatar.style.transform = `translateY(${Math.sin(t*0.8)*4}px) translateX(${Math.sin(t*0.6)*2}px)`;
+      avatar.style.filter = `hue-rotate(${Math.floor(a*30-15)}deg)`;
+    }
+
+    state.raf = requestAnimationFrame(step);
+  }
+
+  window.app = window.app || {};
+  window.app.toggleAutoBattle = function(){
+    state.on = !state.on;
+    const btn = document.getElementById('auto-battle-btn');
+    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
+    if(state.on){
+      state.raf = requestAnimationFrame(step);
+    }else{
+      try{ cancelAnimationFrame(state.raf); }catch(e){}
+      if(wheel) wheel.style.transform='';
+      if(flow) flow.style.transform='';
+      if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
+    }
+  };
+})();
+
+/* =========================
+   AUTO CRUISE / AUTO BATTLE
+   - Tied to bottom button: #btnAutoBattle
+   - Simulates long/short swing, updates direction wheel + planet flow + GA mini-panel bars
+   - Does NOT touch on-chain, does NOT auto-approve, purely UI simulation
+========================= */
+(function(){
+  const AUTO = { on:false, t:null, phase:0, dir:1 };
+
+  function qs(sel){ try{return document.querySelector(sel);}catch(e){return null;} }
+  function qsa(sel){ try{return Array.from(document.querySelectorAll(sel));}catch(e){return [];} }
+
+  function setElText(el, txt){ if(!el) return; el.textContent = txt; }
+  function setRange(el, v){
+    if(!el) return;
+    const min = ("min" in el) ? Number(el.min||0) : 0;
+    const max = ("max" in el) ? Number(el.max||100) : 100;
+    const vv = Math.max(min, Math.min(max, v));
+    el.value = String(vv);
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+    el.dispatchEvent(new Event("change", {bubbles:true}));
+  }
+
+  function pickRange(candidates){
+    for(const sel of candidates){
+      const el = qs(sel);
+      if(el && el.tagName === "INPUT" && (el.type||"").toLowerCase()==="range") return el;
+    }
+    // fallback: first visible range in page
+    const all = qsa('input[type="range"]');
+    for(const el of all){
+      const r = el.getBoundingClientRect();
+      if(r.width>40 && r.height>10) return el;
+    }
+    return null;
+  }
+
+  // likely controls (best-effort across versions)
+  const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
+  const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
+
+  // UI targets (best-effort)
+  const autoBadge = qs("#autoBadge") || (function(){
+    const b = document.createElement("div");
+    b.id="autoBadge";
+    b.style.cssText="position:fixed;left:12px;bottom:92px;z-index:99999;padding:8px 10px;border:1px solid rgba(255,215,120,.35);border-radius:12px;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;display:none;";
+    b.textContent="AUTO: OFF";
+    document.body.appendChild(b);
+    return b;
+  })();
+
+  function setAutoUI(on, mode){
+    autoBadge.style.display = on ? "block" : "none";
+    autoBadge.textContent = on ? ("AUTO: "+mode) : "AUTO: OFF";
+    autoBadge.style.boxShadow = on ? "0 0 18px rgba(255,215,120,.25)" : "none";
+  }
+
+  function syncVisuals(longMode, p){
+    // direction wheel / joystick visual
+    const wheel = qs("#directionWheel") || qs("#dirWheel") || qs(".direction-wheel") || qs(".wheel");
+    if(wheel){
+      const deg = (longMode ? 20 : -20) + (p*30);
+      wheel.style.transform = `rotate(${deg}deg)`;
+    }
+
+    // planet flow / star stream
+    const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
+    if(flow){
+      const x = (longMode ? 1 : -1) * (p*18);
+      flow.style.transform = `translateX(${x}px)`;
+      flow.style.opacity = "1";
+    }
+
+    // main beauty ring subtle drift
+    const ring = qs("#beautyRing") || qs(".beauty-ring") || qs(".main-ring");
+    if(ring){
+      ring.style.filter = longMode ? "drop-shadow(0 0 18px rgba(0,255,255,.18))" : "drop-shadow(0 0 18px rgba(255,120,120,.16))";
+    }
+
+    // GA mini bars sweep (left->right->reset)
+    const bars = qsa(".ga-bar, .gaBar, [data-ga-bar]");
+    if(bars.length){
+      const w = Math.round(100 * p);
+      bars.forEach(el=>{
+        el.style.width = w + "%";
+        el.style.opacity = "1";
+      });
+    }
+  }
+
+  function step(){
+    AUTO.phase += 1;
+    // ping-pong 0..1..0
+    const raw = (AUTO.phase % 120) / 120; // 0..0.99
+    const p = raw <= 0.5 ? raw*2 : (1-raw)*2;
+
+    const longMode = (AUTO.phase % 240) < 120; // switch every ~120 ticks
+    const modeTxt = longMode ? "LONG" : "SHORT";
+    setAutoUI(true, modeTxt);
+
+    // update ranges (if exist) so other listeners update the scene
+    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
+    if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
+
+    syncVisuals(longMode, p);
+  }
+
+  function toggleAuto(){
+    AUTO.on = !AUTO.on;
+    try{
+      const badgeEl = qs("#autoModeBadge");
+      if(badgeEl) badgeEl.textContent = AUTO.on ? "ON" : "OFF";
+    }catch(e){}
+    if(AUTO.on){
+      setAutoUI(true, "LONG");
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = setInterval(step, 250);
+    }else{
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = null;
+      setAutoUI(false, "OFF");
+    }
+  }
+
+  
+  // keep backward-compat: older onclick calls app.autoHunt()
+  try{ if(window.app){ window.app.autoHunt = toggleAuto; } }catch(e){}
+// bind
+  const btn = qs("#btnAutoBattle");
+  if(btn){
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleAuto();
+    }, {passive:false});
+  }
+
+  // expose
+  window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
+})();
+</script>
+
+
+<!-- Wallet Hub Modal -->
+<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999;">
+  <div style="width:min(520px,92vw); background:#0b0f14; border:1px solid rgba(255,215,102,.45); border-radius:14px; padding:14px 14px 12px 14px; box-shadow:0 10px 40px rgba(0,0,0,.55);">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
+      <button class="term-btn" style="padding:6px 10px; font-size:12px;" onclick="web3.closeWalletHub()">✖</button>
+    </div>
+    <div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
+      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
+    </div>
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('metamask')">MetaMask 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('trust')">Trust Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('okx')">OKX Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('bitget')">Bitget Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('binance')">Binance 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.connectWalletConnect()">WalletConnect QR</button>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <input id="walletHubUrl" readonly style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" />
+      <button class="nav-btn" style="padding:10px 12px;" onclick="web3.copyDappUrl()">複製</button>
+    </div>
+    <div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
+      通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== COORD PANEL (V2.20.4) ===== -->
+<div id="coord-panel" aria-label="駕駛艙座標面板">
+  <div class="cp-title">
+    <span>駕駛艙｜座標 / CT</span>
+    <span class="muted" id="cp-side">SIDE: --</span>
+  </div>
+
+  <div class="cp-grid">
+    <div class="cp-row">
+      <div class="cp-k">高老莊地址（8888）</div>
+      <div class="cp-v">
+        <input id="cp-gaolao-addr" readonly placeholder="未設定" style="width:100%;"/>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <button type="button" style="flex:1;" onclick="web3.setGaolaoAddr()">設定</button>
+          <button type="button" style="flex:1;" onclick="web3.copyGaolaoAddr()">複製</button>
+        </div>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊 KGEN 餘額</div>
+      <div class="cp-v" id="cp-gaolao-kgen">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊狀態</div>
+      <div class="cp-v" id="cp-gaolao-status">--</div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊 BNB 餘額</div>
+      <div class="cp-v" id="cp-gaolao-bnb">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">花果山台灣（公益金庫）</div>
+      <div class="cp-v">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span id="cp-treasury-addr" style="font-family:Orbitron; font-size:11px;">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</span>
+          <button type="button" onclick="web3.copyTreasuryAddr()">複製</button>
+        </div>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">金庫 KGEN 餘額</div>
+      <div class="cp-v" id="cp-treasury-kgen">--</div>
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">Token Contract</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xBA3d...32Be</span>
+        <button type="button" onclick="app.openTokenScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">官方交易（PancakeSwap）</div>
+      <div class="cp-v"><button type="button" style="width:100%;" onclick="app.openPancake()">開啟 KGEN / WBNB</button></div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP Pair（KGEN / WBNB）</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xf366...b6c2</span>
+        <button type="button" onclick="app.openPairScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP 鎖倉（PinkLock）</div>
+      <div class="cp-v">
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <span style="font-family:Orbitron; font-size:11px;">鎖至 2027/01/01（UTC）</span>
+          <button type="button" onclick="app.openLpLock()">開啟</button>
+        </div>
+        <div class="muted" style="margin-top:6px; font-size:11px;">請只認合約地址，不認名稱</div>
+      </div>
+    </div>
+
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
+      <div class="cp-v"><input id="ct-in" inputmode="decimal" readonly /></div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">CT+1（依下單金額推估）</div>
+      <div class="cp-v" id="cp-ct1">--</div>
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">最近座標</div>
+      <div class="cp-v" id="cp-nearest">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">距離（以 16888=384400km 換算）</div>
+      <div class="cp-v" id="cp-km">--</div>
+    </div>
+  </div>
+
+  <div class="cp-actions">
+    <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
+    <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
+    <button type="button" onclick="app.openTokenScan()">Token</button>
+    <button type="button" onclick="app.openPairScan()">LP Pair</button>
+    <button type="button" onclick="app.openLpLock()">LP 鎖</button>
+  </div>
+</div>
+
+<div id="coord-modal" role="dialog" aria-label="宇宙座標表">
+  <div class="cm-box">
+    <div class="cm-head">
+      <b>宇宙座標表</b>
+      <input id="cm-q" placeholder="搜尋：名稱 / 點位 (例如 月球 / 21444 / 花果山)" />
+      <button type="button" onclick="app.closeCoordModal()">關閉</button>
+    </div>
+    <div class="cm-list" id="cm-list"></div>
+  </div>
+</div>
+
+
+<script>
+
+(() => {
+  // 宇宙座標表：v=點位(可大於16888)，n=名稱，d=說明
+  const COORDS = [{"v": 87654321, "n": "天堂", "d": "未來所有生物物種都有房子住的地方"}, {"v": 28100000.0, "n": "木星", "d": "木星軌道象徵（6.4×10^8km）"}, {"v": 6570000.0, "n": "太陽", "d": "太陽軌道象徵（1.496×10^8km）"}, {"v": 1800000.0, "n": "金星", "d": "金星軌道象徵（4.1×10^7km）"}, {"v": 1234567, "n": "變形金鋼", "d": "機械神族級別"}, {"v": 511111, "n": "齊天大聖宮", "d": "悟空自立為王的最高殿堂（2538387km）"}, {"v": 188888, "n": "地球神域", "d": "神軍與外星人分界"}, {"v": 168888, "n": "筋斗雲", "d": "無限期權象徵"}, {"v": 126588, "n": "平天大聖宮", "d": "平天大聖的宮殿"}, {"v": 126500, "n": "最重的恐龍", "d": "牛魔王坐騎避水金睛獸重量"}, {"v": 123456, "n": "時間輪盤", "d": "時間運作的根源符號"}, {"v": 111111, "n": "如來神掌", "d": "神明與神軍分界（天上50天地上50年地下一萬年）"}, {"v": 108000, "n": "點石成金", "d": "高等煉金術門檻（2458266km）"}, {"v": 100000, "n": "玉皇宮", "d": "至尊皇帝殿"}, {"v": 99999, "n": "命運之神", "d": "元宇宙道場核心"}, {"v": 99995, "n": "龍珠紅", "d": "雙龍吐珠玉璽之紅珠"}, {"v": 88895, "n": "蟠桃園", "d": "長生不老果園（2023403km）"}, {"v": 88888, "n": "美州大陸", "d": "哥倫布發現新大陸象徵"}, {"v": 77777, "n": "北海龍宮", "d": "北海龍王敖吉宮"}, {"v": 66666, "n": "西海龍宮", "d": "西海龍王敖順宮"}, {"v": 55555, "n": "東海龍宮", "d": "東海龍王敖廣宮"}, {"v": 44444, "n": "南海龍宮", "d": "南海龍王敖欽宮"}, {"v": 33333, "n": "黃金鑽石", "d": "頂級財富能量"}, {"v": 24888, "n": "佛祖金鋼殿", "d": "佛祖聖殿"}, {"v": 24449, "n": "雲端神將", "d": "高階操盤者所在之巔"}, {"v": 23333, "n": "靈山", "d": "佛門聖地"}, {"v": 22888, "n": "白龍門", "d": "白龍族之界門"}, {"v": 22400, "n": "幻市魔影之門", "d": "幻象市場入口"}, {"v": 22200, "n": "魔影之谷", "d": "貪婪恐懼之谷"}, {"v": 22188, "n": "貪婪魔影", "d": "追高殺多化身"}, {"v": 21888, "n": "恐懼女鬼", "d": "恐慌回檔象徵"}, {"v": 21777, "n": "白龍門下層", "d": "三國軍團入口"}, {"v": 21666, "n": "佛光普照之地", "d": "佛光加持區"}, {"v": 21588, "n": "如來佛", "d": "如來禪寺"}, {"v": 21520, "n": "大雄寶殿", "d": "主殿"}, {"v": 21444, "n": "五丈原界碑", "d": "多空對峙"}, {"v": 21344, "n": "參軍將", "d": "諸葛亮部下"}, {"v": 21319, "n": "雷音寺", "d": "金剛般若波羅蜜經導讀地（485257km）"}, {"v": 20888, "n": "火焰山", "d": "高風險高波動"}, {"v": 20732, "n": "創世之門", "d": "悟道閘口"}, {"v": 20000, "n": "女兒國", "d": "情感試煉"}, {"v": 18999, "n": "玉帝", "d": "北京象徵（430082km）"}, {"v": 18921, "n": "斬妖台", "d": "誅邪之台"}, {"v": 18911, "n": "煉丹爐", "d": "極端試煉"}, {"v": 18894, "n": "總兵元帥府", "d": "軍事核心"}, {"v": 18893, "n": "總卒元將府", "d": "士卒核心"}, {"v": 18892, "n": "敖吉", "d": "北海龍王"}, {"v": 18891, "n": "敖順", "d": "西海龍王"}, {"v": 18890, "n": "敖廣", "d": "東海龍王"}, {"v": 18889, "n": "敖欽", "d": "南海龍王"}, {"v": 18888, "n": "凌霄寶殿", "d": "神仙與神明分界殿"}, {"v": 18520, "n": "四大天王", "d": "四大護法"}, {"v": 18319, "n": "四大天門", "d": "東南西北天門"}, {"v": 16888, "n": "白骨洞 / 廣寒宮", "d": "嫦娥居所（384400km）"}, {"v": 13888, "n": "東土大唐", "d": "取經起點"}, {"v": 13500, "n": "金箍棒", "d": "仙級武器重量13500斤/口（台北307283km）"}, {"v": 12682, "n": "阿斗起飛", "d": "阿斗翻身點"}, {"v": 12345, "n": "五指山", "d": "悟空的房子（新竹）"}, {"v": 11520, "n": "花果山", "d": "台灣靈山"}, {"v": 11111, "n": "定海神針", "d": "黃金帥與黃金將分界（高雄）"}, {"v": 9999, "n": "北海龍房", "d": "北海龍族"}, {"v": 9995, "n": "龍珠綠", "d": "玉璽綠珠"}, {"v": 9444, "n": "黑風谷", "d": "暗勢力"}, {"v": 8895, "n": "雲棧洞", "d": "豬八戒房子（綠島）"}, {"v": 8888, "n": "高老莊", "d": "豬八戒老婆家（蘭嶼）"}, {"v": 7777, "n": "西海龍房", "d": "敖犬房子（西藏）"}, {"v": 7744, "n": "流沙河", "d": "沙悟淨房子"}, {"v": 7200, "n": "畫杆方天戟", "d": "龍兵器重量7200斤"}, {"v": 6888, "n": "靈台方寸山", "d": "悟空學道之地"}, {"v": 6666, "n": "東海龍房", "d": "東海龍族住地"}, {"v": 6128, "n": "斜月三星洞", "d": "祖師授法地"}, {"v": 5555, "n": "南海龍房", "d": "南海龍族住地"}, {"v": 5168, "n": "金山銀礦", "d": "財富礦脈"}, {"v": 5048, "n": "九齒釘耙", "d": "五戒武器"}, {"v": 5048, "n": "降妖寶杖", "d": "沙悟淨武器"}, {"v": 4444, "n": "地府", "d": "亡魂審判"}, {"v": 4168, "n": "奈何橋", "d": "無法回頭抉擇"}, {"v": 4040, "n": "暗網交易所", "d": "地下金融"}, {"v": 3141, "n": "影像迷宮", "d": "虛實交錯"}, {"v": 1852, "n": "人造衛星高度", "d": "軌道高度（42157km）"}, {"v": 1111, "n": "閻王殿", "d": "隕石帥與隕石將"}, {"v": 411, "n": "大氣層", "d": "地球保護層（9371km）"}, {"v": 280, "n": "地球表面", "d": "人類居住地（6371km）"}, {"v": 188, "n": "地嶽", "d": "閻羅王之地"}, {"v": 72, "n": "最輕恐龍", "d": "魔族最小等級72斤"}, {"v": 1, "n": "玩家創建", "d": "開局一口的人"}, {"v": 0, "n": "恐龍", "d": "史前霸主"}, {"v": -1, "n": "宇宙", "d": "宇宙誕生點"}, {"v": -37.63, "n": "石油", "d": "黑天鵝象徵"}, {"v": 14520, "n": "巧雲", "d": "天樞做空｜大仙女"}, {"v": 14866, "n": "巧虹", "d": "天璇做多｜二仙女"}, {"v": 16184, "n": "巧芝", "d": "天璣做空｜三仙女"}, {"v": 16888, "n": "巧仙", "d": "天權做多｜四仙女"}, {"v": 17347, "n": "巧蘭", "d": "天衡做空｜五仙女"}, {"v": 18056, "n": "巧梅", "d": "闓陽做多｜六仙女"}, {"v": 18459, "n": "巧靈", "d": "瑤光多退｜七仙女"}];
+  // 月球基準點位（廣寒宮）：16888
+  const MOON_POINT = 16888;
+  // 地球→月球距離（km）：384400
+  const MOON_KM = 384400;
+
+  function $(id) { return document.getElementById(id); }
+  function toNum(x) {
+    if (x === null || x === undefined) return NaN;
+    if (typeof x === 'number') return x;
+    const s = String(x).trim().replace(/,/g,'');
+    if (!s) return NaN;
+    return Number(s);
+  }
+  function fmt(x) {
+    if (!isFinite(x)) return '--';
+    // keep up to 4 decimals if small, else int
+    const ax = Math.abs(x);
+    if (ax >= 1000) return String(Math.round(x));
+    if (ax >= 10) return x.toFixed(2);
+    return x.toFixed(4);
+  }
+  function currentSteerDeg() {
+    const el = $('steer-input-val');
+    return el ? (toNum(el.textContent) || 0) : 0;
+  }
+    // 由方向盤角度（deg）判斷多空：
+  // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
+  
+  // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
+  function moveAutoBadgeIntoCockpit() {
+    try{
+      const badge = document.getElementById('autoBadge');
+      const cockpit = document.getElementById('coord-panel');
+      if(!badge || !cockpit) return;
+      if(cockpit.contains(badge)) return;
+      badge.classList.add('in-cockpit');
+      cockpit.prepend(badge);
+    }catch(e){}
+  }
+function sideFromDeg(deg) {
+    // User rule:
+    // 0..90 and 0..-90 => LONG
+    // 90..180 and -90..-180 => SHORT
+    if (deg >= -90 && deg <= 90) return 'LONG';
+    return 'SHORT';
+  }
+  function nearestCoord(ct) {
+    let best = null, bestDiff = Infinity;
+    for (const c of COORDS) {
+      const diff = Math.abs(c.v - ct);
+      if (diff < bestDiff) { bestDiff = diff; best = c; }
+    }
+    return best;
+  }
+  function kmFromCT(ct) {
+    return (ct / MOON_POINT) * MOON_KM;
+  }
+
+  // expose helpers
+  window.app = window.app || {};
+  app._ct = app._ct ?? NaN;
+  app._ct1 = app._ct1 ?? NaN;
+
+  app.setCT = (v) => {
+    // 手動指定鏈上 CT（除錯用）。正常狀態由鏈上 poolBalance 同步，不建議手動改。
+    const n = toNum(v);
+    if (!isFinite(n)) return;
+    app._ct = n;
+    if ($('ct-in')) $('ct-in').value = String(n);
+    app.updateCoordPanel();
+  };
+
+  app.setCoord = (v) => {
+    // 只改「座標點位」（地圖/星球位置），不動鏈上 CT。
+    const n = toNum(v);
+    if (!isFinite(n)) return;
+    app._coord = n;
+    app.updateCoordPanel();
+  };
+
+  app.updateCoordPanel = () => {
+    const deg = currentSteerDeg();
+    const side = sideFromDeg(deg);
+    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
+
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (isFinite(ct)) {
+      const near = nearestCoord(ct);
+      if ($('cp-nearest')) $('cp-nearest').innerHTML = near ? `${near.n} <span class="muted">({fmt(near.v)})</span>` : '--';
+      const km = kmFromCT(ct);
+      if ($('cp-km')) $('cp-km').textContent = `${fmt(km)} km`;
+    } else {
+      if ($('cp-nearest')) $('cp-nearest').textContent = '--';
+      if ($('cp-km')) $('cp-km').textContent = '--';
+    }
+
+    if ($('cp-ct1')) $('cp-ct1').textContent = isFinite(app._ct1) ? fmt(app._ct1) : '--';
+
+    // keep AUTO badge consistent if exists
+    const autoTag = document.getElementById('auto-tag');
+    if (autoTag && autoTag.textContent && autoTag.textContent.includes('AUTO')) {
+      // only update the side label part, keep styling
+      autoTag.textContent = `AUTO: ${side}`;
+    }
+  };
+
+  app.openCoordModal = () => {
+    const modal = $('coord-modal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    app.renderCoordList('');
+    setTimeout(() => $('cm-q')?.focus(), 50);
+  };
+  app.closeCoordModal = () => {
+    const modal = $('coord-modal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+  app.renderCoordList = (q) => {
+    const list = $('cm-list');
+    if (!list) return;
+    const query = (q||'').trim().toLowerCase();
+    const filtered = !query ? COORDS : COORDS.filter(c =>
+      String(c.v).toLowerCase().includes(query) ||
+      (c.n||'').toLowerCase().includes(query) ||
+      (c.d||'').toLowerCase().includes(query)
+    );
+    list.innerHTML = filtered.map(c => `
+      <div class="cm-item" data-v="${c.v}">
+        <div class="cm-v">${fmt(c.v)}</div>
+        <div>
+          <div class="cm-n">${c.n}</div>
+          <div class="cm-d">${c.d || ''}</div>
+        </div>
+      </div>
+    `).join('') || '<div style="opacity:.75;padding:14px;">沒有符合的座標</div>';
+
+    list.querySelectorAll('.cm-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const v = toNum(el.getAttribute('data-v'));
+        app.setCT(v);
+        app.closeCoordModal();
+      });
+    });
+  };
+
+  app.syncFromWheel = () => {
+    // Use current steering direction to set CT+1 guess (sign)
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (!isFinite(ct)) return;
+    const deg = currentSteerDeg();
+    const side = sideFromDeg(deg);
+    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
+    if (!isFinite(delta) || delta === 0) {
+      // fallback small step
+      app._ct1 = ct + (side === 'LONG' ? 72 : -72);
+    } else {
+      app._ct1 = ct + (side === 'LONG' ? delta : -delta);
+    }
+    app.updateCoordPanel();
+  };
+
+  app.orderGuess = (dir) => {
+    // When user presses UP/DOWN, treat the "amount" input as the delta guess for CT+1.
+    // (If user wants pure KGEN order amount, keep using it; this just updates CT+1 preview.)
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (!isFinite(ct)) return;
+    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
+    const step = (isFinite(delta) && delta !== 0) ? delta : 72;
+    app._ct1 = ct + (dir === 'UP' ? step : -step);
+    app.updateCoordPanel();
+  };
+
+  // Wire up input / modal search
+  $('ct-in')?.addEventListener('input', (e) => {
+    app._ct = toNum(e.target.value);
+    app.updateCoordPanel();
+  });
+  $('cm-q')?.addEventListener('input', (e) => app.renderCoordList(e.target.value));
+  $('coord-modal')?.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'coord-modal') app.closeCoordModal();
+  });
+
+  // Patch applySteer to keep UI consistent, without breaking existing logic.
+  if (typeof window.applySteer === 'function' && !window.__applySteerPatched_v2204) {
+    window.__applySteerPatched_v2204 = true;
+    const _orig = window.applySteer;
+    window.applySteer = function(deg) {
+      _orig(deg);
+      try { app.updateCoordPanel(); } catch(_e) {}
+    };
+  }
+
+  // initial
+  setTimeout(() => {
+    // default CT = 16888 (moon) if empty
+    if ($('ct-in') && !String($('ct-in').value||'').trim()) {
+      app.setCT(16888);
+    } else {
+      app.updateCoordPanel();
+    }
+  }, 300);
+})();
+
+
+// ================================
+// ✅ 一鍵直達連結（Token / LP Pair / LP 鎖 / 地圖）
+// - 以 data-url 屬性綁定
+// - 手機瀏覽器：用 window.open 另開
+// ================================
+function openUrl(url){
+  try{
+    if(!url) return;
+    window.open(url, '_blank', 'noopener');
+  }catch(e){ console.warn('openUrl failed', e); }
+}
+
+document.addEventListener('click', (ev)=>{
+  const btn = ev.target.closest('[data-url]');
+  if(!btn) return;
+  const url = btn.getAttribute('data-url');
+  if(url) openUrl(url);
+});
+</script>
+
+<script>try{app.musicInit();}catch(_){}</script>
 </body>
 </html>
