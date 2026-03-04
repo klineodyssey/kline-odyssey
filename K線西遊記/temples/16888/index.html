@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.6.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix{left:18px; position: fixed; right:auto; top:220px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix{left:18px; position: fixed; right:auto; top:300px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -389,16 +389,116 @@
 @media (max-width: 520px){
   #coord-panel{ right: 12px; bottom: 420px; width: min(360px, 94vw); }
 }
+
+/* ====== V2.22.8 ADD: Resource bars + Toast + AutoTag ====== */
+.resource-bars{
+  position: fixed;
+  left: 18px;
+  top: 118px;
+  width: 300px;
+  max-width: 64vw;
+  z-index: 120;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  pointer-events:none;
+}
+.resource-bars .rb{
+  background: rgba(10,10,14,0.72);
+  border: 1px solid rgba(255,215,0,0.45);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.5);
+}
+.resource-bars .rb .row{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'Orbitron';
+  font-size:11px;
+  letter-spacing:0.4px;
+}
+.resource-bars .rb .bar{
+  height:8px; border-radius:999px;
+  background: rgba(255,255,255,0.06);
+  overflow:hidden;
+  margin-top:6px;
+}
+.resource-bars .rb .fill{
+  height:100%;
+  width:0%;
+  background: var(--cyan);
+  transition: width .45s ease;
+}
+.resource-bars .rb.kgen .fill{ background: var(--gold); }
+.resource-bars .rb small{ color:#9cc; opacity:.9; }
+
+/* Auto Tag (near steering) */
+#autoTag{
+  position: fixed;
+  left: 50%;
+  bottom: 156px;
+  transform: translateX(-50%);
+  z-index: 130;
+  font-family:'Orbitron';
+  font-weight:900;
+  font-size:12px;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,255,0.55);
+  background: rgba(0,0,0,0.55);
+  box-shadow: 0 0 18px rgba(0,255,255,0.18);
+  pointer-events:none;
+}
+#autoTag.short{
+  border-color: rgba(255,120,120,0.65);
+  box-shadow: 0 0 18px rgba(255,120,120,0.18);
+}
+
+/* Toast */
+#toast{
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: min(520px, 92vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,215,0,0.45);
+  background: rgba(0,0,0,0.68);
+  color: #fff;
+  font-family: "Noto Sans TC";
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .4px;
+  display:none;
+}
+#toast.show{ display:block; }
+
 </style>
 </head>
 <body>
 
 
   <div id="brand-badge">K線西遊記・花果山台灣</div>
+  <div class="resource-bars" aria-label="資源條">
+    <div class="rb bnb">
+      <div class="row"><span>BNB｜油量</span><small id="rb-bnb-txt">--</small></div>
+      <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
+    </div>
+    <div class="rb kgen">
+      <div class="row"><span>KGEN｜血量</span><small id="rb-kgen-txt">--</small></div>
+      <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
+    </div>
+  </div>
+
+  <div id="autoTag">AUTO: --</div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.22.8</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1206,7 +1306,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
 speak(m){
       try{
         if(!m) return;
-        const u = new SpeechSynthesisUtterance(String(m));
+        const u = new SpeechSynthesisUtterance(ui.sanitize(m));
         u.lang = 'zh-TW';
         u.rate = 1.0;
         speechSynthesis.cancel();
@@ -1240,6 +1340,48 @@ window.onload = () => app.init();
    - PoolDuel：下單即真成交，輸贏在池內即時結算
    - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
    =========================== */
+
+// =====================
+// UI Helper (sound + toast + sanitize speech)
+// =====================
+const ui = {
+  _toastTimer: null,
+  toast(msg, ms=2200){
+    const t = document.getElementById("toast");
+    if(!t) return;
+    t.textContent = this.sanitize(msg);
+    t.classList.add("show");
+    if(this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(()=>{ t.classList.remove("show"); }, ms);
+  },
+  beep(freq=880, dur=0.06){
+    try{
+      const ctx = this._ctx || (this._ctx = new (window.AudioContext||window.webkitAudioContext)());
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = freq;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, Math.max(20, dur*1000));
+    }catch(_){}
+  },
+  sanitize(s){
+    // remove emoji / symbols that TTS tends to read out loud
+    return String(s||"").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").trim();
+  }
+};
+
+// make all buttons click beep + hint (opt-in via data-hint)
+window.addEventListener("click", (ev)=>{
+  const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+  if(!btn) return;
+  const hint = btn.getAttribute("data-hint");
+  if(hint){ ui.beep(); ui.toast(hint); }
+}, true);
+
+
 const web3 = {
   provider: null,
   signer: null,
@@ -1301,8 +1443,11 @@ const web3 = {
   // 你部署後填上（會自動記到 localStorage）
   UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
 
+  TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  LP_PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+
   // 高老莊（8888）地址：可在頁面設定，會自動記到 localStorage
-  GAOLAO: "",
+  GAOLAO: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
 
   // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
   abiERC20: [
@@ -1401,6 +1546,12 @@ async refreshGaolao(){
     const bal = await kgenR.balanceOf(this.GAOLAO);
     const txt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
     if(vb) vb.innerText = txt;
+    // BNB
+    try{
+      const bnb = await this.provider.getBalance(this.GAOLAO);
+      const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
+      const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText = bnbTxt;
+    }catch(_){ const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText="--"; }
     if(st) st.innerText = "OK";
   }catch(e){
     console.warn("refreshGaolao failed", e);
@@ -1409,6 +1560,20 @@ async refreshGaolao(){
   }
 },
 
+async refreshTreasury(){
+  const vk = document.getElementById('cp-treasury-kgen');
+  if(this.demo){ if(vk) vk.innerText = 'DEMO'; return; }
+  if(!this.provider) { if(vk) vk.innerText='--'; return; }
+  try{
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+    let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
+    const bal = await kgenR.balanceOf(this.TREASURY);
+    if(vk) vk.innerText = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+  }catch(e){
+    console.warn('refreshTreasury failed', e);
+    if(vk) vk.innerText='--';
+  }
+},
 setUniverseAddr(){
     const v = (document.getElementById("uni-addr-input").value || "").trim();
     if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
@@ -1442,11 +1607,13 @@ setUniverseAddr(){
       this.addr = await this.signer.getAddress();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
       this.demo = false;
-            try{ await this.refreshGaolao(); }catch(_){ }
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
 this.ui();
       await this.refresh();
       await this.refreshUser();
-            try{ await this.refreshGaolao(); }catch(_){ }
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
 await this.bindEvents();
       app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
@@ -1489,10 +1656,28 @@ await this.bindEvents();
         const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
         const bn=document.getElementById('userBNB'); if(bn) bn.innerText = bnbTxt;
       }catch(_){ const bn=document.getElementById('userBNB'); if(bn) bn.innerText='--'; }
+      // Resource bars (top-left)
+      try{
+        const bnb = await this.provider.getBalance(this.addr);
+        const bnbVal = parseFloat(ethers.utils.formatEther(bnb));
+        const kgenVal = parseFloat(ethers.utils.formatUnits(bal, dec));
+        const bnbTxt2 = `${bnbVal.toFixed(4)} BNB`;
+        const kgenTxt2 = `${kgenVal.toFixed(4)} KGEN`;
+        const bt = document.getElementById("rb-bnb-txt"); if(bt) bt.textContent = bnbTxt2;
+        const kt = document.getElementById("rb-kgen-txt"); if(kt) kt.textContent = kgenTxt2;
+
+        // simple normalization (no max supply known): BNB capped at 1.0 for bar, KGEN capped at 10,000
+        const bFill = document.getElementById("rb-bnb-fill"); 
+        const kFill = document.getElementById("rb-kgen-fill");
+        if(bFill) bFill.style.width = `${Math.min(100, (bnbVal/1.0)*100)}%`;
+        if(kFill) kFill.style.width = `${Math.min(100, (kgenVal/10000.0)*100)}%`;
+      }catch(_){}
+
 
 
             // 同步更新高老莊（8888）地址餘額
       await this.refreshGaolao();
+      await this.refreshTreasury();
 }catch(e){
       console.warn("refreshUser failed", e);
       const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
@@ -1831,7 +2016,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     // Auto side tag + auto order (demo/live)
     const side = sideFromSteerDeg(steerDeg);
     const autoTag = document.getElementById('autoTag');
-    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; }
+    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; autoTag.classList.toggle('short', side!=='UP'); }
 
     // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
     if(ts - state.lastOrder > 2400){
@@ -2063,6 +2248,24 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div class="cp-row">
       <div class="cp-k">高老莊狀態</div>
       <div class="cp-v" id="cp-gaolao-status">--</div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊 BNB 餘額</div>
+      <div class="cp-v" id="cp-gaolao-bnb">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">花果山台灣（公益金庫）</div>
+      <div class="cp-v">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span id="cp-treasury-addr" style="font-family:Orbitron; font-size:11px;">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</span>
+          <button type="button" onclick="web3.copyTreasuryAddr()">複製</button>
+        </div>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">金庫 KGEN 餘額</div>
+      <div class="cp-v" id="cp-treasury-kgen">--</div>
+    </div>
+
     </div>
 
     <div class="cp-row">
