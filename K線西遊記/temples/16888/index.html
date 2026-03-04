@@ -1588,7 +1588,7 @@ async refreshGaolao(){
   }
   try{
     if(st) st.innerText = "讀取中…";
-    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, p);
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
     let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
     const bal = await kgenR.balanceOf(this.GAOLAO);
     const txt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
@@ -1610,9 +1610,10 @@ async refreshGaolao(){
 async refreshTreasury(){
   const vk = document.getElementById('cp-treasury-kgen');
   if(this.demo){ if(vk) vk.innerText = 'DEMO'; return; }
-  if(!this.provider) { if(vk) vk.innerText='--'; return; }
+  const pr = this.provider || this.rpcProvider;
+  if(!pr) { if(vk) vk.innerText='--'; return; }
   try{
-    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, p);
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
     let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
     const bal = await kgenR.balanceOf(this.TREASURY);
     if(vk) vk.innerText = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
@@ -1649,7 +1650,7 @@ setUniverseAddr(){
         return;
       }
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      try{ const net = await pr.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
@@ -1680,9 +1681,10 @@ await this.bindEvents();
         const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
         return;
       }
-      if(!this.provider || !this.addr || !this.UNIVERSE) return;
+      const pr = this.provider || this.rpcProvider;
+      if(!pr || !this.addr || !this.UNIVERSE) return;
 
-      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, p);
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
       let dec = 18;
       try{ dec = await kgenR.decimals(); }catch(_){}
 
@@ -1699,13 +1701,13 @@ await this.bindEvents();
 
       // BNB 餘額
       try{
-        const bnb = await this.provider.getBalance(this.addr);
+        const bnb = await pr.getBalance(this.addr);
         const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
         const bn=document.getElementById('userBNB'); if(bn) bn.innerText = bnbTxt;
       }catch(_){ const bn=document.getElementById('userBNB'); if(bn) bn.innerText='--'; }
       // Resource bars (top-left)
       try{
-        const bnb = await this.provider.getBalance(this.addr);
+        const bnb = await pr.getBalance(this.addr);
         const bnbVal = parseFloat(ethers.utils.formatEther(bnb));
         const kgenVal = parseFloat(ethers.utils.formatUnits(bal, dec));
         const bnbTxt2 = `${bnbVal.toFixed(4)} BNB`;
@@ -1841,12 +1843,13 @@ app.speak("點燈已入池。");
         this.demoRefresh();
         return;
       }
-      if(!this.UNIVERSE || !this.provider){
+      const pr = this.provider || this.rpcProvider;
+      if(!this.UNIVERSE || !pr){
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+      try{ const net = await pr.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
         uniR.poolBalance(),
@@ -1896,7 +1899,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(this._bound) return;
       this._bound = true;
 
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
 
       uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
         const p = parseFloat(ethers.utils.formatUnits(payout, 18));
@@ -2170,10 +2173,9 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     }
 
     // planet flow / star stream
+    // 注意：不要在這裡覆寫 flow 的 transform，避免把 CSS keyframes 動畫「卡死」
     const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
     if(flow){
-      const x = (longMode ? 1 : -1) * (p*18);
-      flow.style.transform = `translateX(${x}px)`;
       flow.style.opacity = "1";
     }
 
