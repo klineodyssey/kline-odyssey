@@ -79,7 +79,7 @@
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
         /* 🎡 方向盤 */
-        .steer-zone{ position: fixed; bottom:225px; width: 100%; text-align: center; z-index: 100; }
+        .steer-zone{ position: fixed; bottom:210px; width: 100%; text-align: center; z-index: 100; }
         .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
         .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
@@ -171,7 +171,7 @@
 #brand-badge{
   position:fixed;
   left: 44px;
-  top: 90px;
+  top: 110px;
   z-index:260;
   padding:6px 10px;
   border:1px solid rgba(255,215,128,.7);
@@ -394,7 +394,7 @@
 .resource-bars{
   position: fixed;
   left: 18px;
-  top: 150px;
+  top: 170px;
   width: 300px;
   max-width: 64vw;
   z-index: 120;
@@ -503,9 +503,8 @@
     </div>
   <div class="rb-note">E = mc²</div>
   </div>
-
-  <div id="autoTag">AUTO: --</div>
-  <div id="toast" role="status" aria-live="polite"></div>
+  <!-- AUTO status moved into cockpit panel (cp-auto) -->
+<div id="toast" role="status" aria-live="polite"></div>
 
 <div class="hud-top">
     <div class="brand-section">
@@ -694,6 +693,7 @@ const app = {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
         web3.load();
+        try{ refreshCTOnchain(); refreshTreasuryPanels(); setInterval(()=>{ refreshCTOnchain(); refreshTreasuryPanels(); }, 15000); }catch(_){ }
         this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
@@ -903,7 +903,123 @@ setTimeout(() => {
   //   ① 左下狀態（AUTO: LONG/SHORT）② 中央角度讀數 ③ 星球/流向/粒子動畫
   // - CT（現價）若能讀到鏈上池子報價就同步；讀不到則回退到本機模擬值（不會阻斷 UI）
   // ============================================================
- const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
+ 
+  // ============================
+  // 鏈上 CT（現價）讀取：從 KGEN/WBNB Pair 取 reserve 推算
+  // - 盡量「免連線也可讀」：先用 public RPC；失敗再用 window.ethereum
+  // ============================
+  const ADDR = {
+    KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+    WBNB: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    GAOLAO_8888: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
+    HGS_TW: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  };
+
+  const ABI_ERC20 = [
+    "function balanceOf(address) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function symbol() view returns (string)"
+  ];
+  const ABI_PAIR = [
+    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+    "function token0() view returns (address)",
+    "function token1() view returns (address)"
+  ];
+
+  async function getReadProvider(){
+    // 1) public RPC（免連線）
+    try{
+      const rpc = "https://bsc-dataseed.binance.org/";
+      const p = new ethers.providers.JsonRpcProvider(rpc);
+      await p.getBlockNumber();
+      return p;
+    }catch(e){
+      // 2) fallback: window.ethereum（可能仍需用戶允許，但通常可 read-only）
+      if(window.ethereum){
+        try{
+          return new ethers.providers.Web3Provider(window.ethereum);
+        }catch(_){}
+      }
+      throw e;
+    }
+  }
+
+  async function refreshCTOnchain(){
+    const elCtTitle = document.getElementById("cp-ct");
+    const elCtIn = document.getElementById("ct-in");
+    try{
+      const provider = await getReadProvider();
+      const pair = new ethers.Contract(ADDR.PAIR, ABI_PAIR, provider);
+      const [t0, t1] = await Promise.all([pair.token0(), pair.token1()]);
+      const {reserve0, reserve1} = await pair.getReserves();
+
+      // Identify which side is KGEN/WBNB
+      const kgenIs0 = (t0.toLowerCase() === ADDR.KGEN.toLowerCase());
+      const wbnbIs0 = (t0.toLowerCase() === ADDR.WBNB.toLowerCase());
+      // If ordering unexpected, still compute by comparing addresses
+      const kRes = kgenIs0 ? reserve0 : reserve1;
+      const bRes = kgenIs0 ? reserve1 : reserve0;
+
+      // decimals
+      const kgen = new ethers.Contract(ADDR.KGEN, ABI_ERC20, provider);
+      const wbnb = new ethers.Contract(ADDR.WBNB, ABI_ERC20, provider);
+      const [kDec, bDec] = await Promise.all([kgen.decimals(), wbnb.decimals()]);
+
+      const k = Number(ethers.utils.formatUnits(kRes, kDec));
+      const b = Number(ethers.utils.formatUnits(bRes, bDec));
+      // price: 1 KGEN = (b/k) WBNB ; 1 WBNB = (k/b) KGEN
+      const kgenPerBNB = (b>0) ? (k/b) : 0;
+      const bnbPerKgen = (k>0) ? (b/k) : 0;
+
+      const txt = (kgenPerBNB>0) ? (kgenPerBNB.toFixed(2) + " KGEN / BNB") : "--";
+      const txt2 = (bnbPerKgen>0) ? (bnbPerKgen.toFixed(8) + " BNB / KGEN") : "--";
+
+      if(elCtTitle) elCtTitle.textContent = "CT: " + txt;
+      if(elCtIn) elCtIn.value = txt + "  |  " + txt2;
+      return {kgenPerBNB, bnbPerKgen};
+    }catch(e){
+      if(elCtTitle) elCtTitle.textContent = "CT: --";
+      if(elCtIn) elCtIn.value = "";
+      return null;
+    }
+  }
+
+  async function refreshTreasuryPanels(){
+    // 高老莊 / 花果山台灣：免連線也嘗試讀；讀不到就顯示 --
+    try{
+      const provider = await getReadProvider();
+      const kgen = new ethers.Contract(ADDR.KGEN, ABI_ERC20, provider);
+      const kDec = await kgen.decimals();
+
+      // Gaolao
+      const gAddr = (document.getElementById("cp-gaolao-addr")?.value || ADDR.GAOLAO_8888).trim() || ADDR.GAOLAO_8888;
+      const gK = await kgen.balanceOf(gAddr);
+      const gKtxt = Number(ethers.utils.formatUnits(gK, kDec)).toLocaleString(undefined,{maximumFractionDigits:2});
+      const gB = await provider.getBalance(gAddr);
+      const gBtxt = Number(ethers.utils.formatEther(gB)).toFixed(4);
+
+      const elGK = document.getElementById("cp-gaolao-kgen");
+      const elGB = document.getElementById("cp-gaolao-bnb");
+      if(elGK) elGK.textContent = gKtxt + " KGEN";
+      if(elGB) elGB.textContent = gBtxt + " BNB";
+
+      // HGS TW treasury
+      const hK = await kgen.balanceOf(ADDR.HGS_TW);
+      const hKtxt = Number(ethers.utils.formatUnits(hK, kDec)).toLocaleString(undefined,{maximumFractionDigits:2});
+      const elHK = document.getElementById("cp-hgs-kgen");
+      if(elHK) elHK.textContent = hKtxt + " KGEN";
+    }catch(e){
+      const elGK = document.getElementById("cp-gaolao-kgen");
+      const elGB = document.getElementById("cp-gaolao-bnb");
+      const elHK = document.getElementById("cp-hgs-kgen");
+      if(elGK) elGK.textContent = "--";
+      if(elGB) elGB.textContent = "--";
+      if(elHK) elHK.textContent = "--";
+    }
+  }
+
+const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
     },
 
     async cam(mode) {
@@ -2138,14 +2254,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
 
   // UI targets (best-effort)
-  const autoBadge = qs("#autoBadge") || (function(){
-    const b = document.createElement("div");
-    b.id="autoBadge";
-    b.style.cssText="position:fixed;left:12px;bottom:92px;z-index:99999;padding:8px 10px;border:1px solid rgba(255,215,120,.35);border-radius:12px;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;display:none;";
-    b.textContent="AUTO: OFF";
-    document.body.appendChild(b);
-    return b;
-  })();
+  const autoBadge = qs("#cp-auto");
 
   function setAutoUI(on, mode){
     autoBadge.style.display = on ? "block" : "none";
@@ -2270,6 +2379,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
+    <span class="muted" id="cp-auto">AUTO: --</span>
+    <span class="muted" id="cp-ct">CT: --</span>
     <span class="muted" id="cp-side">SIDE: --</span>
   </div>
 
@@ -2291,6 +2402,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div class="cp-row">
       <div class="cp-k">高老莊狀態</div>
       <div class="cp-v" id="cp-gaolao-status">--</div>
+    </div>
     <div class="cp-row">
       <div class="cp-k">高老莊 BNB 餘額</div>
       <div class="cp-v" id="cp-gaolao-bnb">--</div>
@@ -2414,15 +2526,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
   
   // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
-  function moveAutoBadgeIntoCockpit() {
-    try{
-      const badge = document.getElementById('autoBadge');
-      const cockpit = document.getElementById('coord-panel');
-      if(!badge || !cockpit) return;
-      if(cockpit.contains(badge)) return;
-      badge.classList.add('in-cockpit');
-      cockpit.prepend(badge);
-    }catch(e){}
+  function moveAutoBadgeIntoCockpit(){ /* moved to cp-auto */ }
   }
 function sideFromDeg(deg) {
     // User rule:
