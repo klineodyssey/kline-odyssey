@@ -512,7 +512,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.26.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.27.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1364,6 +1364,135 @@ speak(m){
 };
 window.app = app;
 
+
+
+/* =========================
+   V2.27.0 HOTFIX (Wallet/Balances/Pool/Side)
+   - Bridge BinanceChain -> ethereum when Binance Wallet injects it
+   - Unify balances update targets (top bars + order panel)
+   - Ensure pool progress (16888) updates even without wallet via public RPC
+   - Single source of truth for SIDE mapping from deg
+========================= */
+(function(){
+  try{
+    if(!window.ethereum && window.BinanceChain){
+      window.ethereum = window.BinanceChain;
+    }
+    // Some wallets expose ethereum.providers (multiple). Prefer the active one.
+    if(window.ethereum && Array.isArray(window.ethereum.providers) && window.ethereum.providers.length){
+      // Pick first provider that looks like Binance/MetaMask/Trust/OKX; fallback to first.
+      const pick = window.ethereum.providers.find(p=>p && (p.isBinance || p.isMetaMask || p.isTrust || p.isOKXWallet)) || window.ethereum.providers[0];
+      if(pick) window.ethereum = pick;
+    }
+  }catch(_e){}
+})();
+
+(function(){
+  if(!window.app) return;
+
+  // ---- helpers
+  window.app.__v227 = true;
+  const setText = (id, txt)=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  };
+  const setHTML = (id, html)=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  };
+  const clamp = (v, a, b)=>Math.max(a, Math.min(b, v));
+
+  // ---- Public RPC (pool progress works even when wallet not connected)
+  window.app.PUBLIC_RPC = window.app.PUBLIC_RPC || "https://bsc-dataseed.binance.org/";
+
+  // ---- SIDE mapping: 0±90 => LONG, 90~270 => SHORT (符合你定義：-90~0~90 多；90~180 空；-180~-90 空)
+  window.app.calcSideFromDeg = function(deg){
+    const d = ((Number(deg)||0)%360 + 360) % 360;
+    return (d <= 90 || d >= 270) ? "LONG" : "SHORT";
+  };
+
+  // Force-sync any SIDE labels used in UI
+  window.app.syncSideUI = function(deg){
+    const side = window.app.calcSideFromDeg(deg);
+    setText("ct-side", side);
+    // Any element that wants side can use data-side="1"
+    document.querySelectorAll("[data-side='1']").forEach(el=>{ el.textContent = side; });
+    return side;
+  };
+
+  // ---- balances (single refresh)
+  window.app.refreshUserBalances = async function(){
+    if(!window.app.web3 || !window.app.web3.provider || !window.app.web3.address){
+      // not connected
+      setText("rb-bnb-txt", "--");
+      setText("rb-kgen-txt", "--");
+      return;
+    }
+    try{
+      const prov = window.app.web3.provider;
+      const addr = window.app.web3.address;
+
+      // BNB
+      const bnbWei = await prov.getBalance(addr);
+      const bnb = Number(ethers.formatEther(bnbWei));
+      setText("rb-bnb-txt", `${bnb.toFixed(4)} BNB`);
+
+      // KGEN
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const kgen = Number(ethers.formatUnits(await token.balanceOf(addr), dec));
+      setText("rb-kgen-txt", `${kgen.toFixed(4)} KGEN`);
+
+      // Order panel (if present)
+      setText("userBal", `${kgen.toFixed(4)} KGEN`);
+    }catch(_e){
+      // keep silent; UI already shows last known values
+    }
+  };
+
+  // ---- pool progress (16888)
+  window.app.refreshPoolProgress = async function(){
+    try{
+      const prov = (window.app.web3 && window.app.web3.provider) ? window.app.web3.provider : new ethers.JsonRpcProvider(window.app.PUBLIC_RPC);
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const bal = Number(ethers.formatUnits(await token.balanceOf(window.app.UNIVERSE_POOL), dec));
+      setText("w3-bal", `${bal.toFixed(4)} KGEN`);
+
+      const target = 16888;
+      const pct = clamp((bal / target) * 100, 0, 100);
+      setText("w3-prog", `${bal.toFixed(2)} / ${target} (${pct.toFixed(1)}%)`);
+
+      const fill = document.getElementById("prog-fill");
+      if(fill) fill.style.width = `${pct.toFixed(2)}%`;
+    }catch(_e){
+      setText("w3-prog", "讀取失敗");
+    }
+  };
+
+  // ---- de-dup AUTO label: keep only one source of truth at right-bottom panel
+  window.app.setAutoStatus = function(on){
+    const txt = on ? "AUTO: ON" : "AUTO: OFF";
+    setText("autoStatus", txt);
+    // hide legacy labels if any
+    document.querySelectorAll(".legacy-auto").forEach(el=>{ el.style.display = "none"; });
+  };
+
+  // ---- Ensure the main refresh loop calls our functions (without breaking existing logic)
+  const _oldRefreshAll = window.app.refreshAll;
+  window.app.refreshAll = async function(){
+    if(typeof _oldRefreshAll === "function"){
+      try{ await _oldRefreshAll.call(window.app); }catch(_e){}
+    }
+    await window.app.refreshUserBalances();
+    await window.app.refreshPoolProgress();
+    // keep SIDE synced with current deg
+    if(typeof window.app.getDeg === "function"){
+      window.app.syncSideUI(window.app.getDeg());
+    }
+  };
+
+})();
 
 window.onload = () => app.init();
   // auto concierge on first visit
