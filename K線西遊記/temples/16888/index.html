@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.8</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix{left:18px; position: fixed; right:auto; top:300px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix{left:18px; position: fixed; right:auto; top:360px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -498,7 +498,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.8</div>
+        <div class="sys-st" id="ver-st">VERSION v2.22.9</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -643,7 +643,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.22.0";
+const APP_VERSION = "v2.22.9";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1325,6 +1325,21 @@ speak(m){
       const pct = Math.round(r * 1000) / 10; // 0.1%
       el.innerText = `${pct}%`;
     }
+  ,
+  // ===== Chain info quick links =====
+  openTokenScan(){
+    try{ window.open(web3.TOKEN_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：KGEN Token（BscScan）"); }catch(e){}
+  },
+  openPairScan(){
+    try{ window.open(web3.PAIR_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：LP Pair（BscScan）"); }catch(e){}
+  },
+  openLpLock(){
+    try{ window.open(web3.LP_LOCK_URL, "_blank", "noopener"); web3.toast("已開啟：LP 鎖倉（PinkLock）"); }catch(e){}
+  },
+  openPancake(){
+    try{ window.open(web3.PANCAKE_SWAP_URL, "_blank", "noopener"); web3.toast("已開啟：PancakeSwap 交易頁"); }catch(e){}
+  }
+
 };
 window.app = app;
 
@@ -1445,6 +1460,13 @@ const web3 = {
 
   TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
   LP_PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+
+  // 鏈上資訊（唯一正確）
+  TOKEN_SCAN_URL: "https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PANCAKE_SWAP_URL: "https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PAIR_SCAN_URL: "https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+  LP_LOCK_URL: "https://www.pinksale.finance/pinklock/bsc/record/1427003",
+  LP_LOCK_UNTIL_UTC: "2027-01-01T00:00:00Z",
 
   // 高老莊（8888）地址：可在頁面設定，會自動記到 localStorage
   GAOLAO: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
@@ -2264,6 +2286,35 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div class="cp-row">
       <div class="cp-k">金庫 KGEN 餘額</div>
       <div class="cp-v" id="cp-treasury-kgen">--</div>
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">Token Contract</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xBA3d...32Be</span>
+        <button type="button" onclick="app.openTokenScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">官方交易（PancakeSwap）</div>
+      <div class="cp-v"><button type="button" style="width:100%;" onclick="app.openPancake()">開啟 KGEN / WBNB</button></div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP Pair（KGEN / WBNB）</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xf366...b6c2</span>
+        <button type="button" onclick="app.openPairScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP 鎖倉（PinkLock）</div>
+      <div class="cp-v">
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <span style="font-family:Orbitron; font-size:11px;">鎖至 2027/01/01（UTC）</span>
+          <button type="button" onclick="app.openLpLock()">開啟</button>
+        </div>
+        <div class="muted" style="margin-top:6px; font-size:11px;">請只認合約地址，不認名稱</div>
+      </div>
     </div>
 
     </div>
