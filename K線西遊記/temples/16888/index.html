@@ -24,7 +24,41 @@
 <meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+/* ===== V2.31.3 Built-in Music Loader Fix ===== */
+function __resolveTrackUrl(u){
+  if(!u) return "";
+  u = String(u).trim();
+  // full URLs pass through
+  if(/^https?:\/\//i.test(u)) return u;
+  // If playlist is stored in /music/, allow bare filenames
+  if(!u.includes("/")) u = "music/" + u;
+  // Normalize leading "./"
+  u = u.replace(/^\.\//, "");
+  // Encode Chinese filenames safely
+  return encodeURI(u);
+}
+
+async function __fetchPlaylist(){
+  const candidates = [
+    "music/playlist.json",
+    "./music/playlist.json",
+    encodeURI("music/playlist.json"),
+    new URL("music/playlist.json", window.location.href).toString()
+  ];
+  for (const url of candidates){
+    try{
+      const res = await fetch(url, {cache:"no-store"});
+      if(res && res.ok){
+        const json = await res.json();
+        return {ok:true, url, json};
+      }
+    }catch(e){}
+  }
+  return {ok:false, url:candidates[0], json:null};
+}
+/* ===== /V2.31.3 Built-in Music Loader Fix ===== */
+</script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -544,7 +578,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.31.1-OG</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.3-OG-MUSIC</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1457,7 +1491,7 @@ speak(m){
       const item = m.list[idx];
       if(item){
         if(item.url){
-          m.audio.src = item.url;
+          m.audio.src = __resolveTrackUrl(item.url);
         }else if(item.file){
           m.audio.src = URL.createObjectURL(item.file);
         }else{
@@ -1501,7 +1535,7 @@ speak(m){
           // normalize
           const list = arr.map(x=>({
             name: String(x.name||x.title||'Track'),
-            url: String(x.url||'').trim()
+            url: __resolveTrackUrl(x.url||'')
           })).map(x=>{
             // if url is bare filename, assume it's inside /music/
             if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
