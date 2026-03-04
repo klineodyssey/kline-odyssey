@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.22.9</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix{left:18px; position: fixed; right:auto; top:360px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix{left:18px; position: fixed; right:auto; top:420px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -394,7 +394,7 @@
 .resource-bars{
   position: fixed;
   left: 18px;
-  top: 118px;
+  top: 150px;
   width: 300px;
   max-width: 64vw;
   z-index: 120;
@@ -410,6 +410,17 @@
   padding: 8px 10px;
   box-shadow: 0 0 14px rgba(0,0,0,0.5);
 }
+
+.resource-bars .rb-note{
+  font-family: Orbitron, system-ui, -apple-system, "Segoe UI", Arial;
+  font-size: 11px;
+  opacity: .85;
+  color: rgba(255,215,0,0.85);
+  text-shadow: 0 0 10px rgba(255,215,0,0.25);
+  padding-left: 6px;
+  pointer-events:none;
+}
+
 .resource-bars .rb .row{
   display:flex; align-items:center; justify-content:space-between;
   font-family:'Orbitron';
@@ -483,13 +494,14 @@
   <div id="brand-badge">K線西遊記・花果山台灣</div>
   <div class="resource-bars" aria-label="資源條">
     <div class="rb bnb">
-      <div class="row"><span>BNB｜油量</span><small id="rb-bnb-txt">--</small></div>
+      <div class="row"><span>BNB｜暗物質</span><small id="rb-bnb-txt">--</small></div>
       <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
     </div>
     <div class="rb kgen">
-      <div class="row"><span>KGEN｜血量</span><small id="rb-kgen-txt">--</small></div>
+      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
       <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
     </div>
+  <div class="rb-note">E = mc²</div>
   </div>
 
   <div id="autoTag">AUTO: --</div>
@@ -643,7 +655,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.22.9";
+const APP_VERSION = "v2.23.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -967,7 +979,14 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
         document.querySelectorAll('.guide-tab').forEach(btn=>{
             btn.addEventListener('click', ()=> this.openGuide(btn.getAttribute('data-sec')));
         });
-        document.addEventListener('click', (e)=>{
+  
+        // Swap buttons (PancakeSwap)
+        const sb = document.getElementById('btn-swap-bnb');
+        if(sb) sb.addEventListener('click', ()=>{ this.openPancake(); });
+        const su = document.getElementById('btn-swap-usdt');
+        if(su) su.addEventListener('click', ()=>{ this.openPancake(); this.toast('提示：在 PancakeSwap 可用 WBNB 交換；若用 USDT 請先換成 WBNB 或走路由。'); });
+
+      document.addEventListener('click', (e)=>{
             const b = e.target && e.target.closest && e.target.closest('.qa-btn');
             if(!b) return;
             const q = b.getAttribute('data-q');
@@ -1392,8 +1411,10 @@ const ui = {
 window.addEventListener("click", (ev)=>{
   const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
   if(!btn) return;
-  const hint = btn.getAttribute("data-hint");
-  if(hint){ ui.beep(); ui.toast(hint); }
+  // 全按鍵統一音效 + 客服提示（避免空白）
+  ui.beep();
+  const hint = btn.getAttribute("data-hint") || btn.getAttribute("aria-label") || btn.textContent;
+  if(hint){ ui.toast(hint); }
 }, true);
 
 
@@ -1937,8 +1958,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
   
-  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button">🟡 用 BNB 換 KGEN</button>
-  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button">🟢 用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">🟡 用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">🟢 用 USDT 換 KGEN</button>
 <button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
       <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
 </div>
