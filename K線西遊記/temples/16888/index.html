@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.24.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -488,6 +488,13 @@
 }
 #toast.show{ display:block; }
 
+
+/* ===== SIDE LAMP ===== */
+.lamp{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;background:#444;box-shadow:0 0 8px rgba(0,0,0,.6);}
+.lamp.long{background:#38f;box-shadow:0 0 10px rgba(80,180,255,.8);}
+.lamp.short{background:#f83;box-shadow:0 0 10px rgba(255,140,80,.85);}
+.lamp.off{background:#555;box-shadow:none;}
+
 </style>
 </head>
 <body>
@@ -512,7 +519,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.22.9</div>
+        <div class="sys-st" id="ver-st">VERSION v2.24.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -572,7 +579,7 @@
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
-    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
+    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -614,8 +621,8 @@
     <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
     <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
     <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
-    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
-    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">自動巡航打怪</button>
     <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
     <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
 </div>
@@ -657,7 +664,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.23.0";
+const APP_VERSION = "v2.24.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1339,14 +1346,27 @@ speak(m){
     // ratio: 0..1
     setProgress(ratio){
       const el = document.getElementById('w3-prog');
-      if(!el) return;
       let r = Number(ratio);
       if(!Number.isFinite(r)) r = 0;
       r = Math.max(0, Math.min(1, r));
       const pct = Math.round(r * 1000) / 10; // 0.1%
-      el.innerText = `${pct}%`;
-    }
-  ,
+      if(el) el.innerText = `${pct}%`;
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      if(fill) fill.style.width = `${Math.max(0, Math.min(100, r*100))}%`;
+      if(txt) txt.textContent = `${Math.max(0, Math.min(100, r*100)).toFixed(1)}%`;
+    },
+  
+  calcSideByDeg(deg){
+    let d = Number(deg);
+    if(!Number.isFinite(d)) d = 0;
+    // normalize to [-180,180]
+    while(d > 180) d -= 360;
+    while(d < -180) d += 360;
+    // 規則：-90~+90 = LONG；(90~180] 或 [-180~-90) = SHORT
+    return (Math.abs(d) <= 90) ? "LONG" : "SHORT";
+  },
+
   // ===== Chain info quick links =====
   openTokenScan(){
     try{ window.open(web3.TOKEN_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：KGEN Token（BscScan）"); }catch(e){}
@@ -1422,10 +1442,35 @@ window.addEventListener("click", (ev)=>{
 
 const web3 = {
   provider: null,
-  rpcProvider: new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/"),
+  rpcProvider: null,
+  rpcUrls: [
+    "https://bsc-dataseed.binance.org/",
+    "https://bsc-dataseed1.binance.org/",
+    "https://bsc-dataseed2.binance.org/",
+    "https://bsc-dataseed3.binance.org/",
+    "https://rpc.ankr.com/bsc",
+  ],
   signer: null,
   addr: null,
   demo: false,
+
+  async initRpc(){
+    for(const url of this.rpcUrls){
+      try{
+        const p = new ethers.providers.JsonRpcProvider(url);
+        // quick ping
+        await p.getBlockNumber();
+        this.rpcProvider = p;
+        console.log('RPC OK:', url);
+        return true;
+      }catch(e){
+        console.warn('RPC fail:', url, e);
+      }
+    }
+    this.rpcProvider = null;
+    return false;
+  },
+
 
   // ==== chain guard (BSC) ====
   BSC_CHAIN_ID_DEC: 56,
@@ -2091,7 +2136,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   window.app.toggleAutoBattle = function(){
     state.on = !state.on;
     const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
+    if(btn) btn.textContent = state.on ? "自動打怪模式：ON" : "自動打怪模式：OFF";
     if(state.on){
       state.raf = requestAnimationFrame(step);
     }else{
@@ -2158,8 +2203,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     // unify AUTO display inside cockpit panel
     const cpAuto = qs("#cp-auto");
     if(cpAuto) cpAuto.textContent = on ? ("ON · "+mode) : "OFF";
-    const sideEl = qs("#cp-side");
-    if(sideEl) sideEl.textContent = "SIDE: " + (on ? mode : "--");
+    const sideText = qs("#cp-side-text");
+    const lamp = qs("#cp-lamp");
+    if(sideText) sideText.textContent = "SIDE: " + (on ? mode : "--");
+    if(lamp){ lamp.classList.remove("long","short","off"); lamp.classList.add(on ? (mode==="LONG"?"long":"short") : "off"); }
     // keep legacy badge hidden to avoid duplicates
     if(autoBadge){ autoBadge.style.display = "none"; }
   }
@@ -2280,12 +2327,17 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
-    <span class="muted" id="cp-side">SIDE: --</span>
+    <span class="muted" id="cp-side"><span class="lamp" id="cp-lamp" aria-hidden="true"></span><span id="cp-side-text">SIDE: --</span></span>
   </div>
   <div class="cp-row" style="margin:8px 0 10px 0;">
     <div class="cp-k">AUTO</div>
     <div class="cp-v"><span id="cp-auto" style="font-weight:900; color:#ffd27a;">OFF</span></div>
   </div>
+  <div class="cp-row">
+    <div class="cp-k">CT（現價）</div>
+    <div class="cp-v"><span id="cp-ct">--</span></div>
+  </div>
+
 
   <div class="cp-grid">
     <div class="cp-row">
@@ -2305,6 +2357,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div class="cp-row">
       <div class="cp-k">高老莊狀態</div>
       <div class="cp-v" id="cp-gaolao-status">--</div>
+    </div>
     <div class="cp-row">
       <div class="cp-k">高老莊 BNB 餘額</div>
       <div class="cp-v" id="cp-gaolao-bnb">--</div>
@@ -2482,9 +2535,11 @@ function sideFromDeg(deg) {
   app.updateCoordPanel = () => {
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
-    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
+    if ($('cp-side-text')) $('cp-side-text').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
+    if ($('cp-lamp')) { $('cp-lamp').classList.remove('long','short','off'); $('cp-lamp').classList.add(side==='LONG'?'long':'short'); };
 
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (isFinite(ct)) {
       const near = nearestCoord(ct);
       if ($('cp-nearest')) $('cp-nearest').innerHTML = near ? `${near.n} <span class="muted">({fmt(near.v)})</span>` : '--';
@@ -2548,6 +2603,7 @@ function sideFromDeg(deg) {
   app.syncFromWheel = () => {
     // Use current steering direction to set CT+1 guess (sign)
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (!isFinite(ct)) return;
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
@@ -2565,6 +2621,7 @@ function sideFromDeg(deg) {
     // When user presses UP/DOWN, treat the "amount" input as the delta guess for CT+1.
     // (If user wants pure KGEN order amount, keep using it; this just updates CT+1 preview.)
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (!isFinite(ct)) return;
     const delta = toNum(document.getElementById('amt-in')?.value) || 0;
     const step = (isFinite(delta) && delta !== 0) ? delta : 72;
