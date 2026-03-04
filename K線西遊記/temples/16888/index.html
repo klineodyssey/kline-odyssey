@@ -519,7 +519,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.24.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.25.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1695,7 +1695,7 @@ setUniverseAddr(){
         return;
       }
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      try{ const net = await pr.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
       this.signer = this.provider.getSigner();
       this.addr = await this.signer.getAddress();
 const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
@@ -1705,6 +1705,8 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
 this.ui();
       await this.refresh();
       await this.refreshUser();
+        if(this._userTimer) clearInterval(this._userTimer);
+        this._userTimer = setInterval(()=>{ if(this.connected) this.refreshUser().catch(()=>{}); }, 6000);
             try{ await this.refreshGaolao();
       await this.refreshTreasury(); }catch(_){ }
 await this.bindEvents();
@@ -1893,8 +1895,9 @@ app.speak("點燈已入池。");
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
-      try{ const net = await pr.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const pr = this.provider || this.rpcProvider;
+        const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
         uniR.poolBalance(),
@@ -1930,6 +1933,8 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       this.updateCoordPanel();
       app.setProgress(pct/100);
       await this.refreshUser();
+        if(this._userTimer) clearInterval(this._userTimer);
+        this._userTimer = setInterval(()=>{ if(this.connected) this.refreshUser().catch(()=>{}); }, 6000);
     }catch(e){
       console.warn(e);
     }
@@ -1944,7 +1949,8 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(this._bound) return;
       this._bound = true;
 
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
+      const pr = this.provider || this.rpcProvider;
+        const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
 
       uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
         const p = parseFloat(ethers.utils.formatUnits(payout, 18));
