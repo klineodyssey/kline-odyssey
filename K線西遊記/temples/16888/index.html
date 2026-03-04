@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.24.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -79,7 +79,7 @@
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
 
         /* 🎡 方向盤 */
-        .steer-zone{ position: fixed; bottom:210px; width: 100%; text-align: center; z-index: 100; }
+        .steer-zone{ position: fixed; bottom:225px; width: 100%; text-align: center; z-index: 100; }
         .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
         .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
 
@@ -171,7 +171,7 @@
 #brand-badge{
   position:fixed;
   left: 44px;
-  top: 102px;
+  top: 90px;
   z-index:260;
   padding:6px 10px;
   border:1px solid rgba(255,215,128,.7);
@@ -394,7 +394,7 @@
 .resource-bars{
   position: fixed;
   left: 18px;
-  top: 162px;
+  top: 150px;
   width: 300px;
   max-width: 64vw;
   z-index: 120;
@@ -459,8 +459,6 @@
   background: rgba(0,0,0,0.55);
   box-shadow: 0 0 18px rgba(0,255,255,0.18);
   pointer-events:none;
-
-  display:none;
 }
 #autoTag.short{
   border-color: rgba(255,120,120,0.65);
@@ -488,14 +486,9 @@
 }
 #toast.show{ display:block; }
 
-
-/* ===== SIDE LAMP ===== */
-.lamp{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;background:#444;box-shadow:0 0 8px rgba(0,0,0,.6);}
-.lamp.long{background:#38f;box-shadow:0 0 10px rgba(80,180,255,.8);}
-.lamp.short{background:#f83;box-shadow:0 0 10px rgba(255,140,80,.85);}
-.lamp.off{background:#555;box-shadow:none;}
-
 </style>
+
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 </head>
 <body>
 
@@ -519,7 +512,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.25.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.26.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -579,7 +572,7 @@
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
-    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">自動打怪模式：OFF</button>
+    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -621,8 +614,8 @@
     <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 廣寒宮誓約留影錄影</button>
     <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
     <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡航</button>
-    <button class="term-btn active-kgen" onclick="app.boost()">KGEN 沖等演化</button>
-    <button class="term-btn active-kgen" onclick="app.autoHunt()">自動巡航打怪</button>
+    <button class="term-btn active-kgen" onclick="app.boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="app.autoHunt()">⚔️ 自動巡航打怪</button>
     <button class="term-btn" onclick="app.setWish()">👤 許願/還願</button>
     <button class="term-btn" onclick="app.toggleWheel()">🎡 方向盤模式</button>
 </div>
@@ -664,7 +657,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.24.0";
+const APP_VERSION = "v2.26.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1346,27 +1339,14 @@ speak(m){
     // ratio: 0..1
     setProgress(ratio){
       const el = document.getElementById('w3-prog');
+      if(!el) return;
       let r = Number(ratio);
       if(!Number.isFinite(r)) r = 0;
       r = Math.max(0, Math.min(1, r));
       const pct = Math.round(r * 1000) / 10; // 0.1%
-      if(el) el.innerText = `${pct}%`;
-      const fill = document.getElementById('prog-fill');
-      const txt  = document.getElementById('prog-txt');
-      if(fill) fill.style.width = `${Math.max(0, Math.min(100, r*100))}%`;
-      if(txt) txt.textContent = `${Math.max(0, Math.min(100, r*100)).toFixed(1)}%`;
-    },
-  
-  calcSideByDeg(deg){
-    let d = Number(deg);
-    if(!Number.isFinite(d)) d = 0;
-    // normalize to [-180,180]
-    while(d > 180) d -= 360;
-    while(d < -180) d += 360;
-    // 規則：-90~+90 = LONG；(90~180] 或 [-180~-90) = SHORT
-    return (Math.abs(d) <= 90) ? "LONG" : "SHORT";
-  },
-
+      el.innerText = `${pct}%`;
+    }
+  ,
   // ===== Chain info quick links =====
   openTokenScan(){
     try{ window.open(web3.TOKEN_SCAN_URL, "_blank", "noopener"); web3.toast("已開啟：KGEN Token（BscScan）"); }catch(e){}
@@ -1442,35 +1422,9 @@ window.addEventListener("click", (ev)=>{
 
 const web3 = {
   provider: null,
-  rpcProvider: null,
-  rpcUrls: [
-    "https://bsc-dataseed.binance.org/",
-    "https://bsc-dataseed1.binance.org/",
-    "https://bsc-dataseed2.binance.org/",
-    "https://bsc-dataseed3.binance.org/",
-    "https://rpc.ankr.com/bsc",
-  ],
   signer: null,
   addr: null,
   demo: false,
-
-  async initRpc(){
-    for(const url of this.rpcUrls){
-      try{
-        const p = new ethers.providers.JsonRpcProvider(url);
-        // quick ping
-        await p.getBlockNumber();
-        this.rpcProvider = p;
-        console.log('RPC OK:', url);
-        return true;
-      }catch(e){
-        console.warn('RPC fail:', url, e);
-      }
-    }
-    this.rpcProvider = null;
-    return false;
-  },
-
 
   // ==== chain guard (BSC) ====
   BSC_CHAIN_ID_DEC: 56,
@@ -1625,22 +1579,21 @@ async refreshGaolao(){
     if(vb) vb.innerText = "DEMO";
     return;
   }
-  const p = this.provider || this.rpcProvider;
-  if(!p){
+  if(!this.provider){
     if(st) st.innerText = "尚未連線";
     if(vb) vb.innerText = "--";
     return;
   }
   try{
     if(st) st.innerText = "讀取中…";
-    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
     let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
     const bal = await kgenR.balanceOf(this.GAOLAO);
     const txt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
     if(vb) vb.innerText = txt;
     // BNB
     try{
-      const bnb = await p.getBalance(this.GAOLAO);
+      const bnb = await this.provider.getBalance(this.GAOLAO);
       const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
       const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText = bnbTxt;
     }catch(_){ const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText="--"; }
@@ -1655,10 +1608,9 @@ async refreshGaolao(){
 async refreshTreasury(){
   const vk = document.getElementById('cp-treasury-kgen');
   if(this.demo){ if(vk) vk.innerText = 'DEMO'; return; }
-  const pr = this.provider || this.rpcProvider;
-  if(!pr) { if(vk) vk.innerText='--'; return; }
+  if(!this.provider) { if(vk) vk.innerText='--'; return; }
   try{
-    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
     let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
     const bal = await kgenR.balanceOf(this.TREASURY);
     if(vk) vk.innerText = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
@@ -1705,8 +1657,6 @@ const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
 this.ui();
       await this.refresh();
       await this.refreshUser();
-        if(this._userTimer) clearInterval(this._userTimer);
-        this._userTimer = setInterval(()=>{ if(this.connected) this.refreshUser().catch(()=>{}); }, 6000);
             try{ await this.refreshGaolao();
       await this.refreshTreasury(); }catch(_){ }
 await this.bindEvents();
@@ -1728,10 +1678,9 @@ await this.bindEvents();
         const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
         return;
       }
-      const pr = this.provider || this.rpcProvider;
-      if(!pr || !this.addr || !this.UNIVERSE) return;
+      if(!this.provider || !this.addr || !this.UNIVERSE) return;
 
-      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, pr);
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
       let dec = 18;
       try{ dec = await kgenR.decimals(); }catch(_){}
 
@@ -1748,13 +1697,13 @@ await this.bindEvents();
 
       // BNB 餘額
       try{
-        const bnb = await pr.getBalance(this.addr);
+        const bnb = await this.provider.getBalance(this.addr);
         const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
         const bn=document.getElementById('userBNB'); if(bn) bn.innerText = bnbTxt;
       }catch(_){ const bn=document.getElementById('userBNB'); if(bn) bn.innerText='--'; }
       // Resource bars (top-left)
       try{
-        const bnb = await pr.getBalance(this.addr);
+        const bnb = await this.provider.getBalance(this.addr);
         const bnbVal = parseFloat(ethers.utils.formatEther(bnb));
         const kgenVal = parseFloat(ethers.utils.formatUnits(bal, dec));
         const bnbTxt2 = `${bnbVal.toFixed(4)} BNB`;
@@ -1890,14 +1839,12 @@ app.speak("點燈已入池。");
         this.demoRefresh();
         return;
       }
-      const pr = this.provider || this.rpcProvider;
-      if(!this.UNIVERSE || !pr){
+      if(!this.UNIVERSE || !this.provider){
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
       try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
-      const pr = this.provider || this.rpcProvider;
-        const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
         uniR.poolBalance(),
@@ -1933,8 +1880,6 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       this.updateCoordPanel();
       app.setProgress(pct/100);
       await this.refreshUser();
-        if(this._userTimer) clearInterval(this._userTimer);
-        this._userTimer = setInterval(()=>{ if(this.connected) this.refreshUser().catch(()=>{}); }, 6000);
     }catch(e){
       console.warn(e);
     }
@@ -1949,8 +1894,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(this._bound) return;
       this._bound = true;
 
-      const pr = this.provider || this.rpcProvider;
-        const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, pr);
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
 
       uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
         const p = parseFloat(ethers.utils.formatUnits(payout, 18));
@@ -1989,6 +1933,11 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
         link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
       } else if(kind==='bitget'){
         link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      } else if(kind==='binance'){
+        // Binance App deep link is not stable across regions; fallback to open_url
+        link = 'https://www.binance.com/en/download';
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
       }
       window.location.href = link;
     },
@@ -2000,6 +1949,97 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       }catch(e){
         const inp = document.getElementById('walletHubUrl');
         if(inp){ inp.focus(); inp.select(); }
+      }
+    },
+    // ===== WalletConnect v2 (Project ID) =====
+    wcProjectId: "ed256d3118a9c971d550ed5ee522b4d9",
+    wcProvider: null,
+    async connectWalletConnect(){
+      try{
+        if(!window.WalletConnectEthereumProvider){
+          this.toast && this.toast('WalletConnect 載入失敗');
+          return;
+        }
+        const provider = await window.WalletConnectEthereumProvider.init({
+          projectId: this.wcProjectId,
+          chains: [56],
+          optionalChains: [1],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+          }
+        });
+        await provider.enable();
+        this.wcProvider = provider;
+        await this.setProvider(provider, 'WalletConnect');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('WalletConnect 連線取消或失敗');
+      }
+    },
+    async connectBinance(){
+      // Binance Web3 Wallet / Binance Chain Wallet injects window.BinanceChain or window.ethereum (same as injected)
+      const p = window.BinanceChain || window.ethereum;
+      if(!p){
+        this.toast && this.toast('未偵測到幣安錢包。請用幣安 App 內建 DApp 瀏覽器開啟此頁，或安裝 Binance Wallet。');
+        return;
+      }
+      try{
+        await this.setProvider(p, 'Binance');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('幣安錢包連線失敗');
+      }
+    },
+    async setProvider(provider, label){
+      // unify with existing ethers flow
+      try{
+        this.provider = provider;
+        this.providerLabel = label || 'Injected';
+        if(provider.request){
+          await provider.request({ method:'eth_requestAccounts' });
+        }
+        // prefer existing init sequence
+        if(window.ethers){
+          this.ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
+          this.signer = this.ethersProvider.getSigner();
+          const addr = await this.signer.getAddress();
+          const net = await this.ethersProvider.getNetwork();
+          document.getElementById('w3-addr').textContent = addr;
+          document.getElementById('w3-chain').textContent = (net && net.chainId) ? ('bsc ('+net.chainId+')') : '--';
+          // hook events
+          if(provider.on){
+            provider.on('accountsChanged', ()=>this.refreshAll());
+            provider.on('chainChanged', ()=>this.refreshAll());
+            provider.on('disconnect', ()=>this.onDisconnect && this.onDisconnect());
+          }
+          this.closeWalletHub();
+          // start refresh loop
+          this.refreshAll();
+          if(!this._refreshTimer){
+            this._refreshTimer = setInterval(()=>this.refreshAll(), 6000);
+          }
+        }
+      }catch(e){
+        console.warn(e);
+        throw e;
+      }
+    },
+    async refreshAll(){
+      // refresh wallet BNB + KGEN + allowance + pool/progress if available
+      try{
+        if(!this.ethersProvider || !this.signer) return;
+        const addr = await this.signer.getAddress();
+        // native balance
+        const bnb = await this.ethersProvider.getBalance(addr);
+        const bnbFmt = ethers.utils.formatEther(bnb);
+        const elBNB = document.getElementById('userBNB'); if(elBNB) elBNB.textContent = (+bnbFmt).toFixed(6)+' BNB';
+        // top left bars
+        if(window.app && app.updateEnergyBars) app.updateEnergyBars(bnbFmt, null);
+        if(window.app && app.refreshUserToken) await app.refreshUserToken(); // updates userBal/userAllowance + KGEN bar
+        if(window.app && app.refreshPool) await app.refreshPool(); // pool balance + progress
+      }catch(e){
+        // keep silent to avoid spam
       }
     }
 };
@@ -2142,7 +2182,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   window.app.toggleAutoBattle = function(){
     state.on = !state.on;
     const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "自動打怪模式：ON" : "自動打怪模式：OFF";
+    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
     if(state.on){
       state.raf = requestAnimationFrame(step);
     }else{
@@ -2192,8 +2232,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   }
 
   // likely controls (best-effort across versions)
-  const steerRange = pickRange(["#steer-input-val","#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
-  const flowRange  = pickRange(["#warp-input-val","#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
+  const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
+  const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
 
   // UI targets (best-effort)
   const autoBadge = qs("#autoBadge") || (function(){
@@ -2206,15 +2246,9 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   })();
 
   function setAutoUI(on, mode){
-    // unify AUTO display inside cockpit panel
-    const cpAuto = qs("#cp-auto");
-    if(cpAuto) cpAuto.textContent = on ? ("ON · "+mode) : "OFF";
-    const sideText = qs("#cp-side-text");
-    const lamp = qs("#cp-lamp");
-    if(sideText) sideText.textContent = "SIDE: " + (on ? mode : "--");
-    if(lamp){ lamp.classList.remove("long","short","off"); lamp.classList.add(on ? (mode==="LONG"?"long":"short") : "off"); }
-    // keep legacy badge hidden to avoid duplicates
-    if(autoBadge){ autoBadge.style.display = "none"; }
+    autoBadge.style.display = on ? "block" : "none";
+    autoBadge.textContent = on ? ("AUTO: "+mode) : "AUTO: OFF";
+    autoBadge.style.boxShadow = on ? "0 0 18px rgba(255,215,120,.25)" : "none";
   }
 
   function syncVisuals(longMode, p){
@@ -2226,9 +2260,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     }
 
     // planet flow / star stream
-    // 注意：不要在這裡覆寫 flow 的 transform，避免把 CSS keyframes 動畫「卡死」
     const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
     if(flow){
+      const x = (longMode ? 1 : -1) * (p*18);
+      flow.style.transform = `translateX(${x}px)`;
       flow.style.opacity = "1";
     }
 
@@ -2317,6 +2352,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
       <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('trust')">Trust Wallet 開啟</button>
       <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('okx')">OKX Wallet 開啟</button>
       <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('bitget')">Bitget Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('binance')">Binance 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.connectWalletConnect()">WalletConnect QR</button>
     </div>
     <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
       <input id="walletHubUrl" readonly style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" />
@@ -2333,17 +2370,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
-    <span class="muted" id="cp-side"><span class="lamp" id="cp-lamp" aria-hidden="true"></span><span id="cp-side-text">SIDE: --</span></span>
+    <span class="muted" id="cp-side">SIDE: --</span>
   </div>
-  <div class="cp-row" style="margin:8px 0 10px 0;">
-    <div class="cp-k">AUTO</div>
-    <div class="cp-v"><span id="cp-auto" style="font-weight:900; color:#ffd27a;">OFF</span></div>
-  </div>
-  <div class="cp-row">
-    <div class="cp-k">CT（現價）</div>
-    <div class="cp-v"><span id="cp-ct">--</span></div>
-  </div>
-
 
   <div class="cp-grid">
     <div class="cp-row">
@@ -2363,7 +2391,6 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div class="cp-row">
       <div class="cp-k">高老莊狀態</div>
       <div class="cp-v" id="cp-gaolao-status">--</div>
-    </div>
     <div class="cp-row">
       <div class="cp-k">高老莊 BNB 餘額</div>
       <div class="cp-v" id="cp-gaolao-bnb">--</div>
@@ -2541,11 +2568,9 @@ function sideFromDeg(deg) {
   app.updateCoordPanel = () => {
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
-    if ($('cp-side-text')) $('cp-side-text').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
-    if ($('cp-lamp')) { $('cp-lamp').classList.remove('long','short','off'); $('cp-lamp').classList.add(side==='LONG'?'long':'short'); };
+    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
 
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (isFinite(ct)) {
       const near = nearestCoord(ct);
       if ($('cp-nearest')) $('cp-nearest').innerHTML = near ? `${near.n} <span class="muted">({fmt(near.v)})</span>` : '--';
@@ -2609,7 +2634,6 @@ function sideFromDeg(deg) {
   app.syncFromWheel = () => {
     // Use current steering direction to set CT+1 guess (sign)
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (!isFinite(ct)) return;
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
@@ -2627,7 +2651,6 @@ function sideFromDeg(deg) {
     // When user presses UP/DOWN, treat the "amount" input as the delta guess for CT+1.
     // (If user wants pure KGEN order amount, keep using it; this just updates CT+1 preview.)
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
-    if ($('cp-ct')) $('cp-ct').textContent = isFinite(ct) ? fmt(ct) : '--';
     if (!isFinite(ct)) return;
     const delta = toNum(document.getElementById('amt-in')?.value) || 0;
     const step = (isFinite(delta) && delta !== 0) ? delta : 72;
