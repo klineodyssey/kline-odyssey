@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.29.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.30.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1482,6 +1482,59 @@ speak(m){
       // try load built-in silently
       loadBuiltIn();
 
+
+      // === Volume (persist) ===
+      const vol = document.getElementById('music-vol');
+      const volTxt = document.getElementById('music-vol-txt');
+      const savedVol = Number(localStorage.getItem('ufo_music_vol'));
+      const v0 = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) : 70;
+      if(vol) vol.value = String(v0);
+      if(volTxt) volTxt.textContent = `${v0}%`;
+      audio.volume = v0/100;
+
+      if(vol){
+        vol.addEventListener('input', ()=>{
+          const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+          audio.volume = v/100;
+          if(volTxt) volTxt.textContent = `${v}%`;
+          localStorage.setItem('ufo_music_vol', String(v));
+        });
+      }
+
+      // === Audio unlock on first user gesture (mobile friendly) ===
+      const bgmAuto = document.getElementById('music-bgm-auto');
+      const savedAuto = localStorage.getItem('ufo_music_bgm_auto');
+      if(bgmAuto && savedAuto !== null){
+        bgmAuto.checked = (savedAuto === '1');
+      }
+      if(bgmAuto){
+        bgmAuto.addEventListener('change', ()=>{
+          localStorage.setItem('ufo_music_bgm_auto', bgmAuto.checked ? '1':'0');
+        });
+      }
+
+      const unlockOnce = async ()=>{
+        try{
+          await audio.play();
+          audio.pause();
+          audio.currentTime = 0;
+        }catch(e){}
+        try{
+          if(bgmAuto && bgmAuto.checked){
+            this.musicPlay();
+          }
+        }catch(e){}
+      };
+
+      const onFirstInteract = ()=>{
+        document.removeEventListener('pointerdown', onFirstInteract);
+        document.removeEventListener('keydown', onFirstInteract);
+        unlockOnce();
+      };
+      document.addEventListener('pointerdown', onFirstInteract, {once:true, passive:true});
+      document.addEventListener('keydown', onFirstInteract, {once:true});
+
+
       this.musicRenderList();
       }
     }catch(_){}
@@ -2435,6 +2488,20 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </label>
     <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub /music/playlist.json 自動載入內建歌單</div>
   </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-bgm-auto" type="checkbox" checked />
+      BGM 自動（點一下啟動）
+    </label>
+
+    <label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:0.9;">
+      音量
+      <input id="music-vol" type="range" min="0" max="100" value="70" style="width:160px;">
+      <span id="music-vol-txt" style="opacity:0.75;">70%</span>
+    </label>
+  </div>
+
 
   <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
     <div style="font-size:12px; opacity:0.75;">尚未載入清單</div>
