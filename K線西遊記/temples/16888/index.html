@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.28.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.29.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1424,6 +1424,124 @@ speak(m){
       });
     }catch(_){}
   },
+
+  musicSetIndex(i){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      if(!m.list || !m.list.length) return;
+      const n=m.list.length;
+      let idx = Number(i);
+      if(!Number.isFinite(idx)) idx=0;
+      idx = ((idx % n) + n) % n;
+      m.index = idx;
+
+      const item = m.list[idx];
+      if(item){
+        if(item.url){
+          m.audio.src = item.url;
+        }else if(item.file){
+          m.audio.src = URL.createObjectURL(item.file);
+        }else{
+          return;
+        }
+        const nameEl=document.getElementById('music-name');
+        if(nameEl) nameEl.textContent = (item.name||'音檔') + `  (${idx+1}/${n})`;
+  
+      // === Built-in playlist from GitHub ===
+      // Expect a JSON file at: ./music/playlist.json
+      // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
+      const loadBuiltIn = async ()=>{
+        try{
+          const res = await fetch('music/playlist.json', {cache:'no-store'});
+          if(!res.ok) return false;
+          const arr = await res.json();
+          if(!Array.isArray(arr) || !arr.length) return false;
+          // normalize
+          const list = arr.map(x=>({
+            name: String(x.name||x.title||'Track'),
+            url: String(x.url||'').trim()
+          })).filter(x=>x.url);
+          if(!list.length) return false;
+          // If user hasn't selected local files yet, use built-in list
+          const hasLocal = (this._music.list||[]).some(it=>it.file);
+          if(!hasLocal){
+            this._music.list = list;
+            this._music.index = 0;
+            this.musicSetIndex(0);
+          }else{
+            // merge: append built-in after local
+            this._music.list = (this._music.list||[]).concat(list);
+            this.musicRenderList();
+          }
+          return true;
+        }catch(e){
+          return false;
+        }
+      };
+      // try load built-in silently
+      loadBuiltIn();
+
+      this.musicRenderList();
+      }
+    }catch(_){}
+  },
+  musicRenderList(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const box=document.getElementById('music-list');
+      if(!box) return;
+      const list=m.list||[];
+      if(!list.length){
+        box.innerHTML = '<div style="font-size:12px; opacity:0.75;">尚未載入清單</div>';
+        return;
+      }
+      const idx = Number(m.index)||0;
+      box.innerHTML = list.map((it,i)=>{
+        const active = i===idx;
+        const bg = active ? 'rgba(255,215,0,0.12)' : 'transparent';
+        const bd = active ? '1px solid rgba(255,215,0,0.45)' : '1px solid rgba(255,255,255,0.08)';
+        const name = (it.name||('Track '+(i+1))).replace(/[<>&]/g, s=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
+        return `<button type="button" onclick="app.musicSetIndex(${i}); app.musicPlay();" style="width:100%; text-align:left; padding:8px; margin:4px 0; border-radius:10px; background:${bg}; border:${bd}; color:#e9f7ff; cursor:pointer; font-size:12px;">${name}</button>`;
+      }).join('');
+    }catch(_){}
+  },
+  musicNext(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)+1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+  musicPrev(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)-1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+
   musicPlay(){
     try{
       const a=this._music && this._music.audio;
@@ -2291,15 +2409,37 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 
   <div style="margin-top:10px;">
-    <input id="music-file" type="file" accept="audio/*" style="width:100%;"/>
+    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
     <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
   </div>
 
+  
   <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
+
   </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-shuffle" type="checkbox" checked />
+      S（隨機）
+    </label>
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-loop" type="checkbox" />
+      循環
+    </label>
+    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub /music/playlist.json 自動載入內建歌單</div>
+  </div>
+
+  <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
+    <div style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+  </div>
+
 
   <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
     <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
