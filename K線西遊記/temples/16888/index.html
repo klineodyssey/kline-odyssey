@@ -486,6 +486,20 @@
 }
 #toast.show{ display:block; }
 
+
+/* --- UFO Music System --- */
+.nav-btn.nav-music{ border-color:#3ad6ff; box-shadow:0 0 16px rgba(58,214,255,.22); }
+.nav-btn.nav-music-ctl{ padding:10px 12px; min-width:72px; }
+.tiny-btn{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,215,80,.55);
+  color:#ffe4a1;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+.tiny-btn:active{ transform:translateY(1px); }
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -512,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.27.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.28.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1361,13 +1375,87 @@ speak(m){
     try{ window.open(web3.PANCAKE_SWAP_URL, "_blank", "noopener"); web3.toast("已開啟：PancakeSwap 交易頁"); }catch(e){}
   }
 
+
+  ,
+  /* =========================
+     UFO Music System (MP3)
+  ========================= */
+  openMusic(force){
+    try{
+      const p=document.getElementById('music-panel');
+      if(!p) return;
+      const show = (typeof force==='boolean') ? force : (p.style.display==='none' || !p.style.display);
+      p.style.display = show ? 'block' : 'none';
+      if(show) this.speak('飛碟音響已開啟。你可以載入音樂並播放。');
+    }catch(_){}
+  },
+  musicInit(){
+    try{
+      this._music = this._music || {};
+      const audio=document.getElementById('music-audio');
+      const file=document.getElementById('music-file');
+      const vol=document.getElementById('music-vol');
+      const volTxt=document.getElementById('music-vol-txt');
+      const name=document.getElementById('music-name');
+      if(!audio || !file || !vol) return;
+
+      this._music.audio = audio;
+      // default volume
+      audio.volume = (Number(vol.value)||60)/100;
+      if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
+
+      vol.addEventListener('input', ()=>{
+        const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+        audio.volume = v/100;
+        if(volTxt) volTxt.textContent = v + '%';
+      });
+
+      file.addEventListener('change', ()=>{
+        const f = file.files && file.files[0];
+        if(!f){ if(name) name.textContent='未載入音檔'; return; }
+        const url = URL.createObjectURL(f);
+        // revoke old url if any
+        if(this._music.url){ try{ URL.revokeObjectURL(this._music.url);}catch(_){} }
+        this._music.url = url;
+        audio.src = url;
+        audio.load();
+        if(name) name.textContent = '已載入：' + (f.name || 'audio');
+        this.speak('音樂已安裝。');
+      });
+    }catch(_){}
+  },
+  musicPlay(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a || !a.src){ this.speak('請先載入音檔。'); return; }
+      a.play();
+      this.speak('開始播放。');
+    }catch(_){}
+  },
+  musicPause(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      this.speak('已暫停。');
+    }catch(_){}
+  },
+  musicStop(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      a.currentTime = 0;
+      this.speak('已停止。');
+    }catch(_){}
+  }
 };
 window.app = app;
 
 
 
 /* =========================
-   V2.27.0 HOTFIX (Wallet/Balances/Pool/Side)
+   V2.28.0 HOTFIX (Wallet/Balances/Pool/Side)
    - Bridge BinanceChain -> ethereum when Binance Wallet injects it
    - Unify balances update targets (top bars + order panel)
    - Ensure pool progress (16888) updates even without wallet via public RPC
@@ -2184,12 +2272,44 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
-  
-  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">🟡 用 BNB 換 KGEN</button>
-  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">🟢 用 USDT 換 KGEN</button>
-<button class="nav-btn nav-audio" onclick="app.enableAudio()">🔊 開啟音效/說明</button>
-      <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">🤖 語音客服</button>
+
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
+  <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">語音客服</button>
+  <button class="nav-btn nav-music" onclick="app.openMusic()">飛碟音響</button>
 </div>
+
+<div id="music-panel" class="hud-box" style="position:fixed; right:18px; top:410px; z-index:210; width:min(340px, 86vw); display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-weight:900; letter-spacing:0.5px;">飛碟音響（MP3）</div>
+    <button class="tiny-btn" type="button" onclick="app.openMusic(false)">關閉</button>
+  </div>
+
+  <div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
+    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
+  </div>
+
+  <div style="margin-top:10px;">
+    <input id="music-file" type="file" accept="audio/*" style="width:100%;"/>
+    <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
+  </div>
+
+  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
+  </div>
+
+  <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+    <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
+    <input id="music-vol" type="range" min="0" max="100" value="60" style="flex:1;"/>
+    <div id="music-vol-txt" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
+  </div>
+
+  <audio id="music-audio" preload="none" style="display:none;"></audio>
+</div>
+
 
 
 <!-- Guide / Concierge Modal -->
@@ -2838,5 +2958,7 @@ document.addEventListener('click', (ev)=>{
   if(url) openUrl(url);
 });
 </script>
+
+<script>try{app.musicInit();}catch(_){}</script>
 </body>
 </html>
