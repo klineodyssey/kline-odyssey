@@ -556,7 +556,7 @@
 <div id="core-anchor">
     <div id="core-window">
         <div id="wish-label">大聖駕到，光耀廣寒</div>
-        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <img id="fairy-img" src="./assets/fairy.png" data-fallback="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/fcc92f2cea0fae5f0771bbb4b28ca44287597b70/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
         <video id="cam-view" autoplay playsinline muted></video>
         <div id="mini-thumb"></div>
     </div>
@@ -1439,7 +1439,7 @@ speak(m){
       const item = m.list[idx];
       if(item){
         if(item.url){
-          m.audio.src = item.url;
+          m.audio.src = normalizeMediaUrl(item.url);
         }else if(item.file){
           m.audio.src = URL.createObjectURL(item.file);
         }else{
@@ -1469,7 +1469,25 @@ speak(m){
             return {ok:false, url:candidates[0], json:null};
           };
 
-      // Expect a JSON file at: ./music/playlist.json
+      
+      const normalizeMediaUrl = (u)=>{
+        if(!u) return '';
+        let raw = String(u).trim();
+        // allow absolute urls / blobs / data
+        if(/^(https?:|blob:|data:)/i.test(raw)) return raw;
+        // common mistake: playlist is inside /music/ but entries still start with "music/"
+        // We resolve relative to the PAGE, not the playlist file.
+        // If entry has no slash, assume it's a file inside ./music/
+        if(!raw.includes('/')) raw = 'music/' + raw;
+        // build absolute url then encode (handles Chinese filenames)
+        try{
+          const abs = new URL(raw, window.location.href).toString();
+          return encodeURI(abs);
+        }catch(e){
+          return encodeURI(raw);
+        }
+      };
+// Expect a JSON file at: ./music/playlist.json
       // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
       const loadBuiltIn = async ()=>{
         try{
@@ -1477,9 +1495,8 @@ speak(m){
           if(!out.ok) return false;
           const resUrl = out.url;
           const arr = out.json;
-          if(!res.ok) return false;
           
-          if(!Array.isArray(arr) || !arr.length) return false;
+          if(!Array.isArray(arr) || !arr.length) return false false;
           // normalize
           const list = arr.map(x=>({
             name: String(x.name||x.title||'Track'),
@@ -3197,5 +3214,26 @@ document.addEventListener('click', (ev)=>{
 </script>
 
 <script>try{app.musicInit();}catch(_){}</script>
+
+<script>
+(function(){
+  function fixFairy(){
+    var img = document.getElementById('fairy-img');
+    if(!img) return;
+    var fb = img.getAttribute('data-fallback');
+    img.addEventListener('error', function(){
+      if(fb && img.src !== fb){
+        img.src = fb;
+      }
+    }, { once:false });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', fixFairy);
+  } else {
+    fixFairy();
+  }
+})();
+</script>
+
 </body>
 </html>
