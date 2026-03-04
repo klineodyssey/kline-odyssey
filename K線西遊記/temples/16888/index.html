@@ -2125,138 +2125,50 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <script>
 /* =========================
-   Auto Battle Mode (v2.20.0)
-   UI-only autopilot demo:
-   - toggles auto steering/flow values if range inputs exist
-   - animates steering/flow knobs and avatar image subtly
-   Does NOT touch contract.
+   Auto Battle Mode (v2.23.2)
+   - Fix: auto does NOT break scene (late bind after DOM ready)
+   - Fix: keep visuals moving (wheel + planet flow) even if ranges missing
+   - Fix: do not accidentally hijack other sliders
 ========================= */
 (function(){
+  const AUTO = { on:false, t:null, phase:0, prevWarp:null };
+
   function qs(sel){ return document.querySelector(sel); }
-  const wheel = qs('#steer-knob') || qs('.steer-knob') || qs('#steer') || qs('.steer');
-  const flow  = qs('#flow-knob')  || qs('.flow-knob')  || qs('#flow')  || qs('.flow');
-  const avatar= qs('#hero') || qs('#avatar') || qs('.hero') || qs('.avatar') || qs('img[src*="fairy"]');
+  function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
 
-  const state = { on:false, raf:0, lastOrder:0 };
+  function safeText(el, t){ if(el) el.textContent = t; }
 
-  // 方向盤角度 → 多空（依你的規則）
-  // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
-  function sideFromSteerDeg(deg){
-    let a = Number(deg);
-    if(!Number.isFinite(a)) a = 0;
-    while(a > 180) a -= 360;
-    while(a < -180) a += 360;
-    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
+  function setRange(rangeEl, val){
+    if(!rangeEl) return;
+    const min = Number(rangeEl.min ?? 0);
+    const max = Number(rangeEl.max ?? 100);
+    const v = Math.max(min, Math.min(max, Number(val)));
+    rangeEl.value = String(v);
+    rangeEl.dispatchEvent(new Event("input", {bubbles:true}));
+    rangeEl.dispatchEvent(new Event("change", {bubbles:true}));
   }
 
-  function step(ts){
-    if(!state.on) return;
-    const t = ts/1000;
-    const a = (Math.sin(t*0.9)*0.5 + 0.5);     // 0..1
-    const b = (Math.sin(t*0.7+1.2)*0.5 + 0.5); // 0..1
-
-    // Update inputs if present
-    const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
-    const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
-
-    let steerDeg = 0;
-    if(steerInput){
-      const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
-      steerDeg = Math.round(min + a*(max-min));
-      steerInput.value = steerDeg;
-      steerInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-    if(flowInput){
-      const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
-      flowInput.value = Math.round(min + b*(max-min));
-      flowInput.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-
-    // Auto side tag + auto order (demo/live)
-    const side = sideFromSteerDeg(steerDeg);
-    const autoTag = document.getElementById('autoTag');
-    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; autoTag.classList.toggle('short', side!=='UP'); }
-
-    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
-    if(ts - state.lastOrder > 2400){
-      state.lastOrder = ts;
-      if(typeof window.placeOrder === 'function'){
-        window.placeOrder(side);
-      }
-    }
-
-    // Visual motion
-    if(wheel){ wheel.style.transform = `translateY(${Math.sin(t*1.4)*3}px) rotate(${(a*120-60).toFixed(1)}deg)`; }
-    if(flow){  flow.style.transform  = `translateY(${Math.sin(t*1.2+0.7)*3}px) rotate(${(b*120-60).toFixed(1)}deg)`; }
-    if(avatar){
-      avatar.style.transform = `translateY(${Math.sin(t*0.8)*4}px) translateX(${Math.sin(t*0.6)*2}px)`;
-      avatar.style.filter = `hue-rotate(${Math.floor(a*30-15)}deg)`;
-    }
-
-    state.raf = requestAnimationFrame(step);
-  }
-
-  window.app = window.app || {};
-  window.app.toggleAutoBattle = function(){
-    state.on = !state.on;
-    const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
-    if(state.on){
-      state.raf = requestAnimationFrame(step);
-    }else{
-      try{ cancelAnimationFrame(state.raf); }catch(e){}
-      if(wheel) wheel.style.transform='';
-      if(flow) flow.style.transform='';
-      if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
-    }
-  };
-})();
-
-/* =========================
-   AUTO CRUISE / AUTO BATTLE
-   - Tied to bottom button: #btnAutoBattle
-   - Simulates long/short swing, updates direction wheel + planet flow + GA mini-panel bars
-   - Does NOT touch on-chain, does NOT auto-approve, purely UI simulation
-========================= */
-(function(){
-  const AUTO = { on:false, t:null, phase:0, dir:1 };
-
-  function qs(sel){ try{return document.querySelector(sel);}catch(e){return null;} }
-  function qsa(sel){ try{return Array.from(document.querySelectorAll(sel));}catch(e){return [];} }
-
-  function setElText(el, txt){ if(!el) return; el.textContent = txt; }
-  function setRange(el, v){
-    if(!el) return;
-    const min = ("min" in el) ? Number(el.min||0) : 0;
-    const max = ("max" in el) ? Number(el.max||100) : 100;
-    const vv = Math.max(min, Math.min(max, v));
-    el.value = String(vv);
-    el.dispatchEvent(new Event("input", {bubbles:true}));
-    el.dispatchEvent(new Event("change", {bubbles:true}));
-  }
-
-  function pickRange(candidates){
-    for(const sel of candidates){
-      const el = qs(sel);
-      if(el && el.tagName === "INPUT" && (el.type||"").toLowerCase()==="range") return el;
-    }
-    // fallback: first visible range in page
-    const all = qsa('input[type="range"]');
-    for(const el of all){
-      const r = el.getBoundingClientRect();
-      if(r.width>40 && r.height>10) return el;
+  function pickRange(ids){
+    for(const id of ids){
+      const el = qs(id);
+      if(el && el.tagName === "INPUT" && (el.type === "range" || el.getAttribute("role")==="slider")) return el;
     }
     return null;
   }
 
-  // likely controls (best-effort across versions)
-  const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
-  const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
-
-  // UI targets (best-effort)
-  const autoBadge = qs("#cp-auto");
+  function resolve(){
+    // steer/flow best-effort
+    const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
+    // prefer planet/flow, fallback to warp slider (keeps stars moving)
+    const flowRange  = pickRange(["#planetFlowRange","#flowRange","#rangeFlow","#flow","#planetRange","#warp-input-val"]);
+    const autoBadge  = qs("#cp-auto");
+    const sideBadge  = qs("#cp-side");
+    return { steerRange, flowRange, autoBadge, sideBadge };
+  }
 
   function setAutoUI(on, mode){
+    const { autoBadge } = resolve();
+    if(!autoBadge) return;
     autoBadge.style.display = on ? "block" : "none";
     autoBadge.textContent = on ? ("AUTO: "+mode) : "AUTO: OFF";
     autoBadge.style.boxShadow = on ? "0 0 18px rgba(255,215,120,.25)" : "none";
@@ -2266,86 +2178,100 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     // direction wheel / joystick visual
     const wheel = qs("#directionWheel") || qs("#dirWheel") || qs(".direction-wheel") || qs(".wheel");
     if(wheel){
-      const deg = (longMode ? 20 : -20) + (p*30);
+      const deg = (longMode ? 18 : -18) + (p*34);
       wheel.style.transform = `rotate(${deg}deg)`;
     }
 
-    // planet flow / star stream
+    // planet flow / star stream hint
     const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
     if(flow){
       const x = (longMode ? 1 : -1) * (p*18);
       flow.style.transform = `translateX(${x}px)`;
       flow.style.opacity = "1";
     }
-
-    // main beauty ring subtle drift
-    const ring = qs("#beautyRing") || qs(".beauty-ring") || qs(".main-ring");
-    if(ring){
-      ring.style.filter = longMode ? "drop-shadow(0 0 18px rgba(0,255,255,.18))" : "drop-shadow(0 0 18px rgba(255,120,120,.16))";
-    }
-
-    // GA mini bars sweep (left->right->reset)
-    const bars = qsa(".ga-bar, .gaBar, [data-ga-bar]");
-    if(bars.length){
-      const w = Math.round(100 * p);
-      bars.forEach(el=>{
-        el.style.width = w + "%";
-        el.style.opacity = "1";
-      });
-    }
   }
 
   function step(){
     AUTO.phase += 1;
+
     // ping-pong 0..1..0
-    const raw = (AUTO.phase % 120) / 120; // 0..0.99
+    const raw = (AUTO.phase % 120) / 120;
     const p = raw <= 0.5 ? raw*2 : (1-raw)*2;
 
-    const longMode = (AUTO.phase % 240) < 120; // switch every ~120 ticks
+    const longMode = (AUTO.phase % 240) < 120;
     const modeTxt = longMode ? "LONG" : "SHORT";
+
     setAutoUI(true, modeTxt);
 
-    // update ranges (if exist) so other listeners update the scene
-    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
-    if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
+    const { steerRange, flowRange, sideBadge } = resolve();
+    safeText(sideBadge, "SIDE: " + modeTxt + " (deg 0.0000)");
+
+    // update ranges (if exist)
+    if(steerRange) setRange(steerRange, longMode ? 75 + p*18 : 25 - p*18);
+
+    // flow: if we land on warp slider, keep it > 10 so stars/scene keep moving
+    if(flowRange){
+      const v = longMode ? 70 + p*20 : 35 - p*15;
+      setRange(flowRange, Math.max(12, v));
+    }
 
     syncVisuals(longMode, p);
   }
 
   function toggleAuto(){
     AUTO.on = !AUTO.on;
+
     try{
       const badgeEl = qs("#autoModeBadge");
       if(badgeEl) badgeEl.textContent = AUTO.on ? "ON" : "OFF";
     }catch(e){}
+
     if(AUTO.on){
+      // cache warp (if present) so we can restore when OFF
+      const warp = qs("#warp-input-val");
+      if(warp) AUTO.prevWarp = warp.value;
+
       setAutoUI(true, "LONG");
       if(AUTO.t) clearInterval(AUTO.t);
       AUTO.t = setInterval(step, 250);
+
+      try{ if(window.app && typeof window.app.sfx === "function") window.app.sfx("auto_on"); }catch(e){}
     }else{
       if(AUTO.t) clearInterval(AUTO.t);
       AUTO.t = null;
       setAutoUI(false, "OFF");
+
+      // restore warp if we touched it
+      const warp = qs("#warp-input-val");
+      if(warp && AUTO.prevWarp != null) setRange(warp, Number(AUTO.prevWarp));
+
+      try{ if(window.app && typeof window.app.sfx === "function") window.app.sfx("auto_off"); }catch(e){}
     }
   }
 
-  
-  // keep backward-compat: older onclick calls app.autoHunt()
-  try{ if(window.app){ window.app.autoHunt = toggleAuto; } }catch(e){}
-// bind
-  const btn = qs("#btnAutoBattle");
-  if(btn){
-    btn.addEventListener("click", function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      toggleAuto();
-    }, {passive:false});
+  function bind(){
+    // backward-compat: older onclick calls app.autoHunt()
+    try{ if(window.app){ window.app.autoHunt = toggleAuto; } }catch(e){}
+
+    const btn = qs("#btnAutoBattle");
+    if(btn){
+      btn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        toggleAuto();
+      }, {passive:false});
+    }
+    window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
   }
 
-  // expose
-  window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bind, {once:true});
+  }else{
+    bind();
+  }
 })();
 </script>
+
 
 
 <!-- Wallet Hub Modal -->
@@ -2448,8 +2374,6 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
         </div>
         <div class="muted" style="margin-top:6px; font-size:11px;">請只認合約地址，不認名稱</div>
       </div>
-    </div>
-
     </div>
 
     <div class="cp-row">
