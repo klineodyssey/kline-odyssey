@@ -1439,7 +1439,7 @@ speak(m){
       const item = m.list[idx];
       if(item){
         if(item.url){
-          m.audio.src = item.url;
+          m.audio.src = normalizeMediaUrl(item.url);
         }else if(item.file){
           m.audio.src = URL.createObjectURL(item.file);
         }else{
@@ -1469,7 +1469,25 @@ speak(m){
             return {ok:false, url:candidates[0], json:null};
           };
 
-      // Expect a JSON file at: ./music/playlist.json
+      
+      const normalizeMediaUrl = (u)=>{
+        if(!u) return '';
+        let raw = String(u).trim();
+        // allow absolute urls / blobs / data
+        if(/^(https?:|blob:|data:)/i.test(raw)) return raw;
+        // common mistake: playlist is inside /music/ but entries still start with "music/"
+        // We resolve relative to the PAGE, not the playlist file.
+        // If entry has no slash, assume it's a file inside ./music/
+        if(!raw.includes('/')) raw = 'music/' + raw;
+        // build absolute url then encode (handles Chinese filenames)
+        try{
+          const abs = new URL(raw, window.location.href).toString();
+          return encodeURI(abs);
+        }catch(e){
+          return encodeURI(raw);
+        }
+      };
+// Expect a JSON file at: ./music/playlist.json
       // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
       const loadBuiltIn = async ()=>{
         try{
@@ -1477,9 +1495,8 @@ speak(m){
           if(!out.ok) return false;
           const resUrl = out.url;
           const arr = out.json;
-          if(!res.ok) return false;
           
-          if(!Array.isArray(arr) || !arr.length) return false;
+          if(!Array.isArray(arr) || !arr.length) return false false;
           // normalize
           const list = arr.map(x=>({
             name: String(x.name||x.title||'Track'),
