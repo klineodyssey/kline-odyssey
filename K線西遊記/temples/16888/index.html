@@ -24,54 +24,7 @@
 <meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-/* ===== V2.31.4 Built-in Music Loader (Pages + Raw fallback) ===== */
-function __abspath(base, rel){
-  try{ return new URL(rel, base).toString(); }catch(e){ return rel; }
-}
-function __isHttp(u){ return /^https?:\/\//i.test(u||''); }
-
-function __resolveTrackUrl(trackUrl, playlistBase){
-  if(!trackUrl) return "";
-  let u = String(trackUrl).trim();
-  if(__isHttp(u)) return u;
-  // If bare filename, assume in /music/
-  if(!u.includes("/")) u = "music/" + u;
-  // Encode chinese safely per path segment
-  // Use URL to encode; fallback encodeURI
-  try {
-    const abs = __abspath(playlistBase || window.location.href, u);
-    const urlObj = new URL(abs);
-    urlObj.pathname = urlObj.pathname.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
-    return urlObj.toString();
-  } catch(e) {
-    return encodeURI(u);
-  }
-}
-
-async function __fetchPlaylist(){
-  const candidates = [
-    "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json",
-    "music/playlist.json",
-    "./music/playlist.json",
-    encodeURI("music/playlist.json"),
-    new URL("music/playlist.json", window.location.href).toString(),
-    "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json"
-  ];
-  for (const url of candidates){
-    try{
-      const res = await fetch(url, {cache:"no-store"});
-      if(res && res.ok){
-        const json = await res.json();
-        const base = url.endsWith(".json") ? url.replace(/playlist\.json.*$/i, "") : url;
-        return {ok:true, url, base, json};
-      }
-    }catch(e){}
-  }
-  return {ok:false, url:candidates[0], base: window.location.href, json:null};
-}
-/* ===== /V2.31.4 Built-in Music Loader ===== */
-</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -591,7 +544,7 @@ async function __fetchPlaylist(){
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.31.4-OG</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.5-OG-MUSIC-RAW</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1504,7 +1457,7 @@ speak(m){
       const item = m.list[idx];
       if(item){
         if(item.url){
-          m.audio.src = __resolveTrackUrl(item.url, window.__playlistBase || window.location.href);
+          m.audio.src = item.url;
         }else if(item.file){
           m.audio.src = URL.createObjectURL(item.file);
         }else{
@@ -1548,7 +1501,7 @@ speak(m){
           // normalize
           const list = arr.map(x=>({
             name: String(x.name||x.title||'Track'),
-            url: __resolveTrackUrl(x.url||'', window.__playlistBase || window.location.href)
+            url: String(x.url||'').trim()
           })).map(x=>{
             // if url is bare filename, assume it's inside /music/
             if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
@@ -3262,5 +3215,121 @@ document.addEventListener('click', (ev)=>{
 </script>
 
 <script>try{app.musicInit();}catch(_){}</script>
+
+<script>
+/* ===== V2.31.5 Built-in Playlist Loader (Hard Raw) ===== */
+(function(){
+  const RAW_PLAYLIST = "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json";
+  const RAW_BASE = "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/";
+  function $(sel){ return document.querySelector(sel); }
+  function encodePath(url) {
+    try {
+      const u = new URL(url);
+      u.pathname = u.pathname.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
+      return u.toString();
+    } catch(e) {
+      return url;
+    }
+  }
+  function resolveTrack(u) {
+    if(!u) return "";
+    u = String(u).trim();
+    if(/^https?:\/\//i.test(u)) return encodePath(u);
+    // bare filename -> raw base
+    if(!u.includes('/')) return encodePath(RAW_BASE + u);
+    // "music/xxx.mp3" -> strip leading "music/"
+    u = u.replace(/^\.\/?/,'').replace(/^music\//i,'');
+    return encodePath(RAW_BASE + u);
+  }
+  function findLoadBtn(){
+    const btns = Array.from(document.querySelectorAll("button, a"));
+    return btns.find(b => (b.textContent||"").replace(/\s+/g,'').includes("載入內建歌單"));
+  }
+  function findStatusEl(){
+    // Prefer an element that currently says 尚未載入清單
+    const nodes = Array.from(document.querySelectorAll("div, p, span, li"));
+    return nodes.find(n => (n.textContent||"").includes("尚未載入清單")) || null;
+  }
+  function findAudioEl(){
+    return document.querySelector("audio") || null;
+  }
+  function ensureListUI(container){
+    let wrap = document.getElementById("ufoBuiltInPlaylist");
+    if(wrap) return wrap;
+    wrap = document.createElement("div");
+    wrap.id = "ufoBuiltInPlaylist";
+    wrap.style.marginTop = "10px";
+    wrap.style.fontSize = "13px";
+    wrap.style.lineHeight = "1.4";
+    wrap.innerHTML = `
+      <div style="opacity:.85;margin-bottom:6px">內建歌單</div>
+      <div id="ufoPlaylistStatus" style="opacity:.9">尚未載入清單</div>
+      <select id="ufoPlaylistSelect" style="width:100%;margin-top:6px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fff"></select>
+      <div style="margin-top:6px;opacity:.75;font-size:12px">來源：RAW（保證可抓）</div>
+    `;
+    (container || document.body).appendChild(wrap);
+    return wrap;
+  }
+  async function loadBuiltIn(){
+    const statusInline = findStatusEl();
+    const musicSection = statusInline ? statusInline.closest("div") : document.body;
+    const ui = ensureListUI(musicSection);
+    const status = document.getElementById("ufoPlaylistStatus");
+    const sel = document.getElementById("ufoPlaylistSelect");
+    const audio = findAudioEl();
+
+    status.textContent = "載入中…";
+    try {
+      const res = await fetch(RAW_PLAYLIST, {cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const arr = await res.json();
+      if(!Array.isArray(arr) || arr.length===0) throw new Error("Empty playlist");
+      // build select
+      sel.innerHTML = "";
+      arr.forEach((t, i)=>{
+        const opt = document.createElement("option");
+        opt.value = String(i);
+        opt.textContent = (t.name || ("Track " + (i+1)));
+        sel.appendChild(opt);
+      });
+      window.__UFO_PLAYLIST = arr.map(t => ({ name: t.name || "Track", url: resolveTrack(t.url) }));
+      status.textContent = "已載入 " + window.__UFO_PLAYLIST.length + " 首";
+      if(statusInline) statusInline.textContent = status.textContent;
+
+      // Auto set first track (do not autoplay)
+      if(audio && window.__UFO_PLAYLIST[0]) {
+        audio.src = window.__UFO_PLAYLIST[0].url;
+        audio.load();
+      }
+      sel.onchange = ()=>{
+        const idx = parseInt(sel.value,10);
+        const track = window.__UFO_PLAYLIST[idx];
+        if(track && audio){
+          audio.src = track.url;
+          audio.load();
+        }
+      };
+    } catch(e) {
+      const msg = "載入失敗：" + (e && e.message ? e.message : String(e));
+      status.textContent = msg;
+      if(statusInline) statusInline.textContent = msg;
+    }
+  }
+
+  // Hook the existing "載入內建歌單" button
+  window.addEventListener("DOMContentLoaded", ()=>{
+    const btn = findLoadBtn();
+    if(btn) {
+      btn.addEventListener("click", (ev)=>{
+        // prevent any old handler interference
+        try{ ev.stopImmediatePropagation(); }catch(_e){}
+        loadBuiltIn();
+      }, true);
+    }
+  });
+})();
+/* ===== /V2.31.5 ===== */
+</script>
+
 </body>
 </html>
