@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.31.5-OG-MUSIC-RAW</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.6-OG-MUSIC-RAW-PLAYER</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -3264,7 +3264,14 @@ document.addEventListener('click', (ev)=>{
     wrap.innerHTML = `
       <div style="opacity:.85;margin-bottom:6px">內建歌單</div>
       <div id="ufoPlaylistStatus" style="opacity:.9">尚未載入清單</div>
-      <select id="ufoPlaylistSelect" style="width:100%;margin-top:6px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fff"></select>
+      <select id="ufoPlaylistSelect" size="6" style="width:100%;margin-top:6px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fff"></select>
+      
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="ufoPlayBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-weight:800">播放</button>
+        <button id="ufoPauseBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-weight:800">暫停</button>
+        <button id="ufoNextBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-weight:800">下一首</button>
+      </div>
+      <div style="margin-top:6px;opacity:.75;font-size:12px">提示：先選歌，再按播放（手機瀏覽器會擋自動播放）</div>
       <div style="margin-top:6px;opacity:.75;font-size:12px">來源：RAW（保證可抓）</div>
     `;
     (container || document.body).appendChild(wrap);
@@ -3309,6 +3316,51 @@ document.addEventListener('click', (ev)=>{
           audio.load();
         }
       };
+
+      // click / dblclick helpers
+      sel.addEventListener("dblclick", ()=>{
+        const idx = parseInt(sel.value,10);
+        const track = window.__UFO_PLAYLIST[idx];
+        if(track && audio){
+          audio.src = track.url;
+          audio.load();
+          audio.play().catch(()=>{});
+        }
+      });
+
+      // Buttons
+      const playBtn = document.getElementById("ufoPlayBtn");
+      const pauseBtn = document.getElementById("ufoPauseBtn");
+      const nextBtn = document.getElementById("ufoNextBtn");
+      if(playBtn && audio){
+        playBtn.onclick = ()=>{
+          const idx = parseInt(sel.value||"0",10);
+          const track = window.__UFO_PLAYLIST[idx];
+          if(track){
+            if(audio.src !== track.url){
+              audio.src = track.url;
+              audio.load();
+            }
+          }
+          audio.play().catch(()=>{});
+        };
+      }
+      if(pauseBtn && audio){
+        pauseBtn.onclick = ()=>{ audio.pause(); };
+      }
+      if(nextBtn && audio){
+        nextBtn.onclick = ()=>{
+          const cur = parseInt(sel.value||"0",10);
+          const nxt = (cur + 1) % window.__UFO_PLAYLIST.length;
+          sel.value = String(nxt);
+          const track = window.__UFO_PLAYLIST[nxt];
+          if(track){
+            audio.src = track.url;
+            audio.load();
+            audio.play().catch(()=>{});
+          }
+        };
+      }
     } catch(e) {
       const msg = "載入失敗：" + (e && e.message ? e.message : String(e));
       status.textContent = msg;
