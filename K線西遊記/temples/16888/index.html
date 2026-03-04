@@ -6,6 +6,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
     <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
+
+<!-- Open Graph (Restore) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KLINE Odyssey">
+<meta property="og:title" content="KGEN 16888 廣寒宮｜KLINE Odyssey">
+<meta property="og:description" content="進入 KLINE 宇宙｜16888 廣寒宮飛碟控制台｜自我演化金融生命體">
+<meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/">
+<meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="KGEN 16888 廣寒宮｜KLINE Odyssey">
+<meta name="twitter:description" content="進入 KLINE 宇宙｜16888 廣寒宮飛碟控制台｜自我演化金融生命體">
+<meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -63,7 +81,7 @@
         #mini-thumb { 
             position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
             border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
-            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/fcc92f2cea0fae5f0771bbb4b28ca44287597b70/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
             box-shadow: 0 0 25px var(--gold);
         }
         #wish-label { 
@@ -526,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.31.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.1-OG</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -556,7 +574,7 @@
 <div id="core-anchor">
     <div id="core-window">
         <div id="wish-label">大聖駕到，光耀廣寒</div>
-        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/fcc92f2cea0fae5f0771bbb4b28ca44287597b70/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
+        <img id="fairy-img" src="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png" crossorigin="anonymous">
         <video id="cam-view" autoplay playsinline muted></video>
         <div id="mini-thumb"></div>
     </div>
@@ -3197,34 +3215,5 @@ document.addEventListener('click', (ev)=>{
 </script>
 
 <script>try{app.musicInit();}catch(_){}</script>
-
-<script>
-(function(){
-  const FAIRY_CANDIDATES = [
-    "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/fcc92f2cea0fae5f0771bbb4b28ca44287597b70/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png",
-    "./assets/fairy.png",
-    "assets/fairy.png"
-  ];
-  function applyFairy(){
-    const img = document.getElementById("fairy-img");
-    if(!img) return;
-    let i=0;
-    const tryNext=()=>{
-      if(i>=FAIRY_CANDIDATES.length) return;
-      const u=FAIRY_CANDIDATES[i++];
-      img.src=u;
-    };
-    img.addEventListener("error", tryNext, {once:false});
-    // start
-    tryNext();
-  }
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded", applyFairy);
-  } else {
-    applyFairy();
-  }
-})();
-</script>
-
 </body>
 </html>
