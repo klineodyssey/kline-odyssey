@@ -1480,7 +1480,7 @@ speak(m){
   },
 
   musicSetIndex(i){
-    const m = this.music;
+    const m = this._music;
     if(!m || !m.list || !m.list.length) return;
     // clamp / wrap
     const n = m.list.length;
@@ -3259,6 +3259,82 @@ document.addEventListener('click', (ev)=>{
     console.error("Music patch error", err);
   }
 })();
+
+/* =========================
+   V2.46.5 MUSIC HOTFIX
+   - Fix musicSetIndex using _music (was this.music)
+   - Fix Built-in playlist loader (music/playlist.json or playlist.json)
+   - Ensure file multi-select appends & plays
+========================= */
+(function(){
+  if(!window.app) return;
+
+  // unify alias for legacy calls
+  window.app.musicLoadBuiltIn = window.app.musicLoadBuiltin = async function(){
+    const statusEl = document.getElementById('music-status') || document.getElementById('music-name');
+    const setStatus = (t)=>{ try{ if(statusEl) statusEl.textContent = t; }catch(e){} };
+
+    // base directory (folder that contains index.html)
+    const base = (()=>{
+      try{
+        const u = new URL(window.location.href);
+        u.hash = ''; u.search = '';
+        if(!u.pathname.endsWith('/')){
+          u.pathname = u.pathname.substring(0, u.pathname.lastIndexOf('/') + 1);
+        }
+        return u;
+      }catch(e){ return null; }
+    })();
+
+    const candidates = ["music/playlist.json","playlist.json","./music/playlist.json","./playlist.json"];
+    let list = null;
+    let lastErr = null;
+
+    setStatus("載入內建歌單中…");
+    for(const rel of candidates){
+      try{
+        const url = base ? new URL(rel, base).toString() : rel;
+        const r = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), {cache:"no-store"});
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        if(!Array.isArray(data)) throw new Error("playlist not array");
+        list = data.map((it, idx)=>({
+          name: String(it.name || it.title || ("Track " + (idx+1))),
+          url: String(it.url || it.src || it.href || "").trim()
+        })).filter(it=>it.url);
+        if(list.length) break;
+        lastErr = new Error("empty playlist");
+      }catch(e){
+        lastErr = e;
+        list = null;
+      }
+    }
+
+    if(!list){
+      setStatus("載入失敗：找不到 playlist.json");
+      try{ console.warn("[music] builtin playlist load failed:", lastErr); }catch(e){}
+      try{ window.app.speak && window.app.speak('載入失敗，找不到內建歌單。'); }catch(e){}
+      return;
+    }
+
+    window.app._music = window.app._music || {};
+    const m = window.app._music;
+    m.list = list;
+    m.index = 0;
+
+    try{ window.app.musicRenderList && window.app.musicRenderList(); }catch(e){}
+    try{ window.app.musicSetIndex(0); }catch(e){}
+    setStatus("已載入內建歌單：" + list.length + " 首");
+    try{ window.app.speak && window.app.speak('已載入內建歌單。'); }catch(e){}
+  };
+
+  // convenience: if user checks BGM auto, load playlist on first interaction
+  const auto = document.getElementById('music-auto');
+  if(auto && auto.checked){
+    // do nothing (browser policy); user must tap play/load once.
+  }
+})();
+
 </script>
 
 </body>
