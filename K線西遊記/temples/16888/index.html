@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.41.0-OG-MUSIC-RAW-PLAYER</div>
+        <div class="sys-st" id="ver-st">VERSION v2.42.0-OG-MUSIC-RAW-PLAYER</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -3385,7 +3385,22 @@ document.addEventListener('click', (ev)=>{
       }, true);
     }
   });
-})();
+}
+
+function normalizeTrackUrl(u){
+  if(!u) return "";
+  // if already absolute or starts with http, return
+  if(/^https?:\/\//i.test(u)) return u;
+  // if begins with "music/" keep as-is (relative to current page)
+  if(u.startsWith("music/")) return u;
+  // otherwise treat as filename inside music/
+  return "music/" + u.replace(/^\.\/?/,"");
+}
+
+// expose to global (for inline handlers / safety)
+window.resolveTrack = resolveTrack;
+window.resolveTrackUrl = resolveTrackUrl;
+)();
 /* ===== /V2.31.5 ===== */
 </script>
 
