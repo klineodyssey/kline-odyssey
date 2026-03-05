@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.3</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -501,7 +501,7 @@
 }
 .tiny-btn:active{ transform:translateY(1px); }
 
-/* v2.47.3: hide legacy AUTO debug UI */
+/* v2.47.4: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 </style>
 
@@ -527,7 +527,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.47.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -596,7 +596,10 @@
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
     <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
-    <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
+    <div style="margin-top:8px;">
+      <button class="term-btn" id="w3-connect-btn" style="padding:10px 12px; width:100%; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包（BSC）</button>
+    </div>
+<div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
     <div>BNB: <span id="userBNB" style="color:var(--cyan);">-</span></div>
     <div style="margin-top:6px;">Pregnancy Pool（共用獎池）＝ Universe 合約餘額</div>
     <div>Universe V5.2.0: <span id="w3-uni" style="color:var(--cyan);">未設定</span></div>
@@ -745,7 +748,8 @@ const app = {
         this.initThree(); this.buildUI(); this.bind();
         setInterval(() => this.tick(), 1000);
         web3.load();
-        this.updateWarp(33);
+                web3.autoDetect();
+this.updateWarp(33);
         this.applySteer(76, true);
         this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
@@ -1521,7 +1525,7 @@ speak(m){
     }catch(_){}
   },
 
-  // --- v2.47.3 music fixes: ensure next/prev/index/render/builtin work ---
+  // --- v2.47.4 music fixes: ensure next/prev/index/render/builtin work ---
   musicSetIndex(i){
     try{
       this._music=this._music||{};
@@ -1872,7 +1876,9 @@ const web3 = {
   addr: null,
   demo: false,
 
-  // ==== chain guard (BSC) ====
+  pollTimer: null,
+  lastRefreshAt: 0,
+// ==== chain guard (BSC) ====
   BSC_CHAIN_ID_DEC: 56,
   BSC_CHAIN_ID_HEX: "0x38",
   async ensureBSC(){
@@ -2075,8 +2081,51 @@ async setUniverseAddr(){
     app.speak("Universe 合約地址已設定。");
   },
 
+
+startPolling(){
+  try{ if(this.pollTimer) clearInterval(this.pollTimer); }catch(_){}
+  this.pollTimer = setInterval(async ()=>{
+    // avoid overlapping refresh storms
+    const now = Date.now();
+    if(now - (this.lastRefreshAt||0) < 2000) return;
+    this.lastRefreshAt = now;
+    try{ await this.refreshUser(); }catch(_){}
+    try{ await this.refresh(); }catch(_){}
+    try{ await this.refreshGaolao(); }catch(_){}
+    try{ await this.refreshTreasury(); }catch(_){}
+  }, 10000);
+},
+stopPolling(){
+  try{ if(this.pollTimer) clearInterval(this.pollTimer); }catch(_){}
+  this.pollTimer = null;
+},
+async autoDetect(){
+  // cannot auto-connect without user gesture, but can show status & chain
+  if(!window.ethereum){
+    const btn = document.getElementById("w3-connect-btn");
+    if(btn){ btn.disabled = true; btn.textContent = "未偵測到錢包（請安裝/開啟 MetaMask）"; }
+    return;
+  }
+  try{
+    const cid = await window.ethereum.request({ method:"eth_chainId" });
+    const el = document.getElementById("w3-chain");
+    if(el) el.innerText = cid || "--";
+    const accts = await window.ethereum.request({ method:"eth_accounts" });
+    if(accts && accts.length){
+      // show address even before connect
+      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = accts[0];
+      const btn = document.getElementById("w3-connect-btn");
+      if(btn){ btn.textContent = "✅ 已授權，點我啟動同步"; }
+    }
+  }catch(e){
+    console.warn("autoDetect failed", e);
+  }
+},
+
+
   async connect(){
     try{
+      this.stopPolling();
       if(!window.ethereum){
         this.demo = true;
         this.ui();
@@ -2106,6 +2155,7 @@ this.ui();
             try{ await this.refreshGaolao();
       await this.refreshTreasury(); }catch(_){ }
 await this.bindEvents();
+      this.startPolling();
       app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
     }catch(e){
       console.error(e);
@@ -2743,7 +2793,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
   const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
 
-  // UI targets (best-effort) — v2.47.3: hide legacy AUTO debug badges (kept logic, no UI)
+  // UI targets (best-effort) — v2.47.4: hide legacy AUTO debug badges (kept logic, no UI)
   const autoBadge = { style:{ display:"none" }, textContent:"" };
   function setAutoUI(on, mode){ /* UI removed */ }
 
