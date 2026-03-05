@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.31.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.46.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1426,187 +1426,28 @@ speak(m){
   },
 
   musicSetIndex(i){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      if(!m.list || !m.list.length) return;
-      const n=m.list.length;
-      let idx = Number(i);
-      if(!Number.isFinite(idx)) idx=0;
-      idx = ((idx % n) + n) % n;
-      m.index = idx;
+    const m = this.music;
+    if(!m || !m.list || !m.list.length) return;
+    // clamp / wrap
+    const n = m.list.length;
+    m.index = ((i % n) + n) % n;
 
-      const item = m.list[idx];
-      if(item){
-        if(item.url){
-          m.audio.src = item.url;
-        }else if(item.file){
-          m.audio.src = URL.createObjectURL(item.file);
-        }else{
-          return;
-        }
-        const nameEl=document.getElementById('music-name');
-        if(nameEl) nameEl.textContent = (item.name||'音檔') + `  (${idx+1}/${n})`;
-  
-      // === Built-in playlist from GitHub ===
+    const tr = m.list[m.index] || {};
+    const raw = String(tr.url || '').trim();
+    const name = String(tr.name || tr.title || `Track ${m.index+1}`);
 
-          const tryFetchJson = async ()=>{
-            const candidates = [
-              'music/playlist.json',
-              './music/playlist.json',
-              encodeURI('music/playlist.json'),
-              new URL('music/playlist.json', window.location.href).toString()
-            ];
-            for(const u of candidates){
-              try{
-                const r = await fetch(u, {cache:'no-store'});
-                if(r && r.ok){
-                  const j = await r.json();
-                  return {ok:true, url:u, json:j};
-                }
-              }catch(e){}
-            }
-            return {ok:false, url:candidates[0], json:null};
-          };
+    // resolve: absolute stays, relative gets normalized to ./music/<file>
+    const resolved = (typeof resolveTrackUrl === 'function') ? resolveTrackUrl(raw) : raw;
 
-      // Expect a JSON file at: ./music/playlist.json
-      // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
-      const loadBuiltIn = async ()=>{
-        try{
-          const out = await tryFetchJson();
-          if(!out.ok) return false;
-          const resUrl = out.url;
-          const arr = out.json;
-          if(!res.ok) return false;
-          
-          if(!Array.isArray(arr) || !arr.length) return false;
-          // normalize
-          const list = arr.map(x=>({
-            name: String(x.name||x.title||'Track'),
-            url: String(x.url||'').trim()
-          })).map(x=>{
-            // if url is bare filename, assume it's inside /music/
-            if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
-            // ensure proper encoding for Chinese filenames
-            if(x.url && !x.url.startsWith('http')) x.url = encodeURI(x.url);
-            return x;
-          }).filter(x=>x.url);
-
-          if(!list.length) return false;
-          // If user hasn't selected local files yet, use built-in list
-          const hasLocal = (this._music.list||[]).some(it=>it.file);
-          if(!hasLocal){
-            this._music.list = list;
-            this._music.index = 0;
-            this.musicSetIndex(0);
-          }else{
-            // merge: append built-in after local
-            this._music.list = (this._music.list||[]).concat(list);
-            this.musicRenderList();
-          }
-          return true;
-        }catch(e){
-          return false;
-        }
-      };
-      // try load built-in silently
-      loadBuiltIn();
-
-
-      // === Volume (persist) ===
-      const vol = document.getElementById('music-vol');
-      const volTxt = document.getElementById('music-vol-txt');
-      const savedVol = Number(localStorage.getItem('ufo_music_vol'));
-      const v0 = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) : 70;
-      if(vol) vol.value = String(v0);
-      if(volTxt) volTxt.textContent = `${v0}%`;
-      audio.volume = v0/100;
-
-      if(vol){
-        vol.addEventListener('input', ()=>{
-          const v = Math.max(0, Math.min(100, Number(vol.value)||0));
-          audio.volume = v/100;
-          if(volTxt) volTxt.textContent = `${v}%`;
-          localStorage.setItem('ufo_music_vol', String(v));
-        });
-      }
-
-      // === Audio unlock on first user gesture (mobile friendly) ===
-      const bgmAuto = document.getElementById('music-bgm-auto');
-      const savedAuto = localStorage.getItem('ufo_music_bgm_auto');
-      if(bgmAuto && savedAuto !== null){
-        bgmAuto.checked = (savedAuto === '1');
-      }
-      if(bgmAuto){
-        bgmAuto.addEventListener('change', ()=>{
-          localStorage.setItem('ufo_music_bgm_auto', bgmAuto.checked ? '1':'0');
-        });
-      }
-
-      const unlockOnce = async ()=>{
-        try{
-          await audio.play();
-          audio.pause();
-          audio.currentTime = 0;
-        }catch(e){}
-        try{
-          if(bgmAuto && bgmAuto.checked){
-            this.musicPlay();
-          }
-        }catch(e){}
-      };
-
-      const onFirstInteract = ()=>{
-        document.removeEventListener('pointerdown', onFirstInteract);
-        document.removeEventListener('keydown', onFirstInteract);
-        unlockOnce();
-      };
-      document.addEventListener('pointerdown', onFirstInteract, {once:true, passive:true});
-      document.addEventListener('keydown', onFirstInteract, {once:true});
-
-
-      this.musicRenderList();
-      }
-    }catch(_){}
+    if(m.audio){
+      m.audio.src = resolved;
+      // ensure reload on mobile
+      try{ m.audio.load(); }catch(e){}
+    }
+    if(m.nameEl) m.nameEl.textContent = name;
+    if(m.statusEl) m.statusEl.textContent = `已載入：${name}`;
   },
-  musicRenderList(){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      const box=document.getElementById('music-list');
-      if(!box) return;
-      const list=m.list||[];
-      if(!list.length){
-        box.innerHTML = '<div style="font-size:12px; opacity:0.75;">尚未載入清單</div>';
-        return;
-      }
-      const idx = Number(m.index)||0;
-      box.innerHTML = list.map((it,i)=>{
-        const active = i===idx;
-        const bg = active ? 'rgba(255,215,0,0.12)' : 'transparent';
-        const bd = active ? '1px solid rgba(255,215,0,0.45)' : '1px solid rgba(255,255,255,0.08)';
-        const name = (it.name||('Track '+(i+1))).replace(/[<>&]/g, s=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
-        return `<button type="button" onclick="app.musicSetIndex(${i}); app.musicPlay();" style="width:100%; text-align:left; padding:8px; margin:4px 0; border-radius:10px; background:${bg}; border:${bd}; color:#e9f7ff; cursor:pointer; font-size:12px;">${name}</button>`;
-      }).join('');
-    }catch(_){}
-  },
-  musicNext(){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      const list=m.list||[];
-      if(!list.length) return;
-      const shuffle = !!document.getElementById('music-shuffle')?.checked;
-      if(shuffle){
-        let ni = Math.floor(Math.random()*list.length);
-        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
-        this.musicSetIndex(ni);
-      }else{
-        this.musicSetIndex((Number(m.index)||0)+1);
-      }
-      this.musicPlay();
-    }catch(_){}
-  },
+
   musicPrev(){
     try{
       this._music=this._music||{};
