@@ -672,6 +672,40 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 */
 
 const APP_VERSION = "v2.26.0";
+
+/* =========================
+   UFO Music: track URL resolver (fix)
+   - Accepts string or {url/src}
+   - Works with relative paths like "music/song.mp3"
+========================= */
+function resolveTrackUrl(track){
+  try{
+    const raw = (typeof track === 'string')
+      ? track
+      : (track && (track.url || track.src || track.href)) || '';
+    if(!raw) return '';
+    // Prefer ROOT if exists; else fall back to current directory
+    let base;
+    if(typeof ROOT !== 'undefined' && ROOT){
+      base = ROOT;
+    }else{
+      const u = new URL(window.location.href);
+      u.hash = '';
+      u.search = '';
+      // ensure dir
+      if(!u.pathname.endsWith('/')){
+        u.pathname = u.pathname.substring(0, u.pathname.lastIndexOf('/') + 1);
+      }
+      base = u;
+    }
+    return new URL(raw, base).toString();
+  }catch(e){
+    // last resort: return as-is
+    return (typeof track === 'string') ? track : ((track && (track.url||track.src)) || '');
+  }
+}
+
+
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
