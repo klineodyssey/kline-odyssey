@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.47.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -671,7 +671,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.47.0";
+const APP_VERSION = "v2.46.13";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1434,11 +1434,6 @@ speak(m){
       if(!audio || !file || !vol) return;
 
       this._music.audio = audio;
-
-      const m = this._music;
-      m.audio = audio;
-      m.nameEl = name;
-      m.statusEl = document.getElementById('music-status');
       // default volume
       audio.volume = (Number(vol.value)||60)/100;
       if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
@@ -1523,6 +1518,102 @@ speak(m){
       }
       this.musicPlay();
     }catch(_){}
+  },
+
+  // --- v2.47.1 music fixes: ensure next/prev/index/render/builtin work ---
+  musicSetIndex(i){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      let idx = Number(i);
+      if(!Number.isFinite(idx)) idx = 0;
+      idx = ((idx % list.length) + list.length) % list.length;
+      m.index = idx;
+      const track = list[idx];
+      if(m.audio){
+        m.audio.src = track && track.url ? track.url : '';
+      }
+      // UI
+      const status=document.getElementById('music-status');
+      const now=document.getElementById('music-now');
+      if(status) status.textContent = `已載入：${list.length} 首`;
+      if(now) now.textContent = track ? `目前：${track.name || track.title || track.url || '—'}` : '（未選曲）';
+    }catch(_){}
+  },
+
+  musicNext(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)+1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+
+  musicRenderList(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      const status=document.getElementById('music-status');
+      const now=document.getElementById('music-now');
+      if(status) status.textContent = list.length ? `已載入：${list.length} 首` : '尚未載入清單';
+      const idx = Number.isFinite(Number(m.index)) ? Number(m.index) : 0;
+      const track = list[idx];
+      if(now) now.textContent = (list.length && track) ? `目前：${track.name || track.title || track.url}` : '（未選曲）';
+    }catch(_){}
+  },
+
+  async musicLoadBuiltIn(force){
+    try{
+      const base = location.href.split('#')[0].split('?')[0];
+      const dir = base.substring(0, base.lastIndexOf('/')+1);
+      const candidates = [
+        dir + 'music/playlist.json',
+        dir + 'playlist.json'
+      ];
+      for(const url of candidates){
+        try{
+          const r = await fetch(url, {cache:'no-store'});
+          if(!r.ok) continue;
+          const json = await r.json();
+          let arr = Array.isArray(json) ? json : (Array.isArray(json.tracks) ? json.tracks : []);
+          if(!arr.length) continue;
+          const norm = arr.map(x=>({
+            name: x.name || x.title || x.file || x.url || 'track',
+            url:  x.url  || x.file  || ''
+          })).filter(x=>x.url);
+          if(!norm.length) continue;
+          this._music=this._music||{};
+          const m=this._music;
+          if(force || !Array.isArray(m.list) || !m.list.length){
+            m.list = norm;
+            m.index = 0;
+          }else{
+            // append without duplicates by url
+            const existing = new Set((m.list||[]).map(t=>t.url));
+            for(const t of norm){
+              if(!existing.has(t.url)) m.list.push(t);
+            }
+          }
+          this.musicSetIndex(Number(m.index)||0);
+          this.musicRenderList();
+          return true;
+        }catch(_){}
+      }
+      return false;
+    }catch(_){ return false; }
   },
 
   musicPlay(){
@@ -2437,15 +2528,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
     <div id="music-now" style="font-size:12px; margin-top:4px; font-weight:800; opacity:0.95;">（未選曲）</div>
   </div>
-
-
-  <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
-    <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
-    <input id="music-vol" type="range" min="0" max="100" value="60" style="flex:1;"/>
-    <div id="music-vol-txt" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
-  </div>
-
-  <audio id="music-audio" preload="none" style="display:none;"></audio>
+<audio id="music-audio" preload="none" style="display:none;"></audio>
 </div>
 
 
