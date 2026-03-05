@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.2</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -500,6 +500,9 @@
   cursor:pointer;
 }
 .tiny-btn:active{ transform:translateY(1px); }
+
+/* v2.47.3: hide legacy AUTO debug UI */
+#autoTag, #autoBadge{ display:none !important; }
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -519,14 +522,12 @@
     </div>
   <div class="rb-note">E = mc²</div>
   </div>
-
-  <div id="autoTag">AUTO: --</div>
-  <div id="toast" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.47.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1520,7 +1521,7 @@ speak(m){
     }catch(_){}
   },
 
-  // --- v2.47.2 music fixes: ensure next/prev/index/render/builtin work ---
+  // --- v2.47.3 music fixes: ensure next/prev/index/render/builtin work ---
   musicSetIndex(i){
     try{
       this._music=this._music||{};
@@ -2742,21 +2743,9 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
   const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
 
-  // UI targets (best-effort)
-  const autoBadge = qs("#autoBadge") || (function(){
-    const b = document.createElement("div");
-    b.id="autoBadge";
-    b.style.cssText="position:fixed;left:12px;bottom:92px;z-index:99999;padding:8px 10px;border:1px solid rgba(255,215,120,.35);border-radius:12px;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;display:none;";
-    b.textContent="AUTO: OFF";
-    document.body.appendChild(b);
-    return b;
-  })();
-
-  function setAutoUI(on, mode){
-    autoBadge.style.display = on ? "block" : "none";
-    autoBadge.textContent = on ? ("AUTO: "+mode) : "AUTO: OFF";
-    autoBadge.style.boxShadow = on ? "0 0 18px rgba(255,215,120,.25)" : "none";
-  }
+  // UI targets (best-effort) — v2.47.3: hide legacy AUTO debug badges (kept logic, no UI)
+  const autoBadge = { style:{ display:"none" }, textContent:"" };
+  function setAutoUI(on, mode){ /* UI removed */ }
 
   function syncVisuals(longMode, p){
     // direction wheel / joystick visual
