@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.4</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.46.4</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -671,7 +671,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.26.0";
+const APP_VERSION = "v2.47.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1434,6 +1434,11 @@ speak(m){
       if(!audio || !file || !vol) return;
 
       this._music.audio = audio;
+
+      const m = this._music;
+      m.audio = audio;
+      m.nameEl = name;
+      m.statusEl = document.getElementById('music-status');
       // default volume
       audio.volume = (Number(vol.value)||60)/100;
       if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
@@ -2429,7 +2434,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 
   <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
-    <div style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+    <div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+    <div id="music-now" style="font-size:12px; margin-top:4px; font-weight:800; opacity:0.95;">（未選曲）</div>
   </div>
 
 
@@ -3206,7 +3212,15 @@ document.addEventListener('click', (ev)=>{
     });
 
 
-    // Patch prev/next if missing or non-working
+    
+    // UI helper: show current track title
+    window.setMusicNow = window.setMusicNow || function(title){
+      try{
+        const el = document.getElementById('music-now');
+        if(el) el.textContent = title ? String(title) : '（未選曲）';
+      }catch(e){}
+    };
+// Patch prev/next if missing or non-working
     function ensureAudio(){
       if (app._musicAudio) return app._musicAudio;
       // try find existing audio tag
@@ -3224,6 +3238,7 @@ document.addEventListener('click', (ev)=>{
         const idx = (typeof app._musicIndex==="number") ? app._musicIndex : 0;
         const track = app._musicList[idx] || app._musicList[0];
         if (track && track.url && a.src !== track.url) a.src = track.url;
+        try{ window.setMusicNow && window.setMusicNow(track && (track.title || track.name || track.url)); }catch(e){}
         try{ await a.play(); }catch(e){ console.warn(e); }
       }
     });
