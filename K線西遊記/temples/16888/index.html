@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.42.1-OG-MUSIC-RAW-PLAYER</div>
+        <div class="sys-st" id="ver-st">VERSION v2.42.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -689,7 +689,16 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.41.0";
+// ---- Cache / Service Worker hard reset (for GitHub Pages mobile cache) ----
+try {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+  }
+  if (window.caches && caches.keys) {
+    caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+  }
+} catch (e) {}
+const APP_VERSION = "v2.42.2";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
