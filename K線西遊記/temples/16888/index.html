@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.46.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.46.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1445,17 +1445,37 @@ speak(m){
       });
 
       file.addEventListener('change', ()=>{
-        const f = file.files && file.files[0];
-        if(!f){ if(name) name.textContent='未載入音檔'; return; }
-        const url = URL.createObjectURL(f);
-        // revoke old url if any
-        if(this._music.url){ try{ URL.revokeObjectURL(this._music.url);}catch(_){} }
-        this._music.url = url;
-        audio.src = url;
-        audio.load();
-        if(name) name.textContent = '已載入：' + (f.name || 'audio');
-        this.speak('音樂已安裝。');
+        const files = Array.from((file.files || []));
+        if(!files.length){ if(name) name.textContent='未載入音檔'; return; }
+
+        this._music = this._music || {};
+        const m = this._music;
+        m.list = Array.isArray(m.list) ? m.list : [];
+
+        // append selected files to playlist (do NOT replace existing)
+        const added = [];
+        for(const f of files){
+          if(!f) continue;
+          const url = URL.createObjectURL(f);
+          added.push({ name: f.name || 'audio', url, _blob:true });
+        }
+        m.list = m.list.concat(added);
+
+        // set index to first newly-added track if nothing was playing
+        if(typeof m.index !== 'number') m.index = 0;
+        if(!m.audio || !m.audio.src){
+          m.index = Math.max(0, m.list.length - added.length);
+        }
+
+        // update UI list
+        try{ this.musicRenderList && this.musicRenderList(); }catch(_){ }
+
+        // load current track
+        this.musicSetIndex(m.index);
+        if(name) name.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
+        this.speak('音樂已加入歌單。');
       });
+
     }catch(_){}
   },
 
@@ -3179,6 +3199,12 @@ document.addEventListener('click', (ev)=>{
       status("已載入 " + app._musicList.length + " 首");
       return true;
     });
+
+    // Alias for UI button naming consistency
+    app.musicLoadBuiltIn = app.musicLoadBuiltIn || (async function(force=true){
+      try{ return await app.musicLoadBuiltin(); }catch(e){ console.warn(e); return false; }
+    });
+
 
     // Patch prev/next if missing or non-working
     function ensureAudio(){
