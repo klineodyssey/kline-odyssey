@@ -2391,7 +2391,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
       <input id="music-loop" type="checkbox" />
       循環
     </label>
-    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub /music/playlist.json 自動載入內建歌單</div>
+    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub music/playlist.json 或 playlist.json 自動載入內建歌單</div>
   </div>
 
   <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -3110,12 +3110,26 @@ document.addEventListener('click', (ev)=>{
     app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
       const status = (msg)=>{ try{ window.setMusicStatus && window.setMusicStatus(msg); }catch(e){} };
       status("載入中…");
-      const playlistUrl = new URL("music/playlist.json", ROOT).toString() + "?t=" + Date.now();
+      const playlistCandidates = [
+        new URL("music/playlist.json", ROOT).toString(),
+        new URL("playlist.json", ROOT).toString(),
+        new URL(".music/playlist.json 或 playlist.json", ROOT).toString(),
+        new URL("./playlist.json", ROOT).toString(),
+      ].filter((v,i,a)=>a.indexOf(v)===i);
       let data = null;
+      let lastErr = null;
       try{
-        const r = await fetch(playlistUrl, {cache:"no-store"});
-        if(!r.ok) throw new Error("HTTP " + r.status);
-        data = await r.json();
+        for (const base of playlistCandidates){
+          const tryUrl = base + "?t=" + Date.now();
+          try{
+            const r = await fetch(tryUrl, {cache:"no-store"});
+            if(!r.ok) throw new Error("HTTP " + r.status);
+            data = await r.json();
+            if(Array.isArray(data)) { lastErr=null; break; }
+            data = null;
+          }catch(err){ lastErr = err; data = null; }
+        }
+        if(!data) throw (lastErr || new Error("playlist not found"));
       }catch(e){
         // fallback: try raw githubusercontent if user stores playlist there
         try{
@@ -3123,7 +3137,7 @@ document.addEventListener('click', (ev)=>{
           // if on github.io, map to raw.githubusercontent.com
           // user must keep same path structure under repo main branch
           const pathParts = u.pathname.split("/").filter(Boolean);
-          // expected: /kline-odyssey/K線西遊記/temples/16888/music/playlist.json
+          // expected: /kline-odyssey/K線西遊記/temples/16888music/playlist.json 或 playlist.json
           const repo = pathParts[0];
           const rest = pathParts.slice(1).join("/");
           const raw = "https://raw.githubusercontent.com/klineodyssey/" + repo + "/main/" + rest + "?t=" + Date.now();
