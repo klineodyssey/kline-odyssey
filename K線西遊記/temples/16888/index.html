@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.42.1-OG-MUSIC-RAW-PLAYER</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.42.3</title>
 
 <!-- Open Graph (Restore) -->
 <meta property="og:type" content="website">
@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.42.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.42.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -698,7 +698,7 @@ try {
     caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
   }
 } catch (e) {}
-const APP_VERSION = "v2.42.2";
+const APP_VERSION = "v2.42.3";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1813,6 +1813,7 @@ window.app = app;
 
 })();
 
+window.app = app;
 window.onload = () => app.init();
   // auto concierge on first visit
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
