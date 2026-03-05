@@ -1472,11 +1472,6 @@ speak(m){
 
         // load current track
         this.musicSetIndex(m.index);
-        // try autoplay (allowed because triggered by user file selection)
-        try{ 
-          const a=this._music && this._music.audio; 
-          if(a && a.src){ a.play().catch(()=>{}); }
-        }catch(_){}
         if(name) name.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
         this.speak('音樂已加入歌單。');
       });
@@ -2388,11 +2383,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 
   <div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
-    安裝 MP3：可一次選多首（或整個資料夾），選完即自動播放（僅在本裝置本頁面有效，不會上傳）。
+    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
   </div>
 
   <div style="margin-top:10px;">
-    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;" webkitdirectory directory />
+    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
     <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
   </div>
 
@@ -3131,86 +3126,81 @@ document.addEventListener('click', (ev)=>{
     const app = window.app || window.APP || null;
     if (!app) return;
 
-    // Built-in playlist loader (stable)
-// - will try: ./music/playlist.json then ./playlist.json (relative to current page folder)
-// - supports entries: {name,title,url} and relative urls
-app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
-  const status = (msg)=>{ try{ window.setMusicStatus && window.setMusicStatus(msg); }catch(e){} };
-  try{
-    status("載入中…");
-    const ROOT = (function(){
+    // Built-in playlist loader
+    app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
+      const status = (msg)=>{ try{ window.setMusicStatus && window.setMusicStatus(msg); }catch(e){} };
+      status("載入中…");
+      const playlistCandidates = [
+        new URL("music/playlist.json", ROOT).toString(),
+        new URL("playlist.json", ROOT).toString(),
+        new URL(".music/playlist.json 或 playlist.json", ROOT).toString(),
+        new URL("./playlist.json", ROOT).toString(),
+      ].filter((v,i,a)=>a.indexOf(v)===i);
+      let data = null;
+      let lastErr = null;
       try{
-        // current document folder (safe even when URL has ?=123 etc)
-        const u = new URL(location.href);
-        u.hash = "";
-        u.search = "";
-        // keep trailing slash for folder
-        u.pathname = u.pathname.replace(/[^\/]*$/, "");
-        return u.toString();
-      }catch(e){
-        return location.href.replace(/[?#].*$/, "").replace(/[^\/]*$/, "");
-      }
-    })();
-
-    const candidates = [
-      new URL("music/playlist.json", ROOT).toString(),
-      new URL("playlist.json", ROOT).toString(),
-    ];
-
-    let list = null;
-    let lastErr = null;
-
-    for (const base of candidates){
-      const tryUrl = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
-      try{
-        const r = await fetch(tryUrl, { cache: "no-store" });
-        if(!r.ok) throw new Error("HTTP " + r.status);
-        const data = await r.json();
-        if(Array.isArray(data)){
-          list = data;
-          lastErr = null;
-          break;
+        for (const base of playlistCandidates){
+          const tryUrl = base + "?t=" + Date.now();
+          try{
+            const r = await fetch(tryUrl, {cache:"no-store"});
+            if(!r.ok) throw new Error("HTTP " + r.status);
+            data = await r.json();
+            if(Array.isArray(data)) { lastErr=null; break; }
+            data = null;
+          }catch(err){ lastErr = err; data = null; }
         }
-        throw new Error("playlist json is not an array");
+        if(!data) throw (lastErr || new Error("playlist not found"));
       }catch(e){
-        lastErr = e;
+        // fallback: try raw githubusercontent if user stores playlist there
+        try{
+          const u = new URL(playlistUrl);
+          // if on github.io, map to raw.githubusercontent.com
+          // user must keep same path structure under repo main branch
+          const pathParts = u.pathname.split("/").filter(Boolean);
+          // expected: /kline-odyssey/K線西遊記/temples/16888music/playlist.json 或 playlist.json
+          const repo = pathParts[0];
+          const rest = pathParts.slice(1).join("/");
+          const raw = "https://raw.githubusercontent.com/klineodyssey/" + repo + "/main/" + rest + "?t=" + Date.now();
+          const rr = await fetch(raw, {cache:"no-store"});
+          if(!rr.ok) throw new Error("RAW HTTP " + rr.status);
+          data = await rr.json();
+        }catch(e2){
+          status("載入失敗：找不到 playlist.json");
+          console.warn("playlist load failed", e, e2);
+          return false;
+        }
       }
-    }
-    if(!list) throw (lastErr || new Error("playlist not found"));
 
-    // normalize
-    const norm = [];
-    for (const it of list){
-      if(!it) continue;
-      const title = (it.title || it.name || it.track || "Track").toString();
-      const urlRaw = (it.url || it.src || "").toString();
-      if(!urlRaw) continue;
-      const abs = new URL(urlRaw, ROOT).toString();
-      norm.push({ title, url: abs });
-    }
-    if(!norm.length) throw new Error("playlist empty");
+      // normalize
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.tracks) ? data.tracks : []);
+      app._musicList = list.map((t)=>({
+        title: (typeof t==="string") ? t : (t.title || t.name || (t.url||t.src||"").split("/").pop() || "Track"),
+        url: resolveTrackUrl(t)
+      })).filter(x=>x.url);
 
-    app._music = app._music || {};
-    app._music.list = norm.map(x=>({ name: x.title, url: x.url, _remote:true }));
-    app._music.index = 0;
+      if(!app._musicList.length){
+        status("歌單為空");
+        return false;
+      }
 
-    // preload audio element if present
-    try{
-      const a = document.getElementById("music-audio") || app._music.audio;
-      if(a && app._music.list[0]) a.src = app._music.list[0].url;
-    }catch(e){}
+      app._musicIndex = 0;
+      // if original music system exists, try to sync
+      if (typeof app.musicSetIndex === "function") {
+        try{ app.musicSetIndex(0); }catch(e){}
+      } else {
+        try{
+          // basic audio fallback
+          app._musicAudio = app._musicAudio || new Audio();
+          app._musicAudio.src = app._musicList[0].url;
+        }catch(e){}
+      }
 
-    try{ app.musicRenderList && app.musicRenderList(); }catch(e){}
-    try{ window.setMusicNow && window.setMusicNow(app._music.list[0].name); }catch(e){}
-    status("已載入 " + app._music.list.length + " 首");
-    return true;
-  }catch(e){
-    console.warn(e);
-    try{ status("載入失敗：" + (e && e.message ? e.message : e)); }catch(_){}
-    return false;
-  }
-});
-// Alias for UI button naming consistency
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[0].title); }catch(e){}
+      status("已載入 " + app._musicList.length + " 首");
+      return true;
+    });
+
+    // Alias for UI button naming consistency
     app.musicLoadBuiltIn = app.musicLoadBuiltIn || (async function(force=true){
       try{ return await app.musicLoadBuiltin(); }catch(e){ console.warn(e); return false; }
     });
@@ -3337,12 +3327,107 @@ app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
     setStatus("已載入內建歌單：" + list.length + " 首");
     try{ window.app.speak && window.app.speak('已載入內建歌單。'); }catch(e){}
   };
+  // --- AUTO LOAD + AUTO NEXT (V2.46.10) ---
+  try{
+    const toast = (msg)=>{
+      const t = document.getElementById('toast');
+      if(!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._tm);
+      t._tm = setTimeout(()=>t.classList.remove('show'), 2400);
+    };
 
-  // convenience: if user checks BGM auto, load playlist on first interaction
-  const auto = document.getElementById('music-auto');
-  if(auto && auto.checked){
-    // do nothing (browser policy); user must tap play/load once.
-  }
+    // auto-next when a track ends (play through the whole list like a normal player)
+    const a = document.getElementById('music-audio');
+    if (a && !a._klineEndedHook){
+      a._klineEndedHook = true;
+      a.addEventListener('ended', ()=>{
+        const app = window.app;
+        const m = app && app._music ? app._music : null;
+        if(!app || !m || !Array.isArray(m.list) || !m.list.length) return;
+
+        const loop = !!(document.getElementById('music-loop') && document.getElementById('music-loop').checked);
+        const shuffle = !!(document.getElementById('music-shuffle') && document.getElementById('music-shuffle').checked);
+
+        if(shuffle){
+          if(m.list.length === 1){
+            if(loop){ try{ app.musicSetIndex(0); app.musicPlay(); }catch(e){} }
+            return;
+          }
+          let next = m.index;
+          for(let guard=0; guard<12 && next===m.index; guard++){
+            next = Math.floor(Math.random() * m.list.length);
+          }
+          m.index = next;
+          try{ app.musicSetIndex(m.index); app.musicPlay(); }catch(e){}
+          return;
+        }
+
+        const atLast = (m.index >= m.list.length - 1);
+        if(atLast){
+          if(loop){
+            m.index = 0;
+            try{ app.musicSetIndex(0); app.musicPlay(); }catch(e){}
+          }else{
+            toast('播放完畢');
+          }
+        }else{
+          m.index += 1;
+          try{ app.musicSetIndex(m.index); app.musicPlay(); }catch(e){}
+        }
+      });
+    }
+
+    // auto-load builtin playlist from GitHub on page load (no need to click)
+    const autoLoadBuiltin = async ()=>{
+      try{
+        if(typeof window.app.musicLoadBuiltIn === 'function'){
+          await window.app.musicLoadBuiltIn(true);
+        }
+      }catch(e){}
+    };
+
+    // best-effort autoplay:
+    // - mobile browsers block autoplay unless muted or user gesture
+    // - we try muted autoplay; if blocked, we arm a one-tap start anywhere
+    const tryAutoPlay = async ()=>{
+      const autoCk = document.getElementById('music-bgm-auto');
+      if(!autoCk || !autoCk.checked) return;
+
+      const app = window.app;
+      const audio = document.getElementById('music-audio');
+      if(!app || !audio) return;
+
+      // if already playing, skip
+      if(!audio.paused) return;
+
+      const prevMuted = audio.muted;
+      audio.muted = true;
+
+      try{
+        await audio.play();
+        toast('BGM 已自動播放（靜音）點一下開聲');
+        const unmuteOnce = ()=>{
+          audio.muted = false;
+          toast('已開聲');
+        };
+        document.addEventListener('pointerdown', unmuteOnce, { once:true, capture:true });
+      }catch(e){
+        audio.muted = prevMuted;
+        toast('點一下畫面啟動 BGM');
+        const startOnce = async ()=>{
+          try{ await app.musicPlay(); }catch(_){}
+        };
+        document.addEventListener('pointerdown', startOnce, { once:true, capture:true });
+      }
+    };
+
+    window.addEventListener('load', ()=>{
+      autoLoadBuiltin().then(()=>tryAutoPlay());
+    });
+
+  }catch(e){}
 })();
 
 </script>
