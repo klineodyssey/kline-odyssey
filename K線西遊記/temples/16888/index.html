@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.40.0-OG-MUSIC-RAW-PLAYER</div>
+        <div class="sys-st" id="ver-st">VERSION v2.41.0-OG-MUSIC-RAW-PLAYER</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -689,7 +689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.40.0";
+const APP_VERSION = "v2.41.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -3244,6 +3244,9 @@ document.addEventListener('click', (ev)=>{
     u = u.replace(/^\.\/?/,'').replace(/^music\//i,'');
     return encodePath(RAW_BASE + u);
   }
+  // Backward-compat alias (older builds call resolveTrackUrl)
+  function resolveTrackUrl(u){ return resolveTrack(u); }
+
   function findLoadBtn(){
     const btns = Array.from(document.querySelectorAll("button, a"));
     return btns.find(b => (b.textContent||"").replace(/\s+/g,'').includes("載入內建歌單"));
