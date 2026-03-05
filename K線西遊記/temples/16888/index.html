@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.6</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.46.6</div>
+        <div class="sys-st" id="ver-st">VERSION v2.46.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1435,7 +1435,6 @@ speak(m){
       if(!audio || !file || !vol) return;
 
       this._music.audio = audio;
-      this._music.audioEl = audio;
       // default volume
       audio.volume = (Number(vol.value)||60)/100;
       if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
@@ -1443,6 +1442,9 @@ speak(m){
       vol.addEventListener('input', ()=>{
         const v = Math.max(0, Math.min(100, Number(vol.value)||0));
         audio.volume = v/100;
+        if(volTxt) volTxt.textContent = v + '%';
+      });
+
       // add selected files (multi-select or folder) into playlist
       const addFilesToMusic = (fileList)=>{
         const files = Array.from((fileList || []));
@@ -1467,9 +1469,10 @@ speak(m){
         if(!added.length){ if(name) name.textContent='未載入音檔'; return; }
 
         m.list = m.list.concat(added);
-        // jump to first newly added track (so user按播放一定是新加入)
+        // jump to first newly added track so Play uses latest selection
         m.index = startIndex;
         this.musicSetIndex(m.index);
+
         if(name) name.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
         this.speak('音樂已加入歌單。');
 
@@ -1478,17 +1481,31 @@ speak(m){
         if(auto){ setTimeout(()=>{ try{ this.musicPlay(); }catch(_){} }, 80); }
       };
 
-file.addEventListener('change', ()=>{
+      file.addEventListener('change', ()=>{
         addFilesToMusic(file.files);
-        try{ file.value=''; }catch(_){ }
+        try{ file.value=''; }catch(_){}
       });
       if(folder){
         folder.addEventListener('change', ()=>{
           addFilesToMusic(folder.files);
-          try{ folder.value=''; }catch(_){ }
+          try{ folder.value=''; }catch(_){}
         });
       }
- ' + m.list.length + ' 首）';
+}
+        m.list = m.list.concat(added);
+
+        // set index to first newly-added track if nothing was playing
+        if(typeof m.index !== 'number') m.index = 0;
+        if(!m.audio || !m.audio.src){
+          m.index = Math.max(0, m.list.length - added.length);
+        }
+
+        // update UI list
+        try{ this.musicRenderList && this.musicRenderList(); }catch(_){ }
+
+        // load current track
+        this.musicSetIndex(m.index);
+        if(name) name.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
         this.speak('音樂已加入歌單。');
       });
 
@@ -1509,14 +1526,10 @@ file.addEventListener('change', ()=>{
     // resolve: absolute stays, relative gets normalized to ./music/<file>
     const resolved = (typeof resolveTrackUrl === 'function') ? resolveTrackUrl(raw) : raw;
 
-    {
-      const a = m.audio || m.audioEl || document.getElementById('music-audio');
-      m.audio = a;
-      if(a){
-        a.src = resolved;
-        // ensure reload on mobile
-        try{ a.load(); }catch(e){}
-      }
+    if(m.audio){
+      m.audio.src = resolved;
+      // ensure reload on mobile
+      try{ m.audio.load(); }catch(e){}
     }
     if(m.nameEl) m.nameEl.textContent = name;
     if(m.statusEl) m.statusEl.textContent = `已載入：${name}`;
@@ -2408,12 +2421,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
   <div style="margin-top:10px;">
     <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
-    <div style="margin-top:6px; font-size:12px; opacity:0.75; line-height:1.35;">
-      可一次多選多首（依手機檔案管理器支援）。若想「一次全選資料夾」，用下方「選擇音樂資料夾」。
-    </div>
+    <div style="margin-top:6px; font-size:12px; opacity:0.75; line-height:1.35;">可一次多選多首（依手機檔案管理器支援）。若想一次全選資料夾，使用下方「選擇音樂資料夾」。</div>
     <div style="margin-top:8px;">
       <input id="music-folder" type="file" accept="audio/*" multiple webkitdirectory directory style="width:100%;"/>
-      <div style="margin-top:4px; font-size:11px; opacity:0.65;">選擇音樂資料夾（Chrome/Edge較穩，iOS多半不支援）</div>
+      <div style="margin-top:4px; font-size:11px; opacity:0.65;">選擇音樂資料夾（Chrome/Edge較穩；iOS多半不支援）</div>
     </div>
     <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
   </div>
