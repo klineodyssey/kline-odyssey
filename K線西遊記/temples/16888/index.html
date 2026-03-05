@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.31.6-OG-MUSIC-RAW-PLAYER</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.42.1-OG-MUSIC-RAW-PLAYER</title>
 
 <!-- Open Graph (Restore) -->
 <meta property="og:type" content="website">
@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.42.0-OG-MUSIC-RAW-PLAYER</div>
+        <div class="sys-st" id="ver-st">VERSION v2.42.1-OG-MUSIC-RAW-PLAYER</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -3402,6 +3402,211 @@ window.resolveTrack = resolveTrack;
 window.resolveTrackUrl = resolveTrackUrl;
 )();
 /* ===== /V2.31.5 ===== */
+</script>
+
+
+<script>
+/* =========================
+   UFO MUSIC PATCH (Built-in playlist loader)
+   - Fix missing app.musicLoadBuiltIn / resolveTrackUrl
+   - Robust fetch with cache-bust + raw github fallback
+   - Works on GitHub Pages under /K線西遊記/temples/16888/
+========================= */
+(function(){
+  const log = (...a)=>{ try{ console.log('[UFO-MUSIC]', ...a);}catch(e){} };
+  const $ = (id)=>document.getElementById(id);
+
+  // Make sure an audio element exists
+  let audio = window.__ufoAudio;
+  if(!audio){
+    audio = document.createElement('audio');
+    audio.id = 'ufoAudio';
+    audio.preload = 'auto';
+    audio.crossOrigin = 'anonymous';
+    document.body.appendChild(audio);
+    window.__ufoAudio = audio;
+  }
+
+  const state = window.__ufoMusicState || {
+    list: [],
+    idx: 0,
+    shuffle: false,
+    loop: false,
+    bgmAuto: false
+  };
+  window.__ufoMusicState = state;
+
+  // UI elements (if present)
+  const elStatus = $('musicStatus') || $('music_status') || null;
+  const elNow = $('musicNow') || $('music_now') || null;
+  const elVol = $('musicVol') || $('music_vol') || null;
+
+  function setStatus(t){
+    if(elStatus) elStatus.textContent = t;
+    log(t);
+  }
+  function setNow(t){
+    if(elNow) elNow.textContent = t;
+  }
+  function normalizeBase(){
+    // current folder base (…/K線西遊記/temples/16888/)
+    const u = new URL(location.href);
+    u.hash = ''; u.search = '';
+    // ensure ends with slash
+    if(!u.pathname.endsWith('/')){
+      u.pathname = u.pathname.replace(/[^\/]+$/, '');
+    }
+    return u.toString();
+  }
+
+  async function tryFetchJson(url){
+    try{
+      const r = await fetch(url, { cache:'no-store' });
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){
+      log('fetch fail', url, e);
+      throw e;
+    }
+  }
+
+  // Resolve track URL: accept absolute, or relative "music/xxx.mp3"
+  window.resolveTrackUrl = function(trackUrl){
+    if(!trackUrl) return '';
+    try{
+      // already absolute
+      if(/^https?:\/\//i.test(trackUrl)) return trackUrl;
+      // handle raw github "blob" links by converting to raw
+      if(trackUrl.includes('github.com') && trackUrl.includes('/blob/')){
+        return trackUrl.replace('github.com','raw.githubusercontent.com').replace('/blob/','/');
+      }
+      const base = normalizeBase();
+      return new URL(trackUrl, base).toString();
+    }catch(e){
+      return trackUrl;
+    }
+  };
+
+  function pickIndex(next=true){
+    if(!state.list.length) return 0;
+    if(state.shuffle){
+      return Math.floor(Math.random()*state.list.length);
+    }
+    return (state.idx + (next?1:-1) + state.list.length) % state.list.length;
+  }
+
+  function loadTrack(i){
+    if(!state.list.length){ setStatus('尚未載入歌單'); return; }
+    state.idx = Math.max(0, Math.min(i, state.list.length-1));
+    const t = state.list[state.idx];
+    const url = window.resolveTrackUrl(t.url);
+    audio.src = url;
+    setNow(`${t.name || ('Track '+(state.idx+1))}`);
+    setStatus('已載入：' + (t.name || url));
+  }
+
+  function play(){
+    if(!audio.src){
+      if(state.list.length) loadTrack(state.idx);
+      else { setStatus('尚未載入歌單'); return; }
+    }
+    audio.loop = !!state.loop;
+    audio.play().then(()=>setStatus('播放中')).catch(e=>setStatus('播放失敗：請點一下畫面後再按播放'));
+  }
+
+  function pause(){ try{ audio.pause(); setStatus('暫停'); }catch(e){} }
+  function stop(){ try{ audio.pause(); audio.currentTime=0; setStatus('停止'); }catch(e){} }
+  function next(){ loadTrack(pickIndex(true)); play(); }
+  function prev(){ loadTrack(pickIndex(false)); play(); }
+
+  // attach controls if exist
+  const btnPlay = $('btnMusicPlay') || $('musicPlay') || null;
+  const btnPause = $('btnMusicPause') || $('musicPause') || null;
+  const btnStop = $('btnMusicStop') || $('musicStop') || null;
+  const btnNext = $('btnMusicNext') || $('musicNext') || null;
+  const btnPrev = $('btnMusicPrev') || $('musicPrev') || null;
+  const btnLoad = $('btnMusicLoadBuiltIn') || $('btnLoadBuiltin') || null;
+
+  if(btnPlay) btnPlay.onclick = play;
+  if(btnPause) btnPause.onclick = pause;
+  if(btnStop) btnStop.onclick = stop;
+  if(btnNext) btnNext.onclick = next;
+  if(btnPrev) btnPrev.onclick = prev;
+
+  if(elVol){
+    elVol.addEventListener('input', ()=>{
+      const v = parseFloat(elVol.value||'1');
+      audio.volume = Math.max(0, Math.min(1, v));
+    });
+  }
+
+  const chkShuffle = $('chkShuffle') || $('musicShuffle') || null;
+  const chkLoop = $('chkLoop') || $('musicLoop') || null;
+  const chkAuto = $('chkBgmAuto') || $('musicBgmAuto') || null;
+  if(chkShuffle) chkShuffle.addEventListener('change', ()=> state.shuffle = !!chkShuffle.checked);
+  if(chkLoop) chkLoop.addEventListener('change', ()=> { state.loop = !!chkLoop.checked; audio.loop = state.loop; });
+  if(chkAuto) chkAuto.addEventListener('change', ()=> state.bgmAuto = !!chkAuto.checked);
+
+  // Local file loader
+  const fileInput = $('musicFile') || $('music_file') || null;
+  if(fileInput){
+    fileInput.addEventListener('change', ()=>{
+      const f = fileInput.files && fileInput.files[0];
+      if(!f){ setStatus('未選擇任何檔案'); return; }
+      const url = URL.createObjectURL(f);
+      state.list = [{ name: f.name, url }];
+      state.idx = 0;
+      loadTrack(0);
+      play();
+    });
+  }
+
+  // Built-in playlist loader
+  async function loadBuiltIn(){
+    const base = normalizeBase();
+    const now = Date.now();
+    const candidates = [
+      new URL('music/playlist.json?v='+now, base).toString(),
+      new URL('./music/playlist.json?v='+now, base).toString(),
+      // raw github fallbacks (main branch)
+      'https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json?v='+now
+    ];
+    setStatus('載入內建歌單中…');
+    for(const url of candidates){
+      try{
+        const data = await tryFetchJson(url);
+        if(!Array.isArray(data) || !data.length) throw new Error('empty');
+        // normalize
+        state.list = data.map((x,i)=>({
+          name: (x && x.name) ? String(x.name) : ('Track '+(i+1)),
+          url: (x && x.url) ? String(x.url) : ''
+        })).filter(x=>x.url);
+        state.idx = 0;
+        loadTrack(0);
+        setStatus('內建歌單載入成功：'+state.list.length+' 首');
+        // auto play if enabled
+        if(state.bgmAuto) play();
+        return;
+      }catch(e){
+        setStatus('歌單載入失敗，換路徑重試…');
+      }
+    }
+    setStatus('內建歌單載入失敗：請確認 music/playlist.json 已存在且 GitHub Pages 已更新');
+  }
+
+  if(btnLoad) btnLoad.onclick = loadBuiltIn;
+
+  // Provide compatibility with older inline handlers: app.musicLoadBuiltIn()
+  window.app = window.app || {};
+  window.app.musicLoadBuiltIn = loadBuiltIn;
+
+  // If the page had an inline error banner, hide it after patch
+  setTimeout(()=>{
+    const err = document.querySelector('.load-error, #loadError, #load_error');
+    if(err && /resolveTrackUrl/i.test(err.textContent||'')) err.style.display='none';
+  }, 300);
+
+})();
 </script>
 
 </body>
