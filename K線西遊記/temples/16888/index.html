@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.44.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.44.1</title>
 
 <!-- Open Graph (Restore) -->
 <meta property="og:type" content="website">
@@ -565,7 +565,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.44.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.44.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -719,7 +719,7 @@ try {
     caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
   }
 } catch (e) {}
-const APP_VERSION = "v2.44.0";
+const APP_VERSION = "v2.44.1";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1474,191 +1474,91 @@ speak(m){
   },
 
   musicSetIndex(i){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      if(!m.list || !m.list.length) return;
-      const n=m.list.length;
-      let idx = Number(i);
-      if(!Number.isFinite(idx)) idx=0;
-      idx = ((idx % n) + n) % n;
-      m.index = idx;
+      if(!this.music || !this.music.audio) return;
+      const list = this.music.list || [];
+      if(!list.length) return;
+      const n = (i%list.length + list.length)%list.length;
+      this.music.idx = n;
 
-      const item = m.list[idx];
-      if(item){
-        if(item.url){
-          m.audio.src = item.url;
-        }else if(item.file){
-          m.audio.src = URL.createObjectURL(item.file);
-        }else{
-          return;
-        }
-        const nameEl=document.getElementById('music-name');
-        if(nameEl) nameEl.textContent = (item.name||'音檔') + `  (${idx+1}/${n})`;
-  
-      // === Built-in playlist from GitHub ===
+      const item = list[n] || {};
+      const name = item.name || `Track ${n+1}`;
+      const url = item.url ? (new URL(item.url, location.href)).href : "";
 
-          const tryFetchJson = async ()=>{
-            const candidates = [
-              // Relative to current page (recommended)
-              'music/playlist.json',
-              './music/playlist.json',
-              // GitHub Pages (unicode + encoded)
-              'https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/music/playlist.json',
-              'https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json',
-              // GitHub raw (main)
-              'https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json'
-            ];
-            for(const u of candidates){
-              try{
-                const r = await fetch(u, {cache:'no-store'});
-                if(r && r.ok){
-                  const j = await r.json();
-                  return {ok:true, url:u, json:j};
-                }
-              }catch(e){}
-            }
-            return {ok:false, url:candidates[0], json:null};
-          };
+      this.music.audio.src = url;
+      const nameEl = document.getElementById('music-now');
+      if(nameEl) nameEl.textContent = name;
 
-      // Expect a JSON file at: ./music/playlist.json
-      // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
-      const loadBuiltIn = async ()=>{
+      // 若正在播放則切歌後續播（需要使用者手勢觸發過一次）
+      if(this.music.isPlaying){
+        const p = this.music.audio.play();
+        if(p && p.catch) p.catch(()=>{});
+      }
+    },
+
+    async loadBuiltIn(){
+      const statusEl = document.getElementById('music-status');
+      const setStatus = (t)=>{ if(statusEl) statusEl.textContent = t; };
+
+      const tryFetchJson = async (u)=>{
         try{
-          const out = await tryFetchJson();
-          if(!out.ok) return false;
-          const resUrl = out.url;
-          const arr = out.json;
-          
-          if(!Array.isArray(arr) || !arr.length) return false;
-          // normalize
-          const list = arr.map(x=>({
-            name: String(x.name||x.title||'Track'),
-            url: String(x.url||'').trim()
-          })).map(x=>{
-            // if url is bare filename, assume it's inside /music/
-            if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
-            // ensure proper encoding for Chinese filenames
-            if(x.url && !x.url.startsWith('http')) x.url = encodeURI(x.url);
-            return x;
-          }).filter(x=>x.url);
-
-          if(!list.length) return false;
-          // If user hasn't selected local files yet, use built-in list
-          const hasLocal = (this._music.list||[]).some(it=>it.file);
-          if(!hasLocal){
-            this._music.list = list;
-            this._music.index = 0;
-            this.musicSetIndex(0);
-          }else{
-            // merge: append built-in after local
-            this._music.list = (this._music.list||[]).concat(list);
-            this.musicRenderList();
-          }
-          return true;
+          const urlObj = new URL(u, location.href);
+          // bust cache
+          urlObj.searchParams.set('v', String(Date.now()));
+          const r = await fetch(urlObj.href, {cache:'no-store'});
+          if(!r.ok) throw new Error(`HTTP ${r.status}`);
+          return await r.json();
         }catch(e){
-          return false;
+          return null;
         }
       };
-      // try load built-in silently
-      loadBuiltIn();
 
+      setStatus('載入中…');
+      const localCandidate = (new URL('music/playlist.json', location.href)).href;
 
-      // === Volume (persist) ===
-      const vol = document.getElementById('music-vol');
-      const volTxt = document.getElementById('music-vol-txt');
-      const savedVol = Number(localStorage.getItem('ufo_music_vol'));
-      const v0 = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) : 70;
-      if(vol) vol.value = String(v0);
-      if(volTxt) volTxt.textContent = `${v0}%`;
-      audio.volume = v0/100;
+      // GitHub Pages 同源優先；失敗才 raw（部分環境 fetch 可能被擋，但 audio src 仍可用）
+      const rawCandidate = 'https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json';
 
-      if(vol){
-        vol.addEventListener('input', ()=>{
-          const v = Math.max(0, Math.min(100, Number(vol.value)||0));
-          audio.volume = v/100;
-          if(volTxt) volTxt.textContent = `${v}%`;
-          localStorage.setItem('ufo_music_vol', String(v));
-        });
-      }
+      let data = await tryFetchJson(localCandidate);
+      if(!data) data = await tryFetchJson(rawCandidate);
 
-      // === Audio unlock on first user gesture (mobile friendly) ===
-      const bgmAuto = document.getElementById('music-bgm-auto');
-      const savedAuto = localStorage.getItem('ufo_music_bgm_auto');
-      if(bgmAuto && savedAuto !== null){
-        bgmAuto.checked = (savedAuto === '1');
-      }
-      if(bgmAuto){
-        bgmAuto.addEventListener('change', ()=>{
-          localStorage.setItem('ufo_music_bgm_auto', bgmAuto.checked ? '1':'0');
-        });
-      }
-
-      const unlockOnce = async ()=>{
-        try{
-          await audio.play();
-          audio.pause();
-          audio.currentTime = 0;
-        }catch(e){}
-        try{
-          if(bgmAuto && bgmAuto.checked){
-            this.musicPlay();
-          }
-        }catch(e){}
-      };
-
-      const onFirstInteract = ()=>{
-        document.removeEventListener('pointerdown', onFirstInteract);
-        document.removeEventListener('keydown', onFirstInteract);
-        unlockOnce();
-      };
-      document.addEventListener('pointerdown', onFirstInteract, {once:true, passive:true});
-      document.addEventListener('keydown', onFirstInteract, {once:true});
-
-
-      this.musicRenderList();
-      }
-    }catch(_){}
-  },
-  musicRenderList(){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      const box=document.getElementById('music-list');
-      if(!box) return;
-      const list=m.list||[];
-      if(!list.length){
-        box.innerHTML = '<div style="font-size:12px; opacity:0.75;">尚未載入清單</div>';
+      if(!Array.isArray(data) || !data.length){
+        setStatus('載入失敗：找不到 playlist.json');
         return;
       }
-      const idx = Number(m.index)||0;
-      box.innerHTML = list.map((it,i)=>{
-        const active = i===idx;
-        const bg = active ? 'rgba(255,215,0,0.12)' : 'transparent';
-        const bd = active ? '1px solid rgba(255,215,0,0.45)' : '1px solid rgba(255,255,255,0.08)';
-        const name = (it.name||('Track '+(i+1))).replace(/[<>&]/g, s=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
-        return `<button type="button" onclick="app.musicSetIndex(${i}); app.musicPlay();" style="width:100%; text-align:left; padding:8px; margin:4px 0; border-radius:10px; background:${bg}; border:${bd}; color:#e9f7ff; cursor:pointer; font-size:12px;">${name}</button>`;
-      }).join('');
-    }catch(_){}
-  },
-  musicNext(){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      const list=m.list||[];
-      if(!list.length) return;
-      const shuffle = !!document.getElementById('music-shuffle')?.checked;
-      if(shuffle){
-        let ni = Math.floor(Math.random()*list.length);
-        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
-        this.musicSetIndex(ni);
-      }else{
-        this.musicSetIndex((Number(m.index)||0)+1);
+
+      // 正規化 + URL 解析（自動處理中文檔名 percent-encode）
+      this.music.list = data
+        .filter(x=>x && (x.url || x.src))
+        .map((x,idx)=>{
+          const name = x.name || x.title || `Track ${idx+1}`;
+          const rel = x.url || x.src;
+          const href = (new URL(rel, location.href)).href;
+          return {name, url: href};
+        });
+
+      if(!this.music.list.length){
+        setStatus('載入失敗：歌單格式錯誤');
+        return;
       }
-      this.musicPlay();
-    }catch(_){}
-  },
-  musicPrev(){
+
+      // 更新下拉選單
+      const sel = document.getElementById('music-select');
+      if(sel){
+        sel.innerHTML = '';
+        this.music.list.forEach((t,idx)=>{
+          const opt = document.createElement('option');
+          opt.value = String(idx);
+          opt.textContent = t.name;
+          sel.appendChild(opt);
+        });
+        sel.value = '0';
+      }
+
+      setStatus(`已載入 ${this.music.list.length} 首`);
+      this.musicSetIndex(0);
+    },
+
+    musicPrev(){
     try{
       this._music=this._music||{};
       const m=this._music;
