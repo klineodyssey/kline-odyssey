@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -526,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.47.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1520,7 +1520,7 @@ speak(m){
     }catch(_){}
   },
 
-  // --- v2.47.1 music fixes: ensure next/prev/index/render/builtin work ---
+  // --- v2.47.2 music fixes: ensure next/prev/index/render/builtin work ---
   musicSetIndex(i){
     try{
       this._music=this._music||{};
@@ -1540,6 +1540,7 @@ speak(m){
       const now=document.getElementById('music-now');
       if(status) status.textContent = `已載入：${list.length} 首`;
       if(now) now.textContent = track ? `目前：${track.name || track.title || track.url || '—'}` : '（未選曲）';
+      try{ this.musicRenderList && this.musicRenderList(); }catch(_){}
     }catch(_){}
   },
 
@@ -1568,10 +1569,45 @@ speak(m){
       const list=m.list||[];
       const status=document.getElementById('music-status');
       const now=document.getElementById('music-now');
+      const items=document.getElementById('music-items');
+
       if(status) status.textContent = list.length ? `已載入：${list.length} 首` : '尚未載入清單';
+
       const idx = Number.isFinite(Number(m.index)) ? Number(m.index) : 0;
       const track = list[idx];
       if(now) now.textContent = (list.length && track) ? `目前：${track.name || track.title || track.url}` : '（未選曲）';
+
+      if(!items) return;
+      if(!list.length){
+        items.innerHTML = '';
+        return;
+      }
+
+      // clickable playlist (tap to play)
+      items.innerHTML = list.map((t,i)=>{
+        const title = String(t?.name || t?.title || t?.url || `Track ${i+1}`);
+        const active = (i===idx);
+        return `<button type="button" class="music-item-btn" data-i="${i}"
+          style="width:100%; text-align:left; margin:4px 0; padding:8px 10px; border-radius:10px;
+                 border:1px solid rgba(255,215,0,0.25);
+                 background:${active ? 'rgba(255,215,120,0.20)' : 'rgba(0,0,0,0.25)'};
+                 color:${active ? '#ffd778' : '#fff'};
+                 font-weight:${active ? '900' : '800'};
+                 cursor:pointer;">
+          ${active ? '▶ ' : ''}${title}
+        </button>`;
+      }).join('');
+
+      items.querySelectorAll('.music-item-btn').forEach(btn=>{
+        btn.onclick = ()=>{
+          const i = Number(btn.getAttribute('data-i'));
+          if(!Number.isFinite(i)) return;
+          this.musicSetIndex(i);
+          this.musicPlay();
+          this.musicRenderList(); // refresh highlight
+        };
+      });
+
     }catch(_){}
   },
 
@@ -2527,6 +2563,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
     <div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
     <div id="music-now" style="font-size:12px; margin-top:4px; font-weight:800; opacity:0.95;">（未選曲）</div>
+    <div id="music-items" style="margin-top:6px;"></div>
   </div>
 <audio id="music-audio" preload="none" style="display:none;"></audio>
 </div>
