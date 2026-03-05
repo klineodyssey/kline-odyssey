@@ -5,21 +5,8 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.45.0-OG-MUSIC-PLAYLIST</title>
-
-<!-- Open Graph (Restore) -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="KLINE Odyssey">
-<meta property="og:title" content="KGEN 16888 廣寒宮｜KLINE Odyssey">
-<meta property="og:description" content="進入 KLINE 宇宙｜16888 廣寒宮飛碟控制台｜自我演化金融生命體">
-<meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/">
-
-
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KGEN 16888 廣寒宮｜KLINE Odyssey">
-<meta name="twitter:description" content="進入 KLINE 宇宙｜16888 廣寒宮飛碟控制台｜自我演化金融生命體">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.23.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
@@ -527,33 +514,7 @@
       <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
     </div>
     <div class="rb kgen">
-      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div
-  <!-- OG / Social Preview (cache-safe) -->
-  <meta property="og:title" content="KGEN 16888 自我演化金融生命體｜廣寒宮" />
-  <meta property="og:description" content="K線西遊記 · 16888 廣寒宮入口（音樂/飛碟音響/宇宙介面）" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png?v=2440" />
-  <meta property="og:image:secure_url" content="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png?v=2440" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png?v=2440" />
-  <meta name="theme-color" content="#000000" />
-
-  <!-- Kill any stale SW cache on load (safe on GitHub Pages) -->
-  <script>
-  (function(){
-    try{
-      if('serviceWorker' in navigator){
-        navigator.serviceWorker.getRegistrations().then(function(rs){
-          rs.forEach(function(r){ r.unregister(); });
-        });
-      }
-      if('caches' in window){
-        caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); });
-      }
-    }catch(e){}
-  })();
-  </script>
->
+      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
       <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
     </div>
   <div class="rb-note">E = mc²</div>
@@ -565,7 +526,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.45.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.31.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -710,16 +671,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-// ---- Cache / Service Worker hard reset (for GitHub Pages mobile cache) ----
-try {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
-  }
-  if (window.caches && caches.keys) {
-    caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
-  }
-} catch (e) {}
-const APP_VERSION = "v2.44.1";
+const APP_VERSION = "v2.26.0";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -1437,170 +1389,424 @@ speak(m){
       if(show) this.speak('飛碟音響已開啟。你可以載入音樂並播放。');
     }catch(_){}
   },
-    musicInit(){
-    // single audio instance
-    const a = document.getElementById('music-audio') || new Audio();
-    a.preload = 'auto';
-    a.crossOrigin = 'anonymous';
-    a.addEventListener('ended', ()=> {
-      if(this._music && this._music.loop){
-        a.currentTime = 0; this.musicPlay();
-      }else{
-        this.musicNext();
-      }
-    });
+  musicInit(){
+    try{
+      this._music = this._music || {};
+      const audio=document.getElementById('music-audio');
+      const file=document.getElementById('music-file');
+      const vol=document.getElementById('music-vol');
+      const volTxt=document.getElementById('music-vol-txt');
+      const name=document.getElementById('music-name');
+      if(!audio || !file || !vol) return;
 
-    this._music = this._music || { list:[], idx:0, audio:a, loop:false, shuffle:true };
-    this._music.audio = a;
+      this._music.audio = audio;
+      // default volume
+      audio.volume = (Number(vol.value)||60)/100;
+      if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
 
-    // volume sliders
-    const vol = document.getElementById('music-vol');
-    const volTxt = document.getElementById('music-vol-txt');
-    if(vol){
-      vol.value = String(Math.round((a.volume||0.7)*100));
-      if(volTxt) volTxt.textContent = vol.value + '%';
-      vol.oninput = () => {
-        a.volume = Math.min(1, Math.max(0, Number(vol.value)/100));
-        if(volTxt) volTxt.textContent = vol.value + '%';
-      };
-    }
+      vol.addEventListener('input', ()=>{
+        const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+        audio.volume = v/100;
+        if(volTxt) volTxt.textContent = v + '%';
+      });
 
-    // loop & shuffle
-    const loop = document.getElementById('music-loop');
-    const shuf = document.getElementById('music-shuffle');
-    if(loop){
-      loop.checked = !!this._music.loop;
-      loop.onchange = () => { this._music.loop = !!loop.checked; };
-    }
-    if(shuf){
-      shuf.checked = this._music.shuffle !== false;
-      shuf.onchange = () => { this._music.shuffle = !!shuf.checked; };
-    }
+      file.addEventListener('change', ()=>{
+        const f = file.files && file.files[0];
+        if(!f){ if(name) name.textContent='未載入音檔'; return; }
+        const url = URL.createObjectURL(f);
+        // revoke old url if any
+        if(this._music.url){ try{ URL.revokeObjectURL(this._music.url);}catch(_){} }
+        this._music.url = url;
+        audio.src = url;
+        audio.load();
+        if(name) name.textContent = '已載入：' + (f.name || 'audio');
+        this.speak('音樂已安裝。');
+      });
+    }catch(_){}
+  },
 
-    // BGM auto
-    const bgm = document.getElementById('music-bgm-auto');
-    if(bgm){
-      bgm.onchange = () => {
-        if(bgm.checked){
-          // do not autoplay without user gesture; show hint
-          setMusicStatus('BGM 已啟用：請按「播放」開始');
+  musicSetIndex(i){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      if(!m.list || !m.list.length) return;
+      const n=m.list.length;
+      let idx = Number(i);
+      if(!Number.isFinite(idx)) idx=0;
+      idx = ((idx % n) + n) % n;
+      m.index = idx;
+
+      const item = m.list[idx];
+      if(item){
+        if(item.url){
+          m.audio.src = item.url;
+        }else if(item.file){
+          m.audio.src = URL.createObjectURL(item.file);
+        }else{
+          return;
+        }
+        const nameEl=document.getElementById('music-name');
+        if(nameEl) nameEl.textContent = (item.name||'音檔') + `  (${idx+1}/${n})`;
+  
+      // === Built-in playlist from GitHub ===
+
+          const tryFetchJson = async ()=>{
+            const candidates = [
+              'music/playlist.json',
+              './music/playlist.json',
+              encodeURI('music/playlist.json'),
+              new URL('music/playlist.json', window.location.href).toString()
+            ];
+            for(const u of candidates){
+              try{
+                const r = await fetch(u, {cache:'no-store'});
+                if(r && r.ok){
+                  const j = await r.json();
+                  return {ok:true, url:u, json:j};
+                }
+              }catch(e){}
+            }
+            return {ok:false, url:candidates[0], json:null};
+          };
+
+      // Expect a JSON file at: ./music/playlist.json
+      // Format: [{"name":"Track 01","url":"music/track01.mp3"}, ...]
+      const loadBuiltIn = async ()=>{
+        try{
+          const out = await tryFetchJson();
+          if(!out.ok) return false;
+          const resUrl = out.url;
+          const arr = out.json;
+          if(!res.ok) return false;
+          
+          if(!Array.isArray(arr) || !arr.length) return false;
+          // normalize
+          const list = arr.map(x=>({
+            name: String(x.name||x.title||'Track'),
+            url: String(x.url||'').trim()
+          })).map(x=>{
+            // if url is bare filename, assume it's inside /music/
+            if(x.url && !x.url.includes('/') && !x.url.startsWith('http')) x.url = 'music/' + x.url;
+            // ensure proper encoding for Chinese filenames
+            if(x.url && !x.url.startsWith('http')) x.url = encodeURI(x.url);
+            return x;
+          }).filter(x=>x.url);
+
+          if(!list.length) return false;
+          // If user hasn't selected local files yet, use built-in list
+          const hasLocal = (this._music.list||[]).some(it=>it.file);
+          if(!hasLocal){
+            this._music.list = list;
+            this._music.index = 0;
+            this.musicSetIndex(0);
+          }else{
+            // merge: append built-in after local
+            this._music.list = (this._music.list||[]).concat(list);
+            this.musicRenderList();
+          }
+          return true;
+        }catch(e){
+          return false;
         }
       };
-    }
+      // try load built-in silently
+      loadBuiltIn();
 
-    // select
-    const sel = document.getElementById('music-select');
-    if(sel){
-      sel.onchange = () => this.musicSetIndex(parseInt(sel.value,10));
-    }
 
-    setMusicStatus('尚未載入清單');
-    setMusicNow('未載入音檔');
-  },
+      // === Volume (persist) ===
+      const vol = document.getElementById('music-vol');
+      const volTxt = document.getElementById('music-vol-txt');
+      const savedVol = Number(localStorage.getItem('ufo_music_vol'));
+      const v0 = Number.isFinite(savedVol) ? Math.max(0, Math.min(100, savedVol)) : 70;
+      if(vol) vol.value = String(v0);
+      if(volTxt) volTxt.textContent = `${v0}%`;
+      audio.volume = v0/100;
 
-    musicSetIndex(i){
-    const M = this._music || (this._music = { list:[], idx:0, audio:null });
-    if(!M.list || M.list.length===0){
-      setMusicStatus('尚未載入清單');
-      setMusicNow('未載入音檔');
-      return;
-    }
-    const n = M.list.length;
-    M.idx = ((Number(i)||0)%n + n)%n;
-    const item = M.list[M.idx];
-    const url = resolveTrackUrl(item.url || item.src || "");
-    if(!url){
-      setMusicStatus('歌曲 URL 無效');
-      setMusicNow(item.name || '未命名');
-      return;
-    }
-    if(M.audio){
-      M.audio.src = url;
-      M.audio.load();
-    }
-    setMusicNow(item.name || `Track ${M.idx+1}`);
-    setMusicStatus(`已載入：${M.idx+1}/${n}`);
-    const sel = document.getElementById('music-select');
-    if(sel) sel.value = String(M.idx);
-  },
-
-      async musicLoadBuiltIn(){
-    const M = this._music || (this._music = { list:[], idx:0, audio:null });
-    const base = 'music/playlist.json';
-    // bust cache (GitHub Pages + mobile webview caches aggressively)
-    const url = base + (base.includes('?') ? '&' : '?') + 'v=' + Date.now();
-    setMusicStatus('載入中…');
-    try{
-      const resp = await fetch(url, { cache: 'no-store' });
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      if(!Array.isArray(data) || data.length===0) throw new Error('空歌單');
-      // normalize
-      M.list = data.map((x, idx)=>({
-        name: String(x.name || x.title || ('Track '+(idx+1))),
-        url: String(x.url || x.src || '')
-      })).filter(x=>x.url);
-      if(M.list.length===0) throw new Error('歌單沒有可用 url');
-      this._music = M;
-      // build select
-      const sel = document.getElementById('music-select');
-      if(sel){
-        sel.innerHTML = '';
-        M.list.forEach((it, idx)=>{
-          const opt = document.createElement('option');
-          opt.value = String(idx);
-          opt.textContent = it.name;
-          sel.appendChild(opt);
+      if(vol){
+        vol.addEventListener('input', ()=>{
+          const v = Math.max(0, Math.min(100, Number(vol.value)||0));
+          audio.volume = v/100;
+          if(volTxt) volTxt.textContent = `${v}%`;
+          localStorage.setItem('ufo_music_vol', String(v));
         });
-        sel.onchange = () => this.musicSetIndex(parseInt(sel.value,10));
       }
-      // set first track (do not autoplay)
-      this.musicSetIndex(0);
-      setMusicStatus(`內建歌單已載入：${M.list.length} 首`);
-    }catch(e){
-      console.error('playlist load fail', e);
-      setMusicStatus('載入失敗：' + (e && e.message ? e.message : String(e)));
+
+      // === Audio unlock on first user gesture (mobile friendly) ===
+      const bgmAuto = document.getElementById('music-bgm-auto');
+      const savedAuto = localStorage.getItem('ufo_music_bgm_auto');
+      if(bgmAuto && savedAuto !== null){
+        bgmAuto.checked = (savedAuto === '1');
+      }
+      if(bgmAuto){
+        bgmAuto.addEventListener('change', ()=>{
+          localStorage.setItem('ufo_music_bgm_auto', bgmAuto.checked ? '1':'0');
+        });
+      }
+
+      const unlockOnce = async ()=>{
+        try{
+          await audio.play();
+          audio.pause();
+          audio.currentTime = 0;
+        }catch(e){}
+        try{
+          if(bgmAuto && bgmAuto.checked){
+            this.musicPlay();
+          }
+        }catch(e){}
+      };
+
+      const onFirstInteract = ()=>{
+        document.removeEventListener('pointerdown', onFirstInteract);
+        document.removeEventListener('keydown', onFirstInteract);
+        unlockOnce();
+      };
+      document.addEventListener('pointerdown', onFirstInteract, {once:true, passive:true});
+      document.addEventListener('keydown', onFirstInteract, {once:true});
+
+
+      this.musicRenderList();
+      }
+    }catch(_){}
+  },
+  musicRenderList(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const box=document.getElementById('music-list');
+      if(!box) return;
+      const list=m.list||[];
+      if(!list.length){
+        box.innerHTML = '<div style="font-size:12px; opacity:0.75;">尚未載入清單</div>';
+        return;
+      }
+      const idx = Number(m.index)||0;
+      box.innerHTML = list.map((it,i)=>{
+        const active = i===idx;
+        const bg = active ? 'rgba(255,215,0,0.12)' : 'transparent';
+        const bd = active ? '1px solid rgba(255,215,0,0.45)' : '1px solid rgba(255,255,255,0.08)';
+        const name = (it.name||('Track '+(i+1))).replace(/[<>&]/g, s=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]));
+        return `<button type="button" onclick="app.musicSetIndex(${i}); app.musicPlay();" style="width:100%; text-align:left; padding:8px; margin:4px 0; border-radius:10px; background:${bg}; border:${bd}; color:#e9f7ff; cursor:pointer; font-size:12px;">${name}</button>`;
+      }).join('');
+    }catch(_){}
+  },
+  musicNext(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)+1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+  musicPrev(){
+    try{
+      this._music=this._music||{};
+      const m=this._music;
+      const list=m.list||[];
+      if(!list.length) return;
+      const shuffle = !!document.getElementById('music-shuffle')?.checked;
+      if(shuffle){
+        let ni = Math.floor(Math.random()*list.length);
+        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
+        this.musicSetIndex(ni);
+      }else{
+        this.musicSetIndex((Number(m.index)||0)-1);
+      }
+      this.musicPlay();
+    }catch(_){}
+  },
+
+  musicPlay(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a || !a.src){ this.speak('請先載入音檔。'); return; }
+      a.play();
+      this.speak('開始播放。');
+    }catch(_){}
+  },
+  musicPause(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      this.speak('已暫停。');
+    }catch(_){}
+  },
+  musicStop(){
+    try{
+      const a=this._music && this._music.audio;
+      if(!a) return;
+      a.pause();
+      a.currentTime = 0;
+      this.speak('已停止。');
+    }catch(_){}
+  }
+};
+window.app = app;
+
+
+
+/* =========================
+   V2.28.0 HOTFIX (Wallet/Balances/Pool/Side)
+   - Bridge BinanceChain -> ethereum when Binance Wallet injects it
+   - Unify balances update targets (top bars + order panel)
+   - Ensure pool progress (16888) updates even without wallet via public RPC
+   - Single source of truth for SIDE mapping from deg
+========================= */
+(function(){
+  try{
+    if(!window.ethereum && window.BinanceChain){
+      window.ethereum = window.BinanceChain;
     }
-  },
+    // Some wallets expose ethereum.providers (multiple). Prefer the active one.
+    if(window.ethereum && Array.isArray(window.ethereum.providers) && window.ethereum.providers.length){
+      // Pick first provider that looks like Binance/MetaMask/Trust/OKX; fallback to first.
+      const pick = window.ethereum.providers.find(p=>p && (p.isBinance || p.isMetaMask || p.isTrust || p.isOKXWallet)) || window.ethereum.providers[0];
+      if(pick) window.ethereum = pick;
+    }
+  }catch(_e){}
+})();
 
-  // backward compatibility (older buttons)
-  async loadBuiltIn(){ return this.musicLoadBuiltIn(); },
+(function(){
+  if(!window.app) return;
 
-      musicPrev(){
-    const M = this._music;
-    if(!M || !M.list || M.list.length===0){ setMusicStatus('尚未載入清單'); return; }
-    const n=M.list.length;
-    const idx=((M.idx||0)-1+n)%n;
-    this.musicSetIndex(idx);
-  },
+  // ---- helpers
+  window.app.__v227 = true;
+  const setText = (id, txt)=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  };
+  const setHTML = (id, html)=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  };
+  const clamp = (v, a, b)=>Math.max(a, Math.min(b, v));
 
-    async musicPlay(){
-    const M = this._music || (this._music = { list:[], idx:0, audio:null });
-    const a = M.audio;
-    if(!a){ setMusicStatus('Audio 未初始化'); return; }
-    // if no src, try set from list
-    if((!a.src || a.src==='') && M.list && M.list.length>0){
-      this.musicSetIndex(M.idx||0);
+  // ---- Public RPC (pool progress works even when wallet not connected)
+  window.app.PUBLIC_RPC = window.app.PUBLIC_RPC || "https://bsc-dataseed.binance.org/";
+
+  // ---- SIDE mapping: 0±90 => LONG, 90~270 => SHORT (符合你定義：-90~0~90 多；90~180 空；-180~-90 空)
+  window.app.calcSideFromDeg = function(deg){
+    const d = ((Number(deg)||0)%360 + 360) % 360;
+    return (d <= 90 || d >= 270) ? "LONG" : "SHORT";
+  };
+
+  // Force-sync any SIDE labels used in UI
+  window.app.syncSideUI = function(deg){
+    const side = window.app.calcSideFromDeg(deg);
+    setText("ct-side", side);
+    // Any element that wants side can use data-side="1"
+    document.querySelectorAll("[data-side='1']").forEach(el=>{ el.textContent = side; });
+    return side;
+  };
+
+  // ---- balances (single refresh)
+  window.app.refreshUserBalances = async function(){
+    if(!window.app.web3 || !window.app.web3.provider || !window.app.web3.address){
+      // not connected
+      setText("rb-bnb-txt", "--");
+      setText("rb-kgen-txt", "--");
+      return;
     }
     try{
-      await a.play();
-      setMusicStatus('播放中');
-    }catch(e){
-      console.error('play fail', e);
-      setMusicStatus('播放失敗：請先點一次畫面/按鈕解鎖音訊');
+      const prov = window.app.web3.provider;
+      const addr = window.app.web3.address;
+
+      // BNB
+      const bnbWei = await prov.getBalance(addr);
+      const bnb = Number(ethers.formatEther(bnbWei));
+      setText("rb-bnb-txt", `${bnb.toFixed(4)} BNB`);
+
+      // KGEN
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const kgen = Number(ethers.formatUnits(await token.balanceOf(addr), dec));
+      setText("rb-kgen-txt", `${kgen.toFixed(4)} KGEN`);
+
+      // Order panel (if present)
+      setText("userBal", `${kgen.toFixed(4)} KGEN`);
+    }catch(_e){
+      // keep silent; UI already shows last known values
     }
-  },
-    musicPause(){
-    const M = this._music;
-    if(M && M.audio){ M.audio.pause(); setMusicStatus('已暫停'); }
-  },
-    musicStop(){
-    const M = this._music;
-    if(M && M.audio){
-      M.audio.pause();
-      try{ M.audio.currentTime = 0; }catch(e){}
-      setMusicStatus('已停止');
+  };
+
+  // ---- pool progress (16888)
+  window.app.refreshPoolProgress = async function(){
+    try{
+      const prov = (window.app.web3 && window.app.web3.provider) ? window.app.web3.provider : new ethers.JsonRpcProvider(window.app.PUBLIC_RPC);
+      const token = new ethers.Contract(window.app.KGEN_TOKEN, window.app.ERC20_ABI, prov);
+      const dec = await token.decimals();
+      const bal = Number(ethers.formatUnits(await token.balanceOf(window.app.UNIVERSE_POOL), dec));
+      setText("w3-bal", `${bal.toFixed(4)} KGEN`);
+
+      const target = 16888;
+      const pct = clamp((bal / target) * 100, 0, 100);
+      setText("w3-prog", `${bal.toFixed(2)} / ${target} (${pct.toFixed(1)}%)`);
+
+      const fill = document.getElementById("prog-fill");
+      if(fill) fill.style.width = `${pct.toFixed(2)}%`;
+    }catch(_e){
+      setText("w3-prog", "讀取失敗");
     }
+  };
+
+  // ---- de-dup AUTO label: keep only one source of truth at right-bottom panel
+  window.app.setAutoStatus = function(on){
+    const txt = on ? "AUTO: ON" : "AUTO: OFF";
+    setText("autoStatus", txt);
+    // hide legacy labels if any
+    document.querySelectorAll(".legacy-auto").forEach(el=>{ el.style.display = "none"; });
+  };
+
+  // ---- Ensure the main refresh loop calls our functions (without breaking existing logic)
+  const _oldRefreshAll = window.app.refreshAll;
+  window.app.refreshAll = async function(){
+    if(typeof _oldRefreshAll === "function"){
+      try{ await _oldRefreshAll.call(window.app); }catch(_e){}
+    }
+    await window.app.refreshUserBalances();
+    await window.app.refreshPoolProgress();
+    // keep SIDE synced with current deg
+    if(typeof window.app.getDeg === "function"){
+      window.app.syncSideUI(window.app.getDeg());
+    }
+  };
+
+})();
+
+window.onload = () => app.init();
+  // auto concierge on first visit
+  try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
+</script>
+
+<script>
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
+
+// =====================
+// UI Helper (sound + toast + sanitize speech)
+// =====================
+const ui = {
+  _toastTimer: null,
+  toast(msg, ms=2200){
+    const t = document.getElementById("toast");
+    if(!t) return;
+    t.textContent = this.sanitize(msg);
+    t.classList.add("show");
+    if(this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(()=>{ t.classList.remove("show"); }, ms);
   },
   beep(freq=880, dur=0.06){
     try{
@@ -1772,7 +1978,7 @@ setGaolaoAddr(){
   app.speak("高老莊地址已設定。");
 },
 
-copyGaolaoAddr(){
+async copyGaolaoAddr(){
   const v = this.GAOLAO || "";
   if(!v) return alert("尚未設定高老莊地址");
   navigator.clipboard?.writeText(v).then(()=>app.toast?.("已複製")).catch(()=>{});
@@ -1831,7 +2037,7 @@ async refreshTreasury(){
     if(vk) vk.innerText='--';
   }
 },
-setUniverseAddr(){
+async setUniverseAddr(){
     const v = (document.getElementById("uni-addr-input").value || "").trim();
     if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
     this.UNIVERSE = v;
@@ -2334,8 +2540,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
   <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
     <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
-    <input id="music-vol2" type="range" min="0" max="100" value="60" style="flex:1;"/>
-    <div id="music-vol-txt2" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
+    <input id="music-vol" type="range" min="0" max="100" value="60" style="flex:1;"/>
+    <div id="music-vol-txt" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
   </div>
 
   <audio id="music-audio" preload="none" style="display:none;"></audio>
@@ -2993,414 +3199,150 @@ document.addEventListener('click', (ev)=>{
 <script>try{app.musicInit();}catch(_){}</script>
 
 <script>
-/* ===== V2.31.5 Built-in Playlist Loader (Hard Raw) ===== */
 (function(){
-  const RAW_PLAYLIST = "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json";
-  const RAW_BASE = "https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/";
-  function $(sel){ return document.querySelector(sel); }
-  function encodePath(url) {
-    try {
-      const u = new URL(url);
-      u.pathname = u.pathname.split('/').map(seg => encodeURIComponent(decodeURIComponent(seg))).join('/');
-      return u.toString();
-    } catch(e) {
-      return url;
-    }
-  }
-  function resolveTrack(u){
-    // Prefer GitHub Pages assets (more reliable for audio playback than raw.githubusercontent.com on some mobiles)
-    // Base directory of this page (…/temples/16888/)
-    const baseDir = (location.origin + location.pathname).replace(/[^\/]*$/,'');
-    const musicDir = baseDir + 'music/';
-    const safeEncode = (s)=>encodeURI(s).replace(/#/g,'%23');
-
-    if(!u) return null;
-    const s = String(u).trim();
-    if(/^https?:\/\//i.test(s)) return safeEncode(s);
-
-    // normalize: allow "music/xxx.mp3" or "xxx.mp3"
-    const filename = s.replace(/^\.?\//,'').replace(/^music\//,'');
-    return safeEncode(musicDir + filename);
-  }
-  function resolveTrackUrl(u){ return resolveTrack(u); }
-
-  function findLoadBtn(){
-    const btns = Array.from(document.querySelectorAll("button, a"));
-    return btns.find(b => (b.textContent||"").replace(/\s+/g,'').includes("載入內建歌單"));
-  }
-  function findStatusEl(){
-    // Prefer an element that currently says 尚未載入清單
-    const nodes = Array.from(document.querySelectorAll("div, p, span, li"));
-    return nodes.find(n => (n.textContent||"").includes("尚未載入清單")) || null;
-  }
-  function findAudioEl(){
-    return document.querySelector("audio") || null;
-  }
-  function ensureListUI(container){
-    let wrap = document.getElementById("ufoBuiltInPlaylist");
-    if(wrap) return wrap;
-    wrap = document.createElement("div");
-    wrap.id = "ufoBuiltInPlaylist";
-    wrap.style.marginTop = "10px";
-    wrap.style.fontSize = "13px";
-    wrap.style.lineHeight = "1.4";
-    wrap.innerHTML = `
-      <div style="opacity:.85;margin-bottom:6px">內建歌單</div>
-      <div id="ufoPlaylistStatus" style="opacity:.9">尚未載入清單</div>
-      <select id="ufoPlaylistSelect" size="6" style="width:100%;margin-top:6px;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fff"></select>
-      
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="ufoPlayBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-weight:800">播放</button>
-        <button id="ufoPauseBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-weight:800">暫停</button>
-        <button id="ufoNextBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-weight:800">下一首</button>
-      </div>
-      <div style="margin-top:6px;opacity:.75;font-size:12px">提示：先選歌，再按播放（手機瀏覽器會擋自動播放）</div>
-      <div style="margin-top:6px;opacity:.75;font-size:12px">來源：RAW（保證可抓）</div>
-    `;
-    (container || document.body).appendChild(wrap);
-    return wrap;
-  }
-  
-  // === Embedded fallback playlist (works even if fetch is blocked) ===
-  const DEFAULT_PLAYLIST = [
-    { name: "UFO Theme 01", url: "music/情難枕.mp3" },
-    { name: "Guanghan Drift 02", url: "music/我曾用心愛著你.mp3" },
-    { name: "Moon Base Ambient 03", url: "music/我相信.mp3" }
-  ];
-
-async function loadBuiltIn(){
-    const statusInline = findStatusEl();
-    const musicSection = statusInline ? statusInline.closest("div") : document.body;
-    const ui = ensureListUI(musicSection);
-    const status = document.getElementById("ufoPlaylistStatus");
-    const sel = document.getElementById("ufoPlaylistSelect");
-    const audio = findAudioEl();
-
-    status.textContent = "載入中…";
-    try {
-      const res = await fetch(RAW_PLAYLIST, {cache:"no-store"});
-      if(!res.ok) throw new Error("HTTP " + res.status);
-      const arr = await res.json();
-      if(!Array.isArray(arr) || arr.length===0) throw new Error("Empty playlist");
-      // build select
-      sel.innerHTML = "";
-      arr.forEach((t, i)=>{
-        const opt = document.createElement("option");
-        opt.value = String(i);
-        opt.textContent = (t.name || ("Track " + (i+1)));
-        sel.appendChild(opt);
-      });
-      window.__UFO_PLAYLIST = arr.map(t => ({ name: t.name || "Track", url: resolveTrack(t.url) }));
-      status.textContent = "已載入 " + window.__UFO_PLAYLIST.length + " 首";
-      if(statusInline) statusInline.textContent = status.textContent;
-
-      // Auto set first track (do not autoplay)
-      if(audio && window.__UFO_PLAYLIST[0]) {
-        audio.src = resolveTrackUrl(window.__UFO_PLAYLIST[0].url);
-        audio.load();
+  try{
+    // ---- Music helpers (same-origin GitHub Pages) ----
+    const ROOT = (function(){
+      // resolve base URL to .../K線西遊記/temples/16888/
+      const u = new URL(window.location.href);
+      // if we are at .../16888/index.html, keep directory
+      u.hash = "";
+      u.search = "";
+      // ensure ends with /16888/
+      if (!u.pathname.endsWith("/")) {
+        u.pathname = u.pathname.replace(/\/[^\/]*$/, "/");
       }
-      sel.onchange = ()=>{
-        const idx = parseInt(sel.value,10);
-        const track = window.__UFO_PLAYLIST[idx];
-        if(track && audio){
-          audio.src = resolveTrackUrl(track.url);
-          audio.load();
-        }
-      };
+      return u.origin + u.pathname;
+    })();
 
-      // click / dblclick helpers
-      sel.addEventListener("dblclick", ()=>{
-        const idx = parseInt(sel.value,10);
-        const track = window.__UFO_PLAYLIST[idx];
-        if(track && audio){
-          audio.src = resolveTrackUrl(track.url);
-          audio.load();
-          audio.play().catch(()=>{});
-        }
-      });
-
-      // Buttons
-      const playBtn = document.getElementById("ufoPlayBtn");
-      const pauseBtn = document.getElementById("ufoPauseBtn");
-      const nextBtn = document.getElementById("ufoNextBtn");
-      if(playBtn && audio){
-        playBtn.onclick = ()=>{
-          const idx = parseInt(sel.value||"0",10);
-          const track = window.__UFO_PLAYLIST[idx];
-          if(track){
-            if(audio.src !== track.url){
-              audio.src = resolveTrackUrl(track.url);
-              audio.load();
-            }
-          }
-          audio.play().catch(()=>{});
-        };
+    window.resolveTrackUrl = window.resolveTrackUrl || function(track){
+      if (!track) return "";
+      if (typeof track === "string") {
+        // already absolute
+        if (/^https?:\/\//i.test(track)) return track;
+        return new URL(track, ROOT).toString();
       }
-      if(pauseBtn && audio){
-        pauseBtn.onclick = ()=>{ audio.pause(); };
-      }
-      if(nextBtn && audio){
-        nextBtn.onclick = ()=>{
-          const cur = parseInt(sel.value||"0",10);
-          const nxt = (cur + 1) % window.__UFO_PLAYLIST.length;
-          sel.value = String(nxt);
-          const track = window.__UFO_PLAYLIST[nxt];
-          if(track){
-            audio.src = resolveTrackUrl(track.url);
-            audio.load();
-            audio.play().catch(()=>{});
-          }
-        };
-      }
-    } catch(e) {
-      const msg = "載入失敗：" + (e && e.message ? e.message : String(e));
-      status.textContent = msg;
-      if(statusInline) statusInline.textContent = msg;
-    }
-  }
+      const url = track.url || track.src || "";
+      if (/^https?:\/\//i.test(url)) return url;
+      return new URL(url, ROOT).toString();
+    };
 
-  // Hook the existing "載入內建歌單" button
-  window.addEventListener("DOMContentLoaded", ()=>{
-    const btn = findLoadBtn();
-    if(btn) {
-      btn.addEventListener("click", (ev)=>{
-        // prevent any old handler interference
-        try{ ev.stopImmediatePropagation(); }catch(_e){}
-        loadBuiltIn();
-      }, true);
-    }
-  });
-}
+    // Ensure app exists
+    const app = window.app || window.APP || null;
+    if (!app) return;
 
-function normalizeTrackUrl(u){
-  if(!u) return "";
-  // if already absolute or starts with http, return
-  if(/^https?:\/\//i.test(u)) return u;
-  // if begins with "music/" keep as-is (relative to current page)
-  if(u.startsWith("music/")) return u;
-  // otherwise treat as filename inside music/
-  return "music/" + u.replace(/^\.\/?/,"");
-}
-
-// expose to global (for inline handlers / safety)
-window.resolveTrack = resolveTrack;
-window.resolveTrackUrl = resolveTrackUrl;
-)();
-/* ===== /V2.31.5 ===== */
-</script>
-
-
-<script>
-/* =========================
-   UFO MUSIC PATCH (Built-in playlist loader)
-   - Fix missing app.musicLoadBuiltIn / resolveTrackUrl
-   - Robust fetch with cache-bust + raw github fallback
-   - Works on GitHub Pages under /K線西遊記/temples/16888/
-========================= */
-(function(){
-  const log = (...a)=>{ try{ console.log('[UFO-MUSIC]', ...a);}catch(e){} };
-  const $ = (id)=>document.getElementById(id);
-
-  // Make sure an audio element exists
-  let audio = window.__ufoAudio;
-  if(!audio){
-    audio = document.createElement('audio');
-    audio.id = 'ufoAudio';
-    audio.preload = 'auto';
-    audio.crossOrigin = 'anonymous';
-    document.body.appendChild(audio);
-    window.__ufoAudio = audio;
-  }
-
-  const state = window.__ufoMusicState || {
-    list: [],
-    idx: 0,
-    shuffle: false,
-    loop: false,
-    bgmAuto: false
-  };
-  window.__ufoMusicState = state;
-
-  // UI elements (if present)
-  const elStatus = $('musicStatus') || $('music_status') || null;
-  const elNow = $('musicNow') || $('music_now') || null;
-  const elVol = $('musicVol') || $('music_vol') || null;
-
-  function setStatus(t){
-    if(elStatus) elStatus.textContent = t;
-    log(t);
-  }
-  function setNow(t){
-    if(elNow) elNow.textContent = t;
-  }
-  function normalizeBase(){
-    // current folder base (…/K線西遊記/temples/16888/)
-    const u = new URL(location.href);
-    u.hash = ''; u.search = '';
-    // ensure ends with slash
-    if(!u.pathname.endsWith('/')){
-      u.pathname = u.pathname.replace(/[^\/]+$/, '');
-    }
-    return u.toString();
-  }
-
-  async function tryFetchJson(url){
-    try{
-      const r = await fetch(url, { cache:'no-store' });
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return await r.json();
-    }catch(e){
-      log('fetch fail', url, e);
-      throw e;
-    }
-  }
-
-  // Resolve track URL: accept absolute, or relative "music/xxx.mp3"
-  window.resolveTrackUrl = function(trackUrl){
-    if(!trackUrl) return '';
-    try{
-      // already absolute
-      if(/^https?:\/\//i.test(trackUrl)) return trackUrl;
-      // handle raw github "blob" links by converting to raw
-      if(trackUrl.includes('github.com') && trackUrl.includes('/blob/')){
-        return trackUrl.replace('github.com','raw.githubusercontent.com').replace('/blob/','/');
-      }
-      const base = normalizeBase();
-      return new URL(trackUrl, base).toString();
-    }catch(e){
-      return trackUrl;
-    }
-  };
-
-  function pickIndex(next=true){
-    if(!state.list.length) return 0;
-    if(state.shuffle){
-      return Math.floor(Math.random()*state.list.length);
-    }
-    return (state.idx + (next?1:-1) + state.list.length) % state.list.length;
-  }
-
-  function loadTrack(i){
-    if(!state.list.length){ setStatus('尚未載入歌單'); return; }
-    state.idx = Math.max(0, Math.min(i, state.list.length-1));
-    const t = state.list[state.idx];
-    const url = window.resolveTrackUrl(t.url);
-    audio.src = url;
-    setNow(`${t.name || ('Track '+(state.idx+1))}`);
-    setStatus('已載入：' + (t.name || url));
-  }
-
-  function play(){
-    if(!audio.src){
-      if(state.list.length) loadTrack(state.idx);
-      else { setStatus('尚未載入歌單'); return; }
-    }
-    audio.loop = !!state.loop;
-    audio.play().then(()=>setStatus('播放中')).catch(e=>setStatus('播放失敗：請點一下畫面後再按播放'));
-  }
-
-  function pause(){ try{ audio.pause(); setStatus('暫停'); }catch(e){} }
-  function stop(){ try{ audio.pause(); audio.currentTime=0; setStatus('停止'); }catch(e){} }
-  function next(){ loadTrack(pickIndex(true)); play(); }
-  function prev(){ loadTrack(pickIndex(false)); play(); }
-
-  // attach controls if exist
-  const btnPlay = $('btnMusicPlay') || $('musicPlay') || null;
-  const btnPause = $('btnMusicPause') || $('musicPause') || null;
-  const btnStop = $('btnMusicStop') || $('musicStop') || null;
-  const btnNext = $('btnMusicNext') || $('musicNext') || null;
-  const btnPrev = $('btnMusicPrev') || $('musicPrev') || null;
-  const btnLoad = $('btnMusicLoadBuiltIn') || $('btnLoadBuiltin') || null;
-
-  if(btnPlay) btnPlay.onclick = play;
-  if(btnPause) btnPause.onclick = pause;
-  if(btnStop) btnStop.onclick = stop;
-  if(btnNext) btnNext.onclick = next;
-  if(btnPrev) btnPrev.onclick = prev;
-
-  if(elVol){
-    elVol.addEventListener('input', ()=>{
-      const v = parseFloat(elVol.value||'1');
-      audio.volume = Math.max(0, Math.min(1, v));
-    });
-  }
-
-  const chkShuffle = $('chkShuffle') || $('musicShuffle') || null;
-  const chkLoop = $('chkLoop') || $('musicLoop') || null;
-  const chkAuto = $('chkBgmAuto') || $('musicBgmAuto') || null;
-  if(chkShuffle) chkShuffle.addEventListener('change', ()=> state.shuffle = !!chkShuffle.checked);
-  if(chkLoop) chkLoop.addEventListener('change', ()=> { state.loop = !!chkLoop.checked; audio.loop = state.loop; });
-  if(chkAuto) chkAuto.addEventListener('change', ()=> state.bgmAuto = !!chkAuto.checked);
-
-  // Local file loader
-  const fileInput = $('musicFile') || $('music_file') || null;
-  if(fileInput){
-    fileInput.addEventListener('change', ()=>{
-      const f = fileInput.files && fileInput.files[0];
-      if(!f){ setStatus('未選擇任何檔案'); return; }
-      const url = URL.createObjectURL(f);
-      state.list = [{ name: f.name, url }];
-      state.idx = 0;
-      loadTrack(0);
-      play();
-    });
-  }
-
-  // Built-in playlist loader
-  async function loadBuiltIn(){
-    const base = normalizeBase();
-    const now = Date.now();
-    const candidates = [
-      new URL('music/playlist.json?v='+now, base).toString(),
-      new URL('./music/playlist.json?v='+now, base).toString(),
-      // raw github fallbacks (main branch)
-      'https://raw.githubusercontent.com/klineodyssey/kline-odyssey/main/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/music/playlist.json?v='+now
-    ];
-    setStatus('載入內建歌單中…');
-    for(const url of candidates){
+    // Built-in playlist loader
+    app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
+      const status = (msg)=>{ try{ window.setMusicStatus && window.setMusicStatus(msg); }catch(e){} };
+      status("載入中…");
+      const playlistUrl = new URL("music/playlist.json", ROOT).toString() + "?t=" + Date.now();
+      let data = null;
       try{
-        const data = await tryFetchJson(url);
-        if(!Array.isArray(data) || !data.length) throw new Error('empty');
-        // normalize
-        state.list = data.map((x,i)=>({
-          name: (x && x.name) ? String(x.name) : ('Track '+(i+1)),
-          url: (x && x.url) ? String(x.url) : ''
-        })).filter(x=>x.url);
-        state.idx = 0;
-        loadTrack(0);
-        setStatus('內建歌單載入成功：'+state.list.length+' 首');
-        // auto play if enabled
-        if(state.bgmAuto) play();
-        return;
+        const r = await fetch(playlistUrl, {cache:"no-store"});
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        data = await r.json();
       }catch(e){
-        setStatus('歌單載入失敗，換路徑重試…');
+        // fallback: try raw githubusercontent if user stores playlist there
+        try{
+          const u = new URL(playlistUrl);
+          // if on github.io, map to raw.githubusercontent.com
+          // user must keep same path structure under repo main branch
+          const pathParts = u.pathname.split("/").filter(Boolean);
+          // expected: /kline-odyssey/K線西遊記/temples/16888/music/playlist.json
+          const repo = pathParts[0];
+          const rest = pathParts.slice(1).join("/");
+          const raw = "https://raw.githubusercontent.com/klineodyssey/" + repo + "/main/" + rest + "?t=" + Date.now();
+          const rr = await fetch(raw, {cache:"no-store"});
+          if(!rr.ok) throw new Error("RAW HTTP " + rr.status);
+          data = await rr.json();
+        }catch(e2){
+          status("載入失敗：找不到 playlist.json");
+          console.warn("playlist load failed", e, e2);
+          return false;
+        }
       }
+
+      // normalize
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.tracks) ? data.tracks : []);
+      app._musicList = list.map((t)=>({
+        title: (typeof t==="string") ? t : (t.title || t.name || (t.url||t.src||"").split("/").pop() || "Track"),
+        url: resolveTrackUrl(t)
+      })).filter(x=>x.url);
+
+      if(!app._musicList.length){
+        status("歌單為空");
+        return false;
+      }
+
+      app._musicIndex = 0;
+      // if original music system exists, try to sync
+      if (typeof app.musicSetIndex === "function") {
+        try{ app.musicSetIndex(0); }catch(e){}
+      } else {
+        try{
+          // basic audio fallback
+          app._musicAudio = app._musicAudio || new Audio();
+          app._musicAudio.src = app._musicList[0].url;
+        }catch(e){}
+      }
+
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[0].title); }catch(e){}
+      status("已載入 " + app._musicList.length + " 首");
+      return true;
+    });
+
+    // Patch prev/next if missing or non-working
+    function ensureAudio(){
+      if (app._musicAudio) return app._musicAudio;
+      // try find existing audio tag
+      const a = document.querySelector("audio") || null;
+      app._musicAudio = a || new Audio();
+      return app._musicAudio;
     }
-    setStatus('內建歌單載入失敗：改用內建離線歌單'); 
-    try{
-      const fallback = DEFAULT_PLAYLIST.map(t=>({name:t.name, url: resolveTrack(t.url)}));
-      window.__UFO_PLAYLIST = fallback;
-      if(sel){
-        sel.innerHTML='';
-        fallback.forEach((t,i)=>{ const opt=document.createElement('option'); opt.value=String(i); opt.textContent=t.name; sel.appendChild(opt); });
+
+    app.musicPlay = app.musicPlay || (async function(){
+      const a = ensureAudio();
+      if (!app._musicList || !app._musicList.length){
+        await app.musicLoadBuiltin();
       }
-      if(statusInline) statusInline.textContent = '已載入 ' + fallback.length + ' 首（離線）';
-      if(typeof loadTrack==='function') loadTrack(0);
-    }catch(_e){}
-}
+      if (app._musicList && app._musicList.length){
+        const idx = (typeof app._musicIndex==="number") ? app._musicIndex : 0;
+        const track = app._musicList[idx] || app._musicList[0];
+        if (track && track.url && a.src !== track.url) a.src = track.url;
+        try{ await a.play(); }catch(e){ console.warn(e); }
+      }
+    });
 
-  if(btnLoad) btnLoad.onclick = loadBuiltIn;
+    app.musicPause = app.musicPause || (function(){
+      const a = ensureAudio(); try{ a.pause(); }catch(e){}
+    });
 
-  // Provide compatibility with older inline handlers: app.musicLoadBuiltIn()
-  window.app = window.app || {};
-  window.app.musicLoadBuiltIn = loadBuiltIn;
+    app.musicStop = app.musicStop || (function(){
+      const a = ensureAudio(); try{ a.pause(); a.currentTime = 0; }catch(e){}
+    });
 
-  // If the page had an inline error banner, hide it after patch
-  setTimeout(()=>{
-    const err = document.querySelector('.load-error, #loadError, #load_error');
-    if(err && /resolveTrackUrl/i.test(err.textContent||'')) err.style.display='none';
-  }, 300);
+    app.musicPrev = app.musicPrev || (function(){
+      if (!app._musicList || !app._musicList.length) return;
+      app._musicIndex = (app._musicIndex - 1 + app._musicList.length) % app._musicList.length;
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[app._musicIndex].title); }catch(e){}
+      app.musicPlay();
+    });
 
+    app.musicNext = app.musicNext || (function(){
+      if (!app._musicList || !app._musicList.length) return;
+      app._musicIndex = (app._musicIndex + 1) % app._musicList.length;
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[app._musicIndex].title); }catch(e){}
+      app.musicPlay();
+    });
+
+    // autoplay toggle hook if checkbox exists
+    const auto = document.getElementById("bgmAutoToggle") || document.querySelector('input[type="checkbox"][data-bgm-auto]');
+    if (auto){
+      auto.addEventListener("change", ()=>{ if(auto.checked) app.musicPlay(); });
+    }
+  }catch(err){
+    console.error("Music patch error", err);
+  }
 })();
 </script>
 
