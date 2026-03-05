@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.42.3</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.42.4</title>
 
 <!-- Open Graph (Restore) -->
 <meta property="og:type" content="website">
@@ -544,7 +544,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.42.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.42.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -698,7 +698,7 @@ try {
     caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
   }
 } catch (e) {}
-const APP_VERSION = "v2.42.3";
+const APP_VERSION = "v2.42.4";
 const app = {
   // UI helpers (safe in demo/no-wallet mode)
   setProgress(p){
@@ -3244,17 +3244,21 @@ document.addEventListener('click', (ev)=>{
       return url;
     }
   }
-  function resolveTrack(u) {
-    if(!u) return "";
-    u = String(u).trim();
-    if(/^https?:\/\//i.test(u)) return encodePath(u);
-    // bare filename -> raw base
-    if(!u.includes('/')) return encodePath(RAW_BASE + u);
-    // "music/xxx.mp3" -> strip leading "music/"
-    u = u.replace(/^\.\/?/,'').replace(/^music\//i,'');
-    return encodePath(RAW_BASE + u);
+  function resolveTrack(u){
+    // Prefer GitHub Pages assets (more reliable for audio playback than raw.githubusercontent.com on some mobiles)
+    // Base directory of this page (…/temples/16888/)
+    const baseDir = (location.origin + location.pathname).replace(/[^\/]*$/,'');
+    const musicDir = baseDir + 'music/';
+    const safeEncode = (s)=>encodeURI(s).replace(/#/g,'%23');
+
+    if(!u) return null;
+    const s = String(u).trim();
+    if(/^https?:\/\//i.test(s)) return safeEncode(s);
+
+    // normalize: allow "music/xxx.mp3" or "xxx.mp3"
+    const filename = s.replace(/^\.?\//,'').replace(/^music\//,'');
+    return safeEncode(musicDir + filename);
   }
-  // Backward-compat alias (older builds call resolveTrackUrl)
   function resolveTrackUrl(u){ return resolveTrack(u); }
 
   function findLoadBtn(){
@@ -3293,7 +3297,15 @@ document.addEventListener('click', (ev)=>{
     (container || document.body).appendChild(wrap);
     return wrap;
   }
-  async function loadBuiltIn(){
+  
+  // === Embedded fallback playlist (works even if fetch is blocked) ===
+  const DEFAULT_PLAYLIST = [
+    { name: "UFO Theme 01", url: "music/情難枕.mp3" },
+    { name: "Guanghan Drift 02", url: "music/我曾用心愛著你.mp3" },
+    { name: "Moon Base Ambient 03", url: "music/我相信.mp3" }
+  ];
+
+async function loadBuiltIn(){
     const statusInline = findStatusEl();
     const musicSection = statusInline ? statusInline.closest("div") : document.body;
     const ui = ensureListUI(musicSection);
@@ -3601,8 +3613,18 @@ window.resolveTrackUrl = resolveTrackUrl;
         setStatus('歌單載入失敗，換路徑重試…');
       }
     }
-    setStatus('內建歌單載入失敗：請確認 music/playlist.json 已存在且 GitHub Pages 已更新');
-  }
+    setStatus('內建歌單載入失敗：改用內建離線歌單'); 
+    try{
+      const fallback = DEFAULT_PLAYLIST.map(t=>({name:t.name, url: resolveTrack(t.url)}));
+      window.__UFO_PLAYLIST = fallback;
+      if(sel){
+        sel.innerHTML='';
+        fallback.forEach((t,i)=>{ const opt=document.createElement('option'); opt.value=String(i); opt.textContent=t.name; sel.appendChild(opt); });
+      }
+      if(statusInline) statusInline.textContent = '已載入 ' + fallback.length + ' 首（離線）';
+      if(typeof loadTrack==='function') loadTrack(0);
+    }catch(_e){}
+}
 
   if(btnLoad) btnLoad.onclick = loadBuiltIn;
 
