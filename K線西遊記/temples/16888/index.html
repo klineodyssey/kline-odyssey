@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.14</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.46.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -235,7 +235,7 @@
   text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
 }
 
-/* ===== COORD PANEL (V2.20.4) ===== */
+/* ===== COORD PANEL (V2.46.12) ===== */
 #coord-panel{
   position: fixed;
   right: 90px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
@@ -671,7 +671,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.46.14";
+const APP_VERSION = "v2.26.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1431,20 +1431,12 @@ speak(m){
       const vol=document.getElementById('music-vol');
       const volTxt=document.getElementById('music-vol-txt');
       const name=document.getElementById('music-name');
-      const status=document.getElementById('music-status');
-      const now=document.getElementById('music-now');
       if(!audio || !file || !vol) return;
 
       this._music.audio = audio;
-      this._music.nameEl = name;
-      this._music.statusEl = status;
-      this._music.nowEl = now;
-
-      // auto-next when ended
-      if(!this._music._endedBound){
-        this._music._endedBound = true;
-        audio.addEventListener('ended', ()=>{ try{ this.musicNext && this.musicNext(true); }catch(e){} });
-      }
+      this._music.source = this._music.source || "builtin";
+      // restore persisted settings (volume/shuffle/loop/source)
+      try{ this.musicApplyPersist && this.musicApplyPersist(); }catch(_){}
       // default volume
       audio.volume = (Number(vol.value)||60)/100;
       if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
@@ -1453,6 +1445,7 @@ speak(m){
         const v = Math.max(0, Math.min(100, Number(vol.value)||0));
         audio.volume = v/100;
         if(volTxt) volTxt.textContent = v + '%';
+        try{ this.musicPersistSave && this.musicPersistSave(); }catch(_){ }
       });
 
       file.addEventListener('change', ()=>{
@@ -1469,6 +1462,17 @@ speak(m){
           if(!f) continue;
           const url = URL.createObjectURL(f);
           added.push({ name: f.name || 'audio', url, _blob:true });
+
+
+      // persist shuffle/loop toggles
+      const shufCk = document.getElementById('music-shuffle');
+      const loopCk = document.getElementById('music-loop');
+      if(shufCk) shufCk.addEventListener('change', ()=>{ try{ this.musicPersistSave && this.musicPersistSave(); }catch(_){ } });
+      if(loopCk) loopCk.addEventListener('change', ()=>{ try{ this.musicPersistSave && this.musicPersistSave(); }catch(_){ } });
+
+      // persist when track ends or changes
+      audio.addEventListener('ended', ()=>{ try{ this.musicPersistSave && this.musicPersistSave(); }catch(_){ } });
+      audio.addEventListener('play', ()=>{ try{ this.musicPersistSave && this.musicPersistSave(); }catch(_){ } });
         }
         m.list = m.list.concat(added);
 
@@ -1483,9 +1487,9 @@ speak(m){
 
         // load current track
         this.musicSetIndex(m.index);
-        if(status) status.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
-        if(now) now.textContent = '（未選曲）';
-        if(name) name.textContent = (files[0]?.name ? ('已選檔：' + (files[0].name)) : '已選擇音檔');
+        if(name) name.textContent = '已加入：' + added.length + ' 首（共 ' + m.list.length + ' 首）';
+        this._music.source = 'local';
+        try{ this.musicPersistSave && this.musicPersistSave({source:'local'}); }catch(_){ }
         this.speak('音樂已加入歌單。');
       });
 
@@ -1511,7 +1515,8 @@ speak(m){
       // ensure reload on mobile
       try{ m.audio.load(); }catch(e){}
     }
-    if(m.nowEl) m.nowEl.textContent = '目前：' + name;
+    if(m.nameEl) m.nameEl.textContent = name;
+    if(m.statusEl) m.statusEl.textContent = `已載入：${name}`;
   },
 
   musicPrev(){
@@ -1531,59 +1536,12 @@ speak(m){
       this.musicPlay();
     }catch(_){}
   },
-  },
-
-  musicNext(fromEnded=false){
-    try{
-      this._music=this._music||{};
-      const m=this._music;
-      const list=m.list||[];
-      if(!list.length) return;
-      const shuffle = !!document.getElementById('music-shuffle')?.checked;
-      const loop = !!document.getElementById('music-loop')?.checked;
-
-      if(shuffle){
-        let ni = Math.floor(Math.random()*list.length);
-        if(list.length>1 && ni===m.index) ni = (ni+1)%list.length;
-        this.musicSetIndex(ni);
-        this.musicPlay();
-        return;
-      }
-
-      const cur = Number(m.index)||0;
-      const next = cur + 1;
-      if(next >= list.length){
-        if(loop){
-          this.musicSetIndex(0);
-          this.musicPlay();
-        }else{
-          // reached end
-          if(m.nowEl) m.nowEl.textContent = '（播完）';
-          // stop cleanly
-          try{ m.audio && m.audio.pause(); }catch(e){}
-        }
-        return;
-      }
-      this.musicSetIndex(next);
-      this.musicPlay();
-    }catch(_){}
-  },
 
   musicPlay(){
     try{
       const a=this._music && this._music.audio;
       if(!a || !a.src){ this.speak('請先載入音檔。'); return; }
-      const p = a.play();
-      if(p && typeof p.then==='function') p.catch(()=>{});
-      // show current name
-      try{
-        const m=this._music||{};
-        if(m.list && m.list.length){
-          const tr=m.list[m.index||0]||{};
-          const nm=String(tr.name||tr.title||'');
-          if(m.nowEl && nm) m.nowEl.textContent='目前：'+nm;
-        }
-      }catch(e){}
+      a.play();
       this.speak('開始播放。');
     }catch(_){}
   },
@@ -1606,6 +1564,104 @@ speak(m){
   }
 };
 window.app = app;
+
+/* === MUSIC PERSIST + SOURCE SWITCH (V2.46.12) === */
+app.musicPersistKey = "kline16888_music_v1";
+app.musicPersistLoad = function(){
+    try{
+      const raw = localStorage.getItem(this.musicPersistKey);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  };
+app.musicPersistSave = function(extra){
+    try{
+      this._music = this._music || {};
+      const m = this._music;
+      const vol = document.getElementById('music-vol');
+      const loop = document.getElementById('music-loop');
+      const shuf = document.getElementById('music-shuffle');
+      const payload = Object.assign({
+        v: 1,
+        ts: Date.now(),
+        volume: vol ? (Number(vol.value)||0) : Math.round((m.audio?.volume||0.6)*100),
+        loop: !!(loop && loop.checked),
+        shuffle: !!(shuf && shuf.checked),
+        source: m.source || "builtin",
+        index: (typeof m.index === 'number') ? m.index : 0,
+        // For builtin playlist restore: store file/url string if available
+        trackUrl: (m.list && m.list[m.index] && (m.list[m.index].url || m.list[m.index].file)) ? (m.list[m.index].url || m.list[m.index].file) : ""
+      }, extra||{});
+      localStorage.setItem(this.musicPersistKey, JSON.stringify(payload));
+    }catch(e){}
+  };
+app.musicApplyPersist = function(){
+    try{
+      const data = this.musicPersistLoad();
+      if(!data) return;
+
+      const vol = document.getElementById('music-vol');
+      const volTxt = document.getElementById('music-vol-txt');
+      const loop = document.getElementById('music-loop');
+      const shuf = document.getElementById('music-shuffle');
+
+      if(vol && Number.isFinite(Number(data.volume))){
+        vol.value = String(Math.max(0, Math.min(100, Number(data.volume))));
+        if(this._music?.audio) this._music.audio.volume = (Number(vol.value)||60)/100;
+        if(volTxt) volTxt.textContent = (Number(vol.value)||60) + '%';
+      }
+      if(loop) loop.checked = !!data.loop;
+      if(shuf) shuf.checked = !!data.shuffle;
+
+      // If last source was local, we cannot restore files automatically.
+      // We keep settings and show hint via status line.
+      this._music = this._music || {};
+      this._music.source = data.source || "builtin";
+      this._music.index = (typeof data.index === 'number') ? data.index : 0;
+
+      const name=document.getElementById('music-name');
+      if(name && this._music.source === "local"){
+        name.textContent = "上次使用本機歌曲：請重新選擇檔案（瀏覽器限制無法自動載入）";
+      }
+    }catch(e){}
+  };
+app.musicSwitchLocal = function(){
+    try{
+      this._music = this._music || {};
+      this._music.source = "local";
+      this.musicPersistSave({source:"local"});
+      const file=document.getElementById('music-file');
+      if(file) file.click();
+    }catch(e){}
+  };
+app.musicSwitchBuiltin = async function(){
+    try{
+      this._music = this._music || {};
+      this._music.source = "builtin";
+      this.musicPersistSave({source:"builtin"});
+      if(typeof this.musicLoadBuiltIn === 'function'){
+        await this.musicLoadBuiltIn(true);
+      }else if(typeof this.musicLoadBuiltin === 'function'){
+        await this.musicLoadBuiltin(true);
+      }
+      // try restore last index for builtin
+      const data = this.musicPersistLoad();
+      if(data && (data.source==="builtin" || !data.source) && this._music?.list?.length){
+        let targetIdx = (typeof data.index==='number') ? data.index : 0;
+        // If trackUrl matches, find it
+        if(data.trackUrl){
+          const found = this._music.list.findIndex(t => (t.url||t.file||"") === data.trackUrl);
+          if(found>=0) targetIdx = found;
+        }
+        try{ this.musicSetIndex(targetIdx); }catch(e){}
+      }
+      // user may need gesture to play; do not force speak
+      // best effort: if BGM auto checked, try play
+      const autoCk = document.getElementById('music-bgm-auto');
+      if(autoCk && autoCk.checked){ try{ this.musicPlay(); }catch(e){} }
+    }catch(e){}
+  };
+/* === END MUSIC PERSIST (V2.46.12) === */
 
 
 
@@ -2488,8 +2544,14 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 
   <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
-    <div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
-    <div id="music-now" style="margin-top:6px; font-size:12px; opacity:0.85;">（未選曲）</div>
+    <div style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+  </div>
+
+
+  <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+    <div style="font-size:12px; opacity:0.85; min-width:56px;">音量</div>
+    <input id="music-vol" type="range" min="0" max="100" value="60" style="flex:1;"/>
+    <div id="music-vol-txt" style="font-size:12px; opacity:0.85; width:42px; text-align:right;">60%</div>
   </div>
 
   <audio id="music-audio" preload="none" style="display:none;"></audio>
@@ -2800,7 +2862,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 </div>
 
 
-<!-- ===== COORD PANEL (V2.20.4) ===== -->
+<!-- ===== COORD PANEL (V2.46.12) ===== -->
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
@@ -3144,7 +3206,7 @@ document.addEventListener('click', (ev)=>{
 });
 </script>
 
-<script>try{app.musicInit();}catch(_){}</script>
+<script>try{app.musicInit(); setTimeout(()=>{ try{ (app.musicLoadBuiltIn && app.musicLoadBuiltIn(false)) || (app.musicLoadBuiltin && app.musicLoadBuiltin()); }catch(e){} }, 200);}catch(_){}</script>
 
 <script>
 (function(){
@@ -3380,7 +3442,7 @@ document.addEventListener('click', (ev)=>{
     setStatus("已載入內建歌單：" + list.length + " 首");
     try{ window.app.speak && window.app.speak('已載入內建歌單。'); }catch(e){}
   };
-  // --- AUTO LOAD + AUTO NEXT (V2.46.10) ---
+  // --- AUTO LOAD + AUTO NEXT (V2.46.12) ---
   try{
     const toast = (msg)=>{
       const t = document.getElementById('toast');
