@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.3</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.49.3 ===== */
+/* ===== V2.49.4 ===== */
 .resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
   position:fixed !important;
@@ -543,7 +543,7 @@
 }
 
 
-/* === V2.49.3 layout refine === */
+/* === V2.49.4 layout refine === */
 #kline-engine-panel{
   left:18px !important;
   top:230px !important;
@@ -564,6 +564,75 @@
 /* move GA evolution higher */
 .ga-matrix{
   top:180px !important;
+}
+
+
+/* === V2.49.4 format refine === */
+#kline-engine-panel{
+  left:12px !important;
+  top:280px !important;
+  width:min(380px, calc(100vw - 24px)) !important;
+  max-width:380px !important;
+  padding:8px !important;
+}
+#kline-engine-panel .khead{
+  font-size:13px !important;
+  margin-bottom:8px !important;
+}
+#kline-engine-panel .kline-grid{
+  gap:8px !important;
+}
+#kline-engine-panel .kcell{
+  padding:6px 8px !important;
+  min-height:52px !important;
+}
+#kline-engine-panel .kvalue{
+  font-size:15px !important;
+}
+#kline-engine-panel .klabel{
+  font-size:10px !important;
+}
+.ga-matrix{
+  top:238px !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  width:136px !important;
+  padding:10px !important;
+  z-index:146 !important;
+}
+.ga-matrix .ga-stat{font-size:10px !important; margin-bottom:8px !important;}
+.ga-matrix > div:first-child{font-size:12px !important; margin-bottom:8px !important;}
+#coord-panel .cp-title{
+  align-items:flex-start !important;
+}
+#coord-panel .cp-title > div{
+  min-width:120px !important;
+}
+#cp-side{
+  display:block !important;
+  text-align:right !important;
+}
+#cp-deg{
+  display:flex !important;
+  justify-content:flex-end !important;
+  gap:8px !important;
+  text-align:right !important;
+}
+#cp-deg-num{
+  min-width:32px !important;
+  text-align:right !important;
+}
+@media (max-width: 720px){
+  #kline-engine-panel{
+    top:282px !important;
+    width:calc(100vw - 24px) !important;
+    max-width:none !important;
+  }
+  .ga-matrix{
+    top:236px !important;
+    left:250px !important;
+    transform:none !important;
+  }
 }
 
 </style>
@@ -590,7 +659,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.49.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.49.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -612,7 +681,7 @@
 
 <div id="kline-engine-panel">
   <div class="khead">
-    <span>宇宙K線引擎｜V2.49.3</span>
+    <span>宇宙K線引擎｜V2.49.4</span>
     <span id="kline-mode-text">K線模擬</span>
   </div>
   <div class="kline-grid">
@@ -757,7 +826,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.49.3";
+const APP_VERSION = "v2.49.4";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3882,7 +3951,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.49.3 K-line panel + Chinese direction ===== */
+/* ===== V2.49.4 K-line panel + Chinese direction ===== */
 (function(){
   function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -3955,6 +4024,43 @@ document.addEventListener('click', (ev)=>{
       return r;
     };
   }
+})();
+</script>
+
+
+<script>
+/* === V2.49.4 cockpit format hotfix === */
+(function(){
+  function updateCockpitZh(){
+    try{
+      const steer = document.getElementById('steer-input-val');
+      const deg = Math.round(Number(steer && steer.value || 0));
+      const sideZh = Math.abs(deg) <= 90 ? '多' : '空';
+      const side = document.getElementById('cp-side');
+      const num = document.getElementById('cp-deg-num');
+      const degWrap = document.getElementById('cp-deg');
+      if(side) side.textContent = '方向：' + sideZh;
+      if(num) num.textContent = String(Math.abs(deg));
+      if(degWrap){
+        const spans = degWrap.querySelectorAll('span');
+        if(spans.length >= 2){
+          spans[0].textContent = '角度：';
+          spans[1].textContent = String(Math.abs(deg));
+        }else{
+          degWrap.textContent = '角度：' + Math.abs(deg);
+        }
+      }
+      const keSide = document.getElementById('ke-side');
+      const keAngle = document.getElementById('ke-angle');
+      if(keSide) keSide.textContent = sideZh;
+      if(keAngle) keAngle.textContent = String(Math.abs(deg));
+    }catch(e){}
+  }
+  window.addEventListener('load', ()=>{
+    updateCockpitZh();
+    const s = document.getElementById('steer-input-val');
+    if(s) s.addEventListener('input', updateCockpitZh);
+  });
 })();
 </script>
 
