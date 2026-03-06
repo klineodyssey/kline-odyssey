@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -503,6 +503,70 @@
 
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
+
+/* ===== V2.49.0 KLINE ENGINE PANEL ===== */
+#kline-engine-panel{
+  position: fixed;
+  left: 18px;
+  top: 300px;
+  right: auto;
+  bottom: auto;
+  width: min(600px, 92vw);
+  max-width: 600px;
+  z-index: 35;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,242,255,.35);
+  border-radius: 10px;
+  background: rgba(0,0,0,.62);
+  box-shadow: 0 0 18px rgba(0,242,255,.10);
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px){
+  #kline-engine-panel{
+    left: 18px;
+    right: 18px;
+    top: 300px;
+    width: auto;
+    max-width: none;
+  }
+}
+@media (max-width: 520px){
+  .resource-bars{ top: 135px; max-width: 88vw; }
+  .ga-matrix{ top: 560px; left: 18px; width: 180px; }
+  #kline-engine-panel{
+    left: 18px;
+    right: 18px;
+    top: 240px;
+    width: auto;
+    max-width: none;
+    max-height: 250px;
+  }
+}
+#kline-engine-panel .kep-title{
+  display:flex; align-items:center; justify-content:space-between;
+  color:#8af3ff; font-weight:900; margin-bottom:8px;
+}
+#kline-engine-panel .kep-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
+}
+#kline-engine-panel .kep-row{
+  padding:8px 10px; border-radius:12px;
+  border:1px solid rgba(0,242,255,.18);
+  background:rgba(0,0,0,.32);
+}
+#kline-engine-panel .kep-k{ opacity:.82; font-size:12px; }
+#kline-engine-panel .kep-v{ margin-top:2px; font-weight:900; color:#ffd778; word-break:break-word; text-align:right; }
+#kline-engine-panel button{
+  flex:1; border-radius:12px; padding:10px 12px; border:1px solid rgba(0,242,255,.35);
+  background:rgba(0,0,0,.35); color:#eaf7ff; font-weight:900;
+}
+@media (max-width: 520px){
+  #kline-engine-panel{ right:12px; bottom: 86px; width:min(360px,94vw); }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -527,7 +591,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.49.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.49.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -675,7 +739,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.49.0";
+const APP_VERSION = "v2.49.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3085,6 +3149,33 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 </div>
 
+
+<div id="kline-engine-panel" aria-label="宇宙K線引擎面板">
+  <div class="kep-title">
+    <span>宇宙K線引擎｜V2.49.0</span>
+    <span id="ke-mode" class="muted">K線模擬</span>
+  </div>
+  <div class="kep-grid">
+    <div class="kep-row"><div class="kep-k">方向</div><div class="kep-v" id="ke-dir">多</div></div>
+    <div class="kep-row"><div class="kep-k">角度</div><div class="kep-v" id="ke-angle">0</div></div>
+    <div class="kep-row"><div class="kep-k">Open</div><div class="kep-v" id="ke-open">--</div></div>
+    <div class="kep-row"><div class="kep-k">High</div><div class="kep-v" id="ke-high">--</div></div>
+    <div class="kep-row"><div class="kep-k">Low</div><div class="kep-v" id="ke-low">--</div></div>
+    <div class="kep-row"><div class="kep-k">Close</div><div class="kep-v" id="ke-close">--</div></div>
+    <div class="kep-row"><div class="kep-k">Range</div><div class="kep-v" id="ke-range">--</div></div>
+    <div class="kep-row"><div class="kep-k">Wick</div><div class="kep-v" id="ke-wick">--</div></div>
+    <div class="kep-row"><div class="kep-k">結果</div><div class="kep-v" id="ke-bet-result">--</div></div>
+    <div class="kep-row"><div class="kep-k">月下老人</div><div class="kep-v" id="ke-match-a">A：--</div></div>
+    <div class="kep-row" style="grid-column:1 / -1;"><div class="kep-v" id="ke-match-b">B：--</div></div>
+  </div>
+  <div style="margin-top:8px; display:flex; gap:8px;">
+    <button type="button" onclick="app.klineRefreshNow()">刷新K線</button>
+    <button type="button" onclick="app.klineSettlePreview('UP')">預測上</button>
+    <button type="button" onclick="app.klineSettlePreview('DOWN')">預測下</button>
+  </div>
+</div>
+
+
 <div id="coord-modal" role="dialog" aria-label="宇宙座標表">
   <div class="cm-box">
     <div class="cm-head">
@@ -3800,157 +3891,145 @@ document.addEventListener('click', (ev)=>{
 
 
 <script src="./kline_engine_v1_0.js"></script>
+<script src="./steering.js"></script>
+<script src="./candle_sim.js"></script>
 <script>
 /* ===== V2.49.0 K線宇宙引擎整合 ===== */
 (function(){
-  const PARAMS_URL = './engine_params_v1_0.json';
-  const state = {
-    params: null,
-    engine: null,
-    lastCandle: null,
-    mode: 'K線模擬',
-    initialized: false
-  };
-  function el(id){ return document.getElementById(id); }
-  function fmtNum(n){ return Number.isFinite(n) ? Math.round(n).toLocaleString('en-US') : '--'; }
-  function shortAddr(a){
-    if(!a || /^0x0{40}$/i.test(a) || a==='--') return '--';
-    return String(a).slice(0,6) + '...' + String(a).slice(-4);
+  if(!window.app) return;
+  app._kline = app._kline || { params:null, engine:null, last:null, seed:'GUANGHAN-16888-V249' };
+
+  function setTxt(id, txt){
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
   }
-  function angleNow(){
-    const v = Number((el('steer-input-val') && el('steer-input-val').value) || 0);
-    return Number.isFinite(v) ? v : 0;
+  function shortAddr(addr){
+    const a = String(addr||'').trim();
+    if(!a || a==='0x0000000000000000000000000000000000000000') return '--';
+    if(a.length <= 12) return a;
+    return a.slice(0,6) + '...' + a.slice(-4);
   }
-  function sideZhFromDeg(deg){
-    return Math.abs(Number(deg)||0) <= 90 ? '多' : '空';
-  }
-  function flowFromWarp(){
-    const v = Number((el('warp-input-val') && el('warp-input-val').value) || 0);
-    return Math.max(-1, Math.min(1, (v - 50) / 50));
-  }
-  function ctFromDeg(deg){
-    return Math.max(-1, Math.min(1, Math.cos((Number(deg)||0) * Math.PI / 180)));
-  }
-  async function ensurePanel(){
-    if(el('kline-engine-panel')) return;
-    const panel = document.createElement('div');
-    panel.id = 'kline-engine-panel';
-    panel.style.cssText = [
-      'position:fixed','left:18px','top:230px','z-index:155',
-      'width:min(360px,92vw)','background:rgba(0,0,0,.78)',
-      'border:1px solid rgba(0,242,255,.45)','padding:12px',
-      'border-radius:12px','backdrop-filter: blur(6px)','max-height:175px','overflow:auto'
-    ].join(';');
-    panel.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-        <div style="font-family:'Orbitron';color:var(--cyan);font-size:12px;">K線宇宙引擎 v1.0</div>
-        <div id="ke-mode" style="font-size:12px;color:var(--gold);font-weight:900;">模式：K線模擬</div>
-      </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="padding:8px 10px;border:1px solid rgba(255,215,120,.25);border-radius:10px;background:rgba(0,0,0,.25);">
-          <div style="font-size:11px;opacity:.8;">開</div><div id="ke-o" style="font-family:'Orbitron';font-weight:900;color:#8af3ff;">--</div>
-        </div>
-        <div style="padding:8px 10px;border:1px solid rgba(255,215,120,.25);border-radius:10px;background:rgba(0,0,0,.25);">
-          <div style="font-size:11px;opacity:.8;">高</div><div id="ke-h" style="font-family:'Orbitron';font-weight:900;color:#8af3ff;">--</div>
-        </div>
-        <div style="padding:8px 10px;border:1px solid rgba(255,215,120,.25);border-radius:10px;background:rgba(0,0,0,.25);">
-          <div style="font-size:11px;opacity:.8;">低</div><div id="ke-l" style="font-family:'Orbitron';font-weight:900;color:#8af3ff;">--</div>
-        </div>
-        <div style="padding:8px 10px;border:1px solid rgba(255,215,120,.25);border-radius:10px;background:rgba(0,0,0,.25);">
-          <div style="font-size:11px;opacity:.8;">收</div><div id="ke-c" style="font-family:'Orbitron';font-weight:900;color:#8af3ff;">--</div>
-        </div>
-      </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
-        <div>預測：<span id="ke-side" style="color:var(--gold);font-weight:900;">--</span></div>
-        <div>角度：<span id="ke-deg" style="color:var(--gold);font-weight:900;float:right;">--</span></div>
-        <div>Range：<span id="ke-range" style="color:var(--cyan);font-weight:900;">--</span></div>
-        <div>Wick：<span id="ke-wick" style="color:var(--cyan);font-weight:900;float:right;">--</span></div>
-      </div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;">
-        <div>月下老人配對</div>
-        <div style="margin-top:4px;">A：<span id="ke-a" style="font-family:'Orbitron';color:#ffd778;">--</span></div>
-        <div>B：<span id="ke-b" style="font-family:'Orbitron';color:#ffd778;">--</span></div>
-      </div>
-    `;
-    document.body.appendChild(panel);
-  }
-  async function loadEngine(){
-    if(state.initialized) return;
-    await ensurePanel();
-    state.params = await UniverseEngine.loadParams(PARAMS_URL);
-    state.engine = UniverseEngine.create('KGEN-16888-V2.49.0', state.params);
-    state.initialized = true;
-    renderFromControls();
-    refreshMatch();
-  }
-  function renderFromControls(){
-    if(!state.engine) return;
-    const deg = angleNow();
-    const sideZh = sideZhFromDeg(deg);
-    const anchor = Number((window.app && Number.isFinite(app._ct) && app._ct) || 16888);
-    const input = {
-      ct: ctFromDeg(deg),
-      flow: flowFromWarp(),
-      vol: Math.min(1, Math.abs(deg)/180),
-      anchor,
-      t: new Date().toISOString(),
-      events: { ignite:false, heartbeat:false, payroll:false, wishTrigger:false, split:false }
-    };
-    const out = state.engine.nextCandle(input);
-    state.lastCandle = out.candle;
-    if(el('ke-o')) el('ke-o').textContent = fmtNum(out.candle.o);
-    if(el('ke-h')) el('ke-h').textContent = fmtNum(out.candle.h);
-    if(el('ke-l')) el('ke-l').textContent = fmtNum(out.candle.l);
-    if(el('ke-c')) el('ke-c').textContent = fmtNum(out.candle.c);
-    if(el('ke-side')) el('ke-side').textContent = sideZh;
-    if(el('ke-deg')) el('ke-deg').textContent = String(Math.round(Math.abs(deg)));
-    if(el('ke-range')) el('ke-range').textContent = fmtNum(out.candle.h - out.candle.l);
-    if(el('ke-wick')) el('ke-wick').textContent = fmtNum(Math.max(out.candle.h - Math.max(out.candle.o,out.candle.c), Math.min(out.candle.o,out.candle.c) - out.candle.l));
-    // Right cockpit Chinese & alignment override
-    if(el('cp-side')) el('cp-side').textContent = '方向：' + sideZh;
-    if(el('cp-deg-num')) el('cp-deg-num').textContent = String(Math.round(Math.abs(deg)));
-  }
-  async function refreshMatch(){
+
+  app.klineInit = async function(){
     try{
-      let provider = null;
-      if(window.web3 && web3.provider && window.ethers){
-        provider = web3.provider.getNetwork ? web3.provider : new ethers.providers.Web3Provider(web3.provider);
-      }else if(window.ethers){
-        provider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+      const params = await UniverseEngine.loadParams('./engine_params_v1_0.json');
+      app._kline.params = params;
+      app._kline.engine = UniverseEngine.create(app._kline.seed, params);
+      setTxt('ke-mode', 'K線模擬');
+      app.klineRefreshNow();
+      app.klineRefreshMatch();
+    }catch(e){
+      console.warn('kline init failed', e);
+      setTxt('ke-mode', '載入失敗');
+    }
+  };
+
+  app.klineInput = function(){
+    const deg = (window.SteeringModule && SteeringModule.getAngle()) || (Number(document.getElementById('steer-input-val')?.value)||0);
+    const dir = (window.SteeringModule && SteeringModule.getDirectionLabel()) || (Math.abs(deg)<=90 ? '多' : '空');
+    const dirSign = dir === '多' ? 1 : -1;
+    const absDeg = Math.round(Math.abs(deg));
+    const ctRaw = Number(app._ct || document.getElementById('ct-in')?.value || 16888);
+    const warp = Number(document.getElementById('warp-input-val')?.value || 33);
+    const ctN = SteeringModule ? SteeringModule.toNormalizedCt(deg) : (dirSign * Math.min(1, absDeg/180));
+    const flowN = CandleSimModule ? CandleSimModule.flowFromWarp(warp, dirSign) : (dirSign * Math.min(1, warp/100));
+    const volN = CandleSimModule ? CandleSimModule.volFromAngleWarp(absDeg, warp) : Math.min(1, 0.25 + absDeg/360 + warp/140);
+    return {
+      deg, dir, absDeg,
+      input:{
+        ct: ctN,
+        flow: flowN,
+        vol: volN,
+        anchor: ctRaw,
+        events:{
+          ignite: warp >= 80,
+          heartbeat: true,
+          payroll: false,
+          wishTrigger: false,
+          split: false
+        }
       }
-      if(!provider || !window.web3 || !web3.UNIVERSE) return;
-      const uni = new ethers.Contract(web3.UNIVERSE, web3.abiUniverse, provider);
-      const rid = await uni.roundId();
-      const idNum = Number(rid.toString());
-      if(idNum <= 0){
-        if(el('ke-a')) el('ke-a').textContent = '--';
-        if(el('ke-b')) el('ke-b').textContent = '--';
+    };
+  };
+
+  app.klineRefreshNow = function(){
+    try{
+      if(!app._kline.engine || !window.CandleSimModule) return;
+      const s = app.klineInput();
+      setTxt('ke-dir', s.dir);
+      setTxt('ke-angle', String(s.absDeg));
+      const result = CandleSimModule.next(app._kline.engine, s.input);
+      app._kline.last = result;
+      const c = result.candle;
+      setTxt('ke-open', CandleSimModule.fmt(c.open));
+      setTxt('ke-high', CandleSimModule.fmt(c.high));
+      setTxt('ke-low', CandleSimModule.fmt(c.low));
+      setTxt('ke-close', CandleSimModule.fmt(c.close));
+      setTxt('ke-range', CandleSimModule.fmt(c.meta.range));
+      setTxt('ke-wick', CandleSimModule.fmt(c.meta.wickFactor));
+      setTxt('ke-bet-result', '待預測');
+    }catch(e){
+      console.warn('kline refresh failed', e);
+    }
+  };
+
+  app.klineSettlePreview = function(sideLabel){
+    try{
+      if(!app._kline.last || !app._kline.params) return;
+      const amount = Number(document.getElementById('amt-in')?.value || 1);
+      const bet = { side: sideLabel === 'UP' ? 'UP' : 'DOWN', amount };
+      const st = UniverseEngine.settleBet(bet, app._kline.last.candle, app._kline.params);
+      const zh = st.result === 'WIN' ? '預測成功' : (st.result === 'LOSE' ? '預測失敗' : '平手');
+      setTxt('ke-bet-result', `${zh}｜${bet.side==='UP'?'上':'下'}`);
+      try{ ui.toast(`${zh}｜${bet.side==='UP'?'上':'下'}`); }catch(_){}
+    }catch(e){
+      console.warn('settle preview failed', e);
+    }
+  };
+
+  app.klineRefreshMatch = async function(){
+    try{
+      if(!window.web3 || web3.demo || !web3.provider || !web3.UNIVERSE) return;
+      const uniR = new ethers.Contract(web3.UNIVERSE, web3.abiUniverse, web3.provider);
+      const id = await uniR.roundId();
+      if(Number(id) <= 0){
+        setTxt('ke-match-a', 'A：--');
+        setTxt('ke-match-b', 'B：--');
         return;
       }
-      const r = await uni.rounds(rid);
-      const a = r.a || r[0];
-      const b = r.b || r[1];
-      if(el('ke-a')) el('ke-a').textContent = shortAddr(a);
-      if(el('ke-b')) el('ke-b').textContent = shortAddr(b);
+      const r = await uniR.rounds(id);
+      setTxt('ke-match-a', 'A：' + shortAddr(r.a));
+      setTxt('ke-match-b', 'B：' + shortAddr(r.b));
     }catch(e){
-      // silent
-    }
-  }
-  // Expose simple settle preview for future use
-  window.KLineEnginePreview = {
-    settle(side, amount){
-      if(!state.lastCandle || !state.params) return null;
-      return UniverseEngine.settleBet({ side: side === 'UP' ? 'LONG' : 'SHORT', amount:Number(amount)||0, entry: state.lastCandle.o }, state.lastCandle, state.params);
+      setTxt('ke-match-a', 'A：--');
+      setTxt('ke-match-b', 'B：--');
     }
   };
-  // Hook controls
-  window.addEventListener('load', loadEngine);
-  window.addEventListener('load', function(){
-    const s = el('steer-input-val');
-    const w = el('warp-input-val');
-    if(s) s.addEventListener('input', renderFromControls);
-    if(w) w.addEventListener('input', renderFromControls);
-    setInterval(refreshMatch, 12000);
+
+  // final override for cockpit Chinese layout
+  app.updateCoordPanel = (function(oldFn){
+    return function(){
+      try{ if(typeof oldFn === 'function') oldFn(); }catch(_){}
+      const degRaw = (window.SteeringModule && SteeringModule.getAngle()) || (Number(document.getElementById('steer-input-val')?.value)||0);
+      const dir = (window.SteeringModule && SteeringModule.getDirectionLabel()) || (Math.abs(degRaw)<=90 ? '多' : '空');
+      const deg = Math.round(Math.abs(degRaw));
+      setTxt('cp-side', '方向：' + dir);
+      setTxt('cp-deg-num', String(deg));
+      try{ app.klineRefreshNow(); }catch(_){}
+    };
+  })(app.updateCoordPanel);
+
+  // patch order buttons to also preview K線結算
+  app.orderGuess = (function(oldFn){
+    return function(dir){
+      try{ if(typeof oldFn === 'function') oldFn(dir); }catch(_){}
+      try{ app.klineSettlePreview(dir); }catch(_){}
+    };
+  })(app.orderGuess);
+
+  window.addEventListener('load', ()=>{
+    try{ app.klineInit(); }catch(_){}
+    setTimeout(()=>{ try{ app.klineRefreshMatch(); }catch(_){} }, 1500);
   });
 })();
 </script>
