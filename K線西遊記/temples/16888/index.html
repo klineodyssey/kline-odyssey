@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.5</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜V2.51.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.50.5 ===== */
+/* ===== V2.51.0 ===== */
 .resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
   position:fixed !important;
@@ -543,7 +543,7 @@
 }
 
 
-/* === V2.50.5 layout refine === */
+/* === V2.51.0 layout refine === */
 #kline-engine-panel{
   left:18px !important;
   top:230px !important;
@@ -567,7 +567,7 @@
 }
 
 
-/* === V2.50.5 format refine === */
+/* === V2.51.0 format refine === */
 #kline-engine-panel{
   left:12px !important;
   top:280px !important;
@@ -636,7 +636,7 @@
 }
 
 
-/* === V2.50.5 align GA under top-left + enlarge Kline title === */
+/* === V2.51.0 align GA under top-left + enlarge Kline title === */
 #kline-engine-panel{
   left:12px !important;
   top:250px !important;
@@ -677,7 +677,7 @@
 }
 
 
-/* === V2.50.5 宇宙K線圖引擎（override）=== */
+/* === V2.51.0 宇宙K線圖引擎（override）=== */
 .resource-bars{
   top: 150px !important;
   width: 300px !important;
@@ -789,7 +789,7 @@
 }
 
 
-/* === V2.50.5 UI FIX === */
+/* === V2.51.0 UI FIX === */
 #kline-engine-panel{
   overflow:hidden !important;
   width:270px !important;
@@ -840,7 +840,7 @@
 }
 
 
-/* === V2.50.5 left overflow text + spacing fix === */
+/* === V2.51.0 left overflow text + spacing fix === */
 html, body{
   overflow-x:hidden !important;
 }
@@ -881,7 +881,7 @@ body::before{
 }
 
 
-/* === V2.50.5 chart realism + spacing refine === */
+/* === V2.51.0 chart realism + spacing refine === */
 html, body{
   overflow-x:hidden !important;
 }
@@ -929,7 +929,7 @@ html, body{
 }
 
 
-/* === V2.50.5 left-edge fix + panel tighten === */
+/* === V2.51.0 left-edge fix + panel tighten === */
 html, body{
   overflow-x:hidden !important;
 }
@@ -965,7 +965,7 @@ html, body{
 }
 
 
-/* === V2.50.5 left mask + moon match restore === */
+/* === V2.51.0 left mask + moon match restore === */
 #kline-engine-panel,
 #kline-chart-panel{
   left:24px !important;
@@ -1006,6 +1006,109 @@ body::after{
   }
 }
 
+
+/* === V2.51.0 左側區塊重構版 === */
+html, body { overflow-x:hidden !important; }
+
+:root{
+  --left-col-x: 24px;
+  --left-col-w: 300px;
+}
+
+.resource-bars{
+  position: fixed !important;
+  left: var(--left-col-x) !important;
+  top: 176px !important;
+  width: var(--left-col-w) !important;
+  max-width: var(--left-col-w) !important;
+  z-index: 120 !important;
+}
+
+.ga-matrix{
+  position: fixed !important;
+  left: var(--left-col-x) !important;
+  top: 326px !important;
+  width: var(--left-col-w) !important;
+  max-width: var(--left-col-w) !important;
+  transform: none !important;
+  z-index: 121 !important;
+  padding: 10px 12px !important;
+}
+
+#kline-engine-panel{
+  position: fixed !important;
+  left: var(--left-col-x) !important;
+  top: 450px !important;
+  width: var(--left-col-w) !important;
+  max-width: var(--left-col-w) !important;
+  z-index: 122 !important;
+  overflow: hidden !important;
+}
+
+#kline-chart-panel{
+  position: fixed !important;
+  left: var(--left-col-x) !important;
+  top: 860px !important;
+  width: var(--left-col-w) !important;
+  max-width: var(--left-col-w) !important;
+  z-index: 123 !important;
+  overflow: hidden !important;
+}
+
+#kline-engine-panel .khead{
+  font-size: 15px !important;
+}
+#kline-engine-panel .kline-grid{
+  gap: 8px !important;
+}
+#kline-engine-panel .kcell{
+  min-height: 58px !important;
+}
+
+#kline-canvas{
+  height: 108px !important;
+}
+
+/* 狠一點把左側殘留字源頭壓掉 */
+body > *:not(.resource-bars):not(.ga-matrix):not(#kline-engine-panel):not(#kline-chart-panel){
+  /* no-op placeholder */
+}
+.left-labels, .hidden-labels, .panel-labels, .ghost-labels{ display:none !important; }
+
+/* 遮左邊殘字，但不切到新左欄 */
+body::before{
+  content:"";
+  position: fixed;
+  left: 0;
+  top: 92px;
+  width: 22px;
+  height: calc(100vh - 92px);
+  background: #000;
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* K線圖更像交易畫面 */
+#kline-chart-panel{
+  background: linear-gradient(180deg, rgba(4,14,18,.95), rgba(0,0,0,.86)) !important;
+  border: 1px solid rgba(0,242,255,.22) !important;
+}
+#kline-chart-title{
+  margin-bottom: 8px !important;
+}
+#kline-prediction{
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+
+@media (max-width: 720px){
+  :root{
+    --left-col-x: 24px;
+    --left-col-w: 300px;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -1030,7 +1133,7 @@ body::after{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.50.5</div>
+        <div class="sys-st" id="ver-st">VERSION V2.51.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1053,7 +1156,7 @@ body::after{
 
 <div id="kline-engine-panel">
   <div class="khead">
-    <span>宇宙K線引擎｜V2.50.5</span>
+    <span>宇宙K線引擎｜V2.51.0</span>
     <span id="kline-mode-text">K線模擬</span>
   </div>
   <div class="kline-grid">
@@ -1227,7 +1330,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.50.5";
+const APP_VERSION = "V2.51.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4352,7 +4455,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.50.5 K-line panel + Chinese direction ===== */
+/* ===== V2.51.0 K-line panel + Chinese direction ===== */
 (function(){
   function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -4430,7 +4533,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.5 cockpit format hotfix === */
+/* === V2.51.0 cockpit format hotfix === */
 (function(){
   function updateCockpitZh(){
     try{
@@ -4467,7 +4570,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.5 宇宙K線圖引擎 === */
+/* === V2.51.0 宇宙K線圖引擎 === */
 (function(){
   function num(v,d=0){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -4621,7 +4724,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.5 chart render refine === */
+/* === V2.51.0 chart render refine === */
 (function(){
   function drawMoreRealKline(){
     const cvs = document.getElementById('kline-canvas');
@@ -4717,7 +4820,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.5 restore moon match address === */
+/* === V2.51.0 restore moon match address === */
 (function(){
   function shortAddr(a){
     if(!a || a === '0x0000000000000000000000000000000000000000') return '--';
