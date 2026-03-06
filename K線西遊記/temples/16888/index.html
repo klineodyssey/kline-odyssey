@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix{left:18px; position: fixed; right:auto; top:420px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-matrix{position:fixed; left:50%; top:220px; transform:translateX(-50%); width:180px; background:var(--panel); border:1px solid var(--energy); padding:15px; z-index:100; font-family:'Orbitron';}
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -504,67 +504,42 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.49.0 KLINE ENGINE PANEL ===== */
+/* ===== V2.49.2 ===== */
+.resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
-  position: fixed;
-  left: 18px;
-  top: 300px;
-  right: auto;
-  bottom: auto;
-  width: min(600px, 92vw);
-  max-width: 600px;
-  z-index: 35;
-  padding: 10px 12px;
-  border: 1px solid rgba(0,242,255,.35);
-  border-radius: 10px;
-  background: rgba(0,0,0,.62);
-  box-shadow: 0 0 18px rgba(0,242,255,.10);
-  max-height: 260px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  position:fixed !important;
+  left:18px !important;
+  top:260px !important;
+  width:min(560px, calc(100vw - 36px)) !important;
+  max-width:560px !important;
+  background:rgba(0,0,0,.78);
+  border:1px solid rgba(0,242,255,.35);
+  border-radius:14px;
+  padding:12px;
+  z-index:145;
 }
-
-@media (max-width: 900px){
+#kline-engine-panel .khead{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;color:var(--gold);font-weight:900;
+}
+#kline-engine-panel .kline-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+#kline-engine-panel .kcell{
+  border:1px solid rgba(255,215,120,.22);
+  border-radius:12px;padding:10px 12px;background:rgba(0,0,0,.28);min-height:72px;
+}
+#kline-engine-panel .klabel{font-size:12px;color:rgba(255,255,255,.78);}
+#kline-engine-panel .kvalue{margin-top:6px;font-family:'Orbitron',sans-serif;font-size:18px;color:var(--cyan);}
+#coord-panel .cp-title{align-items:flex-start;}
+#coord-panel .cp-title > div{min-width:130px;}
+@media (max-width: 720px){
+  .ga-matrix{left:18px !important; top:420px !important; transform:none !important;}
   #kline-engine-panel{
-    left: 18px;
-    right: 18px;
-    top: 300px;
-    width: auto;
-    max-width: none;
+    top:260px !important;
+    width:calc(100vw - 36px) !important;
+    max-width:none !important;
   }
-}
-@media (max-width: 520px){
-  .resource-bars{ top: 135px; max-width: 88vw; }
-  .ga-matrix{ top: 560px; left: 18px; width: 180px; }
-  #kline-engine-panel{
-    left: 18px;
-    right: 18px;
-    top: 240px;
-    width: auto;
-    max-width: none;
-    max-height: 250px;
-  }
-}
-#kline-engine-panel .kep-title{
-  display:flex; align-items:center; justify-content:space-between;
-  color:#8af3ff; font-weight:900; margin-bottom:8px;
-}
-#kline-engine-panel .kep-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
-}
-#kline-engine-panel .kep-row{
-  padding:8px 10px; border-radius:12px;
-  border:1px solid rgba(0,242,255,.18);
-  background:rgba(0,0,0,.32);
-}
-#kline-engine-panel .kep-k{ opacity:.82; font-size:12px; }
-#kline-engine-panel .kep-v{ margin-top:2px; font-weight:900; color:#ffd778; word-break:break-word; text-align:right; }
-#kline-engine-panel button{
-  flex:1; border-radius:12px; padding:10px 12px; border:1px solid rgba(0,242,255,.35);
-  background:rgba(0,0,0,.35); color:#eaf7ff; font-weight:900;
-}
-@media (max-width: 520px){
-  #kline-engine-panel{ right:12px; bottom: 86px; width:min(360px,94vw); }
 }
 
 </style>
@@ -581,17 +556,17 @@
       <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
     </div>
     <div class="rb kgen">
-      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
+      <div class="row"><span>KGEN｜質量｜E = mc²</span><small id="rb-kgen-txt">--</small></div>
       <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
     </div>
-  <div class="rb-note">E = mc²</div>
+  
   </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.49.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.49.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -609,6 +584,25 @@
     <div class="warp-val-text" id="warp-txt">WARP 100x</div>
     <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
 </div>
+
+
+<div id="kline-engine-panel">
+  <div class="khead">
+    <span>宇宙K線引擎｜V2.49.2</span>
+    <span id="kline-mode-text">K線模擬</span>
+  </div>
+  <div class="kline-grid">
+    <div class="kcell"><div class="klabel">方向</div><div class="kvalue" id="ke-side">多</div></div>
+    <div class="kcell"><div class="klabel">角度</div><div class="kvalue" id="ke-angle" style="text-align:right;">0</div></div>
+    <div class="kcell"><div class="klabel">Open</div><div class="kvalue" id="ke-open">--</div></div>
+    <div class="kcell"><div class="klabel">High</div><div class="kvalue" id="ke-high">--</div></div>
+    <div class="kcell"><div class="klabel">Low</div><div class="kvalue" id="ke-low">--</div></div>
+    <div class="kcell"><div class="klabel">Close</div><div class="kvalue" id="ke-close">--</div></div>
+    <div class="kcell"><div class="klabel">Range</div><div class="kvalue" id="ke-range">--</div></div>
+    <div class="kcell"><div class="klabel">Wick</div><div class="kvalue" id="ke-wick">--</div></div>
+  </div>
+</div>
+
 
 <div class="ga-matrix">
     <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
@@ -739,7 +733,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.49.1";
+const APP_VERSION = "v2.49.2";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3149,33 +3143,6 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   </div>
 </div>
 
-
-<div id="kline-engine-panel" aria-label="宇宙K線引擎面板">
-  <div class="kep-title">
-    <span>宇宙K線引擎｜V2.49.0</span>
-    <span id="ke-mode" class="muted">K線模擬</span>
-  </div>
-  <div class="kep-grid">
-    <div class="kep-row"><div class="kep-k">方向</div><div class="kep-v" id="ke-dir">多</div></div>
-    <div class="kep-row"><div class="kep-k">角度</div><div class="kep-v" id="ke-angle">0</div></div>
-    <div class="kep-row"><div class="kep-k">Open</div><div class="kep-v" id="ke-open">--</div></div>
-    <div class="kep-row"><div class="kep-k">High</div><div class="kep-v" id="ke-high">--</div></div>
-    <div class="kep-row"><div class="kep-k">Low</div><div class="kep-v" id="ke-low">--</div></div>
-    <div class="kep-row"><div class="kep-k">Close</div><div class="kep-v" id="ke-close">--</div></div>
-    <div class="kep-row"><div class="kep-k">Range</div><div class="kep-v" id="ke-range">--</div></div>
-    <div class="kep-row"><div class="kep-k">Wick</div><div class="kep-v" id="ke-wick">--</div></div>
-    <div class="kep-row"><div class="kep-k">結果</div><div class="kep-v" id="ke-bet-result">--</div></div>
-    <div class="kep-row"><div class="kep-k">月下老人</div><div class="kep-v" id="ke-match-a">A：--</div></div>
-    <div class="kep-row" style="grid-column:1 / -1;"><div class="kep-v" id="ke-match-b">B：--</div></div>
-  </div>
-  <div style="margin-top:8px; display:flex; gap:8px;">
-    <button type="button" onclick="app.klineRefreshNow()">刷新K線</button>
-    <button type="button" onclick="app.klineSettlePreview('UP')">預測上</button>
-    <button type="button" onclick="app.klineSettlePreview('DOWN')">預測下</button>
-  </div>
-</div>
-
-
 <div id="coord-modal" role="dialog" aria-label="宇宙座標表">
   <div class="cm-box">
     <div class="cm-head">
@@ -3890,147 +3857,80 @@ document.addEventListener('click', (ev)=>{
 </script>
 
 
-<script src="./kline_engine_v1_0.js"></script>
-<script src="./steering.js"></script>
-<script src="./candle_sim.js"></script>
 <script>
-/* ===== V2.49.0 K線宇宙引擎整合 ===== */
+/* ===== V2.49.2 K-line panel + Chinese direction ===== */
 (function(){
-  if(!window.app) return;
-  app._kline = app._kline || { params:null, engine:null, last:null, seed:'GUANGHAN-16888-V249' };
+  function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
+  function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
 
-  function setTxt(id, txt){
-    const el = document.getElementById(id);
-    if(el) el.textContent = txt;
-  }
-  function shortAddr(addr){
-    const a = String(addr||'').trim();
-    if(!a || a==='0x0000000000000000000000000000000000000000') return '--';
-    if(a.length <= 12) return a;
-    return a.slice(0,6) + '...' + a.slice(-4);
-  }
-
-  app.klineInit = async function(){
+  function renderKlinePanel(){
     try{
-      const params = await UniverseEngine.loadParams('./engine_params_v1_0.json');
-      app._kline.params = params;
-      app._kline.engine = UniverseEngine.create(app._kline.seed, params);
-      setTxt('ke-mode', 'K線模擬');
-      app.klineRefreshNow();
-      app.klineRefreshMatch();
-    }catch(e){
-      console.warn('kline init failed', e);
-      setTxt('ke-mode', '載入失敗');
-    }
-  };
+      const degEl = document.getElementById('steer-input-val');
+      const warpEl = document.getElementById('warp-input-val');
+      const deg = Math.round(num(degEl && degEl.value, 0));
+      const zh = sideZh(deg);
+      const warp = num(warpEl && warpEl.value, 33);
 
-  app.klineInput = function(){
-    const deg = (window.SteeringModule && SteeringModule.getAngle()) || (Number(document.getElementById('steer-input-val')?.value)||0);
-    const dir = (window.SteeringModule && SteeringModule.getDirectionLabel()) || (Math.abs(deg)<=90 ? '多' : '空');
-    const dirSign = dir === '多' ? 1 : -1;
-    const absDeg = Math.round(Math.abs(deg));
-    const ctRaw = Number(app._ct || document.getElementById('ct-in')?.value || 16888);
-    const warp = Number(document.getElementById('warp-input-val')?.value || 33);
-    const ctN = SteeringModule ? SteeringModule.toNormalizedCt(deg) : (dirSign * Math.min(1, absDeg/180));
-    const flowN = CandleSimModule ? CandleSimModule.flowFromWarp(warp, dirSign) : (dirSign * Math.min(1, warp/100));
-    const volN = CandleSimModule ? CandleSimModule.volFromAngleWarp(absDeg, warp) : Math.min(1, 0.25 + absDeg/360 + warp/140);
-    return {
-      deg, dir, absDeg,
-      input:{
-        ct: ctN,
-        flow: flowN,
-        vol: volN,
-        anchor: ctRaw,
-        events:{
-          ignite: warp >= 80,
-          heartbeat: true,
-          payroll: false,
-          wishTrigger: false,
-          split: false
-        }
+      const sideBox = document.getElementById('ke-side');
+      const angleBox = document.getElementById('ke-angle');
+      if(sideBox) sideBox.textContent = zh;
+      if(angleBox) angleBox.textContent = String(Math.abs(deg));
+
+      const cpSide = document.getElementById('cp-side');
+      const cpDegNum = document.getElementById('cp-deg-num');
+      if(cpSide) cpSide.textContent = '方向：' + zh;
+      if(cpDegNum) cpDegNum.textContent = String(Math.abs(deg));
+
+      let candle = null;
+      if(window.UniverseEngine && typeof window.UniverseEngine.create === 'function'){
+        try{
+          window.__unieng = window.__unieng || window.UniverseEngine.create(window.engineParams || {});
+          const ct = (window.app && Number.isFinite(Number(app._ct))) ? Number(app._ct) : 16888;
+          candle = window.__unieng.nextCandle({ ct, deg, warp });
+        }catch(e){}
       }
-    };
-  };
-
-  app.klineRefreshNow = function(){
-    try{
-      if(!app._kline.engine || !window.CandleSimModule) return;
-      const s = app.klineInput();
-      setTxt('ke-dir', s.dir);
-      setTxt('ke-angle', String(s.absDeg));
-      const result = CandleSimModule.next(app._kline.engine, s.input);
-      app._kline.last = result;
-      const c = result.candle;
-      setTxt('ke-open', CandleSimModule.fmt(c.open));
-      setTxt('ke-high', CandleSimModule.fmt(c.high));
-      setTxt('ke-low', CandleSimModule.fmt(c.low));
-      setTxt('ke-close', CandleSimModule.fmt(c.close));
-      setTxt('ke-range', CandleSimModule.fmt(c.meta.range));
-      setTxt('ke-wick', CandleSimModule.fmt(c.meta.wickFactor));
-      setTxt('ke-bet-result', '待預測');
-    }catch(e){
-      console.warn('kline refresh failed', e);
-    }
-  };
-
-  app.klineSettlePreview = function(sideLabel){
-    try{
-      if(!app._kline.last || !app._kline.params) return;
-      const amount = Number(document.getElementById('amt-in')?.value || 1);
-      const bet = { side: sideLabel === 'UP' ? 'UP' : 'DOWN', amount };
-      const st = UniverseEngine.settleBet(bet, app._kline.last.candle, app._kline.params);
-      const zh = st.result === 'WIN' ? '預測成功' : (st.result === 'LOSE' ? '預測失敗' : '平手');
-      setTxt('ke-bet-result', `${zh}｜${bet.side==='UP'?'上':'下'}`);
-      try{ ui.toast(`${zh}｜${bet.side==='UP'?'上':'下'}`); }catch(_){}
-    }catch(e){
-      console.warn('settle preview failed', e);
-    }
-  };
-
-  app.klineRefreshMatch = async function(){
-    try{
-      if(!window.web3 || web3.demo || !web3.provider || !web3.UNIVERSE) return;
-      const uniR = new ethers.Contract(web3.UNIVERSE, web3.abiUniverse, web3.provider);
-      const id = await uniR.roundId();
-      if(Number(id) <= 0){
-        setTxt('ke-match-a', 'A：--');
-        setTxt('ke-match-b', 'B：--');
-        return;
+      if(!candle){
+        const base = 89600 + deg * 3;
+        const drift = deg >= 0 ? 1 : -1;
+        const open = Math.round(base);
+        const close = Math.round(base + drift * (40 + Math.abs(deg)*0.8));
+        const high = Math.max(open, close) + Math.round(15 + Math.abs(deg)*0.6);
+        const low = Math.min(open, close) - Math.round(15 + Math.abs(deg)*0.6);
+        candle = {open, high, low, close, range: high-low, wick: Math.round((high-low)*0.24)};
       }
-      const r = await uniR.rounds(id);
-      setTxt('ke-match-a', 'A：' + shortAddr(r.a));
-      setTxt('ke-match-b', 'B：' + shortAddr(r.b));
-    }catch(e){
-      setTxt('ke-match-a', 'A：--');
-      setTxt('ke-match-b', 'B：--');
-    }
-  };
+      const values = {
+        'ke-open': candle.open,
+        'ke-high': candle.high,
+        'ke-low': candle.low,
+        'ke-close': candle.close,
+        'ke-range': candle.range ?? ((candle.high||0)-(candle.low||0)),
+        'ke-wick': candle.wick ?? Math.round((((candle.high||0)-(candle.low||0))*0.24))
+      };
+      for(const [id,v] of Object.entries(values)){
+        const el = document.getElementById(id);
+        if(el) el.textContent = Number.isFinite(Number(v)) ? Number(v).toLocaleString() : '--';
+      }
+    }catch(e){ console.warn('renderKlinePanel failed', e); }
+  }
 
-  // final override for cockpit Chinese layout
-  app.updateCoordPanel = (function(oldFn){
-    return function(){
-      try{ if(typeof oldFn === 'function') oldFn(); }catch(_){}
-      const degRaw = (window.SteeringModule && SteeringModule.getAngle()) || (Number(document.getElementById('steer-input-val')?.value)||0);
-      const dir = (window.SteeringModule && SteeringModule.getDirectionLabel()) || (Math.abs(degRaw)<=90 ? '多' : '空');
-      const deg = Math.round(Math.abs(degRaw));
-      setTxt('cp-side', '方向：' + dir);
-      setTxt('cp-deg-num', String(deg));
-      try{ app.klineRefreshNow(); }catch(_){}
-    };
-  })(app.updateCoordPanel);
-
-  // patch order buttons to also preview K線結算
-  app.orderGuess = (function(oldFn){
-    return function(dir){
-      try{ if(typeof oldFn === 'function') oldFn(dir); }catch(_){}
-      try{ app.klineSettlePreview(dir); }catch(_){}
-    };
-  })(app.orderGuess);
-
+  window.renderKlinePanel = renderKlinePanel;
   window.addEventListener('load', ()=>{
-    try{ app.klineInit(); }catch(_){}
-    setTimeout(()=>{ try{ app.klineRefreshMatch(); }catch(_){} }, 1500);
+    renderKlinePanel();
+    const s = document.getElementById('steer-input-val');
+    const w = document.getElementById('warp-input-val');
+    if(s) s.addEventListener('input', renderKlinePanel);
+    if(w) w.addEventListener('input', renderKlinePanel);
   });
+
+  if(window.app && typeof app.applySteer === 'function' && !app.__v2492Patch){
+    app.__v2492Patch = true;
+    const _old = app.applySteer.bind(app);
+    app.applySteer = function(v, silent){
+      const r = _old(v, silent);
+      try{ renderKlinePanel(); }catch(_){}
+      return r;
+    };
+  }
 })();
 </script>
 
