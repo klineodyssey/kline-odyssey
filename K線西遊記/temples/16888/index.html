@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.47.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -501,7 +501,7 @@
 }
 .tiny-btn:active{ transform:translateY(1px); }
 
-/* v2.48.0: hide legacy AUTO debug UI */
+/* v2.47.4: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 </style>
 
@@ -527,7 +527,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.48.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.47.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -585,7 +585,7 @@
 <div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
-    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
+    <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
@@ -595,9 +595,9 @@
   </div>
 
   <div style="margin-top:8px; font-size:12px; color:#ddd;">
-    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div><div style="margin-top:4px; opacity:.82; font-size:11px;">提示：沒錢包時按「連結錢包」會自動開啟多錢包入口</div>
+    <div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div>
     <div style="margin-top:8px;">
-      <button class="term-btn" id="w3-connect-btn" style="padding:10px 12px; width:100%; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包（自動）</button>
+      <button class="term-btn" id="w3-connect-btn" style="padding:10px 12px; width:100%; pointer-events:auto;" onclick="web3.connect()">🔌 連結錢包（BSC）</button>
     </div>
 <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
     <div>BNB: <span id="userBNB" style="color:var(--cyan);">-</span></div>
@@ -1525,7 +1525,7 @@ speak(m){
     }catch(_){}
   },
 
-  // --- v2.48.0 music fixes: ensure next/prev/index/render/builtin work ---
+  // --- v2.47.4 music fixes: ensure next/prev/index/render/builtin work ---
   musicSetIndex(i){
     try{
       this._music=this._music||{};
@@ -2100,13 +2100,10 @@ stopPolling(){
   this.pollTimer = null;
 },
 async autoDetect(){
-  // cannot fully auto-connect without user gesture, but we can prepare the best path
-  const btn = document.getElementById("w3-connect-btn");
+  // cannot auto-connect without user gesture, but can show status & chain
   if(!window.ethereum){
-    if(btn){
-      btn.disabled = false;
-      btn.textContent = "🔌 連結錢包（未偵測到時自動開多錢包）";
-    }
+    const btn = document.getElementById("w3-connect-btn");
+    if(btn){ btn.disabled = true; btn.textContent = "未偵測到錢包（請安裝/開啟 MetaMask）"; }
     return;
   }
   try{
@@ -2115,41 +2112,24 @@ async autoDetect(){
     if(el) el.innerText = cid || "--";
     const accts = await window.ethereum.request({ method:"eth_accounts" });
     if(accts && accts.length){
+      // show address even before connect
       const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = accts[0];
+      const btn = document.getElementById("w3-connect-btn");
       if(btn){ btn.textContent = "✅ 已授權，點我啟動同步"; }
-    }else{
-      if(btn){ btn.textContent = "🔌 連結錢包（自動）"; }
     }
   }catch(e){
     console.warn("autoDetect failed", e);
   }
 },
 
-  async smartConnect(){
-    // Smart path: injected wallet -> direct connect; no injected wallet -> open multi-wallet hub
-    try{
-      if(window.ethereum || window.BinanceChain){
-        return await this.connect();
-      }
-      this.openWalletHub();
-      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
-      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
-      return;
-    }catch(e){
-      console.warn('smartConnect failed', e);
-      try{ this.openWalletHub(); }catch(_){}
-    }
-  },
-
 
   async connect(){
     try{
       this.stopPolling();
       if(!window.ethereum){
-        this.openWalletHub();
         this.demo = true;
         this.ui();
-        app.speak("未偵測到錢包，已開啟多錢包入口。");
+        app.speak("未偵測到錢包。已進入 Demo 模式，你仍可體驗玩法。");
         return;
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
@@ -2813,7 +2793,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
   const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
 
-  // UI targets (best-effort) — v2.48.0: hide legacy AUTO debug badges (kept logic, no UI)
+  // UI targets (best-effort) — v2.47.4: hide legacy AUTO debug badges (kept logic, no UI)
   const autoBadge = { style:{ display:"none" }, textContent:"" };
   function setAutoUI(on, mode){ /* UI removed */ }
 
