@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V3.0.9 CLEAN LEFT REBUILD
+   V3.1.9 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V3.0.9 layout micro-tune === */
+/* === V3.1.9 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V3.0.9 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V3.1.9 use V3.1.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -756,7 +756,7 @@ html, body{
 }
 
 
-/* === V3.0.9 center image + shorten left column === */
+/* === V3.1.9 center image + shorten left column === */
 #core-anchor{
   left: 50% !important;
   top: 50% !important;
@@ -806,7 +806,7 @@ html, body{
 }
 
 
-/* === V3.0.9 vertical tightening === */
+/* === V3.1.9 vertical tightening === */
 
 /* 左側整欄往上 */
 .resource-bars{
@@ -882,7 +882,7 @@ html, body{
 }
 
 
-/* === V3.0.9 move only K-line engine/chart upward; keep GA centered === */
+/* === V3.1.9 move only K-line engine/chart upward; keep GA centered === */
 #kline-engine-panel{
   top: 220px !important;
 }
@@ -901,7 +901,7 @@ html, body{
 }
 
 
-/* ===== Guanghan Temple V3.0 Layout Engine ===== */
+/* ===== Guanghan Temple V3.1 Layout Engine ===== */
 
 #left-column-v3{
     position:absolute;
@@ -936,6 +936,19 @@ html, body{
         top:auto;
         width:100%;
         padding:10px;
+    }
+}
+
+
+/* === V3.1 move entire left column downward === */
+#left-column-v3{
+    top: 220px !important;
+    gap: 16px !important;
+}
+@media (max-width:720px){
+    #left-column-v3{
+        top: 220px !important;
+        gap: 16px !important;
     }
 }
 
@@ -993,7 +1006,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.0.9</span>
+    <span>宇宙K線引擎｜V3.1.9</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
