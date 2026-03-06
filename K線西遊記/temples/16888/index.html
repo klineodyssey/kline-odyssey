@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.2</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V2.6.2 CLEAN LEFT REBUILD
+   V2.6.3 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V2.6.2 layout micro-tune === */
+/* === V2.6.3 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,89 +691,67 @@ html, body{
 }
 
 
-/* === V2.6.2 overlap fix === */
-:root{
-  --left-x: 14px !important;
-  --left-w: 280px !important;
-}
-.resource-bars{
-  left: var(--left-x) !important;
-  width: var(--left-w) !important;
-}
+/* === V2.6.3 use V2.6.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
-  left: var(--left-x) !important;
-  width: var(--left-w) !important;
-}
-#kline-engine-panel{
-  left: var(--left-x) !important;
-  width: var(--left-w) !important;
-  max-width: var(--left-w) !important;
-}
-#kline-chart-panel{
-  left: var(--left-x) !important;
-  width: var(--left-w) !important;
-  max-width: var(--left-w) !important;
+  left: 50% !important;
+  top: 210px !important;
+  transform: translateX(-50%) !important;
+  width: 220px !important;
+  max-width: 220px !important;
+  right: auto !important;
+  z-index: 150 !important;
 }
 #core-anchor{
-  left: 72% !important;
+  /* keep image position from previous good version */
+  left: 56% !important;
   top: 50% !important;
-  width: 300px !important;
-  height: 300px !important;
 }
 #web3-panel{
-  left: 10px !important;
-  bottom: 250px !important;
-  width: 260px !important;
-  max-width: 260px !important;
+  left: 18px !important;
+  bottom: 275px !important;
+  width:min(360px,92vw) !important;
 }
 #coord-panel{
-  right: 74px !important;
-  bottom: 252px !important;
-  width: 300px !important;
-  max-width: 300px !important;
+  right: 84px !important;
+  bottom: 278px !important;
 }
 #steer-readout{
-  bottom: 165px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+  bottom: 145px !important;
   z-index: 160 !important;
 }
 #warp-slider{
-  bottom: 145px !important;
+  bottom: 122px !important;
 }
 .footer-terminal{
   bottom: 18px !important;
 }
 @media (max-width:720px){
-  :root{
-    --left-x: 14px !important;
-    --left-w: 280px !important;
+  .ga-matrix{
+    left: 50% !important;
+    top: 210px !important;
+    transform: translateX(-50%) !important;
+    width: 220px !important;
+    max-width: 220px !important;
   }
   #core-anchor{
-    left: 72% !important;
+    left: 56% !important;
     top: 50% !important;
-    width: 290px !important;
-    height: 290px !important;
   }
   #web3-panel{
-    left: 10px !important;
-    bottom: 250px !important;
-    width: 260px !important;
-    max-width: 260px !important;
+    left: 18px !important;
+    bottom: 275px !important;
+    width:min(340px,92vw) !important;
   }
   #coord-panel{
-    right: 74px !important;
-    bottom: 252px !important;
-    width: 300px !important;
-    max-width: 300px !important;
+    right: 84px !important;
+    bottom: 278px !important;
+    width:min(320px,90vw) !important;
   }
   #steer-readout{
-    bottom: 165px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    bottom: 145px !important;
   }
   #warp-slider{
-    bottom: 145px !important;
+    bottom: 122px !important;
   }
 }
 
@@ -801,7 +779,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -831,7 +809,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.2</span>
+    <span>宇宙K線引擎｜V2.6.3</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -984,7 +962,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.2";
+const APP_VERSION = "v2.6.3";
 
 /* =========================
    UFO Music: track URL resolver (fix)
