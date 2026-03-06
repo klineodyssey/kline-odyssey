@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.50.0 ===== */
+/* ===== V2.50.1 ===== */
 .resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
   position:fixed !important;
@@ -543,7 +543,7 @@
 }
 
 
-/* === V2.50.0 layout refine === */
+/* === V2.50.1 layout refine === */
 #kline-engine-panel{
   left:18px !important;
   top:230px !important;
@@ -567,7 +567,7 @@
 }
 
 
-/* === V2.50.0 format refine === */
+/* === V2.50.1 format refine === */
 #kline-engine-panel{
   left:12px !important;
   top:280px !important;
@@ -636,7 +636,7 @@
 }
 
 
-/* === V2.50.0 align GA under top-left + enlarge Kline title === */
+/* === V2.50.1 align GA under top-left + enlarge Kline title === */
 #kline-engine-panel{
   left:12px !important;
   top:250px !important;
@@ -677,7 +677,7 @@
 }
 
 
-/* === V2.50.0 宇宙K線圖引擎（override）=== */
+/* === V2.50.1 宇宙K線圖引擎（override）=== */
 .resource-bars{
   top: 150px !important;
   width: 300px !important;
@@ -788,6 +788,57 @@
   }
 }
 
+
+/* === V2.50.1 UI FIX === */
+#kline-engine-panel{
+  overflow:hidden !important;
+  width:270px !important;
+  max-width:270px !important;
+}
+#kline-engine-panel .kline-grid{
+  gap:6px !important;
+}
+#kline-engine-panel .kcell{
+  min-height:42px !important;
+  padding:5px 7px !important;
+}
+#kline-engine-panel .klabel{
+  font-size:9px !important;
+  opacity:.75 !important;
+}
+#kline-engine-panel .kvalue{
+  font-size:14px !important;
+}
+#kline-chart-panel{
+  width:270px !important;
+  max-width:270px !important;
+  top:525px !important;
+  overflow:hidden !important;
+}
+#kline-canvas{
+  height:90px !important;
+}
+.ga-matrix{
+  top:200px !important;
+}
+@media (max-width:720px){
+  #kline-engine-panel{
+    width:270px !important;
+    max-width:270px !important;
+  }
+  #kline-chart-panel{
+    width:270px !important;
+    max-width:270px !important;
+    top:525px !important;
+  }
+  #kline-canvas{
+    height:90px !important;
+  }
+  .ga-matrix{
+    top:200px !important;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -812,7 +863,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.50.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.50.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -835,7 +886,7 @@
 
 <div id="kline-engine-panel">
   <div class="khead">
-    <span>宇宙K線引擎｜V2.50.0</span>
+    <span>宇宙K線引擎｜V2.50.1</span>
     <span id="kline-mode-text">K線模擬</span>
   </div>
   <div class="kline-grid">
@@ -1004,7 +1055,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.50.0";
+const APP_VERSION = "v2.50.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4129,7 +4180,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.50.0 K-line panel + Chinese direction ===== */
+/* ===== V2.50.1 K-line panel + Chinese direction ===== */
 (function(){
   function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -4207,7 +4258,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.0 cockpit format hotfix === */
+/* === V2.50.1 cockpit format hotfix === */
 (function(){
   function updateCockpitZh(){
     try{
@@ -4244,7 +4295,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.0 宇宙K線圖引擎 === */
+/* === V2.50.1 宇宙K線圖引擎 === */
 (function(){
   function num(v,d=0){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
