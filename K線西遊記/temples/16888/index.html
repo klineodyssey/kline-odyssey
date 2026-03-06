@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.3</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V2.6.3 CLEAN LEFT REBUILD
+   V2.6.4 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V2.6.3 layout micro-tune === */
+/* === V2.6.4 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V2.6.3 use V2.6.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V2.6.4 use V2.6.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -755,6 +755,56 @@ html, body{
   }
 }
 
+
+/* === V2.6.4 center image + shorten left column === */
+#core-anchor{
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+.ga-matrix{
+  top: 200px !important;
+  transform: translateX(-50%) scale(1.08) !important;
+  transform-origin: top center !important;
+}
+#kline-engine-panel{
+  top: 380px !important;
+}
+#kline-chart-panel{
+  top: 640px !important;
+  height: 280px !important;
+  max-height: 280px !important;
+}
+#kline-canvas{
+  height: 126px !important;
+}
+#moon-match{
+  margin-top: 6px !important;
+  padding-top: 6px !important;
+}
+@media (max-width:720px){
+  #core-anchor{
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  .ga-matrix{
+    top: 200px !important;
+    transform: translateX(-50%) scale(1.08) !important;
+  }
+  #kline-engine-panel{
+    top: 380px !important;
+  }
+  #kline-chart-panel{
+    top: 640px !important;
+    height: 280px !important;
+    max-height: 280px !important;
+  }
+  #kline-canvas{
+    height: 126px !important;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -779,7 +829,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.3</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -809,7 +859,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.3</span>
+    <span>宇宙K線引擎｜V2.6.4</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -962,7 +1012,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.3";
+const APP_VERSION = "v2.6.4";
 
 /* =========================
    UFO Music: track URL resolver (fix)
