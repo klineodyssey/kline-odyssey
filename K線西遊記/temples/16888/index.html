@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -527,7 +527,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.48.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.48.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -675,7 +675,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.48.1";
+const APP_VERSION = "v2.48.2";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -2940,7 +2940,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
-    <span class="muted" id="cp-side">SIDE: --</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;">
+      <span class="muted" id="cp-side">SIDE: --</span>
+      <span class="muted" id="cp-deg">deg --</span>
+    </div>
   </div>
 
   <div class="cp-grid">
@@ -3640,6 +3643,112 @@ document.addEventListener('click', (ev)=>{
       if(btn) btn.textContent='🤖 自動打怪（開發中）';
     }catch(_){ }
   });
+})();
+</script>
+
+
+<script>
+/* ===== V2.48.2 HOTFIX =====
+   1) Pool progress text/bar bind to 16888 target
+   2) Cockpit side/deg split into 2 lines
+   3) Auto-battle button shows 開發中 (reserved)
+*/
+(function(){
+  try{
+    const TARGET_POOL = 16888;
+
+    // reserve auto battle button
+    const autoBtn = document.getElementById('auto-battle-btn');
+    if(autoBtn){
+      autoBtn.textContent = '🤖 自動打怪（開發中）';
+      autoBtn.onclick = function(){
+        if(window.ui && typeof ui.toast === 'function') ui.toast('自動打怪功能開發中');
+        try{ window.app && app.speak && app.speak('自動打怪功能開發中。'); }catch(_){}
+      };
+    }
+
+    // force one consistent progress updater
+    window.__updatePoolProgress48 = function(current){
+      const pool = Number(current)||0;
+      const pct = Math.max(0, Math.min(100, (pool / TARGET_POOL) * 100));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      const line = document.getElementById('w3-prog');
+      if(fill) fill.style.width = pct.toFixed(2) + '%';
+      if(txt) txt.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+      if(line) line.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+    };
+
+    // patch app.setProgress to not overwrite useful text
+    if(window.app){
+      app.setProgress = function(ratioOrPct){
+        let v = Number(ratioOrPct);
+        if(!Number.isFinite(v)) v = 0;
+        // support both 0..1 and 0..100
+        const pct = v <= 1 ? v * 100 : v;
+        const fill = document.getElementById('prog-fill');
+        if(fill) fill.style.width = Math.max(0, Math.min(100, pct)).toFixed(2) + '%';
+      };
+    }
+
+    // patch cockpit side sync
+    if(window.app && typeof app.updateCoordPanel === 'function'){
+      const oldUpdateCoordPanel = app.updateCoordPanel;
+      app.updateCoordPanel = function(){
+        try{ oldUpdateCoordPanel(); }catch(_){}
+        try{
+          const steer = document.getElementById('steer-input-val');
+          const deg = steer ? (Number(steer.value)||0) : 0;
+          const side = Math.abs(deg) <= 90 ? 'LONG' : 'SHORT';
+          const sideEl = document.getElementById('cp-side');
+          const degEl = document.getElementById('cp-deg');
+          if(sideEl) sideEl.textContent = 'SIDE: ' + side;
+          if(degEl) degEl.textContent = 'deg ' + deg.toFixed(2);
+        }catch(_){}
+      };
+      try{ app.updateCoordPanel(); }catch(_){}
+    }
+
+    // patch web3 refresh / demoRefresh progress
+    if(window.web3){
+      const oldRefresh = web3.refresh;
+      web3.refresh = async function(){
+        const r = await oldRefresh.apply(this, arguments);
+        try{
+          const balEl = document.getElementById('w3-bal');
+          if(balEl){
+            const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+            if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+          }
+        }catch(_){}
+        return r;
+      };
+
+      const oldDemoRefresh = web3.demoRefresh;
+      web3.demoRefresh = function(){
+        const r = oldDemoRefresh.apply(this, arguments);
+        try{
+          const pool = this.demoState && this.demoState.pool ? Number(this.demoState.pool) : 0;
+          window.__updatePoolProgress48(pool);
+        }catch(_){}
+        return r;
+      };
+    }
+
+    // run once after load
+    window.addEventListener('load', function(){
+      try{
+        const balEl = document.getElementById('w3-bal');
+        if(balEl){
+          const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+          if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+        }
+      }catch(_){}
+      try{ window.app && app.updateCoordPanel && app.updateCoordPanel(); }catch(_){}
+    });
+  }catch(e){
+    console.warn('V2.48.2 hotfix failed', e);
+  }
 })();
 </script>
 
