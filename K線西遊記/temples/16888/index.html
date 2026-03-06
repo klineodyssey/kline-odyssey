@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -527,7 +527,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.48.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.48.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -587,7 +587,7 @@
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
-    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
+    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪（開發中）</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -675,7 +675,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.46.13";
+const APP_VERSION = "v2.48.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -931,6 +931,10 @@ const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `ro
         // wheel sync
         const wheel = document.getElementById('wheel');
         if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
+        try{
+          if(window.app && typeof window.app.updateCoordPanel === 'function') window.app.updateCoordPanel();
+          if(window.app && typeof window.app.syncSideUI === 'function') window.app.syncSideUI(ang);
+        }catch(_){ }
         if(!silent) this.bbEvent("steer", { angle: ang });
     },
 
@@ -2760,7 +2764,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   window.app.toggleAutoBattle = function(){
     state.on = !state.on;
     const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
+    if(btn) btn.textContent = state.on ? "🤖 自動打怪（開發中）" : "🤖 自動打怪（開發中）";
     if(state.on){
       state.raf = requestAnimationFrame(step);
     }else{
@@ -3074,7 +3078,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   }
   function currentSteerDeg() {
     const el = $('steer-input-val');
-    return el ? (toNum(el.textContent) || 0) : 0;
+    return el ? (toNum(el.value) || 0) : 0;
   }
     // 由方向盤角度（deg）判斷多空：
   // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
@@ -3624,6 +3628,19 @@ document.addEventListener('click', (ev)=>{
   }catch(e){}
 })();
 
+</script>
+
+
+<script>
+(function(){
+  window.addEventListener('load', function(){
+    try{
+      if(window.app && typeof window.app.updateCoordPanel==='function') window.app.updateCoordPanel();
+      var btn=document.getElementById('auto-battle-btn');
+      if(btn) btn.textContent='🤖 自動打怪（開發中）';
+    }catch(_){ }
+  });
+})();
 </script>
 
 </body>
