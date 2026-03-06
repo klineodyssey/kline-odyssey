@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V2.6.9 CLEAN LEFT REBUILD
+   V3.0.9 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V2.6.9 layout micro-tune === */
+/* === V3.0.9 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V2.6.9 use V2.6.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V3.0.9 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -756,7 +756,7 @@ html, body{
 }
 
 
-/* === V2.6.9 center image + shorten left column === */
+/* === V3.0.9 center image + shorten left column === */
 #core-anchor{
   left: 50% !important;
   top: 50% !important;
@@ -806,7 +806,7 @@ html, body{
 }
 
 
-/* === V2.6.9 vertical tightening === */
+/* === V3.0.9 vertical tightening === */
 
 /* 左側整欄往上 */
 .resource-bars{
@@ -882,7 +882,7 @@ html, body{
 }
 
 
-/* === V2.6.9 move only K-line engine/chart upward; keep GA centered === */
+/* === V3.0.9 move only K-line engine/chart upward; keep GA centered === */
 #kline-engine-panel{
   top: 220px !important;
 }
@@ -898,6 +898,45 @@ html, body{
   #kline-chart-panel{
     top: 440px !important;
   }
+}
+
+
+/* ===== Guanghan Temple V3.0 Layout Engine ===== */
+
+#left-column-v3{
+    position:absolute;
+    left:20px;
+    top:110px;
+    width:340px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    z-index:50;
+}
+
+/* individual blocks stop using absolute push */
+.resource-bars,
+#kline-engine-panel,
+#kline-chart-panel{
+    position:relative !important;
+    top:auto !important;
+}
+
+/* keep central art stable */
+#main-temple-image{
+    margin:0 auto;
+    display:block;
+}
+
+/* mobile safe */
+@media (max-width:720px){
+    #left-column-v3{
+        position:relative;
+        left:auto;
+        top:auto;
+        width:100%;
+        padding:10px;
+    }
 }
 
 </style>
@@ -954,7 +993,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.9</span>
+    <span>宇宙K線引擎｜V3.0.9</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
