@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.4</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.49.4 ===== */
+/* ===== V2.49.5 ===== */
 .resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
   position:fixed !important;
@@ -543,7 +543,7 @@
 }
 
 
-/* === V2.49.4 layout refine === */
+/* === V2.49.5 layout refine === */
 #kline-engine-panel{
   left:18px !important;
   top:230px !important;
@@ -567,7 +567,7 @@
 }
 
 
-/* === V2.49.4 format refine === */
+/* === V2.49.5 format refine === */
 #kline-engine-panel{
   left:12px !important;
   top:280px !important;
@@ -635,6 +635,47 @@
   }
 }
 
+
+/* === V2.49.5 align GA under top-left + enlarge Kline title === */
+#kline-engine-panel{
+  left:12px !important;
+  top:250px !important;
+  width:min(290px, calc(100vw - 24px)) !important;
+  max-width:290px !important;
+  padding:8px !important;
+}
+#kline-engine-panel .khead{
+  font-size:15px !important;
+  margin-bottom:8px !important;
+}
+#kline-engine-panel .khead span:first-child{
+  font-size:15px !important;
+  font-weight:900 !important;
+}
+.ga-matrix{
+  left:12px !important;
+  top:450px !important;
+  transform:none !important;
+  width:290px !important;
+  max-width:290px !important;
+  padding:10px 12px !important;
+}
+.ga-matrix .ga-stat{font-size:11px !important;}
+.ga-matrix > div:first-child{font-size:13px !important;}
+@media (max-width: 720px){
+  #kline-engine-panel{
+    width:290px !important;
+    max-width:290px !important;
+    top:248px !important;
+  }
+  .ga-matrix{
+    width:290px !important;
+    max-width:290px !important;
+    left:12px !important;
+    top:448px !important;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -659,7 +700,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.49.4</div>
+        <div class="sys-st" id="ver-st">VERSION v2.49.5</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -681,7 +722,7 @@
 
 <div id="kline-engine-panel">
   <div class="khead">
-    <span>宇宙K線引擎｜V2.49.4</span>
+    <span>宇宙K線引擎｜V2.49.5</span>
     <span id="kline-mode-text">K線模擬</span>
   </div>
   <div class="kline-grid">
@@ -826,7 +867,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.49.4";
+const APP_VERSION = "v2.49.5";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3951,7 +3992,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.49.4 K-line panel + Chinese direction ===== */
+/* ===== V2.49.5 K-line panel + Chinese direction ===== */
 (function(){
   function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -4029,7 +4070,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.49.4 cockpit format hotfix === */
+/* === V2.49.5 cockpit format hotfix === */
 (function(){
   function updateCockpitZh(){
     try{
