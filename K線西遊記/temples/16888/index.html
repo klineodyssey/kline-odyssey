@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V2.6.0 CLEAN LEFT REBUILD
+   V2.6.1 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -654,6 +654,42 @@ html, body{
   }
 }
 
+
+/* === V2.6.1 layout micro-tune === */
+:root{
+  --left-x: 24px !important;
+  --left-w: 300px !important;
+}
+#kline-engine-panel{
+  top: 420px !important;
+}
+#kline-chart-panel{
+  top: 770px !important;
+  overflow: visible !important;
+}
+#kline-canvas{
+  height: 150px !important;
+}
+#moon-match{
+  padding-bottom: 8px !important;
+}
+@media (max-width:720px){
+  :root{
+    --left-x: 24px !important;
+    --left-w: 300px !important;
+  }
+  #kline-engine-panel{
+    top: 420px !important;
+  }
+  #kline-chart-panel{
+    top: 770px !important;
+    overflow: visible !important;
+  }
+  #kline-canvas{
+    height: 150px !important;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -678,7 +714,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -708,7 +744,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.0</span>
+    <span>宇宙K線引擎｜V2.6.1</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -728,7 +764,7 @@ html, body{
     <span>宇宙K線圖</span>
     <span id="kc-predict">預測：--</span>
   </div>
-  <canvas id="kline-canvas" width="280" height="116"></canvas>
+  <canvas id="kline-canvas" width="280" height="150"></canvas>
   <div class="kc-foot">
     <span id="kc-dir">方向盤 → --方K</span>
     <span id="kc-hit">命中率：--</span>
@@ -861,7 +897,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.0";
+const APP_VERSION = "v2.6.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
