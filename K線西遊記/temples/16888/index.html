@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.2</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.50.2 ===== */
+/* ===== V2.50.3 ===== */
 .resource-bars .rb .row span{white-space:nowrap;}
 #kline-engine-panel{
   position:fixed !important;
@@ -543,7 +543,7 @@
 }
 
 
-/* === V2.50.2 layout refine === */
+/* === V2.50.3 layout refine === */
 #kline-engine-panel{
   left:18px !important;
   top:230px !important;
@@ -567,7 +567,7 @@
 }
 
 
-/* === V2.50.2 format refine === */
+/* === V2.50.3 format refine === */
 #kline-engine-panel{
   left:12px !important;
   top:280px !important;
@@ -636,7 +636,7 @@
 }
 
 
-/* === V2.50.2 align GA under top-left + enlarge Kline title === */
+/* === V2.50.3 align GA under top-left + enlarge Kline title === */
 #kline-engine-panel{
   left:12px !important;
   top:250px !important;
@@ -677,7 +677,7 @@
 }
 
 
-/* === V2.50.2 宇宙K線圖引擎（override）=== */
+/* === V2.50.3 宇宙K線圖引擎（override）=== */
 .resource-bars{
   top: 150px !important;
   width: 300px !important;
@@ -789,7 +789,7 @@
 }
 
 
-/* === V2.50.2 UI FIX === */
+/* === V2.50.3 UI FIX === */
 #kline-engine-panel{
   overflow:hidden !important;
   width:270px !important;
@@ -840,7 +840,7 @@
 }
 
 
-/* === V2.50.2 left overflow text + spacing fix === */
+/* === V2.50.3 left overflow text + spacing fix === */
 html, body{
   overflow-x:hidden !important;
 }
@@ -880,6 +880,64 @@ body::before{
   body::before{ top:120px; height:820px; }
 }
 
+
+/* === V2.50.3 chart realism + spacing refine === */
+html, body{
+  overflow-x:hidden !important;
+}
+.resource-bars{
+  top:165px !important;
+}
+.ga-matrix{
+  top:205px !important;
+}
+#kline-engine-panel{
+  top:275px !important;
+}
+#kline-chart-panel{
+  top:555px !important;
+  border-color: rgba(0,242,255,.26) !important;
+  background: linear-gradient(180deg, rgba(4,14,18,.92), rgba(0,0,0,.82)) !important;
+}
+body::before{
+  content:"";
+  position:fixed;
+  left:0;
+  top:118px;
+  width:26px;
+  height:860px;
+  background:#000;
+  z-index:149;
+  pointer-events:none;
+}
+#kline-canvas{
+  border-radius:10px !important;
+  background:
+    linear-gradient(180deg, rgba(0,242,255,.04), rgba(0,0,0,.08)),
+    repeating-linear-gradient(to right, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 1px, transparent 34px),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 24px),
+    rgba(0,0,0,.22) !important;
+  box-shadow: inset 0 0 16px rgba(0,242,255,.08) !important;
+}
+#kline-chart-title{
+  margin-bottom:8px !important;
+}
+#kline-prediction{
+  margin-top:8px !important;
+  padding-top:6px !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+#kline-prediction span{
+  text-shadow: 0 0 8px rgba(0,242,255,.16);
+}
+@media (max-width:720px){
+  .resource-bars{ top:165px !important; }
+  .ga-matrix{ top:205px !important; }
+  #kline-engine-panel{ top:275px !important; }
+  #kline-chart-panel{ top:555px !important; }
+  body::before{ top:118px; height:920px; width:26px; }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -904,7 +962,7 @@ body::before{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.50.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.50.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -927,7 +985,7 @@ body::before{
 
 <div id="kline-engine-panel">
   <div class="khead">
-    <span>宇宙K線引擎｜V2.50.2</span>
+    <span>宇宙K線引擎｜V2.50.3</span>
     <span id="kline-mode-text">K線模擬</span>
   </div>
   <div class="kline-grid">
@@ -1096,7 +1154,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.50.2";
+const APP_VERSION = "v2.50.3";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4221,7 +4279,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.50.2 K-line panel + Chinese direction ===== */
+/* ===== V2.50.3 K-line panel + Chinese direction ===== */
 (function(){
   function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
@@ -4299,7 +4357,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.2 cockpit format hotfix === */
+/* === V2.50.3 cockpit format hotfix === */
 (function(){
   function updateCockpitZh(){
     try{
@@ -4336,12 +4394,12 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* === V2.50.2 宇宙K線圖引擎 === */
+/* === V2.50.3 宇宙K線圖引擎 === */
 (function(){
   function num(v,d=0){ v=Number(v); return Number.isFinite(v)?v:d; }
   function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
 
-  const state = { history: [], hits: 0, total: 0 };
+  const state = { history: [], hits: 0, total: 0 }; window.__klineState = state;
 
   function simulateCandle(ct, deg, warp){
     // 若已載入外部引擎，優先用它
@@ -4484,6 +4542,102 @@ document.addEventListener('click', (ev)=>{
       try{ refreshKline(); }catch(_){}
       return r;
     };
+  }
+})();
+</script>
+
+
+<script>
+/* === V2.50.3 chart render refine === */
+(function(){
+  function drawMoreRealKline(){
+    const cvs = document.getElementById('kline-canvas');
+    if(!cvs) return;
+    const ctx = cvs.getContext('2d');
+    const w = cvs.width, h = cvs.height;
+    const history = (window.refreshKlineUniverse && window.__klineState && window.__klineState.history) || [];
+    const candles = history.slice(-12);
+    if(!candles.length) return;
+
+    ctx.clearRect(0,0,w,h);
+
+    // panel background overlay
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0, 'rgba(0,242,255,0.03)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.12)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+
+    // price range
+    const highs = candles.map(c=>c.high);
+    const lows = candles.map(c=>c.low);
+    const maxV = Math.max.apply(null, highs);
+    const minV = Math.min.apply(null, lows);
+    const pad = (maxV-minV)*0.08 || 1;
+    const topV = maxV + pad;
+    const botV = minV - pad;
+    const toY = (v)=>{
+      const t = (v - botV) / (topV - botV);
+      return h - t * h;
+    };
+
+    // dashed midline
+    const mid = (maxV + minV) / 2;
+    ctx.save();
+    ctx.setLineDash([4,4]);
+    ctx.strokeStyle = 'rgba(255,215,120,0.22)';
+    ctx.beginPath();
+    ctx.moveTo(0, toY(mid));
+    ctx.lineTo(w, toY(mid));
+    ctx.stroke();
+    ctx.restore();
+
+    // draw candles
+    const gap = 8;
+    const cw = Math.floor((w - gap*(candles.length+1)) / candles.length);
+
+    candles.forEach((c, i)=>{
+      const x = gap + i*(cw+gap);
+      const yo = toY(c.open), yc = toY(c.close), yh = toY(c.high), yl = toY(c.low);
+      const up = c.close >= c.open;
+
+      ctx.save();
+      ctx.strokeStyle = up ? '#19f0ff' : '#ffcc66';
+      ctx.fillStyle = up ? 'rgba(25,240,255,0.22)' : 'rgba(255,204,102,0.22)';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = up ? 'rgba(25,240,255,.35)' : 'rgba(255,204,102,.28)';
+
+      // wick
+      ctx.beginPath();
+      ctx.moveTo(x + cw/2, yh);
+      ctx.lineTo(x + cw/2, yl);
+      ctx.stroke();
+
+      // body
+      const by = Math.min(yo, yc);
+      const bh = Math.max(5, Math.abs(yc - yo));
+      ctx.fillRect(x, by, cw, bh);
+      ctx.strokeRect(x, by, cw, bh);
+      ctx.restore();
+    });
+
+    // right-side tiny price labels
+    ctx.fillStyle = 'rgba(255,255,255,0.58)';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(String(Math.round(topV)), w-40, 10);
+    ctx.fillText(String(Math.round(mid)), w-40, toY(mid)-4);
+    ctx.fillText(String(Math.round(botV)), w-40, h-4);
+  }
+
+  const oldRefresh = window.refreshKlineUniverse;
+  if(typeof oldRefresh === 'function' && !window.__v2503Patch){
+    window.__v2503Patch = true;
+    window.refreshKlineUniverse = function(){
+      const r = oldRefresh.apply(this, arguments);
+      try{ drawMoreRealKline(); }catch(e){}
+      return r;
+    };
+    window.addEventListener('load', ()=>{ try{ drawMoreRealKline(); }catch(e){}; });
   }
 })();
 </script>
