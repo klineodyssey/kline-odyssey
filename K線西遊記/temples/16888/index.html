@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -527,7 +527,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.48.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.48.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -675,7 +675,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.48.1";
+const APP_VERSION = "v2.48.4";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -848,6 +848,10 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const qa = `
           <h3>語音客服（Q&A）</h3>
           <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
+          <div style='display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 12px 0;'>
+            <button class='qa-btn' id='btn-voice-qa' style='max-width:220px;'>🎤 語音提問</button>
+            <div id='qa-voice-status' class='muted' style='font-size:12px;'>待命中</div>
+          </div>
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
@@ -855,6 +859,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
             <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
             <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
             <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
+            <button class='qa-btn' data-q='輸贏怎麼判定？'>輸贏怎麼判定？</button>
           </div>
           <div style='margin-top:12px;opacity:.92'>
             <div id='qa-last' style='margin-top:8px'></div>
@@ -877,23 +882,58 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const has = (s)=> lower.indexOf(s) >= 0;
 
         if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
-            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
+            ans = '可以。現在預設支援無錢包模式，你可以先看介面、開語音客服、聽說明；若要真正連線與互動，請按連結錢包或多錢包入口。';
         }else if(question.includes('custom') || question.includes('找不到') || has('search')){
-            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
-        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
-            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
+            ans = '有些新發行代幣不會立刻出現在 MetaMask 的預設搜尋清單中，所以找不到 KGEN 時，要改用 Custom。操作方式是切到 BNB Chain，點 Custom，自訂代幣，貼上 KGEN 合約地址，就能把幣加進來。簡單說，Search 找不到時，就用 Custom 加合約地址。';
+        }else if((question.includes('1') && question.includes('1000')) || question.includes('一到一千')){
+            ans = '一到一千是目前前端下單輸入框的金額範圍，用來做 KGEN 對賭體驗。輸入金額後，選上或下，系統就會用合約規則判定輸贏。';
         }else if(question.includes('8888') || question.includes('八八八八')){
-            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
+            ans = '八八八八代表早期敘事中的基底節點；而現在這版合約真正的觸發門檻是獎池累積到一六八八八。到達後才會觸發下凡投胎的一輪配對。';
         }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
-            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
+            ans = '當獎池達到一六八八八 KGEN，就會觸發一輪下凡投胎。這輪固定分配一萬 KGEN：A 即時四千，B 即時四千，A 托管一千，B 托管一千，之後進入三天表態期與三天戀愛期。';
         }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
-            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
+            ans = '表態是指雙方在表態期內，真的轉一到二 KGEN 給對方，表示同意誓約。雙方都表態後，才可以在後面的戀愛期領取各自的一千 KGEN 托管紅包。';
+        }else if(question.includes('輸贏') || question.includes('怎麼判定') || question.includes('上') || question.includes('下')){
+            ans = '目前不是 K 線引擎模式，而是跟池對賭。你選上或下後，合約會用鏈上 pseudo-random 規則判定結果，零代表上，一代表下。贏了拿兩倍 stake，輸了 stake 留在池裡。';
         }else{
-            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、輸贏怎麼判定、到了 16888 會發生什麼。';
         }
 
         if(aBox) aBox.innerText = 'A: ' + ans;
         this.speak(ans);
+    },
+
+    startVoiceQA(){
+        try{
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const st = document.getElementById('qa-voice-status');
+            if(!SR){
+                if(st) st.textContent = '此瀏覽器不支援語音辨識';
+                this.speak('此瀏覽器不支援語音辨識。');
+                return;
+            }
+            const rec = new SR();
+            rec.lang = 'zh-TW';
+            rec.interimResults = false;
+            rec.maxAlternatives = 1;
+            if(st) st.textContent = '正在聆聽...';
+            rec.onresult = (e)=>{
+                const text = (e.results && e.results[0] && e.results[0][0] && e.results[0][0].transcript || '').trim();
+                if(st) st.textContent = text ? ('已辨識：' + text) : '沒有辨識到內容';
+                if(text) this.handleQuestion(text);
+            };
+            rec.onerror = ()=>{
+                if(st) st.textContent = '語音辨識失敗，請再試一次';
+                this.speak('語音辨識失敗，請再試一次。');
+            };
+            rec.onend = ()=>{
+                if(st && st.textContent === '正在聆聽...') st.textContent = '待命中';
+            };
+            rec.start();
+        }catch(e){
+            const st = document.getElementById('qa-voice-status');
+            if(st) st.textContent = '語音啟動失敗';
+        }
     },
 
 
@@ -1048,6 +1088,10 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
       document.addEventListener('click', (e)=>{
             const b = e.target && e.target.closest && e.target.closest('.qa-btn');
             if(!b) return;
+            if(b.id === 'btn-voice-qa'){
+                this.startVoiceQA();
+                return;
+            }
             const q = b.getAttribute('data-q');
             if(q) this.handleQuestion(q);
         });
@@ -2940,7 +2984,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
-    <span class="muted" id="cp-side">SIDE: --</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;min-width:120px;">
+      <span class="muted" id="cp-side">方向：--</span>
+      <span class="muted" id="cp-deg" style="display:flex;justify-content:space-between;width:100%;gap:12px;"><span>角度：</span><span id="cp-deg-num">--</span></span>
+    </div>
   </div>
 
   <div class="cp-grid">
@@ -3138,7 +3185,9 @@ function sideFromDeg(deg) {
   app.updateCoordPanel = () => {
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
-    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
+    const sideZh = side === 'LONG' ? '多' : '空';
+    if ($('cp-side')) $('cp-side').textContent = `方向：${sideZh}`;
+    if ($('cp-deg-num')) $('cp-deg-num').textContent = `${Math.round(Math.abs(deg))}`;
 
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
     if (isFinite(ct)) {
@@ -3640,6 +3689,112 @@ document.addEventListener('click', (ev)=>{
       if(btn) btn.textContent='🤖 自動打怪（開發中）';
     }catch(_){ }
   });
+})();
+</script>
+
+
+<script>
+/* ===== V2.48.2 HOTFIX =====
+   1) Pool progress text/bar bind to 16888 target
+   2) Cockpit side/deg split into 2 lines
+   3) Auto-battle button shows 開發中 (reserved)
+*/
+(function(){
+  try{
+    const TARGET_POOL = 16888;
+
+    // reserve auto battle button
+    const autoBtn = document.getElementById('auto-battle-btn');
+    if(autoBtn){
+      autoBtn.textContent = '🤖 自動打怪（開發中）';
+      autoBtn.onclick = function(){
+        if(window.ui && typeof ui.toast === 'function') ui.toast('自動打怪功能開發中');
+        try{ window.app && app.speak && app.speak('自動打怪功能開發中。'); }catch(_){}
+      };
+    }
+
+    // force one consistent progress updater
+    window.__updatePoolProgress48 = function(current){
+      const pool = Number(current)||0;
+      const pct = Math.max(0, Math.min(100, (pool / TARGET_POOL) * 100));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      const line = document.getElementById('w3-prog');
+      if(fill) fill.style.width = pct.toFixed(2) + '%';
+      if(txt) txt.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+      if(line) line.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+    };
+
+    // patch app.setProgress to not overwrite useful text
+    if(window.app){
+      app.setProgress = function(ratioOrPct){
+        let v = Number(ratioOrPct);
+        if(!Number.isFinite(v)) v = 0;
+        // support both 0..1 and 0..100
+        const pct = v <= 1 ? v * 100 : v;
+        const fill = document.getElementById('prog-fill');
+        if(fill) fill.style.width = Math.max(0, Math.min(100, pct)).toFixed(2) + '%';
+      };
+    }
+
+    // patch cockpit side sync
+    if(window.app && typeof app.updateCoordPanel === 'function'){
+      const oldUpdateCoordPanel = app.updateCoordPanel;
+      app.updateCoordPanel = function(){
+        try{ oldUpdateCoordPanel(); }catch(_){}
+        try{
+          const steer = document.getElementById('steer-input-val');
+          const deg = steer ? (Number(steer.value)||0) : 0;
+          const side = Math.abs(deg) <= 90 ? 'LONG' : 'SHORT';
+          const sideEl = document.getElementById('cp-side');
+          const degEl = document.getElementById('cp-deg');
+          if(sideEl) sideEl.textContent = 'SIDE: ' + side;
+          if(degEl) degEl.textContent = 'deg ' + deg.toFixed(2);
+        }catch(_){}
+      };
+      try{ app.updateCoordPanel(); }catch(_){}
+    }
+
+    // patch web3 refresh / demoRefresh progress
+    if(window.web3){
+      const oldRefresh = web3.refresh;
+      web3.refresh = async function(){
+        const r = await oldRefresh.apply(this, arguments);
+        try{
+          const balEl = document.getElementById('w3-bal');
+          if(balEl){
+            const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+            if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+          }
+        }catch(_){}
+        return r;
+      };
+
+      const oldDemoRefresh = web3.demoRefresh;
+      web3.demoRefresh = function(){
+        const r = oldDemoRefresh.apply(this, arguments);
+        try{
+          const pool = this.demoState && this.demoState.pool ? Number(this.demoState.pool) : 0;
+          window.__updatePoolProgress48(pool);
+        }catch(_){}
+        return r;
+      };
+    }
+
+    // run once after load
+    window.addEventListener('load', function(){
+      try{
+        const balEl = document.getElementById('w3-bal');
+        if(balEl){
+          const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+          if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+        }
+      }catch(_){}
+      try{ window.app && app.updateCoordPanel && app.updateCoordPanel(); }catch(_){}
+    });
+  }catch(e){
+    console.warn('V2.48.2 hotfix failed', e);
+  }
 })();
 </script>
 
