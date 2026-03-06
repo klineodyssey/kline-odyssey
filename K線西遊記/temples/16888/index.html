@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜V2.51.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -73,7 +73,7 @@
         }
 
         /* 🧬 GA 演化矩陣 (右側肌肉) */
-        .ga-matrix{position:fixed; left:50%; top:220px; transform:translateX(-50%); width:180px; background:var(--panel); border:1px solid var(--energy); padding:15px; z-index:100; font-family:'Orbitron';}
+        .ga-matrix{left:18px; position: fixed; right:auto; top:420px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
         .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
         .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
         .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
@@ -503,612 +503,6 @@
 
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
-
-/* ===== V2.51.0 ===== */
-.resource-bars .rb .row span{white-space:nowrap;}
-#kline-engine-panel{
-  position:fixed !important;
-  left:18px !important;
-  top:260px !important;
-  width:min(560px, calc(100vw - 36px)) !important;
-  max-width:560px !important;
-  background:rgba(0,0,0,.78);
-  border:1px solid rgba(0,242,255,.35);
-  border-radius:14px;
-  padding:12px;
-  z-index:145;
-}
-#kline-engine-panel .khead{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:10px;color:var(--gold);font-weight:900;
-}
-#kline-engine-panel .kline-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;
-}
-#kline-engine-panel .kcell{
-  border:1px solid rgba(255,215,120,.22);
-  border-radius:12px;padding:10px 12px;background:rgba(0,0,0,.28);min-height:72px;
-}
-#kline-engine-panel .klabel{font-size:12px;color:rgba(255,255,255,.78);}
-#kline-engine-panel .kvalue{margin-top:6px;font-family:'Orbitron',sans-serif;font-size:18px;color:var(--cyan);}
-#coord-panel .cp-title{align-items:flex-start;}
-#coord-panel .cp-title > div{min-width:130px;}
-@media (max-width: 720px){
-  .ga-matrix{left:18px !important; top:420px !important; transform:none !important;}
-  #kline-engine-panel{
-    top:260px !important;
-    width:calc(100vw - 36px) !important;
-    max-width:none !important;
-  }
-}
-
-
-/* === V2.51.0 layout refine === */
-#kline-engine-panel{
-  left:18px !important;
-  top:230px !important;
-  width:min(520px, calc(100vw - 36px)) !important;
-  padding:8px !important;
-}
-#kline-engine-panel .kcell{
-  padding:6px 10px !important;
-  min-height:56px !important;
-}
-#kline-engine-panel .kvalue{
-  font-size:16px !important;
-}
-#kline-engine-panel .klabel{
-  font-size:11px !important;
-}
-
-/* move GA evolution higher */
-.ga-matrix{
-  top:180px !important;
-}
-
-
-/* === V2.51.0 format refine === */
-#kline-engine-panel{
-  left:12px !important;
-  top:280px !important;
-  width:min(380px, calc(100vw - 24px)) !important;
-  max-width:380px !important;
-  padding:8px !important;
-}
-#kline-engine-panel .khead{
-  font-size:13px !important;
-  margin-bottom:8px !important;
-}
-#kline-engine-panel .kline-grid{
-  gap:8px !important;
-}
-#kline-engine-panel .kcell{
-  padding:6px 8px !important;
-  min-height:52px !important;
-}
-#kline-engine-panel .kvalue{
-  font-size:15px !important;
-}
-#kline-engine-panel .klabel{
-  font-size:10px !important;
-}
-.ga-matrix{
-  top:238px !important;
-  left:50% !important;
-  transform:translateX(-50%) !important;
-  width:136px !important;
-  padding:10px !important;
-  z-index:146 !important;
-}
-.ga-matrix .ga-stat{font-size:10px !important; margin-bottom:8px !important;}
-.ga-matrix > div:first-child{font-size:12px !important; margin-bottom:8px !important;}
-#coord-panel .cp-title{
-  align-items:flex-start !important;
-}
-#coord-panel .cp-title > div{
-  min-width:120px !important;
-}
-#cp-side{
-  display:block !important;
-  text-align:right !important;
-}
-#cp-deg{
-  display:flex !important;
-  justify-content:flex-end !important;
-  gap:8px !important;
-  text-align:right !important;
-}
-#cp-deg-num{
-  min-width:32px !important;
-  text-align:right !important;
-}
-@media (max-width: 720px){
-  #kline-engine-panel{
-    top:282px !important;
-    width:calc(100vw - 24px) !important;
-    max-width:none !important;
-  }
-  .ga-matrix{
-    top:236px !important;
-    left:250px !important;
-    transform:none !important;
-  }
-}
-
-
-/* === V2.51.0 align GA under top-left + enlarge Kline title === */
-#kline-engine-panel{
-  left:12px !important;
-  top:250px !important;
-  width:min(290px, calc(100vw - 24px)) !important;
-  max-width:290px !important;
-  padding:8px !important;
-}
-#kline-engine-panel .khead{
-  font-size:15px !important;
-  margin-bottom:8px !important;
-}
-#kline-engine-panel .khead span:first-child{
-  font-size:15px !important;
-  font-weight:900 !important;
-}
-.ga-matrix{
-  left:12px !important;
-  top:450px !important;
-  transform:none !important;
-  width:290px !important;
-  max-width:290px !important;
-  padding:10px 12px !important;
-}
-.ga-matrix .ga-stat{font-size:11px !important;}
-.ga-matrix > div:first-child{font-size:13px !important;}
-@media (max-width: 720px){
-  #kline-engine-panel{
-    width:290px !important;
-    max-width:290px !important;
-    top:248px !important;
-  }
-  .ga-matrix{
-    width:290px !important;
-    max-width:290px !important;
-    left:12px !important;
-    top:448px !important;
-  }
-}
-
-
-/* === V2.51.0 宇宙K線圖引擎（override）=== */
-.resource-bars{
-  top: 150px !important;
-  width: 300px !important;
-  max-width: 64vw !important;
-}
-.ga-matrix{
-  position: fixed !important;
-  left: 50% !important;
-  top: 185px !important;
-  transform: translateX(-50%) !important;
-  width: 220px !important;
-  max-width: 220px !important;
-  padding: 10px 12px !important;
-  z-index: 151 !important;
-}
-#kline-engine-panel{
-  position: fixed !important;
-  left: 12px !important;
-  top: 250px !important;
-  width: 300px !important;
-  max-width: 300px !important;
-  padding: 8px !important;
-  z-index: 145 !important;
-}
-#kline-engine-panel .khead{
-  display:flex !important;
-  justify-content:space-between !important;
-  align-items:center !important;
-  color: var(--gold) !important;
-  font-weight: 900 !important;
-  font-size: 16px !important;
-  margin-bottom: 8px !important;
-}
-#kline-engine-panel .kline-grid{
-  display:grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 8px !important;
-}
-#kline-engine-panel .kcell{
-  border:1px solid rgba(255,215,120,.22) !important;
-  border-radius:12px !important;
-  padding:6px 8px !important;
-  background:rgba(0,0,0,.28) !important;
-  min-height:52px !important;
-}
-#kline-engine-panel .klabel{
-  font-size:10px !important;
-  color:rgba(255,255,255,.78) !important;
-}
-#kline-engine-panel .kvalue{
-  margin-top:6px !important;
-  font-family:'Orbitron',sans-serif !important;
-  font-size:15px !important;
-  color:var(--cyan) !important;
-}
-#kline-chart-panel{
-  position: fixed;
-  left: 12px;
-  top: 545px;
-  width: 300px;
-  max-width: 300px;
-  background: rgba(0,0,0,.78);
-  border: 1px solid rgba(255,215,120,.28);
-  border-radius: 14px;
-  padding: 8px;
-  z-index: 145;
-}
-#kline-chart-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  color: var(--gold);
-  font-weight: 900;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-#kline-canvas{
-  width: 100%;
-  height: 120px;
-  display:block;
-  border-radius:10px;
-  background: rgba(0,0,0,.22);
-}
-#kline-prediction{
-  margin-top:6px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap: 8px;
-  font-size:12px;
-  color:#fff;
-}
-@media (max-width: 720px){
-  .ga-matrix{
-    top: 180px !important;
-    width: 200px !important;
-    max-width: 200px !important;
-  }
-  #kline-engine-panel{
-    top: 250px !important;
-    width: 300px !important;
-    max-width: 300px !important;
-  }
-  #kline-chart-panel{
-    top: 545px !important;
-    width: 300px !important;
-    max-width: 300px !important;
-  }
-}
-
-
-/* === V2.51.0 UI FIX === */
-#kline-engine-panel{
-  overflow:hidden !important;
-  width:270px !important;
-  max-width:270px !important;
-}
-#kline-engine-panel .kline-grid{
-  gap:6px !important;
-}
-#kline-engine-panel .kcell{
-  min-height:42px !important;
-  padding:5px 7px !important;
-}
-#kline-engine-panel .klabel{
-  font-size:9px !important;
-  opacity:.75 !important;
-}
-#kline-engine-panel .kvalue{
-  font-size:14px !important;
-}
-#kline-chart-panel{
-  width:270px !important;
-  max-width:270px !important;
-  top:525px !important;
-  overflow:hidden !important;
-}
-#kline-canvas{
-  height:90px !important;
-}
-.ga-matrix{
-  top:200px !important;
-}
-@media (max-width:720px){
-  #kline-engine-panel{
-    width:270px !important;
-    max-width:270px !important;
-  }
-  #kline-chart-panel{
-    width:270px !important;
-    max-width:270px !important;
-    top:525px !important;
-  }
-  #kline-canvas{
-    height:90px !important;
-  }
-  .ga-matrix{
-    top:200px !important;
-  }
-}
-
-
-/* === V2.51.0 left overflow text + spacing fix === */
-html, body{
-  overflow-x:hidden !important;
-}
-#kline-engine-panel{
-  top: 290px !important;
-}
-#kline-chart-panel{
-  top: 565px !important;
-}
-.ga-matrix{
-  top: 210px !important;
-}
-#kline-engine-panel,
-#kline-chart-panel{
-  isolation:isolate !important;
-}
-#kline-engine-panel *,
-#kline-chart-panel *{
-  position:relative;
-  z-index:1;
-}
-body::before{
-  content:"";
-  position:fixed;
-  left:0;
-  top:120px;
-  width:18px;
-  height:760px;
-  background:#000;
-  z-index:149;
-  pointer-events:none;
-}
-@media (max-width:720px){
-  #kline-engine-panel{ top: 290px !important; }
-  #kline-chart-panel{ top: 565px !important; }
-  .ga-matrix{ top: 210px !important; }
-  body::before{ top:120px; height:820px; }
-}
-
-
-/* === V2.51.0 chart realism + spacing refine === */
-html, body{
-  overflow-x:hidden !important;
-}
-.resource-bars{
-  top:165px !important;
-}
-.ga-matrix{
-  top:205px !important;
-}
-#kline-engine-panel{
-  top:275px !important;
-}
-#kline-chart-panel{
-  top:555px !important;
-  border-color: rgba(0,242,255,.26) !important;
-  background: linear-gradient(180deg, rgba(4,14,18,.92), rgba(0,0,0,.82)) !important;
-}
-
-#kline-canvas{
-  border-radius:10px !important;
-  background:
-    linear-gradient(180deg, rgba(0,242,255,.04), rgba(0,0,0,.08)),
-    repeating-linear-gradient(to right, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 1px, transparent 34px),
-    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 24px),
-    rgba(0,0,0,.22) !important;
-  box-shadow: inset 0 0 16px rgba(0,242,255,.08) !important;
-}
-#kline-chart-title{
-  margin-bottom:8px !important;
-}
-#kline-prediction{
-  margin-top:8px !important;
-  padding-top:6px !important;
-  border-top:1px solid rgba(255,255,255,.08) !important;
-}
-#kline-prediction span{
-  text-shadow: 0 0 8px rgba(0,242,255,.16);
-}
-@media (max-width:720px){
-  .resource-bars{ top:165px !important; }
-  .ga-matrix{ top:205px !important; }
-  #kline-engine-panel{ top:275px !important; }
-  #kline-chart-panel{ top:555px !important; }
-  body::before{ top:118px; height:920px; width:26px; }
-}
-
-
-/* === V2.51.0 left-edge fix + panel tighten === */
-html, body{
-  overflow-x:hidden !important;
-}
-#kline-engine-panel{
-  left:18px !important;
-  width:260px !important;
-  max-width:260px !important;
-}
-#kline-chart-panel{
-  left:18px !important;
-  width:260px !important;
-  max-width:260px !important;
-}
-#kline-engine-panel .kline-grid{
-  position:relative !important;
-}
-#kline-engine-panel .klabel,
-#kline-chart-panel .klabel{
-  overflow:hidden !important;
-  white-space:nowrap !important;
-}
-@media (max-width:720px){
-  #kline-engine-panel{
-    left:18px !important;
-    width:260px !important;
-    max-width:260px !important;
-  }
-  #kline-chart-panel{
-    left:18px !important;
-    width:260px !important;
-    max-width:260px !important;
-  }
-}
-
-
-/* === V2.51.0 left mask + moon match restore === */
-#kline-engine-panel,
-#kline-chart-panel{
-  left:24px !important;
-}
-body::after{
-  content:"";
-  position:fixed;
-  left:0;
-  top:88px;
-  width:24px;
-  height:100vh;
-  background:#000;
-  z-index:500;
-  pointer-events:none;
-}
-#moon-match{
-  margin-top:8px;
-  padding-top:8px;
-  border-top:1px solid rgba(255,255,255,.08);
-  color:#fff;
-  font-size:12px;
-  line-height:1.55;
-}
-#moon-match-title{
-  color:var(--gold);
-  font-weight:900;
-  margin-bottom:4px;
-}
-#moon-match .addr{
-  color:var(--cyan);
-  font-family:'Orbitron',sans-serif;
-  font-size:11px;
-}
-@media (max-width:720px){
-  #kline-engine-panel,
-  #kline-chart-panel{
-    left:24px !important;
-  }
-}
-
-
-/* === V2.51.0 左側區塊重構版 === */
-html, body { overflow-x:hidden !important; }
-
-:root{
-  --left-col-x: 24px;
-  --left-col-w: 300px;
-}
-
-.resource-bars{
-  position: fixed !important;
-  left: var(--left-col-x) !important;
-  top: 176px !important;
-  width: var(--left-col-w) !important;
-  max-width: var(--left-col-w) !important;
-  z-index: 120 !important;
-}
-
-.ga-matrix{
-  position: fixed !important;
-  left: var(--left-col-x) !important;
-  top: 326px !important;
-  width: var(--left-col-w) !important;
-  max-width: var(--left-col-w) !important;
-  transform: none !important;
-  z-index: 121 !important;
-  padding: 10px 12px !important;
-}
-
-#kline-engine-panel{
-  position: fixed !important;
-  left: var(--left-col-x) !important;
-  top: 450px !important;
-  width: var(--left-col-w) !important;
-  max-width: var(--left-col-w) !important;
-  z-index: 122 !important;
-  overflow: hidden !important;
-}
-
-#kline-chart-panel{
-  position: fixed !important;
-  left: var(--left-col-x) !important;
-  top: 860px !important;
-  width: var(--left-col-w) !important;
-  max-width: var(--left-col-w) !important;
-  z-index: 123 !important;
-  overflow: hidden !important;
-}
-
-#kline-engine-panel .khead{
-  font-size: 15px !important;
-}
-#kline-engine-panel .kline-grid{
-  gap: 8px !important;
-}
-#kline-engine-panel .kcell{
-  min-height: 58px !important;
-}
-
-#kline-canvas{
-  height: 108px !important;
-}
-
-/* 狠一點把左側殘留字源頭壓掉 */
-body > *:not(.resource-bars):not(.ga-matrix):not(#kline-engine-panel):not(#kline-chart-panel){
-  /* no-op placeholder */
-}
-.left-labels, .hidden-labels, .panel-labels, .ghost-labels{ display:none !important; }
-
-/* 遮左邊殘字，但不切到新左欄 */
-body::before{
-  content:"";
-  position: fixed;
-  left: 0;
-  top: 92px;
-  width: 22px;
-  height: calc(100vh - 92px);
-  background: #000;
-  z-index: 200;
-  pointer-events: none;
-}
-
-/* K線圖更像交易畫面 */
-#kline-chart-panel{
-  background: linear-gradient(180deg, rgba(4,14,18,.95), rgba(0,0,0,.86)) !important;
-  border: 1px solid rgba(0,242,255,.22) !important;
-}
-#kline-chart-title{
-  margin-bottom: 8px !important;
-}
-#kline-prediction{
-  margin-top: 8px !important;
-  padding-top: 8px !important;
-  border-top: 1px solid rgba(255,255,255,.08) !important;
-}
-
-@media (max-width: 720px){
-  :root{
-    --left-col-x: 24px;
-    --left-col-w: 300px;
-  }
-}
-
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -1123,17 +517,17 @@ body::before{
       <div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
     </div>
     <div class="rb kgen">
-      <div class="row"><span>KGEN｜質量｜E = mc²</span><small id="rb-kgen-txt">--</small></div>
+      <div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
       <div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
     </div>
-  
+  <div class="rb-note">E = mc²</div>
   </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION V2.51.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.48.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1151,55 +545,6 @@ body::before{
     <div class="warp-val-text" id="warp-txt">WARP 100x</div>
     <div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
 </div>
-
-
-
-<div id="kline-engine-panel">
-  <div class="khead">
-    <span>宇宙K線引擎｜V2.51.0</span>
-    <span id="kline-mode-text">K線模擬</span>
-  </div>
-  <div class="kline-grid">
-    <div class="kcell"><div class="klabel">方向</div><div class="kvalue" id="ke-side">多</div></div>
-    <div class="kcell"><div class="klabel">角度</div><div class="kvalue" id="ke-angle" style="text-align:right;">0</div></div>
-    <div class="kcell"><div class="klabel">Open</div><div class="kvalue" id="ke-open">--</div></div>
-    <div class="kcell"><div class="klabel">High</div><div class="kvalue" id="ke-high">--</div></div>
-    <div class="kcell"><div class="klabel">Low</div><div class="kvalue" id="ke-low">--</div></div>
-    <div class="kcell"><div class="klabel">Close</div><div class="kvalue" id="ke-close">--</div></div>
-    <div class="kcell"><div class="klabel">Range</div><div class="kvalue" id="ke-range">--</div></div>
-    <div class="kcell"><div class="klabel">Wick</div><div class="kvalue" id="ke-wick">--</div></div>
-  </div>
-</div>
-
-<div id="kline-chart-panel">
-  <div id="kline-chart-title">
-    <span>宇宙K線圖</span>
-    <span id="kline-outcome-text">預測：--</span>
-  </div>
-  <canvas id="kline-canvas" width="300" height="120"></canvas>
-  <div id="kline-prediction">
-    <span id="kline-prediction-dir">方向盤 → 預測K線</span>
-    <span id="kline-hit-rate">命中率：--</span>
-  </div>
-  <div id="moon-match">
-    <div id="moon-match-title">月下老人配對</div>
-    <div>A：<span class="addr" id="moon-a">--</span></div>
-    <div>B：<span class="addr" id="moon-b">--</span></div>
-  </div>
-</div>
-
-<div class="kline-grid">
-    <div class="kcell"><div class="klabel">方向</div><div class="kvalue" id="ke-side">多</div></div>
-    <div class="kcell"><div class="klabel">角度</div><div class="kvalue" id="ke-angle" style="text-align:right;">0</div></div>
-    <div class="kcell"><div class="klabel">Open</div><div class="kvalue" id="ke-open">--</div></div>
-    <div class="kcell"><div class="klabel">High</div><div class="kvalue" id="ke-high">--</div></div>
-    <div class="kcell"><div class="klabel">Low</div><div class="kvalue" id="ke-low">--</div></div>
-    <div class="kcell"><div class="klabel">Close</div><div class="kvalue" id="ke-close">--</div></div>
-    <div class="kcell"><div class="klabel">Range</div><div class="kvalue" id="ke-range">--</div></div>
-    <div class="kcell"><div class="klabel">Wick</div><div class="kvalue" id="ke-wick">--</div></div>
-  </div>
-</div>
-
 
 <div class="ga-matrix">
     <div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
@@ -1242,7 +587,7 @@ body::before{
     <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">CONTRACT ALIGN v2.05</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
-    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪（開發中）</button>
+    <button class="term-btn" id="auto-battle-btn" onclick="app.toggleAutoBattle()">🤖 自動打怪模式：OFF</button>
 <div class="kv" style="margin-top:10px">
   <div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
   <div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
@@ -1330,7 +675,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "V2.51.0";
+const APP_VERSION = "v2.46.13";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1503,10 +848,6 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const qa = `
           <h3>語音客服（Q&A）</h3>
           <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
-          <div style='display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 12px 0;'>
-            <button class='qa-btn' id='btn-voice-qa' style='max-width:220px;'>🎤 語音提問</button>
-            <div id='qa-voice-status' class='muted' style='font-size:12px;'>待命中</div>
-          </div>
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
@@ -1514,7 +855,6 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
             <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
             <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
             <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
-            <button class='qa-btn' data-q='輸贏怎麼判定？'>輸贏怎麼判定？</button>
           </div>
           <div style='margin-top:12px;opacity:.92'>
             <div id='qa-last' style='margin-top:8px'></div>
@@ -1537,58 +877,23 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const has = (s)=> lower.indexOf(s) >= 0;
 
         if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
-            ans = '可以。現在預設支援無錢包模式，你可以先看介面、開語音客服、聽說明；若要真正連線與互動，請按連結錢包或多錢包入口。';
+            ans = '可以。現在預設支援無錢包模擬模式，你直接輸入一到一千，按上或下，就能看到勝負與池成長。';
         }else if(question.includes('custom') || question.includes('找不到') || has('search')){
-            ans = '有些新發行代幣不會立刻出現在 MetaMask 的預設搜尋清單中，所以找不到 KGEN 時，要改用 Custom。操作方式是切到 BNB Chain，點 Custom，自訂代幣，貼上 KGEN 合約地址，就能把幣加進來。簡單說，Search 找不到時，就用 Custom 加合約地址。';
-        }else if((question.includes('1') && question.includes('1000')) || question.includes('一到一千')){
-            ans = '一到一千是目前前端下單輸入框的金額範圍，用來做 KGEN 對賭體驗。輸入金額後，選上或下，系統就會用合約規則判定輸贏。';
+            ans = '因為 Search 依賴代幣清單，不一定收錄新幣。請切到 BNB Chain，改用 Custom 貼上合約地址匯入 KGEN。';
+        }else if(question.includes('1') && question.includes('1000') || question.includes('一到一千')){
+            ans = '一到一千是單筆能量輸入範圍。你可以先用小額體驗，池會依勝負增減並推進到一六八八八事件。';
         }else if(question.includes('8888') || question.includes('八八八八')){
-            ans = '八八八八代表早期敘事中的基底節點；而現在這版合約真正的觸發門檻是獎池累積到一六八八八。到達後才會觸發下凡投胎的一輪配對。';
+            ans = '八八八八是基底池，象徵廣寒宮的底座能量。要從這裡往上一六八八八成長，才會觸發下凡投胎。';
         }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
-            ans = '當獎池達到一六八八八 KGEN，就會觸發一輪下凡投胎。這輪固定分配一萬 KGEN：A 即時四千，B 即時四千，A 托管一千，B 托管一千，之後進入三天表態期與三天戀愛期。';
+            ans = '當池到一六八八八，七仙女會啟動下凡儀式，故事線進入生肖投胎與誓約段落，並啟動表態與托管規則。';
         }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
-            ans = '表態是指雙方在表態期內，真的轉一到二 KGEN 給對方，表示同意誓約。雙方都表態後，才可以在後面的戀愛期領取各自的一千 KGEN 托管紅包。';
-        }else if(question.includes('輸贏') || question.includes('怎麼判定') || question.includes('上') || question.includes('下')){
-            ans = '目前不是 K 線引擎模式，而是跟池對賭。你選上或下後，合約會用鏈上 pseudo-random 規則判定結果，零代表上，一代表下。贏了拿兩倍 stake，輸了 stake 留在池裡。';
+            ans = '表態要真的轉帳一到二 KGEN 給對方地址，代表同意誓約。若拒絕或逾期，托管會回收回池。';
         }else{
-            ans = '收到。你可以問：怎麼開始、怎麼找幣、輸贏怎麼判定、到了 16888 會發生什麼。';
+            ans = '收到。你可以問：怎麼開始、怎麼找幣、規則是什麼、到了16888會發生什麼。';
         }
 
         if(aBox) aBox.innerText = 'A: ' + ans;
         this.speak(ans);
-    },
-
-    startVoiceQA(){
-        try{
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const st = document.getElementById('qa-voice-status');
-            if(!SR){
-                if(st) st.textContent = '此瀏覽器不支援語音辨識';
-                this.speak('此瀏覽器不支援語音辨識。');
-                return;
-            }
-            const rec = new SR();
-            rec.lang = 'zh-TW';
-            rec.interimResults = false;
-            rec.maxAlternatives = 1;
-            if(st) st.textContent = '正在聆聽...';
-            rec.onresult = (e)=>{
-                const text = (e.results && e.results[0] && e.results[0][0] && e.results[0][0].transcript || '').trim();
-                if(st) st.textContent = text ? ('已辨識：' + text) : '沒有辨識到內容';
-                if(text) this.handleQuestion(text);
-            };
-            rec.onerror = ()=>{
-                if(st) st.textContent = '語音辨識失敗，請再試一次';
-                this.speak('語音辨識失敗，請再試一次。');
-            };
-            rec.onend = ()=>{
-                if(st && st.textContent === '正在聆聽...') st.textContent = '待命中';
-            };
-            rec.start();
-        }catch(e){
-            const st = document.getElementById('qa-voice-status');
-            if(st) st.textContent = '語音啟動失敗';
-        }
     },
 
 
@@ -1626,10 +931,6 @@ const cw=document.getElementById('core-window'); if(cw) cw.style.transform = `ro
         // wheel sync
         const wheel = document.getElementById('wheel');
         if(wheel) wheel.style.transform = `rotate(${ang}deg)`;
-        try{
-          if(window.app && typeof window.app.updateCoordPanel === 'function') window.app.updateCoordPanel();
-          if(window.app && typeof window.app.syncSideUI === 'function') window.app.syncSideUI(ang);
-        }catch(_){ }
         if(!silent) this.bbEvent("steer", { angle: ang });
     },
 
@@ -1743,10 +1044,6 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
       document.addEventListener('click', (e)=>{
             const b = e.target && e.target.closest && e.target.closest('.qa-btn');
             if(!b) return;
-            if(b.id === 'btn-voice-qa'){
-                this.startVoiceQA();
-                return;
-            }
             const q = b.getAttribute('data-q');
             if(q) this.handleQuestion(q);
         });
@@ -3463,7 +2760,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   window.app.toggleAutoBattle = function(){
     state.on = !state.on;
     const btn = document.getElementById('auto-battle-btn');
-    if(btn) btn.textContent = state.on ? "🤖 自動打怪（開發中）" : "🤖 自動打怪（開發中）";
+    if(btn) btn.textContent = state.on ? "🤖 自動打怪模式：ON" : "🤖 自動打怪模式：OFF";
     if(state.on){
       state.raf = requestAnimationFrame(step);
     }else{
@@ -3639,10 +2936,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="coord-panel" aria-label="駕駛艙座標面板">
   <div class="cp-title">
     <span>駕駛艙｜座標 / CT</span>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;min-width:120px;">
-      <span class="muted" id="cp-side">方向：--</span>
-      <span class="muted" id="cp-deg" style="display:flex;justify-content:space-between;width:100%;gap:12px;"><span>角度：</span><span id="cp-deg-num">--</span></span>
-    </div>
+    <span class="muted" id="cp-side">SIDE: --</span>
   </div>
 
   <div class="cp-grid">
@@ -3780,7 +3074,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   }
   function currentSteerDeg() {
     const el = $('steer-input-val');
-    return el ? (toNum(el.value) || 0) : 0;
+    return el ? (toNum(el.textContent) || 0) : 0;
   }
     // 由方向盤角度（deg）判斷多空：
   // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
@@ -3840,9 +3134,7 @@ function sideFromDeg(deg) {
   app.updateCoordPanel = () => {
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
-    const sideZh = side === 'LONG' ? '多' : '空';
-    if ($('cp-side')) $('cp-side').textContent = `方向：${sideZh}`;
-    if ($('cp-deg-num')) $('cp-deg-num').textContent = `${Math.round(Math.abs(deg))}`;
+    if ($('cp-side')) $('cp-side').textContent = `SIDE: ${side}  (deg ${fmt(deg)})`;
 
     const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
     if (isFinite(ct)) {
@@ -4332,543 +3624,6 @@ document.addEventListener('click', (ev)=>{
   }catch(e){}
 })();
 
-</script>
-
-
-<script>
-(function(){
-  window.addEventListener('load', function(){
-    try{
-      if(window.app && typeof window.app.updateCoordPanel==='function') window.app.updateCoordPanel();
-      var btn=document.getElementById('auto-battle-btn');
-      if(btn) btn.textContent='🤖 自動打怪（開發中）';
-    }catch(_){ }
-  });
-})();
-</script>
-
-
-<script>
-/* ===== V2.48.2 HOTFIX =====
-   1) Pool progress text/bar bind to 16888 target
-   2) Cockpit side/deg split into 2 lines
-   3) Auto-battle button shows 開發中 (reserved)
-*/
-(function(){
-  try{
-    const TARGET_POOL = 16888;
-
-    // reserve auto battle button
-    const autoBtn = document.getElementById('auto-battle-btn');
-    if(autoBtn){
-      autoBtn.textContent = '🤖 自動打怪（開發中）';
-      autoBtn.onclick = function(){
-        if(window.ui && typeof ui.toast === 'function') ui.toast('自動打怪功能開發中');
-        try{ window.app && app.speak && app.speak('自動打怪功能開發中。'); }catch(_){}
-      };
-    }
-
-    // force one consistent progress updater
-    window.__updatePoolProgress48 = function(current){
-      const pool = Number(current)||0;
-      const pct = Math.max(0, Math.min(100, (pool / TARGET_POOL) * 100));
-      const fill = document.getElementById('prog-fill');
-      const txt  = document.getElementById('prog-txt');
-      const line = document.getElementById('w3-prog');
-      if(fill) fill.style.width = pct.toFixed(2) + '%';
-      if(txt) txt.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
-      if(line) line.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
-    };
-
-    // patch app.setProgress to not overwrite useful text
-    if(window.app){
-      app.setProgress = function(ratioOrPct){
-        let v = Number(ratioOrPct);
-        if(!Number.isFinite(v)) v = 0;
-        // support both 0..1 and 0..100
-        const pct = v <= 1 ? v * 100 : v;
-        const fill = document.getElementById('prog-fill');
-        if(fill) fill.style.width = Math.max(0, Math.min(100, pct)).toFixed(2) + '%';
-      };
-    }
-
-    // patch cockpit side sync
-    if(window.app && typeof app.updateCoordPanel === 'function'){
-      const oldUpdateCoordPanel = app.updateCoordPanel;
-      app.updateCoordPanel = function(){
-        try{ oldUpdateCoordPanel(); }catch(_){}
-        try{
-          const steer = document.getElementById('steer-input-val');
-          const deg = steer ? (Number(steer.value)||0) : 0;
-          const side = Math.abs(deg) <= 90 ? 'LONG' : 'SHORT';
-          const sideEl = document.getElementById('cp-side');
-          const degEl = document.getElementById('cp-deg');
-          if(sideEl) sideEl.textContent = 'SIDE: ' + side;
-          if(degEl) degEl.textContent = 'deg ' + deg.toFixed(2);
-        }catch(_){}
-      };
-      try{ app.updateCoordPanel(); }catch(_){}
-    }
-
-    // patch web3 refresh / demoRefresh progress
-    if(window.web3){
-      const oldRefresh = web3.refresh;
-      web3.refresh = async function(){
-        const r = await oldRefresh.apply(this, arguments);
-        try{
-          const balEl = document.getElementById('w3-bal');
-          if(balEl){
-            const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
-            if(m) window.__updatePoolProgress48(parseFloat(m[1]));
-          }
-        }catch(_){}
-        return r;
-      };
-
-      const oldDemoRefresh = web3.demoRefresh;
-      web3.demoRefresh = function(){
-        const r = oldDemoRefresh.apply(this, arguments);
-        try{
-          const pool = this.demoState && this.demoState.pool ? Number(this.demoState.pool) : 0;
-          window.__updatePoolProgress48(pool);
-        }catch(_){}
-        return r;
-      };
-    }
-
-    // run once after load
-    window.addEventListener('load', function(){
-      try{
-        const balEl = document.getElementById('w3-bal');
-        if(balEl){
-          const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
-          if(m) window.__updatePoolProgress48(parseFloat(m[1]));
-        }
-      }catch(_){}
-      try{ window.app && app.updateCoordPanel && app.updateCoordPanel(); }catch(_){}
-    });
-  }catch(e){
-    console.warn('V2.48.2 hotfix failed', e);
-  }
-})();
-</script>
-
-
-<script>
-/* ===== V2.51.0 K-line panel + Chinese direction ===== */
-(function(){
-  function num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
-  function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
-
-  function renderKlinePanel(){
-    try{
-      const degEl = document.getElementById('steer-input-val');
-      const warpEl = document.getElementById('warp-input-val');
-      const deg = Math.round(num(degEl && degEl.value, 0));
-      const zh = sideZh(deg);
-      const warp = num(warpEl && warpEl.value, 33);
-
-      const sideBox = document.getElementById('ke-side');
-      const angleBox = document.getElementById('ke-angle');
-      if(sideBox) sideBox.textContent = zh;
-      if(angleBox) angleBox.textContent = String(Math.abs(deg));
-
-      const cpSide = document.getElementById('cp-side');
-      const cpDegNum = document.getElementById('cp-deg-num');
-      if(cpSide) cpSide.textContent = '方向：' + zh;
-      if(cpDegNum) cpDegNum.textContent = String(Math.abs(deg));
-
-      let candle = null;
-      if(window.UniverseEngine && typeof window.UniverseEngine.create === 'function'){
-        try{
-          window.__unieng = window.__unieng || window.UniverseEngine.create(window.engineParams || {});
-          const ct = (window.app && Number.isFinite(Number(app._ct))) ? Number(app._ct) : 16888;
-          candle = window.__unieng.nextCandle({ ct, deg, warp });
-        }catch(e){}
-      }
-      if(!candle){
-        const base = 89600 + deg * 3;
-        const drift = deg >= 0 ? 1 : -1;
-        const open = Math.round(base);
-        const close = Math.round(base + drift * (40 + Math.abs(deg)*0.8));
-        const high = Math.max(open, close) + Math.round(15 + Math.abs(deg)*0.6);
-        const low = Math.min(open, close) - Math.round(15 + Math.abs(deg)*0.6);
-        candle = {open, high, low, close, range: high-low, wick: Math.round((high-low)*0.24)};
-      }
-      const values = {
-        'ke-open': candle.open,
-        'ke-high': candle.high,
-        'ke-low': candle.low,
-        'ke-close': candle.close,
-        'ke-range': candle.range ?? ((candle.high||0)-(candle.low||0)),
-        'ke-wick': candle.wick ?? Math.round((((candle.high||0)-(candle.low||0))*0.24))
-      };
-      for(const [id,v] of Object.entries(values)){
-        const el = document.getElementById(id);
-        if(el) el.textContent = Number.isFinite(Number(v)) ? Number(v).toLocaleString() : '--';
-      }
-    }catch(e){ console.warn('renderKlinePanel failed', e); }
-  }
-
-  window.renderKlinePanel = renderKlinePanel;
-  window.addEventListener('load', ()=>{
-    renderKlinePanel();
-    const s = document.getElementById('steer-input-val');
-    const w = document.getElementById('warp-input-val');
-    if(s) s.addEventListener('input', renderKlinePanel);
-    if(w) w.addEventListener('input', renderKlinePanel);
-  });
-
-  if(window.app && typeof app.applySteer === 'function' && !app.__v2492Patch){
-    app.__v2492Patch = true;
-    const _old = app.applySteer.bind(app);
-    app.applySteer = function(v, silent){
-      const r = _old(v, silent);
-      try{ renderKlinePanel(); }catch(_){}
-      return r;
-    };
-  }
-})();
-</script>
-
-
-<script>
-/* === V2.51.0 cockpit format hotfix === */
-(function(){
-  function updateCockpitZh(){
-    try{
-      const steer = document.getElementById('steer-input-val');
-      const deg = Math.round(Number(steer && steer.value || 0));
-      const sideZh = Math.abs(deg) <= 90 ? '多' : '空';
-      const side = document.getElementById('cp-side');
-      const num = document.getElementById('cp-deg-num');
-      const degWrap = document.getElementById('cp-deg');
-      if(side) side.textContent = '方向：' + sideZh;
-      if(num) num.textContent = String(Math.abs(deg));
-      if(degWrap){
-        const spans = degWrap.querySelectorAll('span');
-        if(spans.length >= 2){
-          spans[0].textContent = '角度：';
-          spans[1].textContent = String(Math.abs(deg));
-        }else{
-          degWrap.textContent = '角度：' + Math.abs(deg);
-        }
-      }
-      const keSide = document.getElementById('ke-side');
-      const keAngle = document.getElementById('ke-angle');
-      if(keSide) keSide.textContent = sideZh;
-      if(keAngle) keAngle.textContent = String(Math.abs(deg));
-    }catch(e){}
-  }
-  window.addEventListener('load', ()=>{
-    updateCockpitZh();
-    const s = document.getElementById('steer-input-val');
-    if(s) s.addEventListener('input', updateCockpitZh);
-  });
-})();
-</script>
-
-
-<script>
-/* === V2.51.0 宇宙K線圖引擎 === */
-(function(){
-  function num(v,d=0){ v=Number(v); return Number.isFinite(v)?v:d; }
-  function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
-
-  const state = { history: [], hits: 0, total: 0 }; window.__klineState = state;
-
-  function simulateCandle(ct, deg, warp){
-    // 若已載入外部引擎，優先用它
-    try{
-      if(window.UniverseEngine && typeof window.UniverseEngine.create === 'function'){
-        window.__uniEngine = window.__uniEngine || window.UniverseEngine.create(window.engineParams || {});
-        const c = window.__uniEngine.nextCandle({ ct, deg, warp });
-        if(c) return c;
-      }
-    }catch(e){}
-    const d = num(deg, 0);
-    const drift = d >= 0 ? 1 : -1;
-    const strength = 24 + Math.abs(d) * 0.95 + warp * 0.15;
-    const open = Math.round(ct);
-    const close = Math.round(ct + drift * strength);
-    const high = Math.max(open, close) + Math.round(12 + Math.abs(d) * 0.45 + warp * 0.08);
-    const low = Math.min(open, close) - Math.round(12 + Math.abs(d) * 0.45 + warp * 0.08);
-    return {
-      open, high, low, close,
-      range: high - low,
-      wick: Math.round((high - low) * 0.24)
-    };
-  }
-
-  function drawChart(){
-    const cvs = document.getElementById('kline-canvas');
-    if(!cvs) return;
-    const ctx = cvs.getContext('2d');
-    const w = cvs.width, h = cvs.height;
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.fillRect(0,0,w,h);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    for(let i=1;i<4;i++){
-      const y = (h/4)*i;
-      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
-    }
-
-    const candles = state.history.slice(-8);
-    if(!candles.length) return;
-    const highs = candles.map(c=>c.high);
-    const lows  = candles.map(c=>c.low);
-    const maxV = Math.max.apply(null, highs);
-    const minV = Math.min.apply(null, lows);
-    const pad = (maxV - minV) * 0.08 || 1;
-    const topV = maxV + pad, botV = minV - pad;
-    const toY = (v) => {
-      const t = (v - botV) / (topV - botV);
-      return h - t * h;
-    };
-
-    const gap = 8;
-    const cw = Math.floor((w - gap*(candles.length+1)) / candles.length);
-
-    candles.forEach((c, i)=>{
-      const x = gap + i*(cw + gap);
-      const yo = toY(c.open), yc = toY(c.close), yh = toY(c.high), yl = toY(c.low);
-      const up = c.close >= c.open;
-      ctx.strokeStyle = up ? '#00f2ff' : '#ffd778';
-      ctx.fillStyle = up ? 'rgba(0,242,255,0.28)' : 'rgba(255,215,120,0.28)';
-      ctx.beginPath(); ctx.moveTo(x + cw/2, yh); ctx.lineTo(x + cw/2, yl); ctx.stroke();
-      const by = Math.min(yo, yc), bh = Math.max(4, Math.abs(yc - yo));
-      ctx.fillRect(x, by, cw, bh);
-      ctx.strokeRect(x, by, cw, bh);
-    });
-  }
-
-  function refreshKline(){
-    const steer = document.getElementById('steer-input-val');
-    const warpEl = document.getElementById('warp-input-val');
-    const deg = Math.round(num(steer && steer.value, 0));
-    const warp = num(warpEl && warpEl.value, 33);
-    const zh = sideZh(deg);
-    const ct = (window.app && Number.isFinite(Number(app._ct))) ? Number(app._ct) : 89500;
-
-    // 右下駕駛艙
-    const cpSide = document.getElementById('cp-side');
-    const cpDegNum = document.getElementById('cp-deg-num');
-    if(cpSide) cpSide.textContent = '方向：' + zh;
-    if(cpDegNum) cpDegNum.textContent = String(Math.abs(deg));
-
-    // K線引擎數值
-    const keSide = document.getElementById('ke-side');
-    const keAngle = document.getElementById('ke-angle');
-    if(keSide) keSide.textContent = zh;
-    if(keAngle) keAngle.textContent = String(Math.abs(deg));
-
-    const candle = simulateCandle(ct, deg, warp);
-    const ids = {
-      'ke-open': candle.open,
-      'ke-high': candle.high,
-      'ke-low': candle.low,
-      'ke-close': candle.close,
-      'ke-range': candle.range,
-      'ke-wick': candle.wick
-    };
-    Object.keys(ids).forEach((id)=>{
-      const el = document.getElementById(id);
-      if(el) el.textContent = Number(ids[id]).toLocaleString();
-    });
-
-    const last = state.history[state.history.length - 1];
-    if(!last || JSON.stringify(last) !== JSON.stringify(candle)){
-      state.history.push(candle);
-      if(state.history.length > 24) state.history.shift();
-      const predictedUp = zh === '多';
-      const actualUp = candle.close >= candle.open;
-      state.total += 1;
-      if(predictedUp === actualUp) state.hits += 1;
-    }
-
-    const hit = state.total ? ((state.hits / state.total) * 100).toFixed(1) : '--';
-    const outcomeEl = document.getElementById('kline-outcome-text');
-    const predEl = document.getElementById('kline-prediction-dir');
-    const hitEl = document.getElementById('kline-hit-rate');
-    if(outcomeEl) outcomeEl.textContent = '預測：' + zh;
-    if(predEl) predEl.textContent = '方向盤 → ' + zh + '方K';
-    if(hitEl) hitEl.textContent = '命中率：' + hit + '%';
-
-    drawChart();
-  }
-
-  window.refreshKlineUniverse = refreshKline;
-
-  window.addEventListener('load', function(){
-    refreshKline();
-    const s = document.getElementById('steer-input-val');
-    const w = document.getElementById('warp-input-val');
-    if(s) s.addEventListener('input', refreshKline);
-    if(w) w.addEventListener('input', refreshKline);
-  });
-
-  if(window.app && typeof app.applySteer === 'function' && !app.__v250Patch){
-    app.__v250Patch = true;
-    const _old = app.applySteer.bind(app);
-    app.applySteer = function(v, silent){
-      const r = _old(v, silent);
-      try{ refreshKline(); }catch(_){}
-      return r;
-    };
-  }
-})();
-</script>
-
-
-<script>
-/* === V2.51.0 chart render refine === */
-(function(){
-  function drawMoreRealKline(){
-    const cvs = document.getElementById('kline-canvas');
-    if(!cvs) return;
-    const ctx = cvs.getContext('2d');
-    const w = cvs.width, h = cvs.height;
-    const history = (window.refreshKlineUniverse && window.__klineState && window.__klineState.history) || [];
-    const candles = history.slice(-12);
-    if(!candles.length) return;
-
-    ctx.clearRect(0,0,w,h);
-
-    // panel background overlay
-    const grad = ctx.createLinearGradient(0,0,0,h);
-    grad.addColorStop(0, 'rgba(0,242,255,0.03)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.12)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,w,h);
-
-    // price range
-    const highs = candles.map(c=>c.high);
-    const lows = candles.map(c=>c.low);
-    const maxV = Math.max.apply(null, highs);
-    const minV = Math.min.apply(null, lows);
-    const pad = (maxV-minV)*0.08 || 1;
-    const topV = maxV + pad;
-    const botV = minV - pad;
-    const toY = (v)=>{
-      const t = (v - botV) / (topV - botV);
-      return h - t * h;
-    };
-
-    // dashed midline
-    const mid = (maxV + minV) / 2;
-    ctx.save();
-    ctx.setLineDash([4,4]);
-    ctx.strokeStyle = 'rgba(255,215,120,0.22)';
-    ctx.beginPath();
-    ctx.moveTo(0, toY(mid));
-    ctx.lineTo(w, toY(mid));
-    ctx.stroke();
-    ctx.restore();
-
-    // draw candles
-    const gap = 8;
-    const cw = Math.floor((w - gap*(candles.length+1)) / candles.length);
-
-    candles.forEach((c, i)=>{
-      const x = gap + i*(cw+gap);
-      const yo = toY(c.open), yc = toY(c.close), yh = toY(c.high), yl = toY(c.low);
-      const up = c.close >= c.open;
-
-      ctx.save();
-      ctx.strokeStyle = up ? '#19f0ff' : '#ffcc66';
-      ctx.fillStyle = up ? 'rgba(25,240,255,0.22)' : 'rgba(255,204,102,0.22)';
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = up ? 'rgba(25,240,255,.35)' : 'rgba(255,204,102,.28)';
-
-      // wick
-      ctx.beginPath();
-      ctx.moveTo(x + cw/2, yh);
-      ctx.lineTo(x + cw/2, yl);
-      ctx.stroke();
-
-      // body
-      const by = Math.min(yo, yc);
-      const bh = Math.max(5, Math.abs(yc - yo));
-      ctx.fillRect(x, by, cw, bh);
-      ctx.strokeRect(x, by, cw, bh);
-      ctx.restore();
-    });
-
-    // right-side tiny price labels
-    ctx.fillStyle = 'rgba(255,255,255,0.58)';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(String(Math.round(topV)), w-40, 10);
-    ctx.fillText(String(Math.round(mid)), w-40, toY(mid)-4);
-    ctx.fillText(String(Math.round(botV)), w-40, h-4);
-  }
-
-  const oldRefresh = window.refreshKlineUniverse;
-  if(typeof oldRefresh === 'function' && !window.__v2503Patch){
-    window.__v2503Patch = true;
-    window.refreshKlineUniverse = function(){
-      const r = oldRefresh.apply(this, arguments);
-      try{ drawMoreRealKline(); }catch(e){}
-      return r;
-    };
-    window.addEventListener('load', ()=>{ try{ drawMoreRealKline(); }catch(e){}; });
-  }
-})();
-</script>
-
-
-<script>
-/* === V2.51.0 restore moon match address === */
-(function(){
-  function shortAddr(a){
-    if(!a || a === '0x0000000000000000000000000000000000000000') return '--';
-    return String(a).slice(0,6) + '...' + String(a).slice(-4);
-  }
-  async function refreshMoonMatch(){
-    try{
-      const aEl = document.getElementById('moon-a');
-      const bEl = document.getElementById('moon-b');
-      if(!aEl || !bEl) return;
-
-      // try common contract handles
-      const uni = (window.app && (app.universe || app.uni || app.contract || app.universeContract)) || window.universeContract || window.uniContract;
-      if(!uni) { aEl.textContent='--'; bEl.textContent='--'; return; }
-
-      let rid = null;
-      if(typeof uni.roundId === 'function') rid = await uni.roundId();
-      else if(typeof uni.roundID === 'function') rid = await uni.roundID();
-      rid = Number(rid);
-      if(!rid) { aEl.textContent='--'; bEl.textContent='--'; return; }
-
-      let r = null;
-      if(typeof uni.rounds === 'function') r = await uni.rounds(rid);
-      if(!r) { aEl.textContent='--'; bEl.textContent='--'; return; }
-
-      const ra = r.a || r[0];
-      const rb = r.b || r[1];
-      aEl.textContent = shortAddr(ra);
-      bEl.textContent = shortAddr(rb);
-    }catch(e){
-      const aEl = document.getElementById('moon-a');
-      const bEl = document.getElementById('moon-b');
-      if(aEl) aEl.textContent='--';
-      if(bEl) bEl.textContent='--';
-    }
-  }
-
-  window.addEventListener('load', ()=>{ setTimeout(refreshMoonMatch, 1200); });
-  const oldRefresh = window.refreshKlineUniverse;
-  if(typeof oldRefresh === 'function' && !window.__v2505MoonPatch){
-    window.__v2505MoonPatch = true;
-    window.refreshKlineUniverse = function(){
-      const r = oldRefresh.apply(this, arguments);
-      try{ refreshMoonMatch(); }catch(e){}
-      return r;
-    };
-  }
-})();
 </script>
 
 </body>
