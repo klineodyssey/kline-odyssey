@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.9</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.9.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.8.9 layout retune ===== */
+/* ===== V2.9.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.8.9 move E=mc² into 質量 row ===== */
+/* ===== V2.9.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.8.9 MASTER left block ===== */
+/* ===== V2.9.0 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -713,7 +713,7 @@
 }
 
 
-/* ===== V2.8.9 True K-line mode ===== */
+/* ===== V2.9.0 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -725,7 +725,7 @@
 }
 
 
-/* ===== V2.8.9 live ticker + symbol switch ===== */
+/* ===== V2.9.0 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -748,7 +748,7 @@
 }
 
 
-/* ===== V2.8.9 market mode switch ===== */
+/* ===== V2.9.0 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -767,7 +767,7 @@
 }
 
 
-/* ===== V2.8.9 single K-line engine ===== */
+/* ===== V2.9.0 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -805,7 +805,7 @@
 }
 
 
-/* ===== V2.8.9 FAQ ===== */
+/* ===== V2.9.0 FAQ ===== */
 #faq-box{
   margin-top:10px;
   font-size:12px;
@@ -858,7 +858,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.8.9</div>
+        <div class="sys-st" id="ver-st">VERSION v2.9.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -889,7 +889,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.8.9</span>
+    <span>宇宙K線引擎｜V2.9.0</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1084,7 +1084,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.8.9";
+const APP_VERSION = "v2.9.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4228,7 +4228,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.9 True K-line engine (Binance public API) ===== */
+/* ===== V2.9.0 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4391,7 +4391,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.9 live kline + ticker ===== */
+/* ===== V2.9.0 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4570,7 +4570,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.9 dual market engine ===== */
+/* ===== V2.9.0 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4698,7 +4698,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.9 stable market lock ===== */
+/* ===== V2.9.0 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4834,7 +4834,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.9 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.9.0 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5163,7 +5163,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== V2.8.9 Oracle Plus ===== */
+/* ===== V2.9.0 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5286,7 +5286,7 @@ setInterval(update, 20000);
 
 
 <script>
-/* ===== V2.8.9 split KGEN clean oracle ===== */
+/* ===== V2.9.0 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5513,7 +5513,7 @@ document.querySelectorAll(".faq-q").forEach(q=>{
 
 
 <script>
-/* ===== V2.8.9 preserve-all-features + hard KGENLP display lock ===== */
+/* ===== V2.9.0 preserve-all-features + hard KGENLP display lock ===== */
 (function(){
   const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
   const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5679,6 +5679,170 @@ document.querySelectorAll(".faq-q").forEach(q=>{
     setTimeout(hardTick, 200);
     if(STATE.timer) clearInterval(STATE.timer);
     STATE.timer = setInterval(hardTick, 350);
+  });
+})();
+</script>
+
+
+<script>
+/* ===== V2.9.0 ultra lock: stop 16888 flash on KGENLP ===== */
+(function(){
+  const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
+  const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase();
+  const RPC  = "https://bsc-dataseed.binance.org/";
+  const ABI = [
+    "function token0() view returns (address)",
+    "function token1() view returns (address)",
+    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
+  ];
+  const S = { cacheLP:null, cache16888:16888, hist:[], fast:null, slow:null, busy:false, observer:null };
+
+  function $(id){ return document.getElementById(id); }
+  function txt(id,v){ const e=$(id); if(e && e.textContent!==String(v)) e.textContent=String(v); }
+  function val(id,v){ const e=$(id); if(e && e.value!==String(v)) e.value=String(v); }
+  function deg(){ const e=$('steer-input-val'); return e ? (parseFloat(e.value)||0) : 0; }
+  function side(){ const d=deg(); return (d>=-90 && d<=90)?'多':'空'; }
+  function f2(n){ return Number(n||0).toFixed(2); }
+  function f6(n){ return Number(n||0).toFixed(6); }
+  function selected(){ const e=$('ke-symbol'); return e ? e.value : ''; }
+
+  async function bnbUsd(){
+    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT",{cache:"no-store"});
+    const j = await r.json(); return Number(j.price);
+  }
+  async function lpData(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(RPC);
+    const pair = new ethers.Contract(PAIR, ABI, provider);
+    const [t0,t1,res,bnb] = await Promise.all([pair.token0(), pair.token1(), pair.getReserves(), bnbUsd()]);
+    const r0 = Number((res.reserve0 || res[0]).toString());
+    const r1 = Number((res.reserve1 || res[1]).toString());
+    let poolKgen, poolWbnb;
+    if(String(t0).toLowerCase()===KGEN && String(t1).toLowerCase()===WBNB){ poolKgen=r0/1e18; poolWbnb=r1/1e18; }
+    else if(String(t1).toLowerCase()===KGEN && String(t0).toLowerCase()===WBNB){ poolKgen=r1/1e18; poolWbnb=r0/1e18; }
+    else throw new Error('pair mismatch');
+    const price = (poolWbnb * bnb) / poolKgen;
+    return {price, poolKgen, poolWbnb, liq:(poolWbnb*bnb*2), bnb};
+  }
+
+  function push(p){
+    S.hist.push({t:Date.now(), p:Number(p)});
+    while(S.hist.length>16) S.hist.shift();
+  }
+  function candles(price){
+    push(price);
+    const arr=S.hist.slice(-8);
+    const out=arr.map((h,i)=>{
+      const prev=(arr[Math.max(0,i-1)]||h).p;
+      const next=(arr[Math.min(arr.length-1,i+1)]||h).p;
+      return {open:prev, high:Math.max(prev,h.p,next), low:Math.min(prev,h.p,next), close:h.p};
+    });
+    while(out.length<8) out.unshift({open:price, high:price, low:price, close:price});
+    return out;
+  }
+  function draw(data){
+    const c=$('kline-canvas'); if(!c || !data || !data.length) return;
+    const ctx=c.getContext('2d'); const w=c.width,h=c.height;
+    ctx.clearRect(0,0,w,h);
+    const maxH=Math.max.apply(null,data.map(d=>d.high));
+    const minL=Math.min.apply(null,data.map(d=>d.low));
+    const span=(maxH-minL)||1, padX=10,padY=8, step=(w-padX*2)/data.length;
+    const y=v=>padY+(maxH-v)/span*(h-padY*2);
+    data.forEach((d,i)=>{
+      const x=padX+i*step;
+      ctx.strokeStyle='rgba(255,255,255,.06)';
+      ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
+    });
+    data.forEach((d,i)=>{
+      const x=padX+i*step+step/2, yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const up=d.close>=d.open;
+      ctx.strokeStyle=up?'rgba(120,245,255,.95)':'rgba(255,210,120,.95)';
+      ctx.fillStyle=up?'rgba(120,245,255,.25)':'rgba(255,210,120,.25)';
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      const bw=Math.min(14,step*0.55), top=Math.min(yO,yC), bh=Math.max(3,Math.abs(yC-yO));
+      ctx.fillRect(x-bw/2, top, bw, bh); ctx.strokeRect(x-bw/2, top, bw, bh);
+    });
+  }
+
+  function applyMode(symbol, price, extra){
+    const data=candles(price);
+    const last=data[data.length-1], sd=side(), range=last.high-last.low, wick=Math.max(0,range-Math.abs(last.close-last.open));
+    txt('ke-side', sd);
+    txt('ke-angle', String(Math.round(Math.abs(deg()))));
+    txt('kc-predict', '預測：'+sd);
+    txt('kc-hit', '命中率：'+(63.5 + (Math.abs(deg())/180)*12).toFixed(1) + '%');
+    const now=new Date();
+    txt('moon-a', now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+    txt('moon-b', new Date(now.getTime()+60000).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+
+    if(symbol==='KGENLP'){
+      txt('ke-open', f6(last.open)); txt('ke-high', f6(last.high)); txt('ke-low', f6(last.low)); txt('ke-close', f6(last.close));
+      txt('ke-range', f6(range)); txt('ke-wick', f6(wick));
+      txt('ke-live-symbol', 'KGENLP / USD'); txt('ke-live-price', f6(price)); txt('ke-mode', '真 LP 價');
+      txt('kc-dir', 'KGENLP / USD → '+sd+'方K');
+      val('ct-in', f6(price));
+      if(extra){
+        txt('pool-kgen', Math.round(extra.poolKgen).toLocaleString());
+        txt('pool-wbnb', extra.poolWbnb.toFixed(4));
+        txt('lp-liq', '$'+extra.liq.toFixed(0));
+      }
+    } else if(symbol==='KGEN16888'){
+      txt('ke-open', f2(last.open)); txt('ke-high', f2(last.high)); txt('ke-low', f2(last.low)); txt('ke-close', f2(last.close));
+      txt('ke-range', f2(range)); txt('ke-wick', f2(wick));
+      txt('ke-live-symbol', 'KGEN16888 / BASE'); txt('ke-live-price', f2(price)); txt('ke-mode', '宇宙基準價');
+      txt('kc-dir', 'KGEN16888 / BASE → '+sd+'方K');
+      val('ct-in', '16888.00');
+    }
+    draw(data);
+  }
+
+  async function refreshLocked(){
+    const sym=selected();
+    if(sym!=='KGENLP' && sym!=='KGEN16888') return;
+    if(S.busy) return;
+    S.busy=true;
+    try{
+      if(sym==='KGENLP'){
+        S.cacheLP = await lpData();
+        applyMode('KGENLP', S.cacheLP.price, S.cacheLP);
+      }else{
+        applyMode('KGEN16888', 16888, null);
+      }
+    }catch(e){ console.warn('refreshLocked error', e); }
+    finally{ S.busy=false; }
+  }
+
+  function enforceNow(){
+    const sym=selected();
+    if(sym==='KGENLP' && S.cacheLP){
+      applyMode('KGENLP', S.cacheLP.price, S.cacheLP);
+    }else if(sym==='KGEN16888'){
+      applyMode('KGEN16888', 16888, null);
+    }
+  }
+
+  function startObserver(){
+    const ids=['ke-open','ke-high','ke-low','ke-close','ke-range','ke-wick','ke-live-price','ke-live-symbol','ke-mode','kc-dir','kc-predict','ct-in'];
+    const nodes=ids.map(id=>$(id)).filter(Boolean);
+    if(!nodes.length) return;
+    S.observer = new MutationObserver(function(){
+      const sym=selected();
+      if(sym==='KGENLP' || sym==='KGEN16888') enforceNow();
+    });
+    nodes.forEach(n=>S.observer.observe(n, {characterData:true, childList:true, subtree:true, attributes:(n.tagName==='INPUT')}));
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const sel=$('ke-symbol'); if(sel) sel.addEventListener('change', function(){ setTimeout(refreshLocked,10); });
+    const steer=$('steer-input-val'); if(steer) steer.addEventListener('input', function(){ enforceNow(); });
+    startObserver();
+    refreshLocked();
+    if(S.fast) clearInterval(S.fast);
+    if(S.slow) clearInterval(S.slow);
+    S.fast = setInterval(enforceNow, 60);
+    S.slow = setInterval(refreshLocked, 1200);
   });
 })();
 </script>
