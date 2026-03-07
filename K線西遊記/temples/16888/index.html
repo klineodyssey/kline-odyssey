@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.8</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.8.8 layout retune ===== */
+/* ===== V2.8.9 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.8.8 move E=mc² into 質量 row ===== */
+/* ===== V2.8.9 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.8.8 MASTER left block ===== */
+/* ===== V2.8.9 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -713,7 +713,7 @@
 }
 
 
-/* ===== V2.8.8 True K-line mode ===== */
+/* ===== V2.8.9 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -725,7 +725,7 @@
 }
 
 
-/* ===== V2.8.8 live ticker + symbol switch ===== */
+/* ===== V2.8.9 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -748,7 +748,7 @@
 }
 
 
-/* ===== V2.8.8 market mode switch ===== */
+/* ===== V2.8.9 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -767,7 +767,7 @@
 }
 
 
-/* ===== V2.8.8 single K-line engine ===== */
+/* ===== V2.8.9 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -805,7 +805,7 @@
 }
 
 
-/* ===== V2.8.8 FAQ ===== */
+/* ===== V2.8.9 FAQ ===== */
 #faq-box{
   margin-top:10px;
   font-size:12px;
@@ -834,33 +834,6 @@
   line-height:1.5;
 }
 
-
-/* ===== V2.8.8 web3 full visible ===== */
-#web3-panel{
-  width:min(96vw, 430px) !important;
-  max-width:min(96vw, 430px) !important;
-  left:2vw !important;
-  right:auto !important;
-  overflow-x:auto !important;
-  box-sizing:border-box !important;
-}
-#web3-panel .kv{ grid-template-columns: 105px 1fr !important; }
-#web3-panel .term-btn{ white-space:normal !important; word-break:break-word !important; }
-#web3-panel input{ min-width:0 !important; }
-@media (max-width:720px){
-  #web3-panel{
-    width:96vw !important;
-    max-width:96vw !important;
-    left:2vw !important;
-    right:auto !important;
-    bottom:315px !important;
-    padding:10px !important;
-    overflow-x:auto !important;
-  }
-  #web3-panel .kv{ grid-template-columns: 96px 1fr !important; gap:4px 8px !important; }
-  #web3-panel .term-btn{ font-size:11px !important; padding:8px 8px !important; }
-}
-
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -885,7 +858,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.8.8</div>
+        <div class="sys-st" id="ver-st">VERSION v2.8.9</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -916,7 +889,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.8.8</span>
+    <span>宇宙K線引擎｜V2.8.9</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1111,7 +1084,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.8.8";
+const APP_VERSION = "v2.8.9";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -2304,13 +2277,3243 @@ window.onload = () => app.init();
   try{ setTimeout(()=>app.openGuide('intro'), 800); }catch(_){ }
 </script>
 
+<script>
+/* ===========================
+   WEB3 合約對齊（PoolDuel + MoonTrust）
+   - PoolDuel：下單即真成交，輸贏在池內即時結算
+   - MoonTrust：達標後由 Oracle settleRound，玩家做 vow（1~2 KGEN）表態，雙方表態可領紅包托管
+   =========================== */
 
-<!-- removed conflicting fetchTrueKlines block -->
+// =====================
+// UI Helper (sound + toast + sanitize speech)
+// =====================
+const ui = {
+  _toastTimer: null,
+  toast(msg, ms=2200){
+    const t = document.getElementById("toast");
+    if(!t) return;
+    t.textContent = this.sanitize(msg);
+    t.classList.add("show");
+    if(this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(()=>{ t.classList.remove("show"); }, ms);
+  },
+  beep(freq=880, dur=0.06){
+    try{
+      const ctx = this._ctx || (this._ctx = new (window.AudioContext||window.webkitAudioContext)());
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = freq;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, Math.max(20, dur*1000));
+    }catch(_){}
+  },
+  sanitize(s){
+    // remove emoji / symbols that TTS tends to read out loud
+    return String(s||"").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").trim();
+  }
+};
+
+// make all buttons click beep + hint (opt-in via data-hint)
+window.addEventListener("click", (ev)=>{
+  const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+  if(!btn) return;
+  // 全按鍵統一音效 + 客服提示（避免空白）
+  ui.beep();
+  const hint = btn.getAttribute("data-hint") || btn.getAttribute("aria-label") || btn.textContent;
+  if(hint){ ui.toast(hint); }
+}, true);
+
+
+const web3 = {
+  provider: null,
+  signer: null,
+  addr: null,
+  demo: false,
+
+  pollTimer: null,
+  lastRefreshAt: 0,
+// ==== chain guard (BSC) ====
+  BSC_CHAIN_ID_DEC: 56,
+  BSC_CHAIN_ID_HEX: "0x38",
+  async ensureBSC(){
+    if(!window.ethereum) return true;
+    try{
+      const cid = await window.ethereum.request({ method:"eth_chainId" });
+      const el = document.getElementById("w3-chain");
+      if(el) el.innerText = cid;
+      if(cid && cid.toLowerCase() === this.BSC_CHAIN_ID_HEX) return true;
+
+      // Try switch to BSC
+      try{
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+        });
+      }catch(swErr){
+        // If not added, try add chain then switch
+        if(swErr && (swErr.code === 4902 || String(swErr.message||"").includes("Unrecognized chain"))){
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: this.BSC_CHAIN_ID_HEX,
+              chainName: "BNB Smart Chain",
+              nativeCurrency: { name:"BNB", symbol:"BNB", decimals:18 },
+              rpcUrls: ["https://bsc-dataseed.binance.org/","https://bsc-dataseed1.defibit.io/","https://bsc-dataseed1.ninicoin.io/"],
+              blockExplorerUrls: ["https://bscscan.com"]
+            }]
+          });
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: this.BSC_CHAIN_ID_HEX }]
+          });
+        }else{
+          throw swErr;
+        }
+      }
+      const cid2 = await window.ethereum.request({ method:"eth_chainId" });
+      const el2 = document.getElementById("w3-chain");
+      if(el2) el2.innerText = cid2;
+      return (cid2 && cid2.toLowerCase() === this.BSC_CHAIN_ID_HEX);
+    }catch(e){
+      console.warn("ensureBSC failed", e);
+      return false;
+    }
+  },
+
+
+  // 固定 Token（你給的）
+  KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+
+  // 你部署後填上（會自動記到 localStorage）
+  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
+
+  TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  LP_PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+
+  // 鏈上資訊（唯一正確）
+  TOKEN_SCAN_URL: "https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PANCAKE_SWAP_URL: "https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  PAIR_SCAN_URL: "https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+  LP_LOCK_URL: "https://www.pinksale.finance/pinklock/bsc/record/1427003",
+  LP_LOCK_UNTIL_UTC: "2027-01-01T00:00:00Z",
+
+  // 高老莊（8888）地址：可在頁面設定，會自動記到 localStorage
+  GAOLAO: "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
+
+  // 最小 ABI（對齊 Universe V5.2.0：入池 + 下單 + 查詢 + 事件）
+  abiERC20: [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) external view returns (uint256)",
+    "function balanceOf(address a) external view returns (uint256)",
+    "function decimals() external view returns (uint8)"
+  ],
+  abiUniverse: [
+    "function ritualDeposit(uint256 amount, bytes32 tag) external",
+    "function placeOrder(uint8 side, uint256 amountIn) external",
+    "function poolBalance() external view returns (uint256)",
+    "function canTriggerRound() external view returns (bool)",
+    "function minOrder() external view returns (uint256)",
+    "function maxOrder() external view returns (uint256)",
+    "function vowWindowSec() external view returns (uint32)",
+    "function loveWindowSec() external view returns (uint32)",
+    "function treasury8888() external view returns (address)",
+    "function kgen() external view returns (address)",
+    "function TRIGGER() external view returns (uint256)",
+    "function MIN_FLOOR() external view returns (uint256)",
+    "function ROUND_TOTAL() external view returns (uint256)",
+    "function configLocked() external view returns (bool)",
+    "function roundId() external view returns (uint256)",
+    "function rounds(uint256) external view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)",
+    "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
+    "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)",
+    "event RoundTriggered(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 poolBefore)",
+    "event RoundSettled(uint256 indexed roundId,address indexed playerA,address indexed playerB,uint256 toAInstant,uint256 toBInstant,uint256 escrowA,uint256 escrowB,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt)",
+    "event RitualDeposit(address indexed from,uint256 amount,bytes32 indexed tag)"
+  ],
+
+  // ===== helpers =====
+  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+
+  load(){
+  try{
+    const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
+    if(u && ethers.utils.isAddress(u)) this.UNIVERSE = u;
+  }catch(_){}
+  try{
+    const g = localStorage.getItem("KGEN_16888_GAOLAO_ADDR") || "";
+    if(g && ethers.utils.isAddress(g)) this.GAOLAO = g;
+  }catch(_){}
+  this.ui();
+},
+
+ui(){
+const uel=document.getElementById('w3-uni'); if(uel) uel.innerText = this.UNIVERSE ? this.UNIVERSE : '未設定（可先 Demo）';
+    const ga=document.getElementById('cp-gaolao-addr'); if(ga) ga.value = (this.GAOLAO && ethers.utils.isAddress(this.GAOLAO)) ? this.GAOLAO : ''; 
+    const gs=document.getElementById('cp-gaolao-status'); if(gs) gs.innerText = (this.GAOLAO && ethers.utils.isAddress(this.GAOLAO)) ? '已設定' : '未設定';
+    (()=>{const el=document.getElementById("w3-mode"); if(el) el.innerText=this.demo ? "DEMO MODE" : "LIVE MODE";})();
+  },
+
+setGaolaoAddr(){
+  const v = prompt("輸入高老莊地址（8888 / 合約或錢包地址）", this.GAOLAO || "");
+  if(v===null) return;
+  const vv = (v||"").trim();
+  if(vv && !ethers.utils.isAddress(vv)) return alert("地址格式錯誤");
+  this.GAOLAO = vv;
+  try{ localStorage.setItem("KGEN_16888_GAOLAO_ADDR", vv); }catch(_){}
+  this.ui();
+  this.refreshGaolao();
+  app.speak("高老莊地址已設定。");
+},
+
+async copyGaolaoAddr(){
+  const v = this.GAOLAO || "";
+  if(!v) return alert("尚未設定高老莊地址");
+  navigator.clipboard?.writeText(v).then(()=>app.toast?.("已複製")).catch(()=>{});
+},
+
+async refreshGaolao(){
+  const st = document.getElementById('cp-gaolao-status');
+  const vb = document.getElementById('cp-gaolao-kgen');
+  if(!this.GAOLAO || !ethers.utils.isAddress(this.GAOLAO)){
+    if(st) st.innerText = "未設定";
+    if(vb) vb.innerText = "--";
+    return;
+  }
+  if(this.demo){
+    if(st) st.innerText = "DEMO";
+    if(vb) vb.innerText = "DEMO";
+    return;
+  }
+  if(!this.provider){
+    if(st) st.innerText = "尚未連線";
+    if(vb) vb.innerText = "--";
+    return;
+  }
+  try{
+    if(st) st.innerText = "讀取中…";
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+    let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
+    const bal = await kgenR.balanceOf(this.GAOLAO);
+    const txt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+    if(vb) vb.innerText = txt;
+    // BNB
+    try{
+      const bnb = await this.provider.getBalance(this.GAOLAO);
+      const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
+      const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText = bnbTxt;
+    }catch(_){ const gb=document.getElementById("cp-gaolao-bnb"); if(gb) gb.innerText="--"; }
+    if(st) st.innerText = "OK";
+  }catch(e){
+    console.warn("refreshGaolao failed", e);
+    if(st) st.innerText = "讀取失敗";
+    if(vb) vb.innerText = "--";
+  }
+},
+
+async refreshTreasury(){
+  const vk = document.getElementById('cp-treasury-kgen');
+  if(this.demo){ if(vk) vk.innerText = 'DEMO'; return; }
+  if(!this.provider) { if(vk) vk.innerText='--'; return; }
+  try{
+    const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+    let dec = 18; try{ dec = await kgenR.decimals(); }catch(_){}
+    const bal = await kgenR.balanceOf(this.TREASURY);
+    if(vk) vk.innerText = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+  }catch(e){
+    console.warn('refreshTreasury failed', e);
+    if(vk) vk.innerText='--';
+  }
+},
+async setUniverseAddr(){
+    const v = (document.getElementById("uni-addr-input").value || "").trim();
+    if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
+    this.UNIVERSE = v;
+    try{ localStorage.setItem("KGEN_16888_UNIVERSE_ADDR", v); }catch(_){}
+    this.ui();
+    this.refresh();
+    app.speak("Universe 合約地址已設定。");
+  },
+
+
+startPolling(){
+  try{ if(this.pollTimer) clearInterval(this.pollTimer); }catch(_){}
+  this.pollTimer = setInterval(async ()=>{
+    // avoid overlapping refresh storms
+    const now = Date.now();
+    if(now - (this.lastRefreshAt||0) < 2000) return;
+    this.lastRefreshAt = now;
+    try{ await this.refreshUser(); }catch(_){}
+    try{ await this.refresh(); }catch(_){}
+    try{ await this.refreshGaolao(); }catch(_){}
+    try{ await this.refreshTreasury(); }catch(_){}
+  }, 10000);
+},
+stopPolling(){
+  try{ if(this.pollTimer) clearInterval(this.pollTimer); }catch(_){}
+  this.pollTimer = null;
+},
+async autoDetect(){
+  // cannot fully auto-connect without user gesture, but we can prepare the best path
+  const btn = document.getElementById("w3-connect-btn");
+  if(!window.ethereum){
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "🔌 連結錢包（未偵測到時自動開多錢包）";
+    }
+    return;
+  }
+  try{
+    const cid = await window.ethereum.request({ method:"eth_chainId" });
+    const el = document.getElementById("w3-chain");
+    if(el) el.innerText = cid || "--";
+    const accts = await window.ethereum.request({ method:"eth_accounts" });
+    if(accts && accts.length){
+      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = accts[0];
+      if(btn){ btn.textContent = "✅ 已授權，點我啟動同步"; }
+    }else{
+      if(btn){ btn.textContent = "🔌 連結錢包（自動）"; }
+    }
+  }catch(e){
+    console.warn("autoDetect failed", e);
+  }
+},
+
+  async smartConnect(){
+    // Smart path: injected wallet -> direct connect; no injected wallet -> open multi-wallet hub
+    try{
+      if(window.ethereum || window.BinanceChain){
+        return await this.connect();
+      }
+      this.openWalletHub();
+      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
+      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
+      return;
+    }catch(e){
+      console.warn('smartConnect failed', e);
+      try{ this.openWalletHub(); }catch(_){}
+    }
+  },
+
+
+  async connect(){
+    try{
+      this.stopPolling();
+      if(!window.ethereum){
+        this.openWalletHub();
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包，已開啟多錢包入口。");
+        return;
+      }
+      await window.ethereum.request({ method:"eth_requestAccounts" });
+      const okChain = await this.ensureBSC();
+      if(!okChain){
+        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        this.demo = true;
+        this.ui();
+        this.demoRefresh();
+        return;
+      }
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      this.demo = false;
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
+this.ui();
+      await this.refresh();
+      await this.refreshUser();
+            try{ await this.refreshGaolao();
+      await this.refreshTreasury(); }catch(_){ }
+await this.bindEvents();
+      this.startPolling();
+      app.speak("錢包已連線。廣寒宮誓約引擎已啟動。");
+    }catch(e){
+      console.error(e);
+      this.demo = true;
+      this.ui();
+      alert("錢包連線失敗，已切回 Demo 模式");
+    }
+  },
+
+
+  async refreshUser(){
+    try{
+      // Demo 模式：不讀鏈上
+      if(this.demo){
+        const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+        const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+        return;
+      }
+      if(!this.provider || !this.addr || !this.UNIVERSE) return;
+
+      const kgenR = new ethers.Contract(this.KGEN, this.abiERC20, this.provider);
+      let dec = 18;
+      try{ dec = await kgenR.decimals(); }catch(_){}
+
+      const [bal, alw] = await Promise.all([
+        kgenR.balanceOf(this.addr),
+        kgenR.allowance(this.addr, this.UNIVERSE),
+      ]);
+
+      const balTxt = `${parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(4)} KGEN`;
+      const alwTxt = `${parseFloat(ethers.utils.formatUnits(alw, dec)).toFixed(4)} KGEN`;
+
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = balTxt;
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = alwTxt;
+
+      // BNB 餘額
+      try{
+        const bnb = await this.provider.getBalance(this.addr);
+        const bnbTxt = `${parseFloat(ethers.utils.formatEther(bnb)).toFixed(4)} BNB`;
+        const bn=document.getElementById('userBNB'); if(bn) bn.innerText = bnbTxt;
+      }catch(_){ const bn=document.getElementById('userBNB'); if(bn) bn.innerText='--'; }
+      // Resource bars (top-left)
+      try{
+        const bnb = await this.provider.getBalance(this.addr);
+        const bnbVal = parseFloat(ethers.utils.formatEther(bnb));
+        const kgenVal = parseFloat(ethers.utils.formatUnits(bal, dec));
+        const bnbTxt2 = `${bnbVal.toFixed(4)} BNB`;
+        const kgenTxt2 = `${kgenVal.toFixed(4)} KGEN`;
+        const bt = document.getElementById("rb-bnb-txt"); if(bt) bt.textContent = bnbTxt2;
+        const kt = document.getElementById("rb-kgen-txt"); if(kt) kt.textContent = kgenTxt2;
+
+        // simple normalization (no max supply known): BNB capped at 1.0 for bar, KGEN capped at 10,000
+        const bFill = document.getElementById("rb-bnb-fill"); 
+        const kFill = document.getElementById("rb-kgen-fill");
+        if(bFill) bFill.style.width = `${Math.min(100, (bnbVal/1.0)*100)}%`;
+        if(kFill) kFill.style.width = `${Math.min(100, (kgenVal/10000.0)*100)}%`;
+      }catch(_){}
+
+
+
+            // 同步更新高老莊（8888）地址餘額
+      await this.refreshGaolao();
+      await this.refreshTreasury();
+}catch(e){
+      console.warn("refreshUser failed", e);
+      const ub=document.getElementById('userBal'); if(ub) ub.innerText = '讀取失敗';
+      const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = '讀取失敗';
+    }
+  },
+
+  parseAmt(){
+    const v = (document.getElementById("amt-in").value || "").trim();
+    if(!v) throw new Error("請輸入金額");
+    if(!/^\d+(\.\d+)?$/.test(v)) throw new Error("金額格式錯誤");
+    return ethers.utils.parseUnits(v, 18);
+  },
+
+  // ===== DEMO (no wallet) =====
+  demoState: { pool: 8888, target: 16888, base: 8888 },
+  demoRefresh(){
+    const b = this.demoState.pool;
+    const t = this.demoState.target;
+    const pct = Math.max(0, Math.min(100, (b/t)*100));
+const wb=document.getElementById('w3-bal'); if(wb) wb.innerText = `${b.toFixed(2)} KGEN (demo)`;
+const ub=document.getElementById('userBal'); if(ub) ub.innerText = 'DEMO';
+const ua=document.getElementById('userAllowance'); if(ua) ua.innerText = 'DEMO';
+    (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t} (${pct.toFixed(2)}%)`;})();
+const w3b=document.getElementById('prog-fill'); if(w3b) w3b.style.width = pct.toFixed(2) + '%';
+    app.setProgress(pct/100);
+  },
+
+  demoDeposit(amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    this.demoState.pool += a;
+    this.demoRefresh();
+    app.logEvent(`DEMO 入池 +${a.toFixed(2)} KGEN`);
+  },
+
+  demoOrder(side, amt){
+    const a = parseFloat(ethers.utils.formatUnits(amt,18));
+    // 簡化：直接 50/50
+    const win = Math.random() < 0.5;
+    const payout = win ? a*2 : 0;
+    if(win){
+      // pool pay profit portion only in demo
+      this.demoState.pool = Math.max(this.demoState.base, this.demoState.pool - a);
+    }else{
+      this.demoState.pool += a;
+    }
+    this.demoRefresh();
+    app.logEvent(`DEMO 下單 ${side===0?"漲":"跌"}｜${a.toFixed(2)}｜${win?"WIN":"LOSE"}｜payout ${payout.toFixed(2)}`);
+  },
+
+  // ===== LIVE =====
+  async approve(){
+    if(this.demo) return alert("Demo 模式不需要 Approve");
+    if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+    try{
+      const amt = this.parseAmt();
+      const c = this.cKGEN();
+      const tx = await c.approve(this.UNIVERSE, amt);
+      app.speak("Approve 已送出。");
+      await tx.wait();
+      app.speak("Approve 完成。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "Approve 失敗");
+    }
+  },
+
+  async ritualDeposit(){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoDeposit(amt);
+        app.speak("Demo 入池完成。");
+        return;
+      }
+      const okChain = await this.ensureBSC();
+      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.ritualDeposit(amt, ethers.utils.formatBytes32String("RITUAL"));
+app.speak("點燈已入池。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("入池成功。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "入池失敗");
+    }
+  },
+
+  async place(side){
+    try{
+      const amt = this.parseAmt();
+      if(this.demo){
+        this.demoOrder(side, amt);
+        return;
+      }
+      if(!this.UNIVERSE) return alert("請先設定 Universe 合約地址");
+      const uni = this.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      app.speak("下單已送出，等待鏈上結算。");
+      await tx.wait();
+      await this.refresh();
+      app.speak("本次對賭已結算。");
+    }catch(e){
+      console.error(e);
+      alert(e.message || "下單失敗");
+    }
+  },
+
+  async refresh(){
+    try{
+      if(this.demo){
+        this.demoRefresh();
+        return;
+      }
+      if(!this.UNIVERSE || !this.provider){
+const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
+        return;
+      }
+      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
+        uniR.poolBalance(),
+        uniR.canTriggerRound(),
+        uniR.minOrder(),
+        uniR.maxOrder(),
+        uniR.vowWindowSec(),
+        uniR.loveWindowSec(),
+        uniR.treasury8888(),
+        uniR.TRIGGER(),
+        uniR.MIN_FLOOR(),
+        uniR.ROUND_TOTAL()
+      ]);
+const b = parseFloat(ethers.utils.formatUnits(bal, 18));
+      const minK = parseFloat(ethers.utils.formatUnits(minO, 18));
+      const maxK = parseFloat(ethers.utils.formatUnits(maxO, 18));
+      const trigK = parseFloat(ethers.utils.formatUnits(trig, 18));
+      const floorK = parseFloat(ethers.utils.formatUnits(floor, 18));
+      const roundK = parseFloat(ethers.utils.formatUnits(roundT, 18));
+const t = parseFloat(trigK.toFixed(2));
+      const baseF = parseFloat(floorK.toFixed(2));
+
+const wb3=document.getElementById('w3-bal'); if(wb3) wb3.innerText = `${b.toFixed(4)} KGEN`;
+      const pct = (t>0) ? Math.max(0, Math.min(100, (b/t)*100)) : 0;
+
+      (()=>{const el=document.getElementById("prog-txt"); if(el) el.innerText=`${b.toFixed(2)} / ${t.toFixed(0)}  (Base ${baseF.toFixed(0)})  ${pct.toFixed(2)}%`;})();
+
+const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct.toFixed(2) + '%';
+      // ===== CT 同步（重要） =====
+      // 本頁定義：CT = 鏈上 Universe.poolBalance()（KGEN）
+      // 直接把 CT/CT+1 對齊鏈上池子狀態。
+      this._ct = b;
+      this.updateCoordPanel();
+      app.setProgress(pct/100);
+      await this.refreshUser();
+    }catch(e){
+      console.warn(e);
+    }
+  },
+
+  async bindEvents(){
+    try{
+      if(this.demo) return;
+      if(!this.UNIVERSE || !this.provider) return;
+
+      // prevent double bind
+      if(this._bound) return;
+      this._bound = true;
+
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+
+      uniR.on("OrderResolved", (user, side, outcome, win, payout) => {
+        const p = parseFloat(ethers.utils.formatUnits(payout, 18));
+        app.logEvent(`鏈上結算｜${user.slice(0,6)}…｜${side==0?"漲":"跌"}｜${win?"WIN":"LOSE"}｜payout ${p.toFixed(4)} KGEN`);
+        this.refresh();
+      });
+
+      uniR.on("RoundSettled", (roundId, a, b, distributable) => {
+        app.logEvent(`下凡投胎 Round #${roundId.toString()}｜A ${a.slice(0,6)}…｜B ${b.slice(0,6)}…｜${ethers.utils.formatUnits(distributable,18)} KGEN`);
+        this.refresh();
+      });
+    }catch(e){
+      console.warn(e);
+    }
+  }
+
+    ,
+    openWalletHub(){
+      const hub = document.getElementById('walletHub');
+      const inp = document.getElementById('walletHubUrl');
+      if(inp) inp.value = location.href;
+      if(hub){ hub.style.display='flex'; }
+    },
+    closeWalletHub(){
+      const hub = document.getElementById('walletHub');
+      if(hub){ hub.style.display='none'; }
+    },
+    deepLink(kind){
+      const url = location.href;
+      let link = url;
+      if(kind==='metamask'){
+        link = 'https://metamask.app.link/dapp/' + location.host + location.pathname + location.search + location.hash;
+      } else if(kind==='trust'){
+        link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
+      } else if(kind==='okx'){
+        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      } else if(kind==='binance'){
+        // Binance App deep link is not stable across regions; fallback to open_url
+        link = 'https://www.binance.com/en/download';
+      } else if(kind==='bitget'){
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+      }
+      window.location.href = link;
+    },
+    async copyDappUrl(){
+      const url = location.href;
+      try{
+        await navigator.clipboard.writeText(url);
+        this.toast && this.toast('已複製連結');
+      }catch(e){
+        const inp = document.getElementById('walletHubUrl');
+        if(inp){ inp.focus(); inp.select(); }
+      }
+    },
+    // ===== WalletConnect v2 (Project ID) =====
+    wcProjectId: "ed256d3118a9c971d550ed5ee522b4d9",
+    wcProvider: null,
+    async connectWalletConnect(){
+      try{
+        if(!window.WalletConnectEthereumProvider){
+          this.toast && this.toast('WalletConnect 載入失敗');
+          return;
+        }
+        const provider = await window.WalletConnectEthereumProvider.init({
+          projectId: this.wcProjectId,
+          chains: [56],
+          optionalChains: [1],
+          showQrModal: true,
+          qrModalOptions: {
+            themeMode: 'dark',
+          }
+        });
+        await provider.enable();
+        this.wcProvider = provider;
+        await this.setProvider(provider, 'WalletConnect');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('WalletConnect 連線取消或失敗');
+      }
+    },
+    async connectBinance(){
+      // Binance Web3 Wallet / Binance Chain Wallet injects window.BinanceChain or window.ethereum (same as injected)
+      const p = window.BinanceChain || window.ethereum;
+      if(!p){
+        this.toast && this.toast('未偵測到幣安錢包。請用幣安 App 內建 DApp 瀏覽器開啟此頁，或安裝 Binance Wallet。');
+        return;
+      }
+      try{
+        await this.setProvider(p, 'Binance');
+      }catch(e){
+        console.warn(e);
+        this.toast && this.toast('幣安錢包連線失敗');
+      }
+    },
+    async setProvider(provider, label){
+      // unify with existing ethers flow
+      try{
+        this.provider = provider;
+        this.providerLabel = label || 'Injected';
+        if(provider.request){
+          await provider.request({ method:'eth_requestAccounts' });
+        }
+        // prefer existing init sequence
+        if(window.ethers){
+          this.ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
+          this.signer = this.ethersProvider.getSigner();
+          const addr = await this.signer.getAddress();
+          const net = await this.ethersProvider.getNetwork();
+          document.getElementById('w3-addr').textContent = addr;
+          document.getElementById('w3-chain').textContent = (net && net.chainId) ? ('bsc ('+net.chainId+')') : '--';
+          // hook events
+          if(provider.on){
+            provider.on('accountsChanged', ()=>this.refreshAll());
+            provider.on('chainChanged', ()=>this.refreshAll());
+            provider.on('disconnect', ()=>this.onDisconnect && this.onDisconnect());
+          }
+          this.closeWalletHub();
+          // start refresh loop
+          this.refreshAll();
+          if(!this._refreshTimer){
+            this._refreshTimer = setInterval(()=>this.refreshAll(), 6000);
+          }
+        }
+      }catch(e){
+        console.warn(e);
+        throw e;
+      }
+    },
+    async refreshAll(){
+      // refresh wallet BNB + KGEN + allowance + pool/progress if available
+      try{
+        if(!this.ethersProvider || !this.signer) return;
+        const addr = await this.signer.getAddress();
+        // native balance
+        const bnb = await this.ethersProvider.getBalance(addr);
+        const bnbFmt = ethers.utils.formatEther(bnb);
+        const elBNB = document.getElementById('userBNB'); if(elBNB) elBNB.textContent = (+bnbFmt).toFixed(6)+' BNB';
+        // top left bars
+        if(window.app && app.updateEnergyBars) app.updateEnergyBars(bnbFmt, null);
+        if(window.app && app.refreshUserToken) await app.refreshUserToken(); // updates userBal/userAllowance + KGEN bar
+        if(window.app && app.refreshPool) await app.refreshPool(); // pool balance + progress
+      }catch(e){
+        // keep silent to avoid spam
+      }
+    }
+};
+window.web3 = web3;
+// walletHub backdrop close
+setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addEventListener('click',(e)=>{if(e.target===hub) web3.closeWalletHub();});}},0);
+
+
+</script>
+
+
+<!-- === Universe Navigation Buttons V2.04 === -->
+<div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
+  <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">語音客服</button>
+  <button class="nav-btn nav-music" onclick="app.openMusic()">飛碟音響</button>
+</div>
+
+<div id="music-panel" class="hud-box" style="position:fixed; right:18px; top:410px; z-index:210; width:min(340px, 86vw); display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <div style="font-weight:900; letter-spacing:0.5px;">飛碟音響（MP3）</div>
+    <button class="tiny-btn" type="button" onclick="app.openMusic(false)">關閉</button>
+  </div>
+
+  <div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
+    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
+  </div>
+
+  <div style="margin-top:10px;">
+    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
+    <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
+  </div>
+
+  
+  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
+
+  </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-shuffle" type="checkbox" checked />
+      S（隨機）
+    </label>
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-loop" type="checkbox" />
+      循環
+    </label>
+    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub music/playlist.json 或 playlist.json 自動載入內建歌單</div>
+  </div>
+
+  <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+      <input id="music-bgm-auto" type="checkbox" checked />
+      BGM 自動（點一下啟動）
+    </label>
+
+    <label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:0.9;">
+      音量
+      <input id="music-vol" type="range" min="0" max="100" value="70" style="width:160px;">
+      <span id="music-vol-txt" style="opacity:0.75;">70%</span>
+    </label>
+  </div>
+
+
+  <div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
+    <div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+    <div id="music-now" style="font-size:12px; margin-top:4px; font-weight:800; opacity:0.95;">（未選曲）</div>
+    <div id="music-items" style="margin-top:6px;"></div>
+  </div>
+<audio id="music-audio" preload="none" style="display:none;"></audio>
+</div>
+
+
+
+<!-- Guide / Concierge Modal -->
+<div id="guide-modal" class="guide-modal" aria-hidden="true">
+  <div class="guide-card">
+    <div class="guide-header">
+      <div class="guide-title">廣寒宮客服</div>
+      <button class="guide-close" id="btn-guide-close" aria-label="close">✕</button>
+    </div>
+    <div class="guide-tabs">
+      <button class="guide-tab" data-sec="intro">故事與快速開始</button>
+      <button class="guide-tab" data-sec="rules">規則與下凡</button>
+      <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+      <button class="guide-tab" data-sec="qa">語音問答</button>
+    </div>
+    <div class="guide-body" id="guide-body"></div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+  function openSwap(input){
+    const url = "https://pancakeswap.finance/swap?outputCurrency=" + encodeURIComponent(KGEN) +
+                "&inputCurrency=" + encodeURIComponent(input);
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+  const bnbBtn = document.getElementById("btn-swap-bnb");
+  const usdtBtn = document.getElementById("btn-swap-usdt");
+  if (bnbBtn) bnbBtn.addEventListener("click", ()=>openSwap("BNB"));
+  if (usdtBtn) usdtBtn.addEventListener("click", ()=>openSwap(USDT));
+
+  window.__KLINE_openInWallet = function(wallet){
+    const full = window.location.href;
+    const noProto = full.replace(/^https?:\/\//i,'');
+    if (wallet === "metamask") return window.open("https://metamask.app.link/dapp/" + noProto, "_blank");
+    if (wallet === "trust") return window.open("https://link.trustwallet.com/open_url?coin_id=60&url=" + encodeURIComponent(full), "_blank");
+  };
+})();
+</script>
+
+
+<script>
+/* =========================
+   Auto Battle Mode (v2.20.0)
+   UI-only autopilot demo:
+   - toggles auto steering/flow values if range inputs exist
+   - animates steering/flow knobs and avatar image subtly
+   Does NOT touch contract.
+========================= */
+(function(){
+  function qs(sel){ return document.querySelector(sel); }
+  const wheel = qs('#steer-knob') || qs('.steer-knob') || qs('#steer') || qs('.steer');
+  const flow  = qs('#flow-knob')  || qs('.flow-knob')  || qs('#flow')  || qs('.flow');
+  const avatar= qs('#hero') || qs('#avatar') || qs('.hero') || qs('.avatar') || qs('img[src*="fairy"]');
+
+  const state = { on:false, raf:0, lastOrder:0 };
+
+  // 方向盤角度 → 多空（依你的規則）
+  // 0~90 與 0~-90 為多；90~180 與 -90~-180 為空
+  function sideFromSteerDeg(deg){
+    let a = Number(deg);
+    if(!Number.isFinite(a)) a = 0;
+    while(a > 180) a -= 360;
+    while(a < -180) a += 360;
+    return (a >= -90 && a <= 90) ? 'UP' : 'DOWN';
+  }
+
+  function step(ts){
+    if(!state.on) return;
+    const t = ts/1000;
+    const a = (Math.sin(t*0.9)*0.5 + 0.5);     // 0..1
+    const b = (Math.sin(t*0.7+1.2)*0.5 + 0.5); // 0..1
+
+    // Update inputs if present
+    const steerInput = qs('#steer-input') || qs('input[name="steer"]') || qs('#steerRange');
+    const flowInput  = qs('#flow-input')  || qs('input[name="flow"]')  || qs('#flowRange');
+
+    let steerDeg = 0;
+    if(steerInput){
+      const min = Number(steerInput.min||0), max = Number(steerInput.max||100);
+      steerDeg = Math.round(min + a*(max-min));
+      steerInput.value = steerDeg;
+      steerInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    if(flowInput){
+      const min = Number(flowInput.min||0), max = Number(flowInput.max||100);
+      flowInput.value = Math.round(min + b*(max-min));
+      flowInput.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+
+    // Auto side tag + auto order (demo/live)
+    const side = sideFromSteerDeg(steerDeg);
+    const autoTag = document.getElementById('autoTag');
+    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; autoTag.classList.toggle('short', side!=='UP'); }
+
+    // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
+    if(ts - state.lastOrder > 2400){
+      state.lastOrder = ts;
+      if(typeof window.placeOrder === 'function'){
+        window.placeOrder(side);
+      }
+    }
+
+    // Visual motion
+    if(wheel){ wheel.style.transform = `translateY(${Math.sin(t*1.4)*3}px) rotate(${(a*120-60).toFixed(1)}deg)`; }
+    if(flow){  flow.style.transform  = `translateY(${Math.sin(t*1.2+0.7)*3}px) rotate(${(b*120-60).toFixed(1)}deg)`; }
+    if(avatar){
+      avatar.style.transform = `translateY(${Math.sin(t*0.8)*4}px) translateX(${Math.sin(t*0.6)*2}px)`;
+      avatar.style.filter = `hue-rotate(${Math.floor(a*30-15)}deg)`;
+    }
+
+    state.raf = requestAnimationFrame(step);
+  }
+
+  window.app = window.app || {};
+  window.app.toggleAutoBattle = function(){
+    state.on = !state.on;
+    const btn = document.getElementById('auto-battle-btn');
+    if(btn) btn.textContent = state.on ? "🤖 自動打怪（開發中）" : "🤖 自動打怪（開發中）";
+    if(state.on){
+      state.raf = requestAnimationFrame(step);
+    }else{
+      try{ cancelAnimationFrame(state.raf); }catch(e){}
+      if(wheel) wheel.style.transform='';
+      if(flow) flow.style.transform='';
+      if(avatar){ avatar.style.transform=''; avatar.style.filter=''; }
+    }
+  };
+})();
+
+/* =========================
+   AUTO CRUISE / AUTO BATTLE
+   - Tied to bottom button: #btnAutoBattle
+   - Simulates long/short swing, updates direction wheel + planet flow + GA mini-panel bars
+   - Does NOT touch on-chain, does NOT auto-approve, purely UI simulation
+========================= */
+(function(){
+  const AUTO = { on:false, t:null, phase:0, dir:1 };
+
+  function qs(sel){ try{return document.querySelector(sel);}catch(e){return null;} }
+  function qsa(sel){ try{return Array.from(document.querySelectorAll(sel));}catch(e){return [];} }
+
+  function setElText(el, txt){ if(!el) return; el.textContent = txt; }
+  function setRange(el, v){
+    if(!el) return;
+    const min = ("min" in el) ? Number(el.min||0) : 0;
+    const max = ("max" in el) ? Number(el.max||100) : 100;
+    const vv = Math.max(min, Math.min(max, v));
+    el.value = String(vv);
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+    el.dispatchEvent(new Event("change", {bubbles:true}));
+  }
+
+  function pickRange(candidates){
+    for(const sel of candidates){
+      const el = qs(sel);
+      if(el && el.tagName === "INPUT" && (el.type||"").toLowerCase()==="range") return el;
+    }
+    // fallback: first visible range in page
+    const all = qsa('input[type="range"]');
+    for(const el of all){
+      const r = el.getBoundingClientRect();
+      if(r.width>40 && r.height>10) return el;
+    }
+    return null;
+  }
+
+  // likely controls (best-effort across versions)
+  const steerRange = pickRange(["#steerRange","#rangeSteer","#steer","#dirRange","#wheelRange"]);
+  const flowRange  = pickRange(["#flowRange","#rangeFlow","#flow","#planetFlowRange","#planetRange"]);
+
+  // UI targets (best-effort) — v2.48.0: hide legacy AUTO debug badges (kept logic, no UI)
+  const autoBadge = { style:{ display:"none" }, textContent:"" };
+  function setAutoUI(on, mode){ /* UI removed */ }
+
+  function syncVisuals(longMode, p){
+    // direction wheel / joystick visual
+    const wheel = qs("#directionWheel") || qs("#dirWheel") || qs(".direction-wheel") || qs(".wheel");
+    if(wheel){
+      const deg = (longMode ? 20 : -20) + (p*30);
+      wheel.style.transform = `rotate(${deg}deg)`;
+    }
+
+    // planet flow / star stream
+    const flow = qs("#planetFlow") || qs("#flowLine") || qs(".planet-flow") || qs(".flow-line");
+    if(flow){
+      const x = (longMode ? 1 : -1) * (p*18);
+      flow.style.transform = `translateX(${x}px)`;
+      flow.style.opacity = "1";
+    }
+
+    // main beauty ring subtle drift
+    const ring = qs("#beautyRing") || qs(".beauty-ring") || qs(".main-ring");
+    if(ring){
+      ring.style.filter = longMode ? "drop-shadow(0 0 18px rgba(0,255,255,.18))" : "drop-shadow(0 0 18px rgba(255,120,120,.16))";
+    }
+
+    // GA mini bars sweep (left->right->reset)
+    const bars = qsa(".ga-bar, .gaBar, [data-ga-bar]");
+    if(bars.length){
+      const w = Math.round(100 * p);
+      bars.forEach(el=>{
+        el.style.width = w + "%";
+        el.style.opacity = "1";
+      });
+    }
+  }
+
+  function step(){
+    AUTO.phase += 1;
+    // ping-pong 0..1..0
+    const raw = (AUTO.phase % 120) / 120; // 0..0.99
+    const p = raw <= 0.5 ? raw*2 : (1-raw)*2;
+
+    const longMode = (AUTO.phase % 240) < 120; // switch every ~120 ticks
+    const modeTxt = longMode ? "LONG" : "SHORT";
+    setAutoUI(true, modeTxt);
+
+    // update ranges (if exist) so other listeners update the scene
+    if(steerRange) setRange(steerRange, longMode ? 75 + p*20 : 25 - p*20);
+    if(flowRange)  setRange(flowRange,  longMode ? 70 + p*25 : 30 - p*25);
+
+    syncVisuals(longMode, p);
+  }
+
+  function toggleAuto(){
+    AUTO.on = !AUTO.on;
+    try{
+      const badgeEl = qs("#autoModeBadge");
+      if(badgeEl) badgeEl.textContent = AUTO.on ? "ON" : "OFF";
+    }catch(e){}
+    if(AUTO.on){
+      setAutoUI(true, "LONG");
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = setInterval(step, 250);
+    }else{
+      if(AUTO.t) clearInterval(AUTO.t);
+      AUTO.t = null;
+      setAutoUI(false, "OFF");
+    }
+  }
+
+  
+  // keep backward-compat: older onclick calls app.autoHunt()
+  try{ if(window.app){ window.app.autoHunt = toggleAuto; } }catch(e){}
+// bind
+  const btn = qs("#btnAutoBattle");
+  if(btn){
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleAuto();
+    }, {passive:false});
+  }
+
+  // expose
+  window.__KGEN_AUTO_BATTLE__ = { toggle: toggleAuto };
+})();
+</script>
+
+
+<!-- Wallet Hub Modal -->
+<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999;">
+  <div style="width:min(520px,92vw); background:#0b0f14; border:1px solid rgba(255,215,102,.45); border-radius:14px; padding:14px 14px 12px 14px; box-shadow:0 10px 40px rgba(0,0,0,.55);">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
+      <button class="term-btn" style="padding:6px 10px; font-size:12px;" onclick="web3.closeWalletHub()">✖</button>
+    </div>
+    <div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
+      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
+    </div>
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('metamask')">MetaMask 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('trust')">Trust Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('okx')">OKX Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('bitget')">Bitget Wallet 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.deepLink('binance')">Binance 開啟</button>
+      <button class="nav-btn" style="width:100%; padding:10px 12px;" onclick="web3.connectWalletConnect()">WalletConnect QR</button>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <input id="walletHubUrl" readonly style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" />
+      <button class="nav-btn" style="padding:10px 12px;" onclick="web3.copyDappUrl()">複製</button>
+    </div>
+    <div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
+      通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== COORD PANEL (V2.20.4) ===== -->
+<div id="coord-panel" aria-label="駕駛艙座標面板">
+  <div class="cp-title">
+    <span>駕駛艙｜座標 / CT</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;min-width:120px;">
+      <span class="muted" id="cp-side">方向：--</span>
+      <span class="muted" id="cp-deg" style="display:flex;justify-content:space-between;width:100%;gap:12px;"><span>角度：</span><span id="cp-deg-num">--</span></span>
+    </div>
+  </div>
+
+  <div class="cp-grid">
+    <div class="cp-row">
+      <div class="cp-k">高老莊地址（8888）</div>
+      <div class="cp-v">
+        <input id="cp-gaolao-addr" readonly placeholder="未設定" style="width:100%;"/>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <button type="button" style="flex:1;" onclick="web3.setGaolaoAddr()">設定</button>
+          <button type="button" style="flex:1;" onclick="web3.copyGaolaoAddr()">複製</button>
+        </div>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊 KGEN 餘額</div>
+      <div class="cp-v" id="cp-gaolao-kgen">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊狀態</div>
+      <div class="cp-v" id="cp-gaolao-status">--</div>
+    <div class="cp-row">
+      <div class="cp-k">高老莊 BNB 餘額</div>
+      <div class="cp-v" id="cp-gaolao-bnb">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">花果山台灣（公益金庫）</div>
+      <div class="cp-v">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span id="cp-treasury-addr" style="font-family:Orbitron; font-size:11px;">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</span>
+          <button type="button" onclick="web3.copyTreasuryAddr()">複製</button>
+        </div>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">金庫 KGEN 餘額</div>
+      <div class="cp-v" id="cp-treasury-kgen">--</div>
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">Token Contract</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xBA3d...32Be</span>
+        <button type="button" onclick="app.openTokenScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">官方交易（PancakeSwap）</div>
+      <div class="cp-v"><button type="button" style="width:100%;" onclick="app.openPancake()">開啟 KGEN / WBNB</button></div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP Pair（KGEN / WBNB）</div>
+      <div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <span style="font-family:Orbitron; font-size:11px;">0xf366...b6c2</span>
+        <button type="button" onclick="app.openPairScan()">查驗</button>
+      </div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">LP 鎖倉（PinkLock）</div>
+      <div class="cp-v">
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <span style="font-family:Orbitron; font-size:11px;">鎖至 2027/01/01（UTC）</span>
+          <button type="button" onclick="app.openLpLock()">開啟</button>
+        </div>
+        <div class="muted" style="margin-top:6px; font-size:11px;">請只認合約地址，不認名稱</div>
+      </div>
+    </div>
+
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
+      <div class="cp-v"><input id="ct-in" inputmode="decimal" readonly /></div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">CT+1（依下單金額推估）</div>
+      <div class="cp-v" id="cp-ct1">--</div>
+    </div>
+
+    <div class="cp-row">
+      <div class="cp-k">最近座標</div>
+      <div class="cp-v" id="cp-nearest">--</div>
+    </div>
+    <div class="cp-row">
+      <div class="cp-k">距離（以 16888=384400km 換算）</div>
+      <div class="cp-v" id="cp-km">--</div>
+    </div>
+  </div>
+
+  
+
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px;background:rgba(3,8,18,.35)">
+  <b>DeFi Oracle Plus</b><br>
+  CT 真鏈上價：<input id="ct-in" readonly style="width:110px;background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:6px;padding:2px 6px"><br>
+  宇宙基準價：<span id="base-16888">16888.00</span><br>
+  LP 流動性：<span id="lp-liq">--</span><br>
+  KGEN 市值：<span id="kgen-mcap">--</span><br>
+  池內 KGEN：<span id="pool-kgen">--</span><br>
+  池內 WBNB：<span id="pool-wbnb">--</span><br>
+  最近交換：<span id="last-swap">--</span><br>
+  最近區塊：<span id="last-block">--</span>
+</div>
+
+<div class="cp-actions">
+    <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
+    <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
+    <button type="button" onclick="app.openTokenScan()">Token</button>
+    <button type="button" onclick="app.openPairScan()">LP Pair</button>
+    <button type="button" onclick="app.openLpLock()">LP 鎖</button>
+  </div>
+</div>
+
+<div id="coord-modal" role="dialog" aria-label="宇宙座標表">
+  <div class="cm-box">
+    <div class="cm-head">
+      <b>宇宙座標表</b>
+      <input id="cm-q" placeholder="搜尋：名稱 / 點位 (例如 月球 / 21444 / 花果山)" />
+      <button type="button" onclick="app.closeCoordModal()">關閉</button>
+    </div>
+    <div class="cm-list" id="cm-list"></div>
+  </div>
+</div>
+
+
+<script>
+
+(() => {
+  // 宇宙座標表：v=點位(可大於16888)，n=名稱，d=說明
+  const COORDS = [{"v": 87654321, "n": "天堂", "d": "未來所有生物物種都有房子住的地方"}, {"v": 28100000.0, "n": "木星", "d": "木星軌道象徵（6.4×10^8km）"}, {"v": 6570000.0, "n": "太陽", "d": "太陽軌道象徵（1.496×10^8km）"}, {"v": 1800000.0, "n": "金星", "d": "金星軌道象徵（4.1×10^7km）"}, {"v": 1234567, "n": "變形金鋼", "d": "機械神族級別"}, {"v": 511111, "n": "齊天大聖宮", "d": "悟空自立為王的最高殿堂（2538387km）"}, {"v": 188888, "n": "地球神域", "d": "神軍與外星人分界"}, {"v": 168888, "n": "筋斗雲", "d": "無限期權象徵"}, {"v": 126588, "n": "平天大聖宮", "d": "平天大聖的宮殿"}, {"v": 126500, "n": "最重的恐龍", "d": "牛魔王坐騎避水金睛獸重量"}, {"v": 123456, "n": "時間輪盤", "d": "時間運作的根源符號"}, {"v": 111111, "n": "如來神掌", "d": "神明與神軍分界（天上50天地上50年地下一萬年）"}, {"v": 108000, "n": "點石成金", "d": "高等煉金術門檻（2458266km）"}, {"v": 100000, "n": "玉皇宮", "d": "至尊皇帝殿"}, {"v": 99999, "n": "命運之神", "d": "元宇宙道場核心"}, {"v": 99995, "n": "龍珠紅", "d": "雙龍吐珠玉璽之紅珠"}, {"v": 88895, "n": "蟠桃園", "d": "長生不老果園（2023403km）"}, {"v": 88888, "n": "美州大陸", "d": "哥倫布發現新大陸象徵"}, {"v": 77777, "n": "北海龍宮", "d": "北海龍王敖吉宮"}, {"v": 66666, "n": "西海龍宮", "d": "西海龍王敖順宮"}, {"v": 55555, "n": "東海龍宮", "d": "東海龍王敖廣宮"}, {"v": 44444, "n": "南海龍宮", "d": "南海龍王敖欽宮"}, {"v": 33333, "n": "黃金鑽石", "d": "頂級財富能量"}, {"v": 24888, "n": "佛祖金鋼殿", "d": "佛祖聖殿"}, {"v": 24449, "n": "雲端神將", "d": "高階操盤者所在之巔"}, {"v": 23333, "n": "靈山", "d": "佛門聖地"}, {"v": 22888, "n": "白龍門", "d": "白龍族之界門"}, {"v": 22400, "n": "幻市魔影之門", "d": "幻象市場入口"}, {"v": 22200, "n": "魔影之谷", "d": "貪婪恐懼之谷"}, {"v": 22188, "n": "貪婪魔影", "d": "追高殺多化身"}, {"v": 21888, "n": "恐懼女鬼", "d": "恐慌回檔象徵"}, {"v": 21777, "n": "白龍門下層", "d": "三國軍團入口"}, {"v": 21666, "n": "佛光普照之地", "d": "佛光加持區"}, {"v": 21588, "n": "如來佛", "d": "如來禪寺"}, {"v": 21520, "n": "大雄寶殿", "d": "主殿"}, {"v": 21444, "n": "五丈原界碑", "d": "多空對峙"}, {"v": 21344, "n": "參軍將", "d": "諸葛亮部下"}, {"v": 21319, "n": "雷音寺", "d": "金剛般若波羅蜜經導讀地（485257km）"}, {"v": 20888, "n": "火焰山", "d": "高風險高波動"}, {"v": 20732, "n": "創世之門", "d": "悟道閘口"}, {"v": 20000, "n": "女兒國", "d": "情感試煉"}, {"v": 18999, "n": "玉帝", "d": "北京象徵（430082km）"}, {"v": 18921, "n": "斬妖台", "d": "誅邪之台"}, {"v": 18911, "n": "煉丹爐", "d": "極端試煉"}, {"v": 18894, "n": "總兵元帥府", "d": "軍事核心"}, {"v": 18893, "n": "總卒元將府", "d": "士卒核心"}, {"v": 18892, "n": "敖吉", "d": "北海龍王"}, {"v": 18891, "n": "敖順", "d": "西海龍王"}, {"v": 18890, "n": "敖廣", "d": "東海龍王"}, {"v": 18889, "n": "敖欽", "d": "南海龍王"}, {"v": 18888, "n": "凌霄寶殿", "d": "神仙與神明分界殿"}, {"v": 18520, "n": "四大天王", "d": "四大護法"}, {"v": 18319, "n": "四大天門", "d": "東南西北天門"}, {"v": 16888, "n": "白骨洞 / 廣寒宮", "d": "嫦娥居所（384400km）"}, {"v": 13888, "n": "東土大唐", "d": "取經起點"}, {"v": 13500, "n": "金箍棒", "d": "仙級武器重量13500斤/口（台北307283km）"}, {"v": 12682, "n": "阿斗起飛", "d": "阿斗翻身點"}, {"v": 12345, "n": "五指山", "d": "悟空的房子（新竹）"}, {"v": 11520, "n": "花果山", "d": "台灣靈山"}, {"v": 11111, "n": "定海神針", "d": "黃金帥與黃金將分界（高雄）"}, {"v": 9999, "n": "北海龍房", "d": "北海龍族"}, {"v": 9995, "n": "龍珠綠", "d": "玉璽綠珠"}, {"v": 9444, "n": "黑風谷", "d": "暗勢力"}, {"v": 8895, "n": "雲棧洞", "d": "豬八戒房子（綠島）"}, {"v": 8888, "n": "高老莊", "d": "豬八戒老婆家（蘭嶼）"}, {"v": 7777, "n": "西海龍房", "d": "敖犬房子（西藏）"}, {"v": 7744, "n": "流沙河", "d": "沙悟淨房子"}, {"v": 7200, "n": "畫杆方天戟", "d": "龍兵器重量7200斤"}, {"v": 6888, "n": "靈台方寸山", "d": "悟空學道之地"}, {"v": 6666, "n": "東海龍房", "d": "東海龍族住地"}, {"v": 6128, "n": "斜月三星洞", "d": "祖師授法地"}, {"v": 5555, "n": "南海龍房", "d": "南海龍族住地"}, {"v": 5168, "n": "金山銀礦", "d": "財富礦脈"}, {"v": 5048, "n": "九齒釘耙", "d": "五戒武器"}, {"v": 5048, "n": "降妖寶杖", "d": "沙悟淨武器"}, {"v": 4444, "n": "地府", "d": "亡魂審判"}, {"v": 4168, "n": "奈何橋", "d": "無法回頭抉擇"}, {"v": 4040, "n": "暗網交易所", "d": "地下金融"}, {"v": 3141, "n": "影像迷宮", "d": "虛實交錯"}, {"v": 1852, "n": "人造衛星高度", "d": "軌道高度（42157km）"}, {"v": 1111, "n": "閻王殿", "d": "隕石帥與隕石將"}, {"v": 411, "n": "大氣層", "d": "地球保護層（9371km）"}, {"v": 280, "n": "地球表面", "d": "人類居住地（6371km）"}, {"v": 188, "n": "地嶽", "d": "閻羅王之地"}, {"v": 72, "n": "最輕恐龍", "d": "魔族最小等級72斤"}, {"v": 1, "n": "玩家創建", "d": "開局一口的人"}, {"v": 0, "n": "恐龍", "d": "史前霸主"}, {"v": -1, "n": "宇宙", "d": "宇宙誕生點"}, {"v": -37.63, "n": "石油", "d": "黑天鵝象徵"}, {"v": 14520, "n": "巧雲", "d": "天樞做空｜大仙女"}, {"v": 14866, "n": "巧虹", "d": "天璇做多｜二仙女"}, {"v": 16184, "n": "巧芝", "d": "天璣做空｜三仙女"}, {"v": 16888, "n": "巧仙", "d": "天權做多｜四仙女"}, {"v": 17347, "n": "巧蘭", "d": "天衡做空｜五仙女"}, {"v": 18056, "n": "巧梅", "d": "闓陽做多｜六仙女"}, {"v": 18459, "n": "巧靈", "d": "瑤光多退｜七仙女"}];
+  // 月球基準點位（廣寒宮）：16888
+  const MOON_POINT = 16888;
+  // 地球→月球距離（km）：384400
+  const MOON_KM = 384400;
+
+  function $(id) { return document.getElementById(id); }
+  function toNum(x) {
+    if (x === null || x === undefined) return NaN;
+    if (typeof x === 'number') return x;
+    const s = String(x).trim().replace(/,/g,'');
+    if (!s) return NaN;
+    return Number(s);
+  }
+  function fmt(x) {
+    if (!isFinite(x)) return '--';
+    // keep up to 4 decimals if small, else int
+    const ax = Math.abs(x);
+    if (ax >= 1000) return String(Math.round(x));
+    if (ax >= 10) return x.toFixed(2);
+    return x.toFixed(4);
+  }
+  function currentSteerDeg() {
+    const el = $('steer-input-val');
+    return el ? (toNum(el.value) || 0) : 0;
+  }
+    // 由方向盤角度（deg）判斷多空：
+  // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
+  
+  // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
+  function moveAutoBadgeIntoCockpit() {
+    try{
+      const badge = document.getElementById('autoBadge');
+      const cockpit = document.getElementById('coord-panel');
+      if(!badge || !cockpit) return;
+      if(cockpit.contains(badge)) return;
+      badge.classList.add('in-cockpit');
+      cockpit.prepend(badge);
+    }catch(e){}
+  }
+function sideFromDeg(deg) {
+    // User rule:
+    // 0..90 and 0..-90 => LONG
+    // 90..180 and -90..-180 => SHORT
+    if (deg >= -90 && deg <= 90) return 'LONG';
+    return 'SHORT';
+  }
+  function nearestCoord(ct) {
+    let best = null, bestDiff = Infinity;
+    for (const c of COORDS) {
+      const diff = Math.abs(c.v - ct);
+      if (diff < bestDiff) { bestDiff = diff; best = c; }
+    }
+    return best;
+  }
+  function kmFromCT(ct) {
+    return (ct / MOON_POINT) * MOON_KM;
+  }
+
+  // expose helpers
+  window.app = window.app || {};
+  app._ct = app._ct ?? NaN;
+  app._ct1 = app._ct1 ?? NaN;
+
+  app.setCT = (v) => {
+    // 手動指定鏈上 CT（除錯用）。正常狀態由鏈上 poolBalance 同步，不建議手動改。
+    const n = toNum(v);
+    if (!isFinite(n)) return;
+    app._ct = n;
+    if ($('ct-in')) $('ct-in').value = String(n);
+    app.updateCoordPanel();
+  };
+
+  app.setCoord = (v) => {
+    // 只改「座標點位」（地圖/星球位置），不動鏈上 CT。
+    const n = toNum(v);
+    if (!isFinite(n)) return;
+    app._coord = n;
+    app.updateCoordPanel();
+  };
+
+  app.updateCoordPanel = () => {
+    const deg = currentSteerDeg();
+    const side = sideFromDeg(deg);
+    const sideZh = side === 'LONG' ? '多' : '空';
+    if ($('cp-side')) $('cp-side').textContent = `方向：${sideZh}`;
+    if ($('cp-deg-num')) $('cp-deg-num').textContent = `${Math.round(Math.abs(deg))}`;
+
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (isFinite(ct)) {
+      const near = nearestCoord(ct);
+      if ($('cp-nearest')) $('cp-nearest').innerHTML = near ? `${near.n} <span class="muted">({fmt(near.v)})</span>` : '--';
+      const km = kmFromCT(ct);
+      if ($('cp-km')) $('cp-km').textContent = `${fmt(km)} km`;
+    } else {
+      if ($('cp-nearest')) $('cp-nearest').textContent = '--';
+      if ($('cp-km')) $('cp-km').textContent = '--';
+    }
+
+    if ($('cp-ct1')) $('cp-ct1').textContent = isFinite(app._ct1) ? fmt(app._ct1) : '--';
+
+    // keep AUTO badge consistent if exists
+    const autoTag = document.getElementById('auto-tag');
+    if (autoTag && autoTag.textContent && autoTag.textContent.includes('AUTO')) {
+      // only update the side label part, keep styling
+      autoTag.textContent = `AUTO: ${side}`;
+    }
+  };
+
+  app.openCoordModal = () => {
+    const modal = $('coord-modal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    app.renderCoordList('');
+    setTimeout(() => $('cm-q')?.focus(), 50);
+  };
+  app.closeCoordModal = () => {
+    const modal = $('coord-modal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+  app.renderCoordList = (q) => {
+    const list = $('cm-list');
+    if (!list) return;
+    const query = (q||'').trim().toLowerCase();
+    const filtered = !query ? COORDS : COORDS.filter(c =>
+      String(c.v).toLowerCase().includes(query) ||
+      (c.n||'').toLowerCase().includes(query) ||
+      (c.d||'').toLowerCase().includes(query)
+    );
+    list.innerHTML = filtered.map(c => `
+      <div class="cm-item" data-v="${c.v}">
+        <div class="cm-v">${fmt(c.v)}</div>
+        <div>
+          <div class="cm-n">${c.n}</div>
+          <div class="cm-d">${c.d || ''}</div>
+        </div>
+      </div>
+    `).join('') || '<div style="opacity:.75;padding:14px;">沒有符合的座標</div>';
+
+    list.querySelectorAll('.cm-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const v = toNum(el.getAttribute('data-v'));
+        app.setCT(v);
+        app.closeCoordModal();
+      });
+    });
+  };
+
+  app.syncFromWheel = () => {
+    // Use current steering direction to set CT+1 guess (sign)
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (!isFinite(ct)) return;
+    const deg = currentSteerDeg();
+    const side = sideFromDeg(deg);
+    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
+    if (!isFinite(delta) || delta === 0) {
+      // fallback small step
+      app._ct1 = ct + (side === 'LONG' ? 72 : -72);
+    } else {
+      app._ct1 = ct + (side === 'LONG' ? delta : -delta);
+    }
+    app.updateCoordPanel();
+  };
+
+  app.orderGuess = (dir) => {
+    // When user presses UP/DOWN, treat the "amount" input as the delta guess for CT+1.
+    // (If user wants pure KGEN order amount, keep using it; this just updates CT+1 preview.)
+    const ct = isFinite(app._ct) ? app._ct : toNum($('ct-in')?.value);
+    if (!isFinite(ct)) return;
+    const delta = toNum(document.getElementById('amt-in')?.value) || 0;
+    const step = (isFinite(delta) && delta !== 0) ? delta : 72;
+    app._ct1 = ct + (dir === 'UP' ? step : -step);
+    app.updateCoordPanel();
+  };
+
+  // Wire up input / modal search
+  $('ct-in')?.addEventListener('input', (e) => {
+    app._ct = toNum(e.target.value);
+    app.updateCoordPanel();
+  });
+  $('cm-q')?.addEventListener('input', (e) => app.renderCoordList(e.target.value));
+  $('coord-modal')?.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'coord-modal') app.closeCoordModal();
+  });
+
+  // Patch applySteer to keep UI consistent, without breaking existing logic.
+  if (typeof window.applySteer === 'function' && !window.__applySteerPatched_v2204) {
+    window.__applySteerPatched_v2204 = true;
+    const _orig = window.applySteer;
+    window.applySteer = function(deg) {
+      _orig(deg);
+      try { app.updateCoordPanel(); } catch(_e) {}
+    };
+  }
+
+  // initial
+  setTimeout(() => {
+    // default CT = 16888 (moon) if empty
+    if ($('ct-in') && !String($('ct-in').value||'').trim()) {
+      app.setCT(16888);
+    } else {
+      app.updateCoordPanel();
+    }
+  }, 300);
+})();
+
+
+// ================================
+// ✅ 一鍵直達連結（Token / LP Pair / LP 鎖 / 地圖）
+// - 以 data-url 屬性綁定
+// - 手機瀏覽器：用 window.open 另開
+// ================================
+function openUrl(url){
+  try{
+    if(!url) return;
+    window.open(url, '_blank', 'noopener');
+  }catch(e){ console.warn('openUrl failed', e); }
+}
+
+document.addEventListener('click', (ev)=>{
+  const btn = ev.target.closest('[data-url]');
+  if(!btn) return;
+  const url = btn.getAttribute('data-url');
+  if(url) openUrl(url);
+});
+</script>
+
+<script>try{app.musicInit();}catch(_){}</script>
+
+<script>
+(function(){
+  try{
+    // ---- Music helpers (same-origin GitHub Pages) ----
+    const ROOT = (function(){
+      // resolve base URL to .../K線西遊記/temples/16888/
+      const u = new URL(window.location.href);
+      // if we are at .../16888/index.html, keep directory
+      u.hash = "";
+      u.search = "";
+      // ensure ends with /16888/
+      if (!u.pathname.endsWith("/")) {
+        u.pathname = u.pathname.replace(/\/[^\/]*$/, "/");
+      }
+      return u.origin + u.pathname;
+    })();
+
+    window.resolveTrackUrl = window.resolveTrackUrl || function(track){
+      if (!track) return "";
+      if (typeof track === "string") {
+        // already absolute
+        if (/^https?:\/\//i.test(track)) return track;
+        return new URL(track, ROOT).toString();
+      }
+      const url = track.url || track.src || "";
+      if (/^https?:\/\//i.test(url)) return url;
+      return new URL(url, ROOT).toString();
+    };
+
+    // Ensure app exists
+    const app = window.app || window.APP || null;
+    if (!app) return;
+
+    // Built-in playlist loader
+    app.musicLoadBuiltin = app.musicLoadBuiltin || (async function(){
+      const status = (msg)=>{ try{ window.setMusicStatus && window.setMusicStatus(msg); }catch(e){} };
+      status("載入中…");
+      const playlistCandidates = [
+        new URL("music/playlist.json", ROOT).toString(),
+        new URL("playlist.json", ROOT).toString(),
+        new URL(".music/playlist.json 或 playlist.json", ROOT).toString(),
+        new URL("./playlist.json", ROOT).toString(),
+      ].filter((v,i,a)=>a.indexOf(v)===i);
+      let data = null;
+      let lastErr = null;
+      try{
+        for (const base of playlistCandidates){
+          const tryUrl = base + "?t=" + Date.now();
+          try{
+            const r = await fetch(tryUrl, {cache:"no-store"});
+            if(!r.ok) throw new Error("HTTP " + r.status);
+            data = await r.json();
+            if(Array.isArray(data)) { lastErr=null; break; }
+            data = null;
+          }catch(err){ lastErr = err; data = null; }
+        }
+        if(!data) throw (lastErr || new Error("playlist not found"));
+      }catch(e){
+        // fallback: try raw githubusercontent if user stores playlist there
+        try{
+          const u = new URL(playlistUrl);
+          // if on github.io, map to raw.githubusercontent.com
+          // user must keep same path structure under repo main branch
+          const pathParts = u.pathname.split("/").filter(Boolean);
+          // expected: /kline-odyssey/K線西遊記/temples/16888music/playlist.json 或 playlist.json
+          const repo = pathParts[0];
+          const rest = pathParts.slice(1).join("/");
+          const raw = "https://raw.githubusercontent.com/klineodyssey/" + repo + "/main/" + rest + "?t=" + Date.now();
+          const rr = await fetch(raw, {cache:"no-store"});
+          if(!rr.ok) throw new Error("RAW HTTP " + rr.status);
+          data = await rr.json();
+        }catch(e2){
+          status("載入失敗：找不到 playlist.json");
+          console.warn("playlist load failed", e, e2);
+          return false;
+        }
+      }
+
+      // normalize
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.tracks) ? data.tracks : []);
+      app._musicList = list.map((t)=>({
+        title: (typeof t==="string") ? t : (t.title || t.name || (t.url||t.src||"").split("/").pop() || "Track"),
+        url: resolveTrackUrl(t)
+      })).filter(x=>x.url);
+
+      if(!app._musicList.length){
+        status("歌單為空");
+        return false;
+      }
+
+      app._musicIndex = 0;
+      // if original music system exists, try to sync
+      if (typeof app.musicSetIndex === "function") {
+        try{ app.musicSetIndex(0); }catch(e){}
+      } else {
+        try{
+          // basic audio fallback
+          app._musicAudio = app._musicAudio || new Audio();
+          app._musicAudio.src = app._musicList[0].url;
+        }catch(e){}
+      }
+
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[0].title); }catch(e){}
+      status("已載入 " + app._musicList.length + " 首");
+      return true;
+    });
+
+    // Alias for UI button naming consistency
+    app.musicLoadBuiltIn = app.musicLoadBuiltIn || (async function(force=true){
+      try{ return await app.musicLoadBuiltin(); }catch(e){ console.warn(e); return false; }
+    });
+
+
+    
+    // UI helper: show current track title
+    window.setMusicNow = window.setMusicNow || function(title){
+      try{
+        const el = document.getElementById('music-now');
+        if(el) el.textContent = title ? String(title) : '（未選曲）';
+      }catch(e){}
+    };
+// Patch prev/next if missing or non-working
+    function ensureAudio(){
+      if (app._musicAudio) return app._musicAudio;
+      // try find existing audio tag
+      const a = document.querySelector("audio") || null;
+      app._musicAudio = a || new Audio();
+      return app._musicAudio;
+    }
+
+    app.musicPlay = app.musicPlay || (async function(){
+      const a = ensureAudio();
+      if (!app._musicList || !app._musicList.length){
+        await app.musicLoadBuiltin();
+      }
+      if (app._musicList && app._musicList.length){
+        const idx = (typeof app._musicIndex==="number") ? app._musicIndex : 0;
+        const track = app._musicList[idx] || app._musicList[0];
+        if (track && track.url && a.src !== track.url) a.src = track.url;
+        try{ window.setMusicNow && window.setMusicNow(track && (track.title || track.name || track.url)); }catch(e){}
+        try{ await a.play(); }catch(e){ console.warn(e); }
+      }
+    });
+
+    app.musicPause = app.musicPause || (function(){
+      const a = ensureAudio(); try{ a.pause(); }catch(e){}
+    });
+
+    app.musicStop = app.musicStop || (function(){
+      const a = ensureAudio(); try{ a.pause(); a.currentTime = 0; }catch(e){}
+    });
+
+    app.musicPrev = app.musicPrev || (function(){
+      if (!app._musicList || !app._musicList.length) return;
+      app._musicIndex = (app._musicIndex - 1 + app._musicList.length) % app._musicList.length;
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[app._musicIndex].title); }catch(e){}
+      app.musicPlay();
+    });
+
+    app.musicNext = app.musicNext || (function(){
+      if (!app._musicList || !app._musicList.length) return;
+      app._musicIndex = (app._musicIndex + 1) % app._musicList.length;
+      try{ window.setMusicNow && window.setMusicNow(app._musicList[app._musicIndex].title); }catch(e){}
+      app.musicPlay();
+    });
+
+    // autoplay toggle hook if checkbox exists
+    const auto = document.getElementById("bgmAutoToggle") || document.querySelector('input[type="checkbox"][data-bgm-auto]');
+    if (auto){
+      auto.addEventListener("change", ()=>{ if(auto.checked) app.musicPlay(); });
+    }
+  }catch(err){
+    console.error("Music patch error", err);
+  }
+})();
+
+/* =========================
+   V2.46.5 MUSIC HOTFIX
+   - Fix musicSetIndex using _music (was this.music)
+   - Fix Built-in playlist loader (music/playlist.json or playlist.json)
+   - Ensure file multi-select appends & plays
+========================= */
+(function(){
+  if(!window.app) return;
+
+  // unify alias for legacy calls
+  window.app.musicLoadBuiltIn = window.app.musicLoadBuiltin = async function(){
+    const statusEl = document.getElementById('music-status') || document.getElementById('music-name');
+    const setStatus = (t)=>{ try{ if(statusEl) statusEl.textContent = t; }catch(e){} };
+
+    // base directory (folder that contains index.html)
+    const base = (()=>{
+      try{
+        const u = new URL(window.location.href);
+        u.hash = ''; u.search = '';
+        if(!u.pathname.endsWith('/')){
+          u.pathname = u.pathname.substring(0, u.pathname.lastIndexOf('/') + 1);
+        }
+        return u;
+      }catch(e){ return null; }
+    })();
+
+    const candidates = ["music/playlist.json","playlist.json","./music/playlist.json","./playlist.json"];
+    let list = null;
+    let lastErr = null;
+
+    setStatus("載入內建歌單中…");
+    for(const rel of candidates){
+      try{
+        const url = base ? new URL(rel, base).toString() : rel;
+        const r = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), {cache:"no-store"});
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        if(!Array.isArray(data)) throw new Error("playlist not array");
+        list = data.map((it, idx)=>({
+          name: String(it.name || it.title || ("Track " + (idx+1))),
+          url: String(it.url || it.src || it.href || "").trim()
+        })).filter(it=>it.url);
+        if(list.length) break;
+        lastErr = new Error("empty playlist");
+      }catch(e){
+        lastErr = e;
+        list = null;
+      }
+    }
+
+    if(!list){
+      setStatus("載入失敗：找不到 playlist.json");
+      try{ console.warn("[music] builtin playlist load failed:", lastErr); }catch(e){}
+      try{ window.app.speak && window.app.speak('載入失敗，找不到內建歌單。'); }catch(e){}
+      return;
+    }
+
+    window.app._music = window.app._music || {};
+    const m = window.app._music;
+    m.list = list;
+    m.index = 0;
+
+    try{ window.app.musicRenderList && window.app.musicRenderList(); }catch(e){}
+    try{ window.app.musicSetIndex(0); }catch(e){}
+    setStatus("已載入內建歌單：" + list.length + " 首");
+    try{ window.app.speak && window.app.speak('已載入內建歌單。'); }catch(e){}
+  };
+  // --- AUTO LOAD + AUTO NEXT (V2.46.10) ---
+  try{
+    const toast = (msg)=>{
+      const t = document.getElementById('toast');
+      if(!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._tm);
+      t._tm = setTimeout(()=>t.classList.remove('show'), 2400);
+    };
+
+    // auto-next when a track ends (play through the whole list like a normal player)
+    const a = document.getElementById('music-audio');
+    if (a && !a._klineEndedHook){
+      a._klineEndedHook = true;
+      a.addEventListener('ended', ()=>{
+        const app = window.app;
+        const m = app && app._music ? app._music : null;
+        if(!app || !m || !Array.isArray(m.list) || !m.list.length) return;
+
+        const loop = !!(document.getElementById('music-loop') && document.getElementById('music-loop').checked);
+        const shuffle = !!(document.getElementById('music-shuffle') && document.getElementById('music-shuffle').checked);
+
+        if(shuffle){
+          if(m.list.length === 1){
+            if(loop){ try{ app.musicSetIndex(0); app.musicPlay(); }catch(e){} }
+            return;
+          }
+          let next = m.index;
+          for(let guard=0; guard<12 && next===m.index; guard++){
+            next = Math.floor(Math.random() * m.list.length);
+          }
+          m.index = next;
+          try{ app.musicSetIndex(m.index); app.musicPlay(); }catch(e){}
+          return;
+        }
+
+        const atLast = (m.index >= m.list.length - 1);
+        if(atLast){
+          if(loop){
+            m.index = 0;
+            try{ app.musicSetIndex(0); app.musicPlay(); }catch(e){}
+          }else{
+            toast('播放完畢');
+          }
+        }else{
+          m.index += 1;
+          try{ app.musicSetIndex(m.index); app.musicPlay(); }catch(e){}
+        }
+      });
+    }
+
+    // auto-load builtin playlist from GitHub on page load (no need to click)
+    const autoLoadBuiltin = async ()=>{
+      try{
+        if(typeof window.app.musicLoadBuiltIn === 'function'){
+          await window.app.musicLoadBuiltIn(true);
+        }
+      }catch(e){}
+    };
+
+    // best-effort autoplay:
+    // - mobile browsers block autoplay unless muted or user gesture
+    // - we try muted autoplay; if blocked, we arm a one-tap start anywhere
+    const tryAutoPlay = async ()=>{
+      const autoCk = document.getElementById('music-bgm-auto');
+      if(!autoCk || !autoCk.checked) return;
+
+      const app = window.app;
+      const audio = document.getElementById('music-audio');
+      if(!app || !audio) return;
+
+      // if already playing, skip
+      if(!audio.paused) return;
+
+      const prevMuted = audio.muted;
+      audio.muted = true;
+
+      try{
+        await audio.play();
+        toast('BGM 已自動播放（靜音）點一下開聲');
+        const unmuteOnce = ()=>{
+          audio.muted = false;
+          toast('已開聲');
+        };
+        document.addEventListener('pointerdown', unmuteOnce, { once:true, capture:true });
+      }catch(e){
+        audio.muted = prevMuted;
+        toast('點一下畫面啟動 BGM');
+        const startOnce = async ()=>{
+          try{ await app.musicPlay(); }catch(_){}
+        };
+        document.addEventListener('pointerdown', startOnce, { once:true, capture:true });
+      }
+    };
+
+    window.addEventListener('load', ()=>{
+      autoLoadBuiltin().then(()=>tryAutoPlay());
+    });
+
+  }catch(e){}
+})();
+
+</script>
+
+
+<script>
+(function(){
+  window.addEventListener('load', function(){
+    try{
+      if(window.app && typeof window.app.updateCoordPanel==='function') window.app.updateCoordPanel();
+      var btn=document.getElementById('auto-battle-btn');
+      if(btn) btn.textContent='🤖 自動打怪（開發中）';
+    }catch(_){ }
+  });
+})();
+</script>
+
+
+<script>
+/* ===== V2.48.2 HOTFIX =====
+   1) Pool progress text/bar bind to 16888 target
+   2) Cockpit side/deg split into 2 lines
+   3) Auto-battle button shows 開發中 (reserved)
+*/
+(function(){
+  try{
+    const TARGET_POOL = 16888;
+
+    // reserve auto battle button
+    const autoBtn = document.getElementById('auto-battle-btn');
+    if(autoBtn){
+      autoBtn.textContent = '🤖 自動打怪（開發中）';
+      autoBtn.onclick = function(){
+        if(window.ui && typeof ui.toast === 'function') ui.toast('自動打怪功能開發中');
+        try{ window.app && app.speak && app.speak('自動打怪功能開發中。'); }catch(_){}
+      };
+    }
+
+    // force one consistent progress updater
+    window.__updatePoolProgress48 = function(current){
+      const pool = Number(current)||0;
+      const pct = Math.max(0, Math.min(100, (pool / TARGET_POOL) * 100));
+      const fill = document.getElementById('prog-fill');
+      const txt  = document.getElementById('prog-txt');
+      const line = document.getElementById('w3-prog');
+      if(fill) fill.style.width = pct.toFixed(2) + '%';
+      if(txt) txt.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+      if(line) line.textContent = `${pool.toFixed(2)} / ${TARGET_POOL} (${pct.toFixed(1)}%)`;
+    };
+
+    // patch app.setProgress to not overwrite useful text
+    if(window.app){
+      app.setProgress = function(ratioOrPct){
+        let v = Number(ratioOrPct);
+        if(!Number.isFinite(v)) v = 0;
+        // support both 0..1 and 0..100
+        const pct = v <= 1 ? v * 100 : v;
+        const fill = document.getElementById('prog-fill');
+        if(fill) fill.style.width = Math.max(0, Math.min(100, pct)).toFixed(2) + '%';
+      };
+    }
+
+    // patch cockpit side sync
+    if(window.app && typeof app.updateCoordPanel === 'function'){
+      const oldUpdateCoordPanel = app.updateCoordPanel;
+      app.updateCoordPanel = function(){
+        try{ oldUpdateCoordPanel(); }catch(_){}
+        try{
+          const steer = document.getElementById('steer-input-val');
+          const deg = steer ? (Number(steer.value)||0) : 0;
+          const side = Math.abs(deg) <= 90 ? 'LONG' : 'SHORT';
+          const sideEl = document.getElementById('cp-side');
+          const degEl = document.getElementById('cp-deg');
+          if(sideEl) sideEl.textContent = 'SIDE: ' + side;
+          if(degEl) degEl.textContent = 'deg ' + deg.toFixed(2);
+        }catch(_){}
+      };
+      try{ app.updateCoordPanel(); }catch(_){}
+    }
+
+    // patch web3 refresh / demoRefresh progress
+    if(window.web3){
+      const oldRefresh = web3.refresh;
+      web3.refresh = async function(){
+        const r = await oldRefresh.apply(this, arguments);
+        try{
+          const balEl = document.getElementById('w3-bal');
+          if(balEl){
+            const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+            if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+          }
+        }catch(_){}
+        return r;
+      };
+
+      const oldDemoRefresh = web3.demoRefresh;
+      web3.demoRefresh = function(){
+        const r = oldDemoRefresh.apply(this, arguments);
+        try{
+          const pool = this.demoState && this.demoState.pool ? Number(this.demoState.pool) : 0;
+          window.__updatePoolProgress48(pool);
+        }catch(_){}
+        return r;
+      };
+    }
+
+    // run once after load
+    window.addEventListener('load', function(){
+      try{
+        const balEl = document.getElementById('w3-bal');
+        if(balEl){
+          const m = String(balEl.textContent||'').match(/([0-9]+(?:\.[0-9]+)?)/);
+          if(m) window.__updatePoolProgress48(parseFloat(m[1]));
+        }
+      }catch(_){}
+      try{ window.app && app.updateCoordPanel && app.updateCoordPanel(); }catch(_){}
+    });
+  }catch(e){
+    console.warn('V2.48.2 hotfix failed', e);
+  }
+})();
+</script>
+
+
+
+<!-- removed legacy kline block -->
 
 
 
 <script>
-/* ===== V2.8.8 single KGEN lock engine ===== */
+/* ===== V2.8.9 True K-line engine (Binance public API) ===== */
+(function(){
+  const TRUE_KLINE = {
+    symbol: 'BTCUSDT',
+    interval: '1h',
+    limit: 8,
+    timer: null
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function safeText(id, val){
+    var el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    var r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function num(v){ return Number(v || 0); }
+  function fmtInt(v){ return String(Math.round(Number(v || 0))); }
+
+  async function fetchTrueKlines(){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + TRUE_KLINE.symbol +
+                '&interval=' + TRUE_KLINE.interval + '&limit=' + TRUE_KLINE.limit;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Binance HTTP ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: num(k[1]),
+      high: num(k[2]),
+      low: num(k[3]),
+      close: num(k[4]),
+      volume: num(k[5]),
+      closeTime: k[6]
+    }));
+  }
+
+  function predictFromWheel(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+
+    const range = Math.max(1, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(1, range - body);
+
+    let hitBase = 58;
+    let angleBonus = Math.min(18, angle * 0.11);
+    let trendBonus = body > range * 0.38 ? 8 : 3;
+    let wickPenalty = Math.min(14, wick / range * 18);
+    let score = hitBase + angleBonus + trendBonus - wickPenalty;
+    score = Math.max(61.2, Math.min(88.6, score));
+
+    return {
+      side, angle, range: Math.round(range), wick: Math.round(wick), hit: score
+    };
+  }
+
+  function updatePanel(data){
+    if(!data || !data.length) return;
+    const last = data[data.length - 1];
+    const pred = predictFromWheel(last);
+
+    safeText('ke-side', pred.side);
+    safeText('ke-angle', String(pred.angle));
+    safeText('ke-open', fmtInt(last.open));
+    safeText('ke-high', fmtInt(last.high));
+    safeText('ke-low', fmtInt(last.low));
+    safeText('ke-close', fmtInt(last.close));
+    safeText('ke-range', String(pred.range));
+    safeText('ke-wick', String(pred.wick));
+
+    safeText('ke-mode', '真K線');
+    safeText('kc-predict', '預測：' + pred.side);
+    safeText('kc-dir', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval + ' → ' + pred.side + '方K');
+    safeText('kc-hit', '命中率：' + pred.hit.toFixed(1) + '%');
+
+    const moonA = 'A：' + new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const moonB = 'B：' + new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    safeText('moon-a', moonA.replace('A：',''));
+    safeText('moon-b', moonB.replace('B：',''));
+
+    drawTrueKline(data);
+  }
+
+  function drawTrueKline(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const mapY = (v) => padY + (maxH - v) / ((maxH - minL) || 1) * (h - padY*2);
+
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx < data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy = 0; gy < 4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(6, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  async function refreshTrueKline(){
+    try{
+      const data = await fetchTrueKlines();
+      updatePanel(data);
+    }catch(err){
+      safeText('ke-mode', '真K線失敗');
+      safeText('kc-dir', 'Binance 連線失敗');
+      console.warn(err);
+    }
+  }
+
+  function bind(){
+    const s = $('steer-input-val');
+    if(s){
+      s.addEventListener('input', function(){ refreshTrueKline(); });
+    }
+    refreshTrueKline();
+    TRUE_KLINE.timer = setInterval(refreshTrueKline, 30000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+/* ===== V2.8.9 live kline + ticker ===== */
+(function(){
+  const TRUE_KLINE = {
+    symbol: 'BTCUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function safeText(id, val){
+    const el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    const r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function num(v){ return Number(v || 0); }
+
+  async function fetchTrueKlines(){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + TRUE_KLINE.symbol +
+                '&interval=' + TRUE_KLINE.interval + '&limit=' + TRUE_KLINE.limit;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Binance HTTP ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: num(k[1]),
+      high: num(k[2]),
+      low: num(k[3]),
+      close: num(k[4]),
+      volume: num(k[5]),
+      closeTime: k[6]
+    }));
+  }
+
+  async function fetchTicker(){
+    const url = 'https://api.binance.com/api/v3/ticker/price?symbol=' + TRUE_KLINE.symbol;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Ticker HTTP ' + res.status);
+    const j = await res.json();
+    return num(j.price);
+  }
+
+  function predictFromWheel(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(1, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(1, range - body);
+    let hitBase = 58;
+    let angleBonus = Math.min(18, angle * 0.11);
+    let trendBonus = body > range * 0.38 ? 8 : 3;
+    let wickPenalty = Math.min(14, wick / range * 18);
+    let score = hitBase + angleBonus + trendBonus - wickPenalty;
+    score = Math.max(61.2, Math.min(88.6, score));
+    return {side, angle, range: Math.round(range), wick: Math.round(wick), hit: score};
+  }
+
+  function formatBySymbol(v){
+    if(TRUE_KLINE.symbol === 'BTCUSDT') return v.toFixed(2);
+    if(TRUE_KLINE.symbol === 'ETHUSDT') return v.toFixed(2);
+    return v.toFixed(3);
+  }
+
+  function updatePanel(data, livePrice){
+    if(!data || !data.length) return;
+    const last = data[data.length - 1];
+    const pred = predictFromWheel(last);
+
+    safeText('ke-side', pred.side);
+    safeText('ke-angle', String(pred.angle));
+    safeText('ke-open', formatBySymbol(last.open));
+    safeText('ke-high', formatBySymbol(last.high));
+    safeText('ke-low', formatBySymbol(last.low));
+    safeText('ke-close', formatBySymbol(last.close));
+    safeText('ke-range', String(pred.range));
+    safeText('ke-wick', String(pred.wick));
+
+    safeText('ke-mode', '真K線');
+    safeText('kc-predict', '預測：' + pred.side);
+    safeText('kc-dir', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval + ' → ' + pred.side + '方K');
+    safeText('kc-hit', '命中率：' + pred.hit.toFixed(1) + '%');
+
+    safeText('ke-live-symbol', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval);
+    if(typeof livePrice === 'number' && !Number.isNaN(livePrice)){
+      safeText('ke-live-price', formatBySymbol(livePrice));
+    }
+
+    const moonA = new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const moonB = new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    safeText('moon-a', moonA);
+    safeText('moon-b', moonB);
+
+    drawTrueKline(data);
+  }
+
+  function drawTrueKline(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const mapY = (v) => padY + (maxH - v) / ((maxH - minL) || 1) * (h - padY*2);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx < data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy = 0; gy < 4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(6, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  async function refreshTrueKline(){
+    try{
+      const [data, live] = await Promise.all([fetchTrueKlines(), fetchTicker()]);
+      updatePanel(data, live);
+    }catch(err){
+      safeText('ke-mode', '真K線失敗');
+      safeText('kc-dir', 'Binance 連線失敗');
+      console.warn(err);
+    }
+  }
+
+  function bind(){
+    const s = $('steer-input-val');
+    const sel = $('ke-symbol');
+    if(s) s.addEventListener('input', refreshTrueKline);
+    if(sel){
+      sel.value = TRUE_KLINE.symbol;
+      sel.addEventListener('change', function(){
+        TRUE_KLINE.symbol = this.value;
+        refreshTrueKline();
+      });
+    }
+    refreshTrueKline();
+    TRUE_KLINE.timer = setInterval(refreshTrueKline, 5000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+/* ===== V2.8.9 dual market engine ===== */
+(function(){
+
+let marketMode="binance";
+let symbol="BTCUSDT";
+
+function $(id){return document.getElementById(id);}
+
+function setText(id,v){
+ const e=$(id);
+ if(e) e.textContent=v;
+}
+
+function rand(n){return Math.random()*n}
+
+async function fetchBinance(){
+ const r=await fetch("https://api.binance.com/api/v3/klines?symbol="+symbol+"&interval=1m&limit=12");
+ const j=await r.json();
+ return j.map(k=>({
+  open:parseFloat(k[1]),
+  high:parseFloat(k[2]),
+  low:parseFloat(k[3]),
+  close:parseFloat(k[4])
+ }));
+}
+
+function genKGEN(){
+ let base=16888;
+ let arr=[];
+ for(let i=0;i<12;i++){
+  let o=base+rand(60)-30;
+  let c=o+rand(40)-20;
+  let h=Math.max(o,c)+rand(20);
+  let l=Math.min(o,c)-rand(20);
+  arr.push({open:o,high:h,low:l,close:c});
+ }
+ return arr;
+}
+
+function draw(data){
+ const c=$("kline-canvas");
+ if(!c) return;
+ const ctx=c.getContext("2d");
+ const w=c.width,h=c.height;
+ ctx.clearRect(0,0,w,h);
+
+ const max=Math.max(...data.map(d=>d.high));
+ const min=Math.min(...data.map(d=>d.low));
+
+ const pad=10;
+ const map=v=>pad+(max-v)/(max-min)*(h-pad*2);
+
+ const step=(w-pad*2)/data.length;
+
+ data.forEach((d,i)=>{
+  const x=pad+i*step+step/2;
+  const yH=map(d.high),yL=map(d.low),yO=map(d.open),yC=map(d.close);
+
+  ctx.strokeStyle=d.close>=d.open?"#7ff3ff":"#ffd27f";
+  ctx.beginPath();ctx.moveTo(x,yH);ctx.lineTo(x,yL);ctx.stroke();
+
+  ctx.fillStyle=d.close>=d.open?"rgba(120,245,255,.4)":"rgba(255,210,120,.35)";
+  const top=Math.min(yO,yC);
+  const bh=Math.abs(yC-yO)||4;
+  ctx.fillRect(x-6,top,12,bh);
+ });
+
+ const last=data[data.length-1];
+
+ setText("ke-open",last.open.toFixed(2));
+ setText("ke-high",last.high.toFixed(2));
+ setText("ke-low",last.low.toFixed(2));
+ setText("ke-close",last.close.toFixed(2));
+
+}
+
+async function update(){
+
+ let data;
+
+ if(marketMode==="binance"){
+  try{
+   data=await fetchBinance();
+  }catch(e){
+   data=genKGEN();
+  }
+ }else{
+  data=genKGEN();
+ }
+
+ draw(data);
+
+}
+
+function bind(){
+
+ const m=$("ke-market");
+ const s=$("ke-symbol");
+
+ if(m){
+  m.addEventListener("change",function(){
+   marketMode=this.value;
+   update();
+  });
+ }
+
+ if(s){
+  s.addEventListener("change",function(){
+   symbol=this.value;
+   update();
+  });
+ }
+
+ update();
+ setInterval(update,4000);
+}
+
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",bind);
+}else{
+ bind();
+}
+
+})();
+</script>
+
+
+<script>
+/* ===== V2.8.9 stable market lock ===== */
+(function(){
+
+let marketMode="kgen";   // default fixed
+let symbol="BTCUSDT";
+let lockedData=null;
+
+function $(id){return document.getElementById(id);}
+
+function setText(id,v){
+ const e=$(id);
+ if(e) e.textContent=v;
+}
+
+function rand(n){return Math.random()*n}
+
+async function fetchBinance(){
+ const r=await fetch("https://api.binance.com/api/v3/klines?symbol="+symbol+"&interval=1m&limit=12");
+ const j=await r.json();
+ return j.map(k=>({
+  open:parseFloat(k[1]),
+  high:parseFloat(k[2]),
+  low:parseFloat(k[3]),
+  close:parseFloat(k[4])
+ }));
+}
+
+function genKGEN(){
+ let base=16888;
+ let arr=[];
+ for(let i=0;i<12;i++){
+  let o=base+rand(60)-30;
+  let c=o+rand(40)-20;
+  let h=Math.max(o,c)+rand(20);
+  let l=Math.min(o,c)-rand(20);
+  arr.push({open:o,high:h,low:l,close:c});
+ }
+ return arr;
+}
+
+function draw(data){
+ const c=$("kline-canvas");
+ if(!c) return;
+ const ctx=c.getContext("2d");
+ const w=c.width,h=c.height;
+ ctx.clearRect(0,0,w,h);
+
+ const max=Math.max(...data.map(d=>d.high));
+ const min=Math.min(...data.map(d=>d.low));
+
+ const pad=10;
+ const map=v=>pad+(max-v)/(max-min)*(h-pad*2);
+ const step=(w-pad*2)/data.length;
+
+ data.forEach((d,i)=>{
+  const x=pad+i*step+step/2;
+  const yH=map(d.high),yL=map(d.low),yO=map(d.open),yC=map(d.close);
+
+  ctx.strokeStyle=d.close>=d.open?"#7ff3ff":"#ffd27f";
+  ctx.beginPath();ctx.moveTo(x,yH);ctx.lineTo(x,yL);ctx.stroke();
+
+  ctx.fillStyle=d.close>=d.open?"rgba(120,245,255,.4)":"rgba(255,210,120,.35)";
+  const top=Math.min(yO,yC);
+  const bh=Math.abs(yC-yO)||4;
+  ctx.fillRect(x-6,top,12,bh);
+ });
+
+ const last=data[data.length-1];
+
+ setText("ke-open",last.open.toFixed(2));
+ setText("ke-high",last.high.toFixed(2));
+ setText("ke-low",last.low.toFixed(2));
+ setText("ke-close",last.close.toFixed(2));
+}
+
+async function update(){
+
+ if(lockedData){
+   draw(lockedData);
+   return;
+ }
+
+ let data;
+
+ if(marketMode==="binance"){
+   data=await fetchBinance();
+ }else{
+   data=genKGEN();
+ }
+
+ lockedData=data; // lock until user changes mode
+ draw(data);
+
+}
+
+function resetLock(){
+ lockedData=null;
+}
+
+function bind(){
+
+ const m=$("ke-market");
+ const s=$("ke-symbol");
+
+ if(m){
+  m.value=marketMode;
+  m.addEventListener("change",function(){
+   marketMode=this.value;
+   resetLock();
+   update();
+  });
+ }
+
+ if(s){
+  s.value=symbol;
+  s.addEventListener("change",function(){
+   symbol=this.value;
+   resetLock();
+   update();
+  });
+ }
+
+ update();
+}
+
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",bind);
+}else{
+ bind();
+}
+
+})();
+</script>
+
+
+<script>
+/* ===== V2.8.9 CLEAN KLINE CORE (preserve all other features) ===== */
+(function(){
+  const STATE = {
+    symbol: 'BNBUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null,
+    pair: '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2',
+    kgen: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be'.toLowerCase(),
+    wbnb: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'.toLowerCase(),
+    rpc: 'https://bsc-dataseed.binance.org/',
+    kgenHistory: []
+  };
+  const PAIR_ABI = [
+    'function token0() view returns (address)',
+    'function token1() view returns (address)',
+    'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)'
+  ];
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el = $(id); if(el) el.textContent = v; }
+  function getDeg(){
+    const r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
+  function fmt(v){
+    const n = Number(v || 0);
+    if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
+    if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
+    return n.toFixed(2);
+  }
+  function loadKgenHistory(){
+    try{
+      const raw = localStorage.getItem('kgen_lp_history_v2532');
+      const arr = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
+    }catch(e){}
+  }
+  function saveKgenHistory(){
+    try{ localStorage.setItem('kgen_lp_history_v2532', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+  }
+  async function fetchBinanceKlines(symbol){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + symbol + '&interval=' + STATE.interval + '&limit=' + STATE.limit;
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('Binance klines ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: Number(k[0]),
+      open: Number(k[1]),
+      high: Number(k[2]),
+      low: Number(k[3]),
+      close: Number(k[4]),
+      closeTime: Number(k[6])
+    }));
+  }
+  async function fetchBinanceTicker(symbol){
+    const url = 'https://api.binance.com/api/v3/ticker/price?symbol=' + symbol;
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('Binance ticker ' + res.status);
+    const j = await res.json();
+    return Number(j.price);
+  }
+  async function fetchKgenLpUsd(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(STATE.rpc);
+    const pair = new ethers.Contract(STATE.pair, PAIR_ABI, provider);
+    const [token0, token1, reserves, bnbUsd] = await Promise.all([
+      pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
+    ]);
+    const t0 = String(token0).toLowerCase();
+    const t1 = String(token1).toLowerCase();
+    const r0 = Number(reserves.reserve0.toString());
+    const r1 = Number(reserves.reserve1.toString());
+    let kgenPerWbnb = 0;
+    if(t0 === STATE.kgen && t1 === STATE.wbnb){
+      kgenPerWbnb = r0 / r1;
+    }else if(t1 === STATE.kgen && t0 === STATE.wbnb){
+      kgenPerWbnb = r1 / r0;
+    }else{
+      throw new Error('LP pair token mismatch');
+    }
+    return bnbUsd / kgenPerWbnb;
+  }
+  function appendKgen(usd){
+    STATE.kgenHistory.push({t: Date.now(), p: Number(usd)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
+    saveKgenHistory();
+  }
+  function buildKgenCandles(){
+    const hist = STATE.kgenHistory.slice(-12);
+    if(!hist.length) return [];
+    const candles = [];
+    for(let i=0;i<hist.length;i++){
+      const prev = hist[Math.max(0,i-1)].p;
+      const curr = hist[i].p;
+      const next = hist[Math.min(hist.length-1,i+1)].p;
+      candles.push({
+        openTime: hist[i].t - 60000,
+        open: prev,
+        high: Math.max(prev,curr,next),
+        low: Math.min(prev,curr,next),
+        close: curr,
+        closeTime: hist[i].t
+      });
+    }
+    while(candles.length < 12){
+      const f = candles[0];
+      candles.unshift({
+        openTime: f.openTime - 60000, open: f.open, high: f.high, low: f.low, close: f.close, closeTime: f.closeTime - 60000
+      });
+    }
+    return candles.slice(-12);
+  }
+  function predict(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(0.000001, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(0.000001, range - body);
+    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body/range) * 7) - Math.min(12, (wick/range) * 8);
+    hit = Math.max(63.5, Math.min(91.5, hit));
+    return {side, angle, range, wick, hit};
+  }
+  function draw(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const span = (maxH - minL) || 1;
+    const mapY = (v) => padY + (maxH - v) / span * (h - padY*2);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx=0; gx<data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy=0; gy<4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(3, Math.abs(yC-yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+  function updatePanel(data, live, modeLabel, liveLabel){
+    if(!data.length) return;
+    const last = data[data.length-1];
+    const p = predict(last);
+    setText('ke-side', p.side);
+    setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open));
+    setText('ke-high', fmt(last.high));
+    setText('ke-low', fmt(last.low));
+    setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range));
+    setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', modeLabel);
+    setText('ke-live-symbol', liveLabel);
+    setText('ke-live-price', fmt(live));
+    setText('kc-predict', '預測：' + p.side);
+    setText('kc-dir', liveLabel + ' → ' + p.side + '方K');
+    setText('kc-hit', '命中率：' + p.hit.toFixed(1) + '%');
+    const timeA = new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const timeB = new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    setText('moon-a', timeA);
+    setText('moon-b', timeB);
+    draw(data);
+  }
+  async function refresh(){
+    try{
+      if(STATE.symbol === 'KGENLP'){
+        const usd = await fetchKgenLpUsd();
+        appendKgen(usd);
+        const data = buildKgenCandles();
+        updatePanel(data, usd, '真 LP 價', 'KGENLP / USD');
+        const ct = $('ct-in');
+        if(ct) ct.value = usd.toFixed(6);
+      }else if(STATE.symbol === 'KGEN16888'){
+        const base = 16888;
+        const now = Date.now();
+        const data = Array.from({length:12}).map((_, i) => ({
+          openTime: now - (12-i)*60000,
+          open: base,
+          high: base,
+          low: base,
+          close: base,
+          closeTime: now - (11-i)*60000
+        }));
+        updatePanel(data, base, '宇宙基準價', 'KGEN16888 / BASE');
+        const ct = $('ct-in');
+        if(ct) ct.value = base.toFixed(2);
+      }else{
+        const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
+        updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
+      }
+    }catch(err){
+      console.warn(err);
+      setText('ke-mode', '讀取失敗');
+      setText('kc-dir', '市場資料讀取失敗');
+    }
+  }
+  function bind(){
+    loadKgenHistory();
+    const symbolSel = $('ke-symbol');
+    const steer = $('steer-input-val');
+    if(symbolSel){
+      symbolSel.value = STATE.symbol;
+      symbolSel.addEventListener('change', function(){
+        STATE.symbol = this.value;
+        refresh();
+      });
+    }
+    if(steer){
+      steer.addEventListener('input', refresh);
+    }
+    refresh();
+    if(STATE.timer) clearInterval(STATE.timer);
+    STATE.timer = setInterval(refresh, 15000);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+(async function(){
+
+const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2"
+const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase()
+const WBNB="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase()
+const RPC="https://bsc-dataseed.binance.org/"
+
+if(!window.ethers) return
+
+const provider=new ethers.providers.JsonRpcProvider(RPC)
+
+const pairABI=[
+'function token0() view returns(address)',
+'function token1() view returns(address)',
+'function getReserves() view returns(uint112,uint112,uint32)'
+]
+
+const erc20=[
+'function totalSupply() view returns(uint256)'
+]
+
+async function binanceBNB(){
+const r=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT")
+const j=await r.json()
+return Number(j.price)
+}
+
+async function update(){
+
+try{
+
+const pair=new ethers.Contract(PAIR,pairABI,provider)
+
+const [t0,t1,res,bnb]=await Promise.all([
+pair.token0(),
+pair.token1(),
+pair.getReserves(),
+binanceBNB()
+])
+
+const r0=Number(res[0].toString())
+const r1=Number(res[1].toString())
+
+let kgenPerBNB
+
+if(t0.toLowerCase()==KGEN) kgenPerBNB=r0/r1
+else kgenPerBNB=r1/r0
+
+const price=bnb/kgenPerBNB
+
+const liq=(bnb*(r1/1e18))*2
+
+const token=new ethers.Contract(KGEN,erc20,provider)
+const supply=Number(await token.totalSupply())/1e18
+
+const mcap=supply*price
+
+const ct=document.getElementById("ct-in")
+if(ct) ct.value=price.toFixed(6)
+
+const l=document.getElementById("lp-liq")
+if(l) l.innerText="$"+liq.toFixed(0)
+
+const m=document.getElementById("kgen-mcap")
+if(m) m.innerText="$"+mcap.toFixed(0)
+
+}catch(e){console.log(e)}
+
+}
+
+update()
+setInterval(update,20000)
+
+})();
+</script>
+
+
+
+
+<script>
+/* ===== V2.8.9 Oracle Plus ===== */
+(async function(){
+const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
+const WBNB="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase();
+const RPC="https://bsc-dataseed.binance.org/";
+
+if(!window.ethers) return;
+
+const provider=new ethers.providers.JsonRpcProvider(RPC);
+const pairABI=[
+ 'function token0() view returns(address)',
+ 'function token1() view returns(address)',
+ 'function getReserves() view returns(uint112,uint112,uint32)',
+ 'event Swap(address indexed sender,uint amount0In,uint amount1In,uint amount0Out,uint amount1Out,address indexed to)'
+];
+const erc20=['function totalSupply() view returns(uint256)'];
+const pair=new ethers.Contract(PAIR,pairABI,provider);
+
+function setText(id,val){
+ const el=document.getElementById(id);
+ if(el) el.textContent=val;
+}
+
+async function binanceBNB(){
+ const r=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
+ const j=await r.json();
+ return Number(j.price);
+}
+
+function fmt(n, d=2){
+ return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d, minimumFractionDigits:d});
+}
+
+async function getLastSwap(token0IsKgen){
+ try{
+   const current=await provider.getBlockNumber();
+   const logs=await pair.queryFilter(pair.filters.Swap(), current-2500, current);
+   if(!logs.length) return {text:'無近期資料', block: current};
+   const ev=logs[logs.length-1];
+   const a=ev.args;
+   const amount0In=Number(a.amount0In.toString());
+   const amount1In=Number(a.amount1In.toString());
+   const amount0Out=Number(a.amount0Out.toString());
+   const amount1Out=Number(a.amount1Out.toString());
+
+   let text='--';
+   if(token0IsKgen){
+      if(amount1In>0 && amount0Out>0){
+        text='買入 KGEN';
+      }else if(amount0In>0 && amount1Out>0){
+        text='賣出 KGEN';
+      }
+   }else{
+      if(amount0In>0 && amount1Out>0){
+        text='買入 KGEN';
+      }else if(amount1In>0 && amount0Out>0){
+        text='賣出 KGEN';
+      }
+   }
+   return {text, block: ev.blockNumber};
+ }catch(e){
+   return {text:'讀取失敗', block:'--'};
+ }
+}
+
+async function update(){
+ try{
+   const [t0,t1,res,bnbUsd] = await Promise.all([
+     pair.token0(), pair.token1(), pair.getReserves(), binanceBNB()
+   ]);
+
+   const token0IsKgen = String(t0).toLowerCase() === KGEN;
+   const r0 = Number(res[0].toString());
+   const r1 = Number(res[1].toString());
+
+   let kgenRaw, wbnbRaw, kgenPerBnb;
+   if(token0IsKgen && String(t1).toLowerCase() === WBNB){
+      kgenRaw = r0;
+      wbnbRaw = r1;
+      kgenPerBnb = r0 / r1;
+   }else if(String(t1).toLowerCase() === KGEN && String(t0).toLowerCase() === WBNB){
+      kgenRaw = r1;
+      wbnbRaw = r0;
+      kgenPerBnb = r1 / r0;
+   }else{
+      throw new Error('LP pair mismatch');
+   }
+
+   const kgenPrice = bnbUsd / kgenPerBnb;
+   const poolKgen = kgenRaw / 1e18;
+   const poolWbnb = wbnbRaw / 1e18;
+   const tvl = poolWbnb * bnbUsd * 2;
+
+   const token = new ethers.Contract(KGEN, erc20, provider);
+   const supply = Number(await token.totalSupply().toString()) / 1e18;
+   const mcap = supply * kgenPrice;
+
+   const swap = await getLastSwap(token0IsKgen);
+
+   const ct = document.getElementById('ct-in');
+   if(ct) ct.value = kgenPrice.toFixed(6);
+   setText('lp-liq', '$' + fmt(tvl,0));
+   setText('kgen-mcap', '$' + fmt(mcap,0));
+
+   setText('pool-kgen', fmt(poolKgen,0));
+   setText('pool-wbnb', fmt(poolWbnb,4));
+   setText('pool-tvl', '$' + fmt(tvl,0));
+   setText('last-swap', swap.text);
+   setText('last-block', String(swap.block));
+ }catch(e){
+   console.log(e);
+   setText('last-swap', '讀取失敗');
+ }
+}
+
+update();
+setInterval(update, 20000);
+})();
+</script>
+
+
+<script>
+/* ===== V2.8.9 split KGEN clean oracle ===== */
+(function(){
+  const STATE = {
+    symbol: 'BNBUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null,
+    pair: '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2',
+    kgen: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be'.toLowerCase(),
+    wbnb: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'.toLowerCase(),
+    rpc: 'https://bsc-dataseed.binance.org/',
+    kgenHistory: []
+  };
+  const PAIR_ABI = [
+    'function token0() view returns (address)',
+    'function token1() view returns (address)',
+    'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+    'event Swap(address indexed sender,uint amount0In,uint amount1In,uint amount0Out,uint amount1Out,address indexed to)'
+  ];
+  const ERC20 = ['function totalSupply() view returns (uint256)'];
+
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el = $(id); if(el) el.textContent = v; }
+  function getDeg(){ const r = $('steer-input-val'); return r ? (parseFloat(r.value) || 0) : 0; }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
+  function fmt(v){
+    const n = Number(v || 0);
+    if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
+    if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
+    return n.toFixed(2);
+  }
+  function loadHist(){
+    try{
+      const raw = localStorage.getItem('kgen_lp_history_v262');
+      const arr = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
+    }catch(e){}
+  }
+  function saveHist(){
+    try{ localStorage.setItem('kgen_lp_history_v262', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+  }
+  async function fetchBinanceTicker(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + symbol, {cache:'no-store'});
+    if(!r.ok) throw new Error('ticker ' + r.status);
+    const j = await r.json();
+    return Number(j.price);
+  }
+  async function fetchBinanceKlines(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/klines?symbol=' + symbol + '&interval=' + STATE.interval + '&limit=' + STATE.limit, {cache:'no-store'});
+    if(!r.ok) throw new Error('klines ' + r.status);
+    const arr = await r.json();
+    return arr.map(k => ({
+      openTime: Number(k[0]), open: Number(k[1]), high: Number(k[2]),
+      low: Number(k[3]), close: Number(k[4]), closeTime: Number(k[6])
+    }));
+  }
+  async function getLpData(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(STATE.rpc);
+    const pair = new ethers.Contract(STATE.pair, PAIR_ABI, provider);
+    const [t0,t1,res,bnbUsd] = await Promise.all([
+      pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
+    ]);
+    const r0 = Number(res[0].toString());
+    const r1 = Number(res[1].toString());
+    const t0l = String(t0).toLowerCase();
+    const t1l = String(t1).toLowerCase();
+
+    let kgenRaw, wbnbRaw, kgenPerBnb;
+    if(t0l === STATE.kgen && t1l === STATE.wbnb){
+      kgenRaw = r0; wbnbRaw = r1; kgenPerBnb = r0 / r1;
+    }else if(t1l === STATE.kgen && t0l === STATE.wbnb){
+      kgenRaw = r1; wbnbRaw = r0; kgenPerBnb = r1 / r0;
+    }else{
+      throw new Error('LP pair mismatch');
+    }
+    const price = bnbUsd / kgenPerBnb;
+    const poolKgen = kgenRaw / 1e18;
+    const poolWbnb = wbnbRaw / 1e18;
+    const tvl = poolWbnb * bnbUsd * 2;
+    const token = new ethers.Contract(STATE.kgen, ERC20, provider);
+    const supply = Number((await token.totalSupply()).toString()) / 1e18;
+    const mcap = supply * price;
+    const block = await provider.getBlockNumber();
+    return {price, poolKgen, poolWbnb, tvl, mcap, block};
+  }
+  function appendKgen(price){
+    STATE.kgenHistory.push({t: Date.now(), p: Number(price)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
+    saveHist();
+  }
+  function buildKgenCandles(price){
+    appendKgen(price);
+    const hist = STATE.kgenHistory.slice(-12);
+    const candles = hist.map((h, i) => {
+      const prev = hist[Math.max(0, i-1)]?.p ?? h.p;
+      const next = hist[Math.min(hist.length-1, i+1)]?.p ?? h.p;
+      return {
+        openTime: h.t - 60000,
+        open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next),
+        close: h.p, closeTime: h.t
+      };
+    });
+    while(candles.length < 12){
+      const f = candles[0] || {openTime:Date.now(), open:price, high:price, low:price, close:price, closeTime:Date.now()};
+      candles.unshift({openTime:f.openTime-60000, open:f.open, high:f.high, low:f.low, close:f.close, closeTime:f.closeTime-60000});
+    }
+    return candles.slice(-12);
+  }
+  function buildBaseCandles(){
+    const base = 16888;
+    const now = Date.now();
+    return Array.from({length:12}).map((_, i) => ({
+      openTime: now - (12-i)*60000, open: base, high: base, low: base, close: base, closeTime: now - (11-i)*60000
+    }));
+  }
+  function predict(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(0.000001, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(0.000001, range - body);
+    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body/range)*7) - Math.min(12, (wick/range)*8);
+    hit = Math.max(63.5, Math.min(91.5, hit));
+    return {side, angle, range, wick, hit};
+  }
+  function draw(data){
+    const canvas = $('kline-canvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const padX=12,padY=10;
+    const maxH = Math.max.apply(null, data.map(d=>d.high));
+    const minL = Math.min.apply(null, data.map(d=>d.low));
+    const span = (maxH-minL)||1;
+    const y = v => padY + (maxH-v)/span*(h-padY*2);
+    ctx.strokeStyle='rgba(255,255,255,.08)';
+    for(let i=0;i<data.length;i++){
+      const x=padX+i*((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
+    }
+    const spacing=(w-padX*2)/data.length, candleW=Math.min(18, spacing*0.58);
+    data.forEach((d,i)=>{
+      const x=padX+i*spacing+spacing/2, yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const up=d.close>=d.open;
+      ctx.strokeStyle=up?'rgba(120,245,255,.96)':'rgba(255,210,120,.96)';
+      ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      ctx.fillStyle=up?'rgba(120,245,255,.35)':'rgba(255,210,120,.28)';
+      const top=Math.min(yO,yC), bh=Math.max(3, Math.abs(yC-yO));
+      ctx.fillRect(x-candleW/2, top, candleW, bh); ctx.strokeRect(x-candleW/2, top, candleW, bh);
+    });
+  }
+  function updatePanel(data, live, modeLabel, liveLabel){
+    const last=data[data.length-1]; if(!last) return;
+    const p=predict(last);
+    setText('ke-side', p.side); setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open)); setText('ke-high', fmt(last.high)); setText('ke-low', fmt(last.low)); setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range)); setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', modeLabel); setText('ke-live-symbol', liveLabel); setText('ke-live-price', fmt(live));
+    setText('kc-predict', '預測：'+p.side); setText('kc-dir', liveLabel+' → '+p.side+'方K'); setText('kc-hit', '命中率：'+p.hit.toFixed(1)+'%');
+    const tA = new Date(last.openTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    const tB = new Date(last.closeTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    setText('moon-a', tA); setText('moon-b', tB);
+    draw(data);
+  }
+  async function updateOracle(lp){
+    const ct = $('ct-in'); if(ct) ct.value = Number(lp.price).toFixed(6);
+    setText('base-16888', '16888.00');
+    setText('lp-liq', '$' + Math.round(lp.tvl).toLocaleString());
+    setText('kgen-mcap', '$' + Math.round(lp.mcap).toLocaleString());
+    setText('pool-kgen', Math.round(lp.poolKgen).toLocaleString());
+    setText('pool-wbnb', Number(lp.poolWbnb).toFixed(4));
+    setText('last-swap', '鏈上同步');
+    setText('last-block', String(lp.block));
+  }
+  async function refresh(){
+    try{
+      if(STATE.symbol === 'KGENLP'){
+        const lp = await getLpData();
+        await updateOracle(lp);
+        const data = buildKgenCandles(lp.price);
+        updatePanel(data, lp.price, '真 LP 價', 'KGENLP / USD');
+      }else if(STATE.symbol === 'KGEN16888'){
+        const data = buildBaseCandles();
+        updatePanel(data, 16888, '宇宙基準價', 'KGEN16888 / BASE');
+      }else{
+        const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
+        updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
+      }
+    }catch(err){
+      console.warn(err);
+      setText('ke-mode', '讀取失敗');
+      setText('kc-dir', '市場資料讀取失敗');
+    }
+  }
+  function bind(){
+    loadHist();
+    const sel = $('ke-symbol');
+    const steer = $('steer-input-val');
+    if(sel){
+      sel.value = STATE.symbol;
+      sel.addEventListener('change', function(){ STATE.symbol = this.value; refresh(); });
+    }
+    if(steer){ steer.addEventListener('input', refresh); }
+    refresh();
+    if(STATE.timer) clearInterval(STATE.timer);
+    STATE.timer = setInterval(refresh, 15000);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+})();
+</script>
+
+
+<script>
+document.querySelectorAll(".faq-q").forEach(q=>{
+  q.onclick = ()=>{
+    const a = q.nextElementSibling;
+    if(!a) return;
+    a.style.display = (a.style.display==="block") ? "none" : "block";
+  };
+});
+</script>
+
+
+<script>
+/* ===== V2.8.9 preserve-all-features + hard KGENLP display lock ===== */
 (function(){
   const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
   const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -2321,55 +5524,48 @@ window.onload = () => app.init();
     "function token1() view returns (address)",
     "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
   ];
-  const STATE = { symbol:"BNBUSDT", histLP:[], timer:null };
+  const STATE = { hist: [], timer: null, busy: false };
 
   function $(id){ return document.getElementById(id); }
-  function setText(id, v){ const e=$(id); if(e) e.textContent = v; }
-  function getDeg(){ const e=$("steer-input-val"); return e ? (parseFloat(e.value)||0) : 0; }
-  function sideZh(d){ return (d >= -90 && d <= 90) ? "多" : "空"; }
-  function fmt2(n){ return Number(n||0).toFixed(2); }
+  function setText(id, v){ const el=$(id); if(el) el.textContent = v; }
   function fmt6(n){ return Number(n||0).toFixed(6); }
-  function num(v){ return Number(v||0); }
+  function fmt2(n){ return Number(n||0).toFixed(2); }
+  function getDeg(){ const el=$("steer-input-val"); return el ? (parseFloat(el.value)||0) : 0; }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? "多" : "空"; }
 
-  async function ticker(symbol){
-    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol="+symbol, {cache:"no-store"});
+  async function bnbUsd(){
+    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT",{cache:"no-store"});
     const j = await r.json();
     return Number(j.price);
-  }
-  async function klines(symbol){
-    const r = await fetch("https://api.binance.com/api/v3/klines?symbol="+symbol+"&interval=1m&limit=8", {cache:"no-store"});
-    const arr = await r.json();
-    return arr.map(k=>({open:num(k[1]), high:num(k[2]), low:num(k[3]), close:num(k[4]), openTime:k[0], closeTime:k[6]}));
   }
   async function lpData(){
     if(!window.ethers) throw new Error("ethers missing");
     const provider = new ethers.providers.JsonRpcProvider(RPC);
     const pair = new ethers.Contract(PAIR, ABI, provider);
-    const vals = await Promise.all([pair.token0(), pair.token1(), pair.getReserves(), ticker("BNBUSDT")]);
-    const t0 = String(vals[0]).toLowerCase(), t1 = String(vals[1]).toLowerCase(), res = vals[2], bnb = vals[3];
+    const [t0,t1,res,bnb] = await Promise.all([pair.token0(), pair.token1(), pair.getReserves(), bnbUsd()]);
     const r0 = Number((res.reserve0 || res[0]).toString());
     const r1 = Number((res.reserve1 || res[1]).toString());
     let poolKgen, poolWbnb;
-    if(t0===KGEN && t1===WBNB){ poolKgen = r0/1e18; poolWbnb = r1/1e18; }
-    else if(t1===KGEN && t0===WBNB){ poolKgen = r1/1e18; poolWbnb = r0/1e18; }
+    if(String(t0).toLowerCase()===KGEN && String(t1).toLowerCase()===WBNB){ poolKgen = r0/1e18; poolWbnb = r1/1e18; }
+    else if(String(t1).toLowerCase()===KGEN && String(t0).toLowerCase()===WBNB){ poolKgen = r1/1e18; poolWbnb = r0/1e18; }
     else throw new Error("pair mismatch");
     const price = (poolWbnb * bnb) / poolKgen;
     return { price, poolKgen, poolWbnb, liq:(poolWbnb * bnb * 2), bnb };
   }
 
-  function pushLP(price){
-    STATE.histLP.push({t:Date.now(), p:Number(price)});
-    while(STATE.histLP.length > 12) STATE.histLP.shift();
+  function push(price){
+    STATE.hist.push({t:Date.now(), p:Number(price)});
+    while(STATE.hist.length > 12) STATE.hist.shift();
   }
-  function lpCandles(price){
-    pushLP(price);
-    const arr = STATE.histLP.slice(-8);
+  function makeCandles(price){
+    push(price);
+    const arr = STATE.hist.slice(-8);
     const out = arr.map((h,i)=>{
       const prev = (arr[Math.max(0,i-1)] || h).p;
       const next = (arr[Math.min(arr.length-1,i+1)] || h).p;
-      return {open:prev, high:Math.max(prev,h.p,next), low:Math.min(prev,h.p,next), close:h.p, openTime:h.t-60000, closeTime:h.t};
+      return {open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next), close: h.p};
     });
-    while(out.length < 8) out.unshift({open:price, high:price, low:price, close:price, openTime:Date.now()-60000, closeTime:Date.now()});
+    while(out.length < 8) out.unshift({open:price, high:price, low:price, close:price});
     return out;
   }
 
@@ -2403,7 +5599,8 @@ window.onload = () => app.init();
     });
   }
 
-  function updateUI(data, symbol, mode, livePrice){
+  function applyLocked(symbol, price, extra){
+    const data = makeCandles(price);
     const last = data[data.length-1];
     const deg = getDeg();
     const side = sideZh(deg);
@@ -2418,9 +5615,14 @@ window.onload = () => app.init();
       setText("ke-range", fmt6(range));
       setText("ke-wick", fmt6(wick));
       setText("ke-live-symbol", "KGENLP / USD");
-      setText("ke-live-price", fmt6(livePrice));
+      setText("ke-live-price", fmt6(price));
       setText("kc-dir", "KGENLP / USD → " + side + "方K");
-    } else if(symbol === "KGEN16888"){
+      setText("ke-mode", "真 LP 價");
+      const ct = $("ct-in"); if(ct) ct.value = fmt6(price);
+      const pk = $("pool-kgen"); if(pk && extra) pk.textContent = Math.round(extra.poolKgen).toLocaleString();
+      const pw = $("pool-wbnb"); if(pw && extra) pw.textContent = extra.poolWbnb.toFixed(4);
+      const liq = $("lp-liq"); if(liq && extra) liq.textContent = "$" + extra.liq.toFixed(0);
+    }else if(symbol === "KGEN16888"){
       setText("ke-open", fmt2(last.open));
       setText("ke-high", fmt2(last.high));
       setText("ke-low", fmt2(last.low));
@@ -2428,22 +5630,14 @@ window.onload = () => app.init();
       setText("ke-range", fmt2(range));
       setText("ke-wick", fmt2(wick));
       setText("ke-live-symbol", "KGEN16888 / BASE");
-      setText("ke-live-price", fmt2(livePrice));
+      setText("ke-live-price", fmt2(price));
       setText("kc-dir", "KGEN16888 / BASE → " + side + "方K");
-    } else {
-      setText("ke-open", fmt2(last.open));
-      setText("ke-high", fmt2(last.high));
-      setText("ke-low", fmt2(last.low));
-      setText("ke-close", fmt2(last.close));
-      setText("ke-range", fmt2(range));
-      setText("ke-wick", fmt2(wick));
-      setText("ke-live-symbol", symbol + " / 1m");
-      setText("ke-live-price", fmt2(livePrice));
-      setText("kc-dir", symbol + " / 1m → " + side + "方K");
+      setText("ke-mode", "宇宙基準價");
+      const ct = $("ct-in"); if(ct) ct.value = "16888.00";
     }
+
     setText("ke-side", side);
     setText("ke-angle", String(Math.round(Math.abs(deg))));
-    setText("ke-mode", mode);
     setText("kc-predict", "預測：" + side);
     setText("kc-hit", "命中率：" + (63.5 + (Math.abs(deg)/180)*12).toFixed(1) + "%");
     const now = new Date();
@@ -2452,38 +5646,39 @@ window.onload = () => app.init();
     draw(data);
   }
 
-  async function tick(){
+  async function hardTick(){
+    if(STATE.busy) return;
     const sel = $("ke-symbol");
-    if(sel) STATE.symbol = sel.value;
+    if(!sel) return;
+    const symbol = sel.value;
+    if(symbol !== "KGENLP" && symbol !== "KGEN16888") return;
+    STATE.busy = true;
     try{
-      if(STATE.symbol === "KGENLP"){
+      if(symbol === "KGENLP"){
         const d = await lpData();
-        updateUI(lpCandles(d.price), "KGENLP", "真 LP 價", d.price);
-        const ct = $("ct-in"); if(ct) ct.value = fmt6(d.price);
-        const pk = $("pool-kgen"); if(pk) pk.textContent = Math.round(d.poolKgen).toLocaleString();
-        const pw = $("pool-wbnb"); if(pw) pw.textContent = d.poolWbnb.toFixed(4);
-        const liq = $("lp-liq"); if(liq) liq.textContent = "$" + d.liq.toFixed(0);
-      } else if(STATE.symbol === "KGEN16888"){
-        updateUI(lpCandles(16888), "KGEN16888", "宇宙基準價", 16888);
-        const ct = $("ct-in"); if(ct) ct.value = "16888.00";
-      } else {
-        const data = await klines(STATE.symbol);
-        const live = await ticker(STATE.symbol);
-        updateUI(data, STATE.symbol, "真市場", live);
+        applyLocked("KGENLP", d.price, d);
+      }else{
+        applyLocked("KGEN16888", 16888, null);
       }
     }catch(err){
-      console.warn("single K-line engine error", err);
+      console.warn("hard lock tick failed", err);
+    }finally{
+      STATE.busy = false;
     }
   }
 
   document.addEventListener("DOMContentLoaded", function(){
     const sel = $("ke-symbol");
-    if(sel){ sel.addEventListener("change", function(){ setTimeout(tick, 50); }); }
+    if(sel){
+      sel.addEventListener("change", function(){ setTimeout(hardTick, 20); });
+    }
     const steer = $("steer-input-val");
-    if(steer){ steer.addEventListener("input", function(){ setTimeout(tick, 20); }); }
-    tick();
+    if(steer){
+      steer.addEventListener("input", function(){ setTimeout(hardTick, 20); });
+    }
+    setTimeout(hardTick, 200);
     if(STATE.timer) clearInterval(STATE.timer);
-    STATE.timer = setInterval(tick, 2000);
+    STATE.timer = setInterval(hardTick, 350);
   });
 })();
 </script>
