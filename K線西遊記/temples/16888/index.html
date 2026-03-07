@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.6</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.7</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.8.6 layout retune ===== */
+/* ===== V2.8.7 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.8.6 move E=mc² into 質量 row ===== */
+/* ===== V2.8.7 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.8.6 MASTER left block ===== */
+/* ===== V2.8.7 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -584,13 +584,13 @@
   z-index: 122;
 }
 #kline-engine-panel{
-  top: 350px;
+  top: 345px;
   padding: 10px;
 }
 #kline-chart-panel{
   left: 50% !important;
   transform: translateX(-50%);
-  top: 350px;
+  top: 365px;
   padding: 10px;
   height: 210px;
   max-height: 210px;
@@ -708,12 +708,12 @@
     width: var(--left-w-master);
     max-width: var(--left-w-master);
   }
-  #kline-engine-panel{ top: 350px; }
-  #kline-chart-panel{ left: 50% !important; transform: translateX(-50%); top: 350px; height: 210px; max-height: 210px; }
+  #kline-engine-panel{ top: 345px; }
+  #kline-chart-panel{ left: 50% !important; transform: translateX(-50%); top: 365px; height: 210px; max-height: 210px; }
 }
 
 
-/* ===== V2.8.6 True K-line mode ===== */
+/* ===== V2.8.7 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -725,7 +725,7 @@
 }
 
 
-/* ===== V2.8.6 live ticker + symbol switch ===== */
+/* ===== V2.8.7 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -748,7 +748,7 @@
 }
 
 
-/* ===== V2.8.6 market mode switch ===== */
+/* ===== V2.8.7 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -767,7 +767,7 @@
 }
 
 
-/* ===== V2.8.6 single K-line engine ===== */
+/* ===== V2.8.7 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -805,7 +805,7 @@
 }
 
 
-/* ===== V2.8.6 FAQ ===== */
+/* ===== V2.8.7 FAQ ===== */
 #faq-box{
   margin-top:10px;
   font-size:12px;
@@ -834,6 +834,44 @@
   line-height:1.5;
 }
 
+
+/* ===== V2.8.7 web3 panel visibility + KGENLP lock ===== */
+#web3-panel{
+  width:min(96vw, 430px) !important;
+  max-width:min(96vw, 430px) !important;
+  left:2vw !important;
+  right:auto !important;
+  overflow-x:auto !important;
+  box-sizing:border-box !important;
+}
+#web3-panel .kv{
+  grid-template-columns: 105px 1fr !important;
+}
+#web3-panel .term-btn{
+  white-space:normal !important;
+  word-break:break-word !important;
+}
+#web3-panel input{ min-width:0 !important; }
+@media (max-width:720px){
+  #web3-panel{
+    width:96vw !important;
+    max-width:96vw !important;
+    left:2vw !important;
+    right:auto !important;
+    bottom:315px !important;
+    padding:10px !important;
+    overflow-x:auto !important;
+  }
+  #web3-panel .kv{
+    grid-template-columns: 96px 1fr !important;
+    gap:4px 8px !important;
+  }
+  #web3-panel .term-btn{
+    font-size:11px !important;
+    padding:8px 8px !important;
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -858,7 +896,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.8.6</div>
+        <div class="sys-st" id="ver-st">VERSION v2.8.7</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -889,7 +927,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.8.6</span>
+    <span>宇宙K線引擎｜V2.8.7</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1084,7 +1122,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.8.6";
+const APP_VERSION = "v2.8.7";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4228,7 +4266,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.6 True K-line engine (Binance public API) ===== */
+/* ===== V2.8.7 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4391,7 +4429,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.6 live kline + ticker ===== */
+/* ===== V2.8.7 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4570,7 +4608,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.6 dual market engine ===== */
+/* ===== V2.8.7 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4698,7 +4736,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.6 stable market lock ===== */
+/* ===== V2.8.7 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4834,7 +4872,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.6 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.8.7 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5163,7 +5201,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== V2.8.6 Oracle Plus ===== */
+/* ===== V2.8.7 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5286,7 +5324,7 @@ setInterval(update, 20000);
 
 
 <script>
-/* ===== V2.8.6 split KGEN clean oracle ===== */
+/* ===== V2.8.7 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5509,6 +5547,158 @@ document.querySelectorAll(".faq-q").forEach(q=>{
     a.style.display = (a.style.display==="block") ? "none" : "block";
   };
 });
+</script>
+
+
+<script>
+/* ===== V2.8.7 KGENLP symbol hard lock ===== */
+(function(){
+  const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
+  const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase();
+  const RPC  = "https://bsc-dataseed.binance.org/";
+  const ABI = [
+    "function token0() view returns (address)",
+    "function token1() view returns (address)",
+    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
+  ];
+  const hist = [];
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el=$(id); if(el) el.textContent = v; }
+  function fmt6(n){ return Number(n||0).toFixed(6); }
+  function fmt2(n){ return Number(n||0).toFixed(2); }
+  function getDeg(){ const el=$("steer-input-val"); return el ? (parseFloat(el.value)||0) : 0; }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? "多" : "空"; }
+  async function bnbUsd(){
+    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT",{cache:"no-store"});
+    const j = await r.json();
+    return Number(j.price);
+  }
+  async function lpPrice(){
+    if(!window.ethers) throw new Error("ethers missing");
+    const provider = new ethers.providers.JsonRpcProvider(RPC);
+    const pair = new ethers.Contract(PAIR, ABI, provider);
+    const vals = await Promise.all([pair.token0(), pair.token1(), pair.getReserves(), bnbUsd()]);
+    const t0 = vals[0], t1 = vals[1], res = vals[2], bnb = vals[3];
+    const r0 = Number((res.reserve0 || res[0]).toString());
+    const r1 = Number((res.reserve1 || res[1]).toString());
+    let kgenRaw, wbnbRaw;
+    if(String(t0).toLowerCase()===KGEN && String(t1).toLowerCase()===WBNB){ kgenRaw=r0; wbnbRaw=r1; }
+    else if(String(t1).toLowerCase()===KGEN && String(t0).toLowerCase()===WBNB){ kgenRaw=r1; wbnbRaw=r0; }
+    else throw new Error("pair mismatch");
+    const poolKgen = kgenRaw / 1e18;
+    const poolWbnb = wbnbRaw / 1e18;
+    const price = (poolWbnb * bnb) / poolKgen;
+    return { price, poolKgen, poolWbnb, bnb };
+  }
+  function pushHist(p){
+    hist.push({t:Date.now(), p:Number(p)});
+    while(hist.length > 16) hist.shift();
+  }
+  function drawKline(data){
+    const c = $("kline-canvas");
+    if(!c) return;
+    const ctx = c.getContext("2d");
+    const w = c.width, h = c.height;
+    ctx.clearRect(0,0,w,h);
+    const maxH = Math.max.apply(null, data.map(d=>d.high));
+    const minL = Math.min.apply(null, data.map(d=>d.low));
+    const span = (maxH-minL)||1;
+    const padX=10,padY=8, spacing=(w-padX*2)/data.length;
+    const y = v => padY + (maxH-v)/span*(h-padY*2);
+    for(let i=0;i<data.length;i++){
+      const x=padX+i*spacing;
+      ctx.strokeStyle='rgba(255,255,255,.06)';
+      ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
+    }
+    data.forEach((d,i)=>{
+      const x=padX+i*spacing+spacing/2;
+      const yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const up = d.close >= d.open;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.95)' : 'rgba(255,210,120,.95)';
+      ctx.fillStyle   = up ? 'rgba(120,245,255,.25)' : 'rgba(255,210,120,.25)';
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      const bw=Math.min(14, spacing*0.55), top=Math.min(yO,yC), bh=Math.max(3, Math.abs(yC-yO));
+      ctx.fillRect(x-bw/2, top, bw, bh);
+      ctx.strokeRect(x-bw/2, top, bw, bh);
+    });
+  }
+  function applyLocked(symbol, price){
+    pushHist(price);
+    const arr = hist.slice(-8);
+    const candles = arr.map((h,i)=>{
+      const prev = (arr[Math.max(0,i-1)]||h).p;
+      const next = (arr[Math.min(arr.length-1,i+1)]||h).p;
+      return {open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next), close: h.p};
+    });
+    while(candles.length < 8){
+      candles.unshift({open:price, high:price, low:price, close:price});
+    }
+    const last = candles[candles.length-1];
+    const range = last.high - last.low;
+    const wick = Math.max(0, range - Math.abs(last.close-last.open));
+    const deg = getDeg();
+    setText("ke-side", sideZh(deg));
+    setText("ke-angle", String(Math.round(Math.abs(deg))));
+    if(symbol==="KGENLP"){
+      setText("ke-open", fmt6(last.open));
+      setText("ke-high", fmt6(last.high));
+      setText("ke-low", fmt6(last.low));
+      setText("ke-close", fmt6(last.close));
+      setText("ke-range", fmt6(range));
+      setText("ke-wick", fmt6(wick));
+      setText("ke-live-symbol", "KGENLP / USD");
+      setText("ke-live-price", fmt6(price));
+      setText("kc-dir", "KGENLP / USD → " + sideZh(deg) + "方K");
+    }else{
+      setText("ke-open", fmt2(last.open));
+      setText("ke-high", fmt2(last.high));
+      setText("ke-low", fmt2(last.low));
+      setText("ke-close", fmt2(last.close));
+      setText("ke-range", fmt2(range));
+      setText("ke-wick", fmt2(wick));
+      setText("ke-live-symbol", "KGEN16888 / BASE");
+      setText("ke-live-price", fmt2(price));
+      setText("kc-dir", "KGEN16888 / BASE → " + sideZh(deg) + "方K");
+    }
+    setText("ke-mode", symbol==="KGENLP" ? "真 LP 價" : "宇宙基準價");
+    setText("kc-predict", "預測：" + sideZh(deg));
+    setText("kc-hit", "命中率：" + (63.5 + (Math.abs(deg)/180)*12).toFixed(1) + "%");
+    const now = new Date();
+    setText("moon-a", now.toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"}));
+    setText("moon-b", new Date(now.getTime()+60000).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"}));
+    drawKline(candles);
+  }
+  async function tick(){
+    const sel = $("ke-symbol");
+    if(!sel) return;
+    const symbol = sel.value;
+    try{
+      if(symbol==="KGENLP"){
+        const d = await lpPrice();
+        applyLocked("KGENLP", d.price);
+        const ct = $("ct-in"); if(ct) ct.value = fmt6(d.price);
+        const pk = $("pool-kgen"); if(pk) pk.textContent = Math.round(d.poolKgen).toLocaleString();
+        const pw = $("pool-wbnb"); if(pw) pw.textContent = d.poolWbnb.toFixed(4);
+        const liq = $("lp-liq"); if(liq) liq.textContent = "$" + (d.poolWbnb * d.bnb * 2).toFixed(0);
+      }else if(symbol==="KGEN16888"){
+        applyLocked("KGEN16888", 16888);
+        const ct = $("ct-in"); if(ct) ct.value = "16888.00";
+      }
+    }catch(err){
+      console.warn("KGEN lock tick failed", err);
+    }
+  }
+  setInterval(tick, 1500);
+  document.addEventListener("DOMContentLoaded", function(){
+    const sel = $("ke-symbol");
+    if(sel){
+      sel.addEventListener("change", function(){ setTimeout(tick,50); });
+    }
+    setTimeout(tick, 300);
+  });
+})();
 </script>
 
 </body>
