@@ -4855,49 +4855,25 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== KLINE STABILIZER PATCH v2.53.1 =====
-   Keep original features, stop multiple OHLC writers
-*/
+/* ===== KLINE STABILIZER PATCH v2.53.1 ===== */
 (function(){
-const targets=['ke-open','ke-high','ke-low','ke-close'];
-
-function safeSet(id,val){
- const el=document.getElementById(id);
- if(el) el.textContent=val;
-}
-
-let lockMarket='kgen';
-let lastOHLC=null;
-
-function capture(){
+let last=null;
+function get(){
  const o=document.getElementById('ke-open')?.textContent;
  const h=document.getElementById('ke-high')?.textContent;
  const l=document.getElementById('ke-low')?.textContent;
  const c=document.getElementById('ke-close')?.textContent;
- if(o&&h&&l&&c){
-   lastOHLC={o,h,l,c};
- }
+ if(o&&h&&l&&c){ last={o,h,l,c}; }
 }
-
-function restore(){
- if(!lastOHLC) return;
- safeSet('ke-open',lastOHLC.o);
- safeSet('ke-high',lastOHLC.h);
- safeSet('ke-low',lastOHLC.l);
- safeSet('ke-close',lastOHLC.c);
+function set(){
+ if(!last) return;
+ document.getElementById('ke-open').textContent=last.o;
+ document.getElementById('ke-high').textContent=last.h;
+ document.getElementById('ke-low').textContent=last.l;
+ document.getElementById('ke-close').textContent=last.c;
 }
-
-setInterval(capture,800);
-setInterval(restore,900);
-
-const market=document.getElementById('ke-market');
-if(market){
- market.addEventListener('change',function(){
-   lockMarket=this.value;
-   lastOHLC=null;
- });
-}
-
+setInterval(get,800);
+setInterval(set,900);
 })();
 </script>
 
