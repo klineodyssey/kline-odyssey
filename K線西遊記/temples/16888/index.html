@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.0.11</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V3.0.11 CLEAN LEFT REBUILD
+   V2.6.0 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -654,416 +654,6 @@ html, body{
   }
 }
 
-
-/* === V3.0.11 layout micro-tune === */
-:root{
-  --left-x: 24px !important;
-  --left-w: 300px !important;
-}
-#kline-engine-panel{
-  top: 420px !important;
-}
-#kline-chart-panel{
-  top: 770px !important;
-  overflow: visible !important;
-}
-#kline-canvas{
-  height: 150px !important;
-}
-#moon-match{
-  padding-bottom: 8px !important;
-}
-@media (max-width:720px){
-  :root{
-    --left-x: 24px !important;
-    --left-w: 300px !important;
-  }
-  #kline-engine-panel{
-    top: 420px !important;
-  }
-  #kline-chart-panel{
-    top: 770px !important;
-    overflow: visible !important;
-  }
-  #kline-canvas{
-    height: 150px !important;
-  }
-}
-
-
-/* === V3.0.11 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
-.ga-matrix{
-  left: 50% !important;
-  top: 210px !important;
-  transform: translateX(-50%) !important;
-  width: 220px !important;
-  max-width: 220px !important;
-  right: auto !important;
-  z-index: 150 !important;
-}
-#core-anchor{
-  /* keep image position from previous good version */
-  left: 56% !important;
-  top: 50% !important;
-}
-#web3-panel{
-  left: 18px !important;
-  bottom: 275px !important;
-  width:min(360px,92vw) !important;
-}
-#coord-panel{
-  right: 84px !important;
-  bottom: 278px !important;
-}
-#steer-readout{
-  bottom: 145px !important;
-  z-index: 160 !important;
-}
-#warp-slider{
-  bottom: 122px !important;
-}
-.footer-terminal{
-  bottom: 18px !important;
-}
-@media (max-width:720px){
-  .ga-matrix{
-    left: 50% !important;
-    top: 210px !important;
-    transform: translateX(-50%) !important;
-    width: 220px !important;
-    max-width: 220px !important;
-  }
-  #core-anchor{
-    left: 56% !important;
-    top: 50% !important;
-  }
-  #web3-panel{
-    left: 18px !important;
-    bottom: 275px !important;
-    width:min(340px,92vw) !important;
-  }
-  #coord-panel{
-    right: 84px !important;
-    bottom: 278px !important;
-    width:min(320px,90vw) !important;
-  }
-  #steer-readout{
-    bottom: 145px !important;
-  }
-  #warp-slider{
-    bottom: 122px !important;
-  }
-}
-
-
-/* === V3.0.11 center image + shorten left column === */
-#core-anchor{
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-}
-.ga-matrix{
-  top: 200px !important;
-  transform: translateX(-50%) scale(1.08) !important;
-  transform-origin: top center !important;
-}
-#kline-engine-panel{
-  top: 380px !important;
-}
-#kline-chart-panel{
-  top: 640px !important;
-  height: 280px !important;
-  max-height: 280px !important;
-}
-#kline-canvas{
-  height: 126px !important;
-}
-#moon-match{
-  margin-top: 6px !important;
-  padding-top: 6px !important;
-}
-@media (max-width:720px){
-  #core-anchor{
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
-  .ga-matrix{
-    top: 200px !important;
-    transform: translateX(-50%) scale(1.08) !important;
-  }
-  #kline-engine-panel{
-    top: 380px !important;
-  }
-  #kline-chart-panel{
-    top: 640px !important;
-    height: 280px !important;
-    max-height: 280px !important;
-  }
-  #kline-canvas{
-    height: 126px !important;
-  }
-}
-
-
-/* === V3.0.11 vertical tightening === */
-
-/* 左側整欄往上 */
-.resource-bars{
-  top: 80px !important;
-}
-
-.ga-matrix{
-  top: 150px !important;
-}
-
-/* K線引擎與K線圖再往上 */
-#kline-engine-panel{
-  top: 300px !important;
-}
-
-#kline-chart-panel{
-  top: 520px !important;
-}
-
-/* 下方控制區整體往上 */
-#web3-panel{
-  bottom: 320px !important;
-}
-
-#coord-panel{
-  bottom: 325px !important;
-}
-
-/* 方向盤與橫桿往上 */
-#steer-readout{
-  bottom: 190px !important;
-}
-
-#warp-slider{
-  bottom: 165px !important;
-}
-
-/* 手機版同步 */
-@media (max-width:720px){
-
-  .resource-bars{
-    top: 80px !important;
-  }
-
-  .ga-matrix{
-    top: 150px !important;
-  }
-
-  #kline-engine-panel{
-    top: 300px !important;
-  }
-
-  #kline-chart-panel{
-    top: 520px !important;
-  }
-
-  #web3-panel{
-    bottom: 320px !important;
-  }
-
-  #coord-panel{
-    bottom: 325px !important;
-  }
-
-  #steer-readout{
-    bottom: 190px !important;
-  }
-
-  #warp-slider{
-    bottom: 165px !important;
-  }
-
-}
-
-
-/* === V3.0.11 move only K-line engine/chart upward; keep GA centered === */
-#kline-engine-panel{
-  top: 220px !important;
-}
-#kline-chart-panel{
-  top: 440px !important;
-}
-
-/* mobile */
-@media (max-width:720px){
-  #kline-engine-panel{
-    top: 220px !important;
-  }
-  #kline-chart-panel{
-    top: 440px !important;
-  }
-}
-
-
-/* ===== Guanghan Temple V3.0 Layout Engine ===== */
-
-#left-column-v3{
-    position:absolute;
-    left:20px;
-    top:110px;
-    width:340px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    z-index:50;
-}
-
-/* individual blocks stop using absolute push */
-.resource-bars,
-#kline-engine-panel,
-#kline-chart-panel{
-    position:relative !important;
-    top:auto !important;
-}
-
-/* keep central art stable */
-#main-temple-image{
-    margin:0 auto;
-    display:block;
-}
-
-/* mobile safe */
-@media (max-width:720px){
-    #left-column-v3{
-        position:relative;
-        left:auto;
-        top:auto;
-        width:100%;
-        padding:10px;
-    }
-}
-
-
-/* === V3.0.11 precise fix: only heights + resource bars down === */
-/* Do NOT touch fairy/core/GA/width/layout */
-.resource-bars{
-  top: 185px !important;   /* move BNB/KGEN down only */
-}
-
-#kline-engine-panel{
-  top: 255px !important;   /* keep panel in place after bars move down */
-  padding: 8px 10px !important;
-}
-#kline-engine-panel .ke-head{
-  margin-bottom: 6px !important;
-}
-#kline-engine-panel .ke-grid{
-  gap: 6px !important;
-}
-#kline-engine-panel .ke-cell{
-  min-height: 54px !important;   /* shorter cells */
-  padding: 6px 8px !important;
-}
-#kline-engine-panel .ke-label{
-  font-size: 10px !important;
-  line-height: 1.0 !important;
-}
-#kline-engine-panel .ke-value{
-  margin-top: 4px !important;
-  font-size: 15px !important;
-  line-height: 1.0 !important;
-}
-
-#kline-chart-panel{
-  top: 545px !important;   /* chart follows engine, but no layout changes */
-  height: 215px !important;
-  max-height: 215px !important;
-  padding: 8px 10px !important;
-}
-#kline-chart-panel .kc-head{
-  margin-bottom: 4px !important;
-  font-size: 13px !important;
-  line-height: 1.0 !important;
-}
-#kline-canvas{
-  height: 92px !important;
-}
-#kline-chart-panel .kc-foot,
-#moon-match{
-  font-size: 11px !important;
-  line-height: 1.05 !important;
-}
-#moon-match{
-  margin-top: 5px !important;
-  padding-top: 5px !important;
-}
-#moon-match-title{
-  margin-bottom: 2px !important;
-}
-
-@media (max-width:720px){
-  .resource-bars{ top: 185px !important; }
-  #kline-engine-panel{ top: 255px !important; padding: 8px 10px !important; }
-  #kline-engine-panel .ke-cell{ min-height: 54px !important; padding: 6px 8px !important; }
-  #kline-engine-panel .ke-label{ font-size: 10px !important; line-height: 1.0 !important; }
-  #kline-engine-panel .ke-value{ margin-top: 4px !important; font-size: 15px !important; line-height: 1.0 !important; }
-  #kline-chart-panel{ top: 545px !important; height: 215px !important; max-height: 215px !important; padding: 8px 10px !important; }
-  #kline-canvas{ height: 92px !important; }
-}
-
-
-/* === V3.0.11 fix chart position + realistic hit rate support === */
-.resource-bars{
-  top: 185px !important;
-}
-#kline-engine-panel{
-  top: 255px !important;
-  padding: 8px 10px !important;
-}
-#kline-engine-panel .ke-head{ margin-bottom: 6px !important; }
-#kline-engine-panel .ke-grid{ gap: 6px !important; }
-#kline-engine-panel .ke-cell{
-  min-height: 54px !important;
-  padding: 6px 8px !important;
-}
-#kline-engine-panel .ke-label{
-  font-size: 10px !important;
-  line-height: 1.0 !important;
-}
-#kline-engine-panel .ke-value{
-  margin-top: 4px !important;
-  font-size: 15px !important;
-  line-height: 1.0 !important;
-}
-#kline-chart-panel{
-  top: 360px !important;   /* moved up under engine */
-  height: 215px !important;
-  max-height: 215px !important;
-  padding: 8px 10px !important;
-}
-#kline-chart-panel .kc-head{
-  margin-bottom: 4px !important;
-  font-size: 13px !important;
-  line-height: 1.0 !important;
-}
-#kline-canvas{ height: 92px !important; }
-#kline-chart-panel .kc-foot,
-#moon-match{
-  font-size: 11px !important;
-  line-height: 1.05 !important;
-}
-#moon-match{
-  margin-top: 5px !important;
-  padding-top: 5px !important;
-}
-#moon-match-title{ margin-bottom: 2px !important; }
-
-@media (max-width:720px){
-  .resource-bars{ top: 185px !important; }
-  #kline-engine-panel{ top: 255px !important; padding: 8px 10px !important; }
-  #kline-engine-panel .ke-cell{ min-height: 54px !important; padding: 6px 8px !important; }
-  #kline-engine-panel .ke-label{ font-size: 10px !important; line-height: 1.0 !important; }
-  #kline-engine-panel .ke-value{ margin-top: 4px !important; font-size: 15px !important; line-height: 1.0 !important; }
-  #kline-chart-panel{ top: 360px !important; height: 215px !important; max-height: 215px !important; padding: 8px 10px !important; }
-  #kline-canvas{ height: 92px !important; }
-}
-
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -1088,7 +678,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.0.11</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1118,7 +708,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.0.11</span>
+    <span>宇宙K線引擎｜V2.6.0</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -1138,7 +728,7 @@ html, body{
     <span>宇宙K線圖</span>
     <span id="kc-predict">預測：--</span>
   </div>
-  <canvas id="kline-canvas" width="280" height="150"></canvas>
+  <canvas id="kline-canvas" width="280" height="116"></canvas>
   <div class="kc-foot">
     <span id="kc-dir">方向盤 → --方K</span>
     <span id="kc-hit">命中率：--</span>
@@ -1271,7 +861,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.0.11";
+const APP_VERSION = "v2.6.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4596,41 +4186,6 @@ document.addEventListener('click', (ev)=>{
       };
     }
   }catch(e){}
-})();
-</script>
-
-
-<script>
-(function(){
-  function updateHitRate(){
-    try{
-      var sideEl = document.getElementById('ke-side');
-      var angleEl = document.getElementById('ke-angle');
-      var rangeEl = document.getElementById('ke-range');
-      var wickEl = document.getElementById('ke-wick');
-      var hitEl = document.getElementById('kc-hit');
-      if(!hitEl) return;
-
-      var side = sideEl ? String(sideEl.textContent || '').trim() : '多';
-      var angle = angleEl ? Math.abs(parseFloat(angleEl.textContent) || 0) : 0;
-      var range = rangeEl ? Math.abs(parseFloat(rangeEl.textContent) || 0) : 0;
-      var wick = wickEl ? Math.abs(parseFloat(wickEl.textContent) || 0) : 0;
-
-      var base = 62;
-      var angleBonus = Math.min(18, angle * 0.12);
-      var rangeBonus = Math.min(12, range * 0.03);
-      var wickPenalty = Math.min(16, wick * 0.18);
-      var sideBias = (side === '多' || side === 'LONG') ? 2.5 : 1.5;
-      var noise = ((angle + range + wick) % 7) * 1.3;
-
-      var score = base + angleBonus + rangeBonus + sideBias - wickPenalty - noise;
-      score = Math.max(68.2, Math.min(93.8, score));
-
-      hitEl.textContent = '命中率：' + score.toFixed(1) + '%';
-    }catch(e){}
-  }
-  updateHitRate();
-  setInterval(updateHitRate, 1200);
 })();
 </script>
 
