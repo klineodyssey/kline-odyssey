@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.50.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.49.0 layout retune ===== */
+/* ===== V2.50.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.49.0 move E=mc² into 質量 row ===== */
+/* ===== V2.50.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.49.0 MASTER left block ===== */
+/* ===== V2.50.0 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -710,6 +710,18 @@
   #kline-chart-panel{ top: 640px; height: 210px; max-height: 210px; }
 }
 
+
+/* ===== V2.50.0 True K-line mode ===== */
+#kline-engine-panel .ke-head,
+#kline-chart-panel .kc-head{
+  letter-spacing:.3px;
+}
+#kline-chart-panel .kc-head .live-tag{
+  color: var(--cyan);
+  font-size: 11px;
+  font-family: 'Orbitron', sans-serif;
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -734,7 +746,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.49.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.50.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -764,8 +776,8 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.49.0</span>
-    <span id="ke-mode">K線模擬</span>
+    <span>宇宙K線引擎｜V2.50.0</span>
+    <span id="ke-mode">真K線</span>
   </div>
   <div class="ke-grid">
     <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
@@ -917,7 +929,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.49.0";
+const APP_VERSION = "v2.50.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4179,6 +4191,169 @@ document.addEventListener('click', (ev)=>{
     if(w) w.addEventListener('input', updateKline);
     updateKline();
     setInterval(updateKline, 1500);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+/* ===== V2.50.0 True K-line engine (Binance public API) ===== */
+(function(){
+  const TRUE_KLINE = {
+    symbol: 'BTCUSDT',
+    interval: '1h',
+    limit: 8,
+    timer: null
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function safeText(id, val){
+    var el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    var r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function num(v){ return Number(v || 0); }
+  function fmtInt(v){ return String(Math.round(Number(v || 0))); }
+
+  async function fetchTrueKlines(){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + TRUE_KLINE.symbol +
+                '&interval=' + TRUE_KLINE.interval + '&limit=' + TRUE_KLINE.limit;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Binance HTTP ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: num(k[1]),
+      high: num(k[2]),
+      low: num(k[3]),
+      close: num(k[4]),
+      volume: num(k[5]),
+      closeTime: k[6]
+    }));
+  }
+
+  function predictFromWheel(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+
+    const range = Math.max(1, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(1, range - body);
+
+    let hitBase = 58;
+    let angleBonus = Math.min(18, angle * 0.11);
+    let trendBonus = body > range * 0.38 ? 8 : 3;
+    let wickPenalty = Math.min(14, wick / range * 18);
+    let score = hitBase + angleBonus + trendBonus - wickPenalty;
+    score = Math.max(61.2, Math.min(88.6, score));
+
+    return {
+      side, angle, range: Math.round(range), wick: Math.round(wick), hit: score
+    };
+  }
+
+  function updatePanel(data){
+    if(!data || !data.length) return;
+    const last = data[data.length - 1];
+    const pred = predictFromWheel(last);
+
+    safeText('ke-side', pred.side);
+    safeText('ke-angle', String(pred.angle));
+    safeText('ke-open', fmtInt(last.open));
+    safeText('ke-high', fmtInt(last.high));
+    safeText('ke-low', fmtInt(last.low));
+    safeText('ke-close', fmtInt(last.close));
+    safeText('ke-range', String(pred.range));
+    safeText('ke-wick', String(pred.wick));
+
+    safeText('ke-mode', '真K線');
+    safeText('kc-predict', '預測：' + pred.side);
+    safeText('kc-dir', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval + ' → ' + pred.side + '方K');
+    safeText('kc-hit', '命中率：' + pred.hit.toFixed(1) + '%');
+
+    const moonA = 'A：' + new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const moonB = 'B：' + new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    safeText('moon-a', moonA.replace('A：',''));
+    safeText('moon-b', moonB.replace('B：',''));
+
+    drawTrueKline(data);
+  }
+
+  function drawTrueKline(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const mapY = (v) => padY + (maxH - v) / ((maxH - minL) || 1) * (h - padY*2);
+
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx < data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy = 0; gy < 4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(6, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  async function refreshTrueKline(){
+    try{
+      const data = await fetchTrueKlines();
+      updatePanel(data);
+    }catch(err){
+      safeText('ke-mode', '真K線失敗');
+      safeText('kc-dir', 'Binance 連線失敗');
+      console.warn(err);
+    }
+  }
+
+  function bind(){
+    const s = $('steer-input-val');
+    if(s){
+      s.addEventListener('input', function(){ refreshTrueKline(); });
+    }
+    refreshTrueKline();
+    TRUE_KLINE.timer = setInterval(refreshTrueKline, 30000);
   }
 
   if(document.readyState === 'loading'){
