@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.6</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.49.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.48.6 layout retune ===== */
+/* ===== V2.49.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.48.6 move E=mc² into 質量 row ===== */
+/* ===== V2.49.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -549,6 +549,165 @@
   margin-left: 6px;
   font-family: Orbitron, sans-serif;
   font-size: 10px;
+}
+
+
+/* ===== V2.49.0 MASTER left block ===== */
+:root{
+  --left-x-master: 18px;
+  --left-w-master: 300px;
+}
+
+/* already-confirmed changes */
+.resource-bars .rb-note{ display:none !important; }
+.resource-bars .rb.kgen .row span::after{
+  content:"｜E = mc²";
+  color: rgba(255,215,120,.88);
+  margin-left: 6px;
+  font-family: Orbitron, sans-serif;
+  font-size: 10px;
+}
+
+/* left K-line engine + chart */
+#kline-engine-panel,
+#kline-chart-panel{
+  position: fixed;
+  left: var(--left-x-master);
+  width: var(--left-w-master);
+  max-width: var(--left-w-master);
+  background: rgba(4,10,16,.90);
+  border: 1px solid rgba(255,215,120,.34);
+  border-radius: 14px;
+  box-shadow: 0 0 18px rgba(0,242,255,.06), inset 0 0 18px rgba(255,215,120,.03);
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 122;
+}
+#kline-engine-panel{
+  top: 385px;
+  padding: 10px;
+}
+#kline-chart-panel{
+  top: 640px;
+  padding: 10px;
+  height: 210px;
+  max-height: 210px;
+}
+#kline-engine-panel .ke-head,
+#kline-chart-panel .kc-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color: var(--gold);
+  font-weight:900;
+  font-size:14px;
+  margin-bottom:8px;
+}
+#kline-engine-panel .ke-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+#kline-engine-panel .ke-cell{
+  min-height:54px;
+  border:1px solid rgba(255,215,120,.22);
+  border-radius:12px;
+  padding:6px 8px;
+  background:rgba(0,0,0,.22);
+}
+#kline-engine-panel .ke-label{
+  font-size:10px;
+  color:rgba(255,255,255,.78);
+  line-height:1.0;
+}
+#kline-engine-panel .ke-value{
+  margin-top:4px;
+  font-family:'Orbitron',sans-serif;
+  font-size:15px;
+  color:var(--cyan);
+  font-weight:900;
+  line-height:1.0;
+}
+#kline-engine-panel .ke-value.right{ text-align:right; }
+
+#kline-canvas{
+  width:100%;
+  height:92px;
+  display:block;
+  border-radius:10px;
+  background:
+    linear-gradient(180deg, rgba(0,242,255,.03), rgba(0,0,0,.06)),
+    repeating-linear-gradient(to right, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 1px, transparent 32px),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 24px),
+    rgba(0,0,0,.22);
+  box-shadow: inset 0 0 16px rgba(0,242,255,.08);
+}
+#kline-chart-panel .kc-foot{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-size:11px;
+  line-height:1.05;
+  color:#fff;
+}
+#moon-match{
+  margin-top:5px;
+  padding-top:5px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:11px;
+  line-height:1.05;
+}
+#moon-match-title{
+  color:var(--gold);
+  font-weight:900;
+  margin-bottom:2px;
+}
+#moon-match .addr{
+  color:var(--cyan);
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+}
+
+/* keep GA centered above main image */
+.ga-matrix{
+  left: 50% !important;
+  right: auto !important;
+  top: 150px !important;
+  transform: translateX(-50%) !important;
+  width: 180px !important;
+  z-index: 140 !important;
+}
+
+/* keep core image centered */
+#core-anchor{
+  left: 50% !important;
+  top: 52% !important;
+  transform: translate(-50%, -50%) !important;
+  margin-left: 0 !important;
+}
+
+@media (max-width:720px){
+  .ga-matrix{
+    left: 50% !important;
+    top: 150px !important;
+    transform: translateX(-50%) !important;
+  }
+  #core-anchor{
+    left: 50% !important;
+    top: 52% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  #kline-engine-panel,
+  #kline-chart-panel{
+    left: var(--left-x-master);
+    width: var(--left-w-master);
+    max-width: var(--left-w-master);
+  }
+  #kline-engine-panel{ top: 385px; }
+  #kline-chart-panel{ top: 640px; height: 210px; max-height: 210px; }
 }
 
 </style>
@@ -575,7 +734,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.48.6</div>
+        <div class="sys-st" id="ver-st">VERSION v2.49.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -600,6 +759,41 @@
     <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
     <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
     <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
+</div>
+
+
+<div id="kline-engine-panel" aria-label="宇宙K線引擎">
+  <div class="ke-head">
+    <span>宇宙K線引擎｜V2.49.0</span>
+    <span id="ke-mode">K線模擬</span>
+  </div>
+  <div class="ke-grid">
+    <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
+    <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value right" id="ke-angle">0</div></div>
+    <div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
+    <div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
+    <div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
+    <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
+    <div class="ke-cell"><div class="ke-label">Range</div><div class="ke-value" id="ke-range">--</div></div>
+    <div class="ke-cell"><div class="ke-label">Wick</div><div class="ke-value" id="ke-wick">--</div></div>
+  </div>
+</div>
+
+<div id="kline-chart-panel" aria-label="宇宙K線圖">
+  <div class="kc-head">
+    <span>宇宙K線圖</span>
+    <span id="kc-predict">預測：--</span>
+  </div>
+  <canvas id="kline-canvas" width="280" height="92"></canvas>
+  <div class="kc-foot">
+    <span id="kc-dir">方向盤 → --方K</span>
+    <span id="kc-hit">命中率：--</span>
+  </div>
+  <div id="moon-match">
+    <div id="moon-match-title">月下老人配對</div>
+    <div>A：<span class="addr" id="moon-a">--</span></div>
+    <div>B：<span class="addr" id="moon-b">--</span></div>
+  </div>
 </div>
 
 <div id="core-anchor">
@@ -723,7 +917,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.48.6";
+const APP_VERSION = "v2.49.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3842,6 +4036,155 @@ document.addEventListener('click', (ev)=>{
     });
   }catch(e){
     console.warn('V2.48.2 hotfix failed', e);
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function safeText(id, val){
+    var el = document.getElementById(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    var r = document.getElementById('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function getWarp(){
+    var r = document.getElementById('warp-input-val');
+    return r ? (parseFloat(r.value) || 0) : 33;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function pairFromDeg(deg){
+    var a = Math.abs(Math.round(deg));
+    var list = [
+      '0x2caE692310b5A89C44',
+      '0xBA3d3810e58735cb68',
+      '0xfc522243e988a83770',
+      '0xf36640d7327b53ba3d',
+      '0xB73D6716005B37BEC7',
+      '0x15fb2A5463F7873EC3'
+    ];
+    var i1 = a % list.length;
+    var i2 = (a + 2) % list.length;
+    return [list[i1], list[i2]];
+  }
+  function updateKline(){
+    try{
+      var deg = getDeg();
+      var warp = getWarp();
+      var side = sideZh(deg);
+      var angle = Math.round(Math.abs(deg));
+
+      var base = 16888;
+      var drift = Math.round(Math.sin(deg * Math.PI / 180) * 55);
+      var warpBoost = Math.round((warp - 33) * 1.5);
+      var open = base;
+      var close = base + drift + Math.round(warpBoost * 0.35);
+      var high = Math.max(open, close) + Math.round(28 + angle * 0.25);
+      var low  = Math.min(open, close) - Math.round(23 + (180-angle) * 0.18);
+      var range = high - low;
+      var wick = Math.max(12, Math.round(range * 0.22));
+
+      safeText('ke-side', side);
+      safeText('ke-angle', String(angle));
+      safeText('ke-open', String(open));
+      safeText('ke-high', String(high));
+      safeText('ke-low', String(low));
+      safeText('ke-close', String(close));
+      safeText('ke-range', String(range));
+      safeText('ke-wick', String(wick));
+
+      safeText('kc-predict', '預測：' + side);
+      safeText('kc-dir', '方向盤 → ' + side + '方K');
+
+      var baseHit = 71;
+      var angleBonus = Math.min(10, angle * 0.08);
+      var warpBonus = Math.min(8, Math.abs(warp - 33) * 0.12);
+      var wickPenalty = Math.min(12, wick * 0.10);
+      var hit = Math.max(68.4, Math.min(91.8, baseHit + angleBonus + warpBonus - wickPenalty + (side === '多' ? 2 : 1)));
+      safeText('kc-hit', '命中率：' + hit.toFixed(1) + '%');
+
+      var pair = pairFromDeg(deg);
+      safeText('moon-a', pair[0]);
+      safeText('moon-b', pair[1]);
+
+      drawKline(open, high, low, close, side);
+    }catch(e){}
+  }
+
+  function drawKline(open, high, low, close, side){
+    var canvas = document.getElementById('kline-canvas');
+    if(!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    var padX = 12, padY = 10;
+    var data = [];
+    var seed = [open-20, open+10, open-6, open+16, open+4, open+24, open+8];
+    for(var i=0;i<7;i++){
+      var o = seed[i];
+      var c = o + (i%2===0 ? 12 : -9) + (side === '多' ? 2 : -2);
+      var hi = Math.max(o,c) + 12 + i;
+      var lo = Math.min(o,c) - 11 - (i%3);
+      data.push({o:o,h:hi,l:lo,c:c});
+    }
+    data.push({o:open,h:high,l:low,c:close});
+
+    var allH = data.map(function(d){ return d.h; });
+    var allL = data.map(function(d){ return d.l; });
+    var maxH = Math.max.apply(null, allH);
+    var minL = Math.min.apply(null, allL);
+    var mapY = function(v){
+      return padY + (maxH - v) / (maxH - minL || 1) * (h - padY*2);
+    };
+
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(var gx=0; gx<8; gx++){
+      var x = padX + gx * ((w-padX*2)/8);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(var gy=0; gy<4; gy++){
+      var y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    var spacing = (w - padX*2) / data.length;
+    var candleW = Math.min(18, spacing * 0.6);
+    data.forEach(function(d, i){
+      var x = padX + i * spacing + spacing/2;
+      var yH = mapY(d.h), yL = mapY(d.l), yO = mapY(d.o), yC = mapY(d.c);
+      var up = d.c >= d.o;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.95)' : 'rgba(255,210,120,.95)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      var top = Math.min(yO, yC), bh = Math.max(8, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  function bind(){
+    var s = document.getElementById('steer-input-val');
+    var w = document.getElementById('warp-input-val');
+    if(s) s.addEventListener('input', updateKline);
+    if(w) w.addEventListener('input', updateKline);
+    updateKline();
+    setInterval(updateKline, 1500);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
   }
 })();
 </script>
