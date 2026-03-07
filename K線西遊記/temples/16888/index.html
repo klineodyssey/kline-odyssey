@@ -5,19 +5,818 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.4</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-<!-- removed legacy conflicting kline block -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffd778; --cyan: #00f2ff; --bg: #000; --energy: #ffcc00; --panel: rgba(20, 20, 0, 0.9); --red:#ff4444; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; height: 100vh; }
+
+        /* 🏛️ 頂部：品牌與 500 席位數據模組 (肌肉組織 1) */
+        .hud-top { position: fixed; top: 15px; width: 96%; left: 2%; display: flex; justify-content: space-between; z-index: 100; pointer-events: none; }
+        .brand-section { border-left: 5px solid var(--gold); padding-left: 15px; background: linear-gradient(90deg, var(--panel), transparent); }
+        .brand-name { font-size: 26px; color: var(--gold); text-shadow: 0 0 15px var(--gold); white-space: nowrap; }
+        .sys-st { font-family: 'Orbitron'; font-size: 12px; color: var(--cyan); letter-spacing: 1px; }
+
+        .monitor-data { display: flex; gap: 20px; }
+        .data-box { background: var(--panel); border: 1px solid #332200; padding: 10px; border-top: 2px solid var(--gold); }
+        .grid-500 { display: grid; grid-template-columns: repeat(25, 6px); gap: 3px; margin-top: 5px; }
+        .dot { width: 6px; height: 6px; background: #1a1a00; border-radius: 1px; }
+        .dot.on { background: var(--energy); box-shadow: 0 0 8px var(--energy); }
+
+        /* 🚀 左側：曲速引擎肌肉 (操作點往上，下方填滿黃色階圖) */
+        .warp-engine { position: fixed; right: 8px; bottom: 260px; z-index: 150; width: 100px; text-align: center; left: auto; top: auto; transform: none; }
+        .warp-rail { 
+            height: 450px; width: 30px; background: #111; border: 3px solid var(--energy); 
+            position: relative; margin: 0 auto; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+        #energy-fill { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(to top, #ff8800, var(--energy), #fff); 
+            transition: height 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            z-index: 5;
+        }
+        .rail-step { position: absolute; width: 100%; height: 2px; background: rgba(0,0,0,0.4); z-index: 10; }
+
+        #warp-thumb { 
+            width: 70px; height: 35px; background: #fff; position: absolute; 
+            left: -20px; bottom: 33%; cursor: pointer; border-radius: 6px; 
+            box-shadow: 0 0 30px #fff, 0 0 15px var(--cyan); 
+            border: 3px solid var(--cyan); z-index: 30;
+        }
+        .warp-range { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -webkit-appearance: slider-vertical; opacity: 0; cursor: pointer; z-index: 40; }
+        .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
+
+        /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
+        #core-window { 
+            width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
+            overflow: hidden; background: #000; position: relative; 
+            box-shadow: 0 0 80px rgba(255, 215, 120, 0.3);
+            transition: transform 0.05s linear; /* 🎡 物理連動 */
+        }
+        #fairy-img { width: 100%; height: 100%; object-fit: cover; }
+        #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+        #mini-thumb { 
+            position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png') center/cover;
+            box-shadow: 0 0 25px var(--gold);
+        }
+        #wish-label { 
+            position: absolute; bottom: 50px; left: 50px; z-index: 85; 
+            color: #fff; font-weight: 900; font-size: 24px; 
+            text-shadow: 2px 2px 10px #000, 0 0 15px var(--cyan);
+        }
+
+        /* 🧬 GA 演化矩陣 (右側肌肉) */
+        .ga-matrix{left:18px; position: fixed; right:auto; top:420px; transform: none; width: 180px; background: var(--panel); border: 1px solid var(--energy); padding: 15px; z-index: 100; font-family: 'Orbitron'; }
+        .ga-stat { font-size: 11px; margin-bottom: 10px; color: var(--cyan); }
+        .ga-bar { height: 6px; background: #111; margin-top: 4px; overflow: hidden; border-radius: 3px; }
+        .ga-progress { height: 100%; background: var(--energy); width: 0%; transition: width 0.5s; }
+
+        /* 🎡 方向盤 */
+        .steer-zone{ position: fixed; bottom:225px; width: 100%; text-align: center; z-index: 100; }
+        .angle-readout { font-family: 'Orbitron'; font-size: 56px; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); }
+        .steer-slider { width: 75%; max-width: 900px; cursor: pointer; height: 12px; accent-color: var(--gold); }
+
+        /* 🛠️ 控制台 */
+        .footer-terminal { 
+            position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; 
+            border-top: 4px solid var(--gold);
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; z-index: 100;
+        }
+        .term-btn {
+            background: #0a0a0a; border: 1px solid #444; color: #fff;
+            padding: 20px 5px; font-weight: 900; cursor: pointer; transition: 0.2s;
+            font-size: 14px; border-radius: 4px;
+            width: 100%; max-width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .term-btn:hover { background: var(--gold); color: #000; }
+        .term-btn.active-kgen { border-color: var(--energy); color: var(--energy); box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.2); }
+        .term-btn.btn-rec { border-color: var(--red); color: var(--red); box-shadow: inset 0 0 12px rgba(255, 68, 68, 0.20); }
+
+        /* 手機：底部按鈕避免跑出畫面 */
+        @media (max-width: 720px) {
+          .footer-terminal{ grid-template-columns: repeat(2, 1fr); padding: 12px; gap: 10px; }
+          .term-btn{ padding: 16px 6px; font-size: 13px; }
+        }
+
+        /* 方向盤（圓形）— 預設隱藏，按鈕開啟 */
+        .wheel-wrap{
+            position: fixed; left: 50%; bottom: 125px; transform: translateX(-50%);
+            width: 160px; height: 160px; z-index: 120;
+            display:none;
+        }
+        .wheel{
+            width:160px; height:160px; border-radius:50%;
+            border:4px solid rgba(255,215,120,.8);
+            box-shadow:0 0 30px rgba(0,242,255,.25), inset 0 0 25px rgba(255,215,120,.15);
+            position:relative;
+            background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.08), rgba(0,0,0,.55) 55%, rgba(0,0,0,.85));
+            user-select:none;
+            touch-action:none;
+        }
+        .wheel::before{ content:""; position:absolute; inset:16px; border-radius:50%; border:2px dashed rgba(0,242,255,.35); opacity:.9; }
+        .wheel-hub{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%;
+            border:2px solid rgba(255,204,0,.85); box-shadow:0 0 18px rgba(255,204,0,.35); background:rgba(0,0,0,.65);
+            display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:12px; color:var(--gold);
+        }
+        .wheel-knob{ position:absolute; left:50%; top:6px; transform:translateX(-50%); width:18px; height:18px; border-radius:50%;
+            background:var(--cyan); box-shadow:0 0 18px rgba(0,242,255,.7);
+        }
+
+        canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
+    
+        /* NAV buttons */
+        .nav-btn{ pointer-events:auto; display:inline-flex; align-items:center; justify-content:center;
+            min-width:220px; padding:10px 14px; border-radius:10px; font-weight:900; text-decoration:none;
+            border:1px solid rgba(255,215,120,.6); background:rgba(20,20,0,.85); color:#fff;
+            box-shadow:0 0 18px rgba(255,215,120,.18); 
+  width: 280px;
+  max-width: 90%;
+  text-align: center;
+}
+        .nav-gold{ background:rgba(255,215,120,.92); color:#111; }
+        .nav-cyan{ background:rgba(0,242,255,.92); border-color:rgba(0,242,255,.6); }
+  /* --- HOTFIX: ensure button text is visible on dark swap buttons (mobile/in-app) --- */
+  .nav-btn{ color:#fff; }
+  .nav-gold, .nav-cyan{ color:#111; }
+  .nav-swap{
+    background: rgba(0,0,0,.38);
+    color:#fff !important;
+    border-color: rgba(255,215,120,.38);
+    text-shadow: 0 0 10px rgba(0,0,0,.55);
+  }
+  .nav-swap .dot{ box-shadow: 0 0 12px rgba(255,215,120,.55); }
+
+        .nav-audio{ cursor:pointer; background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
+        .nav-audio.on{ background:rgba(255,68,68,.18); border-color:rgba(255,68,68,.6); }
+        .nav-help{ cursor:pointer; background:rgba(0,242,255,.14); border-color:rgba(0,242,255,.35); color:#fff; }
+    
+        .prog-wrap{ position:relative; width:100%; height:14px; border-radius:999px; overflow:hidden;
+            background:rgba(255,255,255,.10); border:1px solid rgba(255,215,120,.25); margin-top:8px; }
+        .prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, rgba(0,242,255,.8), rgba(255,215,120,.9)); box-shadow:0 0 18px rgba(255,215,120,.25); transition:width .35s ease; }
+        .prog-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:#111; font-weight:900; mix-blend-mode:screen; }
+    
+        @media (max-width: 520px){ .brand-name{font-size:22px;} .hud-top{top:10px;} }
+        @media (max-width: 420px){ .brand-name{font-size:20px;} }
+    
+#brand-badge{
+  position:fixed;
+  left: 44px;
+  top: 90px;
+  z-index:260;
+  padding:6px 10px;
+  border:1px solid rgba(255,215,128,.7);
+  border-radius:10px;
+  background:rgba(0,0,0,.55);
+  color:#ffd79a;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:12px;
+  text-shadow:0 0 10px rgba(255,215,128,.3);
+}
+
+
+
+    /* ==== Guide Modal ==== */
+    .guide-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9999;align-items:center;justify-content:center;padding:18px;}
+    .guide-modal.show{display:flex;}
+    .guide-card{width:min(720px,96vw);max-height:86vh;overflow:auto;background:rgba(10,14,18,.96);border:1px solid rgba(255,215,120,.35);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.55);}
+    .guide-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px 14px;border-bottom:1px solid rgba(255,215,120,.18)}
+    .guide-title{font-weight:800;letter-spacing:.5px;color:#ffd88a}
+    .guide-close{background:transparent;border:0;color:#ffd88a;font-size:18px;padding:6px 10px;border-radius:10px}
+    .guide-close:active{transform:scale(.98)}
+    .guide-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid rgba(255,215,120,.14)}
+    .guide-tab{background:rgba(255,255,255,.06);border:1px solid rgba(255,215,120,.22);color:#ffe6b8;padding:8px 10px;border-radius:12px;font-weight:700}
+    .guide-tab:active{transform:scale(.98)}
+    .guide-body{padding:14px;color:#e9eef7;line-height:1.55}
+    .guide-body h3{margin:0 0 10px 0;color:#ffd88a}
+    .guide-body h4{margin:14px 0 8px 0;color:#ffe6b8}
+    .guide-body hr{border:0;border-top:1px solid rgba(255,215,120,.14);margin:14px 0}
+    .guide-body .muted{opacity:.85}
+    .qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .qa-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.28);color:#d6f6ff;padding:10px;border-radius:12px;font-weight:800;text-align:left}
+    .qa-btn:active{transform:scale(.98)}
+    @media (max-width:520px){ .qa-grid{grid-template-columns:1fr;} }
+
+
+    .bar{height:14px; background:#eee; border-radius:999px; overflow:hidden; width:100%;}
+    .bar > div{height:100%; background:#111; width:0%;}
+    .kv{display:grid; grid-template-columns: 160px 1fr; gap:6px 10px; align-items:center;}
+
+
+  .nav-swap{
+    width: 100%;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,215,120,.32);
+  }
+  .nav-swap:hover{ filter: brightness(1.05); }
+
+
+/* --- Swap buttons readability (v2.20.0) --- */
+.nav-btn.swap-bnb{ background: rgba(255, 205, 0, .95) !important; color:#111 !important; border:1px solid rgba(0,0,0,.35) !important; text-shadow:none !important; }
+.nav-btn.swap-usdt{ background: rgba(35, 205, 120, .95) !important; color:#111 !important; border:1px solid rgba(0,0,0,.35) !important; text-shadow:none !important; }
+.nav-btn.swap-bnb:hover,.nav-btn.swap-usdt:hover{ filter: brightness(1.04); }
+
+
+/* HOTFIX: make swap button labels always readable */
+.nav-swap, .nav-swap span{
+  color:#fff !important;
+  opacity:1 !important;
+  font-weight:900 !important;
+  text-shadow:0 0 10px rgba(0,0,0,.85), 0 0 14px rgba(0,255,255,.25);
+}
+
+/* ===== COORD PANEL (V2.20.4) ===== */
+#coord-panel{
+  position: fixed;
+  right: 90px; /* 右移：更靠近曲速縱桿，但保留間距避免互壓 */
+  bottom:315px; /* 往上：不要貼到底部按鈕列 */
+  left: auto;
+  transform: none;
+  width: min(360px, 92vw);
+  max-width: 360px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 215, 0, .35);
+  border-radius: 10px;
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 0 18px rgba(255,215,0,.12);
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 30;
+}
+#coord-panel .cp-title{
+  display:flex;align-items:center;justify-content:space-between;
+  font-weight:900;letter-spacing:.5px;
+  color:#ffd27a;
+  margin-bottom:8px;
+}
+#coord-panel .cp-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:8px 10px;
+  font-size:13px;
+  line-height:1.25;
+}
+#coord-panel .cp-row{
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,200,80,.25);
+  background:rgba(0,0,0,.35);
+}
+#coord-panel .cp-k{
+  opacity:.85; font-size:12px;
+}
+#coord-panel .cp-v{
+  margin-top:2px;
+  font-weight:900;
+  color:#8af3ff;
+  word-break:break-word;
+}
+#coord-panel .cp-v .muted{opacity:.75; font-weight:700; color:#cfd7ff;}
+#coord-panel input{
+  width:100%;
+  border-radius:10px;
+  padding:8px 10px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  outline:none;
+  font-weight:900;
+}
+#coord-panel .cp-actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+#coord-panel .cp-actions button{
+  flex:1;
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.45);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  font-weight:900;
+}
+#coord-panel .cp-actions button:hover{filter:brightness(1.08);}
+
+#coord-modal{
+  position:fixed; inset:0;
+  z-index:120;
+  display:none;
+  background:rgba(0,0,0,.72);
+  pointer-events:auto;
+}
+#coord-modal .cm-box{
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:min(720px, calc(100vw - 22px));
+  height:min(78vh, 680px);
+  border-radius:16px;
+  border:1px solid rgba(255,200,80,.55);
+  background:rgba(0,0,0,.82);
+  box-shadow:0 0 30px rgba(255,190,60,.14);
+  overflow:hidden;
+}
+#coord-modal .cm-head{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 12px;
+  border-bottom:1px solid rgba(255,200,80,.25);
+}
+#coord-modal .cm-head b{color:#ffd27a;}
+#coord-modal .cm-head input{
+  flex:1;
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  outline:none;
+  font-weight:900;
+}
+#coord-modal .cm-head button{
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,200,80,.35);
+  background:rgba(0,0,0,.35);
+  color:#eaf7ff;
+  font-weight:900;
+}
+#coord-modal .cm-list{
+  height:calc(100% - 56px);
+  overflow:auto;
+  padding:10px 12px;
+}
+#coord-modal .cm-item{
+  display:grid;
+  grid-template-columns: 110px 1fr;
+  gap:8px 12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,200,80,.20);
+  background:rgba(0,0,0,.30);
+  margin-bottom:10px;
+}
+#coord-modal .cm-item:hover{filter:brightness(1.08); cursor:pointer;}
+#coord-modal .cm-item .cm-v{font-weight:900; color:#8af3ff;}
+#coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
+#coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
+
+
+/* AUTO 狀態徽章：移入駕駛艙座標面板時改成內嵌樣式 */
+.auto-badge.in-cockpit{
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+  margin: 0 0 8px 0 !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-weight: 800;
+  display: inline-block;
+}
+
+/* ====== 手機窄螢幕：防止左下儀表板與右下駕駛艙互相碰撞 ====== */
+@media (max-width: 520px){
+  #coord-panel{ right: 12px; bottom: 420px; width: min(360px, 94vw); }
+}
+
+/* ====== V2.22.8 ADD: Resource bars + Toast + AutoTag ====== */
+.resource-bars{
+  position: fixed;
+  left: 18px;
+  top: 150px;
+  width: 300px;
+  max-width: 64vw;
+  z-index: 120;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  pointer-events:none;
+}
+.resource-bars .rb{
+  background: rgba(10,10,14,0.72);
+  border: 1px solid rgba(255,215,0,0.45);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.5);
+}
+
+.resource-bars .rb-note{
+  font-family: Orbitron, system-ui, -apple-system, "Segoe UI", Arial;
+  font-size: 11px;
+  opacity: .85;
+  color: rgba(255,215,0,0.85);
+  text-shadow: 0 0 10px rgba(255,215,0,0.25);
+  padding-left: 6px;
+  pointer-events:none;
+}
+
+.resource-bars .rb .row{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'Orbitron';
+  font-size:11px;
+  letter-spacing:0.4px;
+}
+.resource-bars .rb .bar{
+  height:8px; border-radius:999px;
+  background: rgba(255,255,255,0.06);
+  overflow:hidden;
+  margin-top:6px;
+}
+.resource-bars .rb .fill{
+  height:100%;
+  width:0%;
+  background: var(--cyan);
+  transition: width .45s ease;
+}
+.resource-bars .rb.kgen .fill{ background: var(--gold); }
+.resource-bars .rb small{ color:#9cc; opacity:.9; }
+
+/* Auto Tag (near steering) */
+#autoTag{
+  position: fixed;
+  left: 50%;
+  bottom: 156px;
+  transform: translateX(-50%);
+  z-index: 130;
+  font-family:'Orbitron';
+  font-weight:900;
+  font-size:12px;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,255,0.55);
+  background: rgba(0,0,0,0.55);
+  box-shadow: 0 0 18px rgba(0,255,255,0.18);
+  pointer-events:none;
+}
+#autoTag.short{
+  border-color: rgba(255,120,120,0.65);
+  box-shadow: 0 0 18px rgba(255,120,120,0.18);
+}
+
+/* Toast */
+#toast{
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: min(520px, 92vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,215,0,0.45);
+  background: rgba(0,0,0,0.68);
+  color: #fff;
+  font-family: "Noto Sans TC";
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .4px;
+  display:none;
+}
+#toast.show{ display:block; }
+
+
+/* --- UFO Music System --- */
+.nav-btn.nav-music{ border-color:#3ad6ff; box-shadow:0 0 16px rgba(58,214,255,.22); }
+.nav-btn.nav-music-ctl{ padding:10px 12px; min-width:72px; }
+.tiny-btn{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,215,80,.55);
+  color:#ffe4a1;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+.tiny-btn:active{ transform:translateY(1px); }
+
+/* v2.48.0: hide legacy AUTO debug UI */
+#autoTag, #autoBadge{ display:none !important; }
+
+/* ===== V2.6.3 layout retune ===== */
+/* GA 移到中間上方 */
+.ga-matrix{
+  left: 50% !important;
+  right: auto !important;
+  top: 150px !important;
+  transform: translateX(-50%) !important;
+  width: 180px !important;
+  z-index: 140 !important;
+}
+
+/* 主圖置中 */
+#core-anchor{
+  left: 50% !important;
+  top: 52% !important;
+  transform: translate(-50%, -50%) !important;
+  margin-left: 0 !important;
+}
+
+/* 手機時同步 */
+@media (max-width: 720px){
+  .ga-matrix{
+    left: 50% !important;
+    right: auto !important;
+    top: 150px !important;
+    transform: translateX(-50%) !important;
+  }
+  #core-anchor{
+    left: 50% !important;
+    top: 52% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+
+/* ===== V2.6.3 move E=mc² into 質量 row ===== */
+.resource-bars .rb-note{
+  display:none !important;
+}
+.resource-bars .rb.kgen .row span::after{
+  content:"｜E = mc²";
+  color: rgba(255,215,120,.88);
+  margin-left: 6px;
+  font-family: Orbitron, sans-serif;
+  font-size: 10px;
+}
+
+
+/* ===== V2.6.3 MASTER left block ===== */
+:root{
+  --left-x-master: 18px;
+  --left-w-master: 300px;
+}
+
+/* already-confirmed changes */
+.resource-bars .rb-note{ display:none !important; }
+.resource-bars .rb.kgen .row span::after{
+  content:"｜E = mc²";
+  color: rgba(255,215,120,.88);
+  margin-left: 6px;
+  font-family: Orbitron, sans-serif;
+  font-size: 10px;
+}
+
+/* left K-line engine + chart */
+#kline-engine-panel,
+#kline-chart-panel{
+  position: fixed;
+  left: var(--left-x-master);
+  width: var(--left-w-master);
+  max-width: var(--left-w-master);
+  background: rgba(4,10,16,.90);
+  border: 1px solid rgba(255,215,120,.34);
+  border-radius: 14px;
+  box-shadow: 0 0 18px rgba(0,242,255,.06), inset 0 0 18px rgba(255,215,120,.03);
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 122;
+}
+#kline-engine-panel{
+  top: 385px;
+  padding: 10px;
+}
+#kline-chart-panel{
+  top: 640px;
+  padding: 10px;
+  height: 210px;
+  max-height: 210px;
+}
+#kline-engine-panel .ke-head,
+#kline-chart-panel .kc-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color: var(--gold);
+  font-weight:900;
+  font-size:14px;
+  margin-bottom:8px;
+}
+#kline-engine-panel .ke-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+#kline-engine-panel .ke-cell{
+  min-height:54px;
+  border:1px solid rgba(255,215,120,.22);
+  border-radius:12px;
+  padding:6px 8px;
+  background:rgba(0,0,0,.22);
+}
+#kline-engine-panel .ke-label{
+  font-size:10px;
+  color:rgba(255,255,255,.78);
+  line-height:1.0;
+}
+#kline-engine-panel .ke-value{
+  margin-top:4px;
+  font-family:'Orbitron',sans-serif;
+  font-size:15px;
+  color:var(--cyan);
+  font-weight:900;
+  line-height:1.0;
+}
+#kline-engine-panel .ke-value.right{ text-align:right; }
+
+#kline-canvas{
+  width:100%;
+  height:92px;
+  display:block;
+  border-radius:10px;
+  background:
+    linear-gradient(180deg, rgba(0,242,255,.03), rgba(0,0,0,.06)),
+    repeating-linear-gradient(to right, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 1px, transparent 32px),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 24px),
+    rgba(0,0,0,.22);
+  box-shadow: inset 0 0 16px rgba(0,242,255,.08);
+}
+#kline-chart-panel .kc-foot{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-size:11px;
+  line-height:1.05;
+  color:#fff;
+}
+#moon-match{
+  margin-top:5px;
+  padding-top:5px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:11px;
+  line-height:1.05;
+}
+#moon-match-title{
+  color:var(--gold);
+  font-weight:900;
+  margin-bottom:2px;
+}
+#moon-match .addr{
+  color:var(--cyan);
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;
+}
+
+/* keep GA centered above main image */
+.ga-matrix{
+  left: 50% !important;
+  right: auto !important;
+  top: 150px !important;
+  transform: translateX(-50%) !important;
+  width: 180px !important;
+  z-index: 140 !important;
+}
+
+/* keep core image centered */
+#core-anchor{
+  left: 50% !important;
+  top: 52% !important;
+  transform: translate(-50%, -50%) !important;
+  margin-left: 0 !important;
+}
+
+@media (max-width:720px){
+  .ga-matrix{
+    left: 50% !important;
+    top: 150px !important;
+    transform: translateX(-50%) !important;
+  }
+  #core-anchor{
+    left: 50% !important;
+    top: 52% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  #kline-engine-panel,
+  #kline-chart-panel{
+    left: var(--left-x-master);
+    width: var(--left-w-master);
+    max-width: var(--left-w-master);
+  }
+  #kline-engine-panel{ top: 385px; }
+  #kline-chart-panel{ top: 640px; height: 210px; max-height: 210px; }
+}
+
+
+/* ===== V2.6.3 True K-line mode ===== */
+#kline-engine-panel .ke-head,
+#kline-chart-panel .kc-head{
+  letter-spacing:.3px;
+}
+#kline-chart-panel .kc-head .live-tag{
+  color: var(--cyan);
+  font-size: 11px;
+  font-family: 'Orbitron', sans-serif;
+}
+
+
+/* ===== V2.6.3 live ticker + symbol switch ===== */
+#kline-engine-panel .ke-live-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+#kline-engine-panel .ke-live-price{
+  font-family:'Orbitron',sans-serif;
+  color:var(--gold);
+  font-size:16px;
+  font-weight:900;
+}
+#kline-engine-panel .ke-live-symbol{
+  color:var(--cyan);
+  font-size:11px;
+  font-family:'Orbitron',sans-serif;
+}
+
+
+/* ===== V2.6.3 market mode switch ===== */
+#ke-symbol, #ke-market{
+  z-index:9999;
+  pointer-events:auto;
+  position:relative;
+}
+
+#ke-market{
+  background:#081018;
+  color:#7ff3ff;
+  border:1px solid rgba(255,215,120,.28);
+  border-radius:8px;
+  padding:2px 6px;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  margin-right:6px;
+}
+
+
+/* ===== V2.6.3 single K-line engine ===== */
+#ke-symbol{
+  position:relative;
+  z-index:9999;
+  pointer-events:auto;
+}
+#kline-engine-panel .ke-live-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+#kline-engine-panel .ke-live-price{
+  font-family:'Orbitron',sans-serif;
+  color:var(--gold);
+  font-size:16px;
+  font-weight:900;
+}
+#kline-engine-panel .ke-live-symbol{
+  color:var(--cyan);
+  font-size:11px;
+  font-family:'Orbitron',sans-serif;
+}
+
+
+#oracle-plus-dashboard{
+  margin-top:10px;
+  padding:8px;
+  border:1px solid rgba(127,243,255,.18);
+  border-radius:8px;
+  font-size:12px;
+  background:rgba(3,8,18,.35);
+}
+
+
+/* ===== V2.6.3 layout/og patch ===== */
+#oracle-plus-dashboard{position:relative;z-index:2;}
+#kline-engine-panel,#kline-chart-panel{margin-top:8px !important;}
+@media (max-width:768px){
+  #kline-engine-panel{margin-top:-18px !important;}
+}
+
+</style>
+
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 
 <meta property="og:title" content="KGEN 16888 自我演化金融生命體">
 <meta property="og:description" content="K線西遊記・花果山台灣｜16888 廣寒宮">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/">
-<meta property="og:site_name" content="K線西遊記">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 <meta property="og:image:alt" content="KGEN 16888 廣寒宮主視覺">
 <meta name="twitter:card" content="summary_large_image">
@@ -44,7 +843,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.4</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -75,7 +874,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.4</span>
+    <span>宇宙K線引擎｜V2.6.3</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -241,7 +1040,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.4";
+const APP_VERSION = "v2.6.3";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3372,28 +4171,614 @@ document.addEventListener('click', (ev)=>{
 
 
 
+<script>
+/* ===== V2.6.3 True K-line engine (Binance public API) ===== */
+(function(){
+  const TRUE_KLINE = {
+    symbol: 'BTCUSDT',
+    interval: '1h',
+    limit: 8,
+    timer: null
+  };
 
-<!-- removed legacy conflicting kline block -->
+  function $(id){ return document.getElementById(id); }
+  function safeText(id, val){
+    var el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    var r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function num(v){ return Number(v || 0); }
+  function fmtInt(v){ return String(Math.round(Number(v || 0))); }
 
+  async function fetchTrueKlines(){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + TRUE_KLINE.symbol +
+                '&interval=' + TRUE_KLINE.interval + '&limit=' + TRUE_KLINE.limit;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Binance HTTP ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: num(k[1]),
+      high: num(k[2]),
+      low: num(k[3]),
+      close: num(k[4]),
+      volume: num(k[5]),
+      closeTime: k[6]
+    }));
+  }
 
+  function predictFromWheel(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
 
+    const range = Math.max(1, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(1, range - body);
 
-<!-- removed legacy conflicting kline block -->
+    let hitBase = 58;
+    let angleBonus = Math.min(18, angle * 0.11);
+    let trendBonus = body > range * 0.38 ? 8 : 3;
+    let wickPenalty = Math.min(14, wick / range * 18);
+    let score = hitBase + angleBonus + trendBonus - wickPenalty;
+    score = Math.max(61.2, Math.min(88.6, score));
 
+    return {
+      side, angle, range: Math.round(range), wick: Math.round(wick), hit: score
+    };
+  }
 
+  function updatePanel(data){
+    if(!data || !data.length) return;
+    const last = data[data.length - 1];
+    const pred = predictFromWheel(last);
 
+    safeText('ke-side', pred.side);
+    safeText('ke-angle', String(pred.angle));
+    safeText('ke-open', fmtInt(last.open));
+    safeText('ke-high', fmtInt(last.high));
+    safeText('ke-low', fmtInt(last.low));
+    safeText('ke-close', fmtInt(last.close));
+    safeText('ke-range', String(pred.range));
+    safeText('ke-wick', String(pred.wick));
 
-<!-- removed legacy conflicting kline block -->
+    safeText('ke-mode', '真K線');
+    safeText('kc-predict', '預測：' + pred.side);
+    safeText('kc-dir', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval + ' → ' + pred.side + '方K');
+    safeText('kc-hit', '命中率：' + pred.hit.toFixed(1) + '%');
 
+    const moonA = 'A：' + new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const moonB = 'B：' + new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    safeText('moon-a', moonA.replace('A：',''));
+    safeText('moon-b', moonB.replace('B：',''));
 
+    drawTrueKline(data);
+  }
 
+  function drawTrueKline(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
 
-<!-- removed legacy conflicting kline block -->
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const mapY = (v) => padY + (maxH - v) / ((maxH - minL) || 1) * (h - padY*2);
 
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx < data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy = 0; gy < 4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(6, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  async function refreshTrueKline(){
+    try{
+      const data = await fetchTrueKlines();
+      updatePanel(data);
+    }catch(err){
+      safeText('ke-mode', '真K線失敗');
+      safeText('kc-dir', 'Binance 連線失敗');
+      console.warn(err);
+    }
+  }
+
+  function bind(){
+    const s = $('steer-input-val');
+    if(s){
+      s.addEventListener('input', function(){ refreshTrueKline(); });
+    }
+    refreshTrueKline();
+    TRUE_KLINE.timer = setInterval(refreshTrueKline, 30000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
 
 
 <script>
-/* ===== V2.6.4 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.6.3 live kline + ticker ===== */
+(function(){
+  const TRUE_KLINE = {
+    symbol: 'BTCUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function safeText(id, val){
+    const el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    const r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function num(v){ return Number(v || 0); }
+
+  async function fetchTrueKlines(){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + TRUE_KLINE.symbol +
+                '&interval=' + TRUE_KLINE.interval + '&limit=' + TRUE_KLINE.limit;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Binance HTTP ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: num(k[1]),
+      high: num(k[2]),
+      low: num(k[3]),
+      close: num(k[4]),
+      volume: num(k[5]),
+      closeTime: k[6]
+    }));
+  }
+
+  async function fetchTicker(){
+    const url = 'https://api.binance.com/api/v3/ticker/price?symbol=' + TRUE_KLINE.symbol;
+    const res = await fetch(url, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Ticker HTTP ' + res.status);
+    const j = await res.json();
+    return num(j.price);
+  }
+
+  function predictFromWheel(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(1, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(1, range - body);
+    let hitBase = 58;
+    let angleBonus = Math.min(18, angle * 0.11);
+    let trendBonus = body > range * 0.38 ? 8 : 3;
+    let wickPenalty = Math.min(14, wick / range * 18);
+    let score = hitBase + angleBonus + trendBonus - wickPenalty;
+    score = Math.max(61.2, Math.min(88.6, score));
+    return {side, angle, range: Math.round(range), wick: Math.round(wick), hit: score};
+  }
+
+  function formatBySymbol(v){
+    if(TRUE_KLINE.symbol === 'BTCUSDT') return v.toFixed(2);
+    if(TRUE_KLINE.symbol === 'ETHUSDT') return v.toFixed(2);
+    return v.toFixed(3);
+  }
+
+  function updatePanel(data, livePrice){
+    if(!data || !data.length) return;
+    const last = data[data.length - 1];
+    const pred = predictFromWheel(last);
+
+    safeText('ke-side', pred.side);
+    safeText('ke-angle', String(pred.angle));
+    safeText('ke-open', formatBySymbol(last.open));
+    safeText('ke-high', formatBySymbol(last.high));
+    safeText('ke-low', formatBySymbol(last.low));
+    safeText('ke-close', formatBySymbol(last.close));
+    safeText('ke-range', String(pred.range));
+    safeText('ke-wick', String(pred.wick));
+
+    safeText('ke-mode', '真K線');
+    safeText('kc-predict', '預測：' + pred.side);
+    safeText('kc-dir', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval + ' → ' + pred.side + '方K');
+    safeText('kc-hit', '命中率：' + pred.hit.toFixed(1) + '%');
+
+    safeText('ke-live-symbol', TRUE_KLINE.symbol + ' / ' + TRUE_KLINE.interval);
+    if(typeof livePrice === 'number' && !Number.isNaN(livePrice)){
+      safeText('ke-live-price', formatBySymbol(livePrice));
+    }
+
+    const moonA = new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const moonB = new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    safeText('moon-a', moonA);
+    safeText('moon-b', moonB);
+
+    drawTrueKline(data);
+  }
+
+  function drawTrueKline(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const mapY = (v) => padY + (maxH - v) / ((maxH - minL) || 1) * (h - padY*2);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx < data.length; gx++){
+      const x = padX + gx * ((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy = 0; gy < 4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(6, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  async function refreshTrueKline(){
+    try{
+      const [data, live] = await Promise.all([fetchTrueKlines(), fetchTicker()]);
+      updatePanel(data, live);
+    }catch(err){
+      safeText('ke-mode', '真K線失敗');
+      safeText('kc-dir', 'Binance 連線失敗');
+      console.warn(err);
+    }
+  }
+
+  function bind(){
+    const s = $('steer-input-val');
+    const sel = $('ke-symbol');
+    if(s) s.addEventListener('input', refreshTrueKline);
+    if(sel){
+      sel.value = TRUE_KLINE.symbol;
+      sel.addEventListener('change', function(){
+        TRUE_KLINE.symbol = this.value;
+        refreshTrueKline();
+      });
+    }
+    refreshTrueKline();
+    TRUE_KLINE.timer = setInterval(refreshTrueKline, 5000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+/* ===== V2.6.3 dual market engine ===== */
+(function(){
+
+let marketMode="binance";
+let symbol="BTCUSDT";
+
+function $(id){return document.getElementById(id);}
+
+function setText(id,v){
+ const e=$(id);
+ if(e) e.textContent=v;
+}
+
+function rand(n){return Math.random()*n}
+
+async function fetchBinance(){
+ const r=await fetch("https://api.binance.com/api/v3/klines?symbol="+symbol+"&interval=1m&limit=12");
+ const j=await r.json();
+ return j.map(k=>({
+  open:parseFloat(k[1]),
+  high:parseFloat(k[2]),
+  low:parseFloat(k[3]),
+  close:parseFloat(k[4])
+ }));
+}
+
+function genKGEN(){
+ let base=16888;
+ let arr=[];
+ for(let i=0;i<12;i++){
+  let o=base+rand(60)-30;
+  let c=o+rand(40)-20;
+  let h=Math.max(o,c)+rand(20);
+  let l=Math.min(o,c)-rand(20);
+  arr.push({open:o,high:h,low:l,close:c});
+ }
+ return arr;
+}
+
+function draw(data){
+ const c=$("kline-canvas");
+ if(!c) return;
+ const ctx=c.getContext("2d");
+ const w=c.width,h=c.height;
+ ctx.clearRect(0,0,w,h);
+
+ const max=Math.max(...data.map(d=>d.high));
+ const min=Math.min(...data.map(d=>d.low));
+
+ const pad=10;
+ const map=v=>pad+(max-v)/(max-min)*(h-pad*2);
+
+ const step=(w-pad*2)/data.length;
+
+ data.forEach((d,i)=>{
+  const x=pad+i*step+step/2;
+  const yH=map(d.high),yL=map(d.low),yO=map(d.open),yC=map(d.close);
+
+  ctx.strokeStyle=d.close>=d.open?"#7ff3ff":"#ffd27f";
+  ctx.beginPath();ctx.moveTo(x,yH);ctx.lineTo(x,yL);ctx.stroke();
+
+  ctx.fillStyle=d.close>=d.open?"rgba(120,245,255,.4)":"rgba(255,210,120,.35)";
+  const top=Math.min(yO,yC);
+  const bh=Math.abs(yC-yO)||4;
+  ctx.fillRect(x-6,top,12,bh);
+ });
+
+ const last=data[data.length-1];
+
+ setText("ke-open",last.open.toFixed(2));
+ setText("ke-high",last.high.toFixed(2));
+ setText("ke-low",last.low.toFixed(2));
+ setText("ke-close",last.close.toFixed(2));
+
+}
+
+async function update(){
+
+ let data;
+
+ if(marketMode==="binance"){
+  try{
+   data=await fetchBinance();
+  }catch(e){
+   data=genKGEN();
+  }
+ }else{
+  data=genKGEN();
+ }
+
+ draw(data);
+
+}
+
+function bind(){
+
+ const m=$("ke-market");
+ const s=$("ke-symbol");
+
+ if(m){
+  m.addEventListener("change",function(){
+   marketMode=this.value;
+   update();
+  });
+ }
+
+ if(s){
+  s.addEventListener("change",function(){
+   symbol=this.value;
+   update();
+  });
+ }
+
+ update();
+ setInterval(update,4000);
+}
+
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",bind);
+}else{
+ bind();
+}
+
+})();
+</script>
+
+
+<script>
+/* ===== V2.6.3 stable market lock ===== */
+(function(){
+
+let marketMode="kgen";   // default fixed
+let symbol="BTCUSDT";
+let lockedData=null;
+
+function $(id){return document.getElementById(id);}
+
+function setText(id,v){
+ const e=$(id);
+ if(e) e.textContent=v;
+}
+
+function rand(n){return Math.random()*n}
+
+async function fetchBinance(){
+ const r=await fetch("https://api.binance.com/api/v3/klines?symbol="+symbol+"&interval=1m&limit=12");
+ const j=await r.json();
+ return j.map(k=>({
+  open:parseFloat(k[1]),
+  high:parseFloat(k[2]),
+  low:parseFloat(k[3]),
+  close:parseFloat(k[4])
+ }));
+}
+
+function genKGEN(){
+ let base=16888;
+ let arr=[];
+ for(let i=0;i<12;i++){
+  let o=base+rand(60)-30;
+  let c=o+rand(40)-20;
+  let h=Math.max(o,c)+rand(20);
+  let l=Math.min(o,c)-rand(20);
+  arr.push({open:o,high:h,low:l,close:c});
+ }
+ return arr;
+}
+
+function draw(data){
+ const c=$("kline-canvas");
+ if(!c) return;
+ const ctx=c.getContext("2d");
+ const w=c.width,h=c.height;
+ ctx.clearRect(0,0,w,h);
+
+ const max=Math.max(...data.map(d=>d.high));
+ const min=Math.min(...data.map(d=>d.low));
+
+ const pad=10;
+ const map=v=>pad+(max-v)/(max-min)*(h-pad*2);
+ const step=(w-pad*2)/data.length;
+
+ data.forEach((d,i)=>{
+  const x=pad+i*step+step/2;
+  const yH=map(d.high),yL=map(d.low),yO=map(d.open),yC=map(d.close);
+
+  ctx.strokeStyle=d.close>=d.open?"#7ff3ff":"#ffd27f";
+  ctx.beginPath();ctx.moveTo(x,yH);ctx.lineTo(x,yL);ctx.stroke();
+
+  ctx.fillStyle=d.close>=d.open?"rgba(120,245,255,.4)":"rgba(255,210,120,.35)";
+  const top=Math.min(yO,yC);
+  const bh=Math.abs(yC-yO)||4;
+  ctx.fillRect(x-6,top,12,bh);
+ });
+
+ const last=data[data.length-1];
+
+ setText("ke-open",last.open.toFixed(2));
+ setText("ke-high",last.high.toFixed(2));
+ setText("ke-low",last.low.toFixed(2));
+ setText("ke-close",last.close.toFixed(2));
+}
+
+async function update(){
+
+ if(lockedData){
+   draw(lockedData);
+   return;
+ }
+
+ let data;
+
+ if(marketMode==="binance"){
+   data=await fetchBinance();
+ }else{
+   data=genKGEN();
+ }
+
+ lockedData=data; // lock until user changes mode
+ draw(data);
+
+}
+
+function resetLock(){
+ lockedData=null;
+}
+
+function bind(){
+
+ const m=$("ke-market");
+ const s=$("ke-symbol");
+
+ if(m){
+  m.value=marketMode;
+  m.addEventListener("change",function(){
+   marketMode=this.value;
+   resetLock();
+   update();
+  });
+ }
+
+ if(s){
+  s.value=symbol;
+  s.addEventListener("change",function(){
+   symbol=this.value;
+   resetLock();
+   update();
+  });
+ }
+
+ update();
+}
+
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",bind);
+}else{
+ bind();
+}
+
+})();
+</script>
+
+
+<script>
+/* ===== V2.6.3 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -3722,7 +5107,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== V2.6.4 Oracle Plus ===== */
+/* ===== V2.6.3 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -3844,14 +5229,224 @@ setInterval(update, 20000);
 </script>
 
 
+<script>
+/* ===== V2.6.3 split KGEN clean oracle ===== */
+(function(){
+  const STATE = {
+    symbol: 'BNBUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null,
+    pair: '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2',
+    kgen: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be'.toLowerCase(),
+    wbnb: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'.toLowerCase(),
+    rpc: 'https://bsc-dataseed.binance.org/',
+    kgenHistory: []
+  };
+  const PAIR_ABI = [
+    'function token0() view returns (address)',
+    'function token1() view returns (address)',
+    'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+    'event Swap(address indexed sender,uint amount0In,uint amount1In,uint amount0Out,uint amount1Out,address indexed to)'
+  ];
+  const ERC20 = ['function totalSupply() view returns (uint256)'];
 
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el = $(id); if(el) el.textContent = v; }
+  function getDeg(){ const r = $('steer-input-val'); return r ? (parseFloat(r.value) || 0) : 0; }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
+  function fmt(v){
+    const n = Number(v || 0);
+    if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
+    if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
+    return n.toFixed(2);
+  }
+  function loadHist(){
+    try{
+      const raw = localStorage.getItem('kgen_lp_history_v262');
+      const arr = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
+    }catch(e){}
+  }
+  function saveHist(){
+    try{ localStorage.setItem('kgen_lp_history_v262', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+  }
+  async function fetchBinanceTicker(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + symbol, {cache:'no-store'});
+    if(!r.ok) throw new Error('ticker ' + r.status);
+    const j = await r.json();
+    return Number(j.price);
+  }
+  async function fetchBinanceKlines(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/klines?symbol=' + symbol + '&interval=' + STATE.interval + '&limit=' + STATE.limit, {cache:'no-store'});
+    if(!r.ok) throw new Error('klines ' + r.status);
+    const arr = await r.json();
+    return arr.map(k => ({
+      openTime: Number(k[0]), open: Number(k[1]), high: Number(k[2]),
+      low: Number(k[3]), close: Number(k[4]), closeTime: Number(k[6])
+    }));
+  }
+  async function getLpData(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(STATE.rpc);
+    const pair = new ethers.Contract(STATE.pair, PAIR_ABI, provider);
+    const [t0,t1,res,bnbUsd] = await Promise.all([
+      pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
+    ]);
+    const r0 = Number(res[0].toString());
+    const r1 = Number(res[1].toString());
+    const t0l = String(t0).toLowerCase();
+    const t1l = String(t1).toLowerCase();
 
-
-
+    let kgenRaw, wbnbRaw, kgenPerBnb;
+    if(t0l === STATE.kgen && t1l === STATE.wbnb){
+      kgenRaw = r0; wbnbRaw = r1; kgenPerBnb = r0 / r1;
+    }else if(t1l === STATE.kgen && t0l === STATE.wbnb){
+      kgenRaw = r1; wbnbRaw = r0; kgenPerBnb = r1 / r0;
+    }else{
+      throw new Error('LP pair mismatch');
+    }
+    const price = bnbUsd / kgenPerBnb;
+    const poolKgen = kgenRaw / 1e18;
+    const poolWbnb = wbnbRaw / 1e18;
+    const tvl = poolWbnb * bnbUsd * 2;
+    const token = new ethers.Contract(STATE.kgen, ERC20, provider);
+    const supply = Number((await token.totalSupply()).toString()) / 1e18;
+    const mcap = supply * price;
+    const block = await provider.getBlockNumber();
+    return {price, poolKgen, poolWbnb, tvl, mcap, block};
+  }
+  function appendKgen(price){
+    STATE.kgenHistory.push({t: Date.now(), p: Number(price)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
+    saveHist();
+  }
+  function buildKgenCandles(price){
+    appendKgen(price);
+    const hist = STATE.kgenHistory.slice(-12);
+    const candles = hist.map((h, i) => {
+      const prev = hist[Math.max(0, i-1)]?.p ?? h.p;
+      const next = hist[Math.min(hist.length-1, i+1)]?.p ?? h.p;
+      return {
+        openTime: h.t - 60000,
+        open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next),
+        close: h.p, closeTime: h.t
+      };
+    });
+    while(candles.length < 12){
+      const f = candles[0] || {openTime:Date.now(), open:price, high:price, low:price, close:price, closeTime:Date.now()};
+      candles.unshift({openTime:f.openTime-60000, open:f.open, high:f.high, low:f.low, close:f.close, closeTime:f.closeTime-60000});
+    }
+    return candles.slice(-12);
+  }
+  function buildBaseCandles(){
+    const base = 16888;
+    const now = Date.now();
+    return Array.from({length:12}).map((_, i) => ({
+      openTime: now - (12-i)*60000, open: base, high: base, low: base, close: base, closeTime: now - (11-i)*60000
+    }));
+  }
+  function predict(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(0.000001, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(0.000001, range - body);
+    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body/range)*7) - Math.min(12, (wick/range)*8);
+    hit = Math.max(63.5, Math.min(91.5, hit));
+    return {side, angle, range, wick, hit};
+  }
+  function draw(data){
+    const canvas = $('kline-canvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const padX=12,padY=10;
+    const maxH = Math.max.apply(null, data.map(d=>d.high));
+    const minL = Math.min.apply(null, data.map(d=>d.low));
+    const span = (maxH-minL)||1;
+    const y = v => padY + (maxH-v)/span*(h-padY*2);
+    ctx.strokeStyle='rgba(255,255,255,.08)';
+    for(let i=0;i<data.length;i++){
+      const x=padX+i*((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
+    }
+    const spacing=(w-padX*2)/data.length, candleW=Math.min(18, spacing*0.58);
+    data.forEach((d,i)=>{
+      const x=padX+i*spacing+spacing/2, yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const up=d.close>=d.open;
+      ctx.strokeStyle=up?'rgba(120,245,255,.96)':'rgba(255,210,120,.96)';
+      ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      ctx.fillStyle=up?'rgba(120,245,255,.35)':'rgba(255,210,120,.28)';
+      const top=Math.min(yO,yC), bh=Math.max(3, Math.abs(yC-yO));
+      ctx.fillRect(x-candleW/2, top, candleW, bh); ctx.strokeRect(x-candleW/2, top, candleW, bh);
+    });
+  }
+  function updatePanel(data, live, modeLabel, liveLabel){
+    const last=data[data.length-1]; if(!last) return;
+    const p=predict(last);
+    setText('ke-side', p.side); setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open)); setText('ke-high', fmt(last.high)); setText('ke-low', fmt(last.low)); setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range)); setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', modeLabel); setText('ke-live-symbol', liveLabel); setText('ke-live-price', fmt(live));
+    setText('kc-predict', '預測：'+p.side); setText('kc-dir', liveLabel+' → '+p.side+'方K'); setText('kc-hit', '命中率：'+p.hit.toFixed(1)+'%');
+    const tA = new Date(last.openTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    const tB = new Date(last.closeTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    setText('moon-a', tA); setText('moon-b', tB);
+    draw(data);
+  }
+  async function updateOracle(lp){
+    const ct = $('ct-in'); if(ct) ct.value = Number(lp.price).toFixed(6);
+    setText('base-16888', '16888.00');
+    setText('lp-liq', '$' + Math.round(lp.tvl).toLocaleString());
+    setText('kgen-mcap', '$' + Math.round(lp.mcap).toLocaleString());
+    setText('pool-kgen', Math.round(lp.poolKgen).toLocaleString());
+    setText('pool-wbnb', Number(lp.poolWbnb).toFixed(4));
+    setText('last-swap', '鏈上同步');
+    setText('last-block', String(lp.block));
+  }
+  async function refresh(){
+    try{
+      if(STATE.symbol === 'KGENLP'){
+        const lp = await getLpData();
+        await updateOracle(lp);
+        const data = buildKgenCandles(lp.price);
+        updatePanel(data, lp.price, '真 LP 價', 'KGENLP / USD');
+      }else if(STATE.symbol === 'KGEN16888'){
+        const data = buildBaseCandles();
+        updatePanel(data, 16888, '宇宙基準價', 'KGEN16888 / BASE');
+      }else{
+        const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
+        updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
+      }
+    }catch(err){
+      console.warn(err);
+      setText('ke-mode', '讀取失敗');
+      setText('kc-dir', '市場資料讀取失敗');
+    }
+  }
+  function bind(){
+    loadHist();
+    const sel = $('ke-symbol');
+    const steer = $('steer-input-val');
+    if(sel){
+      sel.value = STATE.symbol;
+      sel.addEventListener('change', function(){ STATE.symbol = this.value; refresh(); });
+    }
+    if(steer){ steer.addEventListener('input', refresh); }
+    refresh();
+    if(STATE.timer) clearInterval(STATE.timer);
+    STATE.timer = setInterval(refresh, 15000);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+})();
+</script>
 
 
 <script>
-/* ===== V2.6.4 split KGEN clean oracle ===== */
+/* ===== V2.6.3 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -3884,13 +5479,13 @@ setInterval(update, 20000);
   }
   function loadHist(){
     try{
-      const raw = localStorage.getItem('kgen_lp_history_v264');
+      const raw = localStorage.getItem('kgen_lp_history_v263');
       const arr = raw ? JSON.parse(raw) : [];
       if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
     }catch(e){}
   }
   function saveHist(){
-    try{ localStorage.setItem('kgen_lp_history_v264', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+    try{ localStorage.setItem('kgen_lp_history_v263', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
   }
   async function fetchBinanceTicker(symbol){
     const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + symbol, {cache:'no-store'});
