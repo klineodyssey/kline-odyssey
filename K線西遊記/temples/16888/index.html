@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.54.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.54.0 layout retune ===== */
+/* ===== V2.6.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.54.0 move E=mc² into 質量 row ===== */
+/* ===== V2.6.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.54.0 MASTER left block ===== */
+/* ===== V2.6.0 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -711,7 +711,7 @@
 }
 
 
-/* ===== V2.54.0 True K-line mode ===== */
+/* ===== V2.6.0 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +723,7 @@
 }
 
 
-/* ===== V2.54.0 live ticker + symbol switch ===== */
+/* ===== V2.6.0 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +746,7 @@
 }
 
 
-/* ===== V2.54.0 market mode switch ===== */
+/* ===== V2.6.0 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -765,7 +765,7 @@
 }
 
 
-/* ===== V2.54.0 single K-line engine ===== */
+/* ===== V2.6.0 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -816,7 +816,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.54.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -847,7 +847,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.54.0</span>
+    <span>宇宙K線引擎｜V2.6.0</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1012,7 +1012,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.54.0";
+const APP_VERSION = "v2.6.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4142,7 +4142,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.54.0 True K-line engine (Binance public API) ===== */
+/* ===== V2.6.0 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4305,7 +4305,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.54.0 live kline + ticker ===== */
+/* ===== V2.6.0 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4484,7 +4484,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.54.0 dual market engine ===== */
+/* ===== V2.6.0 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4612,7 +4612,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.54.0 stable market lock ===== */
+/* ===== V2.6.0 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4748,7 +4748,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.54.0 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.6.0 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5061,6 +5061,139 @@ if(m) m.innerText="$"+mcap.toFixed(0)
 update()
 setInterval(update,20000)
 
+})();
+</script>
+
+
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px">
+<b>DeFi Oracle Plus</b><br>
+池內 KGEN：<span id="pool-kgen">--</span><br>
+池內 WBNB：<span id="pool-wbnb">--</span><br>
+TVL：<span id="pool-tvl">--</span><br>
+最近交換：<span id="last-swap">--</span><br>
+最近區塊：<span id="last-block">--</span>
+</div>
+
+
+<script>
+/* ===== V2.6.0 Oracle Plus ===== */
+(async function(){
+const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
+const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
+const WBNB="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase();
+const RPC="https://bsc-dataseed.binance.org/";
+
+if(!window.ethers) return;
+
+const provider=new ethers.providers.JsonRpcProvider(RPC);
+const pairABI=[
+ 'function token0() view returns(address)',
+ 'function token1() view returns(address)',
+ 'function getReserves() view returns(uint112,uint112,uint32)',
+ 'event Swap(address indexed sender,uint amount0In,uint amount1In,uint amount0Out,uint amount1Out,address indexed to)'
+];
+const erc20=['function totalSupply() view returns(uint256)'];
+const pair=new ethers.Contract(PAIR,pairABI,provider);
+
+function setText(id,val){
+ const el=document.getElementById(id);
+ if(el) el.textContent=val;
+}
+
+async function binanceBNB(){
+ const r=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
+ const j=await r.json();
+ return Number(j.price);
+}
+
+function fmt(n, d=2){
+ return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d, minimumFractionDigits:d});
+}
+
+async function getLastSwap(token0IsKgen){
+ try{
+   const current=await provider.getBlockNumber();
+   const logs=await pair.queryFilter(pair.filters.Swap(), current-2500, current);
+   if(!logs.length) return {text:'無近期資料', block: current};
+   const ev=logs[logs.length-1];
+   const a=ev.args;
+   const amount0In=Number(a.amount0In.toString());
+   const amount1In=Number(a.amount1In.toString());
+   const amount0Out=Number(a.amount0Out.toString());
+   const amount1Out=Number(a.amount1Out.toString());
+
+   let text='--';
+   if(token0IsKgen){
+      if(amount1In>0 && amount0Out>0){
+        text='買入 KGEN';
+      }else if(amount0In>0 && amount1Out>0){
+        text='賣出 KGEN';
+      }
+   }else{
+      if(amount0In>0 && amount1Out>0){
+        text='買入 KGEN';
+      }else if(amount1In>0 && amount0Out>0){
+        text='賣出 KGEN';
+      }
+   }
+   return {text, block: ev.blockNumber};
+ }catch(e){
+   return {text:'讀取失敗', block:'--'};
+ }
+}
+
+async function update(){
+ try{
+   const [t0,t1,res,bnbUsd] = await Promise.all([
+     pair.token0(), pair.token1(), pair.getReserves(), binanceBNB()
+   ]);
+
+   const token0IsKgen = String(t0).toLowerCase() === KGEN;
+   const r0 = Number(res[0].toString());
+   const r1 = Number(res[1].toString());
+
+   let kgenRaw, wbnbRaw, kgenPerBnb;
+   if(token0IsKgen && String(t1).toLowerCase() === WBNB){
+      kgenRaw = r0;
+      wbnbRaw = r1;
+      kgenPerBnb = r0 / r1;
+   }else if(String(t1).toLowerCase() === KGEN && String(t0).toLowerCase() === WBNB){
+      kgenRaw = r1;
+      wbnbRaw = r0;
+      kgenPerBnb = r1 / r0;
+   }else{
+      throw new Error('LP pair mismatch');
+   }
+
+   const kgenPrice = bnbUsd / kgenPerBnb;
+   const poolKgen = kgenRaw / 1e18;
+   const poolWbnb = wbnbRaw / 1e18;
+   const tvl = poolWbnb * bnbUsd * 2;
+
+   const token = new ethers.Contract(KGEN, erc20, provider);
+   const supply = Number(await token.totalSupply().toString()) / 1e18;
+   const mcap = supply * kgenPrice;
+
+   const swap = await getLastSwap(token0IsKgen);
+
+   const ct = document.getElementById('ct-in');
+   if(ct) ct.value = kgenPrice.toFixed(6);
+   setText('lp-liq', '$' + fmt(tvl,0));
+   setText('kgen-mcap', '$' + fmt(mcap,0));
+
+   setText('pool-kgen', fmt(poolKgen,0));
+   setText('pool-wbnb', fmt(poolWbnb,4));
+   setText('pool-tvl', '$' + fmt(tvl,0));
+   setText('last-swap', swap.text);
+   setText('last-block', String(swap.block));
+ }catch(e){
+   console.log(e);
+   setText('last-swap', '讀取失敗');
+ }
+}
+
+update();
+setInterval(update, 20000);
 })();
 </script>
 
