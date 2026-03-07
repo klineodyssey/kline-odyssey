@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.70.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.70.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.70.0 layout retune ===== */
+/* ===== V2.70.1 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.70.0 move E=mc² into 質量 row ===== */
+/* ===== V2.70.1 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.70.0 MASTER left block ===== */
+/* ===== V2.70.1 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -711,7 +711,7 @@
 }
 
 
-/* ===== V2.70.0 True K-line mode ===== */
+/* ===== V2.70.1 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +723,7 @@
 }
 
 
-/* ===== V2.70.0 live ticker + symbol switch ===== */
+/* ===== V2.70.1 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +746,7 @@
 }
 
 
-/* ===== V2.70.0 market mode switch ===== */
+/* ===== V2.70.1 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -765,7 +765,7 @@
 }
 
 
-/* ===== V2.70.0 unified market engine ===== */
+/* ===== V2.70.1 unified market engine ===== */
 #ke-market, #ke-symbol{
   position:relative;
   z-index:9999;
@@ -799,7 +799,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.70.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.70.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -829,8 +829,20 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.70.0</span>
-    <span><select id="ke-market"><option value="kgen">KGEN</option><option value="binance">Binance</option></select> <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;"><option value="BTCUSDT">BTCUSDT</option><option value="BNBUSDT">BNBUSDT</option><option value="ETHUSDT">ETHUSDT</option></select> <span id="ke-mode">真K線</span></span>
+    <span>宇宙K線引擎｜V2.70.1</span>
+    <span>
+      <select id="ke-market" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
+        <option value="binance">Binance</option>
+        <option value="kgenlp">KGEN LP</option>
+      </select>
+      <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
+        <option value="BNBUSDT">BNBUSDT</option>
+        <option value="BTCUSDT">BTCUSDT</option>
+        <option value="ETHUSDT">ETHUSDT</option>
+        <option value="KGENLP">KGENLP</option>
+      </select>
+      <span id="ke-mode">真市場</span>
+    </span>
   </div>
   <div class="ke-grid">
     <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
@@ -841,9 +853,9 @@
     <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
     <div class="ke-cell"><div class="ke-label">Range</div><div class="ke-value" id="ke-range">--</div></div>
     <div class="ke-cell"><div class="ke-label">Wick</div><div class="ke-value" id="ke-wick">--</div></div>
-  
+  </div>
   <div class="ke-live-row">
-    <span class="ke-live-symbol" id="ke-live-symbol">BTCUSDT / 1m</span>
+    <span class="ke-live-symbol" id="ke-live-symbol">BNBUSDT / 1m</span>
     <span class="ke-live-price" id="ke-live-price">--</span>
   </div>
 </div>
@@ -986,7 +998,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.70.0";
+const APP_VERSION = "v2.70.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4260,7 +4272,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.70.0 True K-line engine (Binance public API) ===== */
+/* ===== V2.70.1 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4423,7 +4435,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.70.0 live kline + ticker ===== */
+/* ===== V2.70.1 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4602,7 +4614,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.70.0 dual market engine ===== */
+/* ===== V2.70.1 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4730,7 +4742,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.70.0 stable market lock ===== */
+/* ===== V2.70.1 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4866,7 +4878,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.70.0 UNIFIED MARKET ENGINE ===== */
+/* ===== V2.70.1 UNIFIED MARKET ENGINE ===== */
 (function(){
   const STATE = {
     market: 'binance',
