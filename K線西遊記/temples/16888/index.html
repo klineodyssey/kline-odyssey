@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.0.10</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.0.11</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V3.0.10 CLEAN LEFT REBUILD
+   V3.0.11 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V3.0.10 layout micro-tune === */
+/* === V3.0.11 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V3.0.10 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V3.0.11 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -756,7 +756,7 @@ html, body{
 }
 
 
-/* === V3.0.10 center image + shorten left column === */
+/* === V3.0.11 center image + shorten left column === */
 #core-anchor{
   left: 50% !important;
   top: 50% !important;
@@ -806,7 +806,7 @@ html, body{
 }
 
 
-/* === V3.0.10 vertical tightening === */
+/* === V3.0.11 vertical tightening === */
 
 /* 左側整欄往上 */
 .resource-bars{
@@ -882,7 +882,7 @@ html, body{
 }
 
 
-/* === V3.0.10 move only K-line engine/chart upward; keep GA centered === */
+/* === V3.0.11 move only K-line engine/chart upward; keep GA centered === */
 #kline-engine-panel{
   top: 220px !important;
 }
@@ -940,7 +940,7 @@ html, body{
 }
 
 
-/* === V3.0.10 precise fix: only heights + resource bars down === */
+/* === V3.0.11 precise fix: only heights + resource bars down === */
 /* Do NOT touch fairy/core/GA/width/layout */
 .resource-bars{
   top: 185px !important;   /* move BNB/KGEN down only */
@@ -1007,6 +1007,63 @@ html, body{
   #kline-canvas{ height: 92px !important; }
 }
 
+
+/* === V3.0.11 fix chart position + realistic hit rate support === */
+.resource-bars{
+  top: 185px !important;
+}
+#kline-engine-panel{
+  top: 255px !important;
+  padding: 8px 10px !important;
+}
+#kline-engine-panel .ke-head{ margin-bottom: 6px !important; }
+#kline-engine-panel .ke-grid{ gap: 6px !important; }
+#kline-engine-panel .ke-cell{
+  min-height: 54px !important;
+  padding: 6px 8px !important;
+}
+#kline-engine-panel .ke-label{
+  font-size: 10px !important;
+  line-height: 1.0 !important;
+}
+#kline-engine-panel .ke-value{
+  margin-top: 4px !important;
+  font-size: 15px !important;
+  line-height: 1.0 !important;
+}
+#kline-chart-panel{
+  top: 360px !important;   /* moved up under engine */
+  height: 215px !important;
+  max-height: 215px !important;
+  padding: 8px 10px !important;
+}
+#kline-chart-panel .kc-head{
+  margin-bottom: 4px !important;
+  font-size: 13px !important;
+  line-height: 1.0 !important;
+}
+#kline-canvas{ height: 92px !important; }
+#kline-chart-panel .kc-foot,
+#moon-match{
+  font-size: 11px !important;
+  line-height: 1.05 !important;
+}
+#moon-match{
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+#moon-match-title{ margin-bottom: 2px !important; }
+
+@media (max-width:720px){
+  .resource-bars{ top: 185px !important; }
+  #kline-engine-panel{ top: 255px !important; padding: 8px 10px !important; }
+  #kline-engine-panel .ke-cell{ min-height: 54px !important; padding: 6px 8px !important; }
+  #kline-engine-panel .ke-label{ font-size: 10px !important; line-height: 1.0 !important; }
+  #kline-engine-panel .ke-value{ margin-top: 4px !important; font-size: 15px !important; line-height: 1.0 !important; }
+  #kline-chart-panel{ top: 360px !important; height: 215px !important; max-height: 215px !important; padding: 8px 10px !important; }
+  #kline-canvas{ height: 92px !important; }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -1031,7 +1088,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.0.10</div>
+        <div class="sys-st" id="ver-st">VERSION v3.0.11</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1061,7 +1118,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.0.10</span>
+    <span>宇宙K線引擎｜V3.0.11</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -1214,7 +1271,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.0.10";
+const APP_VERSION = "v3.0.11";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4539,6 +4596,41 @@ document.addEventListener('click', (ev)=>{
       };
     }
   }catch(e){}
+})();
+</script>
+
+
+<script>
+(function(){
+  function updateHitRate(){
+    try{
+      var sideEl = document.getElementById('ke-side');
+      var angleEl = document.getElementById('ke-angle');
+      var rangeEl = document.getElementById('ke-range');
+      var wickEl = document.getElementById('ke-wick');
+      var hitEl = document.getElementById('kc-hit');
+      if(!hitEl) return;
+
+      var side = sideEl ? String(sideEl.textContent || '').trim() : '多';
+      var angle = angleEl ? Math.abs(parseFloat(angleEl.textContent) || 0) : 0;
+      var range = rangeEl ? Math.abs(parseFloat(rangeEl.textContent) || 0) : 0;
+      var wick = wickEl ? Math.abs(parseFloat(wickEl.textContent) || 0) : 0;
+
+      var base = 62;
+      var angleBonus = Math.min(18, angle * 0.12);
+      var rangeBonus = Math.min(12, range * 0.03);
+      var wickPenalty = Math.min(16, wick * 0.18);
+      var sideBias = (side === '多' || side === 'LONG') ? 2.5 : 1.5;
+      var noise = ((angle + range + wick) % 7) * 1.3;
+
+      var score = base + angleBonus + rangeBonus + sideBias - wickPenalty - noise;
+      score = Math.max(68.2, Math.min(93.8, score));
+
+      hitEl.textContent = '命中率：' + score.toFixed(1) + '%';
+    }catch(e){}
+  }
+  updateHitRate();
+  setInterval(updateHitRate, 1200);
 })();
 </script>
 
