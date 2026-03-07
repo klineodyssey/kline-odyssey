@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.5</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.8.5 layout retune ===== */
+/* ===== V2.8.6 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.8.5 move E=mc² into 質量 row ===== */
+/* ===== V2.8.6 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.8.5 MASTER left block ===== */
+/* ===== V2.8.6 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -584,13 +584,13 @@
   z-index: 122;
 }
 #kline-engine-panel{
-  top: 345px;
+  top: 350px;
   padding: 10px;
 }
 #kline-chart-panel{
   left: 50% !important;
   transform: translateX(-50%);
-  top: 365px;
+  top: 350px;
   padding: 10px;
   height: 210px;
   max-height: 210px;
@@ -708,12 +708,12 @@
     width: var(--left-w-master);
     max-width: var(--left-w-master);
   }
-  #kline-engine-panel{ top: 345px; }
-  #kline-chart-panel{ left: 50% !important; transform: translateX(-50%); top: 365px; height: 210px; max-height: 210px; }
+  #kline-engine-panel{ top: 350px; }
+  #kline-chart-panel{ left: 50% !important; transform: translateX(-50%); top: 350px; height: 210px; max-height: 210px; }
 }
 
 
-/* ===== V2.8.5 True K-line mode ===== */
+/* ===== V2.8.6 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -725,7 +725,7 @@
 }
 
 
-/* ===== V2.8.5 live ticker + symbol switch ===== */
+/* ===== V2.8.6 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -748,7 +748,7 @@
 }
 
 
-/* ===== V2.8.5 market mode switch ===== */
+/* ===== V2.8.6 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -767,7 +767,7 @@
 }
 
 
-/* ===== V2.8.5 single K-line engine ===== */
+/* ===== V2.8.6 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -805,7 +805,7 @@
 }
 
 
-/* ===== V2.8.5 FAQ ===== */
+/* ===== V2.8.6 FAQ ===== */
 #faq-box{
   margin-top:10px;
   font-size:12px;
@@ -858,7 +858,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.8.5</div>
+        <div class="sys-st" id="ver-st">VERSION v2.8.6</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -889,7 +889,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.8.5</span>
+    <span>宇宙K線引擎｜V2.8.6</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1084,7 +1084,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.8.5";
+const APP_VERSION = "v2.8.6";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4228,7 +4228,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.5 True K-line engine (Binance public API) ===== */
+/* ===== V2.8.6 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4391,7 +4391,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.5 live kline + ticker ===== */
+/* ===== V2.8.6 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4570,7 +4570,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.5 dual market engine ===== */
+/* ===== V2.8.6 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4698,7 +4698,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.5 stable market lock ===== */
+/* ===== V2.8.6 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4834,7 +4834,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.5 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.8.6 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5163,7 +5163,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== V2.8.5 Oracle Plus ===== */
+/* ===== V2.8.6 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5286,7 +5286,7 @@ setInterval(update, 20000);
 
 
 <script>
-/* ===== V2.8.5 split KGEN clean oracle ===== */
+/* ===== V2.8.6 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
