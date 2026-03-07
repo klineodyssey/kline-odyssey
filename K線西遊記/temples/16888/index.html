@@ -5,22 +5,24 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.7.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.7.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-<!-- removed legacy conflicting kline block -->
+<!-- removed conflicting kline block -->
 
 
-<meta property="og:title" content="KGEN 16888 自我演化金融生命體">
+<meta property="og:title" content="KGEN 16888 自我演化金融生命體｜廣寒宮">
 <meta property="og:description" content="K線西遊記・花果山台灣｜16888 廣寒宮">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/">
-<meta property="og:site_name" content="K線西遊記">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 <meta property="og:image:alt" content="KGEN 16888 廣寒宮主視覺">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta property="og:site_name" content="K線西遊記">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="KGEN 16888 自我演化金融生命體｜廣寒宮">
+<meta name="twitter:description" content="K線西遊記・花果山台灣｜16888 廣寒宮">
 <meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
 
 </head>
@@ -44,7 +46,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.7.1</div>
+        <div class="sys-st" id="ver-st">VERSION v2.7.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -75,7 +77,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.7.1</span>
+    <span>宇宙K線引擎｜V2.7.0</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -83,7 +85,7 @@
         <option value="ETHUSDT">ETHUSDT</option>
         <option value="KGENLP">KGENLP</option>
         <option value="KGEN16888">KGEN16888</option>
-        </select>
+      </select>
       <span id="ke-mode">真市場</span>
     </span>
   </div>
@@ -241,7 +243,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.7.1";
+const APP_VERSION = "v2.7.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -2642,9 +2644,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
   </div>
 
-  
-
-<div class="cp-actions">
+  <div class="cp-actions">
     <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
     <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
     <button type="button" onclick="app.openTokenScan()">Token</button>
@@ -3373,27 +3373,27 @@ document.addEventListener('click', (ev)=>{
 
 
 
-<!-- removed legacy conflicting kline block -->
+<!-- removed conflicting kline block -->
 
 
 
 
-<!-- removed legacy conflicting kline block -->
+<!-- removed conflicting kline block -->
 
 
 
 
-<!-- removed legacy conflicting kline block -->
+<!-- removed conflicting kline block -->
 
 
 
 
-<!-- removed legacy conflicting kline block -->
+<!-- removed conflicting kline block -->
 
 
 
 <script>
-/* ===== V2.7.1 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.7.0 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -3422,7 +3422,6 @@ document.addEventListener('click', (ev)=>{
     const n = Number(v || 0);
     if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
     if(STATE.symbol === 'KGENLP') return n.toFixed(6);
-    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
     return n.toFixed(2);
   }
   function loadKgenHistory(){
@@ -3588,22 +3587,6 @@ document.addEventListener('click', (ev)=>{
         appendKgen(usd);
         const data = buildKgenCandles();
         updatePanel(data, usd, '真 LP 價', 'KGENLP / USD');
-        const ct = $('ct-in');
-        if(ct) ct.value = usd.toFixed(6);
-      }else if(STATE.symbol === 'KGEN16888'){
-        const base = 16888;
-        const now = Date.now();
-        const data = Array.from({length:12}).map((_, i) => ({
-          openTime: now - (12-i)*60000,
-          open: base,
-          high: base,
-          low: base,
-          close: base,
-          closeTime: now - (11-i)*60000
-        }));
-        updatePanel(data, base, '宇宙基準價', 'KGEN16888 / BASE');
-        const ct = $('ct-in');
-        if(ct) ct.value = base.toFixed(2);
       }else{
         const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
         updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
@@ -3639,6 +3622,14 @@ document.addEventListener('click', (ev)=>{
   }
 })();
 </script>
+
+
+<div id="defi-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(255,215,120,.2);border-radius:8px;font-size:12px">
+<b>DeFi Oracle</b><br>
+CT 價格：<input id="ct-in" readonly style="width:110px"><br>
+LP 流動性：<span id="lp-liq">--</span><br>
+KGEN 市值：<span id="kgen-mcap">--</span>
+</div>
 
 
 <script>
@@ -3719,10 +3710,18 @@ setInterval(update,20000)
 </script>
 
 
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px">
+<b>DeFi Oracle Plus</b><br>
+池內 KGEN：<span id="pool-kgen">--</span><br>
+池內 WBNB：<span id="pool-wbnb">--</span><br>
+TVL：<span id="pool-tvl">--</span><br>
+最近交換：<span id="last-swap">--</span><br>
+最近區塊：<span id="last-block">--</span>
+</div>
 
 
 <script>
-/* ===== V2.7.1 Oracle Plus ===== */
+/* ===== V2.7.0 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -3844,14 +3843,8 @@ setInterval(update, 20000);
 </script>
 
 
-
-
-
-
-
-
 <script>
-/* ===== V2.7.1 split KGEN clean oracle ===== */
+/* ===== V2.7.0 split KGEN stable core ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -3869,12 +3862,8 @@ setInterval(update, 20000);
     'function token1() view returns (address)',
     'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)'
   ];
-  const ERC20 = ['function totalSupply() view returns (uint256)'];
-
   function $(id){ return document.getElementById(id); }
   function setText(id, v){ const el = $(id); if(el) el.textContent = v; }
-  function getDeg(){ const r = $('steer-input-val'); return r ? (parseFloat(r.value) || 0) : 0; }
-  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
   function fmt(v){
     const n = Number(v || 0);
     if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
@@ -3882,15 +3871,26 @@ setInterval(update, 20000);
     if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
     return n.toFixed(2);
   }
+  function getDeg(){
+    const el = $('steer-input-val');
+    return el ? (parseFloat(el.value) || 0) : 0;
+  }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
+
   function loadHist(){
     try{
-      const raw = localStorage.getItem('kgen_lp_history_v264');
+      const raw = localStorage.getItem('kgen_lp_history_v270');
       const arr = raw ? JSON.parse(raw) : [];
       if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
     }catch(e){}
   }
   function saveHist(){
-    try{ localStorage.setItem('kgen_lp_history_v264', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+    try{ localStorage.setItem('kgen_lp_history_v270', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+  }
+  function appendKgen(price){
+    STATE.kgenHistory.push({t: Date.now(), p: Number(price)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
+    saveHist();
   }
   async function fetchBinanceTicker(symbol){
     const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + symbol, {cache:'no-store'});
@@ -3903,8 +3903,12 @@ setInterval(update, 20000);
     if(!r.ok) throw new Error('klines ' + r.status);
     const arr = await r.json();
     return arr.map(k => ({
-      openTime: Number(k[0]), open: Number(k[1]), high: Number(k[2]),
-      low: Number(k[3]), close: Number(k[4]), closeTime: Number(k[6])
+      openTime: Number(k[0]),
+      open: Number(k[1]),
+      high: Number(k[2]),
+      low: Number(k[3]),
+      close: Number(k[4]),
+      closeTime: Number(k[6])
     }));
   }
   async function getLpData(){
@@ -3914,10 +3918,10 @@ setInterval(update, 20000);
     const [t0,t1,res,bnbUsd] = await Promise.all([
       pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
     ]);
-    const r0 = Number(res[0].toString());
-    const r1 = Number(res[1].toString());
     const t0l = String(t0).toLowerCase();
     const t1l = String(t1).toLowerCase();
+    const r0 = Number((res.reserve0 || res[0]).toString());
+    const r1 = Number((res.reserve1 || res[1]).toString());
     let kgenRaw, wbnbRaw, kgenPerBnb;
     if(t0l === STATE.kgen && t1l === STATE.wbnb){
       kgenRaw = r0; wbnbRaw = r1; kgenPerBnb = r0 / r1;
@@ -3930,27 +3934,31 @@ setInterval(update, 20000);
     const poolKgen = kgenRaw / 1e18;
     const poolWbnb = wbnbRaw / 1e18;
     const tvl = poolWbnb * bnbUsd * 2;
-    const token = new ethers.Contract(STATE.kgen, ERC20, provider);
-    const supply = Number((await token.totalSupply()).toString()) / 1e18;
-    const mcap = supply * price;
     const block = await provider.getBlockNumber();
-    return {price, poolKgen, poolWbnb, tvl, mcap, block};
+    return {price, poolKgen, poolWbnb, tvl, block};
   }
-  function appendKgen(price){
-    STATE.kgenHistory.push({t: Date.now(), p: Number(price)});
-    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
-    saveHist();
+  function buildBaseCandles(){
+    const base = 16888;
+    const now = Date.now();
+    return Array.from({length:12}).map((_, i) => ({
+      openTime: now - (12-i)*60000,
+      open: base, high: base, low: base, close: base,
+      closeTime: now - (11-i)*60000
+    }));
   }
   function buildKgenCandles(price){
     appendKgen(price);
     const hist = STATE.kgenHistory.slice(-12);
     const candles = hist.map((h, i) => {
-      const prev = hist[Math.max(0, i-1)]?.p ?? h.p;
-      const next = hist[Math.min(hist.length-1, i+1)]?.p ?? h.p;
+      const prev = (hist[Math.max(0, i-1)] || {p:h.p}).p;
+      const next = (hist[Math.min(hist.length-1, i+1)] || {p:h.p}).p;
       return {
         openTime: h.t - 60000,
-        open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next),
-        close: h.p, closeTime: h.t
+        open: prev,
+        high: Math.max(prev, h.p, next),
+        low: Math.min(prev, h.p, next),
+        close: h.p,
+        closeTime: h.t
       };
     });
     while(candles.length < 12){
@@ -3959,13 +3967,6 @@ setInterval(update, 20000);
     }
     return candles.slice(-12);
   }
-  function buildBaseCandles(){
-    const base = 16888;
-    const now = Date.now();
-    return Array.from({length:12}).map((_, i) => ({
-      openTime: now - (12-i)*60000, open: base, high: base, low: base, close: base, closeTime: now - (11-i)*60000
-    }));
-  }
   function predict(last){
     const deg = getDeg();
     const side = sideZh(deg);
@@ -3973,16 +3974,17 @@ setInterval(update, 20000);
     const range = Math.max(0.000001, last.high - last.low);
     const body = Math.abs(last.close - last.open);
     const wick = Math.max(0.000001, range - body);
-    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body/range)*7) - Math.min(12, (wick/range)*8);
+    let hit = 62 + Math.min(14, angle*0.09) + Math.min(7, (body/range)*7) - Math.min(12, (wick/range)*8);
     hit = Math.max(63.5, Math.min(91.5, hit));
     return {side, angle, range, wick, hit};
   }
   function draw(data){
-    const canvas = $('kline-canvas'); if(!canvas) return;
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     ctx.clearRect(0,0,w,h);
-    const padX=12,padY=10;
+    const padX=12, padY=10;
     const maxH = Math.max.apply(null, data.map(d=>d.high));
     const minL = Math.min.apply(null, data.map(d=>d.low));
     const span = (maxH-minL)||1;
@@ -3992,39 +3994,50 @@ setInterval(update, 20000);
       const x=padX+i*((w-padX*2)/data.length);
       ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
     }
-    const spacing=(w-padX*2)/data.length, candleW=Math.min(18, spacing*0.58);
+    const spacing=(w-padX*2)/data.length;
+    const candleW=Math.min(18, spacing*0.58);
     data.forEach((d,i)=>{
-      const x=padX+i*spacing+spacing/2, yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const x=padX+i*spacing+spacing/2;
+      const yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
       const up=d.close>=d.open;
       ctx.strokeStyle=up?'rgba(120,245,255,.96)':'rgba(255,210,120,.96)';
-      ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
       ctx.fillStyle=up?'rgba(120,245,255,.35)':'rgba(255,210,120,.28)';
       const top=Math.min(yO,yC), bh=Math.max(3, Math.abs(yC-yO));
-      ctx.fillRect(x-candleW/2, top, candleW, bh); ctx.strokeRect(x-candleW/2, top, candleW, bh);
+      ctx.fillRect(x-candleW/2, top, candleW, bh);
+      ctx.strokeRect(x-candleW/2, top, candleW, bh);
     });
   }
   function updatePanel(data, live, modeLabel, liveLabel){
-    const last=data[data.length-1]; if(!last) return;
-    const p=predict(last);
-    setText('ke-side', p.side); setText('ke-angle', String(p.angle));
-    setText('ke-open', fmt(last.open)); setText('ke-high', fmt(last.high)); setText('ke-low', fmt(last.low)); setText('ke-close', fmt(last.close));
-    setText('ke-range', fmt(p.range)); setText('ke-wick', fmt(p.wick));
-    setText('ke-mode', modeLabel); setText('ke-live-symbol', liveLabel); setText('ke-live-price', fmt(live));
-    setText('kc-predict', '預測：'+p.side); setText('kc-dir', liveLabel+' → '+p.side+'方K'); setText('kc-hit', '命中率：'+p.hit.toFixed(1)+'%');
-    const tA = new Date(last.openTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    const tB = new Date(last.closeTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    setText('moon-a', tA); setText('moon-b', tB);
+    const last = data[data.length-1];
+    if(!last) return;
+    const p = predict(last);
+    setText('ke-side', p.side);
+    setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open));
+    setText('ke-high', fmt(last.high));
+    setText('ke-low', fmt(last.low));
+    setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range));
+    setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', modeLabel);
+    setText('ke-live-symbol', liveLabel);
+    setText('ke-live-price', fmt(live));
+    setText('kc-predict', '預測：' + p.side);
+    setText('kc-dir', liveLabel + ' → ' + p.side + '方K');
+    setText('kc-hit', '命中率：' + p.hit.toFixed(1) + '%');
+    const tA = new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const tB = new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    setText('moon-a', tA);
+    setText('moon-b', tB);
     draw(data);
   }
   function updateOracle(lp){
-    const ct = $('ct-in'); if(ct) ct.value = Number(lp.price).toFixed(6);
-    setText('base-16888', '16888.00');
-    setText('lp-liq', '$' + Math.round(lp.tvl).toLocaleString());
-    setText('kgen-mcap', '$' + Math.round(lp.mcap).toLocaleString());
-    setText('pool-kgen', Math.round(lp.poolKgen).toLocaleString());
-    setText('pool-wbnb', Number(lp.poolWbnb).toFixed(4));
-    setText('last-swap', '鏈上同步');
-    setText('last-block', String(lp.block));
+    const ct = $('ct-in');
+    if(ct) ct.value = Number(lp.price).toFixed(6);
+    setText('cp-gaolao-kgen', Math.round(lp.poolKgen).toLocaleString());
+    setText('cp-gaolao-bnb', Number(lp.poolWbnb).toFixed(4) + ' BNB');
   }
   async function refresh(){
     try{
@@ -4054,14 +4067,23 @@ setInterval(update, 20000);
     const steer = $('steer-input-val');
     if(sel){
       sel.value = STATE.symbol;
-      sel.addEventListener('change', function(){ STATE.symbol = this.value; refresh(); });
+      sel.addEventListener('change', function(){
+        STATE.symbol = this.value;
+        refresh();
+      });
     }
-    if(steer){ steer.addEventListener('input', refresh); }
+    if(steer){
+      steer.addEventListener('input', refresh);
+    }
     refresh();
     if(STATE.timer) clearInterval(STATE.timer);
     STATE.timer = setInterval(refresh, 15000);
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
 })();
 </script>
 
