@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V3.1.9 CLEAN LEFT REBUILD
+   V3.2.1 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V3.1.9 layout micro-tune === */
+/* === V3.2.1 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V3.1.9 use V3.1.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V3.2.1 use V3.1.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -756,7 +756,7 @@ html, body{
 }
 
 
-/* === V3.1.9 center image + shorten left column === */
+/* === V3.2.1 center image + shorten left column === */
 #core-anchor{
   left: 50% !important;
   top: 50% !important;
@@ -806,7 +806,7 @@ html, body{
 }
 
 
-/* === V3.1.9 vertical tightening === */
+/* === V3.2.1 vertical tightening === */
 
 /* 左側整欄往上 */
 .resource-bars{
@@ -882,7 +882,7 @@ html, body{
 }
 
 
-/* === V3.1.9 move only K-line engine/chart upward; keep GA centered === */
+/* === V3.2.1 move only K-line engine/chart upward; keep GA centered === */
 #kline-engine-panel{
   top: 220px !important;
 }
@@ -953,13 +953,115 @@ html, body{
 }
 
 
-/* === V3.2 force move left modules downward === */
+/* === V3.2.1 force move left modules downward === */
 #kline-engine-panel,
 #kline-chart-panel,
 .resource-bars,
 .left-panel,
 #kline-panel{
     transform: translateY(140px) !important;
+}
+
+
+/* === V3.2.1 force left stack down + shorter + tighter === */
+.resource-bars{
+  transform: none !important;
+  top: 120px !important;
+  left: 18px !important;
+  width: 360px !important;
+  max-width: 360px !important;
+}
+.resource-bars .rb{
+  min-height: 54px !important;
+  padding: 8px 12px !important;
+}
+.resource-bars .rb .row{
+  line-height: 1.1 !important;
+}
+.resource-bars .rb .row span,
+.resource-bars .rb .val{
+  font-size: 13px !important;
+}
+
+#kline-engine-panel{
+  transform: none !important;
+  top: 250px !important;
+  left: 18px !important;
+  width: 360px !important;
+  max-width: 360px !important;
+}
+#kline-engine-panel .ke-cell{
+  min-height: 58px !important;
+  padding: 6px 10px !important;
+}
+#kline-engine-panel .ke-label{
+  font-size: 10px !important;
+  line-height: 1.0 !important;
+}
+#kline-engine-panel .ke-value{
+  margin-top: 6px !important;
+  font-size: 15px !important;
+  line-height: 1.0 !important;
+}
+
+#kline-chart-panel{
+  transform: none !important;
+  top: 560px !important;
+  left: 18px !important;
+  width: 360px !important;
+  max-width: 360px !important;
+  height: 260px !important;
+  max-height: 260px !important;
+  padding: 8px 10px !important;
+}
+#kline-chart-panel .kc-head{
+  margin-bottom: 6px !important;
+  font-size: 13px !important;
+  line-height: 1.0 !important;
+}
+#kline-canvas{
+  height: 108px !important;
+}
+#kline-chart-panel .kc-foot,
+#moon-match{
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+}
+#moon-match{
+  margin-top: 6px !important;
+  padding-top: 6px !important;
+}
+#moon-match-title{
+  margin-bottom: 2px !important;
+}
+
+@media (max-width:720px){
+  .resource-bars{
+    transform: none !important;
+    top: 120px !important;
+    left: 18px !important;
+    width: 360px !important;
+    max-width: 360px !important;
+  }
+  #kline-engine-panel{
+    transform: none !important;
+    top: 250px !important;
+    left: 18px !important;
+    width: 360px !important;
+    max-width: 360px !important;
+  }
+  #kline-chart-panel{
+    transform: none !important;
+    top: 560px !important;
+    left: 18px !important;
+    width: 360px !important;
+    max-width: 360px !important;
+    height: 260px !important;
+    max-height: 260px !important;
+  }
+  #kline-canvas{
+    height: 108px !important;
+  }
 }
 
 </style>
@@ -1016,7 +1118,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.1.9</span>
+    <span>宇宙K線引擎｜V3.2.1</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
