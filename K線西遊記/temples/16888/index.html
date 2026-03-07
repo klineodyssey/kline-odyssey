@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.6.0 layout retune ===== */
+/* ===== V2.6.1 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.6.0 move E=mc² into 質量 row ===== */
+/* ===== V2.6.1 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.6.0 MASTER left block ===== */
+/* ===== V2.6.1 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -711,7 +711,7 @@
 }
 
 
-/* ===== V2.6.0 True K-line mode ===== */
+/* ===== V2.6.1 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +723,7 @@
 }
 
 
-/* ===== V2.6.0 live ticker + symbol switch ===== */
+/* ===== V2.6.1 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +746,7 @@
 }
 
 
-/* ===== V2.6.0 market mode switch ===== */
+/* ===== V2.6.1 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -765,7 +765,7 @@
 }
 
 
-/* ===== V2.6.0 single K-line engine ===== */
+/* ===== V2.6.1 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -792,6 +792,16 @@
   font-family:'Orbitron',sans-serif;
 }
 
+
+#oracle-plus-dashboard{
+  margin-top:10px;
+  padding:8px;
+  border:1px solid rgba(127,243,255,.18);
+  border-radius:8px;
+  font-size:12px;
+  background:rgba(3,8,18,.35);
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -816,7 +826,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -847,13 +857,14 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.0</span>
+    <span>宇宙K線引擎｜V2.6.1</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
         <option value="BTCUSDT">BTCUSDT</option>
         <option value="ETHUSDT">ETHUSDT</option>
         <option value="KGENLP">KGENLP</option>
+        <option value="KGEN16888">KGEN16888</option>
       </select>
       <span id="ke-mode">真市場</span>
     </span>
@@ -1012,7 +1023,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.0";
+const APP_VERSION = "v2.6.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3413,7 +3424,17 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
   </div>
 
-  <div class="cp-actions">
+  
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px">
+<b>DeFi Oracle Plus</b><br>
+池內 KGEN：<span id="pool-kgen">--</span><br>
+池內 WBNB：<span id="pool-wbnb">--</span><br>
+TVL：<span id="pool-tvl">--</span><br>
+最近交換：<span id="last-swap">--</span><br>
+最近區塊：<span id="last-block">--</span>
+</div>
+
+<div class="cp-actions">
     <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
     <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
     <button type="button" onclick="app.openTokenScan()">Token</button>
@@ -4142,7 +4163,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 True K-line engine (Binance public API) ===== */
+/* ===== V2.6.1 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4305,7 +4326,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 live kline + ticker ===== */
+/* ===== V2.6.1 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4484,7 +4505,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 dual market engine ===== */
+/* ===== V2.6.1 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4612,7 +4633,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.6.0 stable market lock ===== */
+/* ===== V2.6.1 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4748,7 +4769,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.6.0 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.6.1 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -4777,6 +4798,7 @@ if(document.readyState==="loading"){
     const n = Number(v || 0);
     if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
     if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
     return n.toFixed(2);
   }
   function loadKgenHistory(){
@@ -4942,6 +4964,22 @@ if(document.readyState==="loading"){
         appendKgen(usd);
         const data = buildKgenCandles();
         updatePanel(data, usd, '真 LP 價', 'KGENLP / USD');
+        const ct = $('ct-in');
+        if(ct) ct.value = usd.toFixed(6);
+      }else if(STATE.symbol === 'KGEN16888'){
+        const base = 16888;
+        const now = Date.now();
+        const data = Array.from({length:12}).map((_, i) => ({
+          openTime: now - (12-i)*60000,
+          open: base,
+          high: base,
+          low: base,
+          close: base,
+          closeTime: now - (11-i)*60000
+        }));
+        updatePanel(data, base, '宇宙基準價', 'KGEN16888 / BASE');
+        const ct = $('ct-in');
+        if(ct) ct.value = base.toFixed(2);
       }else{
         const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
         updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
@@ -5065,18 +5103,10 @@ setInterval(update,20000)
 </script>
 
 
-<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px">
-<b>DeFi Oracle Plus</b><br>
-池內 KGEN：<span id="pool-kgen">--</span><br>
-池內 WBNB：<span id="pool-wbnb">--</span><br>
-TVL：<span id="pool-tvl">--</span><br>
-最近交換：<span id="last-swap">--</span><br>
-最近區塊：<span id="last-block">--</span>
-</div>
 
 
 <script>
-/* ===== V2.6.0 Oracle Plus ===== */
+/* ===== V2.6.1 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
