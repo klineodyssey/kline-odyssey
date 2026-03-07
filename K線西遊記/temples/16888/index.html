@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.9</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.0.10</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -51,7 +51,7 @@
         .warp-val-text { margin-top: 25px; color: var(--energy); font-family: 'Orbitron'; font-size: 18px; text-shadow: 0 0 10px var(--energy); }
 
         /* 🧚 核心圓窗：物理連動肌肉 (方向盤轉，窗跟著轉) */
-        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height:320px; z-index: 50; }
+        #core-anchor { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 420px; height: 420px; z-index: 50; }
         #core-window { 
             width: 100%; height: 100%; border-radius: 50%; border: 15px double var(--gold);
             overflow: hidden; background: #000; position: relative; 
@@ -505,7 +505,7 @@
 #autoTag, #autoBadge{ display:none !important; }
 
 /* =========================
-   V3.0.9 CLEAN LEFT REBUILD
+   V3.0.10 CLEAN LEFT REBUILD
 ========================= */
 :root{
   --left-x: 18px;
@@ -655,7 +655,7 @@ html, body{
 }
 
 
-/* === V3.0.9 layout micro-tune === */
+/* === V3.0.10 layout micro-tune === */
 :root{
   --left-x: 24px !important;
   --left-w: 300px !important;
@@ -691,7 +691,7 @@ html, body{
 }
 
 
-/* === V3.0.9 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
+/* === V3.0.10 use V3.0.1 base: keep core image, move GA top-center, raise lower panels, lower steer bar === */
 .ga-matrix{
   left: 50% !important;
   top: 210px !important;
@@ -756,7 +756,7 @@ html, body{
 }
 
 
-/* === V3.0.9 center image + shorten left column === */
+/* === V3.0.10 center image + shorten left column === */
 #core-anchor{
   left: 50% !important;
   top: 50% !important;
@@ -806,7 +806,7 @@ html, body{
 }
 
 
-/* === V3.0.9 vertical tightening === */
+/* === V3.0.10 vertical tightening === */
 
 /* 左側整欄往上 */
 .resource-bars{
@@ -882,7 +882,7 @@ html, body{
 }
 
 
-/* === V3.0.9 move only K-line engine/chart upward; keep GA centered === */
+/* === V3.0.10 move only K-line engine/chart upward; keep GA centered === */
 #kline-engine-panel{
   top: 220px !important;
 }
@@ -939,6 +939,74 @@ html, body{
     }
 }
 
+
+/* === V3.0.10 precise fix: only heights + resource bars down === */
+/* Do NOT touch fairy/core/GA/width/layout */
+.resource-bars{
+  top: 185px !important;   /* move BNB/KGEN down only */
+}
+
+#kline-engine-panel{
+  top: 255px !important;   /* keep panel in place after bars move down */
+  padding: 8px 10px !important;
+}
+#kline-engine-panel .ke-head{
+  margin-bottom: 6px !important;
+}
+#kline-engine-panel .ke-grid{
+  gap: 6px !important;
+}
+#kline-engine-panel .ke-cell{
+  min-height: 54px !important;   /* shorter cells */
+  padding: 6px 8px !important;
+}
+#kline-engine-panel .ke-label{
+  font-size: 10px !important;
+  line-height: 1.0 !important;
+}
+#kline-engine-panel .ke-value{
+  margin-top: 4px !important;
+  font-size: 15px !important;
+  line-height: 1.0 !important;
+}
+
+#kline-chart-panel{
+  top: 545px !important;   /* chart follows engine, but no layout changes */
+  height: 215px !important;
+  max-height: 215px !important;
+  padding: 8px 10px !important;
+}
+#kline-chart-panel .kc-head{
+  margin-bottom: 4px !important;
+  font-size: 13px !important;
+  line-height: 1.0 !important;
+}
+#kline-canvas{
+  height: 92px !important;
+}
+#kline-chart-panel .kc-foot,
+#moon-match{
+  font-size: 11px !important;
+  line-height: 1.05 !important;
+}
+#moon-match{
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+#moon-match-title{
+  margin-bottom: 2px !important;
+}
+
+@media (max-width:720px){
+  .resource-bars{ top: 185px !important; }
+  #kline-engine-panel{ top: 255px !important; padding: 8px 10px !important; }
+  #kline-engine-panel .ke-cell{ min-height: 54px !important; padding: 6px 8px !important; }
+  #kline-engine-panel .ke-label{ font-size: 10px !important; line-height: 1.0 !important; }
+  #kline-engine-panel .ke-value{ margin-top: 4px !important; font-size: 15px !important; line-height: 1.0 !important; }
+  #kline-chart-panel{ top: 545px !important; height: 215px !important; max-height: 215px !important; padding: 8px 10px !important; }
+  #kline-canvas{ height: 92px !important; }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -963,7 +1031,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.9</div>
+        <div class="sys-st" id="ver-st">VERSION v3.0.10</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -993,7 +1061,7 @@ html, body{
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.0.9</span>
+    <span>宇宙K線引擎｜V3.0.10</span>
     <span id="ke-mode">K線模擬</span>
   </div>
   <div class="ke-grid">
@@ -1146,7 +1214,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.9";
+const APP_VERSION = "v3.0.10";
 
 /* =========================
    UFO Music: track URL resolver (fix)
