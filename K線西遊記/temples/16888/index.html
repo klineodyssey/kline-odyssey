@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.53.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.70.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.53.0 layout retune ===== */
+/* ===== V2.70.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.53.0 move E=mc² into 質量 row ===== */
+/* ===== V2.70.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.53.0 MASTER left block ===== */
+/* ===== V2.70.0 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -711,7 +711,7 @@
 }
 
 
-/* ===== V2.53.0 True K-line mode ===== */
+/* ===== V2.70.0 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +723,7 @@
 }
 
 
-/* ===== V2.53.0 live ticker + symbol switch ===== */
+/* ===== V2.70.0 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +746,7 @@
 }
 
 
-/* ===== V2.53.0 market mode switch ===== */
+/* ===== V2.70.0 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -762,6 +762,17 @@
   font-family:Orbitron,sans-serif;
   font-size:11px;
   margin-right:6px;
+}
+
+
+/* ===== V2.70.0 unified market engine ===== */
+#ke-market, #ke-symbol{
+  position:relative;
+  z-index:9999;
+  pointer-events:auto;
+}
+#ke-market:disabled, #ke-symbol:disabled{
+  opacity:.65;
 }
 
 </style>
@@ -788,7 +799,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.53.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.70.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -818,7 +829,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.53.0</span>
+    <span>宇宙K線引擎｜V2.70.0</span>
     <span><select id="ke-market"><option value="kgen">KGEN</option><option value="binance">Binance</option></select> <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;"><option value="BTCUSDT">BTCUSDT</option><option value="BNBUSDT">BNBUSDT</option><option value="ETHUSDT">ETHUSDT</option></select> <span id="ke-mode">真K線</span></span>
   </div>
   <div class="ke-grid">
@@ -975,7 +986,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.53.0";
+const APP_VERSION = "v2.70.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4249,7 +4260,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.53.0 True K-line engine (Binance public API) ===== */
+/* ===== V2.70.0 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4412,7 +4423,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.53.0 live kline + ticker ===== */
+/* ===== V2.70.0 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4591,7 +4602,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.53.0 dual market engine ===== */
+/* ===== V2.70.0 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4719,7 +4730,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.53.0 stable market lock ===== */
+/* ===== V2.70.0 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4855,25 +4866,312 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== KLINE STABILIZER PATCH v2.53.1 ===== */
+/* ===== V2.70.0 UNIFIED MARKET ENGINE ===== */
 (function(){
-let last=null;
-function get(){
- const o=document.getElementById('ke-open')?.textContent;
- const h=document.getElementById('ke-high')?.textContent;
- const l=document.getElementById('ke-low')?.textContent;
- const c=document.getElementById('ke-close')?.textContent;
- if(o&&h&&l&&c){ last={o,h,l,c}; }
-}
-function set(){
- if(!last) return;
- document.getElementById('ke-open').textContent=last.o;
- document.getElementById('ke-high').textContent=last.h;
- document.getElementById('ke-low').textContent=last.l;
- document.getElementById('ke-close').textContent=last.c;
-}
-setInterval(get,800);
-setInterval(set,900);
+  const STATE = {
+    market: 'binance',
+    symbol: 'BNBUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null,
+    kgenHistory: [],
+    pair: '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2',
+    kgen: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be'.toLowerCase(),
+    wbnb: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'.toLowerCase(),
+    bscRpc: 'https://bsc-dataseed.binance.org/'
+  };
+
+  const PAIR_ABI = [
+    'function token0() view returns (address)',
+    'function token1() view returns (address)',
+    'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)'
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function setText(id, val){
+    const el = $(id);
+    if(el) el.textContent = val;
+  }
+  function getDeg(){
+    const r = $('steer-input-val');
+    return r ? (parseFloat(r.value) || 0) : 0;
+  }
+  function sideZh(deg){
+    return (deg >= -90 && deg <= 90) ? '多' : '空';
+  }
+  function fmt(v){
+    const n = Number(v || 0);
+    if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
+    if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    return n.toFixed(2);
+  }
+
+  async function fetchBinanceKlines(symbol){
+    const url = 'https://api.binance.com/api/v3/klines?symbol=' + symbol + '&interval=' + STATE.interval + '&limit=' + STATE.limit;
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('Binance klines ' + res.status);
+    const arr = await res.json();
+    return arr.map(k => ({
+      openTime: k[0],
+      open: Number(k[1]),
+      high: Number(k[2]),
+      low: Number(k[3]),
+      close: Number(k[4]),
+      closeTime: k[6]
+    }));
+  }
+
+  async function fetchBinanceTicker(symbol){
+    const url = 'https://api.binance.com/api/v3/ticker/price?symbol=' + symbol;
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('Binance ticker ' + res.status);
+    const j = await res.json();
+    return Number(j.price);
+  }
+
+  function loadHistory(){
+    try{
+      const raw = localStorage.getItem('kgen_lp_history_v270');
+      const arr = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-40);
+    }catch(e){}
+  }
+  function saveHistory(){
+    try{ localStorage.setItem('kgen_lp_history_v270', JSON.stringify(STATE.kgenHistory.slice(-40))); }catch(e){}
+  }
+
+  async function fetchKgenLpPrice(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(STATE.bscRpc);
+    const pair = new ethers.Contract(STATE.pair, PAIR_ABI, provider);
+
+    const [token0, token1, reserves, bnbPrice] = await Promise.all([
+      pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
+    ]);
+
+    const t0 = String(token0).toLowerCase();
+    const t1 = String(token1).toLowerCase();
+    const r0 = Number(reserves.reserve0.toString());
+    const r1 = Number(reserves.reserve1.toString());
+
+    let priceBnb = 0;
+    if(t0 === STATE.kgen && t1 === STATE.wbnb){
+      priceBnb = r1 / r0;
+    }else if(t1 === STATE.kgen && t0 === STATE.wbnb){
+      priceBnb = r0 / r1;
+    }else{
+      throw new Error('Pair token mismatch');
+    }
+    const priceUsd = priceBnb * bnbPrice;
+    return {
+      usd: priceUsd,
+      bnb: priceBnb,
+      timestamp: Date.now()
+    };
+  }
+
+  function buildKgenCandles(currentUsd){
+    const now = Date.now();
+    STATE.kgenHistory.push({t: now, p: Number(currentUsd)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-40);
+    saveHistory();
+
+    const hist = STATE.kgenHistory.slice(-12);
+    if(hist.length === 1){
+      const p = hist[0].p;
+      return Array.from({length:12}).map((_, i) => ({
+        openTime: now - (12-i)*60000,
+        open: p, high: p, low: p, close: p,
+        closeTime: now - (11-i)*60000
+      }));
+    }
+
+    const candles = [];
+    for(let i=0;i<hist.length;i++){
+      const curr = hist[i].p;
+      const prev = hist[Math.max(0, i-1)].p;
+      const next = hist[Math.min(hist.length-1, i+1)].p;
+      const open = prev;
+      const close = curr;
+      const high = Math.max(open, close, next);
+      const low = Math.min(open, close, next);
+      candles.push({
+        openTime: hist[i].t - 60000,
+        open, high, low, close,
+        closeTime: hist[i].t
+      });
+    }
+    while(candles.length < 12){
+      const last = candles[candles.length-1] || {open: currentUsd, high: currentUsd, low: currentUsd, close: currentUsd, openTime: now, closeTime: now};
+      candles.unshift({...last, openTime: last.openTime - 60000, closeTime: last.closeTime - 60000});
+    }
+    return candles.slice(-12);
+  }
+
+  function predict(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(0.000001, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(0.000001, range - body);
+    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body / range) * 7) - Math.min(12, (wick / range) * 8);
+    hit = Math.max(63.5, Math.min(91.5, hit));
+    return {side, angle, range, wick, hit};
+  }
+
+  function draw(data){
+    const canvas = $('kline-canvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    const padX = 12, padY = 10;
+    const maxH = Math.max.apply(null, data.map(d => d.high));
+    const minL = Math.min.apply(null, data.map(d => d.low));
+    const span = (maxH - minL) || 1;
+    const mapY = (v) => padY + (maxH - v) / span * (h - padY*2);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    for(let gx=0; gx<data.length; gx++){
+      const x = padX + gx * ((w - padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x, padY); ctx.lineTo(x, h-padY); ctx.stroke();
+    }
+    for(let gy=0; gy<4; gy++){
+      const y = padY + gy * ((h-padY*2)/4);
+      ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+    }
+
+    const spacing = (w - padX*2) / data.length;
+    const candleW = Math.min(18, spacing * 0.58);
+    data.forEach((d, i) => {
+      const x = padX + i * spacing + spacing/2;
+      const yH = mapY(d.high), yL = mapY(d.low), yO = mapY(d.open), yC = mapY(d.close);
+      const up = d.close >= d.open;
+      ctx.strokeStyle = up ? 'rgba(120,245,255,.96)' : 'rgba(255,210,120,.96)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+
+      ctx.fillStyle = up ? 'rgba(120,245,255,.35)' : 'rgba(255,210,120,.28)';
+      const top = Math.min(yO, yC);
+      const bh = Math.max(3, Math.abs(yC - yO));
+      ctx.fillRect(x - candleW/2, top, candleW, bh);
+      ctx.strokeRect(x - candleW/2, top, candleW, bh);
+    });
+  }
+
+  function updatePanel(data, livePrice, meta){
+    const last = data[data.length - 1];
+    const p = predict(last);
+    setText('ke-side', p.side);
+    setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open));
+    setText('ke-high', fmt(last.high));
+    setText('ke-low', fmt(last.low));
+    setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range));
+    setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', meta.mode);
+    setText('kc-predict', '預測：' + p.side);
+    setText('kc-dir', meta.label + ' → ' + p.side + '方K');
+    setText('kc-hit', '命中率：' + p.hit.toFixed(1) + '%');
+    setText('ke-live-symbol', meta.liveLabel);
+    setText('ke-live-price', fmt(livePrice));
+
+    const timeA = new Date(last.openTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    const timeB = new Date(last.closeTime).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    setText('moon-a', timeA);
+    setText('moon-b', timeB);
+
+    draw(data);
+  }
+
+  async function unifiedUpdate(){
+    try{
+      let data, live, meta;
+      if(STATE.symbol === 'KGENLP' || STATE.market === 'kgenlp'){
+        STATE.market = 'kgenlp';
+        STATE.symbol = 'KGENLP';
+        const lp = await fetchKgenLpPrice();
+        live = lp.usd;
+        data = buildKgenCandles(live);
+        meta = {
+          mode: '真 LP 價',
+          label: 'KGEN / WBNB LP',
+          liveLabel: 'KGENLP / USD'
+        };
+      }else{
+        STATE.market = 'binance';
+        data = await fetchBinanceKlines(STATE.symbol);
+        live = await fetchBinanceTicker(STATE.symbol);
+        meta = {
+          mode: '真市場',
+          label: STATE.symbol + ' / ' + STATE.interval,
+          liveLabel: STATE.symbol + ' / ' + STATE.interval
+        };
+      }
+      updatePanel(data, live, meta);
+    }catch(err){
+      console.warn(err);
+      setText('ke-mode', '讀取失敗');
+      setText('kc-dir', '市場資料讀取失敗');
+    }
+  }
+
+  function syncSelectors(){
+    const marketSel = $('ke-market');
+    const symbolSel = $('ke-symbol');
+    if(marketSel) marketSel.value = STATE.market;
+    if(symbolSel) symbolSel.value = STATE.symbol;
+  }
+
+  function bind(){
+    loadHistory();
+    const marketSel = $('ke-market');
+    const symbolSel = $('ke-symbol');
+    const steer = $('steer-input-val');
+
+    if(marketSel){
+      marketSel.addEventListener('change', function(){
+        STATE.market = this.value;
+        if(STATE.market === 'kgenlp'){
+          STATE.symbol = 'KGENLP';
+        }else if(STATE.symbol === 'KGENLP'){
+          STATE.symbol = 'BNBUSDT';
+        }
+        syncSelectors();
+        unifiedUpdate();
+      });
+    }
+
+    if(symbolSel){
+      symbolSel.addEventListener('change', function(){
+        STATE.symbol = this.value;
+        STATE.market = (STATE.symbol === 'KGENLP') ? 'kgenlp' : 'binance';
+        syncSelectors();
+        unifiedUpdate();
+      });
+    }
+
+    if(steer){
+      steer.addEventListener('input', function(){
+        unifiedUpdate();
+      });
+    }
+
+    syncSelectors();
+    unifiedUpdate();
+    if(STATE.timer) clearInterval(STATE.timer);
+    STATE.timer = setInterval(unifiedUpdate, 15000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
 })();
 </script>
 
