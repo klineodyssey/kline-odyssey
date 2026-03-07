@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.2</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.8.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.8.2 layout retune ===== */
+/* ===== V2.8.1 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -518,7 +518,7 @@
 /* 主圖置中 */
 #core-anchor{
   left: 50% !important;
-  top: 58% !important;
+  top: 52% !important;
   transform: translate(-50%, -50%) !important;
   margin-left: 0 !important;
 }
@@ -533,13 +533,13 @@
   }
   #core-anchor{
     left: 50% !important;
-    top: 58% !important;
+    top: 52% !important;
     transform: translate(-50%, -50%) !important;
   }
 }
 
 
-/* ===== V2.8.2 move E=mc² into 質量 row ===== */
+/* ===== V2.8.1 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.8.2 MASTER left block ===== */
+/* ===== V2.8.1 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -588,7 +588,9 @@
   padding: 10px;
 }
 #kline-chart-panel{
-  top: 700px;
+  left: 50% !important;
+  transform: translateX(-50%);
+  top: 380px;
   padding: 10px;
   height: 210px;
   max-height: 210px;
@@ -684,7 +686,7 @@
 /* keep core image centered */
 #core-anchor{
   left: 50% !important;
-  top: 58% !important;
+  top: 52% !important;
   transform: translate(-50%, -50%) !important;
   margin-left: 0 !important;
 }
@@ -697,7 +699,7 @@
   }
   #core-anchor{
     left: 50% !important;
-    top: 58% !important;
+    top: 52% !important;
     transform: translate(-50%, -50%) !important;
   }
   #kline-engine-panel,
@@ -706,12 +708,16 @@
     width: var(--left-w-master);
     max-width: var(--left-w-master);
   }
-  #kline-engine-panel{ top: 240px; }
-  #kline-chart-panel{ top: 700px; height: 210px; max-height: 210px; }
+  #kline-engine-panel{
+  top: 240px; }
+  #kline-chart-panel{
+  left: 50% !important;
+  transform: translateX(-50%);
+  top: 380px; height: 210px; max-height: 210px; }
 }
 
 
-/* ===== V2.8.2 True K-line mode ===== */
+/* ===== V2.8.1 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +729,7 @@
 }
 
 
-/* ===== V2.8.2 live ticker + symbol switch ===== */
+/* ===== V2.8.1 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +752,7 @@
 }
 
 
-/* ===== V2.8.2 market mode switch ===== */
+/* ===== V2.8.1 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -765,7 +771,7 @@
 }
 
 
-/* ===== V2.8.2 single K-line engine ===== */
+/* ===== V2.8.1 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -802,16 +808,39 @@
   background:rgba(3,8,18,.35);
 }
 
+
+/* ===== V2.8.1 FAQ ===== */
+#faq-box{
+  margin-top:10px;
+  font-size:12px;
+  color:#ffd98a;
+}
+.faq-item{
+  border:1px solid rgba(255,215,120,0.25);
+  border-radius:10px;
+  margin-bottom:6px;
+  overflow:hidden;
+}
+.faq-q{
+  padding:8px 10px;
+  cursor:pointer;
+  background:rgba(0,0,0,0.35);
+  font-weight:900;
+}
+.faq-q:hover{
+  background:rgba(255,215,120,0.08);
+}
+.faq-a{
+  display:none;
+  padding:8px 10px;
+  color:#ddd;
+  background:rgba(0,0,0,0.25);
+  line-height:1.5;
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
-
-<meta property="og:title" content="KGEN 16888 廣寒宮｜K線西遊記">
-<meta property="og:description" content="花果山台灣 × KGEN 自我演化金融生命體">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/assets/fairy.png">
-<meta name="twitter:card" content="summary_large_image">
-
 </head>
 <body>
 
@@ -833,7 +862,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.8.2</div>
+        <div class="sys-st" id="ver-st">VERSION v2.8.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -864,7 +893,7 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.8.2</span>
+    <span>宇宙K線引擎｜V2.8.1</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -972,6 +1001,35 @@
   </div>
 
   <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
+
+<div id="faq-box">
+  <div class="faq-item">
+    <div class="faq-q">Q：為什麼要用 Custom 找幣？</div>
+    <div class="faq-a">
+      因為一般搜尋可能找不到正確代幣。很多幣名稱會重複，或平台資料還沒有同步。<br>
+      使用 Custom 模式可以直接輸入「代幣合約地址」，系統才能精準找到該代幣。<br><br>
+      使用方式：<br>
+      1. 複製你要查的幣的合約地址<br>
+      2. 進入找幣頁面<br>
+      3. 切換到 Custom<br>
+      4. 貼上合約地址<br>
+      5. 送出搜尋
+    </div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q：Custom 要輸入什麼？</div>
+    <div class="faq-a">請輸入代幣「合約地址」，不是只輸入幣名。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q：怎麼判定輸贏？</div>
+    <div class="faq-a">系統依照宇宙 K 線引擎的方向與市場價格變化判定。方向盤角度決定多空方向，K線資料來自所選市場。</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Q：到了 16888 會發生什麼？</div>
+    <div class="faq-a">當能量價格到達 16888，系統會進入廣寒宮階段，觸發新的流動性與命運演算。</div>
+  </div>
+</div>
+
     <div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">MoonTrust 3+3（表態與紅包托管）</div>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
       <input id="mt-round" placeholder="roundId" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
@@ -1030,7 +1088,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.8.2";
+const APP_VERSION = "v2.8.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -4174,7 +4232,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.2 True K-line engine (Binance public API) ===== */
+/* ===== V2.8.1 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4337,7 +4395,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.2 live kline + ticker ===== */
+/* ===== V2.8.1 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4516,7 +4574,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.8.2 dual market engine ===== */
+/* ===== V2.8.1 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4644,7 +4702,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.2 stable market lock ===== */
+/* ===== V2.8.1 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4780,7 +4838,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.8.2 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.8.1 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5109,7 +5167,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== V2.8.2 Oracle Plus ===== */
+/* ===== V2.8.1 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5232,7 +5290,7 @@ setInterval(update, 20000);
 
 
 <script>
-/* ===== V2.8.2 split KGEN clean oracle ===== */
+/* ===== V2.8.1 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5444,6 +5502,17 @@ setInterval(update, 20000);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
 })();
+</script>
+
+
+<script>
+document.querySelectorAll(".faq-q").forEach(q=>{
+  q.onclick = ()=>{
+    const a = q.nextElementSibling;
+    if(!a) return;
+    a.style.display = (a.style.display==="block") ? "none" : "block";
+  };
+});
 </script>
 
 </body>
