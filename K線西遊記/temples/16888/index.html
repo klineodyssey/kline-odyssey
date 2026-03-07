@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.48.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -503,157 +503,6 @@
 
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
-
-/* =========================
-   V2.6.0 CLEAN LEFT REBUILD
-========================= */
-:root{
-  --left-x: 18px;
-  --left-w: 300px;
-}
-html, body{
-  overflow-x:hidden !important;
-}
-.resource-bars{
-  left: var(--left-x) !important;
-  top: 150px !important;
-  width: var(--left-w) !important;
-  max-width: var(--left-w) !important;
-  z-index: 120 !important;
-}
-.resource-bars .rb-note{ display:none !important; }
-.resource-bars .rb.kgen .row span::after{
-  content:"｜E = mc²";
-  color: rgba(255,215,120,.88);
-  margin-left: 6px;
-  font-family: Orbitron, sans-serif;
-  font-size: 10px;
-}
-.ga-matrix{
-  left: var(--left-x) !important;
-  top: 270px !important;
-  width: var(--left-w) !important;
-  max-width: var(--left-w) !important;
-  right:auto !important;
-  transform:none !important;
-  z-index: 121 !important;
-  padding: 12px !important;
-  box-sizing:border-box !important;
-}
-#kline-engine-panel,
-#kline-chart-panel{
-  position: fixed;
-  left: var(--left-x);
-  width: var(--left-w);
-  max-width: var(--left-w);
-  background: rgba(4,10,16,.88);
-  border: 1px solid rgba(255,215,120,.35);
-  border-radius: 14px;
-  box-shadow: 0 0 18px rgba(0,242,255,.08), inset 0 0 18px rgba(255,215,120,.04);
-  box-sizing:border-box;
-  overflow:hidden;
-  z-index:122;
-}
-#kline-engine-panel{ top: 410px; padding: 10px; }
-#kline-chart-panel{ top: 748px; padding: 10px; }
-#kline-engine-panel .ke-head,
-#kline-chart-panel .kc-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  color: var(--gold);
-  font-weight:900;
-  font-size:14px;
-  margin-bottom:8px;
-}
-#kline-engine-panel .ke-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-#kline-engine-panel .ke-cell{
-  min-height:64px;
-  border:1px solid rgba(255,215,120,.22);
-  border-radius:12px;
-  padding:8px 10px;
-  background:rgba(0,0,0,.24);
-}
-#kline-engine-panel .ke-label{
-  font-size:11px;
-  color:rgba(255,255,255,.78);
-}
-#kline-engine-panel .ke-value{
-  margin-top:8px;
-  font-family:'Orbitron',sans-serif;
-  font-size:16px;
-  color:var(--cyan);
-  font-weight:900;
-}
-#kline-engine-panel .ke-value.right{ text-align:right; }
-#kline-canvas{
-  width:100%;
-  height:116px;
-  display:block;
-  border-radius:10px;
-  background:
-    linear-gradient(180deg, rgba(0,242,255,.03), rgba(0,0,0,.06)),
-    repeating-linear-gradient(to right, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 1px, transparent 32px),
-    repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 24px),
-    rgba(0,0,0,.22);
-  box-shadow: inset 0 0 16px rgba(0,242,255,.08);
-}
-#kline-chart-panel .kc-foot{
-  margin-top:8px;
-  padding-top:8px;
-  border-top:1px solid rgba(255,255,255,.08);
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  font-size:12px;
-  color:#fff;
-}
-#moon-match{
-  margin-top:8px;
-  padding-top:8px;
-  border-top:1px solid rgba(255,255,255,.08);
-  font-size:12px;
-  line-height:1.55;
-}
-#moon-match-title{
-  color:var(--gold);
-  font-weight:900;
-  margin-bottom:4px;
-}
-#moon-match .addr{
-  color:var(--cyan);
-  font-family:'Orbitron',sans-serif;
-  font-size:11px;
-}
-#web3-panel{
-  left: 18px !important;
-  bottom: 245px !important;
-  width:min(360px,92vw) !important;
-}
-#coord-panel{
-  right: 84px !important;
-  bottom: 248px !important;
-}
-@media (max-width:720px){
-  :root{
-    --left-x: 18px;
-    --left-w: 300px;
-  }
-  #web3-panel{
-    bottom:240px !important;
-    width:min(340px,92vw) !important;
-  }
-  #coord-panel{
-    right:80px !important;
-    bottom:244px !important;
-    width:min(320px,90vw) !important;
-  }
-}
-
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -678,7 +527,7 @@ html, body{
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.48.4</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -703,41 +552,6 @@ html, body{
     <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
     <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
     <div style="color:var(--energy); font-size:12px; margin-top:10px;" id="ga-rank">RANK: GA-600</div>
-</div>
-
-
-<div id="kline-engine-panel" aria-label="宇宙K線引擎">
-  <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.0</span>
-    <span id="ke-mode">K線模擬</span>
-  </div>
-  <div class="ke-grid">
-    <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
-    <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value right" id="ke-angle">0</div></div>
-    <div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
-    <div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Range</div><div class="ke-value" id="ke-range">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Wick</div><div class="ke-value" id="ke-wick">--</div></div>
-  </div>
-</div>
-
-<div id="kline-chart-panel" aria-label="宇宙K線圖">
-  <div class="kc-head">
-    <span>宇宙K線圖</span>
-    <span id="kc-predict">預測：--</span>
-  </div>
-  <canvas id="kline-canvas" width="280" height="116"></canvas>
-  <div class="kc-foot">
-    <span id="kc-dir">方向盤 → --方K</span>
-    <span id="kc-hit">命中率：--</span>
-  </div>
-  <div id="moon-match">
-    <div id="moon-match-title">月下老人配對</div>
-    <div>A：<span class="addr" id="moon-a">--</span></div>
-    <div>B：<span class="addr" id="moon-b">--</span></div>
-  </div>
 </div>
 
 <div id="core-anchor">
@@ -861,7 +675,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.0";
+const APP_VERSION = "v2.48.4";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3981,211 +3795,6 @@ document.addEventListener('click', (ev)=>{
   }catch(e){
     console.warn('V2.48.2 hotfix failed', e);
   }
-})();
-</script>
-
-
-<script>
-(function(){
-  function num(v, d=0){ v = Number(v); return Number.isFinite(v) ? v : d; }
-  function sideZh(deg){ return Math.abs(num(deg,0)) <= 90 ? '多' : '空'; }
-  function shortAddr(a){
-    if(!a || a === '0x0000000000000000000000000000000000000000') return '--';
-    a = String(a);
-    return a.slice(0,6) + '...' + a.slice(-4);
-  }
-
-  const kState = { history: [], hits:0, total:0 };
-
-  function simulateCandle(ct, deg, warp){
-    const d = num(deg, 0);
-    const w = num(warp, 33);
-    const longSide = Math.abs(d) <= 90;
-    const drift = longSide ? 1 : -1;
-    const body = 28 + Math.abs(d) * 0.75 + w * 0.16;
-    const open = Math.round(ct);
-    const close = Math.round(ct + drift * body);
-    const hiPad = Math.round(14 + Math.abs(d) * 0.35 + w * 0.08);
-    const loPad = Math.round(14 + Math.abs(d) * 0.35 + w * 0.08);
-    const high = Math.max(open, close) + hiPad;
-    const low = Math.min(open, close) - loPad;
-    return { open, high, low, close, range: high-low, wick: Math.round((high-low)*0.24) };
-  }
-
-  function drawChart(){
-    const cvs = document.getElementById('kline-canvas');
-    if(!cvs) return;
-    const ctx = cvs.getContext('2d');
-    const w = cvs.width, h = cvs.height;
-    ctx.clearRect(0,0,w,h);
-
-    const candles = kState.history.slice(-8);
-    if(!candles.length) return;
-
-    const highs = candles.map(c=>c.high);
-    const lows  = candles.map(c=>c.low);
-    const maxV = Math.max.apply(null, highs);
-    const minV = Math.min.apply(null, lows);
-    const pad = (maxV-minV) * 0.08 || 1;
-    const topV = maxV + pad;
-    const botV = minV - pad;
-    const toY = (v)=>{
-      const t = (v - botV) / (topV - botV);
-      return h - t * h;
-    };
-
-    const mid = (maxV + minV) / 2;
-    ctx.save();
-    ctx.setLineDash([4,4]);
-    ctx.strokeStyle = 'rgba(255,215,120,0.22)';
-    ctx.beginPath(); ctx.moveTo(0, toY(mid)); ctx.lineTo(w, toY(mid)); ctx.stroke();
-    ctx.restore();
-
-    const gap = 6;
-    const cw = Math.floor((w - gap*(candles.length+1)) / candles.length);
-
-    candles.forEach((c, i)=>{
-      const x = gap + i*(cw+gap);
-      const yo = toY(c.open), yc = toY(c.close), yh = toY(c.high), yl = toY(c.low);
-      const up = c.close >= c.open;
-      ctx.save();
-      ctx.strokeStyle = up ? '#19f0ff' : '#ffcc66';
-      ctx.fillStyle = up ? 'rgba(25,240,255,0.22)' : 'rgba(255,204,102,0.22)';
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = up ? 'rgba(25,240,255,.35)' : 'rgba(255,204,102,.28)';
-      ctx.beginPath();
-      ctx.moveTo(x + cw/2, yh);
-      ctx.lineTo(x + cw/2, yl);
-      ctx.stroke();
-      const by = Math.min(yo, yc);
-      const bh = Math.max(5, Math.abs(yc - yo));
-      ctx.fillRect(x, by, cw, bh);
-      ctx.strokeRect(x, by, cw, bh);
-      ctx.restore();
-    });
-
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(String(Math.round(topV)), w-42, 10);
-    ctx.fillText(String(Math.round(mid)), w-42, toY(mid)-4);
-    ctx.fillText(String(Math.round(botV)), w-42, h-4);
-  }
-
-  async function refreshMoonMatch(){
-    try{
-      const aEl = document.getElementById('moon-a');
-      const bEl = document.getElementById('moon-b');
-      if(!aEl || !bEl) return;
-
-      if(window.web3 && web3.demo){
-        aEl.textContent = '--';
-        bEl.textContent = '--';
-        return;
-      }
-
-      if(!window.web3 || !web3.provider || !web3.UNIVERSE || !window.ethers || !web3.abiUniverse){
-        aEl.textContent = '--';
-        bEl.textContent = '--';
-        return;
-      }
-
-      const uni = new ethers.Contract(web3.UNIVERSE, web3.abiUniverse, web3.provider);
-      const rid = Number(await uni.roundId());
-      if(!rid){ aEl.textContent='--'; bEl.textContent='--'; return; }
-      const r = await uni.rounds(rid);
-      const a = r.a || r[0];
-      const b = r.b || r[1];
-      aEl.textContent = shortAddr(a);
-      bEl.textContent = shortAddr(b);
-    }catch(e){
-      const aEl = document.getElementById('moon-a');
-      const bEl = document.getElementById('moon-b');
-      if(aEl) aEl.textContent='--';
-      if(bEl) bEl.textContent='--';
-    }
-  }
-
-  function refreshKline(){
-    const deg = num(document.getElementById('steer-input-val')?.value, 0);
-    const warp = num(document.getElementById('warp-input-val')?.value, 33);
-    const side = sideZh(deg);
-
-    let ct = 16888;
-    if(window.web3 && web3.demo && web3.demoState && Number.isFinite(Number(web3.demoState.pool))){
-      ct = Number(web3.demoState.pool);
-    }else if(window.web3 && Number.isFinite(Number(web3._ct))){
-      ct = Number(web3._ct);
-    }else{
-      const v = document.getElementById('ct-in')?.value;
-      if(Number.isFinite(Number(v))) ct = Number(v);
-    }
-
-    const c = simulateCandle(ct, deg, warp);
-
-    const map = {
-      'ke-side': side,
-      'ke-angle': String(Math.round(Math.abs(deg))),
-      'ke-open': Number(c.open).toLocaleString(),
-      'ke-high': Number(c.high).toLocaleString(),
-      'ke-low': Number(c.low).toLocaleString(),
-      'ke-close': Number(c.close).toLocaleString(),
-      'ke-range': Number(c.range).toLocaleString(),
-      'ke-wick': Number(c.wick).toLocaleString(),
-      'kc-predict': '預測：' + side,
-      'kc-dir': '方向盤 → ' + side + '方K'
-    };
-    Object.keys(map).forEach(id=>{
-      const el = document.getElementById(id);
-      if(el) el.textContent = map[id];
-    });
-
-    const last = kState.history[kState.history.length-1];
-    if(!last || JSON.stringify(last)!==JSON.stringify(c)){
-      kState.history.push(c);
-      if(kState.history.length > 24) kState.history.shift();
-      const predUp = side === '多';
-      const actualUp = c.close >= c.open;
-      kState.total += 1;
-      if(predUp === actualUp) kState.hits += 1;
-    }
-    const hit = kState.total ? ((kState.hits/kState.total)*100).toFixed(1) : '--';
-    const hitEl = document.getElementById('kc-hit');
-    if(hitEl) hitEl.textContent = '命中率：' + hit + '%';
-
-    drawChart();
-    refreshMoonMatch();
-  }
-
-  window.refreshKlineUniverse = refreshKline;
-
-  window.addEventListener('load', ()=>{
-    refreshKline();
-    const s = document.getElementById('steer-input-val');
-    const w = document.getElementById('warp-input-val');
-    if(s) s.addEventListener('input', refreshKline);
-    if(w) w.addEventListener('input', refreshKline);
-  });
-
-  try{
-    if(window.app && typeof app.applySteer === 'function' && !app.__v260SteerPatch){
-      app.__v260SteerPatch = true;
-      const old = app.applySteer.bind(app);
-      app.applySteer = function(v, silent){
-        const r = old(v, silent);
-        try{ refreshKline(); }catch(e){}
-        return r;
-      };
-    }
-    if(window.app && typeof app.updateWarp === 'function' && !app.__v260WarpPatch){
-      app.__v260WarpPatch = true;
-      const oldw = app.updateWarp.bind(app);
-      app.updateWarp = function(v){
-        const r = oldw(v);
-        try{ refreshKline(); }catch(e){}
-        return r;
-      };
-    }
-  }catch(e){}
 })();
 </script>
 
