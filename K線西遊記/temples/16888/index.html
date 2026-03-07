@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v2.6.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -504,7 +504,7 @@
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== V2.6.0 layout retune ===== */
+/* ===== V2.6.2 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -539,7 +539,7 @@
 }
 
 
-/* ===== V2.6.0 move E=mc² into 質量 row ===== */
+/* ===== V2.6.2 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -552,7 +552,7 @@
 }
 
 
-/* ===== V2.6.0 MASTER left block ===== */
+/* ===== V2.6.2 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -711,7 +711,7 @@
 }
 
 
-/* ===== V2.6.0 True K-line mode ===== */
+/* ===== V2.6.2 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -723,7 +723,7 @@
 }
 
 
-/* ===== V2.6.0 live ticker + symbol switch ===== */
+/* ===== V2.6.2 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -746,7 +746,7 @@
 }
 
 
-/* ===== V2.6.0 market mode switch ===== */
+/* ===== V2.6.2 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -765,7 +765,7 @@
 }
 
 
-/* ===== V2.6.0 single K-line engine ===== */
+/* ===== V2.6.2 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -792,6 +792,16 @@
   font-family:'Orbitron',sans-serif;
 }
 
+
+#oracle-plus-dashboard{
+  margin-top:10px;
+  padding:8px;
+  border:1px solid rgba(127,243,255,.18);
+  border-radius:8px;
+  font-size:12px;
+  background:rgba(3,8,18,.35);
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
@@ -816,7 +826,7 @@
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v2.6.0</div>
+        <div class="sys-st" id="ver-st">VERSION v2.6.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -847,13 +857,14 @@
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V2.6.0</span>
+    <span>宇宙K線引擎｜V2.6.2</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
         <option value="BTCUSDT">BTCUSDT</option>
         <option value="ETHUSDT">ETHUSDT</option>
         <option value="KGENLP">KGENLP</option>
+        <option value="KGEN16888">KGEN16888</option>
       </select>
       <span id="ke-mode">真市場</span>
     </span>
@@ -1012,7 +1023,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v2.6.0";
+const APP_VERSION = "v2.6.2";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3413,7 +3424,21 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
   </div>
 
-  <div class="cp-actions">
+  
+
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px;background:rgba(3,8,18,.35)">
+  <b>DeFi Oracle Plus</b><br>
+  CT 真鏈上價：<input id="ct-in" readonly style="width:110px;background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:6px;padding:2px 6px"><br>
+  宇宙基準價：<span id="base-16888">16888.00</span><br>
+  LP 流動性：<span id="lp-liq">--</span><br>
+  KGEN 市值：<span id="kgen-mcap">--</span><br>
+  池內 KGEN：<span id="pool-kgen">--</span><br>
+  池內 WBNB：<span id="pool-wbnb">--</span><br>
+  最近交換：<span id="last-swap">--</span><br>
+  最近區塊：<span id="last-block">--</span>
+</div>
+
+<div class="cp-actions">
     <button type="button" onclick="app.openCoordModal()">地圖（可點全點位）</button>
     <button type="button" onclick="app.syncFromWheel()">方向盤同步(多/空)</button>
     <button type="button" onclick="app.openTokenScan()">Token</button>
@@ -4142,7 +4167,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 True K-line engine (Binance public API) ===== */
+/* ===== V2.6.2 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4305,7 +4330,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 live kline + ticker ===== */
+/* ===== V2.6.2 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4484,7 +4509,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== V2.6.0 dual market engine ===== */
+/* ===== V2.6.2 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4612,7 +4637,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.6.0 stable market lock ===== */
+/* ===== V2.6.2 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4748,7 +4773,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== V2.6.0 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.6.2 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -4777,6 +4802,7 @@ if(document.readyState==="loading"){
     const n = Number(v || 0);
     if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
     if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
     return n.toFixed(2);
   }
   function loadKgenHistory(){
@@ -4942,6 +4968,22 @@ if(document.readyState==="loading"){
         appendKgen(usd);
         const data = buildKgenCandles();
         updatePanel(data, usd, '真 LP 價', 'KGENLP / USD');
+        const ct = $('ct-in');
+        if(ct) ct.value = usd.toFixed(6);
+      }else if(STATE.symbol === 'KGEN16888'){
+        const base = 16888;
+        const now = Date.now();
+        const data = Array.from({length:12}).map((_, i) => ({
+          openTime: now - (12-i)*60000,
+          open: base,
+          high: base,
+          low: base,
+          close: base,
+          closeTime: now - (11-i)*60000
+        }));
+        updatePanel(data, base, '宇宙基準價', 'KGEN16888 / BASE');
+        const ct = $('ct-in');
+        if(ct) ct.value = base.toFixed(2);
       }else{
         const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
         updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
@@ -4977,14 +5019,6 @@ if(document.readyState==="loading"){
   }
 })();
 </script>
-
-
-<div id="defi-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(255,215,120,.2);border-radius:8px;font-size:12px">
-<b>DeFi Oracle</b><br>
-CT 價格：<input id="ct-in" readonly style="width:110px"><br>
-LP 流動性：<span id="lp-liq">--</span><br>
-KGEN 市值：<span id="kgen-mcap">--</span>
-</div>
 
 
 <script>
@@ -5065,18 +5099,10 @@ setInterval(update,20000)
 </script>
 
 
-<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px">
-<b>DeFi Oracle Plus</b><br>
-池內 KGEN：<span id="pool-kgen">--</span><br>
-池內 WBNB：<span id="pool-wbnb">--</span><br>
-TVL：<span id="pool-tvl">--</span><br>
-最近交換：<span id="last-swap">--</span><br>
-最近區塊：<span id="last-block">--</span>
-</div>
 
 
 <script>
-/* ===== V2.6.0 Oracle Plus ===== */
+/* ===== V2.6.2 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5194,6 +5220,222 @@ async function update(){
 
 update();
 setInterval(update, 20000);
+})();
+</script>
+
+
+<script>
+/* ===== V2.6.2 split KGEN clean oracle ===== */
+(function(){
+  const STATE = {
+    symbol: 'BNBUSDT',
+    interval: '1m',
+    limit: 12,
+    timer: null,
+    pair: '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2',
+    kgen: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be'.toLowerCase(),
+    wbnb: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'.toLowerCase(),
+    rpc: 'https://bsc-dataseed.binance.org/',
+    kgenHistory: []
+  };
+  const PAIR_ABI = [
+    'function token0() view returns (address)',
+    'function token1() view returns (address)',
+    'function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+    'event Swap(address indexed sender,uint amount0In,uint amount1In,uint amount0Out,uint amount1Out,address indexed to)'
+  ];
+  const ERC20 = ['function totalSupply() view returns (uint256)'];
+
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el = $(id); if(el) el.textContent = v; }
+  function getDeg(){ const r = $('steer-input-val'); return r ? (parseFloat(r.value) || 0) : 0; }
+  function sideZh(deg){ return (deg >= -90 && deg <= 90) ? '多' : '空'; }
+  function fmt(v){
+    const n = Number(v || 0);
+    if(STATE.symbol === 'BNBUSDT') return n.toFixed(3);
+    if(STATE.symbol === 'KGENLP') return n.toFixed(6);
+    if(STATE.symbol === 'KGEN16888') return n.toFixed(2);
+    return n.toFixed(2);
+  }
+  function loadHist(){
+    try{
+      const raw = localStorage.getItem('kgen_lp_history_v262');
+      const arr = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(arr)) STATE.kgenHistory = arr.slice(-60);
+    }catch(e){}
+  }
+  function saveHist(){
+    try{ localStorage.setItem('kgen_lp_history_v262', JSON.stringify(STATE.kgenHistory.slice(-60))); }catch(e){}
+  }
+  async function fetchBinanceTicker(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + symbol, {cache:'no-store'});
+    if(!r.ok) throw new Error('ticker ' + r.status);
+    const j = await r.json();
+    return Number(j.price);
+  }
+  async function fetchBinanceKlines(symbol){
+    const r = await fetch('https://api.binance.com/api/v3/klines?symbol=' + symbol + '&interval=' + STATE.interval + '&limit=' + STATE.limit, {cache:'no-store'});
+    if(!r.ok) throw new Error('klines ' + r.status);
+    const arr = await r.json();
+    return arr.map(k => ({
+      openTime: Number(k[0]), open: Number(k[1]), high: Number(k[2]),
+      low: Number(k[3]), close: Number(k[4]), closeTime: Number(k[6])
+    }));
+  }
+  async function getLpData(){
+    if(!window.ethers) throw new Error('ethers missing');
+    const provider = new ethers.providers.JsonRpcProvider(STATE.rpc);
+    const pair = new ethers.Contract(STATE.pair, PAIR_ABI, provider);
+    const [t0,t1,res,bnbUsd] = await Promise.all([
+      pair.token0(), pair.token1(), pair.getReserves(), fetchBinanceTicker('BNBUSDT')
+    ]);
+    const r0 = Number(res[0].toString());
+    const r1 = Number(res[1].toString());
+    const t0l = String(t0).toLowerCase();
+    const t1l = String(t1).toLowerCase();
+
+    let kgenRaw, wbnbRaw, kgenPerBnb;
+    if(t0l === STATE.kgen && t1l === STATE.wbnb){
+      kgenRaw = r0; wbnbRaw = r1; kgenPerBnb = r0 / r1;
+    }else if(t1l === STATE.kgen && t0l === STATE.wbnb){
+      kgenRaw = r1; wbnbRaw = r0; kgenPerBnb = r1 / r0;
+    }else{
+      throw new Error('LP pair mismatch');
+    }
+    const price = bnbUsd / kgenPerBnb;
+    const poolKgen = kgenRaw / 1e18;
+    const poolWbnb = wbnbRaw / 1e18;
+    const tvl = poolWbnb * bnbUsd * 2;
+    const token = new ethers.Contract(STATE.kgen, ERC20, provider);
+    const supply = Number((await token.totalSupply()).toString()) / 1e18;
+    const mcap = supply * price;
+    const block = await provider.getBlockNumber();
+    return {price, poolKgen, poolWbnb, tvl, mcap, block};
+  }
+  function appendKgen(price){
+    STATE.kgenHistory.push({t: Date.now(), p: Number(price)});
+    STATE.kgenHistory = STATE.kgenHistory.slice(-60);
+    saveHist();
+  }
+  function buildKgenCandles(price){
+    appendKgen(price);
+    const hist = STATE.kgenHistory.slice(-12);
+    const candles = hist.map((h, i) => {
+      const prev = hist[Math.max(0, i-1)]?.p ?? h.p;
+      const next = hist[Math.min(hist.length-1, i+1)]?.p ?? h.p;
+      return {
+        openTime: h.t - 60000,
+        open: prev, high: Math.max(prev,h.p,next), low: Math.min(prev,h.p,next),
+        close: h.p, closeTime: h.t
+      };
+    });
+    while(candles.length < 12){
+      const f = candles[0] || {openTime:Date.now(), open:price, high:price, low:price, close:price, closeTime:Date.now()};
+      candles.unshift({openTime:f.openTime-60000, open:f.open, high:f.high, low:f.low, close:f.close, closeTime:f.closeTime-60000});
+    }
+    return candles.slice(-12);
+  }
+  function buildBaseCandles(){
+    const base = 16888;
+    const now = Date.now();
+    return Array.from({length:12}).map((_, i) => ({
+      openTime: now - (12-i)*60000, open: base, high: base, low: base, close: base, closeTime: now - (11-i)*60000
+    }));
+  }
+  function predict(last){
+    const deg = getDeg();
+    const side = sideZh(deg);
+    const angle = Math.round(Math.abs(deg));
+    const range = Math.max(0.000001, last.high - last.low);
+    const body = Math.abs(last.close - last.open);
+    const wick = Math.max(0.000001, range - body);
+    let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body/range)*7) - Math.min(12, (wick/range)*8);
+    hit = Math.max(63.5, Math.min(91.5, hit));
+    return {side, angle, range, wick, hit};
+  }
+  function draw(data){
+    const canvas = $('kline-canvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const padX=12,padY=10;
+    const maxH = Math.max.apply(null, data.map(d=>d.high));
+    const minL = Math.min.apply(null, data.map(d=>d.low));
+    const span = (maxH-minL)||1;
+    const y = v => padY + (maxH-v)/span*(h-padY*2);
+    ctx.strokeStyle='rgba(255,255,255,.08)';
+    for(let i=0;i<data.length;i++){
+      const x=padX+i*((w-padX*2)/data.length);
+      ctx.beginPath(); ctx.moveTo(x,padY); ctx.lineTo(x,h-padY); ctx.stroke();
+    }
+    const spacing=(w-padX*2)/data.length, candleW=Math.min(18, spacing*0.58);
+    data.forEach((d,i)=>{
+      const x=padX+i*spacing+spacing/2, yH=y(d.high), yL=y(d.low), yO=y(d.open), yC=y(d.close);
+      const up=d.close>=d.open;
+      ctx.strokeStyle=up?'rgba(120,245,255,.96)':'rgba(255,210,120,.96)';
+      ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,yH); ctx.lineTo(x,yL); ctx.stroke();
+      ctx.fillStyle=up?'rgba(120,245,255,.35)':'rgba(255,210,120,.28)';
+      const top=Math.min(yO,yC), bh=Math.max(3, Math.abs(yC-yO));
+      ctx.fillRect(x-candleW/2, top, candleW, bh); ctx.strokeRect(x-candleW/2, top, candleW, bh);
+    });
+  }
+  function updatePanel(data, live, modeLabel, liveLabel){
+    const last=data[data.length-1]; if(!last) return;
+    const p=predict(last);
+    setText('ke-side', p.side); setText('ke-angle', String(p.angle));
+    setText('ke-open', fmt(last.open)); setText('ke-high', fmt(last.high)); setText('ke-low', fmt(last.low)); setText('ke-close', fmt(last.close));
+    setText('ke-range', fmt(p.range)); setText('ke-wick', fmt(p.wick));
+    setText('ke-mode', modeLabel); setText('ke-live-symbol', liveLabel); setText('ke-live-price', fmt(live));
+    setText('kc-predict', '預測：'+p.side); setText('kc-dir', liveLabel+' → '+p.side+'方K'); setText('kc-hit', '命中率：'+p.hit.toFixed(1)+'%');
+    const tA = new Date(last.openTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    const tB = new Date(last.closeTime).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    setText('moon-a', tA); setText('moon-b', tB);
+    draw(data);
+  }
+  async function updateOracle(lp){
+    const ct = $('ct-in'); if(ct) ct.value = Number(lp.price).toFixed(6);
+    setText('base-16888', '16888.00');
+    setText('lp-liq', '$' + Math.round(lp.tvl).toLocaleString());
+    setText('kgen-mcap', '$' + Math.round(lp.mcap).toLocaleString());
+    setText('pool-kgen', Math.round(lp.poolKgen).toLocaleString());
+    setText('pool-wbnb', Number(lp.poolWbnb).toFixed(4));
+    setText('last-swap', '鏈上同步');
+    setText('last-block', String(lp.block));
+  }
+  async function refresh(){
+    try{
+      if(STATE.symbol === 'KGENLP'){
+        const lp = await getLpData();
+        await updateOracle(lp);
+        const data = buildKgenCandles(lp.price);
+        updatePanel(data, lp.price, '真 LP 價', 'KGENLP / USD');
+      }else if(STATE.symbol === 'KGEN16888'){
+        const data = buildBaseCandles();
+        updatePanel(data, 16888, '宇宙基準價', 'KGEN16888 / BASE');
+      }else{
+        const [data, live] = await Promise.all([fetchBinanceKlines(STATE.symbol), fetchBinanceTicker(STATE.symbol)]);
+        updatePanel(data, live, '真市場', STATE.symbol + ' / 1m');
+      }
+    }catch(err){
+      console.warn(err);
+      setText('ke-mode', '讀取失敗');
+      setText('kc-dir', '市場資料讀取失敗');
+    }
+  }
+  function bind(){
+    loadHist();
+    const sel = $('ke-symbol');
+    const steer = $('steer-input-val');
+    if(sel){
+      sel.value = STATE.symbol;
+      sel.addEventListener('change', function(){ STATE.symbol = this.value; refresh(); });
+    }
+    if(steer){ steer.addEventListener('input', refresh); }
+    refresh();
+    if(STATE.timer) clearInterval(STATE.timer);
+    STATE.timer = setInterval(refresh, 15000);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
 })();
 </script>
 
