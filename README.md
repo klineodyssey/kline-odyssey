@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文 #花果山台灣 #K線西遊記  8888高老莊能量射向16888廣寒宮，  凡間慾望貫穿月宮光門。  天蓬轉世，嫦娥臨月，  宇宙點位正在重排。  
-👉 https://www.youtube.com/watch?v=Q5sJRHnANr4
+▶ #K線西遊記 #花果山台灣悟空看K線不是漲跌，而是宇宙座標。Warp 是飛碟的曲速引擎，能量匯聚，廣寒宮之門開。  
+👉 https://www.youtube.com/watch?v=gwcRxzjR6NU
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
