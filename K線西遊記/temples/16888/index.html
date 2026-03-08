@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+
+<!-- =========================
+K線西遊記｜16888 廣寒宮 OG Engine V3.0
+========================= -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="16888 廣寒宮 · K線西遊記">
+<meta property="og:description" content="花果山宇宙金融地圖 · 廣寒宮飛碟控制中心">
+<meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png?v=1">
+<meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/">
+<meta property="og:site_name" content="KLINE ODYSSEY">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="16888 廣寒宮 · K線西遊記">
+<meta name="twitter:description" content="花果山宇宙金融地圖 · 廣寒宮飛碟控制中心">
+<meta name="twitter:image" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/assets/fairy.png?v=1">
+
     <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
@@ -5846,93 +5862,6 @@ document.querySelectorAll(".faq-q").forEach(q=>{
   });
 })();
 </script>
-
-<script>
-/* ===== V3.0 DEV｜KGEN LP Oracle ===== */
-(function(){
-  const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
-  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
-  const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c".toLowerCase();
-  const RPC  = "https://bsc-dataseed.binance.org/";
-  const ABI = [
-    "function token0() view returns (address)",
-    "function token1() view returns (address)",
-    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
-  ];
-
-  function fmt(n, d=6){
-    return Number(n || 0).toFixed(d);
-  }
-
-  async function fetchBNBUSD(){
-    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT", { cache:"no-store" });
-    const j = await r.json();
-    return Number(j.price);
-  }
-
-  async function fetchLPOracle(){
-    if(!window.ethers) return;
-    const provider = new ethers.providers.JsonRpcProvider(RPC);
-    const pair = new ethers.Contract(PAIR, ABI, provider);
-
-    const [t0, t1, reserves, bnbUsd] = await Promise.all([
-      pair.token0(),
-      pair.token1(),
-      pair.getReserves(),
-      fetchBNBUSD()
-    ]);
-
-    const r0 = Number((reserves.reserve0 || reserves[0]).toString());
-    const r1 = Number((reserves.reserve1 || reserves[1]).toString());
-
-    let poolKgen = 0;
-    let poolWbnb = 0;
-
-    if(String(t0).toLowerCase() === KGEN && String(t1).toLowerCase() === WBNB){
-      poolKgen = r0 / 1e18;
-      poolWbnb = r1 / 1e18;
-    }else if(String(t1).toLowerCase() === KGEN && String(t0).toLowerCase() === WBNB){
-      poolKgen = r1 / 1e18;
-      poolWbnb = r0 / 1e18;
-    }else{
-      throw new Error("LP pair token mismatch");
-    }
-
-    const kgenPriceUsd = (poolWbnb * bnbUsd) / poolKgen;
-    const lpUsd = poolWbnb * bnbUsd * 2;
-
-    const p1 = document.getElementById("oracle-kgenlp-price");
-    const p2 = document.getElementById("oracle-pool-kgen");
-    const p3 = document.getElementById("oracle-pool-wbnb");
-    const p4 = document.getElementById("oracle-lp-usd");
-
-    if(p1) p1.textContent = fmt(kgenPriceUsd, 6);
-    if(p2) p2.textContent = Math.round(poolKgen).toLocaleString();
-    if(p3) p3.textContent = fmt(poolWbnb, 4);
-    if(p4) p4.textContent = "$" + Math.round(lpUsd).toLocaleString();
-
-    const keSymbol = document.getElementById("ke-symbol");
-    const keLive = document.getElementById("ke-live-price");
-
-    if(keSymbol && keLive && keSymbol.value === "KGENLP"){
-      keLive.textContent = fmt(kgenPriceUsd, 6);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function(){
-    fetchLPOracle();
-    setInterval(fetchLPOracle, 5000);
-  });
-})();
-</script>
-
-<div style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px;background:rgba(3,8,18,.35)">
-  <b>V3.0 DEV｜LP Oracle</b><br>
-  KGENLP 真價格：<span id="oracle-kgenlp-price">--</span><br>
-  Pool KGEN：<span id="oracle-pool-kgen">--</span><br>
-  Pool WBNB：<span id="oracle-pool-wbnb">--</span><br>
-  LP USD：<span id="oracle-lp-usd">--</span>
-</div>
 
 </body>
 </html>
