@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
+K線西遊記｜16888 廣寒宮 OG Engine V3.4.0
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.2.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.4.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1034,12 +1034,64 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
   .history-grid{ grid-template-columns:1fr; }
 }
 
+
+/* ===== V3.4.0 chain live panel ===== */
+.chain-live-panel{
+  position:fixed;
+  right:18px;
+  top:520px;
+  z-index:215;
+  width:min(360px, 88vw);
+  background:rgba(8,12,20,.92);
+  border:1px solid rgba(255,215,120,.28);
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+.chain-live-panel .cl-head{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  color:#ffd88a; font-weight:900; font-family:'Orbitron',sans-serif; font-size:13px;
+  margin-bottom:10px;
+}
+.chain-live-panel .cl-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+}
+.chain-live-panel .cl-item{
+  border:1px solid rgba(255,215,120,.14);
+  border-radius:12px;
+  padding:8px 10px;
+  background:rgba(0,0,0,.22);
+}
+.chain-live-panel .cl-k{
+  font-size:10px; color:#ffe6b8; opacity:.88;
+}
+.chain-live-panel .cl-v{
+  margin-top:4px; font-size:13px; color:#d8f9ff; font-weight:900; word-break:break-all;
+}
+.chain-live-panel .cl-row{
+  margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;
+}
+.chain-live-panel .cl-btn{
+  flex:1; min-width:110px;
+  border-radius:10px; padding:8px 10px;
+  border:1px solid rgba(255,215,120,.24);
+  background:rgba(0,0,0,.28); color:#fff; font-weight:800; cursor:pointer;
+}
+.chain-live-panel .cl-note{
+  margin-top:8px; font-size:11px; color:#cfe8ff; opacity:.86; line-height:1.45;
+}
+@media (max-width: 820px){
+  .chain-live-panel{
+    top:auto; bottom:96px; right:12px; width:min(360px,92vw);
+  }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 </head>
 <body>
-<div id="versionHUD">GUANGHAN PALACE V3.2.1</div>
+<div id="versionHUD">GUANGHAN PALACE V3.4.0</div>
 
 
 
@@ -1060,7 +1112,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.2.1</div>
+        <div class="sys-st" id="ver-st">VERSION v3.4.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1091,7 +1143,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.2.1</span>
+    <span>宇宙K線引擎｜V3.4.0</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1190,7 +1242,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">新手玩法｜V3.2.1</div>
+    <div class="qs-title">新手玩法｜V3.4.0</div>
     <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
     <ol>
       <li>連結錢包</li>
@@ -1299,7 +1351,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.2.1";
+const APP_VERSION = "v3.4.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3406,6 +3458,35 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <audio id="music-audio" preload="none" style="display:none;"></audio>
 </div>
 
+
+
+
+<div class="chain-live-panel" id="chain-live-panel">
+  <div class="cl-head">
+    <span>CHAIN LIVE｜V3.4.0</span>
+    <span id="cl-status">待同步</span>
+  </div>
+  <div class="cl-grid">
+    <div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">--</div></div>
+    <div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">--</div></div>
+    <div class="cl-item"><div class="cl-k">月老1（A）</div><div class="cl-v" id="cl-a">--</div></div>
+    <div class="cl-item"><div class="cl-k">月老2（B）</div><div class="cl-v" id="cl-b">--</div></div>
+    <div class="cl-item"><div class="cl-k">Escrow A</div><div class="cl-v" id="cl-escrowA">--</div></div>
+    <div class="cl-item"><div class="cl-k">Escrow B</div><div class="cl-v" id="cl-escrowB">--</div></div>
+    <div class="cl-item"><div class="cl-k">A 表態</div><div class="cl-v" id="cl-aVowed">--</div></div>
+    <div class="cl-item"><div class="cl-k">B 表態</div><div class="cl-v" id="cl-bVowed">--</div></div>
+    <div class="cl-item"><div class="cl-k">A 已領</div><div class="cl-v" id="cl-aClaimed">--</div></div>
+    <div class="cl-item"><div class="cl-k">B 已領</div><div class="cl-v" id="cl-bClaimed">--</div></div>
+  </div>
+  <div class="cl-row">
+    <button class="cl-btn" type="button" onclick="chainLive.refresh()">重新同步</button>
+    <button class="cl-btn" type="button" onclick="roundHistory && roundHistory.open()">月老歷史</button>
+  </div>
+  <div class="cl-note">
+    這裡讀的是 <b>16888 Universe 合約</b> 真狀態：poolBalance、roundId、A/B、托管與表態。<br>
+    本頁是簡單漲跌版；複雜玩法放在花果山交易所。
+  </div>
+</div>
 
 
 <!-- Guide / Concierge Modal -->
@@ -6455,6 +6536,84 @@ document.querySelectorAll(".faq-q").forEach(q=>{
       if(e.target === modal) roundHistory.close();
     });
   }
+})();
+</script>
+
+
+<script>
+(function(){
+  function setTxt(id, v){
+    var el = document.getElementById(id);
+    if(el) el.textContent = v;
+  }
+  function fmtAddr(a){
+    if(!a || /^0x0{40}$/i.test(a)) return '--';
+    return a.slice(0,6) + '...' + a.slice(-4);
+  }
+  function fmtBool(v){
+    return v ? '是' : '否';
+  }
+  var chainLive = {
+    provider: null,
+    addr: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63",
+    abi: [
+      "function poolBalance() view returns (uint256)",
+      "function roundId() view returns (uint256)",
+      "function rounds(uint256) view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)"
+    ],
+    getProvider: function(){
+      try{
+        if(window.web3 && web3.provider){
+          return new ethers.providers.Web3Provider(web3.provider);
+        }
+      }catch(e){}
+      return new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+    },
+    getContract: function(){
+      return new ethers.Contract(this.addr, this.abi, this.getProvider());
+    },
+    refresh: async function(){
+      try{
+        setTxt("cl-status", "同步中");
+        var c = this.getContract();
+        var pool = await c.poolBalance();
+        var rid = await c.roundId();
+        setTxt("cl-pool", parseFloat(ethers.utils.formatUnits(pool, 18)).toFixed(4) + " KGEN");
+        setTxt("cl-round", String(rid));
+        var idNum = Number(rid || 0);
+        if(!idNum){
+          setTxt("cl-a", "--");
+          setTxt("cl-b", "--");
+          setTxt("cl-escrowA", "--");
+          setTxt("cl-escrowB", "--");
+          setTxt("cl-aVowed", "--");
+          setTxt("cl-bVowed", "--");
+          setTxt("cl-aClaimed", "--");
+          setTxt("cl-bClaimed", "--");
+          setTxt("cl-status", "尚無輪次");
+          return;
+        }
+        var r = await c.rounds(idNum);
+        setTxt("cl-a", fmtAddr(r.a));
+        setTxt("cl-b", fmtAddr(r.b));
+        setTxt("cl-escrowA", parseFloat(ethers.utils.formatUnits(r.escrowA, 18)).toFixed(4) + " KGEN");
+        setTxt("cl-escrowB", parseFloat(ethers.utils.formatUnits(r.escrowB, 18)).toFixed(4) + " KGEN");
+        setTxt("cl-aVowed", fmtBool(r.aVowed));
+        setTxt("cl-bVowed", fmtBool(r.bVowed));
+        setTxt("cl-aClaimed", fmtBool(r.aClaimed));
+        setTxt("cl-bClaimed", fmtBool(r.bClaimed));
+        setTxt("cl-status", "已同步");
+      }catch(e){
+        console.warn("chainLive refresh failed", e);
+        setTxt("cl-status", "讀取失敗");
+      }
+    }
+  };
+  window.chainLive = chainLive;
+  window.addEventListener("load", function(){
+    setTimeout(function(){ chainLive.refresh(); }, 1200);
+    setInterval(function(){ chainLive.refresh(); }, 15000);
+  });
 })();
 </script>
 
