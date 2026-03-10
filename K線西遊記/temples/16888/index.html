@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
+K線西遊記｜16888 廣寒宮 OG Engine V3.2.1
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.2.0</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1039,7 +1039,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 </head>
 <body>
-<div id="versionHUD">GUANGHAN PALACE V3.2.0</div>
+<div id="versionHUD">GUANGHAN PALACE V3.2.1</div>
 
 
 
@@ -1060,7 +1060,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.2.0</div>
+        <div class="sys-st" id="ver-st">VERSION v3.2.1</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1091,7 +1091,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.2.0.1</span>
+    <span>宇宙K線引擎｜V3.2.1</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1190,7 +1190,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">新手玩法｜V3.1</div>
+    <div class="qs-title">新手玩法｜V3.2.1</div>
     <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
     <ol>
       <li>連結錢包</li>
@@ -1198,6 +1198,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
       <li>先按 Approve</li>
       <li>再按 下單 UP 或 下單 DOWN</li>
     </ol>
+    <div style="margin-top:8px;opacity:.88;">本頁為簡單漲跌版；複雜玩法將放在花果山交易所。</div>
   </div>
 
   </div>
@@ -1298,7 +1299,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.2.0";
+const APP_VERSION = "v3.2.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1374,7 +1375,7 @@ const app = {
                 web3.autoDetect();
 this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。V3.1 新手教學已就位。先輸入金額，先按 Approve，再下單 UP 或 DOWN。");
+        this.speak("KGEN 16888 廣寒宮啟動。V3.2.1 完整玩法客服已上線。先連結錢包，先 Approve，再下單 UP 或 DOWN；月老歷史與托管規則都可直接查。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -1428,59 +1429,76 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
 
     getGuideBlocks(){
         const intro = `
-          <h3>廣寒宮 16888｜自我演化金融生命體</h3>
-          <p>這裡不是投資建議，這是一個「敘事 × 遊戲 × 合約」的宇宙入口。</p>
-          <p><b>你會看到兩個地址（A / B）像 DNA 與 RNA。</b>它們代表兩股能量在池中互動；當池從 <b>8888</b> 成長到 <b>16888</b>，就會觸發「下凡投胎」的劇情事件。</p>
+          <h3>廣寒宮 16888｜完整玩法入口</h3>
+          <p>這裡是 <b>簡單漲跌結算版</b>，不是複雜交易所。玩法核心只有三步：<b>連錢包 → Approve → 下 UP / DOWN</b>。</p>
+          <p><b>所有下單、入池、發獎、托管</b> 都走鏈上合約，不是前端假動畫。</p>
           <hr/>
-          <h4>最快開始（正式版 V3.1）</h4>
+          <h4>最快開始</h4>
           <ol>
-            <li>先 <b>連結錢包</b></li>
+            <li>先連結錢包，並切到 <b>BNB Smart Chain</b></li>
             <li>輸入你要操作的 <b>KGEN 金額</b></li>
-            <li>先按 <b>Approve</b> 完成授權</li>
+            <li>先按 <b>Approve</b> 授權</li>
             <li>再按 <b>下單 UP</b> 或 <b>下單 DOWN</b></li>
           </ol>
           <p class='muted'>重點：Approve 是授權，不是下單。沒有 Approve，就不能正式下單。</p>
         `;
 
         const rules = `
-          <h3>玩法規則（1~1000｜8888→16888）</h3>
+          <h3>規則與下凡</h3>
           <ul>
-            <li><b>單筆範圍：</b>1 ~ 1000 KGEN（體驗用）。</li>
-            <li><b>基底：</b>8888 KGEN（下凡前必須守住的底池）。</li>
-            <li><b>目標：</b>池累積到 16888 KGEN 觸發「下凡投胎」事件。</li>
+            <li><b>單筆範圍：</b>由合約限制決定，頁面是輸入 KGEN 後直接下單。</li>
+            <li><b>獎池：</b>所有輸掉的 stake、點燈、許願、還願，都會累積到同一個池。</li>
+            <li><b>觸發點：</b>池子累積到 <b>16888 KGEN</b> 時，會觸發一輪下凡投胎。</li>
           </ul>
-          <h4>下凡投胎是什麼？</h4>
-          <p>當池達到 16888：七仙女啟動「下凡」儀式。故事上是 <b>DNA（地址 A）</b> 與 <b>RNA（地址 B）</b> 完成誓約；世界線會進入「生肖投胎 / 結婚」段落。</p>
-          <h4>得獎與表態（誓約）</h4>
-          <p>表態需要「真的轉帳」：從自己地址轉 <b>1 ~ 2 KGEN</b> 給對方地址，代表同意誓約。</p>
-          <p>若拒絕 / 逾期：托管會回收進池（回到懷孕池）。</p>
+          <h4>16888 觸發後會發生什麼？</h4>
+          <p>合約會從玩家池中選出 <b>A / B 兩個地址</b>，也就是你說的月下老人 1 / 月下老人 2。</p>
+          <p>該輪固定分配 <b>10000 KGEN</b>：A 即時 4000、B 即時 4000、A 托管 1000、B 托管 1000。</p>
+          <p class='muted'>不是把整池一次發光，而是固定配額，避免超額池餘造成連續觸發。</p>
         `;
 
         const wallet = `
-          <h3>錢包怎麼用？為什麼 Search 找不到？</h3>
-          <p>很多錢包（例如 MetaMask）在「Search」頁面是靠代幣清單，<b>不一定會即時收錄新代幣</b>。</p>
-          <p>所以要用 <b>Custom</b> 匯入：</p>
+          <h3>錢包與找幣</h3>
+          <p>很多錢包搜尋不到新幣時，要改用 <b>Custom</b> 匯入，不要只打幣名。</p>
           <ol>
-            <li>切到 <b>BNB Chain</b>。</li>
-            <li>點 <b>Custom</b>。</li>
-            <li>貼上 <b>KGEN 合約地址</b>（0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be）。</li>
-            <li>按下一步，確認 Symbol / Decimals 後加入。</li>
+            <li>切到 <b>BNB Chain</b></li>
+            <li>點 <b>Custom</b></li>
+            <li>貼上 <b>KGEN 合約地址</b><br><code>0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code></li>
+            <li>確認 Symbol / Decimals 後加入</li>
           </ol>
-          <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
+          <p><b>安全提醒：</b>只認官方合約地址，不要認同名假幣。</p>
         `;
-
 
         const approve = `
           <h3>Approve 教學｜先授權，再下單</h3>
           <p><b>Approve</b> 的意思，是先授權廣寒宮 Universe 合約可以使用你指定數量的 KGEN。</p>
           <ol>
-            <li>先輸入 KGEN 金額</li>
+            <li>輸入 KGEN 金額</li>
             <li>按 <b>Approve</b></li>
             <li>等待錢包確認與鏈上完成</li>
             <li>完成後，再按 <b>下單 UP</b> 或 <b>下單 DOWN</b></li>
           </ol>
           <p><b>UP</b> 代表押漲，<b>DOWN</b> 代表押跌。</p>
-          <p class='muted'>如果你只是要許願、還願或點燈，就輸入金額後按入池即可，不必走 UP / DOWN。</p>
+          <p class='muted'>如果你只是要點燈、許願、還願，就直接按「入池」，不必走 UP / DOWN。</p>
+        `;
+
+        const playbook = `
+          <h3>完整玩法總覽</h3>
+          <h4>一、漲跌遊戲怎麼結算？</h4>
+          <p>玩家下單後，KGEN 會 <b>真的 transferFrom 進合約</b>。合約扣除手續費後，立刻用鏈上規則判定本次輸贏。</p>
+          <p>贏了：合約會 <b>真的把 payout 轉回玩家地址</b>。輸了：stake 留在池內，成為獎池的一部分。</p>
+          <h4>二、獎池會不會真的發獎？</h4>
+          <p>會。當池子達到 <b>16888</b>，合約會真的發出 A / B 的即時獎金，托管部分則留在合約內等待後續 claim。</p>
+          <h4>三、托管會不會真的執行？</h4>
+          <p>會。托管不是前端記帳，而是鏈上 round 內的 <b>escrowA / escrowB</b>。雙方都表態後，才能各自呼叫 <b>claimWeddingEscrow</b> 領取。</p>
+          <h4>四、什麼是表態？</h4>
+          <p>表態期內，A / B 要真的轉 <b>1 到 2 KGEN</b> 給對方。雙方都表態，才算完成婚配條件。</p>
+          <h4>五、逾期怎麼辦？</h4>
+          <p>若托管逾期未領，任何人都可執行回收，托管資金就回到池內，不再屬於個人。</p>
+          <h4>六、月老 1 / 月老 2 怎麼查？</h4>
+          <p>本頁已內建 <b>月老歷史</b> 面板，可查最新 round、指定 round、A / B 地址、表態狀態與托管狀態。</p>
+          <hr/>
+          <p><b>合約：</b><code>0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63</code></p>
+          <p><b>KGEN：</b><code>0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code></p>
         `;
 
         const qa = `
@@ -1493,11 +1511,12 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <div class='qa-grid'>
             <button class='qa-btn' data-q='沒有錢包也能玩嗎？'>沒有錢包也能玩嗎？</button>
             <button class='qa-btn' data-q='為什麼要用 Custom 找幣？'>為什麼要用 Custom 找幣？</button>
-            <button class='qa-btn' data-q='玩法的 1 到 1000 是什麼？'>玩法的 1 到 1000 是什麼？</button>
-            <button class='qa-btn' data-q='8888 到 16888 的意義？'>8888 到 16888 的意義？</button>
-            <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
-            <button class='qa-btn' data-q='表態 1 到 2 KGEN 是什麼？'>表態 1 到 2 KGEN 是什麼？</button>
+            <button class='qa-btn' data-q='怎麼 Approve？'>怎麼 Approve？</button>
             <button class='qa-btn' data-q='輸贏怎麼判定？'>輸贏怎麼判定？</button>
+            <button class='qa-btn' data-q='獎池會真的發獎嗎？'>獎池會真的發獎嗎？</button>
+            <button class='qa-btn' data-q='托管會真的執行嗎？'>托管會真的執行嗎？</button>
+            <button class='qa-btn' data-q='到了 16888 會發生什麼事？'>到了 16888 會發生什麼事？</button>
+            <button class='qa-btn' data-q='月下老人 2 地址怎麼查？'>月下老人 2 地址怎麼查？</button>
           </div>
           <div style='margin-top:12px;opacity:.92'>
             <div id='qa-last' style='margin-top:8px'></div>
@@ -1505,7 +1524,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           </div>
         `;
 
-        return { intro, rules, wallet, approve, qa };
+        return { intro, rules, wallet, approve, playbook, qa };
     },
 
     handleQuestion(q){
@@ -1520,21 +1539,29 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
         const has = (s)=> lower.indexOf(s) >= 0;
 
         if(question.includes('沒有錢包') || has('no wallet') || has('without wallet')){
-            ans = '可以。現在預設支援無錢包模式，你可以先看介面、開語音客服、聽說明；若要真正連線與互動，請按連結錢包或多錢包入口。';
+            ans = '可以。沒有錢包時可以先看介面、看客服、看歷史與規則；真正要鏈上互動時，請用錢包內建瀏覽器開啟本頁並連結錢包。';
         }else if(question.includes('custom') || question.includes('找不到') || has('search')){
-            ans = '有些新發行代幣不會立刻出現在 MetaMask 的預設搜尋清單中，所以找不到 KGEN 時，要改用 Custom。操作方式是切到 BNB Chain，點 Custom，自訂代幣，貼上 KGEN 合約地址，就能把幣加進來。簡單說，Search 找不到時，就用 Custom 加合約地址。';
+            ans = '因為很多錢包的預設搜尋清單不會即時收錄新幣。找不到 KGEN 時，請切到 BNB Chain，用 Custom 貼上 KGEN 合約地址，再加入代幣。';
+        }else if(question.includes('approve') || question.includes('授權')){
+            ans = '先輸入你要操作的 KGEN 金額，再按 Approve。Approve 只是授權，不是下單。授權成功後，才能按下單 UP 或下單 DOWN。';
+        }else if(question.includes('獎池') || question.includes('發獎')){
+            ans = '會。獎池內的 KGEN 都是真的在合約裡。到 16888 後，合約會真的把 A 與 B 的即時獎金轉出去，這不是前端假動畫。';
+        }else if(question.includes('托管') || question.includes('escrow') || question.includes('拖管')){
+            ans = '會。托管是鏈上 round 內的 escrowA 與 escrowB。雙方都完成表態後，A 與 B 才能各自呼叫 claimWeddingEscrow 領取。如果逾期未領，托管會回收到池裡。';
+        }else if(question.includes('月下老人') || question.includes('月老') || question.includes('地址')){
+            ans = '月老一和月老二就是每一輪 round 的 A 和 B。你可以打開右上角的月老歷史，查最新輪次或指定 roundId，直接看到 A / B 地址、表態狀態與托管狀態。';
         }else if((question.includes('1') && question.includes('1000')) || question.includes('一到一千')){
-            ans = '一到一千是目前前端下單輸入框的金額範圍，用來做 KGEN 對賭體驗。輸入金額後，選上或下，系統就會用合約規則判定輸贏。';
+            ans = '頁面上的輸入金額就是你要操作的 KGEN。廣寒宮是簡單漲跌版，不是複雜交易所，重點是先 Approve，再選 UP 或 DOWN。';
         }else if(question.includes('8888') || question.includes('八八八八')){
-            ans = '八八八八代表早期敘事中的基底節點；而現在這版合約真正的觸發門檻是獎池累積到一六八八八。到達後才會觸發下凡投胎的一輪配對。';
+            ans = '八八八八在敘事上是早期底池節點；這版真正的鏈上觸發點是 16888。當池子到 16888，才會觸發一輪下凡配對。';
         }else if(question.includes('16888') || question.includes('一六八八八') || question.includes('下凡')){
-            ans = '當獎池達到一六八八八 KGEN，就會觸發一輪下凡投胎。這輪固定分配一萬 KGEN：A 即時四千，B 即時四千，A 托管一千，B 托管一千，之後進入三天表態期與三天戀愛期。';
+            ans = '當獎池達到 16888 KGEN，就會觸發一輪下凡投胎。合約會選出 A / B 兩個地址，A 即時 4000、B 即時 4000、A 托管 1000、B 托管 1000，之後進入表態期與戀愛期。';
         }else if(question.includes('表態') || question.includes('誓約') || question.includes('1~2') || question.includes('一到二')){
-            ans = '表態是指雙方在表態期內，真的轉一到二 KGEN 給對方，表示同意誓約。雙方都表態後，才可以在後面的戀愛期領取各自的一千 KGEN 托管紅包。';
+            ans = '表態是指雙方在表態期內，真的轉一到二 KGEN 給對方。雙方都完成表態後，才可以在後續時間內各自領出自己的一千 KGEN 托管紅包。';
         }else if(question.includes('輸贏') || question.includes('怎麼判定') || question.includes('上') || question.includes('下')){
-            ans = '目前不是 K 線引擎模式，而是跟池對賭。你選上或下後，合約會用鏈上 pseudo-random 規則判定結果，零代表上，一代表下。贏了拿兩倍 stake，輸了 stake 留在池裡。';
+            ans = '你選 UP 或 DOWN 後，合約會把 KGEN 真轉入合約，然後用鏈上 pseudo-random 規則立即決定本次結果。贏了拿兩倍 stake，輸了 stake 留在池裡。';
         }else{
-            ans = '收到。你可以問：怎麼開始、怎麼找幣、輸贏怎麼判定、到了 16888 會發生什麼。';
+            ans = '你可以直接問：怎麼 Approve、怎麼下注、獎池會不會發獎、托管會不會執行、到了 16888 會發生什麼、月老地址怎麼查。';
         }
 
         if(aBox) aBox.innerText = 'A: ' + ans;
@@ -3393,6 +3420,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
       <button class="guide-tab" data-sec="rules">規則與下凡</button>
       <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
       <button class="guide-tab" data-sec="approve">Approve教學</button>
+      <button class="guide-tab" data-sec="playbook">完整玩法</button>
       <button class="guide-tab" data-sec="qa">語音問答</button>
     </div>
     <div class="guide-body" id="guide-body"></div>
