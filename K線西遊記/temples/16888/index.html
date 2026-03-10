@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.0
+K線西遊記｜16888 廣寒宮 OG Engine V3.2.0
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.0.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.2.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -520,7 +520,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 /* v2.48.0: hide legacy AUTO debug UI */
 #autoTag, #autoBadge{ display:none !important; }
 
-/* ===== v3.0.1 layout retune ===== */
+/* ===== V2.9.0 layout retune ===== */
 /* GA 移到中間上方 */
 .ga-matrix{
   left: 50% !important;
@@ -555,7 +555,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 move E=mc² into 質量 row ===== */
+/* ===== V2.9.0 move E=mc² into 質量 row ===== */
 .resource-bars .rb-note{
   display:none !important;
 }
@@ -568,7 +568,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 MASTER left block ===== */
+/* ===== V2.9.0 MASTER left block ===== */
 :root{
   --left-x-master: 18px;
   --left-w-master: 300px;
@@ -729,7 +729,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 True K-line mode ===== */
+/* ===== V2.9.0 True K-line mode ===== */
 #kline-engine-panel .ke-head,
 #kline-chart-panel .kc-head{
   letter-spacing:.3px;
@@ -741,7 +741,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 live ticker + symbol switch ===== */
+/* ===== V2.9.0 live ticker + symbol switch ===== */
 #kline-engine-panel .ke-live-row{
   display:flex;
   justify-content:space-between;
@@ -764,7 +764,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 market mode switch ===== */
+/* ===== V2.9.0 market mode switch ===== */
 #ke-symbol, #ke-market{
   z-index:9999;
   pointer-events:auto;
@@ -783,7 +783,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 single K-line engine ===== */
+/* ===== V2.9.0 single K-line engine ===== */
 #ke-symbol{
   position:relative;
   z-index:9999;
@@ -821,7 +821,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 }
 
 
-/* ===== v3.0.1 FAQ ===== */
+/* ===== V2.9.0 FAQ ===== */
 #faq-box{
   margin-top:10px;
   font-size:12px;
@@ -850,11 +850,197 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
   line-height:1.5;
 }
 
+
+/* ===== V3.2.0 onboarding + order fx ===== */
+.quickstart-card{
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid rgba(255,215,120,.28);
+  border-radius:12px;
+  background:rgba(255,215,120,.08);
+  color:#fff5cf;
+  line-height:1.45;
+  font-size:12px;
+}
+.quickstart-card .qs-title{
+  color:var(--gold);
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.quickstart-card ol{
+  margin:6px 0 0 18px;
+  padding:0;
+}
+.quickstart-card li{ margin:4px 0; }
+.quickstart-card .hl{ color:var(--cyan); font-weight:900; }
+#order-fx{
+  position:fixed;
+  inset:0;
+  z-index:99998;
+  display:none;
+  pointer-events:none;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle, rgba(255,215,120,.18), rgba(0,0,0,.0) 55%);
+}
+#order-fx.show{ display:flex; animation:fxFade .9s ease forwards; }
+#order-fx .fx-card{
+  min-width:240px;
+  max-width:86vw;
+  padding:18px 22px;
+  border-radius:18px;
+  text-align:center;
+  border:1px solid rgba(255,215,120,.55);
+  background:rgba(0,0,0,.72);
+  box-shadow:0 0 28px rgba(255,215,120,.18), 0 0 48px rgba(0,242,255,.10);
+}
+#order-fx .fx-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:20px;
+  font-weight:900;
+  color:var(--gold);
+  text-shadow:0 0 12px rgba(255,215,120,.35);
+}
+#order-fx .fx-sub{
+  margin-top:8px;
+  font-size:13px;
+  color:#dffbff;
+}
+@keyframes fxFade{
+  0%{opacity:0; transform:scale(.92);}
+  18%{opacity:1; transform:scale(1);}
+  100%{opacity:0; transform:scale(1.04);}
+}
+
+
+/* ===== V3.2.0 fixed version HUD ===== */
+#versionHUD{
+  position:fixed;
+  top:10px;
+  left:12px;
+  padding:6px 10px;
+  border:1px solid rgba(0,242,255,.35);
+  border-radius:10px;
+  background:rgba(0,0,0,.42);
+  color:#8be9ff;
+  font-family:'Orbitron', monospace;
+  font-size:12px;
+  letter-spacing:1px;
+  opacity:.92;
+  z-index:99999;
+  box-shadow:0 0 14px rgba(0,242,255,.12);
+  pointer-events:none;
+}
+
+
+/* ===== V3.2.0 round history tracker ===== */
+.history-modal{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.72); z-index:99997; padding:18px;
+}
+.history-modal.show{ display:flex; }
+.history-card{
+  width:min(960px, 96vw);
+  max-height:88vh;
+  overflow:auto;
+  border-radius:18px;
+  border:1px solid rgba(255,215,120,.38);
+  background:rgba(6,10,18,.96);
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.history-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:14px 16px; border-bottom:1px solid rgba(255,215,120,.16);
+}
+.history-title{
+  color:#ffd88a; font-weight:900; letter-spacing:.5px; font-family:'Orbitron',sans-serif;
+}
+.history-body{ padding:14px 16px 18px 16px; color:#e9eef7; }
+.history-note{
+  margin-bottom:12px; padding:10px 12px; border-radius:12px;
+  background:rgba(255,215,120,.08); border:1px solid rgba(255,215,120,.18);
+  line-height:1.5; font-size:13px; color:#ffeec8;
+}
+.history-controls{
+  display:grid; grid-template-columns:1.1fr .9fr .9fr .9fr .9fr; gap:8px; margin-bottom:12px;
+}
+.history-controls input, .history-controls button{
+  border-radius:12px; padding:10px 12px; font-weight:900;
+  border:1px solid rgba(255,215,120,.28); background:rgba(0,0,0,.35); color:#eef8ff;
+}
+.history-grid{
+  display:grid; grid-template-columns:1.2fr .8fr; gap:12px;
+}
+.history-panel{
+  border:1px solid rgba(255,215,120,.18); border-radius:14px;
+  background:rgba(0,0,0,.22); padding:12px;
+}
+.history-panel h3{
+  margin:0 0 10px 0; color:#ffd88a; font-size:15px; letter-spacing:.3px;
+}
+.history-kv{
+  display:grid; grid-template-columns:140px 1fr; gap:8px 10px; font-size:13px;
+}
+.history-k{
+  color:#ffe6b8; opacity:.9;
+}
+.history-v{
+  color:#d8f9ff; word-break:break-all;
+}
+.addr-line{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.addr-chip{
+  display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
+  border-radius:999px; border:1px solid rgba(0,242,255,.24);
+  background:rgba(0,242,255,.08); color:#d5fbff; font-family:'Orbitron',sans-serif; font-size:11px;
+}
+.mini-btn{
+  border-radius:10px; padding:6px 9px; border:1px solid rgba(255,215,120,.26);
+  background:rgba(0,0,0,.25); color:#fff; font-weight:800; cursor:pointer;
+}
+.status-pill{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 10px;
+  border-radius:999px; font-size:11px; font-weight:900; letter-spacing:.4px;
+  border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:#fff;
+}
+.status-ok{ border-color:rgba(60,220,120,.35); background:rgba(60,220,120,.12); color:#d8ffe6; }
+.status-warn{ border-color:rgba(255,215,120,.35); background:rgba(255,215,120,.12); color:#fff0ca; }
+.status-bad{ border-color:rgba(255,110,110,.35); background:rgba(255,110,110,.12); color:#ffdede; }
+.history-list{
+  display:flex; flex-direction:column; gap:8px;
+}
+.history-item{
+  border:1px solid rgba(255,215,120,.14); border-radius:12px; padding:10px 12px;
+  background:rgba(0,0,0,.20); cursor:pointer;
+}
+.history-item:hover{ filter:brightness(1.05); }
+.history-item .top{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.history-item .rid{
+  color:#ffd88a; font-weight:900; font-family:'Orbitron',sans-serif;
+}
+.history-item .desc{
+  margin-top:6px; color:#d6f7ff; font-size:12px; line-height:1.45;
+}
+.history-empty{
+  padding:20px 12px; text-align:center; opacity:.78;
+}
+@media (max-width: 820px){
+  .history-controls{ grid-template-columns:1fr 1fr; }
+  .history-grid{ grid-template-columns:1fr; }
+}
+
 </style>
 
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 </head>
 <body>
+<div id="versionHUD">GUANGHAN PALACE V3.2.0</div>
+
 
 
   <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -874,7 +1060,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.0.1</div>
+        <div class="sys-st" id="ver-st">VERSION v3.2.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -905,7 +1091,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜v3.0.1</span>
+    <span>宇宙K線引擎｜V3.2.0.1</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1002,6 +1188,18 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.0
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
     <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
+
+  <div class="quickstart-card" id="quickstart-card">
+    <div class="qs-title">新手玩法｜V3.1</div>
+    <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
+    <ol>
+      <li>連結錢包</li>
+      <li>輸入 KGEN 金額</li>
+      <li>先按 Approve</li>
+      <li>再按 下單 UP 或 下單 DOWN</li>
+    </ol>
+  </div>
+
   </div>
 
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
@@ -1100,7 +1298,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.0.1";
+const APP_VERSION = "v3.2.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1176,7 +1374,7 @@ const app = {
                 web3.autoDetect();
 this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 廣寒宮啟動。廣寒宮誓約留影已掛載。合約對齊面板已就位。");
+        this.speak("KGEN 16888 廣寒宮啟動。V3.1 新手教學已就位。先輸入金額，先按 Approve，再下單 UP 或 DOWN。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -1234,13 +1432,14 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <p>這裡不是投資建議，這是一個「敘事 × 遊戲 × 合約」的宇宙入口。</p>
           <p><b>你會看到兩個地址（A / B）像 DNA 與 RNA。</b>它們代表兩股能量在池中互動；當池從 <b>8888</b> 成長到 <b>16888</b>，就會觸發「下凡投胎」的劇情事件。</p>
           <hr/>
-          <h4>最快開始（沒有錢包也能玩）</h4>
+          <h4>最快開始（正式版 V3.1）</h4>
           <ol>
-            <li>在下單框輸入數字（<b>1 ~ 1000</b>）。</li>
-            <li>按 <b>下單 UP</b> 或 <b>下單 DOWN</b>，系統用模擬勝負立即回饋。</li>
-            <li>你贏：拿回本金 + 獲利（模擬）。你輸：金額累積到「懷孕池 / 彩池」。</li>
+            <li>先 <b>連結錢包</b></li>
+            <li>輸入你要操作的 <b>KGEN 金額</b></li>
+            <li>先按 <b>Approve</b> 完成授權</li>
+            <li>再按 <b>下單 UP</b> 或 <b>下單 DOWN</b></li>
           </ol>
-          <p class='muted'>提示：模擬模式會顯示 demo Pool Balance，不需要連錢包。</p>
+          <p class='muted'>重點：Approve 是授權，不是下單。沒有 Approve，就不能正式下單。</p>
         `;
 
         const rules = `
@@ -1270,6 +1469,20 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <p><b>安全提醒：</b>只用官方提供的合約地址；不要相信陌生人給你的「同名幣」。</p>
         `;
 
+
+        const approve = `
+          <h3>Approve 教學｜先授權，再下單</h3>
+          <p><b>Approve</b> 的意思，是先授權廣寒宮 Universe 合約可以使用你指定數量的 KGEN。</p>
+          <ol>
+            <li>先輸入 KGEN 金額</li>
+            <li>按 <b>Approve</b></li>
+            <li>等待錢包確認與鏈上完成</li>
+            <li>完成後，再按 <b>下單 UP</b> 或 <b>下單 DOWN</b></li>
+          </ol>
+          <p><b>UP</b> 代表押漲，<b>DOWN</b> 代表押跌。</p>
+          <p class='muted'>如果你只是要許願、還願或點燈，就輸入金額後按入池即可，不必走 UP / DOWN。</p>
+        `;
+
         const qa = `
           <h3>語音客服（Q&A）</h3>
           <p>按麥克風說出問題，系統會轉文字後直接送出並回答。</p>
@@ -1292,7 +1505,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           </div>
         `;
 
-        return { intro, rules, wallet, qa };
+        return { intro, rules, wallet, approve, qa };
     },
 
     handleQuestion(q){
@@ -1486,6 +1699,25 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
         const on = (wrap.style.display === 'block');
         wrap.style.display = on ? 'none' : 'block';
         this.bbEvent("wheel_toggle", { on: !on });
+    },
+
+
+    playNewbieGuide(){
+        this.openGuide('approve');
+        this.speak('新手玩法開始。先連結錢包，輸入 KGEN 金額，先按 Approve 授權，再按下單 UP 或下單 DOWN。Approve 是授權，不是下單。');
+    },
+
+    showOrderFx(title, sub){
+        const box = document.getElementById('order-fx');
+        const t = document.getElementById('order-fx-title');
+        const s = document.getElementById('order-fx-sub');
+        if(t) t.textContent = title || 'WARP LOCKED';
+        if(s) s.textContent = sub || 'Position Opened';
+        if(!box) return;
+        box.classList.remove('show');
+        void box.offsetWidth;
+        box.classList.add('show');
+        setTimeout(()=>box.classList.remove('show'), 900);
     },
 
     bind() {
@@ -3033,6 +3265,39 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     }
 };
 window.web3 = web3;
+
+(function(){
+  if(!window.app || !window.web3) return;
+
+  const _approve = web3.approve ? web3.approve.bind(web3) : null;
+  if(_approve){
+    web3.approve = async function(){
+      try{
+        app.showOrderFx('APPROVE', '授權 KGEN 給 Universe');
+        app.speak('即將送出 Approve 授權。');
+      }catch(_){}
+      return await _approve();
+    };
+  }
+
+  const _place = web3.place ? web3.place.bind(web3) : null;
+  if(_place){
+    web3.place = async function(side){
+      try{
+        const dir = Number(side) === 0 ? 'UP' : 'DOWN';
+        app.showOrderFx('WARP ' + dir, 'Position Opening');
+        app.speak('已選擇 ' + dir + '，正在送出下單。');
+      }catch(_){}
+      const res = await _place(side);
+      try{
+        const dir = Number(side) === 0 ? 'UP' : 'DOWN';
+        app.showOrderFx('ORDER ' + dir, 'Position Opened');
+      }catch(_){}
+      return res;
+    };
+  }
+})();
+
 // walletHub backdrop close
 setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addEventListener('click',(e)=>{if(e.target===hub) web3.closeWalletHub();});}},0);
 
@@ -3049,6 +3314,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
   <button class="nav-btn nav-help" onclick="app.openGuide('intro'); app.speak('語音客服已開啟。你可以在這裡再次查看玩法與說明。');">語音客服</button>
+  <button class="nav-btn nav-help" onclick="app.playNewbieGuide()">新手導覽</button>
+  <button class="nav-btn nav-help" onclick="roundHistory.open()">月老歷史</button>
   <button class="nav-btn nav-music" onclick="app.openMusic()">飛碟音響</button>
 </div>
 
@@ -3125,6 +3392,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
       <button class="guide-tab" data-sec="intro">故事與快速開始</button>
       <button class="guide-tab" data-sec="rules">規則與下凡</button>
       <button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+      <button class="guide-tab" data-sec="approve">Approve教學</button>
       <button class="guide-tab" data-sec="qa">語音問答</button>
     </div>
     <div class="guide-body" id="guide-body"></div>
@@ -4244,7 +4512,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== v3.0.1 True K-line engine (Binance public API) ===== */
+/* ===== V2.9.0 True K-line engine (Binance public API) ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4407,7 +4675,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== v3.0.1 live kline + ticker ===== */
+/* ===== V2.9.0 live kline + ticker ===== */
 (function(){
   const TRUE_KLINE = {
     symbol: 'BTCUSDT',
@@ -4586,7 +4854,7 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-/* ===== v3.0.1 dual market engine ===== */
+/* ===== V2.9.0 dual market engine ===== */
 (function(){
 
 let marketMode="binance";
@@ -4714,7 +4982,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== v3.0.1 stable market lock ===== */
+/* ===== V2.9.0 stable market lock ===== */
 (function(){
 
 let marketMode="kgen";   // default fixed
@@ -4850,7 +5118,7 @@ if(document.readyState==="loading"){
 
 
 <script>
-/* ===== v3.0.1 CLEAN KLINE CORE (preserve all other features) ===== */
+/* ===== V2.9.0 CLEAN KLINE CORE (preserve all other features) ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5179,7 +5447,7 @@ setInterval(update,20000)
 
 
 <script>
-/* ===== v3.0.1 Oracle Plus ===== */
+/* ===== V2.9.0 Oracle Plus ===== */
 (async function(){
 const PAIR="0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
 const KGEN="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5302,7 +5570,7 @@ setInterval(update, 20000);
 
 
 <script>
-/* ===== v3.0.1 split KGEN clean oracle ===== */
+/* ===== V2.9.0 split KGEN clean oracle ===== */
 (function(){
   const STATE = {
     symbol: 'BNBUSDT',
@@ -5529,7 +5797,7 @@ document.querySelectorAll(".faq-q").forEach(q=>{
 
 
 <script>
-/* ===== v3.0.1 preserve-all-features + hard KGENLP display lock ===== */
+/* ===== V2.9.0 preserve-all-features + hard KGENLP display lock ===== */
 (function(){
   const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
   const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5701,7 +5969,7 @@ document.querySelectorAll(".faq-q").forEach(q=>{
 
 
 <script>
-/* ===== v3.0.1 ultra lock: stop 16888 flash on KGENLP ===== */
+/* ===== V2.9.0 ultra lock: stop 16888 flash on KGENLP ===== */
 (function(){
   const PAIR = "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2";
   const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be".toLowerCase();
@@ -5860,6 +6128,305 @@ document.querySelectorAll(".faq-q").forEach(q=>{
     S.fast = setInterval(enforceNow, 60);
     S.slow = setInterval(refreshLocked, 1200);
   });
+})();
+</script>
+
+
+<div id="order-fx" aria-hidden="true">
+  <div class="fx-card">
+    <div class="fx-title" id="order-fx-title">WARP LOCKED</div>
+    <div class="fx-sub" id="order-fx-sub">Position Opened</div>
+  </div>
+</div>
+
+
+<div id="round-history-modal" class="history-modal" aria-hidden="true">
+  <div class="history-card">
+    <div class="history-head">
+      <div class="history-title">月下老人歷史追蹤｜Round 通用查詢</div>
+      <button class="mini-btn" type="button" onclick="roundHistory.close()">關閉</button>
+    </div>
+    <div class="history-body">
+      <div class="history-note">
+        到 <b>16888</b> 觸發時，月下老人兩個地址就是每輪的 <b>A / B</b>。<br>
+        在這份合約裡：<b>月老1 = rounds(id).a</b>，<b>月老2 = rounds(id).b</b>。<br>
+        這個面板支援：查最新、查指定輪次、上一輪/下一輪、顯示最近歷史，適合日後直接追蹤。
+      </div>
+
+      <div class="history-controls">
+        <input id="rh-round-input" type="number" min="1" step="1" placeholder="輸入輪次 roundId，例如 1 / 7 / 12">
+        <button type="button" onclick="roundHistory.loadInput()">查詢輪次</button>
+        <button type="button" onclick="roundHistory.loadLatest()">最新輪次</button>
+        <button type="button" onclick="roundHistory.prev()">上一輪</button>
+        <button type="button" onclick="roundHistory.next()">下一輪</button>
+      </div>
+
+      <div class="history-grid">
+        <div class="history-panel">
+          <h3>目前輪次詳情</h3>
+          <div id="rh-detail" class="history-empty">尚未載入，按「最新輪次」或輸入 roundId 查詢。</div>
+        </div>
+        <div class="history-panel">
+          <h3>最近歷史（最新 10 輪）</h3>
+          <div id="rh-recent" class="history-list">
+            <div class="history-empty">尚未載入。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function fmtAddr(addr){
+    if(!addr || /^0x0{40}$/i.test(addr)) return '--';
+    return addr.slice(0,6) + '...' + addr.slice(-4);
+  }
+
+  function unixToLocal(ts){
+    const n = Number(ts||0);
+    if(!n) return '--';
+    try{
+      return new Date(n * 1000).toLocaleString();
+    }catch(e){
+      return String(n);
+    }
+  }
+
+  function statusPill(ok, yesTxt, noTxt, mode){
+    const cls = ok ? 'status-pill status-ok' : (mode === 'warn' ? 'status-pill status-warn' : 'status-pill status-bad');
+    return '<span class="' + cls + '">' + esc(ok ? yesTxt : noTxt) + '</span>';
+  }
+
+  const roundHistory = {
+    currentId: 0,
+    latestId: 0,
+    recentLimit: 10,
+    open(){
+      const m = document.getElementById('round-history-modal');
+      if(m) m.classList.add('show');
+      this.loadLatest();
+    },
+    close(){
+      const m = document.getElementById('round-history-modal');
+      if(m) m.classList.remove('show');
+    },
+    getProvider(){
+      try{
+        if(window.web3 && web3.provider){
+          if(window.ethers && ethers.providers && ethers.providers.Web3Provider){
+            return new ethers.providers.Web3Provider(web3.provider);
+          }
+        }
+      }catch(e){}
+      return new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+    },
+    getUniverseAddr(){
+      try{
+        if(window.web3 && web3.UNIVERSE) return web3.UNIVERSE;
+      }catch(e){}
+      return "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+    },
+    getABI(){
+      return [
+        "function roundId() view returns (uint256)",
+        "function rounds(uint256) view returns (address a,address b,uint40 settledAt,uint40 vowDeadlineAt,uint40 loveDeadlineAt,uint256 escrowA,uint256 escrowB,bool aVowed,bool bVowed,bool aClaimed,bool bClaimed,bool settled)"
+      ];
+    },
+    getContract(){
+      return new ethers.Contract(this.getUniverseAddr(), this.getABI(), this.getProvider());
+    },
+    async loadLatest(){
+      try{
+        const c = this.getContract();
+        const latest = await c.roundId();
+        this.latestId = Number(latest || 0);
+        if(this.latestId <= 0){
+          this.renderEmpty('目前還沒有任何 Round 歷史。');
+          this.renderRecent([]);
+          return;
+        }
+        document.getElementById('rh-round-input').value = this.latestId;
+        await this.loadRound(this.latestId);
+        await this.loadRecent();
+      }catch(e){
+        this.renderError('讀取最新輪次失敗：' + (e && e.message ? e.message : e));
+      }
+    },
+    async loadInput(){
+      const raw = document.getElementById('rh-round-input').value;
+      const id = Number(raw || 0);
+      if(!id || id < 1){
+        this.renderError('請輸入有效的 roundId。');
+        return;
+      }
+      await this.loadRound(id);
+    },
+    async prev(){
+      if(!this.currentId) return;
+      const id = Math.max(1, this.currentId - 1);
+      await this.loadRound(id);
+    },
+    async next(){
+      if(!this.currentId) return;
+      const maxId = this.latestId || this.currentId;
+      const id = Math.min(maxId, this.currentId + 1);
+      await this.loadRound(id);
+    },
+    async loadRound(id){
+      try{
+        const c = this.getContract();
+        const r = await c.rounds(id);
+        const data = {
+          id: Number(id),
+          a: r.a,
+          b: r.b,
+          settledAt: Number(r.settledAt || 0),
+          vowDeadlineAt: Number(r.vowDeadlineAt || 0),
+          loveDeadlineAt: Number(r.loveDeadlineAt || 0),
+          escrowA: ethers.utils.formatUnits(r.escrowA || 0, 18),
+          escrowB: ethers.utils.formatUnits(r.escrowB || 0, 18),
+          aVowed: !!r.aVowed,
+          bVowed: !!r.bVowed,
+          aClaimed: !!r.aClaimed,
+          bClaimed: !!r.bClaimed,
+          settled: !!r.settled
+        };
+        this.currentId = data.id;
+        document.getElementById('rh-round-input').value = data.id;
+        this.renderRound(data);
+      }catch(e){
+        this.renderError('查詢 round #' + id + ' 失敗：' + (e && e.message ? e.message : e));
+      }
+    },
+    async loadRecent(){
+      try{
+        const c = this.getContract();
+        let latest = this.latestId;
+        if(!latest){
+          latest = Number(await c.roundId() || 0);
+          this.latestId = latest;
+        }
+        const rows = [];
+        for(let i = latest; i >= 1 && rows.length < this.recentLimit; i--){
+          try{
+            const r = await c.rounds(i);
+            if(!r || !r.settled) continue;
+            rows.push({
+              id: i,
+              a: r.a,
+              b: r.b,
+              settledAt: Number(r.settledAt || 0),
+              aVowed: !!r.aVowed,
+              bVowed: !!r.bVowed,
+              aClaimed: !!r.aClaimed,
+              bClaimed: !!r.bClaimed
+            });
+          }catch(inner){}
+        }
+        this.renderRecent(rows);
+      }catch(e){
+        const box = document.getElementById('rh-recent');
+        if(box) box.innerHTML = '<div class="history-empty">最近歷史讀取失敗。</div>';
+      }
+    },
+    renderEmpty(msg){
+      const box = document.getElementById('rh-detail');
+      if(box) box.innerHTML = '<div class="history-empty">' + esc(msg) + '</div>';
+    },
+    renderError(msg){
+      const box = document.getElementById('rh-detail');
+      if(box) box.innerHTML = '<div class="history-empty" style="color:#ffd7d7;">' + esc(msg) + '</div>';
+    },
+    copy(addr){
+      if(!addr || addr === '--') return;
+      navigator.clipboard && navigator.clipboard.writeText(addr);
+      if(window.ui && ui.toast) ui.toast('已複製地址');
+    },
+    addrLine(addr){
+      if(!addr || /^0x0{40}$/i.test(addr)){
+        return '<div class="addr-line"><span class="history-v">--</span></div>';
+      }
+      return '<div class="addr-line">' +
+             '<span class="addr-chip">' + esc(addr) + '</span>' +
+             '<button class="mini-btn" type="button" onclick="roundHistory.copy(\'' + esc(addr) + '\')">複製</button>' +
+             '<a class="mini-btn" href="https://bscscan.com/address/' + esc(addr) + '" target="_blank" rel="noopener">查驗</a>' +
+             '</div>';
+    },
+    renderRound(r){
+      const bothVowed = r.aVowed && r.bVowed;
+      const html = ''
+        + '<div class="history-kv">'
+        + '<div class="history-k">Round</div><div class="history-v">#' + esc(r.id) + '</div>'
+        + '<div class="history-k">是否已結算</div><div class="history-v">' + statusPill(r.settled, '已結算', '未結算', 'warn') + '</div>'
+
+        + '<div class="history-k">月老1（A）</div><div class="history-v">' + this.addrLine(r.a) + '</div>'
+        + '<div class="history-k">月老2（B）</div><div class="history-v">' + this.addrLine(r.b) + '</div>'
+
+        + '<div class="history-k">結算時間</div><div class="history-v">' + esc(unixToLocal(r.settledAt)) + '</div>'
+        + '<div class="history-k">表態截止</div><div class="history-v">' + esc(unixToLocal(r.vowDeadlineAt)) + '</div>'
+        + '<div class="history-k">戀愛截止</div><div class="history-v">' + esc(unixToLocal(r.loveDeadlineAt)) + '</div>'
+
+        + '<div class="history-k">A 托管紅包</div><div class="history-v">' + esc(Number(r.escrowA).toFixed(4)) + ' KGEN</div>'
+        + '<div class="history-k">B 托管紅包</div><div class="history-v">' + esc(Number(r.escrowB).toFixed(4)) + ' KGEN</div>'
+
+        + '<div class="history-k">A 表態</div><div class="history-v">' + statusPill(r.aVowed, '已表態', '未表態', 'warn') + '</div>'
+        + '<div class="history-k">B 表態</div><div class="history-v">' + statusPill(r.bVowed, '已表態', '未表態', 'warn') + '</div>'
+        + '<div class="history-k">雙方表態</div><div class="history-v">' + statusPill(bothVowed, '已完成', '尚未完成', 'warn') + '</div>'
+
+        + '<div class="history-k">A 托管狀態</div><div class="history-v">' + statusPill(r.aClaimed, '已領取', '未領取', 'bad') + '</div>'
+        + '<div class="history-k">B 托管狀態</div><div class="history-v">' + statusPill(r.bClaimed, '已領取', '未領取', 'bad') + '</div>'
+        + '</div>';
+      const box = document.getElementById('rh-detail');
+      if(box) box.innerHTML = html;
+    },
+    renderRecent(rows){
+      const box = document.getElementById('rh-recent');
+      if(!box) return;
+      if(!rows || !rows.length){
+        box.innerHTML = '<div class="history-empty">目前還沒有可顯示的歷史。</div>';
+        return;
+      }
+      box.innerHTML = rows.map(r => {
+        const both = r.aVowed && r.bVowed;
+        return ''
+          + '<div class="history-item" onclick="roundHistory.loadRound(' + r.id + ')">'
+          + '<div class="top">'
+          +   '<span class="rid">Round #' + r.id + '</span>'
+          +   '<span>' + statusPill(both, '雙方已表態', '表態未滿', 'warn') + '</span>'
+          + '</div>'
+          + '<div class="desc">'
+          +   'A：' + esc(fmtAddr(r.a)) + '<br>'
+          +   'B：' + esc(fmtAddr(r.b)) + '<br>'
+          +   '結算：' + esc(unixToLocal(r.settledAt))
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+  };
+
+  window.roundHistory = roundHistory;
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      roundHistory.close();
+    }
+  });
+
+  const modal = document.getElementById('round-history-modal');
+  if(modal){
+    modal.addEventListener('click', function(e){
+      if(e.target === modal) roundHistory.close();
+    });
+  }
 })();
 </script>
 
