@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
+K線西遊記｜16888 廣寒宮 OG Engine V3.7.2
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.1</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1035,7 +1035,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
 }
 
 
-/* ===== V3.7.1 chain live panel ===== */
+/* ===== V3.7.2 chain live panel ===== */
 .chain-live-panel{
   position:fixed;
   right:18px;
@@ -1087,7 +1087,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
 }
 
 
-/* ===== V3.7.1 bet panel ===== */
+/* ===== V3.7.2 bet panel ===== */
 .bet-live-panel{
   position:fixed;
   right:18px;
@@ -1124,7 +1124,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
 @media (max-width: 820px){ .bet-live-panel{ top:auto; bottom:96px; right:12px; width:min(360px,92vw);} }
 
 
-/* ===== V3.7.1 leaderboard panel ===== */
+/* ===== V3.7.2 leaderboard panel ===== */
 .board-panel{
   position:fixed;
   right:18px;
@@ -1165,7 +1165,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
 </head>
 <body>
-<div id="versionHUD">GUANGHAN PALACE V3.7.1</div>
+<div id="versionHUD">GUANGHAN PALACE V3.7.2</div>
 
 
 
@@ -1186,7 +1186,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.7.1</div>
+        <div class="sys-st" id="ver-st">VERSION v3.7.2</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1217,7 +1217,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.7.1</span>
+    <span>宇宙K線引擎｜V3.7.2</span>
     <span>
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1316,7 +1316,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.1
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">新手玩法｜V3.7.1</div>
+    <div class="qs-title">新手玩法｜V3.7.2</div>
     <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
     <ol>
       <li>連結錢包</li>
@@ -1425,7 +1425,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.7.1";
+const APP_VERSION = "v3.7.2";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1858,6 +1858,11 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
     playNewbieGuide(){
         this.openGuide('approve');
         this.speak('新手玩法開始。先連結錢包，輸入 KGEN 金額，先按 Approve 授權，再按下單 UP 或下單 DOWN。Approve 是授權，不是下單。');
+    },
+
+    openUnifiedGuide(){
+        this.openGuide('playbook');
+        this.speak('客服與新手導覽已合併。你可以在這裡查看完整玩法、Approve 教學、獎池規則、托管規則與月老歷史。');
     },
 
     showOrderFx(title, sub){
@@ -3539,7 +3544,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="chain-live-panel" id="chain-live-panel" style="display:none;">
   <div class="cl-head">
-    <span>CHAIN LIVE｜V3.7.1</span>
+    <span>CHAIN LIVE｜V3.7.2</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="cl-status">OFF</span>
       <button type="button" onclick="toggleChainLive()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -3571,7 +3576,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="bet-live-panel" id="bet-live-panel" style="display:none;">
   <div class="bp-head">
-    <span>BET PANEL｜V3.7.1</span>
+    <span>BET PANEL｜V3.7.2</span>
     <span id="bp-mode">READY</span>
   </div>
   <div class="bp-note">
@@ -3592,7 +3597,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="board-panel" id="board-panel" style="display:none;">
   <div class="board-head">
-    <span>LEADERBOARD｜V3.7.1</span>
+    <span>LEADERBOARD｜V3.7.2</span>
     <button type="button" onclick="toggleBoardPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
   </div>
   <div class="board-note">
@@ -3628,28 +3633,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 </div>
 
 
-<script>
-(function(){
-  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
-  const USDT = "0x55d398326f99059fF775485246999027B3197955";
-  function openSwap(input){
-    const url = "https://pancakeswap.finance/swap?outputCurrency=" + encodeURIComponent(KGEN) +
-                "&inputCurrency=" + encodeURIComponent(input);
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-  const bnbBtn = document.getElementById("btn-swap-bnb");
-  const usdtBtn = document.getElementById("btn-swap-usdt");
-  if (bnbBtn) bnbBtn.addEventListener("click", ()=>openSwap("BNB"));
-  if (usdtBtn) usdtBtn.addEventListener("click", ()=>openSwap(USDT));
 
-  window.__KLINE_openInWallet = function(wallet){
-    const full = window.location.href;
-    const noProto = full.replace(/^https?:\/\//i,'');
-    if (wallet === "metamask") return window.open("https://metamask.app.link/dapp/" + noProto, "_blank");
-    if (wallet === "trust") return window.open("https://link.trustwallet.com/open_url?coin_id=60&url=" + encodeURIComponent(full), "_blank");
-  };
-})();
-</script>
 
 
 <script>
@@ -6919,7 +6903,7 @@ function toggleBoardPanel(){
 
 <!-- =========================
 KLINE ODYSSEY PATCH
-V3.7.1 OG FULL
+V3.7.2 OG FULL
 ========================= -->
 
 <script>
@@ -6986,24 +6970,37 @@ if(chainLive){
 }
 </script>
 
-<div style="position:fixed;bottom:20px;right:20px;z-index:9999;">
 
-<button onclick="toggleChainLive()" style="
-background:#111;
-color:#00f2ff;
-border:1px solid #00f2ff;
-padding:10px 14px;
-font-weight:bold;
-cursor:pointer;">
-CHAIN LIVE
-</button>
 
-<div id="chainLiveStatus"
-style="margin-top:6px;color:#ffd778;font-size:12px;">
-CHAIN LIVE : OFF
-</div>
 
-</div>
+
+
+
+<script>
+(function(){
+  const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+  function openSwap(input){
+    const url = "https://pancakeswap.finance/swap?outputCurrency=" + encodeURIComponent(KGEN) +
+                "&inputCurrency=" + encodeURIComponent(input);
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+  const bnbBtn = document.getElementById("btn-swap-bnb");
+  const usdtBtn = document.getElementById("btn-swap-usdt");
+  if (bnbBtn){
+    bnbBtn.onclick = function(ev){
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+      openSwap("BNB");
+    };
+  }
+  if (usdtBtn){
+    usdtBtn.onclick = function(ev){
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+      openSwap(USDT);
+    };
+  }
+})();
+</script>
 
 
 <script>
