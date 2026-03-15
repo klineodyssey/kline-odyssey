@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山台灣悟空看K線不是漲跌，而是宇宙座標。Warp 是飛碟的曲速引擎，能量匯聚，廣寒宮之門開。  
-👉 https://www.youtube.com/watch?v=gwcRxzjR6NU
+▶ 🌕 花果山台灣・信念不滅・市場無界Where the Market Becomes the Myth.#KGEN #KLINE #AI修行 #金融宇宙 #廣寒宮 #花果山 #五指山 #凌霄寶殿  
+👉 https://www.youtube.com/shorts/cv_vs7Lp3g4
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
