@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山台灣 #悟空新文不是你不會交易，是你還沒進宇宙。USDT是子彈，BNB是燃料，沒有燃料一切無法啟動。連接廣寒宮入口，完成KGEN兌換，你拿到的不是幣，是身份。  
-👉 https://www.youtube.com/shorts/KT3SbmKqFOY
+▶ #K線西遊記 #花果山火星 #花果山台灣 #AI修行 #市場覺醒#台指期貨 #幻巔28555 #雲巔28333 #東界27888#信念不滅 #自由之島 #智慧島嶼 #悟空覺醒 #火星殿  
+👉 https://www.youtube.com/shorts/U1OxtRgW7WU
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
