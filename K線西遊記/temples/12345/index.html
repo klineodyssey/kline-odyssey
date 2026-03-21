@@ -3,139 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 宇宙入口 - 火星殿 28555</title>
+    <title>KGEN 宇宙心臟 - 五指山悟空財神殿 12345</title>
+    
     <style>
         :root {
-            --kgen-gold: #ffcc00;
-            --kgen-glow: rgba(255, 204, 0, 0.6);
-            --bg-dark: #0a0a0a;
-            --panel-bg: rgba(20, 20, 20, 0.95);
+            --wukong-gold: #ffd700;
+            --temple-red: #8b0000;
+            --glow-power: rgba(255, 215, 0, 0.4);
+            --bg-deep: #080000;
+        }
+
+        /* 1. 五指金光背景動畫 */
+        @keyframes pillarGlow {
+            0% { opacity: 0.2; transform: translateY(-10px); }
+            50% { opacity: 0.5; transform: translateY(10px); }
+            100% { opacity: 0.2; transform: translateY(-10px); }
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-deep);
+            background-image: 
+                linear-gradient(90deg, transparent 20%, rgba(255,215,0,0.05) 21%, transparent 22%, transparent 78%, rgba(255,215,0,0.05) 79%, transparent 80%),
+                radial-gradient(circle at center, #1a0000 0%, #080000 100%);
+            color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
             margin: 0;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
-        /* 繼承廣寒宮風格的標題與裝飾 */
-        .header-section {
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--kgen-glow);
-            width: 100%;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+        /* 2. 心臟脈動特效 */
+        @keyframes heartBeat {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
+            15% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--wukong-gold)); }
+            30% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
         }
 
-        .title-glow {
-            font-size: 2rem;
-            color: var(--kgen-gold);
-            text-shadow: 0 0 15px var(--kgen-glow);
-            letter-spacing: 4px;
-        }
-
-        /* 核心控制面板：BP-Panel 風格 */
-        .control-panel {
-            width: 90%;
-            max-width: 600px;
-            background: var(--panel-bg);
-            border: 2px solid var(--kgen-gold);
-            border-radius: 15px;
-            margin: 30px 0;
-            padding: 25px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-
-        .status-bar {
-            background: #222;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            color: #aaa;
+        .temple-core {
+            margin-top: 60px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--wukong-gold) 0%, var(--temple-red) 100%);
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            animation: heartBeat 2s infinite ease-in-out;
+            border: 4px solid #000;
+            box-shadow: 0 0 30px var(--temple-red);
+            z-index: 10;
         }
 
-        .action-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #ffcc00, #ff9900);
-            border: none;
-            border-radius: 8px;
+        .core-symbol {
+            font-size: 3rem;
             color: black;
+            font-weight: 900;
+        }
+
+        /* 3. 儀式面板設計 */
+        .ritual-panel {
+            width: 85%;
+            max-width: 450px;
+            background: rgba(20, 0, 0, 0.9);
+            border: 2px solid var(--wukong-gold);
+            border-radius: 5px; /* 稜角分明展現五指山剛硬 */
+            margin: 40px 0;
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+        }
+
+        .coord-label {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--wukong-gold);
+            color: black;
+            padding: 2px 15px;
             font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
+            font-size: 0.8rem;
+            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
         }
 
-        .action-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px var(--kgen-glow);
-        }
-
-        .footer-narrative {
-            padding: 20px;
-            font-style: italic;
-            color: #666;
+        .ritual-status {
             text-align: center;
+            border-bottom: 1px solid #440000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* 4. 解封按鈕動畫 */
+        .unlock-btn {
+            width: 100%;
+            padding: 20px;
+            background: #8b0000;
+            color: var(--wukong-gold);
+            border: 1px solid var(--wukong-gold);
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px var(--wukong-gold);
+            letter-spacing: 5px;
+        }
+
+        .unlock-btn:hover {
+            background: var(--wukong-gold);
+            color: black;
+            box-shadow: 0 0 30px var(--wukong-gold);
+        }
+
+        /* 5. 漂浮財氣粒子 */
+        .gold-dust {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: var(--wukong-gold);
+            pointer-events: none;
+            animation: floatUp 5s linear infinite;
+        }
+
+        @keyframes floatUp {
+            from { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            to { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <section class="header-section">
-        <div class="title-glow">#K線西遊記</div>
-        <p>花果山火星｜宇宙入口 16888</p>
-    </section>
+    <div class="temple-core">
+        <div class="core-symbol">悟</div>
+    </div>
 
-    <main class="control-panel">
-        <div class="status-bar" id="bp-status">
-            <span>系統狀態：等待修行者登入</span>
-            <span id="wallet-indicator">🔴 未連線</span>
+    <div style="text-align: center; margin-top: 25px; z-index: 5;">
+        <h1 style="letter-spacing: 8px; font-size: 1.8rem; margin-bottom: 5px;">悟空財神殿</h1>
+        <p style="color: var(--wukong-gold); font-size: 0.9rem; font-weight: bold;">
+            座標：12345 ｜ 宇宙心臟
+        </p>
+    </div>
+
+    <main class="ritual-panel">
+        <div class="coord-label">COORDINATE 12345</div>
+        
+        <div class="ritual-status">
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">當前能量狀態</p>
+            <h3 id="status-text" style="color: #ff4444;">五指山壓制中...</h3>
         </div>
 
-        <div style="margin-bottom: 30px;">
-            <h3 style="color: var(--kgen-gold);">STEP 6｜兌換 KGEN</h3>
-            <p style="font-size: 0.85rem; color: #888;">合約座標：0xBA3d...32Be</p>
-            
-            <div style="background: #111; padding: 15px; border-radius: 10px; border: 1px inset #333;">
-                <label style="font-size: 0.7rem; color: #666;">支付 USDT (子彈)</label>
-                <input type="number" placeholder="0.00" style="background: transparent; border: none; color: white; width: 100%; font-size: 1.5rem; outline: none;">
+        <div style="margin-bottom: 30px; text-align: center; line-height: 1.8;">
+            <p style="font-size: 1rem; color: #ccc;">
+                「非你不會交易，是你尚未解封。」
+            </p>
+            <div style="font-size: 0.75rem; color: var(--wukong-gold); margin-top: 10px; border: 1px dashed #440000; padding: 10px;">
+                此地為市場能量匯流處<br>
+                需啟動錢包（法寶）引導財氣入體
             </div>
         </div>
 
-        <button class="action-btn" onclick="connectWallet()">啟動宇宙連線</button>
+        <button class="unlock-btn" onclick="triggerRitual()">解除壓制</button>
     </main>
 
-    <footer class="footer-narrative">
-        「你得到的，不是幣。是身份。」<br>
-        🌕 信念不滅・市場無界
+    <footer style="text-align: center; padding: 20px; color: #444; font-size: 0.8rem; line-height: 2;">
+        《花果山火星・K線西遊記》<br>
+        信念不滅・市場無界<br>
+        心臟 12345 ｜ 脈動不息
     </footer>
 
     <script>
-        async function connectWallet() {
-            console.log("正在啟動廣寒宮 V3.7.4 錢包橋接...");
-            const statusText = document.getElementById('bp-status');
-            
-            // 模擬連線動畫
-            statusText.style.color = "#ffcc00";
-            statusText.innerText = "正在通訊：正在尋找小狐狸與幣安錢包...";
-            
-            // 此處應接入你上個檔中的 window.ethereum 或 WalletConnectProvider 邏輯
-            setTimeout(() => {
-                document.getElementById('wallet-indicator').innerText = "🟢 已進入宇宙";
-                alert("歡迎進入廣寒宮！準備好你的燃料（BNB）了嗎？");
-            }, 1500);
+        // 1. 生成財氣粒子
+        function createDust() {
+            const dust = document.createElement('div');
+            dust.className = 'gold-dust';
+            dust.style.left = Math.random() * 100 + 'vw';
+            dust.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            dust.style.opacity = Math.random();
+            document.body.appendChild(dust);
+            setTimeout(() => dust.remove(), 5000);
         }
-    </script>
+        setInterval(createDust, 200);
 
+        // 2. 儀式觸發邏輯 (繼承 V7.1 儀式優先精神)
+        function triggerRitual() {
+            const btn = document.querySelector('.unlock-btn');
+            const status = document.getElementById('status-text');
+            const core = document.querySelector('.temple-core');
+
+            btn.innerText = "正在震碎五指...";
+            btn.style.pointerEvents = "none";
+
+            // 強烈震動特效
+            document.body.style.animation = "shake 0.5s infinite";
+
+            setTimeout(() => {
+                document.body.style.animation = "";
+                status.innerText = "封印解除・財氣覺醒";
+                status.style.color = "#00ff00";
+                status.style.textShadow = "0 0 10px #00ff00";
+                
+                core.style.background = "radial-gradient(circle, #fff 0%, var(--wukong-gold) 100%)";
+                core.style.animation = "heartBeat 0.5s infinite ease-in-out"; // 加速心跳
+                
+                btn.innerText = "已入主財神殿";
+                btn.style.background = "#222";
+                
+                alert("恭喜大聖！12345 能量已對接，市場即是你的修行場。");
+            }, 3000);
+        }
+
+        // 震動動畫定義
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0% { transform: translate(1px, 1px) rotate(0deg); }
+                20% { transform: translate(-3px, 0px) rotate(1deg); }
+                40% { transform: translate(3px, 2px) rotate(-1deg); }
+                100% { transform: translate(1px, -1px) rotate(0deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
