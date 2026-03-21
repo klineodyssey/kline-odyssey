@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V7.2 Heart Animation Edition</title>
+  <title>五指山 12345・悟空財神殿｜V8 Final Temple Edition</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -489,135 +489,132 @@
     }
     .toast.show{display:block}
 
-    .heart-hero{
-      position:relative;
-      min-height:220px;
-      margin-top:14px;
-      border:1px solid rgba(243,210,122,.22);
-      border-radius:20px;
-      overflow:hidden;
-      background:
-        radial-gradient(420px 180px at 50% 50%, rgba(255,184,77,.18), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 18px 44px rgba(0,0,0,.25);
-    }
-    .wuzhi-bg{
-      position:absolute; inset:0;
-      display:flex; align-items:flex-end; justify-content:center; gap:8px;
-      padding:0 22px 18px;
-      opacity:.22;
-      pointer-events:none;
-    }
-    .wuzhi-bg span{
-      flex:1; max-width:72px; border-radius:40px 40px 14px 14px;
-      background:linear-gradient(180deg, rgba(243,210,122,.22), rgba(243,210,122,.04));
-      box-shadow:0 0 20px rgba(243,210,122,.10);
-      transform-origin:bottom center;
-    }
-    .wuzhi-bg span:nth-child(1), .wuzhi-bg span:nth-child(5){ height:110px; }
-    .wuzhi-bg span:nth-child(2), .wuzhi-bg span:nth-child(4){ height:145px; }
-    .wuzhi-bg span:nth-child(3){ height:175px; }
-    .heart-core-wrap{
-      position:absolute; inset:0;
-      display:grid; place-items:center;
-      pointer-events:none;
-    }
-    .heart-core{
-      position:relative;
-      width:118px; height:118px;
-      border-radius:36px 36px 46px 46px;
-      transform:rotate(45deg);
-      background:radial-gradient(circle at 35% 35%, rgba(255,240,180,.95), rgba(255,184,77,.78) 35%, rgba(243,120,20,.42) 72%, rgba(0,0,0,0) 76%);
-      box-shadow:0 0 28px rgba(255,184,77,.35), 0 0 70px rgba(243,210,122,.18);
-      animation: heartBeat 1.2s ease-in-out infinite;
-    }
-    .heart-core::before, .heart-core::after{
-      content:"";
-      position:absolute;
-      width:118px; height:118px;
-      background:inherit;
-      border-radius:50%;
-    }
-    .heart-core::before{ left:-44px; top:0; }
-    .heart-core::after{ top:-44px; left:0; }
-    .heart-inner{
-      position:absolute; inset:18px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(255,255,255,.95), rgba(243,210,122,.28) 50%, rgba(0,0,0,0) 70%);
-      filter:blur(1px);
-    }
-    .heart-glow{
-      position:absolute; inset:-18px;
-      border-radius:50%;
-      border:1px solid rgba(255,210,125,.22);
-      opacity:.9;
-      animation: glowSpin 9s linear infinite;
-    }
-    .heart-aura{
-      position:absolute; left:50%; top:50%;
-      width:120px; height:120px;
-      border-radius:999px;
-      transform:translate(-50%,-50%);
-      border:1px solid rgba(255,210,125,.18);
-      animation: pulseAura 2.8s ease-out infinite;
-      pointer-events:none;
-    }
-    .heart-aura.aura-2{ animation-delay:.9s; }
-    .heart-aura.aura-3{ animation-delay:1.8s; }
-    .heart-labels{
-      position:absolute; left:0; right:0; bottom:14px;
-      text-align:center;
-      padding:0 14px;
-    }
-    .heart-main{
-      color:var(--gold2);
-      font-size:18px;
-      font-weight:900;
-      text-shadow:0 0 18px rgba(243,210,122,.18);
-    }
-    .heart-sub{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.4;
-    }
-    .ritual-hero-btns .ritual-btn{
-      font-size:18px;
-      padding:16px 18px;
-      position:relative;
-      overflow:hidden;
-    }
-    .ritual-hero-btns .main-claim{
-      font-size:22px;
-      padding:18px 20px;
-      background:linear-gradient(180deg, rgba(255,210,125,.34), rgba(243,210,122,.10));
-      box-shadow:0 14px 34px rgba(243,210,122,.15);
-    }
-    .fortune-panel, .energy-panel{
-      position:relative;
-    }
-    .fortune-panel::before{
-      content:"";
-      position:absolute; inset:0;
-      pointer-events:none;
-      background:radial-gradient(600px 220px at 20% 0%, rgba(255,210,125,.06), transparent 55%);
-    }
-    @keyframes heartBeat{
-      0%, 100% { transform:rotate(45deg) scale(1); }
-      15% { transform:rotate(45deg) scale(1.08); }
-      30% { transform:rotate(45deg) scale(0.98); }
-      45% { transform:rotate(45deg) scale(1.12); }
-      60% { transform:rotate(45deg) scale(1); }
-    }
-    @keyframes pulseAura{
-      0% { transform:translate(-50%,-50%) scale(.85); opacity:.60; }
-      80% { transform:translate(-50%,-50%) scale(2.3); opacity:0; }
-      100% { opacity:0; }
-    }
-    @keyframes glowSpin{
-      from { transform:rotate(0deg); }
-      to { transform:rotate(360deg); }
-    }
+/* ===== V8 Temple Heart ===== */
+.v8-heart-stage{
+  position:relative; min-height:270px; margin-top:14px;
+  border:1px solid rgba(243,210,122,.24); border-radius:22px; overflow:hidden;
+  background:
+    radial-gradient(580px 240px at 50% 45%, rgba(255,184,77,.18), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 20px 48px rgba(0,0,0,.28);
+}
+.v8-hand-bg{
+  position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center;
+  gap:10px; padding:0 22px 18px; opacity:.24; pointer-events:none;
+}
+.v8-hand-bg span{
+  flex:1; max-width:76px; border-radius:40px 40px 14px 14px;
+  background:linear-gradient(180deg, rgba(243,210,122,.22), rgba(243,210,122,.04));
+  box-shadow:0 0 20px rgba(243,210,122,.10); transform-origin:bottom center;
+}
+.v8-hand-bg span:nth-child(1), .v8-hand-bg span:nth-child(5){ height:118px; }
+.v8-hand-bg span:nth-child(2), .v8-hand-bg span:nth-child(4){ height:158px; }
+.v8-hand-bg span:nth-child(3){ height:188px; }
+
+.v8-heart-wrap{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; }
+.v8-heart-core{
+  position:relative; width:132px; height:132px;
+  border-radius:40px 40px 52px 52px; transform:rotate(45deg);
+  background:radial-gradient(circle at 35% 35%, rgba(255,244,190,.98), rgba(255,184,77,.82) 34%, rgba(243,120,20,.42) 72%, rgba(0,0,0,0) 76%);
+  box-shadow:0 0 34px rgba(255,184,77,.38), 0 0 82px rgba(243,210,122,.20);
+  animation:v8HeartBeat 1.18s ease-in-out infinite;
+}
+.v8-heart-core::before, .v8-heart-core::after{
+  content:""; position:absolute; width:132px; height:132px; background:inherit; border-radius:50%;
+}
+.v8-heart-core::before{ left:-50px; top:0; }
+.v8-heart-core::after{ left:0; top:-50px; }
+.v8-heart-core-inner{
+  position:absolute; inset:18px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.96), rgba(243,210,122,.28) 52%, rgba(0,0,0,0) 72%);
+  filter:blur(1px);
+}
+.v8-heart-energy{
+  position:absolute; inset:-24px; border-radius:50%;
+  border:1px solid rgba(255,210,125,.22); opacity:.9; animation:v8GlowSpin 10s linear infinite;
+}
+.v8-ring{
+  position:absolute; left:50%; top:50%; width:124px; height:124px; border-radius:999px;
+  transform:translate(-50%,-50%); border:1px solid rgba(255,210,125,.18);
+  animation:v8Pulse 3s ease-out infinite; pointer-events:none;
+}
+.v8-ring.ring2{ animation-delay:1s; }
+.v8-ring.ring3{ animation-delay:2s; }
+.v8-heart-caption{
+  position:absolute; left:0; right:0; bottom:14px; text-align:center; padding:0 14px;
+}
+.v8-heart-main{
+  color:var(--gold2); font-size:20px; font-weight:900; text-shadow:0 0 18px rgba(243,210,122,.18);
+}
+.v8-heart-sub{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.4; }
+
+.temple-fab{
+  position:fixed; bottom:18px; z-index:9998;
+  min-width:120px; padding:12px 14px; border-radius:16px;
+  border:1px solid rgba(243,210,122,.34);
+  background:rgba(10,10,16,.88); backdrop-filter:blur(10px);
+  color:#fff; font-weight:900; box-shadow:0 14px 34px rgba(0,0,0,.42);
+}
+.temple-fab.left{ left:14px; }
+.temple-fab.right{ right:14px; }
+.temple-fab .tiny{ display:block; margin-top:2px; font-size:11px; color:rgba(255,255,255,.72); }
+
+.temple-op-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; z-index:10050; padding:18px 14px;
+}
+.temple-op-overlay.show{ display:block; }
+.temple-op-modal{
+  max-width:900px; margin:0 auto; background:rgba(12,12,18,.94);
+  border:1px solid rgba(243,210,122,.25); border-radius:22px;
+  box-shadow:0 22px 70px rgba(0,0,0,.65); overflow:hidden; backdrop-filter:blur(10px);
+}
+.temple-op-head{
+  padding:14px 16px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid rgba(243,210,122,.12);
+}
+.temple-op-head b{ color:var(--gold2); }
+.temple-op-body{ padding:14px 16px 16px; }
+.temple-op-grid{
+  display:grid; grid-template-columns:1.1fr .9fr; gap:12px;
+}
+@media (max-width:860px){ .temple-op-grid{ grid-template-columns:1fr; } }
+.temple-op-card{
+  border:1px solid rgba(255,255,255,.10); border-radius:16px; background:rgba(255,255,255,.04); padding:12px;
+}
+.temple-op-card h3{
+  margin:0 0 8px; font-size:16px; color:var(--gold2);
+}
+.temple-op-big{
+  display:grid; gap:10px;
+}
+.temple-op-big button{
+  font-size:20px; padding:18px 18px;
+}
+.temple-op-big button.main{
+  background:linear-gradient(180deg, rgba(255,210,125,.34), rgba(243,210,122,.10));
+  border-color:rgba(243,210,122,.65);
+}
+.temple-op-mini{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+@media (max-width:640px){ .temple-op-mini{ grid-template-columns:1fr; } }
+
+@keyframes v8HeartBeat{
+  0%,100%{ transform:rotate(45deg) scale(1); }
+  14%{ transform:rotate(45deg) scale(1.08); }
+  28%{ transform:rotate(45deg) scale(.98); }
+  44%{ transform:rotate(45deg) scale(1.12); }
+  60%{ transform:rotate(45deg) scale(1); }
+}
+@keyframes v8Pulse{
+  0%{ transform:translate(-50%,-50%) scale(.86); opacity:.60; }
+  82%{ transform:translate(-50%,-50%) scale(2.35); opacity:0; }
+  100%{ opacity:0; }
+}
+@keyframes v8GlowSpin{
+  from{ transform:rotate(0deg); }
+  to{ transform:rotate(360deg); }
+}
 
   
 .caishenIcon{width:120px;height:120px;border-radius:14px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
@@ -654,34 +651,34 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V7.2 Heart Animation Edition · ChainReady UI<br/>
-                這裡不是交易所，而是悟空心臟的發財金神殿。先三次聖盃，再領發財金；心跳與點火是能量儀式，還願與點燈是補血行為。
+                V8 Final Temple Edition · 與 16888 同宇宙語系<br/>
+                中央改為悟空心臟主視覺；左下與右下打開放大操作介面，主流程為三次聖盃 → 領發財金。
 
               </div>
 
-              <div class="heart-hero">
-                <div class="heart-aura aura-1"></div>
-                <div class="heart-aura aura-2"></div>
-                <div class="heart-aura aura-3"></div>
-                <div class="wuzhi-bg">
+              <div class="v8-heart-stage">
+                <div class="v8-hand-bg">
                   <span></span><span></span><span></span><span></span><span></span>
                 </div>
-                <div class="heart-core-wrap">
-                  <div class="heart-core">
-                    <div class="heart-inner"></div>
-                    <div class="heart-glow"></div>
+                <div class="v8-ring ring1"></div>
+                <div class="v8-ring ring2"></div>
+                <div class="v8-ring ring3"></div>
+                <div class="v8-heart-wrap">
+                  <div class="v8-heart-core">
+                    <div class="v8-heart-core-inner"></div>
+                    <div class="v8-heart-energy"></div>
                   </div>
                 </div>
-                <div class="heart-labels">
-                  <div class="heart-main">12345 = 心臟</div>
-                  <div class="heart-sub">16888 入口 ｜ 11520 交易所 ｜ 12345 發財金神殿</div>
+                <div class="v8-heart-caption">
+                  <div class="v8-heart-main">悟空心臟｜12345</div>
+                  <div class="v8-heart-sub">16888 廣寒宮入口 ｜ 11520 花果山交易所 ｜ 12345 五指山財神殿</div>
                 </div>
               </div>
 
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V7.2</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V8</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
-                <div class="chip"><span>狀態</span><b id="modeTxt">心臟動畫版（可上線測）</b></div>
+                <div class="chip"><span>狀態</span><b id="modeTxt">V8 最終版（可上線測）</b></div>
               </div>
               
               <div class="grid" style="margin-top:14px; grid-template-columns:1.1fr .9fr;">
@@ -690,11 +687,11 @@
                   <div class="tiny" style="margin-top:8px; line-height:1.75">
                     <b>16888</b>｜廣寒宮（入口）<br/>
                     <b>11520</b>｜花果山悟空交易所<br/>
-                    <b>12345</b>｜五指山悟空財神殿（心臟）
+                    <b>12345</b>｜五指山悟空財神殿（悟空心臟）
                   </div>
                 </div>
                 <div class="badge" style="padding:12px 14px;">
-                  <div class="k">神殿流程</div>
+                  <div class="k">主流程</div>
                   <div class="tiny" style="margin-top:8px; line-height:1.75">
                     1. 連接錢包<br/>
                     2. 三次聖盃<br/>
@@ -704,8 +701,8 @@
               </div>
               <div class="sep"></div>
               <div class="progressWrap">
-                <div class="bar"><i id="progFill" style="width:92%"></i></div>
-                <div class="pct" id="progTxt">92%</div>
+                <div class="bar"><i id="progFill" style="width:96%"></i></div>
+                <div class="pct" id="progTxt">96%</div>
               </div>
               <div class="mini" style="margin-top:8px">
                 監工提示：當你在 <span class="mono">/K線西遊記/temples/12345/index.html</span> 更新本檔，GitHub Pages 會自動刷新。若看到版本跳回舊版，通常是瀏覽器快取（請強制重新整理）。
@@ -765,68 +762,15 @@
       </div>
     </div>
 
-    
     <div class="grid" style="margin-top:12px">
-      <div class="card fortune-panel">
+      <div class="card">
         <div class="inner">
-          <h2>🔥 發財金主殿</h2>
-          <div class="sub">五指山不是交易入口，而是悟空心臟的儀式神殿。先完成三次聖盃，再解鎖領發財金。</div>
-
-          <div class="kv">
-            <div>
-              <div class="k">今日發財金狀態</div>
-              <div class="v"><b id="fortuneMainState">等待三次聖盃</b></div>
-              <div class="mini">條件：連接錢包 / BSC / Heart 地址 / 三次聖盃完成</div>
-            </div>
-            <div style="text-align:right">
-              <div class="k">神殿定位</div>
-              <div class="v"><b>12345 = 心臟</b></div>
-              <div class="mini">不是交易所，是發財金神殿</div>
-            </div>
-          </div>
-
-          <div class="cupRow" style="margin-top:12px">
-            <div class="cupBox"><span class="cupIcon">🥢</span> 聖盃進度：<span class="mono" id="cupProg">0 / 3</span></div>
-            <div class="cupBox"><span class="cupIcon">⛩️</span> 連續成功：<span class="mono" id="cupStreak">0</span></div>
-            <div class="cupBox"><span class="cupIcon">🎲</span> 本次結果：<span class="mono" id="cupLast">--</span></div>
-          </div>
-
-          <div class="btns ritual-hero-btns" style="margin-top:12px">
-            <button id="btnCup" class="primary ritual-btn">三次聖盃</button>
-            <button class="primary ritual-btn main-claim" id="btnFortune" disabled>領發財金（上鏈）</button>
-            <button id="btnCupReset" class="ghost">重置聖盃</button>
-            <button class="ghost" id="btnFortuneCheck">查我的冷卻 / 名額</button>
-          </div>
-
-          <div class="grid" style="margin-top:12px">
-            <div class="field">
-              <label>要領多少發財金（KGEN）</label>
-              <input id="fortuneAmt" type="number" min="1" max="888" value="8" />
-              <div class="help">規則：1–888，自填比較有記憶點。</div>
-            </div>
-            <div class="field">
-              <label>發財金狀態</label>
-              <div class="help">
-                <div>需要：<b>三次聖盃成功</b> 才會解鎖「領發財金」。</div>
-                <div>冷卻：預設 <span class="mono">30 days</span>（合約 fortuneCooldownSeconds）。</div>
-                <div>每期名額：預設 <span class="mono">500 / 30 days</span>（fortuneEpochMaxClaims / fortuneEpochSeconds）。</div>
-              </div>
-            </div>
-          </div>
-          <div class="mini" id="fortuneOut" style="margin-top:8px"></div>
-        </div>
-      </div>
-
-      <div class="card energy-panel">
-        <div class="inner">
-          <h2>⚡ 能量儀式</h2>
-          <div class="sub">心跳與點火是能量行為；還願與點燈是補血行為。這些是神殿儀式，不是交易按鈕。</div>
-
+          <h2>心跳 / 點火 倒數（鏈上事件）</h2>
           <div class="kv">
             <div>
               <div class="k">心跳倒數（下一次可領）</div>
               <div class="v"><b id="hbCountdown">--:--:--</b></div>
-              <div class="mini">規則：每小時一次（整點節奏）</div>
+              <div class="mini">規則：每小時一次（合約 heartbeatCooldownSeconds）。</div>
             </div>
             <div style="text-align:right">
               <div class="k">心跳獎勵</div>
@@ -853,28 +797,48 @@
             <button class="primary" id="btnIgnite">轉日點火（上鏈）</button>
           </div>
           <div class="mini" id="hbIgOut" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="inner">
+          <h2>三次聖盃（防 Bot）→ 才能領發財金</h2>
+
+          <div class="cupRow">
+            <div class="cupBox"><span class="cupIcon">🥢</span> 聖盃進度：<span class="mono" id="cupProg">0 / 3</span></div>
+            <div class="cupBox"><span class="cupIcon">⛩️</span> 連續成功：<span class="mono" id="cupStreak">0</span></div>
+            <div class="cupBox"><span class="cupIcon">🎲</span> 本次結果：<span class="mono" id="cupLast">--</span></div>
+          </div>
+
+          <div class="btns" style="margin-top:10px">
+            <button id="btnCup" class="primary">搏杯一次</button>
+            <button id="btnCupReset" class="ghost">重置聖盃</button>
+          </div>
 
           <div class="sep"></div>
 
-          <h2 style="margin-top:0">🏯 還願 / 點燈（補血）</h2>
           <div class="grid">
             <div class="field">
-              <label>還願金額（KGEN）</label>
-              <input id="vowAmt" type="number" min="1" value="8" />
-              <div class="help">還願是補血：會用 <span class="mono">transferFrom</span> 轉入 Heart（需先 approve）。</div>
+              <label>要領多少發財金（KGEN）</label>
+              <input id="fortuneAmt" type="number" min="1" max="888" value="8" />
+              <div class="help">規則：1–888，自填比較有記憶點（你之前的設定）。</div>
             </div>
             <div class="field">
-              <label>點燈天數（每一天 1 KGEN，預設）</label>
-              <input id="lampDays" type="number" min="1" value="7" />
-              <div class="help">點燈也是補血，會延長你的燈火到期時間（鏈上記錄）。</div>
+              <label>發財金狀態</label>
+              <div class="help">
+                <div>需要：<b>三次聖盃成功</b> 才會解鎖「領發財金」。</div>
+                <div>冷卻：預設 <span class="mono">30 days</span>（合約 fortuneCooldownSeconds）。</div>
+                <div>每期名額：預設 <span class="mono">500 / 30 days</span>（fortuneEpochMaxClaims / fortuneEpochSeconds）。</div>
+              </div>
             </div>
           </div>
+
           <div class="btns">
-            <button class="primary" id="btnApprove">先 Approve（KGEN → Heart）</button>
-            <button class="primary" id="btnVow">還願（上鏈）</button>
-            <button class="primary" id="btnLamp">點燈（上鏈）</button>
+            <button class="primary" id="btnFortune" disabled>領發財金（上鏈）</button>
+            <button class="ghost" id="btnFortuneCheck">查我的冷卻 / 名額</button>
           </div>
-          <div class="mini" id="vowOut" style="margin-top:8px"></div>
+
+          <div class="mini" id="fortuneOut" style="margin-top:8px"></div>
         </div>
       </div>
     </div>
@@ -1021,6 +985,57 @@
       </div>
     </div>
 
+
+    <button class="temple-fab left" id="btnTempleOpLeft">左下操作窗<span class="tiny">打開神殿操作</span></button>
+    <button class="temple-fab right" id="btnTempleOpRight">右下操作窗<span class="tiny">領發財金介面</span></button>
+
+    <div class="temple-op-overlay" id="templeOpOverlay">
+      <div class="temple-op-modal">
+        <div class="temple-op-head">
+          <div><b>五指山 12345 操作介面</b>｜悟空財神殿放大操作窗</div>
+          <button class="ghost" id="btnTempleOpClose">關閉</button>
+        </div>
+        <div class="temple-op-body">
+          <div class="temple-op-grid">
+            <div class="temple-op-card">
+              <h3>主流程</h3>
+              <div class="mini" style="margin-bottom:10px">先三次聖盃，再領發財金；這是 V8 最終版的主路徑。</div>
+              <div class="temple-op-big">
+                <button class="primary" id="btnTempleCupProxy">三次聖盃</button>
+                <button class="primary main" id="btnTempleFortuneProxy">領發財金</button>
+              </div>
+              <div class="kv" style="margin-top:10px">
+                <div>
+                  <div class="k">操作狀態</div>
+                  <div class="v"><b id="templeOpState">待命中</b></div>
+                </div>
+                <div style="text-align:right">
+                  <div class="k">主定位</div>
+                  <div class="v"><b>12345 = 心臟</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="temple-op-card">
+              <h3>能量儀式</h3>
+              <div class="temple-op-mini">
+                <button class="primary" id="btnTempleHeartbeatProxy">心跳</button>
+                <button class="primary" id="btnTempleIgniteProxy">點火</button>
+                <button class="primary" id="btnTempleVowProxy">還願</button>
+                <button class="primary" id="btnTempleLampProxy">點燈</button>
+              </div>
+              <div class="sep"></div>
+              <h3>神殿資訊</h3>
+              <div class="tiny" style="line-height:1.8">
+                16888｜廣寒宮入口<br/>
+                11520｜花果山悟空交易所<br/>
+                12345｜五指山悟空財神殿（悟空心臟）
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="footer">
       PrimeForge 以母機之名，開啟金融生命。花果山台灣・信念不滅・市場無界。Where the Market Becomes the Myth.—— 樂天帝 ⌖
     </div>
@@ -1093,7 +1108,7 @@
 ================================ */
 
 const UI = {
-  ver: "V7.2",
+  ver: "V8",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -2437,42 +2452,70 @@ setInterval(()=>{ syncCupUI(); }, 900);
 
 <script>
 (function(){
-  function syncTempleMainState(){
+  function syncMainState(){
     try{
-      const state = document.getElementById('fortuneMainState');
+      const state = document.getElementById('templeOpState');
+      const heart = document.querySelector('.v8-heart-core');
       const btn = document.getElementById('btnFortune');
-      const core = document.querySelector('.heart-core');
-      if(!state || !btn) return;
-      if(btn.disabled){
-        state.textContent = (window.cupUnlocked ? '等待鏈上條件完成' : '等待三次聖盃');
-        if(core) core.style.animationDuration = '1.2s';
-      }else{
-        state.textContent = '可領發財金';
-        if(core) core.style.animationDuration = '.85s';
+      if(state){
+        state.textContent = btn && !btn.disabled ? '可領發財金' : ((window.cupUnlocked || false) ? '等待鏈上條件完成' : '等待三次聖盃');
+      }
+      if(heart && btn){
+        heart.style.animationDuration = btn.disabled ? '1.18s' : '.82s';
       }
     }catch(e){}
   }
 
   function flashTemple(){
-    const hero = document.querySelector('.heart-hero');
+    const hero = document.querySelector('.v8-heart-stage');
     if(!hero) return;
     hero.animate([
-      { boxShadow:'0 18px 44px rgba(0,0,0,.25)' },
-      { boxShadow:'0 0 0 rgba(0,0,0,0), 0 0 55px rgba(255,210,125,.28)' },
-      { boxShadow:'0 18px 44px rgba(0,0,0,.25)' }
+      { boxShadow:'0 20px 48px rgba(0,0,0,.28)' },
+      { boxShadow:'0 0 0 rgba(0,0,0,0), 0 0 60px rgba(255,210,125,.28)' },
+      { boxShadow:'0 20px 48px rgba(0,0,0,.28)' }
     ], { duration:900, easing:'ease-out' });
   }
 
+  function openTempleOp(){
+    const el = document.getElementById('templeOpOverlay');
+    if(el) el.classList.add('show');
+    syncMainState();
+  }
+  function closeTempleOp(){
+    const el = document.getElementById('templeOpOverlay');
+    if(el) el.classList.remove('show');
+  }
+
+  const bindClick = (a,b)=>{
+    const src = document.getElementById(a);
+    const dst = document.getElementById(b);
+    if(src && dst){
+      src.addEventListener('click', ()=>{ dst.click(); flashTemple(); syncMainState(); });
+    }
+  };
+
   ['btnCup','btnFortune','btnHeartbeat','btnIgnite','btnVow','btnLamp'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.addEventListener('click', flashTemple);
+    if(el) el.addEventListener('click', ()=>{ flashTemple(); setTimeout(syncMainState, 150); });
   });
 
-  setInterval(syncTempleMainState, 500);
+  document.getElementById('btnTempleOpLeft')?.addEventListener('click', openTempleOp);
+  document.getElementById('btnTempleOpRight')?.addEventListener('click', openTempleOp);
+  document.getElementById('btnTempleOpClose')?.addEventListener('click', closeTempleOp);
+  document.getElementById('templeOpOverlay')?.addEventListener('click', (e)=>{ if(e.target.id === 'templeOpOverlay') closeTempleOp(); });
+
+  bindClick('btnTempleCupProxy','btnCup');
+  bindClick('btnTempleFortuneProxy','btnFortune');
+  bindClick('btnTempleHeartbeatProxy','btnHeartbeat');
+  bindClick('btnTempleIgniteProxy','btnIgnite');
+  bindClick('btnTempleVowProxy','btnVow');
+  bindClick('btnTempleLampProxy','btnLamp');
+
+  setInterval(syncMainState, 500);
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', syncTempleMainState);
+    document.addEventListener('DOMContentLoaded', syncMainState);
   }else{
-    syncTempleMainState();
+    syncMainState();
   }
 })();
 </script>
