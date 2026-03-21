@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>五指山 12345・悟空財神殿｜V6.6p17p3 Cosmic Voice Stable</title>
+  <title>五指山 12345・悟空財神殿｜V7.1 Ritual First Fortune Temple</title>
 
   <!-- Ethers v5 (lightweight, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -488,6 +488,12 @@
       text-overflow:ellipsis;
     }
     .toast.show{display:block}
+
+    .fortune-main-big{
+      font-size:22px;
+      padding:18px 20px;
+    }
+
   
 .caishenIcon{width:120px;height:120px;border-radius:14px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
 @media (max-width:420px){ .caishenIcon{width:72px;height:72px;border-radius:12px;} }
@@ -523,18 +529,37 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.6p17p3 Cosmic Living Temple · ChainReady UI<br/>
-                心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
+                V7.1 Ritual First Fortune Temple · ChainReady UI<br/>
+                這裡不是交易所，而是悟空心臟的發財金神殿。先三次聖盃，再領發財金；心跳與點火為能量儀式，還願與點燈為補血行為。
               </div>
               <div class="chips">
-                <div class="chip"><span>版本</span><b id="ver">V6.6p17p3</b></div>
+                <div class="chip"><span>版本</span><b id="ver">V7.1</b></div>
                 <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
-                <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
+                <div class="chip"><span>狀態</span><b id="modeTxt">發財金神殿版（可上線測）</b></div>
+              </div>
+              
+              <div class="grid" style="margin-top:14px; grid-template-columns:1.1fr .9fr;">
+                <div class="badge" style="padding:12px 14px;">
+                  <div class="k">宇宙金融地圖</div>
+                  <div class="tiny" style="margin-top:8px; line-height:1.75">
+                    <b>16888</b>｜廣寒宮（入口）<br/>
+                    <b>11520</b>｜花果山悟空交易所<br/>
+                    <b>12345</b>｜五指山悟空財神殿（心臟）
+                  </div>
+                </div>
+                <div class="badge" style="padding:12px 14px;">
+                  <div class="k">神殿流程</div>
+                  <div class="tiny" style="margin-top:8px; line-height:1.75">
+                    1. 連接錢包<br/>
+                    2. 三次聖盃<br/>
+                    3. 領發財金
+                  </div>
+                </div>
               </div>
               <div class="sep"></div>
               <div class="progressWrap">
-                <div class="bar"><i id="progFill" style="width:72%"></i></div>
-                <div class="pct" id="progTxt">72%</div>
+                <div class="bar"><i id="progFill" style="width:88%"></i></div>
+                <div class="pct" id="progTxt">88%</div>
               </div>
               <div class="mini" style="margin-top:8px">
                 監工提示：當你在 <span class="mono">/K線西遊記/temples/12345/index.html</span> 更新本檔，GitHub Pages 會自動刷新。若看到版本跳回舊版，通常是瀏覽器快取（請強制重新整理）。
@@ -594,15 +619,68 @@
       </div>
     </div>
 
+    
     <div class="grid" style="margin-top:12px">
       <div class="card">
         <div class="inner">
-          <h2>心跳 / 點火 倒數（鏈上事件）</h2>
+          <h2>🔥 發財金主殿</h2>
+          <div class="sub">五指山的核心不是交易，而是儀式。先完成三次聖盃，再解鎖領發財金。</div>
+
+          <div class="kv">
+            <div>
+              <div class="k">今日發財金狀態</div>
+              <div class="v"><b id="fortuneMainState">等待三次聖盃</b></div>
+              <div class="mini">條件：連接錢包 / BSC / Heart 地址 / 三次聖盃完成</div>
+            </div>
+            <div style="text-align:right">
+              <div class="k">神殿定位</div>
+              <div class="v"><b>12345 = 心臟</b></div>
+              <div class="mini">不是交易所，是發財金神殿</div>
+            </div>
+          </div>
+
+          <div class="cupRow" style="margin-top:12px">
+            <div class="cupBox"><span class="cupIcon">🥢</span> 聖盃進度：<span class="mono" id="cupProg">0 / 3</span></div>
+            <div class="cupBox"><span class="cupIcon">⛩️</span> 連續成功：<span class="mono" id="cupStreak">0</span></div>
+            <div class="cupBox"><span class="cupIcon">🎲</span> 本次結果：<span class="mono" id="cupLast">--</span></div>
+          </div>
+
+          <div class="btns" style="margin-top:12px">
+            <button id="btnCup" class="primary" style="font-size:18px;padding:16px 18px">三次聖盃</button>
+            <button class="primary" id="btnFortune" disabled style="font-size:22px;padding:18px 20px">領發財金（上鏈）</button>
+            <button id="btnCupReset" class="ghost">重置聖盃</button>
+            <button class="ghost" id="btnFortuneCheck">查我的冷卻 / 名額</button>
+          </div>
+
+          <div class="grid" style="margin-top:12px">
+            <div class="field">
+              <label>要領多少發財金（KGEN）</label>
+              <input id="fortuneAmt" type="number" min="1" max="888" value="8" />
+              <div class="help">規則：1–888，自填比較有記憶點。</div>
+            </div>
+            <div class="field">
+              <label>發財金狀態</label>
+              <div class="help">
+                <div>需要：<b>三次聖盃成功</b> 才會解鎖「領發財金」。</div>
+                <div>冷卻：預設 <span class="mono">30 days</span>（合約 fortuneCooldownSeconds）。</div>
+                <div>每期名額：預設 <span class="mono">500 / 30 days</span>（fortuneEpochMaxClaims / fortuneEpochSeconds）。</div>
+              </div>
+            </div>
+          </div>
+          <div class="mini" id="fortuneOut" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="inner">
+          <h2>⚡ 能量儀式</h2>
+          <div class="sub">心跳與點火是能量行為；還願與點燈是補血行為。這些是神殿儀式，不是交易按鈕。</div>
+
           <div class="kv">
             <div>
               <div class="k">心跳倒數（下一次可領）</div>
               <div class="v"><b id="hbCountdown">--:--:--</b></div>
-              <div class="mini">規則：每小時一次（合約 heartbeatCooldownSeconds）。</div>
+              <div class="mini">規則：每小時一次（整點節奏）</div>
             </div>
             <div style="text-align:right">
               <div class="k">心跳獎勵</div>
@@ -629,48 +707,28 @@
             <button class="primary" id="btnIgnite">轉日點火（上鏈）</button>
           </div>
           <div class="mini" id="hbIgOut" style="margin-top:8px"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="inner">
-          <h2>三次聖盃（防 Bot）→ 才能領發財金</h2>
-
-          <div class="cupRow">
-            <div class="cupBox"><span class="cupIcon">🥢</span> 聖盃進度：<span class="mono" id="cupProg">0 / 3</span></div>
-            <div class="cupBox"><span class="cupIcon">⛩️</span> 連續成功：<span class="mono" id="cupStreak">0</span></div>
-            <div class="cupBox"><span class="cupIcon">🎲</span> 本次結果：<span class="mono" id="cupLast">--</span></div>
-          </div>
-
-          <div class="btns" style="margin-top:10px">
-            <button id="btnCup" class="primary">搏杯一次</button>
-            <button id="btnCupReset" class="ghost">重置聖盃</button>
-          </div>
 
           <div class="sep"></div>
 
+          <h2 style="margin-top:0">🏯 還願 / 點燈（補血）</h2>
           <div class="grid">
             <div class="field">
-              <label>要領多少發財金（KGEN）</label>
-              <input id="fortuneAmt" type="number" min="1" max="888" value="8" />
-              <div class="help">規則：1–888，自填比較有記憶點（你之前的設定）。</div>
+              <label>還願金額（KGEN）</label>
+              <input id="vowAmt" type="number" min="1" value="8" />
+              <div class="help">還願是補血：會用 <span class="mono">transferFrom</span> 轉入 Heart（需先 approve）。</div>
             </div>
             <div class="field">
-              <label>發財金狀態</label>
-              <div class="help">
-                <div>需要：<b>三次聖盃成功</b> 才會解鎖「領發財金」。</div>
-                <div>冷卻：預設 <span class="mono">30 days</span>（合約 fortuneCooldownSeconds）。</div>
-                <div>每期名額：預設 <span class="mono">500 / 30 days</span>（fortuneEpochMaxClaims / fortuneEpochSeconds）。</div>
-              </div>
+              <label>點燈天數（每一天 1 KGEN，預設）</label>
+              <input id="lampDays" type="number" min="1" value="7" />
+              <div class="help">點燈也是補血，會延長你的燈火到期時間（鏈上記錄）。</div>
             </div>
           </div>
-
           <div class="btns">
-            <button class="primary" id="btnFortune" disabled>領發財金（上鏈）</button>
-            <button class="ghost" id="btnFortuneCheck">查我的冷卻 / 名額</button>
+            <button class="primary" id="btnApprove">先 Approve（KGEN → Heart）</button>
+            <button class="primary" id="btnVow">還願（上鏈）</button>
+            <button class="primary" id="btnLamp">點燈（上鏈）</button>
           </div>
-
-          <div class="mini" id="fortuneOut" style="margin-top:8px"></div>
+          <div class="mini" id="vowOut" style="margin-top:8px"></div>
         </div>
       </div>
     </div>
@@ -889,7 +947,7 @@
 ================================ */
 
 const UI = {
-  ver: "V6.6",
+  ver: "V7.1",
   // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
   defaults: {
     hbReward: 1,
@@ -2226,6 +2284,30 @@ setInterval(()=>{ syncCupUI(); }, 900);
     document.addEventListener('DOMContentLoaded', bind);
   }else{
     bind();
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function syncTempleMainState(){
+    try{
+      const state = document.getElementById('fortuneMainState');
+      const btn = document.getElementById('btnFortune');
+      if(!state || !btn) return;
+      if(btn.disabled){
+        state.textContent = (window.cupUnlocked ? '等待鏈上條件完成' : '等待三次聖盃');
+      }else{
+        state.textContent = '可領發財金';
+      }
+    }catch(e){}
+  }
+  setInterval(syncTempleMainState, 500);
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', syncTempleMainState);
+  }else{
+    syncTempleMainState();
   }
 })();
 </script>
