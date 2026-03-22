@@ -2,348 +2,334 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V13.3 核心釋放版</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>五指山 12345・悟空財神殿｜V7 營運版</title>
 <style>
-:root{
-  --gold:#ffd778; --cyan:#00f2ff; --bg:#02060d; --energy:#ffcc00;
-  --panel:rgba(10,12,20,.88); --red:#ff6464; --green:#79ff91;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:#fff;font-family:"Noto Sans TC",Arial,sans-serif;overflow:hidden;height:100vh}
-canvas{position:fixed;inset:0}
-.hud-top{
-  position:fixed;top:12px;left:2%;width:96%;display:flex;justify-content:space-between;align-items:flex-start;z-index:120
-}
-.brand-section{
-  border-left:5px solid var(--gold);padding-left:14px;background:linear-gradient(90deg,var(--panel),transparent)
-}
-.brand-name{font-size:24px;color:var(--gold);text-shadow:0 0 15px var(--gold);font-weight:900}
-.sys-st{font-family:Orbitron,Arial,sans-serif;font-size:11px;color:var(--cyan);letter-spacing:1px}
-.monitor-data{display:flex;gap:12px}
-.data-box{
-  background:var(--panel);border:1px solid rgba(255,215,120,.25);padding:9px 10px;min-width:136px;border-radius:12px
-}
-.data-box .k{font-size:10px;color:#ffe2a2}
-.data-box .v{font-family:Orbitron,Arial,sans-serif;font-size:16px;color:var(--cyan);font-weight:900;margin-top:4px}
-
-#core-anchor{
-  position:fixed;top:43%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;z-index:70
-}
-#core-window{
-  width:100%;height:100%;border-radius:50%;border:14px double var(--gold);overflow:hidden;background:#000;
-  position:relative;box-shadow:0 0 80px rgba(255,215,120,.25);transition:transform .05s linear
-}
-#wish-label{
-  position:absolute;bottom:28px;left:22px;z-index:85;color:#fff;font-weight:900;font-size:21px;
-  text-shadow:2px 2px 10px #000,0 0 15px var(--cyan)
-}
-#core-canvas{width:100%;height:100%;display:block}
-
-.ga-matrix{
-  position:fixed;left:12px;top:120px;width:180px;background:var(--panel);border:1px solid var(--energy);
-  padding:12px;border-radius:12px;z-index:115;font-family:Orbitron,Arial,sans-serif
-}
-.ga-title{color:var(--gold);font-size:14px;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:6px}
-.ga-stat{font-size:11px;margin-bottom:9px;color:var(--cyan)}
-.ga-bar{height:6px;background:#111;margin-top:4px;overflow:hidden;border-radius:3px}
-.ga-progress{height:100%;background:var(--energy);width:0%;transition:width .4s}
-
-#kline-engine-panel{
-  position:fixed;left:12px;top:310px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);
-  border-radius:14px;overflow:hidden;z-index:122;padding:10px
-}
-#kline-chart-panel{
-  position:fixed;left:12px;top:560px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);
-  border-radius:14px;overflow:hidden;z-index:122;padding:10px
-}
-.ke-head,.kc-head{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font-weight:900;font-size:14px;margin-bottom:8px}
-.ke-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ke-cell{min-height:52px;border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:6px 8px;background:rgba(0,0,0,.22)}
-.ke-label{font-size:10px;color:rgba(255,255,255,.78);line-height:1}
-.ke-value{margin-top:4px;font-family:Orbitron,Arial,sans-serif;font-size:15px;color:var(--cyan);font-weight:900;line-height:1}
-.ke-live-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
-.ke-live-price{font-family:Orbitron,Arial,sans-serif;color:var(--gold);font-size:16px;font-weight:900}
-#kline-canvas{width:100%;height:92px;display:block;border-radius:10px;background:
-  linear-gradient(180deg,rgba(0,242,255,.03),rgba(0,0,0,.06)),
-  repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 32px),
-  repeating-linear-gradient(to bottom,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 1px,transparent 1px,transparent 24px),
-  rgba(0,0,0,.22)}
-
-.warp-engine{
-  position:fixed;right:18px;bottom:250px;z-index:150;width:70px;text-align:center
-}
-.warp-rail{
-  height:360px;width:22px;background:#101319;border:3px solid var(--energy);position:relative;
-  margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(255,204,0,.2)
-}
-#energy-fill{
-  position:absolute;bottom:0;width:100%;height:0%;
-  background:linear-gradient(to top,#ff8800,var(--energy),#fff);transition:height .15s cubic-bezier(.17,.67,.83,.67);z-index:5
-}
-.rail-step{position:absolute;width:100%;height:2px;background:rgba(0,0,0,.35);z-index:10}
-#warp-thumb{
-  width:54px;height:28px;background:#fff;position:absolute;left:-19px;bottom:0;cursor:pointer;border-radius:6px;
-  box-shadow:0 0 24px #fff,0 0 12px var(--cyan);border:3px solid var(--cyan);z-index:30
-}
-.warp-val-text{margin-top:12px;color:var(--energy);font-family:Orbitron,Arial,sans-serif;font-size:16px;text-shadow:0 0 10px var(--energy)}
-
-#coord-panel{
-  position:fixed;right:12px;bottom:300px;width:min(280px,84vw);padding:10px 12px;border:1px solid rgba(255,215,0,.35);
-  border-radius:12px;background:rgba(0,0,0,.58);box-shadow:0 0 18px rgba(255,215,0,.12);max-height:240px;overflow-y:auto;z-index:130
-}
-.cp-title{display:flex;align-items:flex-start;justify-content:space-between;font-weight:900;color:#ffd27a;margin-bottom:8px}
-.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;font-size:13px;line-height:1.25}
-.cp-row{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,200,80,.25);background:rgba(0,0,0,.35)}
-.cp-k{opacity:.85;font-size:12px}
-.cp-v{margin-top:2px;font-weight:900;color:#8af3ff;word-break:break-word}
-
-.footer-terminal{
-  position:fixed;bottom:0;width:100%;background:#000;padding:12px;border-top:4px solid var(--gold);
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;z-index:140
-}
-.term-btn{
-  background:#0a0a0a;border:1px solid #444;color:#fff;padding:14px 6px;font-weight:900;cursor:pointer;
-  font-size:12px;border-radius:8px;width:100%;text-align:center
-}
-.term-btn.active-kgen{border-color:var(--energy);color:var(--energy)}
-
-.chain-live-panel,.bet-live-panel{
-  position:fixed;right:12px;top:120px;z-index:215;width:min(320px,88vw);background:rgba(8,12,20,.92);
-  border:1px solid rgba(255,215,120,.25);border-radius:14px;padding:12px;display:none
-}
-.cl-head,.bp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd88a;font-weight:900;font-family:Orbitron,Arial,sans-serif;font-size:13px;margin-bottom:10px}
-.cl-grid,.bp-kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cl-item{border:1px solid rgba(255,215,120,.14);border-radius:12px;padding:8px 10px;background:rgba(0,0,0,.22)}
-.cl-k,.bp-k{font-size:10px;color:#ffe6b8;opacity:.88}
-.cl-v,.bp-v{margin-top:4px;font-size:12px;color:#d8f9ff;font-weight:900;word-break:break-all}
-.bp-input{width:100%;box-sizing:border-box;border-radius:12px;padding:10px 12px;border:1px solid rgba(255,215,120,.22);background:rgba(0,0,0,.28);color:#fff;font-weight:900;outline:none;margin-top:10px}
-.bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.bp-btn{border-radius:12px;padding:10px 12px;cursor:pointer;border:1px solid rgba(255,215,120,.24);font-weight:900;background:rgba(0,0,0,.28);color:#fff}
-.bp-btn.approve{background:rgba(255,215,120,.14);color:#ffe9b8}
-.bp-btn.buy{background:rgba(60,220,120,.16);color:#d8ffe6}
-.bp-btn.sell{background:rgba(255,110,110,.16);color:#ffdede}
-.bp-status{margin-top:10px;min-height:18px;font-size:12px;color:#cfe8ff}
-
-#toast{
-  position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:260;width:min(520px,92vw);padding:10px 12px;border-radius:12px;
-  border:1px solid rgba(255,215,0,.45);background:rgba(0,0,0,.68);color:#fff;font-weight:900;font-size:13px;display:none
-}
-#toast.show{display:block}
-
-@media (max-width:900px){
-  .brand-name{font-size:20px}
-  .monitor-data{display:none}
-  #core-anchor{width:300px;height:300px;top:36%}
-  .ga-matrix{left:10px;top:110px;width:168px}
-  #kline-engine-panel{left:10px;top:300px;width:250px}
-  #kline-chart-panel{left:10px;top:520px;width:250px}
-  .warp-engine{right:10px;bottom:250px}
-  #coord-panel{right:10px;bottom:300px;width:min(250px,82vw)}
-  .footer-terminal{grid-template-columns:repeat(2,1fr)}
-}
+:root{--bg:#07080d;--bg2:#121622;--gold:#f6d27b;--cyan:#74eaff;--line:rgba(246,210,123,.22);--panel:rgba(18,22,34,.86);--muted:rgba(255,255,255,.74)}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;color:#fff;font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;background:
+radial-gradient(900px 500px at 20% 10%, rgba(246,210,123,.10), transparent 55%),
+radial-gradient(700px 400px at 85% 30%, rgba(116,234,255,.08), transparent 55%),
+linear-gradient(180deg,var(--bg),var(--bg2));overflow-x:hidden}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:12px 12px 110px}
+.topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.brand{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(90deg,rgba(255,255,255,.05),transparent);border-left:5px solid var(--gold);padding:10px 12px;border-radius:16px}
+.brand h1{margin:0;font-size:32px;line-height:1;color:var(--gold)} .brand .sub{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
+.pill{display:inline-flex;gap:8px;align-items:center;padding:10px 12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:999px;font-weight:900}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.22)}
+.entry{padding:16px}
+.h2{margin:0 0 10px;font-size:18px;color:var(--gold)} .help{font-size:12px;color:var(--muted);line-height:1.55}
+.entry-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.status{display:flex;gap:10px;flex-wrap:wrap}
+.status-card{padding:12px 14px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px}
+.status-card .k{font-size:11px;color:var(--muted)} .status-card .v{margin-top:4px;font-size:18px;font-weight:900;color:var(--cyan)}
+.entry-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bigbtn{padding:22px 16px;border-radius:22px;border:1px solid var(--line);background:rgba(0,0,0,.26);cursor:pointer;text-align:left;min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+.bigbtn .icon{font-size:28px}.bigbtn .t{font-weight:900;font-size:20px;color:var(--gold)}.bigbtn .d{font-size:13px;color:var(--muted);line-height:1.45}
+.bigbtn.active{outline:2px solid rgba(246,210,123,.38);background:rgba(246,210,123,.08)}
+.section{margin-top:14px;display:none;grid-template-columns:1.1fr .9fr;gap:12px}.section.active{display:grid}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px} label{font-size:12px;color:var(--muted)}
+input,textarea,select{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.24);color:#fff;outline:none}
+textarea{min-height:108px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;padding:12px 14px;border-radius:14px;cursor:pointer;font-weight:900;background:linear-gradient(180deg,rgba(246,210,123,.22),rgba(246,210,123,.08));color:#fff;border:1px solid var(--line)}
+.btn.ghost{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)} .btn.danger{background:rgba(255,108,108,.10);border-color:rgba(255,108,108,.22)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 12px;background:rgba(0,0,0,.20);border:1px solid rgba(255,255,255,.08);border-radius:14px}
+.kv .k{font-size:12px;color:var(--muted)} .kv .v{font-weight:900}
+.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:12px 0}
+.media{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.media video,.media canvas{width:100%;display:block;border-radius:16px;background:#000;border:1px solid rgba(255,255,255,.08)}
+.chatbox{min-height:220px}
+.footerbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(0,0,0,.88);border-top:3px solid var(--gold);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 10px 14px}
+.footerbtn{padding:12px 8px;border-radius:14px;background:#101216;border:1px solid rgba(255,255,255,.08);text-align:center;font-weight:900}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.76);border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:none}
+.toast.show{display:block}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (max-width:980px){.entry-buttons{grid-template-columns:repeat(2,1fr)}.section.active,.grid2,.media{grid-template-columns:1fr}.brand h1{font-size:26px}.footerbar{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<div id="toast"></div>
-<canvas id="world"></canvas>
-
-<div class="hud-top">
-  <div class="brand-section">
-    <div class="brand-name">KLINE V13.3｜核心釋放版</div>
-    <div class="sys-st">VERSION v13.3</div>
-    <div class="sys-st" id="sys-clock">SYSTEM ONLINE | --</div>
+<canvas id="stars"></canvas>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div>
+        <h1>五指山 12345・悟空財神殿</h1>
+        <div class="sub">V7 營運版｜Heart 入口 / 發財金 / 心跳 / 點火 / 許願 / 留影 / 客服<br>交易主系統保留給花果山悟空交易所 11520。</div>
+      </div>
+    </div>
+    <div class="pill mono" id="clock">--</div>
   </div>
-  <div class="monitor-data">
-    <div class="data-box"><div class="k">市場方向</div><div class="v" id="top-zone">多</div></div>
-    <div class="data-box"><div class="k">槓桿動能</div><div class="v" id="top-lev">0.0x</div></div>
+
+  <div class="panel entry">
+    <div class="entry-head">
+      <div>
+        <div class="h2">神殿入口</div>
+        <div class="help">先選你現在要做的事。這版把 12345 做成真正可用的入口，不再把所有工程面板一次塞滿。</div>
+      </div>
+      <div class="status">
+        <div class="status-card"><div class="k">心跳</div><div class="v" id="st-heartbeat">可領</div></div>
+        <div class="status-card"><div class="k">點火</div><div class="v" id="st-ignite">倒數中</div></div>
+        <div class="status-card"><div class="k">發財金</div><div class="v" id="st-fortune">未解鎖</div></div>
+        <div class="status-card"><div class="k">錢包</div><div class="v" id="st-wallet">未連線</div></div>
+      </div>
+    </div>
+    <div class="entry-buttons">
+      <button class="bigbtn active" data-target="section-entry"><div class="icon">🔥</div><div class="t">進入神殿</div><div class="d">連錢包、貼 Heart、看狀態。</div></button>
+      <button class="bigbtn" data-target="section-fortune"><div class="icon">💰</div><div class="t">領發財金</div><div class="d">先過三次聖盃，再進 fortuneClaim。</div></button>
+      <button class="bigbtn" data-target="section-wish"><div class="icon">🙏</div><div class="t">許願 / 還願</div><div class="d">保存願望、hash、還願、點燈。</div></button>
+      <button class="bigbtn" data-target="section-media"><div class="icon">📸</div><div class="t">留影 / 客服</div><div class="d">拍照、下載與客服教學。</div></button>
+    </div>
+  </div>
+
+  <div class="section active" id="section-entry">
+    <div class="panel" style="padding:14px">
+      <div class="h2">神殿進場狀態</div>
+      <div class="grid2">
+        <div class="field"><label>Heart 合約地址</label><input id="heartAddr" class="mono" placeholder="0x..."></div>
+        <div class="field"><label>KGEN Token</label><input id="tokenAddr" class="mono" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnConnect">連接錢包</button>
+        <button class="btn ghost" id="btnSave">保存地址</button>
+        <button class="btn ghost" id="btnInspect">監工檢查</button>
+        <button class="btn danger" id="btnClear">清空本機</button>
+      </div>
+      <div class="sep"></div>
+      <div class="grid2">
+        <div class="kv"><div class="k">錢包狀態</div><div class="v" id="walletState">未連線</div></div>
+        <div class="kv"><div class="k">鏈</div><div class="v" id="chainState">未偵測</div></div>
+        <div class="kv"><div class="k">Heart</div><div class="v" id="heartState">未貼地址</div></div>
+        <div class="kv"><div class="k">Temple 狀態</div><div class="v" id="templeState">可上線測</div></div>
+      </div>
+      <div class="help" id="inspectOut" style="margin-top:10px">監工提示會顯示在這裡。</div>
+    </div>
+
+    <div class="panel" style="padding:14px">
+      <div class="h2">神殿狀態條</div>
+      <div class="kv"><div class="k">心跳倒數</div><div class="v mono" id="hbCountdown">00:00:00</div></div>
+      <div class="kv"><div class="k">點火倒數（UTC 00:00–00:10）</div><div class="v mono" id="igCountdown">00:00:00</div></div>
+      <div class="kv"><div class="k">發財金門檻</div><div class="v" id="fortuneGate">三次聖盃未完成</div></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnHeartbeat">領心跳</button>
+        <button class="btn" id="btnIgnite">轉日點火</button>
+      </div>
+      <div class="help" style="margin-top:10px">這裡只做神殿儀式入口，不放完整交易 UI。交易主戰場是 11520。</div>
+    </div>
+  </div>
+
+  <div class="section" id="section-fortune">
+    <div class="panel" style="padding:14px">
+      <div class="h2">三次聖盃 → 解鎖發財金</div>
+      <div class="kv"><div class="k">聖盃進度</div><div class="v" id="cupProg">0 / 3</div></div>
+      <div class="kv"><div class="k">本次結果</div><div class="v" id="cupLast">--</div></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnCup">搏杯一次</button>
+        <button class="btn ghost" id="btnCupReset">重置聖盃</button>
+      </div>
+      <div class="sep"></div>
+      <div class="field">
+        <label>發財金金額（1–888）</label>
+        <input id="fortuneAmt" type="number" min="1" max="888" value="8">
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnFortune" disabled>領發財金</button>
+        <button class="btn ghost" id="btnFortuneCheck">查冷卻 / 名額</button>
+      </div>
+      <div class="help" id="fortuneOut" style="margin-top:10px">先完成三次聖盃。</div>
+    </div>
+
+    <div class="panel" style="padding:14px">
+      <div class="h2">發財金流程說明</div>
+      <div class="help">1. 先連錢包。<br>2. 貼 Heart 地址。<br>3. 完成三次聖盃。<br>4. 輸入 1–888 KGEN。<br>5. 按下「領發財金」。</div>
+      <div class="sep"></div>
+      <div class="kv"><div class="k">目前狀態</div><div class="v" id="fortuneState">未解鎖</div></div>
+      <div class="kv"><div class="k">下一步</div><div class="v" id="fortuneNext">先搏杯</div></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-wish">
+    <div class="panel" style="padding:14px">
+      <div class="h2">許願 / 留言</div>
+      <div class="field"><label>許願內容</label><textarea id="wishText" placeholder="寫下你的願望…"></textarea></div>
+      <div class="field" style="margin-top:10px"><label>留言</label><textarea id="noteText" placeholder="留下一句話…"></textarea></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnSaveWish">保存願望</button>
+        <button class="btn ghost" id="btnWishHash">產生 hash</button>
+        <button class="btn ghost" id="btnClearNote">清空留言</button>
+      </div>
+      <div class="help" id="wishOut" style="margin-top:10px">願望與留言會保存到本機，也可產生 hash。</div>
+    </div>
+
+    <div class="panel" style="padding:14px">
+      <div class="h2">還願 / 點燈</div>
+      <div class="grid2">
+        <div class="field"><label>還願金額（KGEN）</label><input id="vowAmt" type="number" min="1" value="8"></div>
+        <div class="field"><label>點燈天數</label><input id="lampDays" type="number" min="1" value="7"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnApprove">先 Approve</button>
+        <button class="btn" id="btnVow">還願</button>
+        <button class="btn" id="btnLamp">點燈</button>
+      </div>
+      <div class="help" id="vowOut" style="margin-top:10px">這裡做的是神殿補血，不是交易下單。</div>
+    </div>
+  </div>
+
+  <div class="section" id="section-media">
+    <div class="panel" style="padding:14px">
+      <div class="h2">留影</div>
+      <div class="media">
+        <div>
+          <video id="cam" autoplay playsinline muted></video>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnCamOn">開啟相機</button>
+            <button class="btn ghost" id="btnCamOff">關閉相機</button>
+          </div>
+        </div>
+        <div>
+          <canvas id="shotCanvas" width="1280" height="720"></canvas>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnShot">拍照</button>
+            <button class="btn ghost" id="btnDlPhoto" disabled>下載照片</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:14px">
+      <div class="h2">AI 客服</div>
+      <div class="field"><label>快速問題</label>
+        <select id="faq">
+          <option value="">選一個問題…</option>
+          <option value="wallet">我沒有錢包怎麼辦？</option>
+          <option value="connect">怎麼連接錢包？</option>
+          <option value="fortune">怎麼領發財金？</option>
+          <option value="approve">為什麼要先 approve？</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnAsk">仙女解說</button>
+        <button class="btn ghost" id="btnSpeak">語音唸出來</button>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>客服對話</label>
+        <textarea id="chatBox" class="chatbox" placeholder="客服會一步一步教你…"></textarea>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost" id="btnCopyChat">複製</button>
+        <button class="btn ghost" id="btnClearChat">清空</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="warp-engine">
-  <div class="warp-rail" id="warp-rail-body">
-    <div id="energy-fill"></div>
-    <div id="warp-thumb"></div>
-    <div class="rail-step" style="bottom:0%"></div><div class="rail-step" style="bottom:10%"></div>
-    <div class="rail-step" style="bottom:20%"></div><div class="rail-step" style="bottom:30%"></div>
-    <div class="rail-step" style="bottom:40%"></div><div class="rail-step" style="bottom:50%"></div>
-    <div class="rail-step" style="bottom:60%"></div><div class="rail-step" style="bottom:70%"></div>
-    <div class="rail-step" style="bottom:80%"></div><div class="rail-step" style="bottom:90%"></div>
-  </div>
-  <div class="warp-val-text" id="warp-txt">WARP 0.0x</div>
+<div class="footerbar">
+  <div class="footerbtn" id="footTemple">🏯 神殿入口</div>
+  <div class="footerbtn" id="footState">💰 發財金</div>
+  <div class="footerbtn" id="footWish">🙏 許願</div>
+  <div class="footerbtn" id="footHelp">📸 留影 / 客服</div>
 </div>
 
-<div class="ga-matrix">
-  <div class="ga-title">GA EVOLUTION</div>
-  <div class="ga-stat">FITNESS: <span id="f-val">0.920</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
-  <div class="ga-stat">MUTATION: <span id="m-val">0.010</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
-  <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
-  <div style="color:var(--energy);font-size:12px;margin-top:10px" id="ga-rank">RANK: GA-600</div>
-</div>
-
-<div id="kline-engine-panel">
-  <div class="ke-head"><span>宇宙K線引擎</span><span class="sys-st">真市場</span></div>
-  <div class="ke-grid">
-    <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
-    <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value" id="ke-angle">0°</div></div>
-    <div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
-    <div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
-  </div>
-  <div class="ke-live-row"><span class="sys-st">CT / 1m</span><span class="ke-live-price" id="ke-live-price">0.00</span></div>
-</div>
-
-<div id="kline-chart-panel">
-  <div class="kc-head"><span>宇宙K線圖</span><span id="kc-predict">預測：開</span></div>
-  <canvas id="kline-canvas" width="260" height="92"></canvas>
-</div>
-
-<div id="core-anchor">
-  <div id="core-window">
-    <canvas id="core-canvas" width="380" height="380"></canvas>
-    <div id="wish-label">CT × Angle × Leverage</div>
-  </div>
-</div>
-
-<div id="coord-panel">
-  <div class="cp-title"><span>駕駛艙｜座標 / CT</span><span id="cp-side">方向：多</span></div>
-  <div class="cp-grid">
-    <div class="cp-row"><div class="cp-k">X（左右）</div><div class="cp-v" id="cp-x">0.0</div></div>
-    <div class="cp-row"><div class="cp-k">CT（Y 現價）</div><div class="cp-v" id="cp-ct">0.0</div></div>
-    <div class="cp-row"><div class="cp-k">Angle</div><div class="cp-v" id="cp-deg">0°</div></div>
-    <div class="cp-row"><div class="cp-k">地形</div><div class="cp-v" id="cp-terrain">草原</div></div>
-    <div class="cp-row"><div class="cp-k">Leverage</div><div class="cp-v" id="cp-lev">0.0x</div></div>
-    <div class="cp-row"><div class="cp-k">Time</div><div class="cp-v" id="cp-time">T+0</div></div>
-  </div>
-</div>
-
-<div class="chain-live-panel" id="chain-live-panel">
-  <div class="cl-head"><span>CHAIN LIVE</span><button class="bp-btn" onclick="toggleChainLive()">關</button></div>
-  <div class="cl-grid">
-    <div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">8888.0</div></div>
-    <div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">Round #1</div></div>
-  </div>
-</div>
-
-<div class="bet-live-panel" id="bet-live-panel">
-  <div class="bp-head"><span>BET PANEL</span><button class="bp-btn" onclick="toggleBetPanel()">關</button></div>
-  <div class="bp-kv">
-    <div class="bp-k">模擬錢包</div><div class="bp-v">DEMO</div>
-    <div class="bp-k">獎池</div><div class="bp-v" id="bp-pool">8888.0</div>
-  </div>
-  <input id="bet-amt-input" class="bp-input" type="text" inputmode="decimal" placeholder="輸入 KGEN 金額">
-  <div class="bp-grid">
-    <button class="bp-btn approve" onclick="approveMock()">APPROVE</button>
-    <button class="bp-btn buy" onclick="placeMock('UP')">BUY ↑</button>
-    <button class="bp-btn sell" onclick="placeMock('DOWN')">SELL ↓</button>
-    <button class="bp-btn" onclick="togglePredict()">預測開關</button>
-  </div>
-  <div class="bp-status" id="bp-status">待命中</div>
-</div>
-
-<div class="footer-terminal">
-  <button class="term-btn" onclick="captureMock()">📸 拍照存證</button>
-  <button class="term-btn" onclick="toggleChainLive()">🛰️ Chain Live</button>
-  <button class="term-btn" onclick="toggleBetPanel()">📈 下單面板</button>
-  <button class="term-btn active-kgen" onclick="boost()">💎 KGEN 沖等演化</button>
-  <button class="term-btn active-kgen" onclick="autoHunt()">⚔️ 自動巡航打怪</button>
-  <button class="term-btn" onclick="switchTerrain()">👤 切換地形</button>
-  <button class="term-btn" onclick="spawnBoss()">🎡 召喚 Boss</button>
-  <button class="term-btn" onclick="setWish()">🧭 改核心標語</button>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-const S = {x:0,ct:0,yaw:0,lev:0,t:0,hp:100,energy:100,terrain:'草原',ga:600,auto:false,predict:true,monsters:[],candles:[]};
-for(let i=0;i<120;i++) S.candles.push({o:0,c:0,h:0,l:0,p:0,v:1});
-const world = document.getElementById('world'); const wctx = world.getContext('2d');
-const core = document.getElementById('core-canvas'); const cctx = core.getContext('2d');
-const kline = document.getElementById('kline-canvas'); const kctx = kline.getContext('2d');
-function fit(){ world.width = innerWidth; world.height = innerHeight; } addEventListener('resize', fit); fit();
-function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),1200);}
-function signedDeg(){ let d=(S.yaw*180/Math.PI)%360; if(d>180)d-=360; if(d<-180)d+=360; return d; }
-function zone(){ return Math.abs(signedDeg())<=90?'多':'空'; }
-function direction(){ return zone()==='多'?1:-1; }
-function setWarp(v){
-  S.lev = Math.max(0, Math.min(150, v));
-  const pct = (S.lev/150)*100;
-  document.getElementById('energy-fill').style.height = pct + '%';
-  document.getElementById('warp-thumb').style.bottom = `calc(${pct}% - 14px)`;
-  document.getElementById('warp-txt').textContent = `WARP ${S.lev.toFixed(1)}x`;
-  document.getElementById('top-lev').textContent = `${S.lev.toFixed(1)}x`;
+const $ = id => document.getElementById(id);
+const LS = {get:(k,d='')=>{try{return localStorage.getItem(k)??d}catch(_){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}},del:(k)=>{try{localStorage.removeItem(k)}catch(_){}}};
+const toast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),1800); };
+
+(function stars(){
+  const c=$('stars'),ctx=c.getContext('2d'); let w,h,arr=[];
+  function rs(){ w=c.width=innerWidth*devicePixelRatio; h=c.height=innerHeight*devicePixelRatio; arr=Array.from({length:160},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.6+0.2,a:Math.random()*0.8+0.2,v:Math.random()*0.15+0.03}))}
+  addEventListener('resize',rs,{passive:true}); rs();
+  (function loop(){ ctx.clearRect(0,0,w,h); for(const s of arr){ s.y+=s.v; if(s.y>h) s.y=-5; ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(loop) })();
+})();
+
+function nowFmt(){ const d=new Date(),p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
+setInterval(()=>$('clock').textContent=nowFmt(), 500); $('clock').textContent=nowFmt();
+
+const sections=[...document.querySelectorAll('.section')], entryBtns=[...document.querySelectorAll('.bigbtn')];
+entryBtns.forEach(btn=>btn.onclick=()=>{ entryBtns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sections.forEach(s=>s.classList.remove('active')); $(btn.dataset.target).classList.add('active'); });
+function go(id){ document.querySelector(`[data-target="${id}"]`).click(); }
+$('footTemple').onclick=()=>go('section-entry');
+$('footState').onclick=()=>go('section-fortune');
+$('footWish').onclick=()=>go('section-wish');
+$('footHelp').onclick=()=>go('section-media');
+
+function updateStatusBar(){
+  $('st-heartbeat').textContent = $('hbCountdown').textContent === '00:00:00' ? '可領' : $('hbCountdown').textContent;
+  $('st-ignite').textContent = $('igCountdown').textContent === '00:00:00' ? '視窗中' : $('igCountdown').textContent;
+  $('st-fortune').textContent = $('btnFortune').disabled ? '未解鎖' : '可領';
 }
-function switchTerrain(){ const arr=['草原','森林','湖泊','山地']; S.terrain=arr[(arr.indexOf(S.terrain)+1)%arr.length]; toast('地形切換到 '+S.terrain); }
-function togglePredict(){ S.predict=!S.predict; document.getElementById('kc-predict').textContent='預測：'+(S.predict?'開':'關'); }
-function toggleChainLive(){ const p=document.getElementById('chain-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
-function toggleBetPanel(){ const p=document.getElementById('bet-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
-function approveMock(){ document.getElementById('bp-status').textContent='Approve 完成（模擬）'; }
-function placeMock(side){ document.getElementById('bp-status').textContent=`${side} 完成（模擬）`; }
-function captureMock(){ toast('拍照存證（模擬）'); }
-function setWish(){ const v=prompt('輸入核心標語', document.getElementById('wish-label').textContent); if(v) document.getElementById('wish-label').textContent=v; }
-function boost(){ S.ga=Math.min(1000,S.ga+50); document.getElementById('ga-rank').textContent='RANK: GA-'+S.ga; }
-function autoHunt(){ S.auto=!S.auto; toast('自動巡航 '+(S.auto?'開':'關')); }
-function spawnMonster(type='normal'){ const a=Math.random()*Math.PI*2,d=150+Math.random()*180; S.monsters.push({x:S.x+Math.cos(a)*d,y:S.ct+Math.sin(a)*d,hp:type==='boss'?24:6,maxHp:type==='boss'?24:6,speed:type==='boss'?0.35:0.72,kind:type}); }
-function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
-for(let i=0;i<6;i++) spawnMonster();
-function worldToCamera(wx, wy){ const dx=wx-S.x, dy=wy-S.ct, c=Math.cos(-S.yaw), s=Math.sin(-S.yaw); return {x:dx*c-dy*s,y:dx*s+dy*c}; }
-function cameraToScreen(cx, baseY, cam){ return [cx + cam.x, baseY + cam.y*0.56]; }
-function updateModel(){
-  const drift = direction()*(S.lev/150)*0.28;
-  S.ct += drift + (Math.random()-.5)*0.05;
-  S.t++;
-  const last=S.candles[S.candles.length-1].c, close=last+drift+(Math.random()-.5)*0.65, open=last, high=Math.max(open,close)+Math.random()*0.7, low=Math.min(open,close)-Math.random()*0.7, pred=close+direction()*(S.lev/150)*0.45+(Math.random()-.5)*0.2;
-  S.candles.push({o:open,c:close,h:high,l:low,p:pred,v:Math.random()*4+1}); if(S.candles.length>120) S.candles.shift();
+function pad2(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0')}
+function fmt(sec){ sec=Math.max(0,Math.floor(sec)); const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60; return `${pad2(h)}:${pad2(m)}:${pad2(s)}`; }
+function tickCountdowns(){
+  const now=new Date();
+  const toTop=(59-now.getMinutes())*60+(60-now.getSeconds());
+  $('hbCountdown').textContent = (now.getMinutes()===0&&now.getSeconds()===0)?'00:00:00':fmt(toTop);
+  const utcH=now.getUTCHours(), utcM=now.getUTCMinutes();
+  let ignite=0;
+  if(utcH===0 && utcM<10) ignite=0;
+  else{
+    const t=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+(utcH===0&&utcM<10?0:1),0,0,0);
+    ignite = Math.max(0, Math.floor((t-now.getTime())/1000));
+  }
+  $('igCountdown').textContent = ignite===0?'00:00:00':fmt(ignite);
+  updateStatusBar();
 }
-function drawWorld(){
-  const cw=world.width, ch=world.height, cx=cw/2, baseY=ch*0.72;
-  wctx.clearRect(0,0,cw,ch);
-  const grad=wctx.createLinearGradient(0,0,0,ch); grad.addColorStop(0, zone()==='多'?'#0b1832':'#2a0f18'); grad.addColorStop(.55, zone()==='多'?'#193056':'#53202c'); grad.addColorStop(1,'#0a0f16'); wctx.fillStyle=grad; wctx.fillRect(0,0,cw,ch);
-  wctx.strokeStyle='rgba(255,255,255,.08)';
-  for(let gy=-700; gy<=700; gy+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy)), p2=cameraToScreen(cx,baseY,worldToCamera(900,gy)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
-  for(let gx=-900; gx<=900; gx+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900)), p2=cameraToScreen(cx,baseY,worldToCamera(gx,900)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
-  wctx.fillStyle='#86ff7a'; wctx.beginPath(); wctx.arc(cx,baseY,12,0,Math.PI*2); wctx.fill();
-  wctx.strokeStyle='rgba(255,255,255,.65)'; wctx.beginPath(); wctx.moveTo(cx,baseY); wctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); wctx.stroke();
-  S.monsters.forEach(m=>{ const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(m.x,m.y)); const r=m.kind==='boss'?18:10; wctx.fillStyle=m.kind==='boss'?'#ffb36b':'#ff4d4d'; wctx.beginPath(); wctx.arc(sx,sy,r,0,Math.PI*2); wctx.fill(); });
+tickCountdowns(); setInterval(tickCountdowns,1000);
+
+$('heartAddr').value = LS.get('temple_heart',''); $('wishText').value = LS.get('temple_wish',''); $('noteText').value = LS.get('temple_note',''); $('chatBox').value = LS.get('temple_chat','');
+$('btnSave').onclick=()=>{ LS.set('temple_heart',$('heartAddr').value.trim()); $('heartState').textContent=$('heartAddr').value.trim()?'已保存':'未貼地址'; toast('已保存地址'); };
+$('btnClear').onclick=()=>{ ['temple_heart','temple_wish','temple_note','temple_chat','temple_cup'].forEach(LS.del); location.reload(); };
+$('btnConnect').onclick=()=>{ $('walletState').textContent='DEMO 已連線'; $('st-wallet').textContent='DEMO'; $('chainState').textContent='BSC 56'; toast('示意版：錢包已連線'); };
+$('btnInspect').onclick=()=>{ $('inspectOut').textContent = `Heart：${$('heartAddr').value.trim() || '未貼'} ｜ Wallet：${$('walletState').textContent} ｜ Chain：${$('chainState').textContent}`; };
+$('btnHeartbeat').onclick=()=>toast('心跳流程已觸發（示意）');
+$('btnIgnite').onclick=()=>toast('點火流程已觸發（示意）');
+
+let cup = parseInt(LS.get('temple_cup','0'),10)||0;
+function syncCup(){
+  $('cupProg').textContent = `${cup} / 3`;
+  $('fortuneGate').textContent = cup>=3 ? '三次聖盃完成' : '先完成三次聖盃';
+  $('btnFortune').disabled = cup<3;
+  $('fortuneState').textContent = cup>=3 ? '已解鎖' : '未解鎖';
+  $('fortuneNext').textContent = cup>=3 ? '可直接領取' : '先搏杯';
+  updateStatusBar();
 }
-function drawCore(){
-  const w=core.width,h=core.height,cx=w/2,cy=h/2; cctx.clearRect(0,0,w,h);
-  const rg=cctx.createRadialGradient(cx,cy,18,cx,cy,150); rg.addColorStop(0, zone()==='多'?'rgba(90,180,255,.30)':'rgba(255,90,90,.30)'); rg.addColorStop(1,'rgba(0,0,0,0)');
-  cctx.fillStyle=rg; cctx.beginPath(); cctx.arc(cx,cy,150,0,Math.PI*2); cctx.fill();
-  const baseR=118;
-  S.candles.forEach((k,i)=>{ const t=i/S.candles.length*Math.PI*2+S.yaw, rr=baseR+k.v*1.1, x=cx+Math.cos(t)*rr, y=cy+Math.sin(t)*rr*0.84; cctx.strokeStyle=k.c>=k.o?'#86ff7a':'#ff7575'; cctx.beginPath(); cctx.moveTo(x,y); cctx.lineTo(x,y-(k.c-k.o)*1.8); cctx.stroke(); if(S.predict){ cctx.strokeStyle='rgba(121,215,255,.95)'; cctx.beginPath(); cctx.moveTo(x+1.1,y); cctx.lineTo(x+1.1,y-(k.p-k.o)*1.8); cctx.stroke(); } });
-  cctx.strokeStyle='rgba(242,213,122,.35)'; for(let i=0;i<3;i++){ cctx.beginPath(); cctx.ellipse(cx,cy,72+i*20,52+i*14,S.yaw*0.55+i*.25,0,Math.PI*2); cctx.stroke(); }
-  cctx.beginPath(); cctx.arc(cx,cy,18,0,Math.PI*2); cctx.fillStyle='rgba(242,213,122,.86)'; cctx.fill();
+$('btnCup').onclick=()=>{ const ok=Math.random()<0.5; $('cupLast').textContent = ok?'聖盃':'笑杯'; cup = ok ? Math.min(3,cup+1) : 0; LS.set('temple_cup', String(cup)); syncCup(); toast(ok?'聖盃成功':'笑杯，重來'); };
+$('btnCupReset').onclick=()=>{ cup=0; LS.set('temple_cup','0'); $('cupLast').textContent='--'; syncCup(); toast('已重置聖盃'); };
+$('btnFortune').onclick=()=>{ $('fortuneOut').textContent=`已送出發財金申請（示意）｜${$('fortuneAmt').value} KGEN`; toast('發財金流程已觸發'); };
+$('btnFortuneCheck').onclick=()=>{ $('fortuneOut').textContent='冷卻：30 days｜本期名額：500｜你目前可領'; };
+syncCup();
+
+$('btnSaveWish').onclick=()=>{ LS.set('temple_wish',$('wishText').value); LS.set('temple_note',$('noteText').value); toast('已保存願望與留言'); };
+$('btnWishHash').onclick=async()=>{ const txt=$('wishText').value.trim(); if(!txt) return toast('請先輸入願望'); const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); const hex='0x'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''); $('wishOut').textContent='wishHash = '+hex; toast('已產生 hash'); };
+$('btnClearNote').onclick=()=>{ $('noteText').value=''; LS.set('temple_note',''); toast('已清空留言'); };
+$('btnApprove').onclick=()=>{ $('vowOut').textContent='Approve 完成（示意）'; toast('Approve 完成'); };
+$('btnVow').onclick=()=>{ $('vowOut').textContent=`還願完成（示意）｜${$('vowAmt').value} KGEN`; toast('已還願'); };
+$('btnLamp').onclick=()=>{ $('vowOut').textContent=`點燈完成（示意）｜${$('lampDays').value} 天`; toast('已點燈'); };
+
+let camStream=null, photoBlob=null;
+const cam=$('cam'), cvs=$('shotCanvas'), cctx=cvs.getContext('2d');
+function drawWatermark(){ const txt = `五指山 12345・悟空財神殿｜${new Date().toLocaleString()}`; cctx.fillStyle='rgba(0,0,0,.45)'; cctx.fillRect(0,cvs.height-80,cvs.width,80); cctx.fillStyle='#ffd778'; cctx.font='bold 30px sans-serif'; cctx.fillText(txt, 24, cvs.height-30); }
+$('btnCamOn').onclick=async()=>{ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}); cam.srcObject=camStream; toast('相機已開啟'); }catch(e){ toast('相機不可用'); } };
+$('btnCamOff').onclick=()=>{ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; cam.srcObject=null; } toast('相機已關閉'); };
+$('btnShot').onclick=()=>{ if(!camStream || !cam.videoWidth) return toast('請先開啟相機'); cvs.width=cam.videoWidth; cvs.height=cam.videoHeight; cctx.drawImage(cam,0,0,cvs.width,cvs.height); drawWatermark(); cvs.toBlob(b=>{ photoBlob=b; $('btnDlPhoto').disabled=!b; toast('拍照完成'); },'image/png',0.95); };
+$('btnDlPhoto').onclick=()=>{ if(!photoBlob) return toast('尚未拍照'); const u=URL.createObjectURL(photoBlob); const a=document.createElement('a'); a.href=u; a.download=`TEMPLE_12345_${Date.now()}.png`; a.click(); setTimeout(()=>URL.revokeObjectURL(u),10000); };
+
+function answerFAQ(k){
+  if(k==='wallet') return '請先安裝 MetaMask 或 Trust Wallet，建立錢包後回到神殿按「連接錢包」。';
+  if(k==='connect') return '按「連接錢包」，若跳出視窗就按確認；鏈請切到 BSC。';
+  if(k==='fortune') return '流程：連錢包 → 貼 Heart → 完成三次聖盃 → 領發財金。';
+  if(k==='approve') return '還願與點燈會轉 KGEN，所以要先 approve。';
+  return '請先選一個問題。';
 }
-function drawKlinePanel(){
-  kctx.clearRect(0,0,kline.width,kline.height);
-  const data=S.candles.slice(-22), highs=data.map(d=>d.h), lows=data.map(d=>d.l), max=Math.max(...highs), min=Math.min(...lows), range=Math.max(.0001,max-min);
-  data.forEach((d,i)=>{ const x=8+i*11, yo=78-((d.o-min)/range)*60, yc=78-((d.c-min)/range)*60, yh=78-((d.h-min)/range)*60, yl=78-((d.l-min)/range)*60; kctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.beginPath(); kctx.moveTo(x+4,yh); kctx.lineTo(x+4,yl); kctx.stroke(); kctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.fillRect(x,Math.min(yo,yc),8,Math.max(2,Math.abs(yc-yo))); });
-}
-function updatePanels(){
-  const last=S.candles[S.candles.length-1];
-  document.getElementById('sys-clock').textContent='SYSTEM ONLINE | '+new Date().toLocaleString();
-  document.getElementById('top-zone').textContent=zone();
-  document.getElementById('ke-side').textContent=zone();
-  document.getElementById('ke-angle').textContent=signedDeg().toFixed(1)+'°';
-  document.getElementById('ke-open').textContent=last.o.toFixed(2);
-  document.getElementById('ke-high').textContent=last.h.toFixed(2);
-  document.getElementById('ke-low').textContent=last.l.toFixed(2);
-  document.getElementById('ke-close').textContent=last.c.toFixed(2);
-  document.getElementById('ke-live-price').textContent=S.ct.toFixed(2);
-  document.getElementById('cp-side').textContent='方向：'+zone();
-  document.getElementById('cp-x').textContent=S.x.toFixed(1);
-  document.getElementById('cp-ct').textContent=S.ct.toFixed(2);
-  document.getElementById('cp-deg').textContent=signedDeg().toFixed(1)+'°';
-  document.getElementById('cp-terrain').textContent=S.terrain;
-  document.getElementById('cp-lev').textContent=S.lev.toFixed(1)+'x';
-  document.getElementById('cp-time').textContent='T+'+S.t;
-  document.getElementById('f-bar').style.width=(40+(S.lev/150)*60)+'%';
-  document.getElementById('m-bar').style.width=(15+Math.abs(signedDeg())/180*80)+'%';
-}
-function loop(){ updateModel(); drawWorld(); drawCore(); drawKlinePanel(); updatePanels(); requestAnimationFrame(loop); }
-loop();
-(function(){ const rail=document.getElementById('warp-rail-body'); function setFromY(clientY){ const r=rail.getBoundingClientRect(); let y=clientY-r.top; y=Math.max(14,Math.min(r.height-14,y)); const v=1-((y-14)/(r.height-28)); setWarp(v*150); } rail.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromY(e.clientY); }); rail.addEventListener('pointermove',e=>{ if(e.buttons) setFromY(e.clientY); });})();
-(function(){ const wheel=document.getElementById('core-window'); function setFromX(x){ const r=wheel.getBoundingClientRect(), center=r.left+r.width/2; const dx=x-center; const deg=Math.max(-180,Math.min(180,(dx/(r.width/2))*180)); S.yaw=deg*Math.PI/180; document.getElementById('core-window').style.transform=`rotate(${deg}deg)`; } wheel.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromX(e.clientX); }); wheel.addEventListener('pointermove',e=>{ if(e.buttons) setFromX(e.clientX); });})();
+$('btnAsk').onclick=()=>{ const ans=answerFAQ($('faq').value); $('chatBox').value += ($('chatBox').value.trim()?'\n\n':'') + '客服：' + ans; LS.set('temple_chat',$('chatBox').value); toast('已輸出客服解說'); };
+$('btnSpeak').onclick=()=>{ const txt=$('chatBox').value.trim(); if(!txt) return toast('沒有內容可唸'); try{ const u=new SpeechSynthesisUtterance(txt.slice(-300)); u.lang='zh-TW'; speechSynthesis.speak(u); }catch(e){ toast('語音不可用'); } };
+$('btnCopyChat').onclick=async()=>{ try{ await navigator.clipboard.writeText($('chatBox').value); toast('已複製'); }catch(e){ toast('複製失敗'); } };
+$('btnClearChat').onclick=()=>{ $('chatBox').value=''; LS.set('temple_chat',''); toast('已清空客服'); };
 </script>
 </body>
 </html>
