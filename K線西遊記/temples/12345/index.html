@@ -3,69 +3,141 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V11.5 角度多空＋K線核心版</title>
+<title>KLINE V12 核心穩定版</title>
 <style>
-:root{--bg:#03050b;--panel:rgba(0,0,0,.62);--line:rgba(255,255,255,.14);--gold:#f2d57a;}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:Arial,sans-serif;touch-action:none}
+:root{
+  --bg:#04060d;
+  --panel:rgba(0,0,0,.62);
+  --line:rgba(255,255,255,.14);
+  --gold:#f2d57a;
+  --cyan:#79d7ff;
+  --green:#86ff7a;
+  --red:#ff7575;
+}
+html,body{
+  margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;
+  font-family:Arial,sans-serif;touch-action:none
+}
 canvas{position:fixed;inset:0}
-.version,.coord,.hud{position:fixed;z-index:90;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6}
+.version,.coord,.hud{
+  position:fixed;z-index:90;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6;backdrop-filter:blur(8px)
+}
 .version{top:10px;left:10px}
 .coord{top:50px;left:10px}
-.hud{top:10px;right:10px;min-width:210px}
-.core-shell{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);width:min(44vw,240px);height:min(44vw,240px);z-index:70;pointer-events:none}
-.core-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(242,213,122,.75);box-shadow:0 0 0 3px rgba(242,213,122,.08),0 0 32px rgba(242,213,122,.22);overflow:hidden}
-.core-glow{position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(242,213,122,.18);animation:aura 4s ease-out infinite}
-.core-label{position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);white-space:nowrap;background:rgba(0,0,0,.46);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px}
-.controls{position:fixed;left:0;right:0;bottom:88px;height:186px;z-index:120;pointer-events:none}
+.hud{top:10px;right:10px;min-width:220px}
+.core-shell{
+  position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);
+  width:min(44vw,260px);height:min(44vw,260px);z-index:80;pointer-events:none
+}
+.core-ring{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  border:2px solid rgba(242,213,122,.78);
+  box-shadow:0 0 0 3px rgba(242,213,122,.08),0 0 34px rgba(242,213,122,.22)
+}
+.core-glow{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px solid rgba(242,213,122,.16);animation:aura 4s ease-out infinite
+}
+.core-label{
+  position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);
+  white-space:nowrap;background:rgba(0,0,0,.48);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:11px
+}
+.controls{
+  position:fixed;left:0;right:0;bottom:88px;height:186px;z-index:120;pointer-events:none
+}
 .joy,.yaw,.alt{pointer-events:auto}
-.joy{position:absolute;left:18px;bottom:6px;width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
-.joy:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
-.joy-inner{position:absolute;left:42px;top:42px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
-.joy-label,.yaw-label,.alt-top,.alt-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px}
+.joy{
+  position:absolute;left:18px;bottom:6px;width:128px;height:128px;border-radius:50%;
+  background:rgba(255,255,255,.07);border:1px solid var(--line)
+}
+.joy:before{
+  content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.10)
+}
+.joy-inner{
+  position:absolute;left:42px;top:42px;width:44px;height:44px;border-radius:50%;background:var(--gold)
+}
+.joy-label,.yaw-label,.alt-top,.alt-bottom{
+  position:absolute;left:50%;transform:translateX(-50%);font-size:11px
+}
 .joy-label{top:-18px}
-.yaw{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;width:min(52vw,360px);height:68px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px}
-.yaw-track{position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)}
-.yaw-fill{position:absolute;left:50%;top:29px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(113,216,255,.2),rgba(113,216,255,.9));width:0}
-.yaw-inner{position:absolute;left:calc(50% - 24px);top:10px;width:48px;height:48px;border-radius:50%;background:var(--gold)}
+.yaw{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:20px;
+  width:min(52vw,360px);height:68px;background:rgba(255,255,255,.07);
+  border:1px solid var(--line);border-radius:999px
+}
+.yaw-track{
+  position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)
+}
+.yaw-fill{
+  position:absolute;left:50%;top:29px;height:10px;border-radius:999px;
+  background:linear-gradient(90deg,rgba(121,215,255,.20),rgba(121,215,255,.96));width:0
+}
+.yaw-inner{
+  position:absolute;left:calc(50% - 24px);top:10px;width:48px;height:48px;border-radius:50%;background:var(--gold)
+}
 .yaw-label{top:-18px}
-.alt{position:absolute;right:18px;bottom:0;width:60px;height:176px;border-radius:30px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
-.alt-track{position:absolute;left:25px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
-.alt-inner{position:absolute;left:8px;top:66px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
+.alt{
+  position:absolute;right:18px;bottom:0;width:60px;height:176px;border-radius:30px;
+  background:rgba(255,255,255,.07);border:1px solid var(--line)
+}
+.alt-track{
+  position:absolute;left:25px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)
+}
+.alt-inner{
+  position:absolute;left:8px;top:66px;width:44px;height:44px;border-radius:50%;background:var(--gold)
+}
 .alt-top{top:-18px}.alt-bottom{bottom:-18px}
-.actions{position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px;z-index:130}
-.btn{background:rgba(0,0,0,.62);border:1px solid var(--line);border-radius:12px;padding:10px 8px;font-size:12px;text-align:center}
-.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px;display:none;z-index:200}
-@keyframes aura{0%{transform:scale(.88);opacity:.55}80%{transform:scale(1.2);opacity:0}100%{opacity:0}}
-@media (max-width:820px){.actions{grid-template-columns:repeat(4,1fr)} .core-shell{width:min(56vw,220px);height:min(56vw,220px)}}
+.actions{
+  position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px;z-index:130
+}
+.btn{
+  background:rgba(0,0,0,.62);border:1px solid var(--line);border-radius:12px;padding:10px 8px;font-size:12px;text-align:center
+}
+.toast{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;
+  padding:12px 16px;display:none;z-index:200
+}
+@keyframes aura{
+  0%{transform:scale(.88);opacity:.55}
+  80%{transform:scale(1.2);opacity:0}
+  100%{opacity:0}
+}
+@media (max-width:820px){
+  .actions{grid-template-columns:repeat(4,1fr)}
+  .core-shell{width:min(54vw,220px);height:min(54vw,220px)}
+}
 </style>
 </head>
 <body>
-<div class="version">V11.5 角度多空＋K線核心版</div>
+<div class="version">V12 核心穩定版</div>
 <div class="coord" id="coordBox">X: 0.0<br>Y: 0.0<br>Z: 0.0<br>地形: 草原</div>
-<div class="hud" id="hud">載入中...</div>
+<div class="hud" id="hud">初始化中...</div>
 <canvas id="bg"></canvas>
 
 <div class="core-shell">
   <div class="core-ring"><canvas id="core"></canvas></div>
   <div class="core-glow"></div>
-  <div class="core-label">K 線核心｜角度同步</div>
+  <div class="core-label">K線核心｜World → Camera → Screen</div>
 </div>
 
 <div class="controls">
   <div class="joy" id="joy"><div class="joy-label">X / Y 平面</div><div class="joy-inner" id="joyInner"></div></div>
-  <div class="yaw" id="yaw"><div class="yaw-label">場景旋轉 / 角度</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-inner" id="yawInner"></div></div>
+  <div class="yaw" id="yaw"><div class="yaw-label">場景旋轉 / 多空</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-inner" id="yawInner"></div></div>
   <div class="alt" id="alt"><div class="alt-top">Z+</div><div class="alt-track"></div><div class="alt-inner" id="altInner"></div><div class="alt-bottom">Z-</div></div>
 </div>
 
 <div class="actions">
-  <div class="btn" onclick="toastMsg('目前顯示簽名角度與多空')">角度</div>
-  <div class="btn" onclick="toastMsg('中央 K 線核心跟橫桿同步')">K線核心</div>
-  <div class="btn" onclick="switchMode()">切換模式</div>
-  <div class="btn" onclick="toastMsg(currentTerrain())">查看地形</div>
-  <div class="btn" onclick="toastMsg('森林區')">森林</div>
-  <div class="btn" onclick="toastMsg('草原區')">草原</div>
-  <div class="btn" onclick="toastMsg('湖泊區')">湖泊</div>
-  <div class="btn" onclick="spawnBoss()">召喚Boss</div>
+  <div class="btn" onclick="toastMsg('世界座標已統一')">世界</div>
+  <div class="btn" onclick="toastMsg('鏡頭高度由 Z 控制')">鏡頭</div>
+  <div class="btn" onclick="switchMode()">模式</div>
+  <div class="btn" onclick="toastMsg(currentTerrain())">地形</div>
+  <div class="btn" onclick="spawnBoss()">Boss</div>
+  <div class="btn" onclick="boostEnergy()">能量</div>
+  <div class="btn" onclick="healHP()">回復</div>
+  <div class="btn" onclick="clearMonsters()">清怪</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -73,15 +145,27 @@ canvas{position:fixed;inset:0}
 <script>
 const bg=document.getElementById('bg'), ctx=bg.getContext('2d');
 const core=document.getElementById('core'), c2=core.getContext('2d');
-function fit(){bg.width=innerWidth; bg.height=innerHeight; core.width=240; core.height=240} addEventListener('resize',fit); fit();
 
-const S={x:0,y:0,z:0,yaw:0,moveX:0,moveY:0,yawInput:0,zInput:0,hp:100,energy:100,score:0,mode:'BATTLE',monsters:[],candles:[]};
-for(let i=0;i<140;i++) S.candles.push({o:0,c:0,p:0,v:Math.random()*4+1});
+function fit(){ bg.width=innerWidth; bg.height=innerHeight; core.width=260; core.height=260; }
+addEventListener('resize', fit); fit();
+
+const S = {
+  x:0, y:0, z:0,
+  yaw:0,
+  moveX:0, moveY:0, yawInput:0, zInput:0,
+  hp:100, energy:100, score:0,
+  mode:'BATTLE',
+  monsters:[],
+  candles:[],
+  stars:Array.from({length:140},()=>({x:Math.random()*1e4-5e3,y:Math.random()*1e4-5e3,s:Math.random()*2+0.5}))
+};
+
+for(let i=0;i<160;i++) S.candles.push({o:0,c:0,p:0,v:Math.random()*4+1});
 
 function toastMsg(msg){
   const el=document.getElementById('toast');
   el.textContent=msg; el.style.display='block';
-  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',1300);
+  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',1200);
 }
 
 function signedDeg(){
@@ -90,10 +174,7 @@ function signedDeg(){
   if(deg<-180) deg+=360;
   return deg;
 }
-function zoneFromYaw(){
-  const d=signedDeg();
-  return Math.abs(d) <= 90 ? '多' : '空';
-}
+function zoneFromYaw(){ return Math.abs(signedDeg()) <= 90 ? '多' : '空'; }
 function strengthFromYaw(){
   const a=Math.abs(signedDeg());
   if(a<=45) return '強多';
@@ -115,109 +196,154 @@ function predict(base){
   if(Math.random()>.5) score++;
   if(Math.random()>.5) score++;
   if(Math.random()>.5) score++;
-  return base+(score-1.5)*3.2;
+  return base+(score-1.5)*3.0;
 }
 function genCandles(){
+  const zone=zoneFromYaw();
   const last=S.candles[S.candles.length-1].c;
-  const real=last+(Math.random()-.5)*1.8;
-  const pred=predict(real);
+  let drift=0;
+  if(zone==='多') drift=0.45;
+  else drift=-0.45;
+  if(strengthFromYaw()==='強多') drift=0.8;
+  if(strengthFromYaw()==='強空') drift=-0.8;
+  const real=last+drift+(Math.random()-.5)*1.2;
+  const pred=predict(real+drift*0.6);
   S.candles.push({o:last,c:real,p:pred,v:Math.random()*4+1});
-  if(S.candles.length>140) S.candles.shift();
+  if(S.candles.length>160) S.candles.shift();
 }
 
 function spawnMonster(type='normal'){
   const a=Math.random()*Math.PI*2,d=180+Math.random()*180;
-  S.monsters.push({x:S.x+Math.cos(a)*d,y:S.y+Math.sin(a)*d,hp:type==='boss'?20:5,maxHp:type==='boss'?20:5,speed:type==='boss'?0.4:0.8,kind:type});
+  S.monsters.push({
+    x:S.x+Math.cos(a)*d,
+    y:S.y+Math.sin(a)*d,
+    hp:type==='boss'?20:5,
+    maxHp:type==='boss'?20:5,
+    speed:type==='boss'?0.4:0.8,
+    kind:type
+  });
 }
 for(let i=0;i<6;i++) spawnMonster();
-function spawnBoss(){spawnMonster('boss');toastMsg('Boss 出現');}
+function spawnBoss(){ spawnMonster('boss'); toastMsg('Boss 出現'); }
+function clearMonsters(){ S.monsters=[]; toastMsg('已清怪'); }
+function boostEnergy(){ S.energy=Math.min(100,S.energy+12); toastMsg('能量補充'); }
+function healHP(){ S.hp=Math.min(100,S.hp+10); toastMsg('HP 回復'); }
 
-function worldToScreen(wx, wy, cx, baseY){
+function worldToCamera(wx, wy){
   const dx = wx - S.x;
   const dy = wy - S.y;
   const cos = Math.cos(-S.yaw), sin = Math.sin(-S.yaw);
-  const rx = dx*cos - dy*sin;
-  const ry = dx*sin + dy*cos;
-  return [cx + rx, baseY + ry*0.55 - S.z*10];
+  return {
+    x: dx*cos - dy*sin,
+    y: dx*sin + dy*cos
+  };
+}
+function cameraToScreen(cx, cy, baseY, cam){
+  return [cx + cam.x, baseY + cam.y*0.58 - S.z*12];
+}
+function worldToScreen(wx, wy, cx, baseY){
+  return cameraToScreen(cx, baseY ? 0 : 0, baseY, worldToCamera(wx, wy));
 }
 
-function drawTerrain(cx, horizon, baseY){
+function drawWorld(cx, horizon, baseY){
   const sky=ctx.createLinearGradient(0,0,0,baseY);
   sky.addColorStop(0,'#0b1832'); sky.addColorStop(0.55,'#193056'); sky.addColorStop(1,'#243858');
   ctx.fillStyle=sky; ctx.fillRect(0,0,bg.width,baseY);
 
   const zone=zoneFromYaw();
-  ctx.fillStyle=zone==='多' ? '#355c2d' : '#4d2c2c';
+  ctx.fillStyle=zone==='多' ? '#365e2e' : '#4c2f2f';
   ctx.fillRect(0,baseY,bg.width,bg.height-baseY);
 
-  let pts=[[120,-180],[300,-180],[300,40],[120,40]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
+  // lake area
+  let pts=[[120,-180],[300,-180],[300,40],[120,40]].map(p=>{
+    const cam=worldToCamera(p[0],p[1]); return cameraToScreen(cx,0,baseY,cam);
+  });
   ctx.fillStyle='rgba(70,130,220,.72)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
-  pts=[[-320,40],[-120,40],[-120,260],[-320,260]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
+  // forest area
+  pts=[[-320,40],[-120,40],[-120,260],[-320,260]].map(p=>{
+    const cam=worldToCamera(p[0],p[1]); return cameraToScreen(cx,0,baseY,cam);
+  });
   ctx.fillStyle='rgba(28,80,34,.88)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
-  pts=[[260,160],[520,160],[520,360],[260,360]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
+  // mountain area
+  pts=[[260,160],[520,160],[520,360],[260,360]].map(p=>{
+    const cam=worldToCamera(p[0],p[1]); return cameraToScreen(cx,0,baseY,cam);
+  });
   ctx.fillStyle='rgba(82,72,60,.90)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
-  // rotating/moving grid
+  // moving/rotating grid
   ctx.strokeStyle='rgba(255,255,255,.10)';
   for(let gy=-600; gy<=600; gy+=40){
-    const p1=worldToScreen(-900,gy,cx,baseY), p2=worldToScreen(900,gy,cx,baseY);
+    const p1=cameraToScreen(cx,0,baseY,worldToCamera(-900,gy));
+    const p2=cameraToScreen(cx,0,baseY,worldToCamera(900,gy));
     ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
   }
   for(let gx=-900; gx<=900; gx+=40){
-    const p1=worldToScreen(gx,-800,cx,baseY), p2=worldToScreen(gx,800,cx,baseY);
+    const p1=cameraToScreen(cx,0,baseY,worldToCamera(gx,-800));
+    const p2=cameraToScreen(cx,0,baseY,worldToCamera(gx,800));
     ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
   }
 
+  // trees
   for(let i=-300;i<-130;i+=35){
     for(let j=70;j<250;j+=48){
-      const [sx,sy]=worldToScreen(i,j,cx,baseY);
+      const [sx,sy]=cameraToScreen(cx,0,baseY,worldToCamera(i,j));
       ctx.fillStyle='#3a2617'; ctx.fillRect(sx-2,sy-8,4,12);
       ctx.fillStyle='#1f7a2d'; ctx.beginPath(); ctx.arc(sx,sy-14,10,0,Math.PI*2); ctx.fill();
     }
   }
+
+  // mountains
   for(let i=280;i<500;i+=70){
-    const [sx,sy]=worldToScreen(i,210+((i%140)?40:0),cx,baseY);
+    const [sx,sy]=cameraToScreen(cx,0,baseY,worldToCamera(i,210+((i%140)?40:0)));
     ctx.fillStyle='#746657';
     ctx.beginPath(); ctx.moveTo(sx-30,sy+18); ctx.lineTo(sx,sy-25); ctx.lineTo(sx+30,sy+18); ctx.closePath(); ctx.fill();
   }
+
+  // lake highlights
   for(let i=130;i<290;i+=26){
-    const [sx,sy]=worldToScreen(i,-70 + Math.sin(i*0.1)*20,cx,baseY);
+    const [sx,sy]=cameraToScreen(cx,0,baseY,worldToCamera(i,-70 + Math.sin(i*0.1)*20));
     ctx.strokeStyle='rgba(190,225,255,.45)';
     ctx.beginPath(); ctx.moveTo(sx-10,sy); ctx.lineTo(sx+10,sy); ctx.stroke();
   }
+
+  // far stars with parallax
+  for(const s of S.stars){
+    const cam=worldToCamera(s.x*0.08,s.y*0.08);
+    const sx=(cx+cam.x*0.15)%bg.width, sy=(horizon+cam.y*0.08)%baseY;
+    ctx.fillStyle='rgba(180,220,255,.7)';
+    ctx.fillRect((sx+bg.width)%bg.width,(sy+baseY)%baseY,s.s,s.s);
+  }
 }
 
-function drawCore(){
+function drawKlineCore(){
   c2.clearRect(0,0,core.width,core.height);
   const cx=core.width/2, cy=core.height/2;
   const zone=zoneFromYaw();
-  const rg=c2.createRadialGradient(cx,cy,18,cx,cy,110);
+  const rg=c2.createRadialGradient(cx,cy,18,cx,cy,120);
   rg.addColorStop(0, zone==='多' ? 'rgba(90,180,255,.30)' : 'rgba(255,90,90,.30)');
   rg.addColorStop(1,'rgba(0,0,0,0)');
-  c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,110,0,Math.PI*2); c2.fill();
+  c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,120,0,Math.PI*2); c2.fill();
 
-  const baseR=82 + S.z*0.6;
+  const baseR=82 + S.z*0.5;
   S.candles.forEach((k,i)=>{
     const t=i/S.candles.length*Math.PI*2 + S.yaw;
-    const rr=baseR + k.v*1.2;
+    const rr=baseR + k.v*1.1;
     const x=cx+Math.cos(t)*rr;
     const y=cy+Math.sin(t)*rr*0.84;
-    c2.strokeStyle = k.c>=k.o ? '#83ff74' : '#ff6c6c';
+    c2.strokeStyle = k.c>=k.o ? '#86ff7a' : '#ff7575';
     c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.8); c2.stroke();
-    c2.strokeStyle = 'rgba(113,216,255,.95)';
+    c2.strokeStyle = 'rgba(121,215,255,.95)';
     c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.8); c2.stroke();
   });
 
   c2.strokeStyle='rgba(242,213,122,.35)';
   for(let i=0;i<3;i++){
-    c2.beginPath();
-    c2.ellipse(cx,cy,58+i*16,42+i*10,S.yaw*0.55+i*.25,0,Math.PI*2);
-    c2.stroke();
+    c2.beginPath(); c2.ellipse(cx,cy,58+i*16,42+i*10,S.yaw*0.55+i*.25,0,Math.PI*2); c2.stroke();
   }
   c2.beginPath(); c2.arc(cx,cy,15,0,Math.PI*2); c2.fillStyle='rgba(242,213,122,.82)'; c2.fill();
 }
@@ -227,8 +353,10 @@ function update(){
   S.y += S.moveY*2.1;
   S.z += S.zInput*0.25;
   S.yaw += S.yawInput*0.05;
-  if(S.z>25) S.z=25; if(S.z<-25) S.z=-25;
+  if(S.z>25) S.z=25;
+  if(S.z<-25) S.z=-25;
   genCandles();
+
   while(S.monsters.length<8) spawnMonster();
   S.monsters.forEach(m=>{
     const dx=S.x-m.x, dy=S.y-m.y, d=Math.hypot(dx,dy)||1;
@@ -238,23 +366,25 @@ function update(){
 function draw(){
   ctx.clearRect(0,0,bg.width,bg.height);
   const cx=bg.width/2, horizon=bg.height*0.44 - S.z*6, baseY=bg.height*0.72 - S.z*12;
-  drawTerrain(cx,horizon,baseY);
+  drawWorld(cx,horizon,baseY);
 
-  ctx.fillStyle='#83ff74';
+  // player
+  ctx.fillStyle='#86ff7a';
   ctx.beginPath(); ctx.arc(cx,baseY,12,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.65)';
   ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); ctx.stroke();
 
+  // monsters
   S.monsters.forEach(m=>{
-    const [sx,sy]=worldToScreen(m.x,m.y,cx,baseY);
+    const [sx,sy]=cameraToScreen(cx,0,baseY,worldToCamera(m.x,m.y));
     const r=m.kind==='boss'?18:10;
     ctx.fillStyle=m.kind==='boss' ? '#ffb36b' : '#ff3d3d';
     ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(sx-r, sy-r-10, r*2, 4);
-    ctx.fillStyle='#83ff74'; ctx.fillRect(sx-r, sy-r-10, (m.hp/m.maxHp)*r*2, 4);
+    ctx.fillStyle='#86ff7a'; ctx.fillRect(sx-r, sy-r-10, (m.hp/m.maxHp)*r*2, 4);
   });
 
-  drawCore();
+  drawKlineCore();
 
   const deg=signedDeg();
   document.getElementById('coordBox').innerHTML=`X: ${S.x.toFixed(1)}<br>Y: ${S.y.toFixed(1)}<br>Z: ${S.z.toFixed(1)}<br>地形: ${currentTerrain()}`;
@@ -263,49 +393,51 @@ function draw(){
 function loop(){ update(); draw(); requestAnimationFrame(loop); }
 loop();
 
-function switchMode(){S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE';toastMsg('切換到 '+S.mode);}
+function switchMode(){ S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE'; toastMsg('切換到 '+S.mode); }
 
 // controls
 (function(){
   const joy=document.getElementById('joy'), inner=document.getElementById('joyInner');
   function setP(x,y){
     const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
-    const max=39, len=Math.hypot(dx,dy)||1; if(len>max){dx=dx/len*max; dy=dy/len*max;}
+    const max=39, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; }
     S.moveX = dx/max;
     S.moveY = -dy/max;
     inner.style.left=(42+dx)+'px'; inner.style.top=(42+dy)+'px';
   }
-  function reset(){S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px';}
-  joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY); toastMsg('右=X+ 左=X- 上=Y+ 下=Y-');});
-  joy.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientX,e.clientY);});
+  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px'; }
+  joy.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientX,e.clientY); toastMsg('右=X+ 左=X- 上=Y+ 下=Y-'); });
+  joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
   joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
 })();
 (function(){
   const yaw=document.getElementById('yaw'), inner=document.getElementById('yawInner'), fill=document.getElementById('yawFill');
   function setP(x){
-    const r=yaw.getBoundingClientRect(), max=(r.width/2)-24; let dx=x-r.left-r.width/2; if(dx>max)dx=max; if(dx<-max)dx=-max;
-    S.yawInput=dx/max; inner.style.left=(r.width/2-24+dx)+'px';
-    if(dx>=0){fill.style.left='50%'; fill.style.width=(dx/max*50)+'%';} else {fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%';}
+    const r=yaw.getBoundingClientRect(), max=(r.width/2)-24; let dx=x-r.left-r.width/2; if(dx>max) dx=max; if(dx<-max) dx=-max;
+    S.yawInput = dx/max;
+    inner.style.left=(r.width/2-24+dx)+'px';
+    if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; }
+    else{ fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; }
   }
-  function reset(){S.yawInput=0; inner.style.left='calc(50% - 24px)'; fill.style.left='50%'; fill.style.width='0';}
-  yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX); toastMsg('中間直接顯示角度、多空、強弱');});
-  yaw.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientX);});
+  function reset(){ S.yawInput=0; inner.style.left='calc(50% - 24px)'; fill.style.left='50%'; fill.style.width='0'; }
+  yaw.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientX); toastMsg('中間直接顯示：角度 / 多空 / 強弱'); });
+  yaw.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX); });
   yaw.addEventListener('pointerup',reset); yaw.addEventListener('pointercancel',reset);
 })();
 (function(){
   const alt=document.getElementById('alt'), inner=document.getElementById('altInner');
   function setP(y){
-    const r=alt.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max)dy=max; if(dy<-max)dy=-max;
+    const r=alt.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max) dy=max; if(dy<-max) dy=-max;
     S.zInput = -dy/max;
     inner.style.top=(66+dy)+'px';
   }
-  function reset(){S.zInput=0; inner.style.top='66px';}
-  alt.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY); toastMsg('Z 軸 = 上下高度');});
-  alt.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientY);});
+  function reset(){ S.zInput=0; inner.style.top='66px'; }
+  alt.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientY); toastMsg('Z 軸 = 高度 / 鏡頭'); });
+  alt.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientY); });
   alt.addEventListener('pointerup',reset); alt.addEventListener('pointercancel',reset);
 })();
 
-toastMsg('V11.5 已顯示簽名角度、多空、強弱，中央加入 K 線核心');
+toastMsg('V11.5 已加入角度多空顯示與中央 K 線核心');
 </script>
 </body>
 </html>
