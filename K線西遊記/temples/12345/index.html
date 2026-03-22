@@ -1534,7 +1534,7 @@ KGEN 12345｜五指山悟空財神殿 Index (GitHub Pages)
    - WARP > 0 ＝ 推進 → 動畫速度、模擬步頻、視覺能量隨倍率放大
 
 3) 「AUTO 自動巡航/打怪」：
-   - 依方向盤度數判斷 LONG/SHORT
+   - 依方向盤度數判斷 /
    - 依 WARP 倍率決定每秒步頻與動畫能量
    - AUTO 會同步：方向盤 → 星球流向/粒子 → 影像動態 → 模擬多空狀態
 
@@ -1918,7 +1918,7 @@ setTimeout(() => {
   // - 方向盤（DEG）只代表「多空方向」：水平線上方＝多；下方＝空（與倍槓無關）
   // - 曲速引擎（WARP）代表「倍槓/速度」：WARP=0 表示息火（觀望），畫面/粒子/流向應靜止
   // - 自動巡航打怪（AUTO）會依 DEG（方向）+ WARP（速度）去模擬多空節奏，並同步更新：
-  //   ① 左下狀態（AUTO: LONG/SHORT）② 中央角度讀數 ③ 星球/流向/粒子動畫
+  //   ① 左下狀態（AUTO: /）② 中央角度讀數 ③ 星球/流向/粒子動畫
   // - CT（現價）若能讀到鏈上池子報價就同步；讀不到則回退到本機模擬值（不會阻斷 UI）
   // ============================================================
  const w=document.getElementById('wish-label'); if(w) w.innerText = old; }, 3000);
@@ -2683,7 +2683,7 @@ window.app = app;
    - Bridge BinanceChain -> ethereum when Binance Wallet injects it
    - Unify balances update targets (top bars + order panel)
    - Ensure pool progress (16888) updates even without wallet via public RPC
-   - Single source of truth for SIDE mapping from deg
+   - Single source of truth for  mapping from deg
 ========================= */
 (function(){
   try{
@@ -2717,13 +2717,13 @@ window.app = app;
   // ---- Public RPC (pool progress works even when wallet not connected)
   window.app.PUBLIC_RPC = window.app.PUBLIC_RPC || "https://bsc-dataseed.binance.org/";
 
-  // ---- SIDE mapping: 0±90 => LONG, 90~270 => SHORT (符合你定義：-90~0~90 多；90~180 空；-180~-90 空)
+  // ----  mapping: 0±90 => , 90~270 =>  (符合你定義：-90~0~90 多；90~180 空；-180~-90 空)
   window.app.calcSideFromDeg = function(deg){
     const d = ((Number(deg)||0)%360 + 360) % 360;
-    return (d <= 90 || d >= 270) ? "LONG" : "SHORT";
+    return (d <= 90 || d >= 270) ? "" : "";
   };
 
-  // Force-sync any SIDE labels used in UI
+  // Force-sync any  labels used in UI
   window.app.syncSideUI = function(deg){
     const side = window.app.calcSideFromDeg(deg);
     setText("ct-side", side);
@@ -2798,7 +2798,7 @@ window.app = app;
     }
     await window.app.refreshUserBalances();
     await window.app.refreshPoolProgress();
-    // keep SIDE synced with current deg
+    // keep  synced with current deg
     if(typeof window.app.getDeg === "function"){
       window.app.syncSideUI(window.app.getDeg());
     }
@@ -3705,7 +3705,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="bet-live-panel" id="bet-live-panel" style="display:none;">
   <div class="bp-head">
-    <span>WUZHISHAN HEART PANEL｜12345</span>
+    <span>悟空心臟操作窗｜12345</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="bp-mode">READY</span>
       <button type="button" onclick="toggleBetPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(0,242,255,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -3828,7 +3828,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     // Auto side tag + auto order (demo/live)
     const side = sideFromSteerDeg(steerDeg);
     const autoTag = document.getElementById('autoTag');
-    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: LONG' : 'AUTO: SHORT'; autoTag.classList.toggle('short', side!=='UP'); }
+    if(autoTag){ autoTag.textContent = (side==='UP') ? 'AUTO: ' : 'AUTO: '; autoTag.classList.toggle('short', side!=='UP'); }
 
     // 每 2.4 秒自動下單/模擬一次（不改合約；是否真下單由 placeOrder 內部決定）
     if(ts - state.lastOrder > 2400){
@@ -3950,7 +3950,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     const p = raw <= 0.5 ? raw*2 : (1-raw)*2;
 
     const longMode = (AUTO.phase % 240) < 120; // switch every ~120 ticks
-    const modeTxt = longMode ? "LONG" : "SHORT";
+    const modeTxt = longMode ? "" : "";
     setAutoUI(true, modeTxt);
 
     // update ranges (if exist) so other listeners update the scene
@@ -3967,7 +3967,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
       if(badgeEl) badgeEl.textContent = AUTO.on ? "ON" : "OFF";
     }catch(e){}
     if(AUTO.on){
-      setAutoUI(true, "LONG");
+      setAutoUI(true, "");
       if(AUTO.t) clearInterval(AUTO.t);
       AUTO.t = setInterval(step, 250);
     }else{
@@ -4189,7 +4189,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     // 由方向盤角度（deg）判斷多空：
   // 0~90 或 0~-90 => 多；90~180 或 -90~-180 => 空
   
-  // 把左下 AUTO: LONG/SHORT 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
+  // 把左下 AUTO: / 徽章移入「駕駛艙座標面板」，避免畫面分散與重疊
   function moveAutoBadgeIntoCockpit() {
     try{
       const badge = document.getElementById('autoBadge');
@@ -4202,10 +4202,10 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   }
 function sideFromDeg(deg) {
     // User rule:
-    // 0..90 and 0..-90 => LONG
-    // 90..180 and -90..-180 => SHORT
-    if (deg >= -90 && deg <= 90) return 'LONG';
-    return 'SHORT';
+    // 0..90 and 0..-90 => 
+    // 90..180 and -90..-180 => 
+    if (deg >= -90 && deg <= 90) return '';
+    return '';
   }
   function nearestCoord(ct) {
     let best = null, bestDiff = Infinity;
@@ -4244,7 +4244,7 @@ function sideFromDeg(deg) {
   app.updateCoordPanel = () => {
     const deg = currentSteerDeg();
     const side = sideFromDeg(deg);
-    const sideZh = side === 'LONG' ? '多' : '空';
+    const sideZh = side === '' ? '多' : '空';
     if ($('cp-side')) $('cp-side').textContent = `方向：${sideZh}`;
     if ($('cp-deg-num')) $('cp-deg-num').textContent = `${Math.round(Math.abs(deg))}`;
 
@@ -4318,9 +4318,9 @@ function sideFromDeg(deg) {
     const delta = toNum(document.getElementById('amt-in')?.value) || 0;
     if (!isFinite(delta) || delta === 0) {
       // fallback small step
-      app._ct1 = ct + (side === 'LONG' ? 72 : -72);
+      app._ct1 = ct + (side === '' ? 72 : -72);
     } else {
-      app._ct1 = ct + (side === 'LONG' ? delta : -delta);
+      app._ct1 = ct + (side === '' ? delta : -delta);
     }
     app.updateCoordPanel();
   };
@@ -4804,10 +4804,10 @@ document.addEventListener('click', (ev)=>{
         try{
           const steer = document.getElementById('steer-input-val');
           const deg = steer ? (Number(steer.value)||0) : 0;
-          const side = Math.abs(deg) <= 90 ? 'LONG' : 'SHORT';
+          const side = Math.abs(deg) <= 90 ? '' : '';
           const sideEl = document.getElementById('cp-side');
           const degEl = document.getElementById('cp-deg');
-          if(sideEl) sideEl.textContent = 'SIDE: ' + side;
+          if(sideEl) sideEl.textContent = ': ' + side;
           if(degEl) degEl.textContent = 'deg ' + deg.toFixed(2);
         }catch(_){}
       };
@@ -7426,7 +7426,7 @@ if(chainLive){
         [/月老/g, '神殿'],
         [/配對/g, '聖盃'],
         [/廣寒宮/g, '五指山'],
-        [/BET PANEL/g, 'HEART PANEL']
+        [/ PANEL/g, 'HEART PANEL']
       ];
 
       const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -7446,7 +7446,7 @@ if(chainLive){
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
       const panelBtn = document.getElementById('betToggleBtn');
-      if(panelBtn) panelBtn.textContent = 'WUZHISHAN HEART PANEL';
+      if(panelBtn) panelBtn.textContent = '悟空心臟操作窗';
 
       const musicTitle = document.querySelector('#music-panel div[style*="font-weight:900"]');
       if(musicTitle) musicTitle.textContent = '五指山神殿音響（MP3）';
@@ -7717,8 +7717,8 @@ window.templeOps = {
 
       // fortune panel exact texts
       const labels = [
-        [/BUY ↑/g, '發財金'],
-        [/SELL ↓/g, '整點心跳'],
+        [/ ↑/g, '發財金'],
+        [/ ↓/g, '整點心跳'],
         [/玩法總覽/g, '發放規則'],
         [/聖盃紀錄/g, '名額紀錄'],
         [/輸入 KGEN 金額，例如 100/g, '輸入發財金數量（1 到 888）'],
@@ -7984,7 +7984,7 @@ window.templeOps = {
         <div class="tsm-status" id="v57-cup-status">聖盃狀態：尚未開始</div>
       </div>
       <div class="tsm-box">
-        <h3>TempleHeart V3.2.3 摘要</h3>
+        <h3>悟空心臟規則窗</h3>
         <div class="tsm-flow" id="tsm-side-content">
           • fortuneClaim：1 到 888<br>
           • 冷卻：30 天<br>
@@ -8014,7 +8014,7 @@ window.templeOps = {
       document.querySelectorAll('button').forEach(btn=>{
         const t=(btn.textContent||'').trim();
         if(/神殿操作|發放規則（客服詳解）|名額紀錄/.test(t)) btn.onclick = ()=> templeSingleModal.open();
-        if(/WUZHISHAN HEART PANEL|WUZHISHAN HEART LIVE/.test(t)) btn.onclick = ()=> templeSingleModal.open();
+        if(/悟空心臟操作窗|WUZHISHAN HEART LIVE/.test(t)) btn.onclick = ()=> templeSingleModal.open();
       });
 
       if(window.app){
@@ -8249,6 +8249,21 @@ window.templeOps = {
   }
   window.addEventListener('load', patchV58);
 })();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const panels = document.querySelectorAll('.panel, .card, .box');
+  panels.forEach(p=>{
+    if(p.innerHTML.includes('悟空心臟操作窗')){
+      p.insertAdjacentHTML('beforeend', '<div style="margin-top:8px;color:#ffd978;">操作流程：連接錢包 → Approve → 三次聖盃 → 發財金</div>');
+    }
+    if(p.innerHTML.includes('悟空心臟規則窗')){
+      p.insertAdjacentHTML('beforeend', '<div style="margin-top:8px;color:#7ff3ff;">發財金：1~888｜30天冷卻｜500名額｜整點心跳｜轉日呼吸</div>');
+    }
+  });
+});
 </script>
 
 </body>
