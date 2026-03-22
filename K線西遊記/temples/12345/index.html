@@ -3,70 +3,45 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V13.2 16888風格整合版</title>
+<title>KLINE V13.3 核心釋放版</title>
 <style>
 :root{
-  --gold:#ffd778;
-  --cyan:#00f2ff;
-  --bg:#02060d;
-  --energy:#ffcc00;
-  --panel:rgba(10,12,20,.88);
-  --red:#ff6464;
-  --green:#79ff91;
+  --gold:#ffd778; --cyan:#00f2ff; --bg:#02060d; --energy:#ffcc00;
+  --panel:rgba(10,12,20,.88); --red:#ff6464; --green:#79ff91;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:#fff;font-family:"Noto Sans TC",Arial,sans-serif;overflow:hidden;height:100vh}
 canvas{position:fixed;inset:0}
 .hud-top{
-  position:fixed;top:12px;left:2%;width:96%;display:flex;justify-content:space-between;align-items:flex-start;z-index:120;pointer-events:none
+  position:fixed;top:12px;left:2%;width:96%;display:flex;justify-content:space-between;align-items:flex-start;z-index:120
 }
 .brand-section{
   border-left:5px solid var(--gold);padding-left:14px;background:linear-gradient(90deg,var(--panel),transparent)
 }
 .brand-name{font-size:24px;color:var(--gold);text-shadow:0 0 15px var(--gold);font-weight:900}
 .sys-st{font-family:Orbitron,Arial,sans-serif;font-size:11px;color:var(--cyan);letter-spacing:1px}
-.monitor-data{display:flex;gap:14px}
+.monitor-data{display:flex;gap:12px}
 .data-box{
-  background:var(--panel);border:1px solid rgba(255,215,120,.25);padding:9px 10px;border-top:2px solid var(--gold);
-  min-width:150px;border-radius:12px;pointer-events:auto
+  background:var(--panel);border:1px solid rgba(255,215,120,.25);padding:9px 10px;min-width:136px;border-radius:12px
 }
-.data-box .k{font-size:11px;color:#ffe2a2}
-.data-box .v{font-family:Orbitron,Arial,sans-serif;font-size:17px;color:var(--cyan);font-weight:900;margin-top:4px}
-.grid-100{display:grid;grid-template-columns:repeat(20,6px);gap:3px;margin-top:6px}
-.dot{width:6px;height:6px;background:#18202c;border-radius:1px}
-.dot.on{background:var(--energy);box-shadow:0 0 8px var(--energy)}
+.data-box .k{font-size:10px;color:#ffe2a2}
+.data-box .v{font-family:Orbitron,Arial,sans-serif;font-size:16px;color:var(--cyan);font-weight:900;margin-top:4px}
 
-.warp-engine{
-  position:fixed;right:8px;bottom:246px;z-index:150;width:100px;text-align:center
+#core-anchor{
+  position:fixed;top:43%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;z-index:70
 }
-.warp-rail{
-  height:420px;width:30px;background:#101319;border:3px solid var(--energy);position:relative;
-  margin:0 auto;border-radius:10px;overflow:hidden;box-shadow:0 0 20px rgba(255,204,0,.2)
-}
-#energy-fill{
-  position:absolute;bottom:0;width:100%;height:0%;
-  background:linear-gradient(to top,#ff8800,var(--energy),#fff);transition:height .15s cubic-bezier(.17,.67,.83,.67);z-index:5
-}
-.rail-step{position:absolute;width:100%;height:2px;background:rgba(0,0,0,.35);z-index:10}
-#warp-thumb{
-  width:70px;height:35px;background:#fff;position:absolute;left:-20px;bottom:0;cursor:pointer;border-radius:6px;
-  box-shadow:0 0 24px #fff,0 0 12px var(--cyan);border:3px solid var(--cyan);z-index:30
-}
-.warp-val-text{margin-top:18px;color:var(--energy);font-family:Orbitron,Arial,sans-serif;font-size:18px;text-shadow:0 0 10px var(--energy)}
-
-#core-anchor{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;z-index:70}
 #core-window{
   width:100%;height:100%;border-radius:50%;border:14px double var(--gold);overflow:hidden;background:#000;
   position:relative;box-shadow:0 0 80px rgba(255,215,120,.25);transition:transform .05s linear
 }
 #wish-label{
-  position:absolute;bottom:30px;left:26px;z-index:85;color:#fff;font-weight:900;font-size:22px;
+  position:absolute;bottom:28px;left:22px;z-index:85;color:#fff;font-weight:900;font-size:21px;
   text-shadow:2px 2px 10px #000,0 0 15px var(--cyan)
 }
 #core-canvas{width:100%;height:100%;display:block}
 
 .ga-matrix{
-  position:fixed;left:18px;top:415px;width:180px;background:var(--panel);border:1px solid var(--energy);
+  position:fixed;left:12px;top:120px;width:180px;background:var(--panel);border:1px solid var(--energy);
   padding:12px;border-radius:12px;z-index:115;font-family:Orbitron,Arial,sans-serif
 }
 .ga-title{color:var(--gold);font-size:14px;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:6px}
@@ -74,52 +49,67 @@ canvas{position:fixed;inset:0}
 .ga-bar{height:6px;background:#111;margin-top:4px;overflow:hidden;border-radius:3px}
 .ga-progress{height:100%;background:var(--energy);width:0%;transition:width .4s}
 
-#kline-engine-panel,#kline-chart-panel{
-  position:fixed;left:18px;width:300px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);
-  border-radius:14px;box-shadow:0 0 18px rgba(0,242,255,.06),inset 0 0 18px rgba(255,215,120,.03);overflow:hidden;z-index:122
+#kline-engine-panel{
+  position:fixed;left:12px;top:310px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);
+  border-radius:14px;overflow:hidden;z-index:122;padding:10px
 }
-#kline-engine-panel{top:176px;padding:10px}
-#kline-chart-panel{left:50%;transform:translateX(-50%);top:530px;padding:10px;height:188px}
+#kline-chart-panel{
+  position:fixed;left:12px;top:560px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);
+  border-radius:14px;overflow:hidden;z-index:122;padding:10px
+}
 .ke-head,.kc-head{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font-weight:900;font-size:14px;margin-bottom:8px}
 .ke-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ke-cell{min-height:54px;border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:6px 8px;background:rgba(0,0,0,.22)}
+.ke-cell{min-height:52px;border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:6px 8px;background:rgba(0,0,0,.22)}
 .ke-label{font-size:10px;color:rgba(255,255,255,.78);line-height:1}
 .ke-value{margin-top:4px;font-family:Orbitron,Arial,sans-serif;font-size:15px;color:var(--cyan);font-weight:900;line-height:1}
-.ke-value.right{text-align:right}
 .ke-live-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
 .ke-live-price{font-family:Orbitron,Arial,sans-serif;color:var(--gold);font-size:16px;font-weight:900}
-.ke-live-symbol{color:var(--cyan);font-size:11px;font-family:Orbitron,Arial,sans-serif}
 #kline-canvas{width:100%;height:92px;display:block;border-radius:10px;background:
   linear-gradient(180deg,rgba(0,242,255,.03),rgba(0,0,0,.06)),
   repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 32px),
   repeating-linear-gradient(to bottom,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 1px,transparent 1px,transparent 24px),
-  rgba(0,0,0,.22);box-shadow:inset 0 0 16px rgba(0,242,255,.08)}
-.kc-foot{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#fff}
+  rgba(0,0,0,.22)}
+
+.warp-engine{
+  position:fixed;right:18px;bottom:250px;z-index:150;width:70px;text-align:center
+}
+.warp-rail{
+  height:360px;width:22px;background:#101319;border:3px solid var(--energy);position:relative;
+  margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(255,204,0,.2)
+}
+#energy-fill{
+  position:absolute;bottom:0;width:100%;height:0%;
+  background:linear-gradient(to top,#ff8800,var(--energy),#fff);transition:height .15s cubic-bezier(.17,.67,.83,.67);z-index:5
+}
+.rail-step{position:absolute;width:100%;height:2px;background:rgba(0,0,0,.35);z-index:10}
+#warp-thumb{
+  width:54px;height:28px;background:#fff;position:absolute;left:-19px;bottom:0;cursor:pointer;border-radius:6px;
+  box-shadow:0 0 24px #fff,0 0 12px var(--cyan);border:3px solid var(--cyan);z-index:30
+}
+.warp-val-text{margin-top:12px;color:var(--energy);font-family:Orbitron,Arial,sans-serif;font-size:16px;text-shadow:0 0 10px var(--energy)}
 
 #coord-panel{
-  position:fixed;right:90px;bottom:314px;width:min(360px,92vw);padding:10px 12px;border:1px solid rgba(255,215,0,.35);
-  border-radius:12px;background:rgba(0,0,0,.58);box-shadow:0 0 18px rgba(255,215,0,.12);max-height:230px;overflow-y:auto;z-index:130
+  position:fixed;right:12px;bottom:300px;width:min(280px,84vw);padding:10px 12px;border:1px solid rgba(255,215,0,.35);
+  border-radius:12px;background:rgba(0,0,0,.58);box-shadow:0 0 18px rgba(255,215,0,.12);max-height:240px;overflow-y:auto;z-index:130
 }
 .cp-title{display:flex;align-items:flex-start;justify-content:space-between;font-weight:900;color:#ffd27a;margin-bottom:8px}
 .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;font-size:13px;line-height:1.25}
 .cp-row{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,200,80,.25);background:rgba(0,0,0,.35)}
 .cp-k{opacity:.85;font-size:12px}
 .cp-v{margin-top:2px;font-weight:900;color:#8af3ff;word-break:break-word}
-.cp-v .muted{opacity:.75;font-weight:700;color:#cfd7ff}
 
 .footer-terminal{
-  position:fixed;bottom:0;width:100%;background:#000;padding:14px;border-top:4px solid var(--gold);
+  position:fixed;bottom:0;width:100%;background:#000;padding:12px;border-top:4px solid var(--gold);
   display:grid;grid-template-columns:repeat(4,1fr);gap:10px;z-index:140
 }
 .term-btn{
-  background:#0a0a0a;border:1px solid #444;color:#fff;padding:15px 6px;font-weight:900;cursor:pointer;transition:.2s;
-  font-size:13px;border-radius:8px;width:100%;text-align:center
+  background:#0a0a0a;border:1px solid #444;color:#fff;padding:14px 6px;font-weight:900;cursor:pointer;
+  font-size:12px;border-radius:8px;width:100%;text-align:center
 }
-.term-btn:hover{background:var(--gold);color:#000}
-.term-btn.active-kgen{border-color:var(--energy);color:var(--energy);box-shadow:inset 0 0 15px rgba(255,204,0,.2)}
+.term-btn.active-kgen{border-color:var(--energy);color:var(--energy)}
 
 .chain-live-panel,.bet-live-panel{
-  position:fixed;right:18px;top:120px;z-index:215;width:min(340px,88vw);background:rgba(8,12,20,.92);
+  position:fixed;right:12px;top:120px;z-index:215;width:min(320px,88vw);background:rgba(8,12,20,.92);
   border:1px solid rgba(255,215,120,.25);border-radius:14px;padding:12px;display:none
 }
 .cl-head,.bp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd88a;font-weight:900;font-family:Orbitron,Arial,sans-serif;font-size:13px;margin-bottom:10px}
@@ -135,17 +125,6 @@ canvas{position:fixed;inset:0}
 .bp-btn.sell{background:rgba(255,110,110,.16);color:#ffdede}
 .bp-status{margin-top:10px;min-height:18px;font-size:12px;color:#cfe8ff}
 
-.universe-nav{
-  position:fixed;right:18px;top:124px;z-index:200;display:flex;flex-direction:column;gap:10px;align-items:flex-end
-}
-.nav-btn{
-  pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-width:220px;padding:10px 14px;border-radius:10px;
-  font-weight:900;text-decoration:none;border:1px solid rgba(255,215,120,.6);background:rgba(20,20,0,.85);color:#fff;box-shadow:0 0 18px rgba(255,215,120,.18)
-}
-.nav-gold{background:rgba(255,215,120,.92);color:#111}
-.nav-cyan{background:rgba(0,242,255,.92);border-color:rgba(0,242,255,.6);color:#111}
-.nav-help{cursor:pointer;background:rgba(0,242,255,.14);border-color:rgba(0,242,255,.35);color:#fff}
-
 #toast{
   position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:260;width:min(520px,92vw);padding:10px 12px;border-radius:12px;
   border:1px solid rgba(255,215,0,.45);background:rgba(0,0,0,.68);color:#fff;font-weight:900;font-size:13px;display:none
@@ -154,28 +133,14 @@ canvas{position:fixed;inset:0}
 
 @media (max-width:900px){
   .brand-name{font-size:20px}
-  .monitor-data{gap:8px}
-  .data-box{min-width:120px}
-  #core-anchor{width:300px;height:300px;top:38%}
-  #kline-engine-panel{top:148px;width:260px}
-  #kline-chart-panel{top:454px;width:260px;height:170px}
-  .ga-matrix{top:350px;width:160px}
-  #coord-panel{right:82px;bottom:300px;width:min(300px,86vw)}
-  .warp-engine{bottom:240px}
-}
-@media (max-width:720px){
-  .hud-top{top:8px}
-  .brand-name{font-size:18px}
   .monitor-data{display:none}
-  .ga-matrix{left:50%;transform:translateX(-50%);top:96px;width:180px}
-  #kline-engine-panel{left:10px;top:168px;width:min(300px,46vw)}
-  #kline-chart-panel{left:50%;transform:translateX(-50%);top:466px;width:min(310px,86vw)}
-  #core-anchor{top:34%;width:min(66vw,280px);height:min(66vw,280px)}
-  .universe-nav{display:none}
-  .warp-engine{right:10px;bottom:214px}
-  #coord-panel{right:78px;bottom:282px;width:min(280px,84vw)}
-  .footer-terminal{grid-template-columns:repeat(2,1fr);padding:12px;gap:10px}
-  .term-btn{padding:14px 6px;font-size:12px}
+  #core-anchor{width:300px;height:300px;top:36%}
+  .ga-matrix{left:10px;top:110px;width:168px}
+  #kline-engine-panel{left:10px;top:300px;width:250px}
+  #kline-chart-panel{left:10px;top:520px;width:250px}
+  .warp-engine{right:10px;bottom:250px}
+  #coord-panel{right:10px;bottom:300px;width:min(250px,82vw)}
+  .footer-terminal{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -185,21 +150,13 @@ canvas{position:fixed;inset:0}
 
 <div class="hud-top">
   <div class="brand-section">
-    <div class="brand-name">KLINE V13.2｜交易宇宙整合版</div>
-    <div class="sys-st" id="ver-st">VERSION v13.2</div>
+    <div class="brand-name">KLINE V13.3｜核心釋放版</div>
+    <div class="sys-st">VERSION v13.3</div>
     <div class="sys-st" id="sys-clock">SYSTEM ONLINE | --</div>
   </div>
   <div class="monitor-data">
-    <div class="data-box">
-      <div class="k">市場方向</div>
-      <div class="v" id="top-zone">多</div>
-      <div class="grid-100" id="g1"></div>
-    </div>
-    <div class="data-box">
-      <div class="k">槓桿動能</div>
-      <div class="v" id="top-lev">0.0x</div>
-      <div class="grid-100" id="g2"></div>
-    </div>
+    <div class="data-box"><div class="k">市場方向</div><div class="v" id="top-zone">多</div></div>
+    <div class="data-box"><div class="k">槓桿動能</div><div class="v" id="top-lev">0.0x</div></div>
   </div>
 </div>
 
@@ -207,53 +164,39 @@ canvas{position:fixed;inset:0}
   <div class="warp-rail" id="warp-rail-body">
     <div id="energy-fill"></div>
     <div id="warp-thumb"></div>
-    <div class="rail-step" style="bottom:0%"></div>
-    <div class="rail-step" style="bottom:10%"></div>
-    <div class="rail-step" style="bottom:20%"></div>
-    <div class="rail-step" style="bottom:30%"></div>
-    <div class="rail-step" style="bottom:40%"></div>
-    <div class="rail-step" style="bottom:50%"></div>
-    <div class="rail-step" style="bottom:60%"></div>
-    <div class="rail-step" style="bottom:70%"></div>
-    <div class="rail-step" style="bottom:80%"></div>
-    <div class="rail-step" style="bottom:90%"></div>
+    <div class="rail-step" style="bottom:0%"></div><div class="rail-step" style="bottom:10%"></div>
+    <div class="rail-step" style="bottom:20%"></div><div class="rail-step" style="bottom:30%"></div>
+    <div class="rail-step" style="bottom:40%"></div><div class="rail-step" style="bottom:50%"></div>
+    <div class="rail-step" style="bottom:60%"></div><div class="rail-step" style="bottom:70%"></div>
+    <div class="rail-step" style="bottom:80%"></div><div class="rail-step" style="bottom:90%"></div>
   </div>
   <div class="warp-val-text" id="warp-txt">WARP 0.0x</div>
 </div>
 
 <div class="ga-matrix">
   <div class="ga-title">GA EVOLUTION</div>
-  <div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
-  <div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+  <div class="ga-stat">FITNESS: <span id="f-val">0.920</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+  <div class="ga-stat">MUTATION: <span id="m-val">0.010</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
   <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
   <div style="color:var(--energy);font-size:12px;margin-top:10px" id="ga-rank">RANK: GA-600</div>
 </div>
 
 <div id="kline-engine-panel">
-  <div class="ke-head"><span>宇宙K線引擎</span><span id="ke-mode" class="sys-st">真市場</span></div>
+  <div class="ke-head"><span>宇宙K線引擎</span><span class="sys-st">真市場</span></div>
   <div class="ke-grid">
     <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
-    <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value right" id="ke-angle">0°</div></div>
+    <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value" id="ke-angle">0°</div></div>
     <div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
     <div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
     <div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
     <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Range</div><div class="ke-value" id="ke-range">--</div></div>
-    <div class="ke-cell"><div class="ke-label">Wick</div><div class="ke-value" id="ke-wick">--</div></div>
   </div>
-  <div class="ke-live-row">
-    <span class="ke-live-symbol">CT / 1m</span>
-    <span class="ke-live-price" id="ke-live-price">0.00</span>
-  </div>
+  <div class="ke-live-row"><span class="sys-st">CT / 1m</span><span class="ke-live-price" id="ke-live-price">0.00</span></div>
 </div>
 
 <div id="kline-chart-panel">
   <div class="kc-head"><span>宇宙K線圖</span><span id="kc-predict">預測：開</span></div>
-  <canvas id="kline-canvas" width="280" height="92"></canvas>
-  <div class="kc-foot">
-    <span id="kc-dir">方向盤 → 多方K</span>
-    <span id="kc-hit">命中率：94%</span>
-  </div>
+  <canvas id="kline-canvas" width="260" height="92"></canvas>
 </div>
 
 <div id="core-anchor">
@@ -263,32 +206,33 @@ canvas{position:fixed;inset:0}
   </div>
 </div>
 
-<div class="universe-nav">
-  <div class="nav-btn nav-gold">返回｜交易宇宙入口</div>
-  <div class="nav-btn nav-cyan">官方宇宙首頁入口</div>
-  <button class="nav-btn nav-help" onclick="toggleChainLive()">CHAIN LIVE</button>
-  <button class="nav-btn nav-help" onclick="toggleBetPanel()">BET PANEL</button>
+<div id="coord-panel">
+  <div class="cp-title"><span>駕駛艙｜座標 / CT</span><span id="cp-side">方向：多</span></div>
+  <div class="cp-grid">
+    <div class="cp-row"><div class="cp-k">X（左右）</div><div class="cp-v" id="cp-x">0.0</div></div>
+    <div class="cp-row"><div class="cp-k">CT（Y 現價）</div><div class="cp-v" id="cp-ct">0.0</div></div>
+    <div class="cp-row"><div class="cp-k">Angle</div><div class="cp-v" id="cp-deg">0°</div></div>
+    <div class="cp-row"><div class="cp-k">地形</div><div class="cp-v" id="cp-terrain">草原</div></div>
+    <div class="cp-row"><div class="cp-k">Leverage</div><div class="cp-v" id="cp-lev">0.0x</div></div>
+    <div class="cp-row"><div class="cp-k">Time</div><div class="cp-v" id="cp-time">T+0</div></div>
+  </div>
 </div>
 
 <div class="chain-live-panel" id="chain-live-panel">
   <div class="cl-head"><span>CHAIN LIVE</span><button class="bp-btn" onclick="toggleChainLive()">關</button></div>
   <div class="cl-grid">
-    <div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">--</div></div>
-    <div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">--</div></div>
-    <div class="cl-item"><div class="cl-k">月老1（A）</div><div class="cl-v" id="cl-a">--</div></div>
-    <div class="cl-item"><div class="cl-k">月老2（B）</div><div class="cl-v" id="cl-b">--</div></div>
+    <div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">8888.0</div></div>
+    <div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">Round #1</div></div>
   </div>
 </div>
 
 <div class="bet-live-panel" id="bet-live-panel">
   <div class="bp-head"><span>BET PANEL</span><button class="bp-btn" onclick="toggleBetPanel()">關</button></div>
   <div class="bp-kv">
-    <div class="bp-k">模擬錢包</div><div class="bp-v" id="bp-wallet">DEMO</div>
-    <div class="bp-k">KGEN 餘額</div><div class="bp-v" id="bp-userbal">12000.0</div>
-    <div class="bp-k">Allowance</div><div class="bp-v" id="bp-allowance">15000.0</div>
+    <div class="bp-k">模擬錢包</div><div class="bp-v">DEMO</div>
     <div class="bp-k">獎池</div><div class="bp-v" id="bp-pool">8888.0</div>
   </div>
-  <input id="bet-amt-input" class="bp-input" type="text" inputmode="decimal" placeholder="輸入 KGEN 金額，例如 100">
+  <input id="bet-amt-input" class="bp-input" type="text" inputmode="decimal" placeholder="輸入 KGEN 金額">
   <div class="bp-grid">
     <button class="bp-btn approve" onclick="approveMock()">APPROVE</button>
     <button class="bp-btn buy" onclick="placeMock('UP')">BUY ↑</button>
@@ -296,26 +240,6 @@ canvas{position:fixed;inset:0}
     <button class="bp-btn" onclick="togglePredict()">預測開關</button>
   </div>
   <div class="bp-status" id="bp-status">待命中</div>
-</div>
-
-<div id="coord-panel">
-  <div class="cp-title">
-    <span>駕駛艙｜座標 / CT</span>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;min-width:120px;">
-      <span class="muted" id="cp-side">方向：多</span>
-      <span class="muted" id="cp-deg" style="display:flex;justify-content:space-between;width:100%;gap:12px;"><span>角度：</span><span id="cp-deg-num">0°</span></span>
-    </div>
-  </div>
-  <div class="cp-grid">
-    <div class="cp-row"><div class="cp-k">X（左右）</div><div class="cp-v" id="cp-x">0.0</div></div>
-    <div class="cp-row"><div class="cp-k">CT（Y 現價）</div><div class="cp-v" id="cp-ct">0.0</div></div>
-    <div class="cp-row"><div class="cp-k">CT+1（推估）</div><div class="cp-v" id="cp-ct1">1.0</div></div>
-    <div class="cp-row"><div class="cp-k">地形</div><div class="cp-v" id="cp-terrain">草原</div></div>
-    <div class="cp-row"><div class="cp-k">Leverage</div><div class="cp-v" id="cp-lev">0.0x</div></div>
-    <div class="cp-row"><div class="cp-k">Time</div><div class="cp-v" id="cp-time">T+0</div></div>
-    <div class="cp-row"><div class="cp-k">HP</div><div class="cp-v" id="cp-hp">100</div></div>
-    <div class="cp-row"><div class="cp-k">Energy</div><div class="cp-v" id="cp-energy">100</div></div>
-  </div>
 </div>
 
 <div class="footer-terminal">
@@ -330,385 +254,96 @@ canvas{position:fixed;inset:0}
 </div>
 
 <script>
-const S = {
-  x:0,
-  ct:0,
-  z:0,
-  t:0,
-  yaw:0,
-  lev:0,
-  hp:100,
-  energy:100,
-  terrain:'草原',
-  ga:600,
-  auto:false,
-  predict:true,
-  monsters:[],
-  candles:[]
-};
+const S = {x:0,ct:0,yaw:0,lev:0,t:0,hp:100,energy:100,terrain:'草原',ga:600,auto:false,predict:true,monsters:[],candles:[]};
 for(let i=0;i<120;i++) S.candles.push({o:0,c:0,h:0,l:0,p:0,v:1});
-
-const world = document.getElementById('world');
-const wctx = world.getContext('2d');
-const core = document.getElementById('core-canvas');
-const cctx = core.getContext('2d');
-const kline = document.getElementById('kline-canvas');
-const kctx = kline.getContext('2d');
-
-function fit(){ world.width = innerWidth; world.height = innerHeight; }
-addEventListener('resize', fit); fit();
-
-function toast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(window.__toast);
-  window.__toast = setTimeout(()=>el.classList.remove('show'), 1300);
-}
-function signedDeg(){
-  let d = (S.yaw*180/Math.PI)%360;
-  if(d>180) d -= 360;
-  if(d<-180) d += 360;
-  return d;
-}
-function zone(){ return Math.abs(signedDeg()) <= 90 ? '多' : '空'; }
-function strength(){
-  const a = Math.abs(signedDeg());
-  if(a <= 45) return '強多';
-  if(a <= 90) return '弱多';
-  if(a <= 135) return '弱空';
-  return '強空';
-}
-function direction(){ return zone() === '多' ? 1 : -1; }
-
-function buildDots(){
-  ['g1','g2'].forEach(id=>{
-    const box = document.getElementById(id);
-    box.innerHTML = '';
-    for(let i=0;i<100;i++){
-      const d = document.createElement('div');
-      d.className = 'dot' + (Math.random()>.52 ? ' on':'');
-      box.appendChild(d);
-    }
-  });
-}
-buildDots();
-
+const world = document.getElementById('world'); const wctx = world.getContext('2d');
+const core = document.getElementById('core-canvas'); const cctx = core.getContext('2d');
+const kline = document.getElementById('kline-canvas'); const kctx = kline.getContext('2d');
+function fit(){ world.width = innerWidth; world.height = innerHeight; } addEventListener('resize', fit); fit();
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),1200);}
+function signedDeg(){ let d=(S.yaw*180/Math.PI)%360; if(d>180)d-=360; if(d<-180)d+=360; return d; }
+function zone(){ return Math.abs(signedDeg())<=90?'多':'空'; }
+function direction(){ return zone()==='多'?1:-1; }
 function setWarp(v){
   S.lev = Math.max(0, Math.min(150, v));
   const pct = (S.lev/150)*100;
   document.getElementById('energy-fill').style.height = pct + '%';
-  document.getElementById('warp-thumb').style.bottom = `calc(${pct}% - 17px)`;
+  document.getElementById('warp-thumb').style.bottom = `calc(${pct}% - 14px)`;
   document.getElementById('warp-txt').textContent = `WARP ${S.lev.toFixed(1)}x`;
   document.getElementById('top-lev').textContent = `${S.lev.toFixed(1)}x`;
 }
-
-function switchTerrain(){
-  const arr = ['草原','森林','湖泊','山地'];
-  S.terrain = arr[(arr.indexOf(S.terrain)+1)%arr.length];
-  toast('地形切換到 ' + S.terrain);
-}
-function togglePredict(){
-  S.predict = !S.predict;
-  document.getElementById('kc-predict').textContent = '預測：' + (S.predict ? '開' : '關');
-  toast('AI預測' + (S.predict ? '開' : '關'));
-}
-function toggleChainLive(){
-  const p = document.getElementById('chain-live-panel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}
-function toggleBetPanel(){
-  const p = document.getElementById('bet-live-panel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}
-function approveMock(){
-  document.getElementById('bp-status').textContent = 'Approve 完成（模擬）';
-  toast('Approve 完成（模擬）');
-}
-function placeMock(side){
-  const amt = parseFloat(document.getElementById('bet-amt-input').value || '0') || 0;
-  const dirOk = (side==='UP' && zone()==='多') || (side==='DOWN' && zone()==='空');
-  const win = dirOk ? Math.random()>.32 : Math.random()>.74;
-  document.getElementById('bp-status').textContent = `${side} ${amt.toFixed(2)} KGEN｜${win?'WIN':'LOSE'}`;
-  const pool = document.getElementById('bp-pool');
-  let p = parseFloat(pool.textContent || '8888') || 8888;
-  p += win ? -amt*0.5 : amt;
-  pool.textContent = p.toFixed(1);
-  document.getElementById('cl-pool').textContent = p.toFixed(1);
-  toast(`${side} ${win?'獲勝':'失敗'}（模擬）`);
-}
+function switchTerrain(){ const arr=['草原','森林','湖泊','山地']; S.terrain=arr[(arr.indexOf(S.terrain)+1)%arr.length]; toast('地形切換到 '+S.terrain); }
+function togglePredict(){ S.predict=!S.predict; document.getElementById('kc-predict').textContent='預測：'+(S.predict?'開':'關'); }
+function toggleChainLive(){ const p=document.getElementById('chain-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+function toggleBetPanel(){ const p=document.getElementById('bet-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+function approveMock(){ document.getElementById('bp-status').textContent='Approve 完成（模擬）'; }
+function placeMock(side){ document.getElementById('bp-status').textContent=`${side} 完成（模擬）`; }
 function captureMock(){ toast('拍照存證（模擬）'); }
-function setWish(){
-  const v = prompt('輸入核心標語', document.getElementById('wish-label').textContent);
-  if(v) document.getElementById('wish-label').textContent = v;
-}
-function boost(){
-  S.ga = Math.min(1000, S.ga + 50);
-  document.getElementById('ga-rank').textContent = 'RANK: GA-' + S.ga;
-  toast('GA 升級到 ' + S.ga);
-}
-function autoHunt(){
-  S.auto = !S.auto;
-  toast('自動巡航打怪 ' + (S.auto ? '開' : '關'));
-}
-function spawnMonster(type='normal'){
-  const a = Math.random()*Math.PI*2, d = 160 + Math.random()*180;
-  S.monsters.push({
-    x: S.x + Math.cos(a)*d,
-    y: S.ct + Math.sin(a)*d,
-    hp: type==='boss' ? 24 : 6,
-    maxHp: type==='boss' ? 24 : 6,
-    speed: type==='boss' ? 0.35 : 0.72,
-    kind: type
-  });
-}
-function spawnBoss(){
-  spawnMonster('boss');
-  document.getElementById('cl-round').textContent = 'Round #' + Math.max(1, Math.floor(S.t/180));
-  toast('Boss 出現');
-}
+function setWish(){ const v=prompt('輸入核心標語', document.getElementById('wish-label').textContent); if(v) document.getElementById('wish-label').textContent=v; }
+function boost(){ S.ga=Math.min(1000,S.ga+50); document.getElementById('ga-rank').textContent='RANK: GA-'+S.ga; }
+function autoHunt(){ S.auto=!S.auto; toast('自動巡航 '+(S.auto?'開':'關')); }
+function spawnMonster(type='normal'){ const a=Math.random()*Math.PI*2,d=150+Math.random()*180; S.monsters.push({x:S.x+Math.cos(a)*d,y:S.ct+Math.sin(a)*d,hp:type==='boss'?24:6,maxHp:type==='boss'?24:6,speed:type==='boss'?0.35:0.72,kind:type}); }
+function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
 for(let i=0;i<6;i++) spawnMonster();
-
-function worldToCamera(wx, wy){
-  const dx = wx - S.x;
-  const dy = wy - S.ct;
-  const c = Math.cos(-S.yaw), s = Math.sin(-S.yaw);
-  return {x: dx*c - dy*s, y: dx*s + dy*c};
-}
-function cameraToScreen(cx, baseY, cam){
-  return [cx + cam.x, baseY + cam.y*0.56];
-}
-
+function worldToCamera(wx, wy){ const dx=wx-S.x, dy=wy-S.ct, c=Math.cos(-S.yaw), s=Math.sin(-S.yaw); return {x:dx*c-dy*s,y:dx*s+dy*c}; }
+function cameraToScreen(cx, baseY, cam){ return [cx + cam.x, baseY + cam.y*0.56]; }
 function updateModel(){
-  const drift = direction() * (S.lev/150) * 0.28;
+  const drift = direction()*(S.lev/150)*0.28;
   S.ct += drift + (Math.random()-.5)*0.05;
   S.t++;
-
-  const last = S.candles[S.candles.length-1].c;
-  const close = last + drift + (Math.random()-.5)*0.65;
-  const open = last;
-  const high = Math.max(open, close) + Math.random()*0.7;
-  const low  = Math.min(open, close) - Math.random()*0.7;
-  const pred = close + direction()*(S.lev/150)*0.45 + (Math.random()-.5)*0.2;
-  S.candles.push({o:open,c:close,h:high,l:low,p:pred,v:Math.random()*4+1});
-  if(S.candles.length > 120) S.candles.shift();
-
-  if(S.auto){
-    S.yaw += 0.015 * (Math.sin(S.t*0.05)>0 ? 1 : -1);
-    setWarp(50 + 45*Math.abs(Math.sin(S.t*0.03)));
-  }
-
-  while(S.monsters.length < 8) spawnMonster();
-  const risk = 0.55 + (S.lev/150)*0.8;
-  S.monsters.forEach(m=>{
-    const dx=S.x-m.x, dy=S.ct-m.y, d=Math.hypot(dx,dy)||1;
-    m.x += dx/d*m.speed*risk;
-    m.y += dy/d*m.speed*risk;
-    if(d<18) S.hp = Math.max(0, S.hp - (m.kind==='boss'?0.22:0.07));
-  });
+  const last=S.candles[S.candles.length-1].c, close=last+drift+(Math.random()-.5)*0.65, open=last, high=Math.max(open,close)+Math.random()*0.7, low=Math.min(open,close)-Math.random()*0.7, pred=close+direction()*(S.lev/150)*0.45+(Math.random()-.5)*0.2;
+  S.candles.push({o:open,c:close,h:high,l:low,p:pred,v:Math.random()*4+1}); if(S.candles.length>120) S.candles.shift();
 }
-
 function drawWorld(){
-  const cw = world.width, ch = world.height;
+  const cw=world.width, ch=world.height, cx=cw/2, baseY=ch*0.72;
   wctx.clearRect(0,0,cw,ch);
-
-  const grad = wctx.createLinearGradient(0,0,0,ch);
-  grad.addColorStop(0, zone()==='多' ? '#0b1832' : '#2a0f18');
-  grad.addColorStop(.55, zone()==='多' ? '#193056' : '#53202c');
-  grad.addColorStop(1, '#0a0f16');
-  wctx.fillStyle = grad;
-  wctx.fillRect(0,0,cw,ch);
-
-  const cx = cw/2, baseY = ch*0.68;
-  wctx.strokeStyle = 'rgba(255,255,255,.09)';
-  for(let gy=-700; gy<=700; gy+=40){
-    const p1 = cameraToScreen(cx,baseY,worldToCamera(-900,gy));
-    const p2 = cameraToScreen(cx,baseY,worldToCamera(900,gy));
-    wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke();
-  }
-  for(let gx=-900; gx<=900; gx+=40){
-    const p1 = cameraToScreen(cx,baseY,worldToCamera(gx,-900));
-    const p2 = cameraToScreen(cx,baseY,worldToCamera(gx,900));
-    wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke();
-  }
-
-  if(S.terrain==='森林'){
-    for(let i=-320;i<320;i+=34){
-      for(let j=-80;j<280;j+=54){
-        const [sx,sy] = cameraToScreen(cx,baseY,worldToCamera(i,j));
-        wctx.fillStyle='#3a2617'; wctx.fillRect(sx-2,sy-8,4,12);
-        wctx.fillStyle='#1f7a2d'; wctx.beginPath(); wctx.arc(sx,sy-14,10,0,Math.PI*2); wctx.fill();
-      }
-    }
-  }else if(S.terrain==='湖泊'){
-    wctx.fillStyle='rgba(80,140,230,.72)';
-    for(let i=-220;i<=220;i+=40){
-      const [sx,sy] = cameraToScreen(cx,baseY,worldToCamera(i,30+Math.sin(i*0.04)*20));
-      wctx.beginPath(); wctx.ellipse(sx,sy,35,12,0,0,Math.PI*2); wctx.fill();
-    }
-  }else if(S.terrain==='山地'){
-    for(let i=-300;i<320;i+=70){
-      const [sx,sy] = cameraToScreen(cx,baseY,worldToCamera(i,140+((i%140)?50:0)));
-      wctx.fillStyle='#746657';
-      wctx.beginPath(); wctx.moveTo(sx-30,sy+18); wctx.lineTo(sx,sy-26); wctx.lineTo(sx+30,sy+18); wctx.closePath(); wctx.fill();
-    }
-  }else{
-    wctx.fillStyle='rgba(60,120,70,.25)';
-    wctx.fillRect(0, baseY, cw, ch-baseY);
-  }
-
-  // player
-  wctx.fillStyle = '#86ff7a';
-  wctx.beginPath(); wctx.arc(cx,baseY,12,0,Math.PI*2); wctx.fill();
-  wctx.strokeStyle='rgba(255,255,255,.65)';
-  wctx.beginPath(); wctx.moveTo(cx,baseY); wctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); wctx.stroke();
-
-  // monsters
-  S.monsters.forEach(m=>{
-    const [sx,sy] = cameraToScreen(cx,baseY,worldToCamera(m.x,m.y));
-    const r = m.kind==='boss' ? 18 : 10;
-    wctx.fillStyle = m.kind==='boss' ? '#ffb36b' : '#ff4d4d';
-    wctx.beginPath(); wctx.arc(sx,sy,r,0,Math.PI*2); wctx.fill();
-    wctx.fillStyle='rgba(0,0,0,.5)'; wctx.fillRect(sx-r, sy-r-10, r*2, 4);
-    wctx.fillStyle='#86ff7a'; wctx.fillRect(sx-r, sy-r-10, (m.hp/m.maxHp)*r*2, 4);
-  });
+  const grad=wctx.createLinearGradient(0,0,0,ch); grad.addColorStop(0, zone()==='多'?'#0b1832':'#2a0f18'); grad.addColorStop(.55, zone()==='多'?'#193056':'#53202c'); grad.addColorStop(1,'#0a0f16'); wctx.fillStyle=grad; wctx.fillRect(0,0,cw,ch);
+  wctx.strokeStyle='rgba(255,255,255,.08)';
+  for(let gy=-700; gy<=700; gy+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy)), p2=cameraToScreen(cx,baseY,worldToCamera(900,gy)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
+  for(let gx=-900; gx<=900; gx+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900)), p2=cameraToScreen(cx,baseY,worldToCamera(gx,900)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
+  wctx.fillStyle='#86ff7a'; wctx.beginPath(); wctx.arc(cx,baseY,12,0,Math.PI*2); wctx.fill();
+  wctx.strokeStyle='rgba(255,255,255,.65)'; wctx.beginPath(); wctx.moveTo(cx,baseY); wctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); wctx.stroke();
+  S.monsters.forEach(m=>{ const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(m.x,m.y)); const r=m.kind==='boss'?18:10; wctx.fillStyle=m.kind==='boss'?'#ffb36b':'#ff4d4d'; wctx.beginPath(); wctx.arc(sx,sy,r,0,Math.PI*2); wctx.fill(); });
 }
-
 function drawCore(){
-  const w = core.width, h = core.height;
-  cctx.clearRect(0,0,w,h);
-  const cx = w/2, cy = h/2;
-  const rg = cctx.createRadialGradient(cx,cy,18,cx,cy,150);
-  rg.addColorStop(0, zone()==='多' ? 'rgba(90,180,255,.30)' : 'rgba(255,90,90,.30)');
-  rg.addColorStop(1,'rgba(0,0,0,0)');
-  cctx.fillStyle = rg;
-  cctx.beginPath(); cctx.arc(cx,cy,150,0,Math.PI*2); cctx.fill();
-
-  const baseR = 118;
-  S.candles.forEach((k,i)=>{
-    const t = i/S.candles.length*Math.PI*2 + S.yaw;
-    const rr = baseR + k.v*1.1;
-    const x = cx + Math.cos(t)*rr;
-    const y = cy + Math.sin(t)*rr*0.84;
-    cctx.strokeStyle = k.c>=k.o ? '#86ff7a' : '#ff7575';
-    cctx.beginPath(); cctx.moveTo(x,y); cctx.lineTo(x,y-(k.c-k.o)*1.8); cctx.stroke();
-    if(S.predict){
-      cctx.strokeStyle='rgba(121,215,255,.95)';
-      cctx.beginPath(); cctx.moveTo(x+1.1,y); cctx.lineTo(x+1.1,y-(k.p-k.o)*1.8); cctx.stroke();
-    }
-  });
-
-  cctx.strokeStyle='rgba(242,213,122,.35)';
-  for(let i=0;i<3;i++){
-    cctx.beginPath();
-    cctx.ellipse(cx,cy,72+i*20,52+i*14,S.yaw*0.55+i*.25,0,Math.PI*2);
-    cctx.stroke();
-  }
+  const w=core.width,h=core.height,cx=w/2,cy=h/2; cctx.clearRect(0,0,w,h);
+  const rg=cctx.createRadialGradient(cx,cy,18,cx,cy,150); rg.addColorStop(0, zone()==='多'?'rgba(90,180,255,.30)':'rgba(255,90,90,.30)'); rg.addColorStop(1,'rgba(0,0,0,0)');
+  cctx.fillStyle=rg; cctx.beginPath(); cctx.arc(cx,cy,150,0,Math.PI*2); cctx.fill();
+  const baseR=118;
+  S.candles.forEach((k,i)=>{ const t=i/S.candles.length*Math.PI*2+S.yaw, rr=baseR+k.v*1.1, x=cx+Math.cos(t)*rr, y=cy+Math.sin(t)*rr*0.84; cctx.strokeStyle=k.c>=k.o?'#86ff7a':'#ff7575'; cctx.beginPath(); cctx.moveTo(x,y); cctx.lineTo(x,y-(k.c-k.o)*1.8); cctx.stroke(); if(S.predict){ cctx.strokeStyle='rgba(121,215,255,.95)'; cctx.beginPath(); cctx.moveTo(x+1.1,y); cctx.lineTo(x+1.1,y-(k.p-k.o)*1.8); cctx.stroke(); } });
+  cctx.strokeStyle='rgba(242,213,122,.35)'; for(let i=0;i<3;i++){ cctx.beginPath(); cctx.ellipse(cx,cy,72+i*20,52+i*14,S.yaw*0.55+i*.25,0,Math.PI*2); cctx.stroke(); }
   cctx.beginPath(); cctx.arc(cx,cy,18,0,Math.PI*2); cctx.fillStyle='rgba(242,213,122,.86)'; cctx.fill();
 }
-
 function drawKlinePanel(){
   kctx.clearRect(0,0,kline.width,kline.height);
-  const data = S.candles.slice(-24);
-  const highs = data.map(d=>d.h), lows = data.map(d=>d.l);
-  const max = Math.max(...highs), min = Math.min(...lows);
-  const range = Math.max(0.0001, max-min);
-  data.forEach((d,i)=>{
-    const x = 8 + i*11;
-    const yo = 78 - ((d.o-min)/range)*60;
-    const yc = 78 - ((d.c-min)/range)*60;
-    const yh = 78 - ((d.h-min)/range)*60;
-    const yl = 78 - ((d.l-min)/range)*60;
-    kctx.strokeStyle = d.c>=d.o ? '#79ff91' : '#ff7575';
-    kctx.beginPath(); kctx.moveTo(x+4, yh); kctx.lineTo(x+4, yl); kctx.stroke();
-    kctx.fillStyle = d.c>=d.o ? '#79ff91' : '#ff7575';
-    kctx.fillRect(x, Math.min(yo,yc), 8, Math.max(2, Math.abs(yc-yo)));
-  });
+  const data=S.candles.slice(-22), highs=data.map(d=>d.h), lows=data.map(d=>d.l), max=Math.max(...highs), min=Math.min(...lows), range=Math.max(.0001,max-min);
+  data.forEach((d,i)=>{ const x=8+i*11, yo=78-((d.o-min)/range)*60, yc=78-((d.c-min)/range)*60, yh=78-((d.h-min)/range)*60, yl=78-((d.l-min)/range)*60; kctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.beginPath(); kctx.moveTo(x+4,yh); kctx.lineTo(x+4,yl); kctx.stroke(); kctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.fillRect(x,Math.min(yo,yc),8,Math.max(2,Math.abs(yc-yo))); });
 }
-
 function updatePanels(){
-  const last = S.candles[S.candles.length-1];
-  document.getElementById('sys-clock').textContent = 'SYSTEM ONLINE | ' + new Date().toLocaleString();
-  document.getElementById('top-zone').textContent = zone();
-  document.getElementById('ke-side').textContent = zone();
-  document.getElementById('ke-angle').textContent = signedDeg().toFixed(1)+'°';
-  document.getElementById('ke-open').textContent = last.o.toFixed(2);
-  document.getElementById('ke-high').textContent = last.h.toFixed(2);
-  document.getElementById('ke-low').textContent = last.l.toFixed(2);
-  document.getElementById('ke-close').textContent = last.c.toFixed(2);
-  document.getElementById('ke-range').textContent = (last.h-last.l).toFixed(2);
-  document.getElementById('ke-wick').textContent = ((last.h-last.l)-Math.abs(last.c-last.o)).toFixed(2);
-  document.getElementById('ke-live-price').textContent = S.ct.toFixed(2);
-  document.getElementById('kc-dir').textContent = '方向盤 → ' + zone() + '方K';
-
-  document.getElementById('cp-side').textContent = '方向：' + zone();
-  document.getElementById('cp-deg-num').textContent = signedDeg().toFixed(1)+'°';
-  document.getElementById('cp-x').textContent = S.x.toFixed(1);
-  document.getElementById('cp-ct').textContent = S.ct.toFixed(2);
-  document.getElementById('cp-ct1').textContent = (S.ct + direction()).toFixed(2);
-  document.getElementById('cp-terrain').textContent = S.terrain;
-  document.getElementById('cp-lev').textContent = S.lev.toFixed(1)+'x';
-  document.getElementById('cp-time').textContent = 'T+' + S.t;
-  document.getElementById('cp-hp').textContent = Math.round(S.hp);
-  document.getElementById('cp-energy').textContent = Math.round(S.energy);
-
-  document.getElementById('cl-pool').textContent = document.getElementById('bp-pool').textContent;
-  document.getElementById('cl-round').textContent = 'Round #' + Math.max(1, Math.floor(S.t/180));
-  document.getElementById('cl-a').textContent = '0xA...' + (1000 + (S.t%899)).toString();
-  document.getElementById('cl-b').textContent = '0xB...' + (1000 + ((S.t+77)%899)).toString();
-
-  document.getElementById('f-val').textContent = (0.92 + (S.lev/150)*0.08).toFixed(3);
-  document.getElementById('m-val').textContent = (0.01 + Math.abs(signedDeg())/180*0.04).toFixed(3);
-  document.getElementById('g-val').textContent = 8422 + Math.floor(S.t/12);
-  document.getElementById('f-bar').style.width = (40 + (S.lev/150)*60) + '%';
-  document.getElementById('m-bar').style.width = (15 + Math.abs(signedDeg())/180*80) + '%';
+  const last=S.candles[S.candles.length-1];
+  document.getElementById('sys-clock').textContent='SYSTEM ONLINE | '+new Date().toLocaleString();
+  document.getElementById('top-zone').textContent=zone();
+  document.getElementById('ke-side').textContent=zone();
+  document.getElementById('ke-angle').textContent=signedDeg().toFixed(1)+'°';
+  document.getElementById('ke-open').textContent=last.o.toFixed(2);
+  document.getElementById('ke-high').textContent=last.h.toFixed(2);
+  document.getElementById('ke-low').textContent=last.l.toFixed(2);
+  document.getElementById('ke-close').textContent=last.c.toFixed(2);
+  document.getElementById('ke-live-price').textContent=S.ct.toFixed(2);
+  document.getElementById('cp-side').textContent='方向：'+zone();
+  document.getElementById('cp-x').textContent=S.x.toFixed(1);
+  document.getElementById('cp-ct').textContent=S.ct.toFixed(2);
+  document.getElementById('cp-deg').textContent=signedDeg().toFixed(1)+'°';
+  document.getElementById('cp-terrain').textContent=S.terrain;
+  document.getElementById('cp-lev').textContent=S.lev.toFixed(1)+'x';
+  document.getElementById('cp-time').textContent='T+'+S.t;
+  document.getElementById('f-bar').style.width=(40+(S.lev/150)*60)+'%';
+  document.getElementById('m-bar').style.width=(15+Math.abs(signedDeg())/180*80)+'%';
 }
-
-function loop(){
-  updateModel();
-  drawWorld();
-  drawCore();
-  drawKlinePanel();
-  updatePanels();
-  requestAnimationFrame(loop);
-}
+function loop(){ updateModel(); drawWorld(); drawCore(); drawKlinePanel(); updatePanels(); requestAnimationFrame(loop); }
 loop();
-
-// controls
-(function(){
-  const rail = document.getElementById('warp-rail-body');
-  function setFromClientY(clientY){
-    const r = rail.getBoundingClientRect();
-    let y = clientY - r.top;
-    y = Math.max(17, Math.min(r.height-17, y));
-    const v = 1 - ((y-17)/(r.height-34));
-    setWarp(v*150);
-  }
-  rail.addEventListener('pointerdown', e=>{ e.preventDefault(); setFromClientY(e.clientY); toast('曲速引擎：0~150x'); });
-  rail.addEventListener('pointermove', e=>{ if(e.buttons) setFromClientY(e.clientY); });
-})();
-
-(function(){
-  const wheel = document.getElementById('core-window');
-  function setFromClient(x){
-    const r = wheel.getBoundingClientRect();
-    const center = r.left + r.width/2;
-    const dx = x - center;
-    const deg = Math.max(-180, Math.min(180, (dx/(r.width/2))*180));
-    S.yaw = deg * Math.PI/180;
-    document.getElementById('core-window').style.transform = `rotate(${deg}deg)`;
-  }
-  wheel.addEventListener('pointerdown', e=>{ e.preventDefault(); setFromClient(e.clientX); toast('核心圓窗可拖動方向'); });
-  wheel.addEventListener('pointermove', e=>{ if(e.buttons) setFromClient(e.clientX); });
-})();
-
-(function(){
-  const panel = document.getElementById('kline-chart-panel');
-  panel.addEventListener('pointerdown', e=>{
-    // quick tactile interaction, no move
-  });
-})();
-
+(function(){ const rail=document.getElementById('warp-rail-body'); function setFromY(clientY){ const r=rail.getBoundingClientRect(); let y=clientY-r.top; y=Math.max(14,Math.min(r.height-14,y)); const v=1-((y-14)/(r.height-28)); setWarp(v*150); } rail.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromY(e.clientY); }); rail.addEventListener('pointermove',e=>{ if(e.buttons) setFromY(e.clientY); });})();
+(function(){ const wheel=document.getElementById('core-window'); function setFromX(x){ const r=wheel.getBoundingClientRect(), center=r.left+r.width/2; const dx=x-center; const deg=Math.max(-180,Math.min(180,(dx/(r.width/2))*180)); S.yaw=deg*Math.PI/180; document.getElementById('core-window').style.transform=`rotate(${deg}deg)`; } wheel.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromX(e.clientX); }); wheel.addEventListener('pointermove',e=>{ if(e.buttons) setFromX(e.clientX); });})();
 </script>
 </body>
 </html>
