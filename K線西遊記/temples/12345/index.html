@@ -3,84 +3,120 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V4.2 完整體</title>
+<title>KLINE V5 接鏈版</title>
 <style>
-body{margin:0;background:#000;overflow:hidden}
+body{margin:0;background:#000;overflow:hidden;font-family:sans-serif}
 canvas{position:fixed;inset:0}
+.hud{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.6);padding:10px;border-radius:10px}
+.btn{margin-top:6px;padding:8px 12px;background:#111;border:1px solid #555;color:#fff;border-radius:6px}
 </style>
 </head>
 <body>
+
 <canvas id="c"></canvas>
+
+<div class="hud">
+<div id="zone">ZONE</div>
+<div id="wallet">未連線</div>
+<button class="btn" onclick="connect()">連接錢包</button>
+<button class="btn" onclick="claim()">發財金</button>
+<button class="btn" onclick="heartbeat()">心跳</button>
+<button class="btn" onclick="ignite()">呼吸</button>
+</div>
 
 <script>
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
+
 function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
 let angle=0;
 let candles=[];
-for(let i=0;i<120;i++){
-  candles.push({o:0,c:0});
+
+for(let i=0;i<100;i++){
+ candles.push({o:0,c:0});
 }
 
 function gen(){
-  let last=candles[candles.length-1].c;
-  let n=last+(Math.random()-0.5)*20;
-  candles.push({o:last,c:n});
-  if(candles.length>120)candles.shift();
+ let last=candles[candles.length-1].c;
+ let n=last+(Math.random()-0.5)*10;
+ candles.push({o:last,c:n});
+ if(candles.length>100)candles.shift();
 }
 
 function draw(){
-  ctx.clearRect(0,0,c.width,c.height);
-  let cx=c.width/2;
-  let cy=c.height/2;
+ ctx.clearRect(0,0,c.width,c.height);
 
-  let y=Math.cos(angle);
-  let isBull=y>0;
+ let cx=c.width/2;
+ let cy=c.height/2;
 
-  // energy split
-  let grad=ctx.createLinearGradient(0,0,0,c.height);
-  if(isBull){
-    grad.addColorStop(0,"#0033ff");
-    grad.addColorStop(1,"#000");
-  }else{
-    grad.addColorStop(0,"#000");
-    grad.addColorStop(1,"#ff0000");
-  }
-  ctx.fillStyle=grad;
-  ctx.fillRect(0,0,c.width,c.height);
+ let y=Math.cos(angle);
+ let zone=y>0?"多":"空";
+ document.getElementById("zone").innerText="ZONE: "+zone;
 
-  let radius=200;
+ let grad=ctx.createLinearGradient(0,0,0,c.height);
+ if(zone=="多"){
+   grad.addColorStop(0,"#0033ff");
+   grad.addColorStop(1,"#000");
+ }else{
+   grad.addColorStop(0,"#000");
+   grad.addColorStop(1,"#ff0000");
+ }
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,c.width,c.height);
 
-  candles.forEach((k,i)=>{
-    let t=i/candles.length*Math.PI*2+angle;
-    let h=(k.c-k.o)*2;
+ let radius=200;
 
-    let x=cx+Math.cos(t)*radius;
-    let y=cy+Math.sin(t)*radius;
+ candles.forEach((k,i)=>{
+   let t=i/candles.length*Math.PI*2+angle;
+   let h=(k.c-k.o)*2;
 
-    ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.lineTo(x,y-h);
-    ctx.stroke();
-  });
+   let x=cx+Math.cos(t)*radius;
+   let y=cy+Math.sin(t)*radius;
 
-  // core
-  ctx.beginPath();
-  ctx.arc(cx,cy,50,0,Math.PI*2);
-  ctx.fillStyle="rgba(255,255,255,0.1)";
-  ctx.fill();
+   ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
+   ctx.beginPath();
+   ctx.moveTo(x,y);
+   ctx.lineTo(x,y-h);
+   ctx.stroke();
+ });
+
+ ctx.beginPath();
+ ctx.arc(cx,cy,40,0,Math.PI*2);
+ ctx.fillStyle="rgba(255,255,255,0.1)";
+ ctx.fill();
+}
+
+async function connect(){
+ if(window.ethereum){
+  const acc=await window.ethereum.request({method:"eth_requestAccounts"});
+  document.getElementById("wallet").innerText=acc[0];
+ }else{
+  alert("沒有錢包");
+ }
+}
+
+function claim(){
+ alert("呼叫 fortuneClaim（需接合約）");
+}
+
+function heartbeat(){
+ alert("heartbeatClaim");
+}
+
+function ignite(){
+ alert("igniteAndClaim");
 }
 
 function loop(){
-  angle+=0.01;
-  gen();
-  draw();
-  requestAnimationFrame(loop);
+ angle+=0.01;
+ gen();
+ draw();
+ requestAnimationFrame(loop);
 }
 loop();
+
 </script>
 </body>
 </html>
