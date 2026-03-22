@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V11.3 地形世界版</title>
+<title>KLINE V11.4 旋轉地形版</title>
 <style>
 :root{--bg:#03050b;--panel:rgba(0,0,0,.62);--line:rgba(255,255,255,.14);--gold:#f2d57a;}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:Arial,sans-serif;touch-action:none}
@@ -11,7 +11,7 @@ canvas{position:fixed;inset:0}
 .version,.coord,.hud{position:fixed;z-index:90;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6}
 .version{top:10px;left:10px}
 .coord{top:50px;left:10px}
-.hud{top:10px;right:10px;min-width:200px}
+.hud{top:10px;right:10px;min-width:210px}
 .controls{position:fixed;left:0;right:0;bottom:88px;height:186px;z-index:120;pointer-events:none}
 .joy,.yaw,.alt{pointer-events:auto}
 .joy{position:absolute;left:18px;bottom:6px;width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
@@ -35,25 +35,25 @@ canvas{position:fixed;inset:0}
 </style>
 </head>
 <body>
-<div class="version">V11.3 地形世界版</div>
+<div class="version">V11.4 旋轉地形版</div>
 <div class="coord" id="coordBox">X: 0.0<br>Y: 0.0<br>Z: 0.0<br>地形: 草原</div>
 <div class="hud" id="hud">載入中...</div>
 <canvas id="bg"></canvas>
 
 <div class="controls">
   <div class="joy" id="joy"><div class="joy-label">X / Y 平面</div><div class="joy-inner" id="joyInner"></div></div>
-  <div class="yaw" id="yaw"><div class="yaw-label">方向 / 瞄準</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-inner" id="yawInner"></div></div>
+  <div class="yaw" id="yaw"><div class="yaw-label">場景旋轉</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-inner" id="yawInner"></div></div>
   <div class="alt" id="alt"><div class="alt-top">Z+</div><div class="alt-track"></div><div class="alt-inner" id="altInner"></div><div class="alt-bottom">Z-</div></div>
 </div>
 
 <div class="actions">
-  <div class="btn" onclick="skill()">發財金技能</div>
-  <div class="btn" onclick="swing()">普通攻擊</div>
+  <div class="btn" onclick="toastMsg('X/Y 平面移動')">平面</div>
+  <div class="btn" onclick="toastMsg('Z 軸只改高度')">高度</div>
   <div class="btn" onclick="switchMode()">切換模式</div>
   <div class="btn" onclick="toastMsg(currentTerrain())">查看地形</div>
-  <div class="btn" onclick="toastMsg('森林區可做樹群')">森林</div>
-  <div class="btn" onclick="toastMsg('草原區可做開闊平原')">草原</div>
-  <div class="btn" onclick="toastMsg('湖泊區可做水面反光')">湖泊</div>
+  <div class="btn" onclick="toastMsg('森林區')">森林</div>
+  <div class="btn" onclick="toastMsg('草原區')">草原</div>
+  <div class="btn" onclick="toastMsg('湖泊區')">湖泊</div>
   <div class="btn" onclick="spawnBoss()">召喚Boss</div>
 </div>
 
@@ -63,7 +63,7 @@ canvas{position:fixed;inset:0}
 const bg=document.getElementById('bg'), ctx=bg.getContext('2d');
 function fit(){bg.width=innerWidth; bg.height=innerHeight} addEventListener('resize',fit); fit();
 
-const S={x:0,y:0,z:0,yaw:0,moveX:0,moveY:0,yawInput:0,zInput:0,hp:100,energy:100,score:0,mode:'BATTLE',monsters:[],attackCd:0,skillCd:0};
+const S={x:0,y:0,z:0,yaw:0,moveX:0,moveY:0,yawInput:0,zInput:0,hp:100,energy:100,score:0,mode:'BATTLE',monsters:[]};
 
 function toastMsg(msg){
   const el=document.getElementById('toast');
@@ -86,64 +86,70 @@ function spawnMonster(type='normal'){
 for(let i=0;i<6;i++) spawnMonster();
 function spawnBoss(){spawnMonster('boss');toastMsg('Boss 出現');}
 
+// rotate world around player by yaw
+function worldToScreen(wx, wy, cx, baseY){
+  const dx = wx - S.x;
+  const dy = wy - S.y;
+  const cos = Math.cos(-S.yaw), sin = Math.sin(-S.yaw);
+  const rx = dx*cos - dy*sin;
+  const ry = dx*sin + dy*cos;
+  // Z only affects vertical camera/horizon, not XY plane logic
+  return [cx + rx, baseY + ry*0.55 - S.z*10];
+}
+
 function drawTerrain(cx, horizon, baseY){
-  // sky gradient
   const sky=ctx.createLinearGradient(0,0,0,baseY);
   sky.addColorStop(0,'#0b1832'); sky.addColorStop(0.55,'#193056'); sky.addColorStop(1,'#243858');
   ctx.fillStyle=sky; ctx.fillRect(0,0,bg.width,baseY);
 
-  // zone patches in world space
-  function worldToScreen(wx, wy){ return [cx + (wx-S.x), baseY + (wy-S.y)*0.55 - S.z*5]; }
-
-  // grassland base
   ctx.fillStyle='#355c2d';
   ctx.fillRect(0,baseY,bg.width,bg.height-baseY);
 
   // lake
-  let pts=[[120,-180],[300,-180],[300,40],[120,40]].map(p=>worldToScreen(p[0],p[1]));
+  let pts=[[120,-180],[300,-180],[300,40],[120,40]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
   ctx.fillStyle='rgba(70,130,220,.72)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
   // forest zone
-  pts=[[-320,40],[-120,40],[-120,260],[-320,260]].map(p=>worldToScreen(p[0],p[1]));
+  pts=[[-320,40],[-120,40],[-120,260],[-320,260]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
   ctx.fillStyle='rgba(28,80,34,.88)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
   // mountain zone
-  pts=[[260,160],[520,160],[520,360],[260,360]].map(p=>worldToScreen(p[0],p[1]));
+  pts=[[260,160],[520,160],[520,360],[260,360]].map(p=>worldToScreen(p[0],p[1],cx,baseY));
   ctx.fillStyle='rgba(82,72,60,.90)';
   ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
 
-  // moving grid tied to X/Y
+  // grid now rotates/moves with XY coordinates
   ctx.strokeStyle='rgba(255,255,255,.10)';
   for(let gy=-600; gy<=600; gy+=40){
-    const [, sy]=worldToScreen(0,gy);
-    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(bg.width,sy); ctx.stroke();
+    const p1=worldToScreen(-900,gy,cx,baseY), p2=worldToScreen(900,gy,cx,baseY);
+    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
   }
-  for(let gx=-800; gx<=800; gx+=40){
-    const [sx, ]=worldToScreen(gx,0);
-    ctx.beginPath(); ctx.moveTo(sx,horizon); ctx.lineTo(sx,bg.height); ctx.stroke();
+  for(let gx=-900; gx<=900; gx+=40){
+    const p1=worldToScreen(gx,-800,cx,baseY), p2=worldToScreen(gx,800,cx,baseY);
+    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
   }
 
-  // trees in forest world coordinates
+  // trees
   for(let i=-300;i<-130;i+=35){
     for(let j=70;j<250;j+=48){
-      const [sx,sy]=worldToScreen(i,j);
+      const [sx,sy]=worldToScreen(i,j,cx,baseY);
       ctx.fillStyle='#3a2617'; ctx.fillRect(sx-2,sy-8,4,12);
       ctx.fillStyle='#1f7a2d'; ctx.beginPath(); ctx.arc(sx,sy-14,10,0,Math.PI*2); ctx.fill();
     }
   }
 
-  // mountain silhouette
+  // mountains
   for(let i=280;i<500;i+=70){
-    const [sx,sy]=worldToScreen(i,210+((i%140)?40:0));
+    const [sx,sy]=worldToScreen(i,210+((i%140)?40:0),cx,baseY);
     ctx.fillStyle='#746657';
     ctx.beginPath(); ctx.moveTo(sx-30,sy+18); ctx.lineTo(sx,sy-25); ctx.lineTo(sx+30,sy+18); ctx.closePath(); ctx.fill();
   }
 
   // lake highlights
   for(let i=130;i<290;i+=26){
-    const [sx,sy]=worldToScreen(i,-70 + Math.sin(i*0.1)*20);
+    const [sx,sy]=worldToScreen(i,-70 + Math.sin(i*0.1)*20,cx,baseY);
     ctx.strokeStyle='rgba(190,225,255,.45)';
     ctx.beginPath(); ctx.moveTo(sx-10,sy); ctx.lineTo(sx+10,sy); ctx.stroke();
   }
@@ -152,11 +158,10 @@ function drawTerrain(cx, horizon, baseY){
 function update(){
   S.x += S.moveX*2.1;
   S.y += S.moveY*2.1;
-  S.z += S.zInput*0.14;
+  S.z += S.zInput*0.25; // stronger separation from Y axis
   S.yaw += S.yawInput*0.05;
   if(S.z>25) S.z=25; if(S.z<-25) S.z=-25;
-  if(S.attackCd>0) S.attackCd--;
-  if(S.skillCd>0) S.skillCd--;
+
   while(S.monsters.length<8) spawnMonster();
   S.monsters.forEach(m=>{
     const dx=S.x-m.x, dy=S.y-m.y, d=Math.hypot(dx,dy)||1;
@@ -165,18 +170,18 @@ function update(){
 }
 function draw(){
   ctx.clearRect(0,0,bg.width,bg.height);
-  const cx=bg.width/2, horizon=bg.height*0.46 - S.z*2, baseY=bg.height*0.74 - S.z*8;
+  const cx=bg.width/2, horizon=bg.height*0.44 - S.z*6, baseY=bg.height*0.72 - S.z*12;
   drawTerrain(cx,horizon,baseY);
 
-  // player
+  // player stays center
   ctx.fillStyle='#83ff74';
   ctx.beginPath(); ctx.arc(cx,baseY,12,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.65)';
   ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); ctx.stroke();
 
-  // monsters
+  // monsters rotate with terrain too
   S.monsters.forEach(m=>{
-    const sx=cx+(m.x-S.x), sy=baseY+(m.y-S.y)*0.55 - S.z*5;
+    const [sx,sy]=worldToScreen(m.x,m.y,cx,baseY);
     const r=m.kind==='boss'?18:10;
     ctx.fillStyle=m.kind==='boss' ? '#ffb36b' : '#ff3d3d';
     ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2); ctx.fill();
@@ -191,10 +196,6 @@ function draw(){
 function loop(){ update(); draw(); requestAnimationFrame(loop); }
 loop();
 
-function swing(){toastMsg('普通攻擊');}
-function skill(){toastMsg('發財金技能');}
-function heartbeat(){toastMsg('心跳');}
-function ignite(){toastMsg('呼吸');}
 function switchMode(){S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE';toastMsg('切換到 '+S.mode);}
 
 // controls
@@ -203,13 +204,12 @@ function switchMode(){S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE';toastMsg('切�
   function setP(x,y){
     const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
     const max=39, len=Math.hypot(dx,dy)||1; if(len>max){dx=dx/len*max; dy=dy/len*max;}
-    // corrected mapping
     S.moveX = dx/max;
     S.moveY = -dy/max;
     inner.style.left=(42+dx)+'px'; inner.style.top=(42+dy)+'px';
   }
   function reset(){S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px';}
-  joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY); toastMsg('左下方向已校正');});
+  joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY); toastMsg('X/Y 平面方向已校正');});
   joy.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientX,e.clientY);});
   joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
 })();
@@ -221,7 +221,7 @@ function switchMode(){S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE';toastMsg('切�
     if(dx>=0){fill.style.left='50%'; fill.style.width=(dx/max*50)+'%';} else {fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%';}
   }
   function reset(){S.yawInput=0; inner.style.left='calc(50% - 24px)'; fill.style.left='50%'; fill.style.width='0';}
-  yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX);});
+  yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX); toastMsg('現在旋轉會帶動整個地形與怪物');});
   yaw.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientX);});
   yaw.addEventListener('pointerup',reset); yaw.addEventListener('pointercancel',reset);
 })();
@@ -233,12 +233,12 @@ function switchMode(){S.mode=S.mode==='BATTLE'?'PREDICT':'BATTLE';toastMsg('切�
     inner.style.top=(66+dy)+'px';
   }
   function reset(){S.zInput=0; inner.style.top='66px';}
-  alt.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY);});
+  alt.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY); toastMsg('Z 軸現在只改高度/鏡頭，不再像 Y 軸');});
   alt.addEventListener('pointermove',e=>{if(e.buttons) setP(e.clientY);});
   alt.addEventListener('pointerup',reset); alt.addEventListener('pointercancel',reset);
 })();
 
-toastMsg('V11.3 加入森林、草原、湖泊與隨 X/Y 移動的格線');
+toastMsg('V11.4 已修正：Z 與 Y 分離，旋轉會帶動地形');
 </script>
 </body>
 </html>
