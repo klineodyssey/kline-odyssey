@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>KLINE App Game｜12345 五指山悟空財神殿 V3.5 最終版</title>
+<title>KLINE App Game｜12345 五指山悟空財神殿 V3.6 極簡沉浸版</title>
 <style>
 :root{
-  --panel:rgba(8,12,22,.54);
+  --panel:rgba(8,12,22,.46);
   --panel2:rgba(8,12,22,.95);
-  --line:rgba(255,215,120,.24);
+  --line:rgba(255,215,120,.22);
   --gold:#ffd978;
   --text:#eef4ff;
   --muted:#adbbd2;
@@ -20,37 +20,35 @@ html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text)
 canvas{position:fixed;inset:0;width:100%;height:100%}
 button{pointer-events:auto}
 
-/* Minimal HUD */
-.top-hud{position:fixed;left:12px;right:12px;top:12px;z-index:40;display:flex;justify-content:space-between;gap:10px;pointer-events:none}
-.titlebar,.hudbox,.infofab{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
-.titlebar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;pointer-events:none}
-.titlebar .title{color:var(--gold);font-weight:900;font-size:clamp(18px,3vw,28px)}
+/* ultra minimal top bar */
+.topbar{position:fixed;left:12px;right:12px;top:12px;z-index:50;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.titlebar,.infofab{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.titlebar{padding:10px 14px;border-radius:18px;color:var(--gold);font-weight:900;font-size:clamp(18px,3vw,28px)}
 .infofab{padding:10px 14px;border-radius:16px;color:#fff;font-weight:900;pointer-events:auto}
-.hudcol{display:grid;gap:8px}
-.hudbox{min-width:170px;padding:10px 12px;border-radius:16px;pointer-events:none}
-.hudrow{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:12px}
-.hudrow .k{color:var(--muted)} .hudrow .v{font-weight:900}
 
-/* Center hero */
-.center-wrap{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);width:min(60vw,420px);height:min(60vw,420px);z-index:10;pointer-events:none}
-.ring{position:absolute;inset:0;border-radius:50%;border:8px double rgba(255,215,120,.82);overflow:hidden;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 70px rgba(255,195,60,.22);animation:ringSpin 34s linear infinite}
-.wukong-core{position:absolute;inset:0;overflow:hidden;border-radius:50%;filter:drop-shadow(0 0 40px rgba(255,215,120,.35))}
-.wukong-core img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 55%;animation:pulse 3.2s ease-in-out infinite}
-.wukong-eye{position:absolute;top:37%;width:22%;height:10%;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(255,215,120,.65), rgba(255,215,120,0) 72%);filter:blur(8px);opacity:.0;transition:opacity .18s ease,left .15s ease,right .15s ease}
+/* center world */
+.center-wrap{position:fixed;left:50%;top:35%;transform:translate(-50%,-50%);width:min(66vw,500px);height:min(66vw,500px);z-index:10;pointer-events:none}
+.ring{position:absolute;inset:0;border-radius:50%;border:8px double rgba(255,215,120,.82);overflow:hidden;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 90px rgba(255,195,60,.26);animation:ringSpin 34s linear infinite}
+.wukong-core{position:absolute;inset:0;overflow:hidden;border-radius:50%;filter:drop-shadow(0 0 48px rgba(255,215,120,.42))}
+.wukong-core img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 55%;animation:pulse 3.1s ease-in-out infinite}
+.wukong-eye{position:absolute;top:37%;width:22%;height:10%;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(255,215,120,.76), rgba(255,215,120,0) 72%);filter:blur(8px);opacity:.0;transition:opacity .18s ease,left .15s ease,right .15s ease}
 .wukong-eye.left{left:25%}.wukong-eye.right{right:25%}
-.ring-glow{position:absolute;inset:-18px;border-radius:50%;border:1px solid rgba(255,215,120,.16);animation:aura 4.2s ease-out infinite}
-.center-name{position:absolute;left:50%;bottom:-52px;transform:translateX(-50%);min-width:280px;text-align:center;padding:11px 14px;border-radius:18px;background:rgba(0,0,0,.52);border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow);font-weight:900}
-.center-name .mini{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
-
-/* Tip */
-.node-tip{position:fixed;left:50%;bottom:220px;transform:translateX(-50%);display:none;z-index:50;padding:11px 14px;border-radius:16px;background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);font-weight:900;pointer-events:none}
-.node-tip.show{display:block}
-.crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;z-index:12;pointer-events:none}
+.ring-glow{position:absolute;inset:-22px;border-radius:50%;border:1px solid rgba(255,215,120,.18);animation:aura 4.2s ease-out infinite}
+.crosshair{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);width:18px;height:18px;z-index:12;pointer-events:none}
 .crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.88)}
 .crosshair:before{left:8px;top:0;width:2px;height:18px}
 .crosshair:after{left:0;top:8px;width:18px;height:2px}
 
-/* Controls */
+/* small fade tip only */
+.node-tip{position:fixed;left:50%;top:58%;transform:translateX(-50%);display:none;z-index:60;padding:10px 14px;border-radius:999px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);font-weight:900;pointer-events:none;backdrop-filter:blur(8px)}
+.node-tip.show{display:block;animation:fadeInOut 2.2s ease both}
+
+/* tiny live hud */
+.livehud{position:fixed;right:12px;top:66px;z-index:40;display:grid;gap:8px;pointer-events:none}
+.livebox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px;backdrop-filter:blur(10px);box-shadow:var(--shadow);font-size:12px}
+.livebox .k{color:var(--muted)} .livebox .v{font-weight:900}
+
+/* controls always on top */
 .controls{position:fixed;left:0;right:0;bottom:86px;height:194px;z-index:999999 !important;pointer-events:none}
 .joy-wrap{position:absolute;left:16px;bottom:8px;width:136px;height:136px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
@@ -68,11 +66,12 @@ button{pointer-events:auto}
 .yaw-left{left:10px}.yaw-right{right:10px}
 .enter-btn{position:absolute;right:92px;bottom:40px;width:92px;height:92px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:var(--panel2);color:#fff;font-size:18px;font-weight:900;box-shadow:var(--shadow);pointer-events:auto}
 
+/* bottom actions simplified */
 .footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:999999 !important;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
 .fbtn{min-height:58px;padding:10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shadow);cursor:pointer}
-.fbtn .mini{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:700}
+.fbtn .mini{display:none}
 
-/* Modal only for actions */
+/* modals */
 .modal{position:fixed;inset:0;z-index:80;display:none;background:rgba(0,0,0,.78);padding:14px 14px 260px 14px}
 .modal.show{display:block}
 .modal-card{max-width:980px;max-height:60vh;margin:6vh auto 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:22px;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.68)}
@@ -87,13 +86,12 @@ button{pointer-events:auto}
 .act{min-height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-weight:900;font-size:14px}
 
 @keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-@keyframes aura{0%{transform:scale(.86);opacity:.62}85%{transform:scale(1.24);opacity:0}100%{opacity:0}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes aura{0%{transform:scale(.86);opacity:.62}85%{transform:scale(1.26);opacity:0}100%{opacity:0}}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(8px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 
 @media (max-width:980px){
-  .top-hud{display:block}
-  .status{display:none}
-  .center-wrap{width:min(58vw,320px);height:min(58vw,320px);top:31%}
+  .center-wrap{width:min(64vw,360px);height:min(64vw,360px);top:34%}
   .footer-grid{grid-template-columns:repeat(4,1fr)}
   .yaw-wrap{width:min(42vw,250px)}
   .modal-body{grid-template-columns:1fr}
@@ -104,21 +102,14 @@ button{pointer-events:auto}
 <div id="app">
   <canvas id="scene"></canvas>
 
-  <div class="top-hud hud-layer">
-    <div class="titlebar">
-      <div class="title">12345｜五指山悟空財神殿</div>
-      <button class="infofab" id="infoToggle">☰ 神殿資訊</button>
-    </div>
-    <div class="hudcol">
-      <div class="hudbox">
-        <div class="hudrow"><div class="k">KGEN</div><div class="v" id="kgenBalance">—</div></div>
-        <div class="hudrow"><div class="k">Allowance</div><div class="v" id="allowanceTxt">—</div></div>
-      </div>
-      <div class="hudbox">
-        <div class="hudrow"><div class="k">聖盃</div><div class="v" id="cupTopTxt">0 / 3</div></div>
-        <div class="hudrow"><div class="k">狀態</div><div class="v" id="walletBadge">未連線</div></div>
-      </div>
-    </div>
+  <div class="topbar">
+    <div class="titlebar">12345｜五指山悟空財神殿</div>
+    <button class="infofab" id="infoToggle">☰ 神殿資訊</button>
+  </div>
+
+  <div class="livehud">
+    <div class="livebox"><span class="k">KGEN</span> <span class="v" id="kgenBalance">—</span><br><span class="k">Allowance</span> <span class="v" id="allowanceTxt">—</span></div>
+    <div class="livebox"><span class="k">聖盃</span> <span class="v" id="cupTopTxt">0 / 3</span><br><span class="k">狀態</span> <span class="v" id="walletBadge">未連線</span></div>
   </div>
 
   <div class="modal" id="infoModal">
@@ -130,27 +121,21 @@ button{pointer-events:auto}
       <div class="modal-body">
         <div class="modal-box">
           <h4>12345｜五指山悟空財神殿</h4>
-          <p>V3.5 最終版。上方只保留極簡 HUD，所有常駐功能卡都移除，主畫面只留下世界、悟空與控制。</p>
-          <div class="route">
-            <span class="pill">16888｜廣寒宮入口</span>
-            <span class="pill">12345｜五指山</span>
-            <span class="pill">11520｜花果山交易所</span>
-            <span class="pill">8888｜高老莊</span>
-            <span class="pill">7744｜流沙河</span>
-          </div>
+          <p>V3.6 極簡沉浸版。主畫面只保留世界、悟空、控制與極簡 HUD。所有功能都收進彈窗，不再用大面板佔畫面。</p>
+          <p>主流程：連接錢包 → Approve → 三次聖盃 → fortuneClaim。</p>
         </div>
         <div class="modal-box">
           <h4>即時資訊</h4>
-          <div class="hudrow"><div class="k">最近節點</div><div class="v" id="nearestTxt">—</div></div>
-          <div class="hudrow"><div class="k">高度</div><div class="v" id="altitudeTxt">20</div></div>
-          <div class="hudrow"><div class="k">Yaw</div><div class="v" id="yawTxt">180°</div></div>
-          <div class="hudrow"><div class="k">區間</div><div class="v" id="sideZoneTxt">多</div></div>
+          <p>最近節點：<b id="nearestTxt">—</b></p>
+          <p>高度：<b id="altitudeTxt">20</b></p>
+          <p>Yaw：<b id="yawTxt">180°</b></p>
+          <p>區間：<b id="sideZoneTxt">多</b></p>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="center-wrap center-layer">
+  <div class="center-wrap">
     <div class="ring">
       <div class="wukong-core">
         <img id="wukongImg" src="./assets/wukong_center.png" alt="悟空財神">
@@ -159,11 +144,10 @@ button{pointer-events:auto}
       </div>
       <div class="ring-glow"></div>
     </div>
-    <div class="center-name">12345｜五指山悟空財神殿<span class="mini">靠近節點後按「進入」，開啟 TempleHeart 操作</span></div>
   </div>
 
   <div class="crosshair"></div>
-  <div class="node-tip tip-layer" id="nodeTip"></div>
+  <div class="node-tip" id="nodeTip"></div>
 
   <div class="controls">
     <div class="joy-wrap" id="joyWrap"><div class="joy-ring"></div><div class="joy-knob" id="joyKnob"></div></div>
@@ -173,14 +157,14 @@ button{pointer-events:auto}
   </div>
 
   <div class="footer-grid">
-    <button class="fbtn" id="btnPhoto">📸 拍照存證<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnRecord">🎥 神殿留影錄影<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnFront">🤳 前鏡自拍<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnRear">🌌 後鏡巡禮<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnFortune">🧧 發財金<span class="mini">1 ~ 888</span></button>
-    <button class="fbtn" id="btnHeartbeat">🫀 整點心跳<span class="mini">每小時一次</span></button>
-    <button class="fbtn" id="btnIgnite">🌬️ 轉日呼吸<span class="mini">UTC 00:00–00:10</span></button>
-    <button class="fbtn" id="btnGuide">🗣️ 客服 / 五指山導覽<span class="mini">保留 KGEN 介紹</span></button>
+    <button class="fbtn" id="btnPhoto">📸 拍照存證</button>
+    <button class="fbtn" id="btnRecord">🎥 留影錄影</button>
+    <button class="fbtn" id="btnFront">🤳 前鏡自拍</button>
+    <button class="fbtn" id="btnRear">🌌 後鏡巡禮</button>
+    <button class="fbtn" id="btnFortune">🧧 發財金</button>
+    <button class="fbtn" id="btnHeartbeat">🫀 心跳</button>
+    <button class="fbtn" id="btnIgnite">🌬️ 呼吸</button>
+    <button class="fbtn" id="btnGuide">🗣️ 導覽</button>
   </div>
 
   <div class="modal" id="templeModal">
@@ -225,8 +209,8 @@ const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),z
 
 function normalizeDeg(rad){ return ((((rad*180/Math.PI)%360)+360)%360); }
 function sideZoneFromYaw(deg){ const signed = deg > 180 ? deg - 360 : deg; return (signed >= -90 && signed <= 90) ? "多" : "空"; }
-function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2300); }
-function updateWukongFace(){ const deg = normalizeDeg(state.yaw); const signed = deg > 180 ? deg - 360 : deg; const offset = Math.max(-16, Math.min(16, signed/7)); const scale = 1 + Math.min(.05, Math.abs(signed)/800); ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`; const glow = Math.abs(signed) > 45 ? .82 : .30; ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow; ui.eyeL.style.left = `${25 + offset*0.18}%`; ui.eyeR.style.right = `${25 - offset*0.18}%`; }
+function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2200); }
+function updateWukongFace(){ const deg = normalizeDeg(state.yaw); const signed = deg > 180 ? deg - 360 : deg; const offset = Math.max(-18, Math.min(18, signed/7)); const scale = 1 + Math.min(.06, Math.abs(signed)/700); ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`; const glow = Math.abs(signed) > 45 ? .88 : .34; ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow; ui.eyeL.style.left = `${25 + offset*0.18}%`; ui.eyeR.style.right = `${25 - offset*0.18}%`; }
 function updateUI(){ const yawDeg = normalizeDeg(state.yaw); const zone = sideZoneFromYaw(yawDeg); ui.nearest.textContent = state.nearestId || "—"; ui.altitude.textContent = String(Math.round(state.y)); ui.yaw.textContent = `${Math.round(yawDeg)}°`; ui.zone.textContent = zone; ui.cupTop.textContent = `${state.cupCount} / 3`; ui.wallet.textContent = state.walletConnected ? "已連線" : "未連線"; ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—"; ui.allowance.textContent = state.approved ? "已授權" : "—"; updateWukongFace(); }
 
 function setFocus(kind){
@@ -285,13 +269,13 @@ document.getElementById('enterBtn').onclick = ()=> openTemple(state.nearestId ==
 addEventListener('keydown',e=>{ state.keys[e.key.toLowerCase()] = true; if(e.key==='Escape'){ closeTemple(); ui.infoModal.classList.remove('show'); } });
 addEventListener('keyup',e=>{ state.keys[e.key.toLowerCase()] = false; });
 
-function update(dt){ const dead=.12; const move=((state.keys['w']?1:0)-(state.keys['s']?1:0)) + (Math.abs(state.mobile.my)>dead ? -state.mobile.my : 0); const strafe=((state.keys['d']?1:0)-(state.keys['a']?1:0)) + (Math.abs(state.mobile.mx)>dead ? state.mobile.mx : 0); const vertical=((state.keys[' ']?1:0)-(state.keys['shift']?1:0)) + state.mobile.alt; let yawInput=((state.keys['e']?1:0)-(state.keys['q']?1:0)) + (Math.abs(state.mobile.yaw)>dead ? state.mobile.yaw : 0); if(Math.abs(yawInput) < dead && Math.abs(state.mobile.yawVel) > 0.01){ yawInput += state.mobile.yawVel; state.mobile.yawVel *= 0.93; } state.yaw += yawInput * dt * 1.75; const base=116, fx=Math.cos(state.yaw), fz=Math.sin(state.yaw), rx=Math.cos(state.yaw+Math.PI/2), rz=Math.sin(state.yaw+Math.PI/2); state.x += (fx*move + rx*strafe) * base * dt; state.z += (fz*move + rz*strafe) * base * dt; state.y += vertical * base * .72 * dt; state.y = Math.max(-80, Math.min(220, state.y)); let nearest=null,best=Infinity; Object.entries(nodes).forEach(([id,n])=>{ const dx=n.x-state.x, dy=n.y-state.y, dz=n.z-state.z, d=Math.hypot(dx,dy,dz); if(d<best){best=d; nearest=id;} }); state.nearestId = best < 110 ? nearest : null; if(state.nearestId){ ui.tip.textContent=`最近節點：${nodes[state.nearestId].name}｜按「進入」`; ui.tip.classList.add('show'); } else ui.tip.classList.remove('show'); updateUI(); }
+function update(dt){ const dead=.12; const move=((state.keys['w']?1:0)-(state.keys['s']?1:0)) + (Math.abs(state.mobile.my)>dead ? -state.mobile.my : 0); const strafe=((state.keys['d']?1:0)-(state.keys['a']?1:0)) + (Math.abs(state.mobile.mx)>dead ? state.mobile.mx : 0); const vertical=((state.keys[' ']?1:0)-(state.keys['shift']?1:0)) + state.mobile.alt; let yawInput=((state.keys['e']?1:0)-(state.keys['q']?1:0)) + (Math.abs(state.mobile.yaw)>dead ? state.mobile.yaw : 0); if(Math.abs(yawInput) < dead && Math.abs(state.mobile.yawVel) > 0.01){ yawInput += state.mobile.yawVel; state.mobile.yawVel *= 0.93; } state.yaw += yawInput * dt * 1.75; const base=116, fx=Math.cos(state.yaw), fz=Math.sin(state.yaw), rx=Math.cos(state.yaw+Math.PI/2), rz=Math.sin(state.yaw+Math.PI/2); state.x += (fx*move + rx*strafe) * base * dt; state.z += (fz*move + rz*strafe) * base * dt; state.y += vertical * base * .72 * dt; state.y = Math.max(-80, Math.min(220, state.y)); let nearest=null,best=Infinity; Object.entries(nodes).forEach(([id,n])=>{ const dx=n.x-state.x, dy=n.y-state.y, dz=n.z-state.z, d=Math.hypot(dx,dy,dz); if(d<best){best=d; nearest=id;} });  state.nearestId = best < 110 ? nearest : null; if(state.nearestId){ toast(`按 Enter 進入 ${{nodes[state.nearestId].name}}`); } updateUI(); }
 function project(wx,wy,wz){ const dx=wx-state.x, dy=wy-state.y, dz=wz-state.z; const cy=Math.cos(-state.yaw), sy=Math.sin(-state.yaw); const rx=dx*cy-dz*sy, rz=dx*sy+dz*cy; if(rz<=10) return null; const f=420/rz; return {x:innerWidth/2+rx*f, y:innerHeight/2-dy*f, s:Math.max(2,f*18)}; }
 function drawBackground(){ const w=innerWidth,h=innerHeight; ctx.clearRect(0,0,w,h); const g=ctx.createRadialGradient(w/2,h*.42,20,w/2,h*.58,w*.82); g.addColorStop(0,'rgba(22,36,62,.78)'); g.addColorStop(1,'rgba(2,4,8,1)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h); for(const s of state.stars){ const p=project(s.x,s.y,s.z); if(!p) continue; ctx.fillStyle='rgba(127,243,255,.92)'; ctx.fillRect(p.x,p.y,s.s,s.s); } ctx.strokeStyle='rgba(127,243,255,.07)'; for(let gx=-680;gx<=680;gx+=60){ let first=true; ctx.beginPath(); for(let gz=-680;gz<=680;gz+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); } for(let gz=-680;gz<=680;gz+=60){ let first=true; ctx.beginPath(); for(let gx=-680;gx<=680;gx+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); } }
-function drawNode(id,node){ const p=project(node.x,node.y,node.z); if(!p) return; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=node.color; ctx.shadowBlur=18; ctx.shadowColor=node.color; ctx.fill(); ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.s*1.9,0,Math.PI*2); ctx.strokeStyle=id===state.nearestId?'rgba(255,255,255,.95)':'rgba(255,255,255,.20)'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='700 12px sans-serif'; ctx.fillText(node.name,p.x+p.s+8,p.y+4); }
+function drawNode(id,node){ const p=project(node.x,node.y,node.z); if(!p) return; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=node.color; ctx.shadowBlur=18; ctx.shadowColor=node.color; ctx.fill(); ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.s*1.9,0,Math.PI*2); ctx.strokeStyle=id===state.nearestId?'rgba(255,255,255,.95)':'rgba(255,255,255,.20)'; ctx.lineWidth=2; ctx.stroke(); }
 
 let last=performance.now();
-function loop(now){ const dt=Math.min(.033,(now-last)/1000); last=now; update(dt); drawBackground(); Object.entries(nodes).forEach(([id,n])=>drawNode(id,n)); requestAnimationFrame(loop); }
+function loop(now){ const dt=Math.min(.033,(now-last)/1000); last=now; drawBackground(); update(dt); Object.entries(nodes).forEach(([id,n])=>drawNode(id,n)); requestAnimationFrame(loop); }
 setFocus('fortune'); updateUI(); requestAnimationFrame(loop);
 </script>
 </body>
