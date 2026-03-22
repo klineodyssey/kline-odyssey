@@ -2,143 +2,308 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V10.1 FULL融合版</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>KLINE V10.2 真控制版</title>
 <style>
-body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
+:root{
+  --bg:#000;
+  --panel:rgba(0,0,0,.58);
+  --line:rgba(255,255,255,.14);
+  --gold:#f2d57a;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:Arial,sans-serif;touch-action:none}
 canvas{position:fixed;inset:0}
-
-/* 版本 */
-.version{position:fixed;top:10px;left:10px;background:#000;padding:6px 10px;border-radius:8px}
-
-/* HUD */
-.hud{position:fixed;top:10px;right:10px;background:#000;padding:10px;border-radius:8px;font-size:12px}
-
-/* 左搖桿 */
-.joy{position:fixed;bottom:120px;left:20px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.1)}
-.joy-inner{position:absolute;width:40px;height:40px;background:#fff;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
-
-/* 中間方向 */
-.yaw{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:200px;height:40px;background:rgba(255,255,255,.1);border-radius:20px}
-
-/* 右高度 */
-.alt{position:fixed;bottom:120px;right:20px;width:50px;height:150px;background:rgba(255,255,255,.1);border-radius:30px}
-
-/* 底部按鍵 */
-.panel{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:90%}
-.btn{background:#111;border:1px solid #555;border-radius:6px;padding:8px;text-align:center;font-size:12px}
+.version{position:fixed;top:10px;left:10px;background:var(--panel);padding:6px 10px;border-radius:10px;border:1px solid var(--line);z-index:30}
+.hud{position:fixed;top:10px;right:10px;background:var(--panel);padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:12px;line-height:1.55;z-index:30;min-width:140px}
+.panel{
+  position:fixed;left:10px;right:10px;bottom:10px;display:grid;
+  grid-template-columns:repeat(4,1fr);gap:8px;z-index:40
+}
+.btn{background:#111;border:1px solid #555;border-radius:10px;padding:10px 8px;text-align:center;font-size:12px;color:#fff}
+.controls{position:fixed;left:0;right:0;bottom:92px;height:180px;z-index:50;pointer-events:none}
+.joy{position:absolute;left:18px;bottom:0;width:122px;height:122px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line);pointer-events:auto}
+.joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
+.joy-inner{position:absolute;width:44px;height:44px;background:var(--gold);border-radius:50%;left:39px;top:39px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.yaw{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;width:min(46vw,300px);height:58px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:30px;pointer-events:auto}
+.yaw-track{position:absolute;left:12px;right:12px;top:24px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)}
+.yaw-inner{position:absolute;width:48px;height:48px;background:var(--gold);border-radius:50%;left:calc(50% - 24px);top:5px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.yaw-label{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:11px}
+.alt{position:absolute;right:18px;bottom:0;width:58px;height:170px;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:30px;pointer-events:auto}
+.alt-track{position:absolute;left:24px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
+.alt-inner{position:absolute;width:44px;height:44px;background:var(--gold);border-radius:50%;left:7px;top:63px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.alt-top,.alt-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px}
+.alt-top{top:-18px}.alt-bottom{bottom:-18px}
+.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.84);padding:12px 16px;border-radius:12px;border:1px solid #666;display:none;z-index:80}
+.cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;z-index:20;pointer-events:none}
+.cross:before,.cross:after{content:"";position:absolute;background:#fff;opacity:.85}
+.cross:before{left:11px;top:0;width:2px;height:24px}
+.cross:after{left:0;top:11px;width:24px;height:2px}
+@media (max-width:768px){
+  .panel{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
-
 <body>
-
-<div class="version">V10.1 FULL融合版</div>
-<div class="hud" id="hud">未連線</div>
-
+<div class="version">V10.2 真控制版</div>
+<div class="hud" id="hud">模式：BTC<br>價格：--<br>區域：多<br>Yaw：0°<br>位置：0,0,0</div>
 <canvas id="c"></canvas>
-
-<div class="joy"><div class="joy-inner"></div></div>
-<div class="yaw"></div>
-<div class="alt"></div>
-
-<div class="panel">
-<div class="btn" onclick="claim()">發財金</div>
-<div class="btn" onclick="heartbeat()">心跳</div>
-<div class="btn" onclick="ignite()">呼吸</div>
-<div class="btn">拍照</div>
-<div class="btn">留影</div>
-<div class="btn">前鏡</div>
-<div class="btn">後鏡</div>
-<div class="btn">客服</div>
+<div class="cross"></div>
+<div class="controls">
+  <div class="joy" id="joy"><div class="joy-ring"></div><div class="joy-inner" id="joyInner"></div></div>
+  <div class="yaw" id="yaw"><div class="yaw-label">方向</div><div class="yaw-track"></div><div class="yaw-inner" id="yawInner"></div></div>
+  <div class="alt" id="alt"><div class="alt-top">上升</div><div class="alt-track"></div><div class="alt-inner" id="altInner"></div><div class="alt-bottom">下降</div></div>
 </div>
+<div class="panel">
+  <div class="btn" onclick="claim()">發財金</div>
+  <div class="btn" onclick="heartbeat()">心跳</div>
+  <div class="btn" onclick="ignite()">呼吸</div>
+  <div class="btn" onclick="switchMarket()">切換行情</div>
+  <div class="btn" onclick="snap()">拍照</div>
+  <div class="btn" onclick="record()">留影</div>
+  <div class="btn" onclick="front()">前鏡</div>
+  <div class="btn" onclick="rear()">後鏡</div>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
-let yaw=0;
-let price=0;
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+function resize(){ c.width = innerWidth; c.height = innerHeight; }
+addEventListener('resize', resize); resize();
 
-/* 真行情 */
+const state = {
+  mode:'BTC',
+  price:0,
+  yaw:0,
+  x:0, z:0, alt:0,
+  moveX:0, moveY:0, yawInput:0, altInput:0,
+  candles:[],
+  particles:[]
+};
+
+for(let i=0;i<220;i++) state.candles.push({o:0,c:0,p:0,v:Math.random()*4+1});
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(window.__toast);
+  window.__toast=setTimeout(()=>t.style.display='none',1500);
+}
+
 async function fetchBTC(){
- try{
-  let r=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-  let d=await r.json();
-  price=parseFloat(d.price);
- }catch{}
+  try{
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+    const d = await r.json();
+    state.price = parseFloat(d.price)||0;
+  }catch(e){}
 }
-setInterval(fetchBTC,1000);
+fetchBTC();
+setInterval(fetchBTC, 2000);
 
-/* AI */
-function predict(v){
- let score=0;
- if(Math.random()>0.5)score++;
- if(Math.random()>0.5)score++;
- if(Math.random()>0.5)score++;
- return v+(score-1.5)*5;
+function predict(base){
+  let score=0;
+  const rsi=Math.random(), ma=Math.random(), mom=Math.random();
+  if(rsi>.5) score++;
+  if(ma>.5) score++;
+  if(mom>.5) score++;
+  return base + (score-1.5)*5;
 }
-
-/* K線 */
-const c=document.getElementById("c");
-const ctx=c.getContext("2d");
-function resize(){c.width=innerWidth;c.height=innerHeight}
-resize();addEventListener("resize",resize);
-
-let candles=[];
-for(let i=0;i<200;i++)candles.push({o:0,c:0,p:0});
 
 function gen(){
- let last=candles[candles.length-1].c;
- let real=price/1000+(Math.random()-0.5)*2;
- let p=predict(real);
- candles.push({o:last,c:real,p:p});
- if(candles.length>200)candles.shift();
+  const last = state.candles[state.candles.length-1].c;
+  const real = state.mode==='BTC' ? (state.price/1000 || last) + (Math.random()-.5)*1.3 : last + (Math.random()-.5)*4;
+  const pred = predict(real);
+  state.candles.push({o:last,c:real,p:pred,v:Math.random()*5+1});
+  if(state.candles.length>220) state.candles.shift();
+  // particles
+  if(Math.random()>.4){
+    state.particles.push({
+      a: Math.random()*Math.PI*2,
+      r: 130+Math.random()*110,
+      s: Math.random()*2+1,
+      life: 1
+    });
+  }
+  state.particles.forEach(p=>p.life-=0.02);
+  state.particles=state.particles.filter(p=>p.life>0);
 }
 
 function draw(){
- ctx.clearRect(0,0,c.width,c.height);
- let cx=c.width/2,cy=c.height/2;
+  ctx.clearRect(0,0,c.width,c.height);
+  const cx=c.width/2, cy=c.height/2;
+  const bull = Math.cos(state.yaw) > 0;
+  const zone = bull ? '多' : '空';
 
- let zone=Math.cos(yaw)>0;
- ctx.fillStyle=zone?"#0015ff":"#220000";
- ctx.fillRect(0,0,c.width,c.height);
+  // background field
+  const grad = ctx.createLinearGradient(0,0,0,c.height);
+  if(bull){
+    grad.addColorStop(0,'#0b2fff');
+    grad.addColorStop(.55,'#07145a');
+    grad.addColorStop(1,'#000');
+  }else{
+    grad.addColorStop(0,'#170000');
+    grad.addColorStop(.55,'#5f0b0b');
+    grad.addColorStop(1,'#000');
+  }
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,c.width,c.height);
 
- let r=200;
+  // grid floor
+  ctx.strokeStyle='rgba(120,180,255,.10)';
+  for(let i=0;i<16;i++){
+    const y = cy+80+i*28;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(c.width,y); ctx.stroke();
+  }
+  for(let i=-10;i<=10;i++){
+    ctx.beginPath();
+    ctx.moveTo(cx+i*60, cy+80);
+    ctx.lineTo(cx+i*120, c.height);
+    ctx.stroke();
+  }
 
- candles.forEach((k,i)=>{
-  let t=i/candles.length*Math.PI*2+yaw;
-  let x=cx+Math.cos(t)*r;
-  let y=cy+Math.sin(t)*r;
+  // core glow
+  const rg = ctx.createRadialGradient(cx,cy,30,cx,cy,280);
+  rg.addColorStop(0, bull ? 'rgba(80,180,255,.45)' : 'rgba(255,80,80,.45)');
+  rg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle=rg;
+  ctx.beginPath(); ctx.arc(cx,cy,280,0,Math.PI*2); ctx.fill();
 
-  ctx.strokeStyle="#0f0";
+  // circular K-lines
+  const baseR = 180 + state.alt*10;
+  state.candles.forEach((k,i)=>{
+    const t=i/state.candles.length*Math.PI*2 + state.yaw;
+    const rr=baseR+k.v*2;
+    const x=cx+Math.cos(t)*rr;
+    const y=cy+Math.sin(t)*rr*0.78;
+    // real
+    ctx.strokeStyle=k.c>=k.o?'#9cff62':'#ff6f6f';
+    ctx.lineWidth=1.4;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x,y-(k.c-k.o)*3.5);
+    ctx.stroke();
+    // predicted overlay
+    ctx.strokeStyle='rgba(80,170,255,.85)';
+    ctx.beginPath();
+    ctx.moveTo(x+1.5,y);
+    ctx.lineTo(x+1.5,y-(k.p-k.o)*3.5);
+    ctx.stroke();
+  });
+
+  // particles
+  state.particles.forEach(p=>{
+    const x=cx+Math.cos(p.a+state.yaw)*p.r;
+    const y=cy+Math.sin(p.a+state.yaw)*p.r*0.78;
+    ctx.fillStyle = bull ? `rgba(120,210,255,${p.life})` : `rgba(255,120,120,${p.life})`;
+    ctx.fillRect(x,y,p.s,p.s);
+  });
+
+  // core
   ctx.beginPath();
-  ctx.moveTo(x,y);
-  ctx.lineTo(x,y-(k.c-k.o)*3);
-  ctx.stroke();
-
-  ctx.strokeStyle="#00f";
+  ctx.arc(cx,cy,44,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.10)';
+  ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(x,y);
-  ctx.lineTo(x,y-(k.p-k.o)*3);
-  ctx.stroke();
- });
+  ctx.arc(cx,cy,18,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,220,140,.55)';
+  ctx.fill();
 
- document.getElementById("hud").innerText=
- "BTC:"+Math.round(price)+"\nAI運作中";
+  document.getElementById('hud').innerHTML =
+    `模式：${state.mode}<br>價格：${state.price?Math.round(state.price):'--'}<br>區域：${zone}<br>Yaw：${Math.round((state.yaw*180/Math.PI)%360)}°<br>位置：${state.x.toFixed(1)}, ${state.z.toFixed(1)}, ${state.alt.toFixed(1)}`;
+}
+
+function update(){
+  state.x += state.moveX*0.8;
+  state.z += state.moveY*0.8;
+  state.yaw += state.yawInput*0.045;
+  state.alt += state.altInput*0.035;
+  if(state.alt>8) state.alt=8;
+  if(state.alt<-8) state.alt=-8;
 }
 
 function loop(){
- yaw+=0.01;
- gen();
- draw();
- requestAnimationFrame(loop);
+  update();
+  gen();
+  draw();
+  requestAnimationFrame(loop);
 }
 loop();
 
-/* 假功能 */
-function claim(){alert("發財金")}
-function heartbeat(){alert("心跳")}
-function ignite(){alert("呼吸")}
+// Controls
+function bindJoy(){
+  const joy = document.getElementById('joy');
+  const inner = document.getElementById('joyInner');
+  function setPoint(clientX, clientY){
+    const r=joy.getBoundingClientRect();
+    let dx=clientX-r.left-r.width/2, dy=clientY-r.top-r.height/2;
+    const max=36, len=Math.hypot(dx,dy)||1;
+    if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+    state.moveX = dx/max;
+    state.moveY = dy/max;
+    inner.style.left = (39+dx)+'px';
+    inner.style.top = (39+dy)+'px';
+  }
+  function reset(){
+    state.moveX=0; state.moveY=0;
+    inner.style.left='39px'; inner.style.top='39px';
+  }
+  joy.addEventListener('pointerdown', e=>{ e.preventDefault(); setPoint(e.clientX,e.clientY); });
+  joy.addEventListener('pointermove', e=>{ if(e.buttons) setPoint(e.clientX,e.clientY); });
+  joy.addEventListener('pointerup', reset);
+  joy.addEventListener('pointercancel', reset);
+}
+function bindYaw(){
+  const yaw=document.getElementById('yaw');
+  const inner=document.getElementById('yawInner');
+  function setPoint(clientX){
+    const r=yaw.getBoundingClientRect();
+    let dx=clientX-r.left-r.width/2;
+    const max=(r.width/2)-24;
+    if(dx>max) dx=max;
+    if(dx<-max) dx=-max;
+    state.yawInput = dx/max;
+    inner.style.left = (r.width/2-24+dx)+'px';
+  }
+  function reset(){
+    state.yawInput=0;
+    inner.style.left='calc(50% - 24px)';
+  }
+  yaw.addEventListener('pointerdown', e=>{ e.preventDefault(); setPoint(e.clientX); });
+  yaw.addEventListener('pointermove', e=>{ if(e.buttons) setPoint(e.clientX); });
+  yaw.addEventListener('pointerup', reset);
+  yaw.addEventListener('pointercancel', reset);
+}
+function bindAlt(){
+  const alt=document.getElementById('alt');
+  const inner=document.getElementById('altInner');
+  function setPoint(clientY){
+    const r=alt.getBoundingClientRect();
+    let dy=clientY-r.top-r.height/2;
+    const max=(r.height/2)-24;
+    if(dy>max) dy=max;
+    if(dy<-max) dy=-max;
+    state.altInput = -dy/max;
+    inner.style.top = (63+dy)+'px';
+  }
+  function reset(){
+    state.altInput=0;
+    inner.style.top='63px';
+  }
+  alt.addEventListener('pointerdown', e=>{ e.preventDefault(); setPoint(e.clientY); });
+  alt.addEventListener('pointermove', e=>{ if(e.buttons) setPoint(e.clientY); });
+  alt.addEventListener('pointerup', reset);
+  alt.addEventListener('pointercancel', reset);
+}
+bindJoy(); bindYaw(); bindAlt();
 
+function claim(){ toast('發財金功能入口已保留'); }
+function heartbeat(){ toast('心跳功能入口已保留'); }
+function ignite(){ toast('呼吸功能入口已保留'); }
+function switchMarket(){ state.mode = state.mode==='BTC' ? 'SIM' : 'BTC'; toast('已切換到 '+state.mode); }
+function snap(){ toast('拍照功能保留'); }
+function record(){ toast('留影功能保留'); }
+function front(){ toast('前鏡功能保留'); }
+function rear(){ toast('後鏡功能保留'); }
 </script>
-
 </body>
 </html>
