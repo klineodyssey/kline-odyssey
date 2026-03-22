@@ -3,16 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V4.1 真宇宙版</title>
+<title>KLINE V4.2 完整體</title>
 <style>
-body{margin:0;background:#000;color:#fff;overflow:hidden;font-family:sans-serif}
+body{margin:0;background:#000;overflow:hidden}
 canvas{position:fixed;inset:0}
-.hud{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.5);padding:8px;border-radius:10px}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="hud" id="hud">ZONE</div>
 
 <script>
 const c=document.getElementById("c");
@@ -21,58 +19,57 @@ function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
 let angle=0;
-
 let candles=[];
-for(let i=0;i<80;i++){
-  candles.push({o:0,h:0,l:0,c:0});
+for(let i=0;i<120;i++){
+  candles.push({o:0,c:0});
 }
 
 function gen(){
-  let last=candles[candles.length-1].c||0;
-  let n=last+(Math.random()-0.5)*10;
-  candles.push({o:last,h:Math.max(last,n)+2,l:Math.min(last,n)-2,c:n});
-  if(candles.length>80)candles.shift();
+  let last=candles[candles.length-1].c;
+  let n=last+(Math.random()-0.5)*20;
+  candles.push({o:last,c:n});
+  if(candles.length>120)candles.shift();
 }
 
 function draw(){
   ctx.clearRect(0,0,c.width,c.height);
-
   let cx=c.width/2;
   let cy=c.height/2;
 
-  // zone
   let y=Math.cos(angle);
-  let zone=y>0?"多":"空";
-  document.getElementById("hud").innerText="ZONE: "+zone;
+  let isBull=y>0;
 
-  // energy field
-  let grad=ctx.createRadialGradient(cx,cy,50,cx,cy,400);
-  if(zone=="多"){
-    grad.addColorStop(0,"rgba(0,150,255,0.6)");
-    grad.addColorStop(1,"rgba(0,0,0,1)");
+  // energy split
+  let grad=ctx.createLinearGradient(0,0,0,c.height);
+  if(isBull){
+    grad.addColorStop(0,"#0033ff");
+    grad.addColorStop(1,"#000");
   }else{
-    grad.addColorStop(0,"rgba(255,50,50,0.6)");
-    grad.addColorStop(1,"rgba(0,0,0,1)");
+    grad.addColorStop(0,"#000");
+    grad.addColorStop(1,"#ff0000");
   }
   ctx.fillStyle=grad;
   ctx.fillRect(0,0,c.width,c.height);
 
-  // circular kline
-  let radius=180;
+  let radius=200;
+
   candles.forEach((k,i)=>{
     let t=i/candles.length*Math.PI*2+angle;
-    let r=radius+(k.c*0.5);
+    let h=(k.c-k.o)*2;
 
-    let x=cx+Math.cos(t)*r;
-    let y=cy+Math.sin(t)*r;
+    let x=cx+Math.cos(t)*radius;
+    let y=cy+Math.sin(t)*radius;
 
-    ctx.fillStyle=k.c>=k.o?"#0f0":"#f00";
-    ctx.fillRect(x,y,2,2);
+    ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x,y-h);
+    ctx.stroke();
   });
 
-  // core glow
+  // core
   ctx.beginPath();
-  ctx.arc(cx,cy,40,0,Math.PI*2);
+  ctx.arc(cx,cy,50,0,Math.PI*2);
   ctx.fillStyle="rgba(255,255,255,0.1)";
   ctx.fill();
 }
