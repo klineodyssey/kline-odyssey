@@ -2,114 +2,505 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V12.4 真實運行版</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>KLINE V13 交易宇宙完整版</title>
 <style>
-body{margin:0;background:#05070f;color:#fff;font-family:Arial}
+:root{
+  --bg:#05070f;
+  --panel:rgba(0,0,0,.60);
+  --line:rgba(255,255,255,.14);
+  --gold:#f2d57a;
+  --cyan:#79d7ff;
+  --green:#86ff7a;
+  --red:#ff7575;
+}
+html,body{
+  margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;
+  font-family:Arial,sans-serif;touch-action:none
+}
 canvas{position:fixed;inset:0}
-.hud{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.6);padding:10px;border-radius:10px}
-.ctrl{position:fixed;bottom:20px;width:100%}
-.joy{position:absolute;left:20px;width:120px;height:120px;background:#222;border-radius:50%}
-.joy-inner{position:absolute;width:40px;height:40px;background:gold;border-radius:50%}
-.yaw{position:absolute;left:50%;transform:translateX(-50%);width:200px;height:60px;background:#222;border-radius:30px}
-.yaw-inner{position:absolute;width:40px;height:40px;background:gold;border-radius:50%}
-.lev{position:absolute;right:20px;width:60px;height:200px;background:#222;border-radius:30px}
-.knob{position:absolute;width:40px;height:40px;background:gold;border-radius:50%}
+.card{
+  position:fixed;z-index:90;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.55;
+  backdrop-filter:blur(8px)
+}
+.version{top:10px;left:10px}
+.coord{top:52px;left:10px}
+.hud{top:10px;right:10px;min-width:220px}
+.core-shell{
+  position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);
+  width:min(44vw,280px);height:min(44vw,280px);z-index:80;pointer-events:none
+}
+.core-ring{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  border:2px solid rgba(242,213,122,.80);
+  box-shadow:0 0 0 3px rgba(242,213,122,.08),0 0 36px rgba(242,213,122,.22)
+}
+.core-glow{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px solid rgba(242,213,122,.18);animation:aura 4s ease-out infinite
+}
+.core-label{
+  position:absolute;left:50%;bottom:-36px;transform:translateX(-50%);
+  white-space:nowrap;background:rgba(0,0,0,.48);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:11px
+}
+.controls{
+  position:fixed;left:0;right:0;bottom:88px;height:188px;z-index:120;pointer-events:none
+}
+.joy,.yaw,.lev{pointer-events:auto}
+.joy{
+  position:absolute;left:18px;bottom:6px;width:128px;height:128px;border-radius:50%;
+  background:rgba(255,255,255,.07);border:1px solid var(--line)
+}
+.joy:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
+.joy-inner,.yaw-inner,.lev-inner{
+  position:absolute;width:44px;height:44px;border-radius:50%;background:var(--gold)
+}
+.joy-inner{left:42px;top:42px}
+.lbl{position:absolute;left:50%;transform:translateX(-50%);font-size:11px}
+.joy .lbl{top:-18px}
+.yaw{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:20px;
+  width:min(52vw,360px);height:68px;background:rgba(255,255,255,.07);
+  border:1px solid var(--line);border-radius:999px
+}
+.yaw .lbl{top:-18px}
+.yaw-track{
+  position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)
+}
+.yaw-fill{
+  position:absolute;left:50%;top:29px;height:10px;border-radius:999px;
+  background:linear-gradient(90deg,rgba(121,215,255,.20),rgba(121,215,255,.96));width:0
+}
+.yaw-inner{left:calc(50% - 22px);top:12px}
+.lev{
+  position:absolute;right:18px;bottom:0;width:64px;height:180px;border-radius:32px;
+  background:rgba(255,255,255,.07);border:1px solid var(--line)
+}
+.lev-track{
+  position:absolute;left:27px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)
+}
+.lev .lbl.top{top:-18px}
+.lev .lbl.bottom{bottom:-18px}
+.lev-inner{left:10px;top:68px}
+.actions{
+  position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px;z-index:130
+}
+.btn{
+  background:rgba(0,0,0,.62);border:1px solid var(--line);border-radius:12px;padding:10px 8px;
+  font-size:12px;text-align:center;user-select:none
+}
+.chat{
+  position:fixed;left:10px;bottom:66px;width:240px;height:152px;z-index:100;
+  background:rgba(0,0,0,.62);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column
+}
+.chat-log{flex:1;padding:8px;font-size:11px;overflow:auto}
+.chat-input{display:flex;border-top:1px solid rgba(255,255,255,.08)}
+.chat-input input{flex:1;background:#000;border:none;color:#fff;padding:7px 8px;font-size:11px}
+.chat-input button{background:#151515;color:#fff;border:none;padding:0 10px}
+.toast{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px;display:none;z-index:200
+}
+@keyframes aura{0%{transform:scale(.88);opacity:.55}80%{transform:scale(1.2);opacity:0}100%{opacity:0}}
+@media (max-width:900px){
+  .actions{grid-template-columns:repeat(4,1fr)}
+  .core-shell{width:min(56vw,230px);height:min(56vw,230px)}
+  .chat{width:210px}
+}
 </style>
 </head>
 <body>
-<div class="hud" id="hud"></div>
-<canvas id="c"></canvas>
+<div class="card version">V13 交易宇宙完整版</div>
+<div class="card coord" id="coordBox">X: 0.0<br>CT(Y): 0.0<br>Z: 0.0<br>地形: 草原</div>
+<div class="card hud" id="hud">初始化中...</div>
 
-<div class="ctrl">
-<div class="joy" id="joy"><div class="joy-inner" id="ji"></div></div>
-<div class="yaw" id="yaw"><div class="yaw-inner" id="yi"></div></div>
-<div class="lev" id="lev"><div class="knob" id="li"></div></div>
+<canvas id="bg"></canvas>
+
+<div class="core-shell">
+  <div class="core-ring"><canvas id="core"></canvas></div>
+  <div class="core-glow"></div>
+  <div class="core-label">K線核心｜CT × Angle × Leverage</div>
 </div>
 
-<script>
-const c=document.getElementById('c'),x=c.getContext('2d');
-function fit(){c.width=innerWidth;c.height=innerHeight}fit();onresize=fit;
+<div class="controls">
+  <div class="joy" id="joy">
+    <div class="lbl">X / CT(Y)</div>
+    <div class="joy-inner" id="joyInner"></div>
+  </div>
+  <div class="yaw" id="yaw">
+    <div class="lbl">多空下單桿</div>
+    <div class="yaw-track"></div>
+    <div class="yaw-fill" id="yawFill"></div>
+    <div class="yaw-inner" id="yawInner"></div>
+  </div>
+  <div class="lev" id="lev">
+    <div class="lbl top">150x</div>
+    <div class="lev-track"></div>
+    <div class="lev-inner" id="levInner"></div>
+    <div class="lbl bottom">0x</div>
+  </div>
+</div>
 
-let S={
- x:0,y:0,ct:0,t:0,
- yaw:0,lev:0,
- vx:0,vy:0
+<div class="chat">
+  <div class="chat-log" id="chatLog">客服：V13 已整合 CT、角度、多空、槓桿、地形、K線與怪物。</div>
+  <div class="chat-input">
+    <input id="chatInput" placeholder="輸入問題"/>
+    <button onclick="sendChat()">送出</button>
+  </div>
+</div>
+
+<div class="actions">
+  <div class="btn" onclick="switchTerrain()">切換地形</div>
+  <div class="btn" onclick="spawnBoss()">召喚Boss</div>
+  <div class="btn" onclick="swing()">普通攻擊</div>
+  <div class="btn" onclick="skill()">發財金技能</div>
+  <div class="btn" onclick="heal()">回血</div>
+  <div class="btn" onclick="energyUp()">補能</div>
+  <div class="btn" onclick="togglePredict()">預測開關</div>
+  <div class="btn" onclick="clearMonsters()">清怪</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const bg=document.getElementById('bg'), ctx=bg.getContext('2d');
+const core=document.getElementById('core'), c2=core.getContext('2d');
+function fit(){ bg.width=innerWidth; bg.height=innerHeight; core.width=280; core.height=280; }
+addEventListener('resize', fit); fit();
+
+const terrains=['草原','森林','湖泊','山地'];
+const S={
+  x:0,
+  ct:0,
+  z:0,
+  t:0,
+  yaw:0,
+  moveX:0,
+  moveY:0,
+  yawInput:0,
+  lev:0,
+  hp:100,
+  energy:100,
+  score:0,
+  terrainIndex:0,
+  predictOn:true,
+  monsters:[],
+  fx:[],
+  candles:[]
 };
 
+for(let i=0;i<160;i++) S.candles.push({o:0,c:0,p:0,v:Math.random()*4+1});
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.display='block';
+  clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.style.display='none',1200);
+}
+function sendChat(){
+  const i=document.getElementById('chatInput');
+  const log=document.getElementById('chatLog');
+  const v=i.value.trim();
+  if(!v) return;
+  log.innerHTML += '<br>你：'+v;
+  if(v.includes('槓桿')) log.innerHTML += '<br>客服：右下桿是 0~150x 正值，0=停止。';
+  else if(v.includes('多空')) log.innerHTML += '<br>客服：中間橫桿決定多空，±90 內是多，超過是空。';
+  else if(v.includes('CT')) log.innerHTML += '<br>客服：CT 就是現價主軸，Y 軸對應價格推進。';
+  else log.innerHTML += '<br>客服：已記錄。';
+  log.scrollTop=log.scrollHeight; i.value='';
+}
 function signedDeg(){
- let d=(S.yaw*180/Math.PI)%360;
- if(d>180)d-=360;if(d<-180)d+=360;
- return d;
+  let d=(S.yaw*180/Math.PI)%360;
+  if(d>180)d-=360;
+  if(d<-180)d+=360;
+  return d;
+}
+function zone(){ return Math.abs(signedDeg())<=90?'多':'空'; }
+function strength(){
+  const a=Math.abs(signedDeg());
+  if(a<=45) return '強多';
+  if(a<=90) return '弱多';
+  if(a<=135) return '弱空';
+  return '強空';
+}
+function direction(){ return zone()==='多' ? 1 : -1; }
+
+function currentTerrain(){ return terrains[S.terrainIndex]; }
+function switchTerrain(){ S.terrainIndex=(S.terrainIndex+1)%terrains.length; toast('地形切換到 '+currentTerrain()); }
+function togglePredict(){ S.predictOn=!S.predictOn; toast('AI預測 '+(S.predictOn?'開':'關')); }
+
+function spawnMonster(type='normal'){
+  const a=Math.random()*Math.PI*2, d=180+Math.random()*180;
+  S.monsters.push({
+    x:S.x+Math.cos(a)*d,
+    y:S.ct+Math.sin(a)*d,
+    hp:type==='boss'?24:6,
+    maxHp:type==='boss'?24:6,
+    speed:type==='boss'?0.45:0.85,
+    kind:type
+  });
+}
+for(let i=0;i<6;i++) spawnMonster();
+function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
+function clearMonsters(){ S.monsters=[]; toast('已清怪'); }
+function heal(){ S.hp=Math.min(100,S.hp+12); toast('回血'); }
+function energyUp(){ S.energy=Math.min(100,S.energy+12); toast('補能'); }
+
+function swing(){
+  S.monsters.forEach(m=>{
+    const dx=m.x-S.x, dy=m.y-S.ct;
+    const d=Math.hypot(dx,dy), a=Math.atan2(dy,dx);
+    let diff=Math.abs(a-S.yaw); if(diff>Math.PI) diff=2*Math.PI-diff;
+    if(d<85 && diff<0.7){
+      m.hp -= m.kind==='boss'?3:5;
+      S.fx.push({x:m.x,y:m.y,life:18,color:'#86ff7a'});
+      if(m.hp<=0) S.score += m.kind==='boss'?20:3;
+    }
+  });
+  S.monsters=S.monsters.filter(m=>m.hp>0);
+  toast('普通攻擊');
+}
+function skill(){
+  if(S.energy<20) return toast('能量不足');
+  S.energy-=20;
+  S.monsters.forEach(m=>{
+    const d=Math.hypot(m.x-S.x,m.y-S.ct);
+    if(d<240){
+      m.hp -= m.kind==='boss'?8:99;
+      S.fx.push({x:m.x,y:m.y,life:28,color:'#79d7ff'});
+      if(m.hp<=0) S.score += m.kind==='boss'?20:3;
+    }
+  });
+  S.monsters=S.monsters.filter(m=>m.hp>0);
+  toast('發財金技能');
 }
 
-function zone(){return Math.abs(signedDeg())<=90?'多':'空';}
-function dir(){return zone()=='多'?1:-1;}
+function predict(base){
+  let score=0;
+  if(Math.random()>.5) score++;
+  if(Math.random()>.5) score++;
+  if(Math.random()>.5) score++;
+  return base+(score-1.5)*2.6;
+}
+function genCandles(){
+  const last=S.candles[S.candles.length-1].c;
+  const drift = direction() * (S.lev/150) * 1.2;
+  const real = last + drift + (Math.random()-.5)*0.8;
+  const pred = predict(real + drift*0.8);
+  S.candles.push({o:last,c:real,p:pred,v:Math.random()*4+1});
+  if(S.candles.length>160) S.candles.shift();
+}
+
+function worldToCamera(wx, wy){
+  const dx=wx-S.x;
+  const dy=wy-S.ct;
+  const c=Math.cos(-S.yaw), s=Math.sin(-S.yaw);
+  return {x:dx*c-dy*s, y:dx*s+dy*c};
+}
+function cameraToScreen(cx, baseY, cam){
+  return [cx + cam.x, baseY + cam.y*0.56 - S.z*10];
+}
 
 function update(){
- // CT 推進
- let d=dir()*S.lev*0.02;
- S.ct+=d;
- S.y=S.ct;
- S.t++;
+  // X is lateral movement only.
+  S.x += S.moveX*1.8;
+  // Y control is CT price push/pull, 1 unit = 1 point feel
+  S.ct += S.moveY*0.22;
+  // Main price engine
+  const force = direction() * (S.lev/150) * 0.35;
+  S.ct += force + (Math.random()-.5)*0.06;
+  S.z += 0; // kept for future camera height extension
+  S.yaw += S.yawInput*0.05;
+  S.t++;
+
+  genCandles();
+
+  while(S.monsters.length<8) spawnMonster();
+  const riskBoost = 0.7 + (S.lev/150)*0.9;
+  S.monsters.forEach(m=>{
+    const dx=S.x-m.x, dy=S.ct-m.y, d=Math.hypot(dx,dy)||1;
+    m.x += dx/d*m.speed*riskBoost;
+    m.y += dy/d*m.speed*riskBoost;
+    if(d<20){
+      S.hp -= m.kind==='boss'?0.25:0.08;
+    }
+  });
+  if(S.hp<0) S.hp=0;
+  S.fx.forEach(f=>f.life--);
+  S.fx=S.fx.filter(f=>f.life>0);
+}
+
+function drawTerrain(cx,horizon,baseY){
+  const sky=ctx.createLinearGradient(0,0,0,baseY);
+  sky.addColorStop(0,'#0b1832'); sky.addColorStop(.55,'#193056'); sky.addColorStop(1,'#243858');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,bg.width,baseY);
+
+  const terrain=currentTerrain();
+  if(terrain==='草原') ctx.fillStyle= zone()==='多' ? '#335e2f' : '#553333';
+  if(terrain==='森林') ctx.fillStyle= '#274a26';
+  if(terrain==='湖泊') ctx.fillStyle= '#304967';
+  if(terrain==='山地') ctx.fillStyle= '#5f5448';
+  ctx.fillRect(0,baseY,bg.width,bg.height-baseY);
+
+  // grid
+  ctx.strokeStyle='rgba(255,255,255,.10)';
+  for(let gy=-700; gy<=700; gy+=40){
+    const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy));
+    const p2=cameraToScreen(cx,baseY,worldToCamera(900,gy));
+    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+  }
+  for(let gx=-900; gx<=900; gx+=40){
+    const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900));
+    const p2=cameraToScreen(cx,baseY,worldToCamera(gx,900));
+    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+  }
+
+  if(terrain==='森林'){
+    for(let i=-320;i<320;i+=34){
+      for(let j=-80;j<280;j+=54){
+        const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(i,j));
+        ctx.fillStyle='#3a2617'; ctx.fillRect(sx-2,sy-8,4,12);
+        ctx.fillStyle='#1f7a2d'; ctx.beginPath(); ctx.arc(sx,sy-14,10,0,Math.PI*2); ctx.fill();
+      }
+    }
+  }
+  if(terrain==='湖泊'){
+    ctx.fillStyle='rgba(80,140,230,.72)';
+    for(let i=-220;i<=220;i+=40){
+      const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(i,30+Math.sin(i*0.04)*20));
+      ctx.beginPath(); ctx.ellipse(sx,sy,35,12,0,0,Math.PI*2); ctx.fill();
+    }
+  }
+  if(terrain==='山地'){
+    for(let i=-300;i<320;i+=70){
+      const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(i,140+((i%140)?50:0)));
+      ctx.fillStyle='#746657';
+      ctx.beginPath(); ctx.moveTo(sx-30,sy+18); ctx.lineTo(sx,sy-26); ctx.lineTo(sx+30,sy+18); ctx.closePath(); ctx.fill();
+    }
+  }
+}
+
+function drawKlineCore(){
+  c2.clearRect(0,0,core.width,core.height);
+  const cx=core.width/2, cy=core.height/2;
+  const rg=c2.createRadialGradient(cx,cy,18,cx,cy,128);
+  rg.addColorStop(0, zone()==='多' ? 'rgba(90,180,255,.30)' : 'rgba(255,90,90,.30)');
+  rg.addColorStop(1,'rgba(0,0,0,0)');
+  c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,128,0,Math.PI*2); c2.fill();
+
+  const baseR=88;
+  S.candles.forEach((k,i)=>{
+    const t=i/S.candles.length*Math.PI*2 + S.yaw;
+    const rr=baseR + k.v*1.1;
+    const x=cx+Math.cos(t)*rr;
+    const y=cy+Math.sin(t)*rr*0.84;
+    c2.strokeStyle = k.c>=k.o ? '#86ff7a' : '#ff7575';
+    c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.8); c2.stroke();
+    if(S.predictOn){
+      c2.strokeStyle='rgba(121,215,255,.95)';
+      c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.8); c2.stroke();
+    }
+  });
+
+  c2.strokeStyle='rgba(242,213,122,.35)';
+  for(let i=0;i<3;i++){
+    c2.beginPath(); c2.ellipse(cx,cy,58+i*16,42+i*10,S.yaw*0.55+i*.25,0,Math.PI*2); c2.stroke();
+  }
+  c2.beginPath(); c2.arc(cx,cy,15,0,Math.PI*2); c2.fillStyle='rgba(242,213,122,.82)'; c2.fill();
 }
 
 function draw(){
- x.fillStyle="#000";x.fillRect(0,0,c.width,c.height);
+  ctx.clearRect(0,0,bg.width,bg.height);
+  const cx=bg.width/2, horizon=bg.height*0.44, baseY=bg.height*0.72;
+  drawTerrain(cx,horizon,baseY);
 
- // 畫價格線
- x.strokeStyle="lime";
- x.beginPath();
- for(let i=0;i<200;i++){
-  let yy=300+i*2;
-  let val=S.ct-(200-i)*0.05;
-  x.lineTo(100+i*3,yy-val);
- }
- x.stroke();
+  // player
+  ctx.fillStyle='#86ff7a';
+  ctx.beginPath(); ctx.arc(cx,baseY,12,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.65)';
+  ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); ctx.stroke();
 
- document.getElementById('hud').innerHTML=
- `CT:${S.ct.toFixed(2)}<br>
- Angle:${signedDeg().toFixed(1)}°<br>
- Zone:${zone()}<br>
- Leverage:${S.lev.toFixed(1)}x<br>
- Time:T+${S.t}`;
+  // monsters
+  S.monsters.forEach(m=>{
+    const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(m.x,m.y));
+    const r=m.kind==='boss'?18:10;
+    ctx.fillStyle=m.kind==='boss' ? '#ffb36b' : '#ff3d3d';
+    ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(sx-r, sy-r-10, r*2, 4);
+    ctx.fillStyle='#86ff7a'; ctx.fillRect(sx-r, sy-r-10, (m.hp/m.maxHp)*r*2, 4);
+  });
+
+  // effects
+  S.fx.forEach(f=>{
+    const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(f.x,f.y));
+    ctx.strokeStyle=f.color;
+    ctx.beginPath(); ctx.arc(sx,sy,24-f.life*0.7,0,Math.PI*2); ctx.stroke();
+  });
+
+  drawKlineCore();
+
+  document.getElementById('coordBox').innerHTML=
+    `X: ${S.x.toFixed(1)}<br>CT(Y): ${S.ct.toFixed(2)}<br>Z: ${S.z.toFixed(1)}<br>地形: ${currentTerrain()}`;
+  document.getElementById('hud').innerHTML=
+    `Angle: ${signedDeg().toFixed(1)}°<br>Zone: ${zone()}<br>Strength: ${strength()}<br>Leverage: ${S.lev.toFixed(1)}x<br>HP: ${Math.round(S.hp)}<br>Energy: ${Math.round(S.energy)}<br>Time: T+${S.t}`;
 }
-
-function loop(){update();draw();requestAnimationFrame(loop)}loop();
+function loop(){ update(); draw(); requestAnimationFrame(loop); }
+loop();
 
 // controls
-let joy=document.getElementById('joy'),ji=document.getElementById('ji');
-joy.onpointermove=e=>{
- if(e.buttons){
-  let r=joy.getBoundingClientRect();
-  let dx=e.clientX-r.left-60;
-  let dy=e.clientY-r.top-60;
-  S.x=dx/50;
-  ji.style.left=(dx+60-20)+'px';
-  ji.style.top=(dy+60-20)+'px';
- }
-};
+(function(){
+  const joy=document.getElementById('joy'), inner=document.getElementById('joyInner');
+  function setP(x,y){
+    const r=joy.getBoundingClientRect();
+    let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
+    const max=39, len=Math.hypot(dx,dy)||1;
+    if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+    S.moveX = dx/max;
+    S.moveY = -dy/max;
+    inner.style.left=(42+dx)+'px';
+    inner.style.top=(42+dy)+'px';
+  }
+  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px'; }
+  joy.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientX,e.clientY); toast('右=X+ 左=X- 上=CT+ 下=CT-'); });
+  joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
+  joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
+})();
 
-let yaw=document.getElementById('yaw'),yi=document.getElementById('yi');
-yaw.onpointermove=e=>{
- if(e.buttons){
-  let r=yaw.getBoundingClientRect();
-  let dx=e.clientX-r.left-r.width/2;
-  S.yaw=dx/100*Math.PI;
-  yi.style.left=(dx+r.width/2-20)+'px';
- }
-};
+(function(){
+  const yaw=document.getElementById('yaw'), inner=document.getElementById('yawInner'), fill=document.getElementById('yawFill');
+  function setP(x){
+    const r=yaw.getBoundingClientRect(), max=(r.width/2)-22;
+    let dx=x-r.left-r.width/2;
+    if(dx>max) dx=max;
+    if(dx<-max) dx=-max;
+    S.yawInput=dx/max;
+    inner.style.left=(r.width/2-22+dx)+'px';
+    if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; }
+    else{ fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; }
+  }
+  function reset(){ S.yawInput=0; inner.style.left='calc(50% - 22px)'; fill.style.left='50%'; fill.style.width='0'; }
+  yaw.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientX); toast('下單方向：±90 內多，超過轉空'); });
+  yaw.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX); });
+  yaw.addEventListener('pointerup',reset); yaw.addEventListener('pointercancel',reset);
+})();
 
-let lev=document.getElementById('lev'),li=document.getElementById('li');
-lev.onpointermove=e=>{
- if(e.buttons){
-  let r=lev.getBoundingClientRect();
-  let y=e.clientY-r.top;
-  let v=1-(y/r.height);
-  S.lev=Math.max(0,v*150);
-  li.style.top=(y-20)+'px';
- }
-};
+(function(){
+  const lev=document.getElementById('lev'), inner=document.getElementById('levInner');
+  function setP(y){
+    const r=lev.getBoundingClientRect();
+    let dy=y-r.top;
+    if(dy<22) dy=22;
+    if(dy>r.height-22) dy=r.height-22;
+    const v=1-((dy-22)/(r.height-44));
+    S.lev=Math.max(0,Math.min(150,v*150));
+    inner.style.top=(dy-22)+'px';
+  }
+  function reset(){}
+  lev.addEventListener('pointerdown',e=>{ e.preventDefault(); setP(e.clientY); toast('槓桿 0~150x，0=停止'); });
+  lev.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientY); });
+  lev.addEventListener('pointerup',reset); lev.addEventListener('pointercancel',reset);
+})();
 </script>
 </body>
 </html>
