@@ -3,140 +3,123 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V5.1 手機完整版</title>
+<title>KLINE V6 真上鏈版</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.min.js"></script>
 <style>
-body{margin:0;background:#000;overflow:hidden;font-family:sans-serif;touch-action:none}
+body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
 canvas{position:fixed;inset:0}
-
-/* HUD */
-.hud{
- position:fixed;top:10px;right:10px;
- background:rgba(0,0,0,.6);
- padding:8px 10px;border-radius:10px;font-size:12px
-}
-
-/* 左搖桿 */
-.joy{
- position:fixed;bottom:110px;left:20px;
- width:110px;height:110px;border-radius:50%;
- background:rgba(255,255,255,.08)
-}
-.joy-inner{
- position:absolute;width:40px;height:40px;
- border-radius:50%;background:#fff;
- left:50%;top:50%;transform:translate(-50%,-50%);
-}
-
-/* 中方向 */
-.yaw{
- position:fixed;bottom:50px;left:50%;
- transform:translateX(-50%);
- width:260px;height:50px;
- background:rgba(255,255,255,.08);
- border-radius:30px
-}
-
-/* 右高度 */
-.alt{
- position:fixed;bottom:110px;right:20px;
- width:50px;height:160px;
- background:rgba(255,255,255,.08);
- border-radius:30px
-}
-.alt-inner{
- position:absolute;width:40px;height:40px;
- border-radius:50%;background:#fff;
- left:50%;top:50%;transform:translate(-50%,-50%);
-}
+.hud{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.6);padding:10px;border-radius:10px;font-size:12px}
+.panel{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.btn{padding:10px;background:#111;border:1px solid #555;border-radius:6px;color:#fff}
 </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
 
-<div class="hud" id="hud">ZONE</div>
+<div class="hud" id="hud">
+未連線
+</div>
 
-<div class="joy" id="joy"><div class="joy-inner" id="joyInner"></div></div>
-<div class="yaw" id="yaw"></div>
-<div class="alt" id="alt"><div class="alt-inner" id="altInner"></div></div>
+<div class="panel">
+<button class="btn" onclick="connect()">連接</button>
+<button class="btn" onclick="claim()">發財金</button>
+<button class="btn" onclick="heartbeat()">心跳</button>
+<button class="btn" onclick="ignite()">呼吸</button>
+</div>
 
 <script>
+const CONTRACT_ADDRESS = "填你的TempleHeart地址";
+
+const ABI = [
+ "function fortuneClaim(uint256 amount) external",
+ "function heartbeatClaim() external",
+ "function igniteAndClaim() external",
+ "function balanceOf(address) view returns (uint256)"
+];
+
+let provider, signer, contract, user;
+
+/* ===== Web3 ===== */
+
+async function connect(){
+ if(!window.ethereum){ alert("請用MetaMask"); return; }
+
+ await window.ethereum.request({method:"eth_requestAccounts"});
+ provider = new ethers.BrowserProvider(window.ethereum);
+ signer = await provider.getSigner();
+ user = await signer.getAddress();
+
+ contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+ updateHUD();
+}
+
+async function updateHUD(){
+ if(!contract) return;
+ document.getElementById("hud").innerText =
+ "已連線\n"+user;
+}
+
+/* ===== 合約操作 ===== */
+
+async function claim(){
+ try{
+  const tx = await contract.fortuneClaim(88);
+  notify("發財金送出");
+  await tx.wait();
+  notify("成功入帳");
+ }catch(e){ notify("失敗:"+e.message); }
+}
+
+async function heartbeat(){
+ try{
+  const tx = await contract.heartbeatClaim();
+  notify("心跳送出");
+  await tx.wait();
+  notify("心跳完成");
+ }catch(e){ notify("失敗"); }
+}
+
+async function ignite(){
+ try{
+  const tx = await contract.igniteAndClaim();
+  notify("呼吸送出");
+  await tx.wait();
+  notify("呼吸完成");
+ }catch(e){ notify("失敗"); }
+}
+
+function notify(msg){
+ document.getElementById("hud").innerText = msg;
+}
+
+/* ===== K線引擎 ===== */
+
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
 function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
-let state={vx:0,vy:0,yaw:0,alt:0};
-
-/* ===== 左搖桿（回彈） ===== */
-const joy=document.getElementById("joy");
-const joyInner=document.getElementById("joyInner");
-
-joy.addEventListener("touchmove",e=>{
- let t=e.touches[0];
- let r=joy.getBoundingClientRect();
- let dx=t.clientX-r.left-r.width/2;
- let dy=t.clientY-r.top-r.height/2;
-
- state.vx=dx*0.02;
- state.vy=dy*0.02;
-
- joyInner.style.transform=`translate(${dx}px,${dy}px)`;
-});
-
-joy.addEventListener("touchend",()=>{
- state.vx=0;state.vy=0;
- joyInner.style.transform="translate(-50%,-50%)";
-});
-
-/* ===== 中方向 ===== */
-const yaw=document.getElementById("yaw");
-yaw.addEventListener("touchmove",e=>{
- let t=e.touches[0];
- let r=yaw.getBoundingClientRect();
- let dx=t.clientX-r.left-r.width/2;
- state.yaw+=dx*0.003;
-});
-
-/* ===== 右高度 ===== */
-const alt=document.getElementById("alt");
-const altInner=document.getElementById("altInner");
-
-alt.addEventListener("touchmove",e=>{
- let t=e.touches[0];
- let r=alt.getBoundingClientRect();
- let dy=t.clientY-r.top-r.height/2;
-
- state.alt+=-dy*0.01;
- altInner.style.transform=`translate(-50%,${dy}px)`;
-});
-
-alt.addEventListener("touchend",()=>{
- altInner.style.transform="translate(-50%,-50%)";
-});
-
-/* ===== K線 ===== */
+let yaw=0;
 let candles=[];
-for(let i=0;i<120;i++)candles.push({o:0,c:0});
+
+for(let i=0;i<100;i++) candles.push({o:0,c:0});
 
 function gen(){
  let last=candles[candles.length-1].c;
- let n=last+(Math.random()-0.5)*8;
+ let n=last+(Math.random()-0.5)*6;
  candles.push({o:last,c:n});
- if(candles.length>120)candles.shift();
+ if(candles.length>100)candles.shift();
 }
 
 function draw(){
  ctx.clearRect(0,0,c.width,c.height);
 
- let cx=c.width/2;
- let cy=c.height/2;
+ let cx=c.width/2, cy=c.height/2;
 
- let y=Math.cos(state.yaw);
+ let y=Math.cos(yaw);
  let zone=y>0?"多":"空";
-
- document.getElementById("hud").innerText=
- "ZONE:"+zone+" 角度:"+Math.round(state.yaw*180/Math.PI);
 
  let grad=ctx.createLinearGradient(0,0,0,c.height);
  if(zone=="多"){
@@ -149,10 +132,10 @@ function draw(){
  ctx.fillStyle=grad;
  ctx.fillRect(0,0,c.width,c.height);
 
- let r=200;
+ let r=180;
 
  candles.forEach((k,i)=>{
-   let t=i/candles.length*Math.PI*2+state.yaw;
+   let t=i/candles.length*Math.PI*2+yaw;
    let h=(k.c-k.o)*2;
 
    let x=cx+Math.cos(t)*r;
@@ -172,12 +155,13 @@ function draw(){
 }
 
 function loop(){
+ yaw+=0.01;
  gen();
  draw();
  requestAnimationFrame(loop);
 }
 loop();
-</script>
 
+</script>
 </body>
 </html>
