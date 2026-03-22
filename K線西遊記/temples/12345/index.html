@@ -3,81 +3,25 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V9 商業版</title>
+<title>KLINE V10 AI預測版</title>
 
 <style>
 body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
 canvas{position:fixed;inset:0}
 
-/* 左上版本 */
-.version{
-position:fixed;top:10px;left:10px;
-background:rgba(0,0,0,.6);
-padding:6px 10px;border-radius:10px;font-size:12px
-}
-
-/* HUD */
-.hud{
-position:fixed;top:10px;right:10px;
-background:rgba(0,0,0,.6);
-padding:10px;border-radius:10px;font-size:12px
-}
-
-/* 按鈕 */
-.panel{
-position:fixed;bottom:10px;left:50%;
-transform:translateX(-50%);
-display:flex;gap:8px
-}
-.btn{padding:8px 12px;background:#111;border:1px solid #555;border-radius:6px}
-
-/* 行情 */
-.market{
-position:fixed;top:60px;right:10px;
-background:rgba(0,0,0,.6);
-padding:10px;border-radius:10px;font-size:12px
-}
+.version{position:fixed;top:10px;left:10px;background:#000;padding:6px 10px;border-radius:8px}
+.hud{position:fixed;top:10px;right:10px;background:#000;padding:8px;border-radius:8px;font-size:12px}
 </style>
 </head>
 
 <body>
 
-<div class="version">V9 商業版｜真行情</div>
+<div class="version">V10 AI預測版</div>
+<div class="hud" id="hud">AI運算中...</div>
 
 <canvas id="c"></canvas>
 
-<div class="hud" id="hud">行情載入中...</div>
-
-<div class="market" id="market">
-BTC: --
-</div>
-
-<div class="panel">
-<button class="btn" onclick="switchMarket('BTC')">BTC</button>
-<button class="btn" onclick="switchMarket('SIM')">模擬</button>
-</div>
-
 <script>
-
-let mode="BTC";
-let price=0;
-
-/* ===== 真行情（Binance API） ===== */
-async function fetchBTC(){
- try{
-   let res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-   let data = await res.json();
-   price = parseFloat(data.price);
-   document.getElementById("market").innerText="BTC: "+price;
- }catch(e){}
-}
-
-/* ===== 切換 ===== */
-function switchMarket(m){
- mode=m;
-}
-
-/* ===== K線 ===== */
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
 
@@ -85,27 +29,59 @@ function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
 let yaw=0;
-let candles=[];
 
-for(let i=0;i<150;i++){
- candles.push({o:0,c:0});
+/* ===== 真行情 ===== */
+let price=0;
+
+async function fetchBTC(){
+ try{
+  let r=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+  let d=await r.json();
+  price=parseFloat(d.price);
+ }catch(e){}
+}
+setInterval(fetchBTC,1000);
+
+/* ===== AI預測（核心） ===== */
+/* 模擬你的模型概念（多指標投票） */
+
+function aiPredict(base){
+ let votes=0;
+
+ // 模擬指標
+ let rsi=Math.random();
+ let ma=Math.random();
+ let momentum=Math.random();
+
+ if(rsi>0.5) votes++;
+ if(ma>0.5) votes++;
+ if(momentum>0.5) votes++;
+
+ return base + (votes-1.5)*5;
+}
+
+/* ===== K線 ===== */
+let candles=[];
+for(let i=0;i<200;i++){
+ candles.push({o:0,c:0,p:0});
 }
 
 function gen(){
  let last=candles[candles.length-1].c;
 
- let n;
+ let real = price/1000 + (Math.random()-0.5)*2;
+ let predict = aiPredict(real);
 
- if(mode==="BTC"){
-   n = price/1000 + (Math.random()-0.5)*2;
- }else{
-   n = last + (Math.random()-0.5)*4;
- }
+ candles.push({
+  o:last,
+  c:real,
+  p:predict
+ });
 
- candles.push({o:last,c:n});
- if(candles.length>150)candles.shift();
+ if(candles.length>200) candles.shift();
 }
 
+/* ===== 畫圖 ===== */
 function draw(){
  ctx.clearRect(0,0,c.width,c.height);
 
@@ -117,26 +93,34 @@ function draw(){
  let g=ctx.createLinearGradient(0,0,0,c.height);
  if(zone){g.addColorStop(0,"#0033ff");g.addColorStop(1,"#000");}
  else{g.addColorStop(0,"#000");g.addColorStop(1,"#ff0000");}
-
  ctx.fillStyle=g;
  ctx.fillRect(0,0,c.width,c.height);
 
  let r=180;
 
  candles.forEach((k,i)=>{
-   let t=i/candles.length*Math.PI*2+yaw;
-   let x=cx+Math.cos(t)*r;
-   let y=cy+Math.sin(t)*r;
+  let t=i/candles.length*Math.PI*2+yaw;
 
-   ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
-   ctx.beginPath();
-   ctx.moveTo(x,y);
-   ctx.lineTo(x,y-(k.c-k.o)*3);
-   ctx.stroke();
+  let x=cx+Math.cos(t)*r;
+  let y=cy+Math.sin(t)*r;
+
+  // 真實K線
+  ctx.strokeStyle="#0f0";
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(x,y-(k.c-k.o)*3);
+  ctx.stroke();
+
+  // AI預測（藍）
+  ctx.strokeStyle="#00f";
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(x,y-(k.p-k.o)*3);
+  ctx.stroke();
  });
 
- document.getElementById("hud").innerText =
- "模式:"+mode+"\nYaw:"+Math.round(yaw*180/Math.PI);
+ document.getElementById("hud").innerText=
+ "BTC:"+Math.round(price)+"\nAI預測已啟動";
 }
 
 function loop(){
@@ -146,9 +130,6 @@ function loop(){
  requestAnimationFrame(loop);
 }
 loop();
-
-/* ===== 每秒更新行情 ===== */
-setInterval(fetchBTC,1000);
 
 </script>
 
