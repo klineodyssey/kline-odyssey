@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>KLINE App Game｜12345 五指山悟空財神殿 V3.6.1 極簡沉浸版</title>
+<title>KLINE App Game｜12345 五指山悟空財神殿 V3.6.3.1 極簡沉浸版</title>
 <style>
 :root{
   --panel:rgba(8,12,22,.46);
@@ -23,7 +23,7 @@ button{pointer-events:auto}
 /* ultra minimal top bar */
 .topbar{position:fixed;left:12px;right:12px;top:12px;z-index:50;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
 .titlebar,.infofab{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
-.titlebar{padding:10px 14px;border-radius:18px;color:var(--gold);font-weight:900;font-size:clamp(18px,3vw,28px)}
+.titlebar{padding:10px 14px;border-radius:18px;color:var(--gold);font-weight:900;font-size:clamp(16px,3vw,24px)}
 .infofab{padding:10px 14px;border-radius:16px;color:#fff;font-weight:900;pointer-events:auto}
 
 /* center world */
@@ -45,11 +45,11 @@ button{pointer-events:auto}
 
 /* tiny live hud */
 .livehud{position:fixed;right:12px;top:66px;z-index:40;display:grid;gap:8px;pointer-events:none}
-.livebox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px;backdrop-filter:blur(10px);box-shadow:var(--shadow);font-size:12px}
+.livebox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:7px 9px;backdrop-filter:blur(10px);box-shadow:var(--shadow);font-size:11px}
 .livebox .k{color:var(--muted)} .livebox .v{font-weight:900}
 
 /* controls always on top */
-.controls{position:fixed;left:0;right:0;bottom:86px;height:194px;z-index:999999 !important;pointer-events:none}
+.controls{position:fixed;left:0;right:0;bottom:102px;height:194px;z-index:999999 !important;pointer-events:none}
 .joy-wrap{position:absolute;left:16px;bottom:8px;width:136px;height:136px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .joy-knob{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
@@ -67,8 +67,8 @@ button{pointer-events:auto}
 .enter-btn{position:absolute;right:92px;bottom:40px;width:92px;height:92px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:var(--panel2);color:#fff;font-size:18px;font-weight:900;box-shadow:var(--shadow);pointer-events:auto}
 
 /* bottom actions simplified */
-.footer-grid{position:fixed;left:12px;right:12px;bottom:8px;z-index:999999 !important;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-.fbtn{min-height:54px;padding:8px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shadow);cursor:pointer}
+.footer-grid{position:fixed;left:12px;right:12px;bottom:4px;z-index:999999 !important;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.fbtn{min-height:48px;padding:6px 8px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:12px;box-shadow:var(--shadow);cursor:pointer}
 .fbtn .mini{display:none}
 
 /* modals */
@@ -110,6 +110,7 @@ button{pointer-events:auto}
   <div class="livehud">
     <div class="livebox"><span class="k">KGEN</span> <span class="v" id="kgenBalance">—</span><br><span class="k">Allowance</span> <span class="v" id="allowanceTxt">—</span></div>
     <div class="livebox"><span class="k">聖盃</span> <span class="v" id="cupTopTxt">0 / 3</span><br><span class="k">狀態</span> <span class="v" id="walletBadge">未連線</span></div>
+    <div class="livebox"><span class="k">多空座標</span> <span class="v" id="zoneCoordTxt">多：-90~90</span><br><span class="k">目前</span> <span class="v" id="zoneNowTxt">多 / 180°</span></div>
   </div>
 
   <div class="modal" id="infoModal">
@@ -205,13 +206,13 @@ const nodes={"16888":{x:-220,y:0,z:-140,color:"#9fd8ff",name:"16888｜廣寒宮�
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} addEventListener('resize',resize); resize();
 const $=s=>document.querySelector(s);
-const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),cupTop:$("#cupTopTxt"),wallet:$("#walletBadge"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),tip:$("#nodeTip"),templeModal:$("#templeModal"),infoModal:$("#infoModal")};
+const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),cupTop:$("#cupTopTxt"),wallet:$("#walletBadge"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),zoneCoord:$("#zoneCoordTxt"),zoneNow:$("#zoneNowTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),tip:$("#nodeTip"),templeModal:$("#templeModal"),infoModal:$("#infoModal")};
 
 function normalizeDeg(rad){ return ((((rad*180/Math.PI)%360)+360)%360); }
 function sideZoneFromYaw(deg){ const signed = deg > 180 ? deg - 360 : deg; return (signed >= -90 && signed <= 90) ? "多" : "空"; }
 function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2200); }
 function updateWukongFace(){ const deg = normalizeDeg(state.yaw); const signed = deg > 180 ? deg - 360 : deg; const offset = Math.max(-18, Math.min(18, signed/7)); const scale = 1 + Math.min(.06, Math.abs(signed)/700); ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`; const glow = Math.abs(signed) > 45 ? .88 : .34; ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow; ui.eyeL.style.left = `${25 + offset*0.18}%`; ui.eyeR.style.right = `${25 - offset*0.18}%`; }
-function updateUI(){ const yawDeg = normalizeDeg(state.yaw); const zone = sideZoneFromYaw(yawDeg); ui.nearest.textContent = state.nearestId || "—"; ui.altitude.textContent = String(Math.round(state.y)); ui.yaw.textContent = `${Math.round(yawDeg)}°`; ui.zone.textContent = zone; ui.cupTop.textContent = `${state.cupCount} / 3`; ui.wallet.textContent = state.walletConnected ? "已連線" : "未連線"; ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—"; ui.allowance.textContent = state.approved ? "已授權" : "—"; updateWukongFace(); }
+function updateUI(){ const yawDeg = normalizeDeg(state.yaw); const zone = sideZoneFromYaw(yawDeg); ui.nearest.textContent = state.nearestId || '—'; ui.altitude.textContent = String(Math.round(state.y)); ui.yaw.textContent = `${Math.round(yawDeg)}°`; ui.zone.textContent = zone; ui.cupTop.textContent = `${state.cupCount} / 3`; ui.wallet.textContent = state.walletConnected ? '已連線' : '未連線'; ui.kgenBalance.textContent = state.walletConnected ? '待接鏈' : '—'; ui.allowance.textContent = state.approved ? '已授權' : '—'; if(ui.zoneCoord) ui.zoneCoord.textContent = '多：-90~90｜空：其餘'; if(ui.zoneNow) ui.zoneNow.textContent = `${zone} / ${Math.round(yawDeg)}°`; updateWukongFace(); }
 
 function setFocus(kind){
   state.focus = kind;
