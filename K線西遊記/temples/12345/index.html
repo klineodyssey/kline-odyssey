@@ -3,229 +3,140 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V8 成長優化版</title>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.min.js"></script>
+<title>KLINE V9 商業版</title>
+
 <style>
 body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
 canvas{position:fixed;inset:0}
 
+/* 左上版本 */
+.version{
+position:fixed;top:10px;left:10px;
+background:rgba(0,0,0,.6);
+padding:6px 10px;border-radius:10px;font-size:12px
+}
+
 /* HUD */
 .hud{
- position:fixed;top:10px;right:10px;
- background:rgba(0,0,0,.65);
- padding:12px;border-radius:12px;font-size:12px;line-height:1.6
+position:fixed;top:10px;right:10px;
+background:rgba(0,0,0,.6);
+padding:10px;border-radius:10px;font-size:12px
 }
 
-/* 控制 */
+/* 按鈕 */
 .panel{
- position:fixed;bottom:10px;left:50%;
- transform:translateX(-50%);
- display:flex;gap:8px;flex-wrap:wrap;justify-content:center
+position:fixed;bottom:10px;left:50%;
+transform:translateX(-50%);
+display:flex;gap:8px
 }
-.btn{
- padding:10px 14px;
- background:#111;border:1px solid #555;border-radius:8px;
- color:#fff;font-weight:bold
-}
-.btn:disabled{opacity:0.4}
+.btn{padding:8px 12px;background:#111;border:1px solid #555;border-radius:6px}
 
-/* 客服 */
-客服{
- position:fixed;left:10px;top:10px;
-}
-
-/* 聊天窗 */
-.chat{
- position:fixed;left:10px;bottom:10px;
- width:260px;height:200px;
- background:rgba(0,0,0,.7);
- border:1px solid #555;border-radius:10px;
- display:flex;flex-direction:column
-}
-.chat-log{
- flex:1;padding:6px;font-size:12px;overflow:auto
-}
-.chat-input{
- display:flex
-}
-.chat-input input{
- flex:1;background:#000;border:none;color:#fff;padding:6px
-}
-.chat-input button{
- background:#222;color:#fff;border:none;padding:6px
-}
-
-/* Toast */
-.toast{
- position:fixed;top:50%;left:50%;
- transform:translate(-50%,-50%);
- background:#000;padding:12px 16px;
- border:1px solid #888;border-radius:8px;
- display:none
+/* 行情 */
+.market{
+position:fixed;top:60px;right:10px;
+background:rgba(0,0,0,.6);
+padding:10px;border-radius:10px;font-size:12px
 }
 </style>
 </head>
+
 <body>
+
+<div class="version">V9 商業版｜真行情</div>
 
 <canvas id="c"></canvas>
 
-<div class="hud" id="hud">
-未連線
+<div class="hud" id="hud">行情載入中...</div>
+
+<div class="market" id="market">
+BTC: --
 </div>
 
 <div class="panel">
-<button class="btn" onclick="connect()">連接</button>
-<button class="btn" id="btnClaim" onclick="claim()">發財金</button>
-<button class="btn" id="btnHB" onclick="heartbeat()">心跳</button>
-<button class="btn" id="btnIG" onclick="ignite()">呼吸</button>
+<button class="btn" onclick="switchMarket('BTC')">BTC</button>
+<button class="btn" onclick="switchMarket('SIM')">模擬</button>
 </div>
-
-<div class="chat">
-<div class="chat-log" id="chatLog">客服：歡迎來到悟空財神殿</div>
-<div class="chat-input">
-<input id="chatInput" placeholder="輸入問題"/>
-<button onclick="sendChat()">送出</button>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const CONTRACT_ADDRESS = "填你的TempleHeart地址";
 
-const ABI = [
- "function fortuneClaim(uint256 amount) external",
- "function heartbeatClaim() external",
- "function igniteAndClaim() external"
-];
+let mode="BTC";
+let price=0;
 
-let provider, signer, contract, user;
-
-/* ===== Toast ===== */
-function toast(msg){
- const el=document.getElementById("toast");
- el.innerText=msg;
- el.style.display="block";
- setTimeout(()=>el.style.display="none",2000);
-}
-
-/* ===== Chat客服 ===== */
-function sendChat(){
- let input=document.getElementById("chatInput").value;
- let log=document.getElementById("chatLog");
- log.innerHTML += "<br>你："+input;
-
- if(input.includes("發財金")){
-   log.innerHTML += "<br>客服：30天一次，1~888";
- }else if(input.includes("心跳")){
-   log.innerHTML += "<br>客服：每小時一次";
- }else{
-   log.innerHTML += "<br>客服：請專心修行";
- }
-}
-
-/* ===== Web3 ===== */
-async function connect(){
- if(!window.ethereum){toast("請用MetaMask");return;}
- await window.ethereum.request({method:"eth_requestAccounts"});
- provider = new ethers.BrowserProvider(window.ethereum);
- signer = await provider.getSigner();
- user = await signer.getAddress();
- contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
- updateHUD();
-}
-
-function updateHUD(){
- document.getElementById("hud").innerText="已連線\n"+user;
-}
-
-/* ===== 功能 ===== */
-async function claim(){
+/* ===== 真行情（Binance API） ===== */
+async function fetchBTC(){
  try{
-  disableBtns(true);
-  const tx=await contract.fortuneClaim(88);
-  toast("發財金送出");
-  await tx.wait();
-  toast("成功");
- }catch(e){toast("失敗")}
- disableBtns(false);
+   let res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+   let data = await res.json();
+   price = parseFloat(data.price);
+   document.getElementById("market").innerText="BTC: "+price;
+ }catch(e){}
 }
 
-async function heartbeat(){
- try{
-  disableBtns(true);
-  const tx=await contract.heartbeatClaim();
-  toast("心跳");
-  await tx.wait();
-  toast("完成");
- }catch(e){toast("失敗")}
- disableBtns(false);
+/* ===== 切換 ===== */
+function switchMarket(m){
+ mode=m;
 }
 
-async function ignite(){
- try{
-  disableBtns(true);
-  const tx=await contract.igniteAndClaim();
-  toast("呼吸");
-  await tx.wait();
-  toast("完成");
- }catch(e){toast("失敗")}
- disableBtns(false);
-}
-
-function disableBtns(v){
- document.getElementById("btnClaim").disabled=v;
- document.getElementById("btnHB").disabled=v;
- document.getElementById("btnIG").disabled=v;
-}
-
-/* ===== K線宇宙 ===== */
+/* ===== K線 ===== */
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
+
 function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
 let yaw=0;
 let candles=[];
-for(let i=0;i<120;i++) candles.push({o:0,c:0});
+
+for(let i=0;i<150;i++){
+ candles.push({o:0,c:0});
+}
 
 function gen(){
  let last=candles[candles.length-1].c;
- let n=last+(Math.random()-0.5)*6;
+
+ let n;
+
+ if(mode==="BTC"){
+   n = price/1000 + (Math.random()-0.5)*2;
+ }else{
+   n = last + (Math.random()-0.5)*4;
+ }
+
  candles.push({o:last,c:n});
- if(candles.length>120)candles.shift();
+ if(candles.length>150)candles.shift();
 }
 
 function draw(){
  ctx.clearRect(0,0,c.width,c.height);
- let cx=c.width/2,cy=c.height/2;
 
- let y=Math.cos(yaw);
- let zone=y>0?"多":"空";
+ let cx=c.width/2;
+ let cy=c.height/2;
 
- let grad=ctx.createLinearGradient(0,0,0,c.height);
- if(zone=="多"){grad.addColorStop(0,"#0033ff");grad.addColorStop(1,"#000");}
- else{grad.addColorStop(0,"#000");grad.addColorStop(1,"#ff0000");}
- ctx.fillStyle=grad;
+ let zone=Math.cos(yaw)>0;
+
+ let g=ctx.createLinearGradient(0,0,0,c.height);
+ if(zone){g.addColorStop(0,"#0033ff");g.addColorStop(1,"#000");}
+ else{g.addColorStop(0,"#000");g.addColorStop(1,"#ff0000");}
+
+ ctx.fillStyle=g;
  ctx.fillRect(0,0,c.width,c.height);
 
  let r=180;
+
  candles.forEach((k,i)=>{
    let t=i/candles.length*Math.PI*2+yaw;
-   let h=(k.c-k.o)*2;
    let x=cx+Math.cos(t)*r;
    let y=cy+Math.sin(t)*r;
+
    ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
    ctx.beginPath();
    ctx.moveTo(x,y);
-   ctx.lineTo(x,y-h);
+   ctx.lineTo(x,y-(k.c-k.o)*3);
    ctx.stroke();
  });
 
- ctx.beginPath();
- ctx.arc(cx,cy,40,0,Math.PI*2);
- ctx.fillStyle="rgba(255,255,255,0.1)";
- ctx.fill();
+ document.getElementById("hud").innerText =
+ "模式:"+mode+"\nYaw:"+Math.round(yaw*180/Math.PI);
 }
 
 function loop(){
@@ -235,6 +146,10 @@ function loop(){
  requestAnimationFrame(loop);
 }
 loop();
+
+/* ===== 每秒更新行情 ===== */
+setInterval(fetchBTC,1000);
+
 </script>
 
 </body>
