@@ -1,296 +1,185 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>KLINE App Game｜12345 五指山悟空財神殿 V3.4</title>
-<style>
-:root{
-  --panel:rgba(8,12,22,.62); --panel2:rgba(8,12,22,.95); --line:rgba(255,215,120,.22);
-  --gold:#ffd978; --text:#eef4ff; --muted:#adbbd2; --shadow:0 18px 50px rgba(0,0,0,.40);
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
-#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 42%, rgba(18,34,60,.88), rgba(5,7,13,1) 58%);overflow:hidden}
-canvas{position:fixed;inset:0;width:100%;height:100%}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KGEN 宇宙心臟 - 五指山悟空財神殿 12345</title>
+    <style>
+        :root {
+            --wukong-gold: #ffd700;
+            --temple-red: #8b0000;
+            --kgen-glow: rgba(255, 215, 0, 0.6);
+            --bg-dark: #080000;
+        }
 
-/* layers */
-.hud-layer,.panel-layer,.center-layer,.tip-layer{pointer-events:none}
-button{pointer-events:auto}
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, #1a0000 0%, #080000 100%);
+            color: white;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-/* compact top info */
-.topbar{position:fixed;left:12px;right:12px;top:12px;z-index:20;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.brand-mini{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px 12px;backdrop-filter:blur(10px);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
-.brand-mini .title{color:var(--gold);font-weight:900}
-.info-toggle{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-weight:800}
-.status{display:grid;gap:8px}
-.status .box{min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px 12px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
-.kv{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:12px}.k{color:var(--muted)}.v{font-weight:900}
+        /* 1. 心臟脈動 Logo */
+        @keyframes heartBeat {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
+            15% { transform: scale(1.1); filter: drop-shadow(0 0 25px var(--wukong-gold)); }
+            30% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
+        }
 
-.info-drawer{position:fixed;left:12px;right:12px;top:66px;z-index:30;display:none}
-.info-drawer.show{display:block}
-.info-card{max-width:560px;background:var(--panel2);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
-.info-card h1{margin:0;color:var(--gold);font-size:30px;font-weight:900}
-.info-card .sub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.55}
-.route{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);font-size:12px}
+        .temple-core {
+            margin-top: 40px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--wukong-gold) 0%, var(--temple-red) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: heartBeat 2s infinite ease-in-out;
+            border: 3px solid #000;
+            box-shadow: 0 0 30px var(--temple-red);
+        }
 
-.center-wrap{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);width:min(42vw,280px);height:min(42vw,280px);z-index:8}
-.ring{position:absolute;inset:0;border-radius:50%;border:8px double rgba(255,215,120,.82);overflow:hidden;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 70px rgba(255,195,60,.22);animation:ringSpin 34s linear infinite}
-.wukong-core{position:absolute;inset:0;overflow:hidden;border-radius:50%}
-.wukong-core img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 55%;animation:pulse 3.4s ease-in-out infinite}
-.wukong-eye{position:absolute;top:37%;width:22%;height:10%;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(255,215,120,.55), rgba(255,215,120,0) 70%);filter:blur(8px);opacity:.0;transition:opacity .18s ease,left .15s ease,right .15s ease}
-.wukong-eye.left{left:25%}.wukong-eye.right{right:25%}
-.ring-glow{position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(255,215,120,.16);animation:aura 4.2s ease-out infinite}
-.center-name{position:absolute;left:50%;bottom:-52px;transform:translateX(-50%);min-width:260px;text-align:center;padding:11px 14px;border-radius:18px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow);font-weight:900}
-.center-name .mini{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
+        .core-symbol { font-size: 3rem; color: black; font-weight: 900; }
 
-/* HUD panels moved up and smaller */
-.sidepanel{position:fixed;top:120px;z-index:16;width:min(300px,calc(50vw - 22px));max-height:34vh;background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:auto;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
-.sidepanel.left{left:12px}.sidepanel.right{right:12px}
-.panel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.08)}
-.panel-head h2{margin:0;color:var(--gold);font-size:16px}
-.panel-body{padding:12px}
-.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);border-radius:14px;padding:10px}
-.label{font-size:11px;color:var(--muted)} .value{margin-top:6px;font-size:18px;font-weight:900} .subv{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.55}
+        /* 2. 交易控制面板 (繼承 V3.4) */
+        .swap-panel {
+            width: 90%;
+            max-width: 420px;
+            background: rgba(20, 0, 0, 0.9);
+            border: 2px solid var(--wukong-gold);
+            border-radius: 15px;
+            margin: 30px 0;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.5);
+        }
 
-.node-tip{position:fixed;left:50%;bottom:212px;transform:translateX(-50%);display:none;z-index:26;padding:11px 14px;border-radius:16px;background:rgba(0,0,0,.56);border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);font-weight:900}
-.node-tip.show{display:block}
-.crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;z-index:7;pointer-events:none}
-.crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.88)} .crosshair:before{left:8px;top:0;width:2px;height:18px} .crosshair:after{left:0;top:8px;width:18px;height:2px}
+        .input-group {
+            background: #111;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px inset #333;
+            margin-bottom: 20px;
+        }
 
-/* controls protected */
-.controls{position:fixed;left:0;right:0;bottom:86px;height:194px;z-index:99999 !important;pointer-events:none}
-.joy-wrap{position:absolute;left:16px;bottom:8px;width:136px;height:136px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
-.joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
-.joy-knob{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.alt-wrap{position:absolute;right:16px;bottom:0;width:62px;height:180px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
-.alt-track{position:absolute;left:26px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.13)}
-.alt-knob{position:absolute;left:10px;top:69px;width:42px;height:42px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.alt-label-top,.alt-label-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900}.alt-label-top{top:-24px}.alt-label-bottom{bottom:-24px}
-.yaw-wrap{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:min(44vw,340px);height:62px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
-.yaw-track{position:absolute;left:14px;right:14px;top:26px;height:10px;border-radius:999px;background:rgba(255,255,255,.13)}
-.yaw-fill{position:absolute;left:50%;top:26px;height:10px;border-radius:999px;background:linear-gradient(90deg, rgba(255,215,120,.2), rgba(255,215,120,.9));width:0}
-.yaw-knob{position:absolute;left:calc(50% - 21px);top:10px;width:42px;height:42px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.yaw-left,.yaw-right{position:absolute;top:-18px;font-size:11px;font-weight:900}.yaw-left{left:10px}.yaw-right{right:10px}
-.enter-btn{position:absolute;right:92px;bottom:40px;width:92px;height:92px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:var(--panel2);color:#fff;font-size:18px;font-weight:900;box-shadow:var(--shadow);pointer-events:auto}
+        .input-group label { font-size: 0.75rem; color: #888; display: block; margin-bottom: 5px; }
+        .input-group input {
+            background: transparent; border: none; color: white; width: 100%;
+            font-size: 1.5rem; outline: none; font-weight: bold;
+        }
 
-.footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:99999 !important;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-.fbtn{min-height:58px;padding:10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shadow);cursor:pointer}
-.fbtn .mini{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:700}
+        /* 3. 儀式按鈕：煉金模式 */
+        .ritual-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(90deg, #8b0000, #ff0000, #8b0000);
+            background-size: 200% auto;
+            border: 1px solid var(--wukong-gold);
+            border-radius: 10px;
+            color: var(--wukong-gold);
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.5s;
+            letter-spacing: 5px;
+            animation: moveGradient 3s linear infinite;
+        }
 
-.modal{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.78);padding:14px 14px 260px 14px}.modal.show{display:block}
-.modal-card{max-width:1020px;max-height:60vh;margin:6vh auto 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:22px;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.68)}
-.modal-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(8,12,22,.96);border-bottom:1px solid rgba(255,255,255,.08)}.modal-head h3{margin:0;color:var(--gold)}
-.modal-body{padding:16px;display:grid;grid-template-columns:1.08fr .92fr;gap:14px}
-.modal-box{border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.04);padding:12px}.modal-box h4{margin:0 0 8px;color:var(--gold)}.modal-box p,.modal-box li{line-height:1.7;color:#edf4ff}.modal-box ul{margin:8px 0 0 18px}
-.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.act{min-height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-weight:900;font-size:14px}
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
 
-@keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
-@keyframes aura{0%{transform:scale(.86);opacity:.62}85%{transform:scale(1.22);opacity:0}100%{opacity:0}}
+        .ritual-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px var(--wukong-gold);
+            color: white;
+        }
 
-@media (max-width:980px){
-  .topbar{display:block}.status{display:none}
-  .center-wrap{width:min(54vw,280px);height:min(54vw,280px);top:32%}
-  .sidepanel{width:calc(50vw - 18px);top:120px;max-height:30vh}
-  .panel-head h2{font-size:15px}.panel-grid{grid-template-columns:1fr}
-  .footer-grid{grid-template-columns:repeat(4,1fr)}
-  .yaw-wrap{width:min(42vw,250px)}
-  .modal-body{grid-template-columns:1fr}
-}
-</style>
+        /* 4. 底部敘事 */
+        .footer-text {
+            color: #444;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 20px;
+            line-height: 1.8;
+        }
+    </style>
 </head>
 <body>
-<div id="app">
-  <canvas id="scene"></canvas>
 
-  <div class="topbar hud-layer">
-    <div class="brand-mini">
-      <div class="title">12345｜五指山悟空財神殿</div>
-      <button class="info-toggle" id="infoToggle">☰ 神殿資訊</button>
+    <div class="temple-core">
+        <div class="core-symbol">悟</div>
     </div>
-    <div class="status">
-      <div class="box">
-        <div class="kv"><div class="k">最近節點</div><div class="v" id="nearestTxt">—</div></div>
-        <div class="kv"><div class="k">高度</div><div class="v" id="altitudeTxt">20</div></div>
-        <div class="kv"><div class="k">Yaw</div><div class="v" id="yawTxt">180°</div></div>
-        <div class="kv"><div class="k">區間</div><div class="v" id="sideZoneTxt">多</div></div>
-        <div class="kv"><div class="k">聖盃</div><div class="v" id="cupTopTxt">0 / 3</div></div>
-      </div>
-    </div>
-  </div>
 
-  <div class="info-drawer" id="infoDrawer">
-    <div class="info-card">
-      <h1>12345｜五指山悟空財神殿</h1>
-      <div class="sub">V3.4 完整修正版。上方資訊改成可收合，左右 panel 往上縮成 HUD，控制區與底部安全區完全獨立。</div>
-      <div class="route">
-        <span class="pill">16888｜廣寒宮入口</span>
-        <span class="pill">12345｜五指山</span>
-        <span class="pill">11520｜花果山交易所</span>
-        <span class="pill">8888｜高老莊</span>
-        <span class="pill">7744｜流沙河</span>
-      </div>
-    </div>
-  </div>
+    <h2 style="letter-spacing: 8px; margin-top: 20px;">悟空財神殿</h2>
+    <p style="color: var(--wukong-gold); font-size: 0.9rem; letter-spacing: 2px;">座標：12345 ｜ 宇宙心臟</p>
 
-  <div class="center-wrap center-layer">
-    <div class="ring">
-      <div class="wukong-core">
-        <img id="wukongImg" src="./assets/wukong_center.png" alt="悟空財神">
-        <div class="wukong-eye left" id="eyeL"></div>
-        <div class="wukong-eye right" id="eyeR"></div>
-      </div>
-      <div class="ring-glow"></div>
-    </div>
-    <div class="center-name">12345｜五指山悟空財神殿<span class="mini">靠近節點後按「進入」，開啟 TempleHeart 操作</span></div>
-  </div>
-
-  <div class="sidepanel left panel-layer">
-    <div class="panel-head"><h2>悟空心臟操作窗</h2><span class="pill" id="walletBadge">未連線</span></div>
-    <div class="panel-body"><div class="panel-grid">
-      <div class="card"><div class="label">KGEN 餘額</div><div class="value" id="kgenBalance">—</div><div class="subv">部署後讀取</div></div>
-      <div class="card"><div class="label">Allowance</div><div class="value" id="allowanceTxt">—</div><div class="subv">Approve 後更新</div></div>
-      <div class="card"><div class="label">聖盃進度</div><div class="value" id="cupSideTxt">0 / 3</div><div class="subv">連續三次聖盃才可領發財金</div></div>
-      <div class="card"><div class="label">操作焦點</div><div class="value" id="focusTxt">fortune</div><div class="subv">底部按鍵同步切換</div></div>
-    </div></div>
-  </div>
-
-  <div class="sidepanel right panel-layer">
-    <div class="panel-head"><h2>悟空心臟規則窗</h2><span class="pill">TempleHeart V3.2.3</span></div>
-    <div class="panel-body"><div class="panel-grid">
-      <div class="card"><div class="label">fortuneClaim</div><div class="value">1 ~ 888</div><div class="subv">30 天冷卻 / 每 epoch 500 名</div></div>
-      <div class="card"><div class="label">heartbeatClaim</div><div class="value">每小時</div><div class="subv">整點心跳儀式</div></div>
-      <div class="card"><div class="label">igniteAndClaim</div><div class="value">00:00</div><div class="subv">UTC 00:00–00:10 轉日呼吸</div></div>
-      <div class="card"><div class="label">Yaw 區間</div><div class="value" id="zoneTxt2">多</div><div class="subv">-90~90 多；其餘空</div></div>
-    </div></div>
-  </div>
-
-  <div class="crosshair"></div>
-  <div class="node-tip tip-layer" id="nodeTip"></div>
-
-  <div class="controls">
-    <div class="joy-wrap" id="joyWrap"><div class="joy-ring"></div><div class="joy-knob" id="joyKnob"></div></div>
-    <div class="alt-wrap" id="altWrap"><div class="alt-label-top">上升</div><div class="alt-track"></div><div class="alt-knob" id="altKnob"></div><div class="alt-label-bottom">下降</div></div>
-    <div class="yaw-wrap" id="yawWrap"><div class="yaw-left">左轉</div><div class="yaw-right">右轉</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-knob" id="yawKnob"></div></div>
-    <button class="enter-btn" id="enterBtn">進入</button>
-  </div>
-
-  <div class="footer-grid">
-    <button class="fbtn" id="btnPhoto">📸 拍照存證<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnRecord">🎥 神殿留影錄影<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnFront">🤳 前鏡自拍<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnRear">🌌 後鏡巡禮<span class="mini">保留</span></button>
-    <button class="fbtn" id="btnFortune">🧧 發財金<span class="mini">1 ~ 888</span></button>
-    <button class="fbtn" id="btnHeartbeat">🫀 整點心跳<span class="mini">每小時一次</span></button>
-    <button class="fbtn" id="btnIgnite">🌬️ 轉日呼吸<span class="mini">UTC 00:00–00:10</span></button>
-    <button class="fbtn" id="btnGuide">🗣️ 客服 / 五指山導覽<span class="mini">保留 KGEN 介紹</span></button>
-  </div>
-
-  <div class="modal" id="templeModal">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3>五指山神殿操作中心</h3>
-        <button class="fbtn" style="min-height:auto;padding:10px 14px;width:auto" id="closeModalBtn">關閉</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-box">
-          <h4 id="mainTitle">發財金流程</h4>
-          <div id="mainBody"></div>
-          <div class="act-grid">
-            <button class="act" id="actConnect">🔗 連接錢包</button>
-            <button class="act" id="actApprove">✅ Approve 授權</button>
-            <button class="act" id="actCup">🥢 三次聖盃</button>
-            <button class="act" id="actFortune">🧧 fortuneClaim</button>
-            <button class="act" id="actHeartbeat">🫀 heartbeatClaim</button>
-            <button class="act" id="actIgnite">🌬️ igniteAndClaim</button>
-            <button class="act" id="actVow">🙏 vowTo 還願</button>
-            <button class="act" id="actLamp">🪔 lightLamp 點燈</button>
-            <button class="act" id="actWish">✨ makeWish 許願</button>
-          </div>
-          <p id="actionState" style="margin-top:12px;color:#7ff3ff;font-weight:800">狀態：尚未開始</p>
+    <main class="swap-panel">
+        <div style="text-align: center; margin-bottom: 20px; font-size: 0.85rem; color: #aaa;">
+            <span id="bp-status">🔴 尚未連線宇宙</span>
         </div>
-        <div class="modal-box">
-          <h4>完整說明</h4>
-          <div id="sideBody"></div>
+
+        <div class="input-group">
+            <label>投入 USDT (子彈)</label>
+            <input type="number" id="usdt-amount" placeholder="0.00">
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<script>
-const state={x:0,y:20,z:180,yaw:Math.PI,keys:{},nearestId:"12345",walletConnected:false,walletAddress:"",approved:false,cupCount:0,focus:"fortune",stars:Array.from({length:260},()=>({x:(Math.random()-0.5)*1800,y:(Math.random()-0.5)*800,z:Math.random()*2200+40,s:Math.random()*2+0.5})),mobile:{mx:0,my:0,alt:0,yaw:0,yawVel:0}};
-const nodes={"16888":{x:-220,y:0,z:-140,color:"#9fd8ff",name:"16888｜廣寒宮入口"},"12345":{x:0,y:0,z:0,color:"#ffd978",name:"12345｜五指山悟空財神殿"},"11520":{x:260,y:0,z:-80,color:"#7ff3ff",name:"11520｜花果山交易所"},"8888":{x:180,y:0,z:220,color:"#ffb87f",name:"8888｜高老莊"},"7744":{x:-140,y:0,z:240,color:"#bda7ff",name:"7744｜流沙河"}};
-const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
-function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} addEventListener('resize',resize); resize();
-const $=s=>document.querySelector(s);
-const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),zone2:$("#zoneTxt2"),cupTop:$("#cupTopTxt"),cupSide:$("#cupSideTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#nodeTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),yawKnob:$("#yawKnob"),yawFill:$("#yawFill"),drawer:$("#infoDrawer"),toggle:$("#infoToggle")};
+        <div style="text-align: center; margin-bottom: 20px; color: var(--wukong-gold);">
+            <span style="font-size: 1.2rem;">↓</span>
+        </div>
 
-ui.toggle.onclick = ()=> ui.drawer.classList.toggle('show');
+        <div class="input-group">
+            <label>獲得 KGEN (身份質量)</label>
+            <input type="text" id="kgen-output" placeholder="預計獲取..." readonly>
+        </div>
 
-function normalizeDeg(rad){ return ((((rad*180/Math.PI)%360)+360)%360); }
-function sideZoneFromYaw(deg){ const signed = deg > 180 ? deg - 360 : deg; return (signed >= -90 && signed <= 90) ? "多" : "空"; }
-function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2300); }
-function updateWukongFace(){ const deg = normalizeDeg(state.yaw); const signed = deg > 180 ? deg - 360 : deg; const offset = Math.max(-16, Math.min(16, signed/7)); const scale = 1 + Math.min(.04, Math.abs(signed)/900); ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`; const glow = Math.abs(signed) > 45 ? .75 : .28; ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow; ui.eyeL.style.left = `${25 + offset*0.18}%`; ui.eyeR.style.right = `${25 - offset*0.18}%`; }
-function updateUI(){ const yawDeg = normalizeDeg(state.yaw); const zone = sideZoneFromYaw(yawDeg); ui.nearest.textContent = state.nearestId || "—"; ui.altitude.textContent = String(Math.round(state.y)); ui.yaw.textContent = `${Math.round(yawDeg)}°`; ui.zone.textContent = zone; ui.zone2.textContent = zone; ui.cupTop.textContent = `${state.cupCount} / 3`; ui.cupSide.textContent = `${state.cupCount} / 3`; ui.wallet.textContent = state.walletConnected ? "已連線" : "未連線"; ui.focus.textContent = state.focus; ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—"; ui.allowance.textContent = state.approved ? "已授權" : "—"; updateWukongFace(); }
-function setFocus(kind){ state.focus = kind; const data = { fortune: { main:`<p>主流程：連接錢包 → Approve → 連續三次聖盃 → fortuneClaim 發財金。</p><ul><li>發財金範圍：1 到 888</li><li>冷卻：30 天</li><li>每個 epoch：最多 500 名</li></ul>`, side:`<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣。發財金、還願、點燈、許願流程都圍繞 KGEN 展開。</p><p>三次聖盃完成前，不能領 fortuneClaim。</p>` }, heartbeat: { main:`<p>heartbeatClaim 是固定節奏儀式。</p><ul><li>規則：每小時一次</li><li>用途：維持悟空心臟活性</li></ul>`, side:`<p>這不是買賣功能，而是神殿節奏功能。</p>` }, ignite: { main:`<p>igniteAndClaim 是轉日時刻的呼吸。</p><ul><li>時間：UTC 00:00–00:10</li><li>每天只有一次視窗</li></ul>`, side:`<p>右側直桿控制上下高度，下方橫桿控制 360° 旋轉。</p>` }, guide: { main:`<p>這裡是 12345 五指山悟空財神殿，不是 16888 廣寒宮入口，也不是買賣遊戲頁。</p><p>核心功能：Approve、三次聖盃、fortuneClaim、heartbeatClaim、igniteAndClaim、vowTo、lightLamp、makeWish。</p>`, side:`<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣，會沿著 Heart ↔ 11520 Brain 的邏輯串接。</p><p>TempleHeart 合約尚未部署，這版先把完整產品體驗做成可展示成品。</p>` } }; ui.mainBody.innerHTML = data[kind].main; ui.sideBody.innerHTML = data[kind].side; updateUI(); }
-function openModal(kind="fortune"){ setFocus(kind); ui.modal.classList.add('show'); }
-function closeModal(){ ui.modal.classList.remove('show'); }
-document.getElementById('closeModalBtn').onclick = closeModal;
+        <button class="ritual-btn" onclick="startRitual()">啟動煉金儀式</button>
+    </main>
 
-async function connectWallet(){ if(window.ethereum){ try{ const accounts = await window.ethereum.request({ method:'eth_requestAccounts' }); state.walletConnected = true; state.walletAddress = accounts && accounts[0] ? accounts[0] : "已連線"; toast('錢包已連線：' + state.walletAddress.slice(0,6) + '...' + state.walletAddress.slice(-4)); }catch(e){ toast('連線取消，先保留前端流程'); } } else { state.walletConnected = true; state.walletAddress = "展示模式"; toast('未偵測到錢包，切換展示模式'); } updateUI(); }
-document.getElementById('actConnect').onclick = connectWallet;
-document.getElementById('actApprove').onclick = ()=>{ if(!state.walletConnected){toast('請先連接錢包');return;} state.approved=true; ui.actionState.textContent='狀態：Approve 已完成。部署後即可正式簽名授權。'; toast('Approve 已完成（展示流程）'); updateUI(); };
-document.getElementById('actCup').onclick = ()=>{ state.cupCount=Math.min(3,state.cupCount+1); ui.actionState.textContent=state.cupCount>=3?'狀態：連續三次聖盃完成，可以領 fortuneClaim 發財金。':`狀態：聖盃完成 ${state.cupCount} / 3，還需要連續完成。`; toast(state.cupCount>=3?'三次聖盃完成，可領發財金。':`聖盃 ${state.cupCount} / 3`); updateUI(); };
-document.getElementById('actFortune').onclick = ()=>{ if(state.cupCount<3){toast('尚未完成連續三次聖盃，不能領發財金。');return;} ui.actionState.textContent='狀態：TempleHeart 尚未部署。已達三次聖盃條件，可進行 fortuneClaim（1~888 / 30天 / 500名）。'; toast('已達條件：fortuneClaim（待部署後接鏈）'); };
-document.getElementById('actHeartbeat').onclick = ()=>{ ui.actionState.textContent='狀態：heartbeatClaim 每小時一次（待部署後接鏈）'; toast('heartbeatClaim：每小時一次'); };
-document.getElementById('actIgnite').onclick = ()=>{ ui.actionState.textContent='狀態：igniteAndClaim UTC 00:00–00:10（待部署後接鏈）'; toast('igniteAndClaim：UTC 00:00–00:10'); };
-document.getElementById('actVow').onclick = ()=>{ ui.actionState.textContent='狀態：vowTo 還願補血（待部署後接鏈）'; toast('vowTo：還願補血'); };
-document.getElementById('actLamp').onclick = ()=>{ ui.actionState.textContent='狀態：lightLamp 點燈續命（待部署後接鏈）'; toast('lightLamp：點燈續命'); };
-document.getElementById('actWish').onclick = ()=>{ ui.actionState.textContent='狀態：makeWish 許願 hash（待部署後接鏈）'; toast('makeWish：許願 hash'); };
+    <footer class="footer-text">
+        「你得到的，不是幣。是身份。」<br>
+        🌕 花果山火星・信念不滅
+    </footer>
 
-document.getElementById('btnPhoto').onclick = ()=> toast('拍照存證：保留功能，後續可接裝置相機');
-document.getElementById('btnRecord').onclick = ()=> toast('神殿留影錄影：保留功能，後續可接錄影');
-document.getElementById('btnFront').onclick = ()=> toast('前鏡自拍：保留功能');
-document.getElementById('btnRear').onclick = ()=> toast('後鏡巡禮：保留功能');
-document.getElementById('btnFortune').onclick = ()=> openModal('fortune');
-document.getElementById('btnHeartbeat').onclick = ()=> openModal('heartbeat');
-document.getElementById('btnIgnite').onclick = ()=> openModal('ignite');
-document.getElementById('btnGuide').onclick = ()=> openModal('guide');
+    <script>
+        // 模擬兌換邏輯與儀式反饋
+        function startRitual() {
+            const btn = document.querySelector('.ritual-btn');
+            const status = document.getElementById('bp-status');
+            const amount = document.getElementById('usdt-amount').value;
 
-const joyWrap=document.getElementById('joyWrap'), joyKnob=document.getElementById('joyKnob');
-function joyMove(x,y){ const r=joyWrap.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2; let dx=x-cx, dy=y-cy; const max=38, len=Math.hypot(dx,dy)||1; if(len>max){dx=dx/len*max;dy=dy/len*max;} state.mobile.mx=dx/max; state.mobile.my=dy/max; joyKnob.style.left=(43+dx)+'px'; joyKnob.style.top=(43+dy)+'px'; }
-function joyReset(){ state.mobile.mx=0; state.mobile.my=0; joyKnob.style.left='43px'; joyKnob.style.top='43px'; }
-joyWrap.addEventListener('pointerdown',e=>{e.preventDefault();joyMove(e.clientX,e.clientY);}); joyWrap.addEventListener('pointermove',e=>{if(e.buttons) joyMove(e.clientX,e.clientY);}); joyWrap.addEventListener('pointerup',joyReset); joyWrap.addEventListener('pointercancel',joyReset);
+            if(!amount || amount <= 0) {
+                alert("大聖，請先填入子彈（USDT）！");
+                return;
+            }
 
-const altWrap=document.getElementById('altWrap'), altKnob=document.getElementById('altKnob');
-function altMove(y){ const r=altWrap.getBoundingClientRect(); const top=12,bottom=r.height-54; let yy=y-r.top-21; yy=Math.max(top,Math.min(bottom,yy)); altKnob.style.top=yy+'px'; const center=(top+bottom)/2; state.mobile.alt=(center-yy)/((bottom-top)/2); }
-function altReset(){ altKnob.style.top='69px'; state.mobile.alt=0; }
-altWrap.addEventListener('pointerdown',e=>{e.preventDefault();altMove(e.clientY);}); altWrap.addEventListener('pointermove',e=>{if(e.buttons) altMove(e.clientY);}); altWrap.addEventListener('pointerup',altReset); altWrap.addEventListener('pointercancel',altReset);
+            btn.innerText = "正在震碎壓制...";
+            btn.style.pointerEvents = "none";
+            status.innerText = "🟡 正在引導財氣...";
 
-const yawWrap=document.getElementById('yawWrap'), yawKnob=document.getElementById('yawKnob'), yawFill=document.getElementById('yawFill');
-function yawMove(x){ const r=yawWrap.getBoundingClientRect(); const min=14, max=r.width-56; let xx=x-r.left-21; xx=Math.max(min,Math.min(max,xx)); yawKnob.style.left=xx+'px'; const center=(min+max)/2; const ratio=(xx-center)/((max-min)/2); state.mobile.yaw=ratio; if(ratio>=0){ yawFill.style.left='50%'; yawFill.style.width=(ratio*50)+'%'; } else { yawFill.style.left=(50+ratio*50)+'%'; yawFill.style.width=(-ratio*50)+'%'; } }
-function yawReset(){ state.mobile.yawVel = state.mobile.yaw * 2.4; state.mobile.yaw=0; yawKnob.style.left='calc(50% - 21px)'; yawFill.style.left='50%'; yawFill.style.width='0'; }
-yawWrap.addEventListener('pointerdown',e=>{e.preventDefault();yawMove(e.clientX);}); yawWrap.addEventListener('pointermove',e=>{if(e.buttons) yawMove(e.clientX);}); yawWrap.addEventListener('pointerup',yawReset); yawWrap.addEventListener('pointercancel',yawReset);
+            setTimeout(() => {
+                status.innerText = "🟢 12345 能量對接成功";
+                status.style.color = "#00ff00";
+                btn.innerText = "財氣覺醒・儀式完成";
+                btn.style.background = "#111";
+                btn.style.color = "#00ff00";
+                alert("儀式完成！KGEN 質量已注入你的靈魂座標。");
+            }, 2500);
+        }
 
-document.getElementById('enterBtn').onclick = ()=> openModal(state.nearestId === '12345' ? 'fortune' : 'guide');
-addEventListener('keydown',e=>{ state.keys[e.key.toLowerCase()] = true; if(e.key==='Escape') closeModal(); });
-addEventListener('keyup',e=>{ state.keys[e.key.toLowerCase()] = false; });
-
-function updateWukongFace(){ const deg = normalizeDeg(state.yaw); const signed = deg > 180 ? deg - 360 : deg; const offset = Math.max(-16, Math.min(16, signed/7)); const scale = 1 + Math.min(.04, Math.abs(signed)/900); ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`; const glow = Math.abs(signed) > 45 ? .75 : .28; ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow; ui.eyeL.style.left = `${25 + offset*0.18}%`; ui.eyeR.style.right = `${25 - offset*0.18}%`; }
-function updateUI(){ const yawDeg = normalizeDeg(state.yaw); const zone = sideZoneFromYaw(yawDeg); ui.nearest.textContent = state.nearestId || "—"; ui.altitude.textContent = String(Math.round(state.y)); ui.yaw.textContent = `${Math.round(yawDeg)}°`; ui.zone.textContent = zone; ui.zone2.textContent = zone; ui.cupTop.textContent = `${state.cupCount} / 3`; ui.cupSide.textContent = `${state.cupCount} / 3`; ui.wallet.textContent = state.walletConnected ? "已連線" : "未連線"; ui.focus.textContent = state.focus; ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—"; ui.allowance.textContent = state.approved ? "已授權" : "—"; updateWukongFace(); }
-
-function update(dt){ const dead=.12; const move=((state.keys['w']?1:0)-(state.keys['s']?1:0)) + (Math.abs(state.mobile.my)>dead ? -state.mobile.my : 0); const strafe=((state.keys['d']?1:0)-(state.keys['a']?1:0)) + (Math.abs(state.mobile.mx)>dead ? state.mobile.mx : 0); const vertical=((state.keys[' ']?1:0)-(state.keys['shift']?1:0)) + state.mobile.alt; let yawInput=((state.keys['e']?1:0)-(state.keys['q']?1:0)) + (Math.abs(state.mobile.yaw)>dead ? state.mobile.yaw : 0); if(Math.abs(yawInput) < dead && Math.abs(state.mobile.yawVel) > 0.01){ yawInput += state.mobile.yawVel; state.mobile.yawVel *= 0.93; } state.yaw += yawInput * dt * 1.75; const base=116, fx=Math.cos(state.yaw), fz=Math.sin(state.yaw), rx=Math.cos(state.yaw+Math.PI/2), rz=Math.sin(state.yaw+Math.PI/2); state.x += (fx*move + rx*strafe) * base * dt; state.z += (fz*move + rz*strafe) * base * dt; state.y += vertical * base * .72 * dt; state.y = Math.max(-80, Math.min(220, state.y)); let nearest=null,best=Infinity; Object.entries(nodes).forEach(([id,n])=>{ const dx=n.x-state.x, dy=n.y-state.y, dz=n.z-state.z, d=Math.hypot(dx,dy,dz); if(d<best){best=d; nearest=id;} }); state.nearestId = best < 110 ? nearest : null; if(state.nearestId){ ui.tip.textContent=`最近節點：${nodes[state.nearestId].name}｜按「進入」`; ui.tip.classList.add('show'); } else ui.tip.classList.remove('show'); updateUI(); }
-function project(wx,wy,wz){ const dx=wx-state.x, dy=wy-state.y, dz=wz-state.z; const cy=Math.cos(-state.yaw), sy=Math.sin(-state.yaw); const rx=dx*cy-dz*sy, rz=dx*sy+dz*cy; if(rz<=10) return null; const f=420/rz; return {x:innerWidth/2+rx*f, y:innerHeight/2-dy*f, s:Math.max(2,f*18)}; }
-function drawBackground(){ const w=innerWidth,h=innerHeight; ctx.clearRect(0,0,w,h); const g=ctx.createRadialGradient(w/2,h*.42,20,w/2,h*.58,w*.82); g.addColorStop(0,'rgba(22,36,62,.78)'); g.addColorStop(1,'rgba(2,4,8,1)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h); for(const s of state.stars){ const p=project(s.x,s.y,s.z); if(!p) continue; ctx.fillStyle='rgba(127,243,255,.92)'; ctx.fillRect(p.x,p.y,s.s,s.s); } ctx.strokeStyle='rgba(127,243,255,.07)'; for(let gx=-680;gx<=680;gx+=60){ let first=true; ctx.beginPath(); for(let gz=-680;gz<=680;gz+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); } for(let gz=-680;gz<=680;gz+=60){ let first=true; ctx.beginPath(); for(let gx=-680;gx<=680;gx+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); } }
-function drawNode(id,node){ const p=project(node.x,node.y,node.z); if(!p) return; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=node.color; ctx.shadowBlur=18; ctx.shadowColor=node.color; ctx.fill(); ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.s*1.9,0,Math.PI*2); ctx.strokeStyle=id===state.nearestId?'rgba(255,255,255,.95)':'rgba(255,255,255,.20)'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='700 12px sans-serif'; ctx.fillText(node.name,p.x+p.s+8,p.y+4); }
-
-let last=performance.now();
-function loop(now){ const dt=Math.min(.033,(now-last)/1000); last=now; update(dt); drawBackground(); Object.entries(nodes).forEach(([id,n])=>drawNode(id,n)); requestAnimationFrame(loop); }
-setFocus('fortune'); updateUI(); requestAnimationFrame(loop);
-</script>
+        // 自動計算預計獲取 (模擬 BurnEngine)
+        document.getElementById('usdt-amount').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('kgen-output').value = val ? (val * 100).toLocaleString() : "";
+        });
+    </script>
 </body>
 </html>
