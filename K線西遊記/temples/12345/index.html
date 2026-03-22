@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>KLINE App Game｜12345 五指山悟空財神殿 V3.2 完整版</title>
+<title>KLINE App Game｜12345 五指山悟空財神殿 V3.3 完全體</title>
 <style>
 :root{
-  --panel:rgba(8,12,22,.70); --panel2:rgba(8,12,22,.94); --line:rgba(255,215,120,.22);
+  --panel:rgba(8,12,22,.66); --panel2:rgba(8,12,22,.95); --line:rgba(255,215,120,.22);
   --gold:#ffd978; --text:#eef4ff; --muted:#adbbd2; --shadow:0 18px 50px rgba(0,0,0,.40);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -18,16 +18,19 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 button{pointer-events:auto}
 
 .topbar{position:fixed;left:12px;right:12px;top:12px;z-index:20;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.brand{max-width:min(78vw,620px);background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.brand{max-width:min(74vw,560px);background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:var(--shadow);max-height:120px;overflow:hidden}
+.brand.expanded{max-height:420px}
 .brand h1{margin:0;color:var(--gold);font-size:clamp(20px,4vw,36px);font-weight:900}
 .brand .sub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.55}
 .route{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);font-size:12px}
+.brand-toggle{margin-top:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-weight:800}
+
 .status{display:grid;gap:8px}
 .status .box{min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px 12px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
 .kv{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:12px}.k{color:var(--muted)}.v{font-weight:900}
 
-.center-wrap{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);width:min(50vw,320px);height:min(50vw,320px);z-index:8}
+.center-wrap{position:fixed;left:50%;top:33%;transform:translate(-50%,-50%);width:min(44vw,300px);height:min(44vw,300px);z-index:8}
 .ring{position:absolute;inset:0;border-radius:50%;border:8px double rgba(255,215,120,.82);overflow:hidden;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 70px rgba(255,195,60,.22);animation:ringSpin 34s linear infinite}
 .wukong-core{position:absolute;inset:0;overflow:hidden;border-radius:50%}
 .wukong-core img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 55%;animation:pulse 3.4s ease-in-out infinite}
@@ -37,7 +40,7 @@ button{pointer-events:auto}
 .center-name{position:absolute;left:50%;bottom:-52px;transform:translateX(-50%);min-width:280px;text-align:center;padding:11px 14px;border-radius:18px;background:rgba(0,0,0,.54);border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow);font-weight:900}
 .center-name .mini{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
 
-.sidepanel{position:fixed;bottom:224px;z-index:16;width:min(330px,calc(50vw - 22px));background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.sidepanel{position:fixed;bottom:244px;z-index:16;width:min(320px,calc(50vw - 22px));background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
 .sidepanel.left{left:12px}.sidepanel.right{right:12px}
 .panel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.08)}
 .panel-head h2{margin:0;color:var(--gold);font-size:17px}
@@ -46,12 +49,13 @@ button{pointer-events:auto}
 .card{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);border-radius:14px;padding:10px}
 .label{font-size:11px;color:var(--muted)} .value{margin-top:6px;font-size:18px;font-weight:900} .subv{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.55}
 
-.node-tip{position:fixed;left:50%;bottom:192px;transform:translateX(-50%);display:none;z-index:26;padding:11px 14px;border-radius:16px;background:rgba(0,0,0,.56);border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);font-weight:900}
+.node-tip{position:fixed;left:50%;bottom:212px;transform:translateX(-50%);display:none;z-index:26;padding:11px 14px;border-radius:16px;background:rgba(0,0,0,.56);border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);font-weight:900}
 .node-tip.show{display:block}
 .crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;z-index:7;pointer-events:none}
 .crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.88)} .crosshair:before{left:8px;top:0;width:2px;height:18px} .crosshair:after{left:0;top:8px;width:18px;height:2px}
 
-.controls{position:fixed;left:0;right:0;bottom:86px;height:190px;z-index:40;pointer-events:none}
+/* Highest priority controls */
+.controls{position:fixed;left:0;right:0;bottom:86px;height:194px;z-index:9999;pointer-events:none}
 .joy-wrap{position:absolute;left:16px;bottom:8px;width:136px;height:136px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .joy-knob{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
@@ -66,12 +70,12 @@ button{pointer-events:auto}
 .yaw-left,.yaw-right{position:absolute;top:-18px;font-size:11px;font-weight:900}.yaw-left{left:10px}.yaw-right{right:10px}
 .enter-btn{position:absolute;right:92px;bottom:40px;width:92px;height:92px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:var(--panel2);color:#fff;font-size:18px;font-weight:900;box-shadow:var(--shadow);pointer-events:auto}
 
-.footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:39;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
 .fbtn{min-height:58px;padding:10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shadow);cursor:pointer}
 .fbtn .mini{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:700}
 
-.modal{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.78);padding:14px}.modal.show{display:block}
-.modal-card{max-width:1020px;height:calc(100vh - 28px);margin:0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:22px;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.68)}
+.modal{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.78);padding:14px 14px 230px 14px}.modal.show{display:block}
+.modal-card{max-width:1020px;max-height:60vh;margin:6vh auto 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:22px;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.68)}
 .modal-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(8,12,22,.96);border-bottom:1px solid rgba(255,255,255,.08)}.modal-head h3{margin:0;color:var(--gold)}
 .modal-body{padding:16px;display:grid;grid-template-columns:1.08fr .92fr;gap:14px}
 .modal-box{border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.04);padding:12px}.modal-box h4{margin:0 0 8px;color:var(--gold)}.modal-box p,.modal-box li{line-height:1.7;color:#edf4ff}.modal-box ul{margin:8px 0 0 18px}
@@ -83,8 +87,8 @@ button{pointer-events:auto}
 
 @media (max-width:980px){
   .topbar{display:block}.status{display:none}
-  .center-wrap{width:min(54vw,300px);height:min(54vw,300px);top:34%}
-  .sidepanel{width:calc(50vw - 18px);bottom:224px}
+  .center-wrap{width:min(54vw,300px);height:min(54vw,300px);top:33%}
+  .sidepanel{width:calc(50vw - 18px);bottom:236px}
   .panel-head h2{font-size:15px}.panel-grid{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:repeat(4,1fr)}
   .yaw-wrap{width:min(42vw,250px)}
@@ -97,9 +101,9 @@ button{pointer-events:auto}
   <canvas id="scene"></canvas>
 
   <div class="topbar hud-layer">
-    <div class="brand">
+    <div class="brand" id="brandBox">
       <h1>12345｜五指山悟空財神殿</h1>
-      <div class="sub">V3.2 完整版。說明視窗預設關閉，控制區獨立保護，任何資訊窗不再壓到搖桿、直桿、橫桿與進入按鍵。</div>
+      <div class="sub">V3.3 完全體。控制區永遠優先，說明窗縮小預設，底部安全區鎖定。真正目標是任何資訊層都不能干擾操作。</div>
       <div class="route">
         <span class="pill">16888｜廣寒宮入口</span>
         <span class="pill">12345｜五指山</span>
@@ -107,6 +111,7 @@ button{pointer-events:auto}
         <span class="pill">8888｜高老莊</span>
         <span class="pill">7744｜流沙河</span>
       </div>
+      <button class="brand-toggle" id="brandToggle">展開 / 收合</button>
     </div>
     <div class="status">
       <div class="box">
@@ -210,7 +215,10 @@ const nodes={"16888":{x:-220,y:0,z:-140,color:"#9fd8ff",name:"16888｜廣寒宮�
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} addEventListener('resize',resize); resize();
 const $=s=>document.querySelector(s);
-const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),zone2:$("#zoneTxt2"),cupTop:$("#cupTopTxt"),cupSide:$("#cupSideTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#nodeTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),yawKnob:$("#yawKnob"),yawFill:$("#yawFill")};
+const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),zone2:$("#zoneTxt2"),cupTop:$("#cupTopTxt"),cupSide:$("#cupSideTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#nodeTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),yawKnob:$("#yawKnob"),yawFill:$("#yawFill"),brand:$("#brandBox"),brandToggle:$("#brandToggle")};
+
+ui.brandToggle.onclick = ()=> ui.brand.classList.toggle('expanded');
+
 function normalizeDeg(rad){ return ((((rad*180/Math.PI)%360)+360)%360); }
 function sideZoneFromYaw(deg){ const signed = deg > 180 ? deg - 360 : deg; return (signed >= -90 && signed <= 90) ? "多" : "空"; }
 function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2300); }
@@ -220,6 +228,7 @@ function setFocus(kind){ state.focus = kind; const data = { fortune: { main:`<p>
 function openModal(kind="fortune"){ setFocus(kind); ui.modal.classList.add('show'); }
 function closeModal(){ ui.modal.classList.remove('show'); }
 document.getElementById('closeModalBtn').onclick = closeModal;
+
 async function connectWallet(){ if(window.ethereum){ try{ const accounts = await window.ethereum.request({ method:'eth_requestAccounts' }); state.walletConnected = true; state.walletAddress = accounts && accounts[0] ? accounts[0] : "已連線"; toast('錢包已連線：' + state.walletAddress.slice(0,6) + '...' + state.walletAddress.slice(-4)); }catch(e){ toast('連線取消，先保留前端流程'); } } else { state.walletConnected = true; state.walletAddress = "展示模式"; toast('未偵測到錢包，切換展示模式'); } updateUI(); }
 document.getElementById('actConnect').onclick = connectWallet;
 document.getElementById('actApprove').onclick = ()=>{ if(!state.walletConnected){toast('請先連接錢包');return;} state.approved=true; ui.actionState.textContent='狀態：Approve 已完成。部署後即可正式簽名授權。'; toast('Approve 已完成（展示流程）'); updateUI(); };
