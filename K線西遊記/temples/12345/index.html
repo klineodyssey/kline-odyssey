@@ -1,477 +1,112 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>KLINE App Game｜宇宙移動版 V1</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>KLINE V2 Mobile Clean</title>
 <style>
-  :root{
-    --bg:#05070d; --panel:rgba(8,12,22,.86); --line:rgba(255,215,120,.30);
-    --gold:#ffd978; --cyan:#7ff3ff; --muted:#b9c5d9; --danger:#ff8d8d; --ok:#87ffb2;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:radial-gradient(circle at 50% 30%, #0b1220 0%, #05070d 55%, #020305 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans TC',sans-serif;color:#fff;overflow:hidden}
-  #app{position:fixed;inset:0}
-  canvas{position:fixed;inset:0;width:100%;height:100%}
-  .hud{
-    position:fixed;left:12px;top:12px;z-index:10;width:min(360px,calc(100vw - 24px));
-    background:var(--panel);border:1px solid var(--line);border-radius:18px;
-    backdrop-filter:blur(10px);padding:12px 14px;box-shadow:0 16px 44px rgba(0,0,0,.35);
-  }
-  .title{font-weight:900;color:var(--gold);letter-spacing:.3px}
-  .sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .pill{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;color:#e9eef7;background:rgba(255,255,255,.04)}
-  .grid{
-    position:fixed;left:12px;bottom:12px;z-index:10;
-    display:grid;grid-template-columns:repeat(4,minmax(82px,1fr));gap:8px;
-    width:min(640px,calc(100vw - 24px));
-  }
-  .btn{
-    border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:14px;
-    padding:10px 12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px)
-  }
-  .btn:hover{filter:brightness(1.08)}
-  .btn small{display:block;color:var(--muted);font-weight:600}
-  .panel{
-    position:fixed;right:12px;top:12px;z-index:12;width:min(420px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;
-    background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 16px 44px rgba(0,0,0,.35);display:none
-  }
-  .panel.show{display:block}
-  .panel h2{margin:0 0 8px;color:var(--gold);font-size:18px}
-  .panel p,.panel li{color:#e9eef7;line-height:1.6}
-  .panel .mini{font-size:12px;color:var(--muted)}
-  .panel .section{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10)}
-  .crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;width:18px;height:18px;pointer-events:none;opacity:.9}
-  .crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.8)}
-  .crosshair:before{left:8px;top:0;width:2px;height:18px}
-  .crosshair:after{left:0;top:8px;width:18px;height:2px}
-  .centerTip{
-    position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:11;
-    background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:14px;font-weight:800;display:none
-  }
-  .centerTip.show{display:block}
-  .legend{
-    position:fixed;right:12px;bottom:12px;z-index:10;width:min(360px,calc(100vw - 24px));
-    background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 14px
-  }
-  .legend h3{margin:0 0 8px;color:var(--gold);font-size:15px}
-  .legend .mini{font-size:12px;color:var(--muted);line-height:1.5}
-  @media (max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(120px,1fr));} .legend{display:none} }
-</style>
+body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
+canvas{position:fixed;inset:0}
 
-<style id="mobile-v2-style">
-.mobile-controls{
-  position:fixed; inset:0; z-index:30; pointer-events:none;
+/* 中央提示 */
+.center{
+ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+ font-size:18px; text-align:center;
 }
-.joy-wrap{
-  position:fixed; left:18px; bottom:108px; width:132px; height:132px;
-  border-radius:50%; border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.06); backdrop-filter:blur(8px);
-  pointer-events:auto; touch-action:none; box-shadow:0 8px 24px rgba(0,0,0,.35);
+
+/* 手機控制 */
+.joy{
+ position:fixed; left:20px; bottom:120px;
+ width:120px;height:120px;border-radius:50%;
+ background:rgba(255,255,255,0.1);
 }
-.joy-knob{
-  position:absolute; left:41px; top:41px; width:50px; height:50px; border-radius:50%;
-  background:#ffd978; box-shadow:0 8px 20px rgba(0,0,0,.35);
+.knob{
+ position:absolute; left:40px; top:40px;
+ width:40px;height:40px;border-radius:50%;
+ background:#ffd978;
 }
-.mobile-cluster{
-  position:fixed; right:18px; bottom:108px; display:grid; grid-template-columns:repeat(2,78px); gap:10px;
-  pointer-events:auto;
+.btns{
+ position:fixed; right:20px; bottom:120px;
+ display:grid; gap:10px;
 }
-.m-btn{
-  width:78px; height:78px; border-radius:18px; border:1px solid rgba(255,255,255,.16);
-  background:rgba(8,12,22,.86); color:#fff; font-weight:900; font-size:14px;
-  backdrop-filter:blur(8px); touch-action:none;
+.btn{
+ width:70px;height:70px;
+ background:rgba(255,255,255,0.1);
+ border-radius:15px;color:#fff;
+ font-weight:bold;
 }
-.mobile-top{
-  position:fixed; right:18px; top:88px; display:grid; gap:8px; pointer-events:auto;
+
+/* Temple 視窗 */
+.panel{
+ position:fixed; inset:0;
+ background:rgba(0,0,0,0.9);
+ display:none;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
 }
-.m-top-btn{
-  min-width:86px; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.16);
-  background:rgba(8,12,22,.86); color:#fff; font-weight:800; backdrop-filter:blur(8px); touch-action:none;
-}
-.touch-note{
-  position:fixed; left:50%; top:88px; transform:translateX(-50%); z-index:22;
-  background:rgba(0,0,0,.55); color:#ffd978; border:1px solid rgba(255,215,120,.24);
-  border-radius:999px; padding:8px 12px; font-size:12px; backdrop-filter:blur(8px);
-}
-@media (min-width: 901px){
-  .touch-note{ display:none; }
+.panel.show{display:flex}
+.panel button{
+ margin:10px;
+ padding:15px 20px;
+ font-size:16px;
 }
 </style>
-
 </head>
 <body>
-<div id="app">
-  <canvas id="game"></canvas>
-  <div class="hud">
-    <div class="title">KLINE App Game｜宇宙移動版 V1</div>
-    <div class="sub">WASD / 方向鍵移動，Space 上升，Shift 下降，Q/E 旋轉，F 進入節點，Esc 關閉視窗。</div>
-    <div class="row">
-      <div class="pill">位置：<span id="posTxt">0, 0, 0</span></div>
-      <div class="pill">朝向：<span id="yawTxt">0°</span></div>
-      <div class="pill">最近節點：<span id="nearestTxt">—</span></div>
-    </div>
-    <div class="row">
-      <div class="pill">速度：<span id="speedTxt">0</span></div>
-      <div class="pill">高度：<span id="altTxt">0</span></div>
-      <div class="pill">模式：宇宙移動</div>
-    </div>
-  </div>
 
-  <div class="crosshair"></div>
-  <div id="centerTip" class="centerTip"></div>
-
-  <div id="nodePanel" class="panel">
-    <h2 id="panelTitle">節點</h2>
-    <div class="mini" id="panelSubtitle">—</div>
-    <div class="section" id="panelBody"></div>
-  </div>
-
-  <div class="legend">
-    <h3>宇宙節點</h3>
-    <div class="mini">
-      16888｜廣寒宮入口<br>
-      12345｜五指山悟空財神殿<br>
-      11520｜花果山交易所<br>
-      8888｜高老莊<br>
-      7744｜流沙河
-    </div>
-  </div>
-
-  <div class="grid">
-    <button class="btn" data-node="16888">16888<small>廣寒宮入口</small></button>
-    <button class="btn" data-node="12345">12345<small>五指山財神殿</small></button>
-    <button class="btn" data-node="11520">11520<small>花果山交易所</small></button>
-    <button class="btn" data-node="8888">8888<small>高老莊</small></button>
-    <button class="btn" data-node="7744">7744<small>流沙河</small></button>
-    <button class="btn" id="btnHelp">客服 / 導覽<small>Temple 說明</small></button>
-    <button class="btn" id="btnRules">發放規則<small>12345 規則</small></button>
-    <button class="btn" id="btnClose">關閉視窗<small>Esc</small></button>
-  
-  <div class="mobile-controls">
-    <div class="touch-note">手機操作：左手移動，右手上/下/進入，右上左轉/右轉</div>
-    <div class="joy-wrap" id="joyWrap"><div class="joy-knob" id="joyKnob"></div></div>
-    <div class="mobile-cluster">
-      <button class="m-btn" id="btnUp">上升</button>
-      <button class="m-btn" id="btnInteract">進入</button>
-      <button class="m-btn" id="btnDown">下降</button>
-      <button class="m-btn" id="btnClosePanel">關閉</button>
-    </div>
-    <div class="mobile-top">
-      <button class="m-top-btn" id="btnTurnL">左轉</button>
-      <button class="m-top-btn" id="btnTurnR">右轉</button>
-    </div>
-  </div>
-
+<div class="center">
+  12345｜五指山悟空財神殿<br>
+  靠近後點「進入」
 </div>
+
+<div class="joy" id="joy"><div class="knob" id="knob"></div></div>
+
+<div class="btns">
+  <button class="btn" id="up">上升</button>
+  <button class="btn" id="down">下降</button>
+  <button class="btn" id="enter">進入</button>
+</div>
+
+<div class="panel" id="panel">
+  <h2>五指山財神殿</h2>
+  <button onclick="alert('發財金 1~888')">領發財金</button>
+  <button onclick="alert('每小時心跳')">心跳</button>
+  <button onclick="alert('00:00點火')">點火</button>
+  <button onclick="closePanel()">關閉</button>
 </div>
 
 <script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+const knob=document.getElementById('knob');
+const joy=document.getElementById('joy');
+let mx=0,my=0;
 
-function resize(){
-  canvas.width = innerWidth * devicePixelRatio;
-  canvas.height = innerHeight * devicePixelRatio;
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-}
-addEventListener('resize', resize); resize();
-
-const ui = {
-  pos: document.getElementById('posTxt'),
-  yaw: document.getElementById('yawTxt'),
-  nearest: document.getElementById('nearestTxt'),
-  speed: document.getElementById('speedTxt'),
-  alt: document.getElementById('altTxt'),
-  tip: document.getElementById('centerTip'),
-  panel: document.getElementById('nodePanel'),
-  panelTitle: document.getElementById('panelTitle'),
-  panelSubtitle: document.getElementById('panelSubtitle'),
-  panelBody: document.getElementById('panelBody'),
+joy.ontouchmove=e=>{
+ const t=e.touches[0];
+ const r=joy.getBoundingClientRect();
+ let dx=t.clientX-(r.left+r.width/2);
+ let dy=t.clientY-(r.top+r.height/2);
+ const max=40;
+ const len=Math.hypot(dx,dy)||1;
+ if(len>max){dx=dx/len*max;dy=dy/len*max;}
+ knob.style.left=40+dx+"px";
+ knob.style.top=40+dy+"px";
+ mx=dx/max; my=dy/max;
 };
 
-const nodes = {
-  "16888": { x:-220, y:0, z:-140, color:"#9fd8ff", name:"16888｜廣寒宮入口", subtitle:"宇宙入口節點", body:`
-    <p>這裡是宇宙入口。用途是讓玩家先理解整體世界觀與各節點分工。</p>
-    <ul>
-      <li>定位：入口 / 入口敘事 / 視覺導覽</li>
-      <li>適合放：品牌說明、世界觀、KGEN 基礎介紹</li>
-      <li>不做：TempleHeart 發放主邏輯</li>
-    </ul>` },
-  "12345": { x:40, y:0, z:0, color:"#ffd978", name:"12345｜五指山悟空財神殿", subtitle:"TempleHeart V3.2.3 前端神殿", body:`
-    <p>這裡不是買賣遊戲，而是 <b>TempleHeart</b> 的前端神殿。</p>
-    <ul>
-      <li><b>fortuneClaim</b>：1 到 888</li>
-      <li><b>冷卻</b>：30 天</li>
-      <li><b>名額</b>：每個 epoch 最多 500 名</li>
-      <li><b>heartbeatClaim</b>：每小時一次</li>
-      <li><b>igniteAndClaim</b>：UTC 00:00–00:10</li>
-      <li><b>vowTo / lightLamp / makeWish</b>：還願、點燈、許願</li>
-    </ul>
-    <p>V1 原型先做移動、到點互動、節點顯示。之後可把 Temple 面板正式接進來。</p>` },
-  "11520": { x:280, y:0, z:-80, color:"#7ff3ff", name:"11520｜花果山交易所", subtitle:"Brain / Exchange", body:`
-    <p>這裡是 11520 花果山交易所，也是 Brain 的概念節點。</p>
-    <ul>
-      <li>用途：交易 / 深層互動 / 未來對接 BrainVault</li>
-      <li>與 12345 關係：Heart ↔ Brain 循環血庫</li>
-    </ul>` },
-  "8888": { x:180, y:0, z:220, color:"#ffb87f", name:"8888｜高老莊", subtitle:"凡間流通節點", body:`
-    <p>高老莊是凡間流通節點，適合放資源交換、社群活動、商品與流通內容。</p>` },
-  "7744": { x:-120, y:0, z:260, color:"#bda7ff", name:"7744｜流沙河", subtitle:"試煉與過渡節點", body:`
-    <p>流沙河是過渡 / 洗鍊 / 試煉節點，適合放任務、試煉與風險教育內容。</p>` },
+joy.ontouchend=()=>{
+ knob.style.left="40px";
+ knob.style.top="40px";
+ mx=0;my=0;
 };
 
-const state = {
-  x: 0, y: 18, z: 180,
-  yaw: Math.PI,
-  keys: {},
-  nearestId: null,
-  stars: Array.from({length:220}, ()=>({
-    x:(Math.random()-0.5)*1600,
-    y:(Math.random()-0.5)*700,
-    z:Math.random()*1800+40,
-    s:Math.random()*2+0.6
-  }))
+document.getElementById('enter').onclick=()=>{
+ document.getElementById('panel').classList.add('show');
 };
 
-addEventListener('keydown', e=>{
-  state.keys[e.key.toLowerCase()] = true;
-  if(e.key === 'Escape') closePanel();
-  if(e.key.toLowerCase() === 'f') interactNearest();
-});
-addEventListener('keyup', e=> state.keys[e.key.toLowerCase()] = false);
-
-document.querySelectorAll('[data-node]').forEach(btn=>{
-  btn.addEventListener('click', ()=> openNode(btn.dataset.node));
-});
-document.getElementById('btnHelp').onclick = ()=>showInfo("客服 / 五指山導覽", "宇宙移動版 V1", `
-  <p>這是第一代移動原型，重點是先做到：</p>
-  <ul>
-    <li>前後左右上下移動</li>
-    <li>宇宙節點到點互動</li>
-    <li>進入 12345 後可再接 Temple 面板</li>
-    <li>GitHub Pages 可直接跑</li>
-  </ul>
-  <p>下一代可以把 12345 做成真正的 TempleHeart 操作頁。</p>`);
-document.getElementById('btnRules').onclick = ()=>openNode('12345');
-document.getElementById('btnClose').onclick = closePanel;
-
-function showInfo(title, sub, html){
-  ui.panelTitle.textContent = title;
-  ui.panelSubtitle.textContent = sub;
-  ui.panelBody.innerHTML = html;
-  ui.panel.classList.add('show');
+function closePanel(){
+ document.getElementById('panel').classList.remove('show');
 }
-function openNode(id){
-  const n = nodes[id];
-  ui.panelTitle.textContent = n.name;
-  ui.panelSubtitle.textContent = n.subtitle;
-  ui.panelBody.innerHTML = n.body;
-  ui.panel.classList.add('show');
-}
-function closePanel(){ ui.panel.classList.remove('show'); }
-function interactNearest(){ if(state.nearestId) openNode(state.nearestId); }
-
-function update(dt){
-  const move = (state.keys['w']||state.keys['arrowup'] ? 1:0) - (state.keys['s']||state.keys['arrowdown'] ? 1:0);
-  const strafe = (state.keys['d']||state.keys['arrowright'] ? 1:0) - (state.keys['a']||state.keys['arrowleft'] ? 1:0);
-  const vertical = (state.keys[' '] ? 1:0) - (state.keys['shift'] ? 1:0);
-  const yawMove = (state.keys['e'] ? 1:0) - (state.keys['q'] ? 1:0);
-
-  state.yaw += yawMove * dt * 1.6;
-
-  const base = 120;
-  const fx = Math.cos(state.yaw), fz = Math.sin(state.yaw);
-  const rx = Math.cos(state.yaw + Math.PI/2), rz = Math.sin(state.yaw + Math.PI/2);
-
-  state.x += (fx*move + rx*strafe) * base * dt;
-  state.z += (fz*move + rz*strafe) * base * dt;
-  state.y += vertical * base * 0.8 * dt;
-  state.y = Math.max(-80, Math.min(220, state.y));
-
-  let nearest = null, best = Infinity;
-  Object.entries(nodes).forEach(([id,n])=>{
-    const dx=n.x-state.x, dy=n.y-state.y, dz=n.z-state.z;
-    const d = Math.hypot(dx,dy,dz);
-    if(d < best){ best = d; nearest = id; }
-  });
-  state.nearestId = best < 110 ? nearest : null;
-
-  ui.pos.textContent = `${state.x.toFixed(0)}, ${state.y.toFixed(0)}, ${state.z.toFixed(0)}`;
-  ui.yaw.textContent = `${((state.yaw*180/Math.PI)%360+360)%360|0}°`;
-  ui.speed.textContent = `${(Math.hypot(move,strafe,vertical)*base).toFixed(0)}`;
-  ui.alt.textContent = `${state.y.toFixed(0)}`;
-  ui.nearest.textContent = state.nearestId ? nodes[state.nearestId].name.split('｜')[0] : '—';
-  if(state.nearestId){
-    ui.tip.classList.add('show');
-    ui.tip.textContent = `F 進入 ${nodes[state.nearestId].name}`;
-  } else {
-    ui.tip.classList.remove('show');
-  }
-}
-
-function project(wx, wy, wz){
-  const dx = wx-state.x, dy = wy-state.y, dz = wz-state.z;
-  const cy = Math.cos(-state.yaw), sy = Math.sin(-state.yaw);
-  const rx = dx*cy - dz*sy;
-  const rz = dx*sy + dz*cy;
-  if(rz <= 10) return null;
-  const f = 420 / rz;
-  return { x: innerWidth/2 + rx*f, y: innerHeight/2 - dy*f, s: Math.max(2, f*18), z: rz };
-}
-
-function drawNode(id, node){
-  const p = project(node.x, node.y, node.z);
-  if(!p) return;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
-  ctx.fillStyle = node.color;
-  ctx.shadowBlur = 22;
-  ctx.shadowColor = node.color;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.s*1.8, 0, Math.PI*2);
-  ctx.strokeStyle = id === state.nearestId ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.24)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.fillStyle = '#fff';
-  ctx.font = '700 12px system-ui';
-  ctx.fillText(node.name, p.x + p.s + 8, p.y + 4);
-}
-
-function drawBackground(){
-  ctx.clearRect(0,0,innerWidth,innerHeight);
-  const g = ctx.createRadialGradient(innerWidth/2, innerHeight*0.35, 20, innerWidth/2, innerHeight*0.55, innerWidth*0.8);
-  g.addColorStop(0,'rgba(20,35,64,.65)');
-  g.addColorStop(1,'rgba(2,4,8,1)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,innerWidth,innerHeight);
-
-  for(const s of state.stars){
-    const p = project(s.x, s.y, s.z);
-    if(!p) continue;
-    ctx.fillStyle = 'rgba(255,255,255,.8)';
-    ctx.fillRect(p.x, p.y, s.s, s.s);
-  }
-
-  ctx.strokeStyle = 'rgba(127,243,255,.08)';
-  ctx.lineWidth = 1;
-  for(let gx=-600; gx<=600; gx+=60){
-    let first=true;
-    ctx.beginPath();
-    for(let gz=-600; gz<=600; gz+=40){
-      const p = project(gx, 0, gz);
-      if(!p) continue;
-      if(first){ ctx.moveTo(p.x,p.y); first=false; } else ctx.lineTo(p.x,p.y);
-    }
-    ctx.stroke();
-  }
-  for(let gz=-600; gz<=600; gz+=60){
-    let first=true;
-    ctx.beginPath();
-    for(let gx=-600; gx<=600; gx+=40){
-      const p = project(gx, 0, gz);
-      if(!p) continue;
-      if(first){ ctx.moveTo(p.x,p.y); first=false; } else ctx.lineTo(p.x,p.y);
-    }
-    ctx.stroke();
-  }
-}
-
-let last = performance.now();
-function loop(now){
-  const dt = Math.min(0.033, (now-last)/1000);
-  last = now;
-  update(dt);
-  drawBackground();
-  Object.entries(nodes).forEach(([id,n])=>drawNode(id,n));
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
-</script>
-
-<script>
-(function(){
-  const joyWrap = document.getElementById('joyWrap');
-  const joyKnob = document.getElementById('joyKnob');
-  if(!joyWrap || !joyKnob || !window.state) return;
-
-  state.mobile = {mx:0,my:0,up:false,down:false,turnL:false,turnR:false};
-
-  function resetJoy(){
-    state.mobile.mx = 0; state.mobile.my = 0;
-    joyKnob.style.left = '41px';
-    joyKnob.style.top = '41px';
-  }
-  function moveJoy(e){
-    const p = e.touches ? e.touches[0] : e;
-    const r = joyWrap.getBoundingClientRect();
-    const cx = r.left + r.width/2;
-    const cy = r.top + r.height/2;
-    let dx = p.clientX - cx;
-    let dy = p.clientY - cy;
-    const max = 38;
-    const len = Math.hypot(dx,dy) || 1;
-    if(len > max){ dx = dx/len*max; dy = dy/len*max; }
-    state.mobile.mx = dx / max;
-    state.mobile.my = dy / max;
-    joyKnob.style.left = (41 + dx) + 'px';
-    joyKnob.style.top = (41 + dy) + 'px';
-  }
-  joyWrap.addEventListener('pointerdown', e=>{ e.preventDefault(); moveJoy(e); });
-  joyWrap.addEventListener('pointermove', e=>{ e.preventDefault(); if(e.pressure !== 0) moveJoy(e); });
-  joyWrap.addEventListener('pointerup', resetJoy);
-  joyWrap.addEventListener('pointercancel', resetJoy);
-  joyWrap.addEventListener('touchstart', e=>{ e.preventDefault(); moveJoy(e); }, {passive:false});
-  joyWrap.addEventListener('touchmove', e=>{ e.preventDefault(); moveJoy(e); }, {passive:false});
-  joyWrap.addEventListener('touchend', e=>{ e.preventDefault(); resetJoy(); }, {passive:false});
-
-  function bindHold(id, key){
-    const el = document.getElementById(id);
-    if(!el) return;
-    const on = e=>{ e.preventDefault(); state.mobile[key] = true; };
-    const off = e=>{ if(e) e.preventDefault(); state.mobile[key] = false; };
-    ['pointerdown','touchstart'].forEach(evt=>el.addEventListener(evt,on,{passive:false}));
-    ['pointerup','pointercancel','pointerleave','touchend','touchcancel'].forEach(evt=>el.addEventListener(evt,off,{passive:false}));
-  }
-  bindHold('btnUp','up');
-  bindHold('btnDown','down');
-  bindHold('btnTurnL','turnL');
-  bindHold('btnTurnR','turnR');
-
-  document.getElementById('btnInteract')?.addEventListener('click', e=>{ e.preventDefault(); if(window.interactNearest) interactNearest(); });
-  document.getElementById('btnClosePanel')?.addEventListener('click', e=>{ e.preventDefault(); if(window.closePanel) closePanel(); });
-
-  const oldUpdate = window.update;
-  window.update = function(dt){
-    const dead = 0.12;
-    const mx = Math.abs(state.mobile.mx) > dead ? state.mobile.mx : 0;
-    const my = Math.abs(state.mobile.my) > dead ? state.mobile.my : 0;
-
-    state.keys['w'] = my < -dead || !!state.keys['w'];
-    state.keys['s'] = my > dead || !!state.keys['s'];
-    state.keys['a'] = mx < -dead || !!state.keys['a'];
-    state.keys['d'] = mx > dead || !!state.keys['d'];
-    state.keys[' '] = !!state.mobile.up || !!state.keys[' '];
-    state.keys['shift'] = !!state.mobile.down || !!state.keys['shift'];
-    state.keys['q'] = !!state.mobile.turnL || !!state.keys['q'];
-    state.keys['e'] = !!state.mobile.turnR || !!state.keys['e'];
-
-    oldUpdate(dt);
-
-    // clear one-frame keyboard overlay from mobile merge
-    if(!state.mobile.up) state.keys[' '] = false;
-    if(!state.mobile.down) state.keys['shift'] = false;
-    if(!state.mobile.turnL) state.keys['q'] = false;
-    if(!state.mobile.turnR) state.keys['e'] = false;
-    if(Math.abs(state.mobile.mx) <= dead){ state.keys['a'] = false; state.keys['d'] = false; }
-    if(Math.abs(state.mobile.my) <= dead){ state.keys['w'] = false; state.keys['s'] = false; }
-  };
-})();
 </script>
 
 </body>
