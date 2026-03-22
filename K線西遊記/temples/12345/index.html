@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>KLINE App Game｜12345 五指山悟空財神殿 V3 操控完整版</title>
+<title>KLINE App Game｜12345 五指山悟空財神殿 V3.1</title>
 <style>
 :root{
   --panel:rgba(8,12,22,.78); --panel2:rgba(8,12,22,.92); --line:rgba(255,215,120,.24);
@@ -26,7 +26,10 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 
 .center-wrap{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);width:min(50vw,360px);height:min(50vw,360px);z-index:8}
 .ring{position:absolute;inset:0;border-radius:50%;border:8px double rgba(255,215,120,.82);overflow:hidden;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 70px rgba(255,195,60,.22);animation:ringSpin 34s linear infinite}
-.ring img{width:100%;height:100%;object-fit:cover;display:block;animation:pulse 3.4s ease-in-out infinite}
+.wukong-core{position:absolute;inset:0;overflow:hidden;border-radius:50%}
+.wukong-core img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 55%;animation:pulse 3.4s ease-in-out infinite}
+.wukong-eye{position:absolute;top:37%;width:22%;height:10%;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(255,215,120,.55), rgba(255,215,120,0) 70%);filter:blur(8px);opacity:.0;transition:opacity .18s ease,left .15s ease,right .15s ease}
+.wukong-eye.left{left:25%} .wukong-eye.right{right:25%}
 .ring-glow{position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(255,215,120,.16);animation:aura 4.2s ease-out infinite}
 .center-name{position:absolute;left:50%;bottom:-54px;transform:translateX(-50%);min-width:280px;text-align:center;padding:11px 14px;border-radius:18px;background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow);font-weight:900}
 .center-name .mini{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
@@ -48,18 +51,16 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 .controls{position:fixed;inset:0;z-index:30;pointer-events:none}
 .joy-wrap{position:fixed;left:16px;bottom:106px;width:136px;height:136px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .joy-ring{position:absolute;inset:14px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
-.joy-knob{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-
+.joy-knob{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35);transition:transform .04s linear}
 .alt-wrap{position:fixed;right:16px;bottom:116px;width:62px;height:236px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .alt-track{position:absolute;left:26px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.13)}
 .alt-knob{position:absolute;left:10px;top:92px;width:42px;height:42px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .alt-label-top,.alt-label-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900} .alt-label-top{top:-20px} .alt-label-bottom{bottom:-20px}
-
 .yaw-wrap{position:fixed;left:50%;transform:translateX(-50%);bottom:108px;width:min(42vw,320px);height:62px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:var(--shadow);pointer-events:auto;touch-action:none}
 .yaw-track{position:absolute;left:14px;right:14px;top:26px;height:10px;border-radius:999px;background:rgba(255,255,255,.13)}
+.yaw-fill{position:absolute;left:50%;top:26px;height:10px;border-radius:999px;background:linear-gradient(90deg, rgba(255,215,120,.2), rgba(255,215,120,.9));width:0}
 .yaw-knob{position:absolute;left:calc(50% - 21px);top:10px;width:42px;height:42px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .yaw-left,.yaw-right{position:absolute;top:-18px;font-size:11px;font-weight:900} .yaw-left{left:10px} .yaw-right{right:10px}
-
 .enter-btn{position:fixed;right:88px;bottom:136px;width:96px;height:96px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:var(--panel2);color:#fff;font-size:18px;font-weight:900;box-shadow:var(--shadow);pointer-events:auto}
 .footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:29;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
 .fbtn{min-height:58px;padding:10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shadow);cursor:pointer}
@@ -94,7 +95,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div class="topbar">
     <div class="brand">
       <h1>12345｜五指山悟空財神殿</h1>
-      <div class="sub">V3 操控完整版。主畫面專注宇宙移動，神殿功能在進入後再開啟。已整合左搖桿、右直桿、下方 360° 橫桿。</div>
+      <div class="sub">V3.1 成品版。移除多餘左轉右轉按鈕，不自動跳說明。悟空會隨 360° 朝向做視覺偏移與眼光變化。</div>
       <div class="route">
         <span class="pill">16888｜廣寒宮入口</span>
         <span class="pill">12345｜五指山</span>
@@ -115,7 +116,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   </div>
 
   <div class="center-wrap">
-    <div class="ring"><img src="./assets/wukong_center.png" alt="悟空財神"><div class="ring-glow"></div></div>
+    <div class="ring">
+      <div class="wukong-core">
+        <img id="wukongImg" src="./assets/wukong_center.png" alt="悟空財神">
+        <div class="wukong-eye left" id="eyeL"></div>
+        <div class="wukong-eye right" id="eyeR"></div>
+      </div>
+      <div class="ring-glow"></div>
+    </div>
     <div class="center-name">12345｜五指山悟空財神殿<span class="mini">靠近節點後按「進入」，開啟 TempleHeart 操作</span></div>
   </div>
 
@@ -145,7 +153,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div class="controls">
     <div class="joy-wrap" id="joyWrap"><div class="joy-ring"></div><div class="joy-knob" id="joyKnob"></div></div>
     <div class="alt-wrap" id="altWrap"><div class="alt-label-top">上升</div><div class="alt-track"></div><div class="alt-knob" id="altKnob"></div><div class="alt-label-bottom">下降</div></div>
-    <div class="yaw-wrap" id="yawWrap"><div class="yaw-left">左轉</div><div class="yaw-right">右轉</div><div class="yaw-track"></div><div class="yaw-knob" id="yawKnob"></div></div>
+    <div class="yaw-wrap" id="yawWrap"><div class="yaw-left">左轉</div><div class="yaw-right">右轉</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-knob" id="yawKnob"></div></div>
     <button class="enter-btn" id="enterBtn">進入</button>
   </div>
 
@@ -193,19 +201,28 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 </div>
 
 <script>
-const state={x:0,y:20,z:180,yaw:Math.PI,keys:{},nearestId:"12345",walletConnected:false,walletAddress:"",approved:false,cupCount:0,focus:"fortune",stars:Array.from({length:260},()=>({x:(Math.random()-0.5)*1800,y:(Math.random()-0.5)*800,z:Math.random()*2200+40,s:Math.random()*2+0.5})),mobile:{mx:0,my:0,alt:0,yaw:0}};
+const state={x:0,y:20,z:180,yaw:Math.PI,keys:{},nearestId:"12345",walletConnected:false,walletAddress:"",approved:false,cupCount:0,focus:"fortune",stars:Array.from({length:260},()=>({x:(Math.random()-0.5)*1800,y:(Math.random()-0.5)*800,z:Math.random()*2200+40,s:Math.random()*2+0.5})),mobile:{mx:0,my:0,alt:0,yaw:0,yawVel:0}};
 const nodes={"16888":{x:-220,y:0,z:-140,color:"#9fd8ff",name:"16888｜廣寒宮入口"},"12345":{x:0,y:0,z:0,color:"#ffd978",name:"12345｜五指山悟空財神殿"},"11520":{x:260,y:0,z:-80,color:"#7ff3ff",name:"11520｜花果山交易所"},"8888":{x:180,y:0,z:220,color:"#ffb87f",name:"8888｜高老莊"},"7744":{x:-140,y:0,z:240,color:"#bda7ff",name:"7744｜流沙河"}};
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} addEventListener('resize',resize); resize();
 const $=s=>document.querySelector(s);
-const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),zone2:$("#zoneTxt2"),cupTop:$("#cupTopTxt"),cupSide:$("#cupSideTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#nodeTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt")};
+const ui={nearest:$("#nearestTxt"),altitude:$("#altitudeTxt"),yaw:$("#yawTxt"),zone:$("#sideZoneTxt"),zone2:$("#zoneTxt2"),cupTop:$("#cupTopTxt"),cupSide:$("#cupSideTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#nodeTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState"),kgenBalance:$("#kgenBalance"),allowance:$("#allowanceTxt"),wukong:$("#wukongImg"),eyeL:$("#eyeL"),eyeR:$("#eyeR"),yawKnob:$("#yawKnob"),yawFill:$("#yawFill")};
 
 function normalizeDeg(rad){ return ((((rad*180/Math.PI)%360)+360)%360); }
-function sideZoneFromYaw(deg){
-  const signed = deg > 180 ? deg - 360 : deg;
-  return (signed >= -90 && signed <= 90) ? "多" : "空";
-}
+function sideZoneFromYaw(deg){ const signed = deg > 180 ? deg - 360 : deg; return (signed >= -90 && signed <= 90) ? "多" : "空"; }
 function toast(msg){ ui.tip.textContent=msg; ui.tip.classList.add('show'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2300); }
+
+function updateWukongFace(){
+  const deg = normalizeDeg(state.yaw);
+  const signed = deg > 180 ? deg - 360 : deg;
+  const offset = Math.max(-16, Math.min(16, signed/7));
+  const scale = 1 + Math.min(.04, Math.abs(signed)/900);
+  ui.wukong.style.transform = `translateX(${offset}px) scale(${scale})`;
+  const glow = Math.abs(signed) > 45 ? .75 : .28;
+  ui.eyeL.style.opacity = glow; ui.eyeR.style.opacity = glow;
+  ui.eyeL.style.left = `${25 + offset*0.18}%`;
+  ui.eyeR.style.right = `${25 - offset*0.18}%`;
+}
 function updateUI(){
   const yawDeg = normalizeDeg(state.yaw);
   const zone = sideZoneFromYaw(yawDeg);
@@ -218,7 +235,9 @@ function updateUI(){
   ui.focus.textContent = state.focus;
   ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—";
   ui.allowance.textContent = state.approved ? "已授權" : "—";
+  updateWukongFace();
 }
+
 function setFocus(kind){
   state.focus = kind;
   const data = {
@@ -279,10 +298,23 @@ function altMove(y){ const r=altWrap.getBoundingClientRect(); const top=12,botto
 function altReset(){ altKnob.style.top='92px'; state.mobile.alt=0; }
 altWrap.addEventListener('pointerdown',e=>{e.preventDefault();altMove(e.clientY);}); altWrap.addEventListener('pointermove',e=>{if(e.buttons) altMove(e.clientY);}); altWrap.addEventListener('pointerup',altReset); altWrap.addEventListener('pointercancel',altReset);
 
-const yawWrap=document.getElementById('yawWrap'), yawKnob=document.getElementById('yawKnob');
-function yawMove(x){ const r=yawWrap.getBoundingClientRect(); const min=14, max=r.width-56; let xx=x-r.left-21; xx=Math.max(min,Math.min(max,xx)); yawKnob.style.left=xx+'px'; const center=(min+max)/2; state.mobile.yaw=(xx-center)/((max-min)/2); }
-function yawReset(){ yawKnob.style.left='calc(50% - 21px)'; state.mobile.yaw=0; }
-yawWrap.addEventListener('pointerdown',e=>{e.preventDefault();yawMove(e.clientX);}); yawWrap.addEventListener('pointermove',e=>{if(e.buttons) yawMove(e.clientX);}); yawWrap.addEventListener('pointerup',yawReset); yawWrap.addEventListener('pointercancel',yawReset);
+const yawWrap=document.getElementById('yawWrap'), yawKnob=document.getElementById('yawKnob'), yawFill=document.getElementById('yawFill');
+function yawMove(x){
+  const r=yawWrap.getBoundingClientRect(); const min=14, max=r.width-56; let xx=x-r.left-21; xx=Math.max(min,Math.min(max,xx));
+  yawKnob.style.left=xx+'px';
+  const center=(min+max)/2; const ratio=(xx-center)/((max-min)/2); state.mobile.yaw=ratio;
+  if(ratio>=0){ yawFill.style.left='50%'; yawFill.style.width=(ratio*50)+'%'; } else { yawFill.style.left=(50+ratio*50)+'%'; yawFill.style.width=(-ratio*50)+'%'; }
+}
+function yawReset(){
+  state.mobile.yawVel = state.mobile.yaw * 2.4;
+  state.mobile.yaw=0;
+  yawKnob.style.left='calc(50% - 21px)';
+  yawFill.style.left='50%'; yawFill.style.width='0';
+}
+yawWrap.addEventListener('pointerdown',e=>{e.preventDefault();yawMove(e.clientX);});
+yawWrap.addEventListener('pointermove',e=>{if(e.buttons) yawMove(e.clientX);});
+yawWrap.addEventListener('pointerup',yawReset);
+yawWrap.addEventListener('pointercancel',yawReset);
 
 document.getElementById('enterBtn').onclick = ()=> openModal(state.nearestId === '12345' ? 'fortune' : 'guide');
 addEventListener('keydown',e=>{ state.keys[e.key.toLowerCase()] = true; if(e.key==='Escape') closeModal(); });
@@ -293,9 +325,10 @@ function update(dt){
   const move=((state.keys['w']?1:0)-(state.keys['s']?1:0)) + (Math.abs(state.mobile.my)>dead ? -state.mobile.my : 0);
   const strafe=((state.keys['d']?1:0)-(state.keys['a']?1:0)) + (Math.abs(state.mobile.mx)>dead ? state.mobile.mx : 0);
   const vertical=((state.keys[' ']?1:0)-(state.keys['shift']?1:0)) + state.mobile.alt;
-  const yawMove=((state.keys['e']?1:0)-(state.keys['q']?1:0)) + (Math.abs(state.mobile.yaw)>dead ? state.mobile.yaw : 0);
+  let yawInput=((state.keys['e']?1:0)-(state.keys['q']?1:0)) + (Math.abs(state.mobile.yaw)>dead ? state.mobile.yaw : 0);
+  if(Math.abs(yawInput) < dead && Math.abs(state.mobile.yawVel) > 0.01){ yawInput += state.mobile.yawVel; state.mobile.yawVel *= 0.93; }
 
-  state.yaw += yawMove * dt * 1.75;
+  state.yaw += yawInput * dt * 1.75;
   const base=116, fx=Math.cos(state.yaw), fz=Math.sin(state.yaw), rx=Math.cos(state.yaw+Math.PI/2), rz=Math.sin(state.yaw+Math.PI/2);
   state.x += (fx*move + rx*strafe) * base * dt;
   state.z += (fz*move + rz*strafe) * base * dt;
@@ -328,8 +361,8 @@ function drawBackground(){
   ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
   for(const s of state.stars){ const p=project(s.x,s.y,s.z); if(!p) continue; ctx.fillStyle='rgba(127,243,255,.92)'; ctx.fillRect(p.x,p.y,s.s,s.s); }
   ctx.strokeStyle='rgba(127,243,255,.07)';
-  for(let gx=-680;gx<=680;gx+=60){ let first=true; ctx.beginPath(); for(let gz=-680;gz<=680;gz+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y); } ctx.stroke(); }
-  for(let gz=-680;gz<=680;gz+=60){ let first=true; ctx.beginPath(); for(let gx=-680;gx<=680;gx+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y); } ctx.stroke(); }
+  for(let gx=-680;gx<=680;gx+=60){ let first=true; ctx.beginPath(); for(let gz=-680;gz<=680;gz+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); }
+  for(let gz=-680;gz<=680;gz+=60){ let first=true; ctx.beginPath(); for(let gx=-680;gx<=680;gx+=40){ const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false;} else ctx.lineTo(p.x,p.y);} ctx.stroke(); }
 }
 function drawNode(id,node){
   const p=project(node.x,node.y,node.z); if(!p) return;
