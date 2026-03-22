@@ -3,45 +3,35 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V4 核心引擎版</title>
+<title>KLINE V4.1 真宇宙版</title>
 <style>
-body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
-#canvas{position:fixed;inset:0}
-.hud{position:fixed;top:10px;right:10px;font-size:14px;background:rgba(0,0,0,.5);padding:8px;border-radius:10px}
-.controls{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
-.btn{padding:10px 14px;background:#111;border:1px solid #444;border-radius:10px}
+body{margin:0;background:#000;color:#fff;overflow:hidden;font-family:sans-serif}
+canvas{position:fixed;inset:0}
+.hud{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.5);padding:8px;border-radius:10px}
 </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
-<div class="hud" id="hud">ZONE: 多</div>
-<div class="controls">
-<button class="btn" onclick="dir=-1">←</button>
-<button class="btn" onclick="dir=1">→</button>
-</div>
+<canvas id="c"></canvas>
+<div class="hud" id="hud">ZONE</div>
 
 <script>
-const c=document.getElementById("canvas");
+const c=document.getElementById("c");
 const ctx=c.getContext("2d");
 function resize(){c.width=innerWidth;c.height=innerHeight}
 resize();addEventListener("resize",resize);
 
 let angle=0;
-let dir=0;
 
 let candles=[];
-for(let i=0;i<60;i++){
-  candles.push({o:50,h:60,l:40,c:50});
+for(let i=0;i<80;i++){
+  candles.push({o:0,h:0,l:0,c:0});
 }
 
-function update(){
-  angle+=dir*0.02;
-
-  // simulate price
-  let last=candles[candles.length-1].c;
-  let n=last+(Math.random()-0.5)*5;
+function gen(){
+  let last=candles[candles.length-1].c||0;
+  let n=last+(Math.random()-0.5)*10;
   candles.push({o:last,h:Math.max(last,n)+2,l:Math.min(last,n)-2,c:n});
-  if(candles.length>60)candles.shift();
+  if(candles.length>80)candles.shift();
 }
 
 function draw(){
@@ -49,15 +39,14 @@ function draw(){
 
   let cx=c.width/2;
   let cy=c.height/2;
-  let radius=200;
 
   // zone
   let y=Math.cos(angle);
   let zone=y>0?"多":"空";
   document.getElementById("hud").innerText="ZONE: "+zone;
 
-  // energy background
-  let grad=ctx.createRadialGradient(cx,cy,50,cx,cy,300);
+  // energy field
+  let grad=ctx.createRadialGradient(cx,cy,50,cx,cy,400);
   if(zone=="多"){
     grad.addColorStop(0,"rgba(0,150,255,0.6)");
     grad.addColorStop(1,"rgba(0,0,0,1)");
@@ -68,25 +57,29 @@ function draw(){
   ctx.fillStyle=grad;
   ctx.fillRect(0,0,c.width,c.height);
 
-  // draw candles
-  let w=4;
+  // circular kline
+  let radius=180;
   candles.forEach((k,i)=>{
-    let x=cx-120+i*4;
-    let y1=cy-k.h;
-    let y2=cy-k.l;
-    ctx.strokeStyle=k.c>=k.o?"#0f0":"#f00";
-    ctx.beginPath();
-    ctx.moveTo(x,y1);
-    ctx.lineTo(x,y2);
-    ctx.stroke();
+    let t=i/candles.length*Math.PI*2+angle;
+    let r=radius+(k.c*0.5);
 
-    ctx.fillStyle=ctx.strokeStyle;
-    ctx.fillRect(x-1,cy-k.o,2,k.o-k.c);
+    let x=cx+Math.cos(t)*r;
+    let y=cy+Math.sin(t)*r;
+
+    ctx.fillStyle=k.c>=k.o?"#0f0":"#f00";
+    ctx.fillRect(x,y,2,2);
   });
+
+  // core glow
+  ctx.beginPath();
+  ctx.arc(cx,cy,40,0,Math.PI*2);
+  ctx.fillStyle="rgba(255,255,255,0.1)";
+  ctx.fill();
 }
 
 function loop(){
-  update();
+  angle+=0.01;
+  gen();
   draw();
   requestAnimationFrame(loop);
 }
