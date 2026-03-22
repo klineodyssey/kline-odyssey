@@ -1,335 +1,2413 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>五指山 12345・悟空財神殿｜V7 營運版</title>
-<style>
-:root{--bg:#07080d;--bg2:#121622;--gold:#f6d27b;--cyan:#74eaff;--line:rgba(246,210,123,.22);--panel:rgba(18,22,34,.86);--muted:rgba(255,255,255,.74)}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;color:#fff;font-family:system-ui,-apple-system,'Noto Sans TC','Microsoft JhengHei',sans-serif;background:
-radial-gradient(900px 500px at 20% 10%, rgba(246,210,123,.10), transparent 55%),
-radial-gradient(700px 400px at 85% 30%, rgba(116,234,255,.08), transparent 55%),
-linear-gradient(180deg,var(--bg),var(--bg2));overflow-x:hidden}
-#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:12px 12px 110px}
-.topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
-.brand{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(90deg,rgba(255,255,255,.05),transparent);border-left:5px solid var(--gold);padding:10px 12px;border-radius:16px}
-.brand h1{margin:0;font-size:32px;line-height:1;color:var(--gold)} .brand .sub{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
-.pill{display:inline-flex;gap:8px;align-items:center;padding:10px 12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:999px;font-weight:900}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.22)}
-.entry{padding:16px}
-.h2{margin:0 0 10px;font-size:18px;color:var(--gold)} .help{font-size:12px;color:var(--muted);line-height:1.55}
-.entry-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
-.status{display:flex;gap:10px;flex-wrap:wrap}
-.status-card{padding:12px 14px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px}
-.status-card .k{font-size:11px;color:var(--muted)} .status-card .v{margin-top:4px;font-size:18px;font-weight:900;color:var(--cyan)}
-.entry-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.bigbtn{padding:22px 16px;border-radius:22px;border:1px solid var(--line);background:rgba(0,0,0,.26);cursor:pointer;text-align:left;min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
-.bigbtn .icon{font-size:28px}.bigbtn .t{font-weight:900;font-size:20px;color:var(--gold)}.bigbtn .d{font-size:13px;color:var(--muted);line-height:1.45}
-.bigbtn.active{outline:2px solid rgba(246,210,123,.38);background:rgba(246,210,123,.08)}
-.section{margin-top:14px;display:none;grid-template-columns:1.1fr .9fr;gap:12px}.section.active{display:grid}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.field{display:flex;flex-direction:column;gap:6px} label{font-size:12px;color:var(--muted)}
-input,textarea,select{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.24);color:#fff;outline:none}
-textarea{min-height:108px;resize:vertical}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.btn{appearance:none;border:none;padding:12px 14px;border-radius:14px;cursor:pointer;font-weight:900;background:linear-gradient(180deg,rgba(246,210,123,.22),rgba(246,210,123,.08));color:#fff;border:1px solid var(--line)}
-.btn.ghost{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)} .btn.danger{background:rgba(255,108,108,.10);border-color:rgba(255,108,108,.22)}
-.kv{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 12px;background:rgba(0,0,0,.20);border:1px solid rgba(255,255,255,.08);border-radius:14px}
-.kv .k{font-size:12px;color:var(--muted)} .kv .v{font-weight:900}
-.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:12px 0}
-.media{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.media video,.media canvas{width:100%;display:block;border-radius:16px;background:#000;border:1px solid rgba(255,255,255,.08)}
-.chatbox{min-height:220px}
-.footerbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(0,0,0,.88);border-top:3px solid var(--gold);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 10px 14px}
-.footerbtn{padding:12px 8px;border-radius:14px;background:#101216;border:1px solid rgba(255,255,255,.08);text-align:center;font-weight:900}
-.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.76);border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:none}
-.toast.show{display:block}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-@media (max-width:980px){.entry-buttons{grid-template-columns:repeat(2,1fr)}.section.active,.grid2,.media{grid-template-columns:1fr}.brand h1{font-size:26px}.footerbar{grid-template-columns:repeat(2,1fr)}}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>五指山 12345・悟空財神殿｜V6.7 定稿營運版</title>
+
+  <!-- Ethers v5 (lightweight, CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#0b0d14;
+      --gold:#f3d27a;
+      --gold2:#ffd27d;
+      --gold3:#ffb84d;
+      --ink:#0b0b12;
+      --panel:rgba(18,18,28,.58);
+      --panel2:rgba(255,255,255,.06);
+      --line:rgba(243,210,122,.22);
+      --line2:rgba(243,210,122,.35);
+      --muted:rgba(255,255,255,.68);
+      --muted2:rgba(255,255,255,.50);
+      --danger:#ff5c5c;
+      --ok:#58ff9a;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --r1:18px;
+      --r2:999px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:rgba(255,255,255,.92);
+      background: radial-gradient(1200px 700px at 20% 20%, rgba(243,210,122,.10) 0%, transparent 55%),
+                  radial-gradient(900px 600px at 85% 35%, rgba(255,184,77,.09) 0%, transparent 55%),
+                  radial-gradient(900px 650px at 45% 100%, rgba(120,160,255,.06) 0%, transparent 60%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+    /* Starfield canvas sits behind everything */
+    #stars{
+      position:fixed; inset:0;
+      width:100%; height:100%;
+      z-index:0;
+      pointer-events:none;
+      opacity:.95;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:1;
+      max-width:1100px;
+      margin:0 auto;
+      padding:18px 14px 54px;
+    }
+
+    /* Official entry button (user provided snippet, adapted to cosmic style) */
+    .topbar{
+      position:sticky;
+      top:10px;
+      z-index:9999;
+      display:flex;
+      justify-content:flex-end;
+      margin:6px 0 12px;
+    }
+    .topbar a{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      text-decoration:none;
+      border:1px solid rgba(243,210,122,.35);
+      background:rgba(10,10,16,.82);
+      color:rgba(255,255,255,.92);
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+    }
+    .topbar a:active{transform:translateY(1px)}
+    .topbar .dot{
+      width:10px;height:10px;border-radius:99px;
+      background:radial-gradient(circle, var(--gold2), rgba(243,210,122,.25));
+      box-shadow:0 0 18px rgba(243,210,122,.55);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+      align-items:stretch;
+    }
+    @media (max-width:860px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
+      border:1px solid var(--line);
+      border-radius: var(--r1);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+    .card .inner{padding:16px 16px 14px}
+    .card h2{
+      margin:0 0 10px;
+      font-size:16px;
+      letter-spacing:.5px;
+      color:var(--gold2);
+      text-shadow: 0 0 20px rgba(243,210,122,.22);
+    }
+    .sub{
+      color:var(--muted2);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    /* Title block - single (no duplication) */
+    .title{
+      display:flex;
+      gap:14px;flex-wrap:nowrap;
+      align-items:flex-start;
+    }
+    .pillar{
+      width:8px;
+      border-radius:99px;
+      background: linear-gradient(180deg, rgba(243,210,122,.95), rgba(243,210,122,.15));
+      box-shadow: 0 0 28px rgba(243,210,122,.35);
+      flex:0 0 8px;
+      margin-top:6px;
+    }
+    .ttext h1{
+      margin:0;
+      font-size:44px;
+      line-height:1.02;
+      letter-spacing:1px;
+      color:var(--gold2);
+      text-shadow: 0 0 24px rgba(243,210,122,.25);
+    }
+    .ttext h1 small{
+      display:block;
+      font-size:34px;
+      margin-top:6px;
+      letter-spacing:1px;
+    }
+    .ttext .tagline{
+      margin-top:10px;
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+    .chip{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.25);
+      color:rgba(255,255,255,.9);
+      font-weight:800;
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      box-shadow: 0 10px 26px rgba(0,0,0,.18);
+    }
+    .chip b{color:var(--gold2)}
+    .mono{font-family:var(--mono)}
+    .rightInfo{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:16px;
+    }
+    .badge{
+      border-radius: 18px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      padding:12px 14px;
+    }
+    .badge .row{display:flex; justify-content:space-between; gap:10px; align-items:center}
+    .badge .k{color:var(--muted2); font-size:12px}
+    .badge .v{font-weight:900}
+    .badge .v b{color:var(--gold2)}
+    .badge .tiny{margin-top:6px; color:var(--muted2); font-size:12px}
+    .statusPill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      font-weight:900;
+    }
+    .led{
+      width:10px;height:10px;border-radius:99px;
+      background: rgba(255,255,255,.25);
+      box-shadow:none;
+    }
+    .led.ok{background: radial-gradient(circle, var(--ok), rgba(88,255,154,.18)); box-shadow:0 0 18px rgba(88,255,154,.45)}
+    .led.bad{background: radial-gradient(circle, var(--danger), rgba(255,92,92,.2)); box-shadow:0 0 18px rgba(255,92,92,.35)}
+    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    button{
+      appearance:none;
+      border:none;
+      background: linear-gradient(180deg, rgba(243,210,122,.16), rgba(243,210,122,.06));
+      color:rgba(255,255,255,.94);
+      border:1px solid var(--line2);
+      padding:12px 14px;
+      border-radius: 14px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+      transition: transform .06s ease, border-color .2s ease, background .2s ease;
+    }
+    button:hover{border-color: rgba(243,210,122,.55)}
+    button:active{transform: translateY(1px)}
+    button.ghost{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.14);
+      color: rgba(255,255,255,.82);
+    }
+    button.danger{
+      background: rgba(255,92,92,.12);
+      border-color: rgba(255,92,92,.35);
+    }
+    button.primary{
+      background: linear-gradient(180deg, rgba(255,210,125,.28), rgba(243,210,122,.10));
+      border-color: rgba(243,210,122,.65);
+    }
+    button:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none!important;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    label{
+      font-size:12px;
+      color:var(--muted2);
+    }
+    input, textarea, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(243,210,122,.18);
+      background: rgba(0,0,0,.28);
+      color: rgba(255,255,255,.92);
+      outline:none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.2);
+      font-family: var(--sans);
+    }
+    textarea{min-height:92px; resize:vertical}
+    input::placeholder, textarea::placeholder{color:rgba(255,255,255,.38)}
+    .help{
+      font-size:12px;
+      color:var(--muted2);
+      line-height:1.55;
+    }
+    .sep{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(243,210,122,.20), transparent);
+      margin:12px 0;
+    }
+
+    .progressWrap{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .bar{
+      position:relative;
+      height:14px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.09);
+      overflow:hidden;
+      flex:1;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:65%;
+      background: linear-gradient(90deg, rgba(243,210,122,.15), rgba(243,210,122,.55), rgba(255,184,77,.45));
+      box-shadow: 0 0 24px rgba(243,210,122,.25);
+      border-radius:999px;
+      transition: width .8s ease;
+    }
+    .pct{
+      font-weight:900;
+      color: var(--gold2);
+      min-width:62px;
+      text-align:right;
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      margin-top:10px;
+    }
+    .kv .k{color:var(--muted2); font-size:12px}
+    .kv .v{font-weight:900}
+    .kv .v b{color:var(--gold2)}
+    .warn{color:#ffb0b0}
+    .ok{color:#a7ffd0}
+    .mini{
+      font-size:12px;
+      color:var(--muted2);
+      line-height:1.55;
+    }
+
+    /* Media (camera/photo/video) */
+    .mediaGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+    @media (max-width:860px){ .mediaGrid{grid-template-columns:1fr} }
+    .mediaBox{
+      border-radius: var(--r1);
+      border:1px solid rgba(243,210,122,.18);
+      background: rgba(0,0,0,.22);
+      overflow:hidden;
+      position:relative;
+    }
+    .mediaBox .cap{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(243,210,122,.10);
+      color:var(--muted2);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .mediaBox .cap b{color:var(--gold2)}
+    .mediaBox .body{padding:10px 10px 12px}
+    video, canvas, img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .rowBtns{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+    .note{
+      font-size:12px; color:var(--muted2); margin-top:8px; line-height:1.55;
+    }
+
+    /* Cupoe */
+    .cupRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .cupBox{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(243,210,122,.18);
+      background: rgba(0,0,0,.18);
+      font-weight:900;
+    }
+    .cupIcon{
+      width:24px; height:24px; border-radius:8px;
+      background: radial-gradient(circle, rgba(243,210,122,.70), rgba(243,210,122,.10));
+      box-shadow:0 0 18px rgba(243,210,122,.22);
+      display:grid; place-items:center;
+      font-size:14px;
+    }
+
+    /* Guided overlay */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.62);
+      display:none;
+      z-index:10000;
+      padding:18px 14px;
+    }
+    .overlay.show{display:block}
+    .modal{
+      max-width:760px;
+      margin:0 auto;
+      background: rgba(12,12,18,.90);
+      border:1px solid rgba(243,210,122,.25);
+      border-radius: 22px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.65);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+    .modalHead{
+      padding:14px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid rgba(243,210,122,.12);
+    }
+    .modalHead b{color:var(--gold2)}
+    .modalBody{padding:14px 16px 16px}
+    .steps{
+      display:grid;
+      gap:10px;
+    }
+    .step{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      padding:12px 12px;
+    }
+    .step .t{font-weight:900; color:rgba(255,255,255,.92)}
+    .step .d{margin-top:6px; color:var(--muted2); font-size:13px; line-height:1.55}
+    .footer{
+      margin-top:14px;
+      color:var(--muted2);
+      font-size:12px;
+      text-align:center;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      background: rgba(0,0,0,.72);
+      border:1px solid rgba(243,210,122,.25);
+      color:rgba(255,255,255,.92);
+      padding:10px 12px;
+      border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      z-index:20000;
+      display:none;
+      max-width:92vw;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .toast.show{display:block}
+  
+.caishenIcon{width:120px;height:120px;border-radius:14px;display:inline-block;flex:0 0 auto;box-shadow:0 10px 22px rgba(0,0,0,.35);}
+@media (max-width:420px){ .caishenIcon{width:72px;height:72px;border-radius:12px;} }
+
+
+    .title{display:flex;align-items:flex-start;gap:12px}
+    .title .pillar{order:1}
+    .title .ttext{order:2;flex:1;min-width:0}
+    .title .caishenIcon{order:3;margin-left:auto}
+
+
+    .templeFlow{
+      position:sticky; top:76px; z-index:9998; margin:0 0 12px;
+      display:grid; grid-template-columns:1.2fr 1fr; gap:12px;
+    }
+    .flowHero, .flowNav {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line); border-radius:20px; box-shadow: var(--shadow); backdrop-filter: blur(8px);
+    }
+    .flowHero{padding:16px}
+    .flowTitle{font-size:15px; font-weight:900; color:var(--gold2); margin-bottom:8px}
+    .flowDesc{font-size:12px; color:var(--muted); line-height:1.6}
+    .flowStats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px}
+    .flowStat{padding:10px 12px; border-radius:14px; background:rgba(0,0,0,.22); border:1px solid rgba(243,210,122,.12)}
+    .flowStat .k{font-size:11px; color:var(--muted2)}
+    .flowStat .v{margin-top:4px; font-weight:900; color:var(--gold2)}
+    .flowNav{padding:12px}
+    .navGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+    .navBtn{appearance:none; border:none; cursor:pointer; text-align:left; padding:14px; border-radius:16px; background:rgba(0,0,0,.22); border:1px solid rgba(243,210,122,.18); color:#fff; font-weight:900}
+    .navBtn small{display:block; margin-top:6px; font-size:12px; color:var(--muted2); font-weight:700; line-height:1.45}
+    .quickDock{position:fixed; left:0; right:0; bottom:0; z-index:10001; background:rgba(8,8,12,.92); border-top:2px solid rgba(243,210,122,.25); display:none; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px 10px calc(10px + env(safe-area-inset-bottom));}
+    .dockBtn{appearance:none; border:none; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(243,210,122,.15); color:#fff; font-weight:900; padding:10px 6px; font-size:12px}
+    .sectionFlash{animation: templeFlash 1.2s ease;}
+    @keyframes templeFlash {0%{box-shadow:0 0 0 rgba(243,210,122,0)} 30%{box-shadow:0 0 0 6px rgba(243,210,122,.14)} 100%{box-shadow:0 0 0 rgba(243,210,122,0)}}
+    @media (max-width:860px){
+      .templeFlow{grid-template-columns:1fr; top:68px}
+      .flowStats{grid-template-columns:repeat(2,1fr)}
+      .quickDock{display:grid}
+      .wrap{padding-bottom:106px}
+    }
+
 </style>
 </head>
+
 <body>
-<canvas id="stars"></canvas>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand">
-      <div>
-        <h1>五指山 12345・悟空財神殿</h1>
-        <div class="sub">V7 營運版｜Heart 入口 / 發財金 / 心跳 / 點火 / 許願 / 留影 / 客服<br>交易主系統保留給花果山悟空交易所 11520。</div>
-      </div>
-    </div>
-    <div class="pill mono" id="clock">--</div>
-  </div>
+  <canvas id="stars"></canvas>
 
-  <div class="panel entry">
-    <div class="entry-head">
-      <div>
-        <div class="h2">神殿入口</div>
-        <div class="help">先選你現在要做的事。這版把 12345 做成真正可用的入口，不再把所有工程面板一次塞滿。</div>
-      </div>
-      <div class="status">
-        <div class="status-card"><div class="k">心跳</div><div class="v" id="st-heartbeat">可領</div></div>
-        <div class="status-card"><div class="k">點火</div><div class="v" id="st-ignite">倒數中</div></div>
-        <div class="status-card"><div class="k">發財金</div><div class="v" id="st-fortune">未解鎖</div></div>
-        <div class="status-card"><div class="k">錢包</div><div class="v" id="st-wallet">未連線</div></div>
-      </div>
-    </div>
-    <div class="entry-buttons">
-      <button class="bigbtn active" data-target="section-entry"><div class="icon">🔥</div><div class="t">進入神殿</div><div class="d">連錢包、貼 Heart、看狀態。</div></button>
-      <button class="bigbtn" data-target="section-fortune"><div class="icon">💰</div><div class="t">領發財金</div><div class="d">先過三次聖盃，再進 fortuneClaim。</div></button>
-      <button class="bigbtn" data-target="section-wish"><div class="icon">🙏</div><div class="t">許願 / 還願</div><div class="d">保存願望、hash、還願、點燈。</div></button>
-      <button class="bigbtn" data-target="section-media"><div class="icon">📸</div><div class="t">留影 / 客服</div><div class="d">拍照、下載與客服教學。</div></button>
-    </div>
-  </div>
+  <div class="wrap">
 
-  <div class="section active" id="section-entry">
-    <div class="panel" style="padding:14px">
-      <div class="h2">神殿進場狀態</div>
-      <div class="grid2">
-        <div class="field"><label>Heart 合約地址</label><input id="heartAddr" class="mono" placeholder="0x..."></div>
-        <div class="field"><label>KGEN Token</label><input id="tokenAddr" class="mono" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"></div>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnConnect">連接錢包</button>
-        <button class="btn ghost" id="btnSave">保存地址</button>
-        <button class="btn ghost" id="btnInspect">監工檢查</button>
-        <button class="btn danger" id="btnClear">清空本機</button>
-      </div>
-      <div class="sep"></div>
-      <div class="grid2">
-        <div class="kv"><div class="k">錢包狀態</div><div class="v" id="walletState">未連線</div></div>
-        <div class="kv"><div class="k">鏈</div><div class="v" id="chainState">未偵測</div></div>
-        <div class="kv"><div class="k">Heart</div><div class="v" id="heartState">未貼地址</div></div>
-        <div class="kv"><div class="k">Temple 狀態</div><div class="v" id="templeState">可上線測</div></div>
-      </div>
-      <div class="help" id="inspectOut" style="margin-top:10px">監工提示會顯示在這裡。</div>
+    <!-- Official Entry (Top-Right) -->
+    <div class="topbar">
+      <a href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">
+        <span class="dot"></span>
+        <span>🌐 Official Website</span>
+      </a>
     </div>
 
-    <div class="panel" style="padding:14px">
-      <div class="h2">神殿狀態條</div>
-      <div class="kv"><div class="k">心跳倒數</div><div class="v mono" id="hbCountdown">00:00:00</div></div>
-      <div class="kv"><div class="k">點火倒數（UTC 00:00–00:10）</div><div class="v mono" id="igCountdown">00:00:00</div></div>
-      <div class="kv"><div class="k">發財金門檻</div><div class="v" id="fortuneGate">三次聖盃未完成</div></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnHeartbeat">領心跳</button>
-        <button class="btn" id="btnIgnite">轉日點火</button>
-      </div>
-      <div class="help" style="margin-top:10px">這裡只做神殿儀式入口，不放完整交易 UI。交易主戰場是 11520。</div>
-    </div>
-  </div>
-
-  <div class="section" id="section-fortune">
-    <div class="panel" style="padding:14px">
-      <div class="h2">三次聖盃 → 解鎖發財金</div>
-      <div class="kv"><div class="k">聖盃進度</div><div class="v" id="cupProg">0 / 3</div></div>
-      <div class="kv"><div class="k">本次結果</div><div class="v" id="cupLast">--</div></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnCup">搏杯一次</button>
-        <button class="btn ghost" id="btnCupReset">重置聖盃</button>
-      </div>
-      <div class="sep"></div>
-      <div class="field">
-        <label>發財金金額（1–888）</label>
-        <input id="fortuneAmt" type="number" min="1" max="888" value="8">
-      </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnFortune" disabled>領發財金</button>
-        <button class="btn ghost" id="btnFortuneCheck">查冷卻 / 名額</button>
-      </div>
-      <div class="help" id="fortuneOut" style="margin-top:10px">先完成三次聖盃。</div>
-    </div>
-
-    <div class="panel" style="padding:14px">
-      <div class="h2">發財金流程說明</div>
-      <div class="help">1. 先連錢包。<br>2. 貼 Heart 地址。<br>3. 完成三次聖盃。<br>4. 輸入 1–888 KGEN。<br>5. 按下「領發財金」。</div>
-      <div class="sep"></div>
-      <div class="kv"><div class="k">目前狀態</div><div class="v" id="fortuneState">未解鎖</div></div>
-      <div class="kv"><div class="k">下一步</div><div class="v" id="fortuneNext">先搏杯</div></div>
-    </div>
-  </div>
-
-  <div class="section" id="section-wish">
-    <div class="panel" style="padding:14px">
-      <div class="h2">許願 / 留言</div>
-      <div class="field"><label>許願內容</label><textarea id="wishText" placeholder="寫下你的願望…"></textarea></div>
-      <div class="field" style="margin-top:10px"><label>留言</label><textarea id="noteText" placeholder="留下一句話…"></textarea></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnSaveWish">保存願望</button>
-        <button class="btn ghost" id="btnWishHash">產生 hash</button>
-        <button class="btn ghost" id="btnClearNote">清空留言</button>
-      </div>
-      <div class="help" id="wishOut" style="margin-top:10px">願望與留言會保存到本機，也可產生 hash。</div>
-    </div>
-
-    <div class="panel" style="padding:14px">
-      <div class="h2">還願 / 點燈</div>
-      <div class="grid2">
-        <div class="field"><label>還願金額（KGEN）</label><input id="vowAmt" type="number" min="1" value="8"></div>
-        <div class="field"><label>點燈天數</label><input id="lampDays" type="number" min="1" value="7"></div>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnApprove">先 Approve</button>
-        <button class="btn" id="btnVow">還願</button>
-        <button class="btn" id="btnLamp">點燈</button>
-      </div>
-      <div class="help" id="vowOut" style="margin-top:10px">這裡做的是神殿補血，不是交易下單。</div>
-    </div>
-  </div>
-
-  <div class="section" id="section-media">
-    <div class="panel" style="padding:14px">
-      <div class="h2">留影</div>
-      <div class="media">
-        <div>
-          <video id="cam" autoplay playsinline muted></video>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnCamOn">開啟相機</button>
-            <button class="btn ghost" id="btnCamOff">關閉相機</button>
-          </div>
+    <div class="templeFlow">
+      <div class="flowHero">
+        <div class="flowTitle">神殿主流程</div>
+        <div class="flowDesc">這一版保留原本功能，不拆壞結構，只增加使用動線：先連錢包 / 貼 Heart，再領心跳與點火；三次聖盃解鎖發財金；許願、還願與留影放後段。交易主系統留給花果山悟空交易所 11520。</div>
+        <div class="flowStats">
+          <div class="flowStat"><div class="k">心跳</div><div class="v" id="flowHb">--</div></div>
+          <div class="flowStat"><div class="k">點火</div><div class="v" id="flowIg">--</div></div>
+          <div class="flowStat"><div class="k">發財金</div><div class="v" id="flowFt">未解鎖</div></div>
+          <div class="flowStat"><div class="k">錢包</div><div class="v" id="flowWallet">未連線</div></div>
         </div>
-        <div>
-          <canvas id="shotCanvas" width="1280" height="720"></canvas>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="btnShot">拍照</button>
-            <button class="btn ghost" id="btnDlPhoto" disabled>下載照片</button>
-          </div>
+      </div>
+      <div class="flowNav">
+        <div class="navGrid">
+          <button class="navBtn" data-scroll="top">🏯 進入神殿<small>錢包、鏈與 Heart 地址</small></button>
+          <button class="navBtn" data-scroll="sec-heartbeat">💓 心跳 / 點火<small>整點心跳，UTC 視窗點火</small></button>
+          <button class="navBtn" data-scroll="sec-fortune">💰 領發財金<small>先過三次聖盃再領</small></button>
+          <button class="navBtn" data-scroll="sec-wish">🙏 許願 / 還願<small>保存願望、上鏈 hash、點燈補血</small></button>
+          <button class="navBtn" data-scroll="sec-media">📸 留影存證<small>拍照、錄影、照片＋語音</small></button>
+          <button class="navBtn" data-scroll="sec-help">🧚 AI 客服<small>一步一步教到會</small></button>
         </div>
       </div>
     </div>
 
-    <div class="panel" style="padding:14px">
-      <div class="h2">AI 客服</div>
-      <div class="field"><label>快速問題</label>
-        <select id="faq">
-          <option value="">選一個問題…</option>
-          <option value="wallet">我沒有錢包怎麼辦？</option>
-          <option value="connect">怎麼連接錢包？</option>
-          <option value="fortune">怎麼領發財金？</option>
-          <option value="approve">為什麼要先 approve？</option>
-        </select>
+    <div class="quickDock">
+      <button class="dockBtn" data-scroll="top">神殿</button>
+      <button class="dockBtn" data-scroll="sec-fortune">發財金</button>
+      <button class="dockBtn" data-scroll="sec-wish">許願</button>
+      <button class="dockBtn" data-scroll="sec-help">客服</button>
+    </div>
+
+    <div class="hero">
+      <div class="card">
+        <div class="inner">
+          <div class="title">
+            <div class="pillar"></div>
+            <img class="caishenIcon" src="/kline-odyssey/assets/wukong_caishen.png?v=1" alt="Wukong Caishen" onerror="this.style.display=\'none\'"/>
+<div class="ttext">
+              <h1>五指山 12345<small>悟空財神殿</small></h1>
+              <div class="tagline">
+                V6.7 Cosmic Living Temple · ChainReady UI<br/>
+                心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
+              </div>
+              <div class="chips">
+                <div class="chip"><span>版本</span><b id="ver">V6.7</b></div>
+                <div class="chip"><span>時間</span><b id="nowTxt" class="mono">--</b></div>
+                <div class="chip"><span>狀態</span><b id="modeTxt">施工中（可上線測）</b></div>
+              </div>
+              <div class="sep"></div>
+              <div class="progressWrap">
+                <div class="bar"><i id="progFill" style="width:72%"></i></div>
+                <div class="pct" id="progTxt">72%</div>
+              </div>
+              <div class="mini" style="margin-top:8px">
+                監工提示：當你在 <span class="mono">/K線西遊記/temples/12345/index.html</span> 更新本檔，GitHub Pages 會自動刷新。若看到版本跳回舊版，通常是瀏覽器快取（請強制重新整理）。
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnAsk">仙女解說</button>
-        <button class="btn ghost" id="btnSpeak">語音唸出來</button>
+
+      <div class="card">
+        <div class="rightInfo">
+          <div class="badge">
+            <div class="row">
+              <div>
+                <div class="k">錢包</div>
+                <div class="v"><span class="statusPill"><span id="led" class="led bad"></span><span id="walletState">未連線</span></span></div>
+              </div>
+              <div style="text-align:right">
+                <div class="k">鏈</div>
+                <div class="v"><b id="chainState">未偵測</b></div>
+              </div>
+            </div>
+            <div class="tiny">目標：BSC Mainnet / chainId 56（0x38）</div>
+            <div class="btns">
+              <button class="primary" id="btnConnect">連接錢包</button>
+              <button id="btnSwitch">切換到 BSC (0x38)</button>
+              <button class="ghost" id="btnRefresh">刷新狀態</button>
+              <button class="ghost" id="btnGuide">新手導覽</button>
+            </div>
+          </div>
+
+          <div class="badge">
+            <div class="k">Heart 合約地址（部署後貼上）</div>
+            <div class="field">
+              <input id="heartAddr" class="mono" placeholder="0x..." />
+              <div class="help">貼上部署後的 Heart 合約地址（KGEN_TempleHeart_V3_2_2）。本機會記住（localStorage）。</div>
+            </div>
+            <div class="grid">
+              <div class="field">
+                <label>公益血庫 orphanPool（顯示用，可留空）</label>
+                <input id="orphanAddr" class="mono" placeholder="0xB73D...（可留空）" />
+              </div>
+              <div class="field">
+                <label>KGEN Token（已上鏈）</label>
+                <input id="kgenAddr" class="mono" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" />
+              </div>
+            </div>
+            <div class="btns">
+              <button class="primary" id="btnSave">保存地址</button>
+              <button class="danger" id="btnClear">清除本機設定</button>
+              <button class="ghost" id="btnInspector">監工檢查</button>
+            </div>
+            <div id="inspectOut" class="mini" style="margin-top:8px"></div>
+          </div>
+
+        </div>
       </div>
-      <div class="field" style="margin-top:10px">
-        <label>客服對話</label>
-        <textarea id="chatBox" class="chatbox" placeholder="客服會一步一步教你…"></textarea>
+    </div>
+
+    <div class="grid" style="margin-top:12px">
+      <div class="card">
+        <div class="inner">
+          <div id="sec-heartbeat"></div>
+          <h2>心跳 / 點火 倒數（鏈上事件）</h2>
+          <div class="kv">
+            <div>
+              <div class="k">心跳倒數（下一次可領）</div>
+              <div class="v"><b id="hbCountdown">--:--:--</b></div>
+              <div class="mini">規則：每小時一次（合約 heartbeatCooldownSeconds）。</div>
+            </div>
+            <div style="text-align:right">
+              <div class="k">心跳獎勵</div>
+              <div class="v"><b id="hbReward">1</b> KGEN</div>
+              <div class="mini mono" id="hbNextAt">--</div>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div>
+              <div class="k">點火倒數（UTC 00:00–00:10）</div>
+              <div class="v"><b id="igCountdown">--:--:--</b></div>
+              <div class="mini">規則：每日一次，且只能在視窗內 igniteAndClaim。</div>
+            </div>
+            <div style="text-align:right">
+              <div class="k">點火獎勵</div>
+              <div class="v"><b id="igReward">8</b> KGEN</div>
+              <div class="mini mono" id="igWindowTxt">UTC 00:00–00:10</div>
+            </div>
+          </div>
+
+          <div class="btns">
+            <button class="primary" id="btnHeartbeat">領心跳（上鏈）</button>
+            <button class="primary" id="btnIgnite">轉日點火（上鏈）</button>
+          </div>
+          <div class="mini" id="hbIgOut" style="margin-top:8px"></div>
+        </div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn ghost" id="btnCopyChat">複製</button>
-        <button class="btn ghost" id="btnClearChat">清空</button>
+
+      <div class="card">
+        <div class="inner">
+          <div id="sec-fortune"></div>
+          <h2>三次聖盃（防 Bot）→ 才能領發財金</h2>
+
+          <div class="cupRow">
+            <div class="cupBox"><span class="cupIcon">🥢</span> 聖盃進度：<span class="mono" id="cupProg">0 / 3</span></div>
+            <div class="cupBox"><span class="cupIcon">⛩️</span> 連續成功：<span class="mono" id="cupStreak">0</span></div>
+            <div class="cupBox"><span class="cupIcon">🎲</span> 本次結果：<span class="mono" id="cupLast">--</span></div>
+          </div>
+
+          <div class="btns" style="margin-top:10px">
+            <button id="btnCup" class="primary">搏杯一次</button>
+            <button id="btnCupReset" class="ghost">重置聖盃</button>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="grid">
+            <div class="field">
+              <label>要領多少發財金（KGEN）</label>
+              <input id="fortuneAmt" type="number" min="1" max="888" value="8" />
+              <div class="help">規則：1–888，自填比較有記憶點（你之前的設定）。</div>
+            </div>
+            <div class="field">
+              <label>發財金狀態</label>
+              <div class="help">
+                <div>需要：<b>三次聖盃成功</b> 才會解鎖「領發財金」。</div>
+                <div>冷卻：預設 <span class="mono">30 days</span>（合約 fortuneCooldownSeconds）。</div>
+                <div>每期名額：預設 <span class="mono">500 / 30 days</span>（fortuneEpochMaxClaims / fortuneEpochSeconds）。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btns">
+            <button class="primary" id="btnFortune" disabled>領發財金（上鏈）</button>
+            <button class="ghost" id="btnFortuneCheck">查我的冷卻 / 名額</button>
+          </div>
+
+          <div class="mini" id="fortuneOut" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="inner">
+          <div id="sec-wish"></div>
+          <h2>許願 / 留言（可上鏈 hash）＋ 下載存證</h2>
+          <div class="grid">
+            <div class="field">
+              <label>許願內容（本機保存，可上鏈 hash）</label>
+              <textarea id="wishText" placeholder="寫下你的願望（例如：願我心不亂、願悟空回血、願我能守住節奏…）"></textarea>
+              <div class="btns">
+                <button class="primary" id="btnSaveWish">保存</button>
+                <button class="ghost" id="btnWishHash">產生 hash / 上鏈</button>
+              </div>
+              <div class="mini" id="wishOut"></div>
+            </div>
+            <div class="field">
+              <label>留言（會一起烙印到照片/影片浮印）</label>
+              <textarea id="noteText" placeholder="留下一句話（例如：我已點火、我已還願、我已領到發財金…）"></textarea>
+              <div class="btns">
+                <button class="primary" id="btnSaveNote">保存</button>
+                <button class="ghost" id="btnClearNote">清空</button>
+              </div>
+              <div class="mini">提示：留言/許願會在你拍照或錄影時，寫到浮印裡面。</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <h2 style="margin-top:0">還願 / 點燈（補血）</h2>
+          <div class="grid">
+            <div class="field">
+              <label>還願金額（KGEN）</label>
+              <input id="vowAmt" type="number" min="1" value="8" />
+              <div class="help">還願是補血：會用 <span class="mono">transferFrom</span> 轉入 Heart（需先 approve）。</div>
+            </div>
+            <div class="field">
+              <label>點燈天數（每一天 1 KGEN，預設）</label>
+              <input id="lampDays" type="number" min="1" value="7" />
+              <div class="help">點燈也是補血，會延長你的燈火到期時間（鏈上記錄）。</div>
+            </div>
+          </div>
+          <div class="btns">
+            <button class="primary" id="btnApprove">先 Approve（KGEN → Heart）</button>
+            <button class="primary" id="btnVow">還願（上鏈）</button>
+            <button class="primary" id="btnLamp">點燈（上鏈）</button>
+          </div>
+          <div class="mini" id="vowOut" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="inner">
+          <div id="sec-media"></div>
+          <h2>拍照 / 錄影（含聲音）/ 照片＋語音 合成影片（可下載）</h2>
+          <div class="sub">
+            你要的「照片不縮小」：此版用同一張 Canvas 做浮印，輸出維持原解析度比例。<br/>
+            你要的「合在一起」：按「照片＋語音」會把照片當背景，錄一段語音並輸出成影片檔（WebM）。
+          </div>
+
+          <div class="mediaGrid">
+            <div class="mediaBox">
+              <div class="cap"><span>預覽相機</span><span class="mono" id="camState">off</span></div>
+              <div class="body">
+                <video id="cam" playsinline autoplay muted></video>
+                <div class="rowBtns">
+                  <button class="primary" id="btnCamOn">開啟相機</button>
+                  <button class="ghost" id="btnCamOff">關閉相機</button>
+                </div>
+                <div class="note">若手機跳出權限，請允許相機與麥克風（錄影/錄音需要）。</div>
+              </div>
+            </div>
+
+            <div class="mediaBox">
+              <div class="cap"><span>成品預覽（含浮印）</span><span class="mono" id="exportState">ready</span></div>
+              <div class="body">
+                <canvas id="canvas" width="1280" height="720"></canvas>
+                <div class="rowBtns">
+                  <button class="primary" id="btnShot">拍照（浮印）</button>
+                  <button class="ghost" id="btnDlPhoto">下載照片</button>
+                </div>
+                <div class="rowBtns">
+                  <button class="primary" id="btnRecVideo">開始錄影（含聲音）</button>
+                  <button class="ghost" id="btnStopVideo" disabled>停止錄影</button>
+                  <button class="ghost" id="btnDlVideo" disabled>下載影片</button>
+                </div>
+                <div class="rowBtns">
+                  <button class="primary" id="btnPhotoVoice" disabled>照片＋語音（合成影片）</button>
+                  <button class="ghost" id="btnStopPV" disabled>停止合成</button>
+                  <button class="ghost" id="btnDlPV" disabled>下載合成影片</button>
+                </div>
+                <div class="note">
+                  小提醒：iOS Safari 對錄影支援較保守；Android Chrome / Edge 通常最穩。若錄影按了沒反應，先確認允許「麥克風」權限。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div id="sec-help"></div>
+          <h2 style="margin-top:0">AI 客服（教到會：從沒錢包 → 領到發財金）</h2>
+          <div class="grid">
+            <div class="field">
+              <label>快速問題（點一下就教你）</label>
+              <select id="faq">
+                <option value="">選一個問題…</option>
+                <option value="nowallet">我沒有錢包，要怎麼開始？</option>
+                <option value="connect">我裝了錢包，要怎麼連線？</option>
+                <option value="bsc">怎麼切到 BSC（0x38）？</option>
+                <option value="heart">Heart 合約地址在哪裡貼？</option>
+                <option value="cup">三次聖盃怎麼玩？</option>
+                <option value="fortune">怎麼領發財金？需要什麼條件？</option>
+                <option value="approve">為什麼還願/點燈要先 approve？</option>
+                <option value="fail">交易失敗怎麼辦？</option>
+              </select>
+              <div class="btns">
+                <button class="primary" id="btnAsk">仙女解說</button>
+                <button class="ghost" id="btnSpeak">語音唸出來</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>客服對話（本機保存）</label>
+              <textarea id="chatBox" placeholder="仙女會在這裡一步一步教你…"></textarea>
+              
+          <div class="chatRow">
+                <input id="chatInput" type="text" inputmode="text" autocomplete="off"
+                       placeholder="輸入你的問題（一次一題）…">
+                <div class="btns" style="margin-top:0;">
+                  <button class="primary" id="btnAskChat" type="button">送出</button>
+                  <button class="ghost" id="btnStopChat" type="button">停止</button>
+                  <button class="ghost" id="btnMicChat" type="button">語音輸入</button>
+                </div>
+              </div>
+              <div id="micStatus" class="muted" style="margin-top:8px; font-size:12px; opacity:.85;"></div>
+<div class="btns">
+                <button class="ghost" id="btnCopyChat">複製</button>
+                <button class="ghost" id="btnClearChat">清空</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      PrimeForge 以母機之名，開啟金融生命。花果山台灣・信念不滅・市場無界。Where the Market Becomes the Myth.—— 樂天帝 ⌖
+    </div>
+  </div>
+
+  <!-- Guided modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modalHead">
+        <div><b>新手導覽</b>｜從 0 到領到發財金</div>
+        <button class="ghost" id="btnCloseGuide">關閉</button>
+      </div>
+      <div class="modalBody">
+        <div class="steps">
+          <div class="step">
+            <div class="t">Step 1｜裝錢包（手機建議 MetaMask 或 Trust Wallet）</div>
+            <div class="d">
+              安裝後建立錢包，務必保存助記詞（不要截圖、不要傳給任何人）。
+            </div>
+          </div>
+          <div class="step">
+            <div class="t">Step 2｜回到神殿 → 按「連接錢包」</div>
+            <div class="d">
+              連上後，右上角會顯示你的地址與鏈資訊。若顯示不是 BSC，按「切換到 BSC (0x38)」。
+            </div>
+          </div>
+          <div class="step">
+            <div class="t">Step 3｜貼上 Heart 合約地址</div>
+            <div class="d">
+              這個地址是部署完心臟合約後得到的 <span class="mono">0x...</span>。貼好後按「保存地址」。
+            </div>
+          </div>
+          <div class="step">
+            <div class="t">Step 4｜先玩三次聖盃（防 Bot）</div>
+            <div class="d">
+              按「搏杯一次」直到顯示 <b>3/3</b>。完成後「領發財金」按鈕會解鎖。
+            </div>
+          </div>
+          <div class="step">
+            <div class="t">Step 5｜領發財金（上鏈）</div>
+            <div class="d">
+              自填 1–888 KGEN → 按「領發財金」。若跳出交易確認，按確認即可。成功後會在鏈上留下事件紀錄。
+            </div>
+          </div>
+          <div class="step">
+            <div class="t">Step 6｜拍照/錄影存證（可下載）</div>
+            <div class="d">
+              先寫「留言/許願」，再拍照或錄影；浮印會把你的文字烙印到成品上，可下載保存。
+            </div>
+          </div>
+        </div>
+        <div class="footer">提醒：本頁是神殿介面，不是投資建議。鏈上交易不可逆，請確認鏈與地址。</div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="footerbar">
-  <div class="footerbtn" id="footTemple">🏯 神殿入口</div>
-  <div class="footerbtn" id="footState">💰 發財金</div>
-  <div class="footerbtn" id="footWish">🙏 許願</div>
-  <div class="footerbtn" id="footHelp">📸 留影 / 客服</div>
-</div>
-
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
 <script>
-const $ = id => document.getElementById(id);
-const LS = {get:(k,d='')=>{try{return localStorage.getItem(k)??d}catch(_){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}},del:(k)=>{try{localStorage.removeItem(k)}catch(_){}}};
-const toast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),1800); };
+/* ===============================
+   V6.6 — Wukong Temple UI
+   - Single title (no duplication)
+   - Sticky official website button
+   - Countdown: heartbeat + ignite window
+   - 3-cupoe gate to claim fortune (anti-bot)
+   - Photo: not shrinking + watermark
+   - Video: record with audio
+   - Photo+Voice: canvas stream + mic audio -> webm
+   - Guided onboarding + voice speak
+================================ */
 
-(function stars(){
-  const c=$('stars'),ctx=c.getContext('2d'); let w,h,arr=[];
-  function rs(){ w=c.width=innerWidth*devicePixelRatio; h=c.height=innerHeight*devicePixelRatio; arr=Array.from({length:160},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.6+0.2,a:Math.random()*0.8+0.2,v:Math.random()*0.15+0.03}))}
-  addEventListener('resize',rs,{passive:true}); rs();
-  (function loop(){ ctx.clearRect(0,0,w,h); for(const s of arr){ s.y+=s.v; if(s.y>h) s.y=-5; ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(loop) })();
+const UI = {
+  ver: "V6.6",
+  // IMPORTANT: these are UI defaults; on-chain values are read from contract when connected.
+  defaults: {
+    hbReward: 1,
+    igReward: 8,
+    hbCooldownSec: 3600,
+    igStart: 0,
+    igEnd: 600,
+    fortuneMin: 1,
+    fortuneMax: 888,
+  }
+};
+
+const $ = (id)=>document.getElementById(id);
+const toast = (msg)=>{
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._tm);
+  toast._tm = setTimeout(()=>t.classList.remove("show"), 2600);
+};
+
+$("ver").textContent = UI.ver;
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function fmtHMS(ms){
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const ss = s%60;
+  return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
+}
+function fmtDateTime(d){
+  const y=d.getFullYear(), mo=pad2(d.getMonth()+1), da=pad2(d.getDate());
+  const hh=pad2(d.getHours()), mm=pad2(d.getMinutes()), ss=pad2(d.getSeconds());
+  return `${y}/${mo}/${da} ${hh}:${mm}:${ss}`;
+}
+function fmtUTCWindow(startSec,endSec){
+  const sh = pad2(Math.floor(startSec/3600));
+  const sm = pad2(Math.floor((startSec%3600)/60));
+  const eh = pad2(Math.floor(endSec/3600));
+  const em = pad2(Math.floor((endSec%3600)/60));
+  return `UTC ${sh}:${sm}–${eh}:${em}`;
+}
+
+/* ====== Starfield ====== */
+(function starfield(){
+  const c = $("stars");
+  const ctx = c.getContext("2d");
+  let w=0,h=0,stars=[];
+  function resize(){
+    w = c.width = window.innerWidth * devicePixelRatio;
+    h = c.height = window.innerHeight * devicePixelRatio;
+    stars = Array.from({length: Math.min(260, Math.floor((window.innerWidth*window.innerHeight)/6500))}, ()=>({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: (Math.random()*1.6+0.2)*devicePixelRatio,
+      a: Math.random()*0.8+0.15,
+      v: (Math.random()*0.12+0.02)*devicePixelRatio,
+    }));
+  }
+  window.addEventListener("resize", resize, {passive:true});
+  resize();
+  let t=0;
+  function draw(){
+    t+=1;
+    ctx.clearRect(0,0,w,h);
+    // subtle nebula
+    const g = ctx.createRadialGradient(w*0.2,h*0.25,0,w*0.2,h*0.25,Math.max(w,h)*0.55);
+    g.addColorStop(0, "rgba(243,210,122,.08)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    for(const s of stars){
+      s.y += s.v;
+      if (s.y > h+10) { s.y=-10; s.x=Math.random()*w; }
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
 })();
 
-function nowFmt(){ const d=new Date(),p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
-setInterval(()=>$('clock').textContent=nowFmt(), 500); $('clock').textContent=nowFmt();
+/* ====== Local storage ====== */
+const LS = {
+  get(k, d=""){ try{ return localStorage.getItem(k) ?? d; }catch(_){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(_){ } },
+  del(k){ try{ localStorage.removeItem(k); }catch(_){ } },
+};
 
-const sections=[...document.querySelectorAll('.section')], entryBtns=[...document.querySelectorAll('.bigbtn')];
-entryBtns.forEach(btn=>btn.onclick=()=>{ entryBtns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sections.forEach(s=>s.classList.remove('active')); $(btn.dataset.target).classList.add('active'); });
-function go(id){ document.querySelector(`[data-target="${id}"]`).click(); }
-$('footTemple').onclick=()=>go('section-entry');
-$('footState').onclick=()=>go('section-fortune');
-$('footWish').onclick=()=>go('section-wish');
-$('footHelp').onclick=()=>go('section-media');
-
-function updateStatusBar(){
-  $('st-heartbeat').textContent = $('hbCountdown').textContent === '00:00:00' ? '可領' : $('hbCountdown').textContent;
-  $('st-ignite').textContent = $('igCountdown').textContent === '00:00:00' ? '視窗中' : $('igCountdown').textContent;
-  $('st-fortune').textContent = $('btnFortune').disabled ? '未解鎖' : '可領';
+function loadLocal(){
+  $("heartAddr").value = LS.get("kgen_heart_addr","");
+  $("orphanAddr").value = LS.get("kgen_orphan_addr","");
+  $("wishText").value = LS.get("kgen_wish_text","");
+  $("noteText").value = LS.get("kgen_note_text","");
+  $("chatBox").value = LS.get("kgen_chat","");
 }
-function pad2(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0')}
-function fmt(sec){ sec=Math.max(0,Math.floor(sec)); const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60; return `${pad2(h)}:${pad2(m)}:${pad2(s)}`; }
-function tickCountdowns(){
-  const now=new Date();
-  const toTop=(59-now.getMinutes())*60+(60-now.getSeconds());
-  $('hbCountdown').textContent = (now.getMinutes()===0&&now.getSeconds()===0)?'00:00:00':fmt(toTop);
-  const utcH=now.getUTCHours(), utcM=now.getUTCMinutes();
-  let ignite=0;
-  if(utcH===0 && utcM<10) ignite=0;
-  else{
-    const t=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+(utcH===0&&utcM<10?0:1),0,0,0);
-    ignite = Math.max(0, Math.floor((t-now.getTime())/1000));
+loadLocal();
+
+$("btnSave").onclick = ()=>{
+  LS.set("kgen_heart_addr", $("heartAddr").value.trim());
+  LS.set("kgen_orphan_addr", $("orphanAddr").value.trim());
+  toast("已保存地址（本機）");
+};
+$("btnClear").onclick = ()=>{
+  ["kgen_heart_addr","kgen_orphan_addr","kgen_wish_text","kgen_note_text","kgen_chat","kgen_cup_prog","kgen_cup_streak","kgen_cup_unlocked"]
+    .forEach(LS.del);
+  loadLocal();
+  resetCup(true);
+  toast("已清除本機設定");
+};
+$("btnSaveWish").onclick = ()=>{
+  LS.set("kgen_wish_text", $("wishText").value);
+  toast("願望已保存（本機）");
+};
+$("btnSaveNote").onclick = ()=>{
+  LS.set("kgen_note_text", $("noteText").value);
+  toast("留言已保存（本機）");
+};
+$("btnClearNote").onclick = ()=>{
+  $("noteText").value = "";
+  LS.set("kgen_note_text","");
+  toast("留言已清空");
+};
+
+/* ====== Guided ====== */
+const overlay = $("overlay");
+$("btnGuide").onclick = ()=> overlay.classList.add("show");
+$("btnCloseGuide").onclick = ()=> overlay.classList.remove("show");
+overlay.addEventListener("click", (e)=>{
+  if (e.target === overlay) overlay.classList.remove("show");
+});
+
+/* ====== Web3 / Contract ====== */
+let provider=null, signer=null, account=null, chainId=null;
+let heart=null, kgen=null;
+
+const HEART_ABI = [
+  "function heartbeatCooldownSeconds() view returns(uint256)",
+  "function igniteWindowStart() view returns(uint256)",
+  "function igniteWindowEnd() view returns(uint256)",
+  "function heartbeatReward() view returns(uint256)",
+  "function igniteReward() view returns(uint256)",
+  "function fortuneMin() view returns(uint256)",
+  "function fortuneMax() view returns(uint256)",
+  "function fortuneCooldownSeconds() view returns(uint256)",
+  "function fortuneEpochSeconds() view returns(uint256)",
+  "function fortuneEpochMaxClaims() view returns(uint256)",
+  "function fortuneEpochClaims(uint256) view returns(uint256)",
+  "function lastFortuneAt(address) view returns(uint256)",
+  "function lastHeartbeatAt(address) view returns(uint256)",
+  "function lastIgniteDay(address) view returns(uint256)",
+  "function currentDayIndex() view returns(uint256)",
+  "function currentFortuneEpochIndex() view returns(uint256)",
+  "function orphanPool() view returns(address)",
+  "function heartBalance() view returns(uint256)",
+  "function heartBalanceWhole() view returns(uint256)",
+  "function effectiveCapWhole() view returns(uint256)",
+  "function effectiveFloorWhole() view returns(uint256)",
+  "function fortuneClaim(uint256 amountWhole)",
+  "function heartbeatClaim()",
+  "function igniteAndClaim()",
+  "function vowTo(uint8 option,uint256 amountWhole)",
+  "function lightLamp(uint256 daysToAdd)",
+  "function makeWish(bytes32 wishHash)"
+];
+
+const ERC20_ABI = [
+  "function decimals() view returns(uint8)",
+  "function balanceOf(address) view returns(uint256)",
+  "function allowance(address owner,address spender) view returns(uint256)",
+  "function approve(address spender,uint256 amount) returns(bool)"
+];
+
+function setWalletUI(ok){
+  const led = $("led");
+  led.classList.remove("ok","bad");
+  led.classList.add(ok ? "ok" : "bad");
+  $("walletState").textContent = ok ? (account ? (account.slice(0,6)+"…"+account.slice(-4)) : "已連線") : "未連線";
+  $("chainState").textContent = chainId ? (chainId===56 ? "BSC (0x38)" : ("chainId "+chainId)) : "未偵測";
+}
+
+async function ensureProvider(){
+  if (!window.ethereum) return false;
+  provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  return true;
+}
+
+async function connectWallet(){
+  const ok = await ensureProvider();
+  if(!ok){ toast("未偵測到錢包（MetaMask/Trust Wallet）"); return; }
+  try{
+    const accs = await provider.send("eth_requestAccounts",[]);
+    account = accs?.[0] ?? null;
+    signer = provider.getSigner();
+    const net = await provider.getNetwork();
+    chainId = net.chainId;
+    setWalletUI(true);
+    toast("錢包已連線");
+    // react to chain/account changes
+    if (window.ethereum && !connectWallet._bound){
+      connectWallet._bound = true;
+      window.ethereum.on("accountsChanged", async (a)=>{
+        account = a?.[0] ?? null;
+        setWalletUI(!!account);
+        await hydrateContracts();
+      });
+      window.ethereum.on("chainChanged", async (_hex)=>{
+        try{
+          const net2 = await provider.getNetwork();
+          chainId = net2.chainId;
+        }catch(_){}
+        setWalletUI(!!account);
+        await hydrateContracts();
+      });
+    }
+    await hydrateContracts();
+  }catch(e){
+    toast("連線取消或失敗");
   }
-  $('igCountdown').textContent = ignite===0?'00:00:00':fmt(ignite);
-  updateStatusBar();
 }
-tickCountdowns(); setInterval(tickCountdowns,1000);
 
-$('heartAddr').value = LS.get('temple_heart',''); $('wishText').value = LS.get('temple_wish',''); $('noteText').value = LS.get('temple_note',''); $('chatBox').value = LS.get('temple_chat','');
-$('btnSave').onclick=()=>{ LS.set('temple_heart',$('heartAddr').value.trim()); $('heartState').textContent=$('heartAddr').value.trim()?'已保存':'未貼地址'; toast('已保存地址'); };
-$('btnClear').onclick=()=>{ ['temple_heart','temple_wish','temple_note','temple_chat','temple_cup'].forEach(LS.del); location.reload(); };
-$('btnConnect').onclick=()=>{ $('walletState').textContent='DEMO 已連線'; $('st-wallet').textContent='DEMO'; $('chainState').textContent='BSC 56'; toast('示意版：錢包已連線'); };
-$('btnInspect').onclick=()=>{ $('inspectOut').textContent = `Heart：${$('heartAddr').value.trim() || '未貼'} ｜ Wallet：${$('walletState').textContent} ｜ Chain：${$('chainState').textContent}`; };
-$('btnHeartbeat').onclick=()=>toast('心跳流程已觸發（示意）');
-$('btnIgnite').onclick=()=>toast('點火流程已觸發（示意）');
-
-let cup = parseInt(LS.get('temple_cup','0'),10)||0;
-function syncCup(){
-  $('cupProg').textContent = `${cup} / 3`;
-  $('fortuneGate').textContent = cup>=3 ? '三次聖盃完成' : '先完成三次聖盃';
-  $('btnFortune').disabled = cup<3;
-  $('fortuneState').textContent = cup>=3 ? '已解鎖' : '未解鎖';
-  $('fortuneNext').textContent = cup>=3 ? '可直接領取' : '先搏杯';
-  updateStatusBar();
+async function switchToBSC(){
+  const ok = await ensureProvider();
+  if(!ok){ toast("未偵測到錢包"); return; }
+  try{
+    await window.ethereum.request({
+      method:"wallet_switchEthereumChain",
+      params:[{chainId:"0x38"}]
+    });
+    toast("已切到 BSC");
+  }catch(e){
+    // If chain not added, try add
+    try{
+      await window.ethereum.request({
+        method:"wallet_addEthereumChain",
+        params:[{
+          chainId:"0x38",
+          chainName:"BNB Smart Chain",
+          nativeCurrency:{name:"BNB", symbol:"BNB", decimals:18},
+          rpcUrls:["https://bsc-dataseed.binance.org/"],
+          blockExplorerUrls:["https://bscscan.com/"]
+        }]
+      });
+      toast("已新增並切到 BSC");
+    }catch(_){
+      toast("切鏈失敗：請在錢包手動切到 BSC");
+    }
+  }
 }
-$('btnCup').onclick=()=>{ const ok=Math.random()<0.5; $('cupLast').textContent = ok?'聖盃':'笑杯'; cup = ok ? Math.min(3,cup+1) : 0; LS.set('temple_cup', String(cup)); syncCup(); toast(ok?'聖盃成功':'笑杯，重來'); };
-$('btnCupReset').onclick=()=>{ cup=0; LS.set('temple_cup','0'); $('cupLast').textContent='--'; syncCup(); toast('已重置聖盃'); };
-$('btnFortune').onclick=()=>{ $('fortuneOut').textContent=`已送出發財金申請（示意）｜${$('fortuneAmt').value} KGEN`; toast('發財金流程已觸發'); };
-$('btnFortuneCheck').onclick=()=>{ $('fortuneOut').textContent='冷卻：30 days｜本期名額：500｜你目前可領'; };
-syncCup();
 
-$('btnSaveWish').onclick=()=>{ LS.set('temple_wish',$('wishText').value); LS.set('temple_note',$('noteText').value); toast('已保存願望與留言'); };
-$('btnWishHash').onclick=async()=>{ const txt=$('wishText').value.trim(); if(!txt) return toast('請先輸入願望'); const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); const hex='0x'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''); $('wishOut').textContent='wishHash = '+hex; toast('已產生 hash'); };
-$('btnClearNote').onclick=()=>{ $('noteText').value=''; LS.set('temple_note',''); toast('已清空留言'); };
-$('btnApprove').onclick=()=>{ $('vowOut').textContent='Approve 完成（示意）'; toast('Approve 完成'); };
-$('btnVow').onclick=()=>{ $('vowOut').textContent=`還願完成（示意）｜${$('vowAmt').value} KGEN`; toast('已還願'); };
-$('btnLamp').onclick=()=>{ $('vowOut').textContent=`點燈完成（示意）｜${$('lampDays').value} 天`; toast('已點燈'); };
+$("btnConnect").onclick = connectWallet;
+$("btnSwitch").onclick = switchToBSC;
+$("btnRefresh").onclick = async ()=>{ await hydrateContracts(); toast("已刷新"); };
 
-let camStream=null, photoBlob=null;
-const cam=$('cam'), cvs=$('shotCanvas'), cctx=cvs.getContext('2d');
-function drawWatermark(){ const txt = `五指山 12345・悟空財神殿｜${new Date().toLocaleString()}`; cctx.fillStyle='rgba(0,0,0,.45)'; cctx.fillRect(0,cvs.height-80,cvs.width,80); cctx.fillStyle='#ffd778'; cctx.font='bold 30px sans-serif'; cctx.fillText(txt, 24, cvs.height-30); }
-$('btnCamOn').onclick=async()=>{ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}); cam.srcObject=camStream; toast('相機已開啟'); }catch(e){ toast('相機不可用'); } };
-$('btnCamOff').onclick=()=>{ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; cam.srcObject=null; } toast('相機已關閉'); };
-$('btnShot').onclick=()=>{ if(!camStream || !cam.videoWidth) return toast('請先開啟相機'); cvs.width=cam.videoWidth; cvs.height=cam.videoHeight; cctx.drawImage(cam,0,0,cvs.width,cvs.height); drawWatermark(); cvs.toBlob(b=>{ photoBlob=b; $('btnDlPhoto').disabled=!b; toast('拍照完成'); },'image/png',0.95); };
-$('btnDlPhoto').onclick=()=>{ if(!photoBlob) return toast('尚未拍照'); const u=URL.createObjectURL(photoBlob); const a=document.createElement('a'); a.href=u; a.download=`TEMPLE_12345_${Date.now()}.png`; a.click(); setTimeout(()=>URL.revokeObjectURL(u),10000); };
+async function hydrateContracts(){
+  // wallet info
+  if (!provider){
+    setWalletUI(false);
+    $("hbIgOut").textContent = "未連線：可先逛神殿介面；要上鏈請先連接錢包。";
+    return;
+  }
+  try{
+    const net = await provider.getNetwork();
+    chainId = net.chainId;
+  }catch(_){}
+  setWalletUI(!!account);
 
-function answerFAQ(k){
-  if(k==='wallet') return '請先安裝 MetaMask 或 Trust Wallet，建立錢包後回到神殿按「連接錢包」。';
-  if(k==='connect') return '按「連接錢包」，若跳出視窗就按確認；鏈請切到 BSC。';
-  if(k==='fortune') return '流程：連錢包 → 貼 Heart → 完成三次聖盃 → 領發財金。';
-  if(k==='approve') return '還願與點燈會轉 KGEN，所以要先 approve。';
-  return '請先選一個問題。';
+  // instantiate contracts if address present
+  const heartAddr = $("heartAddr").value.trim();
+  const kgenAddr = $("kgenAddr").value.trim();
+
+  heart = null; kgen = null;
+  if (ethers.utils.isAddress(kgenAddr)){
+    kgen = new ethers.Contract(kgenAddr, ERC20_ABI, signer || provider);
+  }
+  if (ethers.utils.isAddress(heartAddr)){
+    heart = new ethers.Contract(heartAddr, HEART_ABI, signer || provider);
+  }
+
+  await refreshOnChainState();
 }
-$('btnAsk').onclick=()=>{ const ans=answerFAQ($('faq').value); $('chatBox').value += ($('chatBox').value.trim()?'\n\n':'') + '客服：' + ans; LS.set('temple_chat',$('chatBox').value); toast('已輸出客服解說'); };
-$('btnSpeak').onclick=()=>{ const txt=$('chatBox').value.trim(); if(!txt) return toast('沒有內容可唸'); try{ const u=new SpeechSynthesisUtterance(txt.slice(-300)); u.lang='zh-TW'; speechSynthesis.speak(u); }catch(e){ toast('語音不可用'); } };
-$('btnCopyChat').onclick=async()=>{ try{ await navigator.clipboard.writeText($('chatBox').value); toast('已複製'); }catch(e){ toast('複製失敗'); } };
-$('btnClearChat').onclick=()=>{ $('chatBox').value=''; LS.set('temple_chat',''); toast('已清空客服'); };
+
+async function refreshOnChainState(){
+  // default UI values
+  $("hbReward").textContent = UI.defaults.hbReward;
+  $("igReward").textContent = UI.defaults.igReward;
+  $("igWindowTxt").textContent = fmtUTCWindow(UI.defaults.igStart, UI.defaults.igEnd);
+
+  if (!heart){
+    $("hbIgOut").textContent = "尚未貼 Heart 合約地址（部署後貼上）。倒數會以預設規則顯示；上鏈功能需 Heart。";
+    return;
+  }
+  try{
+    const [hbCd, igS, igE, hbR, igR] = await Promise.all([
+      heart.heartbeatCooldownSeconds(),
+      heart.igniteWindowStart(),
+      heart.igniteWindowEnd(),
+      heart.heartbeatReward(),
+      heart.igniteReward(),
+    ]);
+    UI.defaults.hbCooldownSec = hbCd.toNumber();
+    UI.defaults.igStart = igS.toNumber();
+    UI.defaults.igEnd = igE.toNumber();
+    UI.defaults.hbReward = hbR.toString();
+    UI.defaults.igReward = igR.toString();
+
+    $("hbReward").textContent = UI.defaults.hbReward;
+    $("igReward").textContent = UI.defaults.igReward;
+    $("igWindowTxt").textContent = fmtUTCWindow(UI.defaults.igStart, UI.defaults.igEnd);
+
+    // optionally read orphanPool into UI if empty
+    try{
+      const op = await heart.orphanPool();
+      if ($("orphanAddr").value.trim()==="" && ethers.utils.isAddress(op)){
+        $("orphanAddr").value = op;
+      }
+    }catch(_){}
+
+    // show heart balance/cap
+    let extra = "";
+    try{
+      const [hbWhole, capWhole, floorWhole] = await Promise.all([
+        heart.heartBalanceWhole(),
+        heart.effectiveCapWhole(),
+        heart.effectiveFloorWhole()
+      ]);
+      extra = `｜心臟血量 ${hbWhole.toString()} / cap ${capWhole.toString()}（floor ${floorWhole.toString()}）`;
+    }catch(_){}
+    $("hbIgOut").textContent = "已偵測 Heart 合約" + extra;
+
+  }catch(e){
+    $("hbIgOut").textContent = "讀取合約參數失敗：請確認鏈= BSC、合約地址正確、且已驗證部署。";
+  }
+}
+
+$("btnInspector").onclick = async ()=>{
+  const out = $("inspectOut");
+  out.textContent = "";
+  const heartAddr = $("heartAddr").value.trim();
+  const kgenAddr = $("kgenAddr").value.trim();
+
+  const checks = [];
+  checks.push(["偵測錢包", !!window.ethereum]);
+  checks.push(["已連線帳戶", !!account]);
+  checks.push(["鏈是否 BSC(56)", chainId===56]);
+  checks.push(["KGEN 地址格式", ethers.utils.isAddress(kgenAddr)]);
+  checks.push(["Heart 地址格式", ethers.utils.isAddress(heartAddr)]);
+
+  let lines = checks.map(([k,v])=>`- ${k}：${v ? "OK" : "NOT OK"}`).join("\n");
+
+  // read balances if possible
+  try{
+    if (kgen && account){
+      const bal = await kgen.balanceOf(account);
+      const dec = await kgen.decimals();
+      const fmt = ethers.utils.formatUnits(bal, dec);
+      lines += `\n- 我的 KGEN：${fmt}`;
+    }
+  }catch(_){}
+  try{
+    if (heart){
+      const hb = await heart.heartBalanceWhole();
+      lines += `\n- Heart 血量（whole）：${hb.toString()}`;
+    }
+  }catch(_){}
+
+  out.textContent = lines;
+  toast("監工檢查已更新");
+};
+
+/* ====== Countdown (heartbeat & ignite) ====== */
+let lastHB = 0;   // seconds
+let lastFT = 0;
+let lastIGDay = -1;
+
+async function refreshUserTimers(){
+  if (heart && account){
+    try{
+      const [lhb, lft, ligDay] = await Promise.all([
+        heart.lastHeartbeatAt(account),
+        heart.lastFortuneAt(account),
+        heart.lastIgniteDay(account),
+      ]);
+      lastHB = lhb.toNumber();
+      lastFT = lft.toNumber();
+      lastIGDay = ligDay.toNumber();
+    }catch(_){}
+  }else{
+    // local fallbacks
+    lastHB = parseInt(LS.get("local_last_hb","0"),10) || 0;
+    lastFT = parseInt(LS.get("local_last_ft","0"),10) || 0;
+    lastIGDay = parseInt(LS.get("local_last_ig","-1"),10) || -1;
+  }
+}
+
+function currentUTCSecondsOfDay(){
+  const d = new Date();
+  return (d.getUTCHours()*3600 + d.getUTCMinutes()*60 + d.getUTCSeconds());
+}
+function currentUTCDayIndex(){
+  const now = Date.now();
+  return Math.floor(now/86400000); // epoch days; matches solidity block.timestamp/1 days in UTC
+}
+
+function tickCountdown(){
+  const now = Date.now();
+  $("nowTxt").textContent = fmtDateTime(new Date());
+
+  // Heartbeat（整點倒數）：固定對齊「每小時整點」顯示倒數（與鏈上 cooldown 無關）
+  // 使用「本機時間」的整點，使用者體感最直覺。
+  let hbNext = 0;
+  const dNow = new Date(now);
+  const atTop = (dNow.getMinutes()===0 && dNow.getSeconds()===0);
+  const dNext = new Date(dNow);
+  dNext.setMilliseconds(0);
+  if (atTop){
+    hbNext = now; // 已在整點
+  }else{
+    dNext.setMinutes(0,0,0);
+    dNext.setHours(dNext.getHours()+1);
+    hbNext = dNext.getTime();
+  }
+
+  const hbLeft = Math.max(0, hbNext - now);
+  $("hbCountdown").textContent = fmtHMS(hbLeft);
+  $("hbNextAt").textContent = (hbLeft===0) ? "整點到，可領" : ("整點 @ " + new Date(hbNext).toLocaleTimeString());
+
+  // Ignite window (UTC)
+  const tod = currentUTCSecondsOfDay();
+  const start = UI.defaults.igStart;
+  const end = UI.defaults.igEnd;
+  const inWindow = (tod>=start && tod<=end);
+
+  // next window start time
+  const nowUTC = new Date();
+  const nextStart = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0,0,0,0) + start*1000);
+  let target = nextStart.getTime();
+  if (now > target + end*1000) {
+    // already passed today window end -> tomorrow start
+    target += 86400000;
+  }
+  // if we're before today's start, target is today's start; if inside window, countdown shows time to end
+  if (inWindow){
+    const winEnd = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0,0,0,0) + end*1000).getTime();
+    $("igCountdown").textContent = "視窗中 " + fmtHMS(winEnd-now);
+  }else{
+    $("igCountdown").textContent = fmtHMS(target-now);
+  }
+
+  // Buttons enable
+  $("btnHeartbeat").disabled = (hbNext!==0 && hbLeft>0) || (!account || !heart);
+  // ignite allowed only in window & once per day
+  const dayIdx = currentUTCDayIndex();
+  const alreadyToday = (lastIGDay === dayIdx);
+  $("btnIgnite").disabled = (!account) || (!inWindow) || alreadyToday;
+
+  requestAnimationFrame(()=>{});
+}
+
+setInterval(tickCountdown, 350);
+setInterval(refreshUserTimers, 8000);
+refreshUserTimers();
+
+/* ====== Cupoe gate ====== */
+let cupProg = parseInt(LS.get("kgen_cup_prog","0"),10) || 0;
+let cupStreak = parseInt(LS.get("kgen_cup_streak","0"),10) || 0;
+let cupUnlocked = (LS.get("kgen_cup_unlocked","0")==="1");
+
+function syncCupUI(){
+  $("cupProg").textContent = `${cupProg} / 3`;
+  $("cupStreak").textContent = String(cupStreak);
+  $("btnFortune").disabled = !(cupUnlocked && heart && account);
+  if (cupUnlocked && (!heart || !account)){
+    $("fortuneOut").textContent = "已完成三次聖盃：接下來連接錢包並貼上 Heart 地址就能上鏈領發財金。";
+  }
+}
+function resetCup(silent=false){
+  cupProg=0; cupStreak=0; cupUnlocked=false;
+  LS.set("kgen_cup_prog","0"); LS.set("kgen_cup_streak","0"); LS.set("kgen_cup_unlocked","0");
+  $("cupLast").textContent = "--";
+  syncCupUI();
+  if(!silent) toast("聖盃已重置");
+}
+$("btnCupReset").onclick = ()=>resetCup();
+
+$("btnCup").onclick = ()=>{
+  // Simulate holy cupoe: 50% success. Need 3 consecutive successes to unlock.
+  const success = Math.random() < 0.5;
+  $("cupLast").textContent = success ? "聖盃" : "笑杯";
+  if (success){
+    cupStreak += 1;
+    cupProg = Math.min(3, cupProg+1);
+  }else{
+    cupStreak = 0;
+    cupProg = 0;
+  }
+  if (cupProg>=3){
+    cupUnlocked = true;
+    LS.set("kgen_cup_unlocked","1");
+    toast("三次聖盃完成：已解鎖領發財金");
+  }
+  LS.set("kgen_cup_prog", String(cupProg));
+  LS.set("kgen_cup_streak", String(cupStreak));
+  syncCupUI();
+};
+syncCupUI();
+
+/* ====== Fortune / Heartbeat / Ignite actions ====== */
+async function requireChainReady(){
+  if (!account || !provider || !signer) { toast("請先連接錢包"); return false; }
+  if (chainId !== 56) { toast("請先切到 BSC (0x38)"); return false; }
+  if (!heart) { toast("請先貼 Heart 合約地址"); return false; }
+  return true;
+}
+
+$("btnHeartbeat").onclick = async ()=>{
+  if (!(await requireChainReady())) return;
+  try{
+    const tx = await heart.connect(signer).heartbeatClaim();
+    $("hbIgOut").textContent = "心跳已送出交易：" + tx.hash;
+    toast("心跳上鏈中…");
+    await tx.wait();
+    $("hbIgOut").textContent = "心跳成功（鏈上已記錄事件）";
+    toast("心跳成功");
+    await refreshUserTimers();
+  }catch(e){
+    $("hbIgOut").textContent = "心跳失敗：" + (e?.reason || e?.message || "unknown");
+    toast("心跳失敗");
+  }
+};
+
+$("btnIgnite").onclick = async ()=>{
+  if (!(await requireChainReady())) return;
+  try{
+    const tx = await heart.connect(signer).igniteAndClaim();
+    $("hbIgOut").textContent = "點火已送出交易：" + tx.hash;
+    toast("點火上鏈中…");
+    await tx.wait();
+    $("hbIgOut").textContent = "點火成功（鏈上已記錄事件）";
+    toast("點火成功");
+    await refreshUserTimers();
+  }catch(e){
+    $("hbIgOut").textContent = "點火失敗：" + (e?.reason || e?.message || "unknown");
+    toast("點火失敗");
+  }
+};
+
+$("btnFortune").onclick = async ()=>{
+  if (!(await requireChainReady())) return;
+  if (!cupUnlocked){ toast("先完成三次聖盃"); return; }
+  const amt = parseInt($("fortuneAmt").value, 10);
+  if (!Number.isFinite(amt) || amt<1 || amt>888){ toast("金額需在 1–888"); return; }
+  try{
+    const tx = await heart.connect(signer).fortuneClaim(amt);
+    $("fortuneOut").textContent = "發財金已送出交易：" + tx.hash;
+    toast("發財金上鏈中…");
+    await tx.wait();
+    $("fortuneOut").textContent = "發財金成功：你已領到 " + amt + " KGEN（事件已記錄）";
+    toast("領取成功");
+    await refreshUserTimers();
+  }catch(e){
+    $("fortuneOut").textContent = "領取失敗：" + (e?.reason || e?.message || "unknown");
+    toast("領取失敗");
+  }
+};
+
+$("btnFortuneCheck").onclick = async ()=>{
+  if (!heart || !account){ $("fortuneOut").textContent = "請先連接錢包並貼 Heart 地址。"; return; }
+  try{
+    const [min,max,cool,es,em,epoch] = await Promise.all([
+      heart.fortuneMin(), heart.fortuneMax(), heart.fortuneCooldownSeconds(),
+      heart.fortuneEpochSeconds(), heart.fortuneEpochMaxClaims(),
+      heart.currentFortuneEpochIndex()
+    ]);
+    const used = await heart.fortuneEpochClaims(epoch);
+    const last = await heart.lastFortuneAt(account);
+    const next = last.toNumber()*1000 + cool.toNumber()*1000;
+    const left = next - Date.now();
+    $("fortuneOut").textContent =
+      `範圍 ${min.toString()}–${max.toString()}｜冷卻 ${cool.toString()}s｜本期 ${used.toString()}/${em.toString()}（期長 ${es.toString()}s）｜下次可領：` +
+      (left<=0 ? "現在" : fmtHMS(left));
+  }catch(e){
+    $("fortuneOut").textContent = "查詢失敗：請確認鏈與合約。";
+  }
+};
+
+/* ====== Wish hash / on-chain ====== */
+async function sha256Hex(str){
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  const arr = Array.from(new Uint8Array(buf));
+  return "0x" + arr.map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+$("btnWishHash").onclick = async ()=>{
+  const w = $("wishText").value.trim();
+  if (!w){ toast("請先輸入願望"); return; }
+  LS.set("kgen_wish_text", w);
+  const h = await sha256Hex(w);
+  $("wishOut").textContent = "wishHash = " + h;
+  toast("已產生 hash");
+  // if chain ready, send on-chain
+  if (await requireChainReady()){
+    try{
+      const tx = await heart.connect(signer).makeWish(h);
+      $("wishOut").textContent = "上鏈送出：" + tx.hash;
+      toast("許願上鏈中…");
+      await tx.wait();
+      $("wishOut").textContent = "許願已上鏈（hash 留存）：" + h;
+      toast("許願成功");
+    }catch(e){
+      $("wishOut").textContent = "上鏈失敗（但 hash 已產生）：" + h;
+      toast("上鏈失敗");
+    }
+  }
+};
+
+/* ====== Approve / Vow / Lamp ====== */
+$("btnApprove").onclick = async ()=>{
+  if (!account || !provider || !signer){ toast("請先連接錢包"); return; }
+  if (chainId !== 56){ toast("請先切到 BSC"); return; }
+  const heartAddr = $("heartAddr").value.trim();
+  const kgenAddr = $("kgenAddr").value.trim();
+  if (!ethers.utils.isAddress(heartAddr) || !ethers.utils.isAddress(kgenAddr)){ toast("地址不正確"); return; }
+  try{
+    const token = new ethers.Contract(kgenAddr, ERC20_ABI, signer);
+    const dec = await token.decimals();
+    // approve a generous amount (e.g. 1,000,000 KGEN) to avoid repeated approvals
+    const amount = ethers.utils.parseUnits("1000000", dec);
+    const tx = await token.approve(heartAddr, amount);
+    $("vowOut").textContent = "Approve 送出：" + tx.hash;
+    toast("Approve 上鏈中…");
+    await tx.wait();
+    $("vowOut").textContent = "Approve 完成：可還願/點燈";
+    toast("Approve 完成");
+  }catch(e){
+    $("vowOut").textContent = "Approve 失敗：" + (e?.reason || e?.message || "unknown");
+    toast("Approve 失敗");
+  }
+};
+
+$("btnVow").onclick = async ()=>{
+  if (!(await requireChainReady())) return;
+  const amt = parseInt($("vowAmt").value,10);
+  if (!Number.isFinite(amt) || amt<=0){ toast("金額需 > 0"); return; }
+  try{
+    const tx = await heart.connect(signer).vowTo(0, amt);
+    $("vowOut").textContent = "還願送出：" + tx.hash;
+    toast("還願上鏈中…");
+    await tx.wait();
+    $("vowOut").textContent = "還願完成：悟空補血成功";
+    toast("還願完成");
+  }catch(e){
+    $("vowOut").textContent = "還願失敗：" + (e?.reason || e?.message || "unknown");
+    toast("還願失敗");
+  }
+};
+
+$("btnLamp").onclick = async ()=>{
+  if (!(await requireChainReady())) return;
+  const days = parseInt($("lampDays").value,10);
+  if (!Number.isFinite(days) || days<=0){ toast("天數需 > 0"); return; }
+  try{
+    const tx = await heart.connect(signer).lightLamp(days);
+    $("vowOut").textContent = "點燈送出：" + tx.hash;
+    toast("點燈上鏈中…");
+    await tx.wait();
+    $("vowOut").textContent = "點燈完成：你的燈火已延長";
+    toast("點燈完成");
+  }catch(e){
+    $("vowOut").textContent = "點燈失敗：" + (e?.reason || e?.message || "unknown");
+    toast("點燈失敗");
+  }
+};
+
+/* ====== AI客服（FAQ + speech） ====== */
+function setChat(text){
+  $("chatBox").value = text;
+  LS.set("kgen_chat", text);
+}
+function appendChat(text){
+  const cur = $("chatBox").value.trim();
+  const next = (cur ? cur + "\n\n" : "") + text;
+  setChat(next);
+}
+function answerFAQ(key){
+  const base = `【五指山 12345・悟空財神殿｜客服仙女】\n`;
+  const heartAddr = $("heartAddr").value.trim();
+  const hasHeart = ethers.utils.isAddress(heartAddr);
+  const lines = [];
+  if (key==="nowallet"){
+    lines.push("你現在沒有錢包：請先在手機安裝 MetaMask 或 Trust Wallet。");
+    lines.push("安裝後建立錢包，助記詞要手抄保存，絕對不要截圖或傳給任何人。");
+    lines.push("回到神殿頁面，按『連接錢包』。");
+  } else if (key==="connect"){
+    lines.push("按右上『連接錢包』，在錢包跳出的視窗按『連線/確認』。");
+    lines.push("連線後你會看到『錢包已連線』與地址縮寫。");
+  } else if (key==="bsc"){
+    lines.push("本神殿要用 BSC 主網：chainId 56（0x38）。");
+    lines.push("按『切換到 BSC (0x38)』，若錢包問你要不要新增鏈，按同意。");
+  } else if (key==="heart"){
+    lines.push("Heart 合約地址：是你部署心臟合約後得到的 0x...。");
+    lines.push("貼到『Heart 合約地址』欄位 → 按『保存地址』。");
+    lines.push("你現在" + (hasHeart ? "已貼上，下一步可以上鏈互動。" : "尚未貼上，先完成部署再貼。"));
+  } else if (key==="cup"){
+    lines.push("三次聖盃是防 Bot 的門檻：連續成功 3 次才解鎖『領發財金』。");
+    lines.push("按『搏杯一次』直到進度顯示 3/3。若笑杯會重置。");
+  } else if (key==="fortune"){
+    lines.push("領發財金條件：① 錢包連線 ② 鏈在 BSC ③ 已貼 Heart 合約地址 ④ 三次聖盃完成。");
+    lines.push("在『要領多少發財金』輸入 1–888，按『領發財金（上鏈）』。");
+    lines.push("成功後鏈上會有事件紀錄，你也會收到 KGEN。");
+  } else if (key==="approve"){
+    lines.push("還願/點燈會把 KGEN 從你錢包轉入 Heart（transferFrom），所以要先 approve 授權。");
+    lines.push("按『先 Approve』，成功後再按『還願』或『點燈』。");
+  } else if (key==="fail"){
+    lines.push("交易失敗常見原因：");
+    lines.push("1) 鏈不對：請切到 BSC。");
+    lines.push("2) Heart 地址貼錯：請確認是心臟合約地址。");
+    lines.push("3) 沒有足夠 BNB 支付 gas。");
+    lines.push("4) 冷卻時間未到或不在點火視窗。");
+    lines.push("如果你把錯誤訊息貼上來，我可以幫你判斷是哪一種。");
+  } else {
+    lines.push("請先選一個問題，我會一步一步教你做到『領到發財金』。");
+  }
+  return base + lines.join("\n");
+}
+$("btnAsk").onclick = ()=>{
+  const key = $("faq").value;
+  const ans = answerFAQ(key);
+  appendChat(ans);
+  toast("已輸出客服解說");
+};
+$("btnSpeak").onclick = ()=>{
+  const text = $("chatBox").value.trim();
+  if (!text){ toast("沒有內容可以唸"); return; }
+  try{
+    const u = new SpeechSynthesisUtterance(text.slice(-500)); // speak last part
+    u.lang = "zh-TW";
+    speechSynthesis.speak(u);
+    toast("語音已播放");
+  }catch(_){
+    toast("此瀏覽器不支援語音");
+  }
+};
+$("btnCopyChat").onclick = async ()=>{
+  try{
+    await navigator.clipboard.writeText($("chatBox").value);
+    toast("已複製");
+  }catch(_){ toast("複製失敗"); }
+};
+$("btnClearChat").onclick = ()=>{
+  setChat("");
+  toast("已清空客服對話");
+};
+
+/* ====== Media: Camera / Photo / Video / Photo+Voice ====== */
+let camStream=null;
+let micStream=null;
+
+const camEl = $("cam");
+const canvas = $("canvas");
+const ctx = canvas.getContext("2d");
+
+function getOverlayText(){
+  const note = ($("noteText").value || "").trim();
+  const wish = ($("wishText").value || "").trim();
+  const wallet = account ? (account.slice(0,6)+"…"+account.slice(-4)) : "no-wallet";
+  const ts = new Date().toLocaleString();
+  return {
+    top: `五指山 12345 悟空財神殿  ${UI.ver}`,
+    mid: note ? `留言：${note}` : "",
+    bot: wish ? `許願：${wish}` : "",
+    foot: `${ts}  ·  ${wallet}`
+  };
+}
+
+// fit cover from video to canvas, no shrinking
+function drawFrameToCanvas(video){
+  const vw = video.videoWidth || 1280;
+  const vh = video.videoHeight || 720;
+
+  // set canvas to match camera aspect (keep good detail)
+  const targetW = vw;
+  const targetH = vh;
+  if (canvas.width !== targetW || canvas.height !== targetH){
+    canvas.width = targetW;
+    canvas.height = targetH;
+  }
+
+  // draw
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  drawWatermark();
+}
+
+function drawWatermark(){
+  const t = getOverlayText();
+  // dark gradient at bottom for readability
+  const g = ctx.createLinearGradient(0, canvas.height*0.72, 0, canvas.height);
+  g.addColorStop(0, "rgba(0,0,0,0)");
+  g.addColorStop(1, "rgba(0,0,0,.55)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, canvas.height*0.70, canvas.width, canvas.height*0.30);
+
+  const pad = Math.max(16, Math.round(canvas.width*0.02));
+  ctx.font = `bold ${Math.max(22, Math.round(canvas.width*0.028))}px system-ui`;
+  ctx.fillStyle = "rgba(255,210,125,.95)";
+  ctx.shadowColor = "rgba(0,0,0,.55)";
+  ctx.shadowBlur = 10;
+  ctx.fillText(t.top, pad, pad + Math.max(28, Math.round(canvas.width*0.03)));
+
+  ctx.shadowBlur = 0;
+  ctx.font = `${Math.max(16, Math.round(canvas.width*0.020))}px system-ui`;
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  const lineH = Math.max(22, Math.round(canvas.width*0.028));
+  const footY = canvas.height - pad;
+
+  // Start the bottom block ABOVE the footer line to avoid overlap on mobile
+  const lines = (t.mid ? 1 : 0) + (t.bot ? 1 : 0);
+  let y = footY - (lines * lineH) - Math.round(lineH * 0.6);
+
+  if (t.mid){
+    wrapText(t.mid, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
+  }
+  if (t.bot){
+    wrapText(t.bot, pad, y, canvas.width - pad*2, lineH);
+    y += lineH * 1.2;
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,.70)";
+  ctx.font = `${Math.max(14, Math.round(canvas.width*0.018))}px ui-monospace`;
+  ctx.fillText(t.foot, pad, footY);
+}
+
+function wrapText(text, x, y, maxW, lineH){
+  const words = text.split("");
+  let line = "";
+  for (let i=0;i<words.length;i++){
+    const test = line + words[i];
+    const w = ctx.measureText(test).width;
+    if (w > maxW && i>0){
+      ctx.fillText(line, x, y);
+      line = words[i];
+      y += lineH;
+    }else{
+      line = test;
+    }
+  }
+  ctx.fillText(line, x, y);
+}
+
+async function camOn(){
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio:false });
+    camEl.srcObject = camStream;
+    $("camState").textContent = "on";
+    toast("相機已開啟");
+    // enable photo+voice once a photo exists
+  }catch(e){
+    toast("相機權限被拒或不可用");
+  }
+}
+function camOff(){
+  if (camStream){
+    camStream.getTracks().forEach(t=>t.stop());
+    camStream=null;
+  }
+  camEl.srcObject = null;
+  $("camState").textContent = "off";
+  toast("相機已關閉");
+}
+
+$("btnCamOn").onclick = camOn;
+$("btnCamOff").onclick = camOff;
+
+let lastPhotoBlob=null;
+$("btnShot").onclick = ()=>{
+  if (!camStream || !camEl.videoWidth){ toast("請先開啟相機"); return; }
+  drawFrameToCanvas(camEl);
+  canvas.toBlob((b)=>{
+    lastPhotoBlob = b;
+    $("btnDlPhoto").disabled = !b;
+    $("btnPhotoVoice").disabled = !b;
+    toast("拍照完成（可下載）");
+  }, "image/png", 0.95);
+};
+
+$("btnDlPhoto").onclick = ()=>{
+  if (!lastPhotoBlob){ toast("尚未拍照"); return; }
+  const url = URL.createObjectURL(lastPhotoBlob);
+  downloadURL(url, `WUKONG_TEMPLE_12345_${UI.ver}_${Date.now()}.png`);
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+};
+
+/* ---- Video recording with audio ---- */
+let rec=null, recChunks=[], recBlob=null;
+$("btnRecVideo").onclick = async ()=>{
+  if (!camStream){ toast("請先開啟相機"); return; }
+  try{
+    // Get mic + merge tracks
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+    const mix = new MediaStream([
+      ...camStream.getVideoTracks(),
+      ...micStream.getAudioTracks()
+    ]);
+    recChunks = [];
+    recBlob = null;
+    rec = new MediaRecorder(mix, { mimeType: pickMime() });
+    rec.ondataavailable = (e)=>{ if (e.data && e.data.size>0) recChunks.push(e.data); };
+    rec.onstop = ()=>{
+      recBlob = new Blob(recChunks, { type: rec.mimeType });
+      $("btnDlVideo").disabled = false;
+      $("exportState").textContent = "video-ready";
+      toast("錄影完成（可下載）");
+      // stop mic
+      if (micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+    };
+    rec.start(250);
+    $("btnStopVideo").disabled = false;
+    $("btnRecVideo").disabled = true;
+    $("exportState").textContent = "recording";
+    toast("開始錄影（含聲音）");
+  }catch(e){
+    toast("錄影失敗：請允許麥克風");
+  }
+};
+
+$("btnStopVideo").onclick = ()=>{
+  try{
+    if (rec && rec.state !== "inactive") rec.stop();
+  }catch(_){}
+  $("btnStopVideo").disabled = true;
+  $("btnRecVideo").disabled = false;
+};
+
+$("btnDlVideo").onclick = ()=>{
+  if (!recBlob){ toast("尚無影片"); return; }
+  const url = URL.createObjectURL(recBlob);
+  downloadURL(url, `WUKONG_TEMPLE_12345_VIDEO_${UI.ver}_${Date.now()}.webm`);
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+};
+
+/* ---- Photo + Voice => video (canvas stream + mic audio) ---- */
+let pvRec=null, pvChunks=[], pvBlob=null;
+let pvAnim=null;
+$("btnPhotoVoice").onclick = async ()=>{
+  if (!lastPhotoBlob){ toast("請先拍照"); return; }
+  try{
+    // ensure mic
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+    // canvas stream at 30fps
+    const cvsStream = canvas.captureStream(30);
+    const mix = new MediaStream([
+      ...cvsStream.getVideoTracks(),
+      ...micStream.getAudioTracks()
+    ]);
+
+    pvChunks = [];
+    pvBlob = null;
+
+    // Keep drawing watermark time ticking while recording (small animation)
+    const img = await blobToImage(lastPhotoBlob);
+    let start = performance.now();
+    const loop = (t)=>{
+      // draw still image
+      if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight){
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      // tiny pulse dot
+      const dt = (t-start)/1000;
+      const pulse = 0.55 + 0.45*Math.sin(dt*6.0);
+      ctx.fillStyle = `rgba(255,210,125,${pulse})`;
+      ctx.beginPath();
+      ctx.arc(canvas.width-28, 28, 8, 0, Math.PI*2);
+      ctx.fill();
+      drawWatermark();
+      pvAnim = requestAnimationFrame(loop);
+    };
+    pvAnim = requestAnimationFrame(loop);
+
+    pvRec = new MediaRecorder(mix, { mimeType: pickMime() });
+    pvRec.ondataavailable = (e)=>{ if (e.data && e.data.size>0) pvChunks.push(e.data); };
+    pvRec.onstop = ()=>{
+      if (pvAnim) cancelAnimationFrame(pvAnim);
+      pvAnim = null;
+      pvBlob = new Blob(pvChunks, { type: pvRec.mimeType });
+      $("btnDlPV").disabled = false;
+      $("exportState").textContent = "photo-voice-ready";
+      toast("照片＋語音完成（可下載）");
+      if (micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+    };
+    pvRec.start(250);
+    $("btnStopPV").disabled = false;
+    $("btnPhotoVoice").disabled = true;
+    $("exportState").textContent = "photo-voice-recording";
+    toast("開始錄：照片＋語音（再按停止）");
+  }catch(e){
+    toast("照片＋語音失敗：請允許麥克風");
+  }
+};
+
+$("btnStopPV").onclick = ()=>{
+  try{
+    if (pvRec && pvRec.state !== "inactive") pvRec.stop();
+  }catch(_){}
+  $("btnStopPV").disabled = true;
+  $("btnPhotoVoice").disabled = false;
+};
+
+$("btnDlPV").onclick = ()=>{
+  if (!pvBlob){ toast("尚無合成影片"); return; }
+  const url = URL.createObjectURL(pvBlob);
+  downloadURL(url, `WUKONG_TEMPLE_12345_PHOTO_VOICE_${UI.ver}_${Date.now()}.webm`);
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+};
+
+function pickMime(){
+  const cands = [
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm"
+  ];
+  for (const m of cands){
+    if (MediaRecorder.isTypeSupported(m)) return m;
+  }
+  return "";
+}
+function downloadURL(url, filename){
+  const a=document.createElement("a");
+  a.href=url; a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+function blobToImage(blob){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{ URL.revokeObjectURL(url); res(img); };
+    img.onerror = (e)=>{ URL.revokeObjectURL(url); rej(e); };
+    img.src = url;
+  });
+}
+
+/* ====== Boot ====== */
+$("igWindowTxt").textContent = fmtUTCWindow(UI.defaults.igStart, UI.defaults.igEnd);
+setWalletUI(false);
+
+  // Always run local clock + countdown (works even without wallet)
+  try {
+    tickCountdowns();
+    setInterval(tickCountdowns, 1000);
+  } catch (e) {
+    console.warn("countdown init failed", e);
+  }
+
+// Auto-bind refresh when heartAddr changes
+$("heartAddr").addEventListener("change", async ()=>{
+  LS.set("kgen_heart_addr", $("heartAddr").value.trim());
+  await hydrateContracts();
+});
+$("orphanAddr").addEventListener("change", ()=>LS.set("kgen_orphan_addr", $("orphanAddr").value.trim()));
+$("wishText").addEventListener("change", ()=>LS.set("kgen_wish_text", $("wishText").value));
+$("noteText").addEventListener("change", ()=>LS.set("kgen_note_text", $("noteText").value));
+
+// keep fortune button state synced with wallet/heart/cup
+setInterval(()=>{ syncCupUI(); }, 900);
+
+// initial hydration if wallet already authorized
+(async ()=>{
+  if (window.ethereum){
+    await ensureProvider();
+    try{
+      const accs = await provider.listAccounts();
+      if (accs && accs.length){
+        account = accs[0];
+        signer = provider.getSigner();
+        const net = await provider.getNetwork();
+        chainId = net.chainId;
+        setWalletUI(true);
+        await hydrateContracts();
+      }
+    }catch(_){}
+  }
+})();
+
+// ---- Countdown bootstrap (must work even if wallet/boot fails) ----
+(function(){
+  if (window.__TEMPLE_COUNTDOWN_STARTED__) return;
+  window.__TEMPLE_COUNTDOWN_STARTED__ = true;
+  const start = () => {
+    try{
+      tickCountdown();
+      if(!window.__TEMPLE_COUNTDOWN_INTERVAL__){ window.__TEMPLE_COUNTDOWN_INTERVAL__ = setInterval(tickCountdown, 1000); }
+    }catch(e){
+      console.warn('countdown start failed', e);
+    }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
 </script>
+
+<script>
+/* =========================================================
+   V6.7 HOTFIX
+   - Heartbeat countdown aligned to top-of-hour (local time)
+   - Ignite countdown kept to UTC 00:00-00:10 window
+   - Support chat: one-question-one-answer + stop button
+   ========================================================= */
+(function(){
+  const $id = (id)=>document.getElementById(id);
+
+  // -------- Countdown (always available, even if chain read fails) --------
+  function pad2(n){ n=Math.max(0, Math.floor(n)); return (n<10?'0':'')+n; }
+  function fmtHMS(sec){
+    if (!isFinite(sec)) return '--:--:--';
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = sec%60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  }
+  function secondsToNextTopOfHourLocal(now){
+    const next = new Date(now);
+    next.setMinutes(0,0,0);
+    next.setHours(next.getHours()+1);
+    return (next.getTime() - now.getTime())/1000;
+  }
+  function secondsToIgniteWindowUTC(now){
+    // ignite window: UTC 00:00:00 ~ 00:10:00
+    const y = now.getUTCFullYear(), mo = now.getUTCMonth(), d = now.getUTCDate();
+    const start = Date.UTC(y, mo, d, 0, 0, 0);
+    const end   = Date.UTC(y, mo, d, 0,10, 0);
+    const t = now.getTime();
+    if (t < start) return (start - t)/1000;          // countdown to today's window
+    if (t >= start && t < end) return 0;             // in-window (can claim now)
+    // after window: countdown to tomorrow start
+    const tomorrow = Date.UTC(y, mo, d+1, 0,0,0);
+    return (tomorrow - t)/1000;
+  }
+
+  window.tickCountdowns = function tickCountdowns(){
+    try{
+      const now = new Date();
+      const hb = $id('hbCountdown');
+      const ig = $id('igCountdown');
+
+      if (hb) hb.textContent = fmtHMS(secondsToNextTopOfHourLocal(now));
+      if (ig){
+        const s = secondsToIgniteWindowUTC(now);
+        ig.textContent = (s===0) ? '00:00:00' : fmtHMS(s);
+      }
+    }catch(e){ /* silent */ }
+  }
+
+  // -------- Support Chat (one Q one A) --------
+  let typingTimer = null;
+  let typingAbort = false;
+
+  function appendLine(text){
+    const box = $id('chatBox');
+    if (!box) return;
+    box.value += (box.value ? '\n' : '') + text;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function genReply(q){
+    const s = String(q||'').trim();
+    const low = s.toLowerCase();
+
+    // quick keyword routing (offline客服，不連網)
+    if (!s) return '請先輸入問題。';
+    if (low.includes('倒數') || s.includes('心跳') || s.includes('點火')) {
+      return '已確認：心跳倒數以「本地時間整點」計算；點火倒數以「UTC 00:00-00:10」計算。若仍顯示 --:--:--，請先強制重新整理或清除快取再測。';
+    }
+    if (low.includes('拍照') || s.includes('照片') || s.includes('許願') || s.includes('留言')) {
+      return '拍照流程：1) 允許相機權限 2) 拍照後按「下載存證」 3) 若下方文字重疊，請回報你使用的瀏覽器/手機型號，我會調整版面行距與遮罩高度。';
+    }
+    if (low.includes('按鍵') || s.includes('不能按') || s.includes('沒功能')) {
+      return '按鍵無反應通常是：未連錢包/未切到 BSC/合約參數讀取失敗。請先按「監工檢查」看錯誤訊息，再把畫面截圖貼給我。';
+    }
+    if (low.includes('版本') || s.includes('版號')) {
+      return '版本號以頁面標題與內部標記同步；若 GitHub Pages 仍顯示舊版，請清除瀏覽器快取或改用無痕模式測試。';
+    }
+    return '收到。請用一句話描述你要達成的結果（例如：按哪個鍵 → 想看到什麼），我會用「一問一答」方式帶你排查。';
+  }
+
+  function startTyping(reply){
+    // stop previous
+    if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+    typingAbort = false;
+
+    const prefix = '客服：';
+    let i = 0;
+    // we print the prefix first as a line, then type the message after it
+    appendLine(prefix);
+
+    const box = $id('chatBox');
+    if (!box) return;
+
+    // remove the last line prefix (we will rewrite it as we type)
+    const lines = box.value.split('\n');
+    lines[lines.length-1] = prefix + ' ';
+    box.value = lines.join('\n');
+
+    typingTimer = setInterval(()=>{
+      if (typingAbort){
+        clearInterval(typingTimer); typingTimer=null;
+        // dump the rest immediately
+        const l = box.value.split('\n');
+        l[l.length-1] = prefix + ' ' + reply;
+        box.value = l.join('\n');
+        box.scrollTop = box.scrollHeight;
+        enableAsk(true);
+        return;
+      }
+      i++;
+      const part = reply.slice(0, i);
+      const l = box.value.split('\n');
+      l[l.length-1] = prefix + ' ' + part;
+      box.value = l.join('\n');
+      box.scrollTop = box.scrollHeight;
+      if (i >= reply.length){
+        clearInterval(typingTimer); typingTimer=null;
+        enableAsk(true);
+      }
+    }, 18);
+  }
+
+  function enableAsk(on){
+    const btnAsk = $id('btnAskChat');
+    if (btnAsk) btnAsk.disabled = !on;
+    // 不鎖輸入框：避免「不能打字」
+  }
+
+  function ask(){
+    const inp = $id('chatInput');
+    if (!inp) return;
+    const q = inp.value.trim();
+    if (!q) return;
+    inp.value = '';
+    appendLine('你：' + q);
+    enableAsk(false);
+    startTyping(genReply(q));
+  }
+
+  function stop(){
+    typingAbort = true;
+    try{ if (typingTimer){ clearInterval(typingTimer); typingTimer=null; } }catch(e){}
+    try{ if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
+    try{ if (window.__chatSpeechRec && window.__chatSpeechRecActive){ window.__chatSpeechRec.stop(); } }catch(e){}
+    try{ window.__chatSpeechRecActive = false; const ms=$id('micStatus'); if(ms) ms.textContent=''; }catch(e){}
+    try{ enableAsk(true); }catch(e){}
+  }
+
+  function bind(){
+    // countdown tick (safe)
+    const safeTick = ()=>{ try{ if (typeof window.tickCountdowns==='function') window.tickCountdowns(); }catch(e){} };
+    safeTick();
+    setInterval(safeTick, 250);
+
+    // chat bind
+    const btnAsk = $id('btnAskChat');
+    const btnStop = $id('btnStopChat');
+    const inp = $id('chatInput');
+    const btnMic = $id('btnMicChat');
+    const micStatus = $id('micStatus');
+
+    function micSet(txt){ if(micStatus) micStatus.textContent = txt || ''; }
+
+    function micToggle(){
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR){
+        micSet('此瀏覽器不支援語音辨識（建議：Chrome / Edge 桌面版）。');
+        return;
+      }
+      if (window.__chatSpeechRecActive){
+        try{ window.__chatSpeechRec.stop(); }catch(e){}
+        window.__chatSpeechRecActive = false;
+        micSet('');
+        return;
+      }
+      const rec = window.__chatSpeechRec || new SR();
+      window.__chatSpeechRec = rec;
+      rec.lang = 'zh-TW';
+      rec.interimResults = true;
+      rec.continuous = false;
+      window.__chatSpeechRecActive = true;
+      micSet('語音辨識中…請說話（再按一次「語音」可停止）');
+
+      rec.onresult = (ev)=>{
+        let finalText = '';
+        let interim = '';
+        for (let i=ev.resultIndex; i<ev.results.length; i++){
+          const t = ev.results[i][0].transcript;
+          if (ev.results[i].isFinal) finalText += t;
+          else interim += t;
+        }
+        if (inp){
+          const next = (finalText || interim).trim();
+          if (next) inp.value = next;
+        }
+      };
+      rec.onerror = (e)=>{ micSet('語音錯誤：' + (e && e.error ? e.error : 'unknown')); window.__chatSpeechRecActive=false; };
+      rec.onend = ()=>{ window.__chatSpeechRecActive=false; micSet(''); };
+
+      try{ rec.start(); }catch(e){ window.__chatSpeechRecActive=false; micSet('語音啟動失敗，請重新點一次。'); }
+    }
+    if (btnAsk) btnAsk.addEventListener('click', ask);
+    if (btnStop) btnStop.addEventListener('click', stop);
+    if (btnMic) btnMic.addEventListener('click', micToggle);
+    if (inp){
+      inp.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          ask();
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind);
+  }else{
+    bind();
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function scrollToTarget(id){
+    let el;
+    if(id==='top') el = document.querySelector('.hero') || document.body;
+    else el = document.getElementById(id);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'start'});
+    const flash = el.closest('.card') || el.parentElement || el;
+    flash.classList.add('sectionFlash');
+    setTimeout(()=>flash.classList.remove('sectionFlash'), 1300);
+  }
+  document.querySelectorAll('[data-scroll]').forEach(btn=>{
+    btn.addEventListener('click', ()=>scrollToTarget(btn.getAttribute('data-scroll')));
+  });
+  function syncFlow(){
+    const hb = document.getElementById('hbCountdown');
+    const ig = document.getElementById('igCountdown');
+    const ftBtn = document.getElementById('btnFortune');
+    const ws = document.getElementById('walletState');
+    const flowHb = document.getElementById('flowHb');
+    const flowIg = document.getElementById('flowIg');
+    const flowFt = document.getElementById('flowFt');
+    const flowWallet = document.getElementById('flowWallet');
+    if(flowHb && hb) flowHb.textContent = hb.textContent === '00:00:00' ? '可領' : hb.textContent;
+    if(flowIg && ig) flowIg.textContent = ig.textContent === '00:00:00' ? '視窗中' : ig.textContent;
+    if(flowFt && ftBtn) flowFt.textContent = ftBtn.disabled ? '未解鎖' : '可領';
+    if(flowWallet && ws) flowWallet.textContent = ws.textContent || '未連線';
+  }
+  syncFlow();
+  setInterval(syncFlow, 600);
+})();
+</script>
+
 </body>
 </html>
+
+<script>
+
+  // -------------------------
+  // Countdown Engine (fix for missing tickCountdowns in p13)
+  // - Works even when wallet not connected.
+  // - Heartbeat: 1 per hour (default 3600s) from lastHB (ms epoch) in localStorage.
+  // - Ignite: UTC 00:00-00:10 window, 1 per UTC day from lastIGDay (YYYYMMDD) in localStorage.
+  // -------------------------
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const fmtHHMMSS = (sec) => {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  };
+  const utcYMD = (d) => {
+    const y = d.getUTCFullYear();
+    const m = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    return `${y}${pad2(m)}${pad2(day)}`;
+  };
+  const nextUtcWindowStart = (now, startMin=0, windowMin=10) => {
+    // returns Date for next window start (UTC)
+    const d = new Date(now.getTime());
+    const curMin = d.getUTCMinutes();
+    const curH = d.getUTCHours();
+    // window is at 00:00 - 00:10 UTC
+    // If before 00:00 => today 00:00 (not possible since minutes/hours in UTC),
+    // If within day but past window => tomorrow 00:00
+    const inWindow = (curH === 0) && (curMin >= startMin) && (curMin < windowMin);
+    if (curH === 0 && curMin < startMin) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    if (inWindow) {
+      d.setUTCHours(0, startMin, 0, 0);
+      return d;
+    }
+    // tomorrow
+    d.setUTCDate(d.getUTCDate() + 1);
+    d.setUTCHours(0, startMin, 0, 0);
+    return d;
+  };
+
+  function tickCountdowns(){
+    try{
+      const now = new Date();
+
+      // Update top clock
+      const nowEl = $("nowTxt");
+      if (nowEl) nowEl.textContent = `${now.getFullYear()}/${pad2(now.getMonth()+1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+
+      // ---------- Heartbeat countdown（每小時整點） ----------
+      // 依照使用者需求：心跳以「整點」為節奏，倒數到下一個整點（本機時間）。
+      const hbEl = $("hbCountdown");
+      let hbRemainSec = 0;
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      if (m===0 && s===0){
+        hbRemainSec = 0;
+      } else {
+        hbRemainSec = (59 - m) * 60 + (60 - s);
+      }
+      if (hbEl) hbEl.textContent = fmtHHMMSS(hbRemainSec);
+
+      // ---------- Ignite countdown ----------
+      const igEl = $("igCountdown");
+      const lastIGDay = String(LS.get("lastIGDay", "")) || "";
+      const todayUTC = utcYMD(now);
+
+      const utcH = now.getUTCHours();
+      const utcM = now.getUTCMinutes();
+      const inIgniteWindow = (utcH === 0) && (utcM >= 0) && (utcM < 10);
+
+      let igRemainSec = 0;
+      const alreadyClaimedToday = (lastIGDay === todayUTC);
+
+      if (inIgniteWindow && !alreadyClaimedToday){
+        // ready now inside window
+        igRemainSec = 0;
+      } else {
+        // count down to next eligible window start
+        const nextStart = nextUtcWindowStart(now, 0, 10);
+        // if we are before nextStart but tomorrow start and already claimed today doesn't matter, still tomorrow
+        igRemainSec = Math.max(0, (nextStart.getTime() - now.getTime())/1000);
+      }
+      if (igEl) igEl.textContent = fmtHHMMSS(igRemainSec);
+
+    }catch(e){
+      // Never crash the page for timers
+      console.warn("tickCountdowns error:", e);
+    }
+  }
+
+</script>
