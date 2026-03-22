@@ -499,15 +499,15 @@
     .navGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
     .navBtn{appearance:none; border:none; cursor:pointer; text-align:left; padding:14px; border-radius:16px; background:rgba(0,0,0,.22); border:1px solid rgba(243,210,122,.18); color:#fff; font-weight:900}
     .navBtn small{display:block; margin-top:6px; font-size:12px; color:var(--muted2); font-weight:700; line-height:1.45}
-    .quickDock{position:fixed; left:0; right:0; bottom:0; z-index:10001; background:rgba(8,8,12,.92); border-top:2px solid rgba(243,210,122,.25); display:none; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px 10px calc(10px + env(safe-area-inset-bottom));}
+    .quickDock{display:none !important;}
     .dockBtn{appearance:none; border:none; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(243,210,122,.15); color:#fff; font-weight:900; padding:10px 6px; font-size:12px}
     .sectionFlash{animation: templeFlash 1.2s ease;}
     @keyframes templeFlash {0%{box-shadow:0 0 0 rgba(243,210,122,0)} 30%{box-shadow:0 0 0 6px rgba(243,210,122,.14)} 100%{box-shadow:0 0 0 rgba(243,210,122,0)}}
     @media (max-width:860px){
-      .templeFlow{grid-template-columns:1fr; top:68px}
+      .templeFlow{grid-template-columns:1fr; position:relative; top:0}
       .flowStats{grid-template-columns:repeat(2,1fr)}
-      .quickDock{display:grid}
-      .wrap{padding-bottom:106px}
+      .quickDock{display:none !important}
+      .wrap{padding-bottom:32px}
     }
 
 </style>
@@ -565,7 +565,7 @@
 <div class="ttext">
               <h1>五指山 12345<small>悟空財神殿</small></h1>
               <div class="tagline">
-                V6.7 Cosmic Living Temple · ChainReady UI<br/>
+                V6.7.1 Click Fix · ChainReady UI<br/>
                 心跳 / 點火 / 三次聖盃發財金 / 點燈 / 還願 / 許願留言上鏈 / 拍照錄影錄音 / 下載存證
               </div>
               <div class="chips">
