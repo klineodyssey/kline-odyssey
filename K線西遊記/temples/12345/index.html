@@ -1296,6 +1296,33 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 }
 </style>
 
+
+<style id="temple-theme-hotfix-v2">
+/* 12345 temple scene fix: remove outer-space feel, keep all original functions */
+canvas#galaxy-bg{display:none !important;}
+body, html{
+  background:
+    radial-gradient(1200px 700px at 50% 12%, rgba(246,210,123,.18), transparent 52%),
+    radial-gradient(900px 500px at 50% 72%, rgba(255,140,0,.08), transparent 55%),
+    linear-gradient(180deg, #120c05 0%, #1b1308 22%, #0d0905 100%) !important;
+}
+#core-window{
+  animation:none !important;
+  box-shadow:0 0 90px rgba(255,185,70,.32), 0 0 26px rgba(255,215,120,.18) !important;
+}
+#fairy-img{
+  animation: templePulse 2.3s ease-in-out infinite !important;
+  filter: drop-shadow(0 0 18px rgba(255,190,60,.28)) !important;
+}
+@keyframes templePulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.025); }
+}
+.brand-name, #wish-label { text-shadow:0 0 14px rgba(255,190,60,.28) !important; }
+.warp-engine{ box-shadow:none !important; }
+.nav-btn.nav-music, #music-panel{ display:none !important; } /* hide UFO music system on temple page */
+</style>
+
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1518,9 +1545,9 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 
 <div class="footer-terminal">
     <button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
-    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 五指山神殿留影錄影</button>
+    <button id="rec-btn" class="term-btn btn-rec" onclick="app.toggleRec()">🎥 神殿留影錄影</button>
     <button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
-    <button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡禮</button>
+    <button class="term-btn" onclick="app.cam('environment')">📿 神殿巡禮</button>
     <button class="term-btn active-kgen" onclick="templeSingleModal.openTab('fortune')">🧧 發財金</button>
     <button class="term-btn active-kgen" onclick="templeSingleModal.openTab('heartbeat')">🫀 整點心跳</button>
     <button class="term-btn" onclick="templeSingleModal.openTab('ignite')">🌬️ 轉日呼吸</button>
@@ -1640,7 +1667,7 @@ const app = {
                 web3.autoDetect();
 this.updateWarp(33);
         this.applySteer(76, true);
-        this.speak("KGEN 16888 五指山啟動。V3.2.1 完整玩法客服已上線。先連結錢包，先 Approve，再下單 UP 或 DOWN；名額紀錄與托管規則都可直接查。");
+        this.speak("KGEN 12345 五指山啟動。V3.2.1 完整玩法客服已上線。先連結錢包，先 Approve，再下單 UP 或 DOWN；名額紀錄與托管規則都可直接查。");
         window.addEventListener('resize', ()=>this.onResize(), {passive:true});
         this.onResize();
     },
@@ -1694,7 +1721,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
 
     getGuideBlocks(){
         const intro = `
-          <h3>五指山 16888｜完整玩法入口</h3>
+          <h3>五指山 12345｜完整玩法入口</h3>
           <p>這裡是 <b>財神儀式操作版</b>，不是複雜交易所。玩法核心只有三步：<b>連錢包 → Approve → 下 UP / DOWN</b>。</p>
           <p><b>所有下單、入池、發獎、托管</b> 都走鏈上合約，不是前端假動畫。</p>
           <hr/>
@@ -1924,7 +1951,7 @@ const wl=document.getElementById('wish-label'); const old = wl ? wl.innerText : 
 const wl2=document.getElementById('wish-label'); if(wl2) wl2.innerText = '⚔️ KGEN 自動打怪中...';
 setTimeout(() => {
   // ============================================================
-  // 【中文註解｜重要】本頁為「KGEN 16888 五指山」前端單頁（純前端）
+  // 【中文註解｜重要】本頁為「KGEN 12345 五指山」前端單頁（純前端）
   // - 不改合約、不改池子：此檔只做 UI/動畫/WalletConnect 連線與外部入口
   // - 方向盤（DEG）只代表「多空方向」：水平線上方＝多；下方＝空（與倍槓無關）
   // - 曲速引擎（WARP）代表「倍槓/速度」：WARP=0 表示息火（觀望），畫面/粒子/流向應靜止
@@ -1966,7 +1993,7 @@ setTimeout(() => {
         } else ctx.drawImage(f, 0, 0, 1000, 1000);
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
-        ctx.fillText("KGEN 16888 自我演化金融生命體", 50, 80);
+        ctx.fillText("KGEN 12345 自我演化金融生命體", 50, 80);
         ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
         ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
         ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
@@ -2173,7 +2200,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         const warp  = document.getElementById('warp-input-val').value;
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
-        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
+        ctx.fillText("KGEN 12345 TEMPLE-HEART-LOG", 30, 50);
 
         ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
         ctx.fillText(`ANGLE ${angle}°`, 30, 85);
@@ -2200,7 +2227,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
             this.bbStop();
             await this.bbExportJSON();
 
-            btn.innerText = "🎥 五指山神殿留影錄影";
+            btn.innerText = "🎥 神殿留影錄影";
             this.speak("錄影結束，五指山神殿留影數據已封裝。");
             return;
         }
@@ -2234,7 +2261,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         this.recorder.start();
 
         btn.innerText = "⏹️ 停止五指山誓約留影";
-        this.speak("五指山神殿留影錄影開始，記錄演化數據。");
+        this.speak("神殿留影錄影開始，記錄演化數據。");
     },
 
     bindWheel(){
@@ -3605,7 +3632,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <!-- === Universe Navigation Buttons V2.04 === -->
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
-  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方首頁入口</a>
 
   <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
   <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
@@ -3683,7 +3710,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="chain-live-panel" id="chain-live-panel" style="display:none;">
   <div class="cl-head">
-    <span>WUKONG HEART WUZHISHAN HEART LIVE｜12345</span>
+    <span>WUZHISHAN TEMPLE HEART LIVE｜12345</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="cl-status">OFF</span>
       <button type="button" onclick="toggleChainLive()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -8275,6 +8302,41 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 });
+</script>
+
+
+<script id="temple-function-hotfix-v2">
+/* 12345 temple function hotfix: make footer actions reliable */
+(function(){
+  window.bottomTempleActions = {
+    fortune(){ try{ if(window.templeSingleModal){ templeSingleModal.openTab('fortune'); templeSingleModal.open(); return; } }catch(e){} try{ if(window.toggleBetPanel) toggleBetPanel(); }catch(e){} },
+    heartbeat(){ try{ if(window.templeSingleModal){ templeSingleModal.openTab('heartbeat'); templeSingleModal.open(); return; } }catch(e){} try{ if(window.toggleBetPanel) toggleBetPanel(); }catch(e){} },
+    ignite(){ try{ if(window.templeSingleModal){ templeSingleModal.openTab('ignite'); templeSingleModal.open(); return; } }catch(e){} try{ if(window.toggleBetPanel) toggleBetPanel(); }catch(e){} },
+    voice(){ try{ if(window.app && app.openUnifiedGuide){ app.openUnifiedGuide(); return; } }catch(e){} try{ if(window.app && app.playTempleIntro){ app.playTempleIntro(); } }catch(e){} },
+    tour(){ try{ if(window.app && app.cam){ app.cam('environment'); return; } }catch(e){} }
+  };
+
+  function rewireFooter(){
+    try{
+      const buttons = Array.from(document.querySelectorAll('.footer-terminal .term-btn'));
+      buttons.forEach(btn=>{
+        const t = (btn.textContent || '').trim();
+        if(t.includes('發財金')) btn.onclick = ()=> bottomTempleActions.fortune();
+        else if(t.includes('整點心跳')) btn.onclick = ()=> bottomTempleActions.heartbeat();
+        else if(t.includes('轉日呼吸')) btn.onclick = ()=> bottomTempleActions.ignite();
+        else if(t.includes('語音客服')) btn.onclick = ()=> bottomTempleActions.voice();
+        else if(t.includes('神殿巡禮')) btn.onclick = ()=> bottomTempleActions.tour();
+      });
+    }catch(e){}
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', rewireFooter);
+  }else{
+    rewireFooter();
+  }
+  setTimeout(rewireFooter, 800);
+})();
 </script>
 
 </body>
