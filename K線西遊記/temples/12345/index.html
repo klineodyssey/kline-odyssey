@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>KLINE V11.1 真戰鬥版</title>
+<title>KLINE V11.2 座標校正版</title>
 <style>
 :root{
-  --bg:#03050b; --panel:rgba(0,0,0,.58); --line:rgba(255,255,255,.14);
+  --bg:#03050b; --panel:rgba(0,0,0,.62); --line:rgba(255,255,255,.14);
   --gold:#f2d57a; --green:#83ff74; --red:#ff6c6c; --cyan:#71d8ff;
 }
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:Arial,sans-serif;touch-action:none}
 canvas{position:fixed;inset:0}
 .version{position:fixed;top:10px;left:10px;z-index:90;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 11px;font-size:12px}
-.hud{position:fixed;top:10px;right:10px;z-index:90;min-width:160px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.6}
-.core-shell{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);width:min(52vw,320px);height:min(52vw,320px);z-index:35;pointer-events:none}
+.hud{position:fixed;top:10px;right:10px;z-index:90;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.6}
+.core-shell{position:fixed;left:50%;top:33%;transform:translate(-50%,-50%);width:min(50vw,300px);height:min(50vw,300px);z-index:35;pointer-events:none}
 .core-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(242,213,122,.75);box-shadow:0 0 0 3px rgba(242,213,122,.08),0 0 42px rgba(242,213,122,.24);overflow:hidden}
 .core-glow{position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(242,213,122,.18);animation:aura 4s ease-out infinite}
 .controls{position:fixed;left:0;right:0;bottom:88px;height:186px;z-index:120;pointer-events:none}
@@ -21,6 +21,7 @@ canvas{position:fixed;inset:0}
 .joy{position:absolute;left:18px;bottom:6px;width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
 .joy:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
 .joy-inner{position:absolute;left:42px;top:42px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
+.joy-label{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:11px}
 .yaw{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;width:min(52vw,360px);height:68px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px}
 .yaw-track{position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)}
 .yaw-fill{position:absolute;left:50%;top:29px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(113,216,255,.2),rgba(113,216,255,.9));width:0}
@@ -36,25 +37,27 @@ canvas{position:fixed;inset:0}
 .toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px;display:none;z-index:200}
 .tip{position:fixed;left:50%;top:64%;transform:translateX(-50%);background:rgba(0,0,0,.46);border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-size:12px;z-index:95;display:none}
 .tip.show{display:block;animation:fade 1.6s ease both}
+.coord{position:fixed;left:10px;top:48px;z-index:90;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6}
 @keyframes aura{0%{transform:scale(.88);opacity:.55}80%{transform:scale(1.2);opacity:0}100%{opacity:0}}
 @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
-@media (max-width:820px){.actions{grid-template-columns:repeat(4,1fr)} .core-shell{width:min(64vw,300px);height:min(64vw,300px)}}
+@media (max-width:820px){.actions{grid-template-columns:repeat(4,1fr)} .core-shell{width:min(62vw,280px);height:min(62vw,280px)}}
 </style>
 </head>
 <body>
-<div class="version">V11.1 真戰鬥版</div>
+<div class="version">V11.2 座標校正版</div>
+<div class="coord" id="coordBox">X: 0.0<br>Y: 0.0<br>Z: 0.0</div>
 <div class="hud" id="hud">戰鬥初始化...</div>
 <canvas id="bg"></canvas>
 <div class="core-shell">
   <div class="core-ring"><canvas id="core"></canvas></div>
   <div class="core-glow"></div>
 </div>
-<div class="tip" id="tip">左搖桿移動，方向桿瞄準，靠近或放招打怪</div>
+<div class="tip" id="tip">左搖桿 = X/Y 平面，右高度桿 = Z，高度數字已顯示</div>
 
 <div class="controls">
-  <div class="joy" id="joy"><div class="joy-inner" id="joyInner"></div></div>
+  <div class="joy" id="joy"><div class="joy-label">X / Y 平面</div><div class="joy-inner" id="joyInner"></div></div>
   <div class="yaw" id="yaw"><div class="yaw-label">方向 / 瞄準</div><div class="yaw-track"></div><div class="yaw-fill" id="yawFill"></div><div class="yaw-inner" id="yawInner"></div></div>
-  <div class="alt" id="alt"><div class="alt-top">上升</div><div class="alt-track"></div><div class="alt-inner" id="altInner"></div><div class="alt-bottom">下降</div></div>
+  <div class="alt" id="alt"><div class="alt-top">Z+</div><div class="alt-track"></div><div class="alt-inner" id="altInner"></div><div class="alt-bottom">Z-</div></div>
 </div>
 
 <div class="actions">
@@ -75,21 +78,18 @@ const bg = document.getElementById('bg');
 const bgx = bg.getContext('2d');
 const core = document.getElementById('core');
 const cx2 = core.getContext('2d');
-function fit(){ bg.width=innerWidth; bg.height=innerHeight; core.width=320; core.height=320; }
+function fit(){ bg.width=innerWidth; bg.height=innerHeight; core.width=300; core.height=300; }
 addEventListener('resize', fit); fit();
 
 const S = {
   mode:'BATTLE',
-  x:0,z:0,alt:0,yaw:0,
-  moveX:0,moveY:0,yawInput:0,altInput:0,
+  x:0,y:0,z:0,yaw:0,
+  moveX:0,moveY:0,yawInput:0,zInput:0,
   hp:100, energy:100, score:0,
   attackCd:0, skillCd:0, shake:0,
-  stars:Array.from({length:180},()=>({x:(Math.random()-0.5)*innerWidth*1.8,y:(Math.random()-0.5)*innerHeight*1.8,s:Math.random()*2+0.6})),
-  flows:Array.from({length:100},()=>({a:Math.random()*Math.PI*2,r:110+Math.random()*300,l:Math.random(),s:Math.random()*2+1})),
-  monsters:[],
-  projectiles:[],
-  fx:[],
-  candles:[]
+  stars:Array.from({length:220},()=>({x:(Math.random()-0.5)*innerWidth*1.6,y:(Math.random()-0.5)*innerHeight*1.6,s:Math.random()*2+0.5})),
+  flows:Array.from({length:120},()=>({a:Math.random()*Math.PI*2,r:100+Math.random()*300,l:Math.random(),s:Math.random()*2+1})),
+  monsters:[], projectiles:[], fx:[], candles:[]
 };
 for(let i=0;i<120;i++) S.candles.push({o:0,c:0,p:0,v:Math.random()*5+1});
 
@@ -99,22 +99,14 @@ function tip(msg){ const el=document.getElementById('tip'); el.textContent=msg; 
 function predict(base){ let score=0; if(Math.random()>.5) score++; if(Math.random()>.5) score++; if(Math.random()>.5) score++; return base+(score-1.5)*4; }
 function genCandles(){
   const last=S.candles[S.candles.length-1].c;
-  const real = last + (Math.random()-.5)*2.2;
-  const pred = predict(real);
+  const real=last+(Math.random()-.5)*2.2;
+  const pred=predict(real);
   S.candles.push({o:last,c:real,p:pred,v:Math.random()*5+1});
   if(S.candles.length>120) S.candles.shift();
 }
 function spawnMonster(type='normal'){
-  const ang=Math.random()*Math.PI*2, dist=200+Math.random()*240;
-  S.monsters.push({
-    x:S.x+Math.cos(ang)*dist,
-    z:S.z+Math.sin(ang)*dist,
-    hp:type==='boss'?30:6,
-    maxHp:type==='boss'?30:6,
-    speed:type==='boss'?0.45:0.9,
-    kind:type,
-    hit:0
-  });
+  const ang=Math.random()*Math.PI*2, dist=180+Math.random()*220;
+  S.monsters.push({x:S.x+Math.cos(ang)*dist,y:S.y+Math.sin(ang)*dist,z:0,hp:type==='boss'?30:6,maxHp:type==='boss'?30:6,speed:type==='boss'?0.45:0.85,kind:type,hit:0});
 }
 for(let i=0;i<6;i++) spawnMonster();
 function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
@@ -122,14 +114,13 @@ function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
 function updateMonsters(){
   while(S.monsters.length<8) spawnMonster();
   S.monsters.forEach(m=>{
-    const dx=S.x-m.x, dz=S.z-m.z;
-    const d=Math.hypot(dx,dz)||1;
+    const dx=S.x-m.x, dy=S.y-m.y;
+    const d=Math.hypot(dx,dy)||1;
     m.x += dx/d*m.speed;
-    m.z += dz/d*m.speed;
-    if(d<18){
+    m.y += dy/d*m.speed;
+    if(d<18 && Math.abs(m.z-S.z)<4){
       S.hp -= m.kind==='boss'?0.25:0.08;
-      m.hit = 6;
-      S.shake = 8;
+      m.hit=6; S.shake=8;
     }
     if(m.hit>0) m.hit--;
   });
@@ -138,15 +129,15 @@ function updateMonsters(){
 function updateProjectiles(){
   S.projectiles.forEach(p=>{
     p.x += Math.cos(p.a)*p.sp;
-    p.z += Math.sin(p.a)*p.sp;
+    p.y += Math.sin(p.a)*p.sp;
     p.life--;
     S.monsters.forEach(m=>{
       if(m.hp<=0) return;
-      const d=Math.hypot(p.x-m.x,p.z-m.z);
-      if(d<16){
+      const d=Math.hypot(p.x-m.x,p.y-m.y);
+      if(d<16 && Math.abs((p.z||0)-m.z)<6){
         m.hp -= p.dmg;
-        p.life = 0;
-        S.fx.push({x:m.x,z:m.z,life:18,color:'#ffd46b'});
+        p.life=0;
+        S.fx.push({x:m.x,y:m.y,z:m.z,life:18,color:'#ffd46b'});
         if(m.hp<=0){ S.score += m.kind==='boss'?20:3; S.energy=Math.min(100,S.energy+4); }
       }
     });
@@ -154,22 +145,20 @@ function updateProjectiles(){
   S.projectiles = S.projectiles.filter(p=>p.life>0);
   S.monsters = S.monsters.filter(m=>m.hp>0);
   S.fx.forEach(f=>f.life--);
-  S.fx = S.fx.filter(f=>f.life>0);
+  S.fx=S.fx.filter(f=>f.life>0);
 }
 function swing(){
   if(S.attackCd>0) return;
-  S.attackCd = 18;
-  const a = S.yaw;
-  // melee cone
+  S.attackCd=18;
   S.monsters.forEach(m=>{
-    const dx=m.x-S.x, dz=m.z-S.z;
-    const d=Math.hypot(dx,dz);
-    const ang=Math.atan2(dz,dx);
-    let diff=Math.abs(ang-a); if(diff>Math.PI) diff=2*Math.PI-diff;
-    if(d<85 && diff<0.7){
+    const dx=m.x-S.x, dy=m.y-S.y;
+    const d=Math.hypot(dx,dy);
+    const ang=Math.atan2(dy,dx);
+    let diff=Math.abs(ang-S.yaw); if(diff>Math.PI) diff=2*Math.PI-diff;
+    if(d<85 && diff<0.7 && Math.abs(m.z-S.z)<6){
       m.hp -= m.kind==='boss'?3:5;
-      m.hit = 8;
-      S.fx.push({x:m.x,z:m.z,life:15,color:'#83ff74'});
+      m.hit=8;
+      S.fx.push({x:m.x,y:m.y,z:m.z,life:15,color:'#83ff74'});
       if(m.hp<=0){ S.score += m.kind==='boss'?20:3; S.energy=Math.min(100,S.energy+4); }
     }
   });
@@ -177,18 +166,16 @@ function swing(){
 }
 function skill(){
   if(S.skillCd>0 || S.energy<20) return;
-  S.skillCd = 180;
-  S.energy -= 20;
+  S.skillCd=180; S.energy-=20;
   S.monsters.forEach(m=>{
-    const d=Math.hypot(m.x-S.x,m.z-S.z);
+    const d=Math.hypot(m.x-S.x,m.y-S.y);
     if(d<240){
       m.hp -= m.kind==='boss'?8:99;
-      S.fx.push({x:m.x,z:m.z,life:30,color:'#71d8ff'});
-      if(m.hp<=0){ S.score += m.kind==='boss'?20:3; }
+      S.fx.push({x:m.x,y:m.y,z:m.z,life:30,color:'#71d8ff'});
+      if(m.hp<=0) S.score += m.kind==='boss'?20:3;
     }
   });
-  S.shake = 16;
-  toast('發財金技能爆發');
+  S.shake=16; toast('發財金技能爆發');
 }
 function heartbeat(){ S.energy=Math.min(100,S.energy+10); toast('心跳補能'); }
 function ignite(){ S.hp=Math.min(100,S.hp+8); toast('呼吸回復'); }
@@ -197,54 +184,73 @@ function front(){ toast('前鏡功能保留'); }
 function rear(){ toast('後鏡功能保留'); }
 
 function update(){
+  // Left joystick now maps to X/Y plane exactly:
+  // up = Y+, down = Y-, right = X+, left = X-
   S.x += S.moveX*2.1;
-  S.z += S.moveY*2.1;
+  S.y += S.moveY*2.1;
   S.yaw += S.yawInput*0.05;
-  S.alt += S.altInput*0.04;
-  if(S.alt>8) S.alt=8; if(S.alt<-8) S.alt=-8;
+  S.z += S.zInput*0.14;
+  if(S.z>25) S.z=25;
+  if(S.z<-25) S.z=-25;
   if(S.attackCd>0) S.attackCd--;
   if(S.skillCd>0) S.skillCd--;
   if(S.shake>0) S.shake--;
   S.flows.forEach(f=>{
     f.a += 0.008 + S.yawInput*0.02;
     f.l -= 0.01;
-    if(f.l<=0){ f.a=Math.random()*Math.PI*2; f.r=110+Math.random()*300; f.l=1; f.s=Math.random()*2+1; }
+    if(f.l<=0){ f.a=Math.random()*Math.PI*2; f.r=100+Math.random()*300; f.l=1; f.s=Math.random()*2+1; }
   });
   genCandles();
   if(S.mode==='BATTLE') updateMonsters();
   updateProjectiles();
 }
-
 function drawBG(){
-  const ox = S.shake? (Math.random()-0.5)*S.shake : 0;
-  const oy = S.shake? (Math.random()-0.5)*S.shake : 0;
+  const ox=S.shake?(Math.random()-0.5)*S.shake:0;
+  const oy=S.shake?(Math.random()-0.5)*S.shake:0;
   bgx.setTransform(1,0,0,1,ox,oy);
   bgx.clearRect(-50,-50,bg.width+100,bg.height+100);
 
-  const bull = Math.cos(S.yaw)>0;
-  const g = bgx.createLinearGradient(0,0,0,bg.height);
+  const bull=Math.cos(S.yaw)>0;
+  const g=bgx.createLinearGradient(0,0,0,bg.height);
   if(bull){ g.addColorStop(0,'#0a2be2'); g.addColorStop(.45,'#071148'); g.addColorStop(1,'#01040a'); }
   else{ g.addColorStop(0,'#190808'); g.addColorStop(.45,'#4f1111'); g.addColorStop(1,'#01040a'); }
   bgx.fillStyle=g; bgx.fillRect(0,0,bg.width,bg.height);
 
-  // terrain floor
-  const cx=bg.width/2, baseY=bg.height*0.73 - S.alt*8;
-  bgx.strokeStyle='rgba(255,255,255,.07)';
-  for(let i=0;i<12;i++){
+  // clearer "movie-like" terrain feel with parallax grid and horizon
+  const cx=bg.width/2, horizon=bg.height*0.48 - S.z*3;
+  const baseY=bg.height*0.76 - S.z*8;
+  bgx.fillStyle='rgba(255,255,255,.04)';
+  bgx.fillRect(0,horizon,bg.width,2);
+
+  bgx.strokeStyle='rgba(255,255,255,.09)';
+  for(let i=0;i<14;i++){
+    const yy = baseY + i*28;
     bgx.beginPath();
-    bgx.ellipse(cx, baseY+i*34, 160+i*90, 20+i*10, 0, 0, Math.PI*2);
+    bgx.moveTo(0,yy);
+    bgx.lineTo(bg.width,yy);
     bgx.stroke();
   }
-  for(let i=-10;i<=10;i++){
+  for(let i=-12;i<=12;i++){
     bgx.beginPath();
-    bgx.moveTo(cx+i*45, baseY);
-    bgx.lineTo(cx+i*120, bg.height);
+    bgx.moveTo(cx+i*36, baseY);
+    bgx.lineTo(cx+i*115, bg.height);
     bgx.stroke();
   }
 
+  // mountains / terrain silhouette
+  bgx.fillStyle = bull ? 'rgba(80,140,255,.18)' : 'rgba(180,60,60,.18)';
+  bgx.beginPath();
+  bgx.moveTo(0, baseY-90);
+  for(let i=0;i<=bg.width;i+=40){
+    const yy=(Math.sin(i*0.01 + S.yaw)*20)+(Math.cos(i*0.017 + S.yaw*0.5)*16);
+    bgx.lineTo(i, baseY-90 + yy);
+  }
+  bgx.lineTo(bg.width,bg.height); bgx.lineTo(0,bg.height); bgx.closePath(); bgx.fill();
+
   // stars
   for(const s of S.stars){
-    const sx=(s.x+S.yawInput*8+bg.width)%bg.width, sy=(s.y+S.altInput*3+bg.height)%bg.height;
+    const sx=(s.x+S.yawInput*8+bg.width)%bg.width;
+    const sy=(s.y+S.zInput*3+bg.height)%bg.height;
     bgx.fillStyle='rgba(180,220,255,.82)';
     bgx.fillRect(sx,sy,s.s,s.s);
   }
@@ -252,33 +258,27 @@ function drawBG(){
   // flow
   S.flows.forEach(f=>{
     const x = cx + Math.cos(f.a+S.yaw)*f.r;
-    const y = bg.height*0.38 + Math.sin(f.a+S.yaw)*f.r*0.42;
-    bgx.fillStyle = bull ? `rgba(120,220,255,${f.l*.9})` : `rgba(255,120,120,${f.l*.9})`;
+    const y = bg.height*0.34 + Math.sin(f.a+S.yaw)*f.r*0.38;
+    bgx.fillStyle = bull ? `rgba(120,220,255,${f.l*.85})` : `rgba(255,120,120,${f.l*.85})`;
     bgx.fillRect(x,y,f.s,f.s);
   });
 
-  // monsters in world
+  // world objects
   S.monsters.forEach(m=>{
     const sx = cx + (m.x-S.x);
-    const sy = baseY + (m.z-S.z)*0.55;
-    const r = m.kind==='boss' ? 18 : 10;
+    const sy = baseY + (m.y-S.y)*0.55 - m.z*5;
+    const r = m.kind==='boss'?18:10;
     bgx.fillStyle = m.kind==='boss' ? '#ffb36b' : '#ff3d3d';
     bgx.beginPath(); bgx.arc(sx,sy,r,0,Math.PI*2); bgx.fill();
-    // hp bar
     bgx.fillStyle='rgba(0,0,0,.45)'; bgx.fillRect(sx-r, sy-r-10, r*2, 4);
     bgx.fillStyle='#83ff74'; bgx.fillRect(sx-r, sy-r-10, (m.hp/m.maxHp)*r*2, 4);
-    if(m.hit>0){ bgx.strokeStyle='rgba(255,255,255,.75)'; bgx.strokeRect(sx-r-2,sy-r-2,r*2+4,r*2+4); }
   });
-
-  // projectiles
   S.projectiles.forEach(p=>{
-    const sx = cx + (p.x-S.x), sy = baseY + (p.z-S.z)*0.55;
+    const sx = cx + (p.x-S.x), sy = baseY + (p.y-S.y)*0.55 - (p.z||0)*5;
     bgx.fillStyle='#71d8ff'; bgx.beginPath(); bgx.arc(sx,sy,4,0,Math.PI*2); bgx.fill();
   });
-
-  // hit effects
   S.fx.forEach(f=>{
-    const sx = cx + (f.x-S.x), sy = baseY + (f.z-S.z)*0.55;
+    const sx = cx + (f.x-S.x), sy = baseY + (f.y-S.y)*0.55 - f.z*5;
     bgx.strokeStyle = f.color;
     bgx.beginPath(); bgx.arc(sx,sy,22-f.life*0.7,0,Math.PI*2); bgx.stroke();
   });
@@ -286,56 +286,42 @@ function drawBG(){
   // player
   bgx.fillStyle='#83ff74';
   bgx.beginPath(); bgx.arc(cx, baseY, 12, 0, Math.PI*2); bgx.fill();
-  // aim line
   bgx.strokeStyle='rgba(255,255,255,.5)';
-  bgx.beginPath();
-  bgx.moveTo(cx,baseY);
-  bgx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28);
-  bgx.stroke();
+  bgx.beginPath(); bgx.moveTo(cx,baseY); bgx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); bgx.stroke();
 
   bgx.setTransform(1,0,0,1,0,0);
 }
-
 function drawCore(){
   cx2.clearRect(0,0,core.width,core.height);
   const cx=core.width/2, cy=core.height/2;
-  const bull = Math.cos(S.yaw)>0;
-  const rg = cx2.createRadialGradient(cx,cy,28,cx,cy,140);
-  rg.addColorStop(0, bull ? 'rgba(100,210,255,.35)' : 'rgba(255,110,110,.35)');
-  rg.addColorStop(1, 'rgba(0,0,0,0)');
-  cx2.fillStyle=rg;
-  cx2.beginPath(); cx2.arc(cx,cy,140,0,Math.PI*2); cx2.fill();
+  const bull=Math.cos(S.yaw)>0;
+  const rg=cx2.createRadialGradient(cx,cy,28,cx,cy,130);
+  rg.addColorStop(0,bull?'rgba(100,210,255,.35)':'rgba(255,110,110,.35)');
+  rg.addColorStop(1,'rgba(0,0,0,0)');
+  cx2.fillStyle=rg; cx2.beginPath(); cx2.arc(cx,cy,130,0,Math.PI*2); cx2.fill();
 
-  const baseR = 96 + S.alt*5;
+  const baseR=92 + S.z*0.8;
   S.candles.forEach((k,i)=>{
     const t=i/S.candles.length*Math.PI*2+S.yaw;
     const rr=baseR+k.v*1.3;
     const x=cx+Math.cos(t)*rr;
     const y=cy+Math.sin(t)*rr*0.84;
     cx2.strokeStyle=k.c>=k.o?'#83ff74':'#ff6c6c';
-    cx2.beginPath(); cx2.moveTo(x,y); cx2.lineTo(x,y-(k.c-k.o)*2.2); cx2.stroke();
+    cx2.beginPath(); cx2.moveTo(x,y); cx2.lineTo(x,y-(k.c-k.o)*2.0); cx2.stroke();
     if(S.mode==='PREDICT'){
       cx2.strokeStyle='rgba(113,216,255,.95)';
-      cx2.beginPath(); cx2.moveTo(x+1.2,y); cx2.lineTo(x+1.2,y-(k.p-k.o)*2.2); cx2.stroke();
+      cx2.beginPath(); cx2.moveTo(x+1.2,y); cx2.lineTo(x+1.2,y-(k.p-k.o)*2.0); cx2.stroke();
     }
   });
-
-  // combat pulse core
   cx2.beginPath(); cx2.arc(cx,cy,42+Math.sin(Date.now()/180)*2,0,Math.PI*2);
-  cx2.fillStyle = S.mode==='BATTLE' ? 'rgba(242,213,122,.28)' : 'rgba(113,216,255,.22)';
+  cx2.fillStyle=S.mode==='BATTLE'?'rgba(242,213,122,.28)':'rgba(113,216,255,.22)';
   cx2.fill();
-  cx2.beginPath(); cx2.arc(cx,cy,16,0,Math.PI*2);
-  cx2.fillStyle='rgba(242,213,122,.78)';
-  cx2.fill();
-
-  // orbit rings
-  cx2.strokeStyle='rgba(242,213,122,.35)';
-  for(let i=0;i<3;i++){ cx2.beginPath(); cx2.ellipse(cx,cy,70+i*18,52+i*14,S.yaw*0.6+i*.3,0,Math.PI*2); cx2.stroke(); }
+  cx2.beginPath(); cx2.arc(cx,cy,16,0,Math.PI*2); cx2.fillStyle='rgba(242,213,122,.78)'; cx2.fill();
 }
 function updateHUD(){
   let deg=(S.yaw*180/Math.PI)%360; if(deg<0) deg+=360;
-  document.getElementById('hud').innerHTML =
-    `模式：${S.mode}<br>HP：${Math.round(S.hp)}<br>能量：${Math.round(S.energy)}<br>怪物：${S.monsters.length}<br>分數：${S.score}<br>Yaw：${Math.round(deg)}°`;
+  document.getElementById('hud').innerHTML = `模式：${S.mode}<br>HP：${Math.round(S.hp)}<br>能量：${Math.round(S.energy)}<br>怪物：${S.monsters.length}<br>分數：${S.score}<br>Yaw：${Math.round(deg)}°`;
+  document.getElementById('coordBox').innerHTML = `X: ${S.x.toFixed(1)}<br>Y: ${S.y.toFixed(1)}<br>Z: ${S.z.toFixed(1)}`;
 }
 function loop(){ update(); drawBG(); drawCore(); updateHUD(); requestAnimationFrame(loop); }
 loop();
@@ -346,10 +332,14 @@ loop();
   function setP(x,y){
     const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
     const max=39, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; }
-    S.moveX=dx/max; S.moveY=dy/max; inner.style.left=(42+dx)+'px'; inner.style.top=(42+dy)+'px';
+    // exact XY mapping requested:
+    // up => Y+, down => Y-, right => X+, left => X-
+    S.moveX = dx/max;
+    S.moveY = -dy/max;
+    inner.style.left=(42+dx)+'px'; inner.style.top=(42+dy)+'px';
   }
   function reset(){ S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px'; }
-  joy.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientX,e.clientY); tip('左搖桿移動：靠近怪物可自動碰撞攻擊'); });
+  joy.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientX,e.clientY); tip('左下控制已校正：右=X+ 左=X- 上=Y+ 下=Y-'); });
   joy.addEventListener('pointermove', e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
   joy.addEventListener('pointerup', reset); joy.addEventListener('pointercancel', reset);
 })();
@@ -361,7 +351,7 @@ loop();
     if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; } else { fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; }
   }
   function reset(){ S.yawInput=0; inner.style.left='calc(50% - 24px)'; fill.style.left='50%'; fill.style.width='0'; }
-  yaw.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientX); tip('方向瞄準：普通攻擊與發財金技能都吃方向'); });
+  yaw.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientX); tip('中間方向瞄準保留'); });
   yaw.addEventListener('pointermove', e=>{ if(e.buttons) setP(e.clientX); });
   yaw.addEventListener('pointerup', reset); yaw.addEventListener('pointercancel', reset);
 })();
@@ -369,16 +359,17 @@ loop();
   const alt=document.getElementById('alt'), inner=document.getElementById('altInner');
   function setP(y){
     const r=alt.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max) dy=max; if(dy<-max) dy=-max;
-    S.altInput=-dy/max; inner.style.top=(66+dy)+'px';
+    // Up => Z+, Down => Z-
+    S.zInput = -dy/max;
+    inner.style.top=(66+dy)+'px';
   }
-  function reset(){ S.altInput=0; inner.style.top='66px'; }
-  alt.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientY); });
+  function reset(){ S.zInput=0; inner.style.top='66px'; }
+  alt.addEventListener('pointerdown', e=>{ e.preventDefault(); setP(e.clientY); tip('右下控制 Z 座標：上=Z+ 下=Z-'); });
   alt.addEventListener('pointermove', e=>{ if(e.buttons) setP(e.clientY); });
   alt.addEventListener('pointerup', reset); alt.addEventListener('pointercancel', reset);
 })();
 
-// initial tips
-tip('左搖桿移動 · 中間瞄準 · 右側高度 · 發財金技能可清怪');
+tip('V11.2 已顯示 X/Y/Z 數字，並校正左下方向');
 </script>
 </body>
 </html>
