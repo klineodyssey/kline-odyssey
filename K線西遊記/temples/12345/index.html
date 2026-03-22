@@ -394,5 +394,41 @@ $('btnSpeak').onclick=()=>{ const txt=$('chatBox').value.trim(); if(!txt) return
 $('btnCopyChat').onclick=async()=>{ try{ await navigator.clipboard.writeText($('chatBox').value); toast('已複製'); }catch(e){ toast('複製失敗'); } };
 $('btnClearChat').onclick=()=>{ $('chatBox').value=''; LS.set('wzs_chat',''); toast('已清空客服'); };
 </script>
+
+<script id="footer-hotfix-v1">
+(function(){
+  function openSection(name){
+    var portals=[].slice.call(document.querySelectorAll('.portal'));
+    var ids={entry:'sec-entry',fortune:'sec-fortune',wish:'sec-wish',media:'sec-media'};
+    portals.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-target')===name); });
+    Object.keys(ids).forEach(function(k){
+      var el=document.getElementById(ids[k]);
+      if(el) el.classList.toggle('active', k===name);
+    });
+    var target=document.getElementById(ids[name]);
+    if(target){
+      try{ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+      catch(e){ target.scrollIntoView(true); }
+    }
+  }
+  function bindFooter(){
+    var a=document.getElementById('footEntry');
+    var b=document.getElementById('footFortune');
+    var c=document.getElementById('footWish');
+    var d=document.getElementById('footMedia');
+    if(a) a.onclick=function(){ openSection('entry'); };
+    if(b) b.onclick=function(){ openSection('fortune'); };
+    if(c) c.onclick=function(){ openSection('wish'); };
+    if(d) d.onclick=function(){ openSection('media'); };
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', bindFooter);
+  }else{
+    bindFooter();
+  }
+  setTimeout(bindFooter, 300);
+})();
+</script>
+
 </body>
 </html>
