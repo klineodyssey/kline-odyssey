@@ -59,6 +59,43 @@
   .legend .mini{font-size:12px;color:var(--muted);line-height:1.5}
   @media (max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(120px,1fr));} .legend{display:none} }
 </style>
+
+<style id="mobile-controls-style">
+  .mobile-controls{
+    position:fixed; inset:0; pointer-events:none; z-index:20;
+  }
+  .joy-wrap{
+    position:fixed; left:14px; bottom:120px; width:132px; height:132px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.05); backdrop-filter:blur(8px);
+    pointer-events:auto; touch-action:none;
+  }
+  .joy-knob{
+    position:absolute; left:41px; top:41px; width:50px; height:50px; border-radius:50%;
+    background:rgba(255,217,120,.92); box-shadow:0 8px 20px rgba(0,0,0,.35);
+  }
+  .mobile-cluster{
+    position:fixed; right:14px; bottom:120px; display:grid; grid-template-columns:repeat(2,72px); gap:10px;
+    pointer-events:auto;
+  }
+  .m-btn{
+    width:72px; height:72px; border-radius:18px; border:1px solid rgba(255,255,255,.14);
+    background:rgba(8,12,22,.86); color:#fff; font-weight:900; font-size:14px;
+    backdrop-filter:blur(8px); touch-action:none;
+  }
+  .mobile-top{
+    position:fixed; right:14px; top:86px; display:grid; gap:8px; pointer-events:auto;
+  }
+  .m-top-btn{
+    min-width:82px; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.14);
+    background:rgba(8,12,22,.86); color:#fff; font-weight:800; backdrop-filter:blur(8px);
+    touch-action:none;
+  }
+  @media (min-width: 901px){
+    .mobile-controls{ display:none; }
+  }
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -108,6 +145,23 @@
     <button class="btn" id="btnRules">發放規則<small>12345 規則</small></button>
     <button class="btn" id="btnClose">關閉視窗<small>Esc</small></button>
   </div>
+
+  <div class="mobile-controls">
+    <div class="joy-wrap" id="joyWrap">
+      <div class="joy-knob" id="joyKnob"></div>
+    </div>
+    <div class="mobile-cluster">
+      <button class="m-btn" id="btnUp">上升</button>
+      <button class="m-btn" id="btnInteract">進入</button>
+      <button class="m-btn" id="btnDown">下降</button>
+      <button class="m-btn" id="btnClosePanel">關閉</button>
+    </div>
+    <div class="mobile-top">
+      <button class="m-top-btn" id="btnTurnL">左轉</button>
+      <button class="m-top-btn" id="btnTurnR">右轉</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -336,5 +390,88 @@ function loop(now){
 }
 requestAnimationFrame(loop);
 </script>
+
+<script>
+(function(){
+  const joyWrap = document.getElementById('joyWrap');
+  const joyKnob = document.getElementById('joyKnob');
+  if(!joyWrap || !joyKnob) return;
+
+  state.mobile = {mx:0, my:0, up:false, down:false, turnL:false, turnR:false};
+
+  function resetJoy(){
+    state.mobile.mx = 0; state.mobile.my = 0;
+    joyKnob.style.left = '41px';
+    joyKnob.style.top = '41px';
+  }
+
+  function setButtonHold(id, key){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const on = ()=>{ state.mobile[key] = true; };
+    const off = ()=>{ state.mobile[key] = false; };
+    el.addEventListener('pointerdown', e=>{ e.preventDefault(); on(); });
+    el.addEventListener('pointerup', off);
+    el.addEventListener('pointercancel', off);
+    el.addEventListener('pointerleave', off);
+  }
+
+  joyWrap.addEventListener('pointerdown', startJoy);
+  joyWrap.addEventListener('pointermove', moveJoy);
+  joyWrap.addEventListener('pointerup', endJoy);
+  joyWrap.addEventListener('pointercancel', endJoy);
+
+  function startJoy(e){
+    joyWrap.setPointerCapture(e.pointerId);
+    moveJoy(e);
+  }
+  function moveJoy(e){
+    const r = joyWrap.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    let dx = e.clientX - cx;
+    let dy = e.clientY - cy;
+    const max = 38;
+    const len = Math.hypot(dx,dy) || 1;
+    if(len > max){ dx = dx/len*max; dy = dy/len*max; }
+    state.mobile.mx = dx / max;
+    state.mobile.my = dy / max;
+    joyKnob.style.left = (41 + dx) + 'px';
+    joyKnob.style.top = (41 + dy) + 'px';
+  }
+  function endJoy(e){
+    try{ joyWrap.releasePointerCapture(e.pointerId); }catch(_){}
+    resetJoy();
+  }
+
+  setButtonHold('btnUp','up');
+  setButtonHold('btnDown','down');
+  setButtonHold('btnTurnL','turnL');
+  setButtonHold('btnTurnR','turnR');
+
+  document.getElementById('btnInteract')?.addEventListener('click', ()=>interactNearest());
+  document.getElementById('btnClosePanel')?.addEventListener('click', ()=>closePanel());
+
+  const origUpdate = update;
+  update = function(dt){
+    // map mobile control to existing key model
+    const dead = 0.12;
+    const mx = Math.abs(state.mobile.mx) > dead ? state.mobile.mx : 0;
+    const my = Math.abs(state.mobile.my) > dead ? state.mobile.my : 0;
+
+    state.keys['w'] = my < -dead;
+    state.keys['s'] = my > dead;
+    state.keys['a'] = mx < -dead;
+    state.keys['d'] = mx > dead;
+    state.keys[' '] = !!state.mobile.up;
+    state.keys['shift'] = !!state.mobile.down;
+    state.keys['q'] = !!state.mobile.turnL;
+    state.keys['e'] = !!state.mobile.turnR;
+
+    origUpdate(dt);
+  };
+})();
+</script>
+
 </body>
 </html>
