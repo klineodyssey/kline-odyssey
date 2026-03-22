@@ -1,185 +1,176 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KGEN 宇宙心臟 - 五指山悟空財神殿 12345</title>
-    <style>
-        :root {
-            --wukong-gold: #ffd700;
-            --temple-red: #8b0000;
-            --kgen-glow: rgba(255, 215, 0, 0.6);
-            --bg-dark: #080000;
-        }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<title>KGEN 4D Engine | 五指山 12345 悟空財神殿</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+:root {
+  --gold: #ffd978; --red: #ff3333; --glow: rgba(255, 217, 120, 0.6);
+  --bg: #05070d; --panel: rgba(8, 12, 22, 0.9);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body, html { margin: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at center, #1a0000 0%, #080000 100%);
-            color: white;
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+/* 3D 空間背景畫布 */
+#render-canvas { position: fixed; inset: 0; z-index: 1; }
 
-        /* 1. 心臟脈動 Logo */
-        @keyframes heartBeat {
-            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
-            15% { transform: scale(1.1); filter: drop-shadow(0 0 25px var(--wukong-gold)); }
-            30% { transform: scale(1); filter: drop-shadow(0 0 5px var(--wukong-gold)); }
-        }
+/* 4D 覺醒圖層 */
+#ui-layer { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; pointer-events: none; }
 
-        .temple-core {
-            margin-top: 40px;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, var(--wukong-gold) 0%, var(--temple-red) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: heartBeat 2s infinite ease-in-out;
-            border: 3px solid #000;
-            box-shadow: 0 0 30px var(--temple-red);
-        }
+/* 核心心臟 12345 */
+.core-heart {
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, var(--gold) 0%, var(--red) 100%);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4.5rem; font-weight: 900; color: #000;
+  box-shadow: 0 0 40px var(--red);
+  animation: heartbeat 1.2s infinite ease-in-out;
+  cursor: pointer; pointer-events: auto;
+  border: 6px solid #000;
+  position: relative;
+}
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  15% { transform: scale(1.15); filter: brightness(1.3); }
+}
 
-        .core-symbol { font-size: 3rem; color: black; font-weight: 900; }
+/* 遊戲化控制台 */
+.ritual-console {
+  width: 100%; max-width: 400px;
+  background: var(--panel);
+  border: 1px solid var(--gold);
+  border-radius: 4px; padding: 25px;
+  pointer-events: auto; backdrop-filter: blur(15px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
 
-        /* 2. 交易控制面板 (繼承 V3.4) */
-        .swap-panel {
-            width: 90%;
-            max-width: 420px;
-            background: rgba(20, 0, 0, 0.9);
-            border: 2px solid var(--wukong-gold);
-            border-radius: 15px;
-            margin: 30px 0;
-            padding: 25px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 50px rgba(139, 0, 0, 0.5);
-        }
+.status-tag { color: var(--gold); font-size: 0.75rem; letter-spacing: 3px; margin-bottom: 15px; display: block; }
 
-        .input-group {
-            background: #111;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px inset #333;
-            margin-bottom: 20px;
-        }
+.ignite-btn {
+  width: 100%; padding: 20px;
+  background: linear-gradient(45deg, var(--red), #900);
+  color: white; border: 1px solid var(--gold);
+  font-size: 1.4rem; font-weight: bold; letter-spacing: 8px;
+  cursor: pointer; transition: 0.3s;
+  box-shadow: 0 0 20px rgba(255,0,0,0.3);
+}
+.ignite-btn:active { transform: scale(0.95); filter: brightness(1.5); }
 
-        .input-group label { font-size: 0.75rem; color: #888; display: block; margin-bottom: 5px; }
-        .input-group input {
-            background: transparent; border: none; color: white; width: 100%;
-            font-size: 1.5rem; outline: none; font-weight: bold;
-        }
-
-        /* 3. 儀式按鈕：煉金模式 */
-        .ritual-btn {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(90deg, #8b0000, #ff0000, #8b0000);
-            background-size: 200% auto;
-            border: 1px solid var(--wukong-gold);
-            border-radius: 10px;
-            color: var(--wukong-gold);
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.5s;
-            letter-spacing: 5px;
-            animation: moveGradient 3s linear infinite;
-        }
-
-        @keyframes moveGradient {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        .ritual-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px var(--wukong-gold);
-            color: white;
-        }
-
-        /* 4. 底部敘事 */
-        .footer-text {
-            color: #444;
-            font-size: 0.8rem;
-            text-align: center;
-            padding: 20px;
-            line-height: 1.8;
-        }
-    </style>
+/* 能量爆發特效 */
+.energy-flash { position: fixed; inset: 0; background: white; z-index: 100; opacity: 0; pointer-events: none; }
+</style>
 </head>
 <body>
 
-    <div class="temple-core">
-        <div class="core-symbol">悟</div>
+<canvas id="render-canvas"></canvas>
+<div id="flash" class="energy-flash"></div>
+
+<div id="ui-layer">
+  <div style="text-align: center;">
+    <h2 style="letter-spacing: 12px; margin: 0; text-shadow: 0 0 15px var(--gold);">悟空財神殿</h2>
+    <p style="color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 10px;">座標：12345 ｜ 心臟核心</p>
+  </div>
+
+  <div class="core-heart" onclick="trigger4D()">悟</div>
+
+  <div class="ritual-console">
+    <span class="status-tag" id="state-msg">>> 等待解封指令 <<</span>
+    <div style="margin-bottom: 25px; border-left: 3px solid var(--red); padding-left: 15px;">
+      <p style="color: #888; font-size: 0.8rem; margin: 0;">當前市場威壓</p>
+      <div style="font-size: 1.2rem; font-weight: bold;">五指山·厚土重壓</div>
     </div>
+    <button class="ignite-btn" onclick="trigger4D()">解除壓制</button>
+  </div>
+</div>
 
-    <h2 style="letter-spacing: 8px; margin-top: 20px;">悟空財神殿</h2>
-    <p style="color: var(--wukong-gold); font-size: 0.9rem; letter-spacing: 2px;">座標：12345 ｜ 宇宙心臟</p>
+<script>
+const canvas = document.getElementById('render-canvas');
+const ctx = canvas.getContext('2d');
+let w, h;
+let particles = [];
 
-    <main class="swap-panel">
-        <div style="text-align: center; margin-bottom: 20px; font-size: 0.85rem; color: #aaa;">
-            <span id="bp-status">🔴 尚未連線宇宙</span>
-        </div>
+// 3D 空間初始化
+function init3D() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+  particles = [];
+  for(let i=0; i<100; i++) {
+    particles.push({
+      x: Math.random() * w, y: Math.random() * h,
+      z: Math.random() * w, s: Math.random() * 2 + 1
+    });
+  }
+}
 
-        <div class="input-group">
-            <label>投入 USDT (子彈)</label>
-            <input type="number" id="usdt-amount" placeholder="0.00">
-        </div>
+function animate() {
+  ctx.fillStyle = '#05070d';
+  ctx.fillRect(0, 0, w, h);
+  
+  // 繪製 3D 深度網格
+  ctx.strokeStyle = 'rgba(255, 217, 120, 0.05)';
+  ctx.lineWidth = 1;
+  for(let i=0; i<w; i+=60) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+  }
 
-        <div style="text-align: center; margin-bottom: 20px; color: var(--wukong-gold);">
-            <span style="font-size: 1.2rem;">↓</span>
-        </div>
+  // 渲染 3D 粒子流
+  particles.forEach(p => {
+    let scale = w / p.z;
+    let x = (p.x - w/2) * scale + w/2;
+    let y = (p.y - h/2) * scale + h/2;
+    let size = p.s * scale;
+    ctx.fillStyle = `rgba(255, 217, 120, ${Math.min(1, scale/5)})`;
+    ctx.fillRect(x, y, size, size);
+    p.z -= 1.5;
+    if(p.z <= 0) p.z = w;
+  });
+  requestAnimationFrame(animate);
+}
 
-        <div class="input-group">
-            <label>獲得 KGEN (身份質量)</label>
-            <input type="text" id="kgen-output" placeholder="預計獲取..." readonly>
-        </div>
+// 4D 覺醒核心邏輯
+function trigger4D() {
+  const btn = document.querySelector('.ignite-btn');
+  const msg = document.getElementById('state-msg');
+  const flash = document.getElementById('flash');
 
-        <button class="ritual-btn" onclick="startRitual()">啟動煉金儀式</button>
-    </main>
+  // 1. 4D 觸覺：手機震動 (Vibration API)
+  if (navigator.vibrate) {
+    navigator.vibrate([100, 30, 100, 30, 500]);
+  }
 
-    <footer class="footer-text">
-        「你得到的，不是幣。是身份。」<br>
-        🌕 花果山火星・信念不滅
-    </footer>
+  // 2. 視覺噴發：強光閃爍
+  flash.animate([
+    { opacity: 0.8 }, { opacity: 0 }
+  ], { duration: 600, easing: 'ease-out' });
 
-    <script>
-        // 模擬兌換邏輯與儀式反饋
-        function startRitual() {
-            const btn = document.querySelector('.ritual-btn');
-            const status = document.getElementById('bp-status');
-            const amount = document.getElementById('usdt-amount').value;
+  // 3. 狀態變更
+  msg.innerText = ">> 正在震碎五指山壓制 <<";
+  msg.style.color = "var(--red)";
+  btn.innerText = "能量導引中...";
+  btn.disabled = true;
 
-            if(!amount || amount <= 0) {
-                alert("大聖，請先填入子彈（USDT）！");
-                return;
-            }
+  // 模擬能量核心覺醒
+  setTimeout(() => {
+    msg.innerText = ">> 12345 心臟覺醒 · 財氣貫通 <<";
+    msg.style.color = "#00ff00";
+    btn.innerText = "已入主財神殿";
+    btn.style.background = "#111";
+    btn.style.borderColor = "#00ff00";
+    btn.style.color = "#00ff00";
+    
+    // 最終成功震撼
+    if (navigator.vibrate) navigator.vibrate(800);
+    alert("大聖，封印已除！\n12345 核心座標能量已完全釋放。");
+  }, 2500);
+}
 
-            btn.innerText = "正在震碎壓制...";
-            btn.style.pointerEvents = "none";
-            status.innerText = "🟡 正在引導財氣...";
-
-            setTimeout(() => {
-                status.innerText = "🟢 12345 能量對接成功";
-                status.style.color = "#00ff00";
-                btn.innerText = "財氣覺醒・儀式完成";
-                btn.style.background = "#111";
-                btn.style.color = "#00ff00";
-                alert("儀式完成！KGEN 質量已注入你的靈魂座標。");
-            }, 2500);
-        }
-
-        // 自動計算預計獲取 (模擬 BurnEngine)
-        document.getElementById('usdt-amount').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('kgen-output').value = val ? (val * 100).toLocaleString() : "";
-        });
-    </script>
+window.addEventListener('resize', init3D);
+init3D();
+animate();
+</script>
 </body>
-</html>
+    </html>
