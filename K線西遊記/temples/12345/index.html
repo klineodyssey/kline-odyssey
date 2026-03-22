@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>KLINE V7 完整營運版</title>
+<title>KLINE V8 成長優化版</title>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.min.js"></script>
 <style>
 body{margin:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
@@ -12,24 +12,50 @@ canvas{position:fixed;inset:0}
 /* HUD */
 .hud{
  position:fixed;top:10px;right:10px;
- background:rgba(0,0,0,.6);
- padding:12px;border-radius:10px;font-size:12px;line-height:1.5
+ background:rgba(0,0,0,.65);
+ padding:12px;border-radius:12px;font-size:12px;line-height:1.6
 }
 
-/* 按鈕 */
+/* 控制 */
 .panel{
  position:fixed;bottom:10px;left:50%;
  transform:translateX(-50%);
- display:flex;gap:8px
+ display:flex;gap:8px;flex-wrap:wrap;justify-content:center
 }
 .btn{
  padding:10px 14px;
- background:#111;border:1px solid #555;border-radius:6px;
+ background:#111;border:1px solid #555;border-radius:8px;
  color:#fff;font-weight:bold
 }
 .btn:disabled{opacity:0.4}
 
-/* 通知 */
+/* 客服 */
+客服{
+ position:fixed;left:10px;top:10px;
+}
+
+/* 聊天窗 */
+.chat{
+ position:fixed;left:10px;bottom:10px;
+ width:260px;height:200px;
+ background:rgba(0,0,0,.7);
+ border:1px solid #555;border-radius:10px;
+ display:flex;flex-direction:column
+}
+.chat-log{
+ flex:1;padding:6px;font-size:12px;overflow:auto
+}
+.chat-input{
+ display:flex
+}
+.chat-input input{
+ flex:1;background:#000;border:none;color:#fff;padding:6px
+}
+.chat-input button{
+ background:#222;color:#fff;border:none;padding:6px
+}
+
+/* Toast */
 .toast{
  position:fixed;top:50%;left:50%;
  transform:translate(-50%,-50%);
@@ -54,6 +80,14 @@ canvas{position:fixed;inset:0}
 <button class="btn" id="btnIG" onclick="ignite()">呼吸</button>
 </div>
 
+<div class="chat">
+<div class="chat-log" id="chatLog">客服：歡迎來到悟空財神殿</div>
+<div class="chat-input">
+<input id="chatInput" placeholder="輸入問題"/>
+<button onclick="sendChat()">送出</button>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -62,20 +96,32 @@ const CONTRACT_ADDRESS = "填你的TempleHeart地址";
 const ABI = [
  "function fortuneClaim(uint256 amount) external",
  "function heartbeatClaim() external",
- "function igniteAndClaim() external",
- "function balanceOf(address) view returns (uint256)",
- "function lastFortuneAt(address) view returns (uint256)",
- "function lastHeartbeatAt(address) view returns (uint256)"
+ "function igniteAndClaim() external"
 ];
 
 let provider, signer, contract, user;
 
-/* ===== UI ===== */
+/* ===== Toast ===== */
 function toast(msg){
  const el=document.getElementById("toast");
  el.innerText=msg;
  el.style.display="block";
  setTimeout(()=>el.style.display="none",2000);
+}
+
+/* ===== Chat客服 ===== */
+function sendChat(){
+ let input=document.getElementById("chatInput").value;
+ let log=document.getElementById("chatLog");
+ log.innerHTML += "<br>你："+input;
+
+ if(input.includes("發財金")){
+   log.innerHTML += "<br>客服：30天一次，1~888";
+ }else if(input.includes("心跳")){
+   log.innerHTML += "<br>客服：每小時一次";
+ }else{
+   log.innerHTML += "<br>客服：請專心修行";
+ }
 }
 
 /* ===== Web3 ===== */
@@ -89,10 +135,8 @@ async function connect(){
  updateHUD();
 }
 
-async function updateHUD(){
- if(!contract)return;
- let txt="已連線\n"+user;
- document.getElementById("hud").innerText=txt;
+function updateHUD(){
+ document.getElementById("hud").innerText="已連線\n"+user;
 }
 
 /* ===== 功能 ===== */
@@ -100,9 +144,9 @@ async function claim(){
  try{
   disableBtns(true);
   const tx=await contract.fortuneClaim(88);
-  toast("送出中");
+  toast("發財金送出");
   await tx.wait();
-  toast("發財金成功");
+  toast("成功");
  }catch(e){toast("失敗")}
  disableBtns(false);
 }
@@ -111,7 +155,7 @@ async function heartbeat(){
  try{
   disableBtns(true);
   const tx=await contract.heartbeatClaim();
-  toast("心跳中");
+  toast("心跳");
   await tx.wait();
   toast("完成");
  }catch(e){toast("失敗")}
@@ -122,7 +166,7 @@ async function ignite(){
  try{
   disableBtns(true);
   const tx=await contract.igniteAndClaim();
-  toast("呼吸中");
+  toast("呼吸");
   await tx.wait();
   toast("完成");
  }catch(e){toast("失敗")}
