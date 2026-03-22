@@ -2,157 +2,765 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>12345 五指山悟空財神殿｜KLINE App Game 成品版</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<title>KLINE App Game｜12345 五指山悟空財神殿 V2</title>
 <style>
-:root{--panel:rgba(8,12,22,.82);--line:rgba(255,215,120,.28);--gold:#ffd978;--cyan:#7ff3ff;--text:#eef4ff;--muted:#b8c7dc;--shadow:0 16px 44px rgba(0,0,0,.42)}
-*{box-sizing:border-box} html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
-#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%, rgba(18,34,60,.85), rgba(4,6,11,1) 58%)} canvas{position:fixed;inset:0;width:100%;height:100%}
-.topbar{position:fixed;left:12px;right:12px;top:12px;z-index:30;display:flex;justify-content:space-between;gap:12px}
-.brand,.statusbar,.left-panel,.right-panel,.fbtn,.help-card,.joy-wrap,.alt-wrap,.enter-btn{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(10px)}
-.brand{padding:12px 14px;border-radius:18px;min-width:min(420px,calc(100vw - 24px))}
-.brand h1{margin:0;color:var(--gold);font-size:clamp(20px,4vw,36px);font-weight:900}
-.brand .sub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5}
-.route{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}.pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-size:12px}
-.statusbar{padding:12px;border-radius:18px;display:grid;gap:8px;min-width:260px}.kv{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:12px}.k{color:var(--muted)}.v{font-weight:800}
-.center-wrap{position:fixed;left:50%;top:41%;transform:translate(-50%,-50%);width:min(42vw,420px);height:min(42vw,420px);z-index:12}
-.core-ring{width:100%;height:100%;border-radius:50%;border:8px double rgba(255,215,120,.78);overflow:hidden;position:relative;background:#000;box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 60px rgba(255,190,60,.18);animation:ringSpin 28s linear infinite}
-.core-ring img{width:100%;height:100%;object-fit:cover;display:block;animation:pulse 2.8s ease-in-out infinite}
-.core-glow{position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(255,215,120,.18);animation:aura 3.6s ease-out infinite}
-.center-label{position:absolute;left:50%;bottom:-44px;transform:translateX(-50%);min-width:260px;text-align:center;padding:10px 14px;border-radius:16px;background:rgba(0,0,0,.56);border:1px solid rgba(255,255,255,.10);font-weight:900}
-.center-label .mini{display:block;margin-top:4px;color:var(--muted);font-size:12px}
-.left-panel,.right-panel{position:fixed;bottom:132px;z-index:26;width:min(360px,calc(50vw - 28px));border-radius:20px;overflow:hidden}
-.left-panel{left:12px}.right-panel{right:12px}.panel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.08)}
-.panel-head h2{margin:0;font-size:18px;color:var(--gold)}.panel-body{padding:12px 14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.04);padding:10px}.label{font-size:11px;color:var(--muted)}.value{font-size:18px;font-weight:900;margin-top:6px}.subv{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
-.center-tip{position:fixed;left:50%;bottom:108px;transform:translateX(-50%);z-index:28;display:none;padding:10px 14px;border-radius:14px;background:rgba(0,0,0,.56);border:1px solid rgba(255,255,255,.12);font-weight:900}
-.center-tip.show{display:block}.crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:15;width:18px;height:18px;pointer-events:none}.crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.9)}.crosshair:before{left:8px;top:0;width:2px;height:18px}.crosshair:after{left:0;top:8px;width:18px;height:2px}
-.mobile-controls{position:fixed;inset:0;pointer-events:none;z-index:31}
-.joy-wrap{position:fixed;left:16px;bottom:96px;width:132px;height:132px;border-radius:50%;pointer-events:auto;touch-action:none}
-.joy-knob{position:absolute;left:41px;top:41px;width:50px;height:50px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.alt-wrap{position:fixed;right:16px;bottom:108px;width:58px;height:220px;border-radius:999px;pointer-events:auto;touch-action:none}
-.alt-track{position:absolute;left:24px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.12)}
-.alt-knob{position:absolute;left:9px;top:85px;width:40px;height:40px;border-radius:50%;background:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.alt-label-top,.alt-label-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900}.alt-label-top{top:-20px}.alt-label-bottom{bottom:-20px}
-.enter-btn{position:fixed;right:86px;bottom:124px;width:92px;height:92px;border-radius:24px;color:#fff;font-size:18px;font-weight:900;pointer-events:auto}
-.footer-grid{position:fixed;left:12px;right:12px;bottom:12px;z-index:30;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-.fbtn{min-height:58px;padding:10px;border-radius:16px;color:#fff;font-weight:900;font-size:14px;cursor:pointer}.fbtn .mini{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.help-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:60;display:none;padding:14px}.help-modal.show{display:block}
-.help-card{max-width:980px;height:calc(100vh - 28px);margin:0 auto;border-radius:20px;overflow:auto}
-.help-head{position:sticky;top:0;padding:14px 16px;background:rgba(10,16,28,.96);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)} .help-head h3{margin:0;color:var(--gold)}
-.help-body{padding:16px;display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.help-box{border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.04);padding:12px}.help-box h4{margin:0 0 8px;color:var(--gold)} .help-box p,.help-box li{line-height:1.7;color:#edf4ff}.help-box ul{margin:8px 0 0 18px}
-.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.act{min-height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-weight:900;font-size:14px}
-@keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}} @keyframes aura{0%{transform:scale(.86);opacity:.6}85%{transform:scale(1.22);opacity:0}100%{opacity:0}}
-@media (max-width:900px){.topbar{display:block}.statusbar{display:none}.center-wrap{width:min(52vw,320px);height:min(52vw,320px)}.left-panel,.right-panel{width:calc(50vw - 18px);bottom:178px}.panel-head h2{font-size:15px}.panel-body{padding:10px}.grid2{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(4,1fr);bottom:8px}}
+:root {
+  --bg:#05070d;
+  --bg2:#0a1320;
+  --panel:rgba(8,12,22,.76);
+  --panel-strong:rgba(8,12,22,.92);
+  --line:rgba(255,215,120,.24);
+  --gold:#ffd978;
+  --gold2:#f0c15c;
+  --cyan:#7ff3ff;
+  --text:#eef4ff;
+  --muted:#adbbd2;
+  --ok:#94ffbf;
+  --warn:#ffd38a;
+  --danger:#ff9e9e;
+  --shadow:0 18px 50px rgba(0,0,0,.40);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
+#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 42%, rgba(18,34,60,.88), rgba(5,7,13,1) 58%);overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+
+.top-hud {
+  position:fixed;left:12px;right:12px;top:12px;z-index:20;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+}
+.brand {
+  max-width:min(78vw,620px);
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:12px 14px;
+  backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+}
+.brand h1 {
+  margin:0;
+  color:var(--gold);
+  font-size:clamp(20px,4vw,36px);
+  font-weight:900;
+  letter-spacing:.4px;
+}
+.brand .sub {
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+.brand .route {
+  margin-top:8px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.pill {
+  padding:6px 10px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  font-size:12px;
+  color:#fff;
+}
+.mini-hud {
+  display:grid;gap:8px;
+}
+.hud-box {
+  min-width:152px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px 12px;
+  backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+}
+.hud-row {
+  display:grid;grid-template-columns:1fr auto;gap:10px;
+  font-size:12px;line-height:1.45;
+}
+.hud-row .k{color:var(--muted)} .hud-row .v{font-weight:900;color:#fff}
+
+.center-orbit {
+  position:fixed;
+  left:50%; top:41%;
+  width:min(50vw,360px); height:min(50vw,360px);
+  transform:translate(-50%,-50%);
+  z-index:8;
+}
+.ring {
+  position:absolute; inset:0; border-radius:50%;
+  border:8px double rgba(255,215,120,.82);
+  box-shadow:0 0 0 4px rgba(255,215,120,.10),0 0 70px rgba(255,195,60,.22);
+  overflow:hidden;
+  animation:ringSpin 34s linear infinite;
+}
+.ring img {
+  width:100%; height:100%; object-fit:cover; display:block;
+  animation:pulse 3.4s ease-in-out infinite;
+}
+.ring-glow {
+  position:absolute; inset:-14px; border-radius:50%;
+  border:1px solid rgba(255,215,120,.16);
+  animation:aura 4.2s ease-out infinite;
+}
+.center-name {
+  position:absolute; left:50%; bottom:-54px; transform:translateX(-50%);
+  min-width:280px;
+  text-align:center;
+  padding:11px 14px;
+  border-radius:18px;
+  background:rgba(0,0,0,.58);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:var(--shadow);
+  font-weight:900;
+}
+.center-name .mini{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
+
+.node-tooltip {
+  position:fixed; left:50%; bottom:112px; transform:translateX(-50%);
+  display:none;
+  z-index:26;
+  padding:11px 14px;
+  border-radius:16px;
+  background:rgba(0,0,0,.56);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:var(--shadow);
+  font-weight:900;
+}
+.node-tooltip.show{display:block}
+
+.crosshair {
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:18px; height:18px; z-index:7; pointer-events:none;
+}
+.crosshair:before,.crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.88)}
+.crosshair:before{left:8px;top:0;width:2px;height:18px}
+.crosshair:after{left:0;top:8px;width:18px;height:2px}
+
+.left-panel,.right-panel {
+  position:fixed; bottom:126px; z-index:16;
+  width:min(360px,calc(50vw - 24px));
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  overflow:hidden;
+  backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+}
+.left-panel{left:12px} .right-panel{right:12px}
+.panel-head {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 14px; background:rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.08)
+}
+.panel-head h2{margin:0;color:var(--gold);font-size:18px}
+.panel-body{padding:12px}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card {
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:10px;
+}
+.card .label{font-size:11px;color:var(--muted)}
+.card .value{margin-top:6px;font-size:18px;font-weight:900}
+.card .subv{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.55}
+
+.mobile-controls{position:fixed;inset:0;z-index:28;pointer-events:none}
+.joy-wrap {
+  position:fixed; left:16px; bottom:106px;
+  width:136px; height:136px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  box-shadow:var(--shadow);
+  pointer-events:auto; touch-action:none;
+}
+.joy-ring {
+  position:absolute; inset:14px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.08);
+}
+.joy-knob {
+  position:absolute; left:43px; top:43px;
+  width:50px; height:50px; border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+}
+
+.alt-wrap {
+  position:fixed; right:16px; bottom:116px;
+  width:62px; height:236px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  box-shadow:var(--shadow);
+  pointer-events:auto; touch-action:none;
+}
+.alt-track {
+  position:absolute; left:26px; top:12px; bottom:12px; width:10px; border-radius:999px;
+  background:rgba(255,255,255,.13);
+}
+.alt-knob {
+  position:absolute; left:10px; top:92px;
+  width:42px; height:42px; border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+}
+.alt-label-top,.alt-label-bottom {
+  position:absolute; left:50%; transform:translateX(-50%);
+  font-size:11px; font-weight:900;
+}
+.alt-label-top{top:-20px} .alt-label-bottom{bottom:-20px}
+
+.enter-btn {
+  position:fixed; right:90px; bottom:132px;
+  width:96px; height:96px; border-radius:24px;
+  border:1px solid rgba(255,255,255,.16);
+  background:var(--panel-strong);
+  color:#fff; font-size:18px; font-weight:900;
+  box-shadow:var(--shadow);
+  pointer-events:auto;
+}
+
+.footer-grid {
+  position:fixed; left:12px; right:12px; bottom:12px; z-index:29;
+  display:grid; grid-template-columns:repeat(8,1fr); gap:8px;
+}
+.fbtn {
+  min-height:58px;
+  padding:10px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:#fff; font-weight:900; font-size:14px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+}
+.fbtn .mini{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:700}
+
+.screen-modal {
+  position:fixed; inset:0; z-index:60;
+  display:none; background:rgba(0,0,0,.78); padding:14px;
+}
+.screen-modal.show{display:block}
+.modal-card {
+  max-width:1020px; height:calc(100vh - 28px);
+  margin:0 auto;
+  background:var(--panel-strong);
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:auto;
+  box-shadow:0 24px 80px rgba(0,0,0,.68);
+}
+.modal-head {
+  position:sticky; top:0; z-index:2;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 16px;
+  background:rgba(8,12,22,.96);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.modal-head h3{margin:0;color:var(--gold)}
+.modal-body {
+  padding:16px;
+  display:grid; grid-template-columns:1.08fr .92fr; gap:14px;
+}
+.modal-box {
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  padding:12px;
+}
+.modal-box h4{margin:0 0 8px;color:var(--gold)}
+.modal-box p,.modal-box li{line-height:1.7;color:#edf4ff}
+.modal-box ul{margin:8px 0 0 18px;padding:0}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.act{min-height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-weight:900;font-size:14px}
+
+.touch-rotate {
+  position:fixed; right:88px; top:86px; width:104px;
+  display:grid; gap:8px; z-index:28; pointer-events:auto;
+}
+.rot-btn {
+  min-height:44px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:var(--panel);
+  color:#fff; font-weight:900;
+  box-shadow:var(--shadow);
+}
+
+@keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes aura{0%{transform:scale(.86);opacity:.62}85%{transform:scale(1.22);opacity:0}100%{opacity:0}}
+
+@media (max-width:980px){
+  .top-hud{display:block}
+  .mini-hud{display:none}
+  .center-wrap{width:min(54vw,320px);height:min(54vw,320px);top:38%}
+  .left-panel,.right-panel{width:calc(50vw - 18px);bottom:186px}
+  .panel-head h2{font-size:15px}
+  .panel-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:repeat(4,1fr)}
+  .touch-rotate{top:98px;right:88px}
+  .modal-body{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div id="app">
-<canvas id="game"></canvas>
-<div class="topbar">
-  <div class="brand">
-    <h1>12345｜五指山悟空財神殿</h1>
-    <div class="sub">成品版前端。這裡不是買賣遊戲，而是 TempleHeart V3.2.3 的前端神殿。主流程：連接錢包 → Approve → 連續三次聖盃 → fortuneClaim。</div>
-    <div class="route">
-      <span class="pill">16888｜廣寒宮入口</span><span class="pill">12345｜五指山</span><span class="pill">11520｜花果山交易所</span><span class="pill">8888｜高老莊</span><span class="pill">7744｜流沙河</span>
+  <canvas id="scene"></canvas>
+
+  <div class="top-hud">
+    <div class="brand">
+      <h1>12345｜五指山悟空財神殿</h1>
+      <div class="sub">V2 遊戲版成品架構。主畫面專注宇宙移動，神殿功能在進入後再開啟。主流程：連接錢包 → Approve → 連續三次聖盃 → fortuneClaim。</div>
+      <div class="route">
+        <span class="pill">16888｜廣寒宮入口</span>
+        <span class="pill">12345｜五指山</span>
+        <span class="pill">11520｜花果山交易所</span>
+        <span class="pill">8888｜高老莊</span>
+        <span class="pill">7744｜流沙河</span>
+      </div>
+    </div>
+    <div class="mini-hud">
+      <div class="hud-box">
+        <div class="hud-row"><div class="k">最近節點</div><div class="v" id="nearestTxt">—</div></div>
+        <div class="hud-row"><div class="k">高度</div><div class="v" id="altitudeTxt">20</div></div>
+        <div class="hud-row"><div class="k">聖盃進度</div><div class="v" id="cupProgressTop">0 / 3</div></div>
+      </div>
     </div>
   </div>
-  <div class="statusbar">
-    <div class="kv"><div class="k">模式</div><div class="v">Temple 成品版</div></div>
-    <div class="kv"><div class="k">最近節點</div><div class="v" id="nearestTxt">12345</div></div>
-    <div class="kv"><div class="k">聖盃進度</div><div class="v" id="cupTxt">0 / 3</div></div>
-    <div class="kv"><div class="k">發財金狀態</div><div class="v" id="fortuneStateTxt">未解鎖</div></div>
-    <div class="kv"><div class="k">點火視窗</div><div class="v">UTC 00:00–00:10</div></div>
+
+  <div class="center-orbit">
+    <div class="ring">
+      <img src="./assets/wukong_center.png" alt="悟空財神">
+      <div class="ring-glow"></div>
+    </div>
+    <div class="center-name">12345｜五指山悟空財神殿<span class="mini">靠近節點後按「進入」，再開啟 TempleHeart 功能</span></div>
+  </div>
+
+  <div class="left-panel">
+    <div class="panel-head">
+      <h2>悟空心臟操作窗</h2>
+      <span class="pill" id="walletBadge">未連線</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-grid">
+        <div class="card"><div class="label">KGEN 餘額</div><div class="value" id="kgenBalance">—</div><div class="subv">部署後讀取</div></div>
+        <div class="card"><div class="label">Allowance</div><div class="value" id="allowanceTxt">—</div><div class="subv">Approve 後更新</div></div>
+        <div class="card"><div class="label">聖盃進度</div><div class="value" id="cupProgressSide">0 / 3</div><div class="subv">連續三次聖盃才可領發財金</div></div>
+        <div class="card"><div class="label">操作焦點</div><div class="value" id="focusTxt">fortuneClaim</div><div class="subv">底部按鍵同步切換</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="panel-head">
+      <h2>悟空心臟規則窗</h2>
+      <span class="pill">TempleHeart V3.2.3</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-grid">
+        <div class="card"><div class="label">fortuneClaim</div><div class="value">1 ~ 888</div><div class="subv">30 天冷卻 / 每 epoch 500 名</div></div>
+        <div class="card"><div class="label">heartbeatClaim</div><div class="value">每小時</div><div class="subv">整點心跳儀式</div></div>
+        <div class="card"><div class="label">igniteAndClaim</div><div class="value">00:00</div><div class="subv">UTC 00:00–00:10 轉日呼吸</div></div>
+        <div class="card"><div class="label">Heart ↔ Brain</div><div class="value">11520</div><div class="subv">循環血庫 / brainVault 待部署</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="crosshair"></div>
+  <div class="node-tooltip" id="nodeTip"></div>
+
+  <div class="mobile-controls">
+    <div class="joy-wrap" id="joyWrap"><div class="joy-ring"></div><div class="joy-knob" id="joyKnob"></div></div>
+    <div class="alt-wrap" id="altWrap">
+      <div class="alt-label-top">上升</div>
+      <div class="alt-track"></div>
+      <div class="alt-knob" id="altKnob"></div>
+      <div class="alt-label-bottom">下降</div>
+    </div>
+    <button class="enter-btn" id="enterBtn">進入</button>
+  </div>
+
+  <div class="touch-rotate">
+    <button class="rot-btn" id="turnLeftBtn">左轉</button>
+    <button class="rot-btn" id="turnRightBtn">右轉</button>
+  </div>
+
+  <div class="footer-grid">
+    <button class="fbtn" id="btnPhoto">📸 拍照存證<span class="mini">保留</span></button>
+    <button class="fbtn" id="btnRecord">🎥 神殿留影錄影<span class="mini">保留</span></button>
+    <button class="fbtn" id="btnFront">🤳 前鏡自拍<span class="mini">保留</span></button>
+    <button class="fbtn" id="btnRear">🌌 後鏡巡禮<span class="mini">保留</span></button>
+    <button class="fbtn" id="btnFortune">🧧 發財金<span class="mini">1 ~ 888</span></button>
+    <button class="fbtn" id="btnHeartbeat">🫀 整點心跳<span class="mini">每小時一次</span></button>
+    <button class="fbtn" id="btnIgnite">🌬️ 轉日呼吸<span class="mini">UTC 00:00–00:10</span></button>
+    <button class="fbtn" id="btnGuide">🗣️ 客服 / 五指山導覽<span class="mini">保留 KGEN 介紹</span></button>
+  </div>
+
+  <div class="screen-modal" id="templeModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modalTitle">五指山神殿操作中心</h3>
+        <button class="fbtn" style="min-height:auto;padding:10px 14px;width:auto" id="closeModalBtn">關閉</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-box">
+          <h4 id="mainTitle">發財金流程</h4>
+          <div id="mainBody"></div>
+          <div class="act-grid">
+            <button class="act" id="actConnect">🔗 連接錢包</button>
+            <button class="act" id="actApprove">✅ Approve 授權</button>
+            <button class="act" id="actCup">🥢 三次聖盃</button>
+            <button class="act" id="actFortune">🧧 fortuneClaim</button>
+            <button class="act" id="actHeartbeat">🫀 heartbeatClaim</button>
+            <button class="act" id="actIgnite">🌬️ igniteAndClaim</button>
+            <button class="act" id="actVow">🙏 vowTo 還願</button>
+            <button class="act" id="actLamp">🪔 lightLamp 點燈</button>
+            <button class="act" id="actWish">✨ makeWish 許願</button>
+          </div>
+          <p id="actionState" style="margin-top:12px;color:var(--cyan);font-weight:800">狀態：尚未開始</p>
+        </div>
+        <div class="modal-box">
+          <h4>完整說明</h4>
+          <div id="sideBody"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<div class="center-wrap">
-  <div class="core-ring"><img src="./assets/wukong_center.png" alt="悟空財神"/><div class="core-glow"></div></div>
-  <div class="center-label">12345｜五指山悟空財神殿<span class="mini">靠近後按「進入」，開啟 TempleHeart 操作</span></div>
-</div>
-<div class="left-panel"><div class="panel-head"><h2>悟空心臟操作窗</h2><span class="pill" id="walletBadge">未連線</span></div><div class="panel-body"><div class="grid2">
-<div class="card"><div class="label">KGEN 餘額</div><div class="value" id="kgenBal">—</div><div class="subv">部署後讀取</div></div>
-<div class="card"><div class="label">Allowance</div><div class="value" id="allowTxt">—</div><div class="subv">Approve 後更新</div></div>
-<div class="card"><div class="label">聖盃進度</div><div class="value" id="cupTxt2">0 / 3</div><div class="subv">連續三次聖盃才可領發財金</div></div>
-<div class="card"><div class="label">操作焦點</div><div class="value" id="focusTxt">fortuneClaim</div><div class="subv">底部按鍵會同步切換</div></div>
-</div></div></div>
-<div class="right-panel"><div class="panel-head"><h2>悟空心臟規則窗</h2><span class="pill">TempleHeart V3.2.3</span></div><div class="panel-body"><div class="grid2">
-<div class="card"><div class="label">fortuneClaim</div><div class="value">1 ~ 888</div><div class="subv">30 天冷卻 / 每 epoch 500 名</div></div>
-<div class="card"><div class="label">heartbeatClaim</div><div class="value">每小時</div><div class="subv">整點心跳儀式</div></div>
-<div class="card"><div class="label">igniteAndClaim</div><div class="value">00:00</div><div class="subv">UTC 00:00–00:10 轉日呼吸</div></div>
-<div class="card"><div class="label">Heart ↔ Brain</div><div class="value">11520</div><div class="subv">循環血庫 / brainVault 待部署</div></div>
-</div></div></div>
-<div id="centerTip" class="center-tip"></div><div class="crosshair"></div>
-<div class="mobile-controls">
-  <div class="joy-wrap" id="joyWrap"><div class="joy-knob" id="joyKnob"></div></div>
-  <div class="alt-wrap" id="altWrap"><div class="alt-label-top">上升</div><div class="alt-track"></div><div class="alt-knob" id="altKnob"></div><div class="alt-label-bottom">下降</div></div>
-  <button class="enter-btn" id="enterBtn">進入</button>
-</div>
-<div class="footer-grid">
-  <button class="fbtn" id="btnPhoto">📸 拍照存證<span class="mini">保留</span></button>
-  <button class="fbtn" id="btnRec">🎥 神殿留影錄影<span class="mini">保留</span></button>
-  <button class="fbtn" id="btnFront">🤳 前鏡自拍<span class="mini">保留</span></button>
-  <button class="fbtn" id="btnRear">🌌 後鏡巡禮<span class="mini">保留</span></button>
-  <button class="fbtn" id="btnFortune">🧧 發財金<span class="mini">1 ~ 888</span></button>
-  <button class="fbtn" id="btnHeartbeat">🫀 整點心跳<span class="mini">每小時一次</span></button>
-  <button class="fbtn" id="btnIgnite">🌬️ 轉日呼吸<span class="mini">UTC 00:00–00:10</span></button>
-  <button class="fbtn" id="btnGuide">🗣️ 客服 / 五指山導覽<span class="mini">保留 KGEN 介紹</span></button>
-</div>
-<div class="help-modal" id="templeModal"><div class="help-card">
-<div class="help-head"><h3>五指山神殿操作中心</h3><button class="fbtn" style="min-height:auto;padding:10px 14px;width:auto" id="closeModalBtn">關閉</button></div>
-<div class="help-body">
-<div class="help-box"><h4 id="mainTitle">發財金流程</h4><div id="mainBody"></div>
-<div class="act-grid">
-<button class="act" id="actApprove">✅ Approve 授權</button><button class="act" id="actCup">🥢 三次聖盃</button>
-<button class="act" id="actFortune">🧧 fortuneClaim</button><button class="act" id="actHeartbeat">🫀 heartbeatClaim</button>
-<button class="act" id="actIgnite">🌬️ igniteAndClaim</button><button class="act" id="actVow">🙏 vowTo 還願</button>
-<button class="act" id="actLamp">🪔 lightLamp 點燈</button><button class="act" id="actWish">✨ makeWish 許願</button>
-</div><p id="actionState" style="margin-top:12px;color:var(--cyan);font-weight:800">狀態：尚未開始</p></div>
-<div class="help-box"><h4>完整說明</h4><div id="sideBody"></div></div>
-</div></div></div>
-</div>
+
 <script>
-const state={x:0,y:20,z:180,yaw:Math.PI,keys:{},nearestId:"12345",stars:Array.from({length:260},()=>({x:(Math.random()-0.5)*1800,y:(Math.random()-0.5)*800,z:Math.random()*2200+40,s:Math.random()*2+0.5})),mobile:{mx:0,my:0,alt:0},walletConnected:false,allowance:false,cupCount:0,focus:"fortune"};
-const nodes={"16888":{x:-220,y:0,z:-140,color:"#9fd8ff",name:"16888｜廣寒宮入口"},"12345":{x:0,y:0,z:0,color:"#ffd978",name:"12345｜五指山悟空財神殿"},"11520":{x:260,y:0,z:-80,color:"#7ff3ff",name:"11520｜花果山交易所"},"8888":{x:180,y:0,z:220,color:"#ffb87f",name:"8888｜高老莊"},"7744":{x:-140,y:0,z:240,color:"#bda7ff",name:"7744｜流沙河"}};
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} addEventListener('resize',resize); resize();
-const $=s=>document.querySelector(s); const ui={nearest:$("#nearestTxt"),cup:$("#cupTxt"),cup2:$("#cupTxt2"),fortuneState:$("#fortuneStateTxt"),wallet:$("#walletBadge"),focus:$("#focusTxt"),tip:$("#centerTip"),modal:$("#templeModal"),mainBody:$("#mainBody"),sideBody:$("#sideBody"),actionState:$("#actionState")};
-function toast(msg){ui.tip.textContent=msg;ui.tip.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>ui.tip.classList.remove('show'),2200)}
-function updateUI(){ui.nearest.textContent=state.nearestId||"—";ui.cup.textContent=state.cupCount+" / 3";ui.cup2.textContent=state.cupCount+" / 3";ui.fortuneState.textContent=state.cupCount>=3?"已解鎖":"未解鎖";ui.wallet.textContent=state.walletConnected?"已連線":"未連線";ui.focus.textContent=state.focus}
-function setFocus(kind){state.focus=kind; const map={
-fortune:{main:`<p>主流程：連接錢包 → Approve → 連續三次聖盃 → fortuneClaim 發財金。</p><ul><li>發財金範圍：1 到 888</li><li>冷卻：30 天</li><li>每個 epoch：最多 500 名</li></ul>`,side:`<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣。發財金是其中最核心的神殿行為。</p><p>三次聖盃完成前，不能領 fortuneClaim。</p>`},
-heartbeat:{main:`<p>heartbeatClaim 是固定節奏儀式。</p><ul><li>規則：每小時一次</li><li>用途：維持悟空心臟活性</li></ul>`,side:`<p>這不是交易功能，而是神殿節奏功能。</p>`},
-ignite:{main:`<p>igniteAndClaim 是轉日時刻的呼吸。</p><ul><li>時間：UTC 00:00–00:10</li><li>每天只有一次視窗</li></ul>`,side:`<p>右側垂直滑桿控制高度，底部「轉日呼吸」按鍵會直接切到這個頁籤。</p>`},
-guide:{main:`<p>這裡是 12345 五指山悟空財神殿，不是 16888 廣寒宮入口，也不是買賣遊戲頁。</p><p>核心：Approve、三次聖盃、fortuneClaim、heartbeatClaim、igniteAndClaim、vowTo、lightLamp、makeWish。</p>`,side:`<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣。發財金、還願、點燈、許願流程都圍繞 KGEN 展開。</p><p>Heart 將對接 11520 Brain 作為循環血庫。</p>`}}; ui.mainBody.innerHTML=map[kind].main; ui.sideBody.innerHTML=map[kind].side; updateUI()}
-function openModal(kind="fortune"){setFocus(kind);ui.modal.classList.add('show')} function closeModal(){ui.modal.classList.remove('show')}
-document.getElementById('closeModalBtn').onclick=closeModal;
-document.getElementById('actApprove').onclick=()=>{state.walletConnected=true;state.allowance=true;document.getElementById('allowTxt').textContent='已授權';document.getElementById('kgenBal').textContent='待接鏈';toast('Approve 已模擬完成，待合約部署後可正式接鏈。');updateUI()};
-document.getElementById('actCup').onclick=()=>{state.cupCount=Math.min(3,state.cupCount+1);ui.actionState.textContent=state.cupCount>=3?'狀態：連續三次聖盃完成，可以領 fortuneClaim 發財金。':`狀態：聖盃完成 ${state.cupCount} / 3，還需要連續完成。`;toast(state.cupCount>=3?'三次聖盃完成，可領發財金。':`聖盃 ${state.cupCount} / 3`);updateUI()};
-document.getElementById('actFortune').onclick=()=>{if(state.cupCount<3){toast('尚未完成連續三次聖盃，不能領發財金。');return;}ui.actionState.textContent='狀態：TempleHeart 尚未部署。已達三次聖盃條件，可進行 fortuneClaim（1~888 / 30天 / 500名）。';toast('已達條件：fortuneClaim（待部署後接鏈）')};
-document.getElementById('actHeartbeat').onclick=()=>{ui.actionState.textContent='狀態：heartbeatClaim 每小時一次（待部署後接鏈）';toast('heartbeatClaim：每小時一次')};
-document.getElementById('actIgnite').onclick=()=>{ui.actionState.textContent='狀態：igniteAndClaim UTC 00:00–00:10（待部署後接鏈）';toast('igniteAndClaim：UTC 00:00–00:10')};
-document.getElementById('actVow').onclick=()=>{ui.actionState.textContent='狀態：vowTo 還願補血（待部署後接鏈）';toast('vowTo：還願補血')};
-document.getElementById('actLamp').onclick=()=>{ui.actionState.textContent='狀態：lightLamp 點燈續命（待部署後接鏈）';toast('lightLamp：點燈續命')};
-document.getElementById('actWish').onclick=()=>{ui.actionState.textContent='狀態：makeWish 許願 hash（待部署後接鏈）';toast('makeWish：許願 hash')};
-document.getElementById('btnPhoto').onclick=()=>toast('拍照存證：保留功能，後續可接裝置相機');
-document.getElementById('btnRec').onclick=()=>toast('神殿留影錄影：保留功能，後續可接錄影');
-document.getElementById('btnFront').onclick=()=>toast('前鏡自拍：保留功能');
-document.getElementById('btnRear').onclick=()=>toast('後鏡巡禮：保留功能');
-document.getElementById('btnFortune').onclick=()=>openModal('fortune'); document.getElementById('btnHeartbeat').onclick=()=>openModal('heartbeat'); document.getElementById('btnIgnite').onclick=()=>openModal('ignite'); document.getElementById('btnGuide').onclick=()=>openModal('guide');
-const joyWrap=document.getElementById('joyWrap'), joyKnob=document.getElementById('joyKnob');
-function joyMove(x,y){const r=joyWrap.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2; let dx=x-cx,dy=y-cy; const max=38,len=Math.hypot(dx,dy)||1; if(len>max){dx=dx/len*max;dy=dy/len*max;} state.mobile.mx=dx/max; state.mobile.my=dy/max; joyKnob.style.left=(41+dx)+'px'; joyKnob.style.top=(41+dy)+'px'}
-function joyReset(){state.mobile.mx=0;state.mobile.my=0;joyKnob.style.left='41px';joyKnob.style.top='41px'}
-joyWrap.addEventListener('pointerdown',e=>{e.preventDefault();joyMove(e.clientX,e.clientY)}); joyWrap.addEventListener('pointermove',e=>{if(e.buttons) joyMove(e.clientX,e.clientY)}); joyWrap.addEventListener('pointerup',joyReset); joyWrap.addEventListener('pointercancel',joyReset);
-const altWrap=document.getElementById('altWrap'),altKnob=document.getElementById('altKnob');
-function altMove(yc){const r=altWrap.getBoundingClientRect(), top=12,bottom=r.height-52; let y=yc-r.top-20; y=Math.max(top,Math.min(bottom,y)); altKnob.style.top=y+'px'; const center=(top+bottom)/2; state.mobile.alt=(center-y)/((bottom-top)/2)}
-function altReset(){altKnob.style.top='85px'; state.mobile.alt=0}
-altWrap.addEventListener('pointerdown',e=>{e.preventDefault();altMove(e.clientY)}); altWrap.addEventListener('pointermove',e=>{if(e.buttons) altMove(e.clientY)}); altWrap.addEventListener('pointerup',altReset); altWrap.addEventListener('pointercancel',altReset);
-document.getElementById('enterBtn').onclick=()=>openModal(state.nearestId==='12345'?'fortune':'guide');
-addEventListener('keydown',e=>{state.keys[e.key.toLowerCase()]=true;if(e.key==='Escape') closeModal()}); addEventListener('keyup',e=>state.keys[e.key.toLowerCase()]=false);
-function update(dt){const dead=.12; const move=(state.keys['w']?1:0)-(state.keys['s']?1:0)+(Math.abs(state.mobile.my)>dead?-state.mobile.my:0); const strafe=(state.keys['d']?1:0)-(state.keys['a']?1:0)+(Math.abs(state.mobile.mx)>dead?state.mobile.mx:0); const vertical=(state.keys[' ']?1:0)-(state.keys['shift']?1:0)+state.mobile.alt; const yawMove=(state.keys['e']?1:0)-(state.keys['q']?1:0); state.yaw+=yawMove*dt*1.6; const base=115, fx=Math.cos(state.yaw), fz=Math.sin(state.yaw), rx=Math.cos(state.yaw+Math.PI/2), rz=Math.sin(state.yaw+Math.PI/2); state.x+=(fx*move+rx*strafe)*base*dt; state.z+=(fz*move+rz*strafe)*base*dt; state.y+=vertical*base*.7*dt; state.y=Math.max(-80,Math.min(220,state.y)); let nearest=null,best=Infinity; Object.entries(nodes).forEach(([id,n])=>{const dx=n.x-state.x,dy=n.y-state.y,dz=n.z-state.z,d=Math.hypot(dx,dy,dz); if(d<best){best=d; nearest=id}}); state.nearestId=best<110?nearest:null; if(state.nearestId){ui.tip.textContent=`最近節點：${nodes[state.nearestId].name}｜按「進入」`; ui.tip.classList.add('show')} else ui.tip.classList.remove('show'); updateUI()}
-function project(wx,wy,wz){const dx=wx-state.x,dy=wy-state.y,dz=wz-state.z, cy=Math.cos(-state.yaw),sy=Math.sin(-state.yaw), rx=dx*cy-dz*sy, rz=dx*sy+dz*cy; if(rz<=10) return null; const f=420/rz; return {x:innerWidth/2+rx*f,y:innerHeight/2-dy*f,s:Math.max(2,f*18)}}
-function drawBackground(){const w=innerWidth,h=innerHeight; ctx.clearRect(0,0,w,h); const g=ctx.createRadialGradient(w/2,h*.42,20,w/2,h*.58,w*.8); g.addColorStop(0,'rgba(22,36,62,.78)'); g.addColorStop(1,'rgba(2,4,8,1)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h); for(const s of state.stars){const p=project(s.x,s.y,s.z); if(!p) continue; ctx.fillStyle='rgba(127,243,255,.92)'; ctx.fillRect(p.x,p.y,s.s,s.s)} ctx.strokeStyle='rgba(127,243,255,.07)'; for(let gx=-680;gx<=680;gx+=60){let first=true;ctx.beginPath(); for(let gz=-680;gz<=680;gz+=40){const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false}else ctx.lineTo(p.x,p.y)} ctx.stroke()} for(let gz=-680;gz<=680;gz+=60){let first=true;ctx.beginPath(); for(let gx=-680;gx<=680;gx+=40){const p=project(gx,0,gz); if(!p) continue; if(first){ctx.moveTo(p.x,p.y);first=false}else ctx.lineTo(p.x,p.y)} ctx.stroke()}}
-function drawNode(id,node){const p=project(node.x,node.y,node.z); if(!p) return; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=node.color; ctx.shadowBlur=18; ctx.shadowColor=node.color; ctx.fill(); ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.s*1.9,0,Math.PI*2); ctx.strokeStyle=id===state.nearestId?'rgba(255,255,255,.95)':'rgba(255,255,255,.20)'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#fff'; ctx.font='700 12px sans-serif'; ctx.fillText(node.name,p.x+p.s+8,p.y+4)}
-let last=performance.now(); function loop(now){const dt=Math.min(.033,(now-last)/1000); last=now; update(dt); drawBackground(); Object.entries(nodes).forEach(([id,n])=>drawNode(id,n)); requestAnimationFrame(loop)} updateUI(); setFocus('fortune'); requestAnimationFrame(loop);
+const state = {
+  x: 0, y: 20, z: 180,
+  yaw: Math.PI,
+  keys: {},
+  nearestId: "12345",
+  walletConnected: false,
+  walletAddress: "",
+  approved: false,
+  cupCount: 0,
+  focus: "fortune",
+  stars: Array.from({length:260}, ()=>({
+    x:(Math.random()-0.5)*1800,
+    y:(Math.random()-0.5)*800,
+    z:Math.random()*2200+40,
+    s:Math.random()*2+0.5
+  })),
+  mobile: {mx:0,my:0,alt:0,turnL:false,turnR:false}
+};
+
+const nodes = {
+  "16888": { x:-220, y:0, z:-140, color:"#9fd8ff", name:"16888｜廣寒宮入口" },
+  "12345": { x:0, y:0, z:0, color:"#ffd978", name:"12345｜五指山悟空財神殿" },
+  "11520": { x:260, y:0, z:-80, color:"#7ff3ff", name:"11520｜花果山交易所" },
+  "8888": { x:180, y:0, z:220, color:"#ffb87f", name:"8888｜高老莊" },
+  "7744": { x:-140, y:0, z:240, color:"#bda7ff", name:"7744｜流沙河" },
+};
+
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+function resize(){
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+addEventListener('resize', resize); resize();
+
+const $ = s => document.querySelector(s);
+const ui = {
+  nearest: $("#nearestTxt"),
+  altitude: $("#altitudeTxt"),
+  cupTop: $("#cupProgressTop"),
+  cupSide: $("#cupProgressSide"),
+  fortuneState: $("#fortuneStateTxt"),
+  wallet: $("#walletBadge"),
+  focus: $("#focusTxt"),
+  nodeTip: $("#nodeTip"),
+  modal: $("#templeModal"),
+  mainBody: $("#mainBody"),
+  sideBody: $("#sideBody"),
+  actionState: $("#actionState"),
+  kgenBalance: $("#kgenBalance"),
+  allowance: $("#allowanceTxt"),
+};
+
+function toast(msg){
+  ui.nodeTip.textContent = msg;
+  ui.nodeTip.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> ui.nodeTip.classList.remove('show'), 2300);
+}
+
+function updateStatusUI(){
+  ui.nearest.textContent = state.nearestId || "—";
+  ui.altitude.textContent = String(Math.round(state.y));
+  ui.cupTop.textContent = `${state.cupCount} / 3`;
+  ui.cupSide.textContent = `${state.cupCount} / 3`;
+  ui.fortuneState.textContent = state.cupCount >= 3 ? "已解鎖" : "未解鎖";
+  ui.wallet.textContent = state.walletConnected ? "已連線" : "未連線";
+  ui.focus.textContent = state.focus;
+  ui.kgenBalance.textContent = state.walletConnected ? "待接鏈" : "—";
+  ui.allowance.textContent = state.approved ? "已授權" : "—";
+}
+
+function setFocus(kind){
+  state.focus = kind;
+  const data = {
+    fortune: {
+      main: `<p>主流程：連接錢包 → Approve → 連續三次聖盃 → fortuneClaim 發財金。</p>
+      <ul>
+        <li>發財金範圍：1 到 888</li>
+        <li>冷卻：30 天</li>
+        <li>每個 epoch：最多 500 名</li>
+      </ul>`,
+      side: `<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣。發財金、還願、點燈、許願流程都圍繞 KGEN 展開。</p>
+      <p>三次聖盃完成前，不能領 fortuneClaim。</p>`
+    },
+    heartbeat: {
+      main: `<p>heartbeatClaim 是固定節奏儀式。</p>
+      <ul><li>規則：每小時一次</li><li>用途：維持悟空心臟活性</li></ul>`,
+      side: `<p>這不是買賣功能，而是神殿節奏功能。</p>`
+    },
+    ignite: {
+      main: `<p>igniteAndClaim 是轉日時刻的呼吸。</p>
+      <ul><li>時間：UTC 00:00–00:10</li><li>每天只有一次視窗</li></ul>`,
+      side: `<p>右側垂直滑桿控制高度。底部「轉日呼吸」按鍵會直接切到這個頁籤。</p>`
+    },
+    guide: {
+      main: `<p>這裡是 12345 五指山悟空財神殿，不是 16888 廣寒宮入口，也不是買賣遊戲頁。</p>
+      <p>核心功能：Approve、三次聖盃、fortuneClaim、heartbeatClaim、igniteAndClaim、vowTo、lightLamp、makeWish。</p>`,
+      side: `<p><b>KGEN</b> 是 TempleHeart 互動的核心代幣，會沿著 Heart ↔ 11520 Brain 的邏輯串接。</p>
+      <p>TempleHeart 合約尚未部署，這版先把完整產品體驗做成可展示成品。</p>`
+    }
+  };
+  ui.mainBody.innerHTML = data[kind].main;
+  ui.sideBody.innerHTML = data[kind].side;
+  updateStatusUI();
+}
+
+function openModal(kind="fortune"){ setFocus(kind); ui.modal.classList.add('show'); }
+function closeModal(){ ui.modal.classList.remove('show'); }
+document.getElementById('closeModalBtn').onclick = closeModal;
+
+// Actions
+async function connectWallet(){
+  if(window.ethereum){
+    try{
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      state.walletConnected = true;
+      state.walletAddress = accounts && accounts[0] ? accounts[0] : "已連線";
+      toast('錢包已連線：' + state.walletAddress.slice(0,6) + '...' + state.walletAddress.slice(-4));
+    }catch(err){
+      toast('連線取消，先保留前端流程');
+    }
+  } else {
+    state.walletConnected = true;
+    state.walletAddress = "展示模式";
+    toast('未偵測到錢包，切換展示模式');
+  }
+  updateStatusUI();
+}
+document.getElementById('actConnect').onclick = connectWallet;
+
+document.getElementById('actApprove').onclick = ()=>{
+  if(!state.walletConnected){ toast('請先連接錢包'); return; }
+  state.approved = true;
+  ui.actionState.textContent = '狀態：Approve 已完成。部署後即可正式簽名授權。';
+  toast('Approve 已完成（展示流程）');
+  updateStatusUI();
+};
+document.getElementById('actCup').onclick = ()=>{
+  state.cupCount = Math.min(3, state.cupCount + 1);
+  ui.actionState.textContent = state.cupCount >= 3
+    ? '狀態：連續三次聖盃完成，可以領 fortuneClaim 發財金。'
+    : `狀態：聖盃完成 ${state.cupCount} / 3，還需要連續完成。`;
+  toast(state.cupCount >= 3 ? '三次聖盃完成，可領發財金。' : `聖盃 ${state.cupCount} / 3`);
+  updateStatusUI();
+};
+document.getElementById('actFortune').onclick = ()=>{
+  if(state.cupCount < 3){ toast('尚未完成連續三次聖盃，不能領發財金。'); return; }
+  ui.actionState.textContent = '狀態：TempleHeart 尚未部署。已達三次聖盃條件，可進行 fortuneClaim（1~888 / 30天 / 500名）。';
+  toast('已達條件：fortuneClaim（待部署後接鏈）');
+};
+document.getElementById('actHeartbeat').onclick = ()=>{ ui.actionState.textContent = '狀態：heartbeatClaim 每小時一次（待部署後接鏈）'; toast('heartbeatClaim：每小時一次'); };
+document.getElementById('actIgnite').onclick = ()=>{ ui.actionState.textContent = '狀態：igniteAndClaim UTC 00:00–00:10（待部署後接鏈）'; toast('igniteAndClaim：UTC 00:00–00:10'); };
+document.getElementById('actVow').onclick = ()=>{ ui.actionState.textContent = '狀態：vowTo 還願補血（待部署後接鏈）'; toast('vowTo：還願補血'); };
+document.getElementById('actLamp').onclick = ()=>{ ui.actionState.textContent = '狀態：lightLamp 點燈續命（待部署後接鏈）'; toast('lightLamp：點燈續命'); };
+document.getElementById('actWish').onclick = ()=>{ ui.actionState.textContent = '狀態：makeWish 許願 hash（待部署後接鏈）'; toast('makeWish：許願 hash'); };
+
+// Footer 8 buttons preserved
+document.getElementById('btnPhoto').onclick = ()=> toast('拍照存證：保留功能，後續可接裝置相機');
+document.getElementById('btnRecord').onclick = ()=> toast('神殿留影錄影：保留功能，後續可接錄影');
+document.getElementById('btnFront').onclick = ()=> toast('前鏡自拍：保留功能');
+document.getElementById('btnRear').onclick = ()=> toast('後鏡巡禮：保留功能');
+document.getElementById('btnFortune').onclick = ()=> openModal('fortune');
+document.getElementById('btnHeartbeat').onclick = ()=> openModal('heartbeat');
+document.getElementById('btnIgnite').onclick = ()=> openModal('ignite');
+document.getElementById('btnGuide').onclick = ()=> openModal('guide');
+
+// Mobile joystick
+const joyWrap = document.getElementById('joyWrap');
+const joyKnob = document.getElementById('joyKnob');
+function joyMove(clientX, clientY){
+  const r = joyWrap.getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  let dx = clientX - cx, dy = clientY - cy;
+  const max = 38, len = Math.hypot(dx,dy) || 1;
+  if(len > max){ dx = dx/len*max; dy = dy/len*max; }
+  state.mobile.mx = dx / max;
+  state.mobile.my = dy / max;
+  joyKnob.style.left = (43 + dx) + 'px';
+  joyKnob.style.top = (43 + dy) + 'px';
+}
+function joyReset(){ state.mobile.mx = 0; state.mobile.my = 0; joyKnob.style.left = '43px'; joyKnob.style.top = '43px'; }
+joyWrap.addEventListener('pointerdown', e => { e.preventDefault(); joyMove(e.clientX, e.clientY); });
+joyWrap.addEventListener('pointermove', e => { if(e.buttons) joyMove(e.clientX, e.clientY); });
+joyWrap.addEventListener('pointerup', joyReset);
+joyWrap.addEventListener('pointercancel', joyReset);
+
+// Altitude slider
+const altWrap = document.getElementById('altWrap');
+const altKnob = document.getElementById('altKnob');
+function altMove(clientY){
+  const r = altWrap.getBoundingClientRect();
+  const top = 12, bottom = r.height - 54;
+  let y = clientY - r.top - 21;
+  y = Math.max(top, Math.min(bottom, y));
+  altKnob.style.top = y + 'px';
+  const center = (top + bottom) / 2;
+  state.mobile.alt = (center - y) / ((bottom - top) / 2);
+}
+function altReset(){ altKnob.style.top = '92px'; state.mobile.alt = 0; }
+altWrap.addEventListener('pointerdown', e => { e.preventDefault(); altMove(e.clientY); });
+altWrap.addEventListener('pointermove', e => { if(e.buttons) altMove(e.clientY); });
+altWrap.addEventListener('pointerup', altReset);
+altWrap.addEventListener('pointercancel', altReset);
+
+// Turn buttons
+document.getElementById('turnLeftBtn').addEventListener('pointerdown', ()=> state.mobile.turnL = true);
+document.getElementById('turnLeftBtn').addEventListener('pointerup', ()=> state.mobile.turnL = false);
+document.getElementById('turnLeftBtn').addEventListener('pointercancel', ()=> state.mobile.turnL = false);
+document.getElementById('turnRightBtn').addEventListener('pointerdown', ()=> state.mobile.turnR = true);
+document.getElementById('turnRightBtn').addEventListener('pointerup', ()=> state.mobile.turnR = false);
+document.getElementById('turnRightBtn').addEventListener('pointercancel', ()=> state.mobile.turnR = false);
+
+// Enter button
+document.getElementById('enterBtn').onclick = ()=> openModal(state.nearestId === '12345' ? 'fortune' : 'guide');
+
+// keyboard fallback
+addEventListener('keydown', e=>{ state.keys[e.key.toLowerCase()] = true; if(e.key === 'Escape') closeModal(); });
+addEventListener('keyup', e=>{ state.keys[e.key.toLowerCase()] = false; });
+
+function update(dt){
+  const dead = 0.12;
+  const move = ((state.keys['w']?1:0) - (state.keys['s']?1:0)) + (Math.abs(state.mobile.my)>dead ? -state.mobile.my : 0);
+  const strafe = ((state.keys['d']?1:0) - (state.keys['a']?1:0)) + (Math.abs(state.mobile.mx)>dead ? state.mobile.mx : 0);
+  const vertical = ((state.keys[' ']?1:0) - (state.keys['shift']?1:0)) + state.mobile.alt;
+  const yawMove = ((state.keys['e']?1:0) - (state.keys['q']?1:0)) + (state.mobile.turnR?1:0) - (state.mobile.turnL?1:0);
+
+  state.yaw += yawMove * dt * 1.55;
+  const base = 116;
+  const fx = Math.cos(state.yaw), fz = Math.sin(state.yaw);
+  const rx = Math.cos(state.yaw + Math.PI/2), rz = Math.sin(state.yaw + Math.PI/2);
+  state.x += (fx*move + rx*strafe) * base * dt;
+  state.z += (fz*move + rz*strafe) * base * dt;
+  state.y += vertical * base * .72 * dt;
+  state.y = Math.max(-80, Math.min(220, state.y));
+
+  let nearest = null, best = Infinity;
+  Object.entries(nodes).forEach(([id,n])=>{
+    const dx=n.x-state.x, dy=n.y-state.y, dz=n.z-state.z;
+    const d = Math.hypot(dx,dy,dz);
+    if(d<best){ best=d; nearest=id; }
+  });
+  state.nearestId = best < 110 ? nearest : null;
+
+  if(state.nearestId){
+    ui.nodeTip.textContent = `最近節點：${nodes[state.nearestId].name}｜按「進入」`;
+    ui.nodeTip.classList.add('show');
+  } else {
+    ui.nodeTip.classList.remove('show');
+  }
+  updateStatusUI();
+}
+
+function project(wx, wy, wz){
+  const dx = wx - state.x, dy = wy - state.y, dz = wz - state.z;
+  const cy = Math.cos(-state.yaw), sy = Math.sin(-state.yaw);
+  const rx = dx*cy - dz*sy;
+  const rz = dx*sy + dz*cy;
+  if(rz <= 10) return null;
+  const f = 420 / rz;
+  return {
+    x: innerWidth/2 + rx*f,
+    y: innerHeight/2 - dy*f,
+    s: Math.max(2, f*18)
+  };
+}
+
+function drawBackground(){
+  const w = innerWidth, h = innerHeight;
+  ctx.clearRect(0,0,w,h);
+  const g = ctx.createRadialGradient(w/2,h*.42,20,w/2,h*.58,w*.82);
+  g.addColorStop(0,'rgba(22,36,62,.78)');
+  g.addColorStop(1,'rgba(2,4,8,1)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,w,h);
+
+  for(const s of state.stars){
+    const p = project(s.x,s.y,s.z); if(!p) continue;
+    ctx.fillStyle = 'rgba(127,243,255,.92)';
+    ctx.fillRect(p.x,p.y,s.s,s.s);
+  }
+
+  ctx.strokeStyle = 'rgba(127,243,255,.07)';
+  for(let gx=-680; gx<=680; gx+=60){
+    let first=true; ctx.beginPath();
+    for(let gz=-680; gz<=680; gz+=40){
+      const p = project(gx,0,gz); if(!p) continue;
+      if(first){ ctx.moveTo(p.x,p.y); first=false; } else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+  for(let gz=-680; gz<=680; gz+=60){
+    let first=true; ctx.beginPath();
+    for(let gx=-680; gx<=680; gx+=40){
+      const p = project(gx,0,gz); if(!p) continue;
+      if(first){ ctx.moveTo(p.x,p.y); first=false; } else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawNode(id,node){
+  const p = project(node.x,node.y,node.z);
+  if(!p) return;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+  ctx.fillStyle=node.color;
+  ctx.shadowBlur=18; ctx.shadowColor=node.color;
+  ctx.fill(); ctx.shadowBlur=0;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.s*1.9,0,Math.PI*2);
+  ctx.strokeStyle = id===state.nearestId ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.20)';
+  ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#fff';
+  ctx.font='700 12px sans-serif';
+  ctx.fillText(node.name,p.x+p.s+8,p.y+4);
+}
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(.033, (now-last)/1000);
+  last = now;
+  update(dt);
+  drawBackground();
+  Object.entries(nodes).forEach(([id,n])=>drawNode(id,n));
+  requestAnimationFrame(loop);
+}
+setFocus('fortune');
+updateStatusUI();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
