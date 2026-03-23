@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山火星 #花果山台灣 #AI修行 #市場覺醒#台指期貨 #幻巔28555 #雲巔28333 #東界27888#信念不滅 #自由之島 #智慧島嶼 #悟空覺醒 #火星殿  
-👉 https://www.youtube.com/shorts/U1OxtRgW7WU
+▶ 👇 廣寒宮入口https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/  
+👉 https://www.youtube.com/shorts/0It4Am2gxXI
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
