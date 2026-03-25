@@ -4,156 +4,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>WUZHISHAN_12345_scene_v3.html</title>
+<title>WUZHISHAN_12345_V6_GuanghanFusion</title>
 <style>
 :root{
-  --bg:#07070d;
-  --gold:#f2d57a;
-  --gold2:#ffb347;
-  --cyan:#79d7ff;
-  --red:#ff7575;
-  --green:#86ff7a;
-  --panel:rgba(10,8,12,.58);
-  --line:rgba(255,255,255,.10);
+  --bg:#05070c; --gold:#f2d57a; --cyan:#79d7ff; --panel:rgba(8,10,18,.54); --line:rgba(255,255,255,.11);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:"Noto Sans TC",Arial,sans-serif;color:#fff;touch-action:none}
 canvas{position:fixed;inset:0}
-#bg{z-index:0}
-#coreCanvas{z-index:1}
-.panel{
-  position:fixed;z-index:120;background:var(--panel);border:1px solid rgba(255,255,255,.12);
-  border-radius:16px;padding:10px 12px;backdrop-filter:blur(12px);
-  box-shadow:0 10px 28px rgba(0,0,0,.22);
-}
-#brand{top:12px;left:12px;max-width:40vw}
+#stars{z-index:0} #scene{z-index:1}
+.panel{position:fixed;z-index:120;background:var(--panel);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px 12px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.28)}
+#brand{top:12px;left:12px;max-width:34vw}
 #brand .t1{font-size:21px;font-weight:900;color:var(--gold)}
 #brand .t2{font-size:11px;color:#ead9af;margin-top:4px}
 #brand .t3{font-size:11px;color:var(--cyan);margin-top:4px}
-#hud{
-  top:12px;right:12px;min-width:240px;font-size:12px;line-height:1.55;
-}
+#hud{top:12px;right:12px;min-width:260px}
 .hud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .hud-box{padding:7px 9px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03)}
-.hud-k{font-size:10px;color:#ecdba4}
-.hud-v{font-size:15px;font-weight:900;color:var(--cyan);margin-top:4px}
-#centerInfo{
-  position:fixed;left:50%;top:61%;transform:translateX(-50%);z-index:102;
-  padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.09);
-  font-size:12px;color:#ffefc6
-}
-.core-shell{
-  position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);
-  width:min(42vw,300px);height:min(42vw,300px);z-index:100
-}
-.core-ring{
-  position:absolute;inset:0;border-radius:50%;overflow:hidden;border:2px solid rgba(242,213,122,.9);
-  box-shadow:0 0 0 4px rgba(242,213,122,.06),0 0 42px rgba(242,213,122,.12);
-}
-.core-ring::after{
-  content:"";position:absolute;inset:18px;border-radius:50%;border:1px dashed rgba(121,215,255,.22);
-  animation:spin 22s linear infinite;
-}
-.core-glow{
-  position:absolute;inset:-22px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,196,82,.15) 0,rgba(255,132,36,.07) 35%,transparent 62%);
-  filter:blur(7px);animation:pulse 2.6s ease-in-out infinite;
-}
-.temple-heart-hit{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:126px;height:126px;border-radius:50%;cursor:pointer;background:transparent;z-index:4;
-}
-.orbit-note{
-  position:absolute;left:50%;bottom:-28px;transform:translateX(-50%);
-  font-size:11px;color:#ffefc6;background:rgba(0,0,0,.42);
-  border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:999px;white-space:nowrap
-}
-#klinePanel{
-  position:fixed;left:12px;bottom:190px;width:min(340px,46vw);z-index:122;
-}
-.k-head{display:flex;align-items:center;justify-content:space-between;color:var(--gold);font-weight:900;font-size:13px;margin-bottom:8px}
-.k-head .symtabs{display:flex;gap:6px}
-.sym{
-  border-radius:999px;padding:5px 10px;border:1px solid rgba(242,213,122,.18);cursor:pointer;background:rgba(255,255,255,.03);font-size:11px
-}
-.sym.active{background:rgba(242,213,122,.14);color:#ffefbb}
-#klineCanvas{
-  width:100%;height:128px;display:block;border-radius:12px;background:
-   linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.08)),
-   repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 34px),
-   repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 26px);
-}
-.k-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.mini{
-  border-radius:12px;background:rgba(255,255,255,.03);padding:8px 9px;border:1px solid rgba(255,255,255,.08)
-}
-.mini .k{font-size:10px;color:#eedfb2}
-.mini .v{font-size:13px;color:var(--cyan);font-weight:900;margin-top:4px}
-.controls{
-  position:fixed;left:0;right:0;bottom:82px;height:190px;z-index:145;pointer-events:none
-}
+.hud-k{font-size:10px;color:#ecdba4}.hud-v{font-size:15px;font-weight:900;color:var(--cyan);margin-top:4px}
+#centerInfo{position:fixed;left:50%;top:61%;transform:translateX(-50%);z-index:104;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.40);border:1px solid rgba(255,255,255,.09);font-size:12px;color:#ffefc6}
+.core-shell{position:fixed;left:50%;top:31%;transform:translate(-50%,-50%);width:min(42vw,300px);height:min(42vw,300px);z-index:100}
+.core-ring{position:absolute;inset:0;border-radius:50%;overflow:hidden;border:2px solid rgba(242,213,122,.9);box-shadow:0 0 0 4px rgba(242,213,122,.06),0 0 42px rgba(242,213,122,.14)}
+.core-ring::after{content:"";position:absolute;inset:18px;border-radius:50%;border:1px dashed rgba(121,215,255,.24);animation:spin 20s linear infinite}
+.core-glow{position:absolute;inset:-24px;border-radius:50%;background:radial-gradient(circle,rgba(255,196,82,.16) 0,rgba(255,132,36,.08) 38%,transparent 64%);filter:blur(8px);animation:pulse 2.7s ease-in-out infinite}
+.temple-heart-hit{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:130px;height:130px;border-radius:50%;cursor:pointer;background:transparent;z-index:4}
+.orbit-note{position:absolute;left:50%;bottom:-28px;transform:translateX(-50%);font-size:11px;color:#ffefc6;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:999px;white-space:nowrap}
+.objects{position:fixed;inset:0;pointer-events:none;z-index:103}
+.obj{position:absolute;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff7da;text-shadow:0 0 8px rgba(0,0,0,.8)}
+.obj .ico{width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.38);border:1px solid rgba(242,213,122,.25);font-size:30px;box-shadow:0 0 24px rgba(242,213,122,.08)}
+.obj .txt{font-size:11px}
+#objFortune{left:12%;top:66%} #objWish{left:28%;top:76%} #objWallet{right:26%;top:76%} #objPhoto{right:12%;top:66%}
+.modal{position:fixed;left:50%;top:67%;transform:translate(-50%,-50%);width:min(520px,92vw);z-index:160;display:none;background:rgba(8,10,18,.92);border:1px solid rgba(242,213,122,.24);border-radius:18px;padding:14px 14px 12px;box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.modal.show{display:block}
+.mh{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font-weight:900;margin-bottom:10px}
+.mh button,.pill,.footer button{border-radius:12px;border:1px solid rgba(242,213,122,.22);background:rgba(255,255,255,.04);color:#fff;padding:9px 12px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;background:rgba(255,255,255,.03)}
+.box .k{font-size:11px;color:#e9d7a5}.box .v{font-size:16px;font-weight:900;color:var(--cyan);margin-top:5px}
+textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:12px;padding:10px 12px;font:inherit;outline:none;min-height:88px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.controls{position:fixed;left:0;right:0;bottom:84px;height:194px;z-index:145;pointer-events:none}
 .joy,.yaw,.warp{pointer-events:auto}
-.joy{
-  position:absolute;left:18px;bottom:8px;width:132px;height:132px;border-radius:50%;
-  background:rgba(255,255,255,.07);border:1px solid var(--line)
-}
+.joy{position:absolute;left:18px;bottom:8px;width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
 .joy:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}
 .joy-inner{position:absolute;left:44px;top:44px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
-.ctrl-label{position:absolute;left:50%;transform:translateX(-50%);top:-18px;font-size:11px;color:#ffecc0}
-.yaw{
-  position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:min(52vw,360px);height:68px;
-  background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px
-}
+.ctrl-label,.warp-top,.warp-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:#ffecc0}
+.ctrl-label{top:-18px}
+.yaw{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:min(52vw,360px);height:68px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px}
 .yaw-track{position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)}
 .yaw-fill{position:absolute;left:50%;top:29px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(121,215,255,.25),rgba(121,215,255,.96));width:0}
 .yaw-inner{position:absolute;left:calc(50% - 24px);top:10px;width:48px;height:48px;border-radius:50%;background:var(--gold)}
-.warp{
-  position:absolute;right:18px;bottom:0;width:68px;height:178px;border-radius:34px;background:rgba(255,255,255,.07);border:1px solid var(--line)
-}
-.warp-track{position:absolute;left:29px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
-.warp-fill{position:absolute;left:29px;bottom:12px;width:10px;height:0;border-radius:999px;background:linear-gradient(to top,#ff8600,#ffd35c,#fff2ad)}
-.warp-inner{position:absolute;left:12px;top:67px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
-.warp-top,.warp-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:#ffecc0}
+.warp{position:absolute;right:18px;bottom:0;width:70px;height:182px;border-radius:34px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.warp-track{position:absolute;left:30px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
+.warp-fill{position:absolute;left:30px;bottom:12px;width:10px;height:0;border-radius:999px;background:linear-gradient(to top,#ff8600,#ffd35c,#fff2ad)}
+.warp-inner{position:absolute;left:13px;top:69px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
 .warp-top{top:-18px}.warp-bottom{bottom:-18px}
-.footer{
-  position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;z-index:140
-}
-.footer button{
-  border-radius:12px;border:1px solid rgba(242,213,122,.18);background:rgba(0,0,0,.56);color:#fff;padding:12px 8px;font-weight:900;font-size:12px;cursor:pointer
-}
+#klinePanel{position:fixed;left:12px;bottom:292px;width:min(330px,42vw);z-index:121}
+.k-head{display:flex;align-items:center;justify-content:space-between;color:var(--gold);font-weight:900;font-size:13px;margin-bottom:8px}
+.k-sub{font-size:11px;color:#ffefba}
+.klineMini{height:92px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.08)),repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 28px),repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 22px)}
+.footer{position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;z-index:140}
+.footer button{background:rgba(0,0,0,.56);font-weight:900;font-size:12px;padding:12px 8px}
 .footer .gold{color:#ffebaf;border-color:rgba(242,213,122,.36)}
-#portalFlash{
-  position:fixed;inset:0;z-index:210;pointer-events:none;opacity:0;
-  background:radial-gradient(circle at center, rgba(255,246,212,.95) 0, rgba(255,212,100,.85) 10%, rgba(255,170,72,.42) 24%, rgba(0,0,0,0) 58%);
-}
+#portalFlash{position:fixed;inset:0;z-index:210;pointer-events:none;opacity:0;background:radial-gradient(circle at center, rgba(255,246,212,.95) 0, rgba(255,212,100,.85) 10%, rgba(255,170,72,.42) 24%, rgba(0,0,0,0) 58%)}
 #portalFlash.on{animation:flash .95s ease forwards}
-#toast{
-  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:220;display:none;
-  background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px
-}
+#toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:220;display:none;background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px}
 @keyframes flash{0%{opacity:0;transform:scale(.8)}18%{opacity:1;transform:scale(1)}60%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(2.2)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@media (max-width:860px){
-  #brand{max-width:44vw}
-  #brand .t1{font-size:18px}
-  #hud{right:8px;min-width:200px}
-  .core-shell{width:min(58vw,250px);height:min(58vw,250px)}
-  #klinePanel{width:min(300px,48vw)}
-  .footer{grid-template-columns:repeat(3,1fr)}
-}
+@media (max-width:860px){#brand{max-width:44vw} #brand .t1{font-size:18px} #hud{min-width:220px} .core-shell{width:min(58vw,250px);height:min(58vw,250px)} #klinePanel{width:min(300px,46vw)} .footer{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 <div id="brand" class="panel">
   <div class="t1">五指山悟空財神殿</div>
-  <div class="t2">12345 TempleHeart｜場景實作版</div>
+  <div class="t2">V6｜融合廣寒宮粒子與駕駛艙骨架</div>
   <div class="t3" id="clock">SYSTEM ONLINE | --</div>
 </div>
 
 <div id="hud" class="panel">
   <div class="hud-grid">
-    <div class="hud-box"><div class="hud-k">MODE</div><div class="hud-v" id="hudMode">BATTLE</div></div>
+    <div class="hud-box"><div class="hud-k">MODE</div><div class="hud-v" id="hudMode">TEMPLE</div></div>
     <div class="hud-box"><div class="hud-k">ZONE</div><div class="hud-v" id="hudZone">多</div></div>
     <div class="hud-box"><div class="hud-k">ANGLE</div><div class="hud-v" id="hudAngle">0°</div></div>
     <div class="hud-box"><div class="hud-k">WARP</div><div class="hud-v" id="hudWarp">0.0x</div></div>
@@ -164,7 +95,8 @@ canvas{position:fixed;inset:0}
   </div>
 </div>
 
-<canvas id="bg"></canvas>
+<canvas id="stars"></canvas>
+<canvas id="scene"></canvas>
 
 <div class="core-shell">
   <div class="core-glow"></div>
@@ -175,24 +107,18 @@ canvas{position:fixed;inset:0}
   <div class="orbit-note">TempleHeart｜K線核心｜世界入口</div>
 </div>
 
-<div id="centerInfo">CT 依附在雙透視通道上｜漲向前，跌向後</div>
+<div id="centerInfo">融合廣寒宮粒子背景｜中下方向＋右側 Warp｜左下補前後左右</div>
+
+<div class="objects">
+  <div class="obj" id="objFortune"><div class="ico">🧧</div><div class="txt">發財金寶箱</div></div>
+  <div class="obj" id="objWish"><div class="ico">🪨</div><div class="txt">許願石碑</div></div>
+  <div class="obj" id="objWallet"><div class="ico">🔶</div><div class="txt">錢包符文</div></div>
+  <div class="obj" id="objPhoto"><div class="ico">📸</div><div class="txt">留影神像</div></div>
+</div>
 
 <div id="klinePanel" class="panel">
-  <div class="k-head">
-    <span>實際 K 線</span>
-    <div class="symtabs">
-      <button class="sym active" data-symbol="BTCUSDT">BTC</button>
-      <button class="sym" data-symbol="BNBUSDT">BNB</button>
-      <button class="sym" data-symbol="ETHUSDT">USDT</button>
-    </div>
-  </div>
-  <canvas id="klineCanvas" width="320" height="128"></canvas>
-  <div class="k-meta">
-    <div class="mini"><div class="k">SYMBOL</div><div class="v" id="metaSymbol">BTCUSDT</div></div>
-    <div class="mini"><div class="k">PRICE</div><div class="v" id="metaPrice">--</div></div>
-    <div class="mini"><div class="k">OPEN</div><div class="v" id="metaOpen">--</div></div>
-    <div class="mini"><div class="k">HIGH / LOW</div><div class="v" id="metaHL">--</div></div>
-  </div>
+  <div class="k-head"><span>Temple K 線核心</span><span class="k-sub">內建模擬脈動</span></div>
+  <canvas id="klineMini" class="klineMini" width="320" height="92"></canvas>
 </div>
 
 <div class="controls">
@@ -217,328 +143,164 @@ canvas{position:fixed;inset:0}
 
 <div class="footer">
   <button class="gold" id="btnPortal">TempleHeart</button>
-  <button id="btnPredict">預測</button>
+  <button id="btnBuff">Buff</button>
   <button id="btnBoss">Boss</button>
-  <button id="btnHeal">回復</button>
+  <button id="btnPredict">預測</button>
   <button id="btnReset">重置</button>
+</div>
+
+<div id="fortuneModal" class="modal">
+  <div class="mh"><span>發財金寶箱</span><button onclick="closeModal('fortuneModal')">關閉</button></div>
+  <div class="grid2">
+    <div class="box"><div class="k">Temple Energy</div><div class="v" id="energyVal">100</div></div>
+    <div class="box"><div class="k">Warp Buff</div><div class="v" id="buffVal">0</div></div>
+  </div>
+  <div class="row">
+    <button class="pill" onclick="claimFortune()">領取發財金</button>
+    <button class="pill" onclick="closeModal('fortuneModal')">關閉</button>
+  </div>
+</div>
+
+<div id="wishModal" class="modal">
+  <div class="mh"><span>許願石碑</span><button onclick="closeModal('wishModal')">關閉</button></div>
+  <textarea id="wishText" placeholder="寫下你的願望…"></textarea>
+  <div class="row"><button class="pill" onclick="saveWish()">保存願望</button></div>
+</div>
+
+<div id="walletModal" class="modal">
+  <div class="mh"><span>錢包符文</span><button onclick="closeModal('walletModal')">關閉</button></div>
+  <div class="grid2">
+    <div class="box"><div class="k">連線狀態</div><div class="v" id="walletState">未連線</div></div>
+    <div class="box"><div class="k">Temple 狀態</div><div class="v">待喚醒</div></div>
+  </div>
+  <div class="row"><button class="pill" onclick="connectWallet()">連接錢包</button></div>
+</div>
+
+<div id="photoModal" class="modal">
+  <div class="mh"><span>留影神像</span><button onclick="closeModal('photoModal')">關閉</button></div>
+  <div class="box"><div class="k">導覽</div><div class="v" style="font-size:14px">這版融合廣寒宮粒子、方向橫桿與右側 Warp。</div></div>
 </div>
 
 <div id="portalFlash"></div>
 <div id="toast"></div>
 
 <script>
-const bg = document.getElementById('bg');
-const ctx = bg.getContext('2d');
+const starsCanvas = document.getElementById('stars');
+const sceneCanvas = document.getElementById('scene');
 const coreCanvas = document.getElementById('coreCanvas');
+const miniCanvas = document.getElementById('klineMini');
+const sctx = starsCanvas.getContext('2d');
+const ctx = sceneCanvas.getContext('2d');
 const c2 = coreCanvas.getContext('2d');
-const klineCanvas = document.getElementById('klineCanvas');
-const kctx = klineCanvas.getContext('2d');
+const mctx = miniCanvas.getContext('2d');
 
-function fit(){ bg.width=innerWidth; bg.height=innerHeight; }
+function fit(){ starsCanvas.width = innerWidth; starsCanvas.height = innerHeight; sceneCanvas.width = innerWidth; sceneCanvas.height = innerHeight; }
 addEventListener('resize', fit); fit();
-
-function nowText(){
-  const d=new Date(), p=n=>String(n).padStart(2,'0');
-  return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-setInterval(()=>document.getElementById('clock').textContent='SYSTEM ONLINE | '+nowText(),500);
-document.getElementById('clock').textContent='SYSTEM ONLINE | '+nowText();
-
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.style.display='block';
-  clearTimeout(window.__t); window.__t=setTimeout(()=>el.style.display='none',1200);
-}
-
-const S = {
-  mode:'BATTLE',
-  x:0,y:0,z:0,ct:0,yaw:0,
-  moveX:0, moveY:0, yawInput:0, warp:0, warpInput:0,
-  predict:true,
-  monsters:[],
-  candles:[],
-  liveCandles:[],
-  symbol:'BTCUSDT',
-  lastFetch:0,
-  kOpen:0, kHigh:0, kLow:0, kClose:0
-};
+const LS = { get:(k,d='')=>{try{return localStorage.getItem(k) ?? d}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}} };
+const S = { mode:'TEMPLE', x:0,y:0,z:0,ct:0,yaw:0, moveX:0,moveY:0, yawInput:0, warp:0, warpInput:0, predict:true, energy:100, buff:0, wish:LS.get('wzs_v6_wish',''), stars:[], candles:[] };
+for(let i=0;i<150;i++) S.stars.push({x:(Math.random()-0.5)*2000,y:(Math.random()-0.5)*1600,z:Math.random()*1+0.2,s:Math.random()*2+0.3});
 for(let i=0;i<120;i++) S.candles.push({o:0,c:0,p:0,v:1+Math.random()*4});
-function signedDeg(){
-  let deg = (S.yaw * 180 / Math.PI) % 360;
-  if (deg > 180) deg -= 360;
-  if (deg < -180) deg += 360;
-  return deg;
-}
-function zone(){ return Math.abs(signedDeg()) <= 90 ? '多' : '空'; }
-function updateHUD(){
-  document.getElementById('hudMode').textContent=S.mode;
-  document.getElementById('hudZone').textContent=zone();
-  document.getElementById('hudAngle').textContent=signedDeg().toFixed(1)+'°';
-  document.getElementById('hudWarp').textContent=S.warp.toFixed(1)+'x';
-  document.getElementById('hudX').textContent=S.x.toFixed(1);
-  document.getElementById('hudY').textContent=S.y.toFixed(1);
-  document.getElementById('hudZ').textContent=S.z.toFixed(1);
-  document.getElementById('hudCT').textContent=S.ct.toFixed(2);
-}
-function worldToCamera(wx, wy){
-  const dx = wx - S.x;
-  const dy = wy - S.y;
-  const cos = Math.cos(-S.yaw), sin = Math.sin(-S.yaw);
-  return { x: dx*cos - dy*sin, y: dx*sin + dy*cos };
-}
-function cameraToScreen(cx, baseY, cam){
-  return [cx + cam.x, baseY + cam.y*0.58 - S.z*15];
-}
-function ctLanePoint(ctNorm){
-  const cx = bg.width/2;
-  const nearY = bg.height*0.92;
-  const farY = bg.height*0.34 + 18 - S.z*5;
-  const clamped = Math.max(-1, Math.min(1, ctNorm));
-  const t = (clamped + 1) / 2; // -1 back, +1 forward
-  const y = nearY - (nearY - farY) * t;
-  const width = 250 - 200 * t; // open more near, narrow far
-  return { y, left: cx - width, right: cx + width };
-}
 
-function drawBackground(){
-  const grad = ctx.createLinearGradient(0,0,0,bg.height);
-  if(zone()==='多'){
-    grad.addColorStop(0,'#0e1524'); grad.addColorStop(.55,'#15253c'); grad.addColorStop(1,'#0a0f18');
-  } else {
-    grad.addColorStop(0,'#2b0f18'); grad.addColorStop(.55,'#5a2331'); grad.addColorStop(1,'#130d12');
+function nowText(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
+setInterval(()=>document.getElementById('clock').textContent='SYSTEM ONLINE | '+nowText(),500); document.getElementById('clock').textContent='SYSTEM ONLINE | '+nowText();
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block'; clearTimeout(window.__t); window.__t=setTimeout(()=>el.style.display='none',1200); }
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+document.getElementById('objFortune').onclick=()=>openModal('fortuneModal');
+document.getElementById('objWish').onclick=()=>openModal('wishModal');
+document.getElementById('objWallet').onclick=()=>openModal('walletModal');
+document.getElementById('objPhoto').onclick=()=>openModal('photoModal');
+document.getElementById('wishText').value=S.wish;
+function claimFortune(){ S.energy=Math.min(100,S.energy+12); S.buff+=1; S.warp=Math.min(150,S.warp+10); document.getElementById('energyVal').textContent=S.energy; document.getElementById('buffVal').textContent=S.buff; toast('Temple Buff 啟動'); }
+function saveWish(){ S.wish=document.getElementById('wishText').value; LS.set('wzs_v6_wish',S.wish); toast('願望已保存'); }
+function connectWallet(){ document.getElementById('walletState').textContent='DEMO 已連線'; toast('錢包已連線'); }
+document.getElementById('energyVal').textContent=S.energy; document.getElementById('buffVal').textContent=S.buff;
+function signedDeg(){ let deg=(S.yaw*180/Math.PI)%360; if(deg>180) deg-=360; if(deg<-180) deg+=360; return deg; }
+function zone(){ return Math.abs(signedDeg())<=90 ? '多' : '空'; }
+function enterBattle(){ const flash=document.getElementById('portalFlash'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); toast('TempleHeart 啟動'); setTimeout(()=>{ S.mode='BATTLE'; },380); }
+function spawnBoss(){ toast('Boss 出現（待接戰鬥）'); }
+function boostWarp(){ S.warp=Math.min(150,S.warp+15); toast('Warp Boost'); }
+document.getElementById('btnPortal').onclick=enterBattle; document.getElementById('templeHeart').onclick=enterBattle;
+document.getElementById('btnBoss').onclick=spawnBoss; document.getElementById('btnBuff').onclick=boostWarp;
+document.getElementById('btnPredict').onclick=()=>{ S.predict=!S.predict; toast('預測 '+(S.predict?'開':'關')); };
+document.getElementById('btnReset').onclick=()=>{ S.x=0;S.y=0;S.z=0;S.ct=0;S.yaw=0;S.warp=0; toast('已重置'); };
+
+function worldToCamera(wx, wy){ const dx=wx-S.x, dy=wy-S.y, c=Math.cos(-S.yaw), s=Math.sin(-S.yaw); return {x:dx*c-dy*s, y:dx*s+dy*c}; }
+function cameraToScreen(cx, baseY, cam){ return [cx+cam.x, baseY+cam.y*0.58-S.z*14]; }
+
+function drawGalaxy(){
+  sctx.clearRect(0,0,starsCanvas.width,starsCanvas.height);
+  const cx=starsCanvas.width/2, cy=starsCanvas.height/2;
+  for(const p of S.stars){
+    const drift=(S.mode==='BATTLE' ? (S.warp/150)*9 : 0.5);
+    p.y += drift*(zone()==='多' ? -1 : 1)*p.z;
+    if(p.y < -900) p.y = 900;
+    if(p.y > 900) p.y = -900;
+    const cam=worldToCamera(p.x*0.12,p.y*0.12);
+    const sx=cx+cam.x*0.20, sy=cy+cam.y*0.16;
+    const alpha=0.18+p.z*0.5;
+    sctx.fillStyle=`rgba(180,220,255,${alpha})`; sctx.fillRect(sx,sy,p.s,p.s);
+    if(S.mode==='BATTLE' && S.warp>0){ sctx.strokeStyle=`rgba(121,215,255,${alpha*0.8})`; sctx.beginPath(); sctx.moveTo(sx,sy); sctx.lineTo(sx, sy + (zone()==='多' ? 8 : -8)*p.z); sctx.stroke(); }
   }
-  ctx.fillStyle=grad; ctx.fillRect(0,0,bg.width,bg.height);
-
-  const cx = bg.width/2;
-  const horizon = bg.height*0.34 - S.z*5;
-  const nearY = bg.height*0.92;
-  // lanes slightly opened
-  ctx.strokeStyle='rgba(242,213,122,.38)';
-  ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(cx-250,nearY); ctx.lineTo(cx-58,horizon+18); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx+250,nearY); ctx.lineTo(cx+58,horizon+18); ctx.stroke();
-
-  ctx.strokeStyle='rgba(255,255,255,.07)';
-  ctx.lineWidth=1;
-  for(let i=1;i<=10;i++){
-    const t=i/10;
-    const y=nearY-(nearY-horizon)*t;
-    const w=250-(192*t);
-    ctx.beginPath(); ctx.moveTo(cx-w,y); ctx.lineTo(cx+w,y); ctx.stroke();
-  }
-
-  // moving streaks
-  ctx.strokeStyle='rgba(255,255,255,.07)';
-  for(let i=0;i<28;i++){
-    const sy=(i/28)*bg.height;
-    ctx.beginPath(); ctx.moveTo((i*67+performance.now()*0.05)%bg.width-120, sy);
-    ctx.lineTo((i*67+performance.now()*0.05)%bg.width, sy-16);
-    ctx.stroke();
-  }
-
-  // CT marker on lane
-  const ctNorm = Math.max(-1, Math.min(1, S.ct / 1200));
-  const lane = ctLanePoint(ctNorm);
-  const mx = bg.width/2;
-  ctx.strokeStyle='rgba(121,215,255,.95)';
-  ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(lane.left,lane.y); ctx.lineTo(lane.right,lane.y); ctx.stroke();
-  ctx.fillStyle='rgba(121,215,255,.95)';
-  ctx.beginPath(); ctx.arc(mx, lane.y, 5, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle='#d8f7ff';
-  ctx.font='bold 12px Arial';
-  ctx.fillText('CT '+S.ct.toFixed(2), mx+10, lane.y-8);
-
-  // central glow
-  const glow=ctx.createRadialGradient(cx,bg.height*0.34,18,cx,bg.height*0.34,300);
-  glow.addColorStop(0,'rgba(255,200,100,.18)');
-  glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=glow; ctx.fillRect(0,0,bg.width,bg.height);
+}
+function drawTempleScene(){
+  const w=sceneCanvas.width,h=sceneCanvas.height,cx=w/2,horizon=h*0.34-S.z*5,baseY=h*0.79-S.z*10;
+  const sky=ctx.createLinearGradient(0,0,0,h); sky.addColorStop(0,'#140e16'); sky.addColorStop(.42,'#1d1520'); sky.addColorStop(1,'#09080e'); ctx.fillStyle=sky; ctx.fillRect(0,0,w,h);
+  const glow=ctx.createRadialGradient(cx,h*0.30,20,cx,h*0.30,340); glow.addColorStop(0,'rgba(255,220,140,.15)'); glow.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=glow; ctx.fillRect(0,0,w,h);
+  const pillars=[{x:cx-270,w:120,h:195},{x:cx-140,w:112,h:240},{x:cx,w:132,h:320},{x:cx+145,w:112,h:240},{x:cx+275,w:120,h:195}];
+  pillars.forEach(p=>{ const g=ctx.createLinearGradient(0,h*0.4,0,h); g.addColorStop(0,'#56371f'); g.addColorStop(1,'#24150b'); ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(p.x-p.w/2,baseY+12); ctx.lineTo(p.x-p.w*0.32,baseY-p.h*0.66); ctx.lineTo(p.x,baseY-p.h); ctx.lineTo(p.x+p.w*0.34,baseY-p.h*0.68); ctx.lineTo(p.x+p.w/2,baseY+12); ctx.closePath(); ctx.fill(); });
+  ctx.strokeStyle='rgba(242,213,122,.34)'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(cx-230,h*0.94); ctx.lineTo(cx-52,horizon+34); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+230,h*0.94); ctx.lineTo(cx+52,horizon+34); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1;
+  for(let i=1;i<=8;i++){ const t=i/8, y=h*0.94-(h*0.52*t), ww=230-(178*t); ctx.beginPath(); ctx.moveTo(cx-ww,y); ctx.lineTo(cx+ww,y); ctx.stroke(); }
+}
+function drawBattleScene(){
+  const w=sceneCanvas.width,h=sceneCanvas.height,cx=w/2,horizon=h*0.34-S.z*5,baseY=h*0.76-S.z*12;
+  const grad=ctx.createLinearGradient(0,0,0,h);
+  if(zone()==='多'){ grad.addColorStop(0,'#0b1832'); grad.addColorStop(.55,'#193056'); grad.addColorStop(1,'#0d131c'); }
+  else { grad.addColorStop(0,'#2a0f18'); grad.addColorStop(.55,'#53202c'); grad.addColorStop(1,'#130d12'); }
+  ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(242,213,122,.38)'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(cx-230,h*0.92); ctx.lineTo(cx-44,horizon+14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+230,h*0.92); ctx.lineTo(cx+44,horizon+14); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1;
+  for(let gy=-720; gy<=720; gy+=50){ const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy)); const p2=cameraToScreen(cx,baseY,worldToCamera(900,gy)); ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke(); }
+  for(let gx=-900; gx<=900; gx+=48){ const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900)); const p2=cameraToScreen(cx,baseY,worldToCamera(gx,900)); ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke(); }
+  ctx.fillStyle='#86ff7a'; ctx.beginPath(); ctx.arc(cx,baseY,12,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.68)'; ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); ctx.stroke();
 }
 function drawCore(){
   c2.clearRect(0,0,coreCanvas.width,coreCanvas.height);
   const cx=coreCanvas.width/2, cy=coreCanvas.height/2;
   const rg=c2.createRadialGradient(cx,cy,18,cx,cy,140);
-  rg.addColorStop(0, zone()==='多'?'rgba(90,180,255,.25)':'rgba(255,90,90,.26)');
+  rg.addColorStop(0, S.mode==='BATTLE' ? (zone()==='多'?'rgba(90,180,255,.26)':'rgba(255,90,90,.26)') : 'rgba(255,190,90,.34)');
   rg.addColorStop(1,'rgba(0,0,0,0)');
   c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,140,0,Math.PI*2); c2.fill();
-
-  const baseR=84+S.z*0.8;
-  S.candles.forEach((k,i)=>{
-    const deg = signedDeg();
-    const theta = ((deg-90) * Math.PI/180) + i/S.candles.length*Math.PI*2 + performance.now()*0.0002;
-    const rr = baseR + k.v*1.15;
-    const x = cx + Math.cos(theta)*rr;
-    const y = cy + Math.sin(theta)*rr*0.84;
-    c2.strokeStyle = k.c>=k.o ? '#86ff7a' : '#ff7575';
-    c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.8); c2.stroke();
-    if(S.predict){
-      c2.strokeStyle='rgba(121,215,255,.95)';
-      c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.8); c2.stroke();
-    }
-  });
+  const baseR=86+S.z*0.7;
+  S.candles.forEach((k,i)=>{ const t=i/S.candles.length*Math.PI*2 + S.yaw + performance.now()*0.00018*(S.mode==='TEMPLE'?0.35:1); const rr=baseR+k.v*1.15, x=cx+Math.cos(t)*rr, y=cy+Math.sin(t)*rr*0.84; c2.strokeStyle=k.c>=k.o?'#86ff7a':'#ff7575'; c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.7); c2.stroke(); if(S.predict){ c2.strokeStyle='rgba(121,215,255,.95)'; c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.7); c2.stroke(); }});
   c2.strokeStyle='rgba(242,213,122,.34)';
-  for(let i=0;i<3;i++){
-    c2.beginPath();
-    c2.ellipse(cx,cy,62+i*18,44+i*13,0.4+i*0.18,0,Math.PI*2);
-    c2.stroke();
-  }
+  for(let i=0;i<3;i++){ c2.beginPath(); c2.ellipse(cx,cy,62+i*18,44+i*12,S.yaw*0.55+i*.25,0,Math.PI*2); c2.stroke(); }
   c2.beginPath(); c2.arc(cx,cy,16,0,Math.PI*2); c2.fillStyle='rgba(242,213,122,.88)'; c2.fill();
-
-  // 12 o'clock indicator
-  c2.strokeStyle='rgba(255,255,255,.25)';
-  c2.beginPath();
-  c2.moveTo(cx, cy-118);
-  c2.lineTo(cx, cy-142);
-  c2.stroke();
-  c2.fillStyle='#fff5c2';
-  c2.font='bold 11px Arial';
-  c2.fillText('0°', cx-8, cy-148);
 }
-function genInternalCandle(){
-  const dir = zone()==='多' ? 1 : -1;
-  const last = S.candles[S.candles.length-1].c;
-  const delta = dir*(S.warp/150)*1.2 + (Math.random()-.5)*0.6;
-  const close = last + delta;
-  const pred = close + dir*(S.warp/150)*0.7 + (Math.random()-.5)*0.2;
-  S.candles.push({o:last,c:close,p:pred,v:1+Math.random()*4});
-  if(S.candles.length>120) S.candles.shift();
+function drawMiniKline(){
+  mctx.clearRect(0,0,miniCanvas.width,miniCanvas.height);
+  const data=S.candles.slice(-24), highs=data.map(d=>Math.max(d.o,d.c)+Math.abs(d.p-d.c)*0.5+0.5), lows=data.map(d=>Math.min(d.o,d.c)-0.5), max=Math.max(...highs), min=Math.min(...lows), range=Math.max(0.0001,max-min);
+  data.forEach((d,i)=>{ const h=Math.max(d.o,d.c)+Math.abs(d.p-d.c)*0.5+0.5, l=Math.min(d.o,d.c)-0.5, x=8+i*12, yo=80-((d.o-min)/range)*62, yc=80-((d.c-min)/range)*62, yh=80-((h-min)/range)*62, yl=80-((l-min)/range)*62; mctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575'; mctx.beginPath(); mctx.moveTo(x+4,yh); mctx.lineTo(x+4,yl); mctx.stroke(); mctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575'; mctx.fillRect(x,Math.min(yo,yc),8,Math.max(2,Math.abs(yc-yo))); });
 }
-function drawKlinePanel(){
-  kctx.clearRect(0,0,klineCanvas.width,klineCanvas.height);
-  const data = S.liveCandles.length ? S.liveCandles.slice(-26) : S.candles.slice(-26).map(d=>({o:d.o,h:Math.max(d.o,d.c)+1,l:Math.min(d.o,d.c)-1,c:d.c}));
-  const highs = data.map(d=>+d.h), lows = data.map(d=>+d.l);
-  const max = Math.max(...highs), min = Math.min(...lows);
-  const range = Math.max(.0001, max-min);
-  data.forEach((d,i)=>{
-    const x=6+i*12;
-    const yo=114-((d.o-min)/range)*92;
-    const yc=114-((d.c-min)/range)*92;
-    const yh=114-((d.h-min)/range)*92;
-    const yl=114-((d.l-min)/range)*92;
-    kctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575';
-    kctx.beginPath(); kctx.moveTo(x+4,yh); kctx.lineTo(x+4,yl); kctx.stroke();
-    kctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575';
-    kctx.fillRect(x, Math.min(yo,yc), 8, Math.max(2, Math.abs(yc-yo)));
-  });
-}
-async function fetchKlines(symbol){
-  try{
-    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=60`;
-    const res = await fetch(url);
-    const rows = await res.json();
-    if(!Array.isArray(rows)) throw new Error('bad');
-    S.liveCandles = rows.map(r=>({
-      o:+r[1], h:+r[2], l:+r[3], c:+r[4]
-    }));
-    const last=S.liveCandles[S.liveCandles.length-1];
-    S.kOpen=last.o; S.kHigh=last.h; S.kLow=last.l; S.kClose=last.c;
-    document.getElementById('metaSymbol').textContent=symbol;
-    document.getElementById('metaPrice').textContent=last.c.toFixed(2);
-    document.getElementById('metaOpen').textContent=last.o.toFixed(2);
-    document.getElementById('metaHL').textContent=`${last.h.toFixed(2)} / ${last.l.toFixed(2)}`;
-  }catch(err){
-    document.getElementById('metaSymbol').textContent=symbol+' (fallback)';
-    document.getElementById('metaPrice').textContent='offline';
-    document.getElementById('metaOpen').textContent='--';
-    document.getElementById('metaHL').textContent='-- / --';
-  }
-}
+function genCandle(){ const dir=zone()==='多'?1:-1, last=S.candles[S.candles.length-1].c, delta=dir*(S.warp/150)*1.2 + (Math.random()-.5)*0.6, close=last+delta, pred=close+dir*(S.warp/150)*0.7+(Math.random()-.5)*0.2; S.candles.push({o:last,c:close,p:pred,v:1+Math.random()*4}); if(S.candles.length>120) S.candles.shift(); }
 function updateModel(){
-  S.x += S.moveX*1.8;
-  S.y += S.moveY*1.8;
-  S.yaw += S.yawInput*0.05;
-  S.warp += S.warpInput*2.4;
-  if(S.warp<0) S.warp=0;
-  if(S.warp>150) S.warp=150;
-  S.z = (S.warp/150)*8;
-  const dir = zone()==='多' ? 1 : -1;
-  const delta = dir*(S.warp/150)*0.35 + (Math.random()-.5)*0.04;
-  S.ct += delta;
-  genInternalCandle();
-  const now = Date.now();
-  if(now - S.lastFetch > 30000){
-    S.lastFetch = now;
-    fetchKlines(S.symbol);
-  }
+  if(S.mode==='BATTLE'){ S.x += S.moveX*2.0; S.y += S.moveY*2.0; if(S.warp<0) S.warp=0; if(S.warp>150) S.warp=150; S.z=(S.warp/150)*8; const dir=zone()==='多'?1:-1; S.ct += dir*(S.warp/150)*0.26 + (Math.random()-.5)*0.03; }
+  else { S.yaw += 0.0014; }
+  genCandle();
 }
-function loop(){
-  updateModel();
-  drawBackground();
-  drawCore();
-  drawKlinePanel();
-  updateHUD();
-  requestAnimationFrame(loop);
-}
+function updateHUD(){ document.getElementById('hudMode').textContent=S.mode; document.getElementById('hudZone').textContent=zone(); document.getElementById('hudAngle').textContent=signedDeg().toFixed(1)+'°'; document.getElementById('hudWarp').textContent=S.warp.toFixed(1)+'x'; document.getElementById('hudX').textContent=S.x.toFixed(1); document.getElementById('hudY').textContent=S.y.toFixed(1); document.getElementById('hudZ').textContent=S.z.toFixed(1); document.getElementById('hudCT').textContent=S.ct.toFixed(2); }
+function loop(){ updateModel(); drawGalaxy(); if(S.mode==='TEMPLE') drawTempleScene(); else drawBattleScene(); drawCore(); drawMiniKline(); updateHUD(); requestAnimationFrame(loop); }
 loop();
 
-// controls
-(function(){
-  const joy=document.getElementById('joy'), inner=document.getElementById('joyInner');
-  function setP(x,y){
-    const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
-    const max=40, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; }
-    S.moveX = dx/max;
-    S.moveY = -dy/max;
-    inner.style.left=(44+dx)+'px'; inner.style.top=(44+dy)+'px';
-  }
-  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='44px'; inner.style.top='44px'; }
-  joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY);});
-  joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
-  joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
-})();
-(function(){
-  const yaw=document.getElementById('yaw'), inner=document.getElementById('yawInner'), fill=document.getElementById('yawFill');
-  function setP(x){
-    const r=yaw.getBoundingClientRect(), max=(r.width/2)-24; let dx=x-r.left-r.width/2; if(dx>max) dx=max; if(dx<-max) dx=-max;
-    const deg = (dx/max)*180;
-    S.yaw = deg*Math.PI/180;
-    inner.style.left=(r.width/2-24+dx)+'px';
-    if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; }
-    else{ fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; }
-  }
-  yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX);});
-  yaw.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX); });
-})();
-(function(){
-  const warp=document.getElementById('warp'), inner=document.getElementById('warpInner'), fill=document.getElementById('warpFill');
-  function setP(y){
-    const r=warp.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max) dy=max; if(dy<-max) dy=-max;
-    const pct = 1 - ((dy+max)/(max*2));
-    S.warp = Math.max(0, Math.min(150, pct*150));
-    S.z = (S.warp/150)*8;
-    inner.style.top=(67+dy)+'px';
-    fill.style.height=(pct*154)+'px';
-  }
-  warp.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY);});
-  warp.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientY); });
-})();
-
-document.querySelectorAll('.sym').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.sym').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    S.symbol = btn.dataset.symbol;
-    fetchKlines(S.symbol);
-  };
-});
-document.getElementById('btnPortal').onclick=()=>{
-  const flash=document.getElementById('portalFlash');
-  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
-  toast('TempleHeart 啟動');
-};
-document.getElementById('btnPredict').onclick=()=>{ S.predict=!S.predict; toast('預測 '+(S.predict?'開':'關')); };
-document.getElementById('btnBoss').onclick=()=>toast('Boss 佈局待接');
-document.getElementById('btnHeal').onclick=()=>toast('回復觸發');
-document.getElementById('btnReset').onclick=()=>{ S.x=0; S.y=0; S.z=0; S.ct=0; S.yaw=0; S.warp=0; toast('已重置'); };
-
-document.getElementById('templeHeart').onclick=()=>{
-  const flash=document.getElementById('portalFlash');
-  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
-  toast('TempleHeart 入口觸發');
-};
-
-fetchKlines(S.symbol);
+(function(){ const joy=document.getElementById('joy'), inner=document.getElementById('joyInner'); function setP(x,y){ const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2; const max=39, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; } S.moveX=dx/max; S.moveY=-dy/max; inner.style.left=(44+dx)+'px'; inner.style.top=(44+dy)+'px'; } function reset(){ S.moveX=0; S.moveY=0; inner.style.left='44px'; inner.style.top='44px'; } joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY);}); joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); }); joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset); })();
+(function(){ const yaw=document.getElementById('yaw'), inner=document.getElementById('yawInner'), fill=document.getElementById('yawFill'); function setP(x){ const r=yaw.getBoundingClientRect(), max=(r.width/2)-24; let dx=x-r.left-r.width/2; if(dx>max) dx=max; if(dx<-max) dx=-max; const deg=(dx/max)*180; S.yaw=deg*Math.PI/180; inner.style.left=(r.width/2-24+dx)+'px'; if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; } else { fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; } } yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX);}); yaw.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX); }); })();
+(function(){ const warp=document.getElementById('warp'), inner=document.getElementById('warpInner'), fill=document.getElementById('warpFill'); function setP(y){ const r=warp.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max) dy=max; if(dy<-max) dy=-max; const pct=1-((dy+max)/(max*2)); S.warp=Math.max(0,Math.min(150,pct*150)); S.z=(S.warp/150)*8; inner.style.top=(69+dy)+'px'; fill.style.height=(pct*158)+'px'; } warp.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY);}); warp.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientY); }); })();
 </script>
 </body>
 </html>
