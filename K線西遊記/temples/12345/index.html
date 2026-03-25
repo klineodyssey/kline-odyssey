@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>WUZHISHAN_12345_V6_5_walletfix_layout.html</title>
+<title>WUZHISHAN_12345_V6_6_clean_fortune_focus.html</title>
 <style>
 :root{
   --bg:#05070c; --gold:#f2d57a; --cyan:#79d7ff; --panel:rgba(8,10,18,.56); --line:rgba(255,255,255,.11);
@@ -27,7 +27,6 @@ canvas{position:fixed;inset:0}
 .bar-inner{height:100%;border-radius:999px}
 #kgenBar{background:linear-gradient(90deg,#ffe082,#ffb347)}
 #bnbBar{background:linear-gradient(90deg,#9fc7ff,#5fb9ff)}
-#walletBtn{margin-top:8px;width:100%;padding:8px 10px;border-radius:12px;border:1px solid rgba(242,213,122,.22);background:rgba(255,255,255,.04);color:#fff;font-weight:900;cursor:pointer;font-size:12px}
 #hud{top:10px;right:10px;min-width:186px}
 .hud-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .hud-box{padding:6px 8px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03)}
@@ -47,14 +46,15 @@ canvas{position:fixed;inset:0}
 .k-head{display:flex;align-items:center;justify-content:space-between;color:var(--gold);font-weight:900;font-size:12px;margin-bottom:7px}
 .k-sub{font-size:10px;color:#ffefba}
 .symtabs{display:flex;gap:4px;flex-wrap:wrap}
-.symtab,.timebtn,.smallbtn{border-radius:999px;padding:4px 8px;border:1px solid rgba(242,213,122,.18);background:rgba(255,255,255,.03);cursor:pointer;color:#fff;font-size:10px}
-.symtab.active,.timebtn.active,.smallbtn.active{background:rgba(242,213,122,.16);color:#ffefba}
+.symtab,.timebtn{border-radius:999px;padding:4px 8px;border:1px solid rgba(242,213,122,.18);background:rgba(255,255,255,.03);cursor:pointer;color:#fff;font-size:10px}
+.symtab.active,.timebtn.active{background:rgba(242,213,122,.16);color:#ffefba}
 .klineWrap{position:relative}
 .klineCanvas{height:116px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.08)),repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 36px),repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 24px)}
 .scaleLabel{position:absolute;right:6px;font-size:10px;color:#dfefff;text-shadow:0 0 4px #000}
 .scaleTop{top:6px}.scaleMid{top:50%;transform:translateY(-50%)}.scaleBot{bottom:6px}
 #miniActions{position:fixed;left:50%;transform:translateX(-50%);bottom:210px;z-index:141;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(420px,86vw)}
 #miniActions button{padding:8px 6px;border-radius:12px;border:1px solid rgba(242,213,122,.22);background:rgba(0,0,0,.52);color:#fff;font-weight:900;font-size:12px;cursor:pointer}
+#miniActions button.primary{background:rgba(120,70,0,.45); box-shadow:0 0 18px rgba(242,213,122,.12)}
 .controls{position:fixed;left:0;right:0;bottom:78px;height:164px;z-index:145;pointer-events:none}
 .joy,.yaw,.warp{pointer-events:auto}
 .joy{position:absolute;left:6px;bottom:0;width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
@@ -85,11 +85,14 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 #portalFlash{position:fixed;inset:0;z-index:210;pointer-events:none;opacity:0;background:radial-gradient(circle at center, rgba(255,246,212,.95) 0, rgba(255,212,100,.85) 10%, rgba(255,170,72,.42) 24%, rgba(0,0,0,0) 58%)}
 #portalFlash.on{animation:flash .95s ease forwards}
+#fortuneFlash{position:fixed;inset:0;z-index:209;pointer-events:none;opacity:0;background:radial-gradient(circle at center, rgba(255,220,130,.10) 0, rgba(255,180,60,.16) 42%, rgba(0,0,0,0) 100%)}
+#fortuneFlash.on{animation:fortune .55s ease}
 #damageFlash{position:fixed;inset:0;z-index:205;pointer-events:none;opacity:0;background:radial-gradient(circle at center, rgba(255,80,80,.05) 0, rgba(255,80,80,.10) 40%, rgba(255,80,80,.22) 100%)}
 #damageFlash.on{animation:damage .35s ease}
 #toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:220;display:none;background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px}
 @keyframes flash{0%{opacity:0;transform:scale(.8)}18%{opacity:1;transform:scale(1)}60%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(2.2)}}
 @keyframes damage{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+@keyframes fortune{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @media (max-width:860px){
@@ -106,7 +109,7 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 <body>
 <div id="brand" class="panel">
   <div class="t1">五指山悟空財神殿</div>
-  <div class="t2">V6.5｜版面整理＋16888 錢包方式</div>
+  <div class="t2">V6.6｜發財金主角版</div>
   <div class="t3" id="clock">SYSTEM ONLINE | --</div>
 </div>
 
@@ -120,7 +123,6 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
     <div class="r-head"><span class="r-k">BNB / 暗物質</span><span class="r-v" id="resBNB">0.182</span></div>
     <div class="bar-outer"><div id="bnbBar" class="bar-inner" style="width:18%"></div></div>
   </div>
-  <button id="walletBtn">連錢包</button>
 </div>
 
 <div id="hud" class="panel">
@@ -178,7 +180,7 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 </div>
 
 <div id="miniActions">
-  <button id="actFortune">發財金</button>
+  <button id="actFortune" class="primary">發財金</button>
   <button id="actWish">許願</button>
   <button id="actWallet">錢包</button>
   <button id="actService">客服</button>
@@ -219,7 +221,10 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
     <div class="box"><div class="k">Temple Energy</div><div class="v" id="energyVal">100</div></div>
     <div class="box"><div class="k">Warp Buff</div><div class="v" id="buffVal">0</div></div>
   </div>
-  <div class="row"><button class="pill" onclick="claimFortune()">領取發財金</button></div>
+  <div class="row">
+    <button class="pill" onclick="claimFortune()">領取發財金</button>
+    <button class="pill" onclick="fortuneBless()">神殿加持</button>
+  </div>
 </div>
 
 <div id="wishModal" class="modal">
@@ -231,10 +236,9 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 <div id="walletModal" class="modal">
   <div class="mh"><span>錢包</span><button onclick="closeModal('walletModal')">關閉</button></div>
   <div class="grid2">
-    <div class="box"><div class="k">連線狀態</div><div class="v" id="walletState">未連線</div></div>
+    <div class="box"><div class="k">連線狀態</div><div class="v" id="walletState">此版未開啟</div></div>
     <div class="box"><div class="k">暗物質</div><div class="v" id="walletBNB">0.182 BNB</div></div>
   </div>
-  <div class="row"><button class="pill" onclick="toggleWalletConnect()">連接 / 中斷</button></div>
 </div>
 
 <div id="serviceModal" class="modal">
@@ -252,6 +256,7 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 </div>
 
 <div id="portalFlash"></div>
+<div id="fortuneFlash"></div>
 <div id="damageFlash"></div>
 <div id="toast"></div>
 
@@ -271,9 +276,9 @@ addEventListener('resize', fit); fit();
 const LS = { get:(k,d='')=>{try{return localStorage.getItem(k) ?? d}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}} };
 const S = {
   mode:'TEMPLE', x:0,y:0,z:0,ct:0,yaw:0, moveX:0,moveY:0, warp:0,
-  predict:true, energy:100, buff:0, wish:LS.get('wzs_v65_wish',''),
+  predict:true, energy:100, buff:0, wish:LS.get('wzs_v66_wish',''),
   stars:[], candles:[], marketDir:1, enemies:[], lastSpawnAt:0,
-  bnb:0.182, walletConnected:false, symbol:'BTCUSDT', interval:'1m', realK:[]
+  bnb:0.182, symbol:'BTCUSDT', interval:'1m', realK:[]
 };
 for(let i=0;i<150;i++) S.stars.push({x:(Math.random()-0.5)*2000,y:(Math.random()-0.5)*1600,z:Math.random()*1+0.2,s:Math.random()*2+0.3});
 for(let i=0;i<120;i++) S.candles.push({o:0,c:0,p:0,v:1+Math.random()*4});
@@ -292,74 +297,30 @@ document.getElementById('actService').onclick=()=>openModal('serviceModal');
 document.getElementById('btnHelp').onclick=()=>openModal('serviceModal');
 document.getElementById('wishText').value=S.wish;
 
-function claimFortune(){ S.energy=Math.min(100,S.energy+12); S.buff+=1; S.warp=Math.min(150,S.warp+10); document.getElementById('energyVal').textContent=S.energy.toFixed(1); document.getElementById('buffVal').textContent=S.buff; toast('Temple Buff 啟動'); }
-function saveWish(){ S.wish=document.getElementById('wishText').value; LS.set('wzs_v65_wish',S.wish); toast('願望已保存'); }
+function claimFortune(){
+  S.energy=Math.min(100,S.energy+12);
+  S.buff+=1;
+  S.warp=Math.min(150,S.warp+10);
+  document.getElementById('energyVal').textContent=S.energy.toFixed(1);
+  document.getElementById('buffVal').textContent=S.buff;
+  fortuneFlash();
+  toast('發財金已領取');
+}
+function fortuneBless(){
+  S.energy=Math.min(100,S.energy+20);
+  S.warp=Math.min(150,S.warp+18);
+  S.ct += (S.marketDir>0 ? 1 : -1) * 0.8;
+  fortuneFlash();
+  updateHP();
+  toast('神殿加持已啟動');
+}
+function fortuneFlash(){
+  const ff=document.getElementById('fortuneFlash');
+  ff.classList.remove('on'); void ff.offsetWidth; ff.classList.add('on');
+}
+function saveWish(){ S.wish=document.getElementById('wishText').value; LS.set('wzs_v66_wish',S.wish); toast('願望已保存'); }
 document.getElementById('energyVal').textContent=S.energy.toFixed(1);
 document.getElementById('buffVal').textContent=S.buff;
-
-function pickProvider(){
-  if(!window.ethereum && window.BinanceChain) window.ethereum = window.BinanceChain;
-  if(window.ethereum && Array.isArray(window.ethereum.providers) && window.ethereum.providers.length){
-    return window.ethereum.providers.find(p=>p && (p.isBinance || p.isMetaMask || p.isTrust || p.isOKXWallet)) || window.ethereum.providers[0];
-  }
-  return window.ethereum || null;
-}
-async function ensureBSC(provider){
-  const chainId = '0x38';
-  try{
-    const current = await provider.request({ method:'eth_chainId' });
-    if(current === chainId) return true;
-    await provider.request({ method:'wallet_switchEthereumChain', params:[{ chainId }] });
-    return true;
-  }catch(err){
-    try{
-      await provider.request({
-        method:'wallet_addEthereumChain',
-        params:[{
-          chainId:'0x38', chainName:'BNB Smart Chain',
-          nativeCurrency:{ name:'BNB', symbol:'BNB', decimals:18 },
-          rpcUrls:['https://bsc-dataseed.binance.org/'],
-          blockExplorerUrls:['https://bscscan.com']
-        }]
-      });
-      return true;
-    }catch(e){ return false; }
-  }
-}
-async function toggleWalletConnect(){
-  if(S.walletConnected){
-    S.walletConnected = false;
-    updateWalletUI();
-    toast('錢包已中斷');
-    return;
-  }
-  const provider = pickProvider();
-  if(!provider){
-    openModal('walletModal');
-    toast('未偵測到錢包');
-    return;
-  }
-  try{
-    await provider.request({ method:'eth_requestAccounts' });
-    const ok = await ensureBSC(provider);
-    if(!ok){
-      toast('請切到 BNB Smart Chain');
-      return;
-    }
-    S.walletConnected = true;
-    updateWalletUI();
-    toast('錢包已連線');
-  }catch(e){
-    toast('連線失敗');
-  }
-}
-function updateWalletUI(){
-  document.getElementById('walletState').textContent = S.walletConnected ? '已連線' : '未連線';
-  document.getElementById('walletBtn').textContent = S.walletConnected ? '已連線' : '連錢包';
-  document.getElementById('walletBNB').textContent = `${S.bnb.toFixed(3)} BNB`;
-}
-document.getElementById('walletBtn').onclick = toggleWalletConnect;
-updateWalletUI();
 
 function signedDeg(){ let deg=(S.yaw*180/Math.PI)%360; if(deg>180) deg-=360; if(deg<-180) deg+=360; return deg; }
 function zone(){ return Math.abs(signedDeg())<=90 ? '多' : '空'; }
@@ -603,9 +564,9 @@ loop();
     const max=34, len=Math.hypot(dx,dy)||1;
     if(len>max){ dx=dx/len*max; dy=dy/len*max; }
     S.moveX=dx/max; S.moveY=-dy/max;
-    inner.style.left=(38+dx)+'px'; inner.style.top=(38+dy)+'px';
+    inner.style.left=(34+dx)+'px'; inner.style.top=(34+dy)+'px';
   }
-  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='38px'; inner.style.top='38px'; }
+  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='34px'; inner.style.top='34px'; }
   joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY);});
   joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
   joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
