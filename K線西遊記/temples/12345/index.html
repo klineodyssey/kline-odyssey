@@ -122,11 +122,29 @@ textarea{min-height:110px;resize:vertical}
 .cp-row{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,200,80,.25);background:rgba(0,0,0,.35)}
 .cp-k{opacity:.85;font-size:12px}
 .cp-v{margin-top:2px;font-weight:900;color:#8af3ff;word-break:break-word}
-.footer-terminal{position:fixed;bottom:0;width:100%;background:#000;padding:12px;border-top:4px solid var(--gold);display:grid;grid-template-columns:repeat(5,1fr);gap:10px;z-index:140}
+.footer-terminal{display:none}
 .term-btn{background:#0a0a0a;border:1px solid #444;color:#fff;padding:14px 6px;font-weight:900;cursor:pointer;font-size:12px;border-radius:8px;width:100%;text-align:center}
 .term-btn.active-kgen{border-color:var(--energy);color:var(--energy)}
 .chain-live-panel,.bet-live-panel,.ritual-panel{position:fixed;right:12px;top:120px;z-index:215;width:min(340px,88vw);background:rgba(8,12,20,.92);border:1px solid rgba(255,215,120,.25);border-radius:14px;padding:12px;display:none}
-.ritual-panel{top:470px;display:block}
+.ritual-panel{top:470px}
+#world-ui.mode-battle #bet-live-panel,#world-ui.mode-battle #chain-live-panel,#world-ui.mode-battle #ritual-panel{display:none !important}
+#world-ui.mode-temple #bet-live-panel{display:block}
+#world-ui.mode-temple #ritual-panel{display:block}
+#world-ui.mode-temple #chain-live-panel{display:none}
+.function-toggle{position:fixed;right:12px;bottom:104px;z-index:170;padding:12px 16px;border-radius:999px;border:1px solid rgba(255,215,120,.35);background:rgba(0,0,0,.82);color:var(--gold);font-weight:900;box-shadow:0 0 16px rgba(255,215,120,.15)}
+.function-menu{position:fixed;left:12px;right:12px;bottom:92px;background:rgba(0,0,0,.94);border-top:3px solid var(--gold);padding:12px;display:none;grid-template-columns:repeat(5,1fr);gap:10px;z-index:165;border-radius:18px 18px 0 0;max-height:48vh;overflow:auto}
+.function-menu.show{display:grid}
+.quick-trade{position:fixed;left:12px;right:96px;bottom:12px;display:grid;grid-template-columns:1.2fr 1.2fr .9fr .9fr;gap:10px;z-index:150}
+.quick-btn,.hud-pill{background:rgba(0,0,0,.84);border:1px solid rgba(255,215,120,.2);color:#fff;border-radius:14px;padding:14px 10px;font-weight:900;text-align:center}
+.quick-btn.buy{border-color:rgba(60,220,120,.45);color:#d8ffe6;background:rgba(60,220,120,.12)}
+.quick-btn.sell{border-color:rgba(255,110,110,.42);color:#ffdede;background:rgba(255,110,110,.12)}
+.hud-pill .mini{display:block;font-size:10px;opacity:.72;margin-bottom:3px}
+#impact-flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:260;transition:opacity .18s ease}
+#impact-flash.buy{background:radial-gradient(circle at center, rgba(60,220,120,.24), transparent 55%)}
+#impact-flash.sell{background:radial-gradient(circle at center, rgba(255,110,110,.24), transparent 55%)}
+#impact-flash.buff{background:radial-gradient(circle at center, rgba(255,215,120,.24), transparent 55%)}
+.shake{animation:screenShake .22s linear 1}
+@keyframes screenShake{0%{transform:translate(0,0)}25%{transform:translate(4px,-2px)}50%{transform:translate(-4px,2px)}75%{transform:translate(3px,1px)}100%{transform:translate(0,0)}}
 .cl-head,.bp-head,.rp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd88a;font-weight:900;font-family:Orbitron,Arial,sans-serif;font-size:13px;margin-bottom:10px}
 .cl-grid,.bp-kv,.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cl-item,.rp-item{border:1px solid rgba(255,215,120,.14);border-radius:12px;padding:8px 10px;background:rgba(0,0,0,.22)}
@@ -155,7 +173,9 @@ textarea{min-height:110px;resize:vertical}
   #kline-chart-panel{left:10px;top:520px;width:250px}
   .warp-engine{right:10px;bottom:250px}
   #coord-panel{right:10px;bottom:300px;width:min(250px,82vw)}
-  .footer-terminal{grid-template-columns:repeat(3,1fr)}
+  .function-menu{grid-template-columns:repeat(2,1fr)}
+  .quick-trade{left:10px;right:84px;grid-template-columns:1fr 1fr}
+  .function-toggle{right:10px;bottom:100px;padding:12px 14px}
   .ritual-panel{top:auto;bottom:94px;left:10px;right:10px;width:auto}
 }
 </style>
@@ -164,6 +184,7 @@ textarea{min-height:110px;resize:vertical}
 <div id="toast"></div>
 <canvas id="world"></canvas>
 <div class="world-enter-badge" id="world-enter-badge">ENTER KLINE WORLD</div>
+<div id="impact-flash"></div>
 
 <!-- TEMPLE LAYER -->
 <div id="temple-layer">
@@ -466,17 +487,26 @@ textarea{min-height:110px;resize:vertical}
     <div class="rp-status" id="rp-status">神殿儀式已連接戰場。</div>
   </div>
 
-  <div class="footer-terminal">
+  <div class="quick-trade">
+    <button class="quick-btn buy" onclick="placeMock('UP')">BUY ↑</button>
+    <button class="quick-btn sell" onclick="placeMock('DOWN')">SELL ↓</button>
+    <div class="hud-pill"><span class="mini">CT</span><span id="hud-ct">0.00</span></div>
+    <div class="hud-pill"><span class="mini">ENERGY</span><span id="hud-energy">100</span></div>
+  </div>
+
+  <button class="function-toggle" id="function-toggle" onclick="toggleFunctionMenu()">⚙ 功能</button>
+
+  <div class="function-menu" id="function-menu">
     <button class="term-btn" onclick="captureMock()">📸 拍照存證</button>
     <button class="term-btn" onclick="toggleChainLive()">🛰️ Chain Live</button>
-    <button class="term-btn" onclick="toggleBetPanel()">📈 下單面板</button>
+    <button class="term-btn" onclick="openTempleMode()">📈 下單 / 儀式</button>
     <button class="term-btn active-kgen" onclick="boost()">💎 KGEN 沖等演化</button>
     <button class="term-btn active-kgen" onclick="autoHunt()">⚔️ 自動巡航打怪</button>
     <button class="term-btn" onclick="switchTerrain()">👤 切換地形</button>
     <button class="term-btn" onclick="spawnBoss()">🎡 召喚 Boss</button>
     <button class="term-btn" onclick="setWish()">🧭 改核心標語</button>
     <button class="term-btn active-kgen" onclick="returnTemple()">🏯 返回神殿</button>
-    <button class="term-btn active-kgen" onclick="toggleRitualPanel()">✨ Temple Buff</button>
+    <button class="term-btn active-kgen" onclick="openBattleMode()">✨ 回到戰場</button>
   </div>
 </div>
 
@@ -586,6 +616,7 @@ $('btnClearChat').onclick=()=>{ $('chatBox').value=''; LS.set('wzs_chat',''); to
 
 /* World engine */
 const S = {x:0,ct:0,yaw:0,lev:0,t:0,hp:100,energy:100,terrain:'草原',ga:600,auto:false,predict:true,monsters:[],candles:[],buff:0,inWorld:false};
+let MODE='TEMPLE';
 for(let i=0;i<120;i++) S.candles.push({o:0,c:0,h:0,l:0,p:0,v:1});
 const world = $('world'); const wctx = world.getContext('2d');
 const coreCanvas = $('core-canvas'); const cctx = coreCanvas.getContext('2d');
@@ -595,19 +626,19 @@ function signedDeg(){ let d=(S.yaw*180/Math.PI)%360; if(d>180)d-=360; if(d<-180)
 function zone(){ return Math.abs(signedDeg())<=90?'多':'空'; }
 function direction(){ return zone()==='多'?1:-1; }
 function setWarp(v){ S.lev = Math.max(0, Math.min(150, v)); const pct = (S.lev/150)*100; $('energy-fill').style.height = pct + '%'; $('warp-thumb').style.bottom = `calc(${pct}% - 14px)`; $('warp-txt').textContent = `WARP ${S.lev.toFixed(1)}x`; $('top-lev').textContent = `${S.lev.toFixed(1)}x`; }
-function switchTerrain(){ const arr=['草原','森林','湖泊','山地']; S.terrain=arr[(arr.indexOf(S.terrain)+1)%arr.length]; toast('地形切換到 '+S.terrain); }
+function switchTerrain(){ const arr=['草原','森林','湖泊','山地']; S.terrain=arr[(arr.indexOf(S.terrain)+1)%arr.length]; impact('buff'); toast('地形切換到 '+S.terrain); }
 function togglePredict(){ S.predict=!S.predict; $('kc-predict').textContent='預測：'+(S.predict?'開':'關'); }
 function toggleChainLive(){ const p=$('chain-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
-function toggleBetPanel(){ const p=$('bet-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
-function toggleRitualPanel(){ const p=$('ritual-panel'); p.style.display=p.style.display==='none'?'block':'none'; }
-function approveMock(){ $('bp-status').textContent='Approve 完成（模擬）'; }
-function placeMock(side){ $('bp-status').textContent=`${side} 完成（模擬）`; }
+function toggleBetPanel(){ if(MODE==='BATTLE'){ openTempleMode(); return; } const p=$('bet-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+function toggleRitualPanel(){ if(MODE==='BATTLE'){ openTempleMode(); return; } const p=$('ritual-panel'); p.style.display=p.style.display==='none'?'block':'none'; }
+function approveMock(){ $('bp-status').textContent='Approve 完成（模擬）'; impact('buff'); }
+function placeMock(side){ const amt=parseFloat(($('bet-amt-input').value||'0').trim())||0; $('bp-status').textContent=`${side} 完成（模擬）`; if(side==='UP'){ S.energy=Math.max(0,S.energy-(amt||1)*0.1); impact('buy'); toast('BUY 進場'); } else { S.energy=Math.max(0,S.energy-(amt||1)*0.1); impact('sell'); toast('SELL 進場'); } if(MODE==='TEMPLE'){ setTimeout(()=>openBattleMode(),180); } }
 function captureMock(){ toast('拍照存證（模擬）'); }
 function setWish(){ const v=prompt('輸入核心標語', $('wish-label').textContent); if(v) $('wish-label').textContent=v; }
-function boost(){ S.ga=Math.min(1000,S.ga+50); $('ga-rank').textContent='RANK: GA-'+S.ga; }
+function boost(){ S.ga=Math.min(1000,S.ga+50); $('ga-rank').textContent='RANK: GA-'+S.ga; impact('buff'); toast('KGEN 演化升級'); }
 function autoHunt(){ S.auto=!S.auto; toast('自動巡航 '+(S.auto?'開':'關')); }
 function spawnMonster(type='normal'){ const a=Math.random()*Math.PI*2,d=150+Math.random()*180; S.monsters.push({x:S.x+Math.cos(a)*d,y:S.ct+Math.sin(a)*d,hp:type==='boss'?24:6,maxHp:type==='boss'?24:6,speed:type==='boss'?0.35:0.72,kind:type}); }
-function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
+function spawnBoss(){ spawnMonster('boss'); impact('sell'); toast('Boss 出現'); }
 for(let i=0;i<6;i++) spawnMonster();
 function worldToCamera(wx, wy){ const dx=wx-S.x, dy=wy-S.ct, c=Math.cos(-S.yaw), s=Math.sin(-S.yaw); return {x:dx*c-dy*s,y:dx*s+dy*c}; }
 function cameraToScreen(cx, baseY, cam){ return [cx + cam.x, baseY + cam.y*0.56]; }
@@ -657,6 +688,8 @@ function updatePanels(){
   $('cp-energy').textContent=S.energy.toFixed(0);
   $('cp-buff').textContent=S.buff.toFixed(0);
   $('top-buff').textContent=S.buff.toFixed(0);
+  $('hud-ct').textContent=S.ct.toFixed(2);
+  $('hud-energy').textContent=S.energy.toFixed(0);
   $('f-bar').style.width=(40+(S.lev/150)*60)+'%';
   $('m-bar').style.width=(15+Math.abs(signedDeg())/180*80)+'%';
   $('cl-heart').textContent=T.heart || '未貼';
@@ -673,10 +706,10 @@ function updateRitualPanel(){
   $('rp-lamp').textContent = String(T.lampDays||0)+' 天';
   $('rp-wish').textContent = T.wish ? T.wish.slice(0,16) : '未設定';
 }
-function applyTempleFortune(){ const add = Math.max(8, Math.floor((T.fortune||0)/2) || 0); S.energy += add; S.buff += add*0.3; $('rp-status').textContent='發財金已注入戰場：+'+add+' Energy'; toast('發財金注入能量'); }
-function applyWishBuff(){ if(!T.wish){ $('rp-status').textContent='尚未保存願望'; return toast('請先回神殿寫願望'); } const bonus = Math.min(20, Math.max(6, Math.floor(T.wish.length/2))); S.buff += bonus; S.lev = Math.min(150, S.lev + bonus); setWarp(S.lev); $('wish-label').textContent=T.wish.slice(0,24); $('rp-status').textContent='願望 Buff 啟動：+'+bonus; toast('願望 Buff 已啟用'); }
-function applyHeartbeat(){ const add = (T.heartbeat||0) + 1; S.energy += add; $('rp-status').textContent='心跳能量轉換：+'+add; toast('心跳已轉為戰場能量'); }
-function cupEvent(){ if(cup<3) return toast('聖盃尚未完成'); if(Math.random()<0.45){ spawnBoss(); $('rp-status').textContent='聖盃事件：Boss 降臨'; } else { S.buff += 10; $('rp-status').textContent='聖盃事件：Buff +10'; } toast('聖盃事件已觸發'); }
+function applyTempleFortune(){ const add = Math.max(8, Math.floor((T.fortune||0)/2) || 0); S.energy += add; S.buff += add*0.3; $('rp-status').textContent='發財金已注入戰場：+'+add+' Energy'; impact('buff'); toast('發財金注入能量'); }
+function applyWishBuff(){ if(!T.wish){ $('rp-status').textContent='尚未保存願望'; return toast('請先回神殿寫願望'); } const bonus = Math.min(20, Math.max(6, Math.floor(T.wish.length/2))); S.buff += bonus; S.lev = Math.min(150, S.lev + bonus); setWarp(S.lev); $('wish-label').textContent=T.wish.slice(0,24); $('rp-status').textContent='願望 Buff 啟動：+'+bonus; impact('buff'); toast('願望 Buff 已啟用'); }
+function applyHeartbeat(){ const add = (T.heartbeat||0) + 1; S.energy += add; $('rp-status').textContent='心跳能量轉換：+'+add; impact('buff'); toast('心跳已轉為戰場能量'); }
+function cupEvent(){ if(cup<3) return toast('聖盃尚未完成'); if(Math.random()<0.45){ spawnBoss(); $('rp-status').textContent='聖盃事件：Boss 降臨'; impact('sell'); } else { S.buff += 10; $('rp-status').textContent='聖盃事件：Buff +10'; impact('buff'); } toast('聖盃事件已觸發'); }
 
 function enterWorld(){
   const temple = $('temple-layer');
@@ -693,6 +726,7 @@ function enterWorld(){
     temple.classList.add('hidden');
     worldUI.classList.remove('hidden');
     S.inWorld=true;
+    setMode('BATTLE');
     S.energy=parseInt($('energyLevel').textContent,10)||100;
     S.buff=(T.lampDays||0) + Math.floor((T.fortune||0)/10) + (T.wish ? 6 : 0);
     if(T.wish) $('wish-label').textContent=T.wish.slice(0,24);
@@ -706,6 +740,7 @@ function returnTemple(){
   temple.classList.remove('hidden','fade-out');
   worldUI.classList.add('hidden');
   S.inWorld=false;
+  $('function-menu').classList.remove('show');
   $('core').classList.remove('portal-active');
   toast('已返回神殿');
 }
@@ -713,6 +748,7 @@ $('btnEnterWorld').onclick=()=>enterWorld();
 
 updateRitualPanel();
 setWarp(0);
+setMode('BATTLE');
 </script>
 </body>
 </html>
