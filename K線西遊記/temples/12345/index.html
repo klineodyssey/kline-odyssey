@@ -1,191 +1,167 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>WUZHISHAN_12345_Original_Creation_V2</title>
+<title>WUZHISHAN_12345_scene_v3.html</title>
 <style>
 :root{
-  --bg:#06070d;
-  --panel:rgba(0,0,0,.48);
-  --line:rgba(255,255,255,.12);
+  --bg:#07070d;
   --gold:#f2d57a;
   --gold2:#ffb347;
   --cyan:#79d7ff;
-  --green:#86ff7a;
   --red:#ff7575;
-  --earth:#2e2218;
+  --green:#86ff7a;
+  --panel:rgba(10,8,12,.58);
+  --line:rgba(255,255,255,.10);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:"Noto Sans TC",Arial,sans-serif;touch-action:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:"Noto Sans TC",Arial,sans-serif;color:#fff;touch-action:none}
 canvas{position:fixed;inset:0}
+#bg{z-index:0}
+#coreCanvas{z-index:1}
 .panel{
-  position:fixed;z-index:120;background:var(--panel);border:1px solid var(--line);
-  border-radius:14px;padding:10px 12px;backdrop-filter:blur(10px)
+  position:fixed;z-index:120;background:var(--panel);border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;padding:10px 12px;backdrop-filter:blur(12px);
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
 }
-#brand{top:12px;left:12px}
-#brand .t1{font-size:22px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(242,213,122,.25)}
-#brand .t2{font-size:11px;color:#e8d9ad;margin-top:4px}
+#brand{top:12px;left:12px;max-width:40vw}
+#brand .t1{font-size:21px;font-weight:900;color:var(--gold)}
+#brand .t2{font-size:11px;color:#ead9af;margin-top:4px}
 #brand .t3{font-size:11px;color:var(--cyan);margin-top:4px}
-#hud{top:12px;right:12px;min-width:240px;font-size:12px;line-height:1.65}
-#hint{
-  left:50%;top:18px;transform:translateX(-50%);
-  font-size:12px;color:#ffe6b3;min-width:270px;text-align:center
+#hud{
+  top:12px;right:12px;min-width:240px;font-size:12px;line-height:1.55;
 }
-#centerLabel{
-  position:fixed;left:50%;top:58%;transform:translate(-50%,-50%);
-  z-index:98;font-size:13px;letter-spacing:1px;color:#ffe6ad;
-  padding:7px 12px;border-radius:999px;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.1)
+.hud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hud-box{padding:7px 9px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03)}
+.hud-k{font-size:10px;color:#ecdba4}
+.hud-v{font-size:15px;font-weight:900;color:var(--cyan);margin-top:4px}
+#centerInfo{
+  position:fixed;left:50%;top:61%;transform:translateX(-50%);z-index:102;
+  padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.09);
+  font-size:12px;color:#ffefc6
 }
 .core-shell{
-  position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);
-  width:min(42vw,280px);height:min(42vw,280px);z-index:90
+  position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);
+  width:min(42vw,300px);height:min(42vw,300px);z-index:100
 }
 .core-ring{
-  position:absolute;inset:0;border-radius:50%;overflow:hidden;border:2px solid rgba(242,213,122,.82);
-  box-shadow:0 0 0 4px rgba(242,213,122,.06),0 0 38px rgba(242,213,122,.18)
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;border:2px solid rgba(242,213,122,.9);
+  box-shadow:0 0 0 4px rgba(242,213,122,.06),0 0 42px rgba(242,213,122,.12);
 }
 .core-ring::after{
-  content:"";position:absolute;inset:18px;border-radius:50%;
-  border:1px dashed rgba(121,215,255,.24);animation:spin 22s linear infinite
+  content:"";position:absolute;inset:18px;border-radius:50%;border:1px dashed rgba(121,215,255,.22);
+  animation:spin 22s linear infinite;
 }
 .core-glow{
-  position:absolute;inset:-18px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,196,82,.12) 0,rgba(255,132,36,.06) 36%,transparent 62%);
-  filter:blur(6px);animation:pulse 2.4s ease-in-out infinite
+  position:absolute;inset:-22px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,196,82,.15) 0,rgba(255,132,36,.07) 35%,transparent 62%);
+  filter:blur(7px);animation:pulse 2.6s ease-in-out infinite;
 }
-.core-canvas{width:100%;height:100%;display:block;border-radius:50%}
 .temple-heart-hit{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:120px;height:120px;border-radius:50%;cursor:pointer;background:transparent;z-index:3
+  width:126px;height:126px;border-radius:50%;cursor:pointer;background:transparent;z-index:4;
 }
 .orbit-note{
-  position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);
-  white-space:nowrap;font-size:11px;color:#ffefc6;background:rgba(0,0,0,.42);
-  border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:999px
+  position:absolute;left:50%;bottom:-28px;transform:translateX(-50%);
+  font-size:11px;color:#ffefc6;background:rgba(0,0,0,.42);
+  border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:999px;white-space:nowrap
 }
-.objects{
-  position:fixed;inset:0;pointer-events:none;z-index:95
+#klinePanel{
+  position:fixed;left:12px;bottom:190px;width:min(340px,46vw);z-index:122;
 }
-.obj{
-  position:absolute;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;
-  color:#fff7da;text-shadow:0 0 8px rgba(0,0,0,.75)
+.k-head{display:flex;align-items:center;justify-content:space-between;color:var(--gold);font-weight:900;font-size:13px;margin-bottom:8px}
+.k-head .symtabs{display:flex;gap:6px}
+.sym{
+  border-radius:999px;padding:5px 10px;border:1px solid rgba(242,213,122,.18);cursor:pointer;background:rgba(255,255,255,.03);font-size:11px
 }
-.obj .ico{
-  width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.38);border:1px solid rgba(242,213,122,.25);font-size:30px;
-  box-shadow:0 0 24px rgba(242,213,122,.08)
+.sym.active{background:rgba(242,213,122,.14);color:#ffefbb}
+#klineCanvas{
+  width:100%;height:128px;display:block;border-radius:12px;background:
+   linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.08)),
+   repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 34px),
+   repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 26px);
 }
-.obj .txt{font-size:11px}
-#objFortune{left:14%;top:64%}
-#objWish{left:30%;top:74%}
-#objWallet{right:28%;top:73%}
-#objPhoto{right:12%;top:63%}
-.modal{
-  position:fixed;left:50%;top:67%;transform:translate(-50%,-50%);width:min(520px,92vw);
-  z-index:160;display:none;background:rgba(8,10,18,.92);border:1px solid rgba(242,213,122,.24);border-radius:18px;
-  padding:14px 14px 12px;box-shadow:0 18px 50px rgba(0,0,0,.4)
+.k-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.mini{
+  border-radius:12px;background:rgba(255,255,255,.03);padding:8px 9px;border:1px solid rgba(255,255,255,.08)
 }
-.modal.show{display:block}
-.mh{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font-weight:900;margin-bottom:10px}
-.mh button,.pill,.footer-btn,.mini-btn{
-  border-radius:12px;border:1px solid rgba(242,213,122,.22);background:rgba(255,255,255,.04);color:#fff;padding:9px 12px;cursor:pointer
-}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.box{
-  border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;background:rgba(255,255,255,.03)
-}
-.box .k{font-size:11px;color:#e9d7a5}
-.box .v{font-size:16px;font-weight:900;color:var(--cyan);margin-top:5px}
-textarea,input{
-  width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:12px;
-  padding:10px 12px;font:inherit;outline:none
-}
-textarea{min-height:88px;resize:vertical}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.footer{
-  position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;z-index:140
-}
-.footer-btn{
-  background:rgba(0,0,0,.58);font-size:12px;font-weight:900;padding:12px 8px
-}
-.footer-btn.gold{border-color:rgba(242,213,122,.36);color:#ffe8ae}
-.battle-only{display:none}
-body.battle .battle-only{display:block}
-body.battle .temple-only{display:none}
-body.battle .objects{display:none}
+.mini .k{font-size:10px;color:#eedfb2}
+.mini .v{font-size:13px;color:var(--cyan);font-weight:900;margin-top:4px}
 .controls{
-  position:fixed;left:0;right:0;bottom:82px;height:188px;z-index:145;pointer-events:none;display:none
+  position:fixed;left:0;right:0;bottom:82px;height:190px;z-index:145;pointer-events:none
 }
-body.battle .controls{display:block}
 .joy,.yaw,.warp{pointer-events:auto}
 .joy{
-  position:absolute;left:18px;bottom:8px;width:128px;height:128px;border-radius:50%;
+  position:absolute;left:18px;bottom:8px;width:132px;height:132px;border-radius:50%;
   background:rgba(255,255,255,.07);border:1px solid var(--line)
 }
 .joy:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}
-.joy-inner{position:absolute;left:42px;top:42px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
-.ctrl-label,.warp-top,.warp-bottom{
-  position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:#ffecc0
-}
-.ctrl-label{top:-18px}
+.joy-inner{position:absolute;left:44px;top:44px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
+.ctrl-label{position:absolute;left:50%;transform:translateX(-50%);top:-18px;font-size:11px;color:#ffecc0}
 .yaw{
   position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:min(52vw,360px);height:68px;
   background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px
 }
 .yaw-track{position:absolute;left:14px;right:14px;top:29px;height:10px;border-radius:999px;background:rgba(255,255,255,.14)}
-.yaw-fill{position:absolute;left:50%;top:29px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(121,215,255,.20),rgba(121,215,255,.96));width:0}
+.yaw-fill{position:absolute;left:50%;top:29px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(121,215,255,.25),rgba(121,215,255,.96));width:0}
 .yaw-inner{position:absolute;left:calc(50% - 24px);top:10px;width:48px;height:48px;border-radius:50%;background:var(--gold)}
 .warp{
-  position:absolute;right:18px;bottom:0;width:64px;height:178px;border-radius:32px;
-  background:rgba(255,255,255,.07);border:1px solid var(--line)
+  position:absolute;right:18px;bottom:0;width:68px;height:178px;border-radius:34px;background:rgba(255,255,255,.07);border:1px solid var(--line)
 }
-.warp-track{position:absolute;left:27px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
-.warp-fill{position:absolute;left:27px;bottom:12px;width:10px;height:0;border-radius:999px;background:linear-gradient(to top,#ff8600,#ffd35c,#fff2ad)}
-.warp-inner{position:absolute;left:10px;top:67px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
+.warp-track{position:absolute;left:29px;top:12px;bottom:12px;width:10px;border-radius:999px;background:rgba(255,255,255,.14)}
+.warp-fill{position:absolute;left:29px;bottom:12px;width:10px;height:0;border-radius:999px;background:linear-gradient(to top,#ff8600,#ffd35c,#fff2ad)}
+.warp-inner{position:absolute;left:12px;top:67px;width:44px;height:44px;border-radius:50%;background:var(--gold)}
+.warp-top,.warp-bottom{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:#ffecc0}
 .warp-top{top:-18px}.warp-bottom{bottom:-18px}
+.footer{
+  position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;z-index:140
+}
+.footer button{
+  border-radius:12px;border:1px solid rgba(242,213,122,.18);background:rgba(0,0,0,.56);color:#fff;padding:12px 8px;font-weight:900;font-size:12px;cursor:pointer
+}
+.footer .gold{color:#ffebaf;border-color:rgba(242,213,122,.36)}
+#portalFlash{
+  position:fixed;inset:0;z-index:210;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at center, rgba(255,246,212,.95) 0, rgba(255,212,100,.85) 10%, rgba(255,170,72,.42) 24%, rgba(0,0,0,0) 58%);
+}
+#portalFlash.on{animation:flash .95s ease forwards}
 #toast{
   position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:220;display:none;
   background:rgba(0,0,0,.84);border:1px solid #666;border-radius:12px;padding:12px 16px
 }
-#portalFlash{
-  position:fixed;inset:0;z-index:210;pointer-events:none;opacity:0;
-  background:radial-gradient(circle at center, rgba(255,246,212,.94) 0, rgba(255,212,100,.88) 10%, rgba(255,170,72,.42) 24%, rgba(0,0,0,0) 56%);
-}
-#portalFlash.on{animation:flash .95s ease forwards}
-@keyframes flash{
-  0%{opacity:0;transform:scale(.8)}
-  18%{opacity:1;transform:scale(1)}
-  60%{opacity:1;transform:scale(1.6)}
-  100%{opacity:0;transform:scale(2.2)}
-}
-@keyframes pulse{
-  0%,100%{transform:scale(1)}
-  50%{transform:scale(1.045)}
-}
+@keyframes flash{0%{opacity:0;transform:scale(.8)}18%{opacity:1;transform:scale(1)}60%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(2.2)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @media (max-width:860px){
+  #brand{max-width:44vw}
   #brand .t1{font-size:18px}
+  #hud{right:8px;min-width:200px}
+  .core-shell{width:min(58vw,250px);height:min(58vw,250px)}
+  #klinePanel{width:min(300px,48vw)}
   .footer{grid-template-columns:repeat(3,1fr)}
-  .core-shell{width:min(58vw,240px);height:min(58vw,240px)}
-  #objFortune{left:8%;top:67%}
-  #objWish{left:24%;top:78%}
-  #objWallet{right:22%;top:77%}
-  #objPhoto{right:8%;top:67%}
 }
 </style>
 </head>
-<body class="temple">
+<body>
 <div id="brand" class="panel">
   <div class="t1">五指山悟空財神殿</div>
-  <div class="t2">12345 TempleHeart｜原創融合版</div>
+  <div class="t2">12345 TempleHeart｜場景實作版</div>
   <div class="t3" id="clock">SYSTEM ONLINE | --</div>
 </div>
 
-<div id="hint" class="panel temple-only">點中央 TempleHeart 進入戰場｜旁邊物件可互動</div>
-
 <div id="hud" class="panel">
-  <div id="hudText">模式：TEMPLE<br>CT：0.0<br>Angle：0°<br>Zone：多<br>Warp：0.0x</div>
+  <div class="hud-grid">
+    <div class="hud-box"><div class="hud-k">MODE</div><div class="hud-v" id="hudMode">BATTLE</div></div>
+    <div class="hud-box"><div class="hud-k">ZONE</div><div class="hud-v" id="hudZone">多</div></div>
+    <div class="hud-box"><div class="hud-k">ANGLE</div><div class="hud-v" id="hudAngle">0°</div></div>
+    <div class="hud-box"><div class="hud-k">WARP</div><div class="hud-v" id="hudWarp">0.0x</div></div>
+    <div class="hud-box"><div class="hud-k">X</div><div class="hud-v" id="hudX">0.0</div></div>
+    <div class="hud-box"><div class="hud-k">Y</div><div class="hud-v" id="hudY">0.0</div></div>
+    <div class="hud-box"><div class="hud-k">Z</div><div class="hud-v" id="hudZ">0.0</div></div>
+    <div class="hud-box"><div class="hud-k">CT</div><div class="hud-v" id="hudCT">0.0</div></div>
+  </div>
 </div>
 
 <canvas id="bg"></canvas>
@@ -193,66 +169,39 @@ body.battle .controls{display:block}
 <div class="core-shell">
   <div class="core-glow"></div>
   <div class="core-ring">
-    <canvas id="coreCanvas" class="core-canvas" width="280" height="280"></canvas>
+    <canvas id="coreCanvas" width="300" height="300"></canvas>
     <div class="temple-heart-hit" id="templeHeart"></div>
   </div>
   <div class="orbit-note">TempleHeart｜K線核心｜世界入口</div>
 </div>
 
-<div id="centerLabel" class="temple-only">點核心，被吸進市場</div>
+<div id="centerInfo">CT 依附在雙透視通道上｜漲向前，跌向後</div>
 
-<div class="objects temple-only">
-  <div class="obj" id="objFortune"><div class="ico">🧧</div><div class="txt">發財金寶箱</div></div>
-  <div class="obj" id="objWish"><div class="ico">🪨</div><div class="txt">許願石碑</div></div>
-  <div class="obj" id="objWallet"><div class="ico">🔶</div><div class="txt">錢包符文</div></div>
-  <div class="obj" id="objPhoto"><div class="ico">📸</div><div class="txt">留影神像</div></div>
-</div>
-
-<div id="fortuneModal" class="modal">
-  <div class="mh"><span>發財金寶箱</span><button onclick="closeModal('fortuneModal')">關閉</button></div>
-  <div class="grid2">
-    <div class="box"><div class="k">聖盃進度</div><div class="v" id="cupProg">0 / 3</div></div>
-    <div class="box"><div class="k">發財金狀態</div><div class="v" id="fortuneState">未解鎖</div></div>
+<div id="klinePanel" class="panel">
+  <div class="k-head">
+    <span>實際 K 線</span>
+    <div class="symtabs">
+      <button class="sym active" data-symbol="BTCUSDT">BTC</button>
+      <button class="sym" data-symbol="BNBUSDT">BNB</button>
+      <button class="sym" data-symbol="ETHUSDT">USDT</button>
+    </div>
   </div>
-  <div class="row">
-    <button class="pill" onclick="cupOnce()">搏杯一次</button>
-    <button class="pill" onclick="resetCup()">重置聖盃</button>
-    <button class="pill" onclick="claimFortune()">領取發財金</button>
+  <canvas id="klineCanvas" width="320" height="128"></canvas>
+  <div class="k-meta">
+    <div class="mini"><div class="k">SYMBOL</div><div class="v" id="metaSymbol">BTCUSDT</div></div>
+    <div class="mini"><div class="k">PRICE</div><div class="v" id="metaPrice">--</div></div>
+    <div class="mini"><div class="k">OPEN</div><div class="v" id="metaOpen">--</div></div>
+    <div class="mini"><div class="k">HIGH / LOW</div><div class="v" id="metaHL">--</div></div>
   </div>
 </div>
 
-<div id="wishModal" class="modal">
-  <div class="mh"><span>許願石碑</span><button onclick="closeModal('wishModal')">關閉</button></div>
-  <textarea id="wishText" placeholder="寫下你的願望…"></textarea>
-  <div class="row">
-    <button class="pill" onclick="saveWish()">保存願望</button>
-    <button class="pill" onclick="makeWishBuff()">轉為 Buff</button>
-  </div>
-</div>
-
-<div id="walletModal" class="modal">
-  <div class="mh"><span>錢包符文</span><button onclick="closeModal('walletModal')">關閉</button></div>
-  <div class="grid2">
-    <div class="box"><div class="k">連線狀態</div><div class="v" id="walletState">未連線</div></div>
-    <div class="box"><div class="k">Temple 狀態</div><div class="v">待喚醒</div></div>
-  </div>
-  <div class="row">
-    <button class="pill" onclick="connectWallet()">連接錢包</button>
-  </div>
-</div>
-
-<div id="photoModal" class="modal">
-  <div class="mh"><span>留影神像</span><button onclick="closeModal('photoModal')">關閉</button></div>
-  <div class="box"><div class="k">神殿提示</div><div class="v" style="font-size:14px">先點 TempleHeart，再進市場。這裡可作為拍照與導覽入口。</div></div>
-</div>
-
-<div class="controls battle-only">
+<div class="controls">
   <div class="joy" id="joy">
     <div class="ctrl-label">Move｜X 左右 / Y 前後</div>
     <div class="joy-inner" id="joyInner"></div>
   </div>
   <div class="yaw" id="yaw">
-    <div class="ctrl-label">Yaw｜-90~+90 多｜超過即空</div>
+    <div class="ctrl-label">Yaw｜0° = 12點鐘｜-90~+90 多｜其餘空</div>
     <div class="yaw-track"></div>
     <div class="yaw-fill" id="yawFill"></div>
     <div class="yaw-inner" id="yawInner"></div>
@@ -267,17 +216,11 @@ body.battle .controls{display:block}
 </div>
 
 <div class="footer">
-  <button class="footer-btn temple-only gold" onclick="enterBattle()">進入戰場</button>
-  <button class="footer-btn temple-only" onclick="openModal('fortuneModal')">發財金</button>
-  <button class="footer-btn temple-only" onclick="openModal('wishModal')">許願</button>
-  <button class="footer-btn temple-only" onclick="openModal('walletModal')">錢包</button>
-  <button class="footer-btn temple-only" onclick="openModal('photoModal')">留影</button>
-
-  <button class="footer-btn battle-only gold" onclick="backTemple()">返回神殿</button>
-  <button class="footer-btn battle-only" onclick="boostWarp()">Buff</button>
-  <button class="footer-btn battle-only" onclick="spawnBoss()">Boss</button>
-  <button class="footer-btn battle-only" onclick="togglePredict()">預測</button>
-  <button class="footer-btn battle-only" onclick="heal()">回復</button>
+  <button class="gold" id="btnPortal">TempleHeart</button>
+  <button id="btnPredict">預測</button>
+  <button id="btnBoss">Boss</button>
+  <button id="btnHeal">回復</button>
+  <button id="btnReset">重置</button>
 </div>
 
 <div id="portalFlash"></div>
@@ -288,41 +231,11 @@ const bg = document.getElementById('bg');
 const ctx = bg.getContext('2d');
 const coreCanvas = document.getElementById('coreCanvas');
 const c2 = coreCanvas.getContext('2d');
+const klineCanvas = document.getElementById('klineCanvas');
+const kctx = klineCanvas.getContext('2d');
 
-function fit(){
-  bg.width = innerWidth;
-  bg.height = innerHeight;
-}
+function fit(){ bg.width=innerWidth; bg.height=innerHeight; }
 addEventListener('resize', fit); fit();
-
-const LS = {
-  get:(k,d='')=>{try{return localStorage.getItem(k) ?? d}catch(e){return d}},
-  set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}
-};
-
-const S = {
-  mode:'TEMPLE',
-  x:0,
-  y:0,
-  z:0,
-  ct:0,
-  yaw:0,
-  moveX:0,
-  moveY:0,
-  yawInput:0,
-  warp:0,
-  warpInput:0,
-  hp:100,
-  energy:100,
-  predict:true,
-  monsters:[],
-  stars:Array.from({length:120},()=>({x:Math.random()*1e4-5e3,y:Math.random()*1e4-5e3,s:Math.random()*2+0.5})),
-  candles:[],
-  cups:parseInt(LS.get('wzs_cups','0'),10)||0,
-  wish:LS.get('wzs_wish','')
-};
-
-for(let i=0;i<120;i++) S.candles.push({o:0,c:0,p:0,v:1+Math.random()*4});
 
 function nowText(){
   const d=new Date(), p=n=>String(n).padStart(2,'0');
@@ -337,107 +250,36 @@ function toast(msg){
   clearTimeout(window.__t); window.__t=setTimeout(()=>el.style.display='none',1200);
 }
 
-function openModal(id){ document.getElementById(id).classList.add('show'); }
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
-
-document.getElementById('objFortune').onclick=()=>openModal('fortuneModal');
-document.getElementById('objWish').onclick=()=>openModal('wishModal');
-document.getElementById('objWallet').onclick=()=>openModal('walletModal');
-document.getElementById('objPhoto').onclick=()=>openModal('photoModal');
-
-function syncFortune(){
-  document.getElementById('cupProg').textContent = `${S.cups} / 3`;
-  document.getElementById('fortuneState').textContent = S.cups>=3 ? '可領' : '未解鎖';
-}
-function cupOnce(){
-  const ok = Math.random() < 0.55;
-  S.cups = ok ? Math.min(3,S.cups+1) : 0;
-  LS.set('wzs_cups', String(S.cups));
-  syncFortune();
-  toast(ok ? '聖盃成功' : '笑杯，重來');
-}
-function resetCup(){ S.cups=0; LS.set('wzs_cups','0'); syncFortune(); toast('已重置');}
-function claimFortune(){
-  if(S.cups<3){ toast('先完成三次聖盃'); return; }
-  S.energy=Math.min(100,S.energy+18);
-  S.warp=Math.min(150,S.warp+12);
-  toast('發財金注入 Temple Buff');
-}
-function saveWish(){
-  S.wish=document.getElementById('wishText').value;
-  LS.set('wzs_wish', S.wish);
-  toast('願望已保存');
-}
-function makeWishBuff(){
-  const txt=document.getElementById('wishText').value.trim();
-  if(!txt){ toast('先輸入願望'); return; }
-  S.energy=Math.min(100,S.energy+8);
-  toast('願望已轉為 Buff');
-}
-function connectWallet(){
-  document.getElementById('walletState').textContent='DEMO 已連線';
-  toast('錢包已連線');
-}
-
-document.getElementById('wishText').value = S.wish;
-syncFortune();
-
+const S = {
+  mode:'BATTLE',
+  x:0,y:0,z:0,ct:0,yaw:0,
+  moveX:0, moveY:0, yawInput:0, warp:0, warpInput:0,
+  predict:true,
+  monsters:[],
+  candles:[],
+  liveCandles:[],
+  symbol:'BTCUSDT',
+  lastFetch:0,
+  kOpen:0, kHigh:0, kLow:0, kClose:0
+};
+for(let i=0;i<120;i++) S.candles.push({o:0,c:0,p:0,v:1+Math.random()*4});
 function signedDeg(){
-  let deg=(S.yaw*180/Math.PI)%360;
-  if(deg>180) deg-=360;
-  if(deg<-180) deg+=360;
+  let deg = (S.yaw * 180 / Math.PI) % 360;
+  if (deg > 180) deg -= 360;
+  if (deg < -180) deg += 360;
   return deg;
 }
-function zone(){ return Math.abs(signedDeg())<=90 ? '多' : '空'; }
-
-function enterBattle(){
-  if(S.mode==='BATTLE') return;
-  const flash=document.getElementById('portalFlash');
-  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
-  toast('TempleHeart 啟動');
-  setTimeout(()=>{
-    document.body.classList.remove('temple');
-    document.body.classList.add('battle');
-    S.mode='BATTLE';
-  },420);
+function zone(){ return Math.abs(signedDeg()) <= 90 ? '多' : '空'; }
+function updateHUD(){
+  document.getElementById('hudMode').textContent=S.mode;
+  document.getElementById('hudZone').textContent=zone();
+  document.getElementById('hudAngle').textContent=signedDeg().toFixed(1)+'°';
+  document.getElementById('hudWarp').textContent=S.warp.toFixed(1)+'x';
+  document.getElementById('hudX').textContent=S.x.toFixed(1);
+  document.getElementById('hudY').textContent=S.y.toFixed(1);
+  document.getElementById('hudZ').textContent=S.z.toFixed(1);
+  document.getElementById('hudCT').textContent=S.ct.toFixed(2);
 }
-function backTemple(){
-  document.body.classList.remove('battle');
-  document.body.classList.add('temple');
-  S.mode='TEMPLE';
-  toast('返回五指山');
-}
-document.getElementById('templeHeart').onclick=enterBattle;
-
-function boostWarp(){ S.warp=Math.min(150,S.warp+15); toast('Warp Boost'); }
-function togglePredict(){ S.predict=!S.predict; toast('預測 '+(S.predict?'開':'關')); }
-function heal(){ S.hp=Math.min(100,S.hp+10); toast('HP 回復'); }
-
-function spawnMonster(type='normal'){
-  const a=Math.random()*Math.PI*2, d=180+Math.random()*220;
-  S.monsters.push({
-    x:S.x+Math.cos(a)*d,
-    y:S.y+Math.sin(a)*d,
-    hp:type==='boss'?20:6,
-    maxHp:type==='boss'?20:6,
-    speed:type==='boss'?0.35:0.72,
-    kind:type
-  });
-}
-function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
-for(let i=0;i<6;i++) spawnMonster();
-
-function genCandle(){
-  const dir = zone()==='多' ? 1 : -1;
-  const last = S.candles[S.candles.length-1].c;
-  const delta = dir*(S.warp/150)*1.5 + (Math.random()-.5)*0.85;
-  const close = last + delta;
-  const pred = close + dir*(S.warp/150)*0.8 + (Math.random()-.5)*0.3;
-  S.candles.push({o:last,c:close,p:pred,v:1+Math.random()*4});
-  if(S.candles.length>120) S.candles.shift();
-  S.ct += delta*0.12;
-}
-
 function worldToCamera(wx, wy){
   const dx = wx - S.x;
   const dy = wy - S.y;
@@ -445,251 +287,202 @@ function worldToCamera(wx, wy){
   return { x: dx*cos - dy*sin, y: dx*sin + dy*cos };
 }
 function cameraToScreen(cx, baseY, cam){
-  return [cx + cam.x, baseY + cam.y*0.58 - S.z*14];
+  return [cx + cam.x, baseY + cam.y*0.58 - S.z*15];
+}
+function ctLanePoint(ctNorm){
+  const cx = bg.width/2;
+  const nearY = bg.height*0.92;
+  const farY = bg.height*0.34 + 18 - S.z*5;
+  const clamped = Math.max(-1, Math.min(1, ctNorm));
+  const t = (clamped + 1) / 2; // -1 back, +1 forward
+  const y = nearY - (nearY - farY) * t;
+  const width = 250 - 200 * t; // open more near, narrow far
+  return { y, left: cx - width, right: cx + width };
 }
 
-function drawTempleBackground(cx, horizon, baseY){
-  const sky = ctx.createLinearGradient(0,0,0,bg.height);
-  sky.addColorStop(0,'#130d08');
-  sky.addColorStop(.38,'#29180c');
-  sky.addColorStop(.72,'#1a110a');
-  sky.addColorStop(1,'#09070a');
-  ctx.fillStyle=sky; ctx.fillRect(0,0,bg.width,bg.height);
-
-  const glow = ctx.createRadialGradient(cx,bg.height*0.28,20,cx,bg.height*0.28,380);
-  glow.addColorStop(0,'rgba(255,223,145,.22)');
-  glow.addColorStop(.4,'rgba(255,170,72,.08)');
-  glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=glow; ctx.fillRect(0,0,bg.width,bg.height);
-
-  // five mountain pillars
-  const pillars = [
-    {x:cx-270,w:120,h:200},
-    {x:cx-140,w:115,h:250},
-    {x:cx,w:130,h:330},
-    {x:cx+145,w:115,h:255},
-    {x:cx+275,w:120,h:210},
-  ];
-  pillars.forEach((p,i)=>{
-    const g=ctx.createLinearGradient(0,bg.height*0.38,0,bg.height);
-    g.addColorStop(0,'#5a3b20'); g.addColorStop(1,'#24150b');
-    ctx.fillStyle=g;
-    ctx.beginPath();
-    ctx.moveTo(p.x-p.w/2, baseY+18);
-    ctx.lineTo(p.x-p.w*0.32, baseY-p.h*0.64);
-    ctx.lineTo(p.x, baseY-p.h);
-    ctx.lineTo(p.x+p.w*0.34, baseY-p.h*0.66);
-    ctx.lineTo(p.x+p.w/2, baseY+18);
-    ctx.closePath();
-    ctx.fill();
-
-    // cracks
-    ctx.strokeStyle='rgba(255,190,80,.18)';
-    ctx.lineWidth=2;
-    ctx.beginPath();
-    ctx.moveTo(p.x-6, baseY-p.h*0.55);
-    ctx.lineTo(p.x+8, baseY-p.h*0.34);
-    ctx.lineTo(p.x-5, baseY-p.h*0.18);
-    ctx.stroke();
-  });
-
-  // double perspective Y-axis channel
-  ctx.strokeStyle='rgba(255,220,140,.32)';
-  ctx.lineWidth=3;
-  ctx.beginPath();
-  ctx.moveTo(cx-220,bg.height*0.94);
-  ctx.lineTo(cx-52,horizon+40);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx+220,bg.height*0.94);
-  ctx.lineTo(cx+52,horizon+40);
-  ctx.stroke();
-
-  ctx.strokeStyle='rgba(255,255,255,.08)';
-  ctx.lineWidth=1;
-  for(let i=1;i<=8;i++){
-    const t=i/8;
-    const w=220-(168*t);
-    const y=bg.height*0.94-(bg.height*0.50*t);
-    ctx.beginPath();
-    ctx.moveTo(cx-w,y);
-    ctx.lineTo(cx+w,y);
-    ctx.stroke();
-  }
-
-  // ground mist
-  for(let i=0;i<12;i++){
-    const x=(i/11)*bg.width;
-    const r=80+Math.sin(Date.now()*0.001+i)*22;
-    const mg=ctx.createRadialGradient(x,bg.height*0.86,10,x,bg.height*0.86,r);
-    mg.addColorStop(0,'rgba(255,190,90,.08)');
-    mg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=mg;
-    ctx.beginPath();
-    ctx.arc(x,bg.height*0.86,r,0,Math.PI*2);
-    ctx.fill();
-  }
-}
-
-function drawBattleWorld(cx, horizon, baseY){
-  const grad=ctx.createLinearGradient(0,0,0,bg.height);
+function drawBackground(){
+  const grad = ctx.createLinearGradient(0,0,0,bg.height);
   if(zone()==='多'){
-    grad.addColorStop(0,'#0b1832');
-    grad.addColorStop(.55,'#193056');
-    grad.addColorStop(1,'#0d131c');
-  }else{
-    grad.addColorStop(0,'#2a0f18');
-    grad.addColorStop(.55,'#53202c');
-    grad.addColorStop(1,'#130d12');
+    grad.addColorStop(0,'#0e1524'); grad.addColorStop(.55,'#15253c'); grad.addColorStop(1,'#0a0f18');
+  } else {
+    grad.addColorStop(0,'#2b0f18'); grad.addColorStop(.55,'#5a2331'); grad.addColorStop(1,'#130d12');
   }
   ctx.fillStyle=grad; ctx.fillRect(0,0,bg.width,bg.height);
 
-  // Y-axis channel
+  const cx = bg.width/2;
+  const horizon = bg.height*0.34 - S.z*5;
+  const nearY = bg.height*0.92;
+  // lanes slightly opened
   ctx.strokeStyle='rgba(242,213,122,.38)';
-  ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(cx-220,bg.height*0.92); ctx.lineTo(cx-44,horizon+16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx+220,bg.height*0.92); ctx.lineTo(cx+44,horizon+16); ctx.stroke();
+  ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(cx-250,nearY); ctx.lineTo(cx-58,horizon+18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+250,nearY); ctx.lineTo(cx+58,horizon+18); ctx.stroke();
 
-  ctx.strokeStyle='rgba(255,255,255,.08)';
+  ctx.strokeStyle='rgba(255,255,255,.07)';
   ctx.lineWidth=1;
-  for(let gy=-700; gy<=700; gy+=52){
-    const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy));
-    const p2=cameraToScreen(cx,baseY,worldToCamera(900,gy));
-    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
-  }
-  for(let gx=-900; gx<=900; gx+=48){
-    const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900));
-    const p2=cameraToScreen(cx,baseY,worldToCamera(gx,900));
-    ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+  for(let i=1;i<=10;i++){
+    const t=i/10;
+    const y=nearY-(nearY-horizon)*t;
+    const w=250-(192*t);
+    ctx.beginPath(); ctx.moveTo(cx-w,y); ctx.lineTo(cx+w,y); ctx.stroke();
   }
 
-  // stars
-  for(const s of S.stars){
-    const cam=worldToCamera(s.x*0.08,s.y*0.08);
-    const sx=(cx+cam.x*0.15)%bg.width;
-    const sy=(horizon+cam.y*0.08)%baseY;
-    ctx.fillStyle='rgba(180,220,255,.68)';
-    ctx.fillRect((sx+bg.width)%bg.width,(sy+baseY)%baseY,s.s,s.s);
+  // moving streaks
+  ctx.strokeStyle='rgba(255,255,255,.07)';
+  for(let i=0;i<28;i++){
+    const sy=(i/28)*bg.height;
+    ctx.beginPath(); ctx.moveTo((i*67+performance.now()*0.05)%bg.width-120, sy);
+    ctx.lineTo((i*67+performance.now()*0.05)%bg.width, sy-16);
+    ctx.stroke();
   }
-}
 
-function drawMonsters(cx, baseY){
-  S.monsters.forEach(m=>{
-    const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(m.x,m.y));
-    const r=m.kind==='boss'?18:10;
-    ctx.fillStyle=m.kind==='boss' ? '#ffb36b' : '#ff4d4d';
-    ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(sx-r,sy-r-10,r*2,4);
-    ctx.fillStyle='#86ff7a'; ctx.fillRect(sx-r,sy-r-10,(m.hp/m.maxHp)*r*2,4);
-  });
-}
+  // CT marker on lane
+  const ctNorm = Math.max(-1, Math.min(1, S.ct / 1200));
+  const lane = ctLanePoint(ctNorm);
+  const mx = bg.width/2;
+  ctx.strokeStyle='rgba(121,215,255,.95)';
+  ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(lane.left,lane.y); ctx.lineTo(lane.right,lane.y); ctx.stroke();
+  ctx.fillStyle='rgba(121,215,255,.95)';
+  ctx.beginPath(); ctx.arc(mx, lane.y, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#d8f7ff';
+  ctx.font='bold 12px Arial';
+  ctx.fillText('CT '+S.ct.toFixed(2), mx+10, lane.y-8);
 
-function drawPlayer(cx, baseY){
-  ctx.fillStyle='#86ff7a';
-  ctx.beginPath(); ctx.arc(cx,baseY,12,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,.68)';
-  ctx.beginPath(); ctx.moveTo(cx,baseY); ctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); ctx.stroke();
+  // central glow
+  const glow=ctx.createRadialGradient(cx,bg.height*0.34,18,cx,bg.height*0.34,300);
+  glow.addColorStop(0,'rgba(255,200,100,.18)');
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,bg.width,bg.height);
 }
-
 function drawCore(){
   c2.clearRect(0,0,coreCanvas.width,coreCanvas.height);
   const cx=coreCanvas.width/2, cy=coreCanvas.height/2;
-  const rg=c2.createRadialGradient(cx,cy,18,cx,cy,130);
-  const battle = S.mode==='BATTLE';
-  const multi = zone()==='多' ? 'rgba(90,180,255,.30)' : 'rgba(255,90,90,.30)';
-  rg.addColorStop(0, battle ? multi : 'rgba(255,190,90,.36)');
-  rg.addColorStop(1, 'rgba(0,0,0,0)');
-  c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,130,0,Math.PI*2); c2.fill();
+  const rg=c2.createRadialGradient(cx,cy,18,cx,cy,140);
+  rg.addColorStop(0, zone()==='多'?'rgba(90,180,255,.25)':'rgba(255,90,90,.26)');
+  rg.addColorStop(1,'rgba(0,0,0,0)');
+  c2.fillStyle=rg; c2.beginPath(); c2.arc(cx,cy,140,0,Math.PI*2); c2.fill();
 
-  const baseR = 86 + S.z*0.5;
+  const baseR=84+S.z*0.8;
   S.candles.forEach((k,i)=>{
-    const t = i/S.candles.length*Math.PI*2 + S.yaw + Date.now()*0.00018*(S.mode==='TEMPLE'?0.35:1);
+    const deg = signedDeg();
+    const theta = ((deg-90) * Math.PI/180) + i/S.candles.length*Math.PI*2 + performance.now()*0.0002;
     const rr = baseR + k.v*1.15;
-    const x = cx+Math.cos(t)*rr;
-    const y = cy+Math.sin(t)*rr*0.84;
+    const x = cx + Math.cos(theta)*rr;
+    const y = cy + Math.sin(theta)*rr*0.84;
     c2.strokeStyle = k.c>=k.o ? '#86ff7a' : '#ff7575';
-    c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.7); c2.stroke();
+    c2.beginPath(); c2.moveTo(x,y); c2.lineTo(x,y-(k.c-k.o)*1.8); c2.stroke();
     if(S.predict){
-      c2.strokeStyle = 'rgba(121,215,255,.95)';
-      c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.7); c2.stroke();
+      c2.strokeStyle='rgba(121,215,255,.95)';
+      c2.beginPath(); c2.moveTo(x+1.1,y); c2.lineTo(x+1.1,y-(k.p-k.o)*1.8); c2.stroke();
     }
   });
-
   c2.strokeStyle='rgba(242,213,122,.34)';
   for(let i=0;i<3;i++){
     c2.beginPath();
-    c2.ellipse(cx,cy,60+i*18,42+i*11,S.yaw*0.55+i*.25,0,Math.PI*2);
+    c2.ellipse(cx,cy,62+i*18,44+i*13,0.4+i*0.18,0,Math.PI*2);
     c2.stroke();
   }
+  c2.beginPath(); c2.arc(cx,cy,16,0,Math.PI*2); c2.fillStyle='rgba(242,213,122,.88)'; c2.fill();
 
+  // 12 o'clock indicator
+  c2.strokeStyle='rgba(255,255,255,.25)';
   c2.beginPath();
-  c2.arc(cx,cy,16,0,Math.PI*2);
-  c2.fillStyle='rgba(242,213,122,.88)';
-  c2.fill();
+  c2.moveTo(cx, cy-118);
+  c2.lineTo(cx, cy-142);
+  c2.stroke();
+  c2.fillStyle='#fff5c2';
+  c2.font='bold 11px Arial';
+  c2.fillText('0°', cx-8, cy-148);
 }
-
+function genInternalCandle(){
+  const dir = zone()==='多' ? 1 : -1;
+  const last = S.candles[S.candles.length-1].c;
+  const delta = dir*(S.warp/150)*1.2 + (Math.random()-.5)*0.6;
+  const close = last + delta;
+  const pred = close + dir*(S.warp/150)*0.7 + (Math.random()-.5)*0.2;
+  S.candles.push({o:last,c:close,p:pred,v:1+Math.random()*4});
+  if(S.candles.length>120) S.candles.shift();
+}
+function drawKlinePanel(){
+  kctx.clearRect(0,0,klineCanvas.width,klineCanvas.height);
+  const data = S.liveCandles.length ? S.liveCandles.slice(-26) : S.candles.slice(-26).map(d=>({o:d.o,h:Math.max(d.o,d.c)+1,l:Math.min(d.o,d.c)-1,c:d.c}));
+  const highs = data.map(d=>+d.h), lows = data.map(d=>+d.l);
+  const max = Math.max(...highs), min = Math.min(...lows);
+  const range = Math.max(.0001, max-min);
+  data.forEach((d,i)=>{
+    const x=6+i*12;
+    const yo=114-((d.o-min)/range)*92;
+    const yc=114-((d.c-min)/range)*92;
+    const yh=114-((d.h-min)/range)*92;
+    const yl=114-((d.l-min)/range)*92;
+    kctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575';
+    kctx.beginPath(); kctx.moveTo(x+4,yh); kctx.lineTo(x+4,yl); kctx.stroke();
+    kctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575';
+    kctx.fillRect(x, Math.min(yo,yc), 8, Math.max(2, Math.abs(yc-yo)));
+  });
+}
+async function fetchKlines(symbol){
+  try{
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=60`;
+    const res = await fetch(url);
+    const rows = await res.json();
+    if(!Array.isArray(rows)) throw new Error('bad');
+    S.liveCandles = rows.map(r=>({
+      o:+r[1], h:+r[2], l:+r[3], c:+r[4]
+    }));
+    const last=S.liveCandles[S.liveCandles.length-1];
+    S.kOpen=last.o; S.kHigh=last.h; S.kLow=last.l; S.kClose=last.c;
+    document.getElementById('metaSymbol').textContent=symbol;
+    document.getElementById('metaPrice').textContent=last.c.toFixed(2);
+    document.getElementById('metaOpen').textContent=last.o.toFixed(2);
+    document.getElementById('metaHL').textContent=`${last.h.toFixed(2)} / ${last.l.toFixed(2)}`;
+  }catch(err){
+    document.getElementById('metaSymbol').textContent=symbol+' (fallback)';
+    document.getElementById('metaPrice').textContent='offline';
+    document.getElementById('metaOpen').textContent='--';
+    document.getElementById('metaHL').textContent='-- / --';
+  }
+}
 function updateModel(){
-  if(S.mode==='BATTLE'){
-    S.x += S.moveX*2.0;
-    S.y += S.moveY*2.0;
-    S.yaw += S.yawInput*0.05;
-    S.warp += S.warpInput*2.4;
-    if(S.warp<0) S.warp=0;
-    if(S.warp>150) S.warp=150;
-    S.z = (S.warp/150)*8;
-    genCandle();
-    const dir = zone()==='多' ? 1 : -1;
-    const delta = dir*(S.warp/150)*0.28;
-    S.ct += delta + (Math.random()-.5)*0.05;
-    while(S.monsters.length<7) spawnMonster();
-    S.monsters.forEach(m=>{
-      const dx=S.x-m.x, dy=S.y-m.y, d=Math.hypot(dx,dy)||1;
-      m.x += dx/d*m.speed;
-      m.y += dy/d*m.speed;
-    });
-  }else{
-    // temple idle
-    S.yaw += 0.0014;
+  S.x += S.moveX*1.8;
+  S.y += S.moveY*1.8;
+  S.yaw += S.yawInput*0.05;
+  S.warp += S.warpInput*2.4;
+  if(S.warp<0) S.warp=0;
+  if(S.warp>150) S.warp=150;
+  S.z = (S.warp/150)*8;
+  const dir = zone()==='多' ? 1 : -1;
+  const delta = dir*(S.warp/150)*0.35 + (Math.random()-.5)*0.04;
+  S.ct += delta;
+  genInternalCandle();
+  const now = Date.now();
+  if(now - S.lastFetch > 30000){
+    S.lastFetch = now;
+    fetchKlines(S.symbol);
   }
 }
-
-function draw(){
-  ctx.clearRect(0,0,bg.width,bg.height);
-  const cx=bg.width/2, horizon=bg.height*0.34 - S.z*5, baseY=bg.height*0.76 - S.z*12;
-
-  if(S.mode==='TEMPLE'){
-    drawTempleBackground(cx,horizon,baseY);
-  }else{
-    drawBattleWorld(cx,horizon,baseY);
-    drawPlayer(cx,baseY);
-    drawMonsters(cx,baseY);
-  }
-
-  drawCore();
-
-  document.getElementById('hudText').innerHTML =
-    `模式：${S.mode}<br>CT：${S.ct.toFixed(2)}<br>Angle：${signedDeg().toFixed(1)}°<br>Zone：${zone()}<br>Warp：${S.warp.toFixed(1)}x`;
-}
-
 function loop(){
   updateModel();
-  draw();
+  drawBackground();
+  drawCore();
+  drawKlinePanel();
+  updateHUD();
   requestAnimationFrame(loop);
 }
 loop();
 
-// Controls
+// controls
 (function(){
   const joy=document.getElementById('joy'), inner=document.getElementById('joyInner');
   function setP(x,y){
     const r=joy.getBoundingClientRect(); let dx=x-r.left-r.width/2, dy=y-r.top-r.height/2;
-    const max=39, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+    const max=40, len=Math.hypot(dx,dy)||1; if(len>max){ dx=dx/len*max; dy=dy/len*max; }
     S.moveX = dx/max;
     S.moveY = -dy/max;
-    inner.style.left=(42+dx)+'px';
-    inner.style.top=(42+dy)+'px';
+    inner.style.left=(44+dx)+'px'; inner.style.top=(44+dy)+'px';
   }
-  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='42px'; inner.style.top='42px'; }
+  function reset(){ S.moveX=0; S.moveY=0; inner.style.left='44px'; inner.style.top='44px'; }
   joy.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX,e.clientY);});
   joy.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX,e.clientY); });
   joy.addEventListener('pointerup',reset); joy.addEventListener('pointercancel',reset);
@@ -698,30 +491,54 @@ loop();
   const yaw=document.getElementById('yaw'), inner=document.getElementById('yawInner'), fill=document.getElementById('yawFill');
   function setP(x){
     const r=yaw.getBoundingClientRect(), max=(r.width/2)-24; let dx=x-r.left-r.width/2; if(dx>max) dx=max; if(dx<-max) dx=-max;
-    S.yawInput = dx/max;
+    const deg = (dx/max)*180;
+    S.yaw = deg*Math.PI/180;
     inner.style.left=(r.width/2-24+dx)+'px';
     if(dx>=0){ fill.style.left='50%'; fill.style.width=(dx/max*50)+'%'; }
     else{ fill.style.left=(50+dx/max*50)+'%'; fill.style.width=(-dx/max*50)+'%'; }
   }
-  function reset(){ S.yawInput=0; inner.style.left='calc(50% - 24px)'; fill.style.left='50%'; fill.style.width='0'; }
   yaw.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientX);});
   yaw.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientX); });
-  yaw.addEventListener('pointerup',reset); yaw.addEventListener('pointercancel',reset);
 })();
 (function(){
   const warp=document.getElementById('warp'), inner=document.getElementById('warpInner'), fill=document.getElementById('warpFill');
   function setP(y){
     const r=warp.getBoundingClientRect(), max=(r.height/2)-24; let dy=y-r.top-r.height/2; if(dy>max) dy=max; if(dy<-max) dy=-max;
-    S.warpInput = -dy/max;
+    const pct = 1 - ((dy+max)/(max*2));
+    S.warp = Math.max(0, Math.min(150, pct*150));
+    S.z = (S.warp/150)*8;
     inner.style.top=(67+dy)+'px';
-    const pct = Math.max(0, Math.min(100, (1-((dy+max)/(max*2)))*100 ));
-    fill.style.height = `calc(${pct}% - 12px)`;
+    fill.style.height=(pct*154)+'px';
   }
-  function reset(){ S.warpInput=0; inner.style.top='67px'; fill.style.height=(S.warp/150)*154+'px'; }
   warp.addEventListener('pointerdown',e=>{e.preventDefault(); setP(e.clientY);});
   warp.addEventListener('pointermove',e=>{ if(e.buttons) setP(e.clientY); });
-  warp.addEventListener('pointerup',reset); warp.addEventListener('pointercancel',reset);
 })();
+
+document.querySelectorAll('.sym').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.sym').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    S.symbol = btn.dataset.symbol;
+    fetchKlines(S.symbol);
+  };
+});
+document.getElementById('btnPortal').onclick=()=>{
+  const flash=document.getElementById('portalFlash');
+  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+  toast('TempleHeart 啟動');
+};
+document.getElementById('btnPredict').onclick=()=>{ S.predict=!S.predict; toast('預測 '+(S.predict?'開':'關')); };
+document.getElementById('btnBoss').onclick=()=>toast('Boss 佈局待接');
+document.getElementById('btnHeal').onclick=()=>toast('回復觸發');
+document.getElementById('btnReset').onclick=()=>{ S.x=0; S.y=0; S.z=0; S.ct=0; S.yaw=0; S.warp=0; toast('已重置'); };
+
+document.getElementById('templeHeart').onclick=()=>{
+  const flash=document.getElementById('portalFlash');
+  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+  toast('TempleHeart 入口觸發');
+};
+
+fetchKlines(S.symbol);
 </script>
 </body>
 </html>
