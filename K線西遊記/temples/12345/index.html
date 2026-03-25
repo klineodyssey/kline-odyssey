@@ -1,78 +1,64 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>五指山悟空財神殿｜重製定稿版</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>KLINE App Game V14｜五指山融合完整版</title>
 <style>
 :root{
-  --bg:#140d07; --bg2:#25170c; --gold:#f4cf79; --cyan:#89f0ff; --panel:rgba(20,14,10,.84);
-  --line:rgba(244,207,121,.24); --muted:rgba(255,245,220,.72);
+  --gold:#ffd778; --gold2:#f4cf79; --cyan:#00f2ff; --bg:#02060d; --energy:#ffcc00;
+  --panel:rgba(10,12,20,.88); --red:#ff6464; --green:#79ff91; --muted:rgba(255,245,220,.72);
 }
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; color:#fff7eb;
-  font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;
+html,body{margin:0;padding:0;background:var(--bg);color:#fff;font-family:"Noto Sans TC",Arial,sans-serif;height:100%;overflow:hidden}
+button,input,textarea,select{font:inherit}
+.hidden{display:none !important}
+#world{position:fixed;inset:0;z-index:1}
+#toast{
+  position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:500;width:min(560px,92vw);padding:10px 12px;border-radius:12px;
+  border:1px solid rgba(255,215,0,.45);background:rgba(0,0,0,.72);color:#fff;font-weight:900;font-size:13px;display:none
+}
+#toast.show{display:block}
+
+/* Temple Layer */
+#temple-layer{
+  position:fixed;inset:0;z-index:220;overflow:hidden;
   background:
     radial-gradient(900px 420px at 50% 8%, rgba(255,196,82,.18), transparent 55%),
     radial-gradient(700px 260px at 50% 80%, rgba(255,134,42,.10), transparent 60%),
     linear-gradient(180deg,#2f1c0e 0%, #1a110a 18%, #100b06 100%);
-  overflow-x:hidden;
+  transition:opacity .9s ease, transform .9s ease, filter .9s ease;
 }
-#embers{position:fixed;inset:0;pointer-events:none;z-index:0}
-.page{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:14px 14px 110px}
+#temple-layer.fade-out{opacity:0; transform:scale(1.08); filter:blur(14px) brightness(1.4)}
+#embers{position:absolute;inset:0;pointer-events:none;z-index:0}
+.temple-page{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:14px 14px 110px;height:100%;overflow:auto}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
-.brand{
-  display:flex;gap:14px;align-items:flex-start;border-left:6px solid var(--gold);
-  padding:12px 14px;background:linear-gradient(90deg,rgba(255,255,255,.05),transparent);border-radius:18px
-}
-.brand h1{margin:0;font-size:34px;line-height:1;color:var(--gold)}
+.brand{display:flex;gap:14px;align-items:flex-start;border-left:6px solid var(--gold2);padding:12px 14px;background:linear-gradient(90deg,rgba(255,255,255,.05),transparent);border-radius:18px}
+.brand h1{margin:0;font-size:34px;line-height:1;color:var(--gold2)}
 .brand .sub{margin-top:8px;font-size:13px;line-height:1.55;color:var(--muted)}
-.clock{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.28);font-weight:900}
-.hero{
-  position:relative;min-height:360px;border:1px solid var(--line);border-radius:28px;overflow:hidden;
-  background:linear-gradient(180deg, rgba(255,196,82,.08), rgba(0,0,0,.08));
-  box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 0 60px rgba(255,196,82,.05);
-}
-.skyGlow{
-  position:absolute;left:50%;top:16px;transform:translateX(-50%);
-  width:min(44vw,440px);height:min(44vw,440px);border-radius:50%;
-  background:radial-gradient(circle, rgba(255,223,140,.25), rgba(255,180,70,.08) 32%, transparent 66%);
-  filter:blur(6px);
-}
+.clock{padding:10px 14px;border-radius:999px;border:1px solid rgba(244,207,121,.24);background:rgba(0,0,0,.28);font-weight:900}
+.hero{position:relative;min-height:360px;border:1px solid rgba(244,207,121,.24);border-radius:28px;overflow:hidden;background:linear-gradient(180deg, rgba(255,196,82,.08), rgba(0,0,0,.08));box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 0 60px rgba(255,196,82,.05)}
+.skyGlow{position:absolute;left:50%;top:16px;transform:translateX(-50%);width:min(44vw,440px);height:min(44vw,440px);border-radius:50%;background:radial-gradient(circle, rgba(255,223,140,.25), rgba(255,180,70,.08) 32%, transparent 66%);filter:blur(6px)}
 .mountain{position:absolute;bottom:0;left:0;right:0;height:78%}
-.temple-core{
-  position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
-  width:min(44vw,340px);height:min(44vw,340px);max-width:340px;max-height:340px;border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255,251,230,.95) 0 8%, rgba(255,204,90,.95) 11%, rgba(255,132,36,.88) 28%, rgba(80,28,0,0) 62%),
-    radial-gradient(circle at 50% 50%, rgba(255,220,120,.18), transparent 62%);
-  border:2px solid rgba(244,207,121,.62);
-  box-shadow:0 0 25px rgba(255,200,90,.22), 0 0 90px rgba(255,140,35,.20), inset 0 0 50px rgba(255,255,255,.12);
-  animation:pulse 2.4s ease-in-out infinite;
-}
+.temple-core{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(44vw,340px);height:min(44vw,340px);max-width:340px;max-height:340px;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(255,251,230,.95) 0 8%, rgba(255,204,90,.95) 11%, rgba(255,132,36,.88) 28%, rgba(80,28,0,0) 62%),radial-gradient(circle at 50% 50%, rgba(255,220,120,.18), transparent 62%);border:2px solid rgba(244,207,121,.62);box-shadow:0 0 25px rgba(255,200,90,.22), 0 0 90px rgba(255,140,35,.20), inset 0 0 50px rgba(255,255,255,.12);animation:pulse 2.4s ease-in-out infinite;transition:transform .6s ease, filter .6s ease, box-shadow .6s ease}
+.temple-core.portal-active{transform:translate(-50%,-50%) scale(1.35);filter:brightness(1.9) blur(2px);box-shadow:0 0 40px rgba(255,230,150,.55), 0 0 140px rgba(255,140,35,.55), inset 0 0 80px rgba(255,255,255,.2)}
 .temple-ring{position:absolute;inset:-18px;border-radius:50%;border:1px dashed rgba(137,240,255,.35);animation:spin 18s linear infinite}
 .temple-ring:after{content:"";position:absolute;inset:18px;border-radius:50%;border:2px solid rgba(244,207,121,.22)}
 .temple-title{position:absolute;left:50%;top:76%;transform:translateX(-50%);text-align:center;width:min(90%,540px)}
 .temple-title h2{margin:0;font-size:28px;color:#ffe2a3}
 .temple-title p{margin:8px 0 0;font-size:13px;color:var(--muted)}
-.temple-status{
-  position:absolute;left:18px;top:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(760px, calc(100% - 36px));
-}
-.status{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
-.status .k{font-size:11px;color:var(--muted)} .status .v{margin-top:3px;font-size:18px;font-weight:900;color:var(--cyan)}
+.temple-status{position:absolute;left:18px;top:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(760px, calc(100% - 36px))}
+.status{background:rgba(20,14,10,.84);border:1px solid rgba(244,207,121,.24);border-radius:16px;padding:10px 12px}
+.status .k{font-size:11px;color:var(--muted)}
+.status .v{margin-top:3px;font-size:18px;font-weight:900;color:var(--cyan)}
 @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.045)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .main{margin-top:14px;display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:0 14px 34px rgba(0,0,0,.24)}
-.h2{margin:0 0 10px;font-size:20px;color:var(--gold)}
+.panel{background:rgba(20,14,10,.84);border:1px solid rgba(244,207,121,.24);border-radius:22px;padding:14px;box-shadow:0 14px 34px rgba(0,0,0,.24)}
+.h2{margin:0 0 10px;font-size:20px;color:var(--gold2)}
 .help{font-size:12px;color:var(--muted);line-height:1.6}
 .portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px}
-.portal{
-  min-height:138px;padding:16px;border-radius:20px;cursor:pointer;text-align:left;border:1px solid rgba(244,207,121,.22);
-  background:rgba(0,0,0,.20);display:flex;flex-direction:column;justify-content:space-between
-}
+.portal{min-height:138px;padding:16px;border-radius:20px;cursor:pointer;text-align:left;border:1px solid rgba(244,207,121,.22);background:rgba(0,0,0,.20);display:flex;flex-direction:column;justify-content:space-between;color:#fff}
 .portal.active{outline:2px solid rgba(244,207,121,.32);background:rgba(255,210,120,.08)}
 .portal .icon{font-size:28px}.portal .t{font-size:21px;font-weight:900;color:#ffe2a1}.portal .d{font-size:12px;color:var(--muted);line-height:1.5}
 .section{display:none;margin-top:12px}.section.active{display:block}
@@ -82,240 +68,445 @@ label{font-size:12px;color:var(--muted)}
 input,textarea,select{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.22);color:#fff7ec;outline:none}
 textarea{min-height:110px;resize:vertical}
 .row{display:flex;gap:10px;flex-wrap:wrap}
-.btn{padding:12px 14px;border-radius:14px;border:1px solid var(--line);cursor:pointer;font-weight:900;background:linear-gradient(180deg,rgba(244,207,121,.18),rgba(244,207,121,.06));color:#fff}
+.btn{padding:12px 14px;border-radius:14px;border:1px solid rgba(244,207,121,.24);cursor:pointer;font-weight:900;background:linear-gradient(180deg,rgba(244,207,121,.18),rgba(244,207,121,.06));color:#fff}
 .btn.ghost{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
 .btn.red{background:rgba(255,124,110,.10);border-color:rgba(255,124,110,.22)}
+.btn.world{background:linear-gradient(180deg,rgba(0,242,255,.28),rgba(0,242,255,.08));border-color:rgba(0,242,255,.35)}
 .kv{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18)}
 .kv .k{font-size:12px;color:var(--muted)} .kv .v{font-weight:900}
 .sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:12px 0}
 .cups{display:flex;gap:10px;justify-content:center;margin:12px 0}
-.cup{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:22px}
+.cup{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(244,207,121,.24);background:rgba(0,0,0,.18);font-size:22px}
 .cup.on{background:rgba(255,210,120,.16);box-shadow:0 0 18px rgba(255,190,60,.18)}
 .media{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .media video,.media canvas{width:100%;display:block;border-radius:18px;background:#000;border:1px solid rgba(255,255,255,.08)}
-.footer{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:rgba(0,0,0,.92);border-top:3px solid var(--gold)}
-.footer button{padding:12px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#11161c;color:#fff;font-weight:900}
-.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:rgba(0,0,0,.78);border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:none;z-index:60}
-.toast.show{display:block}
+.temple-footer{position:sticky;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px;background:rgba(0,0,0,.92);border-top:3px solid var(--gold2)}
+.temple-footer button{padding:12px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#11161c;color:#fff;font-weight:900}
+
+/* World HUD */
+.hud-top{position:fixed;top:12px;left:2%;width:96%;display:flex;justify-content:space-between;align-items:flex-start;z-index:120}
+.brand-section{border-left:5px solid var(--gold);padding-left:14px;background:linear-gradient(90deg,var(--panel),transparent)}
+.brand-name{font-size:24px;color:var(--gold);text-shadow:0 0 15px var(--gold);font-weight:900}
+.sys-st{font-family:Orbitron,Arial,sans-serif;font-size:11px;color:var(--cyan);letter-spacing:1px}
+.monitor-data{display:flex;gap:12px}
+.data-box{background:var(--panel);border:1px solid rgba(255,215,120,.25);padding:9px 10px;min-width:136px;border-radius:12px}
+.data-box .k{font-size:10px;color:#ffe2a2}.data-box .v{font-family:Orbitron,Arial,sans-serif;font-size:16px;color:var(--cyan);font-weight:900;margin-top:4px}
+#core-anchor{position:fixed;top:43%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;z-index:70}
+#core-window{width:100%;height:100%;border-radius:50%;border:14px double var(--gold);overflow:hidden;background:#000;position:relative;box-shadow:0 0 80px rgba(255,215,120,.25);transition:transform .05s linear}
+#wish-label{position:absolute;bottom:28px;left:22px;z-index:85;color:#fff;font-weight:900;font-size:21px;text-shadow:2px 2px 10px #000,0 0 15px var(--cyan)}
+#core-canvas{width:100%;height:100%;display:block}
+.ga-matrix{position:fixed;left:12px;top:120px;width:180px;background:var(--panel);border:1px solid var(--energy);padding:12px;border-radius:12px;z-index:115;font-family:Orbitron,Arial,sans-serif}
+.ga-title{color:var(--gold);font-size:14px;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:6px}
+.ga-stat{font-size:11px;margin-bottom:9px;color:var(--cyan)}
+.ga-bar{height:6px;background:#111;margin-top:4px;overflow:hidden;border-radius:3px}
+.ga-progress{height:100%;background:var(--energy);width:0%;transition:width .4s}
+#kline-engine-panel{position:fixed;left:12px;top:310px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);border-radius:14px;overflow:hidden;z-index:122;padding:10px}
+#kline-chart-panel{position:fixed;left:12px;top:560px;width:280px;background:rgba(4,10,16,.92);border:1px solid rgba(255,215,120,.34);border-radius:14px;overflow:hidden;z-index:122;padding:10px}
+.ke-head,.kc-head{display:flex;justify-content:space-between;align-items:center;color:var(--gold);font-weight:900;font-size:14px;margin-bottom:8px}
+.ke-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ke-cell{min-height:52px;border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:6px 8px;background:rgba(0,0,0,.22)}
+.ke-label{font-size:10px;color:rgba(255,255,255,.78);line-height:1}
+.ke-value{margin-top:4px;font-family:Orbitron,Arial,sans-serif;font-size:15px;color:var(--cyan);font-weight:900;line-height:1}
+.ke-live-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+.ke-live-price{font-family:Orbitron,Arial,sans-serif;color:var(--gold);font-size:16px;font-weight:900}
+#kline-canvas{width:100%;height:92px;display:block;border-radius:10px;background:linear-gradient(180deg,rgba(0,242,255,.03),rgba(0,0,0,.06)),repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 32px),repeating-linear-gradient(to bottom,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 1px,transparent 1px,transparent 24px),rgba(0,0,0,.22)}
+.warp-engine{position:fixed;right:18px;bottom:250px;z-index:150;width:70px;text-align:center}
+.warp-rail{height:360px;width:22px;background:#101319;border:3px solid var(--energy);position:relative;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(255,204,0,.2)}
+#energy-fill{position:absolute;bottom:0;width:100%;height:0%;background:linear-gradient(to top,#ff8800,var(--energy),#fff);transition:height .15s cubic-bezier(.17,.67,.83,.67);z-index:5}
+.rail-step{position:absolute;width:100%;height:2px;background:rgba(0,0,0,.35);z-index:10}
+#warp-thumb{width:54px;height:28px;background:#fff;position:absolute;left:-19px;bottom:0;cursor:pointer;border-radius:6px;box-shadow:0 0 24px #fff,0 0 12px var(--cyan);border:3px solid var(--cyan);z-index:30}
+.warp-val-text{margin-top:12px;color:var(--energy);font-family:Orbitron,Arial,sans-serif;font-size:16px;text-shadow:0 0 10px var(--energy)}
+#coord-panel{position:fixed;right:12px;bottom:300px;width:min(300px,84vw);padding:10px 12px;border:1px solid rgba(255,215,0,.35);border-radius:12px;background:rgba(0,0,0,.58);box-shadow:0 0 18px rgba(255,215,0,.12);max-height:280px;overflow-y:auto;z-index:130}
+.cp-title{display:flex;align-items:flex-start;justify-content:space-between;font-weight:900;color:#ffd27a;margin-bottom:8px}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;font-size:13px;line-height:1.25}
+.cp-row{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,200,80,.25);background:rgba(0,0,0,.35)}
+.cp-k{opacity:.85;font-size:12px}
+.cp-v{margin-top:2px;font-weight:900;color:#8af3ff;word-break:break-word}
+.footer-terminal{position:fixed;bottom:0;width:100%;background:#000;padding:12px;border-top:4px solid var(--gold);display:grid;grid-template-columns:repeat(5,1fr);gap:10px;z-index:140}
+.term-btn{background:#0a0a0a;border:1px solid #444;color:#fff;padding:14px 6px;font-weight:900;cursor:pointer;font-size:12px;border-radius:8px;width:100%;text-align:center}
+.term-btn.active-kgen{border-color:var(--energy);color:var(--energy)}
+.chain-live-panel,.bet-live-panel,.ritual-panel{position:fixed;right:12px;top:120px;z-index:215;width:min(340px,88vw);background:rgba(8,12,20,.92);border:1px solid rgba(255,215,120,.25);border-radius:14px;padding:12px;display:none}
+.ritual-panel{top:470px;display:block}
+.cl-head,.bp-head,.rp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd88a;font-weight:900;font-family:Orbitron,Arial,sans-serif;font-size:13px;margin-bottom:10px}
+.cl-grid,.bp-kv,.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cl-item,.rp-item{border:1px solid rgba(255,215,120,.14);border-radius:12px;padding:8px 10px;background:rgba(0,0,0,.22)}
+.cl-k,.bp-k,.rp-k{font-size:10px;color:#ffe6b8;opacity:.88}
+.cl-v,.bp-v,.rp-v{margin-top:4px;font-size:12px;color:#d8f9ff;font-weight:900;word-break:break-all}
+.bp-input{width:100%;box-sizing:border-box;border-radius:12px;padding:10px 12px;border:1px solid rgba(255,215,120,.22);background:rgba(0,0,0,.28);color:#fff;font-weight:900;outline:none;margin-top:10px}
+.bp-grid,.rp-grid-btn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bp-btn,.rp-btn{border-radius:12px;padding:10px 12px;cursor:pointer;border:1px solid rgba(255,215,120,.24);font-weight:900;background:rgba(0,0,0,.28);color:#fff}
+.bp-btn.approve,.rp-btn.gold{background:rgba(255,215,120,.14);color:#ffe9b8}
+.bp-btn.buy{background:rgba(60,220,120,.16);color:#d8ffe6}
+.bp-btn.sell{background:rgba(255,110,110,.16);color:#ffdede}
+.bp-status,.rp-status{margin-top:10px;min-height:18px;font-size:12px;color:#cfe8ff}
+.world-enter-badge{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:260;pointer-events:none;color:#fff;font-size:34px;font-weight:900;letter-spacing:2px;text-shadow:0 0 20px var(--gold),0 0 40px var(--cyan);opacity:0;transition:opacity .4s ease}
+.world-enter-badge.show{opacity:1}
+
 @media (max-width:980px){
   .main,.portal-grid,.grid2,.media{grid-template-columns:1fr}
   .temple-status{grid-template-columns:repeat(2,1fr)}
-  .footer{grid-template-columns:repeat(2,1fr)}
+  .temple-footer{grid-template-columns:repeat(3,1fr)}
   .brand h1{font-size:26px}
+  .brand-name{font-size:20px}
+  .monitor-data{display:none}
+  #core-anchor{width:300px;height:300px;top:36%}
+  .ga-matrix{left:10px;top:110px;width:168px}
+  #kline-engine-panel{left:10px;top:300px;width:250px}
+  #kline-chart-panel{left:10px;top:520px;width:250px}
+  .warp-engine{right:10px;bottom:250px}
+  #coord-panel{right:10px;bottom:300px;width:min(250px,82vw)}
+  .footer-terminal{grid-template-columns:repeat(3,1fr)}
+  .ritual-panel{top:auto;bottom:94px;left:10px;right:10px;width:auto}
 }
 </style>
 </head>
 <body>
-<canvas id="embers"></canvas>
-<div class="page">
-  <div class="top">
-    <div class="brand">
-      <div>
-        <h1>五指山悟空財神殿</h1>
-        <div class="sub">12345 TempleHeart｜重新創作設計版<br>每個地點不再共用同一套宇宙風景，這版改成五指山神殿地貌與悟空心臟核心。</div>
+<div id="toast"></div>
+<canvas id="world"></canvas>
+<div class="world-enter-badge" id="world-enter-badge">ENTER KLINE WORLD</div>
+
+<!-- TEMPLE LAYER -->
+<div id="temple-layer">
+  <canvas id="embers"></canvas>
+  <div class="temple-page">
+    <div class="top">
+      <div class="brand">
+        <div>
+          <h1>五指山悟空財神殿</h1>
+          <div class="sub">12345 TempleHeart｜V14 融合入口版<br>這一版不再只是神殿頁，而是直接通往 KLINE App Game 戰場的入口。</div>
+        </div>
       </div>
+      <div class="clock" id="clock">--</div>
     </div>
-    <div class="clock" id="clock">--</div>
+
+    <section class="hero">
+      <div class="skyGlow"></div>
+      <svg class="mountain" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="m1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#49311c"/><stop offset="100%" stop-color="#1a120b"/></linearGradient>
+          <linearGradient id="m2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#6d4926"/><stop offset="100%" stop-color="#2c1b0e"/></linearGradient>
+        </defs>
+        <path d="M0 700 L0 410 L120 330 L200 350 L310 240 L410 270 L520 150 L600 210 L700 160 L810 295 L930 230 L1040 320 L1140 300 L1200 360 L1200 700 Z" fill="url(#m1)" opacity=".9"/>
+        <path d="M0 700 L0 520 L140 470 L240 510 L370 420 L500 470 L610 330 L720 420 L860 380 L980 480 L1100 430 L1200 470 L1200 700 Z" fill="url(#m2)" opacity=".95"/>
+        <path d="M420 520 L505 340 L545 455 L600 270 L650 450 L705 355 L790 520 Z" fill="#2b1609"/>
+        <path d="M470 520 L530 380 L558 450 L600 330 L640 450 L675 400 L730 520 Z" fill="#dca34c" opacity=".55"/>
+      </svg>
+
+      <div class="temple-status">
+        <div class="status"><div class="k">心跳</div><div class="v" id="stHeart">可領</div></div>
+        <div class="status"><div class="k">點火</div><div class="v" id="stIgnite">倒數中</div></div>
+        <div class="status"><div class="k">發財金</div><div class="v" id="stFortune">未解鎖</div></div>
+        <div class="status"><div class="k">錢包</div><div class="v" id="stWallet">未連線</div></div>
+      </div>
+
+      <div class="temple-core" id="core"><div class="temple-ring"></div></div>
+      <div class="temple-title">
+        <h2>悟空心臟・五指山氣脈</h2>
+        <p>先在神殿完成儀式，再由 TempleHeart 傳送進入 KLINE 宇宙戰場。</p>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="panel">
+        <div class="h2">神殿主入口</div>
+        <div class="help">這一版已融合 KLINE 引擎。你可以先完成連接、願望、聖盃，再直接進入 K 線世界。</div>
+
+        <div class="portal-grid">
+          <button class="portal active" data-target="entry"><div class="icon">🏯</div><div class="t">進入神殿</div><div class="d">連接錢包、貼 Heart 地址、檢查神殿狀態。</div></button>
+          <button class="portal" data-target="fortune"><div class="icon">🧧</div><div class="t">發財金</div><div class="d">三次聖盃後，才解鎖發財金流程。</div></button>
+          <button class="portal" data-target="wish"><div class="icon">🙏</div><div class="t">許願還願</div><div class="d">許願、留言、hash、還願、點燈。</div></button>
+          <button class="portal" data-target="media"><div class="icon">📸</div><div class="t">留影客服</div><div class="d">拍照留影、語音講解、客服回覆。</div></button>
+        </div>
+
+        <div class="section active" id="sec-entry">
+          <div class="sep"></div>
+          <div class="grid2">
+            <div class="field"><label>Heart 合約地址</label><input id="heartAddr" placeholder="0x..."/></div>
+            <div class="field"><label>KGEN Token</label><input id="tokenAddr" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"/></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnConnect">連接錢包</button>
+            <button class="btn ghost" id="btnSave">保存地址</button>
+            <button class="btn ghost" id="btnInspect">檢查神殿</button>
+            <button class="btn red" id="btnClear">清空本機</button>
+            <button class="btn world" id="btnEnterWorld">進入 K 線世界</button>
+          </div>
+          <div class="sep"></div>
+          <div class="grid2">
+            <div class="kv"><div class="k">錢包狀態</div><div class="v" id="walletState">未連線</div></div>
+            <div class="kv"><div class="k">鏈</div><div class="v" id="chainState">未偵測</div></div>
+            <div class="kv"><div class="k">Heart</div><div class="v" id="heartState">未貼地址</div></div>
+            <div class="kv"><div class="k">Temple 狀態</div><div class="v" id="templeState">可上線測</div></div>
+          </div>
+          <div class="help" id="inspectOut" style="margin-top:10px">這裡顯示檢查結果。</div>
+        </div>
+
+        <div class="section" id="sec-fortune">
+          <div class="sep"></div>
+          <div class="kv"><div class="k">聖盃進度</div><div class="v" id="cupProg">0 / 3</div></div>
+          <div class="cups">
+            <div class="cup" id="cup1">🥢</div><div class="cup" id="cup2">🥢</div><div class="cup" id="cup3">🥢</div>
+          </div>
+          <div class="kv"><div class="k">本次結果</div><div class="v" id="cupLast">--</div></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnCup">搏杯一次</button>
+            <button class="btn ghost" id="btnCupReset">重置聖盃</button>
+          </div>
+          <div class="field" style="margin-top:12px"><label>發財金金額（1–888）</label><input id="fortuneAmt" type="number" min="1" max="888" value="8"/></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnFortune" disabled>領發財金</button>
+            <button class="btn ghost" id="btnFortuneCheck">查冷卻 / 名額</button>
+          </div>
+          <div class="help" id="fortuneOut" style="margin-top:10px">先完成三次聖盃。</div>
+        </div>
+
+        <div class="section" id="sec-wish">
+          <div class="sep"></div>
+          <div class="field"><label>許願內容</label><textarea id="wishText" placeholder="寫下你的願望…"></textarea></div>
+          <div class="field" style="margin-top:10px"><label>留言</label><textarea id="noteText" placeholder="留下一句話…"></textarea></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnSaveWish">保存願望</button>
+            <button class="btn ghost" id="btnWishHash">產生 hash</button>
+            <button class="btn ghost" id="btnClearNote">清空留言</button>
+          </div>
+          <div class="sep"></div>
+          <div class="grid2">
+            <div class="field"><label>還願金額（KGEN）</label><input id="vowAmt" type="number" min="1" value="8"/></div>
+            <div class="field"><label>點燈天數</label><input id="lampDays" type="number" min="1" value="7"/></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="btnApprove">先 Approve</button>
+            <button class="btn" id="btnVow">還願</button>
+            <button class="btn" id="btnLamp">點燈</button>
+          </div>
+          <div class="help" id="wishOut" style="margin-top:10px">神殿儀式資料都先存在本機，進入戰場後會轉成 Buff。</div>
+        </div>
+
+        <div class="section" id="sec-media">
+          <div class="sep"></div>
+          <div class="media">
+            <div>
+              <video id="cam" autoplay playsinline muted></video>
+              <div class="row" style="margin-top:10px">
+                <button class="btn" id="btnCamOn">開啟相機</button>
+                <button class="btn ghost" id="btnCamOff">關閉相機</button>
+              </div>
+            </div>
+            <div>
+              <canvas id="shotCanvas" width="1280" height="720"></canvas>
+              <div class="row" style="margin-top:10px">
+                <button class="btn" id="btnShot">拍照</button>
+                <button class="btn ghost" id="btnDlPhoto" disabled>下載照片</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="h2">神殿脈動狀態</div>
+        <div class="kv"><div class="k">心跳倒數</div><div class="v" id="hbCountdown">00:00:00</div></div>
+        <div class="kv"><div class="k">點火倒數</div><div class="v" id="igCountdown">00:00:00</div></div>
+        <div class="kv"><div class="k">Temple Energy</div><div class="v" id="energyLevel">100</div></div>
+        <div class="kv"><div class="k">下一步</div><div class="v" id="nextStep">先進神殿</div></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btnHeartbeat">領心跳</button>
+          <button class="btn" id="btnIgnite">轉日點火</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="h2">AI 客服</div>
+        <div class="field"><label>快速問題</label>
+          <select id="faq">
+            <option value="">選一個問題…</option>
+            <option value="wallet">我沒有錢包怎麼辦？</option>
+            <option value="connect">怎麼連接錢包？</option>
+            <option value="fortune">怎麼領發財金？</option>
+            <option value="approve">為什麼要先 approve？</option>
+            <option value="world">怎麼進入 K 線世界？</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btnAsk">仙女解說</button>
+          <button class="btn ghost" id="btnSpeak">語音唸出來</button>
+        </div>
+        <div class="field" style="margin-top:10px"><label>客服對話</label><textarea id="chatBox" placeholder="客服會一步一步教你…"></textarea></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" id="btnCopyChat">複製</button>
+          <button class="btn ghost" id="btnClearChat">清空</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="temple-footer">
+      <button id="footEntry">🏯 神殿入口</button>
+      <button id="footFortune">🧧 發財金</button>
+      <button id="footWish">🙏 許願還願</button>
+      <button id="footMedia">📸 留影客服</button>
+      <button id="footEnterWorld">🚪 進入戰場</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORLD HUD -->
+<div id="world-ui" class="hidden">
+  <div class="hud-top">
+    <div class="brand-section">
+      <div class="brand-name">KLINE App Game V14｜五指山融合完整版</div>
+      <div class="sys-st">TEMPLE → BATTLEFIELD</div>
+      <div class="sys-st" id="sys-clock">SYSTEM ONLINE | --</div>
+    </div>
+    <div class="monitor-data">
+      <div class="data-box"><div class="k">市場方向</div><div class="v" id="top-zone">多</div></div>
+      <div class="data-box"><div class="k">槓桿動能</div><div class="v" id="top-lev">0.0x</div></div>
+      <div class="data-box"><div class="k">Temple Buff</div><div class="v" id="top-buff">0</div></div>
+    </div>
   </div>
 
-  <section class="hero">
-    <div class="skyGlow"></div>
-    <svg class="mountain" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="m1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#49311c"/><stop offset="100%" stop-color="#1a120b"/></linearGradient>
-        <linearGradient id="m2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#6d4926"/><stop offset="100%" stop-color="#2c1b0e"/></linearGradient>
-      </defs>
-      <path d="M0 700 L0 410 L120 330 L200 350 L310 240 L410 270 L520 150 L600 210 L700 160 L810 295 L930 230 L1040 320 L1140 300 L1200 360 L1200 700 Z" fill="url(#m1)" opacity=".9"/>
-      <path d="M0 700 L0 520 L140 470 L240 510 L370 420 L500 470 L610 330 L720 420 L860 380 L980 480 L1100 430 L1200 470 L1200 700 Z" fill="url(#m2)" opacity=".95"/>
-      <path d="M420 520 L505 340 L545 455 L600 270 L650 450 L705 355 L790 520 Z" fill="#2b1609"/>
-      <path d="M470 520 L530 380 L558 450 L600 330 L640 450 L675 400 L730 520 Z" fill="#dca34c" opacity=".55"/>
-    </svg>
-
-    <div class="temple-status">
-      <div class="status"><div class="k">心跳</div><div class="v" id="stHeart">可領</div></div>
-      <div class="status"><div class="k">點火</div><div class="v" id="stIgnite">倒數中</div></div>
-      <div class="status"><div class="k">發財金</div><div class="v" id="stFortune">未解鎖</div></div>
-      <div class="status"><div class="k">錢包</div><div class="v" id="stWallet">未連線</div></div>
+  <div class="warp-engine">
+    <div class="warp-rail" id="warp-rail-body">
+      <div id="energy-fill"></div>
+      <div id="warp-thumb"></div>
+      <div class="rail-step" style="bottom:0%"></div><div class="rail-step" style="bottom:10%"></div>
+      <div class="rail-step" style="bottom:20%"></div><div class="rail-step" style="bottom:30%"></div>
+      <div class="rail-step" style="bottom:40%"></div><div class="rail-step" style="bottom:50%"></div>
+      <div class="rail-step" style="bottom:60%"></div><div class="rail-step" style="bottom:70%"></div>
+      <div class="rail-step" style="bottom:80%"></div><div class="rail-step" style="bottom:90%"></div>
     </div>
+    <div class="warp-val-text" id="warp-txt">WARP 0.0x</div>
+  </div>
 
-    <div class="temple-core" id="core"><div class="temple-ring"></div></div>
-    <div class="temple-title">
-      <h2>悟空心臟・五指山氣脈</h2>
-      <p>心跳、點火、發財金、許願、還願，都由這顆 TempleHeart 向外擴散。</p>
+  <div class="ga-matrix">
+    <div class="ga-title">GA EVOLUTION</div>
+    <div class="ga-stat">FITNESS: <span id="f-val">0.920</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+    <div class="ga-stat">MUTATION: <span id="m-val">0.010</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+    <div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+    <div style="color:var(--energy);font-size:12px;margin-top:10px" id="ga-rank">RANK: GA-600</div>
+  </div>
+
+  <div id="kline-engine-panel">
+    <div class="ke-head"><span>宇宙K線引擎</span><span class="sys-st">真市場</span></div>
+    <div class="ke-grid">
+      <div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
+      <div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value" id="ke-angle">0°</div></div>
+      <div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
+      <div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
+      <div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
+      <div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
     </div>
-  </section>
+    <div class="ke-live-row"><span class="sys-st">CT / 1m</span><span class="ke-live-price" id="ke-live-price">0.00</span></div>
+  </div>
 
-  <section class="main">
-    <div class="panel">
-      <div class="h2">神殿主入口</div>
-      <div class="help">這版改成五指山場景，不再沿用外太空 / 飛碟母版。流程也保留為神殿入口，不把交易主畫面塞進 12345。</div>
+  <div id="kline-chart-panel">
+    <div class="kc-head"><span>宇宙K線圖</span><span id="kc-predict">預測：開</span></div>
+    <canvas id="kline-canvas" width="260" height="92"></canvas>
+  </div>
 
-      <div class="portal-grid">
-        <button class="portal active" data-target="entry"><div class="icon">🏯</div><div class="t">進入神殿</div><div class="d">連接錢包、貼 Heart 地址、檢查神殿狀態。</div></button>
-        <button class="portal" data-target="fortune"><div class="icon">🧧</div><div class="t">發財金</div><div class="d">三次聖盃後，才解鎖發財金流程。</div></button>
-        <button class="portal" data-target="wish"><div class="icon">🙏</div><div class="t">許願還願</div><div class="d">許願、留言、hash、還願、點燈。</div></button>
-        <button class="portal" data-target="media"><div class="icon">📸</div><div class="t">留影客服</div><div class="d">拍照留影、語音講解、客服回覆。</div></button>
-      </div>
-
-      <div class="section active" id="sec-entry">
-        <div class="sep"></div>
-        <div class="grid2">
-          <div class="field"><label>Heart 合約地址</label><input id="heartAddr" placeholder="0x..."></div>
-          <div class="field"><label>KGEN Token</label><input id="tokenAddr" value="0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="btnConnect">連接錢包</button>
-          <button class="btn ghost" id="btnSave">保存地址</button>
-          <button class="btn ghost" id="btnInspect">檢查神殿</button>
-          <button class="btn red" id="btnClear">清空本機</button>
-        </div>
-        <div class="sep"></div>
-        <div class="grid2">
-          <div class="kv"><div class="k">錢包狀態</div><div class="v" id="walletState">未連線</div></div>
-          <div class="kv"><div class="k">鏈</div><div class="v" id="chainState">未偵測</div></div>
-          <div class="kv"><div class="k">Heart</div><div class="v" id="heartState">未貼地址</div></div>
-          <div class="kv"><div class="k">Temple 狀態</div><div class="v" id="templeState">可上線測</div></div>
-        </div>
-        <div class="help" id="inspectOut" style="margin-top:10px">這裡顯示檢查結果。</div>
-      </div>
-
-      <div class="section" id="sec-fortune">
-        <div class="sep"></div>
-        <div class="kv"><div class="k">聖盃進度</div><div class="v" id="cupProg">0 / 3</div></div>
-        <div class="cups">
-          <div class="cup" id="cup1">🥢</div><div class="cup" id="cup2">🥢</div><div class="cup" id="cup3">🥢</div>
-        </div>
-        <div class="kv"><div class="k">本次結果</div><div class="v" id="cupLast">--</div></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="btnCup">搏杯一次</button>
-          <button class="btn ghost" id="btnCupReset">重置聖盃</button>
-        </div>
-        <div class="field" style="margin-top:12px"><label>發財金金額（1–888）</label><input id="fortuneAmt" type="number" min="1" max="888" value="8"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="btnFortune" disabled>領發財金</button>
-          <button class="btn ghost" id="btnFortuneCheck">查冷卻 / 名額</button>
-        </div>
-        <div class="help" id="fortuneOut" style="margin-top:10px">先完成三次聖盃。</div>
-      </div>
-
-      <div class="section" id="sec-wish">
-        <div class="sep"></div>
-        <div class="field"><label>許願內容</label><textarea id="wishText" placeholder="寫下你的願望…"></textarea></div>
-        <div class="field" style="margin-top:10px"><label>留言</label><textarea id="noteText" placeholder="留下一句話…"></textarea></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="btnSaveWish">保存願望</button>
-          <button class="btn ghost" id="btnWishHash">產生 hash</button>
-          <button class="btn ghost" id="btnClearNote">清空留言</button>
-        </div>
-        <div class="sep"></div>
-        <div class="grid2">
-          <div class="field"><label>還願金額（KGEN）</label><input id="vowAmt" type="number" min="1" value="8"></div>
-          <div class="field"><label>點燈天數</label><input id="lampDays" type="number" min="1" value="7"></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="btnApprove">先 Approve</button>
-          <button class="btn" id="btnVow">還願</button>
-          <button class="btn" id="btnLamp">點燈</button>
-        </div>
-        <div class="help" id="wishOut" style="margin-top:10px">神殿儀式資料都先存在本機。</div>
-      </div>
-
-      <div class="section" id="sec-media">
-        <div class="sep"></div>
-        <div class="media">
-          <div>
-            <video id="cam" autoplay playsinline muted></video>
-            <div class="row" style="margin-top:10px">
-              <button class="btn" id="btnCamOn">開啟相機</button>
-              <button class="btn ghost" id="btnCamOff">關閉相機</button>
-            </div>
-          </div>
-          <div>
-            <canvas id="shotCanvas" width="1280" height="720"></canvas>
-            <div class="row" style="margin-top:10px">
-              <button class="btn" id="btnShot">拍照</button>
-              <button class="btn ghost" id="btnDlPhoto" disabled>下載照片</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div id="core-anchor">
+    <div id="core-window">
+      <canvas id="core-canvas" width="380" height="380"></canvas>
+      <div id="wish-label">CT × Angle × Leverage</div>
     </div>
+  </div>
 
-    <div class="panel">
-      <div class="h2">神殿脈動狀態</div>
-      <div class="kv"><div class="k">心跳倒數</div><div class="v" id="hbCountdown">00:00:00</div></div>
-      <div class="kv"><div class="k">點火倒數</div><div class="v" id="igCountdown">00:00:00</div></div>
-      <div class="kv"><div class="k">Temple Energy</div><div class="v" id="energyLevel">100</div></div>
-      <div class="kv"><div class="k">下一步</div><div class="v" id="nextStep">先進神殿</div></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnHeartbeat">領心跳</button>
-        <button class="btn" id="btnIgnite">轉日點火</button>
-      </div>
-
-      <div class="sep"></div>
-      <div class="h2">AI 客服</div>
-      <div class="field"><label>快速問題</label>
-        <select id="faq">
-          <option value="">選一個問題…</option>
-          <option value="wallet">我沒有錢包怎麼辦？</option>
-          <option value="connect">怎麼連接錢包？</option>
-          <option value="fortune">怎麼領發財金？</option>
-          <option value="approve">為什麼要先 approve？</option>
-        </select>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnAsk">仙女解說</button>
-        <button class="btn ghost" id="btnSpeak">語音唸出來</button>
-      </div>
-      <div class="field" style="margin-top:10px"><label>客服對話</label><textarea id="chatBox" placeholder="客服會一步一步教你…"></textarea></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn ghost" id="btnCopyChat">複製</button>
-        <button class="btn ghost" id="btnClearChat">清空</button>
-      </div>
+  <div id="coord-panel">
+    <div class="cp-title"><span>駕駛艙｜座標 / CT</span><span id="cp-side">方向：多</span></div>
+    <div class="cp-grid">
+      <div class="cp-row"><div class="cp-k">X（左右）</div><div class="cp-v" id="cp-x">0.0</div></div>
+      <div class="cp-row"><div class="cp-k">CT（Y 現價）</div><div class="cp-v" id="cp-ct">0.0</div></div>
+      <div class="cp-row"><div class="cp-k">Angle</div><div class="cp-v" id="cp-deg">0°</div></div>
+      <div class="cp-row"><div class="cp-k">地形</div><div class="cp-v" id="cp-terrain">草原</div></div>
+      <div class="cp-row"><div class="cp-k">Leverage</div><div class="cp-v" id="cp-lev">0.0x</div></div>
+      <div class="cp-row"><div class="cp-k">Time</div><div class="cp-v" id="cp-time">T+0</div></div>
+      <div class="cp-row"><div class="cp-k">Temple Energy</div><div class="cp-v" id="cp-energy">100</div></div>
+      <div class="cp-row"><div class="cp-k">Buff</div><div class="cp-v" id="cp-buff">0</div></div>
     </div>
-  </section>
+  </div>
+
+  <div class="chain-live-panel" id="chain-live-panel">
+    <div class="cl-head"><span>CHAIN LIVE</span><button class="bp-btn" onclick="toggleChainLive()">關</button></div>
+    <div class="cl-grid">
+      <div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">8888.0</div></div>
+      <div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">Round #1</div></div>
+      <div class="cl-item"><div class="cl-k">Temple Heart</div><div class="cl-v" id="cl-heart">未貼</div></div>
+      <div class="cl-item"><div class="cl-k">Wallet</div><div class="cl-v" id="cl-wallet">DEMO</div></div>
+    </div>
+  </div>
+
+  <div class="bet-live-panel" id="bet-live-panel">
+    <div class="bp-head"><span>BET PANEL</span><button class="bp-btn" onclick="toggleBetPanel()">關</button></div>
+    <div class="bp-kv">
+      <div class="bp-k">模擬錢包</div><div class="bp-v">DEMO</div>
+      <div class="bp-k">獎池</div><div class="bp-v" id="bp-pool">8888.0</div>
+    </div>
+    <input id="bet-amt-input" class="bp-input" type="text" inputmode="decimal" placeholder="輸入 KGEN 金額"/>
+    <div class="bp-grid">
+      <button class="bp-btn approve" onclick="approveMock()">APPROVE</button>
+      <button class="bp-btn buy" onclick="placeMock('UP')">BUY ↑</button>
+      <button class="bp-btn sell" onclick="placeMock('DOWN')">SELL ↓</button>
+      <button class="bp-btn" onclick="togglePredict()">預測開關</button>
+    </div>
+    <div class="bp-status" id="bp-status">待命中</div>
+  </div>
+
+  <div class="ritual-panel" id="ritual-panel">
+    <div class="rp-head"><span>TEMPLE BUFF</span><button class="rp-btn" onclick="toggleRitualPanel()">關</button></div>
+    <div class="rp-grid">
+      <div class="rp-item"><div class="rp-k">發財金</div><div class="rp-v" id="rp-fortune">0</div></div>
+      <div class="rp-item"><div class="rp-k">心跳</div><div class="rp-v" id="rp-heartbeat">0</div></div>
+      <div class="rp-item"><div class="rp-k">點燈</div><div class="rp-v" id="rp-lamp">0 天</div></div>
+      <div class="rp-item"><div class="rp-k">願望</div><div class="rp-v" id="rp-wish">未設定</div></div>
+    </div>
+    <div class="rp-grid-btn">
+      <button class="rp-btn gold" onclick="applyTempleFortune()">注入發財金</button>
+      <button class="rp-btn gold" onclick="applyWishBuff()">啟用願望 Buff</button>
+      <button class="rp-btn" onclick="applyHeartbeat()">轉心跳能量</button>
+      <button class="rp-btn" onclick="cupEvent()">啟動聖盃事件</button>
+    </div>
+    <div class="rp-status" id="rp-status">神殿儀式已連接戰場。</div>
+  </div>
+
+  <div class="footer-terminal">
+    <button class="term-btn" onclick="captureMock()">📸 拍照存證</button>
+    <button class="term-btn" onclick="toggleChainLive()">🛰️ Chain Live</button>
+    <button class="term-btn" onclick="toggleBetPanel()">📈 下單面板</button>
+    <button class="term-btn active-kgen" onclick="boost()">💎 KGEN 沖等演化</button>
+    <button class="term-btn active-kgen" onclick="autoHunt()">⚔️ 自動巡航打怪</button>
+    <button class="term-btn" onclick="switchTerrain()">👤 切換地形</button>
+    <button class="term-btn" onclick="spawnBoss()">🎡 召喚 Boss</button>
+    <button class="term-btn" onclick="setWish()">🧭 改核心標語</button>
+    <button class="term-btn active-kgen" onclick="returnTemple()">🏯 返回神殿</button>
+    <button class="term-btn active-kgen" onclick="toggleRitualPanel()">✨ Temple Buff</button>
+  </div>
 </div>
-
-<div class="footer">
-  <button id="footEntry">🏯 神殿入口</button>
-  <button id="footFortune">🧧 發財金</button>
-  <button id="footWish">🙏 許願還願</button>
-  <button id="footMedia">📸 留影客服</button>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
 const LS = { get:(k,d='')=>{try{return localStorage.getItem(k) ?? d}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}, del:(k)=>{try{localStorage.removeItem(k)}catch(e){}} };
+function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),1400); }
 
-function toast(msg){
-  const t=$('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
-}
+/* Temple particles */
 (function emberFX(){
   const c=$('embers'), ctx=c.getContext('2d'); let w,h,embers=[];
-  function rs(){ w=c.width=innerWidth*devicePixelRatio; h=c.height=innerHeight*devicePixelRatio; embers=Array.from({length:90},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2.1+0.6,v:Math.random()*0.45+0.1,a:Math.random()*0.5+0.2}))}
+  function rs(){ w=c.width=innerWidth*devicePixelRatio; h=c.height=innerHeight*devicePixelRatio; embers=Array.from({length:90},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2.1+0.6,v:Math.random()*0.45+0.1,a:Math.random()*0.5+0.2})) }
   addEventListener('resize', rs, {passive:true}); rs();
   (function loop(){ ctx.clearRect(0,0,w,h); for(const p of embers){ p.y -= p.v; if(p.y < -8){ p.y=h+8; p.x=Math.random()*w; } ctx.fillStyle='rgba(255,170,70,'+p.a+')'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(loop); })();
 })();
 
 function nowFmt(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()); }
-setInterval(()=>{$('clock').textContent=nowFmt()},500); $('clock').textContent=nowFmt();
+setInterval(()=>{ $('clock').textContent=nowFmt(); $('sys-clock').textContent='SYSTEM ONLINE | '+new Date().toLocaleString(); },500);
+$('clock').textContent=nowFmt();
 
+/* Temple tabs */
 const portals=[...document.querySelectorAll('.portal')];
 const sections={entry:$('sec-entry'), fortune:$('sec-fortune'), wish:$('sec-wish'), media:$('sec-media')};
-function openSection(name){
-  portals.forEach(p=>p.classList.toggle('active', p.dataset.target===name));
-  for(const k in sections){ sections[k].classList.toggle('active', k===name); }
-}
+function openSection(name){ portals.forEach(p=>p.classList.toggle('active', p.dataset.target===name)); for(const k in sections){ sections[k].classList.toggle('active', k===name); } }
 portals.forEach(p=>p.onclick=()=>openSection(p.dataset.target));
 $('footEntry').onclick=()=>openSection('entry');
 $('footFortune').onclick=()=>openSection('fortune');
 $('footWish').onclick=()=>openSection('wish');
 $('footMedia').onclick=()=>openSection('media');
+$('footEnterWorld').onclick=()=>enterWorld();
 
 function updateTempleStatus(){
   $('stWallet').textContent = $('walletState').textContent.indexOf('已')>=0 || $('walletState').textContent.indexOf('DEMO')>=0 ? '已連線' : '未連線';
@@ -329,11 +520,7 @@ function tickCountdowns(){
   $('hbCountdown').textContent = (now.getMinutes()===0&&now.getSeconds()===0)?'00:00:00':fmt(toTop);
   const utcH=now.getUTCHours(), utcM=now.getUTCMinutes();
   let ignite=0;
-  if(utcH===0 && utcM<10) ignite=0;
-  else{
-    const t=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1,0,0,0);
-    ignite=Math.max(0, Math.floor((t-now.getTime())/1000));
-  }
+  if(utcH===0 && utcM<10) ignite=0; else { const t=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1,0,0,0); ignite=Math.max(0, Math.floor((t-now.getTime())/1000)); }
   $('igCountdown').textContent = ignite===0 ? '00:00:00' : fmt(ignite);
   $('stHeart').textContent = $('hbCountdown').textContent==='00:00:00' ? '可領' : $('hbCountdown').textContent;
   $('stIgnite').textContent = $('igCountdown').textContent==='00:00:00' ? '視窗中' : $('igCountdown').textContent;
@@ -346,8 +533,10 @@ $('wishText').value = LS.get('wzs_wish','');
 $('noteText').value = LS.get('wzs_note','');
 $('chatBox').value = LS.get('wzs_chat','');
 
-$('btnConnect').onclick=()=>{ $('walletState').textContent='DEMO 已連線'; $('chainState').textContent='BSC 56'; $('templeState').textContent='神殿已喚醒'; updateTempleStatus(); toast('示意版：錢包已連線'); };
-$('btnSave').onclick=()=>{ LS.set('wzs_heart', $('heartAddr').value.trim()); $('heartState').textContent = $('heartAddr').value.trim() ? '已保存' : '未貼地址'; toast('已保存 Heart 地址'); };
+const T = {fortune:0,heartbeat:0,lampDays:0,wish:'',wallet:'未連線',heart:LS.get('wzs_heart','')||'未貼'};
+
+$('btnConnect').onclick=()=>{ $('walletState').textContent='DEMO 已連線'; $('chainState').textContent='BSC 56'; $('templeState').textContent='神殿已喚醒'; T.wallet='DEMO 已連線'; updateTempleStatus(); toast('示意版：錢包已連線'); };
+$('btnSave').onclick=()=>{ LS.set('wzs_heart', $('heartAddr').value.trim()); $('heartState').textContent = $('heartAddr').value.trim() ? '已保存' : '未貼地址'; T.heart=$('heartAddr').value.trim()||'未貼'; toast('已保存 Heart 地址'); };
 $('btnInspect').onclick=()=>{ $('inspectOut').textContent = 'Heart：'+($('heartAddr').value.trim() || '未貼')+' ｜ Wallet：'+$('walletState').textContent+' ｜ Chain：'+$('chainState').textContent; $('nextStep').textContent = $('walletState').textContent.indexOf('已')>=0 ? '可以進入發財金' : '先連接錢包'; };
 $('btnClear').onclick=()=>{ ['wzs_heart','wzs_wish','wzs_note','wzs_chat','wzs_cup'].forEach(LS.del); location.reload(); };
 
@@ -361,25 +550,25 @@ function syncCup(){
 }
 $('btnCup').onclick=()=>{ const ok=Math.random()<0.5; $('cupLast').textContent = ok ? '聖盃' : '笑杯'; cup = ok ? Math.min(3,cup+1) : 0; LS.set('wzs_cup', String(cup)); syncCup(); toast(ok ? '聖盃成功' : '笑杯，重來'); };
 $('btnCupReset').onclick=()=>{ cup=0; LS.set('wzs_cup','0'); $('cupLast').textContent='--'; syncCup(); toast('已重置聖盃'); };
-$('btnFortune').onclick=()=>{ $('fortuneOut').textContent = '已送出發財金申請（示意）｜'+$('fortuneAmt').value+' KGEN'; $('energyLevel').textContent = String(parseInt($('energyLevel').textContent,10)+8); $('core').animate([{filter:'brightness(1)'},{filter:'brightness(1.65)'},{filter:'brightness(1)'}], {duration:700}); toast('發財金已觸發'); };
+$('btnFortune').onclick=()=>{ const amt=parseFloat($('fortuneAmt').value||'0')||0; T.fortune += amt; $('fortuneOut').textContent = '已送出發財金申請（示意）｜'+amt+' KGEN'; $('energyLevel').textContent = String(parseInt($('energyLevel').textContent,10)+8); $('core').animate([{filter:'brightness(1)'},{filter:'brightness(1.65)'},{filter:'brightness(1)'}], {duration:700}); toast('發財金已觸發'); updateRitualPanel(); };
 $('btnFortuneCheck').onclick=()=>{ $('fortuneOut').textContent='冷卻：30 days｜名額：500｜目前可領'; };
 syncCup();
 
-$('btnSaveWish').onclick=()=>{ LS.set('wzs_wish',$('wishText').value); LS.set('wzs_note',$('noteText').value); toast('已保存願望與留言'); };
+$('btnSaveWish').onclick=()=>{ LS.set('wzs_wish',$('wishText').value); LS.set('wzs_note',$('noteText').value); T.wish=$('wishText').value.trim(); updateRitualPanel(); toast('已保存願望與留言'); };
 $('btnWishHash').onclick=async()=>{ const txt=$('wishText').value.trim(); if(!txt) return toast('請先輸入願望'); const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); const hex='0x'+Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); $('wishOut').textContent='wishHash = '+hex; toast('已產生 hash'); };
 $('btnClearNote').onclick=()=>{ $('noteText').value=''; LS.set('wzs_note',''); toast('已清空留言'); };
 $('btnApprove').onclick=()=>toast('Approve 完成（示意）');
 $('btnVow').onclick=()=>{ $('wishOut').textContent = '還願完成（示意）｜'+$('vowAmt').value+' KGEN'; toast('已還願'); };
-$('btnLamp').onclick=()=>{ $('wishOut').textContent = '點燈完成（示意）｜'+$('lampDays').value+' 天'; toast('已點燈'); };
-$('btnHeartbeat').onclick=()=>{ $('energyLevel').textContent = String(parseInt($('energyLevel').textContent,10)+1); toast('心跳已領取（示意）'); };
+$('btnLamp').onclick=()=>{ T.lampDays=parseInt($('lampDays').value||'0',10)||0; $('wishOut').textContent = '點燈完成（示意）｜'+T.lampDays+' 天'; updateRitualPanel(); toast('已點燈'); };
+$('btnHeartbeat').onclick=()=>{ T.heartbeat += 1; $('energyLevel').textContent = String(parseInt($('energyLevel').textContent,10)+1); updateRitualPanel(); toast('心跳已領取（示意）'); };
 $('btnIgnite').onclick=()=>{ $('energyLevel').textContent = String(parseInt($('energyLevel').textContent,10)+8); toast('點火已觸發（示意）'); };
 
 let camStream=null, photoBlob=null;
-const cam=$('cam'), cvs=$('shotCanvas'), cctx=cvs.getContext('2d');
-function drawWatermark(){ const txt='五指山悟空財神殿｜'+new Date().toLocaleString(); cctx.fillStyle='rgba(0,0,0,.45)'; cctx.fillRect(0,cvs.height-80,cvs.width,80); cctx.fillStyle='#f6d27b'; cctx.font='bold 30px sans-serif'; cctx.fillText(txt, 24, cvs.height-30); }
+const cam=$('cam'), cvs=$('shotCanvas'), cctx2=cvs.getContext('2d');
+function drawWatermark(){ const txt='五指山悟空財神殿｜'+new Date().toLocaleString(); cctx2.fillStyle='rgba(0,0,0,.45)'; cctx2.fillRect(0,cvs.height-80,cvs.width,80); cctx2.fillStyle='#f6d27b'; cctx2.font='bold 30px sans-serif'; cctx2.fillText(txt, 24, cvs.height-30); }
 $('btnCamOn').onclick=async()=>{ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}); cam.srcObject=camStream; toast('相機已開啟'); }catch(e){ toast('相機不可用'); } };
 $('btnCamOff').onclick=()=>{ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; cam.srcObject=null; } toast('相機已關閉'); };
-$('btnShot').onclick=()=>{ if(!camStream || !cam.videoWidth) return toast('請先開啟相機'); cvs.width=cam.videoWidth; cvs.height=cam.videoHeight; cctx.drawImage(cam,0,0,cvs.width,cvs.height); drawWatermark(); cvs.toBlob(function(b){ photoBlob=b; $('btnDlPhoto').disabled=!b; toast('拍照完成'); }, 'image/png', 0.95); };
+$('btnShot').onclick=()=>{ if(!camStream || !cam.videoWidth) return toast('請先開啟相機'); cvs.width=cam.videoWidth; cvs.height=cam.videoHeight; cctx2.drawImage(cam,0,0,cvs.width,cvs.height); drawWatermark(); cvs.toBlob(function(b){ photoBlob=b; $('btnDlPhoto').disabled=!b; toast('拍照完成'); }, 'image/png', 0.95); };
 $('btnDlPhoto').onclick=()=>{ if(!photoBlob) return toast('尚未拍照'); const u=URL.createObjectURL(photoBlob); const a=document.createElement('a'); a.href=u; a.download='WUZHISHAN_12345_'+Date.now()+'.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(u),10000); };
 
 function answerFAQ(k){
@@ -387,48 +576,143 @@ function answerFAQ(k){
   if(k==='connect') return '按連接錢包，若跳出視窗就確認，鏈請切到 BSC。';
   if(k==='fortune') return '流程：連錢包 → 貼 Heart → 完成三次聖盃 → 領發財金。';
   if(k==='approve') return '還願與點燈需要轉 KGEN，所以要先 approve。';
+  if(k==='world') return '先在神殿完成儀式，再按「進入 K 線世界」，TempleHeart 會把你送進戰場。';
   return '請先選一個問題。';
 }
 $('btnAsk').onclick=()=>{ const ans=answerFAQ($('faq').value); $('chatBox').value += ($('chatBox').value.trim() ? '\n\n' : '') + '客服：' + ans; LS.set('wzs_chat', $('chatBox').value); toast('已輸出客服解說'); };
 $('btnSpeak').onclick=()=>{ const txt=$('chatBox').value.trim(); if(!txt) return toast('沒有內容可唸'); try{ const u=new SpeechSynthesisUtterance(txt.slice(-300)); u.lang='zh-TW'; speechSynthesis.speak(u); }catch(e){ toast('語音不可用'); } };
 $('btnCopyChat').onclick=async()=>{ try{ await navigator.clipboard.writeText($('chatBox').value); toast('已複製'); }catch(e){ toast('複製失敗'); } };
 $('btnClearChat').onclick=()=>{ $('chatBox').value=''; LS.set('wzs_chat',''); toast('已清空客服'); };
-</script>
 
-<script id="footer-hotfix-v1">
-(function(){
-  function openSection(name){
-    var portals=[].slice.call(document.querySelectorAll('.portal'));
-    var ids={entry:'sec-entry',fortune:'sec-fortune',wish:'sec-wish',media:'sec-media'};
-    portals.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-target')===name); });
-    Object.keys(ids).forEach(function(k){
-      var el=document.getElementById(ids[k]);
-      if(el) el.classList.toggle('active', k===name);
-    });
-    var target=document.getElementById(ids[name]);
-    if(target){
-      try{ target.scrollIntoView({behavior:'smooth', block:'start'}); }
-      catch(e){ target.scrollIntoView(true); }
-    }
-  }
-  function bindFooter(){
-    var a=document.getElementById('footEntry');
-    var b=document.getElementById('footFortune');
-    var c=document.getElementById('footWish');
-    var d=document.getElementById('footMedia');
-    if(a) a.onclick=function(){ openSection('entry'); };
-    if(b) b.onclick=function(){ openSection('fortune'); };
-    if(c) c.onclick=function(){ openSection('wish'); };
-    if(d) d.onclick=function(){ openSection('media'); };
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded', bindFooter);
-  }else{
-    bindFooter();
-  }
-  setTimeout(bindFooter, 300);
-})();
-</script>
+/* World engine */
+const S = {x:0,ct:0,yaw:0,lev:0,t:0,hp:100,energy:100,terrain:'草原',ga:600,auto:false,predict:true,monsters:[],candles:[],buff:0,inWorld:false};
+for(let i=0;i<120;i++) S.candles.push({o:0,c:0,h:0,l:0,p:0,v:1});
+const world = $('world'); const wctx = world.getContext('2d');
+const coreCanvas = $('core-canvas'); const cctx = coreCanvas.getContext('2d');
+const kline = $('kline-canvas'); const kctx = kline.getContext('2d');
+function fit(){ world.width = innerWidth; world.height = innerHeight; } addEventListener('resize', fit); fit();
+function signedDeg(){ let d=(S.yaw*180/Math.PI)%360; if(d>180)d-=360; if(d<-180)d+=360; return d; }
+function zone(){ return Math.abs(signedDeg())<=90?'多':'空'; }
+function direction(){ return zone()==='多'?1:-1; }
+function setWarp(v){ S.lev = Math.max(0, Math.min(150, v)); const pct = (S.lev/150)*100; $('energy-fill').style.height = pct + '%'; $('warp-thumb').style.bottom = `calc(${pct}% - 14px)`; $('warp-txt').textContent = `WARP ${S.lev.toFixed(1)}x`; $('top-lev').textContent = `${S.lev.toFixed(1)}x`; }
+function switchTerrain(){ const arr=['草原','森林','湖泊','山地']; S.terrain=arr[(arr.indexOf(S.terrain)+1)%arr.length]; toast('地形切換到 '+S.terrain); }
+function togglePredict(){ S.predict=!S.predict; $('kc-predict').textContent='預測：'+(S.predict?'開':'關'); }
+function toggleChainLive(){ const p=$('chain-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+function toggleBetPanel(){ const p=$('bet-live-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+function toggleRitualPanel(){ const p=$('ritual-panel'); p.style.display=p.style.display==='none'?'block':'none'; }
+function approveMock(){ $('bp-status').textContent='Approve 完成（模擬）'; }
+function placeMock(side){ $('bp-status').textContent=`${side} 完成（模擬）`; }
+function captureMock(){ toast('拍照存證（模擬）'); }
+function setWish(){ const v=prompt('輸入核心標語', $('wish-label').textContent); if(v) $('wish-label').textContent=v; }
+function boost(){ S.ga=Math.min(1000,S.ga+50); $('ga-rank').textContent='RANK: GA-'+S.ga; }
+function autoHunt(){ S.auto=!S.auto; toast('自動巡航 '+(S.auto?'開':'關')); }
+function spawnMonster(type='normal'){ const a=Math.random()*Math.PI*2,d=150+Math.random()*180; S.monsters.push({x:S.x+Math.cos(a)*d,y:S.ct+Math.sin(a)*d,hp:type==='boss'?24:6,maxHp:type==='boss'?24:6,speed:type==='boss'?0.35:0.72,kind:type}); }
+function spawnBoss(){ spawnMonster('boss'); toast('Boss 出現'); }
+for(let i=0;i<6;i++) spawnMonster();
+function worldToCamera(wx, wy){ const dx=wx-S.x, dy=wy-S.ct, c=Math.cos(-S.yaw), s=Math.sin(-S.yaw); return {x:dx*c-dy*s,y:dx*s+dy*c}; }
+function cameraToScreen(cx, baseY, cam){ return [cx + cam.x, baseY + cam.y*0.56]; }
+function updateModel(){ const drift = direction()*(S.lev/150)*0.28 + S.buff*0.01; S.ct += drift + (Math.random()-.5)*0.05; S.t++; const last=S.candles[S.candles.length-1].c, close=last+drift+(Math.random()-.5)*0.65, open=last, high=Math.max(open,close)+Math.random()*0.7, low=Math.min(open,close)-Math.random()*0.7, pred=close+direction()*(S.lev/150)*0.45+(Math.random()-.5)*0.2; S.candles.push({o:open,c:close,h:high,l:low,p:pred,v:Math.random()*4+1}); if(S.candles.length>120) S.candles.shift(); }
+function drawWorld(){
+  const cw=world.width, ch=world.height, cx=cw/2, baseY=ch*0.72;
+  wctx.clearRect(0,0,cw,ch);
+  const grad=wctx.createLinearGradient(0,0,0,ch); grad.addColorStop(0, zone()==='多'?'#0b1832':'#2a0f18'); grad.addColorStop(.55, zone()==='多'?'#193056':'#53202c'); grad.addColorStop(1,'#0a0f16'); wctx.fillStyle=grad; wctx.fillRect(0,0,cw,ch);
+  wctx.strokeStyle='rgba(255,255,255,.08)';
+  for(let gy=-700; gy<=700; gy+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(-900,gy)), p2=cameraToScreen(cx,baseY,worldToCamera(900,gy)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
+  for(let gx=-900; gx<=900; gx+=40){ const p1=cameraToScreen(cx,baseY,worldToCamera(gx,-900)), p2=cameraToScreen(cx,baseY,worldToCamera(gx,900)); wctx.beginPath(); wctx.moveTo(p1[0],p1[1]); wctx.lineTo(p2[0],p2[1]); wctx.stroke(); }
+  wctx.fillStyle='#86ff7a'; wctx.beginPath(); wctx.arc(cx,baseY,12,0,Math.PI*2); wctx.fill();
+  wctx.strokeStyle='rgba(255,255,255,.65)'; wctx.beginPath(); wctx.moveTo(cx,baseY); wctx.lineTo(cx+Math.cos(S.yaw)*50, baseY+Math.sin(S.yaw)*28); wctx.stroke();
+  S.monsters.forEach(m=>{ const [sx,sy]=cameraToScreen(cx,baseY,worldToCamera(m.x,m.y)); const r=m.kind==='boss'?18:10; wctx.fillStyle=m.kind==='boss'?'#ffb36b':'#ff4d4d'; wctx.beginPath(); wctx.arc(sx,sy,r,0,Math.PI*2); wctx.fill(); });
+}
+function drawCore(){
+  const w=coreCanvas.width,h=coreCanvas.height,cx=w/2,cy=h/2; cctx.clearRect(0,0,w,h);
+  const rg=cctx.createRadialGradient(cx,cy,18,cx,cy,150); rg.addColorStop(0, zone()==='多'?'rgba(90,180,255,.30)':'rgba(255,90,90,.30)'); rg.addColorStop(1,'rgba(0,0,0,0)');
+  cctx.fillStyle=rg; cctx.beginPath(); cctx.arc(cx,cy,150,0,Math.PI*2); cctx.fill();
+  const baseR=118;
+  S.candles.forEach((k,i)=>{ const t=i/S.candles.length*Math.PI*2+S.yaw, rr=baseR+k.v*1.1, x=cx+Math.cos(t)*rr, y=cy+Math.sin(t)*rr*0.84; cctx.strokeStyle=k.c>=k.o?'#86ff7a':'#ff7575'; cctx.beginPath(); cctx.moveTo(x,y); cctx.lineTo(x,y-(k.c-k.o)*1.8); cctx.stroke(); if(S.predict){ cctx.strokeStyle='rgba(121,215,255,.95)'; cctx.beginPath(); cctx.moveTo(x+1.1,y); cctx.lineTo(x+1.1,y-(k.p-k.o)*1.8); cctx.stroke(); } });
+  cctx.strokeStyle='rgba(242,213,122,.35)'; for(let i=0;i<3;i++){ cctx.beginPath(); cctx.ellipse(cx,cy,72+i*20,52+i*14,S.yaw*0.55+i*.25,0,Math.PI*2); cctx.stroke(); }
+  cctx.beginPath(); cctx.arc(cx,cy,18,0,Math.PI*2); cctx.fillStyle='rgba(242,213,122,.86)'; cctx.fill();
+}
+function drawKlinePanel(){
+  kctx.clearRect(0,0,kline.width,kline.height);
+  const data=S.candles.slice(-22), highs=data.map(d=>d.h), lows=data.map(d=>d.l), max=Math.max(...highs), min=Math.min(...lows), range=Math.max(.0001,max-min);
+  data.forEach((d,i)=>{ const x=8+i*11, yo=78-((d.o-min)/range)*60, yc=78-((d.c-min)/range)*60, yh=78-((d.h-min)/range)*60, yl=78-((d.l-min)/range)*60; kctx.strokeStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.beginPath(); kctx.moveTo(x+4,yh); kctx.lineTo(x+4,yl); kctx.stroke(); kctx.fillStyle=d.c>=d.o?'#79ff91':'#ff7575'; kctx.fillRect(x,Math.min(yo,yc),8,Math.max(2,Math.abs(yc-yo))); });
+}
+function updatePanels(){
+  const last=S.candles[S.candles.length-1];
+  $('top-zone').textContent=zone();
+  $('ke-side').textContent=zone();
+  $('ke-angle').textContent=signedDeg().toFixed(1)+'°';
+  $('ke-open').textContent=last.o.toFixed(2);
+  $('ke-high').textContent=last.h.toFixed(2);
+  $('ke-low').textContent=last.l.toFixed(2);
+  $('ke-close').textContent=last.c.toFixed(2);
+  $('ke-live-price').textContent=S.ct.toFixed(2);
+  $('cp-side').textContent='方向：'+zone();
+  $('cp-x').textContent=S.x.toFixed(1);
+  $('cp-ct').textContent=S.ct.toFixed(2);
+  $('cp-deg').textContent=signedDeg().toFixed(1)+'°';
+  $('cp-terrain').textContent=S.terrain;
+  $('cp-lev').textContent=S.lev.toFixed(1)+'x';
+  $('cp-time').textContent='T+'+S.t;
+  $('cp-energy').textContent=S.energy.toFixed(0);
+  $('cp-buff').textContent=S.buff.toFixed(0);
+  $('top-buff').textContent=S.buff.toFixed(0);
+  $('f-bar').style.width=(40+(S.lev/150)*60)+'%';
+  $('m-bar').style.width=(15+Math.abs(signedDeg())/180*80)+'%';
+  $('cl-heart').textContent=T.heart || '未貼';
+  $('cl-wallet').textContent=T.wallet || '未連線';
+}
+function loop(){ if(S.inWorld){ updateModel(); drawWorld(); drawCore(); drawKlinePanel(); updatePanels(); } requestAnimationFrame(loop); }
+loop();
+(function(){ const rail=$('warp-rail-body'); function setFromY(clientY){ const r=rail.getBoundingClientRect(); let y=clientY-r.top; y=Math.max(14,Math.min(r.height-14,y)); const v=1-((y-14)/(r.height-28)); setWarp(v*150); } rail.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromY(e.clientY); }); rail.addEventListener('pointermove',e=>{ if(e.buttons) setFromY(e.clientY); });})();
+(function(){ const wheel=$('core-window'); function setFromX(x){ const r=wheel.getBoundingClientRect(), center=r.left+r.width/2; const dx=x-center; const deg=Math.max(-180,Math.min(180,(dx/(r.width/2))*180)); S.yaw=deg*Math.PI/180; wheel.style.transform=`rotate(${deg}deg)`; } wheel.addEventListener('pointerdown',e=>{ e.preventDefault(); setFromX(e.clientX); }); wheel.addEventListener('pointermove',e=>{ if(e.buttons) setFromX(e.clientX); });})();
 
+function updateRitualPanel(){
+  $('rp-fortune').textContent = (T.fortune||0).toFixed ? T.fortune.toFixed(0) : T.fortune;
+  $('rp-heartbeat').textContent = String(T.heartbeat||0);
+  $('rp-lamp').textContent = String(T.lampDays||0)+' 天';
+  $('rp-wish').textContent = T.wish ? T.wish.slice(0,16) : '未設定';
+}
+function applyTempleFortune(){ const add = Math.max(8, Math.floor((T.fortune||0)/2) || 0); S.energy += add; S.buff += add*0.3; $('rp-status').textContent='發財金已注入戰場：+'+add+' Energy'; toast('發財金注入能量'); }
+function applyWishBuff(){ if(!T.wish){ $('rp-status').textContent='尚未保存願望'; return toast('請先回神殿寫願望'); } const bonus = Math.min(20, Math.max(6, Math.floor(T.wish.length/2))); S.buff += bonus; S.lev = Math.min(150, S.lev + bonus); setWarp(S.lev); $('wish-label').textContent=T.wish.slice(0,24); $('rp-status').textContent='願望 Buff 啟動：+'+bonus; toast('願望 Buff 已啟用'); }
+function applyHeartbeat(){ const add = (T.heartbeat||0) + 1; S.energy += add; $('rp-status').textContent='心跳能量轉換：+'+add; toast('心跳已轉為戰場能量'); }
+function cupEvent(){ if(cup<3) return toast('聖盃尚未完成'); if(Math.random()<0.45){ spawnBoss(); $('rp-status').textContent='聖盃事件：Boss 降臨'; } else { S.buff += 10; $('rp-status').textContent='聖盃事件：Buff +10'; } toast('聖盃事件已觸發'); }
+
+function enterWorld(){
+  const temple = $('temple-layer');
+  const worldUI = $('world-ui');
+  const badge = $('world-enter-badge');
+  $('core').classList.add('portal-active');
+  badge.classList.add('show');
+  T.wish = $('wishText').value.trim() || T.wish;
+  T.heart = $('heartAddr').value.trim() || T.heart;
+  T.wallet = $('walletState').textContent;
+  updateRitualPanel();
+  setTimeout(()=>temple.classList.add('fade-out'), 180);
+  setTimeout(()=>{
+    temple.classList.add('hidden');
+    worldUI.classList.remove('hidden');
+    S.inWorld=true;
+    S.energy=parseInt($('energyLevel').textContent,10)||100;
+    S.buff=(T.lampDays||0) + Math.floor((T.fortune||0)/10) + (T.wish ? 6 : 0);
+    if(T.wish) $('wish-label').textContent=T.wish.slice(0,24);
+    badge.classList.remove('show');
+    toast('已進入 K 線世界');
+  }, 980);
+}
+function returnTemple(){
+  const temple = $('temple-layer');
+  const worldUI = $('world-ui');
+  temple.classList.remove('hidden','fade-out');
+  worldUI.classList.add('hidden');
+  S.inWorld=false;
+  $('core').classList.remove('portal-active');
+  toast('已返回神殿');
+}
+$('btnEnterWorld').onclick=()=>enterWorld();
+
+updateRitualPanel();
+setWarp(0);
+</script>
 </body>
 </html>
