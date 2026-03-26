@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>WUZHISHAN_12345_V6_6_clean_fortune_focus.html</title>
+<title>WUZHISHAN_12345_V6_7_clean_ui_fix.html</title>
 <style>
 :root{
   --bg:#05070c; --gold:#f2d57a; --cyan:#79d7ff; --panel:rgba(8,10,18,.56); --line:rgba(255,255,255,.11);
@@ -16,9 +16,9 @@ canvas{position:fixed;inset:0}
 .panel{position:fixed;z-index:120;background:var(--panel);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:8px 10px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.28)}
 #brand{top:10px;left:10px;max-width:30vw}
 #brand .t1{font-size:14px;font-weight:900;color:var(--gold);line-height:1.15}
-#brand .t2{font-size:9px;color:#ead9af;margin-top:3px}
+#brand .t2{font-size:9px;color:#ead9af;margin-top:3px;display:none}
 #brand .t3{font-size:9px;color:var(--cyan);margin-top:3px}
-#resourcePanel{top:82px;left:10px;min-width:175px}
+#resourcePanel{top:70px;left:10px;min-width:175px}
 .r-title{font-size:10px;color:#e8d7a4;margin-bottom:4px}
 .r-row{margin:8px 0}
 .r-head{display:flex;justify-content:space-between;align-items:center;font-size:11px}
@@ -52,9 +52,6 @@ canvas{position:fixed;inset:0}
 .klineCanvas{height:116px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.08)),repeating-linear-gradient(to right,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 36px),repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 24px)}
 .scaleLabel{position:absolute;right:6px;font-size:10px;color:#dfefff;text-shadow:0 0 4px #000}
 .scaleTop{top:6px}.scaleMid{top:50%;transform:translateY(-50%)}.scaleBot{bottom:6px}
-#miniActions{position:fixed;left:50%;transform:translateX(-50%);bottom:210px;z-index:141;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(420px,86vw)}
-#miniActions button{padding:8px 6px;border-radius:12px;border:1px solid rgba(242,213,122,.22);background:rgba(0,0,0,.52);color:#fff;font-weight:900;font-size:12px;cursor:pointer}
-#miniActions button.primary{background:rgba(120,70,0,.45); box-shadow:0 0 18px rgba(242,213,122,.12)}
 .controls{position:fixed;left:0;right:0;bottom:78px;height:164px;z-index:145;pointer-events:none}
 .joy,.yaw,.warp{pointer-events:auto}
 .joy{position:absolute;left:6px;bottom:0;width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--line)}
@@ -101,7 +98,6 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
   .core-shell{width:min(58vw,228px);height:min(58vw,228px)}
   #klinePanel{width:min(250px,44vw)}
   .footer{grid-template-columns:repeat(3,1fr)}
-  #miniActions{grid-template-columns:repeat(2,1fr);bottom:208px}
   #hpWrap{width:min(320px,82vw)}
 }
 </style>
@@ -109,7 +105,6 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 <body>
 <div id="brand" class="panel">
   <div class="t1">五指山悟空財神殿</div>
-  <div class="t2">V6.6｜發財金主角版</div>
   <div class="t3" id="clock">SYSTEM ONLINE | --</div>
 </div>
 
@@ -179,13 +174,6 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
   </div>
 </div>
 
-<div id="miniActions">
-  <button id="actFortune" class="primary">發財金</button>
-  <button id="actWish">許願</button>
-  <button id="actWallet">錢包</button>
-  <button id="actService">客服</button>
-</div>
-
 <div class="controls">
   <div class="joy" id="joy">
     <div class="ctrl-label">Move｜到處可走，不影響市場</div>
@@ -207,11 +195,14 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 </div>
 
 <div class="footer">
-  <button class="gold" id="btnPortal">TempleHeart</button>
+  <button class="gold" id="btnFortune">發財金</button>
+  <button id="btnWish">許願</button>
+  <button id="btnWallet">錢包</button>
+  <button id="btnService">客服</button>
+  <button id="btnPortal">TempleHeart</button>
   <button id="btnBuff">Buff</button>
   <button id="btnBoss">Boss</button>
   <button id="btnPredict">預測</button>
-  <button id="btnHelp">客服解說</button>
   <button id="btnReset">重置</button>
 </div>
 
@@ -236,13 +227,13 @@ textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255
 <div id="walletModal" class="modal">
   <div class="mh"><span>錢包</span><button onclick="closeModal('walletModal')">關閉</button></div>
   <div class="grid2">
-    <div class="box"><div class="k">連線狀態</div><div class="v" id="walletState">此版未開啟</div></div>
+    <div class="box"><div class="k">連線狀態</div><div class="v">此版未開啟</div></div>
     <div class="box"><div class="k">暗物質</div><div class="v" id="walletBNB">0.182 BNB</div></div>
   </div>
 </div>
 
 <div id="serviceModal" class="modal">
-  <div class="mh"><span>客服解說</span><button onclick="closeModal('serviceModal')">關閉</button></div>
+  <div class="mh"><span>客服</span><button onclick="closeModal('serviceModal')">關閉</button></div>
   <div class="box">
     <div class="k">玩法說明</div>
     <div class="v" style="font-size:14px;line-height:1.6;color:#fff">
@@ -276,7 +267,7 @@ addEventListener('resize', fit); fit();
 const LS = { get:(k,d='')=>{try{return localStorage.getItem(k) ?? d}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}} };
 const S = {
   mode:'TEMPLE', x:0,y:0,z:0,ct:0,yaw:0, moveX:0,moveY:0, warp:0,
-  predict:true, energy:100, buff:0, wish:LS.get('wzs_v66_wish',''),
+  predict:true, energy:100, buff:0, wish:LS.get('wzs_v67_wish',''),
   stars:[], candles:[], marketDir:1, enemies:[], lastSpawnAt:0,
   bnb:0.182, symbol:'BTCUSDT', interval:'1m', realK:[]
 };
@@ -290,11 +281,10 @@ document.getElementById('clock').textContent='SYSTEM ONLINE | '+nowText();
 function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block'; clearTimeout(window.__t); window.__t=setTimeout(()=>el.style.display='none',1200); }
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
-document.getElementById('actFortune').onclick=()=>openModal('fortuneModal');
-document.getElementById('actWish').onclick=()=>openModal('wishModal');
-document.getElementById('actWallet').onclick=()=>openModal('walletModal');
-document.getElementById('actService').onclick=()=>openModal('serviceModal');
-document.getElementById('btnHelp').onclick=()=>openModal('serviceModal');
+document.getElementById('btnFortune').onclick=()=>openModal('fortuneModal');
+document.getElementById('btnWish').onclick=()=>openModal('wishModal');
+document.getElementById('btnWallet').onclick=()=>openModal('walletModal');
+document.getElementById('btnService').onclick=()=>openModal('serviceModal');
 document.getElementById('wishText').value=S.wish;
 
 function claimFortune(){
@@ -318,7 +308,7 @@ function fortuneFlash(){
   const ff=document.getElementById('fortuneFlash');
   ff.classList.remove('on'); void ff.offsetWidth; ff.classList.add('on');
 }
-function saveWish(){ S.wish=document.getElementById('wishText').value; LS.set('wzs_v66_wish',S.wish); toast('願望已保存'); }
+function saveWish(){ S.wish=document.getElementById('wishText').value; LS.set('wzs_v67_wish',S.wish); toast('願望已保存'); }
 document.getElementById('energyVal').textContent=S.energy.toFixed(1);
 document.getElementById('buffVal').textContent=S.buff;
 
@@ -326,8 +316,8 @@ function signedDeg(){ let deg=(S.yaw*180/Math.PI)%360; if(deg>180) deg-=360; if(
 function zone(){ return Math.abs(signedDeg())<=90 ? '多' : '空'; }
 function zoneColor(){
   return zone()==='多'
-    ? {core:'rgba(255,77,79,0.30)', glow:'rgba(255,90,90,0.14)', stroke:'rgba(255,120,120,0.95)', bgTop:'#2b0f16', bgMid:'#5b1f2b', rgb:'255,110,110'}
-    : {core:'rgba(0,200,83,0.30)', glow:'rgba(0,200,83,0.14)', stroke:'rgba(96,255,170,0.95)', bgTop:'#0b1a13', bgMid:'#103325', rgb:'80,255,170'};
+    ? {core:'rgba(255,77,79,0.30)', glow:'rgba(255,90,90,0.14)', stroke:'rgba(255,120,120,.95)', bgTop:'#2b0f16', bgMid:'#5b1f2b', rgb:'255,110,110'}
+    : {core:'rgba(0,200,83,0.30)', glow:'rgba(0,200,83,0.14)', stroke:'rgba(96,255,170,.95)', bgTop:'#0b1a13', bgMid:'#103325', rgb:'80,255,170'};
 }
 function wrongDirection(){ return zone()==='多' ? S.marketDir<0 : S.marketDir>0; }
 function enterBattle(){ const flash=document.getElementById('portalFlash'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); toast('TempleHeart 啟動'); setTimeout(()=>{ S.mode='BATTLE'; },380); }
