@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 👇 廣寒宮入口https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/  
-👉 https://www.youtube.com/shorts/0It4Am2gxXI
+▶ #K線西遊記 #花果山台灣你不是在看K線，你是在進入市場。方向、槓桿、節奏、能量，每一步都決定你能不能活下來。KLINE App Game，不是遊戲而已，是交易宇宙的入口。信念不滅・市場無界。  
+👉 https://www.youtube.com/shorts/4_ki9cu73pM
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
