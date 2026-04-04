@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山台灣你不是在看K線，你是在進入市場。方向、槓桿、節奏、能量，每一步都決定你能不能活下來。KLINE App Game，不是遊戲而已，是交易宇宙的入口。信念不滅・市場無界。  
-👉 https://www.youtube.com/shorts/4_ki9cu73pM
+▶ #悟空新文 #K線西遊記 #花果山台灣市場不是數字，而是宇宙  價格是位置，槓桿是力量，多空是戰爭  從阿斗一口起飛，到悟空掌控節奏  你不是旁觀者，你是玩家  👉 進入市場宇宙  
+👉 https://www.youtube.com/shorts/uV2oSfNYwYQ
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
