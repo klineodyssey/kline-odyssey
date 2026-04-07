@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文 #K線西遊記 #花果山台灣市場不是數字，而是宇宙  價格是位置，槓桿是力量，多空是戰爭  從阿斗一口起飛，到悟空掌控節奏  你不是旁觀者，你是玩家  👉 進入市場宇宙  
-👉 https://www.youtube.com/shorts/uV2oSfNYwYQ
+▶ 在市場之前先有宇宙4/7日K推演4/9T+2第二日#K線西遊記 #花果山台灣 #市場宇宙 #多空之戰  
+👉 https://www.youtube.com/watch?v=wnN4f4PXK8Q
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
