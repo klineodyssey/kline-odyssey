@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 在市場之前先有宇宙4/7日K推演4/9T+2第二日#K線西遊記 #花果山台灣 #市場宇宙 #多空之戰  
-👉 https://www.youtube.com/watch?v=wnN4f4PXK8Q
+▶ #K線西遊記 #花果山 #美國戰場 📅2026/04/08 T+2推演→04/10⏰宇宙推演時間08:45NASDAQ 26399→22961→25000反彈非翻多，25200上延命  
+👉 https://www.youtube.com/shorts/FIjBHsI2tAo
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
