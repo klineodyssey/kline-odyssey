@@ -459,8 +459,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #花果山 #美國戰場 📅2026/04/08 T+2推演→04/10⏰宇宙推演時間08:45NASDAQ 26399→22961→25000反彈非翻多，25200上延命  
-👉 https://www.youtube.com/shorts/FIjBHsI2tAo
+▶ 市場未明，戰局已起。川普與賴清德對峙背後，不是政治，是資金方向的暗流。多空交界正在醞釀下一段波動，真正的轉折，從來不在表面。看懂結構，才能活下來。  
+👉 https://www.youtube.com/watch?v=N76CO4bIZl0
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
