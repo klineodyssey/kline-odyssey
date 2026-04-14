@@ -1,0 +1,62 @@
+name: TAIFEX Auto Validate
+
+on:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/raw/*.csv"
+      - "K線西遊記/kline-taifex/master/*.xlsx"
+      - "K線西遊記/kline-taifex/scripts/*.py"
+      - ".github/workflows/taifex_auto_validate.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: K線西遊記/kline-taifex
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl numpy
+
+      - name: Find latest raw csv
+        id: latest_raw
+        run: |
+          latest_csv=$(ls -1 raw/*.csv | sort | tail -n 1)
+          echo "latest_csv=$latest_csv" >> $GITHUB_OUTPUT
+          echo "Latest raw: $latest_csv"
+
+      - name: Find latest master xlsx
+        id: latest_xlsx
+        run: |
+          latest_xlsx=$(ls -1 master/台指近全*.xlsx | sort | tail -n 1)
+          echo "latest_xlsx=$latest_xlsx" >> $GITHUB_OUTPUT
+          echo "Latest xlsx: $latest_xlsx"
+
+      - name: Extract date from latest xlsx filename
+        id: dateinfo
+        run: |
+          fname=$(basename "${{ steps.latest_xlsx.outputs.latest_xlsx }}")
+          ymd=$(echo "$fname" | sed -E 's/^台指近全([0-9]{8})\.xlsx$/\1/')
+          echo "ymd=$ymd" >> $GITHUB_OUTPUT
+          echo "Date: $ymd"
+
+      - name: Run validator
+        run: |
+          python tx_transfer_validator.py \
+            --raw "${{ steps.latest_raw.outputs.latest_csv }}" \
+            --out "${{ steps.latest_xlsx.outputs.latest_xlsx }}" \
+            --date "${{ steps.dateinfo.outputs.ymd }}"
