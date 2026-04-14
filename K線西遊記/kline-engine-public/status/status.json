@@ -1,8 +1,8 @@
 {
-  "ts_utc": "2026-04-14T03:18:09.139844+00:00",
+  "ts_utc": "2026-04-14T03:24:21.476099+00:00",
   "tx": {
     "master": "K線西遊記/kline-taifex/master/台指近全.xlsx",
-    "latest_date": "2026-02-26",
+    "latest_date": "2026-03-31",
     "out_latest": null,
     "updated": true
   },
