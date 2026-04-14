@@ -1,5 +1,5 @@
 {
-  "ts_utc": "2026-04-14T03:31:55.132675+00:00",
+  "ts_utc": "2026-04-14T03:36:07.820912+00:00",
   "tx": {
     "master": "K線西遊記/kline-taifex/master/台指近全.xlsx",
     "latest_date": "2026-04-14",
@@ -8,7 +8,7 @@
   },
   "btc": {
     "master": "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx",
-    "latest_date": "2026-01-26",
+    "latest_date": "2026-04-14",
     "out_latest": null,
     "updated": true,
     "source": "auto"
