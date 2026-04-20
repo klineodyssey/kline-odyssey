@@ -2,6 +2,11 @@
   <img src="https://klineodyssey.github.io/kline-odyssey/logo.png" 
        alt="KGEN Logo" 
        style="width:120px;height:120px;border-radius:20px;">
+  <a href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+   target="_blank" rel="noopener"
+   style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#000;color:#fff;">
+  🚀 Buy KGEN（Pancake）
+</a>
 </div>
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
