@@ -1,3 +1,8 @@
+<div style="text-align:center; margin:20px 0;">
+  <img src="https://klineodyssey.github.io/kline-odyssey/logo.png" 
+       alt="KGEN Logo" 
+       style="width:120px;height:120px;border-radius:20px;">
+</div>
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
