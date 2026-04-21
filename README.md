@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 市場未明，戰局已起。川普與賴清德對峙背後，不是政治，是資金方向的暗流。多空交界正在醞釀下一段波動，真正的轉折，從來不在表面。看懂結構，才能活下來。  
-👉 https://www.youtube.com/watch?v=N76CO4bIZl0
+▶ KGEN is now live on BNB Smart Chain  Price = Position  Value = Mass  Market = Gravity  
+👉 https://www.youtube.com/shorts/ab-q2UFWxCY
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
