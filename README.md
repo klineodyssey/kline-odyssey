@@ -474,3 +474,21 @@ Where the Market Becomes the Myth.
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
+
+<h2>Core Team</h2>
+
+<div style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:14px; background:#fff;">
+
+  <p style="margin-bottom:10px;">
+  KLINE Odyssey is an independent Web3 project developed under the identity of 樂天帝.
+  The system focuses on AI-driven financial modeling, decentralized governance, and long-term market structure design.
+  </p>
+
+  <ul style="line-height:1.8;">
+    <li><b>Founder:</b> 樂天帝 (KLINE Odyssey)</li>
+    <li><b>Email:</b> klineodyssey.io@gmail.com</li>
+    <li><b>GitHub:</b> https://github.com/klineodyssey/kline-odyssey</li>
+    <li><b>Telegram:</b> https://t.me/klineodyssey</li>
+  </ul>
+
+</div>
