@@ -1,3 +1,7 @@
+<p style="font-weight:700;">
+KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent smart contract and liquidity.
+</p>
+
 <div style="text-align:center; margin:20px 0;">
   <img src="https://klineodyssey.github.io/kline-odyssey/logo.png" 
        alt="KGEN Logo" 
@@ -490,5 +494,35 @@ Where the Market Becomes the Myth.
     <li><b>GitHub:</b> https://github.com/klineodyssey/kline-odyssey</li>
     <li><b>Telegram:</b> https://t.me/klineodyssey</li>
   </ul>
+
+</div>
+
+<h2>Official Contact</h2>
+
+<div style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:14px; background:#fff;">
+
+  <ul style="line-height:1.8;">
+    <li><b>Official Website:</b> https://klineodyssey.github.io/kline-odyssey/</li>
+    <li><b>Email:</b> klineodyssey.io@gmail.com</li>
+    <li><b>Telegram:</b> https://t.me/klineodyssey</li>
+    <li><b>X (Twitter):</b> https://x.com/klineodyssey</li>
+    <li><b>GitHub:</b> https://github.com/klineodyssey/kline-odyssey</li>
+  </ul>
+
+</div>
+
+<h2>Legal Disclaimer</h2>
+
+<div style="margin:12px 0; padding:14px; border:1px solid #111; border-radius:14px; background:#fff;">
+
+<p>
+KGEN (KLINE GENESIS) is a decentralized digital asset deployed on the BNB Smart Chain.
+This project is experimental and intended for ecosystem participation only.
+It does not represent any form of financial advice, investment guarantee, or profit expectation.
+</p>
+
+<p>
+All users are responsible for their own decisions. Cryptocurrency involves risk, including total loss of funds.
+</p>
 
 </div>
