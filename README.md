@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ KGEN is now live on BNB Smart Chain  Price = Position  Value = Mass  Market = Gravity  
-👉 https://www.youtube.com/shorts/ab-q2UFWxCY
+▶ 🔹 項目狀態（Token Age）KGEN（KLINE GENESIS）為近期在 BNB Smart Chain（BSC）上部署並啟動的項目。屬於新發行代幣，目前正處於早期成長階段。  
+👉 https://www.youtube.com/shorts/7W-AjzFaZHY
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
