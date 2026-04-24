@@ -1,13 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFE27A"/>
-      <stop offset="100%" stop-color="#D89B1D"/>
-    </linearGradient>
+    <radialGradient id="gold" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#fff2a8"/>
+      <stop offset="45%" stop-color="#ffd86b"/>
+      <stop offset="75%" stop-color="#dca52c"/>
+      <stop offset="100%" stop-color="#8d5c00"/>
+    </radialGradient>
   </defs>
-  <rect width="32" height="32" rx="6" fill="#05070B"/>
-  <circle cx="16" cy="16" r="11" fill="none" stroke="url(#g)" stroke-width="1.3"/>
-  <ellipse cx="16" cy="16" rx="13" ry="5" fill="none" stroke="url(#g)" stroke-width="1" transform="rotate(-20 16 16)" opacity="0.9"/>
-  <text x="16" y="18" text-anchor="middle" font-family="Arial" font-size="11" font-weight="bold" fill="url(#g)">KG</text>
-  <circle cx="24.5" cy="10" r="1.2" fill="#FFD76A"/>
+
+  <rect width="32" height="32" rx="16" fill="#050505"/>
+
+  <!-- outer ring -->
+  <circle cx="16" cy="16" r="14" fill="none" stroke="url(#gold)" stroke-width="1.6"/>
+  <circle cx="16" cy="16" r="12.4" fill="none" stroke="#f7c84a" stroke-width="0.6" opacity="0.85"/>
+
+  <!-- orbital rings -->
+  <ellipse cx="16" cy="16" rx="12" ry="4.6"
+           fill="none" stroke="#ffcc55" stroke-width="0.7"
+           transform="rotate(-18 16 16)" opacity="0.9"/>
+
+  <ellipse cx="16" cy="16" rx="11" ry="3.2"
+           fill="none" stroke="#c89118" stroke-width="0.5"
+           transform="rotate(28 16 16)" opacity="0.75"/>
+
+  <!-- star -->
+  <polygon points="16,5.2 16.8,7.3 19,8.1 16.8,8.9 16,11 15.2,8.9 13,8.1 15.2,7.3"
+           fill="#ffe27a"/>
+
+  <!-- K monogram badge -->
+  <circle cx="16" cy="18" r="5.2" fill="#0b0b0b" stroke="#d9a528" stroke-width="0.6"/>
+
+  <text x="16" y="20.2"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="7.8"
+        font-weight="700"
+        fill="url(#gold)">K</text>
 </svg>
