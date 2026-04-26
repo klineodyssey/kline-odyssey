@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 1. Search K G E N  2. Tap the ⭐  3. Stay for 10 seconds  This is how the system sees it.  
-👉 https://www.youtube.com/shorts/SuN19bnEpWQ
+▶ #悟空新文#k線西遊記 #花果山台灣On-chain Vow Economy（鏈上願力經濟）如果 KGEN 是質量，那悟空財神殿，就是讓質量流動的心臟。  
+👉 https://www.youtube.com/shorts/JHpsJMZPALM
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
