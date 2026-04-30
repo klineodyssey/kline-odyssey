@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ KGEN has submitted its CoinGecko review 🚀Live on BNB Chain.  
-👉 https://www.youtube.com/watch?v=dpiUXtqlYMM
+▶ Most people still write code.  We define rules—and let AI build the system.KGEN is not a token.  
+👉 https://www.youtube.com/watch?v=AS7utpgHwh8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
