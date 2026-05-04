@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ Most people still write code.  We define rules—and let AI build the system.KGEN is not a token.  
-👉 https://www.youtube.com/watch?v=AS7utpgHwh8
+▶ 👉 想看市場位置打開 DexTools  搜尋 KGEN  找 KGEN / WBNB（BNB Chain）  
+👉 https://www.youtube.com/watch?v=NwW93MsSoB8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
