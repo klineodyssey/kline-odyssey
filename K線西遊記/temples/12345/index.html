@@ -21,7 +21,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜五指山悟空財神殿｜v5.8</title>
+    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.11｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1237,7 +1237,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 
 
 
-/* === 12345 Temple Music System V7.10 === */
+/* === 12345 Temple Music System V7.11 === */
 #temple-audio-console{
   position:fixed; right:16px; bottom:112px; z-index:260;
   width:min(320px,92vw); padding:10px 12px; border-radius:14px;
@@ -1396,7 +1396,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="temple-audio-console" aria-label="12345 神殿音樂系統">
-  <div class="ta-head"><span>神殿音樂｜V7.10</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
+  <div class="ta-head"><span>神殿音樂｜V7.11</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
   <div class="ta-row">
     <div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
     <button type="button" onclick="templeAudio.playBgm()">播放</button>
@@ -1413,7 +1413,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.10</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.11</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1503,8 +1503,8 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <canvas id="export-canvas" style="display:none;"></canvas>
 
 <div class="steer-zone">
-    <div class="angle-readout" id="ang-val">76°</div>
-    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="76">
+    <div class="angle-readout" id="ang-val">0°</div>
+    <input type="range" id="steer-input-val" class="steer-slider" min="-180" max="180" value="0">
 </div>
 
 <!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
@@ -1519,7 +1519,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <!-- WEB3 控制面板（對齊合約） -->
 <div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V7.10</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V7.11</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.playTempleIntro()">🗣️ 語音客服介紹</button>
@@ -1543,7 +1543,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">神殿玩法｜V7.10</div>
+    <div class="qs-title">神殿玩法｜V7.11</div>
     <div>先 <span class="hl">Approve 授權</span>，再依序完成 <span class="hl">三次聖盃</span>、<span class="hl">領發財金</span>、<span class="hl">整點心跳</span>、<span class="hl">轉日呼吸</span>。</div>
     <ol>
       <li>連結錢包</li>
@@ -1628,7 +1628,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 /*
 ============================================================
 KGEN 12345｜五指山悟空財神殿 Index (GitHub Pages)
-版本：V7.10.0  （以 v2.20.4 可用原版為底，逐步加功能）
+版本：V7.11.0  （以 v2.20.4 可用原版為底，逐步加功能）
 
 【重要觀念 / 介面定義】
 1) 「方向盤(度數)」只代表多空方向：
@@ -1660,7 +1660,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V7.10";
+const APP_VERSION = "12345-TEMPLE-V7.11";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -7548,7 +7548,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.10';
+      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.11';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -10005,7 +10005,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <script id="temple-audio-system-v710">
 /* ============================================================
-   12345 Temple Audio System V7.10
+   12345 Temple Audio System V7.11
    - 主背景音樂：Wuzhishan Heart Core
    - 發財金音效：Wukong Fortune Blessing
    - 心跳/轉日音效：Temple Heartbeat Ignite
@@ -10111,6 +10111,179 @@ KGEN 12345 UI Patch V7.6.0
     await TA.init(); TA.bindAll();
     document.body.addEventListener('pointerdown', ()=>TA.unlock(), {once:true, passive:true});
   });
+})();
+</script>
+
+
+
+<!-- 12345 TEMPLE V7.11 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
+<style id="kh-v711-hotfix-style">
+  /* 右下音樂小窗與右上入口重複，右下取消；音樂系統仍可由按鈕/首次點擊觸發 */
+  #temple-audio-console{ display:none !important; }
+  /* 12345 不是 16888 pool 進度，隱藏舊進度條，但保留 Heart 血庫餘額 */
+  #web3-panel .prog-wrap, #prog-fill, #prog-txt{ display:none !important; }
+  /* 左下錢包/玩法/操作區要保留，但不能壓過方向盤 */
+  #web3-panel{ left:14px !important; bottom:260px !important; max-height:260px !important; }
+  @media(max-width:700px){
+    #web3-panel{ left:10px !important; right:10px !important; bottom:260px !important; width:auto !important; max-height:260px !important; }
+    .angle-readout{ font-size:44px !important; }
+  }
+</style>
+<script id="kh-v711-hotfix-script">
+(function(){
+  const HEART_ADDR = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
+  const KGEN_ADDR  = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const BSC_HEX = "0x38";
+  const BSC_RPC = "https://bsc-dataseed.binance.org/";
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function symbol() view returns (string)",
+    "function allowance(address owner,address spender) view returns (uint256)",
+    "function approve(address spender,uint256 amount) returns (bool)"
+  ];
+  function $(id){ return document.getElementById(id); }
+  function short(a){ return a ? a.slice(0,6)+"…"+a.slice(-4) : "--"; }
+  function set(id,v){ const e=$(id); if(e) e.textContent=v; }
+  function sideZh(deg){ return (Number(deg)>=-90 && Number(deg)<=90) ? "多方" : "空方"; }
+  function safeSpeak(txt){ try{ if(window.templeAudio && templeAudio.speak) templeAudio.speak(txt); else if(window.app&&app.speak) app.speak(txt); }catch(_){} }
+  function toast(txt){ try{ if(window.app&&app.toast) app.toast(txt); }catch(_){} console.log("[12345]",txt); }
+
+  function updateAngleUI(deg){
+    deg = Math.max(-180, Math.min(180, Number(deg)||0));
+    const side = sideZh(deg);
+    const abs = Math.round(Math.abs(deg));
+    set("ang-val", deg + "°");
+    set("ke-angle", String(abs));
+    set("ke-side", side.replace('方',''));
+    set("kc-dir", "方向角 → " + side);
+    set("cp-deg-num", side + "｜deg " + deg.toFixed(2));
+    const cpDeg=$("cp-deg"); if(cpDeg) cpDeg.textContent = "方向：" + side + "｜deg " + deg.toFixed(2);
+    document.querySelectorAll('[data-side="1"]').forEach(el=>{ el.textContent = side; });
+    document.querySelectorAll('.kh-angle-live').forEach(el=>{ el.textContent = "方向：" + side + "｜deg " + deg.toFixed(2); });
+    const core=$("core-window"); if(core) core.style.transform = `rotate(${deg}deg)`;
+    const s=$("steer-input-val"); if(s && String(s.value)!==String(deg)) s.value = String(deg);
+  }
+
+  function patchAngle(){
+    const slider=$("steer-input-val");
+    if(slider){
+      slider.min="-180"; slider.max="180";
+      if(!slider.dataset.khV711){
+        slider.dataset.khV711="1";
+        slider.addEventListener('input', e=>updateAngleUI(e.target.value));
+        slider.addEventListener('change', e=>updateAngleUI(e.target.value));
+      }
+      updateAngleUI(slider.value || 0);
+    }else updateAngleUI(0);
+    const oldApply = (window.app && app.applySteer) ? app.applySteer.bind(app) : null;
+    if(window.app && !app.__khV711ApplyPatched){
+      app.__khV711ApplyPatched=true;
+      app.applySteer=function(v,silent){
+        if(oldApply){ try{ oldApply(v,silent); }catch(_){} }
+        updateAngleUI(v);
+      };
+    }
+  }
+
+  async function getProvider(){
+    if(!window.ethereum && window.BinanceChain) window.ethereum = window.BinanceChain;
+    if(window.ethereum && Array.isArray(window.ethereum.providers) && window.ethereum.providers.length){
+      window.ethereum = window.ethereum.providers.find(p=>p.isMetaMask||p.isTrust||p.isBinance||p.isOKXWallet) || window.ethereum.providers[0];
+    }
+    if(!window.ethereum) return null;
+    return window.ethereum;
+  }
+
+  async function ensureBSC(eth){
+    let cid = await eth.request({method:'eth_chainId'}).catch(()=>null);
+    set('w3-chain', cid || '--');
+    if(cid && cid.toLowerCase()===BSC_HEX) return true;
+    try{ await eth.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC_HEX}]}); }
+    catch(e){
+      if(e && (e.code===4902 || String(e.message||'').toLowerCase().includes('unrecognized'))){
+        await eth.request({method:'wallet_addEthereumChain', params:[{
+          chainId:BSC_HEX, chainName:'BNB Smart Chain', nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+          rpcUrls:[BSC_RPC], blockExplorerUrls:['https://bscscan.com']
+        }]});
+      }else{ throw e; }
+    }
+    cid = await eth.request({method:'eth_chainId'}).catch(()=>null);
+    set('w3-chain', cid || '--');
+    return cid && cid.toLowerCase()===BSC_HEX;
+  }
+
+  async function readBalances(provider, addr){
+    const token = new ethers.Contract(KGEN_ADDR, ERC20_ABI, provider);
+    const dec = await token.decimals().catch(()=>18);
+    const [bnbWei,kgenWei,heartWei,allowWei] = await Promise.all([
+      provider.getBalance(addr), token.balanceOf(addr), token.balanceOf(HEART_ADDR), token.allowance(addr, HEART_ADDR).catch(()=>0)
+    ]);
+    const fmt = ethers.utils ? ethers.utils.formatUnits : ethers.formatUnits;
+    const fmtEth = ethers.utils ? ethers.utils.formatEther : ethers.formatEther;
+    const bnb = Number(fmtEth(bnbWei));
+    const kgen = Number(fmt(kgenWei, dec));
+    const heart = Number(fmt(heartWei, dec));
+    const allow = Number(fmt(allowWei, dec));
+    set('rb-bnb-txt', bnb.toFixed(4)+' BNB');
+    set('rb-kgen-txt', kgen.toFixed(4)+' KGEN');
+    set('userBNB', bnb.toFixed(4)+' BNB');
+    set('userBal', kgen.toFixed(4)+' KGEN');
+    set('userAllowance', allow.toFixed(4)+' KGEN');
+    set('w3-bal', heart.toFixed(4)+' KGEN');
+    set('w3-prog', 'Heart 血庫 ' + heart.toFixed(4) + ' KGEN');
+  }
+
+  async function connectWallet(){
+    const eth = await getProvider();
+    if(!eth){ safeSpeak('未偵測到錢包，請使用 MetaMask、Trust Wallet 或 Binance Wallet 內建瀏覽器開啟。'); alert('未偵測到錢包，請用錢包內建瀏覽器開啟本頁。'); return; }
+    try{
+      const accs = await eth.request({method:'eth_requestAccounts'});
+      const addr = accs && accs[0];
+      if(!addr) throw new Error('NO_ACCOUNT');
+      await ensureBSC(eth);
+      const provider = new ethers.providers.Web3Provider(eth);
+      const signer = provider.getSigner();
+      window.khWallet = { eth, provider, signer, addr };
+      if(window.web3){ web3.provider=provider; web3.signer=signer; web3.addr=addr; web3.UNIVERSE=HEART_ADDR; web3.KGEN=KGEN_ADDR; }
+      set('w3-addr', short(addr));
+      set('w3-uni', HEART_ADDR);
+      await readBalances(provider, addr);
+      safeSpeak('錢包已連線。KGEN 餘額與 Heart 血庫已同步。');
+      toast('wallet connected '+addr);
+    }catch(e){ console.error(e); safeSpeak('錢包連線失敗，請確認授權與 BSC 鏈。'); alert('錢包連線失敗：'+(e.message||e)); }
+  }
+
+  function patchWalletButtons(){
+    ['w3-connect-btn'].forEach(id=>{ const b=$(id); if(b){ b.onclick=connectWallet; b.textContent='🔌 連結錢包 / 同步餘額'; }});
+    document.querySelectorAll('button').forEach(b=>{
+      const t=(b.textContent||'');
+      if(t.includes('連結錢包')) b.onclick=connectWallet;
+    });
+    if(window.web3){ web3.smartConnect=connectWallet; web3.connect=connectWallet; web3.UNIVERSE=HEART_ADDR; web3.KGEN=KGEN_ADDR; }
+  }
+
+  function remove16888Words(){
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+        let t=el.textContent;
+        if(t.includes('16888')) el.textContent=t.replaceAll('16888','12345');
+        if(t.includes('Pool Balance')) el.textContent=t.replace('Pool Balance','Heart Balance');
+      }
+    });
+  }
+
+  function init(){
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.11｜Heart V3.2.6';
+    set('ver-st','VERSION 12345-TEMPLE-V7.11');
+    set('w3-uni', HEART_ADDR);
+    remove16888Words();
+    patchAngle();
+    patchWalletButtons();
+    const slider=$('steer-input-val'); if(slider) updateAngleUI(slider.value || 0);
+    setInterval(()=>{ const s=$('steer-input-val'); if(s) updateAngleUI(s.value||0); }, 1200);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
 
