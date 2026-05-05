@@ -21,7 +21,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.11｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.12｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1413,7 +1413,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.11</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.12</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1660,7 +1660,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V7.11";
+const APP_VERSION = "12345-TEMPLE-V7.12";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -1790,7 +1790,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
 
     getGuideBlocks(){
         const intro = `
-          <h3>五指山 16888｜完整玩法入口</h3>
+          <h3>五指山 12345｜悟空財神殿入口</h3>
           <p>這裡是 <b>財神儀式操作版</b>，不是複雜交易所。玩法核心只有三步：<b>連錢包 → Approve → 下 UP / DOWN</b>。</p>
           <p><b>所有下單、入池、發獎、托管</b> 都走鏈上合約，不是前端假動畫。</p>
           <hr/>
@@ -3706,7 +3706,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
   <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
-  <button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 五指山導覽</button>
+  <button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 悟空財神殿導覽</button>
   <button class="nav-btn nav-help" onclick="roundHistory.open()">名額紀錄</button>
   
   
@@ -3802,15 +3802,14 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <button class="cl-btn" type="button" onclick="roundHistory && roundHistory.open()">名額紀錄</button>
   </div>
   <div class="cl-note">
-    這裡讀的是 <b>16888 Universe 合約</b> 真狀態：poolBalance、roundId、A/B、托管與表態。<br>
-    本頁是簡單漲跌版；複雜玩法放在花果山交易所。
+    這裡讀的是 <b>12345 TempleHeart 合約</b>：Heart 血庫、KGEN 餘額、Allowance、發財金、心跳、點火與還願狀態。<br>本頁是悟空財神殿，不是 16888 廣寒宮。
   </div>
 </div>
 
 
 
 
-<div class="bet-live-panel" id="bet-live-panel" style="display:none;">
+<div class="bet-live-panel" id="bet-live-panel" style="display:block;">
   <div class="bp-head">
     <span>悟空心臟操作窗｜12345</span>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -3833,6 +3832,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <button class="bp-btn approve" type="button" onclick="betPanel.approve()">APPROVE</button>
     <button class="bp-btn buy" type="button" onclick="betPanel.buy()">發財金</button>
     <button class="bp-btn sell" type="button" onclick="betPanel.sell()">整點心跳</button>
+    <button class="bp-btn" type="button" onclick="templeOps.ignite()">轉日呼吸</button>
     <button class="bp-btn" type="button" onclick="app.openGuide('playbook')">發放規則</button>
     <button class="bp-btn" type="button" onclick="roundHistory && roundHistory.open()">名額紀錄</button>
   </div>
@@ -3864,7 +3864,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 <div id="guide-modal" class="guide-modal" aria-hidden="true">
   <div class="guide-card">
     <div class="guide-header">
-      <div class="guide-title">客服 / 五指山導覽</div>
+      <div class="guide-title">客服 / 悟空財神殿導覽</div>
       <button class="guide-close" id="btn-guide-close" aria-label="close">✕</button>
     </div>
     <div class="guide-tabs">
@@ -7548,7 +7548,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.11';
+      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.12';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -7677,7 +7677,7 @@ window.templeOps = {
           </div>
           <div class="faq-item">
             <div class="faq-q">Q：五指山之後去哪？</div>
-            <div class="faq-a">宇宙節點路線是：16888 廣寒宮入口 → 12345 五指山 → 8888 高老莊 → 7744 流沙河。</div>
+            <div class="faq-a">宇宙節點路線是：12345 五指山悟空財神殿 → 11520 Brain 花果山交易所 → 108000 MarsSeats。16888 另屬廣寒宮月老成親系統，不混用。</div>
           </div>
         `;
       }
@@ -7701,7 +7701,7 @@ window.templeOps = {
         faq.innerHTML = `
           <div class="faq-item">
             <div class="faq-q">Q：12345 五指山悟空財神殿是什麼？</div>
-            <div class="faq-a">這裡不是 16888 廣寒宮入口，也不是下注遊戲頁。這裡是悟空心臟甦醒之地，是 TempleHeart 的前端控制神殿。</div>
+            <div class="faq-a">這裡是 12345 五指山悟空財神殿，是悟空心臟甦醒之地，也是 TempleHeart 的前端控制神殿。</div>
           </div>
           <div class="faq-item">
             <div class="faq-q">Q：TempleHeart V3.2.6 提供哪些鏈上動作？</div>
@@ -7721,7 +7721,7 @@ window.templeOps = {
       // unify right-side guide button texts if present
       document.querySelectorAll('button').forEach(btn=>{
         const t = (btn.textContent || '').trim();
-        if(/客服|導覽/.test(t)) btn.textContent = '客服 / 五指山導覽';
+        if(/客服|導覽/.test(t)) btn.textContent = '客服 / 悟空財神殿導覽';
       });
     }catch(e){}
   }
@@ -7894,7 +7894,7 @@ window.templeOps = {
           <div>• 每 epoch：500 名</div>
           <div>• heartbeatClaim：每小時一次</div>
           <div>• igniteAndClaim：UTC 00:00–00:10</div>
-          <div style="margin-top:6px;color:#7ff3ff;">完整規則請看「客服 / 五指山導覽」</div>
+          <div style="margin-top:6px;color:#7ff3ff;">完整規則請看「客服 / 悟空財神殿導覽」</div>
         `;
       }
 
@@ -7929,7 +7929,7 @@ window.templeOps = {
         app.getGuideBlocks = function(){
           const intro = `
             <h3>12345 五指山悟空財神殿</h3>
-            <p>這裡不是 16888 廣寒宮，也不是買賣遊戲。這裡是 <b>TempleHeart V3.2.6</b> 的前端神殿。</p>
+            <p>這裡是 <b>12345 五指山悟空財神殿</b>，也是 <b>TempleHeart V3.2.6</b> 的前端控制神殿。</p>
             <p><b>主流程只有三步：</b><br>連接錢包 → Approve → 三次聖盃 / 領發財金</p>
             <hr/>
             <h4>最快開始</h4>
@@ -8100,7 +8100,7 @@ window.templeOps = {
           • igniteAndClaim：UTC 00:00–00:10 每日一次<br>
           • Heart ↔ 11520 Brain：循環血庫
         </div>
-        <div class="tsm-status">詳細說明請打開 <b>客服 / 五指山導覽</b>。</div>
+        <div class="tsm-status">詳細說明請打開 <b>客服 / 悟空財神殿導覽</b>。</div>
       </div>
     </div>
   </div>
@@ -10274,8 +10274,8 @@ KGEN 12345 UI Patch V7.6.0
   }
 
   function init(){
-    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.11｜Heart V3.2.6';
-    set('ver-st','VERSION 12345-TEMPLE-V7.11');
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.12｜Heart V3.2.6';
+    set('ver-st','VERSION 12345-TEMPLE-V7.12');
     set('w3-uni', HEART_ADDR);
     remove16888Words();
     patchAngle();
@@ -10284,6 +10284,124 @@ KGEN 12345 UI Patch V7.6.0
     setInterval(()=>{ const s=$('steer-input-val'); if(s) updateAngleUI(s.value||0); }, 1200);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+
+
+
+<!-- KGEN 12345 V7.12 final patch: Heart UI / wallet panel / angle sync -->
+<style id="kgen12345-v712-final-css">
+  /* 左下交易 / 錢包 / 玩法區塊：固定恢復，不再消失 */
+  #bet-live-panel.bet-live-panel{
+    display:block !important;
+    left:18px !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:132px !important;
+    width:min(375px, calc(100vw - 36px)) !important;
+    z-index:650 !important;
+    max-height:42vh !important;
+    overflow:auto !important;
+    border-color:rgba(255,215,120,.42) !important;
+    box-shadow:0 0 22px rgba(255,215,120,.20), 0 14px 42px rgba(0,0,0,.52) !important;
+  }
+  #bet-live-panel .bp-head span:first-child::after{content:'｜Wallet / Heart'; color:#7ff3ff; margin-left:6px; font-size:11px;}
+  #chain-live-panel{display:none !important;}
+  #guideUnifiedBtn{font-weight:900 !important;}
+  .guide-title{color:#ffe39a !important;}
+  #walletHub{z-index:99999 !important;}
+  @media (max-width:820px){
+    #bet-live-panel.bet-live-panel{
+      left:12px !important;
+      bottom:128px !important;
+      width:min(340px, calc(100vw - 24px)) !important;
+      max-height:38vh !important;
+    }
+  }
+</style>
+<script id="kgen12345-v712-final-js">
+(function(){
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const MARS='0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const $ = id => document.getElementById(id);
+  function set(id,v){ const e=$(id); if(e) e.textContent=v; }
+  function speak(msg){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(msg);
+      u.lang='zh-TW'; u.rate=0.95; u.pitch=0.9; u.volume=0.95;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function fixText(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.12';
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.children.length) return;
+      let t=el.textContent||'';
+      if(t.includes('客服 / 五指山導覽')) el.textContent=t.replace('客服 / 五指山導覽','客服 / 悟空財神殿導覽');
+      if(t.includes('客服 / 五指山')) el.textContent=t.replace('客服 / 五指山','客服 / 悟空財神殿');
+      if(t.includes('16888 Universe 合約')) el.textContent=t.replace('16888 Universe 合約','12345 TempleHeart 合約');
+    });
+    set('bp-mode','HEART READY');
+    set('bp-pool','Heart: '+HEART.slice(0,8)+'…'+HEART.slice(-6));
+  }
+  function degFromSlider(){
+    const s=$('steer-input-val') || document.querySelector('input[type="range"]');
+    return s ? Math.max(-180,Math.min(180,Number(s.value)||0)) : 0;
+  }
+  function side(deg){ return deg>=-90 && deg<=90 ? '多方' : '空方'; }
+  function updateAngle(){
+    const deg=degFromSlider();
+    const txt='方向：'+side(deg)+'｜deg '+deg.toFixed(2);
+    set('cp-deg',txt); set('cp-deg-num',txt); set('ang-val',deg+'°');
+    document.querySelectorAll('.kh-angle-live').forEach(e=>e.textContent=txt);
+    const core=$('core-window') || $('mainCore') || $('main-core');
+    if(core) core.style.transform='rotate('+deg+'deg)';
+    const wheel=$('wheel'); if(wheel) wheel.style.transform='rotate('+deg+'deg)';
+  }
+  async function connectWalletV712(){
+    const st=$('bp-status');
+    try{
+      const eth=window.ethereum || (window.trustwallet && window.trustwallet.ethereum);
+      if(!eth){
+        if(window.web3 && web3.openWalletHub) web3.openWalletHub();
+        if(st) st.textContent='未偵測到錢包，請用 MetaMask / Trust Wallet / OKX / Binance Wallet 開啟。';
+        speak('尚未偵測到錢包。請使用 MetaMask、Trust Wallet、OKX 或 Binance Wallet 開啟神殿。');
+        return;
+      }
+      const accounts=await eth.request({method:'eth_requestAccounts'});
+      const acct=accounts && accounts[0];
+      if(acct){ set('bp-wallet',acct.slice(0,6)+'…'+acct.slice(-4)); }
+      try{
+        const chain=await eth.request({method:'eth_chainId'});
+        if(chain!=='0x38'){
+          await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]});
+        }
+      }catch(e){}
+      if(st) st.textContent='錢包已連線，BSC 檢查完成。';
+      speak('錢包已連線。請確認 BSC 網路，並查看 KGEN 餘額與 Heart 血庫。');
+      if(window.web3 && web3.refreshBalances) setTimeout(()=>web3.refreshBalances(),300);
+    }catch(e){ if(st) st.textContent='錢包連線失敗：'+(e.message||e); speak('錢包連線失敗，請重新確認錢包權限。'); }
+  }
+  // override smartConnect to robust fallback, but preserve original if present under backup
+  window.kgen12345ConnectWallet = connectWalletV712;
+  window.addEventListener('load',()=>{
+    fixText(); updateAngle();
+    const s=$('steer-input-val') || document.querySelector('input[type="range"]');
+    if(s) ['input','change','touchmove'].forEach(ev=>s.addEventListener(ev,updateAngle,{passive:true}));
+    const bet=$('bet-live-panel'); if(bet) bet.style.display='block';
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包')) btn.onclick=(e)=>{e.preventDefault(); connectWalletV712();};
+      if(t.includes('發財金')) btn.addEventListener('click',()=>speak('發財金功能已啟動。請確認金額一到八八八，並確認錢包交易。'));
+      if(t.includes('整點心跳') || t.includes('heartbeat')) btn.addEventListener('click',()=>speak('整點心跳已啟動。請確認錢包交易。'));
+      if(t.includes('轉日呼吸') || t.includes('ignite')) btn.addEventListener('click',()=>speak('轉日呼吸已啟動。請確認是否在 UTC 零點到零點十分。'));
+    });
+  });
+  setTimeout(fixText,700);
 })();
 </script>
 
