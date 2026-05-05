@@ -10989,8 +10989,8 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('load',init);
 })();
 </script>
-</body>
-</html>
+
+
 <!-- ===== KGEN 12345 FINAL HOTFIX V7.9: wallet/game panel restore + angle + music + self-check ===== -->
 <style id="kgen-12345-v790-final-style">
   /* 左下交易 / 錢包 / 玩法區塊：保留，不能拿掉 */
@@ -11395,3 +11395,265 @@ KGEN 12345 UI Patch V7.6.0
   setTimeout(bindFinal,500); setTimeout(bindFinal,1500);
 })();
 </script>
+
+<!-- ===== KGEN 12345 V7.17｜Bottom 8 Button Standardized Game UI ===== -->
+<style id="kgen12345-v717-footer8-standard-css">
+  /* 只保留底部 8 個標準按鈕當主入口；其他左右浮動入口不再干擾畫面 */
+  #v715-left-dock,
+  #v715-right-dock,
+  #v716-side-actions,
+  #music-panel{display:none!important;}
+
+  body{padding-bottom:128px!important;}
+
+  .footer-terminal{
+    position:fixed!important;
+    left:0!important; right:0!important; bottom:0!important;
+    z-index:2147483200!important;
+    display:grid!important;
+    grid-template-columns:repeat(4, minmax(0,1fr))!important;
+    gap:8px!important;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))!important;
+    background:linear-gradient(180deg, rgba(0,0,0,.58), rgba(0,0,0,.94))!important;
+    border-top:1px solid rgba(255,215,120,.72)!important;
+    box-shadow:0 -18px 38px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08)!important;
+    backdrop-filter:blur(10px)!important;
+    pointer-events:auto!important;
+  }
+  .footer-terminal .term-btn{
+    min-height:46px!important;
+    border-radius:10px!important;
+    border:1px solid rgba(255,215,120,.34)!important;
+    background:linear-gradient(180deg,rgba(8,11,18,.92),rgba(0,0,0,.82))!important;
+    color:#eaf5ff!important;
+    font-size:12px!important;
+    font-weight:900!important;
+    line-height:1.25!important;
+    padding:8px 6px!important;
+    box-shadow:inset 0 0 16px rgba(0,242,255,.05)!important;
+    white-space:normal!important;
+    pointer-events:auto!important;
+  }
+  .footer-terminal .term-btn:nth-child(n+5){
+    border-color:rgba(255,215,120,.76)!important;
+    color:#ffe39b!important;
+    background:linear-gradient(180deg,rgba(33,25,8,.92),rgba(0,0,0,.86))!important;
+    box-shadow:0 0 14px rgba(255,215,120,.12), inset 0 0 15px rgba(255,215,120,.08)!important;
+  }
+  .footer-terminal .term-btn.k17-wallet-btn{background:linear-gradient(180deg,rgba(5,47,38,.95),rgba(0,0,0,.86))!important;border-color:rgba(0,255,191,.55)!important;color:#b8fff3!important;}
+  .footer-terminal .term-btn.k17-fortune-btn{background:linear-gradient(180deg,rgba(67,42,6,.95),rgba(0,0,0,.86))!important;border-color:rgba(255,213,111,.9)!important;color:#ffe39b!important;}
+  .footer-terminal .term-btn.k17-rules-btn{background:linear-gradient(180deg,rgba(27,32,67,.95),rgba(0,0,0,.86))!important;border-color:rgba(121,177,255,.7)!important;color:#d9e9ff!important;}
+  .footer-terminal .term-btn.k17-guide-btn{background:linear-gradient(180deg,rgba(28,62,66,.95),rgba(0,0,0,.86))!important;border-color:rgba(95,245,255,.72)!important;color:#c9fbff!important;}
+
+  /* 左下錢包/聖盃操作頁：點底部按鈕才展開，位置統一，不能遮底部 8 鍵文字 */
+  body:not(.k17-ops-open) #web3-panel{display:none!important;}
+  body.k17-ops-open #web3-panel{
+    display:block!important;
+    position:fixed!important;
+    left:12px!important;
+    right:auto!important;
+    bottom:124px!important;
+    width:min(430px,calc(100vw - 24px))!important;
+    max-height:60vh!important;
+    overflow:auto!important;
+    z-index:2147483300!important;
+    border-radius:18px!important;
+    padding:12px!important;
+    background:linear-gradient(180deg,rgba(6,9,15,.97),rgba(0,0,0,.92))!important;
+    border:1px solid rgba(255,215,120,.74)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.72),0 0 24px rgba(255,215,120,.18)!important;
+  }
+  #web3-panel .k17-panel-head{
+    position:sticky; top:0; z-index:2;
+    display:flex!important; align-items:center!important; justify-content:space-between!important; gap:8px!important;
+    padding:6px 0 10px!important;
+    background:linear-gradient(180deg,rgba(6,9,15,.98),rgba(6,9,15,.82))!important;
+    color:#ffd978!important; font-weight:900!important;
+    border-bottom:1px solid rgba(255,215,120,.18)!important;
+    margin-bottom:8px!important;
+  }
+  .k17-close-btn{
+    border:1px solid rgba(255,215,120,.55)!important;
+    background:rgba(255,215,120,.12)!important;
+    color:#ffe39b!important;
+    border-radius:10px!important;
+    padding:7px 10px!important;
+    font-weight:900!important;
+  }
+
+  /* 右下規則/活動頁：點底部按鈕才展開，比舊版再上移，避免卡住右下資訊 */
+  body:not(.k17-rules-open) #temple-modal{display:none!important;}
+  body.k17-rules-open #temple-modal{
+    display:block!important;
+    position:fixed!important;
+    left:12px!important;
+    right:12px!important;
+    top:auto!important;
+    bottom:150px!important;
+    width:auto!important;
+    max-height:58vh!important;
+    overflow:auto!important;
+    z-index:2147483290!important;
+    background:transparent!important;
+    padding:0!important;
+  }
+  body.k17-rules-open #temple-modal > div{
+    max-width:100%!important;
+    margin:0!important;
+    max-height:58vh!important;
+    overflow:auto!important;
+    border-radius:18px!important;
+    background:linear-gradient(180deg,rgba(7,10,16,.97),rgba(0,0,0,.92))!important;
+    border:1px solid rgba(255,215,120,.64)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.72),0 0 24px rgba(255,215,120,.18)!important;
+  }
+
+  @media(max-width:760px){
+    body{padding-bottom:138px!important;}
+    .footer-terminal{grid-template-columns:repeat(4, minmax(0,1fr))!important;gap:7px!important;padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px))!important;}
+    .footer-terminal .term-btn{min-height:44px!important;font-size:11px!important;padding:7px 4px!important;}
+    body.k17-ops-open #web3-panel{left:10px!important;bottom:122px!important;width:calc(100vw - 20px)!important;max-height:56vh!important;}
+    body.k17-rules-open #temple-modal{left:10px!important;right:10px!important;bottom:142px!important;max-height:54vh!important;}
+  }
+</style>
+<script id="kgen12345-v717-footer8-standard-js">
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V7.17';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const $=id=>document.getElementById(id);
+  function speak(msg){
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){}
+    try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; u.rate=.95; u.pitch=.92; speechSynthesis.speak(u); } }catch(e){}
+  }
+  function toast(msg){ try{ if(window.toast) window.toast(msg); }catch(e){} }
+  function setVersion(){
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+        el.textContent=el.textContent
+          .replace(/12345-TEMPLE-V7\.1[0-9]/g, VERSION)
+          .replace(/V7\.1[0-9]/g, 'V7.17')
+          .replace(/客服 \/ 悟空財神殿導覽/g,'客服導覽')
+          .replace(/錢包 \/ 聖盃操作/g,'錢包 / 聖盃');
+      }
+    });
+  }
+  function normalizeFooter8(){
+    const footer=document.querySelector('.footer-terminal');
+    if(!footer) return;
+    const btns=[...footer.querySelectorAll('button,.term-btn')].slice(0,8);
+    if(btns.length<8) return;
+    // 前四個影像功能：只整理文字，不動原本 onclick
+    btns[0].innerHTML='📸<br>拍照';
+    btns[1].innerHTML='🎥<br>錄影';
+    btns[2].innerHTML='🤳<br>前鏡';
+    btns[3].innerHTML='🌌<br>後鏡';
+    // 後四個變成真正遊戲介面入口
+    btns[4].classList.add('k17-wallet-btn');
+    btns[4].innerHTML='🔌<br>錢包聖盃';
+    btns[4].onclick=function(e){e.preventDefault(); openOps('wallet');};
+    btns[5].classList.add('k17-fortune-btn');
+    btns[5].innerHTML='🧧<br>發財金';
+    btns[5].onclick=function(e){e.preventDefault(); openOps('fortune');};
+    btns[6].classList.add('k17-rules-btn');
+    btns[6].innerHTML='📜<br>規則活動';
+    btns[6].onclick=function(e){e.preventDefault(); openRules();};
+    btns[7].classList.add('k17-guide-btn');
+    btns[7].innerHTML='🗣️<br>客服導覽';
+    btns[7].onclick=function(e){e.preventDefault(); openGuide();};
+  }
+  function ensureOpsPanel(){
+    const p=$('web3-panel'); if(!p) return;
+    p.classList.remove('v715-collapsed');
+    let head=p.querySelector('.k17-panel-head');
+    if(!head){
+      head=document.createElement('div');
+      head.className='k17-panel-head';
+      head.innerHTML='<span>12345 錢包 / 聖盃 / Heart 操作</span><button class="k17-close-btn" type="button">收合</button>';
+      p.insertBefore(head,p.firstChild);
+    }
+    const c=head.querySelector('button'); if(c) c.onclick=function(e){e.preventDefault(); closeOps();};
+    // 隱藏舊的關閉/收合雜按鈕，只保留標準頭部收合
+    p.querySelectorAll('button').forEach(btn=>{
+      if(btn.closest('.k17-panel-head')) return;
+      const t=(btn.textContent||'').trim();
+      if(t==='關'||t==='關閉'||t==='收合'||t==='展開') btn.style.display='none';
+    });
+    // 修正提示文，不再出現不明悟空操作/16888語彙
+    const note=p.querySelector('.bp-note');
+    if(note){
+      note.innerHTML='這裡是 <b>12345 五指山悟空財神殿</b> 的操作頁。順序：連接錢包 → Approve → 請示聖盃 → 發財金 / 心跳 / 轉日 / 節日活動。';
+    }
+  }
+  function focusOps(kind){
+    const p=$('web3-panel'); if(!p) return;
+    if(kind==='fortune'){
+      const cup=$('v715-cup-status') || [...p.querySelectorAll('*')].find(el=>(el.textContent||'').includes('聖盃'));
+      if(cup && cup.scrollIntoView) setTimeout(()=>cup.scrollIntoView({block:'center',behavior:'smooth'}),120);
+    }
+  }
+  function openOps(kind){
+    ensureOpsPanel();
+    document.body.classList.add('k17-ops-open');
+    document.body.classList.remove('k17-rules-open','v716-ops-open','v716-rules-open');
+    focusOps(kind);
+    speak(kind==='fortune'?'已打開發財金流程。請先確認錢包、Approve 與三次聖盃。':'已打開錢包與聖盃操作。');
+    toast(kind==='fortune'?'發財金流程':'錢包 / 聖盃操作');
+  }
+  function closeOps(){ document.body.classList.remove('k17-ops-open'); speak('操作頁已收合。'); }
+  function repairRules(){
+    const m=$('temple-modal'); if(!m) return;
+    const inner=m.firstElementChild;
+    if(inner){
+      const title=inner.querySelector('h3,.guide-title,.tsm-title,div');
+      // 不強抓第一個 div 破壞佈局，只新增一段清楚規則
+      if(!m.querySelector('.k17-rules-body')){
+        const box=document.createElement('div');
+        box.className='k17-rules-body';
+        box.style.cssText='padding:14px;color:#eaf5ff;font-size:13px;line-height:1.8;';
+        box.innerHTML=`
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;color:#ffd978;font-weight:900;">
+            <span>12345 五指山悟空財神殿｜規則活動</span>
+            <button class="k17-close-btn" type="button" onclick="document.body.classList.remove('k17-rules-open')">收合</button>
+          </div>
+          <div style="border:1px solid rgba(255,215,120,.22);border-radius:14px;padding:12px;background:rgba(255,255,255,.04);">
+            <b>主流程：</b>連接錢包 → Approve → 請示三次聖盃 → fortuneClaim 發財金。<br>
+            <b>聖盃：</b>正反 / 反正成功；正正是笑杯；反反是陰杯。沒有三次成功就不能領。<br>
+            <b>日常：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸。<br>
+            <b>補血：</b>vowTo 還願、lightLamp 點燈、makeWish 許願 hash。<br>
+            <b>活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
+            <b>Heart：</b>${HEART}
+          </div>`;
+        inner.insertBefore(box, inner.firstChild);
+      }
+    }
+  }
+  function openRules(){
+    repairRules();
+    document.body.classList.add('k17-rules-open');
+    document.body.classList.remove('k17-ops-open','v716-ops-open','v716-rules-open');
+    speak('已打開規則活動。這裡只說五指山悟空財神殿。');
+  }
+  function openGuide(){
+    document.body.classList.remove('k17-ops-open','k17-rules-open');
+    if(window.app && typeof app.openUnifiedGuide==='function') app.openUnifiedGuide();
+    else if(window.app && typeof app.openGuide==='function') app.openGuide('intro');
+    else openRules();
+    speak('客服導覽已開啟。');
+  }
+  function init(){
+    setVersion();
+    normalizeFooter8();
+    ensureOpsPanel();
+    repairRules();
+    document.body.classList.remove('k17-ops-open','k17-rules-open','v716-ops-open','v716-rules-open');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',init);
+  setTimeout(init,600); setTimeout(init,1600);
+})();
+</script>
+</body>
+</html>
