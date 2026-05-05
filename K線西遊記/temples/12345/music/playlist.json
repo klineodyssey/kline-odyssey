@@ -1,14 +1,14 @@
 [
   {
-    "name": "wuzhishan_heart_core 01",
-    "url": "music/Take My Breath Away.mp3"
+    "name": "Wuzhishan Heart Core",
+    "url": "./music/Take My Breath Away.mp3"
   },
   {
-    "name": "wukong_fortune_claim 02",
-    "url": "music/Greatest Love Of All.mp3"
+    "name": "Wukong Fortune Blessing",
+    "url": "./music/Greatest Love Of All.mp3"
   },
   {
-    "name": "temple_heartbeat_ignite 03",
-    "url": "music/Bruno Mars - Just The Way You Are.mp3"
+    "name": "Temple Heartbeat Ignite",
+    "url": "./music/Bruno Mars - Just The Way You Are.mp3"
   }
 ]
