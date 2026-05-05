@@ -1506,7 +1506,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
     <div>BNB: <span id="userBNB" style="color:var(--cyan);">-</span></div>
     <div style="margin-top:6px;">悟空心臟血庫（Temple Heart）＝ 合約餘額（地址待部署）</div>
-    <div>TempleHeart V3.2.3: <span id="w3-uni" style="color:var(--cyan);">待部署</span></div>
+    <div>TempleHeart V3.2.6: <span id="w3-uni" style="color:var(--cyan);">0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</span></div>
     <div style="margin-top:6px;">Pool Balance: <span id="w3-bal" style="color:var(--energy);">--</span></div>
     <div style="margin-top:6px;">進度：<span id="w3-prog" style="color:var(--gold);">--</span></div>
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
@@ -1576,7 +1576,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
       <div>4. 還願 <b>vowTo</b>：transferFrom 補血。</div>
       <div>5. 點燈 <b>lightLamp</b>：transferFrom 延長燈火。</div>
       <div>6. 許願 <b>makeWish</b>：只上鏈 hash。</div>
-      <div>7. 合約地址尚未部署，現在頁面先保留完整介面與前端流程。</div>
+      <div>7. 合約已部署：Heart 12345 = 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972；Brain 11520 = 0xd0605F4EF10e5C1438F11AF9edc36926769239d6；MarsSeats 108000 = 0x3529dbFbaD465C2269F8096879A1c298d5257298。</div>
     </div>
   </div>
 </div>
@@ -8445,6 +8445,234 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }else{
     initV72TrueUpgrade();
   }
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 Heart Live Patch V7.3.0
+- Deployed addresses wired: KGEN / Heart / Brain / MarsSeats
+- Adds safe MetaMask BSC connection and Heart actions
+- No automatic transactions. Every tx requires explicit button + confirm.
+============================================================ -->
+<style id="kgen-12345-heart-live-v730-style">
+  #kgen-heart-live-panel{
+    position:fixed; left:18px; top:92px; z-index:100500;
+    width:min(390px, calc(100vw - 36px)); max-height:72vh; overflow:auto;
+    padding:12px; border-radius:16px;
+    border:1px solid rgba(255,215,120,.55);
+    background:rgba(5,8,15,.90); color:#fff;
+    box-shadow:0 0 30px rgba(255,215,120,.16), inset 0 0 22px rgba(0,242,255,.05);
+    backdrop-filter:blur(8px); box-sizing:border-box;
+    font-family:'Noto Sans TC', system-ui, sans-serif;
+  }
+  #kgen-heart-live-panel .kh-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  #kgen-heart-live-panel .kh-title{color:#ffd778;font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;letter-spacing:.6px;}
+  #kgen-heart-live-panel .kh-pill{font-size:11px;color:#8af3ff;border:1px solid rgba(0,242,255,.28);border-radius:999px;padding:4px 8px;background:rgba(0,242,255,.08);}
+  #kgen-heart-live-panel .kh-grid{display:grid;grid-template-columns:118px 1fr;gap:6px 8px;font-size:12px;line-height:1.35;}
+  #kgen-heart-live-panel .kh-k{color:#ffe6b8;opacity:.9;}
+  #kgen-heart-live-panel .kh-v{color:#d8f9ff;font-weight:900;word-break:break-all;}
+  #kgen-heart-live-panel input,#kgen-heart-live-panel select{
+    width:100%;box-sizing:border-box;border-radius:10px;padding:9px 10px;
+    border:1px solid rgba(255,215,120,.28);background:rgba(0,0,0,.38);color:#fff;font-weight:900;outline:none;
+  }
+  #kgen-heart-live-panel .kh-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+  #kgen-heart-live-panel button{
+    border-radius:12px;padding:10px 9px;border:1px solid rgba(255,215,120,.34);
+    background:rgba(0,0,0,.42);color:#fff;font-weight:900;cursor:pointer;
+  }
+  #kgen-heart-live-panel button.kh-gold{background:rgba(255,215,120,.90);color:#111;border-color:rgba(255,215,120,.85);}
+  #kgen-heart-live-panel button.kh-cyan{background:rgba(0,242,255,.16);border-color:rgba(0,242,255,.44);color:#d8fbff;}
+  #kgen-heart-live-panel button.kh-red{background:rgba(255,80,80,.14);border-color:rgba(255,80,80,.38);color:#ffdede;}
+  #kgen-heart-live-panel .kh-log{margin-top:10px;padding:9px 10px;border-radius:12px;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.10);font-size:12px;line-height:1.45;color:#dfe9ff;min-height:38px;white-space:pre-wrap;}
+  #kgen-heart-live-panel .kh-mini{font-size:11px;opacity:.86;line-height:1.45;margin-top:8px;color:#ffeec8;}
+  #kgen-heart-toggle{position:fixed;left:18px;top:52px;z-index:100501;border-radius:999px;padding:8px 12px;border:1px solid rgba(255,215,120,.55);background:rgba(0,0,0,.72);color:#ffd778;font-weight:900;box-shadow:0 0 18px rgba(255,215,120,.16);}
+  @media(max-width:720px){#kgen-heart-live-panel{left:10px;right:10px;top:86px;width:auto;max-height:62vh;}#kgen-heart-live-panel .kh-actions{grid-template-columns:1fr;}#kgen-heart-toggle{left:10px;top:50px;}}
+</style>
+<button id="kgen-heart-toggle" type="button">12345 Heart</button>
+<section id="kgen-heart-live-panel" aria-label="12345 Heart Live Panel">
+  <div class="kh-head">
+    <div class="kh-title">12345 悟空財神殿 Heart V3.2.6</div>
+    <div class="kh-pill" id="kh-chain">BSC 56</div>
+  </div>
+  <div class="kh-grid">
+    <div class="kh-k">Wallet</div><div class="kh-v" id="kh-wallet">未連線</div>
+    <div class="kh-k">UTC</div><div class="kh-v" id="kh-utc">--</div>
+    <div class="kh-k">KGEN</div><div class="kh-v" id="kh-kgen-bal">--</div>
+    <div class="kh-k">Heart 血庫</div><div class="kh-v" id="kh-heart-bal">--</div>
+    <div class="kh-k">Ignite</div><div class="kh-v" id="kh-ignite-open">--</div>
+    <div class="kh-k">Festival</div><div class="kh-v" id="kh-festival-open">--</div>
+    <div class="kh-k">NY Slot</div><div class="kh-v" id="kh-ny-slot">--</div>
+    <div class="kh-k">Heart</div><div class="kh-v">0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</div>
+    <div class="kh-k">Brain</div><div class="kh-v">0xd0605F4EF10e5C1438F11AF9edc36926769239d6</div>
+    <div class="kh-k">MarsSeats</div><div class="kh-v">0x3529dbFbaD465C2269F8096879A1c298d5257298</div>
+  </div>
+  <div class="kh-actions">
+    <button class="kh-gold" type="button" id="kh-connect">連結錢包 / 切 BSC</button>
+    <button class="kh-cyan" type="button" id="kh-refresh">刷新餘額</button>
+  </div>
+  <div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。所有交易都會先跳確認視窗。</div>
+  <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
+    <input id="kh-amount" placeholder="金額 / 天數，例如 8 或 88" value="8">
+    <select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
+  </div>
+  <input id="kh-wish" style="margin-top:8px;" placeholder="許願文字或 0x bytes32 hash">
+  <div class="kh-actions">
+    <button type="button" id="kh-fortune">fortuneClaim</button>
+    <button type="button" id="kh-heartbeat">heartbeatClaim</button>
+    <button type="button" id="kh-ignite">igniteAndClaim</button>
+    <button type="button" id="kh-festival1">5/20 悟空生日</button>
+    <button type="button" id="kh-festival2">11/11 孤勇日</button>
+    <button type="button" id="kh-newyear">12/31 倒數</button>
+    <button type="button" id="kh-vow">vowTo 還願</button>
+    <button type="button" id="kh-lamp">lightLamp 點燈</button>
+    <button class="kh-gold" style="grid-column:1 / -1;" type="button" id="kh-wishbtn">makeWish 許願上鏈</button>
+  </div>
+  <div class="kh-log" id="kh-log">待命：不會自動送出任何交易。</div>
+</section>
+<script id="kgen-12345-heart-live-v730-script">
+(function(){
+  const C = {
+    KGEN: '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',
+    HEART: '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972',
+    BRAIN: '0xd0605F4EF10e5C1438F11AF9edc36926769239d6',
+    MARS: '0x3529dbFbaD465C2269F8096879A1c298d5257298',
+    BSC: '0x38',
+    RPC: 'https://bsc-dataseed.binance.org/'
+  };
+  const ERC20_ABI = [
+    'function balanceOf(address) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function symbol() view returns (string)'
+  ];
+  const HEART_ABI = [
+    'function kgen() view returns (address)',
+    'function brainVault() view returns (address)',
+    'function fortuneClaim(uint256 amountWhole) external',
+    'function heartbeatClaim() external',
+    'function igniteAndClaim() external',
+    'function festivalClaim(uint8 festivalId) external',
+    'function newYearCountdownClaim() external',
+    'function vowTo(uint8 option, uint256 amountWhole) external',
+    'function lightLamp(uint256 daysToAdd) external',
+    'function makeWish(bytes32 wishHash) external'
+  ];
+  const $ = (id)=>document.getElementById(id);
+  const state = { provider:null, signer:null, address:null, dec:18 };
+  function log(msg){ const el=$('kh-log'); if(el) el.textContent = String(msg||''); }
+  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '--'; }
+  function nowUTC(){ return new Date(); }
+  function fmt(v, d=4){ const n=Number(v); return Number.isFinite(n)? n.toFixed(d) : String(v); }
+  function getAmountWhole(){
+    const v = ($('kh-amount')?.value || '').trim();
+    if(!/^\d+(\.\d+)?$/.test(v)) throw new Error('金額格式錯誤');
+    return v;
+  }
+  function providerRO(){
+    if(window.ethers && ethers.providers){ return new ethers.providers.JsonRpcProvider(C.RPC); }
+    throw new Error('ethers.js 尚未載入');
+  }
+  async function ensureBSC(){
+    if(!window.ethereum) throw new Error('未偵測到 MetaMask / EVM 錢包');
+    const cid = await ethereum.request({method:'eth_chainId'});
+    if($('kh-chain')) $('kh-chain').textContent = cid;
+    if(String(cid).toLowerCase() === C.BSC) return true;
+    try{
+      await ethereum.request({method:'wallet_switchEthereumChain', params:[{chainId:C.BSC}]});
+    }catch(e){
+      if(e && e.code === 4902){
+        await ethereum.request({method:'wallet_addEthereumChain', params:[{chainId:C.BSC, chainName:'BNB Smart Chain', nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18}, rpcUrls:[C.RPC], blockExplorerUrls:['https://bscscan.com']} ]});
+      }else{ throw e; }
+    }
+    return true;
+  }
+  async function connect(){
+    await ensureBSC();
+    await ethereum.request({method:'eth_requestAccounts'});
+    state.provider = new ethers.providers.Web3Provider(window.ethereum);
+    state.signer = state.provider.getSigner();
+    state.address = await state.signer.getAddress();
+    $('kh-wallet').textContent = short(state.address) + '｜' + state.address;
+    log('錢包已連線，所有交易仍需按鈕與確認。');
+    await refresh();
+  }
+  async function refresh(){
+    const ro = state.provider || providerRO();
+    const token = new ethers.Contract(C.KGEN, ERC20_ABI, ro);
+    state.dec = Number(await token.decimals().catch(()=>18));
+    const heartBal = await token.balanceOf(C.HEART);
+    $('kh-heart-bal').textContent = fmt(ethers.utils.formatUnits(heartBal, state.dec), 4) + ' KGEN';
+    if(state.address){
+      const bal = await token.balanceOf(state.address);
+      $('kh-kgen-bal').textContent = fmt(ethers.utils.formatUnits(bal, state.dec), 4) + ' KGEN';
+    }
+    updateClock();
+    log('刷新完成。Heart=' + C.HEART + '\nBrain=' + C.BRAIN + '\nMars=' + C.MARS);
+  }
+  function updateClock(){
+    const d = nowUTC();
+    const h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds();
+    const mo = d.getUTCMonth()+1, day = d.getUTCDate();
+    $('kh-utc').textContent = d.toISOString().replace('T',' ').replace('Z',' UTC');
+    const tod = h*3600 + m*60 + s;
+    $('kh-ignite-open').textContent = (tod >= 0 && tod <= 600) ? 'OPEN UTC 00:00–00:10' : 'CLOSED';
+    let fest = 'CLOSED';
+    if(mo===5 && day===20 && tod>=0 && tod<=600) fest='OPEN 5/20';
+    if(mo===11 && day===11 && tod>=0 && tod<=600) fest='OPEN 11/11';
+    if(mo===12 && day===31 && tod>=85800 && tod<86400) fest='OPEN 12/31';
+    $('kh-festival-open').textContent = fest;
+    if(mo===12 && day===31 && tod>=85800 && tod<86400){ $('kh-ny-slot').textContent = String(Math.floor((tod-85800)/60)) + ' / 9'; }
+    else $('kh-ny-slot').textContent = '--';
+  }
+  async function contract(){
+    if(!state.signer) await connect();
+    return new ethers.Contract(C.HEART, HEART_ABI, state.signer);
+  }
+  async function send(label, fn){
+    try{
+      if(!confirm('確認送出交易：' + label + '\n\n所有交易都會花 BNB gas，且不可逆。')){ log('已取消：' + label); return; }
+      const c = await contract();
+      log('送出中：' + label);
+      const tx = await fn(c);
+      log('Tx sent: ' + tx.hash + '\n等待確認中…');
+      const rc = await tx.wait();
+      log('成功：' + label + '\nTx: ' + tx.hash + '\nBlock: ' + rc.blockNumber);
+      await refresh();
+    }catch(e){
+      console.error(e);
+      log('失敗：' + label + '\n' + (e && (e.data?.message || e.error?.message || e.reason || e.message) || String(e)));
+    }
+  }
+  function wishHash(){
+    const raw = ($('kh-wish')?.value || '').trim();
+    if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
+    if(!raw) throw new Error('請輸入許願文字或 bytes32 hash');
+    return ethers.utils.id(raw);
+  }
+  function bind(){
+    $('kgen-heart-toggle').onclick = ()=>{ const p=$('kgen-heart-live-panel'); p.style.display = (p.style.display==='none')?'block':'none'; };
+    $('kh-connect').onclick = connect;
+    $('kh-refresh').onclick = refresh;
+    $('kh-fortune').onclick = ()=>send('fortuneClaim(' + getAmountWhole() + ')', c=>c.fortuneClaim(String(Math.floor(Number(getAmountWhole())))));
+    $('kh-heartbeat').onclick = ()=>send('heartbeatClaim()', c=>c.heartbeatClaim());
+    $('kh-ignite').onclick = ()=>send('igniteAndClaim()', c=>c.igniteAndClaim());
+    $('kh-festival1').onclick = ()=>send('festivalClaim(1)', c=>c.festivalClaim(1));
+    $('kh-festival2').onclick = ()=>send('festivalClaim(2)', c=>c.festivalClaim(2));
+    $('kh-newyear').onclick = ()=>send('newYearCountdownClaim()', c=>c.newYearCountdownClaim());
+    $('kh-vow').onclick = ()=>send('vowTo(option,' + getAmountWhole() + ')', c=>c.vowTo(Number($('kh-vow-option').value||1), String(Math.floor(Number(getAmountWhole())))));
+    $('kh-lamp').onclick = ()=>send('lightLamp(' + getAmountWhole() + ')', c=>c.lightLamp(String(Math.floor(Number(getAmountWhole())))));
+    $('kh-wishbtn').onclick = ()=>send('makeWish(bytes32)', c=>c.makeWish(wishHash()));
+    if(window.ethereum){
+      ethereum.on && ethereum.on('accountsChanged', ()=>location.reload());
+      ethereum.on && ethereum.on('chainChanged', ()=>location.reload());
+    }
+  }
+  document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6 Live';
+  const oldVer = document.getElementById('ver-st'); if(oldVer) oldVer.textContent = 'VERSION 12345 HEART LIVE V7.3.0';
+  bind();
+  updateClock(); setInterval(updateClock, 1000);
+  setTimeout(()=>refresh().catch(e=>log('讀取 Heart 失敗：' + (e.message||e))), 700);
 })();
 </script>
 
