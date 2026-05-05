@@ -1461,7 +1461,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="core-anchor">
     <div id="core-window">
         <div id="wish-label">悟空心臟，財氣覺醒</div>
-        <img id="fairy-img" src="./assets/wukong_caishen.png" crossorigin="anonymous">
+        <img id="fairy-img" src="./assets/wukong_heart_core.jpg" crossorigin="anonymous">
         <video id="cam-view" autoplay playsinline muted></video>
         <div id="mini-thumb"></div>
     </div>
@@ -9611,6 +9611,363 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('load', init);
   window.addEventListener('pointerup', stopJoystick);
   window.addEventListener('blur', stopJoystick);
+})();
+</script>
+
+
+
+<!-- KGEN 12345 UI V7.8.0 FINAL OVERRIDE: layout + wallet + voice + no 16888 pool -->
+<style id="kgen-12345-ui-v780-final-style">
+  /* 16888 的 Pool Balance / 進度是廣寒宮功能，12345 不顯示舊 web3-panel */
+  #web3-panel{
+    display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+
+  /* 左上操作區塊移到 E=mc² 資源條下面，不擋上方背景字 */
+  #kgen-heart-toggle{
+    top: 312px !important;
+    left: 18px !important;
+    z-index: 100900 !important;
+    pointer-events:auto !important;
+    background: rgba(0,0,0,.78) !important;
+    border: 1px solid rgba(255,215,120,.65) !important;
+    color:#ffe08a !important;
+    box-shadow: 0 0 18px rgba(255,215,120,.20) !important;
+  }
+  #kgen-heart-live-panel{
+    top: 352px !important;
+    left: 18px !important;
+    width: min(380px, 92vw) !important;
+    max-height: 52vh !important;
+    overflow-y:auto !important;
+    z-index: 100890 !important;
+    pointer-events:auto !important;
+  }
+  body.k12345-heart-collapsed #kgen-heart-live-panel{
+    display:none !important;
+  }
+  body.k12345-heart-collapsed #kgen-heart-toggle::after{ content:' 展開'; }
+  body:not(.k12345-heart-collapsed) #kgen-heart-toggle::after{ content:' 收合'; }
+
+  /* 原本圓形遙桿保留：按住拖曳控制角色移動 */
+  #move-joystick-wrap{
+    display:block !important;
+    pointer-events:auto !important;
+    touch-action:none !important;
+    z-index:100760 !important;
+  }
+  #k12345-move-pad{ display:none !important; }
+
+  /* 中下橫桿控制主核心角度，不自轉 */
+  #core-anchor,
+  #core-anchor.v72-character{
+    transform:
+      translate(calc(-50% + var(--k12345-core-x, 0px)), calc(-50% + var(--k12345-core-y, 0px)))
+      scale(var(--k12345-core-scale, 1))
+      rotate(var(--k12345-core-rotate, 0deg)) !important;
+    transform-origin:50% 50% !important;
+    transition: transform .08s linear !important;
+    will-change: transform !important;
+  }
+  #core-window{
+    animation:none !important;
+    transform:none !important;
+  }
+
+  @media(max-width:720px){
+    #kgen-heart-toggle{ top: 326px !important; left:10px !important; }
+    #kgen-heart-live-panel{
+      top: 366px !important;
+      left:10px !important;
+      right:10px !important;
+      width:auto !important;
+      max-height:46vh !important;
+    }
+  }
+</style>
+<script id="kgen-12345-ui-v780-final-script">
+(function(){
+  'use strict';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BRAIN = '0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const MARS  = '0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const KGEN  = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const BSC   = '0x38';
+  const RPC   = 'https://bsc-dataseed.binance.org/';
+  const $ = (id)=>document.getElementById(id);
+  const clamp = (n,min,max)=>Math.max(min, Math.min(max, Number(n)||0));
+  const hasEthers5 = ()=> !!(window.ethers && ethers.providers && ethers.utils);
+
+  function speak(text){
+    try{
+      const msg = String(text||'');
+      if(window.app && typeof window.app.speak === 'function') return window.app.speak(msg);
+      if(!('speechSynthesis' in window)) return;
+      const u = new SpeechSynthesisUtterance(msg);
+      u.lang = 'zh-TW';
+      u.rate = 1;
+      u.pitch = 1;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }catch(_){ }
+  }
+  function log(msg){ const el=$('kh-log'); if(el) el.textContent = String(msg||''); }
+  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '--'; }
+  function fmt(n,d=4){ const x=Number(n); return Number.isFinite(x)?x.toFixed(d):String(n); }
+
+  const state = window.k12345ControlState || (window.k12345ControlState = {x:0,y:0,scale:1,rotate:0});
+  state.x = Number(state.x)||0;
+  state.y = Number(state.y)||0;
+  state.scale = Number(state.scale)||1;
+  state.rotate = Number(state.rotate)||0;
+  let joyTimer=null, activePointer=null, joyVector={x:0,y:0};
+
+  function sideText(deg){ return (deg >= -90 && deg <= 90) ? '多方' : '空方'; }
+  function applyCore(){
+    const root = document.documentElement;
+    root.style.setProperty('--k12345-core-x', state.x + 'px');
+    root.style.setProperty('--k12345-core-y', state.y + 'px');
+    root.style.setProperty('--k12345-core-scale', String(state.scale));
+    root.style.setProperty('--k12345-core-rotate', state.rotate + 'deg');
+    const av=$('ang-val'); if(av) av.textContent = state.rotate + '°';
+    const slider=$('steer-input-val'); if(slider && String(Math.round(Number(slider.value)||0))!==String(state.rotate)) slider.value = state.rotate;
+    const ss=$('k12345-slider-status'); if(ss) ss.textContent = 'CORE 方向 ' + state.rotate + '°｜' + sideText(state.rotate) + '｜X ' + Math.round(state.x) + ' / Y ' + Math.round(state.y);
+    const ml=$('move-joystick-label'); if(ml) ml.textContent = 'X ' + Math.round(state.x) + ' / Y ' + Math.round(state.y);
+    const wish=$('wish-label'); if(wish) wish.textContent = state.rotate >= -90 && state.rotate <= 90 ? '悟空心臟，多方前行' : '悟空心臟，空方反面';
+  }
+  function moveStep(){
+    if(!joyVector.x && !joyVector.y) return;
+    state.x = clamp(state.x + joyVector.x * 7, -360, 360);
+    state.y = clamp(state.y + joyVector.y * 7, -300, 300);
+    applyCore();
+  }
+  function setKnob(dx,dy){
+    const knob=$('move-joystick-knob');
+    if(knob){ knob.style.left = (40+dx)+'px'; knob.style.top = (40+dy)+'px'; }
+  }
+  function setJoystickFromPoint(clientX, clientY){
+    const wrap=$('move-joystick-wrap'); if(!wrap) return;
+    const r=wrap.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+    let dx=clientX-cx, dy=clientY-cy;
+    const max=38, len=Math.hypot(dx,dy)||1;
+    if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+    setKnob(dx,dy);
+    joyVector={x:dx/max,y:dy/max};
+    if(!joyTimer) joyTimer=setInterval(moveStep,45);
+    moveStep();
+  }
+  function stopJoystick(){
+    if(joyTimer) clearInterval(joyTimer);
+    joyTimer=null; activePointer=null; joyVector={x:0,y:0}; setKnob(0,0);
+  }
+  function rebuildJoystick(){
+    const old=$('move-joystick-wrap'); if(!old) return;
+    const clone=old.cloneNode(true); old.parentNode.replaceChild(clone,old);
+    const wrap=$('move-joystick-wrap');
+    wrap.addEventListener('pointerdown', e=>{ e.preventDefault(); activePointer=e.pointerId; try{wrap.setPointerCapture(activePointer);}catch(_){} setJoystickFromPoint(e.clientX,e.clientY); speak('悟空移動控制啟動。按住拖曳，角色就會移動。'); });
+    wrap.addEventListener('pointermove', e=>{ if(activePointer!==e.pointerId) return; e.preventDefault(); setJoystickFromPoint(e.clientX,e.clientY); });
+    wrap.addEventListener('pointerup', stopJoystick);
+    wrap.addEventListener('pointercancel', stopJoystick);
+    wrap.addEventListener('lostpointercapture', stopJoystick);
+  }
+  function setupSlider(){
+    const slider=$('steer-input-val'); if(!slider) return;
+    slider.min='-180'; slider.max='180';
+    function sync(){
+      state.rotate = Math.round(clamp(slider.value,-180,180));
+      applyCore();
+      const wheel=$('wheel'); if(wheel) wheel.style.transform = 'rotate(' + state.rotate + 'deg)';
+      try{ if(window.app && typeof window.app.syncSideUI==='function') window.app.syncSideUI(state.rotate); }catch(_){}
+    }
+    slider.oninput=sync; slider.onchange=sync;
+    if(window.app){ window.app.applySteer = function(v){ state.rotate=Math.round(clamp(v,-180,180)); if(slider) slider.value=state.rotate; sync(); }; }
+    sync();
+  }
+
+  function fixLabelsAndHide16888(){
+    document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.8.0';
+    const ver=$('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.8.0';
+    const title=document.querySelector('#kgen-heart-live-panel .kh-title'); if(title) title.textContent='12345 悟空財神殿 Heart V3.2.6';
+    const panel=$('web3-panel'); if(panel) panel.style.display='none';
+    const uni=$('w3-uni'); if(uni) uni.textContent = HEART;
+    try{
+      localStorage.setItem('KGEN_16888_UNIVERSE_ADDR', HEART);
+      localStorage.setItem('KGEN_12345_HEART_ADDR', HEART);
+    }catch(_){ }
+    try{ if(window.web3){ window.web3.UNIVERSE=HEART; window.web3.HEART=HEART; window.web3.KGEN=KGEN; } }catch(_){ }
+    const walker=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      n.nodeValue = n.nodeValue
+        .replace(/0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63/g, HEART)
+        .replace(/0xabf1ebf153a69cf383a1435afc20f7232d893d63/g, HEART.toLowerCase())
+        .replace(/TempleHeart V3\.2\.3/g,'TempleHeart V3.2.6')
+        .replace(/Heart V3\.2\.3/g,'Heart V3.2.6')
+        .replace(/TEMPLE HEART v5\.3/g,'TEMPLE HEART V3.2.6')
+        .replace(/Pool Balance/g,'Heart Balance');
+    });
+  }
+
+  function setupHeartPanel(){
+    const btn=$('kgen-heart-toggle'), panel=$('kgen-heart-live-panel'); if(!btn||!panel) return;
+    document.body.classList.add('k12345-heart-collapsed'); panel.style.display='none';
+    btn.onclick = e=>{ e.preventDefault(); const closed=document.body.classList.toggle('k12345-heart-collapsed'); panel.style.display=closed?'none':'block'; speak(closed?'12345 Heart 面板已收合。':'12345 Heart 面板已展開，這裡是悟空財神殿操作區。'); };
+  }
+
+  const ERC20_ABI = ['function balanceOf(address) view returns (uint256)','function decimals() view returns (uint8)'];
+  const HEART_ABI = [
+    'function fortuneClaim(uint256 amountWhole) external',
+    'function heartbeatClaim() external',
+    'function igniteAndClaim() external',
+    'function festivalClaim(uint8 festivalId) external',
+    'function newYearCountdownClaim() external',
+    'function vowTo(uint8 option, uint256 amountWhole) external',
+    'function lightLamp(uint256 daysToAdd) external',
+    'function makeWish(bytes32 wishHash) external'
+  ];
+  const wstate={provider:null,signer:null,address:null,dec:18};
+  async function ensureBSC(){
+    if(!window.ethereum) throw new Error('未偵測到 EVM 錢包。請用 MetaMask、Trust Wallet、OKX 或 Binance Wallet 的瀏覽器開啟。');
+    const cid=await ethereum.request({method:'eth_chainId'});
+    const ch=$('w3-chain'); if(ch) ch.textContent=cid||'--';
+    if(String(cid).toLowerCase()===BSC) return;
+    try{ await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC}]}); }
+    catch(e){
+      if(e && e.code===4902) await ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:BSC,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[RPC],blockExplorerUrls:['https://bscscan.com']} ]});
+      else throw e;
+    }
+  }
+  async function connectWallet(){
+    try{
+      if(!hasEthers5()) throw new Error('ethers.js 尚未載入');
+      speak('準備連結錢包，請在錢包視窗確認。');
+      await ensureBSC();
+      const accounts=await ethereum.request({method:'eth_requestAccounts'});
+      wstate.provider=new ethers.providers.Web3Provider(window.ethereum);
+      wstate.signer=wstate.provider.getSigner();
+      wstate.address=await wstate.signer.getAddress();
+      const walletText=short(wstate.address)+'｜'+wstate.address;
+      const khw=$('kh-wallet'); if(khw) khw.textContent=walletText;
+      const w3a=$('w3-addr'); if(w3a) w3a.textContent=walletText;
+      try{ if(window.web3){ window.web3.provider=wstate.provider; window.web3.signer=wstate.signer; window.web3.addr=wstate.address; window.web3.address=wstate.address; window.web3.UNIVERSE=HEART; } }catch(_){ }
+      log('錢包已連線：'+wstate.address+'\n12345 Heart：'+HEART);
+      speak('錢包已連線。正在讀取 KGEN 與 Heart 血庫餘額。');
+      await refreshBalances();
+    }catch(e){
+      console.error(e); log('錢包連線失敗：'+(e.message||e)); speak('錢包連線失敗，請確認錢包與 BSC 網路。');
+    }
+  }
+  async function refreshBalances(){
+    try{
+      if(!hasEthers5()) return;
+      const ro = wstate.provider || new ethers.providers.JsonRpcProvider(RPC);
+      const token = new ethers.Contract(KGEN, ERC20_ABI, ro);
+      const dec = Number(await token.decimals().catch(()=>18)); wstate.dec=dec;
+      const heartBal = await token.balanceOf(HEART);
+      const heartText = fmt(ethers.utils.formatUnits(heartBal,dec),4)+' KGEN';
+      const khhb=$('kh-heart-bal'); if(khhb) khhb.textContent=heartText;
+      const w3b=$('w3-bal'); if(w3b) w3b.textContent=heartText;
+      const p=$('w3-prog'); if(p) p.textContent='12345 Heart 血庫餘額';
+      const prog=$('prog-fill'); if(prog) prog.style.width='0%';
+      if(wstate.address){
+        const [kbal,bnb] = await Promise.all([token.balanceOf(wstate.address), ro.getBalance(wstate.address)]);
+        const kText = fmt(ethers.utils.formatUnits(kbal,dec),4)+' KGEN';
+        const bText = fmt(ethers.utils.formatEther(bnb),4)+' BNB';
+        ['kh-kgen-bal','userBal','rb-kgen-txt'].forEach(id=>{ const el=$(id); if(el) el.textContent=kText; });
+        ['userBNB','rb-bnb-txt'].forEach(id=>{ const el=$(id); if(el) el.textContent=bText; });
+        const kFill=$('rb-kgen-fill'); if(kFill) kFill.style.width=Math.min(100,Number(ethers.utils.formatUnits(kbal,dec))/10000*100)+'%';
+        const bFill=$('rb-bnb-fill'); if(bFill) bFill.style.width=Math.min(100,Number(ethers.utils.formatEther(bnb))/1*100)+'%';
+      }
+      log('刷新完成。\nKGEN Token：'+KGEN+'\nHeart：'+HEART+'\nBrain：'+BRAIN+'\nMarsSeats：'+MARS);
+      speak('餘額刷新完成。');
+    }catch(e){ console.error(e); log('刷新餘額失敗：'+(e.message||e)); speak('刷新餘額失敗。'); }
+  }
+  async function heartContract(){ if(!wstate.signer) await connectWallet(); return new ethers.Contract(HEART, HEART_ABI, wstate.signer); }
+  function amountWhole(){ const v=($('kh-amount')?.value||'8').trim(); if(!/^\d+(\.\d+)?$/.test(v)) throw new Error('金額格式錯誤'); return v; }
+  function wishHash(){
+    const raw=($('kh-wish')?.value||'').trim();
+    if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
+    if(!raw) throw new Error('請輸入許願文字或 bytes32 hash');
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
+  }
+  async function send(label, fn){
+    try{
+      speak('準備執行：'+label+'。請確認錢包交易。');
+      if(!confirm('確認送出交易：'+label+'\n\n會花 BNB gas，鏈上交易不可逆。')){ log('已取消：'+label); speak('已取消交易。'); return; }
+      const c=await heartContract();
+      log('送出中：'+label);
+      const tx=await fn(c);
+      log('Tx sent：'+tx.hash+'\n等待確認中。');
+      speak(label+' 已送出，等待鏈上確認。');
+      const rc=await tx.wait();
+      log('成功：'+label+'\nTx：'+tx.hash+'\nBlock：'+rc.blockNumber);
+      speak(label+' 成功完成。');
+      await refreshBalances();
+    }catch(e){ console.error(e); const m=e && (e.data?.message || e.error?.message || e.reason || e.message) || String(e); log('失敗：'+label+'\n'+m); speak(label+' 失敗。請看畫面訊息。'); }
+  }
+  function bindHeartButtons(){
+    const bind=(id,label,fn)=>{ const b=$(id); if(!b) return; b.onclick=(e)=>{ e.preventDefault(); fn(); }; };
+    bind('kh-connect','連結錢包',connectWallet);
+    bind('kh-refresh','刷新餘額',refreshBalances);
+    bind('kh-fortune','fortuneClaim 發財金',()=>send('fortuneClaim 發財金',c=>c.fortuneClaim(amountWhole())));
+    bind('kh-heartbeat','heartbeatClaim 整點心跳',()=>send('heartbeatClaim 整點心跳',c=>c.heartbeatClaim())) ;
+    bind('kh-ignite','igniteAndClaim 轉日呼吸',()=>send('igniteAndClaim 轉日呼吸',c=>c.igniteAndClaim())) ;
+    bind('kh-festival1','5/20 悟空生日',()=>send('festivalClaim 5/20 悟空生日',c=>c.festivalClaim(1)));
+    bind('kh-festival2','11/11 孤勇日',()=>send('festivalClaim 11/11 孤勇日',c=>c.festivalClaim(2)));
+    bind('kh-newyear','12/31 倒數',()=>send('newYearCountdownClaim 倒數',c=>c.newYearCountdownClaim())) ;
+    bind('kh-vow','vowTo 還願',()=>send('vowTo 還願',c=>c.vowTo(Number($('kh-vow-option')?.value||1), amountWhole())));
+    bind('kh-lamp','lightLamp 點燈',()=>send('lightLamp 點燈',c=>c.lightLamp(amountWhole())));
+    bind('kh-wishbtn','makeWish 許願',()=>send('makeWish 許願',c=>c.makeWish(wishHash())));
+  }
+  function clickHeartAction(id,label){ const b=$(id); if(b){ speak('開啟 '+label); b.click(); return; } alert('找不到 '+label+' 按鈕。'); }
+  function bindFooterAndVoice(){
+    window.templeOps = window.templeOps || {};
+    window.templeOps.fortune = ()=>clickHeartAction('kh-fortune','fortuneClaim 發財金');
+    window.templeOps.heartbeat = ()=>clickHeartAction('kh-heartbeat','heartbeatClaim 整點心跳');
+    window.templeOps.ignite = ()=>clickHeartAction('kh-ignite','igniteAndClaim 轉日呼吸');
+    window.templeOps.vow = ()=>clickHeartAction('kh-vow','vowTo 還願');
+    window.templeOps.lamp = ()=>clickHeartAction('kh-lamp','lightLamp 點燈');
+    window.templeOps.wish = ()=>clickHeartAction('kh-wishbtn','makeWish 許願');
+    document.querySelectorAll('button').forEach(btn=>{
+      if(btn.dataset.k12345V780Voice) return;
+      btn.dataset.k12345V780Voice='1';
+      btn.addEventListener('click',()=>{
+        const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+        if(t) speak('你按下了 '+t+'。');
+      },{capture:false});
+    });
+    document.querySelectorAll('.footer-terminal button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(/發財金/.test(t)) btn.onclick=e=>{e.preventDefault(); window.templeOps.fortune();};
+      if(/heartbeatClaim|整點心跳/.test(t)) btn.onclick=e=>{e.preventDefault(); window.templeOps.heartbeat();};
+      if(/igniteAndClaim|轉日呼吸/.test(t)) btn.onclick=e=>{e.preventDefault(); window.templeOps.ignite();};
+    });
+  }
+  function updateClock(){
+    const d=new Date(); const h=d.getUTCHours(), m=d.getUTCMinutes(), s=d.getUTCSeconds(), mo=d.getUTCMonth()+1, day=d.getUTCDate();
+    const utc=$('kh-utc'); if(utc) utc.textContent=d.toISOString().replace('T',' ').replace('Z',' UTC');
+    const tod=h*3600+m*60+s;
+    const ign=$('kh-ignite-open'); if(ign) ign.textContent=(tod>=0&&tod<=600)?'OPEN UTC 00:00–00:10':'CLOSED';
+    const fest=$('kh-festival-open');
+    if(fest){
+      let f='CLOSED';
+      if(mo===5&&day===20&&tod<=600) f='OPEN 5/20';
+      if(mo===11&&day===11&&tod<=600) f='OPEN 11/11';
+      if(mo===12&&day===31&&tod>=85800&&tod<86400) f='OPEN 12/31';
+      fest.textContent=f;
+    }
+    const slot=$('kh-ny-slot'); if(slot) slot.textContent=(mo===12&&day===31&&tod>=85800&&tod<86400)?String(Math.floor((tod-85800)/60))+' / 9':'--';
+  }
+  function init(){
+    fixLabelsAndHide16888(); setupHeartPanel(); rebuildJoystick(); setupSlider(); bindHeartButtons(); bindFooterAndVoice(); applyCore(); updateClock(); refreshBalances();
+    setInterval(updateClock,1000);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',init);
+  window.addEventListener('pointerup',stopJoystick);
+  window.addEventListener('blur',stopJoystick);
 })();
 </script>
 
