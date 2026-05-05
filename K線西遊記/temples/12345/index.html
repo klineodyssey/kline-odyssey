@@ -8996,5 +8996,314 @@ KGEN 12345 UI Control Patch V7.4.0
 })();
 </script>
 
+
+
+<!-- ============================================================
+KGEN 12345 UI Patch V7.5.0
+修正項目：
+1. 左上 Heart 收合按鈕下移，不擋背景標題字。
+2. 左下前後左右改為「按住連續移動」，保留點一下單步移動。
+3. 中下橫桿只控制核心方向角度，不再讓圖自動一直旋轉。
+4. 下方 發財金 / 整點心跳 / 轉日呼吸 三鍵改為直接觸發 Heart 實際交易按鈕。
+============================================================ -->
+<style id="kgen-12345-ui-v750-final-style">
+  :root{
+    --k12345-core-x: 0px;
+    --k12345-core-y: 0px;
+    --k12345-core-scale: 1;
+    --k12345-core-rotate: 0deg;
+  }
+
+  /* 左上收合按鈕與面板：下移，避免遮住 KGEN 標題與背景字 */
+  #kgen-heart-toggle{
+    top: 84px !important;
+    left: 14px !important;
+    z-index: 100650 !important;
+    padding: 7px 11px !important;
+    border-radius: 999px !important;
+    background: rgba(0,0,0,.78) !important;
+    border: 1px solid rgba(255,215,120,.62) !important;
+    color: #ffd778 !important;
+    box-shadow: 0 0 18px rgba(255,215,120,.16), inset 0 0 10px rgba(0,242,255,.08) !important;
+  }
+  #kgen-heart-live-panel{
+    top: 126px !important;
+    left: 14px !important;
+    max-height: min(64vh, 620px) !important;
+  }
+  body.k12345-heart-collapsed #kgen-heart-live-panel{display:none !important;}
+  #kgen-heart-toggle::after{
+    content:' 收合';
+    font-size:11px;
+    opacity:.78;
+  }
+  body.k12345-heart-collapsed #kgen-heart-toggle::after{content:' 展開';}
+
+  /* 核心圖：取消舊版自動旋轉，只接受 joystick + 橫桿的靜態 transform */
+  #core-window{
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  #core-anchor{
+    transform:
+      translate(-50%, -50%)
+      translate(var(--k12345-core-x), var(--k12345-core-y))
+      scale(var(--k12345-core-scale))
+      rotate(var(--k12345-core-rotate)) !important;
+    transition: transform .08s linear !important;
+    will-change: transform;
+    transform-origin: 50% 50%;
+  }
+
+  /* 左下移動器：按住控制，並避開底部按鈕 */
+  #k12345-move-pad{
+    left: 14px !important;
+    bottom: 150px !important;
+    width: 160px !important;
+    z-index: 100630 !important;
+    touch-action: none;
+  }
+  #k12345-move-pad button{
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+  }
+  #k12345-move-pad button.k12345-holding{
+    background: rgba(255,215,120,.88) !important;
+    color:#111 !important;
+    box-shadow: 0 0 18px rgba(255,215,120,.32) !important;
+  }
+  #k12345-slider-status{
+    bottom: 214px !important;
+    z-index: 100625 !important;
+  }
+
+  @media(max-width:720px){
+    #kgen-heart-toggle{top:78px !important; left:10px !important;}
+    #kgen-heart-live-panel{top:118px !important; left:10px !important; right:10px !important; width:auto !important; max-height:58vh !important;}
+    #k12345-move-pad{left:10px !important; bottom:142px !important; width:148px !important;}
+    #k12345-slider-status{bottom:202px !important;}
+    .steer-zone{bottom:230px !important;}
+  }
+</style>
+
+<script id="kgen-12345-ui-v750-final-script">
+(function(){
+  'use strict';
+  const $ = (id)=>document.getElementById(id);
+  const clamp = (n,min,max)=>Math.max(min, Math.min(max, Number(n)||0));
+  const state = window.k12345ControlState || (window.k12345ControlState = {
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    holdTimer: null,
+    holdRAF: null,
+    holdBtn: null,
+    step: 12
+  });
+
+  function root(){ return document.documentElement; }
+
+  function applyCore(){
+    root().style.setProperty('--k12345-core-x', state.x + 'px');
+    root().style.setProperty('--k12345-core-y', state.y + 'px');
+    root().style.setProperty('--k12345-core-scale', String(state.scale));
+    root().style.setProperty('--k12345-core-rotate', state.rotate + 'deg');
+    const cw = $('core-window');
+    if(cw){
+      cw.style.animation = 'none';
+      cw.style.transform = 'none';
+      cw.style.transition = 'none';
+    }
+    const ms = $('k12345-move-status');
+    if(ms) ms.textContent = 'X ' + state.x + ' / Y ' + state.y + ' / Z ' + Math.round(state.scale*100) + '%';
+    const ss = $('k12345-slider-status');
+    if(ss) ss.textContent = 'CORE 方向 ' + state.rotate + '°｜縮放 ' + Math.round(state.scale*100) + '%';
+    const av = $('ang-val');
+    if(av) av.textContent = state.rotate + '°';
+  }
+
+  function moveBy(dx,dy){
+    state.x = clamp(state.x + dx, -300, 300);
+    state.y = clamp(state.y + dy, -260, 260);
+    applyCore();
+  }
+
+  function startHold(btn){
+    stopHold();
+    const raw = String(btn.getAttribute('data-kmove') || '0,0');
+    const parts = raw.split(',').map(Number);
+    const dx = parts[0] || 0;
+    const dy = parts[1] || 0;
+    const unitX = dx === 0 ? 0 : Math.sign(dx) * state.step;
+    const unitY = dy === 0 ? 0 : Math.sign(dy) * state.step;
+    btn.classList.add('k12345-holding');
+    state.holdBtn = btn;
+    moveBy(unitX, unitY);
+    state.holdTimer = setInterval(()=>moveBy(unitX, unitY), 70);
+  }
+
+  function stopHold(){
+    if(state.holdTimer) clearInterval(state.holdTimer);
+    state.holdTimer = null;
+    if(state.holdBtn) state.holdBtn.classList.remove('k12345-holding');
+    state.holdBtn = null;
+  }
+
+  function setRotationFromSlider(){
+    const slider = $('steer-input-val');
+    if(!slider) return;
+    state.rotate = Math.round(clamp(slider.value, -180, 180));
+    // 橫桿只控制方向角，不自動縮放、不自動旋轉動畫
+    applyCore();
+  }
+
+  function home(){
+    state.x = 0;
+    state.y = 0;
+    state.scale = 1;
+    applyCore();
+  }
+
+  function zoom(delta){
+    state.scale = clamp(Math.round((state.scale + delta) * 100) / 100, .55, 1.85);
+    applyCore();
+  }
+
+  function setupCollapse(){
+    const btn = $('kgen-heart-toggle');
+    const panel = $('kgen-heart-live-panel');
+    if(!btn || !panel) return;
+    // 手機預設收合，避免一進頁就擋中間畫面
+    if(window.innerWidth <= 720 && !document.body.dataset.k12345CollapseReady){
+      document.body.classList.add('k12345-heart-collapsed');
+      document.body.dataset.k12345CollapseReady = '1';
+    }
+    btn.onclick = function(){
+      document.body.classList.toggle('k12345-heart-collapsed');
+      const hidden = document.body.classList.contains('k12345-heart-collapsed');
+      panel.style.display = hidden ? 'none' : 'block';
+    };
+  }
+
+  function setupMovePad(){
+    document.querySelectorAll('#k12345-move-pad [data-kmove]').forEach(btn=>{
+      if(btn.dataset.k12345HoldReady === '1') return;
+      btn.dataset.k12345HoldReady = '1';
+      btn.onclick = null;
+      btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); try{btn.setPointerCapture(e.pointerId);}catch(_){} startHold(btn); });
+      btn.addEventListener('pointerup', stopHold);
+      btn.addEventListener('pointercancel', stopHold);
+      btn.addEventListener('pointerleave', stopHold);
+      // 擋掉舊版 click listener，避免按住放開後又多跳一格。
+      btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopImmediatePropagation(); }, true);
+      btn.addEventListener('contextmenu', (e)=>e.preventDefault());
+    });
+    const h = $('k12345-move-home');
+    if(h) h.onclick = home;
+    const zin = $('k12345-zoom-in');
+    const zout = $('k12345-zoom-out');
+    if(zin) zin.onclick = ()=>zoom(.08);
+    if(zout) zout.onclick = ()=>zoom(-.08);
+  }
+
+  function setupSlider(){
+    const slider = $('steer-input-val');
+    if(!slider) return;
+    if(!slider.dataset.k12345V750Ready){
+      slider.dataset.k12345V750Ready = '1';
+      slider.addEventListener('input', setRotationFromSlider, {passive:true});
+      slider.addEventListener('change', setRotationFromSlider, {passive:true});
+    }
+    // 覆蓋舊 app.applySteer：只更新角度與舊 UI，不再把 core-window 轉到一直動
+    if(window.app && typeof window.app.applySteer === 'function' && !window.app.__k12345V750ApplySteer){
+      window.app.applySteer = function(v, silent){
+        const ang = Math.round(clamp(v, -180, 180));
+        const av = $('ang-val'); if(av) av.innerText = ang + '°';
+        const slider = $('steer-input-val'); if(slider) slider.value = ang;
+        const wheel = $('wheel'); if(wheel) wheel.style.transform = 'rotate(' + ang + 'deg)';
+        state.rotate = ang;
+        applyCore();
+        try{
+          if(window.app && typeof window.app.updateCoordPanel === 'function') window.app.updateCoordPanel();
+          if(window.app && typeof window.app.syncSideUI === 'function') window.app.syncSideUI(ang);
+          if(!silent && typeof window.app.bbEvent === 'function') window.app.bbEvent('steer', {angle:ang});
+        }catch(_){ }
+      };
+      window.app.__k12345V750ApplySteer = true;
+    }
+    setRotationFromSlider();
+  }
+
+  function clickHeartAction(id, label){
+    const btn = $(id);
+    if(btn){ btn.click(); return; }
+    try{ alert('找不到 ' + label + ' 按鈕，請先展開 12345 Heart 面板。'); }catch(_){ }
+  }
+
+  function setupFooterActions(){
+    const map = [
+      {re:/發財金/, id:'kh-fortune', label:'fortuneClaim 發財金'},
+      {re:/heartbeatClaim|整點心跳/, id:'kh-heartbeat', label:'heartbeatClaim 整點心跳'},
+      {re:/igniteAndClaim|轉日呼吸/, id:'kh-ignite', label:'igniteAndClaim 轉日呼吸'}
+    ];
+    document.querySelectorAll('.footer-terminal button, #temple-single-modal button, #web3-panel button').forEach(btn=>{
+      const text = (btn.textContent || '').trim();
+      for(const m of map){
+        if(m.re.test(text)){
+          btn.onclick = function(e){
+            if(e) e.preventDefault();
+            clickHeartAction(m.id, m.label);
+          };
+          btn.dataset.k12345ActionFixed = '1';
+          break;
+        }
+      }
+    });
+    // templeOps 也改接真正 Heart Live 按鈕，避免只是跳提示
+    window.templeOps = window.templeOps || {};
+    window.templeOps.fortune = ()=>clickHeartAction('kh-fortune','fortuneClaim 發財金');
+    window.templeOps.heartbeat = ()=>clickHeartAction('kh-heartbeat','heartbeatClaim 整點心跳');
+    window.templeOps.ignite = ()=>clickHeartAction('kh-ignite','igniteAndClaim 轉日呼吸');
+    window.templeOps.vow = ()=>clickHeartAction('kh-vow','vowTo 還願補血');
+    window.templeOps.lamp = ()=>clickHeartAction('kh-lamp','lightLamp 點燈');
+    window.templeOps.wish = ()=>clickHeartAction('kh-wishbtn','makeWish 許願');
+  }
+
+  function fixLabels(){
+    document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.5.0';
+    const title = document.querySelector('#kgen-heart-live-panel .kh-title');
+    if(title) title.textContent = '12345 悟空財神殿 Heart V3.2.6';
+    const ver = $('ver-st');
+    if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.5.0';
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el.childNodes && el.childNodes.length === 1 && el.childNodes[0].nodeType === 3){
+        el.textContent = el.textContent
+          .replace(/TempleHeart V3\.2\.3/g, 'TempleHeart V3.2.6')
+          .replace(/Heart V3\.2\.3/g, 'Heart V3.2.6')
+          .replace(/合約地址尚未部署/g, '合約已部署');
+      }
+    });
+  }
+
+  function init(){
+    fixLabels();
+    setupCollapse();
+    setupMovePad();
+    setupSlider();
+    setupFooterActions();
+    applyCore();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  window.addEventListener('load', init);
+  window.addEventListener('pointerup', stopHold);
+  window.addEventListener('blur', stopHold);
+})();
+</script>
+
 </body>
 </html>
