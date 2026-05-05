@@ -10766,6 +10766,229 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
+
+
+<!-- ===== KGEN 12345 V7.16 FINAL UX PATCH: fixed human buttons / no text blocking ===== -->
+<style id="kgen12345-v716-human-buttons-css">
+  /* 版號統一：V7.16 */
+  #ver-st::after{content:'';}
+
+  /* 舊的左右浮動按鈕會蓋字，隱藏，改用新的側邊人類按鈕 */
+  #v715-left-dock,
+  #v715-right-dock{display:none!important;}
+
+  #v716-side-actions{
+    position:fixed!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:205px!important;
+    z-index:2147483000!important;
+    display:flex!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    pointer-events:none!important;
+  }
+  #v716-side-actions button{
+    pointer-events:auto!important;
+    min-width:112px!important;
+    max-width:42vw!important;
+    padding:10px 12px!important;
+    border-radius:16px!important;
+    border:1px solid rgba(255,215,120,.85)!important;
+    color:#ffe39b!important;
+    background:linear-gradient(180deg,rgba(12,15,20,.92),rgba(0,0,0,.82))!important;
+    box-shadow:0 0 18px rgba(255,215,120,.28), inset 0 0 14px rgba(0,242,255,.08)!important;
+    font-family:'Orbitron','Noto Sans TC',sans-serif!important;
+    font-weight:900!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+  }
+  #v716-rules-btn{transform:translateY(-38px)!important;} /* 右下再上一點，不壓右下資訊 */
+
+  /* 左下操作面板：平常隱藏，點按鈕才展開；收合才是唯一關閉 */
+  body:not(.v716-ops-open) #web3-panel{display:none!important;}
+  body.v716-ops-open #web3-panel{
+    display:block!important;
+    position:fixed!important;
+    left:12px!important;
+    bottom:112px!important;
+    width:min(430px,calc(100vw - 24px))!important;
+    max-height:66vh!important;
+    overflow:auto!important;
+    z-index:2147483001!important;
+    border-radius:18px!important;
+    padding:12px!important;
+    background:linear-gradient(180deg,rgba(7,10,15,.96),rgba(0,0,0,.90))!important;
+    border:1px solid rgba(255,215,120,.75)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.68),0 0 24px rgba(255,215,120,.2)!important;
+  }
+  #web3-panel .v715-close-bad,
+  #web3-panel button:empty{display:none!important;}
+  #v715-collapse-ops,
+  #v716-collapse-ops{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-radius:12px!important;
+    padding:7px 10px!important;
+    border:1px solid rgba(255,215,120,.55)!important;
+    background:rgba(255,215,120,.14)!important;
+    color:#ffe3a0!important;
+    font-weight:900!important;
+  }
+
+  /* 右下規則活動頁：點按鈕才開，並往上放，不壓底部文字 */
+  body:not(.v716-rules-open) #temple-modal{display:none!important;}
+  body.v716-rules-open #temple-modal{
+    display:block!important;
+    position:fixed!important;
+    left:12px!important;
+    right:12px!important;
+    bottom:165px!important;
+    top:auto!important;
+    width:auto!important;
+    max-height:62vh!important;
+    overflow:auto!important;
+    z-index:2147483002!important;
+    background:transparent!important;
+    padding:0!important;
+  }
+  body.v716-rules-open #temple-modal > div{
+    max-width:100%!important;
+    margin:0!important;
+    max-height:62vh!important;
+    overflow:auto!important;
+    border-radius:18px!important;
+  }
+
+  /* 客服/導覽如果被打開，位置置中，避免蓋住上方主要資料 */
+  #guide-modal.show .guide-card{
+    width:min(560px,calc(100vw - 28px))!important;
+    max-height:68vh!important;
+    overflow:auto!important;
+    margin:12vh auto 0 auto!important;
+  }
+
+  @media(max-width:760px){
+    #v716-side-actions{bottom:192px!important;}
+    #v716-side-actions button{min-width:104px!important;font-size:12px!important;padding:9px 10px!important;}
+    #v716-rules-btn{transform:translateY(-44px)!important;}
+    body.v716-ops-open #web3-panel{bottom:96px!important;max-height:62vh!important;}
+    body.v716-rules-open #temple-modal{bottom:150px!important;max-height:58vh!important;}
+  }
+</style>
+<script id="kgen12345-v716-human-buttons-js">
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V7.16';
+  const $=id=>document.getElementById(id);
+  function speak(msg){
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){}
+    try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; u.rate=.95; u.pitch=.92; speechSynthesis.speak(u); } }catch(e){}
+  }
+  function toast(msg){ try{ if(window.toast) window.toast(msg); }catch(e){} }
+  function setVersion(){
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+        el.textContent=el.textContent.replace(/12345-TEMPLE-V7\.15/g,VERSION).replace(/V7\.15/g,'V7.16');
+      }
+    });
+  }
+  function buildActionButtons(){
+    if(!$('v716-side-actions')){
+      const bar=document.createElement('div');
+      bar.id='v716-side-actions';
+      bar.innerHTML=`
+        <button id="v716-ops-btn" type="button">錢包 / 聖盃</button>
+        <button id="v716-rules-btn" type="button">規則 / 活動</button>
+      `;
+      document.body.appendChild(bar);
+    }
+    $('v716-ops-btn').onclick=function(e){e.preventDefault(); openOps();};
+    $('v716-rules-btn').onclick=function(e){e.preventDefault(); openRules();};
+  }
+  function repairOpsPanel(){
+    const p=$('web3-panel'); if(!p) return;
+    p.classList.remove('v715-collapsed');
+    // 加上清楚標題，移除不明「悟空操作」概念
+    let title=$('v716-ops-title');
+    if(!title){
+      title=document.createElement('div');
+      title.id='v716-ops-title';
+      title.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:#ffd978;font-weight:900;';
+      title.innerHTML='<span>12345 錢包 / 聖盃操作</span><button id="v716-collapse-ops" type="button">收合</button>';
+      p.insertBefore(title,p.firstChild);
+    }
+    const close=$('v716-collapse-ops'); if(close) close.onclick=function(e){e.preventDefault(); closeOps();};
+    const old=$('v715-collapse-ops'); if(old) old.style.display='none';
+    // 避免原本假進度和多餘關閉字樣干擾
+    p.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t==='關' || t==='關閉') btn.style.display='none';
+      if(t==='收合' && btn.id!=='v716-collapse-ops') btn.style.display='none';
+    });
+    const note=p.querySelector('.bp-note');
+    if(note) note.innerHTML='這裡是 <b>12345 五指山悟空財神殿</b> 的實際操作頁。順序：連接錢包 → Approve → 請示聖盃 → 發財金 / 心跳 / 轉日 / 節日活動。';
+  }
+  function repairRulesModal(){
+    const m=$('temple-modal');
+    if(m){
+      const title=m.querySelector('.tsm-title, h3, .guide-title');
+      if(title) title.textContent='12345 五指山悟空財神殿｜規則與活動';
+      const close=m.querySelector('button[aria-label="close"], .close, .tsm-close');
+      if(close) close.onclick=function(e){e.preventDefault(); closeRules();};
+    }
+  }
+  function openOps(){
+    repairOpsPanel();
+    document.body.classList.add('v716-ops-open');
+    document.body.classList.remove('v716-rules-open');
+    speak('已展開錢包與聖盃操作。請先連接錢包，再請示聖盃。');
+    toast('錢包 / 聖盃操作已展開');
+  }
+  function closeOps(){
+    document.body.classList.remove('v716-ops-open');
+    speak('錢包與聖盃操作已收合。');
+  }
+  function openRules(){
+    repairRulesModal();
+    // 優先使用原本單一規則面板；若沒有，就開客服 guide 的 playbook
+    const m=$('temple-modal');
+    if(m){ document.body.classList.add('v716-rules-open'); document.body.classList.remove('v716-ops-open'); }
+    else if(window.app && app.openGuide){ app.openGuide('playbook'); }
+    speak('已展開五指山悟空財神殿規則與活動。');
+  }
+  function closeRules(){ document.body.classList.remove('v716-rules-open'); speak('規則與活動已收合。'); }
+  function bindFooterButtons(){
+    document.querySelectorAll('.footer-terminal button, .footer-terminal .term-btn').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(/客服|導覽|規則|活動/.test(t)) btn.onclick=function(e){e.preventDefault(); openRules();};
+      if(/發財金|heartbeat|整點心跳|ignite|轉日呼吸/.test(t)){
+        btn.addEventListener('click',()=>{ if(!document.body.classList.contains('v716-ops-open')) speak('若要查看餘額或請示聖盃，請按左側錢包聖盃按鈕展開。'); },{capture:true});
+      }
+    });
+  }
+  function init(){
+    setVersion();
+    buildActionButtons();
+    repairOpsPanel();
+    repairRulesModal();
+    bindFooterButtons();
+    document.body.classList.remove('v716-ops-open','v716-rules-open');
+    // 對外保留函式，避免舊按鈕無作用
+    window.v715OpenOps=openOps;
+    window.v715CloseOps=closeOps;
+    window.v715OpenRules=openRules;
+    window.v716OpenOps=openOps;
+    window.v716OpenRules=openRules;
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',init);
+})();
+</script>
 </body>
 </html>
 <!-- ===== KGEN 12345 FINAL HOTFIX V7.9: wallet/game panel restore + angle + music + self-check ===== -->
