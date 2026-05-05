@@ -1827,7 +1827,7 @@ const mb=document.getElementById('m-bar'); if(mb) mb.style.width = (Math.random(
           <h4>六、神殿 1 / 神殿 2 怎麼查？</h4>
           <p>本頁已內建 <b>名額紀錄</b> 面板，可查最新 round、指定 round、A / B 地址、表態狀態與托管狀態。</p>
           <hr/>
-          <p><b>合約：</b><code>0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63</code></p>
+          <p><b>合約：</b><code>0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</code></p>
           <p><b>KGEN：</b><code>0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code></p>
         `;
 
@@ -2998,7 +2998,7 @@ const web3 = {
   KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
 
   // 你部署後填上（會自動記到 localStorage）
-  UNIVERSE: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63", // LIVE KGEN_16888_Universe_V5_2_0
+  UNIVERSE: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972", // LIVE KGEN_16888_Universe_V5_2_0
 
   TREASURY: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
   LP_PAIR: "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
@@ -6661,7 +6661,7 @@ document.querySelectorAll(".faq-q").forEach(q=>{
       try{
         if(window.web3 && web3.UNIVERSE) return web3.UNIVERSE;
       }catch(e){}
-      return "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+      return "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
     },
     getABI(){
       return [
@@ -6874,7 +6874,7 @@ document.querySelectorAll(".faq-q").forEach(q=>{
   }
   var chainLive = {
     provider: null,
-    addr: "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63",
+    addr: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
     abi: [
       "function poolBalance() view returns (uint256)",
       "function roundId() view returns (uint256)",
@@ -9302,6 +9302,315 @@ KGEN 12345 UI Patch V7.5.0
   window.addEventListener('load', init);
   window.addEventListener('pointerup', stopHold);
   window.addEventListener('blur', stopHold);
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 UI Patch V7.6.0
+修正：
+1) Heart 合約地址全面鎖定 12345 Heart V3.2.6，不再使用 16888 Universe 地址。
+2) 左上 Heart 操作面板手機預設收合，展開時下移，不擋上方標題背景字。
+3) 隱藏上一版方形移動鍵，恢復原本左下圓形搖桿操作。
+4) 圓形搖桿改為按住/拖曳連續控制角色位置，放開不歸零角色位置，只歸位搖桿球。
+5) 中下橫桿控制核心方向角，圖會跟著橫桿角度旋轉；0~90 / 0~-90 多，90~180 / -90~-180 空。
+6) 底部 發財金 / heartbeatClaim / igniteAndClaim 重新綁定到 Heart 實際交易按鈕。
+============================================================ -->
+<style id="kgen-12345-ui-v760-final-style">
+  :root{
+    --k12345-core-x: 0px;
+    --k12345-core-y: 0px;
+    --k12345-core-scale: 1;
+    --k12345-core-rotate: 0deg;
+  }
+
+  /* Heart 面板：不要再擋住最上方背景字與標題；手機預設收合 */
+  #kgen-heart-toggle{
+    top: 118px !important;
+    left: 12px !important;
+    z-index: 100900 !important;
+    background: rgba(0,0,0,.78) !important;
+    border-color: rgba(255,215,120,.72) !important;
+    color: #ffe08a !important;
+    box-shadow: 0 0 18px rgba(255,215,120,.20) !important;
+  }
+  #kgen-heart-live-panel{
+    top: 160px !important;
+    left: 12px !important;
+    width: min(360px, calc(100vw - 24px)) !important;
+    max-height: 50vh !important;
+    z-index: 100899 !important;
+  }
+  body.k12345-heart-collapsed #kgen-heart-live-panel{
+    display:none !important;
+  }
+  body.k12345-heart-collapsed #kgen-heart-toggle::after{content:' 展開' !important;}
+  body:not(.k12345-heart-collapsed) #kgen-heart-toggle::after{content:' 收合' !important;}
+
+  /* 隱藏上一版方形移動鍵，恢復原本圓形搖桿 */
+  #k12345-move-pad{display:none !important;}
+  #move-joystick-wrap{
+    display:block !important;
+    left: 18px !important;
+    bottom: 126px !important;
+    z-index: 100760 !important;
+    touch-action:none !important;
+    pointer-events:auto !important;
+  }
+  #move-joystick-label{
+    color:#8af3ff !important;
+    font-family:'Orbitron',sans-serif !important;
+    font-size:10px !important;
+  }
+
+  /* 核心主圖：橫桿角度與搖桿位移都作用在 core-anchor；覆蓋舊 v72-character transform */
+  #core-anchor,
+  #core-anchor.v72-character{
+    transform:
+      translate(calc(-50% + var(--k12345-core-x)), calc(-50% + var(--k12345-core-y)))
+      scale(var(--k12345-core-scale))
+      rotate(var(--k12345-core-rotate)) !important;
+    transform-origin:50% 50% !important;
+    transition: transform .08s linear !important;
+    will-change: transform !important;
+  }
+  #core-window{
+    animation:none !important;
+    transform:none !important;
+  }
+
+  #k12345-slider-status{
+    bottom: 206px !important;
+    z-index: 100750 !important;
+  }
+  .steer-zone{bottom:226px !important;}
+
+  @media(max-width:720px){
+    #kgen-heart-toggle{top:112px !important; left:10px !important;}
+    #kgen-heart-live-panel{
+      top:150px !important;
+      left:10px !important;
+      right:10px !important;
+      width:auto !important;
+      max-height:48vh !important;
+    }
+    #move-joystick-wrap{left:12px !important; bottom:122px !important;}
+    .steer-zone{bottom:222px !important;}
+    #k12345-slider-status{bottom:198px !important; max-width:74vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  }
+</style>
+<script id="kgen-12345-ui-v760-final-script">
+(function(){
+  'use strict';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BRAIN = '0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const MARS  = '0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const $ = (id)=>document.getElementById(id);
+  const clamp = (n,min,max)=>Math.max(min, Math.min(max, Number(n)||0));
+
+  const state = window.k12345ControlState || (window.k12345ControlState = {x:0,y:0,scale:1,rotate:0});
+  state.x = Number(state.x)||0;
+  state.y = Number(state.y)||0;
+  state.scale = Number(state.scale)||1;
+  state.rotate = Number(state.rotate)||0;
+
+  let joyTimer = null;
+  let joyVector = {x:0,y:0};
+  let activePointer = null;
+
+  function isLongAngle(deg){ return deg >= -90 && deg <= 90; }
+  function sideText(deg){ return isLongAngle(deg) ? '多方' : '空方'; }
+
+  function applyCore(){
+    const root = document.documentElement;
+    root.style.setProperty('--k12345-core-x', state.x + 'px');
+    root.style.setProperty('--k12345-core-y', state.y + 'px');
+    root.style.setProperty('--k12345-core-scale', String(state.scale));
+    root.style.setProperty('--k12345-core-rotate', state.rotate + 'deg');
+
+    const av = $('ang-val');
+    if(av) av.textContent = state.rotate + '°';
+    const slider = $('steer-input-val');
+    if(slider && String(Math.round(Number(slider.value)||0)) !== String(state.rotate)) slider.value = state.rotate;
+    const ss = $('k12345-slider-status');
+    if(ss) ss.textContent = 'CORE 方向 ' + state.rotate + '°｜' + sideText(state.rotate) + '｜X ' + Math.round(state.x) + ' / Y ' + Math.round(state.y);
+    const ml = $('move-joystick-label');
+    if(ml) ml.textContent = 'X ' + Math.round(state.x) + ' / Y ' + Math.round(state.y);
+    const wish = $('wish-label');
+    if(wish) wish.textContent = isLongAngle(state.rotate) ? '悟空心臟，多方前行' : '悟空心臟，空方反面';
+  }
+
+  function moveStep(){
+    if(!joyVector.x && !joyVector.y) return;
+    state.x = clamp(state.x + joyVector.x * 7, -360, 360);
+    state.y = clamp(state.y + joyVector.y * 7, -300, 300);
+    applyCore();
+  }
+
+  function setKnob(dx,dy){
+    const knob = $('move-joystick-knob');
+    if(knob){
+      knob.style.left = (40 + dx) + 'px';
+      knob.style.top  = (40 + dy) + 'px';
+    }
+  }
+
+  function setJoystickFromPoint(clientX, clientY){
+    const wrap = $('move-joystick-wrap');
+    if(!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    let dx = clientX - cx;
+    let dy = clientY - cy;
+    const max = 38;
+    const len = Math.hypot(dx,dy) || 1;
+    if(len > max){ dx = dx / len * max; dy = dy / len * max; }
+    setKnob(dx,dy);
+    joyVector.x = dx / max;
+    joyVector.y = dy / max;
+    if(!joyTimer) joyTimer = setInterval(moveStep, 45);
+    moveStep();
+  }
+
+  function stopJoystick(){
+    if(joyTimer) clearInterval(joyTimer);
+    joyTimer = null;
+    joyVector = {x:0,y:0};
+    activePointer = null;
+    setKnob(0,0);
+  }
+
+  function rebuildJoystick(){
+    const old = $('move-joystick-wrap');
+    if(!old) return;
+    const clone = old.cloneNode(true);       // 移除舊版 v72 listener，保留原本圓形 UI
+    old.parentNode.replaceChild(clone, old);
+    const wrap = $('move-joystick-wrap');
+    wrap.addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      activePointer = e.pointerId;
+      try{ wrap.setPointerCapture(activePointer); }catch(_){ }
+      setJoystickFromPoint(e.clientX, e.clientY);
+    });
+    wrap.addEventListener('pointermove', (e)=>{
+      if(activePointer !== e.pointerId) return;
+      e.preventDefault();
+      setJoystickFromPoint(e.clientX, e.clientY);
+    });
+    wrap.addEventListener('pointerup', stopJoystick);
+    wrap.addEventListener('pointercancel', stopJoystick);
+    wrap.addEventListener('lostpointercapture', stopJoystick);
+  }
+
+  function setupSlider(){
+    const slider = $('steer-input-val');
+    if(!slider) return;
+    slider.min = '-180';
+    slider.max = '180';
+    function sync(){
+      state.rotate = Math.round(clamp(slider.value, -180, 180));
+      applyCore();
+      try{
+        if(window.app && typeof window.app.syncSideUI === 'function') window.app.syncSideUI(state.rotate);
+        if(window.app && typeof window.app.updateCoordPanel === 'function') window.app.updateCoordPanel();
+      }catch(_){ }
+    }
+    slider.oninput = sync;
+    slider.onchange = sync;
+    if(window.app && typeof window.app.applySteer === 'function'){
+      window.app.applySteer = function(v, silent){
+        state.rotate = Math.round(clamp(v, -180, 180));
+        const s = $('steer-input-val'); if(s) s.value = state.rotate;
+        const wheel = $('wheel'); if(wheel) wheel.style.transform = 'rotate(' + state.rotate + 'deg)';
+        applyCore();
+        try{ if(!silent && typeof window.app.bbEvent === 'function') window.app.bbEvent('steer', {angle:state.rotate}); }catch(_){ }
+      };
+    }
+    sync();
+  }
+
+  function setupHeartPanel(){
+    const btn = $('kgen-heart-toggle');
+    const panel = $('kgen-heart-live-panel');
+    if(!btn || !panel) return;
+    // 手機一律先收起來，避免擋背景字與主畫面；使用者點才展開。
+    document.body.classList.add('k12345-heart-collapsed');
+    panel.style.display = 'none';
+    btn.onclick = function(e){
+      e.preventDefault();
+      const closed = document.body.classList.toggle('k12345-heart-collapsed');
+      panel.style.display = closed ? 'none' : 'block';
+    };
+  }
+
+  function fixAddressesAndLabels(){
+    document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.6.0';
+    const ver = $('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.6.0';
+    const khTitle = document.querySelector('#kgen-heart-live-panel .kh-title');
+    if(khTitle) khTitle.textContent = '12345 悟空財神殿 Heart V3.2.6';
+    const uni = $('w3-uni'); if(uni) uni.textContent = HEART;
+
+    // 把頁面誤殘留的 16888 合約顯示全部改成 12345 Heart。
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      n.nodeValue = n.nodeValue
+        .replace(/0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63/g, HEART)
+        .replace(/0xabf1ebf153a69cf383a1435afc20f7232d893d63/g, HEART.toLowerCase())
+        .replace(/TempleHeart V3\.2\.3/g, 'TempleHeart V3.2.6')
+        .replace(/Heart V3\.2\.3/g, 'Heart V3.2.6')
+        .replace(/TEMPLE HEART v5\.3/g, 'TEMPLE HEART V3.2.6');
+    });
+
+    // 若舊 web3 物件仍存在，強制它的主合約指向 Heart，避免讀到 16888。
+    try{ if(window.web3) window.web3.UNIVERSE = HEART; }catch(_){ }
+    try{ if(window.web3) window.web3.HEART = HEART; }catch(_){ }
+  }
+
+  function clickHeartAction(id, label){
+    const btn = $(id);
+    if(btn){ btn.click(); return; }
+    alert('找不到 ' + label + '，請先展開 12345 Heart 面板。');
+  }
+
+  function setupFooterActions(){
+    const map = [
+      {re:/發財金/, id:'kh-fortune', label:'fortuneClaim 發財金'},
+      {re:/heartbeatClaim|整點心跳/, id:'kh-heartbeat', label:'heartbeatClaim 整點心跳'},
+      {re:/igniteAndClaim|轉日呼吸/, id:'kh-ignite', label:'igniteAndClaim 轉日呼吸'}
+    ];
+    document.querySelectorAll('.footer-terminal button').forEach(btn=>{
+      const text = (btn.textContent || '').trim();
+      for(const m of map){
+        if(m.re.test(text)){
+          btn.onclick = (e)=>{ e.preventDefault(); clickHeartAction(m.id, m.label); };
+          btn.dataset.k12345V760Action = '1';
+          break;
+        }
+      }
+    });
+    window.templeOps = window.templeOps || {};
+    window.templeOps.fortune = ()=>clickHeartAction('kh-fortune','fortuneClaim 發財金');
+    window.templeOps.heartbeat = ()=>clickHeartAction('kh-heartbeat','heartbeatClaim 整點心跳');
+    window.templeOps.ignite = ()=>clickHeartAction('kh-ignite','igniteAndClaim 轉日呼吸');
+  }
+
+  function init(){
+    fixAddressesAndLabels();
+    setupHeartPanel();
+    rebuildJoystick();
+    setupSlider();
+    setupFooterActions();
+    applyCore();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  window.addEventListener('load', init);
+  window.addEventListener('pointerup', stopJoystick);
+  window.addEventListener('blur', stopJoystick);
 })();
 </script>
 
