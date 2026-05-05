@@ -21,7 +21,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.14｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.15｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1237,7 +1237,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 
 
 
-/* === 12345 Temple Music System V7.11 === */
+/* === 12345 Temple Music System V7.15 === */
 #temple-audio-console{
   position:fixed; right:16px; bottom:112px; z-index:260;
   width:min(320px,92vw); padding:10px 12px; border-radius:14px;
@@ -1396,7 +1396,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="temple-audio-console" aria-label="12345 神殿音樂系統">
-  <div class="ta-head"><span>神殿音樂｜V7.11</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
+  <div class="ta-head"><span>神殿音樂｜V7.15</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
   <div class="ta-row">
     <div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
     <button type="button" onclick="templeAudio.playBgm()">播放</button>
@@ -1413,7 +1413,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.14</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.15</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1519,7 +1519,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <!-- WEB3 控制面板（對齊合約） -->
 <div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V7.11</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V7.15</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.playTempleIntro()">🗣️ 語音客服介紹</button>
@@ -1543,7 +1543,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">神殿玩法｜V7.11</div>
+    <div class="qs-title">神殿玩法｜V7.15</div>
     <div>先 <span class="hl">Approve 授權</span>，再依序完成 <span class="hl">三次聖盃</span>、<span class="hl">領發財金</span>、<span class="hl">整點心跳</span>、<span class="hl">轉日呼吸</span>。</div>
     <ol>
       <li>連結錢包</li>
@@ -1628,7 +1628,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 /*
 ============================================================
 KGEN 12345｜五指山悟空財神殿 Index (GitHub Pages)
-版本：V7.11.0  （以 v2.20.4 可用原版為底，逐步加功能）
+版本：V7.15.0  （以 v2.20.4 可用原版為底，逐步加功能）
 
 【重要觀念 / 介面定義】
 1) 「方向盤(度數)」只代表多空方向：
@@ -1660,7 +1660,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V7.14";
+const APP_VERSION = "12345-TEMPLE-V7.15";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -7548,7 +7548,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.14';
+      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.15';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -7604,7 +7604,7 @@ if(chainLive){
           lightLamp：transferFrom 點燈續命。<br>
           makeWish：只上鏈 hash。
         </div>
-        <div style="margin-top:12px; color:#7ff3ff; font-size:12px;">合約地址尚未部署，這裡先保留完整神殿前端流程。</div>
+        <div style="margin-top:12px; color:#7ff3ff; font-size:12px;">Heart 合約已部署：0xB016D4d8f1aED1339101b30722cad6dbA9B8C972。請先小額測試，再正式操作。</div>
       </div>
     </div>
   </div>
@@ -7615,7 +7615,7 @@ if(chainLive){
 window.templeOps = {
   cupCount: 0,
   pending(action){
-    const msg = 'TempleHeart 合約地址尚未部署，先保留前端流程：' + action;
+    const msg = 'TempleHeart V3.2.6 前端已接合約，請確認錢包、BSC 與授權：' + action;
     try{ window.app && app.speak && app.speak(msg); }catch(e){}
     try{ if(window.toast) toast(msg); else alert(msg); }catch(e){}
   },
@@ -10005,7 +10005,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <script id="temple-audio-system-v710">
 /* ============================================================
-   12345 Temple Audio System V7.11
+   12345 Temple Audio System V7.15
    - 主背景音樂：Wuzhishan Heart Core
    - 發財金音效：Wukong Fortune Blessing
    - 心跳/轉日音效：Temple Heartbeat Ignite
@@ -10116,7 +10116,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- 12345 TEMPLE V7.11 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
+<!-- 12345 TEMPLE V7.15 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
 <style id="kh-v711-hotfix-style">
   /* 右下音樂小窗與右上入口重複，右下取消；音樂系統仍可由按鈕/首次點擊觸發 */
   #temple-audio-console{ display:none !important; }
@@ -10274,8 +10274,8 @@ KGEN 12345 UI Patch V7.6.0
   }
 
   function init(){
-    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.14｜Heart V3.2.6';
-    set('ver-st','VERSION 12345-TEMPLE-V7.14');
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.15｜Heart V3.2.6';
+    set('ver-st','VERSION 12345-TEMPLE-V7.15');
     set('w3-uni', HEART_ADDR);
     remove16888Words();
     patchAngle();
@@ -10289,7 +10289,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- KGEN 12345 V7.14 final patch: Heart UI / wallet panel / angle sync -->
+<!-- KGEN 12345 V7.15 final patch: Heart UI / wallet panel / angle sync -->
 <style id="kgen12345-v712-final-css">
   /* 左下交易 / 錢包 / 玩法區塊：固定恢復，不再消失 */
   #bet-live-panel.bet-live-panel{
@@ -10337,7 +10337,7 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){}
   }
   function fixText(){
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.14';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.15';
     document.querySelectorAll('*').forEach(el=>{
       if(el.children.length) return;
       let t=el.textContent||'';
@@ -10407,7 +10407,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V7.14 HUMAN UX PATCH: guide / left wallet panel / cups / events ===== -->
+<!-- ===== KGEN 12345 V7.15 HUMAN UX PATCH: guide / left wallet panel / cups / events ===== -->
 <style>
   :root{--v714Panel:rgba(7,10,14,.88);--v714Line:rgba(255,215,120,.58);--v714Cyan:#7ff3ff;--v714Gold:#ffd978;}
   #bet-live-panel.bet-live-panel{
@@ -10457,11 +10457,11 @@ KGEN 12345 UI Patch V7.6.0
   function speak(msg){try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; u.rate=.96; u.pitch=.92; speechSynthesis.speak(u);} }catch(e){}}
   function set(id,v){const e=$(id); if(e) e.textContent=v;}
   function patchVersion(){
-    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.14｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.14';
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION 12345-TEMPLE-V7.14'; });
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.15｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.15';
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION 12345-TEMPLE-V7.15'; });
     document.querySelectorAll('*').forEach(el=>{ if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
-      el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V7.14').replace(/規則與下凡/g,'發放規則');
+      el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V7.15').replace(/規則與下凡/g,'發放規則');
     }});
   }
   function buildLeftPanel(){
@@ -10556,6 +10556,213 @@ KGEN 12345 UI Patch V7.6.0
   function init(){patchVersion(); buildLeftPanel(); patchGuide(); patchTempleOps();}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
   setTimeout(init,500); setTimeout(init,1500);
+})();
+</script>
+
+
+
+<!-- === V7.15 Human Panel + Holy Cup Override === -->
+<style id="v715-human-panel-css">
+  :root { --v715-panel-w: min(390px, 92vw); }
+  #v715-left-dock,
+  #v715-right-dock{
+    position:fixed; z-index:10090; pointer-events:auto;
+    border:1px solid rgba(255,215,120,.72); color:#ffd978;
+    background:rgba(0,0,0,.82); backdrop-filter:blur(8px);
+    border-radius:16px; padding:10px 12px; font-weight:900;
+    box-shadow:0 0 18px rgba(255,215,120,.24), inset 0 0 14px rgba(255,215,120,.08);
+    font-size:13px; letter-spacing:.5px;
+  }
+  #v715-left-dock{left:14px; bottom:118px;}
+  #v715-right-dock{right:14px; bottom:118px;}
+  #web3-panel.v715-panel{
+    left:14px!important; right:auto!important; bottom:106px!important;
+    width:var(--v715-panel-w)!important; max-height:62vh!important;
+    overflow:auto!important; z-index:10091!important;
+    padding:12px!important; border-radius:16px!important;
+  }
+  #web3-panel.v715-collapsed{display:none!important;}
+  #web3-panel .v715-close-bad{display:none!important;}
+  #v715-cup-status{
+    margin:8px 0 6px 0; padding:8px;
+    border:1px solid rgba(255,215,120,.35); border-radius:12px;
+    background:rgba(255,215,120,.06); font-size:12px; line-height:1.55;
+  }
+  #v715-cup-status b{color:#ffd978;}
+  #v715-cup-log{color:#dfe9ff; opacity:.92; margin-top:4px;}
+  #temple-modal.v715-right-sheet{
+    inset:auto 14px 106px auto!important; width:min(520px,92vw)!important; height:auto!important;
+    background:transparent!important; padding:0!important; z-index:10092!important;
+  }
+  #temple-modal.v715-right-sheet > div{
+    max-width:100%!important; margin:0!important; max-height:70vh; overflow:auto;
+  }
+  #guide-modal .guide-title::after{content:'｜12345 五指山悟空財神殿'; color:#7ff3ff; margin-left:6px; font-size:12px;}
+  @media (max-width: 760px){
+    #v715-left-dock{left:12px; bottom:96px;}
+    #v715-right-dock{right:12px; bottom:96px;}
+    #web3-panel.v715-panel{left:10px!important; bottom:88px!important; width:calc(100vw - 20px)!important; max-height:58vh!important;}
+    #temple-modal.v715-right-sheet{left:10px!important; right:10px!important; bottom:88px!important; width:calc(100vw - 20px)!important;}
+  }
+</style>
+
+<script id="v715-human-panel-js">
+(function(){
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const VERSION='12345-TEMPLE-V7.15';
+  const $=(id)=>document.getElementById(id);
+  function say(msg){ try{ window.app&&app.speak&&app.speak(msg); }catch(e){} try{ if(window.toast) toast(msg); }catch(e){} }
+  function makeDock(){
+    if(!$('v715-left-dock')){
+      const b=document.createElement('button'); b.id='v715-left-dock'; b.type='button';
+      b.textContent='🔌 悟空操作'; b.onclick=()=>window.v715OpenOps(); document.body.appendChild(b);
+    }
+    if(!$('v715-right-dock')){
+      const b=document.createElement('button'); b.id='v715-right-dock'; b.type='button';
+      b.textContent='📜 規則活動'; b.onclick=()=>window.v715OpenRules(); document.body.appendChild(b);
+    }
+  }
+  function ensureOpsPanel(){
+    const p=$('web3-panel'); if(!p) return;
+    p.classList.add('v715-panel','v715-collapsed');
+    // remove fake progress if still present
+    const pf=$('prog-fill'), pt=$('prog-txt'); if(pf) pf.closest('.prog-wrap')?.remove(); if(pt) pt.remove();
+    // header: single collapse button only
+    const head=p.firstElementChild;
+    if(head && !$('v715-collapse-ops')){
+      const c=document.createElement('button'); c.id='v715-collapse-ops'; c.className='term-btn'; c.type='button';
+      c.style.cssText='padding:8px 10px;font-size:12px;pointer-events:auto;'; c.textContent='收合';
+      c.onclick=()=>window.v715CloseOps(); head.appendChild(c);
+    }
+    // hide duplicated close-ish buttons inside panel that do nothing
+    [...p.querySelectorAll('button')].forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t==='關'||t==='關閉') btn.classList.add('v715-close-bad');
+    });
+    // cup status before amount/action grid
+    if(!$('v715-cup-status')){
+      const box=document.createElement('div'); box.id='v715-cup-status';
+      box.innerHTML='<b>請示神明｜三次聖盃</b><br>發財金不是按了就能領。每次請示會出現：正反、反正、正正、反反。只有 <b>正反 / 反正</b> 算聖盃成功；正正為笑杯、反反為陰杯。累積三次成功才可領發財金。<div id="v715-cup-log">目前：0 / 3，尚未請示。</div>';
+      const grid=p.querySelector('input#amt-in')?.parentElement;
+      if(grid) grid.parentElement.insertBefore(box, grid);
+    }
+    // rewrite confusing copy
+    p.querySelectorAll('*').forEach(el=>{
+      if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+        let s=el.textContent;
+        if(s.includes('Allowance → Universe')) el.textContent='Allowance → Heart';
+        if(s.includes('Temple Heart）＝ 合約餘額（地址待部署')) el.textContent='悟空心臟血庫（Temple Heart）＝ Heart 合約餘額';
+      }
+    });
+  }
+  window.v715OpenOps=function(){ ensureOpsPanel(); const p=$('web3-panel'); if(p) p.classList.remove('v715-collapsed'); say('悟空操作面板已展開。請先連接錢包，再請示三次聖盃。'); };
+  window.v715CloseOps=function(){ const p=$('web3-panel'); if(p) p.classList.add('v715-collapsed'); say('悟空操作面板已收合。'); };
+  window.v715OpenRules=function(){
+    const m=$('temple-modal'); if(m){ m.classList.add('v715-right-sheet'); m.style.display='block'; }
+    say('規則與活動已展開。這裡是五指山悟空財神殿，不是廣寒宮。');
+  };
+  window.v715CloseRules=function(){ const m=$('temple-modal'); if(m) m.style.display='none'; };
+
+  function patchTempleModal(){
+    const m=$('temple-modal'); if(!m) return;
+    m.classList.add('v715-right-sheet');
+    const title=m.querySelector('div[style*="color:#ffd978"]'); if(title) title.textContent='12345 五指山悟空財神殿｜規則與活動';
+    const close=m.querySelector('button'); if(close){ close.textContent='收合'; close.setAttribute('onclick','v715CloseRules()'); }
+    const body=m.querySelector('div[style*="grid-template-columns"]');
+    if(body){
+      body.style.gridTemplateColumns='1fr';
+      body.innerHTML=`
+        <div style="border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.04); padding:12px;">
+          <div style="color:#ffd978; font-weight:900; margin-bottom:8px;">主流程：先問神明，再領福緣</div>
+          <div style="font-size:13px; line-height:1.8; color:#e6eef8;">
+            1. 連接錢包並切到 BSC。<br>
+            2. 確認 BNB、KGEN、Heart 血庫與 Allowance。<br>
+            3. 按三次聖盃請示神明：正反 / 反正為成功，正正為笑杯，反反為陰杯。<br>
+            4. 累積三次成功後，才可按 fortuneClaim 領發財金。<br>
+            5. heartbeatClaim 是整點心跳；igniteAndClaim 是 UTC 00:00–00:10 轉日呼吸。<br>
+            6. vowTo 還願補血、lightLamp 點燈續命、makeWish 許願上鏈 hash。
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;">
+            <button class="nav-btn" type="button" onclick="templeOps.cup()">🥢 請示聖盃</button>
+            <button class="nav-btn" type="button" onclick="templeOps.fortune()">🧧 領發財金</button>
+            <button class="nav-btn" type="button" onclick="templeOps.heartbeat()">🫀 整點心跳</button>
+            <button class="nav-btn" type="button" onclick="templeOps.ignite()">🌬️ 轉日呼吸</button>
+            <button class="nav-btn" type="button" onclick="templeOps.festival1&&templeOps.festival1()">5/20 悟空生日</button>
+            <button class="nav-btn" type="button" onclick="templeOps.festival2&&templeOps.festival2()">11/11 孤勇日</button>
+            <button class="nav-btn" type="button" onclick="templeOps.newYear&&templeOps.newYear()" style="grid-column:1 / span 2;">12/31 跨年倒數</button>
+          </div>
+        </div>
+        <div style="border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.04); padding:12px;">
+          <div style="color:#ffd978; font-weight:900; margin-bottom:8px;">活動說明</div>
+          <div style="font-size:13px; line-height:1.8; color:#e6eef8;">
+            5/20 悟空生日：festivalClaim(1)。<br>
+            11/11 孤勇日：festivalClaim(2)。<br>
+            12/31 跨年倒數：newYearCountdownClaim()。<br><br>
+            Heart V3.2.6：${HEART}<br>
+            操作前請先小額測試；發財金由 Heart 血庫狀態與冷卻規則決定。
+          </div>
+        </div>`;
+    }
+  }
+
+  const cups=['正反','反正','正正','反反'];
+  const cupNames={'正反':'聖盃成功','反正':'聖盃成功','正正':'笑杯，神明還沒允','反反':'陰杯，今日氣未順'};
+  function updateCupLog(result, ok){
+    const log=$('v715-cup-log');
+    if(!log) return;
+    const n=Number(localStorage.getItem('kgen12345CupOk')||'0');
+    const history=JSON.parse(localStorage.getItem('kgen12345CupHistory')||'[]').slice(-6);
+    log.innerHTML=`本次：<b>${result||'--'}</b>｜${result?cupNames[result]:''}<br>成功：<b>${n}</b> / 3<br>紀錄：${history.join('、')||'尚未請示'}`;
+  }
+  function patchTempleOps(){
+    const old=window.templeOps||{};
+    window.templeOps={...old,
+      cup(){
+        ensureOpsPanel();
+        const r=cups[Math.floor(Math.random()*cups.length)];
+        const ok=(r==='正反'||r==='反正');
+        let n=Number(localStorage.getItem('kgen12345CupOk')||'0');
+        const h=JSON.parse(localStorage.getItem('kgen12345CupHistory')||'[]');
+        h.push(r); localStorage.setItem('kgen12345CupHistory', JSON.stringify(h.slice(-12)));
+        if(ok) n=Math.min(3,n+1); localStorage.setItem('kgen12345CupOk', String(n));
+        updateCupLog(r, ok);
+        const msg= ok ? `本次${r}，聖盃成功。已完成 ${n} / 3。` : `本次${r}，${cupNames[r]}。請重新請示。`;
+        say(msg);
+      },
+      resetCup(){ localStorage.setItem('kgen12345CupOk','0'); localStorage.setItem('kgen12345CupHistory','[]'); updateCupLog(); say('聖盃紀錄已重置。'); },
+      async fortune(){
+        ensureOpsPanel();
+        const n=Number(localStorage.getItem('kgen12345CupOk')||'0');
+        if(n<3){ say(`尚未取得三次聖盃，目前 ${n} / 3，不能領發財金。請繼續請示神明。`); return; }
+        if(old.fortune) return old.fortune.call(this);
+        say('三次聖盃已完成，準備送出 fortuneClaim。');
+      },
+      festival1(){ if(old.festival1) return old.festival1.call(this); say('5/20 悟空生日活動：festivalClaim(1)。請確認活動期間與錢包後送出。'); },
+      festival2(){ if(old.festival2) return old.festival2.call(this); say('11/11 孤勇日活動：festivalClaim(2)。請確認活動期間與錢包後送出。'); },
+      newYear(){ if(old.newYear) return old.newYear.call(this); say('12/31 跨年倒數活動：newYearCountdownClaim。請確認活動時段後送出。'); }
+    };
+    // add reset button near cup status
+    const box=$('v715-cup-status');
+    if(box && !$('v715-reset-cup')){
+      const b=document.createElement('button'); b.id='v715-reset-cup'; b.className='term-btn'; b.type='button';
+      b.style.cssText='margin-top:6px;padding:7px 10px;font-size:12px;pointer-events:auto;'; b.textContent='重置聖盃紀錄'; b.onclick=()=>window.templeOps.resetCup(); box.appendChild(b);
+    }
+    updateCupLog();
+  }
+  function patchGuideCopy(){
+    const body=$('guide-body');
+    if(body){
+      body.innerHTML=`<h3>12345 五指山悟空財神殿</h3>
+      <p><b>這裡不是廣寒宮，不是月老成親系統。</b>這裡是 TempleHeart V3.2.6 的前端神殿操作艙。</p>
+      <p>主流程：連接錢包 → Approve → 請示三次聖盃 → fortuneClaim 領發財金。</p>
+      <p>聖盃規則：正反 / 反正代表神明允許，正正是笑杯，反反是陰杯。沒過就繼續請示，三次成功後才可領。</p>
+      <p>日常儀式：heartbeatClaim 整點心跳、igniteAndClaim 轉日呼吸、vowTo 還願補血、lightLamp 點燈續命、makeWish 許願上鏈 hash。</p>
+      <p>活動：5/20 悟空生日 festivalClaim(1)，11/11 孤勇日 festivalClaim(2)，12/31 跨年倒數 newYearCountdownClaim。</p>`;
+    }
+  }
+  function apply(){ makeDock(); ensureOpsPanel(); patchTempleModal(); patchGuideCopy(); patchTempleOps(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', apply); else apply();
+  window.addEventListener('load', apply);
 })();
 </script>
 
@@ -10830,7 +11037,7 @@ KGEN 12345 UI Patch V7.6.0
 </script>
 
 
-<!-- ===== KGEN 12345 FINAL HOTFIX V7.14: real wallet connect injection/provider fix ===== -->
+<!-- ===== KGEN 12345 FINAL HOTFIX V7.15: real wallet connect injection/provider fix ===== -->
 <style id="kgen12345-v713-walletfix-css">
   #walletHub{z-index:2147483647 !important;}
   #kgen-heart-toggle{top:92px !important;}
@@ -10840,7 +11047,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v713-walletfix-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.14';
+  const VERSION='12345-TEMPLE-V7.15';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
