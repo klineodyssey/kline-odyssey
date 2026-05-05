@@ -10674,3 +10674,140 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('load',init);
 })();
 </script>
+
+
+<!-- ===== KGEN 12345 FINAL HOTFIX V7.13: real wallet connect injection/provider fix ===== -->
+<style id="kgen12345-v713-walletfix-css">
+  #walletHub{z-index:2147483647 !important;}
+  #kgen-heart-toggle{top:92px !important;}
+  #kgen-heart-live-panel{top:142px !important; max-height:62vh !important; overflow:auto !important;}
+  #bet-live-panel.bet-live-panel,#web3-panel{display:block !important;}
+</style>
+<script id="kgen12345-v713-walletfix-js">
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V7.13';
+  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const BSC='0x38';
+  const RPC='https://bsc-dataseed.binance.org/';
+  const ERC20=[
+    'function balanceOf(address) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function allowance(address owner,address spender) view returns (uint256)',
+    'function approve(address spender,uint256 amount) returns (bool)'
+  ];
+  const $=id=>document.getElementById(id);
+  const set=(id,v)=>{const e=$(id); if(e) e.textContent=v;};
+  function short(a){return a? a.slice(0,6)+'…'+a.slice(-4):'--';}
+  function speak(msg){try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; u.rate=.95; u.pitch=.9; u.volume=.95; speechSynthesis.speak(u); }}catch(e){}}
+  function log(msg){ const ids=['kh-log','bp-status']; ids.forEach(id=>{const e=$(id); if(e) e.textContent=msg;}); console.log('[KGEN12345]',msg); }
+  function pickProvider(){
+    let eth=window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || window.BinanceChain || window.okxwallet;
+    if(eth && Array.isArray(eth.providers) && eth.providers.length){
+      eth = eth.providers.find(p=>p && (p.isMetaMask || p.isTrust || p.isOKXWallet || p.isBinance || p.isCoinbaseWallet)) || eth.providers[0];
+    }
+    if(!eth && window.ethereum && window.ethereum.providers) eth=window.ethereum.providers[0];
+    if(eth) window.ethereum=eth;
+    return eth;
+  }
+  function openWalletHub(){
+    const hub=$('walletHub'); const inp=$('walletHubUrl'); if(inp) inp.value=location.href;
+    if(hub) hub.style.display='flex';
+    speak('一般瀏覽器沒有錢包注入。請用 MetaMask、Trust Wallet、OKX 或 Binance Wallet 內建瀏覽器開啟本頁。');
+  }
+  async function ensureBSC(eth){
+    let cid='';
+    try{ cid=await eth.request({method:'eth_chainId'}); }catch(e){}
+    set('w3-chain',cid||'--'); set('kh-chain',(cid||'--')==='0x38'?'BSC 56':(cid||'--'));
+    if(String(cid).toLowerCase()===BSC) return true;
+    try{ await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC}]}); return true; }
+    catch(e){
+      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized'))){
+        await eth.request({method:'wallet_addEthereumChain',params:[{chainId:BSC,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[RPC],blockExplorerUrls:['https://bscscan.com']} ]});
+        return true;
+      }
+      throw e;
+    }
+  }
+  async function readBalances(provider,addr){
+    const token=new ethers.Contract(TOKEN,ERC20,provider);
+    const dec=Number(await token.decimals().catch(()=>18));
+    const [bnb,kgen,heart,allowance]=await Promise.all([
+      provider.getBalance(addr), token.balanceOf(addr), token.balanceOf(HEART), token.allowance(addr,HEART).catch(()=>null)
+    ]);
+    const bnbTxt=Number(ethers.utils.formatEther(bnb)).toFixed(4)+' BNB';
+    const kgenTxt=Number(ethers.utils.formatUnits(kgen,dec)).toFixed(4)+' KGEN';
+    const heartTxt=Number(ethers.utils.formatUnits(heart,dec)).toFixed(4)+' KGEN';
+    const alwTxt=allowance?Number(ethers.utils.formatUnits(allowance,dec)).toFixed(4)+' KGEN':'--';
+    ['kh-kgen-bal','userBal','rb-kgen-txt','bp-userbal'].forEach(id=>set(id,kgenTxt));
+    ['kh-heart-bal','w3-bal','bp-pool'].forEach(id=>set(id,heartTxt));
+    ['userBNB','rb-bnb-txt'].forEach(id=>set(id,bnbTxt));
+    ['userAllowance','bp-allowance'].forEach(id=>set(id,alwTxt));
+    const p=$('w3-prog'); if(p) p.textContent='12345 Heart 血庫餘額';
+    const fill=$('prog-fill'); if(fill) fill.style.width='0%';
+  }
+  async function connectWalletV713(ev){
+    if(ev){ try{ev.preventDefault();ev.stopPropagation();}catch(_){} }
+    try{
+      if(!window.ethers || !ethers.providers || !ethers.utils){ log('ethers.js 尚未載入，請重新整理頁面'); return; }
+      const eth=pickProvider();
+      if(!eth){ openWalletHub(); log('未偵測到錢包注入：請用錢包 App 內建瀏覽器開啟'); return; }
+      speak('正在連結錢包，請在錢包視窗確認授權。');
+      const accounts=await eth.request({method:'eth_requestAccounts'});
+      const addr=accounts && accounts[0];
+      if(!addr) throw new Error('錢包未回傳地址');
+      await ensureBSC(eth);
+      const provider=new ethers.providers.Web3Provider(eth,'any');
+      const signer=provider.getSigner();
+      window.__KGEN12345_PROVIDER=provider;
+      window.__KGEN12345_SIGNER=signer;
+      window.__KGEN12345_ADDR=addr;
+      if(window.web3){
+        web3.provider=provider; web3.signer=signer; web3.addr=addr; web3.address=addr; web3.UNIVERSE=HEART; web3.KGEN=TOKEN;
+      }
+      const wt=short(addr)+'｜'+addr;
+      ['kh-wallet','w3-addr','bp-wallet'].forEach(id=>set(id,wt));
+      await readBalances(provider,addr);
+      log('錢包已連線完成：'+addr+'\nBSC 56 已同步，KGEN / BNB / Heart 血庫已讀取。');
+      speak('錢包已連線完成。KGEN、BNB 與五指山 Heart 血庫已同步。');
+    }catch(e){
+      console.error(e);
+      log('錢包連線失敗：'+(e && e.message ? e.message : e));
+      speak('錢包連線失敗。請確認你正在錢包內建瀏覽器，並允許連線到 BNB Smart Chain。');
+    }
+  }
+  async function refreshV713(){
+    try{
+      const addr=window.__KGEN12345_ADDR || (window.web3 && (web3.addr||web3.address));
+      const provider=window.__KGEN12345_PROVIDER || (window.web3 && web3.provider) || new ethers.providers.JsonRpcProvider(RPC);
+      if(addr) await readBalances(provider,addr);
+      else{
+        const ro=new ethers.providers.JsonRpcProvider(RPC);
+        const token=new ethers.Contract(TOKEN,ERC20,ro);
+        const dec=Number(await token.decimals().catch(()=>18));
+        const heart=await token.balanceOf(HEART);
+        ['kh-heart-bal','w3-bal','bp-pool'].forEach(id=>set(id,Number(ethers.utils.formatUnits(heart,dec)).toFixed(4)+' KGEN'));
+      }
+      log('刷新完成。');
+    }catch(e){log('刷新失敗：'+(e.message||e));}
+  }
+  function bindFinal(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || btn.id==='kh-connect' || btn.id==='w3-connect-btn'){
+        btn.onclick=connectWalletV713;
+      }
+      if(t.includes('刷新餘額') || btn.id==='kh-refresh') btn.onclick=refreshV713;
+    });
+    window.kgen12345ConnectWallet=connectWalletV713;
+    if(window.web3){ web3.smartConnect=connectWalletV713; web3.connect=connectWalletV713; web3.refreshBalances=refreshV713; }
+    const eth=pickProvider();
+    if(!eth){ set('kh-wallet','未偵測到錢包：請用錢包App開啟'); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindFinal); else bindFinal();
+  setTimeout(bindFinal,500); setTimeout(bindFinal,1500);
+})();
+</script>
