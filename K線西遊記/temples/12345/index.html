@@ -9973,3 +9973,270 @@ KGEN 12345 UI Patch V7.6.0
 
 </body>
 </html>
+<!-- ===== KGEN 12345 FINAL HOTFIX V7.9: wallet/game panel restore + angle + music + self-check ===== -->
+<style id="kgen-12345-v790-final-style">
+  /* 左下交易 / 錢包 / 玩法區塊：保留，不能拿掉 */
+  #web3-panel{
+    display:block !important;
+    position:fixed !important;
+    left:16px !important;
+    bottom:255px !important;
+    top:auto !important;
+    width:min(385px, 92vw) !important;
+    max-height:310px !important;
+    overflow-y:auto !important;
+    z-index:165 !important;
+    pointer-events:auto !important;
+    background:linear-gradient(180deg, rgba(10,12,18,.92), rgba(0,0,0,.76)) !important;
+    border:1px solid rgba(255,215,120,.58) !important;
+    box-shadow:0 0 22px rgba(255,215,120,.12), inset 0 0 18px rgba(0,242,255,.05) !important;
+  }
+  #web3-panel::before{
+    content:'錢包 / 金額 / 神殿玩法';
+    display:block;
+    color:#ffd978;
+    font-family:'Orbitron',sans-serif;
+    font-weight:900;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+    border-bottom:1px solid rgba(255,215,120,.18);
+    padding-bottom:6px;
+  }
+  /* 12345 不用 16888 Pool Balance 與進度條 */
+  #web3-panel .prog-wrap,
+  #web3-panel #prog-fill,
+  #web3-panel #prog-txt{ display:none !important; }
+
+  /* 右下狀態角度不能固定，要跟橫桿同步 */
+  #coord-panel #cp-deg-num,
+  #ang-val{ color:#61f7ff !important; text-shadow:0 0 12px rgba(0,242,255,.65); }
+
+  /* 中央核心：方向由橫桿控制，不自動一直轉 */
+  #core-window{
+    animation:none !important;
+    transition:transform .08s linear !important;
+    transform-origin:center center !important;
+    will-change:transform !important;
+  }
+  #fairy-img{
+    opacity:1 !important;
+    display:block !important;
+    visibility:visible !important;
+    object-fit:cover !important;
+  }
+
+  /* 原來的圓形遙桿保留；控制主圖 X/Y，不是只按一下 */
+  #move-joystick-wrap{
+    left:18px !important;
+    bottom:118px !important;
+    z-index:190 !important;
+    pointer-events:auto !important;
+  }
+
+  /* 神殿音樂面板位置，不擋主畫面 */
+  #music-panel{
+    right:14px !important;
+    top:410px !important;
+    max-height:330px !important;
+    overflow:auto !important;
+  }
+
+  @media(max-width:720px){
+    #web3-panel{
+      left:12px !important;
+      right:auto !important;
+      bottom:245px !important;
+      width:min(360px, 92vw) !important;
+      max-height:280px !important;
+    }
+    #move-joystick-wrap{ bottom:118px !important; }
+  }
+</style>
+
+<script id="kgen-12345-v790-final-script">
+(function(){
+  'use strict';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const MARS='0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const RPC='https://bsc-dataseed.binance.org/';
+  const $=(id)=>document.getElementById(id);
+
+  const speak=(msg)=>{
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(_){ }
+    try{
+      if(!('speechSynthesis' in window)) return;
+      const u=new SpeechSynthesisUtterance(String(msg||''));
+      u.lang='zh-TW'; u.rate=.98; u.pitch=1.02;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch(_){ }
+  };
+  const log=(msg)=>{ const el=$('kh-log'); if(el) el.textContent=String(msg||''); };
+
+  function fixTextsAndAddresses(){
+    try{
+      document.querySelectorAll('*').forEach(el=>{
+        if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+          el.textContent = el.textContent
+            .replace(/TempleHeart V3\.2\.3/g,'TempleHeart V3.2.6')
+            .replace(/Heart V3\.2\.3/g,'Heart V3.2.6')
+            .replace(/TEMPLE HEART v5\.3/g,'TEMPLE HEART V3.2.6');
+        }
+      });
+    }catch(_){ }
+    try{ if(window.web3){ window.web3.UNIVERSE=HEART; window.web3.HEART=HEART; window.web3.KGEN=KGEN; } }catch(_){ }
+    const ids=['w3-uni','cp-gaolao-addr'];
+    ids.forEach(id=>{ const el=$(id); if(!el) return; if('value' in el) el.value=HEART; else el.textContent=HEART; });
+    const khTitle=document.querySelector('#kgen-heart-live-panel .kh-title');
+    if(khTitle) khTitle.textContent='12345 悟空財神殿 Heart V3.2.6';
+  }
+
+  function restoreWalletGamePanel(){
+    const p=$('web3-panel'); if(!p) return;
+    p.style.display='block';
+    // 移除 16888 pool wording，改成 12345 Heart 血庫
+    p.querySelectorAll('div').forEach(div=>{
+      if(/Pool Balance/.test(div.textContent||'')) div.firstChild && (div.firstChild.textContent='Heart 血庫餘額: ');
+      if(/^進度/.test((div.textContent||'').trim())) div.style.display='none';
+    });
+    const bal=$('w3-bal'); if(bal && (!bal.textContent || bal.textContent==='--')) bal.textContent='讀取中 / 需連錢包';
+    const tip=p.querySelector('.quickstart-card');
+    if(tip){
+      const title=tip.querySelector('.qs-title'); if(title) title.textContent='神殿玩法｜12345 Heart V3.2.6';
+      const last=tip.querySelector('div[style*="margin-top"]');
+      if(last) last.innerHTML='本區是 <b>錢包、餘額、授權與玩法介紹</b>，不能移除。連線後會顯示 KGEN、BNB 與 Heart 血庫。';
+    }
+  }
+
+  let angle=0, posX=0, posY=0, scale=1;
+  function sideFromAngle(a){
+    const n=Number(a)||0;
+    const abs=Math.abs(n);
+    return abs<=90 ? '多方' : '空方';
+  }
+  function applyCore(){
+    const core=$('core-window');
+    if(core) core.style.transform=`rotate(${angle}deg)`;
+    const anchor=$('core-anchor');
+    if(anchor) anchor.style.transform=`translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+    const ang=$('ang-val'); if(ang) ang.textContent=`${angle}°`;
+    const cp=$('cp-deg-num'); if(cp) cp.textContent=`${angle}°｜${sideFromAngle(angle)}`;
+    const side=$('cp-side'); if(side) side.textContent=`方向：${sideFromAngle(angle)}`;
+    const dir=$('kc-dir'); if(dir) dir.textContent=`方向盤 → ${sideFromAngle(angle)}K`;
+    const label=$('wish-label'); if(label) label.textContent=`悟空心臟｜${sideFromAngle(angle)}｜${angle}°`;
+    const xy=$('move-joystick-label'); if(xy) xy.textContent=`X ${Math.round(posX)} / Y ${Math.round(posY)} / ${Math.round(scale*100)}%`;
+  }
+  function setupSlider(){
+    const s=$('steer-input-val'); if(!s) return;
+    s.min='-180'; s.max='180';
+    angle=Number(s.value||0);
+    s.addEventListener('input',()=>{ angle=Math.max(-180,Math.min(180,Number(s.value)||0)); applyCore(); },{passive:true});
+    applyCore();
+  }
+
+  // 原來遙桿操作方式：按住 / 拖曳連續移動，放開回中，角色位置保留
+  function setupJoystick(){
+    const wrap=$('move-joystick-wrap');
+    const knob=$('move-joystick-knob');
+    if(!wrap || !knob) return;
+    let active=false, vx=0, vy=0, raf=0;
+    const max=42;
+    const loop=()=>{
+      if(active){
+        posX += vx*2.6;
+        posY += vy*2.6;
+        applyCore();
+        raf=requestAnimationFrame(loop);
+      }
+    };
+    const update=(ev)=>{
+      const rect=wrap.getBoundingClientRect();
+      const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+      const p=(ev.touches&&ev.touches[0])?ev.touches[0]:ev;
+      let dx=p.clientX-cx, dy=p.clientY-cy;
+      const len=Math.hypot(dx,dy)||1;
+      if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+      vx=dx/max; vy=dy/max;
+      knob.style.transform=`translate(${dx}px, ${dy}px)`;
+    };
+    const start=(ev)=>{ active=true; update(ev); cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); speak('移動控制啟動。'); ev.preventDefault(); };
+    const move=(ev)=>{ if(!active) return; update(ev); ev.preventDefault(); };
+    const stop=()=>{ active=false; vx=0; vy=0; knob.style.transform='translate(0,0)'; cancelAnimationFrame(raf); };
+    wrap.addEventListener('pointerdown',start,{passive:false});
+    window.addEventListener('pointermove',move,{passive:false});
+    window.addEventListener('pointerup',stop,{passive:true});
+    wrap.addEventListener('touchstart',start,{passive:false});
+    window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('touchend',stop,{passive:true});
+    window.__k12345CoreMove={reset(){posX=0;posY=0;scale=1;applyCore();}, zoomIn(){scale=Math.min(1.8,scale+.05);applyCore();}, zoomOut(){scale=Math.max(.55,scale-.05);applyCore();}};
+  }
+
+  function setupWalletFallback(){
+    const connectBtn=$('w3-connect-btn');
+    if(connectBtn && !connectBtn.dataset.v790){
+      connectBtn.dataset.v790='1';
+      connectBtn.addEventListener('click',()=>{ speak('正在連結錢包。請確認錢包授權與 BSC 網路。'); if(window.web3 && web3.smartConnect) web3.smartConnect(); },{capture:true});
+    }
+    const khConnect=$('kh-connect');
+    if(khConnect && !khConnect.dataset.v790){
+      khConnect.dataset.v790='1';
+      khConnect.addEventListener('click',()=>speak('正在連結錢包，請確認 BSC 五十六鏈。'),{capture:true});
+    }
+  }
+
+  function setupMusic(){
+    // 沒有飛碟音樂時，預設使用五指山神殿音樂。檔案放這裡：K線西遊記/temples/12345/music/wuzhishan_temple.mp3
+    const audio=$('music-audio');
+    if(audio && !audio.dataset.v790){
+      audio.dataset.v790='1';
+      if(!audio.getAttribute('src')) audio.src='./music/wuzhishan_temple.mp3';
+      audio.preload='none';
+    }
+    if(window.app){
+      const oldOpen=app.openMusic && app.openMusic.bind(app);
+      app.openMusic=function(){
+        speak('已開啟五指山神殿音響。若沒有飛碟音樂，請把音樂放在 music/wuzhishan_temple.mp3。');
+        if(oldOpen) return oldOpen();
+        const p=$('music-panel'); if(p) p.style.display=(p.style.display==='none'||!p.style.display)?'block':'none';
+      };
+    }
+  }
+
+  function bindVoiceAllButtons(){
+    document.querySelectorAll('button').forEach(btn=>{
+      if(btn.dataset.v790Voice) return;
+      btn.dataset.v790Voice='1';
+      btn.addEventListener('click',()=>{
+        const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+        if(t) speak('你按下：'+t);
+      });
+    });
+  }
+
+  function selfCheck(){
+    const issues=[];
+    if(!$('web3-panel')) issues.push('缺左下交易 / 錢包面板');
+    if(!$('move-joystick-wrap')) issues.push('缺左下遙桿');
+    if(!$('steer-input-val')) issues.push('缺中下橫桿');
+    if(!$('fairy-img')) issues.push('缺中央主圖');
+    if(!/0xB016D4d8f1aED1339101b30722cad6dbA9B8C972/i.test(document.body.innerHTML)) issues.push('Heart 地址不是 12345');
+    if(issues.length){ console.warn('[12345 self-check]', issues); log('自檢提醒：\n'+issues.join('\n')); }
+    else{ console.log('[12345 self-check] OK'); }
+  }
+
+  function init(){
+    fixTextsAndAddresses();
+    restoreWalletGamePanel();
+    setupSlider();
+    setupJoystick();
+    setupWalletFallback();
+    setupMusic();
+    bindVoiceAllButtons();
+    applyCore();
+    selfCheck();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',init);
+})();
+</script>
