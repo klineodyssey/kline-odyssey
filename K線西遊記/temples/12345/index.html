@@ -8676,5 +8676,325 @@ KGEN 12345 Heart Live Patch V7.3.0
 })();
 </script>
 
+
+
+<!-- ============================================================
+KGEN 12345 UI Control Patch V7.4.0
+- Contract display: KGEN_TempleHeart_V3_2_6.sol / 12345 Heart V3.2.6
+- Left Heart panel is truly collapsible and does not block the main image.
+- Lower-left Forward / Back / Left / Right pad controls the central character/core position.
+- Bottom horizontal slider controls the central core rotation/scale visibly.
+- No Solidity / deploy logic touched. Wallet and Heart tx functions are preserved.
+============================================================ -->
+<style id="kgen-12345-ui-control-v740-style">
+  :root{
+    --k12345-core-x: 0px;
+    --k12345-core-y: 0px;
+    --k12345-core-scale: 1;
+    --k12345-core-rotate: 0deg;
+  }
+
+  /* 中央角色/核心：由左下移動鍵與下方橫桿共同控制 */
+  #core-anchor{
+    transform:
+      translate(-50%, -50%)
+      translate(var(--k12345-core-x), var(--k12345-core-y))
+      scale(var(--k12345-core-scale))
+      rotate(var(--k12345-core-rotate)) !important;
+    transition: transform .18s ease, filter .18s ease;
+    will-change: transform;
+  }
+  #core-window{
+    transform-origin: 50% 50%;
+  }
+
+  /* 讓 Heart 面板真正可以收起，不再一直擋畫面 */
+  #kgen-heart-live-panel{
+    max-height: min(72vh, 680px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.k12345-heart-collapsed #kgen-heart-live-panel{
+    display: none !important;
+  }
+  #kgen-heart-toggle{
+    display:flex !important;
+    align-items:center;
+    gap:6px;
+    pointer-events:auto !important;
+    user-select:none;
+  }
+  #kgen-heart-toggle::after{
+    content:'展開/收合';
+    font-size:11px;
+    opacity:.82;
+  }
+
+  /* 左下角色移動控制器：12345 專屬，16888 不需要 */
+  #k12345-move-pad{
+    position: fixed;
+    left: 18px;
+    bottom: 118px;
+    z-index: 100620;
+    width: 176px;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,215,120,.50);
+    background: rgba(0,0,0,.72);
+    box-shadow: 0 0 22px rgba(255,215,120,.14), inset 0 0 18px rgba(0,242,255,.05);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-family: 'Noto Sans TC', system-ui, sans-serif;
+    box-sizing: border-box;
+  }
+  #k12345-move-pad .move-title{
+    color:#ffd778;
+    font-family:'Orbitron', sans-serif;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  #k12345-move-pad .move-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:6px;
+  }
+  #k12345-move-pad button{
+    min-height:36px;
+    border-radius:10px;
+    border:1px solid rgba(0,242,255,.35);
+    background:rgba(0,0,0,.45);
+    color:#dffbff;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow: inset 0 0 12px rgba(0,242,255,.08);
+  }
+  #k12345-move-pad button:active{
+    transform: scale(.96);
+    background:rgba(255,215,120,.82);
+    color:#111;
+  }
+  #k12345-move-pad .move-status{
+    margin-top:8px;
+    padding:6px 8px;
+    border-radius:10px;
+    background:rgba(255,255,255,.06);
+    color:#8af3ff;
+    font-family:'Orbitron', sans-serif;
+    font-size:11px;
+    line-height:1.45;
+  }
+  #k12345-move-pad .move-row{
+    display:flex;
+    gap:6px;
+    margin-top:7px;
+  }
+  #k12345-move-pad .move-row button{
+    flex:1;
+    min-height:30px;
+    font-size:11px;
+    border-color:rgba(255,215,120,.32);
+    color:#ffe9b8;
+  }
+
+  /* 下方橫桿狀態提示：確認滑桿真的在控制核心 */
+  #k12345-slider-status{
+    position: fixed;
+    left:50%;
+    bottom: 198px;
+    transform: translateX(-50%);
+    z-index: 100610;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border:1px solid rgba(0,242,255,.38);
+    background:rgba(0,0,0,.62);
+    color:#dffbff;
+    font-family:'Orbitron', sans-serif;
+    font-size:12px;
+    font-weight:900;
+    pointer-events:none;
+    box-shadow:0 0 16px rgba(0,242,255,.15);
+  }
+
+  @media(max-width:720px){
+    body.k12345-heart-collapsed #kgen-heart-live-panel{display:none !important;}
+    #kgen-heart-toggle{top:46px !important; left:10px !important;}
+    #k12345-move-pad{
+      left: 10px;
+      bottom: 104px;
+      width: 156px;
+      padding:8px;
+    }
+    #k12345-move-pad .move-title{font-size:11px;}
+    #k12345-move-pad button{min-height:32px;font-size:12px;}
+    #k12345-slider-status{
+      bottom: 190px;
+      font-size:11px;
+      max-width:72vw;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .steer-zone{bottom:220px !important;}
+  }
+</style>
+
+<div id="k12345-move-pad" aria-label="12345 悟空角色移動控制器">
+  <div class="move-title"><span>悟空移動</span><span>12345</span></div>
+  <div class="move-grid">
+    <span></span><button type="button" data-kmove="0,-24">前</button><span></span>
+    <button type="button" data-kmove="-24,0">左</button><button type="button" id="k12345-move-home">中</button><button type="button" data-kmove="24,0">右</button>
+    <span></span><button type="button" data-kmove="0,24">後</button><span></span>
+  </div>
+  <div class="move-row">
+    <button type="button" id="k12345-zoom-out">縮小</button>
+    <button type="button" id="k12345-zoom-in">放大</button>
+  </div>
+  <div class="move-status" id="k12345-move-status">X 0 / Y 0 / Z 100%</div>
+</div>
+<div id="k12345-slider-status">CORE 角度 0°｜縮放 100%</div>
+
+<script id="kgen-12345-ui-control-v740-script">
+(function(){
+  'use strict';
+  const S = {
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    step: 24
+  };
+  const $ = (id)=>document.getElementById(id);
+  const clamp = (n,min,max)=>Math.max(min, Math.min(max, Number(n)||0));
+
+  function root(){ return document.documentElement; }
+
+  function applyCore(){
+    root().style.setProperty('--k12345-core-x', S.x + 'px');
+    root().style.setProperty('--k12345-core-y', S.y + 'px');
+    root().style.setProperty('--k12345-core-scale', String(S.scale));
+    root().style.setProperty('--k12345-core-rotate', S.rotate + 'deg');
+    const ms = $('k12345-move-status');
+    if(ms) ms.textContent = 'X ' + S.x + ' / Y ' + S.y + ' / Z ' + Math.round(S.scale*100) + '%';
+    const ss = $('k12345-slider-status');
+    if(ss) ss.textContent = 'CORE 角度 ' + S.rotate + '°｜縮放 ' + Math.round(S.scale*100) + '%';
+  }
+
+  function move(dx, dy){
+    S.x = clamp(S.x + dx, -260, 260);
+    S.y = clamp(S.y + dy, -220, 220);
+    applyCore();
+  }
+
+  function zoom(delta){
+    S.scale = clamp(Math.round((S.scale + delta) * 100) / 100, .55, 1.8);
+    applyCore();
+  }
+
+  function home(){
+    S.x = 0; S.y = 0; S.scale = 1;
+    applyCore();
+  }
+
+  function syncBottomSlider(){
+    const slider = $('steer-input-val');
+    const readout = $('ang-val');
+    if(!slider) return;
+    const value = clamp(slider.value, -180, 180);
+    S.rotate = Math.round(value);
+    // 讓橫桿的變化更明顯：角度越偏，核心略放大，像 4D 視角推進
+    S.scale = clamp(1 + Math.abs(S.rotate) / 900, .75, 1.28);
+    if(readout) readout.textContent = S.rotate + '°';
+    applyCore();
+  }
+
+  function setupHeartCollapse(){
+    const btn = $('kgen-heart-toggle');
+    const panel = $('kgen-heart-live-panel');
+    if(!btn || !panel) return;
+
+    function setCollapsed(on){
+      document.body.classList.toggle('k12345-heart-collapsed', !!on);
+      btn.dataset.collapsed = on ? '1' : '0';
+      btn.firstChild && (btn.firstChild.nodeValue = on ? '12345 Heart 展開 ' : '12345 Heart 收合 ');
+      try{ localStorage.setItem('k12345HeartCollapsed', on ? '1' : '0'); }catch(e){}
+    }
+
+    // 手機預設收合；桌機沿用上次設定，避免擋主畫面
+    let saved = null;
+    try{ saved = localStorage.getItem('k12345HeartCollapsed'); }catch(e){}
+    const defaultCollapsed = saved === null ? (window.innerWidth <= 720) : saved === '1';
+    setCollapsed(defaultCollapsed);
+
+    btn.onclick = function(e){
+      e.preventDefault();
+      setCollapsed(!document.body.classList.contains('k12345-heart-collapsed'));
+    };
+  }
+
+  function setupMovePad(){
+    document.querySelectorAll('[data-kmove]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const [dx,dy] = String(btn.getAttribute('data-kmove')||'0,0').split(',').map(Number);
+        move(dx||0, dy||0);
+      });
+    });
+    const homeBtn = $('k12345-move-home');
+    if(homeBtn) homeBtn.addEventListener('click', home);
+    const zin = $('k12345-zoom-in');
+    const zout = $('k12345-zoom-out');
+    if(zin) zin.addEventListener('click', ()=>zoom(.08));
+    if(zout) zout.addEventListener('click', ()=>zoom(-.08));
+  }
+
+  function setupSlider(){
+    const slider = $('steer-input-val');
+    if(!slider) return;
+    slider.addEventListener('input', syncBottomSlider, {passive:true});
+    slider.addEventListener('change', syncBottomSlider, {passive:true});
+    // 包住原本 app.applySteer：保留舊功能，同步新核心控制
+    if(window.app && typeof window.app.applySteer === 'function' && !window.app.__k12345ApplySteerWrapped){
+      const old = window.app.applySteer.bind(window.app);
+      window.app.applySteer = function(v, silent){
+        const r = old(v, silent);
+        if($('steer-input-val')) $('steer-input-val').value = v;
+        syncBottomSlider();
+        return r;
+      };
+      window.app.__k12345ApplySteerWrapped = true;
+    }
+    syncBottomSlider();
+  }
+
+  function fixLabels(){
+    const title = document.querySelector('#kgen-heart-live-panel .kh-title');
+    if(title) title.textContent = '12345 悟空財神殿 Heart V3.2.6';
+    const ver = $('ver-st');
+    if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.4.0';
+    document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.4.0';
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el.childNodes && el.childNodes.length === 1 && el.childNodes[0].nodeType === 3){
+        el.textContent = el.textContent.replace('TempleHeart V3.2.3', 'TempleHeart V3.2.6');
+      }
+    });
+  }
+
+  function init(){
+    fixLabels();
+    setupHeartCollapse();
+    setupMovePad();
+    setupSlider();
+    applyCore();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
