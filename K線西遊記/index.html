@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="K線西遊記 KLINE Odyssey 銀河宇宙入口。16888 廣寒宮已接入 LIVE Universe 合約，可進入遊玩。" />
-  <title>K線西遊記｜銀河宇宙入口 Portal V2.0｜16888 LIVE</title>
+  <meta name="description" content="K線西遊記 KLINE Odyssey 銀河宇宙入口。16888 廣寒宮已接入 LIVE Universe 合約；12345 悟空財神殿入口改為直連 index.html，避免 GitHub Pages 目錄 404。" />
+  <title>K線西遊記｜銀河宇宙入口 Portal V2.0.1｜16888 LIVE｜12345 INDEX FIX</title>
   <style>
     :root {
       --bg0:#03040a;
@@ -126,10 +126,11 @@
     <header class="topbar">
       <a class="brand" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noreferrer">
         <div class="sigil">K</div>
-        <div><b>K線西遊記｜KLINE ODYSSEY</b><span>Portal V2.0 · 16888 廣寒宮 LIVE 接入版</span></div>
+        <div><b>K線西遊記｜KLINE ODYSSEY</b><span>Portal V2.0.1 · 16888 LIVE · 12345 index.html 修正版</span></div>
       </a>
       <nav class="top-actions">
         <a class="btn live" href="./K線西遊記/temples/16888/index.html">進入 16888</a>
+        <a class="btn live" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html" target="_blank" rel="noreferrer">進入 12345</a>
         <a class="btn" href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noreferrer">PancakeSwap</a>
         <a class="btn" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noreferrer">KGEN BscScan</a>
         <button class="btn" onclick="openDrawer('contracts')">合約資料</button>
@@ -186,9 +187,9 @@
       </aside>
 
       <section class="panel node">
-        <div class="node-top"><h3>12345 悟空財神殿</h3><span class="tag dev">待部署</span></div>
-        <p class="sub">Temple Heart / 發財金 / 心跳 / 點火 / 許願 / 還願。作為 KGEN 神殿心臟的下一階段入口。</p>
-        <div class="node-actions"><a class="btn mini" href="./K線西遊記/temples/12345/">查看入口</a><button class="btn mini" onclick="openDrawer('temple12345')">狀態</button></div>
+        <div class="node-top"><h3>12345 悟空財神殿</h3><span class="tag live">INDEX</span></div>
+        <p class="sub">Temple Heart / 發財金 / 心跳 / 點火 / 許願 / 還願。入口已改為直連悟空財神殿 index.html，避免目錄連結 404。</p>
+        <div class="node-actions"><a class="btn live mini" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html" target="_blank" rel="noreferrer">ENTER 12345</a><button class="btn mini" onclick="openDrawer('temple12345')">路徑</button></div>
       </section>
 
       <section class="panel node">
@@ -226,6 +227,7 @@
         <div class="link-grid">
           <a class="link-tile" href="./K線西遊記/temples/16888/index.html"><b>16888 本地相對路徑</b><span>./K線西遊記/temples/16888/</span></a>
           <a class="link-tile" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/" target="_blank" rel="noreferrer"><b>16888 GitHub Pages</b><span>LIVE Page</span></a>
+          <a class="link-tile" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html" target="_blank" rel="noreferrer"><b>12345 GitHub Pages</b><span>直連 index.html</span></a>
           <a class="link-tile" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noreferrer"><b>KGEN Token</b><span>BscScan Token</span></a>
           <a class="link-tile" href="https://bscscan.com/address/0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63" target="_blank" rel="noreferrer"><b>16888 Universe</b><span>V5.2.0 Contract</span></a>
           <a class="link-tile" href="https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" rel="noreferrer"><b>KGEN/WBNB Pair</b><span>LP Pair Scan</span></a>
@@ -268,6 +270,7 @@ const LINKS = {
   "github": "https://github.com/klineodyssey/kline-odyssey",
   "portal16888_live": "./K線西遊記/temples/16888/index.html",
   "portal16888_abs": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/",
+  "portal12345_abs": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   "token_scan": "https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
   "universe_scan": "https://bscscan.com/address/0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63",
   "pair_scan": "https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
@@ -306,8 +309,8 @@ const DRAWERS = {
     `
   },
   temple12345: {
-    title: '12345 悟空財神殿｜狀態',
-    html: `<div class="drawer-section"><h4>下一階段神殿</h4><p>12345 目前作為 Temple Heart / 發財金 / 心跳 / 點火 / 許願 / 還願 的預部署入口。此 Portal 先保留節點與路徑，等合約上鏈後再接入 LIVE 狀態。</p></div>`
+    title: '12345 悟空財神殿｜入口路徑',
+    html: `<div class="drawer-section"><h4>入口已修正</h4><p>12345 悟空財神殿已改為直連 <b>index.html</b>，不再只連資料夾目錄，避免 GitHub Pages 出現 404。</p><p class="addr">https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html</p><p style="margin-top:8px"><a class="btn live mini" target="_blank" rel="noreferrer" href="${LINKS.portal12345_abs}">ENTER 12345</a></p></div>`
   },
   brain11520: {
     title: '11520 花果山台灣｜Brain 規劃',
