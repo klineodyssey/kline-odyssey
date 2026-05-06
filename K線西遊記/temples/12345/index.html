@@ -13053,5 +13053,436 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
+
+<!-- ===== KGEN 12345 V7.21.2｜wallet display refresh + activity countdowns ===== -->
+<style id="kgen12345-v7212-countdown-css">
+  .kgen-countdown-grid{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .kgen-countdown-card{
+    border:1px solid rgba(255,215,120,.38);
+    background:rgba(0,0,0,.42);
+    border-radius:12px;
+    padding:8px 10px;
+    color:#ffe39b;
+    font-size:12px;
+    line-height:1.45;
+  }
+  .kgen-countdown-card b{ color:#66f7ff; }
+  .kgen-mini-wallet-note{
+    margin-top:6px;
+    color:#66f7ff;
+    font-size:11px;
+    opacity:.95;
+  }
+</style>
+
+<script id="kgen12345-v7212-wallet-countdown-hotfix">
+(function(){
+  'use strict';
+
+  const KGEN_TOKEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BSC_CHAIN_ID = '0x38';
+
+  function $(id){ return document.getElementById(id); }
+  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '未連線'; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function hexToBigInt(hex){ if(!hex || hex === '0x') return 0n; return BigInt(hex); }
+  function addrParam(address){ return address.toLowerCase().replace(/^0x/,'').padStart(64,'0'); }
+  function toToken(v, decimals=18, fixed=4){
+    const base = 10n ** BigInt(decimals);
+    const whole = v / base;
+    const frac = v % base;
+    const fracStr = (frac * (10n ** BigInt(fixed)) / base).toString().padStart(fixed,'0');
+    return `${whole}.${fracStr}`;
+  }
+  async function ethCall(to, data){
+    return await ethereum.request({method:'eth_call', params:[{to, data}, 'latest']});
+  }
+  async function erc20Balance(token, owner){
+    return hexToBigInt(await ethCall(token, '0x70a08231' + addrParam(owner)));
+  }
+  async function erc20Allowance(token, owner, spender){
+    return hexToBigInt(await ethCall(token, '0xdd62ed3e' + addrParam(owner) + addrParam(spender)));
+  }
+
+  function updateTextNear(label, value){
+    const all = Array.from(document.querySelectorAll('*'));
+    for(const el of all){
+      const t=(el.textContent||'').trim();
+      if(!t || !t.includes(label)) continue;
+      const parent = el.parentElement;
+      if(!parent) continue;
+      const leaves = Array.from(parent.querySelectorAll('span,b,strong,em,div,p')).filter(x=>!x.children.length);
+      const target = leaves.find(x=>{
+        const tx=(x.textContent||'').trim();
+        return tx && tx!==t && !tx.includes(label);
+      });
+      if(target){ target.textContent=value; return true; }
+    }
+    return false;
+  }
+
+  function resetWalletUI(){
+    document.body.classList.remove('wallet-connected','is-connected','kgen-wallet-connected');
+    document.body.classList.add('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
+    updateTextNear('Wallet','未連線');
+    updateTextNear('錢包','未連線');
+    updateTextNear('BNB','--');
+    updateTextNear('KGEN','--');
+    updateTextNear('KGEN 餘額','--');
+    updateTextNear('Allowance','--');
+    updateTextNear('心臟血庫','0.0000 KGEN');
+    updateTextNear('Heart 血量','0.0000 KGEN');
+  }
+
+  async function forceWalletRefresh(){
+    try{
+      if(!window.ethereum || !ethereum.request){
+        resetWalletUI();
+        return false;
+      }
+      const accounts = await ethereum.request({method:'eth_accounts'});
+      if(!accounts || !accounts.length){
+        resetWalletUI();
+        return false;
+      }
+      const account = accounts[0];
+      const chainId = await ethereum.request({method:'eth_chainId'});
+      if(chainId !== BSC_CHAIN_ID){
+        updateTextNear('Wallet', short(account));
+        updateTextNear('錢包', short(account));
+        updateTextNear('KGEN 餘額', '請切換 BSC');
+        return false;
+      }
+
+      const bnbWei = hexToBigInt(await ethereum.request({method:'eth_getBalance', params:[account,'latest']}));
+      const kgen = await erc20Balance(KGEN_TOKEN, account);
+      const heart = await erc20Balance(KGEN_TOKEN, HEART);
+      const allow = await erc20Allowance(KGEN_TOKEN, account, HEART);
+
+      document.body.classList.add('wallet-connected','is-connected','kgen-wallet-connected');
+      document.body.classList.remove('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
+
+      updateTextNear('Wallet', short(account));
+      updateTextNear('錢包', short(account));
+      updateTextNear('BNB', toToken(bnbWei,18,4)+' BNB');
+      updateTextNear('KGEN', toToken(kgen,18,4)+' KGEN');
+      updateTextNear('KGEN 餘額', toToken(kgen,18,4)+' KGEN');
+      updateTextNear('Allowance', toToken(allow,18,4)+' KGEN');
+      updateTextNear('心臟血庫', toToken(heart,18,4)+' KGEN');
+      updateTextNear('Heart 血量', toToken(heart,18,4)+' KGEN');
+
+      const panel = document.querySelector('#web3-panel');
+      if(panel && !panel.querySelector('.kgen-mini-wallet-note')){
+        const note = document.createElement('div');
+        note.className='kgen-mini-wallet-note';
+        note.textContent='錢包資料已同步：BNB / KGEN / Allowance / Heart 血庫。';
+        panel.appendChild(note);
+      }
+      return true;
+    }catch(err){
+      console.warn('[KGEN 12345] wallet refresh failed', err);
+      return false;
+    }
+  }
+
+  function nextDate(month, day, hour=0, minute=0){
+    const now = new Date();
+    let d = new Date(Date.UTC(now.getUTCFullYear(), month-1, day, hour, minute, 0));
+    if(d.getTime() <= now.getTime()) d = new Date(Date.UTC(now.getUTCFullYear()+1, month-1, day, hour, minute, 0));
+    return d;
+  }
+
+  function nextIgniteWindow(){
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1, 0, 0, 0));
+  }
+
+  function fmtLeft(ms){
+    if(ms <= 0) return '進行中 / 可檢查';
+    let s = Math.floor(ms/1000);
+    const days = Math.floor(s/86400); s%=86400;
+    const h = Math.floor(s/3600); s%=3600;
+    const m = Math.floor(s/60); s%=60;
+    if(days>0) return `${days}天 ${pad(h)}:${pad(m)}:${pad(s)}`;
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  function ensureCountdownBox(){
+    const panel = document.querySelector('#web3-panel') || document.body;
+    let box = document.getElementById('kgen-activity-countdowns');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'kgen-activity-countdowns';
+      box.className = 'kgen-countdown-grid';
+      box.innerHTML = `
+        <div class="kgen-countdown-card">轉日呼吸 igniteAndClaim：<b id="cd-ignite">--</b></div>
+        <div class="kgen-countdown-card">5/20 悟空生日 festivalClaim(1)：<b id="cd-520">--</b></div>
+        <div class="kgen-countdown-card">11/11 孤勇日 festivalClaim(2)：<b id="cd-1111">--</b></div>
+        <div class="kgen-countdown-card">12/31 跨年倒數 newYearCountdownClaim：<b id="cd-1231">--</b></div>
+      `;
+      panel.appendChild(box);
+    }
+    return box;
+  }
+
+  function updateCountdowns(){
+    ensureCountdownBox();
+    const now = Date.now();
+    const items = [
+      ['cd-ignite', nextIgniteWindow().getTime()-now, ' 後開下一次'],
+      ['cd-520', nextDate(5,20).getTime()-now, ''],
+      ['cd-1111', nextDate(11,11).getTime()-now, ''],
+      ['cd-1231', nextDate(12,31).getTime()-now, '']
+    ];
+    items.forEach(([id,ms,suffix])=>{
+      const e=document.getElementById(id);
+      if(e) e.textContent = fmtLeft(ms) + suffix;
+    });
+  }
+
+  function patchButtons(){
+    document.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('button,a') : null;
+      if(!btn) return;
+      const t=(btn.textContent||'').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('刷新餘額') || t.includes('切 BSC')){
+        setTimeout(forceWalletRefresh, 300);
+        setTimeout(forceWalletRefresh, 1200);
+      }
+    }, true);
+  }
+
+  function bindEvents(){
+    if(window.ethereum && !ethereum.__kgen7212Bound){
+      ethereum.__kgen7212Bound = true;
+      if(ethereum.on){
+        ethereum.on('accountsChanged', ()=>setTimeout(forceWalletRefresh,200));
+        ethereum.on('chainChanged', ()=>setTimeout(forceWalletRefresh,300));
+        ethereum.on('disconnect', resetWalletUI);
+      }
+    }
+  }
+
+  function markVersion(){
+    const ver = document.getElementById('ver-st');
+    if(ver) ver.textContent = (ver.textContent||'').replace(/V7\\.21(\\.1)?/g,'V7.21.2');
+  }
+
+  async function init(){
+    markVersion();
+    bindEvents();
+    patchButtons();
+    updateCountdowns();
+    await forceWalletRefresh();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  window.addEventListener('load', init);
+  setInterval(updateCountdowns, 1000);
+  setInterval(forceWalletRefresh, 15000);
+
+  window.kgen12345ForceWalletRefresh = forceWalletRefresh;
+})();
+</script>
+
+
+<!-- ===== KGEN 12345 V7.21.3｜human friendly countdowns + heartbeat hourly + Q/A display ===== -->
+<style id="kgen12345-v7213-human-countdown-qa-css">
+  #kgen-human-activity-panel{
+    margin-top:10px;
+    border:1px solid rgba(255,215,120,.45);
+    background:linear-gradient(180deg,rgba(10,14,22,.82),rgba(0,0,0,.78));
+    border-radius:14px;
+    padding:10px;
+    color:#ffe39b;
+    font-size:12px;
+    line-height:1.55;
+  }
+  #kgen-human-activity-panel .title{
+    font-weight:900;
+    color:#ffd978;
+    margin-bottom:8px;
+  }
+  .kgen-human-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    align-items:center;
+    border-top:1px solid rgba(255,215,120,.16);
+    padding:7px 0;
+  }
+  .kgen-human-row:first-of-type{border-top:0}
+  .kgen-human-row .name{font-weight:800;color:#fff2ba}
+  .kgen-human-row .desc{font-size:11px;color:#cfeff2;opacity:.95;margin-top:2px}
+  .kgen-human-row .time{
+    color:#66f7ff;
+    font-weight:900;
+    white-space:nowrap;
+    text-align:right;
+  }
+  #kgen-question-answer-box{
+    margin-top:10px;
+    border:1px solid rgba(102,247,255,.35);
+    background:rgba(0,20,30,.45);
+    border-radius:12px;
+    padding:9px;
+    color:#fff;
+    font-size:12px;
+  }
+  #kgen-question-answer-box .q{
+    color:#66f7ff;
+    font-weight:900;
+    margin-bottom:4px;
+  }
+  #kgen-question-answer-box .a{
+    color:#ffe39b;
+    font-weight:800;
+  }
+</style>
+
+<script id="kgen12345-v7213-human-countdown-qa-js">
+(function(){
+  'use strict';
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function fmtLeft(ms){
+    if(ms <= 0) return '現在可檢查';
+    let s = Math.floor(ms/1000);
+    const d = Math.floor(s/86400); s%=86400;
+    const h = Math.floor(s/3600); s%=3600;
+    const m = Math.floor(s/60); s%=60;
+    if(d > 0) return `${d}天 ${pad(h)}時${pad(m)}分${pad(s)}秒`;
+    if(h > 0) return `${h}時${pad(m)}分${pad(s)}秒`;
+    if(m > 0) return `${m}分${pad(s)}秒`;
+    return `${s}秒`;
+  }
+
+  function nextUtcHour(){
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours()+1, 0, 0));
+  }
+
+  function nextUtcMidnight(){
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1, 0, 0, 0));
+  }
+
+  function nextDate(month, day, hour=0, minute=0){
+    const now = new Date();
+    let d = new Date(Date.UTC(now.getUTCFullYear(), month-1, day, hour, minute, 0));
+    if(d.getTime() <= now.getTime()) d = new Date(Date.UTC(now.getUTCFullYear()+1, month-1, day, hour, minute, 0));
+    return d;
+  }
+
+  function ensurePanel(){
+    const host = document.querySelector('#web3-panel') || document.querySelector('.hud-card') || document.body;
+    let panel = document.getElementById('kgen-human-activity-panel');
+    if(!panel){
+      panel = document.createElement('div');
+      panel.id = 'kgen-human-activity-panel';
+      panel.innerHTML = `
+        <div class="title">活動倒數｜下一次可以做什麼</div>
+
+        <div class="kgen-human-row">
+          <div>
+            <div class="name">整點心跳 heartbeatClaim</div>
+            <div class="desc">每小時一次，下一個 UTC 整點可檢查。</div>
+          </div>
+          <div class="time" id="human-cd-heartbeat">--</div>
+        </div>
+
+        <div class="kgen-human-row">
+          <div>
+            <div class="name">轉日呼吸 igniteAndClaim</div>
+            <div class="desc">每天 UTC 00:00 開始檢查，神殿換日呼吸。</div>
+          </div>
+          <div class="time" id="human-cd-ignite">--</div>
+        </div>
+
+        <div class="kgen-human-row">
+          <div>
+            <div class="name">5/20 悟空生日 festivalClaim(1)</div>
+            <div class="desc">生日活動日，到時按 5/20 活動。</div>
+          </div>
+          <div class="time" id="human-cd-520">--</div>
+        </div>
+
+        <div class="kgen-human-row">
+          <div>
+            <div class="name">11/11 孤勇日 festivalClaim(2)</div>
+            <div class="desc">孤勇日活動，到時按 11/11 活動。</div>
+          </div>
+          <div class="time" id="human-cd-1111">--</div>
+        </div>
+
+        <div class="kgen-human-row">
+          <div>
+            <div class="name">12/31 跨年倒數 newYearCountdownClaim</div>
+            <div class="desc">跨年活動，到時按 12/31 倒數。</div>
+          </div>
+          <div class="time" id="human-cd-1231">--</div>
+        </div>
+
+        <div id="kgen-question-answer-box">
+          <div class="q">目前問題：</div>
+          <div class="a">錢包餘額顯示與活動倒數要更清楚。</div>
+          <div class="q" style="margin-top:7px;">目前回答：</div>
+          <div class="a">已加入每小時心跳倒數、轉日呼吸倒數、節日活動倒數，並用人能看懂的文字說明下一步。</div>
+        </div>
+      `;
+      host.appendChild(panel);
+    }
+    return panel;
+  }
+
+  function set(id, text){
+    const el = document.getElementById(id);
+    if(el) el.textContent = text;
+  }
+
+  function update(){
+    ensurePanel();
+    const now = Date.now();
+    set('human-cd-heartbeat', fmtLeft(nextUtcHour().getTime() - now));
+    set('human-cd-ignite', fmtLeft(nextUtcMidnight().getTime() - now));
+    set('human-cd-520', fmtLeft(nextDate(5,20).getTime() - now));
+    set('human-cd-1111', fmtLeft(nextDate(11,11).getTime() - now));
+    set('human-cd-1231', fmtLeft(nextDate(12,31).getTime() - now));
+
+    // 同步舊版倒數欄位，避免只有舊欄位顯示
+    const oldHeartbeat = document.getElementById('cd-heartbeat');
+    if(oldHeartbeat) oldHeartbeat.textContent = fmtLeft(nextUtcHour().getTime() - now) + ' 後下一次';
+    const oldIgnite = document.getElementById('cd-ignite');
+    if(oldIgnite) oldIgnite.textContent = fmtLeft(nextUtcMidnight().getTime() - now) + ' 後下一次';
+  }
+
+  function markVersion(){
+    const ver = document.getElementById('ver-st');
+    if(ver) ver.textContent = (ver.textContent||'').replace(/V7\.21(\.\d+)?/g,'V7.21.3');
+    document.title = document.title.replace(/V7\.21(\.\d+)?/g,'V7.21.3');
+  }
+
+  function init(){
+    markVersion();
+    ensurePanel();
+    update();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  window.addEventListener('load', init);
+  setInterval(update, 1000);
+})();
+</script>
+
 </body>
 </html>
