@@ -12390,5 +12390,47 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
+
+<!-- ===== KGEN 12345 V7.21 hotfix ===== -->
+<style id="kgen12345-v721-css">
+  #wheel-wrap{position:fixed!important;left:18px!important;bottom:205px!important;width:118px!important;height:118px!important;z-index:2147483400!important;transform:none!important;pointer-events:auto!important}
+  #wheel-wrap .wheel{width:118px!important;height:118px!important}
+  #rotate-wheel-wrap{position:fixed!important;right:18px!important;bottom:205px!important;width:118px!important;height:118px!important;z-index:2147483400!important;pointer-events:auto!important;display:block!important}
+  #rotate-wheel-wrap .wheel{width:118px!important;height:118px!important;border:1px solid rgba(255,215,120,.42);border-radius:50%;background:radial-gradient(circle,rgba(255,215,120,.30),rgba(0,0,0,.66));display:flex;align-items:center;justify-content:center;color:#ffe39b;font-size:11px;font-weight:900;box-shadow:0 0 18px rgba(255,215,120,.23)}
+  .steer-zone{bottom:335px!important;z-index:2147483300!important}
+  body.k21-ops-open #web3-panel{display:block!important;position:fixed!important;left:12px!important;right:auto!important;bottom:470px!important;width:min(440px,calc(50vw - 18px))!important;max-height:34vh!important;overflow:auto!important;z-index:2147483500!important}
+  body.k21-rules-open #temple-modal{display:block!important;position:fixed!important;right:12px!important;left:auto!important;top:auto!important;bottom:470px!important;width:min(460px,calc(50vw - 18px))!important;max-height:34vh!important;overflow:auto!important;z-index:2147483490!important;background:transparent!important;padding:0!important}
+  body.k21-rules-open #temple-modal>div{max-width:100%!important;margin:0!important;max-height:34vh!important;overflow:auto!important;border-radius:18px!important}
+  #web3-panel .k21-panel-head,#temple-modal .k21-panel-head{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border-bottom:1px solid rgba(255,215,120,.22)!important;color:#ffe39b!important;font-weight:900!important}
+  .k21-close-btn{border:1px solid rgba(255,215,120,.55)!important;background:rgba(255,215,120,.12)!important;color:#ffe39b!important;border-radius:10px!important;padding:7px 10px!important;font-weight:900!important}
+  #web3-panel .k19-close-btn:not(.k21-close-btn),#web3-panel .close-btn:not(.k21-close-btn){display:none!important}
+  .footer-terminal{z-index:2147483200!important}
+  @media(max-width:760px){
+    #wheel-wrap{left:16px!important;bottom:204px!important;width:104px!important;height:104px!important}
+    #wheel-wrap .wheel{width:104px!important;height:104px!important}
+    #rotate-wheel-wrap{right:16px!important;bottom:204px!important;width:104px!important;height:104px!important}
+    .steer-zone{bottom:318px!important}
+    body.k21-ops-open #web3-panel{left:10px!important;right:10px!important;width:auto!important;bottom:430px!important;max-height:31vh!important}
+    body.k21-rules-open #temple-modal{left:10px!important;right:10px!important;width:auto!important;bottom:430px!important;max-height:31vh!important}
+  }
+</style>
+<script id="kgen12345-v721-js">
+(function(){
+ const VERSION='12345-TEMPLE-V7.21';
+ const $=id=>document.getElementById(id);
+ function speak(msg){try{if(window.app&&typeof app.speak==='function'){app.speak(msg);return}}catch(e){} try{if(speechSynthesis){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';u.rate=.95;speechSynthesis.speak(u)}}catch(e){}}
+ function setVersion(){document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';let ver=$('ver-st');if(ver)ver.textContent='VERSION '+VERSION;document.body.innerHTML=document.body.innerHTML.replace(/12345-TEMPLE-V7\.\d+/g,VERSION).replace(/V7\.\d+/g,'V7.21')}
+ function closePanels(){document.body.classList.remove('k17-ops-open','k17-rules-open','k18-ops-open','k18-rules-open','k19-ops-open','k19-rules-open','k20-ops-open','k20-rules-open','k21-ops-open','k21-rules-open')}
+ function normalizeOps(){let p=$('web3-panel');if(!p)return;let head=p.querySelector('.k21-panel-head');if(!head){head=document.createElement('div');p.insertBefore(head,p.firstChild)}head.className='k21-panel-head';head.innerHTML='<span>悟空心臟操作窗｜12345｜HEART READY｜Wallet / Heart</span><button class="k21-close-btn" type="button">收合</button>';head.querySelector('button').onclick=e=>{e.preventDefault();closePanels();speak('悟空心臟操作窗已收合')};[...p.querySelectorAll('button')].forEach(b=>{let t=(b.textContent||'').trim();if(t==='關'||t==='關閉')b.style.display='none';if(t==='展開'){b.textContent='收合';b.onclick=e=>{e.preventDefault();closePanels()}}})}
+ function normalizeRules(){let m=$('temple-modal');if(!m)return;let box=m.querySelector('div')||m;let head=box.querySelector('.k21-panel-head');if(!head){head=document.createElement('div');box.insertBefore(head,box.firstChild)}head.className='k21-panel-head';head.innerHTML='<span>規則 / 活動｜12345 五指山悟空財神殿</span><button class="k21-close-btn" type="button">收合</button>';head.querySelector('button').onclick=e=>{e.preventDefault();closePanels();speak('規則活動已收合')}}
+ function openOps(kind){normalizeOps();closePanels();document.body.classList.add('k21-ops-open');let p=$('web3-panel');if(p){p.style.display='block';p.scrollTop=0}speak(kind==='fortune'?'已開啟發財金，請先完成三次有效聖盃，再領取':'已開啟錢包與聖盃')}
+ function openRules(){normalizeRules();closePanels();document.body.classList.add('k21-rules-open');let m=$('temple-modal');if(m){m.style.display='block';m.scrollTop=0}speak('已開啟規則活動')}
+ function bindFooter(){let footer=document.querySelector('.footer-terminal');if(!footer)return;let btns=[...footer.querySelectorAll('button,.term-btn')].slice(0,8);if(btns.length<8)return;btns[4].onclick=e=>{e.preventDefault();openOps('wallet')};btns[5].onclick=e=>{e.preventDefault();openOps('fortune')};btns[6].onclick=e=>{e.preventDefault();openRules()}}
+ function ensureRotateWheel(){if($('rotate-wheel-wrap'))return;let wrap=document.createElement('div');wrap.id='rotate-wheel-wrap';wrap.innerHTML='<div class="wheel"><div>多空<br>旋轉</div></div>';document.body.appendChild(wrap);let dragging=false;function set(ev){let r=wrap.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,p=ev.touches?ev.touches[0]:ev,deg=Math.round(Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI);let s=document.querySelector('input[type="range"][min="-180"],input[type="range"][max="180"],#angle-slider,#steer-slider');if(s){s.value=deg;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}))}let lab=document.querySelector('.big-deg,.core-deg,#core-deg,#deg-label');if(lab)lab.textContent=deg+'°'}wrap.addEventListener('pointerdown',e=>{dragging=true;try{wrap.setPointerCapture(e.pointerId)}catch(x){}set(e)});wrap.addEventListener('pointermove',e=>{if(dragging)set(e)});wrap.addEventListener('pointerup',()=>dragging=false);wrap.addEventListener('pointercancel',()=>dragging=false)}
+ function init(){setVersion();normalizeOps();normalizeRules();bindFooter();ensureRotateWheel()}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();window.addEventListener('load',init);setTimeout(init,800);setTimeout(init,1800);window.k12345OpenOps=openOps;window.k12345OpenRules=openRules;
+})();
+</script>
+
 </body>
 </html>
