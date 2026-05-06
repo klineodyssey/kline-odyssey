@@ -12391,1096 +12391,615 @@ KGEN 12345 UI Patch V7.6.0
 </script>
 
 
+<!-- ===== KGEN 12345 V7.21 hotfix ===== -->
+<style id="kgen12345-v721-css">
+  #wheel-wrap{position:fixed!important;left:18px!important;bottom:205px!important;width:118px!important;height:118px!important;z-index:2147483400!important;transform:none!important;pointer-events:auto!important}
+  #wheel-wrap .wheel{width:118px!important;height:118px!important}
+  #rotate-wheel-wrap{position:fixed!important;right:18px!important;bottom:205px!important;width:118px!important;height:118px!important;z-index:2147483400!important;pointer-events:auto!important;display:block!important}
+  #rotate-wheel-wrap .wheel{width:118px!important;height:118px!important;border:1px solid rgba(255,215,120,.42);border-radius:50%;background:radial-gradient(circle,rgba(255,215,120,.30),rgba(0,0,0,.66));display:flex;align-items:center;justify-content:center;color:#ffe39b;font-size:11px;font-weight:900;box-shadow:0 0 18px rgba(255,215,120,.23)}
+  .steer-zone{bottom:335px!important;z-index:2147483300!important}
+  body.k21-ops-open #web3-panel{display:block!important;position:fixed!important;left:12px!important;right:auto!important;bottom:470px!important;width:min(440px,calc(50vw - 18px))!important;max-height:34vh!important;overflow:auto!important;z-index:2147483500!important}
+  body.k21-rules-open #temple-modal{display:block!important;position:fixed!important;right:12px!important;left:auto!important;top:auto!important;bottom:470px!important;width:min(460px,calc(50vw - 18px))!important;max-height:34vh!important;overflow:auto!important;z-index:2147483490!important;background:transparent!important;padding:0!important}
+  body.k21-rules-open #temple-modal>div{max-width:100%!important;margin:0!important;max-height:34vh!important;overflow:auto!important;border-radius:18px!important}
+  #web3-panel .k21-panel-head,#temple-modal .k21-panel-head{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border-bottom:1px solid rgba(255,215,120,.22)!important;color:#ffe39b!important;font-weight:900!important}
+  .k21-close-btn{border:1px solid rgba(255,215,120,.55)!important;background:rgba(255,215,120,.12)!important;color:#ffe39b!important;border-radius:10px!important;padding:7px 10px!important;font-weight:900!important}
+  #web3-panel .k19-close-btn:not(.k21-close-btn),#web3-panel .close-btn:not(.k21-close-btn){display:none!important}
+  .footer-terminal{z-index:2147483200!important}
+  @media(max-width:760px){
+    #wheel-wrap{left:16px!important;bottom:204px!important;width:104px!important;height:104px!important}
+    #wheel-wrap .wheel{width:104px!important;height:104px!important}
+    #rotate-wheel-wrap{right:16px!important;bottom:204px!important;width:104px!important;height:104px!important}
+    .steer-zone{bottom:318px!important}
+    body.k21-ops-open #web3-panel{left:10px!important;right:10px!important;width:auto!important;bottom:430px!important;max-height:31vh!important}
+    body.k21-rules-open #temple-modal{left:10px!important;right:10px!important;width:auto!important;bottom:430px!important;max-height:31vh!important}
+  }
+</style>
+<script id="kgen12345-v721-js">
+(function(){
+ const VERSION='12345-TEMPLE-V7.21';
+ const $=id=>document.getElementById(id);
+ function speak(msg){try{if(window.app&&typeof app.speak==='function'){app.speak(msg);return}}catch(e){} try{if(speechSynthesis){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';u.rate=.95;speechSynthesis.speak(u)}}catch(e){}}
+ function setVersion(){document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';let ver=$('ver-st');if(ver)ver.textContent='VERSION '+VERSION;document.body.innerHTML=document.body.innerHTML.replace(/12345-TEMPLE-V7\.\d+/g,VERSION).replace(/V7\.\d+/g,'V7.21')}
+ function closePanels(){document.body.classList.remove('k17-ops-open','k17-rules-open','k18-ops-open','k18-rules-open','k19-ops-open','k19-rules-open','k20-ops-open','k20-rules-open','k21-ops-open','k21-rules-open')}
+ function normalizeOps(){let p=$('web3-panel');if(!p)return;let head=p.querySelector('.k21-panel-head');if(!head){head=document.createElement('div');p.insertBefore(head,p.firstChild)}head.className='k21-panel-head';head.innerHTML='<span>悟空心臟操作窗｜12345｜HEART READY｜Wallet / Heart</span><button class="k21-close-btn" type="button">收合</button>';head.querySelector('button').onclick=e=>{e.preventDefault();closePanels();speak('悟空心臟操作窗已收合')};[...p.querySelectorAll('button')].forEach(b=>{let t=(b.textContent||'').trim();if(t==='關'||t==='關閉')b.style.display='none';if(t==='展開'){b.textContent='收合';b.onclick=e=>{e.preventDefault();closePanels()}}})}
+ function normalizeRules(){let m=$('temple-modal');if(!m)return;let box=m.querySelector('div')||m;let head=box.querySelector('.k21-panel-head');if(!head){head=document.createElement('div');box.insertBefore(head,box.firstChild)}head.className='k21-panel-head';head.innerHTML='<span>規則 / 活動｜12345 五指山悟空財神殿</span><button class="k21-close-btn" type="button">收合</button>';head.querySelector('button').onclick=e=>{e.preventDefault();closePanels();speak('規則活動已收合')}}
+ function openOps(kind){normalizeOps();closePanels();document.body.classList.add('k21-ops-open');let p=$('web3-panel');if(p){p.style.display='block';p.scrollTop=0}speak(kind==='fortune'?'已開啟發財金，請先完成三次有效聖盃，再領取':'已開啟錢包與聖盃')}
+ function openRules(){normalizeRules();closePanels();document.body.classList.add('k21-rules-open');let m=$('temple-modal');if(m){m.style.display='block';m.scrollTop=0}speak('已開啟規則活動')}
+ function bindFooter(){let footer=document.querySelector('.footer-terminal');if(!footer)return;let btns=[...footer.querySelectorAll('button,.term-btn')].slice(0,8);if(btns.length<8)return;btns[4].onclick=e=>{e.preventDefault();openOps('wallet')};btns[5].onclick=e=>{e.preventDefault();openOps('fortune')};btns[6].onclick=e=>{e.preventDefault();openRules()}}
+ function ensureRotateWheel(){if($('rotate-wheel-wrap'))return;let wrap=document.createElement('div');wrap.id='rotate-wheel-wrap';wrap.innerHTML='<div class="wheel"><div>多空<br>旋轉</div></div>';document.body.appendChild(wrap);let dragging=false;function set(ev){let r=wrap.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,p=ev.touches?ev.touches[0]:ev,deg=Math.round(Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI);let s=document.querySelector('input[type="range"][min="-180"],input[type="range"][max="180"],#angle-slider,#steer-slider');if(s){s.value=deg;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}))}let lab=document.querySelector('.big-deg,.core-deg,#core-deg,#deg-label');if(lab)lab.textContent=deg+'°'}wrap.addEventListener('pointerdown',e=>{dragging=true;try{wrap.setPointerCapture(e.pointerId)}catch(x){}set(e)});wrap.addEventListener('pointermove',e=>{if(dragging)set(e)});wrap.addEventListener('pointerup',()=>dragging=false);wrap.addEventListener('pointercancel',()=>dragging=false)}
+ function init(){setVersion();normalizeOps();normalizeRules();bindFooter();ensureRotateWheel()}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();window.addEventListener('load',init);setTimeout(init,800);setTimeout(init,1800);window.k12345OpenOps=openOps;window.k12345OpenRules=openRules;
+})();
+</script>
 
-<!-- ===== KGEN 12345 V7.21｜stable repair patch from V7.20 ===== -->
-<style id="kgen12345-v721-stable-repair-css">
-  /* V7.21 只做穩定修復：不再疊舊客服、不再打亂原本攝影/錄影功能 */
-  #brand-badge{display:none!important;}
-  #temple-audio-console{display:none!important;}
-  body:not(.k21-audio-open) #music-panel{display:none!important;}
-  body:not(.k21-ops-open) #web3-panel{display:none!important;}
-  body:not(.k21-rules-open) #temple-modal{display:none!important;}
 
-  /* 左下悟空心臟操作窗：方向橫桿上方，不能藏到底部 */
-  body.k21-ops-open #web3-panel{
-    display:block!important;
-    position:fixed!important;
-    left:12px!important;
-    right:auto!important;
-    bottom:258px!important;
-    width:min(430px,calc(100vw - 24px))!important;
-    max-height:40vh!important;
-    overflow:auto!important;
-    -webkit-overflow-scrolling:touch!important;
-    z-index:2147483600!important;
-    border-radius:18px!important;
-    padding:12px!important;
-    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
-    border:1px solid rgba(255,215,120,.76)!important;
-    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
-  }
-  #web3-panel .k21-panel-head,
-  #temple-modal .k21-panel-head,
-  #music-panel .k21-panel-head{
-    position:sticky!important;
-    top:0!important;
-    z-index:5!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:space-between!important;
-    gap:10px!important;
-    padding:8px 0 10px!important;
-    margin-bottom:8px!important;
-    background:linear-gradient(180deg,rgba(5,9,15,.99),rgba(5,9,15,.86))!important;
-    color:#ffd978!important;
-    border-bottom:1px solid rgba(255,215,120,.22)!important;
-    font-weight:900!important;
-    font-size:13px!important;
-  }
-  .k21-close-btn{
-    pointer-events:auto!important;
-    border:1px solid rgba(255,215,120,.58)!important;
-    background:rgba(255,215,120,.14)!important;
-    color:#ffe39b!important;
-    border-radius:11px!important;
-    padding:7px 11px!important;
-    font-weight:900!important;
-    cursor:pointer!important;
-  }
+<!-- ===== KGEN 12345 V7.22｜guide modal close + controller side swap fix ===== -->
+<style id="kgen12345-v722-guide-controller-fix-css">
+  /* V7.22: 左右圓形控制器對調修正
+     左下：旋轉 / 多空方向
+     右下：前後左右 MOVE
+  */
 
-  /* 右下規則/活動窗：與左下操作窗同高度、同尺寸邏輯 */
-  body.k21-rules-open #temple-modal{
-    display:block!important;
-    position:fixed!important;
-    left:auto!important;
-    right:12px!important;
-    top:auto!important;
-    bottom:258px!important;
-    width:min(430px,calc(100vw - 24px))!important;
-    max-height:40vh!important;
-    overflow:auto!important;
-    z-index:2147483590!important;
-    background:transparent!important;
-    padding:0!important;
-  }
-  body.k21-rules-open #temple-modal > div{
-    width:100%!important;
-    max-width:100%!important;
-    margin:0!important;
-    max-height:40vh!important;
-    overflow:auto!important;
-    border-radius:18px!important;
-    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
-    border:1px solid rgba(255,215,120,.70)!important;
-    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
-  }
-
-  /* 右上神殿音響：只由右上「五指山神殿音響」按鈕展開，不在右下浮出 */
-  body.k21-audio-open #music-panel{
-    display:block!important;
-    position:fixed!important;
-    right:12px!important;
-    top:154px!important;
-    left:auto!important;
-    bottom:auto!important;
-    width:min(360px,calc(100vw - 24px))!important;
-    max-height:44vh!important;
-    overflow:auto!important;
-    z-index:2147483610!important;
-    border-radius:18px!important;
-    padding:12px!important;
-    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
-    border:1px solid rgba(255,215,120,.76)!important;
-    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
-  }
-
-  /* 兩個圓形控制器：左下是前後左右移動；右下是旋轉多空。兩者同高度、在橫桿上方 */
-  #move-joystick-wrap{
-    display:block!important;
-    position:fixed!important;
-    left:18px!important;
-    bottom:224px!important;
-    right:auto!important;
-    width:118px!important;
-    height:118px!important;
-    z-index:2147483450!important;
-    pointer-events:auto!important;
-  }
-  #move-joystick-wrap::before{content:"MOVE"!important;}
-  #move-joystick-base{inset:13px!important;}
-  #move-joystick-knob{
-    left:35px!important;
-    top:35px!important;
-    width:48px!important;
-    height:48px!important;
-  }
-
+  /* 原本的移動方向盤，移到右下 */
   #wheel-wrap{
-    display:block!important;
     position:fixed!important;
     right:18px!important;
     left:auto!important;
-    bottom:224px!important;
-    transform:none!important;
+    bottom:205px!important;
     width:118px!important;
     height:118px!important;
-    z-index:2147483450!important;
+    z-index:2147483400!important;
+    transform:none!important;
     pointer-events:auto!important;
-  }
-  #wheel-wrap::before{
-    content:"方向 / 多空";
-    position:absolute;
-    top:-24px;
-    left:50%;
-    transform:translateX(-50%);
-    color:#ffe39b;
-    font-family:'Orbitron','Noto Sans TC',sans-serif;
-    font-size:10px;
-    white-space:nowrap;
-    text-shadow:0 0 10px rgba(255,215,120,.35);
   }
   #wheel-wrap .wheel{
     width:118px!important;
     height:118px!important;
   }
-  #wheel-wrap .wheel-hub{
-    width:42px!important;
-    height:42px!important;
-    font-size:9px!important;
-  }
-  #wheel-wrap .wheel-knob{
-    width:16px!important;
-    height:16px!important;
+
+  /* 旋轉 / 多空圓盤，移到左下 */
+  #rotate-wheel-wrap,
+  .rotate-wheel-wrap,
+  #steer-wheel-wrap,
+  .steer-wheel-wrap,
+  #direction-wheel-wrap,
+  .direction-wheel-wrap{
+    position:fixed!important;
+    left:18px!important;
+    right:auto!important;
+    bottom:205px!important;
+    width:118px!important;
+    height:118px!important;
+    z-index:2147483400!important;
+    transform:none!important;
+    pointer-events:auto!important;
+    display:block!important;
   }
 
-  .steer-zone{bottom:194px!important;z-index:2147483300!important;}
-  .angle-readout{font-size:50px!important;}
-  .footer-terminal{z-index:2147483200!important; padding:10px!important; gap:8px!important;}
-  .footer-terminal .term-btn{pointer-events:auto!important; padding:12px 6px!important; min-height:54px!important; line-height:1.2!important;}
+  #rotate-wheel-wrap .wheel,
+  .rotate-wheel-wrap .wheel,
+  .rotate-wheel,
+  .direction-wheel{
+    width:118px!important;
+    height:118px!important;
+    border:1px solid rgba(255,215,120,.42)!important;
+    border-radius:50%!important;
+    background:radial-gradient(circle,rgba(255,215,120,.30),rgba(0,0,0,.66))!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    color:#ffe39b!important;
+    font-size:11px!important;
+    font-weight:900!important;
+    box-shadow:0 0 18px rgba(255,215,120,.23)!important;
+  }
 
-  /* 避免舊版導覽失控疊滿畫面 */
-  #guide-modal{z-index:2147483620!important;}
-  #guide-modal .guide-card{max-height:78vh!important;}
-  .k21-highlight{outline:2px solid rgba(0,242,255,.48)!important; box-shadow:0 0 18px rgba(0,242,255,.25)!important;}
+  /* 中間客服導覽 modal：可關、可點、層級正確 */
+  #temple-modal,
+  .guide-modal,
+  .modal,
+  [data-modal="guide"]{
+    pointer-events:auto!important;
+  }
+
+  #temple-modal .k722-guide-body,
+  .k722-guide-body{
+    color:#fff!important;
+    line-height:1.65!important;
+    font-size:13px!important;
+  }
+
+  .k722-guide-tabs{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:8px!important;
+    margin:10px 0 12px!important;
+  }
+  .k722-guide-tabs button{
+    border:1px solid rgba(255,215,120,.45)!important;
+    background:rgba(255,215,120,.10)!important;
+    color:#ffe39b!important;
+    border-radius:10px!important;
+    padding:8px 10px!important;
+    font-weight:800!important;
+  }
+  .k722-guide-tabs button.active{
+    background:rgba(255,215,120,.28)!important;
+  }
+
+  .k722-close-x{
+    position:absolute!important;
+    right:12px!important;
+    top:10px!important;
+    border:0!important;
+    background:transparent!important;
+    color:#ffe39b!important;
+    font-size:22px!important;
+    line-height:1!important;
+    z-index:2147483640!important;
+    pointer-events:auto!important;
+  }
+
+  body.k722-guide-open #temple-modal{
+    display:block!important;
+    position:fixed!important;
+    left:50%!important;
+    top:50%!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:translate(-50%,-50%)!important;
+    width:min(560px,calc(100vw - 28px))!important;
+    max-height:72vh!important;
+    overflow:auto!important;
+    z-index:2147483600!important;
+    background:rgba(5,8,14,.96)!important;
+    border:1px solid rgba(255,215,120,.55)!important;
+    border-radius:18px!important;
+    box-shadow:0 24px 80px rgba(0,0,0,.78),0 0 28px rgba(255,215,120,.16)!important;
+    padding:14px!important;
+  }
+
+  body:not(.k722-guide-open):not(.k21-rules-open):not(.k20-rules-open):not(.k19-rules-open) #temple-modal{
+    display:none!important;
+  }
 
   @media(max-width:760px){
-    body.k21-ops-open #web3-panel{
-      left:10px!important;
-      right:10px!important;
-      width:auto!important;
-      bottom:252px!important;
-      max-height:40vh!important;
+    #wheel-wrap{
+      right:16px!important;
+      left:auto!important;
+      bottom:204px!important;
+      width:104px!important;
+      height:104px!important;
     }
-    body.k21-rules-open #temple-modal{
-      left:10px!important;
-      right:10px!important;
-      width:auto!important;
-      bottom:252px!important;
-      max-height:40vh!important;
+    #wheel-wrap .wheel{width:104px!important;height:104px!important}
+    #rotate-wheel-wrap,
+    .rotate-wheel-wrap,
+    #steer-wheel-wrap,
+    .steer-wheel-wrap,
+    #direction-wheel-wrap,
+    .direction-wheel-wrap{
+      left:16px!important;
+      right:auto!important;
+      bottom:204px!important;
+      width:104px!important;
+      height:104px!important;
     }
-    body.k21-rules-open #temple-modal > div{max-height:40vh!important;}
-    body.k21-audio-open #music-panel{
-      left:10px!important;
-      right:10px!important;
-      top:144px!important;
-      width:auto!important;
-      max-height:44vh!important;
-    }
-    #move-joystick-wrap{left:14px!important;bottom:222px!important;width:108px!important;height:108px!important;}
-    #move-joystick-knob{left:30px!important;top:30px!important;}
-    #wheel-wrap{right:14px!important;bottom:222px!important;width:108px!important;height:108px!important;}
-    #wheel-wrap .wheel{width:108px!important;height:108px!important;}
-    .steer-zone{bottom:194px!important;}
-    .footer-terminal{grid-template-columns:repeat(4,1fr)!important;}
-    .footer-terminal .term-btn{font-size:11px!important;padding:10px 2px!important;}
   }
 </style>
 
-<script id="kgen12345-v721-stable-repair-js">
+<script id="kgen12345-v722-guide-controller-fix-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.21';
-  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
-  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
-  const MARS='0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const VERSION='12345-TEMPLE-V7.22';
   const $=id=>document.getElementById(id);
 
   function speak(msg){
-    try{ if(window.app && typeof app.speak==='function'){ app.speak(String(msg||'')); return; } }catch(e){}
+    try{ if(window.app && typeof window.app.speak==='function'){ window.app.speak(msg); return; } }catch(e){}
     try{
       if(window.speechSynthesis){
         speechSynthesis.cancel();
         const u=new SpeechSynthesisUtterance(String(msg||''));
-        u.lang='zh-TW'; u.rate=.95; u.pitch=.92;
+        u.lang='zh-TW'; u.rate=.95; u.pitch=.95;
         speechSynthesis.speak(u);
       }
     }catch(e){}
   }
 
-  function closeAll(){
-    document.body.classList.remove(
-      'k17-ops-open','k17-rules-open',
-      'k18-ops-open','k18-rules-open','k18-audio-open',
-      'k19-ops-open','k19-rules-open','k19-audio-open',
-      'k20-ops-open','k20-rules-open','k20-audio-open',
-      'k21-ops-open','k21-rules-open','k21-audio-open',
-      'v716-ops-open','v716-rules-open'
-    );
-    const g=$('guide-modal');
-    if(g) g.classList.remove('show');
-  }
-
   function setVersion(){
     document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    const ver=$('ver-st');
+    if(ver) ver.textContent='VERSION '+VERSION;
+    // 不用 innerHTML 重寫，避免破壞原本事件；只改明確文字節點
     document.querySelectorAll('*').forEach(el=>{
       if(!el || !el.childNodes || el.childNodes.length!==1) return;
       const n=el.childNodes[0];
       if(n.nodeType!==3) return;
-      n.nodeValue=String(n.nodeValue)
-        .replace(/12345-TEMPLE-V7\.\d+/g,VERSION)
-        .replace(/V7\.\d+/g,'V7.21')
-        .replace(/16888 廣寒宮/g,'12345 五指山悟空財神殿')
-        .replace(/月老成親系統/g,'悟空財神殿系統')
-        .replace(/下凡/g,'發財金');
+      n.nodeValue=n.nodeValue.replace(/12345-TEMPLE-V7\.\d+/g,VERSION).replace(/V7\.\d+/g,'V7.22');
     });
   }
 
-  function ensureOpsHead(){
-    const p=$('web3-panel'); if(!p) return;
-    p.querySelectorAll('.k17-panel-head,.k18-panel-head,.k19-panel-head,.k20-panel-head,.k21-panel-head').forEach((h,i)=>{ if(i>0) h.remove(); });
-    let h=p.querySelector('.k21-panel-head');
-    if(!h){
-      h=document.createElement('div');
-      h.className='k21-panel-head';
-      p.insertBefore(h,p.firstChild);
+  function closeAll(){
+    document.body.classList.remove(
+      'k17-ops-open','k17-rules-open',
+      'k18-ops-open','k18-rules-open',
+      'k19-ops-open','k19-rules-open',
+      'k20-ops-open','k20-rules-open',
+      'k21-ops-open','k21-rules-open',
+      'k722-guide-open'
+    );
+    const m=$('temple-modal');
+    if(m && !document.body.classList.contains('k21-rules-open')) m.style.display='none';
+    speak('視窗已收合。');
+  }
+
+  const guideText = {
+    intro: `
+      <h3>12345 五指山悟空財神殿</h3>
+      <p>這不是 16888 廣寒宮，也不是月老成親系統。這裡是 TempleHeart V3.2.6 前端控制神殿。</p>
+      <p>主流程：連錢包 → Approve Heart → 三次聖盃 → fortuneClaim 發財金。</p>
+    `,
+    cup: `
+      <h3>三次聖盃請示</h3>
+      <p>每次請示會出現四種結果：正反、反正為聖盃成功；正正為笑杯；反反為陰杯。</p>
+      <p>必須累積三次有效聖盃，才能送出發財金交易。沒過就繼續請示，不會直接通過。</p>
+    `,
+    claim: `
+      <h3>發財金與 Heart 血庫</h3>
+      <p>fortuneClaim 為 1 到 888 KGEN。Heart 合約需要先有 KGEN 血庫餘額，才能實際發出。</p>
+      <p>第一次測試建議只轉 1,000 KGEN 到 Heart 合約，小額確認成功後再調整。</p>
+    `,
+    events: `
+      <h3>節日活動</h3>
+      <p>5/20：悟空生日 festivalClaim(1)。</p>
+      <p>11/11：孤勇日 festivalClaim(2)。</p>
+      <p>12/31：跨年倒數 newYearCountdownClaim。</p>
+    `,
+    approve: `
+      <h3>Approve 教學</h3>
+      <p>Approve 不是領幣，是授權 Heart 合約在你操作還願、點燈等功能時可使用 KGEN。</p>
+      <p>發財金本身是從 Heart 血庫發出；還願與點燈則需要你錢包授權。</p>
+    `
+  };
+
+  function ensureGuideModal(){
+    let m=$('temple-modal');
+    if(!m){
+      m=document.createElement('div');
+      m.id='temple-modal';
+      document.body.appendChild(m);
     }
-    h.innerHTML='<span>悟空心臟操作窗｜12345｜Wallet / Heart</span><button class="k21-close-btn" type="button">收合</button>';
-    h.querySelector('button').onclick=function(e){e.preventDefault();closeAll();speak('悟空心臟操作窗已收合。');};
-    p.querySelectorAll('button').forEach(btn=>{
-      if(btn.closest('.k21-panel-head')) return;
-      const t=(btn.textContent||'').trim();
-      if(t==='關'||t==='關閉'||t==='收合'||t==='展開') btn.style.display='none';
+    if(!m.querySelector('.k722-guide-body')){
+      m.innerHTML = `
+        <button class="k722-close-x" type="button" aria-label="close">×</button>
+        <div style="color:#ffe39b;font-weight:900;margin-bottom:8px;">客服導覽｜12345 五指山悟空財神殿</div>
+        <div class="k722-guide-tabs">
+          <button data-guide-tab="intro" class="active">故事與快速開始</button>
+          <button data-guide-tab="cup">三次聖盃</button>
+          <button data-guide-tab="claim">發財金</button>
+          <button data-guide-tab="events">活動</button>
+          <button data-guide-tab="approve">Approve</button>
+        </div>
+        <div class="k722-guide-body"></div>
+      `;
+    }
+    const close=m.querySelector('.k722-close-x');
+    if(close) close.onclick=(e)=>{e.preventDefault(); e.stopPropagation(); closeAll();};
+    m.querySelectorAll('[data-guide-tab]').forEach(btn=>{
+      btn.onclick=(e)=>{
+        e.preventDefault(); e.stopPropagation();
+        const tab=btn.getAttribute('data-guide-tab')||'intro';
+        m.querySelectorAll('[data-guide-tab]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const body=m.querySelector('.k722-guide-body');
+        if(body) body.innerHTML=guideText[tab]||guideText.intro;
+        speak(btn.textContent.trim()+'說明已開啟。');
+      };
     });
-    p.querySelectorAll('*').forEach(el=>{
-      if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
-        let s=el.textContent||'';
-        s=s.replace('Allowance → Universe','Allowance → Heart')
-           .replace('Universe','Heart')
-           .replace('高老莊','Heart')
-           .replace('16888','12345');
-        el.textContent=s;
-      }
-    });
+    const body=m.querySelector('.k722-guide-body');
+    if(body && !body.innerHTML.trim()) body.innerHTML=guideText.intro;
+    return m;
   }
 
-  function buildRulesModal(){
-    const m=$('temple-modal'); if(!m) return;
-    let inner=m.firstElementChild || m;
-    inner.querySelectorAll('.k17-rules-body,.k18-rules-body,.k19-rules-body,.k21-rules-body').forEach(x=>x.remove());
-    const box=document.createElement('div');
-    box.className='k21-rules-body';
-    box.style.cssText='padding:14px 16px;color:#eaf5ff;font-size:13px;line-height:1.75;';
-    box.innerHTML=`
-      <div class="k21-panel-head">
-        <span>12345 五指山悟空財神殿｜規則與活動</span>
-        <button class="k21-close-btn" type="button" id="k21-close-rules">收合</button>
-      </div>
-      <div style="border:1px solid rgba(255,215,120,.24);border-radius:14px;padding:12px;background:rgba(255,255,255,.04);">
-        <b>這裡不是 16888 廣寒宮，也不是月老成親系統。</b><br>
-        這裡是 <b>TempleHeart V3.2.6</b> 的前端控制神殿。<br><br>
-        <b>主流程：</b>連接錢包 → Approve Heart → 請示三次聖盃 → fortuneClaim 發財金。<br>
-        <b>聖盃規則：</b>正反 / 反正 = 聖盃成功；正正 = 笑杯；反反 = 陰杯。未滿三次成功不可領。<br>
-        <b>日常功能：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸；vowTo 還願補血；lightLamp 點燈續命；makeWish 許願 hash。<br>
-        <b>節日活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br><br>
-        <b>Heart：</b><code>${HEART}</code><br>
-        <b>KGEN：</b><code>${TOKEN}</code><br>
-        <b>Brain：</b><code>${BRAIN}</code><br>
-        <b>MarsSeats：</b><code>${MARS}</code>
-      </div>`;
-    inner.insertBefore(box, inner.firstChild);
-    const c=$('k21-close-rules'); if(c) c.onclick=function(e){e.preventDefault();closeAll();speak('規則活動已收合。');};
+  function openGuide(tab='intro'){
+    const m=ensureGuideModal();
+    document.body.classList.remove('k21-rules-open','k20-rules-open','k19-rules-open');
+    document.body.classList.add('k722-guide-open');
+    m.style.display='block';
+    const btn=m.querySelector(`[data-guide-tab="${tab}"]`) || m.querySelector('[data-guide-tab="intro"]');
+    if(btn) btn.click();
+    speak('客服導覽已開啟。');
   }
 
-  function ensureMusicPanel(){
-    let p=$('music-panel');
-    if(!p) return;
-    p.querySelectorAll('.k21-panel-head').forEach(x=>x.remove());
-    const h=document.createElement('div');
-    h.className='k21-panel-head';
-    h.innerHTML='<span>五指山神殿音響｜V7.21</span><button class="k21-close-btn" type="button">收合</button>';
-    p.insertBefore(h,p.firstChild);
-    h.querySelector('button').onclick=function(e){e.preventDefault();closeAll();speak('神殿音響已收合。');};
-  }
-
-  function openOps(kind){
-    closeAll(); ensureOpsHead();
-    document.body.classList.add('k21-ops-open');
-    const p=$('web3-panel');
-    if(p){
-      p.style.display='block';
-      p.scrollTop=0;
-      const key=kind==='fortune'?'發財金':(kind==='cup'?'聖盃':'');
-      if(key){
-        setTimeout(()=>{
-          const target=[...p.querySelectorAll('button,div,input')].find(el=>(el.textContent||el.placeholder||'').includes(key));
-          if(target && target.scrollIntoView){
-            target.classList.add('k21-highlight');
-            target.scrollIntoView({block:'center',behavior:'smooth'});
-            setTimeout(()=>target.classList.remove('k21-highlight'),1600);
-          }
-        },150);
-      }
-    }
-    speak(kind==='fortune'
-      ? '已開啟發財金操作。請確認錢包，先完成三次有效聖盃，再送出 fortuneClaim。'
-      : '已開啟悟空心臟操作窗。請先連接錢包並切到 BSC。');
-  }
-
-  function openRules(){
-    closeAll(); buildRulesModal();
-    const m=$('temple-modal'); if(m) m.style.display='block';
-    document.body.classList.add('k21-rules-open');
-    speak('已開啟五指山悟空財神殿規則與活動。');
-  }
-
-  function openAudio(){
-    closeAll(); ensureMusicPanel();
-    const p=$('music-panel'); if(p) p.style.display='block';
-    document.body.classList.add('k21-audio-open');
-    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
-    try{ if(window.app && typeof app.musicLoadBuiltIn==='function') app.musicLoadBuiltIn(false); }catch(e){}
-    speak('五指山神殿音響已開啟。');
-  }
-
-  function openGuide(){
-    closeAll();
-    const modal=$('guide-modal');
-    const body=$('guide-body');
-    if(modal && body){
-      body.innerHTML=`
-        <h3>12345 五指山悟空財神殿｜客服導覽</h3>
-        <p>這裡是 <b>TempleHeart V3.2.6</b> 前端控制神殿，不是廣寒宮，也不是月老成親系統。</p>
-        <p><b>主流程：</b>連接錢包 → Approve Heart → 請示三次聖盃 → fortuneClaim 發財金。</p>
-        <p><b>聖盃：</b>正反 / 反正算成功；正正是笑杯；反反是陰杯。三次成功才可領。</p>
-        <p><b>活動：</b>5/20 festivalClaim(1)，11/11 festivalClaim(2)，12/31 newYearCountdownClaim。</p>
-        <p><b>Heart：</b><code>${HEART}</code></p>`;
-      modal.classList.add('show');
-      speak('客服導覽已開啟，這是五指山悟空財神殿說明。');
-      return;
-    }
-    openRules();
-  }
-
-  function normalizeFooter8(){
-    const footer=document.querySelector('.footer-terminal'); if(!footer) return;
-    const btns=[...footer.querySelectorAll('button,.term-btn')].slice(0,8);
-    if(btns.length<8) return;
-    btns[0].innerHTML='📸<br>拍照';
-    btns[1].innerHTML='🎥<br>錄影';
-    btns[2].innerHTML='🤳<br>前鏡';
-    btns[3].innerHTML='🌌<br>後鏡';
-    btns[4].innerHTML='🔌<br>錢包聖盃';
-    btns[5].innerHTML='🧧<br>發財金';
-    btns[6].innerHTML='📜<br>規則活動';
-    btns[7].innerHTML='🗣️<br>客服導覽';
-    btns[4].onclick=e=>{e.preventDefault();openOps('cup');};
-    btns[5].onclick=e=>{e.preventDefault();openOps('fortune');};
-    btns[6].onclick=e=>{e.preventDefault();openRules();};
-    btns[7].onclick=e=>{e.preventDefault();openGuide();};
-  }
-
-  function bindTopButtons(){
+  function bindGuideButtons(){
     document.addEventListener('click',function(e){
-      const btn=e.target && e.target.closest ? e.target.closest('button,.nav-btn,a') : null;
+      const btn=e.target && e.target.closest ? e.target.closest('button,.term-btn,.nav-btn,a') : null;
       if(!btn) return;
-      const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
-      if(t.includes('五指山神殿音響')){
-        e.preventDefault(); e.stopPropagation(); openAudio(); return false;
+      const t=(btn.textContent||'').trim();
+      if(t.includes('客服') || t.includes('導覽') || t.includes('完整玩法') || t.includes('語音問答')){
+        e.preventDefault();
+        e.stopPropagation();
+        openGuide('intro');
       }
-      if(t.includes('客服') && (t.includes('導覽') || t.includes('神殿'))){
-        e.preventDefault(); e.stopPropagation(); openGuide(); return false;
-      }
-      if(t.includes('開啟音效')){
-        speak('音效說明已啟動。右上五指山神殿音響可開啟音樂面板。');
-      }
-    },true);
-
-    document.addEventListener('click',function(e){
-      if(e.target && (e.target.classList && e.target.classList.contains('guide-close'))){
-        e.preventDefault(); closeAll(); return false;
-      }
-      if(e.target && e.target.id==='guide-modal'){
-        closeAll(); return false;
+      if(t.includes('規則活動') || t.includes('規則 / 活動')){
+        // 規則活動也用可操作客服 modal，避免中間視窗卡死
+        e.preventDefault();
+        e.stopPropagation();
+        openGuide('events');
       }
     },true);
   }
 
-  function bindWheelSync(){
-    const slider=$('steer-input-val');
-    const wheel=$('wheel');
-    if(!slider) return;
-    const sync=()=>{
-      const v=Number(slider.value||0);
-      if(wheel) wheel.style.transform='rotate('+v+'deg)';
-    };
-    slider.addEventListener('input',sync,{passive:true});
-    slider.addEventListener('change',sync,{passive:true});
-    sync();
-  }
-
-  function selfCheck(){
-    const issues=[];
-    if(!$('web3-panel')) issues.push('缺悟空心臟操作窗');
-    if(!$('temple-modal')) issues.push('缺規則活動窗');
-    if(!$('music-panel')) issues.push('缺神殿音響面板');
-    if(!$('move-joystick-wrap')) issues.push('缺左下移動控制器');
-    if(!$('wheel-wrap')) issues.push('缺右下旋轉控制器');
-    if(!$('steer-input-val')) issues.push('缺方向橫桿');
-    if(issues.length) console.warn('[KGEN 12345 V7.21 self-check]', issues);
-    else console.log('[KGEN 12345 V7.21 self-check] OK');
+  function ensureRotateWheel(){
+    let wrap=$('rotate-wheel-wrap');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.id='rotate-wheel-wrap';
+      wrap.innerHTML='<div class="wheel"><div>多空<br>旋轉</div></div>';
+      document.body.appendChild(wrap);
+    }
+    // 避免重複綁定
+    if(wrap.dataset.k722Bound==='1') return;
+    wrap.dataset.k722Bound='1';
+    let dragging=false;
+    function setAngleFromEvent(ev){
+      const r=wrap.getBoundingClientRect();
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const p=ev.touches?ev.touches[0]:ev;
+      const deg=Math.round(Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI);
+      const slider=document.querySelector('input[type="range"][min="-180"],input[type="range"][max="180"],#angle-slider,#steer-slider');
+      if(slider){
+        slider.value=deg;
+        slider.dispatchEvent(new Event('input',{bubbles:true}));
+        slider.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      const labels=document.querySelectorAll('.big-deg,.core-deg,#core-deg,#deg-label');
+      labels.forEach(l=>l.textContent=deg+'°');
+    }
+    wrap.addEventListener('pointerdown',e=>{dragging=true;try{wrap.setPointerCapture(e.pointerId)}catch(x){}setAngleFromEvent(e);});
+    wrap.addEventListener('pointermove',e=>{if(dragging)setAngleFromEvent(e);});
+    wrap.addEventListener('pointerup',()=>dragging=false);
+    wrap.addEventListener('pointercancel',()=>dragging=false);
   }
 
   function init(){
     setVersion();
-    ensureOpsHead();
-    buildRulesModal();
-    ensureMusicPanel();
-    normalizeFooter8();
-    bindTopButtons();
-    bindWheelSync();
-    closeAll();
-    window.k12345OpenOps=openOps;
-    window.k12345OpenRules=openRules;
-    window.k12345OpenAudio=openAudio;
-    window.k12345OpenGuide=openGuide;
-    selfCheck();
+    ensureGuideModal();
+    bindGuideButtons();
+    ensureRotateWheel();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
   else init();
   window.addEventListener('load',init);
-  setTimeout(init,600);
-  setTimeout(init,1500);
+  setTimeout(init,800);
+  setTimeout(init,1800);
+
+  window.k12345OpenGuide=openGuide;
+  window.k12345ClosePanels=closeAll;
 })();
 </script>
 
 
-<!-- ===== KGEN 12345 V7.21.1｜wallet disconnected reset hotfix ===== -->
-<script id="kgen12345-v7211-wallet-reset-hotfix">
+
+<!-- KGEN 12345 V7.23 HOTFIX: 單一錢包同步中樞 Wallet Sync Hub -->
+<style id="kgen12345-v723-wallet-sync-style">
+  .k723-sync-ok{
+    color:#7fffd4!important;
+    text-shadow:0 0 10px rgba(0,255,220,.35)!important;
+  }
+  .k723-sync-warn{
+    color:#ffe39b!important;
+  }
+</style>
+<script id="kgen12345-v723-wallet-sync-hub-js">
 (function(){
   'use strict';
-
-  const VERSION_PATCH = 'V7.21.1-wallet-reset';
-
-  function q(id){ return document.getElementById(id); }
-
-  function setTextByPossibleIds(ids, text){
+  const VERSION='12345-TEMPLE-V7.23';
+  const BSC_CHAIN_ID='0x38';
+  const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const ERC20_ABI=[
+    'function decimals() view returns (uint8)',
+    'function balanceOf(address) view returns (uint256)',
+    'function allowance(address,address) view returns (uint256)'
+  ];
+  const $=id=>document.getElementById(id);
+  const set=(ids,value,cls)=>{
     ids.forEach(id=>{
-      const el = q(id);
-      if(el) el.textContent = text;
+      const el=$(id);
+      if(!el) return;
+      el.textContent=value;
+      if(cls){ el.classList.remove('k723-sync-warn','k723-sync-ok'); el.classList.add(cls); }
     });
-  }
+  };
+  const short=a=>a?`${a.slice(0,6)}••${a.slice(-4)}`:'未連接';
+  const fullWallet=a=>a?`${short(a)} | ${a}`:'未連接';
+  const nfmt=(v,d=4)=>{
+    const n=Number(v);
+    if(!Number.isFinite(n)) return String(v);
+    return n.toFixed(d);
+  };
+  const kfmt=(bn,dec)=>nfmt(window.ethers.utils.formatUnits(bn,dec),4)+' KGEN';
 
-  function setTextByLabel(labelKeywords, value){
-    const all = Array.from(document.querySelectorAll('*'));
-    for(const el of all){
-      const t = (el.textContent || '').trim();
-      if(!t) continue;
-      if(labelKeywords.some(k => t.includes(k))){
-        const parent = el.parentElement;
-        if(!parent) continue;
-        const candidates = Array.from(parent.querySelectorAll('span,b,strong,em,div,p'));
-        for(const c of candidates){
-          const ct = (c.textContent || '').trim();
-          if(ct && ct !== t && !labelKeywords.some(k => ct.includes(k))){
-            c.textContent = value;
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  function resetWalletUI(){
-    window.kgenConnectedAccount = null;
-    window.connectedAccount = null;
-    window.walletAddress = null;
-
-    setTextByPossibleIds([
-      'wallet-address','walletText','wallet-status','walletStatus','connected-address',
-      'account','accountText','addr','address','walletMini','walletLabel'
-    ], '未連線');
-
-    setTextByPossibleIds([
-      'bnb-balance','bnbBalance','bnbText','bnb-mini','bnbMini','darkMatterBalance'
-    ], '--');
-
-    setTextByPossibleIds([
-      'kgen-balance','kgenBalance','kgenText','kgen-mini','kgenMini','massBalance'
-    ], '--');
-
-    setTextByPossibleIds([
-      'heart-balance','heartBalance','heartText','heart-blood','heartBlood','bloodText'
-    ], '0.0000 KGEN');
-
-    setTextByPossibleIds([
-      'allowance','allowanceText','allowanceBalance'
-    ], '--');
-
-    /* 兼容舊版文字欄位：避免上一個 session 殘留 */
+  function setVersion(){
+    try{ document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6'; }catch(e){}
+    const ver=$('ver-st');
+    if(ver) ver.textContent='VERSION '+VERSION;
     document.querySelectorAll('*').forEach(el=>{
-      if(!el || el.children.length) return;
-      const t = (el.textContent || '').trim();
-      if(/^0x[a-fA-F0-9]{4,}\.{0,3}[a-fA-F0-9]{2,}$/.test(t)) el.textContent = '未連線';
-      if(/^\d+(\.\d+)?\s*KGEN$/i.test(t) && el.closest('#web3-panel,.wallet-card,.balance-card,.top-balance,.hud-card')) {
-        if(t !== '0.0000 KGEN') el.textContent = '--';
-      }
-    });
-
-    const root = document.body;
-    root.classList.remove('wallet-connected','is-connected','kgen-wallet-connected');
-    root.classList.add('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
-
-    console.log('[KGEN 12345]', VERSION_PATCH, 'wallet UI reset');
-  }
-
-  async function hasInjectedAccount(){
-    try{
-      const eth = window.ethereum;
-      if(!eth || !eth.request) return false;
-      const accounts = await eth.request({ method:'eth_accounts' });
-      return Array.isArray(accounts) && accounts.length > 0;
-    }catch(e){
-      return false;
-    }
-  }
-
-  async function guardWalletState(){
-    const ok = await hasInjectedAccount();
-    if(!ok) resetWalletUI();
-    return ok;
-  }
-
-  function wrapRefreshFunctions(){
-    ['refreshWallet','refreshBalances','loadWallet','updateWallet','connectWalletState'].forEach(name=>{
-      const fn = window[name];
-      if(typeof fn === 'function' && !fn.__kgenWrapped){
-        const wrapped = async function(...args){
-          const ok = await guardWalletState();
-          if(!ok) return null;
-          return await fn.apply(this,args);
-        };
-        wrapped.__kgenWrapped = true;
-        window[name] = wrapped;
+      if(!el || !el.childNodes || el.childNodes.length!==1) return;
+      const n=el.childNodes[0];
+      if(n.nodeType!==3) return;
+      if(/12345-TEMPLE-V7\.\d+|V7\.\d+/.test(n.nodeValue||'')){
+        n.nodeValue=n.nodeValue.replace(/12345-TEMPLE-V7\.\d+/g,VERSION).replace(/V7\.\d+/g,'V7.23');
       }
     });
   }
 
-  function bindEthereumEvents(){
-    const eth = window.ethereum;
-    if(!eth || eth.__kgen7211Bound) return;
-    eth.__kgen7211Bound = true;
-
-    if(eth.on){
-      eth.on('accountsChanged', async function(accounts){
-        if(!accounts || accounts.length === 0){
-          resetWalletUI();
-          return;
-        }
-        setTimeout(()=> {
-          if(typeof window.refreshWallet === 'function') window.refreshWallet();
-          else if(typeof window.refreshBalances === 'function') window.refreshBalances();
-        }, 80);
-      });
-
-      eth.on('chainChanged', async function(){
-        setTimeout(()=> {
-          guardWalletState().then(ok=>{
-            if(ok && typeof window.refreshWallet === 'function') window.refreshWallet();
-          });
-        }, 120);
-      });
-
-      eth.on('disconnect', function(){
-        resetWalletUI();
-      });
-    }
+  async function getAccount(){
+    if(!window.ethereum) return null;
+    let accounts=[];
+    try{ accounts=await window.ethereum.request({method:'eth_accounts'}); }catch(e){}
+    const a=(accounts && accounts[0]) || window.ethereum.selectedAddress || null;
+    if(!a) return null;
+    try{ return window.ethers.utils.getAddress(a); }catch(e){ return a; }
   }
 
-  function patchConnectButtons(){
-    document.addEventListener('click', async function(e){
-      const btn = e.target && e.target.closest ? e.target.closest('button,a') : null;
-      if(!btn) return;
-      const t = (btn.textContent || '').trim();
-      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('Connect') || t.includes('切 BSC')){
-        setTimeout(async ()=>{
-          const ok = await guardWalletState();
-          if(ok){
-            if(typeof window.refreshWallet === 'function') window.refreshWallet();
-            else if(typeof window.refreshBalances === 'function') window.refreshBalances();
-          }
-        }, 500);
-      }
-    }, true);
-  }
-
-  function markVersion(){
-    const ver = document.getElementById('ver-st');
-    if(ver && !ver.textContent.includes('V7.21.1')){
-      ver.textContent = ver.textContent.replace(/V7\.21/g, 'V7.21.1');
-    }
-  }
-
-  async function init(){
-    markVersion();
-    bindEthereumEvents();
-    wrapRefreshFunctions();
-    patchConnectButtons();
-    await guardWalletState();
-  }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-
-  window.addEventListener('load', init);
-  setTimeout(init, 700);
-  setTimeout(init, 1800);
-
-  window.kgen12345ResetWalletUI = resetWalletUI;
-})();
-</script>
-
-
-<!-- ===== KGEN 12345 V7.21.2｜wallet display refresh + activity countdowns ===== -->
-<style id="kgen12345-v7212-countdown-css">
-  .kgen-countdown-grid{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns:1fr;
-    gap:8px;
-  }
-  .kgen-countdown-card{
-    border:1px solid rgba(255,215,120,.38);
-    background:rgba(0,0,0,.42);
-    border-radius:12px;
-    padding:8px 10px;
-    color:#ffe39b;
-    font-size:12px;
-    line-height:1.45;
-  }
-  .kgen-countdown-card b{ color:#66f7ff; }
-  .kgen-mini-wallet-note{
-    margin-top:6px;
-    color:#66f7ff;
-    font-size:11px;
-    opacity:.95;
-  }
-</style>
-
-<script id="kgen12345-v7212-wallet-countdown-hotfix">
-(function(){
-  'use strict';
-
-  const KGEN_TOKEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
-  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const BSC_CHAIN_ID = '0x38';
-
-  function $(id){ return document.getElementById(id); }
-  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '未連線'; }
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function hexToBigInt(hex){ if(!hex || hex === '0x') return 0n; return BigInt(hex); }
-  function addrParam(address){ return address.toLowerCase().replace(/^0x/,'').padStart(64,'0'); }
-  function toToken(v, decimals=18, fixed=4){
-    const base = 10n ** BigInt(decimals);
-    const whole = v / base;
-    const frac = v % base;
-    const fracStr = (frac * (10n ** BigInt(fixed)) / base).toString().padStart(fixed,'0');
-    return `${whole}.${fracStr}`;
-  }
-  async function ethCall(to, data){
-    return await ethereum.request({method:'eth_call', params:[{to, data}, 'latest']});
-  }
-  async function erc20Balance(token, owner){
-    return hexToBigInt(await ethCall(token, '0x70a08231' + addrParam(owner)));
-  }
-  async function erc20Allowance(token, owner, spender){
-    return hexToBigInt(await ethCall(token, '0xdd62ed3e' + addrParam(owner) + addrParam(spender)));
-  }
-
-  function updateTextNear(label, value){
-    const all = Array.from(document.querySelectorAll('*'));
-    for(const el of all){
-      const t=(el.textContent||'').trim();
-      if(!t || !t.includes(label)) continue;
-      const parent = el.parentElement;
-      if(!parent) continue;
-      const leaves = Array.from(parent.querySelectorAll('span,b,strong,em,div,p')).filter(x=>!x.children.length);
-      const target = leaves.find(x=>{
-        const tx=(x.textContent||'').trim();
-        return tx && tx!==t && !tx.includes(label);
-      });
-      if(target){ target.textContent=value; return true; }
-    }
-    return false;
-  }
-
-  function resetWalletUI(){
-    document.body.classList.remove('wallet-connected','is-connected','kgen-wallet-connected');
-    document.body.classList.add('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
-    updateTextNear('Wallet','未連線');
-    updateTextNear('錢包','未連線');
-    updateTextNear('BNB','--');
-    updateTextNear('KGEN','--');
-    updateTextNear('KGEN 餘額','--');
-    updateTextNear('Allowance','--');
-    updateTextNear('心臟血庫','0.0000 KGEN');
-    updateTextNear('Heart 血量','0.0000 KGEN');
-  }
-
-  async function forceWalletRefresh(){
+  async function switchBSC(){
+    if(!window.ethereum) return;
     try{
-      if(!window.ethereum || !ethereum.request){
-        resetWalletUI();
-        return false;
-      }
-      const accounts = await ethereum.request({method:'eth_accounts'});
-      if(!accounts || !accounts.length){
-        resetWalletUI();
-        return false;
-      }
-      const account = accounts[0];
-      const chainId = await ethereum.request({method:'eth_chainId'});
-      if(chainId !== BSC_CHAIN_ID){
-        updateTextNear('Wallet', short(account));
-        updateTextNear('錢包', short(account));
-        updateTextNear('KGEN 餘額', '請切換 BSC');
-        return false;
-      }
-
-      const bnbWei = hexToBigInt(await ethereum.request({method:'eth_getBalance', params:[account,'latest']}));
-      const kgen = await erc20Balance(KGEN_TOKEN, account);
-      const heart = await erc20Balance(KGEN_TOKEN, HEART);
-      const allow = await erc20Allowance(KGEN_TOKEN, account, HEART);
-
-      document.body.classList.add('wallet-connected','is-connected','kgen-wallet-connected');
-      document.body.classList.remove('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
-
-      updateTextNear('Wallet', short(account));
-      updateTextNear('錢包', short(account));
-      updateTextNear('BNB', toToken(bnbWei,18,4)+' BNB');
-      updateTextNear('KGEN', toToken(kgen,18,4)+' KGEN');
-      updateTextNear('KGEN 餘額', toToken(kgen,18,4)+' KGEN');
-      updateTextNear('Allowance', toToken(allow,18,4)+' KGEN');
-      updateTextNear('心臟血庫', toToken(heart,18,4)+' KGEN');
-      updateTextNear('Heart 血量', toToken(heart,18,4)+' KGEN');
-
-      const panel = document.querySelector('#web3-panel');
-      if(panel && !panel.querySelector('.kgen-mini-wallet-note')){
-        const note = document.createElement('div');
-        note.className='kgen-mini-wallet-note';
-        note.textContent='錢包資料已同步：BNB / KGEN / Allowance / Heart 血庫。';
-        panel.appendChild(note);
-      }
-      return true;
+      const chainId=await window.ethereum.request({method:'eth_chainId'});
+      if(String(chainId).toLowerCase()===BSC_CHAIN_ID) return;
+      await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN_ID}]});
     }catch(err){
-      console.warn('[KGEN 12345] wallet refresh failed', err);
-      return false;
+      if(err && (err.code===4902 || err.code===-32603)){
+        try{
+          await window.ethereum.request({
+            method:'wallet_addEthereumChain',
+            params:[{
+              chainId:BSC_CHAIN_ID,
+              chainName:'BNB Smart Chain',
+              nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+              rpcUrls:['https://bsc-dataseed.binance.org/'],
+              blockExplorerUrls:['https://bscscan.com/']
+            }]
+          });
+        }catch(e){}
+      }
     }
   }
 
-  function nextDate(month, day, hour=0, minute=0){
-    const now = new Date();
-    let d = new Date(Date.UTC(now.getUTCFullYear(), month-1, day, hour, minute, 0));
-    if(d.getTime() <= now.getTime()) d = new Date(Date.UTC(now.getUTCFullYear()+1, month-1, day, hour, minute, 0));
-    return d;
+  async function connect(){
+    if(!window.ethereum){ alert('找不到錢包。請用 MetaMask / Trust Wallet / SafePal 的 DApp 瀏覽器開啟。'); return null; }
+    await switchBSC();
+    try{ await window.ethereum.request({method:'eth_requestAccounts'}); }catch(e){}
+    return refresh('connect');
   }
 
-  function nextIgniteWindow(){
-    const now = new Date();
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1, 0, 0, 0));
+  function applyOffline(reason){
+    set(['w3-addr','bp-wallet','kh-wallet'], '未連接', 'k723-sync-warn');
+    set(['userBal','bp-userbal','kh-kgen-bal'], '-- KGEN', 'k723-sync-warn');
+    set(['userAllowance','bp-allowance'], '-- KGEN', 'k723-sync-warn');
+    set(['poolBalance','bp-pool','kh-heart-bal'], '-- KGEN', 'k723-sync-warn');
+    set(['w3-bnb'], '-- BNB', 'k723-sync-warn');
+    const note=reason||'Wallet Sync Hub standby';
+    set(['chainStatus','bp-status','kh-status'], note, 'k723-sync-warn');
   }
 
-  function fmtLeft(ms){
-    if(ms <= 0) return '進行中 / 可檢查';
-    let s = Math.floor(ms/1000);
-    const days = Math.floor(s/86400); s%=86400;
-    const h = Math.floor(s/3600); s%=3600;
-    const m = Math.floor(s/60); s%=60;
-    if(days>0) return `${days}天 ${pad(h)}:${pad(m)}:${pad(s)}`;
-    return `${pad(h)}:${pad(m)}:${pad(s)}`;
-  }
+  let inflight=false;
+  let lastOk=0;
+  async function refresh(source){
+    if(inflight) return window.KGEN12345_SYNC && window.KGEN12345_SYNC.state;
+    if(!window.ethereum || !window.ethers){ applyOffline('等待錢包與 ethers 載入'); return null; }
+    inflight=true;
+    try{
+      const acct=await getAccount();
+      if(!acct){ applyOffline('尚未連接錢包'); return null; }
 
-  function ensureCountdownBox(){
-    const panel = document.querySelector('#web3-panel') || document.body;
-    let box = document.getElementById('kgen-activity-countdowns');
-    if(!box){
-      box = document.createElement('div');
-      box.id = 'kgen-activity-countdowns';
-      box.className = 'kgen-countdown-grid';
-      box.innerHTML = `
-        <div class="kgen-countdown-card">轉日呼吸 igniteAndClaim：<b id="cd-ignite">--</b></div>
-        <div class="kgen-countdown-card">5/20 悟空生日 festivalClaim(1)：<b id="cd-520">--</b></div>
-        <div class="kgen-countdown-card">11/11 孤勇日 festivalClaim(2)：<b id="cd-1111">--</b></div>
-        <div class="kgen-countdown-card">12/31 跨年倒數 newYearCountdownClaim：<b id="cd-1231">--</b></div>
-      `;
-      panel.appendChild(box);
+      const provider=new window.ethers.providers.Web3Provider(window.ethereum,'any');
+      const signer=provider.getSigner();
+      const token=new window.ethers.Contract(KGEN,ERC20_ABI,provider);
+      const chain=await provider.getNetwork().catch(()=>({chainId:0}));
+      const dec=await token.decimals().catch(()=>18);
+      const [bnbBal,kgenBal,allowance,heartBal]=await Promise.all([
+        provider.getBalance(acct),
+        token.balanceOf(acct),
+        token.allowance(acct,HEART),
+        token.balanceOf(HEART)
+      ]);
+      const accountText=fullWallet(acct);
+      const bnbText=nfmt(window.ethers.utils.formatEther(bnbBal),5)+' BNB';
+      const kgenText=kfmt(kgenBal,dec);
+      const allowanceText=kfmt(allowance,dec);
+      const heartText=kfmt(heartBal,dec);
+      const chainText=chain && chain.chainId===56 ? 'BSC 56｜Wallet Sync Hub OK' : '請切換 BSC 56';
+
+      // 舊操作窗、新 Heart 面板、聖盃面板全部使用同一組鏈上資料
+      set(['w3-addr','bp-wallet','kh-wallet'], accountText, 'k723-sync-ok');
+      set(['w3-bnb'], bnbText, 'k723-sync-ok');
+      set(['userBal','bp-userbal','kh-kgen-bal'], kgenText, 'k723-sync-ok');
+      set(['userAllowance','bp-allowance'], allowanceText, 'k723-sync-ok');
+      set(['poolBalance','bp-pool','kh-heart-bal'], heartText, 'k723-sync-ok');
+      set(['chainStatus','bp-status','kh-status'], chainText, chain && chain.chainId===56?'k723-sync-ok':'k723-sync-warn');
+
+      // 給舊版 web3 物件同步同一個 signer/account，避免兩套操作窗各自抓帳號
+      try{
+        if(typeof web3!=='undefined'){
+          web3.provider=provider;
+          web3.signer=signer;
+          web3.account=acct;
+          web3.chainId=chain.chainId;
+        }
+      }catch(e){}
+
+      const state={source:source||'refresh',account:acct,short:short(acct),chainId:chain.chainId,kgen:kgenText,allowance:allowanceText,heart:heartText,bnb:bnbText,ts:Date.now()};
+      window.KGEN12345_SYNC.state=state;
+      lastOk=Date.now();
+      return state;
+    }catch(err){
+      console.warn('[KGEN 12345 V7.23 Wallet Sync Hub]',err);
+      if(Date.now()-lastOk>12000) set(['chainStatus','bp-status','kh-status'],'Wallet Sync Hub 讀取中斷，請刷新或切 BSC','k723-sync-warn');
+      return null;
+    }finally{
+      inflight=false;
     }
-    return box;
   }
 
-  function updateCountdowns(){
-    ensureCountdownBox();
-    const now = Date.now();
-    const items = [
-      ['cd-ignite', nextIgniteWindow().getTime()-now, ' 後開下一次'],
-      ['cd-520', nextDate(5,20).getTime()-now, ''],
-      ['cd-1111', nextDate(11,11).getTime()-now, ''],
-      ['cd-1231', nextDate(12,31).getTime()-now, '']
-    ];
-    items.forEach(([id,ms,suffix])=>{
-      const e=document.getElementById(id);
-      if(e) e.textContent = fmtLeft(ms) + suffix;
-    });
+  function afterTxRefresh(){
+    setTimeout(()=>refresh('after-click-1s'),1000);
+    setTimeout(()=>refresh('after-click-5s'),5000);
+    setTimeout(()=>refresh('after-click-12s'),12000);
   }
 
-  function patchButtons(){
-    document.addEventListener('click', function(e){
-      const btn = e.target && e.target.closest ? e.target.closest('button,a') : null;
+  function bindButtons(){
+    document.addEventListener('click',function(e){
+      const btn=e.target && e.target.closest ? e.target.closest('button,a,.term-btn,.nav-btn') : null;
       if(!btn) return;
-      const t=(btn.textContent||'').trim();
-      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('刷新餘額') || t.includes('切 BSC')){
-        setTimeout(forceWalletRefresh, 300);
-        setTimeout(forceWalletRefresh, 1200);
+      const txt=(btn.textContent||'').trim();
+      const id=btn.id||'';
+      if(/連結錢包|切 BSC|刷新餘額|CONNECT|Wallet/i.test(txt) || /connect|refresh/i.test(id)){
+        setTimeout(()=>refresh('wallet-button'),600);
+        setTimeout(()=>refresh('wallet-button-late'),2000);
       }
-    }, true);
-  }
-
-  function bindEvents(){
-    if(window.ethereum && !ethereum.__kgen7212Bound){
-      ethereum.__kgen7212Bound = true;
-      if(ethereum.on){
-        ethereum.on('accountsChanged', ()=>setTimeout(forceWalletRefresh,200));
-        ethereum.on('chainChanged', ()=>setTimeout(forceWalletRefresh,300));
-        ethereum.on('disconnect', resetWalletUI);
+      if(/Approve|approve|fortuneClaim|heartbeatClaim|igniteAndClaim|festivalClaim|newYearCountdownClaim|發財金|心跳|點燈|還願|許願|聖盃/.test(txt+id)){
+        afterTxRefresh();
       }
-    }
+    },true);
   }
 
-  function markVersion(){
-    const ver = document.getElementById('ver-st');
-    if(ver) ver.textContent = (ver.textContent||'').replace(/V7\\.21(\\.1)?/g,'V7.21.2');
-  }
-
-  async function init(){
-    markVersion();
-    bindEvents();
-    patchButtons();
-    updateCountdowns();
-    await forceWalletRefresh();
-  }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-  window.addEventListener('load', init);
-  setInterval(updateCountdowns, 1000);
-  setInterval(forceWalletRefresh, 15000);
-
-  window.kgen12345ForceWalletRefresh = forceWalletRefresh;
-})();
-</script>
-
-
-<!-- ===== KGEN 12345 V7.21.3｜human friendly countdowns + heartbeat hourly + Q/A display ===== -->
-<style id="kgen12345-v7213-human-countdown-qa-css">
-  #kgen-human-activity-panel{
-    margin-top:10px;
-    border:1px solid rgba(255,215,120,.45);
-    background:linear-gradient(180deg,rgba(10,14,22,.82),rgba(0,0,0,.78));
-    border-radius:14px;
-    padding:10px;
-    color:#ffe39b;
-    font-size:12px;
-    line-height:1.55;
-  }
-  #kgen-human-activity-panel .title{
-    font-weight:900;
-    color:#ffd978;
-    margin-bottom:8px;
-  }
-  .kgen-human-row{
-    display:grid;
-    grid-template-columns:1fr auto;
-    gap:8px;
-    align-items:center;
-    border-top:1px solid rgba(255,215,120,.16);
-    padding:7px 0;
-  }
-  .kgen-human-row:first-of-type{border-top:0}
-  .kgen-human-row .name{font-weight:800;color:#fff2ba}
-  .kgen-human-row .desc{font-size:11px;color:#cfeff2;opacity:.95;margin-top:2px}
-  .kgen-human-row .time{
-    color:#66f7ff;
-    font-weight:900;
-    white-space:nowrap;
-    text-align:right;
-  }
-  #kgen-question-answer-box{
-    margin-top:10px;
-    border:1px solid rgba(102,247,255,.35);
-    background:rgba(0,20,30,.45);
-    border-radius:12px;
-    padding:9px;
-    color:#fff;
-    font-size:12px;
-  }
-  #kgen-question-answer-box .q{
-    color:#66f7ff;
-    font-weight:900;
-    margin-bottom:4px;
-  }
-  #kgen-question-answer-box .a{
-    color:#ffe39b;
-    font-weight:800;
-  }
-</style>
-
-<script id="kgen12345-v7213-human-countdown-qa-js">
-(function(){
-  'use strict';
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-
-  function fmtLeft(ms){
-    if(ms <= 0) return '現在可檢查';
-    let s = Math.floor(ms/1000);
-    const d = Math.floor(s/86400); s%=86400;
-    const h = Math.floor(s/3600); s%=3600;
-    const m = Math.floor(s/60); s%=60;
-    if(d > 0) return `${d}天 ${pad(h)}時${pad(m)}分${pad(s)}秒`;
-    if(h > 0) return `${h}時${pad(m)}分${pad(s)}秒`;
-    if(m > 0) return `${m}分${pad(s)}秒`;
-    return `${s}秒`;
-  }
-
-  function nextUtcHour(){
-    const now = new Date();
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours()+1, 0, 0));
-  }
-
-  function nextUtcMidnight(){
-    const now = new Date();
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1, 0, 0, 0));
-  }
-
-  function nextDate(month, day, hour=0, minute=0){
-    const now = new Date();
-    let d = new Date(Date.UTC(now.getUTCFullYear(), month-1, day, hour, minute, 0));
-    if(d.getTime() <= now.getTime()) d = new Date(Date.UTC(now.getUTCFullYear()+1, month-1, day, hour, minute, 0));
-    return d;
-  }
-
-  function ensurePanel(){
-    const host = document.querySelector('#web3-panel') || document.querySelector('.hud-card') || document.body;
-    let panel = document.getElementById('kgen-human-activity-panel');
-    if(!panel){
-      panel = document.createElement('div');
-      panel.id = 'kgen-human-activity-panel';
-      panel.innerHTML = `
-        <div class="title">活動倒數｜下一次可以做什麼</div>
-
-        <div class="kgen-human-row">
-          <div>
-            <div class="name">整點心跳 heartbeatClaim</div>
-            <div class="desc">每小時一次，下一個 UTC 整點可檢查。</div>
-          </div>
-          <div class="time" id="human-cd-heartbeat">--</div>
-        </div>
-
-        <div class="kgen-human-row">
-          <div>
-            <div class="name">轉日呼吸 igniteAndClaim</div>
-            <div class="desc">每天 UTC 00:00 開始檢查，神殿換日呼吸。</div>
-          </div>
-          <div class="time" id="human-cd-ignite">--</div>
-        </div>
-
-        <div class="kgen-human-row">
-          <div>
-            <div class="name">5/20 悟空生日 festivalClaim(1)</div>
-            <div class="desc">生日活動日，到時按 5/20 活動。</div>
-          </div>
-          <div class="time" id="human-cd-520">--</div>
-        </div>
-
-        <div class="kgen-human-row">
-          <div>
-            <div class="name">11/11 孤勇日 festivalClaim(2)</div>
-            <div class="desc">孤勇日活動，到時按 11/11 活動。</div>
-          </div>
-          <div class="time" id="human-cd-1111">--</div>
-        </div>
-
-        <div class="kgen-human-row">
-          <div>
-            <div class="name">12/31 跨年倒數 newYearCountdownClaim</div>
-            <div class="desc">跨年活動，到時按 12/31 倒數。</div>
-          </div>
-          <div class="time" id="human-cd-1231">--</div>
-        </div>
-
-        <div id="kgen-question-answer-box">
-          <div class="q">目前問題：</div>
-          <div class="a">錢包餘額顯示與活動倒數要更清楚。</div>
-          <div class="q" style="margin-top:7px;">目前回答：</div>
-          <div class="a">已加入每小時心跳倒數、轉日呼吸倒數、節日活動倒數，並用人能看懂的文字說明下一步。</div>
-        </div>
-      `;
-      host.appendChild(panel);
-    }
-    return panel;
-  }
-
-  function set(id, text){
-    const el = document.getElementById(id);
-    if(el) el.textContent = text;
-  }
-
-  function update(){
-    ensurePanel();
-    const now = Date.now();
-    set('human-cd-heartbeat', fmtLeft(nextUtcHour().getTime() - now));
-    set('human-cd-ignite', fmtLeft(nextUtcMidnight().getTime() - now));
-    set('human-cd-520', fmtLeft(nextDate(5,20).getTime() - now));
-    set('human-cd-1111', fmtLeft(nextDate(11,11).getTime() - now));
-    set('human-cd-1231', fmtLeft(nextDate(12,31).getTime() - now));
-
-    // 同步舊版倒數欄位，避免只有舊欄位顯示
-    const oldHeartbeat = document.getElementById('cd-heartbeat');
-    if(oldHeartbeat) oldHeartbeat.textContent = fmtLeft(nextUtcHour().getTime() - now) + ' 後下一次';
-    const oldIgnite = document.getElementById('cd-ignite');
-    if(oldIgnite) oldIgnite.textContent = fmtLeft(nextUtcMidnight().getTime() - now) + ' 後下一次';
-  }
-
-  function markVersion(){
-    const ver = document.getElementById('ver-st');
-    if(ver) ver.textContent = (ver.textContent||'').replace(/V7\.21(\.\d+)?/g,'V7.21.3');
-    document.title = document.title.replace(/V7\.21(\.\d+)?/g,'V7.21.3');
+  function wrapLegacy(){
+    try{
+      if(typeof web3!=='undefined' && web3 && !web3.__k723Wrapped){
+        web3.__k723Wrapped=true;
+        ['smartConnect','readBalances','refreshUser','refreshPool'].forEach(name=>{
+          if(typeof web3[name]!=='function') return;
+          const old=web3[name].bind(web3);
+          web3[name]=async function(){
+            const r=await old(...arguments).catch(err=>{ console.warn('[legacy '+name+']',err); throw err; });
+            afterTxRefresh();
+            return r;
+          };
+        });
+      }
+    }catch(e){}
   }
 
   function init(){
-    markVersion();
-    ensurePanel();
-    update();
+    setVersion();
+    bindButtons();
+    wrapLegacy();
+    setTimeout(()=>refresh('init'),400);
+    setTimeout(()=>refresh('init-late'),1800);
   }
 
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  window.KGEN12345_SYNC={connect,refresh,switchBSC,state:null,version:VERSION};
+  if(window.ethereum && window.ethereum.on){
+    try{ window.ethereum.on('accountsChanged',()=>setTimeout(()=>refresh('accountsChanged'),300)); }catch(e){}
+    try{ window.ethereum.on('chainChanged',()=>setTimeout(()=>refresh('chainChanged'),500)); }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
   else init();
-
-  window.addEventListener('load', init);
-  setInterval(update, 1000);
+  window.addEventListener('load',()=>setTimeout(()=>refresh('load'),600));
+  setInterval(()=>refresh('interval'),8000);
 })();
 </script>
 
