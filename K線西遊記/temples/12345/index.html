@@ -12866,5 +12866,192 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
+
+<!-- ===== KGEN 12345 V7.21.1｜wallet disconnected reset hotfix ===== -->
+<script id="kgen12345-v7211-wallet-reset-hotfix">
+(function(){
+  'use strict';
+
+  const VERSION_PATCH = 'V7.21.1-wallet-reset';
+
+  function q(id){ return document.getElementById(id); }
+
+  function setTextByPossibleIds(ids, text){
+    ids.forEach(id=>{
+      const el = q(id);
+      if(el) el.textContent = text;
+    });
+  }
+
+  function setTextByLabel(labelKeywords, value){
+    const all = Array.from(document.querySelectorAll('*'));
+    for(const el of all){
+      const t = (el.textContent || '').trim();
+      if(!t) continue;
+      if(labelKeywords.some(k => t.includes(k))){
+        const parent = el.parentElement;
+        if(!parent) continue;
+        const candidates = Array.from(parent.querySelectorAll('span,b,strong,em,div,p'));
+        for(const c of candidates){
+          const ct = (c.textContent || '').trim();
+          if(ct && ct !== t && !labelKeywords.some(k => ct.includes(k))){
+            c.textContent = value;
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function resetWalletUI(){
+    window.kgenConnectedAccount = null;
+    window.connectedAccount = null;
+    window.walletAddress = null;
+
+    setTextByPossibleIds([
+      'wallet-address','walletText','wallet-status','walletStatus','connected-address',
+      'account','accountText','addr','address','walletMini','walletLabel'
+    ], '未連線');
+
+    setTextByPossibleIds([
+      'bnb-balance','bnbBalance','bnbText','bnb-mini','bnbMini','darkMatterBalance'
+    ], '--');
+
+    setTextByPossibleIds([
+      'kgen-balance','kgenBalance','kgenText','kgen-mini','kgenMini','massBalance'
+    ], '--');
+
+    setTextByPossibleIds([
+      'heart-balance','heartBalance','heartText','heart-blood','heartBlood','bloodText'
+    ], '0.0000 KGEN');
+
+    setTextByPossibleIds([
+      'allowance','allowanceText','allowanceBalance'
+    ], '--');
+
+    /* 兼容舊版文字欄位：避免上一個 session 殘留 */
+    document.querySelectorAll('*').forEach(el=>{
+      if(!el || el.children.length) return;
+      const t = (el.textContent || '').trim();
+      if(/^0x[a-fA-F0-9]{4,}\.{0,3}[a-fA-F0-9]{2,}$/.test(t)) el.textContent = '未連線';
+      if(/^\d+(\.\d+)?\s*KGEN$/i.test(t) && el.closest('#web3-panel,.wallet-card,.balance-card,.top-balance,.hud-card')) {
+        if(t !== '0.0000 KGEN') el.textContent = '--';
+      }
+    });
+
+    const root = document.body;
+    root.classList.remove('wallet-connected','is-connected','kgen-wallet-connected');
+    root.classList.add('wallet-disconnected','is-disconnected','kgen-wallet-disconnected');
+
+    console.log('[KGEN 12345]', VERSION_PATCH, 'wallet UI reset');
+  }
+
+  async function hasInjectedAccount(){
+    try{
+      const eth = window.ethereum;
+      if(!eth || !eth.request) return false;
+      const accounts = await eth.request({ method:'eth_accounts' });
+      return Array.isArray(accounts) && accounts.length > 0;
+    }catch(e){
+      return false;
+    }
+  }
+
+  async function guardWalletState(){
+    const ok = await hasInjectedAccount();
+    if(!ok) resetWalletUI();
+    return ok;
+  }
+
+  function wrapRefreshFunctions(){
+    ['refreshWallet','refreshBalances','loadWallet','updateWallet','connectWalletState'].forEach(name=>{
+      const fn = window[name];
+      if(typeof fn === 'function' && !fn.__kgenWrapped){
+        const wrapped = async function(...args){
+          const ok = await guardWalletState();
+          if(!ok) return null;
+          return await fn.apply(this,args);
+        };
+        wrapped.__kgenWrapped = true;
+        window[name] = wrapped;
+      }
+    });
+  }
+
+  function bindEthereumEvents(){
+    const eth = window.ethereum;
+    if(!eth || eth.__kgen7211Bound) return;
+    eth.__kgen7211Bound = true;
+
+    if(eth.on){
+      eth.on('accountsChanged', async function(accounts){
+        if(!accounts || accounts.length === 0){
+          resetWalletUI();
+          return;
+        }
+        setTimeout(()=> {
+          if(typeof window.refreshWallet === 'function') window.refreshWallet();
+          else if(typeof window.refreshBalances === 'function') window.refreshBalances();
+        }, 80);
+      });
+
+      eth.on('chainChanged', async function(){
+        setTimeout(()=> {
+          guardWalletState().then(ok=>{
+            if(ok && typeof window.refreshWallet === 'function') window.refreshWallet();
+          });
+        }, 120);
+      });
+
+      eth.on('disconnect', function(){
+        resetWalletUI();
+      });
+    }
+  }
+
+  function patchConnectButtons(){
+    document.addEventListener('click', async function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('button,a') : null;
+      if(!btn) return;
+      const t = (btn.textContent || '').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('Connect') || t.includes('切 BSC')){
+        setTimeout(async ()=>{
+          const ok = await guardWalletState();
+          if(ok){
+            if(typeof window.refreshWallet === 'function') window.refreshWallet();
+            else if(typeof window.refreshBalances === 'function') window.refreshBalances();
+          }
+        }, 500);
+      }
+    }, true);
+  }
+
+  function markVersion(){
+    const ver = document.getElementById('ver-st');
+    if(ver && !ver.textContent.includes('V7.21.1')){
+      ver.textContent = ver.textContent.replace(/V7\.21/g, 'V7.21.1');
+    }
+  }
+
+  async function init(){
+    markVersion();
+    bindEthereumEvents();
+    wrapRefreshFunctions();
+    patchConnectButtons();
+    await guardWalletState();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  window.addEventListener('load', init);
+  setTimeout(init, 700);
+  setTimeout(init, 1800);
+
+  window.kgen12345ResetWalletUI = resetWalletUI;
+})();
+</script>
+
 </body>
 </html>
