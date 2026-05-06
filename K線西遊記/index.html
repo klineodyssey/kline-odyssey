@@ -3,1417 +3,313 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>K線西遊記｜銀河宇宙入口（Portal V1.4 Multi-Nodes）</title>
+  <title>K線西遊記｜銀河宇宙入口 Portal V1.9</title>
   <style>
     :root{
-      --bg:#06070b;
-      --panel: rgba(255,255,255,.06);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
-      --line: rgba(255,255,255,.14);
-      --btn: rgba(255,255,255,.12);
-      --btnh: rgba(255,255,255,.18);
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
-      --r: 18px;
-      --r2: 999px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Heiti TC", Arial, sans-serif;
-      --ok:#9fffd9;
-      --warn:#ffd28c;
-      --bad:#ff9fb2;
+      --bg:#05070b;--panel:rgba(255,255,255,.065);--panel2:rgba(0,0,0,.38);
+      --text:rgba(255,255,255,.94);--muted:rgba(255,255,255,.66);--line:rgba(255,255,255,.15);
+      --gold:#ffd978;--cyan:#66f7ff;--ok:#9fffd9;--warn:#ffd28c;--bad:#ff9fb2;
+      --shadow:0 18px 60px rgba(0,0,0,.5);--r:18px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: var(--sans);
-      background: radial-gradient(1200px 800px at 30% 20%, rgba(120,170,255,.10), transparent 60%),
-                  radial-gradient(1000px 700px at 70% 60%, rgba(255,160,220,.08), transparent 55%),
-                  var(--bg);
-      color: var(--text);
-      min-height:100vh;
-      overflow-x:hidden;
+    html,body{margin:0;min-height:100%;font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden}
+    body:before{
+      content:"";position:fixed;inset:0;z-index:-3;
+      background:
+        radial-gradient(900px 600px at 70% 20%,rgba(255,217,120,.12),transparent 60%),
+        radial-gradient(1000px 700px at 20% 70%,rgba(102,247,255,.10),transparent 55%),
+        linear-gradient(#030409,#080b13);
     }
-    a{color:inherit}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 40px;}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0 14px;}
-    .brand{display:flex;flex-direction:column;gap:4px;}
-    .brand .h{font-weight:900;letter-spacing:.5px;font-size:18px;}
-    .brand .s{font-size:12px;color:var(--muted);}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-    .pill{
-      display:flex;gap:8px;align-items:center;
-      padding:9px 12px;border:1px solid var(--line);border-radius:var(--r2);
-      background:rgba(255,255,255,.05);backdrop-filter:blur(8px);box-shadow:var(--shadow);
-      font-size:12px;color:var(--muted);white-space:nowrap;
+    #stars{position:fixed;inset:0;width:100vw;height:100vh;z-index:-2;opacity:.95}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 50px}
+    header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0 14px}
+    .brand h1{font-size:22px;margin:0;color:var(--gold);letter-spacing:.5px;text-shadow:0 0 18px rgba(255,217,120,.3)}
+    .brand p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+    .topBtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn,.pill{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;border:1px solid var(--line);
+      border-radius:999px;background:rgba(255,255,255,.08);box-shadow:var(--shadow);font-size:12px;font-weight:850;cursor:pointer;user-select:none
     }
-    .pill b{color:var(--text);font-weight:800}
+    .btn:hover{background:rgba(255,255,255,.14)}
+    .btn.gold{background:rgba(255,217,120,.20);border-color:rgba(255,217,120,.45);color:#fff2bd}
+    .btn.cyan{background:rgba(102,247,255,.18);border-color:rgba(102,247,255,.45)}
     .mono{font-family:var(--mono)}
-    .hero{
-      position:relative;border:1px solid var(--line);border-radius:24px;
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      box-shadow:var(--shadow);overflow:hidden;padding:18px;
+    .hero,.card,.map,.drawer,.modalBox{
+      border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.032));
+      box-shadow:var(--shadow);backdrop-filter:blur(10px)
     }
-    canvas#stars{position:absolute;inset:0;width:100%;height:100%;opacity:.85;pointer-events:none;}
-    .heroGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;}
-    @media (max-width:900px){.heroGrid{grid-template-columns:1fr}}
-    .title{font-size:26px;font-weight:950;letter-spacing:.8px;margin:4px 0 8px;}
-    .subtitle{color:var(--muted);line-height:1.55;margin:0 0 14px;font-size:13px;}
-    .ctaRow{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:var(--r2);border:1px solid var(--line);
-      background:var(--btn);text-decoration:none;font-weight:850;font-size:13px;transition:.15s;user-select:none;
-      cursor:pointer;
-    }
-    .btn:hover{background:var(--btnh)}
-    .btn.small{padding:8px 12px;font-weight:800}
-    .grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-top:14px;}
-    @media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    @media (max-width:520px){.grid{grid-template-columns:1fr}}
-    .card{
-      border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
-      box-shadow:var(--shadow);padding:14px;min-height:110px;position:relative;overflow:hidden;
-    }
-    .card .k{font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.2px}
-    .card .v{font-size:18px;font-weight:950;letter-spacing:.6px}
-    .card .t{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-    .smallText{font-size:12px;color:var(--muted);line-height:1.35}
-    .map{
-      margin-top:14px;border:1px solid var(--line);border-radius:24px;background:rgba(0,0,0,.20);
-      box-shadow:var(--shadow);padding:16px;position:relative;overflow:hidden;
-    }
-    .mapHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px;}
-    .mapHead .h{font-weight:950;letter-spacing:.6px;font-size:16px;}
-    .mapHead .s{color:var(--muted);font-size:12px;}
-    .nodes{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-top:10px;}
-    @media (max-width:900px){.nodes{grid-template-columns:repeat(2, 1fr)}}
-    @media (max-width:520px){.nodes{grid-template-columns:1fr}}
-    .node{
-      border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.06);
-      padding:12px;text-decoration:none;display:flex;flex-direction:column;gap:6px;transition:.15s;min-height:110px;
-    }
-    .node:hover{background:rgba(255,255,255,.10)}
-    .node .n{font-weight:950;letter-spacing:.5px}
-    .node .p{color:var(--muted);font-size:12px;line-height:1.35}
-    .node .id{color:rgba(255,255,255,.75);font-size:12px;font-family:var(--mono)}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px;color:var(--muted)}
-    .badge.ok{color:var(--ok)}
-    .badge.warn{color:var(--warn)}
-    .badge.bad{color:var(--bad)}
-    .footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.55;padding-bottom:6px;}
-    .hr{height:1px;background:var(--line);margin:10px 0}
-
-    .topRight{
-      position:fixed; right:14px; top:14px; z-index:50;
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
-    }
-    .miniPill{
-      background: rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.18);
-      padding:8px 10px;
-      border-radius:999px;
-      box-shadow: var(--shadow);
-      font-size:12px;
-      color: var(--text);
-      backdrop-filter: blur(8px);
-    }
-    .miniPill b{ font-family: var(--mono); }
-    .supervisorBtn{
-      cursor:pointer; user-select:none;
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.18);
-      padding:8px 12px; border-radius:999px;
-      box-shadow: var(--shadow);
-      font-weight:800;
-    }
-    .overlay{
-      position:fixed; inset:0; z-index:80;
-      background: rgba(0,0,0,.72);
-      display:none;
-    }
-    .overlay.on{ display:block; }
-    .overlayCard{
-      position:absolute; right:14px; top:64px;
-      width:min(560px, calc(100vw - 28px));
-      background: rgba(10,10,16,.85);
-      border:1px solid rgba(255,215,0,.30);
-      border-radius: var(--r);
-      box-shadow: 0 18px 70px rgba(0,0,0,.65);
-      padding:14px;
-      backdrop-filter: blur(10px);
-      color: var(--text);
-    }
-    .progressWrap{ margin-top:10px; }
-    .progressBar{
-      width:100%; height:14px; border-radius:999px;
-      background: rgba(255,255,255,.10);
-      overflow:hidden; border:1px solid rgba(255,255,255,.14);
-    }
-    .progressFill{
-      height:100%; width:0%;
-      background: linear-gradient(90deg, rgba(255,215,0,.95), rgba(255,160,0,.95));
-      transition: width .6s ease;
-    }
-    .chkGrid{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap:8px 10px;
-      margin-top:10px;
-      font-size:13px;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:999px;
-      background: rgba(255,255,255,.25);
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow: 0 0 10px rgba(255,255,255,.10);
-      justify-self:end;
-      margin-top:4px;
-    }
-    .dot.ok{ background: rgba(120,255,200,.95); box-shadow:0 0 14px rgba(120,255,200,.45); }
-    .dot.warn{ background: rgba(255,210,120,.95); box-shadow:0 0 14px rgba(255,210,120,.45); }
-    .dot.bad{ background: rgba(255,120,120,.95); box-shadow:0 0 14px rgba(255,120,120,.45); }
-
-    .drawerScrim{
-      position:fixed; inset:0; z-index:90;
-      background: rgba(0,0,0,.55);
-      display:none;
-    }
-    .drawerScrim.on{ display:block; }
-    .drawer{
-      position:fixed; right:14px; bottom:14px; top:14px; z-index:91;
-      width:min(560px, calc(100vw - 28px));
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(10,10,16,.86);
-      border-radius: 20px;
-      box-shadow: 0 18px 70px rgba(0,0,0,.65);
-      backdrop-filter: blur(12px);
-      padding:14px;
-      display:none;
-      overflow:auto;
-    }
-    .drawer.on{ display:block; }
-    .drawer h3{ margin:0 0 8px; font-size:14px; letter-spacing:.35px; }
-    .drawer .muted{ color: var(--muted); font-size:12px; line-height:1.55; }
-    .field{ margin-top:10px; }
-    .field label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
-    .field input, .field textarea{
-      width:100%; border-radius:14px; border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.35); color: var(--text);
-      padding:10px 12px; outline:none; font-family: var(--mono); font-size:12px;
-    }
-    .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    .rowBtns .btn{ padding:9px 12px; }
-    .sectionLine{ height:1px; background: rgba(255,255,255,.12); margin:12px 0; }
-    .table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
-    .table td{ font-size:12px; color: var(--muted); padding:8px 10px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
-    .table td:first-child{ border-radius:12px 0 0 12px; }
-    .table td:last-child{ border-radius:0 12px 12px 0; }
-    .kTag{ color: var(--text); font-weight:850; }
-    .warnText{ color: var(--warn); }
-    .okText{ color: var(--ok); }
-  
-    /* ===== Player Trigger Mode (Guanghan Palace 16888) ===== */
-    .wishCard{ margin-top:14px; }
-    .wishGrid{ display:grid; grid-template-columns: 1.1fr .9fr; gap:12px; margin-top:12px; }
-    @media (max-width:900px){ .wishGrid{ grid-template-columns:1fr; } }
-    .wishBox{ border:1px solid rgba(255,255,255,.14); border-radius:18px; background:rgba(255,255,255,.05); padding:12px; box-shadow: var(--shadow); }
-    .wishTitle{ font-weight:950; letter-spacing:.35px; font-size:15px; margin-bottom:8px; }
-    .wishRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .wishRow > *{ flex:1; min-width: 140px; }
-    .wishLabel{ font-size:12px; color: var(--muted); margin-bottom:6px; }
-    .seg{ display:flex; gap:8px; }
-    .seg button{ flex:1; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08); color: var(--text); font-weight:900; cursor:pointer; }
-    .seg button.active{ background: rgba(255,215,0,.20); border-color: rgba(255,215,0,.35); }
-    .monoBox{ font-family: var(--mono); }
-    .candles{ max-height: 240px; overflow:auto; font-family: var(--mono); font-size:12px;
-      border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:10px; background:rgba(0,0,0,.20); }
-    .cRow{ display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.10); }
-    .cRow:last-child{ border-bottom:none; }
-    .tiny{ font-size:12px; color: var(--muted); line-height:1.55; }
-    .kpiLine{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
-    .kpiPill{ padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.22);
-      font-size:12px; color: var(--text); }
-    .kpiPill b{ font-family: var(--mono); }
-
+    .hero{padding:18px;overflow:hidden;position:relative}
+    .heroGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+    @media(max-width:900px){.heroGrid{grid-template-columns:1fr}header{flex-direction:column}.topBtns{justify-content:flex-start}}
+    .title{font-size:28px;font-weight:950;margin:0 0 10px;letter-spacing:.8px}
+    .sub{font-size:13px;color:var(--muted);line-height:1.65;margin:0 0 14px}
+    .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    @media(max-width:900px){.quick{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.quick{grid-template-columns:1fr}}
+    .card{padding:14px}
+    .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .v{font-weight:950;font-size:18px;color:#fff}
+    .v.cyan{color:var(--cyan)}
+    .small{font-size:12px;color:var(--muted);line-height:1.55}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+    @media(max-width:900px){.grid3{grid-template-columns:1fr}}
+    .map{margin-top:14px;padding:16px}
+    .mapHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:12px}
+    .mapHead h2{font-size:18px;margin:0;color:var(--gold)}
+    .nodes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:900px){.nodes{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.nodes{grid-template-columns:1fr}}
+    .node{border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.055);padding:14px;min-height:150px;display:flex;flex-direction:column;gap:8px}
+    .node:hover{background:rgba(255,255,255,.1)}
+    .node .n{font-weight:950;color:#fff}
+    .node .id{font-family:var(--mono);color:var(--cyan);font-size:12px}
+    .node .p{font-size:12px;color:var(--muted);line-height:1.45}
+    .badge{display:inline-flex;width:max-content;padding:6px 9px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.24);font-size:11px;color:var(--muted)}
+    .badge.ok{color:var(--ok);border-color:rgba(159,255,217,.35)}
+    .badge.warn{color:var(--warn);border-color:rgba(255,210,140,.35)}
+    .badge.bad{color:var(--bad);border-color:rgba(255,159,178,.35)}
+    .sectionTitle{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .sectionTitle h2{margin:0;font-size:17px;color:var(--gold)}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    td{font-size:12px;padding:8px 10px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)}
+    td:first-child{border-radius:12px 0 0 12px}td:last-child{border-radius:0 12px 12px 0}
+    .drawerScrim,.modalScrim{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;z-index:90}
+    .drawerScrim.on,.modalScrim.on{display:block}
+    .drawer{position:fixed;right:12px;top:12px;bottom:12px;width:min(560px,calc(100vw - 24px));display:none;z-index:91;padding:14px;overflow:auto}
+    .drawer.on{display:block}
+    .field{margin-top:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+    input,textarea,select{width:100%;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(0,0,0,.35);color:var(--text);padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none}
+    textarea{min-height:86px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .modalBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 26px));max-height:76vh;overflow:auto;display:none;z-index:101;padding:15px}
+    .modalBox.on{display:block}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .tab{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-size:12px;font-weight:850;cursor:pointer}
+    .tab.active{background:rgba(255,217,120,.22);color:#fff2bd}
+    .wishGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media(max-width:900px){.wishGrid{grid-template-columns:1fr}}
+    .seg{display:flex;gap:8px}.seg button{flex:1}
+    .log{max-height:230px;overflow:auto;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(0,0,0,.22);padding:8px;font-family:var(--mono);font-size:12px}
+    .logRow{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(255,255,255,.12);padding:6px 0}.logRow:last-child{border-bottom:0}
+    .footer{font-size:12px;color:var(--muted);line-height:1.7;margin-top:16px}
   </style>
-
-  <script src="./assets/ethers-5.7.2.umd.min.js"></script>
 </head>
-
 <body>
-  <div class="topRight">
-    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.4</b></div>
-    <div class="miniPill">時間：<b id="nowClock" class="mono">--</b></div>
-    <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
-    <div class="supervisorBtn" id="btnSettings">設定</div>
-  </div>
+<canvas id="stars"></canvas>
 
-  <div class="overlay" id="supervisorOverlay" aria-hidden="true">
-    <div class="overlayCard">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.4</div>
-        <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
-      </div>
-      <div class="progressWrap">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div style="color:var(--muted);font-size:12px;">工程進度（自動檢查）</div>
-          <div class="badge" id="supPct">0%</div>
-        </div>
-        <div class="progressBar"><div class="progressFill" id="supFill"></div></div>
-      </div>
-
-      <div class="chkGrid" id="supChecks">
-        <div>頁面載入</div><div class="dot" id="chkLoaded"></div>
-        <div>星空引擎（Canvas）</div><div class="dot" id="chkStars"></div>
-        <div>節點偵測（各殿 index.html）</div><div class="dot" id="chkNodes"></div>
-        <div>全域點火（Multi-Heart）</div><div class="dot" id="chkGlobalIgnite"></div>
-        <div>11520 Brain 面板</div><div class="dot" id="chkBrainPanel"></div>
-        <div>錯誤監看（Console 捕捉）</div><div class="dot" id="chkErrors"></div>
-      </div>
-
-      <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6;">
-        說明：Portal 只做「導航＋讀鏈」。地址未設定或合約未部署時，面板會顯示「未部署/未設定」但不會壞。
-      </div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>K線西遊記｜銀河宇宙入口</h1>
+      <p>Portal V1.9｜KGEN Universe Map｜12345 悟空財神殿 × 16888 廣寒宮 × 11520 花果山交易所</p>
     </div>
-  </div>
+    <div class="topBtns">
+      <button class="btn" id="btnGuide">客服導覽</button>
+      <button class="btn" id="btnSettings">設定</button>
+      <button class="btn cyan" id="btnRefresh">刷新</button>
+    </div>
+  </header>
 
-  <div class="drawerScrim" id="drawerScrim"></div>
-  <div class="drawer" id="drawer">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+  <section class="hero">
+    <div class="heroGrid">
       <div>
-        <h3>Portal 設定（多殿 / 多 Heart / 11520 / 16888）</h3>
-        <div class="muted">
-          這裡只改「讀鏈/導航」用的地址，不會動到合約。<br/>
-          你部署後把地址貼上，Portal 就會自動亮燈與讀鏈。
+        <div class="title">宇宙不需要解釋，只需要入口。</div>
+        <p class="sub">
+          這裡是《K線西遊記》總入口。12345 是五指山悟空財神殿，負責 Heart、發財金、心跳、點燈、還願與請示神明。
+          16888 是廣寒宮七仙女／月下老人系統，連到 8888 高老莊成親與鴛鴦譜，不是分紅程式。
+        </p>
+        <div class="row">
+          <a class="btn gold" href="./temples/12345/index.html">進入 12345 悟空財神殿</a>
+          <a class="btn cyan" href="./temples/16888/index.html">進入 16888 廣寒宮</a>
+          <a class="btn" href="./temples/108000/index.html">進入 108000 火星豪宅</a>
         </div>
       </div>
-      <div class="badge" id="btnCloseDrawer" style="cursor:pointer;">關閉</div>
+      <div class="quick">
+        <div class="card"><div class="k">系統時間</div><div class="v mono cyan" id="clock">--</div></div>
+        <div class="card"><div class="k">今日參訪</div><div class="v mono" id="today">0</div></div>
+        <div class="card"><div class="k">總參訪</div><div class="v mono" id="total">0</div></div>
+        <div class="card"><div class="k">版本</div><div class="v mono">V1.9</div></div>
+      </div>
     </div>
+  </section>
 
-    <div class="sectionLine"></div>
-
-    <div class="field">
-      <label>KGEN Token（已部署）</label>
-      <input id="inKgenToken" placeholder="0x..." />
+  <div class="grid3">
+    <div class="card">
+      <div class="k">KGEN Token</div>
+      <div class="v mono" id="kgenShort">--</div>
+      <div class="small" id="kgenFull"></div>
     </div>
-
-    <div class="field">
-      <label>Heart 列表（每行：座標,0x地址）</label>
-      <textarea id="inHearts" placeholder="12345,0x...\n23456,0x..."></textarea>
-      <div class="muted">你現在可先放 12345；未來新增殿就加一行。</div>
+    <div class="card">
+      <div class="k">12345 Heart V3.2.6</div>
+      <div class="v mono" id="heartShort">--</div>
+      <div class="small">發財金、整點心跳、轉日呼吸、5/20、11/11、12/31 活動。</div>
     </div>
-
-    <div class="field">
-      <label>11520 BrainExchange（大腦交易所）</label>
-      <input id="inBrain11520" placeholder="0x..." />
-      <div class="muted">容量顯示固定 50,000,000 KGEN（悟空腦容量）。</div>
-    </div>
-
-    <div class="field">
-      <label>108000 MarsSeats（豪宅）</label>
-      <input id="inMars108000" placeholder="0x..." />
-    </div>
-
-    <div class="field">
-      <label>18888 靈霄寶殿（DeityBank）</label>
-      <input id="inBank18888" placeholder="0x..." />
-    </div>
-
-    <div class="field">
-      <label>18921 斬妖台（TaxSplitter / AutoLP 分流）</label>
-      <input id="inZhanyao18921" placeholder="0x..." />
-    </div>
-
-    <div class="field">
-      <label>16888 廣寒宮（七仙女許願池）</label>
-      <input id="inWish16888" placeholder="0x..." />
-      <div class="muted">先建點位；等你部署許願池合約再點亮。</div>
-    </div>
-
-    <div class="field">
-      <label>七仙女地址（每行一個 0x 地址，共 7 行）</label>
-      <textarea id="inFairies7" placeholder="0x...\n0x...\n..."></textarea>
-      <div class="muted">Portal 會顯示「已登記幾位」。</div>
-    </div>
-
-    <div class="rowBtns">
-      <div class="btn" id="btnSaveCfg">儲存設定</div>
-      <div class="btn" id="btnResetCfg">重置</div>
-      <div class="btn" id="btnApplyAndRefresh">套用並刷新</div>
-    </div>
-
-    <div class="sectionLine"></div>
-
-    <div class="muted">
-      GitHub 路徑：<span class="mono">K線西遊記/index.html</span><br/>
-      ethers 路徑：<span class="mono">K線西遊記/assets/ethers-5.7.2.umd.min.js</span><br/>
-      設定存在 localStorage（不會上鏈）。
+    <div class="card">
+      <div class="k">11520 Brain</div>
+      <div class="v mono" id="brainShort">--</div>
+      <div class="small">花果山台灣交易所／悟空大腦，與 Heart 血庫循環。</div>
     </div>
   </div>
 
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="h">K線西遊記｜銀河宇宙入口</div>
-        <div class="s">KLINE Odyssey · Map Portal · Portal V1.4（Multi-Heart + 11520）</div>
+  <section class="map" id="map">
+    <div class="mapHead">
+      <div>
+        <h2>宇宙節點導航</h2>
+        <div class="small">所有殿各自 index.html；入口只做導航、說明與狀態整理。</div>
       </div>
-
-      <div class="pillrow">
-        <div class="pill">KGEN Token：<b class="mono" id="kgenAddrTop">--</b></div>
-        <div class="pill">今日參訪：<b class="mono" id="today">0</b></div>
-        <div class="pill">總參訪：<b class="mono" id="total">0</b></div>
-      </div>
-    </header>
-
-    <section class="hero">
-      <canvas id="stars"></canvas>
-
-      <div class="heroGrid">
-        <div>
-          <div class="title">宇宙不需要解釋，只需要入口。</div>
-          <p class="subtitle">
-            Portal V1.8：新增「全域點火 Multi‑Heart」＋「11520 悟空大腦（5000萬容量）」。<br/>
-            未部署點位先保留座標、先上地圖，等合約上鏈自動亮燈。
-          </p>
-
-          <div class="ctaRow">
-            <a class="btn" href="#map">🗺️ 進入宇宙地圖</a>
-            <a class="btn" href="./README.md">📘 查看資料說明</a>
-            <a class="btn small" href="https://t.me/klineodyssey" target="_blank" rel="noreferrer">Telegram</a>
-            <a class="btn small" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方</a>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="smallText">
-            RPC 模式：公開 RPC 讀鏈（不需要錢包）。<br/>
-            連錢包只在未來「一鍵點火 / 一鍵呼吸」才需要；本版先把讀鏈穩定做好。
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <div class="k">當前節律（本機）</div>
-            <div class="v mono" id="clock">--:--:--</div>
-            <div class="t">
-              <span class="btn small" id="pingBtn">🔔 心跳打點</span>
-              <span class="btn small" id="resetBtn">♻️ 重置統計</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="k">鏈上連線</div>
-            <div class="v" style="font-size:14px;font-weight:900;" id="rpcStatus">尚未檢測</div>
-            <div class="t">
-              <span class="badge">CHAIN: <b class="mono" id="chainId">--</b></span>
-              <span class="badge">BLOCK: <b class="mono" id="blockNum">--</b></span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="k">全域點火（Multi‑Heart）</div>
-            <div class="v" style="font-size:14px;font-weight:900;" id="globalIgniteStatus">尚未讀取</div>
-            <div class="t">
-              <span class="badge">HEARTS: <b class="mono" id="heartCount">0</b></span>
-              <span class="badge">IN WINDOW: <b class="mono" id="inWindowCount">0</b></span>
-              <span class="badge">IGNITED TODAY: <b class="mono" id="ignitedCount">0</b></span>
-            </div>
-            <div class="smallText" style="margin-top:10px;">
-              <span class="mono" id="globalIgniteHint">—</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:950;letter-spacing:.35px;">全域點火清單（Heart 狀態）</div>
-        <div class="badge" id="igniteTableStatus">偵測中…</div>
-      </div>
-      <div class="smallText" style="margin-top:8px;">
-        顯示每個 Heart：血量（KGEN）、是否在點火窗口、今日是否點火。
-      </div>
-      <div style="margin-top:12px; overflow:auto;">
-        <table class="table" style="min-width:720px">
-          <thead>
-            <tr>
-              <td class="kTag">座標</td>
-              <td class="kTag">地址</td>
-              <td class="kTag">血量（KGEN）</td>
-              <td class="kTag">窗口</td>
-              <td class="kTag">今日點火</td>
-            </tr>
-          </thead>
-          <tbody id="igniteRows">
-            <tr><td colspan="5">—</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:950;letter-spacing:.35px;">11520｜花果山台灣・悟空大腦交易所（BrainExchange）</div>
-        <div class="badge" id="brainStatusBadge">尚未讀取</div>
-      </div>
-
-      <div class="smallText" style="margin-top:8px;">
-        腦容量顯示固定 <span class="mono">50,000,000 KGEN</span>（悟空腦容量）。
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-top:12px;">
-        <div class="card" style="min-height:auto;">
-          <div class="k">Brain 地址</div>
-          <div class="v" style="font-size:13px;" id="brainAddr">未設定</div>
-          <div class="smallText" style="margin-top:8px;">座標：<span class="mono">11520</span></div>
-        </div>
-
-        <div class="card" style="min-height:auto;">
-          <div class="k">腦內 KGEN（餘額）</div>
-          <div class="v mono" id="brainBal">--</div>
-          <div class="smallText" style="margin-top:8px;">讀取：<span class="mono">KGEN.balanceOf(Brain)</span></div>
-        </div>
-
-        <div class="card" style="min-height:auto;">
-          <div class="k">容量（VaultCap）</div>
-          <div class="v mono" id="brainCap">50,000,000</div>
-          <div class="smallText" style="margin-top:8px;">填充率：<span class="mono" id="brainFill">--</span></div>
-        </div>
-      </div>
-
-      <div class="smallText" style="margin-top:12px;">
-        Brain 尚未部署時，這區顯示「未部署」，不影響 Portal 其他功能。
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:950;letter-spacing:.35px;">時光隧道｜宇宙入口列表</div>
-        <div class="badge warn" id="nodesStatus">偵測中…</div>
-      </div>
-      <div class="smallText" style="margin-top:8px;">
-        12345 會用 <span class="mono">fetch</span> 偵測是否存在 index.html；其他殿目前先用「地址是否已填」顯示狀態。
-      </div>
-
-      <div id="nodesGrid" style="margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;"></div>
-    </section>
-
-    <section class="map" id="map">
-      <div class="mapHead">
-        <div>
-          <div class="h">宇宙節點導航</div>
-          <div class="s">每個殿各自 index.html；入口只做導航＋讀鏈狀態</div>
-        </div>
-        <div class="s mono" id="pathHint">/K線西遊記/index.html</div>
-      </div>
-
-      <div class="nodes">
-
-        <a class="node" href="./temples/12345/index.html" data-node="12345" id="nodeLink12345">
-          <div class="n">五指山・悟空財神殿</div>
-          <div class="id">12345</div>
-          <div class="p">Heart / 發財金 / 呼吸心跳 / 還願 / 許願 / 光明燈 / 影像自看</div>
-          <div class="p mono" id="node12345Hint">Heart 未設定</div>
-        </a>
-
-        <a class="node" href="./temples/11520/index.html" data-node="11520" id="nodeLink11520">
-          <div class="n">花果山台灣・悟空大腦交易所</div>
-          <div class="id">11520</div>
-          <div class="p">Reward 0.05% 稅流 / 保證金池 / 月結算</div>
-          <div class="p mono" id="node11520Hint">Brain 未設定</div>
-        </a>
-
-        <a class="node" href="./temples/16888/index.html" data-node="16888" id="nodeLink16888">
-          <div class="n">廣寒宮・七仙女許願池</div>
-          <div class="id">16888</div>
-          <div class="p">許願 / 點燈影像留言 / 七仙女分潤</div>
-          <div class="p mono" id="node16888Hint">未部署</div>
-        </a>
-
-        <a class="node" href="javascript:void(0)" data-node="18888" id="nodeLink18888">
-          <div class="n">靈霄寶殿・玉帝金庫</div>
-          <div class="id">18888</div>
-          <div class="p">Deity Bank / 0.1% 稅收接收</div>
-          <div class="p mono" id="node18888Hint">未部署</div>
-        </a>
-
-        <a class="node" href="javascript:void(0)" data-node="18921" id="nodeLink18921">
-          <div class="n">斬妖台・AutoLP/分流引擎</div>
-          <div class="id">18921</div>
-          <div class="p">0.05% AutoLP 稅 / 分流引擎</div>
-          <div class="p mono" id="node18921Hint">未部署</div>
-        </a>
-
-        <a class="node" href="javascript:void(0)" data-node="108000" id="nodeLink108000">
-          <div class="n">花果山火星（MARS）</div>
-          <div class="id">108000</div>
-          <div class="p">豪宅 500 席 / 5000 KGEN 入住 / 月分潤自領</div>
-          <div class="p mono" id="node108000Hint">未部署</div>
-        </a>
-
-      </div>
-
-      <div class="footer">
-        Portal V1.8：Multi‑Heart 全域點火 + 11520 Brain（腦容量 5000萬）已加上。<br/>
-        16888 廣寒宮先納入座標與入口（待你部署許願池合約後再點亮）。<br/>
-      </div>
-    </section>
-
-    
-    <section class="card wishCard" id="wish16888" style="margin-top:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div style="font-weight:950;letter-spacing:.35px;">廣寒宮 16888｜七仙女許願池（即時玩家觸發模式）</div>
-        <div class="badge" id="wishModeBadge">LIVE SIM</div>
-      </div>
-      <div class="nodeSub">
-        規則（Portal 先做可視化／本機模擬，之後再對接 16888 合約）：有人玩就有行情。每次許願會觸發 1 根「宇宙 K 線」並結算多空。
-      </div>
-
-      <div class="wishGrid">
-        <div class="wishBox">
-          <div class="wishTitle">許願下單</div>
-
-          <div class="wishRow" style="margin-top:10px;">
-            <div>
-              <div class="wishLabel">方向（CT）</div>
-              <div class="seg">
-                <button id="wishSideLong" class="active">多</button>
-                <button id="wishSideShort">空</button>
-              </div>
-              <div class="tiny" style="margin-top:8px;">
-                CT=Cosmic Tick（宇宙即時節律）。此版先用「玩家觸發」產生 CT+1 的 K 線。
-              </div>
-            </div>
-
-            <div>
-              <div class="wishLabel">押注金額（KGEN，1–1000）</div>
-              <input id="wishBet" class="mono" type="number" min="1" max="1000" step="1" value="100" />
-              <div class="tiny" style="margin-top:8px;">
-                贏：0.8～1.0 倍獎勵（本機模擬）；輸：全額進獎池累積。
-              </div>
-            </div>
-          </div>
-
-          <div class="wishRow" style="margin-top:10px;">
-            <div>
-              <div class="wishLabel">玩家名稱（可選）</div>
-              <input id="wishName" class="mono" type="text" placeholder="例如：阿斗 / 來福 / 0795" />
-            </div>
-            <div>
-              <div class="wishLabel">操作</div>
-              <div class="wishRow" style="gap:8px;">
-                <button class="btn" id="btnWishPlay">許願觸發（生成 K 線）</button>
-                <button class="btn small" id="btnWishReset">重置本機獎池</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="kpiLine">
-            <div class="kpiPill">本輪獎池：<b id="wishPot">0</b> KGEN / 16888</div>
-            <div class="kpiPill">本輪玩家：<b id="wishPlayers">0</b></div>
-            <div class="kpiPill">多/空：<b id="wishLS">0 / 0</b></div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="tiny">
-            滿池觸發（當獎池 ≥ 16888 KGEN）：<br/>
-            60% 隨機抽一名玩家（本輪參與者）｜30% 轉公益（顯示）｜10% 留池延續。<br/>
-            註：此版為前端模擬；未上鏈前不涉及真實資金轉移。
-          </div>
-        </div>
-
-        <div class="wishBox">
-          <div class="wishTitle">即時 K 線（玩家觸發）</div>
-          <div class="kpiLine">
-            <div class="kpiPill">CT：<b id="ctNow">0</b></div>
-            <div class="kpiPill">最新收盤：<b id="ctPrice">18888</b></div>
-            <div class="kpiPill">本輪結算：<b id="ctResult">--</b></div>
-          </div>
-          <div class="candles" id="candleLog" style="margin-top:10px;"></div>
-          <div class="tiny" style="margin-top:10px;">
-            生成器原則（可調）：依「玩家多空比」做微偏置，避免單邊穩贏；以小波動為主，偶爾放大波動做「神明誤導」。<br/>
-            等 11520/16888 合約上鏈後，Portal 會改成讀鏈結算。
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-<div class="footer" style="margin-top:14px;">
-      PrimeForge 以母機之名，開啟金融生命。<br/>
-      花果山台灣・信念不滅・市場無界。<br/>
-      Where the Market Becomes the Myth.<br/>
-      —— 樂天帝 ⌖
+      <span class="badge ok">/K線西遊記/index.html</span>
     </div>
+    <div class="nodes" id="nodes"></div>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <div class="sectionTitle">
+      <h2>活動倒數總覽</h2>
+      <span class="badge warn">讓人看得懂下一步</span>
+    </div>
+    <table>
+      <tbody>
+        <tr><td>整點心跳 heartbeatClaim</td><td id="cdHeartbeat" class="mono">--</td><td>每小時一次，下一個 UTC 整點檢查。</td></tr>
+        <tr><td>轉日呼吸 igniteAndClaim</td><td id="cdIgnite" class="mono">--</td><td>每天 UTC 00:00 後檢查。</td></tr>
+        <tr><td>5/20 悟空生日 festivalClaim(1)</td><td id="cd520" class="mono">--</td><td>悟空生日活動。</td></tr>
+        <tr><td>11/11 孤勇日 festivalClaim(2)</td><td id="cd1111" class="mono">--</td><td>孤勇日活動。</td></tr>
+        <tr><td>12/31 跨年倒數 newYearCountdownClaim</td><td id="cd1231" class="mono">--</td><td>跨年活動。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <div class="sectionTitle">
+      <h2>16888 廣寒宮｜七仙女許願池玩家觸發模式</h2>
+      <span class="badge warn">前端模擬，待合約對接</span>
+    </div>
+    <div class="small">
+      16888 是仙女下凡、月下老人點鴛鴦譜系統，未來連到 8888 高老莊成親。這裡先保留玩家觸發 K 線模擬。
+    </div>
+    <div class="wishGrid">
+      <div class="card">
+        <div class="k">許願方向</div>
+        <div class="seg">
+          <button class="btn gold" id="longBtn">多</button>
+          <button class="btn" id="shortBtn">空</button>
+        </div>
+        <div class="field">
+          <label>押注金額（本機模擬 KGEN）</label>
+          <input id="wishBet" type="number" min="1" max="1000" value="100">
+        </div>
+        <div class="field">
+          <label>玩家名稱</label>
+          <input id="wishName" placeholder="阿斗 / 來福 / 0795">
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn cyan" id="playWish">許願觸發 K 線</button>
+          <button class="btn" id="resetWish">重置</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <span class="pill">CT：<b id="ctNow" class="mono">0</b></span>
+          <span class="pill">價格：<b id="ctPrice" class="mono">18888</b></span>
+          <span class="pill">池：<b id="wishPot" class="mono">0</b></span>
+        </div>
+        <div class="log" id="candleLog" style="margin-top:10px">尚未有人許願。</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    PrimeForge 以母機之名，開啟金融生命。<br>
+    花果山台灣・信念不滅・市場無界。<br>
+    Where the Market Becomes the Myth.<br>
+    —— 樂天帝 ⌖
   </div>
+</div>
+
+<div class="drawerScrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="row" style="justify-content:space-between">
+    <b>Portal 設定</b><button class="btn" id="closeSettings">收合</button>
+  </div>
+  <div class="field"><label>KGEN Token</label><input id="cfgKgen"></div>
+  <div class="field"><label>12345 Heart</label><input id="cfgHeart"></div>
+  <div class="field"><label>11520 Brain</label><input id="cfgBrain"></div>
+  <div class="field"><label>16888 廣寒宮 / 許願池</label><input id="cfg16888"></div>
+  <div class="field"><label>8888 高老莊成親系統</label><input id="cfg8888"></div>
+  <div class="field"><label>108000 MarsSeats</label><input id="cfgMars"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn gold" id="saveSettings">儲存設定</button>
+    <button class="btn" id="resetSettings">重置預設</button>
+  </div>
+</aside>
+
+<div class="modalScrim" id="modalScrim"></div>
+<div class="modalBox" id="guideModal">
+  <div class="row" style="justify-content:space-between">
+    <b>客服導覽｜K線西遊記宇宙入口</b><button class="btn" id="closeGuide">收合</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="intro">快速開始</button>
+    <button class="tab" data-tab="12345">12345</button>
+    <button class="tab" data-tab="16888">16888</button>
+    <button class="tab" data-tab="qa">問題回答</button>
+  </div>
+  <div id="guideBody" class="small"></div>
+</div>
 
 <script>
-const LS_KEY = "KLINE_PORTAL_V1_4_CFG";
-const DEFAULT_CFG = {
-  chain: {
-    name: "BSC",
-    chainIdExpected: 56,
-    rpcUrls: [
-      "https://bsc-dataseed.binance.org/",
-      "https://bsc-dataseed1.binance.org/",
-      "https://bsc-dataseed2.binance.org/"
-    ]
-  },
-  addresses: {
-    kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    hearts: [
-      { id: "12345", addr: "0x0000000000000000000000000000000000000000" }
-    ],
-    brain11520: "0x0000000000000000000000000000000000000000",
-    wish16888: "0x0000000000000000000000000000000000000000",
-    bank18888: "0x0000000000000000000000000000000000000000",
-    zhanyao18921: "0x0000000000000000000000000000000000000000",
-    mars108000: "0x0000000000000000000000000000000000000000",
-    fairies7: []
-  },
-  brain: { capWhole: 50000000 }
+const DEFAULT_CFG={
+  kgen:"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  heart:"0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+  brain:"0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+  mars:"0x3529dbFbaD465C2269F8096879A1c298d5257298",
+  temple16888:"",
+  gaolao8888:""
 };
-function loadCfg(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return structuredClone(DEFAULT_CFG);
-    const parsed = JSON.parse(raw);
-    const cfg = structuredClone(DEFAULT_CFG);
-    cfg.chain = Object.assign({}, cfg.chain, parsed.chain || {});
-    cfg.addresses = Object.assign({}, cfg.addresses, parsed.addresses || {});
-    if(Array.isArray(parsed.addresses?.hearts)) cfg.addresses.hearts = parsed.addresses.hearts;
-    if(Array.isArray(parsed.addresses?.fairies7)) cfg.addresses.fairies7 = parsed.addresses.fairies7;
-    cfg.brain = Object.assign({}, cfg.brain, parsed.brain || {});
-    return cfg;
-  }catch(e){
-    return structuredClone(DEFAULT_CFG);
-  }
-}
-function saveCfg(cfg){ localStorage.setItem(LS_KEY, JSON.stringify(cfg)); }
-function $(id){ return document.getElementById(id); }
-function setText(id, v){ $(id).textContent = v; }
-function fmtNum(n){ try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); } }
-function shortAddr(a){ if(!a||a.length<10) return a||""; return a.slice(0,6)+"…"+a.slice(-4); }
-function isZeroAddr(a){ return !a || a.toLowerCase()==="0x0000000000000000000000000000000000000000"; }
-function isAddr(a){ try{ return ethers.utils.isAddress(a); }catch(e){ return false; } }
-function badgeSet(el, kind, text){
-  el.className = "badge " + (kind==="ok"?"ok":kind==="warn"?"warn":"bad");
-  el.textContent = text;
-}
-let __errors = [];
-window.addEventListener("error", (e)=>{ __errors.push(String(e.message||e.error||e)); });
-window.addEventListener("unhandledrejection", (e)=>{ __errors.push(String(e.reason||e)); });
-
-function startStars(){
-  const c = document.getElementById("stars");
-  const ctx = c.getContext("2d");
-  const resize = ()=>{
-    const dpr = Math.min(2, window.devicePixelRatio||1);
-    c.width = Math.floor(c.clientWidth*dpr);
-    c.height = Math.floor(c.clientHeight*dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  };
-  const rand = (a,b)=> a + Math.random()*(b-a);
-  let stars = [];
-  const init = ()=>{
-    const w = c.clientWidth, h=c.clientHeight;
-    stars = Array.from({length: 120}, ()=>({x:rand(0,w), y:rand(0,h), r:rand(.3,1.4), v:rand(.08,.32)}));
-  };
-  const loop = ()=>{
-    const w = c.clientWidth, h=c.clientHeight;
-    ctx.clearRect(0,0,w,h);
-    ctx.globalAlpha = .9;
-    for(const s of stars){
-      s.y += s.v;
-      if(s.y > h+10){ s.y=-10; s.x=rand(0,w); }
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fillStyle = "rgba(255,255,255,.85)";
-      ctx.fill();
-    }
-    requestAnimationFrame(loop);
-  };
-  resize(); init(); loop();
-  window.addEventListener("resize", ()=>{ resize(); init(); });
-}
-
-async function makeProvider(cfg){
-  if(!window.ethers) throw new Error("ethers not loaded. Put ethers-5.7.2.umd.min.js into /K線西遊記/assets/");
-  let lastErr = null;
-  for(const url of cfg.chain.rpcUrls){
-    try{
-      const p = new ethers.providers.JsonRpcProvider(url);
-      await p.getBlockNumber();
-      return p;
-    }catch(e){ lastErr = e; }
-  }
-  throw lastErr || new Error("No RPC works");
-}
-
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)"
-];
-const HEART_ABI = [
-  "function token() view returns (address)",
-  "function windowStartSec() view returns (uint32)",
-  "function windowEndSec() view returns (uint32)",
-  "function inIgniteWindow() view returns (bool)",
-  "function localDayIdNow() view returns (uint256)",
-  "function dayIgnited(uint256) view returns (bool)",
-  "function igniteReward() view returns (uint256)",
-  "function heartbeatReward() view returns (uint256)"
-];
-
-function initCounters(){
-  const kToday = "KLINE_PORTAL_TODAY_" + new Date().toISOString().slice(0,10);
-  const kTotal = "KLINE_PORTAL_TOTAL";
-  const today = Number(localStorage.getItem(kToday)||"0") + 1;
-  localStorage.setItem(kToday, String(today));
-  const total = Number(localStorage.getItem(kTotal)||"0") + 1;
-  localStorage.setItem(kTotal, String(total));
-  setText("today", String(today));
-  setText("total", String(total));
-  $("resetBtn").onclick = ()=>{
-    localStorage.removeItem(kToday);
-    localStorage.removeItem(kTotal);
-    setText("today", "0");
-    setText("total", "0");
-  };
-  $("pingBtn").onclick = ()=>{
-    try{ navigator.vibrate?.(30); }catch(e){}
-    const now = new Date();
-    setText("clock", now.toLocaleTimeString());
-  };
-}
-function startClock(){
-  const tick = ()=>{
-    const now = new Date();
-    setText("clock", now.toLocaleTimeString());
-    setText("nowClock", now.toLocaleTimeString());
-  };
-  tick();
-  setInterval(tick, 1000);
-}
-
-async function detectNodeFile(path){
-  try{
-    const res = await fetch(path, { method:"GET", cache:"no-store" });
-    return res.ok;
-  }catch(e){ return false; }
-}
-function nodeCardHTML(n){
-  return `
-    <div class="card" style="min-height:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div>
-          <div style="font-weight:950;letter-spacing:.35px;">${n.name}</div>
-          <div class="smallText" style="margin-top:6px;">${n.desc}</div>
-        </div>
-        <div class="badge" id="nodeStatus_${n.id}">偵測中…</div>
-      </div>
-      <div class="smallText" style="margin-top:10px;">座標：<span class="mono">${n.id}</span></div>
-      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn small" href="${n.href}" ${n.href.startsWith("http")?'target="_blank" rel="noreferrer"':''}>開啟</a>
-        <span class="badge" id="nodeHint_${n.id}">—</span>
-      </div>
-    </div>
-  `;
-}
-
-async function refreshChain(provider, cfg){
-  const net = await provider.getNetwork();
-  setText("chainId", String(net.chainId));
-  const bn = await provider.getBlockNumber();
-  setText("blockNum", String(bn));
-  $("rpcStatus").textContent = (net.chainId === cfg.chain.chainIdExpected) ? "RPC OK（讀鏈正常）" : `RPC OK（chainId=${net.chainId}）`;
-}
-
-async function readTokenMeta(provider, tokenAddr){
-  const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
-  const [dec, sym] = await Promise.all([
-    token.decimals().catch(()=>18),
-    token.symbol().catch(()=> "KGEN"),
-  ]);
-  return { token, dec, sym };
-}
-function hhmm(sec){
-  const h = Math.floor(sec/3600);
-  const m = Math.floor((sec%3600)/60);
-  return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
-}
-
-async function refreshGlobalIgnite(provider, cfg){
-  const hearts = Array.isArray(cfg.addresses.hearts) ? cfg.addresses.hearts : [];
-  setText("heartCount", String(hearts.length));
-  $("igniteRows").innerHTML = "";
-
-  if(!hearts.length){
-    $("igniteTableStatus").textContent = "沒有 Heart（請在設定加入）";
-    $("globalIgniteStatus").textContent = "沒有 Heart";
-    $("globalIgniteHint").textContent = "請按右上角【設定】加入 Heart 地址。";
-    return { ok:false, inWindow:0, ignited:0, total:0 };
-  }
-
-  const tokenAddr = cfg.addresses.kgenToken;
-  if(!isAddr(tokenAddr) || isZeroAddr(tokenAddr)){
-    $("igniteTableStatus").textContent = "KGEN 未設定";
-    $("globalIgniteStatus").textContent = "KGEN 未設定";
-    $("globalIgniteHint").textContent = "請在設定填 KGEN Token 地址。";
-    return { ok:false, inWindow:0, ignited:0, total:hearts.length };
-  }
-
-  const meta = await readTokenMeta(provider, tokenAddr);
-
-  let inWin = 0, ignited = 0, okCount = 0;
-
-  for(const h of hearts){
-    const id = String(h.id || "").trim() || "????";
-    const addr = String(h.addr || "").trim();
-    const tr = document.createElement("tr");
-
-    if(!isAddr(addr) || isZeroAddr(addr)){
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td class="mono">${addr ? shortAddr(addr) : "未設定"}</td>
-        <td>--</td>
-        <td class="warnText">未部署/未設定</td>
-        <td class="warnText">--</td>
-      `;
-      $("igniteRows").appendChild(tr);
-      continue;
-    }
-
-    try{
-      const heartC = new ethers.Contract(addr, HEART_ABI, provider);
-      const [bal, ws, we, inWindow, dayId] = await Promise.all([
-        meta.token.balanceOf(addr).catch(()=> ethers.BigNumber.from(0)),
-        heartC.windowStartSec(),
-        heartC.windowEndSec(),
-        heartC.inIgniteWindow(),
-        heartC.localDayIdNow()
-      ]);
-      const ign = await heartC.dayIgnited(dayId).catch(()=>false);
-
-      const balFmt = Number(ethers.utils.formatUnits(bal, meta.dec));
-      const balTxt = Number.isFinite(balFmt) ? fmtNum(balFmt.toFixed(2)) : "--";
-
-      if(inWindow) inWin++;
-      if(ign) ignited++;
-      okCount++;
-
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td class="mono" title="${addr}">${shortAddr(addr)}</td>
-        <td class="mono">${balTxt}</td>
-        <td class="${inWindow ? "okText" : "warnText"}">${hhmm(ws)}–${hhmm(we)} ${inWindow ? "(IN)" : ""}</td>
-        <td class="${ign ? "okText" : "warnText"}">${ign ? "YES" : "NO"}</td>
-      `;
-      $("igniteRows").appendChild(tr);
-
-    }catch(e){
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td class="mono" title="${addr}">${shortAddr(addr)}</td>
-        <td>--</td>
-        <td class="warnText">讀取失敗</td>
-        <td class="warnText">--</td>
-      `;
-      $("igniteRows").appendChild(tr);
-    }
-  }
-
-  setText("inWindowCount", String(inWin));
-  setText("ignitedCount", String(ignited));
-
-  if(okCount > 0){
-    $("igniteTableStatus").textContent = "讀取完成";
-    $("globalIgniteStatus").textContent = `OK（${okCount}/${hearts.length} 可讀）`;
-    $("globalIgniteHint").textContent = `多殿全域監看：共 ${hearts.length} 殿。`;
-  }else{
-    $("igniteTableStatus").textContent = "未可讀（地址未設定或未部署）";
-    $("globalIgniteStatus").textContent = "未可讀";
-    $("globalIgniteHint").textContent = "請在設定填入 Heart 合約地址。";
-  }
-  return { ok: okCount>0, inWindow: inWin, ignited: ignited, total: hearts.length };
-}
-
-async function refreshBrain(provider, cfg){
-  const brain = String(cfg.addresses.brain11520||"").trim();
-  setText("brainAddr", brain && !isZeroAddr(brain) ? brain : "未設定");
-  setText("node11520Hint", brain && !isZeroAddr(brain) ? `Brain: ${shortAddr(brain)}` : "Brain 未設定");
-
-  const cap = Number(cfg.brain?.capWhole || 50000000);
-  setText("brainCap", fmtNum(cap));
-
-  if(!isAddr(brain) || isZeroAddr(brain)){
-    badgeSet($("brainStatusBadge"), "warn", "未部署/未設定");
-    setText("brainBal", "--");
-    setText("brainFill", "--");
-    return false;
-  }
-
-  const tokenAddr = String(cfg.addresses.kgenToken||"").trim();
-  if(!isAddr(tokenAddr) || isZeroAddr(tokenAddr)){
-    badgeSet($("brainStatusBadge"), "warn", "KGEN 未設定");
-    setText("brainBal", "--");
-    setText("brainFill", "--");
-    return false;
-  }
-
-  try{
-    const meta = await readTokenMeta(provider, tokenAddr);
-    const bal = await meta.token.balanceOf(brain);
-    const balFmt = Number(ethers.utils.formatUnits(bal, meta.dec));
-    const balTxt = Number.isFinite(balFmt) ? fmtNum(balFmt.toFixed(2)) : "--";
-    setText("brainBal", balTxt);
-
-    const fill = (Number.isFinite(balFmt) && cap>0) ? (balFmt / cap * 100) : NaN;
-    setText("brainFill", Number.isFinite(fill) ? (fill.toFixed(2) + "%") : "--");
-
-    badgeSet($("brainStatusBadge"), "ok", "讀取完成");
-    return true;
-  }catch(e){
-    badgeSet($("brainStatusBadge"), "warn", "讀取失敗");
-    setText("brainBal", "--");
-    setText("brainFill", "--");
-    return false;
-  }
-}
-
-function applyNodeHints(cfg){
-  const a = cfg.addresses;
-  const heart0 = (a.hearts||[]).find(x=>String(x.id||"")==="12345");
-  setText("node12345Hint", (heart0?.addr && !isZeroAddr(heart0.addr) && isAddr(heart0.addr)) ? `Heart: ${shortAddr(heart0.addr)}` : "Heart 未設定");
-  setText("node16888Hint", (!isZeroAddr(a.wish16888) && isAddr(a.wish16888)) ? `Wish: ${shortAddr(a.wish16888)}` : `未部署（仙女 ${String((a.fairies7||[]).length)}/7）`);
-  setText("node18888Hint", (!isZeroAddr(a.bank18888) && isAddr(a.bank18888)) ? `Bank: ${shortAddr(a.bank18888)}` : "未部署");
-  setText("node18921Hint", (!isZeroAddr(a.zhanyao18921) && isAddr(a.zhanyao18921)) ? `Zhanyao: ${shortAddr(a.zhanyao18921)}` : "未部署");
-  setText("node108000Hint", (!isZeroAddr(a.mars108000) && isAddr(a.mars108000)) ? `Mars: ${shortAddr(a.mars108000)}` : "未部署");
-}
-
-function cfgToTextHearts(hearts){ return (hearts||[]).map(h=>`${String(h.id||"").trim()},${String(h.addr||"").trim()}`).join("\n"); }
-function textToHearts(text){
-  const lines = String(text||"").split("\n").map(s=>s.trim()).filter(Boolean);
-  const out = [];
-  for(const line of lines){
-    const parts = line.split(",").map(s=>s.trim()).filter(Boolean);
-    if(parts.length<2) continue;
-    out.push({ id: parts[0], addr: parts[1] });
-  }
-  return out;
-}
-function openDrawer(){ $("drawerScrim").classList.add("on"); $("drawer").classList.add("on"); }
-function closeDrawer(){ $("drawerScrim").classList.remove("on"); $("drawer").classList.remove("on"); }
-function renderDrawer(cfg){
-  $("inKgenToken").value = cfg.addresses.kgenToken || "";
-  $("inHearts").value = cfgToTextHearts(cfg.addresses.hearts||[]);
-  $("inBrain11520").value = cfg.addresses.brain11520 || "";
-  $("inMars108000").value = cfg.addresses.mars108000 || "";
-  $("inBank18888").value = cfg.addresses.bank18888 || "";
-  $("inZhanyao18921").value = cfg.addresses.zhanyao18921 || "";
-  $("inWish16888").value = cfg.addresses.wish16888 || "";
-  $("inFairies7").value = (cfg.addresses.fairies7||[]).join("\n");
-}
-function readDrawerToCfg(cfg){
-  const next = structuredClone(cfg);
-  const kgen = $("inKgenToken").value.trim();
-  const heartsText = $("inHearts").value;
-  const brain = $("inBrain11520").value.trim();
-  const mars = $("inMars108000").value.trim();
-  const bank = $("inBank18888").value.trim();
-  const zh = $("inZhanyao18921").value.trim();
-  const wish = $("inWish16888").value.trim();
-  const fairiesText = $("inFairies7").value;
-
-  if(kgen) next.addresses.kgenToken = kgen;
-  const hearts = textToHearts(heartsText);
-  if(hearts.length) next.addresses.hearts = hearts;
-  if(brain) next.addresses.brain11520 = brain;
-  if(mars) next.addresses.mars108000 = mars;
-  if(bank) next.addresses.bank18888 = bank;
-  if(zh) next.addresses.zhanyao18921 = zh;
-  if(wish) next.addresses.wish16888 = wish;
-
-  const fairies = String(fairiesText||"").split("\n").map(s=>s.trim()).filter(Boolean);
-  next.addresses.fairies7 = fairies.slice(0,7);
-  return next;
-}
-
-function setDot(id, state){
-  const el = $(id);
-  el.classList.remove("ok","warn","bad");
-  el.classList.add(state);
-}
-function setProgress(pct){
-  setText("supPct", pct + "%");
-  $("supFill").style.width = pct + "%";
-}
-function openSupervisor(){ $("supervisorOverlay").classList.add("on"); }
-function closeSupervisor(){ $("supervisorOverlay").classList.remove("on"); }
-function runSupervisor(result){
-  setDot("chkLoaded", result.loaded ? "ok" : "bad");
-  setDot("chkStars", result.stars ? "ok" : "warn");
-  setDot("chkNodes", result.nodes ? "ok" : "warn");
-  setDot("chkGlobalIgnite", result.globalIgnite ? "ok" : "warn");
-  setDot("chkBrainPanel", result.brain ? "ok" : "warn");
-  setDot("chkErrors", result.errors ? "ok" : "warn");
-  const score = [result.loaded,result.stars,result.nodes,result.globalIgnite,result.brain,result.errors].filter(Boolean).length;
-  setProgress(Math.round(score/6*100));
-}
-
-(async function main(){
-  initCounters();
-  startClock();
-  startStars();
-
-  $("btnSupervisor").onclick = ()=> openSupervisor();
-  $("supClose").onclick = ()=> closeSupervisor();
-  $("supervisorOverlay").onclick = (e)=>{ if(e.target === $("supervisorOverlay")) closeSupervisor(); };
-
-  $("btnSettings").onclick = ()=>{
-    const cfg = loadCfg();
-    renderDrawer(cfg);
-    openDrawer();
-  };
-  $("btnCloseDrawer").onclick = closeDrawer;
-  $("drawerScrim").onclick = closeDrawer;
-
-  $("btnSaveCfg").onclick = ()=>{
-    const cfg = loadCfg();
-    const next = readDrawerToCfg(cfg);
-    saveCfg(next);
-    renderDrawer(next);
-    alert("已儲存設定");
-  };
-  $("btnResetCfg").onclick = ()=>{
-    localStorage.removeItem(LS_KEY);
-    renderDrawer(loadCfg());
-    alert("已重置");
-  };
-  $("btnApplyAndRefresh").onclick = async ()=>{
-    const cfg = loadCfg();
-    const next = readDrawerToCfg(cfg);
-    saveCfg(next);
-    closeDrawer();
-    await boot();
-  };
-
-  await boot();
-})();
-
-async function boot(){
-  const cfg = loadCfg();
-  setText("kgenAddrTop", shortAddr(cfg.addresses.kgenToken));
-  applyNodeHints(cfg);
-
-  let provider=null, chainOk=false;
-  try{
-    provider = await makeProvider(cfg);
-    await refreshChain(provider, cfg);
-    chainOk=true;
-  }catch(e){
-    $("rpcStatus").textContent = "RPC 失敗（無法讀鏈）";
-  }
-
-  const nodes = [
-    { id:"12345", name:"五指山・悟空財神殿", desc:"已上線：temples/12345/index.html", href:"./temples/12345/index.html", detect:"./temples/12345/index.html" },
-    { id:"11520", name:"花果山台灣・悟空大腦交易所", desc:"合約待部署；入口頁待施工（本 Portal 已有讀鏈面板）", href:"javascript:void(0)", detect:null },
-    { id:"16888", name:"廣寒宮・七仙女許願池", desc:"座標已預留；許願池合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"18888", name:"靈霄寶殿・玉帝金庫", desc:"DeityBank 合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"18921", name:"斬妖台・分流引擎", desc:"TaxSplitter 合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"108000", name:"花果山火星（MARS）", desc:"你已有 Mars Seats UI（另檔）", href:"javascript:void(0)", detect:null },
+const KEY="KLINE_PORTAL_V1_9_CFG";
+function $(id){return document.getElementById(id)}
+function loadCfg(){try{return Object.assign({},DEFAULT_CFG,JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){return {...DEFAULT_CFG}}}
+function saveCfg(c){localStorage.setItem(KEY,JSON.stringify(c))}
+function short(a){return a? a.slice(0,6)+"…"+a.slice(-4):"未設定"}
+function pad(n){return String(n).padStart(2,"0")}
+function fmtLeft(ms){if(ms<=0)return"現在可檢查";let s=Math.floor(ms/1000),d=Math.floor(s/86400);s%=86400;let h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60);s%=60;if(d)return `${d}天 ${pad(h)}時${pad(m)}分${pad(s)}秒`;if(h)return `${h}時${pad(m)}分${pad(s)}秒`;if(m)return `${m}分${pad(s)}秒`;return `${s}秒`}
+function nextHour(){let n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),n.getUTCHours()+1,0,0))}
+function nextMid(){let n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()+1,0,0,0))}
+function nextDate(m,d){let n=new Date(),x=new Date(Date.UTC(n.getUTCFullYear(),m-1,d,0,0,0));if(x<=n)x=new Date(Date.UTC(n.getUTCFullYear()+1,m-1,d,0,0,0));return x}
+function updateCountdowns(){let now=Date.now();$("cdHeartbeat").textContent=fmtLeft(nextHour()-now)+" 後下一次";$("cdIgnite").textContent=fmtLeft(nextMid()-now)+" 後下一次";$("cd520").textContent=fmtLeft(nextDate(5,20)-now);$("cd1111").textContent=fmtLeft(nextDate(11,11)-now);$("cd1231").textContent=fmtLeft(nextDate(12,31)-now)}
+function renderNodes(){
+  const c=loadCfg();
+  const nodes=[
+    ["12345","五指山・悟空財神殿","Heart V3.2.6｜發財金、心跳、轉日呼吸、聖盃、點燈、還願、許願。","./temples/12345/index.html",c.heart,"ok"],
+    ["16888","廣寒宮・七仙女許願池","仙女下凡、月老點鴛鴦譜，連往 8888 高老莊成親系統。","./temples/16888/index.html",c.temple16888,"warn"],
+    ["8888","高老莊・成親系統","鴛鴦譜與成親系統預留入口。","./temples/8888/index.html",c.gaolao8888,"warn"],
+    ["11520","花果山台灣・悟空大腦交易所","Brain / 交易所 / Heart 血庫循環。","./temples/11520/index.html",c.brain,"ok"],
+    ["108000","花果山火星・MarsSeats","火星豪宅 500 席。","./temples/108000/index.html",c.mars,"ok"],
+    ["18888","靈霄寶殿・玉帝神明銀行","神明銀行與制度中樞。","javascript:void(0)","","warn"]
   ];
-  $("nodesGrid").innerHTML = nodes.map(nodeCardHTML).join("");
-
-  let nodeOkAny=false;
-  for(const n of nodes){
-    const badge = $("nodeStatus_"+n.id);
-    const hint = $("nodeHint_"+n.id);
-
-    if(n.id==="11520"){
-      const a = cfg.addresses.brain11520;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Brain: "+shortAddr(a)) : "未部署";
-    }else if(n.id==="16888"){
-      const a = cfg.addresses.wish16888;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Wish: "+shortAddr(a)) : ("仙女 "+String((cfg.addresses.fairies7||[]).length)+"/7");
-    }else if(n.id==="18888"){
-      const a = cfg.addresses.bank18888;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Bank: "+shortAddr(a)) : "未部署";
-    }else if(n.id==="18921"){
-      const a = cfg.addresses.zhanyao18921;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Zhanyao: "+shortAddr(a)) : "未部署";
-    }else if(n.id==="108000"){
-      const a = cfg.addresses.mars108000;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Mars: "+shortAddr(a)) : "未部署";
-    }else{
-      hint.textContent = "—";
-    }
-
-    if(n.detect){
-      const ok = await detectNodeFile(n.detect);
-      if(ok){ badgeSet(badge,"ok","已完工"); nodeOkAny=true; }
-      else { badgeSet(badge,"warn","施工準備中"); }
-    }else{
-      badgeSet(badge,"warn","待施工");
-    }
-  }
-  badgeSet($("nodesStatus"), nodeOkAny ? "ok" : "warn", nodeOkAny ? "部分完工" : "偵測完成");
-
-  let globalIgniteOk=false, brainOk=false;
-  if(chainOk && provider){
-    try{ globalIgniteOk = (await refreshGlobalIgnite(provider, cfg)).ok; }catch(e){
-      $("globalIgniteStatus").textContent="讀取失敗";
-      $("igniteTableStatus").textContent="讀取失敗";
-    }
-    try{ brainOk = await refreshBrain(provider, cfg); }catch(e){}
-  }else{
-    $("globalIgniteStatus").textContent="RPC 失敗（無法讀鏈）";
-    $("igniteTableStatus").textContent="RPC 失敗";
-    badgeSet($("brainStatusBadge"),"warn","RPC 失敗");
-  }
-
-  runSupervisor({
-    loaded:true, stars:true, nodes:nodeOkAny, globalIgnite:globalIgniteOk, brain:brainOk, errors:__errors.length===0
-  });
+  $("nodes").innerHTML=nodes.map(n=>`<a class="node" href="${n[3]}"><div class="n">${n[1]}</div><div class="id">${n[0]}</div><div class="p">${n[2]}</div><span class="badge ${n[5]}">${n[4]?short(n[4]):"待部署 / 預留"}</span></a>`).join("");
+  $("kgenShort").textContent=short(c.kgen);$("kgenFull").textContent=c.kgen;$("heartShort").textContent=short(c.heart);$("brainShort").textContent=short(c.brain);
 }
-
-/* =========================
-   Guanghan Palace 16888 — Player Trigger Mode (Front-end SIM)
-   - Local-only state stored in localStorage
-   - Each play generates one candle (CT+1) and settles LONG/SHORT
-   - Pool reaches 16888 => random draw (60% winner / 30% public good / 10% carry)
-   ========================= */
-
-const WISH_LS_KEY = "KLINE_WISH_16888_PLAYER_TRIGGER_V1";
-const WISH_CFG = {
-  potTarget: 16888,
-  betMin: 1,
-  betMax: 1000,
-  winMultMin: 0.8,
-  winMultMax: 1.0,
-  // price engine
-  basePrice: 18888,
-  stepMin: 6,
-  stepMax: 88,
-  shockChance: 0.08,     // occasional bigger move
-  shockMul: 4.0,
-  crowdBias: 0.35        // bias weight vs crowded side
+function openSettings(){let c=loadCfg();["Kgen","Heart","Brain","16888","8888","Mars"].forEach(k=>{$("cfg"+k).value=c[k.charAt(0).toLowerCase()+k.slice(1)]||""});$("scrim").classList.add("on");$("drawer").classList.add("on")}
+function closeSettings(){$("scrim").classList.remove("on");$("drawer").classList.remove("on")}
+function saveSettings(){let c=loadCfg();c.kgen=$("cfgKgen").value.trim();c.heart=$("cfgHeart").value.trim();c.brain=$("cfgBrain").value.trim();c.temple16888=$("cfg16888").value.trim();c.gaolao8888=$("cfg8888").value.trim();c.mars=$("cfgMars").value.trim();saveCfg(c);closeSettings();renderNodes()}
+function openGuide(tab="intro"){$("modalScrim").classList.add("on");$("guideModal").classList.add("on");setTab(tab)}
+function closeGuide(){$("modalScrim").classList.remove("on");$("guideModal").classList.remove("on")}
+const guide={
+ intro:"目前問題：更新 K線西遊記宇宙入口。<br><br>目前回答：已整理成 Portal V1.9，入口可連 12345、16888、8888、11520、108000，並加入活動倒數與客服導覽。",
+ "12345":"12345 是五指山悟空財神殿。主流程：連錢包 → Approve Heart → 三次有效聖盃 → fortuneClaim 發財金。Heart 合約目前使用 V3.2.6。",
+ "16888":"16888 是廣寒宮，不是分紅程式。它是七仙女下凡、月下老人點鴛鴦譜，未來連 8888 高老莊成親系統。",
+ qa:"你問什麼，畫面要顯示回答什麼問題。這版在客服導覽加入「目前問題 / 目前回答」，方便知道目前修改目標。"
 };
-
-let wishState = null;
-let wishSide = "LONG";
-
-function wishLoad(){
-  try{
-    const raw = localStorage.getItem(WISH_LS_KEY);
-    if(raw){
-      const s = JSON.parse(raw);
-      if(s && typeof s === "object") return s;
-    }
-  }catch(e){}
-  return {
-    ct: 0,
-    lastClose: WISH_CFG.basePrice,
-    pot: 0,
-    players: [], // {name, side, bet, pnl, ts}
-    longCount: 0,
-    shortCount: 0,
-    candles: []  // {ct, o,h,l,c, sideWin, ts}
-  };
-}
-function wishSave(){
-  try{ localStorage.setItem(WISH_LS_KEY, JSON.stringify(wishState)); }catch(e){}
-}
-
-function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-
-function rnd(a,b){ return a + Math.random()*(b-a); }
-function rndInt(a,b){ return Math.floor(rnd(a,b+1)); }
-
-function wishSetSide(s){
-  wishSide = s;
-  const a = $("wishSideLong"), b = $("wishSideShort");
-  if(!a || !b) return;
-  if(s==="LONG"){ a.classList.add("active"); b.classList.remove("active"); }
-  else{ b.classList.add("active"); a.classList.remove("active"); }
-}
-
-function wishFmt(n){
-  try{ return new Intl.NumberFormat("en-US").format(n); }catch(e){ return String(n); }
-}
-
-function wishRender(){
-  if(!wishState) return;
-  setText("wishPot", wishFmt(wishState.pot));
-  setText("wishPlayers", String(wishState.players.length));
-  setText("wishLS", `${wishState.longCount} / ${wishState.shortCount}`);
-  setText("ctNow", String(wishState.ct));
-  setText("ctPrice", String(wishState.lastClose));
-
-  const log = $("candleLog");
-  if(log){
-    const items = wishState.candles.slice(-30).reverse();
-    if(items.length===0){
-      log.innerHTML = `<div class="tiny">尚未有人許願。按「許願觸發」就會生成第一根 K 線。</div>`;
-    }else{
-      log.innerHTML = items.map(c=>{
-        const dir = c.sideWin==="LONG" ? "多勝" : "空勝";
-        return `<div class="cRow">
-          <div>CT+${c.ct}</div>
-          <div>O:${c.o} H:${c.h} L:${c.l} C:${c.c}</div>
-          <div>${dir}</div>
-        </div>`;
-      }).join("");
-    }
-  }
-}
-
-function wishGenCandle(){
-  // Crowd bias: if long crowded, slightly more chance to go down, and vice versa.
-  const total = wishState.longCount + wishState.shortCount;
-  let crowd = 0; // positive => long crowded
-  if(total>0) crowd = (wishState.longCount - wishState.shortCount)/total;
-
-  const o = wishState.lastClose;
-  let step = rndInt(WISH_CFG.stepMin, WISH_CFG.stepMax);
-  if(Math.random() < WISH_CFG.shockChance) step = Math.floor(step * WISH_CFG.shockMul);
-
-  // base direction
-  let sign = Math.random() < 0.5 ? -1 : 1;
-
-  // apply crowd bias against crowded side
-  // if crowd>0 (more longs), push sign negative a bit; if crowd<0, push sign positive a bit
-  const bias = -crowd * WISH_CFG.crowdBias; // crowd>0 => bias<0
-  if(Math.random() < Math.abs(bias)){
-    sign = bias > 0 ? 1 : -1;
-  }
-
-  const c = Math.max(1, Math.round(o + sign*step));
-  const h = Math.max(o,c) + rndInt(0, Math.max(3, Math.floor(step*0.35)));
-  const l = Math.min(o,c) - rndInt(0, Math.max(3, Math.floor(step*0.35)));
-
-  const sideWin = (c >= o) ? "LONG" : "SHORT";
-  wishState.ct += 1;
-  wishState.lastClose = c;
-
-  wishState.candles.push({ct:wishState.ct, o, h, l, c, sideWin, ts: Date.now()});
-  if(wishState.candles.length > 200) wishState.candles.shift();
-
-  return sideWin;
-}
-
-function wishSettlePlay(playerSide, bet, name){
-  const winSide = wishGenCandle();
-
-  const isWin = (playerSide === winSide);
-  let pnl = 0;
-
-  if(isWin){
-    const mult = rnd(WISH_CFG.winMultMin, WISH_CFG.winMultMax);
-    pnl = Math.round(bet * mult);        // reward (not including principal; sim as net payout)
-    // payout reduces pot, but not below 0
-    wishState.pot = Math.max(0, wishState.pot - pnl);
-  }else{
-    pnl = -bet;
-    wishState.pot += bet;
-  }
-
-  // counts for crowd stats
-  if(playerSide==="LONG") wishState.longCount += 1;
-  else wishState.shortCount += 1;
-
-  wishState.players.push({
-    name: (name||"匿名").slice(0,24),
-    side: playerSide,
-    bet,
-    pnl,
-    ct: wishState.ct,
-    ts: Date.now()
-  });
-  if(wishState.players.length > 500) wishState.players.shift();
-
-  // UI
-  const resEl = $("ctResult");
-  if(resEl){
-    const txt = isWin ? `WIN +${pnl}` : `LOSE ${pnl}`;
-    resEl.textContent = `${winSide==="LONG"?"多勝":"空勝"}｜${txt}｜池=${wishFmt(wishState.pot)}`;
-  }
-
-  // draw if pot hits target
-  if(wishState.pot >= WISH_CFG.potTarget){
-    wishDraw();
-  }
-
-  wishSave();
-  wishRender();
-}
-
-function wishDraw(){
-  const participants = wishState.players.slice(-300); // last 300 plays as eligible
-  if(participants.length === 0) return;
-
-  const winner = participants[rndInt(0, participants.length-1)];
-  const pot = wishState.pot;
-
-  const winAmt = Math.floor(pot * 0.60);
-  const goodAmt = Math.floor(pot * 0.30);
-  const carry = pot - winAmt - goodAmt; // ~10%
-
-  wishState.pot = carry;
-
-  // Append "draw event" candle log as message row (reuse candleLog)
-  const log = $("candleLog");
-  if(log){
-    const msg = document.createElement("div");
-    msg.className = "cRow";
-    msg.innerHTML = `<div>🎉 16888 觸發</div><div>Winner: ${winner.name}｜+${wishFmt(winAmt)}｜公益:${wishFmt(goodAmt)}｜留池:${wishFmt(carry)}</div><div>完成</div>`;
-    log.prepend(msg);
-  }
-
-  // reset crowd stats for new round (optional)
-  wishState.longCount = 0;
-  wishState.shortCount = 0;
-  wishState.players = []; // start a fresh round
-}
-
-function wishInit(){
-  // only if section exists
-  if(!$("wish16888")) return;
-
-  wishState = wishLoad();
-  wishRender();
-  wishSetSide("LONG");
-
-  $("wishSideLong")?.addEventListener("click", ()=> wishSetSide("LONG"));
-  $("wishSideShort")?.addEventListener("click", ()=> wishSetSide("SHORT"));
-
-  $("btnWishPlay")?.addEventListener("click", ()=>{
-    const betRaw = Number($("wishBet")?.value || 0);
-    const bet = clamp(Math.floor(betRaw), WISH_CFG.betMin, WISH_CFG.betMax);
-    if($("wishBet")) $("wishBet").value = String(bet);
-    const name = ($("wishName")?.value || "").trim();
-    wishSettlePlay(wishSide, bet, name);
-  });
-
-  $("btnWishReset")?.addEventListener("click", ()=>{
-    if(!confirm("確定要重置本機獎池與玩家紀錄？（只影響你這台裝置）")) return;
-    localStorage.removeItem(WISH_LS_KEY);
-    wishState = wishLoad();
-    wishSave();
-    wishRender();
-    setText("ctResult", "--");
-  });
-}
-
-// hook into existing init
-try{ wishInit(); }catch(e){ console.warn("wishInit failed:", e); }
-
-
+function setTab(t){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===t));$("guideBody").innerHTML=guide[t]||guide.intro}
+function startStars(){const c=$("stars"),x=c.getContext("2d");let stars=[];function resize(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);stars=Array.from({length:180},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.25,v:Math.random()*.35+.05}))}function loop(){x.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){s.y+=s.v;if(s.y>innerHeight){s.y=-5;s.x=Math.random()*innerWidth}x.fillStyle="rgba(102,247,255,.82)";x.fillRect(s.x,s.y,s.r,s.r)}requestAnimationFrame(loop)}resize();addEventListener("resize",resize);loop()}
+function counters(){let d=new Date().toISOString().slice(0,10),kt="KLINE_PORTAL_TODAY_"+d,ka="KLINE_PORTAL_TOTAL";let t=+localStorage.getItem(kt)||0,a=+localStorage.getItem(ka)||0;localStorage.setItem(kt,++t);localStorage.setItem(ka,++a);$("today").textContent=t;$("total").textContent=a}
+let wish=JSON.parse(localStorage.getItem("WISH_16888_V19")||'{"ct":0,"price":18888,"pot":0,"logs":[]}'),side="多";
+function renderWish(){$("ctNow").textContent=wish.ct;$("ctPrice").textContent=wish.price;$("wishPot").textContent=wish.pot;$("candleLog").innerHTML=wish.logs.length?wish.logs.slice(-30).reverse().map(l=>`<div class="logRow"><span>CT+${l.ct}</span><span>${l.o}→${l.c}</span><span>${l.win}</span></div>`).join(""):"尚未有人許願。"}
+function playWish(){let bet=Math.max(1,Math.min(1000,+$("wishBet").value||100));let o=wish.price,move=Math.floor(Math.random()*88)+6,dir=Math.random()<.5?-1:1,c=Math.max(1,o+move*dir),win=c>=o?"多":"空";wish.ct++;wish.price=c;if(win===side)wish.pot=Math.max(0,wish.pot-Math.floor(bet*.8));else wish.pot+=bet;wish.logs.push({ct:wish.ct,o,c,win});localStorage.setItem("WISH_16888_V19",JSON.stringify(wish));renderWish()}
+function init(){startStars();counters();renderNodes();updateCountdowns();setInterval(()=>{$("clock").textContent=new Date().toLocaleTimeString();updateCountdowns()},1000);$("btnSettings").onclick=openSettings;$("closeSettings").onclick=closeSettings;$("scrim").onclick=closeSettings;$("saveSettings").onclick=saveSettings;$("resetSettings").onclick=()=>{localStorage.removeItem(KEY);renderNodes();openSettings()};$("btnRefresh").onclick=()=>{renderNodes();updateCountdowns()};$("btnGuide").onclick=()=>openGuide();$("closeGuide").onclick=closeGuide;$("modalScrim").onclick=closeGuide;document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));$("longBtn").onclick=()=>{side="多";$("longBtn").className="btn gold";$("shortBtn").className="btn"};$("shortBtn").onclick=()=>{side="空";$("shortBtn").className="btn gold";$("longBtn").className="btn"};$("playWish").onclick=playWish;$("resetWish").onclick=()=>{localStorage.removeItem("WISH_16888_V19");wish={ct:0,price:18888,pot:0,logs:[]};renderWish()}}
+init();
 </script>
-
 </body>
 </html>
