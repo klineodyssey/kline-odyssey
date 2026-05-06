@@ -1,14 +1,17 @@
 [
   {
-    "name": "Wuzhishan Heart Core｜五指山心臟核心",
+    "name": "五指山心臟核心",
+    "en": "Wuzhishan Heart Core",
     "url": "./music/Take My Breath Away.mp3"
   },
   {
-    "name": "Wukong Fortune Blessing｜悟空賜財",
+    "name": "悟空賜財",
+    "en": "Wukong Fortune Blessing",
     "url": "./music/Greatest Love Of All.mp3"
   },
   {
-    "name": "Temple Heartbeat Ignite｜神殿心跳與轉日呼吸",
+    "name": "神殿心跳與轉日呼吸",
+    "en": "Temple Heartbeat Ignite",
     "url": "./music/Bruno Mars - Just The Way You Are.mp3"
   }
 ]
