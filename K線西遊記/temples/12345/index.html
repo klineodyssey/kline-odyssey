@@ -12390,5 +12390,481 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
+
+
+<!-- ===== KGEN 12345 V7.21｜stable repair patch from V7.20 ===== -->
+<style id="kgen12345-v721-stable-repair-css">
+  /* V7.21 只做穩定修復：不再疊舊客服、不再打亂原本攝影/錄影功能 */
+  #brand-badge{display:none!important;}
+  #temple-audio-console{display:none!important;}
+  body:not(.k21-audio-open) #music-panel{display:none!important;}
+  body:not(.k21-ops-open) #web3-panel{display:none!important;}
+  body:not(.k21-rules-open) #temple-modal{display:none!important;}
+
+  /* 左下悟空心臟操作窗：方向橫桿上方，不能藏到底部 */
+  body.k21-ops-open #web3-panel{
+    display:block!important;
+    position:fixed!important;
+    left:12px!important;
+    right:auto!important;
+    bottom:258px!important;
+    width:min(430px,calc(100vw - 24px))!important;
+    max-height:40vh!important;
+    overflow:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    z-index:2147483600!important;
+    border-radius:18px!important;
+    padding:12px!important;
+    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
+    border:1px solid rgba(255,215,120,.76)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
+  }
+  #web3-panel .k21-panel-head,
+  #temple-modal .k21-panel-head,
+  #music-panel .k21-panel-head{
+    position:sticky!important;
+    top:0!important;
+    z-index:5!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    padding:8px 0 10px!important;
+    margin-bottom:8px!important;
+    background:linear-gradient(180deg,rgba(5,9,15,.99),rgba(5,9,15,.86))!important;
+    color:#ffd978!important;
+    border-bottom:1px solid rgba(255,215,120,.22)!important;
+    font-weight:900!important;
+    font-size:13px!important;
+  }
+  .k21-close-btn{
+    pointer-events:auto!important;
+    border:1px solid rgba(255,215,120,.58)!important;
+    background:rgba(255,215,120,.14)!important;
+    color:#ffe39b!important;
+    border-radius:11px!important;
+    padding:7px 11px!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+  }
+
+  /* 右下規則/活動窗：與左下操作窗同高度、同尺寸邏輯 */
+  body.k21-rules-open #temple-modal{
+    display:block!important;
+    position:fixed!important;
+    left:auto!important;
+    right:12px!important;
+    top:auto!important;
+    bottom:258px!important;
+    width:min(430px,calc(100vw - 24px))!important;
+    max-height:40vh!important;
+    overflow:auto!important;
+    z-index:2147483590!important;
+    background:transparent!important;
+    padding:0!important;
+  }
+  body.k21-rules-open #temple-modal > div{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    max-height:40vh!important;
+    overflow:auto!important;
+    border-radius:18px!important;
+    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
+    border:1px solid rgba(255,215,120,.70)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
+  }
+
+  /* 右上神殿音響：只由右上「五指山神殿音響」按鈕展開，不在右下浮出 */
+  body.k21-audio-open #music-panel{
+    display:block!important;
+    position:fixed!important;
+    right:12px!important;
+    top:154px!important;
+    left:auto!important;
+    bottom:auto!important;
+    width:min(360px,calc(100vw - 24px))!important;
+    max-height:44vh!important;
+    overflow:auto!important;
+    z-index:2147483610!important;
+    border-radius:18px!important;
+    padding:12px!important;
+    background:linear-gradient(180deg,rgba(5,9,15,.98),rgba(0,0,0,.94))!important;
+    border:1px solid rgba(255,215,120,.76)!important;
+    box-shadow:0 18px 55px rgba(0,0,0,.74),0 0 24px rgba(255,215,120,.18)!important;
+  }
+
+  /* 兩個圓形控制器：左下是前後左右移動；右下是旋轉多空。兩者同高度、在橫桿上方 */
+  #move-joystick-wrap{
+    display:block!important;
+    position:fixed!important;
+    left:18px!important;
+    bottom:224px!important;
+    right:auto!important;
+    width:118px!important;
+    height:118px!important;
+    z-index:2147483450!important;
+    pointer-events:auto!important;
+  }
+  #move-joystick-wrap::before{content:"MOVE"!important;}
+  #move-joystick-base{inset:13px!important;}
+  #move-joystick-knob{
+    left:35px!important;
+    top:35px!important;
+    width:48px!important;
+    height:48px!important;
+  }
+
+  #wheel-wrap{
+    display:block!important;
+    position:fixed!important;
+    right:18px!important;
+    left:auto!important;
+    bottom:224px!important;
+    transform:none!important;
+    width:118px!important;
+    height:118px!important;
+    z-index:2147483450!important;
+    pointer-events:auto!important;
+  }
+  #wheel-wrap::before{
+    content:"方向 / 多空";
+    position:absolute;
+    top:-24px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#ffe39b;
+    font-family:'Orbitron','Noto Sans TC',sans-serif;
+    font-size:10px;
+    white-space:nowrap;
+    text-shadow:0 0 10px rgba(255,215,120,.35);
+  }
+  #wheel-wrap .wheel{
+    width:118px!important;
+    height:118px!important;
+  }
+  #wheel-wrap .wheel-hub{
+    width:42px!important;
+    height:42px!important;
+    font-size:9px!important;
+  }
+  #wheel-wrap .wheel-knob{
+    width:16px!important;
+    height:16px!important;
+  }
+
+  .steer-zone{bottom:194px!important;z-index:2147483300!important;}
+  .angle-readout{font-size:50px!important;}
+  .footer-terminal{z-index:2147483200!important; padding:10px!important; gap:8px!important;}
+  .footer-terminal .term-btn{pointer-events:auto!important; padding:12px 6px!important; min-height:54px!important; line-height:1.2!important;}
+
+  /* 避免舊版導覽失控疊滿畫面 */
+  #guide-modal{z-index:2147483620!important;}
+  #guide-modal .guide-card{max-height:78vh!important;}
+  .k21-highlight{outline:2px solid rgba(0,242,255,.48)!important; box-shadow:0 0 18px rgba(0,242,255,.25)!important;}
+
+  @media(max-width:760px){
+    body.k21-ops-open #web3-panel{
+      left:10px!important;
+      right:10px!important;
+      width:auto!important;
+      bottom:252px!important;
+      max-height:40vh!important;
+    }
+    body.k21-rules-open #temple-modal{
+      left:10px!important;
+      right:10px!important;
+      width:auto!important;
+      bottom:252px!important;
+      max-height:40vh!important;
+    }
+    body.k21-rules-open #temple-modal > div{max-height:40vh!important;}
+    body.k21-audio-open #music-panel{
+      left:10px!important;
+      right:10px!important;
+      top:144px!important;
+      width:auto!important;
+      max-height:44vh!important;
+    }
+    #move-joystick-wrap{left:14px!important;bottom:222px!important;width:108px!important;height:108px!important;}
+    #move-joystick-knob{left:30px!important;top:30px!important;}
+    #wheel-wrap{right:14px!important;bottom:222px!important;width:108px!important;height:108px!important;}
+    #wheel-wrap .wheel{width:108px!important;height:108px!important;}
+    .steer-zone{bottom:194px!important;}
+    .footer-terminal{grid-template-columns:repeat(4,1fr)!important;}
+    .footer-terminal .term-btn{font-size:11px!important;padding:10px 2px!important;}
+  }
+</style>
+
+<script id="kgen12345-v721-stable-repair-js">
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V7.21';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+  const MARS='0x3529dbFbaD465C2269F8096879A1c298d5257298';
+  const $=id=>document.getElementById(id);
+
+  function speak(msg){
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(String(msg||'')); return; } }catch(e){}
+    try{
+      if(window.speechSynthesis){
+        speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(String(msg||''));
+        u.lang='zh-TW'; u.rate=.95; u.pitch=.92;
+        speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+
+  function closeAll(){
+    document.body.classList.remove(
+      'k17-ops-open','k17-rules-open',
+      'k18-ops-open','k18-rules-open','k18-audio-open',
+      'k19-ops-open','k19-rules-open','k19-audio-open',
+      'k20-ops-open','k20-rules-open','k20-audio-open',
+      'k21-ops-open','k21-rules-open','k21-audio-open',
+      'v716-ops-open','v716-rules-open'
+    );
+    const g=$('guide-modal');
+    if(g) g.classList.remove('show');
+  }
+
+  function setVersion(){
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.querySelectorAll('*').forEach(el=>{
+      if(!el || !el.childNodes || el.childNodes.length!==1) return;
+      const n=el.childNodes[0];
+      if(n.nodeType!==3) return;
+      n.nodeValue=String(n.nodeValue)
+        .replace(/12345-TEMPLE-V7\.\d+/g,VERSION)
+        .replace(/V7\.\d+/g,'V7.21')
+        .replace(/16888 廣寒宮/g,'12345 五指山悟空財神殿')
+        .replace(/月老成親系統/g,'悟空財神殿系統')
+        .replace(/下凡/g,'發財金');
+    });
+  }
+
+  function ensureOpsHead(){
+    const p=$('web3-panel'); if(!p) return;
+    p.querySelectorAll('.k17-panel-head,.k18-panel-head,.k19-panel-head,.k20-panel-head,.k21-panel-head').forEach((h,i)=>{ if(i>0) h.remove(); });
+    let h=p.querySelector('.k21-panel-head');
+    if(!h){
+      h=document.createElement('div');
+      h.className='k21-panel-head';
+      p.insertBefore(h,p.firstChild);
+    }
+    h.innerHTML='<span>悟空心臟操作窗｜12345｜Wallet / Heart</span><button class="k21-close-btn" type="button">收合</button>';
+    h.querySelector('button').onclick=function(e){e.preventDefault();closeAll();speak('悟空心臟操作窗已收合。');};
+    p.querySelectorAll('button').forEach(btn=>{
+      if(btn.closest('.k21-panel-head')) return;
+      const t=(btn.textContent||'').trim();
+      if(t==='關'||t==='關閉'||t==='收合'||t==='展開') btn.style.display='none';
+    });
+    p.querySelectorAll('*').forEach(el=>{
+      if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+        let s=el.textContent||'';
+        s=s.replace('Allowance → Universe','Allowance → Heart')
+           .replace('Universe','Heart')
+           .replace('高老莊','Heart')
+           .replace('16888','12345');
+        el.textContent=s;
+      }
+    });
+  }
+
+  function buildRulesModal(){
+    const m=$('temple-modal'); if(!m) return;
+    let inner=m.firstElementChild || m;
+    inner.querySelectorAll('.k17-rules-body,.k18-rules-body,.k19-rules-body,.k21-rules-body').forEach(x=>x.remove());
+    const box=document.createElement('div');
+    box.className='k21-rules-body';
+    box.style.cssText='padding:14px 16px;color:#eaf5ff;font-size:13px;line-height:1.75;';
+    box.innerHTML=`
+      <div class="k21-panel-head">
+        <span>12345 五指山悟空財神殿｜規則與活動</span>
+        <button class="k21-close-btn" type="button" id="k21-close-rules">收合</button>
+      </div>
+      <div style="border:1px solid rgba(255,215,120,.24);border-radius:14px;padding:12px;background:rgba(255,255,255,.04);">
+        <b>這裡不是 16888 廣寒宮，也不是月老成親系統。</b><br>
+        這裡是 <b>TempleHeart V3.2.6</b> 的前端控制神殿。<br><br>
+        <b>主流程：</b>連接錢包 → Approve Heart → 請示三次聖盃 → fortuneClaim 發財金。<br>
+        <b>聖盃規則：</b>正反 / 反正 = 聖盃成功；正正 = 笑杯；反反 = 陰杯。未滿三次成功不可領。<br>
+        <b>日常功能：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸；vowTo 還願補血；lightLamp 點燈續命；makeWish 許願 hash。<br>
+        <b>節日活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br><br>
+        <b>Heart：</b><code>${HEART}</code><br>
+        <b>KGEN：</b><code>${TOKEN}</code><br>
+        <b>Brain：</b><code>${BRAIN}</code><br>
+        <b>MarsSeats：</b><code>${MARS}</code>
+      </div>`;
+    inner.insertBefore(box, inner.firstChild);
+    const c=$('k21-close-rules'); if(c) c.onclick=function(e){e.preventDefault();closeAll();speak('規則活動已收合。');};
+  }
+
+  function ensureMusicPanel(){
+    let p=$('music-panel');
+    if(!p) return;
+    p.querySelectorAll('.k21-panel-head').forEach(x=>x.remove());
+    const h=document.createElement('div');
+    h.className='k21-panel-head';
+    h.innerHTML='<span>五指山神殿音響｜V7.21</span><button class="k21-close-btn" type="button">收合</button>';
+    p.insertBefore(h,p.firstChild);
+    h.querySelector('button').onclick=function(e){e.preventDefault();closeAll();speak('神殿音響已收合。');};
+  }
+
+  function openOps(kind){
+    closeAll(); ensureOpsHead();
+    document.body.classList.add('k21-ops-open');
+    const p=$('web3-panel');
+    if(p){
+      p.style.display='block';
+      p.scrollTop=0;
+      const key=kind==='fortune'?'發財金':(kind==='cup'?'聖盃':'');
+      if(key){
+        setTimeout(()=>{
+          const target=[...p.querySelectorAll('button,div,input')].find(el=>(el.textContent||el.placeholder||'').includes(key));
+          if(target && target.scrollIntoView){
+            target.classList.add('k21-highlight');
+            target.scrollIntoView({block:'center',behavior:'smooth'});
+            setTimeout(()=>target.classList.remove('k21-highlight'),1600);
+          }
+        },150);
+      }
+    }
+    speak(kind==='fortune'
+      ? '已開啟發財金操作。請確認錢包，先完成三次有效聖盃，再送出 fortuneClaim。'
+      : '已開啟悟空心臟操作窗。請先連接錢包並切到 BSC。');
+  }
+
+  function openRules(){
+    closeAll(); buildRulesModal();
+    const m=$('temple-modal'); if(m) m.style.display='block';
+    document.body.classList.add('k21-rules-open');
+    speak('已開啟五指山悟空財神殿規則與活動。');
+  }
+
+  function openAudio(){
+    closeAll(); ensureMusicPanel();
+    const p=$('music-panel'); if(p) p.style.display='block';
+    document.body.classList.add('k21-audio-open');
+    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
+    try{ if(window.app && typeof app.musicLoadBuiltIn==='function') app.musicLoadBuiltIn(false); }catch(e){}
+    speak('五指山神殿音響已開啟。');
+  }
+
+  function openGuide(){
+    closeAll();
+    const modal=$('guide-modal');
+    const body=$('guide-body');
+    if(modal && body){
+      body.innerHTML=`
+        <h3>12345 五指山悟空財神殿｜客服導覽</h3>
+        <p>這裡是 <b>TempleHeart V3.2.6</b> 前端控制神殿，不是廣寒宮，也不是月老成親系統。</p>
+        <p><b>主流程：</b>連接錢包 → Approve Heart → 請示三次聖盃 → fortuneClaim 發財金。</p>
+        <p><b>聖盃：</b>正反 / 反正算成功；正正是笑杯；反反是陰杯。三次成功才可領。</p>
+        <p><b>活動：</b>5/20 festivalClaim(1)，11/11 festivalClaim(2)，12/31 newYearCountdownClaim。</p>
+        <p><b>Heart：</b><code>${HEART}</code></p>`;
+      modal.classList.add('show');
+      speak('客服導覽已開啟，這是五指山悟空財神殿說明。');
+      return;
+    }
+    openRules();
+  }
+
+  function normalizeFooter8(){
+    const footer=document.querySelector('.footer-terminal'); if(!footer) return;
+    const btns=[...footer.querySelectorAll('button,.term-btn')].slice(0,8);
+    if(btns.length<8) return;
+    btns[0].innerHTML='📸<br>拍照';
+    btns[1].innerHTML='🎥<br>錄影';
+    btns[2].innerHTML='🤳<br>前鏡';
+    btns[3].innerHTML='🌌<br>後鏡';
+    btns[4].innerHTML='🔌<br>錢包聖盃';
+    btns[5].innerHTML='🧧<br>發財金';
+    btns[6].innerHTML='📜<br>規則活動';
+    btns[7].innerHTML='🗣️<br>客服導覽';
+    btns[4].onclick=e=>{e.preventDefault();openOps('cup');};
+    btns[5].onclick=e=>{e.preventDefault();openOps('fortune');};
+    btns[6].onclick=e=>{e.preventDefault();openRules();};
+    btns[7].onclick=e=>{e.preventDefault();openGuide();};
+  }
+
+  function bindTopButtons(){
+    document.addEventListener('click',function(e){
+      const btn=e.target && e.target.closest ? e.target.closest('button,.nav-btn,a') : null;
+      if(!btn) return;
+      const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+      if(t.includes('五指山神殿音響')){
+        e.preventDefault(); e.stopPropagation(); openAudio(); return false;
+      }
+      if(t.includes('客服') && (t.includes('導覽') || t.includes('神殿'))){
+        e.preventDefault(); e.stopPropagation(); openGuide(); return false;
+      }
+      if(t.includes('開啟音效')){
+        speak('音效說明已啟動。右上五指山神殿音響可開啟音樂面板。');
+      }
+    },true);
+
+    document.addEventListener('click',function(e){
+      if(e.target && (e.target.classList && e.target.classList.contains('guide-close'))){
+        e.preventDefault(); closeAll(); return false;
+      }
+      if(e.target && e.target.id==='guide-modal'){
+        closeAll(); return false;
+      }
+    },true);
+  }
+
+  function bindWheelSync(){
+    const slider=$('steer-input-val');
+    const wheel=$('wheel');
+    if(!slider) return;
+    const sync=()=>{
+      const v=Number(slider.value||0);
+      if(wheel) wheel.style.transform='rotate('+v+'deg)';
+    };
+    slider.addEventListener('input',sync,{passive:true});
+    slider.addEventListener('change',sync,{passive:true});
+    sync();
+  }
+
+  function selfCheck(){
+    const issues=[];
+    if(!$('web3-panel')) issues.push('缺悟空心臟操作窗');
+    if(!$('temple-modal')) issues.push('缺規則活動窗');
+    if(!$('music-panel')) issues.push('缺神殿音響面板');
+    if(!$('move-joystick-wrap')) issues.push('缺左下移動控制器');
+    if(!$('wheel-wrap')) issues.push('缺右下旋轉控制器');
+    if(!$('steer-input-val')) issues.push('缺方向橫桿');
+    if(issues.length) console.warn('[KGEN 12345 V7.21 self-check]', issues);
+    else console.log('[KGEN 12345 V7.21 self-check] OK');
+  }
+
+  function init(){
+    setVersion();
+    ensureOpsHead();
+    buildRulesModal();
+    ensureMusicPanel();
+    normalizeFooter8();
+    bindTopButtons();
+    bindWheelSync();
+    closeAll();
+    window.k12345OpenOps=openOps;
+    window.k12345OpenRules=openRules;
+    window.k12345OpenAudio=openAudio;
+    window.k12345OpenGuide=openGuide;
+    selfCheck();
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+  window.addEventListener('load',init);
+  setTimeout(init,600);
+  setTimeout(init,1500);
+})();
+</script>
+
 </body>
 </html>
