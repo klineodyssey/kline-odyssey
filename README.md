@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 👉 想看市場位置打開 DexTools  搜尋 KGEN  找 KGEN / WBNB（BNB Chain）  
-👉 https://www.youtube.com/watch?v=NwW93MsSoB8
+▶ 悟空12345不是失敗，而是KGEN第一場鏈上天雷。機器人大軍喝乾血庫後，五指山開始進化——從發財金，走向真正會記帳、會驗證、會成長的金融生命體。#KGEN #金融生命體 #K線西遊記  
+👉 https://www.youtube.com/watch?v=Tj04JDIZkTs
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
