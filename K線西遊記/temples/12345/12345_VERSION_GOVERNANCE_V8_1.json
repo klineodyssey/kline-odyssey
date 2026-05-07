@@ -1,0 +1,32 @@
+{
+  "product_id": "KGEN-12345-HEART-UI",
+  "version": "12345-TEMPLE-V8.1",
+  "build": "2026-05-07T00:00:00+08:00",
+  "changeset": "V8.1-version-governed-mobile-stabilized",
+  "base_from": "index_12345_Heart_UI_V8_0_mobile_stabilized.html",
+  "base_sha256": "2c3e977799aa39d9fd8e50db09a4afe978d717daff269f9e843ac3454d6f61b6",
+  "output_file": "index_12345_Heart_UI_V8_1_version_governed.html",
+  "output_sha256": "37121aa60dbaa016169263d40b8061c0cfab6e32e2c95d98d7968d12f4d99171",
+  "version_policy": {
+    "source_of_truth": "file content, not filename",
+    "required_before_code_changes": [
+      "PRODUCT_ID",
+      "VERSION",
+      "BUILD",
+      "CHANGELOG",
+      "BASE_FROM",
+      "content hash"
+    ],
+    "forbidden": [
+      "same-version-only-rename",
+      "ranking builds by filename only",
+      "old content with new label only"
+    ]
+  },
+  "applied_fixes": [
+    "embedded PRODUCT_ID/VERSION/BUILD/CHANGESET/BASE_FROM/BASE_SHA256 at top of HTML before functional code",
+    "normalized stale visible UI version labels from V5.8/V7.x/V8.0 to V8.1",
+    "added runtime KGEN12345_BUILD and KGEN12345_VERSION_GOVERNANCE object",
+    "added recurring version governance lock so mobile render cannot fall back to old version text"
+  ]
+}
