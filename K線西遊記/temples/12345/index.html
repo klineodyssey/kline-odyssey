@@ -5,21 +5,20 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: V8.3.0
-BUILD: 20260507-v830-mother-v7213-first-functional-nav-patch
+VERSION: V8.4.0
+BUILD: 20260507-mother-v7213-content-governed
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 BASE_SHA256: 8e0a1ccf6b091c66e87d08840c94125cd6551d3f590b6a2798f75ce32171d2c1
 CHANGELOG:
-- 以 V8.2.0 回穩母版作為底稿，底層仍繼承使用者確認可用的 V7.21.3 human_countdown_qa。
-- 本版開始實作功能補丁，不再只是版本顯示修正。
-- 實作宇宙節點導航修正：返回宇宙入口改為相對路徑 ../../index.html，新增 16888 廣寒宮相對入口 ../16888/index.html。
-- 新增 V8.3 生命狀態條與 runtime path 檢查，方便上傳後確認不是快取舊檔。
-- 保留母版錢包、鏈上操作、血庫、發財金、心跳、點火、許願、還願邏輯，不重寫核心避免再爆版。
+- 以使用者上傳且確認可用的 V7.21.3 human_countdown_qa 作為唯一母版。
+- 不採用 V7.23 / V8.1 壞版作為底稿，避免疊層、遮罩與手機版操作區錯位延續。
+- 先建立產品編號 / VERSION / BUILD / CHANGELOG / BASE_FROM，再套用版本治理補丁。
+- 保留 V7.21.3 母版版面、功能與鏈上互動邏輯；僅修正對外顯示版本與交接識別。
 ============================================================
 -->
 <meta name="kgen-product-id" content="KGEN-12345-HEART-UI">
-<meta name="kgen-version" content="V8.3.0">
-<meta name="kgen-build" content="20260507-v830-mother-v7213-first-functional-nav-patch">
+<meta name="kgen-version" content="V8.4.0">
+<meta name="kgen-build" content="20260507-mother-v7213-content-governed">
 <meta name="kgen-base-from" content="index_12345_Heart_UI_V7_21_3_human_countdown_qa.html">
 
 
@@ -27,14 +26,14 @@ CHANGELOG:
 K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
 ========================= -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="12345 五指山悟空財神殿 · K線西遊記 · V8.3.0">
+<meta property="og:title" content="12345 五指山悟空財神殿 · K線西遊記 · V8.4.0">
 <meta property="og:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta property="og:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">
 <meta property="og:site_name" content="KLINE ODYSSEY">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="12345 五指山悟空財神殿 · K線西遊記 · V8.3.0">
+<meta name="twitter:title" content="12345 五指山悟空財神殿 · K線西遊記 · V8.4.0">
 <meta name="twitter:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta name="twitter:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 
@@ -42,7 +41,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.3.0｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.4.0｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1258,7 +1257,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 
 
 
-/* === 12345 Temple Music System V8.2.0 === */
+/* === 12345 Temple Music System V8.4.0 === */
 #temple-audio-console{
   position:fixed; right:16px; bottom:112px; z-index:260;
   width:min(320px,92vw); padding:10px 12px; border-radius:14px;
@@ -1417,7 +1416,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="temple-audio-console" aria-label="12345 神殿音樂系統">
-  <div class="ta-head"><span>神殿音樂｜V8.3.0</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
+  <div class="ta-head"><span>神殿音樂｜V8.4.0</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
   <div class="ta-row">
     <div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
     <button type="button" onclick="templeAudio.playBgm()">播放</button>
@@ -1434,7 +1433,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.3.0</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.4.0</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1540,7 +1539,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <!-- WEB3 控制面板（對齊合約） -->
 <div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V8.2.0</div>
+    <div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V8.4.0</div>
     <button class="term-btn" style="padding:8px 10px; font-size:12px; pointer-events:auto;" onclick="web3.smartConnect()">🔌 連結錢包</button>
 <button class="term-btn" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;" onclick="web3.openWalletHub()">🧩 多錢包</button>
     <button class="term-btn" id="auto-battle-btn" onclick="app.playTempleIntro()">🗣️ 語音客服介紹</button>
@@ -1564,7 +1563,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">神殿玩法｜V8.2.0</div>
+    <div class="qs-title">神殿玩法｜V8.4.0</div>
     <div>先 <span class="hl">Approve 授權</span>，再依序完成 <span class="hl">三次聖盃</span>、<span class="hl">領發財金</span>、<span class="hl">整點心跳</span>、<span class="hl">轉日呼吸</span>。</div>
     <ol>
       <li>連結錢包</li>
@@ -1649,7 +1648,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 /*
 ============================================================
 KGEN 12345｜五指山悟空財神殿 Index (GitHub Pages)
-版本：V8.2.0  （以 v2.20.4 可用原版為底，逐步加功能）
+版本：V8.4.0  （以 v2.20.4 可用原版為底，逐步加功能）
 
 【重要觀念 / 介面定義】
 1) 「方向盤(度數)」只代表多空方向：
@@ -1681,7 +1680,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION='KGEN-12345-HEART-UI-V8.3.0';
+const APP_VERSION='KGEN-12345-HEART-UI-V8.4.0';
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3719,24 +3718,18 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 </script>
 
 
-<!-- === Universe Navigation Buttons V8.3.0｜functional relative-path patch === -->
-<style id="kgen12345-v830-nav-style">
-  #v830-live-strip{position:fixed;left:18px;top:86px;z-index:260;max-width:min(440px,calc(100vw - 36px));padding:8px 10px;border:1px solid rgba(255,215,120,.45);border-radius:12px;background:rgba(5,8,15,.78);backdrop-filter:blur(8px);box-shadow:0 0 22px rgba(255,198,72,.18);font:11px/1.45 Orbitron,'Noto Sans TC',sans-serif;color:#ffe6a0;pointer-events:none}
-  #v830-live-strip b{color:#78f7ff}
-  #universe-nav .nav-btn[data-v830="yes"]{border-color:rgba(120,247,255,.55);box-shadow:0 0 12px rgba(0,242,255,.15)}
-  @media (max-width: 720px){#v830-live-strip{top:64px;left:10px;font-size:10px;max-width:calc(100vw - 20px)}#universe-nav{right:10px!important;top:108px!important;gap:7px!important}#universe-nav .nav-btn{font-size:11px!important;padding:7px 9px!important}}
-</style>
-<div id="v830-live-strip">KGEN-12345-HEART-UI <b>V8.3.0</b>｜母版：V7.21.3｜導航實作：Portal / 16888｜等待 runtime path...</div>
-<div id="universe-nav" data-version="V8.3.0" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-  <a class="nav-btn nav-gold" data-v830="yes" data-node="portal" href="../../index.html" target="_self" rel="noopener">返回｜K線西遊記宇宙入口</a>
-  <a class="nav-btn nav-cyan" data-v830="yes" data-node="16888" href="../16888/index.html" target="_self" rel="noopener">前往｜16888 廣寒宮</a>
-  <a class="nav-btn nav-cyan" data-node="official" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
+<!-- === Universe Navigation Buttons V2.04 === -->
+<div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
 
   <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
   <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
   <button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 悟空財神殿導覽</button>
   <button class="nav-btn nav-help" onclick="roundHistory.open()">名額紀錄</button>
+  
+  
   <button class="nav-btn nav-help" id="boardToggleBtn" onclick="toggleBoardPanel()">排行榜</button>
   <button class="nav-btn nav-music" onclick="app.openMusic()">五指山神殿音響</button>
 </div>
@@ -7575,7 +7568,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.3.0';
+      if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.4.0';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -10032,7 +10025,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <script id="temple-audio-system-v710">
 /* ============================================================
-   12345 Temple Audio System V8.2.0
+   12345 Temple Audio System V8.4.0
    - 主背景音樂：Wuzhishan Heart Core
    - 發財金音效：Wukong Fortune Blessing
    - 心跳/轉日音效：Temple Heartbeat Ignite
@@ -10143,7 +10136,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- 12345 TEMPLE V8.2.0 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
+<!-- 12345 TEMPLE V8.4.0 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
 <style id="kh-v711-hotfix-style">
   /* 右下音樂小窗與右上入口重複，右下取消；音樂系統仍可由按鈕/首次點擊觸發 */
   #temple-audio-console{ display:none !important; }
@@ -10301,8 +10294,8 @@ KGEN 12345 UI Patch V7.6.0
   }
 
   function init(){
-    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.3.0｜Heart V3.2.6';
-    set('ver-st','VERSION KGEN-12345-HEART-UI-V8.3.0');
+    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.4.0｜Heart V3.2.6';
+    set('ver-st','VERSION KGEN-12345-HEART-UI-V8.4.0');
     set('w3-uni', HEART_ADDR);
     remove16888Words();
     patchAngle();
@@ -10316,7 +10309,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- KGEN 12345 V8.2.0 final patch: Heart UI / wallet panel / angle sync -->
+<!-- KGEN 12345 V8.4.0 final patch: Heart UI / wallet panel / angle sync -->
 <style id="kgen12345-v712-final-css">
   /* 左下交易 / 錢包 / 玩法區塊：固定恢復，不再消失 */
   #bet-live-panel.bet-live-panel{
@@ -10364,7 +10357,7 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){}
   }
   function fixText(){
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.3.0';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.4.0';
     document.querySelectorAll('*').forEach(el=>{
       if(el.children.length) return;
       let t=el.textContent||'';
@@ -10434,7 +10427,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V8.2.0 HUMAN UX PATCH: guide / left wallet panel / cups / events ===== -->
+<!-- ===== KGEN 12345 V8.4.0 HUMAN UX PATCH: guide / left wallet panel / cups / events ===== -->
 <style>
   :root{--v714Panel:rgba(7,10,14,.88);--v714Line:rgba(255,215,120,.58);--v714Cyan:#7ff3ff;--v714Gold:#ffd978;}
   #bet-live-panel.bet-live-panel{
@@ -10484,11 +10477,11 @@ KGEN 12345 UI Patch V7.6.0
   function speak(msg){try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; u.rate=.96; u.pitch=.92; speechSynthesis.speak(u);} }catch(e){}}
   function set(id,v){const e=$(id); if(e) e.textContent=v;}
   function patchVersion(){
-    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.3.0｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.3.0';
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION KGEN-12345-HEART-UI-V8.3.0'; });
+    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.4.0｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.4.0';
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION KGEN-12345-HEART-UI-V8.4.0'; });
     document.querySelectorAll('*').forEach(el=>{ if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
-      el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V8.2.0').replace(/規則與下凡/g,'發放規則');
+      el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V8.4.0').replace(/規則與下凡/g,'發放規則');
     }});
   }
   function buildLeftPanel(){
@@ -10588,7 +10581,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- === V8.2.0 Human Panel + Holy Cup Override === -->
+<!-- === V8.4.0 Human Panel + Holy Cup Override === -->
 <style id="v715-human-panel-css">
   :root { --v715-panel-w: min(390px, 92vw); }
   #v715-left-dock,
@@ -10636,7 +10629,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="v715-human-panel-js">
 (function(){
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const $=(id)=>document.getElementById(id);
   function say(msg){ try{ window.app&&app.speak&&app.speak(msg); }catch(e){} try{ if(window.toast) toast(msg); }catch(e){} }
   function makeDock(){
@@ -10908,7 +10901,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v716-human-buttons-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const $=id=>document.getElementById(id);
   function speak(msg){
     try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){}
@@ -11287,7 +11280,7 @@ KGEN 12345 UI Patch V7.6.0
 </script>
 
 
-<!-- ===== KGEN 12345 FINAL HOTFIX V8.2.0: real wallet connect injection/provider fix ===== -->
+<!-- ===== KGEN 12345 FINAL HOTFIX V8.4.0: real wallet connect injection/provider fix ===== -->
 <style id="kgen12345-v713-walletfix-css">
   #walletHub{z-index:2147483647 !important;}
   #kgen-heart-toggle{top:92px !important;}
@@ -11297,7 +11290,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v713-walletfix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -11546,7 +11539,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v717-footer8-standard-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11683,7 +11676,7 @@ KGEN 12345 UI Patch V7.6.0
 })();
 </script>
 
-<!-- ===== KGEN 12345 V8.2.0｜Standard footer buttons + clean floating windows hotfix ===== -->
+<!-- ===== KGEN 12345 V8.4.0｜Standard footer buttons + clean floating windows hotfix ===== -->
 <style id="kgen12345-v718-final-layout-css">
   /* 左上 logo 與 Heart 展開鈕互相遮擋：直接移除小 logo，保留主標題 */
   #brand-badge{display:none!important;}
@@ -11766,7 +11759,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v718-final-layout-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11778,7 +11771,7 @@ KGEN 12345 UI Patch V7.6.0
     const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
     document.querySelectorAll('*').forEach(el=>{
       if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
-        el.textContent=el.textContent.replace(/12345-TEMPLE-V7\.1[0-9]/g, VERSION).replace(/V7\.1[0-9]/g,'V8.2.0');
+        el.textContent=el.textContent.replace(/12345-TEMPLE-V7\.1[0-9]/g, VERSION).replace(/V7\.1[0-9]/g,'V8.4.0');
       }
     });
   }
@@ -11892,7 +11885,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V8.2.0 FINAL｜footer8 + audio top panel + ops window placement ===== -->
+<!-- ===== KGEN 12345 V8.4.0 FINAL｜footer8 + audio top panel + ops window placement ===== -->
 <style id="kgen12345-v719-final-fix-css">
   /* 版號與上方：避免左上小 logo 擋 12345 Heart 展開 */
   #brand-badge{display:none!important;}
@@ -11987,7 +11980,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v719-final-fix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11999,7 +11992,7 @@ KGEN 12345 UI Patch V7.6.0
     const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
     document.querySelectorAll('*').forEach(el=>{
       if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
-        el.textContent=el.textContent.replace(/12345-TEMPLE-V7\.1[0-9]/g, VERSION).replace(/V7\.1[0-9]/g,'V8.2.0');
+        el.textContent=el.textContent.replace(/12345-TEMPLE-V7\.1[0-9]/g, VERSION).replace(/V7\.1[0-9]/g,'V8.4.0');
       }
     });
   }
@@ -12250,7 +12243,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v720-layout-audio-hotfix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const $=id=>document.getElementById(id);
 
   function speak(msg){
@@ -12626,7 +12619,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v721-stable-repair-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.3.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.4.0';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -13513,23 +13506,22 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN-12345-HEART-UI V8.3.0｜mother-base version governance patch ===== -->
-<script id="kgen12345-v830-version-governance">
+<!-- ===== KGEN-12345-HEART-UI V8.4.0｜mother-base version governance patch ===== -->
+<script id="kgen12345-v820-version-governance">
 (function(){
   'use strict';
   const GOVERNANCE = {
     productId: 'KGEN-12345-HEART-UI',
-    version: 'V8.3.0',
-    build: '20260507-v830-mother-v7213-first-functional-nav-patch',
+    version: 'V8.4.0',
+    build: '20260507-mother-v7213-content-governed',
     baseFrom: 'index_12345_Heart_UI_V7_21_3_human_countdown_qa.html',
     baseSha256: '8e0a1ccf6b091c66e87d08840c94125cd6551d3f590b6a2798f75ce32171d2c1',
     policy: 'content-first-versioning',
     changelog: [
-      'Base restored through V8.2.0 from the confirmed working V7.21.3 human_countdown_qa mother file.',
-      'V8.3.0 is the first functional patch after recovery, not a filename-only relabel.',
-      'Universe node navigation now uses relative GitHub Pages paths for Portal and 16888.',
-      'Runtime live badge added so deployment/cache can be visually checked.',
-      'Mother wallet and chain-operation logic are preserved; core behavior is not rewritten.'
+      'Base restored from the confirmed working V7.21.3 human_countdown_qa mother file.',
+      'Broken V7.23/V8.1 branches are not used as base.',
+      'Version identifiers are governed before additional code behavior.',
+      'Layout and chain-operation logic from the mother file are preserved.'
     ]
   };
   window.KGEN_12345_VERSION_GOVERNANCE = GOVERNANCE;
@@ -13539,7 +13531,7 @@ KGEN 12345 UI Patch V7.6.0
 
   function setText(el, txt){ if(el) el.textContent = txt; }
   function applyVersion(){
-    document.title = 'KGEN 12345 悟空財神殿｜' + GOVERNANCE.version + ' 母版治理＋導航實作版';
+    document.title = 'KGEN 12345 悟空財神殿｜' + GOVERNANCE.version + ' 母版治理穩定版';
     setText(document.getElementById('ver-st'), 'VERSION ' + GOVERNANCE.productId + '-' + GOVERNANCE.version);
     setText(document.getElementById('sys-st'), 'SYSTEM ONLINE | ' + new Date().toLocaleString());
 
@@ -13576,46 +13568,129 @@ KGEN 12345 UI Patch V7.6.0
 </script>
 
 
-<!-- ===== KGEN-12345-HEART-UI V8.3.0｜functional deployment sanity patch ===== -->
-<script id="kgen12345-v830-functional-patch">
+<!-- ============================================================
+KGEN 12345｜V8.4.0 SWAP ROUTE LOCK
+BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+PURPOSE:
+- Fix PancakeSwap route after wallet connect.
+- BNB button always opens BNB -> KGEN.
+- USDT button always opens USDT(BSC) -> KGEN.
+- Prevent old app.openPancake / wallet refresh listeners from falling back to CAKE.
+============================================================ -->
+<script id="kgen-12345-v840-swap-route-lock">
 (function(){
   'use strict';
-  const VERSION = 'V8.3.0';
-  const NODES = {
-    portalRelative: '../../index.html',
-    temple16888Relative: '../16888/index.html',
-    officialHome: 'https://klineodyssey.github.io/kline-odyssey/',
-    expectedDeployedPath: '/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html'
-  };
-  window.KGEN_12345_NODE_URLS = NODES;
 
-  function qs(sel){ return document.querySelector(sel); }
-  function setAttr(sel, attrs){
-    const el = qs(sel);
-    if(!el) return;
-    Object.keys(attrs).forEach(k=>el.setAttribute(k, attrs[k]));
+  const PRODUCT_ID = 'KGEN-12345-HEART-UI';
+  const VERSION = 'V8.4.0';
+  const BUILD = '2026-05-07-SWAP-ROUTE-LOCK';
+  const BASE_FROM = 'index_12345_Heart_UI_V7_21_3_human_countdown_qa.html';
+  const CHANGELOG = [
+    'Lock PancakeSwap output token to official KGEN contract.',
+    'BNB swap button opens BNB -> KGEN route.',
+    'USDT swap button opens BSC USDT -> KGEN route.',
+    'Capture click events to prevent legacy CAKE fallback after wallet connection.'
+  ];
+
+  const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const BSC_USDT = '0x55d398326f99059fF775485246999027B3197955';
+  const PANCAKE_BASE = 'https://pancakeswap.finance/swap';
+
+  function q(v){ return encodeURIComponent(v); }
+
+  function pancakeUrl(inputCurrency){
+    const input = inputCurrency ? '&inputCurrency=' + q(inputCurrency) : '';
+    return PANCAKE_BASE + '?chain=bsc' + input + '&outputCurrency=' + q(KGEN);
   }
-  function init(){
-    setAttr('#universe-nav a[data-node="portal"]', {href:NODES.portalRelative, target:'_self'});
-    setAttr('#universe-nav a[data-node="16888"]', {href:NODES.temple16888Relative, target:'_self'});
-    setAttr('#universe-nav a[data-node="official"]', {href:NODES.officialHome, target:'_blank'});
 
-    const strip = document.getElementById('v830-live-strip');
-    if(strip){
-      const path = location.pathname || '';
-      const isTemplePath = /\/temples\/12345\/index\.html$/i.test(path) || /%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/i.test(path);
-      strip.innerHTML = 'KGEN-12345-HEART-UI <b>'+VERSION+'</b>｜母版：V7.21.3｜功能補丁：Portal / 16888 導航｜目前路徑：' + (isTemplePath ? 'OK' : '請確認是否上傳到 temples/12345/index.html');
+  const URL_BNB_TO_KGEN  = pancakeUrl('BNB');
+  const URL_USDT_TO_KGEN = pancakeUrl(BSC_USDT);
+
+  function openSwap(kind){
+    const url = kind === 'USDT' ? URL_USDT_TO_KGEN : URL_BNB_TO_KGEN;
+    try{
+      window.open(url, '_blank', 'noopener');
+    }catch(e){
+      location.href = url;
+    }
+    try{
+      if(window.ui && ui.toast) ui.toast((kind === 'USDT' ? 'USDT' : 'BNB') + ' → KGEN 路由已鎖定');
+      else if(window.web3 && web3.toast) web3.toast((kind === 'USDT' ? 'USDT' : 'BNB') + ' → KGEN 路由已鎖定');
+    }catch(e){}
+  }
+
+  function bindSwapButtons(){
+    const bnb = document.getElementById('btn-swap-bnb');
+    const usdt = document.getElementById('btn-swap-usdt');
+
+    if(bnb && !bnb.dataset.v840RouteLock){
+      bnb.dataset.v840RouteLock = 'true';
+      bnb.textContent = '用 BNB 換 KGEN';
+      bnb.setAttribute('data-hint','BNB → KGEN：已鎖定官方 KGEN 合約，不會跳 CAKE');
+      bnb.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        openSwap('BNB');
+      }, true);
     }
 
-    const ver = document.getElementById('ver-st');
-    if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-' + VERSION + '｜母版 V7.21.3｜功能補丁已啟用';
-    const nav = document.getElementById('universe-nav');
-    if(nav) nav.setAttribute('data-runtime-ready','true');
-    console.log('[KGEN 12345 V8.3 FUNCTIONAL PATCH]', {version:VERSION, nodes:NODES, pathname:location.pathname});
+    if(usdt && !usdt.dataset.v840RouteLock){
+      usdt.dataset.v840RouteLock = 'true';
+      usdt.textContent = '用 USDT 換 KGEN';
+      usdt.setAttribute('data-hint','USDT(BSC) → KGEN：已鎖定官方 KGEN 合約，不會跳 CAKE');
+      usdt.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        openSwap('USDT');
+      }, true);
+    }
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-  window.addEventListener('load', init);
+
+  function patchGlobalSwap(){
+    window.KGEN12345_SWAP_LOCK = {
+      PRODUCT_ID, VERSION, BUILD, BASE_FROM, CHANGELOG,
+      KGEN, BSC_USDT, URL_BNB_TO_KGEN, URL_USDT_TO_KGEN
+    };
+
+    if(window.web3){
+      web3.PANCAKE_SWAP_URL = URL_BNB_TO_KGEN;
+      web3.PANCAKE_SWAP_URL_BNB = URL_BNB_TO_KGEN;
+      web3.PANCAKE_SWAP_URL_USDT = URL_USDT_TO_KGEN;
+    }
+
+    if(window.app){
+      app.openPancake = function(){ openSwap('BNB'); };
+      app.openPancakeBNB = function(){ openSwap('BNB'); };
+      app.openPancakeUSDT = function(){ openSwap('USDT'); };
+    }
+  }
+
+  function showVersion(){
+    try{
+      const ver = document.getElementById('ver-st');
+      if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-' + VERSION;
+      const badge = document.getElementById('brand-badge');
+      if(badge) badge.textContent = '12345 Heart 展開｜' + VERSION + '｜Swap鎖定 KGEN';
+    }catch(e){}
+  }
+
+  function boot(){
+    patchGlobalSwap();
+    bindSwapButtons();
+    showVersion();
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  }else{
+    boot();
+  }
+
+  window.addEventListener('load', boot);
+  window.addEventListener('pageshow', boot);
+  setInterval(boot, 2000);
 })();
 </script>
 
