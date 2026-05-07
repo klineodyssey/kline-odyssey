@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>K線西遊記｜銀河宇宙入口（Portal V1.4 Multi-Nodes）</title>
+  <title>K線西遊記｜銀河宇宙入口（Portal V2.0 Live-Nodes）</title>
+  <meta name="app-version" content="Portal V2.0 2026-05-07" />
   <style>
     :root{
       --bg:#06070b;
@@ -243,7 +244,7 @@
 
 <body>
   <div class="topRight">
-    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V1.4</b></div>
+    <div class="miniPill">版本：<b id="uiVersion" class="mono">Portal V2.0</b></div>
     <div class="miniPill">時間：<b id="nowClock" class="mono">--</b></div>
     <div class="supervisorBtn" id="btnSupervisor">監工檢查</div>
     <div class="supervisorBtn" id="btnSettings">設定</div>
@@ -252,7 +253,7 @@
   <div class="overlay" id="supervisorOverlay" aria-hidden="true">
     <div class="overlayCard">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V1.4</div>
+        <div style="font-weight:950;letter-spacing:.35px;">監工檢查｜Portal V2.0</div>
         <div class="badge" id="supClose" style="cursor:pointer;">關閉</div>
       </div>
       <div class="progressWrap">
@@ -356,7 +357,7 @@
     <header>
       <div class="brand">
         <div class="h">K線西遊記｜銀河宇宙入口</div>
-        <div class="s">KLINE Odyssey · Map Portal · Portal V1.4（Multi-Heart + 11520）</div>
+        <div class="s">KLINE Odyssey · Map Portal · Portal V2.0（12345 + 16888 + 11520 + Mars + 8895）</div>
       </div>
 
       <div class="pillrow">
@@ -373,7 +374,7 @@
         <div>
           <div class="title">宇宙不需要解釋，只需要入口。</div>
           <p class="subtitle">
-            Portal V1.8：新增「全域點火 Multi‑Heart」＋「11520 悟空大腦（5000萬容量）」。<br/>
+            Portal V2.0：更新 12345 悟空財神殿、16888 廣寒宮入口、11520 悟空大腦、Mars 席位與 8895 八戒人民銀行地下錢莊座標。<br/>
             未部署點位先保留座標、先上地圖，等合約上鏈自動亮燈。
           </p>
 
@@ -515,21 +516,28 @@
           <div class="n">五指山・悟空財神殿</div>
           <div class="id">12345</div>
           <div class="p">Heart / 發財金 / 呼吸心跳 / 還願 / 許願 / 光明燈 / 影像自看</div>
-          <div class="p mono" id="node12345Hint">Heart 未設定</div>
+          <div class="p mono" id="node12345Hint">Heart 已部署</div>
         </a>
 
         <a class="node" href="./temples/11520/index.html" data-node="11520" id="nodeLink11520">
           <div class="n">花果山台灣・悟空大腦交易所</div>
           <div class="id">11520</div>
           <div class="p">Reward 0.05% 稅流 / 保證金池 / 月結算</div>
-          <div class="p mono" id="node11520Hint">Brain 未設定</div>
+          <div class="p mono" id="node11520Hint">Brain 已部署</div>
         </a>
 
         <a class="node" href="./temples/16888/index.html" data-node="16888" id="nodeLink16888">
-          <div class="n">廣寒宮・七仙女許願池</div>
+          <div class="n">廣寒宮・七仙女飛碟駕駛艙</div>
           <div class="id">16888</div>
-          <div class="p">許願 / 點燈影像留言 / 七仙女分潤</div>
-          <div class="p mono" id="node16888Hint">未部署</div>
+          <div class="p">音樂 / 錢包同步 / 飛碟儀表 / 許願池介面</div>
+          <div class="p mono" id="node16888Hint">入口已上線</div>
+        </a>
+
+        <a class="node" href="javascript:void(0)" data-node="8895" id="nodeLink8895">
+          <div class="n">雲棧洞・八戒人民銀行地下錢莊</div>
+          <div class="id">8895</div>
+          <div class="p">借金帳本 / 還金進度 / 香客帳戶 / 下一輪資格</div>
+          <div class="p mono" id="node8895Hint">規劃中</div>
         </a>
 
         <a class="node" href="javascript:void(0)" data-node="18888" id="nodeLink18888">
@@ -556,8 +564,8 @@
       </div>
 
       <div class="footer">
-        Portal V1.8：Multi‑Heart 全域點火 + 11520 Brain（腦容量 5000萬）已加上。<br/>
-        16888 廣寒宮先納入座標與入口（待你部署許願池合約後再點亮）。<br/>
+        Portal V2.0：12345 與 16888 入口已接回宇宙入口；11520、Mars 與 8895 已列入主線座標。<br/>
+        8895 雲棧洞・八戒人民銀行地下錢莊：帳戶管理 / 借金帳本 / 還金進度 / 下一輪資格。<br/>
       </div>
     </section>
 
@@ -665,13 +673,13 @@ const DEFAULT_CFG = {
   addresses: {
     kgenToken: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
     hearts: [
-      { id: "12345", addr: "0x0000000000000000000000000000000000000000" }
+      { id: "12345", addr: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972" }
     ],
-    brain11520: "0x0000000000000000000000000000000000000000",
+    brain11520: "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
     wish16888: "0x0000000000000000000000000000000000000000",
-    bank18888: "0x0000000000000000000000000000000000000000",
+    bank18888: "0xfc522243e988a837700CaD600D6f030f5932681F",
     zhanyao18921: "0x0000000000000000000000000000000000000000",
-    mars108000: "0x0000000000000000000000000000000000000000",
+    mars108000: "0x3529dbFbaD465C2269F8096879A1c298d5257298",
     fairies7: []
   },
   brain: { capWhole: 50000000 }
@@ -989,7 +997,8 @@ function applyNodeHints(cfg){
   const a = cfg.addresses;
   const heart0 = (a.hearts||[]).find(x=>String(x.id||"")==="12345");
   setText("node12345Hint", (heart0?.addr && !isZeroAddr(heart0.addr) && isAddr(heart0.addr)) ? `Heart: ${shortAddr(heart0.addr)}` : "Heart 未設定");
-  setText("node16888Hint", (!isZeroAddr(a.wish16888) && isAddr(a.wish16888)) ? `Wish: ${shortAddr(a.wish16888)}` : `未部署（仙女 ${String((a.fairies7||[]).length)}/7）`);
+  setText("node16888Hint", "入口已上線");
+  setText("node8895Hint", "規劃中｜借金帳本 / 還金進度");
   setText("node18888Hint", (!isZeroAddr(a.bank18888) && isAddr(a.bank18888)) ? `Bank: ${shortAddr(a.bank18888)}` : "未部署");
   setText("node18921Hint", (!isZeroAddr(a.zhanyao18921) && isAddr(a.zhanyao18921)) ? `Zhanyao: ${shortAddr(a.zhanyao18921)}` : "未部署");
   setText("node108000Hint", (!isZeroAddr(a.mars108000) && isAddr(a.mars108000)) ? `Mars: ${shortAddr(a.mars108000)}` : "未部署");
@@ -1120,12 +1129,13 @@ async function boot(){
   }
 
   const nodes = [
-    { id:"12345", name:"五指山・悟空財神殿", desc:"已上線：temples/12345/index.html", href:"./temples/12345/index.html", detect:"./temples/12345/index.html" },
-    { id:"11520", name:"花果山台灣・悟空大腦交易所", desc:"合約待部署；入口頁待施工（本 Portal 已有讀鏈面板）", href:"javascript:void(0)", detect:null },
-    { id:"16888", name:"廣寒宮・七仙女許願池", desc:"座標已預留；許願池合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"18888", name:"靈霄寶殿・玉帝金庫", desc:"DeityBank 合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"18921", name:"斬妖台・分流引擎", desc:"TaxSplitter 合約待部署", href:"javascript:void(0)", detect:null },
-    { id:"108000", name:"花果山火星（MARS）", desc:"你已有 Mars Seats UI（另檔）", href:"javascript:void(0)", detect:null },
+    { id:"12345", name:"五指山・悟空財神殿", desc:"已上線：temples/12345/index.html｜返回宇宙入口已接通", href:"./temples/12345/index.html", detect:"./temples/12345/index.html" },
+    { id:"11520", name:"花果山台灣・悟空大腦交易所", desc:"Brain 已部署；入口頁待施工（本 Portal 已有讀鏈面板）", href:"javascript:void(0)", detect:null },
+    { id:"16888", name:"廣寒宮・七仙女飛碟駕駛艙", desc:"已上線：temples/16888/index.html｜返回宇宙入口已接通", href:"./temples/16888/index.html", detect:"./temples/16888/index.html" },
+    { id:"8895", name:"雲棧洞・八戒人民銀行地下錢莊", desc:"品牌主線：帳戶管理、借金帳本、還金進度、下一輪資格", href:"javascript:void(0)", detect:null },
+    { id:"18888", name:"靈霄寶殿・玉帝金庫", desc:"DeityBank / Galactic Bank 已部署底座", href:"javascript:void(0)", detect:null },
+    { id:"18921", name:"斬妖台・分流引擎", desc:"TaxSplitter / AutoLP 分流引擎待施工", href:"javascript:void(0)", detect:null },
+    { id:"108000", name:"花果山火星（MARS）", desc:"Mars Seats 已部署；前端入口待接入", href:"javascript:void(0)", detect:null },
   ];
   $("nodesGrid").innerHTML = nodes.map(nodeCardHTML).join("");
 
@@ -1138,8 +1148,9 @@ async function boot(){
       const a = cfg.addresses.brain11520;
       hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Brain: "+shortAddr(a)) : "未部署";
     }else if(n.id==="16888"){
-      const a = cfg.addresses.wish16888;
-      hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Wish: "+shortAddr(a)) : ("仙女 "+String((cfg.addresses.fairies7||[]).length)+"/7");
+      hint.textContent = "入口已上線";
+    }else if(n.id==="8895"){
+      hint.textContent = "規劃中｜八戒帳房";
     }else if(n.id==="18888"){
       const a = cfg.addresses.bank18888;
       hint.textContent = (!isZeroAddr(a) && isAddr(a)) ? ("Bank: "+shortAddr(a)) : "未部署";
