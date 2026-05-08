@@ -2,16 +2,17 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-108000-MARSSEATS-UI
-VERSION: V1.0.0
-BUILD: 20260508-MARSSEATS-GENESIS
-BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+VERSION: V1.0.1
+BUILD: 20260508-MARS-REACTOR-SEATGRID
+BASE_FROM: index_108000_MarsSeats_UI_V1_0_0.html
 MODE: Patch / Integration Mode
-NOTES:
-- 單檔完整 HTML，延續 12345 / 16888 宇宙 HUD 風格。
-- 使用正式鏈上地址，不使用離線樣本資料。
-- 支援 ethers.js、MetaMask、WalletConnect、Mobile Browser。
-- 包含 approve(5000e18)、mintSeat(1)、claimSeat(uint256)、claimSeats(uint256[])。
-- 單音源 audio engine：play / pause / stop / emergencyStopAudio()。
+CHANGELOG:
+- Mars Reactor 視覺升級
+- 500 Seat HUD 小點矩陣
+- Mars Seat Badge 小圓副圖
+- WalletConnect prompt 移除
+- 單一 audio engine 穩定化
+- 保留正式鏈上地址
 ============================================================
 -->
 <html lang="zh-TW">
@@ -22,13 +23,13 @@ NOTES:
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0" />
-  <meta property="og:description" content="KGEN 宇宙火星殖民艙 · 108000 MarsSeats 火星席位系統 HUD" />
+  <meta property="og:title" content="KGEN 108000 火星殖民艙・齊天豪宅席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.1" />
+  <meta property="og:description" content="K線西遊記宇宙 · 108000 火星殖民艙・齊天豪宅席位系統 · Mars Reactor SeatGrid HUD" />
   <meta property="og:site_name" content="KLINE ODYSSEY" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0" />
-  <meta name="twitter:description" content="KGEN 宇宙火星殖民艙 · 108000 MarsSeats 火星席位系統 HUD" />
-  <title>KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0</title>
+  <meta name="twitter:title" content="KGEN 108000 火星殖民艙・齊天豪宅席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.1" />
+  <meta name="twitter:description" content="Mars Reactor · θ 108000 · 500 SeatGrid · KGEN MarsSeats" />
+  <title>KGEN 108000 火星殖民艙・齊天豪宅席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.1</title>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js"></script>
@@ -36,94 +37,102 @@ NOTES:
 
   <style>
     :root{
-      --gold:#ffd778; --cyan:#00f2ff; --mars:#ff6a2a; --mars2:#ffb36a; --red:#ff4444;
-      --bg:#000; --panel:rgba(22,11,5,.88); --panel2:rgba(0,12,18,.76); --line:rgba(255,183,106,.42);
-      --ok:#7cffc5; --warn:#ffd778; --bad:#ff6a6a; --text:#fff; --muted:#b8d9e0;
-      --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
+      --gold:#ffd778;--cyan:#00f2ff;--cyan2:#7effff;--mars:#ff6a2a;--mars2:#ffb36a;--red:#ff4444;
+      --bg:#000;--panel:rgba(22,11,5,.90);--panel2:rgba(0,12,18,.78);--line:rgba(255,183,106,.42);
+      --ok:#7cffc5;--warn:#ffd778;--bad:#ff6a6a;--text:#fff;--muted:#b8d9e0;--dark:#050607;
+      --safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:var(--text);font-family:'Noto Sans TC',system-ui,sans-serif;overflow:hidden;}
+    *{box-sizing:border-box} html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:var(--text);font-family:'Noto Sans TC',system-ui,sans-serif;overflow:hidden}
     body:before{content:"";position:fixed;inset:-20%;z-index:0;background:
-      radial-gradient(circle at 50% 42%, rgba(255,106,42,.22), transparent 19%),
-      radial-gradient(circle at 20% 70%, rgba(0,242,255,.12), transparent 24%),
-      radial-gradient(circle at 82% 18%, rgba(255,215,120,.13), transparent 22%),
-      linear-gradient(180deg,#020304 0%,#100500 46%,#000 100%);}
-    body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;background-image:
-      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,#000 0%,transparent 74%)}
-    .starfield{position:fixed;inset:0;z-index:2;pointer-events:none;background-image:
-      radial-gradient(circle,#fff 0 1px,transparent 1.4px),radial-gradient(circle,#ffdf9a 0 1px,transparent 1.4px),radial-gradient(circle,#8ff8ff 0 1px,transparent 1.4px);background-size:137px 113px,211px 191px,281px 239px;background-position:0 0,40px 70px,90px 30px;opacity:.42;animation:drift 38s linear infinite}
-    @keyframes drift{to{transform:translate3d(-140px,80px,0)}}
+      radial-gradient(circle at 50% 44%,rgba(255,106,42,.26),transparent 18%),radial-gradient(circle at 20% 70%,rgba(0,242,255,.12),transparent 24%),radial-gradient(circle at 82% 18%,rgba(255,215,120,.14),transparent 22%),linear-gradient(180deg,#020304 0%,#110500 46%,#000 100%)}
+    body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,#000 0%,transparent 74%)}
+    .starfield{position:fixed;inset:0;z-index:2;pointer-events:none;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.4px),radial-gradient(circle,#ffdf9a 0 1px,transparent 1.4px),radial-gradient(circle,#8ff8ff 0 1px,transparent 1.4px);background-size:137px 113px,211px 191px,281px 239px;background-position:0 0,40px 70px,90px 30px;opacity:.42;animation:drift 38s linear infinite}@keyframes drift{to{transform:translate3d(-140px,80px,0)}}
     .scan{position:fixed;inset:0;z-index:90;pointer-events:none;background:linear-gradient(transparent,rgba(0,242,255,.035),transparent);background-size:100% 7px;mix-blend-mode:screen;opacity:.35}
-    .hud-top{position:fixed;left:2%;right:2%;top:calc(12px + var(--safe-top));z-index:100;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;pointer-events:none}.brand-section{min-width:270px;border-left:5px solid var(--mars);padding:9px 14px;background:linear-gradient(90deg,var(--panel),rgba(0,0,0,.06));box-shadow:0 0 28px rgba(255,106,42,.18)}.brand-name{font-size:25px;line-height:1.05;color:var(--gold);text-shadow:0 0 16px rgba(255,215,120,.75);white-space:nowrap}.sys-st{font-family:Orbitron,monospace;font-size:11px;letter-spacing:1px;color:var(--cyan);margin-top:4px}.monitor-data{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.data-box{min-width:128px;border:1px solid var(--line);border-top:2px solid var(--mars);background:var(--panel);padding:9px 10px;box-shadow:inset 0 0 22px rgba(255,106,42,.08),0 0 18px rgba(0,0,0,.4)}.data-label{font-size:11px;color:var(--muted);letter-spacing:.7px}.data-value{font-family:Orbitron,monospace;color:var(--gold);font-size:18px;text-shadow:0 0 10px rgba(255,215,120,.5);margin-top:4px}.data-value.small{font-size:12px;word-break:break-all}.layout{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:330px 1fr 360px;gap:18px;padding:112px 24px 86px}.panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(45,18,6,.85),rgba(4,8,14,.82));box-shadow:0 0 30px rgba(255,106,42,.15),inset 0 0 28px rgba(0,242,255,.04);backdrop-filter:blur(8px);overflow:hidden}.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid rgba(255,215,120,.18);background:linear-gradient(90deg,rgba(255,106,42,.18),transparent)}.panel-title{font-family:Orbitron,monospace;font-size:13px;color:var(--gold);letter-spacing:1px}.panel-body{padding:15px}.kv{display:grid;grid-template-columns:1fr auto;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);padding:9px 0}.kv span:first-child{color:var(--muted);font-size:13px}.kv span:last-child{font-family:Orbitron,monospace;color:#fff;font-size:13px;text-align:right;max-width:190px;word-break:break-all}.center-stage{display:flex;align-items:center;justify-content:center;position:relative}.mars-orb{position:relative;width:min(57vh,520px);height:min(57vh,520px);border-radius:50%;border:14px double var(--gold);box-shadow:0 0 90px rgba(255,106,42,.35),inset 0 0 80px rgba(0,0,0,.72);background:radial-gradient(circle at 35% 28%,#ffd7a6 0 6%,#ff8f3d 18%,#b73316 48%,#4a100b 70%,#090100 100%);overflow:hidden}.mars-orb:before{content:"";position:absolute;inset:8%;border-radius:50%;border:1px solid rgba(0,242,255,.28);box-shadow:0 0 40px rgba(0,242,255,.18)}.mars-orb:after{content:"";position:absolute;inset:0;background:linear-gradient(26deg,transparent 38%,rgba(255,215,120,.2) 39% 43%,transparent 45%),linear-gradient(-18deg,transparent 52%,rgba(0,0,0,.22) 53% 57%,transparent 59%);mix-blend-mode:screen}.seat-ring{position:absolute;inset:14%;border:2px dashed rgba(0,242,255,.55);border-radius:50%;animation:spin 28s linear infinite}.seat-ring.r2{inset:26%;border-color:rgba(255,215,120,.45);animation-duration:18s;animation-direction:reverse}.seat-ring.r3{inset:38%;border-style:solid;border-color:rgba(255,255,255,.18);animation-duration:11s}@keyframes spin{to{transform:rotate(360deg)}}.core-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:5;text-shadow:0 0 20px #000}.core-label .moon{font-size:54px;filter:drop-shadow(0 0 18px rgba(255,183,106,.8))}.core-label h1{font-family:Orbitron,monospace;margin:5px 0 2px;font-size:24px;color:#fff}.core-label p{margin:0;color:var(--gold);font-size:14px}.warp-engine{position:fixed;right:10px;bottom:135px;z-index:120;width:80px;text-align:center}.warp-rail{height:340px;width:24px;background:#111;border:3px solid var(--mars);border-radius:8px;margin:0 auto;position:relative;overflow:hidden;box-shadow:0 0 22px rgba(255,106,42,.28)}#energy-fill{position:absolute;bottom:0;left:0;width:100%;height:60%;background:linear-gradient(to top,#ff3d00,#ff8f2f,#fff1b0);box-shadow:0 0 18px #ff6a2a}.warp-val-text{font-family:Orbitron,monospace;color:var(--mars2);margin-top:10px;font-size:13px;text-shadow:0 0 8px var(--mars)}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{appearance:none;border:1px solid rgba(255,215,120,.45);background:linear-gradient(180deg,rgba(255,106,42,.32),rgba(44,9,0,.9));color:#fff;border-radius:12px;padding:12px 10px;min-height:44px;font-family:'Noto Sans TC',sans-serif;font-weight:900;cursor:pointer;box-shadow:0 0 16px rgba(255,106,42,.14);transition:.16s transform,.16s filter}.btn:hover{transform:translateY(-1px);filter:brightness(1.12)}.btn:active{transform:translateY(1px)}.btn.cyan{border-color:rgba(0,242,255,.55);background:linear-gradient(180deg,rgba(0,242,255,.23),rgba(0,22,28,.92))}.btn.gold{border-color:rgba(255,215,120,.7);background:linear-gradient(180deg,rgba(255,215,120,.28),rgba(56,32,0,.94))}.btn.red{border-color:rgba(255,80,80,.65);background:linear-gradient(180deg,rgba(255,68,68,.23),rgba(42,0,0,.94))}.btn.full{grid-column:1/-1}.input{width:100%;border:1px solid rgba(0,242,255,.32);background:rgba(0,0,0,.42);color:#fff;border-radius:11px;padding:12px;font-family:Orbitron,monospace}.status{margin-top:12px;padding:11px;border:1px solid rgba(0,242,255,.22);border-radius:12px;background:rgba(0,14,18,.5);color:var(--muted);font-size:12px;line-height:1.55;max-height:96px;overflow:auto}.nav{position:fixed;left:50%;bottom:calc(16px + var(--safe-bottom));transform:translateX(-50%);z-index:130;display:flex;gap:9px;flex-wrap:wrap;justify-content:center}.nav a,.nav button{pointer-events:auto;text-decoration:none;color:#fff;border:1px solid rgba(255,215,120,.38);background:rgba(12,8,0,.78);border-radius:999px;padding:10px 14px;font-weight:900;box-shadow:0 0 14px rgba(255,215,120,.08);cursor:pointer}.audio-dock{position:fixed;left:18px;bottom:calc(15px + var(--safe-bottom));z-index:125;border:1px solid rgba(0,242,255,.32);border-radius:16px;background:rgba(0,10,16,.82);padding:10px;display:flex;align-items:center;gap:8px;box-shadow:0 0 22px rgba(0,242,255,.1)}.audio-dock button{border:1px solid rgba(0,242,255,.3);background:rgba(0,242,255,.12);color:#fff;border-radius:9px;padding:8px 10px;font-weight:900;cursor:pointer}.audio-dock .track{font-family:Orbitron,monospace;font-size:11px;color:var(--cyan);max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,215,120,.32);border-radius:999px;padding:4px 8px;color:var(--gold);font-family:Orbitron,monospace;font-size:10px}.mobile-tabs{display:none}.hidden{display:none!important}.ok{color:var(--ok)!important}.bad{color:var(--bad)!important}.warn{color:var(--warn)!important}
-    @media(max-width:980px){html,body{overflow:auto;height:auto;min-height:100%}.hud-top{position:relative;left:auto;right:auto;top:auto;padding:calc(10px + var(--safe-top)) 10px 0;display:block}.brand-section{min-width:0}.brand-name{font-size:20px;white-space:normal}.monitor-data{margin-top:10px;display:grid;grid-template-columns:1fr 1fr}.layout{position:relative;display:block;padding:12px 10px 118px}.panel{margin:12px 0}.center-stage{min-height:360px}.mars-orb{width:330px;height:330px}.core-label .moon{font-size:42px}.core-label h1{font-size:19px}.warp-engine{display:none}.audio-dock{left:10px;right:10px;bottom:58px;justify-content:center}.nav{left:0;right:0;bottom:6px;transform:none;padding:0 8px}.nav a,.nav button{padding:8px 10px;font-size:12px}.mobile-tabs{display:flex;position:sticky;top:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);gap:6px;padding:8px}.mobile-tabs button{flex:1;border:1px solid rgba(255,215,120,.3);background:rgba(255,106,42,.12);color:#fff;border-radius:10px;padding:9px;font-weight:900}.mobile-hide{display:none}.kv span:last-child{max-width:160px}.controls{grid-template-columns:1fr}}
+    .hud-top{position:fixed;left:2%;right:2%;top:calc(12px + var(--safe-top));z-index:100;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;pointer-events:none}.brand-section{min-width:330px;border-left:5px solid var(--mars);padding:9px 14px;background:linear-gradient(90deg,var(--panel),rgba(0,0,0,.06));box-shadow:0 0 28px rgba(255,106,42,.18)}.brand-name{font-size:23px;line-height:1.08;color:var(--gold);text-shadow:0 0 16px rgba(255,215,120,.75);white-space:nowrap}.sys-st{font-family:Orbitron,monospace;font-size:11px;letter-spacing:1px;color:var(--cyan);margin-top:4px}.monitor-data{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.data-box{min-width:128px;border:1px solid var(--line);border-top:2px solid var(--mars);background:var(--panel);padding:9px 10px;box-shadow:inset 0 0 22px rgba(255,106,42,.08),0 0 18px rgba(0,0,0,.4)}.data-label{font-size:11px;color:var(--muted);letter-spacing:.7px}.data-value{font-family:Orbitron,monospace;color:var(--gold);font-size:18px;text-shadow:0 0 10px rgba(255,215,120,.5);margin-top:4px}.data-value.small{font-size:12px;word-break:break-all}
+    .layout{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:330px 1fr 370px;gap:18px;padding:112px 24px 86px}.panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(45,18,6,.86),rgba(4,8,14,.84));box-shadow:0 0 30px rgba(255,106,42,.15),inset 0 0 28px rgba(0,242,255,.04);backdrop-filter:blur(8px);overflow:hidden}.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid rgba(255,215,120,.18);background:linear-gradient(90deg,rgba(255,106,42,.18),transparent)}.panel-title{font-family:Orbitron,monospace;font-size:13px;color:var(--gold);letter-spacing:1px}.panel-body{padding:15px}.kv{display:grid;grid-template-columns:1fr auto;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);padding:9px 0}.kv span:first-child{color:var(--muted);font-size:13px}.kv span:last-child{font-family:Orbitron,monospace;color:#fff;font-size:13px;text-align:right;max-width:200px;word-break:break-all}.kv .highlight{color:var(--cyan);text-shadow:0 0 10px rgba(0,242,255,.6)}
+    .center-stage{display:flex;align-items:center;justify-content:center;position:relative;min-width:0}.reactor-wrap{position:relative;width:min(64vh,620px);height:min(64vh,620px);display:grid;place-items:center}.mars-reactor{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;border:16px double var(--gold);box-shadow:0 0 95px rgba(255,106,42,.38),0 0 34px rgba(0,242,255,.18),inset 0 0 86px rgba(0,0,0,.76);background:radial-gradient(circle at 36% 28%,#ffe0ae 0 6%,#ff8f3d 18%,#b73316 48%,#4a100b 72%,#090100 100%)}
+    .mars-reactor:before{content:"";position:absolute;inset:2.5%;border-radius:50%;border:8px solid rgba(12,8,0,.58);box-shadow:inset 0 0 0 2px rgba(255,215,120,.38),0 0 34px rgba(255,106,42,.25)}.mars-reactor:after{content:"";position:absolute;inset:0;background:linear-gradient(26deg,transparent 35%,rgba(255,215,120,.2) 39% 43%,transparent 46%),linear-gradient(-18deg,transparent 52%,rgba(0,0,0,.26) 53% 57%,transparent 59%);mix-blend-mode:screen}.reactor-door{position:absolute;inset:8%;border-radius:50%;border:3px solid rgba(255,215,120,.58);box-shadow:inset 0 0 36px rgba(0,0,0,.8),0 0 36px rgba(255,106,42,.28)}.orbit{position:absolute;border-radius:50%;pointer-events:none}.orbit.o1{inset:14%;border:2px dashed rgba(0,242,255,.56);animation:spin 24s linear infinite}.orbit.o2{inset:25%;border:2px dashed rgba(255,215,120,.48);animation:spin 17s linear infinite reverse}.orbit.o3{inset:36%;border:2px solid rgba(255,255,255,.17);animation:spin 11s linear infinite}.seat-ring-visual{position:absolute;inset:19%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,106,42,.8) 0 2deg,transparent 2deg 5.5deg);filter:drop-shadow(0 0 10px rgba(255,106,42,.55));mask:radial-gradient(circle,transparent 0 67%,#000 68% 75%,transparent 76%)}@keyframes spin{to{transform:rotate(360deg)}}
+    .core-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48%;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;background:radial-gradient(circle at center,rgba(255,215,120,.28),rgba(255,106,42,.14) 38%,rgba(0,0,0,.68) 72%);border:2px solid rgba(0,242,255,.45);box-shadow:0 0 42px rgba(0,242,255,.25),inset 0 0 26px rgba(255,106,42,.25);text-shadow:0 0 20px #000}.core-label h1{font-family:Orbitron,monospace;margin:0;font-size:24px;color:#fff;letter-spacing:1px}.core-label .theta{font-family:Orbitron,monospace;color:var(--cyan);font-size:22px;margin:5px 0;text-shadow:0 0 14px rgba(0,242,255,.9)}.core-label p{margin:2px 0;color:var(--gold);font-size:12px}.badge-orbit{position:absolute;right:5%;top:12%;z-index:12;width:92px;height:92px;border-radius:50%;border:3px solid var(--cyan);background:radial-gradient(circle at 34% 27%,#fff5c4 0 8%,#ff6a2a 9% 42%,#281008 72%,#030303 100%);box-shadow:0 0 28px rgba(0,242,255,.35),inset 0 0 22px rgba(255,215,120,.35);display:grid;place-items:center}.badge-orbit:before{content:"MARS\A SEAT";white-space:pre;text-align:center;font-family:Orbitron,monospace;font-size:12px;line-height:1.1;color:#fff;text-shadow:0 0 10px #000}.badge-orbit:after{content:"108000";position:absolute;bottom:11px;font-family:Orbitron,monospace;font-size:9px;color:var(--cyan)}
+    .seatgrid-panel{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);z-index:20;width:min(94%,640px);border:1px solid rgba(255,215,120,.32);border-radius:16px;background:rgba(0,7,10,.78);padding:9px;box-shadow:0 0 24px rgba(0,242,255,.12)}.seatgrid-head{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px;margin-bottom:7px}.seatgrid{display:grid;grid-template-columns:repeat(25,1fr);gap:3px}.seat-dot{width:100%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 5px rgba(0,0,0,.8)}.seat-dot.minted{background:#ff5a1f;border-color:#ffb36a;box-shadow:0 0 8px rgba(255,90,31,.75)}.seat-dot.mine{background:var(--cyan);border-color:#fff;box-shadow:0 0 10px rgba(0,242,255,.95)}.seat-dot.pending{background:rgba(255,215,120,.75);box-shadow:0 0 8px rgba(255,215,120,.55)}
+    .warp-engine{position:fixed;right:10px;bottom:135px;z-index:120;width:80px;text-align:center}.warp-rail{height:340px;width:24px;background:#111;border:3px solid var(--mars);border-radius:8px;margin:0 auto;position:relative;overflow:hidden;box-shadow:0 0 22px rgba(255,106,42,.28)}#energy-fill{position:absolute;bottom:0;left:0;width:100%;height:60%;background:linear-gradient(to top,#ff3d00,#ff8f2f,#fff1b0);box-shadow:0 0 18px #ff6a2a}.warp-val-text{font-family:Orbitron,monospace;color:var(--mars2);margin-top:10px;font-size:13px;text-shadow:0 0 8px var(--mars)}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{appearance:none;border:1px solid rgba(255,215,120,.45);background:linear-gradient(180deg,rgba(255,106,42,.32),rgba(44,9,0,.9));color:#fff;border-radius:12px;padding:12px 10px;min-height:44px;font-family:'Noto Sans TC',sans-serif;font-weight:900;cursor:pointer;box-shadow:0 0 16px rgba(255,106,42,.14);transition:.16s transform,.16s filter}.btn:hover{transform:translateY(-1px);filter:brightness(1.12)}.btn:active{transform:translateY(1px)}.btn.cyan{border-color:rgba(0,242,255,.55);background:linear-gradient(180deg,rgba(0,242,255,.23),rgba(0,22,28,.92))}.btn.gold{border-color:rgba(255,215,120,.7);background:linear-gradient(180deg,rgba(255,215,120,.28),rgba(56,32,0,.94))}.btn.red{border-color:rgba(255,80,80,.65);background:linear-gradient(180deg,rgba(255,68,68,.23),rgba(42,0,0,.94))}.btn.full{grid-column:1/-1}.btn:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.25)}.input{width:100%;border:1px solid rgba(0,242,255,.32);background:rgba(0,0,0,.42);color:#fff;border-radius:11px;padding:12px;font-family:Orbitron,monospace}.status{margin-top:12px;padding:11px;border:1px solid rgba(0,242,255,.22);border-radius:12px;background:rgba(0,14,18,.5);color:var(--muted);font-size:12px;line-height:1.55;max-height:105px;overflow:auto}.nav{position:fixed;left:50%;bottom:calc(16px + var(--safe-bottom));transform:translateX(-50%);z-index:130;display:flex;gap:9px;flex-wrap:wrap;justify-content:center}.nav a,.nav button{pointer-events:auto;text-decoration:none;color:#fff;border:1px solid rgba(255,215,120,.38);background:rgba(12,8,0,.78);border-radius:999px;padding:10px 14px;font-weight:900;box-shadow:0 0 14px rgba(255,215,120,.08);cursor:pointer}.audio-dock{position:fixed;left:18px;bottom:calc(15px + var(--safe-bottom));z-index:125;border:1px solid rgba(0,242,255,.32);border-radius:16px;background:rgba(0,10,16,.82);padding:10px;display:flex;align-items:center;gap:8px;box-shadow:0 0 22px rgba(0,242,255,.1)}.audio-dock button{border:1px solid rgba(0,242,255,.3);background:rgba(0,242,255,.12);color:#fff;border-radius:9px;padding:8px 10px;font-weight:900;cursor:pointer}.audio-dock .track{font-family:Orbitron,monospace;font-size:11px;color:var(--cyan);max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,215,120,.32);border-radius:999px;padding:4px 8px;color:var(--gold);font-family:Orbitron,monospace;font-size:10px}.mobile-tabs{display:none}.hidden{display:none!important}.ok{color:var(--ok)!important}.bad{color:var(--bad)!important}.warn{color:var(--warn)!important}
+    @media(max-width:980px){html,body{overflow:auto;height:auto;min-height:100%}.hud-top{position:relative;left:auto;right:auto;top:auto;padding:calc(10px + var(--safe-top)) 10px 0;display:block}.brand-section{min-width:0}.brand-name{font-size:20px;white-space:normal}.monitor-data{margin-top:10px;display:grid;grid-template-columns:1fr 1fr}.layout{position:relative;display:block;padding:12px 10px 122px}.panel{margin:12px 0}.center-stage{min-height:600px}.reactor-wrap{width:340px;height:340px;margin:44px auto 150px}.core-label h1{font-size:16px}.core-label .theta{font-size:18px}.core-label p{font-size:10px}.badge-orbit{width:70px;height:70px;right:-2%;top:4%}.seatgrid-panel{bottom:-142px;width:98%}.seatgrid{grid-template-columns:repeat(20,1fr);gap:2px}.warp-engine{display:none}.audio-dock{left:10px;right:10px;bottom:58px;justify-content:center}.nav{left:0;right:0;bottom:6px;transform:none;padding:0 8px}.nav a,.nav button{padding:8px 10px;font-size:12px}.mobile-tabs{display:flex;position:sticky;top:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);gap:6px;padding:8px}.mobile-tabs button{flex:1;border:1px solid rgba(255,215,120,.3);background:rgba(255,106,42,.12);color:#fff;border-radius:10px;padding:9px;font-weight:900}.mobile-hide{display:none}.kv span:last-child{max-width:160px}.controls{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div class="starfield"></div><div class="scan"></div>
   <div class="hud-top">
     <section class="brand-section">
-      <div class="brand-name">🌕 108000 MarsSeats</div>
-      <div class="sys-st">VERSION KGEN-108000-MARSSEATS-UI-V1.0.0</div>
-      <div class="sys-st">BUILD 20260508-MARSSEATS-GENESIS · DEEP SPACE HUD</div>
+      <div class="brand-name">108000 火星殖民艙・齊天豪宅席位系統</div>
+      <div class="sys-st">VERSION KGEN-108000-MARSSEATS-UI-V1.0.1</div>
+      <div class="sys-st">BUILD 20260508-MARS-REACTOR-SEATGRID · θ 108000</div>
     </section>
-    <section class="monitor-data">
-      <div class="data-box"><div class="data-label">Total Seats</div><div class="data-value" id="hudTotalSeats">讀取中</div></div>
+    <section class="monitor-data" aria-label="500 Seat HUD">
+      <div class="data-box"><div class="data-label">Total Seats</div><div class="data-value" id="hudTotalSeats">500</div></div>
       <div class="data-box"><div class="data-label">Minted</div><div class="data-value" id="hudMinted">讀取中</div></div>
       <div class="data-box"><div class="data-label">Remaining</div><div class="data-value" id="hudRemaining">讀取中</div></div>
-      <div class="data-box"><div class="data-label">Price</div><div class="data-value" id="hudPrice">5000 KGEN</div></div>
+      <div class="data-box"><div class="data-label">My Seats</div><div class="data-value highlight" id="hudMySeats">未連線</div></div>
     </section>
   </div>
 
-  <div class="mobile-tabs" aria-label="Mobile UI tabs">
-    <button onclick="showMobile('wallet')">錢包</button><button onclick="showMobile('core')">火星艙</button><button onclick="showMobile('ops')">操作</button>
-  </div>
+  <div class="mobile-tabs" aria-label="Mobile UI tabs"><button onclick="showMobile('wallet')">錢包</button><button onclick="showMobile('core')">反應爐</button><button onclick="showMobile('ops')">操作</button></div>
 
   <main class="layout">
     <section class="panel mobile-panel" data-panel="wallet">
-      <div class="panel-h"><div class="panel-title">WALLET CONNECT · COSMIC PAYROLL</div><span class="badge" id="netBadge">OFFLINE</span></div>
+      <div class="panel-h"><div class="panel-title">WALLET HUD · COSMIC PAYROLL</div><span class="badge" id="netBadge">OFFLINE</span></div>
       <div class="panel-body">
         <div class="controls">
           <button class="btn cyan" id="btnMetaMask">Connect MetaMask</button>
-          <button class="btn cyan" id="btnMobile">Mobile Browser</button>
-          <button class="btn gold full" id="btnWalletConnect">WalletConnect</button>
+          <button class="btn cyan" id="btnMobile">Mobile Injected</button>
+          <button class="btn gold full" id="btnWalletConnect" disabled title="WalletConnect Project ID 尚未正式設定">WalletConnect 待設定</button>
         </div>
-        <div class="kv"><span>wallet</span><span id="walletAddr">未連線</span></div>
-        <div class="kv"><span>chainId</span><span id="chainId">未連線</span></div>
-        <div class="kv"><span>KGEN balance</span><span id="kgenBalance">未連線</span></div>
-        <div class="kv"><span>BNB balance</span><span id="bnbBalance">未連線</span></div>
+        <div class="kv"><span>Wallet</span><span id="walletAddr">未連線</span></div>
+        <div class="kv"><span>ChainId</span><span id="chainId">未連線</span></div>
+        <div class="kv"><span>BNB = 暗物質</span><span id="bnbBalance">未連線</span></div>
+        <div class="kv"><span>KGEN = 質量</span><span id="kgenBalance">未連線</span></div>
         <div class="kv"><span>Allowance</span><span id="allowance">未連線</span></div>
-        <div class="kv"><span>My Seats</span><span id="mySeats">未連線</span></div>
-        <div class="kv"><span>Pending Seat</span><span id="pendingSeat">未連線</span></div>
+        <div class="kv"><span>KGEN Balance</span><span id="kgenBalanceMirror">未連線</span></div>
+        <div class="kv"><span>BNB Balance</span><span id="bnbBalanceMirror">未連線</span></div>
+        <div class="kv"><span>My Seats</span><span class="highlight" id="mySeats">未連線</span></div>
         <div class="kv"><span>Pending Rewards</span><span id="pendingRewards">未連線</span></div>
-        <div class="status" id="statusBox">等待連線。鏈上資料會直接從正式合約讀取；讀取失敗時顯示錯誤，不填入離線樣本值。</div>
+        <div class="status" id="statusBox">等待連線。MarsSeats HUD 會直接讀取正式鏈上資料；讀取失敗時顯示錯誤，不填入離線樣本值。</div>
       </div>
     </section>
 
     <section class="center-stage mobile-panel" data-panel="core">
-      <div class="mars-orb" aria-label="Mars colony seat system">
-        <div class="seat-ring r1"></div><div class="seat-ring r2"></div><div class="seat-ring r3"></div>
-        <div class="core-label"><div class="moon">🌕</div><h1>MARS SEATS</h1><p>500 seats · 5000 KGEN / Seat</p><p>θ角 108000 · Mars Colony Gate</p></div>
+      <div class="reactor-wrap" aria-label="Mars Reactor θ 108000">
+        <div class="mars-reactor">
+          <div class="reactor-door"></div>
+          <div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div>
+          <div class="seat-ring-visual"></div>
+          <div class="core-label"><h1>Mars Reactor</h1><div class="theta">θ 108000</div><p>火星殖民艙</p><p>齊天豪宅席位系統</p></div>
+        </div>
+        <div class="badge-orbit" aria-label="Mars Seat Badge 火星席位徽章"></div>
+        <div class="seatgrid-panel" aria-label="500 Seat HUD 小點矩陣">
+          <div class="seatgrid-head"><span>500 SeatGrid</span><span>亮橘紅 = 已 Mint · 亮青色 = My Seats</span></div>
+          <div class="seatgrid" id="seatGrid"></div>
+        </div>
       </div>
     </section>
 
     <section class="panel mobile-panel" data-panel="ops">
-      <div class="panel-h"><div class="panel-title">MARSSEATS OPS · KGEN_MarsSeats_V2_2_1</div><span class="badge">LIVE ABI</span></div>
+      <div class="panel-h"><div class="panel-title">MARS OPERATIONS · KGEN_MarsSeats_V2_2_1</div><span class="badge">LIVE ABI</span></div>
       <div class="panel-body">
         <div class="kv"><span>MarsSeats</span><span id="marsAddr">0x3529...7298</span></div>
         <div class="kv"><span>KGEN Token</span><span id="kgenAddr">0xBA3d...32Be</span></div>
-        <div class="kv"><span>seatPrice</span><span id="seatPrice">讀取中</span></div>
+        <div class="kv"><span>Seat Price</span><span id="seatPrice">5000 KGEN</span></div>
         <div class="kv"><span>seatsOf(wallet)</span><span id="seatsOf">未連線</span></div>
+        <div class="kv"><span>Pending Seat</span><span id="pendingSeat">未連線</span></div>
         <div class="controls" style="margin-top:14px">
           <button class="btn gold full" id="btnApprove">Approve 5000 KGEN</button>
           <button class="btn full" id="btnMint">Mint 1 Seat</button>
+          <button class="btn cyan" id="btnClaimOne">Claim Reward</button>
+          <button class="btn cyan" id="btnClaimAll">Claim All</button>
+          <button class="btn cyan" id="btnMySeats">My Seats</button>
+          <button class="btn cyan" id="btnRefresh">Refresh HUD</button>
         </div>
         <div style="height:12px"></div>
         <input class="input" id="seatIdInput" type="number" min="0" step="1" placeholder="Seat ID for claimSeat(uint256)" />
-        <div class="controls" style="margin-top:10px">
-          <button class="btn cyan" id="btnClaimOne">Claim Reward</button>
-          <button class="btn cyan" id="btnClaimAll">Claim All</button>
-        </div>
         <div class="status" id="txBox">尚無交易。</div>
       </div>
     </section>
@@ -132,32 +141,30 @@ NOTES:
   <aside class="warp-engine"><div class="warp-rail"><div id="energy-fill"></div></div><div class="warp-val-text">θ 108000</div></aside>
 
   <section class="audio-dock" aria-label="single audio engine">
-    <button id="audPlay">Play</button><button id="audPause">Pause</button><button id="audStop">Stop</button>
-    <span class="track" id="audioTrack">Mars Engine</span>
+    <button id="audPlay">Play</button><button id="audPause">Pause</button><button id="audStop">Stop</button><span class="track" id="audioTrack">Mars Reactor Engine</span>
   </section>
 
   <nav class="nav" aria-label="宇宙導航">
     <a href="https://klineodyssey.github.io/kline-odyssey/">返回宇宙入口</a>
-    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">前往 12345</a>
-    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/">前往 16888</a>
-    <button onclick="refreshWalletState('manual')">Refresh HUD</button>
+    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">前往 12345 悟空財神殿</a>
+    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/">前往 16888 廣寒宮</a>
+    <a href="https://klineodyssey.github.io/kline-odyssey/">官方宇宙首頁</a>
   </nav>
 
 <script>
 'use strict';
-const APP_VERSION = 'KGEN-108000-MARSSEATS-UI-V1.0.0';
-const BUILD = '20260508-MARSSEATS-GENESIS';
+const PRODUCT_ID = 'KGEN-108000-MARSSEATS-UI';
+const APP_VERSION = 'KGEN-108000-MARSSEATS-UI-V1.0.1';
+const BUILD = '20260508-MARS-REACTOR-SEATGRID';
+const BASE_FROM = 'index_108000_MarsSeats_UI_V1_0_0.html';
 const BSC_CHAIN_ID = 56;
 const BSC_CHAIN_HEX = '0x38';
 const BSC_RPC = 'https://bsc-dataseed.binance.org/';
 const KGEN_TOKEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 const MARSSEATS = '0x3529dbFbaD465C2269F8096879A1c298d5257298';
-const BRAIN_11520 = '0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
-const TEMPLE_HEART_12345 = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-const LP_PAIR = '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2';
-const MOTHER = '0xcd60bf474e691f2484950a0276eaf507616ca4b9';
-const TREASURY_COLDMOTHER = '0x3b19c226fbfcde67933bc96d2cff513aab413cc2';
 const SEAT_PRICE_KGEN = '5000';
+const TOTAL_SEATS_FALLBACK = 500;
+const WC_PROJECT_ID = '';
 
 const ERC20_ABI = [
  'function decimals() view returns (uint8)', 'function symbol() view returns (string)',
@@ -176,123 +183,109 @@ const MARS_ABI = [
 const $ = (id)=>document.getElementById(id);
 function shortAddr(a){return a ? a.slice(0,6)+'...'+a.slice(-4) : '未連線';}
 function setText(id,v){const el=$(id); if(el) el.textContent = v;}
-function setStatus(msg, bad=false){const el=$('statusBox'); if(el){el.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
-function setTx(msg, bad=false){const el=$('txBox'); if(el){el.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
-function fmtUnits(v, d=18, max=4){try{const n=Number(ethers.utils.formatUnits(v,d)); if(!Number.isFinite(n)) return ethers.utils.formatUnits(v,d); return n.toLocaleString(undefined,{maximumFractionDigits:max});}catch(e){return '讀取失敗';}}
-function toSeatArray(v){try{return Array.from(v || []).map(x=>x.toString());}catch(e){return [];}}
+function setStatus(msg,bad=false){const el=$('statusBox'); if(el){el.textContent='['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
+function setTx(msg,bad=false){const el=$('txBox'); if(el){el.textContent='['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
+function fmtUnits(v,d=18,max=4){try{const n=Number(ethers.utils.formatUnits(v,d)); if(!Number.isFinite(n)) return ethers.utils.formatUnits(v,d); return n.toLocaleString(undefined,{maximumFractionDigits:max});}catch(e){return '讀取失敗';}}
+function toSeatArray(v){try{return Array.from(v||[]).map(x=>x.toString()).filter(x=>x!=='' && x!=='0');}catch(e){return [];}}
+function bnToNum(v,fallback=0){try{return Number(ethers.BigNumber.from(v).toString());}catch(e){return fallback;}}
 
-const state = { provider:null, signer:null, account:null, chainId:null, readonly:null, kgen:null, mars:null, decimals:18, wcProvider:null, refreshing:false };
-function readonlyProvider(){ if(!state.readonly) state.readonly = new ethers.providers.JsonRpcProvider(BSC_RPC, {name:'binance', chainId:BSC_CHAIN_ID}); return state.readonly; }
-function marsRead(){ return new ethers.Contract(MARSSEATS, MARS_ABI, state.provider || readonlyProvider()); }
-function kgenRead(){ return new ethers.Contract(KGEN_TOKEN, ERC20_ABI, state.provider || readonlyProvider()); }
-function marsWrite(){ if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(MARSSEATS, MARS_ABI, state.signer); }
-function kgenWrite(){ if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(KGEN_TOKEN, ERC20_ABI, state.signer); }
-async function firstCall(contract, calls, fallback){ let last; for(const [name,args=[]] of calls){ try{ if(typeof contract[name] === 'function') return await contract[name](...args); }catch(e){ last=e; } } if(fallback !== undefined) return fallback; throw last || new Error('no callable method'); }
+const state = {provider:null,signer:null,account:null,chainId:null,readonly:null,kgen:null,mars:null,decimals:18,wcProvider:null,refreshing:false,lastSeats:[],lastMinted:0,totalSeats:TOTAL_SEATS_FALLBACK};
+function readonlyProvider(){if(!state.readonly) state.readonly = new ethers.providers.JsonRpcProvider(BSC_RPC,{name:'binance',chainId:BSC_CHAIN_ID}); return state.readonly;}
+function marsRead(){return new ethers.Contract(MARSSEATS,MARS_ABI,state.provider || readonlyProvider());}
+function kgenRead(){return new ethers.Contract(KGEN_TOKEN,ERC20_ABI,state.provider || readonlyProvider());}
+function marsWrite(){if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(MARSSEATS,MARS_ABI,state.signer);}
+function kgenWrite(){if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(KGEN_TOKEN,ERC20_ABI,state.signer);}
+async function firstCall(contract,calls,fallback){let last; for(const [name,args=[]] of calls){try{if(typeof contract[name]==='function') return await contract[name](...args);}catch(e){last=e;}} if(fallback!==undefined) return fallback; throw last || new Error('no callable method');}
+
+function renderSeatGrid(total=TOTAL_SEATS_FALLBACK,minted=0,mySeats=[]){
+  const grid=$('seatGrid'); if(!grid) return; total=Math.max(1,Math.min(500,Number(total)||TOTAL_SEATS_FALLBACK)); minted=Math.max(0,Math.min(total,Number(minted)||0));
+  const mineSet = new Set((mySeats||[]).map(x=>String(x)));
+  const frag=document.createDocumentFragment(); grid.innerHTML='';
+  for(let i=1;i<=total;i++){const dot=document.createElement('span'); dot.className='seat-dot'; dot.title='Seat '+i; if(i<=minted) dot.classList.add('minted'); if(mineSet.has(String(i))){dot.classList.add('mine'); dot.title='My Seat '+i;} frag.appendChild(dot);}
+  grid.appendChild(frag);
+}
+
 async function ensureBSC(extProvider){
   if(!extProvider || !extProvider.request) return;
-  const cid = await extProvider.request({method:'eth_chainId'}).catch(()=>null);
-  if(cid && String(cid).toLowerCase() !== BSC_CHAIN_HEX){
-    try{ await extProvider.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC_CHAIN_HEX}]}); }
-    catch(e){ if(e && e.code === 4902){ await extProvider.request({method:'wallet_addEthereumChain', params:[{chainId:BSC_CHAIN_HEX, chainName:'BNB Smart Chain', nativeCurrency:{name:'BNB', symbol:'BNB', decimals:18}, rpcUrls:[BSC_RPC], blockExplorerUrls:['https://bscscan.com']} ]}); } else { throw e; } }
+  const cid=await extProvider.request({method:'eth_chainId'}).catch(()=>null);
+  if(cid && String(cid).toLowerCase()!==BSC_CHAIN_HEX){
+    try{await extProvider.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN_HEX}]});}
+    catch(e){if(e && e.code===4902){await extProvider.request({method:'wallet_addEthereumChain',params:[{chainId:BSC_CHAIN_HEX,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[BSC_RPC],blockExplorerUrls:['https://bscscan.com']}]});}else{throw e;}}
   }
 }
-async function bindProvider(extProvider, label){
-  if(!extProvider) throw new Error('找不到錢包 provider');
-  await ensureBSC(extProvider);
-  state.provider = new ethers.providers.Web3Provider(extProvider, 'any');
-  await state.provider.send('eth_requestAccounts', []);
-  state.signer = state.provider.getSigner();
-  state.account = await state.signer.getAddress();
-  const net = await state.provider.getNetwork(); state.chainId = net.chainId;
-  state.kgen = kgenWrite(); state.mars = marsWrite();
-  if(extProvider.on){
-    extProvider.on('accountsChanged', ()=>location.reload());
-    extProvider.on('chainChanged', ()=>location.reload());
-  }
-  setStatus(label+' connected: '+state.account);
-  await refreshWalletState('connect');
+async function bindProvider(extProvider,label){
+  if(!extProvider) throw new Error('找不到錢包 provider'); await ensureBSC(extProvider);
+  state.provider = new ethers.providers.Web3Provider(extProvider,'any'); await state.provider.send('eth_requestAccounts',[]);
+  state.signer = state.provider.getSigner(); state.account = await state.signer.getAddress(); const net=await state.provider.getNetwork(); state.chainId=net.chainId;
+  state.kgen=kgenWrite(); state.mars=marsWrite();
+  if(extProvider.on){extProvider.on('accountsChanged',()=>location.reload()); extProvider.on('chainChanged',()=>location.reload());}
+  setStatus(label+' connected: '+state.account); await refreshWalletState('connect');
 }
-async function connectMetaMask(){ if(!window.ethereum) throw new Error('此瀏覽器未偵測到 MetaMask / injected wallet'); await bindProvider(window.ethereum, 'MetaMask'); }
-async function connectMobile(){ if(window.ethereum) return bindProvider(window.ethereum, 'Mobile injected wallet'); const deeplink = 'https://metamask.app.link/dapp/'+location.host+location.pathname; location.href = deeplink; }
-async function connectWalletConnect(){
-  const Provider = window.EthereumProvider || (window.WalletConnectEthereumProvider && window.WalletConnectEthereumProvider.EthereumProvider);
-  if(!Provider) throw new Error('WalletConnect 套件尚未載入，請重新整理或改用 injected wallet');
-  let projectId = localStorage.getItem('KGEN_WC_PROJECT_ID') || '';
-  if(!projectId){ projectId = prompt('請輸入 WalletConnect Cloud Project ID，以啟動正式 WalletConnect 連線：') || ''; if(projectId) localStorage.setItem('KGEN_WC_PROJECT_ID', projectId); }
-  if(!projectId) throw new Error('WalletConnect 需要 Project ID，未建立假連線。');
-  state.wcProvider = await Provider.init({ projectId, chains:[BSC_CHAIN_ID], optionalChains:[BSC_CHAIN_ID], showQrModal:true, rpcMap:{[BSC_CHAIN_ID]:BSC_RPC}, metadata:{name:'KGEN 108000 MarsSeats', description:'KGEN MarsSeats UI', url:location.origin, icons:[]} });
-  await state.wcProvider.connect();
-  await bindProvider(state.wcProvider, 'WalletConnect');
-}
+async function connectMetaMask(){if(!window.ethereum) throw new Error('此瀏覽器未偵測到 MetaMask / injected wallet'); await bindProvider(window.ethereum,'MetaMask');}
+async function connectMobile(){if(window.ethereum) return bindProvider(window.ethereum,'Mobile injected wallet'); const deeplink='https://metamask.app.link/dapp/'+location.host+location.pathname; location.href=deeplink;}
+async function connectWalletConnect(){throw new Error('WalletConnect 待設定：目前未內建正式 Project ID，請先使用 MetaMask / Mobile injected wallet。');}
 
 async function refreshWalletState(reason='refresh'){
-  if(state.refreshing) return; state.refreshing = true;
+  if(state.refreshing) return; state.refreshing=true;
   try{
-    const mr = marsRead(); const kr = kgenRead();
-    let totalSeats = await firstCall(mr, [['totalSeats'], ['maxSeats']], ethers.BigNumber.from(500));
-    let minted = await firstCall(mr, [['totalMinted']], null).catch(()=>null);
-    let remaining = await firstCall(mr, [['remainingSeats']], null).catch(()=>null);
-    let price = await firstCall(mr, [['seatPrice']], ethers.utils.parseUnits(SEAT_PRICE_KGEN,18)).catch(()=>ethers.utils.parseUnits(SEAT_PRICE_KGEN,18));
-    state.decimals = await firstCall(kr, [['decimals']], 18).catch(()=>18);
-    if(minted === null && remaining !== null) minted = ethers.BigNumber.from(totalSeats).sub(remaining);
-    if(remaining === null && minted !== null) remaining = ethers.BigNumber.from(totalSeats).sub(minted);
-    setText('hudTotalSeats', totalSeats.toString()); setText('hudMinted', minted ? minted.toString() : '讀取失敗'); setText('hudRemaining', remaining ? remaining.toString() : '讀取失敗');
-    setText('hudPrice', fmtUnits(price, state.decimals, 2)+' KGEN'); setText('seatPrice', fmtUnits(price, state.decimals, 8)+' KGEN');
+    const mr=marsRead(); const kr=kgenRead();
+    let totalSeats=await firstCall(mr,[['totalSeats'],['maxSeats']],ethers.BigNumber.from(TOTAL_SEATS_FALLBACK)).catch(()=>ethers.BigNumber.from(TOTAL_SEATS_FALLBACK));
+    let minted=await firstCall(mr,[['totalMinted']],null).catch(()=>null);
+    let remaining=await firstCall(mr,[['remainingSeats']],null).catch(()=>null);
+    let price=await firstCall(mr,[['seatPrice']],ethers.utils.parseUnits(SEAT_PRICE_KGEN,18)).catch(()=>ethers.utils.parseUnits(SEAT_PRICE_KGEN,18));
+    state.decimals=await firstCall(kr,[['decimals']],18).catch(()=>18);
+    if(minted===null && remaining!==null) minted=ethers.BigNumber.from(totalSeats).sub(remaining);
+    if(remaining===null && minted!==null) remaining=ethers.BigNumber.from(totalSeats).sub(minted);
+    state.totalSeats=bnToNum(totalSeats,TOTAL_SEATS_FALLBACK); state.lastMinted=bnToNum(minted,0);
+    setText('hudTotalSeats', String(state.totalSeats)); setText('hudMinted', minted ? minted.toString() : '讀取失敗'); setText('hudRemaining', remaining ? remaining.toString() : '讀取失敗');
+    setText('seatPrice', fmtUnits(price,state.decimals,8)+' KGEN');
     if(state.account){
-      const bnb = await state.provider.getBalance(state.account); const kbal = await kr.balanceOf(state.account); const allow = await kr.allowance(state.account, MARSSEATS);
-      const seats = await firstCall(mr, [['seatsOf',[state.account]]], []).catch(()=>[]); const seatArr = toSeatArray(seats);
-      const seatCount = seatArr.length ? String(seatArr.length) : await firstCall(mr, [['balanceOf',[state.account]]], ethers.BigNumber.from(0)).then(x=>x.toString()).catch(()=>String(seatArr.length));
-      const pendingSeat = await firstCall(mr, [['pendingSeat',[state.account]], ['pendingSeats',[state.account]]], null).catch(()=>null);
-      const pendingRewards = await firstCall(mr, [['pendingRewards',[state.account]], ['pendingReward',[state.account]]], null).catch(()=>null);
-      setText('walletAddr', shortAddr(state.account)); setText('chainId', String(state.chainId || '讀取中')); setText('kgenBalance', fmtUnits(kbal,state.decimals,4)+' KGEN'); setText('bnbBalance', fmtUnits(bnb,18,6)+' BNB'); setText('allowance', fmtUnits(allow,state.decimals,4)+' KGEN');
-      setText('mySeats', seatCount); setText('seatsOf', seatArr.length ? seatArr.join(', ') : '尚無或讀取為空'); setText('pendingSeat', pendingSeat ? pendingSeat.toString() : '讀取失敗'); setText('pendingRewards', pendingRewards ? fmtUnits(pendingRewards,state.decimals,6)+' KGEN' : '讀取失敗');
-      setText('netBadge', 'BSC '+(state.chainId || '')); $('netBadge').className='badge ok';
-    }
-    setStatus('HUD refreshed: '+reason);
-  }catch(e){ setStatus('鏈上讀取失敗：'+(e.message || e), true); }
-  finally{ state.refreshing = false; }
+      const bnb=await state.provider.getBalance(state.account); const kbal=await kr.balanceOf(state.account); const allow=await kr.allowance(state.account,MARSSEATS);
+      const seats=await firstCall(mr,[['seatsOf',[state.account]]],[]).catch(()=>[]); const seatArr=toSeatArray(seats); state.lastSeats=seatArr;
+      const seatCount=seatArr.length ? String(seatArr.length) : await firstCall(mr,[['balanceOf',[state.account]]],ethers.BigNumber.from(0)).then(x=>x.toString()).catch(()=>String(seatArr.length));
+      const pendingSeat=await firstCall(mr,[['pendingSeat',[state.account]],['pendingSeats',[state.account]]],null).catch(()=>null);
+      const pendingRewards=await firstCall(mr,[['pendingRewards',[state.account]],['pendingReward',[state.account]]],null).catch(()=>null);
+      setText('walletAddr',shortAddr(state.account)); setText('chainId',String(state.chainId||'讀取中'));
+      setText('kgenBalance',fmtUnits(kbal,state.decimals,4)+' KGEN'); setText('kgenBalanceMirror',fmtUnits(kbal,state.decimals,4)+' KGEN');
+      setText('bnbBalance',fmtUnits(bnb,18,6)+' BNB'); setText('bnbBalanceMirror',fmtUnits(bnb,18,6)+' BNB'); setText('allowance',fmtUnits(allow,state.decimals,4)+' KGEN');
+      setText('mySeats',seatCount); setText('hudMySeats',seatCount); setText('seatsOf',seatArr.length ? seatArr.join(', ') : '尚無或讀取為空'); setText('pendingSeat',pendingSeat ? pendingSeat.toString() : '讀取失敗'); setText('pendingRewards',pendingRewards ? fmtUnits(pendingRewards,state.decimals,6)+' KGEN' : '讀取失敗');
+      setText('netBadge','BSC '+(state.chainId||'')); $('netBadge').className='badge ok';
+    } else { setText('hudMySeats','未連線'); }
+    renderSeatGrid(state.totalSeats,state.lastMinted,state.lastSeats);
+    setStatus('Mars Reactor HUD refreshed: '+reason);
+  }catch(e){ setStatus('鏈上讀取失敗：'+(e.message||e),true); renderSeatGrid(state.totalSeats || TOTAL_SEATS_FALLBACK,state.lastMinted || 0,state.lastSeats || []); }
+  finally{state.refreshing=false;}
 }
-window.refreshWalletState = refreshWalletState;
+window.refreshWalletState=refreshWalletState;
 
-async function approveKGEN(){
-  try{ setTx('送出 approve('+MARSSEATS+', 5000e18)'); const amount = ethers.utils.parseUnits(SEAT_PRICE_KGEN, 18); const tx = await kgenWrite().approve(MARSSEATS, amount); setTx('Approve pending: '+tx.hash); await tx.wait(); setTx('Approve success: '+tx.hash); await refreshWalletState('approve success'); }
-  catch(e){ setTx('Approve failed: '+(e.message || e), true); }
-}
-async function mintSeat(){
-  try{ setTx('送出 mintSeat(1)'); const tx = await marsWrite().mintSeat(1); setTx('Mint pending: '+tx.hash); await tx.wait(); setTx('Mint success: '+tx.hash); await refreshWalletState('mintSeat success'); setTimeout(()=>refreshWalletState('mint delayed'), 2500); }
-  catch(e){ setTx('Mint failed: '+(e.message || e), true); }
-}
-async function claimSeat(){
-  try{ const raw = $('seatIdInput').value.trim(); if(raw === '') throw new Error('請輸入 seatId'); const seatId = ethers.BigNumber.from(raw); setTx('送出 claimSeat('+seatId.toString()+')'); const tx = await marsWrite().claimSeat(seatId); setTx('Claim pending: '+tx.hash); await tx.wait(); setTx('Claim success: '+tx.hash); await refreshWalletState('claimSeat success'); }
-  catch(e){ setTx('Claim failed: '+(e.message || e), true); }
-}
-async function claimAll(){
-  try{ let seats=[]; const txt = $('seatsOf').textContent.trim(); if(txt && !txt.includes('尚無') && !txt.includes('未連線') && !txt.includes('讀取')) seats = txt.split(',').map(s=>s.trim()).filter(Boolean).map(s=>ethers.BigNumber.from(s)); if(!seats.length) throw new Error('沒有可用 seatsOf(wallet) 清單，請先 Refresh HUD 或輸入單一 seatId'); setTx('送出 claimSeats(['+seats.map(x=>x.toString()).join(',')+'])'); const tx = await marsWrite().claimSeats(seats); setTx('Claim All pending: '+tx.hash); await tx.wait(); setTx('Claim All success: '+tx.hash); await refreshWalletState('claimSeats success'); }
-  catch(e){ setTx('Claim All failed: '+(e.message || e), true); }
-}
+async function approveKGEN(){try{setTx('送出 approve('+MARSSEATS+', 5000e18)'); const amount=ethers.utils.parseUnits(SEAT_PRICE_KGEN,18); const tx=await kgenWrite().approve(MARSSEATS,amount); setTx('Approve pending: '+tx.hash); await tx.wait(); setTx('Approve success: '+tx.hash); await refreshWalletState('approve success');}catch(e){setTx('Approve failed: '+(e.message||e),true);}}
+async function mintSeat(){try{setTx('送出 mintSeat(1)'); const tx=await marsWrite().mintSeat(1); setTx('Mint pending: '+tx.hash); await tx.wait(); setTx('Mint success: '+tx.hash); await refreshWalletState('mintSeat success'); setTimeout(()=>refreshWalletState('mint delayed'),2500);}catch(e){setTx('Mint failed: '+(e.message||e),true);}}
+async function claimSeat(){try{const raw=$('seatIdInput').value.trim(); if(raw==='') throw new Error('請輸入 seatId'); const seatId=ethers.BigNumber.from(raw); setTx('送出 claimSeat('+seatId.toString()+')'); const tx=await marsWrite().claimSeat(seatId); setTx('Claim pending: '+tx.hash); await tx.wait(); setTx('Claim success: '+tx.hash); await refreshWalletState('claimSeat success');}catch(e){setTx('Claim failed: '+(e.message||e),true);}}
+async function claimAll(){try{let seats=state.lastSeats.map(s=>ethers.BigNumber.from(s)); if(!seats.length){const txt=$('seatsOf').textContent.trim(); if(txt && !txt.includes('尚無') && !txt.includes('未連線') && !txt.includes('讀取')) seats=txt.split(',').map(s=>s.trim()).filter(Boolean).map(s=>ethers.BigNumber.from(s));} if(!seats.length) throw new Error('沒有可用 seatsOf(wallet) 清單，請先 Refresh HUD 或輸入單一 seatId'); setTx('送出 claimSeats(['+seats.map(x=>x.toString()).join(',')+'])'); const tx=await marsWrite().claimSeats(seats); setTx('Claim All pending: '+tx.hash); await tx.wait(); setTx('Claim All success: '+tx.hash); await refreshWalletState('claimSeats success');}catch(e){setTx('Claim All failed: '+(e.message||e),true);}}
+function showMySeats(){renderSeatGrid(state.totalSeats,state.lastMinted,state.lastSeats); setTx('My Seats highlighted: '+(state.lastSeats.length ? state.lastSeats.join(', ') : '目前無席位或尚未連線'));}
 
-const audioEngine = { ctx:null, osc:null, gain:null, playing:false, audio:null };
-function stopNode(n){ try{ n.stop && n.stop(0); }catch(_){} try{ n.disconnect && n.disconnect(); }catch(_){} }
+const audioEngine={ctx:null,osc:null,gain:null,playing:false,startedAt:0};
+function stopNode(n){try{n && n.stop && n.stop(0);}catch(_){} try{n && n.disconnect && n.disconnect();}catch(_){}}
 function emergencyStopAudio(){
-  try{ document.querySelectorAll('audio').forEach(a=>{ try{a.pause(); a.currentTime=0; a.removeAttribute('src'); a.src=''; a.load && a.load();}catch(_){} }); }catch(_){}
-  stopNode(audioEngine.osc); audioEngine.osc=null;
-  try{ if(audioEngine.ctx && audioEngine.ctx.state !== 'closed') audioEngine.ctx.close(); }catch(_){}
-  audioEngine.ctx=null; audioEngine.gain=null; audioEngine.playing=false; setText('audioTrack','Stopped');
+  try{document.querySelectorAll('audio').forEach(a=>{try{a.pause(); a.currentTime=0; a.removeAttribute('src'); a.src=''; a.load && a.load();}catch(_){}});}catch(_){ }
+  stopNode(audioEngine.osc); audioEngine.osc=null; audioEngine.gain=null;
+  try{if(audioEngine.ctx && audioEngine.ctx.state!=='closed') audioEngine.ctx.close();}catch(_){ }
+  audioEngine.ctx=null; audioEngine.playing=false; setText('audioTrack','Stopped');
 }
-window.emergencyStopAudio = emergencyStopAudio;
-function audioPlay(){ emergencyStopAudio(); const Ctx = window.AudioContext || window.webkitAudioContext; if(!Ctx){ setText('audioTrack','AudioContext unsupported'); return; } const ctx = new Ctx(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type='sawtooth'; osc.frequency.setValueAtTime(108, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(216, ctx.currentTime+1.8); gain.gain.setValueAtTime(0.0001, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.045, ctx.currentTime+.12); gain.gain.exponentialRampToValueAtTime(0.018, ctx.currentTime+2.6); osc.connect(gain); gain.connect(ctx.destination); osc.start(); audioEngine.ctx=ctx; audioEngine.osc=osc; audioEngine.gain=gain; audioEngine.playing=true; setText('audioTrack','Mars Engine 108Hz'); }
-function audioPause(){ if(audioEngine.ctx && audioEngine.ctx.state === 'running'){ audioEngine.ctx.suspend(); audioEngine.playing=false; setText('audioTrack','Paused'); } }
-function audioResumeOrPlay(){ if(audioEngine.ctx && audioEngine.ctx.state === 'suspended'){ audioEngine.ctx.resume(); audioEngine.playing=true; setText('audioTrack','Mars Engine 108Hz'); } else audioPlay(); }
+window.emergencyStopAudio=emergencyStopAudio;
+function audioPlay(){emergencyStopAudio(); const Ctx=window.AudioContext || window.webkitAudioContext; if(!Ctx){setText('audioTrack','AudioContext unsupported'); return;} const ctx=new Ctx(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); const filter=ctx.createBiquadFilter(); osc.type='sawtooth'; osc.frequency.setValueAtTime(108,ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(216,ctx.currentTime+1.8); filter.type='lowpass'; filter.frequency.setValueAtTime(520,ctx.currentTime); gain.gain.setValueAtTime(0.0001,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.045,ctx.currentTime+.12); gain.gain.exponentialRampToValueAtTime(0.018,ctx.currentTime+2.6); osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination); osc.start(); audioEngine.ctx=ctx; audioEngine.osc=osc; audioEngine.gain=gain; audioEngine.playing=true; setText('audioTrack','Mars Reactor 108Hz');}
+function audioPause(){if(audioEngine.ctx && audioEngine.ctx.state==='running'){audioEngine.ctx.suspend(); audioEngine.playing=false; setText('audioTrack','Paused');}}
+function audioResumeOrPlay(){if(audioEngine.ctx && audioEngine.ctx.state==='suspended'){audioEngine.ctx.resume(); audioEngine.playing=true; setText('audioTrack','Mars Reactor 108Hz');}else audioPlay();}
 
-function showMobile(name){ document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.toggle('mobile-hide', p.getAttribute('data-panel')!==name)); }
+function showMobile(name){document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.toggle('mobile-hide',p.getAttribute('data-panel')!==name));}
 function bindUI(){
-  $('btnMetaMask').onclick = ()=>connectMetaMask().catch(e=>setStatus(e.message||e,true)); $('btnMobile').onclick = ()=>connectMobile().catch(e=>setStatus(e.message||e,true)); $('btnWalletConnect').onclick = ()=>connectWalletConnect().catch(e=>setStatus(e.message||e,true));
-  $('btnApprove').onclick = approveKGEN; $('btnMint').onclick = mintSeat; $('btnClaimOne').onclick = claimSeat; $('btnClaimAll').onclick = claimAll;
-  $('audPlay').onclick = audioResumeOrPlay; $('audPause').onclick = audioPause; $('audStop').onclick = emergencyStopAudio;
-  setText('marsAddr', shortAddr(MARSSEATS)); setText('kgenAddr', shortAddr(KGEN_TOKEN));
-  if(matchMedia('(max-width:980px)').matches) showMobile('core');
+  $('btnMetaMask').onclick=()=>connectMetaMask().catch(e=>setStatus(e.message||e,true)); $('btnMobile').onclick=()=>connectMobile().catch(e=>setStatus(e.message||e,true)); $('btnWalletConnect').onclick=()=>connectWalletConnect().catch(e=>setStatus(e.message||e,true));
+  $('btnApprove').onclick=approveKGEN; $('btnMint').onclick=mintSeat; $('btnClaimOne').onclick=claimSeat; $('btnClaimAll').onclick=claimAll; $('btnMySeats').onclick=showMySeats; $('btnRefresh').onclick=()=>refreshWalletState('manual');
+  $('audPlay').onclick=audioResumeOrPlay; $('audPause').onclick=audioPause; $('audStop').onclick=emergencyStopAudio;
+  setText('marsAddr',shortAddr(MARSSEATS)); setText('kgenAddr',shortAddr(KGEN_TOKEN)); renderSeatGrid(TOTAL_SEATS_FALLBACK,0,[]); if(matchMedia('(max-width:980px)').matches) showMobile('core');
+  if(!WC_PROJECT_ID){$('btnWalletConnect').disabled=true; $('btnWalletConnect').textContent='WalletConnect 待設定';}
 }
-document.addEventListener('DOMContentLoaded', ()=>{ bindUI(); refreshWalletState('initial readonly'); });
+document.addEventListener('DOMContentLoaded',()=>{bindUI(); refreshWalletState('initial readonly');});
 </script>
 </body>
 </html>
