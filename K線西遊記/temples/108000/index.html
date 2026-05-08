@@ -1,600 +1,298 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<!--
+============================================================
+PRODUCT_ID: KGEN-108000-MARSSEATS-UI
+VERSION: V1.0.0
+BUILD: 20260508-MARSSEATS-GENESIS
+BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+MODE: Patch / Integration Mode
+NOTES:
+- 單檔完整 HTML，延續 12345 / 16888 宇宙 HUD 風格。
+- 使用正式鏈上地址，不使用離線樣本資料。
+- 支援 ethers.js、MetaMask、WalletConnect、Mobile Browser。
+- 包含 approve(5000e18)、mintSeat(1)、claimSeat(uint256)、claimSeats(uint256[])。
+- 單音源 audio engine：play / pause / stop / emergencyStopAudio()。
+============================================================
+-->
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>花果山火星齊天豪宅 108000｜Mars Seats V2.2（Temple UI V1.0）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0" />
+  <meta property="og:description" content="KGEN 宇宙火星殖民艙 · 108000 MarsSeats 火星席位系統 HUD" />
+  <meta property="og:site_name" content="KLINE ODYSSEY" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0" />
+  <meta name="twitter:description" content="KGEN 宇宙火星殖民艙 · 108000 MarsSeats 火星席位系統 HUD" />
+  <title>KGEN 108000 MarsSeats 火星席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.0</title>
 
-  <!-- Ethers v5.7.2：優先本地檔 ./ethers-5.7.2.umd.min.js，若缺少則自動 CDN 備援 -->
-  <script>
-    (function(){
-      function add(src){
-        return new Promise((res, rej)=>{
-          var s=document.createElement('script');
-          s.src=src; s.async=true;
-          s.onload=res; s.onerror=rej;
-          document.head.appendChild(s);
-        });
-      }
-      var local = "./ethers-5.7.2.umd.min.js";
-      var cdn   = "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
-      add(local).catch(()=>add(cdn)).catch(()=>console.warn("ethers load failed"));
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg0:#05060a;
-      --bg1:#0b0f1a;
-      --gold:#ffd56a;
-      --gold2:#ffb74a;
-      --cyan:#7cf6ff;
-      --muted:rgba(255,255,255,.72);
-      --card:rgba(255, 213, 106, .06);
-      --card2:rgba(124, 246, 255, .06);
-      --line:rgba(255, 213, 106, .28);
-      --shadow: 0 14px 60px rgba(0,0,0,.55);
+      --gold:#ffd778; --cyan:#00f2ff; --mars:#ff6a2a; --mars2:#ffb36a; --red:#ff4444;
+      --bg:#000; --panel:rgba(22,11,5,.88); --panel2:rgba(0,12,18,.76); --line:rgba(255,183,106,.42);
+      --ok:#7cffc5; --warn:#ffd778; --bad:#ff6a6a; --text:#fff; --muted:#b8d9e0;
+      --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Microsoft JhengHei", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 20% 20%, #121a2e 0%, var(--bg0) 55%) , radial-gradient(900px 600px at 80% 70%, #1a1133 0%, var(--bg0) 55%);
-      color: #fff;
-      overflow-x:hidden;
-    }
-
-    /* Starfield */
-    .stars, .stars2, .stars3{
-      position:fixed; inset:0;
-      background-repeat:repeat;
-      pointer-events:none;
-      z-index:-1;
-      opacity:.75;
-    }
-    .stars{ background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 140px 140px; animation: drift 120s linear infinite;}
-    .stars2{ background-image: radial-gradient(#7cf6ff 1px, transparent 1px); background-size: 220px 220px; opacity:.35; animation: drift 180s linear infinite reverse;}
-    .stars3{ background-image: radial-gradient(#ffd56a 1px, transparent 1px); background-size: 320px 320px; opacity:.20; animation: drift 240s linear infinite;}
-    @keyframes drift { from{ transform: translate3d(0,0,0)} to{ transform: translate3d(-800px, -600px, 0)} }
-
-    .wrap{ max-width: 1080px; margin: 0 auto; padding: 18px 14px 60px; }
-
-    /* Top bar */
-    .topbar{
-      position: sticky; top: 10px; z-index: 9999;
-      display:flex; gap:10px; justify-content: space-between; align-items:center;
-      padding: 10px 10px;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 999px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 14px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      text-decoration:none;
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      user-select:none;
-    }
-    .pill:hover{ background: rgba(255,255,255,.10); }
-    .pill.gold{ border-color: rgba(255,213,106,.45); }
-    .pill.cyan{ border-color: rgba(124,246,255,.45); }
-    .right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-    .tag{
-      font-weight:900; letter-spacing:.6px;
-      color: var(--gold);
-      padding: 8px 12px;
-      border: 1px solid rgba(255,213,106,.25);
-      border-radius: 999px;
-      background: rgba(255,213,106,.06);
-    }
-
-    header{ padding: 18px 0 6px; text-align:left; }
-    h1{
-      margin: 10px 0 8px;
-      font-size: 30px;
-      color: var(--gold);
-      text-shadow: 0 0 24px rgba(255,213,106,.28);
-      letter-spacing: .8px;
-      line-height: 1.15;
-    }
-    .sub{
-      color: rgba(255,255,255,.78);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .sub b{ color: var(--cyan); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(0,0,0,.14) 100%);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 14px;
-    }
-    .card.gold{ border-color: rgba(255,213,106,.22); }
-    .card.cyan{ border-color: rgba(124,246,255,.22); }
-
-    .card h2{
-      margin: 0 0 10px;
-      font-size: 16px;
-      color: #fff;
-      letter-spacing:.5px;
-    }
-    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .kpi{
-      flex: 1 1 200px;
-      background: rgba(255,213,106,.06);
-      border: 1px solid rgba(255,213,106,.18);
-      border-radius: 14px;
-      padding: 12px;
-      min-width: 220px;
-    }
-    .kpi .label{ font-size:12px; color: rgba(255,255,255,.72); }
-    .kpi .value{ font-size:20px; font-weight:900; color: var(--gold); margin-top:6px; }
-    .kpi .hint{ font-size:12px; color: rgba(255,255,255,.68); margin-top:6px; line-height:1.4; }
-    .kpi.cyanish{
-      background: rgba(124,246,255,.06);
-      border-color: rgba(124,246,255,.18);
-    }
-    .kpi.cyanish .value{ color: var(--cyan); }
-
-    .btn{
-      appearance:none;
-      border: 1px solid rgba(255,213,106,.35);
-      background: rgba(255,213,106,.10);
-      color: #fff;
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-weight: 900;
-      cursor:pointer;
-    }
-    .btn:hover{ background: rgba(255,213,106,.16); }
-    .btn.cyan{ border-color: rgba(124,246,255,.35); background: rgba(124,246,255,.10); }
-    .btn.cyan:hover{ background: rgba(124,246,255,.16); }
-    .btn.danger{ border-color: rgba(255,80,80,.35); background: rgba(255,80,80,.10); }
-    .btn.danger:hover{ background: rgba(255,80,80,.16); }
-
-    input, textarea, select{
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.25);
-      color:#fff;
-      outline:none;
-    }
-    textarea{ min-height: 86px; resize: vertical; }
-
-    .small{ font-size:12px; color: rgba(255,255,255,.72); line-height:1.5; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .sep{ height: 1px; background: rgba(255,255,255,.10); margin: 12px 0; }
-
-    .addr{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-    .addr code{
-      font-size: 12px;
-      word-break: break-all;
-      color: rgba(255,255,255,.86);
-    }
-    .toast{
-      position: fixed; right: 12px; bottom: 12px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(0,0,0,.75);
-      border: 1px solid rgba(255,255,255,.14);
-      color:#fff;
-      font-size: 12px;
-      max-width: 360px;
-      display:none;
-      z-index: 99999;
-      backdrop-filter: blur(10px);
-    }
-
-    .footer{
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      color: rgba(255,255,255,.72);
-      line-height: 1.7;
-      font-size: 12px;
-    }
+    html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:var(--text);font-family:'Noto Sans TC',system-ui,sans-serif;overflow:hidden;}
+    body:before{content:"";position:fixed;inset:-20%;z-index:0;background:
+      radial-gradient(circle at 50% 42%, rgba(255,106,42,.22), transparent 19%),
+      radial-gradient(circle at 20% 70%, rgba(0,242,255,.12), transparent 24%),
+      radial-gradient(circle at 82% 18%, rgba(255,215,120,.13), transparent 22%),
+      linear-gradient(180deg,#020304 0%,#100500 46%,#000 100%);}
+    body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,#000 0%,transparent 74%)}
+    .starfield{position:fixed;inset:0;z-index:2;pointer-events:none;background-image:
+      radial-gradient(circle,#fff 0 1px,transparent 1.4px),radial-gradient(circle,#ffdf9a 0 1px,transparent 1.4px),radial-gradient(circle,#8ff8ff 0 1px,transparent 1.4px);background-size:137px 113px,211px 191px,281px 239px;background-position:0 0,40px 70px,90px 30px;opacity:.42;animation:drift 38s linear infinite}
+    @keyframes drift{to{transform:translate3d(-140px,80px,0)}}
+    .scan{position:fixed;inset:0;z-index:90;pointer-events:none;background:linear-gradient(transparent,rgba(0,242,255,.035),transparent);background-size:100% 7px;mix-blend-mode:screen;opacity:.35}
+    .hud-top{position:fixed;left:2%;right:2%;top:calc(12px + var(--safe-top));z-index:100;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;pointer-events:none}.brand-section{min-width:270px;border-left:5px solid var(--mars);padding:9px 14px;background:linear-gradient(90deg,var(--panel),rgba(0,0,0,.06));box-shadow:0 0 28px rgba(255,106,42,.18)}.brand-name{font-size:25px;line-height:1.05;color:var(--gold);text-shadow:0 0 16px rgba(255,215,120,.75);white-space:nowrap}.sys-st{font-family:Orbitron,monospace;font-size:11px;letter-spacing:1px;color:var(--cyan);margin-top:4px}.monitor-data{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.data-box{min-width:128px;border:1px solid var(--line);border-top:2px solid var(--mars);background:var(--panel);padding:9px 10px;box-shadow:inset 0 0 22px rgba(255,106,42,.08),0 0 18px rgba(0,0,0,.4)}.data-label{font-size:11px;color:var(--muted);letter-spacing:.7px}.data-value{font-family:Orbitron,monospace;color:var(--gold);font-size:18px;text-shadow:0 0 10px rgba(255,215,120,.5);margin-top:4px}.data-value.small{font-size:12px;word-break:break-all}.layout{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:330px 1fr 360px;gap:18px;padding:112px 24px 86px}.panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(45,18,6,.85),rgba(4,8,14,.82));box-shadow:0 0 30px rgba(255,106,42,.15),inset 0 0 28px rgba(0,242,255,.04);backdrop-filter:blur(8px);overflow:hidden}.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid rgba(255,215,120,.18);background:linear-gradient(90deg,rgba(255,106,42,.18),transparent)}.panel-title{font-family:Orbitron,monospace;font-size:13px;color:var(--gold);letter-spacing:1px}.panel-body{padding:15px}.kv{display:grid;grid-template-columns:1fr auto;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);padding:9px 0}.kv span:first-child{color:var(--muted);font-size:13px}.kv span:last-child{font-family:Orbitron,monospace;color:#fff;font-size:13px;text-align:right;max-width:190px;word-break:break-all}.center-stage{display:flex;align-items:center;justify-content:center;position:relative}.mars-orb{position:relative;width:min(57vh,520px);height:min(57vh,520px);border-radius:50%;border:14px double var(--gold);box-shadow:0 0 90px rgba(255,106,42,.35),inset 0 0 80px rgba(0,0,0,.72);background:radial-gradient(circle at 35% 28%,#ffd7a6 0 6%,#ff8f3d 18%,#b73316 48%,#4a100b 70%,#090100 100%);overflow:hidden}.mars-orb:before{content:"";position:absolute;inset:8%;border-radius:50%;border:1px solid rgba(0,242,255,.28);box-shadow:0 0 40px rgba(0,242,255,.18)}.mars-orb:after{content:"";position:absolute;inset:0;background:linear-gradient(26deg,transparent 38%,rgba(255,215,120,.2) 39% 43%,transparent 45%),linear-gradient(-18deg,transparent 52%,rgba(0,0,0,.22) 53% 57%,transparent 59%);mix-blend-mode:screen}.seat-ring{position:absolute;inset:14%;border:2px dashed rgba(0,242,255,.55);border-radius:50%;animation:spin 28s linear infinite}.seat-ring.r2{inset:26%;border-color:rgba(255,215,120,.45);animation-duration:18s;animation-direction:reverse}.seat-ring.r3{inset:38%;border-style:solid;border-color:rgba(255,255,255,.18);animation-duration:11s}@keyframes spin{to{transform:rotate(360deg)}}.core-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:5;text-shadow:0 0 20px #000}.core-label .moon{font-size:54px;filter:drop-shadow(0 0 18px rgba(255,183,106,.8))}.core-label h1{font-family:Orbitron,monospace;margin:5px 0 2px;font-size:24px;color:#fff}.core-label p{margin:0;color:var(--gold);font-size:14px}.warp-engine{position:fixed;right:10px;bottom:135px;z-index:120;width:80px;text-align:center}.warp-rail{height:340px;width:24px;background:#111;border:3px solid var(--mars);border-radius:8px;margin:0 auto;position:relative;overflow:hidden;box-shadow:0 0 22px rgba(255,106,42,.28)}#energy-fill{position:absolute;bottom:0;left:0;width:100%;height:60%;background:linear-gradient(to top,#ff3d00,#ff8f2f,#fff1b0);box-shadow:0 0 18px #ff6a2a}.warp-val-text{font-family:Orbitron,monospace;color:var(--mars2);margin-top:10px;font-size:13px;text-shadow:0 0 8px var(--mars)}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{appearance:none;border:1px solid rgba(255,215,120,.45);background:linear-gradient(180deg,rgba(255,106,42,.32),rgba(44,9,0,.9));color:#fff;border-radius:12px;padding:12px 10px;min-height:44px;font-family:'Noto Sans TC',sans-serif;font-weight:900;cursor:pointer;box-shadow:0 0 16px rgba(255,106,42,.14);transition:.16s transform,.16s filter}.btn:hover{transform:translateY(-1px);filter:brightness(1.12)}.btn:active{transform:translateY(1px)}.btn.cyan{border-color:rgba(0,242,255,.55);background:linear-gradient(180deg,rgba(0,242,255,.23),rgba(0,22,28,.92))}.btn.gold{border-color:rgba(255,215,120,.7);background:linear-gradient(180deg,rgba(255,215,120,.28),rgba(56,32,0,.94))}.btn.red{border-color:rgba(255,80,80,.65);background:linear-gradient(180deg,rgba(255,68,68,.23),rgba(42,0,0,.94))}.btn.full{grid-column:1/-1}.input{width:100%;border:1px solid rgba(0,242,255,.32);background:rgba(0,0,0,.42);color:#fff;border-radius:11px;padding:12px;font-family:Orbitron,monospace}.status{margin-top:12px;padding:11px;border:1px solid rgba(0,242,255,.22);border-radius:12px;background:rgba(0,14,18,.5);color:var(--muted);font-size:12px;line-height:1.55;max-height:96px;overflow:auto}.nav{position:fixed;left:50%;bottom:calc(16px + var(--safe-bottom));transform:translateX(-50%);z-index:130;display:flex;gap:9px;flex-wrap:wrap;justify-content:center}.nav a,.nav button{pointer-events:auto;text-decoration:none;color:#fff;border:1px solid rgba(255,215,120,.38);background:rgba(12,8,0,.78);border-radius:999px;padding:10px 14px;font-weight:900;box-shadow:0 0 14px rgba(255,215,120,.08);cursor:pointer}.audio-dock{position:fixed;left:18px;bottom:calc(15px + var(--safe-bottom));z-index:125;border:1px solid rgba(0,242,255,.32);border-radius:16px;background:rgba(0,10,16,.82);padding:10px;display:flex;align-items:center;gap:8px;box-shadow:0 0 22px rgba(0,242,255,.1)}.audio-dock button{border:1px solid rgba(0,242,255,.3);background:rgba(0,242,255,.12);color:#fff;border-radius:9px;padding:8px 10px;font-weight:900;cursor:pointer}.audio-dock .track{font-family:Orbitron,monospace;font-size:11px;color:var(--cyan);max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,215,120,.32);border-radius:999px;padding:4px 8px;color:var(--gold);font-family:Orbitron,monospace;font-size:10px}.mobile-tabs{display:none}.hidden{display:none!important}.ok{color:var(--ok)!important}.bad{color:var(--bad)!important}.warn{color:var(--warn)!important}
+    @media(max-width:980px){html,body{overflow:auto;height:auto;min-height:100%}.hud-top{position:relative;left:auto;right:auto;top:auto;padding:calc(10px + var(--safe-top)) 10px 0;display:block}.brand-section{min-width:0}.brand-name{font-size:20px;white-space:normal}.monitor-data{margin-top:10px;display:grid;grid-template-columns:1fr 1fr}.layout{position:relative;display:block;padding:12px 10px 118px}.panel{margin:12px 0}.center-stage{min-height:360px}.mars-orb{width:330px;height:330px}.core-label .moon{font-size:42px}.core-label h1{font-size:19px}.warp-engine{display:none}.audio-dock{left:10px;right:10px;bottom:58px;justify-content:center}.nav{left:0;right:0;bottom:6px;transform:none;padding:0 8px}.nav a,.nav button{padding:8px 10px;font-size:12px}.mobile-tabs{display:flex;position:sticky;top:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);gap:6px;padding:8px}.mobile-tabs button{flex:1;border:1px solid rgba(255,215,120,.3);background:rgba(255,106,42,.12);color:#fff;border-radius:10px;padding:9px;font-weight:900}.mobile-hide{display:none}.kv span:last-child{max-width:160px}.controls{grid-template-columns:1fr}}
   </style>
 </head>
-
 <body>
-  <div class="stars"></div><div class="stars2"></div><div class="stars3"></div>
-
-  <div class="wrap">
-
-    <div class="topbar">
-      <div class="left">
-        <span class="tag">MARS 108000｜500 席位豪宅</span>
-      </div>
-      <div class="right">
-        <a class="pill gold" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">🌐 Official Website</a>
-        <button class="pill cyan" id="btnConnect">🪐 連接錢包</button>
-        <button class="pill" id="btnRefresh">🔄 重新整理</button>
-      </div>
-    </div>
-
-    <header>
-      <h1>花果山火星齊天豪宅 108000</h1>
-      <div class="sub">
-        合約：<b>MarsSeats V2.2</b>｜席位：<b>500</b>｜入住：<b>5000 K G E N</b><br/>
-        這裡是「席位系統」：入住取得席位 NFT-like（seatId），月結算分潤用 <b>claim</b> 自領，不會一次群發爆炸。<br/>
-        重要：本頁僅提供鏈上互動，不提供投資承諾與收益保證。
-      </div>
-    </header>
-
-    <div class="grid">
-
-      <div class="card gold">
-        <h2>合約與狀態</h2>
-
-        <div class="row">
-          <div class="kpi">
-            <div class="label">錢包</div>
-            <div class="value mono" id="wallet">未連線</div>
-            <div class="hint">請用 MetaMask（BSC Mainnet / chainId 56）</div>
-          </div>
-          <div class="kpi cyanish">
-            <div class="label">席位剩餘</div>
-            <div class="value" id="remain">—</div>
-            <div class="hint">500 - totalMinted</div>
-          </div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="row">
-          <div class="kpi">
-            <div class="label">我的席位</div>
-            <div class="value" id="mySeats">—</div>
-            <div class="hint">查詢你的 seatIds（簡化顯示：數量 + 前 10 個 seatId）</div>
-          </div>
-          <div class="kpi cyanish">
-            <div class="label">可領分潤</div>
-            <div class="value" id="pending">—</div>
-            <div class="hint">pendingReward(user)（單位：KGEN）</div>
-          </div>
-        </div>
-
-        <div class="sep"></div>
-
-        <h2>快速操作</h2>
-
-        <div class="row">
-          <button class="btn cyan" id="btnApprove">1) 授權 5000 KGEN</button>
-          <button class="btn" id="btnBuy">2) 入住（鑄造席位）</button>
-          <button class="btn cyan" id="btnClaim">3) 領分潤（Claim）</button>
-        </div>
-
-        <div class="small" style="margin-top:10px;">
-          你會看到鏈上事件：<span class="mono">SeatMinted</span> / <span class="mono">RewardNotified</span> / <span class="mono">RewardClaimed</span>。<br/>
-          若你想把「入住款」打進交易所（11520 Brain），請把 MarsSeats 的 <span class="mono">treasury</span> 設為 BrainExchange 合約地址（更乾淨），不要把「Mars 合約地址」當成交易所地址。
-        </div>
-
-        <div class="sep"></div>
-
-        <h2>地址（可一鍵複製）</h2>
-
-        <div class="addr">
-          <div class="small" style="min-width:80px;">KGEN</div>
-          <code class="mono" id="addrKGEN">（填入你的 KGEN Token）</code>
-          <button class="btn" data-copy="#addrKGEN">Copy</button>
-        </div>
-
-        <div class="addr" style="margin-top:10px;">
-          <div class="small" style="min-width:80px;">MarsSeats</div>
-          <code class="mono" id="addrMARS">（填入你部署後的 MarsSeats）</code>
-          <button class="btn" data-copy="#addrMARS">Copy</button>
-        </div>
-
-        <div class="addr" style="margin-top:10px;">
-          <div class="small" style="min-width:80px;">Treasury</div>
-          <code class="mono" id="addrTREAS">（可設為 BrainExchange 或公益庫）</code>
-          <button class="btn" data-copy="#addrTREAS">Copy</button>
-        </div>
-
-        <div class="sep"></div>
-
-        <h2>新手導覽（從沒錢包到入住）</h2>
-        <ol class="small">
-          <li>手機/電腦安裝 MetaMask，新增網路 BNB Chain（BSC / chainId 56）。</li>
-          <li>錢包裡準備少量 BNB 作為 Gas（交易手續費）。</li>
-          <li>把 KGEN 加入錢包（自訂代幣：貼上 KGEN Token 地址）。</li>
-          <li>按「連接錢包」，再按「授權 5000 KGEN」，MetaMask 會跳出確認。</li>
-          <li>授權成功後按「入住」，成功會鑄造席位（seatId）。</li>
-          <li>之後每月分潤由交易所大腦撥款到 MarsSeats，你按「領分潤」自領。</li>
-        </ol>
-      </div>
-
-      <div class="card cyan">
-        <h2>設定區（部署後必填）</h2>
-
-        <div class="small">把你部署後的地址貼上來，本頁就能直接對接（前端不需要改程式）。</div>
-
-        <div class="sep"></div>
-
-        <label class="small">KGEN Token Address</label>
-        <input class="mono" id="inKGEN" placeholder="0x..." />
-
-        <label class="small" style="margin-top:10px;">MarsSeats Contract Address</label>
-        <input class="mono" id="inMARS" placeholder="0x..." />
-
-        <label class="small" style="margin-top:10px;">Treasury Address（入住款流向）</label>
-        <input class="mono" id="inTREAS" placeholder="0x..." />
-
-        <div class="row" style="margin-top:10px;">
-          <button class="btn cyan" id="btnApply">套用設定</button>
-          <button class="btn danger" id="btnReset">重置</button>
-        </div>
-
-        <div class="sep"></div>
-
-        <h2>常見問題</h2>
-        <div class="small">
-          <b>Q：如果把 treasury 設為交易所地址，那繳 5000 KGEN 交易所怎麼知道是住豪宅的錢還是保證金？</b><br/><br/>
-          <b>推薦做法：</b><br/>
-          1) 讓 MarsSeats 的 treasury 直接是 BrainExchange 合約地址。<br/>
-          2) BrainExchange 增加專用入口：<span class="mono">depositFromMars(address user, uint256 amount)</span>，只允許 msg.sender == MarsSeats。<br/>
-          3) MarsSeats 在 mintSeat 後由合約呼叫 Brain 入口，讓 Brain 帳本可分類，不混保證金。<br/><br/>
-          若你暫時只做「純轉帳到 Brain」，也可以靠事件追蹤，但鏈上帳本分類會不乾淨。
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="footer">
-      PrimeForge 以母機之名，開啟金融生命。<br/>
-      花果山台灣・信念不滅・市場無界。<br/>
-      Where the Market Becomes the Myth.<br/>
-      —— 樂天帝 ⌖
-    </div>
-
+  <div class="starfield"></div><div class="scan"></div>
+  <div class="hud-top">
+    <section class="brand-section">
+      <div class="brand-name">🌕 108000 MarsSeats</div>
+      <div class="sys-st">VERSION KGEN-108000-MARSSEATS-UI-V1.0.0</div>
+      <div class="sys-st">BUILD 20260508-MARSSEATS-GENESIS · DEEP SPACE HUD</div>
+    </section>
+    <section class="monitor-data">
+      <div class="data-box"><div class="data-label">Total Seats</div><div class="data-value" id="hudTotalSeats">讀取中</div></div>
+      <div class="data-box"><div class="data-label">Minted</div><div class="data-value" id="hudMinted">讀取中</div></div>
+      <div class="data-box"><div class="data-label">Remaining</div><div class="data-value" id="hudRemaining">讀取中</div></div>
+      <div class="data-box"><div class="data-label">Price</div><div class="data-value" id="hudPrice">5000 KGEN</div></div>
+    </section>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="mobile-tabs" aria-label="Mobile UI tabs">
+    <button onclick="showMobile('wallet')">錢包</button><button onclick="showMobile('core')">火星艙</button><button onclick="showMobile('ops')">操作</button>
+  </div>
+
+  <main class="layout">
+    <section class="panel mobile-panel" data-panel="wallet">
+      <div class="panel-h"><div class="panel-title">WALLET CONNECT · COSMIC PAYROLL</div><span class="badge" id="netBadge">OFFLINE</span></div>
+      <div class="panel-body">
+        <div class="controls">
+          <button class="btn cyan" id="btnMetaMask">Connect MetaMask</button>
+          <button class="btn cyan" id="btnMobile">Mobile Browser</button>
+          <button class="btn gold full" id="btnWalletConnect">WalletConnect</button>
+        </div>
+        <div class="kv"><span>wallet</span><span id="walletAddr">未連線</span></div>
+        <div class="kv"><span>chainId</span><span id="chainId">未連線</span></div>
+        <div class="kv"><span>KGEN balance</span><span id="kgenBalance">未連線</span></div>
+        <div class="kv"><span>BNB balance</span><span id="bnbBalance">未連線</span></div>
+        <div class="kv"><span>Allowance</span><span id="allowance">未連線</span></div>
+        <div class="kv"><span>My Seats</span><span id="mySeats">未連線</span></div>
+        <div class="kv"><span>Pending Seat</span><span id="pendingSeat">未連線</span></div>
+        <div class="kv"><span>Pending Rewards</span><span id="pendingRewards">未連線</span></div>
+        <div class="status" id="statusBox">等待連線。鏈上資料會直接從正式合約讀取；讀取失敗時顯示錯誤，不填入離線樣本值。</div>
+      </div>
+    </section>
+
+    <section class="center-stage mobile-panel" data-panel="core">
+      <div class="mars-orb" aria-label="Mars colony seat system">
+        <div class="seat-ring r1"></div><div class="seat-ring r2"></div><div class="seat-ring r3"></div>
+        <div class="core-label"><div class="moon">🌕</div><h1>MARS SEATS</h1><p>500 seats · 5000 KGEN / Seat</p><p>θ角 108000 · Mars Colony Gate</p></div>
+      </div>
+    </section>
+
+    <section class="panel mobile-panel" data-panel="ops">
+      <div class="panel-h"><div class="panel-title">MARSSEATS OPS · KGEN_MarsSeats_V2_2_1</div><span class="badge">LIVE ABI</span></div>
+      <div class="panel-body">
+        <div class="kv"><span>MarsSeats</span><span id="marsAddr">0x3529...7298</span></div>
+        <div class="kv"><span>KGEN Token</span><span id="kgenAddr">0xBA3d...32Be</span></div>
+        <div class="kv"><span>seatPrice</span><span id="seatPrice">讀取中</span></div>
+        <div class="kv"><span>seatsOf(wallet)</span><span id="seatsOf">未連線</span></div>
+        <div class="controls" style="margin-top:14px">
+          <button class="btn gold full" id="btnApprove">Approve 5000 KGEN</button>
+          <button class="btn full" id="btnMint">Mint 1 Seat</button>
+        </div>
+        <div style="height:12px"></div>
+        <input class="input" id="seatIdInput" type="number" min="0" step="1" placeholder="Seat ID for claimSeat(uint256)" />
+        <div class="controls" style="margin-top:10px">
+          <button class="btn cyan" id="btnClaimOne">Claim Reward</button>
+          <button class="btn cyan" id="btnClaimAll">Claim All</button>
+        </div>
+        <div class="status" id="txBox">尚無交易。</div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="warp-engine"><div class="warp-rail"><div id="energy-fill"></div></div><div class="warp-val-text">θ 108000</div></aside>
+
+  <section class="audio-dock" aria-label="single audio engine">
+    <button id="audPlay">Play</button><button id="audPause">Pause</button><button id="audStop">Stop</button>
+    <span class="track" id="audioTrack">Mars Engine</span>
+  </section>
+
+  <nav class="nav" aria-label="宇宙導航">
+    <a href="https://klineodyssey.github.io/kline-odyssey/">返回宇宙入口</a>
+    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">前往 12345</a>
+    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/">前往 16888</a>
+    <button onclick="refreshWalletState('manual')">Refresh HUD</button>
+  </nav>
 
 <script>
-/** ===============================
- *  Mars Seats Temple UI V1.0
- * =============================== */
+'use strict';
+const APP_VERSION = 'KGEN-108000-MARSSEATS-UI-V1.0.0';
+const BUILD = '20260508-MARSSEATS-GENESIS';
+const BSC_CHAIN_ID = 56;
+const BSC_CHAIN_HEX = '0x38';
+const BSC_RPC = 'https://bsc-dataseed.binance.org/';
+const KGEN_TOKEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+const MARSSEATS = '0x3529dbFbaD465C2269F8096879A1c298d5257298';
+const BRAIN_11520 = '0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
+const TEMPLE_HEART_12345 = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+const LP_PAIR = '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2';
+const MOTHER = '0xcd60bf474e691f2484950a0276eaf507616ca4b9';
+const TREASURY_COLDMOTHER = '0x3b19c226fbfcde67933bc96d2cff513aab413cc2';
+const SEAT_PRICE_KGEN = '5000';
 
-const LS_KEY = "KLINE_MARS_SEATS_UI_V1";
-const DEFAULTS = { kgen:"", mars:"", treasury:"" };
-
-let provider, signer, walletAddress = "";
-let KGEN, MARS;
-
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=> t.style.display="none", 2600);
-}
-
-function isAddr(x){
-  try{ return ethers.utils.isAddress((x||"").trim()); }catch(e){ return false; }
-}
-
-function loadCfg(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    return raw ? Object.assign({}, DEFAULTS, JSON.parse(raw)) : {...DEFAULTS};
-  }catch(e){
-    return {...DEFAULTS};
-  }
-}
-function saveCfg(cfg){ localStorage.setItem(LS_KEY, JSON.stringify(cfg)); }
-
-function applyCfgToUI(cfg){
-  document.getElementById("inKGEN").value = cfg.kgen || "";
-  document.getElementById("inMARS").value = cfg.mars || "";
-  document.getElementById("inTREAS").value = cfg.treasury || "";
-  document.getElementById("addrKGEN").textContent = cfg.kgen || "（填入你的 KGEN Token）";
-  document.getElementById("addrMARS").textContent = cfg.mars || "（填入你部署後的 MarsSeats）";
-  document.getElementById("addrTREAS").textContent = cfg.treasury || "（可設為 BrainExchange 或公益庫）";
-}
-
-function requireCfgReady(cfg){
-  if(!isAddr(cfg.kgen)) throw new Error("KGEN 地址未填或不合法");
-  if(!isAddr(cfg.mars)) throw new Error("MarsSeats 地址未填或不合法");
-}
-
-const ABI_KGEN = [
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 amount) returns (bool)"
+const ERC20_ABI = [
+ 'function decimals() view returns (uint8)', 'function symbol() view returns (string)',
+ 'function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)',
+ 'function approve(address,uint256) returns (bool)'
+];
+const MARS_ABI = [
+ 'function totalMinted() view returns (uint256)', 'function totalSeats() view returns (uint256)', 'function maxSeats() view returns (uint256)',
+ 'function remainingSeats() view returns (uint256)', 'function seatPrice() view returns (uint256)',
+ 'function seatsOf(address) view returns (uint256[])', 'function balanceOf(address) view returns (uint256)',
+ 'function pendingSeat(address) view returns (uint256)', 'function pendingSeats(address) view returns (uint256)',
+ 'function pendingRewards(address) view returns (uint256)', 'function pendingReward(address) view returns (uint256)',
+ 'function mintSeat(uint256 qty)', 'function claimSeat(uint256 seatId)', 'function claimSeats(uint256[] seatIds)'
 ];
 
-const ABI_MARS = [
-  "function remainingSeats() view returns (uint256)",
-  "function pendingReward(address user) view returns (uint256)",
-  "function treasury() view returns (address)",
-  "function mintSeat()",
-  "function claimReward()",
-  "function seatsOf(address user) view returns (uint256[] memory)"
-];
+const $ = (id)=>document.getElementById(id);
+function shortAddr(a){return a ? a.slice(0,6)+'...'+a.slice(-4) : '未連線';}
+function setText(id,v){const el=$(id); if(el) el.textContent = v;}
+function setStatus(msg, bad=false){const el=$('statusBox'); if(el){el.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
+function setTx(msg, bad=false){const el=$('txBox'); if(el){el.textContent = '['+new Date().toLocaleTimeString()+'] '+msg; el.className='status '+(bad?'bad':'');}}
+function fmtUnits(v, d=18, max=4){try{const n=Number(ethers.utils.formatUnits(v,d)); if(!Number.isFinite(n)) return ethers.utils.formatUnits(v,d); return n.toLocaleString(undefined,{maximumFractionDigits:max});}catch(e){return '讀取失敗';}}
+function toSeatArray(v){try{return Array.from(v || []).map(x=>x.toString());}catch(e){return [];}}
 
-async function connect(){
-  if(!window.ethereum) throw new Error("未偵測到錢包（請安裝 MetaMask）");
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
-  walletAddress = await signer.getAddress();
-  document.getElementById("wallet").textContent = walletAddress;
-  toast("錢包已連線");
-}
-
-async function bindContracts(){
-  const cfg = loadCfg();
-  requireCfgReady(cfg);
-  if(!provider || !signer) throw new Error("請先連接錢包");
-  KGEN = new ethers.Contract(cfg.kgen, ABI_KGEN, signer);
-  MARS = new ethers.Contract(cfg.mars, ABI_MARS, signer);
-}
-
-function fmt18(x){
-  try{ return ethers.utils.formatUnits(x, 18); }catch(e){ return String(x); }
-}
-function fmtKgen(x){
-  const n = Number(fmt18(x));
-  if(Number.isNaN(n)) return "—";
-  return n.toLocaleString(undefined, {maximumFractionDigits: 6});
-}
-
-async function refresh(){
-  const cfg = loadCfg();
-  applyCfgToUI(cfg);
-  if(!provider || !signer || !walletAddress) return;
-
-  await bindContracts();
-
-  const [remain, pending] = await Promise.all([
-    MARS.remainingSeats(),
-    MARS.pendingReward(walletAddress).catch(()=>ethers.BigNumber.from(0))
-  ]);
-
-  document.getElementById("remain").textContent = `${remain.toString()} / 500`;
-  document.getElementById("pending").textContent = `${fmtKgen(pending)} KGEN`;
-
-  // seats
-  let seats = [];
-  try{ seats = await MARS.seatsOf(walletAddress); }catch(e){ seats = []; }
-  const seatIds = (seats||[]).map(s=>s.toString());
-  const preview = seatIds.slice(0,10).join(", ");
-  document.getElementById("mySeats").textContent = seatIds.length ? `${seatIds.length} 席（${preview}${seatIds.length>10?"…":""}）` : "0 席";
-
-  // treasury in chain
-  try{
-    const treas = await MARS.treasury();
-    document.getElementById("addrTREAS").textContent = treas;
-  }catch(e){}
-}
-
-async function approve5000(){
-  const cfg = loadCfg();
-  await bindContracts();
-  const amount = ethers.utils.parseUnits("5000", 18);
-  const allowance = await KGEN.allowance(walletAddress, cfg.mars);
-  if(allowance.gte(amount)){
-    toast("已授權足夠（5000 KGEN）");
-    return;
+const state = { provider:null, signer:null, account:null, chainId:null, readonly:null, kgen:null, mars:null, decimals:18, wcProvider:null, refreshing:false };
+function readonlyProvider(){ if(!state.readonly) state.readonly = new ethers.providers.JsonRpcProvider(BSC_RPC, {name:'binance', chainId:BSC_CHAIN_ID}); return state.readonly; }
+function marsRead(){ return new ethers.Contract(MARSSEATS, MARS_ABI, state.provider || readonlyProvider()); }
+function kgenRead(){ return new ethers.Contract(KGEN_TOKEN, ERC20_ABI, state.provider || readonlyProvider()); }
+function marsWrite(){ if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(MARSSEATS, MARS_ABI, state.signer); }
+function kgenWrite(){ if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(KGEN_TOKEN, ERC20_ABI, state.signer); }
+async function firstCall(contract, calls, fallback){ let last; for(const [name,args=[]] of calls){ try{ if(typeof contract[name] === 'function') return await contract[name](...args); }catch(e){ last=e; } } if(fallback !== undefined) return fallback; throw last || new Error('no callable method'); }
+async function ensureBSC(extProvider){
+  if(!extProvider || !extProvider.request) return;
+  const cid = await extProvider.request({method:'eth_chainId'}).catch(()=>null);
+  if(cid && String(cid).toLowerCase() !== BSC_CHAIN_HEX){
+    try{ await extProvider.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC_CHAIN_HEX}]}); }
+    catch(e){ if(e && e.code === 4902){ await extProvider.request({method:'wallet_addEthereumChain', params:[{chainId:BSC_CHAIN_HEX, chainName:'BNB Smart Chain', nativeCurrency:{name:'BNB', symbol:'BNB', decimals:18}, rpcUrls:[BSC_RPC], blockExplorerUrls:['https://bscscan.com']} ]}); } else { throw e; } }
   }
-  const tx = await KGEN.approve(cfg.mars, amount);
-  toast("送出授權交易…");
-  await tx.wait();
-  toast("授權完成");
+}
+async function bindProvider(extProvider, label){
+  if(!extProvider) throw new Error('找不到錢包 provider');
+  await ensureBSC(extProvider);
+  state.provider = new ethers.providers.Web3Provider(extProvider, 'any');
+  await state.provider.send('eth_requestAccounts', []);
+  state.signer = state.provider.getSigner();
+  state.account = await state.signer.getAddress();
+  const net = await state.provider.getNetwork(); state.chainId = net.chainId;
+  state.kgen = kgenWrite(); state.mars = marsWrite();
+  if(extProvider.on){
+    extProvider.on('accountsChanged', ()=>location.reload());
+    extProvider.on('chainChanged', ()=>location.reload());
+  }
+  setStatus(label+' connected: '+state.account);
+  await refreshWalletState('connect');
+}
+async function connectMetaMask(){ if(!window.ethereum) throw new Error('此瀏覽器未偵測到 MetaMask / injected wallet'); await bindProvider(window.ethereum, 'MetaMask'); }
+async function connectMobile(){ if(window.ethereum) return bindProvider(window.ethereum, 'Mobile injected wallet'); const deeplink = 'https://metamask.app.link/dapp/'+location.host+location.pathname; location.href = deeplink; }
+async function connectWalletConnect(){
+  const Provider = window.EthereumProvider || (window.WalletConnectEthereumProvider && window.WalletConnectEthereumProvider.EthereumProvider);
+  if(!Provider) throw new Error('WalletConnect 套件尚未載入，請重新整理或改用 injected wallet');
+  let projectId = localStorage.getItem('KGEN_WC_PROJECT_ID') || '';
+  if(!projectId){ projectId = prompt('請輸入 WalletConnect Cloud Project ID，以啟動正式 WalletConnect 連線：') || ''; if(projectId) localStorage.setItem('KGEN_WC_PROJECT_ID', projectId); }
+  if(!projectId) throw new Error('WalletConnect 需要 Project ID，未建立假連線。');
+  state.wcProvider = await Provider.init({ projectId, chains:[BSC_CHAIN_ID], optionalChains:[BSC_CHAIN_ID], showQrModal:true, rpcMap:{[BSC_CHAIN_ID]:BSC_RPC}, metadata:{name:'KGEN 108000 MarsSeats', description:'KGEN MarsSeats UI', url:location.origin, icons:[]} });
+  await state.wcProvider.connect();
+  await bindProvider(state.wcProvider, 'WalletConnect');
 }
 
-async function buySeat(){
-  await bindContracts();
-  const tx = await MARS.mintSeat();
-  toast("送出入住交易…");
-  await tx.wait();
-  toast("入住成功（席位已鑄造）");
-  await refresh();
-}
-
-async function claim(){
-  await bindContracts();
-  const tx = await MARS.claimReward();
-  toast("送出領分潤交易…");
-  await tx.wait();
-  toast("領取完成");
-  await refresh();
-}
-
-/* Copy buttons */
-document.addEventListener("click", async (e)=>{
-  const el = e.target;
-  if(el && el.dataset && el.dataset.copy){
-    const sel = el.dataset.copy;
-    const node = document.querySelector(sel);
-    const text = (node && node.textContent) ? node.textContent.trim() : "";
-    if(!text) return toast("沒有可複製內容");
-    try{
-      await navigator.clipboard.writeText(text);
-      toast("已複製");
-    }catch(err){
-      toast("複製失敗（瀏覽器限制）");
+async function refreshWalletState(reason='refresh'){
+  if(state.refreshing) return; state.refreshing = true;
+  try{
+    const mr = marsRead(); const kr = kgenRead();
+    let totalSeats = await firstCall(mr, [['totalSeats'], ['maxSeats']], ethers.BigNumber.from(500));
+    let minted = await firstCall(mr, [['totalMinted']], null).catch(()=>null);
+    let remaining = await firstCall(mr, [['remainingSeats']], null).catch(()=>null);
+    let price = await firstCall(mr, [['seatPrice']], ethers.utils.parseUnits(SEAT_PRICE_KGEN,18)).catch(()=>ethers.utils.parseUnits(SEAT_PRICE_KGEN,18));
+    state.decimals = await firstCall(kr, [['decimals']], 18).catch(()=>18);
+    if(minted === null && remaining !== null) minted = ethers.BigNumber.from(totalSeats).sub(remaining);
+    if(remaining === null && minted !== null) remaining = ethers.BigNumber.from(totalSeats).sub(minted);
+    setText('hudTotalSeats', totalSeats.toString()); setText('hudMinted', minted ? minted.toString() : '讀取失敗'); setText('hudRemaining', remaining ? remaining.toString() : '讀取失敗');
+    setText('hudPrice', fmtUnits(price, state.decimals, 2)+' KGEN'); setText('seatPrice', fmtUnits(price, state.decimals, 8)+' KGEN');
+    if(state.account){
+      const bnb = await state.provider.getBalance(state.account); const kbal = await kr.balanceOf(state.account); const allow = await kr.allowance(state.account, MARSSEATS);
+      const seats = await firstCall(mr, [['seatsOf',[state.account]]], []).catch(()=>[]); const seatArr = toSeatArray(seats);
+      const seatCount = seatArr.length ? String(seatArr.length) : await firstCall(mr, [['balanceOf',[state.account]]], ethers.BigNumber.from(0)).then(x=>x.toString()).catch(()=>String(seatArr.length));
+      const pendingSeat = await firstCall(mr, [['pendingSeat',[state.account]], ['pendingSeats',[state.account]]], null).catch(()=>null);
+      const pendingRewards = await firstCall(mr, [['pendingRewards',[state.account]], ['pendingReward',[state.account]]], null).catch(()=>null);
+      setText('walletAddr', shortAddr(state.account)); setText('chainId', String(state.chainId || '讀取中')); setText('kgenBalance', fmtUnits(kbal,state.decimals,4)+' KGEN'); setText('bnbBalance', fmtUnits(bnb,18,6)+' BNB'); setText('allowance', fmtUnits(allow,state.decimals,4)+' KGEN');
+      setText('mySeats', seatCount); setText('seatsOf', seatArr.length ? seatArr.join(', ') : '尚無或讀取為空'); setText('pendingSeat', pendingSeat ? pendingSeat.toString() : '讀取失敗'); setText('pendingRewards', pendingRewards ? fmtUnits(pendingRewards,state.decimals,6)+' KGEN' : '讀取失敗');
+      setText('netBadge', 'BSC '+(state.chainId || '')); $('netBadge').className='badge ok';
     }
-  }
-});
+    setStatus('HUD refreshed: '+reason);
+  }catch(e){ setStatus('鏈上讀取失敗：'+(e.message || e), true); }
+  finally{ state.refreshing = false; }
+}
+window.refreshWalletState = refreshWalletState;
 
-document.getElementById("btnConnect").addEventListener("click", async ()=>{
-  try{ await connect(); await refresh(); }catch(e){ toast(e.message || String(e)); }
-});
-document.getElementById("btnRefresh").addEventListener("click", async ()=>{
-  try{ await refresh(); }catch(e){ toast(e.message || String(e)); }
-});
+async function approveKGEN(){
+  try{ setTx('送出 approve('+MARSSEATS+', 5000e18)'); const amount = ethers.utils.parseUnits(SEAT_PRICE_KGEN, 18); const tx = await kgenWrite().approve(MARSSEATS, amount); setTx('Approve pending: '+tx.hash); await tx.wait(); setTx('Approve success: '+tx.hash); await refreshWalletState('approve success'); }
+  catch(e){ setTx('Approve failed: '+(e.message || e), true); }
+}
+async function mintSeat(){
+  try{ setTx('送出 mintSeat(1)'); const tx = await marsWrite().mintSeat(1); setTx('Mint pending: '+tx.hash); await tx.wait(); setTx('Mint success: '+tx.hash); await refreshWalletState('mintSeat success'); setTimeout(()=>refreshWalletState('mint delayed'), 2500); }
+  catch(e){ setTx('Mint failed: '+(e.message || e), true); }
+}
+async function claimSeat(){
+  try{ const raw = $('seatIdInput').value.trim(); if(raw === '') throw new Error('請輸入 seatId'); const seatId = ethers.BigNumber.from(raw); setTx('送出 claimSeat('+seatId.toString()+')'); const tx = await marsWrite().claimSeat(seatId); setTx('Claim pending: '+tx.hash); await tx.wait(); setTx('Claim success: '+tx.hash); await refreshWalletState('claimSeat success'); }
+  catch(e){ setTx('Claim failed: '+(e.message || e), true); }
+}
+async function claimAll(){
+  try{ let seats=[]; const txt = $('seatsOf').textContent.trim(); if(txt && !txt.includes('尚無') && !txt.includes('未連線') && !txt.includes('讀取')) seats = txt.split(',').map(s=>s.trim()).filter(Boolean).map(s=>ethers.BigNumber.from(s)); if(!seats.length) throw new Error('沒有可用 seatsOf(wallet) 清單，請先 Refresh HUD 或輸入單一 seatId'); setTx('送出 claimSeats(['+seats.map(x=>x.toString()).join(',')+'])'); const tx = await marsWrite().claimSeats(seats); setTx('Claim All pending: '+tx.hash); await tx.wait(); setTx('Claim All success: '+tx.hash); await refreshWalletState('claimSeats success'); }
+  catch(e){ setTx('Claim All failed: '+(e.message || e), true); }
+}
 
-document.getElementById("btnApply").addEventListener("click", async ()=>{
-  const cfg = loadCfg();
-  const k = document.getElementById("inKGEN").value.trim();
-  const m = document.getElementById("inMARS").value.trim();
-  const t = document.getElementById("inTREAS").value.trim();
+const audioEngine = { ctx:null, osc:null, gain:null, playing:false, audio:null };
+function stopNode(n){ try{ n.stop && n.stop(0); }catch(_){} try{ n.disconnect && n.disconnect(); }catch(_){} }
+function emergencyStopAudio(){
+  try{ document.querySelectorAll('audio').forEach(a=>{ try{a.pause(); a.currentTime=0; a.removeAttribute('src'); a.src=''; a.load && a.load();}catch(_){} }); }catch(_){}
+  stopNode(audioEngine.osc); audioEngine.osc=null;
+  try{ if(audioEngine.ctx && audioEngine.ctx.state !== 'closed') audioEngine.ctx.close(); }catch(_){}
+  audioEngine.ctx=null; audioEngine.gain=null; audioEngine.playing=false; setText('audioTrack','Stopped');
+}
+window.emergencyStopAudio = emergencyStopAudio;
+function audioPlay(){ emergencyStopAudio(); const Ctx = window.AudioContext || window.webkitAudioContext; if(!Ctx){ setText('audioTrack','AudioContext unsupported'); return; } const ctx = new Ctx(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type='sawtooth'; osc.frequency.setValueAtTime(108, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(216, ctx.currentTime+1.8); gain.gain.setValueAtTime(0.0001, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.045, ctx.currentTime+.12); gain.gain.exponentialRampToValueAtTime(0.018, ctx.currentTime+2.6); osc.connect(gain); gain.connect(ctx.destination); osc.start(); audioEngine.ctx=ctx; audioEngine.osc=osc; audioEngine.gain=gain; audioEngine.playing=true; setText('audioTrack','Mars Engine 108Hz'); }
+function audioPause(){ if(audioEngine.ctx && audioEngine.ctx.state === 'running'){ audioEngine.ctx.suspend(); audioEngine.playing=false; setText('audioTrack','Paused'); } }
+function audioResumeOrPlay(){ if(audioEngine.ctx && audioEngine.ctx.state === 'suspended'){ audioEngine.ctx.resume(); audioEngine.playing=true; setText('audioTrack','Mars Engine 108Hz'); } else audioPlay(); }
 
-  if(k && !isAddr(k)) return toast("KGEN 地址不合法");
-  if(m && !isAddr(m)) return toast("MarsSeats 地址不合法");
-  if(t && !isAddr(t)) return toast("Treasury 地址不合法");
-
-  cfg.kgen = k || cfg.kgen;
-  cfg.mars = m || cfg.mars;
-  cfg.treasury = t || cfg.treasury;
-
-  saveCfg(cfg);
-  applyCfgToUI(cfg);
-  toast("設定已套用");
-  try{ await refresh(); }catch(e){}
-});
-
-document.getElementById("btnReset").addEventListener("click", ()=>{
-  localStorage.removeItem(LS_KEY);
-  applyCfgToUI({...DEFAULTS});
-  toast("已重置");
-});
-
-document.getElementById("btnApprove").addEventListener("click", async ()=>{
-  try{ await approve5000(); }catch(e){ toast(e.message || String(e)); }
-});
-document.getElementById("btnBuy").addEventListener("click", async ()=>{
-  try{ await buySeat(); }catch(e){ toast(e.message || String(e)); }
-});
-document.getElementById("btnClaim").addEventListener("click", async ()=>{
-  try{ await claim(); }catch(e){ toast(e.message || String(e)); }
-});
-
-(function init(){
-  const cfg = loadCfg();
-  applyCfgToUI(cfg);
-})();
+function showMobile(name){ document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.toggle('mobile-hide', p.getAttribute('data-panel')!==name)); }
+function bindUI(){
+  $('btnMetaMask').onclick = ()=>connectMetaMask().catch(e=>setStatus(e.message||e,true)); $('btnMobile').onclick = ()=>connectMobile().catch(e=>setStatus(e.message||e,true)); $('btnWalletConnect').onclick = ()=>connectWalletConnect().catch(e=>setStatus(e.message||e,true));
+  $('btnApprove').onclick = approveKGEN; $('btnMint').onclick = mintSeat; $('btnClaimOne').onclick = claimSeat; $('btnClaimAll').onclick = claimAll;
+  $('audPlay').onclick = audioResumeOrPlay; $('audPause').onclick = audioPause; $('audStop').onclick = emergencyStopAudio;
+  setText('marsAddr', shortAddr(MARSSEATS)); setText('kgenAddr', shortAddr(KGEN_TOKEN));
+  if(matchMedia('(max-width:980px)').matches) showMobile('core');
+}
+document.addEventListener('DOMContentLoaded', ()=>{ bindUI(); refreshWalletState('initial readonly'); });
 </script>
-
 </body>
 </html>
