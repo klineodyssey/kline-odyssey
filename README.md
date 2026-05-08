@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 悟空12345不是失敗，而是KGEN第一場鏈上天雷。機器人大軍喝乾血庫後，五指山開始進化——從發財金，走向真正會記帳、會驗證、會成長的金融生命體。#KGEN #金融生命體 #K線西遊記  
-👉 https://www.youtube.com/watch?v=Tj04JDIZkTs
+▶ You are a financial life form.https://klineodyssey.github.io/kline-odyssey/#KGEN #KLINE #AI  
+👉 https://www.youtube.com/watch?v=WpdMvce7AWY
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
