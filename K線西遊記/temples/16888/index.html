@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
+K線西遊記｜16888 廣寒宮 OG Engine V3.7.6｜Pool Safety Patch
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.5</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1036,7 +1036,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 }
 
 
-/* ===== V3.7.5 chain live panel ===== */
+/* ===== V3.7.6 chain live panel ===== */
 .chain-live-panel{
   position:fixed;
   right:18px;
@@ -1088,7 +1088,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 }
 
 
-/* ===== V3.7.5 bet panel ===== */
+/* ===== V3.7.6 bet panel ===== */
 .bet-live-panel{
   position:fixed;
   right:18px;
@@ -1125,7 +1125,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 @media (max-width: 820px){ .bet-live-panel{ top:auto; bottom:96px; right:12px; width:min(360px,92vw);} }
 
 
-/* ===== V3.7.5 leaderboard panel ===== */
+/* ===== V3.7.6 leaderboard panel ===== */
 .board-panel{
   position:fixed;
   right:18px;
@@ -1162,7 +1162,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 }
 
 
-/* ===== V3.7.5 UI fix ===== */
+/* ===== V3.7.6 UI fix ===== */
 #versionHUD{ display:none !important; }
 
 #kline-engine-panel .ke-head{
@@ -1189,7 +1189,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 }
 
 
-/* ===== V3.7.5 BET PANEL enrich ===== */
+/* ===== V3.7.6 BET PANEL enrich ===== */
 .bet-live-panel .bp-kv{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -1230,7 +1230,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.7.5</div>
+        <div class="sys-st" id="ver-st">VERSION v3.7.6</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1261,7 +1261,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.7.5</span>
+    <span>宇宙K線引擎｜V3.7.6</span>
     <div class="ke-head-right">
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1360,7 +1360,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">新手玩法｜V3.7.5</div>
+    <div class="qs-title">新手玩法｜V3.7.6</div>
     <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
     <ol>
       <li>連結錢包</li>
@@ -1376,8 +1376,8 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
   <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
     <input id="amt-in" placeholder="下單/點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;">
     <button class="term-btn active-kgen" style="padding:10px; pointer-events:auto;" onclick="web3.approve()">✅ Approve</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('UP'); web3.place(0)">📈 下單 UP</button>
-    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="app.orderGuess('DOWN'); web3.place(1)">📉 下單 DOWN</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(0)">📈 下單 UP</button>
+    <button class="term-btn" style="padding:10px; pointer-events:auto;" onclick="web3.place(1)">📉 下單 DOWN</button>
     <button class="term-btn active-kgen" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;" onclick="web3.ritualDeposit()">🧧 許願/還願/點燈 → 入池</button>
   </div>
 
@@ -1469,7 +1469,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.7.5";
+const APP_VERSION = "v3.7.6";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -2890,7 +2890,7 @@ const web3 = {
 
   load(){
   /*
-   * V3.7.5 ADDRESS REGISTRY LOCK
+   * V3.7.6 ADDRESS REGISTRY LOCK
    * 16888 Universe must NOT be overridden by localStorage.
    * Root cause of pool display failure:
    * localStorage KGEN_16888_UNIVERSE_ADDR contained the 12345 Heart address
@@ -2985,7 +2985,7 @@ async refreshTreasury(){
 },
 async setUniverseAddr(){
     /*
-     * V3.7.5: LIVE mode locks the 16888 Universe address.
+     * V3.7.6: LIVE mode locks the 16888 Universe address.
      * Do not allow debug input or old localStorage to replace it.
      */
     this.UNIVERSE = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
@@ -3597,7 +3597,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="chain-live-panel" id="chain-live-panel" style="display:none;">
   <div class="cl-head">
-    <span>CHAIN LIVE｜V3.7.5</span>
+    <span>CHAIN LIVE｜V3.7.6</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="cl-status">OFF</span>
       <button type="button" onclick="toggleChainLive()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -3630,14 +3630,14 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="bet-live-panel" id="bet-live-panel" style="display:none;">
   <div class="bp-head">
-    <span>BET PANEL｜V3.7.5</span>
+    <span>BET PANEL｜V3.7.6</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="bp-mode">READY</span>
       <button type="button" onclick="toggleBetPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(0,242,255,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
     </div>
   </div>
   <div class="bp-note">
-    廣寒宮是 <b>簡單漲跌結算版</b>。先輸入 KGEN 金額，先 <b>Approve</b>，再按 <b>BUY ↑</b> 或 <b>SELL ↓</b>。
+    廣寒宮是 <b>簡單漲跌結算版</b>。先輸入 KGEN 金額，先 <b>Approve</b>，再按 <b>UP ↑</b> 或 <b>DOWN ↓</b>。<br>V3.7.6 安全規則：LIVE 鏈上交易在錢包確認前不預顯示輸贏結果，交易成功後才讀鏈上事件顯示結算。
   </div>
   <div class="bp-kv">
     <div class="bp-k">錢包</div><div class="bp-v" id="bp-wallet">未連線</div>
@@ -3649,8 +3649,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <div class="bp-grid">
     <button class="bp-btn" type="button" onclick="web3.smartConnect()">連結錢包</button>
     <button class="bp-btn approve" type="button" onclick="betPanel.approve()">APPROVE</button>
-    <button class="bp-btn buy" type="button" onclick="betPanel.buy()">BUY ↑</button>
-    <button class="bp-btn sell" type="button" onclick="betPanel.sell()">SELL ↓</button>
+    <button class="bp-btn buy" type="button" onclick="betPanel.buy()">UP ↑</button>
+    <button class="bp-btn sell" type="button" onclick="betPanel.sell()">DOWN ↓</button>
     <button class="bp-btn" type="button" onclick="app.openGuide('playbook')">玩法總覽</button>
     <button class="bp-btn" type="button" onclick="roundHistory && roundHistory.open()">月老歷史</button>
   </div>
@@ -3662,7 +3662,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="board-panel" id="board-panel" style="display:none;">
   <div class="board-head">
-    <span>LEADERBOARD｜V3.7.5</span>
+    <span>LEADERBOARD｜V3.7.6</span>
     <button type="button" onclick="toggleBoardPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
   </div>
   <div class="board-note">
@@ -6841,27 +6841,25 @@ function toggleBetPanel(){
       try{
         var amt = syncAmount();
         if(!amt){ setStatus("請先輸入 KGEN 金額"); return; }
-        setStatus("正在送出 BUY ↑ ...");
-        if(window.app && typeof app.orderGuess === "function") app.orderGuess("UP");
+        setStatus("UP ↑ 已送出錢包請求；交易成功後才顯示鏈上結算結果。");
         if(window.web3 && typeof web3.place === "function"){
           await web3.place(0);
-          setStatus("BUY ↑ 已送出 / 完成");
+          setStatus("UP ↑ 已完成；請查看鏈上結算事件。");
           if(window.chainLive && typeof chainLive.refresh === "function") setTimeout(function(){ chainLive.refresh(); }, 1800);
         }else{ setStatus("找不到 web3.place()"); }
-      }catch(e){ console.warn(e); setStatus("BUY ↑ 失敗"); }
+      }catch(e){ console.warn(e); setStatus("UP ↑ 取消或失敗；未上鏈不計結果。"); }
     },
     sell: async function(){
       try{
         var amt = syncAmount();
         if(!amt){ setStatus("請先輸入 KGEN 金額"); return; }
-        setStatus("正在送出 SELL ↓ ...");
-        if(window.app && typeof app.orderGuess === "function") app.orderGuess("DOWN");
+        setStatus("DOWN ↓ 已送出錢包請求；交易成功後才顯示鏈上結算結果。");
         if(window.web3 && typeof web3.place === "function"){
           await web3.place(1);
-          setStatus("SELL ↓ 已送出 / 完成");
+          setStatus("DOWN ↓ 已完成；請查看鏈上結算事件。");
           if(window.chainLive && typeof chainLive.refresh === "function") setTimeout(function(){ chainLive.refresh(); }, 1800);
         }else{ setStatus("找不到 web3.place()"); }
-      }catch(e){ console.warn(e); setStatus("SELL ↓ 失敗"); }
+      }catch(e){ console.warn(e); setStatus("DOWN ↓ 取消或失敗；未上鏈不計結果。"); }
     }
   };
   window.betPanel = betPanel;
@@ -6968,7 +6966,7 @@ function toggleBoardPanel(){
 
 <!-- =========================
 KLINE ODYSSEY PATCH
-V3.7.5 OG FULL
+V3.7.6 OG FULL
 ========================= -->
 
 <script>
@@ -7057,7 +7055,7 @@ if(chainLive){
     const bnbBtn = document.getElementById("btn-swap-bnb");
     const usdtBtn = document.getElementById("btn-swap-usdt");
     const ver = document.getElementById("ver-st");
-    if(ver) ver.textContent = "VERSION v3.7.5";
+    if(ver) ver.textContent = "VERSION v3.7.6";
     if(bnbBtn){
       bnbBtn.textContent = "用 BNB 換 KGEN";
       bnbBtn.onclick = function(ev){
@@ -7168,7 +7166,7 @@ if(chainLive){
 </script>
 
 <script>
-/* ===== 16888 Pool Display Hotfix V3.7.5-P1 ===== */
+/* ===== 16888 Pool Display Hotfix V3.7.6-P1 ===== */
 (function(){
   const UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
   const RPC = "https://bsc-dataseed.binance.org/";
@@ -7274,7 +7272,7 @@ if(chainLive){
 
 <script>
 /* ============================================================
-   KGEN 16888 V3.7.5 HOTFIX｜Address Registry Lock + Pool HUD Sync
+   KGEN 16888 V3.7.6 HOTFIX｜Address Registry Lock + Pool HUD Sync
    Fix:
    - Prevent 12345 Heart address from polluting 16888 Universe via localStorage.
    - Force official 16888 Universe address.
@@ -7282,7 +7280,7 @@ if(chainLive){
    - Sync w3-bal / bp-pool / cl-pool / progress / ct-in.
 ============================================================ */
 (function(){
-  const APP_VERSION_LOCK = "v3.7.5";
+  const APP_VERSION_LOCK = "v3.7.6";
   const TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
   const UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
   const BAD_12345_HEART = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
@@ -7311,7 +7309,7 @@ if(chainLive){
     try{
       const old = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR");
       if(old && old.toLowerCase() !== UNIVERSE_16888.toLowerCase()){
-        console.warn("[16888 V3.7.5] Removed polluted Universe address:", old, "expected:", UNIVERSE_16888);
+        console.warn("[16888 V3.7.6] Removed polluted Universe address:", old, "expected:", UNIVERSE_16888);
       }
       localStorage.removeItem("KGEN_16888_UNIVERSE_ADDR");
     }catch(_){}
@@ -7388,7 +7386,7 @@ if(chainLive){
       }
       return r;
     }catch(e){
-      console.warn("[16888 V3.7.5] pool refresh failed", e);
+      console.warn("[16888 V3.7.6] pool refresh failed", e);
       setText("w3-bal", "讀取失敗 / CHECK CONTRACT");
       setText("bp-pool", "讀取失敗");
       setText("cl-pool", "讀取失敗");
@@ -7404,12 +7402,12 @@ if(chainLive){
     setText("ver-st", "VERSION " + APP_VERSION_LOCK);
     document.querySelectorAll(".ke-head span:first-child").forEach(el=>{
       if(el.textContent && el.textContent.indexOf("宇宙K線引擎") >= 0){
-        el.textContent = "宇宙K線引擎｜V3.7.5";
+        el.textContent = "宇宙K線引擎｜V3.7.6";
       }
     });
-    document.querySelectorAll(".cl-head span:first-child").forEach(el=>{ el.textContent = "CHAIN LIVE｜V3.7.5"; });
-    document.querySelectorAll(".bp-head span:first-child").forEach(el=>{ el.textContent = "BET PANEL｜V3.7.5"; });
-    document.querySelectorAll(".board-head span:first-child").forEach(el=>{ el.textContent = "LEADERBOARD｜V3.7.5"; });
+    document.querySelectorAll(".cl-head span:first-child").forEach(el=>{ el.textContent = "CHAIN LIVE｜V3.7.6"; });
+    document.querySelectorAll(".bp-head span:first-child").forEach(el=>{ el.textContent = "BET PANEL｜V3.7.6"; });
+    document.querySelectorAll(".board-head span:first-child").forEach(el=>{ el.textContent = "LEADERBOARD｜V3.7.6"; });
 
     if(window.web3){
       const oldLoad = web3.load ? web3.load.bind(web3) : null;
@@ -7422,7 +7420,7 @@ if(chainLive){
       web3.refresh = async function(){
         lock16888Address();
         if(oldRefresh){
-          try{ await oldRefresh(); }catch(e){ console.warn("[16888 V3.7.5] legacy refresh failed", e); }
+          try{ await oldRefresh(); }catch(e){ console.warn("[16888 V3.7.6] legacy refresh failed", e); }
         }
         return await window.refresh16888PoolV375();
       };
@@ -7444,6 +7442,243 @@ if(chainLive){
   }else{
     install();
   }
+})();
+</script>
+
+
+
+<script>
+/* =========================================================
+   16888 廣寒宮 V3.7.6｜Pool Safety Runtime Patch
+   目的：先處理最低獎池與 lock 參數顯示，再堵住「錢包確認前預顯示輸贏」漏洞。
+   - 不改合約，不重構 UI。
+   - LIVE 模式：不在 wallet confirm 前呼叫 app.orderGuess() 顯示 CT+1 結果。
+   - 交易 confirmed 後，解析 OrderResolved 事件顯示輸贏。
+   - 顯示 TRIGGER / MIN_FLOOR / ROUND_TOTAL / configLocked / 3+3 window。
+   ========================================================= */
+(function(){
+  const PATCH_ID = "V3.7.6-POOL-SAFETY";
+  const LIVE_UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+  const HEART_12345_BLOCKED = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972".toLowerCase();
+  const PUBLIC_RPC = "https://bsc-dataseed.binance.org/";
+
+  const ABI_UNIVERSE_SAFETY = [
+    "function placeOrder(uint8 side,uint256 amountIn) external",
+    "function poolBalance() view returns (uint256)",
+    "function minOrder() view returns (uint256)",
+    "function maxOrder() view returns (uint256)",
+    "function TRIGGER() view returns (uint256)",
+    "function MIN_FLOOR() view returns (uint256)",
+    "function ROUND_TOTAL() view returns (uint256)",
+    "function configLocked() view returns (bool)",
+    "function vowWindowSec() view returns (uint32)",
+    "function loveWindowSec() view returns (uint32)",
+    "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)"
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function setText(id, v){ const el=$(id); if(el) el.textContent = v; }
+  function fmt(raw){
+    try { return Number(ethers.utils.formatUnits(raw,18)); } catch(e){ return NaN; }
+  }
+  function kgen(n, d){
+    if(!isFinite(n)) return "--";
+    return n.toLocaleString("en-US", {maximumFractionDigits: d ?? 4}) + " KGEN";
+  }
+  function status(msg){
+    setText("bp-status", msg);
+    try{ if(window.app && typeof app.logEvent === "function") app.logEvent(msg); }catch(_){ }
+  }
+  function ensureSafetyPanel(){
+    if($("pool-safety-panel")) return;
+    const parent = $("bet-panel") || $("coord-panel") || document.body;
+    const div = document.createElement("div");
+    div.id = "pool-safety-panel";
+    div.style.cssText = "margin-top:10px;padding:10px;border:1px solid rgba(255,215,120,.35);border-radius:12px;background:rgba(0,0,0,.35);font-size:12px;line-height:1.55;color:#fff;";
+    div.innerHTML = `
+      <div style="font-weight:900;color:#ffd778;margin-bottom:4px;">16888 Pool Safety｜${PATCH_ID}</div>
+      <div>Pool：<b id="safe-pool">--</b></div>
+      <div>最低保留池 MIN_FLOOR：<b id="safe-floor">--</b></div>
+      <div>下凡觸發 TRIGGER：<b id="safe-trigger">--</b></div>
+      <div>單輪分配 ROUND_TOTAL：<b id="safe-round-total">--</b></div>
+      <div>Order：<b id="safe-order-range">--</b></div>
+      <div>3+3 Window：<b id="safe-window">--</b></div>
+      <div>Config Lock：<b id="safe-lock">--</b></div>
+      <div style="margin-top:6px;color:#8af3ff;">LIVE 安全規則：錢包確認前不顯示輸贏；confirmed 後才讀鏈上事件。</div>
+    `;
+    parent.appendChild(div);
+  }
+  function getProvider(){
+    if(window.web3 && web3.provider && web3.provider.getNetwork) return web3.provider;
+    return new ethers.providers.JsonRpcProvider(PUBLIC_RPC);
+  }
+  function universeAddr(){
+    try{ localStorage.removeItem("KGEN_16888_UNIVERSE_ADDR"); }catch(_){ }
+    if(window.web3) web3.UNIVERSE = LIVE_UNIVERSE_16888;
+    return LIVE_UNIVERSE_16888;
+  }
+  async function getParams(){
+    const provider = getProvider();
+    const c = new ethers.Contract(universeAddr(), ABI_UNIVERSE_SAFETY, provider);
+    const [pool,minO,maxO,trig,floor,roundT,locked,vow,love] = await Promise.all([
+      c.poolBalance(), c.minOrder(), c.maxOrder(), c.TRIGGER(), c.MIN_FLOOR(), c.ROUND_TOTAL(), c.configLocked(), c.vowWindowSec(), c.loveWindowSec()
+    ]);
+    return {
+      c,
+      poolRaw: pool,
+      minOrderRaw: minO,
+      maxOrderRaw: maxO,
+      triggerRaw: trig,
+      floorRaw: floor,
+      roundTotalRaw: roundT,
+      locked,
+      vowSec: Number(vow),
+      loveSec: Number(love),
+      pool: fmt(pool),
+      minOrder: fmt(minO),
+      maxOrder: fmt(maxO),
+      trigger: fmt(trig),
+      floor: fmt(floor),
+      roundTotal: fmt(roundT)
+    };
+  }
+  async function refreshSafety(){
+    try{
+      ensureSafetyPanel();
+      const p = await getParams();
+      setText("safe-pool", kgen(p.pool,4));
+      setText("safe-floor", kgen(p.floor,0));
+      setText("safe-trigger", kgen(p.trigger,0));
+      setText("safe-round-total", kgen(p.roundTotal,0));
+      setText("safe-order-range", kgen(p.minOrder,0) + " ~ " + kgen(p.maxOrder,0));
+      setText("safe-window", Math.round(p.vowSec/86400) + " + " + Math.round(p.loveSec/86400) + " days");
+      setText("safe-lock", p.locked ? "LOCKED" : "UNLOCKED");
+      return p;
+    }catch(e){
+      console.warn("[16888 safety] refresh failed", e);
+      setText("safe-pool", "讀取失敗");
+      return null;
+    }
+  }
+  function parseOrderResolved(receipt){
+    try{
+      const iface = new ethers.utils.Interface(ABI_UNIVERSE_SAFETY);
+      for(const log of receipt.logs || []){
+        if((log.address || "").toLowerCase() !== LIVE_UNIVERSE_16888.toLowerCase()) continue;
+        try{
+          const parsed = iface.parseLog(log);
+          if(parsed && parsed.name === "OrderResolved"){
+            const a = parsed.args;
+            return {
+              user: a.user,
+              side: Number(a.side),
+              outcome: Number(a.outcome),
+              win: !!a.win,
+              payout: fmt(a.payout)
+            };
+          }
+        }catch(_){ }
+      }
+    }catch(e){ console.warn(e); }
+    return null;
+  }
+  async function safePlace(side){
+    if(!window.web3) return alert("web3 尚未初始化");
+    try{
+      universeAddr();
+      if((web3.UNIVERSE || "").toLowerCase() === HEART_12345_BLOCKED){
+        alert("地址錯誤：目前是 12345 Heart，不可作為 16888 Universe。已自動鎖回 16888 正式地址。");
+        universeAddr();
+        return;
+      }
+      if(web3.demo){
+        // Demo 可以模擬，但明確標示不代表鏈上結果。
+        status("DEMO 模式：此為本機模擬，不代表鏈上輸贏。");
+        return web3.demoOrder(side, web3.parseAmt());
+      }
+      const okChain = await web3.ensureBSC();
+      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
+
+      const amt = web3.parseAmt();
+      const params = await getParams();
+      if(!params) return alert("無法讀取 16888 參數，請稍後再試。");
+      if(amt.lt(params.minOrderRaw) || amt.gt(params.maxOrderRaw)){
+        return alert("下單金額超出合約範圍：" + kgen(params.minOrder,0) + " ~ " + kgen(params.maxOrder,0));
+      }
+      const feeTotal = amt.mul(500).div(10000);
+      const stake = amt.sub(feeTotal);
+      const required = params.floorRaw.add(stake.mul(2));
+      // 注意：合約內會先 transferFrom amountIn，因此前端預估用 pool + amountIn 檢查。
+      if(params.poolRaw.add(amt).lt(required)){
+        return alert("POOL_THIN：本單若勝出會使獎池低於 MIN_FLOOR 1688 KGEN，合約會拒絕。");
+      }
+
+      status((side===0 ? "UP ↑" : "DOWN ↓") + " 錢包請求已送出；確認前不顯示輸贏結果。");
+      const uni = web3.cUNI();
+      const tx = await uni.placeOrder(side, amt);
+      status("交易已送出：" + tx.hash.slice(0,10) + "… 等待 confirmed。");
+      const receipt = await tx.wait();
+      const r = parseOrderResolved(receipt);
+      if(r){
+        status("鏈上結算完成｜" + (r.side===0?"UP":"DOWN") + " → outcome " + (r.outcome===0?"UP":"DOWN") + "｜" + (r.win?"WIN":"LOSE") + "｜payout " + kgen(r.payout,4));
+      }else{
+        status("交易 confirmed，但未解析到 OrderResolved；請看 BscScan event。");
+      }
+      await refreshSafety();
+      try{ await web3.refresh(); }catch(_){ }
+      return r;
+    }catch(e){
+      console.warn("[16888 safety] place failed/cancelled", e);
+      status("交易取消或失敗；未 confirmed 不顯示、不計入鏈上結果。");
+      throw e;
+    }
+  }
+
+  window.refresh16888Safety = refreshSafety;
+  window.placeOrder = function(side){
+    // Auto battle 不允許發 live 真單，只保留視覺動作；避免 2.4 秒自動消耗資金。
+    status("自動打怪已進入安全模式：不送 LIVE 真單。請用手動 UP / DOWN 下單。");
+    return null;
+  };
+
+  function patchBetPanel(){
+    if(!window.betPanel) return false;
+    const oldApprove = betPanel.approve ? betPanel.approve.bind(betPanel) : null;
+    betPanel.approve = async function(){
+      status("Approve 僅授權額度，不代表下單或輸贏。");
+      if(oldApprove) return oldApprove();
+    };
+    betPanel.buy = function(){ return safePlace(0); };
+    betPanel.sell = function(){ return safePlace(1); };
+    return true;
+  }
+
+  function patchWeb3(){
+    if(window.web3){
+      universeAddr();
+      web3.place = safePlace;
+      const oldRefresh = web3.refresh ? web3.refresh.bind(web3) : null;
+      if(oldRefresh && !web3.__safetyRefreshPatched_v376){
+        web3.__safetyRefreshPatched_v376 = true;
+        web3.refresh = async function(){
+          const r = await oldRefresh();
+          try{ await refreshSafety(); }catch(_){ }
+          return r;
+        };
+      }
+    }
+  }
+
+  function boot(){
+    document.title = document.title.replace(/v3\.7\.5/ig, "v3.7.6");
+    ensureSafetyPanel();
+    patchWeb3();
+    patchBetPanel();
+    refreshSafety();
+    setInterval(function(){ patchWeb3(); patchBetPanel(); refreshSafety(); }, 20000);
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
 </script>
 
