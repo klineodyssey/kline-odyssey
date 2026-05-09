@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.6.0
-BUILD: 20260509-V8.6.0-WALLET-ROBUST-RITUAL-PALACE
+VERSION: KGEN-12345-HEART-UI-V8.6.1
+BUILD: 20260509-V8.6.1-AUDIO-REAL-RITUAL-HOTFIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.6.1] 修正音響控制與許願/還願/點燈實際交易路徑，避免只開說明視窗不扣款。
 - [V8.6.0] 以 V7.21.3 母檔為底，不再沿用會跳商店或無反應的 wallet fallback。
 - [V8.6.0] 重寫錢包連線最後覆蓋層：Injected Provider / 多 provider / WalletConnect / BSC 切鏈 / 無錢包提示。
 - [V8.6.0] 連結錢包按鈕全部接到同一條 robustConnect，不再只改單一按鈕。
@@ -38,7 +39,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.6.0｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.6.1｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1677,7 +1678,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.6.0";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.6.1";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -13583,7 +13584,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.6.0';
+  const VERSION='KGEN-12345-HEART-UI-V8.6.1';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13753,6 +13754,254 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('load',bindAll);
   window.kgen12345RobustConnectV860=robustConnect;
   window.kgen12345OpenRitualV860=openRitual;
+})();
+</script>
+
+
+<!-- === V8.6.1 FINAL HOTFIX: Audio + Real Heart Transactions === -->
+<script id="kgen-v861-audio-real-ritual-hotfix">
+(function(){
+  'use strict';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.6.1';
+  const BUILD = '20260509-V8.6.1-AUDIO-REAL-RITUAL-HOTFIX';
+  const BSC = '0x38';
+  const RPC = 'https://bsc-dataseed.binance.org/';
+  const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const ERC20_ABI = [
+    'function approve(address spender,uint256 amount) external returns (bool)',
+    'function allowance(address owner,address spender) view returns (uint256)',
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)'
+  ];
+  const HEART_ABI = [
+    'function fortuneClaim(uint256 amountWhole) external',
+    'function heartbeatClaim() external',
+    'function igniteAndClaim() external',
+    'function vowTo(uint8 option,uint256 amountWhole) external',
+    'function lightLamp(uint256 daysToAdd) external',
+    'function makeWish(bytes32 wishHash) external',
+    'function festivalClaim(uint8 festivalId) external',
+    'function newYearCountdownClaim() external'
+  ];
+  const $ = (id)=>document.getElementById(id);
+  const short = (a)=> a ? a.slice(0,6)+'…'+a.slice(-4) : '--';
+  const num = (v)=>{ const n=Number(v); return Number.isFinite(n)?n:0; };
+  const hasEthers5 = ()=> !!(window.ethers && ethers.providers && ethers.utils && ethers.Contract);
+  function say(msg){
+    try{ if(window.app && app.speak) return app.speak(msg); }catch(_){ }
+    try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; speechSynthesis.speak(u); }catch(_){ }
+  }
+  function status(msg){
+    const text = String(msg||'');
+    ['bp-status','kh-log','w3-prog'].forEach(id=>{ const el=$(id); if(el) el.textContent=text; });
+    try{ console.log('[KGEN V8.6.1]', text); }catch(_){ }
+  }
+  function setVal(id,v){ const el=$(id); if(el) el.value=v; }
+  function getAmountWhole(defaultValue){
+    const raw = (($('kh-amount')&&$('kh-amount').value) || ($('amt-in')&&$('amt-in').value) || defaultValue || '').toString().trim();
+    if(!/^\d+(\.\d+)?$/.test(raw)) throw new Error('請先輸入整數金額或天數。');
+    const n = Math.floor(Number(raw));
+    if(!Number.isFinite(n) || n <= 0) throw new Error('數值必須大於 0。');
+    return String(n);
+  }
+  function pickProvider(){
+    let p = window.ethereum || window.BinanceChain || null;
+    if(p && Array.isArray(p.providers) && p.providers.length){
+      p = p.providers.find(x=>x && (x.isMetaMask || x.isTrust || x.isOKXWallet || x.isBinance)) || p.providers[0];
+    }
+    return p;
+  }
+  async function ensureBSC(injected){
+    if(!injected || !injected.request) throw new Error('未偵測到錢包。請用錢包內建瀏覽器開啟本頁。');
+    let cid = await injected.request({method:'eth_chainId'}).catch(()=>null);
+    const ch=$('w3-chain'); if(ch) ch.textContent = cid || '--';
+    if(String(cid||'').toLowerCase() === BSC) return true;
+    try{
+      await injected.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC}]});
+    }catch(e){
+      if(e && e.code === 4902){
+        await injected.request({method:'wallet_addEthereumChain', params:[{
+          chainId:BSC, chainName:'BNB Smart Chain', nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+          rpcUrls:[RPC], blockExplorerUrls:['https://bscscan.com']
+        }]});
+        await injected.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC}]});
+      }else throw e;
+    }
+    cid = await injected.request({method:'eth_chainId'}).catch(()=>null);
+    if(ch) ch.textContent = cid || '--';
+    return String(cid||'').toLowerCase() === BSC;
+  }
+  const state = { injected:null, provider:null, signer:null, address:null, dec:18 };
+  async function connect(){
+    if(!hasEthers5()) throw new Error('ethers v5 尚未載入，請重新整理頁面。');
+    const injected = pickProvider();
+    if(!injected){
+      if(window.web3 && web3.openWalletHub) web3.openWalletHub();
+      throw new Error('沒有偵測到錢包注入；已開啟多錢包入口。');
+    }
+    await ensureBSC(injected);
+    await injected.request({method:'eth_requestAccounts'});
+    state.injected = injected;
+    state.provider = new ethers.providers.Web3Provider(injected, 'any');
+    state.signer = state.provider.getSigner();
+    state.address = await state.signer.getAddress();
+    try{ if(window.web3){ web3.provider=state.provider; web3.signer=state.signer; web3.addr=state.address; web3.address=state.address; web3.UNIVERSE=HEART; web3.KGEN=KGEN; } }catch(_){ }
+    const walletText = short(state.address)+'｜'+state.address;
+    ['w3-addr','kh-wallet'].forEach(id=>{ const el=$(id); if(el) el.textContent=walletText; });
+    status('錢包已連線：'+state.address+'｜Heart：'+HEART);
+    say('錢包已連線。五指山悟空財神殿已接上 BSC。');
+    await refresh();
+    return state;
+  }
+  async function getSigner(){ if(!state.signer) await connect(); return state.signer; }
+  async function token(roOrSigner){ return new ethers.Contract(KGEN, ERC20_ABI, roOrSigner || state.provider || new ethers.providers.JsonRpcProvider(RPC)); }
+  async function heart(){ return new ethers.Contract(HEART, HEART_ABI, await getSigner()); }
+  async function refresh(){
+    if(!hasEthers5()) return;
+    const ro = state.provider || new ethers.providers.JsonRpcProvider(RPC);
+    const t = await token(ro);
+    const dec = Number(await t.decimals().catch(()=>18)); state.dec=dec;
+    const heartBal = await t.balanceOf(HEART).catch(()=>null);
+    if(heartBal){
+      const ht = Number(ethers.utils.formatUnits(heartBal,dec)).toFixed(4)+' KGEN';
+      ['w3-bal','kh-heart-bal'].forEach(id=>{ const el=$(id); if(el) el.textContent=ht; });
+    }
+    if(state.address){
+      const [bal, alw, bnb] = await Promise.all([
+        t.balanceOf(state.address), t.allowance(state.address, HEART), ro.getBalance(state.address)
+      ]);
+      const btxt = Number(ethers.utils.formatUnits(bal,dec)).toFixed(4)+' KGEN';
+      const atxt = Number(ethers.utils.formatUnits(alw,dec)).toFixed(4)+' KGEN';
+      const ntxt = Number(ethers.utils.formatEther(bnb)).toFixed(5)+' BNB';
+      ['userBal','kh-kgen-bal','rb-kgen-txt'].forEach(id=>{ const el=$(id); if(el) el.textContent=btxt; });
+      ['userAllowance','kh-allowance'].forEach(id=>{ const el=$(id); if(el) el.textContent=atxt; });
+      ['userBNB','rb-bnb-txt'].forEach(id=>{ const el=$(id); if(el) el.textContent=ntxt; });
+    }
+    status('餘額已刷新。Heart 為真正鏈上後端；許願、還願、點燈已改為直接送交易。');
+  }
+  async function approveAmount(){
+    const amount = getAmountWhole('8');
+    const signer = await getSigner();
+    const t = await token(signer);
+    const wei = ethers.utils.parseUnits(amount, state.dec || 18);
+    if(!confirm('確認 Approve Heart 使用 '+amount+' KGEN？\nHeart：'+HEART)) return;
+    status('Approve 送出中：'+amount+' KGEN'); say('Approve 授權送出，請確認錢包。');
+    const tx = await t.approve(HEART, wei); status('Approve Tx：'+tx.hash); await tx.wait();
+    status('Approve 完成：'+amount+' KGEN'); say('Approve 完成。'); await refresh();
+  }
+  function makeHash(){
+    const raw = (($('kh-wish')&&$('kh-wish').value) || ($('v860-wish-text')&&$('v860-wish-text').value) || '').trim();
+    if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
+    if(!raw) throw new Error('請先輸入願望文字或 bytes32 hash。');
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
+  }
+  async function sendHeart(label, fn){
+    try{
+      const c = await heart();
+      if(!confirm('確認送出：'+label+'\n\n這是真正鏈上交易，會花 BNB gas；若合約函式包含 transferFrom，會依合約扣 KGEN。')){ status('已取消：'+label); return; }
+      status('送出中：'+label); say(label+' 準備送出，請確認錢包。');
+      const tx = await fn(c);
+      status(label+' Tx：'+tx.hash+'｜等待確認');
+      const rc = await tx.wait();
+      status(label+' 成功｜Block '+rc.blockNumber+'｜Tx '+tx.hash);
+      say(label+' 成功完成。');
+      await refresh();
+    }catch(e){
+      const m = e && (e.data?.message || e.error?.message || e.reason || e.message) || String(e);
+      status(label+' 失敗：'+m); say(label+' 失敗。請看畫面訊息。'); console.error(e);
+    }
+  }
+  async function wishWithOptionalDonation(){
+    const amountRaw = (($('kh-amount')&&$('kh-amount').value) || ($('amt-in')&&$('amt-in').value) || '').trim();
+    const hasDonation = /^\d+(\.\d+)?$/.test(amountRaw) && Number(amountRaw) > 0;
+    const h = makeHash();
+    await sendHeart('makeWish 許願 hash 上鏈', c=>c.makeWish(h));
+    // makeWish 合約本身只收 gas；使用者若輸入金額，補一筆 vowTo 作為許願功德金，才會扣 KGEN。
+    if(hasDonation){
+      const whole = String(Math.floor(Number(amountRaw)));
+      if(confirm('你輸入了 '+whole+' KGEN。\nmakeWish 本身只上鏈 hash，不扣 KGEN。\n是否接著送出 vowTo(13,'+whole+') 作為「許願功德金」回補 Heart？')){
+        await sendHeart('許願功德金 vowTo(13,'+whole+')', c=>c.vowTo(13, whole));
+      }else{
+        status('許願已上鏈；未送出 KGEN 功德金。');
+      }
+    }
+  }
+  async function vow(){
+    const whole = getAmountWhole('8');
+    const opt = Number(($('kh-vow-option')&&$('kh-vow-option').value) || ($('v860-vow-option')&&$('v860-vow-option').value) || 1);
+    await sendHeart('vowTo 還願補血 option '+opt+' / '+whole+' KGEN', c=>c.vowTo(opt, whole));
+  }
+  async function lamp(){
+    const days = getAmountWhole('1');
+    const species = (($('v860-species')&&$('v860-species').value) || localStorage.getItem('kgen12345LampSpecies') || '任意物種').trim();
+    status('點燈對象：'+species+'｜天數：'+days+'。注意：lightLamp 依合約設定扣款，不是前端自行扣款。');
+    await sendHeart('lightLamp 點燈續命 '+days+' 天｜'+species, c=>c.lightLamp(days));
+  }
+  function bind(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    // Fix all wallet buttons.
+    document.querySelectorAll('button,a').forEach(el=>{
+      const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || el.id==='kh-connect' || el.id==='w3-connect-btn'){
+        el.onclick = function(ev){ ev.preventDefault(); connect().catch(err=>{status('錢包連線失敗：'+(err.message||err)); say('錢包連線失敗。');}); };
+      }
+      if(t.includes('刷新餘額') || el.id==='kh-refresh') el.onclick = function(ev){ ev.preventDefault(); refresh(); };
+      if(t.includes('Approve') || t.includes('APPROVE') || el.id==='kh-approve') el.onclick = function(ev){ ev.preventDefault(); approveAmount(); };
+    });
+    // Direct Heart buttons; do not click old placeholder buttons anymore.
+    const map = {
+      'kh-fortune': ()=>sendHeart('fortuneClaim 發財金 '+getAmountWhole('1'), c=>c.fortuneClaim(getAmountWhole('1'))),
+      'kh-heartbeat': ()=>sendHeart('heartbeatClaim 整點心跳', c=>c.heartbeatClaim()),
+      'kh-ignite': ()=>sendHeart('igniteAndClaim 轉日呼吸', c=>c.igniteAndClaim()),
+      'kh-vow': vow,
+      'kh-lamp': lamp,
+      'kh-wishbtn': wishWithOptionalDonation,
+      'kh-festival1': ()=>sendHeart('festivalClaim 5/20', c=>c.festivalClaim(1)),
+      'kh-festival2': ()=>sendHeart('festivalClaim 11/11', c=>c.festivalClaim(2)),
+      'kh-newyear': ()=>sendHeart('newYearCountdownClaim 跨年倒數', c=>c.newYearCountdownClaim())
+    };
+    Object.keys(map).forEach(id=>{ const b=$(id); if(b) b.onclick = (ev)=>{ev.preventDefault(); map[id]();}; });
+    // v860 modal buttons direct call.
+    const wgo=$('v860-wish-go'); if(wgo) wgo.onclick=(ev)=>{ev.preventDefault(); const v=($('v860-wish-text')?.value||'').trim(); if(v) setVal('kh-wish',v); wishWithOptionalDonation();};
+    const vgo=$('v860-vow-go'); if(vgo) vgo.onclick=(ev)=>{ev.preventDefault(); const a=($('v860-vow-amt')?.value||'').trim(); if(a){setVal('kh-amount',a); setVal('amt-in',a);} const o=$('v860-vow-option')?.value; if(o) setVal('kh-vow-option',o); vow();};
+    const lgo=$('v860-lamp-go'); if(lgo) lgo.onclick=(ev)=>{ev.preventDefault(); const d=($('v860-lamp-days')?.value||'').trim(); if(d){setVal('kh-amount',d); setVal('amt-in',d);} lamp();};
+    window.templeOps = window.templeOps || {};
+    Object.assign(window.templeOps, {
+      approve: approveAmount,
+      fortune: ()=>map['kh-fortune'](), heartbeat: ()=>map['kh-heartbeat'](), ignite: ()=>map['kh-ignite'](),
+      vow, lamp, wish: wishWithOptionalDonation,
+      festival:(id)=>sendHeart('festivalClaim '+id, c=>c.festivalClaim(Number(id)||1)),
+      newyear:()=>sendHeart('newYearCountdownClaim 跨年倒數', c=>c.newYearCountdownClaim())
+    });
+    try{ if(window.web3){ web3.smartConnect=connect; web3.connect=connect; web3.refresh=refresh; web3.refreshBalances=refresh; web3.UNIVERSE=HEART; web3.KGEN=KGEN; } }catch(_){ }
+  }
+  // 音響系統：不依賴 MP3，沒有 playlist 也能出莊嚴底音。
+  window.templeAudio = {
+    ctx:null, master:null, nodes:[], vol:0.56, mini:false,
+    _ctx(){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) throw new Error('此瀏覽器不支援 WebAudio'); if(!this.ctx) this.ctx=new AC(); return this.ctx; },
+    setVolume(v){ this.vol=Math.max(0,Math.min(1,Number(v)/100)); if(this.master) this.master.gain.value=this.vol*0.18; const el=$('ta-vol-txt'); if(el) el.textContent=Math.round(this.vol*100)+'%'; },
+    _stopNodes(){ try{ this.nodes.forEach(n=>{try{n.stop&&n.stop();}catch(_){ } try{n.disconnect&&n.disconnect();}catch(_){ }}); }catch(_){ } this.nodes=[]; },
+    playBgm(){
+      try{
+        const ctx=this._ctx(); if(ctx.state==='suspended') ctx.resume(); this._stopNodes();
+        const master=ctx.createGain(); master.gain.value=this.vol*0.18; master.connect(ctx.destination); this.master=master;
+        const freqs=[110,220,330];
+        freqs.forEach((f,i)=>{ const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=i===0?'sine':'triangle'; o.frequency.value=f; g.gain.value=i===0?0.42:0.12; o.connect(g); g.connect(master); o.start(); this.nodes.push(o,g); });
+        const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.frequency.value=0.09; lg.gain.value=12; lfo.connect(lg); this.nodes[2] && lg.connect(this.nodes[2].frequency||this.nodes[2]); lfo.start(); this.nodes.push(lfo,lg);
+        const now=$('ta-now'); if(now) now.textContent='神殿底音播放中｜V8.6.1';
+        say('神殿音響已開啟。'); status('音響正常：WebAudio 神殿底音已啟動。');
+      }catch(e){ status('音響啟動失敗：'+(e.message||e)); }
+    },
+    stopBgm(){ this._stopNodes(); const now=$('ta-now'); if(now) now.textContent='音樂已停止'; status('神殿音響已停止。'); },
+    toggleMini(){ const p=$('temple-audio-console'); if(p){ this.mini=!this.mini; p.classList.toggle('ta-mini',this.mini); } },
+    speak:say
+  };
+  function finalBind(){ bind(); refresh().catch(()=>{}); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',finalBind); else finalBind();
+  window.addEventListener('load', finalBind);
+  window.kgen12345V861 = {connect, refresh, approveAmount, vow, lamp, wish:wishWithOptionalDonation, sendHeart};
 })();
 </script>
 
