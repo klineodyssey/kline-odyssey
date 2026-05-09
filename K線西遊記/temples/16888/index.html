@@ -3,7 +3,7 @@
 <head>
 
 <!-- =========================
-K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
+K線西遊記｜16888 廣寒宮 OG Engine V3.7.5
 ========================= -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="16888 廣寒宮 · K線西遊記">
@@ -21,7 +21,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.4</title>
+    <title>KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1036,7 +1036,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 }
 
 
-/* ===== V3.7.4 chain live panel ===== */
+/* ===== V3.7.5 chain live panel ===== */
 .chain-live-panel{
   position:fixed;
   right:18px;
@@ -1088,7 +1088,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 }
 
 
-/* ===== V3.7.4 bet panel ===== */
+/* ===== V3.7.5 bet panel ===== */
 .bet-live-panel{
   position:fixed;
   right:18px;
@@ -1125,7 +1125,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 @media (max-width: 820px){ .bet-live-panel{ top:auto; bottom:96px; right:12px; width:min(360px,92vw);} }
 
 
-/* ===== V3.7.4 leaderboard panel ===== */
+/* ===== V3.7.5 leaderboard panel ===== */
 .board-panel{
   position:fixed;
   right:18px;
@@ -1162,7 +1162,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 }
 
 
-/* ===== V3.7.4 UI fix ===== */
+/* ===== V3.7.5 UI fix ===== */
 #versionHUD{ display:none !important; }
 
 #kline-engine-panel .ke-head{
@@ -1189,7 +1189,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 }
 
 
-/* ===== V3.7.4 BET PANEL enrich ===== */
+/* ===== V3.7.5 BET PANEL enrich ===== */
 .bet-live-panel .bp-kv{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -1230,7 +1230,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 <div class="hud-top">
     <div class="brand-section">
         <div class="brand-name">KGEN 16888 自我演化金融生命體</div>
-        <div class="sys-st" id="ver-st">VERSION v3.7.4</div>
+        <div class="sys-st" id="ver-st">VERSION v3.7.5</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1261,7 +1261,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
 
 <div id="kline-engine-panel" aria-label="宇宙K線引擎">
   <div class="ke-head">
-    <span>宇宙K線引擎｜V3.7.4</span>
+    <span>宇宙K線引擎｜V3.7.5</span>
     <div class="ke-head-right">
       <select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
         <option value="BNBUSDT">BNBUSDT</option>
@@ -1360,7 +1360,7 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.4
     <div class="prog-wrap"><div id="prog-fill" class="prog-fill"></div><div id="prog-txt" class="prog-txt">0%</div></div>
 
   <div class="quickstart-card" id="quickstart-card">
-    <div class="qs-title">新手玩法｜V3.7.4</div>
+    <div class="qs-title">新手玩法｜V3.7.5</div>
     <div>先 <span class="hl">Approve 授權</span>，再按 <span class="hl">UP / DOWN</span> 下單。</div>
     <ol>
       <li>連結錢包</li>
@@ -1469,7 +1469,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "v3.7.4";
+const APP_VERSION = "v3.7.5";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -2889,10 +2889,15 @@ const web3 = {
   cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
 
   load(){
-  try{
-    const u = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR") || "";
-    if(u && ethers.utils.isAddress(u)) this.UNIVERSE = u;
-  }catch(_){}
+  /*
+   * V3.7.5 ADDRESS REGISTRY LOCK
+   * 16888 Universe must NOT be overridden by localStorage.
+   * Root cause of pool display failure:
+   * localStorage KGEN_16888_UNIVERSE_ADDR contained the 12345 Heart address
+   * 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972.
+   */
+  this.UNIVERSE = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+  try{ localStorage.removeItem("KGEN_16888_UNIVERSE_ADDR"); }catch(_){}
   try{
     const g = localStorage.getItem("KGEN_16888_GAOLAO_ADDR") || "";
     if(g && ethers.utils.isAddress(g)) this.GAOLAO = g;
@@ -2979,13 +2984,16 @@ async refreshTreasury(){
   }
 },
 async setUniverseAddr(){
-    const v = (document.getElementById("uni-addr-input").value || "").trim();
-    if(!ethers.utils.isAddress(v)) return alert("合約地址格式錯誤");
-    this.UNIVERSE = v;
-    try{ localStorage.setItem("KGEN_16888_UNIVERSE_ADDR", v); }catch(_){}
+    /*
+     * V3.7.5: LIVE mode locks the 16888 Universe address.
+     * Do not allow debug input or old localStorage to replace it.
+     */
+    this.UNIVERSE = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+    try{ localStorage.removeItem("KGEN_16888_UNIVERSE_ADDR"); }catch(_){}
     this.ui();
-    this.refresh();
-    app.speak("Universe 合約地址已設定。");
+    await this.refresh();
+    app.speak("16888 Universe 地址已鎖定為正式合約。");
+    alert("16888 Universe 地址已鎖定正式合約，不再允許舊地址覆蓋。");
   },
 
 
@@ -3262,12 +3270,13 @@ app.speak("點燈已入池。");
         this.demoRefresh();
         return;
       }
-      if(!this.UNIVERSE || !this.provider){
+      if(!this.UNIVERSE){
 const wb2=document.getElementById('w3-bal'); if(wb2) wb2.innerText = '--';
         return;
       }
-      try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
-      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.provider);
+      const readProvider = this.provider || new ethers.providers.JsonRpcProvider(this.PUBLIC_RPC || "https://bsc-dataseed.binance.org/");
+      try{ const net = await readProvider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
+      const uniR = new ethers.Contract(this.UNIVERSE, this.abiUniverse, readProvider);
 
       const [bal, can, minO, maxO, vowW, loveW, tre, trig, floor, roundT] = await Promise.all([
         uniR.poolBalance(),
@@ -3588,7 +3597,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="chain-live-panel" id="chain-live-panel" style="display:none;">
   <div class="cl-head">
-    <span>CHAIN LIVE｜V3.7.4</span>
+    <span>CHAIN LIVE｜V3.7.5</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="cl-status">OFF</span>
       <button type="button" onclick="toggleChainLive()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -3621,7 +3630,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="bet-live-panel" id="bet-live-panel" style="display:none;">
   <div class="bp-head">
-    <span>BET PANEL｜V3.7.4</span>
+    <span>BET PANEL｜V3.7.5</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="bp-mode">READY</span>
       <button type="button" onclick="toggleBetPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(0,242,255,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
@@ -3653,7 +3662,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div class="board-panel" id="board-panel" style="display:none;">
   <div class="board-head">
-    <span>LEADERBOARD｜V3.7.4</span>
+    <span>LEADERBOARD｜V3.7.5</span>
     <button type="button" onclick="toggleBoardPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;">關</button>
   </div>
   <div class="board-note">
@@ -6959,7 +6968,7 @@ function toggleBoardPanel(){
 
 <!-- =========================
 KLINE ODYSSEY PATCH
-V3.7.4 OG FULL
+V3.7.5 OG FULL
 ========================= -->
 
 <script>
@@ -7048,7 +7057,7 @@ if(chainLive){
     const bnbBtn = document.getElementById("btn-swap-bnb");
     const usdtBtn = document.getElementById("btn-swap-usdt");
     const ver = document.getElementById("ver-st");
-    if(ver) ver.textContent = "VERSION v3.7.4";
+    if(ver) ver.textContent = "VERSION v3.7.5";
     if(bnbBtn){
       bnbBtn.textContent = "用 BNB 換 KGEN";
       bnbBtn.onclick = function(ev){
@@ -7159,7 +7168,7 @@ if(chainLive){
 </script>
 
 <script>
-/* ===== 16888 Pool Display Hotfix V3.7.4-P1 ===== */
+/* ===== 16888 Pool Display Hotfix V3.7.5-P1 ===== */
 (function(){
   const UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
   const RPC = "https://bsc-dataseed.binance.org/";
@@ -7259,6 +7268,182 @@ if(chainLive){
     setTimeout(window.refresh16888Pool, 1200);
     setInterval(window.refresh16888Pool, 15000);
   });
+})();
+</script>
+
+
+<script>
+/* ============================================================
+   KGEN 16888 V3.7.5 HOTFIX｜Address Registry Lock + Pool HUD Sync
+   Fix:
+   - Prevent 12345 Heart address from polluting 16888 Universe via localStorage.
+   - Force official 16888 Universe address.
+   - Read poolBalance with ethers v5 public RPC even before wallet connect.
+   - Sync w3-bal / bp-pool / cl-pool / progress / ct-in.
+============================================================ */
+(function(){
+  const APP_VERSION_LOCK = "v3.7.5";
+  const TOKEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+  const BAD_12345_HEART = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
+  const RPC = "https://bsc-dataseed.binance.org/";
+  const TARGET = 16888;
+
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
+  function setValue(id, value){
+    const el = document.getElementById(id);
+    if(el) el.value = value;
+  }
+  function setWidth(id, pct){
+    const el = document.getElementById(id);
+    if(el) el.style.width = pct + "%";
+  }
+  function fmt(n, d){
+    const x = Number(n);
+    if(!Number.isFinite(x)) return "--";
+    return x.toFixed(d == null ? 4 : d);
+  }
+
+  function lock16888Address(){
+    try{
+      const old = localStorage.getItem("KGEN_16888_UNIVERSE_ADDR");
+      if(old && old.toLowerCase() !== UNIVERSE_16888.toLowerCase()){
+        console.warn("[16888 V3.7.5] Removed polluted Universe address:", old, "expected:", UNIVERSE_16888);
+      }
+      localStorage.removeItem("KGEN_16888_UNIVERSE_ADDR");
+    }catch(_){}
+    if(window.web3){
+      window.web3.UNIVERSE = UNIVERSE_16888;
+      if(typeof window.web3.ui === "function"){
+        try{ window.web3.ui(); }catch(_){}
+      }
+    }
+    setText("w3-uni", UNIVERSE_16888);
+  }
+
+  async function readPool(){
+    if(!window.ethers || !ethers.providers || !ethers.Contract){
+      throw new Error("ethers v5 not loaded");
+    }
+    const provider = (window.web3 && web3.provider) ? web3.provider : new ethers.providers.JsonRpcProvider(RPC);
+    const uni = new ethers.Contract(UNIVERSE_16888, [
+      "function poolBalance() view returns (uint256)",
+      "function TRIGGER() view returns (uint256)",
+      "function roundId() view returns (uint256)"
+    ], provider);
+    const token = new ethers.Contract(TOKEN, [
+      "function balanceOf(address) view returns (uint256)",
+      "function decimals() view returns (uint8)"
+    ], provider);
+
+    let poolRaw;
+    try{
+      poolRaw = await uni.poolBalance();
+    }catch(e){
+      // Fallback: Universe 合約持有的 KGEN 餘額
+      poolRaw = await token.balanceOf(UNIVERSE_16888);
+    }
+
+    let trigRaw;
+    try{ trigRaw = await uni.TRIGGER(); }
+    catch(_){ trigRaw = ethers.utils.parseUnits(String(TARGET), 18); }
+
+    let round = "--";
+    try{ round = (await uni.roundId()).toString(); }catch(_){}
+
+    const pool = Number(ethers.utils.formatUnits(poolRaw, 18));
+    const trigger = Number(ethers.utils.formatUnits(trigRaw, 18)) || TARGET;
+    const pct = Math.max(0, Math.min(100, (pool / trigger) * 100));
+    return { pool, trigger, pct, round };
+  }
+
+  window.refresh16888PoolV375 = async function(){
+    lock16888Address();
+    try{
+      setText("w3-bal", "讀取中...");
+      setText("bp-pool", "讀取中...");
+      setText("cl-pool", "讀取中...");
+      const r = await readPool();
+
+      const poolTxt = fmt(r.pool, 4) + " KGEN";
+      const progTxt = fmt(r.pool, 2) + " / " + fmt(r.trigger, 0) + " (" + fmt(r.pct, 2) + "%)";
+
+      setText("w3-bal", poolTxt);
+      setText("bp-pool", poolTxt);
+      setText("cl-pool", poolTxt);
+      setText("w3-prog", progTxt);
+      setText("prog-txt", progTxt);
+      setText("cl-round", r.round);
+      setValue("ct-in", fmt(r.pool, 4));
+      setWidth("prog-fill", fmt(r.pct, 2));
+
+      if(window.web3){
+        web3._ct = r.pool;
+      }
+      if(window.app && typeof app.updateCoordPanel === "function"){
+        try{ app.updateCoordPanel(); }catch(_){}
+      }
+      return r;
+    }catch(e){
+      console.warn("[16888 V3.7.5] pool refresh failed", e);
+      setText("w3-bal", "讀取失敗 / CHECK CONTRACT");
+      setText("bp-pool", "讀取失敗");
+      setText("cl-pool", "讀取失敗");
+      setText("w3-prog", "讀取失敗");
+      return null;
+    }
+  };
+
+  function install(){
+    lock16888Address();
+
+    // Version HUD sync
+    setText("ver-st", "VERSION " + APP_VERSION_LOCK);
+    document.querySelectorAll(".ke-head span:first-child").forEach(el=>{
+      if(el.textContent && el.textContent.indexOf("宇宙K線引擎") >= 0){
+        el.textContent = "宇宙K線引擎｜V3.7.5";
+      }
+    });
+    document.querySelectorAll(".cl-head span:first-child").forEach(el=>{ el.textContent = "CHAIN LIVE｜V3.7.5"; });
+    document.querySelectorAll(".bp-head span:first-child").forEach(el=>{ el.textContent = "BET PANEL｜V3.7.5"; });
+    document.querySelectorAll(".board-head span:first-child").forEach(el=>{ el.textContent = "LEADERBOARD｜V3.7.5"; });
+
+    if(window.web3){
+      const oldLoad = web3.load ? web3.load.bind(web3) : null;
+      web3.load = function(){
+        if(oldLoad) oldLoad();
+        lock16888Address();
+      };
+
+      const oldRefresh = web3.refresh ? web3.refresh.bind(web3) : null;
+      web3.refresh = async function(){
+        lock16888Address();
+        if(oldRefresh){
+          try{ await oldRefresh(); }catch(e){ console.warn("[16888 V3.7.5] legacy refresh failed", e); }
+        }
+        return await window.refresh16888PoolV375();
+      };
+
+      web3.setUniverseAddr = async function(){
+        lock16888Address();
+        await window.refresh16888PoolV375();
+        alert("16888 Universe 地址已鎖定正式合約，不允許 12345 Heart 或舊快取覆蓋。");
+      };
+    }
+
+    setTimeout(window.refresh16888PoolV375, 500);
+    setTimeout(window.refresh16888PoolV375, 2000);
+    setInterval(window.refresh16888PoolV375, 15000);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", install);
+  }else{
+    install();
+  }
 })();
 </script>
 
