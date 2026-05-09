@@ -1,45 +1,36 @@
-<!--
-============================================================
-PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: V8.5.3
-BUILD: 20260509-V8.5.3-WALLET-NO-PLAYSTORE-HOTFIX
-BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
-CHANGELOG:
-- [V8.5.3 Hotfix] 修正手機錢包連線誤跳 Google Play / 商店下載頁；只使用已注入 provider 連線，無 provider 時顯示多錢包入口與複製網址。
-- [V8.5.1 Hotfix] 修正版本顯示為 KGEN-12345-HEART-UI-V8.5.3。
-- [V8.5.1 Hotfix] 修正音樂多重播放與無法關閉問題。
-- [Phase 1] 移除 12345 頁內自我導航按鈕。
-- [Phase 1] 鎖定 Swap 路由：BNB/USDT -> KGEN，防止錢包連接後回退 CAKE。
-- [Phase 1] 修正相機系統：移除 16888 fairy overlay，mini-thumb 顯示 Heart Reactor。
-- [Phase 1] 建立 ID Alias 機制：fairy-img -> heart-reactor-img。
-VERIFY_LOG:
-- [2026-05-08] 已驗證 V8.5.1 版本顯示與音訊緊急停止 Hotfix。
-- [2026-05-08] 已驗證導航按鈕清理。
-- [2026-05-08] 已驗證 Swap 路由生成器。
-- [2026-05-08] 已驗證相機視覺適配器。
-MODULE_DEPENDENCY_MAP:
-- wallet_core (inline)
-- swap_core (inline)
-- camera_core (inline)
-- navigation_core (inline)
-============================================================
--->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!--
+============================================================
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: KGEN-12345-HEART-UI-V8.6.0
+BUILD: 20260509-V8.6.0-WALLET-ROBUST-RITUAL-PALACE
+BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+CHANGELOG:
+- [V8.6.0] 以 V7.21.3 母檔為底，不再沿用會跳商店或無反應的 wallet fallback。
+- [V8.6.0] 重寫錢包連線最後覆蓋層：Injected Provider / 多 provider / WalletConnect / BSC 切鏈 / 無錢包提示。
+- [V8.6.0] 連結錢包按鈕全部接到同一條 robustConnect，不再只改單一按鈕。
+- [V8.6.0] 增建「許願 / 還願 / 點燈」豪華神殿工程；點燈新增 12+1 生肖，任意物種為第 13 生肖。
+- [V8.6.0] 補完整客服說明：每個動作要先說清楚用途、金額、鏈上不可逆，不亂收錢不辦事。
+VERIFY_LOG:
+- [2026-05-09] Static patch applied over V7.21.3 mother file.
+============================================================
+-->
+
 
 <!-- =========================
 K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
 ========================= -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3">
+<meta property="og:title" content="12345 五指山悟空財神殿 · K線西遊記 · V5.8">
 <meta property="og:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta property="og:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">
 <meta property="og:site_name" content="KLINE ODYSSEY">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3">
+<meta name="twitter:title" content="12345 五指山悟空財神殿 · K線西遊記 · V5.8">
 <meta name="twitter:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta name="twitter:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 
@@ -47,7 +38,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.6.0｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -104,8 +95,8 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
         #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
         #mini-thumb { 
             position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
-            border-radius: 50%; border: 3px solid var(--gold); display: block; z-index: 110; opacity: 1;
-            background: url('./assets/wukong_heart_core.jpg') center/cover;
+            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
+            background: url('./assets/wukong_caishen.png') center/cover;
             box-shadow: 0 0 25px var(--gold);
         }
         #wish-label { 
@@ -1405,38 +1396,6 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 }
 </style>
 
-
-<script id="kgen-v850-core-patch">
-(function(){
-    // ID Alias Mechanism
-    window.addEventListener('DOMContentLoaded', () => {
-        const fairyImg = document.getElementById('fairy-img');
-        if (fairyImg) {
-            window.heartReactorImg = fairyImg; // Alias
-            console.log("[KGEN] Alias created: fairy-img -> heartReactorImg");
-        }
-    });
-
-    // Swap Route Lock Logic
-    const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
-    const BSC_USDT = "0x55d398326f99059fF775485246999027B3197955";
-    
-    window.buildSwapUrl = function(inputCurrency) {
-        let url = "https://pancakeswap.finance/swap?outputCurrency=" + KGEN;
-        if (inputCurrency) {
-            url += "&inputCurrency=" + inputCurrency;
-        }
-        return url;
-    };
-
-    // Intercept legacy swap calls
-    window.openPancakeFixed = function(input) {
-        const target = window.buildSwapUrl(input);
-        window.open(target, "_blank", "noopener,noreferrer");
-        console.log("[KGEN] Swap locked to KGEN:", target);
-    };
-})();
-</script>
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1454,11 +1413,11 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="temple-audio-console" aria-label="12345 神殿音樂系統">
-  <div class="ta-head"><span>神殿音樂｜V8.5.3</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
+  <div class="ta-head"><span>神殿音樂｜V7.19</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
   <div class="ta-row">
     <div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
     <button type="button" onclick="templeAudio.playBgm()">播放</button>
-    <button type="button" onclick="window.emergencyStopAudio && window.emergencyStopAudio()">停止</button>
+    <button type="button" onclick="templeAudio.stopBgm()">停止</button>
   </div>
   <div class="ta-volume" style="margin-top:8px;display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;">
     <span>音量</span><input id="ta-volume" type="range" min="0" max="100" value="56" oninput="templeAudio.setVolume(this.value)"><span id="ta-vol-txt">56%</span>
@@ -1471,7 +1430,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.5.3</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.19</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1718,7 +1677,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.5.3";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.6.0";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3761,8 +3720,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
 
-  <button class="nav-btn nav-swap" id="btn-swap-bnb" onclick="window.openPancakeFixed()" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
-  <button class="nav-btn nav-swap" id="btn-swap-usdt" onclick="window.openPancakeFixed('0x55d398326f99059fF775485246999027B3197955')" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
   <button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 悟空財神殿導覽</button>
   <button class="nav-btn nav-help" onclick="roundHistory.open()">名額紀錄</button>
@@ -3792,7 +3751,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
-    <button class="nav-btn nav-music-ctl" type="button" onclick="window.emergencyStopAudio && window.emergencyStopAudio()">停止</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
 
@@ -4245,7 +4204,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
     <div class="cp-row">
       <div class="cp-k">11520 花果山交易所</div>
-      <div class="cp-v"><button type="button" style="width:100%;" onclick="window.openPancakeFixed()">開啟 KGEN / WBNB</button></div>
+      <div class="cp-v"><button type="button" style="width:100%;" onclick="app.openPancake()">開啟 KGEN / WBNB</button></div>
     </div>
     <div class="cp-row">
       <div class="cp-k">8888 高老莊</div>
@@ -4553,7 +4512,7 @@ document.addEventListener('click', (ev)=>{
 });
 </script>
 
-<script>try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(_){}</script>
+<script>try{app.musicInit();}catch(_){}</script>
 
 <script>
 (function(){
@@ -4895,7 +4854,7 @@ document.addEventListener('click', (ev)=>{
     };
 
     window.addEventListener('load', ()=>{
-      autoLoadBuiltin(); // V8.5.1: no autoplay; prevent duplicated audio engines
+      autoLoadBuiltin().then(()=>tryAutoPlay());
     });
 
   }catch(e){}
@@ -7606,7 +7565,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
+      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.19';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -8758,7 +8717,7 @@ KGEN 12345 Heart Live Patch V7.3.0
     }
   }
   document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6 Live';
-  const oldVer = document.getElementById('ver-st'); if(oldVer) oldVer.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
+  const oldVer = document.getElementById('ver-st'); if(oldVer) oldVer.textContent = 'VERSION 12345 HEART LIVE V7.3.0';
   bind();
   updateClock(); setInterval(updateClock, 1000);
   setTimeout(()=>refresh().catch(e=>log('讀取 Heart 失敗：' + (e.message||e))), 700);
@@ -9636,7 +9595,7 @@ KGEN 12345 UI Patch V7.6.0
 
   function fixAddressesAndLabels(){
     document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.6.0';
-    const ver = $('ver-st'); if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
+    const ver = $('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.6.0';
     const khTitle = document.querySelector('#kgen-heart-live-panel .kh-title');
     if(khTitle) khTitle.textContent = '12345 悟空財神殿 Heart V3.2.6';
     const uni = $('w3-uni'); if(uni) uni.textContent = HEART;
@@ -9877,7 +9836,7 @@ KGEN 12345 UI Patch V7.6.0
 
   function fixLabelsAndHide16888(){
     document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.8.0';
-    const ver=$('ver-st'); if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
+    const ver=$('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.8.0';
     const title=document.querySelector('#kgen-heart-live-panel .kh-title'); if(title) title.textContent='12345 悟空財神殿 Heart V3.2.6';
     const panel=$('web3-panel'); if(panel) panel.style.display='none';
     const uni=$('w3-uni'); if(uni) uni.textContent = HEART;
@@ -10332,8 +10291,8 @@ KGEN 12345 UI Patch V7.6.0
   }
 
   function init(){
-    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3｜Heart V3.2.6';
-    set('ver-st','VERSION KGEN-12345-HEART-UI-V8.5.3');
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.19｜Heart V3.2.6';
+    set('ver-st','VERSION 12345-TEMPLE-V7.19');
     set('w3-uni', HEART_ADDR);
     remove16888Words();
     patchAngle();
@@ -10395,7 +10354,7 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){}
   }
   function fixText(){
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.19';
     document.querySelectorAll('*').forEach(el=>{
       if(el.children.length) return;
       let t=el.textContent||'';
@@ -10515,9 +10474,9 @@ KGEN 12345 UI Patch V7.6.0
   function speak(msg){try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; u.rate=.96; u.pitch=.92; speechSynthesis.speak(u);} }catch(e){}}
   function set(id,v){const e=$(id); if(e) e.textContent=v;}
   function patchVersion(){
-    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3';
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3'; });
+    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.19｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.19';
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION 12345-TEMPLE-V7.19'; });
     document.querySelectorAll('*').forEach(el=>{ if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
       el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V7.19').replace(/規則與下凡/g,'發放規則');
     }});
@@ -10667,7 +10626,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="v715-human-panel-js">
 (function(){
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.19';
   const $=(id)=>document.getElementById(id);
   function say(msg){ try{ window.app&&app.speak&&app.speak(msg); }catch(e){} try{ if(window.toast) toast(msg); }catch(e){} }
   function makeDock(){
@@ -10939,7 +10898,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v716-human-buttons-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.16';
   const $=id=>document.getElementById(id);
   function speak(msg){
     try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){}
@@ -11328,7 +11287,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v713-walletfix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.19';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -11577,7 +11536,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v717-footer8-standard-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.17';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11797,7 +11756,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v718-final-layout-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.19';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -12018,7 +11977,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v719-final-fix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.19';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -12094,7 +12053,7 @@ KGEN 12345 UI Patch V7.6.0
     closeAll(); document.body.classList.add('k19-audio-open');
     const p=$('music-panel'); if(p) p.style.display='block';
     speak('五指山神殿音響已開啟。');
-    try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(e){}
+    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
   }
   function openGuide(){
     closeAll();
@@ -12281,7 +12240,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v720-layout-audio-hotfix-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.20';
   const $=id=>document.getElementById(id);
 
   function speak(msg){
@@ -12378,7 +12337,7 @@ KGEN 12345 UI Patch V7.6.0
       }
     }
     speak('五指山神殿音響已開啟。');
-    try{ if(window.app && !window.app.__v851MusicInitDone && typeof window.app.musicInit==='function'){ window.app.__v851MusicInitDone=true; window.app.musicInit(); } }catch(e){}
+    try{ if(window.app && typeof window.app.musicInit==='function') window.app.musicInit(); }catch(e){}
   }
 
   function openGuide(){
@@ -12657,7 +12616,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v721-stable-repair-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
+  const VERSION='12345-TEMPLE-V7.21';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -12807,7 +12766,7 @@ KGEN 12345 UI Patch V7.6.0
     closeAll(); ensureMusicPanel();
     const p=$('music-panel'); if(p) p.style.display='block';
     document.body.classList.add('k21-audio-open');
-    try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(e){}
+    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
     try{ if(window.app && typeof app.musicLoadBuiltIn==='function') app.musicLoadBuiltIn(false); }catch(e){}
     speak('五指山神殿音響已開啟。');
   }
@@ -13544,775 +13503,256 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ============================================================
-V8.5.1 HOTFIX: version display + single audio engine emergency stop
-Scope: no wallet_core / no contract interaction / no UI layout change
-============================================================ -->
-<script id="v851-audio-version-hotfix">
-(function(){
-  'use strict';
-  const APP_VERSION_V851 = 'KGEN-12345-HEART-UI-V8.5.3';
-  const DISPLAY_VERSION_V851 = 'VERSION ' + APP_VERSION_V851;
-  const TITLE_V851 = 'KGEN 12345 五指山悟空財神殿｜' + APP_VERSION_V851;
-
-  function $(id){ return document.getElementById(id); }
-  function setText(el, text){ if(el) el.textContent = text; }
-  function safeCall(fn){ try{ return fn && fn(); }catch(_){} }
-
-  window.__kgenAudioEngineV851 = window.__kgenAudioEngineV851 || {
-    active: null,
-    oscillators: new Set(),
-    htmlAudio: new Set(),
-    stopping: false
-  };
-  const engine = window.__kgenAudioEngineV851;
-
-  function trackAudio(a){
-    try{ if(a && typeof a.pause === 'function') engine.htmlAudio.add(a); }catch(_){}
-    return a;
+<!-- ===== KGEN 12345 V8.6.0｜Wallet Robust Fix + 許願還願點燈豪華增建工程 ===== -->
+<style id="kgen12345-v860-palace-style">
+  #kgen-v860-wallet-status{
+    position:fixed; left:12px; top:56px; z-index:2147483601;
+    max-width:min(520px, calc(100vw - 24px));
+    padding:8px 10px; border-radius:12px;
+    border:1px solid rgba(255,215,120,.55);
+    background:rgba(0,0,0,.76); color:#eaffff;
+    font-size:12px; line-height:1.45; box-shadow:0 0 24px rgba(255,215,120,.14);
+    display:none; pointer-events:auto;
   }
-
-  function stopAudioElement(a, clearSrc){
-    if(!a) return;
-    try{ a.pause(); }catch(_){}
-    try{ a.currentTime = 0; }catch(_){}
-    try{ a.muted = false; }catch(_){}
-    if(clearSrc){
-      try{ a.removeAttribute('src'); }catch(_){}
-      try{ a.src = ''; }catch(_){}
-      try{ a.load && a.load(); }catch(_){}
-    }
+  #kgen-v860-ritual-open{
+    position:fixed; right:14px; bottom:154px; z-index:2147483500;
+    border:1px solid rgba(255,215,120,.72); border-radius:999px;
+    background:linear-gradient(135deg,rgba(255,215,120,.96),rgba(255,145,30,.92));
+    color:#160b00; font-weight:1000; padding:10px 14px;
+    box-shadow:0 0 26px rgba(255,215,120,.28); cursor:pointer;
   }
-
-  function stopNode(n){
-    if(!n) return;
-    try{ if(typeof n.stop === 'function') n.stop(0); }catch(_){}
-    try{ if(typeof n.disconnect === 'function') n.disconnect(); }catch(_){}
+  #kgen-v860-ritual-modal{
+    position:fixed; inset:0; z-index:2147483600; display:none;
+    background:radial-gradient(circle at 50% 25%, rgba(255,215,120,.22), rgba(0,0,0,.78) 62%, rgba(0,0,0,.92));
+    align-items:center; justify-content:center; padding:16px; box-sizing:border-box;
   }
-
-  window.emergencyStopAudio = function emergencyStopAudio(){
-    if(engine.stopping) return;
-    engine.stopping = true;
-    try{
-      safeCall(()=>window.speechSynthesis && window.speechSynthesis.cancel());
-
-      document.querySelectorAll('audio').forEach(a=>{ trackAudio(a); stopAudioElement(a, true); });
-
-      const app = window.app;
-      if(app){
-        app.audioOn = false;
-        safeCall(()=>document.querySelector('.nav-audio')?.classList.remove('on'));
-        if(Array.isArray(app.audioNodes)) app.audioNodes.forEach(stopNode);
-        app.audioNodes = [];
-        safeCall(()=>{ if(app.audioCtx && typeof app.audioCtx.close === 'function' && app.audioCtx.state !== 'closed') app.audioCtx.close(); });
-        app.audioCtx = null;
-
-        if(app._music){
-          trackAudio(app._music.audio);
-          stopAudioElement(app._music.audio, true);
-        }
-        trackAudio(app._musicAudio);
-        stopAudioElement(app._musicAudio, true);
-      }
-
-      const ta = window.templeAudio;
-      if(ta){
-        trackAudio(ta.bgm);
-        stopAudioElement(ta.bgm, true);
-        ta.bgm = null;
-        safeCall(()=>{ if(ta.ctx && typeof ta.ctx.close === 'function' && ta.ctx.state !== 'closed') ta.ctx.close(); });
-        ta.ctx = null;
-        ta.unlocked = false;
-        setText($('ta-now'), '已停止｜神殿音樂');
-      }
-
-      engine.oscillators.forEach(stopNode);
-      engine.oscillators.clear();
-      engine.htmlAudio.forEach(a=>stopAudioElement(a, true));
-      engine.active = null;
-
-      setText($('music-now'), '（已停止）');
-      setText($('music-status'), '音樂已關閉');
-      setText($('music-name'), '未載入音檔');
-    }finally{
-      engine.stopping = false;
-    }
-  };
-
-  function normalizeVersionDisplay(){
-    document.title = TITLE_V851;
-    document.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]').forEach(meta=>meta.setAttribute('content', TITLE_V851));
-    setText($('ver-st'), DISPLAY_VERSION_V851);
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent || '').includes('VERSION')) el.textContent = DISPLAY_VERSION_V851; });
+  #kgen-v860-ritual-modal.v860-show{display:flex;}
+  .v860-palace{
+    width:min(920px, 96vw); max-height:88vh; overflow:auto;
+    border-radius:24px; border:1px solid rgba(255,215,120,.62);
+    background:linear-gradient(180deg,rgba(12,8,18,.96),rgba(0,0,0,.92));
+    box-shadow:0 30px 88px rgba(0,0,0,.78), 0 0 46px rgba(255,215,120,.18), inset 0 0 30px rgba(0,242,255,.04);
+    color:#fff; font-family:'Noto Sans TC', system-ui, sans-serif;
   }
-
-  function patchAudioConstructors(){
-    if(!window.__v851AudioConstructorPatched && typeof window.Audio === 'function'){
-      const NativeAudio = window.Audio;
-      const WrappedAudio = function(src){
-        const a = src ? new NativeAudio(src) : new NativeAudio();
-        return trackAudio(a);
-      };
-      WrappedAudio.prototype = NativeAudio.prototype;
-      try{ Object.setPrototypeOf(WrappedAudio, NativeAudio); }catch(_){}
-      window.Audio = WrappedAudio;
-      window.__v851AudioConstructorPatched = true;
-    }
-
-    if(!window.__v851OscillatorPatched){
-      ['AudioContext','webkitAudioContext'].forEach(name=>{
-        const AC = window[name];
-        if(!AC || !AC.prototype || AC.prototype.__v851CreateOscillatorPatched) return;
-        const oldCreate = AC.prototype.createOscillator;
-        AC.prototype.createOscillator = function(){
-          const osc = oldCreate.apply(this, arguments);
-          try{ engine.oscillators.add(osc); }catch(_){}
-          return osc;
-        };
-        AC.prototype.__v851CreateOscillatorPatched = true;
-      });
-      window.__v851OscillatorPatched = true;
-    }
-  }
-
-  function patchAppAudio(){
-    const app = window.app;
-    if(!app || app.__v851AudioPatched) return;
-    app.__v851AudioPatched = true;
-
-    const originalEnableAudio = typeof app.enableAudio === 'function' ? app.enableAudio.bind(app) : null;
-    app.enableAudio = function(){
-      if(app.audioOn){ window.emergencyStopAudio(); return; }
-      window.emergencyStopAudio();
-      return originalEnableAudio ? originalEnableAudio() : undefined;
-    };
-
-    const originalMusicInit = typeof app.musicInit === 'function' ? app.musicInit.bind(app) : null;
-    app.musicInit = function(){
-      if(app.__v851MusicInitDone) return;
-      app.__v851MusicInitDone = true;
-      const r = originalMusicInit ? originalMusicInit() : undefined;
-      if(app._music && app._music.audio) trackAudio(app._music.audio);
-      trackAudio($('music-audio'));
-      return r;
-    };
-
-    const originalSetIndex = typeof app.musicSetIndex === 'function' ? app.musicSetIndex.bind(app) : null;
-    app.musicSetIndex = function(i){
-      const r = originalSetIndex ? originalSetIndex(i) : undefined;
-      if(app._music && app._music.audio) trackAudio(app._music.audio);
-      return r;
-    };
-
-    const originalPlay = typeof app.musicPlay === 'function' ? app.musicPlay.bind(app) : null;
-    app.musicPlay = async function(){
-      const keep = app._music && app._music.audio ? app._music.audio : $('music-audio');
-      engine.htmlAudio.forEach(a=>{ if(a !== keep) stopAudioElement(a, true); });
-      document.querySelectorAll('audio').forEach(a=>{ trackAudio(a); if(a !== keep) stopAudioElement(a, true); });
-      if(keep){ trackAudio(keep); engine.active = keep; }
-      return originalPlay ? originalPlay() : undefined;
-    };
-
-    app.musicPause = function(){ window.emergencyStopAudio(); };
-    app.musicStop = function(){ window.emergencyStopAudio(); };
-  }
-
-  function patchTempleAudio(){
-    const ta = window.templeAudio;
-    if(!ta || ta.__v851AudioPatched) return;
-    ta.__v851AudioPatched = true;
-
-    const originalInit = typeof ta.init === 'function' ? ta.init.bind(ta) : null;
-    ta.init = async function(){
-      if(ta.__v851InitDone) return;
-      ta.__v851InitDone = true;
-      const r = originalInit ? await originalInit() : undefined;
-      trackAudio(ta.bgm);
-      return r;
-    };
-
-    const originalPlayBgm = typeof ta.playBgm === 'function' ? ta.playBgm.bind(ta) : null;
-    ta.playBgm = async function(){
-      window.emergencyStopAudio();
-      const r = originalPlayBgm ? await originalPlayBgm() : undefined;
-      trackAudio(ta.bgm);
-      engine.active = ta.bgm || engine.active;
-      return r;
-    };
-
-    ta.stopBgm = function(){ window.emergencyStopAudio(); };
-  }
-
-  function patchStopButtons(){
-    document.querySelectorAll('[onclick]').forEach(el=>{
-      const code = el.getAttribute('onclick') || '';
-      if(code.includes('musicStop') || code.includes('stopBgm')){
-        el.setAttribute('onclick', 'window.emergencyStopAudio && window.emergencyStopAudio()');
-      }
-    });
-  }
-
-  patchAudioConstructors();
-  patchAppAudio();
-  patchTempleAudio();
-  patchStopButtons();
-  normalizeVersionDisplay();
-  window.emergencyStopAudio();
-
-  document.addEventListener('DOMContentLoaded', function(){
-    patchAudioConstructors();
-    patchAppAudio();
-    patchTempleAudio();
-    patchStopButtons();
-    normalizeVersionDisplay();
-  });
-  window.addEventListener('load', function(){
-    patchAppAudio();
-    patchTempleAudio();
-    patchStopButtons();
-    normalizeVersionDisplay();
-  });
-  setInterval(normalizeVersionDisplay, 1500);
-})();
-</script>
-
-
-
-<!-- ============================================================
-V8.5.3 HOTFIX: 12345 camera thumb + wallet state sync + audio transport + version
-Scope: no wallet connect main-flow change / no contract address / no ABI / no UI layout change
-============================================================ -->
-<style id="v852-camera-wallet-audio-hotfix-style">
-  #mini-thumb{
-    display:block !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    background-image:url('./assets/wukong_heart_core.jpg') !important;
-    background-position:center center !important;
-    background-size:cover !important;
-    background-repeat:no-repeat !important;
-    background-color:#050505 !important;
-  }
-  #mini-thumb::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    background:url('./assets/wukong_heart_core.jpg') center/cover no-repeat !important;
-    opacity:1 !important;
-    pointer-events:none;
-  }
-  #fairy-img{
-    opacity:1 !important;
-    visibility:visible !important;
+  .v860-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,215,120,.20); position:sticky; top:0; background:rgba(10,8,16,.97); z-index:2;}
+  .v860-title{color:#ffd978; font-weight:1000; letter-spacing:.08em; text-shadow:0 0 18px rgba(255,215,120,.22);}
+  .v860-close,.v860-tab,.v860-btn{border-radius:12px; border:1px solid rgba(255,215,120,.36); background:rgba(0,0,0,.36); color:#fff; padding:9px 11px; font-weight:900; cursor:pointer;}
+  .v860-close{color:#ffd978;}
+  .v860-body{padding:14px 16px 18px;}
+  .v860-tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;}
+  .v860-tab.v860-active{background:rgba(255,215,120,.88); color:#130b00;}
+  .v860-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .v860-card{border:1px solid rgba(255,215,120,.24); border-radius:18px; padding:12px; background:rgba(255,255,255,.045);}
+  .v860-card h3{margin:0 0 8px; color:#ffd978; font-size:16px;}
+  .v860-card p,.v860-card li{font-size:13px; line-height:1.68; color:#e9f5ff;}
+  .v860-field{width:100%; box-sizing:border-box; border-radius:12px; border:1px solid rgba(255,215,120,.32); background:rgba(0,0,0,.36); color:#fff; padding:11px 12px; font-weight:900; outline:none; margin-top:8px;}
+  .v860-zodiac{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:8px;}
+  .v860-zodiac button{border-radius:12px; border:1px solid rgba(255,215,120,.28); background:rgba(0,0,0,.30); color:#fff3be; padding:8px 6px; font-weight:900; cursor:pointer;}
+  .v860-zodiac button.v860-picked{background:rgba(0,242,255,.18); border-color:rgba(0,242,255,.55); color:#dffcff;}
+  .v860-action{background:linear-gradient(135deg, rgba(255,215,120,.95), rgba(0,242,255,.35)); color:#110b00; border-color:rgba(255,215,120,.8);}
+  .v860-log{margin-top:10px; border-radius:14px; border:1px solid rgba(0,242,255,.22); background:rgba(0,20,30,.34); color:#dffcff; padding:10px; font-size:12px; line-height:1.6; white-space:pre-wrap;}
+  .v860-muted{opacity:.86; color:#cfe8ff; font-size:12px; line-height:1.6;}
+  @media(max-width:720px){
+    #kgen-v860-ritual-open{right:10px; bottom:138px; padding:9px 11px; font-size:12px;}
+    .v860-grid{grid-template-columns:1fr;}
+    .v860-tabs{grid-template-columns:1fr;}
+    .v860-zodiac{grid-template-columns:repeat(2,1fr);}
   }
 </style>
-<script id="v852-camera-wallet-audio-hotfix">
+
+<div id="kgen-v860-wallet-status" role="status" aria-live="polite"></div>
+<button id="kgen-v860-ritual-open" type="button">🏯 許願・還願・點燈</button>
+<div id="kgen-v860-ritual-modal" aria-label="悟空財神殿許願還願點燈增建工程">
+  <div class="v860-palace">
+    <div class="v860-head">
+      <div class="v860-title">五指山12345・悟空財神殿增建工程 V8.6.0</div>
+      <button class="v860-close" type="button" id="v860-close">收合</button>
+    </div>
+    <div class="v860-body">
+      <div class="v860-tabs">
+        <button class="v860-tab v860-active" type="button" data-tab="wish">✨ 許願上鏈</button>
+        <button class="v860-tab" type="button" data-tab="vow">🙏 還願補血</button>
+        <button class="v860-tab" type="button" data-tab="lamp">🪔 十二生肖＋任意物種點燈</button>
+      </div>
+      <div id="v860-content"></div>
+      <div class="v860-log" id="v860-log">待命：本增建工程只做前端導覽與操作整合；真正鏈上交易仍會跳錢包確認，不會自動扣款。</div>
+    </div>
+  </div>
+</div>
+
+<script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const APP_VERSION_V852 = 'KGEN-12345-HEART-UI-V8.5.3';
-  const DISPLAY_VERSION_V852 = 'VERSION ' + APP_VERSION_V852;
-  const TITLE_V852 = 'KGEN 12345 五指山悟空財神殿｜' + APP_VERSION_V852;
-  const HEART_REACTOR_IMG = './assets/wukong_heart_core.jpg';
-  const HEART_ADDR = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-
-  function $(id){ return document.getElementById(id); }
-  function setText(el, text){ if(el) el.textContent = text; }
-  function safe(fn){ try{ return fn && fn(); }catch(_){} }
-  function safeAsync(fn){ try{ return Promise.resolve(fn && fn()).catch(()=>undefined); }catch(_){ return Promise.resolve(undefined); } }
-
-  window.__kgenAudioEngineV852 = window.__kgenAudioEngineV852 || {
-    active:null,
-    htmlAudio:new Set(),
-    oscillators:new Set(),
-    contexts:new Set(),
-    paused:false,
-    stopping:false
-  };
-  const engine = window.__kgenAudioEngineV852;
-
-  function normalizeVersionDisplay(){
-    document.title = TITLE_V852;
-    document.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]').forEach(meta=>meta.setAttribute('content', TITLE_V852));
-    setText($('ver-st'), DISPLAY_VERSION_V852);
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent = DISPLAY_VERSION_V852; });
-    const taHead = document.querySelector('#temple-audio-console .ta-head span');
-    if(taHead) taHead.textContent = '神殿音樂｜V8.5.3';
-  }
-
-  function normalizeCameraThumb(){
-    const mini = $('mini-thumb');
-    if(mini){
-      mini.style.setProperty('display','block','important');
-      mini.style.setProperty('visibility','visible','important');
-      mini.style.setProperty('opacity','1','important');
-      mini.style.setProperty('background-image', "url('" + HEART_REACTOR_IMG + "')", 'important');
-      mini.style.setProperty('background-position','center center','important');
-      mini.style.setProperty('background-size','cover','important');
-      mini.style.setProperty('background-repeat','no-repeat','important');
-      mini.dataset.kgen12345Thumb = 'heart-reactor';
-      mini.setAttribute('aria-label','Heart Reactor / 悟空心臟圖');
-    }
-    const img = $('fairy-img');
-    if(img){
-      const src = String(img.getAttribute('src') || '').toLowerCase();
-      if(!src || src.includes('fairy') || src.includes('16888')) img.setAttribute('src', HEART_REACTOR_IMG);
-      img.style.setProperty('opacity','1','important');
-      img.style.setProperty('visibility','visible','important');
-      img.dataset.kgen12345Role = 'heart-reactor';
-      window.heartReactorImg = img;
-    }
-  }
-
-  function patchAudioConstructors(){
-    if(!window.__v852AudioConstructorPatched && typeof window.Audio === 'function'){
-      const NativeAudio = window.Audio;
-      const WrappedAudio = function(src){
-        const a = src ? new NativeAudio(src) : new NativeAudio();
-        try{ engine.htmlAudio.add(a); }catch(_){}
-        return a;
-      };
-      WrappedAudio.prototype = NativeAudio.prototype;
-      try{ Object.setPrototypeOf(WrappedAudio, NativeAudio); }catch(_){}
-      window.Audio = WrappedAudio;
-      window.__v852AudioConstructorPatched = true;
-    }
-    ['AudioContext','webkitAudioContext'].forEach(name=>{
-      const AC = window[name];
-      if(!AC || !AC.prototype) return;
-      if(!AC.prototype.__v852CreateOscillatorPatched){
-        const oldCreate = AC.prototype.createOscillator;
-        AC.prototype.createOscillator = function(){
-          try{ engine.contexts.add(this); }catch(_){}
-          const osc = oldCreate.apply(this, arguments);
-          try{ engine.oscillators.add(osc); }catch(_){}
-          return osc;
-        };
-        AC.prototype.__v852CreateOscillatorPatched = true;
-      }
-      if(!AC.prototype.__v852ResumePatched){
-        const oldResume = AC.prototype.resume;
-        if(typeof oldResume === 'function'){
-          AC.prototype.resume = function(){ try{ engine.contexts.add(this); }catch(_){} return oldResume.apply(this, arguments); };
-        }
-        AC.prototype.__v852ResumePatched = true;
-      }
-    });
-  }
-
-  function trackAudio(a){ try{ if(a && typeof a.pause === 'function') engine.htmlAudio.add(a); }catch(_){} return a; }
-  function stopNode(n){ if(!n) return; try{ if(typeof n.stop==='function') n.stop(0); }catch(_){} try{ if(typeof n.disconnect==='function') n.disconnect(); }catch(_){} }
-  function pauseAudioElement(a, reset, clearSrc){
-    if(!a) return;
-    try{ a.pause(); }catch(_){}
-    if(reset) try{ a.currentTime = 0; }catch(_){}
-    if(clearSrc){
-      try{ a.removeAttribute('src'); }catch(_){}
-      try{ a.src = ''; }catch(_){}
-      try{ a.load && a.load(); }catch(_){}
-    }
-  }
-  function allAudioElements(){
-    const set = new Set();
-    try{ document.querySelectorAll('audio').forEach(a=>set.add(a)); }catch(_){}
-    try{ engine.htmlAudio.forEach(a=>set.add(a)); }catch(_){}
-    const app = window.app;
-    if(app && app._music && app._music.audio) set.add(app._music.audio);
-    if(app && app._musicAudio) set.add(app._musicAudio);
-    if(window.templeAudio && window.templeAudio.bgm) set.add(window.templeAudio.bgm);
-    return set;
-  }
-  function stopEveryAudioExcept(keep, clearOthers){
-    allAudioElements().forEach(a=>{ trackAudio(a); if(a !== keep) pauseAudioElement(a, true, !!clearOthers); });
-  }
-
-  window.emergencyStopAudio = function emergencyStopAudio(){
-    if(engine.stopping) return;
-    engine.stopping = true;
-    try{
-      safe(()=>window.speechSynthesis && window.speechSynthesis.cancel());
-      stopEveryAudioExcept(null, true);
-      const app = window.app;
-      if(app){
-        app.audioOn = false;
-        safe(()=>document.querySelector('.nav-audio')?.classList.remove('on'));
-        if(Array.isArray(app.audioNodes)) app.audioNodes.forEach(stopNode);
-        app.audioNodes = [];
-        safe(()=>{ if(app.audioCtx && typeof app.audioCtx.close==='function' && app.audioCtx.state !== 'closed') app.audioCtx.close(); });
-        app.audioCtx = null;
-        if(app._music) app._music.playing = false;
-      }
-      const ta = window.templeAudio;
-      if(ta){
-        pauseAudioElement(ta.bgm, true, true);
-        ta.bgm = null;
-        safe(()=>{ if(ta.ctx && typeof ta.ctx.close==='function' && ta.ctx.state !== 'closed') ta.ctx.close(); });
-        ta.ctx = null;
-        ta.unlocked = false;
-        setText($('ta-now'), '已停止｜神殿音樂');
-      }
-      engine.oscillators.forEach(stopNode); engine.oscillators.clear();
-      engine.contexts.forEach(ctx=>safe(()=>{ if(ctx && typeof ctx.close==='function' && ctx.state !== 'closed') ctx.close(); }));
-      engine.contexts.clear();
-      engine.active = null; engine.paused = false;
-      setText($('music-status'), '音樂已停止');
-      setText($('ta-now'), '已停止｜神殿音樂');
-    }finally{ engine.stopping = false; }
-  };
-
-  function patchMusicTransport(){
-    const app = window.app;
-    if(!app || app.__v852AudioTransportPatched) return;
-    app.__v852AudioTransportPatched = true;
-    const original = {
-      init: typeof app.musicInit==='function' ? app.musicInit.bind(app) : null,
-      setIndex: typeof app.musicSetIndex==='function' ? app.musicSetIndex.bind(app) : null,
-      loadBuiltIn: typeof app.musicLoadBuiltIn==='function' ? app.musicLoadBuiltIn.bind(app) : null,
-      play: typeof app.musicPlay==='function' ? app.musicPlay.bind(app) : null,
-      pause: typeof app.musicPause==='function' ? app.musicPause.bind(app) : null,
-      stop: typeof app.musicStop==='function' ? app.musicStop.bind(app) : null,
-      prev: typeof app.musicPrev==='function' ? app.musicPrev.bind(app) : null,
-      next: typeof app.musicNext==='function' ? app.musicNext.bind(app) : null
-    };
-    app.__v852MusicOriginal = original;
-
-    function ensureMusic(){
-      app._music = app._music || {list:[], index:0};
-      const m = app._music;
-      if(!m.audio){
-        m.audio = trackAudio($('music-audio') || new Audio());
-        try{ m.audio.preload = 'auto'; }catch(_){}
-      }else trackAudio(m.audio);
-      return m;
-    }
-    function currentTrack(m){ const list=m.list||[]; const idx=((Number(m.index)||0)%list.length+list.length)%list.length; m.index=idx; return list[idx]||null; }
-    function resolveUrl(t){ return String((t && (t.url || t.src || t.file)) || '').trim(); }
-    function setNow(m, msg){
-      const t = currentTrack(m); const name = t ? (t.name || t.title || t.url || 'Track') : '未載入音檔';
-      setText($('music-name'), name);
-      setText($('music-now'), msg || (t ? '目前：' + name : '（未選曲）'));
-    }
-    function applyIndex(i){
-      const m=ensureMusic(); const list=m.list||[];
-      if(!list.length){ setNow(m,'（未選曲）'); return m; }
-      m.index = ((Number(i)||0)%list.length+list.length)%list.length;
-      const url = resolveUrl(currentTrack(m));
-      if(url){
-        pauseAudioElement(m.audio, true, false);
-        try{ m.audio.src = url; m.audio.load && m.audio.load(); }catch(_){}
-      }
-      if(original.setIndex) safe(()=>original.setIndex(m.index));
-      m.audio = trackAudio((app._music && app._music.audio) || m.audio || $('music-audio'));
-      setNow(m);
-      safe(()=>app.musicRenderList && app.musicRenderList());
-      return m;
-    }
-
-    app.musicInit = function(){
-      if(app.__v852MusicInitDone) return;
-      app.__v852MusicInitDone = true;
-      safe(()=>original.init && original.init());
-      ensureMusic();
-    };
-    app.musicSetIndex = function(i){ return applyIndex(i); };
-    app.musicPlay = async function(){
-      const m=ensureMusic();
-      if(!(m.list||[]).length && original.loadBuiltIn) await safeAsync(()=>original.loadBuiltIn(false));
-      if(!(m.list||[]).length){ setText($('music-status'),'請先載入音檔或內建歌單'); safe(()=>app.speak&&app.speak('請先載入音檔。')); return; }
-      if(!m.audio.src) applyIndex(Number(m.index)||0);
-      stopEveryAudioExcept(m.audio, true);
-      engine.active = m.audio; engine.paused = false;
-      try{ await m.audio.play(); m.playing = true; setText($('music-status'),'播放中'); setNow(m); safe(()=>app.speak&&app.speak('開始播放。')); }
-      catch(e){ setText($('music-status'),'請再點一次播放解鎖音樂'); }
-    };
-    app.musicPause = function(){
-      const m=ensureMusic();
-      pauseAudioElement(m.audio, false, false);
-      engine.paused = true; m.playing = false;
-      setText($('music-status'),'已暫停'); safe(()=>app.speak&&app.speak('已暫停。'));
-    };
-    app.musicStop = function(){ window.emergencyStopAudio(); safe(()=>app.speak&&app.speak('已停止。')); };
-    app.musicPrev = function(){ const m=ensureMusic(); if(!(m.list||[]).length) return; applyIndex((Number(m.index)||0)-1); return app.musicPlay(); };
-    app.musicNext = function(){ const m=ensureMusic(); if(!(m.list||[]).length) return; applyIndex((Number(m.index)||0)+1); return app.musicPlay(); };
-  }
-
-  function patchTempleAudio(){
-    const ta = window.templeAudio;
-    if(!ta || ta.__v852AudioTransportPatched) return;
-    ta.__v852AudioTransportPatched = true;
-    const oldPlay = typeof ta.playBgm==='function' ? ta.playBgm.bind(ta) : null;
-    const oldInit = typeof ta.init==='function' ? ta.init.bind(ta) : null;
-    ta.init = async function(){ if(ta.__v852InitDone) return; ta.__v852InitDone = true; const r = oldInit ? await oldInit() : undefined; trackAudio(ta.bgm); return r; };
-    ta.playBgm = async function(){ window.emergencyStopAudio(); const r = oldPlay ? await oldPlay() : undefined; trackAudio(ta.bgm); engine.active = ta.bgm || engine.active; return r; };
-    ta.stopBgm = function(){ window.emergencyStopAudio(); };
-  }
-
-  function patchStopButtons(){
-    document.querySelectorAll('[onclick]').forEach(el=>{
-      const code=el.getAttribute('onclick')||'';
-      if(code.includes('musicStop') || code.includes('stopBgm') || code.includes('emergencyStopAudio')) el.setAttribute('onclick','window.emergencyStopAudio && window.emergencyStopAudio()');
-    });
-  }
-
-  function patchWalletRefresh(){
-    const web3 = window.web3;
-    if(!web3 || web3.__v852WalletRefreshPatched) return;
-    web3.__v852WalletRefreshPatched = true;
-    const original = {
-      refresh: typeof web3.refresh==='function' ? web3.refresh.bind(web3) : null,
-      refreshUser: typeof web3.refreshUser==='function' ? web3.refreshUser.bind(web3) : null,
-      refreshAll: typeof web3.refreshAll==='function' ? web3.refreshAll.bind(web3) : null,
-      connect: typeof web3.connect==='function' ? web3.connect.bind(web3) : null,
-      setProvider: typeof web3.setProvider==='function' ? web3.setProvider.bind(web3) : null
-    };
-    web3.__v852OriginalRefresh = original;
-
-    window.refreshWalletState = async function refreshWalletState(reason){
-      if(window.__v852RefreshingWalletState) return;
-      window.__v852RefreshingWalletState = true;
-      try{
-        if(web3.ethersProvider && !web3.provider) web3.provider = web3.ethersProvider;
-        if(web3.signer && !web3.addr){
-          await safeAsync(async()=>{ web3.addr = await web3.signer.getAddress(); });
-        }
-        if(web3.signer){
-          await safeAsync(async()=>{ const addr = await web3.signer.getAddress(); web3.addr = addr; setText($('w3-addr'), addr); });
-        }else if(web3.addr) setText($('w3-addr'), web3.addr);
-        const provider = web3.provider || web3.ethersProvider;
-        if(provider && provider.getNetwork){
-          await safeAsync(async()=>{ const net = await provider.getNetwork(); setText($('w3-chain'), net && net.chainId ? ((net.name||'chain')+' ('+net.chainId+')') : '--'); });
-        }else if(window.ethereum && window.ethereum.request){
-          await safeAsync(async()=>{ const cid = await window.ethereum.request({method:'eth_chainId'}); setText($('w3-chain'), cid || '--'); });
-        }
-        if(original.refresh) await safeAsync(()=>original.refresh());
-        if(original.refreshUser) await safeAsync(()=>original.refreshUser());
-        if(original.refreshAll) await safeAsync(()=>original.refreshAll());
-        if(web3.UNIVERSE) setText($('w3-uni'), web3.UNIVERSE);
-        else setText($('w3-uni'), HEART_ADDR);
-      }finally{ window.__v852RefreshingWalletState = false; }
-    };
-
-    function wrapTxMethod(obj, name){
-      const fn = obj && obj[name];
-      if(typeof fn !== 'function' || fn.__v852Wrapped) return;
-      const wrapped = async function(){
-        const result = await fn.apply(this, arguments);
-        await safeAsync(()=>window.refreshWalletState(name));
-        setTimeout(()=>safeAsync(()=>window.refreshWalletState(name + ':delayed')), 1200);
-        return result;
-      };
-      wrapped.__v852Wrapped = true;
-      obj[name] = wrapped;
-    }
-    ['approve','ritualDeposit','place','connect','setProvider','connectWalletConnect','connectBinance'].forEach(n=>wrapTxMethod(web3,n));
-
-    if(window.templeOps && !window.templeOps.__v852WalletRefreshPatched){
-      window.templeOps.__v852WalletRefreshPatched = true;
-      ['approve','cup','fortune','heartbeat','ignite','vow','lamp','wish','festival','festival1','festival2','newyear','newYear'].forEach(n=>wrapTxMethod(window.templeOps,n));
-    }
-    safeAsync(()=>window.refreshWalletState('init'));
-  }
-
-  function initV852(){
-    normalizeVersionDisplay();
-    normalizeCameraThumb();
-    patchAudioConstructors();
-    patchMusicTransport();
-    patchTempleAudio();
-    patchStopButtons();
-    patchWalletRefresh();
-  }
-
-  initV852();
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initV852); else setTimeout(initV852, 0);
-  window.addEventListener('load', initV852);
-  setTimeout(initV852, 600);
-  setTimeout(initV852, 1600);
-  setInterval(function(){ normalizeVersionDisplay(); normalizeCameraThumb(); patchStopButtons(); patchWalletRefresh(); }, 1800);
-})();
-</script>
-
-
-<!-- ===== KGEN 12345 FINAL HOTFIX V8.5.3: wallet connect no Play Store redirect ===== -->
-<script id="kgen12345-v853-wallet-no-playstore-hotfix">
-(function(){
-  'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.5.3';
-  const BSC = '0x38';
-  const RPC = 'https://bsc-dataseed.binance.org/';
-
-  function $(id){ return document.getElementById(id); }
-  function set(id, v){ const el=$(id); if(el) el.textContent = v; }
-  function short(a){ return a ? a.slice(0,6) + '…' + a.slice(-4) : '--'; }
-  function speak(msg){
-    try{
-      if(window.speechSynthesis){
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(String(msg || ''));
-        u.lang = 'zh-TW';
-        u.rate = 0.95;
-        u.pitch = 0.9;
-        u.volume = 0.95;
-        speechSynthesis.speak(u);
-      }
-    }catch(e){}
-  }
-  function toast(msg){
-    try{
-      if(window.ui && ui.toast) ui.toast(msg);
-      else if(window.web3 && web3.toast) web3.toast(msg);
-    }catch(e){}
-    console.log('[KGEN12345 V8.5.3]', msg);
-  }
+  const VERSION='KGEN-12345-HEART-UI-V8.6.0';
+  const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BSC='0x38';
+  const RPC='https://bsc-dataseed.binance.org/';
+  const ERC20=[
+    'function balanceOf(address) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function allowance(address owner,address spender) view returns (uint256)',
+    'function approve(address spender,uint256 amount) returns (bool)'
+  ];
+  const $=id=>document.getElementById(id);
+  const set=(id,v)=>{const e=$(id); if(e) e.textContent=String(v);};
+  function short(a){return a? a.slice(0,6)+'…'+a.slice(-4):'--';}
+  function status(msg){ const e=$('kgen-v860-wallet-status'); if(e){e.style.display='block'; e.textContent=String(msg||'');} const log=$('kh-log')||$('bp-status')||$('v860-log'); if(log) log.textContent=String(msg||''); console.log('[KGEN12345 V8.6.0]',msg); }
+  function speak(msg){ try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){} try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; u.rate=.95; u.pitch=.9; speechSynthesis.speak(u);} }catch(e){} }
+  function hasEthers5(){return !!(window.ethers && ethers.providers && ethers.utils && ethers.Contract);}
 
   function pickProvider(){
-    let eth = window.ethereum ||
-      (window.trustwallet && window.trustwallet.ethereum) ||
-      window.BinanceChain ||
-      window.okxwallet ||
-      (window.bitkeep && window.bitkeep.ethereum);
-
-    if(eth && Array.isArray(eth.providers) && eth.providers.length){
-      eth = eth.providers.find(p => p && (
-        p.isMetaMask || p.isTrust || p.isOKXWallet || p.isBinance ||
-        p.isCoinbaseWallet || p.isBitKeep || p.isTokenPocket
-      )) || eth.providers[0];
+    const list=[];
+    if(window.ethereum) list.push(window.ethereum);
+    if(window.ethereum && Array.isArray(window.ethereum.providers)) list.push(...window.ethereum.providers);
+    if(window.trustwallet && window.trustwallet.ethereum) list.push(window.trustwallet.ethereum);
+    if(window.BinanceChain) list.push(window.BinanceChain);
+    if(window.okxwallet && window.okxwallet.ethereum) list.push(window.okxwallet.ethereum);
+    if(window.okxwallet) list.push(window.okxwallet);
+    const uniq=[]; const seen=new Set();
+    for(const p of list){ if(!p) continue; const key=p.isMetaMask+'|'+p.isTrust+'|'+p.isOKXWallet+'|'+p.isBinance+'|'+(p.request?'r':''); if(!seen.has(key)){seen.add(key); uniq.push(p);} }
+    const picked=uniq.find(p=>p.isMetaMask)||uniq.find(p=>p.isTrust)||uniq.find(p=>p.isOKXWallet)||uniq.find(p=>p.isBinance)||uniq.find(p=>p.request)||uniq[0];
+    if(picked && picked.request) window.ethereum=picked;
+    return picked && picked.request ? picked : null;
+  }
+  function ensureWalletHub(){
+    let hub=$('walletHub');
+    if(!hub){
+      hub=document.createElement('div'); hub.id='walletHub';
+      hub.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:2147483646;padding:16px;box-sizing:border-box;';
+      hub.innerHTML='<div style="width:min(560px,96vw);border:1px solid rgba(255,215,120,.55);border-radius:18px;background:rgba(8,10,18,.96);color:#fff;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.7);"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;"><b style="color:#ffd978;">多錢包入口</b><button type="button" id="walletHubClose" style="border-radius:10px;padding:8px 10px;">關閉</button></div><p style="line-height:1.6;color:#dff;">目前瀏覽器沒有注入錢包。請複製本頁網址，到 MetaMask / Trust Wallet / OKX / Binance Wallet 的 DApp 瀏覽器開啟。</p><input id="walletHubUrl" readonly style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;background:#05070b;color:#9ff;border:1px solid rgba(255,215,120,.3);"><button type="button" id="walletHubCopy" style="margin-top:10px;border-radius:12px;padding:10px 12px;font-weight:900;">複製本頁網址</button></div>';
+      document.body.appendChild(hub);
+      hub.addEventListener('click',ev=>{ if(ev.target===hub) hub.style.display='none'; });
+      setTimeout(()=>{ const c=$('walletHubClose'); if(c) c.onclick=()=>hub.style.display='none'; const cp=$('walletHubCopy'); if(cp) cp.onclick=copyDappUrl; },0);
     }
-    if(eth) window.ethereum = eth;
-    return eth || null;
+    return hub;
   }
-
-  function openWalletHubOnly(){
-    const hub = $('walletHub');
-    const inp = $('walletHubUrl');
-    if(inp) inp.value = location.href;
-    if(hub) hub.style.display = 'flex';
-    set('bp-status', '未偵測到已注入錢包。請用錢包內建瀏覽器開啟本頁，或複製網址到錢包 DApp。');
-    toast('未偵測到錢包；已開啟多錢包入口，不會跳商店。');
-    speak('未偵測到錢包。請用錢包內建瀏覽器開啟本頁，或複製網址到錢包 DApp。');
+  async function copyDappUrl(){
+    const url=location.href;
+    const inp=$('walletHubUrl'); if(inp) inp.value=url;
+    try{ await navigator.clipboard.writeText(url); status('已複製本頁網址。請到錢包 App 的 DApp 瀏覽器貼上開啟。'); speak('已複製網址。請到錢包 App 的 DApp 瀏覽器開啟。'); }
+    catch(e){ if(inp){inp.focus(); inp.select();} status('請手動複製網址。'); }
   }
-
+  function openWalletHub(){
+    const hub=ensureWalletHub(); const inp=$('walletHubUrl'); if(inp) inp.value=location.href;
+    hub.style.display='flex'; status('未偵測到錢包注入。請用錢包 App 內建瀏覽器開啟，或改用 WalletConnect。'); speak('未偵測到錢包注入。請用錢包 App 內建瀏覽器開啟。');
+  }
   async function ensureBSC(eth){
-    let cid = '';
-    try{ cid = await eth.request({method:'eth_chainId'}); }catch(e){}
-    set('w3-chain', cid || '--');
-    set('kh-chain', String(cid).toLowerCase() === BSC ? 'BSC 56' : (cid || '--'));
-    if(String(cid).toLowerCase() === BSC) return true;
-
-    try{
-      await eth.request({ method:'wallet_switchEthereumChain', params:[{chainId:BSC}] });
-      return true;
-    }catch(e){
-      if(e && (e.code === 4902 || String(e.message || '').includes('Unrecognized'))){
-        await eth.request({
-          method:'wallet_addEthereumChain',
-          params:[{
-            chainId:BSC,
-            chainName:'BNB Smart Chain',
-            nativeCurrency:{name:'BNB', symbol:'BNB', decimals:18},
-            rpcUrls:[RPC],
-            blockExplorerUrls:['https://bscscan.com']
-          }]
-        });
+    let cid=''; try{cid=await eth.request({method:'eth_chainId'});}catch(e){}
+    set('w3-chain',cid||'--'); set('kh-chain',String(cid||'').toLowerCase()===BSC?'BSC 56':(cid||'--'));
+    if(String(cid||'').toLowerCase()===BSC) return true;
+    try{ await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC}]}); return true; }
+    catch(e){
+      if(e && (e.code===4902 || String(e.message||'').toLowerCase().includes('unrecognized'))){
+        await eth.request({method:'wallet_addEthereumChain',params:[{chainId:BSC,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[RPC],blockExplorerUrls:['https://bscscan.com']}]});
         return true;
       }
       throw e;
     }
   }
-
-  async function connectWalletV853(ev){
-    if(ev){
-      try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){}
-    }
-
-    if(!window.ethers || !ethers.providers || !ethers.utils){
-      set('bp-status', 'ethers.js 尚未載入，請重新整理頁面。');
-      speak('程式尚未完全載入，請重新整理頁面。');
-      return;
-    }
-
-    const eth = pickProvider();
-    if(!eth){
-      openWalletHubOnly();
-      return;
-    }
-
+  async function readBalances(provider,addr){
+    const token=new ethers.Contract(KGEN,ERC20,provider);
+    const dec=Number(await token.decimals().catch(()=>18));
+    const calls=[provider.getBalance(addr),token.balanceOf(addr),token.balanceOf(HEART),token.allowance(addr,HEART).catch(()=>null)];
+    const [bnb,kbal,hbal,alw]=await Promise.all(calls);
+    const bnbTxt=Number(ethers.utils.formatEther(bnb)).toFixed(6)+' BNB';
+    const kTxt=Number(ethers.utils.formatUnits(kbal,dec)).toFixed(4)+' KGEN';
+    const hTxt=Number(ethers.utils.formatUnits(hbal,dec)).toFixed(4)+' KGEN';
+    const aTxt=alw ? Number(ethers.utils.formatUnits(alw,dec)).toFixed(4)+' KGEN' : '--';
+    ['userBNB','rb-bnb-txt'].forEach(id=>set(id,bnbTxt));
+    ['userBal','kh-kgen-bal','rb-kgen-txt','bp-userbal'].forEach(id=>set(id,kTxt));
+    ['w3-bal','kh-heart-bal','bp-pool'].forEach(id=>set(id,hTxt));
+    ['userAllowance','bp-allowance'].forEach(id=>set(id,aTxt));
+    const kfill=$('rb-kgen-fill'); if(kfill) kfill.style.width=Math.min(100,Number(ethers.utils.formatUnits(kbal,dec))/10000*100)+'%';
+    const bfill=$('rb-bnb-fill'); if(bfill) bfill.style.width=Math.min(100,Number(ethers.utils.formatEther(bnb))*100)+'%';
+  }
+  async function robustConnect(ev){
+    if(ev){ try{ev.preventDefault(); ev.stopPropagation();}catch(e){} }
     try{
-      set('bp-status', '錢包連線中，請在錢包確認授權。');
-      await eth.request({method:'eth_requestAccounts'});
+      if(!hasEthers5()) throw new Error('ethers.js 尚未載入，請重新整理頁面');
+      const eth=pickProvider();
+      if(!eth){ openWalletHub(); return; }
+      status('正在呼叫錢包授權，請在錢包視窗按確認。'); speak('正在連結錢包，請在錢包中確認。');
+      const accounts=await eth.request({method:'eth_requestAccounts'});
+      const addr=accounts && accounts[0];
+      if(!addr) throw new Error('錢包未回傳地址');
       await ensureBSC(eth);
-
-      const provider = new ethers.providers.Web3Provider(eth, 'any');
-      const signer = provider.getSigner();
-      const addr = await signer.getAddress();
-
-      // 同步到既有 web3 物件，不重構原架構
-      if(window.web3){
-        web3.provider = provider;
-        web3.ethersProvider = provider;
-        web3.signer = signer;
-        web3.addr = addr;
-        web3.address = addr;
-        web3.demo = false;
+      const provider=new ethers.providers.Web3Provider(eth,'any');
+      const signer=provider.getSigner();
+      window.__KGEN12345_PROVIDER=provider; window.__KGEN12345_SIGNER=signer; window.__KGEN12345_ADDR=addr;
+      if(window.web3){ web3.provider=provider; web3.signer=signer; web3.addr=addr; web3.address=addr; web3.UNIVERSE=HEART; web3.KGEN=KGEN; }
+      const wt=short(addr)+'｜'+addr;
+      ['w3-addr','kh-wallet','bp-wallet'].forEach(id=>set(id,wt));
+      await readBalances(provider,addr);
+      status('錢包已連線完成：'+addr+'\nBSC 56 / KGEN / BNB / Heart 血庫已同步。'); speak('錢包已連線完成。五指山 Heart 血庫已同步。');
+    }catch(e){ console.error(e); status('錢包連線失敗：'+(e&&e.message?e.message:e)); speak('錢包連線失敗，請確認權限與 BSC 網路。'); }
+  }
+  async function robustRefresh(){
+    try{
+      if(!hasEthers5()) return;
+      const addr=window.__KGEN12345_ADDR || (window.web3 && (web3.addr||web3.address));
+      const provider=window.__KGEN12345_PROVIDER || (window.web3 && web3.provider) || new ethers.providers.JsonRpcProvider(RPC);
+      if(addr) await readBalances(provider,addr);
+      else{
+        const ro=new ethers.providers.JsonRpcProvider(RPC); const token=new ethers.Contract(KGEN,ERC20,ro); const dec=Number(await token.decimals().catch(()=>18)); const h=await token.balanceOf(HEART);
+        ['w3-bal','kh-heart-bal','bp-pool'].forEach(id=>set(id,Number(ethers.utils.formatUnits(h,dec)).toFixed(4)+' KGEN'));
       }
-
-      set('w3-addr', addr);
-      set('bp-wallet', short(addr));
-
-      const net = await provider.getNetwork().catch(()=>null);
-      if(net) set('w3-chain', 'bsc (' + net.chainId + ')');
-
-      set('bp-status', '錢包已連線，BSC 檢查完成。');
-      toast('錢包已連線。');
-      speak('錢包已連線。五指山悟空財神殿已接上 BSC。');
-
-      try{ if(web3 && web3.refreshUser) await web3.refreshUser(); }catch(e){}
-      try{ if(web3 && web3.refresh) await web3.refresh(); }catch(e){}
-      try{ if(web3 && web3.refreshGaolao) await web3.refreshGaolao(); }catch(e){}
-      try{ if(web3 && web3.refreshTreasury) await web3.refreshTreasury(); }catch(e){}
-
-      return addr;
-    }catch(e){
-      console.warn('[KGEN12345 V8.5.3] connect failed', e);
-      set('bp-status', '錢包連線失敗：' + (e && e.message ? e.message : e));
-      speak('錢包連線失敗，請確認錢包權限與 BSC 網路。');
-    }
+      status('刷新完成。');
+    }catch(e){ status('刷新失敗：'+(e&&e.message?e.message:e)); }
   }
 
-  function install(){
-    // 保留舊版，但覆蓋錯誤會跳商店的連線入口
-    window.kgen12345ConnectWallet = connectWalletV853;
-
-    if(window.web3){
-      web3.smartConnect = connectWalletV853;
-      web3.connect = connectWalletV853;
-      web3.connectBinance = connectWalletV853;
-
-      // 關鍵：deepLink 不再自動導去 Google Play / Binance download。
-      web3.deepLink = function(kind){
-        if(kind === 'copy'){
-          try{ navigator.clipboard && navigator.clipboard.writeText(location.href); }catch(e){}
-          toast('已複製本頁網址。');
-          return;
-        }
-        openWalletHubOnly();
-      };
+  const zodiac=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','任意物種'];
+  let tab='wish', picked='任意物種';
+  function setUnderlying(id,val){ const e=$(id); if(e) e.value=val; }
+  function clickUnderlying(id,label){ const b=$(id); if(b){ status('準備執行：'+label+'。請確認錢包交易。'); b.click(); } else { status('找不到底層按鈕 '+id+'，請檢查 Heart Live Panel 是否存在。'); }}
+  function renderRitual(){
+    const c=$('v860-content'); if(!c) return;
+    const intro='<div class="v860-card"><h3>宮殿規則</h3><p>本區是悟空財神殿正式增建工程。它會先把用途、金額與後果說清楚，再交給底層 Heart 按鈕送出。所有鏈上交易都需要錢包確認，會花 BNB gas，不會自動扣款。</p></div>';
+    if(tab==='wish'){
+      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>✨ 許願上鏈 makeWish</h3><p>許願只把願望轉成 bytes32 hash 上鏈，不公開明文。用途是留下願力紀錄，不是保證收益。</p><input class="v860-field" id="v860-wish-text" placeholder="輸入願望，例如：願創作長久、願神殿血庫穩定"><button class="v860-btn v860-action" type="button" id="v860-wish-go">送出許願 hash</button><div class="v860-muted">提示：若你輸入的是 0x 開頭 64 位 hash，會直接送 hash；一般文字會由原本底層 makeWish 轉 hash。</div></div></div>';
+      $('v860-wish-go').onclick=()=>{ const v=($('v860-wish-text').value||'').trim(); if(!v){status('請先輸入願望文字。'); return;} setUnderlying('kh-wish',v); clickUnderlying('kh-wishbtn','makeWish 許願上鏈'); };
+    }else if(tab==='vow'){
+      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🙏 還願補血 vowTo</h3><p>還願是把 KGEN 回補給悟空心臟血庫，象徵領福緣後有成再回來補血。這是實際鏈上交易，送出後不可逆。</p><input class="v860-field" id="v860-vow-amt" placeholder="還願 KGEN 整數，例如 8 或 88"><select class="v860-field" id="v860-vow-option"><option value="1">還願一：感謝發財金</option><option value="2">還願二：感謝心跳守護</option><option value="3">還願三：感謝創作與生意有成</option></select><button class="v860-btn v860-action" type="button" id="v860-vow-go">確認還願補血</button></div></div>';
+      $('v860-vow-go').onclick=()=>{ const amt=($('v860-vow-amt').value||'').trim(); if(!/^\d+(\.\d+)?$/.test(amt)){status('請輸入還願 KGEN 金額。'); return;} setUnderlying('kh-amount',amt); setUnderlying('amt-in',amt); setUnderlying('kh-vow-option',$('v860-vow-option').value); clickUnderlying('kh-vow','vowTo 還願補血'); };
+    }else{
+      const z=zodiac.map(x=>'<button type="button" class="'+(x===picked?'v860-picked':'')+'" data-z="'+x+'">'+(x==='任意物種'?'第13生肖｜任意物種':x)+'</button>').join('');
+      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🪔 點燈續命 lightLamp</h3><p>點燈分十二生肖，第十三生肖是任意物種：超人、變形金鋼、貓、魚、蟑螂、螞蟻、大象，任何生命都能點燈。</p><div class="v860-zodiac">'+z+'</div><input class="v860-field" id="v860-species" placeholder="第13生肖可填物種名稱，例如 變形金鋼 / 貓 / 螞蟻"><input class="v860-field" id="v860-lamp-days" placeholder="點燈天數，例如 1、7、30"><button class="v860-btn v860-action" type="button" id="v860-lamp-go">確認點燈續命</button><div class="v860-muted">目前底層合約 lightLamp 接收天數參數；生肖與物種先寫入前端紀錄與語音客服，不額外收費。</div></div></div>';
+      document.querySelectorAll('#v860-content [data-z]').forEach(b=>b.onclick=()=>{picked=b.dataset.z; renderRitual();});
+      $('v860-lamp-go').onclick=()=>{ const days=($('v860-lamp-days').value||'').trim(); if(!/^\d+$/.test(days)){status('請輸入點燈天數整數。'); return;} const sp=($('v860-species').value||picked).trim(); localStorage.setItem('kgen12345LampSpecies',sp); setUnderlying('kh-amount',days); setUnderlying('amt-in',days); status('點燈對象：'+sp+'｜天數：'+days+'。準備呼叫 lightLamp。'); clickUnderlying('kh-lamp','lightLamp 點燈續命'); };
     }
-
-    document.querySelectorAll('button').forEach(btn=>{
-      const t = (btn.textContent || '').trim();
-      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('多錢包')){
-        btn.onclick = connectWalletV853;
-      }
+  }
+  function openRitual(t){ tab=t||tab; $('kgen-v860-ritual-modal')?.classList.add('v860-show'); renderRitual(); speak(tab==='lamp'?'十二生肖與任意物種點燈已開啟。':tab==='vow'?'還願補血已開啟。':'許願上鏈已開啟。'); }
+  function closeRitual(){ $('kgen-v860-ritual-modal')?.classList.remove('v860-show'); }
+  function bindAll(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    ensureWalletHub();
+    if(window.web3){ web3.smartConnect=robustConnect; web3.connect=robustConnect; web3.refreshBalances=robustRefresh; web3.openWalletHub=openWalletHub; web3.copyDappUrl=copyDappUrl; web3.UNIVERSE=HEART; web3.KGEN=KGEN; }
+    document.querySelectorAll('button,a').forEach(btn=>{
+      const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('切 BSC') || btn.id==='kh-connect' || btn.id==='w3-connect-btn') btn.onclick=robustConnect;
+      if(t.includes('刷新餘額') || btn.id==='kh-refresh') btn.onclick=robustRefresh;
     });
-
-    const ver = $('ver-st');
-    if(ver) ver.textContent = 'VERSION ' + VERSION;
+    const op=$('kgen-v860-ritual-open'); if(op) op.onclick=()=>openRitual('wish');
+    const cl=$('v860-close'); if(cl) cl.onclick=closeRitual;
+    const modal=$('kgen-v860-ritual-modal'); if(modal) modal.addEventListener('click',ev=>{ if(ev.target===modal) closeRitual(); });
+    document.querySelectorAll('.v860-tab').forEach(b=>b.onclick=()=>{tab=b.dataset.tab; document.querySelectorAll('.v860-tab').forEach(x=>x.classList.remove('v860-active')); b.classList.add('v860-active'); renderRitual();});
+    const old=window.templeOps||{}; window.templeOps={...old,
+      wish:()=>openRitual('wish'), vow:()=>openRitual('vow'), lamp:()=>openRitual('lamp')
+    };
+    document.addEventListener('click',function(ev){
+      const btn=ev.target && ev.target.closest ? ev.target.closest('button') : null; if(!btn) return;
+      const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
+      if(t.includes('許願')){ if(!btn.id || btn.id!=='v860-wish-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('wish'); return false; } }
+      if(t.includes('還願')){ if(!btn.id || btn.id!=='v860-vow-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('vow'); return false; } }
+      if(t.includes('點燈')){ if(!btn.id || btn.id!=='v860-lamp-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('lamp'); return false; } }
+    },true);
+    robustRefresh();
   }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
-  else install();
-  window.addEventListener('load', install);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindAll); else bindAll();
+  window.addEventListener('load',bindAll);
+  window.kgen12345RobustConnectV860=robustConnect;
+  window.kgen12345OpenRitualV860=openRitual;
 })();
 </script>
 
