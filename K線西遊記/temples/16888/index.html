@@ -7158,5 +7158,109 @@ if(chainLive){
 })();
 </script>
 
+<script>
+/* ===== 16888 Pool Display Hotfix V3.7.4-P1 ===== */
+(function(){
+  const UNIVERSE_16888 = "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63";
+  const RPC = "https://bsc-dataseed.binance.org/";
+  const TARGET = 16888;
+
+  const ABI_16888_POOL = [
+    "function poolBalance() view returns (uint256)",
+    "function TRIGGER() view returns (uint256)"
+  ];
+
+  function setText(id, text){
+    const el = document.getElementById(id);
+    if(el) el.textContent = text;
+  }
+
+  function setValue(id, text){
+    const el = document.getElementById(id);
+    if(el) el.value = text;
+  }
+
+  function setWidth(id, pct){
+    const el = document.getElementById(id);
+    if(el) el.style.width = pct + "%";
+  }
+
+  async function getPoolProvider(){
+    if(window.web3 && web3.provider && web3.provider.getNetwork){
+      return web3.provider;
+    }
+    return new ethers.providers.JsonRpcProvider(RPC);
+  }
+
+  window.refresh16888Pool = async function(){
+    try{
+      setText("w3-bal", "讀取中...");
+      setText("bp-pool", "讀取中...");
+      setText("cl-pool", "讀取中...");
+
+      const provider = await getPoolProvider();
+      const addr = (window.web3 && web3.UNIVERSE) ? web3.UNIVERSE : UNIVERSE_16888;
+      const c = new ethers.Contract(addr, ABI_16888_POOL, provider);
+
+      const poolRaw = await c.poolBalance();
+      let triggerRaw;
+
+      try{
+        triggerRaw = await c.TRIGGER();
+      }catch(e){
+        triggerRaw = ethers.utils.parseUnits(String(TARGET), 18);
+      }
+
+      const pool = parseFloat(ethers.utils.formatUnits(poolRaw, 18));
+      const trigger = parseFloat(ethers.utils.formatUnits(triggerRaw, 18)) || TARGET;
+      const pct = Math.max(0, Math.min(100, pool / trigger * 100));
+
+      const poolTxt = pool.toFixed(4) + " KGEN";
+      const progTxt = pool.toFixed(2) + " / " + trigger.toFixed(0) + " (" + pct.toFixed(2) + "%)";
+
+      setText("w3-bal", poolTxt);
+      setText("bp-pool", poolTxt);
+      setText("cl-pool", poolTxt);
+      setText("w3-prog", progTxt);
+      setText("prog-txt", progTxt);
+      setValue("ct-in", pool.toFixed(4));
+
+      setWidth("prog-fill", pct.toFixed(2));
+
+      if(window.web3){
+        web3._ct = pool;
+      }
+
+      if(window.app && typeof app.updateCoordPanel === "function"){
+        try{ app.updateCoordPanel(); }catch(e){}
+      }
+
+      console.log("[16888 Pool Hotfix] OK", poolTxt);
+      return pool;
+    }catch(e){
+      console.warn("[16888 Pool Hotfix] failed", e);
+      setText("w3-bal", "讀取失敗 / CHECK CONTRACT");
+      setText("bp-pool", "讀取失敗");
+      setText("cl-pool", "讀取失敗");
+      setText("w3-prog", "讀取失敗");
+      return null;
+    }
+  };
+
+  const oldRefresh = window.web3 && web3.refresh ? web3.refresh.bind(web3) : null;
+  if(window.web3 && oldRefresh){
+    web3.refresh = async function(){
+      try{ await oldRefresh(); }catch(e){ console.warn(e); }
+      try{ await window.refresh16888Pool(); }catch(e){}
+    };
+  }
+
+  window.addEventListener("load", function(){
+    setTimeout(window.refresh16888Pool, 1200);
+    setInterval(window.refresh16888Pool, 15000);
+  });
+})();
+</script>
+
 </body>
 </html>
