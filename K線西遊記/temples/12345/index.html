@@ -1,3 +1,29 @@
+<!--
+============================================================
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: V8.5.3
+BUILD: 20260509-V8.5.3-WALLET-NO-PLAYSTORE-HOTFIX
+BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+CHANGELOG:
+- [V8.5.3 Hotfix] 修正手機錢包連線誤跳 Google Play / 商店下載頁；只使用已注入 provider 連線，無 provider 時顯示多錢包入口與複製網址。
+- [V8.5.1 Hotfix] 修正版本顯示為 KGEN-12345-HEART-UI-V8.5.3。
+- [V8.5.1 Hotfix] 修正音樂多重播放與無法關閉問題。
+- [Phase 1] 移除 12345 頁內自我導航按鈕。
+- [Phase 1] 鎖定 Swap 路由：BNB/USDT -> KGEN，防止錢包連接後回退 CAKE。
+- [Phase 1] 修正相機系統：移除 16888 fairy overlay，mini-thumb 顯示 Heart Reactor。
+- [Phase 1] 建立 ID Alias 機制：fairy-img -> heart-reactor-img。
+VERIFY_LOG:
+- [2026-05-08] 已驗證 V8.5.1 版本顯示與音訊緊急停止 Hotfix。
+- [2026-05-08] 已驗證導航按鈕清理。
+- [2026-05-08] 已驗證 Swap 路由生成器。
+- [2026-05-08] 已驗證相機視覺適配器。
+MODULE_DEPENDENCY_MAP:
+- wallet_core (inline)
+- swap_core (inline)
+- camera_core (inline)
+- navigation_core (inline)
+============================================================
+-->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -6,14 +32,14 @@
 K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
 ========================= -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="12345 五指山悟空財神殿 · K線西遊記 · V5.8">
+<meta property="og:title" content="KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3">
 <meta property="og:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta property="og:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">
 <meta property="og:site_name" content="KLINE ODYSSEY">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="12345 五指山悟空財神殿 · K線西遊記 · V5.8">
+<meta name="twitter:title" content="KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3">
 <meta name="twitter:description" content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心">
 <meta name="twitter:image" content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A">
 
@@ -21,7 +47,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.19｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -78,8 +104,8 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
         #cam-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
         #mini-thumb { 
             position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; 
-            border-radius: 50%; border: 3px solid var(--gold); display: none; z-index: 110;
-            background: url('./assets/wukong_caishen.png') center/cover;
+            border-radius: 50%; border: 3px solid var(--gold); display: block; z-index: 110; opacity: 1;
+            background: url('./assets/wukong_heart_core.jpg') center/cover;
             box-shadow: 0 0 25px var(--gold);
         }
         #wish-label { 
@@ -1379,6 +1405,38 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 }
 </style>
 
+
+<script id="kgen-v850-core-patch">
+(function(){
+    // ID Alias Mechanism
+    window.addEventListener('DOMContentLoaded', () => {
+        const fairyImg = document.getElementById('fairy-img');
+        if (fairyImg) {
+            window.heartReactorImg = fairyImg; // Alias
+            console.log("[KGEN] Alias created: fairy-img -> heartReactorImg");
+        }
+    });
+
+    // Swap Route Lock Logic
+    const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+    const BSC_USDT = "0x55d398326f99059fF775485246999027B3197955";
+    
+    window.buildSwapUrl = function(inputCurrency) {
+        let url = "https://pancakeswap.finance/swap?outputCurrency=" + KGEN;
+        if (inputCurrency) {
+            url += "&inputCurrency=" + inputCurrency;
+        }
+        return url;
+    };
+
+    // Intercept legacy swap calls
+    window.openPancakeFixed = function(input) {
+        const target = window.buildSwapUrl(input);
+        window.open(target, "_blank", "noopener,noreferrer");
+        console.log("[KGEN] Swap locked to KGEN:", target);
+    };
+})();
+</script>
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1396,11 +1454,11 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="temple-audio-console" aria-label="12345 神殿音樂系統">
-  <div class="ta-head"><span>神殿音樂｜V7.19</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
+  <div class="ta-head"><span>神殿音樂｜V8.5.3</span><button type="button" onclick="templeAudio.toggleMini()">收合</button></div>
   <div class="ta-row">
     <div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
     <button type="button" onclick="templeAudio.playBgm()">播放</button>
-    <button type="button" onclick="templeAudio.stopBgm()">停止</button>
+    <button type="button" onclick="window.emergencyStopAudio && window.emergencyStopAudio()">停止</button>
   </div>
   <div class="ta-volume" style="margin-top:8px;display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;">
     <span>音量</span><input id="ta-volume" type="range" min="0" max="100" value="56" oninput="templeAudio.setVolume(this.value)"><span id="ta-vol-txt">56%</span>
@@ -1413,7 +1471,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.19</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.5.3</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1660,7 +1718,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V7.19";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.5.3";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3703,8 +3761,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
 
-  <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
-  <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-bnb" onclick="window.openPancakeFixed()" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
+  <button class="nav-btn nav-swap" id="btn-swap-usdt" onclick="window.openPancakeFixed('0x55d398326f99059fF775485246999027B3197955')" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
   <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
   <button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 悟空財神殿導覽</button>
   <button class="nav-btn nav-help" onclick="roundHistory.open()">名額紀錄</button>
@@ -3734,7 +3792,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
-    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="window.emergencyStopAudio && window.emergencyStopAudio()">停止</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
 
@@ -4187,7 +4245,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     </div>
     <div class="cp-row">
       <div class="cp-k">11520 花果山交易所</div>
-      <div class="cp-v"><button type="button" style="width:100%;" onclick="app.openPancake()">開啟 KGEN / WBNB</button></div>
+      <div class="cp-v"><button type="button" style="width:100%;" onclick="window.openPancakeFixed()">開啟 KGEN / WBNB</button></div>
     </div>
     <div class="cp-row">
       <div class="cp-k">8888 高老莊</div>
@@ -4495,7 +4553,7 @@ document.addEventListener('click', (ev)=>{
 });
 </script>
 
-<script>try{app.musicInit();}catch(_){}</script>
+<script>try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(_){}</script>
 
 <script>
 (function(){
@@ -4837,7 +4895,7 @@ document.addEventListener('click', (ev)=>{
     };
 
     window.addEventListener('load', ()=>{
-      autoLoadBuiltin().then(()=>tryAutoPlay());
+      autoLoadBuiltin(); // V8.5.1: no autoplay; prevent duplicated audio engines
     });
 
   }catch(e){}
@@ -7548,7 +7606,7 @@ if(chainLive){
       const title = document.querySelector('.brand-name');
       if(title) title.textContent = 'KGEN 12345 五指山悟空財神殿';
       const ver = document.getElementById('ver-st');
-      if(ver) ver.textContent = 'VERSION 12345-TEMPLE-V7.19';
+      if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
 
       const liveBtn = document.getElementById('chainToggleBtn');
       if(liveBtn) liveBtn.textContent = 'WUZHISHAN HEART LIVE';
@@ -8700,7 +8758,7 @@ KGEN 12345 Heart Live Patch V7.3.0
     }
   }
   document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6 Live';
-  const oldVer = document.getElementById('ver-st'); if(oldVer) oldVer.textContent = 'VERSION 12345 HEART LIVE V7.3.0';
+  const oldVer = document.getElementById('ver-st'); if(oldVer) oldVer.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
   bind();
   updateClock(); setInterval(updateClock, 1000);
   setTimeout(()=>refresh().catch(e=>log('讀取 Heart 失敗：' + (e.message||e))), 700);
@@ -9578,7 +9636,7 @@ KGEN 12345 UI Patch V7.6.0
 
   function fixAddressesAndLabels(){
     document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.6.0';
-    const ver = $('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.6.0';
+    const ver = $('ver-st'); if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
     const khTitle = document.querySelector('#kgen-heart-live-panel .kh-title');
     if(khTitle) khTitle.textContent = '12345 悟空財神殿 Heart V3.2.6';
     const uni = $('w3-uni'); if(uni) uni.textContent = HEART;
@@ -9819,7 +9877,7 @@ KGEN 12345 UI Patch V7.6.0
 
   function fixLabelsAndHide16888(){
     document.title = 'KGEN 12345 五指山悟空財神殿｜Heart V3.2.6｜UI V7.8.0';
-    const ver=$('ver-st'); if(ver) ver.textContent = 'VERSION 12345 HEART V3.2.6 / UI V7.8.0';
+    const ver=$('ver-st'); if(ver) ver.textContent = 'VERSION KGEN-12345-HEART-UI-V8.5.3';
     const title=document.querySelector('#kgen-heart-live-panel .kh-title'); if(title) title.textContent='12345 悟空財神殿 Heart V3.2.6';
     const panel=$('web3-panel'); if(panel) panel.style.display='none';
     const uni=$('w3-uni'); if(uni) uni.textContent = HEART;
@@ -10274,8 +10332,8 @@ KGEN 12345 UI Patch V7.6.0
   }
 
   function init(){
-    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.19｜Heart V3.2.6';
-    set('ver-st','VERSION 12345-TEMPLE-V7.19');
+    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3｜Heart V3.2.6';
+    set('ver-st','VERSION KGEN-12345-HEART-UI-V8.5.3');
     set('w3-uni', HEART_ADDR);
     remove16888Words();
     patchAngle();
@@ -10337,7 +10395,7 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){}
   }
   function fixText(){
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.19';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3';
     document.querySelectorAll('*').forEach(el=>{
       if(el.children.length) return;
       let t=el.textContent||'';
@@ -10457,9 +10515,9 @@ KGEN 12345 UI Patch V7.6.0
   function speak(msg){try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; u.rate=.96; u.pitch=.92; speechSynthesis.speak(u);} }catch(e){}}
   function set(id,v){const e=$(id); if(e) e.textContent=v;}
   function patchVersion(){
-    document.title='KGEN 12345 五指山悟空財神殿｜12345-TEMPLE-V7.19｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION 12345-TEMPLE-V7.19';
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION 12345-TEMPLE-V7.19'; });
+    document.title='KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.5.3｜Heart V3.2.6';
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3';
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION KGEN-12345-HEART-UI-V8.5.3'; });
     document.querySelectorAll('*').forEach(el=>{ if(el.childNodes && el.childNodes.length===1 && el.childNodes[0].nodeType===3){
       el.textContent=el.textContent.replace(/V7\.12|V7\.13/g,'V7.19').replace(/規則與下凡/g,'發放規則');
     }});
@@ -10609,7 +10667,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="v715-human-panel-js">
 (function(){
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const VERSION='12345-TEMPLE-V7.19';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const $=(id)=>document.getElementById(id);
   function say(msg){ try{ window.app&&app.speak&&app.speak(msg); }catch(e){} try{ if(window.toast) toast(msg); }catch(e){} }
   function makeDock(){
@@ -10881,7 +10939,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v716-human-buttons-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.16';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const $=id=>document.getElementById(id);
   function speak(msg){
     try{ if(window.app && typeof app.speak==='function'){ app.speak(msg); return; } }catch(e){}
@@ -11270,7 +11328,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v713-walletfix-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.19';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -11519,7 +11577,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v717-footer8-standard-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.17';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11739,7 +11797,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v718-final-layout-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.19';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -11960,7 +12018,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v719-final-fix-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.19';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const $=id=>document.getElementById(id);
   function speak(msg){
@@ -12036,7 +12094,7 @@ KGEN 12345 UI Patch V7.6.0
     closeAll(); document.body.classList.add('k19-audio-open');
     const p=$('music-panel'); if(p) p.style.display='block';
     speak('五指山神殿音響已開啟。');
-    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
+    try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(e){}
   }
   function openGuide(){
     closeAll();
@@ -12223,7 +12281,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v720-layout-audio-hotfix-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.20';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const $=id=>document.getElementById(id);
 
   function speak(msg){
@@ -12320,7 +12378,7 @@ KGEN 12345 UI Patch V7.6.0
       }
     }
     speak('五指山神殿音響已開啟。');
-    try{ if(window.app && typeof window.app.musicInit==='function') window.app.musicInit(); }catch(e){}
+    try{ if(window.app && !window.app.__v851MusicInitDone && typeof window.app.musicInit==='function'){ window.app.__v851MusicInitDone=true; window.app.musicInit(); } }catch(e){}
   }
 
   function openGuide(){
@@ -12599,7 +12657,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v721-stable-repair-js">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V7.21';
+  const VERSION='KGEN-12345-HEART-UI-V8.5.3';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
@@ -12749,7 +12807,7 @@ KGEN 12345 UI Patch V7.6.0
     closeAll(); ensureMusicPanel();
     const p=$('music-panel'); if(p) p.style.display='block';
     document.body.classList.add('k21-audio-open');
-    try{ if(window.app && typeof app.musicInit==='function') app.musicInit(); }catch(e){}
+    try{ if(window.app && !window.app.__v851MusicInitDone && typeof app.musicInit==='function'){ window.app.__v851MusicInitDone=true; app.musicInit(); } }catch(e){}
     try{ if(window.app && typeof app.musicLoadBuiltIn==='function') app.musicLoadBuiltIn(false); }catch(e){}
     speak('五指山神殿音響已開啟。');
   }
@@ -13481,6 +13539,780 @@ KGEN 12345 UI Patch V7.6.0
 
   window.addEventListener('load', init);
   setInterval(update, 1000);
+})();
+</script>
+
+
+
+<!-- ============================================================
+V8.5.1 HOTFIX: version display + single audio engine emergency stop
+Scope: no wallet_core / no contract interaction / no UI layout change
+============================================================ -->
+<script id="v851-audio-version-hotfix">
+(function(){
+  'use strict';
+  const APP_VERSION_V851 = 'KGEN-12345-HEART-UI-V8.5.3';
+  const DISPLAY_VERSION_V851 = 'VERSION ' + APP_VERSION_V851;
+  const TITLE_V851 = 'KGEN 12345 五指山悟空財神殿｜' + APP_VERSION_V851;
+
+  function $(id){ return document.getElementById(id); }
+  function setText(el, text){ if(el) el.textContent = text; }
+  function safeCall(fn){ try{ return fn && fn(); }catch(_){} }
+
+  window.__kgenAudioEngineV851 = window.__kgenAudioEngineV851 || {
+    active: null,
+    oscillators: new Set(),
+    htmlAudio: new Set(),
+    stopping: false
+  };
+  const engine = window.__kgenAudioEngineV851;
+
+  function trackAudio(a){
+    try{ if(a && typeof a.pause === 'function') engine.htmlAudio.add(a); }catch(_){}
+    return a;
+  }
+
+  function stopAudioElement(a, clearSrc){
+    if(!a) return;
+    try{ a.pause(); }catch(_){}
+    try{ a.currentTime = 0; }catch(_){}
+    try{ a.muted = false; }catch(_){}
+    if(clearSrc){
+      try{ a.removeAttribute('src'); }catch(_){}
+      try{ a.src = ''; }catch(_){}
+      try{ a.load && a.load(); }catch(_){}
+    }
+  }
+
+  function stopNode(n){
+    if(!n) return;
+    try{ if(typeof n.stop === 'function') n.stop(0); }catch(_){}
+    try{ if(typeof n.disconnect === 'function') n.disconnect(); }catch(_){}
+  }
+
+  window.emergencyStopAudio = function emergencyStopAudio(){
+    if(engine.stopping) return;
+    engine.stopping = true;
+    try{
+      safeCall(()=>window.speechSynthesis && window.speechSynthesis.cancel());
+
+      document.querySelectorAll('audio').forEach(a=>{ trackAudio(a); stopAudioElement(a, true); });
+
+      const app = window.app;
+      if(app){
+        app.audioOn = false;
+        safeCall(()=>document.querySelector('.nav-audio')?.classList.remove('on'));
+        if(Array.isArray(app.audioNodes)) app.audioNodes.forEach(stopNode);
+        app.audioNodes = [];
+        safeCall(()=>{ if(app.audioCtx && typeof app.audioCtx.close === 'function' && app.audioCtx.state !== 'closed') app.audioCtx.close(); });
+        app.audioCtx = null;
+
+        if(app._music){
+          trackAudio(app._music.audio);
+          stopAudioElement(app._music.audio, true);
+        }
+        trackAudio(app._musicAudio);
+        stopAudioElement(app._musicAudio, true);
+      }
+
+      const ta = window.templeAudio;
+      if(ta){
+        trackAudio(ta.bgm);
+        stopAudioElement(ta.bgm, true);
+        ta.bgm = null;
+        safeCall(()=>{ if(ta.ctx && typeof ta.ctx.close === 'function' && ta.ctx.state !== 'closed') ta.ctx.close(); });
+        ta.ctx = null;
+        ta.unlocked = false;
+        setText($('ta-now'), '已停止｜神殿音樂');
+      }
+
+      engine.oscillators.forEach(stopNode);
+      engine.oscillators.clear();
+      engine.htmlAudio.forEach(a=>stopAudioElement(a, true));
+      engine.active = null;
+
+      setText($('music-now'), '（已停止）');
+      setText($('music-status'), '音樂已關閉');
+      setText($('music-name'), '未載入音檔');
+    }finally{
+      engine.stopping = false;
+    }
+  };
+
+  function normalizeVersionDisplay(){
+    document.title = TITLE_V851;
+    document.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]').forEach(meta=>meta.setAttribute('content', TITLE_V851));
+    setText($('ver-st'), DISPLAY_VERSION_V851);
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent || '').includes('VERSION')) el.textContent = DISPLAY_VERSION_V851; });
+  }
+
+  function patchAudioConstructors(){
+    if(!window.__v851AudioConstructorPatched && typeof window.Audio === 'function'){
+      const NativeAudio = window.Audio;
+      const WrappedAudio = function(src){
+        const a = src ? new NativeAudio(src) : new NativeAudio();
+        return trackAudio(a);
+      };
+      WrappedAudio.prototype = NativeAudio.prototype;
+      try{ Object.setPrototypeOf(WrappedAudio, NativeAudio); }catch(_){}
+      window.Audio = WrappedAudio;
+      window.__v851AudioConstructorPatched = true;
+    }
+
+    if(!window.__v851OscillatorPatched){
+      ['AudioContext','webkitAudioContext'].forEach(name=>{
+        const AC = window[name];
+        if(!AC || !AC.prototype || AC.prototype.__v851CreateOscillatorPatched) return;
+        const oldCreate = AC.prototype.createOscillator;
+        AC.prototype.createOscillator = function(){
+          const osc = oldCreate.apply(this, arguments);
+          try{ engine.oscillators.add(osc); }catch(_){}
+          return osc;
+        };
+        AC.prototype.__v851CreateOscillatorPatched = true;
+      });
+      window.__v851OscillatorPatched = true;
+    }
+  }
+
+  function patchAppAudio(){
+    const app = window.app;
+    if(!app || app.__v851AudioPatched) return;
+    app.__v851AudioPatched = true;
+
+    const originalEnableAudio = typeof app.enableAudio === 'function' ? app.enableAudio.bind(app) : null;
+    app.enableAudio = function(){
+      if(app.audioOn){ window.emergencyStopAudio(); return; }
+      window.emergencyStopAudio();
+      return originalEnableAudio ? originalEnableAudio() : undefined;
+    };
+
+    const originalMusicInit = typeof app.musicInit === 'function' ? app.musicInit.bind(app) : null;
+    app.musicInit = function(){
+      if(app.__v851MusicInitDone) return;
+      app.__v851MusicInitDone = true;
+      const r = originalMusicInit ? originalMusicInit() : undefined;
+      if(app._music && app._music.audio) trackAudio(app._music.audio);
+      trackAudio($('music-audio'));
+      return r;
+    };
+
+    const originalSetIndex = typeof app.musicSetIndex === 'function' ? app.musicSetIndex.bind(app) : null;
+    app.musicSetIndex = function(i){
+      const r = originalSetIndex ? originalSetIndex(i) : undefined;
+      if(app._music && app._music.audio) trackAudio(app._music.audio);
+      return r;
+    };
+
+    const originalPlay = typeof app.musicPlay === 'function' ? app.musicPlay.bind(app) : null;
+    app.musicPlay = async function(){
+      const keep = app._music && app._music.audio ? app._music.audio : $('music-audio');
+      engine.htmlAudio.forEach(a=>{ if(a !== keep) stopAudioElement(a, true); });
+      document.querySelectorAll('audio').forEach(a=>{ trackAudio(a); if(a !== keep) stopAudioElement(a, true); });
+      if(keep){ trackAudio(keep); engine.active = keep; }
+      return originalPlay ? originalPlay() : undefined;
+    };
+
+    app.musicPause = function(){ window.emergencyStopAudio(); };
+    app.musicStop = function(){ window.emergencyStopAudio(); };
+  }
+
+  function patchTempleAudio(){
+    const ta = window.templeAudio;
+    if(!ta || ta.__v851AudioPatched) return;
+    ta.__v851AudioPatched = true;
+
+    const originalInit = typeof ta.init === 'function' ? ta.init.bind(ta) : null;
+    ta.init = async function(){
+      if(ta.__v851InitDone) return;
+      ta.__v851InitDone = true;
+      const r = originalInit ? await originalInit() : undefined;
+      trackAudio(ta.bgm);
+      return r;
+    };
+
+    const originalPlayBgm = typeof ta.playBgm === 'function' ? ta.playBgm.bind(ta) : null;
+    ta.playBgm = async function(){
+      window.emergencyStopAudio();
+      const r = originalPlayBgm ? await originalPlayBgm() : undefined;
+      trackAudio(ta.bgm);
+      engine.active = ta.bgm || engine.active;
+      return r;
+    };
+
+    ta.stopBgm = function(){ window.emergencyStopAudio(); };
+  }
+
+  function patchStopButtons(){
+    document.querySelectorAll('[onclick]').forEach(el=>{
+      const code = el.getAttribute('onclick') || '';
+      if(code.includes('musicStop') || code.includes('stopBgm')){
+        el.setAttribute('onclick', 'window.emergencyStopAudio && window.emergencyStopAudio()');
+      }
+    });
+  }
+
+  patchAudioConstructors();
+  patchAppAudio();
+  patchTempleAudio();
+  patchStopButtons();
+  normalizeVersionDisplay();
+  window.emergencyStopAudio();
+
+  document.addEventListener('DOMContentLoaded', function(){
+    patchAudioConstructors();
+    patchAppAudio();
+    patchTempleAudio();
+    patchStopButtons();
+    normalizeVersionDisplay();
+  });
+  window.addEventListener('load', function(){
+    patchAppAudio();
+    patchTempleAudio();
+    patchStopButtons();
+    normalizeVersionDisplay();
+  });
+  setInterval(normalizeVersionDisplay, 1500);
+})();
+</script>
+
+
+
+<!-- ============================================================
+V8.5.3 HOTFIX: 12345 camera thumb + wallet state sync + audio transport + version
+Scope: no wallet connect main-flow change / no contract address / no ABI / no UI layout change
+============================================================ -->
+<style id="v852-camera-wallet-audio-hotfix-style">
+  #mini-thumb{
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    background-image:url('./assets/wukong_heart_core.jpg') !important;
+    background-position:center center !important;
+    background-size:cover !important;
+    background-repeat:no-repeat !important;
+    background-color:#050505 !important;
+  }
+  #mini-thumb::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:url('./assets/wukong_heart_core.jpg') center/cover no-repeat !important;
+    opacity:1 !important;
+    pointer-events:none;
+  }
+  #fairy-img{
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+</style>
+<script id="v852-camera-wallet-audio-hotfix">
+(function(){
+  'use strict';
+  const APP_VERSION_V852 = 'KGEN-12345-HEART-UI-V8.5.3';
+  const DISPLAY_VERSION_V852 = 'VERSION ' + APP_VERSION_V852;
+  const TITLE_V852 = 'KGEN 12345 五指山悟空財神殿｜' + APP_VERSION_V852;
+  const HEART_REACTOR_IMG = './assets/wukong_heart_core.jpg';
+  const HEART_ADDR = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+
+  function $(id){ return document.getElementById(id); }
+  function setText(el, text){ if(el) el.textContent = text; }
+  function safe(fn){ try{ return fn && fn(); }catch(_){} }
+  function safeAsync(fn){ try{ return Promise.resolve(fn && fn()).catch(()=>undefined); }catch(_){ return Promise.resolve(undefined); } }
+
+  window.__kgenAudioEngineV852 = window.__kgenAudioEngineV852 || {
+    active:null,
+    htmlAudio:new Set(),
+    oscillators:new Set(),
+    contexts:new Set(),
+    paused:false,
+    stopping:false
+  };
+  const engine = window.__kgenAudioEngineV852;
+
+  function normalizeVersionDisplay(){
+    document.title = TITLE_V852;
+    document.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]').forEach(meta=>meta.setAttribute('content', TITLE_V852));
+    setText($('ver-st'), DISPLAY_VERSION_V852);
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent = DISPLAY_VERSION_V852; });
+    const taHead = document.querySelector('#temple-audio-console .ta-head span');
+    if(taHead) taHead.textContent = '神殿音樂｜V8.5.3';
+  }
+
+  function normalizeCameraThumb(){
+    const mini = $('mini-thumb');
+    if(mini){
+      mini.style.setProperty('display','block','important');
+      mini.style.setProperty('visibility','visible','important');
+      mini.style.setProperty('opacity','1','important');
+      mini.style.setProperty('background-image', "url('" + HEART_REACTOR_IMG + "')", 'important');
+      mini.style.setProperty('background-position','center center','important');
+      mini.style.setProperty('background-size','cover','important');
+      mini.style.setProperty('background-repeat','no-repeat','important');
+      mini.dataset.kgen12345Thumb = 'heart-reactor';
+      mini.setAttribute('aria-label','Heart Reactor / 悟空心臟圖');
+    }
+    const img = $('fairy-img');
+    if(img){
+      const src = String(img.getAttribute('src') || '').toLowerCase();
+      if(!src || src.includes('fairy') || src.includes('16888')) img.setAttribute('src', HEART_REACTOR_IMG);
+      img.style.setProperty('opacity','1','important');
+      img.style.setProperty('visibility','visible','important');
+      img.dataset.kgen12345Role = 'heart-reactor';
+      window.heartReactorImg = img;
+    }
+  }
+
+  function patchAudioConstructors(){
+    if(!window.__v852AudioConstructorPatched && typeof window.Audio === 'function'){
+      const NativeAudio = window.Audio;
+      const WrappedAudio = function(src){
+        const a = src ? new NativeAudio(src) : new NativeAudio();
+        try{ engine.htmlAudio.add(a); }catch(_){}
+        return a;
+      };
+      WrappedAudio.prototype = NativeAudio.prototype;
+      try{ Object.setPrototypeOf(WrappedAudio, NativeAudio); }catch(_){}
+      window.Audio = WrappedAudio;
+      window.__v852AudioConstructorPatched = true;
+    }
+    ['AudioContext','webkitAudioContext'].forEach(name=>{
+      const AC = window[name];
+      if(!AC || !AC.prototype) return;
+      if(!AC.prototype.__v852CreateOscillatorPatched){
+        const oldCreate = AC.prototype.createOscillator;
+        AC.prototype.createOscillator = function(){
+          try{ engine.contexts.add(this); }catch(_){}
+          const osc = oldCreate.apply(this, arguments);
+          try{ engine.oscillators.add(osc); }catch(_){}
+          return osc;
+        };
+        AC.prototype.__v852CreateOscillatorPatched = true;
+      }
+      if(!AC.prototype.__v852ResumePatched){
+        const oldResume = AC.prototype.resume;
+        if(typeof oldResume === 'function'){
+          AC.prototype.resume = function(){ try{ engine.contexts.add(this); }catch(_){} return oldResume.apply(this, arguments); };
+        }
+        AC.prototype.__v852ResumePatched = true;
+      }
+    });
+  }
+
+  function trackAudio(a){ try{ if(a && typeof a.pause === 'function') engine.htmlAudio.add(a); }catch(_){} return a; }
+  function stopNode(n){ if(!n) return; try{ if(typeof n.stop==='function') n.stop(0); }catch(_){} try{ if(typeof n.disconnect==='function') n.disconnect(); }catch(_){} }
+  function pauseAudioElement(a, reset, clearSrc){
+    if(!a) return;
+    try{ a.pause(); }catch(_){}
+    if(reset) try{ a.currentTime = 0; }catch(_){}
+    if(clearSrc){
+      try{ a.removeAttribute('src'); }catch(_){}
+      try{ a.src = ''; }catch(_){}
+      try{ a.load && a.load(); }catch(_){}
+    }
+  }
+  function allAudioElements(){
+    const set = new Set();
+    try{ document.querySelectorAll('audio').forEach(a=>set.add(a)); }catch(_){}
+    try{ engine.htmlAudio.forEach(a=>set.add(a)); }catch(_){}
+    const app = window.app;
+    if(app && app._music && app._music.audio) set.add(app._music.audio);
+    if(app && app._musicAudio) set.add(app._musicAudio);
+    if(window.templeAudio && window.templeAudio.bgm) set.add(window.templeAudio.bgm);
+    return set;
+  }
+  function stopEveryAudioExcept(keep, clearOthers){
+    allAudioElements().forEach(a=>{ trackAudio(a); if(a !== keep) pauseAudioElement(a, true, !!clearOthers); });
+  }
+
+  window.emergencyStopAudio = function emergencyStopAudio(){
+    if(engine.stopping) return;
+    engine.stopping = true;
+    try{
+      safe(()=>window.speechSynthesis && window.speechSynthesis.cancel());
+      stopEveryAudioExcept(null, true);
+      const app = window.app;
+      if(app){
+        app.audioOn = false;
+        safe(()=>document.querySelector('.nav-audio')?.classList.remove('on'));
+        if(Array.isArray(app.audioNodes)) app.audioNodes.forEach(stopNode);
+        app.audioNodes = [];
+        safe(()=>{ if(app.audioCtx && typeof app.audioCtx.close==='function' && app.audioCtx.state !== 'closed') app.audioCtx.close(); });
+        app.audioCtx = null;
+        if(app._music) app._music.playing = false;
+      }
+      const ta = window.templeAudio;
+      if(ta){
+        pauseAudioElement(ta.bgm, true, true);
+        ta.bgm = null;
+        safe(()=>{ if(ta.ctx && typeof ta.ctx.close==='function' && ta.ctx.state !== 'closed') ta.ctx.close(); });
+        ta.ctx = null;
+        ta.unlocked = false;
+        setText($('ta-now'), '已停止｜神殿音樂');
+      }
+      engine.oscillators.forEach(stopNode); engine.oscillators.clear();
+      engine.contexts.forEach(ctx=>safe(()=>{ if(ctx && typeof ctx.close==='function' && ctx.state !== 'closed') ctx.close(); }));
+      engine.contexts.clear();
+      engine.active = null; engine.paused = false;
+      setText($('music-status'), '音樂已停止');
+      setText($('ta-now'), '已停止｜神殿音樂');
+    }finally{ engine.stopping = false; }
+  };
+
+  function patchMusicTransport(){
+    const app = window.app;
+    if(!app || app.__v852AudioTransportPatched) return;
+    app.__v852AudioTransportPatched = true;
+    const original = {
+      init: typeof app.musicInit==='function' ? app.musicInit.bind(app) : null,
+      setIndex: typeof app.musicSetIndex==='function' ? app.musicSetIndex.bind(app) : null,
+      loadBuiltIn: typeof app.musicLoadBuiltIn==='function' ? app.musicLoadBuiltIn.bind(app) : null,
+      play: typeof app.musicPlay==='function' ? app.musicPlay.bind(app) : null,
+      pause: typeof app.musicPause==='function' ? app.musicPause.bind(app) : null,
+      stop: typeof app.musicStop==='function' ? app.musicStop.bind(app) : null,
+      prev: typeof app.musicPrev==='function' ? app.musicPrev.bind(app) : null,
+      next: typeof app.musicNext==='function' ? app.musicNext.bind(app) : null
+    };
+    app.__v852MusicOriginal = original;
+
+    function ensureMusic(){
+      app._music = app._music || {list:[], index:0};
+      const m = app._music;
+      if(!m.audio){
+        m.audio = trackAudio($('music-audio') || new Audio());
+        try{ m.audio.preload = 'auto'; }catch(_){}
+      }else trackAudio(m.audio);
+      return m;
+    }
+    function currentTrack(m){ const list=m.list||[]; const idx=((Number(m.index)||0)%list.length+list.length)%list.length; m.index=idx; return list[idx]||null; }
+    function resolveUrl(t){ return String((t && (t.url || t.src || t.file)) || '').trim(); }
+    function setNow(m, msg){
+      const t = currentTrack(m); const name = t ? (t.name || t.title || t.url || 'Track') : '未載入音檔';
+      setText($('music-name'), name);
+      setText($('music-now'), msg || (t ? '目前：' + name : '（未選曲）'));
+    }
+    function applyIndex(i){
+      const m=ensureMusic(); const list=m.list||[];
+      if(!list.length){ setNow(m,'（未選曲）'); return m; }
+      m.index = ((Number(i)||0)%list.length+list.length)%list.length;
+      const url = resolveUrl(currentTrack(m));
+      if(url){
+        pauseAudioElement(m.audio, true, false);
+        try{ m.audio.src = url; m.audio.load && m.audio.load(); }catch(_){}
+      }
+      if(original.setIndex) safe(()=>original.setIndex(m.index));
+      m.audio = trackAudio((app._music && app._music.audio) || m.audio || $('music-audio'));
+      setNow(m);
+      safe(()=>app.musicRenderList && app.musicRenderList());
+      return m;
+    }
+
+    app.musicInit = function(){
+      if(app.__v852MusicInitDone) return;
+      app.__v852MusicInitDone = true;
+      safe(()=>original.init && original.init());
+      ensureMusic();
+    };
+    app.musicSetIndex = function(i){ return applyIndex(i); };
+    app.musicPlay = async function(){
+      const m=ensureMusic();
+      if(!(m.list||[]).length && original.loadBuiltIn) await safeAsync(()=>original.loadBuiltIn(false));
+      if(!(m.list||[]).length){ setText($('music-status'),'請先載入音檔或內建歌單'); safe(()=>app.speak&&app.speak('請先載入音檔。')); return; }
+      if(!m.audio.src) applyIndex(Number(m.index)||0);
+      stopEveryAudioExcept(m.audio, true);
+      engine.active = m.audio; engine.paused = false;
+      try{ await m.audio.play(); m.playing = true; setText($('music-status'),'播放中'); setNow(m); safe(()=>app.speak&&app.speak('開始播放。')); }
+      catch(e){ setText($('music-status'),'請再點一次播放解鎖音樂'); }
+    };
+    app.musicPause = function(){
+      const m=ensureMusic();
+      pauseAudioElement(m.audio, false, false);
+      engine.paused = true; m.playing = false;
+      setText($('music-status'),'已暫停'); safe(()=>app.speak&&app.speak('已暫停。'));
+    };
+    app.musicStop = function(){ window.emergencyStopAudio(); safe(()=>app.speak&&app.speak('已停止。')); };
+    app.musicPrev = function(){ const m=ensureMusic(); if(!(m.list||[]).length) return; applyIndex((Number(m.index)||0)-1); return app.musicPlay(); };
+    app.musicNext = function(){ const m=ensureMusic(); if(!(m.list||[]).length) return; applyIndex((Number(m.index)||0)+1); return app.musicPlay(); };
+  }
+
+  function patchTempleAudio(){
+    const ta = window.templeAudio;
+    if(!ta || ta.__v852AudioTransportPatched) return;
+    ta.__v852AudioTransportPatched = true;
+    const oldPlay = typeof ta.playBgm==='function' ? ta.playBgm.bind(ta) : null;
+    const oldInit = typeof ta.init==='function' ? ta.init.bind(ta) : null;
+    ta.init = async function(){ if(ta.__v852InitDone) return; ta.__v852InitDone = true; const r = oldInit ? await oldInit() : undefined; trackAudio(ta.bgm); return r; };
+    ta.playBgm = async function(){ window.emergencyStopAudio(); const r = oldPlay ? await oldPlay() : undefined; trackAudio(ta.bgm); engine.active = ta.bgm || engine.active; return r; };
+    ta.stopBgm = function(){ window.emergencyStopAudio(); };
+  }
+
+  function patchStopButtons(){
+    document.querySelectorAll('[onclick]').forEach(el=>{
+      const code=el.getAttribute('onclick')||'';
+      if(code.includes('musicStop') || code.includes('stopBgm') || code.includes('emergencyStopAudio')) el.setAttribute('onclick','window.emergencyStopAudio && window.emergencyStopAudio()');
+    });
+  }
+
+  function patchWalletRefresh(){
+    const web3 = window.web3;
+    if(!web3 || web3.__v852WalletRefreshPatched) return;
+    web3.__v852WalletRefreshPatched = true;
+    const original = {
+      refresh: typeof web3.refresh==='function' ? web3.refresh.bind(web3) : null,
+      refreshUser: typeof web3.refreshUser==='function' ? web3.refreshUser.bind(web3) : null,
+      refreshAll: typeof web3.refreshAll==='function' ? web3.refreshAll.bind(web3) : null,
+      connect: typeof web3.connect==='function' ? web3.connect.bind(web3) : null,
+      setProvider: typeof web3.setProvider==='function' ? web3.setProvider.bind(web3) : null
+    };
+    web3.__v852OriginalRefresh = original;
+
+    window.refreshWalletState = async function refreshWalletState(reason){
+      if(window.__v852RefreshingWalletState) return;
+      window.__v852RefreshingWalletState = true;
+      try{
+        if(web3.ethersProvider && !web3.provider) web3.provider = web3.ethersProvider;
+        if(web3.signer && !web3.addr){
+          await safeAsync(async()=>{ web3.addr = await web3.signer.getAddress(); });
+        }
+        if(web3.signer){
+          await safeAsync(async()=>{ const addr = await web3.signer.getAddress(); web3.addr = addr; setText($('w3-addr'), addr); });
+        }else if(web3.addr) setText($('w3-addr'), web3.addr);
+        const provider = web3.provider || web3.ethersProvider;
+        if(provider && provider.getNetwork){
+          await safeAsync(async()=>{ const net = await provider.getNetwork(); setText($('w3-chain'), net && net.chainId ? ((net.name||'chain')+' ('+net.chainId+')') : '--'); });
+        }else if(window.ethereum && window.ethereum.request){
+          await safeAsync(async()=>{ const cid = await window.ethereum.request({method:'eth_chainId'}); setText($('w3-chain'), cid || '--'); });
+        }
+        if(original.refresh) await safeAsync(()=>original.refresh());
+        if(original.refreshUser) await safeAsync(()=>original.refreshUser());
+        if(original.refreshAll) await safeAsync(()=>original.refreshAll());
+        if(web3.UNIVERSE) setText($('w3-uni'), web3.UNIVERSE);
+        else setText($('w3-uni'), HEART_ADDR);
+      }finally{ window.__v852RefreshingWalletState = false; }
+    };
+
+    function wrapTxMethod(obj, name){
+      const fn = obj && obj[name];
+      if(typeof fn !== 'function' || fn.__v852Wrapped) return;
+      const wrapped = async function(){
+        const result = await fn.apply(this, arguments);
+        await safeAsync(()=>window.refreshWalletState(name));
+        setTimeout(()=>safeAsync(()=>window.refreshWalletState(name + ':delayed')), 1200);
+        return result;
+      };
+      wrapped.__v852Wrapped = true;
+      obj[name] = wrapped;
+    }
+    ['approve','ritualDeposit','place','connect','setProvider','connectWalletConnect','connectBinance'].forEach(n=>wrapTxMethod(web3,n));
+
+    if(window.templeOps && !window.templeOps.__v852WalletRefreshPatched){
+      window.templeOps.__v852WalletRefreshPatched = true;
+      ['approve','cup','fortune','heartbeat','ignite','vow','lamp','wish','festival','festival1','festival2','newyear','newYear'].forEach(n=>wrapTxMethod(window.templeOps,n));
+    }
+    safeAsync(()=>window.refreshWalletState('init'));
+  }
+
+  function initV852(){
+    normalizeVersionDisplay();
+    normalizeCameraThumb();
+    patchAudioConstructors();
+    patchMusicTransport();
+    patchTempleAudio();
+    patchStopButtons();
+    patchWalletRefresh();
+  }
+
+  initV852();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initV852); else setTimeout(initV852, 0);
+  window.addEventListener('load', initV852);
+  setTimeout(initV852, 600);
+  setTimeout(initV852, 1600);
+  setInterval(function(){ normalizeVersionDisplay(); normalizeCameraThumb(); patchStopButtons(); patchWalletRefresh(); }, 1800);
+})();
+</script>
+
+
+<!-- ===== KGEN 12345 FINAL HOTFIX V8.5.3: wallet connect no Play Store redirect ===== -->
+<script id="kgen12345-v853-wallet-no-playstore-hotfix">
+(function(){
+  'use strict';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.5.3';
+  const BSC = '0x38';
+  const RPC = 'https://bsc-dataseed.binance.org/';
+
+  function $(id){ return document.getElementById(id); }
+  function set(id, v){ const el=$(id); if(el) el.textContent = v; }
+  function short(a){ return a ? a.slice(0,6) + '…' + a.slice(-4) : '--'; }
+  function speak(msg){
+    try{
+      if(window.speechSynthesis){
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(String(msg || ''));
+        u.lang = 'zh-TW';
+        u.rate = 0.95;
+        u.pitch = 0.9;
+        u.volume = 0.95;
+        speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+  function toast(msg){
+    try{
+      if(window.ui && ui.toast) ui.toast(msg);
+      else if(window.web3 && web3.toast) web3.toast(msg);
+    }catch(e){}
+    console.log('[KGEN12345 V8.5.3]', msg);
+  }
+
+  function pickProvider(){
+    let eth = window.ethereum ||
+      (window.trustwallet && window.trustwallet.ethereum) ||
+      window.BinanceChain ||
+      window.okxwallet ||
+      (window.bitkeep && window.bitkeep.ethereum);
+
+    if(eth && Array.isArray(eth.providers) && eth.providers.length){
+      eth = eth.providers.find(p => p && (
+        p.isMetaMask || p.isTrust || p.isOKXWallet || p.isBinance ||
+        p.isCoinbaseWallet || p.isBitKeep || p.isTokenPocket
+      )) || eth.providers[0];
+    }
+    if(eth) window.ethereum = eth;
+    return eth || null;
+  }
+
+  function openWalletHubOnly(){
+    const hub = $('walletHub');
+    const inp = $('walletHubUrl');
+    if(inp) inp.value = location.href;
+    if(hub) hub.style.display = 'flex';
+    set('bp-status', '未偵測到已注入錢包。請用錢包內建瀏覽器開啟本頁，或複製網址到錢包 DApp。');
+    toast('未偵測到錢包；已開啟多錢包入口，不會跳商店。');
+    speak('未偵測到錢包。請用錢包內建瀏覽器開啟本頁，或複製網址到錢包 DApp。');
+  }
+
+  async function ensureBSC(eth){
+    let cid = '';
+    try{ cid = await eth.request({method:'eth_chainId'}); }catch(e){}
+    set('w3-chain', cid || '--');
+    set('kh-chain', String(cid).toLowerCase() === BSC ? 'BSC 56' : (cid || '--'));
+    if(String(cid).toLowerCase() === BSC) return true;
+
+    try{
+      await eth.request({ method:'wallet_switchEthereumChain', params:[{chainId:BSC}] });
+      return true;
+    }catch(e){
+      if(e && (e.code === 4902 || String(e.message || '').includes('Unrecognized'))){
+        await eth.request({
+          method:'wallet_addEthereumChain',
+          params:[{
+            chainId:BSC,
+            chainName:'BNB Smart Chain',
+            nativeCurrency:{name:'BNB', symbol:'BNB', decimals:18},
+            rpcUrls:[RPC],
+            blockExplorerUrls:['https://bscscan.com']
+          }]
+        });
+        return true;
+      }
+      throw e;
+    }
+  }
+
+  async function connectWalletV853(ev){
+    if(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){}
+    }
+
+    if(!window.ethers || !ethers.providers || !ethers.utils){
+      set('bp-status', 'ethers.js 尚未載入，請重新整理頁面。');
+      speak('程式尚未完全載入，請重新整理頁面。');
+      return;
+    }
+
+    const eth = pickProvider();
+    if(!eth){
+      openWalletHubOnly();
+      return;
+    }
+
+    try{
+      set('bp-status', '錢包連線中，請在錢包確認授權。');
+      await eth.request({method:'eth_requestAccounts'});
+      await ensureBSC(eth);
+
+      const provider = new ethers.providers.Web3Provider(eth, 'any');
+      const signer = provider.getSigner();
+      const addr = await signer.getAddress();
+
+      // 同步到既有 web3 物件，不重構原架構
+      if(window.web3){
+        web3.provider = provider;
+        web3.ethersProvider = provider;
+        web3.signer = signer;
+        web3.addr = addr;
+        web3.address = addr;
+        web3.demo = false;
+      }
+
+      set('w3-addr', addr);
+      set('bp-wallet', short(addr));
+
+      const net = await provider.getNetwork().catch(()=>null);
+      if(net) set('w3-chain', 'bsc (' + net.chainId + ')');
+
+      set('bp-status', '錢包已連線，BSC 檢查完成。');
+      toast('錢包已連線。');
+      speak('錢包已連線。五指山悟空財神殿已接上 BSC。');
+
+      try{ if(web3 && web3.refreshUser) await web3.refreshUser(); }catch(e){}
+      try{ if(web3 && web3.refresh) await web3.refresh(); }catch(e){}
+      try{ if(web3 && web3.refreshGaolao) await web3.refreshGaolao(); }catch(e){}
+      try{ if(web3 && web3.refreshTreasury) await web3.refreshTreasury(); }catch(e){}
+
+      return addr;
+    }catch(e){
+      console.warn('[KGEN12345 V8.5.3] connect failed', e);
+      set('bp-status', '錢包連線失敗：' + (e && e.message ? e.message : e));
+      speak('錢包連線失敗，請確認錢包權限與 BSC 網路。');
+    }
+  }
+
+  function install(){
+    // 保留舊版，但覆蓋錯誤會跳商店的連線入口
+    window.kgen12345ConnectWallet = connectWalletV853;
+
+    if(window.web3){
+      web3.smartConnect = connectWalletV853;
+      web3.connect = connectWalletV853;
+      web3.connectBinance = connectWalletV853;
+
+      // 關鍵：deepLink 不再自動導去 Google Play / Binance download。
+      web3.deepLink = function(kind){
+        if(kind === 'copy'){
+          try{ navigator.clipboard && navigator.clipboard.writeText(location.href); }catch(e){}
+          toast('已複製本頁網址。');
+          return;
+        }
+        openWalletHubOnly();
+      };
+    }
+
+    document.querySelectorAll('button').forEach(btn=>{
+      const t = (btn.textContent || '').trim();
+      if(t.includes('連結錢包') || t.includes('連接錢包') || t.includes('多錢包')){
+        btn.onclick = connectWalletV853;
+      }
+    });
+
+    const ver = $('ver-st');
+    if(ver) ver.textContent = 'VERSION ' + VERSION;
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+  else install();
+  window.addEventListener('load', install);
 })();
 </script>
 
