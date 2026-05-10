@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX
-BUILD: 20260510-V8.8.0-CUP-NY-COUNTDOWN-FIX
+VERSION: KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX
+BUILD: 20260511-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.8.1] 跨年倒數只保留左上操作區下方單一倒數槽，隱藏上方重複 NY Slot 欄位並停止閃爍；客服解說改為可點即語音，不新增遮罩。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
@@ -48,7 +49,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1440,7 +1441,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1687,7 +1688,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15550,7 +15551,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15657,7 +15658,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15697,12 +15698,30 @@ KGEN 12345 UI Patch V7.6.0
     const m=Math.floor(s/60); s-=m*60;
     return d+'天 '+String(h).padStart(2,'0')+'時 '+String(m).padStart(2,'0')+'分 '+String(s).padStart(2,'0')+'秒';
   }
+  function hideDuplicateNySlot(){
+    const slot=$('kh-ny-slot');
+    if(slot){ slot.style.display='none'; slot.setAttribute('aria-hidden','true'); }
+    const panel=$('kgen-heart-live-panel');
+    if(panel){
+      Array.from(panel.querySelectorAll('.kh-k')).forEach(k=>{
+        const t=(k.textContent||'').trim();
+        if(t==='NY Slot' || t==='跨年倒數槽' || t==='跨年倒數'){
+          k.style.display='none'; k.setAttribute('aria-hidden','true');
+        }
+      });
+    }
+  }
   function updateNewYearCountdown(){
+    hideDuplicateNySlot();
     const t=nextNewYearTarget();
     const r=fmtRemain(t.getTime()-Date.now());
-    const text='距跨年倒數：'+r+'\n目標：12/31 23:59:59（台灣時間 UTC+8）';
-    const slot=$('kh-ny-slot'); if(slot) slot.textContent=r;
-    const box=$('kh-ny-countdown'); if(box) box.innerHTML='<b>跨年倒數槽</b><br>'+text.replace('\n','<br>');
+    const text='距離跨年：'+r+'\n目標：12/31 23:59:59（台灣時間 UTC+8）';
+    const box=$('kh-ny-countdown');
+    if(box){
+      box.innerHTML='<b>跨年倒數槽</b><br>'+text.replace('\n','<br>');
+      box.style.visibility='visible';
+      box.style.opacity='1';
+    }
   }
   function ensureCupBox(){
     const panel=$('kgen-heart-live-panel');
@@ -15782,6 +15801,134 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('load', ()=>{bind(); setTimeout(bind,700); setTimeout(bind,1800);});
   setInterval(()=>{updateNewYearCountdown();},1000);
   window.kgenV880CupNY={bind, getCupCount, setCupCount, updateNewYearCountdown};
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.8.1｜NY Single Slot + Service Voice Fix ===== -->
+<style id="kgen-v881-ny-service-style">
+  /* 只保留左上操作區下方的單一跨年倒數槽，避免上方舊 NY Slot 被舊計時器反覆改寫造成閃爍 */
+  #kh-ny-slot{display:none!important;visibility:hidden!important;opacity:0!important;}
+  #kgen-heart-live-panel .kh-ny-countdown{
+    animation:none!important;
+    transition:none!important;
+    will-change:auto!important;
+    background:rgba(0,242,255,.08)!important;
+  }
+  #kgen-v881-voice-test{
+    margin-top:6px;
+    width:100%;
+    pointer-events:auto;
+    border:1px solid rgba(255,215,120,.42);
+    border-radius:10px;
+    background:rgba(0,0,0,.34);
+    color:#ffeec8;
+    font-weight:900;
+    padding:8px 10px;
+  }
+</style>
+<script id="kgen-v881-ny-single-slot-service-voice-fix">
+(function(){
+  'use strict';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
+  const $=id=>document.getElementById(id);
+  function clean(s){return String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();}
+  function speak(msg){
+    const text=clean(msg||'客服語音測試。五指山悟空財神殿客服已啟動。');
+    try{
+      if(window.speechSynthesis){
+        try{ speechSynthesis.cancel(); }catch(_){ }
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang='zh-TW'; u.rate=.95; u.pitch=.95; u.volume=1;
+        speechSynthesis.speak(u);
+        return true;
+      }
+    }catch(_){ }
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(text); return true; } }catch(_){ }
+    return false;
+  }
+  function toast(msg){
+    try{ if(window.ui && ui.toast) ui.toast(clean(msg),4200); }catch(_){ }
+    try{ const l=$('kh-log'); if(l) l.textContent=clean(msg); }catch(_){ }
+  }
+  function nextTarget(){
+    const now=new Date();
+    let y=now.getUTCFullYear();
+    let t=new Date(Date.UTC(y,11,31,15,59,59));
+    if(now.getTime()>t.getTime()) t=new Date(Date.UTC(y+1,11,31,15,59,59));
+    return t;
+  }
+  function fmt(ms){
+    ms=Math.max(0,ms|0); let s=Math.floor(ms/1000);
+    const d=Math.floor(s/86400); s-=d*86400;
+    const h=Math.floor(s/3600); s-=h*3600;
+    const m=Math.floor(s/60); s-=m*60;
+    return d+'天 '+String(h).padStart(2,'0')+'時 '+String(m).padStart(2,'0')+'分 '+String(s).padStart(2,'0')+'秒';
+  }
+  function hideDupNy(){
+    const slot=$('kh-ny-slot');
+    if(slot){slot.style.display='none';slot.style.visibility='hidden';slot.style.opacity='0';slot.textContent='';}
+    const panel=$('kgen-heart-live-panel');
+    if(panel){
+      Array.from(panel.querySelectorAll('.kh-k')).forEach(k=>{
+        const t=(k.textContent||'').trim();
+        if(t==='NY Slot'||t==='跨年倒數槽'||t==='跨年倒數'){
+          k.style.display='none';k.style.visibility='hidden';k.style.opacity='0';
+        }
+      });
+    }
+  }
+  function updateNy(){
+    hideDupNy();
+    const r=fmt(nextTarget().getTime()-Date.now());
+    const box=$('kh-ny-countdown');
+    if(box){
+      box.className='kh-ny-countdown';
+      box.innerHTML='<b>跨年倒數槽</b><br>距離跨年：'+r+'<br>目標：12/31 23:59:59（台灣時間 UTC+8）';
+      box.style.display='block'; box.style.visibility='visible'; box.style.opacity='1';
+    }
+  }
+  function ensureVoiceButton(){
+    const card=$('kgen-v879-service-card');
+    if(card && !$('kgen-v881-voice-test')){
+      const b=document.createElement('button');
+      b.id='kgen-v881-voice-test';
+      b.type='button';
+      b.textContent='客服語音測試';
+      card.appendChild(b);
+    }
+    const b=$('kgen-v881-voice-test');
+    if(b) b.onclick=function(e){
+      e.preventDefault(); e.stopPropagation();
+      const msg='客服語音已啟動。請先連結錢包，確認 KGEN 餘額與授權額，再進行發財金、心跳、呼吸、還願、點燈或許願。';
+      toast(msg); speak(msg); return false;
+    };
+  }
+  function patchServiceClicks(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if((t.includes('客服')||t.includes('語音')||t.includes('解說')) && !btn.dataset.v881VoiceBound){
+        btn.dataset.v881VoiceBound='1';
+        btn.addEventListener('click', function(){
+          setTimeout(()=>{
+            const msg=(($('kgen-v879-msg')&&$('kgen-v879-msg').textContent)||'客服解說已開啟。五指山悟空財神殿客服為您說明目前操作。');
+            speak(msg);
+          },80);
+        }, false);
+      }
+    });
+  }
+  function bind(){
+    updateNy(); ensureVoiceButton(); patchServiceClicks();
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  window.addEventListener('load',()=>{bind();setTimeout(bind,500);setTimeout(bind,1800);});
+  setInterval(updateNy,1000);
+  setInterval(()=>{hideDupNy();},500);
+  window.kgenV881NyService={updateNy, speak, bind};
 })();
 </script>
 
