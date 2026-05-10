@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.6.3
-BUILD: 20260509-V8.6.3-WALLET-SYNC-REAL-TX-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX
+BUILD: 20260510-V8.7.1-TOP-WALLET-BUTTON-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.7.1] 小修上方「連結錢包 / 切 BSC」按鈕：改走下方同一個多錢包 / smartConnect 入口，不改視覺、不改 Heart 交易邏輯。
 - [V8.6.2] 修正音響控制與許願/還願/點燈實際交易路徑，避免只開說明視窗不扣款。
 - [V8.6.3] 統一錢包連線狀態，強制 Heart 交易走同一個 signer，修正左上/左下不同步造成無法還願點燈。
 - [V8.6.0] 以 V7.21.3 母檔為底，不再沿用會跳商店或無反應的 wallet fallback。
@@ -40,7 +41,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.6.3｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1432,7 +1433,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V7.19</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1679,7 +1680,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.6.3";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -13585,7 +13586,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.6.3';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13763,7 +13764,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.6.3';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14225,7 +14226,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.6.3';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14425,6 +14426,113 @@ KGEN 12345 UI Patch V7.6.0
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
   window.addEventListener('load',init);
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.7.1｜Top Wallet Button Fix Only ===== -->
+<script id="kgen12345-v871-top-wallet-button-fix">
+(function(){
+  'use strict';
+  const FIX_VERSION = 'KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
+  function $(id){ return document.getElementById(id); }
+  function status(msg){
+    try{ const st=$('kh-status')||$('bp-status')||$('w3-prog'); if(st) st.textContent=msg; }catch(_){ }
+    try{ if(window.ui&&ui.toast) ui.toast(msg,2600); }catch(_){ }
+  }
+  function speak(msg){
+    try{ if(window.app&&app.speak) app.speak(String(msg||'').replace(/[🔌⚠️✅]/g,'')); }catch(_){ }
+  }
+  function showWalletHub(){
+    try{
+      if(window.web3 && typeof web3.openWalletHub === 'function'){
+        web3.openWalletHub();
+        return true;
+      }
+    }catch(_){ }
+    const hub = $('walletHub');
+    const inp = $('walletHubUrl');
+    if(inp) inp.value = location.href;
+    if(hub){
+      hub.style.display = 'flex';
+      hub.style.visibility = 'visible';
+      hub.style.opacity = '1';
+      return true;
+    }
+    return false;
+  }
+  function pickInjectedProvider(){
+    const eth = window.ethereum || window.BinanceChain || null;
+    if(eth && Array.isArray(eth.providers) && eth.providers.length){
+      return eth.providers.find(p => p && (p.isMetaMask || p.isTrust || p.isBinance || p.isOKXWallet || p.isBitKeep || p.isBitgetWallet)) || eth.providers[0];
+    }
+    return eth && eth.request ? eth : null;
+  }
+  async function topWalletConnect(ev){
+    if(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }catch(_){ }
+    }
+    const btn = $('kh-connect');
+    if(btn) btn.dataset.v871State = 'connecting';
+    status('正在開啟錢包連線入口。');
+    try{
+      const eth = pickInjectedProvider();
+      if(eth){
+        if(window.web3 && typeof web3.smartConnect === 'function'){
+          await web3.smartConnect();
+          return false;
+        }
+        if(window.kgen12345V863 && typeof window.kgen12345V863.connect === 'function'){
+          await window.kgen12345V863.connect();
+          return false;
+        }
+        try{
+          const accounts = await eth.request({method:'eth_requestAccounts'});
+          if(accounts && accounts[0]){
+            status('錢包已授權：' + String(accounts[0]).slice(0,6) + '…' + String(accounts[0]).slice(-4));
+            return false;
+          }
+        }catch(e){ console.warn('[V8.7.1 direct eth_requestAccounts]', e); }
+      }
+      if(showWalletHub()){
+        status('未偵測到錢包注入，已開啟多錢包入口。');
+        speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟。');
+      }else{
+        status('請使用 MetaMask 或 Trust Wallet 內建瀏覽器開啟。');
+        speak('請使用 MetaMask 或 Trust Wallet 內建瀏覽器開啟。');
+      }
+    }catch(e){
+      console.warn('[V8.7.1 top wallet connect fallback]', e);
+      if(showWalletHub()) status('錢包授權未完成，已開啟多錢包入口。');
+    }finally{
+      if(btn) btn.dataset.v871State = 'ready';
+    }
+    return false;
+  }
+  function bindTopWalletButton(){
+    const btn = $('kh-connect');
+    if(!btn) return false;
+    btn.onclick = topWalletConnect;
+    btn.style.pointerEvents = 'auto';
+    btn.setAttribute('data-wallet-route','v871-top-wallet-button-fix');
+    if(!btn.dataset.v871CaptureBound){
+      btn.dataset.v871CaptureBound = '1';
+      btn.addEventListener('click', topWalletConnect, true);
+    }
+    const ver = $('ver-st');
+    if(ver) ver.textContent = 'VERSION ' + FIX_VERSION;
+    document.title = 'KGEN 12345 五指山悟空財神殿｜' + FIX_VERSION + '｜Heart V3.2.6';
+    return true;
+  }
+  window.kgen12345TopWalletFixV871 = { bind: bindTopWalletButton, connect: topWalletConnect, showWalletHub };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindTopWalletButton);
+  else bindTopWalletButton();
+  window.addEventListener('load', function(){
+    bindTopWalletButton();
+    setTimeout(bindTopWalletButton, 800);
+    setTimeout(bindTopWalletButton, 2500);
+  });
 })();
 </script>
 
