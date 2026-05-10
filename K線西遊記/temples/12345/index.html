@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX
-BUILD: 20260510-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX
+BUILD: 20260510-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
 - [V8.7.5] 補齊左上無限授權強制接線、Allowance 顯示、切換錢包、交易收據本機紀錄與下載；許願 / 還願 / 點燈成功後記錄 tx hash、開始時間、結束時間。
 - [V8.7.4] 左上與左下都新增 / 統一 Approve：目前金額與無限授權共用同一 provider / signer / allowance refresh；十三聖靈第 13 類正式納入人類、AI、超人、變形金剛、地球外星所有物種，1 到 12 維持動物生肖。
 - [V8.7.3] 統一左上與左下 Heart 血庫顯示；新增十三聖靈燈紀錄：1 到 12 為動物，第 13 為人類／AI／超人／變形金剛覺醒種，記錄點燈開始、除夕結束、剩餘天數與交易 hash。
@@ -45,7 +46,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1437,7 +1438,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1684,7 +1685,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -8570,7 +8571,7 @@ KGEN 12345 Heart Live Patch V7.3.0
     <button class="kh-gold" type="button" id="kh-approve-current">Approve 目前金額</button>
     <button class="kh-cyan" type="button" id="kh-approve-unlimited">無限授權</button>
   </div>
-  <div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。所有交易都會先跳確認視窗。</div>
+  <div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 目前金額＝只授權輸入數量；無限授權＝授權官方 Heart 合約長期使用 allowance，所有鏈上交易都會先跳錢包確認視窗。</div>
   <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
     <input id="kh-amount" placeholder="金額 / 天數，例如 8 或 88" value="8">
     <select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
@@ -13593,7 +13594,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13771,7 +13772,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14233,7 +14234,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14444,7 +14445,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BSC_HEX = '0x38';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14663,7 +14664,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v873-heart-balance-13-spirit-lamp-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20 = [
@@ -14848,7 +14849,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v874-approve-13-spirit-sync-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20=[
@@ -15040,7 +15041,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v875-approve-receipt-wallet-switch-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.5-APPROVE-RECEIPT-WALLET-SWITCH-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC_HEX='0x38';
@@ -15263,6 +15264,231 @@ KGEN 12345 UI Patch V7.6.0
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
   window.addEventListener('load',()=>{bind();setTimeout(bind,700);setTimeout(bind,2200);});
   setInterval(()=>refresh().catch(()=>{}),20000);
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.7.6｜Service Countdown Approve Fix ===== -->
+<style id="kgen12345-v876-style">
+  #kgen-v876-service-card{position:fixed;right:18px;top:116px;z-index:310;width:min(330px,90vw);border:1px solid rgba(255,215,120,.62);border-radius:16px;background:rgba(3,8,12,.92);box-shadow:0 0 24px rgba(255,215,120,.15);padding:12px;color:#eef;font-size:12px;line-height:1.5;display:none;backdrop-filter:blur(8px)}
+  #kgen-v876-service-card .svc-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;color:#ffd778;font-weight:900}
+  #kgen-v876-service-card .svc-face{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#ffe89a,#9b5b00 70%,#111);box-shadow:0 0 18px rgba(255,215,120,.45);font-size:24px}
+  #kgen-v876-service-card button{border:1px solid rgba(255,215,120,.5);border-radius:10px;background:rgba(255,215,120,.12);color:#ffeec8;font-weight:900;padding:7px 10px;margin-top:8px;cursor:pointer}
+  .kgen-v876-minirow{font-size:11px;color:#d8fbff;line-height:1.5;margin-top:5px;word-break:break-all}
+  .kgen-v876-minirow b{color:#ffd778}
+  .kgen-v876-countdown{color:#7ff3ff;font-weight:900}
+  #kgen-heart-live-panel .kh-actions button[data-v876-ready="1"]{outline:1px solid rgba(127,243,255,.26)}
+</style>
+<script id="kgen12345-v876-service-countdown-approve-fix">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
+  const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const BSC_HEX='0x38';
+  const RECEIPT_KEY='KGEN_12345_TEMPLE_RECEIPTS_V1';
+  const ERC20=[
+    'function approve(address spender,uint256 amount) external returns (bool)',
+    'function allowance(address owner,address spender) view returns (uint256)',
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)'
+  ];
+  const HEART_ABI=[
+    'function vowTo(uint256 amount) external',
+    'function vowTo(uint8 vowType,uint256 amount) external',
+    'function lightLamp(uint256 daysCount) external',
+    'function makeWish(bytes32 wishHash) external',
+    'function heartbeatClaim() external',
+    'function fortuneClaim(uint256 seed) external',
+    'function igniteAndClaim() external',
+    'function festivalClaim(uint8 id) external',
+    'function newYearCountdownClaim() external'
+  ];
+  const state=window.kgenWalletState=window.kgenWalletState||{provider:null,signer:null,account:null,chainId:null};
+  let pending=false, remindedHour='', remindedIgnite='';
+  function $(id){return document.getElementById(id)}
+  function q(s){return document.querySelector(s)}
+  function qa(s){return Array.from(document.querySelectorAll(s))}
+  function short(a){return a?String(a).slice(0,6)+'…'+String(a).slice(-4):'未連線'}
+  function setText(ids,txt){ids.forEach(id=>{const e=$(id); if(e) e.textContent=String(txt)})}
+  function say(msg){
+    try{ if(window.app && typeof app.speak==='function') app.speak(String(msg)); }
+    catch(_){ try{ const u=new SpeechSynthesisUtterance(String(msg)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(__){} }
+  }
+  function toast(msg){
+    ['kh-log','bp-status','w3-prog','kgen-v860-wallet-status'].forEach(id=>{const e=$(id); if(e) e.textContent=String(msg)});
+    try{if(window.ui&&ui.toast) ui.toast(String(msg),2800)}catch(_){ }
+    console.log('[KGEN V8.7.6]',msg);
+  }
+  function getEth(){
+    let eth=window.ethereum||(window.trustwallet&&window.trustwallet.ethereum)||window.BinanceChain||null;
+    if(eth&&Array.isArray(eth.providers)&&eth.providers.length){
+      eth=eth.providers.find(p=>p&&(p.isMetaMask||p.isTrust||p.isBinance||p.isOKXWallet||p.isBitKeep||p.isBitgetWallet))||eth.providers[0];
+    }
+    return eth&&eth.request?eth:null;
+  }
+  async function switchBSC(eth){
+    const cid=await eth.request({method:'eth_chainId'}).catch(()=>null);
+    if(String(cid||'').toLowerCase()!==BSC_HEX){
+      try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});}
+      catch(_){
+        await eth.request({method:'wallet_addEthereumChain',params:[{chainId:BSC_HEX,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com']} ]});
+        await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+      }
+    }
+  }
+  async function connect(forcePicker){
+    if(!window.ethers) throw new Error('ethers 尚未載入，請重新整理。');
+    const eth=getEth();
+    if(!eth){
+      toast('未偵測到錢包注入，已開啟多錢包入口。'); say('未偵測到錢包，請用 MetaMask 或 Trust Wallet 內建瀏覽器開啟。');
+      try{ if(window.web3&&web3.openWalletHub) web3.openWalletHub(); }catch(_){ }
+      return null;
+    }
+    await switchBSC(eth);
+    if(forcePicker){ try{ await eth.request({method:'wallet_requestPermissions',params:[{eth_accounts:{}}]}); }catch(_){ } }
+    const acc=await eth.request({method:'eth_requestAccounts'});
+    if(!acc||!acc[0]) throw new Error('沒有取得錢包地址。');
+    state.provider=new ethers.providers.Web3Provider(eth,'any');
+    state.signer=state.provider.getSigner();
+    state.account=await state.signer.getAddress();
+    state.chainId=BSC_HEX;
+    if(window.web3){web3.provider=state.provider;web3.signer=state.signer;web3.addr=state.account;web3.KGEN=KGEN;web3.UNIVERSE=HEART;}
+    await refresh(); toast('錢包已連線，餘額與授權額已刷新。'); return state;
+  }
+  async function ensureSigner(){ if(!state.signer||!state.account) await connect(false); if(!state.signer||!state.account) throw new Error('尚未連線錢包。'); return state.signer; }
+  function amount(def='8'){
+    const raw=(($('kh-amount')&&$('kh-amount').value)||($('bet-amt-input')&&$('bet-amt-input').value)||($('amt-in')&&$('amt-in').value)||def).trim();
+    if(!/^\d+(\.\d+)?$/.test(raw)||Number(raw)<=0) throw new Error('請輸入正確金額或天數。');
+    return raw;
+  }
+  async function refresh(){
+    if(!state.provider||!state.account){ const eth=getEth(); if(eth){ const acc=await eth.request({method:'eth_accounts'}).catch(()=>[]); if(acc&&acc[0]){state.provider=new ethers.providers.Web3Provider(eth,'any');state.signer=state.provider.getSigner();state.account=await state.signer.getAddress();} } }
+    if(!state.provider||!state.account) return false;
+    const token=new ethers.Contract(KGEN,ERC20,state.provider);
+    const [dec,bnb,bal,alw,heartBal]=await Promise.all([token.decimals().catch(()=>18),state.provider.getBalance(state.account),token.balanceOf(state.account),token.allowance(state.account,HEART),token.balanceOf(HEART)]);
+    state.dec=dec; state.allowance=alw; state.kgenBalance=bal; state.heartBalance=heartBal;
+    const fmt=(v,d=4)=>Number(ethers.utils.formatUnits(v,dec)).toFixed(d);
+    const kgenTxt=fmt(bal)+' KGEN', alwTxt=(alw.gte(ethers.constants.MaxUint256.div(2))?'無限授權':fmt(alw)+' KGEN'), heartTxt=fmt(heartBal)+' KGEN', bnbTxt=Number(ethers.utils.formatEther(bnb)).toFixed(6)+' BNB';
+    setText(['kh-wallet','bp-wallet','w3-addr'],short(state.account));
+    setText(['kh-kgen','kh-kgen-bal','userBal','bp-userbal','rb-kgen-txt'],kgenTxt);
+    setText(['kh-allowance','userAllowance','bp-allowance','kgen-v875-allowance-value','kgen-v876-allowance-value'],alwTxt);
+    setText(['kh-heart','kh-heart-bal','bp-pool','w3-bal'],heartTxt);
+    setText(['userBNB','rb-bnb-txt'],bnbTxt);
+    const line=$('kgen-v876-allowance-line'); if(line) line.innerHTML='<b>授權額 Allowance：</b><span id="kgen-v876-allowance-value">'+alwTxt+'</span>｜KGEN：'+kgenTxt+'｜Heart 血庫：'+heartTxt;
+    return true;
+  }
+  async function approveUnlimited(){
+    if(pending){toast('已有交易處理中，請稍候。'); return;}
+    pending=true;
+    try{
+      const signer=await ensureSigner();
+      const ok=confirm('無限授權確認：\n\n授權官方 Heart 合約使用你的 KGEN allowance。\n這不是直接扣款，但日後還願、點燈、許願補血可免重複 approve。\n\nHeart：'+HEART+'\n\n確認送出？');
+      if(!ok){toast('已取消無限授權。'); return;}
+      const token=new ethers.Contract(KGEN,ERC20,signer);
+      toast('無限授權送出中，請確認錢包。'); say('請在錢包確認無限授權。');
+      const tx=await token.approve(HEART,ethers.constants.MaxUint256);
+      toast('無限授權 Tx：'+tx.hash+'，等待確認。');
+      const rc=await tx.wait(); saveReceipt('approveUnlimited','無限授權',tx,rc,{amount:'MAX',spender:HEART});
+      await refresh(); toast('無限授權完成，授權額已刷新。'); say('無限授權完成。');
+    }catch(e){toast('無限授權失敗：'+((e&&(e.reason||e.message))||e)); console.error(e);} finally{pending=false;}
+  }
+  async function approveCurrent(){
+    if(pending){toast('已有交易處理中，請稍候。'); return;}
+    pending=true;
+    try{
+      const signer=await ensureSigner(); const token=new ethers.Contract(KGEN,ERC20,signer); const dec=state.dec||await token.decimals().catch(()=>18); const amt=amount('8');
+      if(!confirm('Approve 目前金額：'+amt+' KGEN\n\n確認送出？')){toast('已取消 Approve。'); return;}
+      toast('Approve 目前金額送出中，請確認錢包。'); say('請在錢包確認 Approve。');
+      const tx=await token.approve(HEART,ethers.utils.parseUnits(amt,dec));
+      toast('Approve Tx：'+tx.hash+'，等待確認。'); const rc=await tx.wait(); saveReceipt('approveCurrent','Approve 目前金額',tx,rc,{amount:amt+' KGEN',spender:HEART});
+      await refresh(); toast('Approve 完成，授權額已刷新。'); say('Approve 完成。');
+    }catch(e){toast('Approve 失敗：'+((e&&(e.reason||e.message))||e)); console.error(e);} finally{pending=false;}
+  }
+  function receipts(){try{return JSON.parse(localStorage.getItem(RECEIPT_KEY)||'[]')||[]}catch(_){return[]}}
+  function saveReceipt(type,label,tx,rc,extra){ const r={type,label,account:state.account||'',heart:HEART,kgen:KGEN,txHash:tx&&tx.hash||'',blockNumber:rc&&rc.blockNumber||'',timeISO:new Date().toISOString(),localTime:new Date().toLocaleString(),version:VERSION,extra:extra||{}}; const arr=receipts(); arr.unshift(r); localStorage.setItem(RECEIPT_KEY,JSON.stringify(arr.slice(0,150))); renderReceipt(); return r; }
+  function downloadReceipts(){ const arr=receipts(); const blob=new Blob([JSON.stringify({project:'K線西遊記 12345 悟空財神殿',version:VERSION,exportedAt:new Date().toISOString(),receipts:arr},null,2)],{type:'application/json;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='KGEN_12345_receipts_'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); toast('收據已下載，本機紀錄共 '+arr.length+' 筆。'); }
+  function renderReceipt(){ const arr=receipts(); const r=arr[0]; const line=$('kgen-v875-receipt-line')||$('kgen-v876-receipt-line'); if(line) line.innerHTML='<b>本機收據：</b>'+(r?(r.label+'｜'+short(r.txHash)+'｜'+r.localTime):'尚無紀錄')+'｜共 '+arr.length+' 筆'; }
+  function hashWishText(){ const raw=(($('kh-wish')&&$('kh-wish').value)||($('wish-input')&&$('wish-input').value)||($('wishText')&&$('wishText').value)||'KGEN WISH').trim(); if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw; return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw)); }
+  async function sendHeart(method,args,label,extra){
+    if(pending){toast('已有交易處理中，請稍候。'); return;}
+    pending=true;
+    try{ const signer=await ensureSigner(); const heart=new ethers.Contract(HEART,HEART_ABI,signer); toast(label+' 送出中，請確認錢包。'); say('請在錢包確認 '+label); const tx=await heart[method](...(args||[])); toast(label+' Tx：'+tx.hash+'，等待確認。'); const rc=await tx.wait(); saveReceipt(method,label,tx,rc,extra); await refresh(); toast(label+' 完成，收據已記錄。'); say(label+' 完成。'); return tx; }
+    catch(e){toast(label+' 失敗：'+((e&&(e.reason||e.message))||e)); console.error(e);} finally{pending=false;}
+  }
+  async function vow(){ const dec=state.dec||18; const amt=amount('8'); const opt=Number(($('kh-vow-option')&&$('kh-vow-option').value)||1); try{return await sendHeart('vowTo',[opt,ethers.utils.parseUnits(amt,dec)],'vowTo 還願補血',{amount:amt+' KGEN',option:opt});}catch(_){return await sendHeart('vowTo',[ethers.utils.parseUnits(amt,dec)],'vowTo 還願補血',{amount:amt+' KGEN'});} }
+  async function lamp(){ const days=Math.max(1,Math.floor(Number(amount('1'))||1)); const sp=($('kgen-13-spirit-select')&&$('kgen-13-spirit-select').selectedOptions[0]&&$('kgen-13-spirit-select').selectedOptions[0].textContent)||'13｜人類／AI／超人／變形金剛／萬物文明聖靈'; return sendHeart('lightLamp',[days],'lightLamp 點燈',{days,spirit:sp,start:new Date().toISOString(),endRule:'當年除夕 23:59:59'}); }
+  async function wish(){ const h=hashWishText(); return sendHeart('makeWish',[h],'makeWish 許願 hash',{wishHash:h}); }
+  async function heartbeat(){ return sendHeart('heartbeatClaim',[],'heartbeatClaim 整點心跳',{}); }
+  async function ignite(){ return sendHeart('igniteAndClaim',[],'igniteAndClaim 轉日呼吸',{}); }
+  async function switchWallet(){ state.provider=null; state.signer=null; state.account=null; setText(['kh-wallet','bp-wallet','w3-addr'],'未連線'); toast('準備切換錢包，請在錢包視窗選擇帳號。'); await connect(true); }
+  function ensureRows(){
+    const grid=q('#kgen-heart-live-panel .kh-grid');
+    if(grid && !$('kgen-v876-allowance-label')){
+      const k=document.createElement('div'); k.className='kh-k'; k.id='kgen-v876-allowance-label'; k.textContent='Allowance 授權額';
+      const v=document.createElement('div'); v.className='kh-v'; v.id='kh-allowance'; v.textContent='--';
+      const ref=$('kh-ignite-open') && $('kh-ignite-open').parentElement?null:null;
+      grid.insertBefore(k, grid.children[6]||null); grid.insertBefore(v, grid.children[7]||null);
+      const k2=document.createElement('div'); k2.className='kh-k'; k2.textContent='心跳倒數'; const v2=document.createElement('div'); v2.className='kh-v kgen-v876-countdown'; v2.id='kh-heartbeat-countdown'; v2.textContent='--'; grid.insertBefore(k2, grid.children[10]||null); grid.insertBefore(v2, grid.children[11]||null);
+      const k3=document.createElement('div'); k3.className='kh-k'; k3.textContent='呼吸倒數'; const v3=document.createElement('div'); v3.className='kh-v kgen-v876-countdown'; v3.id='kh-ignite-countdown'; v3.textContent='--'; grid.insertBefore(k3, grid.children[12]||null); grid.insertBefore(v3, grid.children[13]||null);
+    }
+    const nyLabel=Array.from(document.querySelectorAll('#kgen-heart-live-panel .kh-k')).find(e=>e.textContent.trim()==='NY Slot'); if(nyLabel) nyLabel.textContent='跨年倒數槽';
+    const host=($('kh-connect')&&$('kh-connect').parentElement)||$('kgen-heart-live-panel');
+    if(host&&!$('kgen-v876-allowance-line')){ const a=document.createElement('div'); a.id='kgen-v876-allowance-line'; a.className='kgen-v876-minirow'; a.innerHTML='<b>授權額 Allowance：</b><span id="kgen-v876-allowance-value">--</span>｜Approve 目前金額 / 無限授權皆可用'; host.appendChild(a); }
+    const mini=q('#kgen-heart-live-panel .kh-mini'); if(mini) mini.innerHTML='金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。<b>Approve 目前金額</b>只授權輸入數量；<b>無限授權</b>授權官方 Heart 合約長期 allowance。所有交易都會先跳錢包確認視窗。';
+  }
+  function ensureService(){
+    if(!$('kgen-v876-service-card')){ const d=document.createElement('div'); d.id='kgen-v876-service-card'; d.innerHTML='<div class="svc-head"><div class="svc-face">🐵</div><div>悟空影像客服<br><span style="color:#7ff3ff;font-size:11px">Temple Heart Concierge</span></div></div><div id="kgen-v876-service-text">歡迎來到五指山悟空財神殿。請先連結錢包、確認授權額，再進行還願、點燈、許願。</div><button id="kgen-v876-service-speak">語音說明</button> <button id="kgen-v876-service-close">收合</button>'; document.body.appendChild(d); }
+    if(!$('kgen-v876-service-open')){ const host=($('kh-connect')&&$('kh-connect').parentElement)||$('kgen-heart-live-panel'); if(host){ const b=document.createElement('button'); b.id='kgen-v876-service-open'; b.type='button'; b.className='kh-cyan'; b.textContent='影像客服'; host.appendChild(b); } }
+    const open=$('kgen-v876-service-open'), card=$('kgen-v876-service-card'), close=$('kgen-v876-service-close'), sp=$('kgen-v876-service-speak');
+    if(open) open.onclick=()=>{card.style.display='block'; say('悟空影像客服已開啟。請先連結錢包，確認授權額，再進行鏈上交易。');};
+    if(close) close.onclick=()=>{card.style.display='none'};
+    if(sp) sp.onclick=()=>say(($('kgen-v876-service-text')&&$('kgen-v876-service-text').textContent)||'歡迎來到悟空財神殿。');
+  }
+  function updateCountdowns(){
+    const now=new Date();
+    const msToHour=(60-now.getUTCMinutes()-1)*60000+(60-now.getUTCSeconds())*1000-now.getUTCMilliseconds();
+    const hmin=Math.floor(msToHour/60000), hsec=Math.floor((msToHour%60000)/1000);
+    const hb=$('kh-heartbeat-countdown'); if(hb) hb.textContent=`距下次整點約 ${hmin}分${hsec}秒`;
+    const utcMid=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1,0,0,0,0);
+    const msToMid=utcMid-now.getTime(); const ih=Math.floor(msToMid/3600000), im=Math.floor((msToMid%3600000)/60000), is=Math.floor((msToMid%60000)/1000);
+    const ig=$('kh-ignite-countdown'); if(ig) ig.textContent=`距 UTC 00:00 約 ${ih}時${im}分${is}秒`;
+    const hourKey=now.toISOString().slice(0,13); if(now.getUTCMinutes()===0 && now.getUTCSeconds()<20 && remindedHour!==hourKey){remindedHour=hourKey; toast('整點心跳時間到，可執行 heartbeatClaim。'); say('整點心跳時間到，可以執行 heartbeat claim。');}
+    const dayKey=now.toISOString().slice(0,10); if(now.getUTCHours()===0 && now.getUTCMinutes()<10 && remindedIgnite!==dayKey){remindedIgnite=dayKey; toast('轉日呼吸時間窗開啟，可執行 igniteAndClaim。'); say('轉日呼吸時間窗開啟，可以執行 ignite and claim。');}
+  }
+  function bind(){
+    ensureRows(); ensureService(); renderReceipt(); updateCountdowns();
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    const binds={
+      'kh-connect':ev=>{ev.preventDefault();connect(false).catch(e=>toast('連線失敗：'+(e.message||e)))},
+      'kh-refresh':ev=>{ev.preventDefault();refresh().then(ok=>toast(ok?'餘額 / 授權額已刷新。':'尚未連線。'))},
+      'kh-approve-current':ev=>{ev.preventDefault();approveCurrent()},
+      'kh-approve-unlimited':ev=>{ev.preventDefault();approveUnlimited()},
+      'bp-approve-unlimited':ev=>{ev.preventDefault();approveUnlimited()},
+      'kgen-v875-switch-wallet':ev=>{ev.preventDefault();switchWallet().catch(e=>toast('切換錢包失敗：'+(e.message||e)))},
+      'kgen-v875-download-receipts':ev=>{ev.preventDefault();downloadReceipts()},
+      'kh-vow':ev=>{ev.preventDefault();vow()},'kh-lamp':ev=>{ev.preventDefault();lamp()},'kh-wishbtn':ev=>{ev.preventDefault();wish()},
+      'kh-heartbeat':ev=>{ev.preventDefault();heartbeat()},'kh-ignite':ev=>{ev.preventDefault();ignite()}
+    };
+    Object.entries(binds).forEach(([id,fn])=>{const e=$(id); if(e){e.onclick=fn;e.dataset.v876Ready='1'; if(!e.dataset.v876Cap){e.dataset.v876Cap='1'; e.addEventListener('click',fn,true);}}});
+    qa('button').forEach(b=>{ const t=(b.textContent||'').replace(/\s+/g,' ').trim();
+      if(t==='無限授權') b.onclick=(ev)=>{ev.preventDefault();approveUnlimited()};
+      if(t==='APPROVE'||t.includes('Approve 目前金額')) b.onclick=(ev)=>{ev.preventDefault();approveCurrent()};
+      if(t.includes('vowTo')||t.includes('還願補血')) b.onclick=(ev)=>{ev.preventDefault();vow()};
+      if(t.includes('lightLamp')||t.includes('點燈')) b.onclick=(ev)=>{ev.preventDefault();lamp()};
+      if(t.includes('makeWish')||t.includes('許願')) b.onclick=(ev)=>{ev.preventDefault();wish()};
+      if(t.includes('heartbeatClaim')) b.onclick=(ev)=>{ev.preventDefault();heartbeat()};
+      if(t.includes('igniteAndClaim')) b.onclick=(ev)=>{ev.preventDefault();ignite()};
+    });
+    window.kgen12345V876={connect,refresh,approveCurrent,approveUnlimited,switchWallet,downloadReceipts,receipts,saveReceipt,vow,lamp,wish,heartbeat,ignite,say,state,version:VERSION};
+    if(window.web3){web3.connect=connect;web3.smartConnect=connect;web3.refresh=refresh;web3.approve=approveCurrent;web3.approveUnlimited=approveUnlimited;}
+    window.templeOps=window.templeOps||{}; Object.assign(window.templeOps,{approve:approveCurrent,approveUnlimited,vow,lamp,wish,heartbeat,ignite,refresh});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+  window.addEventListener('load',()=>{bind(); setTimeout(bind,700); setTimeout(bind,2200); setTimeout(refresh,1500);});
+  setInterval(updateCountdowns,1000);
 })();
 </script>
 
