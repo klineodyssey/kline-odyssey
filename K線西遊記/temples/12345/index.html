@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX
 BUILD: 20260510-V8.7.2-WALLET-TX-SYNC-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.7.3] 統一左上與左下 Heart 血庫顯示；新增十三聖靈燈紀錄：1 到 12 為動物，第 13 為人類／AI／超人／變形金剛覺醒種，記錄點燈開始、除夕結束、剩餘天數與交易 hash。
 - [V8.7.2] 修正左下操作區錢包同步與許願 / 還願 / 點燈送交易：統一 signer、刷新餘額欄位、動態彈窗按鈕直接送 Heart 交易。
 - [V8.7.1] 小修上方「連結錢包 / 切 BSC」按鈕：改走下方同一個多錢包 / smartConnect 入口，不改視覺、不改 Heart 交易邏輯。
 - [V8.6.2] 修正音響控制與許願/還願/點燈實際交易路徑，避免只開說明視窗不扣款。
@@ -15,7 +16,7 @@ CHANGELOG:
 - [V8.6.0] 以 V7.21.3 母檔為底，不再沿用會跳商店或無反應的 wallet fallback。
 - [V8.6.0] 重寫錢包連線最後覆蓋層：Injected Provider / 多 provider / WalletConnect / BSC 切鏈 / 無錢包提示。
 - [V8.6.0] 連結錢包按鈕全部接到同一條 robustConnect，不再只改單一按鈕。
-- [V8.6.0] 增建「許願 / 還願 / 點燈」豪華神殿工程；點燈新增 12+1 生肖，任意物種為第 13 生肖。
+- [V8.6.0] 增建「許願 / 還願 / 點燈」豪華神殿工程；點燈新增 十三聖靈燈：1 到 12 為動物聖靈，第 13 為人類／AI／超人／變形金剛覺醒種。
 - [V8.6.0] 補完整客服說明：每個動作要先說清楚用途、金額、鏈上不可逆，不亂收錢不辦事。
 VERIFY_LOG:
 - [2026-05-09] Static patch applied over V7.21.3 mother file.
@@ -42,7 +43,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1434,7 +1435,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1681,7 +1682,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -13576,7 +13577,7 @@ KGEN 12345 UI Patch V7.6.0
       <div class="v860-tabs">
         <button class="v860-tab v860-active" type="button" data-tab="wish">✨ 許願上鏈</button>
         <button class="v860-tab" type="button" data-tab="vow">🙏 還願補血</button>
-        <button class="v860-tab" type="button" data-tab="lamp">🪔 十二生肖＋任意物種點燈</button>
+        <button class="v860-tab" type="button" data-tab="lamp">🪔 十三聖靈燈點燈</button>
       </div>
       <div id="v860-content"></div>
       <div class="v860-log" id="v860-log">待命：本增建工程只做前端導覽與操作整合；真正鏈上交易仍會跳錢包確認，不會自動扣款。</div>
@@ -13587,7 +13588,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13705,8 +13706,8 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){ status('刷新失敗：'+(e&&e.message?e.message:e)); }
   }
 
-  const zodiac=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','任意物種'];
-  let tab='wish', picked='任意物種';
+  const zodiac=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬','人類／AI／超人／變形金剛'];
+  let tab='wish', picked='人類／AI／超人／變形金剛';
   function setUnderlying(id,val){ const e=$(id); if(e) e.value=val; }
   function clickUnderlying(id,label){ const b=$(id); if(b){ status('準備執行：'+label+'。請確認錢包交易。'); b.click(); } else { status('找不到底層按鈕 '+id+'，請檢查 Heart Live Panel 是否存在。'); }}
   function renderRitual(){
@@ -13719,13 +13720,13 @@ KGEN 12345 UI Patch V7.6.0
       c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🙏 還願補血 vowTo</h3><p>還願是把 KGEN 回補給悟空心臟血庫，象徵領福緣後有成再回來補血。這是實際鏈上交易，送出後不可逆。</p><input class="v860-field" id="v860-vow-amt" placeholder="還願 KGEN 整數，例如 8 或 88"><select class="v860-field" id="v860-vow-option"><option value="1">還願一：感謝發財金</option><option value="2">還願二：感謝心跳守護</option><option value="3">還願三：感謝創作與生意有成</option></select><button class="v860-btn v860-action" type="button" id="v860-vow-go">確認還願補血</button></div></div>';
       $('v860-vow-go').onclick=()=>{ const amt=($('v860-vow-amt').value||'').trim(); if(!/^\d+(\.\d+)?$/.test(amt)){status('請輸入還願 KGEN 金額。'); return;} setUnderlying('kh-amount',amt); setUnderlying('amt-in',amt); setUnderlying('kh-vow-option',$('v860-vow-option').value); clickUnderlying('kh-vow','vowTo 還願補血'); };
     }else{
-      const z=zodiac.map(x=>'<button type="button" class="'+(x===picked?'v860-picked':'')+'" data-z="'+x+'">'+(x==='任意物種'?'第13生肖｜任意物種':x)+'</button>').join('');
-      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🪔 點燈續命 lightLamp</h3><p>點燈分十二生肖，第十三生肖是任意物種：超人、變形金鋼、貓、魚、蟑螂、螞蟻、大象，任何生命都能點燈。</p><div class="v860-zodiac">'+z+'</div><input class="v860-field" id="v860-species" placeholder="第13生肖可填物種名稱，例如 變形金鋼 / 貓 / 螞蟻"><input class="v860-field" id="v860-lamp-days" placeholder="點燈天數，例如 1、7、30"><button class="v860-btn v860-action" type="button" id="v860-lamp-go">確認點燈續命</button><div class="v860-muted">目前底層合約 lightLamp 接收天數參數；生肖與物種先寫入前端紀錄與語音客服，不額外收費。</div></div></div>';
+      const z=zodiac.map(x=>'<button type="button" class="'+(x===picked?'v860-picked':'')+'" data-z="'+x+'">'+(x==='人類／AI／超人／變形金剛'?'第13聖靈｜人類／AI／超人／變形金剛':x)+'</button>').join('');
+      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🪔 點燈續命 lightLamp</h3><p>點燈分十二生肖，第十三生肖是人類／AI／超人／變形金剛：超人、變形金鋼、貓、魚、蟑螂、螞蟻、大象，任何生命都能點燈。</p><div class="v860-zodiac">'+z+'</div><input class="v860-field" id="v860-species" placeholder="第13生肖可填物種名稱，例如 變形金鋼 / 貓 / 螞蟻"><input class="v860-field" id="v860-lamp-days" placeholder="點燈天數，例如 1、7、30"><button class="v860-btn v860-action" type="button" id="v860-lamp-go">確認點燈續命</button><div class="v860-muted">目前底層合約 lightLamp 接收天數參數；生肖與物種先寫入前端紀錄與語音客服，不額外收費。</div></div></div>';
       document.querySelectorAll('#v860-content [data-z]').forEach(b=>b.onclick=()=>{picked=b.dataset.z; renderRitual();});
       $('v860-lamp-go').onclick=()=>{ const days=($('v860-lamp-days').value||'').trim(); if(!/^\d+$/.test(days)){status('請輸入點燈天數整數。'); return;} const sp=($('v860-species').value||picked).trim(); localStorage.setItem('kgen12345LampSpecies',sp); setUnderlying('kh-amount',days); setUnderlying('amt-in',days); status('點燈對象：'+sp+'｜天數：'+days+'。準備呼叫 lightLamp。'); clickUnderlying('kh-lamp','lightLamp 點燈續命'); };
     }
   }
-  function openRitual(t){ tab=t||tab; $('kgen-v860-ritual-modal')?.classList.add('v860-show'); renderRitual(); speak(tab==='lamp'?'十二生肖與任意物種點燈已開啟。':tab==='vow'?'還願補血已開啟。':'許願上鏈已開啟。'); }
+  function openRitual(t){ tab=t||tab; $('kgen-v860-ritual-modal')?.classList.add('v860-show'); renderRitual(); speak(tab==='lamp'?'十三聖靈燈點燈已開啟。':tab==='vow'?'還願補血已開啟。':'許願上鏈已開啟。'); }
   function closeRitual(){ $('kgen-v860-ritual-modal')?.classList.remove('v860-show'); }
   function bindAll(){
     const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
@@ -13765,7 +13766,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -13937,7 +13938,7 @@ KGEN 12345 UI Patch V7.6.0
   }
   async function lamp(){
     const days = getAmountWhole('1');
-    const species = (($('v860-species')&&$('v860-species').value) || localStorage.getItem('kgen12345LampSpecies') || '任意物種').trim();
+    const species = (($('v860-species')&&$('v860-species').value) || localStorage.getItem('kgen12345LampSpecies') || '人類／AI／超人／變形金剛').trim();
     status('點燈對象：'+species+'｜天數：'+days+'。注意：lightLamp 依合約設定扣款，不是前端自行扣款。');
     await sendHeart('lightLamp 點燈續命 '+days+' 天｜'+species, c=>c.lightLamp(days));
   }
@@ -14227,7 +14228,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14438,7 +14439,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
   const BSC_HEX = '0x38';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14641,6 +14642,192 @@ KGEN 12345 UI Patch V7.6.0
     eth.on('accountsChanged',()=>setTimeout(connect,200));
     eth.on('chainChanged',()=>setTimeout(connect,300));
   }
+})();
+</script>
+
+
+<!-- ===== KGEN 12345 V8.7.3｜Heart Balance + 13 Spirit Lamp Record Fix ===== -->
+<style id="kgen12345-v873-spirit-lamp-style">
+  #kgen-13-spirit-record{margin-top:10px;padding:10px;border:1px solid rgba(255,215,120,.28);border-radius:12px;background:rgba(0,0,0,.28);font-size:11px;line-height:1.45;color:#ffeec8;}
+  #kgen-13-spirit-record b{color:#ffd778;}
+  #kgen-13-spirit-record .row{display:grid;grid-template-columns:72px 1fr;gap:6px;margin:2px 0;}
+  #kgen-13-spirit-record .empty{opacity:.78;color:#d8f9ff;}
+  #kgen-13-spirit-select{width:100%;margin-top:8px;background:#060606;color:#ffeec8;border:1px solid rgba(255,215,120,.35);border-radius:10px;padding:8px;font-weight:900;}
+  #kgen-13-spirit-note{font-size:11px;color:#d8f9ff;opacity:.9;margin-top:6px;line-height:1.45;}
+</style>
+<script id="kgen12345-v873-heart-balance-13-spirit-lamp-fix">
+(function(){
+  'use strict';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const ERC20 = [
+    'function balanceOf(address owner) external view returns (uint256)',
+    'function allowance(address owner,address spender) external view returns (uint256)',
+    'function decimals() external view returns (uint8)'
+  ];
+  const SPIRITS = [
+    ['1','鼠','動物聖靈'],['2','牛','動物聖靈'],['3','虎','動物聖靈'],['4','兔','動物聖靈'],
+    ['5','龍','神獸聖靈'],['6','蛇','動物聖靈'],['7','馬','動物聖靈'],['8','羊','動物聖靈'],
+    ['9','猴','動物聖靈'],['10','雞','動物聖靈'],['11','狗','動物聖靈'],['12','豬','動物聖靈'],
+    ['13','人類／AI／超人／變形金剛','文明覺醒聖靈']
+  ];
+  const LS_KEY = 'KGEN_12345_13_SPIRIT_LAMP_RECORDS_V1';
+  function $(id){ return document.getElementById(id); }
+  function q(sel){ return document.querySelector(sel); }
+  function qa(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '未連線'; }
+  function fmt(v,d=4){ try{return Number(ethers.utils.formatUnits(v,18)).toFixed(d);}catch(_){return '--';} }
+  function status(m){
+    ['kh-log','bp-status','w3-prog','kgen-v860-wallet-status'].forEach(id=>{const e=$(id); if(e) e.textContent=String(m);});
+    try{ if(window.ui&&ui.toast) ui.toast(String(m),2600); }catch(_){ }
+    console.log('[KGEN V8.7.3]',m);
+  }
+  function getState(){ return window.kgenWalletState || {}; }
+  function setText(ids,txt){ ids.forEach(id=>{const e=$(id); if(e) e.textContent=String(txt);}); }
+  function setByLabel(label,txt){
+    qa('div,span').forEach(el=>{
+      const t=(el.textContent||'').trim();
+      if(t===label || t.replace(/：$/,'')===label){
+        const nx=el.nextElementSibling;
+        if(nx && nx.textContent !== txt) nx.textContent = txt;
+      }
+    });
+  }
+  function lunarNewYearEveEnd(now){
+    // Practical table for current public UI. End time follows Taiwan local time, displayed as local string.
+    const table = {
+      2026:'2026-02-16T23:59:59+08:00',
+      2027:'2027-02-05T23:59:59+08:00',
+      2028:'2028-01-25T23:59:59+08:00',
+      2029:'2029-02-12T23:59:59+08:00',
+      2030:'2030-02-02T23:59:59+08:00'
+    };
+    let y = (now||new Date()).getFullYear();
+    let end = new Date(table[y] || (y+'-12-31T23:59:59+08:00'));
+    if(end.getTime() < (now||new Date()).getTime()){
+      y += 1; end = new Date(table[y] || (y+'-12-31T23:59:59+08:00'));
+    }
+    return end;
+  }
+  function records(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')||[];}catch(_){return [];} }
+  function saveRecord(r){ const arr=records(); arr.unshift(r); localStorage.setItem(LS_KEY,JSON.stringify(arr.slice(0,30))); renderRecord(); }
+  function remainDays(endISO){ const ms=new Date(endISO).getTime()-Date.now(); return Math.max(0,Math.ceil(ms/86400000)); }
+  function getSpirit(){
+    const sel=$('kgen-13-spirit-select');
+    const v = sel ? sel.value : '13';
+    return SPIRITS.find(x=>x[0]===String(v)) || SPIRITS[12];
+  }
+  function ensureSpiritSelect(){
+    const amt=$('kh-amount');
+    if(amt && !$('kgen-13-spirit-select')){
+      const sel=document.createElement('select'); sel.id='kgen-13-spirit-select';
+      sel.innerHTML = SPIRITS.map(x=>`<option value="${x[0]}">${x[0]}｜${x[1]}｜${x[2]}</option>`).join('');
+      const note=document.createElement('div'); note.id='kgen-13-spirit-note';
+      note.innerHTML='十三聖靈燈：一到十二為動物聖靈；第十三為人類／AI／超人／變形金剛的文明覺醒席位。點燈開始以交易成功時間記錄，結束為當年除夕二十三點五十九分五十九秒。';
+      amt.insertAdjacentElement('afterend',note);
+      note.insertAdjacentElement('beforebegin',sel);
+    }
+  }
+  function renderRecord(){
+    let box=$('kgen-13-spirit-record');
+    const panel=$('kgen-heart-live-panel');
+    if(!box && panel){
+      box=document.createElement('div'); box.id='kgen-13-spirit-record';
+      const log=$('kh-log'); if(log) log.insertAdjacentElement('afterend',box); else panel.appendChild(box);
+    }
+    if(!box) return;
+    const arr=records();
+    if(!arr.length){ box.innerHTML='<b>十三聖靈燈紀錄</b><div class="empty">尚未點燈。完成 lightLamp 交易後，這裡會記錄開始時間、除夕結束時間、剩餘天數與交易 hash。</div>'; return; }
+    const r=arr[0];
+    box.innerHTML=`<b>十三聖靈燈紀錄</b>
+      <div class="row"><span>聖靈</span><span>${r.spiritNo}｜${r.spiritName}｜${r.spiritType}</span></div>
+      <div class="row"><span>錢包</span><span>${short(r.account)}</span></div>
+      <div class="row"><span>開始</span><span>${new Date(r.startISO).toLocaleString()}</span></div>
+      <div class="row"><span>結束</span><span>${new Date(r.endISO).toLocaleString()}（除夕）</span></div>
+      <div class="row"><span>剩餘</span><span>${remainDays(r.endISO)} 天</span></div>
+      <div class="row"><span>交易</span><span>${r.txHash ? short(r.txHash) : '待確認'}</span></div>`;
+  }
+  async function syncHeartBalance(){
+    try{
+      const S=getState();
+      const provider = S.provider || (window.web3&&web3.provider) || null;
+      const account = S.account || (window.web3&&web3.addr) || '';
+      if(!provider || !window.ethers) return false;
+      const token=new ethers.Contract(KGEN,ERC20,provider);
+      const [heart,dec] = await Promise.all([token.balanceOf(HEART), token.decimals().catch(()=>18)]);
+      const hTxt = Number(ethers.utils.formatUnits(heart,dec)).toFixed(4)+' KGEN';
+      setText(['w3-bal','kh-heart','kh-heart-bal','bp-pool','prog-txt'], hTxt);
+      setByLabel('Heart 血庫', hTxt);
+      setByLabel('心臟血庫', hTxt);
+      if(account){
+        const [bal,alw] = await Promise.all([token.balanceOf(account), token.allowance(account,HEART)]);
+        const bTxt=Number(ethers.utils.formatUnits(bal,dec)).toFixed(4)+' KGEN';
+        const aTxt=Number(ethers.utils.formatUnits(alw,dec)).toFixed(4)+' KGEN';
+        setText(['kh-kgen','kh-kgen-bal','userBal','bp-userbal','rb-kgen-txt'], bTxt);
+        setText(['kh-allowance','userAllowance','bp-allowance'], aTxt);
+      }
+      return true;
+    }catch(e){ console.warn('[V8.7.3 syncHeartBalance]',e); return false; }
+  }
+  function wrapRefresh(){
+    const prior = window.kgen12345V872 && window.kgen12345V872.refresh;
+    if(prior && !prior.__v873Wrapped){
+      const fn = async function(ev){ const r=await prior(ev); await syncHeartBalance(); renderRecord(); return r; };
+      fn.__v873Wrapped=true; window.kgen12345V872.refresh=fn;
+    }
+  }
+  function wrapLamp(){
+    const api = window.kgen12345V872 || window.templeOps || {};
+    const oldLamp = api.lamp || (window.templeOps && window.templeOps.lamp);
+    if(oldLamp && !oldLamp.__v873Wrapped){
+      const fn = async function(ev){
+        const [no,name,type] = getSpirit();
+        status('十三聖靈燈：'+no+'｜'+name+'｜'+type+'。準備點燈交易。');
+        const tx = await oldLamp(ev);
+        const now=new Date(); const end=lunarNewYearEveEnd(now);
+        saveRecord({spiritNo:no, spiritName:name, spiritType:type, account:(getState().account||''), startISO:now.toISOString(), endISO:end.toISOString(), txHash:tx&&tx.hash?tx.hash:'', version:VERSION});
+        await syncHeartBalance();
+        return tx;
+      };
+      fn.__v873Wrapped=true;
+      if(window.kgen12345V872) window.kgen12345V872.lamp=fn;
+      window.templeOps = window.templeOps || {}; window.templeOps.lamp=fn;
+      const b=$('kh-lamp'); if(b){ b.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();fn(ev).catch(err=>status('點燈取消或失敗：'+(err.message||err)));return false;}; }
+      const vb=$('v860-lamp-go'); if(vb){ vb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();fn(ev).catch(err=>status('點燈取消或失敗：'+(err.message||err)));return false;}; }
+    }
+  }
+  function patchLampModalText(){
+    const modal=$('kgen-v860-ritual-modal'); if(!modal) return;
+    modal.querySelectorAll('h3,p,div,button,option').forEach(el=>{
+      if(!el.childElementCount){
+        el.textContent = (el.textContent||'')
+          .replace(/十二生肖與人類／AI／超人／變形金剛/g,'十三聖靈燈')
+          .replace(/第13生肖/g,'第13聖靈')
+          .replace(/人類／AI／超人／變形金剛可填物種名稱/g,'第13聖靈為人類／AI／超人／變形金剛')
+          .replace(/任何生命都能點燈/g,'文明覺醒種可點燈');
+      }
+    });
+  }
+  function bind(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    ensureSpiritSelect(); renderRecord(); wrapRefresh(); wrapLamp(); syncHeartBalance(); patchLampModalText();
+    qa('button').forEach(b=>{
+      const t=(b.textContent||'').trim();
+      if((/lightLamp|點燈/.test(t)) && b.id!=='kh-lamp' && !b.dataset.v873Lamp){
+        b.dataset.v873Lamp='1';
+        b.addEventListener('click',()=>setTimeout(()=>{ensureSpiritSelect();wrapLamp();patchLampModalText();},120),true);
+      }
+      if((/刷新餘額|刷新/.test(t)) && !b.dataset.v873Refresh){
+        b.dataset.v873Refresh='1'; b.addEventListener('click',()=>setTimeout(syncHeartBalance,1200),true);
+      }
+    });
+  }
+  window.kgen12345V873 = {bind, syncHeartBalance, renderRecord, records, spirits:SPIRITS};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+  window.addEventListener('load',()=>{ bind(); setTimeout(bind,800); setTimeout(bind,2500); });
+  setInterval(()=>{ syncHeartBalance(); renderRecord(); }, 15000);
 })();
 </script>
 
