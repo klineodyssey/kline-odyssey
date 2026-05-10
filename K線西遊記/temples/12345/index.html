@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX
+VERSION: KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX
 BUILD: 20260511-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.8.2] 修正 MetaMask / Trust / OKX / Bitget 錢包入口 deep link：中文路徑與 GitHub Pages 路徑改用安全編碼，避免跳到「此頁面不存在」；不改神殿視覺與交易邏輯。
 - [V8.8.1] 跨年倒數只保留左上操作區下方單一倒數槽，隱藏上方重複 NY Slot 欄位並停止閃爍；客服解說改為可點即語音，不新增遮罩。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
@@ -49,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1441,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1688,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15551,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15658,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15831,7 +15832,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v881-ny-single-slot-service-voice-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.1-NY-SINGLE-SLOT-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX';
   const $=id=>document.getElementById(id);
   function clean(s){return String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();}
   function speak(msg){
@@ -15929,6 +15930,91 @@ KGEN 12345 UI Patch V7.6.0
   setInterval(updateNy,1000);
   setInterval(()=>{hideDupNy();},500);
   window.kgenV881NyService={updateNy, speak, bind};
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.8.2｜Wallet DeepLink Fix ===== -->
+<script id="kgen12345-v882-wallet-deeplink-fix">
+(function(){
+  'use strict';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.2-WALLET-DEEPLINK-FIX';
+  function $(id){ return document.getElementById(id); }
+  function fullUrl(){
+    const u = new URL(window.location.href);
+    // keep cache buster but remove empty fragments; URL.href safely percent-encodes Chinese path
+    return u.href;
+  }
+  function dappPath(){
+    // MetaMask universal link expects host + encoded path, without https://
+    const u = new URL(fullUrl());
+    return u.host + encodeURI(u.pathname + u.search + u.hash);
+  }
+  function speak(msg){ try{ if(window.app&&app.speak) app.speak(msg); }catch(_){ } }
+  function toast(msg){ try{ if(window.ui&&ui.toast) ui.toast(msg,2600); }catch(_){ } }
+  function setVersion(){
+    try{ document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6'; }catch(_){ }
+    const v=$('ver-st'); if(v) v.textContent='VERSION '+FIX_VERSION;
+  }
+  function copyDappUrl(){
+    const url=fullUrl();
+    const inp=$('walletHubUrl'); if(inp){ inp.value=url; try{ inp.focus(); inp.select(); }catch(_){ } }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(()=>toast('已複製本頁網址，請貼到錢包 DApp 瀏覽器。')).catch(()=>toast('請手動複製網址。'));
+    }else toast('請手動複製網址。');
+  }
+  function openWalletHub(){
+    const hub=$('walletHub');
+    const inp=$('walletHubUrl'); if(inp) inp.value=fullUrl();
+    if(hub){ hub.style.display='flex'; hub.style.visibility='visible'; hub.style.opacity='1'; hub.style.pointerEvents='auto'; }
+    toast('已開啟多錢包入口。若 MetaMask 顯示此頁不存在，請改用複製網址貼入 DApp 瀏覽器。');
+  }
+  function deepLink(kind){
+    const url=fullUrl();
+    let link=url;
+    if(kind==='metamask'){
+      // Correct format: https://metamask.app.link/dapp/<host>/<encoded-path>
+      link='https://metamask.app.link/dapp/'+dappPath();
+    }else if(kind==='trust'){
+      link='https://link.trustwallet.com/open_url?coin_id=20000714&url='+encodeURIComponent(url);
+    }else if(kind==='okx'){
+      link='okx://wallet/dapp/details?dappUrl='+encodeURIComponent(url);
+    }else if(kind==='bitget'){
+      link='bitget://openDapp?url='+encodeURIComponent(url);
+    }else if(kind==='binance'){
+      link='https://www.binance.com/en/web3wallet/dapp?url='+encodeURIComponent(url);
+    }else{
+      copyDappUrl(); return false;
+    }
+    toast('正在開啟錢包；若出現「頁面不存在」，請返回並按「複製」貼到錢包 DApp 瀏覽器。');
+    speak('正在開啟錢包。如果錢包顯示頁面不存在，請回到神殿，按複製網址，貼到錢包的 DApp 瀏覽器。');
+    setTimeout(()=>{ window.location.href=link; }, 80);
+    return false;
+  }
+  function install(){
+    setVersion();
+    if(window.web3){
+      window.web3.deepLink=deepLink;
+      window.web3.openWalletHub=openWalletHub;
+      window.web3.copyDappUrl=copyDappUrl;
+    }
+    const inp=$('walletHubUrl'); if(inp) inp.value=fullUrl();
+    // Hard-bind visible wallet hub buttons in case old inline onclick remains cached.
+    document.querySelectorAll('[onclick*="deepLink"]').forEach(btn=>{
+      const onclick=btn.getAttribute('onclick')||'';
+      const m=onclick.match(/deepLink\('([^']+)'\)/);
+      if(m){ btn.onclick=(ev)=>{ ev.preventDefault(); ev.stopPropagation(); return deepLink(m[1]); }; }
+    });
+    const copyBtns=[...document.querySelectorAll('button')].filter(b=>/複製/.test(b.textContent||''));
+    copyBtns.forEach(b=>{
+      const near=b.closest('#walletHub');
+      if(near) b.onclick=(ev)=>{ ev.preventDefault(); return copyDappUrl(); };
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+  window.addEventListener('load', ()=>{ install(); setTimeout(install,700); setTimeout(install,2200); });
+  window.kgenWalletDeepLinkFixV882={install,deepLink,openWalletHub,copyDappUrl,fullUrl,dappPath};
 })();
 </script>
 
