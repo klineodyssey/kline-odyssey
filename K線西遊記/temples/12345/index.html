@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX
-BUILD: 20260510-V8.7.1-TOP-WALLET-BUTTON-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX
+BUILD: 20260510-V8.7.2-WALLET-TX-SYNC-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.7.2] 修正左下操作區錢包同步與許願 / 還願 / 點燈送交易：統一 signer、刷新餘額欄位、動態彈窗按鈕直接送 Heart 交易。
 - [V8.7.1] 小修上方「連結錢包 / 切 BSC」按鈕：改走下方同一個多錢包 / smartConnect 入口，不改視覺、不改 Heart 交易邏輯。
 - [V8.6.2] 修正音響控制與許願/還願/點燈實際交易路徑，避免只開說明視窗不扣款。
 - [V8.6.3] 統一錢包連線狀態，強制 Heart 交易走同一個 signer，修正左上/左下不同步造成無法還願點燈。
@@ -41,7 +42,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1433,7 +1434,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1680,7 +1681,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -13586,7 +13587,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13746,9 +13747,9 @@ KGEN 12345 UI Patch V7.6.0
     document.addEventListener('click',function(ev){
       const btn=ev.target && ev.target.closest ? ev.target.closest('button') : null; if(!btn) return;
       const t=(btn.textContent||'').replace(/\s+/g,' ').trim();
-      if(t.includes('許願')){ if(!btn.id || btn.id!=='v860-wish-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('wish'); return false; } }
-      if(t.includes('還願')){ if(!btn.id || btn.id!=='v860-vow-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('vow'); return false; } }
-      if(t.includes('點燈')){ if(!btn.id || btn.id!=='v860-lamp-go'){ ev.preventDefault(); ev.stopPropagation(); openRitual('lamp'); return false; } }
+      if(t.includes('許願')){ if(!['v860-wish-go','kh-wishbtn'].includes(btn.id||'')){ ev.preventDefault(); ev.stopPropagation(); openRitual('wish'); return false; } }
+      if(t.includes('還願')){ if(!['v860-vow-go','kh-vow'].includes(btn.id||'')){ ev.preventDefault(); ev.stopPropagation(); openRitual('vow'); return false; } }
+      if(t.includes('點燈')){ if(!['v860-lamp-go','kh-lamp'].includes(btn.id||'')){ ev.preventDefault(); ev.stopPropagation(); openRitual('lamp'); return false; } }
     },true);
     robustRefresh();
   }
@@ -13764,7 +13765,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14226,7 +14227,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14431,108 +14432,215 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V8.7.1｜Top Wallet Button Fix Only ===== -->
-<script id="kgen12345-v871-top-wallet-button-fix">
+
+
+<!-- ===== KGEN 12345 V8.7.2｜Wallet Balance + Real TX Sync Fix ===== -->
+<script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const FIX_VERSION = 'KGEN-12345-HEART-UI-V8.7.1-TOP-WALLET-BUTTON-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.2-WALLET-TX-SYNC-FIX';
+  const BSC_HEX = '0x38';
+  const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const ERC20 = [
+    'function approve(address spender,uint256 amount) external returns (bool)',
+    'function allowance(address owner,address spender) external view returns (uint256)',
+    'function balanceOf(address owner) external view returns (uint256)',
+    'function decimals() external view returns (uint8)'
+  ];
+  const HEART_ABI = [
+    'function fortuneClaim() external',
+    'function heartbeatClaim() external',
+    'function igniteAndClaim() external',
+    'function festivalClaim(uint8 festivalId) external',
+    'function newYearCountdownClaim() external',
+    'function vowTo(uint8 option,uint256 amountWhole) external',
+    'function lightLamp(uint256 daysToAdd) external',
+    'function makeWish(bytes32 wishHash) external'
+  ];
+  const state = window.kgenWalletState = window.kgenWalletState || { provider:null, signer:null, account:null, chainId:null };
   function $(id){ return document.getElementById(id); }
+  function val(id){ const e=$(id); return e ? String(e.value||'').trim() : ''; }
+  function setVal(id,v){ const e=$(id); if(e) e.value = String(v ?? ''); }
+  function setText(ids,v){ ids.forEach(id=>{ const e=$(id); if(e) e.textContent = String(v); }); }
+  function short(a){ return a ? a.slice(0,6)+'…'+a.slice(-4) : '未連線'; }
+  function fmtWei(v,d=4){ try{ return Number(ethers.utils.formatUnits(v,18)).toFixed(d); }catch(_){ return '--'; } }
   function status(msg){
-    try{ const st=$('kh-status')||$('bp-status')||$('w3-prog'); if(st) st.textContent=msg; }catch(_){ }
-    try{ if(window.ui&&ui.toast) ui.toast(msg,2600); }catch(_){ }
+    setText(['kh-log','bp-status','w3-prog','kgen-v860-wallet-status'], msg);
+    try{ if(window.ui && ui.toast) ui.toast(msg,2600); }catch(_){ }
+    console.log('[KGEN V8.7.2]', msg);
   }
-  function speak(msg){
-    try{ if(window.app&&app.speak) app.speak(String(msg||'').replace(/[🔌⚠️✅]/g,'')); }catch(_){ }
-  }
-  function showWalletHub(){
-    try{
-      if(window.web3 && typeof web3.openWalletHub === 'function'){
-        web3.openWalletHub();
-        return true;
-      }
-    }catch(_){ }
-    const hub = $('walletHub');
-    const inp = $('walletHubUrl');
-    if(inp) inp.value = location.href;
-    if(hub){
-      hub.style.display = 'flex';
-      hub.style.visibility = 'visible';
-      hub.style.opacity = '1';
-      return true;
-    }
+  function showHub(){
+    try{ if(window.web3 && typeof web3.openWalletHub === 'function'){ web3.openWalletHub(); return true; } }catch(_){ }
+    const hub=$('walletHub'); const inp=$('walletHubUrl');
+    if(inp) inp.value=location.href;
+    if(hub){ hub.style.display='flex'; hub.style.visibility='visible'; hub.style.opacity='1'; return true; }
     return false;
   }
-  function pickInjectedProvider(){
-    const eth = window.ethereum || window.BinanceChain || null;
+  function getEth(){
+    let eth = window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || window.BinanceChain || null;
     if(eth && Array.isArray(eth.providers) && eth.providers.length){
-      return eth.providers.find(p => p && (p.isMetaMask || p.isTrust || p.isBinance || p.isOKXWallet || p.isBitKeep || p.isBitgetWallet)) || eth.providers[0];
+      eth = eth.providers.find(p=>p && (p.isMetaMask || p.isTrust || p.isBinance || p.isOKXWallet || p.isBitKeep || p.isBitgetWallet)) || eth.providers[0];
     }
     return eth && eth.request ? eth : null;
   }
-  async function topWalletConnect(ev){
-    if(ev){
-      try{ ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }catch(_){ }
-    }
-    const btn = $('kh-connect');
-    if(btn) btn.dataset.v871State = 'connecting';
-    status('正在開啟錢包連線入口。');
-    try{
-      const eth = pickInjectedProvider();
-      if(eth){
-        if(window.web3 && typeof web3.smartConnect === 'function'){
-          await web3.smartConnect();
-          return false;
-        }
-        if(window.kgen12345V863 && typeof window.kgen12345V863.connect === 'function'){
-          await window.kgen12345V863.connect();
-          return false;
-        }
-        try{
-          const accounts = await eth.request({method:'eth_requestAccounts'});
-          if(accounts && accounts[0]){
-            status('錢包已授權：' + String(accounts[0]).slice(0,6) + '…' + String(accounts[0]).slice(-4));
-            return false;
-          }
-        }catch(e){ console.warn('[V8.7.1 direct eth_requestAccounts]', e); }
+  async function switchBSC(eth){
+    let cid = await eth.request({method:'eth_chainId'}).catch(()=>null);
+    if(String(cid||'').toLowerCase() !== BSC_HEX){
+      try{ await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]}); }
+      catch(e){
+        await eth.request({method:'wallet_addEthereumChain',params:[{chainId:BSC_HEX,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com']} ]});
+        await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
       }
-      if(showWalletHub()){
-        status('未偵測到錢包注入，已開啟多錢包入口。');
-        speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟。');
-      }else{
-        status('請使用 MetaMask 或 Trust Wallet 內建瀏覽器開啟。');
-        speak('請使用 MetaMask 或 Trust Wallet 內建瀏覽器開啟。');
-      }
-    }catch(e){
-      console.warn('[V8.7.1 top wallet connect fallback]', e);
-      if(showWalletHub()) status('錢包授權未完成，已開啟多錢包入口。');
-    }finally{
-      if(btn) btn.dataset.v871State = 'ready';
     }
-    return false;
+    state.chainId = BSC_HEX;
   }
-  function bindTopWalletButton(){
-    const btn = $('kh-connect');
-    if(!btn) return false;
-    btn.onclick = topWalletConnect;
-    btn.style.pointerEvents = 'auto';
-    btn.setAttribute('data-wallet-route','v871-top-wallet-button-fix');
-    if(!btn.dataset.v871CaptureBound){
-      btn.dataset.v871CaptureBound = '1';
-      btn.addEventListener('click', topWalletConnect, true);
+  async function connect(ev){
+    if(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_){ } }
+    if(!window.ethers || !ethers.providers){ status('ethers 尚未載入，請重新整理頁面。'); return null; }
+    const eth=getEth();
+    if(!eth){ status('未偵測到錢包注入，已開啟多錢包入口。'); showHub(); return null; }
+    status('正在連結錢包並切換 BSC。');
+    await switchBSC(eth);
+    const accounts = await eth.request({method:'eth_requestAccounts'});
+    if(!accounts || !accounts[0]) throw new Error('NO_ACCOUNT');
+    state.provider = new ethers.providers.Web3Provider(eth,'any');
+    state.signer = state.provider.getSigner();
+    state.account = await state.signer.getAddress();
+    try{ if(window.web3){ web3.provider=state.provider; web3.signer=state.signer; web3.addr=state.account; web3.demo=false; web3.UNIVERSE=HEART; } }catch(_){ }
+    try{ if(window.kgen12345V863){ window.kgen12345V863.__v872Provider=state.provider; } }catch(_){ }
+    await refresh();
+    status('錢包已連線：'+short(state.account)+'，餘額已刷新。');
+    return state;
+  }
+  async function refresh(ev){
+    if(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_){ } }
+    if(!state.provider || !state.account){
+      const eth=getEth();
+      if(eth){
+        const acc=await eth.request({method:'eth_accounts'}).catch(()=>[]);
+        if(acc && acc[0]) await connect();
+      }
+      if(!state.provider || !state.account){ status('尚未連線，請先按連結錢包。'); return false; }
     }
-    const ver = $('ver-st');
-    if(ver) ver.textContent = 'VERSION ' + FIX_VERSION;
-    document.title = 'KGEN 12345 五指山悟空財神殿｜' + FIX_VERSION + '｜Heart V3.2.6';
+    const token = new ethers.Contract(KGEN,ERC20,state.provider);
+    const [bnb,bal,alw,heartBal] = await Promise.all([
+      state.provider.getBalance(state.account),
+      token.balanceOf(state.account),
+      token.allowance(state.account,HEART),
+      token.balanceOf(HEART)
+    ]);
+    const bnbTxt=Number(ethers.utils.formatEther(bnb)).toFixed(6)+' BNB';
+    const balTxt=fmtWei(bal)+' KGEN';
+    const alwTxt=fmtWei(alw)+' KGEN';
+    const heartTxt=fmtWei(heartBal)+' KGEN';
+    setText(['w3-addr','kh-wallet','walletAddr','bp-wallet'], short(state.account));
+    setText(['w3-chain','kh-chain'], 'BSC 56');
+    setText(['userBNB','kh-bnb','rb-bnb-txt'], bnbTxt);
+    setText(['userBal','kh-kgen','kh-kgen-bal','rb-kgen-txt','bp-userbal'], balTxt);
+    setText(['userAllowance','kh-allowance','bp-allowance'], alwTxt);
+    setText(['w3-bal','kh-heart','kh-heart-bal','prog-txt'], heartTxt);
+    const uni=$('w3-uni'); if(uni) uni.textContent=HEART;
+    const fill=$('prog-fill'); if(fill){ fill.style.width=Math.min(100, Number(fmtWei(heartBal,6))/12345*100).toFixed(2)+'%'; }
+    document.body.classList.add('wallet-connected','kgen-wallet-connected');
+    document.body.classList.remove('wallet-disconnected','kgen-wallet-disconnected');
     return true;
   }
-  window.kgen12345TopWalletFixV871 = { bind: bindTopWalletButton, connect: topWalletConnect, showWalletHub };
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindTopWalletButton);
-  else bindTopWalletButton();
-  window.addEventListener('load', function(){
-    bindTopWalletButton();
-    setTimeout(bindTopWalletButton, 800);
-    setTimeout(bindTopWalletButton, 2500);
-  });
+  function amountWhole(){
+    let raw = val('v860-vow-amt') || val('v860-lamp-days') || val('kh-amount') || val('amt-in') || val('bet-amt-input') || '1';
+    raw = String(raw).trim();
+    if(!/^\d+(\.\d+)?$/.test(raw)) throw new Error('請輸入 KGEN 整數或天數');
+    const n = Math.floor(Number(raw));
+    if(!Number.isFinite(n)||n<=0) throw new Error('請輸入大於 0 的整數');
+    setVal('kh-amount',n); setVal('amt-in',n); setVal('bet-amt-input',n);
+    return String(n);
+  }
+  function wishHash(){
+    const raw = val('v860-wish-text') || val('kh-wish') || 'KGEN-12345-WISH';
+    if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
+    return ethers.utils.id(raw || 'KGEN-12345-WISH').slice(0,66);
+  }
+  async function heart(){ await connect(); return new ethers.Contract(HEART,HEART_ABI,state.signer); }
+  async function send(label, fn){
+    try{
+      const c=await heart();
+      status('準備開啟錢包確認：'+label);
+      const tx=await fn(c);
+      status('交易已送出：'+label+'｜'+tx.hash);
+      await tx.wait();
+      status('完成：'+label);
+      await refresh();
+      return tx;
+    }catch(e){ console.warn('[V8.7.2 tx failed]',e); status('交易取消或失敗：'+(e && e.message ? e.message : e)); throw e; }
+  }
+  async function approve(){
+    try{
+      await connect();
+      const amt=ethers.utils.parseUnits(amountWhole(),18);
+      const token=new ethers.Contract(KGEN,ERC20,state.signer);
+      status('準備開啟錢包確認：Approve Heart');
+      const tx=await token.approve(HEART,amt);
+      status('Approve 已送出：'+tx.hash);
+      await tx.wait();
+      status('Approve 完成');
+      await refresh();
+      return tx;
+    }catch(e){ status('Approve 取消或失敗：'+(e.message||e)); throw e; }
+  }
+  const api={
+    connect, refresh, approve,
+    fortune:()=>send('fortuneClaim 發財金',c=>c.fortuneClaim()),
+    heartbeat:()=>send('heartbeatClaim 整點心跳',c=>c.heartbeatClaim()),
+    ignite:()=>send('igniteAndClaim 轉日呼吸',c=>c.igniteAndClaim()),
+    vow:()=>send('vowTo 還願補血',c=>c.vowTo(Number(val('v860-vow-option') || val('kh-vow-option') || 1), amountWhole())),
+    lamp:()=>send('lightLamp 點燈續命',c=>c.lightLamp(amountWhole())),
+    wish:()=>send('makeWish 許願 hash',c=>c.makeWish(wishHash())),
+    festival520:()=>send('festivalClaim 5/20',c=>c.festivalClaim(1)),
+    festival1111:()=>send('festivalClaim 11/11',c=>c.festivalClaim(2)),
+    newyear:()=>send('newYearCountdownClaim 跨年',c=>c.newYearCountdownClaim())
+  };
+  function bindOne(id,fn){ const el=$(id); if(el){ el.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); fn(ev).catch(()=>{}); return false; }; el.style.pointerEvents='auto'; el.dataset.walletRoute='v872'; } }
+  function bindAll(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    bindOne('kh-connect',connect); bindOne('w3-connect-btn',connect); bindOne('kh-refresh',refresh);
+    bindOne('kh-approve',approve); bindOne('kh-vow',api.vow); bindOne('kh-lamp',api.lamp); bindOne('kh-wishbtn',api.wish);
+    bindOne('kh-heartbeat',api.heartbeat); bindOne('kh-fortune',api.fortune); bindOne('kh-ignite',api.ignite);
+    bindOne('v860-wish-go',api.wish); bindOne('v860-vow-go',api.vow); bindOne('v860-lamp-go',api.lamp);
+    try{ if(window.web3){ web3.connect=connect; web3.smartConnect=connect; web3.refresh=refresh; web3.refreshUser=refresh; web3.approve=approve; } }catch(_){ }
+    window.templeOps = window.templeOps || {};
+    Object.assign(window.templeOps,{ approve, fortune:api.fortune, heartbeat:api.heartbeat, ignite:api.ignite, vow:api.vow, lamp:api.lamp, wish:api.wish });
+    window.kgen12345V872 = api;
+  }
+  document.addEventListener('click',function(ev){
+    const b=ev.target && ev.target.closest ? ev.target.closest('button') : null;
+    if(!b) return;
+    const id=b.id||'';
+    const t=(b.textContent||'').replace(/\s+/g,' ').trim();
+    const map={
+      'kh-connect':connect,'w3-connect-btn':connect,'kh-refresh':refresh,'kh-approve':approve,
+      'kh-vow':api.vow,'kh-lamp':api.lamp,'kh-wishbtn':api.wish,
+      'v860-wish-go':api.wish,'v860-vow-go':api.vow,'v860-lamp-go':api.lamp,
+      'kh-heartbeat':api.heartbeat,'kh-fortune':api.fortune,'kh-ignite':api.ignite
+    };
+    let fn=map[id];
+    if(!fn){
+      if(t.includes('APPROVE')||t.includes('Approve')) fn=approve;
+      else if(t.includes('連結錢包')||t.includes('連接錢包')||t.includes('切 BSC')) fn=connect;
+      else if(t.includes('確認還願')||t.includes('vowTo')) fn=api.vow;
+      else if(t.includes('確認點燈')||t.includes('lightLamp')) fn=api.lamp;
+      else if(t.includes('送出許願')||t.includes('makeWish')) fn=api.wish;
+    }
+    if(fn){ ev.preventDefault(); ev.stopPropagation(); fn(ev).catch(()=>{}); return false; }
+  }, true);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindAll); else bindAll();
+  window.addEventListener('load',function(){ bindAll(); setTimeout(bindAll,800); setTimeout(bindAll,2500); });
+  const eth=getEth();
+  if(eth && eth.on && !eth.__kgenV872Bound){
+    eth.__kgenV872Bound=true;
+    eth.on('accountsChanged',()=>setTimeout(connect,200));
+    eth.on('chainChanged',()=>setTimeout(connect,300));
+  }
 })();
 </script>
 
