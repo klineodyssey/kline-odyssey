@@ -4,11 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX
-BUILD: 20260510-V8.7.8-SERVICE-LAYER-UNLOCK-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX
+BUILD: 20260510-V8.7.9-CLEAN-SERVICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
-- [V8.7.7] 高規格 AI 語音客服：交易失敗即時解說、心跳/轉日/跨年倒數顯示、5/20 改為悟空覺醒日說明、客服影像面板與收據提示。
+- [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
 - [V8.7.5] 補齊左上無限授權強制接線、Allowance 顯示、切換錢包、交易收據本機紀錄與下載；許願 / 還願 / 點燈成功後記錄 tx hash、開始時間、結束時間。
 - [V8.7.4] 左上與左下都新增 / 統一 Approve：目前金額與無限授權共用同一 provider / signer / allowance refresh；十三聖靈第 13 類正式納入人類、AI、超人、變形金剛、地球外星所有物種，1 到 12 維持動物生肖。
@@ -47,7 +47,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1439,7 +1439,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1686,7 +1686,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -8582,7 +8582,7 @@ KGEN 12345 Heart Live Patch V7.3.0
     <button type="button" id="kh-fortune">fortuneClaim</button>
     <button type="button" id="kh-heartbeat">heartbeatClaim</button>
     <button type="button" id="kh-ignite">igniteAndClaim</button>
-    <button type="button" id="kh-festival1">5/20 悟空覺醒日</button>
+    <button type="button" id="kh-festival1">5/20 悟空生日</button>
     <button type="button" id="kh-festival2">11/11 孤勇日</button>
     <button type="button" id="kh-newyear">12/31 倒數</button>
     <button type="button" id="kh-vow">vowTo 還願</button>
@@ -9974,7 +9974,7 @@ KGEN 12345 UI Patch V7.6.0
     bind('kh-fortune','fortuneClaim 發財金',()=>send('fortuneClaim 發財金',c=>c.fortuneClaim(amountWhole())));
     bind('kh-heartbeat','heartbeatClaim 整點心跳',()=>send('heartbeatClaim 整點心跳',c=>c.heartbeatClaim())) ;
     bind('kh-ignite','igniteAndClaim 轉日呼吸',()=>send('igniteAndClaim 轉日呼吸',c=>c.igniteAndClaim())) ;
-    bind('kh-festival1','5/20 悟空覺醒日',()=>send('festivalClaim 5/20 悟空覺醒日',c=>c.festivalClaim(1)));
+    bind('kh-festival1','5/20 悟空生日',()=>send('festivalClaim 5/20 悟空生日',c=>c.festivalClaim(1)));
     bind('kh-festival2','11/11 孤勇日',()=>send('festivalClaim 11/11 孤勇日',c=>c.festivalClaim(2)));
     bind('kh-newyear','12/31 倒數',()=>send('newYearCountdownClaim 倒數',c=>c.newYearCountdownClaim())) ;
     bind('kh-vow','vowTo 還願',()=>send('vowTo 還願',c=>c.vowTo(Number($('kh-vow-option')?.value||1), amountWhole())));
@@ -10518,7 +10518,7 @@ KGEN 12345 UI Patch V7.6.0
     if(!$('v714-events')){
       const ev=document.createElement('div'); ev.id='v714-events'; ev.className='v714-events';
       ev.innerHTML=`
-        <div class="v714-event"><button type="button" onclick="window.templeOps&&templeOps.festival&&templeOps.festival(1)">啟動</button><b>5/20 悟空覺醒日</b><br>節日領取：festivalClaim(1)</div>
+        <div class="v714-event"><button type="button" onclick="window.templeOps&&templeOps.festival&&templeOps.festival(1)">啟動</button><b>5/20 悟空生日</b><br>節日領取：festivalClaim(1)</div>
         <div class="v714-event"><button type="button" onclick="window.templeOps&&templeOps.festival&&templeOps.festival(2)">啟動</button><b>11/11 孤勇日</b><br>節日領取：festivalClaim(2)</div>
         <div class="v714-event"><button type="button" onclick="window.templeOps&&templeOps.newyear&&templeOps.newyear()">啟動</button><b>12/31 跨年倒數</b><br>newYearCountdownClaim()</div>`;
       const grid=p.querySelector('.bp-grid'); grid && grid.insertAdjacentElement('afterend',ev);
@@ -10555,7 +10555,7 @@ KGEN 12345 UI Patch V7.6.0
       const rules=`<h3>發放規則</h3><ul><li><b>fortuneClaim：</b>1 到 888 KGEN，30 天冷卻，每 epoch 最多 500 名。</li><li><b>前置：</b>前端先完成三次聖盃，才顯示可領發財金。</li><li><b>heartbeatClaim：</b>整點心跳，每小時一次。</li><li><b>igniteAndClaim：</b>轉日呼吸，UTC 00:00–00:10 每日一次。</li><li><b>vowTo：</b>還願補血，讓 Heart 血庫回流。</li><li><b>lightLamp：</b>點燈續命。</li><li><b>makeWish：</b>許願 hash 上鏈。</li></ul><p>Heart ↔ 11520 Brain 是循環血庫，不是 16888 下凡。</p>`;
       const wallet=`<h3>錢包與 KGEN</h3><p>請用 MetaMask、Trust Wallet、OKX 或 Binance Wallet 內建瀏覽器開啟本頁。一般瀏覽器可能沒有錢包注入。</p><ol><li>切到 BNB Smart Chain。</li><li>連結錢包。</li><li>讀取 BNB、KGEN、Allowance、Heart 血庫。</li><li>若找不到 KGEN，用 Custom Token 匯入：<code>${TOKEN}</code></li></ol>`;
       const approve=`<h3>Approve Heart 教學</h3><p>Approve 是授權 Heart 合約使用你指定數量的 KGEN，不是直接領發財金。</p><ol><li>確認 KGEN 餘額。</li><li>輸入授權數量。</li><li>按 APPROVE。</li><li>錢包確認成功後，再做三次聖盃與發財金。</li></ol>`;
-      const playbook=`<h3>完整玩法</h3><p><b>12345 是福緣循環神殿：</b>領福緣 → 創造 → 還願 → 補血 → 再循環。</p><h4>日常功能</h4><ul><li>fortuneClaim：領發財金，需三次聖盃。</li><li>heartbeatClaim：整點心跳。</li><li>igniteAndClaim：轉日呼吸。</li><li>vowTo：還願補血。</li><li>lightLamp：點燈。</li><li>makeWish：許願。</li></ul><h4>節日活動</h4><ul><li>5/20 悟空覺醒日：festivalClaim(1)</li><li>11/11 孤勇日：festivalClaim(2)</li><li>12/31 跨年倒數：newYearCountdownClaim()</li></ul><p>Brain：<code>${BRAIN}</code><br>MarsSeats：<code>${MARS}</code></p>`;
+      const playbook=`<h3>完整玩法</h3><p><b>12345 是福緣循環神殿：</b>領福緣 → 創造 → 還願 → 補血 → 再循環。</p><h4>日常功能</h4><ul><li>fortuneClaim：領發財金，需三次聖盃。</li><li>heartbeatClaim：整點心跳。</li><li>igniteAndClaim：轉日呼吸。</li><li>vowTo：還願補血。</li><li>lightLamp：點燈。</li><li>makeWish：許願。</li></ul><h4>節日活動</h4><ul><li>5/20 悟空生日：festivalClaim(1)</li><li>11/11 孤勇日：festivalClaim(2)</li><li>12/31 跨年倒數：newYearCountdownClaim()</li></ul><p>Brain：<code>${BRAIN}</code><br>MarsSeats：<code>${MARS}</code></p>`;
       const qa=`<h3>語音客服問答</h3><div class='qa-grid'><button class='qa-btn' data-q='12345 是什麼？'>12345 是什麼？</button><button class='qa-btn' data-q='發財金怎麼領？'>發財金怎麼領？</button><button class='qa-btn' data-q='為什麼要三次聖盃？'>為什麼要三次聖盃？</button><button class='qa-btn' data-q='5/20 活動是什麼？'>5/20 活動是什麼？</button><button class='qa-btn' data-q='11/11 活動是什麼？'>11/11 活動是什麼？</button><button class='qa-btn' data-q='跨年活動是什麼？'>跨年活動是什麼？</button></div><div id='qa-last' style='margin-top:10px'></div><div id='qa-last-a' style='margin-top:8px'></div>`;
       return {intro,rules,wallet,approve,playbook,qa};
     };
@@ -10563,7 +10563,7 @@ KGEN 12345 UI Patch V7.6.0
       const question=String(q||''); let ans='';
       if(question.includes('發財金')) ans='發財金流程是：連結錢包，Approve Heart，完成三次聖盃，然後呼叫 fortuneClaim。範圍是一到八百八十八 KGEN，冷卻三十天。';
       else if(question.includes('聖盃')) ans='三次聖盃是 12345 的前端儀式門檻，用來避免使用者誤按直接送交易。完成三次後才開放發財金按鈕。';
-      else if(question.includes('5/20')) ans='五二零是悟空覺醒日活動，對應 festivalClaim 一。只有活動日期或合約允許時才會成功。';
+      else if(question.includes('5/20')) ans='五二零是悟空生日活動，對應 festivalClaim 一。只有活動日期或合約允許時才會成功。';
       else if(question.includes('11/11')) ans='十一月十一日是孤勇日活動，對應 festivalClaim 二。';
       else if(question.includes('跨年')) ans='跨年活動對應 newYearCountdownClaim，主要用於十二月三十一日倒數區間。';
       else if(question.includes('12345')) ans='12345 是五指山悟空財神殿，是 TempleHeart V3.2.6 的前端控制神殿，核心是發財金、心跳、轉日呼吸、還願、點燈與許願。';
@@ -10579,7 +10579,7 @@ KGEN 12345 UI Patch V7.6.0
   }
   function patchTempleOps(){
     if(!window.templeOps) window.templeOps={};
-    templeOps.festival=function(id){ speak((id===1?'五二零悟空覺醒日':'十一月十一孤勇日')+'活動準備啟動，將呼叫 festivalClaim。'); if(window.kgenHeartCall) return kgenHeartCall('festivalClaim',[id]); set('bp-status',(id===1?'5/20 悟空覺醒日':'11/11 孤勇日')+'：請確認合約與日期條件。'); };
+    templeOps.festival=function(id){ speak((id===1?'五二零悟空生日':'十一月十一孤勇日')+'活動準備啟動，將呼叫 festivalClaim。'); if(window.kgenHeartCall) return kgenHeartCall('festivalClaim',[id]); set('bp-status',(id===1?'5/20 悟空生日':'11/11 孤勇日')+'：請確認合約與日期條件。'); };
     templeOps.newyear=function(){ speak('跨年倒數活動準備啟動，將呼叫 newYearCountdownClaim。'); if(window.kgenHeartCall) return kgenHeartCall('newYearCountdownClaim',[]); set('bp-status','12/31 跨年活動：請確認合約與日期條件。'); };
   }
   function init(){patchVersion(); buildLeftPanel(); patchGuide(); patchTempleOps();}
@@ -10716,7 +10716,7 @@ KGEN 12345 UI Patch V7.6.0
             <button class="nav-btn" type="button" onclick="templeOps.fortune()">🧧 領發財金</button>
             <button class="nav-btn" type="button" onclick="templeOps.heartbeat()">🫀 整點心跳</button>
             <button class="nav-btn" type="button" onclick="templeOps.ignite()">🌬️ 轉日呼吸</button>
-            <button class="nav-btn" type="button" onclick="templeOps.festival1&&templeOps.festival1()">5/20 悟空覺醒日</button>
+            <button class="nav-btn" type="button" onclick="templeOps.festival1&&templeOps.festival1()">5/20 悟空生日</button>
             <button class="nav-btn" type="button" onclick="templeOps.festival2&&templeOps.festival2()">11/11 孤勇日</button>
             <button class="nav-btn" type="button" onclick="templeOps.newYear&&templeOps.newYear()" style="grid-column:1 / span 2;">12/31 跨年倒數</button>
           </div>
@@ -10724,7 +10724,7 @@ KGEN 12345 UI Patch V7.6.0
         <div style="border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.04); padding:12px;">
           <div style="color:#ffd978; font-weight:900; margin-bottom:8px;">活動說明</div>
           <div style="font-size:13px; line-height:1.8; color:#e6eef8;">
-            5/20 悟空覺醒日：festivalClaim(1)。<br>
+            5/20 悟空生日：festivalClaim(1)。<br>
             11/11 孤勇日：festivalClaim(2)。<br>
             12/31 跨年倒數：newYearCountdownClaim()。<br><br>
             Heart V3.2.6：${HEART}<br>
@@ -10766,7 +10766,7 @@ KGEN 12345 UI Patch V7.6.0
         if(old.fortune) return old.fortune.call(this);
         say('三次聖盃已完成，準備送出 fortuneClaim。');
       },
-      festival1(){ if(old.festival1) return old.festival1.call(this); say('5/20 悟空覺醒日活動：festivalClaim(1)。請確認活動期間與錢包後送出。'); },
+      festival1(){ if(old.festival1) return old.festival1.call(this); say('5/20 悟空生日活動：festivalClaim(1)。請確認活動期間與錢包後送出。'); },
       festival2(){ if(old.festival2) return old.festival2.call(this); say('11/11 孤勇日活動：festivalClaim(2)。請確認活動期間與錢包後送出。'); },
       newYear(){ if(old.newYear) return old.newYear.call(this); say('12/31 跨年倒數活動：newYearCountdownClaim。請確認活動時段後送出。'); }
     };
@@ -10786,7 +10786,7 @@ KGEN 12345 UI Patch V7.6.0
       <p>主流程：連接錢包 → Approve → 請示三次聖盃 → fortuneClaim 領發財金。</p>
       <p>聖盃規則：正反 / 反正代表神明允許，正正是笑杯，反反是陰杯。沒過就繼續請示，三次成功後才可領。</p>
       <p>日常儀式：heartbeatClaim 整點心跳、igniteAndClaim 轉日呼吸、vowTo 還願補血、lightLamp 點燈續命、makeWish 許願上鏈 hash。</p>
-      <p>活動：5/20 悟空覺醒日 festivalClaim(1)，11/11 孤勇日 festivalClaim(2)，12/31 跨年倒數 newYearCountdownClaim。</p>`;
+      <p>活動：5/20 悟空生日 festivalClaim(1)，11/11 孤勇日 festivalClaim(2)，12/31 跨年倒數 newYearCountdownClaim。</p>`;
     }
   }
   function apply(){ makeDock(); ensureOpsPanel(); patchTempleModal(); patchGuideCopy(); patchTempleOps(); }
@@ -11652,7 +11652,7 @@ KGEN 12345 UI Patch V7.6.0
             <b>聖盃：</b>正反 / 反正成功；正正是笑杯；反反是陰杯。沒有三次成功就不能領。<br>
             <b>日常：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸。<br>
             <b>補血：</b>vowTo 還願、lightLamp 點燈、makeWish 許願 hash。<br>
-            <b>活動：</b>5/20 悟空覺醒日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
+            <b>活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
             <b>Heart：</b>${HEART}
           </div>`;
         inner.insertBefore(box, inner.firstChild);
@@ -11835,7 +11835,7 @@ KGEN 12345 UI Patch V7.6.0
           <b>主流程：</b>連接錢包 → Approve → 請示三次聖盃 → fortuneClaim 發財金。<br>
           <b>聖盃規則：</b>正反 / 反正 = 聖盃成功；正正 = 笑杯；反反 = 陰杯。未滿三次成功不可領。<br>
           <b>日常：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸。<br>
-          <b>節日活動：</b>5/20 悟空覺醒日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
+          <b>節日活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
           <b>補血儀式：</b>vowTo 還願、lightLamp 點燈、makeWish 許願 hash。<br>
           <b>Heart：</b>${HEART}
         </div>`;
@@ -12053,7 +12053,7 @@ KGEN 12345 UI Patch V7.6.0
           <b>主流程：</b>連接錢包 → Approve → 請示三次聖盃 → fortuneClaim 發財金。<br>
           <b>聖盃規則：</b>正反 / 反正 = 聖盃成功；正正 = 笑杯；反反 = 陰杯。未滿三次成功不可領。<br>
           <b>日常：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸。<br>
-          <b>節日活動：</b>5/20 悟空覺醒日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
+          <b>節日活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br>
           <b>補血儀式：</b>vowTo 還願、lightLamp 點燈、makeWish 許願 hash。<br>
           <b>Heart：</b>${HEART}
         </div>`;
@@ -12722,7 +12722,7 @@ KGEN 12345 UI Patch V7.6.0
         <b>主流程：</b>連接錢包 → Approve Heart → 請示三次聖盃 → fortuneClaim 發財金。<br>
         <b>聖盃規則：</b>正反 / 反正 = 聖盃成功；正正 = 笑杯；反反 = 陰杯。未滿三次成功不可領。<br>
         <b>日常功能：</b>heartbeatClaim 整點心跳；igniteAndClaim 轉日呼吸；vowTo 還願補血；lightLamp 點燈續命；makeWish 許願 hash。<br>
-        <b>節日活動：</b>5/20 悟空覺醒日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br><br>
+        <b>節日活動：</b>5/20 悟空生日 festivalClaim(1)；11/11 孤勇日 festivalClaim(2)；12/31 跨年 newYearCountdownClaim。<br><br>
         <b>Heart：</b><code>${HEART}</code><br>
         <b>KGEN：</b><code>${TOKEN}</code><br>
         <b>Brain：</b><code>${BRAIN}</code><br>
@@ -13251,7 +13251,7 @@ KGEN 12345 UI Patch V7.6.0
       box.className = 'kgen-countdown-grid';
       box.innerHTML = `
         <div class="kgen-countdown-card">轉日呼吸 igniteAndClaim：<b id="cd-ignite">--</b></div>
-        <div class="kgen-countdown-card">5/20 悟空覺醒日 festivalClaim(1)：<b id="cd-520">--</b></div>
+        <div class="kgen-countdown-card">5/20 悟空生日 festivalClaim(1)：<b id="cd-520">--</b></div>
         <div class="kgen-countdown-card">11/11 孤勇日 festivalClaim(2)：<b id="cd-1111">--</b></div>
         <div class="kgen-countdown-card">12/31 跨年倒數 newYearCountdownClaim：<b id="cd-1231">--</b></div>
       `;
@@ -13438,7 +13438,7 @@ KGEN 12345 UI Patch V7.6.0
 
         <div class="kgen-human-row">
           <div>
-            <div class="name">5/20 悟空覺醒日 festivalClaim(1)</div>
+            <div class="name">5/20 悟空生日 festivalClaim(1)</div>
             <div class="desc">生日活動日，到時按 5/20 活動。</div>
           </div>
           <div class="time" id="human-cd-520">--</div>
@@ -13595,7 +13595,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13773,7 +13773,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14235,7 +14235,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14446,7 +14446,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const BSC_HEX = '0x38';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14665,7 +14665,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v873-heart-balance-13-spirit-lamp-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20 = [
@@ -14850,7 +14850,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v874-approve-13-spirit-sync-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20=[
@@ -15042,7 +15042,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v875-approve-receipt-wallet-switch-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC_HEX='0x38';
@@ -15284,7 +15284,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v876-service-countdown-approve-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.6-SERVICE-COUNTDOWN-APPROVE-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC_HEX='0x38';
@@ -15495,235 +15495,148 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V8.7.8｜Service Layer Unlock Fix ===== -->
-<style id="kgen12345-v877-ai-service-style">
-  #kgen-ai-service-panel{position:fixed;right:18px;top:72px;z-index:9997;width:min(360px,92vw);max-height:76vh;overflow:auto;background:rgba(0,0,0,.88);border:1px solid rgba(255,215,120,.72);border-radius:16px;padding:12px;color:#fff;box-shadow:0 0 26px rgba(255,215,120,.18);font-size:13px;display:none;backdrop-filter:blur(8px)}
-  #kgen-ai-service-panel .ks-title{font-weight:900;color:#ffd778;font-size:16px;margin-bottom:8px}
-  #kgen-ai-service-panel .ks-row{display:grid;grid-template-columns:110px 1fr;gap:6px;margin:5px 0;border-bottom:1px solid rgba(255,215,120,.14);padding-bottom:4px}
-  #kgen-ai-service-panel .ks-k{color:#ffd778;font-weight:900}.ks-v{color:#dffcff;word-break:break-word}
-  #kgen-ai-service-panel button{border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.12);color:#fff;border-radius:10px;padding:8px 10px;font-weight:900;margin:4px;cursor:pointer}
-  #kgen-ai-video-avatar{width:86px;height:86px;border-radius:50%;border:2px solid #ffd778;background:radial-gradient(circle at 45% 35%,#fff8bf 0,#ffd778 15%,#9b5a00 44%,#060606 70%);box-shadow:0 0 22px rgba(255,215,120,.45);margin:8px auto;position:relative;overflow:hidden}
-  #kgen-ai-video-avatar:after{content:'AI';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Orbitron,Arial;font-weight:900;color:#001;text-shadow:0 0 8px #fff;font-size:24px}
-  #kgen-service-mini{margin:8px 0;padding:8px;border:1px solid rgba(0,242,255,.35);border-radius:10px;background:rgba(0,242,255,.06);font-size:12px;color:#dffcff;line-height:1.55}
+<!-- ===== KGEN 12345 V8.7.9｜Clean Service Fix based on V8.7.6 ===== -->
+<style id="kgen12345-v879-clean-service-style">
+  /* V8.7.9: 不再用全畫面客服 overlay，避免封印神殿按鍵 */
+  .kgen-v879-passive-layer,
+  .kgen-v879-passive-layer * { pointer-events: none !important; }
+
+  #kgen-v879-service-card{
+    position:fixed;
+    right:14px;
+    bottom:92px;
+    z-index:99980;
+    width:min(340px,92vw);
+    max-height:45vh;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    display:none;
+    border:1px solid rgba(255,215,120,.62);
+    border-radius:16px;
+    background:rgba(4,8,14,.94);
+    box-shadow:0 0 26px rgba(255,215,120,.16), inset 0 0 18px rgba(0,242,255,.04);
+    color:#eefaff;
+    padding:12px;
+    font-size:12px;
+    line-height:1.55;
+    pointer-events:auto;
+    backdrop-filter:blur(8px);
+  }
+  #kgen-v879-service-card.show{display:block;}
+  #kgen-v879-service-card .v879-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd778;font-weight:900;margin-bottom:8px;}
+  #kgen-v879-service-card .v879-title{display:flex;align-items:center;gap:8px;}
+  #kgen-v879-service-card .v879-face{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:radial-gradient(circle,#fff2b0,#ac6b00 72%,#101010);box-shadow:0 0 14px rgba(255,215,120,.38);}
+  #kgen-v879-service-card .v879-msg{white-space:pre-wrap;word-break:break-word;color:#eafaff;}
+  #kgen-v879-service-card .v879-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+  #kgen-v879-service-card button{pointer-events:auto;border:1px solid rgba(255,215,120,.42);border-radius:10px;background:rgba(0,0,0,.32);color:#ffeec8;font-weight:900;padding:8px 10px;cursor:pointer;}
+  #kgen-v879-service-card button:active{transform:scale(.98);}
+  #kgen-v879-float-btn{
+    position:fixed;
+    right:14px;
+    bottom:24px;
+    z-index:99979;
+    pointer-events:auto;
+    border:1px solid rgba(255,215,120,.58);
+    border-radius:999px;
+    background:rgba(255,215,120,.92);
+    color:#111;
+    padding:9px 13px;
+    font-weight:900;
+    box-shadow:0 0 20px rgba(255,215,120,.22);
+  }
+  @media(max-width:720px){#kgen-v879-service-card{right:10px;left:10px;width:auto;bottom:84px;}#kgen-v879-float-btn{right:10px;bottom:18px;}}
 </style>
-<script id="kgen12345-v877-ai-service-failure-explain-fix">
+<script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
-  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
-  const BRAIN='0xd0605F4EF10e5C1438F11AF9edc36926769239d6';
-  const TZ='Asia/Taipei';
-  let lastVoice=0;
-  function $(id){return document.getElementById(id)}
-  function now(){return new Date()}
-  function fmt(d){try{return new Intl.DateTimeFormat('zh-TW',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(d)}catch(_){return d.toISOString()}}
-  function pad(n){return String(n).padStart(2,'0')}
-  function dur(ms){ms=Math.max(0,ms|0);let s=Math.floor(ms/1000),h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60);s%=60;return `${h}小時${pad(m)}分${pad(s)}秒`}
-  function taipeiDateParts(d){const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});return {y:+p.year,m:+p.month,d:+p.day,h:+p.hour,mi:+p.minute,s:+p.second}}
-  function nextTaipeiLocal(month,day,hour=0,min=0,sec=0){
-    const t=taipeiDateParts(new Date());
-    let y=t.y;
-    function utcOf(y){return new Date(Date.UTC(y,month-1,day,hour-8,min,sec))}
-    let d=utcOf(y); if(d<=new Date()) d=utcOf(y+1); return d;
-  }
-  function nextHeartbeat(){const d=new Date();d.setMinutes(60,0,0);return d}
-  function nextIgnite(){const d=new Date();let n=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+1,0,0,0));return n}
-  function nextNY(){return nextTaipeiLocal(12,31,23,59,59)}
-  function speak(text,force){
-    text=String(text||'').replace(/0x[a-fA-F0-9]{20,}/g,'錢包地址').replace(/[\u{1F300}-\u{1FAFF}]/gu,'');
-    const t=Date.now(); if(!force && t-lastVoice<2500) return; lastVoice=t;
-    try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='zh-TW'; u.rate=.95; u.pitch=1.02; speechSynthesis.speak(u); return; } }catch(_){ }
-    try{ if(window.app&&app.speak) app.speak(text); }catch(_){ }
-  }
-  function toast(msg){try{const t=$('toast'); if(t){t.textContent=msg;t.classList&&t.classList.add('show');setTimeout(()=>t.classList&&t.classList.remove('show'),4200)}}catch(_){ } }
-  function setStatus(msg,voice){
-    ['kh-status','bp-status','w3-status','w3-prog'].forEach(id=>{try{const e=$(id); if(e) e.textContent=msg}catch(_){}});
-    toast(msg); if(voice) speak(msg,true);
-  }
-  function explainError(err){
-    const raw=(typeof err==='string'?err:JSON.stringify(err||{},Object.getOwnPropertyNames(err||{}))).slice(0,1800);
-    let reason='交易沒有送出。';
-    if(/insufficient funds|not enough|餘額不足/i.test(raw)) reason='BNB 不足以支付 gas，或 KGEN 餘額不足。請先補足 BNB 作為礦工費，再刷新餘額。';
-    else if(/cannot estimate gas|UNPREDICTABLE_GAS_LIMIT|execution reverted|reverted/i.test(raw)) reason='合約預估 gas 失敗，通常不是單純沒 gas，而是條件未達成：可能冷卻時間未到、活動時間窗未開、名額已滿、金額不合規，或這個功能今日未開放。';
-    else if(/user rejected|denied|4001|拒絕/i.test(raw)) reason='你在錢包中取消或拒絕簽名，所以交易沒有送出。';
-    else if(/allowance|approve|transfer amount exceeds allowance/i.test(raw)) reason='授權額度不足。請先按 Approve 目前金額，或使用無限授權，再重新送出交易。';
-    else if(/network|chain|BSC|56|wrong/i.test(raw)) reason='目前錢包網路不是 BSC 56。請切換到 BNB Smart Chain 後再試。';
-    else if(/cooldown/i.test(raw)) reason='冷卻時間尚未結束。請看心跳、呼吸或發財金冷卻倒數。';
-    const full='交易失敗客服解說：'+reason;
-    setStatus(full,true);
-    updatePanel(reason, raw);
-    saveReceipt({type:'error-explain',reason,raw,time:new Date().toISOString(),wallet:getWallet()});
-    return reason;
-  }
-  function getWallet(){try{return (window.kgenWalletState&&kgenWalletState.account)||window.currentAccount||localStorage.getItem('kgen_last_wallet')||''}catch(_){return ''}}
-  function saveReceipt(obj){
-    try{const key='kgen12345_receipts_v877';const arr=JSON.parse(localStorage.getItem(key)||'[]');arr.unshift(Object.assign({version:VERSION,page:location.href},obj));localStorage.setItem(key,JSON.stringify(arr.slice(0,200)));return arr}catch(_){return []}
-  }
-  function downloadReceipts(){
-    const key='kgen12345_receipts_v877'; const data=localStorage.getItem(key)||'[]';
-    const blob=new Blob([data],{type:'application/json;charset=utf-8'}); const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='KGEN_12345_receipts_'+Date.now()+'.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);
-    speak('收據已下載。這是本機保存的 JSON 紀錄，包含交易時間、錢包與錯誤客服解說。',true);
-  }
-  function serviceIntro(){
-    const msg='歡迎來到五指山悟空財神殿高規格客服。Approve 是授權，不是扣款；無限授權代表授權官方 Heart 合約可在你確認交易時使用 KGEN。發財金一到八八八，失敗常見原因是冷卻未到、活動未開、名額額度或條件不符，不一定是沒有 gas。五二零是 KGEN 遊戲宇宙的悟空覺醒日，不是原著生日。悟空由花果山靈石而生，無父無母。';
-    speak(msg,true); updatePanel(msg,'');
-  }
-  function videoService(){
-    openPanel(); speak('AI 影像客服已開啟。我會用語音提示你目前狀態、倒數時間與交易失敗原因。',true);
-  }
-  function updatePanel(msg,raw){
-    ensurePanel();
-    const hb=nextHeartbeat(), ig=nextIgnite(), ny=nextNY();
-    const html=`<div class="ks-title">五指山 12345｜AI 語音客服</div><div id="kgen-ai-video-avatar"></div>
-      <div class="ks-row"><div class="ks-k">客服狀態</div><div class="ks-v">${escapeHtml(msg||'待命中。按客服導覽可播放語音。')}</div></div>
-      <div class="ks-row"><div class="ks-k">心跳整點</div><div class="ks-v" id="ks-hb">${dur(hb-new Date())}</div></div>
-      <div class="ks-row"><div class="ks-k">轉日呼吸</div><div class="ks-v" id="ks-ig">${dur(ig-new Date())}｜UTC 00:00-00:10</div></div>
-      <div class="ks-row"><div class="ks-k">跨年倒數</div><div class="ks-v" id="ks-ny">${dur(ny-new Date())}｜台北 12/31 23:59:59</div></div>
-      <div class="ks-row"><div class="ks-k">5/20</div><div class="ks-v">悟空覺醒日：遊戲宇宙紀念日，不是原著生日。</div></div>
-      <div class="ks-row"><div class="ks-k">失敗解說</div><div class="ks-v">${escapeHtml(raw||'若交易 revert，我會即時解釋可能原因。')}</div></div>
-      <button type="button" onclick="kgenAIService877.speakIntro()">語音客服導覽</button><button type="button" onclick="kgenAIService877.downloadReceipts()">下載收據</button><button type="button" onclick="kgenAIService877.close()">關閉</button>`;
-    const p=$('kgen-ai-service-panel'); if(p) p.innerHTML=html;
-  }
-  function escapeHtml(x){return String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-  function ensurePanel(){
-    if($('kgen-ai-service-panel')) return;
-    const p=document.createElement('div'); p.id='kgen-ai-service-panel'; document.body.appendChild(p);
-  }
-  function openPanel(){ensurePanel(); updatePanel('AI 影像客服已開啟。',''); $('kgen-ai-service-panel').style.display='block'}
-  function closePanel(){const p=$('kgen-ai-service-panel'); if(p) p.style.display='none'}
-  function addMiniService(){
-    const host=$('kh-status')||$('web3-panel')||document.body; if($('kgen-service-mini')) return;
-    const div=document.createElement('div'); div.id='kgen-service-mini';
-    div.innerHTML='客服：Approve 是授權；無限授權需確認只對官方 Heart。發財金失敗多半是冷卻、名額、活動時間或合約條件，不一定是 gas。<br><b id="ks-mini-hb"></b><br><b id="ks-mini-ig"></b><br><b id="ks-mini-ny"></b><br><button type="button" onclick="kgenAIService877.speakIntro()">語音客服</button><button type="button" onclick="kgenAIService877.openVideo()">影像客服</button><button type="button" onclick="kgenAIService877.downloadReceipts()">下載收據</button>';
-    try{host.parentNode.insertBefore(div, host.nextSibling)}catch(_){document.body.appendChild(div)}
-  }
-  function patchButtons(){
-    document.querySelectorAll('button').forEach(btn=>{
-      const t=(btn.textContent||'').trim();
-      if(/客服導覽|語音客服|開啟音效說明/.test(t)){ btn.onclick=function(e){e.preventDefault(); serviceIntro(); openPanel(); return false}; }
-      if(/影像客服/.test(t)){ btn.onclick=function(e){e.preventDefault(); videoService(); return false}; }
-      if(/5\/20|悟空生日/.test(t)){ btn.textContent=t.replace('悟空生日','悟空覺醒日'); btn.title='5/20 是 KGEN 遊戲宇宙悟空覺醒日，不是原著生日。'; }
-    });
-  }
-  function tick(){
-    const hb=dur(nextHeartbeat()-new Date()), ig=dur(nextIgnite()-new Date()), ny=dur(nextNY()-new Date());
-    [['ks-mini-hb','心跳整點倒數：'+hb],['ks-mini-ig','轉日呼吸倒數：'+ig],['ks-mini-ny','跨年倒數槽：'+ny],['ks-hb',hb],['ks-ig',ig+'｜UTC 00:00-00:10'],['ks-ny',ny+'｜台北 12/31 23:59:59']].forEach(([id,txt])=>{const e=$(id); if(e) e.textContent=txt});
-    const t=new Date(); if(t.getMinutes()===59 && t.getSeconds()===50) speak('心跳整點即將到來，準備 heartbeatClaim。');
-    if(t.getUTCHours()===23 && t.getUTCMinutes()===59 && t.getUTCSeconds()===50) speak('轉日呼吸即將到來，UTC 零點到零點十分可檢查 igniteAndClaim。');
-  }
-  function watchErrors(){
-    window.addEventListener('unhandledrejection', ev=>{try{explainError(ev.reason||ev)}catch(_){}});
-    window.addEventListener('error', ev=>{try{if(/revert|gas|allowance|execution/i.test(String(ev.message||''))) explainError(ev.message)}catch(_){}});
-    const mo=new MutationObserver(ms=>{for(const m of ms){const txt=(m.target&&m.target.textContent||'').slice(-1200); if(/cannot estimate gas|execution reverted|UNPREDICTABLE_GAS_LIMIT|交易失敗|領取失敗|insufficient funds|user rejected/i.test(txt)){ explainError(txt); break; }}});
-    mo.observe(document.body,{subtree:true,childList:true,characterData:true});
-  }
-  function boot(){
-    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
-    addMiniService(); patchButtons(); updatePanel('AI 客服待命中。交易失敗時會即時語音解說。',''); watchErrors(); tick(); setInterval(tick,1000); setInterval(patchButtons,3000);
-  }
-  window.kgenAIService877={speak,explainError,speakIntro:serviceIntro,openVideo:videoService,open:openPanel,close:closePanel,downloadReceipts,saveReceipt};
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-})();
-</script>
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX';
+  const $=id=>document.getElementById(id);
+  const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
-
-
-<!-- ===== KGEN 12345 V8.7.8｜Service Layer Unlock Fix ===== -->
-<style id="kgen12345-v878-service-layer-unlock-style">
-  html,body{touch-action:manipulation;}
-  body.kgen-v878-unlocked #kgen-heart-live-panel,
-  body.kgen-v878-unlocked #web3-panel,
-  body.kgen-v878-unlocked .footer-terminal,
-  body.kgen-v878-unlocked .footer-terminal button,
-  body.kgen-v878-unlocked .kh-actions,
-  body.kgen-v878-unlocked .kh-actions button,
-  body.kgen-v878-unlocked #kh-connect,
-  body.kgen-v878-unlocked #kh-refresh,
-  body.kgen-v878-unlocked #walletHub button,
-  body.kgen-v878-unlocked #kgen-v875-tools button,
-  body.kgen-v878-unlocked #kgen-service-mini button{
-    pointer-events:auto!important;
+  function say(msg){
+    const text=cleanText(msg);
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(text); return; } }catch(_){ }
+    try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='zh-TW'; u.rate=1; speechSynthesis.speak(u); }catch(_){ }
   }
-  body.kgen-v878-unlocked #kgen-ai-service-panel,
-  body.kgen-v878-unlocked #kgen-v876-service-card{
-    pointer-events:auto!important;
+  function toast(msg, ms){
+    try{ if(window.ui && typeof ui.toast==='function') ui.toast(msg, ms||3600); }catch(_){ }
+    try{ const t=$('toast'); if(t){ t.textContent=cleanText(msg); t.classList.add('show'); clearTimeout(window.__kgenV879ToastTimer); window.__kgenV879ToastTimer=setTimeout(()=>t.classList.remove('show'), ms||3600); } }catch(_){ }
   }
-  body.kgen-v878-unlocked #kgen-ai-service-panel:not([data-open="1"]),
-  body.kgen-v878-unlocked #kgen-v876-service-card:not([data-open="1"]){
-    pointer-events:none!important;
-  }
-  body.kgen-v878-unlocked #guide-modal:not(.show),
-  body.kgen-v878-unlocked #temple-single-modal:not(.show),
-  body.kgen-v878-unlocked #kgen-v860-ritual-modal:not(.v860-show){
-    pointer-events:none!important;
-  }
-  body.kgen-v878-unlocked:not(.v716-rules-open):not(.k17-rules-open):not(.k18-rules-open):not(.k19-rules-open):not(.k20-rules-open):not(.k21-rules-open) #temple-modal{
-    pointer-events:none!important;
-  }
-  .kgen-v878-touch-safe{pointer-events:auto!important;}
-</style>
-<script id="kgen12345-v878-service-layer-unlock-fix">
-(function(){
-  'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.8-SERVICE-LAYER-UNLOCK-FIX';
-  function $(id){return document.getElementById(id);}
-  function shown(el){
-    if(!el) return false;
-    const cs=getComputedStyle(el);
-    return cs.display!=='none' && cs.visibility!=='hidden' && cs.opacity!=='0' && (el.offsetWidth>0 || el.offsetHeight>0);
-  }
-  function markPanel(id, open){const el=$(id); if(el) el.setAttribute('data-open', open?'1':'0');}
-  function unlock(){
-    if(!document.body) return;
-    document.body.classList.add('kgen-v878-unlocked');
-    // Hidden customer-service layers must not become a transparent glass cover.
-    const ai=$('kgen-ai-service-panel');
-    if(ai){
-      const open=shown(ai); markPanel('kgen-ai-service-panel',open);
-      ai.style.pointerEvents=open?'auto':'none';
+  function ensureCard(){
+    if(!$('kgen-v879-service-card')){
+      const d=document.createElement('div');
+      d.id='kgen-v879-service-card';
+      d.innerHTML='<div class="v879-head"><div class="v879-title"><div class="v879-face">悟</div><div>悟空客服｜不封鎖操作</div></div><button type="button" id="kgen-v879-close">收合</button></div><div class="v879-msg" id="kgen-v879-msg">客服待命。這一版以 V8.7.6 為母版，客服不再用全畫面遮罩，所以主神殿按鍵可以照常操作。</div><div class="v879-actions"><button type="button" id="kgen-v879-speak">語音說明</button><button type="button" id="kgen-v879-copy">複製說明</button></div>';
+      document.body.appendChild(d);
     }
-    const svc=$('kgen-v876-service-card');
-    if(svc){
-      const open=shown(svc); markPanel('kgen-v876-service-card',open);
-      svc.style.pointerEvents=open?'auto':'none';
+    if(!$('kgen-v879-float-btn')){
+      const b=document.createElement('button');
+      b.id='kgen-v879-float-btn';
+      b.type='button';
+      b.textContent='客服解說';
+      document.body.appendChild(b);
     }
-    // Hidden full-screen modals must not intercept mobile taps.
-    const modalRules=[
-      ['guide-modal',el=>el.classList.contains('show')],
-      ['temple-single-modal',el=>el.classList.contains('show')],
-      ['kgen-v860-ritual-modal',el=>el.classList.contains('v860-show')],
-      ['walletHub',el=>shown(el)&&getComputedStyle(el).display!=='none']
-    ];
-    modalRules.forEach(([id,fn])=>{const el=$(id); if(!el) return; try{el.style.pointerEvents=fn(el)?'auto':'none';}catch(_){}});
-    // Restore all real action buttons.
-    document.querySelectorAll('button,.term-btn,.kh-actions button,#kh-connect,#kh-refresh,#kgen-v875-tools button,#kgen-service-mini button,input,select,textarea').forEach(el=>{
-      el.classList.add('kgen-v878-touch-safe');
-      el.style.pointerEvents='auto';
-    });
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
-    try{document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';}catch(_){ }
+    $('kgen-v879-close') && ($('kgen-v879-close').onclick=()=>$('kgen-v879-service-card').classList.remove('show'));
+    $('kgen-v879-float-btn') && ($('kgen-v879-float-btn').onclick=()=>explain('歡迎來到五指山悟空財神殿。請先連結錢包，確認 KGEN 餘額與 Allowance，再進行發財金、整點心跳、轉日呼吸、還願、點燈或許願。客服視窗不會封鎖主畫面按鍵。', true));
+    $('kgen-v879-speak') && ($('kgen-v879-speak').onclick=()=>say(($('kgen-v879-msg')&&$('kgen-v879-msg').textContent)||'客服待命。'));
+    $('kgen-v879-copy') && ($('kgen-v879-copy').onclick=async()=>{try{await navigator.clipboard.writeText(($('kgen-v879-msg')&&$('kgen-v879-msg').textContent)||'');toast('客服說明已複製');}catch(_){toast('無法複製，請手動選取。');}});
   }
-  function wrapService(){
-    const svc=window.kgenAIService877;
-    if(svc && !svc.__v878Wrapped){
-      const open=svc.open, close=svc.close, video=svc.openVideo;
-      if(typeof open==='function') svc.open=function(){const r=open.apply(this,arguments); setTimeout(unlock,0); return r;};
-      if(typeof close==='function') svc.close=function(){const r=close.apply(this,arguments); setTimeout(unlock,0); return r;};
-      if(typeof video==='function') svc.openVideo=function(){const r=video.apply(this,arguments); setTimeout(unlock,0); return r;};
-      svc.__v878Wrapped=true;
+  function explain(msg, speakIt){
+    ensureCard();
+    const m=$('kgen-v879-msg'); if(m) m.textContent=cleanText(msg);
+    const c=$('kgen-v879-service-card'); if(c) c.classList.add('show');
+    toast(msg, 5200);
+    if(speakIt!==false) say(msg);
+  }
+  function explainError(err, action){
+    const raw=(err && (err.reason || err.message || (err.data && err.data.message))) || String(err||'');
+    let msg='交易未完成。';
+    if(/insufficient funds|not enough|gas required exceeds allowance/i.test(raw)){
+      msg='交易未完成：可能是 BNB 不足以支付 gas，請先補一點 BNB 當暗物質燃料。';
+    }else if(/cannot estimate gas|UNPREDICTABLE_GAS_LIMIT|execution reverted|revert/i.test(raw)){
+      msg='交易未完成：這通常不是單純沒 gas，而是合約條件目前不允許。可能原因包含冷卻時間未到、活動時間未開、epoch 名額已滿、輸入數量不符合規則、或該功能尚未開放。';
+    }else if(/user rejected|denied|cancel/i.test(raw)){
+      msg='交易已取消：你在錢包中拒絕或關閉確認視窗，鏈上沒有送出。';
+    }else if(/allowance|approve/i.test(raw)){
+      msg='交易未完成：授權額不足或 Approve 尚未完成。請先按 Approve 目前金額或無限授權，等待鏈上確認後再送交易。';
+    }else if(/network|chain|BSC|56/i.test(raw)){
+      msg='交易未完成：請確認錢包已切到 BNB Smart Chain，也就是 BSC 56。';
+    }else{
+      msg='交易未完成：請確認錢包、BSC 56、BNB gas、KGEN 餘額與 Allowance。詳細錯誤：'+raw.slice(0,260);
     }
+    explain((action?('【'+action+'】\n'):'')+msg, true);
   }
-  const mo=new MutationObserver(()=>{wrapService(); unlock();});
-  function boot(){
-    unlock(); wrapService();
-    try{mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});}catch(_){ }
-    setInterval(unlock,1500);
+  function wrapAsync(obj, name, label){
+    if(!obj || typeof obj[name] !== 'function' || obj[name].__v879Wrapped) return;
+    const orig=obj[name];
+    const fn=function(){
+      try{
+        const ret=orig.apply(this, arguments);
+        if(ret && typeof ret.then==='function') return ret.catch(e=>{explainError(e,label||name); throw e;});
+        return ret;
+      }catch(e){ explainError(e,label||name); throw e; }
+    };
+    fn.__v879Wrapped=true;
+    obj[name]=fn;
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-  window.addEventListener('load',()=>{boot(); setTimeout(unlock,500); setTimeout(unlock,2000);});
-  window.kgen12345V878={unlock,version:VERSION};
+  function unlockLayers(){
+    // 只修隱藏層，不干擾已開啟的原生導覽或錢包 hub
+    document.querySelectorAll('.guide-modal:not(.show), .history-modal:not(.show)').forEach(el=>{el.style.pointerEvents='none';});
+    document.querySelectorAll('#kgen-v879-service-card, #kgen-v879-float-btn, button, input, select, textarea, a').forEach(el=>{el.style.pointerEvents='auto';});
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
+  }
+  function bind(){
+    ensureCard();
+    unlockLayers();
+    if(window.templeOps){ ['approve','fortune','heartbeat','ignite','vow','lamp','wish','cup'].forEach(k=>wrapAsync(window.templeOps,k,'templeOps.'+k)); }
+    if(window.web3){ ['approve','connect','smartConnect','ritualDeposit','place','refresh','refreshUser','connectWalletConnect','connectBinance'].forEach(k=>wrapAsync(window.web3,k,'web3.'+k)); }
+    window.kgenV879Service={explain, explainError, unlockLayers};
+  }
+  window.addEventListener('error', e=>{ if(e && e.error) explainError(e.error,'頁面錯誤'); });
+  window.addEventListener('unhandledrejection', e=>{ if(e && e.reason) explainError(e.reason,'交易或非同步錯誤'); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  window.addEventListener('load', ()=>{bind(); setTimeout(bind,600); setTimeout(bind,1800);});
 })();
 </script>
 
