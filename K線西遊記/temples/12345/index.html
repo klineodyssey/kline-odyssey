@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX
-BUILD: 20260510-V8.7.2-WALLET-TX-SYNC-FIX
+VERSION: KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX
+BUILD: 20260510-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.7.4] 左上與左下都新增 / 統一 Approve：目前金額與無限授權共用同一 provider / signer / allowance refresh；十三聖靈第 13 類正式納入人類、AI、超人、變形金剛、地球外星所有物種，1 到 12 維持動物生肖。
 - [V8.7.3] 統一左上與左下 Heart 血庫顯示；新增十三聖靈燈紀錄：1 到 12 為動物，第 13 為人類／AI／超人／變形金剛覺醒種，記錄點燈開始、除夕結束、剩餘天數與交易 hash。
 - [V8.7.2] 修正左下操作區錢包同步與許願 / 還願 / 點燈送交易：統一 signer、刷新餘額欄位、動態彈窗按鈕直接送 Heart 交易。
 - [V8.7.1] 小修上方「連結錢包 / 切 BSC」按鈕：改走下方同一個多錢包 / smartConnect 入口，不改視覺、不改 Heart 交易邏輯。
@@ -43,7 +44,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1435,7 +1436,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1682,7 +1683,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -3852,6 +3853,7 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
   <div class="bp-grid">
     <button class="bp-btn" type="button" onclick="web3.smartConnect()">連結錢包</button>
     <button class="bp-btn approve" type="button" onclick="betPanel.approve()">APPROVE</button>
+    <button class="bp-btn approve" type="button" id="bp-approve-unlimited">無限授權</button>
     <button class="bp-btn buy" type="button" onclick="betPanel.buy()">發財金</button>
     <button class="bp-btn sell" type="button" onclick="betPanel.sell()">整點心跳</button>
     <button class="bp-btn" type="button" onclick="templeOps.ignite()">轉日呼吸</button>
@@ -8564,6 +8566,8 @@ KGEN 12345 Heart Live Patch V7.3.0
   <div class="kh-actions">
     <button class="kh-gold" type="button" id="kh-connect">連結錢包 / 切 BSC</button>
     <button class="kh-cyan" type="button" id="kh-refresh">刷新餘額</button>
+    <button class="kh-gold" type="button" id="kh-approve-current">Approve 目前金額</button>
+    <button class="kh-cyan" type="button" id="kh-approve-unlimited">無限授權</button>
   </div>
   <div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。所有交易都會先跳確認視窗。</div>
   <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
@@ -13588,7 +13592,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13721,7 +13725,7 @@ KGEN 12345 UI Patch V7.6.0
       $('v860-vow-go').onclick=()=>{ const amt=($('v860-vow-amt').value||'').trim(); if(!/^\d+(\.\d+)?$/.test(amt)){status('請輸入還願 KGEN 金額。'); return;} setUnderlying('kh-amount',amt); setUnderlying('amt-in',amt); setUnderlying('kh-vow-option',$('v860-vow-option').value); clickUnderlying('kh-vow','vowTo 還願補血'); };
     }else{
       const z=zodiac.map(x=>'<button type="button" class="'+(x===picked?'v860-picked':'')+'" data-z="'+x+'">'+(x==='人類／AI／超人／變形金剛'?'第13聖靈｜人類／AI／超人／變形金剛':x)+'</button>').join('');
-      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🪔 點燈續命 lightLamp</h3><p>點燈分十二生肖，第十三生肖是人類／AI／超人／變形金剛：超人、變形金鋼、貓、魚、蟑螂、螞蟻、大象，任何生命都能點燈。</p><div class="v860-zodiac">'+z+'</div><input class="v860-field" id="v860-species" placeholder="第13生肖可填物種名稱，例如 變形金鋼 / 貓 / 螞蟻"><input class="v860-field" id="v860-lamp-days" placeholder="點燈天數，例如 1、7、30"><button class="v860-btn v860-action" type="button" id="v860-lamp-go">確認點燈續命</button><div class="v860-muted">目前底層合約 lightLamp 接收天數參數；生肖與物種先寫入前端紀錄與語音客服，不額外收費。</div></div></div>';
+      c.innerHTML='<div class="v860-grid">'+intro+'<div class="v860-card"><h3>🪔 點燈續命 lightLamp</h3><p>點燈採十三聖靈：1 到 12 維持地球動物生肖；第 13 是文明覺醒席位，包含人類、AI、超人、變形金剛、地球外星所有物種，例如貓、魚、大象、蟑螂、螞蟻、龜、牛魔王等。</p><div class="v860-zodiac">'+z+'</div><input class="v860-field" id="v860-species" placeholder="第13聖靈可填物種／文明名稱，例如 AI / 變形金剛 / 貓 / 螞蟻 / 外星人"><input class="v860-field" id="v860-lamp-days" placeholder="點燈天數，例如 1、7、30"><button class="v860-btn v860-action" type="button" id="v860-lamp-go">確認點燈續命</button><div class="v860-muted">目前底層合約 lightLamp 接收天數參數；生肖與物種先寫入前端紀錄與語音客服，不額外收費。</div></div></div>';
       document.querySelectorAll('#v860-content [data-z]').forEach(b=>b.onclick=()=>{picked=b.dataset.z; renderRitual();});
       $('v860-lamp-go').onclick=()=>{ const days=($('v860-lamp-days').value||'').trim(); if(!/^\d+$/.test(days)){status('請輸入點燈天數整數。'); return;} const sp=($('v860-species').value||picked).trim(); localStorage.setItem('kgen12345LampSpecies',sp); setUnderlying('kh-amount',days); setUnderlying('amt-in',days); status('點燈對象：'+sp+'｜天數：'+days+'。準備呼叫 lightLamp。'); clickUnderlying('kh-lamp','lightLamp 點燈續命'); };
     }
@@ -13766,7 +13770,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14228,7 +14232,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14439,7 +14443,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
   const BSC_HEX = '0x38';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14658,7 +14662,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v873-heart-balance-13-spirit-lamp-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.7.3-HEART-BALANCE-13-SPIRIT-LAMP-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20 = [
@@ -14828,6 +14832,198 @@ KGEN 12345 UI Patch V7.6.0
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
   window.addEventListener('load',()=>{ bind(); setTimeout(bind,800); setTimeout(bind,2500); });
   setInterval(()=>{ syncHeartBalance(); renderRecord(); }, 15000);
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.7.4｜Approve + 13 Spirit Unified Sync Fix ===== -->
+<style id="kgen12345-v874-style">
+  #kh-approve-current,#kh-approve-unlimited{min-height:42px;}
+  #bp-approve-unlimited{background:rgba(255,215,120,.20); color:#fff0c2;}
+  #kgen-v874-approve-note{margin-top:7px;font-size:11px;line-height:1.45;color:#d8f9ff;opacity:.92;}
+  #kgen-v874-approve-note b{color:#ffd778;}
+</style>
+<script id="kgen12345-v874-approve-13-spirit-sync-fix">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.7.4-APPROVE-13-SPIRIT-SYNC-FIX';
+  const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const ERC20=[
+    'function approve(address spender,uint256 amount) external returns (bool)',
+    'function allowance(address owner,address spender) external view returns (uint256)',
+    'function balanceOf(address owner) external view returns (uint256)',
+    'function decimals() external view returns (uint8)'
+  ];
+  const BSC_HEX='0x38';
+  const state=window.kgenWalletState=window.kgenWalletState||{provider:null,signer:null,account:null,chainId:null};
+  let pendingApprove=false;
+  function $(id){return document.getElementById(id);} 
+  function qa(s){return Array.from(document.querySelectorAll(s));}
+  function short(a){return a?String(a).slice(0,6)+'…'+String(a).slice(-4):'未連線';}
+  function status(m){
+    ['kh-log','bp-status','w3-prog','kgen-v860-wallet-status'].forEach(id=>{const e=$(id); if(e) e.textContent=String(m);});
+    try{ if(window.ui&&ui.toast) ui.toast(String(m),2600); }catch(_){ }
+    console.log('[KGEN V8.7.4]',m);
+  }
+  function setText(ids,v){ids.forEach(id=>{const e=$(id); if(e) e.textContent=String(v);});}
+  function fmtWei(v,d=4){try{return Number(ethers.utils.formatUnits(v,18)).toFixed(d);}catch(_){return '--';}}
+  function getEth(){
+    let eth=window.ethereum||(window.trustwallet&&window.trustwallet.ethereum)||window.BinanceChain||null;
+    if(eth&&Array.isArray(eth.providers)&&eth.providers.length){
+      eth=eth.providers.find(p=>p&&(p.isMetaMask||p.isTrust||p.isBinance||p.isOKXWallet||p.isBitKeep||p.isBitgetWallet))||eth.providers[0];
+    }
+    return eth&&eth.request?eth:null;
+  }
+  async function ensureBSC(eth){
+    let cid=await eth.request({method:'eth_chainId'}).catch(()=>null);
+    if(String(cid||'').toLowerCase()!==BSC_HEX){
+      try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});}
+      catch(_){
+        await eth.request({method:'wallet_addEthereumChain',params:[{chainId:BSC_HEX,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com']} ]});
+        await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+      }
+    }
+    state.chainId=BSC_HEX;
+  }
+  async function connect(){
+    if(!window.ethers||!ethers.providers){status('ethers 尚未載入，請重新整理頁面。'); return null;}
+    const eth=getEth();
+    if(!eth){
+      status('未偵測到錢包注入，請用錢包 App 內建瀏覽器，或開啟多錢包入口。');
+      try{ if(window.web3&&web3.openWalletHub) web3.openWalletHub(); }catch(_){ }
+      return null;
+    }
+    await ensureBSC(eth);
+    const acc=await eth.request({method:'eth_requestAccounts'});
+    if(!acc||!acc[0]) throw new Error('NO_ACCOUNT');
+    state.provider=new ethers.providers.Web3Provider(eth,'any');
+    state.signer=state.provider.getSigner();
+    state.account=await state.signer.getAddress();
+    if(window.web3){ web3.provider=state.provider; web3.signer=state.signer; web3.addr=state.account; web3.KGEN=KGEN; web3.UNIVERSE=HEART; }
+    await refreshAll();
+    status('錢包已連線：'+short(state.account)+'，餘額與授權已同步。');
+    return state;
+  }
+  async function ensureSigner(){
+    if(!state.signer||!state.account) await connect();
+    if(!state.signer||!state.account) throw new Error('尚未連線錢包。');
+    return state.signer;
+  }
+  function amountWhole(def='8'){
+    const raw=(($('kh-amount')&&$('kh-amount').value)||($('bet-amt-input')&&$('bet-amt-input').value)||($('amt-in')&&$('amt-in').value)||def).trim();
+    if(!/^\d+(\.\d+)?$/.test(raw)||Number(raw)<=0) throw new Error('請輸入正確 KGEN 金額。');
+    return raw;
+  }
+  async function refreshAll(){
+    if(!window.ethers) return;
+    if(!state.provider||!state.account){
+      const eth=getEth();
+      if(eth){
+        const acc=await eth.request({method:'eth_accounts'}).catch(()=>[]);
+        if(acc&&acc[0]){
+          state.provider=new ethers.providers.Web3Provider(eth,'any');
+          state.signer=state.provider.getSigner();
+          state.account=await state.signer.getAddress();
+        }
+      }
+    }
+    if(!state.provider||!state.account) return false;
+    const token=new ethers.Contract(KGEN,ERC20,state.provider);
+    const [dec,bnb,bal,alw,heartBal]=await Promise.all([
+      token.decimals().catch(()=>18),
+      state.provider.getBalance(state.account),
+      token.balanceOf(state.account),
+      token.allowance(state.account,HEART),
+      token.balanceOf(HEART)
+    ]);
+    state.dec=dec; state.allowance=alw; state.kgenBalance=bal; state.heartBalance=heartBal;
+    const kgenTxt=Number(ethers.utils.formatUnits(bal,dec)).toFixed(4)+' KGEN';
+    const alwTxt=Number(ethers.utils.formatUnits(alw,dec)).toFixed(4)+' KGEN';
+    const heartTxt=Number(ethers.utils.formatUnits(heartBal,dec)).toFixed(4)+' KGEN';
+    const bnbTxt=Number(ethers.utils.formatEther(bnb)).toFixed(5)+' BNB';
+    setText(['kh-wallet','bp-wallet','w3-addr'],short(state.account));
+    setText(['kh-kgen-bal','userBal','bp-userbal','rb-kgen-txt'],kgenTxt);
+    setText(['kh-allowance','userAllowance','bp-allowance'],alwTxt);
+    setText(['kh-heart-bal','bp-pool','w3-bal'],heartTxt);
+    setText(['userBNB','rb-bnb-txt'],bnbTxt);
+    try{ if(window.app){ app.userBal=Number(ethers.utils.formatUnits(bal,dec)); app.userAllowance=Number(ethers.utils.formatUnits(alw,dec)); } }catch(_){ }
+    return true;
+  }
+  async function approveCurrent(){
+    if(pendingApprove){status('已有 Approve 交易處理中，請稍候。'); return;}
+    pendingApprove=true;
+    try{
+      const signer=await ensureSigner();
+      const token=new ethers.Contract(KGEN,ERC20,signer);
+      const dec=state.dec||await token.decimals().catch(()=>18);
+      const amt=amountWhole('8');
+      const wei=ethers.utils.parseUnits(amt,dec);
+      if(!confirm('Approve 目前金額：'+amt+' KGEN\n\n左上與左下都走同一 Heart 授權。')){status('已取消 Approve。'); return;}
+      status('Approve 目前金額送出中：'+amt+' KGEN。');
+      const tx=await token.approve(HEART,wei);
+      status('Approve Tx：'+tx.hash+'｜等待確認。');
+      await tx.wait();
+      await refreshAll();
+      status('Approve 完成：'+amt+' KGEN，左上左下 allowance 已同步。');
+    }catch(e){status('Approve 失敗：'+((e&& (e.reason||e.message))||e)); console.error(e);}finally{pendingApprove=false;}
+  }
+  async function approveUnlimited(){
+    if(pendingApprove){status('已有 Approve 交易處理中，請稍候。'); return;}
+    pendingApprove=true;
+    try{
+      const signer=await ensureSigner();
+      const token=new ethers.Contract(KGEN,ERC20,signer);
+      if(!confirm('無限授權確認\n\n這會授權官方 Heart 合約可使用你的 KGEN allowance。\n好處：還願、點燈、相關交易不用每次重複 Approve。\n請確認網址與 Heart 合約正確後再繼續。')){status('已取消無限授權。'); return;}
+      status('無限授權送出中，請確認錢包。');
+      const tx=await token.approve(HEART,ethers.constants.MaxUint256);
+      status('無限授權 Tx：'+tx.hash+'｜等待確認。');
+      await tx.wait();
+      await refreshAll();
+      status('無限授權完成，左上左下 allowance 已同步。');
+    }catch(e){status('無限授權失敗：'+((e&&(e.reason||e.message))||e)); console.error(e);}finally{pendingApprove=false;}
+  }
+  function addTopButtons(){
+    const actions=$('kh-connect')&&$('kh-connect').parentElement;
+    if(actions&&!$('kh-approve-current')){
+      const cur=document.createElement('button'); cur.className='kh-gold'; cur.type='button'; cur.id='kh-approve-current'; cur.textContent='Approve 目前金額';
+      const max=document.createElement('button'); max.className='kh-cyan'; max.type='button'; max.id='kh-approve-unlimited'; max.textContent='無限授權';
+      actions.appendChild(cur); actions.appendChild(max);
+    }
+  }
+  function addBottomUnlimited(){
+    const approve=qa('button').find(b=>(b.textContent||'').trim()==='APPROVE');
+    if(approve&&!$('bp-approve-unlimited')){
+      const max=document.createElement('button'); max.className=approve.className||'bp-btn approve'; max.type='button'; max.id='bp-approve-unlimited'; max.textContent='無限授權';
+      approve.insertAdjacentElement('afterend',max);
+    }
+  }
+  function note(){
+    const box=$('bp-status');
+    if(box&&!$('kgen-v874-approve-note')){
+      const n=document.createElement('div'); n.id='kgen-v874-approve-note';
+      n.innerHTML='<b>Approve 規則：</b>左上與左下可同時操作，但都走同一 provider / signer / allowance。第 13 聖靈包含人類、AI、超人、變形金剛、地球外星所有物種；1 到 12 維持動物生肖。';
+      box.insertAdjacentElement('afterend',n);
+    }
+  }
+  function bind(){
+    addTopButtons(); addBottomUnlimited(); note();
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    qa('button,a').forEach(el=>{
+      const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+      if(el.id==='kh-connect'||t.includes('連結錢包')||t.includes('連接錢包')||t.includes('切 BSC')) el.onclick=function(ev){ev.preventDefault();connect().catch(e=>status('錢包連線失敗：'+(e.message||e)));};
+      if(el.id==='kh-refresh'||t.includes('刷新餘額')) el.onclick=function(ev){ev.preventDefault();refreshAll().then(ok=>status(ok?'餘額已同步刷新。':'尚未連線。'));};
+      if(el.id==='kh-approve-current'||t==='APPROVE'||t.includes('Approve 目前金額')) el.onclick=function(ev){ev.preventDefault();approveCurrent();};
+      if(el.id==='kh-approve-unlimited'||el.id==='bp-approve-unlimited'||t.includes('無限授權')) el.onclick=function(ev){ev.preventDefault();approveUnlimited();};
+    });
+    if(window.web3){ web3.approve=approveCurrent; web3.approveUnlimited=approveUnlimited; web3.refreshBalances=refreshAll; }
+    if(window.betPanel){ betPanel.approve=approveCurrent; }
+    window.kgen12345ApproveBus={connect,refreshAll,approveCurrent,approveUnlimited,state,version:VERSION};
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+  window.addEventListener('load',function(){bind(); setTimeout(bind,700); setTimeout(bind,2000); setTimeout(refreshAll,1200);});
 })();
 </script>
 
