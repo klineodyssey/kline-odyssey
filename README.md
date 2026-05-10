@@ -473,8 +473,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ You are a financial life form.https://klineodyssey.github.io/kline-odyssey/#KGEN #KLINE #AI  
-👉 https://www.youtube.com/watch?v=WpdMvce7AWY
+▶ KLINE App Game is the Runtimefor Financial Lifeformsinside a market gravity field  
+👉 https://www.youtube.com/watch?v=xYMzYgW00nM
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
