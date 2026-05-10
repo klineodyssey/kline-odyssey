@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX
-BUILD: 20260510-V8.7.9-CLEAN-SERVICE-FIX
+VERSION: KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX
+BUILD: 20260510-V8.8.0-CUP-NY-COUNTDOWN-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
 - [V8.7.5] 補齊左上無限授權強制接線、Allowance 顯示、切換錢包、交易收據本機紀錄與下載；許願 / 還願 / 點燈成功後記錄 tx hash、開始時間、結束時間。
@@ -47,7 +48,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1439,7 +1440,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1686,7 +1687,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15549,7 +15550,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.7.9-CLEAN-SERVICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15637,6 +15638,150 @@ KGEN 12345 UI Patch V7.6.0
   window.addEventListener('unhandledrejection', e=>{ if(e && e.reason) explainError(e.reason,'交易或非同步錯誤'); });
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
   window.addEventListener('load', ()=>{bind(); setTimeout(bind,600); setTimeout(bind,1800);});
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.8.0｜Cup Gate + New Year Countdown Fix ===== -->
+<style id="kgen-v880-cup-ny-style">
+#kgen-heart-live-panel .kh-cupbox{margin-top:10px;padding:9px 10px;border:1px solid rgba(255,215,120,.28);border-radius:12px;background:rgba(255,215,120,.07);}
+#kgen-heart-live-panel .kh-cup-title{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#ffd778;font-weight:900;font-size:12px;}
+#kgen-heart-live-panel .kh-cup-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px;}
+#kgen-heart-live-panel .kh-cup-row button{min-height:34px;padding:8px 6px;font-size:12px;border-radius:10px;border:1px solid rgba(255,215,120,.35);background:rgba(0,0,0,.36);color:#fff;font-weight:900;}
+#kgen-heart-live-panel .kh-cup-row button.done{background:linear-gradient(135deg,rgba(255,215,120,.50),rgba(0,242,255,.18));color:#ffe9a8;box-shadow:0 0 15px rgba(255,215,120,.18);}
+#kgen-heart-live-panel .kh-cup-status{margin-top:7px;font-size:12px;color:#8af3ff;line-height:1.4;white-space:pre-wrap;}
+#kgen-heart-live-panel .kh-ny-countdown{margin-top:8px;padding:8px 9px;border:1px solid rgba(0,242,255,.22);border-radius:11px;background:rgba(0,242,255,.06);font-size:12px;line-height:1.45;color:#d8fbff;}
+#kgen-heart-live-panel .kh-ny-countdown b{color:#ffd778;}
+</style>
+<script id="kgen-v880-cup-ny-fix">
+(function(){
+  'use strict';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
+  const $=id=>document.getElementById(id);
+  function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
+  function toast(msg){
+    try{ if(window.ui&&ui.toast) ui.toast(String(msg||''),3600); }catch(_){ }
+    try{ const l=$('kh-log'); if(l) l.textContent=String(msg||''); }catch(_){ }
+  }
+  function getWalletKey(){
+    let a='guest';
+    try{ a=(window.kgenWalletState&&kgenWalletState.account)||(window.web3&&web3.addr)||($('kh-wallet')&&$('kh-wallet').textContent)||'guest'; }catch(_){ }
+    a=String(a||'guest').replace(/[^a-zA-Z0-9x]/g,'').slice(0,42) || 'guest';
+    const d=new Date();
+    return 'kgen12345.v880.cups.'+a+'.'+d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+  }
+  function getCupCount(){
+    try{ return Math.max(0, Math.min(3, Number(localStorage.getItem(getWalletKey())||window.__templeCupCount||0)||0)); }catch(_){ return window.__templeCupCount||0; }
+  }
+  function setCupCount(n){
+    n=Math.max(0, Math.min(3, Number(n)||0));
+    window.__templeCupCount=n;
+    try{ localStorage.setItem(getWalletKey(), String(n)); }catch(_){ }
+    renderCupState();
+    return n;
+  }
+  function nextNewYearTarget(){
+    const now=new Date();
+    // 台灣時間 12/31 23:59:59 = UTC 12/31 15:59:59
+    let y=now.getUTCFullYear();
+    let t=new Date(Date.UTC(y,11,31,15,59,59));
+    if(now.getTime()>t.getTime()) t=new Date(Date.UTC(y+1,11,31,15,59,59));
+    return t;
+  }
+  function fmtRemain(ms){
+    if(ms<0) ms=0;
+    let s=Math.floor(ms/1000);
+    const d=Math.floor(s/86400); s-=d*86400;
+    const h=Math.floor(s/3600); s-=h*3600;
+    const m=Math.floor(s/60); s-=m*60;
+    return d+'天 '+String(h).padStart(2,'0')+'時 '+String(m).padStart(2,'0')+'分 '+String(s).padStart(2,'0')+'秒';
+  }
+  function updateNewYearCountdown(){
+    const t=nextNewYearTarget();
+    const r=fmtRemain(t.getTime()-Date.now());
+    const text='距跨年倒數：'+r+'\n目標：12/31 23:59:59（台灣時間 UTC+8）';
+    const slot=$('kh-ny-slot'); if(slot) slot.textContent=r;
+    const box=$('kh-ny-countdown'); if(box) box.innerHTML='<b>跨年倒數槽</b><br>'+text.replace('\n','<br>');
+  }
+  function ensureCupBox(){
+    const panel=$('kgen-heart-live-panel');
+    if(!panel) return false;
+    if(!$('kh-cupbox')){
+      const box=document.createElement('div');
+      box.id='kh-cupbox';
+      box.className='kh-cupbox';
+      box.innerHTML='<div class="kh-cup-title"><span>三次聖盃驗證</span><span id="kh-cup-mini">0 / 3</span></div><div class="kh-cup-row"><button type="button" id="kh-cup-1">聖盃一</button><button type="button" id="kh-cup-2">聖盃二</button><button type="button" id="kh-cup-3">聖盃三</button><button type="button" id="kh-cup-reset">重置</button></div><div class="kh-cup-status" id="kh-cup-status">尚未開始：0 / 3。完成三次聖盃後，左上 fortuneClaim 才會送交易。</div>';
+      const mini=panel.querySelector('.kh-mini');
+      if(mini) mini.insertAdjacentElement('afterend', box); else panel.appendChild(box);
+    }
+    if(!$('kh-ny-countdown')){
+      const ny=document.createElement('div');
+      ny.id='kh-ny-countdown';
+      ny.className='kh-ny-countdown';
+      const box=$('kh-cupbox');
+      if(box) box.insertAdjacentElement('afterend', ny); else panel.appendChild(ny);
+    }
+    for(let i=1;i<=3;i++){
+      const b=$('kh-cup-'+i);
+      if(b && !b.dataset.v880Bound){
+        b.dataset.v880Bound='1';
+        b.onclick=function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          const need=getCupCount()+1;
+          if(i!==need){ toast('請依序完成聖盃，目前需要按：聖盃'+need); say('請依序完成聖盃，目前需要第 '+need+' 次聖盃。'); return false; }
+          const n=setCupCount(i);
+          const msg=n>=3?'三次聖盃完成，可以領 fortuneClaim 發財金。':'聖盃完成 '+n+' / 3。';
+          toast(msg); say(msg);
+          return false;
+        };
+      }
+    }
+    const reset=$('kh-cup-reset');
+    if(reset && !reset.dataset.v880Bound){
+      reset.dataset.v880Bound='1';
+      reset.onclick=function(ev){ev.preventDefault(); ev.stopPropagation(); setCupCount(0); toast('三次聖盃已重置。'); say('三次聖盃已重置。'); return false;};
+    }
+    return true;
+  }
+  function renderCupState(){
+    const n=getCupCount();
+    const mini=$('kh-cup-mini'); if(mini) mini.textContent=n+' / 3';
+    for(let i=1;i<=3;i++){ const b=$('kh-cup-'+i); if(b) b.classList.toggle('done', i<=n); }
+    const status=$('kh-cup-status');
+    if(status) status.textContent=n>=3 ? '聖盃狀態：3 / 3 已完成。可以按 fortuneClaim 發財金；仍會跳錢包確認與合約條件檢查。' : '聖盃狀態：'+n+' / 3。請依序完成三次聖盃後再領發財金。';
+  }
+  function bindFortuneGate(){
+    const btn=$('kh-fortune');
+    if(!btn || btn.dataset.v880FortuneGate) return;
+    const original=btn.onclick;
+    btn.dataset.v880FortuneGate='1';
+    btn.onclick=function(ev){
+      if(getCupCount()<3){
+        if(ev){ev.preventDefault(); ev.stopPropagation();}
+        const msg='尚未完成三次聖盃，不能送出 fortuneClaim。請先按聖盃一、聖盃二、聖盃三。';
+        toast(msg); say(msg); renderCupState();
+        return false;
+      }
+      const msg='三次聖盃已完成，準備送出 fortuneClaim。請確認錢包交易；若合約冷卻、名額或條件不符合，仍可能失敗。';
+      toast(msg); say(msg);
+      if(typeof original==='function') return original.call(this, ev);
+      if(window.templeOps && typeof templeOps.fortune==='function') return templeOps.fortune();
+      return false;
+    };
+  }
+  function bind(){
+    ensureCupBox();
+    renderCupState();
+    updateNewYearCountdown();
+    bindFortuneGate();
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  window.addEventListener('load', ()=>{bind(); setTimeout(bind,700); setTimeout(bind,1800);});
+  setInterval(()=>{updateNewYearCountdown();},1000);
+  window.kgenV880CupNY={bind, getCupCount, setCupCount, updateNewYearCountdown};
 })();
 </script>
 
