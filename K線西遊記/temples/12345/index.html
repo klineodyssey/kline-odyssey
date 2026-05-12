@@ -4,12 +4,12 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
-BUILD: 20260512-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+VERSION: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
 
-- [V8.9.2] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
+- [V8.9.3] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,6 +15896,18 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+
+用途：
+1. 將「訊息紀錄」移到右側導覽列的「五指山神殿音響」下方。
+2. 訊息按鍵改用 nav-btn 樣式，大小、長度與右側前面按鈕一致。
+3. 保留訊息中心、客服語音、底部按鍵與錢包橋接功能。
+============================================================ -->
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
 VERSION PATCH: KGEN-12345-HEART-UI-V8.9.1-TOAST-MESSAGE-CENTER-FIX
 BUILD: 20260512-V8.9.1-TOAST-MESSAGE-CENTER-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
@@ -15914,21 +15926,20 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 <style id="kgen-v891-toast-message-center-style">
 /* ===== V8.9.1：右上訊息中心與 Toast ===== */
 #kgenMsgCenterBtn{
-  position:fixed;
-  right:12px;
-  top:318px; /* 右上音響區下方，可依畫面微調 */
-  z-index:2147483000;
-  min-width:132px;
-  height:38px;
-  padding:0 12px;
-  border-radius:12px;
-  border:1px solid rgba(255,215,120,.55);
-  background:rgba(0,0,0,.86);
-  color:#ffd778;
+  position:static;
+  width:280px;
+  max-width:90%;
+  min-width:220px;
+  min-height:40px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(0,242,255,.35);
+  background:rgba(0,242,255,.14);
+  color:#fff;
   font-weight:900;
   font-size:13px;
   letter-spacing:.5px;
-  box-shadow:0 0 18px rgba(255,215,120,.22);
+  box-shadow:0 0 18px rgba(255,215,120,.18);
   cursor:pointer;
   pointer-events:auto;
   user-select:none;
@@ -15951,10 +15962,10 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 #kgenMsgPanel{
   position:fixed;
-  right:12px;
-  top:362px;
-  width:min(340px, calc(100vw - 24px));
-  max-height:min(430px, calc(100vh - 390px));
+  right:18px;
+  top:568px;
+  width:min(340px, calc(100vw - 36px));
+  max-height:min(360px, calc(100vh - 590px));
   overflow:auto;
   z-index:2147483001;
   border:1px solid rgba(255,215,120,.35);
@@ -16092,16 +16103,17 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 /* 手機高度不足時，訊息面板稍微上提 */
 @media(max-width:560px){
   #kgenMsgCenterBtn{
-    right:10px;
-    top:304px;
-    min-width:118px;
-    height:36px;
+    width:280px;
+    max-width:90%;
+    min-width:220px;
+    min-height:40px;
     font-size:12px;
   }
   #kgenMsgPanel{
-    right:10px;
-    top:346px;
-    max-height:min(390px, calc(100vh - 360px));
+    right:18px;
+    top:568px;
+    width:min(340px, calc(100vw - 36px));
+    max-height:min(340px, calc(100vh - 590px));
   }
   #kgenToastWrap{
     right:10px;
@@ -16136,8 +16148,19 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
       const btn = document.createElement("button");
       btn.id = "kgenMsgCenterBtn";
       btn.type = "button";
-      btn.innerHTML = '🔔 訊息 <span class="kgen-msg-badge" id="kgenMsgBadge">0</span>';
-      document.body.appendChild(btn);
+      btn.className = "nav-btn nav-help kgen-msg-nav-btn";
+      btn.innerHTML = '🔔 訊息紀錄 <span class="kgen-msg-badge" id="kgenMsgBadge">0</span>';
+      const nav = document.getElementById("universe-nav");
+      const musicBtn = nav ? Array.from(nav.querySelectorAll("button,a")).find(function(x){ return (x.textContent||"").includes("五指山神殿音響"); }) : null;
+      if(nav && musicBtn && musicBtn.nextSibling){ nav.insertBefore(btn, musicBtn.nextSibling); }
+      else if(nav && musicBtn){ nav.appendChild(btn); }
+      else if(nav){ nav.appendChild(btn); }
+      else { document.body.appendChild(btn); }
+    }else{
+      const btn = document.getElementById("kgenMsgCenterBtn");
+      btn.className = "nav-btn nav-help kgen-msg-nav-btn";
+      const nav = document.getElementById("universe-nav");
+      if(nav && btn.parentElement !== nav){ nav.appendChild(btn); }
     }
 
     if(!document.getElementById("kgenMsgPanel")){
@@ -16424,8 +16447,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
-BUILD: 20260512-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
 1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
@@ -16465,7 +16488,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -16490,7 +16513,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
   function msg(type,text,voice){ notify(type,text); if(voice!==false) speak(voice||text); }
   function setVersion(){
     try{ const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION; }catch(e){}
-    try{ document.title='KGEN 12345 五指山悟空財神殿｜V8.9.2'; }catch(e){}
+    try{ document.title='KGEN 12345 五指山悟空財神殿｜V8.9.3'; }catch(e){}
   }
   function modal(title, html, voice){
     const m=$('kgenV892ServiceModal'), t=$('kgenV892ServiceTitle'), b=$('kgenV892ServiceBody');
@@ -16613,7 +16636,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
     document.body.appendChild(d);
   }
   window.kgenV892={open:function(k){ if(k==='wallet') return walletPanel(); if(k==='fortune') return fortunePanel(); if(k==='rules') return rulesPanel(); return servicePanel(); }, close:closeModal, confirmTx, resetCup:function(){state.cup=0; localStorage.setItem('KGEN_12345_CUP_COUNT_V892','0'); msg('info','三次聖盃已重置。');}, speakRules:function(){speak('TempleHeart 規則。發財金一到八八八，三十天冷卻，每個 epoch 五百名。心跳每小時一次，呼吸在 UTC 零點到零點十分。還願、點燈需要 Approve。');}, voiceTest:function(){msg('success','客服語音測試成功。','客服語音已啟動。歡迎來到五指山悟空財神殿。');}};
-  function init(){ setVersion(); wrapOps(); bindButtons(); installDock(); const c=$('kgenV892CloseBtn'); if(c) c.onclick=closeModal; const m=$('kgenV892ServiceModal'); if(m) m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }); msg('success','V8.9.2 已啟動：下方按鍵與客服語音已補齊。','V八點九點二已啟動。下方按鍵與客服語音已補齊。'); }
+  function init(){ setVersion(); wrapOps(); bindButtons(); installDock(); const c=$('kgenV892CloseBtn'); if(c) c.onclick=closeModal; const m=$('kgenV892ServiceModal'); if(m) m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }); msg('success','V8.9.3 已啟動：下方按鍵與客服語音已補齊。','V八點九點二已啟動。下方按鍵與客服語音已補齊。'); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
