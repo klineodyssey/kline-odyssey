@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<!--
+============================================================
+PRODUCT_ID: KGEN-SOCIAL-WALLET-BRIDGE
+VERSION: KGEN-SOCIAL-WALLET-BRIDGE-V1.0.0
+BUILD: 20260512-V1.0.0-SOCIAL-WALLET-TO-TEMPLE
+BASE_FROM: new root ASCII bridge
+CHANGELOG:
+- [V1.0.0] 新增 Facebook / LINE / 社群內建瀏覽器專用錢包中繼頁。
+- [V1.0.0] 預設導向 12345 悟空財神殿，避免只打開錢包首頁後不續導神殿。
+- [V1.0.0] 使用 ASCII 根路徑 wallet.html，降低 LINE / Facebook 對中文路徑與深層連結的誤判。
+============================================================
+-->
+<title>KGEN Wallet Bridge｜前往悟空財神殿</title>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="KGEN Wallet Bridge｜前往 12345 悟空財神殿"/>
+<meta property="og:description" content="Facebook / LINE / 手機錢包專用入口，連結錢包後續導至 K線西遊記 12345 悟空財神殿。"/>
+<meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/wallet.html"/>
+<style>
+:root{--bg:#05060b;--gold:#ffd778;--cyan:#65f5ff;--line:rgba(255,255,255,.16);--text:rgba(255,255,255,.94);--muted:rgba(255,255,255,.68);--card:rgba(255,255,255,.075);--r:24px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans TC",Arial,sans-serif}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(900px 600px at 20% 10%,rgba(255,215,120,.16),transparent 65%),radial-gradient(900px 700px at 80% 45%,rgba(0,242,255,.11),transparent 62%),linear-gradient(180deg,#05060b,#090911 52%,#05060b);color:var(--text)}.wrap{max-width:760px;margin:0 auto;padding:28px 16px 44px}.card{border:1px solid var(--line);border-radius:30px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.035));box-shadow:0 24px 80px rgba(0,0,0,.45);padding:24px}.tag{display:inline-flex;border:1px solid rgba(255,215,120,.35);border-radius:999px;padding:7px 10px;color:var(--gold);font-weight:900;font-size:12px}.h1{font-size:32px;font-weight:950;line-height:1.15;margin:14px 0 8px}.p{color:var(--muted);line-height:1.72;margin:0 0 16px}.btns{display:grid;gap:10px;margin-top:16px}.btn{display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid var(--line);border-radius:999px;padding:13px 14px;font-weight:950;color:inherit;text-decoration:none;background:rgba(255,255,255,.10)}.gold{background:rgba(255,215,120,.92);color:#111}.cyan{background:rgba(101,245,255,.88);color:#071015}.mini{font-size:12px;color:var(--muted);word-break:break-all;margin-top:16px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);padding:12px;border-radius:18px}.footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}@media(max-width:520px){.h1{font-size:28px}.card{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="tag">KGEN SOCIAL WALLET BRIDGE · V1.0.0</div>
+    <div class="h1">前往 12345 悟空財神殿</div>
+    <p class="p">這是 Facebook / LINE / 手機瀏覽器專用中繼頁。若你已在錢包瀏覽器內，系統會直接續導神殿；若目前在社群 App 內，請按下方錢包按鈕開啟。</p>
+    <div class="btns">
+      <a id="openDirect" class="btn gold" href="#">直接開啟神殿</a>
+      <a id="openMetaMask" class="btn cyan" href="#">用 MetaMask 開啟神殿</a>
+      <a id="openTrust" class="btn" href="#">用 Trust Wallet 開啟神殿</a>
+      <a id="openCoinbase" class="btn" href="#">用 Coinbase Wallet 開啟神殿</a>
+      <a class="btn" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方帳號</a>
+    </div>
+    <div class="mini" id="targetText"></div>
+  </div>
+  <div class="footer">PrimeForge 以母機之名，開啟金融生命。<br>花果山台灣・信念不滅・市場無界。<br>Where the Market Becomes the Myth.<br>—— 樂天帝 ⌖</div>
+</div>
+<script>
+(function(){
+  const BASE = 'https://klineodyssey.github.io/kline-odyssey/';
+  const TARGETS = {
+    '12345': BASE + 'K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?v=890',
+    'portal': BASE + 'K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html?v=220',
+    '16888': BASE + 'K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/index.html?v=374'
+  };
+  const qs = new URLSearchParams(location.search);
+  const to = (qs.get('to') || '12345').toLowerCase();
+  const target = TARGETS[to] || TARGETS['12345'];
+  const noAuto = qs.get('manual') === '1';
+  const hostPath = target.replace(/^https?:\/\//,'');
+
+  document.getElementById('openDirect').href = target;
+  document.getElementById('openMetaMask').href = 'https://metamask.app.link/dapp/' + hostPath;
+  document.getElementById('openTrust').href = 'https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(target);
+  document.getElementById('openCoinbase').href = 'https://go.cb-w.com/dapp?cb_url=' + encodeURIComponent(target);
+  document.getElementById('targetText').textContent = 'Target: ' + target;
+
+  const ua = navigator.userAgent || '';
+  const isWallet = !!(window.ethereum || /MetaMask|Trust|TokenPocket|Bitget|OKX|imToken|CoinbaseWallet/i.test(ua));
+  const isSocial = /FBAN|FBAV|Instagram|Line\//i.test(ua);
+  if (isWallet && !noAuto) {
+    setTimeout(function(){ location.replace(target); }, 650);
+  } else if (!isSocial && !noAuto && qs.get('auto') === '1') {
+    setTimeout(function(){ location.replace(target); }, 900);
+  }
+})();
+</script>
+</body>
+</html>
