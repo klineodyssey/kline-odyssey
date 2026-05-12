@@ -4,8 +4,8 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX
-BUILD: 20260512-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX
+VERSION: KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX
+BUILD: 20260512-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
 - [V8.8.7] 錢包入口能用版：LINE/Facebook 內建瀏覽器按錢包入口可跳 MetaMask/Trust/OKX/Bitget；MetaMask 內建瀏覽器按連結錢包直接注入連線並刷新餘額。
@@ -49,7 +49,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1441,7 +1441,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1688,7 +1688,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15551,7 +15551,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15658,7 +15658,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15788,7 +15788,7 @@ KGEN 12345 UI Patch V7.6.0
 
 
 
-<!-- ===== KGEN 12345 V8.8.7｜Wallet Entry Can Connect Fix ===== -->
+<!-- ===== KGEN 12345 V8.8.8｜Wallet Entry Real Connect Fix ===== -->
 <style id="kgen-v887-wallet-entry-style">
   #walletHub{
     z-index:2147483647 !important;
@@ -15822,7 +15822,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v887-wallet-entry-can-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.7-WALLET-ENTRY-CAN-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX';
   const OFFICIAL_PATH='/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const OFFICIAL_HOST='klineodyssey.github.io';
   const OFFICIAL_FULL='https://'+OFFICIAL_HOST+OFFICIAL_PATH;
@@ -15918,7 +15918,7 @@ KGEN 12345 UI Patch V7.6.0
     hub.style.pointerEvents='auto';
     hub.innerHTML=''
       +'<div id="walletHubCard" style="width:min(560px,96vw);max-height:86vh;overflow:auto;border:1px solid rgba(255,215,120,.58);border-radius:18px;background:rgba(8,10,18,.97);color:#fff;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.72);position:relative;z-index:2147483647;pointer-events:auto;">'
-      +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;"><b style="color:#ffd978;font-size:16px;">多錢包入口｜V8.8.7 能連版</b><button type="button" id="walletHubClose" style="border-radius:10px;padding:8px 12px;font-weight:900;">×</button></div>'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;"><b style="color:#ffd978;font-size:16px;">多錢包入口｜V8.8.8 真連版</b><button type="button" id="walletHubClose" style="border-radius:10px;padding:8px 12px;font-weight:900;">×</button></div>'
       +'<p style="line-height:1.6;color:#dff;margin:0 0 10px 0;">LINE / Facebook 內建瀏覽器沒有錢包注入。請點下方錢包入口開啟錢包 DApp；進入錢包瀏覽器後，再按「連結錢包 / 切 BSC」即可顯示餘額。</p>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
       +'<button type="button" id="walletHubMetaMask" class="nav-btn">MetaMask 開啟</button>'
@@ -15981,6 +15981,248 @@ KGEN 12345 UI Patch V7.6.0
     window.openWalletHub=openWalletHub;
     window.connectWallet=smartConnect;
     window.kgenWalletEntry={openWalletHub, openDeepLink, smartConnect, connectInjected, officialUrl:OFFICIAL_FULL};
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
+    patchButtons();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+  window.addEventListener('load',()=>{install(); setTimeout(install,600); setTimeout(install,1800);});
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.8.8｜Wallet Entry Real Connect Fix ===== -->
+<style id="kgen-v888-wallet-real-connect-style">
+  #walletHub{
+    z-index:2147483647 !important;
+    pointer-events:auto !important;
+    touch-action:auto !important;
+  }
+  #walletHub *{
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+  #walletHubCard,
+  #walletHub button,
+  #walletHub .nav-btn,
+  #walletHub input{
+    position:relative !important;
+    z-index:2147483647 !important;
+    pointer-events:auto !important;
+  }
+  .kgen-v888-wallet-btn{
+    width:100%;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,215,120,.45);
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    font-weight:900;
+  }
+  .kgen-v888-wallet-note{
+    margin-top:10px;
+    padding:9px 10px;
+    border:1px solid rgba(0,242,255,.35);
+    border-radius:12px;
+    background:rgba(0,242,255,.08);
+    color:#dffbff;
+    font-size:12px;
+    line-height:1.55;
+    font-weight:900;
+  }
+</style>
+<script id="kgen12345-v888-wallet-entry-real-connect-fix">
+(function(){
+  'use strict';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.8-WALLET-ENTRY-REAL-CONNECT-FIX';
+  const OFFICIAL_FULL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
+  const OFFICIAL_NOSCHEME='klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
+  const BSC_HEX='0x38';
+  const $=id=>document.getElementById(id);
+
+  function toast(msg, ms){
+    try{ if(window.ui&&typeof ui.toast==='function') ui.toast(msg, ms||4200); }catch(_){ }
+    try{ const t=$('toast'); if(t){ t.textContent=String(msg||''); t.classList.add('show'); clearTimeout(window.__kgen888Toast); window.__kgen888Toast=setTimeout(()=>t.classList.remove('show'),ms||4200); } }catch(_){ }
+  }
+  function say(msg){
+    try{ if(window.app&&typeof app.speak==='function'){ app.speak(String(msg||'')); return; } }catch(_){ }
+    try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; speechSynthesis.speak(u); }catch(_){ }
+  }
+  function pickInjected(){
+    try{
+      let eth=window.ethereum || window.BinanceChain;
+      if(eth && Array.isArray(eth.providers) && eth.providers.length){
+        eth = eth.providers.find(p=>p && (p.isMetaMask || p.isTrust || p.isOKXWallet || p.isBitKeep || p.isBinance)) || eth.providers[0];
+      }
+      return (eth && typeof eth.request==='function') ? eth : null;
+    }catch(_){ return null; }
+  }
+  function short(addr){ return addr ? (addr.slice(0,6)+'...'+addr.slice(-4)) : '--'; }
+  function setText(id,txt){ const el=$(id); if(el) el.textContent=txt; }
+
+  async function ensureBSC(eth){
+    try{
+      const cid = await eth.request({method:'eth_chainId'});
+      if(String(cid||'').toLowerCase() === BSC_HEX) return true;
+      try{
+        await eth.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC_HEX}]});
+        return true;
+      }catch(e){
+        if(e && (e.code===4902 || String(e.message||'').toLowerCase().includes('unrecognized'))){
+          await eth.request({method:'wallet_addEthereumChain', params:[{
+            chainId:BSC_HEX,
+            chainName:'BNB Smart Chain',
+            nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+            rpcUrls:['https://bsc-dataseed.binance.org/'],
+            blockExplorerUrls:['https://bscscan.com']
+          }]});
+          await eth.request({method:'wallet_switchEthereumChain', params:[{chainId:BSC_HEX}]});
+          return true;
+        }
+        throw e;
+      }
+    }catch(e){
+      console.warn('V8.8.8 ensureBSC failed', e);
+      toast('請在錢包中切到 BSC 56。');
+      say('請在錢包中切到 BSC 五十六。');
+      return false;
+    }
+  }
+
+  async function realConnect(){
+    const eth=pickInjected();
+    if(!eth){ openWalletHub(); return false; }
+    try{
+      await eth.request({method:'eth_requestAccounts'});
+      const ok=await ensureBSC(eth);
+      if(!ok) return false;
+
+      if(!window.ethers || !ethers.providers || !ethers.providers.Web3Provider){
+        toast('ethers.js 尚未載入完成，請重新整理後再連。');
+        return false;
+      }
+      const provider=new ethers.providers.Web3Provider(eth, 'any');
+      const signer=provider.getSigner();
+      const addr=await signer.getAddress();
+
+      if(window.web3){
+        web3.provider=provider;
+        web3.signer=signer;
+        web3.addr=addr;
+        web3.demo=false;
+        if(typeof web3.ensureBSC==='function') { try{ await web3.ensureBSC(); }catch(_){ } }
+      }
+      window.kgenWalletState = window.kgenWalletState || {};
+      Object.assign(window.kgenWalletState, { provider, signer, account:addr, address:addr, chainId:56, connected:true });
+
+      setText('w3-addr', short(addr));
+      setText('w3-chain', 'BSC 56');
+
+      try{ if(window.web3&&typeof web3.refreshUser==='function') await web3.refreshUser(); }catch(e){ console.warn(e); }
+      try{ if(window.web3&&typeof web3.refresh==='function') await web3.refresh(); }catch(e){ console.warn(e); }
+      try{ if(window.web3&&typeof web3.refreshBalances==='function') await web3.refreshBalances(); }catch(e){ console.warn(e); }
+      try{ if(window.templeHeart&&typeof templeHeart.refresh==='function') await templeHeart.refresh(); }catch(e){ console.warn(e); }
+      try{ if(window.refreshHeartStats) await window.refreshHeartStats(); }catch(e){ console.warn(e); }
+      try{ if(window.kgenWalletState&&typeof kgenWalletState.refresh==='function') await kgenWalletState.refresh(); }catch(e){ console.warn(e); }
+
+      const hub=$('walletHub'); if(hub) hub.style.display='none';
+      toast('錢包已連線：'+short(addr)+'，餘額已刷新。');
+      say('錢包已連線，餘額已刷新。');
+      return true;
+    }catch(e){
+      console.warn('V8.8.8 realConnect failed', e);
+      toast('錢包連線失敗：請確認授權、BSC 56、並使用錢包 DApp 瀏覽器。');
+      say('錢包連線失敗，請確認授權與 BSC 五十六。');
+      return false;
+    }
+  }
+
+  function deepLink(kind){
+    if(pickInjected()){ realConnect(); return; }
+    let link=OFFICIAL_FULL;
+    if(kind==='metamask') link='https://metamask.app.link/dapp/'+OFFICIAL_NOSCHEME;
+    else if(kind==='trust') link='https://link.trustwallet.com/open_url?url='+encodeURIComponent(OFFICIAL_FULL);
+    else if(kind==='okx') link='okx://wallet/dapp/url?dappUrl='+encodeURIComponent(OFFICIAL_FULL);
+    else if(kind==='bitget') link='bitget://openDapp?url='+encodeURIComponent(OFFICIAL_FULL);
+    else if(kind==='binance') link='bnc://app.binance.com/cedefi/dapp?url='+encodeURIComponent(OFFICIAL_FULL);
+    else if(kind==='walletconnect'){
+      if(window.web3 && typeof web3.connectWalletConnect==='function') return web3.connectWalletConnect();
+      toast('WalletConnect 未載入，請使用 MetaMask / Trust / OKX / Bitget DApp 瀏覽器。'); return;
+    }
+    toast('正在開啟錢包 App。若 Facebook / LINE 詢問是否跳外部程式，請允許。');
+    try{ window.location.assign(link); }catch(_){ window.location.href=link; }
+  }
+
+  async function copyOfficial(){
+    try{ await navigator.clipboard.writeText(OFFICIAL_FULL); toast('已複製官方神殿網址'); say('已複製官方神殿網址，請貼到錢包 DApp 瀏覽器。'); }
+    catch(_){ const inp=$('walletHubUrl'); if(inp){ inp.value=OFFICIAL_FULL; inp.focus(); inp.select(); } toast('請手動複製網址欄。'); }
+  }
+
+  function buildHub(){
+    let hub=$('walletHub');
+    if(!hub){ hub=document.createElement('div'); hub.id='walletHub'; document.body.appendChild(hub); }
+    hub.style.cssText='position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);z-index:2147483647;pointer-events:auto;';
+    hub.innerHTML=''
+      +'<div id="walletHubCard" style="width:min(560px,96vw);max-height:86vh;overflow:auto;border:1px solid rgba(255,215,120,.58);border-radius:18px;background:rgba(8,10,18,.97);color:#fff;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.72);position:relative;z-index:2147483647;pointer-events:auto;">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;"><b style="color:#ffd978;font-size:16px;">多錢包入口｜V8.8.8 真連版</b><button type="button" id="walletHubClose" class="kgen-v888-wallet-btn" style="width:auto;min-width:48px;">×</button></div>'
+      +'<p style="line-height:1.6;color:#dff;margin:0 0 10px 0;">LINE / Facebook 可先點 MetaMask、Trust、OKX 或 Bitget。跳到錢包 App 後，會開啟官方神殿頁，再按「連結錢包 / 切 BSC」即可讀取餘額。</p>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      +'<button type="button" id="walletHubMetaMask" class="kgen-v888-wallet-btn">MetaMask 開啟</button>'
+      +'<button type="button" id="walletHubTrust" class="kgen-v888-wallet-btn">Trust Wallet 開啟</button>'
+      +'<button type="button" id="walletHubOKX" class="kgen-v888-wallet-btn">OKX Wallet 開啟</button>'
+      +'<button type="button" id="walletHubBitget" class="kgen-v888-wallet-btn">Bitget Wallet 開啟</button>'
+      +'<button type="button" id="walletHubBinance" class="kgen-v888-wallet-btn">Binance 開啟</button>'
+      +'<button type="button" id="walletHubWC" class="kgen-v888-wallet-btn">WalletConnect QR</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px;"><input id="walletHubUrl" readonly value="'+OFFICIAL_FULL+'" style="flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0a0d12;color:#e9f4ff;font-size:12px;"><button type="button" id="walletHubCopy" class="kgen-v888-wallet-btn" style="width:96px;">複製</button></div>'
+      +'<div class="kgen-v888-wallet-note">注意：在 Facebook 顯示「跳轉外部程式」是正常流程，請允許開啟錢包 App。禁止導向 github.com / assets / raw 檔，只能導向官方 github.io 神殿頁。</div>'
+      +'</div>';
+    const bind=(id,fn)=>{ const el=$(id); if(el){ el.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); fn(); return false; }; } };
+    bind('walletHubClose',()=>{hub.style.display='none';});
+    bind('walletHubMetaMask',()=>deepLink('metamask'));
+    bind('walletHubTrust',()=>deepLink('trust'));
+    bind('walletHubOKX',()=>deepLink('okx'));
+    bind('walletHubBitget',()=>deepLink('bitget'));
+    bind('walletHubBinance',()=>deepLink('binance'));
+    bind('walletHubWC',()=>deepLink('walletconnect'));
+    bind('walletHubCopy',copyOfficial);
+    hub.onclick=function(ev){ if(ev.target===hub) hub.style.display='none'; };
+    return hub;
+  }
+
+  function openWalletHub(){
+    const hub=buildHub();
+    const inp=$('walletHubUrl'); if(inp) inp.value=OFFICIAL_FULL;
+    hub.style.display='flex';
+  }
+  async function smartConnect(){
+    if(pickInjected()) return realConnect();
+    openWalletHub();
+    toast('未偵測到錢包注入，請選 MetaMask / Trust / OKX / Bitget 開啟。');
+  }
+  function patchButtons(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const txt=(btn.textContent||'').trim();
+      const on=(btn.getAttribute('onclick')||'');
+      if(/連結錢包|多錢包|切 BSC/.test(txt) || /openWalletHub|smartConnect|connect\(/.test(on)){
+        if(/Approve|發財金|heartbeat|fortune|vow|lamp|wish|點燈|還願|許願/.test(txt)) return;
+        btn.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); smartConnect(); return false; };
+        btn.style.pointerEvents='auto';
+      }
+    });
+  }
+  function install(){
+    if(window.web3){
+      web3.openWalletHub=openWalletHub;
+      web3.deepLink=deepLink;
+      web3.copyDappUrl=copyOfficial;
+      web3.smartConnect=smartConnect;
+      web3.connect=smartConnect;
+    }
+    window.openWalletHub=openWalletHub;
+    window.connectWallet=smartConnect;
+    window.kgenWalletEntry={openWalletHub, deepLink, smartConnect, realConnect, officialUrl:OFFICIAL_FULL};
     const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
     document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
     patchButtons();
