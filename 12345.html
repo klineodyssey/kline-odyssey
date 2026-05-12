@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<base href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/">
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
+VERSION: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
 
@@ -50,7 +51,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1443,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1690,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15553,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15660,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15805,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15897,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,8 +15925,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260513-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -16090,7 +16091,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,8 +16284,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260513-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -16341,7 +16342,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16420,6 +16421,300 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
   },true);
 
   note('success','V8.9.5 已啟動：錢包入口改用 ASCII 完整神殿頁 12345.html，左上訊息已清場。');
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
+修正：
+1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
+2. 左上重複訊息列退場，只保留 12345 Heart 展開/收合與 Heart 面板。
+3. Heart 展開鈕與左上 Heart 面板寬度對齊，避免擋品牌與背景字。
+4. 12345.html 根路徑主圖與 assets 使用絕對資源，避免中間悟空心臟圖消失。
+5. LINE / Facebook → MetaMask 改用 ASCII 12345.html 真入口，禁止導到中文路徑、assets、github.com blob。
+6. 保留目前 GitHub / 錢包內建瀏覽器可連線與顯示餘額核心，不改 ethers.js / connectWallet / signer。
+============================================================ -->
+<style id="kgen-v896-hud-wallet-image-sync-style">
+  :root{
+    --kgen-right-x:18px;
+    --kgen-nav-w:280px;
+    --kgen-left-x:18px;
+    --kgen-left-w:280px;
+  }
+
+  /* 右上導覽列統一寬度 */
+  #universe-nav{right:var(--kgen-right-x)!important;align-items:flex-end!important;z-index:220!important;}
+  #universe-nav .nav-btn{width:var(--kgen-nav-w)!important;max-width:var(--kgen-nav-w)!important;box-sizing:border-box!important;}
+
+  /* 訊息紀錄：在五指山神殿音響下面，和上方按鈕對齊 */
+  #kgenMsgCenterBtn{
+    position:fixed!important;
+    right:var(--kgen-right-x)!important;
+    top:575px!important;
+    width:var(--kgen-nav-w)!important;
+    max-width:var(--kgen-nav-w)!important;
+    min-width:var(--kgen-nav-w)!important;
+    height:38px!important;
+    padding:0 14px!important;
+    border-radius:10px!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:6px!important;
+    z-index:2147482500!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    box-sizing:border-box!important;
+    pointer-events:auto!important;
+  }
+  #kgenMsgCenterBtn .kgen-msg-badge{margin-left:4px!important;flex:0 0 auto!important;}
+  #kgenMsgPanel{
+    position:fixed!important;
+    right:var(--kgen-right-x)!important;
+    top:620px!important;
+    width:var(--kgen-nav-w)!important;
+    max-width:var(--kgen-nav-w)!important;
+    max-height:min(380px,calc(100vh - 640px))!important;
+    box-sizing:border-box!important;
+    z-index:2147482501!important;
+  }
+
+  /* 左上重複浮動訊息全部退場，只保留 Heart toggle / Heart panel / message center */
+  #kgenToastWrap,
+  #toast,
+  #status,
+  #top-status,
+  #status-line,
+  #kgenStatusLine,
+  #kgenTopMessage,
+  #kgenLiveToast,
+  .kgen-left-toast,
+  .kgen-debug-status,
+  [id*="TopMessage"],
+  [id*="LiveToast"],
+  [class*="debug-status"]{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  /* 12345 Heart 展開/收合：和左上視窗對齊，下移，不擋品牌字 */
+  #kgen-heart-toggle{
+    position:fixed!important;
+    left:var(--kgen-left-x)!important;
+    top:78px!important;
+    width:var(--kgen-left-w)!important;
+    height:36px!important;
+    border-radius:999px!important;
+    z-index:260!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    white-space:nowrap!important;
+    pointer-events:auto!important;
+  }
+  #kgen-heart-live-panel{
+    position:fixed!important;
+    left:var(--kgen-left-x)!important;
+    top:122px!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - 188px)!important;
+    overflow:auto!important;
+    z-index:250!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 左下操作窗與其他小窗避免互壓 */
+  #web3-panel,
+  .wallet-panel,
+  .kgen-wallet-panel{
+    max-width:var(--kgen-left-w)!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 中央主圖永遠可見，不被舊層蓋成黑洞 */
+  #core-window{overflow:hidden!important;background:radial-gradient(circle,rgba(255,210,100,.22),rgba(0,0,0,.15) 58%,rgba(0,0,0,.55))!important;}
+  #fairy-img{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    position:relative!important;
+    z-index:2!important;
+    pointer-events:none!important;
+  }
+  #wish-label{z-index:4!important;position:absolute!important;}
+
+  /* 手機窄版：右側按鈕維持同寬，避免訊息變短 */
+  @media(max-width:720px){
+    :root{--kgen-right-x:12px;--kgen-nav-w:190px;--kgen-left-x:12px;--kgen-left-w:255px;}
+    #kgenMsgCenterBtn{top:575px!important;height:36px!important;font-size:12px!important;}
+    #kgenMsgPanel{top:616px!important;max-height:330px!important;}
+    #kgen-heart-toggle{top:74px!important;}
+    #kgen-heart-live-panel{top:116px!important;max-height:calc(100vh - 184px)!important;}
+  }
+</style>
+<script id="kgen-v896-hud-wallet-image-sync-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
+  const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
+  const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
+  const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
+  const ASSET_BASE='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/assets/';
+
+  function $(id){return document.getElementById(id)}
+  function speak(text){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(text)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
+  function msg(type,text){try{ if(window.kgenPushMessage) window.kgenPushMessage(type||'info',String(text||'')); }catch(e){} }
+
+  function fixCenterImage(){
+    const img=$('fairy-img');
+    if(!img) return;
+    const abs=ASSET_BASE+'wukong_heart_core.jpg';
+    img.onerror=function(){ if(img.src!==abs) img.src=abs; };
+    if(!img.getAttribute('src') || img.naturalWidth===0 || /(^|\/)assets\//.test(img.getAttribute('src')||'')){
+      /* 根目錄 12345.html 會因相對 assets 失效，統一改絕對資源 */
+      img.src=abs;
+    }
+  }
+
+  function cleanLeftMessages(){
+    const allow=new Set(['kgen-heart-toggle','kgen-heart-live-panel','kgenMsgCenterBtn','kgenMsgPanel']);
+    const keys=['完成','準備','錯誤','失敗','未偵測','已開啟','V8.9.1 訊息中心','HUD 與 BSC','錢包已連線'];
+    document.querySelectorAll('body > div, body > span, body > section').forEach(el=>{
+      if(!el || allow.has(el.id)) return;
+      const cs=getComputedStyle(el);
+      if(!(cs.position==='fixed' || cs.position==='absolute')) return;
+      const r=el.getBoundingClientRect();
+      if(r.top<120 && r.left<380){
+        const txt=(el.textContent||'').trim();
+        if(keys.some(k=>txt.includes(k))){ el.style.display='none'; el.style.pointerEvents='none'; }
+      }
+    });
+  }
+
+  function placeMessageButton(){
+    const nav=$('universe-nav');
+    const btn=$('kgenMsgCenterBtn');
+    if(!nav||!btn) return;
+    /* 若還沒移進右側列，插到五指山神殿音響後方，保持同一按鈕列語意 */
+    const music=Array.from(nav.querySelectorAll('button,a')).find(x=>(x.textContent||'').includes('五指山神殿音響'));
+    if(music && btn.parentElement!==nav){
+      try{ nav.insertBefore(btn, music.nextSibling); }catch(e){ nav.appendChild(btn); }
+      btn.style.position=''; btn.style.right=''; btn.style.top='';
+      btn.classList.add('nav-btn','nav-help');
+    }
+  }
+
+  function openUrl(url){
+    try{ window.location.href=url; }catch(e){ try{ location.assign(url); }catch(_){} }
+  }
+  function metamaskPrimary(){ return 'https://link.metamask.io/dapp/'+ASCII_NO_SCHEME; }
+  function metamaskFallback(){ return 'https://metamask.app.link/dapp/'+ASCII_NO_SCHEME; }
+  function trustLink(){ return 'https://link.trustwallet.com/open_url?coin_id=20000714&url='+encodeURIComponent(ASCII_URL); }
+  function okxLink(){ return 'okx://wallet/dapp/details?dappUrl='+encodeURIComponent(ASCII_URL); }
+  function bitgetLink(){ return 'bitget://wallet/dapp?url='+encodeURIComponent(ASCII_URL); }
+
+  function openWallet(kind){
+    if(kind==='metamask') return openUrl(metamaskPrimary());
+    if(kind==='metamask2') return openUrl(metamaskFallback());
+    if(kind==='trust') return openUrl(trustLink());
+    if(kind==='okx') return openUrl(okxLink());
+    if(kind==='bitget') return openUrl(bitgetLink());
+    if(kind==='bridge') return openUrl(WALLET_BRIDGE);
+    return openUrl(ASCII_URL);
+  }
+
+  function installWalletOverrides(){
+    window.kgenWalletEntryV896={openWallet,ASCII_URL,WALLET_BRIDGE,metamaskPrimary:metamaskPrimary(),metamaskFallback:metamaskFallback()};
+    if(window.web3){
+      const old=window.web3;
+      old.deepLink=function(kind){openWallet(kind||'metamask')};
+      old.openWalletHub=showWalletHub;
+      old.smartConnect=old.connect=async function(){
+        if(window.ethereum && window.ethers && ethers.providers){
+          try{
+            const provider=new ethers.providers.Web3Provider(window.ethereum,'any');
+            await provider.send('eth_requestAccounts',[]);
+            if(window.ensureBsc) await window.ensureBsc();
+            if(window.connectWallet) return window.connectWallet();
+          }catch(e){ msg('warn','錢包連線未完成：'+(e.message||e)); }
+        }
+        showWalletHub();
+      };
+    }
+    window.openWalletHub=showWalletHub;
+  }
+
+  function showWalletHub(){
+    let hub=$('kgenWalletHubV896');
+    if(!hub){
+      hub=document.createElement('div');
+      hub.id='kgenWalletHubV896';
+      hub.style.cssText='position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;pointer-events:auto;';
+      hub.innerHTML=`
+        <div style="width:min(560px,94vw);border:1px solid rgba(255,215,120,.55);border-radius:18px;background:rgba(4,6,12,.98);color:#fff;padding:16px;box-shadow:0 0 50px rgba(0,0,0,.75);font-weight:800;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;color:#ffd778;font-size:17px;font-weight:950;"><span>🧩 多錢包入口｜V8.9.6</span><button id="kw896Close" type="button" style="border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:7px 11px;font-weight:900;">×</button></div>
+          <div style="font-size:13px;line-height:1.7;color:#dff;margin-bottom:10px;">LINE / Facebook 請先開外部錢包，再進入 <b>12345.html</b> 英文入口。登入 MetaMask 後若沒有自動進入，請按「MetaMask 備用」或複製 12345.html 貼到 MetaMask 瀏覽器。</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button id="kw896Meta" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.55);background:linear-gradient(180deg,#ffe28a,#d5aa3d);color:#111;font-weight:950;">MetaMask 開啟</button>
+            <button id="kw896Meta2" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">MetaMask 備用</button>
+            <button id="kw896Trust" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">Trust Wallet</button>
+            <button id="kw896OKX" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">OKX Wallet</button>
+            <button id="kw896Bitget" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">Bitget Wallet</button>
+            <button id="kw896Direct" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">直接開 12345</button>
+          </div>
+          <input id="kw896Url" readonly value="${ASCII_URL}" style="width:100%;box-sizing:border-box;margin-top:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#05070b;color:#9ff;padding:10px;font-size:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;"><button id="kw896Copy" type="button" style="padding:11px;border-radius:12px;border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.16);color:#ffe28a;font-weight:950;">複製 12345.html</button><button id="kw896Bridge" type="button" style="padding:11px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">橋接入口</button></div>
+          <div style="margin-top:10px;color:#8ff;font-size:12px;line-height:1.55;">正確流程：LINE / Facebook → 連結錢包 → MetaMask 開啟 → 進入 12345.html → 按「連結錢包 / 切 BSC」→ 顯示 BNB / KGEN / Allowance。</div>
+        </div>`;
+      document.body.appendChild(hub);
+      $('kw896Close').onclick=()=>hub.remove();
+      $('kw896Meta').onclick=()=>openWallet('metamask');
+      $('kw896Meta2').onclick=()=>openWallet('metamask2');
+      $('kw896Trust').onclick=()=>openWallet('trust');
+      $('kw896OKX').onclick=()=>openWallet('okx');
+      $('kw896Bitget').onclick=()=>openWallet('bitget');
+      $('kw896Direct').onclick=()=>openWallet('direct');
+      $('kw896Bridge').onclick=()=>openWallet('bridge');
+      $('kw896Copy').onclick=async()=>{try{await navigator.clipboard.writeText(ASCII_URL); msg('success','已複製 12345.html 官方入口。'); speak('已複製官方入口。');}catch(e){prompt('請複製 12345.html',ASCII_URL);}};
+      hub.addEventListener('click',e=>{if(e.target===hub) hub.remove();});
+    }
+  }
+
+  function captureWalletButtons(){
+    document.addEventListener('click',function(ev){
+      const el=ev.target && ev.target.closest ? ev.target.closest('button,a,[role="button"]') : null;
+      if(!el) return;
+      const t=(el.textContent||'').trim();
+      if(/MetaMask\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('metamask'); return; }
+      if(/Trust Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('trust'); return; }
+      if(/OKX Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('okx'); return; }
+      if(/Bitget Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('bitget'); return; }
+      if(/多錢包入口|連結錢包|連接錢包|切 BSC/.test(t) && !window.ethereum){ ev.preventDefault(); ev.stopPropagation(); showWalletHub(); return; }
+    },true);
+  }
+
+  function boot(){
+    fixCenterImage();
+    cleanLeftMessages();
+    placeMessageButton();
+    installWalletOverrides();
+    captureWalletButtons();
+    setInterval(function(){fixCenterImage();cleanLeftMessages();placeMessageButton();},1500);
+    msg('success','V8.9.6 已啟動：HUD 對齊、主圖修復、錢包入口改走 12345.html。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
 
@@ -16950,8 +17245,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
 1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
@@ -16991,7 +17286,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -17148,8 +17443,8 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260513-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -17314,7 +17609,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -17507,8 +17802,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
-BUILD: 20260513-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -17565,7 +17860,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.5-ASCII-WALLET-HUD-CLEAN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -17644,6 +17939,300 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
   },true);
 
   note('success','V8.9.5 已啟動：錢包入口改用 ASCII 完整神殿頁 12345.html，左上訊息已清場。');
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BUILD: 20260513-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX
+BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
+修正：
+1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
+2. 左上重複訊息列退場，只保留 12345 Heart 展開/收合與 Heart 面板。
+3. Heart 展開鈕與左上 Heart 面板寬度對齊，避免擋品牌與背景字。
+4. 12345.html 根路徑主圖與 assets 使用絕對資源，避免中間悟空心臟圖消失。
+5. LINE / Facebook → MetaMask 改用 ASCII 12345.html 真入口，禁止導到中文路徑、assets、github.com blob。
+6. 保留目前 GitHub / 錢包內建瀏覽器可連線與顯示餘額核心，不改 ethers.js / connectWallet / signer。
+============================================================ -->
+<style id="kgen-v896-hud-wallet-image-sync-style">
+  :root{
+    --kgen-right-x:18px;
+    --kgen-nav-w:280px;
+    --kgen-left-x:18px;
+    --kgen-left-w:280px;
+  }
+
+  /* 右上導覽列統一寬度 */
+  #universe-nav{right:var(--kgen-right-x)!important;align-items:flex-end!important;z-index:220!important;}
+  #universe-nav .nav-btn{width:var(--kgen-nav-w)!important;max-width:var(--kgen-nav-w)!important;box-sizing:border-box!important;}
+
+  /* 訊息紀錄：在五指山神殿音響下面，和上方按鈕對齊 */
+  #kgenMsgCenterBtn{
+    position:fixed!important;
+    right:var(--kgen-right-x)!important;
+    top:575px!important;
+    width:var(--kgen-nav-w)!important;
+    max-width:var(--kgen-nav-w)!important;
+    min-width:var(--kgen-nav-w)!important;
+    height:38px!important;
+    padding:0 14px!important;
+    border-radius:10px!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:6px!important;
+    z-index:2147482500!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    box-sizing:border-box!important;
+    pointer-events:auto!important;
+  }
+  #kgenMsgCenterBtn .kgen-msg-badge{margin-left:4px!important;flex:0 0 auto!important;}
+  #kgenMsgPanel{
+    position:fixed!important;
+    right:var(--kgen-right-x)!important;
+    top:620px!important;
+    width:var(--kgen-nav-w)!important;
+    max-width:var(--kgen-nav-w)!important;
+    max-height:min(380px,calc(100vh - 640px))!important;
+    box-sizing:border-box!important;
+    z-index:2147482501!important;
+  }
+
+  /* 左上重複浮動訊息全部退場，只保留 Heart toggle / Heart panel / message center */
+  #kgenToastWrap,
+  #toast,
+  #status,
+  #top-status,
+  #status-line,
+  #kgenStatusLine,
+  #kgenTopMessage,
+  #kgenLiveToast,
+  .kgen-left-toast,
+  .kgen-debug-status,
+  [id*="TopMessage"],
+  [id*="LiveToast"],
+  [class*="debug-status"]{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  /* 12345 Heart 展開/收合：和左上視窗對齊，下移，不擋品牌字 */
+  #kgen-heart-toggle{
+    position:fixed!important;
+    left:var(--kgen-left-x)!important;
+    top:78px!important;
+    width:var(--kgen-left-w)!important;
+    height:36px!important;
+    border-radius:999px!important;
+    z-index:260!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    white-space:nowrap!important;
+    pointer-events:auto!important;
+  }
+  #kgen-heart-live-panel{
+    position:fixed!important;
+    left:var(--kgen-left-x)!important;
+    top:122px!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - 188px)!important;
+    overflow:auto!important;
+    z-index:250!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 左下操作窗與其他小窗避免互壓 */
+  #web3-panel,
+  .wallet-panel,
+  .kgen-wallet-panel{
+    max-width:var(--kgen-left-w)!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 中央主圖永遠可見，不被舊層蓋成黑洞 */
+  #core-window{overflow:hidden!important;background:radial-gradient(circle,rgba(255,210,100,.22),rgba(0,0,0,.15) 58%,rgba(0,0,0,.55))!important;}
+  #fairy-img{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    position:relative!important;
+    z-index:2!important;
+    pointer-events:none!important;
+  }
+  #wish-label{z-index:4!important;position:absolute!important;}
+
+  /* 手機窄版：右側按鈕維持同寬，避免訊息變短 */
+  @media(max-width:720px){
+    :root{--kgen-right-x:12px;--kgen-nav-w:190px;--kgen-left-x:12px;--kgen-left-w:255px;}
+    #kgenMsgCenterBtn{top:575px!important;height:36px!important;font-size:12px!important;}
+    #kgenMsgPanel{top:616px!important;max-height:330px!important;}
+    #kgen-heart-toggle{top:74px!important;}
+    #kgen-heart-live-panel{top:116px!important;max-height:calc(100vh - 184px)!important;}
+  }
+</style>
+<script id="kgen-v896-hud-wallet-image-sync-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.6-HUD-WALLET-IMAGE-SYNC-FIX';
+  const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
+  const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
+  const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
+  const ASSET_BASE='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/assets/';
+
+  function $(id){return document.getElementById(id)}
+  function speak(text){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(text)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
+  function msg(type,text){try{ if(window.kgenPushMessage) window.kgenPushMessage(type||'info',String(text||'')); }catch(e){} }
+
+  function fixCenterImage(){
+    const img=$('fairy-img');
+    if(!img) return;
+    const abs=ASSET_BASE+'wukong_heart_core.jpg';
+    img.onerror=function(){ if(img.src!==abs) img.src=abs; };
+    if(!img.getAttribute('src') || img.naturalWidth===0 || /(^|\/)assets\//.test(img.getAttribute('src')||'')){
+      /* 根目錄 12345.html 會因相對 assets 失效，統一改絕對資源 */
+      img.src=abs;
+    }
+  }
+
+  function cleanLeftMessages(){
+    const allow=new Set(['kgen-heart-toggle','kgen-heart-live-panel','kgenMsgCenterBtn','kgenMsgPanel']);
+    const keys=['完成','準備','錯誤','失敗','未偵測','已開啟','V8.9.1 訊息中心','HUD 與 BSC','錢包已連線'];
+    document.querySelectorAll('body > div, body > span, body > section').forEach(el=>{
+      if(!el || allow.has(el.id)) return;
+      const cs=getComputedStyle(el);
+      if(!(cs.position==='fixed' || cs.position==='absolute')) return;
+      const r=el.getBoundingClientRect();
+      if(r.top<120 && r.left<380){
+        const txt=(el.textContent||'').trim();
+        if(keys.some(k=>txt.includes(k))){ el.style.display='none'; el.style.pointerEvents='none'; }
+      }
+    });
+  }
+
+  function placeMessageButton(){
+    const nav=$('universe-nav');
+    const btn=$('kgenMsgCenterBtn');
+    if(!nav||!btn) return;
+    /* 若還沒移進右側列，插到五指山神殿音響後方，保持同一按鈕列語意 */
+    const music=Array.from(nav.querySelectorAll('button,a')).find(x=>(x.textContent||'').includes('五指山神殿音響'));
+    if(music && btn.parentElement!==nav){
+      try{ nav.insertBefore(btn, music.nextSibling); }catch(e){ nav.appendChild(btn); }
+      btn.style.position=''; btn.style.right=''; btn.style.top='';
+      btn.classList.add('nav-btn','nav-help');
+    }
+  }
+
+  function openUrl(url){
+    try{ window.location.href=url; }catch(e){ try{ location.assign(url); }catch(_){} }
+  }
+  function metamaskPrimary(){ return 'https://link.metamask.io/dapp/'+ASCII_NO_SCHEME; }
+  function metamaskFallback(){ return 'https://metamask.app.link/dapp/'+ASCII_NO_SCHEME; }
+  function trustLink(){ return 'https://link.trustwallet.com/open_url?coin_id=20000714&url='+encodeURIComponent(ASCII_URL); }
+  function okxLink(){ return 'okx://wallet/dapp/details?dappUrl='+encodeURIComponent(ASCII_URL); }
+  function bitgetLink(){ return 'bitget://wallet/dapp?url='+encodeURIComponent(ASCII_URL); }
+
+  function openWallet(kind){
+    if(kind==='metamask') return openUrl(metamaskPrimary());
+    if(kind==='metamask2') return openUrl(metamaskFallback());
+    if(kind==='trust') return openUrl(trustLink());
+    if(kind==='okx') return openUrl(okxLink());
+    if(kind==='bitget') return openUrl(bitgetLink());
+    if(kind==='bridge') return openUrl(WALLET_BRIDGE);
+    return openUrl(ASCII_URL);
+  }
+
+  function installWalletOverrides(){
+    window.kgenWalletEntryV896={openWallet,ASCII_URL,WALLET_BRIDGE,metamaskPrimary:metamaskPrimary(),metamaskFallback:metamaskFallback()};
+    if(window.web3){
+      const old=window.web3;
+      old.deepLink=function(kind){openWallet(kind||'metamask')};
+      old.openWalletHub=showWalletHub;
+      old.smartConnect=old.connect=async function(){
+        if(window.ethereum && window.ethers && ethers.providers){
+          try{
+            const provider=new ethers.providers.Web3Provider(window.ethereum,'any');
+            await provider.send('eth_requestAccounts',[]);
+            if(window.ensureBsc) await window.ensureBsc();
+            if(window.connectWallet) return window.connectWallet();
+          }catch(e){ msg('warn','錢包連線未完成：'+(e.message||e)); }
+        }
+        showWalletHub();
+      };
+    }
+    window.openWalletHub=showWalletHub;
+  }
+
+  function showWalletHub(){
+    let hub=$('kgenWalletHubV896');
+    if(!hub){
+      hub=document.createElement('div');
+      hub.id='kgenWalletHubV896';
+      hub.style.cssText='position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;pointer-events:auto;';
+      hub.innerHTML=`
+        <div style="width:min(560px,94vw);border:1px solid rgba(255,215,120,.55);border-radius:18px;background:rgba(4,6,12,.98);color:#fff;padding:16px;box-shadow:0 0 50px rgba(0,0,0,.75);font-weight:800;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;color:#ffd778;font-size:17px;font-weight:950;"><span>🧩 多錢包入口｜V8.9.6</span><button id="kw896Close" type="button" style="border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:7px 11px;font-weight:900;">×</button></div>
+          <div style="font-size:13px;line-height:1.7;color:#dff;margin-bottom:10px;">LINE / Facebook 請先開外部錢包，再進入 <b>12345.html</b> 英文入口。登入 MetaMask 後若沒有自動進入，請按「MetaMask 備用」或複製 12345.html 貼到 MetaMask 瀏覽器。</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button id="kw896Meta" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.55);background:linear-gradient(180deg,#ffe28a,#d5aa3d);color:#111;font-weight:950;">MetaMask 開啟</button>
+            <button id="kw896Meta2" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">MetaMask 備用</button>
+            <button id="kw896Trust" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">Trust Wallet</button>
+            <button id="kw896OKX" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">OKX Wallet</button>
+            <button id="kw896Bitget" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">Bitget Wallet</button>
+            <button id="kw896Direct" type="button" style="padding:12px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">直接開 12345</button>
+          </div>
+          <input id="kw896Url" readonly value="${ASCII_URL}" style="width:100%;box-sizing:border-box;margin-top:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#05070b;color:#9ff;padding:10px;font-size:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;"><button id="kw896Copy" type="button" style="padding:11px;border-radius:12px;border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.16);color:#ffe28a;font-weight:950;">複製 12345.html</button><button id="kw896Bridge" type="button" style="padding:11px;border-radius:12px;border:1px solid rgba(255,215,120,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:950;">橋接入口</button></div>
+          <div style="margin-top:10px;color:#8ff;font-size:12px;line-height:1.55;">正確流程：LINE / Facebook → 連結錢包 → MetaMask 開啟 → 進入 12345.html → 按「連結錢包 / 切 BSC」→ 顯示 BNB / KGEN / Allowance。</div>
+        </div>`;
+      document.body.appendChild(hub);
+      $('kw896Close').onclick=()=>hub.remove();
+      $('kw896Meta').onclick=()=>openWallet('metamask');
+      $('kw896Meta2').onclick=()=>openWallet('metamask2');
+      $('kw896Trust').onclick=()=>openWallet('trust');
+      $('kw896OKX').onclick=()=>openWallet('okx');
+      $('kw896Bitget').onclick=()=>openWallet('bitget');
+      $('kw896Direct').onclick=()=>openWallet('direct');
+      $('kw896Bridge').onclick=()=>openWallet('bridge');
+      $('kw896Copy').onclick=async()=>{try{await navigator.clipboard.writeText(ASCII_URL); msg('success','已複製 12345.html 官方入口。'); speak('已複製官方入口。');}catch(e){prompt('請複製 12345.html',ASCII_URL);}};
+      hub.addEventListener('click',e=>{if(e.target===hub) hub.remove();});
+    }
+  }
+
+  function captureWalletButtons(){
+    document.addEventListener('click',function(ev){
+      const el=ev.target && ev.target.closest ? ev.target.closest('button,a,[role="button"]') : null;
+      if(!el) return;
+      const t=(el.textContent||'').trim();
+      if(/MetaMask\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('metamask'); return; }
+      if(/Trust Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('trust'); return; }
+      if(/OKX Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('okx'); return; }
+      if(/Bitget Wallet\s*開啟/i.test(t)){ ev.preventDefault(); ev.stopPropagation(); openWallet('bitget'); return; }
+      if(/多錢包入口|連結錢包|連接錢包|切 BSC/.test(t) && !window.ethereum){ ev.preventDefault(); ev.stopPropagation(); showWalletHub(); return; }
+    },true);
+  }
+
+  function boot(){
+    fixCenterImage();
+    cleanLeftMessages();
+    placeMessageButton();
+    installWalletOverrides();
+    captureWalletButtons();
+    setInterval(function(){fixCenterImage();cleanLeftMessages();placeMessageButton();},1500);
+    msg('success','V8.9.6 已啟動：HUD 對齊、主圖修復、錢包入口改走 12345.html。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
 
