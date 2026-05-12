@@ -4,11 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE
-BUILD: 20260511-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE
+VERSION: KGEN-12345-HEART-UI-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX
+BUILD: 20260511-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
-- [V8.8.3] 以 V8.8.0 為母版，只修 LINE / Facebook / MetaMask 錢包入口：中文路徑改用固定官方網址與安全編碼，不再讓 WebView 跳錯 404；GitHub Pages 主頁正常時不自動改頁。
+- [V8.8.4] 以 V8.8.0 為母版，只修 LINE / Facebook 內建瀏覽器錢包入口：社群 WebView 不再自動跳 MetaMask / Google Play，改顯示多錢包入口與一鍵複製官方神殿網址；GitHub Pages / 錢包內建瀏覽器仍維持原連線。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
@@ -49,7 +49,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1441,7 +1441,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1688,7 +1688,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15551,7 +15551,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15658,7 +15658,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.8.0-CUP-NY-COUNTDOWN-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15787,109 +15787,149 @@ KGEN 12345 UI Patch V7.6.0
 </script>
 
 
-<!-- ===== KGEN 12345 V8.8.3｜Wallet DeepLink Rollback Safe Patch ===== -->
-<script id="kgen12345-v883-wallet-deeplink-rollback-safe">
+
+<!-- ===== KGEN 12345 V8.8.4｜Social WebView Wallet Safe Fix ===== -->
+<style id="kgen12345-v884-social-wallet-safe-style">
+  .kgen-social-wallet-note{
+    margin-top:10px;
+    padding:10px 12px;
+    border:1px solid rgba(0,242,255,.35);
+    border-radius:12px;
+    background:rgba(0,242,255,.08);
+    color:#dffbff;
+    font-size:12px;
+    line-height:1.55;
+  }
+  .kgen-social-wallet-note b{color:#ffd778;}
+</style>
+<script id="kgen12345-v884-social-webview-wallet-safe-fix">
 (function(){
   'use strict';
-  const FIX_VERSION = 'KGEN-12345-HEART-UI-V8.8.3-WALLET-DEEPLINK-ROLLBACK-SAFE';
-  const CANONICAL_PAGE = 'https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX';
+  const CANONICAL = 'https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
+  const UA = navigator.userAgent || '';
+  const isLine = /Line\//i.test(UA) || / Line/i.test(UA);
+  const isFacebook = /FBAN|FBAV|FB_IAB|FB4A|FBIOS|Messenger|Instagram/i.test(UA);
+  const isSocialWebView = isLine || isFacebook;
   function $(id){ return document.getElementById(id); }
-  function setStatus(msg){
-    try{ const st=$('kh-status')||$('w3-prog')||$('bp-status'); if(st) st.textContent=msg; }catch(_){}
-    try{ if(window.ui && ui.toast) ui.toast(msg,2600); }catch(_){}
+  function say(msg){
+    try{ if(window.app && typeof app.speak === 'function') app.speak(msg); }catch(_){ }
+    try{ if(window.ui && typeof ui.toast === 'function') ui.toast(msg, 4200); }catch(_){ }
+    try{ const st=$('kh-status')||$('w3-prog')||$('bp-status'); if(st) st.textContent = msg; }catch(_){ }
   }
-  function speak(msg){
+  async function copyCanonical(){
     try{
-      const text=String(msg||'').replace(/[🔌✅⚠️🦊]/g,'');
-      if(window.app && typeof app.speak==='function') app.speak(text);
-      else if(window.speechSynthesis){ speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
-    }catch(_){}
+      await navigator.clipboard.writeText(CANONICAL);
+      say('已複製官方神殿網址。請打開 MetaMask 或 Trust Wallet 的 DApp 瀏覽器貼上。');
+      return true;
+    }catch(_){
+      const inp=$('walletHubUrl');
+      if(inp){ inp.value=CANONICAL; inp.focus(); inp.select(); }
+      say('請手動複製欄位中的官方神殿網址，到錢包 DApp 瀏覽器貼上。');
+      return false;
+    }
   }
-  function dappUrl(){
-    // Always use official GitHub Pages directory URL, not Facebook/LINE wrapped URL or partial path.
-    return CANONICAL_PAGE;
+  function hasInjected(){
+    const eth = window.ethereum || window.BinanceChain;
+    return !!(eth && (eth.request || eth.enable));
   }
-  function dappNoProtocol(){
-    return dappUrl().replace(/^https?:\/\//,'');
+  function enrichHub(){
+    const hub=$('walletHub');
+    const inp=$('walletHubUrl');
+    if(inp) inp.value = CANONICAL;
+    if(!hub) return;
+    const card = hub.querySelector('div');
+    if(card && !$('kgen-social-wallet-note')){
+      const note=document.createElement('div');
+      note.id='kgen-social-wallet-note';
+      note.className='kgen-social-wallet-note';
+      note.innerHTML = '<b>LINE / Facebook 開啟時：</b>不要直接跳 MetaMask，容易被導到商店或 404。請按「複製網址」，再到 MetaMask / Trust Wallet / OKX / Bitget 的 DApp 瀏覽器貼上官方神殿網址。';
+      card.appendChild(note);
+    }
   }
-  async function copyUrl(){
-    const url=dappUrl();
-    try{ await navigator.clipboard.writeText(url); setStatus('已複製官方神殿網址，請貼到錢包 App 的 DApp 瀏覽器。'); }
-    catch(_){ const inp=$('walletHubUrl'); if(inp){ inp.value=url; inp.focus(); inp.select(); } }
-    speak('已複製官方神殿網址。請貼到錢包 App 的 DApp 瀏覽器。');
-    return url;
-  }
-  function openWalletHub(){
-    const hub=$('walletHub'), inp=$('walletHubUrl');
-    if(inp) inp.value=dappUrl();
+  function openHub(){
+    const hub=$('walletHub');
+    const inp=$('walletHubUrl');
+    if(inp) inp.value = CANONICAL;
+    enrichHub();
     if(hub){
       hub.style.display='flex';
       hub.style.visibility='visible';
       hub.style.opacity='1';
     }
-  }
-  function hasInjectedWallet(){
-    return !!(window.ethereum || window.BinanceChain);
-  }
-  async function safeSmartConnect(){
-    try{
-      if(hasInjectedWallet() && window.web3 && typeof web3.connect==='function'){
-        return await web3.connect();
-      }
-      openWalletHub();
-      setStatus('請用錢包 App 內建瀏覽器開啟官方神殿網址；LINE / Facebook 內建瀏覽器不適合直接連錢包。');
-      speak('請用錢包 App 內建瀏覽器開啟官方神殿網址。LINE 或 Facebook 內建瀏覽器不適合直接連錢包。');
-    }catch(e){
-      console.warn('[V8.8.3 safeSmartConnect]', e);
-      openWalletHub();
+    if(isSocialWebView){
+      say('偵測到 LINE 或 Facebook 內建瀏覽器。為避免跳到 Google Play 或 404，請複製網址後到錢包 DApp 瀏覽器開啟。');
+    }else{
+      say('已開啟多錢包入口。');
     }
+  }
+  async function socialSafeConnect(ev){
+    if(ev){ try{ ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }catch(_){ } }
+    if(hasInjected()){
+      try{
+        if(window.web3 && typeof web3.connect === 'function') return await web3.connect();
+      }catch(e){ console.warn('[V8.8.4 injected connect failed]', e); }
+    }
+    openHub();
+    if(isSocialWebView) await copyCanonical();
+    return false;
   }
   function safeDeepLink(kind){
-    const url=dappUrl();
-    const noProto=dappNoProtocol();
-    let link=url;
-    if(kind==='metamask'){
-      // MetaMask expects dapp/<host/path>. Keep % encoded Chinese path from canonical URL.
-      link='https://metamask.app.link/dapp/' + noProto;
-    }else if(kind==='trust'){
-      link='https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(url);
-    }else if(kind==='okx'){
-      link='okx://wallet/dapp/details?dappUrl=' + encodeURIComponent(url);
-    }else if(kind==='bitget'){
-      link='bitget://openDapp?url=' + encodeURIComponent(url);
-    }else if(kind==='binance'){
-      // Binance deep links vary by region; safest is copy + manual DApp browser.
-      copyUrl();
-      return;
+    if(isSocialWebView){
+      openHub();
+      copyCanonical();
+      return false;
     }
-    setStatus('正在開啟錢包；若顯示 404，請返回並用「複製」貼到錢包 DApp 瀏覽器。');
-    try{ window.location.href=link; }catch(_){ copyUrl(); }
+    const url = CANONICAL;
+    let link = url;
+    if(kind === 'metamask'){
+      // Keep MetaMask link only outside LINE/Facebook. Encode path once.
+      link = 'https://metamask.app.link/dapp/' + url.replace(/^https?:\/\//,'');
+    }else if(kind === 'trust'){
+      link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
+    }else if(kind === 'okx'){
+      link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
+    }else if(kind === 'bitget'){
+      link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+    }else if(kind === 'binance'){
+      openHub();
+      copyCanonical();
+      say('Binance App 深連結不穩，請複製網址到 Binance Web3 Wallet 的 DApp 瀏覽器開啟。');
+      return false;
+    }
+    try{ window.location.href = link; }catch(_){ window.open(link, '_blank', 'noopener'); }
+    return false;
   }
   function bind(){
-    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+FIX_VERSION;
-    document.title='KGEN 12345 五指山悟空財神殿｜'+FIX_VERSION+'｜Heart V3.2.6';
+    try{ document.title = 'KGEN 12345 五指山悟空財神殿｜' + VERSION + '｜Heart V3.2.6'; }catch(_){ }
+    try{ const v=$('ver-st'); if(v) v.textContent='VERSION ' + VERSION; }catch(_){ }
+    enrichHub();
     if(window.web3){
-      web3.openWalletHub=openWalletHub;
-      web3.copyDappUrl=copyUrl;
-      web3.deepLink=safeDeepLink;
-      const oldConnect=web3.connect ? web3.connect.bind(web3) : null;
-      web3.smartConnect=function(){
-        if(hasInjectedWallet() && oldConnect) return oldConnect();
-        return safeSmartConnect();
-      };
+      const originalConnect = (typeof web3.connect === 'function') ? web3.connect.bind(web3) : null;
+      if(!web3.__v884OriginalConnect && originalConnect) web3.__v884OriginalConnect = originalConnect;
+      web3.openWalletHub = openHub;
+      web3.copyDappUrl = copyCanonical;
+      web3.deepLink = safeDeepLink;
+      web3.smartConnect = socialSafeConnect;
     }
+    const ids=['kh-connect','w3-connect-btn'];
+    ids.forEach(id=>{
+      const b=$(id);
+      if(!b) return;
+      b.onclick=socialSafeConnect;
+      b.setAttribute('data-wallet-route','v884-social-webview-safe');
+    });
     document.querySelectorAll('button').forEach(btn=>{
       const txt=(btn.textContent||'').trim();
-      if(/連結錢包|切 BSC/.test(txt)){
-        btn.onclick=function(ev){ try{ev.preventDefault();ev.stopPropagation();}catch(_){} return safeSmartConnect(); };
+      if(txt.includes('MetaMask') || txt.includes('Trust Wallet') || txt.includes('OKX') || txt.includes('Bitget') || txt.includes('Binance')){
+        btn.setAttribute('data-wallet-social-safe','v884');
       }
     });
-    const hubUrl=$('walletHubUrl'); if(hubUrl) hubUrl.value=dappUrl();
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
-  window.addEventListener('load', function(){ bind(); setTimeout(bind,800); setTimeout(bind,2500); });
-  window.kgen12345WalletSafeV883={ bind, dappUrl, copyUrl, openWalletHub, safeDeepLink, safeSmartConnect };
+  window.addEventListener('load', function(){ bind(); setTimeout(bind,700); setTimeout(bind,2200); });
+  window.kgenV884WalletSafe = { openHub, copyCanonical, socialSafeConnect, safeDeepLink, isSocialWebView, CANONICAL };
 })();
 </script>
 
