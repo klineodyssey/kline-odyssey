@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+VERSION: KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15920,7 +15920,366 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 5. 客服彈窗與訊息面板 z-index 拉高，避免按鍵被底層 HUD 吃掉。
 
 安裝位置：
-請貼在 K線西遊記/temples/12345/index.html 的 </body> 前面。
+請貼在 K線西遊記/temples/12345/index.html 的 
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX
+BUILD: 20260513-V8.9.4-HUD-BSC-CHAIN-FIX
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+
+修正：
+1. 右上訊息改為小型 HUD，不再擋按鈕。
+2. 左上重複訊息區退場，只保留 Heart 展開/收合。
+3. Heart 展開/收合與操作窗寬度對齊並下移，避免遮住品牌字。
+4. K線西遊記・花果山台灣品牌字恢復顯示，改成宇宙浮雕層。
+5. 強制 BSC chainId=56；非 BSC/Linea/其他鏈先提示並嘗試切 BSC。
+6. 客服語音 V2：鏈錯、切鏈、提示會發聲。
+============================================================ -->
+<style id="kgen-v894-hud-bsc-chain-style">
+  :root{
+    --kgen-left-x:18px;
+    --kgen-panel-w:min(390px, calc(100vw - 36px));
+  }
+
+  /* 品牌字不再封印：原本多版補丁把 #brand-badge display:none，這裡解封 */
+  #brand-badge{
+    display:block!important;
+    position:fixed!important;
+    left:18px!important;
+    top:72px!important;
+    z-index:150!important;
+    padding:5px 12px!important;
+    border:1px solid rgba(255,215,128,.55)!important;
+    border-radius:12px!important;
+    background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.12))!important;
+    color:rgba(255,217,136,.96)!important;
+    font-weight:950!important;
+    letter-spacing:.08em!important;
+    font-size:12px!important;
+    text-shadow:0 0 14px rgba(255,215,128,.55),0 0 24px rgba(0,242,255,.22)!important;
+    box-shadow:0 0 18px rgba(255,215,128,.10)!important;
+    pointer-events:none!important;
+    white-space:nowrap!important;
+  }
+  #brand-badge::after{
+    content:'｜Where the Market Becomes the Myth';
+    color:rgba(0,242,255,.72);
+    margin-left:8px;
+    font-size:10px;
+    letter-spacing:.04em;
+  }
+
+  /* 左上 Heart 收合/展開：與下方窗同寬，並下移，不壓品牌 */
+  #kgen-heart-toggle{
+    left:var(--kgen-left-x)!important;
+    top:108px!important;
+    width:var(--kgen-panel-w)!important;
+    height:38px!important;
+    padding:0 14px!important;
+    border-radius:14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    text-align:left!important;
+    z-index:2147482600!important;
+    box-sizing:border-box!important;
+    background:linear-gradient(90deg,rgba(12,14,20,.92),rgba(0,0,0,.72))!important;
+    border:1px solid rgba(255,215,120,.65)!important;
+    color:#ffd778!important;
+    font-size:14px!important;
+    font-weight:950!important;
+    box-shadow:0 0 18px rgba(255,215,120,.16)!important;
+  }
+  #kgen-heart-toggle::after{
+    content:'展開 / 收合';
+    font-size:12px;
+    color:rgba(255,255,255,.82);
+    font-weight:800;
+  }
+  #kgen-heart-live-panel{
+    left:var(--kgen-left-x)!important;
+    top:154px!important;
+    width:var(--kgen-panel-w)!important;
+    z-index:2147482500!important;
+  }
+
+  /* 左上重複訊息與長錯誤不再佔據品牌區：只留右側訊息中心 */
+  .kgen-left-toast,
+  #top-status,
+  #status-line,
+  #kgenStatusLine,
+  #kgenTopMessage,
+  #kgenLiveToast,
+  .kgen-debug-status{
+    display:none!important;
+  }
+
+  /* 右上訊息 / Toast 小型化：不遮右側按鈕，只作 HUD 跑馬燈 */
+  #kgenToastWrap{
+    right:12px!important;
+    top:612px!important;
+    width:280px!important;
+    max-width:calc(100vw - 24px)!important;
+    pointer-events:none!important;
+    z-index:2147482400!important;
+  }
+  #kgenToastWrap .kgen-toast{
+    width:100%!important;
+    min-height:28px!important;
+    max-height:58px!important;
+    overflow:hidden!important;
+    padding:7px 10px!important;
+    border-radius:10px!important;
+    font-size:11px!important;
+    line-height:1.35!important;
+    opacity:.92!important;
+    background:rgba(0,0,0,.78)!important;
+    box-shadow:0 0 16px rgba(0,242,255,.12)!important;
+  }
+  #kgenMsgCenterBtn{
+    width:280px!important;
+    max-width:90%!important;
+    min-width:0!important;
+    min-height:38px!important;
+    height:38px!important;
+    padding:0 12px!important;
+    border-radius:10px!important;
+    box-sizing:border-box!important;
+  }
+  #kgenMsgPanel{
+    z-index:2147483001!important;
+  }
+
+  /* 目前鏈提示膠囊 */
+  #kgenBscGuardPill{
+    position:fixed;
+    left:18px;
+    top:42px;
+    z-index:2147482601;
+    min-width:168px;
+    max-width:calc(100vw - 36px);
+    height:26px;
+    padding:0 10px;
+    border-radius:999px;
+    border:1px solid rgba(0,242,255,.45);
+    background:rgba(0,0,0,.72);
+    color:#bffcff;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-weight:900;
+    pointer-events:none;
+    box-shadow:0 0 16px rgba(0,242,255,.14);
+  }
+  #kgenBscGuardPill.ok{border-color:rgba(0,255,153,.5);color:#d8ffef;}
+  #kgenBscGuardPill.bad{border-color:rgba(255,77,77,.62);color:#ffd9d9;}
+  #kgenBscGuardPill.warn{border-color:rgba(255,204,0,.6);color:#fff2b8;}
+
+  @media(max-width:720px){
+    :root{--kgen-left-x:10px;--kgen-panel-w:calc(100vw - 20px);}
+    #brand-badge{left:10px!important;top:70px!important;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis;}
+    #brand-badge::after{display:none;}
+    #kgen-heart-toggle{left:10px!important;top:104px!important;width:calc(100vw - 20px)!important;}
+    #kgen-heart-live-panel{left:10px!important;right:10px!important;top:148px!important;width:auto!important;max-height:60vh!important;}
+    #kgenBscGuardPill{left:10px;top:40px;}
+    #kgenToastWrap{right:10px!important;top:602px!important;width:260px!important;}
+  }
+</style>
+<script id="kgen-v894-hud-bsc-chain-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
+  const BSC_HEX='0x38';
+  const BSC_DEC='56';
+  const BSC_PARAMS={
+    chainId:BSC_HEX,
+    chainName:'BNB Smart Chain',
+    nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+    rpcUrls:['https://bsc-dataseed.binance.org/'],
+    blockExplorerUrls:['https://bscscan.com/']
+  };
+
+  function $(id){return document.getElementById(id);}
+  function msg(type,text){
+    try{ (window.kgenPushMessage||window.kgenToast||console.log)(type||'info', text); }
+    catch(e){ try{console.log(text);}catch(_){} }
+  }
+  function speak(text){
+    try{
+      if(window.kgenSpeak && typeof window.kgenSpeak==='function') return window.kgenSpeak(text);
+      if(window.speechSynthesis){
+        const u=new SpeechSynthesisUtterance(String(text||''));
+        u.lang='zh-TW'; u.rate=1.03; u.pitch=1.0;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+  window.kgenSpeakV894=speak;
+
+  function ensurePill(){
+    let el=$('kgenBscGuardPill');
+    if(!el){
+      el=document.createElement('div');
+      el.id='kgenBscGuardPill';
+      el.textContent='鏈檢查：等待錢包';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function setPill(kind,text){
+    const el=ensurePill();
+    el.className=kind||'';
+    el.textContent=text;
+  }
+  async function currentChain(){
+    if(!window.ethereum || !window.ethereum.request) return null;
+    try{return await window.ethereum.request({method:'eth_chainId'});}catch(e){return null;}
+  }
+  function isBsc(cid){return String(cid||'').toLowerCase()===BSC_HEX || String(cid||'')===BSC_DEC;}
+  function chainName(cid){
+    const c=String(cid||'').toLowerCase();
+    if(c==='0x38'||c==='56') return 'BSC';
+    if(c==='0x1'||c==='1') return 'Ethereum';
+    if(c==='0xe708'||c==='59144') return 'Linea';
+    if(c==='0x89'||c==='137') return 'Polygon';
+    if(!cid) return '未注入';
+    return cid;
+  }
+
+  async function switchToBSC(opts){
+    opts=opts||{};
+    if(!window.ethereum || !window.ethereum.request){
+      setPill('warn','未偵測到錢包：請用錢包 DApp 開啟');
+      return false;
+    }
+    const cid=await currentChain();
+    if(isBsc(cid)){
+      setPill('ok','目前鏈：BSC 56');
+      return true;
+    }
+    const name=chainName(cid);
+    setPill('bad','目前鏈：'+name+'，需要 BSC 56');
+    msg('warn','偵測到目前不是 BSC 主網：'+name+'。神殿將嘗試切換至 BSC 56。');
+    if(!opts.silent) speak('偵測到您目前不在 BSC 主網，正在切換至五指山宇宙鏈，請在錢包確認。');
+    try{
+      await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+      setPill('ok','目前鏈：BSC 56');
+      msg('success','已切換至 BSC 56。');
+      if(!opts.silent) speak('已切換至 BSC 主網。');
+      return true;
+    }catch(e){
+      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized'))){
+        try{
+          await window.ethereum.request({method:'wallet_addEthereumChain',params:[BSC_PARAMS]});
+          await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+          setPill('ok','目前鏈：BSC 56');
+          msg('success','已新增並切換至 BSC 56。');
+          return true;
+        }catch(addErr){
+          setPill('bad','BSC 切換失敗');
+          msg('error','BSC 切換失敗：'+(addErr.message||addErr));
+          if(!opts.silent) speak('BSC 切換失敗，請手動在錢包選擇 BNB Smart Chain。');
+          return false;
+        }
+      }
+      setPill('bad','BSC 切換被取消');
+      msg('warn','BSC 切換未完成：'+(e.message||e));
+      if(!opts.silent) speak('BSC 切換未完成。請手動選擇 BNB Smart Chain 後再操作。');
+      return false;
+    }
+  }
+
+  window.kgenEnsureBSC894=switchToBSC;
+
+  function protectTxButtons(){
+    const ids=['kh-fortune','kh-heartbeat','kh-ignite','kh-festival','kh-newyear','kh-vow','kh-lamp','kh-wish','w3-fortune','w3-heartbeat','w3-ignite','w3-vow','w3-lamp','w3-wish'];
+    ids.forEach(id=>{
+      const b=$(id);
+      if(!b || b.__kgenBscGuarded) return;
+      b.__kgenBscGuarded=true;
+      b.addEventListener('click',async function(ev){
+        const ok=await switchToBSC({silent:false});
+        if(!ok){ ev.preventDefault(); ev.stopImmediatePropagation(); return false; }
+      },true);
+    });
+  }
+
+  function wrapConnect(){
+    if(typeof window.connectWallet==='function' && !window.connectWallet.__kgen894Wrapped){
+      const old=window.connectWallet;
+      const wrapped=async function(){
+        await switchToBSC({silent:false});
+        return old.apply(this,arguments);
+      };
+      wrapped.__kgen894Wrapped=true;
+      window.connectWallet=wrapped;
+    }
+    if(window.web3 && typeof window.web3.connect==='function' && !window.web3.connect.__kgen894Wrapped){
+      const old=window.web3.connect;
+      const wrapped=async function(){
+        await switchToBSC({silent:false});
+        return old.apply(this,arguments);
+      };
+      wrapped.__kgen894Wrapped=true;
+      window.web3.connect=wrapped;
+    }
+  }
+
+  function setupEvents(){
+    if(window.ethereum && window.ethereum.on && !window.__KGEN_V894_CHAIN_EVENTS__){
+      window.__KGEN_V894_CHAIN_EVENTS__=true;
+      window.ethereum.on('chainChanged',function(cid){
+        if(isBsc(cid)){
+          setPill('ok','目前鏈：BSC 56');
+          msg('success','目前已在 BSC 56。');
+        }else{
+          const n=chainName(cid);
+          setPill('bad','目前鏈：'+n+'，需要 BSC 56');
+          msg('warn','偵測到鏈已切到 '+n+'。神殿只支援 BSC 56，請切回 BSC。');
+          speak('偵測到目前不是 BSC 主網。請切回 BNB Smart Chain。');
+        }
+      });
+      window.ethereum.on('accountsChanged',function(){ setTimeout(refresh,500); });
+    }
+  }
+
+  function alignUi(){
+    const btn=$('kgen-heart-toggle');
+    if(btn){
+      const t=(btn.textContent||'').replace(/展開|收合/g,'').trim();
+      if(!t.includes('12345 Heart')) btn.textContent='12345 Heart';
+    }
+    const brand=$('brand-badge');
+    if(brand) brand.textContent='K線西遊記・花果山台灣';
+  }
+
+  async function refresh(){
+    ensurePill();
+    setupEvents();
+    wrapConnect();
+    protectTxButtons();
+    alignUi();
+    const cid=await currentChain();
+    if(!window.ethereum) setPill('warn','未偵測到錢包：等待 DApp 瀏覽器');
+    else if(isBsc(cid)) setPill('ok','目前鏈：BSC 56');
+    else setPill('bad','目前鏈：'+chainName(cid)+'，需要 BSC 56');
+  }
+
+  function init(){
+    refresh();
+    setTimeout(refresh,800);
+    setTimeout(refresh,2200);
+    setInterval(refresh,8000);
+    msg('success','V8.9.4 HUD 與 BSC 鎖鏈已啟動。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+</body> 前面。
 ============================================================ -->
 
 <style id="kgen-v891-toast-message-center-style">
@@ -16447,7 +16806,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BUTTON-SERVICE-VOICE-FIX
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -16488,7 +16847,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -16637,6 +16996,365 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
   }
   window.kgenV892={open:function(k){ if(k==='wallet') return walletPanel(); if(k==='fortune') return fortunePanel(); if(k==='rules') return rulesPanel(); return servicePanel(); }, close:closeModal, confirmTx, resetCup:function(){state.cup=0; localStorage.setItem('KGEN_12345_CUP_COUNT_V892','0'); msg('info','三次聖盃已重置。');}, speakRules:function(){speak('TempleHeart 規則。發財金一到八八八，三十天冷卻，每個 epoch 五百名。心跳每小時一次，呼吸在 UTC 零點到零點十分。還願、點燈需要 Approve。');}, voiceTest:function(){msg('success','客服語音測試成功。','客服語音已啟動。歡迎來到五指山悟空財神殿。');}};
   function init(){ setVersion(); wrapOps(); bindButtons(); installDock(); const c=$('kgenV892CloseBtn'); if(c) c.onclick=closeModal; const m=$('kgenV892ServiceModal'); if(m) m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }); msg('success','V8.9.3 已啟動：下方按鍵與客服語音已補齊。','V八點九點二已啟動。下方按鍵與客服語音已補齊。'); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX
+BUILD: 20260513-V8.9.4-HUD-BSC-CHAIN-FIX
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+
+修正：
+1. 右上訊息改為小型 HUD，不再擋按鈕。
+2. 左上重複訊息區退場，只保留 Heart 展開/收合。
+3. Heart 展開/收合與操作窗寬度對齊並下移，避免遮住品牌字。
+4. K線西遊記・花果山台灣品牌字恢復顯示，改成宇宙浮雕層。
+5. 強制 BSC chainId=56；非 BSC/Linea/其他鏈先提示並嘗試切 BSC。
+6. 客服語音 V2：鏈錯、切鏈、提示會發聲。
+============================================================ -->
+<style id="kgen-v894-hud-bsc-chain-style">
+  :root{
+    --kgen-left-x:18px;
+    --kgen-panel-w:min(390px, calc(100vw - 36px));
+  }
+
+  /* 品牌字不再封印：原本多版補丁把 #brand-badge display:none，這裡解封 */
+  #brand-badge{
+    display:block!important;
+    position:fixed!important;
+    left:18px!important;
+    top:72px!important;
+    z-index:150!important;
+    padding:5px 12px!important;
+    border:1px solid rgba(255,215,128,.55)!important;
+    border-radius:12px!important;
+    background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.12))!important;
+    color:rgba(255,217,136,.96)!important;
+    font-weight:950!important;
+    letter-spacing:.08em!important;
+    font-size:12px!important;
+    text-shadow:0 0 14px rgba(255,215,128,.55),0 0 24px rgba(0,242,255,.22)!important;
+    box-shadow:0 0 18px rgba(255,215,128,.10)!important;
+    pointer-events:none!important;
+    white-space:nowrap!important;
+  }
+  #brand-badge::after{
+    content:'｜Where the Market Becomes the Myth';
+    color:rgba(0,242,255,.72);
+    margin-left:8px;
+    font-size:10px;
+    letter-spacing:.04em;
+  }
+
+  /* 左上 Heart 收合/展開：與下方窗同寬，並下移，不壓品牌 */
+  #kgen-heart-toggle{
+    left:var(--kgen-left-x)!important;
+    top:108px!important;
+    width:var(--kgen-panel-w)!important;
+    height:38px!important;
+    padding:0 14px!important;
+    border-radius:14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    text-align:left!important;
+    z-index:2147482600!important;
+    box-sizing:border-box!important;
+    background:linear-gradient(90deg,rgba(12,14,20,.92),rgba(0,0,0,.72))!important;
+    border:1px solid rgba(255,215,120,.65)!important;
+    color:#ffd778!important;
+    font-size:14px!important;
+    font-weight:950!important;
+    box-shadow:0 0 18px rgba(255,215,120,.16)!important;
+  }
+  #kgen-heart-toggle::after{
+    content:'展開 / 收合';
+    font-size:12px;
+    color:rgba(255,255,255,.82);
+    font-weight:800;
+  }
+  #kgen-heart-live-panel{
+    left:var(--kgen-left-x)!important;
+    top:154px!important;
+    width:var(--kgen-panel-w)!important;
+    z-index:2147482500!important;
+  }
+
+  /* 左上重複訊息與長錯誤不再佔據品牌區：只留右側訊息中心 */
+  .kgen-left-toast,
+  #top-status,
+  #status-line,
+  #kgenStatusLine,
+  #kgenTopMessage,
+  #kgenLiveToast,
+  .kgen-debug-status{
+    display:none!important;
+  }
+
+  /* 右上訊息 / Toast 小型化：不遮右側按鈕，只作 HUD 跑馬燈 */
+  #kgenToastWrap{
+    right:12px!important;
+    top:612px!important;
+    width:280px!important;
+    max-width:calc(100vw - 24px)!important;
+    pointer-events:none!important;
+    z-index:2147482400!important;
+  }
+  #kgenToastWrap .kgen-toast{
+    width:100%!important;
+    min-height:28px!important;
+    max-height:58px!important;
+    overflow:hidden!important;
+    padding:7px 10px!important;
+    border-radius:10px!important;
+    font-size:11px!important;
+    line-height:1.35!important;
+    opacity:.92!important;
+    background:rgba(0,0,0,.78)!important;
+    box-shadow:0 0 16px rgba(0,242,255,.12)!important;
+  }
+  #kgenMsgCenterBtn{
+    width:280px!important;
+    max-width:90%!important;
+    min-width:0!important;
+    min-height:38px!important;
+    height:38px!important;
+    padding:0 12px!important;
+    border-radius:10px!important;
+    box-sizing:border-box!important;
+  }
+  #kgenMsgPanel{
+    z-index:2147483001!important;
+  }
+
+  /* 目前鏈提示膠囊 */
+  #kgenBscGuardPill{
+    position:fixed;
+    left:18px;
+    top:42px;
+    z-index:2147482601;
+    min-width:168px;
+    max-width:calc(100vw - 36px);
+    height:26px;
+    padding:0 10px;
+    border-radius:999px;
+    border:1px solid rgba(0,242,255,.45);
+    background:rgba(0,0,0,.72);
+    color:#bffcff;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-weight:900;
+    pointer-events:none;
+    box-shadow:0 0 16px rgba(0,242,255,.14);
+  }
+  #kgenBscGuardPill.ok{border-color:rgba(0,255,153,.5);color:#d8ffef;}
+  #kgenBscGuardPill.bad{border-color:rgba(255,77,77,.62);color:#ffd9d9;}
+  #kgenBscGuardPill.warn{border-color:rgba(255,204,0,.6);color:#fff2b8;}
+
+  @media(max-width:720px){
+    :root{--kgen-left-x:10px;--kgen-panel-w:calc(100vw - 20px);}
+    #brand-badge{left:10px!important;top:70px!important;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis;}
+    #brand-badge::after{display:none;}
+    #kgen-heart-toggle{left:10px!important;top:104px!important;width:calc(100vw - 20px)!important;}
+    #kgen-heart-live-panel{left:10px!important;right:10px!important;top:148px!important;width:auto!important;max-height:60vh!important;}
+    #kgenBscGuardPill{left:10px;top:40px;}
+    #kgenToastWrap{right:10px!important;top:602px!important;width:260px!important;}
+  }
+</style>
+<script id="kgen-v894-hud-bsc-chain-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.4-HUD-BSC-CHAIN-FIX';
+  const BSC_HEX='0x38';
+  const BSC_DEC='56';
+  const BSC_PARAMS={
+    chainId:BSC_HEX,
+    chainName:'BNB Smart Chain',
+    nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+    rpcUrls:['https://bsc-dataseed.binance.org/'],
+    blockExplorerUrls:['https://bscscan.com/']
+  };
+
+  function $(id){return document.getElementById(id);}
+  function msg(type,text){
+    try{ (window.kgenPushMessage||window.kgenToast||console.log)(type||'info', text); }
+    catch(e){ try{console.log(text);}catch(_){} }
+  }
+  function speak(text){
+    try{
+      if(window.kgenSpeak && typeof window.kgenSpeak==='function') return window.kgenSpeak(text);
+      if(window.speechSynthesis){
+        const u=new SpeechSynthesisUtterance(String(text||''));
+        u.lang='zh-TW'; u.rate=1.03; u.pitch=1.0;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+  window.kgenSpeakV894=speak;
+
+  function ensurePill(){
+    let el=$('kgenBscGuardPill');
+    if(!el){
+      el=document.createElement('div');
+      el.id='kgenBscGuardPill';
+      el.textContent='鏈檢查：等待錢包';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function setPill(kind,text){
+    const el=ensurePill();
+    el.className=kind||'';
+    el.textContent=text;
+  }
+  async function currentChain(){
+    if(!window.ethereum || !window.ethereum.request) return null;
+    try{return await window.ethereum.request({method:'eth_chainId'});}catch(e){return null;}
+  }
+  function isBsc(cid){return String(cid||'').toLowerCase()===BSC_HEX || String(cid||'')===BSC_DEC;}
+  function chainName(cid){
+    const c=String(cid||'').toLowerCase();
+    if(c==='0x38'||c==='56') return 'BSC';
+    if(c==='0x1'||c==='1') return 'Ethereum';
+    if(c==='0xe708'||c==='59144') return 'Linea';
+    if(c==='0x89'||c==='137') return 'Polygon';
+    if(!cid) return '未注入';
+    return cid;
+  }
+
+  async function switchToBSC(opts){
+    opts=opts||{};
+    if(!window.ethereum || !window.ethereum.request){
+      setPill('warn','未偵測到錢包：請用錢包 DApp 開啟');
+      return false;
+    }
+    const cid=await currentChain();
+    if(isBsc(cid)){
+      setPill('ok','目前鏈：BSC 56');
+      return true;
+    }
+    const name=chainName(cid);
+    setPill('bad','目前鏈：'+name+'，需要 BSC 56');
+    msg('warn','偵測到目前不是 BSC 主網：'+name+'。神殿將嘗試切換至 BSC 56。');
+    if(!opts.silent) speak('偵測到您目前不在 BSC 主網，正在切換至五指山宇宙鏈，請在錢包確認。');
+    try{
+      await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+      setPill('ok','目前鏈：BSC 56');
+      msg('success','已切換至 BSC 56。');
+      if(!opts.silent) speak('已切換至 BSC 主網。');
+      return true;
+    }catch(e){
+      if(e && (e.code===4902 || String(e.message||'').includes('Unrecognized'))){
+        try{
+          await window.ethereum.request({method:'wallet_addEthereumChain',params:[BSC_PARAMS]});
+          await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_HEX}]});
+          setPill('ok','目前鏈：BSC 56');
+          msg('success','已新增並切換至 BSC 56。');
+          return true;
+        }catch(addErr){
+          setPill('bad','BSC 切換失敗');
+          msg('error','BSC 切換失敗：'+(addErr.message||addErr));
+          if(!opts.silent) speak('BSC 切換失敗，請手動在錢包選擇 BNB Smart Chain。');
+          return false;
+        }
+      }
+      setPill('bad','BSC 切換被取消');
+      msg('warn','BSC 切換未完成：'+(e.message||e));
+      if(!opts.silent) speak('BSC 切換未完成。請手動選擇 BNB Smart Chain 後再操作。');
+      return false;
+    }
+  }
+
+  window.kgenEnsureBSC894=switchToBSC;
+
+  function protectTxButtons(){
+    const ids=['kh-fortune','kh-heartbeat','kh-ignite','kh-festival','kh-newyear','kh-vow','kh-lamp','kh-wish','w3-fortune','w3-heartbeat','w3-ignite','w3-vow','w3-lamp','w3-wish'];
+    ids.forEach(id=>{
+      const b=$(id);
+      if(!b || b.__kgenBscGuarded) return;
+      b.__kgenBscGuarded=true;
+      b.addEventListener('click',async function(ev){
+        const ok=await switchToBSC({silent:false});
+        if(!ok){ ev.preventDefault(); ev.stopImmediatePropagation(); return false; }
+      },true);
+    });
+  }
+
+  function wrapConnect(){
+    if(typeof window.connectWallet==='function' && !window.connectWallet.__kgen894Wrapped){
+      const old=window.connectWallet;
+      const wrapped=async function(){
+        await switchToBSC({silent:false});
+        return old.apply(this,arguments);
+      };
+      wrapped.__kgen894Wrapped=true;
+      window.connectWallet=wrapped;
+    }
+    if(window.web3 && typeof window.web3.connect==='function' && !window.web3.connect.__kgen894Wrapped){
+      const old=window.web3.connect;
+      const wrapped=async function(){
+        await switchToBSC({silent:false});
+        return old.apply(this,arguments);
+      };
+      wrapped.__kgen894Wrapped=true;
+      window.web3.connect=wrapped;
+    }
+  }
+
+  function setupEvents(){
+    if(window.ethereum && window.ethereum.on && !window.__KGEN_V894_CHAIN_EVENTS__){
+      window.__KGEN_V894_CHAIN_EVENTS__=true;
+      window.ethereum.on('chainChanged',function(cid){
+        if(isBsc(cid)){
+          setPill('ok','目前鏈：BSC 56');
+          msg('success','目前已在 BSC 56。');
+        }else{
+          const n=chainName(cid);
+          setPill('bad','目前鏈：'+n+'，需要 BSC 56');
+          msg('warn','偵測到鏈已切到 '+n+'。神殿只支援 BSC 56，請切回 BSC。');
+          speak('偵測到目前不是 BSC 主網。請切回 BNB Smart Chain。');
+        }
+      });
+      window.ethereum.on('accountsChanged',function(){ setTimeout(refresh,500); });
+    }
+  }
+
+  function alignUi(){
+    const btn=$('kgen-heart-toggle');
+    if(btn){
+      const t=(btn.textContent||'').replace(/展開|收合/g,'').trim();
+      if(!t.includes('12345 Heart')) btn.textContent='12345 Heart';
+    }
+    const brand=$('brand-badge');
+    if(brand) brand.textContent='K線西遊記・花果山台灣';
+  }
+
+  async function refresh(){
+    ensurePill();
+    setupEvents();
+    wrapConnect();
+    protectTxButtons();
+    alignUi();
+    const cid=await currentChain();
+    if(!window.ethereum) setPill('warn','未偵測到錢包：等待 DApp 瀏覽器');
+    else if(isBsc(cid)) setPill('ok','目前鏈：BSC 56');
+    else setPill('bad','目前鏈：'+chainName(cid)+'，需要 BSC 56');
+  }
+
+  function init(){
+    refresh();
+    setTimeout(refresh,800);
+    setTimeout(refresh,2200);
+    setInterval(refresh,8000);
+    msg('success','V8.9.4 HUD 與 BSC 鎖鏈已啟動。');
+  }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
