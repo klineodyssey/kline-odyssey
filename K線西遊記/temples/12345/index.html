@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX
+VERSION: KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX
 BUILD: 20260511-V8.8.4-SOCIAL-WEBVIEW-WALLET-SAFE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+- [V8.8.6] LINE / Facebook 多錢包入口改為獨立安全面板：所有按鈕可點、社群瀏覽器只複製官方網址不跳商店；右上音響只保留單一表頭，清除 V7.20/V7.21 殘影。
 - [V8.8.5] 修 LINE / Facebook 多錢包入口按鈕可點擊：社群瀏覽器不再跳商店，改為複製官方神殿網址與清楚提示；音響面板統一為單一標題，清除 V7.20 / V7.21 / MP3 多重表頭。
 - [V8.8.4] 以 V8.8.0 為母版，只修 LINE / Facebook 內建瀏覽器錢包入口：社群 WebView 不再自動跳 MetaMask / Google Play，改顯示多錢包入口與一鍵複製官方神殿網址；GitHub Pages / 錢包內建瀏覽器仍維持原連線。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
@@ -50,7 +51,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1443,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1690,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15806,7 +15807,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v884-social-webview-wallet-safe-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX';
+  const VERSION = 'KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX';
   const CANONICAL = 'https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const UA = navigator.userAgent || '';
   const isLine = /Line\//i.test(UA) || / Line/i.test(UA);
@@ -16001,7 +16002,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v885-social-wallet-click-audio-single-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V8.8.5-SOCIAL-WALLET-CLICK-AUDIO-SINGLE-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX';
   const OFFICIAL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   function $(id){return document.getElementById(id);}
   function socialUA(){
@@ -16147,6 +16148,173 @@ KGEN 12345 UI Patch V7.6.0
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
   window.addEventListener('load',()=>{ bind(); setTimeout(bind,600); setTimeout(bind,1800); });
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V8.8.6｜Social Wallet Tap + Audio Header Hard Fix ===== -->
+<style id="kgen-v886-social-wallet-tap-audio-style">
+  #kgenWalletSafePanelV886{
+    position:fixed!important; inset:0!important; z-index:2147483647!important;
+    display:none; align-items:center!important; justify-content:center!important;
+    background:rgba(0,0,0,.78)!important; padding:16px!important; box-sizing:border-box!important;
+    pointer-events:auto!important; touch-action:auto!important;
+  }
+  #kgenWalletSafePanelV886 *{pointer-events:auto!important; touch-action:manipulation!important; box-sizing:border-box!important;}
+  #kgenWalletSafeCardV886{
+    width:min(540px,94vw)!important; max-height:86vh!important; overflow:auto!important;
+    background:#0b0f14!important; border:1px solid rgba(255,215,120,.55)!important;
+    border-radius:16px!important; padding:14px!important; color:#fff!important;
+    box-shadow:0 24px 70px rgba(0,0,0,.72)!important;
+    position:relative!important; z-index:2147483647!important;
+  }
+  .k886-wallet-row{display:grid!important; grid-template-columns:1fr 1fr!important; gap:10px!important; margin-top:10px!important;}
+  .k886-wallet-btn{
+    border:1px solid rgba(255,215,120,.55)!important; border-radius:12px!important;
+    background:rgba(255,215,120,.10)!important; color:#ffe9a8!important;
+    min-height:42px!important; padding:10px 8px!important; font-weight:900!important; font-size:13px!important;
+    position:relative!important; z-index:2147483647!important;
+  }
+  .k886-wallet-copy{width:100%!important; margin-top:10px!important; background:rgba(0,242,255,.12)!important; color:#dffbff!important;}
+  #kgenWalletUrlV886{
+    width:100%!important; padding:11px 12px!important; border-radius:12px!important;
+    border:1px solid rgba(255,255,255,.22)!important; background:#05070b!important;
+    color:#9ff!important; font-size:12px!important; margin-top:10px!important;
+  }
+  .k886-note{font-size:12px!important; line-height:1.6!important; color:#dffbff!important; margin-top:10px!important; padding:10px!important; border:1px solid rgba(0,242,255,.28)!important; border-radius:12px!important; background:rgba(0,242,255,.08)!important;}
+  .k886-audio-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-bottom:10px!important;padding:8px 10px!important;border:1px solid rgba(255,215,120,.35)!important;border-radius:12px!important;background:rgba(255,215,120,.08)!important;color:#ffe39a!important;font-weight:900!important;font-size:13px!important;}
+  .k886-audio-head button{border:1px solid rgba(255,215,120,.55)!important;background:rgba(255,215,120,.12)!important;color:#ffe39b!important;border-radius:10px!important;padding:7px 10px!important;font-weight:900!important;}
+</style>
+<script id="kgen-v886-social-wallet-tap-audio-fix">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.8.6-SOCIAL-WALLET-TAP-AUDIO-HEADER-FIX';
+  const OFFICIAL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
+  function $(id){return document.getElementById(id);}
+  function isSocial(){const ua=(navigator.userAgent||'').toLowerCase(); return /(line\/|fb_iab|fbav|fban|instagram|messenger|micromessenger)/i.test(ua);}
+  function say(msg){
+    try{ if(window.ui&&ui.toast) ui.toast(msg,4200); }catch(_){ }
+    try{ if(window.app&&app.speak) app.speak(msg); }catch(_){ }
+    const st=$('kh-status')||$('bp-status')||$('w3-prog'); if(st) st.textContent=msg;
+  }
+  function ensureSafePanel(){
+    let panel=$('kgenWalletSafePanelV886');
+    if(panel) return panel;
+    panel=document.createElement('div');
+    panel.id='kgenWalletSafePanelV886';
+    panel.innerHTML=`
+      <div id="kgenWalletSafeCardV886">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <b style="color:#ffd978;font-size:16px;">多錢包安全入口</b>
+          <button type="button" class="k886-wallet-btn" id="k886CloseWallet" style="min-height:34px;width:42px;padding:4px;">×</button>
+        </div>
+        <div class="k886-note">LINE / Facebook 內建瀏覽器請不要直接跳 MetaMask，容易跳到 Google Play 或 404。請先複製官方神殿網址，再到 MetaMask / Trust Wallet / OKX / Bitget 的 DApp 瀏覽器貼上開啟。</div>
+        <input id="kgenWalletUrlV886" readonly value="${OFFICIAL}">
+        <button type="button" class="k886-wallet-btn k886-wallet-copy" id="k886CopyUrl">複製官方神殿網址</button>
+        <div class="k886-wallet-row">
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="metamask">MetaMask 開啟</button>
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="trust">Trust Wallet 開啟</button>
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="okx">OKX Wallet 開啟</button>
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="bitget">Bitget Wallet 開啟</button>
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="binance">Binance 開啟</button>
+          <button type="button" class="k886-wallet-btn" data-k886-wallet="walletconnect">WalletConnect QR</button>
+        </div>
+        <div id="k886WalletStatus" class="k886-note">操作提示：在 LINE / Facebook 裡按任何錢包按鈕，會先複製網址，不跳商城；請切到錢包 App 的 DApp 瀏覽器貼上。</div>
+      </div>`;
+    document.body.appendChild(panel);
+    panel.addEventListener('click',function(ev){ if(ev.target===panel) closePanel(); },true);
+    $('k886CloseWallet').onclick=function(ev){ev.preventDefault();ev.stopPropagation();closePanel();return false;};
+    $('k886CopyUrl').onclick=function(ev){ev.preventDefault();ev.stopPropagation();copyUrl();return false;};
+    panel.querySelectorAll('[data-k886-wallet]').forEach(btn=>{
+      const kind=btn.getAttribute('data-k886-wallet');
+      const handler=function(ev){
+        if(ev){ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();}
+        if(isSocial()){ copyUrl(); return false; }
+        return openWallet(kind);
+      };
+      btn.onclick=handler;
+      btn.addEventListener('touchstart',function(ev){ev.stopPropagation();},{capture:true,passive:true});
+      btn.addEventListener('touchend',handler,{capture:true,passive:false});
+      btn.addEventListener('click',handler,true);
+    });
+    return panel;
+  }
+  function openPanel(){
+    const p=ensureSafePanel();
+    const inp=$('kgenWalletUrlV886'); if(inp) inp.value=OFFICIAL;
+    p.style.display='flex';
+    p.style.visibility='visible';
+    p.style.opacity='1';
+    const legacy=$('walletHub'); if(legacy) legacy.style.display='none';
+    say(isSocial()?'已開啟安全入口。LINE / Facebook 內請複製網址，再到錢包 DApp 瀏覽器貼上。':'已開啟多錢包安全入口。');
+    return false;
+  }
+  function closePanel(){const p=$('kgenWalletSafePanelV886'); if(p) p.style.display='none';}
+  async function copyUrl(){
+    const inp=$('kgenWalletUrlV886'); if(inp) inp.value=OFFICIAL;
+    try{ await navigator.clipboard.writeText(OFFICIAL); setStatus('已複製官方神殿網址。請到錢包 App 的 DApp 瀏覽器貼上。'); say('已複製官方神殿網址。'); return true; }
+    catch(e){ if(inp){inp.focus(); inp.select();} setStatus('請長按網址欄手動複製。'); say('請長按網址欄手動複製。'); return false; }
+  }
+  function setStatus(msg){const st=$('k886WalletStatus'); if(st) st.textContent=msg;}
+  function openWallet(kind){
+    if(isSocial()){ copyUrl(); return false; }
+    const url=OFFICIAL; let link=url;
+    if(kind==='metamask') link='https://metamask.app.link/dapp/'+url.replace(/^https?:\/\//,'');
+    else if(kind==='trust') link='https://link.trustwallet.com/open_url?url='+encodeURIComponent(url);
+    else if(kind==='okx') link='okx://wallet/dapp/url?dappUrl='+encodeURIComponent(url);
+    else if(kind==='bitget') link='bitget://openDapp?url='+encodeURIComponent(url);
+    else if(kind==='walletconnect'){ try{ if(window.web3&&web3.connectWalletConnect) return web3.connectWalletConnect(); }catch(_){ } return copyUrl(); }
+    else if(kind==='binance'){ return copyUrl(); }
+    try{ window.location.href=link; }catch(e){ copyUrl(); }
+    return false;
+  }
+  function socialConnect(ev){
+    if(ev){try{ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}catch(_){}}
+    if((window.ethereum||window.BinanceChain) && !isSocial()){
+      try{ if(window.web3&&web3.connect) return web3.connect(); }catch(_){ }
+    }
+    return openPanel();
+  }
+  function fixAudioHeader(){
+    const p=$('music-panel'); if(!p) return;
+    let head=p.querySelector('.k886-audio-head');
+    if(!head){
+      head=document.createElement('div'); head.className='k886-audio-head';
+      head.innerHTML='<span>五指山神殿音響｜V8.8.6 單一控制台</span><button type="button">收合</button>';
+      p.insertBefore(head,p.firstChild);
+      head.querySelector('button').onclick=function(ev){ev.preventDefault();ev.stopPropagation();p.style.display='none';document.body.classList.remove('k21-audio-open','k20-audio-open','k19-audio-open','k18-audio-open');};
+    }else{ const sp=head.querySelector('span'); if(sp) sp.textContent='五指山神殿音響｜V8.8.6 單一控制台'; }
+    [...p.children].forEach(el=>{
+      if(el===head) return;
+      const text=(el.textContent||'').trim();
+      // hide only old header bars, not the music controls beneath them
+      if(/^五指山神殿音響｜V7\./.test(text) || /^五指山神殿音響（MP3）/.test(text) || /^五指山神殿音響｜V8\.8\.5/.test(text)){
+        el.style.display='none';
+      }
+    });
+    [...p.querySelectorAll('div,span,b')].forEach(el=>{
+      if(el.closest('.k886-audio-head')) return;
+      const text=(el.textContent||'').trim();
+      if(/^五指山神殿音響｜V7\./.test(text) || /^五指山神殿音響｜V8\.8\.5/.test(text)){
+        el.style.display='none';
+      }
+    });
+  }
+  function bind(){
+    const vs=$('ver-st'); if(vs) vs.textContent='VERSION '+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';
+    ensureSafePanel(); fixAudioHeader();
+    if(window.web3){
+      web3.openWalletHub=openPanel; web3.closeWalletHub=closePanel; web3.deepLink=openWallet; web3.smartConnect=socialConnect;
+    }
+    ['kh-connect','w3-connect-btn'].forEach(id=>{const b=$(id); if(b){b.onclick=socialConnect; b.setAttribute('data-wallet-route','v886-social-safe-panel');}});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
+  window.addEventListener('load',()=>{bind();setTimeout(bind,600);setTimeout(bind,1800);setTimeout(fixAudioHeader,2800);});
+  const mo=new MutationObserver(()=>{fixAudioHeader();});
+  try{mo.observe(document.body,{childList:true,subtree:true,characterData:true});}catch(_){ }
+  window.kgenV886WalletAudioFix={openPanel,closePanel,copyUrl,openWallet,fixAudioHeader,isSocial,OFFICIAL};
 })();
 </script>
 
