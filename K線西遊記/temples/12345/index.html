@@ -4,10 +4,12 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
-BUILD: 20260512-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
+VERSION: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+BUILD: 20260512-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
+
+- [V8.9.2] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
 - [V8.7.6] 補齊左上 Approve / 無限授權實際接線、Allowance 可視化、心跳與跨日呼吸倒數提醒、語音客服與影像客服入口；收據維持本機 localStorage + JSON 下載。
@@ -48,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1440,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1687,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15550,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15657,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15802,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15889,6 +15891,730 @@ KGEN 12345 UI Patch V7.6.0
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
   window.addEventListener('load',()=>{bind(); setTimeout(bind,700); setTimeout(bind,1800);});
+})();
+</script>
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.1-TOAST-MESSAGE-CENTER-FIX
+BUILD: 20260512-V8.9.1-TOAST-MESSAGE-CENTER-FIX
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
+
+用途：
+1. 左上不再放長錯誤訊息，避免擋到 12345 Heart 展開/收合。
+2. 新增右上「訊息紀錄」按鍵，可查最近 20 筆訊息。
+3. Toast 短暫顯示後自動收起。
+4. 客服導覽按鍵強制純教學，避免 Approve 教學誤觸交易。
+5. 客服彈窗與訊息面板 z-index 拉高，避免按鍵被底層 HUD 吃掉。
+
+安裝位置：
+請貼在 K線西遊記/temples/12345/index.html 的 </body> 前面。
+============================================================ -->
+
+<style id="kgen-v891-toast-message-center-style">
+/* ===== V8.9.1：右上訊息中心與 Toast ===== */
+#kgenMsgCenterBtn{
+  position:fixed;
+  right:12px;
+  top:318px; /* 右上音響區下方，可依畫面微調 */
+  z-index:2147483000;
+  min-width:132px;
+  height:38px;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,215,120,.55);
+  background:rgba(0,0,0,.86);
+  color:#ffd778;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.5px;
+  box-shadow:0 0 18px rgba(255,215,120,.22);
+  cursor:pointer;
+  pointer-events:auto;
+  user-select:none;
+}
+
+#kgenMsgCenterBtn .kgen-msg-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:18px;
+  height:18px;
+  margin-left:6px;
+  padding:0 5px;
+  border-radius:999px;
+  background:#00f2ff;
+  color:#001014;
+  font-size:11px;
+  font-weight:950;
+}
+
+#kgenMsgPanel{
+  position:fixed;
+  right:12px;
+  top:362px;
+  width:min(340px, calc(100vw - 24px));
+  max-height:min(430px, calc(100vh - 390px));
+  overflow:auto;
+  z-index:2147483001;
+  border:1px solid rgba(255,215,120,.35);
+  border-radius:18px;
+  background:rgba(3,4,8,.96);
+  color:#fff;
+  box-shadow:0 0 40px rgba(0,0,0,.65);
+  padding:12px;
+  pointer-events:auto;
+  backdrop-filter:blur(10px);
+}
+
+#kgenMsgPanel.kgen-hidden{display:none;}
+
+.kgen-msg-panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  margin-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  color:#ffd778;
+  font-weight:950;
+}
+
+.kgen-msg-panel-actions{
+  display:flex;
+  gap:6px;
+}
+
+.kgen-msg-panel-actions button{
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  padding:5px 9px;
+  font-weight:800;
+  font-size:12px;
+  cursor:pointer;
+}
+
+#kgenMsgList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.kgen-msg-item{
+  border:1px solid rgba(255,255,255,.10);
+  border-left:4px solid #ffd778;
+  border-radius:12px;
+  background:rgba(255,255,255,.045);
+  padding:9px 10px;
+  font-size:12px;
+  line-height:1.48;
+  word-break:break-word;
+}
+
+.kgen-msg-item.success{border-left-color:#00ff99;}
+.kgen-msg-item.error{border-left-color:#ff4d4d;}
+.kgen-msg-item.warn{border-left-color:#ffcc00;}
+.kgen-msg-item.info{border-left-color:#00f2ff;}
+
+.kgen-msg-time{
+  color:#00f2ff;
+  font-size:11px;
+  margin-bottom:4px;
+  opacity:.95;
+}
+
+#kgenToastWrap{
+  position:fixed;
+  right:14px;
+  top:154px;
+  z-index:2147483002;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  pointer-events:none;
+}
+
+.kgen-toast{
+  width:min(340px, calc(100vw - 28px));
+  padding:11px 13px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  border-left:4px solid #ffd778;
+  background:rgba(0,0,0,.92);
+  color:#fff;
+  font-size:12px;
+  line-height:1.45;
+  font-weight:800;
+  box-shadow:0 0 28px rgba(0,0,0,.58);
+  animation:kgenToastIn .22s ease-out;
+  pointer-events:none;
+}
+
+.kgen-toast.success{border-left-color:#00ff99;}
+.kgen-toast.error{border-left-color:#ff4d4d;}
+.kgen-toast.warn{border-left-color:#ffcc00;}
+.kgen-toast.info{border-left-color:#00f2ff;}
+
+@keyframes kgenToastIn{
+  from{transform:translateX(34px);opacity:0;}
+  to{transform:translateX(0);opacity:1;}
+}
+
+/* ===== V8.9.1：客服層永遠可點，避免被 HUD 吃事件 ===== */
+.customer-guide,
+.customer-guide *,
+.guide-panel,
+.guide-panel *,
+#customerGuide,
+#customerGuide *,
+#guidePanel,
+#guidePanel *,
+[id*="guide"],
+[id*="Guide"],
+[class*="guide"],
+[class*="Guide"]{
+  pointer-events:auto !important;
+}
+
+/* 常見客服/教學面板提高層級 */
+.customer-guide,
+.guide-panel,
+#customerGuide,
+#guidePanel,
+[id*="guidePanel"],
+[class*="guide-panel"]{
+  z-index:2147482500 !important;
+}
+
+/* 手機高度不足時，訊息面板稍微上提 */
+@media(max-width:560px){
+  #kgenMsgCenterBtn{
+    right:10px;
+    top:304px;
+    min-width:118px;
+    height:36px;
+    font-size:12px;
+  }
+  #kgenMsgPanel{
+    right:10px;
+    top:346px;
+    max-height:min(390px, calc(100vh - 360px));
+  }
+  #kgenToastWrap{
+    right:10px;
+    top:138px;
+  }
+}
+</style>
+
+<script id="kgen-v891-toast-message-center-script">
+(function(){
+  "use strict";
+
+  const MAX_HISTORY = 20;
+  const STORAGE_KEY = "KGEN_12345_MESSAGE_HISTORY_V891";
+
+  function safeParse(json, fallback){
+    try { return JSON.parse(json); } catch(e){ return fallback; }
+  }
+
+  const state = {
+    history: safeParse(localStorage.getItem(STORAGE_KEY) || "[]", [])
+  };
+
+  function ensureDom(){
+    if(!document.getElementById("kgenToastWrap")){
+      const toastWrap = document.createElement("div");
+      toastWrap.id = "kgenToastWrap";
+      document.body.appendChild(toastWrap);
+    }
+
+    if(!document.getElementById("kgenMsgCenterBtn")){
+      const btn = document.createElement("button");
+      btn.id = "kgenMsgCenterBtn";
+      btn.type = "button";
+      btn.innerHTML = '🔔 訊息 <span class="kgen-msg-badge" id="kgenMsgBadge">0</span>';
+      document.body.appendChild(btn);
+    }
+
+    if(!document.getElementById("kgenMsgPanel")){
+      const panel = document.createElement("div");
+      panel.id = "kgenMsgPanel";
+      panel.className = "kgen-hidden";
+      panel.innerHTML = `
+        <div class="kgen-msg-panel-head">
+          <span>宇宙訊息紀錄</span>
+          <div class="kgen-msg-panel-actions">
+            <button type="button" id="kgenCopyMsgBtn">複製</button>
+            <button type="button" id="kgenClearMsgBtn">清除</button>
+            <button type="button" id="kgenCloseMsgBtn">關閉</button>
+          </div>
+        </div>
+        <div id="kgenMsgList"></div>
+      `;
+      document.body.appendChild(panel);
+    }
+
+    document.getElementById("kgenMsgCenterBtn").onclick = function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      document.getElementById("kgenMsgPanel").classList.toggle("kgen-hidden");
+      render();
+    };
+
+    document.getElementById("kgenCloseMsgBtn").onclick = function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      document.getElementById("kgenMsgPanel").classList.add("kgen-hidden");
+    };
+
+    document.getElementById("kgenClearMsgBtn").onclick = function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      state.history = [];
+      persist();
+      render();
+      toastOnly("info", "訊息紀錄已清除", 2500);
+    };
+
+    document.getElementById("kgenCopyMsgBtn").onclick = async function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      const text = state.history.map(m => `[${m.time}] ${m.type}: ${m.text}`).join("\n");
+      try{
+        await navigator.clipboard.writeText(text || "目前沒有訊息紀錄");
+        toastOnly("success", "訊息紀錄已複製", 2500);
+      }catch(e){
+        toastOnly("warn", "此瀏覽器不允許自動複製，請手動截圖或展開查看", 4000);
+      }
+    };
+  }
+
+  function persist(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history));
+    }catch(e){}
+  }
+
+  function render(){
+    ensureDom();
+    const badge = document.getElementById("kgenMsgBadge");
+    const list = document.getElementById("kgenMsgList");
+    if(badge) badge.textContent = String(state.history.length);
+    if(!list) return;
+
+    if(!state.history.length){
+      list.innerHTML = `<div class="kgen-msg-item info"><div class="kgen-msg-time">--</div><div>目前沒有訊息紀錄</div></div>`;
+      return;
+    }
+
+    list.innerHTML = state.history.map(m => `
+      <div class="kgen-msg-item ${escapeAttr(m.type || "info")}">
+        <div class="kgen-msg-time">${escapeHtml(m.time || "")}</div>
+        <div>${escapeHtml(m.text || "")}</div>
+      </div>
+    `).join("");
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function escapeAttr(s){
+    return String(s).replace(/[^a-zA-Z0-9_-]/g,"");
+  }
+
+  function normalizeType(type){
+    if(["success","error","warn","info"].includes(type)) return type;
+    return "info";
+  }
+
+  function defaultDuration(type){
+    if(type === "error") return 5000;
+    if(type === "warn") return 4000;
+    if(type === "success") return 3000;
+    return 3000;
+  }
+
+  function toastOnly(type, text, duration){
+    ensureDom();
+    type = normalizeType(type);
+    const wrap = document.getElementById("kgenToastWrap");
+    const div = document.createElement("div");
+    div.className = "kgen-toast " + type;
+    div.textContent = text;
+    wrap.appendChild(div);
+
+    setTimeout(function(){
+      div.style.opacity = "0";
+      div.style.transform = "translateX(34px)";
+      div.style.transition = "all .22s ease";
+      setTimeout(function(){ div.remove(); }, 240);
+    }, duration || defaultDuration(type));
+  }
+
+  function pushMessage(type, text, duration){
+    ensureDom();
+    type = normalizeType(type);
+    const msg = {
+      type,
+      text: String(text || ""),
+      time: new Date().toLocaleString("zh-TW", { hour12:false })
+    };
+
+    state.history.unshift(msg);
+    if(state.history.length > MAX_HISTORY) state.history.length = MAX_HISTORY;
+
+    persist();
+    render();
+    toastOnly(type, msg.text, duration || defaultDuration(type));
+  }
+
+  /* 對外提供統一訊息函式：之後交易成功/失敗都呼叫這個 */
+  window.kgenPushMessage = pushMessage;
+  window.kgenToast = pushMessage;
+
+  /* 攔截 alert：避免長錯誤再擋住左上區 */
+  if(!window.__KGEN_V891_ALERT_PATCHED__){
+    window.__KGEN_V891_ALERT_PATCHED__ = true;
+    const oldAlert = window.alert;
+    window.alert = function(message){
+      const text = String(message || "");
+      const lower = text.toLowerCase();
+      const type =
+        lower.includes("error") ||
+        lower.includes("fail") ||
+        lower.includes("reject") ||
+        lower.includes("rejected") ||
+        text.includes("失敗") ||
+        text.includes("拒絕") ? "error" :
+        text.includes("成功") || lower.includes("success") ? "success" :
+        text.includes("警告") || lower.includes("warning") ? "warn" :
+        "info";
+
+      pushMessage(type, text, defaultDuration(type));
+      /* 不再跳原生 alert，避免擋畫面 */
+    };
+  }
+
+  /* 全域錯誤收斂進訊息中心 */
+  window.addEventListener("error", function(ev){
+    if(ev && ev.message){
+      pushMessage("error", "系統錯誤：" + ev.message, 5000);
+    }
+  });
+
+  window.addEventListener("unhandledrejection", function(ev){
+    const reason = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : "Promise rejected";
+    pushMessage("error", "交易或系統拒絕：" + reason, 5000);
+  });
+
+  /* ===== 客服導覽安全化：教學按鈕不准觸發交易 ===== */
+  function installGuideSafeMode(){
+    const guideKeywords = ["Approve教學", "完整玩法", "語音問答", "發放規則", "錢包與找幣", "故事與快速開始"];
+    document.addEventListener("click", function(ev){
+      const el = ev.target && ev.target.closest ? ev.target.closest("button,a,[role='button']") : null;
+      if(!el) return;
+      const text = (el.innerText || el.textContent || "").trim();
+
+      if(!guideKeywords.some(k => text.includes(k))) return;
+
+      /* 客服教學按鈕一律先攔截，不讓事件冒泡到交易函式 */
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      const content = getGuideContent(text);
+      showGuideText(content.title, content.body);
+    }, true);
+  }
+
+  function getGuideContent(text){
+    if(text.includes("Approve")){
+      return {
+        title:"Approve 教學",
+        body:"Approve 是授權 Heart 合約使用你的 KGEN。教學頁只負責說明，不會送出交易。真正授權請回到 Heart 操作區，確認金額後按 APPROVE。"
+      };
+    }
+    if(text.includes("完整玩法")){
+      return {
+        title:"完整玩法",
+        body:"先連結錢包並切到 BSC。需要花 KGEN 的動作會先經過 APPROVE，再由 Heart 操作區執行。客服導覽只說明流程，不會扣款。"
+      };
+    }
+    if(text.includes("語音")){
+      return {
+        title:"語音問答",
+        body:"語音客服用來說明規則、錢包、Approve、發財金、心跳、還願與點燈。語音按鈕不應觸發任何鏈上交易。"
+      };
+    }
+    if(text.includes("發放規則")){
+      return {
+        title:"發放規則",
+        body:"fortuneClaim：1 到 888 KGEN，30 天冷卻，每 epoch 最多 500 名。heartbeatClaim：整點心跳，每小時一次。igniteAndClaim：UTC 00:00–00:10 每日一次。"
+      };
+    }
+    if(text.includes("錢包")){
+      return {
+        title:"錢包與找幣",
+        body:"請使用 MetaMask、Trust Wallet 或支援 BSC 的錢包。若看不到 KGEN，請用官方合約地址加入自訂代幣。"
+      };
+    }
+    return {
+      title:"故事與快速開始",
+      body:"五指山悟空財神殿是 KGEN 宇宙 Heart 節點。請先連錢包、切 BSC，再依操作區指示進行。"
+    };
+  }
+
+  function showGuideText(title, body){
+    let box = document.getElementById("kgenGuideSafeBox");
+    if(!box){
+      box = document.createElement("div");
+      box.id = "kgenGuideSafeBox";
+      box.style.cssText = [
+        "position:fixed",
+        "left:50%",
+        "top:50%",
+        "transform:translate(-50%,-50%)",
+        "width:min(560px,calc(100vw - 28px))",
+        "max-height:min(70vh,620px)",
+        "overflow:auto",
+        "z-index:2147483003",
+        "border:1px solid rgba(255,215,120,.45)",
+        "border-radius:20px",
+        "background:rgba(4,5,10,.97)",
+        "color:#fff",
+        "box-shadow:0 0 60px rgba(0,0,0,.72)",
+        "padding:18px",
+        "pointer-events:auto"
+      ].join(";");
+      document.body.appendChild(box);
+    }
+
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;">
+        <div style="color:#ffd778;font-weight:950;font-size:18px;">${escapeHtml(title)}</div>
+        <button id="kgenGuideSafeClose" type="button" style="border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;padding:7px 12px;font-weight:900;cursor:pointer;">關閉</button>
+      </div>
+      <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,.88);">${escapeHtml(body)}</div>
+      <div style="margin-top:14px;color:#00f2ff;font-size:12px;font-weight:900;">安全提示：此視窗為純教學，不會送出交易。</div>
+    `;
+    document.getElementById("kgenGuideSafeClose").onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      box.remove();
+    };
+  }
+
+  ensureDom();
+  render();
+  installGuideSafeMode();
+
+  pushMessage("success", "V8.9.1 訊息中心已啟動：提示會自動收起，可按右上訊息查看紀錄。", 3500);
+})();
+</script>
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+BUILD: 20260512-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+BASE_FROM: V8.9.0 + V8.9.1 message center
+用途：
+1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
+2. 客服所有按鍵都有語音說明。
+3. 交易按鈕先顯示規則與確認，再呼叫原本 TempleHeart 交易函式。
+4. 不改 ethers.js、不改 wallet bridge、不改 provider/signer 核心。
+============================================================ -->
+<style id="kgen-v892-full-button-service-style">
+#kgenV892ServiceModal{position:fixed;inset:0;display:none;z-index:2147483100;background:rgba(0,0,0,.66);align-items:center;justify-content:center;padding:14px;pointer-events:auto;}
+#kgenV892ServiceModal.show{display:flex;}
+#kgenV892ServiceCard{width:min(720px,calc(100vw - 28px));max-height:min(82vh,780px);overflow:auto;border:1px solid rgba(255,215,120,.5);border-radius:22px;background:rgba(4,5,10,.97);box-shadow:0 0 70px rgba(0,0,0,.78),0 0 26px rgba(255,215,120,.16);color:#fff;pointer-events:auto;}
+.kgen-v892-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,215,120,.18);position:sticky;top:0;background:rgba(4,5,10,.98);z-index:2;}
+.kgen-v892-title{font-weight:950;color:#ffd778;font-size:17px;line-height:1.35;}
+.kgen-v892-close{border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;padding:7px 12px;font-weight:900;cursor:pointer;}
+.kgen-v892-body{padding:16px;display:grid;gap:12px;}
+.kgen-v892-box{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.045);padding:12px;line-height:1.8;font-size:14px;}
+.kgen-v892-box b{color:#ffd778;}
+.kgen-v892-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.kgen-v892-actions button{min-height:46px;border:1px solid rgba(255,215,120,.36);border-radius:12px;background:rgba(0,0,0,.58);color:#fff;font-weight:900;cursor:pointer;pointer-events:auto;}
+.kgen-v892-actions button.primary{background:linear-gradient(180deg,#f4d77c,#bd8f35);color:#1a1204;}
+.kgen-v892-actions button.danger{border-color:rgba(255,90,90,.45);background:rgba(120,20,20,.45);}
+#kgenV892QuickDock{position:fixed;left:10px;bottom:86px;z-index:2147482500;display:flex;gap:6px;flex-wrap:wrap;max-width:min(420px,calc(100vw - 20px));pointer-events:none;}
+#kgenV892QuickDock button{pointer-events:auto;border:1px solid rgba(255,215,120,.38);border-radius:999px;background:rgba(0,0,0,.72);color:#ffd778;font-weight:900;font-size:12px;padding:7px 10px;box-shadow:0 0 14px rgba(0,0,0,.38);}
+@media(max-width:560px){.kgen-v892-actions{grid-template-columns:1fr;}#kgenV892QuickDock{bottom:74px}.kgen-v892-title{font-size:15px}}
+</style>
+
+<div id="kgenV892ServiceModal" aria-hidden="true">
+  <div id="kgenV892ServiceCard" role="dialog" aria-modal="true">
+    <div class="kgen-v892-head">
+      <div class="kgen-v892-title" id="kgenV892ServiceTitle">五指山客服</div>
+      <button class="kgen-v892-close" id="kgenV892CloseBtn" type="button">關閉</button>
+    </div>
+    <div class="kgen-v892-body" id="kgenV892ServiceBody"></div>
+  </div>
+</div>
+
+<script id="kgen-v892-full-button-service-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX';
+  const oldOps = Object.assign({}, window.templeOps || {});
+  const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
+
+  function $(id){ return document.getElementById(id); }
+  function clean(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
+  function notify(type,msg){
+    try{ if(window.kgenPushMessage) window.kgenPushMessage(type,msg); else if(window.kgenToast) window.kgenToast(type,msg); else if(window.toast) window.toast(msg); }catch(e){}
+  }
+  function speak(msg){
+    const text = String(msg||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+    if(!text) return;
+    try{ if(window.app && typeof app.speak==='function'){ app.speak(text); return; } }catch(e){}
+    try{
+      if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'zh-TW'; u.rate = 1; u.pitch = 1;
+        window.speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+  function msg(type,text,voice){ notify(type,text); if(voice!==false) speak(voice||text); }
+  function setVersion(){
+    try{ const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION; }catch(e){}
+    try{ document.title='KGEN 12345 五指山悟空財神殿｜V8.9.2'; }catch(e){}
+  }
+  function modal(title, html, voice){
+    const m=$('kgenV892ServiceModal'), t=$('kgenV892ServiceTitle'), b=$('kgenV892ServiceBody');
+    if(!m||!t||!b) return;
+    t.textContent=title; b.innerHTML=html; m.classList.add('show'); m.setAttribute('aria-hidden','false');
+    if(voice!==false) speak(voice || title + '。' + b.textContent.slice(0,260));
+  }
+  function closeModal(){ const m=$('kgenV892ServiceModal'); if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');} }
+  function callOld(name){
+    const fn = oldOps[name] || (window.kgen12345V872 && window.kgen12345V872[name]);
+    if(typeof fn==='function'){
+      try{ return fn.call(window.templeOps); }catch(e){ msg('error','執行 '+name+' 失敗：'+(e.message||e), '執行失敗，客服已記錄錯誤。'); }
+    }else{
+      msg('warn','目前找不到 '+name+' 的合約函式，請確認本版是否已部署 Heart 操作核心。');
+    }
+  }
+  function amount(){
+    const el=$('amt-in') || $('bet-amt-input') || document.querySelector('input[inputmode="decimal"]');
+    return el ? clean(el.value||'') : '';
+  }
+  function walletPanel(){
+    const voice='錢包聖盃流程。先連結錢包並切到 BSC，再確認 KGEN 餘額與授權額，完成三次聖盃後才能領發財金。';
+    modal('錢包聖盃｜Wallet / Cup', `
+      <div class="kgen-v892-box"><b>用途：</b>這裡是進入神殿前的檢查流程，不會自動扣款。</div>
+      <div class="kgen-v892-box">
+        <ol>
+          <li>連結錢包 / 切換 BSC 56。</li>
+          <li>刷新 KGEN 餘額、Heart 血庫與 Allowance。</li>
+          <li>需要花 KGEN 的動作，先 Approve。</li>
+          <li>連續完成三次聖盃，再領 fortuneClaim 發財金。</li>
+        </ol>
+      </div>
+      <div class="kgen-v892-actions">
+        <button class="primary" type="button" onclick="window.connectWallet&&connectWallet()">連結錢包 / 切 BSC</button>
+        <button type="button" onclick="window.templeOps&&templeOps.refresh&&templeOps.refresh()">刷新餘額</button>
+        <button type="button" onclick="window.templeOps&&templeOps.cup&&templeOps.cup()">聖盃一次</button>
+        <button type="button" onclick="window.kgenV892&&kgenV892.resetCup()">重置聖盃</button>
+      </div>`, voice);
+  }
+  function fortunePanel(){
+    const amt = amount() || '未填';
+    const ok = state.cup>=3;
+    const voice = ok ? '發財金流程已達三次聖盃，可確認後送出 fortuneClaim。' : '還不能領發財金，請先完成三次聖盃。';
+    modal('發財金｜fortuneClaim', `
+      <div class="kgen-v892-box"><b>目前金額：</b>${amt} KGEN。發財金建議填整數 <b>1 到 888</b>。</div>
+      <div class="kgen-v892-box"><b>規則：</b>三十天冷卻，每個 epoch 最多五百名。送出前錢包會再次跳確認。</div>
+      <div class="kgen-v892-box"><b>聖盃狀態：</b>${state.cup}/3 ${ok?'已完成':'未完成'}</div>
+      <div class="kgen-v892-actions">
+        <button type="button" onclick="window.templeOps&&templeOps.cup&&templeOps.cup()">聖盃一次</button>
+        <button class="${ok?'primary':'danger'}" type="button" onclick="window.kgenV892&&kgenV892.confirmTx('fortune')">${ok?'確認送出 fortuneClaim':'尚未完成三聖盃'}</button>
+      </div>`, voice);
+  }
+  function rulesPanel(tab){
+    const voice='規則活動說明。發財金、心跳、呼吸、還願、點燈與許願都需要先看清規則，確認錢包後才送交易。';
+    modal('規則活動｜TempleHeart', `
+      <div class="kgen-v892-box"><b>fortuneClaim 發財金：</b>1 到 888 KGEN，三十天冷卻，每 epoch 五百名。</div>
+      <div class="kgen-v892-box"><b>heartbeatClaim 整點心跳：</b>每小時一次。時間未到可能 revert，不是單純沒 Gas。</div>
+      <div class="kgen-v892-box"><b>igniteAndClaim 轉日呼吸：</b>UTC 00:00 到 00:10，每日一次。</div>
+      <div class="kgen-v892-box"><b>vowTo 還願：</b>使用 KGEN 補血，會走 transferFrom，需要 Approve。</div>
+      <div class="kgen-v892-box"><b>lightLamp 點燈：</b>十三聖靈燈，一到十二為動物聖靈，第十三為人類 / AI / 超人 / 變形金剛文明覺醒席位。</div>
+      <div class="kgen-v892-box"><b>makeWish 許願：</b>只上鏈 hash，不上鏈明文願望。</div>
+      <div class="kgen-v892-actions">
+        <button type="button" onclick="window.kgenV892&&kgenV892.open('wallet')">錢包聖盃</button>
+        <button type="button" onclick="window.kgenV892&&kgenV892.open('fortune')">發財金流程</button>
+        <button type="button" onclick="window.kgenV892&&kgenV892.speakRules()">語音說明</button>
+        <button type="button" onclick="window.templeSingleModal&&templeSingleModal.open&&templeSingleModal.open()">打開原神殿操作窗</button>
+      </div>`, voice);
+  }
+  function servicePanel(){
+    const voice='語音客服已啟動。所有客服按鍵都是教學，不會自動送出交易。';
+    modal('語音客服｜Service', `
+      <div class="kgen-v892-box"><b>客服原則：</b>先說明用途、條件、金額、風險，再讓使用者自己按確認。</div>
+      <div class="kgen-v892-box"><b>交易失敗解說：</b>cannot estimate gas 或 execution reverted 通常是冷卻、名額、時間窗或合約條件未滿，不一定是 BNB 不夠。</div>
+      <div class="kgen-v892-actions">
+        <button type="button" onclick="window.kgenV892&&kgenV892.open('wallet')">錢包教學</button>
+        <button type="button" onclick="window.kgenV892&&kgenV892.open('fortune')">發財金教學</button>
+        <button type="button" onclick="window.kgenV892&&kgenV892.open('rules')">規則活動</button>
+        <button class="primary" type="button" onclick="window.kgenV892&&kgenV892.voiceTest()">客服語音測試</button>
+      </div>`, voice);
+  }
+  function confirmTx(name){
+    const names={fortune:'fortuneClaim 發財金',heartbeat:'heartbeatClaim 整點心跳',ignite:'igniteAndClaim 轉日呼吸',vow:'vowTo 還願補血',lamp:'lightLamp 點燈',wish:'makeWish 許願 hash',approve:'Approve 授權'};
+    if(name==='fortune' && state.cup<3){ msg('warn','請先完成三次聖盃，目前 '+state.cup+'/3。'); return fortunePanel(); }
+    msg('info','準備送出：'+(names[name]||name)+'，請在錢包確認交易。');
+    closeModal();
+    callOld(name);
+  }
+  function bindButtons(){
+    document.addEventListener('click',function(ev){
+      const btn=ev.target && ev.target.closest ? ev.target.closest('button,a,[role="button"]') : null;
+      if(!btn) return;
+      const t=clean(btn.innerText||btn.textContent||btn.getAttribute('aria-label')||'');
+      const id=btn.id||'';
+      if(btn.closest('#kgenV892ServiceModal')||btn.closest('#kgenMsgPanel')) return;
+      if(/錢包聖盃|聖盃/.test(t) && !/三次聖盃/.test(t)){ ev.preventDefault(); ev.stopPropagation(); walletPanel(); return; }
+      if(/規則活動|發放規則|活動/.test(t)){ ev.preventDefault(); ev.stopPropagation(); rulesPanel(); return; }
+      if(/客服|語音客服|導覽/.test(t)){ ev.preventDefault(); ev.stopPropagation(); servicePanel(); return; }
+      if(/名額紀錄/.test(t)){ ev.preventDefault(); ev.stopPropagation(); modal('名額紀錄｜Records','<div class="kgen-v892-box">名額紀錄會以鏈上交易與本機收據為準。若尚未接後端索引器，請先用下載收據保存 JSON。</div><div class="kgen-v892-actions"><button type="button" onclick="window.downloadKgenReceipts&&downloadKgenReceipts()">下載收據</button><button type="button" onclick="window.kgenV892&&kgenV892.open(\'rules\')">查看規則</button></div>','名額紀錄以鏈上交易與本機收據為準。'); return; }
+    },true);
+  }
+  function wrapOps(){
+    window.templeOps = window.templeOps || {};
+    const keep = Object.assign({}, window.templeOps);
+    Object.assign(window.templeOps, keep, {
+      approve:function(){ modal('Approve 授權','<div class="kgen-v892-box">Approve 是授權 Heart 合約使用你的 KGEN，不是付款本身。授權後仍需你逐筆確認交易。</div><div class="kgen-v892-actions"><button class="primary" type="button" onclick="window.kgenV892.confirmTx(\'approve\')">確認送出 Approve</button><button type="button" onclick="window.templeOps&&templeOps.approveUnlimited&&templeOps.approveUnlimited()">無限授權</button></div>','Approve 是授權，不是付款。請確認官方 Heart 合約後再送出。'); },
+      cup:function(){ state.cup=Math.min(3,state.cup+1); localStorage.setItem('KGEN_12345_CUP_COUNT_V892',String(state.cup)); const m= state.cup>=3?'三次聖盃完成，可以領發財金。':'聖盃完成 '+state.cup+' / 3。'; msg('success',m); try{ const el=document.getElementById('v57-cup-status'); if(el) el.textContent='聖盃狀態：'+state.cup+'/3'; }catch(e){} },
+      fortune:fortunePanel,
+      heartbeat:function(){ modal('整點心跳｜heartbeatClaim','<div class="kgen-v892-box">heartbeatClaim 每小時一次。若時間未到，合約可能拒絕交易。</div><div class="kgen-v892-actions"><button class="primary" onclick="window.kgenV892.confirmTx(\'heartbeat\')">確認送出 heartbeatClaim</button><button onclick="window.kgenV892.open(\'rules\')">查看規則</button></div>','整點心跳每小時一次，時間未到可能失敗。'); },
+      ignite:function(){ modal('轉日呼吸｜igniteAndClaim','<div class="kgen-v892-box">igniteAndClaim 只在 UTC 零點到零點十分開放。時間窗外可能失敗。</div><div class="kgen-v892-actions"><button class="primary" onclick="window.kgenV892.confirmTx(\'ignite\')">確認送出 igniteAndClaim</button><button onclick="window.kgenV892.open(\'rules\')">查看規則</button></div>','轉日呼吸只在 UTC 零點到零點十分開放。'); },
+      vow:function(){ modal('還願補血｜vowTo','<div class="kgen-v892-box">還願會使用 KGEN 補入 Heart 血庫，需要先 Approve。金額請填 KGEN。</div><div class="kgen-v892-actions"><button class="primary" onclick="window.kgenV892.confirmTx(\'vow\')">確認送出 vowTo</button><button onclick="window.templeOps&&templeOps.approve&&templeOps.approve()">先 Approve</button></div>','還願補血需要先授權 KGEN。'); },
+      lamp:function(){ modal('十三聖靈燈｜lightLamp','<div class="kgen-v892-box">一到十二為動物聖靈，第十三為人類、AI、超人、變形金剛文明覺醒席位。點燈會記錄交易時間，結束為除夕二十三點五十九分五十九秒。</div><div class="kgen-v892-actions"><button class="primary" onclick="window.kgenV892.confirmTx(\'lamp\')">確認送出 lightLamp</button><button onclick="window.kgenV892.open(\'rules\')">查看燈規則</button></div>','十三聖靈燈已開啟。'); },
+      wish:function(){ modal('許願上鏈｜makeWish','<div class="kgen-v892-box">許願只上鏈 bytes32 hash，不上鏈明文願望。請確認 hash 或願望文字已轉換。</div><div class="kgen-v892-actions"><button class="primary" onclick="window.kgenV892.confirmTx(\'wish\')">確認送出 makeWish</button><button onclick="window.kgenV892.open(\'rules\')">查看規則</button></div>','許願只上鏈 hash，不公開明文。'); },
+      rules:rulesPanel
+    });
+  }
+  function installDock(){
+    if($('kgenV892QuickDock')) return;
+    const d=document.createElement('div'); d.id='kgenV892QuickDock';
+    d.innerHTML='<button type="button" onclick="window.kgenV892.open(\'wallet\')">錢包聖盃</button><button type="button" onclick="window.kgenV892.open(\'fortune\')">發財金</button><button type="button" onclick="window.kgenV892.open(\'rules\')">規則活動</button><button type="button" onclick="window.kgenV892.open(\'service\')">語音客服</button>';
+    document.body.appendChild(d);
+  }
+  window.kgenV892={open:function(k){ if(k==='wallet') return walletPanel(); if(k==='fortune') return fortunePanel(); if(k==='rules') return rulesPanel(); return servicePanel(); }, close:closeModal, confirmTx, resetCup:function(){state.cup=0; localStorage.setItem('KGEN_12345_CUP_COUNT_V892','0'); msg('info','三次聖盃已重置。');}, speakRules:function(){speak('TempleHeart 規則。發財金一到八八八，三十天冷卻，每個 epoch 五百名。心跳每小時一次，呼吸在 UTC 零點到零點十分。還願、點燈需要 Approve。');}, voiceTest:function(){msg('success','客服語音測試成功。','客服語音已啟動。歡迎來到五指山悟空財神殿。');}};
+  function init(){ setVersion(); wrapOps(); bindButtons(); installDock(); const c=$('kgenV892CloseBtn'); if(c) c.onclick=closeModal; const m=$('kgenV892ServiceModal'); if(m) m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }); msg('success','V8.9.2 已啟動：下方按鍵與客服語音已補齊。','V八點九點二已啟動。下方按鍵與客服語音已補齊。'); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 
