@@ -4,10 +4,13 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
-BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
+VERSION: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260514-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BASE_FROM: KGEN-12345-HEART-UI-V9.2.3-RUNTIME-LAYOUT-RETUNE + V9.2.1 FULL bundle root bridge format
+BASE_SHA256: 53f4ba38112d0df38e590cd18c8eaf9cf7bc7f9026256411c131c1529f1cf556
 CHANGELOG:
+
+- [V9.2.4] ROOT BRIDGE BUNDLE GOVERNED: 補齊 V9.2.1 正式包格式，產出 index.html / 12345.html / 版本母檔 / wallet-12345.html / README / SHA256 manifest；保留 V9.2.3 版面調校，避免後續程式漏掉根目錄橋接入口。
 
 - [V8.9.3] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
@@ -50,7 +53,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN-12345-HEART-UI-V9.2.5</title>
+    <title>KGEN 12345 五指山悟空財神殿｜V9.2.4 Root Bridge Governed</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1445,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1692,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15555,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15662,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15807,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15899,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,8 +15927,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -16090,7 +16093,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,8 +16286,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -16341,7 +16344,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,8 +16430,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -16566,7 +16569,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,8 +16724,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -16909,7 +16912,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,8 +17032,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -17149,7 +17152,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17380,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17606,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17725,7 +17728,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -17827,7 +17830,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -19217,8 +19220,8 @@ CHANGELOG:
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
 1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
@@ -19258,7 +19261,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -19415,8 +19418,8 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -19581,7 +19584,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -19774,8 +19777,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -19832,7 +19835,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -19918,8 +19921,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -20057,7 +20060,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20212,8 +20215,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
 1. 右上「訊息紀錄」固定為 universe-nav 內部按鈕，寬度與上方按鈕一致，排在五指山神殿音響正下方。
@@ -20407,7 +20410,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20514,8 +20517,8 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -20702,7 +20705,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -20822,8 +20825,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
-BUILD: 20260513-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -20942,7 +20945,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -21170,7 +21173,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -21346,7 +21349,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -21575,7 +21578,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -21791,7 +21794,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -21890,7 +21893,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -21992,7 +21995,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -24326,7 +24329,7 @@ KGEN 12345 V9.2.0｜Layout Final Polish
 
 
 <!-- ============================================================
-KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
+KGEN 12345 V9.2.1｜LAYOUT POLISH 2
 先改版本識別，再做程式修正。
 - GA Evolution 移到中上空白區，不壓 K 線圖。
 - 隱藏功能列只保留一列，避免左下重複四鍵。
@@ -24468,14 +24471,14 @@ KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
 <script id="kgen-v920-layout-final-polish-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
-  const BUILD='20260513-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BUILD='20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
 
   function setVersion(){
-    document.title='KGEN-12345-HEART-UI-V9.2.5';
+    document.title='KGEN-12345-HEART-UI-V9.2.1';
     document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build').forEach(el=>{
       let t=(el.textContent||'');
       if(/V9\.|VERSION|SYSTEM ONLINE|KGEN-12345/.test(t)){
@@ -24580,7 +24583,7 @@ KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
 
 
 <!-- ============================================================
-KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
+KGEN 12345 V9.2.1｜LAYOUT POLISH 2
 版本治理：先升 VERSION / BUILD，再修 UI。
 - 移除底部 8 鍵內與上方隱藏功能列重複的 4 鍵。
 - 右下神規區塊改成接近左側悟空心臟窗的寬高比例。
@@ -24697,20 +24700,20 @@ KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
 <script id="kgen-v921-layout-polish-2-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE';
-  const BUILD='20260513-V9.2.5-ROOT-BRIDGE-RETUNE';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BUILD='20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function setVersion(){
-    document.title='KGEN-12345-HEART-UI-V9.2.5';
+    document.title='KGEN-12345-HEART-UI-V9.2.1';
     document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build').forEach(el=>{
       const t=el.textContent||'';
       if(/VERSION|SYSTEM ONLINE|KGEN-12345|V9\./.test(t)){
         el.textContent=t
           .replace(/KGEN-12345-HEART-UI-V[0-9.\-A-Z_]+/g,VERSION)
           .replace(/20260513-V[0-9.\-A-Z_]+/g,BUILD)
-          .replace(/V9\.2\.0/g,'V9.2.5')
-          .replace(/V9\.1\.[0-9]/g,'V9.2.5');
+          .replace(/V9\.2\.0/g,'V9.2.1')
+          .replace(/V9\.1\.[0-9]/g,'V9.2.1');
       }
     });
   }
@@ -24779,320 +24782,980 @@ KGEN 12345 V9.2.5｜ROOT BRIDGE RETUNE
 })();
 </script>
 
-<!-- =========================================================
-KGEN 12345｜V9.2.5 ROOT BRIDGE RETUNE PATCH
-Version governance: product/version/build/base hash are set before layout edits.
-Base: index_12345_Heart_UI_V9_2_1_LAYOUT_POLISH_2.html
-Base SHA256: a51972d117742a0e4134409239f76075881b4d60d1e8a5d92fcc995c48f6a9a2
-ChangeSet:
-- Preserve V9.2.1 root-bridge bundle format: index.html / 12345.html / wallet-12345.html / versioned full HTML / README.
-- Move GA EVOLUTION upward and right into the upper blank zone.
-- Remove duplicated bottom large button rows.
-- Keep the four edge quick buttons only, stacked on the left edge and moved upward.
-- Nudge left top live/control strip upward and the dark-matter / KGEN resource bars slightly downward.
-- Add right-bottom Mars mansion shortcut label: 火星齊天豪宅｜108000.
-========================================================= -->
-<style id="kgen-v925-root-bridge-retune-css">
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BUILD: 20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BASE_FROM: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
+BASE_SHA256: c96955e6bc2a024633d212afc7353a057d0b7fe36b4ff03cb8440ce28f6ae228
+CHANGESET:
+1. 右下神規 / coord-panel 移到中央圖前層，z-index 高於核心圖，避免被中圖蓋住。
+2. 左下四小功能鍵改為左側縱邊直列 dock。
+3. 底部主列刪除重複的：錢包聖盃、發財金、規則活動、客服導覽。
+4. 底部主列補齊：悟空心臟、雙鏡錄影、右側神規、齊天席位。
+5. GA Evolution 移回中上觀測位，不蓋 K 線圖與右側選單。
+6. Warp 曲速桿上移，不碰方向盤。
+7. 跨年倒數維持固定分鐘文字，不閃爍、不跳行。
+============================================================ -->
+
+<style id="kgen-v922-runtime-layout-governed-style">
 :root{
-  --kgen-v925-bottom-safe: max(132px, env(safe-area-inset-bottom, 0px));
-  --kgen-v925-left-edge-w: 78px;
+  --kgen-v922-left-edge: 10px;
+  --kgen-v922-edge-dock-bottom: 142px;
+  --kgen-v922-right-panel-w: min(438px, calc(100vw - 238px));
 }
 
-/* V9.2.5: top-left micro tune: status/control goes up; mass bars go down a little. */
-#kgen-v902-left-status,
-#kgen-live-status,
-#kgen-msg-strip,
-#kgen-status-strip,
-.kgen-live-status,
-.left-message,
-.hud-message,
-.system-ribbon,
-.system-message,
-#heart-toggle,
-#kgen-heart-toggle,
-.kgen-heart-toggle{
-  transform: translateY(-7px) !important;
+/* 版本顯示一致 */
+#ver-st::after{
+  content:"";
 }
 
-#kgen-heart-live-panel,
-#kgen-resource-bars,
-.resource-bars,
-.mass-bars,
-.wallet-bars,
-.asset-bars,
-.kgen-resource-bars{
-  transform: translateY(10px) !important;
-}
-
-/* V9.2.5: GA evolution moves up/right, not under the center image and not on the bottom controls. */
-#ga-matrix,
-.ga-matrix,
-#kgen-ga-evolution,
-.kgen-ga-evolution,
-.ga-evolution-panel,
-#kgen-v917-ga-evolution,
-#kgen-v921-ga-evolution{
+/* GA Evolution：中上觀測位 */
+.ga-matrix{
   position: fixed !important;
-  z-index: 980 !important;
-  top: 238px !important;
-  left: auto !important;
-  right: clamp(184px, 31vw, 302px) !important;
-  width: 142px !important;
-  max-width: 142px !important;
-  min-height: auto !important;
-  padding: 8px 9px !important;
-  pointer-events: auto !important;
-  transform: none !important;
-}
-
-/* V9.2.5: bottom duplicate rows are cancelled. */
-.footer-terminal,
-.bottom-terminal,
-.bottom-control-bar,
-.bottom-action-row,
-.bottom-actions,
-#footer-terminal,
-#bottom-actions,
-#kgen-footer-terminal,
-#kgen-bottom-actions,
-.kgen-footer-actions,
-.kgen-bottom-buttons,
-.action-floor,
-#v921-bottom-actions,
-#v922-bottom-actions,
-#v923-bottom-actions,
-#v924-bottom-actions{
-  display:none !important;
-  visibility:hidden !important;
-  opacity:0 !important;
-  pointer-events:none !important;
-  height:0 !important;
-  min-height:0 !important;
-  max-height:0 !important;
-  overflow:hidden !important;
-}
-
-/* V9.2.5: only the four small edge buttons survive, stacked on the left edge and moved upward. */
-#kgen-v917-quick-dock,
-#kgen-v921-quick-dock,
-#kgen-v922-quick-dock,
-#kgen-v923-quick-dock,
-#kgen-v924-quick-dock,
-.kgen-v917-quick-dock,
-.kgen-edge-quick-dock,
-.left-edge-actions,
-#left-edge-actions{
-  position: fixed !important;
-  left: 7px !important;
+  left: clamp(278px, 43vw, 390px) !important;
+  top: clamp(250px, 28vh, 318px) !important;
   right: auto !important;
-  bottom: calc(var(--kgen-v925-bottom-safe) + 126px) !important;
-  width: var(--kgen-v925-left-edge-w) !important;
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  grid-auto-rows: 23px !important;
-  gap: 5px !important;
-  z-index: 1045 !important;
+  bottom: auto !important;
+  width: 158px !important;
+  min-width: 158px !important;
+  max-width: 158px !important;
+  padding: 9px 10px !important;
   transform: none !important;
+  z-index: 260100 !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
+}
+.ga-matrix div:first-child{font-size:12px!important;margin-bottom:6px!important;}
+.ga-matrix .ga-stat{font-size:9.5px!important;margin-bottom:5px!important;}
+.ga-matrix .ga-bar{height:4px!important;margin-top:2px!important;}
+
+/* 右下神規：強制在中央圖前面 */
+#coord-panel,.coord-panel,#right-info-panel,.right-info-panel{
+  position: fixed !important;
+  right: 70px !important;
+  left: auto !important;
+  bottom: 285px !important;
+  top: auto !important;
+  width: var(--kgen-v922-right-panel-w) !important;
+  max-width: var(--kgen-v922-right-panel-w) !important;
+  min-height: 320px !important;
+  max-height: 45vh !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+  z-index: 260050 !important;
+  pointer-events: auto !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* 核心圖在後層 */
+#core-anchor{ z-index: 90 !important; }
+#core-window,.core-window,#core-orb,.core-orb,.mecha-core,.main-core{
+  z-index: 120 !important;
+}
+
+/* 左側縱邊四小功能鍵 */
+#kgen-v917-quick-dock{
+  display: grid !important;
+  position: fixed !important;
+  left: var(--kgen-v922-left-edge) !important;
+  bottom: var(--kgen-v922-edge-dock-bottom) !important;
+  width: 96px !important;
+  max-width: 96px !important;
+  grid-template-columns: 1fr !important;
+  grid-auto-rows: 28px !important;
+  gap: 5px !important;
+  z-index: 360000 !important;
   pointer-events: auto !important;
 }
-#kgen-v917-quick-dock button,
-#kgen-v921-quick-dock button,
-#kgen-v922-quick-dock button,
-#kgen-v923-quick-dock button,
-#kgen-v924-quick-dock button,
-.kgen-v917-quick-dock button,
-.kgen-edge-quick-dock button,
-.left-edge-actions button,
-#left-edge-actions button{
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 23px !important;
-  padding: 0 5px !important;
+#kgen-v917-quick-dock button{
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 2px 4px !important;
+  border-radius: 999px !important;
   font-size: 10px !important;
   line-height: 1 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  border-radius: 9px !important;
+  border: 1px solid rgba(255,215,120,.45) !important;
+  background: rgba(0,0,0,.78) !important;
+  color: #ffd778 !important;
+  box-shadow: 0 0 12px rgba(0,242,255,.16) !important;
+}
+#kgen-v917-hidden-panel{
+  left: 112px !important;
+  bottom: 142px !important;
+  width: min(360px, calc(100vw - 126px)) !important;
+  max-width: min(360px, calc(100vw - 126px)) !important;
+  max-height: 42vh !important;
+  overflow: auto !important;
+  z-index: 360001 !important;
 }
 
-/* V9.2.5: right-bottom Mars mansion entrance, above report/capture/sticker. */
-#kgen-v925-mars-mansion{
-  position: fixed !important;
-  right: 12px !important;
-  bottom: calc(var(--kgen-v925-bottom-safe) + 58px) !important;
-  z-index: 1060 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  min-width: 132px !important;
-  height: 34px !important;
-  padding: 0 13px !important;
-  border: 1px solid rgba(255,198,76,.88) !important;
-  border-radius: 999px !important;
-  background: linear-gradient(180deg, rgba(35,24,5,.92), rgba(9,14,16,.94)) !important;
-  color: #ffd86b !important;
-  box-shadow: 0 0 16px rgba(255,193,64,.28), inset 0 0 14px rgba(255,193,64,.10) !important;
-  font-weight: 900 !important;
-  font-size: 12px !important;
-  letter-spacing: .02em !important;
-  text-decoration: none !important;
+/* 底部主列：重複功能鍵砍掉 */
+.footer-terminal{
+  z-index: 300000 !important;
+  pointer-events: auto !important;
+  grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+}
+.footer-terminal .term-btn,.footer-terminal button{
   pointer-events: auto !important;
 }
-#kgen-v925-mars-mansion:active{ transform: translateY(1px) !important; }
-
-@media (max-width: 760px){
-  #ga-matrix,
-  .ga-matrix,
-  #kgen-ga-evolution,
-  .kgen-ga-evolution,
-  .ga-evolution-panel,
-  #kgen-v917-ga-evolution,
-  #kgen-v921-ga-evolution{
-    top: 246px !important;
-    right: clamp(172px, 29vw, 246px) !important;
-    width: 138px !important;
-    max-width: 138px !important;
-    font-size: 10px !important;
-  }
-  #kgen-v917-quick-dock,
-  #kgen-v921-quick-dock,
-  #kgen-v922-quick-dock,
-  #kgen-v923-quick-dock,
-  #kgen-v924-quick-dock,
-  .kgen-v917-quick-dock,
-  .kgen-edge-quick-dock,
-  .left-edge-actions,
-  #left-edge-actions{
-    left: 6px !important;
-    bottom: calc(var(--kgen-v925-bottom-safe) + 118px) !important;
-    width: 74px !important;
-  }
-  #kgen-v925-mars-mansion{
-    right: 10px !important;
-    bottom: calc(var(--kgen-v925-bottom-safe) + 52px) !important;
-    min-width: 124px !important;
-    height: 32px !important;
-    font-size: 11px !important;
-  }
+.footer-terminal .kgen-v922-remove-dup{
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
 }
 
-@media (max-width: 430px){
-  #ga-matrix,
-  .ga-matrix,
-  #kgen-ga-evolution,
-  .kgen-ga-evolution,
-  .ga-evolution-panel,
-  #kgen-v917-ga-evolution,
-  #kgen-v921-ga-evolution{
-    top: 250px !important;
-    right: 126px !important;
-    width: 132px !important;
+/* Warp 上移 */
+.warp-engine{
+  right: 8px !important;
+  bottom: 385px !important;
+  z-index: 260060 !important;
+}
+
+/* 倒數固定不閃 */
+#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,
+#kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]{
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  line-height: 20px !important;
+  overflow: hidden !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+@media(max-width:720px){
+  .ga-matrix{
+    left: clamp(250px, 42vw, 330px) !important;
+    top: clamp(246px, 27vh, 308px) !important;
+    width: 146px !important;
+    min-width: 146px !important;
+    max-width: 146px !important;
   }
-  #kgen-v925-mars-mansion{
-    right: 8px !important;
-    min-width: 112px !important;
-    padding: 0 10px !important;
+  #coord-panel,.coord-panel,#right-info-panel,.right-info-panel{
+    right: 58px !important;
+    bottom: 282px !important;
+    width: min(350px, calc(100vw - 178px)) !important;
+    max-width: min(350px, calc(100vw - 178px)) !important;
+    min-height: 310px !important;
+  }
+  .warp-engine{bottom: 385px !important;}
+}
+
+@media(max-width:560px){
+  .ga-matrix{
+    left: calc(50vw - 18px) !important;
+    top: 252px !important;
+    width: 138px !important;
+    min-width: 138px !important;
+    max-width: 138px !important;
+  }
+  #kgen-v917-quick-dock{
+    left: 8px !important;
+    bottom: 140px !important;
+    width: 92px !important;
+    max-width: 92px !important;
+  }
+  #coord-panel,.coord-panel,#right-info-panel,.right-info-panel{
+    right: 52px !important;
+    width: min(330px, calc(100vw - 156px)) !important;
+    max-width: min(330px, calc(100vw - 156px)) !important;
   }
 }
 </style>
-<script id="kgen-v925-root-bridge-retune-js">
-(function(){
-  const GOV = {
-    PRODUCT_ID: 'KGEN-12345-HEART-UI',
-    VERSION: '12345-TEMPLE-V9.2.5',
-    VERSION_LABEL: 'KGEN-12345-HEART-UI-V9.2.5-ROOT-BRIDGE-RETUNE',
-    BUILD: '2026-05-14T18:45:00+08:00',
-    BASE_FROM: 'index_12345_Heart_UI_V9_2_1_LAYOUT_POLISH_2.html',
-    BASE_SHA256: 'a51972d117742a0e4134409239f76075881b4d60d1e8a5d92fcc995c48f6a9a2',
-    CHANGESET: [
-      'root_bridge_bundle_format_preserved',
-      'ga_evolution_up_right_blank_zone',
-      'bottom_duplicate_buttons_removed',
-      'left_edge_four_buttons_up',
-      'top_left_status_up_resource_bars_down',
-      'mars_mansion_button_added'
-    ]
-  };
-  window.KGEN12345_BUILD = GOV;
-  window.KGEN12345_VERSION_GOVERNANCE = Object.assign({}, window.KGEN12345_VERSION_GOVERNANCE || {}, GOV);
 
-  function qsAll(sel){ return Array.from(document.querySelectorAll(sel)); }
-  function rmBottomDuplicates(){
-    const killSelectors = [
-      '.footer-terminal','.bottom-terminal','.bottom-control-bar','.bottom-action-row','.bottom-actions',
-      '#footer-terminal','#bottom-actions','#kgen-footer-terminal','#kgen-bottom-actions',
-      '.kgen-footer-actions','.kgen-bottom-buttons','.action-floor',
-      '#v921-bottom-actions','#v922-bottom-actions','#v923-bottom-actions','#v924-bottom-actions'
-    ];
-    qsAll(killSelectors.join(',')).forEach(el=>{
-      if(el && el.id !== 'kgen-v917-quick-dock'){
-        el.dataset.kgenV925Hidden = 'bottom-duplicate-cancelled';
-        el.style.setProperty('display','none','important');
+<script id="kgen-v922-runtime-layout-governed-script">
+(function(){
+  'use strict';
+
+  const PRODUCT_ID='KGEN-12345-HEART-UI';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BUILD='20260513-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BASE_FROM='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const BASE_SHA256='a51972d117742a0e4134409239f76075881b4d60d1e8a5d92fcc995c48f6a9a2';
+
+  window.KGEN12345_BUILD = { PRODUCT_ID, VERSION, BUILD, BASE_FROM, BASE_SHA256 };
+  window.KGEN12345_VERSION_GOVERNANCE = {
+    rule: 'content-hash-and-internal-version-first',
+    changedBeforeFeaturePatch: true
+  };
+
+  const $=(id)=>document.getElementById(id);
+
+  function speak(msg){
+    try{
+      if(window.speak) return window.speak(msg);
+      if(window.app && typeof app.speak==='function') return app.speak(msg);
+      if('speechSynthesis' in window){
+        const u=new SpeechSynthesisUtterance(String(msg||''));
+        u.lang='zh-TW';
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
       }
-    });
+    }catch(e){}
   }
-  function ensureMarsButton(){
-    if(document.getElementById('kgen-v925-mars-mansion')) return;
-    const a=document.createElement('a');
-    a.id='kgen-v925-mars-mansion';
-    a.href='../../mars/108000/index.html';
-    a.textContent='火星齊天豪宅｜108000';
-    a.title='KGEN 108000 Mars Mansion';
-    a.setAttribute('data-kgen-role','mars-mansion-entry');
-    document.body.appendChild(a);
+
+  function setVersion(){
+    try{
+      document.title='KGEN 12345 五指山悟空財神殿｜V9.2.4｜Root Bridge Governed';
+      const ver=$('ver-st');
+      if(ver) ver.textContent='VERSION '+VERSION;
+      document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build').forEach(el=>{
+        const t=el.textContent||'';
+        if(/VERSION|SYSTEM ONLINE|KGEN-12345|V9\./.test(t)){
+          el.textContent=t
+            .replace(/KGEN-12345-HEART-UI-V[0-9.\-A-Z_]+/g, VERSION)
+            .replace(/20260513-V[0-9.\-A-Z_]+/g, BUILD)
+            .replace(/V9\.2\.1/g,'V9.2.4')
+            .replace(/V9\.2\.0/g,'V9.2.4')
+            .replace(/V9\.1\.[0-9]/g,'V9.2.4');
+        }
+      });
+    }catch(e){}
   }
-  function normalizeQuickDock(){
-    let dock = document.getElementById('kgen-v917-quick-dock') ||
-               document.getElementById('kgen-v921-quick-dock') ||
-               document.querySelector('.kgen-v917-quick-dock,.kgen-edge-quick-dock,.left-edge-actions,#left-edge-actions');
-    if(!dock) return;
-    dock.id = dock.id || 'kgen-v917-quick-dock';
-    dock.dataset.kgenV925 = 'left-edge-four-buttons-only';
-    const keepText = ['錢包聖盃','發財金','規則活動','客服導覽'];
-    const buttons = Array.from(dock.querySelectorAll('button,a'));
-    if(buttons.length){
-      buttons.forEach(btn=>{
-        const txt=(btn.textContent||'').trim();
-        const keep=keepText.some(k=>txt.includes(k));
-        if(!keep && buttons.length>4){ btn.style.display='none'; }
+
+  function ensureEdgeDock(){
+    let dock=$('kgen-v917-quick-dock');
+    if(!dock){
+      dock=document.createElement('div');
+      dock.id='kgen-v917-quick-dock';
+      document.body.appendChild(dock);
+    }
+
+    const items=[
+      ['🔌 錢包聖盃','cup'],
+      ['🧧 發財金','fortune'],
+      ['📜 規則活動','rules'],
+      ['🗣 客服導覽','guide']
+    ];
+    const wanted=items.map(x=>x[0]).join('|');
+    const now=[...dock.children].map(x=>(x.textContent||'').trim()).join('|');
+
+    if(now!==wanted){
+      dock.innerHTML='';
+      items.forEach(([label,kind])=>{
+        const b=document.createElement('button');
+        b.type='button';
+        b.textContent=label;
+        b.dataset.v922Kind=kind;
+        b.onclick=function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          if(window.kgenV920 && typeof kgenV920.openHiddenPanel==='function'){
+            kgenV920.openHiddenPanel(kind);
+          }else if(window.kgenV917 && typeof kgenV917.openHiddenPanel==='function'){
+            kgenV917.openHiddenPanel(kind);
+          }else{
+            alert(label+'｜功能已開啟');
+          }
+          speak(label+'已開啟。');
+          return false;
+        };
+        dock.appendChild(b);
       });
     }
   }
-  function forceVersionLabels(){
-    const finalLabel = 'VERSION ' + GOV.VERSION_LABEL;
-    document.title = 'KGEN 12345 五指山悟空財神殿｜' + GOV.VERSION_LABEL;
-    const directIds = ['ver-st','version','version-label','kgen-version','kgen-build','build-label'];
-    directIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent = finalLabel; });
-    const re = /V(?:5\.8|5\.9|7(?:\.\d+){0,2}|8(?:\.\d+){0,2}|9\.2\.1)(?:[- ][A-Z0-9_ .]+)?|12345-TEMPLE-V(?:7|8|9\.2\.1)[A-Z0-9_ .-]*/g;
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode(node){
-        const p=node.parentElement;
-        if(!p) return NodeFilter.FILTER_REJECT;
-        const tag=p.tagName;
-        if(tag==='SCRIPT' || tag==='STYLE' || tag==='NOSCRIPT' || tag==='TEXTAREA') return NodeFilter.FILTER_REJECT;
-        return re.test(node.nodeValue || '') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+
+  function findRightPanel(){
+    return $('coord-panel') || document.querySelector('.coord-panel') ||
+           $('right-info-panel') || document.querySelector('.right-info-panel') ||
+           Array.from(document.querySelectorAll('div')).find(el=>{
+             try{
+               const t=(el.textContent||'').replace(/\s+/g,' ');
+               const r=el.getBoundingClientRect();
+               return r.width>120 && r.height>80 && r.left>window.innerWidth*0.35 &&
+                      /TempleHeart|神殿規則|Heart\s*\/\s*Brain|KGEN Token|LP Pair|11520/.test(t);
+             }catch(e){return false;}
+           });
+  }
+
+  function fixRightPanel(){
+    const p=findRightPanel();
+    if(!p) return;
+    p.style.position='fixed';
+    p.style.right='70px';
+    p.style.left='auto';
+    p.style.bottom='285px';
+    p.style.top='auto';
+    p.style.width='min(438px, calc(100vw - 238px))';
+    p.style.maxWidth='min(438px, calc(100vw - 238px))';
+    p.style.minHeight='320px';
+    p.style.maxHeight='45vh';
+    p.style.overflow='auto';
+    p.style.zIndex='260050';
+    p.style.pointerEvents='auto';
+  }
+
+  function toggleRightPanel(ev){
+    if(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    }
+    const p=findRightPanel();
+    const closed=document.body.classList.toggle('kgen-v922-right-closed');
+    if(p){
+      p.style.display=closed?'none':'block';
+      p.style.visibility=closed?'hidden':'visible';
+      p.style.pointerEvents=closed?'none':'auto';
+    }
+    speak(closed?'右側神規已收合。':'右側神規已展開。');
+    return false;
+  }
+
+  function fixFooterButtons(){
+    const footer=document.querySelector('.footer-terminal');
+    if(!footer) return;
+    const btns=[...footer.querySelectorAll('button,.term-btn')];
+
+    btns.forEach(b=>{
+      b.classList.remove('kgen-v922-remove-dup');
+      b.removeAttribute('aria-hidden');
+    });
+
+    // 砍掉和左側四小鍵重複的按鈕
+    btns.forEach(b=>{
+      const t=(b.textContent||'').replace(/\s+/g,'');
+      if(/錢包聖盃|發財金|規則活動|客服導覽/.test(t)){
+        b.classList.add('kgen-v922-remove-dup');
+        b.setAttribute('aria-hidden','true');
       }
     });
-    const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(n=>{ n.nodeValue = (n.nodeValue || '').replace(re, GOV.VERSION_LABEL); });
+
+    const visible=btns.filter(b=>!b.classList.contains('kgen-v922-remove-dup'));
+    const labels=[
+      ['📸<br>拍照', function(){try{app.capture()}catch(e){}}],
+      ['🎥<br>錄影', function(){try{app.toggleRec()}catch(e){}}],
+      ['🌙<br>前鏡多方', function(){try{app.cam('user')}catch(e){}}],
+      ['🌌<br>後鏡空方', function(){try{app.cam('environment')}catch(e){}}],
+      ['💚<br>悟空心臟', function(ev){
+        if(window.kgenV916ToggleHeartPanel) return window.kgenV916ToggleHeartPanel(ev);
+        if(window.kgenV920 && typeof kgenV920.openHiddenPanel==='function') return kgenV920.openHiddenPanel('cup');
+        speak('悟空心臟操作窗已切換。');
+      }],
+      ['🎬<br>雙鏡錄影', function(){try{app.toggleRec()}catch(e){}}],
+      ['🧭<br>右側神規', toggleRightPanel],
+      ['👑<br>齊天席位', function(){alert('齊天席位｜Seat Panel 準備中');}]
+    ];
+
+    visible.slice(0,8).forEach((b,i)=>{
+      if(!labels[i]) return;
+      b.innerHTML=labels[i][0];
+      b.onclick=function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        return labels[i][1](ev);
+      };
+    });
   }
-  function markVersion(){
-    document.documentElement.setAttribute('data-kgen-product-id', GOV.PRODUCT_ID);
-    document.documentElement.setAttribute('data-kgen-version', GOV.VERSION);
-    document.documentElement.setAttribute('data-kgen-build', GOV.BUILD);
-    forceVersionLabels();
+
+  let lastCountdown='';
+  function stableCountdown(){
+    const now=new Date();
+    let target=new Date(now.getFullYear(),11,31,23,59,59);
+    if(now>target) target=new Date(now.getFullYear()+1,11,31,23,59,59);
+    let sec=Math.max(0,Math.floor((target-now)/1000));
+    const d=Math.floor(sec/86400); sec%=86400;
+    const h=Math.floor(sec/3600); sec%=3600;
+    const m=Math.floor(sec/60);
+    const txt='距跨年：'+d+'天 '+String(h).padStart(2,'0')+'時'+String(m).padStart(2,'0')+'分';
+    if(txt===lastCountdown) return;
+    lastCountdown=txt;
+    document.querySelectorAll('#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]').forEach(el=>{
+      const t=el.textContent||'';
+      if(t.includes('跨年') || t.includes('12/31') || /\d+天/.test(t)){
+        el.textContent=txt;
+        el.style.animation='none';
+        el.style.transition='none';
+        el.style.opacity='1';
+        el.style.whiteSpace='nowrap';
+        el.style.height='20px';
+        el.style.lineHeight='20px';
+        el.style.overflow='hidden';
+      }
+    });
   }
-  function boot(){
-    markVersion();
-    rmBottomDuplicates();
-    normalizeQuickDock();
+
+  function init(){
+    setVersion();
+    ensureEdgeDock();
+    fixFooterButtons();
+    fixRightPanel();
+    stableCountdown();
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('load', function(){
+    init();
+    setTimeout(init,600);
+    setTimeout(init,1600);
+  });
+  setInterval(function(){
+    setVersion();
+    ensureEdgeDock();
+    fixFooterButtons();
+    fixRightPanel();
+  },1500);
+  setInterval(stableCountdown,30000);
+
+  window.kgenV922RuntimeLayoutGoverned={
+    init,
+    setVersion,
+    ensureEdgeDock,
+    fixFooterButtons,
+    fixRightPanel,
+    toggleRightPanel,
+    stableCountdown
+  };
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION PATCH: KGEN-12345-HEART-UI-V9.2.3-RUNTIME-LAYOUT-RETUNE
+BUILD: 20260514-V9.2.3-RUNTIME-LAYOUT-RETUNE
+BASE_FROM: KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+BASE_SHA256: f81463994017c035b7d2ada9efce85004cefa8d1ec039a466b621f5703c5d12e
+CHANGESET:
+1. GA Evolution 往上、往右移入中上空白觀測區，避免壓住左側四宮格與 K 線圖。
+2. 取消底部主列四個重複按鈕，保留左側縱邊四小鍵作為唯一快速入口。
+3. 左側縱邊四小鍵整組上移，避免貼近底部滑桿與手機瀏覽器列。
+4. 左上 BNB 暗物質與 KGEN 質量條往下微調；悟空財神殿控制台與系統訊息往上微調。
+5. 右下新增「火星齊天豪宅」入口鍵，對應 108000 Mars / KUFO 豪宅區。
+6. 右下神規區塊維持在中央圖前層，不被核心圖遮住。
+============================================================ -->
+
+<style id="kgen-v923-runtime-layout-retune-style">
+:root{
+  --kgen-v923-edge-dock-bottom: 226px;
+  --kgen-v923-left-edge: 8px;
+}
+
+/* V9.2.3 版本顯示最後鎖定 */
+#ver-st{
+  white-space: normal !important;
+}
+
+/* 左上：控制台與訊息區塊往上微調 */
+.hud-top{
+  transform: translateY(-7px) !important;
+}
+.brand-section{
+  transform: translateY(-6px) !important;
+}
+#kgen-heart-toggle{
+  transform: translateY(-7px) !important;
+}
+.system-bar,.system-chip,.status-line,.sys-st{
+  transform: translateY(-5px) !important;
+}
+
+/* 左上：暗物質 / 質量條往下微調 */
+.resource-bars{
+  transform: translateY(12px) !important;
+}
+
+/* GA Evolution：往上、往右，放到星空空白處 */
+.ga-matrix{
+  position: fixed !important;
+  left: min(calc(50vw + 22px), calc(100vw - 146px)) !important;
+  top: 210px !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 138px !important;
+  min-width: 138px !important;
+  max-width: 138px !important;
+  padding: 8px 9px !important;
+  transform: none !important;
+  z-index: 365000 !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
+}
+.ga-matrix div:first-child{font-size:11px!important;margin-bottom:5px!important;}
+.ga-matrix .ga-stat{font-size:9px!important;margin-bottom:4px!important;}
+.ga-matrix .ga-bar{height:4px!important;margin-top:2px!important;}
+
+/* 底部主列四鍵取消：不再佔據畫面下緣 */
+.footer-terminal{
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+.footer-terminal *{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+/* 左側縱邊四小鍵上移 */
+#kgen-v917-quick-dock{
+  display: grid !important;
+  position: fixed !important;
+  left: var(--kgen-v923-left-edge) !important;
+  bottom: var(--kgen-v923-edge-dock-bottom) !important;
+  width: 96px !important;
+  max-width: 96px !important;
+  grid-template-columns: 1fr !important;
+  grid-auto-rows: 28px !important;
+  gap: 6px !important;
+  z-index: 380000 !important;
+  pointer-events: auto !important;
+}
+#kgen-v917-quick-dock button{
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 2px 5px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+#kgen-v917-hidden-panel{
+  left: 112px !important;
+  bottom: var(--kgen-v923-edge-dock-bottom) !important;
+  width: min(360px, calc(100vw - 126px)) !important;
+  max-width: min(360px, calc(100vw - 126px)) !important;
+  max-height: 42vh !important;
+  overflow: auto !important;
+  z-index: 380001 !important;
+}
+
+/* 右下神規維持前層 */
+#coord-panel,.coord-panel,#right-info-panel,.right-info-panel{
+  z-index: 360050 !important;
+}
+#core-anchor{ z-index: 90 !important; }
+#core-window,.core-window,#core-orb,.core-orb,.mecha-core,.main-core{
+  z-index: 120 !important;
+}
+
+/* 右下新增 108000 火星齊天豪宅入口 */
+#kgen-v923-mars-mansion-btn{
+  position: fixed !important;
+  right: 9px !important;
+  bottom: 170px !important;
+  width: 142px !important;
+  min-height: 32px !important;
+  z-index: 390000 !important;
+  border: 1px solid rgba(255,213,95,.85) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, rgba(255,196,55,.95), rgba(255,133,25,.92)) !important;
+  color: #111 !important;
+  font-weight: 900 !important;
+  font-size: 12px !important;
+  letter-spacing: .02em !important;
+  box-shadow: 0 0 18px rgba(255,201,75,.42), 0 0 18px rgba(0,242,255,.18) inset !important;
+  pointer-events: auto !important;
+  text-align: center !important;
+}
+#kgen-v923-mars-mansion-btn:active{ transform: translateY(1px) scale(.99) !important; }
+
+@media(max-width:720px){
+  .ga-matrix{
+    left: min(calc(50vw + 14px), calc(100vw - 144px)) !important;
+    top: 208px !important;
+    width: 136px !important;
+    min-width: 136px !important;
+    max-width: 136px !important;
+  }
+  #kgen-v917-quick-dock{
+    bottom: 218px !important;
+  }
+  #kgen-v917-hidden-panel{
+    bottom: 218px !important;
+  }
+  #kgen-v923-mars-mansion-btn{
+    right: 8px !important;
+    bottom: 166px !important;
+    width: 138px !important;
+  }
+}
+
+@media(max-width:560px){
+  .ga-matrix{
+    left: min(calc(50vw + 8px), calc(100vw - 142px)) !important;
+    top: 204px !important;
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+  }
+  #kgen-v917-quick-dock{
+    left: 7px !important;
+    bottom: 212px !important;
+    width: 92px !important;
+    max-width: 92px !important;
+  }
+  #kgen-v917-hidden-panel{
+    bottom: 212px !important;
+    left: 106px !important;
+  }
+  #kgen-v923-mars-mansion-btn{
+    right: 8px !important;
+    bottom: 158px !important;
+    width: 132px !important;
+    font-size: 11px !important;
+  }
+}
+</style>
+
+<script id="kgen-v923-runtime-layout-retune-script">
+(function(){
+  'use strict';
+
+  const PRODUCT_ID='KGEN-12345-HEART-UI';
+  const VERSION='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BUILD='20260514-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BASE_FROM='KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED';
+  const BASE_SHA256='f81463994017c035b7d2ada9efce85004cefa8d1ec039a466b621f5703c5d12e';
+
+  window.KGEN12345_BUILD={PRODUCT_ID,VERSION,BUILD,BASE_FROM,BASE_SHA256};
+  window.KGEN12345_VERSION_GOVERNANCE={
+    rule:'content-hash-and-internal-version-first',
+    changedBeforeFeaturePatch:true,
+    activePatch:'V9.2.4 root bridge bundle governed',
+    changes:[
+      'move GA Evolution up and right',
+      'hide lower duplicate button row',
+      'move left edge quick dock upward',
+      'micro-adjust top-left control/resource zones',
+      'add 108000 Mars Qitian Mansion button'
+    ]
+  };
+
+  const VERSION_RE=/KGEN-12345-HEART-UI-V[0-9.]+[-A-Z0-9_]*|V9\.2\.2|V9\.2\.1|V9\.2\.0|V9\.1\.[0-9]|V8\.0|V7\.[0-9]+|V5\.8/g;
+
+  function speak(msg){
+    try{
+      if(window.speak) return window.speak(msg);
+      if(window.app && typeof app.speak==='function') return app.speak(msg);
+      if('speechSynthesis' in window){
+        const u=new SpeechSynthesisUtterance(String(msg||''));
+        u.lang='zh-TW';
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+
+  function setVersion(){
+    try{
+      document.title='KGEN 12345 五指山悟空財神殿｜V9.2.4｜Root Bridge Governed';
+      const ver=document.getElementById('ver-st');
+      if(ver) ver.textContent='VERSION '+VERSION;
+      document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build,[id*="version"],[id*="build"]').forEach(el=>{
+        const t=el.textContent||'';
+        if(/VERSION|SYSTEM ONLINE|KGEN-12345|V9\.|V8\.|V7\.|V5\./.test(t)){
+          el.textContent=t.replace(VERSION_RE,VERSION).replace(/20260513-V9\.2\.2[-A-Z0-9_]*/g,BUILD);
+        }
+      });
+    }catch(e){}
+  }
+
+  function hideFooter(){
+    const footer=document.querySelector('.footer-terminal');
+    if(!footer) return;
+    footer.style.display='none';
+    footer.style.visibility='hidden';
+    footer.style.pointerEvents='none';
+    footer.style.opacity='0';
+    footer.style.height='0';
+    footer.style.maxHeight='0';
+    footer.setAttribute('aria-hidden','true');
+  }
+
+  function ensureEdgeDock(){
+    let dock=document.getElementById('kgen-v917-quick-dock');
+    if(!dock){
+      dock=document.createElement('div');
+      dock.id='kgen-v917-quick-dock';
+      document.body.appendChild(dock);
+    }
+    const items=[
+      ['🔌 錢包聖盃','cup'],
+      ['🧧 發財金','fortune'],
+      ['📜 規則活動','rules'],
+      ['🗣 客服導覽','guide']
+    ];
+    if(dock.children.length!==4 || !/錢包聖盃/.test(dock.textContent||'')){
+      dock.innerHTML='';
+      items.forEach(([label,kind])=>{
+        const b=document.createElement('button');
+        b.type='button';
+        b.textContent=label;
+        b.dataset.v923Kind=kind;
+        b.onclick=function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          if(window.kgenV920 && typeof kgenV920.openHiddenPanel==='function') kgenV920.openHiddenPanel(kind);
+          else if(window.kgenV917 && typeof kgenV917.openHiddenPanel==='function') kgenV917.openHiddenPanel(kind);
+          else alert(label+'｜功能已開啟');
+          speak(label+'已開啟。');
+          return false;
+        };
+        dock.appendChild(b);
+      });
+    }
+  }
+
+  function ensureMarsButton(){
+    let btn=document.getElementById('kgen-v923-mars-mansion-btn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.id='kgen-v923-mars-mansion-btn';
+      btn.type='button';
+      document.body.appendChild(btn);
+    }
+    btn.textContent='🏠 火星齊天豪宅';
+    btn.title='108000 Mars / KUFO 齊天豪宅入口';
+    btn.onclick=function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      const url='https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/108000/';
+      try{ window.open(url,'_self'); }
+      catch(e){ location.href=url; }
+      return false;
+    };
+  }
+
+  function microNudgeTopLeft(){
+    try{
+      const rb=document.querySelector('.resource-bars');
+      if(rb) rb.style.transform='translateY(12px)';
+      const hud=document.querySelector('.hud-top');
+      if(hud) hud.style.transform='translateY(-7px)';
+      const brand=document.querySelector('.brand-section');
+      if(brand) brand.style.transform='translateY(-6px)';
+      const heart=document.getElementById('kgen-heart-toggle');
+      if(heart) heart.style.transform='translateY(-7px)';
+    }catch(e){}
+  }
+
+  function fixRightPanelLayer(){
+    try{
+      const p=document.getElementById('coord-panel') || document.querySelector('.coord-panel') || document.getElementById('right-info-panel') || document.querySelector('.right-info-panel');
+      if(p) p.style.zIndex='360050';
+    }catch(e){}
+  }
+
+  function init(){
+    setVersion();
+    hideFooter();
+    ensureEdgeDock();
     ensureMarsButton();
+    microNudgeTopLeft();
+    fixRightPanelLayer();
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
-  else boot();
-  setTimeout(boot, 600);
-  setTimeout(boot, 1800);
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setInterval(init,700);
+  window.kgenV923={setVersion,hideFooter,ensureEdgeDock,ensureMarsButton,microNudgeTopLeft,fixRightPanelLayer};
+})();
+</script>
+
+
+
+<!-- =========================================================
+  V9.2.4 ROOT BRIDGE BUNDLE GOVERNED PATCH
+  PRODUCT_ID: KGEN-12345-HEART-UI
+  VERSION: 12345-TEMPLE-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED
+  BUILD: 2026-05-14T16:24:00+08:00
+  BASE_FROM: V9.2.3_RUNTIME_LAYOUT_RETUNE + V9.2.1_FULL_BUNDLE_FORMAT
+  CHANGESET:
+  1. Bundle structure restored to V9.2.1 format: 12345.html + versioned HTML + wallet bridge + README.
+  2. index.html included for direct folder deployment.
+  3. GA panel reinforced upward/right into blank star field.
+  4. Bottom duplicate graphic buttons are suppressed; four side buttons remain on left vertical edge and moved upward.
+  5. Right lower Mars/108000 entry button is retained as「火星齊天豪宅」.
+========================================================= -->
+<style id="kgen-v924-root-bridge-bundle-governed-style">
+  :root{
+    --kgen-v924-side-ops-bottom: clamp(158px, 18vh, 210px);
+    --kgen-v924-ga-top: clamp(118px, 16vh, 168px);
+    --kgen-v924-ga-left: min(53vw, calc(100vw - 190px));
+  }
+  @media (max-width: 920px){
+    #kgen-v923-ga,
+    #kgen-v922-ga,
+    #kgen-v924-ga,
+    [id*="ga"][id*="923"],
+    [id*="ga"][id*="922"],
+    [class*="ga-evolution"],
+    [class*="GAEvolution"]{
+      position:absolute!important;
+      top:var(--kgen-v924-ga-top)!important;
+      left:var(--kgen-v924-ga-left)!important;
+      right:auto!important;
+      transform:none!important;
+      z-index:75!important;
+      width:clamp(92px, 16vw, 128px)!important;
+      max-width:128px!important;
+      pointer-events:none!important;
+    }
+    .kgen-v923-edge-ops,
+    .kgen-v924-edge-ops{
+      position:fixed!important;
+      left:2px!important;
+      bottom:var(--kgen-v924-side-ops-bottom)!important;
+      z-index:86!important;
+    }
+    .kgen-v923-edge-ops button,
+    .kgen-v924-edge-ops button{
+      height:18px!important;
+      min-height:18px!important;
+      padding:0 5px!important;
+      font-size:9px!important;
+      line-height:18px!important;
+    }
+    #footer-terminal,
+    .footer-terminal,
+    .footer-actions,
+    .bottom-actions,
+    .bottom-action-grid,
+    .mobile-footer-actions,
+    .dock-actions,
+    .action-dock,
+    .quick-actions-bottom,
+    [data-kgen-bottom-actions="true"],
+    [data-role="bottom-actions"]{
+      display:none!important;
+      visibility:hidden!important;
+      pointer-events:none!important;
+      height:0!important;
+      min-height:0!important;
+      max-height:0!important;
+      overflow:hidden!important;
+    }
+    .left-market-panel{
+      top:132px!important;
+    }
+    .resource-panel,
+    .wallet-progress,
+    .mass-progress,
+    .token-progress,
+    [class*="wallet"][class*="panel"],
+    [class*="progress"][class*="panel"]{
+      margin-top:6px!important;
+    }
+  }
+</style>
+<script id="kgen-v924-root-bridge-bundle-governed-script">
+(function(){
+  const BUILD = {
+    PRODUCT_ID: 'KGEN-12345-HEART-UI',
+    VERSION: '12345-TEMPLE-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED',
+    BUILD: '2026-05-14T16:24:00+08:00',
+    BASE_FROM: 'V9.2.3_RUNTIME_LAYOUT_RETUNE + V9.2.1_FULL_BUNDLE_FORMAT',
+    BASE_SHA256: 'c96955e6bc2a024633d212afc7353a057d0b7fe36b4ff03cb8440ce28f6ae228',
+    CHANGESET: [
+      'restore root bridge bundle files',
+      'include index.html plus 12345.html full entry',
+      'preserve wallet-12345.html bridge',
+      'reinforce requested mobile layout retune',
+      'remove duplicate bottom graphic buttons'
+    ]
+  };
+  window.KGEN12345_BUILD = BUILD;
+  window.KGEN12345_VERSION_GOVERNANCE = Object.assign({}, window.KGEN12345_VERSION_GOVERNANCE || {}, {
+    product: BUILD.PRODUCT_ID,
+    version: BUILD.VERSION,
+    build: BUILD.BUILD,
+    rootBridgeRequired: true,
+    requiredBundleFiles: ['index.html','12345.html','index_12345_Heart_UI_V9_2_4_ROOT_BRIDGE_BUNDLE_GOVERNED.html','wallet-12345.html','README_V9_2_4.txt','SHA256SUMS_V9_2_4.txt'],
+    rule: 'Do not judge by filename or file size. Verify internal version fields and SHA256.'
+  });
+
+  function text(el){ return (el && (el.innerText || el.textContent) || '').replace(/\s+/g,' ').trim(); }
+  function setTextVersion(){
+    document.title = 'KGEN 12345 五指山悟空財神殿｜V9.2.4 Root Bridge Governed';
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el.childElementCount === 0){
+        let t = el.textContent || '';
+        if(/KGEN-12345-HEART-UI-V9\.2\.[0-3]/.test(t) || /V9\.2\.[0-3]/.test(t)){
+          el.textContent = t
+            .replace(/KGEN-12345-HEART-UI-V9\.2\.[0-3][A-Z0-9_\-.]*/g,'KGEN-12345-HEART-UI-V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED')
+            .replace(/V9\.2\.[0-3][A-Z0-9_\-.]*/g,'V9.2.4-ROOT-BRIDGE-BUNDLE-GOVERNED');
+        }
+      }
+    });
+  }
+
+  function ensureMarsButton(){
+    const labels = ['火星齊天豪宅','108000 齊天豪宅','齊天豪宅'];
+    const exists = Array.from(document.querySelectorAll('a,button')).some(el => labels.some(s => text(el).includes(s)));
+    if(exists) return;
+    const rightButtons = Array.from(document.querySelectorAll('a,button')).filter(el=>{
+      const r = el.getBoundingClientRect();
+      return r.width > 80 && r.left > innerWidth * 0.55 && r.top < innerHeight * 0.48;
+    });
+    const host = rightButtons.length ? rightButtons[rightButtons.length - 1].parentElement : document.body;
+    const a = document.createElement('a');
+    a.className = 'kgen-v924-mars-button';
+    a.textContent = '火星齊天豪宅';
+    a.href = './108000mars/index.html';
+    a.style.cssText = 'display:block;box-sizing:border-box;text-align:center;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,190,70,.75);background:linear-gradient(180deg,rgba(40,26,4,.92),rgba(8,16,18,.94));color:#ffe28a;text-decoration:none;font-weight:900;letter-spacing:.08em;box-shadow:0 0 16px rgba(255,180,50,.28);';
+    host.appendChild(a);
+  }
+
+  function hideDuplicateBottomRows(){
+    const terms = ['錢包聖盃','發財金','規則法勸','客服導覽','悟空心臟','雙魂夢影','右臂神眼','前線多方','後燼空方'];
+    const nodes = Array.from(document.querySelectorAll('div,section,nav,footer'));
+    nodes.forEach(el=>{
+      const t = text(el);
+      if(!t) return;
+      const hitCount = terms.reduce((n,s)=> n + (t.includes(s) ? 1 : 0), 0);
+      const r = el.getBoundingClientRect();
+      if(hitCount >= 3 && r.top > innerHeight * 0.70 && !el.classList.contains('kgen-v923-edge-ops') && !el.classList.contains('kgen-v924-edge-ops')){
+        el.style.setProperty('display','none','important');
+        el.style.setProperty('visibility','hidden','important');
+        el.style.setProperty('height','0','important');
+        el.style.setProperty('max-height','0','important');
+        el.style.setProperty('overflow','hidden','important');
+        el.setAttribute('data-kgen-v924-hidden-bottom-duplicate','true');
+      }
+    });
+  }
+
+  function relayoutEdgeButtons(){
+    const edge = document.querySelector('.kgen-v923-edge-ops,.kgen-v924-edge-ops');
+    if(edge){
+      edge.classList.add('kgen-v924-edge-ops');
+      edge.style.setProperty('bottom','var(--kgen-v924-side-ops-bottom)','important');
+      edge.style.setProperty('left','2px','important');
+      edge.style.setProperty('z-index','86','important');
+    }
+  }
+
+  function tick(){
+    setTextVersion();
+    ensureMarsButton();
+    hideDuplicateBottomRows();
+    relayoutEdgeButtons();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick); else tick();
+  window.addEventListener('load', tick);
+  window.addEventListener('resize', tick);
+  setInterval(tick, 900);
 })();
 </script>
 
