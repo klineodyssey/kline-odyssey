@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,7 +15924,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -16090,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16283,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16427,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16721,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,7 +17029,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -17149,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17603,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17718,6 +17718,234 @@ MESSAGE / RECORDER / COUNTDOWN FIX
     setTimeout(()=>push('success','V9.0.3 音響、訊息與左上 HUD 對齊完成。',4000),800);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
+修正：
+1. GA Evolution 移到右下曲速引擎縱桿上方空白區。
+2. 左上控制台與暗物質／質量整組下移，不擋品牌字與訊息列。
+3. 三聖盃重做為「正正、正反、反正、反反」；正反／反正才是聖盃。
+4. 跨年倒數刪掉舊閃爍刷新，改單一固定寬度顯示，避免畫面跳動。
+============================================================ -->
+<style id="kgen-v904-ga-cup-countdown-style">
+  :root{
+    --kgen-left-x:18px;
+    --kgen-left-w:min(430px, calc(48vw - 24px));
+    --kgen-message-top:76px;
+    --kgen-heart-toggle-top:124px;
+    --kgen-bars-top:172px;
+    --kgen-heart-panel-top:292px;
+  }
+  /* 讓頂部品牌字與系統列呼吸，不再被左上控制台壓住 */
+  #kgen-v902-left-status{
+    top:var(--kgen-message-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    height:32px!important;
+    line-height:16px!important;
+    overflow:hidden!important;
+    white-space:normal!important;
+  }
+  #kgen-heart-toggle{
+    top:var(--kgen-heart-toggle-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+  }
+  #brand-badge{
+    top:58px!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    pointer-events:none!important;
+    opacity:.88!important;
+  }
+  .resource-bars{
+    top:var(--kgen-bars-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+  }
+  #kgen-heart-live-panel{
+    top:var(--kgen-heart-panel-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - var(--kgen-heart-panel-top) - 126px)!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding-bottom:160px!important;
+  }
+  #bet-live-panel.bet-live-panel{
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - 368px)!important;
+    padding-bottom:180px!important;
+  }
+  /* GA Evolution 轉移到右下曲速縱桿上方，不再卡在上方資訊區 */
+  .ga-matrix{
+    left:auto!important;
+    right:92px!important;
+    top:auto!important;
+    bottom:705px!important;
+    width:178px!important;
+    transform:none!important;
+    z-index:135!important;
+    opacity:.96!important;
+  }
+  /* 三聖盃新版顯示 */
+  .v904-cup-result{display:block;margin-top:4px;font-size:11px;color:#7ff3ff;line-height:1.35;min-height:28px;}
+  .v714-cup.done{background:linear-gradient(135deg,rgba(255,215,120,.42),rgba(0,242,255,.16))!important;color:#ffe9a8!important;}
+  .v714-cup.fail{background:rgba(255,70,70,.13)!important;border-color:rgba(255,120,120,.45)!important;color:#ffd0d0!important;}
+  #v714-cup-status,#kh-cup-status{font-variant-numeric:tabular-nums;line-height:1.45;min-height:34px;}
+  #kh-ny-slot{font-variant-numeric:tabular-nums;white-space:nowrap!important;}
+  #kh-ny-countdown{font-variant-numeric:tabular-nums;min-height:42px!important;line-height:1.45!important;}
+  @media(max-width:760px){
+    :root{
+      --kgen-left-x:12px;
+      --kgen-left-w:min(330px, calc(50vw - 18px));
+      --kgen-message-top:78px;
+      --kgen-heart-toggle-top:126px;
+      --kgen-bars-top:174px;
+      --kgen-heart-panel-top:298px;
+    }
+    #kgen-v902-left-status{font-size:10px!important;height:30px!important;}
+    #kgen-heart-live-panel{max-height:calc(100vh - 360px)!important;}
+    #bet-live-panel.bet-live-panel{max-height:48vh!important;}
+    .ga-matrix{right:82px!important;bottom:590px!important;width:150px!important;padding:10px!important;}
+  }
+</style>
+<script id="kgen-v904-ga-cup-countdown-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
+  const $=(id)=>document.getElementById(id);
+  function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
+  function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
+  function pad(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0');}
+  function fmtFixed(ms){
+    const total=Math.max(0,Math.floor(ms/1000));
+    const d=Math.floor(total/86400); const h=Math.floor(total%86400/3600); const m=Math.floor(total%3600/60); const sec=total%60;
+    return String(d).padStart(3,'0')+'天 '+pad(h)+':'+pad(m)+':'+pad(sec);
+  }
+  function nextTaiwanNewYear(){
+    const now=new Date();
+    let y=now.getUTCFullYear();
+    // target Taiwan 12/31 23:59:59 = UTC 12/31 15:59:59
+    let t=Date.UTC(y,11,31,15,59,59);
+    if(now.getTime()>t) t=Date.UTC(y+1,11,31,15,59,59);
+    return t;
+  }
+  let lastNy='';
+  function updateNyStable(){
+    const text=fmtFixed(nextTaiwanNewYear()-Date.now());
+    if(text===lastNy) return;
+    lastNy=text;
+    const slot=$('kh-ny-slot'); if(slot) slot.textContent=text;
+    const box=$('kh-ny-countdown'); if(box) box.innerHTML='<b>跨年倒數槽</b><br><span>距跨年：'+text+'</span><br><small>目標：12/31 23:59:59（台灣時間 UTC+8）</small>';
+    const ev=[...document.querySelectorAll('.v714-event')].find(x=>(x.textContent||'').includes('跨年倒數'));
+    if(ev){ const b=ev.querySelector('b'); if(b) b.textContent='12/31 跨年倒數'; const br=b&&b.nextSibling; }
+  }
+  function disableOldCountdownWriters(){
+    // 以屬性標記，避免舊 interval 寫入造成閃爍。用 requestAnimationFrame 後再覆蓋一次。
+    updateNyStable();
+    setTimeout(updateNyStable,60);
+    setTimeout(updateNyStable,260);
+  }
+  const CUP_RESULTS=[
+    {code:'正正', ok:false, text:'笑杯／陽陽：方向未定，請再請示。'},
+    {code:'正反', ok:true,  text:'聖盃：一正一反，允杯。'},
+    {code:'反正', ok:true,  text:'聖盃：一反一正，允杯。'},
+    {code:'反反', ok:false, text:'陰杯：時機未到，請重新整理心念。'}
+  ];
+  const cupState={};
+  function getCupBox(){ return $('v714-cupbox') || $('kh-cupbox'); }
+  function cupStatusText(){
+    const vals=[1,2,3].map(i=>cupState[i]).filter(Boolean);
+    const ok=vals.filter(v=>v.ok).length;
+    return {ok,total:vals.length,done:ok>=3};
+  }
+  function refreshCupStatus(){
+    const st=cupStatusText();
+    const text=st.done?'三次聖盃完成：3 / 3，可以領發財金。':'聖盃狀態：'+st.ok+' / 3。正反、反正才算聖盃。';
+    ['v714-cup-status','kh-cup-status','v57-cup-status'].forEach(id=>{const el=$(id); if(el) el.textContent=text;});
+    try{localStorage.setItem('k12345CupOk',st.done?'1':'0'); localStorage.setItem('k12345CupCount',String(st.ok));}catch(e){}
+    window.__templeCupCount=st.ok;
+    window.__templeCupOk=st.done;
+    return st;
+  }
+  function rebuildCupButtons(){
+    const box=getCupBox(); if(!box) return false;
+    const status=$('v714-cup-status') || $('kh-cup-status');
+    if(status) status.textContent='聖盃狀態：0 / 3。正反、反正才算聖盃。';
+    document.querySelectorAll('.v714-cup,#kh-cupbox button[id^="kh-cup-"]').forEach((btn,idx)=>{
+      const n=Number(btn.dataset.cup || (btn.id||'').replace(/\D/g,'') || (idx+1));
+      if(!n || n>3) return;
+      btn.dataset.cup=String(n);
+      if(!btn.querySelector('.v904-cup-label')){
+        btn.innerHTML='<span class="v904-cup-label">聖盃'+['一','二','三'][n-1]+'</span><span class="v904-cup-result">尚未擲杯</span>';
+      }
+      btn.onclick=function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        const r=CUP_RESULTS[Math.floor(Math.random()*CUP_RESULTS.length)];
+        cupState[n]=r;
+        btn.classList.toggle('done',!!r.ok); btn.classList.toggle('fail',!r.ok);
+        const rr=btn.querySelector('.v904-cup-result'); if(rr) rr.textContent=r.code+'｜'+(r.ok?'聖盃':'未允');
+        refreshCupStatus();
+        msg(r.ok?'success':'warn','聖盃'+['一','二','三'][n-1]+'：'+r.text);
+        say(r.ok?'聖盃成立。':'不是聖盃，請再請示。');
+        return false;
+      };
+    });
+    // 重置按鈕也接線
+    document.querySelectorAll('button').forEach(b=>{
+      const t=(b.textContent||'').trim();
+      if(t==='重置' && !b._v904CupReset){
+        b._v904CupReset=true;
+        b.addEventListener('click',function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          [1,2,3].forEach(i=>delete cupState[i]);
+          document.querySelectorAll('.v714-cup,#kh-cupbox button[id^="kh-cup-"]').forEach((x,idx)=>{x.classList.remove('done','fail'); const r=x.querySelector('.v904-cup-result'); if(r) r.textContent='尚未擲杯';});
+          refreshCupStatus(); msg('info','三聖盃已重置。'); say('三聖盃已重置。');
+        },true);
+      }
+    });
+    refreshCupStatus();
+    return true;
+  }
+  function patchFortuneGate(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').toLowerCase();
+      if((t.includes('fortune')||t.includes('發財金')) && !btn._v904FortuneGate){
+        btn._v904FortuneGate=true;
+        btn.addEventListener('click',function(ev){
+          const st=refreshCupStatus();
+          if(!st.done){ ev.preventDefault(); ev.stopImmediatePropagation(); msg('warn','請先完成三次聖盃：正反或反正才算。'); say('請先完成三次聖盃，正反或反正才算聖盃。'); return false; }
+        },true);
+      }
+    });
+  }
+  function applyLayout(){
+    const ga=document.querySelector('.ga-matrix');
+    if(ga && !ga.dataset.v904Moved){ ga.dataset.v904Moved='1'; msg('info','GA Evolution 已移到右下曲速引擎上方。'); }
+    const panel=$('kgen-heart-live-panel'); if(panel){ panel.style.overflowY='auto'; panel.style.paddingBottom='160px'; }
+    const bet=$('bet-live-panel'); if(bet){ bet.style.overflowY='auto'; bet.style.paddingBottom='180px'; }
+  }
+  function boot(){
+    applyLayout(); rebuildCupButtons(); patchFortuneGate(); disableOldCountdownWriters();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  setTimeout(boot,500); setTimeout(boot,1600); setTimeout(boot,3200);
+  setInterval(()=>{updateNyStable();},1000);
 })();
 </script>
 
@@ -18248,7 +18476,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -18289,7 +18517,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -18446,7 +18674,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -18612,7 +18840,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -18805,7 +19033,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -18863,7 +19091,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -18949,7 +19177,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -19088,7 +19316,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19243,7 +19471,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -19438,7 +19666,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19545,7 +19773,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -19733,7 +19961,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -19853,7 +20081,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -19973,7 +20201,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -20201,7 +20429,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -20377,7 +20605,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -20606,7 +20834,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -20822,7 +21050,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -20914,6 +21142,234 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
     setTimeout(()=>msg('success','V9.0.3：音響按鍵、訊息列與左上 HUD 已重新對齊。',4200),600);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
+修正：
+1. GA Evolution 移到右下曲速引擎縱桿上方空白區。
+2. 左上控制台與暗物質／質量整組下移，不擋品牌字與訊息列。
+3. 三聖盃重做為「正正、正反、反正、反反」；正反／反正才是聖盃。
+4. 跨年倒數刪掉舊閃爍刷新，改單一固定寬度顯示，避免畫面跳動。
+============================================================ -->
+<style id="kgen-v904-ga-cup-countdown-style">
+  :root{
+    --kgen-left-x:18px;
+    --kgen-left-w:min(430px, calc(48vw - 24px));
+    --kgen-message-top:76px;
+    --kgen-heart-toggle-top:124px;
+    --kgen-bars-top:172px;
+    --kgen-heart-panel-top:292px;
+  }
+  /* 讓頂部品牌字與系統列呼吸，不再被左上控制台壓住 */
+  #kgen-v902-left-status{
+    top:var(--kgen-message-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    height:32px!important;
+    line-height:16px!important;
+    overflow:hidden!important;
+    white-space:normal!important;
+  }
+  #kgen-heart-toggle{
+    top:var(--kgen-heart-toggle-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+  }
+  #brand-badge{
+    top:58px!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    pointer-events:none!important;
+    opacity:.88!important;
+  }
+  .resource-bars{
+    top:var(--kgen-bars-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+  }
+  #kgen-heart-live-panel{
+    top:var(--kgen-heart-panel-top)!important;
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - var(--kgen-heart-panel-top) - 126px)!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding-bottom:160px!important;
+  }
+  #bet-live-panel.bet-live-panel{
+    left:var(--kgen-left-x)!important;
+    width:var(--kgen-left-w)!important;
+    max-width:var(--kgen-left-w)!important;
+    max-height:calc(100vh - 368px)!important;
+    padding-bottom:180px!important;
+  }
+  /* GA Evolution 轉移到右下曲速縱桿上方，不再卡在上方資訊區 */
+  .ga-matrix{
+    left:auto!important;
+    right:92px!important;
+    top:auto!important;
+    bottom:705px!important;
+    width:178px!important;
+    transform:none!important;
+    z-index:135!important;
+    opacity:.96!important;
+  }
+  /* 三聖盃新版顯示 */
+  .v904-cup-result{display:block;margin-top:4px;font-size:11px;color:#7ff3ff;line-height:1.35;min-height:28px;}
+  .v714-cup.done{background:linear-gradient(135deg,rgba(255,215,120,.42),rgba(0,242,255,.16))!important;color:#ffe9a8!important;}
+  .v714-cup.fail{background:rgba(255,70,70,.13)!important;border-color:rgba(255,120,120,.45)!important;color:#ffd0d0!important;}
+  #v714-cup-status,#kh-cup-status{font-variant-numeric:tabular-nums;line-height:1.45;min-height:34px;}
+  #kh-ny-slot{font-variant-numeric:tabular-nums;white-space:nowrap!important;}
+  #kh-ny-countdown{font-variant-numeric:tabular-nums;min-height:42px!important;line-height:1.45!important;}
+  @media(max-width:760px){
+    :root{
+      --kgen-left-x:12px;
+      --kgen-left-w:min(330px, calc(50vw - 18px));
+      --kgen-message-top:78px;
+      --kgen-heart-toggle-top:126px;
+      --kgen-bars-top:174px;
+      --kgen-heart-panel-top:298px;
+    }
+    #kgen-v902-left-status{font-size:10px!important;height:30px!important;}
+    #kgen-heart-live-panel{max-height:calc(100vh - 360px)!important;}
+    #bet-live-panel.bet-live-panel{max-height:48vh!important;}
+    .ga-matrix{right:82px!important;bottom:590px!important;width:150px!important;padding:10px!important;}
+  }
+</style>
+<script id="kgen-v904-ga-cup-countdown-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX';
+  const $=(id)=>document.getElementById(id);
+  function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
+  function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
+  function pad(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0');}
+  function fmtFixed(ms){
+    const total=Math.max(0,Math.floor(ms/1000));
+    const d=Math.floor(total/86400); const h=Math.floor(total%86400/3600); const m=Math.floor(total%3600/60); const sec=total%60;
+    return String(d).padStart(3,'0')+'天 '+pad(h)+':'+pad(m)+':'+pad(sec);
+  }
+  function nextTaiwanNewYear(){
+    const now=new Date();
+    let y=now.getUTCFullYear();
+    // target Taiwan 12/31 23:59:59 = UTC 12/31 15:59:59
+    let t=Date.UTC(y,11,31,15,59,59);
+    if(now.getTime()>t) t=Date.UTC(y+1,11,31,15,59,59);
+    return t;
+  }
+  let lastNy='';
+  function updateNyStable(){
+    const text=fmtFixed(nextTaiwanNewYear()-Date.now());
+    if(text===lastNy) return;
+    lastNy=text;
+    const slot=$('kh-ny-slot'); if(slot) slot.textContent=text;
+    const box=$('kh-ny-countdown'); if(box) box.innerHTML='<b>跨年倒數槽</b><br><span>距跨年：'+text+'</span><br><small>目標：12/31 23:59:59（台灣時間 UTC+8）</small>';
+    const ev=[...document.querySelectorAll('.v714-event')].find(x=>(x.textContent||'').includes('跨年倒數'));
+    if(ev){ const b=ev.querySelector('b'); if(b) b.textContent='12/31 跨年倒數'; const br=b&&b.nextSibling; }
+  }
+  function disableOldCountdownWriters(){
+    // 以屬性標記，避免舊 interval 寫入造成閃爍。用 requestAnimationFrame 後再覆蓋一次。
+    updateNyStable();
+    setTimeout(updateNyStable,60);
+    setTimeout(updateNyStable,260);
+  }
+  const CUP_RESULTS=[
+    {code:'正正', ok:false, text:'笑杯／陽陽：方向未定，請再請示。'},
+    {code:'正反', ok:true,  text:'聖盃：一正一反，允杯。'},
+    {code:'反正', ok:true,  text:'聖盃：一反一正，允杯。'},
+    {code:'反反', ok:false, text:'陰杯：時機未到，請重新整理心念。'}
+  ];
+  const cupState={};
+  function getCupBox(){ return $('v714-cupbox') || $('kh-cupbox'); }
+  function cupStatusText(){
+    const vals=[1,2,3].map(i=>cupState[i]).filter(Boolean);
+    const ok=vals.filter(v=>v.ok).length;
+    return {ok,total:vals.length,done:ok>=3};
+  }
+  function refreshCupStatus(){
+    const st=cupStatusText();
+    const text=st.done?'三次聖盃完成：3 / 3，可以領發財金。':'聖盃狀態：'+st.ok+' / 3。正反、反正才算聖盃。';
+    ['v714-cup-status','kh-cup-status','v57-cup-status'].forEach(id=>{const el=$(id); if(el) el.textContent=text;});
+    try{localStorage.setItem('k12345CupOk',st.done?'1':'0'); localStorage.setItem('k12345CupCount',String(st.ok));}catch(e){}
+    window.__templeCupCount=st.ok;
+    window.__templeCupOk=st.done;
+    return st;
+  }
+  function rebuildCupButtons(){
+    const box=getCupBox(); if(!box) return false;
+    const status=$('v714-cup-status') || $('kh-cup-status');
+    if(status) status.textContent='聖盃狀態：0 / 3。正反、反正才算聖盃。';
+    document.querySelectorAll('.v714-cup,#kh-cupbox button[id^="kh-cup-"]').forEach((btn,idx)=>{
+      const n=Number(btn.dataset.cup || (btn.id||'').replace(/\D/g,'') || (idx+1));
+      if(!n || n>3) return;
+      btn.dataset.cup=String(n);
+      if(!btn.querySelector('.v904-cup-label')){
+        btn.innerHTML='<span class="v904-cup-label">聖盃'+['一','二','三'][n-1]+'</span><span class="v904-cup-result">尚未擲杯</span>';
+      }
+      btn.onclick=function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        const r=CUP_RESULTS[Math.floor(Math.random()*CUP_RESULTS.length)];
+        cupState[n]=r;
+        btn.classList.toggle('done',!!r.ok); btn.classList.toggle('fail',!r.ok);
+        const rr=btn.querySelector('.v904-cup-result'); if(rr) rr.textContent=r.code+'｜'+(r.ok?'聖盃':'未允');
+        refreshCupStatus();
+        msg(r.ok?'success':'warn','聖盃'+['一','二','三'][n-1]+'：'+r.text);
+        say(r.ok?'聖盃成立。':'不是聖盃，請再請示。');
+        return false;
+      };
+    });
+    // 重置按鈕也接線
+    document.querySelectorAll('button').forEach(b=>{
+      const t=(b.textContent||'').trim();
+      if(t==='重置' && !b._v904CupReset){
+        b._v904CupReset=true;
+        b.addEventListener('click',function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          [1,2,3].forEach(i=>delete cupState[i]);
+          document.querySelectorAll('.v714-cup,#kh-cupbox button[id^="kh-cup-"]').forEach((x,idx)=>{x.classList.remove('done','fail'); const r=x.querySelector('.v904-cup-result'); if(r) r.textContent='尚未擲杯';});
+          refreshCupStatus(); msg('info','三聖盃已重置。'); say('三聖盃已重置。');
+        },true);
+      }
+    });
+    refreshCupStatus();
+    return true;
+  }
+  function patchFortuneGate(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const t=(btn.textContent||'').toLowerCase();
+      if((t.includes('fortune')||t.includes('發財金')) && !btn._v904FortuneGate){
+        btn._v904FortuneGate=true;
+        btn.addEventListener('click',function(ev){
+          const st=refreshCupStatus();
+          if(!st.done){ ev.preventDefault(); ev.stopImmediatePropagation(); msg('warn','請先完成三次聖盃：正反或反正才算。'); say('請先完成三次聖盃，正反或反正才算聖盃。'); return false; }
+        },true);
+      }
+    });
+  }
+  function applyLayout(){
+    const ga=document.querySelector('.ga-matrix');
+    if(ga && !ga.dataset.v904Moved){ ga.dataset.v904Moved='1'; msg('info','GA Evolution 已移到右下曲速引擎上方。'); }
+    const panel=$('kgen-heart-live-panel'); if(panel){ panel.style.overflowY='auto'; panel.style.paddingBottom='160px'; }
+    const bet=$('bet-live-panel'); if(bet){ bet.style.overflowY='auto'; bet.style.paddingBottom='180px'; }
+  }
+  function boot(){
+    applyLayout(); rebuildCupButtons(); patchFortuneGate(); disableOldCountdownWriters();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  setTimeout(boot,500); setTimeout(boot,1600); setTimeout(boot,3200);
+  setInterval(()=>{updateNyStable();},1000);
 })();
 </script>
 
