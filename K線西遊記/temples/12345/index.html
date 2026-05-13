@@ -4,8 +4,8 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
 
@@ -1408,6 +1408,114 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 }
 </style>
 
+
+<style id="v930-cosmic-integration-patch">
+:root{
+  --ga-top: 210px;
+}
+
+/* 左上 HUD */
+#brand-badge,
+#kgenMsgCenterBtn{
+  width:min(430px, calc(100vw - 36px)) !important;
+}
+
+/* GA Evolution */
+#ga-evolution,
+#ga-panel,
+.ga-evolution{
+  position:fixed !important;
+  top:var(--ga-top) !important;
+  right:18px !important;
+  z-index:99999 !important;
+}
+
+/* Warp Engine */
+.warp-engine{
+  bottom:180px !important;
+  z-index:99998 !important;
+}
+
+/* 左下悟空心臟 */
+#web3-panel{
+  z-index:99997 !important;
+  border-radius:22px !important;
+}
+
+/* 倒數不閃 */
+#ny-countdown,
+.countdown{
+  font-variant-numeric: tabular-nums;
+  will-change:auto !important;
+}
+
+/* 宇宙導航 */
+#cosmic-nav-v930{
+  position:fixed;
+  right:18px;
+  bottom:110px;
+  width:260px;
+  z-index:99999;
+  border:1px solid rgba(255,215,128,.35);
+  border-radius:18px;
+  background:rgba(0,0,0,.72);
+  padding:14px;
+  color:#ffd778;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 24px rgba(0,242,255,.18);
+}
+
+#cosmic-nav-v930 h3{
+  margin:0 0 10px;
+  font-size:16px;
+}
+
+#cosmic-nav-v930 button{
+  width:100%;
+  margin:6px 0;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  background:#111827;
+  color:#fff;
+  font-weight:700;
+}
+
+/* 手機安全區 */
+body{
+  padding-bottom: env(safe-area-inset-bottom);
+}
+</style>
+
+<script>
+window.addEventListener('load', ()=>{
+
+  // 修 countdown 閃爍
+  const cd = document.querySelector('#ny-countdown,.countdown');
+  if(cd){
+    let last = "";
+    setInterval(()=>{
+      const t = cd.textContent;
+      if(t===last) return;
+      last = t;
+    },1000);
+  }
+
+  // 宇宙導航
+  const nav = document.createElement('div');
+  nav.id = 'cosmic-nav-v930';
+  nav.innerHTML = `
+    <h3>宇宙導航｜V9.3.0</h3>
+    <button onclick="location.reload()">宇宙重啟</button>
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})">返回天庭</button>
+    <button onclick="alert('齊天席位系統準備中')">齊天席位</button>
+    <button onclick="alert('Warp Engine Online')">曲速引擎</button>
+  `;
+  document.body.appendChild(nav);
+
+});
+</script>
+
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1442,7 +1550,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1797,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15660,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15767,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15912,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +16004,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,8 +16032,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -16090,7 +16198,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,8 +16391,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -16341,7 +16449,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,8 +16535,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -16566,7 +16674,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,8 +16829,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -16909,7 +17017,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,8 +17137,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -17149,7 +17257,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17485,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17711,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17725,7 +17833,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -17827,7 +17935,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -19217,8 +19325,8 @@ CHANGELOG:
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
 1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
@@ -19258,7 +19366,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -19415,8 +19523,8 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -19581,7 +19689,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -19774,8 +19882,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -19832,7 +19940,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -19918,8 +20026,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -20057,7 +20165,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20212,8 +20320,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
 1. 右上「訊息紀錄」固定為 universe-nav 內部按鈕，寬度與上方按鈕一致，排在五指山神殿音響正下方。
@@ -20407,7 +20515,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20514,8 +20622,8 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -20702,7 +20810,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -20822,8 +20930,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
-BUILD: 20260513-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
+BUILD: 20260513-V9.3.0-COSMIC-INTEGRATION
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -20942,7 +21050,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -21170,7 +21278,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -21346,7 +21454,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -21575,7 +21683,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -21791,7 +21899,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -21890,7 +21998,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2
+VERSION PATCH: KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -21992,7 +22100,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -24468,8 +24576,8 @@ KGEN 12345 V9.2.1｜LAYOUT POLISH 2
 <script id="kgen-v920-layout-final-polish-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
-  const BUILD='20260513-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
+  const BUILD='20260513-V9.3.0-COSMIC-INTEGRATION';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
@@ -24697,8 +24805,8 @@ KGEN 12345 V9.2.1｜LAYOUT POLISH 2
 <script id="kgen-v921-layout-polish-2-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.2.1-LAYOUT-POLISH-2';
-  const BUILD='20260513-V9.2.1-LAYOUT-POLISH-2';
+  const VERSION='KGEN-12345-HEART-UI-V9.3.0-COSMIC-INTEGRATION';
+  const BUILD='20260513-V9.3.0-COSMIC-INTEGRATION';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function setVersion(){
