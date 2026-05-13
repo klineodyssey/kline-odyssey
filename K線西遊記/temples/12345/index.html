@@ -23849,7 +23849,7 @@ CHANGELOG:
 
 
 <!-- ============================================================
-KGEN 12345 V9.1.8｜GA position + hidden dock + right panel toggle
+KGEN 12345 V9.1.9｜GA position + hidden dock + right panel polish
 - Preserve V9.1.6 working heart-panel toggle.
 - Add left-bottom hidden function dock: 錢包聖盃 / 發財金 / 規則活動 / 客服導覽.
 - Footer 客服導覽 becomes right-side button group collapse/expand.
@@ -24003,7 +24003,7 @@ KGEN 12345 V9.1.8｜GA position + hidden dock + right panel toggle
 
 
 <!-- ============================================================
-KGEN 12345 V9.1.8｜REAL patch after V9.1.7
+KGEN 12345 V9.1.9｜GA / hidden dock / countdown polish after V9.1.8
 - Move GA Evolution to upper-middle blank area, away from K-line chart.
 - Move hidden function dock between direction slider and bottom 8 buttons.
 - Footer 客服導覽 controls right-bottom info panel collapse/expand.
@@ -24130,6 +24130,196 @@ KGEN 12345 V9.1.8｜REAL patch after V9.1.7
   if(document.readyState!=='loading') init();
   setInterval(bindFooterGuide,1200);
   window.kgenV918ToggleRightInfo=toggleRightInfo;
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 V9.1.9｜GA / Hidden Dock / Countdown / Right Panel Polish
+- GA Evolution moved to upper-middle blank zone, no longer covering K chart.
+- Hidden function buttons locked between direction rail and bottom 8 buttons.
+- Right-bottom customer button renamed to「右側神規」and controls right info panel.
+- Right info panel size aligned to Heart panel visual scale.
+- Left Heart console widened to match top status bar.
+- New Year countdown rendered by one stable text source; no blink / no line jump.
+============================================================ -->
+<style id="kgen-v919-layout-polish-style">
+  :root{
+    --kgen-v919-left-x:10px;
+    --kgen-v919-left-w:min(438px, calc(100vw - 220px));
+  }
+
+  /* 左上：訊息欄、控制台、暗物質、質量、Heart 面板同寬，視覺更齊 */
+  #kgen-v902-left-status,#kgen-v902-live-status,#kgen-v902-message-strip,
+  #kgen-live-status,#kgen-msg-strip,#kgen-status-strip,.kgen-live-status,.left-message,.hud-message,
+  #kgen-heart-toggle,.resource-bars,#kgen-heart-live-panel{
+    left:var(--kgen-v919-left-x)!important;
+    width:var(--kgen-v919-left-w)!important;
+    max-width:var(--kgen-v919-left-w)!important;
+    box-sizing:border-box!important;
+  }
+  #kgen-v902-left-status,#kgen-v902-live-status,#kgen-v902-message-strip,
+  #kgen-live-status,#kgen-msg-strip,#kgen-status-strip,.kgen-live-status,.left-message,.hud-message{
+    top:132px!important;
+    z-index:2147482600!important;
+  }
+  #kgen-heart-toggle{top:178px!important;z-index:2147482700!important;}
+  .resource-bars{top:222px!important;z-index:2147482500!important;}
+  #kgen-heart-live-panel{
+    top:386px!important;
+    max-height:calc(100vh - 386px - 96px)!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    z-index:2147482500!important;
+  }
+
+  /* GA Evolution：移到中上方空白區，避開 K 線圖、右側按鈕與曲速桿 */
+  .ga-matrix{
+    position:fixed!important;
+    left:clamp(360px, 50vw, 500px)!important;
+    top:clamp(240px, 28vh, 330px)!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:none!important;
+    width:162px!important;
+    max-width:162px!important;
+    padding:10px 12px!important;
+    z-index:100120!important;
+    box-sizing:border-box!important;
+  }
+  .ga-matrix .ga-stat{font-size:10px!important;margin-bottom:7px!important;}
+  .ga-matrix .ga-bar{height:5px!important;}
+
+  /* 左下 4 鍵：精準卡在方向橫桿與 8 主按鍵中間 */
+  #kgen-v917-quick-dock{
+    left:10px!important;
+    bottom:128px!important;
+    width:min(338px, 52vw)!important;
+    max-width:min(338px, 52vw)!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    z-index:260000!important;
+  }
+  #kgen-v917-quick-dock button{
+    min-height:30px!important;
+    font-size:10px!important;
+    line-height:1.05!important;
+    padding:3px 2px!important;
+  }
+  #kgen-v917-hidden-panel{
+    left:10px!important;
+    bottom:164px!important;
+    width:min(438px, calc(100vw - 220px))!important;
+    max-height:44vh!important;
+    z-index:260001!important;
+  }
+
+  /* 右下資訊面板：收合按鍵控制此區，尺寸接近悟空心臟控制窗比例 */
+  #coord-panel,.coord-panel,#right-info-panel,.right-info-panel{
+    width:min(438px, calc(100vw - 220px))!important;
+    max-width:min(438px, calc(100vw - 220px))!important;
+    min-height:210px!important;
+    box-sizing:border-box!important;
+  }
+  body.kgen-v919-right-info-collapsed #coord-panel,
+  body.kgen-v919-right-info-collapsed .coord-panel,
+  body.kgen-v919-right-info-collapsed #right-info-panel,
+  body.kgen-v919-right-info-collapsed .right-info-panel,
+  body.kgen-v918-right-info-collapsed #coord-panel,
+  body.kgen-v918-right-info-collapsed .coord-panel,
+  body.kgen-v918-right-info-collapsed #right-info-panel,
+  body.kgen-v918-right-info-collapsed .right-info-panel{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+
+  /* 跨年倒數：取消所有閃爍、動畫、跳行與高度變化 */
+  #kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,
+  #kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]{
+    animation:none!important;
+    transition:none!important;
+    opacity:1!important;
+    white-space:nowrap!important;
+    min-height:20px!important;
+    line-height:20px!important;
+    overflow:hidden!important;
+  }
+  #kh-ny-countdown,.kh-ny-countdown{display:block!important;height:auto!important;}
+
+  @media(max-width:720px){
+    :root{--kgen-v919-left-x:10px;--kgen-v919-left-w:min(438px, calc(100vw - 220px));}
+    .ga-matrix{left:clamp(280px, 42vw, 390px)!important;top:clamp(238px, 27vh, 310px)!important;width:156px!important;max-width:156px!important;}
+    #kgen-v917-quick-dock{bottom:126px!important;width:min(330px, 52vw)!important;}
+    #kgen-v917-hidden-panel{bottom:162px!important;width:min(438px, calc(100vw - 220px))!important;}
+  }
+  @media(max-width:560px){
+    :root{--kgen-v919-left-w:min(360px, calc(100vw - 24px));}
+    .ga-matrix{left:calc(50vw - 28px)!important;top:365px!important;width:148px!important;max-width:148px!important;}
+    #kgen-v917-quick-dock{left:10px!important;bottom:126px!important;width:min(318px, 54vw)!important;}
+    #kgen-v917-hidden-panel{left:10px!important;bottom:162px!important;width:min(360px, 56vw)!important;}
+  }
+</style>
+<script id="kgen-v919-layout-polish-script">
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id)};
+  function speak(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
+  function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
+
+  function secondsToText(ms){
+    var sec=Math.max(0,Math.floor(ms/1000));
+    var d=Math.floor(sec/86400); sec%=86400;
+    var h=Math.floor(sec/3600); sec%=3600;
+    var m=Math.floor(sec/60); var s=sec%60;
+    return '距跨年：'+d+'天 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  function stableNY(){
+    try{
+      var now=new Date(); var y=now.getFullYear();
+      var target=new Date(y,11,31,23,59,59); if(now>target) target=new Date(y+1,11,31,23,59,59);
+      var one=secondsToText(target-now);
+      ['kh-ny-slot','cd-1231','kgen-ny-countdown','v714-ny-count'].forEach(function(id){var el=$(id); if(el){el.textContent=one; el.style.animation='none'; el.style.opacity='1';}});
+      var box=$('kh-ny-countdown'); if(box){box.textContent=one; box.style.animation='none'; box.style.opacity='1'; box.style.minHeight='20px';}
+      document.querySelectorAll('.kh-ny-countdown,[class*="ny-count"],[class*="countdown"]').forEach(function(el){
+        if((el.textContent||'').indexOf('跨年')>=0 || el.id==='kh-ny-countdown'){el.style.animation='none';el.style.opacity='1';el.style.transition='none';}
+      });
+    }catch(e){}
+  }
+
+  function findRightInfo(){
+    var p=$('coord-panel')||document.querySelector('.coord-panel')||$('right-info-panel')||document.querySelector('.right-info-panel');
+    if(p) return p;
+    var nodes=Array.from(document.querySelectorAll('div'));
+    return nodes.find(function(el){
+      var t=(el.textContent||'').replace(/\s+/g,' '), r=el.getBoundingClientRect&&el.getBoundingClientRect();
+      return r && r.width>110 && r.height>80 && r.left>window.innerWidth*0.42 && /神殿規則|Heart\s*\/\s*Brain|TempleHeart|LP Pair|Token/.test(t);
+    })||null;
+  }
+  function toggleRightPanel(ev){
+    if(ev){ev.preventDefault();ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();}
+    var close=!document.body.classList.contains('kgen-v919-right-info-collapsed');
+    document.body.classList.toggle('kgen-v919-right-info-collapsed', close);
+    document.body.classList.toggle('kgen-v918-right-info-collapsed', close);
+    var p=findRightInfo();
+    if(p){p.style.display=close?'none':'block';p.style.visibility=close?'hidden':'visible';p.style.pointerEvents=close?'none':'auto';}
+    var msg=close?'右側神規已收合。':'右側神規已展開。'; log(msg); speak(msg);
+    return false;
+  }
+  function bindRightButton(){
+    var btns=Array.from(document.querySelectorAll('.footer-terminal .term-btn,.footer-terminal button,button.term-btn'));
+    var target=null;
+    btns.forEach(function(b){var t=(b.textContent||'').replace(/\s+/g,''); if(t.indexOf('客服導覽')>=0 || b.dataset.v918RightInfoToggle==='1') target=b;});
+    if(target){target.innerHTML='🧭<br>右側神規'; target.dataset.v919RightToggle='1'; target.dataset.v918RightInfoToggle='1'; target.onclick=toggleRightPanel; target.style.pointerEvents='auto';}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('[data-v919-right-toggle="1"],[data-v918-right-info-toggle="1"]');
+    if(b) return toggleRightPanel(e);
+  },true);
+  function init(){bindRightButton();stableNY();}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setInterval(bindRightButton,1000);
+  setInterval(stableNY,1000);
+  window.kgenV919={toggleRightPanel:toggleRightPanel,stableNY:stableNY};
 })();
 </script>
 
