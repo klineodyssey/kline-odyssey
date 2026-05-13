@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,7 +15924,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -16090,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16283,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16427,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16721,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,7 +17029,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -17149,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17603,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17715,7 +17715,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
   function init(){
     patchFooter(); patchMessages(); wirePanel(); stableCountdown();
     setInterval(stableCountdown,1000);
-    setTimeout(()=>push('success','V9.0.2 訊息、倒數、錄影與備用功能已啟動。',4000),800);
+    setTimeout(()=>push('success','V9.0.3 音響、訊息與左上 HUD 對齊完成。',4000),800);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
@@ -18248,7 +18248,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -18289,7 +18289,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -18446,7 +18446,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -18612,7 +18612,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -18805,7 +18805,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -18863,7 +18863,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -18949,7 +18949,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -19088,7 +19088,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19243,7 +19243,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -19438,7 +19438,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19545,7 +19545,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -19733,7 +19733,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -19853,7 +19853,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -19973,7 +19973,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -20201,7 +20201,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -20377,7 +20377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -20606,7 +20606,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -20718,9 +20718,202 @@ MESSAGE / RECORDER / COUNTDOWN FIX
   function init(){
     patchFooter(); patchMessages(); wirePanel(); stableCountdown();
     setInterval(stableCountdown,1000);
-    setTimeout(()=>push('success','V9.0.2 訊息、倒數、錄影與備用功能已啟動。',4000),800);
+    setTimeout(()=>push('success','V9.0.3 音響、訊息與左上 HUD 對齊完成。',4000),800);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+
+
+<!-- ============================================================
+V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
+- Right music panel controls use one real audio engine; Stop/Pause/Prev/Next/Load all work.
+- Left HUD stack moved down and aligned; top area reserved for status messages.
+- Message center receives audio/service/transaction status again.
+- No wallet/core contract changes.
+============================================================ -->
+<style id="kgen-v903-audio-hud-message-align-style">
+  :root{
+    --kgen-left-x:18px;
+    --kgen-left-w:min(430px, calc(48vw - 20px));
+    --kgen-message-top:58px;
+    --kgen-heart-toggle-top:122px;
+    --kgen-bars-top:174px;
+    --kgen-heart-panel-top:286px;
+  }
+  #kgen-v902-left-status{
+    left:var(--kgen-left-x)!important;
+    top:var(--kgen-message-top)!important;
+    width:var(--kgen-left-w)!important;
+    min-width:330px!important;
+    min-height:38px!important;
+    max-height:46px!important;
+    display:flex!important;
+    align-items:center!important;
+    padding:8px 12px!important;
+    white-space:normal!important;
+    line-height:1.35!important;
+    background:linear-gradient(180deg,rgba(0,0,0,.84),rgba(0,38,44,.72))!important;
+    border-color:rgba(0,242,255,.42)!important;
+    z-index:100520!important;
+  }
+  #kgen-heart-toggle{
+    left:var(--kgen-left-x)!important;
+    top:var(--kgen-heart-toggle-top)!important;
+    width:var(--kgen-left-w)!important;
+    min-width:330px!important;
+    height:auto!important;
+    min-height:44px!important;
+    box-sizing:border-box!important;
+  }
+  .resource-bars{
+    left:var(--kgen-left-x)!important;
+    top:var(--kgen-bars-top)!important;
+    width:var(--kgen-left-w)!important;
+    min-width:330px!important;
+    box-sizing:border-box!important;
+    z-index:130!important;
+  }
+  .resource-bars .rb{width:100%!important;box-sizing:border-box!important;}
+  #kgen-heart-live-panel{
+    left:var(--kgen-left-x)!important;
+    top:var(--kgen-heart-panel-top)!important;
+    width:var(--kgen-left-w)!important;
+    min-width:330px!important;
+    box-sizing:border-box!important;
+    max-height:calc(100vh - var(--kgen-heart-panel-top) - 86px)!important;
+    overflow-y:auto!important;
+    padding-bottom:260px!important;
+  }
+  #kgen-heart-live-panel::after{height:260px!important;min-height:260px!important;}
+  #music-panel{
+    right:18px!important;
+    top:410px!important;
+    width:min(340px, 86vw)!important;
+    max-height:calc(100vh - 500px)!important;
+    overflow:auto!important;
+    z-index:240!important;
+  }
+  #music-panel .nav-music-ctl,
+  #music-panel button{
+    pointer-events:auto!important;
+    cursor:pointer!important;
+    touch-action:manipulation!important;
+  }
+  #music-list{max-height:150px!important;}
+  #temple-audio-console{display:none!important;}
+  @media(max-width:720px){
+    :root{
+      --kgen-left-x:10px;
+      --kgen-left-w:calc(100vw - 20px);
+      --kgen-message-top:58px;
+      --kgen-heart-toggle-top:118px;
+      --kgen-bars-top:170px;
+      --kgen-heart-panel-top:282px;
+    }
+    #kgen-v902-left-status{min-width:0!important;}
+    #kgen-heart-toggle{min-width:0!important;}
+    .resource-bars{min-width:0!important;}
+    #kgen-heart-live-panel{min-width:0!important;max-height:calc(100vh - 360px)!important;}
+    #music-panel{right:10px!important;left:auto!important;top:360px!important;width:min(330px, calc(100vw - 24px))!important;max-height:46vh!important;}
+  }
+</style>
+<script id="kgen-v903-audio-hud-message-align-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.3-AUDIO-HUD-MESSAGE-ALIGN-FIX';
+  const $=(id)=>document.getElementById(id);
+  function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
+  function msg(type,text,dur){
+    text=String(text||'');
+    try{ const left=$('kgen-v902-left-status'); if(left) left.textContent=text; }catch(e){}
+    try{ if(window.kgenPushMessage) window.kgenPushMessage(type||'info', text, dur||3500); }catch(e){}
+    try{ if(window.kgenV902Push) window.kgenV902Push(type||'info', text, dur||3500); }catch(e){}
+    try{ console.log('[KGEN V9.0.3]',type,text); }catch(e){}
+  }
+  window.kgenV903Msg=msg;
+
+  function normalizeTrack(x,idx){
+    if(typeof x==='string') return {name:x.split('/').pop()||('Track '+(idx+1)),url:x};
+    x=x||{};
+    return {name:String(x.name||x.title||x.file||x.url||('Track '+(idx+1))),url:String(x.url||x.src||x.file||'')};
+  }
+  function resolveTrackUrl(raw){
+    raw=String(raw||'').trim();
+    if(!raw) return '';
+    if(/^blob:|^data:|^https?:/i.test(raw)) return raw;
+    try{
+      const base=new URL(location.href); base.hash=''; base.search='';
+      if(!base.pathname.endsWith('/')) base.pathname=base.pathname.substring(0,base.pathname.lastIndexOf('/')+1);
+      return new URL(raw.replace(/^\.\//,''), base).toString();
+    }catch(e){return raw;}
+  }
+  function audio(){
+    let a=$('music-audio');
+    if(!a){a=document.createElement('audio');a.id='music-audio';a.preload='none';a.style.display='none';document.body.appendChild(a);}
+    window.app=window.app||{};
+    app._music=app._music||{};
+    app._music.audio=a;
+    const vol=$('music-vol');
+    if(vol){a.volume=Math.max(0,Math.min(1,(Number(vol.value)||70)/100));}
+    return a;
+  }
+  function state(){ window.app=window.app||{}; app._music=app._music||{}; app._music.list=Array.isArray(app._music.list)?app._music.list:[]; if(!Number.isFinite(Number(app._music.index))) app._music.index=0; return app._music; }
+  function render(){
+    const m=state(); const list=m.list||[]; const idx=((Number(m.index)||0)%Math.max(1,list.length)+Math.max(1,list.length))%Math.max(1,list.length);
+    const status=$('music-status'), now=$('music-now'), name=$('music-name'), items=$('music-items');
+    const tr=list[idx]; const title=tr?(tr.name||tr.title||tr.url):'未選曲';
+    if(status) status.textContent=list.length?'已載入：'+list.length+' 首':'尚未載入清單';
+    if(now) now.textContent=list.length?'目前：'+title:'（未選曲）';
+    if(name) name.textContent=list.length?'目前：'+title:'未載入音檔';
+    if(items){
+      items.innerHTML=list.map((t,i)=>'<button type="button" class="music-item-btn" data-i="'+i+'" style="width:100%;text-align:left;margin:4px 0;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,215,0,.28);background:'+(i===idx?'rgba(255,215,120,.22)':'rgba(0,0,0,.28)')+';color:#fff;font-weight:900;">'+(i===idx?'▶ ':'')+(t.name||t.title||t.url)+'</button>').join('');
+      items.querySelectorAll('.music-item-btn').forEach(b=>b.onclick=()=>{app.musicSetIndex(Number(b.dataset.i)||0);app.musicPlay();});
+    }
+  }
+  function setIndex(i){
+    const m=state(); const list=m.list||[]; if(!list.length){render();return;}
+    m.index=((Number(i)||0)%list.length+list.length)%list.length;
+    const tr=list[m.index]; const a=audio();
+    a.src=resolveTrackUrl(tr.url||tr.src||'');
+    try{a.load();}catch(e){}
+    render();
+    msg('info','神殿音響選曲：'+(tr.name||tr.title||'Track'),2500);
+  }
+  async function loadBuiltIn(force){
+    const candidates=['music/playlist.json','playlist.json','./music/playlist.json','./playlist.json'];
+    for(const rel of candidates){
+      try{
+        const url=resolveTrackUrl(rel)+(resolveTrackUrl(rel).includes('?')?'&':'?')+'t='+Date.now();
+        const r=await fetch(url,{cache:'no-store'}); if(!r.ok) continue;
+        const data=await r.json(); const arr=Array.isArray(data)?data:(Array.isArray(data.tracks)?data.tracks:[]);
+        const list=arr.map(normalizeTrack).filter(t=>t.url);
+        if(!list.length) continue;
+        const m=state(); if(force!==false || !m.list.length){m.list=list;m.index=0;} else {m.list=m.list.concat(list);} setIndex(m.index||0); render(); msg('success','五指山神殿音響已載入 '+list.length+' 首。',3500); speak('五指山神殿音響已載入。'); return true;
+      }catch(e){}
+    }
+    msg('warn','找不到 playlist.json，請選擇 MP3 或確認 music/playlist.json。',4500); speak('找不到內建歌單。'); return false;
+  }
+  async function play(){
+    const m=state(); if(!m.list.length){await loadBuiltIn(true);} if(m.list.length && !audio().src) setIndex(m.index||0);
+    const a=audio(); try{await a.play(); msg('success','神殿音樂播放中。',2500); speak('開始播放。');}catch(e){msg('warn','播放被瀏覽器阻擋，請再點一次播放或先選擇音檔。',4000);}
+  }
+  function pause(){try{audio().pause();msg('info','神殿音樂已暫停。',2500);speak('已暫停。');}catch(e){}}
+  function stop(){try{const a=audio(); a.pause(); a.currentTime=0; msg('info','神殿音樂已停止。',2500); speak('已停止。');}catch(e){}}
+  function next(){const m=state(); if(!m.list.length)return loadBuiltIn(true); const shuffle=!!($('music-shuffle')&&$('music-shuffle').checked); setIndex(shuffle?Math.floor(Math.random()*m.list.length):(Number(m.index)||0)+1); play();}
+  function prev(){const m=state(); if(!m.list.length)return loadBuiltIn(true); const shuffle=!!($('music-shuffle')&&$('music-shuffle').checked); setIndex(shuffle?Math.floor(Math.random()*m.list.length):(Number(m.index)||0)-1); play();}
+  function wire(){
+    window.app=window.app||{};
+    app.musicSetIndex=setIndex; app.musicRenderList=render; app.musicLoadBuiltIn=app.musicLoadBuiltin=loadBuiltIn; app.musicPlay=play; app.musicPause=pause; app.musicStop=stop; app.musicNext=next; app.musicPrev=prev;
+    app.openMusic=function(force){const p=$('music-panel'); if(!p)return; const show=(typeof force==='boolean')?force:(p.style.display==='none'||!p.style.display); p.style.display=show?'block':'none'; if(show){msg('info','五指山神殿音響已開啟。',2500);}};
+    const file=$('music-file'); if(file && !file._v903){file._v903=true; file.addEventListener('change',()=>{const files=Array.from(file.files||[]); if(!files.length)return; const m=state(); files.forEach((f,i)=>m.list.push({name:f.name||('MP3 '+(i+1)),url:URL.createObjectURL(f)})); setIndex(Math.max(0,m.list.length-files.length)); msg('success','已加入 '+files.length+' 首 MP3。',3000);});}
+    const vol=$('music-vol'); if(vol && !vol._v903){vol._v903=true; vol.addEventListener('input',()=>{const v=Math.max(0,Math.min(100,Number(vol.value)||0)); audio().volume=v/100; const t=$('music-vol-txt'); if(t)t.textContent=v+'%';});}
+    const a=audio(); if(!a._v903){a._v903=true; a.addEventListener('ended',()=>{const loop=!!($('music-loop')&&$('music-loop').checked); const m=state(); if(loop || (m.index||0)<(m.list.length-1)) next(); else msg('info','歌單播放完畢。',2500);});}
+    render();
+    setTimeout(()=>msg('success','V9.0.3：音響按鍵、訊息列與左上 HUD 已重新對齊。',4200),600);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
 })();
 </script>
 
