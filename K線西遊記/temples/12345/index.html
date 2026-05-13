@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,7 +15924,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -16090,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16283,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16427,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16721,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,7 +17029,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -17149,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17477,6 +17477,247 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
     speak('V9.0.0 已啟動：前鏡後鏡合併中央悟空心臟，左上控制台已下移，跨年倒數改為固定顯示。');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 Heart UI Patch V9.0.2
+MESSAGE / RECORDER / COUNTDOWN FIX
+- countdown uses one-line fixed-height display, no row jitter
+- restore transaction/status/service messages into left mini status + right message center
+- bottom buttons: replace inactive cup/fortune UI shortcuts with Backup and Screen Recorder
+- no wallet/core contract changes
+============================================================ -->
+<style id="kgen-v902-message-recorder-countdown-style">
+  :root{ --kgen-left-top-safe: 96px; }
+  #kgen-heart-toggle{
+    top: var(--kgen-left-top-safe) !important;
+    width: min(420px, calc(48vw - 18px)) !important;
+    min-width: 330px !important;
+    box-sizing:border-box !important;
+    justify-content:space-between !important;
+    white-space:nowrap !important;
+  }
+  #kgen-heart-live-panel{
+    top: calc(var(--kgen-left-top-safe) + 44px) !important;
+    width: min(420px, calc(48vw - 18px)) !important;
+    max-height: calc(100vh - 184px) !important;
+    padding-bottom: 190px !important;
+    overscroll-behavior: contain;
+  }
+  #kgen-heart-live-panel::after{
+    content:"";
+    display:block;
+    height:150px;
+    flex:0 0 auto;
+  }
+  #kgen-heart-live-panel .kh-grid{
+    grid-template-columns: 82px minmax(0,1fr) !important;
+    align-items:start !important;
+  }
+  #kgen-heart-live-panel .kh-v,
+  #kgen-heart-live-panel .kh-k,
+  #kh-ny-slot,
+  #human-cd-1231,
+  #cd-1231{
+    font-variant-numeric: tabular-nums !important;
+  }
+  #kh-ny-slot{
+    display:block !important;
+    min-height: 34px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    overflow:hidden !important;
+  }
+  .kgen-countdown-card,
+  .kgen-human-row .time{
+    min-height: 22px !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    animation:none !important;
+    transition:none !important;
+  }
+  #kgen-v902-left-status{
+    position:fixed;
+    left:18px;
+    top:52px;
+    width:min(420px, calc(48vw - 18px));
+    min-width:330px;
+    z-index:100506;
+    border:1px solid rgba(0,242,255,.32);
+    border-radius:12px;
+    background:rgba(0,0,0,.70);
+    color:#d8fbff;
+    font-size:12px;
+    font-weight:900;
+    line-height:1.35;
+    padding:7px 10px;
+    box-shadow:0 0 18px rgba(0,242,255,.10);
+    pointer-events:none;
+    box-sizing:border-box;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #kgen-v902-rec-panel{
+    position:fixed;
+    left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(520px, calc(100vw - 28px));
+    z-index:2147483100;
+    border:1px solid rgba(255,215,120,.45);
+    border-radius:20px;
+    background:rgba(4,6,12,.96);
+    color:#fff;
+    box-shadow:0 0 60px rgba(0,0,0,.7);
+    padding:16px;
+    display:none;
+  }
+  #kgen-v902-rec-panel.active{display:block;}
+  #kgen-v902-rec-panel .rec-title{color:#ffd778;font-weight:950;font-size:18px;margin-bottom:8px;}
+  #kgen-v902-rec-panel .rec-body{font-size:13px;line-height:1.75;color:#e9f7ff;}
+  #kgen-v902-rec-panel .rec-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  #kgen-v902-rec-panel button{border:1px solid rgba(255,215,120,.34);border-radius:12px;background:rgba(255,215,120,.12);color:#fff;font-weight:900;padding:11px;}
+  #kgen-v902-rec-panel button.gold{background:linear-gradient(135deg,#ffdf86,#b98222);color:#111;}
+  @media(max-width:720px){
+    :root{ --kgen-left-top-safe: 98px; }
+    #kgen-v902-left-status{left:10px;top:55px;width:calc(100vw - 20px);min-width:0;}
+    #kgen-heart-toggle{left:10px!important;top:96px!important;width:calc(100vw - 20px)!important;min-width:0!important;}
+    #kgen-heart-live-panel{left:10px!important;right:auto!important;top:142px!important;width:calc(100vw - 20px)!important;max-height:calc(100vh - 220px)!important;}
+  }
+</style>
+<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
+<div id="kgen-v902-rec-panel" aria-label="螢幕全程錄影">
+  <div class="rec-title">🎥 螢幕全程錄影</div>
+  <div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
+  <div class="rec-actions">
+    <button class="gold" id="kgen-v902-rec-start" type="button">開始錄影</button>
+    <button id="kgen-v902-rec-stop" type="button">停止並下載</button>
+    <button id="kgen-v902-rec-help" type="button">錄影說明</button>
+    <button id="kgen-v902-rec-close" type="button">關閉</button>
+  </div>
+</div>
+<script id="kgen-v902-message-recorder-countdown-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  function $(id){return document.getElementById(id);}
+  function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
+  function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
+  function push(type,text,dur){
+    text=String(text||'');
+    left(text);
+    try{ if(window.kgenPushMessage) window.kgenPushMessage(type||'info', text, dur||3500); }
+    catch(e){ try{ console.log('[KGEN]',type,text); }catch(_){} }
+  }
+  window.kgenV902Push=push;
+  function fmt(ms){
+    ms=Math.max(0, Math.floor(Number(ms)||0));
+    const sec=Math.floor(ms/1000);
+    const d=Math.floor(sec/86400), h=Math.floor((sec%86400)/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    if(d>0) return d+'天 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  function nextDate(month,day,hour=0,min=0,sec=0){
+    const now=new Date(); let y=now.getFullYear();
+    let t=new Date(y, month-1, day, hour, min, sec, 0);
+    if(t.getTime()<=now.getTime()) t=new Date(y+1, month-1, day, hour, min, sec, 0);
+    return t;
+  }
+  function nextTopHour(){ const n=new Date(); const t=new Date(n); t.setMinutes(0,0,0); t.setHours(t.getHours()+1); return t; }
+  function nextUtcMidnight(){ const n=new Date(); return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()+1, 0,0,0,0)); }
+  let lastHourWarn='', lastBreathWarn='';
+  function stableCountdown(){
+    const now=Date.now();
+    const ny=fmt(nextDate(12,31,23,59,59).getTime()-now);
+    const heart=fmt(nextTopHour().getTime()-now);
+    const breath=fmt(nextUtcMidnight().getTime()-now);
+    const kh=$('kh-ny-slot'); if(kh) kh.textContent='距跨年 '+ny;
+    const ids1231=['cd-1231','human-cd-1231']; ids1231.forEach(id=>{const e=$(id); if(e) e.textContent=ny;});
+    const hi=$('human-cd-heart'); if(hi) hi.textContent=heart;
+    const ign=$('human-cd-ignite'); if(ign) ign.textContent=breath;
+    const secH=Math.floor((nextTopHour().getTime()-now)/1000);
+    const secB=Math.floor((nextUtcMidnight().getTime()-now)/1000);
+    if(secH<=60 && secH>0){ const k=new Date().getHours()+':'+new Date().getDate(); if(k!==lastHourWarn){lastHourWarn=k; push('warn','整點心跳倒數 '+secH+' 秒，時間到可按 heartbeatClaim。',5000); speak('整點心跳即將到來，請準備確認是否要執行。');}}
+    if(secB<=120 && secB>0){ const k=new Date().toDateString(); if(k!==lastBreathWarn){lastBreathWarn=k; push('warn','轉日呼吸倒數 '+secB+' 秒，UTC 零點可按 igniteAndClaim。',5000); speak('轉日呼吸即將到來，請準備確認是否要執行。');}}
+  }
+  let rec={stream:null, recorder:null, chunks:[], active:false};
+  async function startRecording(){
+    const panel=$('kgen-v902-rec-panel');
+    try{
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+        push('warn','此瀏覽器不支援網頁螢幕錄影，請使用手機內建錄影或錢包瀏覽器支援版本。',6000);
+        speak('此瀏覽器不支援網頁螢幕錄影，請使用手機內建錄影。');
+        return;
+      }
+      rec.stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+      rec.chunks=[]; rec.recorder=new MediaRecorder(rec.stream,{mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm'});
+      rec.recorder.ondataavailable=e=>{ if(e.data && e.data.size) rec.chunks.push(e.data); };
+      rec.recorder.onstop=()=>{
+        const blob=new Blob(rec.chunks,{type:'video/webm'}); const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download='KGEN-12345-temple-record-'+new Date().toISOString().replace(/[:.]/g,'-')+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),5000);
+        try{rec.stream.getTracks().forEach(t=>t.stop());}catch(e){}
+        rec.active=false; push('success','螢幕錄影已完成並下載。',3500); speak('螢幕錄影已完成。');
+      };
+      rec.recorder.start(1000); rec.active=true;
+      if(panel) panel.classList.remove('active');
+      push('success','螢幕全程錄影已開始。',3500); speak('螢幕錄影已開始。');
+    }catch(e){ push('error','螢幕錄影未啟動：'+(e&&e.message?e.message:e),6000); speak('螢幕錄影未啟動，可能是瀏覽器不支援或使用者取消。'); }
+  }
+  function stopRecording(){
+    try{ if(rec.recorder && rec.active){ rec.recorder.stop(); } else { push('info','目前沒有正在錄影。',3000); } }catch(e){ push('error','停止錄影失敗：'+(e.message||e),5000); }
+  }
+  function openRecorder(){ const p=$('kgen-v902-rec-panel'); if(p) p.classList.add('active'); push('info','已開啟螢幕全程錄影功能。',3000); }
+  function openReserve(){
+    push('info','備用功能槽：保留給下一版神殿服務，不送交易、不動錢包。',4000);
+    speak('這是備用功能槽，保留給下一版神殿服務。');
+  }
+  function patchFooter(){
+    const buttons=Array.from(document.querySelectorAll('.footer-terminal .term-btn'));
+    buttons.forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t.includes('發財金') || t.includes('錢包聖盃')){
+        btn.textContent = t.includes('發財金') ? '🎥 螢幕全程錄影' : '🧩 備用功能';
+        btn.classList.remove('active-kgen');
+        btn.onclick = t.includes('發財金') ? openRecorder : openReserve;
+      }
+    });
+    // If no explicit reserve exists, use rules/activity button only when present and inactive.
+    const maybe=buttons.find(b=>(b.textContent||'').includes('規則活動'));
+    if(maybe){ maybe.textContent='🧩 備用功能'; maybe.onclick=openReserve; }
+  }
+  function patchMessages(){
+    if(window.__KGEN_V902_MSG_PATCHED__) return; window.__KGEN_V902_MSG_PATCHED__=true;
+    const oldToast=window.toast; if(typeof oldToast==='function') window.toast=function(m){ push('info',m,3500); try{return oldToast.apply(this,arguments);}catch(e){} };
+    const oldAlert=window.alert; window.alert=function(m){ push(String(m).includes('失敗')?'error':'info',m,5000); };
+    if(window.app && typeof app.speak==='function'){
+      const oldSpeak=app.speak.bind(app);
+      app.speak=function(m){ push('info','客服語音：'+String(m).slice(0,80),2500); return oldSpeak(m); };
+    }
+    ['kh-connect','kh-refresh','kh-approve','kh-approve-max'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('click',()=>push('info','已按下 '+(el.textContent||id).trim()+'，等待錢包或鏈上回應。',3000),true); });
+    document.addEventListener('click',ev=>{
+      const b=ev.target&&ev.target.closest&&ev.target.closest('button'); if(!b) return;
+      const t=(b.textContent||'').trim();
+      if(/fortuneClaim|heartbeatClaim|igniteAndClaim|vowTo|lightLamp|makeWish|發財金|心跳|呼吸|還願|點燈|許願/.test(t)) push('info','準備執行：'+t,3000);
+    },true);
+  }
+  function wirePanel(){
+    const p=$('kgen-v902-rec-panel');
+    const s=$('kgen-v902-rec-start'), st=$('kgen-v902-rec-stop'), h=$('kgen-v902-rec-help'), c=$('kgen-v902-rec-close');
+    if(s) s.onclick=startRecording; if(st) st.onclick=stopRecording;
+    if(h) h.onclick=()=>{push('info','錄影說明：按開始後選擇目前畫面，完成後按停止下載 WebM 檔。手機不支援時請用系統錄影。',6000); speak('按開始後選擇目前畫面，完成後按停止下載影片。');};
+    if(c) c.onclick=()=>p&&p.classList.remove('active');
+  }
+  function init(){
+    patchFooter(); patchMessages(); wirePanel(); stableCountdown();
+    setInterval(stableCountdown,1000);
+    setTimeout(()=>push('success','V9.0.2 訊息、倒數、錄影與備用功能已啟動。',4000),800);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 
@@ -18007,7 +18248,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -18048,7 +18289,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -18205,7 +18446,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -18371,7 +18612,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -18564,7 +18805,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -18622,7 +18863,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -18708,7 +18949,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -18847,7 +19088,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19002,7 +19243,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -19197,7 +19438,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19304,7 +19545,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -19492,7 +19733,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -19612,7 +19853,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -19732,7 +19973,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -19960,7 +20201,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -20136,7 +20377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -20239,6 +20480,247 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
     say('V9.0.1 已啟動：前後鏡改為一鍵切換中央心臟圖，左上控制台整組下移。');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install); else install();
+})();
+</script>
+
+
+
+<!-- ============================================================
+KGEN 12345 Heart UI Patch V9.0.2
+MESSAGE / RECORDER / COUNTDOWN FIX
+- countdown uses one-line fixed-height display, no row jitter
+- restore transaction/status/service messages into left mini status + right message center
+- bottom buttons: replace inactive cup/fortune UI shortcuts with Backup and Screen Recorder
+- no wallet/core contract changes
+============================================================ -->
+<style id="kgen-v902-message-recorder-countdown-style">
+  :root{ --kgen-left-top-safe: 96px; }
+  #kgen-heart-toggle{
+    top: var(--kgen-left-top-safe) !important;
+    width: min(420px, calc(48vw - 18px)) !important;
+    min-width: 330px !important;
+    box-sizing:border-box !important;
+    justify-content:space-between !important;
+    white-space:nowrap !important;
+  }
+  #kgen-heart-live-panel{
+    top: calc(var(--kgen-left-top-safe) + 44px) !important;
+    width: min(420px, calc(48vw - 18px)) !important;
+    max-height: calc(100vh - 184px) !important;
+    padding-bottom: 190px !important;
+    overscroll-behavior: contain;
+  }
+  #kgen-heart-live-panel::after{
+    content:"";
+    display:block;
+    height:150px;
+    flex:0 0 auto;
+  }
+  #kgen-heart-live-panel .kh-grid{
+    grid-template-columns: 82px minmax(0,1fr) !important;
+    align-items:start !important;
+  }
+  #kgen-heart-live-panel .kh-v,
+  #kgen-heart-live-panel .kh-k,
+  #kh-ny-slot,
+  #human-cd-1231,
+  #cd-1231{
+    font-variant-numeric: tabular-nums !important;
+  }
+  #kh-ny-slot{
+    display:block !important;
+    min-height: 34px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    overflow:hidden !important;
+  }
+  .kgen-countdown-card,
+  .kgen-human-row .time{
+    min-height: 22px !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    animation:none !important;
+    transition:none !important;
+  }
+  #kgen-v902-left-status{
+    position:fixed;
+    left:18px;
+    top:52px;
+    width:min(420px, calc(48vw - 18px));
+    min-width:330px;
+    z-index:100506;
+    border:1px solid rgba(0,242,255,.32);
+    border-radius:12px;
+    background:rgba(0,0,0,.70);
+    color:#d8fbff;
+    font-size:12px;
+    font-weight:900;
+    line-height:1.35;
+    padding:7px 10px;
+    box-shadow:0 0 18px rgba(0,242,255,.10);
+    pointer-events:none;
+    box-sizing:border-box;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #kgen-v902-rec-panel{
+    position:fixed;
+    left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(520px, calc(100vw - 28px));
+    z-index:2147483100;
+    border:1px solid rgba(255,215,120,.45);
+    border-radius:20px;
+    background:rgba(4,6,12,.96);
+    color:#fff;
+    box-shadow:0 0 60px rgba(0,0,0,.7);
+    padding:16px;
+    display:none;
+  }
+  #kgen-v902-rec-panel.active{display:block;}
+  #kgen-v902-rec-panel .rec-title{color:#ffd778;font-weight:950;font-size:18px;margin-bottom:8px;}
+  #kgen-v902-rec-panel .rec-body{font-size:13px;line-height:1.75;color:#e9f7ff;}
+  #kgen-v902-rec-panel .rec-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  #kgen-v902-rec-panel button{border:1px solid rgba(255,215,120,.34);border-radius:12px;background:rgba(255,215,120,.12);color:#fff;font-weight:900;padding:11px;}
+  #kgen-v902-rec-panel button.gold{background:linear-gradient(135deg,#ffdf86,#b98222);color:#111;}
+  @media(max-width:720px){
+    :root{ --kgen-left-top-safe: 98px; }
+    #kgen-v902-left-status{left:10px;top:55px;width:calc(100vw - 20px);min-width:0;}
+    #kgen-heart-toggle{left:10px!important;top:96px!important;width:calc(100vw - 20px)!important;min-width:0!important;}
+    #kgen-heart-live-panel{left:10px!important;right:auto!important;top:142px!important;width:calc(100vw - 20px)!important;max-height:calc(100vh - 220px)!important;}
+  }
+</style>
+<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
+<div id="kgen-v902-rec-panel" aria-label="螢幕全程錄影">
+  <div class="rec-title">🎥 螢幕全程錄影</div>
+  <div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
+  <div class="rec-actions">
+    <button class="gold" id="kgen-v902-rec-start" type="button">開始錄影</button>
+    <button id="kgen-v902-rec-stop" type="button">停止並下載</button>
+    <button id="kgen-v902-rec-help" type="button">錄影說明</button>
+    <button id="kgen-v902-rec-close" type="button">關閉</button>
+  </div>
+</div>
+<script id="kgen-v902-message-recorder-countdown-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.2-MESSAGE-RECORDER-COUNTDOWN-FIX';
+  function $(id){return document.getElementById(id);}
+  function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
+  function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
+  function push(type,text,dur){
+    text=String(text||'');
+    left(text);
+    try{ if(window.kgenPushMessage) window.kgenPushMessage(type||'info', text, dur||3500); }
+    catch(e){ try{ console.log('[KGEN]',type,text); }catch(_){} }
+  }
+  window.kgenV902Push=push;
+  function fmt(ms){
+    ms=Math.max(0, Math.floor(Number(ms)||0));
+    const sec=Math.floor(ms/1000);
+    const d=Math.floor(sec/86400), h=Math.floor((sec%86400)/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    if(d>0) return d+'天 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  function nextDate(month,day,hour=0,min=0,sec=0){
+    const now=new Date(); let y=now.getFullYear();
+    let t=new Date(y, month-1, day, hour, min, sec, 0);
+    if(t.getTime()<=now.getTime()) t=new Date(y+1, month-1, day, hour, min, sec, 0);
+    return t;
+  }
+  function nextTopHour(){ const n=new Date(); const t=new Date(n); t.setMinutes(0,0,0); t.setHours(t.getHours()+1); return t; }
+  function nextUtcMidnight(){ const n=new Date(); return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()+1, 0,0,0,0)); }
+  let lastHourWarn='', lastBreathWarn='';
+  function stableCountdown(){
+    const now=Date.now();
+    const ny=fmt(nextDate(12,31,23,59,59).getTime()-now);
+    const heart=fmt(nextTopHour().getTime()-now);
+    const breath=fmt(nextUtcMidnight().getTime()-now);
+    const kh=$('kh-ny-slot'); if(kh) kh.textContent='距跨年 '+ny;
+    const ids1231=['cd-1231','human-cd-1231']; ids1231.forEach(id=>{const e=$(id); if(e) e.textContent=ny;});
+    const hi=$('human-cd-heart'); if(hi) hi.textContent=heart;
+    const ign=$('human-cd-ignite'); if(ign) ign.textContent=breath;
+    const secH=Math.floor((nextTopHour().getTime()-now)/1000);
+    const secB=Math.floor((nextUtcMidnight().getTime()-now)/1000);
+    if(secH<=60 && secH>0){ const k=new Date().getHours()+':'+new Date().getDate(); if(k!==lastHourWarn){lastHourWarn=k; push('warn','整點心跳倒數 '+secH+' 秒，時間到可按 heartbeatClaim。',5000); speak('整點心跳即將到來，請準備確認是否要執行。');}}
+    if(secB<=120 && secB>0){ const k=new Date().toDateString(); if(k!==lastBreathWarn){lastBreathWarn=k; push('warn','轉日呼吸倒數 '+secB+' 秒，UTC 零點可按 igniteAndClaim。',5000); speak('轉日呼吸即將到來，請準備確認是否要執行。');}}
+  }
+  let rec={stream:null, recorder:null, chunks:[], active:false};
+  async function startRecording(){
+    const panel=$('kgen-v902-rec-panel');
+    try{
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+        push('warn','此瀏覽器不支援網頁螢幕錄影，請使用手機內建錄影或錢包瀏覽器支援版本。',6000);
+        speak('此瀏覽器不支援網頁螢幕錄影，請使用手機內建錄影。');
+        return;
+      }
+      rec.stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+      rec.chunks=[]; rec.recorder=new MediaRecorder(rec.stream,{mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm'});
+      rec.recorder.ondataavailable=e=>{ if(e.data && e.data.size) rec.chunks.push(e.data); };
+      rec.recorder.onstop=()=>{
+        const blob=new Blob(rec.chunks,{type:'video/webm'}); const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download='KGEN-12345-temple-record-'+new Date().toISOString().replace(/[:.]/g,'-')+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),5000);
+        try{rec.stream.getTracks().forEach(t=>t.stop());}catch(e){}
+        rec.active=false; push('success','螢幕錄影已完成並下載。',3500); speak('螢幕錄影已完成。');
+      };
+      rec.recorder.start(1000); rec.active=true;
+      if(panel) panel.classList.remove('active');
+      push('success','螢幕全程錄影已開始。',3500); speak('螢幕錄影已開始。');
+    }catch(e){ push('error','螢幕錄影未啟動：'+(e&&e.message?e.message:e),6000); speak('螢幕錄影未啟動，可能是瀏覽器不支援或使用者取消。'); }
+  }
+  function stopRecording(){
+    try{ if(rec.recorder && rec.active){ rec.recorder.stop(); } else { push('info','目前沒有正在錄影。',3000); } }catch(e){ push('error','停止錄影失敗：'+(e.message||e),5000); }
+  }
+  function openRecorder(){ const p=$('kgen-v902-rec-panel'); if(p) p.classList.add('active'); push('info','已開啟螢幕全程錄影功能。',3000); }
+  function openReserve(){
+    push('info','備用功能槽：保留給下一版神殿服務，不送交易、不動錢包。',4000);
+    speak('這是備用功能槽，保留給下一版神殿服務。');
+  }
+  function patchFooter(){
+    const buttons=Array.from(document.querySelectorAll('.footer-terminal .term-btn'));
+    buttons.forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(t.includes('發財金') || t.includes('錢包聖盃')){
+        btn.textContent = t.includes('發財金') ? '🎥 螢幕全程錄影' : '🧩 備用功能';
+        btn.classList.remove('active-kgen');
+        btn.onclick = t.includes('發財金') ? openRecorder : openReserve;
+      }
+    });
+    // If no explicit reserve exists, use rules/activity button only when present and inactive.
+    const maybe=buttons.find(b=>(b.textContent||'').includes('規則活動'));
+    if(maybe){ maybe.textContent='🧩 備用功能'; maybe.onclick=openReserve; }
+  }
+  function patchMessages(){
+    if(window.__KGEN_V902_MSG_PATCHED__) return; window.__KGEN_V902_MSG_PATCHED__=true;
+    const oldToast=window.toast; if(typeof oldToast==='function') window.toast=function(m){ push('info',m,3500); try{return oldToast.apply(this,arguments);}catch(e){} };
+    const oldAlert=window.alert; window.alert=function(m){ push(String(m).includes('失敗')?'error':'info',m,5000); };
+    if(window.app && typeof app.speak==='function'){
+      const oldSpeak=app.speak.bind(app);
+      app.speak=function(m){ push('info','客服語音：'+String(m).slice(0,80),2500); return oldSpeak(m); };
+    }
+    ['kh-connect','kh-refresh','kh-approve','kh-approve-max'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('click',()=>push('info','已按下 '+(el.textContent||id).trim()+'，等待錢包或鏈上回應。',3000),true); });
+    document.addEventListener('click',ev=>{
+      const b=ev.target&&ev.target.closest&&ev.target.closest('button'); if(!b) return;
+      const t=(b.textContent||'').trim();
+      if(/fortuneClaim|heartbeatClaim|igniteAndClaim|vowTo|lightLamp|makeWish|發財金|心跳|呼吸|還願|點燈|許願/.test(t)) push('info','準備執行：'+t,3000);
+    },true);
+  }
+  function wirePanel(){
+    const p=$('kgen-v902-rec-panel');
+    const s=$('kgen-v902-rec-start'), st=$('kgen-v902-rec-stop'), h=$('kgen-v902-rec-help'), c=$('kgen-v902-rec-close');
+    if(s) s.onclick=startRecording; if(st) st.onclick=stopRecording;
+    if(h) h.onclick=()=>{push('info','錄影說明：按開始後選擇目前畫面，完成後按停止下載 WebM 檔。手機不支援時請用系統錄影。',6000); speak('按開始後選擇目前畫面，完成後按停止下載影片。');};
+    if(c) c.onclick=()=>p&&p.classList.remove('active');
+  }
+  function init(){
+    patchFooter(); patchMessages(); wirePanel(); stableCountdown();
+    setInterval(stableCountdown,1000);
+    setTimeout(()=>push('success','V9.0.2 訊息、倒數、錄影與備用功能已啟動。',4000),800);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 
