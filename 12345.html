@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,7 +15924,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -16090,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16283,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16427,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16721,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,7 +17029,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -17149,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17603,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17725,7 +17725,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -17827,7 +17827,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -18690,8 +18690,8 @@ CHANGELOG:
 })();
 </script>
 
-</body> 前面。
-============================================================ -->
+
+<!-- removed stray visible patch anchor -->
 
 <style id="kgen-v891-toast-message-center-style">
 /* ===== V8.9.1：右上訊息中心與 Toast ===== */
@@ -19217,7 +19217,7 @@ CHANGELOG:
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -19258,7 +19258,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -19415,7 +19415,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -19581,7 +19581,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -19774,7 +19774,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -19832,7 +19832,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -19918,7 +19918,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -20057,7 +20057,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20212,7 +20212,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -20407,7 +20407,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20514,7 +20514,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -20702,7 +20702,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -20822,7 +20822,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.7-UI-REC-HEART-CUP-GA-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -20942,7 +20942,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -21170,7 +21170,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -21346,7 +21346,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -21575,7 +21575,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -21791,7 +21791,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -21890,7 +21890,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX
+VERSION PATCH: KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -21992,7 +21992,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.9-REAL-GA-HEART-LAYOUT-FIX';
+  const VERSION='KGEN-12345-HEART-UI-V9.1.0-REAL-TOGGLE-LAYOUT-FIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -22855,5 +22855,195 @@ CHANGELOG:
 })();
 </script>
 
+
+
+<!-- KGEN 12345 UI V9.1.0 REAL TOGGLE / LAYOUT PATCH
+CHANGELOG:
+- Fix non-collapsing Heart panel caused by older V9.0.8 toggle class and V9.0.9 body selector conflict.
+- Move GA Evolution upward and away from warp lever / rule panel.
+- Move and widen left HUD group: message, Heart toggle, BNB dark matter, KGEN mass, Heart control panel.
+- Remove stray visible patch text such as "前面。" from earlier insertion.
+- Keep existing wallet connection core untouched.
+-->
+<style id="kgen-v910-real-toggle-layout-style">
+  :root{
+    --kgen-v910-left-x:14px;
+    --kgen-v910-left-w:min(520px,50vw);
+    --kgen-v910-status-top:126px;
+    --kgen-v910-toggle-top:172px;
+    --kgen-v910-bars-top:214px;
+    --kgen-v910-panel-top:372px;
+  }
+
+  #kgen-v902-live-status,
+  #kgen-v902-message-strip,
+  #kgen-live-status,
+  #kgen-msg-strip,
+  #kgen-status-strip,
+  .kgen-live-status,
+  .left-message,
+  .hud-message,
+  #toast{
+    position:fixed !important;
+    top:var(--kgen-v910-status-top) !important;
+    left:var(--kgen-v910-left-x) !important;
+    width:var(--kgen-v910-left-w) !important;
+    max-width:var(--kgen-v910-left-w) !important;
+    box-sizing:border-box !important;
+    z-index:2147482500 !important;
+  }
+
+  #kgen-heart-toggle{
+    position:fixed !important;
+    top:var(--kgen-v910-toggle-top) !important;
+    left:var(--kgen-v910-left-x) !important;
+    width:var(--kgen-v910-left-w) !important;
+    max-width:var(--kgen-v910-left-w) !important;
+    min-height:36px !important;
+    box-sizing:border-box !important;
+    z-index:2147482600 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:10px !important;
+    pointer-events:auto !important;
+  }
+
+  .resource-bars{
+    position:fixed !important;
+    top:var(--kgen-v910-bars-top) !important;
+    left:var(--kgen-v910-left-x) !important;
+    width:var(--kgen-v910-left-w) !important;
+    max-width:var(--kgen-v910-left-w) !important;
+    box-sizing:border-box !important;
+    z-index:2147482400 !important;
+  }
+  .resource-bars .rb{width:100% !important;max-width:100% !important;box-sizing:border-box !important;}
+
+  #kgen-heart-live-panel{
+    position:fixed !important;
+    top:var(--kgen-v910-panel-top) !important;
+    left:var(--kgen-v910-left-x) !important;
+    width:var(--kgen-v910-left-w) !important;
+    max-width:var(--kgen-v910-left-w) !important;
+    max-height:calc(100vh - var(--kgen-v910-panel-top) - 92px) !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    box-sizing:border-box !important;
+    z-index:2147483000 !important;
+    pointer-events:auto !important;
+    padding-bottom:160px !important;
+  }
+
+  /* Final winning close rules: support V9.0.8 is-hidden, V9.0.9 hidden, aria-hidden and body collapsed. */
+  body.k12345-heart-collapsed #kgen-heart-live-panel,
+  #kgen-heart-live-panel.kgen-v909-hidden,
+  #kgen-heart-live-panel.is-hidden,
+  #kgen-heart-live-panel[aria-hidden="true"]{
+    display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+  #kgen-heart-live-panel.kgen-v908-open,
+  #kgen-heart-live-panel.kgen-v909-open,
+  #kgen-heart-live-panel[aria-hidden="false"]{
+    display:block !important;
+    visibility:visible !important;
+    pointer-events:auto !important;
+  }
+
+  #kgen-heart-toggle .kgen-heart-state,
+  #kgen-heart-toggle::after{font-size:12px !important;font-weight:950 !important;color:#ffe6a3 !important;}
+
+  .ga-matrix{
+    position:fixed !important;
+    right:106px !important;
+    left:auto !important;
+    bottom:520px !important;
+    top:auto !important;
+    width:210px !important;
+    max-width:210px !important;
+    transform:none !important;
+    z-index:2147481200 !important;
+    box-sizing:border-box !important;
+  }
+
+  @media(max-width:720px){
+    :root{
+      --kgen-v910-left-x:10px;
+      --kgen-v910-left-w:min(500px,50vw);
+      --kgen-v910-status-top:126px;
+      --kgen-v910-toggle-top:172px;
+      --kgen-v910-bars-top:214px;
+      --kgen-v910-panel-top:374px;
+    }
+    .ga-matrix{
+      right:78px !important;
+      bottom:455px !important;
+      width:190px !important;
+      max-width:190px !important;
+    }
+  }
+</style>
+<script id="kgen-v910-real-toggle-layout-script">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const qa=s=>Array.from(document.querySelectorAll(s));
+  function text(el){return (el&&el.textContent||'').replace(/\s+/g,' ').trim();}
+  function say(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(t); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u); } }catch(e){}}
+  function log(t){
+    try{ if(window.msg) window.msg('info',t); }catch(e){}
+    try{ const el=$('kgen-v902-message-list')||$('kgen-msg-list')||$('message-list'); if(el){ const d=document.createElement('div'); d.textContent='['+new Date().toLocaleTimeString('zh-TW',{hour12:false})+'] '+t; el.prepend(d); } }catch(e){}
+    try{ const toast=$('toast'); if(toast){toast.textContent=t; toast.style.display='block';} }catch(e){}
+  }
+  function isOpen(){
+    const p=$('kgen-heart-live-panel');
+    if(!p) return false;
+    return p.getAttribute('aria-hidden')!=='true' && !p.classList.contains('is-hidden') && !p.classList.contains('kgen-v909-hidden') && getComputedStyle(p).display!=='none';
+  }
+  function setHeart(open, silent){
+    const p=$('kgen-heart-live-panel');
+    const b=$('kgen-heart-toggle');
+    if(!p) return false;
+    document.body.classList.toggle('k12345-heart-collapsed', !open);
+    p.classList.toggle('is-hidden', !open);
+    p.classList.toggle('kgen-v908-open', open);
+    p.classList.toggle('kgen-v909-hidden', !open);
+    p.classList.toggle('kgen-v909-open', open);
+    p.style.setProperty('display', open?'block':'none', 'important');
+    p.style.setProperty('visibility', open?'visible':'hidden', 'important');
+    p.setAttribute('aria-hidden', open?'false':'true');
+    if(b){
+      b.setAttribute('aria-expanded', open?'true':'false');
+      let state=b.querySelector('.kgen-heart-state');
+      if(state) state.textContent=open?'收合':'展開';
+    }
+    if(open){ try{ p.scrollTop=0; }catch(e){} }
+    if(!silent){ log(open?'悟空心臟操作窗已展開。':'悟空心臟操作窗已收合。'); }
+    return false;
+  }
+  function toggleHeart(){ return setHeart(!isOpen()); }
+  function bind(){
+    const top=$('kgen-heart-toggle');
+    if(top){
+      top.onclick=function(e){ if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation&&e.stopImmediatePropagation();} return toggleHeart(); };
+    }
+    qa('button,.term-btn,a').forEach(btn=>{
+      const t=text(btn);
+      if(t.includes('悟空心臟')||t.includes('心臟操作')||t.includes('Heart 面板')){
+        btn.onclick=function(e){ if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation&&e.stopImmediatePropagation();} return toggleHeart(); };
+      }
+    });
+  }
+  function cleanStray(){
+    try{ Array.from(document.body.childNodes).forEach(n=>{ if(n.nodeType===3 && /前面|={6,}/.test(n.nodeValue||'')) n.nodeValue=''; }); }catch(e){}
+  }
+  function init(){ bind(); cleanStray(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setInterval(init,700);
+  window.kgenV910={setHeart,toggleHeart,isOpen};
+})();
+</script>
 </body>
 </html>
