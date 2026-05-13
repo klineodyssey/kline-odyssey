@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -50,7 +50,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE｜Heart V3.2.6</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX｜Heart V3.2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE";
+const APP_VERSION = "KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15552,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const FIX_VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15924,7 +15924,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -16090,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16283,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16427,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16721,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,7 +17029,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -17149,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17259,7 +17259,7 @@ Fixes:
 
 
 
-<!-- ===== KGEN 12345 V9.0.0｜16888 CAMERA CORE MERGE + LEFT HUD / NY STABLE PATCH ===== -->
+<!-- ===== KGEN 12345 V9.0.1｜12345 CAMERA TOGGLE + LAYOUT FIX + LEFT HUD / NY STABLE PATCH ===== -->
 <style id="kgen-v900-camera-core-merge-style">
 :root{
   --kgen-left-x:18px;
@@ -17377,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -18007,7 +18007,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -18048,7 +18048,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -18205,7 +18205,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
@@ -18371,7 +18371,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -18564,7 +18564,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -18622,7 +18622,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -18708,7 +18708,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -18847,7 +18847,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19002,7 +19002,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -19197,7 +19197,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -19304,7 +19304,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -19492,7 +19492,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -19612,7 +19612,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE
+VERSION PATCH: KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX
 BUILD: 20260513-V9.0.0-CAMERA-CORE-MERGE
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
@@ -19732,7 +19732,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -19842,7 +19842,7 @@ Fixes:
 
 
 
-<!-- ===== KGEN 12345 V9.0.0｜16888 CAMERA CORE MERGE + LEFT HUD / NY STABLE PATCH ===== -->
+<!-- ===== KGEN 12345 V9.0.1｜12345 CAMERA TOGGLE + LAYOUT FIX + LEFT HUD / NY STABLE PATCH ===== -->
 <style id="kgen-v900-camera-core-merge-style">
 :root{
   --kgen-left-x:18px;
@@ -19960,7 +19960,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-HEART-UI-V9.0.0-CAMERA-CORE-MERGE';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -20060,6 +20060,185 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
     speak('V9.0.0 已啟動：前鏡後鏡合併中央悟空心臟，左上控制台已下移，跨年倒數改為固定顯示。');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install); else install();
+})();
+</script>
+
+
+
+<!-- ===== KGEN 12345 V9.0.1｜CAMERA TOGGLE + LAYOUT CLEAN PATCH ===== -->
+<style id="kgen-v901-camera-toggle-layout-clean-style">
+:root{
+  --kgen-left-x:18px;
+  --kgen-left-w:min(430px, 35vw, calc(100vw - 36px));
+  --kgen-heart-toggle-top:132px;
+  --kgen-bars-top:190px;
+  --kgen-heart-panel-top:286px;
+}
+/* 左上整組再下移：避開背景品牌字與最上方雜訊 */
+#kgen-heart-toggle{
+  top:var(--kgen-heart-toggle-top)!important;
+  left:var(--kgen-left-x)!important;
+  width:var(--kgen-left-w)!important;
+  max-width:var(--kgen-left-w)!important;
+  z-index:100650!important;
+}
+.resource-bars{
+  top:var(--kgen-bars-top)!important;
+  left:var(--kgen-left-x)!important;
+  width:var(--kgen-left-w)!important;
+  max-width:var(--kgen-left-w)!important;
+  z-index:100640!important;
+}
+#kgen-heart-live-panel{
+  top:var(--kgen-heart-panel-top)!important;
+  left:var(--kgen-left-x)!important;
+  width:var(--kgen-left-w)!important;
+  max-width:var(--kgen-left-w)!important;
+  max-height:calc(100vh - var(--kgen-heart-panel-top) - 98px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-bottom:360px!important;
+  scroll-padding-bottom:360px!important;
+  box-sizing:border-box!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#kgen-heart-live-panel::after{content:""!important;display:block!important;height:360px!important;min-height:360px!important;}
+/* 清掉 V8/V9 舊彈窗鏡頭與可能殘留最上方文字 */
+#kgenCameraPanelV899,#kgenCameraToast,.kgen-cam-panel,.kgen-cam-backdrop,.kgen-camera-modal,
+[id*="kgenCamPanel"],[id*="kgen-camera-panel"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+/* 16888 標準：中央圓窗實鏡頭 + 右上小原圖 */
+#core-window{position:relative!important;}
+#cam-view{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;opacity:0;z-index:30!important;transition:opacity .18s ease!important;}
+#fairy-img{display:block!important;transition:opacity .18s ease!important;}
+#mini-thumb{
+  position:absolute!important;right:28px!important;top:28px!important;width:96px!important;height:96px!important;
+  border-radius:999px!important;border:3px solid rgba(255,215,120,.78)!important;
+  background-color:rgba(0,0,0,.55)!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;
+  z-index:80!important;display:none;box-shadow:0 0 26px rgba(255,215,120,.42)!important;overflow:hidden!important;
+}
+#mini-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;}
+/* 跨年倒數完全固定，只換文字不閃 */
+#kgen-heart-live-panel [id*="ny"],#kgen-heart-live-panel [id*="NY"],#kgen-heart-live-panel [class*="ny"],#kgen-heart-live-panel [class*="NY"],#kgen-heart-live-panel [id*="1231"],#kgen-heart-live-panel [class*="1231"],
+#kh-ny-slot,#kh-ny-countdown,#cd-1231,.kh-ny-countdown{
+  animation:none!important;transition:none!important;opacity:1!important;filter:none!important;transform:none!important;
+}
+@media(max-width:720px) and (orientation:landscape){
+  :root{--kgen-left-x:10px;--kgen-left-w:min(305px,44vw);--kgen-heart-toggle-top:124px;--kgen-bars-top:178px;--kgen-heart-panel-top:268px;}
+  #kgen-heart-live-panel{max-height:calc(100vh - 278px)!important;padding-bottom:340px!important;}
+  #kgen-heart-live-panel::after{height:340px!important;min-height:340px!important;}
+}
+@media(max-width:720px) and (orientation:portrait){
+  :root{--kgen-left-x:10px;--kgen-left-w:calc(100vw - 20px);--kgen-heart-toggle-top:126px;--kgen-bars-top:184px;--kgen-heart-panel-top:276px;}
+  #kgen-heart-live-panel{max-height:calc(100vh - 374px)!important;padding-bottom:380px!important;}
+  #kgen-heart-live-panel::after{height:380px!important;min-height:380px!important;}
+}
+</style>
+<script id="kgen-v901-camera-toggle-layout-clean-script">
+(function(){
+  'use strict';
+  const VERSION='KGEN-12345-HEART-UI-V9.0.1-CAMERA-CORE-TOGGLE-LAYOUT-FIX';
+  const HEART_IMG='./assets/wukong_heart_core.jpg';
+  function $(id){return document.getElementById(id);}
+  function say(t){
+    try{ if(window.kgenPushMessage) window.kgenPushMessage('info',t,2400); else if(window.kgenToast) window.kgenToast('info',t,2400); }catch(e){}
+    try{ if(window.speechSynthesis){ window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(t||'')); u.lang='zh-TW'; u.rate=1.02; window.speechSynthesis.speak(u); } }catch(e){}
+  }
+  function getApp(){return window.app||(window.app={});}
+  function stopStream(){
+    const a=getApp();
+    try{ if(a.stream){ a.stream.getTracks().forEach(t=>t.stop()); } }catch(e){}
+    a.stream=null;
+  }
+  function restoreCore(){
+    const a=getApp(), v=$('cam-view'), f=$('fairy-img'), m=$('mini-thumb');
+    stopStream();
+    if(v){ try{v.pause&&v.pause();}catch(e){} v.srcObject=null; v.style.opacity='0'; }
+    if(f){ f.style.opacity='1'; f.style.visibility='visible'; }
+    if(m){ m.style.display='none'; m.innerHTML=''; }
+    a.isCam=false; a.camMode=null; a.kgenCamBusy=false;
+    document.body.classList.remove('kgen-camera-on','kgen-camera-front','kgen-camera-back');
+    updateCamButtons(null);
+    say('中央鏡頭已關閉，恢復悟空心臟核心圖。');
+  }
+  function makeMini(){
+    const m=$('mini-thumb'), f=$('fairy-img'); if(!m) return;
+    const imgSrc=(f && (f.currentSrc||f.src)) || HEART_IMG;
+    m.innerHTML='<img alt="悟空心臟核心圖" src="'+imgSrc+'" onerror="this.onerror=null;this.src=\''+HEART_IMG+'\';">';
+    m.style.backgroundImage='url("'+imgSrc+'")';
+    m.style.display='block';
+  }
+  function updateCamButtons(mode){
+    document.querySelectorAll('.footer-terminal .term-btn').forEach((b,i)=>{
+      const txt=(b.innerText||b.textContent||'');
+      if(i===2 || /前鏡/.test(txt)){ b.setAttribute('data-kgen-camera','front'); b.innerHTML='🤳<br>前鏡多方'; }
+      if(i===3 || /後鏡/.test(txt)){ b.setAttribute('data-kgen-camera','back'); b.innerHTML='🌌<br>後鏡空方'; }
+      b.classList.toggle('active-kgen', (mode==='user' && b.getAttribute('data-kgen-camera')==='front') || (mode==='environment' && b.getAttribute('data-kgen-camera')==='back'));
+    });
+  }
+  async function startCoreCam(mode){
+    const a=getApp(), v=$('cam-view'), f=$('fairy-img');
+    if(!v || !f){ say('找不到中央核心鏡頭元件。'); return; }
+    if(a.kgenCamBusy) return;
+    if(a.isCam && a.camMode===mode){ restoreCore(); return; }
+    a.kgenCamBusy=true;
+    try{
+      /* 只由這個最終核心請求 camera；window capture 會攔掉舊版重複監聽，所以只需確認一次。 */
+      stopStream();
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:mode},width:{ideal:1280},height:{ideal:720}},audio:false});
+      a.stream=stream; a.isCam=true; a.camMode=mode;
+      v.srcObject=stream; v.setAttribute('playsinline',''); v.muted=true;
+      try{ await v.play(); }catch(e){}
+      v.style.opacity='1'; f.style.opacity='0'; v.style.transform=mode==='user'?'scaleX(-1)':'scaleX(1)';
+      makeMini();
+      document.body.classList.add('kgen-camera-on');
+      document.body.classList.toggle('kgen-camera-front',mode==='user');
+      document.body.classList.toggle('kgen-camera-back',mode!=='user');
+      updateCamButtons(mode);
+      say(mode==='user'?'前鏡多方已接入中央悟空心臟；再按一次前鏡可回原圖。':'後鏡空方已接入中央悟空心臟；再按一次後鏡可回原圖。');
+    }catch(e){
+      console.warn('V9.0.1 camera failed',e);
+      restoreCore();
+      say('攝像頭權限未開啟，請允許相機權限後再按前鏡或後鏡。');
+    }finally{ setTimeout(()=>{a.kgenCamBusy=false;},350); }
+  }
+  function fmt(ms){
+    if(ms<0) return '已進入新年交界';
+    const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=s%60;
+    return d+'天 '+String(h).padStart(2,'0')+'時 '+String(m).padStart(2,'0')+'分 '+String(sec).padStart(2,'0')+'秒';
+  }
+  function updateNY(){
+    const now=new Date(); const target=new Date(now.getFullYear(),11,31,23,59,59,999);
+    const short='距跨年倒數：'+fmt(target-now); const full=short+'｜目標：12/31 23:59:59（台灣時間 UTC+8）';
+    ['kh-ny-slot','kh-ny-countdown','cd-1231'].forEach(id=>{const el=$(id); if(el){el.textContent=(id==='kh-ny-slot'?short:full);el.style.animation='none';el.style.transition='none';el.style.opacity='1';}});
+    document.querySelectorAll('#kgen-heart-live-panel .kh-ny-countdown,#kgen-heart-live-panel [data-kgen-ny],#kgen-heart-live-panel [class*="ny-count"]').forEach(el=>{el.textContent=full;el.style.animation='none';el.style.transition='none';el.style.opacity='1';});
+  }
+  function layout(){
+    try{document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION+'｜Heart V3.2.6';}catch(e){}
+    try{if($('ver-st')) $('ver-st').textContent='VERSION '+VERSION;}catch(e){}
+    updateCamButtons(getApp().camMode);
+    const panel=$('kgen-heart-live-panel');
+    if(panel){panel.style.paddingBottom='360px';panel.style.overflowY='auto';panel.style.webkitOverflowScrolling='touch';}
+    const toggle=$('kgen-heart-toggle');
+    if(toggle){
+      const open=!document.body.classList.contains('k12345-heart-collapsed');
+      toggle.innerHTML='<span><span class="kgen-heart-title">K線西遊記・花果山台灣</span><span class="kgen-heart-sub">12345 Heart 悟空財神殿控制台</span></span><span class="kgen-heart-state">'+(open?'收合':'展開')+'</span>';
+    }
+  }
+  function intercept(ev){
+    const b=ev.target&&ev.target.closest?ev.target.closest('button,[role="button"],a'):null; if(!b) return;
+    const txt=(b.innerText||b.textContent||'').trim(); const attr=b.getAttribute('data-kgen-camera');
+    if(attr==='front'||/前鏡/.test(txt)){ev.preventDefault();ev.stopImmediatePropagation();startCoreCam('user');return false;}
+    if(attr==='back'||/後鏡/.test(txt)){ev.preventDefault();ev.stopImmediatePropagation();startCoreCam('environment');return false;}
+  }
+  function install(){
+    const a=getApp(); a.cam=startCoreCam; a.kgenRestoreCoreCamera=restoreCore;
+    /* window capture 比舊 document capture 更早，避免同一次點擊觸發兩套 getUserMedia。 */
+    window.addEventListener('click',intercept,true);
+    window.addEventListener('touchend',function(ev){},true);
+    updateNY(); setInterval(updateNY,1000); layout(); setInterval(layout,1400);
+    say('V9.0.1 已啟動：前後鏡改為一鍵切換中央心臟圖，左上控制台整組下移。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install); else install();
 })();
 </script>
 
