@@ -1,0 +1,76 @@
+
+/* KGEN 12345 V10.9｜Original Temple Modular Repair
+   只修接線與顯示，不改合約、不打掉神殿。 */
+:root{ --kgen-v109-panel-z:2147483300; --kgen-v109-dock-z:2147483200; }
+
+/* 版本治理標記 */
+body::after{content:"V10.9";position:fixed;right:6px;bottom:6px;font-size:9px;color:rgba(127,243,255,.35);z-index:1;pointer-events:none;}
+
+/* 右側按鈕群保持存在，不被新增功能蓋住 */
+#universe-nav{z-index:2147482100!important;}
+#universe-nav .nav-btn{pointer-events:auto!important;}
+#kgen-v109-festival-toggle{order:999!important;width:100%!important;min-height:38px!important;}
+
+/* 節日活動面板：使用原 V10.2 面板內容，只改穩定位置與收合 */
+#kgen-v102-festival-panel.kgen-v109-festival-panel{
+  position:fixed!important;right:18px!important;top:430px!important;width:min(318px,45vw)!important;
+  max-height:42vh!important;overflow:auto!important;z-index:var(--kgen-v109-panel-z)!important;
+  display:none;border:1px solid rgba(255,215,120,.55)!important;border-radius:14px!important;
+  background:rgba(8,10,18,.94)!important;box-shadow:0 16px 45px rgba(0,0,0,.65)!important;
+  pointer-events:auto!important;
+}
+#kgen-v102-festival-panel.kgen-v109-open{display:block!important;}
+#kgen-v109-festival-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:#ffd978;font-weight:900;}
+#kgen-v109-festival-head button,#kgen-v109-right-rule-head button{border:1px solid rgba(255,215,120,.6);border-radius:10px;background:rgba(255,215,120,.12);color:#ffe28a;padding:6px 10px;font-weight:900;}
+#kgen-v102-festival-countdown{font-size:0!important;line-height:0!important;min-height:0!important;opacity:0!important;}
+#kgen-v109-festival-stable-countdown{font-size:12px!important;line-height:1.45!important;color:#7ff3ff!important;margin:4px 0 8px 0!important;}
+
+/* 右側神規獨立面板 */
+#kgen-v109-right-rule-panel{
+  position:fixed;right:18px;top:330px;width:min(330px,46vw);max-height:48vh;overflow:auto;
+  z-index:var(--kgen-v109-panel-z);display:none;padding:12px;border-radius:14px;
+  border:1px solid rgba(255,215,120,.58);background:rgba(8,10,18,.95);box-shadow:0 16px 45px rgba(0,0,0,.70);
+  color:#e8ffff;box-sizing:border-box;pointer-events:auto;
+}
+#kgen-v109-right-rule-panel.kgen-v109-open{display:block!important;}
+#kgen-v109-right-rule-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#ffd978;font-weight:900;}
+#kgen-v109-right-rule-panel .rule-card{border:1px solid rgba(0,242,255,.24);border-radius:12px;background:rgba(0,242,255,.06);padding:10px;margin:8px 0;line-height:1.55;font-size:12px;}
+#kgen-v109-right-rule-panel b{color:#ffd978;}
+
+/* 悟空心臟控制台：固定在底部八大按鈕之上，內部捲動，不再蓋住按鈕 */
+#web3-panel{
+  left:10px!important;right:auto!important;top:350px!important;bottom:150px!important;width:min(430px,46vw)!important;
+  max-height:none!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;box-sizing:border-box!important;z-index:2147482500!important;
+  padding-bottom:18px!important;
+}
+#web3-panel.v109-collapsed{display:none!important;}
+#web3-panel #bp-status,#web3-panel #kh-log,#bp-status,#kh-log,#kgen-v902-left-status{
+  min-height:24px!important;max-height:54px!important;overflow:auto!important;line-height:1.35!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+}
+
+/* 三聖盃：取消 0/3 分數式，改三次通過式 */
+#v715-cup-status,#v715-cup-log,#v714-cup-status,#v57-cup-status,
+.kgen-cup-status,.v908-cup-status,.v907-cup-status{display:none!important;}
+#kgen-v109-cup-box{border:1px solid rgba(255,215,120,.35);border-radius:13px;background:rgba(255,215,120,.055);padding:10px;margin:10px 0;}
+#kgen-v109-cup-title{color:#ffd978;font-weight:900;margin-bottom:6px;}
+#kgen-v109-cup-status{color:#7ff3ff;font-size:12px;line-height:1.45;margin:6px 0 8px 0;}
+#kgen-v109-cup-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+#kgen-v109-cup-row button{border:1px solid rgba(255,215,120,.45);background:rgba(0,0,0,.45);color:#fff;border-radius:10px;padding:9px 6px;font-weight:900;}
+#kgen-v109-cup-row button.done{background:rgba(0,180,110,.24);border-color:rgba(0,255,170,.65);color:#bfffe8;}
+#kgen-v109-cup-reset{margin-top:8px;width:100%;border:1px solid rgba(255,215,120,.35);background:rgba(255,215,120,.10);color:#ffe28a;border-radius:10px;padding:7px 8px;font-weight:900;}
+
+/* 跨年倒數槽保留但隱藏舊秒跳動文字，改顯示穩定文字 */
+#kh-ny-slot{font-size:0!important;line-height:0!important;min-height:18px!important;}
+#kgen-v109-ny-stable{display:block!important;font-size:11px!important;line-height:1.35!important;color:#7ff3ff!important;white-space:normal!important;}
+#kh-ny-countdown,.kh-ny-countdown,#cd-1231,#human-cd-1231{animation:none!important;transition:none!important;opacity:1!important;}
+
+/* 舊版殘留浮窗 / 會亂跳訊息：非使用者主動開啟時不阻擋主畫面 */
+#kgenV892ServiceCard:not(.kgen-v109-open),#kgen-v917-hidden-panel:not(.kgen-v109-open){display:none!important;}
+
+@media(max-width:760px){
+  #kgen-v102-festival-panel.kgen-v109-festival-panel{right:8px!important;top:392px!important;width:min(320px,48vw)!important;max-height:38vh!important;}
+  #kgen-v109-right-rule-panel{right:8px;top:330px;width:min(330px,50vw);max-height:44vh;}
+  #web3-panel{left:8px!important;top:322px!important;bottom:148px!important;width:min(430px,46vw)!important;}
+}
