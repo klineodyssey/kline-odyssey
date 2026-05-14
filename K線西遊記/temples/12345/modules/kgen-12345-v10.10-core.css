@@ -1,0 +1,33 @@
+/* KGEN 12345 V10.10｜Original Temple Module Repair
+   放置路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.10-core.css
+   原則：不新增右側神規小面板；只控制原本 #coord-panel。 */
+body::after{content:"V10.10";position:fixed;right:6px;bottom:6px;font-size:9px;color:rgba(127,243,255,.35);z-index:1;pointer-events:none;}
+/* 原本右側神規區塊：只控制 #coord-panel，不再生小面板 */
+#kgen-v109-right-rule-panel,#kgen-v1010-right-rule-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+#coord-panel{box-sizing:border-box!important;}
+body.kgen-v1010-right-rule-closed #coord-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+body.kgen-v1010-right-rule-open #coord-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+.kgen-v1010-panel-close{border:1px solid rgba(255,215,120,.55)!important;border-radius:9px!important;background:rgba(255,215,120,.10)!important;color:#ffe28a!important;padding:4px 8px!important;font-weight:900!important;cursor:pointer!important;}
+/* 右上節日活動：按鈕放在右側按鈕列最下面；面板只點擊後開啟 */
+#universe-nav{z-index:2147482100!important;}
+#universe-nav .nav-btn{pointer-events:auto!important;}
+#kgen-v1010-festival-toggle{order:999!important;width:100%!important;min-height:38px!important;box-sizing:border-box!important;}
+#kgen-v102-festival-panel{display:none!important;right:12px!important;top:430px!important;width:min(330px,44vw)!important;max-height:42vh!important;overflow:auto!important;z-index:2147483200!important;}
+#kgen-v102-festival-panel.kgen-v1010-open{display:block!important;}
+#kgen-v1010-festival-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:#ffd978;font-weight:900;}
+/* 左上悟空心臟控制台：展開時自己捲動，不往下蓋八大按鍵 */
+#web3-panel{max-height:calc(100dvh - 210px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;padding-bottom:24px!important;box-sizing:border-box!important;}
+body.kgen-v1010-heart-closed #web3-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+body.kgen-v1010-heart-open #web3-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+/* 訊息欄固定，不再一直增加造成跳動 */
+#bp-status,#kh-log,#kgen-v902-left-status,#web3-panel #bp-status,#web3-panel #kh-log{min-height:24px!important;max-height:58px!important;overflow:auto!important;line-height:1.35!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+/* 三聖盃簡化：不顯示 0/3、1/3、2/3、3/3；按三次通過 */
+#v715-cup-log,#v715-cup-status,#v714-cup-status,#v57-cup-status,.v908-cup-status,.v907-cup-status{font-size:0!important;line-height:0!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;}
+#kgen-v1010-cup-status{display:block!important;font-size:12px!important;line-height:1.45!important;color:#7ff3ff!important;margin:6px 0!important;padding:6px 8px!important;border:1px solid rgba(0,242,255,.22)!important;border-radius:10px!important;background:rgba(0,242,255,.06)!important;}
+.v714-cup.done,.kgen-v1010-cup-done{background:rgba(0,180,110,.24)!important;border-color:rgba(0,255,170,.65)!important;color:#bfffe8!important;}
+/* 跨年倒數槽保留：舊秒數字隱藏，由穩定文字顯示 */
+#kh-ny-slot{font-size:0!important;line-height:0!important;min-height:18px!important;}
+#kgen-v1010-ny-stable{display:block!important;font-size:11px!important;line-height:1.35!important;color:#7ff3ff!important;white-space:normal!important;}
+#kgen-v102-festival-countdown{font-size:0!important;line-height:0!important;min-height:0!important;opacity:0!important;}
+#kgen-v1010-festival-stable{font-size:11px!important;line-height:1.35!important;color:#72ffcf!important;margin:4px 0 8px!important;}
+@media(max-width:760px){#kgen-v102-festival-panel{right:8px!important;top:392px!important;width:min(315px,48vw)!important;max-height:38vh!important;}#web3-panel{max-height:calc(100dvh - 230px)!important;}}
