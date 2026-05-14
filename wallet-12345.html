@@ -1,262 +1,204 @@
-<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KGEN 12345 Wallet Bridge V9.0.0</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}.card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.75)}h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#dff}button,a{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:linear-gradient(180deg,#ffe28a,#d3a93b);color:#111;font-weight:900;text-decoration:none}.sub{background:rgba(255,255,255,.06);color:#fff}</style><script>const TARGET='https://klineodyssey.github.io/kline-odyssey/12345.html';const NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';function go(){location.replace(TARGET)}function mm(){location.href='metamask://dapp/'+NOSCHEME;setTimeout(()=>{location.href='https://metamask.app.link/dapp/'+NOSCHEME},900)}window.addEventListener('load',()=>setTimeout(go,900));</script></head><body><div class="card"><h1>KGEN 12345 錢包橋接入口 V9.0.0</h1><p>正在進入英文路徑完整神殿頁 <b>12345.html</b>。若 MetaMask 登入後沒有自動跳轉，請按下方按鈕或複製網址貼到錢包 DApp 瀏覽器。</p><a href="https://klineodyssey.github.io/kline-odyssey/12345.html">立即進入 12345 神殿</a><button onclick="mm()">用 MetaMask 開啟 12345 神殿</button><button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TARGET);this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button><p style="font-size:12px;color:#9ff">進入後按「連結錢包 / 切 BSC」，即可讀取 BNB、KGEN、Allowance、Heart 血庫。</p></div></body></html>
-
+<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KGEN 12345 Wallet Bridge V9.0.0</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}.card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.75)}h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#dff}button,a{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:linear-gradient(180deg,#ffe28a,#d3a93b);color:#111;font-weight:900;text-decoration:none}.sub{background:rgba(255,255,255,.06);color:#fff}</style><script>const TARGET='https://klineodyssey.github.io/kline-odyssey/12345.html';const NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';function go(){location.replace(TARGET)}function mm(){location.href='metamask://dapp/'+NOSCHEME;setTimeout(()=>{location.href='https://metamask.app.link/dapp/'+NOSCHEME},900)}window.addEventListener('load',()=>setTimeout(go,900));</script></head><body><div class="card"><h1>KGEN 12345 錢包橋接入口 V9.0.0</h1><p>正在進入英文路徑完整神殿頁 <b>12345.html</b>。若 MetaMask 登入後沒有自動跳轉，請按下方按鈕或複製網址貼到錢包 DApp 瀏覽器。</p><a href="https://klineodyssey.github.io/kline-odyssey/12345.html">立即進入 12345 神殿</a><button onclick="mm()">用 MetaMask 開啟 12345 神殿</button><button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TARGET);this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button><p style="font-size:12px;color:#9ff">進入後按「連結錢包 / 切 BSC」，即可讀取 BNB、KGEN、Allowance、Heart 血庫。</p></div>
 <!-- ============================================================
-KGEN 12345 V10.3.1｜PANEL STABILITY HOTFIX
-PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
-BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
-BASE_FROM: KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip
-CHANGESET:
-1. 版本只升不降：由 V10.2 / V10.3 線升至 V10.3.1。
-2. 不修改 KGEN_TempleHeart_V3_2_6.sol，不改合約生命核心。
-3. 悟空心臟按鈕只控制悟空心臟面板 #kgen-heart-live-panel，不再誤動左上控制台。
-4. 右側神規用原本下方「右側神規」按鈕展開；右側神規面板右上新增收合按鈕。
-5. 右上活動區塊新增展開/收合按鈕，收合時只保留標題列。
-6. 倒數只更新文字，不重建整區 DOM；清除本補丁自己的舊 interval，避免疊加。
+KGEN 12345 V10.4 TEMPLE REBUILD HOTFIX
+- Front-end only. Solidity / Heart V3.2.6 untouched.
+- Fixes panel ownership: Heart panel only controls Heart; rules panel only rules; festival panel only festivals.
+- Replaces flashing countdown with stable textContent timer.
+- Removes old residual Wukong customer-service floating widget.
+- Rebuilds sacred cup as a clean 3-step readiness panel.
 ============================================================ -->
-<style id="kgen-v1031-panel-stability-hotfix-style">
-  :root{--kgen-v1031-gold:#ffd778;--kgen-v1031-cyan:#7ff3ff;--kgen-v1031-green:#72ffcf;}
+<style id="kgen-12345-v104-rebuild-style">
+  :root{--v104-gold:#ffd778;--v104-cyan:#00f2ff;--v104-bg:rgba(3,8,14,.86);--v104-line:rgba(255,215,120,.46);}
+  body.v104-temple-rebuild #guideUnifiedBtn,
+  body.v104-temple-rebuild .nav-help{display:none!important;}
+  body.v104-temple-rebuild #temple-audio-console{display:none!important;}
+  body.v104-temple-rebuild #web3-panel{display:none!important;}
+  body.v104-temple-rebuild #kgen-heart-live-panel{left:16px!important;top:112px!important;max-height:48vh!important;}
+  body.v104-temple-rebuild #kgen-heart-toggle{left:16px!important;top:70px!important;z-index:100600!important;}
+  body.v104-temple-rebuild #core-window img{object-fit:cover!important;}
+  body.v104-temple-rebuild .footer-terminal{z-index:100400!important;}
 
-  /* 悟空心臟：只讓此區塊被悟空心臟按鈕收合，不牽動左上控制台 */
-  #kgen-heart-toggle{cursor:pointer!important;pointer-events:auto!important;user-select:none!important;}
-  #kgen-heart-toggle .kgen-v1031-heart-state{margin-left:auto!important;color:var(--kgen-v1031-green)!important;font-weight:900!important;font-size:11px!important;}
-  body.k12345-heart-collapsed #kgen-heart-live-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-  body:not(.k12345-heart-collapsed) #kgen-heart-live-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+  #v104-rules-panel,#v104-festival-panel,#v104-cup-panel{
+    box-sizing:border-box;border:1px solid var(--v104-line);border-radius:16px;background:var(--v104-bg);color:#fff;
+    box-shadow:0 0 30px rgba(255,215,120,.12), inset 0 0 20px rgba(0,242,255,.04);backdrop-filter:blur(10px);
+    font-family:'Noto Sans TC',system-ui,sans-serif;
+  }
+  #v104-rules-panel{position:fixed;right:18px;top:276px;width:min(380px,calc(100vw - 36px));z-index:100710;padding:12px;display:none;}
+  #v104-rules-panel.open{display:block;}
+  .v104-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:var(--v104-gold);font-weight:900;letter-spacing:.04em;}
+  .v104-close{border:1px solid rgba(255,215,120,.55);background:rgba(0,0,0,.42);color:#ffd778;border-radius:999px;padding:5px 10px;font-weight:900;cursor:pointer;}
+  .v104-list{display:grid;gap:8px;}
+  .v104-list button,.v104-pill-btn{border:1px solid rgba(0,242,255,.42);background:rgba(0,242,255,.10);color:#dffcff;border-radius:12px;padding:10px 12px;font-weight:900;text-align:left;cursor:pointer;}
+  .v104-list button:hover,.v104-pill-btn:hover{background:rgba(0,242,255,.18);}
 
-  /* 右側神規：預設不自動彈出；展開後右上可收合 */
-  #kgen-v1031-right-rule-close,
-  #kgen-v1031-festival-toggle{
-    border:1px solid rgba(255,215,120,.55)!important;
-    background:rgba(0,0,0,.58)!important;
-    color:var(--kgen-v1031-gold)!important;
-    border-radius:999px!important;
-    min-width:44px!important;
-    min-height:24px!important;
-    font-size:11px!important;
-    font-weight:900!important;
-    cursor:pointer!important;
-    line-height:1!important;
-    padding:3px 8px!important;
-    box-shadow:inset 0 0 10px rgba(255,215,120,.08)!important;
-  }
-  #kgen-v1031-right-rule-close{
-    position:absolute!important;
-    right:8px!important;
-    top:8px!important;
-    z-index:2147483647!important;
-  }
-  .kgen-v1031-right-rule-panel{position:fixed!important;box-sizing:border-box!important;}
-  body.kgen-v1031-right-rule-collapsed .kgen-v1031-right-rule-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-  body:not(.kgen-v1031-right-rule-collapsed) .kgen-v1031-right-rule-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
-  .footer-terminal [data-kgen-v1031-right-rule-btn="1"],
-  button[data-kgen-v1031-right-rule-btn="1"]{pointer-events:auto!important;}
+  #v104-festival-dock{position:fixed;right:18px;top:110px;z-index:100720;display:flex;align-items:center;gap:8px;}
+  #v104-festival-dock button{border:1px solid var(--v104-line);background:rgba(0,0,0,.62);color:#ffd778;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;box-shadow:0 0 16px rgba(255,215,120,.14);}
+  #v104-festival-panel{position:fixed;right:18px;top:158px;width:min(380px,calc(100vw - 36px));z-index:100715;padding:12px;display:none;}
+  #v104-festival-panel.open{display:block;}
+  .v104-event{border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:9px;margin-top:8px;background:rgba(0,0,0,.25);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+  .v104-event b{color:#fff6d7;}.v104-event small{color:#9ff8ff;display:block;margin-top:3px;}
+  .v104-event button{border:1px solid rgba(255,215,120,.50);background:rgba(255,215,120,.84);color:#111;border-radius:10px;padding:8px 12px;font-weight:900;cursor:pointer;}
+  #v104-countdown{font-family:'Orbitron',monospace;color:#00f2ff;font-size:18px;text-align:center;letter-spacing:.08em;padding:8px 6px;border-radius:12px;background:rgba(0,242,255,.06);border:1px solid rgba(0,242,255,.18);white-space:nowrap;}
 
-  /* 右上活動區：一個總收合，不拆三個收合 */
-  #kgen-v102-festival-panel{box-sizing:border-box!important;}
-  #kgen-v102-festival-panel h3{
-    display:flex!important;
-    align-items:center!important;
-    justify-content:space-between!important;
-    gap:8px!important;
-    margin-bottom:6px!important;
-  }
-  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed{
-    width:min(310px,42vw)!important;
-    max-height:44px!important;
-    overflow:hidden!important;
-  }
-  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed .kgen-v102-festival-body{display:none!important;}
-  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3::before{
-    content:'節日活動｜5/20・11/11・12/31';
-    color:var(--kgen-v1031-gold)!important;
-    font-size:12px!important;
-    white-space:nowrap!important;
-  }
-  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3 > .kgen-v1031-festival-title-text{display:none!important;}
-  #kgen-v102-festival-panel:not(.kgen-v1031-festival-collapsed) h3 > .kgen-v1031-festival-title-text{display:inline!important;}
+  #v104-cup-panel{position:fixed;left:18px;right:18px;bottom:106px;z-index:100500;padding:12px;}
+  #v104-cup-panel .v104-cup-grid{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr 34px 1.1fr;gap:10px;align-items:center;}
+  .v104-step{border:1px solid rgba(0,242,255,.30);border-radius:13px;background:rgba(0,20,28,.52);padding:10px;min-height:70px;}
+  .v104-step .no{color:#00f2ff;font-size:11px;font-weight:900;letter-spacing:.08em}.v104-step .title{font-weight:900;margin-top:3px}.v104-step .stat{color:#ff6d6d;font-weight:900;margin-top:4px}.v104-step.ok .stat{color:#7dffb2}.v104-arrow{font-size:28px;color:rgba(255,215,120,.55);text-align:center;}
+  .v104-step button{margin-top:7px;width:100%;border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.86);color:#111;border-radius:9px;padding:7px;font-weight:900;cursor:pointer;}
+  #v104-cup-result{border:1px solid rgba(255,215,120,.35);border-radius:13px;background:rgba(255,215,120,.12);padding:12px;text-align:center;color:#ffd778;font-weight:900;min-height:70px;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  #v104-cup-result.ok{background:rgba(80,255,160,.12);color:#9dffc8;border-color:rgba(80,255,160,.38);}
 
-  /* 倒數防閃爍：只固定文字層，不動交易按鈕 */
-  #kgen-v102-festival-countdown,#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,
-  #kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]{
-    animation:none!important;transition:none!important;opacity:1!important;filter:none!important;text-shadow:none!important;
-    white-space:nowrap!important;min-height:20px!important;line-height:20px!important;overflow:hidden!important;
+  @media(max-width:760px){
+    body.v104-temple-rebuild #kgen-heart-live-panel{left:8px!important;right:8px!important;top:96px!important;width:auto!important;max-height:52vh!important;}
+    body.v104-temple-rebuild #kgen-heart-toggle{left:8px!important;top:64px!important;}
+    #v104-rules-panel{right:8px;left:8px;top:210px;width:auto;max-height:54vh;overflow:auto;}
+    #v104-festival-dock{right:8px;top:150px;}
+    #v104-festival-dock button{padding:8px 10px;font-size:12px;}
+    #v104-festival-panel{right:8px;left:8px;top:192px;width:auto;max-height:48vh;overflow:auto;}
+    #v104-cup-panel{left:8px;right:8px;bottom:86px;padding:9px;}
+    #v104-cup-panel .v104-cup-grid{grid-template-columns:1fr;gap:7px;}
+    .v104-arrow{display:none;}.v104-step{min-height:auto;padding:8px;font-size:12px;}#v104-cup-result{min-height:48px;padding:9px;font-size:13px;}
+    #v104-countdown{font-size:14px;}
   }
 </style>
-<script id="kgen-v1031-panel-stability-hotfix-script">
+<script id="kgen-12345-v104-rebuild-script">
 (function(){
   'use strict';
-  var VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
-  var BUILD='20260514-V10.3.1-PANEL-STABILITY-HOTFIX';
-  window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{
-    VERSION:VERSION,BUILD:BUILD,
-    BASE_FROM:'KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip',
-    CHANGESET:'V10.3.1-PANEL-STABILITY-HOTFIX',
-    CONTRACT_LOCK:'KGEN_TempleHeart_V3_2_6.sol unchanged'
-  });
-  function $(id){return document.getElementById(id);} 
-  function text(el){return (el&&el.textContent?el.textContent:'').replace(/\s+/g,' ').trim();}
-  function say(msg){try{if(window.kgenLog)window.kgenLog('info',msg);else console.log('[KGEN V10.3.1]',msg);}catch(e){}}
-  function store(k,v){try{localStorage.setItem(k,v?'1':'0');}catch(e){}}
-  function load(k,def){try{var v=localStorage.getItem(k);return v==null?def:v==='1';}catch(e){return def;}}
-
-  function cleanVersionText(){
-    try{document.title='KGEN 12345 五指山悟空財神殿｜V10.3.1｜Heart V3.2.6';}catch(e){}
-    try{
-      document.querySelectorAll('#ver-st,#version,#build,.version,.sys-st,[class*="version"],[id*="version"]').forEach(function(el){
-        var t=text(el); if(!t) return;
-        if(/V10\.2|V10\.3|VERSION|BUILD|12345-TEMPLE/.test(t)){
-          el.textContent=t.replace(/12345-TEMPLE-V10\.2-[A-Z0-9\-]+/g,VERSION)
-                          .replace(/12345-TEMPLE-V10\.3-[A-Z0-9\-]+/g,VERSION)
-                          .replace(/20260514-V10\.2-[A-Z0-9\-]+/g,BUILD)
-                          .replace(/V10\.2/g,'V10.3.1')
-                          .replace(/V10\.3(?!\.1)/g,'V10.3.1');
-        }
-      });
-    }catch(e){}
+  const VERSION='12345-TEMPLE-V10.4-TEMPLE-REBUILD';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const $=id=>document.getElementById(id);
+  const qsa=s=>Array.from(document.querySelectorAll(s));
+  function short(a){return a?String(a).slice(0,6)+'…'+String(a).slice(-4):'--';}
+  function safeText(el,txt){ if(el && el.textContent!==txt) el.textContent=txt; }
+  function toast(msg){ try{ if(window.app&&app.toast) app.toast(msg); }catch(e){} const t=$('toast'); if(t) t.textContent=msg; }
+  function callIf(fnName){ try{ if(window.templeOps && typeof templeOps[fnName]==='function') return templeOps[fnName](); }catch(e){ toast(e.message||String(e)); } }
+  function setVersion(){
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION;
+    safeText($('ver-st'),'VERSION '+VERSION);
+    qsa('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) safeText(el,'VERSION '+VERSION); });
   }
-
-  /* 悟空心臟：clone 掉舊事件，避免舊補丁把左上控制台一起動 */
-  function normalizeHeartHeader(btn,collapsed){
-    btn.innerHTML='<span><span class="kgen-heart-title">K線西遊記・花果山台灣</span><span class="kgen-heart-sub">12345 Heart 悟空心臟</span></span><span class="kgen-v1031-heart-state">'+(collapsed?'展開':'收合')+'</span>';
-    btn.setAttribute('aria-label','12345 悟空心臟 '+(collapsed?'展開':'收合'));
-    btn.setAttribute('title','悟空心臟展開 / 收合');
-  }
-  function setHeartCollapsed(collapsed){
-    document.body.classList.toggle('k12345-heart-collapsed',!!collapsed);
-    var panel=$('kgen-heart-live-panel');
-    if(panel){panel.style.display=collapsed?'none':'block';panel.style.visibility=collapsed?'hidden':'visible';panel.style.pointerEvents=collapsed?'none':'auto';}
-    var btn=$('kgen-heart-toggle'); if(btn) normalizeHeartHeader(btn,!!collapsed);
-    store('kgen_v1031_heart_collapsed',!!collapsed);
-  }
-  function bindHeartToggle(){
-    var btn=$('kgen-heart-toggle'); if(!btn) return;
-    if(btn.dataset.kgenV1031HeartBound==='1') { normalizeHeartHeader(btn,document.body.classList.contains('k12345-heart-collapsed')); return; }
-    var clone=btn.cloneNode(true);
-    clone.dataset.kgenV1031HeartBound='1';
-    btn.parentNode.replaceChild(clone,btn);
-    clone.addEventListener('click',function(ev){
-      ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-      setHeartCollapsed(!document.body.classList.contains('k12345-heart-collapsed'));
-      return false;
-    },true);
-    setHeartCollapsed(load('kgen_v1031_heart_collapsed',false));
-  }
-
-  function findRightPanel(){
-    var direct=$('coord-panel')||document.querySelector('.coord-panel')||$('right-info-panel')||document.querySelector('.right-info-panel');
-    if(direct) return direct;
-    var nodes=Array.prototype.slice.call(document.querySelectorAll('body div'));
-    return nodes.find(function(el){
-      var t=text(el); if(!t) return false;
-      var r; try{r=el.getBoundingClientRect();}catch(e){return false;}
-      return r && r.width>160 && r.height>90 && r.left>window.innerWidth*0.35 && /(右側神規|神規|Heart\s*\/\s*Brain|TempleHeart|神殿規則|LP Pair|Token)/i.test(t);
-    })||null;
-  }
-  function ensureRightClose(panel){
-    if(!panel||panel.querySelector('#kgen-v1031-right-rule-close')) return;
-    try{ if(getComputedStyle(panel).position==='static') panel.style.position='fixed'; }catch(e){panel.style.position='fixed';}
-    panel.classList.add('kgen-v1031-right-rule-panel');
-    var b=document.createElement('button');
-    b.id='kgen-v1031-right-rule-close'; b.type='button'; b.textContent='收合';
-    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setRightCollapsed(true);return false;},true);
-    panel.appendChild(b);
-  }
-  function setRightCollapsed(collapsed){
-    var panel=findRightPanel();
-    if(panel){
-      panel.classList.add('kgen-v1031-right-rule-panel');
-      ensureRightClose(panel);
-      panel.style.display=collapsed?'none':'block';
-      panel.style.visibility=collapsed?'hidden':'visible';
-      panel.style.pointerEvents=collapsed?'none':'auto';
-    }
-    document.body.classList.toggle('kgen-v1031-right-rule-collapsed',!!collapsed);
-    document.body.classList.toggle('kgen-v10-right-info-collapsed',!!collapsed);
-    document.body.classList.toggle('kgen-v919-right-info-collapsed',!!collapsed);
-    document.body.classList.toggle('kgen-v918-right-info-collapsed',!!collapsed);
-    store('kgen_v1031_right_rule_collapsed',!!collapsed);
-    markRightButtons();
-  }
-  function toggleRightRule(){setRightCollapsed(!document.body.classList.contains('kgen-v1031-right-rule-collapsed'));}
-  function markRightButtons(){
-    var btns=Array.prototype.slice.call(document.querySelectorAll('.footer-terminal .term-btn,.footer-terminal button,button.term-btn,#kgen-v917-quick-dock button'));
-    btns.forEach(function(b){
-      var t=text(b).replace(/\s+/g,'');
-      if(t.indexOf('右側神規')>=0 || t.indexOf('客服導覽')>=0 || b.dataset.v918RightInfoToggle==='1' || b.dataset.kgenV10RightRule==='1'){
-        b.dataset.kgenV1031RightRuleBtn='1';
-        b.dataset.v918RightInfoToggle='0';
-        b.dataset.kgenV10RightRule='0';
-        b.innerHTML='🧭<br>右側神規';
-        b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;};
+  function setHeartImage(){ const img=$('fairy-img'); if(img) img.src='./assets/wukong_heart_v10_4.png'; }
+  function hideResidualService(){
+    const keywords=['悟空客服','客服 / 悟空財神殿導覽','語音客服介紹','語音客服'];
+    qsa('body *').forEach(el=>{
+      if(!el || el.id==='v104-rules-panel' || el.closest('#v104-rules-panel')) return;
+      const st=getComputedStyle(el);
+      const txt=(el.textContent||'').trim();
+      if(!txt) return;
+      if(keywords.some(k=>txt.includes(k)) && (st.position==='fixed' || st.position==='absolute' || el.className.toString().includes('guide') || el.className.toString().includes('help'))){
+        if(!el.closest('.footer-terminal')) el.style.display='none';
       }
     });
   }
-  document.addEventListener('click',function(ev){
-    var b=ev.target&&ev.target.closest&&ev.target.closest('[data-kgen-v1031-right-rule-btn="1"]');
-    if(b){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;}
-  },true);
-
-  function setFestivalCollapsed(collapsed){
-    var p=$('kgen-v102-festival-panel'); if(!p) return;
-    p.classList.toggle('kgen-v1031-festival-collapsed',!!collapsed);
-    var b=$('kgen-v1031-festival-toggle'); if(b) b.textContent=collapsed?'展開':'收合';
-    store('kgen_v1031_festival_collapsed',!!collapsed);
-  }
-  function ensureFestivalToggle(){
-    var p=$('kgen-v102-festival-panel'); if(!p) return;
-    var h=p.querySelector('h3'); if(!h) return;
-    if(!h.querySelector('.kgen-v1031-festival-title-text')){
-      var old=h.textContent||'節日活動';
-      h.textContent='';
-      var span=document.createElement('span'); span.className='kgen-v1031-festival-title-text'; span.textContent=old.replace(/\s+/g,' ').trim()||'節日活動';
-      h.appendChild(span);
+  function buildRules(){
+    if(!$('v104-rules-panel')){
+      document.body.insertAdjacentHTML('beforeend',`<section id="v104-rules-panel" aria-label="右神神規">
+        <div class="v104-head"><span>神規宇宙法則</span><button class="v104-close" id="v104-rules-close" type="button">收合</button></div>
+        <div class="v104-list">
+          <button type="button">1. 智慧合約說明：Heart V3.2.6，前端不改生命。</button>
+          <button type="button">2. 奉獻尊享：還願補血、點燈續命、許願 hash。</button>
+          <button type="button">3. 名號紀錄 / 聖座：交易由錢包自行確認。</button>
+          <button type="button">4. 排行榜：僅作宇宙儀式顯示，不承諾收益。</button>
+          <button type="button">5. 五指山神殿守則：Connect → BSC → Approve → Claim。</button>
+        </div>
+      </section>`);
     }
-    var b=$('kgen-v1031-festival-toggle');
-    if(!b){
-      b=document.createElement('button'); b.id='kgen-v1031-festival-toggle'; b.type='button'; b.textContent='收合';
-      b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setFestivalCollapsed(!p.classList.contains('kgen-v1031-festival-collapsed'));return false;},true);
-      h.appendChild(b);
-    }
-    setFestivalCollapsed(load('kgen_v1031_festival_collapsed',false));
-  }
-
-  var lastFestivalText='';
-  function updateStableFestivalCountdown(){
-    var el=$('kgen-v102-festival-countdown'); if(!el) return;
-    try{
-      var now=new Date(); var y=now.getUTCFullYear();
-      var events=[
-        {name:'5/20 悟空生日',date:new Date(Date.UTC(y,4,20,0,0,0)),end:new Date(Date.UTC(y,4,20,0,10,0))},
-        {name:'11/11 孤勇日',date:new Date(Date.UTC(y,10,11,0,0,0)),end:new Date(Date.UTC(y,10,11,0,10,0))},
-        {name:'12/31 跨年倒數',date:new Date(Date.UTC(y,11,31,23,50,0)),end:new Date(Date.UTC(y,11,31,23,59,59))}
-      ];
-      var ev=events.find(function(x){return now<=x.end;}) || {name:'明年 5/20 悟空生日',date:new Date(Date.UTC(y+1,4,20,0,0,0)),end:new Date(Date.UTC(y+1,4,20,0,10,0))};
-      var inWindow=now>=ev.date&&now<=ev.end;
-      var s=Math.max(0,Math.floor((ev.date-now)/1000));
-      var d=Math.floor(s/86400); s%=86400; var h=Math.floor(s/3600); s%=3600; var m=Math.floor(s/60); s%=60;
-      var out=inWindow?(ev.name+'｜活動視窗開啟中'):('下一個活動：'+ev.name+'｜倒數 '+d+'天 '+h+'時 '+m+'分 '+s+'秒');
-      if(out!==lastFestivalText){el.textContent=out; lastFestivalText=out;}
-      el.style.animation='none'; el.style.transition='none'; el.style.opacity='1';
-    }catch(e){}
-  }
-  function noFlicker(){
-    document.querySelectorAll('#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]').forEach(function(el){
-      el.style.animation='none';el.style.transition='none';el.style.opacity='1';el.style.filter='none';el.style.textShadow='none';
+    $('v104-rules-close').onclick=()=>toggleRules(false);
+    qsa('.footer-terminal button,.term-btn,button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(/右神神規|神規|規則活動|五指山神殿守則/.test(t)){
+        btn.onclick=function(ev){ev.preventDefault(); toggleRules(); return false;};
+      }
     });
   }
-
-  function init(){
-    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker();
-    markRightButtons(); var panel=findRightPanel(); if(panel) ensureRightClose(panel);
-    setRightCollapsed(load('kgen_v1031_right_rule_collapsed',true));
+  function toggleRules(force){ const p=$('v104-rules-panel'); if(!p) return; const open=(force===undefined)?!p.classList.contains('open'):!!force; p.classList.toggle('open',open); localStorage.setItem('kgen12345.v104.rules.open',open?'1':'0'); }
+  window.v104ToggleRules=toggleRules;
+  function buildFestival(){
+    if(!$('v104-festival-dock')){
+      document.body.insertAdjacentHTML('beforeend',`<div id="v104-festival-dock"><button id="v104-festival-toggle" type="button">節日活動 ▾</button></div>
+      <section id="v104-festival-panel" aria-label="節日活動">
+        <div class="v104-head"><span>節日活動</span><button class="v104-close" id="v104-festival-close" type="button">收合</button></div>
+        <div id="v104-countdown">-- : -- : -- : --</div>
+        <div class="v104-event"><div><b>5/20 悟空生日</b><small>festivalClaim(1)</small></div><button type="button" id="v104-festival-1">啟動</button></div>
+        <div class="v104-event"><div><b>11/11 孤勇日</b><small>festivalClaim(2)</small></div><button type="button" id="v104-festival-2">啟動</button></div>
+        <div class="v104-event"><div><b>12/31 跨年倒數</b><small>newYearCountdownClaim()</small></div><button type="button" id="v104-newyear-claim">啟動</button></div>
+      </section>`);
+    }
+    $('v104-festival-toggle').onclick=()=>toggleFestival();
+    $('v104-festival-close').onclick=()=>toggleFestival(false);
+    $('v104-festival-1').onclick=()=>{try{ if(window.templeOps&&templeOps.festival) templeOps.festival(1); else callIf('festival1'); }catch(e){toast(e.message||String(e));}};
+    $('v104-festival-2').onclick=()=>{try{ if(window.templeOps&&templeOps.festival) templeOps.festival(2); else callIf('festival2'); }catch(e){toast(e.message||String(e));}};
+    $('v104-newyear-claim').onclick=()=>{try{ if(window.templeOps&&templeOps.newyear) templeOps.newyear(); else callIf('newyear'); }catch(e){toast(e.message||String(e));}};
+    // hide old right-top festival bars/cards to avoid blocking behind buttons
+    qsa('#v714-events,.v714-events').forEach(e=>e.style.display='none');
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
-  window.addEventListener('load',function(){init(); setTimeout(init,500); setTimeout(init,1600);});
-  if(window.__KGEN_V1031_TIMER__) clearInterval(window.__KGEN_V1031_TIMER__);
-  window.__KGEN_V1031_TIMER__=setInterval(function(){
-    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker(); markRightButtons();
-    var p=findRightPanel(); if(p) ensureRightClose(p);
-  },1000);
-  window.kgenV1031PanelStability={version:VERSION,build:BUILD,setHeartCollapsed:setHeartCollapsed,setRightCollapsed:setRightCollapsed,setFestivalCollapsed:setFestivalCollapsed};
+  function toggleFestival(force){ const p=$('v104-festival-panel'); const b=$('v104-festival-toggle'); if(!p) return; const open=(force===undefined)?!p.classList.contains('open'):!!force; p.classList.toggle('open',open); if(b) b.textContent=open?'節日活動 ▴':'節日活動 ▾'; localStorage.setItem('kgen12345.v104.festival.open',open?'1':'0'); }
+  function startStableCountdown(){
+    if(window.__KGEN_V104_TIMER) clearInterval(window.__KGEN_V104_TIMER);
+    const target=()=>{ const now=new Date(); let y=now.getUTCFullYear(); let t=new Date(Date.UTC(y,11,31,23,59,59)); if(t-now<0) t=new Date(Date.UTC(y+1,11,31,23,59,59)); return t; };
+    function tick(){
+      const diff=Math.max(0,target()-new Date());
+      const d=Math.floor(diff/86400000), h=Math.floor(diff/3600000)%24, m=Math.floor(diff/60000)%60, s=Math.floor(diff/1000)%60;
+      const txt=`${String(d).padStart(3,'0')}天 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      safeText($('v104-countdown'),txt);
+      // freeze old countdown fields to stable text only, no innerHTML rewrite
+      ['kh-ny-slot','ny-slot','newyear-countdown'].forEach(id=>safeText($(id),txt));
+    }
+    tick(); window.__KGEN_V104_TIMER=setInterval(tick,1000);
+  }
+  function buildCup(){
+    if(!$('v104-cup-panel')){
+      document.body.insertAdjacentHTML('beforeend',`<section id="v104-cup-panel" aria-label="三聖盃檢查系統">
+        <div class="v104-head"><span>三聖盃檢查系統</span><button class="v104-close" id="v104-cup-close" type="button">收合</button></div>
+        <div class="v104-cup-grid">
+          <div class="v104-step" id="v104-step-wallet"><div class="no">STEP 1</div><div class="title">WALLET 檢查</div><div class="stat">未連接</div><button type="button" id="v104-wallet-btn">連接錢包</button></div>
+          <div class="v104-arrow">→</div>
+          <div class="v104-step" id="v104-step-bsc"><div class="no">STEP 2</div><div class="title">BSC NETWORK 檢查</div><div class="stat">未在 BSC</div><button type="button" id="v104-bsc-btn">切換 BSC</button></div>
+          <div class="v104-arrow">→</div>
+          <div class="v104-step" id="v104-step-approve"><div class="no">STEP 3</div><div class="title">APPROVE 檢查</div><div class="stat">未授權</div><button type="button" id="v104-approve-btn">前往核准</button></div>
+          <div class="v104-arrow">→</div>
+          <div id="v104-cup-result"><div style="font-size:28px">🏆</div><div>未完成</div><small>三聖盃未完成</small></div>
+        </div>
+      </section>`);
+    }
+    $('v104-cup-close').onclick=()=>{$('v104-cup-panel').style.display='none';};
+    $('v104-wallet-btn').onclick=()=>{ try{ if(window.web3&&web3.smartConnect) web3.smartConnect(); else if(window.ethereum) ethereum.request({method:'eth_requestAccounts'}); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,900); };
+    $('v104-bsc-btn').onclick=()=>{ try{ if(window.ethereum) ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]}); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,900); };
+    $('v104-approve-btn').onclick=()=>{ try{ if(window.templeOps&&templeOps.approve) templeOps.approve(); else document.getElementById('kh-approve-current')?.click(); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,1400); };
+    qsa('#v714-cupbox,.v714-cupbox,#v57-cup-status').forEach(e=>e.style.display='none');
+    updateCup(); setInterval(updateCup,4000);
+  }
+  async function updateCup(){
+    let wallet=false,bsc=false,approve=false;
+    try{ if(window.ethereum){ const acc=await ethereum.request({method:'eth_accounts'}); wallet=!!(acc&&acc.length); const ch=await ethereum.request({method:'eth_chainId'}); bsc=String(ch).toLowerCase()==='0x38'; }}catch(e){}
+    // infer approve from existing visible text; avoids forcing chain reads
+    const allowText=[ $('userAllowance')?.textContent, $('kh-kgen-allowance')?.textContent, document.body.textContent.match(/Allowance[^\n]{0,60}/)?.[0] ].filter(Boolean).join(' ');
+    approve = /[1-9][0-9\.]*\s*KGEN|已授權|unlimited|∞/i.test(allowText);
+    setStep('v104-step-wallet',wallet,wallet?'已連接':'未連接');
+    setStep('v104-step-bsc',bsc,bsc?'BSC 56':'未在 BSC');
+    setStep('v104-step-approve',approve,approve?'已授權':'未授權');
+    const result=$('v104-cup-result'); if(result){ const ok=wallet&&bsc&&approve; result.classList.toggle('ok',ok); result.innerHTML=ok?'<div style="font-size:28px">🏆</div><div>神殿已開啟</div><small>可領發財金</small>':'<div style="font-size:28px">🏆</div><div>未完成</div><small>請依序完成 Wallet / BSC / Approve</small>'; }
+    window.__templeCupCount=(wallet&&bsc&&approve)?3:0;
+  }
+  function setStep(id,ok,txt){ const el=$(id); if(!el) return; el.classList.toggle('ok',ok); const st=el.querySelector('.stat'); if(st) st.textContent=txt; }
+  function ownHeartToggle(){
+    const p=$('kgen-heart-live-panel'), t=$('kgen-heart-toggle'); if(!p||!t) return;
+    t.onclick=function(){ const hide=p.style.display==='none'; p.style.display=hide?'block':'none'; t.textContent=hide?'12345 Heart 收合':'12345 Heart 展開'; };
+    // add close in heart panel header only controlling itself
+    const head=p.querySelector('.kh-head'); if(head && !$('v104-heart-close')){ const b=document.createElement('button'); b.id='v104-heart-close'; b.type='button'; b.className='v104-close'; b.textContent='收合'; b.onclick=()=>{p.style.display='none'; t.textContent='12345 Heart 展開';}; head.appendChild(b); }
+  }
+  function init(){
+    document.body.classList.add('v104-temple-rebuild');
+    setVersion(); setHeartImage(); buildRules(); buildFestival(); buildCup(); ownHeartToggle(); hideResidualService(); startStableCountdown();
+    // default states: rules and festival collapsed; heart collapsed on small screens
+    toggleRules(false); toggleFestival(false);
+    if(innerWidth<760 && $('kgen-heart-live-panel')) $('kgen-heart-live-panel').style.display='none';
+    toast('V10.4 神殿重構完成：前端修正，不動合約。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  setTimeout(init,1200);
 })();
 </script>
+
+</body></html>
