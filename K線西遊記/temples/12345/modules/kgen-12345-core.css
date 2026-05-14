@@ -1,0 +1,64 @@
+
+/* KGEN 12345 V10.11 core css
+   路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-core.css
+   原則：不新增第二個右側神規面板，只修原面板顯示、收合與高度。 */
+.kgen-v1011-close,
+.kgen-v1011-panel-close{
+  border:1px solid rgba(255,215,120,.55)!important;
+  border-radius:10px!important;
+  background:rgba(0,0,0,.55)!important;
+  color:#ffd778!important;
+  font-weight:900!important;
+  padding:5px 9px!important;
+  min-height:28px!important;
+  cursor:pointer!important;
+}
+#coord-panel{
+  max-height: min(360px, 46vh) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+#coord-panel .cp-title{position:sticky;top:0;background:rgba(0,0,0,.72);z-index:2;padding-bottom:6px;}
+#kgen-v102-festival-panel{
+  display:none;
+  max-height:min(430px, 48vh)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+body.kgen-v1011-festival-open #kgen-v102-festival-panel{display:block!important;}
+#kgen-v102-festival-panel .kgen-v1011-festival-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;color:#ffd778;font-weight:900;}
+#kgen-v102-festival-panel .kgen-v1011-festival-head button{width:auto!important;margin-top:0!important;}
+#kgen-v102-festival-countdown,
+#kh-ny-slot{
+  animation:none!important;transition:none!important;opacity:1!important;white-space:normal!important;
+}
+#kgen-heart-live-panel{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  max-height:calc(100vh - 170px)!important;
+  padding-bottom:42px!important;
+}
+#kh-log,
+.kh-log,
+#kgen-log,
+.kgen-log,
+#last-event{
+  max-height:56px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  white-space:pre-wrap!important;
+}
+#kgen-heart-live-panel .kh-cupbox{margin-top:10px!important;}
+#kgen-heart-live-panel .kgen-v1011-cup-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px;}
+#kgen-heart-live-panel .kgen-v1011-cup-row button{min-height:34px;padding:8px 6px;font-size:12px;border-radius:10px;border:1px solid rgba(255,215,120,.35);background:rgba(0,0,0,.36);color:#fff;font-weight:900;}
+#kgen-heart-live-panel .kgen-v1011-cup-row button.done{background:linear-gradient(135deg,rgba(255,215,120,.55),rgba(0,242,255,.18));color:#ffe9a8;box-shadow:0 0 15px rgba(255,215,120,.20);}
+#kgen-heart-live-panel .kgen-v1011-cup-status{margin-top:7px;font-size:12px;color:#8af3ff;line-height:1.4;white-space:pre-wrap;}
+@media(max-width:760px){
+  #coord-panel{right:10px!important;left:auto!important;width:min(330px,52vw)!important;max-height:42vh!important;}
+  #kgen-v102-festival-panel{right:8px!important;top:300px!important;width:min(315px,48vw)!important;}
+  #kgen-heart-live-panel{max-height:calc(100vh - 180px)!important;}
+}
