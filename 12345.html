@@ -4,12 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
 
-- [V10.3] 中央神殿穩定化：不改 Heart V3.2.6 合約生命；新增早期 TimerGate 防重複倒數；右側神規預設收合並由原按鈕控制；節日活動三合一收合；三聖盃改為錢包/BSC/Approve 三步檢查；修正倒數閃爍與手機跳動。
 - [V8.9.3] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
 - [V8.7.9] 以 V8.7.6 為母版回復可操作狀態；廢棄 V8.7.7/V8.7.8 overlay 疊層，改為不封鎖主畫面的乾淨客服層；補交易失敗即時解說、語音客服、按鍵事件穿透與倒數提示，不重蓋視覺與合約邏輯。
@@ -1409,36 +1408,6 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 }
 </style>
 
-
-<script id="kgen-v103-early-timer-gate">
-(function(){
-  "use strict";
-  if (window.__KGEN_V103_TIMER_GATE__) return;
-  window.__KGEN_V103_TIMER_GATE__ = true;
-  const nativeSetInterval = window.setInterval.bind(window);
-  const nativeClearInterval = window.clearInterval.bind(window);
-  const registry = Object.create(null);
-  function isCountdownCallback(cb, delay){
-    if (Number(delay) !== 1000) return false;
-    let s = "";
-    try { s = Function.prototype.toString.call(cb); } catch(e) { s = String(cb || ""); }
-    return /updateClock|updateFestivalCountdown|kh-utc|kh-ny-slot|kh-festival-open|newYear|Countdown|countdown|festival/i.test(s);
-  }
-  window.__kgenV103ClearTimerKey = function(key){
-    if (registry[key]) { nativeClearInterval(registry[key]); delete registry[key]; }
-  };
-  window.setInterval = function(cb, delay){
-    if (isCountdownCallback(cb, delay)) {
-      const key = "kgen-single-countdown-1000";
-      if (registry[key]) nativeClearInterval(registry[key]);
-      registry[key] = nativeSetInterval(cb, delay);
-      return registry[key];
-    }
-    return nativeSetInterval(cb, delay);
-  };
-})();
-</script>
-
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1473,7 +1442,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.3-STABLE-TEMPLE</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1720,7 +1689,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V10.3-STABLE-TEMPLE";
+const APP_VERSION = "12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -15583,7 +15552,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const FIX_VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15690,7 +15659,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const FIX_VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15835,7 +15804,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const FIX_VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15927,7 +15896,7 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
 
@@ -15955,8 +15924,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.0-WALLET-BRIDGE-REAL-CONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -16121,7 +16090,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16314,8 +16283,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -16372,7 +16341,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16458,8 +16427,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -16597,7 +16566,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16752,8 +16721,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -16940,7 +16909,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17060,8 +17029,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -17180,7 +17149,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17408,7 +17377,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17634,7 +17603,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17756,7 +17725,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -17858,7 +17827,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -19248,8 +19217,8 @@ CHANGELOG:
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
 1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
@@ -19289,7 +19258,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -19446,8 +19415,8 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 修正：
@@ -19612,7 +19581,7 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -19805,8 +19774,8 @@ BASE_FROM: KGEN-12345-HEART-UI-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 修正：
@@ -19863,7 +19832,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -19949,8 +19918,8 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
 1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
@@ -20088,7 +20057,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20243,8 +20212,8 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
 1. 右上「訊息紀錄」固定為 universe-nav 內部按鈕，寬度與上方按鈕一致，排在五指山神殿音響正下方。
@@ -20438,7 +20407,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20545,8 +20514,8 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
 1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
@@ -20733,7 +20702,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -20853,8 +20822,8 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
 
 Fixes:
@@ -20973,7 +20942,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -21201,7 +21170,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -21377,7 +21346,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const HEART_IMG='./assets/wukong_heart_core.jpg';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -21606,7 +21575,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -21822,7 +21791,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -21921,7 +21890,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: 12345-TEMPLE-V10.3-STABLE-TEMPLE
+VERSION PATCH: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -22023,7 +21992,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -24499,8 +24468,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script id="kgen-v920-layout-final-polish-script">
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.3-STABLE-TEMPLE';
-  const BUILD='20260514-V10.3-STABLE-TEMPLE';
+  const VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
+  const BUILD='20260514-V10.3.1-PANEL-STABILITY-HOTFIX';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
@@ -24612,8 +24581,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <!-- ============================================================
 KGEN 12345｜V10.0 HUD LAYER SYSTEM
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip
 BASE_SHA256: e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39
 ============================================================ -->
@@ -24822,8 +24791,8 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 (function(){
   "use strict";
   const PRODUCT_ID="KGEN-12345-HEART-UI";
-  const VERSION="12345-TEMPLE-V10.3-STABLE-TEMPLE";
-  const BUILD="20260514-V10.3-STABLE-TEMPLE";
+  const VERSION="12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX";
+  const BUILD="20260514-V10.3.1-PANEL-STABILITY-HOTFIX";
   const BASE_FROM="KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip";
   const BASE_SHA256="e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39";
 
@@ -24950,7 +24919,7 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 </script>
 
 
-<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.3-STABLE-TEMPLE | BUILD: 20260514-V10.3-STABLE-TEMPLE | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
+<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX | BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
 <style id="kgen-v101-hud-runtime-voice-fix-style">
 :root{--kgen-v101-modal-z:2147483600;}
 .warp-engine{bottom:calc(var(--kgen-v10-dock-h,98px) + 242px)!important;z-index:var(--kgen-v10-hud-z,2147482200)!important;}
@@ -24968,7 +24937,7 @@ body.kgen-v101-map-open #world-map,body.kgen-v101-map-open #map-modal,body.kgen-
 <script id="kgen-v101-hud-runtime-voice-fix-script">
 (function(){
 "use strict";
-const VERSION="12345-TEMPLE-V10.3-STABLE-TEMPLE", BUILD="20260514-V10.3-STABLE-TEMPLE";
+const VERSION="12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX", BUILD="20260514-V10.3.1-PANEL-STABILITY-HOTFIX";
 window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{VERSION,BUILD,BASE_FROM:"KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip",BASE_SHA256:"db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c",CHANGESET:"V10.1-HUD-RUNTIME-VOICE-FIX"});
 function speak(msg){try{if(window.speak)return window.speak(msg);if(window.app&&typeof app.speak==="function")return app.speak(msg);if("speechSynthesis"in window){const u=new SpeechSynthesisUtterance(String(msg||""));u.lang="zh-TW";speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
 function txt(el){return(el&&el.textContent?el.textContent:"").replace(/\s+/g," ").trim();}
@@ -24989,8 +24958,8 @@ window.kgenV101HudRuntimeVoiceFix={version:VERSION,build:BUILD,speakCupStatus:fu
 <!-- ============================================================
 KGEN 12345｜V10.2 Festival Runtime Lock
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.3-STABLE-TEMPLE
-BUILD: 20260514-V10.3-STABLE-TEMPLE
+VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
 BASE_FROM: KGEN_12345_V10_1_HUD_RUNTIME_VOICE_FIX_FULL_bundle.zip
 BASE_SHA256: 29a8e07fa014eb4b0e896d869bc8d9e4b93bd187c3cea3d608dc1680782306a3
 
@@ -25126,15 +25095,15 @@ CHANGESET:
 <script id="kgen-v102-festival-runtime-lock-script">
 (function(){
   "use strict";
-  const VERSION = "12345-TEMPLE-V10.3-STABLE-TEMPLE";
-  const BUILD = "20260514-V10.3-STABLE-TEMPLE";
+  const VERSION = "12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX";
+  const BUILD = "20260514-V10.3.1-PANEL-STABILITY-HOTFIX";
 
   window.KGEN12345_BUILD = Object.assign({}, window.KGEN12345_BUILD || {}, {
     VERSION,
     BUILD,
     BASE_FROM: "KGEN_12345_V10_1_HUD_RUNTIME_VOICE_FIX_FULL_bundle.zip",
     BASE_SHA256: "29a8e07fa014eb4b0e896d869bc8d9e4b93bd187c3cea3d608dc1680782306a3",
-    CHANGESET: "V10.2-FESTIVAL-RUNTIME-LOCK"
+    CHANGESET: "V10.3.1-PANEL-STABILITY-HOTFIX"
   });
 
   function $(id){ return document.getElementById(id); }
@@ -25350,215 +25319,263 @@ CHANGESET:
 
 
 <!-- ============================================================
-KGEN 12345 V10.3｜Stable Temple Repair Layer
-- Frontend only. Does NOT modify KGEN_TempleHeart_V3_2_6.sol.
-- Fixes countdown flicker via a single stable runtime.
-- Right-side 神規 defaults collapsed and uses the existing bottom button only.
-- Festival actions become one collapsible dock between direction rail and bottom buttons.
-- 三聖盃 becomes a clear three-step safety gate: Wallet → BSC → Approve.
+KGEN 12345 V10.3.1｜PANEL STABILITY HOTFIX
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
+BASE_FROM: KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip
+CHANGESET:
+1. 版本只升不降：由 V10.2 / V10.3 線升至 V10.3.1。
+2. 不修改 KGEN_TempleHeart_V3_2_6.sol，不改合約生命核心。
+3. 悟空心臟按鈕只控制悟空心臟面板 #kgen-heart-live-panel，不再誤動左上控制台。
+4. 右側神規用原本下方「右側神規」按鈕展開；右側神規面板右上新增收合按鈕。
+5. 右上活動區塊新增展開/收合按鈕，收合時只保留標題列。
+6. 倒數只更新文字，不重建整區 DOM；清除本補丁自己的舊 interval，避免疊加。
 ============================================================ -->
-<style id="kgen-v103-stable-temple-style">
-  :root{ --kgen-v103-dock-bottom: calc(var(--kgen-v10-dock-h, 92px) + 44px); }
-  body.kgen-v103-right-rule-collapsed #coord-panel,
-  body.kgen-v103-right-rule-collapsed .coord-panel,
-  body.kgen-v103-right-rule-collapsed #right-info-panel,
-  body.kgen-v103-right-rule-collapsed .right-info-panel{
-    display:none!important; visibility:hidden!important; pointer-events:none!important;
+<style id="kgen-v1031-panel-stability-hotfix-style">
+  :root{--kgen-v1031-gold:#ffd778;--kgen-v1031-cyan:#7ff3ff;--kgen-v1031-green:#72ffcf;}
+
+  /* 悟空心臟：只讓此區塊被悟空心臟按鈕收合，不牽動左上控制台 */
+  #kgen-heart-toggle{cursor:pointer!important;pointer-events:auto!important;user-select:none!important;}
+  #kgen-heart-toggle .kgen-v1031-heart-state{margin-left:auto!important;color:var(--kgen-v1031-green)!important;font-weight:900!important;font-size:11px!important;}
+  body.k12345-heart-collapsed #kgen-heart-live-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body:not(.k12345-heart-collapsed) #kgen-heart-live-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+
+  /* 右側神規：預設不自動彈出；展開後右上可收合 */
+  #kgen-v1031-right-rule-close,
+  #kgen-v1031-festival-toggle{
+    border:1px solid rgba(255,215,120,.55)!important;
+    background:rgba(0,0,0,.58)!important;
+    color:var(--kgen-v1031-gold)!important;
+    border-radius:999px!important;
+    min-width:44px!important;
+    min-height:24px!important;
+    font-size:11px!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+    line-height:1!important;
+    padding:3px 8px!important;
+    box-shadow:inset 0 0 10px rgba(255,215,120,.08)!important;
   }
-  #kgen-v103-rule-close{
-    float:right; margin-left:8px; border-radius:999px; padding:5px 9px;
-    border:1px solid rgba(255,215,120,.45); background:rgba(0,0,0,.42);
-    color:#ffd978; font-size:11px; font-weight:900; cursor:pointer; pointer-events:auto;
+  #kgen-v1031-right-rule-close{
+    position:absolute!important;
+    right:8px!important;
+    top:8px!important;
+    z-index:2147483647!important;
   }
-  #kgen-v103-festival-dock{
-    position:fixed; left:10px; bottom:var(--kgen-v103-dock-bottom); z-index:260050;
-    width:min(438px, calc(100vw - 220px)); max-width:min(438px, calc(100vw - 220px));
-    display:grid; grid-template-columns:1fr; gap:6px; pointer-events:auto; box-sizing:border-box;
-    font-family:'Noto Sans TC', system-ui, sans-serif;
+  .kgen-v1031-right-rule-panel{position:fixed!important;box-sizing:border-box!important;}
+  body.kgen-v1031-right-rule-collapsed .kgen-v1031-right-rule-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body:not(.kgen-v1031-right-rule-collapsed) .kgen-v1031-right-rule-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+  .footer-terminal [data-kgen-v1031-right-rule-btn="1"],
+  button[data-kgen-v1031-right-rule-btn="1"]{pointer-events:auto!important;}
+
+  /* 右上活動區：一個總收合，不拆三個收合 */
+  #kgen-v102-festival-panel{box-sizing:border-box!important;}
+  #kgen-v102-festival-panel h3{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    margin-bottom:6px!important;
   }
-  #kgen-v103-festival-toggle{
-    min-height:32px; border-radius:12px; padding:6px 10px;
-    border:1px solid rgba(255,215,120,.55); background:rgba(0,0,0,.76);
-    color:#ffe6b8; font-size:11px; font-weight:900; letter-spacing:.2px; cursor:pointer;
-    box-shadow:0 0 18px rgba(255,215,120,.12); text-align:left;
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed{
+    width:min(310px,42vw)!important;
+    max-height:44px!important;
+    overflow:hidden!important;
   }
-  #kgen-v103-festival-panel{
-    display:none; border-radius:16px; padding:10px; border:1px solid rgba(255,215,120,.45);
-    background:rgba(5,8,15,.94); color:#fff; box-shadow:0 0 28px rgba(255,215,120,.12);
-    backdrop-filter:blur(8px);
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed .kgen-v102-festival-body{display:none!important;}
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3::before{
+    content:'節日活動｜5/20・11/11・12/31';
+    color:var(--kgen-v1031-gold)!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
   }
-  body.kgen-v103-festival-open #kgen-v103-festival-panel{display:block;}
-  .kgen-v103-festival-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd978;font-size:12px;font-weight:900;margin-bottom:8px;}
-  .kgen-v103-festival-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-  .kgen-v103-festival-grid button{
-    border-radius:12px; padding:9px 6px; border:1px solid rgba(0,242,255,.32);
-    background:rgba(0,242,255,.10); color:#dffbff; font-size:11px; font-weight:900; cursor:pointer;
-  }
-  #kgen-v103-festival-countdown{margin-top:8px; font-size:11px; color:#ffe6b8; line-height:1.45; min-height:16px; white-space:nowrap; overflow:hidden;}
-  #v715-cup-status,#kgen-v103-gate-card{
-    border:1px solid rgba(255,215,120,.38)!important; border-radius:14px!important;
-    background:rgba(255,215,120,.07)!important; padding:10px!important;
-  }
-  #kgen-v103-gate-card{font-size:12px; line-height:1.65; color:#eaf8ff; margin:8px 0;}
-  #kgen-v103-gate-card .ok{color:#7dffb2;font-weight:900;} #kgen-v103-gate-card .bad{color:#ffb2b2;font-weight:900;}
-  #kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,
-  #kgen-v102-festival-countdown,#kgen-v103-festival-countdown,[id*="countdown"],[class*="countdown"]{
-    animation:none!important; transition:none!important; opacity:1!important; filter:none!important;
-    text-shadow:none!important; white-space:nowrap!important; transform:none!important;
-  }
-  @media(max-width:760px){
-    #kgen-v103-festival-dock{left:8px; bottom:calc(var(--kgen-v10-dock-h, 98px) + 42px); width:min(360px, calc(100vw - 16px)); max-width:min(360px, calc(100vw - 16px));}
-    .kgen-v103-festival-grid{grid-template-columns:1fr;}
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3 > .kgen-v1031-festival-title-text{display:none!important;}
+  #kgen-v102-festival-panel:not(.kgen-v1031-festival-collapsed) h3 > .kgen-v1031-festival-title-text{display:inline!important;}
+
+  /* 倒數防閃爍：只固定文字層，不動交易按鈕 */
+  #kgen-v102-festival-countdown,#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,
+  #kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]{
+    animation:none!important;transition:none!important;opacity:1!important;filter:none!important;text-shadow:none!important;
+    white-space:nowrap!important;min-height:20px!important;line-height:20px!important;overflow:hidden!important;
   }
 </style>
-<script id="kgen-v103-stable-temple-script">
+<script id="kgen-v1031-panel-stability-hotfix-script">
 (function(){
-  "use strict";
-  const VERSION="12345-TEMPLE-V10.3-STABLE-TEMPLE";
-  const BUILD="20260514-V10.3-STABLE-TEMPLE";
-  window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{}, {
-    PRODUCT_ID:"KGEN-12345-HEART-UI", VERSION, BUILD,
-    CHANGESET:"V10.3-STABLE-TEMPLE-FRONTEND-ONLY",
-    CONTRACT_POLICY:"Do not modify KGEN_TempleHeart_V3_2_6.sol. Contract is life; frontend is temple building."
+  'use strict';
+  var VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
+  var BUILD='20260514-V10.3.1-PANEL-STABILITY-HOTFIX';
+  window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{
+    VERSION:VERSION,BUILD:BUILD,
+    BASE_FROM:'KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip',
+    CHANGESET:'V10.3.1-PANEL-STABILITY-HOTFIX',
+    CONTRACT_LOCK:'KGEN_TempleHeart_V3_2_6.sol unchanged'
   });
-  const $=(id)=>document.getElementById(id);
-  const q=(sel)=>document.querySelector(sel);
-  function say(msg){try{ if(window.app&&app.speak) app.speak(msg); else if(window.toast) toast(msg); }catch(e){} try{ const bp=$("bp-status"); if(bp) bp.textContent=String(msg||""); }catch(e){} }
-  function setText(id, text){ const el=$(id); if(el && el.textContent!==String(text)) el.textContent=String(text); }
-  function findRightPanel(){ return $("coord-panel")||q(".coord-panel")||$("right-info-panel")||q(".right-info-panel"); }
-  function setRightPanel(open){
-    document.body.classList.toggle("kgen-v103-right-rule-collapsed", !open);
-    document.body.classList.toggle("kgen-v10-right-info-collapsed", !open);
-    document.body.classList.toggle("kgen-v919-right-info-collapsed", !open);
-    document.body.classList.toggle("kgen-v918-right-info-collapsed", !open);
-    localStorage.setItem("kgen12345RightRuleOpen", open?"1":"0");
-    const p=findRightPanel();
-    if(p){ p.style.display=open?"block":"none"; p.style.visibility=open?"visible":"hidden"; p.style.pointerEvents=open?"auto":"none"; }
+  function $(id){return document.getElementById(id);} 
+  function text(el){return (el&&el.textContent?el.textContent:'').replace(/\s+/g,' ').trim();}
+  function say(msg){try{if(window.kgenLog)window.kgenLog('info',msg);else console.log('[KGEN V10.3.1]',msg);}catch(e){}}
+  function store(k,v){try{localStorage.setItem(k,v?'1':'0');}catch(e){}}
+  function load(k,def){try{var v=localStorage.getItem(k);return v==null?def:v==='1';}catch(e){return def;}}
+
+  function cleanVersionText(){
+    try{document.title='KGEN 12345 五指山悟空財神殿｜V10.3.1｜Heart V3.2.6';}catch(e){}
+    try{
+      document.querySelectorAll('#ver-st,#version,#build,.version,.sys-st,[class*="version"],[id*="version"]').forEach(function(el){
+        var t=text(el); if(!t) return;
+        if(/V10\.2|V10\.3|VERSION|BUILD|12345-TEMPLE/.test(t)){
+          el.textContent=t.replace(/12345-TEMPLE-V10\.2-[A-Z0-9\-]+/g,VERSION)
+                          .replace(/12345-TEMPLE-V10\.3-[A-Z0-9\-]+/g,VERSION)
+                          .replace(/20260514-V10\.2-[A-Z0-9\-]+/g,BUILD)
+                          .replace(/V10\.2/g,'V10.3.1')
+                          .replace(/V10\.3(?!\.1)/g,'V10.3.1');
+        }
+      });
+    }catch(e){}
   }
-  function toggleRightPanel(ev){ if(ev){ev.preventDefault();ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();} const open=document.body.classList.contains("kgen-v103-right-rule-collapsed"); setRightPanel(open); say(open?"右側神規已展開。":"右側神規已收合。"); return false; }
-  function prepareRightPanel(){
-    const p=findRightPanel();
-    if(p && !$("kgen-v103-rule-close")){
-      const b=document.createElement("button"); b.id="kgen-v103-rule-close"; b.type="button"; b.textContent="收合"; b.onclick=()=>setRightPanel(false);
-      p.insertBefore(b,p.firstChild);
+
+  /* 悟空心臟：clone 掉舊事件，避免舊補丁把左上控制台一起動 */
+  function normalizeHeartHeader(btn,collapsed){
+    btn.innerHTML='<span><span class="kgen-heart-title">K線西遊記・花果山台灣</span><span class="kgen-heart-sub">12345 Heart 悟空心臟</span></span><span class="kgen-v1031-heart-state">'+(collapsed?'展開':'收合')+'</span>';
+    btn.setAttribute('aria-label','12345 悟空心臟 '+(collapsed?'展開':'收合'));
+    btn.setAttribute('title','悟空心臟展開 / 收合');
+  }
+  function setHeartCollapsed(collapsed){
+    document.body.classList.toggle('k12345-heart-collapsed',!!collapsed);
+    var panel=$('kgen-heart-live-panel');
+    if(panel){panel.style.display=collapsed?'none':'block';panel.style.visibility=collapsed?'hidden':'visible';panel.style.pointerEvents=collapsed?'none':'auto';}
+    var btn=$('kgen-heart-toggle'); if(btn) normalizeHeartHeader(btn,!!collapsed);
+    store('kgen_v1031_heart_collapsed',!!collapsed);
+  }
+  function bindHeartToggle(){
+    var btn=$('kgen-heart-toggle'); if(!btn) return;
+    if(btn.dataset.kgenV1031HeartBound==='1') { normalizeHeartHeader(btn,document.body.classList.contains('k12345-heart-collapsed')); return; }
+    var clone=btn.cloneNode(true);
+    clone.dataset.kgenV1031HeartBound='1';
+    btn.parentNode.replaceChild(clone,btn);
+    clone.addEventListener('click',function(ev){
+      ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      setHeartCollapsed(!document.body.classList.contains('k12345-heart-collapsed'));
+      return false;
+    },true);
+    setHeartCollapsed(load('kgen_v1031_heart_collapsed',false));
+  }
+
+  function findRightPanel(){
+    var direct=$('coord-panel')||document.querySelector('.coord-panel')||$('right-info-panel')||document.querySelector('.right-info-panel');
+    if(direct) return direct;
+    var nodes=Array.prototype.slice.call(document.querySelectorAll('body div'));
+    return nodes.find(function(el){
+      var t=text(el); if(!t) return false;
+      var r; try{r=el.getBoundingClientRect();}catch(e){return false;}
+      return r && r.width>160 && r.height>90 && r.left>window.innerWidth*0.35 && /(右側神規|神規|Heart\s*\/\s*Brain|TempleHeart|神殿規則|LP Pair|Token)/i.test(t);
+    })||null;
+  }
+  function ensureRightClose(panel){
+    if(!panel||panel.querySelector('#kgen-v1031-right-rule-close')) return;
+    try{ if(getComputedStyle(panel).position==='static') panel.style.position='fixed'; }catch(e){panel.style.position='fixed';}
+    panel.classList.add('kgen-v1031-right-rule-panel');
+    var b=document.createElement('button');
+    b.id='kgen-v1031-right-rule-close'; b.type='button'; b.textContent='收合';
+    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setRightCollapsed(true);return false;},true);
+    panel.appendChild(b);
+  }
+  function setRightCollapsed(collapsed){
+    var panel=findRightPanel();
+    if(panel){
+      panel.classList.add('kgen-v1031-right-rule-panel');
+      ensureRightClose(panel);
+      panel.style.display=collapsed?'none':'block';
+      panel.style.visibility=collapsed?'hidden':'visible';
+      panel.style.pointerEvents=collapsed?'none':'auto';
     }
-    const stored=localStorage.getItem("kgen12345RightRuleOpen");
-    setRightPanel(stored==="1" ? true : false);
+    document.body.classList.toggle('kgen-v1031-right-rule-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v10-right-info-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v919-right-info-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v918-right-info-collapsed',!!collapsed);
+    store('kgen_v1031_right_rule_collapsed',!!collapsed);
+    markRightButtons();
   }
-  function bindExistingRuleButton(){
-    const btns=Array.from(document.querySelectorAll(".footer-terminal button,.footer-terminal .term-btn,button.term-btn"));
-    let b=btns.find(x=>/右側神規/.test((x.textContent||""))) || btns.find(x=>/客服.*導覽|規則活動|語音客服/.test((x.textContent||"").replace(/\s+/g,"")));
-    if(!b) return;
-    b.dataset.kgenV103RuleBtn="1";
-    b.innerHTML="🛡<br>右側神規";
-    b.onclick=toggleRightPanel;
-  }
-  function secondsToText(sec){
-    sec=Math.max(0, Math.floor(sec));
-    const d=Math.floor(sec/86400), h=Math.floor(sec%86400/3600), m=Math.floor(sec%3600/60), s=sec%60;
-    return (d>0?d+"天 ":"")+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-  }
-  function nextDate(month, day, hour=0, minute=0){
-    const now=new Date();
-    let y=now.getFullYear();
-    let t=new Date(y,month-1,day,hour,minute,0,0);
-    if(t.getTime()<=now.getTime()) t=new Date(y+1,month-1,day,hour,minute,0,0);
-    return t;
-  }
-  function updateFestivalText(){
-    const now=new Date();
-    const targets=[
-      ["5/20 悟空生日", nextDate(5,20,0,0)],
-      ["11/11 孤勇日", nextDate(11,11,0,0)],
-      ["12/31 跨年", nextDate(12,31,23,50)]
-    ].sort((a,b)=>a[1]-b[1]);
-    const msg="下一個活動："+targets[0][0]+"｜"+secondsToText((targets[0][1]-now)/1000);
-    setText("kgen-v103-festival-countdown", msg);
-    setText("kh-ny-slot", msg);
-  }
-  let stableTimer=null;
-  function startStableTimer(){
-    if(window.__kgenV103ClearTimerKey) window.__kgenV103ClearTimerKey("kgen-single-countdown-1000");
-    if(stableTimer) clearInterval(stableTimer);
-    updateFestivalText();
-    stableTimer=setInterval(updateFestivalText,1000);
-  }
-  function callFestival(id){
-    if(window.templeOps){
-      if(id===1 && templeOps.festival1) return templeOps.festival1();
-      if(id===2 && templeOps.festival2) return templeOps.festival2();
-      if(templeOps.festival) return templeOps.festival(id);
-    }
-    say((id===1?"5/20":"11/11")+" 活動：請確認錢包與活動條件後操作。");
-  }
-  function callNewYear(){ if(window.templeOps && (templeOps.newYear||templeOps.newyear)) return (templeOps.newYear||templeOps.newyear).call(templeOps); say("12/31 跨年活動：請確認錢包與活動條件後操作。"); }
-  function buildFestivalDock(){
-    if($("kgen-v103-festival-dock")) return;
-    const dock=document.createElement("div"); dock.id="kgen-v103-festival-dock";
-    dock.innerHTML='<button id="kgen-v103-festival-toggle" type="button">節日活動｜5/20・11/11・12/31</button><div id="kgen-v103-festival-panel"><div class="kgen-v103-festival-head"><span>節日活動</span><button type="button" id="kgen-v103-festival-close" class="term-btn" style="padding:5px 9px;font-size:11px;">收合</button></div><div class="kgen-v103-festival-grid"><button type="button" id="kgen-v103-f520">5/20<br>悟空生日</button><button type="button" id="kgen-v103-f1111">11/11<br>孤勇日</button><button type="button" id="kgen-v103-f1231">12/31<br>跨年倒數</button></div><div id="kgen-v103-festival-countdown">下一個活動：--</div></div>';
-    document.body.appendChild(dock);
-    $("kgen-v103-festival-toggle").onclick=()=>{document.body.classList.toggle("kgen-v103-festival-open");};
-    $("kgen-v103-festival-close").onclick=()=>{document.body.classList.remove("kgen-v103-festival-open");};
-    $("kgen-v103-f520").onclick=()=>callFestival(1);
-    $("kgen-v103-f1111").onclick=()=>callFestival(2);
-    $("kgen-v103-f1231").onclick=()=>callNewYear();
-  }
-  function detectGate(){
-    const addr=(($("w3-addr")||$("kh-wallet"))?.textContent||"").trim();
-    const chain=(($("w3-chain")||$("kh-chain"))?.textContent||"").toLowerCase();
-    const allow=(($("userAllowance")||{})?.textContent||"").replace(/,/g,"").trim();
-    const walletOk=!!addr && !/未連線|--|-/.test(addr);
-    const bscOk=/56|0x38|bsc/i.test(chain);
-    let approveOk=false;
-    const n=parseFloat(allow); if(Number.isFinite(n)&&n>0) approveOk=true;
-    if(/unlimited|無限|∞/i.test(allow)) approveOk=true;
-    const count=(walletOk?1:0)+(bscOk?1:0)+(approveOk?1:0);
-    localStorage.setItem("kgen12345CupOk", String(count));
-    return {walletOk,bscOk,approveOk,count};
-  }
-  function renderGate(){
-    const p=$("web3-panel"); if(!p) return;
-    let card=$("kgen-v103-gate-card");
-    if(!card){
-      card=document.createElement("div"); card.id="kgen-v103-gate-card";
-      const grid=p.querySelector('input#amt-in')?.parentElement || p.querySelector('.quickstart-card') || p.firstElementChild;
-      if(grid && grid.parentElement) grid.parentElement.insertBefore(card, grid);
-      else p.insertBefore(card,p.firstChild);
-    }
-    const g=detectGate();
-    card.innerHTML='<b>開啟神殿流程</b><br>'+ 
-      '<span class="'+(g.walletOk?'ok':'bad')+'">STEP 1 錢包 '+(g.walletOk?'已連接':'未連接')+'</span><br>'+ 
-      '<span class="'+(g.bscOk?'ok':'bad')+'">STEP 2 BSC '+(g.bscOk?'已切換':'未切換')+'</span><br>'+ 
-      '<span class="'+(g.approveOk?'ok':'bad')+'">STEP 3 Approve '+(g.approveOk?'已偵測':'尚未偵測')+'</span><br>'+ 
-      '<b>神殿狀態：'+g.count+'/3</b>'+(g.count>=3?'｜神殿已開啟，可領發財金。':'｜請依序完成三步。');
-    const old=$("v715-cup-status"); if(old) old.style.display="none";
-  }
-  function patchTempleOps(){
-    const old=window.templeOps||{};
-    if(old.__v103Patched) return;
-    window.templeOps=Object.assign({}, old, {
-      __v103Patched:true,
-      cup:function(){ renderGate(); const g=detectGate(); say(g.count>=3?"神殿已開啟，可以領發財金。":"神殿尚未開啟：請完成錢包、BSC、Approve 三步。"); },
-      resetCup:function(){ localStorage.setItem("kgen12345CupOk","0"); renderGate(); say("神殿開啟狀態已重新檢查。"); },
-      fortune:function(){ renderGate(); const g=detectGate(); if(g.count<3){ say("尚未完成三步，不能送出發財金交易。請先連錢包、切 BSC、Approve。"); return false; } if(old.fortune) return old.fortune.apply(this,arguments); say("三步完成，準備送出 fortuneClaim。"); }
+  function toggleRightRule(){setRightCollapsed(!document.body.classList.contains('kgen-v1031-right-rule-collapsed'));}
+  function markRightButtons(){
+    var btns=Array.prototype.slice.call(document.querySelectorAll('.footer-terminal .term-btn,.footer-terminal button,button.term-btn,#kgen-v917-quick-dock button'));
+    btns.forEach(function(b){
+      var t=text(b).replace(/\s+/g,'');
+      if(t.indexOf('右側神規')>=0 || t.indexOf('客服導覽')>=0 || b.dataset.v918RightInfoToggle==='1' || b.dataset.kgenV10RightRule==='1'){
+        b.dataset.kgenV1031RightRuleBtn='1';
+        b.dataset.v918RightInfoToggle='0';
+        b.dataset.kgenV10RightRule='0';
+        b.innerHTML='🧭<br>右側神規';
+        b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;};
+      }
     });
   }
-  function killFlickerStyles(){
-    document.querySelectorAll('#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,#kgen-v102-festival-countdown,[id*="countdown"],[class*="countdown"]').forEach(el=>{
-      el.style.animation="none"; el.style.transition="none"; el.style.opacity="1"; el.style.filter="none"; el.style.textShadow="none";
+  document.addEventListener('click',function(ev){
+    var b=ev.target&&ev.target.closest&&ev.target.closest('[data-kgen-v1031-right-rule-btn="1"]');
+    if(b){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;}
+  },true);
+
+  function setFestivalCollapsed(collapsed){
+    var p=$('kgen-v102-festival-panel'); if(!p) return;
+    p.classList.toggle('kgen-v1031-festival-collapsed',!!collapsed);
+    var b=$('kgen-v1031-festival-toggle'); if(b) b.textContent=collapsed?'展開':'收合';
+    store('kgen_v1031_festival_collapsed',!!collapsed);
+  }
+  function ensureFestivalToggle(){
+    var p=$('kgen-v102-festival-panel'); if(!p) return;
+    var h=p.querySelector('h3'); if(!h) return;
+    if(!h.querySelector('.kgen-v1031-festival-title-text')){
+      var old=h.textContent||'節日活動';
+      h.textContent='';
+      var span=document.createElement('span'); span.className='kgen-v1031-festival-title-text'; span.textContent=old.replace(/\s+/g,' ').trim()||'節日活動';
+      h.appendChild(span);
+    }
+    var b=$('kgen-v1031-festival-toggle');
+    if(!b){
+      b=document.createElement('button'); b.id='kgen-v1031-festival-toggle'; b.type='button'; b.textContent='收合';
+      b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setFestivalCollapsed(!p.classList.contains('kgen-v1031-festival-collapsed'));return false;},true);
+      h.appendChild(b);
+    }
+    setFestivalCollapsed(load('kgen_v1031_festival_collapsed',false));
+  }
+
+  var lastFestivalText='';
+  function updateStableFestivalCountdown(){
+    var el=$('kgen-v102-festival-countdown'); if(!el) return;
+    try{
+      var now=new Date(); var y=now.getUTCFullYear();
+      var events=[
+        {name:'5/20 悟空生日',date:new Date(Date.UTC(y,4,20,0,0,0)),end:new Date(Date.UTC(y,4,20,0,10,0))},
+        {name:'11/11 孤勇日',date:new Date(Date.UTC(y,10,11,0,0,0)),end:new Date(Date.UTC(y,10,11,0,10,0))},
+        {name:'12/31 跨年倒數',date:new Date(Date.UTC(y,11,31,23,50,0)),end:new Date(Date.UTC(y,11,31,23,59,59))}
+      ];
+      var ev=events.find(function(x){return now<=x.end;}) || {name:'明年 5/20 悟空生日',date:new Date(Date.UTC(y+1,4,20,0,0,0)),end:new Date(Date.UTC(y+1,4,20,0,10,0))};
+      var inWindow=now>=ev.date&&now<=ev.end;
+      var s=Math.max(0,Math.floor((ev.date-now)/1000));
+      var d=Math.floor(s/86400); s%=86400; var h=Math.floor(s/3600); s%=3600; var m=Math.floor(s/60); s%=60;
+      var out=inWindow?(ev.name+'｜活動視窗開啟中'):('下一個活動：'+ev.name+'｜倒數 '+d+'天 '+h+'時 '+m+'分 '+s+'秒');
+      if(out!==lastFestivalText){el.textContent=out; lastFestivalText=out;}
+      el.style.animation='none'; el.style.transition='none'; el.style.opacity='1';
+    }catch(e){}
+  }
+  function noFlicker(){
+    document.querySelectorAll('#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]').forEach(function(el){
+      el.style.animation='none';el.style.transition='none';el.style.opacity='1';el.style.filter='none';el.style.textShadow='none';
     });
   }
-  function updateVersionText(){
-    document.querySelectorAll('#ver-st,.sys-st').forEach(el=>{ if(/VERSION/i.test(el.textContent||"")) el.textContent="VERSION "+VERSION; });
-  }
+
   function init(){
-    updateVersionText(); bindExistingRuleButton(); prepareRightPanel(); buildFestivalDock(); patchTempleOps(); renderGate(); killFlickerStyles(); startStableTimer();
+    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker();
+    markRightButtons(); var panel=findRightPanel(); if(panel) ensureRightClose(panel);
+    setRightCollapsed(load('kgen_v1031_right_rule_collapsed',true));
   }
-  document.addEventListener('click',function(ev){ const b=ev.target&&ev.target.closest&&ev.target.closest('[data-kgen-v103-rule-btn="1"]'); if(b) return toggleRightPanel(ev); },true);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
-  window.addEventListener('load',()=>{init(); setTimeout(init,600); setTimeout(init,1800);});
-  setInterval(()=>{ bindExistingRuleButton(); renderGate(); killFlickerStyles(); },2500);
-  window.kgenV103StableTemple={VERSION,BUILD,setRightPanel,toggleRightPanel,renderGate,startStableTimer};
+  window.addEventListener('load',function(){init(); setTimeout(init,500); setTimeout(init,1600);});
+  if(window.__KGEN_V1031_TIMER__) clearInterval(window.__KGEN_V1031_TIMER__);
+  window.__KGEN_V1031_TIMER__=setInterval(function(){
+    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker(); markRightButtons();
+    var p=findRightPanel(); if(p) ensureRightClose(p);
+  },1000);
+  window.kgenV1031PanelStability={version:VERSION,build:BUILD,setHeartCollapsed:setHeartCollapsed,setRightCollapsed:setRightCollapsed,setFestivalCollapsed:setFestivalCollapsed};
 })();
 </script>
 

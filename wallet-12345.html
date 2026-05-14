@@ -1,1 +1,262 @@
 <!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KGEN 12345 Wallet Bridge V9.0.0</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}.card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.75)}h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#dff}button,a{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:linear-gradient(180deg,#ffe28a,#d3a93b);color:#111;font-weight:900;text-decoration:none}.sub{background:rgba(255,255,255,.06);color:#fff}</style><script>const TARGET='https://klineodyssey.github.io/kline-odyssey/12345.html';const NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';function go(){location.replace(TARGET)}function mm(){location.href='metamask://dapp/'+NOSCHEME;setTimeout(()=>{location.href='https://metamask.app.link/dapp/'+NOSCHEME},900)}window.addEventListener('load',()=>setTimeout(go,900));</script></head><body><div class="card"><h1>KGEN 12345 錢包橋接入口 V9.0.0</h1><p>正在進入英文路徑完整神殿頁 <b>12345.html</b>。若 MetaMask 登入後沒有自動跳轉，請按下方按鈕或複製網址貼到錢包 DApp 瀏覽器。</p><a href="https://klineodyssey.github.io/kline-odyssey/12345.html">立即進入 12345 神殿</a><button onclick="mm()">用 MetaMask 開啟 12345 神殿</button><button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TARGET);this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button><p style="font-size:12px;color:#9ff">進入後按「連結錢包 / 切 BSC」，即可讀取 BNB、KGEN、Allowance、Heart 血庫。</p></div></body></html>
+
+<!-- ============================================================
+KGEN 12345 V10.3.1｜PANEL STABILITY HOTFIX
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: 12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX
+BUILD: 20260514-V10.3.1-PANEL-STABILITY-HOTFIX
+BASE_FROM: KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip
+CHANGESET:
+1. 版本只升不降：由 V10.2 / V10.3 線升至 V10.3.1。
+2. 不修改 KGEN_TempleHeart_V3_2_6.sol，不改合約生命核心。
+3. 悟空心臟按鈕只控制悟空心臟面板 #kgen-heart-live-panel，不再誤動左上控制台。
+4. 右側神規用原本下方「右側神規」按鈕展開；右側神規面板右上新增收合按鈕。
+5. 右上活動區塊新增展開/收合按鈕，收合時只保留標題列。
+6. 倒數只更新文字，不重建整區 DOM；清除本補丁自己的舊 interval，避免疊加。
+============================================================ -->
+<style id="kgen-v1031-panel-stability-hotfix-style">
+  :root{--kgen-v1031-gold:#ffd778;--kgen-v1031-cyan:#7ff3ff;--kgen-v1031-green:#72ffcf;}
+
+  /* 悟空心臟：只讓此區塊被悟空心臟按鈕收合，不牽動左上控制台 */
+  #kgen-heart-toggle{cursor:pointer!important;pointer-events:auto!important;user-select:none!important;}
+  #kgen-heart-toggle .kgen-v1031-heart-state{margin-left:auto!important;color:var(--kgen-v1031-green)!important;font-weight:900!important;font-size:11px!important;}
+  body.k12345-heart-collapsed #kgen-heart-live-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body:not(.k12345-heart-collapsed) #kgen-heart-live-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+
+  /* 右側神規：預設不自動彈出；展開後右上可收合 */
+  #kgen-v1031-right-rule-close,
+  #kgen-v1031-festival-toggle{
+    border:1px solid rgba(255,215,120,.55)!important;
+    background:rgba(0,0,0,.58)!important;
+    color:var(--kgen-v1031-gold)!important;
+    border-radius:999px!important;
+    min-width:44px!important;
+    min-height:24px!important;
+    font-size:11px!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+    line-height:1!important;
+    padding:3px 8px!important;
+    box-shadow:inset 0 0 10px rgba(255,215,120,.08)!important;
+  }
+  #kgen-v1031-right-rule-close{
+    position:absolute!important;
+    right:8px!important;
+    top:8px!important;
+    z-index:2147483647!important;
+  }
+  .kgen-v1031-right-rule-panel{position:fixed!important;box-sizing:border-box!important;}
+  body.kgen-v1031-right-rule-collapsed .kgen-v1031-right-rule-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body:not(.kgen-v1031-right-rule-collapsed) .kgen-v1031-right-rule-panel{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+  .footer-terminal [data-kgen-v1031-right-rule-btn="1"],
+  button[data-kgen-v1031-right-rule-btn="1"]{pointer-events:auto!important;}
+
+  /* 右上活動區：一個總收合，不拆三個收合 */
+  #kgen-v102-festival-panel{box-sizing:border-box!important;}
+  #kgen-v102-festival-panel h3{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    margin-bottom:6px!important;
+  }
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed{
+    width:min(310px,42vw)!important;
+    max-height:44px!important;
+    overflow:hidden!important;
+  }
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed .kgen-v102-festival-body{display:none!important;}
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3::before{
+    content:'節日活動｜5/20・11/11・12/31';
+    color:var(--kgen-v1031-gold)!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
+  }
+  #kgen-v102-festival-panel.kgen-v1031-festival-collapsed h3 > .kgen-v1031-festival-title-text{display:none!important;}
+  #kgen-v102-festival-panel:not(.kgen-v1031-festival-collapsed) h3 > .kgen-v1031-festival-title-text{display:inline!important;}
+
+  /* 倒數防閃爍：只固定文字層，不動交易按鈕 */
+  #kgen-v102-festival-countdown,#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,
+  #kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]{
+    animation:none!important;transition:none!important;opacity:1!important;filter:none!important;text-shadow:none!important;
+    white-space:nowrap!important;min-height:20px!important;line-height:20px!important;overflow:hidden!important;
+  }
+</style>
+<script id="kgen-v1031-panel-stability-hotfix-script">
+(function(){
+  'use strict';
+  var VERSION='12345-TEMPLE-V10.3.1-PANEL-STABILITY-HOTFIX';
+  var BUILD='20260514-V10.3.1-PANEL-STABILITY-HOTFIX';
+  window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{
+    VERSION:VERSION,BUILD:BUILD,
+    BASE_FROM:'KGEN_12345_V10_2_FESTIVAL_RUNTIME_LOCK_FULL_bundle.zip',
+    CHANGESET:'V10.3.1-PANEL-STABILITY-HOTFIX',
+    CONTRACT_LOCK:'KGEN_TempleHeart_V3_2_6.sol unchanged'
+  });
+  function $(id){return document.getElementById(id);} 
+  function text(el){return (el&&el.textContent?el.textContent:'').replace(/\s+/g,' ').trim();}
+  function say(msg){try{if(window.kgenLog)window.kgenLog('info',msg);else console.log('[KGEN V10.3.1]',msg);}catch(e){}}
+  function store(k,v){try{localStorage.setItem(k,v?'1':'0');}catch(e){}}
+  function load(k,def){try{var v=localStorage.getItem(k);return v==null?def:v==='1';}catch(e){return def;}}
+
+  function cleanVersionText(){
+    try{document.title='KGEN 12345 五指山悟空財神殿｜V10.3.1｜Heart V3.2.6';}catch(e){}
+    try{
+      document.querySelectorAll('#ver-st,#version,#build,.version,.sys-st,[class*="version"],[id*="version"]').forEach(function(el){
+        var t=text(el); if(!t) return;
+        if(/V10\.2|V10\.3|VERSION|BUILD|12345-TEMPLE/.test(t)){
+          el.textContent=t.replace(/12345-TEMPLE-V10\.2-[A-Z0-9\-]+/g,VERSION)
+                          .replace(/12345-TEMPLE-V10\.3-[A-Z0-9\-]+/g,VERSION)
+                          .replace(/20260514-V10\.2-[A-Z0-9\-]+/g,BUILD)
+                          .replace(/V10\.2/g,'V10.3.1')
+                          .replace(/V10\.3(?!\.1)/g,'V10.3.1');
+        }
+      });
+    }catch(e){}
+  }
+
+  /* 悟空心臟：clone 掉舊事件，避免舊補丁把左上控制台一起動 */
+  function normalizeHeartHeader(btn,collapsed){
+    btn.innerHTML='<span><span class="kgen-heart-title">K線西遊記・花果山台灣</span><span class="kgen-heart-sub">12345 Heart 悟空心臟</span></span><span class="kgen-v1031-heart-state">'+(collapsed?'展開':'收合')+'</span>';
+    btn.setAttribute('aria-label','12345 悟空心臟 '+(collapsed?'展開':'收合'));
+    btn.setAttribute('title','悟空心臟展開 / 收合');
+  }
+  function setHeartCollapsed(collapsed){
+    document.body.classList.toggle('k12345-heart-collapsed',!!collapsed);
+    var panel=$('kgen-heart-live-panel');
+    if(panel){panel.style.display=collapsed?'none':'block';panel.style.visibility=collapsed?'hidden':'visible';panel.style.pointerEvents=collapsed?'none':'auto';}
+    var btn=$('kgen-heart-toggle'); if(btn) normalizeHeartHeader(btn,!!collapsed);
+    store('kgen_v1031_heart_collapsed',!!collapsed);
+  }
+  function bindHeartToggle(){
+    var btn=$('kgen-heart-toggle'); if(!btn) return;
+    if(btn.dataset.kgenV1031HeartBound==='1') { normalizeHeartHeader(btn,document.body.classList.contains('k12345-heart-collapsed')); return; }
+    var clone=btn.cloneNode(true);
+    clone.dataset.kgenV1031HeartBound='1';
+    btn.parentNode.replaceChild(clone,btn);
+    clone.addEventListener('click',function(ev){
+      ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      setHeartCollapsed(!document.body.classList.contains('k12345-heart-collapsed'));
+      return false;
+    },true);
+    setHeartCollapsed(load('kgen_v1031_heart_collapsed',false));
+  }
+
+  function findRightPanel(){
+    var direct=$('coord-panel')||document.querySelector('.coord-panel')||$('right-info-panel')||document.querySelector('.right-info-panel');
+    if(direct) return direct;
+    var nodes=Array.prototype.slice.call(document.querySelectorAll('body div'));
+    return nodes.find(function(el){
+      var t=text(el); if(!t) return false;
+      var r; try{r=el.getBoundingClientRect();}catch(e){return false;}
+      return r && r.width>160 && r.height>90 && r.left>window.innerWidth*0.35 && /(右側神規|神規|Heart\s*\/\s*Brain|TempleHeart|神殿規則|LP Pair|Token)/i.test(t);
+    })||null;
+  }
+  function ensureRightClose(panel){
+    if(!panel||panel.querySelector('#kgen-v1031-right-rule-close')) return;
+    try{ if(getComputedStyle(panel).position==='static') panel.style.position='fixed'; }catch(e){panel.style.position='fixed';}
+    panel.classList.add('kgen-v1031-right-rule-panel');
+    var b=document.createElement('button');
+    b.id='kgen-v1031-right-rule-close'; b.type='button'; b.textContent='收合';
+    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setRightCollapsed(true);return false;},true);
+    panel.appendChild(b);
+  }
+  function setRightCollapsed(collapsed){
+    var panel=findRightPanel();
+    if(panel){
+      panel.classList.add('kgen-v1031-right-rule-panel');
+      ensureRightClose(panel);
+      panel.style.display=collapsed?'none':'block';
+      panel.style.visibility=collapsed?'hidden':'visible';
+      panel.style.pointerEvents=collapsed?'none':'auto';
+    }
+    document.body.classList.toggle('kgen-v1031-right-rule-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v10-right-info-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v919-right-info-collapsed',!!collapsed);
+    document.body.classList.toggle('kgen-v918-right-info-collapsed',!!collapsed);
+    store('kgen_v1031_right_rule_collapsed',!!collapsed);
+    markRightButtons();
+  }
+  function toggleRightRule(){setRightCollapsed(!document.body.classList.contains('kgen-v1031-right-rule-collapsed'));}
+  function markRightButtons(){
+    var btns=Array.prototype.slice.call(document.querySelectorAll('.footer-terminal .term-btn,.footer-terminal button,button.term-btn,#kgen-v917-quick-dock button'));
+    btns.forEach(function(b){
+      var t=text(b).replace(/\s+/g,'');
+      if(t.indexOf('右側神規')>=0 || t.indexOf('客服導覽')>=0 || b.dataset.v918RightInfoToggle==='1' || b.dataset.kgenV10RightRule==='1'){
+        b.dataset.kgenV1031RightRuleBtn='1';
+        b.dataset.v918RightInfoToggle='0';
+        b.dataset.kgenV10RightRule='0';
+        b.innerHTML='🧭<br>右側神規';
+        b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;};
+      }
+    });
+  }
+  document.addEventListener('click',function(ev){
+    var b=ev.target&&ev.target.closest&&ev.target.closest('[data-kgen-v1031-right-rule-btn="1"]');
+    if(b){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();toggleRightRule();return false;}
+  },true);
+
+  function setFestivalCollapsed(collapsed){
+    var p=$('kgen-v102-festival-panel'); if(!p) return;
+    p.classList.toggle('kgen-v1031-festival-collapsed',!!collapsed);
+    var b=$('kgen-v1031-festival-toggle'); if(b) b.textContent=collapsed?'展開':'收合';
+    store('kgen_v1031_festival_collapsed',!!collapsed);
+  }
+  function ensureFestivalToggle(){
+    var p=$('kgen-v102-festival-panel'); if(!p) return;
+    var h=p.querySelector('h3'); if(!h) return;
+    if(!h.querySelector('.kgen-v1031-festival-title-text')){
+      var old=h.textContent||'節日活動';
+      h.textContent='';
+      var span=document.createElement('span'); span.className='kgen-v1031-festival-title-text'; span.textContent=old.replace(/\s+/g,' ').trim()||'節日活動';
+      h.appendChild(span);
+    }
+    var b=$('kgen-v1031-festival-toggle');
+    if(!b){
+      b=document.createElement('button'); b.id='kgen-v1031-festival-toggle'; b.type='button'; b.textContent='收合';
+      b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();setFestivalCollapsed(!p.classList.contains('kgen-v1031-festival-collapsed'));return false;},true);
+      h.appendChild(b);
+    }
+    setFestivalCollapsed(load('kgen_v1031_festival_collapsed',false));
+  }
+
+  var lastFestivalText='';
+  function updateStableFestivalCountdown(){
+    var el=$('kgen-v102-festival-countdown'); if(!el) return;
+    try{
+      var now=new Date(); var y=now.getUTCFullYear();
+      var events=[
+        {name:'5/20 悟空生日',date:new Date(Date.UTC(y,4,20,0,0,0)),end:new Date(Date.UTC(y,4,20,0,10,0))},
+        {name:'11/11 孤勇日',date:new Date(Date.UTC(y,10,11,0,0,0)),end:new Date(Date.UTC(y,10,11,0,10,0))},
+        {name:'12/31 跨年倒數',date:new Date(Date.UTC(y,11,31,23,50,0)),end:new Date(Date.UTC(y,11,31,23,59,59))}
+      ];
+      var ev=events.find(function(x){return now<=x.end;}) || {name:'明年 5/20 悟空生日',date:new Date(Date.UTC(y+1,4,20,0,0,0)),end:new Date(Date.UTC(y+1,4,20,0,10,0))};
+      var inWindow=now>=ev.date&&now<=ev.end;
+      var s=Math.max(0,Math.floor((ev.date-now)/1000));
+      var d=Math.floor(s/86400); s%=86400; var h=Math.floor(s/3600); s%=3600; var m=Math.floor(s/60); s%=60;
+      var out=inWindow?(ev.name+'｜活動視窗開啟中'):('下一個活動：'+ev.name+'｜倒數 '+d+'天 '+h+'時 '+m+'分 '+s+'秒');
+      if(out!==lastFestivalText){el.textContent=out; lastFestivalText=out;}
+      el.style.animation='none'; el.style.transition='none'; el.style.opacity='1';
+    }catch(e){}
+  }
+  function noFlicker(){
+    document.querySelectorAll('#kh-ny-slot,#cd-1231,#kh-ny-countdown,.kh-ny-countdown,#kgen-ny-countdown,#v714-ny-count,[id*="ny"],[class*="ny-count"],[class*="countdown"]').forEach(function(el){
+      el.style.animation='none';el.style.transition='none';el.style.opacity='1';el.style.filter='none';el.style.textShadow='none';
+    });
+  }
+
+  function init(){
+    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker();
+    markRightButtons(); var panel=findRightPanel(); if(panel) ensureRightClose(panel);
+    setRightCollapsed(load('kgen_v1031_right_rule_collapsed',true));
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',function(){init(); setTimeout(init,500); setTimeout(init,1600);});
+  if(window.__KGEN_V1031_TIMER__) clearInterval(window.__KGEN_V1031_TIMER__);
+  window.__KGEN_V1031_TIMER__=setInterval(function(){
+    cleanVersionText(); bindHeartToggle(); ensureFestivalToggle(); updateStableFestivalCountdown(); noFlicker(); markRightButtons();
+    var p=findRightPanel(); if(p) ensureRightClose(p);
+  },1000);
+  window.kgenV1031PanelStability={version:VERSION,build:BUILD,setHeartCollapsed:setHeartCollapsed,setRightCollapsed:setRightCollapsed,setFestivalCollapsed:setFestivalCollapsed};
+})();
+</script>
