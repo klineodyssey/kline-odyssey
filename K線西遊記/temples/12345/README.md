@@ -1,4 +1,4 @@
-# 五指山・悟空財神殿 12345（Temple UI V10.20 TRUE LINK MODE）
+# 五指山・悟空財神殿 12345（Temple UI V10.23 TRUE LINK MODE）
 
 本頁是《K線西遊記》GitHub Pages 的「五指山 12345」神殿入口。  
 定位：悟空財神殿（Heart 發財金 / 呼吸 / 心跳 / 還願 / XYZ 宇宙控制台）
@@ -7,7 +7,7 @@
 
 # 本版身份
 
-VERSION：V10.20 TRUE LINK MODE  
+VERSION：V10.23 TRUE LINK MODE  
 BASE_FROM：KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle  
 PATCH_TYPE：只新增圖片連動，不改原本旋轉邏輯
 
@@ -170,7 +170,7 @@ final.png
 
 ---
 
-# V10.20 控制邏輯
+# V10.23 控制邏輯
 
 ## 原旋轉邏輯保留
 
@@ -276,7 +276,7 @@ DO_NOT_MODIFY
 目前主版本：
 
 ```text
-V10.20 TRUE LINK MODE
+V10.23 TRUE LINK MODE
 ```
 
 旋轉母版：
@@ -286,14 +286,14 @@ V10.12 MOTION CONTROL PATCH
 ```
 
 
-# V10.20 Install Check
+# V10.23 Install Check
 
 新增：`modules/kgen-12345-install-check.js`。開頁會檢查必要 modules 與 assets，缺檔時顯示 INSTALL CHECK FAILED 並語音提醒。
 
 
 ---
 
-# V10.20 FIX NOTES
+# V10.23 FIX NOTES
 
 - BASE_FROM remains V10.12_MOTION_CONTROL_PATCH.
 - Do not rewrite rotation math.
@@ -305,3 +305,21 @@ V10.12 MOTION CONTROL PATCH
 - Right-side rule panel size is matched to the Wukong Heart panel.
 - Countdown flicker is guarded by stable minute-only updates and no animation.
 - Holy Cup remains front-end ritual gate: press three Holy Cup buttons to pass; actual fortuneClaim still depends on Heart contract rules.
+
+
+---
+
+# V10.24 TRUE SYNC STRUCTURE
+
+BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+
+本版不重寫旋轉系統。方向盤、橫桿、主圖旋轉仍繼承 V10.12 TRUE ROTATION DNA。
+
+新增與修正：
+
+- 右側神規改為 drawer：長寬對齊左側悟空心臟視窗，內容內部捲動，收合按鈕固定在右上角。
+- 共用 amount-input：Approve、fortuneClaim、vowTo、lightLamp 共用同一個 KGEN 數量輸入。
+- MOVE Y = WARP Y = 主圖 Y = warp-core Y：左下前後、右下曲速縱桿、主圖上下、曲速小圖上下，使用同一同步源。
+- 操作中顯示 heart.png；停止後依角度回 bull-front.png 或 bear-rear.png。
+- warp-core.png 僅為右下曲速小圖，不額外發光，不取代主圖。
+- install-check 檢查固定資產與 modules，缺檔要顯示警告與語音提示。

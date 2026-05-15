@@ -1,69 +1,20 @@
-# KGEN 12345 File Manifest｜V10.20
+# KGEN 12345 FILE MANIFEST
+# VERSION: V10.24
+# BASE_FROM: V10.12_MOTION_CONTROL_PATCH
 
-主路徑：`/K線西遊記/temples/12345/`
+## Active HTML
+- /12345.html — 根目錄橋接入口，導向神殿主頁。
+- /K線西遊記/temples/12345/index.html — 悟空財神殿主頁。
+- /wallet-12345.html — 錢包橋接入口。
 
-## 主頁
+## Active modules
+- /K線西遊記/temples/12345/modules/kgen-12345-core.css — UI 樣式、drawer、amount box、warp scale。
+- /K線西遊記/temples/12345/modules/kgen-12345-version.js — 版本顯示。
+- /K線西遊記/temples/12345/modules/kgen-12345-panel-router.js — 左右視窗展開收合、客服導覽、右側神規 drawer。
+- /K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js — 三聖盃、共用 amount-input、跨年倒數資訊。
+- /K線西遊記/temples/12345/modules/kgen-12345-stable-countdown.js — 跨年倒數防閃爍。
+- /K線西遊記/temples/12345/modules/kgen-12345-motion-control.js — V10.12 旋轉 DNA + V10.24 TRUE SYNC。
+- /K線西遊記/temples/12345/modules/kgen-12345-install-check.js — 缺檔檢查與語音提示。
 
-```text
-index.html
-README.md
-VERSION_INFO.txt
-FILE_MANIFEST.md
-ASSET_MANIFEST.md
-```
-
-## Modules
-
-```text
-modules/kgen-12345-core.css
-modules/kgen-12345-version.js
-modules/kgen-12345-panel-router.js
-modules/kgen-12345-holy-cup.js
-modules/kgen-12345-stable-countdown.js
-modules/kgen-12345-motion-control.js
-modules/kgen-12345-install-check.js
-```
-
-## Assets
-
-```text
-assets/bull-front.png
-assets/bear-rear.png
-assets/heart.png
-assets/warp-core.png
-```
-
-## 入口
-
-```text
-/12345.html          # 根目錄快捷入口
-/wallet-12345.html   # 錢包橋接入口
-```
-
-## BASE_FROM
-
-```text
-KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
-```
-
-## MERGE_FROM
-
-```text
-KGEN_12345_V10_18_TRUE_LINK_FROM_V10_12_FULL
-```
-
-
----
-
-# V10.20 FIX NOTES
-
-- BASE_FROM remains V10.12_MOTION_CONTROL_PATCH.
-- Do not rewrite rotation math.
-- Static state must show bull-front.png or bear-rear.png.
-- Any active rotation or MOVE/WARP movement temporarily shows heart.png.
-- Left MOVE Y links the right WARP vertical rail display.
-- WARP 0x = bottom floor, 20x = neutral aesthetic floor, 300x = ceiling / highest parallel universe floor.
-- warp-core.png stays inside the right WARP engine rail and never replaces the main image.
-- Right-side rule panel size is matched to the Wukong Heart panel.
-- Countdown flicker is guarded by stable minute-only updates and no animation.
-- Holy Cup remains front-end ritual gate: press three Holy Cup buttons to pass; actual fortuneClaim still depends on Heart contract rules.
+## Rule
+Do not add versioned module filenames to /modules/. Old files go to /modules/archive/.
