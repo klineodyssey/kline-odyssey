@@ -1,4 +1,4 @@
-# 五指山・悟空財神殿 12345（Temple UI V10.18 TRUE LINK MODE）
+# 五指山・悟空財神殿 12345（Temple UI V10.19 TRUE LINK MODE）
 
 本頁是《K線西遊記》GitHub Pages 的「五指山 12345」神殿入口。  
 定位：悟空財神殿（Heart 發財金 / 呼吸 / 心跳 / 還願 / XYZ 宇宙控制台）
@@ -7,7 +7,7 @@
 
 # 本版身份
 
-VERSION：V10.18 TRUE LINK MODE  
+VERSION：V10.19 TRUE LINK MODE  
 BASE_FROM：KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle  
 PATCH_TYPE：只新增圖片連動，不改原本旋轉邏輯
 
@@ -131,7 +131,7 @@ VERSION_INFO.txt
 ```text
 bull-front.png
 bear-rear.png
-heart-drive.png
+heart.png
 warp-core.png
 ```
 
@@ -139,7 +139,7 @@ warp-core.png
 
 - `bull-front.png`：多方靜止主圖
 - `bear-rear.png`：空方靜止主圖
-- `heart-drive.png`：MOVE / WARP 操作中顯示的悟空心臟推進圖
+- `heart.png`：MOVE / WARP 操作中顯示的悟空心臟推進圖
 - `warp-core.png`：右下曲速引擎槽獨立顯示，不取代主圖
 
 禁止再新增或改名成：
@@ -170,7 +170,7 @@ final.png
 
 ---
 
-# V10.18 控制邏輯
+# V10.19 控制邏輯
 
 ## 原旋轉邏輯保留
 
@@ -225,7 +225,7 @@ bear-rear.png
 當 MOVE 左下方向盤正在操作，或右側 WARP / Y 軸正在操作：
 
 ```text
-顯示 heart-drive.png
+顯示 heart.png
 ```
 
 停止操作後：
@@ -276,7 +276,7 @@ DO_NOT_MODIFY
 目前主版本：
 
 ```text
-V10.18 TRUE LINK MODE
+V10.19 TRUE LINK MODE
 ```
 
 旋轉母版：
@@ -284,3 +284,8 @@ V10.18 TRUE LINK MODE
 ```text
 V10.12 MOTION CONTROL PATCH
 ```
+
+
+# V10.19 Install Check
+
+新增：`modules/kgen-12345-install-check.js`。開頁會檢查必要 modules 與 assets，缺檔時顯示 INSTALL CHECK FAILED 並語音提醒。
