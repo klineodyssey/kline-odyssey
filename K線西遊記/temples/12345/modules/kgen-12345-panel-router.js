@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.21 panel router
+// KGEN 12345 V10.22 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
@@ -109,7 +109,60 @@
       oldHeartToggle.dataset.kgenV1011Bound='1'; oldHeartToggle.onclick=null; oldHeartToggle.addEventListener('click',e=>{e.preventDefault();toggleHeart();},true);
     }
   }
-  function init(){ensureRightClose();ensureFestivalClose();bindFooter(); setFestival(false);}
+
+
+  /* V10.22 客服導覽修復：按鈕必須有答案與語音，不再只打開空面板 */
+  function speakGuide(msg){
+    try{
+      if(window.app && typeof window.app.speak==='function') return window.app.speak(msg);
+      if(!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; u.rate=1; speechSynthesis.speak(u);
+    }catch(_){}
+  }
+  const GUIDE_ANSWERS={
+    intro:'這裡是五指山一二三四五悟空財神殿客服導覽。這是 TempleHeart V3.2.6 前端控制神殿，不是廣寒宮，也不是月老系統。',
+    rules:'主流程是連接錢包，Approve Heart，完成三次聖盃，再按 fortuneClaim 領發財金。真正交易是否成功，以鏈上 Heart 合約規則為準。',
+    wallet:'請先連接錢包並切換 BSC。畫面會讀取 BNB、KGEN、Allowance 與 Heart 血庫。',
+    approve:'Approve 是授權 Heart 合約使用你的 KGEN。領發財金通常不用先付款，但還願、點燈等轉出 KGEN 的動作需要授權。',
+    playbook:'完整玩法是領福緣、創造、還願補血，讓 Heart 和 Brain 形成循環。發財金、心跳、呼吸、還願、點燈、許願各自對應不同鏈上動作。',
+    qa:'你可以問：發財金怎麼領、為什麼要三次聖盃、五二零活動、十一月十一活動、跨年倒數活動、Heart 和 Brain 怎麼循環。'
+  };
+  function answerQuestion(q){
+    q=String(q||'').trim();
+    let ans='你可以問：發財金怎麼領、為什麼要三次聖盃、五二零活動、十一月十一活動、跨年活動、Approve 是什麼。';
+    if(/12345|是什麼|神殿/.test(q)) ans=GUIDE_ANSWERS.intro;
+    else if(/發財金|fortune/i.test(q)) ans='發財金使用 fortuneClaim，一次輸入一到八百八十八整數。前端需完成三次聖盃；鏈上仍會檢查冷卻、名額與血庫。';
+    else if(/聖盃/.test(q)) ans='三次聖盃已改成人性化前端 gate：任意按聖盃按鈕累積三次即通過，不再判斷陰陽，避免操作卡住。';
+    else if(/Approve|授權/i.test(q)) ans=GUIDE_ANSWERS.approve;
+    else if(/5\/20|520|五二零|悟空生日/.test(q)) ans='五二零是悟空生日活動，對應 festivalClaim(1)。只有合約允許的時間與條件成立時才會成功。';
+    else if(/11\/11|1111|十一月十一|孤勇/.test(q)) ans='十一月十一日是孤勇日活動，對應 festivalClaim(2)。';
+    else if(/12\/31|1231|跨年|倒數/.test(q)) ans='跨年倒數活動對應 newYearCountdownClaim。畫面只顯示清楚倒數，是否可領仍以合約條件為準。';
+    const qbox=$('qa-last'), abox=$('qa-last-a');
+    if(qbox) qbox.textContent='Q: '+q;
+    if(abox) abox.textContent='A: '+ans;
+    log(ans); speakGuide(ans);
+  }
+  function bindGuideButtons(){
+    document.addEventListener('click',function(e){
+      const tab=e.target&&e.target.closest?e.target.closest('.guide-tab,[data-sec]'):null;
+      if(tab && tab.getAttribute('data-sec')){
+        const sec=tab.getAttribute('data-sec');
+        const ans=GUIDE_ANSWERS[sec]||GUIDE_ANSWERS.intro;
+        const body=$('guide-body')||$('temple-guide-body')||$('qa-last-a');
+        if(body && !/qa-last-a/.test(body.id||'')) body.innerHTML='<h3>'+tab.textContent.trim()+'</h3><p>'+ans+'</p>';
+        log(ans); speakGuide(ans);
+      }
+      const qb=e.target&&e.target.closest?e.target.closest('.qa-btn,[data-q]'):null;
+      if(qb){
+        const q=qb.getAttribute('data-q')||qb.textContent||'';
+        if(qb.id==='btn-voice-qa') return;
+        e.preventDefault(); e.stopPropagation(); answerQuestion(q); return false;
+      }
+    },true);
+  }
+
+  function init(){ensureRightClose();ensureFestivalClose();bindFooter();bindGuideButtons(); setFestival(false);}
   window.KGEN12345_V1011_PANELS={setRight,toggleRight,setHeart,toggleHeart,setFestival,toggleFestival};
   document.addEventListener('DOMContentLoaded',init); if(document.readyState!=='loading') init(); setTimeout(init,500); setTimeout(init,1800); setInterval(bindFooter,2500);
 })();

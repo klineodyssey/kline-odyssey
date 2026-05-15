@@ -1,7 +1,7 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.21.0
+ * VERSION: V10.22.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
  * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.21 0-300 warp scale + idle texture fix
  *
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.21.0';
+  const VERSION = 'V10.22.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -112,7 +112,7 @@
         border-radius:50%;
         border:2px solid rgba(255,215,120,.75);
         background:rgba(0,0,0,.50);
-        box-shadow:0 0 18px rgba(255,215,120,.32), 0 0 28px rgba(0,242,255,.18);
+        box-shadow:none;
         transform:translate(-50%, 50%);
         transition: bottom .06s linear;
         pointer-events:none;
@@ -510,6 +510,57 @@
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+
+
+
+  /* =========================================================
+     V10.22 FINAL STABILIZER
+     - Static state must show bull/bear, never heart.
+     - Any MOVE / WARP / STEER operation temporarily shows heart.
+     - MOVE Y drives WARP 0~300 elevator and visual rail.
+     - No extra glowing WARP thumb/core.
+  ========================================================= */
+  (function installV1022FinalStabilizer(){
+    let activeUntil = 0;
+    function now(){return Date.now();}
+    function currentDeg(){
+      const el = $('steer-input-val');
+      const v = el ? parseFloat(el.value||'0') : 0;
+      return Number.isFinite(v) ? v : 0;
+    }
+    function sideFromDeg(v){ return (v >= -90 && v <= 90) ? 'long' : 'short'; }
+    function forceTexture(active){
+      const img = $('fairy-img'); if(!img) return;
+      const src = active ? ASSETS.heart : (sideFromDeg(currentDeg())==='long' ? ASSETS.bull : ASSETS.bear);
+      if(img.getAttribute('src') !== src) img.setAttribute('src',src);
+      state.lastTexture = src;
+    }
+    function markFinalActivity(ms){ activeUntil = now() + (ms||720); forceTexture(true); }
+    ['pointerdown','touchstart','mousedown','input','change'].forEach(function(ev){
+      document.addEventListener(ev,function(e){
+        const t=e.target;
+        if(!t) return;
+        const isMove = t.closest && t.closest('#move-joystick-wrap');
+        const isSteer = t.id === 'steer-input-val';
+        const isWarp = t.id === 'warp-input-val' || (t.closest && t.closest('#warp-rail-body'));
+        if(isMove || isSteer || isWarp) markFinalActivity(isMove?900:650);
+      },true);
+    });
+    ['pointerup','touchend','mouseup','pointercancel','touchcancel'].forEach(function(ev){
+      document.addEventListener(ev,function(){ activeUntil = now() + 260; },true);
+    });
+    setInterval(function(){
+      const active = now() < activeUntil;
+      if(!active){
+        state.isMoveActive=false; state.isWarpActive=false; state.isSteerActive=false;
+      }
+      forceTexture(active);
+      // Keep WARP rail visual clean: use image and scale, no extra glow block.
+      const ef=$('energy-fill'); if(ef){ ef.style.boxShadow='none'; ef.style.filter='none'; }
+      const th=$('warp-thumb'); if(th){ th.style.boxShadow='none'; th.style.filter='none'; }
+      const wc=$('kgen-12345-warp-core-layer'); if(wc){ wc.style.boxShadow='none'; wc.style.filter='none'; }
+    },220);
+  })();
 
   window.KGEN_12345_MOTION_CONTROL = {
     version: VERSION,

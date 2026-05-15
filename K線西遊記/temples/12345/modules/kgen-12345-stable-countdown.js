@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.21 stable countdown
+// KGEN 12345 V10.22 stable countdown
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-stable-countdown.js
 // 原則：保留倒數槽，不刪 DOM；只用 textContent 更新，不顯示秒數，降低手機閃爍。
 (function(){
@@ -22,4 +22,15 @@
     document.querySelectorAll('[data-kgen-countdown],.kh-ny-countdown').forEach(el=>{if(el.textContent!==t) el.textContent=t;});
   }
   document.addEventListener('DOMContentLoaded',apply); if(document.readyState!=='loading') apply(); setTimeout(apply,500); setTimeout(apply,1800); setInterval(apply,60000);
+})();
+
+
+/* V10.22 countdown clarity patch */
+(function(){
+  function apply(){
+    var css='[id*="count"],[class*="count"],[id*="ny"],[class*="ny"]{animation:none!important;transition:none!important;opacity:1!important;filter:none!important;text-shadow:none!important;} #kgen-v102-festival-countdown,.kgen-v1011-cup-status{white-space:normal!important;overflow:visible!important;color:#ffe39a!important;background:rgba(0,0,0,.34)!important;}';
+    if(!document.getElementById('kgen-12345-v1022-countdown-style')){var st=document.createElement('style');st.id='kgen-12345-v1022-countdown-style';st.textContent=css;document.head.appendChild(st);}  
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
+  window.addEventListener('load',apply); setInterval(apply,2000);
 })();
