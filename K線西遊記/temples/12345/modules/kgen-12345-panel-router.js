@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.11 panel router
+// KGEN 12345 V10.20 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
@@ -10,6 +10,22 @@
   function rightPanel(){return $('coord-panel')||document.querySelector('.coord-panel');}
   function heartPanel(){return $('kgen-heart-live-panel')||$('web3-panel');}
   function isVisible(el){if(!el)return false; const cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&el.offsetParent!==null;}
+  function matchRightSizeToHeart(){
+    const rp=rightPanel(), hp=heartPanel();
+    if(!rp || !hp) return;
+    try{
+      const cs=getComputedStyle(hp);
+      // Match the right-side rule panel to the Wukong Heart panel size, but keep right-side placement.
+      rp.style.width = cs.width || 'min(390px, calc(100vw - 28px))';
+      rp.style.maxHeight = cs.maxHeight && cs.maxHeight !== 'none' ? cs.maxHeight : '62vh';
+      rp.style.overflow = 'auto';
+      rp.style.boxSizing = 'border-box';
+    }catch(_){
+      rp.style.width = 'min(390px, calc(100vw - 28px))';
+      rp.style.maxHeight = '62vh';
+      rp.style.overflow = 'auto';
+    }
+  }
   function ensureRightClose(){
     const p=rightPanel(); if(!p)return;
     let title=p.querySelector('.cp-title')||p.firstElementChild||p;
@@ -22,6 +38,7 @@
   function setRight(open){
     const p=rightPanel(); if(!p){log('找不到右側神規區塊 #coord-panel'); return;}
     ensureRightClose();
+    if(open) matchRightSizeToHeart();
     p.style.display=open?'block':'none'; p.style.visibility=open?'visible':'hidden'; p.style.pointerEvents=open?'auto':'none';
     p.setAttribute('data-kgen-v1011-open', open?'1':'0');
     document.body.classList.toggle('kgen-v1011-right-open',!!open);

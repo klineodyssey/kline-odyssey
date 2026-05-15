@@ -1,9 +1,9 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.19.0
+ * VERSION: V10.20.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
- * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy
+ * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.20 activity/warp elevator fix
  *
  * Purpose:
  * 1) Left MOVE joystick keeps original behavior: X moves central core left/right, Y moves central core up/down.
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.19.0';
+  const VERSION = 'V10.20.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -33,8 +33,8 @@
     coreMultiplier: 1.8,
     warpEngineMultiplier: 0.75,
     warpCoreMultiplier: 1.15,
-    warpUpMax: 220,
-    warpDownMax: 85,
+    warpUpMax: 260,
+    warpDownMax: 120,
     warpCenterX: 20,
     isMoveActive: false,
     isWarpActive: false,
@@ -88,27 +88,32 @@
         ) !important;
       }
       .warp-engine{
-        transform: translateY(var(--kgen-warp-engine-y, 0px)) !important;
         transition: transform .06s linear;
         will-change: transform;
       }
       #fairy-img.kgen-motion-side{
-        /* V10.18: image src switches; do not transform this layer. Rotation remains on original core/window layer. */
+        /* V10.20: image src switches only; do not transform this layer. Rotation remains on original core/window layer. */
         transform-origin:center center;
       }
-
+      #warp-rail-body{
+        position:relative !important;
+      }
       #kgen-12345-warp-core-layer{
         display:block;
-        width:68px;
-        height:68px;
+        position:absolute;
+        left:50%;
+        bottom:var(--kgen-warp-core-bottom, 6.67%);
+        width:58px;
+        height:58px;
         object-fit:cover;
         border-radius:50%;
-        margin:10px auto 0 auto;
-        border:2px solid rgba(255,215,120,.65);
-        box-shadow:0 0 18px rgba(255,215,120,.28), 0 0 28px rgba(0,242,255,.14);
-        transform: translateY(var(--kgen-warp-y, 0px));
-        transition: transform .06s linear;
+        border:2px solid rgba(255,215,120,.75);
+        background:rgba(0,0,0,.50);
+        box-shadow:0 0 18px rgba(255,215,120,.32), 0 0 28px rgba(0,242,255,.18);
+        transform:translate(-50%, 50%);
+        transition: bottom .06s linear;
         pointer-events:none;
+        z-index:34;
       }
       #mini-thumb.kgen-motion-badge::after,
       #core-window.kgen-motion-badge::after{
@@ -145,6 +150,59 @@
     return state.side === 'long' ? ASSETS.bull : ASSETS.bear;
   }
 
+
+  function markActivity(kind){
+    if(kind === 'move') state.isMoveActive = true;
+    if(kind === 'warp') state.isWarpActive = true;
+    if(kind === 'steer') state.isSteerActive = true;
+    updateTextureLayer();
+  }
+
+  function clearActivity(kind){
+    if(kind === 'move') state.isMoveActive = false;
+    if(kind === 'warp') state.isWarpActive = false;
+    if(kind === 'steer') state.isSteerActive = false;
+    updateTextureLayer();
+  }
+
+  function warpXToY(warpX){
+    // 0x = lower floor, 20x = neutral beauty floor, 300x = ceiling.
+    const x = clamp(Number(warpX)||0, 0, 300);
+    if(x <= state.warpCenterX){
+      return Math.round(((state.warpCenterX - x) / state.warpCenterX) * state.warpDownMax);
+    }
+    return Math.round(-((x - state.warpCenterX) / (300 - state.warpCenterX)) * state.warpUpMax);
+  }
+
+  function warpXToPercent(warpX){
+    const x = clamp(Number(warpX)||0, 0, 300);
+    return (x / 300) * 100;
+  }
+
+  function setWarpVisualByX(warpX, opts){
+    opts = opts || {};
+    const x = clamp(Number(warpX)||0, 0, 300);
+    const raw = x / 3; // page range 0..100; label shows raw*3 = 0..300x
+    const input = $('warp-input-val');
+    if(input && opts.updateInput !== false){
+      input.value = String(raw);
+    }
+    const fill = $('energy-fill');
+    if(fill) fill.style.height = raw + '%';
+    const thumb = $('warp-thumb');
+    if(thumb) thumb.style.bottom = 'calc(' + raw + '% - 17px)';
+    const txt = $('warp-txt');
+    if(txt) txt.textContent = 'WARP ' + Math.round(x) + 'x';
+    document.documentElement.style.setProperty('--kgen-warp-core-bottom', warpXToPercent(x) + '%');
+  }
+
+  function moveDyToWarpX(dy, max){
+    const n = clamp((Number(dy)||0) / (Number(max)||1), -1, 1);
+    // Up/forward (negative dy) climbs toward 300x. Down/backward descends toward 0x.
+    if(n < 0) return state.warpCenterX + (-n) * (300 - state.warpCenterX);
+    return state.warpCenterX * (1 - n);
+  }
+
   function updateTextureLayer(){
     // V10.18 TRUE LINK MODE:
     // Do NOT touch rotation/transform math here.
@@ -157,7 +215,7 @@
   }
 
   function ensureWarpCoreLayer(){
-    const host = qs('.warp-engine');
+    const host = $('warp-rail-body') || qs('.warp-engine');
     if(!host || $('kgen-12345-warp-core-layer')) return;
     const img = document.createElement('img');
     img.id = 'kgen-12345-warp-core-layer';
@@ -177,7 +235,7 @@
     root.style.setProperty('--kgen-motion-x', state.moveX + 'px');
     root.style.setProperty('--kgen-motion-y', state.moveY + 'px');
     root.style.setProperty('--kgen-warp-y', state.warpY + 'px');
-    root.style.setProperty('--kgen-warp-engine-y', (state.moveY * state.warpEngineMultiplier) + 'px');
+    root.style.setProperty('--kgen-warp-engine-y', '0px');
     root.style.setProperty('--kgen-side-scale', state.side === 'long' ? '1' : '-1');
 
     if(core) core.classList.add('kgen-motion-ready');
@@ -208,8 +266,7 @@
     if(steer){
       // 多空方向與中間方向橫桿一致：多用正角度，空用負角度。
       steer.value = state.side === 'long' ? '76' : '-76';
-      try{ steer.dispatchEvent(new Event('input', { bubbles:true })); }catch(_e){}
-      try{ steer.dispatchEvent(new Event('change', { bubbles:true })); }catch(_e){}
+      // Do not dispatch steer events here; mirror buttons change side but should not trigger activity-heart mode.
     }
     if(ang) ang.textContent = state.side === 'long' ? '76°' : '-76°';
 
@@ -245,8 +302,11 @@
       }
       state.moveX = Math.round(dx * state.coreMultiplier);
       state.moveY = Math.round(dy * state.coreMultiplier);
-      // Y = universe elevator. Forward/backward MOVE also drives the right WARP rail and the WARP core layer.
-      state.warpY = state.moveY;
+      // Y = universe elevator. Forward/backward MOVE also drives the right WARP rail display.
+      // Keep V10.12 image movement: MOVE controls X/Y. Do not double-add warpY here.
+      state.warpY = 0;
+      setWarpVisualByX(moveDyToWarpX(dy, max), { updateInput:true });
+      markActivity('move');
       applyMotion();
     }
 
@@ -257,6 +317,7 @@
       state.moveX = 0;
       state.moveY = 0;
       state.warpY = 0;
+      setWarpVisualByX(state.warpCenterX, { updateInput:true });
       applyMotion();
     }
 
@@ -288,30 +349,21 @@
       return clamp(Number(raw)||0, 0, 100) * 3;
     }
 
-    function warpXToY(warpX){
-      // V10.19 official rule:
-      // WARP 20x = center / neutral universe floor.
-      // WARP 0x  = lower floor, but never hits the middle direction bar.
-      // WARP 300x = ceiling / upper parallel universe.
-      const x = clamp(Number(warpX)||0, 0, 300);
-      if(x <= state.warpCenterX){
-        return Math.round(((state.warpCenterX - x) / state.warpCenterX) * state.warpDownMax);
-      }
-      return Math.round(-((x - state.warpCenterX) / (300 - state.warpCenterX)) * state.warpUpMax);
-    }
-
-    function applyWarp(){
+    function applyWarp(active){
       const raw = parseFloat(input.value || '0');
       const warpX = warpInputToX(raw);
       state.warpY = warpXToY(warpX);
-      state.isWarpActive = true;
-      if(state.warpTimer) clearTimeout(state.warpTimer);
-      state.warpTimer = setTimeout(function(){ state.isWarpActive = false; applyMotion(); }, 520);
+      setWarpVisualByX(warpX, { updateInput:false });
+      if(active){
+        markActivity('warp');
+        if(state.warpTimer) clearTimeout(state.warpTimer);
+        state.warpTimer = setTimeout(function(){ clearActivity('warp'); applyMotion(); }, 520);
+      }
       applyMotion();
     }
-    input.addEventListener('input', applyWarp, { passive:true });
-    input.addEventListener('change', applyWarp, { passive:true });
-    applyWarp();
+    input.addEventListener('input', function(){ applyWarp(true); }, { passive:true });
+    input.addEventListener('change', function(){ applyWarp(true); }, { passive:true });
+    applyWarp(false);
     return true;
   }
 
@@ -353,19 +405,21 @@
     const steer = $('steer-input-val');
     const ang = $('ang-val');
     if(!steer) return;
-    function syncFromSteer(){
+    function syncFromSteer(active){
       const v = parseFloat(steer.value || '0');
       state.side = (v >= -90 && v <= 90) ? 'long' : 'short';
       if(ang) ang.textContent = Math.round(v) + '°';
-      // V10.19: any direction rotation shows heart while rotating; after stop returns to bull/bear.
-      state.isSteerActive = true;
-      if(state.steerTimer) clearTimeout(state.steerTimer);
-      state.steerTimer = setTimeout(function(){ state.isSteerActive = false; applyMotion(); }, 520);
+      // V10.20: only user rotation activity shows heart; page initialization must remain bull/bear.
+      if(active){
+        markActivity('steer');
+        if(state.steerTimer) clearTimeout(state.steerTimer);
+        state.steerTimer = setTimeout(function(){ clearActivity('steer'); applyMotion(); }, 520);
+      }
       applyMotion();
     }
-    steer.addEventListener('input', syncFromSteer, { passive:true });
-    steer.addEventListener('change', syncFromSteer, { passive:true });
-    syncFromSteer();
+    steer.addEventListener('input', function(){ syncFromSteer(true); }, { passive:true });
+    steer.addEventListener('change', function(){ syncFromSteer(true); }, { passive:true });
+    syncFromSteer(false);
   }
 
   function init(){
