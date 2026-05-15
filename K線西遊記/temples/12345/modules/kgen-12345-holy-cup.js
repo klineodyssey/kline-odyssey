@@ -1,10 +1,10 @@
-// KGEN 12345 V10.23 holy cup final sync
+// KGEN 12345 V10.24 holy cup amount sync
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js
 // BASE_FROM: V10.22 + V10.12 rotation master
 // 規則：所有聖盃區塊同步；任意按滿三次即通過；跨年資訊不隱藏、不閃爍。
 (function(){
   'use strict';
-  const KEY='kgen12345.holyCup.v1023';
+  const KEY='kgen12345.holyCup.v1024';
   const $=id=>document.getElementById(id);
   const qsa=s=>Array.prototype.slice.call(document.querySelectorAll(s));
   function get(){
@@ -55,8 +55,8 @@
   function markup(){
     const s=get(); const count=Math.max(0,Math.min(3,Number(s.count)||0)); const done=!!s.done||count>=3; const need=Math.max(0,3-count);
     const status=done
-      ? '聖盃狀態：三次已完成。現在可以按 fortuneClaim／領發財金；真正是否成功仍依 Heart 合約冷卻、名額、血庫與錢包交易結果。'
-      : '聖盃狀態：已完成 '+count+' 次，還差 '+need+' 次。任意按聖盃按鈕累積到三次即可通過，不再卡 0/3。';
+      ? '聖盃狀態：三次已完成。可按「領發財金 fortuneClaim」，將使用下方共用 KGEN 數量；鏈上仍會檢查冷卻、名額與 Heart 血庫。'
+      : '聖盃狀態：已完成 '+count+' 次，還差 '+need+' 次。請按滿三次，完成後才能啟動領發財金按鈕。';
     return `<div class="kgen-cup-final">
       <div class="kgen-cup-final-title"><span>三次聖盃驗證</span><span class="${done?'ok':''}">${done?'已通過，可領發財金':'還差 '+need+' 次'}</span></div>
       <div class="kgen-cup-final-row">
@@ -66,6 +66,11 @@
         <button type="button" data-cup="reset">重置</button>
       </div>
       <div class="kgen-cup-final-status">${status}</div>
+      <div class="kgen-v1024-amount-box">
+        <label for="kgen-12345-amount-input">輸入 KGEN 數量</label>
+        <input id="kgen-12345-amount-input" class="kgen-amount-input" type="number" min="1" max="888" step="1" value="8" inputmode="decimal" placeholder="例如 8、88、888">
+        <div class="hint">這是全神殿共用金額：Approve 授權、fortuneClaim 發財金、vowTo 還願、lightLamp 點燈都讀這一格。發財金建議 1～888。</div>
+      </div>
       <div class="kgen-cup-final-ny" data-kgen-countdown>${nextNYText()}</div>
     </div>`;
   }
@@ -81,4 +86,23 @@
   window.KGEN12345_HOLY_CUP={version:'V10.23',render,get,set,tap,reset};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
   window.addEventListener('load',boot); setTimeout(boot,300); setTimeout(boot,1000); setInterval(render,1500); setInterval(updateNY,60000);
+})();
+
+
+/* V10.24 amount input sync: keep legacy amount fields synchronized with the shared amount box. */
+(function(){
+  function $(id){return document.getElementById(id)}
+  function fields(){return Array.prototype.slice.call(document.querySelectorAll('#kgen-12345-amount-input,#amt-in,#fortune-amount,#kh-amount,input[data-kgen-amount]'));}
+  function syncFrom(el){
+    const v=el&&el.value?String(el.value):'8';
+    fields().forEach(f=>{if(f!==el) f.value=v;});
+    try{localStorage.setItem('kgen12345.sharedAmount',v)}catch(_){}
+  }
+  function boot(){
+    const saved=(function(){try{return localStorage.getItem('kgen12345.sharedAmount')||'8'}catch(_){return '8'}})();
+    fields().forEach(f=>{if(!f.value)f.value=saved; f.removeEventListener('input',f.__kgenSync||function(){}); f.__kgenSync=function(){syncFrom(f)}; f.addEventListener('input',f.__kgenSync,{passive:true});});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
+  setInterval(boot,2000);
+  window.KGEN12345_AMOUNT={get:function(){const f=$('kgen-12345-amount-input')||$('amt-in'); return f&&f.value?f.value:'8';},sync:boot};
 })();

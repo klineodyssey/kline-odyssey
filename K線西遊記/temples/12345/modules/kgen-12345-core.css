@@ -85,3 +85,70 @@ body.kgen-v1011-festival-open #kgen-v102-festival-panel{display:block!important;
   #coord-panel{right:10px!important;left:auto!important;width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
   #kgen-heart-live-panel{width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
 }
+
+
+/* =========================================================
+   KGEN 12345 V10.24 UI STRUCTURE SYNC
+   BASE_FROM: V10.12_MOTION_CONTROL_PATCH
+   NOTE: positioning/texture only; rotation math remains in original master.
+========================================================= */
+:root{
+  --kgen-sync-x:0px;
+  --kgen-sync-y:0px;
+  --kgen-warp-core-bottom:12%;
+}
+#core-anchor{
+  transform: translate(calc(-50% + var(--kgen-sync-x)), calc(-50% + var(--kgen-sync-y))) !important;
+  will-change: transform;
+}
+#coord-panel.kgen-v1024-right-drawer{
+  width: var(--kgen-heart-panel-width, min(390px, calc(100vw - 28px))) !important;
+  max-width: var(--kgen-heart-panel-width, min(390px, calc(100vw - 28px))) !important;
+  height: var(--kgen-heart-panel-height, min(520px, calc(100vh - 190px))) !important;
+  max-height: var(--kgen-heart-panel-height, min(520px, calc(100vh - 190px))) !important;
+  min-height: 260px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-top: 42px !important;
+}
+#coord-panel.kgen-v1024-right-drawer .kgen-v1011-panel-close,
+#coord-panel.kgen-v1024-right-drawer #kgen-v1011-right-close{
+  position:absolute !important;
+  top:10px !important;
+  right:10px !important;
+  z-index:50 !important;
+  margin:0 !important;
+  padding:6px 10px !important;
+  border-radius:10px !important;
+  border:1px solid rgba(255,215,120,.55) !important;
+  background:rgba(0,0,0,.78) !important;
+  color:#ffe39a !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+}
+#coord-panel.kgen-v1024-right-drawer .cp-grid,
+#coord-panel.kgen-v1024-right-drawer .cp-body,
+#coord-panel.kgen-v1024-right-drawer .content,
+#coord-panel.kgen-v1024-right-drawer > div:not(.cp-title):not(.kgen-v1011-panel-close):not(#kgen-v1011-right-close){
+  overflow:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+.kgen-v1024-amount-box{
+  margin:10px 0 !important;
+  padding:12px !important;
+  border:1px solid rgba(255,215,120,.42) !important;
+  border-radius:14px !important;
+  background:rgba(0,0,0,.36) !important;
+  color:#fff !important;
+}
+.kgen-v1024-amount-box label{display:block;color:#ffe39a;font-weight:900;margin-bottom:6px;}
+.kgen-v1024-amount-box input{
+  width:100%;box-sizing:border-box;border-radius:12px;padding:11px 12px;
+  border:1px solid rgba(255,215,120,.48);background:rgba(0,0,0,.60);color:#fff;font-weight:900;outline:none;
+}
+.kgen-v1024-amount-box .hint{margin-top:6px;font-size:12px;line-height:1.45;color:#9ff;}
+#kgen-12345-warp-scale{right:auto!important;}
+#kgen-12345-warp-core-layer{box-shadow:none!important;filter:none!important;background:transparent!important;}
+#warp-thumb{box-shadow:none!important;filter:none!important;background:transparent!important;border-color:transparent!important;}

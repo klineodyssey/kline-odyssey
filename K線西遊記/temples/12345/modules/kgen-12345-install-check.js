@@ -99,3 +99,19 @@
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })();
+
+
+/* V10.24 manifest note: required asset names are fixed. Missing files display a warning and voice guidance. */
+window.KGEN12345_REQUIRED_FILES_V1024 = [
+  './assets/bull-front.png',
+  './assets/bear-rear.png',
+  './assets/heart.png',
+  './assets/warp-core.png',
+  './modules/kgen-12345-core.css',
+  './modules/kgen-12345-version.js',
+  './modules/kgen-12345-panel-router.js',
+  './modules/kgen-12345-holy-cup.js',
+  './modules/kgen-12345-stable-countdown.js',
+  './modules/kgen-12345-motion-control.js',
+  './modules/kgen-12345-install-check.js'
+];

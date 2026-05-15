@@ -1,7 +1,7 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.23.0
+ * VERSION: V10.24.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
  * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.21 0-300 warp scale + idle texture fix
  *
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.23.0';
+  const VERSION = 'V10.24.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -639,4 +639,127 @@
   }
   function boot(){ setWarpX(20,true); bindMoveY(); bindActivity(); monitorRotation(); setTimeout(()=>{ready=true; texture(false);},1000); }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+
+
+/* =========================================================
+   KGEN 12345 V10.24 TRUE SYNC STRUCTURE FINAL OVERRIDE
+   BASE_FROM: V10.12_MOTION_CONTROL_PATCH
+   DO NOT MODIFY: original rotation math / wheel sync / core-window rotate.
+
+   Single sync source:
+   MOVE Y = WARP X(0~300) = main image Y = warp-core Y.
+   Any MOVE / WARP / DRIVE / CORE operation shows heart.png.
+   Idle shows bull-front.png or bear-rear.png by current steering angle.
+========================================================= */
+(function(){
+  'use strict';
+  const ASSETS={
+    bull:'./assets/bull-front.png',
+    bear:'./assets/bear-rear.png',
+    heart:'./assets/heart.png',
+    warp:'./assets/warp-core.png'
+  };
+  const $=id=>document.getElementById(id);
+  const qs=s=>document.querySelector(s);
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
+  const root=document.documentElement;
+  let sync={x:0,y:0,warp:20,activeUntil:0,lastDeg:null,lastCore:'',lastWheel:''};
+
+  function now(){return Date.now();}
+  function deg(){const el=$('steer-input-val'); const v=el?parseFloat(el.value||'0'):0; return Number.isFinite(v)?v:0;}
+  function side(){const v=deg(); return (v>=-90 && v<=90)?'bull':'bear';}
+  function warpToPercent(w){w=clamp(w,0,300); return 4+(w/300)*92;}
+  function warpToY(w){
+    w=clamp(w,0,300);
+    // 0 = bottom floor, 20 = visual neutral floor, 300 = ceiling.
+    if(w<=20) return Math.round(((20-w)/20)*115);
+    return Math.round(-((w-20)/(300-20))*265);
+  }
+  function yToWarp(dy,max){
+    const n=Math.max(-1,Math.min(1,(Number(dy)||0)/(Number(max)||1)));
+    // joystick up/forward => higher universe elevator; down/back => floor.
+    return n<0 ? 20+(-n)*(300-20) : 20*(1-n);
+  }
+  function setTexture(active){
+    const img=$('fairy-img'); if(!img) return;
+    const src=active?ASSETS.heart:(side()==='bull'?ASSETS.bull:ASSETS.bear);
+    if(img.getAttribute('src')!==src) img.setAttribute('src',src);
+  }
+  function setWarpVisual(w, updateInput){
+    w=clamp(w,0,300); sync.warp=w; sync.y=warpToY(w);
+    const raw=w/3;
+    const input=$('warp-input-val'); if(input && updateInput!==false) input.value=String(raw);
+    const fill=$('energy-fill'); if(fill) fill.style.height=raw+'%';
+    const thumb=$('warp-thumb'); if(thumb){thumb.style.bottom='calc('+raw+'% - 17px)';thumb.style.boxShadow='none';thumb.style.filter='none';}
+    const txt=$('warp-txt'); if(txt) txt.textContent='WARP '+Math.round(w)+'x';
+    const p=warpToPercent(w);
+    root.style.setProperty('--kgen-warp-core-bottom',p+'%');
+    const wc=$('kgen-12345-warp-core-layer'); if(wc){wc.style.bottom=p+'%';wc.style.boxShadow='none';wc.style.filter='none';}
+  }
+  function applySync(){
+    root.style.setProperty('--kgen-sync-x',Math.round(sync.x)+'px');
+    root.style.setProperty('--kgen-sync-y',Math.round(sync.y)+'px');
+    root.style.setProperty('--kgen-motion-x','0px');
+    root.style.setProperty('--kgen-motion-y','0px');
+    root.style.setProperty('--kgen-warp-y','0px');
+    setTexture(now()<sync.activeUntil);
+  }
+  function mark(ms){sync.activeUntil=now()+(ms||760); setTexture(true); setTimeout(applySync,0);}
+
+  function ensureWarpCore(){
+    const host=$('warp-rail-body')||qs('.warp-engine'); if(!host) return;
+    let img=$('kgen-12345-warp-core-layer');
+    if(!img){img=document.createElement('img');img.id='kgen-12345-warp-core-layer';img.src=ASSETS.warp;img.alt='KGEN Warp Core';host.appendChild(img);}
+    let scale=$('kgen-12345-warp-scale');
+    if(!scale){
+      scale=document.createElement('div'); scale.id='kgen-12345-warp-scale';
+      [0,20,50,100,150,200,250,300].forEach(v=>{
+        const d=document.createElement('div'); d.className='warp-tick '+((v===0||v===20||v===300)?'major':''); d.style.bottom=warpToPercent(v)+'%'; d.textContent=v+'x'; scale.appendChild(d);
+      });
+      host.appendChild(scale);
+    }
+  }
+  function bindMove(){
+    const wrap=$('move-joystick-wrap'); if(!wrap) return;
+    let active=false,pid=null;
+    function setFrom(x,y){
+      const r=wrap.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      let dx=x-cx, dy=y-cy; const max=Math.max(40,Math.min(r.width,r.height)*0.42); const len=Math.hypot(dx,dy)||1;
+      if(len>max){dx=dx/len*max;dy=dy/len*max;}
+      sync.x=Math.round(dx*1.75);
+      const w=yToWarp(dy,max); setWarpVisual(w,true);
+      // One source only: main image Y follows same warp/elevator value, not an independent second Y.
+      mark(980); applySync();
+    }
+    function stop(){active=false;pid=null;sync.x=0;setWarpVisual(20,true);sync.y=0;mark(260);setTimeout(()=>{sync.activeUntil=0;applySync();},280);}
+    wrap.addEventListener('pointerdown',e=>{active=true;pid=e.pointerId;try{wrap.setPointerCapture(pid)}catch(_){} setFrom(e.clientX,e.clientY);},{passive:false,capture:true});
+    wrap.addEventListener('pointermove',e=>{if(!active||(pid!==null&&e.pointerId!==pid))return; setFrom(e.clientX,e.clientY);},{passive:false,capture:true});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wrap.addEventListener(ev,stop,{passive:true,capture:true}));
+  }
+  function bindWarp(){
+    const input=$('warp-input-val'); if(!input) return;
+    function apply(active){const w=clamp((parseFloat(input.value||'0')||0)*3,0,300); setWarpVisual(w,false); if(active)mark(820); applySync();}
+    input.addEventListener('input',()=>apply(true),{passive:true,capture:true});
+    input.addEventListener('change',()=>apply(true),{passive:true,capture:true});
+  }
+  function bindActivity(){
+    ['pointerdown','mousedown','touchstart','input','change','pointermove','touchmove'].forEach(ev=>document.addEventListener(ev,e=>{
+      const t=e.target; if(!t) return;
+      const hit=(t.closest&&(t.closest('#wheel-wrap')||t.closest('#wheel')||t.closest('.wheel-wrap')||t.closest('.steer-zone')||t.closest('#core-window')||t.closest('#move-joystick-wrap')||t.closest('#warp-rail-body')||t.closest('.warp-engine'))) || t.id==='steer-input-val'||t.id==='warp-input-val';
+      if(hit) mark((ev==='pointermove'||ev==='touchmove')?430:880);
+    },true));
+  }
+  function monitor(){
+    setInterval(()=>{
+      const d=String(deg()); const cw=$('core-window'), wh=$('wheel'); const cws=cw?(cw.style.transform||''):''; const whs=wh?(wh.style.transform||''):'';
+      if(sync.lastDeg!==null && (d!==sync.lastDeg||cws!==sync.lastCore||whs!==sync.lastWheel)) mark(680);
+      sync.lastDeg=d; sync.lastCore=cws; sync.lastWheel=whs;
+      if(now()>sync.activeUntil) sync.activeUntil=0;
+      applySync();
+    },140);
+  }
+  function boot(){ensureWarpCore(); setWarpVisual(20,true); bindMove(); bindWarp(); bindActivity(); monitor(); setTimeout(()=>{sync.activeUntil=0;applySync();},900);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.KGEN12345_V1024_SYNC={version:'V10.24',setWarpVisual,applySync,get:()=>Object.assign({},sync)};
 })();

@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.23 panel router
+// KGEN 12345 V10.24 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
@@ -167,4 +167,36 @@
   function init(){ensureRightClose();ensureFestivalClose();bindFooter();bindGuideButtons(); setFestival(false);}
   window.KGEN12345_V1011_PANELS={setRight,toggleRight,setHeart,toggleHeart,setFestival,toggleFestival};
   document.addEventListener('DOMContentLoaded',init); if(document.readyState!=='loading') init(); setTimeout(init,500); setTimeout(init,1800); setInterval(bindFooter,2500);
+})();
+
+
+/* =========================================================
+   KGEN 12345 V10.24 RIGHT DRAWER STRUCTURE
+   - Right 神規 panel close button fixed at header top-right.
+   - Size follows Wukong Heart panel; content scrolls internally.
+========================================================= */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  function right(){return $('coord-panel')||document.querySelector('.coord-panel');}
+  function heart(){return $('kgen-heart-live-panel')||$('web3-panel');}
+  function syncSize(){
+    const r=right(), h=heart(); if(!r) return;
+    r.classList.add('kgen-v1024-right-drawer');
+    if(h){
+      const rect=h.getBoundingClientRect();
+      if(rect.width>180) document.documentElement.style.setProperty('--kgen-heart-panel-width',Math.round(rect.width)+'px');
+      if(rect.height>220) document.documentElement.style.setProperty('--kgen-heart-panel-height',Math.round(Math.min(rect.height, window.innerHeight-190))+'px');
+    }
+    r.style.overflow='hidden';
+  }
+  function ensureClose(){
+    const r=right(); if(!r) return;
+    let b=$('kgen-v1011-right-close')||r.querySelector('.kgen-v1011-panel-close');
+    if(!b){b=document.createElement('button'); b.id='kgen-v1011-right-close'; b.className='kgen-v1011-panel-close'; b.type='button'; b.textContent='收合'; r.appendChild(b);}
+    b.onclick=function(e){e.preventDefault(); e.stopPropagation(); r.style.display='none'; r.style.visibility='hidden'; r.setAttribute('data-kgen-v1011-open','0');};
+  }
+  function boot(){syncSize(); ensureClose();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.addEventListener('resize',boot,{passive:true}); setInterval(boot,1600);
 })();
