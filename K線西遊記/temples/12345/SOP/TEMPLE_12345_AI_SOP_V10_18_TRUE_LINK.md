@@ -1,4 +1,4 @@
-# 五指山・悟空財神殿 12345（Temple UI V10.20 TRUE LINK MODE）
+# 五指山・悟空財神殿 12345（Temple UI V10.21 TRUE LINK MODE）
 
 本頁是《K線西遊記》GitHub Pages 的「五指山 12345」神殿入口。  
 定位：悟空財神殿（Heart 發財金 / 呼吸 / 心跳 / 還願 / XYZ 宇宙控制台）
@@ -7,7 +7,7 @@
 
 # 本版身份
 
-VERSION：V10.20 TRUE LINK MODE  
+VERSION：V10.21 TRUE LINK MODE  
 BASE_FROM：KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle  
 PATCH_TYPE：只新增圖片連動，不改原本旋轉邏輯
 
@@ -170,7 +170,7 @@ final.png
 
 ---
 
-# V10.20 控制邏輯
+# V10.21 控制邏輯
 
 ## 原旋轉邏輯保留
 
@@ -276,7 +276,7 @@ DO_NOT_MODIFY
 目前主版本：
 
 ```text
-V10.20 TRUE LINK MODE
+V10.21 TRUE LINK MODE
 ```
 
 旋轉母版：
@@ -286,14 +286,14 @@ V10.12 MOTION CONTROL PATCH
 ```
 
 
-# V10.20 Install Check
+# V10.21 Install Check
 
 新增：`modules/kgen-12345-install-check.js`。開頁會檢查必要 modules 與 assets，缺檔時顯示 INSTALL CHECK FAILED 並語音提醒。
 
 
 ---
 
-# V10.20 FIX NOTES
+# V10.21 FIX NOTES
 
 - BASE_FROM remains V10.12_MOTION_CONTROL_PATCH.
 - Do not rewrite rotation math.
