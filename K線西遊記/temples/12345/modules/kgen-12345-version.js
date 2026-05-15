@@ -1,15 +1,17 @@
-
-// KGEN 12345 V10.24.0 version sync
+// KGEN 12345 V10.25.0 version sync
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.24.0-ORIGINAL-TEMPLE-MODULE-PATCH';
-  const BUILD='20260515-V10.24.0-ORIGINAL-TEMPLE-MODULE-PATCH';
-  window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET:'V10.24.0 original temple module patch'});
+  const VERSION='12345-TEMPLE-V10.25.0-UNIVERSE-ELEVATOR-SYNC';
+  const BUILD='20260516-V10.25.0-UNIVERSE-ELEVATOR-SYNC';
+  window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET:'V10.25 Universe Elevator Sync / KLINE OS first city'});
   function sync(){
     const v=document.getElementById('ver-st');
     if(v) v.textContent='VERSION '+VERSION;
     const title=document.querySelector('title');
-    if(title && !/V10\.11/.test(title.textContent||'')) title.textContent='KGEN 12345 五指山悟空財神殿 V10.24.0';
+    if(title) title.textContent='KGEN 12345 五指山悟空財神殿 V10.25 宇宙電梯同步版';
+    document.documentElement.setAttribute('data-kgen12345-version', VERSION);
   }
-  document.addEventListener('DOMContentLoaded',sync); if(document.readyState!=='loading') sync(); setTimeout(sync,800); setTimeout(sync,2200);
+  document.addEventListener('DOMContentLoaded',sync);
+  if(document.readyState!=='loading') sync();
+  setTimeout(sync,800); setTimeout(sync,2200); setInterval(sync,5000);
 })();

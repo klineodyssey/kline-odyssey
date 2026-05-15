@@ -1,13 +1,13 @@
 /*
  * KGEN 12345 Install Check
  * MODULE: kgen-12345-install-check.js
- * VERSION: V10.19.0
+ * VERSION: V10.25.0
  * BASE_FROM: V10.18 TRUE LINK + V10.12 ROTATION MASTER
  * PURPOSE: Check required modules/assets at runtime. Missing files must be visible and spoken by voice support.
  */
 (function(){
   'use strict';
-  const VERSION = 'V10.19.0';
+  const VERSION = 'V10.25.0';
   const REQUIRED_FILES = [
     './assets/bull-front.png',
     './assets/bear-rear.png',
@@ -19,7 +19,8 @@
     './modules/kgen-12345-holy-cup.js',
     './modules/kgen-12345-stable-countdown.js',
     './modules/kgen-12345-motion-control.js',
-    './modules/kgen-12345-install-check.js'
+    './modules/kgen-12345-install-check.js',
+    './modules/kgen-12345-universe-elevator.js'
   ];
 
   function speak(msg){
@@ -113,5 +114,6 @@ window.KGEN12345_REQUIRED_FILES_V1024 = [
   './modules/kgen-12345-holy-cup.js',
   './modules/kgen-12345-stable-countdown.js',
   './modules/kgen-12345-motion-control.js',
-  './modules/kgen-12345-install-check.js'
+  './modules/kgen-12345-install-check.js',
+    './modules/kgen-12345-universe-elevator.js'
 ];
