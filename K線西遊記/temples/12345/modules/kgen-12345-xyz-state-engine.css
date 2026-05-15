@@ -1,0 +1,30 @@
+/* KGEN 12345 XYZ State Engine CSS | VERSION V10.14.0 */
+#core-anchor[data-kgen-side="bull"] #core-window{
+  box-shadow:0 0 44px rgba(255,201,78,.65), inset 0 0 28px rgba(255,201,78,.2)!important;
+}
+#core-anchor[data-kgen-side="bear"] #core-window{
+  box-shadow:0 0 44px rgba(142,104,255,.52), inset 0 0 28px rgba(142,104,255,.18)!important;
+}
+#core-anchor[data-kgen-order="on"] #core-window{
+  outline:2px solid rgba(255,215,120,.55)!important;
+}
+#fairy-img[data-kgen-asset="bull-front.png"],
+#fairy-img[data-kgen-asset="bear-rear.png"]{
+  object-fit:cover!important;
+  object-position:center!important;
+  transition:opacity .22s ease, filter .22s ease!important;
+}
+#mini-thumb{
+  background-size:cover!important;
+  background-position:center!important;
+  color:#ffe08a!important;
+  font-weight:900!important;
+  text-shadow:0 0 8px #000,0 0 12px rgba(255,215,120,.9)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+html[data-kgen-xyz-side="bull"] #wish-label{color:#ffe08a!important;}
+html[data-kgen-xyz-side="bear"] #wish-label{color:#c7b6ff!important;}
+#kgen-warp-universe-preview{animation:kgenWarpPulse 2.4s ease-in-out infinite;}
+@keyframes kgenWarpPulse{0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(.92)}50%{opacity:.78;transform:translate(-50%,-50%) scale(1.08)}}
