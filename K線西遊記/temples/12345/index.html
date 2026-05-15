@@ -4,7 +4,9 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK
+VERSION: 12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12
+BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
 BASE_FROM: index_12345_Heart_UI_V7_21_3_human_countdown_qa.html
 CHANGELOG:
@@ -1442,7 +1444,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1691,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK";
+const APP_VERSION = "12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -24581,7 +24583,9 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <!-- ============================================================
 KGEN 12345｜V10.0 HUD LAYER SYSTEM
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK
+VERSION: 12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12
+BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
 BASE_FROM: KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip
 BASE_SHA256: e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39
@@ -24919,7 +24923,9 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 </script>
 
 
-<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK | BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
+<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12
+BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+PATCH: texture linkage only; V10.12 rotation/motion math preserved | BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
 <style id="kgen-v101-hud-runtime-voice-fix-style">
 :root{--kgen-v101-modal-z:2147483600;}
 .warp-engine{bottom:calc(var(--kgen-v10-dock-h,98px) + 242px)!important;z-index:var(--kgen-v10-hud-z,2147482200)!important;}
@@ -24958,7 +24964,9 @@ window.kgenV101HudRuntimeVoiceFix={version:VERSION,build:BUILD,speakCupStatus:fu
 <!-- ============================================================
 KGEN 12345｜V10.2 Festival Runtime Lock
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK
+VERSION: 12345-TEMPLE-V10.18-TRUE-LINK-FROM-V10.12
+BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
 BASE_FROM: KGEN_12345_V10_1_HUD_RUNTIME_VOICE_FIX_FULL_bundle.zip
 BASE_SHA256: 29a8e07fa014eb4b0e896d869bc8d9e4b93bd187c3cea3d608dc1680782306a3
@@ -25316,5 +25324,18 @@ CHANGESET:
 })();
 </script>
 
+
+
+<!-- ============================================================
+KGEN 12345 V10.12｜Original Temple Module Patch
+路徑：/K線西遊記/temples/12345/modules/
+目的：不重蓋原神殿，只用外掛模組修右側神規、節日活動、三聖盃、倒數與面板高度。
+============================================================ -->
+<link rel="stylesheet" href="./modules/kgen-12345-core.css">
+<script src="./modules/kgen-12345-version.js"></script>
+<script src="./modules/kgen-12345-panel-router.js"></script>
+<script src="./modules/kgen-12345-holy-cup.js"></script>
+<script src="./modules/kgen-12345-stable-countdown.js"></script>
+<script src="./modules/kgen-12345-motion-control.js"></script>
 </body>
 </html>
