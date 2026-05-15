@@ -1,12 +1,12 @@
 
-// KGEN 12345 V10.11 panel router
+// KGEN 12345 V10.15 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
   const norm=s=>String(s||'').replace(/\s+/g,'').trim();
-  function log(msg){try{const l=$('kh-log'); if(l) l.textContent=String(msg||'');}catch(_){}; try{console.log('[KGEN V10.11]',msg);}catch(_){} }
+  function log(msg){try{const l=$('kh-log'); if(l) l.textContent=String(msg||'');}catch(_){}; try{console.log('[KGEN V10.15]',msg);}catch(_){} }
   function rightPanel(){return $('coord-panel')||document.querySelector('.coord-panel');}
   function heartPanel(){return $('kgen-heart-live-panel')||$('web3-panel');}
   function isVisible(el){if(!el)return false; const cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&el.offsetParent!==null;}

@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.11 holy cup simple
+// KGEN 12345 V10.15 holy cup simple
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-holy-cup-simple.js
 // 規則：取消 0/3 視覺干擾；按三次聖盃即前端通過，可領發財金。這不改合約，只是前端儀式 gate。
 (function(){
