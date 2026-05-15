@@ -1,18 +1,14 @@
-# KGEN 12345 ASSET MANIFEST
-# VERSION: V10.25
+# KGEN 12345 ASSET MANIFEST｜V10.27.1
 
-## Required active assets
-- /K線西遊記/temples/12345/assets/bull-front.png — 靜止多方主圖。
-- /K線西遊記/temples/12345/assets/bear-rear.png — 靜止空方主圖。
-- /K線西遊記/temples/12345/assets/heart.png — MOVE / WARP / DRIVE / CORE 操作中顯示的悟空心臟圖。
-- /K線西遊記/temples/12345/assets/warp-core.png — 右下曲速引擎室小圖，隨 0～300 宇宙電梯同步移動。
+正式資產固定檔名：
 
-## Deprecated names
-- heart-drive.png — 廢止，改用既有 heart.png。
-- warp-universe.png — 廢止，改用 warp-core.png。
+- `/K線西遊記/temples/12345/assets/bull-front.png`：多方主圖
+- `/K線西遊記/temples/12345/assets/bear-rear.png`：空方主圖
+- `/K線西遊記/temples/12345/assets/heart.png`：操作觸發心臟圖
+- `/K線西遊記/temples/12345/assets/warp-core.png`：宇宙電梯 / WARP 核心圖
 
-## Rule
-Program code must not invent new asset names unless this manifest is updated first.
+規則：
 
-## V10.25 Universe Elevator
-- warp-core.png is the official Universe Elevator moving core image. No extra glow object should replace it.
+- 不新增 `heart-drive.png`、`warp-universe.png` 等漂移命名。
+- 若未來要換圖，只替換同名檔案，不改 JS 路徑。
+- assets 目錄如果已在 GitHub 既有專案中，覆蓋本包時不要刪除。

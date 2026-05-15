@@ -1,22 +1,40 @@
-# KGEN 12345 FILE MANIFEST
-# VERSION: V10.25
-# BASE_FROM: V10.12_MOTION_CONTROL_PATCH
+# KGEN 12345 FILE MANIFEST｜V10.27.1 STABLE STANDARD MODULES
 
-## Active HTML
-- /12345.html — 根目錄橋接入口，導向神殿主頁。
-- /K線西遊記/temples/12345/index.html — 悟空財神殿主頁。
-- /wallet-12345.html — 錢包橋接入口。
+BASE_FROM: V10.27_STABLE_ORGAN_CHECK_FULL
+VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
+BUILD: 20260516-V10.27.1-STANDARD-MODULES
 
-## Active modules
-- /K線西遊記/temples/12345/modules/kgen-12345-core.css — UI 樣式、drawer、amount box、warp scale。
-- /K線西遊記/temples/12345/modules/kgen-12345-version.js — 版本顯示。
-- /K線西遊記/temples/12345/modules/kgen-12345-panel-router.js — 左右視窗展開收合、客服導覽、右側神規 drawer。
-- /K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js — 三聖盃、共用 amount-input、跨年倒數資訊。
-- /K線西遊記/temples/12345/modules/kgen-12345-stable-countdown.js — 跨年倒數防閃爍。
-- /K線西遊記/temples/12345/modules/kgen-12345-motion-control.js — V10.12 旋轉 DNA + V10.24 TRUE SYNC。
-- /K線西遊記/temples/12345/modules/kgen-12345-install-check.js — 缺檔檢查與語音提示。
+## GitHub Pages 主路徑
 
-## Rule
-Do not add versioned module filenames to /modules/. Old files go to /modules/archive/.
+- `/12345.html`：根目錄快捷入口
+- `/wallet-12345.html`：錢包橋接入口
+- `/K線西遊記/temples/12345/index.html`：12345 悟空財神殿主頁
 
-- /K線西遊記/temples/12345/modules/kgen-12345-universe-elevator.js — V10.25 宇宙電梯同步層；MOVE Y = WARP = 主圖 Y = warp-core Y；總收合與 panel hierarchy。
+## 正式 modules 根目錄檔案
+
+以下檔名為永久標準名。改版只改檔案內 VERSION / BUILD / CHANGELOG，不在檔名加版本號。
+
+- `/K線西遊記/temples/12345/modules/kgen-12345-core.css`
+- `/K線西遊記/temples/12345/modules/kgen-12345-version.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-panel-router.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-stable-countdown.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-motion-control.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-install-check.js`
+- `/K線西遊記/temples/12345/modules/kgen-12345-universe-elevator.js`
+
+## 禁止事項
+
+- 禁止在 `modules/` 根目錄放正式載入的 `kgen-12345-v10.xx-*.js`。
+- 舊版保存一律放 `modules/archive/`。
+- `index.html` 不可引用 archive 內檔案。
+- 若要新增檔案，必須先更新本 MANIFEST 與 install-check。
+
+## 已封存
+
+- `modules/archive/kgen-12345-v10.26-autopilot-fix.js`
+- `modules/archive/kgen-12345-v10.27-stable-organ-check.js`
+
+功能已合併到：
+
+- `modules/kgen-12345-universe-elevator.js`

@@ -1,7 +1,3 @@
-KGEN 12345 Temple UI
-VERSION: V10.24
-BASE_FROM: V10.12_MOTION_CONTROL_PATCH
-PATCH_FROM: V10.23_FINAL_PANEL_CUP_WARP_FIX
-STATUS: TRUE SYNC STRUCTURE. Right rule drawer scroll/header close fixed, shared amount input, MOVE-Y = WARP-Y = main image Y = warp-core Y, activity heart texture, idle bull/bear texture, install-check retained.
-
-V10.24: UI structure sync / amount source / drawer scroll / universe elevator linkage.
+12345-TEMPLE-V10.27-STABLE-ORGAN-CHECK-FROM-V10.26
+BASE_FROM: V10.26_UNIVERSE_ELEVATOR_CONTROL_PANEL_FIX
+ROTATION_DNA: V10.12_TRUE_ROTATION_MASTER

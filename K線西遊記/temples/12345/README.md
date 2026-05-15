@@ -327,7 +327,7 @@ BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 
 ---
 
-# V10.25_UNIVERSE_ELEVATOR_SYNC
+# V10.27_UNIVERSE_ELEVATOR_CONTROL_PANEL_FIX
 
 BASE_FROM: V10.24_UI_STRUCTURE_SYNC + V10.12_TRUE_ROTATION_DNA
 
@@ -351,3 +351,53 @@ MOVE Y = Universe Elevator = WARP 0~300 = 主圖 Y = warp-core Y
 - 不得改 rotation math
 - 不得改 V10.12 方向盤 1:1 DNA
 - 不得新增未登記資產名
+
+
+# V10.27 Universe Elevator Control Panel Fix
+
+- 宇宙電梯正式控制主圖上下位移。
+- 左下 MOVE Y 與右側宇宙電梯同步。
+- 右側神規按鈕穩定開合，視窗 header 縮小並可內部捲動。
+- 宇宙地圖提升到最上層，不被 panel 壓住。
+- 悟空心臟控制台右上新增收合 X。
+- 底部八個主按鈕不被面板蓋住。
+- 重複跨年倒數改為宇宙節點冷卻訊息。
+
+BASE_FROM: V10.25_UNIVERSE_ELEVATOR_SYNC + V10.12_TRUE_ROTATION_DNA
+
+- `modules/kgen-12345-v10.27-stable-organ-check.js`：V10.27 穩定器官自檢；修正金額輸入、宇宙電梯同步、Panel 層級與底部按鈕保護。
+
+
+---
+
+# V10.27.1 標準模組命名修正版
+
+本版修正：正式載入模組不得使用版本號檔名。
+
+正式規則：
+
+```text
+modules/ 根目錄只放標準名
+版本號只寫在檔案內部 VERSION / BUILD / CHANGELOG
+舊版檔案放 modules/archive/
+index.html 不引用 archive
+```
+
+V10.26 與 V10.27 的功能已合併到：
+
+```text
+/K線西遊記/temples/12345/modules/kgen-12345-universe-elevator.js
+```
+
+目前 index.html 正式引用：
+
+```html
+<link rel="stylesheet" href="./modules/kgen-12345-core.css">
+<script src="./modules/kgen-12345-version.js"></script>
+<script src="./modules/kgen-12345-panel-router.js"></script>
+<script src="./modules/kgen-12345-holy-cup.js"></script>
+<script src="./modules/kgen-12345-stable-countdown.js"></script>
+<script src="./modules/kgen-12345-motion-control.js"></script>
+<script src="./modules/kgen-12345-install-check.js"></script>
+<script src="./modules/kgen-12345-universe-elevator.js"></script>
+```
