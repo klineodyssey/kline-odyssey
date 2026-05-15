@@ -1,9 +1,9 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.18.0
+ * VERSION: V10.19.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
- * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage only
+ * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy
  *
  * Purpose:
  * 1) Left MOVE joystick keeps original behavior: X moves central core left/right, Y moves central core up/down.
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.18.0';
+  const VERSION = 'V10.19.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -33,16 +33,21 @@
     coreMultiplier: 1.8,
     warpEngineMultiplier: 0.75,
     warpCoreMultiplier: 1.15,
+    warpUpMax: 220,
+    warpDownMax: 85,
+    warpCenterX: 20,
     isMoveActive: false,
     isWarpActive: false,
+    isSteerActive: false,
     warpTimer: null,
+    steerTimer: null,
     lastTexture: ''
   };
 
   const ASSETS = {
     bull: './assets/bull-front.png',
     bear: './assets/bear-rear.png',
-    heart: './assets/heart-drive.png',
+    heart: './assets/heart.png',
     warp: './assets/warp-core.png'
   };
 
@@ -144,7 +149,7 @@
     // V10.18 TRUE LINK MODE:
     // Do NOT touch rotation/transform math here.
     // Only switch the image src on the existing image layer.
-    if(state.isMoveActive || state.isWarpActive){
+    if(state.isMoveActive || state.isWarpActive || state.isSteerActive){
       setMainTexture(ASSETS.heart);
     }else{
       setMainTexture(getDirectionTexture());
@@ -240,6 +245,8 @@
       }
       state.moveX = Math.round(dx * state.coreMultiplier);
       state.moveY = Math.round(dy * state.coreMultiplier);
+      // Y = universe elevator. Forward/backward MOVE also drives the right WARP rail and the WARP core layer.
+      state.warpY = state.moveY;
       applyMotion();
     }
 
@@ -249,6 +256,7 @@
       pointerId = null;
       state.moveX = 0;
       state.moveY = 0;
+      state.warpY = 0;
       applyMotion();
     }
 
@@ -275,11 +283,27 @@
     const input = $('warp-input-val');
     if(!input) return false;
 
+    function warpInputToX(raw){
+      // Existing UI range is 0..100 and label is WARP raw*3 = 0..300x.
+      return clamp(Number(raw)||0, 0, 100) * 3;
+    }
+
+    function warpXToY(warpX){
+      // V10.19 official rule:
+      // WARP 20x = center / neutral universe floor.
+      // WARP 0x  = lower floor, but never hits the middle direction bar.
+      // WARP 300x = ceiling / upper parallel universe.
+      const x = clamp(Number(warpX)||0, 0, 300);
+      if(x <= state.warpCenterX){
+        return Math.round(((state.warpCenterX - x) / state.warpCenterX) * state.warpDownMax);
+      }
+      return Math.round(-((x - state.warpCenterX) / (300 - state.warpCenterX)) * state.warpUpMax);
+    }
+
     function applyWarp(){
-      const raw = parseFloat(input.value || '50');
-      const centered = clamp(raw, 0, 100) - 50;
-      // range value high means energy upward; visual movement should be up = negative Y.
-      state.warpY = Math.round(-centered * state.warpCoreMultiplier);
+      const raw = parseFloat(input.value || '0');
+      const warpX = warpInputToX(raw);
+      state.warpY = warpXToY(warpX);
       state.isWarpActive = true;
       if(state.warpTimer) clearTimeout(state.warpTimer);
       state.warpTimer = setTimeout(function(){ state.isWarpActive = false; applyMotion(); }, 520);
@@ -333,6 +357,10 @@
       const v = parseFloat(steer.value || '0');
       state.side = (v >= -90 && v <= 90) ? 'long' : 'short';
       if(ang) ang.textContent = Math.round(v) + '°';
+      // V10.19: any direction rotation shows heart while rotating; after stop returns to bull/bear.
+      state.isSteerActive = true;
+      if(state.steerTimer) clearTimeout(state.steerTimer);
+      state.steerTimer = setTimeout(function(){ state.isSteerActive = false; applyMotion(); }, 520);
       applyMotion();
     }
     steer.addEventListener('input', syncFromSteer, { passive:true });
@@ -355,6 +383,7 @@
 
   window.KGEN_12345_MOTION_CONTROL = {
     version: VERSION,
+    assets: Object.assign({}, ASSETS),
     getState: function(){ return Object.assign({}, state); },
     setSide: setSide,
     applyMotion: applyMotion
