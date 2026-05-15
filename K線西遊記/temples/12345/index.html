@@ -4,7 +4,7 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
+VERSION: 12345-TEMPLE-V10.27.2-STABLE-STANDARD-MODULES
 BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
@@ -8579,7 +8579,7 @@ KGEN 12345 Heart Live Patch V7.3.0
   </div>
   <div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 目前金額＝只授權輸入數量；無限授權＝授權官方 Heart 合約長期使用 allowance，所有鏈上交易都會先跳錢包確認視窗。</div>
   <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
-    <input id="kh-amount" placeholder="金額 / 天數，例如 8 或 88" value="8">
+    <input id="kh-amount" placeholder="輸入 KGEN 數量：Approve / 發財金 / 還願 / 點燈共用" value="">
     <select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
   </div>
   <input id="kh-wish" style="margin-top:8px;" placeholder="許願文字或 0x bytes32 hash">
@@ -9950,7 +9950,7 @@ KGEN 12345 UI Patch V7.6.0
     }catch(e){ console.error(e); log('刷新餘額失敗：'+(e.message||e)); speak('刷新餘額失敗。'); }
   }
   async function heartContract(){ if(!wstate.signer) await connectWallet(); return new ethers.Contract(HEART, HEART_ABI, wstate.signer); }
-  function amountWhole(){ const v=($('kh-amount')?.value||'8').trim(); if(!/^\d+(\.\d+)?$/.test(v)) throw new Error('金額格式錯誤'); return v; }
+  function amountWhole(){ const v=($('kh-amount')?.value||'').trim(); if(!/^\d+(\.\d+)?$/.test(v)) throw new Error('請先輸入 KGEN 數量'); return v; }
   function wishHash(){
     const raw=($('kh-wish')?.value||'').trim();
     if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
@@ -24583,7 +24583,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <!-- ============================================================
 KGEN 12345｜V10.0 HUD LAYER SYSTEM
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
+VERSION: 12345-TEMPLE-V10.27.2-STABLE-STANDARD-MODULES
 BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
@@ -24923,7 +24923,7 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 </script>
 
 
-<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
+<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.27.2-STABLE-STANDARD-MODULES
 BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 PATCH: texture linkage only; V10.12 rotation/motion math preserved | BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
 <style id="kgen-v101-hud-runtime-voice-fix-style">
@@ -24964,7 +24964,7 @@ window.kgenV101HudRuntimeVoiceFix={version:VERSION,build:BUILD,speakCupStatus:fu
 <!-- ============================================================
 KGEN 12345｜V10.2 Festival Runtime Lock
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
+VERSION: 12345-TEMPLE-V10.27.2-STABLE-STANDARD-MODULES
 BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 PATCH: texture linkage only; V10.12 rotation/motion math preserved
 BUILD: 20260514-V10.2-FESTIVAL-RUNTIME-LOCK
