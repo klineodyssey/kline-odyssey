@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.15 stable countdown
+// KGEN 12345 V10.11 stable countdown
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-stable-countdown.js
 // 原則：保留倒數槽，不刪 DOM；只用 textContent 更新，不顯示秒數，降低手機閃爍。
 (function(){

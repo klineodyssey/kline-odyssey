@@ -1,8 +1,9 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.12.0
- * BASE: V10.2 original temple + V10.11 module line
+ * VERSION: V10.18.0
+ * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
+ * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage only
  *
  * Purpose:
  * 1) Left MOVE joystick keeps original behavior: X moves central core left/right, Y moves central core up/down.
@@ -22,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.12.0';
+  const VERSION = 'V10.18.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -31,7 +32,18 @@
     maxMove: 70,
     coreMultiplier: 1.8,
     warpEngineMultiplier: 0.75,
-    warpCoreMultiplier: 1.15
+    warpCoreMultiplier: 1.15,
+    isMoveActive: false,
+    isWarpActive: false,
+    warpTimer: null,
+    lastTexture: ''
+  };
+
+  const ASSETS = {
+    bull: './assets/bull-front.png',
+    bear: './assets/bear-rear.png',
+    heart: './assets/heart-drive.png',
+    warp: './assets/warp-core.png'
   };
 
   function $(id){ return document.getElementById(id); }
@@ -76,8 +88,22 @@
         will-change: transform;
       }
       #fairy-img.kgen-motion-side{
-        transform: scaleX(var(--kgen-side-scale, 1));
+        /* V10.18: image src switches; do not transform this layer. Rotation remains on original core/window layer. */
         transform-origin:center center;
+      }
+
+      #kgen-12345-warp-core-layer{
+        display:block;
+        width:68px;
+        height:68px;
+        object-fit:cover;
+        border-radius:50%;
+        margin:10px auto 0 auto;
+        border:2px solid rgba(255,215,120,.65);
+        box-shadow:0 0 18px rgba(255,215,120,.28), 0 0 28px rgba(0,242,255,.14);
+        transform: translateY(var(--kgen-warp-y, 0px));
+        transition: transform .06s linear;
+        pointer-events:none;
       }
       #mini-thumb.kgen-motion-badge::after,
       #core-window.kgen-motion-badge::after{
@@ -101,6 +127,41 @@
     document.head.appendChild(style);
   }
 
+
+  function setMainTexture(src){
+    const img = $('fairy-img');
+    if(!img || !src) return;
+    if(state.lastTexture === src) return;
+    img.setAttribute('src', src);
+    state.lastTexture = src;
+  }
+
+  function getDirectionTexture(){
+    return state.side === 'long' ? ASSETS.bull : ASSETS.bear;
+  }
+
+  function updateTextureLayer(){
+    // V10.18 TRUE LINK MODE:
+    // Do NOT touch rotation/transform math here.
+    // Only switch the image src on the existing image layer.
+    if(state.isMoveActive || state.isWarpActive){
+      setMainTexture(ASSETS.heart);
+    }else{
+      setMainTexture(getDirectionTexture());
+    }
+  }
+
+  function ensureWarpCoreLayer(){
+    const host = qs('.warp-engine');
+    if(!host || $('kgen-12345-warp-core-layer')) return;
+    const img = document.createElement('img');
+    img.id = 'kgen-12345-warp-core-layer';
+    img.src = ASSETS.warp;
+    img.alt = 'KGEN Warp Core';
+    img.setAttribute('aria-hidden','true');
+    host.appendChild(img);
+  }
+
   function applyMotion(){
     const root = document.documentElement;
     const core = $('core-anchor');
@@ -116,6 +177,8 @@
 
     if(core) core.classList.add('kgen-motion-ready');
     if(fairy) fairy.classList.add('kgen-motion-side');
+    ensureWarpCoreLayer();
+    updateTextureLayer();
 
     const label = state.side === 'long' ? '多' : '空';
     if(coreWindow){
@@ -182,6 +245,7 @@
 
     function reset(){
       active = false;
+      state.isMoveActive = false;
       pointerId = null;
       state.moveX = 0;
       state.moveY = 0;
@@ -190,6 +254,7 @@
 
     wrap.addEventListener('pointerdown', function(e){
       active = true;
+      state.isMoveActive = true;
       pointerId = e.pointerId;
       try{ wrap.setPointerCapture(pointerId); }catch(_e){}
       setFromClient(e.clientX, e.clientY);
@@ -215,6 +280,9 @@
       const centered = clamp(raw, 0, 100) - 50;
       // range value high means energy upward; visual movement should be up = negative Y.
       state.warpY = Math.round(-centered * state.warpCoreMultiplier);
+      state.isWarpActive = true;
+      if(state.warpTimer) clearTimeout(state.warpTimer);
+      state.warpTimer = setTimeout(function(){ state.isWarpActive = false; applyMotion(); }, 520);
       applyMotion();
     }
     input.addEventListener('input', applyWarp, { passive:true });
