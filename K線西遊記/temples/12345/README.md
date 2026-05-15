@@ -323,3 +323,31 @@ BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 - 操作中顯示 heart.png；停止後依角度回 bull-front.png 或 bear-rear.png。
 - warp-core.png 僅為右下曲速小圖，不額外發光，不取代主圖。
 - install-check 檢查固定資產與 modules，缺檔要顯示警告與語音提示。
+
+
+---
+
+# V10.25_UNIVERSE_ELEVATOR_SYNC
+
+BASE_FROM: V10.24_UI_STRUCTURE_SYNC + V10.12_TRUE_ROTATION_DNA
+
+核心規則：
+
+```text
+MOVE Y = Universe Elevator = WARP 0~300 = 主圖 Y = warp-core Y
+```
+
+右側曲速縱桿正式命名為「宇宙電梯 / UNIVERSE ELEVATOR」。
+0 = 地表宇宙；20 = 正常市場層；100 = 高槓桿層；300 = 神級宇宙層。
+
+新增：
+- `modules/kgen-12345-universe-elevator.js`
+- 右上「總收合」按鈕
+- 右側神規 drawer scroll + 右上收合按鈕
+- 左上悟空控制台右上收合按鈕
+- 共用 KGEN 金額輸入說明
+
+禁止：
+- 不得改 rotation math
+- 不得改 V10.12 方向盤 1:1 DNA
+- 不得新增未登記資產名

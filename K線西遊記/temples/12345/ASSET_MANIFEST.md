@@ -1,5 +1,5 @@
 # KGEN 12345 ASSET MANIFEST
-# VERSION: V10.24
+# VERSION: V10.25
 
 ## Required active assets
 - /K線西遊記/temples/12345/assets/bull-front.png — 靜止多方主圖。
@@ -13,3 +13,6 @@
 
 ## Rule
 Program code must not invent new asset names unless this manifest is updated first.
+
+## V10.25 Universe Elevator
+- warp-core.png is the official Universe Elevator moving core image. No extra glow object should replace it.

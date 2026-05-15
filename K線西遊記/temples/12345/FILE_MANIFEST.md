@@ -1,5 +1,5 @@
 # KGEN 12345 FILE MANIFEST
-# VERSION: V10.24
+# VERSION: V10.25
 # BASE_FROM: V10.12_MOTION_CONTROL_PATCH
 
 ## Active HTML
@@ -18,3 +18,5 @@
 
 ## Rule
 Do not add versioned module filenames to /modules/. Old files go to /modules/archive/.
+
+- /K線西遊記/temples/12345/modules/kgen-12345-universe-elevator.js — V10.25 宇宙電梯同步層；MOVE Y = WARP = 主圖 Y = warp-core Y；總收合與 panel hierarchy。
