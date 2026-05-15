@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.22 panel router
+// KGEN 12345 V10.23 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
@@ -17,12 +17,14 @@
       const cs=getComputedStyle(hp);
       // Match the right-side rule panel to the Wukong Heart panel size, but keep right-side placement.
       rp.style.width = cs.width || 'min(390px, calc(100vw - 28px))';
-      rp.style.maxHeight = cs.maxHeight && cs.maxHeight !== 'none' ? cs.maxHeight : '62vh';
+      rp.style.maxHeight = cs.maxHeight && cs.maxHeight !== 'none' ? cs.maxHeight : 'calc(100vh - 180px)';
+      rp.style.minHeight = '220px';
       rp.style.overflow = 'auto';
       rp.style.boxSizing = 'border-box';
     }catch(_){
       rp.style.width = 'min(390px, calc(100vw - 28px))';
-      rp.style.maxHeight = '62vh';
+      rp.style.maxHeight = 'calc(100vh - 180px)';
+      rp.style.minHeight = '220px';
       rp.style.overflow = 'auto';
     }
   }
@@ -111,7 +113,7 @@
   }
 
 
-  /* V10.22 客服導覽修復：按鈕必須有答案與語音，不再只打開空面板 */
+  /* V10.23 客服導覽修復：按鈕必須有答案與語音，不再只打開空面板 */
   function speakGuide(msg){
     try{
       if(window.app && typeof window.app.speak==='function') return window.app.speak(msg);

@@ -1,7 +1,7 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.22.0
+ * VERSION: V10.23.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
  * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.21 0-300 warp scale + idle texture fix
  *
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.22.0';
+  const VERSION = 'V10.23.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -514,7 +514,7 @@
 
 
   /* =========================================================
-     V10.22 FINAL STABILIZER
+     V10.23 FINAL STABILIZER
      - Static state must show bull/bear, never heart.
      - Any MOVE / WARP / STEER operation temporarily shows heart.
      - MOVE Y drives WARP 0~300 elevator and visual rail.
@@ -569,4 +569,74 @@
     setSide: setSide,
     applyMotion: applyMotion
   };
+})();
+
+
+/* =========================================================
+   V10.23 FINAL ACTIVITY / WARP ELEVATOR GUARD
+   - 不改 V10.12 rotation math
+   - 只補：操作中顯示 heart.png、靜止顯示多空圖、MOVE Y 連動 WARP 0~300
+========================================================= */
+(function(){
+  'use strict';
+  const ASSETS={bull:'./assets/bull-front.png',bear:'./assets/bear-rear.png',heart:'./assets/heart.png',warp:'./assets/warp-core.png'};
+  const $=id=>document.getElementById(id);
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
+  let activeUntil=0, ready=false, lastSteer=null, lastWheel='', lastCore='';
+  function now(){return Date.now();}
+  function deg(){const el=$('steer-input-val'); const v=el?parseFloat(el.value||'0'):0; return Number.isFinite(v)?v:0;}
+  function side(){const v=deg(); return (v>=-90&&v<=90)?'bull':'bear';}
+  function texture(active){const img=$('fairy-img'); if(!img)return; const src=active?ASSETS.heart:(side()==='bull'?ASSETS.bull:ASSETS.bear); if(img.getAttribute('src')!==src) img.setAttribute('src',src);}
+  function mark(ms){ if(!ready)return; activeUntil=now()+(ms||850); texture(true); }
+  function pctFromWarp(x){ x=clamp(x,0,300); return 4+(x/300)*92; }
+  function warpFromDy(dy,max){ const n=Math.max(-1,Math.min(1,(Number(dy)||0)/(Number(max)||1))); return n<0 ? 20+(-n)*(300-20) : 20*(1-n); }
+  function setWarpX(x, updateInput){
+    x=clamp(x,0,300); const raw=x/3;
+    const input=$('warp-input-val'); if(input&&updateInput!==false) input.value=String(raw);
+    const fill=$('energy-fill'); if(fill) fill.style.height=raw+'%';
+    const th=$('warp-thumb'); if(th){ th.style.bottom='calc('+raw+'% - 17px)'; th.style.boxShadow='none'; th.style.filter='none'; }
+    const txt=$('warp-txt'); if(txt) txt.textContent='WARP '+Math.round(x)+'x';
+    document.documentElement.style.setProperty('--kgen-warp-core-bottom',pctFromWarp(x)+'%');
+    const wc=$('kgen-12345-warp-core-layer'); if(wc){ wc.style.bottom=pctFromWarp(x)+'%'; wc.style.boxShadow='none'; wc.style.filter='none'; }
+  }
+  function bindMoveY(){
+    const wrap=$('move-joystick-wrap');
+    if(wrap){
+      let active=false,pid=null;
+      function apply(e){ const r=wrap.getBoundingClientRect(); const cy=r.top+r.height/2; let dy=e.clientY-cy; const max=Math.max(30,Math.min(r.width,r.height)*0.5); if(dy>max)dy=max; if(dy<-max)dy=-max; setWarpX(warpFromDy(dy,max),true); mark(950); }
+      wrap.addEventListener('pointerdown',e=>{active=true;pid=e.pointerId;try{wrap.setPointerCapture(pid)}catch(_){} apply(e);},{passive:true,capture:true});
+      wrap.addEventListener('pointermove',e=>{if(active&&(pid===null||e.pointerId===pid))apply(e);},{passive:true,capture:true});
+      ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wrap.addEventListener(ev,()=>{active=false;pid=null;setTimeout(()=>setWarpX(20,true),120);},{passive:true,capture:true}));
+    }
+    document.querySelectorAll('#k12345-move-pad [data-kmove]').forEach(btn=>{
+      const raw=btn.getAttribute('data-kmove')||'0,0'; const parts=raw.split(',').map(Number); const dy=parts[1]||0;
+      btn.addEventListener('pointerdown',()=>{setWarpX(warpFromDy(dy,24),true); mark(900);},{passive:true,capture:true});
+      btn.addEventListener('click',()=>{setWarpX(warpFromDy(dy,24),true); mark(900);},{passive:true,capture:true});
+    });
+    const home=$('k12345-move-home'); if(home) home.addEventListener('click',()=>setWarpX(20,true),true);
+  }
+  function bindActivity(){
+    ['pointerdown','mousedown','touchstart','input','change','pointermove','touchmove'].forEach(ev=>{
+      document.addEventListener(ev,e=>{
+        const t=e.target; if(!t)return;
+        const hit=(t.closest&&(
+          t.closest('#wheel-wrap')||t.closest('#wheel')||t.closest('.wheel-wrap')||t.closest('.steer-zone')||t.closest('#move-joystick-wrap')||t.closest('#warp-rail-body')||t.closest('.warp-engine')
+        )) || t.id==='steer-input-val' || t.id==='warp-input-val';
+        if(hit) mark(ev==='pointermove'||ev==='touchmove'?360:900);
+      },true);
+    });
+    ['pointerup','mouseup','touchend','pointercancel','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>{activeUntil=now()+220;},true));
+  }
+  function monitorRotation(){
+    setInterval(()=>{
+      const st=$('steer-input-val'); const wh=$('wheel'); const cw=$('core-window');
+      const sv=st?String(st.value):''; const wv=wh?(wh.style.transform||''):''; const cv=cw?(cw.style.transform||''):'';
+      if(ready && ((lastSteer!==null&&sv!==lastSteer)||(lastWheel&&wv!==lastWheel)||(lastCore&&cv!==lastCore))) mark(680);
+      lastSteer=sv; lastWheel=wv; lastCore=cv;
+      texture(now()<activeUntil);
+      const input=$('warp-input-val'); if(input){ const x=clamp(parseFloat(input.value||'0')*3,0,300); setWarpX(x,false); }
+    },160);
+  }
+  function boot(){ setWarpX(20,true); bindMoveY(); bindActivity(); monitorRotation(); setTimeout(()=>{ready=true; texture(false);},1000); }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

@@ -62,3 +62,26 @@ body.kgen-v1011-festival-open #kgen-v102-festival-panel{display:block!important;
   #kgen-v102-festival-panel{right:8px!important;top:300px!important;width:min(315px,48vw)!important;}
   #kgen-heart-live-panel{max-height:calc(100vh - 180px)!important;}
 }
+
+
+/* =========================
+   V10.23 final panel / countdown / cup layout patch
+   BASE_FROM: V10.12 rotation master; does not touch rotation math.
+========================= */
+#coord-panel{
+  width:min(360px,92vw)!important;
+  max-height:calc(100vh - 180px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  box-sizing:border-box!important;
+  padding-bottom:42px!important;
+}
+#coord-panel .cp-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;position:sticky!important;top:0!important;z-index:5!important;background:rgba(0,0,0,.78)!important;}
+#kgen-v1011-right-close{margin-left:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}
+#kgen-heart-live-panel{width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+#kh-ny-slot,.kh-ny-countdown,#kgen-v102-festival-countdown,[data-kgen-countdown],#cd-1231{display:block!important;visibility:visible!important;opacity:1!important;animation:none!important;transition:none!important;filter:none!important;white-space:normal!important;overflow:visible!important;}
+.kgen-cup-final{font-size:13px!important;}
+@media(max-width:760px){
+  #coord-panel{right:10px!important;left:auto!important;width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+  #kgen-heart-live-panel{width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+}

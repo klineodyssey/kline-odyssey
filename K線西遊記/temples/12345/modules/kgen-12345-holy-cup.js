@@ -1,84 +1,84 @@
-// KGEN 12345 V10.22 holy cup humanized / resilient
+// KGEN 12345 V10.23 holy cup final sync
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js
-// 規則：前端聖盃儀式改為「任意聖盃按鈕累積三次即通過」，不再卡 0/3；完成後明確提示可按 fortuneClaim。
+// BASE_FROM: V10.22 + V10.12 rotation master
+// 規則：所有聖盃區塊同步；任意按滿三次即通過；跨年資訊不隱藏、不閃爍。
 (function(){
   'use strict';
-  const KEY='kgen12345.holyCup.v1022';
+  const KEY='kgen12345.holyCup.v1023';
   const $=id=>document.getElementById(id);
-  function panel(){return $('kgen-heart-live-panel')||$('web3-panel');}
-  function box(){const p=panel(); return p ? p.querySelector('.kh-cupbox') : null;}
-  function get(){try{return JSON.parse(localStorage.getItem(KEY)||'{"count":0,"done":false}');}catch(_){return {count:0,done:false};}}
-  function set(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(_){}}
-  function speak(msg){
+  const qsa=s=>Array.prototype.slice.call(document.querySelectorAll(s));
+  function get(){
     try{
-      if(!('speechSynthesis' in window)) return;
-      speechSynthesis.cancel();
-      const u=new SpeechSynthesisUtterance(String(msg||''));
-      u.lang='zh-TW'; u.rate=1; u.pitch=1;
-      speechSynthesis.speak(u);
+      const a=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(a) return a;
+      const old=JSON.parse(localStorage.getItem('kgen12345.holyCup.v1022')||'null');
+      if(old) return old;
     }catch(_){}
+    return {count:0,done:false};
   }
-  function log(msg){try{const l=$('kh-log')||$('bp-status'); if(l) l.textContent=String(msg||'');}catch(_){} }
+  function set(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(_){} }
+  function speak(msg){
+    try{ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg||'')); u.lang='zh-TW'; u.rate=1; speechSynthesis.speak(u); }catch(_){}
+  }
+  function log(msg){
+    ['kh-log','bp-status','last-event','kgen-log'].forEach(id=>{const el=$(id); if(el) el.textContent=String(msg||'');});
+  }
+  function nextNYText(){
+    const now=new Date(); let y=now.getUTCFullYear(); let t=new Date(Date.UTC(y,11,31,23,50,0)); if(t-now<=0)t=new Date(Date.UTC(y+1,11,31,23,50,0));
+    const diff=Math.max(0,t-now), m=Math.floor(diff/60000), d=Math.floor(m/1440), h=Math.floor((m%1440)/60), mm=m%60;
+    return '12/31 跨年倒數 newYearCountdownClaim：距離活動約 '+d+'天 '+String(h).padStart(2,'0')+'時 '+String(mm).padStart(2,'0')+'分。';
+  }
   function ensureStyle(){
-    if($('kgen-12345-holy-cup-v1022-style')) return;
-    const st=document.createElement('style');
-    st.id='kgen-12345-holy-cup-v1022-style';
+    if($('kgen-12345-holy-cup-v1023-style')) return;
+    const st=document.createElement('style'); st.id='kgen-12345-holy-cup-v1023-style';
     st.textContent=`
-      .kh-cupbox,.kh-cupbox *{animation:none!important;transition:none!important;filter:none!important;text-shadow:none!important;}
-      .kh-cupbox{min-height:118px!important;overflow:visible!important;}
-      .kh-cup-title{display:flex!important;justify-content:space-between!important;gap:8px!important;color:#ffe39a!important;font-weight:900!important;margin-bottom:8px!important;}
-      .kgen-v1011-cup-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;margin-top:8px!important;}
-      .kgen-v1011-cup-row button{min-height:42px!important;padding:8px 6px!important;border-radius:11px!important;border:1px solid rgba(255,215,120,.45)!important;background:rgba(0,0,0,.34)!important;color:#fff!important;font-weight:900!important;white-space:normal!important;}
-      .kgen-v1011-cup-row button.done{background:linear-gradient(135deg,rgba(255,215,120,.72),rgba(0,242,255,.16))!important;color:#111!important;box-shadow:none!important;}
-      .kgen-v1011-cup-status{animation:none!important;transition:none!important;opacity:1!important;filter:none!important;color:#ffe39a!important;line-height:1.55!important;min-height:46px!important;padding:8px 10px!important;border:1px solid rgba(255,215,120,.32)!important;border-radius:10px!important;background:rgba(0,0,0,.32)!important;white-space:normal!important;}
+      .kh-cupbox,#kh-cupbox,#v714-cupbox,#v917-cup-result{display:block!important;visibility:visible!important;opacity:1!important;overflow:visible!important;animation:none!important;transition:none!important;filter:none!important;}
+      .kh-cupbox * ,#kh-cupbox * ,#v714-cupbox *{animation:none!important;transition:none!important;filter:none!important;text-shadow:none!important;}
+      .kgen-cup-final{margin:10px 0!important;padding:12px!important;border:1px solid rgba(255,215,120,.45)!important;border-radius:14px!important;background:rgba(255,215,120,.075)!important;color:#fff!important;}
+      .kgen-cup-final-title{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important;color:#ffe39a!important;font-weight:900!important;margin-bottom:9px!important;}
+      .kgen-cup-final-title .ok{color:#7fffd4!important;}
+      .kgen-cup-final-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin-top:8px!important;}
+      .kgen-cup-final-row button{min-height:44px!important;padding:8px 6px!important;border-radius:12px!important;border:1px solid rgba(255,215,120,.45)!important;background:rgba(0,0,0,.38)!important;color:#fff!important;font-weight:900!important;white-space:normal!important;}
+      .kgen-cup-final-row button.done{background:linear-gradient(135deg,rgba(255,215,120,.78),rgba(0,242,255,.22))!important;color:#111!important;box-shadow:none!important;}
+      .kgen-cup-final-status,.kgen-cup-final-ny{margin-top:8px!important;padding:9px 10px!important;border:1px solid rgba(255,215,120,.30)!important;border-radius:10px!important;background:rgba(0,0,0,.36)!important;color:#ffe39a!important;line-height:1.55!important;min-height:36px!important;white-space:normal!important;overflow:visible!important;opacity:1!important;}
+      .kgen-cup-final-ny{color:#9ff!important;border-color:rgba(0,242,255,.28)!important;}
+      #kh-ny-slot,.kh-ny-countdown,#kgen-v102-festival-countdown,[data-kgen-countdown],#cd-1231{display:block!important;visibility:visible!important;opacity:1!important;animation:none!important;transition:none!important;filter:none!important;white-space:normal!important;overflow:visible!important;color:#9ff!important;}
     `;
     document.head.appendChild(st);
   }
-  function render(){
-    ensureStyle();
-    const b=box(); if(!b) return false;
-    const s=get();
-    const count=Math.max(0,Math.min(3,Number(s.count)||0));
-    const done=!!s.done || count>=3;
-    const need=Math.max(0,3-count);
-    b.innerHTML=`
-      <div class="kh-cup-title"><span>三次聖盃驗證</span><span>${done?'已通過，可領發財金':'還差 '+need+' 次'}</span></div>
-      <div class="kgen-v1011-cup-row">
-        <button type="button" data-cup="tap" class="${count>=1?'done':''}">${count>=1?'第一次完成':'按我請聖盃'}</button>
+  function containers(){
+    const arr=[];
+    ['kh-cupbox','v714-cupbox'].forEach(id=>{const el=$(id); if(el) arr.push(el);});
+    qsa('.kh-cupbox').forEach(el=>{if(arr.indexOf(el)<0)arr.push(el);});
+    return arr;
+  }
+  function markup(){
+    const s=get(); const count=Math.max(0,Math.min(3,Number(s.count)||0)); const done=!!s.done||count>=3; const need=Math.max(0,3-count);
+    const status=done
+      ? '聖盃狀態：三次已完成。現在可以按 fortuneClaim／領發財金；真正是否成功仍依 Heart 合約冷卻、名額、血庫與錢包交易結果。'
+      : '聖盃狀態：已完成 '+count+' 次，還差 '+need+' 次。任意按聖盃按鈕累積到三次即可通過，不再卡 0/3。';
+    return `<div class="kgen-cup-final">
+      <div class="kgen-cup-final-title"><span>三次聖盃驗證</span><span class="${done?'ok':''}">${done?'已通過，可領發財金':'還差 '+need+' 次'}</span></div>
+      <div class="kgen-cup-final-row">
+        <button type="button" data-cup="tap" class="${count>=1?'done':''}">${count>=1?'第一次完成':'按我擲聖盃'}</button>
         <button type="button" data-cup="tap" class="${count>=2?'done':''}">${count>=2?'第二次完成':'再按一次'}</button>
         <button type="button" data-cup="tap" class="${count>=3?'done':''}">${count>=3?'第三次完成':'完成第三次'}</button>
         <button type="button" data-cup="reset">重置</button>
       </div>
-      <div class="kgen-v1011-cup-status">${done?'聖盃狀態：已完成三次。現在可以按 fortuneClaim／領發財金；是否成功仍以 Heart 合約冷卻、名額、血庫與錢包交易為準。':'聖盃狀態：已完成 '+count+' 次，請再按 '+need+' 次。這裡不再判斷陰陽，避免前端卡住。'}</div>`;
-    return true;
+      <div class="kgen-cup-final-status">${status}</div>
+      <div class="kgen-cup-final-ny" data-kgen-countdown>${nextNYText()}</div>
+    </div>`;
   }
-  function tap(){
-    const cur=get();
-    let n=Math.max(0,Math.min(3,Number(cur.count)||0));
-    n=Math.min(3,n+1);
-    const done=n>=3;
-    set({count:n,done,updatedAt:new Date().toISOString()});
-    const msg=done?'三次聖盃已完成，可以按領發財金。':'聖盃已記錄，目前完成 '+n+' 次，請繼續。';
-    log(msg); speak(msg); render();
+  function render(){ ensureStyle(); const html=markup(); containers().forEach(el=>{ if(el.innerHTML!==html) el.innerHTML=html; }); updateNY(); }
+  function updateNY(){
+    const t=nextNYText();
+    qsa('[data-kgen-countdown],.kh-ny-countdown,#kh-ny-slot,#kgen-v102-festival-countdown,#cd-1231').forEach(el=>{ if(el && el.textContent!==t) el.textContent=t; });
   }
-  function reset(){set({count:0,done:false,updatedAt:new Date().toISOString()}); log('三次聖盃已重置。'); speak('三次聖盃已重置，請重新按三次。'); render();}
-
-  document.addEventListener('click',function(e){
-    const btn=e.target&&e.target.closest?e.target.closest('.kh-cupbox button,[data-cup]'):null;
-    if(!btn) return;
-    const v=btn.getAttribute('data-cup')||'';
-    if(v || btn.closest('.kh-cupbox')){
-      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-      if(v==='reset' || /重置/.test(btn.textContent||'')) reset(); else tap();
-      return false;
-    }
-  },true);
-
+  function tap(){ const cur=get(); let n=Math.max(0,Math.min(3,Number(cur.count)||0)); n=Math.min(3,n+1); const done=n>=3; set({count:n,done,updatedAt:new Date().toISOString()}); const msg=done?'三次聖盃完成，可以按 fortuneClaim 領發財金。':'聖盃已記錄，目前完成 '+n+' 次。'; log(msg); speak(msg); render(); }
+  function reset(){ set({count:0,done:false,updatedAt:new Date().toISOString()}); log('三次聖盃已重置。'); speak('三次聖盃已重置，請重新按三次。'); render(); }
+  document.addEventListener('click',function(e){ const btn=e.target&&e.target.closest?e.target.closest('[data-cup],.v714-cup,.kh-cupbox button,#v714-cupbox button'):null; if(!btn) return; if(btn.getAttribute('data-cup')==='reset'||/重置/.test(btn.textContent||'')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); reset(); return false;} if(btn.closest('.kh-cupbox')||btn.closest('#v714-cupbox')||btn.hasAttribute('data-cup')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); tap(); return false;} },true);
   function boot(){render();}
-  window.KGEN12345_HOLY_CUP={version:'V10.22',render,get,set,tap,reset};
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-  window.addEventListener('load',boot);
-  setTimeout(boot,300); setTimeout(boot,1000); setTimeout(boot,2500);
-  // 舊 runtime 會重畫 0/3；這裡固定守住新版聖盃 UI。
-  setInterval(render,1200);
+  window.KGEN12345_HOLY_CUP={version:'V10.23',render,get,set,tap,reset};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  window.addEventListener('load',boot); setTimeout(boot,300); setTimeout(boot,1000); setInterval(render,1500); setInterval(updateNY,60000);
 })();
