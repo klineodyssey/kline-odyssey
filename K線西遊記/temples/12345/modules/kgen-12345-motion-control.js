@@ -1,9 +1,9 @@
 /*
  * KGEN 12345 Motion Control Module
  * MODULE: kgen-12345-motion-control.js
- * VERSION: V10.20.0
+ * VERSION: V10.21.0
  * BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
- * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.20 activity/warp elevator fix
+ * MERGE_POLICY: keep V10.12 rotation/motion math unchanged; add texture linkage + install-safe asset policy + V10.21 0-300 warp scale + idle texture fix
  *
  * Purpose:
  * 1) Left MOVE joystick keeps original behavior: X moves central core left/right, Y moves central core up/down.
@@ -23,7 +23,7 @@
   'use strict';
 
   const MODULE = 'KGEN_12345_MOTION_CONTROL';
-  const VERSION = 'V10.20.0';
+  const VERSION = 'V10.21.0';
   const state = {
     moveX: 0,
     moveY: 0,
@@ -41,7 +41,9 @@
     isSteerActive: false,
     warpTimer: null,
     steerTimer: null,
-    lastTexture: ''
+    lastTexture: '',
+    activityTimer: null,
+    lastActivityAt: 0
   };
 
   const ASSETS = {
@@ -92,17 +94,18 @@
         will-change: transform;
       }
       #fairy-img.kgen-motion-side{
-        /* V10.20: image src switches only; do not transform this layer. Rotation remains on original core/window layer. */
+        /* V10.21: image src switches only; do not transform this layer. Rotation remains on original core/window layer. */
         transform-origin:center center;
       }
       #warp-rail-body{
         position:relative !important;
+        overflow:visible !important;
       }
       #kgen-12345-warp-core-layer{
         display:block;
         position:absolute;
         left:50%;
-        bottom:var(--kgen-warp-core-bottom, 6.67%);
+        bottom:var(--kgen-warp-core-bottom, 6%);
         width:58px;
         height:58px;
         object-fit:cover;
@@ -114,6 +117,44 @@
         transition: bottom .06s linear;
         pointer-events:none;
         z-index:34;
+      }
+      #kgen-12345-warp-scale{
+        position:absolute;
+        left:calc(100% + 10px);
+        top:0;
+        bottom:0;
+        width:52px;
+        pointer-events:none;
+        z-index:36;
+        font-family:Orbitron, system-ui, sans-serif;
+      }
+      #kgen-12345-warp-scale .warp-tick{
+        position:absolute;
+        left:0;
+        transform:translateY(50%);
+        display:flex;
+        align-items:center;
+        gap:4px;
+        color:#ffd778;
+        font-size:10px;
+        font-weight:900;
+        text-shadow:0 0 8px rgba(0,0,0,.95);
+        white-space:nowrap;
+      }
+      #kgen-12345-warp-scale .warp-tick::before{
+        content:'';
+        width:9px;
+        height:1px;
+        background:rgba(255,215,120,.8);
+        box-shadow:0 0 6px rgba(255,215,120,.35);
+      }
+      #kgen-12345-warp-scale .warp-tick.major{
+        color:#8af3ff;
+        font-size:11px;
+      }
+      #kgen-12345-warp-scale .warp-tick.major::before{
+        width:15px;
+        background:rgba(138,243,255,.95);
       }
       #mini-thumb.kgen-motion-badge::after,
       #core-window.kgen-motion-badge::after{
@@ -151,17 +192,34 @@
   }
 
 
+  function scheduleIdleTexture(delay){
+    if(state.activityTimer) clearTimeout(state.activityTimer);
+    state.activityTimer = setTimeout(function(){
+      // V10.21: if no new operation happened, return to bull/bear.
+      state.isMoveActive = false;
+      state.isWarpActive = false;
+      state.isSteerActive = false;
+      updateTextureLayer();
+    }, delay || 650);
+  }
+
   function markActivity(kind){
+    state.lastActivityAt = Date.now();
     if(kind === 'move') state.isMoveActive = true;
     if(kind === 'warp') state.isWarpActive = true;
     if(kind === 'steer') state.isSteerActive = true;
     updateTextureLayer();
+    // Any rotation / MOVE / WARP shows heart only while operating; never stays heart forever.
+    scheduleIdleTexture(700);
   }
 
   function clearActivity(kind){
     if(kind === 'move') state.isMoveActive = false;
     if(kind === 'warp') state.isWarpActive = false;
     if(kind === 'steer') state.isSteerActive = false;
+    if(!state.isMoveActive && !state.isWarpActive && !state.isSteerActive){
+      if(state.activityTimer) clearTimeout(state.activityTimer);
+    }
     updateTextureLayer();
   }
 
@@ -175,8 +233,10 @@
   }
 
   function warpXToPercent(warpX){
+    // V10.21: use full visible rail as a 0~300 universe elevator.
+    // 0 = floor, 300 = ceiling. Add 6% safety padding so the circle never hits the bottom buttons.
     const x = clamp(Number(warpX)||0, 0, 300);
-    return (x / 300) * 100;
+    return 6 + (x / 300) * 88;
   }
 
   function setWarpVisualByX(warpX, opts){
@@ -214,6 +274,19 @@
     }
   }
 
+  function ensureWarpScale(){
+    const host = $('warp-rail-body') || qs('.warp-engine');
+    if(!host || $('kgen-12345-warp-scale')) return;
+    const scale = document.createElement('div');
+    scale.id = 'kgen-12345-warp-scale';
+    const ticks = [0,20,50,100,150,200,250,300];
+    scale.innerHTML = ticks.map(function(v){
+      const cls = (v===0 || v===20 || v===300) ? 'warp-tick major' : 'warp-tick';
+      return '<div class="'+cls+'" style="bottom:'+warpXToPercent(v)+'%">'+v+'x</div>';
+    }).join('');
+    host.appendChild(scale);
+  }
+
   function ensureWarpCoreLayer(){
     const host = $('warp-rail-body') || qs('.warp-engine');
     if(!host || $('kgen-12345-warp-core-layer')) return;
@@ -223,6 +296,7 @@
     img.alt = 'KGEN Warp Core';
     img.setAttribute('aria-hidden','true');
     host.appendChild(img);
+    ensureWarpScale();
   }
 
   function applyMotion(){
@@ -241,6 +315,7 @@
     if(core) core.classList.add('kgen-motion-ready');
     if(fairy) fairy.classList.add('kgen-motion-side');
     ensureWarpCoreLayer();
+    ensureWarpScale();
     updateTextureLayer();
 
     const label = state.side === 'long' ? '多' : '空';
@@ -409,7 +484,7 @@
       const v = parseFloat(steer.value || '0');
       state.side = (v >= -90 && v <= 90) ? 'long' : 'short';
       if(ang) ang.textContent = Math.round(v) + '°';
-      // V10.20: only user rotation activity shows heart; page initialization must remain bull/bear.
+      // V10.21: only user rotation activity shows heart; page initialization must remain bull/bear.
       if(active){
         markActivity('steer');
         if(state.steerTimer) clearTimeout(state.steerTimer);
@@ -429,6 +504,7 @@
     bindSteer();
     bindMirrorButtons();
     applyMotion();
+    setTimeout(function(){ state.isMoveActive=false; state.isWarpActive=false; state.isSteerActive=false; updateTextureLayer(); }, 900);
     log('initialized');
   }
 

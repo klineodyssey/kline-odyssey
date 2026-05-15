@@ -1,17 +1,17 @@
 
-// KGEN 12345 V10.20 stable countdown
+// KGEN 12345 V10.21 stable countdown
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-stable-countdown.js
 // 原則：保留倒數槽，不刪 DOM；只用 textContent 更新，不顯示秒數，降低手機閃爍。
 (function(){
   'use strict';
   function pad(n){return String(n).padStart(2,'0');}
   function nextNY(){const now=new Date(); let y=now.getUTCFullYear(); let t=new Date(Date.UTC(y,11,31,23,50,0)); if(t-now<=0)t=new Date(Date.UTC(y+1,11,31,23,50,0)); return t;}
-  function text(){const diff=Math.max(0,nextNY()-new Date()); const m=Math.floor(diff/60000); const d=Math.floor(m/1440); const h=Math.floor((m%1440)/60); const mm=m%60; return `距跨年 ${d}天 ${pad(h)}時 ${pad(mm)}分`;}
+  function text(){const diff=Math.max(0,nextNY()-new Date()); const m=Math.floor(diff/60000); const d=Math.floor(m/1440); const h=Math.floor((m%1440)/60); const mm=m%60; return `跨年倒數：距 12/31 23:50 還有 ${d}天 ${pad(h)}時 ${pad(mm)}分`;}
   function ensureNoFlickerStyle(){
     if(document.getElementById('kgen-v102-countdown-no-flicker')) return;
     const st=document.createElement('style');
     st.id='kgen-v102-countdown-no-flicker';
-    st.textContent='#kgen-v102-festival-countdown,#kh-ny-slot,[data-kgen-countdown],.kh-ny-countdown{animation:none!important;transition:none!important;will-change:auto!important;}';
+    st.textContent='#kgen-v102-festival-countdown,#kh-ny-slot,[data-kgen-countdown],.kh-ny-countdown{animation:none!important;transition:none!important;will-change:auto!important;opacity:1!important;filter:none!important;text-shadow:0 0 8px rgba(0,0,0,.85)!important;color:#ffe39a!important;min-height:1.4em!important;white-space:normal!important;} #kgen-v102-festival-countdown * ,#kh-ny-slot *{animation:none!important;transition:none!important;opacity:1!important;}';
     document.head.appendChild(st);
   }
   function apply(){

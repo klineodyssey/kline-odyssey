@@ -1,5 +1,5 @@
 
-// KGEN 12345 V10.20 panel router
+// KGEN 12345 V10.21 panel router
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-panel-router.js
 // 原則：只控制原本 #coord-panel 與 #kgen-heart-live-panel，不新增第二個神規小面板。
 (function(){
