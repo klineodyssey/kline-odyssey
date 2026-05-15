@@ -68,7 +68,7 @@
       <div class="kgen-cup-final-status">${status}</div>
       <div class="kgen-v1024-amount-box">
         <label for="kgen-12345-amount-input">輸入 KGEN 數量</label>
-        <input id="kgen-12345-amount-input" class="kgen-amount-input" type="number" min="1" max="888" step="1" value="8" inputmode="decimal" placeholder="例如 8、88、888">
+        <input id="kgen-12345-amount-input" class="kgen-amount-input" type="number" min="1" max="888" step="1" value="" inputmode="decimal" placeholder="由操作者輸入，例如 8、88、888">
         <div class="hint">這是全神殿共用金額：Approve 授權、fortuneClaim 發財金、vowTo 還願、lightLamp 點燈都讀這一格。發財金建議 1～888。</div>
       </div>
       <div class="kgen-cup-final-ny" data-kgen-countdown>${nextNYText()}</div>
@@ -83,7 +83,7 @@
   function reset(){ set({count:0,done:false,updatedAt:new Date().toISOString()}); log('三次聖盃已重置。'); speak('三次聖盃已重置，請重新按三次。'); render(); }
   document.addEventListener('click',function(e){ const btn=e.target&&e.target.closest?e.target.closest('[data-cup],.v714-cup,.kh-cupbox button,#v714-cupbox button'):null; if(!btn) return; if(btn.getAttribute('data-cup')==='reset'||/重置/.test(btn.textContent||'')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); reset(); return false;} if(btn.closest('.kh-cupbox')||btn.closest('#v714-cupbox')||btn.hasAttribute('data-cup')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); tap(); return false;} },true);
   function boot(){render();}
-  window.KGEN12345_HOLY_CUP={version:'V10.23',render,get,set,tap,reset};
+  window.KGEN12345_HOLY_CUP={version:'V10.27.2',render,get,set,tap,reset};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
   window.addEventListener('load',boot); setTimeout(boot,300); setTimeout(boot,1000); setInterval(render,1500); setInterval(updateNY,60000);
 })();
@@ -94,15 +94,15 @@
   function $(id){return document.getElementById(id)}
   function fields(){return Array.prototype.slice.call(document.querySelectorAll('#kgen-12345-amount-input,#amt-in,#fortune-amount,#kh-amount,input[data-kgen-amount]'));}
   function syncFrom(el){
-    const v=el&&el.value?String(el.value):'8';
+    const v=el&&el.value?String(el.value):'';
     fields().forEach(f=>{if(f!==el) f.value=v;});
-    try{localStorage.setItem('kgen12345.sharedAmount',v)}catch(_){}
+    try{if(v){localStorage.setItem('kgen12345.sharedAmount',v)}else{localStorage.removeItem('kgen12345.sharedAmount')}}catch(_){}
   }
   function boot(){
-    const saved=(function(){try{return localStorage.getItem('kgen12345.sharedAmount')||'8'}catch(_){return '8'}})();
-    fields().forEach(f=>{if(!f.value)f.value=saved; f.removeEventListener('input',f.__kgenSync||function(){}); f.__kgenSync=function(){syncFrom(f)}; f.addEventListener('input',f.__kgenSync,{passive:true});});
+    const saved=(function(){try{return localStorage.getItem('kgen12345.sharedAmount')||''}catch(_){return '8'}})();
+    fields().forEach(f=>{if(!f.value && saved)f.value=saved; f.removeEventListener('input',f.__kgenSync||function(){}); f.__kgenSync=function(){syncFrom(f)}; f.addEventListener('input',f.__kgenSync,{passive:true});});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
   setInterval(boot,2000);
-  window.KGEN12345_AMOUNT={get:function(){const f=$('kgen-12345-amount-input')||$('amt-in'); return f&&f.value?f.value:'8';},sync:boot};
+  window.KGEN12345_AMOUNT={get:function(){const f=$('kgen-12345-amount-input')||$('amt-in'); return f&&f.value?f.value:'';},sync:boot};
 })();

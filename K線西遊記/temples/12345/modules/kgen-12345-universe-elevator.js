@@ -1,8 +1,8 @@
 /* =========================================================
  KGEN 12345｜STANDARD MODULE｜UNIVERSE ELEVATOR + ORGAN SYNC
  PRODUCT_ID: KGEN-12345-HEART-UI
- VERSION: 12345-TEMPLE-V10.27.1-STABLE-STANDARD-MODULES
- BUILD: 20260516-V10.27.1-STANDARD-MODULES
+ VERSION: 12345-TEMPLE-V10.27.2-STABLE-ORGAN-RESTORE
+ BUILD: 20260516-V10.27.2-STABLE-ORGAN-RESTORE
  BASE_FROM: V10.27_STABLE_ORGAN_CHECK + V10.26_PANEL_FIX + V10.25_UNIVERSE_ELEVATOR + V10.12_TRUE_ROTATION_DNA
 
  檔名治理：
@@ -1176,4 +1176,128 @@
   setInterval(()=>{bindAmountInputs();ensureElevator();bindElevator();bindMove();bindPanelButtons();fixCountdownAndBottom();raiseMaps();organCheck();},900);
   requestAnimationFrame(rafLoop);
   window.KGEN12345_V1027_STABLE={version:VERSION,state,setElevator,setXY,getAmount:()=>sanitizeAmount(getAmountValue(),true),organCheck,speak};
+})();
+
+
+/* =========================================================
+ KGEN 12345｜V10.27.2 STABLE ORGAN RESTORE PATCH
+ PRODUCT_ID: KGEN-12345-HEART-UI
+ VERSION: 12345-TEMPLE-V10.27.2-STABLE-ORGAN-RESTORE
+ BASE_FROM: V10.27.1_STANDARD_MODULES + V10.24_UI_STRUCTURE_SYNC + V10.12_TRUE_ROTATION_DNA
+
+ 修復重點：
+ - 不刪 vowTo / lightLamp / makeWish；若被覆蓋則恢復顯示。
+ - 金額欄不自動帶 8；操作者自行輸入。
+ - 點入金額欄不跳開，手機可正常輸入。
+ - 左下 XY MOVE 重新接管，Y 軸同步宇宙電梯與主圖上下。
+ - 宇宙電梯拖動也同步主圖上下。
+ ========================================================= */
+(function(){
+  'use strict';
+  const VERSION='V10.27.2-STABLE-ORGAN-RESTORE';
+  const AMOUNT_KEY='kgen12345.sharedAmount';
+  const $=id=>document.getElementById(id);
+  const qa=s=>Array.prototype.slice.call(document.querySelectorAll(s));
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
+  const root=document.documentElement;
+  const state=window.KGEN12345_UNIVERSE_COORDINATE_STATE=Object.assign({x:0,elevator:20,angle:0,activeUntil:0},window.KGEN12345_UNIVERSE_COORDINATE_STATE||{});
+  const ASSETS={bull:'./assets/bull-front.png',bear:'./assets/bear-rear.png',heart:'./assets/heart.png',warp:'./assets/warp-core.png'};
+
+  function say(msg){try{if(window.app&&typeof app.speak==='function')return app.speak(msg); if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(msg||''));u.lang='zh-TW';speechSynthesis.speak(u);}}catch(_){}}
+  function getAngle(){const input=$('steer-input-val'); if(input&&input.value!=='')return clamp(parseFloat(input.value),-180,180); const t=($('ang-val')&&$('ang-val').textContent)||'0'; const m=t.match(/-?\d+(\.\d+)?/); return m?clamp(parseFloat(m[0]),-180,180):0;}
+  function isBull(){const a=getAngle(); return a>=-90&&a<=90;}
+  function isActive(){return Date.now()<(state.activeUntil||0);}
+  function active(ms){state.activeUntil=Date.now()+(ms||650);}
+  function elevToY(v){v=clamp(v,0,300); return Math.round(((v-150)/150)*-160);}
+  function yToElev(y){return clamp(150-(Number(y)||0)/160*150,0,300);}
+  function pct(v){return 4+(clamp(v,0,300)/300)*92;}
+
+  function applyTexture(){const img=$('fairy-img'); if(!img)return; const src=isActive()?ASSETS.heart:(isBull()?ASSETS.bull:ASSETS.bear); if(img.getAttribute('src')!==src)img.setAttribute('src',src);}
+  function applyCoord(){
+    state.angle=getAngle();
+    const y=elevToY(state.elevator);
+    root.style.setProperty('--kgen-v1027-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1027-main-y',Math.round(y)+'px');
+    root.style.setProperty('--kgen-v1026-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1026-main-y',Math.round(y)+'px');
+    root.style.setProperty('--kgen-v1025-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1025-main-y',Math.round(y)+'px');
+    root.style.setProperty('--k12345-core-x',Math.round(state.x)+'px');
+    root.style.setProperty('--k12345-core-y',Math.round(y)+'px');
+    root.style.setProperty('--k12345-core-rotate',state.angle+'deg');
+    root.style.setProperty('--kgen-v1027-elevator-percent',pct(state.elevator)+'%');
+    const anchor=$('core-anchor');
+    if(anchor){anchor.style.setProperty('transform',`translate(calc(-50% + ${Math.round(state.x)}px), calc(-50% + ${Math.round(y)}px)) scale(var(--k12345-core-scale,1)) rotate(${state.angle}deg)`,'important'); anchor.style.setProperty('transform-origin','50% 50%','important');}
+    const fill=$('energy-fill'); if(fill)fill.style.height=(state.elevator/3)+'%';
+    const thumb=$('warp-thumb'); if(thumb)thumb.style.bottom='calc('+(state.elevator/3)+'% - 17px)';
+    const core=$('kgen-v1027-warp-core')||$('kgen-v1026-warp-core')||$('kgen-v1025-warp-core-layer')||$('kgen-12345-warp-core-layer');
+    if(core){core.style.setProperty('bottom',pct(state.elevator)+'%','important'); core.style.setProperty('box-shadow','none','important'); core.style.setProperty('filter','none','important');}
+    const lab=$('kgen-v1027-elevator-label')||$('kgen-v1026-elevator-label'); if(lab)lab.textContent='宇宙電梯 '+Math.round(state.elevator)+' / 300｜Y '+Math.round(y);
+    const ml=$('move-joystick-label'); if(ml)ml.textContent='X '+Math.round(state.x)+' / Y '+Math.round(y)+' / 電梯 '+Math.round(state.elevator);
+    const st=$('k12345-slider-status'); if(st)st.textContent='CORE 方向 '+state.angle+'°｜'+(isBull()?'多方':'空方')+'｜X '+Math.round(state.x)+' / Y '+Math.round(y)+'｜電梯 '+Math.round(state.elevator);
+    applyTexture();
+  }
+  function setElev(v,activity){state.elevator=clamp(v,0,300); if(activity)active(850); applyCoord();}
+  function setXY(x,y,activity){state.x=clamp(x,-360,360); state.elevator=yToElev(y); if(activity)active(850); applyCoord();}
+
+  function amountFields(){
+    const sel='#kgen-12345-amount-input,.kgen-amount-input,#kh-amount,#amt-in,#bet-amt-input,#fortune-amount,#v860-vow-amt,#v860-lamp-days,input[data-kgen-amount]';
+    const seen=new Set();
+    return qa(sel).filter(f=>f&&!seen.has(f)&&(seen.add(f)||true)&&!f.readOnly);
+  }
+  function clean(v){let s=String(v==null?'':v).replace(/[０-９]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[^0-9]/g,''); if(s.length>1)s=s.replace(/^0+(?=\d)/,''); if(s&&Number(s)>888)s='888'; return s;}
+  function getAmount(){const f=amountFields().find(x=>String(x.value||'').trim()!==''); return clean(f?f.value:'');}
+  function syncAmount(v,except){const c=clean(v); if(c){try{localStorage.setItem(AMOUNT_KEY,c)}catch(_){}}else{try{localStorage.removeItem(AMOUNT_KEY)}catch(_){}} amountFields().forEach(f=>{if(f!==except&&document.activeElement!==f)f.value=c;});}
+  function bindAmount(){
+    amountFields().forEach((f,i)=>{
+      if(i>0&&f.id==='kgen-12345-amount-input')f.id='kgen-12345-amount-input-'+i;
+      f.type='text'; f.inputMode='numeric'; f.autocomplete='off'; f.pattern='[0-9]*'; f.setAttribute('data-kgen-amount','1'); f.removeAttribute('value');
+      f.placeholder=f.placeholder||'請輸入 KGEN 數量，例如 8、88、888';
+      if(f.dataset.v10272Amount!=='1'){
+        f.dataset.v10272Amount='1';
+        ['pointerdown','mousedown','touchstart','click','dblclick'].forEach(ev=>f.addEventListener(ev,e=>{e.stopPropagation();},true));
+        f.addEventListener('focus',e=>{e.stopPropagation(); setTimeout(()=>{try{f.select()}catch(_){}} ,60);},true);
+        f.addEventListener('input',e=>{const c=clean(f.value); if(f.value!==c)f.value=c; syncAmount(c,f);},true);
+        f.addEventListener('change',e=>{const c=clean(f.value); f.value=c; syncAmount(c,f);},true);
+      }
+    });
+    const first=amountFields()[0];
+    if(first&&!$('kgen-v10272-amount-note')){const n=document.createElement('div'); n.id='kgen-v10272-amount-note'; n.className='kgen-v1027-amount-organ-note'; n.textContent='金額由操作者自行輸入；Approve、fortuneClaim、vowTo、lightLamp 共用此數量。空白不會自動補 8。'; first.insertAdjacentElement('afterend',n);}
+  }
+
+  function restoreHeartActions(){
+    const panel=$('kgen-heart-live-panel'); if(!panel)return;
+    const actions=panel.querySelector('.kh-actions:last-of-type')||panel.querySelector('.kh-actions'); if(!actions)return;
+    const defs=[['kh-fortune','fortuneClaim'],['kh-heartbeat','heartbeatClaim'],['kh-ignite','igniteAndClaim'],['kh-festival1','5/20 悟空生日'],['kh-festival2','11/11 孤勇日'],['kh-newyear','12/31 倒數'],['kh-vow','vowTo 還願'],['kh-lamp','lightLamp 點燈'],['kh-wishbtn','makeWish 許願上鏈']];
+    defs.forEach(([id,label])=>{let b=$(id); if(!b){b=document.createElement('button'); b.type='button'; b.id=id; b.textContent=label; if(id==='kh-wishbtn')b.className='kh-gold'; actions.appendChild(b);} b.style.display=''; b.style.visibility='visible'; b.style.pointerEvents='auto';});
+    const amt=$('kh-amount'); if(amt){amt.value=clean(amt.value); amt.placeholder='輸入 KGEN 數量：Approve / 發財金 / 還願 / 點燈共用';}
+    if(!$('kh-wish')){const w=document.createElement('input'); w.id='kh-wish'; w.placeholder='許願文字或 0x bytes32 hash'; actions.parentNode.insertBefore(w, actions);}
+    const wish=$('kh-wish'); if(wish){wish.style.display=''; wish.style.visibility='visible'; wish.style.pointerEvents='auto';}
+    const sel=$('kh-vow-option'); if(sel){sel.style.display=''; sel.style.visibility='visible'; sel.style.pointerEvents='auto';}
+  }
+
+  function bindMoveStable(){
+    const wrap=$('move-joystick-wrap'), knob=$('move-joystick-knob'); if(!wrap||!knob||wrap.dataset.v10272Move==='1')return; wrap.dataset.v10272Move='1';
+    let pid=null;
+    function setKnob(dx,dy){knob.style.left=(40+dx)+'px'; knob.style.top=(40+dy)+'px';}
+    function apply(clientX,clientY){const r=wrap.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=clientX-cx,dy=clientY-cy;const max=Math.max(38,Math.min(r.width,r.height)*.42);const len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max;}setKnob(dx,dy);state.x=Math.round(dx*2.2);state.elevator=clamp(150+clamp(-dy/max,-1,1)*150,0,300);active(900);applyCoord();}
+    function stop(){pid=null;setKnob(0,0);active(240);applyCoord();}
+    wrap.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pid=e.pointerId;try{wrap.setPointerCapture(pid)}catch(_){}apply(e.clientX,e.clientY);},true);
+    wrap.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;e.preventDefault();e.stopPropagation();apply(e.clientX,e.clientY);},true);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wrap.addEventListener(ev,stop,true));
+  }
+  function bindElevStable(){
+    const rail=$('warp-rail-body')||document.querySelector('.warp-engine'); if(!rail||rail.dataset.v10272Elev==='1')return; rail.dataset.v10272Elev='1';
+    let pid=null; function from(clientY){const r=rail.getBoundingClientRect();const y=clamp(clientY-r.top,0,r.height);setElev((1-y/r.height)*300,true)}
+    rail.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pid=e.pointerId;try{rail.setPointerCapture(pid)}catch(_){}from(e.clientY);},true);
+    rail.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;e.preventDefault();e.stopPropagation();from(e.clientY);},true);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>rail.addEventListener(ev,()=>{pid=null;active(240);},true));
+  }
+  function protectButtons(){const p=$('kgen-heart-live-panel'); if(p){p.style.maxHeight='calc(100vh - 210px)';p.style.overflowY='auto';p.style.paddingBottom='120px';} const dock=$('kgen-v917-quick-dock')||document.querySelector('.bottom-controls')||document.querySelector('.quick-dock'); if(dock){dock.style.zIndex='2147483000';dock.style.pointerEvents='auto';}}
+  function style(){if($('kgen-v10272-style'))return;const s=document.createElement('style');s.id='kgen-v10272-style';s.textContent=`input[data-kgen-amount],#kh-amount,#kgen-12345-amount-input{pointer-events:auto!important;touch-action:manipulation!important;user-select:text!important;-webkit-user-select:text!important;position:relative!important;z-index:2147482000!important;}#move-joystick-wrap{pointer-events:auto!important;touch-action:none!important;z-index:2147482100!important;}#kgen-heart-live-panel .kh-actions button{display:block!important;visibility:visible!important;pointer-events:auto!important;}#kh-wish,#kh-vow-option{display:block!important;visibility:visible!important;pointer-events:auto!important;}`;document.head.appendChild(s);}
+  function boot(){style();bindAmount();restoreHeartActions();bindMoveStable();bindElevStable();protectButtons();applyCoord();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  window.addEventListener('load',boot);
+  setInterval(boot,1000); setInterval(applyCoord,120);
+  window.KGEN12345_V10272_STABLE={version:VERSION,getAmount,setElevator:setElev,setXY,restoreHeartActions};
 })();
