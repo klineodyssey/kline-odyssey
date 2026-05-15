@@ -1,4 +1,4 @@
-# KGEN 12345 File Manifest｜V10.19
+# KGEN 12345 File Manifest｜V10.20
 
 主路徑：`/K線西遊記/temples/12345/`
 
@@ -51,3 +51,19 @@ KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
 ```text
 KGEN_12345_V10_18_TRUE_LINK_FROM_V10_12_FULL
 ```
+
+
+---
+
+# V10.20 FIX NOTES
+
+- BASE_FROM remains V10.12_MOTION_CONTROL_PATCH.
+- Do not rewrite rotation math.
+- Static state must show bull-front.png or bear-rear.png.
+- Any active rotation or MOVE/WARP movement temporarily shows heart.png.
+- Left MOVE Y links the right WARP vertical rail display.
+- WARP 0x = bottom floor, 20x = neutral aesthetic floor, 300x = ceiling / highest parallel universe floor.
+- warp-core.png stays inside the right WARP engine rail and never replaces the main image.
+- Right-side rule panel size is matched to the Wukong Heart panel.
+- Countdown flicker is guarded by stable minute-only updates and no animation.
+- Holy Cup remains front-end ritual gate: press three Holy Cup buttons to pass; actual fortuneClaim still depends on Heart contract rules.

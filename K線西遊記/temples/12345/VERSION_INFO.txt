@@ -1,12 +1,5 @@
-VERSION: V10.19.0
-BASE_FROM: KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle
-MERGE_FROM: KGEN_12345_V10_18_TRUE_LINK_FROM_V10_12_FULL
-PATCH_TYPE: TRUE_LINK_RUNTIME_ACTIVITY + INSTALL_CHECK
-ROTATION_POLICY: DO_NOT_MODIFY_V10_12_ROTATION_MATH
-ASSETS_REQUIRED: bull-front.png, bear-rear.png, heart.png, warp-core.png
-RULES:
-- Any rotation or movement displays heart.png during active motion.
-- When motion stops, image returns to bull-front.png or bear-rear.png by Z angle.
-- WARP 20x is center, 0x is bottom, 300x is ceiling.
-- Left MOVE X/Y controls universe position; Y is universe elevator and links to WARP vertical motion.
-- Runtime install check must warn and speak if required files are missing.
+KGEN 12345 Temple UI
+VERSION: V10.20
+BASE_FROM: V10.12_MOTION_CONTROL_PATCH
+PATCH_FROM: V10.19_TRUE_LINK_ACTIVITY_INSTALL_CHECK
+STATUS: fixes static bull/bear texture return, Y elevator warp linkage, right panel sizing, countdown flicker guard, holy cup rule documented.

@@ -1,4 +1,4 @@
-# 五指山・悟空財神殿 12345（Temple UI V10.19 TRUE LINK MODE）
+# 五指山・悟空財神殿 12345（Temple UI V10.20 TRUE LINK MODE）
 
 本頁是《K線西遊記》GitHub Pages 的「五指山 12345」神殿入口。  
 定位：悟空財神殿（Heart 發財金 / 呼吸 / 心跳 / 還願 / XYZ 宇宙控制台）
@@ -7,7 +7,7 @@
 
 # 本版身份
 
-VERSION：V10.19 TRUE LINK MODE  
+VERSION：V10.20 TRUE LINK MODE  
 BASE_FROM：KGEN_12345_V10_12_MOTION_CONTROL_PATCH_FULL_bundle  
 PATCH_TYPE：只新增圖片連動，不改原本旋轉邏輯
 
@@ -170,7 +170,7 @@ final.png
 
 ---
 
-# V10.19 控制邏輯
+# V10.20 控制邏輯
 
 ## 原旋轉邏輯保留
 
@@ -276,7 +276,7 @@ DO_NOT_MODIFY
 目前主版本：
 
 ```text
-V10.19 TRUE LINK MODE
+V10.20 TRUE LINK MODE
 ```
 
 旋轉母版：
@@ -286,6 +286,22 @@ V10.12 MOTION CONTROL PATCH
 ```
 
 
-# V10.19 Install Check
+# V10.20 Install Check
 
 新增：`modules/kgen-12345-install-check.js`。開頁會檢查必要 modules 與 assets，缺檔時顯示 INSTALL CHECK FAILED 並語音提醒。
+
+
+---
+
+# V10.20 FIX NOTES
+
+- BASE_FROM remains V10.12_MOTION_CONTROL_PATCH.
+- Do not rewrite rotation math.
+- Static state must show bull-front.png or bear-rear.png.
+- Any active rotation or MOVE/WARP movement temporarily shows heart.png.
+- Left MOVE Y links the right WARP vertical rail display.
+- WARP 0x = bottom floor, 20x = neutral aesthetic floor, 300x = ceiling / highest parallel universe floor.
+- warp-core.png stays inside the right WARP engine rail and never replaces the main image.
+- Right-side rule panel size is matched to the Wukong Heart panel.
+- Countdown flicker is guarded by stable minute-only updates and no animation.
+- Holy Cup remains front-end ritual gate: press three Holy Cup buttons to pass; actual fortuneClaim still depends on Heart contract rules.
