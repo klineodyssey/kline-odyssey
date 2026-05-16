@@ -1,9 +1,6 @@
-KGEN 12345 五指山悟空財神殿
-VERSION: 12345-TEMPLE-V10.30-MASTER-STABLE
-BUILD: 20260516-V10.30-MASTER-STABLE
-BASE_FROM: V10.27.3_MIRROR_ORDER_STABLE + V10.12_TRUE_ROTATION_DNA
-POLICY:
-- modules root uses standard filenames only.
-- amount input is user-owned and starts blank.
-- no automatic transaction, no automatic amount, no automatic music.
-- Heart actions preserved: approve / fortuneClaim / heartbeatClaim / igniteAndClaim / vowTo / lightLamp / makeWish.
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: 12345-TEMPLE-V10.36-WORLD-AXIS-COUNTDOWN-FIX
+BUILD: 20260516-V10.36-WORLD-AXIS-COUNTDOWN-FIX
+BASE_FROM_VISUAL: KGEN_12345_V10_30_MASTER_STABLE_FULL
+BASE_FROM_COUNTDOWN: V10.33_DNA_MERGE_FINAL rule + V10.36 rewrite
+CHANGELOG: Fix three timers: heartbeat hourly, ignite daily, new year only festival; free amount input; XY true-world axis separated from WARP elevator; Z mirror only on order.
