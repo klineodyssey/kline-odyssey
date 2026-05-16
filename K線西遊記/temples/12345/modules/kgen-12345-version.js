@@ -1,7 +1,18 @@
-// KGEN 12345 version source - standard filename only
+// KGEN 12345 MASTER version sync
 (function(){
-  window.KGEN_12345_VERSION = '12345-TEMPLE-V10.31-MASTER-STABLE-LOCK';
-  window.KGEN_12345_BUILD = '2026/05/16 V10.31 final stable lock';
-  window.KGEN_12345_BASE_FROM = 'V10.30_MASTER_STABLE';
-  window.KGEN_12345_CHANGESET = 'Fix amount input, holy cup flicker, MOVE XY, Universe Elevator Y sync, transaction organ buttons, mirror order linkage';
+  'use strict';
+  const VERSION='12345-TEMPLE-V10.36-WORLD-AXIS-COUNTDOWN-FIX';
+  const BUILD='20260516-V10.36-WORLD-AXIS-COUNTDOWN-FIX';
+  const CHANGESET='Fix three timers: heartbeat hourly, ignite daily, new year only festival; free amount input; XY true-world axis separated from WARP elevator; Z mirror only on order.';
+  function sync(){
+    window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET});
+    const v=document.getElementById('ver-st'); if(v) v.textContent='VERSION '+VERSION;
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION '+VERSION; });
+    document.title='KGEN 12345 五指山悟空財神殿 V10.36 WORLD AXIS';
+    document.documentElement.setAttribute('data-kgen12345-version', VERSION);
+  }
+  document.addEventListener('DOMContentLoaded',sync);
+  if(document.readyState!=='loading') sync();
+  setTimeout(sync,300); setTimeout(sync,1200); setTimeout(sync,3200); setInterval(sync,5000);
+  window.KGEN12345_MASTER_VERSION={VERSION,BUILD,CHANGESET,sync};
 })();
