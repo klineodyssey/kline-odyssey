@@ -1,19 +1,18 @@
-// KGEN 12345 V10.25.0 version sync
+// KGEN 12345 MASTER STABLE version sync
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.27.2-STABLE-STANDARD-MODULES';
-  const BUILD='20260516-V10.27.2-STANDARD-MODULES';
-  window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET:'V10.27.2 standard module names / merged organ check / amount input / elevator sync / panel safe'});
+  const VERSION='12345-TEMPLE-V10.30-MASTER-STABLE';
+  const BUILD='20260516-V10.30-MASTER-STABLE';
+  const CHANGESET='MASTER STABLE: unified version source, amount input free mode, Heart actions restored, MOVE/WARP sync, mirror order stable';
   function sync(){
-    const v=document.getElementById('ver-st');
-    if(v) v.textContent='VERSION '+VERSION;
-    const title=document.querySelector('title');
-    if(title) title.textContent='KGEN 12345 五指山悟空財神殿 V10.27.2 標準模組穩定版';
+    window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET});
+    const v=document.getElementById('ver-st'); if(v) v.textContent='VERSION '+VERSION;
+    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION '+VERSION; });
+    document.title='KGEN 12345 五指山悟空財神殿 V10.30 MASTER STABLE';
     document.documentElement.setAttribute('data-kgen12345-version', VERSION);
   }
   document.addEventListener('DOMContentLoaded',sync);
   if(document.readyState!=='loading') sync();
-  setTimeout(sync,800); setTimeout(sync,2200); setInterval(sync,5000);
+  setTimeout(sync,300); setTimeout(sync,1200); setTimeout(sync,3200); setInterval(sync,1800);
+  window.KGEN12345_MASTER_VERSION={VERSION,BUILD,CHANGESET,sync};
 })();
-
-// V10.27.2: stable organ restore; standard module filenames only.

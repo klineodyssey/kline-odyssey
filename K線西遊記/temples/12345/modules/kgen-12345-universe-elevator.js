@@ -1301,3 +1301,234 @@
   setInterval(boot,1000); setInterval(applyCoord,120);
   window.KGEN12345_V10272_STABLE={version:VERSION,getAmount,setElevator:setElev,setXY,restoreHeartActions};
 })();
+
+
+/* =========================================================
+ KGEN 12345｜V10.27.3 STABLE MIRROR ORDER RESTORE PATCH
+ PRODUCT_ID: KGEN-12345-HEART-UI
+ VERSION: 12345-TEMPLE-V10.27.3-MIRROR-ORDER-STABLE
+ BUILD: 20260516-V10.27.3-MIRROR-ORDER-STABLE
+ BASE_FROM: V10.27.2_STABLE_ORGAN_RESTORE + V10.12_TRUE_ROTATION_DNA
+
+ 修復重點：
+ - 金額欄不再自動帶 8；操作者自行輸入。
+ - 手機點入金額欄不跳開，可正常輸入。
+ - 恢復/保護 makeWish 許願、vowTo 還願、lightLamp 點燈「下單」按鈕。
+ - 左下 XY MOVE 重新接管，X/Y 同步控制主圖；Y 同步宇宙電梯。
+ - 宇宙電梯拖動也同步主圖上下與 warp-core。
+ - 下單與多空切換啟動前鏡/後鏡狀態；多方前鏡、空方後鏡。
+ - 右上訊息 20 視窗可收合；語音對應訊息紀錄，不再串到其他功能。
+ - 右側神規按鈕穩定開合；面板標題縮小，地圖永遠在上層。
+ - 總收合按鈕下移，不遮擋 509 席位文字。
+ - 曲速刻度只保留一組 0~300。
+ ========================================================= */
+(function(){
+  'use strict';
+  const VERSION='V10.27.3-MIRROR-ORDER-STABLE';
+  const $=id=>document.getElementById(id);
+  const qa=s=>Array.prototype.slice.call(document.querySelectorAll(s));
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
+  const root=document.documentElement;
+  const state=window.KGEN12345_UNIVERSE_COORDINATE_STATE=Object.assign({x:0,elevator:20,angle:0,activeUntil:0,orderMode:null,mirrorActive:false},window.KGEN12345_UNIVERSE_COORDINATE_STATE||{});
+  const ASSETS={bull:'./assets/bull-front.png',bear:'./assets/bear-rear.png',heart:'./assets/heart.png',warp:'./assets/warp-core.png'};
+
+  function say(msg){try{if(window.app&&typeof app.speak==='function')return app.speak(msg); if(window.speak)return window.speak(msg); if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(msg||''));u.lang='zh-TW';u.rate=1;speechSynthesis.speak(u);}}catch(_){} }
+  function log(msg){try{console.log('[KGEN 12345 '+VERSION+'] '+msg); const el=$('kh-log')||$('bp-status'); if(el) el.textContent=String(msg||'');}catch(_){} }
+  function text(el){return (el&&el.textContent||'').replace(/\s+/g,' ').trim();}
+  function getAngle(){const input=$('steer-input-val'); if(input&&input.value!=='')return clamp(parseFloat(input.value),-180,180); const t=($('ang-val')&&$('ang-val').textContent)||'0'; const m=t.match(/-?\d+(\.\d+)?/); return m?clamp(parseFloat(m[0]),-180,180):0;}
+  function setAngle(a){a=clamp(a,-180,180); state.angle=a; const input=$('steer-input-val'); if(input&&String(input.value)!==String(a)){input.value=String(a); input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true}));} }
+  function isBull(){const a=getAngle(); return a>=-90&&a<=90;}
+  function isActive(){return Date.now()<(state.activeUntil||0);}
+  function active(ms){state.activeUntil=Date.now()+(ms||700);}
+  function pct(v){return 4+(clamp(v,0,300)/300)*92;}
+  function elevToY(v){v=clamp(v,0,300); return Math.round(((v-150)/150)*-160);}
+  function yToElev(y){return clamp(150-(Number(y)||0)/160*150,0,300);}
+
+  function setMainTexture(){const img=$('fairy-img'); if(!img)return; const src=isActive()?ASSETS.heart:(isBull()?ASSETS.bull:ASSETS.bear); if(img.getAttribute('src')!==src)img.setAttribute('src',src);}
+  function setMirror(mode, reason){
+    state.orderMode = mode || (isBull()?'bull':'bear');
+    state.mirrorActive = true;
+    document.body.setAttribute('data-kgen-mirror', state.orderMode);
+    const label = $('kgen-v10273-mirror-status') || createMirrorStatus();
+    const bull = state.orderMode==='bull';
+    if(label) label.textContent = bull ? '前鏡啟動｜多方鏡' : '後鏡啟動｜空方鏡';
+    say((bull?'多方前鏡':'空方後鏡')+'已啟動。');
+    log((reason||'下單鏡頭')+'：'+(bull?'多方前鏡':'空方後鏡'));
+  }
+  function createMirrorStatus(){
+    const box=document.createElement('div'); box.id='kgen-v10273-mirror-status'; box.textContent='前後鏡待命';
+    box.style.cssText='position:fixed;right:128px;bottom:96px;z-index:2147483200;border:1px solid rgba(255,215,120,.55);border-radius:999px;background:rgba(0,0,0,.72);color:#ffe08a;font-weight:900;font-size:12px;padding:6px 10px;pointer-events:none;text-shadow:0 0 8px #000;';
+    document.body.appendChild(box); return box;
+  }
+  function applyCoord(){
+    state.angle=getAngle();
+    const y=elevToY(state.elevator);
+    root.style.setProperty('--kgen-v1027-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1027-main-y',Math.round(y)+'px');
+    root.style.setProperty('--kgen-v1026-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1026-main-y',Math.round(y)+'px');
+    root.style.setProperty('--kgen-v1025-main-x',Math.round(state.x)+'px');
+    root.style.setProperty('--kgen-v1025-main-y',Math.round(y)+'px');
+    root.style.setProperty('--k12345-core-x',Math.round(state.x)+'px');
+    root.style.setProperty('--k12345-core-y',Math.round(y)+'px');
+    root.style.setProperty('--k12345-core-rotate',state.angle+'deg');
+    root.style.setProperty('--kgen-v1027-elevator-percent',pct(state.elevator)+'%');
+    const anchor=$('core-anchor');
+    if(anchor){anchor.style.setProperty('transform',`translate(calc(-50% + ${Math.round(state.x)}px), calc(-50% + ${Math.round(y)}px)) scale(var(--k12345-core-scale,1)) rotate(${state.angle}deg)`,'important'); anchor.style.setProperty('transform-origin','50% 50%','important');}
+    const fill=$('energy-fill'); if(fill)fill.style.height=(state.elevator/3)+'%';
+    const thumb=$('warp-thumb'); if(thumb)thumb.style.bottom='calc('+(state.elevator/3)+'% - 17px)';
+    const core=$('kgen-v1027-warp-core')||$('kgen-v1026-warp-core')||$('kgen-v1025-warp-core-layer')||$('kgen-12345-warp-core-layer');
+    if(core){core.style.setProperty('bottom',pct(state.elevator)+'%','important'); core.style.setProperty('box-shadow','none','important'); core.style.setProperty('filter','none','important');}
+    const lab=$('kgen-v1027-elevator-label')||$('kgen-v1026-elevator-label'); if(lab)lab.textContent='宇宙電梯 '+Math.round(state.elevator)+' / 300｜Y '+Math.round(y);
+    const ml=$('move-joystick-label'); if(ml)ml.textContent='X '+Math.round(state.x)+' / Y '+Math.round(y)+' / 電梯 '+Math.round(state.elevator);
+    const st=$('k12345-slider-status'); if(st)st.textContent='CORE 方向 '+state.angle+'°｜'+(isBull()?'多方':'空方')+'｜X '+Math.round(state.x)+' / Y '+Math.round(y)+'｜電梯 '+Math.round(state.elevator);
+    setMainTexture();
+  }
+  function setElev(v,activity){state.elevator=clamp(v,0,300); if(activity)active(900); applyCoord();}
+
+  function amountFields(){
+    const sel='#kgen-12345-amount-input,.kgen-amount-input,#kh-amount,#amt-in,#bet-amt-input,#fortune-amount,#v860-vow-amt,#v860-lamp-days,input[data-kgen-amount]';
+    const seen=new Set();
+    return qa(sel).filter(f=>f&&f.tagName==='INPUT'&&!seen.has(f)&&(seen.add(f)||true));
+  }
+  function clean(v){let s=String(v==null?'':v).replace(/[０-９]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[^0-9]/g,''); if(s.length>1)s=s.replace(/^0+(?=\d)/,''); if(s&&Number(s)>888)s='888'; return s;}
+  function getAmount(){const f=amountFields().find(x=>String(x.value||'').trim()!==''); return clean(f?f.value:'');}
+  function syncAmount(v,except){const c=clean(v); amountFields().forEach(f=>{if(f!==except&&document.activeElement!==f)f.value=c;});}
+  function bindAmount(){
+    amountFields().forEach(f=>{
+      f.type='text'; f.inputMode='numeric'; f.autocomplete='off'; f.pattern='[0-9]*'; f.setAttribute('data-kgen-amount','1'); f.removeAttribute('readonly'); f.removeAttribute('disabled'); f.removeAttribute('value');
+      f.placeholder=f.placeholder||'請輸入 KGEN 數量，例如 8、88、888';
+      if(!f.dataset.kgenUserTouched && f.value==='8') f.value='';
+      if(f.dataset.v10273Amount==='1') return;
+      f.dataset.v10273Amount='1';
+      ['pointerdown','mousedown','touchstart','click','dblclick'].forEach(ev=>f.addEventListener(ev,e=>{e.stopPropagation();},true));
+      f.addEventListener('focus',e=>{e.stopPropagation(); f.dataset.kgenUserTouched='1'; setTimeout(()=>{try{f.select()}catch(_){}} ,80);},true);
+      f.addEventListener('input',e=>{f.dataset.kgenUserTouched='1';const c=clean(f.value); if(f.value!==c)f.value=c; syncAmount(c,f);},true);
+      f.addEventListener('change',e=>{const c=clean(f.value); f.value=c; syncAmount(c,f);},true);
+    });
+    const first=amountFields()[0];
+    if(first&&!$('kgen-v10273-amount-note')){const n=document.createElement('div'); n.id='kgen-v10273-amount-note'; n.className='kgen-v1027-amount-organ-note'; n.textContent='金額由操作者自行輸入；Approve、fortuneClaim、vowTo、lightLamp 共用此數量。空白不會自動補 8。'; first.insertAdjacentElement('afterend',n);}  
+  }
+
+  function restoreHeartActions(){
+    const panel=$('kgen-heart-live-panel'); if(!panel)return;
+    let actions=panel.querySelector('.kh-actions:last-of-type')||panel.querySelector('.kh-actions');
+    if(!actions){actions=document.createElement('div'); actions.className='kh-actions'; panel.appendChild(actions);}
+    const defs=[['kh-fortune','fortuneClaim 發財金'],['kh-heartbeat','heartbeatClaim 心跳'],['kh-ignite','igniteAndClaim 呼吸'],['kh-festival1','5/20 悟空生日'],['kh-festival2','11/11 孤勇日'],['kh-newyear','12/31 倒數'],['kh-vow','vowTo 還願下單'],['kh-lamp','lightLamp 點燈下單'],['kh-wishbtn','makeWish 許願下單']];
+    defs.forEach(([id,label])=>{let b=$(id); if(!b){b=document.createElement('button'); b.type='button'; b.id=id; actions.appendChild(b);} if(!text(b)||/vowTo|lightLamp|makeWish/.test(label)) b.textContent=label; b.style.display=''; b.style.visibility='visible'; b.style.pointerEvents='auto';});
+    if(!$('kh-wish')){const w=document.createElement('input'); w.id='kh-wish'; w.placeholder='許願文字或 0x bytes32 hash'; actions.parentNode.insertBefore(w, actions);}    
+    ['kh-wish','kh-vow-option'].forEach(id=>{const el=$(id); if(el){el.style.display=''; el.style.visibility='visible'; el.style.pointerEvents='auto';}});
+  }
+
+  function bindMoveStable(){
+    const wrap=$('move-joystick-wrap'), knob=$('move-joystick-knob'); if(!wrap||!knob||wrap.dataset.v10273Move==='1')return; wrap.dataset.v10273Move='1';
+    let pid=null;
+    function centerKnob(){knob.style.left='30px'; knob.style.top='30px'; knob.style.transform='translate(0,0)';}
+    function setKnob(dx,dy){knob.style.left='30px'; knob.style.top='30px'; knob.style.transform=`translate(${dx}px,${dy}px)`;}
+    function apply(clientX,clientY){const r=wrap.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=clientX-cx,dy=clientY-cy;const max=Math.max(34,Math.min(r.width,r.height)*.36);const len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max;}setKnob(dx,dy);state.x=Math.round(dx*2.8);state.elevator=clamp(150+clamp(-dy/max,-1,1)*150,0,300);active(900);applyCoord();}
+    function stop(){pid=null;centerKnob();active(260);applyCoord();}
+    wrap.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pid=e.pointerId;try{wrap.setPointerCapture(pid)}catch(_){}apply(e.clientX,e.clientY);},true);
+    wrap.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;e.preventDefault();e.stopPropagation();apply(e.clientX,e.clientY);},true);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wrap.addEventListener(ev,stop,true));
+  }
+  function bindElevStable(){
+    const rail=$('warp-rail-body')||document.querySelector('.warp-engine'); if(!rail||rail.dataset.v10273Elev==='1')return; rail.dataset.v10273Elev='1';
+    let pid=null; function from(clientY){const r=rail.getBoundingClientRect();const y=clamp(clientY-r.top,0,r.height);setElev((1-y/r.height)*300,true)}
+    rail.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pid=e.pointerId;try{rail.setPointerCapture(pid)}catch(_){}from(e.clientY);},true);
+    rail.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;e.preventDefault();e.stopPropagation();from(e.clientY);},true);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>rail.addEventListener(ev,()=>{pid=null;active(260);},true));
+  }
+
+  function findButtonsByText(re){return qa('button,a,[role="button"],.btn,.pill').filter(el=>re.test(text(el)));}
+  function bindMirrorOrders(){
+    findButtonsByText(/多方|多頭|射線多|前鏡/).forEach(b=>{if(b.dataset.v10273MirrorBull==='1')return;b.dataset.v10273MirrorBull='1';b.addEventListener('click',()=>{setAngle(0);active(900);setMirror('bull','多方下單');},true);});
+    findButtonsByText(/空方|空頭|後續空|後鏡/).forEach(b=>{if(b.dataset.v10273MirrorBear==='1')return;b.dataset.v10273MirrorBear='1';b.addEventListener('click',()=>{setAngle(180);active(900);setMirror('bear','空方下單');},true);});
+    ['kh-fortune','kh-vow','kh-lamp','kh-wishbtn','kh-heartbeat','kh-ignite'].forEach(id=>{const b=$(id); if(b&&b.dataset.v10273Order!=='1'){b.dataset.v10273Order='1'; b.addEventListener('click',()=>{setMirror(isBull()?'bull':'bear','鏈上功能下單');},true);}});
+  }
+
+  function togglePanel(panel, show){if(!panel)return; const on=show==null?(panel.style.display==='none'||getComputedStyle(panel).display==='none'):show; panel.style.display=on?'block':'none'; panel.style.visibility=on?'visible':'hidden'; panel.style.pointerEvents=on?'auto':'none';}
+  function ensurePanelClose(panel, label){if(!panel||panel.querySelector('.kgen-v10273-panel-close'))return; panel.style.position=panel.style.position||'relative'; const b=document.createElement('button'); b.type='button'; b.className='kgen-v10273-panel-close'; b.textContent='收合'; b.title='收合'+(label||'視窗'); b.onclick=(e)=>{e.preventDefault();e.stopPropagation();togglePanel(panel,false);say((label||'視窗')+'已收合。');}; panel.appendChild(b);}
+  function bindRightPanels(){
+    const rule=$('coord-panel')||document.querySelector('.coord-panel')||$('right-info-panel')||document.querySelector('.right-info-panel');
+    if(rule){ensurePanelClose(rule,'右側神規'); rule.classList.add('kgen-v10273-right-panel');}
+    findButtonsByText(/右側神規|神規|規則/).forEach(b=>{if(b.dataset.v10273Rule==='1')return;b.dataset.v10273Rule='1';b.addEventListener('click',e=>{if(!rule)return;e.preventDefault();e.stopPropagation();togglePanel(rule);say('右側神規控制台已切換。');},true);});
+    // 訊息 20：只說明訊息紀錄，不再串到客服或其他功能。
+    const msgPanel = $('kgen-message-panel')||$('kgen-v1027-message-panel')||findPanelByHeading(/訊息|紀錄/);
+    if(msgPanel){ensurePanelClose(msgPanel,'訊息紀錄'); msgPanel.classList.add('kgen-v10273-message-panel');}
+    findButtonsByText(/訊息紀錄|訊息|20/).forEach(b=>{if(b.dataset.v10273Msg==='1')return;b.dataset.v10273Msg='1';b.addEventListener('click',e=>{if(!/訊息|20/.test(text(b)))return; e.preventDefault();e.stopPropagation(); if(msgPanel)togglePanel(msgPanel); say('宇宙訊息紀錄已切換。這裡顯示操作、移動、曲速與神殿事件。');},true);});
+  }
+  function findPanelByHeading(re){return qa('div,section,aside').find(el=>re.test(text(el).slice(0,80)) && (el.offsetWidth>120||el.offsetHeight>80));}
+  function raiseMap(){qa('#coord-modal,.coord-modal,[id*="map"],[class*="map"],[id*="Map"],[class*="Map"]').forEach(el=>{el.style.zIndex='2147483400';});}
+  function cleanupScale(){
+    qa('#kgen-v1025-elevator-scale,#kgen-v1026-elevator-scale,#kgen-v1027-elevator-scale').forEach((el,i)=>{ if(i>0) el.remove(); });
+    const rail=$('warp-rail-body'); if(rail&&!$('kgen-v10273-elevator-scale')){const scale=document.createElement('div');scale.id='kgen-v10273-elevator-scale';scale.innerHTML='<div class="tick t300">300</div><div class="tick t250">250</div><div class="tick t200">200</div><div class="tick t150">150</div><div class="tick t100">100</div><div class="tick t50">50</div><div class="tick t0">0</div>'; rail.appendChild(scale);}  
+  }
+  function layoutFix(){
+    ['kgen-v1025-total-collapse','kgen-v1026-total-collapse','kgen-v1027-total-collapse'].forEach(id=>{const b=$(id); if(b){b.style.top='46px'; b.style.right='10px'; b.style.zIndex='2147483600';}});
+    const p=$('kgen-heart-live-panel'); if(p){p.style.maxHeight='calc(100vh - 205px)';p.style.overflowY='auto';p.style.paddingBottom='150px'; ensurePanelClose(p,'悟空控制台');}
+    const dock=$('kgen-v917-quick-dock')||document.querySelector('.bottom-controls')||document.querySelector('.quick-dock'); if(dock){dock.style.zIndex='2147483100';dock.style.pointerEvents='auto';dock.style.position=dock.style.position||'fixed';}
+  }
+  function css(){if($('kgen-v10273-style'))return; const s=document.createElement('style'); s.id='kgen-v10273-style'; s.textContent=`
+    input[data-kgen-amount],#kh-amount,#amt-in,#bet-amt-input,#kgen-12345-amount-input{pointer-events:auto!important;touch-action:manipulation!important;user-select:text!important;-webkit-user-select:text!important;position:relative!important;z-index:2147482500!important;}
+    #move-joystick-wrap{pointer-events:auto!important;touch-action:none!important;z-index:2147482400!important;}
+    #kgen-heart-live-panel .kh-actions button,#kh-wish,#kh-vow-option{display:block!important;visibility:visible!important;pointer-events:auto!important;}
+    .kgen-v10273-panel-close{position:absolute!important;top:8px!important;right:8px!important;z-index:2147483500!important;border:1px solid rgba(255,215,120,.62)!important;border-radius:999px!important;background:rgba(0,0,0,.78)!important;color:#ffe39a!important;font-weight:900!important;font-size:11px!important;padding:5px 9px!important;pointer-events:auto!important;}
+    .kgen-v10273-right-panel{max-height:44vh!important;overflow-y:auto!important;font-size:12px!important;line-height:1.38!important;}
+    .kgen-v10273-right-panel h1,.kgen-v10273-right-panel h2,.kgen-v10273-right-panel h3,.kgen-v10273-right-panel .title{font-size:13px!important;line-height:1.25!important;margin-right:46px!important;}
+    .kgen-v10273-message-panel{max-height:42vh!important;overflow-y:auto!important;}
+    #kgen-v10273-elevator-scale{position:absolute;top:0;bottom:0;left:calc(100% + 10px);width:46px;pointer-events:none;z-index:80;font-family:Orbitron,'Noto Sans TC',sans-serif;}
+    #kgen-v10273-elevator-scale .tick{position:absolute;left:0;transform:translateY(50%);font-size:10px;font-weight:900;color:#ffd978;text-shadow:0 0 8px #000;}
+    #kgen-v10273-elevator-scale .tick:before{content:'';display:inline-block;width:10px;height:1px;background:#ffd978;margin-right:4px;vertical-align:middle;}
+    #kgen-v10273-elevator-scale .t300{bottom:96%;} #kgen-v10273-elevator-scale .t250{bottom:80%;} #kgen-v10273-elevator-scale .t200{bottom:64%;} #kgen-v10273-elevator-scale .t150{bottom:50%;} #kgen-v10273-elevator-scale .t100{bottom:34%;} #kgen-v10273-elevator-scale .t50{bottom:18%;} #kgen-v10273-elevator-scale .t0{bottom:4%;}
+    #kgen-v1025-elevator-scale,#kgen-v1026-elevator-scale,#kgen-v1027-elevator-scale{display:none!important;}
+    body[data-kgen-mirror="bull"] #kgen-v10273-mirror-status{border-color:rgba(69,255,184,.75)!important;color:#9dffd8!important;}
+    body[data-kgen-mirror="bear"] #kgen-v10273-mirror-status{border-color:rgba(255,120,120,.75)!important;color:#ffb2b2!important;}
+  `; document.head.appendChild(s); }
+  function boot(){css();bindAmount();restoreHeartActions();bindMoveStable();bindElevStable();bindMirrorOrders();bindRightPanels();cleanupScale();layoutFix();raiseMap();applyCoord();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  window.addEventListener('load',boot);
+  setInterval(boot,1200); setInterval(applyCoord,140);
+  window.KGEN12345_V10273_STABLE={version:VERSION,state,getAmount,setElevator:setElev,setMirror,applyCoord};
+})();
+
+
+/* =========================================================
+KGEN 12345｜V10.30 MASTER STABLE FINAL STABILIZER
+VERSION: 12345-TEMPLE-V10.30-MASTER-STABLE
+BASE_FROM: V10.27.3 + V10.12 TRUE ROTATION DNA
+========================================================= */
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V10.30-MASTER-STABLE';
+  const BUILD='20260516-V10.30-MASTER-STABLE';
+  const $=(id)=>document.getElementById(id);
+  const qa=(s,root=document)=>Array.from(root.querySelectorAll(s));
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
+  const root=document.documentElement;
+  const state={x:0,elevator:20,lastAmount:'',orderActive:false};
+  function speak(msg){try{ if(!msg||!speechSynthesis) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(msg)); u.lang='zh-TW'; u.rate=1.03; speechSynthesis.speak(u);}catch(e){}}
+  function status(msg){['kh-log','bp-status','w3-prog','kgen-v1030-status'].forEach(id=>{const e=$(id); if(e) e.textContent=String(msg||'');}); console.log('[KGEN12345 V10.30]',msg);}
+  function syncVersion(){window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{VERSION,BUILD,CHANGESET:'MASTER STABLE FINAL'}); const v=$('ver-st'); if(v) v.textContent='VERSION '+VERSION; qa('.sys-st').forEach(el=>{if((el.textContent||'').includes('VERSION')) el.textContent='VERSION '+VERSION;}); document.title='KGEN 12345 五指山悟空財神殿 V10.30 MASTER STABLE'; root.setAttribute('data-kgen12345-version',VERSION);}
+  function amountInputs(){return Array.from(new Set(qa('input').filter(i=>{const id=(i.id||'').toLowerCase(), ph=(i.placeholder||'').toLowerCase(), nm=(i.name||'').toLowerCase(), type=(i.type||'').toLowerCase(); if(['range','checkbox','radio','button','submit'].includes(type)) return false; return /(^|-)amt|amount|kh-amount|amt-in|kgen/.test(id)||/kgen|amount|金額|數量/.test(ph)||/amount|amt/.test(nm);})));}
+  function sanitize(v){v=String(v||'').replace(/[，,]/g,'.').replace(/[^0-9.]/g,''); const p=v.split('.'); if(p.length>2) v=p.shift()+'.'+p.join(''); if(v.startsWith('.')) v='0'+v; return v;}
+  function setupAmountInputs(){amountInputs().forEach(i=>{i.type='text'; i.inputMode='decimal'; i.autocomplete='off'; i.setAttribute('data-kgen-user-owned','true'); i.placeholder='請自行輸入 KGEN 數量（不自動填 8）'; if(!i.dataset.kgenTouched && String(i.value||'').trim()==='8') i.value=''; ['pointerdown','mousedown','touchstart','click','focus','keydown','keyup'].forEach(ev=>i.addEventListener(ev,e=>{e.stopPropagation();},true)); i.addEventListener('focus',()=>{i.dataset.kgenTouched='1';},true); i.addEventListener('input',()=>{i.dataset.kgenTouched='1'; const c=sanitize(i.value); if(c!==i.value) i.value=c; state.lastAmount=c; amountInputs().forEach(o=>{if(o!==i && document.activeElement!==o) o.value=c;}); updateStatus();});});}
+  function getAmount(){setupAmountInputs(); const active=document.activeElement; if(active&&amountInputs().includes(active)) return sanitize(active.value); return amountInputs().map(i=>sanitize(i.value)).find(Boolean)||state.lastAmount||'';}
+  function clickByIdOrText(id,pats,label){let btn=id?$(id):null; if(!btn){btn=qa('button').find(b=>pats.some(p=>p.test((b.textContent||'')+' '+(b.id||''))));} if(btn){btn.click();return true;} status(label+'：找不到原始交易按鈕。'); speak(label+' 找不到交易按鈕。'); return false;}
+  function ensureTempleOps(){const old=window.templeOps||{}; window.templeOps=Object.assign({},old,{approve:old.approve||(()=>clickByIdOrText('kh-approve',[/approve|授權/i],'Approve 授權')), cup:old.cup||(()=>{try{window.KGEN12345_HOLY_CUP&&KGEN12345_HOLY_CUP.tap&&KGEN12345_HOLY_CUP.tap();}catch(e){} status('三聖盃已請示。');}), fortune:old.fortune||(()=>clickByIdOrText('kh-fortune',[/fortuneClaim|發財金/],'fortuneClaim 發財金')), heartbeat:old.heartbeat||(()=>clickByIdOrText('kh-heartbeat',[/heartbeatClaim|整點心跳|心跳/],'heartbeatClaim 整點心跳')), ignite:old.ignite||(()=>clickByIdOrText('kh-ignite',[/igniteAndClaim|轉日呼吸|呼吸/],'igniteAndClaim 轉日呼吸')), vow:old.vow||(()=>clickByIdOrText('kh-vow',[/vowTo|還願/],'vowTo 還願')), lamp:old.lamp||(()=>clickByIdOrText('kh-lamp',[/lightLamp|點燈/],'lightLamp 點燈')), wish:old.wish||(()=>clickByIdOrText('kh-wishbtn',[/makeWish|許願/],'makeWish 許願'))});}
+  function btn(label,fn,cls='term-btn'){const b=document.createElement('button'); b.type='button'; b.className=cls; b.textContent=label; b.style.cssText='padding:10px;border-radius:10px;pointer-events:auto;'; b.onclick=e=>{e.preventDefault();e.stopPropagation();fn();}; return b;}
+  function ensureMasterDock(){const panel=$('web3-panel')||document.querySelector('[id*="heart-live"],[id*="web3"]'); if(!panel||$('kgen-v1030-master-dock')) return; const d=document.createElement('div'); d.id='kgen-v1030-master-dock'; d.style.cssText='margin-top:10px;padding:10px;border:1px solid rgba(255,215,120,.45);border-radius:12px;background:rgba(0,0,0,.38);display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:5;'; d.innerHTML='<div style="grid-column:1/3;color:#ffd778;font-weight:900;">悟空控制台｜鏈上交易器官</div><div style="grid-column:1/3;color:#bff;font-size:12px;line-height:1.5;">金額由下方欄位自行輸入；系統不自動填 8，不會自動送交易。</div><input id="kh-amount-master" data-kgen-user-owned="true" inputmode="decimal" placeholder="請自行輸入 KGEN 數量" style="grid-column:1/3;padding:10px;border-radius:10px;border:1px solid rgba(255,215,120,.35);background:#050505;color:#fff;font-weight:900;pointer-events:auto;">'; d.appendChild(btn('Approve 授權',()=>templeOps.approve(),'term-btn active-kgen')); d.appendChild(btn('fortuneClaim 發財金',()=>templeOps.fortune(),'term-btn active-kgen')); d.appendChild(btn('heartbeatClaim 心跳',()=>templeOps.heartbeat())); d.appendChild(btn('igniteAndClaim 呼吸',()=>templeOps.ignite())); d.appendChild(btn('vowTo 還願下單',()=>templeOps.vow())); d.appendChild(btn('lightLamp 點燈下單',()=>templeOps.lamp())); const w=btn('makeWish 許願下單',()=>templeOps.wish(),'term-btn active-kgen'); w.style.gridColumn='1/3'; d.appendChild(w); const st=document.createElement('div'); st.id='kgen-v1030-status'; st.style.cssText='grid-column:1/3;color:#bff;font-size:12px;line-height:1.45;white-space:pre-wrap;'; st.textContent='MASTER STABLE：心跳、呼吸、許願、還願、點燈已保留。'; d.appendChild(st); const q=panel.querySelector('.quickstart-card'); if(q&&q.parentNode) q.parentNode.insertBefore(d,q.nextSibling); else panel.appendChild(d); setupAmountInputs();}
+  function injectCss(){if($('kgen-v1030-master-stable-css')) return; const st=document.createElement('style'); st.id='kgen-v1030-master-stable-css'; st.textContent='#web3-panel,#kgen-heart-live-panel{max-height:calc(100vh - 210px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;bottom:185px!important}#bottom-dock,.bottom-dock,.bottom-nav,.footer-nav{z-index:100500!important}input[data-kgen-user-owned="true"]{pointer-events:auto!important;user-select:text!important;-webkit-user-select:text!important;touch-action:manipulation!important}#kgen-v1030-total-collapse{position:fixed;right:12px;top:88px;z-index:100900;padding:8px 11px;border:1px solid rgba(255,215,120,.7);border-radius:16px;background:rgba(0,0,0,.72);color:#ffd778;font-weight:900;font-size:12px;pointer-events:auto}.kgen-v1030-collapsed #web3-panel,.kgen-v1030-collapsed #kgen-heart-live-panel,.kgen-v1030-collapsed #right-rules-panel{display:none!important}.kgen-v1030-front-mirror{outline:2px solid rgba(95,245,255,.95)!important;box-shadow:0 0 22px rgba(95,245,255,.55)!important}.kgen-v1030-rear-mirror{outline:2px solid rgba(255,190,80,.95)!important;box-shadow:0 0 22px rgba(255,190,80,.55)!important}'; document.head.appendChild(st); if(!$('kgen-v1030-total-collapse')){const b=document.createElement('button'); b.id='kgen-v1030-total-collapse'; b.type='button'; b.textContent='總收合'; b.onclick=e=>{e.preventDefault();e.stopPropagation();document.body.classList.toggle('kgen-v1030-collapsed');b.textContent=document.body.classList.contains('kgen-v1030-collapsed')?'全部展開':'總收合';}; document.body.appendChild(b);}}
+  function percent(v){return clamp(v,0,300)/300*100;} function yFrom(v){return (clamp(v,0,300)-20)*1.4;}
+  function applyMove(){const e=clamp(state.elevator,0,300), y=Math.round(yFrom(e)), p=percent(e).toFixed(2); root.style.setProperty('--kgen-v1027-main-x',Math.round(state.x)+'px'); root.style.setProperty('--kgen-v1027-main-y',y+'px'); root.style.setProperty('--kgen-v1026-main-x',Math.round(state.x)+'px'); root.style.setProperty('--kgen-v1026-main-y',y+'px'); root.style.setProperty('--v72-move-x',Math.round(state.x)+'px'); root.style.setProperty('--v72-move-y',y+'px'); root.style.setProperty('--kgen-motion-x','0px'); root.style.setProperty('--kgen-warp-y','0px'); ['--kgen-v1027-elevator-percent','--kgen-v1026-elevator-percent','--kgen-v1025-elevator-percent'].forEach(k=>root.style.setProperty(k,p+'%')); const core=$('core-anchor'); if(core){core.style.setProperty('--v72-move-x',Math.round(state.x)+'px');core.style.setProperty('--v72-move-y',y+'px');} const k=$('move-joystick-knob'); if(k){k.style.left=(40+clamp(state.x/1.8,-38,38))+'px';k.style.top=(40+clamp((20-e)/280*38,-38,38))+'px';} ['kgen-v1027-elevator-value','kgen-v1026-elevator-value','warp-val','warp-label'].forEach(id=>{const el=$(id); if(el) el.textContent=String(Math.round(e));}); updateStatus();}
+  function setupMoveJoystick(){const wrap=$('move-joystick-wrap'), knob=$('move-joystick-knob'); if(!wrap||!knob) return; let active=false,pid=null; function h(x,y){const r=wrap.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2; let dx=x-cx,dy=y-cy; const m=38,l=Math.hypot(dx,dy)||1; if(l>m){dx=dx/l*m;dy=dy/l*m;} state.x=dx*1.8; state.elevator=clamp(20+(-dy/m)*280,0,300); applyMove();} wrap.addEventListener('pointerdown',e=>{if(e.target&&/input|button|select|textarea/i.test(e.target.tagName))return; e.preventDefault();e.stopPropagation();active=true;pid=e.pointerId;try{wrap.setPointerCapture(pid)}catch(_){ }h(e.clientX,e.clientY);},true); wrap.addEventListener('pointermove',e=>{if(!active||e.pointerId!==pid)return; e.preventDefault();e.stopPropagation();h(e.clientX,e.clientY);},true); function up(e){if(pid!==null&&e&&e.pointerId!==pid)return;active=false;pid=null;} wrap.addEventListener('pointerup',up,true);wrap.addEventListener('pointercancel',up,true);wrap.addEventListener('lostpointercapture',up,true);}
+  function setupElevatorRail(){const c=qa('[id*="elevator"],[id*="warp"],.universe-elevator,.warp-rail').filter(el=>{const t=((el.id||'')+' '+(el.className||'')+' '+(el.textContent||'')).toLowerCase();const r=el.getBoundingClientRect();return (t.includes('elevator')||t.includes('warp')||t.includes('宇宙電梯'))&&r.height>80&&r.width<240;})[0]||$('warp-input-val'); if(!c)return; function fromY(y){const r=c.getBoundingClientRect(); setElevator((1-clamp((y-r.top)/Math.max(1,r.height),0,1))*300);} ['pointerdown','pointermove'].forEach(ev=>c.addEventListener(ev,e=>{if(ev==='pointermove'&&e.buttons!==1)return;e.preventDefault();e.stopPropagation();fromY(e.clientY);},true));}
+  function setElevator(v){state.elevator=clamp(v,0,300);applyMove();} function setXY(x,y){state.x=clamp(x,-180,180);state.elevator=clamp(y,0,300);applyMove();}
+  function sideFromAngle(){const s=$('steer-input-val'), a=s?Number(s.value||0):0; return (a>=-90&&a<=90)?'多方':'空方';}
+  function setupMirror(){const old=window.templeOps||{}; function activate(){const side=sideFromAngle();const core=$('core-window')||$('core-anchor'); if(core){core.classList.remove('kgen-v1030-front-mirror','kgen-v1030-rear-mirror');core.classList.add(side==='多方'?'kgen-v1030-front-mirror':'kgen-v1030-rear-mirror');} status('下單鏡頭啟動：'+(side==='多方'?'前鏡｜多方':'後鏡｜空方'));}
+    ['fortune','heartbeat','ignite','vow','lamp','wish'].forEach(k=>{const fn=old[k]||window.templeOps?.[k]; if(typeof fn==='function') window.templeOps[k]=function(){activate();return fn.apply(this,arguments);};}); const s=$('steer-input-val'); if(s)s.addEventListener('input',activate);}
+  function fixMessages(){qa('button').forEach(b=>{const t=b.textContent||''; if(/訊息|紀錄|20/.test(t)&&!b.dataset.k1030memo){b.dataset.k1030memo='1';b.addEventListener('click',()=>setTimeout(()=>speak('訊息紀錄已開啟，這裡只顯示紀錄，不會送交易。'),30),true);} if(/關閉|收合|×|X/.test(t)&&!b.dataset.k1030close){b.dataset.k1030close='1';b.addEventListener('click',()=>{const p=b.closest('[id],.modal,.panel,.drawer,.card'); if(p&&!/web3-panel|kgen-heart-live-panel/.test(p.id||'')){p.classList.remove('show','open','active');p.style.display='none';}},true);}});}
+  function updateStatus(){const el=$('kgen-v1030-status'); if(el) el.textContent='MASTER STABLE｜Amount '+(getAmount()||'自行輸入')+' KGEN｜Elevator '+Math.round(state.elevator)+'｜X '+Math.round(state.x)+'｜'+sideFromAngle();}
+  function init(){syncVersion();injectCss();ensureTempleOps();ensureMasterDock();setupAmountInputs();setupMoveJoystick();setupElevatorRail();setupMirror();fixMessages();applyMove();status('V10.30 MASTER STABLE 已啟動。');}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init(); setTimeout(init,500);setTimeout(init,1600);setTimeout(init,3600);setInterval(()=>{syncVersion();setupAmountInputs();fixMessages();updateStatus();},2000);
+  window.KGEN12345_MASTER_STABLE={version:VERSION,build:BUILD,state,setElevator,setXY,getAmount,setupAmountInputs,syncVersion};
+})();
