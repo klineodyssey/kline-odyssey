@@ -1,1 +1,204 @@
-<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KGEN 12345 Wallet Bridge V10.36 V10.36</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}.card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.75)}h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#dff}button,a{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:linear-gradient(180deg,#ffe28a,#d3a93b);color:#111;font-weight:900;text-decoration:none}.sub{background:rgba(255,255,255,.06);color:#fff}</style><script>const TARGET='https://klineodyssey.github.io/kline-odyssey/12345.html';const NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';function go(){location.replace(TARGET)}function mm(){location.href='metamask://dapp/'+NOSCHEME;setTimeout(()=>{location.href='https://metamask.app.link/dapp/'+NOSCHEME},900)}window.addEventListener('load',()=>setTimeout(go,900));</script></head><body><div class="card"><h1>KGEN 12345 錢包橋接入口 V10.36</h1><p>正在進入英文路徑完整神殿頁 <b>12345.html</b>。若 MetaMask 登入後沒有自動跳轉，請按下方按鈕或複製網址貼到錢包 DApp 瀏覽器。</p><a href="https://klineodyssey.github.io/kline-odyssey/12345.html">立即進入 12345 神殿</a><button onclick="mm()">用 MetaMask 開啟 12345 神殿</button><button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TARGET);this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button><p style="font-size:12px;color:#9ff">進入後按「連結錢包 / 切 BSC」，即可讀取 BNB、KGEN、Allowance、Heart 血庫。</p></div></body></html>
+<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KGEN 12345 Wallet Bridge V9.0.0</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}.card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.75)}h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#dff}button,a{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:linear-gradient(180deg,#ffe28a,#d3a93b);color:#111;font-weight:900;text-decoration:none}.sub{background:rgba(255,255,255,.06);color:#fff}</style><script>const TARGET='https://klineodyssey.github.io/kline-odyssey/12345.html';const NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';function go(){location.replace(TARGET)}function mm(){location.href='metamask://dapp/'+NOSCHEME;setTimeout(()=>{location.href='https://metamask.app.link/dapp/'+NOSCHEME},900)}window.addEventListener('load',()=>setTimeout(go,900));</script></head><body><div class="card"><h1>KGEN 12345 錢包橋接入口 V9.0.0</h1><p>正在進入英文路徑完整神殿頁 <b>12345.html</b>。若 MetaMask 登入後沒有自動跳轉，請按下方按鈕或複製網址貼到錢包 DApp 瀏覽器。</p><a href="https://klineodyssey.github.io/kline-odyssey/12345.html">立即進入 12345 神殿</a><button onclick="mm()">用 MetaMask 開啟 12345 神殿</button><button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TARGET);this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button><p style="font-size:12px;color:#9ff">進入後按「連結錢包 / 切 BSC」，即可讀取 BNB、KGEN、Allowance、Heart 血庫。</p></div>
+<!-- ============================================================
+KGEN 12345 V10.4 TEMPLE REBUILD HOTFIX
+- Front-end only. Solidity / Heart V3.2.6 untouched.
+- Fixes panel ownership: Heart panel only controls Heart; rules panel only rules; festival panel only festivals.
+- Replaces flashing countdown with stable textContent timer.
+- Removes old residual Wukong customer-service floating widget.
+- Rebuilds sacred cup as a clean 3-step readiness panel.
+============================================================ -->
+<style id="kgen-12345-v104-rebuild-style">
+  :root{--v104-gold:#ffd778;--v104-cyan:#00f2ff;--v104-bg:rgba(3,8,14,.86);--v104-line:rgba(255,215,120,.46);}
+  body.v104-temple-rebuild #guideUnifiedBtn,
+  body.v104-temple-rebuild .nav-help{display:none!important;}
+  body.v104-temple-rebuild #temple-audio-console{display:none!important;}
+  body.v104-temple-rebuild #web3-panel{display:none!important;}
+  body.v104-temple-rebuild #kgen-heart-live-panel{left:16px!important;top:112px!important;max-height:48vh!important;}
+  body.v104-temple-rebuild #kgen-heart-toggle{left:16px!important;top:70px!important;z-index:100600!important;}
+  body.v104-temple-rebuild #core-window img{object-fit:cover!important;}
+  body.v104-temple-rebuild .footer-terminal{z-index:100400!important;}
+
+  #v104-rules-panel,#v104-festival-panel,#v104-cup-panel{
+    box-sizing:border-box;border:1px solid var(--v104-line);border-radius:16px;background:var(--v104-bg);color:#fff;
+    box-shadow:0 0 30px rgba(255,215,120,.12), inset 0 0 20px rgba(0,242,255,.04);backdrop-filter:blur(10px);
+    font-family:'Noto Sans TC',system-ui,sans-serif;
+  }
+  #v104-rules-panel{position:fixed;right:18px;top:276px;width:min(380px,calc(100vw - 36px));z-index:100710;padding:12px;display:none;}
+  #v104-rules-panel.open{display:block;}
+  .v104-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:var(--v104-gold);font-weight:900;letter-spacing:.04em;}
+  .v104-close{border:1px solid rgba(255,215,120,.55);background:rgba(0,0,0,.42);color:#ffd778;border-radius:999px;padding:5px 10px;font-weight:900;cursor:pointer;}
+  .v104-list{display:grid;gap:8px;}
+  .v104-list button,.v104-pill-btn{border:1px solid rgba(0,242,255,.42);background:rgba(0,242,255,.10);color:#dffcff;border-radius:12px;padding:10px 12px;font-weight:900;text-align:left;cursor:pointer;}
+  .v104-list button:hover,.v104-pill-btn:hover{background:rgba(0,242,255,.18);}
+
+  #v104-festival-dock{position:fixed;right:18px;top:110px;z-index:100720;display:flex;align-items:center;gap:8px;}
+  #v104-festival-dock button{border:1px solid var(--v104-line);background:rgba(0,0,0,.62);color:#ffd778;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer;box-shadow:0 0 16px rgba(255,215,120,.14);}
+  #v104-festival-panel{position:fixed;right:18px;top:158px;width:min(380px,calc(100vw - 36px));z-index:100715;padding:12px;display:none;}
+  #v104-festival-panel.open{display:block;}
+  .v104-event{border:1px solid rgba(255,215,120,.22);border-radius:12px;padding:9px;margin-top:8px;background:rgba(0,0,0,.25);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+  .v104-event b{color:#fff6d7;}.v104-event small{color:#9ff8ff;display:block;margin-top:3px;}
+  .v104-event button{border:1px solid rgba(255,215,120,.50);background:rgba(255,215,120,.84);color:#111;border-radius:10px;padding:8px 12px;font-weight:900;cursor:pointer;}
+  #v104-countdown{font-family:'Orbitron',monospace;color:#00f2ff;font-size:18px;text-align:center;letter-spacing:.08em;padding:8px 6px;border-radius:12px;background:rgba(0,242,255,.06);border:1px solid rgba(0,242,255,.18);white-space:nowrap;}
+
+  #v104-cup-panel{position:fixed;left:18px;right:18px;bottom:106px;z-index:100500;padding:12px;}
+  #v104-cup-panel .v104-cup-grid{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr 34px 1.1fr;gap:10px;align-items:center;}
+  .v104-step{border:1px solid rgba(0,242,255,.30);border-radius:13px;background:rgba(0,20,28,.52);padding:10px;min-height:70px;}
+  .v104-step .no{color:#00f2ff;font-size:11px;font-weight:900;letter-spacing:.08em}.v104-step .title{font-weight:900;margin-top:3px}.v104-step .stat{color:#ff6d6d;font-weight:900;margin-top:4px}.v104-step.ok .stat{color:#7dffb2}.v104-arrow{font-size:28px;color:rgba(255,215,120,.55);text-align:center;}
+  .v104-step button{margin-top:7px;width:100%;border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.86);color:#111;border-radius:9px;padding:7px;font-weight:900;cursor:pointer;}
+  #v104-cup-result{border:1px solid rgba(255,215,120,.35);border-radius:13px;background:rgba(255,215,120,.12);padding:12px;text-align:center;color:#ffd778;font-weight:900;min-height:70px;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  #v104-cup-result.ok{background:rgba(80,255,160,.12);color:#9dffc8;border-color:rgba(80,255,160,.38);}
+
+  @media(max-width:760px){
+    body.v104-temple-rebuild #kgen-heart-live-panel{left:8px!important;right:8px!important;top:96px!important;width:auto!important;max-height:52vh!important;}
+    body.v104-temple-rebuild #kgen-heart-toggle{left:8px!important;top:64px!important;}
+    #v104-rules-panel{right:8px;left:8px;top:210px;width:auto;max-height:54vh;overflow:auto;}
+    #v104-festival-dock{right:8px;top:150px;}
+    #v104-festival-dock button{padding:8px 10px;font-size:12px;}
+    #v104-festival-panel{right:8px;left:8px;top:192px;width:auto;max-height:48vh;overflow:auto;}
+    #v104-cup-panel{left:8px;right:8px;bottom:86px;padding:9px;}
+    #v104-cup-panel .v104-cup-grid{grid-template-columns:1fr;gap:7px;}
+    .v104-arrow{display:none;}.v104-step{min-height:auto;padding:8px;font-size:12px;}#v104-cup-result{min-height:48px;padding:9px;font-size:13px;}
+    #v104-countdown{font-size:14px;}
+  }
+</style>
+<script id="kgen-12345-v104-rebuild-script">
+(function(){
+  'use strict';
+  const VERSION='12345-TEMPLE-V10.4-TEMPLE-REBUILD';
+  const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
+  const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const $=id=>document.getElementById(id);
+  const qsa=s=>Array.from(document.querySelectorAll(s));
+  function short(a){return a?String(a).slice(0,6)+'…'+String(a).slice(-4):'--';}
+  function safeText(el,txt){ if(el && el.textContent!==txt) el.textContent=txt; }
+  function toast(msg){ try{ if(window.app&&app.toast) app.toast(msg); }catch(e){} const t=$('toast'); if(t) t.textContent=msg; }
+  function callIf(fnName){ try{ if(window.templeOps && typeof templeOps[fnName]==='function') return templeOps[fnName](); }catch(e){ toast(e.message||String(e)); } }
+  function setVersion(){
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION;
+    safeText($('ver-st'),'VERSION '+VERSION);
+    qsa('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) safeText(el,'VERSION '+VERSION); });
+  }
+  function setHeartImage(){ const img=$('fairy-img'); if(img) img.src='./assets/wukong_heart_v10_4.png'; }
+  function hideResidualService(){
+    const keywords=['悟空客服','客服 / 悟空財神殿導覽','語音客服介紹','語音客服'];
+    qsa('body *').forEach(el=>{
+      if(!el || el.id==='v104-rules-panel' || el.closest('#v104-rules-panel')) return;
+      const st=getComputedStyle(el);
+      const txt=(el.textContent||'').trim();
+      if(!txt) return;
+      if(keywords.some(k=>txt.includes(k)) && (st.position==='fixed' || st.position==='absolute' || el.className.toString().includes('guide') || el.className.toString().includes('help'))){
+        if(!el.closest('.footer-terminal')) el.style.display='none';
+      }
+    });
+  }
+  function buildRules(){
+    if(!$('v104-rules-panel')){
+      document.body.insertAdjacentHTML('beforeend',`<section id="v104-rules-panel" aria-label="右神神規">
+        <div class="v104-head"><span>神規宇宙法則</span><button class="v104-close" id="v104-rules-close" type="button">收合</button></div>
+        <div class="v104-list">
+          <button type="button">1. 智慧合約說明：Heart V3.2.6，前端不改生命。</button>
+          <button type="button">2. 奉獻尊享：還願補血、點燈續命、許願 hash。</button>
+          <button type="button">3. 名號紀錄 / 聖座：交易由錢包自行確認。</button>
+          <button type="button">4. 排行榜：僅作宇宙儀式顯示，不承諾收益。</button>
+          <button type="button">5. 五指山神殿守則：Connect → BSC → Approve → Claim。</button>
+        </div>
+      </section>`);
+    }
+    $('v104-rules-close').onclick=()=>toggleRules(false);
+    qsa('.footer-terminal button,.term-btn,button').forEach(btn=>{
+      const t=(btn.textContent||'').trim();
+      if(/右神神規|神規|規則活動|五指山神殿守則/.test(t)){
+        btn.onclick=function(ev){ev.preventDefault(); toggleRules(); return false;};
+      }
+    });
+  }
+  function toggleRules(force){ const p=$('v104-rules-panel'); if(!p) return; const open=(force===undefined)?!p.classList.contains('open'):!!force; p.classList.toggle('open',open); localStorage.setItem('kgen12345.v104.rules.open',open?'1':'0'); }
+  window.v104ToggleRules=toggleRules;
+  function buildFestival(){
+    if(!$('v104-festival-dock')){
+      document.body.insertAdjacentHTML('beforeend',`<div id="v104-festival-dock"><button id="v104-festival-toggle" type="button">節日活動 ▾</button></div>
+      <section id="v104-festival-panel" aria-label="節日活動">
+        <div class="v104-head"><span>節日活動</span><button class="v104-close" id="v104-festival-close" type="button">收合</button></div>
+        <div id="v104-countdown">-- : -- : -- : --</div>
+        <div class="v104-event"><div><b>5/20 悟空生日</b><small>festivalClaim(1)</small></div><button type="button" id="v104-festival-1">啟動</button></div>
+        <div class="v104-event"><div><b>11/11 孤勇日</b><small>festivalClaim(2)</small></div><button type="button" id="v104-festival-2">啟動</button></div>
+        <div class="v104-event"><div><b>12/31 跨年倒數</b><small>newYearCountdownClaim()</small></div><button type="button" id="v104-newyear-claim">啟動</button></div>
+      </section>`);
+    }
+    $('v104-festival-toggle').onclick=()=>toggleFestival();
+    $('v104-festival-close').onclick=()=>toggleFestival(false);
+    $('v104-festival-1').onclick=()=>{try{ if(window.templeOps&&templeOps.festival) templeOps.festival(1); else callIf('festival1'); }catch(e){toast(e.message||String(e));}};
+    $('v104-festival-2').onclick=()=>{try{ if(window.templeOps&&templeOps.festival) templeOps.festival(2); else callIf('festival2'); }catch(e){toast(e.message||String(e));}};
+    $('v104-newyear-claim').onclick=()=>{try{ if(window.templeOps&&templeOps.newyear) templeOps.newyear(); else callIf('newyear'); }catch(e){toast(e.message||String(e));}};
+    // hide old right-top festival bars/cards to avoid blocking behind buttons
+    qsa('#v714-events,.v714-events').forEach(e=>e.style.display='none');
+  }
+  function toggleFestival(force){ const p=$('v104-festival-panel'); const b=$('v104-festival-toggle'); if(!p) return; const open=(force===undefined)?!p.classList.contains('open'):!!force; p.classList.toggle('open',open); if(b) b.textContent=open?'節日活動 ▴':'節日活動 ▾'; localStorage.setItem('kgen12345.v104.festival.open',open?'1':'0'); }
+  function startStableCountdown(){
+    if(window.__KGEN_V104_TIMER) clearInterval(window.__KGEN_V104_TIMER);
+    const target=()=>{ const now=new Date(); let y=now.getUTCFullYear(); let t=new Date(Date.UTC(y,11,31,23,59,59)); if(t-now<0) t=new Date(Date.UTC(y+1,11,31,23,59,59)); return t; };
+    function tick(){
+      const diff=Math.max(0,target()-new Date());
+      const d=Math.floor(diff/86400000), h=Math.floor(diff/3600000)%24, m=Math.floor(diff/60000)%60, s=Math.floor(diff/1000)%60;
+      const txt=`${String(d).padStart(3,'0')}天 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      safeText($('v104-countdown'),txt);
+      // freeze old countdown fields to stable text only, no innerHTML rewrite
+      ['kh-ny-slot','ny-slot','newyear-countdown'].forEach(id=>safeText($(id),txt));
+    }
+    tick(); window.__KGEN_V104_TIMER=setInterval(tick,1000);
+  }
+  function buildCup(){
+    if(!$('v104-cup-panel')){
+      document.body.insertAdjacentHTML('beforeend',`<section id="v104-cup-panel" aria-label="三聖盃檢查系統">
+        <div class="v104-head"><span>三聖盃檢查系統</span><button class="v104-close" id="v104-cup-close" type="button">收合</button></div>
+        <div class="v104-cup-grid">
+          <div class="v104-step" id="v104-step-wallet"><div class="no">STEP 1</div><div class="title">WALLET 檢查</div><div class="stat">未連接</div><button type="button" id="v104-wallet-btn">連接錢包</button></div>
+          <div class="v104-arrow">→</div>
+          <div class="v104-step" id="v104-step-bsc"><div class="no">STEP 2</div><div class="title">BSC NETWORK 檢查</div><div class="stat">未在 BSC</div><button type="button" id="v104-bsc-btn">切換 BSC</button></div>
+          <div class="v104-arrow">→</div>
+          <div class="v104-step" id="v104-step-approve"><div class="no">STEP 3</div><div class="title">APPROVE 檢查</div><div class="stat">未授權</div><button type="button" id="v104-approve-btn">前往核准</button></div>
+          <div class="v104-arrow">→</div>
+          <div id="v104-cup-result"><div style="font-size:28px">🏆</div><div>未完成</div><small>三聖盃未完成</small></div>
+        </div>
+      </section>`);
+    }
+    $('v104-cup-close').onclick=()=>{$('v104-cup-panel').style.display='none';};
+    $('v104-wallet-btn').onclick=()=>{ try{ if(window.web3&&web3.smartConnect) web3.smartConnect(); else if(window.ethereum) ethereum.request({method:'eth_requestAccounts'}); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,900); };
+    $('v104-bsc-btn').onclick=()=>{ try{ if(window.ethereum) ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]}); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,900); };
+    $('v104-approve-btn').onclick=()=>{ try{ if(window.templeOps&&templeOps.approve) templeOps.approve(); else document.getElementById('kh-approve-current')?.click(); }catch(e){toast(e.message||String(e));} setTimeout(updateCup,1400); };
+    qsa('#v714-cupbox,.v714-cupbox,#v57-cup-status').forEach(e=>e.style.display='none');
+    updateCup(); setInterval(updateCup,4000);
+  }
+  async function updateCup(){
+    let wallet=false,bsc=false,approve=false;
+    try{ if(window.ethereum){ const acc=await ethereum.request({method:'eth_accounts'}); wallet=!!(acc&&acc.length); const ch=await ethereum.request({method:'eth_chainId'}); bsc=String(ch).toLowerCase()==='0x38'; }}catch(e){}
+    // infer approve from existing visible text; avoids forcing chain reads
+    const allowText=[ $('userAllowance')?.textContent, $('kh-kgen-allowance')?.textContent, document.body.textContent.match(/Allowance[^\n]{0,60}/)?.[0] ].filter(Boolean).join(' ');
+    approve = /[1-9][0-9\.]*\s*KGEN|已授權|unlimited|∞/i.test(allowText);
+    setStep('v104-step-wallet',wallet,wallet?'已連接':'未連接');
+    setStep('v104-step-bsc',bsc,bsc?'BSC 56':'未在 BSC');
+    setStep('v104-step-approve',approve,approve?'已授權':'未授權');
+    const result=$('v104-cup-result'); if(result){ const ok=wallet&&bsc&&approve; result.classList.toggle('ok',ok); result.innerHTML=ok?'<div style="font-size:28px">🏆</div><div>神殿已開啟</div><small>可領發財金</small>':'<div style="font-size:28px">🏆</div><div>未完成</div><small>請依序完成 Wallet / BSC / Approve</small>'; }
+    window.__templeCupCount=(wallet&&bsc&&approve)?3:0;
+  }
+  function setStep(id,ok,txt){ const el=$(id); if(!el) return; el.classList.toggle('ok',ok); const st=el.querySelector('.stat'); if(st) st.textContent=txt; }
+  function ownHeartToggle(){
+    const p=$('kgen-heart-live-panel'), t=$('kgen-heart-toggle'); if(!p||!t) return;
+    t.onclick=function(){ const hide=p.style.display==='none'; p.style.display=hide?'block':'none'; t.textContent=hide?'12345 Heart 收合':'12345 Heart 展開'; };
+    // add close in heart panel header only controlling itself
+    const head=p.querySelector('.kh-head'); if(head && !$('v104-heart-close')){ const b=document.createElement('button'); b.id='v104-heart-close'; b.type='button'; b.className='v104-close'; b.textContent='收合'; b.onclick=()=>{p.style.display='none'; t.textContent='12345 Heart 展開';}; head.appendChild(b); }
+  }
+  function init(){
+    document.body.classList.add('v104-temple-rebuild');
+    setVersion(); setHeartImage(); buildRules(); buildFestival(); buildCup(); ownHeartToggle(); hideResidualService(); startStableCountdown();
+    // default states: rules and festival collapsed; heart collapsed on small screens
+    toggleRules(false); toggleFestival(false);
+    if(innerWidth<760 && $('kgen-heart-live-panel')) $('kgen-heart-live-panel').style.display='none';
+    toast('V10.4 神殿重構完成：前端修正，不動合約。');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  setTimeout(init,1200);
+})();
+</script>
+
+</body></html>
