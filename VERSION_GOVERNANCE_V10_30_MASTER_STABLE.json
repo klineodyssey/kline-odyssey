@@ -1,0 +1,15 @@
+{
+  "version": "12345-TEMPLE-V10.30-MASTER-STABLE",
+  "build": "20260516-V10.30-MASTER-STABLE",
+  "base_from": [
+    "V10.27.3_MIRROR_ORDER_STABLE",
+    "V10.12_TRUE_ROTATION_DNA"
+  ],
+  "rules": [
+    "standard module filenames only",
+    "amount input is user-owned",
+    "heart actions are preserved",
+    "MOVE Y / Universe Elevator / main image Y / warp-core Y sync",
+    "no automatic music"
+  ]
+}
