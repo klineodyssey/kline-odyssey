@@ -401,3 +401,24 @@ V10.26 與 V10.27 的功能已合併到：
 <script src="./modules/kgen-12345-install-check.js"></script>
 <script src="./modules/kgen-12345-universe-elevator.js"></script>
 ```
+
+
+## V10.27.2 STABLE ORGAN RESTORE
+- 標準模組檔名不變；版本寫在檔案內部。
+- 恢復 vowTo / lightLamp / makeWish，不得刪除。
+- 金額欄預設空白，由操作者輸入；不再自動補 8。
+- 左下 XY MOVE 與宇宙電梯同步控制主圖 Y。
+
+
+## V10.27.3｜Mirror Order Stable / 器官穩定修復
+
+- 金額欄不再自動帶入 `8`，操作者自行輸入。
+- 金額欄點擊不跳開，手機可正常輸入，Approve / fortuneClaim / vowTo / lightLamp 共用同一金額來源。
+- 恢復並保護 `makeWish`、`vowTo`、`lightLamp` 下單按鈕，不得刪除。
+- 左下 XY MOVE 重新接管，X 控制主圖左右，Y 同步宇宙電梯並控制主圖上下。
+- 右側宇宙電梯直接拖曳可控制主圖上下與 warp-core。
+- 下單與多空按鈕啟動前後鏡：多方前鏡、空方後鏡，並依方向切換 bull / bear 圖。
+- 訊息紀錄視窗可收合，語音提示固定為訊息紀錄，不串到其他功能。
+- 右側神規視窗穩定開合、標題縮小、內容捲動；地圖顯示層級提高。
+- 右上總收合按鈕下移，避免遮擋 509 席位字樣。
+- 曲速引擎刻度只保留一組 0～300。

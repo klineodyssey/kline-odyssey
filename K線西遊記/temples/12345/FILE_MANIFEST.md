@@ -38,3 +38,26 @@ BUILD: 20260516-V10.27.1-STANDARD-MODULES
 功能已合併到：
 
 - `modules/kgen-12345-universe-elevator.js`
+
+
+## V10.27.2 STABLE ORGAN RESTORE
+- 標準模組檔名不變；版本寫在檔案內部。
+- 恢復 vowTo / lightLamp / makeWish，不得刪除。
+- 金額欄預設空白，由操作者輸入；不再自動補 8。
+- 左下 XY MOVE 與宇宙電梯同步控制主圖 Y。
+
+
+## V10.27.3 標準模組規則
+
+正式載入檔仍使用固定檔名：
+
+- `modules/kgen-12345-core.css`
+- `modules/kgen-12345-holy-cup.js`
+- `modules/kgen-12345-install-check.js`
+- `modules/kgen-12345-motion-control.js`
+- `modules/kgen-12345-panel-router.js`
+- `modules/kgen-12345-stable-countdown.js`
+- `modules/kgen-12345-universe-elevator.js`
+- `modules/kgen-12345-version.js`
+
+版本寫在檔案內部 header，不在正式檔名新增 v10.xx。
