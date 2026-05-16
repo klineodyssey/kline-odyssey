@@ -1,0 +1,33 @@
+{
+  "product_id": "KGEN-12345-HEART-UI",
+  "version": "V10.37.4 COMPLETE_RUNTIME_GOVERNANCE_CLEAN",
+  "build": "20260516-V10.37.4-COMPLETE-RUNTIME-GOVERNANCE-CLEAN",
+  "base_from": "KGEN1_12345_V10_37_1TRANSFORMER_STABLE_AXIS_C_SCENE_FULL",
+  "main_file": "K線西遊記/temples/12345/index.html",
+  "root_readme_rule": "GitHub 根目錄 README.md 是官網首頁，不得用 12345 README 覆蓋。",
+  "temple_readme": "K線西遊記/temples/12345/README.md",
+  "official_modules": [
+    "kgen-12345-core.css",
+    "kgen-12345-version.js",
+    "kgen-12345-panel-router.js",
+    "kgen-12345-transformer-runtime.js",
+    "kgen-12345-holy-cup.js",
+    "kgen-12345-stable-countdown.js",
+    "kgen-12345-motion-control.js",
+    "kgen-12345-install-check.js",
+    "kgen-12345-universe-elevator.js"
+  ],
+  "archive_rule": "modules 根目錄不得放版本號 runtime；版本號檔、歷史 patch、參考器官放 modules/archive/。",
+  "asset_manifest": [
+    "assets/bull-front.png",
+    "assets/bear-rear.png",
+    "assets/heart.png",
+    "assets/warp-core.png"
+  ],
+  "changes": [
+    "Cleaned module root and moved versioned runtime files to archive.",
+    "Updated index visible version and module references.",
+    "Added governance, manifest and checksum files.",
+    "Kept GitHub deploy structure fixed."
+  ]
+}
