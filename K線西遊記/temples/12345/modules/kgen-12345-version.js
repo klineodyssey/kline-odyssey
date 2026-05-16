@@ -1,18 +1,12 @@
-// KGEN 12345 MASTER STABLE version sync
-(function(){
-  'use strict';
-  const VERSION='12345-TEMPLE-V10.30-MASTER-STABLE';
-  const BUILD='20260516-V10.30-MASTER-STABLE';
-  const CHANGESET='MASTER STABLE: unified version source, amount input free mode, Heart actions restored, MOVE/WARP sync, mirror order stable';
-  function sync(){
-    window.KGEN12345_BUILD=Object.assign({}, window.KGEN12345_BUILD||{}, {VERSION, BUILD, CHANGESET});
-    const v=document.getElementById('ver-st'); if(v) v.textContent='VERSION '+VERSION;
-    document.querySelectorAll('.sys-st').forEach(el=>{ if((el.textContent||'').includes('VERSION')) el.textContent='VERSION '+VERSION; });
-    document.title='KGEN 12345 五指山悟空財神殿 V10.30 MASTER STABLE';
-    document.documentElement.setAttribute('data-kgen12345-version', VERSION);
-  }
-  document.addEventListener('DOMContentLoaded',sync);
-  if(document.readyState!=='loading') sync();
-  setTimeout(sync,300); setTimeout(sync,1200); setTimeout(sync,3200); setInterval(sync,1800);
-  window.KGEN12345_MASTER_VERSION={VERSION,BUILD,CHANGESET,sync};
-})();
+// KGEN 12345 official version registry
+window.KGEN_12345_VERSION = {
+  PRODUCT_ID: "KGEN-12345-HEART-UI",
+  VERSION: "V10.37.4 COMPLETE_RUNTIME_GOVERNANCE_CLEAN",
+  BUILD: "20260516-V10.37.4-COMPLETE-RUNTIME-GOVERNANCE-CLEAN",
+  BASE_FROM: "KGEN1_12345_V10_37_1TRANSFORMER_STABLE_AXIS_C_SCENE_FULL",
+  MAIN_FILE: "K線西遊記/temples/12345/index.html",
+  ROOT_README_RULE: "GitHub root README.md is official website homepage; do not overwrite unless explicitly updating website.",
+  TEMPLE_README_RULE: "K線西遊記/temples/12345/README.md is 12345 temple documentation.",
+  ASSET_RULE: "Use only bull-front.png, bear-rear.png, heart.png, warp-core.png in assets root."
+};
+console.log("[KGEN 12345 VERSION]", window.KGEN_12345_VERSION);

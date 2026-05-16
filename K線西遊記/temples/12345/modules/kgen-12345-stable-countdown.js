@@ -1,41 +1,85 @@
-// KGEN 12345 V10.23 stable countdown visible patch
-// 路徑：/K線西遊記/temples/12345/modules/kgen-12345-stable-countdown.js
-// 原則：跨年資訊要顯示，不可隱藏；解決閃爍，不刪 DOM。
+// KGEN 12345 stable countdown core
 (function(){
-  'use strict';
-  function pad(n){return String(n).padStart(2,'0');}
-  function nextNY(){const now=new Date(); let y=now.getUTCFullYear(); let t=new Date(Date.UTC(y,11,31,23,50,0)); if(t-now<=0)t=new Date(Date.UTC(y+1,11,31,23,50,0)); return t;}
-  function text(){const diff=Math.max(0,nextNY()-new Date()); const m=Math.floor(diff/60000); const d=Math.floor(m/1440); const h=Math.floor((m%1440)/60); const mm=m%60; return `12/31 跨年倒數 newYearCountdownClaim：距活動約 ${d}天 ${pad(h)}時 ${pad(mm)}分`;}
-  function ensureStyle(){
-    if(document.getElementById('kgen-v1023-countdown-visible-style')) return;
-    const st=document.createElement('style'); st.id='kgen-v1023-countdown-visible-style';
-    st.textContent=`
-      #kgen-v102-festival-countdown,#kh-ny-slot,.kh-ny-countdown,[data-kgen-countdown],#cd-1231,.kgen-countdown-card{
-        display:block!important;visibility:visible!important;opacity:1!important;animation:none!important;transition:none!important;filter:none!important;text-shadow:0 0 8px rgba(0,0,0,.85)!important;color:#9ff!important;min-height:1.45em!important;white-space:normal!important;overflow:visible!important;background:rgba(0,0,0,.28)!important;border-radius:10px!important;padding:6px 8px!important;
-      }
-      #kgen-v102-festival-countdown *,#kh-ny-slot *,.kh-ny-countdown *{animation:none!important;transition:none!important;opacity:1!important;}
-    `;
-    document.head.appendChild(st);
+  "use strict";
+  if (window.__KGEN_12345_SINGLE_COUNTDOWN_ENGINE__) return;
+  window.__KGEN_12345_SINGLE_COUNTDOWN_ENGINE__ = true;
+
+  function pad(n){ return String(n).padStart(2, "0"); }
+  function nextTopHour(){
+    const n = new Date();
+    const t = new Date(n);
+    t.setMinutes(0,0,0);
+    t.setHours(t.getHours()+1);
+    return t;
   }
-  function apply(){ensureStyle(); const t=text(); document.querySelectorAll('#kgen-v102-festival-countdown,#kh-ny-slot,.kh-ny-countdown,[data-kgen-countdown],#cd-1231').forEach(el=>{ if(el.textContent!==t) el.textContent=t; });}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply(); window.addEventListener('load',apply); setTimeout(apply,500); setInterval(apply,60000);
-})();
+  function nextUtcMidnight(){
+    const n = new Date();
+    return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()+1, 0,0,0,0));
+  }
+  function nextNewYear(){
+    const n = new Date();
+    let t = new Date(n.getFullYear(), 11, 31, 23, 59, 59, 999);
+    if (t <= n) t = new Date(n.getFullYear()+1, 11, 31, 23, 59, 59, 999);
+    return t;
+  }
+  function diff(target){
+    const ms = Math.max(0, target.getTime() - Date.now());
+    const s = Math.floor(ms / 1000);
+    return {
+      d: Math.floor(s / 86400),
+      h: Math.floor((s % 86400) / 3600),
+      m: Math.floor((s % 3600) / 60),
+      sec: s % 60
+    };
+  }
+  function hms(v){ return `${v.h}時${pad(v.m)}分${pad(v.sec)}秒`; }
+  function dayhm(v){ return `${v.d}天 ${pad(v.h)}時${pad(v.m)}分`; }
+  function setText(id, text){
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.textContent !== text) el.textContent = text;
+    el.style.animation = "none";
+    el.style.transition = "none";
+    el.style.opacity = "1";
+  }
+  function setByLabel(labelText, valueText){
+    const panel = document.getElementById("kgen-heart-live-panel");
+    if (!panel) return;
+    panel.querySelectorAll(".kh-k").forEach(k => {
+      if ((k.textContent || "").trim() === labelText) {
+        const v = k.nextElementSibling;
+        if (v) {
+          v.textContent = valueText;
+          v.style.animation = "none";
+          v.style.transition = "none";
+          v.style.opacity = "1";
+        }
+      }
+    });
+  }
+  function cleanAmountInputs(){
+    document.querySelectorAll("input").forEach(i => {
+      if (i.value === "8") i.value = "";
+      if ((i.placeholder || "").includes("1 到 888")) {
+        i.placeholder = "請自行輸入 KGEN 金額 / 點燈天數";
+      }
+    });
+  }
+  function tick(){
+    const heartbeat = "距下次整點 " + hms(diff(nextTopHour()));
+    const ignite = "距 UTC 00:00 " + hms(diff(nextUtcMidnight()));
+    const ny = dayhm(diff(nextNewYear()));
 
+    setText("kh-heartbeat-countdown", heartbeat);
+    setText("kh-ignite-countdown", ignite);
+    setText("cd-1231", ny);
+    setText("kh-ny-countdown", "三聖盃完成後，才可領發財金。金額欄由操作者自行輸入，不自動填數字。");
 
-/* KGEN_V10371_COUNTDOWN */
-(function(){
-if(window.__KGEN_V10371_COUNTDOWN__) return;
-window.__KGEN_V10371_COUNTDOWN__=true;
-function pad(n){return String(n).padStart(2,'0');}
-function nextHour(){const n=new Date();const t=new Date(n);t.setMinutes(0,0,0);t.setHours(t.getHours()+1);return t;}
-function nextUTC0(){const n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()+1,0,0,0,0));}
-function diff(target){const d=Math.max(0,target-Date.now());const s=Math.floor(d/1000);const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return `${h}時${pad(m)}分${pad(sec)}秒`;}
-setInterval(()=>{
- const hb=document.getElementById('kh-heartbeat-countdown');
- if(hb) hb.textContent='距下次整點 '+diff(nextHour());
- const ig=document.getElementById('kh-ignite-countdown');
- if(ig) ig.textContent='距 UTC 00:00 '+diff(nextUTC0());
- const ny=document.getElementById('kh-ny-countdown');
- if(ny) ny.textContent='三聖盃完成後，才可領發財金。金額欄由操作者自行輸入。';
-},1000);
+    setByLabel("心跳倒數", heartbeat);
+    setByLabel("呼吸倒數", ignite);
+    setByLabel("跨年倒數槽", "距跨年：" + ny);
+    cleanAmountInputs();
+  }
+  tick();
+  window.KGEN_12345_COUNTDOWN_TIMER = setInterval(tick, 1000);
 })();
