@@ -1,0 +1,19 @@
+{
+  "version": "V10.31_MASTER_STABLE_LOCK",
+  "base_from": "V10.30_MASTER_STABLE",
+  "standard_module_names": true,
+  "changes": [
+    "no auto amount value",
+    "holy cup no input redraw",
+    "MOVE XY controls main image",
+    "Universe Elevator and MOVE Y single source",
+    "transaction buttons restored",
+    "mirror order link",
+    "version source locked"
+  ],
+  "do_not_change": [
+    "kgen-12345-motion-control.js rotation DNA",
+    "standard module filenames",
+    "user amount input ownership"
+  ]
+}
