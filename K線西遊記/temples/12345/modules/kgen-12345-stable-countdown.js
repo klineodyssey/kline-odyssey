@@ -59,8 +59,7 @@
   }
   function cleanAmountInputs(){
     document.querySelectorAll("input").forEach(i => {
-      if (i.value === "8") i.value = "";
-      if ((i.placeholder || "").includes("1 到 888")) {
+      if (i.placeholder && (i.placeholder.includes("1 到 888") || i.placeholder.includes("發財金"))) {
         i.placeholder = "請自行輸入 KGEN 金額 / 點燈天數";
       }
     });
