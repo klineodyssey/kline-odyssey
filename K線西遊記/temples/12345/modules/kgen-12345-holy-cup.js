@@ -1,7 +1,7 @@
-// KGEN 12345 V10.24 holy cup amount sync
+// KGEN 12345 MASTER STABLE V10.31 holy cup amount sync
 // 路徑：/K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js
 // BASE_FROM: V10.22 + V10.12 rotation master
-// 規則：所有聖盃區塊同步；任意按滿三次即通過；跨年資訊不隱藏、不閃爍。
+// 規則：三聖盃不再重繪輸入框；金額由操作者自行輸入；跨年資訊不隱藏、不閃爍。
 (function(){
   'use strict';
   const KEY='kgen12345.holyCup.v1024';
@@ -74,7 +74,20 @@
       <div class="kgen-cup-final-ny" data-kgen-countdown>${nextNYText()}</div>
     </div>`;
   }
-  function render(){ ensureStyle(); const html=markup(); containers().forEach(el=>{ if(el.innerHTML!==html) el.innerHTML=html; }); updateNY(); }
+  function render(){
+    ensureStyle();
+    const active=document.activeElement;
+    const isAmountActive=active && (active.id==='kgen-12345-amount-input' || active.matches?.('input[data-kgen-amount],.kgen-amount-input,#amt-in,#kh-amount'));
+    const currentValue=isAmountActive ? active.value : '';
+    const html=markup();
+    containers().forEach(el=>{
+      // 金額輸入中不重繪整個聖盃區，避免手機鍵盤彈出後被重建、跳開、閃爍。
+      if(isAmountActive && el.contains(active)) return;
+      if(el.innerHTML!==html) el.innerHTML=html;
+    });
+    if(isAmountActive){ try{active.value=currentValue;}catch(_){} }
+    updateNY();
+  }
   function updateNY(){
     const t=nextNYText();
     qsa('[data-kgen-countdown],.kh-ny-countdown,#kh-ny-slot,#kgen-v102-festival-countdown,#cd-1231').forEach(el=>{ if(el && el.textContent!==t) el.textContent=t; });
@@ -83,9 +96,9 @@
   function reset(){ set({count:0,done:false,updatedAt:new Date().toISOString()}); log('三次聖盃已重置。'); speak('三次聖盃已重置，請重新按三次。'); render(); }
   document.addEventListener('click',function(e){ const btn=e.target&&e.target.closest?e.target.closest('[data-cup],.v714-cup,.kh-cupbox button,#v714-cupbox button'):null; if(!btn) return; if(btn.getAttribute('data-cup')==='reset'||/重置/.test(btn.textContent||'')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); reset(); return false;} if(btn.closest('.kh-cupbox')||btn.closest('#v714-cupbox')||btn.hasAttribute('data-cup')){e.preventDefault();e.stopPropagation(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); tap(); return false;} },true);
   function boot(){render();}
-  window.KGEN12345_HOLY_CUP={version:'V10.27.2',render,get,set,tap,reset};
+  window.KGEN12345_HOLY_CUP={version:'V10.31_MASTER_STABLE_LOCK',render,get,set,tap,reset};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-  window.addEventListener('load',boot); setTimeout(boot,300); setTimeout(boot,1000); setInterval(render,1500); setInterval(updateNY,60000);
+  window.addEventListener('load',boot); setTimeout(boot,300); setTimeout(boot,1000); setInterval(updateNY,60000);
 })();
 
 
@@ -99,10 +112,19 @@
     try{if(v){localStorage.setItem('kgen12345.sharedAmount',v)}else{localStorage.removeItem('kgen12345.sharedAmount')}}catch(_){}
   }
   function boot(){
-    const saved=(function(){try{return localStorage.getItem('kgen12345.sharedAmount')||''}catch(_){return '8'}})();
-    fields().forEach(f=>{if(!f.value && saved)f.value=saved; f.removeEventListener('input',f.__kgenSync||function(){}); f.__kgenSync=function(){syncFrom(f)}; f.addEventListener('input',f.__kgenSync,{passive:true});});
+    fields().forEach(f=>{
+      // 金額欄屬於操作者，系統不得自動塞 8 或任何預設值。
+      f.removeAttribute('value');
+      if(!f.dataset.kgenAmountBound){
+        f.dataset.kgenAmountBound='1';
+        f.addEventListener('input',function(){syncFrom(f)},{passive:true});
+        ['pointerdown','mousedown','touchstart','click','focus','keydown','keyup'].forEach(ev=>{
+          f.addEventListener(ev,function(e){e.stopPropagation();},true);
+        });
+      }
+    });
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
-  setInterval(boot,2000);
+  setInterval(boot,5000);
   window.KGEN12345_AMOUNT={get:function(){const f=$('kgen-12345-amount-input')||$('amt-in'); return f&&f.value?f.value:'';},sync:boot};
 })();
