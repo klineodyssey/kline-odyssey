@@ -763,3 +763,19 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
   window.KGEN12345_V1024_SYNC={version:'V10.24',setWarpVisual,applySync,get:()=>Object.assign({},sync)};
 })();
+
+
+/* KGEN_V10371_XY_PATCH */
+(function(){
+if(window.__KGEN_V10371_XY_PATCH__) return;
+window.__KGEN_V10371_XY_PATCH__=true;
+window.KGEN_AXIS=window.KGEN_AXIS||{x:0,y:0,z:0};
+window.KGEN_MOVE_XY=function(dx,dy){
+ KGEN_AXIS.x+=dx;
+ KGEN_AXIS.y+=dy;
+ const core=document.getElementById('core-anchor');
+ if(core){
+  core.style.transform=`translate(calc(-50% + ${KGEN_AXIS.x}px), calc(-50% + ${KGEN_AXIS.y}px))`;
+ }
+};
+})();

@@ -1,72 +1,154 @@
-/* KGEN 12345 V10.35 Transformer Final Core CSS
-   Standard filename. Version is internal only. */
+
+/* KGEN 12345 V10.11 core css
+   路徑：/K線西遊記/temples/12345/modules/kgen-12345-v10.11-core.css
+   原則：不新增第二個右側神規面板，只修原面板顯示、收合與高度。 */
+.kgen-v1011-close,
+.kgen-v1011-panel-close{
+  border:1px solid rgba(255,215,120,.55)!important;
+  border-radius:10px!important;
+  background:rgba(0,0,0,.55)!important;
+  color:#ffd778!important;
+  font-weight:900!important;
+  padding:5px 9px!important;
+  min-height:28px!important;
+  cursor:pointer!important;
+}
+#coord-panel{
+  max-height: min(360px, 46vh) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+#coord-panel .cp-title{position:sticky;top:0;background:rgba(0,0,0,.72);z-index:2;padding-bottom:6px;}
+#kgen-v102-festival-panel{
+  display:none;
+  max-height:min(430px, 48vh)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+body.kgen-v1011-festival-open #kgen-v102-festival-panel{display:block!important;}
+#kgen-v102-festival-panel .kgen-v1011-festival-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;color:#ffd778;font-weight:900;}
+#kgen-v102-festival-panel .kgen-v1011-festival-head button{width:auto!important;margin-top:0!important;}
+#kgen-v102-festival-countdown,
+#kh-ny-slot{
+  animation:none!important;transition:none!important;opacity:1!important;white-space:normal!important;
+}
+#kgen-heart-live-panel{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  max-height:calc(100vh - 170px)!important;
+  padding-bottom:42px!important;
+}
+#kh-log,
+.kh-log,
+#kgen-log,
+.kgen-log,
+#last-event{
+  max-height:56px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  white-space:pre-wrap!important;
+}
+#kgen-heart-live-panel .kh-cupbox{margin-top:10px!important;}
+#kgen-heart-live-panel .kgen-v1011-cup-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px;}
+#kgen-heart-live-panel .kgen-v1011-cup-row button{min-height:34px;padding:8px 6px;font-size:12px;border-radius:10px;border:1px solid rgba(255,215,120,.35);background:rgba(0,0,0,.36);color:#fff;font-weight:900;}
+#kgen-heart-live-panel .kgen-v1011-cup-row button.done{background:linear-gradient(135deg,rgba(255,215,120,.55),rgba(0,242,255,.18));color:#ffe9a8;box-shadow:0 0 15px rgba(255,215,120,.20);}
+#kgen-heart-live-panel .kgen-v1011-cup-status{margin-top:7px;font-size:12px;color:#8af3ff;line-height:1.4;white-space:pre-wrap;}
+@media(max-width:760px){
+  #coord-panel{right:10px!important;left:auto!important;width:min(330px,52vw)!important;max-height:42vh!important;}
+  #kgen-v102-festival-panel{right:8px!important;top:300px!important;width:min(315px,48vw)!important;}
+  #kgen-heart-live-panel{max-height:calc(100vh - 180px)!important;}
+}
+
+
+/* =========================
+   V10.23 final panel / countdown / cup layout patch
+   BASE_FROM: V10.12 rotation master; does not touch rotation math.
+========================= */
+#coord-panel{
+  width:min(360px,92vw)!important;
+  max-height:calc(100vh - 180px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  box-sizing:border-box!important;
+  padding-bottom:42px!important;
+}
+#coord-panel .cp-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;position:sticky!important;top:0!important;z-index:5!important;background:rgba(0,0,0,.78)!important;}
+#kgen-v1011-right-close{margin-left:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}
+#kgen-heart-live-panel{width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+#kh-ny-slot,.kh-ny-countdown,#kgen-v102-festival-countdown,[data-kgen-countdown],#cd-1231{display:block!important;visibility:visible!important;opacity:1!important;animation:none!important;transition:none!important;filter:none!important;white-space:normal!important;overflow:visible!important;}
+.kgen-cup-final{font-size:13px!important;}
+@media(max-width:760px){
+  #coord-panel{right:10px!important;left:auto!important;width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+  #kgen-heart-live-panel{width:min(360px,92vw)!important;max-height:calc(100vh - 180px)!important;}
+}
+
+
+/* =========================================================
+   KGEN 12345 V10.24 UI STRUCTURE SYNC
+   BASE_FROM: V10.12_MOTION_CONTROL_PATCH
+   NOTE: positioning/texture only; rotation math remains in original master.
+========================================================= */
 :root{
-  --kgen-cy-x:0px;
-  --kgen-cy-y:0px;
-  --kgen-warp-y:0px;
-  --kgen-render-x:0px;
-  --kgen-render-y:0px;
-  --kgen-gold:#ffd778;
-  --kgen-cyan:#00f2ff;
+  --kgen-sync-x:0px;
+  --kgen-sync-y:0px;
+  --kgen-warp-core-bottom:12%;
 }
 #core-anchor{
-  will-change:transform;
-  transform:translate(calc(-50% + var(--kgen-render-x)), calc(-50% + var(--kgen-render-y))) !important;
+  transform: translate(calc(-50% + var(--kgen-sync-x)), calc(-50% + var(--kgen-sync-y))) !important;
+  will-change: transform;
 }
-#move-joystick-wrap{z-index:260050!important; touch-action:none!important; pointer-events:auto!important;}
-#move-joystick-knob{pointer-events:none!important;}
-#move-joystick-label{white-space:nowrap!important;color:#d8f6ff!important;text-shadow:0 0 10px rgba(0,242,255,.35)!important;}
-.warp-engine::before{
-  content:'宇宙電梯 / Universe Elevator';
-  display:block;
-  color:var(--kgen-cyan);
-  font-family:Orbitron,system-ui,sans-serif;
-  font-size:10px;
-  line-height:1.2;
-  margin-bottom:6px;
-  text-shadow:0 0 10px rgba(0,242,255,.45);
+#coord-panel.kgen-v1024-right-drawer{
+  width: var(--kgen-heart-panel-width, min(390px, calc(100vw - 28px))) !important;
+  max-width: var(--kgen-heart-panel-width, min(390px, calc(100vw - 28px))) !important;
+  height: var(--kgen-heart-panel-height, min(520px, calc(100vh - 190px))) !important;
+  max-height: var(--kgen-heart-panel-height, min(520px, calc(100vh - 190px))) !important;
+  min-height: 260px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-top: 42px !important;
 }
-.warp-engine{z-index:260030!important; pointer-events:auto!important;}
-.warp-rail{overflow:visible!important;}
-.kgen-warp-scale{
-  position:absolute;right:-34px;top:0;height:100%;width:30px;
-  font-family:Orbitron,monospace;font-size:9px;color:var(--kgen-cyan);
-  pointer-events:none;text-shadow:0 0 6px rgba(0,242,255,.5);
+#coord-panel.kgen-v1024-right-drawer .kgen-v1011-panel-close,
+#coord-panel.kgen-v1024-right-drawer #kgen-v1011-right-close{
+  position:absolute !important;
+  top:10px !important;
+  right:10px !important;
+  z-index:50 !important;
+  margin:0 !important;
+  padding:6px 10px !important;
+  border-radius:10px !important;
+  border:1px solid rgba(255,215,120,.55) !important;
+  background:rgba(0,0,0,.78) !important;
+  color:#ffe39a !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
 }
-.kgen-warp-scale span{position:absolute;right:0;transform:translateY(50%);}
-#kgen-v1035-status{
-  position:fixed;left:50%;bottom:188px;transform:translateX(-50%);z-index:260040;
-  min-width:260px;max-width:min(720px,70vw);padding:5px 10px;border-radius:999px;
-  border:1px solid rgba(255,215,120,.45);background:rgba(0,0,0,.65);color:#fff;
-  font-family:Orbitron,'Noto Sans TC',sans-serif;font-size:11px;text-align:center;
-  box-shadow:0 0 16px rgba(255,215,120,.12);pointer-events:none;
+#coord-panel.kgen-v1024-right-drawer .cp-grid,
+#coord-panel.kgen-v1024-right-drawer .cp-body,
+#coord-panel.kgen-v1024-right-drawer .content,
+#coord-panel.kgen-v1024-right-drawer > div:not(.cp-title):not(.kgen-v1011-panel-close):not(#kgen-v1011-right-close){
+  overflow:auto !important;
+  -webkit-overflow-scrolling:touch !important;
 }
-#kgen-master-collapse{
-  position:fixed;right:14px;top:74px;z-index:999999;
-  border:1px solid rgba(255,215,120,.45);background:rgba(0,0,0,.72);color:#ffe8aa;
-  border-radius:999px;padding:6px 10px;font-weight:900;font-size:12px;pointer-events:auto;
+.kgen-v1024-amount-box{
+  margin:10px 0 !important;
+  padding:12px !important;
+  border:1px solid rgba(255,215,120,.42) !important;
+  border-radius:14px !important;
+  background:rgba(0,0,0,.36) !important;
+  color:#fff !important;
 }
-body.kgen-all-collapsed #web3-panel,
-body.kgen-all-collapsed #coord-panel,
-body.kgen-all-collapsed #right-info-panel,
-body.kgen-all-collapsed #kgen-heart-live-panel,
-body.kgen-all-collapsed .chain-live-panel,
-body.kgen-all-collapsed .board-panel,
-body.kgen-all-collapsed .bet-live-panel,
-body.kgen-all-collapsed #kgenMsgCenterPanel,
-body.kgen-all-collapsed #kgenCameraPanelV899{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-#coord-panel,#right-info-panel,.chain-live-panel,.board-panel{
-  max-height:46vh!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;
-  z-index:260020!important;box-sizing:border-box!important;
+.kgen-v1024-amount-box label{display:block;color:#ffe39a;font-weight:900;margin-bottom:6px;}
+.kgen-v1024-amount-box input{
+  width:100%;box-sizing:border-box;border-radius:12px;padding:11px 12px;
+  border:1px solid rgba(255,215,120,.48);background:rgba(0,0,0,.60);color:#fff;font-weight:900;outline:none;
 }
-#coord-modal,.coord-modal,#kgenMapModal,.kgen-map-modal{z-index:999998!important;}
-.footer-terminal{z-index:260060!important;}
-[id*='ny'],[class*='ny-count'],[class*='countdown']{
-  animation:none!important;transition:none!important;opacity:1!important;filter:none!important;will-change:auto!important;
-}
-input[data-kgen-amount='1']{user-select:text!important;-webkit-user-select:text!important;pointer-events:auto!important;}
-.kgen-install-pill{
-  position:fixed;left:12px;top:110px;z-index:999998;max-width:min(420px,88vw);
-  border:1px solid rgba(0,242,255,.35);background:rgba(0,0,0,.72);color:#d8fbff;
-  border-radius:10px;padding:7px 10px;font-size:11px;font-weight:800;line-height:1.35;
-}
+.kgen-v1024-amount-box .hint{margin-top:6px;font-size:12px;line-height:1.45;color:#9ff;}
+#kgen-12345-warp-scale{right:auto!important;}
+#kgen-12345-warp-core-layer{box-shadow:none!important;filter:none!important;background:transparent!important;}
+#warp-thumb{box-shadow:none!important;filter:none!important;background:transparent!important;border-color:transparent!important;}

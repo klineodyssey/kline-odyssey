@@ -1532,3 +1532,28 @@ BASE_FROM: V10.27.3 + V10.12 TRUE ROTATION DNA
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init(); setTimeout(init,500);setTimeout(init,1600);setTimeout(init,3600);setInterval(()=>{syncVersion();setupAmountInputs();fixMessages();updateStatus();},2000);
   window.KGEN12345_MASTER_STABLE={version:VERSION,build:BUILD,state,setElevator,setXY,getAmount,setupAmountInputs,syncVersion};
 })();
+
+
+/* KGEN_V10371_C_PATCH */
+(function(){
+if(window.__KGEN_V10371_C_PATCH__) return;
+window.__KGEN_V10371_C_PATCH__=true;
+window.KGEN_SET_WARP_C=function(v){
+ v=Math.max(0,Math.min(300,Number(v)||0));
+ const txt=document.getElementById('warp-txt');
+ if(txt){
+  txt.textContent=v===0?'C 0｜觀望':`C ${v}｜第 ${v} 層宇宙`;
+ }
+ const img=document.getElementById('fairy-img');
+ if(img){
+  const fallback='./assets/heart.png';
+  const n=String(v).padStart(3,'0');
+  if(v===0){
+   img.src=fallback;
+  }else{
+   img.onerror=function(){this.onerror=null;this.src=fallback;};
+   img.src=`./scenes/floor_${n}.png`;
+  }
+ }
+};
+})();
