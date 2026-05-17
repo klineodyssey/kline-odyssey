@@ -1,15 +1,16 @@
 window.KGEN_12345_VERSION = {
   PRODUCT_ID: "KGEN-12345-HEART-UI",
-  VERSION: "V10.37.9_PANEL_ROUTER_REPAIR",
-  BUILD: "20260516-V10.37.9-PANEL-ROUTER-REPAIR",
-  BASE_FROM: "KGEN_12345_V10_37_5_INPUT_LOCK_RUNTIME_GOVERNANCE_FULL",
+  VERSION: "V10.38.0_GENESIS_520_PANEL_RECOVERY",
+  BUILD: "20260517-V10.38.0-GENESIS-520-PANEL-RECOVERY",
+  BASE_FROM: "KGEN_12345_V10_37_6_PANEL_ROUTER_REPAIR_FULL",
   MAIN_FILE: "K線西遊記/temples/12345/index.html",
+  TARGET: "5/20 悟空覺醒・發發財金啟動前穩定版",
   FIX: [
-    "Panel Router Repair: top total expand/collapse controls GA / heart engine / heart chart.",
-    "Festival button controls 520 / 1111 / 12/31 activity panel.",
-    "Right deity rule button controls rule panel.",
-    "Left Wukong Heart button controls Wukong Heart panel, separate from left-top console.",
-    "Holy Cup check system layout raised to avoid overlap."
+    "右上總收合/總展開控制 GA Evolution、悟空心臟引擎、悟空心臟圖譜。",
+    "節日活動面板控制 520 / 1111 / 跨年活動，不遮住按鍵。",
+    "右側神規按鈕可控制神規面板。",
+    "左下悟空心臟按鈕控制獨立心臟視窗，不混左上控制台。",
+    "修正跑到最上面的浮動按鈕定位。"
   ]
 };
 console.log("[KGEN 12345 VERSION]", window.KGEN_12345_VERSION);
