@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## V10.39.2_EXECUTION_MAP_GOVERNANCE
+- 清理根層歷史版號檔：VERSION_GOVERNANCE_Vxx、PACKAGE_MANIFEST_Vxx、SHA256SUMS_Vxx 移入 archive/version-history。
+- 新增 docs/EXECUTION_MAP.md，標示真正會執行的檔案。
+- 新增 modules/README.md 與 modules/runtime/README.md，說明 runtime 會執行與載入方式。
+- 正式檔名不變，只更新 header、VERSION、CHANGELOG、VERSION_GOVERNANCE。
+
+
 ## V10.39.1_TEMPLE_ARCHITECTURE_MASTER
 - 先升版治理，再改程式。
 - 新增神殿建築藍圖 docs。

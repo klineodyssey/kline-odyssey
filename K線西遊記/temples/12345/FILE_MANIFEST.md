@@ -1,28 +1,23 @@
 # FILE MANIFEST
 
-VERSION: V10.39.1_TEMPLE_ARCHITECTURE_MASTER
+VERSION: V10.39.2_EXECUTION_MAP_GOVERNANCE
 
-## Root modules
-- modules/kgen-12345-core.css
-- modules/kgen-12345-holy-cup.js
-- modules/kgen-12345-input-governance.js
-- modules/kgen-12345-install-check.js
-- modules/kgen-12345-motion-control.js
-- modules/kgen-12345-panel-router.js
-- modules/kgen-12345-stable-countdown.js
-- modules/kgen-12345-transformer-runtime.js
-- modules/kgen-12345-universe-elevator.js
-- modules/kgen-12345-version.js
+## 根層必要檔
+- index.html
+- VERSION
+- CHANGELOG.md
+- README.md
+- VERSION_GOVERNANCE.json
+- FILE_MANIFEST.md
+- PACKAGE_MANIFEST.txt
+- SHA256SUMS.txt
 
-## Runtime modules
-- modules/runtime/kgen-festival-runtime.js
-- modules/runtime/kgen-panel-registry.js
-- modules/runtime/kgen-recording-runtime.js
-- modules/runtime/kgen-router-engine.js
-- modules/runtime/kgen-runtime-state.js
-- modules/runtime/kgen-temple-layout.js
-- modules/runtime/kgen-universe-axis.js
-- modules/runtime/kgen-visibility-engine.js
-- modules/runtime/kgen-visual-semantic-control.js
-- modules/runtime/kgen-warp-elevator.js
-- modules/runtime/kgen-zlayer-engine.js
+## 說明書
+- docs/EXECUTION_MAP.md
+- docs/TEMPLE_ARCHITECTURE_MASTER.md
+- docs/PANEL_CONTROL_MAP.md
+- docs/ASSET_BINDING_MAP.md
+- docs/WARP_ELEVATOR_STRUCTURE.md
+- docs/AU_REBUILD_RULES.md
+- modules/README.md
+- modules/runtime/README.md

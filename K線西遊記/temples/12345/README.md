@@ -1,41 +1,25 @@
 # KGEN 12345 五指山悟空財神殿
 
-## VERSION
-V10.39.0_RUNTIME_GOVERNANCE
+VERSION: V10.39.2_EXECUTION_MAP_GOVERNANCE  
+BUILD: 20260517-V10.39.2-EXECUTION-MAP-GOVERNANCE
 
-## BUILD
-20260517-V10.39.0-RUNTIME-GOVERNANCE
+## 入口
+`index.html`
 
-## BASE_FROM
-KGEN_12345_V10_38_0_GENESIS_520_PANEL_RECOVERY_FULL.zip
+## 下一頁接手先讀
+1. `docs/EXECUTION_MAP.md`
+2. `docs/TEMPLE_ARCHITECTURE_MASTER.md`
+3. `modules/README.md`
+4. `modules/runtime/README.md`
+5. `VERSION_GOVERNANCE.json`
 
-## 主檔
-`K線西遊記/temples/12345/index.html`
+## 定位
+12345 是發發財金神殿：發財金、心跳、點火、許願、還願、三聖盃檢查、TempleHeart / Brain 對齊規則。  
+不是 11520 交易所。
 
-## 版本治理天條
-
-- modules 與 modules/runtime 的正式檔名不得含版本號。
-- 版本號必須寫在檔案內容最前面的 header。
-- 沒用到的檔案不放 active path；需要保留參考才放 archive。
-- GitHub 根目錄 README.md 是官網首頁，不得覆蓋。
-- 12345 神殿 README.md 放本層。
-
-## 正式座標定義
-
-- X = 左右空間
-- Y = 上下空間
-- Z = 多空鏡像軸：+Z 多方，-Z 空方
-- C = 曲速宇宙電梯
-- T = 自然時間流
-- CT = 現價 / 宇宙生成邊界
-
-## 本版新增
-
-- Runtime State Engine
-- Panel Registry
-- Router Engine
-- Visibility Engine
-- Z-Layer Engine
-- Universe Axis Engine
-- Recording Runtime
-- Festival Runtime
+## 治理規則
+- ZIP 外包裝可帶產品名與版號。
+- 內部正式路徑與檔名固定。
+- 根層只放現在執行或交接必要檔。
+- 歷史版本檔放 `archive/version-history/`。
+- 版本寫在 header / VERSION / CHANGELOG / VERSION_GOVERNANCE。
