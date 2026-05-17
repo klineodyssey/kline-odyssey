@@ -1,3 +1,11 @@
+/*
+PRODUCT_ID: KGEN-12345-HEART-UI
+MODULE: kgen-12345-universe-elevator.js
+VERSION: V10.39.2_EXECUTION_MAP_GOVERNANCE
+BUILD: 20260517-V10.39.2-EXECUTION-MAP-GOVERNANCE
+BASE_FROM: KGEN_12345_V10_39_1_TEMPLE_ARCHITECTURE_MASTER_FULL.zip
+RULE: Official filename is fixed. Version is written here, not in filename.
+*/
 // KGEN 12345 official universe elevator
 (function(){
   "use strict";
