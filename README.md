@@ -472,8 +472,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ Price = Position.Market = Gravity Field.KGEN = Mass.KLINE Universe is not technical analysis.  
-👉 https://www.youtube.com/shorts/a-U5FVf8u2g
+▶ Taiwan now standsat the CT Boundaryof this era.#KLINE #KGEN #AI  
+👉 https://www.youtube.com/watch?v=DM8XPDrbYYo
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
