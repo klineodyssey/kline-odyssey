@@ -96,3 +96,20 @@ input[data-kgen-amount='1']{user-select:text!important;-webkit-user-select:text!
   top:auto!important;
   transform:none!important;
 }
+
+
+/*
+PRODUCT_ID: KGEN-12345-HEART-UI
+MODULE: kgen-12345-core.css
+VERSION: V10.39.0_RUNTIME_GOVERNANCE
+BUILD: 20260517-V10.39.0-RUNTIME-GOVERNANCE
+RULE: Official filename has no version number.
+*/
+[data-kgen-collapsed="1"]{display:none!important;}
+#kgen-axis-labels{position:fixed;left:12px;top:82px;z-index:1600;display:flex;flex-direction:column;gap:6px;pointer-events:none;font-family:system-ui,"Noto Sans TC",sans-serif;}
+.kgen-axis-badge{display:inline-block;width:max-content;max-width:78vw;border:1px solid rgba(127,243,255,.45);border-radius:999px;padding:5px 10px;background:rgba(0,0,0,.62);color:#dffcff;font-size:12px;font-weight:900;box-shadow:0 0 16px rgba(0,240,255,.12);}
+.kgen-axis-zp{color:#ffd778;border-color:rgba(255,215,120,.5);}
+.kgen-axis-zn{color:#ff9aa8;border-color:rgba(255,120,150,.5);}
+.kgen-axis-c{color:#b7f7ff;}
+.kgen-axis-ct{color:#d8c7ff;}
+#kgen-reopen-anchor{position:fixed!important;right:14px!important;top:86px!important;z-index:2000!important;}
