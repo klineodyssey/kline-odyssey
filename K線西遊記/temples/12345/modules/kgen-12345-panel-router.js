@@ -1,5 +1,5 @@
 // KGEN 12345 Panel Router Repair
-// VERSION: V10.37.8_PANEL_ROUTER_REPAIR
+// VERSION: V10.37.9_PANEL_ROUTER_REPAIR
 (function(){
   "use strict";
   if (window.__KGEN_12345_PANEL_ROUTER_REPAIR__) return;
@@ -82,5 +82,5 @@
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
   setInterval(boot,2000);
 
-  window.KGEN_PANEL_ROUTER={VERSION:"V10.37.8_PANEL_ROUTER_REPAIR",rules:RULES,boot,toggle:function(key){const r=RULES.find(x=>x.key===key);if(r)toggle(r);}};
+  window.KGEN_PANEL_ROUTER={VERSION:"V10.37.9_PANEL_ROUTER_REPAIR",rules:RULES,boot,toggle:function(key){const r=RULES.find(x=>x.key===key);if(r)toggle(r);}};
 })();
