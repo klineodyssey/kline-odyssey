@@ -1,4 +1,4 @@
-/* KGEN 12345 V10.34 Install / Organ Check */
+/* KGEN 12345 V10.37.8 Install / Organ Check */
 (function(){
   'use strict';
   const REQUIRED_DOM=['core-anchor','core-window','fairy-img','warp-input-val','warp-thumb','energy-fill','warp-txt','move-joystick-wrap','move-joystick-knob'];
@@ -22,10 +22,10 @@
     ].filter(Boolean);
     const box=statusBox();
     if(missing.length){
-      box.innerHTML='<b>V10.34 器官檢查：</b><span class="bad">缺檔 / 缺節點：</span> '+missing.join('、');
+      box.innerHTML='<b>V10.37.8 器官檢查：</b><span class="bad">缺檔 / 缺節點：</span> '+missing.join('、');
       speak('五指山器官檢查發現缺檔，請檢查檔案路徑。');
     }else{
-      box.innerHTML='<b>V10.34 器官檢查：</b><span class="ok">OK</span>｜CY/WARP 分離｜modules '+loaded.join('+');
+      box.innerHTML='<b>V10.37.8 器官檢查：</b><span class="ok">OK</span>｜CY/WARP 分離｜modules '+loaded.join('+');
     }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
