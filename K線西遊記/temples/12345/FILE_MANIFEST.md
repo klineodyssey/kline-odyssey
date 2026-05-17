@@ -1,23 +1,10 @@
 # FILE MANIFEST
 
-VERSION: V10.39.2_EXECUTION_MAP_GOVERNANCE
+VERSION: V10.40.0_GITHUB_RELEASE_CLEAN
 
-## 根層必要檔
-- index.html
-- VERSION
-- CHANGELOG.md
-- README.md
-- VERSION_GOVERNANCE.json
-- FILE_MANIFEST.md
-- PACKAGE_MANIFEST.txt
-- SHA256SUMS.txt
-
-## 說明書
-- docs/EXECUTION_MAP.md
-- docs/TEMPLE_ARCHITECTURE_MASTER.md
-- docs/PANEL_CONTROL_MAP.md
-- docs/ASSET_BINDING_MAP.md
-- docs/WARP_ELEVATOR_STRUCTURE.md
-- docs/AU_REBUILD_RULES.md
-- modules/README.md
-- modules/runtime/README.md
+## 一層資料夾
+- modules/
+- assets/
+- SOP/
+- docs/
+- archive/

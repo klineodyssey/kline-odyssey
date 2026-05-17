@@ -1,21 +1,13 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "version": "V10.39.1_TEMPLE_ARCHITECTURE_MASTER",
-  "build": "20260517-V10.39.1-TEMPLE-ARCHITECTURE-MASTER",
-  "base_from": "KGEN_12345_V10_39_0_RUNTIME_GOVERNANCE_FULL.zip",
-  "rule": "升版改內容與 header，不改正式檔名。",
-  "purpose": "12345 五指山悟空財神殿：發發財金、心跳、點火、許願、還願。",
-  "not_scope": [
-    "11520 跨市場交易所",
-    "跨市場交易"
-  ],
-  "asset_binding": {
-    "bull-front.png": "+Z 多方宇宙中央圖",
-    "bear-rear.png": "-Z 空方宇宙中央圖",
-    "heart.png": "移動暫態圖，停止後回 bull/bear",
-    "warp-core.png": "右下曲速電梯艙，跟隨 C=0~300 移動"
-  },
-  "active_root_modules": [
+  "current_version": "V10.40.0_GITHUB_RELEASE_CLEAN",
+  "build": "20260517-V10.40.0-GITHUB-RELEASE-CLEAN",
+  "base_from": "KGEN_12345_V10_39_2_EXECUTION_MAP_GOVERNANCE_FULL.zip",
+  "release_rule": "GitHub 正式層只保留必要執行檔。不用檔案放當層 archive。",
+  "folder_rule": "index.html 旁只開一層資料夾；禁止 modules/runtime 等第二層執行資料夾。",
+  "ai_first_read": "SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
+  "execution_map": "docs/EXECUTION_MAP.md",
+  "active_modules": [
     "kgen-12345-core.css",
     "kgen-12345-holy-cup.js",
     "kgen-12345-input-governance.js",
@@ -25,19 +17,23 @@
     "kgen-12345-stable-countdown.js",
     "kgen-12345-transformer-runtime.js",
     "kgen-12345-universe-elevator.js",
-    "kgen-12345-version.js"
+    "kgen-12345-version.js",
+    "runtime-festival-engine.js",
+    "runtime-panel-registry.js",
+    "runtime-recording-engine.js",
+    "runtime-router-engine.js",
+    "runtime-state.js",
+    "runtime-temple-layout.js",
+    "runtime-universe-axis.js",
+    "runtime-visibility-engine.js",
+    "runtime-visual-semantic-control.js",
+    "runtime-warp-elevator.js",
+    "runtime-zlayer-engine.js"
   ],
-  "active_runtime_modules": [
-    "kgen-festival-runtime.js",
-    "kgen-panel-registry.js",
-    "kgen-recording-runtime.js",
-    "kgen-router-engine.js",
-    "kgen-runtime-state.js",
-    "kgen-temple-layout.js",
-    "kgen-universe-axis.js",
-    "kgen-visibility-engine.js",
-    "kgen-visual-semantic-control.js",
-    "kgen-warp-elevator.js",
-    "kgen-zlayer-engine.js"
+  "official_assets": [
+    "bear-rear.png",
+    "bull-front.png",
+    "heart.png",
+    "warp-core.png"
   ]
 }
