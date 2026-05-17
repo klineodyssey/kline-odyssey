@@ -113,3 +113,59 @@ RULE: Official filename has no version number.
 .kgen-axis-c{color:#b7f7ff;}
 .kgen-axis-ct{color:#d8c7ff;}
 #kgen-reopen-anchor{position:fixed!important;right:14px!important;top:86px!important;z-index:2000!important;}
+
+
+/*
+PRODUCT_ID: KGEN-12345-HEART-UI
+MODULE: kgen-12345-core.css
+VERSION: V10.39.1_TEMPLE_ARCHITECTURE_MASTER
+BUILD: 20260517-V10.39.1-TEMPLE-ARCHITECTURE-MASTER
+BASE_FROM: KGEN_12345_V10_39_0_RUNTIME_GOVERNANCE_FULL.zip
+RULE: Official filename is fixed. Version is written here, not in filename.
+*/
+
+:root {
+  --kgen-safe-top: max(38px, env(safe-area-inset-top));
+  --kgen-safe-bottom: max(18px, env(safe-area-inset-bottom));
+}
+#kgen-heart-live-panel,.heart-console,.kgen-heart-console{top:var(--kgen-safe-top)!important;}
+#right-rule-panel,#rule-panel,.deity-rule-panel,.rule-panel,.kgen-temple-right-rule-panel{
+  position:fixed!important; right:88px!important; bottom:170px!important;
+  width:min(280px,calc(100vw - 32px))!important; max-height:min(300px,calc(100vh - 180px))!important;
+  overflow-y:auto!important; z-index:980!important; transform-origin:bottom right!important;
+  pointer-events:auto!important; border-radius:18px!important;
+}
+#holy-cup-modal,#holy-cup-check,.holy-cup-check,#cup-check-panel,.cup-check-panel,#cup-system,.cup-system{
+  position:fixed!important; left:50%!important; bottom:calc(92px + var(--kgen-safe-bottom))!important;
+  transform:translateX(-50%)!important; width:min(360px,78vw)!important; max-height:190px!important;
+  overflow-y:auto!important; z-index:720!important; margin:0!important; border-radius:16px!important;
+}
+.kgen-holycup-collapsed #holy-cup-modal,.kgen-holycup-collapsed #holy-cup-check,
+.kgen-holycup-collapsed .holy-cup-check,.kgen-holycup-collapsed #cup-check-panel,
+.kgen-holycup-collapsed .cup-check-panel,.kgen-holycup-collapsed #cup-system,
+.kgen-holycup-collapsed .cup-system{display:none!important;}
+#kgen-holycup-tab{
+  position:fixed; left:50%; bottom:calc(64px + var(--kgen-safe-bottom)); transform:translateX(-50%);
+  z-index:760; border:1px solid rgba(255,215,120,.65); background:rgba(0,0,0,.78);
+  color:#ffe28a; border-radius:999px; padding:6px 12px; font-size:12px; font-weight:900;
+}
+#kgen-warp-elevator,.kgen-warp-elevator{
+  position:fixed!important; right:18px!important; bottom:calc(118px + var(--kgen-safe-bottom))!important;
+  width:72px!important; height:260px!important; z-index:650!important; pointer-events:auto!important;
+}
+#kgen-warp-core,.kgen-warp-core{
+  position:absolute!important; left:50%!important; width:56px!important; height:56px!important; object-fit:contain!important;
+  transform:translate(-50%,0); filter:drop-shadow(0 0 10px rgba(135,247,255,.65)); transition:top .38s ease,filter .28s ease; z-index:3;
+}
+#kgen-drive-ring,.kgen-drive-ring{
+  position:fixed!important; right:16px!important; bottom:calc(42px + var(--kgen-safe-bottom))!important; z-index:670!important;
+}
+.kgen-drive-active{filter:drop-shadow(0 0 22px rgba(90,255,255,.9)) brightness(1.25)!important;}
+@media(max-width:720px){
+  #right-rule-panel,#rule-panel,.deity-rule-panel,.rule-panel,.kgen-temple-right-rule-panel{
+    right:76px!important; bottom:158px!important; width:min(268px,calc(100vw - 104px))!important; max-height:282px!important;
+  }
+  #holy-cup-modal,#holy-cup-check,.holy-cup-check,#cup-check-panel,.cup-check-panel,#cup-system,.cup-system{
+    width:min(330px,82vw)!important; max-height:168px!important; bottom:calc(86px + var(--kgen-safe-bottom))!important;
+  }
+}
