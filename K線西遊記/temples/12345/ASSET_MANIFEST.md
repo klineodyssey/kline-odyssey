@@ -8,7 +8,6 @@
 - `assets/warp-core.png`：宇宙電梯 / WARP 核心圖
 
 規則：
-
 - 不新增 `heart-drive.png`、`warp-universe.png` 等漂移命名。
-- 若未來要換圖，只替換同名檔案，不改 JS 路徑。
-- assets 目錄如果已在 GitHub 既有專案中，覆蓋本包時不要刪除既有 assets。
+- 換圖只替換同名檔案，不改 JS 路徑。
+- GitHub 既有 assets 不得刪除。

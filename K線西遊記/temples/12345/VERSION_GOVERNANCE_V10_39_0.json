@@ -1,0 +1,46 @@
+{
+  "product_id": "KGEN-12345-HEART-UI",
+  "version": "V10.39.0_RUNTIME_GOVERNANCE",
+  "build": "20260517-V10.39.0-RUNTIME-GOVERNANCE",
+  "base_from": "KGEN_12345_V10_38_0_GENESIS_520_PANEL_RECOVERY_FULL.zip",
+  "main_file": "K線西遊記/temples/12345/index.html",
+  "official_module_root": "K線西遊記/temples/12345/modules/",
+  "official_runtime_root": "K線西遊記/temples/12345/modules/runtime/",
+  "filename_rule": "Official active module filenames must not include version numbers. Version is written in file header.",
+  "axis_rule": {
+    "X": "左右空間",
+    "Y": "上下空間",
+    "Z": "多空鏡像軸；+Z 多方，-Z 空方",
+    "C": "曲速宇宙電梯",
+    "T": "自然時間流",
+    "CT": "現價 / 宇宙生成邊界"
+  },
+  "official_root_modules": [
+    "kgen-12345-core.css",
+    "kgen-12345-version.js",
+    "kgen-12345-input-governance.js",
+    "kgen-12345-panel-router.js",
+    "kgen-12345-transformer-runtime.js",
+    "kgen-12345-holy-cup.js",
+    "kgen-12345-stable-countdown.js",
+    "kgen-12345-motion-control.js",
+    "kgen-12345-install-check.js",
+    "kgen-12345-universe-elevator.js"
+  ],
+  "official_runtime_modules": [
+    "kgen-runtime-state.js",
+    "kgen-panel-registry.js",
+    "kgen-router-engine.js",
+    "kgen-zlayer-engine.js",
+    "kgen-visibility-engine.js",
+    "kgen-universe-axis.js",
+    "kgen-recording-runtime.js",
+    "kgen-festival-runtime.js"
+  ],
+  "official_assets": [
+    "bear-rear.png",
+    "bull-front.png",
+    "heart.png",
+    "warp-core.png"
+  ]
+}

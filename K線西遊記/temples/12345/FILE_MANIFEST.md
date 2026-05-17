@@ -1,6 +1,9 @@
-# KGEN 12345 FILE MANIFEST｜V10.37.6_PANEL_ROUTER_REPAIR
+# KGEN 12345 FILE MANIFEST｜V10.39.0_RUNTIME_GOVERNANCE
 
-## 正式 runtime modules
+## 主檔
+- index.html
+
+## 正式 root modules
 - modules/kgen-12345-core.css
 - modules/kgen-12345-version.js
 - modules/kgen-12345-input-governance.js
@@ -12,10 +15,22 @@
 - modules/kgen-12345-install-check.js
 - modules/kgen-12345-universe-elevator.js
 
+## 正式 runtime modules
+- modules/runtime/kgen-runtime-state.js
+- modules/runtime/kgen-panel-registry.js
+- modules/runtime/kgen-router-engine.js
+- modules/runtime/kgen-zlayer-engine.js
+- modules/runtime/kgen-visibility-engine.js
+- modules/runtime/kgen-universe-axis.js
+- modules/runtime/kgen-recording-runtime.js
+- modules/runtime/kgen-festival-runtime.js
 
-## V10.37.7 PANEL_LAYOUT_ROUTER_HOTFIX
-- 修正底部悟空心臟：控制悟空心臟宇宙圖譜，不再混用左上悟空財神殿控制台。
-- 修正右側神規：控制右側規則 panel。
-- 修正總展開 / 總收合：控制 GA Evolution、悟空心臟引擎、悟空心臟圖譜。
-- 修正 520 / 1111 / 跨年活動：預設收合並移到安全右上 dock，避免擋住按鍵。
-- 新增 axis-c-scene：Warp/C 為宇宙樓層切換，不再與 XY 平面連動。
+## 正式 assets
+- assets/bull-front.png
+- assets/bear-rear.png
+- assets/heart.png
+- assets/warp-core.png
+
+## archive
+- modules/archive/
+- assets/archive/
