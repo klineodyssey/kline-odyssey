@@ -1,29 +1,20 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "version": "V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION",
-  "build": "20260518-V10.41.1-RESTORE-GOLDEN-LAYOUT-NO-DEMOLITION",
-  "base_from": "V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
-  "status": "OPENING_READY_RESTORE_BASELINE",
-  "rules": {
-    "no_versioned_runtime_filenames": true,
-    "no_release_notes_in_github_public_layer": true,
-    "do_not_upload_assets_from_this_package": true,
-    "do_not_rebuild_layout": true,
-    "preserve_existing_signboard": true,
-    "preserve_existing_central_scene": true,
-    "preserve_joystick_warp_wallet": true
-  },
-  "allowed_upload_files": [
+  "version": "KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY",
+  "build": "20260518-V10.41.2-TEMPLE-FRONT-REPAIR-OPENING-READY",
+  "base_from": "KGEN_12345_V10_40_5_MIRROR_CENTER_BULLBEAR_RESTORE_FULL.zip",
+  "mode": "opening_ready_temple_front",
+  "fixed_entry_files": [
     "12345.html",
     "wallet-12345.html",
-    "K線西遊記/temples/12345/index.html",
-    "K線西遊記/temples/12345/modules/*",
-    "K線西遊記/temples/12345/VERSION",
-    "K線西遊記/temples/12345/CHANGELOG.md",
-    "K線西遊記/temples/12345/README.md",
-    "K線西遊記/temples/12345/VERSION_GOVERNANCE.json",
-    "K線西遊記/temples/12345/PROGRAM_HISTORY.md",
-    "K線西遊記/temples/12345/UPLOAD_LIST.txt",
-    "K線西遊記/temples/12345/SHA256SUMS.txt"
-  ]
+    "K線西遊記/temples/12345/index.html"
+  ],
+  "active_modules_added": [
+    "modules/kgen-12345-layout-engine.js",
+    "modules/kgen-12345-ui-runtime.js",
+    "modules/kgen-12345-countdown-engine.js"
+  ],
+  "asset_policy": "Do not overwrite assets. Required official names: bull-front.png, bear-rear.png, heart.png, warp-core.png.",
+  "scope": "front layout, central visual binding, warp-core binding, holy cup placement, label governance",
+  "out_of_scope": "camera, recorder, full battle mode, XYZ/C/T runtime expansion"
 }

@@ -1,29 +1,32 @@
 # KGEN 12345 五指山悟空財神殿
 
-## V10.41.1 Restore Golden Layout
+VERSION: `KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY`
 
-本版以 V10.40.5 為母版回復，不再拆屋重排。
+這版是「開張門面修復版」。目標不是新增戰鬥遊戲，而是讓 12345 先像正式神殿，讓使用者願意進來連錢包、領發財金、許願、還願、點燈、心跳、呼吸與參加節日活動。
 
-目標：先讓 12345 可以開張，不再像工程 debug 場。
+## 上傳原則
 
-本包不含 assets，避免覆蓋 GitHub 正式資產。
+固定入口：
 
-# KGEN 12345 V10.40.5 Mirror Center Bull/Bear Restore
+```text
+12345.html
+wallet-12345.html
+K線西遊記/temples/12345/index.html
+```
 
-本版以 V10.40.4 為母版，不重寫、不換結構，只修中央鏡像核心：圓心旋轉、多空圖切換、殘留 debug 文字。
+正式 assets 不要覆蓋，GitHub 既有圖檔保留：
 
-上傳重點：`12345.html`、`wallet-12345.html`、`K線西遊記/temples/12345/index.html`。文件可同步上傳：VERSION、CHANGELOG.md、README.md、VERSION_GOVERNANCE.json。
+```text
+assets/bull-front.png
+assets/bear-rear.png
+assets/heart.png
+assets/warp-core.png
+```
 
-# KGEN 12345 悟空財神殿
+## 本版重點
 
-VERSION: V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
-BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
-
-本版只做前端 UI 收斂，不動合約地址、不動 wallet 核心、不動左下 MOVE 遙桿。
-
-處理重點：
-- 舊倒數整塊隱藏，不再白工重調早期版倒數。
-- 新增一條小型穩定倒數條。
-- 三聖盃檢查系統縮小放在方向橫桿上方。
-- 左上控制台與訊息往下移。
-- 小標籤與 debug 顯示預設收起。
+- 中央圖：多方 `bull-front.png`，空方 `bear-rear.png`，MOVE / 儀式 `heart.png`。
+- 右下曲速縱桿：`warp-core.png` 跟隨發光點上下移動。
+- 三聖盃檢查系統：移到中央圖與方向橫桿之間，縮小、不碰右下 Warp。
+- 小標籤 / debug / 工程字樣：預設收起。
+- 戰鬥宇宙功能暫收，後續再開。

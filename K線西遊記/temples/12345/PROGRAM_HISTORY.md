@@ -1,19 +1,21 @@
-# PROGRAM HISTORY｜KGEN 12345
+# KGEN 12345 程式履歷
 
-## V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
+## KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY
 
-- Base: V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE。
-- 原則：保留既有招牌、中央悟空主圖、MOVE、WARP、錢包流程與神殿面板。
-- 修正前一版錯誤方向：不再做大幅 UI 拆屋、不再將正式神殿改成空洞鬼城。
-- 僅做版本治理、檔案清潔、GitHub 上傳規則整理。
-- 正式層禁止版本化執行檔名與 RELEASE_NOTES。
+### 母版
+- KGEN_12345_V10_40_5_MIRROR_CENTER_BULLBEAR_RESTORE_FULL.zip
 
-## Next Rule
+### 本次判斷
+12345 不需要先做完整戰鬥宇宙。先做神殿開張門面：連錢包、發財金、許願、還願、點燈、心跳、呼吸、節日。
 
-下一版若要調整畫面，只能在 V10.40.5 視覺母版上做小幅修正：
+### 本次實作
+- `modules/kgen-12345-layout-engine.js`：門面位置、三聖盃位置、底部功能名、debug 清除。
+- `modules/kgen-12345-ui-runtime.js`：中央圖 bull / bear / heart 正式綁定，Warp core 跟隨縱桿。
+- `modules/kgen-12345-countdown-engine.js`：新穩定倒數條，舊倒數不再壓版。
+- `modules/kgen-12345-core.css`：開張門面 CSS 治理。
 
-1. 不動招牌主結構。
-2. 不清空中央主圖。
-3. 不重排整個 layout。
-4. 不新增 patch/temp/final 執行檔。
-5. 所有版本只寫入 VERSION / CHANGELOG / VERSION_GOVERNANCE。
+### 不做
+- 不新增遊戲戰鬥。
+- 不展開 XY / Z / C / T / CT 大型變化。
+- 不覆蓋 assets。
+- 不新增帶版本號的 HTML 執行檔。

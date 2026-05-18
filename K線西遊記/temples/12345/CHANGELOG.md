@@ -1,16 +1,5 @@
 # CHANGELOG
 
-## V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
-
-- 回退到 V10.40.5 視覺母版，不再拆屋、不重排招牌、不破壞中央主圖。
-- 只更新版本治理與正式上傳包結構。
-- 保留原本畫面：上方招牌、中央悟空、MOVE、WARP、三聖盃、節日活動、錢包流程。
-- 不新增 RELEASE_NOTES 到 GitHub 正式層。
-- 不包含 assets，避免覆蓋 GitHub 正式圖。
-- 下一步只能在此母版上做「小幅收斂」，不得再大改 UI layout。
-
-# CHANGELOG
-
 ## V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 - 修復中央圖旋轉圓心：鎖定 `#core-window` 不再被舊腳本二次旋轉，統一由 `#core-anchor` 以 50%/50% 圓心旋轉。
 - 恢復多空圖切換：方向角 `-90° ~ +90°` 顯示 `bull-front.png`，其餘角度顯示 `bear-rear.png`。
@@ -30,3 +19,13 @@
 
 ## V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX
 - 修正 active runtime 殘留舊測試圖。
+
+## KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY
+
+- 以 V10.40.5 為母版，不再拆屋重排。
+- 12345 定位改為「悟空財神殿開張版」：畫面好看、位置正確、基本功能入口清楚。
+- 中央主圖治理：預設多方悟空門面；角度進入空方區間切換 `bear-rear.png`；MOVE / 儀式動作切換 `heart.png`。
+- 右下 Warp：新增 `warp-core.png` 跟隨曲速縱桿發光點上下移動。
+- 三聖盃檢查系統移到中央圖與方向橫桿之間，縮小寬度，避免碰到右下曲速引擎。
+- 小標籤與工程 debug 預設收起，避免破廟感。
+- K線 / 戰鬥 / XY / Z / C / T / CT 大型變化暫收，後續放入遊戲戰鬥模式或其他殿。
