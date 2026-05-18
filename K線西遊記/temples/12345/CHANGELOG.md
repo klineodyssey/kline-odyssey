@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH
+- Continue modules from V10.40.5; no rollback to single-file.
+- Add `modules/runtime-v10-40-6-stable-patch.js`.
+- Isolate broken old countdown and install independent New Year countdown widget.
+- Holy Cup panel moved to lower safe zone above direction bar; self-collapse and reopen tab.
+- Central image semantic control: bull / bear / heart.
+- Warp core image attached to right warp elevator.
+- Left heart and right rule mini-panels restored as independent windows.
+- Top stray labels hidden.
+
+
+# CHANGELOG
+
 ## V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 - 修復中央圖旋轉圓心：鎖定 `#core-window` 不再被舊腳本二次旋轉，統一由 `#core-anchor` 以 50%/50% 圓心旋轉。
 - 恢復多空圖切換：方向角 `-90° ~ +90°` 顯示 `bull-front.png`，其餘角度顯示 `bear-rear.png`。

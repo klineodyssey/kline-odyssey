@@ -1,42 +1,24 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "current_version": "V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
-  "build": "20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE",
-  "base_from": "KGEN-12345-V10.40.4_NO_WHITEWORK_COUNTDOWN_UI_FIX",
-  "canonical_path": "K線西遊記/temples/12345/index.html",
-  "root_bridges": [
-    "12345.html",
-    "wallet-12345.html"
-  ],
-  "asset_manifest": "V10.27.1 official asset names only",
+  "version": "KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH",
+  "build": "20260518-V10.40.6-MODULES-STABLE-PATCH",
+  "base_from": "KGEN_12345_V10_40_5_MIRROR_CENTER_BULLBEAR_RESTORE_FULL.zip",
+  "strategy": "modules_continue_patch_layer",
+  "main_file": "K線西遊記/temples/12345/index.html",
+  "active_patch": "modules/runtime-v10-40-6-stable-patch.js",
   "official_assets": [
-    "assets/bull-front.png",
-    "assets/bear-rear.png",
-    "assets/heart.png",
-    "assets/warp-core.png"
+    "bull-front.png",
+    "bear-rear.png",
+    "heart.png",
+    "warp-core.png"
   ],
-  "fixed": [
-    "removed active legacy wukong_heart_v10_4.png dependency",
-    "removed active legacy wukong_heart_core.jpg / wukong_caishen.png fallback dependency",
-    "updated install-check required asset to assets/heart.png",
-    "preserved left-bottom MOVE joystick and V9 recorder core",
-    "added mobile safe layout patch for central core, panels, HUD, joystick and elevator",
-    "converted root 12345.html into bridge file only",
-    "updated wallet-12345.html bridge version"
-  ],
-  "version": "KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
-  "rules": [
-    "do not retune broken legacy countdown blocks",
-    "hide old countdown and rebuild compact strip",
-    "preserve joystick",
-    "preserve wallet and contract wiring",
-    "do not overwrite official assets"
-  ],
-  "patch_scope": [
-    "central core transform-origin fixed",
-    "bull/bear image switching restored",
-    "legacy debug text suppressed",
-    "joystick preserved",
-    "wallet/contract unchanged"
-  ]
+  "rules": {
+    "rollback": "forbidden",
+    "single_file": "not this track",
+    "modules": "continue",
+    "dom_rebuild": "forbidden",
+    "countdown": "hide old, install independent widget",
+    "holy_cup": "self collapse only, reopen tab",
+    "warp_core": "bind to warp elevator"
+  }
 }
