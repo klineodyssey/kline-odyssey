@@ -1,21 +1,13 @@
 # KGEN 12345 程式履歷
 
-## KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY
+## KGEN-12345-V10.41.3_TEMPLE_FACE_RESTORE
 
-### 母版
-- KGEN_12345_V10_40_5_MIRROR_CENTER_BULLBEAR_RESTORE_FULL.zip
+母版：V10.40.5 Mirror Center Bull/Bear Restore。
 
-### 本次判斷
-12345 不需要先做完整戰鬥宇宙。先做神殿開張門面：連錢包、發財金、許願、還願、點燈、心跳、呼吸、節日。
+本次修正不是重排神殿，不拆原本門面。只處理跑圖結果中確認的錯位：中央圖、XY/旋轉語意、Warp 小圖跟隨、三聖盃下移與殘字清理。
 
-### 本次實作
-- `modules/kgen-12345-layout-engine.js`：門面位置、三聖盃位置、底部功能名、debug 清除。
-- `modules/kgen-12345-ui-runtime.js`：中央圖 bull / bear / heart 正式綁定，Warp core 跟隨縱桿。
-- `modules/kgen-12345-countdown-engine.js`：新穩定倒數條，舊倒數不再壓版。
-- `modules/kgen-12345-core.css`：開張門面 CSS 治理。
-
-### 不做
-- 不新增遊戲戰鬥。
-- 不展開 XY / Z / C / T / CT 大型變化。
-- 不覆蓋 assets。
-- 不新增帶版本號的 HTML 執行檔。
+固定天條：
+- 下面功能列不是問題，不再亂動。
+- 右下曲速縱桿位置不是問題，不再亂移。
+- K 線圖必須保留。
+- 12345 現階段只做開張神殿：連錢包、發財金、許願、還願、點燈、心跳、呼吸、節日。
