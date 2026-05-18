@@ -221,3 +221,243 @@ RULE: Active JS/CSS stays in modules single layer. V9 recorder core restored.
 .brand-section{margin-top:8px!important;}
 #brand-badge{display:none!important;}
 @media(max-width:720px){#kgen-holy-cup-panel{width:min(300px,70vw)!important;bottom:88px!important;max-height:124px!important}.kgen-v10402-panel{font-size:11px}.hud-top{top:24px!important}}
+
+
+/* ============================================================
+KGEN 12345｜V10.41.2 TEMPLE FRONT REPAIR OPENING READY
+目的：12345 先開張。只保留神殿門面、錢包/發財金/許願/還願/點燈/心跳/呼吸/節日基本功能。
+遊戲戰鬥用的 XY / Z / C / T / CT 大型鏡像變化暫收，不在開張門面展開。
+============================================================ */
+:root{
+  --kgen-temple-top-safe: calc(12px + env(safe-area-inset-top, 0px));
+  --kgen-temple-bottom-safe: calc(8px + env(safe-area-inset-bottom, 0px));
+  --kgen-temple-gold: #ffd778;
+  --kgen-temple-cyan: #00f2ff;
+  --kgen-temple-panel: rgba(3, 8, 14, .78);
+}
+body.kgen-opening-ready{
+  background:#000 !important;
+  overflow-x:hidden !important;
+}
+body.kgen-opening-ready .hud-top{
+  top: var(--kgen-temple-top-safe) !important;
+  left: 10px !important;
+  right: 10px !important;
+  width: calc(100vw - 20px) !important;
+  z-index: 220 !important;
+  align-items:flex-start !important;
+  gap: 10px !important;
+}
+body.kgen-opening-ready .brand-section{
+  max-width: min(48vw, 420px) !important;
+  padding: 8px 10px 8px 14px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,215,120,.35) !important;
+  background: linear-gradient(90deg, rgba(12, 10, 2, .86), rgba(0,0,0,.28)) !important;
+  box-shadow: 0 0 24px rgba(255,215,120,.12) !important;
+}
+body.kgen-opening-ready .brand-name{
+  font-size: clamp(17px, 3.8vw, 26px) !important;
+  line-height: 1.06 !important;
+  white-space: normal !important;
+  text-shadow: 0 0 12px rgba(255,215,120,.42) !important;
+}
+body.kgen-opening-ready .sys-st{
+  font-size: clamp(8px, 2vw, 12px) !important;
+  line-height: 1.2 !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+body.kgen-opening-ready .monitor-data{
+  transform: scale(.82) !important;
+  transform-origin: top right !important;
+  gap: 10px !important;
+  max-width: 52vw !important;
+}
+body.kgen-opening-ready .data-box{
+  border-radius: 10px !important;
+  background: rgba(15, 12, 0, .78) !important;
+  box-shadow: 0 0 18px rgba(255,215,120,.12) !important;
+}
+/* 神殿開張門面：K線工程面板預設收起，避免破廟感 */
+body.kgen-opening-ready #kline-engine-panel,
+body.kgen-opening-ready #kline-chart-panel,
+body.kgen-opening-ready #coord-panel,
+body.kgen-opening-ready #coord-modal,
+body.kgen-opening-ready #kgen-axis-labels,
+body.kgen-opening-ready .kgen-axis-badge,
+body.kgen-opening-ready .kgen-floating-tag,
+body.kgen-opening-ready .mini-tag,
+body.kgen-opening-ready .tag-chip,
+body.kgen-opening-ready .kgen-debug,
+body.kgen-opening-ready .debug-label,
+body.kgen-opening-ready [data-debug="true"]{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+/* 中央主圖：不要再被方向盤轉成斜的；開張門面要端正 */
+body.kgen-opening-ready #core-anchor,
+body.kgen-opening-ready #core-anchor.v72-character{
+  left: 50% !important;
+  top: 50.5% !important;
+  width: min(56vw, 430px) !important;
+  height: min(56vw, 430px) !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 58 !important;
+  margin: 0 !important;
+}
+body.kgen-opening-ready #core-window{
+  width:100% !important;
+  height:100% !important;
+  border-radius:50% !important;
+  overflow:hidden !important;
+  border: 9px double rgba(255,215,120,.95) !important;
+  background: radial-gradient(circle, rgba(255,215,120,.12), rgba(0,0,0,.95)) !important;
+  box-shadow: 0 0 48px rgba(255,215,120,.32), 0 0 90px rgba(0,242,255,.10) !important;
+  transform:none !important;
+}
+body.kgen-opening-ready #fairy-img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  transform:none !important;
+  filter: saturate(1.08) contrast(1.02) !important;
+}
+body.kgen-opening-ready #core-window.kgen-front-heart{
+  box-shadow: 0 0 56px rgba(255,170,20,.38), 0 0 96px rgba(255,215,120,.18) !important;
+}
+body.kgen-opening-ready #core-window.kgen-front-bull{
+  box-shadow: 0 0 52px rgba(255,215,120,.34), 0 0 96px rgba(0,242,255,.10) !important;
+}
+body.kgen-opening-ready #core-window.kgen-front-bear{
+  box-shadow: 0 0 52px rgba(255,92,56,.30), 0 0 96px rgba(255,180,80,.12) !important;
+}
+/* 三聖盃：四步驟流程移到中央主圖與方向橫桿之間，不碰右下 Warp */
+body.kgen-opening-ready #v104-cup-panel{
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: calc(134px + env(safe-area-inset-bottom, 0px)) !important;
+  width: min(650px, calc(100vw - 170px)) !important;
+  min-width: 260px !important;
+  max-height: 118px !important;
+  transform: translateX(-50%) !important;
+  z-index: 180 !important;
+  overflow: hidden !important;
+  padding: 9px 10px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,215,120,.46) !important;
+  background: rgba(3, 9, 16, .84) !important;
+  box-shadow: 0 0 22px rgba(0,242,255,.10), inset 0 0 18px rgba(255,215,120,.05) !important;
+  backdrop-filter: blur(10px) !important;
+}
+body.kgen-opening-ready #v104-cup-panel .v104-head{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+  margin:0 0 6px 0 !important;
+  font-size: 13px !important;
+  color: var(--kgen-temple-gold) !important;
+}
+body.kgen-opening-ready #v104-cup-panel .v104-cup-grid{
+  display:grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items:stretch !important;
+}
+body.kgen-opening-ready #v104-cup-panel .v104-arrow{ display:none !important; }
+body.kgen-opening-ready #v104-cup-panel .v104-step,
+body.kgen-opening-ready #v104-cup-result{
+  min-height: 66px !important;
+  padding: 7px 6px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,215,120,.25) !important;
+  background: rgba(0,0,0,.30) !important;
+  box-sizing:border-box !important;
+}
+body.kgen-opening-ready #v104-cup-panel .v104-step .no{font-size:9px !important;color:#7ff3ff !important;}
+body.kgen-opening-ready #v104-cup-panel .v104-step .title{font-size:11px !important;line-height:1.15 !important;}
+body.kgen-opening-ready #v104-cup-panel .v104-step .stat{font-size:10px !important;line-height:1.1 !important;color:#ffb7b7 !important;}
+body.kgen-opening-ready #v104-cup-panel .v104-step button{font-size:10px !important;padding:5px 3px !important;margin-top:4px !important;border-radius:8px !important;}
+body.kgen-opening-ready #v104-cup-result{font-size:11px !important;line-height:1.14 !important;justify-content:center !important;}
+body.kgen-opening-ready #v104-cup-result div:first-child{font-size:18px !important;}
+body.kgen-opening-ready #v104-cup-result small{font-size:9px !important;}
+/* 右下曲速引擎：warp-core 圖跟著發光點上下移動 */
+body.kgen-opening-ready .warp-engine{
+  right: 10px !important;
+  bottom: calc(145px + env(safe-area-inset-bottom, 0px)) !important;
+  width: 84px !important;
+  z-index: 170 !important;
+}
+body.kgen-opening-ready .warp-rail{
+  height: min(38vh, 330px) !important;
+  width: 24px !important;
+  border-width:2px !important;
+  overflow: visible !important;
+}
+body.kgen-opening-ready #warp-thumb{ width:58px !important;height:30px !important;left:-19px !important; }
+body.kgen-opening-ready #kgen-warp-core-live{
+  position:absolute !important;
+  left:50% !important;
+  width:54px !important;
+  height:54px !important;
+  transform: translate(-50%, 50%) !important;
+  object-fit:contain !important;
+  z-index:36 !important;
+  pointer-events:none !important;
+  filter: drop-shadow(0 0 14px rgba(0,242,255,.9)) drop-shadow(0 0 20px rgba(255,215,120,.38)) !important;
+}
+body.kgen-opening-ready .warp-val-text{font-size:14px !important;margin-top:18px !important;}
+/* 下方只留基本神殿功能，不當宇宙戰鬥總控台 */
+body.kgen-opening-ready .footer-terminal{
+  bottom:0 !important;
+  z-index: 210 !important;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom,0px)) !important;
+  gap: 6px !important;
+  grid-template-columns: repeat(4, minmax(0,1fr)) !important;
+  border-top: 1px solid rgba(255,215,120,.35) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,.50), rgba(0,0,0,.92)) !important;
+}
+body.kgen-opening-ready .term-btn{
+  min-height: 39px !important;
+  padding: 8px 5px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+body.kgen-opening-ready .steer-zone{
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 160 !important;
+}
+body.kgen-opening-ready .angle-readout{font-size: clamp(34px, 8vw, 56px) !important;}
+body.kgen-opening-ready .steer-slider{width: min(78vw, 780px) !important;}
+body.kgen-opening-ready #kgen-v10404-countdown-strip{
+  bottom: calc(112px + env(safe-area-inset-bottom,0px)) !important;
+  width: min(360px, calc(100vw - 180px)) !important;
+  z-index: 168 !important;
+}
+body.kgen-opening-ready #move-joystick-wrap{
+  left: max(10px, env(safe-area-inset-left,0px)) !important;
+  bottom: calc(74px + env(safe-area-inset-bottom,0px)) !important;
+  z-index: 230 !important;
+}
+@media (max-width: 760px){
+  body.kgen-opening-ready .hud-top{top: calc(8px + env(safe-area-inset-top,0px)) !important;}
+  body.kgen-opening-ready .monitor-data{transform:scale(.68)!important;gap:6px!important;}
+  body.kgen-opening-ready #core-anchor{top: 51% !important;width:min(62vw, 340px) !important;height:min(62vw, 340px) !important;}
+  body.kgen-opening-ready #v104-cup-panel{bottom: calc(132px + env(safe-area-inset-bottom,0px)) !important;width:calc(100vw - 146px) !important;max-height:106px!important;padding:7px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-head{font-size:11px!important;margin-bottom:4px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-cup-grid{gap:4px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-step,#v104-cup-result{min-height:56px!important;padding:5px 3px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-step .title{font-size:9px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-step .stat{font-size:8px!important;}
+  body.kgen-opening-ready #v104-cup-panel .v104-step button{display:none!important;}
+  body.kgen-opening-ready .warp-engine{right:7px!important;bottom:calc(138px + env(safe-area-inset-bottom,0px))!important;width:70px!important;}
+  body.kgen-opening-ready .warp-rail{height:min(36vh,300px)!important;}
+  body.kgen-opening-ready #kgen-warp-core-live{width:46px!important;height:46px!important;}
+  body.kgen-opening-ready .footer-terminal{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+  body.kgen-opening-ready .term-btn{font-size:11px!important;min-height:37px!important;}
+}
