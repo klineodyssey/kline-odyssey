@@ -1,8 +1,8 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "current_version": "V10.40.4_NO_WHITEWORK_COUNTDOWN_UI_FIX",
-  "build": "20260518-V10.40.4-NO-WHITEWORK-COUNTDOWN-UI-FIX",
-  "base_from": "KGEN_12345_V10_40_3_MOBILE_LAYOUT_SAFE_ASSET_FIX_FULL.zip",
+  "current_version": "V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
+  "build": "20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE",
+  "base_from": "KGEN-12345-V10.40.4_NO_WHITEWORK_COUNTDOWN_UI_FIX",
   "canonical_path": "K線西遊記/temples/12345/index.html",
   "root_bridges": [
     "12345.html",
@@ -24,12 +24,19 @@
     "converted root 12345.html into bridge file only",
     "updated wallet-12345.html bridge version"
   ],
-  "version": "V10.40.4_NO_WHITEWORK_COUNTDOWN_UI_FIX",
+  "version": "KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
   "rules": [
     "do not retune broken legacy countdown blocks",
     "hide old countdown and rebuild compact strip",
     "preserve joystick",
     "preserve wallet and contract wiring",
     "do not overwrite official assets"
+  ],
+  "patch_scope": [
+    "central core transform-origin fixed",
+    "bull/bear image switching restored",
+    "legacy debug text suppressed",
+    "joystick preserved",
+    "wallet/contract unchanged"
   ]
 }
