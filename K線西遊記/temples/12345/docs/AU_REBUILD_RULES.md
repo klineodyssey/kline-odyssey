@@ -16,9 +16,9 @@ VERSION: V10.39.1_TEMPLE_ARCHITECTURE_MASTER
 - 不得刪除 warp-core.png 曲速電梯綁定
 
 
-## V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX 補充
+## V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE 補充
 
-BUILD: 20260518-V10.40.3-MOBILE-LAYOUT-SAFE-ASSET-FIX
+BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
 
 - 本版只做安全修復：正式資產回歸 `assets/heart.png`，不再要求 `wukong_heart_v10_4.png`。
 - 左下 MOVE joystick 與 V9 recorder core 必須保留。
