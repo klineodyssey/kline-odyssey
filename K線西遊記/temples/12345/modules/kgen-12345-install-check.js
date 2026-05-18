@@ -1,8 +1,8 @@
 /*
 PRODUCT_ID: KGEN-12345-HEART-UI
 MODULE: kgen-12345-install-check.js
-VERSION: V10.40.0_GITHUB_RELEASE_CLEAN
-BUILD: 20260517-V10.40.0-GITHUB-RELEASE-CLEAN
+VERSION: V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX
+BUILD: 20260518-V10.40.3-MOBILE-LAYOUT-SAFE-ASSET-FIX
 BASE_FROM: KGEN_12345_V10_39_2_EXECUTION_MAP_GOVERNANCE_FULL.zip
 RULE: GitHub release layer only keeps active files. Modules single-layer.
 */
@@ -10,7 +10,7 @@ RULE: GitHub release layer only keeps active files. Modules single-layer.
 (function(){
   'use strict';
   const REQUIRED_DOM=['core-anchor','core-window','fairy-img','warp-input-val','warp-thumb','energy-fill','warp-txt','move-joystick-wrap','move-joystick-knob'];
-  const REQUIRED_ASSETS=['assets/wukong_heart_v10_4.png'];
+  const REQUIRED_ASSETS=['assets/heart.png'];
   function speak(msg){ try{ if(window.app&&app.speak) app.speak(msg); else if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(msg); u.lang='zh-TW'; speechSynthesis.speak(u);} }catch(e){} }
   function statusBox(){
     let box=document.getElementById('kgen-v1034-status');
