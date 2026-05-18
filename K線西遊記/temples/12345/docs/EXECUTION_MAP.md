@@ -1,15 +1,17 @@
 # 12345 EXECUTION MAP
 
-VERSION: V10.40.0_GITHUB_RELEASE_CLEAN
+VERSION: V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL
 
 ## 入口
 `index.html`
 
-## 執行判斷
-只有被 `index.html` 載入的檔案才會執行。不存在 `/modules/runtime/`。所有可執行 JS/CSS 均在 `/modules/` 單層。
+## 新增 / 覆寫執行模組
+- `modules/runtime-canvas-screen-recorder.js`：螢幕錄影 canvas fallback，window capture 優先攔截舊 getDisplayMedia handler。
+- `modules/runtime-visual-semantic-control.js`：中央多空 / 心臟移動圖切換。
+- `modules/runtime-warp-elevator.js`：warp-core.png 綁定既有右側 WARP 引擎軌道。
+- `modules/runtime-layout-fix.js`：三聖盃位置、收合、左上標籤清理。
 
-## 重要控制
-- 三聖盃：`runtime-temple-layout.js` / `kgen-12345-holy-cup.js`
-- 右側神規：`runtime-temple-layout.js`
-- 右下曲速：`runtime-warp-elevator.js`
-- 四圖語意：`runtime-visual-semantic-control.js`
+## 不可恢復
+- `/modules/runtime/`
+- 舊版 getDisplayMedia 手機硬叫流程
+- 三聖盃控制總收合
