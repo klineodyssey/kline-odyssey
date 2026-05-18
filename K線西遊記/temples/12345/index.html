@@ -4,10 +4,11 @@
 <!--
 ============================================================
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
-BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
+VERSION: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
+BUILD: 20260518-V10.41.1-RESTORE-GOLDEN-LAYOUT-NO-DEMOLITION
 BASE_FROM: KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip
 CHANGELOG:
+- [V10.41.1] Restore from V10.40.5 golden layout. No demolition: no layout rewrite, no panel relocation, no debug overlay expansion. Only version governance and clean package structure updated.
 
 - [V8.9.3] 補齊下方按鍵與客服功能：錢包聖盃、發財金、規則活動、客服導覽皆會開啟內容面板；每個客服按鍵都有語音說明；交易動作先顯示確認與規則，再呼叫原本 TempleHeart 函式，不改錢包核心。
 - [V8.8.0] 左上 Heart 操作區新增三次聖盃按鈕與狀態；fortuneClaim 發財金需完成三次聖盃後才放行；NY Slot 改為距離 12/31 跨年倒數時間。
@@ -50,7 +51,7 @@ K線西遊記｜12345 五指山悟空財神殿 OG Temple Engine V5.8
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE</title>
+    <title>KGEN 12345 五指山悟空財神殿｜KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
@@ -1442,7 +1443,7 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
         <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
         
 
-<div class="sys-st" id="ver-st">VERSION KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH</div>
+<div class="sys-st" id="ver-st">VERSION KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION</div>
         <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
     </div>
     <div class="monitor-data">
@@ -1689,7 +1690,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE";
+const APP_VERSION = "KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -13598,7 +13599,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v860-wallet-and-ritual-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC='0x38';
@@ -13776,7 +13777,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v861-audio-real-ritual-hotfix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION = 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BUILD = '20260509-V8.6.2-AUDIO-REAL-RITUAL-HOTFIX';
   const BSC = '0x38';
   const RPC = 'https://bsc-dataseed.binance.org/';
@@ -14238,7 +14239,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v863-wallet-sync-real-tx">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BSC_HEX='0x38';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14350,7 +14351,7 @@ KGEN 12345 UI Patch V7.6.0
     return String(n);
   }
   function wishHash(){
-    const raw=(($('kh-wish')&&$('kh-wish').value)||($('amt-wish')&&$('amt-wish').value)||'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE').trim()||'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+    const raw=(($('kh-wish')&&$('kh-wish').value)||($('amt-wish')&&$('amt-wish').value)||'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION').trim()||'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
     return ethers.utils.id(raw).slice(0,66);
   }
   async function send(label, fn){
@@ -14449,7 +14450,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v872-wallet-tx-sync-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION = 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BSC_HEX = '0x38';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
@@ -14567,9 +14568,9 @@ KGEN 12345 UI Patch V7.6.0
     return String(n);
   }
   function wishHash(){
-    const raw = val('v860-wish-text') || val('kh-wish') || 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+    const raw = val('v860-wish-text') || val('kh-wish') || 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
     if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
-    return ethers.utils.id(raw || 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE').slice(0,66);
+    return ethers.utils.id(raw || 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION').slice(0,66);
   }
   async function heart(){ await connect(); return new ethers.Contract(HEART,HEART_ABI,state.signer); }
   async function send(label, fn){
@@ -14668,7 +14669,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v873-heart-balance-13-spirit-lamp-fix">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION = 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const KGEN = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART = '0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20 = [
@@ -14853,7 +14854,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v874-approve-13-spirit-sync-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const ERC20=[
@@ -15045,7 +15046,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v875-approve-receipt-wallet-switch-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC_HEX='0x38';
@@ -15287,7 +15288,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v876-service-countdown-approve-fix">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const BSC_HEX='0x38';
@@ -15552,7 +15553,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v879-clean-service-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const FIX_VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -15659,7 +15660,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen-v880-cup-ny-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const FIX_VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -15804,7 +15805,7 @@ KGEN 12345 UI Patch V7.6.0
 <script id="kgen12345-v890-wallet-bridge-real-connect-fix">
 (function(){
   'use strict';
-  const FIX_VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const FIX_VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -15896,9 +15897,9 @@ KGEN 12345 UI Patch V7.6.0
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 用途：
 1. 將「訊息紀錄」移到右側導覽列的「五指山神殿音響」下方。
@@ -15908,9 +15909,9 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260512-V8.9.1-TOAST-MESSAGE-CENTER-FIX
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 用途：
 1. 左上不再放長錯誤訊息，避免擋到 12345 Heart 展開/收合。
@@ -15924,9 +15925,9 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 修正：
 1. 右上訊息改為小型 HUD，不再擋按鈕。
@@ -16090,7 +16091,7 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -16283,7 +16284,7 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -16341,7 +16342,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -16427,7 +16428,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -16566,7 +16567,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -16721,7 +16722,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -16909,7 +16910,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -17029,9 +17030,9 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 Fixes:
 1. 左上 Heart 控制台可上下捲動，底部不被吃掉。
@@ -17149,7 +17150,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -17377,7 +17378,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -17603,7 +17604,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -17725,7 +17726,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -17827,7 +17828,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -18648,7 +18649,7 @@ CHANGELOG:
         rec.active=false;
         const blob=new Blob(rec.chunks,{type:'video/webm'});
         const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob); a.download='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE'+Date.now()+'.webm';
+        a.href=URL.createObjectURL(blob); a.download='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION'+Date.now()+'.webm';
         document.body.appendChild(a); a.click();
         setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1600);
         const f=$('kgen-v909-rec-float'); if(f) f.remove();
@@ -19217,7 +19218,7 @@ CHANGELOG:
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.0 + V8.9.1 message center
 用途：
@@ -19258,7 +19259,7 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 <script id="kgen-v892-full-button-service-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -19415,9 +19416,9 @@ BASE_FROM: V8.9.0 + V8.9.1 message center
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 修正：
 1. 右上訊息改為小型 HUD，不再擋按鈕。
@@ -19581,7 +19582,7 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 <script id="kgen-v894-hud-bsc-chain-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -19774,7 +19775,7 @@ BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.4 HUD/BSC chain fix
 
@@ -19832,7 +19833,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 <script id="kgen-v895-ascii-wallet-entry-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -19918,7 +19919,7 @@ BASE_FROM: V8.9.4 HUD/BSC chain fix
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 修正：
@@ -20057,7 +20058,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 <script id="kgen-v896-hud-wallet-image-sync-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20212,7 +20213,7 @@ BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.6 HUD Wallet Image Sync
 修正：
@@ -20407,7 +20408,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 <script id="kgen-v897-wallet-layout-realconnect-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -20514,7 +20515,7 @@ BASE_FROM: V8.9.6 HUD Wallet Image Sync
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 目的：
@@ -20702,7 +20703,7 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 <script id="kgen-v898-unified-heart-camera-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -20822,9 +20823,9 @@ BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
 
 <!-- ============================================================
 KGEN 12345 PATCH
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
-BASE_FROM: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BASE_FROM: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
 Fixes:
 1. 左上 Heart 控制台可上下捲動，底部不被吃掉。
@@ -20942,7 +20943,7 @@ Fixes:
 <script id="kgen-v899-panel-cup-camera-ny-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -21170,7 +21171,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v900-camera-core-merge-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -21346,7 +21347,7 @@ body.kgen-camera-back #wish-label::after{content:"｜後鏡空方";}
 <script id="kgen-v901-camera-toggle-layout-clean-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const HEART_IMG='./assets/heart.png';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -21575,7 +21576,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 <script id="kgen-v902-message-recorder-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -21791,7 +21792,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 <script id="kgen-v903-audio-hud-message-align-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -21890,7 +21891,7 @@ V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
 
 <!-- ============================================================
 KGEN 12345 五指山悟空財神殿
-VERSION PATCH: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+VERSION PATCH: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
 BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 修正：
@@ -21992,7 +21993,7 @@ BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
 <script id="kgen-v904-ga-cup-countdown-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -22813,7 +22814,7 @@ CHANGELOG:
         rec.active=false;
         const blob=new Blob(rec.chunks,{type:'video/webm'});
         const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob); a.download='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE'+Date.now()+'.webm';
+        a.href=URL.createObjectURL(blob); a.download='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION'+Date.now()+'.webm';
         document.body.appendChild(a); a.click();
         setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1600);
         const f=$('kgen-v909-rec-float'); if(f) f.remove();
@@ -24468,19 +24469,19 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script id="kgen-v920-layout-final-polish-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BUILD='20260516-V10.34-TRANSFORMER-MODULE-CORE';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
 
   function setVersion(){
-    document.title='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+    document.title='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
     document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build').forEach(el=>{
       let t=(el.textContent||'');
       if(/V9\.|VERSION|SYSTEM ONLINE|KGEN-12345/.test(t)){
         el.textContent=t
-          .replace(/KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE[0-9.\-A-Z_]+/g, VERSION)
+          .replace(/KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION[0-9.\-A-Z_]+/g, VERSION)
           .replace(/20260513-V[0-9.\-A-Z_]+/g, BUILD)
           .replace(/V9\.1\.[0-9][A-Z0-9\-]*/g, 'V9.2.0');
       }
@@ -24580,8 +24581,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 
 <!-- ============================================================
 KGEN 12345｜V10.0 HUD LAYER SYSTEM
-PRODUCT_ID: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
-VERSION: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+PRODUCT_ID: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
+VERSION: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip
 BASE_SHA256: e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39
@@ -24790,8 +24791,8 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 <script id="kgen-v10-hud-layer-system-script">
 (function(){
   "use strict";
-  const PRODUCT_ID="KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE";
-  const VERSION="KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE";
+  const PRODUCT_ID="KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION";
+  const VERSION="KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION";
   const BUILD="20260516-V10.34-TRANSFORMER-MODULE-CORE";
   const BASE_FROM="KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip";
   const BASE_SHA256="e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39";
@@ -24919,7 +24920,7 @@ body.kgen-v918-right-info-collapsed .right-info-panel{
 </script>
 
 
-<!-- V10.1 HUD Runtime Voice Fix | VERSION: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE | BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
+<!-- V10.1 HUD Runtime Voice Fix | VERSION: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION | BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
 <style id="kgen-v101-hud-runtime-voice-fix-style">
 :root{--kgen-v101-modal-z:2147483600;}
 .warp-engine{bottom:calc(var(--kgen-v10-dock-h,98px) + 242px)!important;z-index:var(--kgen-v10-hud-z,2147482200)!important;}
@@ -24937,7 +24938,7 @@ body.kgen-v101-map-open #world-map,body.kgen-v101-map-open #map-modal,body.kgen-
 <script id="kgen-v101-hud-runtime-voice-fix-script">
 (function(){
 "use strict";
-const VERSION="KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE", BUILD="20260516-V10.34-TRANSFORMER-MODULE-CORE";
+const VERSION="KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION", BUILD="20260516-V10.34-TRANSFORMER-MODULE-CORE";
 window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{VERSION,BUILD,BASE_FROM:"KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip",BASE_SHA256:"db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c",CHANGESET:"V10.1-HUD-RUNTIME-VOICE-FIX"});
 function speak(msg){try{if(window.speak)return window.speak(msg);if(window.app&&typeof app.speak==="function")return app.speak(msg);if("speechSynthesis"in window){const u=new SpeechSynthesisUtterance(String(msg||""));u.lang="zh-TW";speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
 function txt(el){return(el&&el.textContent?el.textContent:"").replace(/\s+/g," ").trim();}
@@ -24957,8 +24958,8 @@ window.kgenV101HudRuntimeVoiceFix={version:VERSION,build:BUILD,speakCupStatus:fu
 
 <!-- ============================================================
 KGEN 12345｜V10.2 Festival Runtime Lock
-PRODUCT_ID: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
-VERSION: KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+PRODUCT_ID: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
+VERSION: KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 BUILD: 20260516-V10.34-TRANSFORMER-MODULE-CORE
 BASE_FROM: KGEN_12345_V10_1_HUD_RUNTIME_VOICE_FIX_FULL_bundle.zip
 BASE_SHA256: 29a8e07fa014eb4b0e896d869bc8d9e4b93bd187c3cea3d608dc1680782306a3
@@ -25095,7 +25096,7 @@ CHANGESET:
 <script id="kgen-v102-festival-runtime-lock-script">
 (function(){
   "use strict";
-  const VERSION = "KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE";
+  const VERSION = "KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION";
   const BUILD = "20260516-V10.34-TRANSFORMER-MODULE-CORE";
 
   window.KGEN12345_BUILD = Object.assign({}, window.KGEN12345_BUILD || {}, {
@@ -25382,7 +25383,7 @@ KGEN 12345 V10.4 TEMPLE REBUILD HOTFIX
 <script id="kgen-12345-v104-rebuild-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const HEART='0xB016D4d8f1aED1339101b30722cad6dbA9B8C972';
   const TOKEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
   const $=id=>document.getElementById(id);
@@ -25644,7 +25645,7 @@ KGEN 12345 V10.5 STABLE TEMPLE UX REBUILD
 <script id="kgen-12345-v105-stable-temple-script">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const BUILD='20260514-V10.5-STABLE-TEMPLE-UX';
   const $=id=>document.getElementById(id);
   const qsa=s=>Array.from(document.querySelectorAll(s));
@@ -25830,7 +25831,7 @@ RULE: no organ hard-transplant; runtime DNA rewrite only.
 <script id="kgen-v1033-dna-merge-final-runtime">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION = 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const $ = (id)=>document.getElementById(id);
   const qsa = (sel)=>Array.from(document.querySelectorAll(sel));
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
@@ -26061,7 +26062,7 @@ KGEN 12345 V10.35.4 HEART/BREATH/NY DISPLAY FIX
 <script id="kgen-v1035-4-heart-breath-fix-script">
 (function(){
   'use strict';
-  const VERSION = 'KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION = 'KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
 
   if(window.__KGEN_V1035_4_HEART_BREATH_FIX__) return;
   window.__KGEN_V1035_4_HEART_BREATH_FIX__ = true;
@@ -26235,7 +26236,7 @@ KGEN 12345 V10.35.4 HEART/BREATH/NY DISPLAY FIX
 
 <!-- ============================================================
 KGEN 12345 V10.40.3 MOBILE LAYOUT SAFE ASSET FIX
-BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
+BUILD: 20260518-V10.41.1-RESTORE-GOLDEN-LAYOUT-NO-DEMOLITION
 BASE_FROM: KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip
 RULES:
 - Keep left-bottom MOVE joystick alive. Do not remove #move-joystick-wrap / #move-joystick-knob.
@@ -26291,7 +26292,7 @@ RULES:
 <script id="kgen-v10403-asset-guard">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const OFFICIAL_HEART='./assets/heart.png';
   function fix(){
     try{
@@ -26317,7 +26318,7 @@ RULES:
 
 <!-- ============================================================
 KGEN 12345 V10.40.4 NO WHITEWORK COUNTDOWN UI FIX
-BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
+BUILD: 20260518-V10.41.1-RESTORE-GOLDEN-LAYOUT-NO-DEMOLITION
 BASE_FROM: V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX
 PURPOSE:
 - Do not keep tuning broken legacy countdown blocks.
@@ -26494,7 +26495,7 @@ PURPOSE:
 <script id="kgen-v10404-no-whitework-countdown-ui-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const OFFICIAL_HEART='./assets/heart.png';
   function pad(n){return String(n).padStart(2,'0');}
   function nextDate(month,day,hour=23,min=59,sec=59){
@@ -26612,7 +26613,7 @@ body.kgen-v10405-clean .tag-chip{ display:none !important; }
 <script id="kgen-v10405-mirror-center-bullbear-js">
 (function(){
   'use strict';
-  const VERSION='KGEN-12345-V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE';
+  const VERSION='KGEN-12345-V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION';
   const ASSET={ bull:'./assets/bull-front.png', bear:'./assets/bear-rear.png', heart:'./assets/heart.png' };
   const $=(id)=>document.getElementById(id);
   function angle(){ const s=$('steer-input-val'); return s ? (Number(s.value)||0) : (window.k12345ControlState?.rotate||0); }
@@ -26666,7 +26667,5 @@ body.kgen-v10405-clean .tag-chip{ display:none !important; }
 })();
 </script>
 
-
-<script src="./modules/runtime-v10-40-6-stable-patch.js"></script>
 </body>
 </html>

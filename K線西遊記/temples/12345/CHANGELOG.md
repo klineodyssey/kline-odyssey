@@ -1,15 +1,13 @@
 # CHANGELOG
 
-## KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH
-- Continue modules from V10.40.5; no rollback to single-file.
-- Add `modules/runtime-v10-40-6-stable-patch.js`.
-- Isolate broken old countdown and install independent New Year countdown widget.
-- Holy Cup panel moved to lower safe zone above direction bar; self-collapse and reopen tab.
-- Central image semantic control: bull / bear / heart.
-- Warp core image attached to right warp elevator.
-- Left heart and right rule mini-panels restored as independent windows.
-- Top stray labels hidden.
+## V10.41.1_RESTORE_GOLDEN_LAYOUT_NO_DEMOLITION
 
+- 回退到 V10.40.5 視覺母版，不再拆屋、不重排招牌、不破壞中央主圖。
+- 只更新版本治理與正式上傳包結構。
+- 保留原本畫面：上方招牌、中央悟空、MOVE、WARP、三聖盃、節日活動、錢包流程。
+- 不新增 RELEASE_NOTES 到 GitHub 正式層。
+- 不包含 assets，避免覆蓋 GitHub 正式圖。
+- 下一步只能在此母版上做「小幅收斂」，不得再大改 UI layout。
 
 # CHANGELOG
 

@@ -1,3 +1,13 @@
+# KGEN 12345 五指山悟空財神殿
+
+## V10.41.1 Restore Golden Layout
+
+本版以 V10.40.5 為母版回復，不再拆屋重排。
+
+目標：先讓 12345 可以開張，不再像工程 debug 場。
+
+本包不含 assets，避免覆蓋 GitHub 正式資產。
+
 # KGEN 12345 V10.40.5 Mirror Center Bull/Bear Restore
 
 本版以 V10.40.4 為母版，不重寫、不換結構，只修中央鏡像核心：圓心旋轉、多空圖切換、殘留 debug 文字。

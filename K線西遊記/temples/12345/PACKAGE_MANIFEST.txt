@@ -23,10 +23,7 @@ archive/version-history/VERSION_GOVERNANCE_V10_38_0.json
 archive/version-history/VERSION_GOVERNANCE_V10_39_0.json
 archive/version-history/VERSION_GOVERNANCE_V10_39_1.json
 assets/archive/v10_4/wukong_heart_v10_4.png
-assets/bear-rear.png
-assets/bull-front.png
 assets/heart.png
-assets/warp-core.png
 docs/ASSET_BINDING_MAP.md
 docs/AU_REBUILD_RULES.md
 docs/EXECUTION_MAP.md
@@ -89,7 +86,6 @@ modules/runtime-router-engine.js
 modules/runtime-state.js
 modules/runtime-temple-layout.js
 modules/runtime-universe-axis.js
-modules/runtime-v10-40-6-stable-patch.js
 modules/runtime-visibility-engine.js
 modules/runtime-visual-semantic-control.js
 modules/runtime-warp-elevator.js
