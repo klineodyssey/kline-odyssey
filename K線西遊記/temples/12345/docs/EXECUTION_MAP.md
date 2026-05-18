@@ -1,26 +1,24 @@
-# 12345 EXECUTION MAP
+# EXECUTION MAP
+VERSION: V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE
+BUILD: 20260518-V10.40.5-MIRROR-CENTER-BULLBEAR-RESTORE
+BASE_FROM: KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip
 
-VERSION: KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH
+## 部署路徑
 
-## 入口
-`K線西遊記/temples/12345/index.html`
+1. 根目錄放置：`12345.html`、`wallet-12345.html`。
+2. 正式 app 放置：`K線西遊記/temples/12345/index.html`。
+3. modules 放置：`K線西遊記/temples/12345/modules/`。
+4. assets 使用 GitHub 現有正式資產，不得以零 byte placeholder 覆蓋。
 
-## 本版新增執行檔
-`modules/runtime-v10-40-6-stable-patch.js`
+## 本版執行順序
 
-## 執行順序
-index 原本 modules 先載入。  
-最後載入 `runtime-v10-40-6-stable-patch.js` 作為穩定外掛修復層。
+- 先更新版本治理檔。
+- 再修正 active asset references。
+- 再加手機 layout safe patch。
+- 最後重建 PACKAGE_MANIFEST / SHA256SUMS。
 
-## 本版修復
-- 舊跨年倒數隔離，新倒數獨立視窗。
-- 三聖盃 panel 移到下方方向橫桿上方，縮寬，自己收合 / 再開。
-- 中央主圖多空切換：多=bull-front，空=bear-rear，移動=heart。
-- 右下 Warp 引擎綁定 `warp-core.png`，跟隨拉桿上下移動。
-- 左下悟空心臟與右側神規補獨立視窗。
-- 左上殘留小標籤遮擋清理。
+## 保護項目
 
-## 不做
-- 不退回單檔。
-- 不重建主 DOM。
-- 不新增 modules/runtime 深層資料夾。
+- 左下 MOVE joystick 保留。
+- V9 recorder core 保留。
+- Wallet / 合約地址未變更。
