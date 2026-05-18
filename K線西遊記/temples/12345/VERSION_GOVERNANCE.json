@@ -1,12 +1,18 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "current_version": "V10.40.0_GITHUB_RELEASE_CLEAN",
-  "build": "20260517-V10.40.0-GITHUB-RELEASE-CLEAN",
-  "base_from": "KGEN_12345_V10_39_2_EXECUTION_MAP_GOVERNANCE_FULL.zip",
-  "release_rule": "GitHub 正式層只保留必要執行檔。不用檔案放當層 archive。",
-  "folder_rule": "index.html 旁只開一層資料夾；禁止 modules/runtime 等第二層執行資料夾。",
+  "current_version": "V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL",
+  "build": "20260518-V10.40.3-CANVAS-SCREEN-VISUAL-WARP-FULL",
+  "base_from": "KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip",
+  "main_file": "K線西遊記/temples/12345/index.html",
   "ai_first_read": "SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
-  "execution_map": "docs/EXECUTION_MAP.md",
+  "done": [
+    "canvas screen recorder fallback",
+    "V9 recorder core kept",
+    "bull/bear/heart central visual switching",
+    "warp-core bound to WARP engine rail",
+    "Holy Cup compact below direction bar with own collapse/reopen",
+    "top label cleanup"
+  ],
   "active_modules": [
     "kgen-12345-core.css",
     "kgen-12345-holy-cup.js",
@@ -18,8 +24,11 @@
     "kgen-12345-transformer-runtime.js",
     "kgen-12345-universe-elevator.js",
     "kgen-12345-version.js",
+    "runtime-canvas-screen-recorder.js",
     "runtime-festival-engine.js",
+    "runtime-layout-fix.js",
     "runtime-panel-registry.js",
+    "runtime-panel-window-restore.js",
     "runtime-recording-engine.js",
     "runtime-router-engine.js",
     "runtime-state.js",
@@ -30,10 +39,10 @@
     "runtime-warp-elevator.js",
     "runtime-zlayer-engine.js"
   ],
-  "official_assets": [
-    "bear-rear.png",
-    "bull-front.png",
-    "heart.png",
-    "warp-core.png"
-  ]
+  "asset_binding": {
+    "bull-front.png": "多方靜止",
+    "bear-rear.png": "空方靜止",
+    "heart.png": "移動中",
+    "warp-core.png": "右側 WARP 引擎艙"
+  }
 }
