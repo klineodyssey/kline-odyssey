@@ -1,48 +1,27 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "current_version": "V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL",
-  "build": "20260518-V10.40.3-CANVAS-SCREEN-VISUAL-WARP-FULL",
+  "current_version": "V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX",
+  "build": "20260518-V10.40.3-MOBILE-LAYOUT-SAFE-ASSET-FIX",
   "base_from": "KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip",
-  "main_file": "K線西遊記/temples/12345/index.html",
-  "ai_first_read": "SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
-  "done": [
-    "canvas screen recorder fallback",
-    "V9 recorder core kept",
-    "bull/bear/heart central visual switching",
-    "warp-core bound to WARP engine rail",
-    "Holy Cup compact below direction bar with own collapse/reopen",
-    "top label cleanup"
+  "canonical_path": "K線西遊記/temples/12345/index.html",
+  "root_bridges": [
+    "12345.html",
+    "wallet-12345.html"
   ],
-  "active_modules": [
-    "kgen-12345-core.css",
-    "kgen-12345-holy-cup.js",
-    "kgen-12345-input-governance.js",
-    "kgen-12345-install-check.js",
-    "kgen-12345-motion-control.js",
-    "kgen-12345-panel-router.js",
-    "kgen-12345-stable-countdown.js",
-    "kgen-12345-transformer-runtime.js",
-    "kgen-12345-universe-elevator.js",
-    "kgen-12345-version.js",
-    "runtime-canvas-screen-recorder.js",
-    "runtime-festival-engine.js",
-    "runtime-layout-fix.js",
-    "runtime-panel-registry.js",
-    "runtime-panel-window-restore.js",
-    "runtime-recording-engine.js",
-    "runtime-router-engine.js",
-    "runtime-state.js",
-    "runtime-temple-layout.js",
-    "runtime-universe-axis.js",
-    "runtime-visibility-engine.js",
-    "runtime-visual-semantic-control.js",
-    "runtime-warp-elevator.js",
-    "runtime-zlayer-engine.js"
+  "asset_manifest": "V10.27.1 official asset names only",
+  "official_assets": [
+    "assets/bull-front.png",
+    "assets/bear-rear.png",
+    "assets/heart.png",
+    "assets/warp-core.png"
   ],
-  "asset_binding": {
-    "bull-front.png": "多方靜止",
-    "bear-rear.png": "空方靜止",
-    "heart.png": "移動中",
-    "warp-core.png": "右側 WARP 引擎艙"
-  }
+  "fixed": [
+    "removed active legacy wukong_heart_v10_4.png dependency",
+    "removed active legacy wukong_heart_core.jpg / wukong_caishen.png fallback dependency",
+    "updated install-check required asset to assets/heart.png",
+    "preserved left-bottom MOVE joystick and V9 recorder core",
+    "added mobile safe layout patch for central core, panels, HUD, joystick and elevator",
+    "converted root 12345.html into bridge file only",
+    "updated wallet-12345.html bridge version"
+  ]
 }

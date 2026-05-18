@@ -1,11 +1,27 @@
-# FILE MANIFEST
+# KGEN 12345 FILE MANIFEST｜V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX
 
-VERSION: V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL
+BUILD: 20260518-V10.40.3-MOBILE-LAYOUT-SAFE-ASSET-FIX
+BASE_FROM: KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip
 
-## 本版核心檔
-- modules/runtime-canvas-screen-recorder.js
-- modules/runtime-visual-semantic-control.js
-- modules/runtime-warp-elevator.js
-- modules/runtime-layout-fix.js
-- SOP/TEMPLE_12345_AI_SOP_CURRENT.md
-- docs/EXECUTION_MAP.md
+## Root bridge files
+
+- `12345.html`：根目錄橋接入口，不放完整 app。
+- `wallet-12345.html`：根目錄錢包橋接入口，不放完整 app。
+
+## Canonical app
+
+- `K線西遊記/temples/12345/index.html`
+
+## Active modules
+
+- `modules/kgen-12345-version.js`
+- `modules/kgen-12345-install-check.js`
+- `modules/kgen-12345-transformer-runtime.js`
+- `modules/kgen-12345-panel-router.js`
+- `modules/kgen-12345-motion-control.js`
+- `modules/runtime-recording-engine.js`
+- `modules/runtime-panel-window-restore.js`
+
+## Asset rule
+
+Active runtime may require only the official fixed names from `ASSET_MANIFEST.md`.
