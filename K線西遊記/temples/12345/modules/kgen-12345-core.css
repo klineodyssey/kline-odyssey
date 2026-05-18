@@ -221,3 +221,214 @@ RULE: Active JS/CSS stays in modules single layer. V9 recorder core restored.
 .brand-section{margin-top:8px!important;}
 #brand-badge{display:none!important;}
 @media(max-width:720px){#kgen-holy-cup-panel{width:min(300px,70vw)!important;bottom:88px!important;max-height:124px!important}.kgen-v10402-panel{font-size:11px}.hud-top{top:24px!important}}
+
+
+/* ============================================================
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: KGEN-12345-HEART-UI-V10.40.6-MODULES-STABLE-PATCH
+BUILD: 20260518-V10.40.6-MODULES-STABLE-PATCH
+PATCH: V10.40.6 stable modules patch
+============================================================ */
+.kgen-old-countdown-hidden,
+.kgen-top-stray-hidden {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#kgen-warp-core-cabin {
+  position:absolute !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  width:46px !important;
+  height:46px !important;
+  object-fit:cover !important;
+  border-radius:50% !important;
+  z-index:45 !important;
+  border:2px solid rgba(0,242,255,.92) !important;
+  box-shadow:0 0 18px rgba(0,242,255,.72), 0 0 28px rgba(255,215,120,.26) !important;
+  pointer-events:none !important;
+  transition:bottom .12s linear !important;
+}
+
+#kgen-newyear-countdown-widget {
+  position:fixed !important;
+  right:92px !important;
+  top:174px !important;
+  z-index:880 !important;
+  width:min(292px, calc(100vw - 112px)) !important;
+  box-sizing:border-box !important;
+  border:1px solid rgba(255,215,120,.58) !important;
+  border-radius:14px !important;
+  background:rgba(0,0,0,.76) !important;
+  box-shadow:0 0 22px rgba(255,215,120,.16), inset 0 0 18px rgba(0,242,255,.05) !important;
+  color:#ffe7a1 !important;
+  backdrop-filter:blur(8px) !important;
+  overflow:hidden !important;
+}
+#kgen-newyear-countdown-widget .kgen-ny-head {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:8px 10px !important;
+  color:#ffd978 !important;
+  font-size:12px !important;
+  border-bottom:1px solid rgba(255,215,120,.18) !important;
+}
+#kgen-newyear-countdown-widget button,
+#kgen-newyear-countdown-tab,
+#kgen-cup-tab-v10406 {
+  border:1px solid rgba(255,215,120,.58) !important;
+  border-radius:999px !important;
+  background:rgba(0,0,0,.76) !important;
+  color:#ffe7a1 !important;
+  padding:6px 10px !important;
+  font-weight:900 !important;
+  font-size:11px !important;
+}
+#kgen-newyear-countdown-widget .kgen-ny-body {
+  padding:9px 10px 10px !important;
+}
+#kgen-ny-time {
+  font-family:'Orbitron', monospace !important;
+  color:#00f2ff !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  text-shadow:0 0 10px rgba(0,242,255,.35) !important;
+}
+.kgen-ny-note {
+  margin-top:5px !important;
+  font-size:11px !important;
+  line-height:1.45 !important;
+  color:#fff3c7 !important;
+}
+
+#kgen-newyear-countdown-tab {
+  position:fixed !important;
+  right:18px !important;
+  top:174px !important;
+  z-index:881 !important;
+  display:none;
+}
+
+#kgen-holy-cup-panel-v10406 {
+  position:fixed !important;
+  left:50% !important;
+  bottom:112px !important;
+  transform:translateX(-50%) !important;
+  width:min(360px, 78vw) !important;
+  max-height:138px !important;
+  overflow:auto !important;
+  z-index:870 !important;
+  box-sizing:border-box !important;
+  border:1px solid rgba(255,215,120,.55) !important;
+  border-radius:14px !important;
+  background:rgba(0,0,0,.78) !important;
+  color:#ffe7a1 !important;
+  box-shadow:0 0 20px rgba(0,242,255,.12), inset 0 0 18px rgba(255,215,120,.05) !important;
+  backdrop-filter:blur(8px) !important;
+}
+#kgen-holy-cup-panel-v10406 .kgen-cup-head {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  padding:8px 10px !important;
+  border-bottom:1px solid rgba(255,215,120,.16) !important;
+  color:#ffd978 !important;
+  font-size:12px !important;
+}
+#kgen-holy-cup-panel-v10406 .kgen-cup-head button {
+  border:1px solid rgba(255,215,120,.5) !important;
+  border-radius:999px !important;
+  background:rgba(0,0,0,.5) !important;
+  color:#ffe7a1 !important;
+  padding:4px 8px !important;
+  font-weight:900 !important;
+}
+#kgen-holy-cup-panel-v10406 .kgen-cup-body {
+  display:grid !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:8px !important;
+  padding:10px !important;
+  font-size:11px !important;
+  text-align:center !important;
+}
+#kgen-holy-cup-panel-v10406 .kgen-cup-body span {
+  border:1px solid rgba(0,242,255,.24) !important;
+  border-radius:10px !important;
+  padding:8px 6px !important;
+  background:rgba(0,0,0,.34) !important;
+}
+#kgen-cup-tab-v10406 {
+  position:fixed !important;
+  left:50% !important;
+  bottom:83px !important;
+  transform:translateX(-50%) !important;
+  z-index:871 !important;
+  display:none;
+}
+
+.kgen-mini-panel {
+  position:fixed !important;
+  z-index:882 !important;
+  width:min(300px, calc(100vw - 32px)) !important;
+  max-height:240px !important;
+  overflow:auto !important;
+  border:1px solid rgba(255,215,120,.55) !important;
+  border-radius:14px !important;
+  background:rgba(0,0,0,.80) !important;
+  color:#ffe7a1 !important;
+  padding:10px !important;
+  box-shadow:0 0 22px rgba(0,242,255,.14) !important;
+}
+.kgen-mini-panel.left-heart { left:16px !important; bottom:150px !important; }
+.kgen-mini-panel.right-rule { right:84px !important; bottom:158px !important; }
+.kgen-mini-head {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  color:#ffd978 !important;
+  font-size:12px !important;
+  margin-bottom:8px !important;
+}
+.kgen-mini-head button {
+  border:1px solid rgba(255,215,120,.5) !important;
+  border-radius:999px !important;
+  background:rgba(0,0,0,.5) !important;
+  color:#ffe7a1 !important;
+  padding:4px 8px !important;
+  font-weight:900 !important;
+}
+
+@media(max-width:720px){
+  #kgen-newyear-countdown-widget {
+    right:74px !important;
+    top:156px !important;
+    width:min(254px, calc(100vw - 94px)) !important;
+  }
+  #kgen-newyear-countdown-tab {
+    right:12px !important;
+    top:156px !important;
+  }
+  #kgen-holy-cup-panel-v10406 {
+    bottom:108px !important;
+    width:min(330px, 82vw) !important;
+  }
+  #kgen-cup-tab-v10406 { bottom:78px !important; }
+  #kgen-warp-core-cabin {
+    width:40px !important;
+    height:40px !important;
+  }
+  .kgen-mini-panel.left-heart {
+    left:10px !important;
+    bottom:144px !important;
+    width:min(276px, calc(100vw - 96px)) !important;
+  }
+  .kgen-mini-panel.right-rule {
+    right:74px !important;
+    bottom:154px !important;
+    width:min(250px, calc(100vw - 104px)) !important;
+  }
+}
