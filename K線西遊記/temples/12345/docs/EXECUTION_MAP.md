@@ -1,17 +1,24 @@
-# 12345 EXECUTION MAP
+# EXECUTION MAP
+VERSION: V10.40.3_MOBILE_LAYOUT_SAFE_ASSET_FIX
+BUILD: 20260518-V10.40.3-MOBILE-LAYOUT-SAFE-ASSET-FIX
+BASE_FROM: KGEN_12345_V10_40_2_V9_RECORDER_CORE_RESTORE_FULL.zip
 
-VERSION: V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL
+## 部署路徑
 
-## 入口
-`index.html`
+1. 根目錄放置：`12345.html`、`wallet-12345.html`。
+2. 正式 app 放置：`K線西遊記/temples/12345/index.html`。
+3. modules 放置：`K線西遊記/temples/12345/modules/`。
+4. assets 使用 GitHub 現有正式資產，不得以零 byte placeholder 覆蓋。
 
-## 新增 / 覆寫執行模組
-- `modules/runtime-canvas-screen-recorder.js`：螢幕錄影 canvas fallback，window capture 優先攔截舊 getDisplayMedia handler。
-- `modules/runtime-visual-semantic-control.js`：中央多空 / 心臟移動圖切換。
-- `modules/runtime-warp-elevator.js`：warp-core.png 綁定既有右側 WARP 引擎軌道。
-- `modules/runtime-layout-fix.js`：三聖盃位置、收合、左上標籤清理。
+## 本版執行順序
 
-## 不可恢復
-- `/modules/runtime/`
-- 舊版 getDisplayMedia 手機硬叫流程
-- 三聖盃控制總收合
+- 先更新版本治理檔。
+- 再修正 active asset references。
+- 再加手機 layout safe patch。
+- 最後重建 PACKAGE_MANIFEST / SHA256SUMS。
+
+## 保護項目
+
+- 左下 MOVE joystick 保留。
+- V9 recorder core 保留。
+- Wallet / 合約地址未變更。
