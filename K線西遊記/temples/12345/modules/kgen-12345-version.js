@@ -1,24 +1,19 @@
 /*
 PRODUCT_ID: KGEN-12345-HEART-UI
 MODULE: kgen-12345-version.js
-VERSION: V10.39.2_EXECUTION_MAP_GOVERNANCE
-BUILD: 20260517-V10.39.2-EXECUTION-MAP-GOVERNANCE
-BASE_FROM: KGEN_12345_V10_39_1_TEMPLE_ARCHITECTURE_MASTER_FULL.zip
-RULE: Official filename is fixed. Version is written here, not in filename.
+VERSION: V10.40.2_V9_RECORDER_CORE_RESTORE
+BUILD: 20260518-V10.40.2-V9-RECORDER-CORE-RESTORE
+BASE_FROM: KGEN_12345_V10_40_1_PANEL_RECORDING_RESTORE_FULL.zip
+RULE: Active JS/CSS stays in modules single layer. V9 recorder core restored.
 */
+
 window.KGEN_12345_VERSION={
-  PRODUCT_ID:"KGEN-12345-HEART-UI",
-  VERSION:"V10.39.1_TEMPLE_ARCHITECTURE_MASTER",
-  BUILD:"20260517-V10.39.1-TEMPLE-ARCHITECTURE-MASTER",
-  BASE_FROM:"KGEN_12345_V10_39_0_RUNTIME_GOVERNANCE_FULL.zip",
-  MAIN_FILE:"K線西遊記/temples/12345/index.html",
-  RULE:"升版改內容與 header，不改正式 module 檔名。",
-  CORE_PURPOSE:"12345 五指山悟空財神殿，以發發財金、心跳、點火、許願、還願為主，不擴充成 11520 交易所。",
-  ASSET_BINDING:{
-    "bull-front.png":"+Z 多方宇宙中央圖",
-    "bear-rear.png":"-Z 空方宇宙中央圖",
-    "heart.png":"移動暫態圖，停止後回多空圖",
-    "warp-core.png":"右下曲速電梯艙，跟隨 C=0~300 移動"
-  }
+  PRODUCT_ID:'KGEN-12345-HEART-UI',
+  VERSION:'V10.40.2_V9_RECORDER_CORE_RESTORE',
+  BUILD:'20260518-V10.40.2-V9-RECORDER-CORE-RESTORE',
+  BASE_FROM:'KGEN_12345_V10_40_1_PANEL_RECORDING_RESTORE_FULL.zip',
+  RECORDER_CORE:'V9.0.0 canvas captureStream flow restored',
+  SCREEN_RECORDING_POLICY:'Disabled as primary path; recording button uses stable canvas recorder.',
+  ASSET_BINDING:{'bull-front.png':'多方靜止','bear-rear.png':'空方靜止','heart.png':'移動暫態','warp-core.png':'右下曲速電梯'}
 };
-console.log("[KGEN 12345 VERSION]",window.KGEN_12345_VERSION);
+console.log('[KGEN 12345 VERSION]', window.KGEN_12345_VERSION);

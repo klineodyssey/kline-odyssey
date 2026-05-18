@@ -177,3 +177,90 @@ RULE: Official filename is fixed. Version is written here, not in filename.
     width:min(330px,82vw)!important; max-height:168px!important; bottom:calc(86px + var(--kgen-safe-bottom))!important;
   }
 }
+
+/*
+PRODUCT_ID: KGEN-12345-HEART-UI
+MODULE: kgen-12345-core.css
+VERSION: V10.40.1_PANEL_RECORDING_RESTORE
+BUILD: 20260518-V10.40.1-PANEL-RECORDING-RESTORE
+BASE_FROM: KGEN_12345_V10_40_0_GITHUB_RELEASE_CLEAN_FULL.zip
+RULE: GitHub release layer only keeps active files. Single folder depth beside index.html.
+*/
+
+/* V10.40.1 panel + recording + header cleanup */
+.kgen-stray-top-label-hidden{display:none!important;visibility:hidden!important;}
+.kgen-panel-window{width:min(300px,calc(100vw - 32px));max-height:min(330px,calc(100vh - 190px));overflow-y:auto;background:rgba(2,8,12,.90);color:#ffe7a1;border:1px solid rgba(255,215,120,.55);border-radius:18px;box-shadow:0 0 24px rgba(0,255,255,.18),inset 0 0 24px rgba(255,215,120,.05);backdrop-filter:blur(8px);padding:12px;font-size:12px;line-height:1.55;}
+.kgen-panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;color:#ffdf80;font-weight:900;}
+.kgen-panel-close{border:1px solid rgba(255,215,120,.55);border-radius:999px;background:rgba(0,0,0,.5);color:#ffe7a1;padding:4px 9px;font-weight:900;font-size:12px;}
+.kgen-left-heart-panel{left:18px!important;bottom:154px!important;}
+.kgen-right-rule-panel{right:78px!important;bottom:166px!important;}
+.kgen-holy-cup-panel{transform:translateX(-50%)!important;width:min(360px,78vw)!important;max-height:178px!important;}
+#kgen-holy-cup-tab-v10401{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:860;border:1px solid rgba(255,215,120,.65);background:rgba(0,0,0,.82);color:#ffe28a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:900;}
+.kgen-mini-grid{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;border-top:1px solid rgba(255,255,255,.12);margin-top:8px;padding-top:8px;}
+@media(max-width:720px){.kgen-left-heart-panel{left:10px!important;bottom:148px!important;width:min(284px,calc(100vw - 96px))!important}.kgen-right-rule-panel{right:74px!important;bottom:158px!important;width:min(270px,calc(100vw - 104px))!important}.kgen-holy-cup-panel{bottom:112px!important;width:min(330px,82vw)!important;max-height:158px!important}}
+
+/*
+PRODUCT_ID: KGEN-12345-HEART-UI
+MODULE: kgen-12345-core.css
+VERSION: V10.40.2_V9_RECORDER_CORE_RESTORE
+BUILD: 20260518-V10.40.2-V9-RECORDER-CORE-RESTORE
+BASE_FROM: KGEN_12345_V10_40_1_PANEL_RECORDING_RESTORE_FULL.zip
+RULE: Active JS/CSS stays in modules single layer. V9 recorder core restored.
+*/
+
+/* V10.40.2 layout and panel safety */
+.kgen-hide-stray-label{display:none!important;visibility:hidden!important;}
+.kgen-v10402-panel{width:min(280px,calc(100vw - 96px));max-height:255px;overflow:auto;background:rgba(1,7,12,.92);border:1px solid rgba(255,215,120,.55);border-radius:16px;color:#ffe7a1;box-shadow:0 0 24px rgba(0,255,255,.16);backdrop-filter:blur(8px);padding:10px;font-size:12px;line-height:1.5;}
+.kgen-v10402-panel .phead{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffdf80;font-weight:900;margin-bottom:6px;}
+.kgen-v10402-panel button,#kgen-holy-cup-tab-v10402{border:1px solid rgba(255,215,120,.55);border-radius:999px;background:rgba(0,0,0,.65);color:#ffe7a1;font-weight:900;font-size:12px;padding:5px 10px;}
+#kgen-holy-cup-panel{width:min(320px,72vw)!important;max-height:132px!important;bottom:92px!important;}
+#kgen-holy-cup-tab-v10402{position:fixed;left:50%;bottom:62px;transform:translateX(-50%);z-index:920;}
+#kgen-left-heart-panel{width:min(286px,calc(100vw - 92px))!important;}
+#kgen-right-rule-panel{width:min(268px,calc(100vw - 108px))!important;}
+.hud-top{top:28px!important;}
+.brand-section{margin-top:8px!important;}
+#brand-badge{display:none!important;}
+@media(max-width:720px){#kgen-holy-cup-panel{width:min(300px,70vw)!important;bottom:88px!important;max-height:124px!important}.kgen-v10402-panel{font-size:11px}.hud-top{top:24px!important}}
+
+
+/* V10.40.3_CANVAS_SCREEN_VISUAL_WARP_FULL layout override */
+#v104-cup-panel.kgen-cup-compact-v10403,
+#kgen-holy-cup-panel.kgen-cup-compact-v10403{
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:116px!important;
+  transform:translateX(-50%)!important;
+  width:min(520px,72vw)!important;
+  max-width:520px!important;
+  max-height:170px!important;
+  overflow:auto!important;
+  padding:8px!important;
+  border-radius:16px!important;
+  z-index:100500!important;
+}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-cup-grid{
+  grid-template-columns:1fr 1fr 1fr 1fr!important;
+  gap:6px!important;
+  align-items:stretch!important;
+}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-arrow{display:none!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-step{min-height:58px!important;padding:6px!important;font-size:11px!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-step .no{font-size:9px!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-step .title{font-size:10px!important;line-height:1.15!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-step .stat{font-size:10px!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 .v104-step button{font-size:10px!important;padding:4px!important;margin-top:4px!important;}
+#v104-cup-panel.kgen-cup-compact-v10403 #v104-cup-result{min-height:58px!important;padding:6px!important;font-size:11px!important;}
+#kgen-cup-reopen-tab-v10403{
+  position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:100520;
+  border:1px solid rgba(255,215,120,.65);background:rgba(0,0,0,.82);color:#ffe28a;
+  border-radius:999px;padding:5px 12px;font-size:12px;font-weight:900;
+}
+#kgen-12345-warp-core-layer{display:block;}
+.kgen-recording-on{outline:2px solid rgba(255,68,68,.75)!important;box-shadow:0 0 18px rgba(255,68,68,.45)!important;}
+@media(max-width:720px){
+  #v104-cup-panel.kgen-cup-compact-v10403,#kgen-holy-cup-panel.kgen-cup-compact-v10403{
+    width:min(440px,66vw)!important;bottom:118px!important;max-height:150px!important;
+  }
+  #v104-cup-panel.kgen-cup-compact-v10403 .v104-cup-grid{grid-template-columns:1fr 1fr!important;}
+}
