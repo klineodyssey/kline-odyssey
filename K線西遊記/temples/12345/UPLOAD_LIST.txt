@@ -1,4 +1,4 @@
-請上傳 / 覆蓋以下檔案到 GitHub 對應位置：
+Upload / overwrite these files:
 
 12345.html
 wallet-12345.html
@@ -6,24 +6,11 @@ K線西遊記/temples/12345/index.html
 K線西遊記/temples/12345/VERSION
 K線西遊記/temples/12345/CHANGELOG.md
 K線西遊記/temples/12345/PROGRAM_HISTORY.md
-K線西遊記/temples/12345/ASSET_MANIFEST.md
-K線西遊記/temples/12345/UPLOAD_LIST.txt
-K線西遊記/temples/12345/SHA256SUMS.txt
-K線西遊記/temples/12345/modules/kgen-12345-core.css
-K線西遊記/temples/12345/modules/kgen-12345-version.js
-K線西遊記/temples/12345/modules/kgen-12345-transformer-runtime.js
-K線西遊記/temples/12345/modules/kgen-12345-panel-router.js
-K線西遊記/temples/12345/modules/kgen-12345-holy-cup.js
-K線西遊記/temples/12345/modules/kgen-12345-install-check.js
-K線西遊記/temples/12345/modules/kgen-12345-stable-countdown.js
-K線西遊記/temples/12345/modules/kgen-12345-motion-control.js
-K線西遊記/temples/12345/modules/kgen-12345-universe-elevator.js
-K線西遊記/temples/12345/modules/kgen-12345-input-governance.js
-K線西遊記/temples/12345/modules/kgen-12345-2d-antigravity-engine.js
-K線西遊記/temples/12345/modules/runtime-recording-engine.js
-K線西遊記/temples/12345/modules/runtime-panel-window-restore.js
-K線西遊記/temples/12345/docs/ANTI_GRAVITY_2D_ENGINE_SPEC.md
+K線西遊記/temples/12345/docs/KGEN_AntiGravity_Core_Engine_ISO_V2_0.md
+K線西遊記/temples/12345/modules/kgen-12345-ui-runtime.js
 
-不要上傳 RELEASE_NOTES。
-不要新增 assets 漂移命名。
-assets 仍使用既有正式檔名：bull-front.png、bear-rear.png、heart.png、warp-core.png。
+Keep existing assets on GitHub:
+K線西遊記/temples/12345/assets/bull-front.png
+K線西遊記/temples/12345/assets/bear-rear.png
+K線西遊記/temples/12345/assets/heart.png
+K線西遊記/temples/12345/assets/warp-core.png
