@@ -197,3 +197,202 @@ Purpose:
   setInterval(()=>{bindWarp(); bindFooter(); cleanText(); render();},900);
   window.KGEN_12345_PROTO_STABILIZER={VERSION,setTheta,touchHeart,applyWarp,state,assets:ASSET};
 })();
+
+/*
+VERSION: KGEN-12345-V10.42.3-PROTO-INTERACTION-LOCK
+BUILD: 20260519-V10.42.3
+BASE_FROM: V10.42.2 PROTO_RUNTIME_STABILIZER
+CHANGELOG:
+- Force bottom 8 buttons to real panel router actions.
+- Restore core image state machine: static bull/bear, moving heart.
+- Bind direction slider + right wheel to rotateZ and bull/bear judgement.
+- Bind XY joystick with sane sensitivity and limited displacement.
+- Bind Warp Elevator C0~C300 and remove stray cyan vertical line.
+- Clean floating tags, header offset, duplicated bottom text.
+*/
+(function(){
+  const VERSION='KGEN-12345-V10.42.3_PROTO_INTERACTION_LOCK';
+  const $=(id)=>document.getElementById(id);
+  const qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const ASSET={bull:'./assets/bull-front.png',bear:'./assets/bear-rear.png',heart:'./assets/heart.png',warp:'./assets/warp-core.png'};
+  const state={x:0,y:0,theta:76,mode:'static',warp:0,side:'bull'};
+  let moveTimer=null;
+
+  function injectStyle(){
+    if($('kgen-v10423-style')) return;
+    const css=`
+      html,body{overflow:hidden!important;}
+      .hud-top{top:24px!important;z-index:500!important;}
+      .brand-section{transform:translateY(18px)!important;max-width:45vw!important;}
+      .sys-st#ver-st,.sys-st#sys-clock{line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+      /* hide uncontrolled floating tags */
+      .kgen-v10423-hidden-float{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+      .warp-engine{right:8px!important;bottom:262px!important;width:96px!important;z-index:620!important;}
+      .warp-engine:before,.warp-engine:after,#wheel-wrap:before,#wheel-wrap:after,.wheel:before,.wheel:after{display:none!important;content:none!important;}
+      .warp-rail{height:420px!important;width:30px!important;overflow:visible!important;}
+      #energy-fill{left:0!important;right:0!important;width:100%!important;border-radius:0 0 6px 6px!important;}
+      #warp-thumb{width:58px!important;height:58px!important;left:50%!important;margin-left:-29px!important;border-radius:50%!important;background:rgba(0,0,0,.32)!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+      #warp-thumb img{width:100%!important;height:100%!important;border-radius:50%!important;object-fit:cover!important;display:block!important;}
+      .warp-val-text{font-size:16px!important;line-height:1.05!important;margin-top:10px!important;white-space:nowrap!important;text-align:center!important;}
+      #warp-level-badge{font-size:10px!important;color:#ffe39a!important;text-shadow:0 0 8px #000!important;margin-top:2px!important;white-space:nowrap!important;}
+      #core-anchor{position:fixed!important;top:50%!important;left:50%!important;width:min(380px,54vw)!important;height:min(380px,54vw)!important;z-index:80!important;will-change:transform!important;transform:translate(calc(-50% + var(--kgen-x,0px)),calc(-50% + var(--kgen-y,0px)))!important;}
+      #core-window{width:100%!important;height:100%!important;border-radius:50%!important;overflow:hidden!important;transform:rotateZ(var(--kgen-theta,76deg))!important;transform-origin:50% 50%!important;transition:transform .08s linear!important;}
+      #fairy-img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;opacity:1!important;filter:contrast(1.04) saturate(1.08)!important;transform:none!important;}
+      #wish-label{left:50%!important;right:auto!important;bottom:32px!important;transform:translateX(-50%)!important;font-size:15px!important;line-height:1.2!important;text-align:center!important;background:rgba(0,0,0,.48)!important;border:1px solid rgba(255,215,120,.38)!important;border-radius:14px!important;padding:6px 12px!important;white-space:nowrap!important;max-width:86%!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+      #move-joystick-wrap{left:16px!important;bottom:170px!important;width:88px!important;height:88px!important;z-index:850!important;touch-action:none!important;pointer-events:auto!important;}
+      #move-joystick-base{inset:12px!important;}
+      #move-joystick-knob{width:34px!important;height:34px!important;left:27px!important;top:27px!important;pointer-events:none!important;}
+      #move-joystick-label{font-size:9px!important;bottom:-18px!important;white-space:nowrap!important;}
+      .steer-zone{bottom:126px!important;z-index:780!important;pointer-events:auto!important;}
+      .angle-readout{font-size:44px!important;line-height:.9!important;pointer-events:none!important;}
+      .steer-slider{width:86%!important;height:12px!important;pointer-events:auto!important;}
+      #k12345-slider-status{bottom:104px!important;left:50%!important;transform:translateX(-50%)!important;max-width:82vw!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:11px!important;z-index:800!important;}
+      #v104-cup-panel{left:50%!important;right:auto!important;bottom:166px!important;transform:translateX(-50%)!important;width:min(520px,58vw)!important;max-width:58vw!important;z-index:720!important;max-height:128px!important;overflow:hidden!important;padding:8px!important;}
+      #v104-cup-panel .v104-cup-grid{grid-template-columns:1fr 12px 1fr 12px 1fr 12px 1.15fr!important;gap:4px!important;}
+      #v104-cup-panel .v104-step{min-height:48px!important;padding:5px!important;}
+      #v104-cup-panel .v104-step .title{font-size:9px!important;line-height:1.1!important;}
+      #v104-cup-panel .v104-step .stat{font-size:9px!important;}
+      #v104-cup-panel .v104-step button{font-size:9px!important;padding:4px!important;}
+      #v104-cup-result{min-height:48px!important;font-size:10px!important;padding:5px!important;}
+      .footer-terminal{grid-template-columns:repeat(4,1fr)!important;padding:8px 8px 10px!important;gap:6px!important;z-index:900!important;}
+      .footer-terminal .term-btn,.footer-terminal button{min-height:46px!important;padding:7px 4px!important;font-size:12px!important;line-height:1.15!important;overflow:hidden!important;white-space:normal!important;}
+      .kgen-v10423-panel{position:fixed;left:12px;right:12px;bottom:238px;z-index:950;max-height:46vh;overflow:auto;background:rgba(0,0,0,.86);border:1px solid rgba(255,215,120,.55);border-radius:14px;box-shadow:0 0 30px rgba(0,0,0,.65),0 0 16px rgba(0,245,255,.18);backdrop-filter:blur(8px);padding:12px;color:#fff;display:none;}
+      .kgen-v10423-panel.open{display:block!important;}
+      .kgen-v10423-head{display:flex;align-items:center;justify-content:space-between;color:#ffe39a;font-weight:900;margin-bottom:8px;border-bottom:1px solid rgba(255,215,120,.18);padding-bottom:7px;}
+      .kgen-v10423-panel button{border:1px solid rgba(255,215,120,.38);border-radius:10px;background:rgba(255,215,120,.14);color:#ffe39a;font-weight:900;padding:6px 10px;}
+      .kgen-v10423-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;line-height:1.4;}
+      .kgen-v10423-card{border:1px solid rgba(0,245,255,.22);background:rgba(0,40,48,.36);border-radius:10px;padding:8px;}
+      @media(max-width:760px){
+        .brand-section{max-width:48vw!important;transform:translateY(20px)!important;}
+        #core-anchor{width:min(330px,56vw)!important;height:min(330px,56vw)!important;top:51%!important;}
+        #v104-cup-panel{width:min(420px,58vw)!important;max-width:58vw!important;bottom:162px!important;}
+        #v104-cup-panel .v104-step .title,#v104-cup-panel .v104-step button{display:none!important;}
+        #v104-cup-panel .v104-step{min-height:36px!important;}
+        #v104-cup-result small{display:none!important;}
+        .warp-engine{bottom:268px!important;right:6px!important;}
+        .warp-rail{height:370px!important;}
+        .angle-readout{font-size:40px!important;}
+      }
+    `;
+    const st=document.createElement('style'); st.id='kgen-v10423-style'; st.textContent=css; document.head.appendChild(st);
+  }
+
+  function txt(el){return (el&&el.textContent||'').replace(/\s+/g,' ').trim();}
+  function isBull(a){a=((Number(a)||0)+540)%360-180; return a>=-90 && a<=90;}
+  function setVersionText(){
+    const ver=$('ver-st'); if(ver) ver.textContent='VERSION '+VERSION;
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el.childElementCount>2) return;
+      if(/V10\.42\.2|PROTO_RUNTIME_STABILIZER/.test(txt(el))) el.textContent=txt(el).replace(/KGEN-12345-V10\.42\.2_PROTO_RUNTIME_STABILIZER/g,VERSION).replace(/V10\.42\.2_PROTO_RUNTIME_STABILIZER/g,'V10.42.3_PROTO_INTERACTION_LOCK');
+    });
+  }
+  function cleanFloatingTags(){
+    qsa('button,div,span').forEach(el=>{
+      const t=txt(el);
+      if((t==='總收合' || t==='展開神殿' || t==='節日活動▼' || t==='節日活動') && !el.closest('.footer-terminal') && !el.closest('.data-box')){
+        el.classList.add('kgen-v10423-hidden-float');
+      }
+      if(t.includes('三聖盃檢查') && !el.closest('#v104-cup-panel') && !el.closest('.footer-terminal')){
+        el.classList.add('kgen-v10423-hidden-float');
+      }
+    });
+  }
+  function ensureWarpOrb(){
+    const thumb=$('warp-thumb'); if(thumb && !thumb.querySelector('img')){ const img=document.createElement('img'); img.src=ASSET.warp; img.alt='warp-core'; thumb.appendChild(img); }
+    let badge=$('warp-level-badge'); if(!badge && document.querySelector('.warp-engine')){ badge=document.createElement('div'); badge.id='warp-level-badge'; document.querySelector('.warp-engine').appendChild(badge); }
+  }
+  function applyCore(){
+    const core=$('core-anchor'), win=$('core-window'), img=$('fairy-img'), label=$('wish-label');
+    if(!core||!win||!img) return;
+    core.style.setProperty('--kgen-x', state.x+'px'); core.style.setProperty('--kgen-y', state.y+'px');
+    win.style.setProperty('--kgen-theta', state.theta+'deg');
+    const bull=isBull(state.theta); state.side=bull?'bull':'bear';
+    let src = state.mode==='heart' ? ASSET.heart : (bull ? ASSET.bull : ASSET.bear);
+    if(!img.getAttribute('src') || !img.getAttribute('src').endsWith(src.replace('./',''))) img.src=src;
+    if(label) label.textContent= state.mode==='heart' ? '悟空心臟｜移動推進' : (bull?'悟空鎮守五指山｜多方前行':'悟空鎮守五指山｜空方後鏡');
+    const ang=$('ang-val'); if(ang) ang.textContent=Math.round(state.theta)+'°';
+    const status=$('k12345-slider-status'); if(status) status.textContent='CORE 方向 '+Math.round(state.theta)+'°｜'+(bull?'多方':'空方')+'｜X '+Math.round(state.x)+' / Y '+Math.round(state.y)+'｜C '+Math.round(state.warp)+'/300';
+    const ml=$('move-joystick-label'); if(ml) ml.textContent='X '+Math.round(state.x)+' / Y '+Math.round(state.y);
+  }
+  function setTheta(v){ state.theta=Math.max(-180,Math.min(180,Number(v)||0)); const r=$('steer-input-val'); if(r && String(r.value)!==String(Math.round(state.theta))) r.value=Math.round(state.theta); applyCore(); }
+  function setMoving(active){ state.mode=active?'heart':'static'; clearTimeout(moveTimer); if(active){ moveTimer=setTimeout(()=>{state.mode='static'; applyCore();},700); } applyCore(); }
+  function bindSlider(){
+    const r=$('steer-input-val'); if(!r) return; r.min='-180'; r.max='180'; r.value=String(state.theta);
+    ['input','change','pointermove','touchmove'].forEach(ev=>r.addEventListener(ev,()=>setTheta(r.value),{passive:true}));
+    setTheta(r.value||76);
+  }
+  function bindWheel(){
+    const wheel=$('wheel')||document.querySelector('.wheel'); const wrap=$('wheel-wrap'); if(!wheel) return;
+    function calc(e){const p=e.touches?e.touches[0]:e; const rc=wheel.getBoundingClientRect(); const cx=rc.left+rc.width/2, cy=rc.top+rc.height/2; let deg=Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI; setTheta(deg); wheel.style.transform='rotate('+deg+'deg)';}
+    ['pointerdown','pointermove','touchstart','touchmove'].forEach(ev=>wheel.addEventListener(ev,function(e){ if(ev.includes('move') && !(e.buttons||e.touches)) return; e.preventDefault(); calc(e); },{passive:false}));
+    if(wrap) wrap.style.pointerEvents='auto';
+  }
+  function bindJoystick(){
+    const wrap=$('move-joystick-wrap'), knob=$('move-joystick-knob'); if(!wrap||!knob) return;
+    let active=false;
+    function center(){ const r=wrap.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2,rad:Math.min(r.width,r.height)*0.34}; }
+    function move(e){ const p=e.touches?e.touches[0]:e; const c=center(); let dx=p.clientX-c.x, dy=p.clientY-c.y; const len=Math.hypot(dx,dy)||1; if(len>c.rad){dx=dx/len*c.rad; dy=dy/len*c.rad;} knob.style.transform='translate('+dx+'px,'+dy+'px)'; state.x=Math.round(dx*1.35); state.y=Math.round(dy*1.35); setMoving(true); }
+    function down(e){ active=true; e.preventDefault(); move(e); }
+    function up(){ if(!active) return; active=false; knob.style.transform='translate(0,0)'; state.x=0; state.y=0; setMoving(false); }
+    ['pointerdown','touchstart'].forEach(ev=>wrap.addEventListener(ev,down,{passive:false,capture:true}));
+    ['pointermove','touchmove'].forEach(ev=>window.addEventListener(ev,e=>{if(active){e.preventDefault();move(e);}}, {passive:false,capture:true}));
+    ['pointerup','pointercancel','touchend','touchcancel'].forEach(ev=>window.addEventListener(ev,up,{passive:true,capture:true}));
+  }
+  function applyWarp(){
+    ensureWarpOrb(); const input=$('warp-input-val'), thumb=$('warp-thumb'), fill=$('energy-fill'), txtEl=$('warp-txt'), badge=$('warp-level-badge');
+    let v=Number(input&&input.value||state.warp||0); v=Math.max(0,Math.min(300,v)); state.warp=v;
+    const pct=v/300;
+    if(fill) fill.style.height=(pct*100)+'%';
+    if(thumb) thumb.style.bottom=`calc(${pct*100}% - 29px)`;
+    if(txtEl) txtEl.textContent='WARP '+String(Math.round(v)).padStart(3,'0');
+    if(badge) badge.textContent='C '+Math.round(v)+' / 300';
+    // optional floor image: if future 301 frames exist, use them; otherwise keep active face.
+    const floor=''+Math.round(v).toString().padStart(3,'0');
+    const img=$('fairy-img');
+    if(img && state.mode!=='heart') img.dataset.warpFloor=floor;
+    applyCore();
+  }
+  function bindWarp(){ const input=$('warp-input-val'); if(input){ input.min='0'; input.max='300'; input.step='1'; input.value=String(Math.min(300, Number(input.value||0)*3)); ['input','change'].forEach(ev=>input.addEventListener(ev,applyWarp,{passive:true})); } applyWarp(); }
+  function ensurePanel(id,title,body){
+    let p=$(id); if(!p){ p=document.createElement('section'); p.id=id; p.className='kgen-v10423-panel'; document.body.appendChild(p); }
+    p.innerHTML='<div class="kgen-v10423-head"><span>'+title+'</span><button type="button" data-close="'+id+'">收合</button></div>'+body;
+    p.querySelector('[data-close]').onclick=()=>p.classList.remove('open'); return p;
+  }
+  function togglePanel(id){ qsa('.kgen-v10423-panel').forEach(p=>{if(p.id!==id)p.classList.remove('open')}); const p=$(id); if(p) p.classList.toggle('open'); }
+  function buildPanels(){
+    ensurePanel('kgen-v10423-heart-panel','悟空心臟｜發財金 / 點燈 / 還願','<div class="kgen-v10423-grid"><div class="kgen-v10423-card">流程：連接錢包 → 切換 BSC → Approve → 三聖盃 → fortuneClaim。</div><div class="kgen-v10423-card">功能：發財金、heartbeatClaim、igniteAndClaim、lightLamp、vowTo 還願。</div><div class="kgen-v10423-card">狀態：Heart 血庫 / Allowance / KGEN 餘額沿用鏈上讀值。</div><div class="kgen-v10423-card">提醒：本面板為原型機控制台，不修改合約規則。</div></div>');
+    ensurePanel('kgen-v10423-right-panel','右側神規｜地址 / 地圖 / Gate / CT','<div class="kgen-v10423-grid"><div class="kgen-v10423-card">五指山 12345：悟空財神殿，主入口與發財金原型機。</div><div class="kgen-v10423-card">CT：宇宙生成界面；多方 +Z，空方 -Z。</div><div class="kgen-v10423-card">Warp：C0~C300 宇宙電梯樓層，warp-core 隨樓層移動。</div><div class="kgen-v10423-card">Gate：地圖通道、角色點位、後續可接東海龍宮 / 火焰山 / 牛魔王魔殿。</div></div>');
+    ensurePanel('kgen-v10423-rules-panel','規則活動｜Festival / Heartbeat','<div class="kgen-v10423-grid"><div class="kgen-v10423-card">5/20 悟空生日、11/11 孤勇日、12/31 跨年倒數。</div><div class="kgen-v10423-card">Heartbeat 整點心跳；Ignite 跨日呼吸；Festival 節日活動。</div></div>');
+  }
+  function normalizeFooter(){
+    const footer=document.querySelector('.footer-terminal'); if(!footer) return;
+    let btns=qsa('button,.term-btn',footer); if(btns.length<8) return;
+    btns=btns.slice(0,8);
+    const labels=['📸<br><span>拍照</span>','🎥<br><span>錄影</span>','🐂<br><span>前鏡多方</span>','🐻<br><span>後鏡空方</span>','💚<br><span>悟空心臟</span>','🎬<br><span>螢幕錄影</span>','📜<br><span>規則活動</span>','🛡<br><span>右側神規</span>'];
+    btns.forEach((b,i)=>{b.classList.add('term-btn'); b.innerHTML=labels[i]; b.onclick=null;});
+    btns[0].addEventListener('click',()=>alert('拍照功能保留：可用手機截圖或後續接 canvas snapshot。'));
+    btns[1].addEventListener('click',()=>alert('錄影功能保留：手機請用系統螢幕錄影，PC 可接 getDisplayMedia。'));
+    btns[2].addEventListener('click',()=>{setTheta(0); state.mode='static'; applyCore();});
+    btns[3].addEventListener('click',()=>{setTheta(180); state.mode='static'; applyCore();});
+    btns[4].addEventListener('click',()=>togglePanel('kgen-v10423-heart-panel'));
+    btns[5].addEventListener('click',()=>alert('螢幕錄影：若瀏覽器支援 getDisplayMedia，下一版接錄影核心；手機先用系統錄影。'));
+    btns[6].addEventListener('click',()=>togglePanel('kgen-v10423-rules-panel'));
+    btns[7].addEventListener('click',()=>togglePanel('kgen-v10423-right-panel'));
+  }
+  function layoutCleanup(){
+    // Remove stray cyan guide lines near warp/right wheel caused by older pseudo/runtime layers.
+    qsa('body *').forEach(el=>{
+      const s=getComputedStyle(el); const r=el.getBoundingClientRect();
+      if(r.height>180 && r.width<=3 && (s.backgroundColor.includes('0, 245')||s.borderLeftColor.includes('0, 245')||s.backgroundColor.includes('0, 255'))){ el.style.display='none'; }
+    });
+    cleanFloatingTags();
+  }
+  function init(){
+    injectStyle(); setVersionText(); buildPanels(); normalizeFooter(); bindSlider(); bindWheel(); bindJoystick(); bindWarp(); layoutCleanup(); applyCore();
+    setTimeout(()=>{normalizeFooter(); layoutCleanup(); applyWarp(); applyCore();},500);
+    setInterval(()=>{cleanFloatingTags();},1500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('load',init);
+  window.KGEN_12345_V10423={VERSION,state,setTheta,applyCore,applyWarp};
+})();
