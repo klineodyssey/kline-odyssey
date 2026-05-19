@@ -472,8 +472,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 2026 / 5 / 20｜Wukong Awakening Day｜The Birth of a Financial Civilization  
-👉 https://www.youtube.com/watch?v=KxB32m6_OQk
+▶ Wukong Awakens｜KGEN Financial Physics Engine V1.3  
+👉 https://www.youtube.com/watch?v=rBF1crFFErU
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
