@@ -472,8 +472,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ Taiwan now standsat the CT Boundaryof this era.#KLINE #KGEN #AI  
-👉 https://www.youtube.com/watch?v=DM8XPDrbYYo
+▶ 2026 / 5 / 20｜Wukong Awakening Day｜The Birth of a Financial Civilization  
+👉 https://www.youtube.com/watch?v=KxB32m6_OQk
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
