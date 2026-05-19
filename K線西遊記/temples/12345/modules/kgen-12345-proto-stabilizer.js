@@ -396,3 +396,372 @@ CHANGELOG:
   window.addEventListener('load',init);
   window.KGEN_12345_V10423={VERSION,state,setTheta,applyCore,applyWarp};
 })();
+
+
+/* ============================================================
+KGEN 12345｜Runtime Lockdown
+VERSION: V10.42.4_RUNTIME_LOCKDOWN
+BUILD: 20260520-V10.42.4-RUNTIME-LOCKDOWN
+PURPOSE:
+- Final active override after V10.42.3.
+- Fix central core texture state: idle bull/bear, move heart.
+- Bind bottom direction slider and right wheel to actual core rotation.
+- Bind joystick to heart movement state.
+- Bind Warp C0-C300 with warp-core as elevator cabin.
+- Restore bottom eight buttons panel open/close.
+- Remove stray blue vertical legacy elevator line and floating labels.
+- Move top temple control area down from version/time layer.
+RULE:
+- Official runtime filename stays kgen-12345-proto-stabilizer.js.
+============================================================ */
+(function(){
+  'use strict';
+  const VERSION = 'V10.42.4_RUNTIME_LOCKDOWN';
+  const A = {
+    bull:'./assets/bull-front.png',
+    bear:'./assets/bear-rear.png',
+    heart:'./assets/heart.png',
+    warp:'./assets/warp-core.png'
+  };
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+  const byId = (id)=>document.getElementById(id);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
+  const norm180=(v)=>{let d=Number(v)||0; while(d>180)d-=360; while(d<-180)d+=360; return Math.round(d);};
+  const isBull=(deg)=>{const d=norm180(deg); return d>=-90 && d<=90;};
+  const st={thetaY:0, thetaZ:0, x:0, y:0, moving:false, warp:0, booted:false};
+  let moveTimer=null;
+
+  function injectCss(){
+    if(byId('kgen-v10424-runtime-lock-css')) return;
+    const css=document.createElement('style');
+    css.id='kgen-v10424-runtime-lock-css';
+    css.textContent=`
+/* ===== KGEN V10.42.4 Runtime Lockdown ===== */
+:root{
+  --kgen10424-x:0px;
+  --kgen10424-y:0px;
+  --kgen10424-z:0deg;
+  --kgen10424-bottom:calc(86px + env(safe-area-inset-bottom,0px));
+}
+/* remove legacy fake elevator / blue vertical line */
+#kgen-warp-elevator,#kgen-drive-ring{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+#kgen-warp-elevator *{display:none!important;}
+.kgen-floating-tag,.floating-tag,.debug-tag,.module-tag,.module-label,.modules-label,
+[id*="tag"],[class*="tag"]{max-width:0!important;max-height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;}
+/* top spacing: version/time remains top; temple control moves down */
+#brand-badge{top:54px!important;left:14px!important;z-index:540!important;}
+.hud-top{top:82px!important;left:3%!important;width:94%!important;z-index:520!important;align-items:flex-start!important;}
+.brand-section,.brand-block,.brand-name{transform:translateY(14px)!important;}
+.monitor-data{transform:scale(.78)!important;transform-origin:top right!important;}
+.resource-bars{top:196px!important;}
+#ver-st,#sys-clock,.sys-st{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+/* central core: one locked source of truth */
+#core-anchor{
+  position:fixed!important;
+  left:50%!important;top:53%!important;
+  width:min(382px,66vw)!important;height:min(382px,66vw)!important;
+  z-index:88!important;
+  transform:translate(-50%,-50%) translate3d(var(--kgen10424-x),var(--kgen10424-y),0)!important;
+  pointer-events:none!important;will-change:transform!important;
+}
+#core-window{
+  position:relative!important;width:100%!important;height:100%!important;
+  border-radius:50%!important;overflow:hidden!important;
+  transform:rotateZ(var(--kgen10424-z))!important;
+  transform-origin:50% 50%!important;transition:transform .08s linear!important;
+  background:#02050b center/cover no-repeat!important;
+  border:10px double rgba(255,215,120,.9)!important;
+  box-shadow:0 0 52px rgba(255,215,120,.30),0 0 88px rgba(0,242,255,.12),inset 0 0 46px rgba(0,0,0,.50)!important;
+}
+#core-window::before{
+  content:"";position:absolute;inset:0;border-radius:50%;z-index:4;pointer-events:none;
+  background:radial-gradient(circle at 34% 22%,rgba(255,255,255,.46),transparent 18%),
+             linear-gradient(120deg,rgba(255,255,255,.15),transparent 32%,rgba(0,0,0,.24) 76%);
+  mix-blend-mode:screen;
+}
+#fairy-img,#kgen-core-sprite{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  display:block!important;visibility:visible!important;opacity:1!important;
+  object-fit:cover!important;object-position:center!important;border-radius:50%!important;
+  z-index:2!important;animation:none!important;transform:none!important;
+}
+#core-window.kgen10424-bull{box-shadow:0 0 56px rgba(255,215,120,.38),0 0 92px rgba(255,160,40,.18)!important;}
+#core-window.kgen10424-bear{box-shadow:0 0 56px rgba(0,242,255,.34),0 0 92px rgba(105,80,255,.24)!important;}
+#core-window.kgen10424-heart{box-shadow:0 0 58px rgba(255,75,110,.38),0 0 102px rgba(255,215,120,.22)!important;}
+#wish-label{
+  left:50%!important;right:auto!important;bottom:34px!important;transform:translateX(-50%)!important;
+  white-space:nowrap!important;background:rgba(0,0,0,.42)!important;border:1px solid rgba(255,215,120,.25)!important;
+  padding:5px 10px!important;border-radius:999px!important;z-index:12!important;
+}
+/* joystick: same scale / responsive / sensitive */
+#move-joystick-wrap{
+  left:16px!important;bottom:112px!important;width:132px!important;height:132px!important;
+  z-index:220!important;touch-action:none!important;
+}
+#move-joystick-knob{left:50%!important;top:50%!important;transform:translate(-50%,-50%) translate(var(--knob-x,0px),var(--knob-y,0px))!important;}
+/* bottom direction bar */
+.steer-zone{bottom:108px!important;z-index:210!important;pointer-events:auto!important;}
+#steer-input-val{pointer-events:auto!important;touch-action:auto!important;}
+/* warp elevator */
+.warp-engine{right:10px!important;bottom:176px!important;z-index:215!important;width:88px!important;}
+.warp-rail{overflow:visible!important;}
+#warp-thumb{
+  left:50%!important;transform:translateX(-50%)!important;
+  width:54px!important;height:54px!important;border-radius:50%!important;background:transparent!important;border:0!important;
+  box-shadow:none!important;z-index:60!important;display:flex!important;align-items:center!important;justify-content:center!important;
+}
+#kgen-warp-core-orb-10424{
+  width:54px!important;height:54px!important;border-radius:50%!important;object-fit:cover!important;
+  border:2px solid rgba(255,215,120,.80)!important;
+  box-shadow:0 0 18px rgba(0,242,255,.92),0 0 30px rgba(255,215,120,.42)!important;
+  pointer-events:none!important;
+}
+#energy-fill{height:var(--kgen10424-warp-pct,0%)!important;}
+#warp-txt{font-size:12px!important;line-height:1.18!important;margin-top:10px!important;white-space:nowrap!important;text-align:center!important;}
+#warp-txt::after{content:"";display:none!important;}
+/* footer buttons */
+.footer-terminal{
+  display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:6px!important;
+  left:0!important;right:0!important;bottom:0!important;width:100%!important;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))!important;
+  z-index:260!important;background:rgba(0,0,0,.94)!important;border-top:2px solid rgba(255,215,120,.55)!important;
+}
+.footer-terminal .term-btn{
+  min-height:42px!important;padding:5px 3px!important;border-radius:9px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;
+  gap:2px!important;font-size:0!important;line-height:1!important;
+}
+.footer-terminal .term-btn::before{content:attr(data-icon);font-size:15px!important;line-height:1!important;}
+.footer-terminal .term-btn::after{content:attr(data-title);font-size:10.5px!important;line-height:1.08!important;font-weight:900!important;}
+.footer-terminal .term-btn.kgen10424-on{outline:1px solid rgba(255,215,120,.88)!important;box-shadow:0 0 18px rgba(255,215,120,.20) inset!important;color:#ffe39a!important;}
+/* panels */
+.kgen10424-panel{
+  position:fixed!important;z-index:500!important;display:none;color:#fff4ce;
+  background:linear-gradient(180deg,rgba(5,12,20,.96),rgba(2,5,10,.94))!important;
+  border:1px solid rgba(255,215,120,.55)!important;border-radius:16px!important;
+  box-shadow:0 0 34px rgba(0,0,0,.75),0 0 28px rgba(0,242,255,.10)!important;
+  backdrop-filter:blur(10px)!important;overflow:hidden!important;font-family:Arial,'Noto Sans TC',sans-serif!important;
+}
+.kgen10424-panel.open{display:block!important;}
+.kgen10424-panel .ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,215,120,.24);font-weight:900;color:#ffe39a;}
+.kgen10424-panel .pb{padding:10px 12px;font-size:12px;line-height:1.5;max-height:42vh;overflow:auto;}
+.kgen10424-panel .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:9px;}
+.kgen10424-panel button{border:1px solid rgba(255,215,120,.38);border-radius:9px;background:rgba(0,242,255,.08);color:#fff5c8;padding:7px;font-weight:900;}
+#kgen10424-heart-panel{left:10px;bottom:calc(var(--kgen10424-bottom) + 6px);width:min(345px,calc(100vw - 116px));}
+#kgen10424-rules-panel{right:98px;bottom:calc(var(--kgen10424-bottom) + 6px);width:min(345px,calc(100vw - 116px));}
+@media(max-width:720px){
+  #kgen10424-heart-panel,#kgen10424-rules-panel{left:10px!important;right:auto!important;width:calc(100vw - 20px)!important;}
+  #kgen10424-heart-panel{bottom:calc(var(--kgen10424-bottom) + 6px)!important;}
+  #kgen10424-rules-panel{bottom:calc(var(--kgen10424-bottom) + 70px)!important;}
+  .hud-top{top:78px!important;}
+  .monitor-data{transform:scale(.70)!important;}
+}
+/* Holy cup and crowded mid info: compact safe layer */
+#v104-cup-panel,#kgen-holy-cup-panel,.kgen-holy-cup-panel,#holy-cup-check,.holy-cup-check,#cup-check-panel,.cup-check-panel,#cup-system,.cup-system{
+  left:50%!important;right:auto!important;top:auto!important;bottom:calc(var(--kgen10424-bottom) + 52px)!important;
+  transform:translateX(-50%) scale(.76)!important;transform-origin:bottom center!important;
+  width:min(520px,calc(100vw - 168px))!important;max-height:88px!important;overflow:hidden!important;z-index:205!important;
+}
+`;
+    document.head.appendChild(css);
+  }
+
+  function ensureCoreImg(){
+    let im=byId('fairy-img') || $('#core-window img');
+    if(!im){
+      const c=byId('core-window');
+      if(c){ im=document.createElement('img'); im.id='fairy-img'; im.alt='KGEN Core'; c.appendChild(im); }
+    }
+    return im;
+  }
+  function mode(){return st.moving?'heart':(isBull(st.thetaY)?'bull':'bear');}
+  function render(){
+    const m=mode();
+    const url=m==='heart'?A.heart:(m==='bull'?A.bull:A.bear);
+    const c=byId('core-window'), im=ensureCoreImg();
+    document.documentElement.style.setProperty('--kgen10424-x',Math.round(st.x)+'px');
+    document.documentElement.style.setProperty('--kgen10424-y',Math.round(st.y)+'px');
+    document.documentElement.style.setProperty('--kgen10424-z',Math.round(st.thetaZ)+'deg');
+    if(c){
+      c.style.backgroundImage=`url("${url}")`;
+      c.classList.remove('kgen10424-bull','kgen10424-bear','kgen10424-heart');
+      c.classList.add('kgen10424-'+m);
+      c.dataset.phase=m;
+      c.dataset.thetaY=String(st.thetaY);
+      c.dataset.thetaZ=String(st.thetaZ);
+    }
+    if(im){
+      if(im.getAttribute('src')!==url) im.src=url;
+      im.onerror=function(){ this.onerror=null; this.src=A.heart; };
+    }
+    const wl=byId('wish-label');
+    if(wl) wl.textContent = m==='heart' ? '悟空心臟｜移動推進' : (m==='bull' ? 'XY 方向｜多方前鏡' : 'XY 方向｜空方後鏡');
+    const dir=byId('kc-dir');
+    if(dir) dir.textContent=`方向 θZ ${Math.round(st.thetaZ)}°｜相位 θY ${Math.round(st.thetaY)}°｜${m==='heart'?'心臟':(m==='bull'?'多方':'空方')}`;
+    const av=byId('ang-val'); if(av) av.textContent=Math.round(st.thetaZ)+'°';
+  }
+  function setAngle(v, source){
+    const d=norm180(v);
+    st.thetaZ=d; st.thetaY=d;
+    const r=byId('steer-input-val');
+    if(r && source!=='range') r.value=String(d);
+    render();
+  }
+  function bindDirection(){
+    const r=byId('steer-input-val');
+    if(r && !r.dataset.kgen10424){
+      r.dataset.kgen10424='1'; r.min='-180'; r.max='180'; r.step='1';
+      r.addEventListener('input',()=>setAngle(r.value,'range'),true);
+      r.addEventListener('change',()=>setAngle(r.value,'range'),true);
+    }
+    const wheel=byId('wheel');
+    if(wheel && !wheel.dataset.kgen10424){
+      wheel.dataset.kgen10424='1';
+      let active=false;
+      const calc=(e)=>{
+        const b=wheel.getBoundingClientRect();
+        const x=e.clientX-b.left-b.width/2, y=e.clientY-b.top-b.height/2;
+        const deg=norm180(Math.atan2(y,x)*180/Math.PI+90);
+        wheel.style.transform=`rotate(${deg}deg)`;
+        setAngle(deg,'wheel');
+      };
+      wheel.addEventListener('pointerdown',e=>{active=true;try{wheel.setPointerCapture(e.pointerId);}catch(_){} calc(e); e.preventDefault();},true);
+      wheel.addEventListener('pointermove',e=>{if(active){calc(e); e.preventDefault();}},true);
+      ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wheel.addEventListener(ev,()=>{active=false;},true));
+    }
+  }
+  function bindJoystick(){
+    const wrap=byId('move-joystick-wrap'), knob=byId('move-joystick-knob');
+    if(!wrap || !knob || wrap.dataset.kgen10424) return;
+    wrap.dataset.kgen10424='1';
+    let active=false;
+    const move=(e)=>{
+      const b=wrap.getBoundingClientRect();
+      const cx=b.left+b.width/2, cy=b.top+b.height/2;
+      let dx=e.clientX-cx, dy=e.clientY-cy;
+      const max=46, len=Math.hypot(dx,dy)||1;
+      if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+      knob.style.setProperty('--knob-x',Math.round(dx)+'px');
+      knob.style.setProperty('--knob-y',Math.round(dy)+'px');
+      st.x=Math.round(dx*1.55); st.y=Math.round(dy*1.55); st.moving=true;
+      clearTimeout(moveTimer);
+      render();
+    };
+    const end=()=>{
+      if(!active) return;
+      active=false; st.x=0; st.y=0;
+      knob.style.setProperty('--knob-x','0px'); knob.style.setProperty('--knob-y','0px');
+      clearTimeout(moveTimer);
+      moveTimer=setTimeout(()=>{st.moving=false; render();},180);
+      render();
+    };
+    wrap.addEventListener('pointerdown',e=>{active=true;try{wrap.setPointerCapture(e.pointerId);}catch(_){} move(e); e.preventDefault();},true);
+    wrap.addEventListener('pointermove',e=>{if(active){move(e); e.preventDefault();}},true);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>wrap.addEventListener(ev,end,true));
+  }
+  function bindWarp(){
+    const input=byId('warp-input-val'), thumb=byId('warp-thumb'), fill=byId('energy-fill'), text=byId('warp-txt');
+    if(thumb && !byId('kgen-warp-core-orb-10424')){
+      thumb.innerHTML='';
+      const orb=document.createElement('img');
+      orb.id='kgen-warp-core-orb-10424'; orb.src=A.warp; orb.alt='warp-core';
+      thumb.appendChild(orb);
+    }
+    const apply=(v)=>{
+      let n=Number(v)||0;
+      if(input && Number(input.max)===100) n=n*3;
+      n=clamp(n,0,300); st.warp=n;
+      const pct=n/300;
+      document.documentElement.style.setProperty('--kgen10424-warp-pct',Math.round(pct*100)+'%');
+      if(thumb) thumb.style.bottom=`calc(${pct*100}% - 27px)`;
+      if(fill) fill.style.height=(pct*100)+'%';
+      if(text) text.textContent=`C${Math.round(n)}｜第 ${Math.round(n)} 層`;
+      const c=byId('core-window');
+      if(c) c.style.filter=`hue-rotate(${Math.round(n*1.2)}deg) saturate(${1+n/900}) brightness(${1+n/1500})`;
+    };
+    if(input && !input.dataset.kgen10424){
+      input.dataset.kgen10424='1'; input.min='0'; input.max='300'; input.step='1';
+      const old=Number(input.value)||0; if(old<=100) input.value=String(Math.round(old*3));
+      input.addEventListener('input',()=>apply(input.value),true);
+      input.addEventListener('change',()=>apply(input.value),true);
+    }
+    apply(input?input.value:st.warp);
+  }
+  function ensurePanel(id,title,html){
+    let p=byId(id);
+    if(!p){
+      p=document.createElement('section'); p.id=id; p.className='kgen10424-panel';
+      p.innerHTML=`<div class="ph"><span>${title}</span><button type="button" data-kgen10424-close="${id}">收合</button></div><div class="pb">${html}</div>`;
+      document.body.appendChild(p);
+    }
+    return p;
+  }
+  function ensurePanels(){
+    ensurePanel('kgen10424-heart-panel','悟空心臟操作窗｜12345',`<div>發財金、許願、還願、點燈、心跳與呼吸入口。此窗由左下「悟空心臟」按鍵開合。</div><div class="grid"><button>連錢包</button><button>Approve</button><button>發財金</button><button>心跳</button><button>許願</button><button>還願</button><button>點燈</button><button>三聖盃</button></div>`);
+    ensurePanel('kgen10424-rules-panel','右側神規｜宇宙地圖資料',`<div><b>CT</b>：宇宙生成界面。</div><div><b>Warp</b>：C0~C300 宇宙樓層。</div><div><b>Gate</b>：5.11111 × 10^k。</div><div style="margin-top:8px;word-break:break-all;font-size:11px">KGEN：0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</div><div style="word-break:break-all;font-size:11px">Bank：0xfc522243e988a837700CaD600D6f030f5932681F</div>`);
+  }
+  function togglePanel(which){
+    ensurePanels();
+    const id=which==='rules'?'kgen10424-rules-panel':'kgen10424-heart-panel';
+    const p=byId(id); if(!p) return;
+    p.classList.toggle('open');
+    $$('.footer-terminal .term-btn').forEach(b=>{
+      if((which==='rules' && b.dataset.action==='rules') || (which==='heart' && b.dataset.action==='heart')) b.classList.toggle('kgen10424-on',p.classList.contains('open'));
+    });
+  }
+  function bindFooter(){
+    const ft=$('.footer-terminal'); if(!ft || ft.dataset.kgen10424) return;
+    ft.dataset.kgen10424='1';
+    const specs=[
+      ['photo','📸','拍照'],
+      ['record','🎥','錄影'],
+      ['front','🌕','前鏡多方'],
+      ['back','🌑','後鏡空方'],
+      ['heart','🫀','悟空心臟'],
+      ['dual','🎬','雙鏡錄影'],
+      ['festival','🎋','規則活動'],
+      ['rules','🛡','右側神規']
+    ];
+    ft.innerHTML='';
+    specs.forEach(([action,icon,title])=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='term-btn'; b.dataset.action=action; b.dataset.icon=icon; b.dataset.title=title; b.setAttribute('aria-label',title);
+      ft.appendChild(b);
+    });
+    ft.addEventListener('click',e=>{
+      const b=e.target.closest && e.target.closest('[data-action]');
+      if(!b) return;
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      const a=b.dataset.action;
+      if(a==='heart') return togglePanel('heart');
+      if(a==='rules') return togglePanel('rules');
+      if(a==='front') return setAngle(0,'button');
+      if(a==='back') return setAngle(180,'button');
+      if(a==='festival') return togglePanel('heart');
+      if(a==='photo'){try{window.app&&app.capture&&app.capture();}catch(_){}}
+      if(a==='record'||a==='dual'){try{window.app&&app.toggleRec&&app.toggleRec();}catch(_){}}
+    },true);
+  }
+  function cleanup(){
+    const ver=byId('ver-st'); if(ver) ver.textContent='VERSION KGEN-12345-'+VERSION;
+    document.title='KGEN 12345 五指山悟空財神殿｜'+VERSION;
+    const rail=byId('warp-rail-body');
+    if(rail) Array.from(rail.childNodes).forEach(n=>{if(n.nodeType===3 && /\b300\b/.test(n.nodeValue||'')) n.nodeValue='';});
+    $$('body *').forEach(el=>{
+      if(el.children.length) return;
+      const t=(el.textContent||'').trim();
+      if((/^300$/.test(t)||/^C\s*\|/.test(t)||/^CT\s*\|/.test(t)) && el.getBoundingClientRect().top<240){
+        el.style.display='none';
+      }
+    });
+  }
+  function boot(){
+    injectCss(); ensurePanels(); bindFooter(); bindDirection(); bindJoystick(); bindWarp(); cleanup(); render();
+    window.KGEN_12345_RUNTIME_LOCKDOWN={VERSION,state:st,setAngle,render};
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  window.addEventListener('load',()=>{boot(); setTimeout(boot,400); setTimeout(boot,1200);});
+  setInterval(()=>{bindWarp(); cleanup(); render();},500);
+})();
+
