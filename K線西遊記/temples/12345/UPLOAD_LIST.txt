@@ -14,3 +14,9 @@ K線西遊記/temples/12345/assets/bull-front.png
 K線西遊記/temples/12345/assets/bear-rear.png
 K線西遊記/temples/12345/assets/heart.png
 K線西遊記/temples/12345/assets/warp-core.png
+
+K線西遊記/temples/12345/modules/kgen-12345-proto-stabilizer.js
+K線西遊記/temples/12345/assets/bull-front.png
+K線西遊記/temples/12345/assets/bear-rear.png
+K線西遊記/temples/12345/assets/heart.png
+K線西遊記/temples/12345/assets/warp-core.png

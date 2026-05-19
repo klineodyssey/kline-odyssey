@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## V10.42.2_PROTO_RUNTIME_STABILIZER
+- 補齊正式 assets：bull-front.png / bear-rear.png / heart.png / warp-core.png。
+- 強制中央核心三態：靜止 bull/bear，移動 heart。
+- 修正方向盤與方向橫桿：角度直接驅動核心 rotateZ 與多空判定。
+- 底部八顆按鈕改為可展開 / 收合 panel，並接回悟空心臟與右側神規。
+- Warp 文字清理，隱藏錯位 C0/300 與 300 污染，warp-core 跟隨縱桿滑塊。
+- 左上控制台下移，版本號保持可見。
+
+# CHANGELOG
+
 ## V10.42.0_PROTO_STABILIZATION
 - Restored bottom eight-button router: photo, record, front camera, back camera, Wukong Heart, dual recording, rules/events, right-side deity rules.
 - Added official runtime file `modules/kgen-12345-ui-runtime.js`.
