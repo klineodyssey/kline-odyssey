@@ -1,3 +1,23 @@
+# V10.42.4 RUNTIME LOCKDOWN｜2026-05-20
+
+## 修改重點
+- 修正中央圖 Runtime：靜止顯示 bull/bear，移動顯示 heart。
+- 修正中下方向橫桿與右下方向盤：同步控制核心旋轉角度與多空相位。
+- 修正左下 XY 遙桿：提高靈敏度，移動時觸發 heart，放開後回到多空相位圖。
+- 修正 Warp 宇宙電梯：C0~C300、warp-core 圓圖跟隨滑塊，清理 300 文字跑位。
+- 修正底部八鍵：重建按鈕與左下悟空心臟 / 右下右側神規 panel 開合。
+- 修正版面：移除右側藍色垂直線與漂浮小標籤，左上控制台下移，避免壓到版本與時間。
+
+## 更動檔案
+- modules/kgen-12345-proto-stabilizer.js
+- VERSION
+- CHANGELOG.md
+- docs/KGEN_12345_V10_42_4_RUNTIME_LOCKDOWN.md
+- UPLOAD_LIST.txt
+- SHA256SUMS.txt
+
+---
+
 # CHANGELOG
 
 ## V10.42.2_PROTO_RUNTIME_STABILIZER
