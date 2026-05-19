@@ -1,12 +1,26 @@
-# ASSET MANIFEST
+# KGEN 12345 Asset Manifest｜V10.42.6
 
-正式資產路徑固定：
+## 正式資產名
 
 ```text
-K線西遊記/temples/12345/assets/bull-front.png
-K線西遊記/temples/12345/assets/bear-rear.png
-K線西遊記/temples/12345/assets/heart.png
-K線西遊記/temples/12345/assets/warp-core.png
+assets/bull-front.png
+assets/bear-rear.png
+assets/heart.png
+assets/warp-core.png
 ```
 
-本包不覆蓋 assets。GitHub 既有正式圖保留。
+## 禁止資產漂移
+
+```text
+wukong_heart_core.jpg
+wukong_caishen.png
+heart-drive.png
+warp-universe.png
+*-patch.*
+*-temp.*
+*-hotfix.*
+```
+
+## 規則
+
+檔名也是資產。程式只讀正式檔名；換圖只能覆蓋正式檔名，不新增舊名、不新增臨時名。

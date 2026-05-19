@@ -1,14 +1,11 @@
-# KGEN 12345 V10.42.4 changed files only
-
-只需要上傳以下更動檔案：
-
-K線西遊記/temples/12345/modules/kgen-12345-proto-stabilizer.js
+K線西遊記/temples/12345/index.html
+K線西遊記/temples/12345/modules/kgen-12345-core.css
+K線西遊記/temples/12345/modules/kgen-12345-runtime.js
+K線西遊記/temples/12345/modules/README.md
 K線西遊記/temples/12345/VERSION
 K線西遊記/temples/12345/CHANGELOG.md
-K線西遊記/temples/12345/docs/KGEN_12345_V10_42_4_RUNTIME_LOCKDOWN.md
+K線西遊記/temples/12345/PROGRAM_HISTORY.md
+K線西遊記/temples/12345/ASSET_MANIFEST.md
+K線西遊記/temples/12345/docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md
 K線西遊記/temples/12345/UPLOAD_LIST.txt
 K線西遊記/temples/12345/SHA256SUMS.txt
-
-橋接檔 12345.html、wallet-12345.html 本版未更動，不必上傳。
-assets 本版未更動，不必上傳。
-index.html 本版未更動，不必上傳。
