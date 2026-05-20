@@ -3,8 +3,8 @@
 FILE_CERTIFICATE:
   FILE: modules/kgen-12345-runtime.js
   PRODUCT_ID: KGEN-12345-HEART-UI
-  VERSION: 12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE
-  BUILD: 20260520-V10.42.6-MODULAR-ASSET-GOVERNANCE
+  VERSION: 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX
+  BUILD: 20260521-V10.45.3-VERSION-GENOME-FIX
   BIRTH: 2026-05-20
   BASE_FROM: inline <script> blocks of index_12345_Heart_UI_V10_2_FESTIVAL_RUNTIME_LOCK.html
   DEATH: ACTIVE
@@ -52,7 +52,7 @@ C. 右側 曲速引擎（.warp-engine）：WARP 倍率拉桿（0=息火）
 ============================================================
 */
 
-const APP_VERSION = "12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
+const APP_VERSION = "12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX";
 
 /* =========================
    UFO Music: track URL resolver (fix)
@@ -11613,7 +11613,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const FIX_VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const $=id=>document.getElementById(id);
   const cleanText=(s)=>String(s||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim();
 
@@ -11708,7 +11708,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const FIX_VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const $=id=>document.getElementById(id);
   function say(msg){try{ if(window.app&&typeof app.speak==='function') app.speak(String(msg||'')); }catch(_){}}
   function toast(msg){
@@ -11840,7 +11840,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const FIX_VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const FIX_VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const OFFICIAL_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
   const BRIDGE_NOSCHEME='klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -11934,7 +11934,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -12127,7 +12127,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -12213,7 +12213,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -12368,7 +12368,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -12488,7 +12488,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -12600,7 +12600,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -12707,7 +12707,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -12829,7 +12829,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -13703,7 +13703,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const oldOps = Object.assign({}, window.templeOps || {});
   const state = { speaking:true, cup: Number(localStorage.getItem('KGEN_12345_CUP_COUNT_V892')||'0')||0 };
 
@@ -13860,7 +13860,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const BSC_HEX='0x38';
   const BSC_DEC='56';
   const BSC_PARAMS={
@@ -14053,7 +14053,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const ASCII_APP_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_APP_NOSCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const CHINESE_APP_URL='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/';
@@ -14139,7 +14139,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_NO_SCHEME='klineodyssey.github.io/kline-odyssey/12345.html';
   const WALLET_BRIDGE='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -14294,7 +14294,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const ASCII_URL='https://klineodyssey.github.io/kline-odyssey/12345.html';
   const ASCII_HOST_PATH='klineodyssey.github.io/kline-odyssey/12345.html';
   const BRIDGE_URL='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
@@ -14402,7 +14402,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
 
   function $(id){return document.getElementById(id);}
   function speak(text){
@@ -14522,7 +14522,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const CUP_KEY='KGEN_12345_CUP_COUNT_V899';
   const CUP_LOG_KEY='KGEN_12345_CUP_LOG_V899';
   function $(id){return document.getElementById(id);}
@@ -14634,7 +14634,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){
     try{ if(window.kgenPushMessage) window.kgenPushMessage('info', text, 2600); else if(window.kgenToast) window.kgenToast('info', text, 2600); }catch(e){}
@@ -14741,7 +14741,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const HEART_IMG='./assets/heart.png';
   function $(id){return document.getElementById(id);}
   function say(t){
@@ -14851,7 +14851,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   function $(id){return document.getElementById(id);}
   function speak(text){ try{ if(window.app && typeof app.speak==='function') app.speak(String(text)); }catch(e){} }
   function left(text){ const el=$('kgen-v902-left-status'); if(el) el.textContent=String(text||''); }
@@ -14973,7 +14973,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const $=(id)=>document.getElementById(id);
   function speak(t){try{ if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }}catch(e){} }
   function msg(type,text,dur){
@@ -15072,7 +15072,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
   const $=(id)=>document.getElementById(id);
   function say(t){try{ if(window.app&&typeof app.speak==='function') app.speak(String(t)); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(String(t)); u.lang='zh-TW'; speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){}}
   function msg(type,text){try{ if(window.kgenMsg&&kgenMsg.add) kgenMsg.add(type||'info',text); }catch(e){} const s=$('kgen-v902-left-status'); if(s) s.textContent=text;}
@@ -16313,14 +16313,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
-  const BUILD='20260520-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE';
+  const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
+  const BUILD='20260521-V10.45.3-VERSION-GENOME-FIX';
   const $=(id)=>document.getElementById(id);
   function say(msg){try{ if(window.speak) return window.speak(msg); if(window.app&&app.speak) return app.speak(msg); if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(msg);u.lang='zh-TW';speechSynthesis.cancel();speechSynthesis.speak(u);} }catch(e){}}
   function log(msg){try{ if(window.kgenLog) window.kgenLog('info',msg); if(window.msg) window.msg('info',msg); }catch(e){}}
 
   function setVersion(){
-    document.title='KGEN-12345-HEART-UI-V10.42.6';
+    document.title='KGEN-12345-HEART-UI-V10.45.3';
     document.querySelectorAll('.sys-st,.version,[class*="version"],#version,#build').forEach(el=>{
       let t=(el.textContent||'');
       if(/V9\.|VERSION|SYSTEM ONLINE|KGEN-12345/.test(t)){
@@ -16427,8 +16427,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 (function(){
   "use strict";
   const PRODUCT_ID="KGEN-12345-HEART-UI";
-  const VERSION="12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
-  const BUILD="20260520-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
+  const VERSION="12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX";
+  const BUILD="20260521-V10.45.3-VERSION-GENOME-FIX";
   const BASE_FROM="KGEN_12345_V9_2_0_layout_final_polish_FULL_bundle.zip";
   const BASE_SHA256="e701345ac772c4bae4c398261d3a07eeb729ba04a0890d268100b9d1a0d88b39";
 
@@ -16558,7 +16558,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 (function(){
 "use strict";
-const VERSION="12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE", BUILD="20260520-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
+const VERSION="12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX", BUILD="20260521-V10.45.3-VERSION-GENOME-FIX";
 window.KGEN12345_BUILD=Object.assign({},window.KGEN12345_BUILD||{},{VERSION,BUILD,BASE_FROM:"KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip",BASE_SHA256:"db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c",CHANGESET:"V10.1-HUD-RUNTIME-VOICE-FIX"});
 function speak(msg){try{if(window.speak)return window.speak(msg);if(window.app&&typeof app.speak==="function")return app.speak(msg);if("speechSynthesis"in window){const u=new SpeechSynthesisUtterance(String(msg||""));u.lang="zh-TW";speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}}
 function txt(el){return(el&&el.textContent?el.textContent:"").replace(/\s+/g," ").trim();}
@@ -16579,8 +16579,8 @@ window.kgenV101HudRuntimeVoiceFix={version:VERSION,build:BUILD,speakCupStatus:fu
 
 (function(){
   "use strict";
-  const VERSION = "12345-TEMPLE-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
-  const BUILD = "20260520-V10.42.6-V10.2-MODULAR-ASSET-GOVERNANCE";
+  const VERSION = "12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX";
+  const BUILD = "20260521-V10.45.3-VERSION-GENOME-FIX";
 
   window.KGEN12345_BUILD = Object.assign({}, window.KGEN12345_BUILD || {}, {
     VERSION,
