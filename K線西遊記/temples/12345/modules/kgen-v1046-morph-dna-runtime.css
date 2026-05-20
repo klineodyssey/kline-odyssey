@@ -1,0 +1,13 @@
+
+#festivalButtons{
+ display:flex;
+ gap:8px;
+}
+#festivalButtons .festival-btn{
+ width:140px;
+ height:42px;
+ border-radius:12px;
+}
+#rightRulePanel.collapsed{
+ transform:translateX(110%);
+}
