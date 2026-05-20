@@ -1,0 +1,137 @@
+/*
+============================================================
+FILE_CERTIFICATE:
+  FILE: modules/kgen-12345-organ-system.css
+  PRODUCT_ID: KGEN-12345-ORGAN-LIFECYCLE-SYSTEM
+  VERSION: 12345-TEMPLE-V10.42.9-DEATH-CELL-CLEANUP
+  BUILD: 20260520-V10.42.9-DEATH-CELL-CLEANUP
+  BIRTH: 2026-05-20
+  BASE_FROM: V10.42.6 modular asset governance
+  DEATH: ACTIVE
+  PURPOSE: Organ UI shell, lifecycle badge, organ dock and Wukong console visuals.
+  ASSET_GOVERNANCE: no new image names; official assets remain bull-front.png / bear-rear.png / heart.png / warp-core.png
+============================================================
+*/
+:root{
+  --organ-gold:#ffd778;
+  --organ-cyan:#63f4ff;
+  --organ-bg:rgba(3,7,13,.86);
+  --organ-line:rgba(255,215,120,.38);
+  --organ-shadow:0 0 24px rgba(99,244,255,.14), 0 18px 48px rgba(0,0,0,.42);
+}
+.kgen-organ-dock{
+  position:fixed;
+  left:14px;
+  bottom:84px;
+  z-index:10050;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  pointer-events:auto;
+}
+.kgen-organ-pill{
+  border:1px solid var(--organ-line);
+  background:linear-gradient(180deg,rgba(255,215,120,.18),rgba(0,0,0,.66));
+  color:#fff4cf;
+  border-radius:999px;
+  padding:8px 12px;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.05em;
+  box-shadow:var(--organ-shadow);
+  cursor:pointer;
+  user-select:none;
+}
+.kgen-organ-pill[data-state="ACTIVE"]{border-color:rgba(99,244,255,.62); color:#d8fcff;}
+.kgen-organ-pill[data-state="DORMANT"]{opacity:.82;}
+.kgen-organ-console{
+  position:fixed;
+  left:18px;
+  top:92px;
+  width:min(392px, calc(100vw - 28px));
+  max-height:calc(100vh - 170px);
+  z-index:10040;
+  background:var(--organ-bg);
+  border:1px solid var(--organ-line);
+  border-radius:16px;
+  box-shadow:var(--organ-shadow);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+  color:#fff;
+  pointer-events:auto;
+}
+.kgen-organ-console[data-collapsed="true"]{display:none;}
+.kgen-organ-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px 10px;
+  border-bottom:1px solid rgba(255,215,120,.18);
+  background:linear-gradient(90deg,rgba(255,215,120,.13),rgba(0,242,255,.05));
+}
+.kgen-organ-title{font-weight:900;color:var(--organ-gold);line-height:1.25;}
+.kgen-organ-sub{font-family:Orbitron,monospace;font-size:10px;color:var(--organ-cyan);opacity:.92;margin-top:3px;}
+.kgen-organ-actions{display:flex;gap:6px;}
+.kgen-organ-btn{
+  border:1px solid rgba(255,215,120,.35);
+  background:rgba(0,0,0,.36);
+  color:#fff3c8;
+  border-radius:10px;
+  padding:7px 9px;
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+}
+.kgen-organ-body{padding:12px 14px;overflow:auto;max-height:calc(100vh - 245px);}
+.kgen-organ-cert{
+  border:1px solid rgba(99,244,255,.23);
+  background:rgba(0,242,255,.055);
+  border-radius:12px;
+  padding:9px 10px;
+  margin-bottom:10px;
+  font-size:11px;
+  line-height:1.45;
+}
+.kgen-organ-cert b{color:var(--organ-cyan);}
+.kgen-organ-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.kgen-organ-main-btn{
+  border:1px solid rgba(255,215,120,.28);
+  background:linear-gradient(180deg,rgba(0,242,255,.12),rgba(0,0,0,.42));
+  color:#fff;
+  border-radius:12px;
+  min-height:58px;
+  padding:9px 8px;
+  font-weight:900;
+  text-align:center;
+  cursor:pointer;
+}
+.kgen-organ-main-btn.gold{background:linear-gradient(180deg,rgba(255,215,120,.30),rgba(0,0,0,.42)); color:#ffe8a6;}
+.kgen-organ-main-btn.green{background:linear-gradient(180deg,rgba(50,255,165,.20),rgba(0,0,0,.42)); color:#d8ffe6;}
+.kgen-organ-main-btn.purple{background:linear-gradient(180deg,rgba(120,115,255,.20),rgba(0,0,0,.42)); color:#e4e1ff;}
+.kgen-organ-log{
+  margin-top:10px;
+  border-top:1px solid rgba(255,255,255,.10);
+  padding-top:8px;
+  font-size:11px;
+  color:#dffcff;
+  max-height:104px;
+  overflow:auto;
+  line-height:1.45;
+}
+.kgen-organ-log div{padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.06);}
+.kgen-organ-health{
+  display:grid;
+  grid-template-columns:92px 1fr;
+  gap:6px 10px;
+  margin:9px 0;
+  font-size:11px;
+}
+.kgen-organ-health span:nth-child(odd){color:#ffe6a8;opacity:.9;}
+.kgen-organ-health span:nth-child(even){color:#8af3ff;font-family:Orbitron,monospace;word-break:break-word;}
+@media(max-width:720px){
+  .kgen-organ-console{left:10px;right:10px;top:78px;width:auto;max-height:calc(100vh - 160px);} 
+  .kgen-organ-dock{left:10px;bottom:78px;}
+  .kgen-organ-grid{grid-template-columns:1fr 1fr;}
+  .kgen-organ-main-btn{font-size:12px;min-height:52px;}
+}

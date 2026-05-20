@@ -1,0 +1,64 @@
+{
+  "PRODUCT_ID": "KGEN-12345-ORGAN-REGISTRY",
+  "VERSION": "12345-TEMPLE-V10.42.8-NERVE-CONVERGENCE",
+  "BUILD": "20260520-V10.42.8-NERVE-CONVERGENCE",
+  "BIRTH": "2026-05-20",
+  "DEATH": "ACTIVE",
+  "GOVERNANCE": "Folders are also assets and nerve paths. Do not create deep organ folders unless ORGAN_NERVE_MAP exists. V10.42.8 converges organ nerves to /modules root to avoid forgotten deep paths and half-paralyzed UI organs.",
+  "FOLDER_POLICY": {
+    "allowed_runtime_root": [
+      "modules/kgen-12345-organ-system.js",
+      "modules/kgen-12345-organ-system.css",
+      "modules/kgen-12345-organ-wukong-control-console.js",
+      "modules/kgen-12345-organ-registry.json"
+    ],
+    "deprecated_deep_paths": [
+      "modules/organs/"
+    ],
+    "rule": "Use existing /modules unless there are ten or more organs and a maintained ORGAN_NERVE_MAP.json."
+  },
+  "organs": [
+    {
+      "ORGAN_ID": "ORGAN_12345_WUKONG_CONTROL_CONSOLE",
+      "ORGAN_NAME": "五指山12345｜悟空財神殿控制台",
+      "VERSION": "ORGAN-V1.1.0 / HOST-V10.42.8",
+      "BIRTH": "2026-05-20",
+      "DEATH": "ACTIVE",
+      "SOURCE": "SELF_CREATED_FROM_ORGAN_LIFECYCLE_RULES; NERVE_CONVERGED_FROM_V10.42.7",
+      "TRANSPLANT": false,
+      "OLD_PATH": "modules/organs/organ-12345-wukong-control-console.js",
+      "NEW_PATH": "modules/kgen-12345-organ-wukong-control-console.js",
+      "DEPENDENCIES": [
+        "kgen-12345-organ-system.js",
+        "kgen-12345-organ-system.css"
+      ],
+      "OFFICIAL_ASSETS": [
+        "bull-front.png",
+        "bear-rear.png",
+        "heart.png",
+        "warp-core.png"
+      ]
+    }
+  ],
+  "version": "12345-TEMPLE-V10.42.9-DEATH-CELL-CLEANUP",
+  "build": "20260520-V10.42.9-DEATH-CELL-CLEANUP",
+  "nerve_policy": "ROOT_MODULES_ONLY_NO_DEEP_ORGANS_FOLDER",
+  "death_cell_cleanup": {
+    "status": "PASSED_PACKAGE_AUDIT",
+    "forbidden_paths": [
+      "modules/organs/",
+      "modules/*patch*",
+      "modules/*hotfix*",
+      "modules/*temp*",
+      "modules/*fix2*"
+    ],
+    "survivors": [
+      "modules/kgen-12345-core.css",
+      "modules/kgen-12345-runtime.js",
+      "modules/kgen-12345-organ-system.css",
+      "modules/kgen-12345-organ-system.js",
+      "modules/kgen-12345-organ-wukong-control-console.js",
+      "modules/kgen-12345-organ-registry.json"
+    ]
+  }
+}
