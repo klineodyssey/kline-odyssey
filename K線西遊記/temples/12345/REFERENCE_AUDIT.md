@@ -1,0 +1,5 @@
+# REFERENCE AUDIT
+
+VERSION: 12345-TEMPLE-V10.43-FINAL-RUNTIME-ARCHITECTURE-CONSTITUTION
+
+Runtime references will be checked by verify_manifest.js.

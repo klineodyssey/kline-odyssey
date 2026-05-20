@@ -1,0 +1,17 @@
+# DELETE_LIST｜死亡細胞刪除表
+
+請從 GitHub 正式層刪除以下殘留：
+
+modules/organs/
+modules/*patch*
+modules/*hotfix*
+modules/*temp*
+modules/*fix2*
+modules/*ultimate*
+modules/*stable-patch*
+assets/heart-drive.png
+assets/warp-universe.png
+assets/wukong_heart_core.jpg
+assets/wukong_caishen.png
+
+原則：正式資產只允許 bull-front.png / bear-rear.png / heart.png / warp-core.png。
