@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><!--
+============================================================
+FILE_CERTIFICATE:
+  FILE: index.html
+  PRODUCT_ID: KGEN-12345-HEART-UI
+  VERSION: 12345-TEMPLE-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+  BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+  BIRTH: 2026-05-20
+  BASE_FROM: index_12345_Heart_UI_V10_2_FESTIVAL_RUNTIME_LOCK.html
+  UPGRADE_FROM: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK
+  DEATH: ACTIVE
+  GROWTH_STAGE: PRIMEFORGE_MOTHER_RUNTIME_GENESIS
+  AUTONOMOUS_NAVIGATION: ENABLED_OBSERVER_MODE
+  ASSET_GOVERNANCE:
+    OFFICIAL_ASSETS_ONLY: bull-front.png / bear-rear.png / heart.png / warp-core.png
+    FORBIDDEN_DRIFT_NAMES: heart.png / bull-front.png / *patch* / *temp* / *hotfix*
+  CHANGELOG:
+    - V10.42.6: 將 V10.2 單檔 UI 母版升為 modules 結構。
+    - V10.42.6: index.html 僅保留結構與外部載入，CSS / Runtime 拆成正式模組。
+    - V10.42.6: 程式改綁正式定版資產名，不再新增舊圖片名。
+    - V10.42.6: 每個程式檔加入出生 / 死亡 / 版本履歷。
+    - V10.44.0: 以 V10.42.6 穩定母體為基礎，新增 PrimeForge Mother Runtime 自動導行層。
+    - V10.44.0: 不接管 UI 主神經，只以觀測模式管理器官、細胞、資產、Manifest、成長法則。
+============================================================
+-->
+<head>
+
+
+<meta content="website" property="og:type"/>
+<meta content="12345 五指山悟空財神殿 · K線西遊記 · V5.8" property="og:title"/>
+<meta content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心" property="og:description"/>
+<meta content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A" property="og:image"/>
+<meta content="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/" property="og:url"/>
+<meta content="KLINE ODYSSEY" property="og:site_name"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="12345 五指山悟空財神殿 · K線西遊記 · V5.8" name="twitter:title"/>
+<meta content="花果山宇宙金融地圖 · 五指山悟空心臟神殿控制中心" name="twitter:description"/>
+<meta content="data:image/svg+xml;utf8,%0A%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201024%201024%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22bg%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2260%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fff6c8%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2218%25%22%20stop-color%3D%22%23ffd66e%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2242%25%22%20stop-color%3D%22%23ff9d2f%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2268%25%22%20stop-color%3D%22%239d4d00%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230b0700%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22core%22%20cx%3D%2245%25%22%20cy%3D%2242%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2225%25%22%20stop-color%3D%22%23fff0a5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2260%25%22%20stop-color%3D%22%23ffd13d%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ff8a00%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22glow%22%20x%3D%22-40%25%22%20y%3D%22-40%25%22%20width%3D%22180%25%22%20height%3D%22180%25%22%3E%0A%20%20%20%20%20%20%3CfeGaussianBlur%20stdDeviation%3D%2216%22%20result%3D%22b%22/%3E%0A%20%20%20%20%20%20%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20fill%3D%22%23000%22/%3E%0A%20%20%3Cg%20opacity%3D%220.25%22%3E%0A%20%20%20%20%3Crect%20x%3D%22115%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22255%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22395%22%20y%3D%22190%22%20width%3D%2295%22%20height%3D%22620%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22535%22%20y%3D%22290%22%20width%3D%2295%22%20height%3D%22520%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%20%20%3Crect%20x%3D%22675%22%20y%3D%22390%22%20width%3D%2295%22%20height%3D%22420%22%20rx%3D%2248%22%20fill%3D%22%23c28a22%22/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22280%22%20fill%3D%22none%22%20stroke%3D%22%23ffd978%22%20stroke-opacity%3D%220.35%22%20stroke-width%3D%226%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22470%22%20r%3D%22220%22%20fill%3D%22none%22%20stroke%3D%22%2300f2ff%22%20stroke-opacity%3D%220.25%22%20stroke-width%3D%224%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20780%20C%20420%20690%2C%20250%20560%2C%20250%20390%20C%20250%20260%2C%20350%20190%2C%20450%20220%20C%20495%20234%2C%20520%20266%2C%20512%20312%20C%20504%20266%2C%20529%20234%2C%20574%20220%20C%20674%20190%2C%20774%20260%2C%20774%20390%20C%20774%20560%2C%20604%20690%2C%20512%20780Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23bg%29%22%20filter%3D%22url%28%23glow%29%22/%3E%0A%20%20%3Cpath%20d%3D%22M512%20726%20C%20438%20646%2C%20308%20536%2C%20308%20400%20C%20308%20302%2C%20383%20248%2C%20454%20268%20C%20495%20280%2C%20515%20312%2C%20512%20346%20C%20509%20312%2C%20529%20280%2C%20570%20268%20C%20641%20248%2C%20716%20302%2C%20716%20400%20C%20716%20536%2C%20586%20646%2C%20512%20726Z%22%0A%20%20%20%20%20%20%20%20fill%3D%22url%28%23core%29%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2272%22%20fill%3D%22%23fffce8%22%20opacity%3D%220.95%22/%3E%0A%20%20%3Ccircle%20cx%3D%22512%22%20cy%3D%22430%22%20r%3D%2236%22%20fill%3D%22%2300f2ff%22%20opacity%3D%220.45%22/%3E%0A%20%20%3Ctext%20x%3D%22512%22%20y%3D%22915%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffd978%22%20font-size%3D%2262%22%20font-family%3D%22Arial%20Black%2C%20Arial%22%20font-weight%3D%22900%22%3EWUKONG%20HEART%3C/text%3E%0A%3C/svg%3E%0A" name="twitter:image"/>
+<meta charset="utf-8"/>
+<meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
+<meta content="no-cache" http-equiv="Pragma"/>
+<meta content="0" http-equiv="Expires"/>
+<title>KGEN-12345-HEART-UI-V10.46.2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
+
+<script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
+
+
+
+<link href="modules/kgen-12345-core.css" rel="stylesheet"/>
+<link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
+<link href="modules/kgen-12345-morph-dna-organ-transplant.css?v=V10.46.2" rel="stylesheet"/>
+</head>
+<body>
+<div id="brand-badge">K線西遊記・花果山台灣</div>
+<div aria-label="資源條" class="resource-bars">
+<div class="rb bnb">
+<div class="row"><span>BNB｜暗物質</span><small id="rb-bnb-txt">--</small></div>
+<div class="bar"><div class="fill" id="rb-bnb-fill"></div></div>
+</div>
+<div class="rb kgen">
+<div class="row"><span>KGEN｜質量</span><small id="rb-kgen-txt">--</small></div>
+<div class="bar"><div class="fill" id="rb-kgen-fill"></div></div>
+</div>
+<div class="rb-note">E = mc²</div>
+</div>
+<div aria-live="polite" id="toast" role="status"></div>
+<div aria-label="12345 神殿音樂系統" id="temple-audio-console">
+<div class="ta-head"><span>神殿音樂｜V7.19</span><button onclick="templeAudio.toggleMini()" type="button">收合</button></div>
+<div class="ta-row">
+<div class="ta-now" id="ta-now">等待點擊啟動音樂</div>
+<button onclick="templeAudio.playBgm()" type="button">播放</button>
+<button onclick="templeAudio.stopBgm()" type="button">停止</button>
+</div>
+<div class="ta-volume" style="margin-top:8px;display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;">
+<span>音量</span><input id="ta-volume" max="100" min="0" oninput="templeAudio.setVolume(this.value)" type="range" value="56"/><span id="ta-vol-txt">56%</span>
+</div>
+</div>
+<div class="hud-top">
+<div class="brand-section">
+<div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT</div>
+<div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
+</div>
+<div class="monitor-data">
+<div class="data-box"><div>靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
+<div class="data-box"><div>火星齊天豪宅分紅席位（500）</div><div class="grid-500" id="g2"></div></div>
+</div>
+</div>
+<div class="warp-engine">
+<div class="warp-rail" id="warp-rail-body">
+<div id="energy-fill"></div>
+<div id="warp-thumb"></div>
+<input class="warp-range" id="warp-input-val" max="100" min="0" type="range" value="33"/>
+</div>
+<div class="warp-val-text" id="warp-txt">WARP 100x</div>
+<div class="sys-st" id="rec-ind" style="margin-top:8px; color:var(--red); display:none;">REC 00:00</div>
+</div>
+<div class="ga-matrix">
+<div style="color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid #444;">GA EVOLUTION</div>
+<div class="ga-stat">FITNESS: <span id="f-val">0.992</span><div class="ga-bar"><div class="ga-progress" id="f-bar"></div></div></div>
+<div class="ga-stat">MUTATION: <span id="m-val">0.021</span><div class="ga-bar"><div class="ga-progress" id="m-bar"></div></div></div>
+<div class="ga-stat">GEN: <span id="g-val">8422</span></div>
+<div id="ga-rank" style="color:var(--energy); font-size:12px; margin-top:10px;">RANK: GA-600</div>
+</div>
+<div aria-label="宇宙K線引擎" id="kline-engine-panel">
+<div class="ke-head">
+<span>悟空心臟引擎｜12345</span>
+<div class="ke-head-right">
+<select id="ke-symbol" style="background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:8px;padding:2px 6px;font-family:Orbitron,sans-serif;font-size:11px;">
+<option value="BNBUSDT">BNBUSDT</option>
+<option value="BTCUSDT">BTCUSDT</option>
+<option value="ETHUSDT">ETHUSDT</option>
+<option value="KGENLP">KGENLP</option>
+<option value="KGEN16888">KGEN16888</option>
+</select>
+<div class="ke-mode-line" id="ke-mode">真市場</div>
+</div>
+</div>
+<div class="ke-grid">
+<div class="ke-cell"><div class="ke-label">方向</div><div class="ke-value" id="ke-side">多</div></div>
+<div class="ke-cell"><div class="ke-label">角度</div><div class="ke-value right" id="ke-angle">0</div></div>
+<div class="ke-cell"><div class="ke-label">Open</div><div class="ke-value" id="ke-open">--</div></div>
+<div class="ke-cell"><div class="ke-label">High</div><div class="ke-value" id="ke-high">--</div></div>
+<div class="ke-cell"><div class="ke-label">Low</div><div class="ke-value" id="ke-low">--</div></div>
+<div class="ke-cell"><div class="ke-label">Close</div><div class="ke-value" id="ke-close">--</div></div>
+<div class="ke-cell"><div class="ke-label">Range</div><div class="ke-value" id="ke-range">--</div></div>
+<div class="ke-cell"><div class="ke-label">Wick</div><div class="ke-value" id="ke-wick">--</div></div>
+</div>
+<div class="ke-live-row">
+<span class="ke-live-symbol" id="ke-live-symbol">BNBUSDT / 1m</span>
+<span class="ke-live-price" id="ke-live-price">--</span>
+</div>
+</div>
+<div aria-label="宇宙K線圖" id="kline-chart-panel">
+<div class="kc-head">
+<span>悟空心臟圖譜</span>
+<span id="kc-predict">預測：--</span>
+</div>
+<canvas height="92" id="kline-canvas" width="280"></canvas>
+<div class="kc-foot">
+<span id="kc-dir">方向盤 → --方K</span>
+<span id="kc-hit">命中率：--</span>
+</div>
+<div id="moon-match">
+<div id="moon-match-title">五指山名額紀錄</div>
+<div>A：<span class="addr" id="moon-a">--</span></div>
+<div>B：<span class="addr" id="moon-b">--</span></div>
+</div>
+</div>
+<div id="core-anchor">
+<div id="core-window">
+<div id="wish-label">悟空心臟，財氣覺醒</div>
+<img crossorigin="anonymous" id="fairy-img" src="./assets/heart.png"/>
+<video autoplay="" id="cam-view" muted="" playsinline=""></video>
+<div id="mini-thumb"></div>
+</div>
+</div>
+<canvas id="galaxy-bg"></canvas>
+<canvas id="snap-canvas" style="display:none;"></canvas>
+<canvas id="export-canvas" style="display:none;"></canvas>
+<div class="steer-zone">
+<div class="angle-readout" id="ang-val">0°</div>
+<input class="steer-slider" id="steer-input-val" max="180" min="-180" type="range" value="0"/>
+</div>
+<!-- 圓形方向盤：預設不顯示，按鈕開啟 -->
+<div class="wheel-wrap" id="wheel-wrap">
+<div class="wheel" id="wheel">
+<div class="wheel-knob"></div>
+<div class="wheel-hub">DRIVE</div>
+</div>
+</div>
+<!-- WEB3 控制面板（對齊合約） -->
+<div id="web3-panel" style="position:fixed; left:18px; bottom: 315px; z-index:160;  background:rgba(0,0,0,.78); border:1px solid rgba(255,215,120,.55); padding:12px; border-radius:10px; backdrop-filter: blur(6px); width:min(360px,92vw); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+<div style="font-family:'Orbitron'; color:var(--gold); font-size:12px;">TEMPLE HEART V7.19</div>
+<button class="term-btn" onclick="web3.smartConnect()" style="padding:8px 10px; font-size:12px; pointer-events:auto;">🔌 連結錢包</button>
+<button class="term-btn" onclick="web3.openWalletHub()" style="padding:8px 10px; font-size:12px; margin-left:6px; pointer-events:auto;">🧩 多錢包</button>
+<button class="term-btn" id="auto-battle-btn" onclick="app.playTempleIntro()">🗣️ 語音客服介紹</button>
+<div class="kv" style="margin-top:10px">
+<div class="muted">你的 KGEN 餘額</div><div id="userBal">-</div>
+<div class="muted">Allowance → Universe</div><div id="userAllowance">-</div>
+</div>
+</div>
+<div style="margin-top:8px; font-size:12px; color:#ddd;">
+<div>Wallet: <span id="w3-addr" style="color:var(--cyan);">未連線</span></div><div style="margin-top:4px; opacity:.82; font-size:11px;">提示：沒錢包時按「連結錢包」會自動開啟多錢包入口</div>
+<div style="margin-top:8px;">
+<button class="term-btn" id="w3-connect-btn" onclick="web3.smartConnect()" style="padding:10px 12px; width:100%; pointer-events:auto;">🔌 連結錢包（自動）</button>
+</div>
+<div>Chain: <span id="w3-chain" style="color:var(--cyan);">--</span></div>
+<div>BNB: <span id="userBNB" style="color:var(--cyan);">-</span></div>
+<div style="margin-top:6px;">悟空心臟血庫（Temple Heart）＝ 合約餘額（地址待部署）</div>
+<div>TempleHeart V3.2.6: <span id="w3-uni" style="color:var(--cyan);">0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</span></div>
+<div style="margin-top:6px;">Heart 血庫: <span id="w3-bal" style="color:var(--energy);">--</span></div>
+<div style="margin-top:6px;">Heart 狀態：<span id="w3-prog" style="color:var(--gold);">--</span></div>
+<div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div><div class="prog-txt" id="prog-txt">0%</div></div>
+<div class="quickstart-card" id="quickstart-card">
+<div class="qs-title">神殿玩法｜V7.19</div>
+<div>先 <span class="hl">Approve 授權</span>，再依序完成 <span class="hl">三次聖盃</span>、<span class="hl">領發財金</span>、<span class="hl">整點心跳</span>、<span class="hl">轉日呼吸</span>。</div>
+<ol>
+<li>連結錢包</li>
+<li>輸入 KGEN 金額</li>
+<li>先按 Approve</li>
+<li>完成三次聖盃</li>
+<li>領發財金 / 整點心跳 / 轉日呼吸 / 還願 / 點燈 / 許願</li>
+</ol>
+<div style="margin-top:8px;opacity:.88;">本頁不是遊戲，是發放發財金與補血儀式的神殿控制頁。</div>
+</div>
+</div>
+<div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+<input id="amt-in" placeholder="發財金／還願／點燈金額 (KGEN)" style="padding:10px; border-radius:8px; border:1px solid #333; background:#050505; color:#fff; font-weight:900; outline:none; pointer-events:auto;"/>
+<button class="term-btn active-kgen" onclick="templeOps.approve()" style="padding:10px; pointer-events:auto;">✅ Approve</button>
+<button class="term-btn" onclick="templeOps.cup()" style="padding:10px; pointer-events:auto;">🥢 三次聖盃</button>
+<button class="term-btn active-kgen" onclick="templeOps.fortune()" style="padding:10px; pointer-events:auto;">🧧 領發財金</button>
+<button class="term-btn" onclick="templeOps.heartbeat()" style="padding:10px; pointer-events:auto;">🫀 整點心跳</button>
+<button class="term-btn" onclick="templeOps.ignite()" style="padding:10px; pointer-events:auto;">🌬️ 轉日呼吸</button>
+<button class="term-btn" onclick="templeOps.vow()" style="padding:10px; pointer-events:auto;">🙏 還願補血</button>
+<button class="term-btn" onclick="templeOps.lamp()" style="padding:10px; pointer-events:auto;">🪔 點燈續命</button>
+<button class="term-btn active-kgen" onclick="templeOps.wish()" style="grid-column:1 / span 2; padding:10px; pointer-events:auto;">✨ 許願上鏈（hash）</button>
+</div>
+<div style="margin-top:10px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px;">
+<div id="faq-box">
+<div class="faq-item">
+<div class="faq-q">Q：為什麼要用 Custom 找幣？</div>
+<div class="faq-a">
+      因為一般搜尋可能找不到正確代幣。很多幣名稱會重複，或平台資料還沒有同步。<br/>
+      使用 Custom 模式可以直接輸入「代幣合約地址」，系統才能精準找到該代幣。<br/><br/>
+      使用方式：<br/>
+      1. 複製你要查的幣的合約地址<br/>
+      2. 進入找幣頁面<br/>
+      3. 切換到 Custom<br/>
+      4. 貼上合約地址<br/>
+      5. 送出搜尋
+    </div>
+</div>
+<div class="faq-item">
+<div class="faq-q">Q：Custom 要輸入什麼？</div>
+<div class="faq-a">請輸入代幣「合約地址」，不是只輸入幣名。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">Q：怎麼判定輸贏？</div>
+<div class="faq-a">系統依照宇宙 K 線引擎的方向與市場價格變化判定。方向盤角度決定多空方向，K線資料來自所選市場。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">Q：到了 16888 會發生什麼？</div>
+<div class="faq-a">當能量價格到達 16888，系統會進入五指山階段，觸發新的流動性與命運演算。</div>
+</div>
+</div>
+<div style="font-family:'Orbitron'; color:var(--cyan); font-size:11px;">TempleHeart V3.2.6 發放規則</div>
+<div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:6px; font-size:12px; color:#dfe9ff; line-height:1.65;">
+<div>1. 發財金 <b>fortuneClaim</b>：30 天冷卻，每 epoch 最多 500 名。</div>
+<div>2. 整點心跳 <b>heartbeatClaim</b>：每小時一次，預設 1 KGEN。</div>
+<div>3. 轉日呼吸 <b>igniteAndClaim</b>：UTC 00:00–00:10 每日一次，預設 8 KGEN。</div>
+<div>4. 還願 <b>vowTo</b>：transferFrom 補血。</div>
+<div>5. 點燈 <b>lightLamp</b>：transferFrom 延長燈火。</div>
+<div>6. 許願 <b>makeWish</b>：只上鏈 hash。</div>
+<div>7. 合約已部署：Heart 12345 = 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972；Brain 11520 = 0xd0605F4EF10e5C1438F11AF9edc36926769239d6；MarsSeats 108000 = 0x3529dbFbaD465C2269F8096879A1c298d5257298。</div>
+</div>
+</div>
+</div>
+<div class="footer-terminal">
+<button class="term-btn" onclick="app.capture()">📸 拍照存證</button>
+<button class="term-btn btn-rec" id="rec-btn" onclick="app.toggleRec()">🎥 五指山神殿留影錄影</button>
+<button class="term-btn" onclick="app.cam('user')">🤳 前鏡自拍</button>
+<button class="term-btn" onclick="app.cam('environment')">🌌 後鏡巡禮</button>
+<button class="term-btn active-kgen" onclick="templeSingleModal.openTab('fortune')">🧧 發財金</button>
+<button class="term-btn active-kgen" onclick="templeSingleModal.openTab('heartbeat')">🫀 整點心跳</button>
+<button class="term-btn" onclick="templeSingleModal.openTab('ignite')">🌬️ 轉日呼吸</button>
+<button class="term-btn" onclick="app.playTempleIntro()">🗣️ 語音客服</button>
+</div>
+
+
+<!-- === Universe Navigation Buttons V2.04 === -->
+<div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+<a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" rel="noopener" target="_blank">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+<a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" rel="noopener" target="_blank">官方宇宙首頁入口</a>
+<button class="nav-btn nav-swap" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN" id="btn-swap-bnb" type="button">用 BNB 換 KGEN</button>
+<button class="nav-btn nav-swap" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）" id="btn-swap-usdt" type="button">用 USDT 換 KGEN</button>
+<button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
+<button class="nav-btn nav-help" id="guideUnifiedBtn" onclick="app.openUnifiedGuide()">客服 / 悟空財神殿導覽</button>
+<button class="nav-btn nav-help" onclick="roundHistory.open()">名額紀錄</button>
+<button class="nav-btn nav-help" id="boardToggleBtn" onclick="toggleBoardPanel()">排行榜</button>
+<button class="nav-btn nav-music" onclick="app.openMusic()">五指山神殿音響</button>
+</div>
+<div class="hud-box" id="music-panel" style="position:fixed; right:18px; top:410px; z-index:210; width:min(340px, 86vw); display:none;">
+<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+<div style="font-weight:900; letter-spacing:0.5px;">五指山神殿音響（MP3）</div>
+<button class="tiny-btn" onclick="app.openMusic(false)" type="button">關閉</button>
+</div>
+<div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
+    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
+  </div>
+<div style="margin-top:10px;">
+<input accept="audio/*" id="music-file" multiple="" style="width:100%;" type="file">
+<div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
+</input></div>
+<div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+<button class="nav-btn nav-music-ctl" onclick="app.musicPrev()" type="button">上一首</button>
+<button class="nav-btn nav-music-ctl" onclick="app.musicPlay()" type="button">播放</button>
+<button class="nav-btn nav-music-ctl" onclick="app.musicPause()" type="button">暫停</button>
+<button class="nav-btn nav-music-ctl" onclick="app.musicStop()" type="button">停止</button>
+<button class="nav-btn nav-music-ctl" onclick="app.musicNext()" type="button">下一首</button>
+<button class="nav-btn nav-music-ctl" onclick="app.musicLoadBuiltIn &amp;&amp; app.musicLoadBuiltIn(true)" type="button">載入內建歌單</button>
+</div>
+<div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+<label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+<input checked="" id="music-shuffle" type="checkbox">
+      S（隨機）
+    </input></label>
+<label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+<input id="music-loop" type="checkbox">
+      循環
+    </input></label>
+<div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub music/playlist.json 或 playlist.json 自動載入內建歌單</div>
+</div>
+<div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+<label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
+<input checked="" id="music-bgm-auto" type="checkbox">
+      BGM 自動（點一下啟動）
+    </input></label>
+<label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:0.9;">
+      音量
+      <input id="music-vol" max="100" min="0" style="width:160px;" type="range" value="70"/>
+<span id="music-vol-txt" style="opacity:0.75;">70%</span>
+</label>
+</div>
+<div id="music-list" style="margin-top:10px; max-height:140px; overflow:auto; border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:8px;">
+<div id="music-status" style="font-size:12px; opacity:0.75;">尚未載入清單</div>
+<div id="music-now" style="font-size:12px; margin-top:4px; font-weight:800; opacity:0.95;">（未選曲）</div>
+<div id="music-items" style="margin-top:6px;"></div>
+</div>
+<audio id="music-audio" preload="none" style="display:none;"></audio>
+</div>
+<div class="chain-live-panel" id="chain-live-panel" style="display:none;">
+<div class="cl-head">
+<span>WUKONG HEART WUZHISHAN HEART LIVE｜12345</span>
+<div style="display:flex;align-items:center;gap:8px;">
+<span id="cl-status">OFF</span>
+<button onclick="toggleChainLive()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;" type="button">關</button>
+</div>
+</div>
+<div class="cl-grid">
+<div class="cl-item"><div class="cl-k">Pool Balance</div><div class="cl-v" id="cl-pool">--</div></div>
+<div class="cl-item"><div class="cl-k">Current Round</div><div class="cl-v" id="cl-round">--</div></div>
+<div class="cl-item"><div class="cl-k">神殿1（A）</div><div class="cl-v" id="cl-a">--</div></div>
+<div class="cl-item"><div class="cl-k">神殿2（B）</div><div class="cl-v" id="cl-b">--</div></div>
+<div class="cl-item"><div class="cl-k">Escrow A</div><div class="cl-v" id="cl-escrowA">--</div></div>
+<div class="cl-item"><div class="cl-k">Escrow B</div><div class="cl-v" id="cl-escrowB">--</div></div>
+<div class="cl-item"><div class="cl-k">A 表態</div><div class="cl-v" id="cl-aVowed">--</div></div>
+<div class="cl-item"><div class="cl-k">B 表態</div><div class="cl-v" id="cl-bVowed">--</div></div>
+<div class="cl-item"><div class="cl-k">A 已領</div><div class="cl-v" id="cl-aClaimed">--</div></div>
+<div class="cl-item"><div class="cl-k">B 已領</div><div class="cl-v" id="cl-bClaimed">--</div></div>
+</div>
+<div class="cl-row">
+<button class="cl-btn" onclick="chainLive.refresh()" type="button">重新同步</button>
+<button class="cl-btn" onclick="roundHistory &amp;&amp; roundHistory.open()" type="button">名額紀錄</button>
+</div>
+<div class="cl-note">
+    這裡讀的是 <b>12345 TempleHeart 合約</b>：Heart 血庫、KGEN 餘額、Allowance、發財金、心跳、點火與還願狀態。<br/>本頁是悟空財神殿，不是 16888 廣寒宮。
+  </div>
+</div>
+<div class="bet-live-panel" id="bet-live-panel" style="display:block;">
+<div class="bp-head">
+<span>悟空心臟操作窗｜12345</span>
+<div style="display:flex;align-items:center;gap:8px;">
+<span id="bp-mode">READY</span>
+<button onclick="toggleBetPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(0,242,255,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;" type="button">關</button>
+</div>
+</div>
+<div class="bp-note">
+    五指山是 <b>悟空財神殿操作版</b>。主流程是三次聖盃與領發財金。先輸入 KGEN 金額，先 <b>Approve</b>，再依序完成 <b>三次聖盃</b>、<b>領發財金</b>、<b>心跳</b>、<b>點火</b> 或補血儀式。
+  </div>
+<div class="bp-kv">
+<div class="bp-k">錢包</div><div class="bp-v" id="bp-wallet">未連線</div>
+<div class="bp-k">KGEN 餘額</div><div class="bp-v" id="bp-userbal">--</div>
+<div class="bp-k">Allowance</div><div class="bp-v" id="bp-allowance">--</div>
+<div class="bp-k">心臟血庫</div><div class="bp-v" id="bp-pool">--</div>
+</div>
+<input class="bp-input" id="bet-amt-input" inputmode="decimal" placeholder="輸入發財金數量（1 到 888）" type="text"/>
+<div class="bp-grid">
+<button class="bp-btn" onclick="web3.smartConnect()" type="button">連結錢包</button>
+<button class="bp-btn approve" onclick="betPanel.approve()" type="button">APPROVE</button>
+<button class="bp-btn approve" id="bp-approve-unlimited" type="button">無限授權</button>
+<button class="bp-btn buy" onclick="betPanel.buy()" type="button">發財金</button>
+<button class="bp-btn sell" onclick="betPanel.sell()" type="button">整點心跳</button>
+<button class="bp-btn" onclick="templeOps.ignite()" type="button">轉日呼吸</button>
+<button class="bp-btn" onclick="app.openGuide('playbook')" type="button">發放規則</button>
+<button class="bp-btn" onclick="roundHistory &amp;&amp; roundHistory.open()" type="button">名額紀錄</button>
+</div>
+<div class="bp-status" id="bp-status">待命中</div>
+</div>
+<div class="board-panel" id="board-panel" style="display:none;">
+<div class="board-head">
+<span>WUZHISHAN CAISHEN BOARD｜12345</span>
+<button onclick="toggleBoardPanel()" style="border-radius:10px;padding:4px 8px;border:1px solid rgba(255,215,120,.24);background:rgba(0,0,0,.28);color:#fff;font-weight:800;cursor:pointer;" type="button">關</button>
+</div>
+<div class="board-note">
+    依最近 20 輪 round 的 <b>A / B 出現次數</b> 做簡易排行榜。用來看哪些地址最常成為神殿感應主角。
+  </div>
+<div class="board-list" id="board-list">
+<div style="opacity:.78;padding:8px 0;">尚未載入。</div>
+</div>
+<div class="board-actions">
+<button class="board-btn" onclick="leaderboard.refresh()" type="button">重新計算</button>
+<button class="board-btn" onclick="roundHistory &amp;&amp; roundHistory.open()" type="button">名額紀錄</button>
+</div>
+</div>
+<!-- Guide / Concierge Modal -->
+<div aria-hidden="true" class="guide-modal" id="guide-modal">
+<div class="guide-card">
+<div class="guide-header">
+<div class="guide-title">客服 / 悟空財神殿導覽</div>
+<button aria-label="close" class="guide-close" id="btn-guide-close">✕</button>
+</div>
+<div class="guide-tabs">
+<button class="guide-tab" data-sec="intro">故事與快速開始</button>
+<button class="guide-tab" data-sec="rules">規則與下凡</button>
+<button class="guide-tab" data-sec="wallet">錢包與找幣</button>
+<button class="guide-tab" data-sec="approve">Approve教學</button>
+<button class="guide-tab" data-sec="playbook">完整玩法</button>
+<button class="guide-tab" data-sec="qa">語音問答</button>
+</div>
+<div class="guide-body" id="guide-body"></div>
+</div>
+</div>
+
+<!-- Wallet Hub Modal -->
+<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999;">
+<div style="width:min(520px,92vw); background:#0b0f14; border:1px solid rgba(255,215,102,.45); border-radius:14px; padding:14px 14px 12px 14px; box-shadow:0 10px 40px rgba(0,0,0,.55);">
+<div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+<div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
+<button class="term-btn" onclick="web3.closeWalletHub()" style="padding:6px 10px; font-size:12px;">✖</button>
+</div>
+<div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
+      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
+    </div>
+<div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+<button class="nav-btn" onclick="web3.deepLink('metamask')" style="width:100%; padding:10px 12px;">MetaMask 開啟</button>
+<button class="nav-btn" onclick="web3.deepLink('trust')" style="width:100%; padding:10px 12px;">Trust Wallet 開啟</button>
+<button class="nav-btn" onclick="web3.deepLink('okx')" style="width:100%; padding:10px 12px;">OKX Wallet 開啟</button>
+<button class="nav-btn" onclick="web3.deepLink('bitget')" style="width:100%; padding:10px 12px;">Bitget Wallet 開啟</button>
+<button class="nav-btn" onclick="web3.deepLink('binance')" style="width:100%; padding:10px 12px;">Binance 開啟</button>
+<button class="nav-btn" onclick="web3.connectWalletConnect()" style="width:100%; padding:10px 12px;">WalletConnect QR</button>
+</div>
+<div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+<input id="walletHubUrl" readonly="" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;">
+<button class="nav-btn" onclick="web3.copyDappUrl()" style="padding:10px 12px;">複製</button>
+</input></div>
+<div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
+      通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
+    </div>
+</div>
+</div>
+<!-- ===== COORD PANEL (V2.20.4) ===== -->
+<div aria-label="駕駛艙座標面板" id="coord-panel">
+<div class="cp-title">
+<span>神殿規則｜Heart / Brain</span>
+<div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;min-width:120px;">
+<span class="muted" id="cp-side">循環：Heart ↔ Brain</span>
+<span class="muted" id="cp-deg" style="display:flex;justify-content:space-between;width:100%;gap:12px;"><span>狀態：</span><span id="cp-deg-num">待部署</span></span>
+</div>
+</div>
+<div class="cp-grid">
+<div class="cp-row">
+<div class="cp-k">Heart 合約地址（待部署）</div>
+<div class="cp-v">
+<input id="cp-gaolao-addr" placeholder="待部署" readonly="" style="width:100%;">
+<div style="display:flex; gap:8px; margin-top:6px;">
+<button onclick="web3.setGaolaoAddr()" style="flex:1;" type="button">設定</button>
+<button onclick="web3.copyGaolaoAddr()" style="flex:1;" type="button">複製</button>
+</div>
+</input></div>
+</div>
+<div class="cp-row">
+<div class="cp-k">Heart KGEN 餘額</div>
+<div class="cp-v" id="cp-gaolao-kgen">--</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">Heart 狀態</div>
+<div class="cp-v" id="cp-gaolao-status">--</div>
+<div class="cp-row">
+<div class="cp-k">11520 Brain 地址（待部署）</div>
+<div class="cp-v" id="cp-gaolao-bnb">--</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">宇宙節點路線</div>
+<div class="cp-v">
+<div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+<span id="cp-treasury-addr" style="font-family:Orbitron; font-size:11px;">0xB73D6716005B37BEC742D64482fA26033eE1A4E1</span>
+<button onclick="web3.copyTreasuryAddr()" type="button">複製</button>
+</div>
+</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">宇宙路線</div>
+<div class="cp-v" id="cp-treasury-kgen">--</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">KGEN Token Contract</div>
+<div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+<span style="font-family:Orbitron; font-size:11px;">0xBA3d...32Be</span>
+<button onclick="app.openTokenScan()" type="button">查驗</button>
+</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">11520 花果山交易所</div>
+<div class="cp-v"><button onclick="app.openPancake()" style="width:100%;" type="button">開啟 KGEN / WBNB</button></div>
+</div>
+<div class="cp-row">
+<div class="cp-k">8888 高老莊</div>
+<div class="cp-v" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+<span style="font-family:Orbitron; font-size:11px;">0xf366...b6c2</span>
+<button onclick="app.openPairScan()" type="button">查驗</button>
+</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">7744 流沙河</div>
+<div class="cp-v">
+<div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+<span style="font-family:Orbitron; font-size:11px;">鎖至 2027/01/01（UTC）</span>
+<button onclick="app.openLpLock()" type="button">開啟</button>
+</div>
+<div class="muted" style="margin-top:6px; font-size:11px;">請只認合約地址，不認名稱</div>
+</div>
+</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">CT（鏈上池 KGEN 餘額 / 報價基準）</div>
+<div class="cp-v"><input id="ct-in" inputmode="decimal" readonly=""/></div>
+</div>
+<div class="cp-row">
+<div class="cp-k">CT+1（依下單金額推估）</div>
+<div class="cp-v" id="cp-ct1">--</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">最近座標</div>
+<div class="cp-v" id="cp-nearest">--</div>
+</div>
+<div class="cp-row">
+<div class="cp-k">距離（以 16888=384400km 換算）</div>
+<div class="cp-v" id="cp-km">--</div>
+</div>
+</div>
+<div id="oracle-plus-dashboard" style="margin-top:10px;padding:8px;border:1px solid rgba(127,243,255,.18);border-radius:8px;font-size:12px;background:rgba(3,8,18,.35)">
+<b>DeFi Oracle Plus</b><br/>
+  CT 真鏈上價：<input id="ct-in" readonly="" style="width:110px;background:#081018;color:#7ff3ff;border:1px solid rgba(255,215,120,.28);border-radius:6px;padding:2px 6px"/><br/>
+  宇宙基準價：<span id="base-16888">16888.00</span><br/>
+  LP 流動性：<span id="lp-liq">--</span><br/>
+  KGEN 市值：<span id="kgen-mcap">--</span><br/>
+  池內 KGEN：<span id="pool-kgen">--</span><br/>
+  池內 WBNB：<span id="pool-wbnb">--</span><br/>
+  最近交換：<span id="last-swap">--</span><br/>
+  最近區塊：<span id="last-block">--</span>
+</div>
+<div class="cp-actions">
+<button onclick="app.openCoordModal()" type="button">地圖（可點全點位）</button>
+<button onclick="app.syncFromWheel()" type="button">方向盤同步(多/空)</button>
+<button onclick="app.openTokenScan()" type="button">Token</button>
+<button onclick="app.openPairScan()" type="button">LP Pair</button>
+<button onclick="app.openLpLock()" type="button">LP 鎖</button>
+</div>
+</div>
+<div aria-label="宇宙座標表" id="coord-modal" role="dialog">
+<div class="cm-box">
+<div class="cm-head">
+<b>宇宙座標表</b>
+<input id="cm-q" placeholder="搜尋：名稱 / 點位 (例如 月球 / 21444 / 花果山)">
+<button onclick="app.closeCoordModal()" type="button">關閉</button>
+</input></div>
+<div class="cm-list" id="cm-list"></div>
+</div>
+</div>
+
+
+
+
+
+<!-- removed legacy kline block -->
+
+
+
+
+
+
+
+
+
+
+
+<div aria-hidden="true" id="order-fx">
+<div class="fx-card">
+<div class="fx-title" id="order-fx-title">WARP LOCKED</div>
+<div class="fx-sub" id="order-fx-sub">Position Opened</div>
+</div>
+</div>
+<div aria-hidden="true" class="history-modal" id="round-history-modal">
+<div class="history-card">
+<div class="history-head">
+<div class="history-title">五指山神殿歷史追蹤｜Round 通用查詢</div>
+<button class="mini-btn" onclick="roundHistory.close()" type="button">關閉</button>
+</div>
+<div class="history-body">
+<div class="history-note">
+        到 <b>16888</b> 觸發時，五指山神殿兩個地址就是每輪的 <b>A / B</b>。<br/>
+        在這份合約裡：<b>神殿1 = rounds(id).a</b>，<b>神殿2 = rounds(id).b</b>。<br/>
+        這個面板支援：查最新、查指定輪次、上一輪/下一輪、顯示最近歷史，適合日後直接追蹤。
+      </div>
+<div class="history-controls">
+<input id="rh-round-input" min="1" placeholder="輸入輪次 roundId，例如 1 / 7 / 12" step="1" type="number"/>
+<button onclick="roundHistory.loadInput()" type="button">查詢輪次</button>
+<button onclick="roundHistory.loadLatest()" type="button">最新輪次</button>
+<button onclick="roundHistory.prev()" type="button">上一輪</button>
+<button onclick="roundHistory.next()" type="button">下一輪</button>
+</div>
+<div class="history-grid">
+<div class="history-panel">
+<h3>目前輪次詳情</h3>
+<div class="history-empty" id="rh-detail">尚未載入，按「最新輪次」或輸入 roundId 查詢。</div>
+</div>
+<div class="history-panel">
+<h3>最近歷史（最新 10 輪）</h3>
+<div class="history-list" id="rh-recent">
+<div class="history-empty">尚未載入。</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<!-- =========================
+KLINE ODYSSEY PATCH
+V3.7.4 OG FULL
+========================= -->
+
+
+
+
+
+
+
+<div id="temple-modal" style="position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:10080; display:none; padding:16px;">
+<div style="max-width:920px; margin:0 auto; background:rgba(12,12,18,.95); border:1px solid rgba(255,215,120,.28); border-radius:18px; overflow:hidden; box-shadow:0 22px 70px rgba(0,0,0,.65);">
+<div style="padding:14px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,215,120,.12);">
+<div style="color:#ffd978; font-weight:900;">五指山神殿操作中心</div>
+<button class="nav-btn" onclick="templeOps.closeTempleModal()" type="button">關閉</button>
+</div>
+<div style="padding:16px; display:grid; grid-template-columns:1.1fr .9fr; gap:12px;">
+<div style="border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.04); padding:12px;">
+<div style="color:#ffd978; font-weight:900; margin-bottom:8px;">主流程</div>
+<div style="font-size:13px; line-height:1.7; color:#e6eef8;">
+          1. 連接錢包<br/>
+          2. Approve 授權<br/>
+          3. 三次聖盃<br/>
+          4. 領發財金<br/>
+          5. 整點心跳 / 轉日呼吸<br/>
+          6. 還願 / 點燈 / 許願
+        </div>
+<div style="display:grid; gap:10px; margin-top:12px;">
+<button class="nav-btn" onclick="templeOps.cup()" type="button">🥢 三次聖盃</button>
+<button class="nav-btn" onclick="templeOps.fortune()" type="button">🧧 領發財金</button>
+<button class="nav-btn" onclick="templeOps.heartbeat()" type="button">🫀 整點心跳</button>
+<button class="nav-btn" onclick="templeOps.ignite()" type="button">🌬️ 轉日呼吸</button>
+</div>
+</div>
+<div style="border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.04); padding:12px;">
+<div style="color:#ffd978; font-weight:900; margin-bottom:8px;">TempleHeart V3.2.6 合約規則</div>
+<div style="font-size:13px; line-height:1.7; color:#e6eef8;">
+          Heart 只對接 11520 花果山台灣交易所 / 悟空大腦作為循環血庫。<br/>
+          fortuneClaim：30 天冷卻 / 每 epoch 500 名。<br/>
+          heartbeatClaim：整點 / 每小時冷卻。<br/>
+          igniteAndClaim：UTC 00:00–00:10 每日一次。<br/>
+          vowTo：transferFrom 還願補血。<br/>
+          lightLamp：transferFrom 點燈續命。<br/>
+          makeWish：只上鏈 hash。
+        </div>
+<div style="margin-top:12px; color:#7ff3ff; font-size:12px;">Heart 合約已部署：0xB016D4d8f1aED1339101b30722cad6dbA9B8C972。請先小額測試，再正式操作。</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+<div id="temple-single-modal">
+<div class="tsm-card">
+<div class="tsm-head">
+<div class="tsm-title">12345 五指山悟空財神殿｜單一操作視窗</div>
+<button class="nav-btn" onclick="templeSingleModal.close()" type="button">關閉</button>
+</div>
+<div class="tsm-body">
+<div class="tsm-box" style="grid-column:1 / -1;">
+<div class="tsm-grid" style="grid-template-columns:repeat(4,1fr);">
+<button class="nav-btn" id="tsm-tab-fortune" onclick="templeSingleModal.openTab('fortune')" type="button">🧧 發財金</button>
+<button class="nav-btn" id="tsm-tab-heartbeat" onclick="templeSingleModal.openTab('heartbeat')" type="button">🫀 整點心跳</button>
+<button class="nav-btn" id="tsm-tab-ignite" onclick="templeSingleModal.openTab('ignite')" type="button">🌬️ 轉日呼吸</button>
+<button class="nav-btn" id="tsm-tab-rules" onclick="templeSingleModal.openTab('rules')" type="button">📜 發放規則</button>
+</div>
+</div>
+<div class="tsm-box">
+<h3 id="tsm-main-title">發財金流程</h3>
+<div class="tsm-flow" id="tsm-main-content">
+          連接錢包 → Approve → 連續三次聖盃 → fortuneClaim 發財金。
+        </div>
+<div class="tsm-grid" id="tsm-main-actions">
+<button class="nav-btn" onclick="templeOps.approve()" type="button">✅ Approve 授權</button>
+<button class="nav-btn" onclick="templeOps.cup()" type="button">🥢 三次聖盃</button>
+<button class="nav-btn" onclick="templeOps.fortune()" type="button">🧧 fortuneClaim 發財金</button>
+<button class="nav-btn" onclick="templeOps.heartbeat()" type="button">🫀 heartbeatClaim 整點心跳</button>
+<button class="nav-btn" onclick="templeOps.ignite()" type="button">🌬️ igniteAndClaim 轉日呼吸</button>
+<button class="nav-btn" onclick="templeOps.vow()" type="button">🙏 vowTo 還願補血</button>
+<button class="nav-btn" onclick="templeOps.lamp()" type="button">🪔 lightLamp 點燈續命</button>
+<button class="nav-btn" onclick="templeOps.wish()" type="button">✨ makeWish 許願 hash</button>
+</div>
+<div class="tsm-status" id="v57-cup-status">聖盃狀態：尚未開始</div>
+</div>
+<div class="tsm-box">
+<h3>悟空心臟規則窗</h3>
+<div class="tsm-flow" id="tsm-side-content">
+          • fortuneClaim：1 到 888<br/>
+          • 冷卻：30 天<br/>
+          • 每個 epoch：最多 500 名<br/>
+          • heartbeatClaim：每小時一次<br/>
+          • igniteAndClaim：UTC 00:00–00:10 每日一次<br/>
+          • Heart ↔ 11520 Brain：循環血庫
+        </div>
+<div class="tsm-status">詳細說明請打開 <b>客服 / 悟空財神殿導覽</b>。</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<div aria-label="前後左右移動控制" id="move-joystick-wrap">
+<div id="move-joystick-base"></div>
+<div id="move-joystick-knob"></div>
+<div id="move-joystick-label">前後左右</div>
+</div>
+
+<!-- ============================================================
+KGEN 12345 Heart Live Patch V7.3.0
+- Deployed addresses wired: KGEN / Heart / Brain / MarsSeats
+- Adds safe MetaMask BSC connection and Heart actions
+- No automatic transactions. Every tx requires explicit button + confirm.
+============================================================ -->
+
+<button id="kgen-heart-toggle" type="button">12345 Heart</button>
+<section aria-label="12345 Heart Live Panel" id="kgen-heart-live-panel">
+<div class="kh-head">
+<div class="kh-title">12345 悟空財神殿 Heart V3.2.6</div>
+<div class="kh-pill" id="kh-chain">BSC 56</div>
+</div>
+<div class="kh-grid">
+<div class="kh-k">Wallet</div><div class="kh-v" id="kh-wallet">未連線</div>
+<div class="kh-k">UTC</div><div class="kh-v" id="kh-utc">--</div>
+<div class="kh-k">KGEN</div><div class="kh-v" id="kh-kgen-bal">--</div>
+<div class="kh-k">Heart 血庫</div><div class="kh-v" id="kh-heart-bal">--</div>
+<div class="kh-k">Ignite</div><div class="kh-v" id="kh-ignite-open">--</div>
+<div class="kh-k">Festival</div><div class="kh-v" id="kh-festival-open">--</div>
+<div class="kh-k">NY Slot</div><div class="kh-v" id="kh-ny-slot">--</div>
+<div class="kh-k">Heart</div><div class="kh-v">0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</div>
+<div class="kh-k">Brain</div><div class="kh-v">0xd0605F4EF10e5C1438F11AF9edc36926769239d6</div>
+<div class="kh-k">MarsSeats</div><div class="kh-v">0x3529dbFbaD465C2269F8096879A1c298d5257298</div>
+</div>
+<div class="kh-actions">
+<button class="kh-gold" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
+<button class="kh-cyan" id="kh-refresh" type="button">刷新餘額</button>
+<button class="kh-gold" id="kh-approve-current" type="button">Approve 目前金額</button>
+<button class="kh-cyan" id="kh-approve-unlimited" type="button">無限授權</button>
+</div>
+<div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 目前金額＝只授權輸入數量；無限授權＝授權官方 Heart 合約長期使用 allowance，所有鏈上交易都會先跳錢包確認視窗。</div>
+<div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
+<input id="kh-amount" placeholder="金額 / 天數，例如 8 或 88" value="8"/>
+<select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
+</div>
+<input id="kh-wish" placeholder="許願文字或 0x bytes32 hash" style="margin-top:8px;"/>
+<div class="kh-actions">
+<button id="kh-fortune" type="button">fortuneClaim</button>
+<button id="kh-heartbeat" type="button">heartbeatClaim</button>
+<button id="kh-ignite" type="button">igniteAndClaim</button>
+<button id="kh-festival1" type="button">5/20 悟空生日</button>
+<button id="kh-festival2" type="button">11/11 孤勇日</button>
+<button id="kh-newyear" type="button">12/31 倒數</button>
+<button id="kh-vow" type="button">vowTo 還願</button>
+<button id="kh-lamp" type="button">lightLamp 點燈</button>
+<button class="kh-gold" id="kh-wishbtn" style="grid-column:1 / -1;" type="button">makeWish 許願上鏈</button>
+</div>
+<div class="kh-log" id="kh-log">待命：不會自動送出任何交易。</div>
+</section>
+
+<!-- ============================================================
+KGEN 12345 UI Control Patch V7.4.0
+- Contract display: KGEN_TempleHeart_V3_2_6.sol / 12345 Heart V3.2.6
+- Left Heart panel is truly collapsible and does not block the main image.
+- Lower-left Forward / Back / Left / Right pad controls the central character/core position.
+- Bottom horizontal slider controls the central core rotation/scale visibly.
+- No Solidity / deploy logic touched. Wallet and Heart tx functions are preserved.
+============================================================ -->
+
+<div aria-label="12345 悟空角色移動控制器" id="k12345-move-pad">
+<div class="move-title"><span>悟空移動</span><span>12345</span></div>
+<div class="move-grid">
+<span></span><button data-kmove="0,-24" type="button">前</button><span></span>
+<button data-kmove="-24,0" type="button">左</button><button id="k12345-move-home" type="button">中</button><button data-kmove="24,0" type="button">右</button>
+<span></span><button data-kmove="0,24" type="button">後</button><span></span>
+</div>
+<div class="move-row">
+<button id="k12345-zoom-out" type="button">縮小</button>
+<button id="k12345-zoom-in" type="button">放大</button>
+</div>
+<div class="move-status" id="k12345-move-status">X 0 / Y 0 / Z 100%</div>
+</div>
+<div id="k12345-slider-status">CORE 角度 0°｜縮放 100%</div>
+
+<!-- ============================================================
+KGEN 12345 UI Patch V7.5.0
+修正項目：
+1. 左上 Heart 收合按鈕下移，不擋背景標題字。
+2. 左下前後左右改為「按住連續移動」，保留點一下單步移動。
+3. 中下橫桿只控制核心方向角度，不再讓圖自動一直旋轉。
+4. 下方 發財金 / 整點心跳 / 轉日呼吸 三鍵改為直接觸發 Heart 實際交易按鈕。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 UI Patch V7.6.0
+修正：
+1) Heart 合約地址全面鎖定 12345 Heart V3.2.6，不再使用 16888 Universe 地址。
+2) 左上 Heart 操作面板手機預設收合，展開時下移，不擋上方標題背景字。
+3) 隱藏上一版方形移動鍵，恢復原本左下圓形搖桿操作。
+4) 圓形搖桿改為按住/拖曳連續控制角色位置，放開不歸零角色位置，只歸位搖桿球。
+5) 中下橫桿控制核心方向角，圖會跟著橫桿角度旋轉；0~90 / 0~-90 多，90~180 / -90~-180 空。
+6) 底部 發財金 / heartbeatClaim / igniteAndClaim 重新綁定到 Heart 實際交易按鈕。
+============================================================ -->
+
+
+<!-- KGEN 12345 UI V7.8.0 FINAL OVERRIDE: layout + wallet + voice + no 16888 pool -->
+
+
+
+<!-- 12345 TEMPLE V7.19 FINAL HOTFIX: wallet, angle, audio panel, no 16888 pool UI -->
+
+
+<!-- KGEN 12345 V7.19 final patch: Heart UI / wallet panel / angle sync -->
+
+
+<!-- ===== KGEN 12345 V7.19 HUMAN UX PATCH: guide / left wallet panel / cups / events ===== -->
+
+
+<!-- === V7.19 Human Panel + Holy Cup Override === -->
+
+
+<!-- ===== KGEN 12345 V7.16 FINAL UX PATCH: fixed human buttons / no text blocking ===== -->
+
+
+<!-- ===== KGEN 12345 FINAL HOTFIX V7.9: wallet/game panel restore + angle + music + self-check ===== -->
+
+
+<!-- ===== KGEN 12345 FINAL HOTFIX V7.19: real wallet connect injection/provider fix ===== -->
+
+
+<!-- ===== KGEN 12345 V7.17｜Bottom 8 Button Standardized Game UI ===== -->
+
+
+<!-- ===== KGEN 12345 V7.19｜Standard footer buttons + clean floating windows hotfix ===== -->
+
+
+<!-- ===== KGEN 12345 V7.19 FINAL｜footer8 + audio top panel + ops window placement ===== -->
+
+
+<!-- ===== KGEN 12345 V7.20｜panel alignment + audio button hotfix + joystick above slider ===== -->
+
+
+<!-- ===== KGEN 12345 V7.21｜stable repair patch from V7.20 ===== -->
+
+
+<!-- ===== KGEN 12345 V7.21.1｜wallet disconnected reset hotfix ===== -->
+
+<!-- ===== KGEN 12345 V7.21.2｜wallet display refresh + activity countdowns ===== -->
+
+
+<!-- ===== KGEN 12345 V7.21.3｜human friendly countdowns + heartbeat hourly + Q/A display ===== -->
+
+
+<!-- ===== KGEN 12345 V8.6.0｜Wallet Robust Fix + 許願還願點燈豪華增建工程 ===== -->
+
+<div aria-live="polite" id="kgen-v860-wallet-status" role="status"></div>
+<button id="kgen-v860-ritual-open" type="button">🏯 許願・還願・點燈</button>
+<div aria-label="悟空財神殿許願還願點燈增建工程" id="kgen-v860-ritual-modal">
+<div class="v860-palace">
+<div class="v860-head">
+<div class="v860-title">五指山12345・悟空財神殿增建工程 V8.6.0</div>
+<button class="v860-close" id="v860-close" type="button">收合</button>
+</div>
+<div class="v860-body">
+<div class="v860-tabs">
+<button class="v860-tab v860-active" data-tab="wish" type="button">✨ 許願上鏈</button>
+<button class="v860-tab" data-tab="vow" type="button">🙏 還願補血</button>
+<button class="v860-tab" data-tab="lamp" type="button">🪔 十三聖靈燈點燈</button>
+</div>
+<div id="v860-content"></div>
+<div class="v860-log" id="v860-log">待命：本增建工程只做前端導覽與操作整合；真正鏈上交易仍會跳錢包確認，不會自動扣款。</div>
+</div>
+</div>
+</div>
+
+<!-- === V8.6.2 FINAL HOTFIX: Audio + Real Heart Transactions === -->
+
+
+<!-- ===== KGEN 12345 V8.6.3｜Wallet Sync + Real Heart TX Final Patch ===== -->
+
+
+<!-- ===== KGEN 12345 V8.7.2｜Wallet Balance + Real TX Sync Fix ===== -->
+
+<!-- ===== KGEN 12345 V8.7.3｜Heart Balance + 13 Spirit Lamp Record Fix ===== -->
+
+
+<!-- ===== KGEN 12345 V8.7.4｜Approve + 13 Spirit Unified Sync Fix ===== -->
+
+
+<!-- ===== KGEN 12345 V8.7.5｜Approve Receipt Wallet Switch Fix ===== -->
+
+
+<!-- ===== KGEN 12345 V8.7.6｜Service Countdown Approve Fix ===== -->
+
+
+<!-- ===== KGEN 12345 V8.7.9｜Clean Service Fix based on V8.7.6 ===== -->
+
+
+<!-- ===== KGEN 12345 V8.8.0｜Cup Gate + New Year Countdown Fix ===== -->
+
+
+<!-- ===== KGEN 12345 V8.9.0｜Wallet Bridge Real Connect Fix ===== -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260512-V8.9.3-MESSAGE-BELOW-AUDIO-FIX
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.2-FULL-BUTTON-SERVICE-VOICE-FIX
+
+用途：
+1. 將「訊息紀錄」移到右側導覽列的「五指山神殿音響」下方。
+2. 訊息按鍵改用 nav-btn 樣式，大小、長度與右側前面按鈕一致。
+3. 保留訊息中心、客服語音、底部按鍵與錢包橋接功能。
+============================================================ -->
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.4 HUD/BSC chain fix
+
+修正：
+1. LINE/Facebook → MetaMask 不再導向中文路徑，改導向根目錄 ASCII 入口 /12345.html。
+2. /12345.html 內含完整神殿程式，不是轉址頁，避免 MetaMask 對中文路徑 404。
+3. 左上重複訊息/Toast 全部收斂，不再互相遮擋。
+4. 右側訊息紀錄按鈕改成與右側 nav 按鈕同尺寸；Toast 不再蓋住按鈕。
+5. 保留 BSC 鎖鏈、客服語音、聖盃、發財金與 Heart 交易核心。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
+修正：
+1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
+2. 左上重複訊息列退場，只保留 12345 Heart 展開/收合與 Heart 面板。
+3. Heart 展開鈕與左上 Heart 面板寬度對齊，避免擋品牌與背景字。
+4. 12345.html 根路徑主圖與 assets 使用絕對資源，避免中間悟空心臟圖消失。
+5. LINE / Facebook → MetaMask 改用 ASCII 12345.html 真入口，禁止導到中文路徑、assets、github.com blob。
+6. 保留目前 GitHub / 錢包內建瀏覽器可連線與顯示餘額核心，不改 ethers.js / connectWallet / signer。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
+目的：
+1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
+2. 左上 Heart 按鈕與 Heart 操作面板同寬、下移、不遮住品牌層。
+3. 前鏡 / 後鏡補成可點的多空鏡頭入口，優先使用既有 app.cam，失敗時用本補丁 camera fallback。
+4. 不動已確認正常的 GitHub / LINE / Facebook 錢包連線核心。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
+
+Fixes:
+1. 左上 Heart 控制台可上下捲動，底部不被吃掉。
+2. 左上控制台寬度微增但不碰右側區塊；暗物質 / 質量橫 bar 同步寬度。
+3. 三次聖盃按鈕補正式前端流程與語音，不再沒反應。
+4. 前鏡 / 後鏡補多空鏡頭面板與語音。
+5. 跨年倒數改固定顯示，不閃爍；只更新文字。
+============================================================ -->
+
+
+<!-- ===== KGEN 12345 V9.0.1｜12345 CAMERA TOGGLE + LAYOUT FIX + LEFT HUD / NY STABLE PATCH ===== -->
+
+
+<!-- ============================================================
+KGEN 12345 Heart UI Patch V9.0.2
+MESSAGE / RECORDER / COUNTDOWN FIX
+- countdown uses one-line fixed-height display, no row jitter
+- restore transaction/status/service messages into left mini status + right message center
+- bottom buttons: replace inactive cup/fortune UI shortcuts with Backup and Screen Recorder
+- no wallet/core contract changes
+============================================================ -->
+
+<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
+<div aria-label="螢幕全程錄影" id="kgen-v902-rec-panel">
+<div class="rec-title">🎥 螢幕全程錄影</div>
+<div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
+<div class="rec-actions">
+<button class="gold" id="kgen-v902-rec-start" type="button">開始錄影</button>
+<button id="kgen-v902-rec-stop" type="button">停止並下載</button>
+<button id="kgen-v902-rec-help" type="button">錄影說明</button>
+<button id="kgen-v902-rec-close" type="button">關閉</button>
+</div>
+</div>
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
+修正：
+1. GA Evolution 移到右下曲速引擎縱桿上方空白區。
+2. 左上控制台與暗物質／質量整組下移，不擋品牌字與訊息列。
+3. 三聖盃重做為「正正、正反、反正、反反」；正反／反正才是聖盃。
+4. 跨年倒數刪掉舊閃爍刷新，改單一固定寬度顯示，避免畫面跳動。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.7 UI REC HEART CUP GA FIX
+重作原則：以 V9.0.4 穩定母版為底，不沿用 V9.0.5 的錯誤覆蓋。
+只做：底部按鍵重接、三聖盃重接、錄影、心臟窗、倒數固定、GA/左上布局。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.8｜REAL UI TOGGLE LAYOUT FIX
+- GA Evolution 上移到曲速桿上方但不壓規則窗
+- 左上訊息/品牌/資源條/Heart 控制台整組再下移，控制台置頂不被遮蓋
+- 下方「悟空心臟」改成同一個收合/展開控制台功能
+- 下方「螢幕錄影」強制接螢幕錄影，不再觸發聖盃語音
+- 三聖盃事件重新綁定：正反/反正才算，按鈕必有回應
+- 跨年倒數固定一行、等寬數字、不跳行
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.8｜REAL UI TOGGLE / REC / GA LAYOUT FIX
+BASE_FROM: V9.0.7_UI_REC_HEART_CUP_GA_FIX
+CHANGELOG:
+- GA Evolution moved upward above warp lever area.
+- Bottom 悟空心臟 button now toggles the live control panel open/close.
+- Bottom 螢幕錄影 no longer triggers cup voice; it uses browser screen recording when supported.
+- Left message / resource bars / heart control panel aligned and moved down together.
+- Heart control panel gets highest z-index when opened.
+============================================================ -->
+
+
+<!-- KGEN 12345 UI V9.0.9 REAL LAYOUT TOGGLE GA FIX
+CHANGELOG:
+- GA Evolution moved upward from warp lever area.
+- Left status / Heart button / BNB / KGEN / Heart panel use one wider aligned column and move down as a group.
+- Heart panel toggle is forced at CSS + JS level; bottom 悟空心臟 button and top Heart button both expand/collapse same panel.
+- Expanded Heart panel is always top layer and not hidden behind other panels.
+- Screen recording button uses real MediaRecorder when supported and no longer triggers cup voice.
+-->
+
+
+<!-- removed stray visible patch anchor -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.0 + V8.9.1 message center
+用途：
+1. 補齊下方按鍵：錢包聖盃 / 發財金 / 規則活動 / 客服導覽都有內容面板。
+2. 客服所有按鍵都有語音說明。
+3. 交易按鈕先顯示規則與確認，再呼叫原本 TempleHeart 交易函式。
+4. 不改 ethers.js、不改 wallet bridge、不改 provider/signer 核心。
+============================================================ -->
+
+<div aria-hidden="true" id="kgenV892ServiceModal">
+<div aria-modal="true" id="kgenV892ServiceCard" role="dialog">
+<div class="kgen-v892-head">
+<div class="kgen-v892-title" id="kgenV892ServiceTitle">五指山客服</div>
+<button class="kgen-v892-close" id="kgenV892CloseBtn" type="button">關閉</button>
+</div>
+<div class="kgen-v892-body" id="kgenV892ServiceBody"></div>
+</div>
+</div>
+
+
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.4 HUD/BSC chain fix
+
+修正：
+1. LINE/Facebook → MetaMask 不再導向中文路徑，改導向根目錄 ASCII 入口 /12345.html。
+2. /12345.html 內含完整神殿程式，不是轉址頁，避免 MetaMask 對中文路徑 404。
+3. 左上重複訊息/Toast 全部收斂，不再互相遮擋。
+4. 右側訊息紀錄按鈕改成與右側 nav 按鈕同尺寸；Toast 不再蓋住按鈕。
+5. 保留 BSC 鎖鏈、客服語音、聖盃、發財金與 Heart 交易核心。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.5 ASCII Wallet HUD Clean
+修正：
+1. 右上「訊息紀錄」固定移到五指山神殿音響下方，寬度與右側按鈕一致。
+2. 左上重複訊息列退場，只保留 12345 Heart 展開/收合與 Heart 面板。
+3. Heart 展開鈕與左上 Heart 面板寬度對齊，避免擋品牌與背景字。
+4. 12345.html 根路徑主圖與 assets 使用絕對資源，避免中間悟空心臟圖消失。
+5. LINE / Facebook → MetaMask 改用 ASCII 12345.html 真入口，禁止導到中文路徑、assets、github.com blob。
+6. 保留目前 GitHub / 錢包內建瀏覽器可連線與顯示餘額核心，不改 ethers.js / connectWallet / signer。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.6 HUD Wallet Image Sync
+修正：
+1. 右上「訊息紀錄」固定為 universe-nav 內部按鈕，寬度與上方按鈕一致，排在五指山神殿音響正下方。
+2. 左上品牌、12345 Heart 展開鈕、資源條、Heart 面板重新排版，不互相遮擋。
+3. BNB 暗物質 / KGEN 質量橫 bar 強制顯示軌道與填充，不再透明消失。
+4. 錢包入口強化：LINE/Facebook → MetaMask/Trust/OKX/Bitget 指向 ASCII 完整神殿頁 12345.html。
+5. 保留現有 ethers.js、connectWallet、provider、signer、交易核心，不動合約功能。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: V8.9.7-HUD-WALLET-LAYOUT-REALCONNECT-FIX
+目的：
+1. 左上品牌與 12345 Heart 展開/收合合併成同一顆長按鈕。
+2. 左上 Heart 按鈕與 Heart 操作面板同寬、下移、不遮住品牌層。
+3. 前鏡 / 後鏡補成可點的多空鏡頭入口，優先使用既有 app.cam，失敗時用本補丁 camera fallback。
+4. 不動已確認正常的 GitHub / LINE / Facebook 錢包連線核心。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT
+BASE_FROM: KGEN-12345-HEART-UI-V8.9.8-UNIFIED-HEART-CAMERA-FIX
+
+Fixes:
+1. 左上 Heart 控制台可上下捲動，底部不被吃掉。
+2. 左上控制台寬度微增但不碰右側區塊；暗物質 / 質量橫 bar 同步寬度。
+3. 三次聖盃按鈕補正式前端流程與語音，不再沒反應。
+4. 前鏡 / 後鏡補多空鏡頭面板與語音。
+5. 跨年倒數改固定顯示，不閃爍；只更新文字。
+============================================================ -->
+
+
+<!-- ===== KGEN 12345 V9.0.1｜12345 CAMERA TOGGLE + LAYOUT FIX + LEFT HUD / NY STABLE PATCH ===== -->
+
+
+<!-- ===== KGEN 12345 V9.0.1｜CAMERA TOGGLE + LAYOUT CLEAN PATCH ===== -->
+
+
+<!-- ============================================================
+KGEN 12345 Heart UI Patch V9.0.2
+MESSAGE / RECORDER / COUNTDOWN FIX
+- countdown uses one-line fixed-height display, no row jitter
+- restore transaction/status/service messages into left mini status + right message center
+- bottom buttons: replace inactive cup/fortune UI shortcuts with Backup and Screen Recorder
+- no wallet/core contract changes
+============================================================ -->
+
+<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
+<div aria-label="螢幕全程錄影" id="kgen-v902-rec-panel">
+<div class="rec-title">🎥 螢幕全程錄影</div>
+<div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
+<div class="rec-actions">
+<button class="gold" id="kgen-v902-rec-start" type="button">開始錄影</button>
+<button id="kgen-v902-rec-stop" type="button">停止並下載</button>
+<button id="kgen-v902-rec-help" type="button">錄影說明</button>
+<button id="kgen-v902-rec-close" type="button">關閉</button>
+</div>
+</div>
+
+<!-- ============================================================
+V9.0.3 AUDIO / HUD / MESSAGE ALIGN FIX
+- Right music panel controls use one real audio engine; Stop/Pause/Prev/Next/Load all work.
+- Left HUD stack moved down and aligned; top area reserved for status messages.
+- Message center receives audio/service/transaction status again.
+- No wallet/core contract changes.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 五指山悟空財神殿
+VERSION PATCH: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260513-V9.0.4-GA-CUP-COUNTDOWN-REBUILD-FIX
+BASE_FROM: V9.0.3 AUDIO HUD MESSAGE ALIGN
+修正：
+1. GA Evolution 移到右下曲速引擎縱桿上方空白區。
+2. 左上控制台與暗物質／質量整組下移，不擋品牌字與訊息列。
+3. 三聖盃重做為「正正、正反、反正、反反」；正反／反正才是聖盃。
+4. 跨年倒數刪掉舊閃爍刷新，改單一固定寬度顯示，避免畫面跳動。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.7 UI REC HEART CUP GA FIX
+重作原則：以 V9.0.4 穩定母版為底，不沿用 V9.0.5 的錯誤覆蓋。
+只做：底部按鍵重接、三聖盃重接、錄影、心臟窗、倒數固定、GA/左上布局。
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.8｜REAL UI TOGGLE LAYOUT FIX
+- GA Evolution 上移到曲速桿上方但不壓規則窗
+- 左上訊息/品牌/資源條/Heart 控制台整組再下移，控制台置頂不被遮蓋
+- 下方「悟空心臟」改成同一個收合/展開控制台功能
+- 下方「螢幕錄影」強制接螢幕錄影，不再觸發聖盃語音
+- 三聖盃事件重新綁定：正反/反正才算，按鈕必有回應
+- 跨年倒數固定一行、等寬數字、不跳行
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.0.8｜REAL UI TOGGLE / REC / GA LAYOUT FIX
+BASE_FROM: V9.0.7_UI_REC_HEART_CUP_GA_FIX
+CHANGELOG:
+- GA Evolution moved upward above warp lever area.
+- Bottom 悟空心臟 button now toggles the live control panel open/close.
+- Bottom 螢幕錄影 no longer triggers cup voice; it uses browser screen recording when supported.
+- Left message / resource bars / heart control panel aligned and moved down together.
+- Heart control panel gets highest z-index when opened.
+============================================================ -->
+
+
+<!-- KGEN 12345 UI V9.0.9 REAL LAYOUT TOGGLE GA FIX
+CHANGELOG:
+- GA Evolution moved upward from warp lever area.
+- Left status / Heart button / BNB / KGEN / Heart panel use one wider aligned column and move down as a group.
+- Heart panel toggle is forced at CSS + JS level; bottom 悟空心臟 button and top Heart button both expand/collapse same panel.
+- Expanded Heart panel is always top layer and not hidden behind other panels.
+- Screen recording button uses real MediaRecorder when supported and no longer triggers cup voice.
+-->
+
+
+<!-- KGEN 12345 UI V9.1.0 REAL TOGGLE / LAYOUT PATCH
+CHANGELOG:
+- Fix non-collapsing Heart panel caused by older V9.0.8 toggle class and V9.0.9 body selector conflict.
+- Move GA Evolution upward and away from warp lever / rule panel.
+- Move and widen left HUD group: message, Heart toggle, BNB dark matter, KGEN mass, Heart control panel.
+- Remove stray visible patch text such as "前面。" from earlier insertion.
+- Keep existing wallet connection core untouched.
+-->
+
+
+<!-- ============================================================
+ KGEN 12345 UI V9.1.1｜REAL TOGGLE + LEFT HUD ALIGN FIX
+ - Fix actual left message id (#kgen-v902-left-status) alignment.
+ - Force Heart console collapse/open through capture-stage click handler.
+ - Widen left four blocks and move them lower as one group.
+ - Move GA Evolution upward and align right edge with lower rule panel.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH V9.1.3｜STABLE V9.1.1 BASE + HEART TOGGLE FIX
+- Base restored from V9.1.1 because V9.1.2 layout/toggle regressed.
+- Keep V9.1.1 left-side width and top HUD proportion.
+- Force bottom 悟空心臟 button and top control button to use the same toggle.
+- GA Evolution adjusted without touching wallet/web3 core.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 PATCH V9.1.5｜STABLE V9.1.3 BASE + SEPARATE PANEL FIX
+Base: V9.1.3. Do not use V9.1.4/V9.1.2 regressions.
+- Top button controls 五指山悟空財神殿控制台 (#kgen-heart-live-panel).
+- Bottom 悟空心臟 controls the separate 悟空心臟操作窗 (#bet-live-panel).
+- GA Evolution moved upward/right but kept clear of warp lever.
+- Left top HUD spacing adjusted without changing V9.1.3 width.
+- 三聖盃 direct handler rebuilt; only 正反 / 反正 count.
+- 跨年倒數 stable text, no flashing seconds.
+============================================================ -->
+
+
+<!-- KGEN 12345 UI V9.1.6 FINAL SEPARATE PANEL / HEART OPS / GA / COUNTDOWN PATCH
+CHANGELOG:
+- Keep V9.1.5/V9.1.3 left HUD width and layout base.
+- Top 悟空財神殿控制台 (#kgen-heart-live-panel) and bottom 悟空心臟操作窗 (#bet-live-panel) are separate panels.
+- Bottom 悟空心臟 button only toggles #bet-live-panel.
+- Bottom eight buttons float above all panels and are never covered.
+- GA Evolution moved left/up and aligned with lower rules block without covering warp lever.
+- Cross-year countdown rebuilt as a single stable one-line value; all blinking/animation disabled.
+-->
+
+
+<!-- ============================================================
+KGEN 12345 V9.2.0｜Layout Final Polish
+- Preserve V9.1.6 working heart-panel toggle.
+- Add left-bottom hidden function dock: 錢包聖盃 / 發財金 / 規則活動 / 客服導覽.
+- Footer 客服導覽 becomes right-side button group collapse/expand.
+- GA Evolution returns to upper-middle empty area.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.1.9｜GA / hidden dock / countdown polish after V9.1.8
+- Move GA Evolution to upper-middle blank area, away from K-line chart.
+- Move hidden function dock between direction slider and bottom 8 buttons.
+- Footer 客服導覽 controls right-bottom info panel collapse/expand.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.2.0｜Layout Final Polish
+- GA Evolution moved to upper-middle blank zone, no longer covering K chart.
+- Hidden function buttons locked between direction rail and bottom 8 buttons.
+- Right-bottom customer button renamed to「右側神規」and controls right info panel.
+- Right info panel size aligned to Heart panel visual scale.
+- Left Heart console widened to match top status bar.
+- New Year countdown rendered by one stable text source; no blink / no line jump.
+============================================================ -->
+
+
+<!-- ============================================================
+KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
+先改版本識別，再做程式修正。
+- GA Evolution 移到中上空白區，不壓 K 線圖。
+- 隱藏功能列只保留一列，避免左下重複四鍵。
+- 底部八鍵重排：拍照 / 錄影 / 前鏡 / 後鏡 / 悟空心臟 / 雙鏡錄影 / 規則活動 / 右側神規。
+- 右側神規控制右下資訊區塊。
+- 曲速引擎上移，避開方向盤。
+- 跨年倒數改為分鐘級固定顯示，不每秒閃爍。
+============================================================ -->
+
+
+
+
+
+<!-- V10.1 HUD Runtime Voice Fix | VERSION: 12345-TEMPLE-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT | BUILD: 20260520-V10.46.2-MORPH-DNA-ORGAN-TRANSPLANT | BASE: KGEN_12345_V10_0_HUD_LAYER_SYSTEM_FULL_bundle.zip | BASE_SHA256: db42bbbf8581f2c962d6be7a9c6da47045e0095b7f8467670afff2ce565af54c -->
+
+
+
+
+<div id="kgen-v102-festival-panel">
+<h3>520 / 1111 / 跨年活動</h3>
+<div class="kgen-v102-festival-body">
+<div id="kgen-v102-festival-countdown">活動時間同步中…</div>
+<div class="kgen-v102-festival-row">
+<b>5/20 悟空生日</b><br/>
+      UTC 00:00–00:10<br/>
+      每地址每年一次，預設 5.2 KGEN。<br/>
+<button id="kgen-v102-festival-520" type="button">領取 5/20 悟空生日 festivalClaim(1)</button>
+</div>
+<div class="kgen-v102-festival-row">
+<b>11/11 孤勇日</b><br/>
+      UTC 00:00–00:10<br/>
+      每地址每年一次，預設 11.1 KGEN。<br/>
+<button id="kgen-v102-festival-1111" type="button">領取 11/11 孤勇日 festivalClaim(2)</button>
+</div>
+<div class="kgen-v102-festival-row">
+<b>12/31 跨年倒數</b><br/>
+      UTC 23:50–23:59<br/>
+      每地址每分鐘一次，最多 10 次，預設每次 0.72 KGEN。<br/>
+<button id="kgen-v102-newyear" type="button">領取跨年倒數 newYearCountdownClaim()</button>
+</div>
+<button id="kgen-v102-festival-voice" type="button">語音解說活動規則</button>
+</div>
+</div>
+
+<script src="modules/kgen-12345-runtime.js"></script>
+<script src="modules/kgen-12345-mother-runtime.js"></script>
+<script src="modules/kgen-12345-divine-regeneration.js"></script>
+<script src="modules/kgen-12345-morph-dna-organ-transplant.js?v=V10.46.2"></script></body>
+</html>
