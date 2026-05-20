@@ -20,3 +20,13 @@
 - 程式改綁正式定版資產：`bull-front.png`、`bear-rear.png`、`heart.png`、`warp-core.png`。
 - 移除對 `wukong_heart_core.jpg`、`wukong_caishen.png` 的依賴。
 - 每個新增/更動程式檔皆加入 FILE_CERTIFICATE，記錄出生、來源、版本、狀態。
+
+## V10.44.1｜DIVINE REGENERATION RECORDING CELL
+
+- 新增神級再生器官：`modules/kgen-12345-divine-regeneration.js`。
+- 新增神級再生樣式：`modules/kgen-12345-divine-regeneration.css`。
+- 修復錄影/拍照身份誤顯示 16888 的問題，改為 12345 五指山悟空財神殿。
+- 修復底部錄影按鍵接到舊版殘廢器官的問題，統一接到 `KGEN_12345_RECORDING`。
+- 520 / 1111 / 跨年活動改成可收合 Festival Organ Cell。
+- 跨年倒數改成穩定顯示，避免每秒閃爍抽搐。
+- 不新增深層資料夾，不更改正式資產檔名。
