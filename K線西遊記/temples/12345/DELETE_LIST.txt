@@ -1,17 +1,14 @@
-# DELETE_LIST｜死亡細胞刪除表
+# DELETE_LIST｜V10.44.0
 
-請從 GitHub 正式層刪除以下殘留：
+本版不要求刪除 V10.42.6 母體既有檔案。
 
-modules/organs/
-modules/*patch*
-modules/*hotfix*
-modules/*temp*
-modules/*fix2*
-modules/*ultimate*
-modules/*stable-patch*
-assets/heart-drive.png
-assets/warp-universe.png
-assets/wukong_heart_core.jpg
-assets/wukong_caishen.png
+若 GitHub 上仍存在舊 V10.43 系列檔案，建議刪除或移入 archive：
 
-原則：正式資產只允許 bull-front.png / bear-rear.png / heart.png / warp-core.png。
+modules/kgen-12345-boot-runtime.js
+modules/kgen-12345-immune-runtime.js
+modules/kgen-12345-watchdog-runtime.js
+modules/kgen-12345-recursive-verify.js
+modules/kgen-12345-organ-lifecycle.js
+modules/kgen-12345-death-manager.js
+
+原因：本版改用 observer-only Mother Runtime，不沿用 V10.43 過重自檢器官。

@@ -1,272 +1,120 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "version": "12345-TEMPLE-V10.43-FINAL-RUNTIME-ARCHITECTURE-CONSTITUTION",
-  "build": "20260520-V10.43-FINAL-RUNTIME-ARCHITECTURE-CONSTITUTION",
-  "date": "2026-05-20",
+  "version": "12345-TEMPLE-V10.44.0-PRIMEFORGE-MOTHER-RUNTIME-GROWTH",
+  "build": "20260520-V10.44.0-MOTHER-RUNTIME-GROWTH",
+  "base_from": "V10.42.6",
+  "generated": "2026-05-20",
   "root": "K線西遊記/temples/12345",
-  "rules": {
-    "no_deep_organ_folder": true,
-    "formal_asset_names": [
-      "assets/bull-front.png",
-      "assets/bear-rear.png",
-      "assets/heart.png",
-      "assets/warp-core.png"
-    ],
-    "allowed_top_dirs": [
-      "assets",
-      "docs",
-      "modules",
-      "SOP",
-      "archive",
-      "music"
-    ],
-    "forbidden_runtime_names": [
-      "patch",
-      "hotfix",
-      "stable-patch",
-      "ultimate",
-      "fix2",
-      "temp",
-      "backup",
-      "copy"
-    ],
-    "runtime_recursive_verification": true
-  },
   "files": [
     {
       "path": "ASSET_MANIFEST.md",
-      "size": 1862,
-      "sha256": "1aa25ad42028b96a0ca9484fd1e75b814af492d69a17cef2772538b87390bcb3"
+      "sha256": "6bb88b608e8fb2733ae4528242fd7f0ef8ecf73e850c48e111b290306cc21e4f",
+      "bytes": 591
     },
     {
-      "path": "BOOT_REPORT.md",
-      "size": 249,
-      "generated": true
+      "path": "CELL_REGISTRY.md",
+      "sha256": "335e60230c1f368eb857ca88da54b0a6062dd1c46ce077e726c4d0fe94a30ce1",
+      "bytes": 596
     },
     {
       "path": "CHANGELOG.md",
-      "size": 3104,
-      "sha256": "375b69d11363811146384613c4df40052ceebc8a5c989b672427500eae5ac770"
+      "sha256": "ccaf216e91604a55731981b1155a4fc26c08e2c3e4c2e23c385d1a01f965a66d",
+      "bytes": 1229
     },
     {
-      "path": "DEATH_CERTIFICATE.md",
-      "size": 1837,
-      "sha256": "096c0c2fc060226e395f8348d6258fade0f3af0a6a2642514fd8b0680325ea97"
+      "path": "GROWTH_LAW.md",
+      "sha256": "082fefd2b92d84c0f46a55930081888591b71d8eba72135e7cdb2838e90e3b7c",
+      "bytes": 690
     },
     {
-      "path": "DELETE_LIST.txt",
-      "size": 403,
-      "sha256": "50108758222af8ea9746f778cf772f0331be270739bb1a2a25479308ccb40f68"
-    },
-    {
-      "path": "HEALTH_REPORT.md",
-      "size": 465,
-      "generated": true
-    },
-    {
-      "path": "INSTALL_CHECKLIST.md",
-      "size": 1045,
-      "sha256": "bf6c14c81879ec73fd74031600f41f263c2534de70915a14d50f7b6f1701fbe7"
-    },
-    {
-      "path": "MANIFEST.json",
-      "size": 7994,
-      "generated": "self"
-    },
-    {
-      "path": "MISSING_REPORT.md",
-      "size": 23,
-      "generated": true
-    },
-    {
-      "path": "ORGAN_REGISTRY.md",
-      "size": 1664,
-      "sha256": "366edf28b9df55cf8ad511d24b0e248687984dc1f803fcec951c61de3275a0ff"
-    },
-    {
-      "path": "ORPHAN_REPORT.md",
-      "size": 22,
-      "generated": true
+      "path": "MOTHER_RUNTIME.md",
+      "sha256": "4b19595f67517240659d8f0568e7c4ca3dae30ac303fb7564055beb8d392ee33",
+      "bytes": 924
     },
     {
       "path": "PROGRAM_HISTORY.md",
-      "size": 2785,
-      "sha256": "9a06f916ecbbbd2e7b36f54fe575cc6a9757a870826d426b09f7a0f3e3c6890f"
-    },
-    {
-      "path": "REFERENCE_AUDIT.md",
-      "size": 147,
-      "sha256": "b6a7644bb652153d8c48c059ab8bc4d7ed49eb35b84f27869951c3a24f62128d"
+      "sha256": "b78601f8b30d5d4d58b543c20caa25ac2a3cf47a38215184f1faa2da1f57e7bc",
+      "bytes": 1373
     },
     {
       "path": "SHA256SUMS.txt",
-      "size": 4452,
-      "generated": true
-    },
-    {
-      "path": "SURVIVOR_LIST.txt",
-      "size": 819,
-      "sha256": "81d457545f1c60be1a56e19461ed94b0d468c0872ed8b84d3d91af5fcab0a0b6"
+      "sha256": "f3c63e8173dd9dc77fa069ed52909cb6aedace53d0943596eaedba3211e97637",
+      "bytes": 1778
     },
     {
       "path": "UPLOAD_LIST.txt",
-      "size": 843,
-      "generated": true
+      "sha256": "2904ef3d09a952a49fda1a0323c3b57cf330b9a393b37620ecf91400f8828674",
+      "bytes": 543
     },
     {
       "path": "VERSION",
-      "size": 60,
-      "sha256": "991523feac75f8e8b4aebcafb80ed6e0e044094424e869e5cf5cb07eb17e0746"
+      "sha256": "2aeb0536d7e5b6be03a6c85a633e1c1fdf1f6984fccc928b77529b35e444b4b9",
+      "bytes": 327
     },
     {
       "path": "assets/bear-rear.png",
-      "size": 1810422,
-      "sha256": "1d16d5a5021125ace4321e52382d68783d4bbd1fbdd4ff3ac242e7ad32e35f64"
+      "sha256": "1d16d5a5021125ace4321e52382d68783d4bbd1fbdd4ff3ac242e7ad32e35f64",
+      "bytes": 1810422
     },
     {
       "path": "assets/bull-front.png",
-      "size": 1972510,
-      "sha256": "e7f94266beb9fad268609fbf1661ec593e44b05c756b2f9cefb3e357fd0f6be9"
+      "sha256": "e7f94266beb9fad268609fbf1661ec593e44b05c756b2f9cefb3e357fd0f6be9",
+      "bytes": 1972510
     },
     {
       "path": "assets/heart.png",
-      "size": 1465663,
-      "sha256": "517c02927849b0171388d06fe0ea4e0154af17c7c205f70bc97c2d7d4773a959"
+      "sha256": "517c02927849b0171388d06fe0ea4e0154af17c7c205f70bc97c2d7d4773a959",
+      "bytes": 1465663
     },
     {
       "path": "assets/warp-core.png",
-      "size": 510701,
-      "sha256": "7d2c8417b1bf1b9412403d2fc0c89345b065fa7c8f0b15c1f2842113e993acb5"
-    },
-    {
-      "path": "docs/KGEN_12345_V10_42_10_HEALTH_REGISTRY_CHECK.md",
-      "size": 1126,
-      "sha256": "edd55bbc7afcf15d391173440d7af9f6cb5a74bbf2b289526bfac8dcf67d8ab5"
+      "sha256": "7d2c8417b1bf1b9412403d2fc0c89345b065fa7c8f0b15c1f2842113e993acb5",
+      "bytes": 510701
     },
     {
       "path": "docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md",
-      "size": 698,
-      "sha256": "a15ce304297d22c2480af529621b74faa515f090d71bdda86eddd202c66e3ff4"
+      "sha256": "a15ce304297d22c2480af529621b74faa515f090d71bdda86eddd202c66e3ff4",
+      "bytes": 698
     },
     {
-      "path": "docs/KGEN_12345_V10_42_7_ORGAN_LIFECYCLE_SYSTEM.md",
-      "size": 1523,
-      "sha256": "86127e850329f0664e715e38254284b326b06ed8579083cace458ec0f90e7e94"
-    },
-    {
-      "path": "docs/KGEN_12345_V10_42_8_NERVE_CONVERGENCE.md",
-      "size": 1329,
-      "sha256": "2725878827dc0abb6aa013c4a8a0917698de8e12ff931565aef9beedcc0eef09"
-    },
-    {
-      "path": "docs/KGEN_12345_V10_42_9_DEATH_CELL_CLEANUP.md",
-      "size": 715,
-      "sha256": "1d12ee8eaac26ad665fbfdd5cea2af72eda44ecf094dd149d2cb53e40efecb90"
-    },
-    {
-      "path": "docs/KGEN_12345_V10_43_FINAL_RUNTIME_ARCHITECTURE_CONSTITUTION.md",
-      "size": 1246,
-      "sha256": "d73119f0d4a590efd6670312a8fca476a962847d74070e429f124a332cb011e8"
+      "path": "docs/KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+      "sha256": "ae584e778c7b0fb27cdae29833dcc82b7814f9c6c67b8d59617851d8f619a429",
+      "bytes": 772
     },
     {
       "path": "index.html",
-      "size": 83471,
-      "sha256": "6e3f6209c22a2b7ce95d79710840205017e25c48f0159f50cca739b8df536a6a"
+      "sha256": "2d6318025820783c34f19a16ec33ce0791125e3a56b471416fb6022b143d9c4d",
+      "bytes": 82509
     },
     {
       "path": "modules/README.md",
-      "size": 1011,
-      "sha256": "7b62896215ae3291d2091080517030b39b774130522991d9e8aaac305cfe3f8e"
+      "sha256": "abb04661c1ed2d61c6fd5639e5508a4d1af93c4d80cfec701619f07b6daf9b7c",
+      "bytes": 809
     },
     {
-      "path": "modules/kgen-12345-boot-runtime.js",
-      "size": 2257,
-      "sha256": "62f9427a02ce49f16eb34ae41d5f89e62b2f337114351e81295b426e17dd0749"
+      "path": "modules/kgen-12345-cell-registry.json",
+      "sha256": "e30fdaa77855eb392ef6c464f61c5ed15e693001d81cc6bf4db6d593f2daaada",
+      "bytes": 1551
     },
     {
       "path": "modules/kgen-12345-core.css",
-      "size": 281603,
-      "sha256": "0a1521866ea4e5a06afa5f57cdb8cd215520dcd5276747fedeae8d873cc21422"
+      "sha256": "0a1521866ea4e5a06afa5f57cdb8cd215520dcd5276747fedeae8d873cc21422",
+      "bytes": 281603
     },
     {
-      "path": "modules/kgen-12345-death-manager.js",
-      "size": 1514,
-      "sha256": "1310c2293304226b5e91ae0f5114641f122667bc9e8fbd8d3a41a836beb65bbc"
+      "path": "modules/kgen-12345-growth-policy.json",
+      "sha256": "989e61d21ca0540b86a98b31c76dbae3ee2c860cdc9a5a35845b5c6d0cc8228f",
+      "bytes": 1359
     },
     {
-      "path": "modules/kgen-12345-immune-runtime.js",
-      "size": 1609,
-      "sha256": "3f91f39de14623f276a5838f8d39e7d23cfc8c9d6d6da6b6c3c44093145e253c"
-    },
-    {
-      "path": "modules/kgen-12345-layout-runtime.js",
-      "size": 1578,
-      "sha256": "d1b1d170d40f38a66cae13f82b3eb856a39f390dc8c0e020259104761f15aac5"
-    },
-    {
-      "path": "modules/kgen-12345-manifest-runtime.js",
-      "size": 1592,
-      "sha256": "ffb12469b5317d1f9613902c71e4280707b9d6869df533b8e77fcae89acc94e5"
-    },
-    {
-      "path": "modules/kgen-12345-organ-lifecycle.js",
-      "size": 1437,
-      "sha256": "ba22a3d71cc95fd05c93c156286ad35880654338a8eeb7e7df3130cdf869396f"
-    },
-    {
-      "path": "modules/kgen-12345-organ-registry.json",
-      "size": 2312,
-      "sha256": "aaeae6da4d1d43bd99addaec227e7687f1f90efa8f032636949a850ea0de6a24"
-    },
-    {
-      "path": "modules/kgen-12345-organ-system.css",
-      "size": 4442,
-      "sha256": "8969ef419f1b102bef763518738d45281585a2c23c3d652344481c07fc705c08"
-    },
-    {
-      "path": "modules/kgen-12345-organ-system.js",
-      "size": 6141,
-      "sha256": "bc4a22ab5d6a6d4836ffdb0b4731d5cc16f87f7329ac35660c95bb35229691f8"
-    },
-    {
-      "path": "modules/kgen-12345-organ-wukong-control-console.js",
-      "size": 7237,
-      "sha256": "cab33e2d96dfd0f3e00a45d259e7cbe7fa97ebd9f79024446faef97a675277d8"
-    },
-    {
-      "path": "modules/kgen-12345-recursive-verify.js",
-      "size": 1444,
-      "sha256": "e14d5f86d43470051f8850e82d05cd79a8f2827b2975e87bb5e40ff430bdabce"
+      "path": "modules/kgen-12345-mother-runtime.js",
+      "sha256": "be9165cdcd74bc6bc2024532a015eed00495777831e2a11d7992205eaef1ba32",
+      "bytes": 4828
     },
     {
       "path": "modules/kgen-12345-runtime.js",
-      "size": 852853,
-      "sha256": "d6592276d300b3a117988c2a3131c41ab3e9c55a8339a22e96bf5a0336596945"
-    },
-    {
-      "path": "modules/kgen-12345-sphere-runtime.js",
-      "size": 1374,
-      "sha256": "04d557c4c8fd172b80a75c4a199018b7fd8f39c75b4d3714cbac891b4821a1b3"
-    },
-    {
-      "path": "modules/kgen-12345-warp-runtime.js",
-      "size": 1154,
-      "sha256": "b749cd90ae2d45ab54a0a803427a997e996d2b23414e5d5e1ecdb365a2814241"
-    },
-    {
-      "path": "modules/kgen-12345-watchdog-runtime.js",
-      "size": 1355,
-      "sha256": "4f1f9c231133c55d674051704a9634fb0d4b138cd8aa2a1f5df75f9c7712fc47"
-    },
-    {
-      "path": "music/wuzhishan_temple.mp3",
-      "size": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "path": "verify_manifest.js",
-      "size": 6030,
-      "sha256": "71602455ef37c609f4cde0514d6f7e27434b5cab857c4d00bbf021213d8e4b81"
+      "sha256": "54287c5397532dfb8c7b4ed7bdb94eff7d5c2496c0f77c66d17e947eacc28019",
+      "bytes": 852855
     }
   ]
 }

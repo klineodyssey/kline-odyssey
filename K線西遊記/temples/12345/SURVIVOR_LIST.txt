@@ -1,31 +1,10 @@
-V10.43 FINAL SURVIVORS
-modules/kgen-12345-boot-runtime.js
-modules/kgen-12345-immune-runtime.js
-modules/kgen-12345-watchdog-runtime.js
-modules/kgen-12345-manifest-runtime.js
-modules/kgen-12345-recursive-verify.js
-modules/kgen-12345-organ-lifecycle.js
-modules/kgen-12345-death-manager.js
-modules/kgen-12345-layout-runtime.js
-modules/kgen-12345-sphere-runtime.js
-modules/kgen-12345-warp-runtime.js
-
-
-KGEN 12345 V10.42.9 SURVIVOR LIST
-
 index.html
 modules/kgen-12345-core.css
 modules/kgen-12345-runtime.js
-modules/kgen-12345-organ-system.css
-modules/kgen-12345-organ-system.js
-modules/kgen-12345-organ-wukong-control-console.js
-modules/kgen-12345-organ-registry.json
+modules/kgen-12345-mother-runtime.js
+modules/kgen-12345-cell-registry.json
+modules/kgen-12345-growth-policy.json
 assets/bull-front.png
 assets/bear-rear.png
 assets/heart.png
 assets/warp-core.png
-VERSION
-CHANGELOG.md
-PROGRAM_HISTORY.md
-ASSET_MANIFEST.md
-ORGAN_REGISTRY.md
