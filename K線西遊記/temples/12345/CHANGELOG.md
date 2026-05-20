@@ -1,3 +1,12 @@
+# KGEN 12345 CHANGELOG
+
+## V10.44.2｜FESTIVAL HEART CLOCK + RECORDING SYNC
+- 修復錄影器官：REC 秒數與 app.recMMSS 同步，錄影 HUD / 按鈕 / export-canvas 均顯示實際錄影時間。
+- 建立節日單心跳：520 / 1111 / 跨年共用 Festival Heart Clock，跨年倒數改為分鐘級穩定顯示，避免秒級抽搐閃爍。
+- 隔離舊倒數神經：自動隱藏舊版重複 countdown / ny-countdown / cd-1231 節點，避免多重心臟同時跳。
+- 節日細胞右側停靠：固定為 360px 寬，收合後只保留可按標題，不再壓住 USDT / KGEN 兌換區。
+- 不新增深層資料夾；不改正式資產名；維持 V10.42.6 母體可繼續生長。
+
 # CHANGELOG
 
 ## V10.44.0｜PrimeForge Mother Runtime Growth

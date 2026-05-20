@@ -1,3 +1,16 @@
+# PROGRAM HISTORY
+
+## V10.44.2｜Festival Heart Clock Recording Sync
+BORN: 2026-05-20
+PARENT: V10.44.1 Divine Regeneration Recording Cell
+REASON: V10.44.1 出現跨年心率不整與錄影秒數不顯示。
+SURGERY:
+- 將錄影器官補上實際 elapsed clock。
+- 將節日倒數改為單心跳 Festival Heart Clock。
+- 將舊倒數 DOM 神經隔離，不讓多個 countdown 同時控制同一器官。
+- 保留正式資產名與 modules 根層治理。
+STATUS: ACTIVE
+
 # PROGRAM_HISTORY｜KGEN 12345
 
 ## V10.44.0｜2026-05-20｜PrimeForge Mother Runtime Growth

@@ -1,12 +1,10 @@
 index.html
-modules/kgen-12345-runtime.js
 modules/kgen-12345-divine-regeneration.css
 modules/kgen-12345-divine-regeneration.js
-CELL_REGISTRY.md
+docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md
 VERSION
 CHANGELOG.md
 PROGRAM_HISTORY.md
-docs/KGEN_12345_V10_44_1_DIVINE_REGENERATION_RECORDING_CELL.md
 MANIFEST.json
 UPLOAD_LIST.txt
 SHA256SUMS.txt

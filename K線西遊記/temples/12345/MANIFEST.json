@@ -1,10 +1,15 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
-  "version": "12345-TEMPLE-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL",
-  "build": "20260520-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL",
-  "base_from": "V10.44.0",
+  "version": "12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC",
+  "build": "20260520-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC",
+  "base_from": "V10.44.1-DIVINE-REGENERATION-RECORDING-CELL",
   "generated": "2026-05-20",
   "root": "K線西遊記/temples/12345",
+  "health": {
+    "missing": 0,
+    "orphan": 0,
+    "syntax": "node --check passed for divine-regeneration.js and runtime.js"
+  },
   "files": [
     {
       "path": "ASSET_MANIFEST.md",
@@ -18,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "9ba71313ba7ffa243dc3df0f1e787f87c7c6afe1672e12b6115f68db2391c87f",
-      "bytes": 1819
+      "sha256": "66915a0c4c18ea0e61c90d5e13e59e39fba28905b61ca28ce82f9657949689ce",
+      "bytes": 2508
     },
     {
       "path": "DEATH_CERTIFICATE.md",
@@ -58,13 +63,8 @@
     },
     {
       "path": "PROGRAM_HISTORY.md",
-      "sha256": "4f6dcfa5e2b46ca7408508697837a5c5af68dd374dc7c1dc1be8e6aea7d6eaa1",
-      "bytes": 1739
-    },
-    {
-      "path": "SHA256SUMS.txt",
-      "sha256": "7f2106ff77e11dc2dd6ee4b5ffcfcd76c94300028139dfb9aa629b168c575a71",
-      "bytes": 2920
+      "sha256": "84624f7989a4b0a83bb328d7cc8aa60288a062cb573c373ba9a643d8edf58ef4",
+      "bytes": 2211
     },
     {
       "path": "SURVIVOR_LIST.txt",
@@ -78,8 +78,8 @@
     },
     {
       "path": "VERSION",
-      "sha256": "1fdc8d4a75ff8fe33ca9c631776aeb68e04b660b0d3ddd2c0f71088ab266d1b4",
-      "bytes": 347
+      "sha256": "7431b0b97d5f8d385e83e5f17ddcc45066658b48746090cb67f05f3aa9e3d910",
+      "bytes": 309
     },
     {
       "path": "assets/bear-rear.png",
@@ -117,9 +117,14 @@
       "bytes": 2140
     },
     {
+      "path": "docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md",
+      "sha256": "709a93da7055b3b953c21bafeded6e41dc8b4699a45a51d200acd6f1708400b1",
+      "bytes": 860
+    },
+    {
       "path": "index.html",
-      "sha256": "befa7909e85260494ee5c952fa93e723d2695834c44d77c191389881c58f5ce5",
-      "bytes": 82839
+      "sha256": "961f0a0614c6483c1cdc1911c525c860fc64d6453b52634e0556a1441b4564eb",
+      "bytes": 82867
     },
     {
       "path": "modules/README.md",
@@ -138,13 +143,13 @@
     },
     {
       "path": "modules/kgen-12345-divine-regeneration.css",
-      "sha256": "e133a9d103b2d68d09a2c19fc487451f30360f854c6a1b6350f1ed5117efaa20",
-      "bytes": 3207
+      "sha256": "db9d5286a2b1d00b6dfe353caa1f8675060835e20087a96562abe367e991b992",
+      "bytes": 4221
     },
     {
       "path": "modules/kgen-12345-divine-regeneration.js",
-      "sha256": "b87f53c0d24a205603b51adf913b70306cb7db72bb2d3b1cc8c0294fe96d548a",
-      "bytes": 11007
+      "sha256": "6b3c6c116c5db573975f57558a11a907b1b7e8b1ea8b2562862a0074caf087b0",
+      "bytes": 14638
     },
     {
       "path": "modules/kgen-12345-growth-policy.json",
@@ -161,10 +166,5 @@
       "sha256": "0bc7373b088f1f5ebf69a68c6e46bc331fb055a67162017a36ef3ee721313b28",
       "bytes": 852903
     }
-  ],
-  "health_policy": {
-    "deep_folder_growth": "disabled unless governed by nerve map",
-    "recording_identity": "12345 only",
-    "asset_names": "fixed manifest names only"
-  }
+  ]
 }
