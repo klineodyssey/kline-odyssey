@@ -1,0 +1,40 @@
+{
+  "file_certificate": {
+    "file": "modules/kgen-12345-growth-policy.json",
+    "product_id": "KGEN-12345-GROWTH-POLICY",
+    "version": "V10.44.0",
+    "birth": "2026-05-20",
+    "death": "ACTIVE"
+  },
+  "mission": "支援 AI 母機自動導行、生長一萬年航程；創作者不在時仍可依憲法演化。",
+  "rules": [
+    "index.html 是母體骨架，不再塞入新功能。",
+    "所有新器官必須先有 FILE_CERTIFICATE、REGISTRY、死亡規則。",
+    "深層資料夾只有在有導行 registry 與權限邊界時才允許。",
+    "免疫系統只能觀測與報告，不可直接破壞主神經。",
+    "正式資產檔名不可漂移；換圖只能覆蓋正式名。",
+    "升版只能累積文明，不能刪除未登記歷史。"
+  ],
+  "growth_stages": [
+    {
+      "stage": "V10.44",
+      "name": "Mother Runtime Observer",
+      "scope": "穩定母體 + 母機導行 HUD + 細胞戶口"
+    },
+    {
+      "stage": "V10.45",
+      "name": "Organ Isolation",
+      "scope": "心臟、曲速、腦、免疫分器官但不搶主神經"
+    },
+    {
+      "stage": "V10.46",
+      "name": "DNA Runtime",
+      "scope": "玩家 DNA / 宇宙細胞 / 商店細胞初生"
+    },
+    {
+      "stage": "V10.50",
+      "name": "Civilization Runtime",
+      "scope": "12345 / 16888 / 8888 / 11520 跨地圖生命連線"
+    }
+  ]
+}

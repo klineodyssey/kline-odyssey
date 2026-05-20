@@ -1,0 +1,66 @@
+{
+  "file_certificate": {
+    "file": "modules/kgen-12345-cell-registry.json",
+    "product_id": "KGEN-12345-CELL-REGISTRY",
+    "version": "V10.44.0",
+    "birth": "2026-05-20",
+    "base_from": "V10.42.6 stable mother body",
+    "death": "ACTIVE"
+  },
+  "principle": "所有細胞與器官先登記，後載入；未登記不得自動生長。",
+  "root_body": "index.html",
+  "core_cells": [
+    {
+      "id": "body.index",
+      "path": "index.html",
+      "type": "root-body",
+      "status": "ACTIVE",
+      "authority": "layout-shell"
+    },
+    {
+      "id": "skin.core-css",
+      "path": "modules/kgen-12345-core.css",
+      "type": "skin",
+      "status": "ACTIVE",
+      "authority": "visual-layout"
+    },
+    {
+      "id": "nerve.runtime",
+      "path": "modules/kgen-12345-runtime.js",
+      "type": "nerve-runtime",
+      "status": "ACTIVE",
+      "authority": "legacy-v10.2-ui-runtime"
+    },
+    {
+      "id": "mother.autopilot",
+      "path": "modules/kgen-12345-mother-runtime.js",
+      "type": "mother-observer",
+      "status": "ACTIVE",
+      "authority": "observe-register-report-only"
+    }
+  ],
+  "official_assets": [
+    "assets/bull-front.png",
+    "assets/bear-rear.png",
+    "assets/heart.png",
+    "assets/warp-core.png"
+  ],
+  "future_organs_reserved": [
+    "heart-engine",
+    "warp-engine",
+    "brain-engine",
+    "immune-engine",
+    "dna-engine",
+    "marketplace-engine"
+  ],
+  "forbidden_growth": [
+    "patch",
+    "hotfix",
+    "temp",
+    "copy",
+    "backup",
+    "fix2",
+    "ultimate",
+    "stable"
+  ]
+}

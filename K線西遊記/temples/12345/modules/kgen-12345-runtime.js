@@ -8221,7 +8221,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const audio=$('music-audio');
     if(audio && !audio.dataset.v790){
       audio.dataset.v790='1';
-      if(!audio.getAttribute('src')) audio.src='music/wuzhishan_temple.mp3';
+      if(!audio.getAttribute('src')) audio.src='./music/wuzhishan_temple.mp3';
       audio.preload='none';
     }
     if(window.app){
