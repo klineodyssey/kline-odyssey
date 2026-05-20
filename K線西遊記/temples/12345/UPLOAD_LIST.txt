@@ -1,10 +1,7 @@
-index.html
-modules/kgen-12345-divine-regeneration.css
-modules/kgen-12345-divine-regeneration.js
-docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md
-VERSION
-CHANGELOG.md
-PROGRAM_HISTORY.md
-MANIFEST.json
-UPLOAD_LIST.txt
-SHA256SUMS.txt
+K線西遊記/temples/12345/index.html
+K線西遊記/temples/12345/modules/kgen-12345-core.css
+K線西遊記/temples/12345/modules/kgen-12345-runtime.js
+K線西遊記/temples/12345/VERSION
+K線西遊記/temples/12345/CHANGELOG.md
+K線西遊記/temples/12345/MANIFEST.json
+K線西遊記/temples/12345/docs/KGEN_12345_V10_45_3_VERSION_GENOME_FIX.md

@@ -39,3 +39,22 @@
 - 520 / 1111 / 跨年活動改成可收合 Festival Organ Cell。
 - 跨年倒數改成穩定顯示，避免每秒閃爍抽搐。
 - 不新增深層資料夾，不更改正式資產檔名。
+
+
+## V10.45.2｜DIVINE IMMORTAL RUNTIME
+
+- 以 V10.44.2 主宇宙實體檔案為基礎修改，不再建立空白 index。
+- 修正左上版本銘牌，顯示 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX。
+- 新增 Cosmic Runtime Genome Registry：記錄 base_from=V10.44.2、DNA_ANCESTOR=V10.42.6。
+- 新增 Festival 單心跳穩定器：520 / 1111 / 跨年使用單一穩定顯示，不再每秒造成行高跳動。
+- 節日活動器官固定右側停靠，同寬同高，可點標題收合。
+- 錄影器官接回時間神經：REC READY / REC 00:00:00 顯示總錄影時間。
+- 聖盃器官建立 Runtime State，避免訊息欄 1~3 行增減癌化。
+- 右側神規 / 導覽類面板登入初始收合。
+
+
+## V10.45.3 VERSION GENOME FIX
+- 修正左上版本銘牌仍顯示 V10.42.6 的 DNA 銘牌不同步問題。
+- 全域替換 runtime.js / core.css / index.html 內殘留的 V10.42.6-MODULAR-ASSET-GOVERNANCE。
+- 新增啟動與延遲守護，強制 #ver-st 顯示 VERSION 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX。
+- 更新 document.title 與 window.RUNTIME_GENOME。

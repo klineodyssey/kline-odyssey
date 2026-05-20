@@ -5,8 +5,8 @@
 FILE_CERTIFICATE:
   FILE: index.html
   PRODUCT_ID: KGEN-12345-HEART-UI
-  VERSION: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
-  BUILD: 20260520-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+  VERSION: 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX
+  BUILD: 20260521-V10.45.3-VERSION-GENOME-FIX
   BIRTH: 2026-05-20
   BASE_FROM: index_12345_Heart_UI_V10_2_FESTIVAL_RUNTIME_LOCK.html
   UPGRADE_FROM: 12345-TEMPLE-V10.2-FESTIVAL-RUNTIME-LOCK
@@ -26,6 +26,38 @@ FILE_CERTIFICATE:
 ============================================================
 -->
 <head>
+<!-- KGEN VERSION GENOME FIX V10.45.3 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+(function(){
+  const VERSION="12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX";
+  const BUILD="20260521-V10.45.3-VERSION-GENOME-FIX";
+  function apply(){
+    window.RUNTIME_GENOME = Object.assign({}, window.RUNTIME_GENOME||{}, {
+      universe:"V10.45.3",
+      version:VERSION,
+      build:BUILD,
+      base_from:"V10.42.6",
+      timeline:"V10.44.2",
+      evolution:"DIVINE_IMMORTAL_RUNTIME",
+      patch:"VERSION_GENOME_FIX"
+    });
+    document.title="KGEN 12345 五指山悟空財神殿｜V10.45.3";
+    const ver=document.getElementById("ver-st");
+    if(ver) ver.textContent="VERSION "+VERSION;
+    document.querySelectorAll('[data-version],[data-runtime-version]').forEach(el=>{el.textContent=VERSION;});
+    document.querySelectorAll('.sys-st').forEach(el=>{
+      if(/VERSION|V10\.42\.6|MODULAR-ASSET-GOVERNANCE|V10\.45\.2/.test(el.textContent||'')) el.textContent='VERSION '+VERSION;
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply); else apply();
+  window.addEventListener('load',apply);
+  setTimeout(apply,300);
+})();
+</script>
+
 
 
 <meta content="website" property="og:type"/>
@@ -42,7 +74,7 @@ FILE_CERTIFICATE:
 <meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<title>KGEN-12345-HEART-UI-V10.42.6</title>
+<title>KGEN-12345-HEART-UI-V10.45.3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
@@ -53,6 +85,7 @@ FILE_CERTIFICATE:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
+<link rel="stylesheet" href="modules/kgen-12345-divine-immortal-runtime.css"/>
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -82,7 +115,7 @@ FILE_CERTIFICATE:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC</div>
+<div class="sys-st" id="ver-st">VERSION 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX</div>
 <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
 </div>
 <div class="monitor-data">
@@ -1408,5 +1441,18 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
-<script src="modules/kgen-12345-divine-regeneration.js"></script></body>
+<script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/kgen-12345-divine-immortal-runtime.js"></script>
+<script id="KGEN_VERSION_GENOME_FINAL_GUARD_V10_45_3">
+(function(){
+ const VERSION='12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX';
+ function lockVersion(){
+  const ver=document.getElementById('ver-st');
+  if(ver && ver.textContent!==('VERSION '+VERSION)) ver.textContent='VERSION '+VERSION;
+  if(document.title.indexOf('V10.45.3')<0) document.title='KGEN 12345 五指山悟空財神殿｜V10.45.3';
+ }
+ lockVersion();
+ setInterval(lockVersion, 2000);
+})();
+</script>
+</body>
 </html>
