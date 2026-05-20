@@ -1,8 +1,8 @@
 /*
 FILE: modules/kgen-12345-divine-regeneration.css
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
-BUILD: 20260520-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
+VERSION: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
 BASE_FROM: V10.44.0 PrimeForge Mother Runtime Growth
 BORN: 2026-05-20
 STATUS: ACTIVE
@@ -107,4 +107,30 @@ PURPOSE: No-scar UI regeneration layer. Fixes 12345 recording identity, festival
     top:268px !important;
     width:min(330px, calc(100vw - 24px)) !important;
   }
+}
+
+
+/* ===== V10.44.2 Festival Heart Clock + Recording Sync ===== */
+#kgen-v102-festival-panel{
+  width:360px !important;
+  max-width:calc(100vw - 24px) !important;
+  right:18px !important;
+  top:360px !important;
+  border-radius:14px !important;
+}
+#kgen-v102-festival-panel h3{min-height:38px !important; padding:0 10px !important; box-sizing:border-box;}
+#kgen-v102-festival-countdown{
+  font-variant-numeric:tabular-nums !important;
+  min-height:22px !important;
+  line-height:22px !important;
+  animation:none !important;
+  transition:none !important;
+  opacity:1 !important;
+  filter:none !important;
+}
+[data-kgen-v10442-quarantined="1"]{display:none !important;}
+#rec-ind{font-variant-numeric:tabular-nums !important; min-height:20px !important;}
+.kgen-v10441-body-recording #kgen-v10441-rec-msg{font-variant-numeric:tabular-nums !important; color:#ffefb0;}
+@media(max-width:760px){
+  #kgen-v102-festival-panel{right:12px !important; top:345px !important; width:min(360px, calc(100vw - 24px)) !important;}
 }

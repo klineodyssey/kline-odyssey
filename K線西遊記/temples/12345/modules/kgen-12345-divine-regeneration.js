@@ -1,8 +1,8 @@
 /*
 FILE: modules/kgen-12345-divine-regeneration.js
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: 12345-TEMPLE-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
-BUILD: 20260520-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
+VERSION: 12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
+BUILD: 20260520-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC
 BASE_FROM: V10.44.0 PrimeForge Mother Runtime Growth
 BORN: 2026-05-20
 STATUS: ACTIVE
@@ -12,8 +12,8 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
 */
 (function(){
   'use strict';
-  const VERSION='12345-TEMPLE-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL';
-  const BUILD='20260520-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL';
+  const VERSION='12345-TEMPLE-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC';
+  const BUILD='20260520-V10.44.2-FESTIVAL-HEART-CLOCK-RECORDING-SYNC';
   const IDENTITY={
     title:'KGEN 12345 五指山悟空財神殿',
     log:'KGEN 12345 WUKONG-TEMPLE-LOG',
@@ -28,7 +28,7 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
   function log(msg,type='info'){
     try{window.app&&window.app.toast&&window.app.toast(msg);}catch(_){ }
     const s=$('kgen-v902-left-status'); if(s) s.textContent=msg;
-    console[type==='error'?'error':'log']('[KGEN V10.44.1]',msg);
+    console[type==='error'?'error':'log']('[KGEN V10.44.2]',msg);
   }
   function ensureHud(){
     let hud=$('kgen-v10441-rec-heal-hud');
@@ -48,7 +48,16 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
   }
   function hideHud(){const h=$('kgen-v10441-rec-heal-hud'); if(h) h.classList.remove('show');}
 
-  const rec={stream:null, recorder:null, chunks:[], active:false, timer:null, mode:null, startedAt:0};
+  const rec={stream:null, recorder:null, chunks:[], active:false, timer:null, mode:null, startedAt:0, elapsed:'00:00'};
+  function fmtElapsed(ms){ const sec=Math.max(0,Math.floor((Number(ms)||0)/1000)); const h=Math.floor(sec/3600); const m=Math.floor((sec%3600)/60); const s=sec%60; return h>0 ? String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') : String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+  function updateRecClock(){
+    if(!rec.active) return;
+    rec.elapsed=fmtElapsed(Date.now()-rec.startedAt);
+    try{ if(window.app){ window.app.recMMSS=rec.elapsed; } }catch(_){}
+    const msg=$('kgen-v10441-rec-msg'); if(msg) msg.textContent='錄影中｜'+rec.elapsed+'｜'+(rec.mode==='screen'?'螢幕錄影模式':'五指山神殿留影模式');
+    const ind=$('rec-ind'); if(ind){ ind.style.display='block'; ind.textContent='REC '+rec.elapsed; }
+    document.querySelectorAll('#rec-btn,.btn-rec').forEach(btn=>{ if(/錄影|停止|REC/.test(btn.textContent||'')) btn.textContent='⏹️ 停止錄影｜REC '+rec.elapsed; });
+  }
   function chooseMime(){
     if(!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
     const mimes=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
@@ -56,10 +65,10 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
   }
   function setBtn(active){
     document.querySelectorAll('#rec-btn,.btn-rec').forEach(btn=>{
-      btn.textContent=active?'⏹️ 停止五指山錄影':'🎥 五指山神殿留影錄影';
+      btn.textContent=active?('⏹️ 停止錄影｜REC '+(rec.elapsed||'00:00')):'🎥 五指山神殿留影錄影';
       btn.classList.toggle('active-kgen',!!active);
     });
-    document.body.classList.toggle('kgen-v10441-body-recording',!!active);
+    document.body.classList.toggle('kgen-v10441-body-recording',!!active); if(!active){ const ind=$('rec-ind'); if(ind){ind.style.display='none'; ind.textContent='REC 00:00';} }
   }
   function stopTracks(){try{rec.stream&&rec.stream.getTracks().forEach(t=>t.stop());}catch(_){}}
   function stop(){
@@ -109,7 +118,9 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
         }
       };
       rec.recorder.start(1000); rec.active=true; setBtn(true);
-      rec.timer=setInterval(()=>{ if(window.app && rec.mode==='canvas' && typeof window.app.syncExportCanvas==='function') window.app.syncExportCanvas(); },250);
+      rec.elapsed='00:00'; try{ if(window.app) window.app.recMMSS='00:00'; }catch(_){}
+      rec.timer=setInterval(()=>{ updateRecClock(); if(window.app && rec.mode==='canvas' && typeof window.app.syncExportCanvas==='function') window.app.syncExportCanvas(); },250);
+      updateRecClock();
       showHud('錄影中：'+(mode==='canvas'?'五指山神殿留影模式':'螢幕錄影模式')+'。再按一次錄影或按停止即可下載。',true);
       say('五指山神殿錄影開始。');
     }catch(e){
@@ -138,7 +149,7 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
       const warp=($('warp-input-val')||{}).value||'0';
       ctx.fillStyle='#ffd778';ctx.font='bold 30px Noto Sans TC';ctx.fillText(IDENTITY.log,30,50);
       ctx.fillStyle='#00f2ff';ctx.font='bold 22px Orbitron';ctx.fillText('ANGLE '+angle+'°',30,85);ctx.fillText('WARP '+Math.round(Number(warp||0)*3)+'x',30,115);ctx.fillText('GA '+(app.gaLevel||600),30,145);
-      ctx.fillStyle='#ff4444';ctx.font='bold 26px Orbitron';ctx.fillText('REC '+(app.recMMSS||'00:00'),30,185);
+      ctx.fillStyle='#ff4444';ctx.font='bold 26px Orbitron';ctx.fillText('REC '+(rec.elapsed||app.recMMSS||'00:00'),30,185);
       ctx.fillStyle='#fff';ctx.font='bold 26px Noto Sans TC';ctx.shadowBlur=10;ctx.shadowColor='#000';ctx.fillText(($('wish-label')||{}).innerText||'悟空心臟｜五指山',30,690);ctx.shadowBlur=0;
     };
     const oldCapture=app.capture&&app.capture.bind(app);
@@ -189,9 +200,48 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
       stable();
     }
   }
+
+  /* V10.44.2 Festival Heart Clock: one visible festival clock, old countdown nerves quarantined. */
+  function pad(n){return String(n).padStart(2,'0');}
+  function nextLocal(month,day,hour=0,min=0,sec=0){
+    const now=new Date(); let y=now.getFullYear(); let d=new Date(y,month-1,day,hour,min,sec,0); if(d.getTime()<=now.getTime()) d=new Date(y+1,month-1,day,hour,min,sec,0); return d;
+  }
+  function fmtNoSeconds(ms){
+    ms=Math.max(0,Number(ms)||0); const totalMin=Math.floor(ms/60000); const days=Math.floor(totalMin/1440); const hours=Math.floor((totalMin%1440)/60); const mins=totalMin%60;
+    if(days>0) return days+'天 '+pad(hours)+'時 '+pad(mins)+'分';
+    return pad(hours)+'時 '+pad(mins)+'分';
+  }
+  function renderFestivalHeart(){
+    const cd=$('kgen-v102-festival-countdown'); if(!cd) return;
+    const now=Date.now();
+    const ny=nextLocal(12,31,23,59,59).getTime()-now;
+    const d520=nextLocal(5,20,0,0,0).getTime()-now;
+    const d1111=nextLocal(11,11,0,0,0).getTime()-now;
+    const text='跨年 '+fmtNoSeconds(ny)+'｜520 '+fmtNoSeconds(d520)+'｜1111 '+fmtNoSeconds(d1111);
+    if(cd.dataset.kgenStableText!==text){ cd.dataset.kgenStableText=text; cd.textContent=text; }
+  }
+  function quarantineOldCountdownNerves(){
+    const keep=$('kgen-v102-festival-panel');
+    const candidates=[];
+    ['kgen-activity-countdowns','kh-ny-countdown','human-cd-520','human-cd-1111','human-cd-1231','cd-520','cd-1111','cd-1231','kgen-ny-countdown','v714-ny-count','kh-ny-slot'].forEach(id=>{const el=$(id); if(el) candidates.push(el);});
+    document.querySelectorAll('.kh-ny-countdown,[class*="ny-count"],[class*="countdown"]').forEach(el=>{ const tx=(el.textContent||''); if(/跨年|520|1111|newYear|festival/i.test(tx) || /ny|countdown/i.test(el.id||'')) candidates.push(el); });
+    Array.from(new Set(candidates)).forEach(el=>{
+      if(!el || (keep && keep.contains(el))) return;
+      el.dataset.kgenV10442Quarantined='1';
+      el.style.display='none';
+      el.style.animation='none'; el.style.transition='none'; el.style.opacity='1';
+    });
+  }
+  let festivalTimer=null;
+  function startFestivalHeartClock(){
+    if(festivalTimer) clearInterval(festivalTimer);
+    renderFestivalHeart(); quarantineOldCountdownNerves();
+    festivalTimer=setInterval(()=>{ renderFestivalHeart(); quarantineOldCountdownNerves(); },1000);
+  }
+
   function boot(){
-    patchAppIdentity(); patchButtons(); patchFestival(); hideHud();
-    log('V10.44.1 神級再生器官已啟動：錄影身份修復、節日細胞收合、跨年倒數穩定。');
+    patchAppIdentity(); patchButtons(); patchFestival(); startFestivalHeartClock(); hideHud();
+    log('V10.44.2 神級再生器官已啟動：錄影秒數同步、節日單心跳、舊倒數神經隔離。');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
   setTimeout(boot,800);
