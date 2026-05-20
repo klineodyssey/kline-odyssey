@@ -454,7 +454,7 @@ setTimeout(() => {
         } else ctx.drawImage(f, 0, 0, 1000, 1000);
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 40px Noto Sans TC";
-        ctx.fillText("KGEN 16888 自我演化金融生命體", 50, 80);
+        ctx.fillText("KGEN 12345 五指山悟空財神殿", 50, 80);
         ctx.fillStyle = "#ffcc00"; ctx.font = "24px Orbitron";
         ctx.fillText(`EVO RANK: GA-${this.gaLevel} | ${new Date().toLocaleString()}`, 50, 120);
         ctx.fillStyle = "#fff"; ctx.font = "bold 45px Noto Sans TC";
@@ -463,7 +463,7 @@ setTimeout(() => {
 
         this.bbEvent("capture", {});
 
-        const link = document.createElement('a'); link.download = `KGEN_MUSCLE_V4.png`;
+        const link = document.createElement('a'); link.download = `KGEN_12345_WUKONG_TEMPLE_CAPTURE.png`;
         link.href = canvas.toDataURL(); link.click();
     },
 
@@ -588,7 +588,7 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
         const durationSec = (started && ended) ? Math.max(0, Math.round((ended-started)/1000)) : null;
 
         const payload = {
-            schema: "kgen.moonwedding.v1",
+            schema: "kgen.12345.wukong.temple.v1",
             sessionId: this.blackbox.sessionId,
             startedAt: this.blackbox.startedAt,
             endedAt: this.blackbox.endedAt,
@@ -612,10 +612,10 @@ this.bbEvent('wish', { text: (document.getElementById('wish-label')?document.get
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `KGEN_MOON_WEDDING_${this.blackbox.sessionId}.json`;
+        a.download = `KGEN_12345_WUKONG_TEMPLE_${this.blackbox.sessionId}.json`;
         a.click();
 
-        try { localStorage.setItem(`KGEN_MOON_WEDDING_${this.blackbox.sessionId}`, json); } catch(e) {}
+        try { localStorage.setItem(`KGEN_12345_WUKONG_TEMPLE_${this.blackbox.sessionId}`, json); } catch(e) {}
     },
 
     startRecTimer(){
@@ -661,7 +661,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         const warp  = document.getElementById('warp-input-val').value;
 
         ctx.fillStyle = "#ffd778"; ctx.font = "bold 30px Noto Sans TC";
-        ctx.fillText("KGEN 16888 MOON-WEDDING-LOG", 30, 50);
+        ctx.fillText("KGEN 12345 WUKONG-TEMPLE-LOG", 30, 50);
 
         ctx.fillStyle = "#00f2ff"; ctx.font = "bold 22px Orbitron";
         ctx.fillText(`ANGLE ${angle}°`, 30, 85);
@@ -710,7 +710,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         this.recorder.onstop = () => {
             const blob = new Blob(this.chunks, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_MOON_WEDDING_LOG.webm'; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = 'KGEN_12345_WUKONG_TEMPLE_RECORD.webm'; a.click();
         };
 
         this.bbStart();

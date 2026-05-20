@@ -1,0 +1,110 @@
+/*
+FILE: modules/kgen-12345-divine-regeneration.css
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: 12345-TEMPLE-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
+BUILD: 20260520-V10.44.1-DIVINE-REGENERATION-RECORDING-CELL
+BASE_FROM: V10.44.0 PrimeForge Mother Runtime Growth
+BORN: 2026-05-20
+STATUS: ACTIVE
+DNA: divine-regeneration / recorder-identity-fix / festival-organ-collapse
+DEATH: NONE
+PURPOSE: No-scar UI regeneration layer. Fixes 12345 recording identity, festival organ docking, and countdown jitter without stealing the main UI nervous system.
+*/
+
+:root{
+  --kgen-v10441-panel-w: 340px;
+}
+
+#kgen-v10441-rec-heal-hud{
+  position:fixed;
+  left:50%;
+  top:58%;
+  transform:translate(-50%,-50%);
+  width:min(520px,88vw);
+  z-index:99999;
+  display:none;
+  padding:14px 16px;
+  border:1px solid rgba(255,215,120,.5);
+  border-radius:14px;
+  background:rgba(5,7,10,.86);
+  color:#fff8d8;
+  text-align:center;
+  box-shadow:0 0 22px rgba(255,203,77,.22),0 18px 60px rgba(0,0,0,.68);
+  backdrop-filter:blur(8px);
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+}
+#kgen-v10441-rec-heal-hud.show{display:block;}
+#kgen-v10441-rec-heal-hud b{color:#74f6ff;}
+#kgen-v10441-rec-heal-hud .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;}
+#kgen-v10441-rec-heal-hud button{
+  border:1px solid rgba(255,215,120,.45);
+  border-radius:10px;
+  background:linear-gradient(180deg,#ffe28a,#d6a841);
+  color:#111;
+  font-weight:900;
+  padding:8px 14px;
+}
+#kgen-v10441-rec-heal-hud button.secondary{background:rgba(0,0,0,.35);color:#ffecc0;}
+
+#kgen-v102-festival-panel{
+  width:var(--kgen-v10441-panel-w) !important;
+  max-width:calc(100vw - 24px) !important;
+  right:18px !important;
+  top:275px !important;
+  z-index:260 !important;
+  overflow:hidden !important;
+  transition:max-height .25s ease, opacity .25s ease, transform .25s ease;
+  contain:layout paint;
+}
+#kgen-v102-festival-panel h3{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  cursor:pointer;
+  min-height:34px;
+  margin:0 !important;
+  line-height:1.2 !important;
+  white-space:nowrap;
+}
+#kgen-v102-festival-panel h3::after{
+  content:'收合';
+  color:#ffecad;
+  border:1px solid rgba(255,215,120,.35);
+  border-radius:999px;
+  padding:3px 8px;
+  font-size:11px;
+  flex:0 0 auto;
+}
+#kgen-v102-festival-panel.kgen-festival-collapsed{
+  max-height:48px !important;
+}
+#kgen-v102-festival-panel.kgen-festival-collapsed .kgen-v102-festival-body{
+  display:none !important;
+}
+#kgen-v102-festival-panel.kgen-festival-collapsed h3::after{content:'展開';}
+#kgen-v102-festival-countdown{
+  font-variant-numeric:tabular-nums;
+  min-height:18px;
+  line-height:18px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#kgen-v102-newyear, #kgen-v102-festival-520, #kgen-v102-festival-1111, #kgen-v102-festival-voice{
+  min-height:30px;
+}
+
+.kgen-v10441-body-recording #rec-btn,
+.kgen-v10441-body-recording .btn-rec{
+  box-shadow:0 0 16px rgba(255,68,68,.65) !important;
+  border-color:rgba(255,88,88,.9) !important;
+}
+
+@media(max-width:760px){
+  #kgen-v102-festival-panel{
+    right:12px !important;
+    top:268px !important;
+    width:min(330px, calc(100vw - 24px)) !important;
+  }
+}
