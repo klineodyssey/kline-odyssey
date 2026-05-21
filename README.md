@@ -472,8 +472,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ Wukong Awakens｜KGEN Financial Physics Engine V1.3  
-👉 https://www.youtube.com/watch?v=rBF1crFFErU
+▶ 2026年5月22日  
+👉 https://www.youtube.com/watch?v=zsEpvBwIbws
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
