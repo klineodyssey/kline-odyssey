@@ -472,8 +472,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 2026年5月22日  
-👉 https://www.youtube.com/watch?v=zsEpvBwIbws
+▶ #K線西遊記 #KGEN #白皮書《KGEN 5D Warp Timeline Civilization》白皮書正式公開。市場不再只是價格波動。而是一個可穿越 Timeline 的五維金融文明。  
+👉 https://www.youtube.com/watch?v=z_p_cmz14UA
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
