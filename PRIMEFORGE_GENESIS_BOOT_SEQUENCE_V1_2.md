@@ -12,7 +12,7 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2/
      target="_blank"
      rel="noopener"
      style="display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; font-weight:900; text-decoration:none; border:1px solid #111; background:#fff;">
-    🌌 返回宇宙入口
+    
   </a>
 </div>
 
