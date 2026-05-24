@@ -31,14 +31,20 @@ Homepage Quick Actions (Production Block)
 ========================= -->
 
 <div style="margin:14px 0 6px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
-
-<a
-  class="btn"
-  href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
-  target="_blank"
-  rel="noopener"
->
-  PrimeForge 開機序列
+  
+<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
+   target="_blank"
+   rel="noopener"
+   style="display:inline-flex;
+          align-items:center;
+          gap:8px;
+          padding:10px 14px;
+          border-radius:999px;
+          font-weight:900;
+          text-decoration:none;
+          border:1px solid #111;
+          background:#fff;">
+  🚀 PrimeForge 開機序列
 </a>
 
   <a href="./whitepaper/donation/"
