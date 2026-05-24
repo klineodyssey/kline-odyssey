@@ -24,6 +24,7 @@ KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent
             font-weight:800; text-decoration:none;
             border:1px solid #111; background:#fff;">
     🗺️ 進入銀河宇宙入口 
+    
   </a>
   
 </div>
