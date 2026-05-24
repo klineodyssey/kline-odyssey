@@ -1,21 +1,15 @@
-<a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
-target="_blank"
-rel="noopener"
-style="
-display:block;
-width:fit-content;
-margin-bottom:12px;
-padding:10px 14px;
-border-radius:999px;
-font-weight:900;
-text-decoration:none;
-border:1px solid #111;
-background:#fff;
-">
 
-🗺️ 進入銀河宇宙入口
+[🌌 返回宇宙入口](https://klineodyssey.github.io/kline-odyssey/)
 
-</a>
+<!-- Universe Return Gate -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank"
+     rel="noopener"
+     style="display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; font-weight:900; text-decoration:none; border:1px solid #111; background:#fff;">
+    
+  </a>
+</div>
 
 # 《KGEN 宇宙座標白皮書》
 # KGEN Cosmic Coordinate Framework Whitepaper
