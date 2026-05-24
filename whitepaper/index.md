@@ -1,9 +1,11 @@
 ---
 layout: default
 title: Whitepaper
+permalink: /whitepaper/
 ---
 
 # KLINE ODYSSEY
+
 ## Whitepaper Index｜宇宙白皮書總入口
 
 本區是《KLINE Odyssey》白皮書與宇宙文件的總入口。
