@@ -6,9 +6,34 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2/
 
 [🌌 返回宇宙入口](https://klineodyssey.github.io/kline-odyssey/)
 
-# PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2
+<!-- Universe Return Gate -->
+<div style="position:sticky;
+            top:10px;
+            z-index:9999;
+            display:flex;
+            justify-content:flex-end;
+            margin:10px 0;">
 
-# PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank"
+     rel="noopener"
+     style="display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 14px;
+            border-radius:999px;
+            font-weight:900;
+            text-decoration:none;
+            border:1px solid #111;
+            background:#fff;">
+
+    🌌 返回宇宙入口
+
+  </a>
+
+</div>
+
+# PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2
 
 STATUS: ACTIVE  
 TYPE: AI Civilization Boot Sequence / Mandatory Runtime Initialization  
