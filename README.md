@@ -16,16 +16,23 @@ KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent
 </div>
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
-  <a 
-    href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
-     target="_blank" rel="noopener"
-     style="display:inline-flex; align-items:center; gap:8px;
-            padding:10px 14px; border-radius:999px;
-            font-weight:800; text-decoration:none;
-            border:1px solid #111; background:#fff;">
-    🗺️ 進入銀河宇宙入口 
-    
-  </a>
+  
+<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
+   target="_blank"
+   rel="noopener"
+   style="
+      display:block;
+      width:fit-content;
+      margin-bottom:12px;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      text-decoration:none;
+      border:1px solid #111;
+      background:#fff;
+   ">
+  🚀 PrimeForge 開機序列
+</a>
   
 </div>
 
@@ -37,19 +44,21 @@ Homepage Quick Actions (Production Block)
 
 <div style="margin:14px 0 6px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
   
-<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
+<a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
    target="_blank"
    rel="noopener"
-   style="display:inline-flex;
-          align-items:center;
-          gap:8px;
-          padding:10px 14px;
-          border-radius:999px;
-          font-weight:900;
-          text-decoration:none;
-          border:1px solid #111;
-          background:#fff;">
-  🚀 PrimeForge 開機序列
+   style="
+      display:block;
+      width:fit-content;
+      margin-bottom:12px;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      text-decoration:none;
+      border:1px solid #111;
+      background:#fff;
+   ">
+  🗺️ 進入銀河宇宙入口
 </a>
 
   <a href="./whitepaper/donation/"
