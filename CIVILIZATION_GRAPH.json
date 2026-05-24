@@ -1,0 +1,69 @@
+{
+  "version": "V1.0",
+  "civilizations": {
+    "12345": {
+      "name": "五指山悟空財神殿",
+      "role": "Universe Core / Heart Runtime",
+      "depends_on": [
+        "11520",
+        "18888"
+      ],
+      "can_mount": [
+        "16888",
+        "runtime-heart",
+        "runtime-boundary"
+      ]
+    },
+    "16888": {
+      "name": "廣寒宮",
+      "role": "UFO Cockpit / Visualization Runtime",
+      "depends_on": [
+        "12345"
+      ],
+      "can_mount": [
+        "runtime-hud",
+        "runtime-sphere"
+      ]
+    },
+    "11520": {
+      "name": "花果山台灣交易所",
+      "role": "Universe Brain",
+      "depends_on": [],
+      "can_mount": [
+        "runtime-brain"
+      ]
+    },
+    "18888": {
+      "name": "靈霄寶殿神明銀行",
+      "role": "Divine Treasury / Civilization Mass",
+      "depends_on": [],
+      "can_mount": [
+        "runtime-heart"
+      ]
+    },
+    "108000": {
+      "name": "花果山火星齊天豪宅",
+      "role": "Mars Civilization / Seat Runtime",
+      "depends_on": [
+        "18888"
+      ],
+      "can_mount": []
+    },
+    "8895": {
+      "name": "雲棧洞地下錢莊",
+      "role": "Shadow Bank / Underground Liquidity",
+      "depends_on": [
+        "18888"
+      ],
+      "can_mount": []
+    },
+    "20888": {
+      "name": "火焰山",
+      "role": "High Volatility Fire Realm",
+      "depends_on": [
+        "12345"
+      ],
+      "can_mount": []
+    }
+  }
+}
