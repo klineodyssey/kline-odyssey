@@ -1,0 +1,22 @@
+{
+  "version": "V1.0",
+  "required_fields": [
+    "species",
+    "version",
+    "build",
+    "ancestor",
+    "runtime_file",
+    "css_file",
+    "taxonomy"
+  ],
+  "taxonomy_required": [
+    "domain",
+    "kingdom",
+    "phylum",
+    "classis",
+    "order",
+    "family",
+    "genus",
+    "species"
+  ]
+}
