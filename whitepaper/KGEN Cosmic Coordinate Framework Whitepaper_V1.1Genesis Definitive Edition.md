@@ -1,3 +1,8 @@
+---
+layout: default
+title: PRIMEFORGE GENESIS BOOT SEQUENCE
+permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2/
+---
 
 [🌌 返回宇宙入口](https://klineodyssey.github.io/kline-odyssey/)
 
