@@ -1,0 +1,5 @@
+# HANDOFF_CURRENT
+
+STATUS: INITIAL
+
+本包為 AI 必讀開機與神經索引基礎包。
