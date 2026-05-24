@@ -1,3 +1,28 @@
+<!-- PrimeForge Universe Return Gate -->
+<div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
+
+  <a href="https://klineodyssey.github.io/kline-odyssey/"
+     target="_blank"
+     rel="noopener"
+     style="
+       display:inline-flex;
+       align-items:center;
+       gap:8px;
+       padding:10px 14px;
+       border-radius:999px;
+       font-weight:900;
+       text-decoration:none;
+       border:1px solid #111;
+       background:#fff;
+       box-shadow:0 2px 8px rgba(0,0,0,0.12);
+     ">
+
+     🧬 返回宇宙母機｜PrimeForge Portal
+
+  </a>
+
+</div>
+
 # KGEN Whitepaper
 ## Galactic Bank · 500Y Epoch
 ### Version 7.5.2 (Genesis Edition)
