@@ -454,6 +454,63 @@ Where the Market Becomes the Myth.
 
 ---
 
+# 13.1 必讀文件入口
+
+<div style="display:flex;flex-direction:column;gap:10px;margin:14px 0;">
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/SOP"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🧠 /SOP
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/docs/runtime"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+⚙️ /docs/runtime
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/docs/physics"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🌌 /docs/physics
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/docs/biology"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🧬 /docs/biology
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/docs/neural"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🧠 /docs/neural
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/neural"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🛰️ /neural
+</a>
+
+<a href="https://github.com/klineodyssey/kline-odyssey/tree/main/K線西遊記"
+target="_blank"
+rel="noopener"
+style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+🐵 /K線西遊記
+</a>
+
+</div>
+
+---
+
 # 14. AI 開機讀取順序
 
 ```text
