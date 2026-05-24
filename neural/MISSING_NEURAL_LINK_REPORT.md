@@ -1,0 +1,5 @@
+# MISSING_NEURAL_LINK_REPORT
+
+STATUS: EMPTY
+
+缺檔或失聯器官時，於此記錄。

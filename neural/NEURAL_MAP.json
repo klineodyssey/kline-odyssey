@@ -1,0 +1,56 @@
+{
+  "version": "V1.0",
+  "source_of_truth": true,
+  "root": "/",
+  "must_read_order": [
+    "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+    "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+    "/docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md",
+    "/docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
+    "/docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+    "/docs/runtime/KGEN_UFO_Runtime_Control_System_V3_0.md",
+    "/docs/neural/KGEN_Universe_Neural_System_V1_0.md"
+  ],
+  "nodes": {
+    "boot": {
+      "path": "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+      "type": "core_boot",
+      "must_read": true
+    },
+    "ancestor_boot": {
+      "path": "/archive/boot/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_0.md",
+      "type": "archive",
+      "must_read": false
+    },
+    "sop": {
+      "path": "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      "type": "sop",
+      "must_read": true
+    },
+    "runtime_boot": {
+      "path": "/docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md",
+      "type": "runtime_boot",
+      "must_read": true
+    },
+    "ufo_runtime": {
+      "path": "/docs/runtime/KGEN_UFO_Runtime_Control_System_V3_0.md",
+      "type": "runtime_constitution",
+      "must_read": true
+    },
+    "physics": {
+      "path": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
+      "type": "physics_constitution",
+      "must_read": true
+    },
+    "biology": {
+      "path": "/docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+      "type": "biology_constitution",
+      "must_read": true
+    },
+    "neural_system": {
+      "path": "/docs/neural/KGEN_Universe_Neural_System_V1_0.md",
+      "type": "neural_constitution",
+      "must_read": true
+    }
+  }
+}

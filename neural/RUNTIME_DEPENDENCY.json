@@ -1,0 +1,34 @@
+{
+  "version": "V1.0",
+  "dependencies": {
+    "runtime-main.js": {
+      "depends_on": [
+        "runtime-heart.js",
+        "runtime-brain.js",
+        "runtime-boundary.js",
+        "runtime-autopilot.js",
+        "runtime-sphere.js",
+        "runtime-hud.js"
+      ]
+    },
+    "runtime-autopilot.js": {
+      "depends_on": [
+        "runtime-boundary.js",
+        "runtime-brain.js"
+      ]
+    },
+    "runtime-hud.js": {
+      "depends_on": [
+        "runtime-main.js",
+        "runtime-boundary.js",
+        "runtime-sphere.js"
+      ]
+    },
+    "runtime-sphere.js": {
+      "depends_on": [
+        "runtime-main.js",
+        "runtime-hud.js"
+      ]
+    }
+  }
+}

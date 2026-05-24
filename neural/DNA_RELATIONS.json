@@ -1,0 +1,33 @@
+{
+  "version": "V1.0",
+  "dna_rules": {
+    "must_have_taxonomy": true,
+    "must_have_version": true,
+    "must_have_source_of_truth": true,
+    "must_have_compatibility": true,
+    "must_preserve_ancestor": true
+  },
+  "compatibility": {
+    "UFOCockpit": [
+      "HeartRuntime",
+      "BrainRuntime",
+      "BoundaryRuntime",
+      "SphereRuntime",
+      "HUDRuntime"
+    ],
+    "HeartRuntime": [
+      "BrainRuntime",
+      "TreasuryRuntime",
+      "BoundaryRuntime"
+    ],
+    "TreasuryRuntime": [
+      "HeartRuntime",
+      "BankRuntime"
+    ],
+    "BrainRuntime": [
+      "HeartRuntime",
+      "AutopilotRuntime",
+      "NeuralRuntime"
+    ]
+  }
+}

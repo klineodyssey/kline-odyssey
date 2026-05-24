@@ -1,0 +1,53 @@
+{
+  "version": "V1.0",
+  "organs": {
+    "runtime-main": {
+      "file": "runtime-main.js",
+      "type": "core-organ",
+      "role": "Universe Loop",
+      "required": true
+    },
+    "runtime-main-css": {
+      "file": "runtime-main.css",
+      "type": "skin-organ",
+      "role": "Core Runtime Visual Skin",
+      "required": true
+    },
+    "runtime-heart": {
+      "file": "runtime-heart.js",
+      "type": "heart-organ",
+      "role": "Mass / Energy / Temple Heart",
+      "required": true
+    },
+    "runtime-brain": {
+      "file": "runtime-brain.js",
+      "type": "brain-organ",
+      "role": "Decision / Memory / AI Routing",
+      "required": true
+    },
+    "runtime-boundary": {
+      "file": "runtime-boundary.js",
+      "type": "immune-organ",
+      "role": "Boundary Pressure / Risk Shield",
+      "required": true
+    },
+    "runtime-autopilot": {
+      "file": "runtime-autopilot.js",
+      "type": "navigation-organ",
+      "role": "AutoPilot / Self-Healing",
+      "required": true
+    },
+    "runtime-sphere": {
+      "file": "runtime-sphere.js",
+      "type": "geometry-organ",
+      "role": "Sphere Timeline Renderer",
+      "required": true
+    },
+    "runtime-hud": {
+      "file": "runtime-hud.js",
+      "type": "vision-organ",
+      "role": "HUD / Player Interface",
+      "required": true
+    }
+  }
+}
