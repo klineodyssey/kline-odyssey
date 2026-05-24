@@ -11,6 +11,7 @@ KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent
    target="_blank" rel="noopener"
    style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#000;color:#fff;">
   🚀 Buy KGEN（Pancake）
+  
 </a>
 </div>
 <!-- Official Entry (Top-Right) -->
