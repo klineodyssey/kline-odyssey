@@ -1,18 +1,20 @@
 <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html"
-   target="_blank"
-   rel="noopener"
-   style="
-      display:block;
-      width:fit-content;
-      margin-bottom:12px;
-      padding:10px 14px;
-      border-radius:999px;
-      font-weight:900;
-      text-decoration:none;
-      border:1px solid #111;
-      background:#fff;
-   ">
-  🗺️ 進入銀河宇宙入口
+target="_blank"
+rel="noopener"
+style="
+display:block;
+width:fit-content;
+margin-bottom:12px;
+padding:10px 14px;
+border-radius:999px;
+font-weight:900;
+text-decoration:none;
+border:1px solid #111;
+background:#fff;
+">
+
+🗺️ 進入銀河宇宙入口
+
 </a>
 
 # 《KGEN 宇宙座標白皮書》
