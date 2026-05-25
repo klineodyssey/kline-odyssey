@@ -75,11 +75,11 @@
     "structure_coordinate": {
       "root_structure": "/K線西遊記",
       "city_structure": "/K線西遊記/temples/12345",
-      "current_life_coordinate": "/modules/kgen-12345-cell-registry.json"
+      "current_life_coordinate": "/modules/runtime-cell-registry.json"
     },
     "file_certificate": {
-      "file": "kgen-12345-cell-registry.json",
-      "path": "/modules/kgen-12345-cell-registry.json",
+      "file": "runtime-cell-registry.json",
+      "path": "/modules/runtime-cell-registry.json",
       "product_id": "KGEN-12345-HEART-UI",
       "life_layer": "DNA",
       "life_type": "Genome DNA Record",
@@ -97,7 +97,7 @@
       "order": "ConfigurationDNA",
       "family": "PrimeForgeLife",
       "genus": "KGEN12345",
-      "species": "kgen-12345-cell-registry.json",
+      "species": "runtime-cell-registry.json",
       "cell": "Genome Cell",
       "organ": "DNA Registry",
       "dna": "JSON-GENOME-DNA"

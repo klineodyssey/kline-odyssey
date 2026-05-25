@@ -36,5 +36,59 @@
       "name": "Civilization Runtime",
       "scope": "12345 / 16888 / 8888 / 11520 跨地圖生命連線"
     }
-  ]
+  ],
+  "_primeforge_life_header": {
+    "version": "PRIMEFORGE_LIFE_HEADER_V1",
+    "civilization_info": {
+      "civilization_id": "KGEN-PRIME-CIVILIZATION",
+      "civilization_name": "KLINE ODYSSEY",
+      "planet": "GitHub",
+      "repo": "klineodyssey/kline-odyssey",
+      "survival_rule": "沒有質量，就沒有位置"
+    },
+    "structure_coordinate": {
+      "root_structure": "/K線西遊記",
+      "city_structure": "/K線西遊記/temples/12345",
+      "current_life_coordinate": "/modules/kgen-12345-growth-policy.json"
+    },
+    "file_certificate": {
+      "file": "kgen-12345-growth-policy.json",
+      "path": "/modules/kgen-12345-growth-policy.json",
+      "product_id": "KGEN-12345-HEART-UI",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "build": "20260525-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "birth": "2026-05-25",
+      "death": "ACTIVE",
+      "growth_stage": "IMMORTAL_REGENERATION_STANDARDIZATION"
+    },
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "GenomeRecord",
+      "class": "JsonGenome",
+      "order": "ConfigurationDNA",
+      "family": "PrimeForgeLife",
+      "genus": "KGEN12345",
+      "species": "kgen-12345-growth-policy.json",
+      "cell": "Genome Cell",
+      "organ": "DNA Registry",
+      "dna": "JSON-GENOME-DNA"
+    },
+    "immune_system": {
+      "virus_scan": "ENABLED",
+      "hash_validation": "REQUIRED",
+      "unknown_organ_block": true,
+      "patch_drift_block": true,
+      "version_filename_block": true,
+      "self_healing": "ENABLED"
+    },
+    "regeneration": {
+      "embryo_mode": "GZIP_BASE64",
+      "can_rebuild_from_embryo": true,
+      "rejuvenation": "ENABLED",
+      "immortality_class": "WUKONG_LONGEVITY"
+    }
+  }
 }

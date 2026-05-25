@@ -11,10 +11,10 @@ PRIMEFORGE_LIFE_HEADER_V1:
   STRUCTURE_COORDINATE:
     ROOT_STRUCTURE: /K線西遊記
     CITY_STRUCTURE: /K線西遊記/temples/12345
-    CURRENT_LIFE_COORDINATE: /modules/kgen-12345-divine-regeneration.css
+    CURRENT_LIFE_COORDINATE: /modules/runtime-regeneration.css
   FILE_CERTIFICATE:
-    FILE: kgen-12345-divine-regeneration.css
-    PATH: /modules/kgen-12345-divine-regeneration.css
+    FILE: runtime-regeneration.css
+    PATH: /modules/runtime-regeneration.css
     PRODUCT_ID: KGEN-12345-HEART-UI
     LIFE_LAYER: SKIN
     LIFE_TYPE: Skin Runtime Lifeform
@@ -33,7 +33,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
     ORDER: CSSOrgan
     FAMILY: PrimeForgeLife
     GENUS: KGEN12345
-    SPECIES: kgen-12345-divine-regeneration.css
+    SPECIES: runtime-regeneration.css
     CELL: Visual Skin Cell
     ORGAN: Skin / Appearance Organ
     DNA: CSS-SKIN-DNA

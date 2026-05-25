@@ -1,67 +1,41 @@
 {
   "file_certificate": {
-    "file": "modules/kgen-12345-cell-registry.json",
-    "product_id": "KGEN-12345-CELL-REGISTRY",
+    "file": "modules/kgen-12345-growth-policy.json",
+    "product_id": "KGEN-12345-GROWTH-POLICY",
     "version": "V10.44.0",
     "birth": "2026-05-20",
-    "base_from": "V10.42.6 stable mother body",
     "death": "ACTIVE"
   },
-  "principle": "所有細胞與器官先登記，後載入；未登記不得自動生長。",
-  "root_body": "index.html",
-  "core_cells": [
+  "mission": "支援 AI 母機自動導行、生長一萬年航程；創作者不在時仍可依憲法演化。",
+  "rules": [
+    "index.html 是母體骨架，不再塞入新功能。",
+    "所有新器官必須先有 FILE_CERTIFICATE、REGISTRY、死亡規則。",
+    "深層資料夾只有在有導行 registry 與權限邊界時才允許。",
+    "免疫系統只能觀測與報告，不可直接破壞主神經。",
+    "正式資產檔名不可漂移；換圖只能覆蓋正式名。",
+    "升版只能累積文明，不能刪除未登記歷史。"
+  ],
+  "growth_stages": [
     {
-      "id": "body.index",
-      "path": "index.html",
-      "type": "root-body",
-      "status": "ACTIVE",
-      "authority": "layout-shell"
+      "stage": "V10.44",
+      "name": "Mother Runtime Observer",
+      "scope": "穩定母體 + 母機導行 HUD + 細胞戶口"
     },
     {
-      "id": "skin.core-css",
-      "path": "modules/kgen-12345-core.css",
-      "type": "skin",
-      "status": "ACTIVE",
-      "authority": "visual-layout"
+      "stage": "V10.45",
+      "name": "Organ Isolation",
+      "scope": "心臟、曲速、腦、免疫分器官但不搶主神經"
     },
     {
-      "id": "nerve.runtime",
-      "path": "modules/kgen-12345-runtime.js",
-      "type": "nerve-runtime",
-      "status": "ACTIVE",
-      "authority": "legacy-v10.2-ui-runtime"
+      "stage": "V10.46",
+      "name": "DNA Runtime",
+      "scope": "玩家 DNA / 宇宙細胞 / 商店細胞初生"
     },
     {
-      "id": "mother.autopilot",
-      "path": "modules/kgen-12345-mother-runtime.js",
-      "type": "mother-observer",
-      "status": "ACTIVE",
-      "authority": "observe-register-report-only"
+      "stage": "V10.50",
+      "name": "Civilization Runtime",
+      "scope": "12345 / 16888 / 8888 / 11520 跨地圖生命連線"
     }
-  ],
-  "official_assets": [
-    "assets/bull-front.png",
-    "assets/bear-rear.png",
-    "assets/heart.png",
-    "assets/warp-core.png"
-  ],
-  "future_organs_reserved": [
-    "heart-engine",
-    "warp-engine",
-    "brain-engine",
-    "immune-engine",
-    "dna-engine",
-    "marketplace-engine"
-  ],
-  "forbidden_growth": [
-    "patch",
-    "hotfix",
-    "temp",
-    "copy",
-    "backup",
-    "fix2",
-    "ultimate",
-    "stable"
   ],
   "_primeforge_life_header": {
     "version": "PRIMEFORGE_LIFE_HEADER_V1",
@@ -75,11 +49,11 @@
     "structure_coordinate": {
       "root_structure": "/K線西遊記",
       "city_structure": "/K線西遊記/temples/12345",
-      "current_life_coordinate": "/modules/kgen-12345-cell-registry.json"
+      "current_life_coordinate": "/modules/runtime-growth-policy.json"
     },
     "file_certificate": {
-      "file": "kgen-12345-cell-registry.json",
-      "path": "/modules/kgen-12345-cell-registry.json",
+      "file": "runtime-growth-policy.json",
+      "path": "/modules/runtime-growth-policy.json",
       "product_id": "KGEN-12345-HEART-UI",
       "life_layer": "DNA",
       "life_type": "Genome DNA Record",
@@ -97,7 +71,7 @@
       "order": "ConfigurationDNA",
       "family": "PrimeForgeLife",
       "genus": "KGEN12345",
-      "species": "kgen-12345-cell-registry.json",
+      "species": "runtime-growth-policy.json",
       "cell": "Genome Cell",
       "organ": "DNA Registry",
       "dna": "JSON-GENOME-DNA"

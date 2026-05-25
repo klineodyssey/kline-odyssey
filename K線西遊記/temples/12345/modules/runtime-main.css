@@ -1,0 +1,246 @@
+/*
+PRIMEFORGE_LIFE_HEADER_V1:
+  CIVILIZATION_INFO:
+    CIVILIZATION_ID: KGEN-PRIME-CIVILIZATION
+    CIVILIZATION_NAME: KLINE ODYSSEY
+    GALAXY: Internet
+    PLANET: GitHub
+    REPO: klineodyssey/kline-odyssey
+    CHAIN_NETWORK: BNB Smart Chain
+    SURVIVAL_RULE: 沒有質量，就沒有位置
+  STRUCTURE_COORDINATE:
+    ROOT_STRUCTURE: /K線西遊記
+    CITY_STRUCTURE: /K線西遊記/temples/12345
+    CURRENT_LIFE_COORDINATE: /modules/runtime-main.css
+  FILE_CERTIFICATE:
+    FILE: runtime-main.css
+    PATH: /modules/runtime-main.css
+    PRODUCT_ID: KGEN-12345-HEART-UI
+    LIFE_LAYER: SKIN
+    LIFE_TYPE: Skin Runtime Lifeform
+    VERSION: 12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION
+    BUILD: 20260525-V10.48.0-LIFE-STANDARD-REGENERATION
+    BIRTH: 2026-05-25
+    BASE_FROM: KGEN_12345_V10_47_1_LAYOUT_REAL_FIX_FULL_GITHUB_READY.zip
+    UPGRADE_FROM: 12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX
+    DEATH: ACTIVE
+    GROWTH_STAGE: IMMORTAL_REGENERATION_STANDARDIZATION
+  TAXONOMY:
+    DOMAIN: KGENVERSE
+    KINGDOM: FinancialLifeform
+    PHYLUM: AppearanceOrganism
+    CLASS: SkinRuntime
+    ORDER: CSSOrgan
+    FAMILY: PrimeForgeLife
+    GENUS: KGEN12345
+    SPECIES: runtime-main.css
+    CELL: Visual Skin Cell
+    ORGAN: Skin / Appearance Organ
+    DNA: CSS-SKIN-DNA
+  IMMUNE_SYSTEM:
+    VIRUS_SCAN: ENABLED
+    HASH_VALIDATION: REQUIRED
+    UNKNOWN_ORGAN_BLOCK: TRUE
+    PATCH_DRIFT_BLOCK: TRUE
+    VERSION_FILENAME_BLOCK: TRUE
+    SELF_HEALING: ENABLED
+  REGENERATION:
+    EMBRYO_MODE: GZIP_BASE64
+    CAN_REBUILD_FROM_EMBRYO: TRUE
+    REJUVENATION: ENABLED
+    IMMORTALITY_CLASS: WUKONG_LONGEVITY
+  SECURITY_FINGERPRINT:
+    FINAL_SHA256: FILLED_IN_SHA256SUMS
+
+*/
+
+/*
+FILE: modules/runtime-main.css
+PRODUCT_ID: KGEN-12345-HEART-UI
+VERSION: 12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX
+BUILD: 20260520-V10.47.1-LAYOUT-REAL-FIX
+BASE_FROM: V10.44.2
+ANCESTOR_DNA: V10.42.6
+STATUS: ACTIVE
+PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
+*/
+
+:root {
+  --kgen-cell-height: 44px;
+  --kgen-cell-radius: 13px;
+  --kgen-nav-width: 320px;
+  --kgen-organ-gap: 10px;
+}
+
+/* 版本銘牌 */
+#ver-st {
+  display:block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+  z-index: 9999 !important;
+}
+
+/* 右側神規登入預設關閉 */
+body.kgen-right-rule-closed #coord-panel,
+body.kgen-right-rule-closed .coord-panel,
+body.kgen-right-rule-closed #right-info-panel,
+body.kgen-right-rule-closed .right-info-panel {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 右側導覽統一器官序列 */
+#universe-nav {
+  display:flex !important;
+  flex-direction:column !important;
+  gap: var(--kgen-organ-gap) !important;
+  align-items: stretch !important;
+}
+
+#universe-nav .nav-btn,
+#universe-nav #kgenMsgCenterBtn,
+#universe-nav > button {
+  width: var(--kgen-nav-width) !important;
+  max-width: var(--kgen-nav-width) !important;
+  min-height: var(--kgen-cell-height) !important;
+  height: var(--kgen-cell-height) !important;
+  border-radius: var(--kgen-cell-radius) !important;
+  box-sizing:border-box !important;
+}
+
+/* Festival organ 必須回到右側 nav 序列，不准 absolute/fixed 漂浮 */
+#universe-nav #kgen-v102-festival-panel,
+#kgen-v102-festival-panel.kgen-layout-fixed {
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: var(--kgen-nav-width) !important;
+  max-width: var(--kgen-nav-width) !important;
+  min-width: 0 !important;
+  box-sizing:border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--kgen-cell-radius) !important;
+  overflow: hidden !important;
+  z-index: 230 !important;
+}
+
+#kgen-v102-festival-panel h3 {
+  min-height: var(--kgen-cell-height) !important;
+  height: var(--kgen-cell-height) !important;
+  line-height: var(--kgen-cell-height) !important;
+  padding: 0 12px !important;
+  margin: 0 !important;
+  box-sizing:border-box !important;
+  white-space: nowrap !important;
+  cursor:pointer !important;
+}
+
+#kgen-v102-festival-panel.kgen-festival-closed .kgen-v102-festival-body {
+  display:none !important;
+}
+
+#kgen-v102-festival-countdown {
+  display:block !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  line-height: 28px !important;
+  overflow:hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  font-variant-numeric: tabular-nums !important;
+  animation:none !important;
+  transition:none !important;
+  opacity:1 !important;
+}
+
+#kgen-v102-festival-panel .kgen-v102-festival-row {
+  min-height: 112px !important;
+  height: 112px !important;
+  max-height: 112px !important;
+  overflow:hidden !important;
+  box-sizing:border-box !important;
+  margin: 8px 10px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+}
+
+#kgen-v102-festival-panel button {
+  width:100% !important;
+  height: var(--kgen-cell-height) !important;
+  min-height: var(--kgen-cell-height) !important;
+  max-height: var(--kgen-cell-height) !important;
+  border-radius: var(--kgen-cell-radius) !important;
+  box-sizing:border-box !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* 聖盃：固定高度，避免 1~3 行跳動；下方訊息不得被縮起來 */
+#v57-cup-status,
+#v714-cup-status,
+#v715-cup-status,
+#v715-cup-log,
+#kh-cup-status,
+.kgen-cup-status,
+[data-kgen-organ="holycup-organ"] {
+  min-height: 58px !important;
+  height: 58px !important;
+  max-height: 58px !important;
+  line-height: 1.4 !important;
+  overflow: hidden !important;
+  box-sizing:border-box !important;
+  font-variant-numeric: tabular-nums !important;
+  transition:none !important;
+}
+
+.v714-cupbox,
+.kh-cupbox {
+  min-height: 156px !important;
+  overflow: visible !important;
+}
+
+/* 悟空控制台跨年倒數槽：固定一行穩定高度 */
+#kh-ny-slot,
+#kh-ny-countdown,
+.kh-ny-countdown,
+#cd-1231,
+#kgen-ny-countdown {
+  display:block !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  line-height: 28px !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+  font-variant-numeric: tabular-nums !important;
+  animation:none !important;
+  transition:none !important;
+  opacity:1 !important;
+}
+
+/* 統一面板間距 */
+#kgen-heart-live-panel .kh-grid,
+#kgen-heart-live-panel .kh-actions,
+#kgen-heart-live-panel .kh-log,
+.panel,
+.runtime-panel,
+.hud-box,
+.bp-panel {
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
+  box-sizing:border-box !important;
+}
+
+[data-kgen-cell] { --kgen-cell-alive: 1; }
+[data-kgen-organ] { --kgen-organ-alive: 1; }

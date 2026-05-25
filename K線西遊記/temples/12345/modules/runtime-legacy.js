@@ -11,10 +11,10 @@ PRIMEFORGE_LIFE_HEADER_V1:
   STRUCTURE_COORDINATE:
     ROOT_STRUCTURE: /K線西遊記
     CITY_STRUCTURE: /K線西遊記/temples/12345
-    CURRENT_LIFE_COORDINATE: /modules/kgen-12345-runtime.js
+    CURRENT_LIFE_COORDINATE: /modules/runtime-legacy.js
   FILE_CERTIFICATE:
-    FILE: kgen-12345-runtime.js
-    PATH: /modules/kgen-12345-runtime.js
+    FILE: runtime-legacy.js
+    PATH: /modules/runtime-legacy.js
     PRODUCT_ID: KGEN-12345-HEART-UI
     LIFE_LAYER: ORGAN
     LIFE_TYPE: JavaScript Organ Lifeform
@@ -33,7 +33,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
     ORDER: JavaScriptOrgan
     FAMILY: PrimeForgeLife
     GENUS: KGEN12345
-    SPECIES: kgen-12345-runtime.js
+    SPECIES: runtime-legacy.js
     CELL: Function Cell Cluster
     ORGAN: Runtime Organ
     DNA: JS-ORGAN-DNA
