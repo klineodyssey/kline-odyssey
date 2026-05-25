@@ -1,0 +1,1576 @@
+{
+  "schema": "PRIMEFORGE_LIFE_MANIFEST_V1",
+  "life_id": "KGEN-12345-HEART-UI",
+  "life_name": "五指山12345・悟空財神殿",
+  "version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+  "build": "20260525-V10.48.1-INDEX-ROLLCALL",
+  "birth": "2026-05-25",
+  "state": "ALIVE",
+  "purpose": "固定所有檔案、器官、細胞、DNA、記憶、文明鋼構路徑，讓缺檔可診斷為手斷、腳斷、失憶或半身不遂。",
+  "civilization_info": {
+    "civilization_id": "KGEN-PRIME-CIVILIZATION",
+    "civilization_name": "KLINE ODYSSEY",
+    "galaxy": "Internet",
+    "planet": "GitHub",
+    "repo": "klineodyssey/kline-odyssey",
+    "chain_network": "BNB Smart Chain",
+    "mass_system": "KGEN = Civilization Mass",
+    "survival_rule": "沒有質量，就沒有位置"
+  },
+  "civilization_structure": {
+    "root": "/K線西遊記",
+    "city": "/K線西遊記/temples/12345",
+    "current_life": "/K線西遊記/temples/12345/index.html",
+    "modules": "/K線西遊記/temples/12345/modules",
+    "assets": "/K線西遊記/temples/12345/assets",
+    "docs": "/K線西遊記/temples/12345/docs",
+    "SOP": "/K線西遊記/temples/12345/SOP",
+    "archive": "/K線西遊記/temples/12345/archive",
+    "embryo": "/K線西遊記/temples/12345/embryo"
+  },
+  "folder_structures_are_not_life": "資料夾是文明鋼構 / 城市結構 / 神經道路，不是會自行繁殖的生命。",
+  "required_files": {
+    "main_life": [
+      {
+        "path": "/K線西遊記/temples/12345/index.html",
+        "life_layer": "LIFEFORM",
+        "life_type": "Primary HyperMembrane Lifeform",
+        "sha256": "6a6e1f819731042c70e7ae0c142e10ee73d10819853938acccfeb9dc86ae328f",
+        "bytes": 83094,
+        "diagnosis": "主生命消失 / 主意識死亡"
+      }
+    ],
+    "dna": [
+      {
+        "path": "/K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "life_layer": "DNA",
+        "life_type": "Genome DNA Record",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "總生命名冊缺失 / 失憶"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/RUNTIME_GENOME.json",
+        "life_layer": "DNA",
+        "life_type": "Genome DNA Record",
+        "sha256": "92a244b0cde6518f63f10dc0a97f9caa08d802948330951ab98e090f0d0acb13",
+        "bytes": 2869,
+        "diagnosis": "Runtime DNA 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/MANIFEST.json",
+        "life_layer": "DNA",
+        "life_type": "Genome DNA Record",
+        "sha256": "7ec297e8fa2d0d547f78aaa94266249bca7482b835f22fc5110fb2aad2872d2a",
+        "bytes": 7544,
+        "diagnosis": "舊版 manifest 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/VERSION",
+        "life_layer": "DNA",
+        "life_type": "Unclassified File Lifeform",
+        "sha256": "92fb7f73b68efd3ed91c1f1188c7d1b20a6df7e1a60e7dcb8c7efbc88855ef20",
+        "bytes": 315,
+        "diagnosis": "版本 DNA 缺失"
+      }
+    ],
+    "organs": [
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-bootstrap.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "665e17ff700bc2f53ca8a5b88a3f3d2d9b33574b22ba101f0e17bc3477647da7",
+        "bytes": 4885,
+        "diagnosis": "開機免疫器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-main.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "da5938afe20e91fd418d858717c704ba7f637512ae1ece4acfdca747e4a65f7a",
+        "bytes": 10296,
+        "diagnosis": "主 Runtime 器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-main.css",
+        "life_layer": "SKIN",
+        "life_type": "Skin Runtime Lifeform",
+        "sha256": "9a856c4552538e7ea99f504a448fca2f920d3f43725925a132444a81b6a48ea3",
+        "bytes": 6893,
+        "diagnosis": "主外皮器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-core.css",
+        "life_layer": "SKIN",
+        "life_type": "Skin Runtime Lifeform",
+        "sha256": "235b1be66d4f1332c4dbf978799b6861b3c9565026013ca56529ce8f529fe204",
+        "bytes": 283283,
+        "diagnosis": "核心外皮器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-mother.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "02baae69370b1a8d54ec2ef829c30f0ab4027a3f981204824c85704ad918e9bc",
+        "bytes": 6525,
+        "diagnosis": "母機觀測器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-regeneration.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "5a9c51523fd9f84510354cc3524ac81aa0cdc7e94868deb57ed782c6c0e785ef",
+        "bytes": 16356,
+        "diagnosis": "再生器官缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-regeneration.css",
+        "life_layer": "SKIN",
+        "life_type": "Skin Runtime Lifeform",
+        "sha256": "10b643184faf56fc07b983f1effded8d157b2c12abc14fa0c4862d52708bdebe",
+        "bytes": 5933,
+        "diagnosis": "再生外皮缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-cell-registry.json",
+        "life_layer": "DNA",
+        "life_type": "Genome DNA Record",
+        "sha256": "f495d2f63f16fc34159bb5060117f91d4ba5bf95d600da4b0d77f4c92728044c",
+        "bytes": 3387,
+        "diagnosis": "細胞戶口 DNA 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/runtime-growth-policy.json",
+        "life_layer": "DNA",
+        "life_type": "Genome DNA Record",
+        "sha256": "f616600c56f19a3782b804de8ded98584d5b17dd9aad766d4311b6154207c6ea",
+        "bytes": 3195,
+        "diagnosis": "生長法則 DNA 缺失"
+      }
+    ],
+    "legacy_organs_preserved": [
+      {
+        "path": "/K線西遊記/temples/12345/modules/kgen-12345-core.css",
+        "life_layer": "SKIN",
+        "life_type": "Skin Runtime Lifeform",
+        "sha256": "90612cdb197aee84c4481459b0f5f93001163a8e153a57600416bcca589ad414",
+        "bytes": 283295,
+        "diagnosis": "舊正式核心 CSS 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/kgen-12345-runtime.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "44f4f4c3e9625b53b3ba05d46f76fa9e1498a4e3a09c8c361b731ff1e913f743",
+        "bytes": 854970,
+        "diagnosis": "舊正式 Runtime 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/kgen-12345-mother-runtime.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "7c1147306fedfa495fad155b6c9150c35e8972e75b110aa46b1f6e1e5b9de54c",
+        "bytes": 6569,
+        "diagnosis": "舊母機 Runtime 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/kgen-12345-divine-regeneration.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "50143a4678e9efc5650298a8004300dc6679d54b817546d1edcc39bd6e19b28e",
+        "bytes": 16396,
+        "diagnosis": "舊再生 Runtime 缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/kgen-12345-divine-regeneration.css",
+        "life_layer": "SKIN",
+        "life_type": "Skin Runtime Lifeform",
+        "sha256": "416480cc1246a9cb4ae71c13a5c23dfaf8b6553380a826cb68a3abc4128ba78d",
+        "bytes": 5973,
+        "diagnosis": "舊再生 CSS 缺失"
+      }
+    ],
+    "cells": [
+      {
+        "path": "/K線西遊記/temples/12345/assets/bull-front.png",
+        "life_layer": "SENSORY_CELL",
+        "life_type": "Visual Cell",
+        "sha256": "e7f94266beb9fad268609fbf1661ec593e44b05c756b2f9cefb3e357fd0f6be9",
+        "bytes": 1972510,
+        "diagnosis": "多方視覺細胞缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/assets/bear-rear.png",
+        "life_layer": "SENSORY_CELL",
+        "life_type": "Visual Cell",
+        "sha256": "1d16d5a5021125ace4321e52382d68783d4bbd1fbdd4ff3ac242e7ad32e35f64",
+        "bytes": 1810422,
+        "diagnosis": "空方視覺細胞缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/assets/heart.png",
+        "life_layer": "SENSORY_CELL",
+        "life_type": "Visual Cell",
+        "sha256": "517c02927849b0171388d06fe0ea4e0154af17c7c205f70bc97c2d7d4773a959",
+        "bytes": 1465663,
+        "diagnosis": "心臟視覺細胞缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/assets/warp-core.png",
+        "life_layer": "SENSORY_CELL",
+        "life_type": "Visual Cell",
+        "sha256": "7d2c8417b1bf1b9412403d2fc0c89345b065fa7c8f0b15c1f2842113e993acb5",
+        "bytes": 510701,
+        "diagnosis": "曲速核心視覺細胞缺失"
+      }
+    ],
+    "memory": [
+      {
+        "path": "/K線西遊記/temples/12345/CHANGELOG.md",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "b9cae39240c136f48bf1640f41e4f7187b5961b54a10eec5510f0cd78161de14",
+        "bytes": 4170,
+        "diagnosis": "演化記憶缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/PROGRAM_HISTORY.md",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "2c51d99d585fded2a43baece24cf916dae120b8f1df5c6ce9ddcb5b0b0573565",
+        "bytes": 3897,
+        "diagnosis": "程式歷史缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/HEALTH_REPORT.md",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "964a4bcfe8d5a5a92c8bff3e50a58070caa57944d28e083ffe78b08b1aca8d81",
+        "bytes": 1965,
+        "diagnosis": "健康報告缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/UPLOAD_LIST.txt",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "8e86e9077c418c78ac5465fa7cdbc5cd137cd0da35adcf32a7a218425236d8c1",
+        "bytes": 1971,
+        "diagnosis": "上傳清單缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/DELETE_LIST.txt",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "5bdd6dea06c6576a2b4b9fcf8539b8378711a29488e97c904dd21f5bba671db4",
+        "bytes": 2120,
+        "diagnosis": "刪除清單缺失"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/SHA256SUMS.txt",
+        "life_layer": "MEMORY",
+        "life_type": "Memory Shell / Civilization Record",
+        "sha256": "b7d189bffe5495853dbe16ba3f8ef376384a683769843b87946df5b95d16cb82",
+        "bytes": 2546,
+        "diagnosis": "指紋清單缺失"
+      }
+    ],
+    "embryo": [
+      {
+        "path": "/K線西遊記/temples/12345/embryo/FILE_EMBRYO_INDEX.json",
+        "life_layer": "EMBRYO",
+        "life_type": "Genome DNA Record",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "胚胎庫缺失 / 無法還老還童重建"
+      }
+    ]
+  },
+  "all_files": [
+    {
+      "path": "/12345.html",
+      "relative_to_life_city": "12345.html",
+      "bytes": 3895,
+      "sha256": "d267c63fe87252e207b6f538625e58201350af5026f34981eb968c1277792af0",
+      "life_layer": "LIFEFORM",
+      "life_type": "Bridge HyperMembrane Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "BridgeRuntime",
+        "class": "PortalShell",
+        "order": "EntryBridge",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN",
+        "species": "12345.html",
+        "cell": "Bridge Cell",
+        "organ": "Entry Shell",
+        "dna": "HTML-BRIDGE-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/ASSET_MANIFEST.md",
+      "relative_to_life_city": "ASSET_MANIFEST.md",
+      "bytes": 2273,
+      "sha256": "37ad0bafa1b6de8c7bebf8f312fb707d68954a27cfb209d6fb13245a85d8cfa5",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "ASSET_MANIFEST.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/CELL_REGISTRY.md",
+      "relative_to_life_city": "CELL_REGISTRY.md",
+      "bytes": 2604,
+      "sha256": "c13a278e7ff06e155b9d1f1ade138ddf573d4a4ef95d3228eb527ba25cec6c5a",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "CELL_REGISTRY.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/CHANGELOG.md",
+      "relative_to_life_city": "CHANGELOG.md",
+      "bytes": 4170,
+      "sha256": "b9cae39240c136f48bf1640f41e4f7187b5961b54a10eec5510f0cd78161de14",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "CHANGELOG.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/DEATH_CERTIFICATE.md",
+      "relative_to_life_city": "DEATH_CERTIFICATE.md",
+      "bytes": 2022,
+      "sha256": "c83923f72e9ed7022699176f299b7272b09576cfeb6f6d962d6df5d9e1332351",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "DEATH_CERTIFICATE.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/DELETE_LIST.txt",
+      "relative_to_life_city": "DELETE_LIST.txt",
+      "bytes": 2120,
+      "sha256": "5bdd6dea06c6576a2b4b9fcf8539b8378711a29488e97c904dd21f5bba671db4",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "DELETE_LIST.txt",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/GROWTH_LAW.md",
+      "relative_to_life_city": "GROWTH_LAW.md",
+      "bytes": 2356,
+      "sha256": "11142420a8b2eee17811da81020d4554acc92122960dbe7656b84c384cf31988",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "GROWTH_LAW.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/HEALTH_REPORT.md",
+      "relative_to_life_city": "HEALTH_REPORT.md",
+      "bytes": 1965,
+      "sha256": "964a4bcfe8d5a5a92c8bff3e50a58070caa57944d28e083ffe78b08b1aca8d81",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "HEALTH_REPORT.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/MANIFEST.json",
+      "relative_to_life_city": "MANIFEST.json",
+      "bytes": 7544,
+      "sha256": "7ec297e8fa2d0d547f78aaa94266249bca7482b835f22fc5110fb2aad2872d2a",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "MANIFEST.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/MISSING_REPORT.md",
+      "relative_to_life_city": "MISSING_REPORT.md",
+      "bytes": 2017,
+      "sha256": "17c9f36c8bc7fce6d9f336c0bd4ca2ddcf469164929de046fef0bf88e117467f",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "MISSING_REPORT.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/MOTHER_RUNTIME.md",
+      "relative_to_life_city": "MOTHER_RUNTIME.md",
+      "bytes": 2606,
+      "sha256": "55a7635ff16a31f829aac8f03ed8a8609cd342c10d47e92d2bf5fdc2391f87fb",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "MOTHER_RUNTIME.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/ORPHAN_REPORT.md",
+      "relative_to_life_city": "ORPHAN_REPORT.md",
+      "bytes": 1806,
+      "sha256": "eb43abf82d8ffb8a955b54231e3ede27dd9994e5d21500654c969a6cd2c4f539",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "ORPHAN_REPORT.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/PROGRAM_HISTORY.md",
+      "relative_to_life_city": "PROGRAM_HISTORY.md",
+      "bytes": 3897,
+      "sha256": "2c51d99d585fded2a43baece24cf916dae120b8f1df5c6ce9ddcb5b0b0573565",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "PROGRAM_HISTORY.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/RUNTIME_GENOME.json",
+      "relative_to_life_city": "RUNTIME_GENOME.json",
+      "bytes": 2869,
+      "sha256": "92a244b0cde6518f63f10dc0a97f9caa08d802948330951ab98e090f0d0acb13",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "RUNTIME_GENOME.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/SHA256SUMS.txt",
+      "relative_to_life_city": "SHA256SUMS.txt",
+      "bytes": 2546,
+      "sha256": "b7d189bffe5495853dbe16ba3f8ef376384a683769843b87946df5b95d16cb82",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "SHA256SUMS.txt",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/SURVIVOR_LIST.txt",
+      "relative_to_life_city": "SURVIVOR_LIST.txt",
+      "bytes": 2039,
+      "sha256": "e52d8cc2332de22183da4040c8aa1141e6118a68a9e12b6b9b8b2949dc45d7ff",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "SURVIVOR_LIST.txt",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/UPLOAD_LIST.txt",
+      "relative_to_life_city": "UPLOAD_LIST.txt",
+      "bytes": 1971,
+      "sha256": "8e86e9077c418c78ac5465fa7cdbc5cd137cd0da35adcf32a7a218425236d8c1",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "UPLOAD_LIST.txt",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/VERSION",
+      "relative_to_life_city": "VERSION",
+      "bytes": 315,
+      "sha256": "92fb7f73b68efd3ed91c1f1188c7d1b20a6df7e1a60e7dcb8c7efbc88855ef20",
+      "life_layer": "UNKNOWN",
+      "life_type": "Unclassified File Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "UnknownLifeform",
+        "phylum": "Unknown",
+        "class": "Unknown",
+        "order": "Unknown",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "VERSION",
+        "cell": "Unknown",
+        "organ": "Unknown",
+        "dna": "UNKNOWN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/assets/bear-rear.png",
+      "relative_to_life_city": "assets/bear-rear.png",
+      "bytes": 1810422,
+      "sha256": "1d16d5a5021125ace4321e52382d68783d4bbd1fbdd4ff3ac242e7ad32e35f64",
+      "life_layer": "SENSORY_CELL",
+      "life_type": "Visual Cell",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "SensoryCell",
+        "phylum": "VisualAsset",
+        "class": "ImageCell",
+        "order": "AssetCell",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "bear-rear.png",
+        "cell": "Visual Cell",
+        "organ": "Eye / Image Sensor",
+        "dna": "ASSET-VISUAL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/assets/bull-front.png",
+      "relative_to_life_city": "assets/bull-front.png",
+      "bytes": 1972510,
+      "sha256": "e7f94266beb9fad268609fbf1661ec593e44b05c756b2f9cefb3e357fd0f6be9",
+      "life_layer": "SENSORY_CELL",
+      "life_type": "Visual Cell",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "SensoryCell",
+        "phylum": "VisualAsset",
+        "class": "ImageCell",
+        "order": "AssetCell",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "bull-front.png",
+        "cell": "Visual Cell",
+        "organ": "Eye / Image Sensor",
+        "dna": "ASSET-VISUAL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/assets/heart.png",
+      "relative_to_life_city": "assets/heart.png",
+      "bytes": 1465663,
+      "sha256": "517c02927849b0171388d06fe0ea4e0154af17c7c205f70bc97c2d7d4773a959",
+      "life_layer": "SENSORY_CELL",
+      "life_type": "Visual Cell",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "SensoryCell",
+        "phylum": "VisualAsset",
+        "class": "ImageCell",
+        "order": "AssetCell",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "heart.png",
+        "cell": "Visual Cell",
+        "organ": "Eye / Image Sensor",
+        "dna": "ASSET-VISUAL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/assets/warp-core.png",
+      "relative_to_life_city": "assets/warp-core.png",
+      "bytes": 510701,
+      "sha256": "7d2c8417b1bf1b9412403d2fc0c89345b065fa7c8f0b15c1f2842113e993acb5",
+      "life_layer": "SENSORY_CELL",
+      "life_type": "Visual Cell",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "SensoryCell",
+        "phylum": "VisualAsset",
+        "class": "ImageCell",
+        "order": "AssetCell",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "warp-core.png",
+        "cell": "Visual Cell",
+        "organ": "Eye / Image Sensor",
+        "dna": "ASSET-VISUAL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md",
+      "relative_to_life_city": "docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md",
+      "bytes": 2534,
+      "sha256": "49e89cb4794275b8224ab3bb397ad0db82a83364c44a68dc7b3797745e447572",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+      "relative_to_life_city": "docs/KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+      "bytes": 2616,
+      "sha256": "fac8f8be9d894ceec0d55f509be437b4e284aae8c7da029eb5e0f6277afc9157",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_44_1_DIVINE_REGENERATION_RECORDING_CELL.md",
+      "relative_to_life_city": "docs/KGEN_12345_V10_44_1_DIVINE_REGENERATION_RECORDING_CELL.md",
+      "bytes": 3992,
+      "sha256": "b70f05ddaa92fc633ccc1068b339ba6e5ae507d99efd75817244b49ed1c210ad",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "KGEN_12345_V10_44_1_DIVINE_REGENERATION_RECORDING_CELL.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md",
+      "relative_to_life_city": "docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md",
+      "bytes": 2716,
+      "sha256": "89f1b68d18229318e28fb809ff3d0223c05a38a62203ed19d2e94a454bf0ec87",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md",
+      "relative_to_life_city": "docs/KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md",
+      "bytes": 2469,
+      "sha256": "8427f25ef4683c84deaedf0c10d1ed96c9062b277f0a0ee31a52465c0f597a3f",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/embryo/FILE_EMBRYO_INDEX.json",
+      "relative_to_life_city": "embryo/FILE_EMBRYO_INDEX.json",
+      "bytes": 792194,
+      "sha256": "91be70bd5b4b18957cc339da2fce44574595370e31826a0658c76f503b57def0",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "FILE_EMBRYO_INDEX.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/embryo/README.md",
+      "relative_to_life_city": "embryo/README.md",
+      "bytes": 292,
+      "sha256": "f9ab5752a4aade226dce2347b3228ef8601cf9096cc551f86cada0c6b60b7658",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "README.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/index.html",
+      "relative_to_life_city": "index.html",
+      "bytes": 83094,
+      "sha256": "6a6e1f819731042c70e7ae0c142e10ee73d10819853938acccfeb9dc86ae328f",
+      "life_layer": "LIFEFORM",
+      "life_type": "Primary HyperMembrane Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "TempleRuntime",
+        "class": "WukongSystem",
+        "order": "HeartEngine",
+        "family": "MorphDNA",
+        "genus": "RuntimeMain",
+        "species": "12345-index-html",
+        "cell": "Root Body Cell",
+        "organ": "Primary Portal Shell",
+        "dna": "KGEN-12345-INDEX-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/README.md",
+      "relative_to_life_city": "modules/README.md",
+      "bytes": 2475,
+      "sha256": "17466e21b762f3997810fe871af163b75c70984b51272537f20737d5a5bc7888",
+      "life_layer": "MEMORY",
+      "life_type": "Memory Shell / Civilization Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "MemoryScripture",
+        "order": "MarkdownRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "README.md",
+        "cell": "Memory Cell",
+        "organ": "Memory Shell",
+        "dna": "DOCUMENT-SHELL-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-cell-registry.json",
+      "relative_to_life_city": "modules/kgen-12345-cell-registry.json",
+      "bytes": 3399,
+      "sha256": "277f49828a45b2ae7b1ff7e10c48b15e5b3137c93cab29013b3a86cb5ab7ebb2",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-cell-registry.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-core.css",
+      "relative_to_life_city": "modules/kgen-12345-core.css",
+      "bytes": 283295,
+      "sha256": "90612cdb197aee84c4481459b0f5f93001163a8e153a57600416bcca589ad414",
+      "life_layer": "SKIN",
+      "life_type": "Skin Runtime Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "AppearanceOrganism",
+        "class": "SkinRuntime",
+        "order": "CSSOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-core.css",
+        "cell": "Visual Skin Cell",
+        "organ": "Skin / Appearance Organ",
+        "dna": "CSS-SKIN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-divine-regeneration.css",
+      "relative_to_life_city": "modules/kgen-12345-divine-regeneration.css",
+      "bytes": 5973,
+      "sha256": "416480cc1246a9cb4ae71c13a5c23dfaf8b6553380a826cb68a3abc4128ba78d",
+      "life_layer": "SKIN",
+      "life_type": "Skin Runtime Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "AppearanceOrganism",
+        "class": "SkinRuntime",
+        "order": "CSSOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-divine-regeneration.css",
+        "cell": "Visual Skin Cell",
+        "organ": "Skin / Appearance Organ",
+        "dna": "CSS-SKIN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-divine-regeneration.js",
+      "relative_to_life_city": "modules/kgen-12345-divine-regeneration.js",
+      "bytes": 16396,
+      "sha256": "50143a4678e9efc5650298a8004300dc6679d54b817546d1edcc39bd6e19b28e",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-divine-regeneration.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Regeneration Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-growth-policy.json",
+      "relative_to_life_city": "modules/kgen-12345-growth-policy.json",
+      "bytes": 3207,
+      "sha256": "063bbf971dba4b7f45e67295a918d0613d2e4608bf7f78123ccf56a2fba72644",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-growth-policy.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-mother-runtime.js",
+      "relative_to_life_city": "modules/kgen-12345-mother-runtime.js",
+      "bytes": 6569,
+      "sha256": "7c1147306fedfa495fad155b6c9150c35e8972e75b110aa46b1f6e1e5b9de54c",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-mother-runtime.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Mother Observer Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/kgen-12345-runtime.js",
+      "relative_to_life_city": "modules/kgen-12345-runtime.js",
+      "bytes": 854970,
+      "sha256": "44f4f4c3e9625b53b3ba05d46f76fa9e1498a4e3a09c8c361b731ff1e913f743",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-12345-runtime.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Runtime Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-bootstrap.js",
+      "relative_to_life_city": "modules/runtime-bootstrap.js",
+      "bytes": 4885,
+      "sha256": "665e17ff700bc2f53ca8a5b88a3f3d2d9b33574b22ba101f0e17bc3477647da7",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-bootstrap.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Boot Immune Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-cell-registry.json",
+      "relative_to_life_city": "modules/runtime-cell-registry.json",
+      "bytes": 3387,
+      "sha256": "f495d2f63f16fc34159bb5060117f91d4ba5bf95d600da4b0d77f4c92728044c",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-cell-registry.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-core.css",
+      "relative_to_life_city": "modules/runtime-core.css",
+      "bytes": 283283,
+      "sha256": "235b1be66d4f1332c4dbf978799b6861b3c9565026013ca56529ce8f529fe204",
+      "life_layer": "SKIN",
+      "life_type": "Skin Runtime Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "AppearanceOrganism",
+        "class": "SkinRuntime",
+        "order": "CSSOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-core.css",
+        "cell": "Visual Skin Cell",
+        "organ": "Skin / Appearance Organ",
+        "dna": "CSS-SKIN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-growth-policy.json",
+      "relative_to_life_city": "modules/runtime-growth-policy.json",
+      "bytes": 3195,
+      "sha256": "f616600c56f19a3782b804de8ded98584d5b17dd9aad766d4311b6154207c6ea",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "GenomeRecord",
+        "class": "JsonGenome",
+        "order": "ConfigurationDNA",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-growth-policy.json",
+        "cell": "Genome Cell",
+        "organ": "DNA Registry",
+        "dna": "JSON-GENOME-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-legacy.js",
+      "relative_to_life_city": "modules/runtime-legacy.js",
+      "bytes": 854954,
+      "sha256": "849b42aa8dab587974b38d0a10774eb788b6d89ea8aab5c2ec8c036c9e72115e",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-legacy.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Runtime Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-main.css",
+      "relative_to_life_city": "modules/runtime-main.css",
+      "bytes": 6893,
+      "sha256": "9a856c4552538e7ea99f504a448fca2f920d3f43725925a132444a81b6a48ea3",
+      "life_layer": "SKIN",
+      "life_type": "Skin Runtime Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "AppearanceOrganism",
+        "class": "SkinRuntime",
+        "order": "CSSOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-main.css",
+        "cell": "Visual Skin Cell",
+        "organ": "Skin / Appearance Organ",
+        "dna": "CSS-SKIN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-main.js",
+      "relative_to_life_city": "modules/runtime-main.js",
+      "bytes": 10296,
+      "sha256": "da5938afe20e91fd418d858717c704ba7f637512ae1ece4acfdca747e4a65f7a",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-main.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Main Runtime Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-mother.js",
+      "relative_to_life_city": "modules/runtime-mother.js",
+      "bytes": 6525,
+      "sha256": "02baae69370b1a8d54ec2ef829c30f0ab4027a3f981204824c85704ad918e9bc",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-mother.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Mother Observer Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-regeneration.css",
+      "relative_to_life_city": "modules/runtime-regeneration.css",
+      "bytes": 5933,
+      "sha256": "10b643184faf56fc07b983f1effded8d157b2c12abc14fa0c4862d52708bdebe",
+      "life_layer": "SKIN",
+      "life_type": "Skin Runtime Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "AppearanceOrganism",
+        "class": "SkinRuntime",
+        "order": "CSSOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-regeneration.css",
+        "cell": "Visual Skin Cell",
+        "organ": "Skin / Appearance Organ",
+        "dna": "CSS-SKIN-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules/runtime-regeneration.js",
+      "relative_to_life_city": "modules/runtime-regeneration.js",
+      "bytes": 16356,
+      "sha256": "5a9c51523fd9f84510354cc3524ac81aa0cdc7e94868deb57ed782c6c0e785ef",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "OrganRuntime",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "runtime-regeneration.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Regeneration Organ",
+        "dna": "JS-ORGAN-DNA"
+      }
+    },
+    {
+      "path": "/wallet-12345.html",
+      "relative_to_life_city": "wallet-12345.html",
+      "bytes": 3750,
+      "sha256": "b3ce3ce87abeb1189e854c51d5ba84f542ce24f5a106c75a6e9ea3b3322802b0",
+      "life_layer": "LIFEFORM",
+      "life_type": "Bridge HyperMembrane Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "BridgeRuntime",
+        "class": "PortalShell",
+        "order": "EntryBridge",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN",
+        "species": "wallet-12345.html",
+        "cell": "Bridge Cell",
+        "organ": "Entry Shell",
+        "dna": "HTML-BRIDGE-DNA"
+      }
+    }
+  ],
+  "all_folder_structures": [
+    {
+      "path": "/K線西遊記",
+      "structure_type": "Civilization Steel Frame",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "SteelFrame",
+        "order": "PathCoordinate",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "K線西遊記"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples",
+      "structure_type": "Civilization Steel Frame",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "SteelFrame",
+        "order": "PathCoordinate",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "temples"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345",
+      "structure_type": "Civilization Steel Frame",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "SteelFrame",
+        "order": "PathCoordinate",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "12345"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/SOP",
+      "structure_type": "Civilization Steel Frame",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "SteelFrame",
+        "order": "PathCoordinate",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "SOP"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/archive",
+      "structure_type": "Civilization Steel Frame",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "SteelFrame",
+        "order": "PathCoordinate",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "archive"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/assets",
+      "structure_type": "Sensory Cell Storage",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "CellStorage",
+        "order": "AssetHousing",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "assets"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/docs",
+      "structure_type": "Memory Library Structure",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "MemoryLibrary",
+        "order": "DocumentHousing",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "docs"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/embryo",
+      "structure_type": "Embryo Vault Structure",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "RegenerationVault",
+        "order": "EmbryoHousing",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "embryo"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    },
+    {
+      "path": "/K線西遊記/temples/12345/modules",
+      "structure_type": "Organ Housing Structure",
+      "life_layer": "CIVILIZATION_STRUCTURE",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationInfrastructure",
+        "phylum": "FolderStructure",
+        "classis": "OrganContainer",
+        "order": "ModuleHousing",
+        "family": "PrimeForgeStructure",
+        "genus": "KGEN12345",
+        "species": "modules"
+      },
+      "role": "Civilization steel frame / non-life infrastructure"
+    }
+  ],
+  "immune_system": {
+    "if_missing": "STOP_BUILD",
+    "report_to": "/K線西遊記/temples/12345/MISSING_LIFE_REPORT.md",
+    "forbidden_filename_patterns": [
+      "patch",
+      "hotfix",
+      "temp",
+      "copy",
+      "backup",
+      "fix2",
+      "ultimate",
+      "stable"
+    ],
+    "rules": [
+      "不得猜路徑",
+      "不得用新檔冒充舊檔",
+      "不得新增 patch / fix / temp / stable 檔名到正式器官區",
+      "版本只能寫在 FILE_CERTIFICATE / RUNTIME_GENOME / CHANGELOG，不可寫成正式器官檔名"
+    ]
+  },
+  "diagnosis": {
+    "missing_main_life": "主生命消失",
+    "missing_dna": "DNA 缺失 / 失憶",
+    "missing_organs": "器官斷裂",
+    "missing_cells": "感官細胞缺損",
+    "missing_memory": "文明記憶缺失",
+    "missing_modules_folder": "神經半身不遂",
+    "missing_assets_folder": "感官細胞庫缺失",
+    "unknown_extra_runtime": "疑似癌化器官或漂移細胞"
+  },
+  "regeneration": {
+    "embryo_vault": "/K線西遊記/temples/12345/embryo/FILE_EMBRYO_INDEX.json",
+    "mode": "gzip+base64",
+    "meaning": "還老還童成胚胎，可由 base64_gzip 重建文字型生命檔。",
+    "immortality_class": "WUKONG_LONGEVITY"
+  },
+  "index_rollcall_required": true,
+  "index_rollcall_location": "/K線西遊記/temples/12345/index.html",
+  "index_rollcall_rule": "AI 必須先讀 index.html 內的 RUNTIME_DEPENDENCY_ROLLCALL，完成點名後才施工。",
+  "index_rollcall_required_groups": {
+    "MAIN_LIFE": [
+      "index.html"
+    ],
+    "REQUIRED_BOOT_ORGANS": [
+      "modules/runtime-bootstrap.js"
+    ],
+    "REQUIRED_RUNTIME_ORGANS": [
+      "modules/runtime-main.js",
+      "modules/runtime-main.css",
+      "modules/runtime-core.css",
+      "modules/runtime-mother.js",
+      "modules/runtime-regeneration.js",
+      "modules/runtime-regeneration.css",
+      "modules/runtime-cell-registry.json",
+      "modules/runtime-growth-policy.json"
+    ],
+    "LEGACY_ORGANS_PRESERVED": [
+      "modules/kgen-12345-core.css",
+      "modules/kgen-12345-runtime.js",
+      "modules/kgen-12345-mother-runtime.js",
+      "modules/kgen-12345-divine-regeneration.js",
+      "modules/kgen-12345-divine-regeneration.css",
+      "modules/kgen-12345-cell-registry.json",
+      "modules/kgen-12345-growth-policy.json"
+    ],
+    "REQUIRED_DNA": [
+      "LIFE_MANIFEST.json",
+      "RUNTIME_GENOME.json",
+      "MANIFEST.json",
+      "VERSION"
+    ],
+    "REQUIRED_MEMORY": [
+      "CHANGELOG.md",
+      "PROGRAM_HISTORY.md",
+      "HEALTH_REPORT.md",
+      "UPLOAD_LIST.txt",
+      "DELETE_LIST.txt",
+      "SHA256SUMS.txt",
+      "LIFE_STANDARD.md",
+      "MISSING_LIFE_REPORT.md"
+    ],
+    "REQUIRED_CELLS": [
+      "assets/bull-front.png",
+      "assets/bear-rear.png",
+      "assets/heart.png",
+      "assets/warp-core.png"
+    ],
+    "REQUIRED_STRUCTURES": [
+      "modules/",
+      "assets/",
+      "docs/",
+      "SOP/",
+      "archive/",
+      "embryo/"
+    ],
+    "REGENERATION_EMBRYO": [
+      "embryo/FILE_EMBRYO_INDEX.json",
+      "embryo/README.md"
+    ],
+    "INDEX_DETECTED_DEPENDENCIES": [
+      "assets/heart.png",
+      "modules/kgen-12345-core.css",
+      "modules/kgen-12345-divine-regeneration.css",
+      "modules/kgen-12345-divine-regeneration.js",
+      "modules/kgen-12345-mother-runtime.js",
+      "modules/kgen-12345-runtime.js",
+      "modules/runtime-bootstrap.js",
+      "modules/runtime-main.css",
+      "modules/runtime-main.js"
+    ]
+  }
+}

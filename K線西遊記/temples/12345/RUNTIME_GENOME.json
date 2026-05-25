@@ -1,0 +1,164 @@
+{
+  "schema": "PRIMEFORGE_RUNTIME_GENOME_V1",
+  "product_id": "KGEN-12345-HEART-UI",
+  "version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+  "build": "20260525-V10.48.1-INDEX-ROLLCALL",
+  "birth": "2026-05-25",
+  "life_state": "ALIVE",
+  "civilization_info": {
+    "civilization_id": "KGEN-PRIME-CIVILIZATION",
+    "civilization_name": "KLINE ODYSSEY",
+    "galaxy": "Internet",
+    "planet": "GitHub",
+    "repo": "klineodyssey/kline-odyssey",
+    "chain_network": "BNB Smart Chain",
+    "mass_system": "KGEN = Civilization Mass",
+    "survival_rule": "沒有質量，就沒有位置"
+  },
+  "taxonomy": {
+    "domain": "KGENVERSE",
+    "kingdom": "FinancialLifeform",
+    "phylum": "TempleRuntime",
+    "class": "WukongSystem",
+    "order": "HeartEngine",
+    "family": "MorphDNA",
+    "genus": "RuntimeMain",
+    "species": "12345"
+  },
+  "immortality": {
+    "class": "WUKONG_LONGEVITY",
+    "rejuvenation": "ENABLED",
+    "embryo_compression": "GZIP_BASE64",
+    "self_healing": "ENABLED",
+    "virus_defense": "HASH_AND_MANIFEST_IMMUNE_CHECK"
+  },
+  "_primeforge_life_header": {
+    "version": "PRIMEFORGE_LIFE_HEADER_V1",
+    "civilization_info": {
+      "civilization_id": "KGEN-PRIME-CIVILIZATION",
+      "civilization_name": "KLINE ODYSSEY",
+      "planet": "GitHub",
+      "repo": "klineodyssey/kline-odyssey",
+      "survival_rule": "沒有質量，就沒有位置"
+    },
+    "structure_coordinate": {
+      "root_structure": "/K線西遊記",
+      "city_structure": "/K線西遊記/temples/12345",
+      "current_life_coordinate": "/RUNTIME_GENOME.json"
+    },
+    "file_certificate": {
+      "file": "RUNTIME_GENOME.json",
+      "path": "/RUNTIME_GENOME.json",
+      "product_id": "KGEN-12345-HEART-UI",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "build": "20260525-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "birth": "2026-05-25",
+      "death": "ACTIVE",
+      "growth_stage": "IMMORTAL_REGENERATION_STANDARDIZATION"
+    },
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "GenomeRecord",
+      "class": "JsonGenome",
+      "order": "ConfigurationDNA",
+      "family": "PrimeForgeLife",
+      "genus": "KGEN12345",
+      "species": "RUNTIME_GENOME.json",
+      "cell": "Genome Cell",
+      "organ": "DNA Registry",
+      "dna": "JSON-GENOME-DNA"
+    },
+    "immune_system": {
+      "virus_scan": "ENABLED",
+      "hash_validation": "REQUIRED",
+      "unknown_organ_block": true,
+      "patch_drift_block": true,
+      "version_filename_block": true,
+      "self_healing": "ENABLED"
+    },
+    "regeneration": {
+      "embryo_mode": "GZIP_BASE64",
+      "can_rebuild_from_embryo": true,
+      "rejuvenation": "ENABLED",
+      "immortality_class": "WUKONG_LONGEVITY"
+    }
+  },
+  "index_rollcall_required": true,
+  "index_rollcall_location": "/K線西遊記/temples/12345/index.html",
+  "index_rollcall_rule": "AI 必須先讀 index.html 內的 RUNTIME_DEPENDENCY_ROLLCALL，完成點名後才施工。",
+  "index_rollcall_required_groups": {
+    "MAIN_LIFE": [
+      "index.html"
+    ],
+    "REQUIRED_BOOT_ORGANS": [
+      "modules/runtime-bootstrap.js"
+    ],
+    "REQUIRED_RUNTIME_ORGANS": [
+      "modules/runtime-main.js",
+      "modules/runtime-main.css",
+      "modules/runtime-core.css",
+      "modules/runtime-mother.js",
+      "modules/runtime-regeneration.js",
+      "modules/runtime-regeneration.css",
+      "modules/runtime-cell-registry.json",
+      "modules/runtime-growth-policy.json"
+    ],
+    "LEGACY_ORGANS_PRESERVED": [
+      "modules/kgen-12345-core.css",
+      "modules/kgen-12345-runtime.js",
+      "modules/kgen-12345-mother-runtime.js",
+      "modules/kgen-12345-divine-regeneration.js",
+      "modules/kgen-12345-divine-regeneration.css",
+      "modules/kgen-12345-cell-registry.json",
+      "modules/kgen-12345-growth-policy.json"
+    ],
+    "REQUIRED_DNA": [
+      "LIFE_MANIFEST.json",
+      "RUNTIME_GENOME.json",
+      "MANIFEST.json",
+      "VERSION"
+    ],
+    "REQUIRED_MEMORY": [
+      "CHANGELOG.md",
+      "PROGRAM_HISTORY.md",
+      "HEALTH_REPORT.md",
+      "UPLOAD_LIST.txt",
+      "DELETE_LIST.txt",
+      "SHA256SUMS.txt",
+      "LIFE_STANDARD.md",
+      "MISSING_LIFE_REPORT.md"
+    ],
+    "REQUIRED_CELLS": [
+      "assets/bull-front.png",
+      "assets/bear-rear.png",
+      "assets/heart.png",
+      "assets/warp-core.png"
+    ],
+    "REQUIRED_STRUCTURES": [
+      "modules/",
+      "assets/",
+      "docs/",
+      "SOP/",
+      "archive/",
+      "embryo/"
+    ],
+    "REGENERATION_EMBRYO": [
+      "embryo/FILE_EMBRYO_INDEX.json",
+      "embryo/README.md"
+    ],
+    "INDEX_DETECTED_DEPENDENCIES": [
+      "assets/heart.png",
+      "modules/kgen-12345-core.css",
+      "modules/kgen-12345-divine-regeneration.css",
+      "modules/kgen-12345-divine-regeneration.js",
+      "modules/kgen-12345-mother-runtime.js",
+      "modules/kgen-12345-runtime.js",
+      "modules/runtime-bootstrap.js",
+      "modules/runtime-main.css",
+      "modules/runtime-main.js"
+    ]
+  }
+}

@@ -1,7 +1,238 @@
 {
-  "version": "V10.46.1",
-  "evolution": "ORGAN_TRANSPLANT_RUNTIME",
-  "base_from": "V10.42.6",
-  "timeline": "V10.44.2",
-  "runtime": "ACTIVE"
+  "product_id": "KGEN-12345-HEART-UI",
+  "version": "12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX",
+  "build": "20260520-V10.47.1-LAYOUT-REAL-FIX",
+  "base_from": "V10.44.2",
+  "generated": "2026-05-20",
+  "root": "K線西遊記/temples/12345",
+  "health": {
+    "missing": 0,
+    "orphan": 0,
+    "syntax": "node --check passed for divine-regeneration.js and runtime.js"
+  },
+  "files": [
+    {
+      "path": "ASSET_MANIFEST.md",
+      "sha256": "6bb88b608e8fb2733ae4528242fd7f0ef8ecf73e850c48e111b290306cc21e4f",
+      "bytes": 591
+    },
+    {
+      "path": "CELL_REGISTRY.md",
+      "sha256": "fde435dd70c223dcc0d2fd3069b24bcd96574f67ab026ee5d767a8cdd3d25089",
+      "bytes": 926
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "66915a0c4c18ea0e61c90d5e13e59e39fba28905b61ca28ce82f9657949689ce",
+      "bytes": 2508
+    },
+    {
+      "path": "DEATH_CERTIFICATE.md",
+      "sha256": "42b91f0c774a51fbe58641bae10e02986b55865378f0c0c3c2cd51914080a724",
+      "bytes": 328
+    },
+    {
+      "path": "DELETE_LIST.txt",
+      "sha256": "2e65a52db3e68907ec59004d77571fda5ad35f82c0f1264edd289be09c4d8548",
+      "bytes": 480
+    },
+    {
+      "path": "GROWTH_LAW.md",
+      "sha256": "082fefd2b92d84c0f46a55930081888591b71d8eba72135e7cdb2838e90e3b7c",
+      "bytes": 690
+    },
+    {
+      "path": "HEALTH_REPORT.md",
+      "sha256": "d9de64540c8b9a32c26fdf2bc769f2881b98aa0d618b93dcdc2ce5fa0e9be75f",
+      "bytes": 287
+    },
+    {
+      "path": "MISSING_REPORT.md",
+      "sha256": "7f529145f13e3f4542fa28755383fc3018134de810715eb3f47bd63440eb351c",
+      "bytes": 335
+    },
+    {
+      "path": "MOTHER_RUNTIME.md",
+      "sha256": "4b19595f67517240659d8f0568e7c4ca3dae30ac303fb7564055beb8d392ee33",
+      "bytes": 924
+    },
+    {
+      "path": "ORPHAN_REPORT.md",
+      "sha256": "4726ebe307a6181db2d685535cdca783701d15dbbfaac25e0dea04475fcc7653",
+      "bytes": 128
+    },
+    {
+      "path": "PROGRAM_HISTORY.md",
+      "sha256": "84624f7989a4b0a83bb328d7cc8aa60288a062cb573c373ba9a643d8edf58ef4",
+      "bytes": 2211
+    },
+    {
+      "path": "SURVIVOR_LIST.txt",
+      "sha256": "566cd7582f59e85272610de8f293ac41429f10d40e29446f2b1e49471376f099",
+      "bytes": 263
+    },
+    {
+      "path": "UPLOAD_LIST.txt",
+      "sha256": "cc696c510e0690ce622523ead492a5f4ebae74c374feb9d3aeb39564f82ef10c",
+      "bytes": 291
+    },
+    {
+      "path": "VERSION",
+      "sha256": "7431b0b97d5f8d385e83e5f17ddcc45066658b48746090cb67f05f3aa9e3d910",
+      "bytes": 309
+    },
+    {
+      "path": "assets/bear-rear.png",
+      "sha256": "1d16d5a5021125ace4321e52382d68783d4bbd1fbdd4ff3ac242e7ad32e35f64",
+      "bytes": 1810422
+    },
+    {
+      "path": "assets/bull-front.png",
+      "sha256": "e7f94266beb9fad268609fbf1661ec593e44b05c756b2f9cefb3e357fd0f6be9",
+      "bytes": 1972510
+    },
+    {
+      "path": "assets/heart.png",
+      "sha256": "517c02927849b0171388d06fe0ea4e0154af17c7c205f70bc97c2d7d4773a959",
+      "bytes": 1465663
+    },
+    {
+      "path": "assets/warp-core.png",
+      "sha256": "7d2c8417b1bf1b9412403d2fc0c89345b065fa7c8f0b15c1f2842113e993acb5",
+      "bytes": 510701
+    },
+    {
+      "path": "docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md",
+      "sha256": "a15ce304297d22c2480af529621b74faa515f090d71bdda86eddd202c66e3ff4",
+      "bytes": 698
+    },
+    {
+      "path": "docs/KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+      "sha256": "ae584e778c7b0fb27cdae29833dcc82b7814f9c6c67b8d59617851d8f619a429",
+      "bytes": 772
+    },
+    {
+      "path": "docs/KGEN_12345_V10_44_1_DIVINE_REGENERATION_RECORDING_CELL.md",
+      "sha256": "0cd7ec54bb031721ace60fca21d337b0ce3569f5dd0d19c1c5806878043ff7f6",
+      "bytes": 2140
+    },
+    {
+      "path": "docs/KGEN_12345_V10_44_2_FESTIVAL_HEART_CLOCK_RECORDING_SYNC.md",
+      "sha256": "709a93da7055b3b953c21bafeded6e41dc8b4699a45a51d200acd6f1708400b1",
+      "bytes": 860
+    },
+    {
+      "path": "index.html",
+      "sha256": "961f0a0614c6483c1cdc1911c525c860fc64d6453b52634e0556a1441b4564eb",
+      "bytes": 82867
+    },
+    {
+      "path": "modules/README.md",
+      "sha256": "abb04661c1ed2d61c6fd5639e5508a4d1af93c4d80cfec701619f07b6daf9b7c",
+      "bytes": 809
+    },
+    {
+      "path": "modules/kgen-12345-cell-registry.json",
+      "sha256": "e30fdaa77855eb392ef6c464f61c5ed15e693001d81cc6bf4db6d593f2daaada",
+      "bytes": 1551
+    },
+    {
+      "path": "modules/kgen-12345-core.css",
+      "sha256": "0a1521866ea4e5a06afa5f57cdb8cd215520dcd5276747fedeae8d873cc21422",
+      "bytes": 281603
+    },
+    {
+      "path": "modules/kgen-12345-divine-regeneration.css",
+      "sha256": "db9d5286a2b1d00b6dfe353caa1f8675060835e20087a96562abe367e991b992",
+      "bytes": 4221
+    },
+    {
+      "path": "modules/kgen-12345-divine-regeneration.js",
+      "sha256": "6b3c6c116c5db573975f57558a11a907b1b7e8b1ea8b2562862a0074caf087b0",
+      "bytes": 14638
+    },
+    {
+      "path": "modules/kgen-12345-growth-policy.json",
+      "sha256": "989e61d21ca0540b86a98b31c76dbae3ee2c860cdc9a5a35845b5c6d0cc8228f",
+      "bytes": 1359
+    },
+    {
+      "path": "modules/kgen-12345-mother-runtime.js",
+      "sha256": "be9165cdcd74bc6bc2024532a015eed00495777831e2a11d7992205eaef1ba32",
+      "bytes": 4828
+    },
+    {
+      "path": "modules/kgen-12345-runtime.js",
+      "sha256": "0bc7373b088f1f5ebf69a68c6e46bc331fb055a67162017a36ef3ee721313b28",
+      "bytes": 852903
+    }
+  ],
+  "runtime_files": [
+    "modules/runtime-main.js",
+    "modules/runtime-main.css"
+  ],
+  "ancestor_dna": "V10.42.6",
+  "fixed": [
+    "festival panel moved below audio/info cell",
+    "festival buttons same size",
+    "right rule panel default closed",
+    "HolyCup state fixed",
+    "HolyCup message height fixed",
+    "NY countdown slot stable",
+    "permanent runtime file names"
+  ],
+  "_primeforge_life_header": {
+    "version": "PRIMEFORGE_LIFE_HEADER_V1",
+    "civilization_info": {
+      "civilization_id": "KGEN-PRIME-CIVILIZATION",
+      "civilization_name": "KLINE ODYSSEY",
+      "planet": "GitHub",
+      "repo": "klineodyssey/kline-odyssey",
+      "survival_rule": "沒有質量，就沒有位置"
+    },
+    "structure_coordinate": {
+      "root_structure": "/K線西遊記",
+      "city_structure": "/K線西遊記/temples/12345",
+      "current_life_coordinate": "/MANIFEST.json"
+    },
+    "file_certificate": {
+      "file": "MANIFEST.json",
+      "path": "/MANIFEST.json",
+      "product_id": "KGEN-12345-HEART-UI",
+      "life_layer": "DNA",
+      "life_type": "Genome DNA Record",
+      "version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "build": "20260525-V10.48.0-LIFE-STANDARD-REGENERATION",
+      "birth": "2026-05-25",
+      "death": "ACTIVE",
+      "growth_stage": "IMMORTAL_REGENERATION_STANDARDIZATION"
+    },
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "GenomeRecord",
+      "class": "JsonGenome",
+      "order": "ConfigurationDNA",
+      "family": "PrimeForgeLife",
+      "genus": "KGEN12345",
+      "species": "MANIFEST.json",
+      "cell": "Genome Cell",
+      "organ": "DNA Registry",
+      "dna": "JSON-GENOME-DNA"
+    },
+    "immune_system": {
+      "virus_scan": "ENABLED",
+      "hash_validation": "REQUIRED",
+      "unknown_organ_block": true,
+      "patch_drift_block": true,
+      "version_filename_block": true,
+      "self_healing": "ENABLED"
+    },
+    "regeneration": {
+      "embryo_mode": "GZIP_BASE64",
+      "can_rebuild_from_embryo": true,
+      "rejuvenation": "ENABLED",
+      "immortality_class": "WUKONG_LONGEVITY"
+    }
+  }
 }

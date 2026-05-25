@@ -1,3 +1,78 @@
+# V10.48.1｜INDEX ROLLCALL GOVERNANCE
+
+- 在 `index.html` 最前面加入 `PRIMEFORGE_RUNTIME_DEPENDENCY_ROLLCALL_V1`。
+- 主生命開頭直接列出所有必點名檔案、資料夾、器官、DNA、記憶、細胞與胚胎庫。
+- 明確規定 AI / Agent / Cursor / Autopilot 改版前必須先點名，不得叫別人點名。
+- `LIFE_MANIFEST.json` 與 `RUNTIME_GENOME.json` 增加 index rollcall 規則。
+- 保留 V10.48.0 的 bootstrap / manifest / genome / embryo 架構。
+
+# V10.48.0｜LIFE STANDARD REGENERATION
+
+- 建立 `LIFE_MANIFEST.json`：全身名冊，列出所有生命檔、器官、DNA、記憶、感官細胞與文明鋼構。
+- 建立 `RUNTIME_GENOME.json`：12345 悟空財神殿 DNA。
+- 新增 `modules/runtime-bootstrap.js`：開機自檢、缺檔診斷、免疫防禦。
+- 新增正式器官別名：`runtime-core.css`、`runtime-mother.js`、`runtime-regeneration.js`、`runtime-regeneration.css`、`runtime-cell-registry.json`、`runtime-growth-policy.json`。
+- 建立 `embryo/FILE_EMBRYO_INDEX.json`：文字型生命 gzip+base64 胚胎庫，可用於還老還童重建。
+- 所有文字型檔案補入 `PRIMEFORGE_LIFE_HEADER_V1` 或 JSON 生命標頭。
+- 保留舊檔，不刪除原可跑結構；正式命名往無版本器官名收斂。
+
+
+<!--
+PRIMEFORGE_LIFE_HEADER_V1:
+  CIVILIZATION_INFO:
+    CIVILIZATION_ID: KGEN-PRIME-CIVILIZATION
+    CIVILIZATION_NAME: KLINE ODYSSEY
+    GALAXY: Internet
+    PLANET: GitHub
+    REPO: klineodyssey/kline-odyssey
+    CHAIN_NETWORK: BNB Smart Chain
+    SURVIVAL_RULE: 沒有質量，就沒有位置
+  STRUCTURE_COORDINATE:
+    ROOT_STRUCTURE: /K線西遊記
+    CITY_STRUCTURE: /K線西遊記/temples/12345
+    CURRENT_LIFE_COORDINATE: /CHANGELOG.md
+  FILE_CERTIFICATE:
+    FILE: CHANGELOG.md
+    PATH: /CHANGELOG.md
+    PRODUCT_ID: KGEN-12345-HEART-UI
+    LIFE_LAYER: MEMORY
+    LIFE_TYPE: Memory Shell / Civilization Record
+    VERSION: 12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION
+    BUILD: 20260525-V10.48.0-LIFE-STANDARD-REGENERATION
+    BIRTH: 2026-05-25
+    BASE_FROM: KGEN_12345_V10_47_1_LAYOUT_REAL_FIX_FULL_GITHUB_READY.zip
+    UPGRADE_FROM: 12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX
+    DEATH: ACTIVE
+    GROWTH_STAGE: IMMORTAL_REGENERATION_STANDARDIZATION
+  TAXONOMY:
+    DOMAIN: KGENVERSE
+    KINGDOM: CivilizationMemory
+    PHYLUM: DocumentShell
+    CLASS: MemoryScripture
+    ORDER: MarkdownRecord
+    FAMILY: PrimeForgeLife
+    GENUS: KGEN12345
+    SPECIES: CHANGELOG.md
+    CELL: Memory Cell
+    ORGAN: Memory Shell
+    DNA: DOCUMENT-SHELL-DNA
+  IMMUNE_SYSTEM:
+    VIRUS_SCAN: ENABLED
+    HASH_VALIDATION: REQUIRED
+    UNKNOWN_ORGAN_BLOCK: TRUE
+    PATCH_DRIFT_BLOCK: TRUE
+    VERSION_FILENAME_BLOCK: TRUE
+    SELF_HEALING: ENABLED
+  REGENERATION:
+    EMBRYO_MODE: GZIP_BASE64
+    CAN_REBUILD_FROM_EMBRYO: TRUE
+    REJUVENATION: ENABLED
+    IMMORTALITY_CLASS: WUKONG_LONGEVITY
+  SECURITY_FINGERPRINT:
+    FINAL_SHA256: FILLED_IN_SHA256SUMS
+
+-->
+
 # KGEN 12345 CHANGELOG
 
 ## V10.44.2｜FESTIVAL HEART CLOCK + RECORDING SYNC
@@ -39,22 +114,3 @@
 - 520 / 1111 / 跨年活動改成可收合 Festival Organ Cell。
 - 跨年倒數改成穩定顯示，避免每秒閃爍抽搐。
 - 不新增深層資料夾，不更改正式資產檔名。
-
-
-## V10.45.2｜DIVINE IMMORTAL RUNTIME
-
-- 以 V10.44.2 主宇宙實體檔案為基礎修改，不再建立空白 index。
-- 修正左上版本銘牌，顯示 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX。
-- 新增 Cosmic Runtime Genome Registry：記錄 base_from=V10.44.2、DNA_ANCESTOR=V10.42.6。
-- 新增 Festival 單心跳穩定器：520 / 1111 / 跨年使用單一穩定顯示，不再每秒造成行高跳動。
-- 節日活動器官固定右側停靠，同寬同高，可點標題收合。
-- 錄影器官接回時間神經：REC READY / REC 00:00:00 顯示總錄影時間。
-- 聖盃器官建立 Runtime State，避免訊息欄 1~3 行增減癌化。
-- 右側神規 / 導覽類面板登入初始收合。
-
-
-## V10.45.3 VERSION GENOME FIX
-- 修正左上版本銘牌仍顯示 V10.42.6 的 DNA 銘牌不同步問題。
-- 全域替換 runtime.js / core.css / index.html 內殘留的 V10.42.6-MODULAR-ASSET-GOVERNANCE。
-- 新增啟動與延遲守護，強制 #ver-st 顯示 VERSION 12345-TEMPLE-V10.45.3-VERSION-GENOME-FIX。
-- 更新 document.title 與 window.RUNTIME_GENOME。
