@@ -11,10 +11,10 @@ PRIMEFORGE_LIFE_HEADER_V1:
   STRUCTURE_COORDINATE:
     ROOT_STRUCTURE: /K線西遊記
     CITY_STRUCTURE: /K線西遊記/temples/12345
-    CURRENT_LIFE_COORDINATE: /docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md
+    CURRENT_LIFE_COORDINATE: /docs/KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md
   FILE_CERTIFICATE:
-    FILE: KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md
-    PATH: /docs/KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md
+    FILE: KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md
+    PATH: /docs/KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md
     PRODUCT_ID: KGEN-12345-HEART-UI
     LIFE_LAYER: MEMORY
     LIFE_TYPE: Memory Shell / Civilization Record
@@ -33,7 +33,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
     ORDER: MarkdownRecord
     FAMILY: PrimeForgeLife
     GENUS: KGEN12345
-    SPECIES: KGEN_12345_V10_42_6_V10_2_MODULAR_ASSET_GOVERNANCE.md
+    SPECIES: KGEN_12345_V10_47_1_LAYOUT_REAL_FIX.md
     CELL: Memory Cell
     ORGAN: Memory Shell
     DNA: DOCUMENT-SHELL-DNA
@@ -54,37 +54,17 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 -->
 
-# KGEN 12345 V10.42.6｜V10.2 單檔升 Modules 執行說明
+# KGEN 12345 V10.47.1｜Layout Real Fix
 
-## 本版目標
+## 這版只做你指出的門面 bug
 
-使用 V10.2 單檔 `index.html` 作為畫面母版，直接升級成 modules，不再讓舊 modules / runtime patch 疊加搶版位。
+- 520 / 1111 / 跨年活動移到右側導覽「開啟音效/說明」下方。
+- Festival 視窗固定同寬同高，可收合，不再漂浮壓住其他按鈕。
+- 三聖盃改成單一狀態，不再永遠 0/3。
+- 三聖盃訊息欄固定高度，不再 1 到 3 行跳動。
+- 悟空控制台跨年倒數槽固定一行，不再心率不整。
+- 右側神規登入預設收合。
+- 執行檔固定使用 `runtime-main.js` / `runtime-main.css`，版本寫在 RUNTIME_GENOME。
 
-## 變更原則
-
-```text
-檔名也是資產。
-所有檔案必須有履歷。
-程式只讀正式定版資產名。
-圖片更換只覆蓋同名正式檔。
-```
-
-## 正式資產名
-
-```text
-assets/bull-front.png
-assets/bear-rear.png
-assets/heart.png
-assets/warp-core.png
-```
-
-## 新 modules
-
-```text
-modules/kgen-12345-core.css
-modules/kgen-12345-runtime.js
-```
-
-## 上傳方式
-
-若只更新 GitHub，可上傳 changed-only zip 內的檔案。完整包則可直接覆蓋同路徑。
+## 不做的事
+本版不新增新版號器官檔，不再使用 `kgen-v10461-...` 或 `kgen-12345-morph-...` 這類版本檔名。
