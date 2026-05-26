@@ -131,3 +131,16 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 VERSION:
 V10.48.2_RUNTIME_V1.6
+
+
+---
+
+# V10.48.3 Runtime Version Sync
+
+VERSION: 12345-TEMPLE-V10.48.3-RUNTIME-V1.6-VERSION-SYNC
+BUILD: 2026-05-27T00:00:00Z
+
+- 修正左上角顯示舊版 VERSION 的問題。
+- 同步前端內部 VERSION / BUILD 標記。
+- 新增 VERSION.md 版本識別檔。
+- 保留 V1.6 Runtime 內容，不刪除既有神殿功能。
