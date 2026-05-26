@@ -67,7 +67,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 (function(){
   "use strict";
 
-  const VERSION = "V10.47.1";
+  J345-TEMPLE-V10.48.3-RUNTIME-V1.6-VERSION-SYNC";
   const VERSION_TAG = "12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX";
   const $ = (id)=>document.getElementById(id);
   const qa = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
