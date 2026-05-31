@@ -1,0 +1,5480 @@
+{
+  "version": "KLINE_UNIVERSE_MAP_V10_2_DISTANCE_COMPLETE_ALL_POINTS",
+  "meta": {
+    "author_human": "樂天帝",
+    "author_ai": "PrimeForge Autopilot",
+    "mode": "mixed_layers",
+    "note": "主宇宙 + 平行縮放宇宙",
+    "distance_upgrade": "V10.2",
+    "source_excel": "西遊記_宇宙地圖_V5_1_距離尺升版.xlsx",
+    "source_json": "UniverseMap_V10_0.json",
+    "rule": "所有點位列入，不以相同數值去重；按照數值大小遠近排序",
+    "scale_reference": "16888 = 月球距離 384400 km",
+    "excel_rows_imported": 117,
+    "original_json_extra_points_added": 6,
+    "total_points": 123
+  },
+  "layers": {
+    "main_universe": {
+      "id": "U1_MAIN",
+      "scale": 1,
+      "points": [
+        {
+          "id": "P_m37p63_石油_R2",
+          "row_index_v5_1": 2,
+          "name": "石油",
+          "coord": -37.63,
+          "type": "location",
+          "role": "黑天鵝象徵",
+          "source": {
+            "v5_1_name": "石油",
+            "description": "黑天鵝象徵",
+            "original_info": "石油-37.63",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 2
+          },
+          "distance": {
+            "from_origin_0_km": 856.523685457,
+            "from_origin_0_m": 856523.685,
+            "moon_ratio_16888": 0.002228209379,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_m1p0_宇宙_R3",
+          "row_index_v5_1": 3,
+          "name": "宇宙",
+          "coord": -1,
+          "type": "location",
+          "role": "宇宙誕生點",
+          "source": {
+            "v5_1_name": "宇宙",
+            "description": "宇宙誕生點",
+            "original_info": "宇宙-1",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 3
+          },
+          "distance": {
+            "from_origin_0_km": 22.761724301,
+            "from_origin_0_m": 22761.724,
+            "moon_ratio_16888": 5.9213643e-05,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_0p0_恐龍_R4",
+          "row_index_v5_1": 4,
+          "name": "恐龍",
+          "coord": 0,
+          "type": "location",
+          "role": "史前霸主",
+          "source": {
+            "v5_1_name": "恐龍",
+            "description": "史前霸主",
+            "original_info": "恐龍0",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 4
+          },
+          "distance": {
+            "from_origin_0_km": 0.0,
+            "from_origin_0_m": 0.0,
+            "moon_ratio_16888": 0.0,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1p0_玩家創建_R5",
+          "row_index_v5_1": 5,
+          "name": "玩家創建",
+          "coord": 1,
+          "type": "location",
+          "role": "開局一口的人",
+          "source": {
+            "v5_1_name": "玩家創建",
+            "description": "開局一口的人",
+            "original_info": "玩家創建1",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 5
+          },
+          "distance": {
+            "from_origin_0_km": 22.761724301,
+            "from_origin_0_m": 22761.724,
+            "moon_ratio_16888": 5.9213643e-05,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_72p0_最輕恐龍_R6",
+          "row_index_v5_1": 6,
+          "name": "最輕恐龍",
+          "coord": 72,
+          "type": "location",
+          "role": "魔族最小等級72斤",
+          "source": {
+            "v5_1_name": "最輕恐龍",
+            "description": "魔族最小等級72斤",
+            "original_info": "最輕恐龍72",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 6
+          },
+          "distance": {
+            "from_origin_0_km": 1638.844149692,
+            "from_origin_0_m": 1638844.15,
+            "moon_ratio_16888": 0.004263382283,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_144p0_一四四時間之門_R7",
+          "row_index_v5_1": 7,
+          "name": "一四四時間之門",
+          "coord": 144,
+          "type": "gate",
+          "role": "對應時間與價格的費波節奏交會點",
+          "source": {
+            "v5_1_name": "一四四時間之門",
+            "description": "對應時間與價格的費波節奏交會點",
+            "original_info": "144時間之門",
+            "system_category": "遊戲物理 / 費波時間",
+            "energy_attribute": "節奏鎖定 / 轉折潛能",
+            "universe_level": "節奏層",
+            "classification_note": "作為T+1、T+2等時間循環的校正點，連動ATR與K線節奏",
+            "spreadsheet_row": 7
+          },
+          "distance": {
+            "from_origin_0_km": 3277.688299384,
+            "from_origin_0_m": 3277688.299,
+            "moon_ratio_16888": 0.008526764567,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_188p0_地嶽_R8",
+          "row_index_v5_1": 8,
+          "name": "地嶽",
+          "coord": 188,
+          "type": "location",
+          "role": "閻羅王之地",
+          "source": {
+            "v5_1_name": "地嶽",
+            "description": "閻羅王之地",
+            "original_info": "地嶽188",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 8
+          },
+          "distance": {
+            "from_origin_0_km": 4279.20416864,
+            "from_origin_0_m": 4279204.169,
+            "moon_ratio_16888": 0.011132164851,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_188p0_地獄門_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "地獄門",
+          "coord": 188,
+          "type": "gate",
+          "role": "地獄入口",
+          "note": "多重投影見 scaled_universes",
+          "cycle": null,
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 4279.20416864,
+            "from_origin_0_m": 4279204.169,
+            "moon_ratio_16888": 0.011132164851,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_233p0_二三三波動門_R9",
+          "row_index_v5_1": 9,
+          "name": "二三三波動門",
+          "coord": 233,
+          "type": "gate",
+          "role": "中階波動聚焦區，常出現趨勢延伸或反轉",
+          "source": {
+            "v5_1_name": "二三三波動門",
+            "description": "中階波動聚焦區，常出現趨勢延伸或反轉",
+            "original_info": "233波動門",
+            "system_category": "遊戲物理 / 波動聚焦",
+            "energy_attribute": "中頻震盪 / 趨勢試煉",
+            "universe_level": "中階波動層",
+            "classification_note": "給予角色在此區進行加碼、減碼或反手試煉的宇宙錨點",
+            "spreadsheet_row": 9
+          },
+          "distance": {
+            "from_origin_0_km": 5303.481762198,
+            "from_origin_0_m": 5303481.762,
+            "moon_ratio_16888": 0.013796778778,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_280p0_地球表面_R10",
+          "row_index_v5_1": 10,
+          "name": "地球表面",
+          "coord": 280,
+          "type": "planetary_surface",
+          "role": "人類居住地",
+          "source": {
+            "v5_1_name": "地球表面",
+            "description": "人類居住地",
+            "original_info": "地球表面280（6371km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 10
+          },
+          "distance": {
+            "from_origin_0_km": 6373.282804358,
+            "from_origin_0_m": 6373282.804,
+            "moon_ratio_16888": 0.016579819991,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_377p0_三七七銀河峽谷_R11",
+          "row_index_v5_1": 11,
+          "name": "三七七銀河峽谷",
+          "coord": 377,
+          "type": "river",
+          "role": "大型波段趨勢的加速或終結區",
+          "source": {
+            "v5_1_name": "三七七銀河峽谷",
+            "description": "大型波段趨勢的加速或終結區",
+            "original_info": "377銀河峽谷",
+            "system_category": "遊戲物理 / 大波段",
+            "energy_attribute": "高能量 / 方向選擇",
+            "universe_level": "高階波動層",
+            "classification_note": "適合作為劇情中的「審判段」與KGEN重要調整區",
+            "spreadsheet_row": 11
+          },
+          "distance": {
+            "from_origin_0_km": 8581.170061582,
+            "from_origin_0_m": 8581170.062,
+            "moon_ratio_16888": 0.022323543344,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_411p0_大氣層_R12",
+          "row_index_v5_1": 12,
+          "name": "大氣層",
+          "coord": 411,
+          "type": "planetary_surface",
+          "role": "地球保護層",
+          "source": {
+            "v5_1_name": "大氣層",
+            "description": "地球保護層",
+            "original_info": "大氣層411（9371km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 12
+          },
+          "distance": {
+            "from_origin_0_km": 9355.068687826,
+            "from_origin_0_m": 9355068.688,
+            "moon_ratio_16888": 0.0243368072,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_720p0_七二零轉生門_R13",
+          "row_index_v5_1": 13,
+          "name": "七二零轉生門",
+          "coord": 720,
+          "type": "gate",
+          "role": "玩家清袋、重生與策略重啟的門檻",
+          "source": {
+            "v5_1_name": "七二零轉生門",
+            "description": "玩家清袋、重生與策略重啟的門檻",
+            "original_info": "720轉生門",
+            "system_category": "遊戲機制 / 軟重置",
+            "energy_attribute": "清空 / 重啟",
+            "universe_level": "轉生層",
+            "classification_note": "對應遊戲中的重新分配、洗牌與角色重建，保留記憶但重設部位",
+            "spreadsheet_row": 13
+          },
+          "distance": {
+            "from_origin_0_km": 16388.441496921,
+            "from_origin_0_m": 16388441.497,
+            "moon_ratio_16888": 0.042633822833,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1111p0_閻王殿_R14",
+          "row_index_v5_1": 14,
+          "name": "閻王殿",
+          "coord": 1111,
+          "type": "palace",
+          "role": "隕石帥與隕石將",
+          "source": {
+            "v5_1_name": "閻王殿",
+            "description": "隕石帥與隕石將",
+            "original_info": "閻王殿1111",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 14
+          },
+          "distance": {
+            "from_origin_0_km": 25288.275698721,
+            "from_origin_0_m": 25288275.699,
+            "moon_ratio_16888": 0.065786357177,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1852p0_人造衛星高度_R15",
+          "row_index_v5_1": 15,
+          "name": "人造衛星高度",
+          "coord": 1852,
+          "type": "location",
+          "role": "軌道高度",
+          "source": {
+            "v5_1_name": "人造衛星高度",
+            "description": "軌道高度",
+            "original_info": "人造衛星1852（42157km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 15
+          },
+          "distance": {
+            "from_origin_0_km": 42154.713405969,
+            "from_origin_0_m": 42154713.406,
+            "moon_ratio_16888": 0.109663666509,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_3141p0_影像迷宮_R16",
+          "row_index_v5_1": 16,
+          "name": "影像迷宮",
+          "coord": 3141,
+          "type": "palace",
+          "role": "虛實交錯",
+          "source": {
+            "v5_1_name": "影像迷宮",
+            "description": "虛實交錯",
+            "original_info": "影像迷宮3141",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 16
+          },
+          "distance": {
+            "from_origin_0_km": 71494.576030317,
+            "from_origin_0_m": 71494576.03,
+            "moon_ratio_16888": 0.185990052108,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_4040p0_暗網交易所_R17",
+          "row_index_v5_1": 17,
+          "name": "暗網交易所",
+          "coord": 4040,
+          "type": "location",
+          "role": "地下金融",
+          "source": {
+            "v5_1_name": "暗網交易所",
+            "description": "地下金融",
+            "original_info": "暗網交易所4040",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 17
+          },
+          "distance": {
+            "from_origin_0_km": 91957.366177167,
+            "from_origin_0_m": 91957366.177,
+            "moon_ratio_16888": 0.239223117006,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_4168p0_奈何橋_R18",
+          "row_index_v5_1": 18,
+          "name": "奈何橋",
+          "coord": 4168,
+          "type": "location",
+          "role": "無法回頭抉擇",
+          "source": {
+            "v5_1_name": "奈何橋",
+            "description": "無法回頭抉擇",
+            "original_info": "奈何橋4168",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 18
+          },
+          "distance": {
+            "from_origin_0_km": 94870.866887731,
+            "from_origin_0_m": 94870866.888,
+            "moon_ratio_16888": 0.246802463288,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_4444p0_地府_R19",
+          "row_index_v5_1": 19,
+          "name": "地府",
+          "coord": 4444,
+          "type": "underworld",
+          "role": "陰司審判之所",
+          "source": {
+            "v5_1_name": "地府",
+            "description": "亡魂審判",
+            "original_info": "地府4444",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 19
+          },
+          "distance": {
+            "from_origin_0_km": 101153.102794884,
+            "from_origin_0_m": 101153102.795,
+            "moon_ratio_16888": 0.263145428707,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_5048p0_九齒釘耙_R20",
+          "row_index_v5_1": 20,
+          "name": "九齒釘耙",
+          "coord": 5048,
+          "type": "location",
+          "role": "五戒武器",
+          "source": {
+            "v5_1_name": "九齒釘耙",
+            "description": "五戒武器",
+            "original_info": "九齒釘耙5048",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 20
+          },
+          "distance": {
+            "from_origin_0_km": 114901.184272856,
+            "from_origin_0_m": 114901184.273,
+            "moon_ratio_16888": 0.298910468972,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_5048p0_降妖寶杖_R21",
+          "row_index_v5_1": 21,
+          "name": "降妖寶杖",
+          "coord": 5048,
+          "type": "location",
+          "role": "沙悟淨武器",
+          "source": {
+            "v5_1_name": "降妖寶杖",
+            "description": "沙悟淨武器",
+            "original_info": "降妖寶杖5048",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 21
+          },
+          "distance": {
+            "from_origin_0_km": 114901.184272856,
+            "from_origin_0_m": 114901184.273,
+            "moon_ratio_16888": 0.298910468972,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_5168p0_金山銀礦_R22",
+          "row_index_v5_1": 22,
+          "name": "金山銀礦",
+          "coord": 5168,
+          "type": "mountain",
+          "role": "財富礦脈",
+          "source": {
+            "v5_1_name": "金山銀礦",
+            "description": "財富礦脈",
+            "original_info": "金山銀礦5168",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 22
+          },
+          "distance": {
+            "from_origin_0_km": 117632.59118901,
+            "from_origin_0_m": 117632591.189,
+            "moon_ratio_16888": 0.306016106111,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_5555p0_南海龍房_R23",
+          "row_index_v5_1": 23,
+          "name": "南海龍房",
+          "coord": 5555,
+          "type": "location",
+          "role": "南海龍族住地",
+          "source": {
+            "v5_1_name": "南海龍房",
+            "description": "南海龍族住地",
+            "original_info": "南海龍房5555",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 23
+          },
+          "distance": {
+            "from_origin_0_km": 126441.378493605,
+            "from_origin_0_m": 126441378.494,
+            "moon_ratio_16888": 0.328931785883,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_6128p0_斜月三星洞_R24",
+          "row_index_v5_1": 24,
+          "name": "斜月三星洞",
+          "coord": 6128,
+          "type": "cave",
+          "role": "悟空學成七十二變之洞府",
+          "source": {
+            "v5_1_name": "斜月三星洞",
+            "description": "祖師授法地",
+            "original_info": "斜月三星洞6128",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 24
+          },
+          "distance": {
+            "from_origin_0_km": 139483.846518238,
+            "from_origin_0_m": 139483846.518,
+            "moon_ratio_16888": 0.362861203221,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_6666p0_東海龍房_R25",
+          "row_index_v5_1": 25,
+          "name": "東海龍房",
+          "coord": 6666,
+          "type": "palace_inner",
+          "role": "龍王私宅與寶庫",
+          "source": {
+            "v5_1_name": "東海龍房",
+            "description": "東海龍族住地",
+            "original_info": "東海龍房6666",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 25
+          },
+          "distance": {
+            "from_origin_0_km": 151729.654192326,
+            "from_origin_0_m": 151729654.192,
+            "moon_ratio_16888": 0.39471814306,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_6888p0_松樹國_R26",
+          "row_index_v5_1": 26,
+          "name": "松樹國",
+          "coord": 6888,
+          "type": "forest_kingdom",
+          "role": "悟空在斜月三星洞學藝，賣弄學藝變松樹，自力為國，被菩提祖師趕出門之地",
+          "source": {
+            "v5_1_name": "松樹國",
+            "description": "松樹國地點，玩家走路世界新增錨點",
+            "original_info": "松樹國6888",
+            "system_category": "開放世界 / 玩家地圖",
+            "energy_attribute": "穩定探索 / 松樹能量",
+            "universe_level": "地表修行層",
+            "classification_note": "作為玩家從出生地0前往神殿前的中階地點，可承接走路、探索、XP累積與神殿入口導引",
+            "spreadsheet_row": 26
+          },
+          "distance": {
+            "from_origin_0_km": 156782.75698721,
+            "from_origin_0_m": 156782756.987,
+            "moon_ratio_16888": 0.407863571767,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          },
+          "note": "悟空變為松樹適應火星環境的場域",
+          "story": {
+            "chapter": "斜月三星洞學藝",
+            "summary": "悟空在斜月三星洞學藝後，因賣弄所學變化成松樹，自力為國，後被菩提祖師趕出門。",
+            "characters": [
+              "孫悟空",
+              "菩提祖師"
+            ],
+            "tags": [
+              "斜月三星洞",
+              "松樹",
+              "學藝",
+              "逐出師門",
+              "自力為國"
+            ]
+          }
+        },
+        {
+          "id": "P_7200p0_畫杆方天戟_R27",
+          "row_index_v5_1": 27,
+          "name": "畫杆方天戟",
+          "coord": 7200,
+          "type": "location",
+          "role": "龍兵器重量7200斤",
+          "source": {
+            "v5_1_name": "畫杆方天戟",
+            "description": "龍兵器重量7200斤",
+            "original_info": "畫杆方天戟7200",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 27
+          },
+          "distance": {
+            "from_origin_0_km": 163884.414969209,
+            "from_origin_0_m": 163884414.969,
+            "moon_ratio_16888": 0.426338228328,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_7744p0_流沙河_R28",
+          "row_index_v5_1": 28,
+          "name": "流沙河",
+          "coord": 7744,
+          "type": "river",
+          "role": "沙悟淨出沒之河",
+          "source": {
+            "v5_1_name": "流沙河",
+            "description": "沙悟淨房子",
+            "original_info": "流沙河7744",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 28
+          },
+          "distance": {
+            "from_origin_0_km": 176266.792989105,
+            "from_origin_0_m": 176266792.989,
+            "moon_ratio_16888": 0.458550450024,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_7777p0_西海龍房_R29",
+          "row_index_v5_1": 29,
+          "name": "西海龍房",
+          "coord": 7777,
+          "type": "location",
+          "role": "敖犬房子",
+          "source": {
+            "v5_1_name": "西海龍房",
+            "description": "敖犬房子",
+            "original_info": "西海龍房7777（西藏）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 29
+          },
+          "distance": {
+            "from_origin_0_km": 177017.929891047,
+            "from_origin_0_m": 177017929.891,
+            "moon_ratio_16888": 0.460504500237,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_8888p0_高老莊_R30",
+          "row_index_v5_1": 30,
+          "name": "高老莊",
+          "coord": 8888,
+          "type": "village",
+          "role": "八戒入贅人間之地",
+          "source": {
+            "v5_1_name": "高老莊",
+            "description": "豬八戒老婆家",
+            "original_info": "高老莊8888（蘭嶼）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 30
+          },
+          "distance": {
+            "from_origin_0_km": 202306.205589768,
+            "from_origin_0_m": 202306205.59,
+            "moon_ratio_16888": 0.526290857414,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_8895p0_雲棧洞_R31",
+          "row_index_v5_1": 31,
+          "name": "雲棧洞",
+          "coord": 8895,
+          "type": "cave",
+          "role": "悟空雲端棲居之所",
+          "source": {
+            "v5_1_name": "雲棧洞",
+            "description": "豬八戒房子",
+            "original_info": "雲棧洞8895（綠島）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 31
+          },
+          "distance": {
+            "from_origin_0_km": 202465.537659877,
+            "from_origin_0_m": 202465537.66,
+            "moon_ratio_16888": 0.526705352913,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_9444p0_黑風谷_R32",
+          "row_index_v5_1": 32,
+          "name": "黑風谷",
+          "coord": 9444,
+          "type": "location",
+          "role": "暗勢力",
+          "source": {
+            "v5_1_name": "黑風谷",
+            "description": "暗勢力",
+            "original_info": "黑風谷9444",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 32
+          },
+          "distance": {
+            "from_origin_0_km": 214961.724301279,
+            "from_origin_0_m": 214961724.301,
+            "moon_ratio_16888": 0.559213642823,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_9995p0_龍珠綠_R33",
+          "row_index_v5_1": 33,
+          "name": "龍珠綠",
+          "coord": 9995,
+          "type": "location",
+          "role": "玉璽綠珠",
+          "source": {
+            "v5_1_name": "龍珠綠",
+            "description": "玉璽綠珠",
+            "original_info": "龍珠綠9995",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 33
+          },
+          "distance": {
+            "from_origin_0_km": 227503.434391284,
+            "from_origin_0_m": 227503434.391,
+            "moon_ratio_16888": 0.591840360019,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_9999p0_北海龍房_R34",
+          "row_index_v5_1": 34,
+          "name": "北海龍房",
+          "coord": 9999,
+          "type": "location",
+          "role": "北海龍族",
+          "source": {
+            "v5_1_name": "北海龍房",
+            "description": "北海龍族",
+            "original_info": "北海龍房9999",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 34
+          },
+          "distance": {
+            "from_origin_0_km": 227594.481288489,
+            "from_origin_0_m": 227594481.288,
+            "moon_ratio_16888": 0.59207721459,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_11111p0_定海神針_R35",
+          "row_index_v5_1": 35,
+          "name": "定海神針",
+          "coord": 11111,
+          "type": "location",
+          "role": "黃金帥與黃金將分界",
+          "source": {
+            "v5_1_name": "定海神針",
+            "description": "黃金帥與黃金將分界",
+            "original_info": "定海神針11111（高雄）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 35
+          },
+          "distance": {
+            "from_origin_0_km": 252905.518711511,
+            "from_origin_0_m": 252905518.712,
+            "moon_ratio_16888": 0.65792278541,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_11520p0_花果山_R36",
+          "row_index_v5_1": 36,
+          "name": "花果山",
+          "coord": 11520,
+          "type": "mountain",
+          "role": "凡界起點・悟空根本之山",
+          "source": {
+            "v5_1_name": "花果山",
+            "description": "台灣靈山",
+            "original_info": "花果山11520",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 36
+          },
+          "distance": {
+            "from_origin_0_km": 262215.063950734,
+            "from_origin_0_m": 262215063.951,
+            "moon_ratio_16888": 0.682141165324,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_12345p0_五指山_R37",
+          "row_index_v5_1": 37,
+          "name": "五指山",
+          "coord": 12345,
+          "type": "mountain",
+          "role": "悟空的房子",
+          "source": {
+            "v5_1_name": "五指山",
+            "description": "悟空的房子",
+            "original_info": "五指山12345（新竹）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 37
+          },
+          "distance": {
+            "from_origin_0_km": 280993.486499289,
+            "from_origin_0_m": 280993486.499,
+            "moon_ratio_16888": 0.730992420654,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_12345p0_小五指山_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "小五指山",
+          "coord": 12345,
+          "type": "mountain",
+          "role": "凡界級壓制點",
+          "note": null,
+          "cycle": "short",
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 280993.486499289,
+            "from_origin_0_m": 280993486.499,
+            "moon_ratio_16888": 0.730992420654,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_12682p0_阿斗起飛_R38",
+          "row_index_v5_1": 38,
+          "name": "阿斗起飛",
+          "coord": 12682,
+          "type": "location",
+          "role": "阿斗翻身點",
+          "source": {
+            "v5_1_name": "阿斗起飛",
+            "description": "阿斗翻身點",
+            "original_info": "阿斗起飛12682",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 38
+          },
+          "distance": {
+            "from_origin_0_km": 288664.18758882,
+            "from_origin_0_m": 288664187.589,
+            "moon_ratio_16888": 0.750947418285,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_12800p0_靈台方寸山_R39",
+          "row_index_v5_1": 39,
+          "name": "靈台方寸山",
+          "coord": 12800,
+          "type": "mountain",
+          "role": "悟空修道總壇",
+          "source": {
+            "v5_1_name": "靈台方寸山",
+            "description": "悟空學道之地，通往斜月三星洞的仙山主殿",
+            "original_info": "靈台方寸山12800",
+            "system_category": "仙界核心 / 悟空修行母點",
+            "energy_attribute": "悟性啟動 / 修行主場",
+            "universe_level": "仙界中樞",
+            "classification_note": "悟空拜師、修行與心法總結之地，作為花果山與高維佛界之間的重要樞紐",
+            "spreadsheet_row": 39
+          },
+          "distance": {
+            "from_origin_0_km": 291350.071056371,
+            "from_origin_0_m": 291350071.056,
+            "moon_ratio_16888": 0.757934628138,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          },
+          "note": "正式修正為12800，取代舊傳6888"
+        },
+        {
+          "id": "P_13500p0_金箍棒_R40",
+          "row_index_v5_1": 40,
+          "name": "金箍棒",
+          "coord": 13500,
+          "type": "location",
+          "role": "仙級武器重量13500斤/口",
+          "source": {
+            "v5_1_name": "金箍棒",
+            "description": "仙級武器重量13500斤/口",
+            "original_info": "金箍棒13500（台北307283km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 40
+          },
+          "distance": {
+            "from_origin_0_km": 307283.278067267,
+            "from_origin_0_m": 307283278.067,
+            "moon_ratio_16888": 0.799384178115,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_13888p0_東土大唐_R41",
+          "row_index_v5_1": 41,
+          "name": "東土大唐",
+          "coord": 13888,
+          "type": "location",
+          "role": "取經起點",
+          "source": {
+            "v5_1_name": "東土大唐",
+            "description": "取經起點",
+            "original_info": "東土大唐13888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 41
+          },
+          "distance": {
+            "from_origin_0_km": 316114.827096163,
+            "from_origin_0_m": 316114827.096,
+            "moon_ratio_16888": 0.82235907153,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_14520p0_大仙女_巧雲__R43",
+          "row_index_v5_1": 43,
+          "name": "大仙女(巧雲)",
+          "coord": 14520,
+          "type": "location",
+          "role": "天樞專掌:風調雨順做空",
+          "source": {
+            "v5_1_name": "大仙女(巧雲)",
+            "description": "天樞專掌:風調雨順做空",
+            "original_info": "大仙女(巧雲)14520天樞專掌:風調雨順做空",
+            "system_category": "現貨系統",
+            "energy_attribute": "做空",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 43
+          },
+          "distance": {
+            "from_origin_0_km": 330500.236854571,
+            "from_origin_0_m": 330500236.855,
+            "moon_ratio_16888": 0.859782093794,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_14520p0_巧雲_R42",
+          "row_index_v5_1": 42,
+          "name": "巧雲",
+          "coord": 14520,
+          "type": "location",
+          "role": "天樞做空",
+          "source": {
+            "v5_1_name": "巧雲",
+            "description": "天樞做空",
+            "original_info": "大仙女14520",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 42
+          },
+          "distance": {
+            "from_origin_0_km": 330500.236854571,
+            "from_origin_0_m": 330500236.855,
+            "moon_ratio_16888": 0.859782093794,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_14866p0_二仙女_巧虹__R45",
+          "row_index_v5_1": 45,
+          "name": "二仙女(巧虹)",
+          "coord": 14866,
+          "type": "location",
+          "role": "天璇專掌:家庭美滿做多",
+          "source": {
+            "v5_1_name": "二仙女(巧虹)",
+            "description": "天璇專掌:家庭美滿做多",
+            "original_info": "二仙女(巧虹)14866天璇專掌:家庭美滿做多",
+            "system_category": "現貨系統",
+            "energy_attribute": "做多",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 45
+          },
+          "distance": {
+            "from_origin_0_km": 338375.793462814,
+            "from_origin_0_m": 338375793.463,
+            "moon_ratio_16888": 0.880270014211,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_14866p0_巧虹_R44",
+          "row_index_v5_1": 44,
+          "name": "巧虹",
+          "coord": 14866,
+          "type": "location",
+          "role": "天璇做多",
+          "source": {
+            "v5_1_name": "巧虹",
+            "description": "天璇做多",
+            "original_info": "二仙女14866",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 44
+          },
+          "distance": {
+            "from_origin_0_km": 338375.793462814,
+            "from_origin_0_m": 338375793.463,
+            "moon_ratio_16888": 0.880270014211,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16184p0_三仙女_巧芝__R47",
+          "row_index_v5_1": 47,
+          "name": "三仙女(巧芝)",
+          "coord": 16184,
+          "type": "location",
+          "role": "天璣專掌:育子收驚做空",
+          "source": {
+            "v5_1_name": "三仙女(巧芝)",
+            "description": "天璣專掌:育子收驚做空",
+            "original_info": "三仙女(巧芝)16184天璣專掌:育子收驚做空",
+            "system_category": "現貨系統",
+            "energy_attribute": "做空",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 47
+          },
+          "distance": {
+            "from_origin_0_km": 368375.7460919,
+            "from_origin_0_m": 368375746.092,
+            "moon_ratio_16888": 0.958313595452,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16184p0_巧芝_R46",
+          "row_index_v5_1": 46,
+          "name": "巧芝",
+          "coord": 16184,
+          "type": "location",
+          "role": "天璣做空",
+          "source": {
+            "v5_1_name": "巧芝",
+            "description": "天璣做空",
+            "original_info": "三仙女16184",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 46
+          },
+          "distance": {
+            "from_origin_0_km": 368375.7460919,
+            "from_origin_0_m": 368375746.092,
+            "moon_ratio_16888": 0.958313595452,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16888p0_四仙女_巧仙__R50",
+          "row_index_v5_1": 50,
+          "name": "四仙女(巧仙)",
+          "coord": 16888,
+          "type": "location",
+          "role": "天權專掌:事業運通做多",
+          "source": {
+            "v5_1_name": "四仙女(巧仙)",
+            "description": "天權專掌:事業運通做多",
+            "original_info": "四仙女(巧仙)16888天權專掌:事業運通做多",
+            "system_category": "現貨系統",
+            "energy_attribute": "做多",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 50
+          },
+          "distance": {
+            "from_origin_0_km": 384400.0,
+            "from_origin_0_m": 384400000.0,
+            "moon_ratio_16888": 1.0,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16888p0_巧仙_R49",
+          "row_index_v5_1": 49,
+          "name": "巧仙",
+          "coord": 16888,
+          "type": "location",
+          "role": "天權做多",
+          "source": {
+            "v5_1_name": "巧仙",
+            "description": "天權做多",
+            "original_info": "四仙女16888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 49
+          },
+          "distance": {
+            "from_origin_0_km": 384400.0,
+            "from_origin_0_m": 384400000.0,
+            "moon_ratio_16888": 1.0,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16888p0_月球_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "月球",
+          "coord": 16888,
+          "type": "moon",
+          "role": "太陽系試煉門",
+          "note": null,
+          "cycle": null,
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 384400.0,
+            "from_origin_0_m": 384400000.0,
+            "moon_ratio_16888": 1.0,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_16888p0_白骨洞_廣寒宮_R48",
+          "row_index_v5_1": 48,
+          "name": "白骨洞 / 廣寒宮",
+          "coord": 16888,
+          "type": "cave",
+          "role": "嫦娥居所",
+          "source": {
+            "v5_1_name": "白骨洞 / 廣寒宮",
+            "description": "嫦娥居所",
+            "original_info": "白骨洞16888（384400km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 48
+          },
+          "distance": {
+            "from_origin_0_km": 384400.0,
+            "from_origin_0_m": 384400000.0,
+            "moon_ratio_16888": 1.0,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_17347p0_五仙女_巧蘭__R52",
+          "row_index_v5_1": 52,
+          "name": "五仙女(巧蘭)",
+          "coord": 17347,
+          "type": "location",
+          "role": "天衡專掌:長命百歲做空",
+          "source": {
+            "v5_1_name": "五仙女(巧蘭)",
+            "description": "天衡專掌:長命百歲做空",
+            "original_info": "五仙女(巧蘭)17347天衡專掌:長命百歲做空",
+            "system_category": "現貨系統",
+            "energy_attribute": "做空",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 52
+          },
+          "distance": {
+            "from_origin_0_km": 394847.631454287,
+            "from_origin_0_m": 394847631.454,
+            "moon_ratio_16888": 1.027179062056,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_17347p0_巧蘭_R51",
+          "row_index_v5_1": 51,
+          "name": "巧蘭",
+          "coord": 17347,
+          "type": "location",
+          "role": "天衡做空",
+          "source": {
+            "v5_1_name": "巧蘭",
+            "description": "天衡做空",
+            "original_info": "五仙女17347",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 51
+          },
+          "distance": {
+            "from_origin_0_km": 394847.631454287,
+            "from_origin_0_m": 394847631.454,
+            "moon_ratio_16888": 1.027179062056,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18000p0_黑洞層_R53",
+          "row_index_v5_1": 53,
+          "name": "黑洞層",
+          "coord": 18000,
+          "type": "cave",
+          "role": "極端虧損與錯誤槓桿的最終收容層",
+          "source": {
+            "v5_1_name": "黑洞層",
+            "description": "極端虧損與錯誤槓桿的最終收容層",
+            "original_info": "黑洞層18000",
+            "system_category": "KGEN核心 / 風險收容",
+            "energy_attribute": "極端壓縮 / 單向吸收",
+            "universe_level": "深層風險區",
+            "classification_note": "對應爆倉、錯誤操作與惡意行為的最終歸宿，設計為有限而可預期的損失區",
+            "spreadsheet_row": 53
+          },
+          "distance": {
+            "from_origin_0_km": 409711.037423022,
+            "from_origin_0_m": 409711037.423,
+            "moon_ratio_16888": 1.06584557082,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18056p0_六仙女_巧梅__R55",
+          "row_index_v5_1": 55,
+          "name": "六仙女(巧梅)",
+          "coord": 18056,
+          "type": "location",
+          "role": "闓陽專掌:身體健康做多",
+          "source": {
+            "v5_1_name": "六仙女(巧梅)",
+            "description": "闓陽專掌:身體健康做多",
+            "original_info": "六仙女(巧梅)18056闓陽專掌:身體健康做多",
+            "system_category": "現貨系統",
+            "energy_attribute": "做多",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 55
+          },
+          "distance": {
+            "from_origin_0_km": 410985.693983894,
+            "from_origin_0_m": 410985693.984,
+            "moon_ratio_16888": 1.069161534818,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18056p0_巧梅_R54",
+          "row_index_v5_1": 54,
+          "name": "巧梅",
+          "coord": 18056,
+          "type": "location",
+          "role": "闓陽做多",
+          "source": {
+            "v5_1_name": "巧梅",
+            "description": "闓陽做多",
+            "original_info": "六仙女18056",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 54
+          },
+          "distance": {
+            "from_origin_0_km": 410985.693983894,
+            "from_origin_0_m": 410985693.984,
+            "moon_ratio_16888": 1.069161534818,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18319p0_四大天門_R56",
+          "row_index_v5_1": 56,
+          "name": "四大天門",
+          "coord": 18319,
+          "type": "gate",
+          "role": "東南西北天門",
+          "source": {
+            "v5_1_name": "四大天門",
+            "description": "東南西北天門",
+            "original_info": "四大天門18319",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 56
+          },
+          "distance": {
+            "from_origin_0_km": 416972.02747513,
+            "from_origin_0_m": 416972027.475,
+            "moon_ratio_16888": 1.08473472288,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18459p0_七仙女_巧靈__R58",
+          "row_index_v5_1": 58,
+          "name": "七仙女(巧靈)",
+          "coord": 18459,
+          "type": "location",
+          "role": "瑤光專掌:感情圓滿多單退",
+          "source": {
+            "v5_1_name": "七仙女(巧靈)",
+            "description": "瑤光專掌:感情圓滿多單退",
+            "original_info": "七仙女(巧靈)18459瑤光專掌:感情圓滿多單退",
+            "system_category": "現貨系統",
+            "energy_attribute": "多單退",
+            "universe_level": "現貨七元神",
+            "classification_note": "掌控台股現貨能量的七大系統",
+            "spreadsheet_row": 58
+          },
+          "distance": {
+            "from_origin_0_km": 420158.668877309,
+            "from_origin_0_m": 420158668.877,
+            "moon_ratio_16888": 1.093024632875,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18459p0_巧靈_R57",
+          "row_index_v5_1": 57,
+          "name": "巧靈",
+          "coord": 18459,
+          "type": "location",
+          "role": "瑤光多退",
+          "source": {
+            "v5_1_name": "巧靈",
+            "description": "瑤光多退",
+            "original_info": "七仙女18459",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 57
+          },
+          "distance": {
+            "from_origin_0_km": 420158.668877309,
+            "from_origin_0_m": 420158668.877,
+            "moon_ratio_16888": 1.093024632875,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18520p0_四大天王_R59",
+          "row_index_v5_1": 59,
+          "name": "四大天王",
+          "coord": 18520,
+          "type": "location",
+          "role": "四大護法",
+          "source": {
+            "v5_1_name": "四大天王",
+            "description": "四大護法",
+            "original_info": "四大天王18520",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 59
+          },
+          "distance": {
+            "from_origin_0_km": 421547.134059687,
+            "from_origin_0_m": 421547134.06,
+            "moon_ratio_16888": 1.096636665088,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18888p0_凌霄寶殿_R60",
+          "row_index_v5_1": 60,
+          "name": "凌霄寶殿",
+          "coord": 18888,
+          "type": "palace",
+          "role": "神仙與神明分界殿",
+          "source": {
+            "v5_1_name": "凌霄寶殿",
+            "description": "神仙與神明分界殿",
+            "original_info": "凌霄寶殿18888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 60
+          },
+          "distance": {
+            "from_origin_0_km": 429923.448602558,
+            "from_origin_0_m": 429923448.603,
+            "moon_ratio_16888": 1.118427285647,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18889p0_敖欽_R61",
+          "row_index_v5_1": 61,
+          "name": "敖欽",
+          "coord": 18889,
+          "type": "location",
+          "role": "南海龍王",
+          "source": {
+            "v5_1_name": "敖欽",
+            "description": "南海龍王",
+            "original_info": "敖欽18889",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 61
+          },
+          "distance": {
+            "from_origin_0_km": 429946.210326859,
+            "from_origin_0_m": 429946210.327,
+            "moon_ratio_16888": 1.118486499289,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18890p0_敖廣_R62",
+          "row_index_v5_1": 62,
+          "name": "敖廣",
+          "coord": 18890,
+          "type": "location",
+          "role": "東海龍王",
+          "source": {
+            "v5_1_name": "敖廣",
+            "description": "東海龍王",
+            "original_info": "敖廣18890",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 62
+          },
+          "distance": {
+            "from_origin_0_km": 429968.972051161,
+            "from_origin_0_m": 429968972.051,
+            "moon_ratio_16888": 1.118545712932,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18891p0_敖順_R63",
+          "row_index_v5_1": 63,
+          "name": "敖順",
+          "coord": 18891,
+          "type": "location",
+          "role": "西海龍王",
+          "source": {
+            "v5_1_name": "敖順",
+            "description": "西海龍王",
+            "original_info": "敖順18891",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 63
+          },
+          "distance": {
+            "from_origin_0_km": 429991.733775462,
+            "from_origin_0_m": 429991733.775,
+            "moon_ratio_16888": 1.118604926575,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18892p0_敖吉_R64",
+          "row_index_v5_1": 64,
+          "name": "敖吉",
+          "coord": 18892,
+          "type": "location",
+          "role": "北海龍王",
+          "source": {
+            "v5_1_name": "敖吉",
+            "description": "北海龍王",
+            "original_info": "敖吉18892",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 64
+          },
+          "distance": {
+            "from_origin_0_km": 430014.495499763,
+            "from_origin_0_m": 430014495.5,
+            "moon_ratio_16888": 1.118664140218,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18893p0_總卒元將府_R65",
+          "row_index_v5_1": 65,
+          "name": "總卒元將府",
+          "coord": 18893,
+          "type": "location",
+          "role": "士卒核心",
+          "source": {
+            "v5_1_name": "總卒元將府",
+            "description": "士卒核心",
+            "original_info": "總卒元將府18893",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 65
+          },
+          "distance": {
+            "from_origin_0_km": 430037.257224064,
+            "from_origin_0_m": 430037257.224,
+            "moon_ratio_16888": 1.118723353861,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18894p0_總兵元帥府_R66",
+          "row_index_v5_1": 66,
+          "name": "總兵元帥府",
+          "coord": 18894,
+          "type": "location",
+          "role": "軍事核心",
+          "source": {
+            "v5_1_name": "總兵元帥府",
+            "description": "軍事核心",
+            "original_info": "總兵元帥府18894",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 66
+          },
+          "distance": {
+            "from_origin_0_km": 430060.018948366,
+            "from_origin_0_m": 430060018.948,
+            "moon_ratio_16888": 1.118782567504,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18911p0_煉丹爐_R67",
+          "row_index_v5_1": 67,
+          "name": "煉丹爐",
+          "coord": 18911,
+          "type": "location",
+          "role": "極端試煉",
+          "source": {
+            "v5_1_name": "煉丹爐",
+            "description": "極端試煉",
+            "original_info": "煉丹爐18911",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 67
+          },
+          "distance": {
+            "from_origin_0_km": 430446.968261487,
+            "from_origin_0_m": 430446968.261,
+            "moon_ratio_16888": 1.119789199432,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18921p0_斬妖台_R68",
+          "row_index_v5_1": 68,
+          "name": "斬妖台",
+          "coord": 18921,
+          "type": "location",
+          "role": "誅邪之台",
+          "source": {
+            "v5_1_name": "斬妖台",
+            "description": "誅邪之台",
+            "original_info": "斬妖台18921",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 68
+          },
+          "distance": {
+            "from_origin_0_km": 430674.5855045,
+            "from_origin_0_m": 430674585.505,
+            "moon_ratio_16888": 1.12038133586,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_18999p0_玉帝_R69",
+          "row_index_v5_1": 69,
+          "name": "玉帝",
+          "coord": 18999,
+          "type": "location",
+          "role": "北京象徵",
+          "source": {
+            "v5_1_name": "玉帝",
+            "description": "北京象徵",
+            "original_info": "玉帝18999（430082km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 69
+          },
+          "distance": {
+            "from_origin_0_km": 432450.0,
+            "from_origin_0_m": 432450000.0,
+            "moon_ratio_16888": 1.125,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_20000p0_女兒國_R70",
+          "row_index_v5_1": 70,
+          "name": "女兒國",
+          "coord": 20000,
+          "type": "location",
+          "role": "情感試煉",
+          "source": {
+            "v5_1_name": "女兒國",
+            "description": "情感試煉",
+            "original_info": "女兒國20000",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 70
+          },
+          "distance": {
+            "from_origin_0_km": 455234.48602558,
+            "from_origin_0_m": 455234486.026,
+            "moon_ratio_16888": 1.184272856466,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_20732p0_創世之門_R71",
+          "row_index_v5_1": 71,
+          "name": "創世之門",
+          "coord": 20732,
+          "type": "gate",
+          "role": "悟道閘口",
+          "source": {
+            "v5_1_name": "創世之門",
+            "description": "悟道閘口",
+            "original_info": "創世之門20732",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 71
+          },
+          "distance": {
+            "from_origin_0_km": 471896.068214117,
+            "from_origin_0_m": 471896068.214,
+            "moon_ratio_16888": 1.227617243013,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_20888p0_火焰山_R72",
+          "row_index_v5_1": 72,
+          "name": "火焰山",
+          "coord": 20888,
+          "type": "mountain",
+          "role": "高風險高波動",
+          "source": {
+            "v5_1_name": "火焰山",
+            "description": "高風險高波動",
+            "original_info": "火焰山20888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 72
+          },
+          "distance": {
+            "from_origin_0_km": 475446.897205116,
+            "from_origin_0_m": 475446897.205,
+            "moon_ratio_16888": 1.236854571293,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21319p0_雷音寺_R73",
+          "row_index_v5_1": 73,
+          "name": "雷音寺",
+          "coord": 21319,
+          "type": "location",
+          "role": "金剛般若波羅蜜經導讀地",
+          "source": {
+            "v5_1_name": "雷音寺",
+            "description": "金剛般若波羅蜜經導讀地",
+            "original_info": "雷音寺21319（485257km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 73
+          },
+          "distance": {
+            "from_origin_0_km": 485257.200378967,
+            "from_origin_0_m": 485257200.379,
+            "moon_ratio_16888": 1.26237565135,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21344p0_參軍將_R74",
+          "row_index_v5_1": 74,
+          "name": "參軍將",
+          "coord": 21344,
+          "type": "location",
+          "role": "諸葛亮部下",
+          "source": {
+            "v5_1_name": "參軍將",
+            "description": "諸葛亮部下",
+            "original_info": "參軍將21344",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 74
+          },
+          "distance": {
+            "from_origin_0_km": 485826.243486499,
+            "from_origin_0_m": 485826243.486,
+            "moon_ratio_16888": 1.263855992421,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21444p0_五丈原界碑_R75",
+          "row_index_v5_1": 75,
+          "name": "五丈原界碑",
+          "coord": 21444,
+          "type": "location",
+          "role": "多空對峙",
+          "source": {
+            "v5_1_name": "五丈原界碑",
+            "description": "多空對峙",
+            "original_info": "五丈原界碑21444",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 75
+          },
+          "distance": {
+            "from_origin_0_km": 488102.415916627,
+            "from_origin_0_m": 488102415.917,
+            "moon_ratio_16888": 1.269777356703,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21520p0_大雄寶殿_R76",
+          "row_index_v5_1": 76,
+          "name": "大雄寶殿",
+          "coord": 21520,
+          "type": "palace",
+          "role": "主殿",
+          "source": {
+            "v5_1_name": "大雄寶殿",
+            "description": "主殿",
+            "original_info": "大雄寶殿21520",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 76
+          },
+          "distance": {
+            "from_origin_0_km": 489832.306963524,
+            "from_origin_0_m": 489832306.964,
+            "moon_ratio_16888": 1.274277593558,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21588p0_如來佛_R77",
+          "row_index_v5_1": 77,
+          "name": "如來佛",
+          "coord": 21588,
+          "type": "location",
+          "role": "如來禪寺",
+          "source": {
+            "v5_1_name": "如來佛",
+            "description": "如來禪寺",
+            "original_info": "如來佛21588",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 77
+          },
+          "distance": {
+            "from_origin_0_km": 491380.104216011,
+            "from_origin_0_m": 491380104.216,
+            "moon_ratio_16888": 1.27830412127,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21666p0_佛光普照之地_R78",
+          "row_index_v5_1": 78,
+          "name": "佛光普照之地",
+          "coord": 21666,
+          "type": "location",
+          "role": "佛光加持區",
+          "source": {
+            "v5_1_name": "佛光普照之地",
+            "description": "佛光加持區",
+            "original_info": "佛光普照之地21666",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 78
+          },
+          "distance": {
+            "from_origin_0_km": 493155.518711511,
+            "from_origin_0_m": 493155518.712,
+            "moon_ratio_16888": 1.28292278541,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21777p0_白龍門下層_R79",
+          "row_index_v5_1": 79,
+          "name": "白龍門下層",
+          "coord": 21777,
+          "type": "gate",
+          "role": "三國軍團入口",
+          "source": {
+            "v5_1_name": "白龍門下層",
+            "description": "三國軍團入口",
+            "original_info": "白龍門21777",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 79
+          },
+          "distance": {
+            "from_origin_0_km": 495682.070108953,
+            "from_origin_0_m": 495682070.109,
+            "moon_ratio_16888": 1.289495499763,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_21888p0_恐懼女鬼_R80",
+          "row_index_v5_1": 80,
+          "name": "恐懼女鬼",
+          "coord": 21888,
+          "type": "location",
+          "role": "恐慌回檔象徵",
+          "source": {
+            "v5_1_name": "恐懼女鬼",
+            "description": "恐慌回檔象徵",
+            "original_info": "恐懼女鬼21888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 80
+          },
+          "distance": {
+            "from_origin_0_km": 498208.621506395,
+            "from_origin_0_m": 498208621.506,
+            "moon_ratio_16888": 1.296068214117,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_22188p0_貪婪魔影_R81",
+          "row_index_v5_1": 81,
+          "name": "貪婪魔影",
+          "coord": 22188,
+          "type": "location",
+          "role": "追高殺多化身",
+          "source": {
+            "v5_1_name": "貪婪魔影",
+            "description": "追高殺多化身",
+            "original_info": "貪婪魔影22188",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 81
+          },
+          "distance": {
+            "from_origin_0_km": 505037.138796779,
+            "from_origin_0_m": 505037138.797,
+            "moon_ratio_16888": 1.313832306964,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_22200p0_魔影之谷_R82",
+          "row_index_v5_1": 82,
+          "name": "魔影之谷",
+          "coord": 22200,
+          "type": "location",
+          "role": "貪婪恐懼之谷",
+          "source": {
+            "v5_1_name": "魔影之谷",
+            "description": "貪婪恐懼之谷",
+            "original_info": "魔影之谷22200",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 82
+          },
+          "distance": {
+            "from_origin_0_km": 505310.279488394,
+            "from_origin_0_m": 505310279.488,
+            "moon_ratio_16888": 1.314542870677,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_22400p0_幻市魔影之門_R83",
+          "row_index_v5_1": 83,
+          "name": "幻市魔影之門",
+          "coord": 22400,
+          "type": "gate",
+          "role": "幻象市場入口",
+          "source": {
+            "v5_1_name": "幻市魔影之門",
+            "description": "幻象市場入口",
+            "original_info": "幻市魔影之門22400",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 83
+          },
+          "distance": {
+            "from_origin_0_km": 509862.62434865,
+            "from_origin_0_m": 509862624.349,
+            "moon_ratio_16888": 1.326385599242,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_22888p0_白龍門_R84",
+          "row_index_v5_1": 84,
+          "name": "白龍門",
+          "coord": 22888,
+          "type": "gate",
+          "role": "白龍族之界門",
+          "source": {
+            "v5_1_name": "白龍門",
+            "description": "白龍族之界門",
+            "original_info": "白龍門22888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 84
+          },
+          "distance": {
+            "from_origin_0_km": 520970.345807674,
+            "from_origin_0_m": 520970345.808,
+            "moon_ratio_16888": 1.35528185694,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_23333p0_靈山_R85",
+          "row_index_v5_1": 85,
+          "name": "靈山",
+          "coord": 23333,
+          "type": "mountain",
+          "role": "佛門聖地",
+          "source": {
+            "v5_1_name": "靈山",
+            "description": "佛門聖地",
+            "original_info": "靈山23333",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 85
+          },
+          "distance": {
+            "from_origin_0_km": 531099.313121743,
+            "from_origin_0_m": 531099313.122,
+            "moon_ratio_16888": 1.381631927996,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_24449p0_雲端神將_R86",
+          "row_index_v5_1": 86,
+          "name": "雲端神將",
+          "coord": 24449,
+          "type": "location",
+          "role": "高階操盤者所在之巔",
+          "source": {
+            "v5_1_name": "雲端神將",
+            "description": "高階操盤者所在之巔",
+            "original_info": "雲端神將24449",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 86
+          },
+          "distance": {
+            "from_origin_0_km": 556501.397441971,
+            "from_origin_0_m": 556501397.442,
+            "moon_ratio_16888": 1.447714353387,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_24888p0_佛祖金鋼殿_R87",
+          "row_index_v5_1": 87,
+          "name": "佛祖金鋼殿",
+          "coord": 24888,
+          "type": "palace",
+          "role": "佛祖聖殿",
+          "source": {
+            "v5_1_name": "佛祖金鋼殿",
+            "description": "佛祖聖殿",
+            "original_info": "佛祖金鋼殿24888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 87
+          },
+          "distance": {
+            "from_origin_0_km": 566493.794410232,
+            "from_origin_0_m": 566493794.41,
+            "moon_ratio_16888": 1.473709142586,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_33333p0_黃金鑽石_R88",
+          "row_index_v5_1": 88,
+          "name": "黃金鑽石",
+          "coord": 33333,
+          "type": "location",
+          "role": "頂級財富能量",
+          "source": {
+            "v5_1_name": "黃金鑽石",
+            "description": "頂級財富能量",
+            "original_info": "黃金鑽石33333",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 88
+          },
+          "distance": {
+            "from_origin_0_km": 758716.556134533,
+            "from_origin_0_m": 758716556.135,
+            "moon_ratio_16888": 1.973768356229,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_36000p0_白洞層_R89",
+          "row_index_v5_1": 89,
+          "name": "白洞層",
+          "coord": 36000,
+          "type": "cave",
+          "role": "黑洞對偶層，象徵再分配與再生產的能量出口",
+          "source": {
+            "v5_1_name": "白洞層",
+            "description": "黑洞對偶層，象徵再分配與再生產的能量出口",
+            "original_info": "白洞層36000",
+            "system_category": "KGEN核心 / 風險緩衝",
+            "energy_attribute": "高頻再生 / 釋放壓力",
+            "universe_level": "高階能量層",
+            "classification_note": "對應KGEN中長期獎勵與利息釋放，避免單向吸收造成系統性崩塌",
+            "spreadsheet_row": 89
+          },
+          "distance": {
+            "from_origin_0_km": 819422.074846045,
+            "from_origin_0_m": 819422074.846,
+            "moon_ratio_16888": 2.131691141639,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_44444p0_南海龍宮_R90",
+          "row_index_v5_1": 90,
+          "name": "南海龍宮",
+          "coord": 44444,
+          "type": "palace",
+          "role": "南海龍王敖欽宮",
+          "source": {
+            "v5_1_name": "南海龍宮",
+            "description": "南海龍王敖欽宮",
+            "original_info": "南海龍宮44444",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 90
+          },
+          "distance": {
+            "from_origin_0_km": 1011622.074846044,
+            "from_origin_0_m": 1011622074.846,
+            "moon_ratio_16888": 2.631691141639,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_55555p0_東海龍宮_R91",
+          "row_index_v5_1": 91,
+          "name": "東海龍宮",
+          "coord": 55555,
+          "type": "palace",
+          "role": "龍族正宮與水界樞紐",
+          "source": {
+            "v5_1_name": "東海龍宮",
+            "description": "東海龍王敖廣宮",
+            "original_info": "東海龍宮55555",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 91
+          },
+          "distance": {
+            "from_origin_0_km": 1264527.593557556,
+            "from_origin_0_m": 1264527593.558,
+            "moon_ratio_16888": 3.289613927049,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_66666p0_西海龍宮_R92",
+          "row_index_v5_1": 92,
+          "name": "西海龍宮",
+          "coord": 66666,
+          "type": "palace",
+          "role": "西海龍王敖順宮",
+          "source": {
+            "v5_1_name": "西海龍宮",
+            "description": "西海龍王敖順宮",
+            "original_info": "西海龍宮66666",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 92
+          },
+          "distance": {
+            "from_origin_0_km": 1517433.112269067,
+            "from_origin_0_m": 1517433112.269,
+            "moon_ratio_16888": 3.947536712459,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_72000p0_大爆炸奇點_R93",
+          "row_index_v5_1": 93,
+          "name": "大爆炸奇點",
+          "coord": 72000,
+          "type": "location",
+          "role": "KGEN宇宙創世點，所有燃料與質量守恆計算的原點",
+          "source": {
+            "v5_1_name": "大爆炸奇點",
+            "description": "KGEN宇宙創世點，所有燃料與質量守恆計算的原點",
+            "original_info": "大爆炸奇點72000",
+            "system_category": "KGEN核心 / 宇宙論",
+            "energy_attribute": "極端高溫 / 全頻帶潛能",
+            "universe_level": "創世層",
+            "classification_note": "對應KGEN燃料總量與銀河銀行長期通縮模型，用於飛船與黑白洞平衡計算",
+            "spreadsheet_row": 93
+          },
+          "distance": {
+            "from_origin_0_km": 1638844.149692089,
+            "from_origin_0_m": 1638844149.692,
+            "moon_ratio_16888": 4.263382283278,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_77777p0_北海龍宮_R94",
+          "row_index_v5_1": 94,
+          "name": "北海龍宮",
+          "coord": 77777,
+          "type": "palace",
+          "role": "北海龍王敖吉宮",
+          "source": {
+            "v5_1_name": "北海龍宮",
+            "description": "北海龍王敖吉宮",
+            "original_info": "北海龍宮77777",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 94
+          },
+          "distance": {
+            "from_origin_0_km": 1770338.630980578,
+            "from_origin_0_m": 1770338630.981,
+            "moon_ratio_16888": 4.605459497868,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_80000p0_多重宇宙邊界_R95",
+          "row_index_v5_1": 95,
+          "name": "多重宇宙邊界",
+          "coord": 80000,
+          "type": "location",
+          "role": "主鏈與側鏈、層一與層二之間的遷徙邊界",
+          "source": {
+            "v5_1_name": "多重宇宙邊界",
+            "description": "主鏈與側鏈、層一與層二之間的遷徙邊界",
+            "original_info": "多重宇宙邊界80000",
+            "system_category": "鏈級架構 / 橋接層",
+            "energy_attribute": "跨域流動 / 區塊同步",
+            "universe_level": "鏈際邊界",
+            "classification_note": "對應KGEN未來升級到其他公鏈或Layer2時的邏輯锚點",
+            "spreadsheet_row": 95
+          },
+          "distance": {
+            "from_origin_0_km": 1820937.944102321,
+            "from_origin_0_m": 1820937944.102,
+            "moon_ratio_16888": 4.737091425865,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_88888p0_美州大陸_R96",
+          "row_index_v5_1": 96,
+          "name": "美州大陸",
+          "coord": 88888,
+          "type": "planetary_surface",
+          "role": "哥倫布發現新大陸象徵",
+          "source": {
+            "v5_1_name": "美州大陸",
+            "description": "哥倫布發現新大陸象徵",
+            "original_info": "美州大陸88888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 96
+          },
+          "distance": {
+            "from_origin_0_km": 2023244.149692089,
+            "from_origin_0_m": 2023244149.692,
+            "moon_ratio_16888": 5.263382283278,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_88888p0_美洲大陸_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "美洲大陸",
+          "coord": 88888,
+          "type": "continent",
+          "role": "如來佛系勢力象徵",
+          "note": null,
+          "cycle": null,
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 2023244.149692089,
+            "from_origin_0_m": 2023244149.692,
+            "moon_ratio_16888": 5.263382283278,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_88895p0_蟠桃園_R97",
+          "row_index_v5_1": 97,
+          "name": "蟠桃園",
+          "coord": 88895,
+          "type": "garden",
+          "role": "仙界盛宴之園",
+          "source": {
+            "v5_1_name": "蟠桃園",
+            "description": "長生不老果園",
+            "original_info": "蟠桃園88895（2023403km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 97
+          },
+          "distance": {
+            "from_origin_0_km": 2023403.481762198,
+            "from_origin_0_m": 2023403481.762,
+            "moon_ratio_16888": 5.263796778778,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_99995p0_龍珠紅_R98",
+          "row_index_v5_1": 98,
+          "name": "龍珠紅",
+          "coord": 99995,
+          "type": "location",
+          "role": "雙龍吐珠玉璽之紅珠",
+          "source": {
+            "v5_1_name": "龍珠紅",
+            "description": "雙龍吐珠玉璽之紅珠",
+            "original_info": "龍珠紅99995",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 98
+          },
+          "distance": {
+            "from_origin_0_km": 2276058.621506395,
+            "from_origin_0_m": 2276058621.506,
+            "moon_ratio_16888": 5.921068214117,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_99999p0_命運之神_R99",
+          "row_index_v5_1": 99,
+          "name": "命運之神",
+          "coord": 99999,
+          "type": "location",
+          "role": "元宇宙道場核心",
+          "source": {
+            "v5_1_name": "命運之神",
+            "description": "元宇宙道場核心",
+            "original_info": "命運之神99999",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 99
+          },
+          "distance": {
+            "from_origin_0_km": 2276149.6684036,
+            "from_origin_0_m": 2276149668.404,
+            "moon_ratio_16888": 5.921305068688,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_99999p0_銀河主脈_R100",
+          "row_index_v5_1": 100,
+          "name": "銀河主脈",
+          "coord": 99999,
+          "type": "river",
+          "role": "整個金融宇宙資金流的主幹道",
+          "source": {
+            "v5_1_name": "銀河主脈",
+            "description": "整個金融宇宙資金流的主幹道",
+            "original_info": "銀河主脈99999",
+            "system_category": "宏觀資金 / 流動性樞紐",
+            "energy_attribute": "高流動 / 穩定脈動",
+            "universe_level": "銀河層",
+            "classification_note": "用來對應全球股市、債市、加密貨幣之間的總體流動節奏",
+            "spreadsheet_row": 100
+          },
+          "distance": {
+            "from_origin_0_km": 2276149.6684036,
+            "from_origin_0_m": 2276149668.404,
+            "moon_ratio_16888": 5.921305068688,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_100000p0_玉皇宮_R101",
+          "row_index_v5_1": 101,
+          "name": "玉皇宮",
+          "coord": 100000,
+          "type": "palace",
+          "role": "至尊皇帝殿",
+          "source": {
+            "v5_1_name": "玉皇宮",
+            "description": "至尊皇帝殿",
+            "original_info": "玉皇宮100000",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 101
+          },
+          "distance": {
+            "from_origin_0_km": 2276172.430127901,
+            "from_origin_0_m": 2276172430.128,
+            "moon_ratio_16888": 5.921364282331,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_108000p0_點石成金_R102",
+          "row_index_v5_1": 102,
+          "name": "點石成金",
+          "coord": 108000,
+          "type": "gate",
+          "role": "高等煉金術門檻",
+          "source": {
+            "v5_1_name": "點石成金",
+            "description": "高等煉金術門檻",
+            "original_info": "點石成金108000（2458266km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 102
+          },
+          "distance": {
+            "from_origin_0_km": 2458266.224538133,
+            "from_origin_0_m": 2458266224.538,
+            "moon_ratio_16888": 6.395073424917,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_111111p0_如來神掌_R103",
+          "row_index_v5_1": 103,
+          "name": "如來神掌",
+          "coord": 111111,
+          "type": "boundary",
+          "role": "掌界邊界與宇宙上限之一",
+          "source": {
+            "v5_1_name": "如來神掌",
+            "description": "神明與神軍分界",
+            "original_info": "如來神掌111111（天上50天地上50年地下一萬年）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 103
+          },
+          "distance": {
+            "from_origin_0_km": 2529077.948839413,
+            "from_origin_0_m": 2529077948.839,
+            "moon_ratio_16888": 6.57928706774,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_123456p0_時間輪盤_R104",
+          "row_index_v5_1": 104,
+          "name": "時間輪盤",
+          "coord": 123456,
+          "type": "location",
+          "role": "時間運作的根源符號",
+          "source": {
+            "v5_1_name": "時間輪盤",
+            "description": "時間運作的根源符號",
+            "original_info": "時間輪盤123456",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 104
+          },
+          "distance": {
+            "from_origin_0_km": 2810071.435338702,
+            "from_origin_0_m": 2810071435.339,
+            "moon_ratio_16888": 7.310279488394,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_126500p0_最重的恐龍_R105",
+          "row_index_v5_1": 105,
+          "name": "最重的恐龍",
+          "coord": 126500,
+          "type": "location",
+          "role": "牛魔王坐騎避水金睛獸重量",
+          "source": {
+            "v5_1_name": "最重的恐龍",
+            "description": "牛魔王坐騎避水金睛獸重量",
+            "original_info": "最重的恐龍126500",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 105
+          },
+          "distance": {
+            "from_origin_0_km": 2879358.124111795,
+            "from_origin_0_m": 2879358124.112,
+            "moon_ratio_16888": 7.490525817148,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_126588p0_平天大聖宮_R106",
+          "row_index_v5_1": 106,
+          "name": "平天大聖宮",
+          "coord": 126588,
+          "type": "palace",
+          "role": "平天大聖的宮殿",
+          "source": {
+            "v5_1_name": "平天大聖宮",
+            "description": "平天大聖的宮殿",
+            "original_info": "平天大聖宮126588",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 106
+          },
+          "distance": {
+            "from_origin_0_km": 2881361.155850308,
+            "from_origin_0_m": 2881361155.85,
+            "moon_ratio_16888": 7.495736617717,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_168000p0_月球基地L2_R107",
+          "row_index_v5_1": 107,
+          "name": "月球基地L2",
+          "coord": 168000,
+          "type": "moon",
+          "role": "16888月球在人類高維文明中的進階投影",
+          "source": {
+            "v5_1_name": "月球基地L2",
+            "description": "16888月球在人類高維文明中的進階投影",
+            "original_info": "月球基地L2-168000",
+            "system_category": "科技文明 / 前哨基地",
+            "energy_attribute": "觀測 / 中繼",
+            "universe_level": "外層軌道",
+            "classification_note": "作為比特幣與KGEN觀測站，對應鏈上數據與市場情緒的高維監聽點",
+            "spreadsheet_row": 107
+          },
+          "distance": {
+            "from_origin_0_km": 3823969.682614874,
+            "from_origin_0_m": 3823969682.615,
+            "moon_ratio_16888": 9.947891994315,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_168888p0_筋斗雲_R108",
+          "row_index_v5_1": 108,
+          "name": "筋斗雲",
+          "coord": 168888,
+          "type": "location",
+          "role": "無限期權象徵",
+          "source": {
+            "v5_1_name": "筋斗雲",
+            "description": "無限期權象徵",
+            "original_info": "筋斗雲168888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 108
+          },
+          "distance": {
+            "from_origin_0_km": 3844182.09379441,
+            "from_origin_0_m": 3844182093.794,
+            "moon_ratio_16888": 10.000473709143,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_188888p0_地球神域_R109",
+          "row_index_v5_1": 109,
+          "name": "地球神域",
+          "coord": 188888,
+          "type": "planetary_surface",
+          "role": "神軍與外星人分界",
+          "source": {
+            "v5_1_name": "地球神域",
+            "description": "神軍與外星人分界",
+            "original_info": "地球神域188888",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 109
+          },
+          "distance": {
+            "from_origin_0_km": 4299416.57981999,
+            "from_origin_0_m": 4299416579.82,
+            "moon_ratio_16888": 11.184746565609,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_511111p0_齊天大聖宮_R110",
+          "row_index_v5_1": 110,
+          "name": "齊天大聖宮",
+          "coord": 511111,
+          "type": "palace",
+          "role": "悟空封號後的個人神宮",
+          "source": {
+            "v5_1_name": "齊天大聖宮",
+            "description": "悟空自立為王的最高殿堂",
+            "original_info": "齊天大聖宮511111（2538387km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 110
+          },
+          "distance": {
+            "from_origin_0_km": 11633767.669351017,
+            "from_origin_0_m": 11633767669.351,
+            "moon_ratio_16888": 30.264744197063,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_555550p0_東海龍宮_深淵殿_R111",
+          "row_index_v5_1": 111,
+          "name": "東海龍宮·深淵殿",
+          "coord": 555550,
+          "type": "palace",
+          "role": "東海龍宮55555的高維財富與流動性金庫",
+          "source": {
+            "v5_1_name": "東海龍宮·深淵殿",
+            "description": "東海龍宮55555的高維財富與流動性金庫",
+            "original_info": "東海龍宮深淵殿555550",
+            "system_category": "財富中心 / 流動性池",
+            "energy_attribute": "深流 / 穩定輸出",
+            "universe_level": "龍族金庫層",
+            "classification_note": "對應LP池與長期儲備資金來源，用於支援市值與獎勵",
+            "spreadsheet_row": 111
+          },
+          "distance": {
+            "from_origin_0_km": 12645275.935575556,
+            "from_origin_0_m": 12645275935.576,
+            "moon_ratio_16888": 32.896139270488,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_654321p0_大五指山_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "大五指山",
+          "coord": 654321,
+          "type": "mountain",
+          "role": "宇宙級壓制點",
+          "note": null,
+          "cycle": "long",
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 14893474.206537185,
+            "from_origin_0_m": 14893474206.537,
+            "moon_ratio_16888": 38.744729985789,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1000000p0_玉皇大宇宙殿_R112",
+          "row_index_v5_1": 112,
+          "name": "玉皇大宇宙殿",
+          "coord": 1000000,
+          "type": "palace",
+          "role": "玉皇宮100000在多重宇宙中的最高會議殿",
+          "source": {
+            "v5_1_name": "玉皇大宇宙殿",
+            "description": "玉皇宮100000在多重宇宙中的最高會議殿",
+            "original_info": "玉皇大宇宙殿1000000",
+            "system_category": "治理中心 / 宇宙議會",
+            "energy_attribute": "最高決策 / 多維平衡",
+            "universe_level": "主神層",
+            "classification_note": "象徵跨鏈治理、重大參數調整、以及宇宙級規則的審核點",
+            "spreadsheet_row": 112
+          },
+          "distance": {
+            "from_origin_0_km": 22761724.301279012,
+            "from_origin_0_m": 22761724301.279,
+            "moon_ratio_16888": 59.213642823306,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1234567p0_變形金鋼_R113",
+          "row_index_v5_1": 113,
+          "name": "變形金鋼",
+          "coord": 1234567,
+          "type": "location",
+          "role": "機械神族級別",
+          "source": {
+            "v5_1_name": "變形金鋼",
+            "description": "機械神族級別",
+            "original_info": "變形金鋼1234567",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 113
+          },
+          "distance": {
+            "from_origin_0_km": 28100873.68545713,
+            "from_origin_0_m": 28100873685.457,
+            "moon_ratio_16888": 73.103209379441,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_1800000p0_金星_R114",
+          "row_index_v5_1": 114,
+          "name": "金星",
+          "coord": 1800000,
+          "type": "location",
+          "role": "金星軌道象徵",
+          "source": {
+            "v5_1_name": "金星",
+            "description": "金星軌道象徵",
+            "original_info": "金星1.8×10^6（4.1×10^7km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 114
+          },
+          "distance": {
+            "from_origin_0_km": 40971103.742302224,
+            "from_origin_0_m": 40971103742.302,
+            "moon_ratio_16888": 106.584557081952,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_6570000p0_太陽_R115",
+          "row_index_v5_1": 115,
+          "name": "太陽",
+          "coord": 6570000,
+          "type": "location",
+          "role": "太陽軌道象徵",
+          "source": {
+            "v5_1_name": "太陽",
+            "description": "太陽軌道象徵",
+            "original_info": "太陽6.57×10^6（1.496×10^8 km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 115
+          },
+          "distance": {
+            "from_origin_0_km": 149544528.65940312,
+            "from_origin_0_m": 149544528659.403,
+            "moon_ratio_16888": 389.033633349124,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_7200000p0_天規石碑_R116",
+          "row_index_v5_1": 116,
+          "name": "天規石碑",
+          "coord": 7200000,
+          "type": "location",
+          "role": "紀錄所有宇宙規則與不可逆修改的區塊鏈石碑",
+          "source": {
+            "v5_1_name": "天規石碑",
+            "description": "紀錄所有宇宙規則與不可逆修改的區塊鏈石碑",
+            "original_info": "天規石碑7200000",
+            "system_category": "區塊鏈 / 天條",
+            "energy_attribute": "不可逆 / 全域公開",
+            "universe_level": "法則層",
+            "classification_note": "象徵智能合約與鏈上紀錄，一經刻上便難以更改，只能追加歷史",
+            "spreadsheet_row": 116
+          },
+          "distance": {
+            "from_origin_0_km": 163884414.9692089,
+            "from_origin_0_m": 163884414969.209,
+            "moon_ratio_16888": 426.338228327807,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_28100000p0_木星_R117",
+          "row_index_v5_1": 117,
+          "name": "木星",
+          "coord": 28100000,
+          "type": "location",
+          "role": "木星軌道象徵",
+          "source": {
+            "v5_1_name": "木星",
+            "description": "木星軌道象徵",
+            "original_info": "木星2.81×10^7（6.4×10^8km）",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 117
+          },
+          "distance": {
+            "from_origin_0_km": 639604452.8659403,
+            "from_origin_0_m": 639604452865.94,
+            "moon_ratio_16888": 1663.903363334912,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_87654321p0_天堂_R118",
+          "row_index_v5_1": 118,
+          "name": "天堂",
+          "coord": 87654321,
+          "type": "location",
+          "role": "未來所有生物物種都有房子住的地方",
+          "source": {
+            "v5_1_name": "天堂",
+            "description": "未來所有生物物種都有房子住的地方",
+            "original_info": "天堂87654321",
+            "system_category": null,
+            "energy_attribute": null,
+            "universe_level": null,
+            "classification_note": null,
+            "spreadsheet_row": 118
+          },
+          "distance": {
+            "from_origin_0_km": 1995163488.4178114,
+            "from_origin_0_m": 1995163488417.811,
+            "moon_ratio_16888": 5190.331655613453,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        },
+        {
+          "id": "P_87654321p0_天庭_Rjson",
+          "source_only": "UniverseMap_V10_0.json",
+          "name": "天庭",
+          "coord": 87654321,
+          "type": "heaven",
+          "role": "玉皇系最上層宇宙天花板",
+          "note": null,
+          "cycle": null,
+          "source": {
+            "v10_0_original": true
+          },
+          "distance": {
+            "from_origin_0_km": 1995163488.4178114,
+            "from_origin_0_m": 1995163488417.811,
+            "moon_ratio_16888": 5190.331655613453,
+            "km_per_index": 22.761724301279,
+            "reference": "16888 = 384400 km"
+          },
+          "runtime_mapping": {
+            "axis": "K-Sphere",
+            "player_coordinate": "XYZ",
+            "boundary_coordinate": "KX/KY/KZ",
+            "profit_axis": "Z-KZ",
+            "explore_axis": [
+              "X-KX",
+              "Y-KY"
+            ],
+            "movement_mode": "PLAYER_WALK"
+          }
+        }
+      ]
+    },
+    "scaled_universes": [
+      {
+        "id": "U0_MICRO",
+        "scale": 0.1,
+        "note": "縮小一階宇宙，適合作為過去殘影或微觀世界",
+        "projections": [
+          {
+            "base": "月球",
+            "coord": 1.6888
+          },
+          {
+            "base": "地獄門",
+            "coord": 0.0188
+          }
+        ]
+      },
+      {
+        "id": "U2_MACRO",
+        "scale": 10,
+        "note": "放大一階宇宙，代表未來更高能量層級",
+        "projections": [
+          {
+            "base": "月球",
+            "coord": 168880
+          },
+          {
+            "base": "地獄門",
+            "coord": 1880
+          }
+        ]
+      }
+    ]
+  },
+  "global_scale": {
+    "reference_point": 16888,
+    "reference_name": "月球",
+    "moon_distance_km": 384400,
+    "km_per_index": 22.761724301279013,
+    "meters_per_index": 22761.724301279013,
+    "formula": "distance_km_from_0 = ABS(coord) * 384400 / 16888",
+    "axis_rule": "所有方向、所有尺度共用 XYZ / K-Sphere 地圖"
+  },
+  "world_runtime_rules": {
+    "player_spawn": 0,
+    "movement_mode": "WALK_FIRST",
+    "all_points_are_locations": true,
+    "temple_runtime_switch": true,
+    "profit_axis": "Z-KZ",
+    "explore_axis": [
+      "X-KX",
+      "Y-KY"
+    ],
+    "ct_definition": "CT 為現價宇宙邊界，正反物質在此產生",
+    "liquidity_rule": "離 CT 越遠成交量越低，時空越穩定"
+  },
+  "point_index_sorted": [
+    {
+      "id": "P_m37p63_石油_R2",
+      "coord": -37.63,
+      "name": "石油",
+      "distance_km_from_0": 856.523685457,
+      "moon_ratio_16888": 0.002228209379,
+      "type": "location"
+    },
+    {
+      "id": "P_m1p0_宇宙_R3",
+      "coord": -1,
+      "name": "宇宙",
+      "distance_km_from_0": 22.761724301,
+      "moon_ratio_16888": 5.9213643e-05,
+      "type": "location"
+    },
+    {
+      "id": "P_0p0_恐龍_R4",
+      "coord": 0,
+      "name": "恐龍",
+      "distance_km_from_0": 0.0,
+      "moon_ratio_16888": 0.0,
+      "type": "location"
+    },
+    {
+      "id": "P_1p0_玩家創建_R5",
+      "coord": 1,
+      "name": "玩家創建",
+      "distance_km_from_0": 22.761724301,
+      "moon_ratio_16888": 5.9213643e-05,
+      "type": "location"
+    },
+    {
+      "id": "P_72p0_最輕恐龍_R6",
+      "coord": 72,
+      "name": "最輕恐龍",
+      "distance_km_from_0": 1638.844149692,
+      "moon_ratio_16888": 0.004263382283,
+      "type": "location"
+    },
+    {
+      "id": "P_144p0_一四四時間之門_R7",
+      "coord": 144,
+      "name": "一四四時間之門",
+      "distance_km_from_0": 3277.688299384,
+      "moon_ratio_16888": 0.008526764567,
+      "type": "gate"
+    },
+    {
+      "id": "P_188p0_地嶽_R8",
+      "coord": 188,
+      "name": "地嶽",
+      "distance_km_from_0": 4279.20416864,
+      "moon_ratio_16888": 0.011132164851,
+      "type": "location"
+    },
+    {
+      "id": "P_188p0_地獄門_Rjson",
+      "coord": 188,
+      "name": "地獄門",
+      "distance_km_from_0": 4279.20416864,
+      "moon_ratio_16888": 0.011132164851,
+      "type": "gate"
+    },
+    {
+      "id": "P_233p0_二三三波動門_R9",
+      "coord": 233,
+      "name": "二三三波動門",
+      "distance_km_from_0": 5303.481762198,
+      "moon_ratio_16888": 0.013796778778,
+      "type": "gate"
+    },
+    {
+      "id": "P_280p0_地球表面_R10",
+      "coord": 280,
+      "name": "地球表面",
+      "distance_km_from_0": 6373.282804358,
+      "moon_ratio_16888": 0.016579819991,
+      "type": "planetary_surface"
+    },
+    {
+      "id": "P_377p0_三七七銀河峽谷_R11",
+      "coord": 377,
+      "name": "三七七銀河峽谷",
+      "distance_km_from_0": 8581.170061582,
+      "moon_ratio_16888": 0.022323543344,
+      "type": "river"
+    },
+    {
+      "id": "P_411p0_大氣層_R12",
+      "coord": 411,
+      "name": "大氣層",
+      "distance_km_from_0": 9355.068687826,
+      "moon_ratio_16888": 0.0243368072,
+      "type": "planetary_surface"
+    },
+    {
+      "id": "P_720p0_七二零轉生門_R13",
+      "coord": 720,
+      "name": "七二零轉生門",
+      "distance_km_from_0": 16388.441496921,
+      "moon_ratio_16888": 0.042633822833,
+      "type": "gate"
+    },
+    {
+      "id": "P_1111p0_閻王殿_R14",
+      "coord": 1111,
+      "name": "閻王殿",
+      "distance_km_from_0": 25288.275698721,
+      "moon_ratio_16888": 0.065786357177,
+      "type": "palace"
+    },
+    {
+      "id": "P_1852p0_人造衛星高度_R15",
+      "coord": 1852,
+      "name": "人造衛星高度",
+      "distance_km_from_0": 42154.713405969,
+      "moon_ratio_16888": 0.109663666509,
+      "type": "location"
+    },
+    {
+      "id": "P_3141p0_影像迷宮_R16",
+      "coord": 3141,
+      "name": "影像迷宮",
+      "distance_km_from_0": 71494.576030317,
+      "moon_ratio_16888": 0.185990052108,
+      "type": "palace"
+    },
+    {
+      "id": "P_4040p0_暗網交易所_R17",
+      "coord": 4040,
+      "name": "暗網交易所",
+      "distance_km_from_0": 91957.366177167,
+      "moon_ratio_16888": 0.239223117006,
+      "type": "location"
+    },
+    {
+      "id": "P_4168p0_奈何橋_R18",
+      "coord": 4168,
+      "name": "奈何橋",
+      "distance_km_from_0": 94870.866887731,
+      "moon_ratio_16888": 0.246802463288,
+      "type": "location"
+    },
+    {
+      "id": "P_4444p0_地府_R19",
+      "coord": 4444,
+      "name": "地府",
+      "distance_km_from_0": 101153.102794884,
+      "moon_ratio_16888": 0.263145428707,
+      "type": "underworld"
+    },
+    {
+      "id": "P_5048p0_九齒釘耙_R20",
+      "coord": 5048,
+      "name": "九齒釘耙",
+      "distance_km_from_0": 114901.184272856,
+      "moon_ratio_16888": 0.298910468972,
+      "type": "location"
+    },
+    {
+      "id": "P_5048p0_降妖寶杖_R21",
+      "coord": 5048,
+      "name": "降妖寶杖",
+      "distance_km_from_0": 114901.184272856,
+      "moon_ratio_16888": 0.298910468972,
+      "type": "location"
+    },
+    {
+      "id": "P_5168p0_金山銀礦_R22",
+      "coord": 5168,
+      "name": "金山銀礦",
+      "distance_km_from_0": 117632.59118901,
+      "moon_ratio_16888": 0.306016106111,
+      "type": "mountain"
+    },
+    {
+      "id": "P_5555p0_南海龍房_R23",
+      "coord": 5555,
+      "name": "南海龍房",
+      "distance_km_from_0": 126441.378493605,
+      "moon_ratio_16888": 0.328931785883,
+      "type": "location"
+    },
+    {
+      "id": "P_6128p0_斜月三星洞_R24",
+      "coord": 6128,
+      "name": "斜月三星洞",
+      "distance_km_from_0": 139483.846518238,
+      "moon_ratio_16888": 0.362861203221,
+      "type": "cave"
+    },
+    {
+      "id": "P_6666p0_東海龍房_R25",
+      "coord": 6666,
+      "name": "東海龍房",
+      "distance_km_from_0": 151729.654192326,
+      "moon_ratio_16888": 0.39471814306,
+      "type": "palace_inner"
+    },
+    {
+      "id": "P_6888p0_松樹國_R26",
+      "coord": 6888,
+      "name": "松樹國",
+      "distance_km_from_0": 156782.75698721,
+      "moon_ratio_16888": 0.407863571767,
+      "type": "forest_kingdom"
+    },
+    {
+      "id": "P_7200p0_畫杆方天戟_R27",
+      "coord": 7200,
+      "name": "畫杆方天戟",
+      "distance_km_from_0": 163884.414969209,
+      "moon_ratio_16888": 0.426338228328,
+      "type": "location"
+    },
+    {
+      "id": "P_7744p0_流沙河_R28",
+      "coord": 7744,
+      "name": "流沙河",
+      "distance_km_from_0": 176266.792989105,
+      "moon_ratio_16888": 0.458550450024,
+      "type": "river"
+    },
+    {
+      "id": "P_7777p0_西海龍房_R29",
+      "coord": 7777,
+      "name": "西海龍房",
+      "distance_km_from_0": 177017.929891047,
+      "moon_ratio_16888": 0.460504500237,
+      "type": "location"
+    },
+    {
+      "id": "P_8888p0_高老莊_R30",
+      "coord": 8888,
+      "name": "高老莊",
+      "distance_km_from_0": 202306.205589768,
+      "moon_ratio_16888": 0.526290857414,
+      "type": "village"
+    },
+    {
+      "id": "P_8895p0_雲棧洞_R31",
+      "coord": 8895,
+      "name": "雲棧洞",
+      "distance_km_from_0": 202465.537659877,
+      "moon_ratio_16888": 0.526705352913,
+      "type": "cave"
+    },
+    {
+      "id": "P_9444p0_黑風谷_R32",
+      "coord": 9444,
+      "name": "黑風谷",
+      "distance_km_from_0": 214961.724301279,
+      "moon_ratio_16888": 0.559213642823,
+      "type": "location"
+    },
+    {
+      "id": "P_9995p0_龍珠綠_R33",
+      "coord": 9995,
+      "name": "龍珠綠",
+      "distance_km_from_0": 227503.434391284,
+      "moon_ratio_16888": 0.591840360019,
+      "type": "location"
+    },
+    {
+      "id": "P_9999p0_北海龍房_R34",
+      "coord": 9999,
+      "name": "北海龍房",
+      "distance_km_from_0": 227594.481288489,
+      "moon_ratio_16888": 0.59207721459,
+      "type": "location"
+    },
+    {
+      "id": "P_11111p0_定海神針_R35",
+      "coord": 11111,
+      "name": "定海神針",
+      "distance_km_from_0": 252905.518711511,
+      "moon_ratio_16888": 0.65792278541,
+      "type": "location"
+    },
+    {
+      "id": "P_11520p0_花果山_R36",
+      "coord": 11520,
+      "name": "花果山",
+      "distance_km_from_0": 262215.063950734,
+      "moon_ratio_16888": 0.682141165324,
+      "type": "mountain"
+    },
+    {
+      "id": "P_12345p0_五指山_R37",
+      "coord": 12345,
+      "name": "五指山",
+      "distance_km_from_0": 280993.486499289,
+      "moon_ratio_16888": 0.730992420654,
+      "type": "mountain"
+    },
+    {
+      "id": "P_12345p0_小五指山_Rjson",
+      "coord": 12345,
+      "name": "小五指山",
+      "distance_km_from_0": 280993.486499289,
+      "moon_ratio_16888": 0.730992420654,
+      "type": "mountain"
+    },
+    {
+      "id": "P_12682p0_阿斗起飛_R38",
+      "coord": 12682,
+      "name": "阿斗起飛",
+      "distance_km_from_0": 288664.18758882,
+      "moon_ratio_16888": 0.750947418285,
+      "type": "location"
+    },
+    {
+      "id": "P_12800p0_靈台方寸山_R39",
+      "coord": 12800,
+      "name": "靈台方寸山",
+      "distance_km_from_0": 291350.071056371,
+      "moon_ratio_16888": 0.757934628138,
+      "type": "mountain"
+    },
+    {
+      "id": "P_13500p0_金箍棒_R40",
+      "coord": 13500,
+      "name": "金箍棒",
+      "distance_km_from_0": 307283.278067267,
+      "moon_ratio_16888": 0.799384178115,
+      "type": "location"
+    },
+    {
+      "id": "P_13888p0_東土大唐_R41",
+      "coord": 13888,
+      "name": "東土大唐",
+      "distance_km_from_0": 316114.827096163,
+      "moon_ratio_16888": 0.82235907153,
+      "type": "location"
+    },
+    {
+      "id": "P_14520p0_大仙女_巧雲__R43",
+      "coord": 14520,
+      "name": "大仙女(巧雲)",
+      "distance_km_from_0": 330500.236854571,
+      "moon_ratio_16888": 0.859782093794,
+      "type": "location"
+    },
+    {
+      "id": "P_14520p0_巧雲_R42",
+      "coord": 14520,
+      "name": "巧雲",
+      "distance_km_from_0": 330500.236854571,
+      "moon_ratio_16888": 0.859782093794,
+      "type": "location"
+    },
+    {
+      "id": "P_14866p0_二仙女_巧虹__R45",
+      "coord": 14866,
+      "name": "二仙女(巧虹)",
+      "distance_km_from_0": 338375.793462814,
+      "moon_ratio_16888": 0.880270014211,
+      "type": "location"
+    },
+    {
+      "id": "P_14866p0_巧虹_R44",
+      "coord": 14866,
+      "name": "巧虹",
+      "distance_km_from_0": 338375.793462814,
+      "moon_ratio_16888": 0.880270014211,
+      "type": "location"
+    },
+    {
+      "id": "P_16184p0_三仙女_巧芝__R47",
+      "coord": 16184,
+      "name": "三仙女(巧芝)",
+      "distance_km_from_0": 368375.7460919,
+      "moon_ratio_16888": 0.958313595452,
+      "type": "location"
+    },
+    {
+      "id": "P_16184p0_巧芝_R46",
+      "coord": 16184,
+      "name": "巧芝",
+      "distance_km_from_0": 368375.7460919,
+      "moon_ratio_16888": 0.958313595452,
+      "type": "location"
+    },
+    {
+      "id": "P_16888p0_四仙女_巧仙__R50",
+      "coord": 16888,
+      "name": "四仙女(巧仙)",
+      "distance_km_from_0": 384400.0,
+      "moon_ratio_16888": 1.0,
+      "type": "location"
+    },
+    {
+      "id": "P_16888p0_巧仙_R49",
+      "coord": 16888,
+      "name": "巧仙",
+      "distance_km_from_0": 384400.0,
+      "moon_ratio_16888": 1.0,
+      "type": "location"
+    },
+    {
+      "id": "P_16888p0_月球_Rjson",
+      "coord": 16888,
+      "name": "月球",
+      "distance_km_from_0": 384400.0,
+      "moon_ratio_16888": 1.0,
+      "type": "moon"
+    },
+    {
+      "id": "P_16888p0_白骨洞_廣寒宮_R48",
+      "coord": 16888,
+      "name": "白骨洞 / 廣寒宮",
+      "distance_km_from_0": 384400.0,
+      "moon_ratio_16888": 1.0,
+      "type": "cave"
+    },
+    {
+      "id": "P_17347p0_五仙女_巧蘭__R52",
+      "coord": 17347,
+      "name": "五仙女(巧蘭)",
+      "distance_km_from_0": 394847.631454287,
+      "moon_ratio_16888": 1.027179062056,
+      "type": "location"
+    },
+    {
+      "id": "P_17347p0_巧蘭_R51",
+      "coord": 17347,
+      "name": "巧蘭",
+      "distance_km_from_0": 394847.631454287,
+      "moon_ratio_16888": 1.027179062056,
+      "type": "location"
+    },
+    {
+      "id": "P_18000p0_黑洞層_R53",
+      "coord": 18000,
+      "name": "黑洞層",
+      "distance_km_from_0": 409711.037423022,
+      "moon_ratio_16888": 1.06584557082,
+      "type": "cave"
+    },
+    {
+      "id": "P_18056p0_六仙女_巧梅__R55",
+      "coord": 18056,
+      "name": "六仙女(巧梅)",
+      "distance_km_from_0": 410985.693983894,
+      "moon_ratio_16888": 1.069161534818,
+      "type": "location"
+    },
+    {
+      "id": "P_18056p0_巧梅_R54",
+      "coord": 18056,
+      "name": "巧梅",
+      "distance_km_from_0": 410985.693983894,
+      "moon_ratio_16888": 1.069161534818,
+      "type": "location"
+    },
+    {
+      "id": "P_18319p0_四大天門_R56",
+      "coord": 18319,
+      "name": "四大天門",
+      "distance_km_from_0": 416972.02747513,
+      "moon_ratio_16888": 1.08473472288,
+      "type": "gate"
+    },
+    {
+      "id": "P_18459p0_七仙女_巧靈__R58",
+      "coord": 18459,
+      "name": "七仙女(巧靈)",
+      "distance_km_from_0": 420158.668877309,
+      "moon_ratio_16888": 1.093024632875,
+      "type": "location"
+    },
+    {
+      "id": "P_18459p0_巧靈_R57",
+      "coord": 18459,
+      "name": "巧靈",
+      "distance_km_from_0": 420158.668877309,
+      "moon_ratio_16888": 1.093024632875,
+      "type": "location"
+    },
+    {
+      "id": "P_18520p0_四大天王_R59",
+      "coord": 18520,
+      "name": "四大天王",
+      "distance_km_from_0": 421547.134059687,
+      "moon_ratio_16888": 1.096636665088,
+      "type": "location"
+    },
+    {
+      "id": "P_18888p0_凌霄寶殿_R60",
+      "coord": 18888,
+      "name": "凌霄寶殿",
+      "distance_km_from_0": 429923.448602558,
+      "moon_ratio_16888": 1.118427285647,
+      "type": "palace"
+    },
+    {
+      "id": "P_18889p0_敖欽_R61",
+      "coord": 18889,
+      "name": "敖欽",
+      "distance_km_from_0": 429946.210326859,
+      "moon_ratio_16888": 1.118486499289,
+      "type": "location"
+    },
+    {
+      "id": "P_18890p0_敖廣_R62",
+      "coord": 18890,
+      "name": "敖廣",
+      "distance_km_from_0": 429968.972051161,
+      "moon_ratio_16888": 1.118545712932,
+      "type": "location"
+    },
+    {
+      "id": "P_18891p0_敖順_R63",
+      "coord": 18891,
+      "name": "敖順",
+      "distance_km_from_0": 429991.733775462,
+      "moon_ratio_16888": 1.118604926575,
+      "type": "location"
+    },
+    {
+      "id": "P_18892p0_敖吉_R64",
+      "coord": 18892,
+      "name": "敖吉",
+      "distance_km_from_0": 430014.495499763,
+      "moon_ratio_16888": 1.118664140218,
+      "type": "location"
+    },
+    {
+      "id": "P_18893p0_總卒元將府_R65",
+      "coord": 18893,
+      "name": "總卒元將府",
+      "distance_km_from_0": 430037.257224064,
+      "moon_ratio_16888": 1.118723353861,
+      "type": "location"
+    },
+    {
+      "id": "P_18894p0_總兵元帥府_R66",
+      "coord": 18894,
+      "name": "總兵元帥府",
+      "distance_km_from_0": 430060.018948366,
+      "moon_ratio_16888": 1.118782567504,
+      "type": "location"
+    },
+    {
+      "id": "P_18911p0_煉丹爐_R67",
+      "coord": 18911,
+      "name": "煉丹爐",
+      "distance_km_from_0": 430446.968261487,
+      "moon_ratio_16888": 1.119789199432,
+      "type": "location"
+    },
+    {
+      "id": "P_18921p0_斬妖台_R68",
+      "coord": 18921,
+      "name": "斬妖台",
+      "distance_km_from_0": 430674.5855045,
+      "moon_ratio_16888": 1.12038133586,
+      "type": "location"
+    },
+    {
+      "id": "P_18999p0_玉帝_R69",
+      "coord": 18999,
+      "name": "玉帝",
+      "distance_km_from_0": 432450.0,
+      "moon_ratio_16888": 1.125,
+      "type": "location"
+    },
+    {
+      "id": "P_20000p0_女兒國_R70",
+      "coord": 20000,
+      "name": "女兒國",
+      "distance_km_from_0": 455234.48602558,
+      "moon_ratio_16888": 1.184272856466,
+      "type": "location"
+    },
+    {
+      "id": "P_20732p0_創世之門_R71",
+      "coord": 20732,
+      "name": "創世之門",
+      "distance_km_from_0": 471896.068214117,
+      "moon_ratio_16888": 1.227617243013,
+      "type": "gate"
+    },
+    {
+      "id": "P_20888p0_火焰山_R72",
+      "coord": 20888,
+      "name": "火焰山",
+      "distance_km_from_0": 475446.897205116,
+      "moon_ratio_16888": 1.236854571293,
+      "type": "mountain"
+    },
+    {
+      "id": "P_21319p0_雷音寺_R73",
+      "coord": 21319,
+      "name": "雷音寺",
+      "distance_km_from_0": 485257.200378967,
+      "moon_ratio_16888": 1.26237565135,
+      "type": "location"
+    },
+    {
+      "id": "P_21344p0_參軍將_R74",
+      "coord": 21344,
+      "name": "參軍將",
+      "distance_km_from_0": 485826.243486499,
+      "moon_ratio_16888": 1.263855992421,
+      "type": "location"
+    },
+    {
+      "id": "P_21444p0_五丈原界碑_R75",
+      "coord": 21444,
+      "name": "五丈原界碑",
+      "distance_km_from_0": 488102.415916627,
+      "moon_ratio_16888": 1.269777356703,
+      "type": "location"
+    },
+    {
+      "id": "P_21520p0_大雄寶殿_R76",
+      "coord": 21520,
+      "name": "大雄寶殿",
+      "distance_km_from_0": 489832.306963524,
+      "moon_ratio_16888": 1.274277593558,
+      "type": "palace"
+    },
+    {
+      "id": "P_21588p0_如來佛_R77",
+      "coord": 21588,
+      "name": "如來佛",
+      "distance_km_from_0": 491380.104216011,
+      "moon_ratio_16888": 1.27830412127,
+      "type": "location"
+    },
+    {
+      "id": "P_21666p0_佛光普照之地_R78",
+      "coord": 21666,
+      "name": "佛光普照之地",
+      "distance_km_from_0": 493155.518711511,
+      "moon_ratio_16888": 1.28292278541,
+      "type": "location"
+    },
+    {
+      "id": "P_21777p0_白龍門下層_R79",
+      "coord": 21777,
+      "name": "白龍門下層",
+      "distance_km_from_0": 495682.070108953,
+      "moon_ratio_16888": 1.289495499763,
+      "type": "gate"
+    },
+    {
+      "id": "P_21888p0_恐懼女鬼_R80",
+      "coord": 21888,
+      "name": "恐懼女鬼",
+      "distance_km_from_0": 498208.621506395,
+      "moon_ratio_16888": 1.296068214117,
+      "type": "location"
+    },
+    {
+      "id": "P_22188p0_貪婪魔影_R81",
+      "coord": 22188,
+      "name": "貪婪魔影",
+      "distance_km_from_0": 505037.138796779,
+      "moon_ratio_16888": 1.313832306964,
+      "type": "location"
+    },
+    {
+      "id": "P_22200p0_魔影之谷_R82",
+      "coord": 22200,
+      "name": "魔影之谷",
+      "distance_km_from_0": 505310.279488394,
+      "moon_ratio_16888": 1.314542870677,
+      "type": "location"
+    },
+    {
+      "id": "P_22400p0_幻市魔影之門_R83",
+      "coord": 22400,
+      "name": "幻市魔影之門",
+      "distance_km_from_0": 509862.62434865,
+      "moon_ratio_16888": 1.326385599242,
+      "type": "gate"
+    },
+    {
+      "id": "P_22888p0_白龍門_R84",
+      "coord": 22888,
+      "name": "白龍門",
+      "distance_km_from_0": 520970.345807674,
+      "moon_ratio_16888": 1.35528185694,
+      "type": "gate"
+    },
+    {
+      "id": "P_23333p0_靈山_R85",
+      "coord": 23333,
+      "name": "靈山",
+      "distance_km_from_0": 531099.313121743,
+      "moon_ratio_16888": 1.381631927996,
+      "type": "mountain"
+    },
+    {
+      "id": "P_24449p0_雲端神將_R86",
+      "coord": 24449,
+      "name": "雲端神將",
+      "distance_km_from_0": 556501.397441971,
+      "moon_ratio_16888": 1.447714353387,
+      "type": "location"
+    },
+    {
+      "id": "P_24888p0_佛祖金鋼殿_R87",
+      "coord": 24888,
+      "name": "佛祖金鋼殿",
+      "distance_km_from_0": 566493.794410232,
+      "moon_ratio_16888": 1.473709142586,
+      "type": "palace"
+    },
+    {
+      "id": "P_33333p0_黃金鑽石_R88",
+      "coord": 33333,
+      "name": "黃金鑽石",
+      "distance_km_from_0": 758716.556134533,
+      "moon_ratio_16888": 1.973768356229,
+      "type": "location"
+    },
+    {
+      "id": "P_36000p0_白洞層_R89",
+      "coord": 36000,
+      "name": "白洞層",
+      "distance_km_from_0": 819422.074846045,
+      "moon_ratio_16888": 2.131691141639,
+      "type": "cave"
+    },
+    {
+      "id": "P_44444p0_南海龍宮_R90",
+      "coord": 44444,
+      "name": "南海龍宮",
+      "distance_km_from_0": 1011622.074846044,
+      "moon_ratio_16888": 2.631691141639,
+      "type": "palace"
+    },
+    {
+      "id": "P_55555p0_東海龍宮_R91",
+      "coord": 55555,
+      "name": "東海龍宮",
+      "distance_km_from_0": 1264527.593557556,
+      "moon_ratio_16888": 3.289613927049,
+      "type": "palace"
+    },
+    {
+      "id": "P_66666p0_西海龍宮_R92",
+      "coord": 66666,
+      "name": "西海龍宮",
+      "distance_km_from_0": 1517433.112269067,
+      "moon_ratio_16888": 3.947536712459,
+      "type": "palace"
+    },
+    {
+      "id": "P_72000p0_大爆炸奇點_R93",
+      "coord": 72000,
+      "name": "大爆炸奇點",
+      "distance_km_from_0": 1638844.149692089,
+      "moon_ratio_16888": 4.263382283278,
+      "type": "location"
+    },
+    {
+      "id": "P_77777p0_北海龍宮_R94",
+      "coord": 77777,
+      "name": "北海龍宮",
+      "distance_km_from_0": 1770338.630980578,
+      "moon_ratio_16888": 4.605459497868,
+      "type": "palace"
+    },
+    {
+      "id": "P_80000p0_多重宇宙邊界_R95",
+      "coord": 80000,
+      "name": "多重宇宙邊界",
+      "distance_km_from_0": 1820937.944102321,
+      "moon_ratio_16888": 4.737091425865,
+      "type": "location"
+    },
+    {
+      "id": "P_88888p0_美州大陸_R96",
+      "coord": 88888,
+      "name": "美州大陸",
+      "distance_km_from_0": 2023244.149692089,
+      "moon_ratio_16888": 5.263382283278,
+      "type": "planetary_surface"
+    },
+    {
+      "id": "P_88888p0_美洲大陸_Rjson",
+      "coord": 88888,
+      "name": "美洲大陸",
+      "distance_km_from_0": 2023244.149692089,
+      "moon_ratio_16888": 5.263382283278,
+      "type": "continent"
+    },
+    {
+      "id": "P_88895p0_蟠桃園_R97",
+      "coord": 88895,
+      "name": "蟠桃園",
+      "distance_km_from_0": 2023403.481762198,
+      "moon_ratio_16888": 5.263796778778,
+      "type": "garden"
+    },
+    {
+      "id": "P_99995p0_龍珠紅_R98",
+      "coord": 99995,
+      "name": "龍珠紅",
+      "distance_km_from_0": 2276058.621506395,
+      "moon_ratio_16888": 5.921068214117,
+      "type": "location"
+    },
+    {
+      "id": "P_99999p0_命運之神_R99",
+      "coord": 99999,
+      "name": "命運之神",
+      "distance_km_from_0": 2276149.6684036,
+      "moon_ratio_16888": 5.921305068688,
+      "type": "location"
+    },
+    {
+      "id": "P_99999p0_銀河主脈_R100",
+      "coord": 99999,
+      "name": "銀河主脈",
+      "distance_km_from_0": 2276149.6684036,
+      "moon_ratio_16888": 5.921305068688,
+      "type": "river"
+    },
+    {
+      "id": "P_100000p0_玉皇宮_R101",
+      "coord": 100000,
+      "name": "玉皇宮",
+      "distance_km_from_0": 2276172.430127901,
+      "moon_ratio_16888": 5.921364282331,
+      "type": "palace"
+    },
+    {
+      "id": "P_108000p0_點石成金_R102",
+      "coord": 108000,
+      "name": "點石成金",
+      "distance_km_from_0": 2458266.224538133,
+      "moon_ratio_16888": 6.395073424917,
+      "type": "gate"
+    },
+    {
+      "id": "P_111111p0_如來神掌_R103",
+      "coord": 111111,
+      "name": "如來神掌",
+      "distance_km_from_0": 2529077.948839413,
+      "moon_ratio_16888": 6.57928706774,
+      "type": "boundary"
+    },
+    {
+      "id": "P_123456p0_時間輪盤_R104",
+      "coord": 123456,
+      "name": "時間輪盤",
+      "distance_km_from_0": 2810071.435338702,
+      "moon_ratio_16888": 7.310279488394,
+      "type": "location"
+    },
+    {
+      "id": "P_126500p0_最重的恐龍_R105",
+      "coord": 126500,
+      "name": "最重的恐龍",
+      "distance_km_from_0": 2879358.124111795,
+      "moon_ratio_16888": 7.490525817148,
+      "type": "location"
+    },
+    {
+      "id": "P_126588p0_平天大聖宮_R106",
+      "coord": 126588,
+      "name": "平天大聖宮",
+      "distance_km_from_0": 2881361.155850308,
+      "moon_ratio_16888": 7.495736617717,
+      "type": "palace"
+    },
+    {
+      "id": "P_168000p0_月球基地L2_R107",
+      "coord": 168000,
+      "name": "月球基地L2",
+      "distance_km_from_0": 3823969.682614874,
+      "moon_ratio_16888": 9.947891994315,
+      "type": "moon"
+    },
+    {
+      "id": "P_168888p0_筋斗雲_R108",
+      "coord": 168888,
+      "name": "筋斗雲",
+      "distance_km_from_0": 3844182.09379441,
+      "moon_ratio_16888": 10.000473709143,
+      "type": "location"
+    },
+    {
+      "id": "P_188888p0_地球神域_R109",
+      "coord": 188888,
+      "name": "地球神域",
+      "distance_km_from_0": 4299416.57981999,
+      "moon_ratio_16888": 11.184746565609,
+      "type": "planetary_surface"
+    },
+    {
+      "id": "P_511111p0_齊天大聖宮_R110",
+      "coord": 511111,
+      "name": "齊天大聖宮",
+      "distance_km_from_0": 11633767.669351017,
+      "moon_ratio_16888": 30.264744197063,
+      "type": "palace"
+    },
+    {
+      "id": "P_555550p0_東海龍宮_深淵殿_R111",
+      "coord": 555550,
+      "name": "東海龍宮·深淵殿",
+      "distance_km_from_0": 12645275.935575556,
+      "moon_ratio_16888": 32.896139270488,
+      "type": "palace"
+    },
+    {
+      "id": "P_654321p0_大五指山_Rjson",
+      "coord": 654321,
+      "name": "大五指山",
+      "distance_km_from_0": 14893474.206537185,
+      "moon_ratio_16888": 38.744729985789,
+      "type": "mountain"
+    },
+    {
+      "id": "P_1000000p0_玉皇大宇宙殿_R112",
+      "coord": 1000000,
+      "name": "玉皇大宇宙殿",
+      "distance_km_from_0": 22761724.301279012,
+      "moon_ratio_16888": 59.213642823306,
+      "type": "palace"
+    },
+    {
+      "id": "P_1234567p0_變形金鋼_R113",
+      "coord": 1234567,
+      "name": "變形金鋼",
+      "distance_km_from_0": 28100873.68545713,
+      "moon_ratio_16888": 73.103209379441,
+      "type": "location"
+    },
+    {
+      "id": "P_1800000p0_金星_R114",
+      "coord": 1800000,
+      "name": "金星",
+      "distance_km_from_0": 40971103.742302224,
+      "moon_ratio_16888": 106.584557081952,
+      "type": "location"
+    },
+    {
+      "id": "P_6570000p0_太陽_R115",
+      "coord": 6570000,
+      "name": "太陽",
+      "distance_km_from_0": 149544528.65940312,
+      "moon_ratio_16888": 389.033633349124,
+      "type": "location"
+    },
+    {
+      "id": "P_7200000p0_天規石碑_R116",
+      "coord": 7200000,
+      "name": "天規石碑",
+      "distance_km_from_0": 163884414.9692089,
+      "moon_ratio_16888": 426.338228327807,
+      "type": "location"
+    },
+    {
+      "id": "P_28100000p0_木星_R117",
+      "coord": 28100000,
+      "name": "木星",
+      "distance_km_from_0": 639604452.8659403,
+      "moon_ratio_16888": 1663.903363334912,
+      "type": "location"
+    },
+    {
+      "id": "P_87654321p0_天堂_R118",
+      "coord": 87654321,
+      "name": "天堂",
+      "distance_km_from_0": 1995163488.4178114,
+      "moon_ratio_16888": 5190.331655613453,
+      "type": "location"
+    },
+    {
+      "id": "P_87654321p0_天庭_Rjson",
+      "coord": 87654321,
+      "name": "天庭",
+      "distance_km_from_0": 1995163488.4178114,
+      "moon_ratio_16888": 5190.331655613453,
+      "type": "heaven"
+    }
+  ]
+}
