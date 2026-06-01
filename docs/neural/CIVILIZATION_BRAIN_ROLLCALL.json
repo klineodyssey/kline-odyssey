@@ -1,0 +1,23 @@
+{
+  "schema": "KGEN_CIVILIZATION_BRAIN_ROLLCALL_V1",
+  "version": "V10.49.0_CIVILIZATION_BRAIN_SYNC",
+  "status": "ACTIVE",
+  "single_source_of_truth": true,
+  "boot": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+  "sop": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+  "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+  "maps": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+  "neural": "neural/NEURAL_MAP.json",
+  "runtime": "K線西遊記/index.html",
+  "temples": {
+    "12345": "K線西遊記/temples/12345/index.html",
+    "16888": "K線西遊記/temples/16888/index.html",
+    "108000": "K線西遊記/temples/108000/index.html"
+  },
+  "governance_rules": [
+    "Physics Runtime has one formal master file only.",
+    "UniverseMap has one formal master file only.",
+    "Temple runtimes must reference civilization master files instead of keeping formal duplicate copies.",
+    "Archive files are historical records and must not be treated as active runtime dependencies."
+  ]
+}
