@@ -160,5 +160,26 @@
       "modules/runtime-main.css",
       "modules/runtime-main.js"
     ]
+  },
+  "runtime_version": "V10.49.1",
+  "civilization_brain_sync": {
+    "version": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+    "status": "ACTIVE",
+    "entry_script_id": "kgen-civilization-brain-rollcall-v10-49-1",
+    "global_object": "window.KGEN_CIVILIZATION_BRAIN",
+    "source_of_truth": {
+      "physics": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "universe_map": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "neural_map": "/neural/NEURAL_MAP.json"
+    }
+  },
+  "frontend_ritual_fix": {
+    "version": "V10.49.2_FRONTEND_RITUAL_FIX",
+    "contract_unchanged": true,
+    "fortune_button": "領發財金 fortuneClaim",
+    "cup_rule": "single cup button; click 3 times to unlock fortuneClaim",
+    "ignite_display": "front-end countdown shows Taiwan 08:00 target; contract remains UTC",
+    "new_year": "hidden unless countdown window",
+    "makeWish": "block empty wish before transaction"
   }
 }

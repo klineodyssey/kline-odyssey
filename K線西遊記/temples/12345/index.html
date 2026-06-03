@@ -1,3 +1,23 @@
+<!--
+============================================================
+KGEN_12345_V10_49_1_CIVILIZATION_BRAIN_CODE_SYNC
+AI MUST READ BEFORE EDITING THIS FILE
+
+SOURCE_OF_TRUTH:
+- BOOT: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md
+- SOP: /SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md
+- PHYSICS: /docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md
+- MAPS: /docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json
+- NEURAL: /neural/NEURAL_MAP.json
+- CIVILIZATION_GRAPH: /neural/CIVILIZATION_GRAPH.json
+
+RULE:
+- Do not create temple-local official copies of Physics Runtime or UniverseMap.
+- 12345 must reference shared civilization files.
+- Duplicate civilization files belong in archive only.
+============================================================
+-->
+
 <!DOCTYPE html>
 
 <html lang="zh-TW">
@@ -268,6 +288,53 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
 <link href="modules/runtime-main.css?v=V10.47.1" rel="stylesheet"/>
+
+<script id="kgen-civilization-brain-rollcall-v10-49-1">
+(function(){
+  "use strict";
+  const CIVILIZATION_BRAIN = {
+    version: "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+    status: "ACTIVE",
+    sourceOfTruth: {
+      boot: "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+      sop: "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      physics: "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      universeMap: "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      neuralMap: "/neural/NEURAL_MAP.json",
+      civilizationGraph: "/neural/CIVILIZATION_GRAPH.json"
+    },
+    rules: [
+      "NO_TEMPLE_LOCAL_OFFICIAL_PHYSICS_COPY",
+      "NO_TEMPLE_LOCAL_OFFICIAL_UNIVERSE_MAP_COPY",
+      "REFERENCE_SHARED_CIVILIZATION_FILES",
+      "ARCHIVE_DUPLICATES_DO_NOT_DELETE_WITHOUT_REPORT"
+    ]
+  };
+
+  window.KGEN_CIVILIZATION_BRAIN = CIVILIZATION_BRAIN;
+
+  function exposeRollcall(){
+    try{
+      document.documentElement.setAttribute("data-kgen-brain-sync", CIVILIZATION_BRAIN.version);
+      const tag = document.createElement("script");
+      tag.type = "application/json";
+      tag.id = "kgen-civilization-brain-rollcall-json";
+      tag.textContent = JSON.stringify(CIVILIZATION_BRAIN, null, 2);
+      document.head.appendChild(tag);
+      console.info("[KGEN 12345] Civilization Brain Rollcall loaded", CIVILIZATION_BRAIN);
+    }catch(err){
+      console.warn("[KGEN 12345] Civilization Brain Rollcall failed", err);
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", exposeRollcall);
+  }else{
+    exposeRollcall();
+  }
+})();
+</script>
+
 </head>
 <body>
 <div id="brand-badge">K線西遊記・花果山台灣</div>
@@ -1625,5 +1692,81 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V10.47.1"></script>
 <script src="modules/runtime-bootstrap.js"></script>
+
+<!-- KGEN V10.49.2 FRONTEND_RITUAL_FIX｜合約不變，只修前端 -->
+<style id="kgen-v10-49-2-ritual-css">
+.kgen-cup-panel{margin:8px 0;padding:10px;border:1px solid #d9b85f;border-radius:12px;background:rgba(0,0,0,.45);color:#f7d271}
+.kgen-cup-btn,.kgen-fortune-cn{width:100%;padding:10px;border-radius:10px;border:1px solid #d9b85f;background:linear-gradient(180deg,#f7d271,#9b6b00);color:#111;font-weight:900}
+.kgen-fortune-cn[disabled]{opacity:.5;filter:grayscale(1)}
+.kgen-ny-hidden{display:none!important}
+</style>
+<script id="kgen-v10-49-2-ritual-js">
+(function(){
+  "use strict";
+  const KEY="kgen12345_cup_count_v10492";
+  function all(sel){return Array.from(document.querySelectorAll(sel));}
+  function twNow(){return new Date(Date.now()+8*3600*1000);}
+  function secToTaiwan8(){
+    const tw=twNow();
+    let targetReal=Date.UTC(tw.getUTCFullYear(),tw.getUTCMonth(),tw.getUTCDate(),8,0,0)-8*3600*1000;
+    if(Date.now()>=targetReal) targetReal+=86400000;
+    return Math.max(0,Math.floor((targetReal-Date.now())/1000));
+  }
+  function fmt(s){const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);return (d?d+"天 ":"")+h+"時"+m+"分";}
+  function relabel(){
+    all("button").forEach(b=>{
+      const t=(b.textContent||"").trim();
+      if(t==="fortuneClaim"||t.includes("fortuneClaim")) b.textContent="領發財金 fortuneClaim";
+      if(t==="heartbeatClaim"||t.includes("heartbeatClaim")) b.textContent="呼吸 / 心跳 heartbeatClaim";
+      if(t==="igniteAndClaim"||t.includes("igniteAndClaim")) b.textContent="轉日呼吸 igniteAndClaim";
+      if(t.includes("跨年倒數")){
+        const tw=twNow();
+        const ok=tw.getUTCMonth()===11&&tw.getUTCDate()===31&&tw.getUTCHours()===23&&tw.getUTCMinutes()>=50;
+        if(!ok) b.classList.add("kgen-ny-hidden");
+      }
+    });
+  }
+  function installCup(){
+    if(document.getElementById("kgen-cup-panel")) return;
+    const fortune=all("button").find(b=>(b.textContent||"").includes("fortuneClaim")||(b.textContent||"").includes("發財金"));
+    if(!fortune) return;
+    fortune.classList.add("kgen-fortune-cn");
+    fortune.disabled=true;
+    let count=Number(localStorage.getItem(KEY)||"0");
+    const panel=document.createElement("div");
+    panel.id="kgen-cup-panel";
+    panel.className="kgen-cup-panel";
+    panel.innerHTML='<b>聖盃解鎖發財金</b><div id="kgen-cup-status">聖盃：0 / 3</div><button type="button" id="kgen-cup-btn" class="kgen-cup-btn">擲聖盃</button><div id="kgen-tw8-tip"></div>';
+    fortune.parentNode.insertBefore(panel,fortune);
+    const status=document.getElementById("kgen-cup-status");
+    const cup=document.getElementById("kgen-cup-btn");
+    function up(){
+      status.textContent="聖盃："+count+" / 3";
+      document.getElementById("kgen-tw8-tip").textContent="轉日呼吸倒數顯示到台灣早上八點，剩餘："+fmt(secToTaiwan8());
+      if(count>=3){fortune.disabled=false;cup.textContent="聖盃完成，可領發財金";}
+    }
+    cup.onclick=function(){if(count<3)count++;localStorage.setItem(KEY,String(count));up();};
+    fortune.addEventListener("click",function(){if(!fortune.disabled){localStorage.setItem(KEY,"0");}},true);
+    up();
+  }
+  function fixWish(){
+    const btn=all("button").find(b=>(b.textContent||"").includes("makeWish"));
+    if(!btn||btn.dataset.kgenWishFix)return;
+    btn.dataset.kgenWishFix="1";
+    btn.addEventListener("click",function(e){
+      const input=document.querySelector("input[placeholder*='許願'],textarea[placeholder*='許願']");
+      if(input && !(input.value||"").trim()){
+        e.preventDefault();e.stopImmediatePropagation();
+        alert("請先輸入願望文字；空願望會造成 HASH_ZERO。");
+        return false;
+      }
+    },true);
+  }
+  function run(){document.documentElement.dataset.kgenFrontendFix="V10.49.2";relabel();installCup();fixWish();}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
+  setInterval(run,30000);
+})();
+</script>
+
 </body>
 </html>

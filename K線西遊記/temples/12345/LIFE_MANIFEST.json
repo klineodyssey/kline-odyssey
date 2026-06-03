@@ -1572,5 +1572,35 @@
       "modules/runtime-main.css",
       "modules/runtime-main.js"
     ]
+  },
+  "version_governance": {
+    "current_package": "KGEN_12345_V10_49_1_CIVILIZATION_BRAIN_CODE_SYNC",
+    "code_sync": true,
+    "generated_at_utc": "2026-06-01T06:08:50Z"
+  },
+  "civilization_brain_rollcall": {
+    "status": "ACTIVE",
+    "boot": "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+    "sop": "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+    "physics": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "maps": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "neural_map": "/neural/NEURAL_MAP.json",
+    "civilization_graph": "/neural/CIVILIZATION_GRAPH.json",
+    "target_runtime": "/K線西遊記/temples/12345/index.html"
+  },
+  "governance_rules": [
+    "NO_TEMPLE_LOCAL_OFFICIAL_PHYSICS_COPY",
+    "NO_TEMPLE_LOCAL_OFFICIAL_UNIVERSE_MAP_COPY",
+    "USE_DOCS_PHYSICS_AS_SOURCE_OF_TRUTH",
+    "USE_DOCS_MAPS_AS_SOURCE_OF_TRUTH"
+  ],
+  "frontend_ritual_fix": {
+    "version": "V10.49.2_FRONTEND_RITUAL_FIX",
+    "contract_unchanged": true,
+    "fortune_button": "領發財金 fortuneClaim",
+    "cup_rule": "single cup button; click 3 times to unlock fortuneClaim",
+    "ignite_display": "front-end countdown shows Taiwan 08:00 target; contract remains UTC",
+    "new_year": "hidden unless countdown window",
+    "makeWish": "block empty wish before transaction"
   }
 }
