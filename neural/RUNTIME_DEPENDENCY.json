@@ -1,5 +1,7 @@
 {
-  "version": "V1.0",
+  "version": "V1.1",
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
   "dependencies": {
     "runtime-main.js": {
       "depends_on": [
@@ -9,7 +11,8 @@
         "runtime-autopilot.js",
         "runtime-sphere.js",
         "runtime-hud.js"
-      ]
+      ],
+      "note": "Generic UFO dependency tree. 12345 actual load tree is under temple_12345."
     },
     "runtime-autopilot.js": {
       "depends_on": [
@@ -30,5 +33,116 @@
         "runtime-hud.js"
       ]
     }
+  },
+  "temple_12345": {
+    "entry": "/K線西遊記/temples/12345/index.html",
+    "load_order": "document order as of Phase 0 audit",
+    "css": [
+      {
+        "file": "modules/kgen-12345-core.css",
+        "organ_role": "legacy layout skin",
+        "official_target": "modules/runtime-core.css",
+        "index_loaded": true
+      },
+      {
+        "file": "modules/kgen-12345-divine-regeneration.css",
+        "organ_role": "legacy regeneration skin",
+        "official_target": "modules/runtime-regeneration.css",
+        "index_loaded": true
+      },
+      {
+        "file": "modules/runtime-main.css",
+        "organ_role": "official runtime skin overlay",
+        "official_target": "modules/runtime-main.css",
+        "index_loaded": true
+      }
+    ],
+    "scripts": [
+      {
+        "file": "inline:kgen-civilization-brain-rollcall-v10-49-1",
+        "organ_role": "civilization brain rollcall",
+        "official_target": "modules/kgen-12345-civilization-brain-rollcall.js",
+        "index_loaded": true,
+        "note": "Currently inline in index.html head; external module exists but not loaded"
+      },
+      {
+        "file": "modules/kgen-12345-runtime.js",
+        "organ_role": "legacy primary runtime / Web3 / K-line / Heart TX",
+        "official_target": "modules/runtime-main.js",
+        "index_loaded": true,
+        "load_before": "modules/runtime-main.js"
+      },
+      {
+        "file": "modules/kgen-12345-mother-runtime.js",
+        "organ_role": "legacy mother observer",
+        "official_target": "modules/runtime-mother.js",
+        "index_loaded": true
+      },
+      {
+        "file": "modules/kgen-12345-divine-regeneration.js",
+        "organ_role": "legacy regeneration / recording",
+        "official_target": "modules/runtime-regeneration.js",
+        "index_loaded": true
+      },
+      {
+        "file": "modules/runtime-main.js",
+        "organ_role": "official runtime thin layer",
+        "official_target": "modules/runtime-main.js",
+        "index_loaded": true
+      },
+      {
+        "file": "modules/runtime-bootstrap.js",
+        "organ_role": "boot immune / manifest check",
+        "official_target": "modules/runtime-bootstrap.js",
+        "index_loaded": true,
+        "load_last": true
+      },
+      {
+        "file": "inline:kgen-v10-49-2-ritual-js",
+        "organ_role": "frontend ritual hotfix",
+        "official_target": "absorb into runtime-main.js or runtime-festival-engine.js",
+        "index_loaded": true,
+        "status": "CANCER_INLINE_PATCH",
+        "note": "Phase 0 does not modify index; recorded for Phase 2"
+      }
+    ],
+    "actual_index_dependencies": {
+      "runtime-bootstrap.js": {
+        "path": "modules/runtime-bootstrap.js",
+        "loaded": true
+      },
+      "runtime-main.js": {
+        "path": "modules/runtime-main.js",
+        "loaded": true
+      },
+      "kgen-12345-runtime.js": {
+        "path": "modules/kgen-12345-runtime.js",
+        "loaded": true
+      },
+      "kgen-12345-mother-runtime.js": {
+        "path": "modules/kgen-12345-mother-runtime.js",
+        "loaded": true
+      },
+      "kgen-12345-divine-regeneration.js": {
+        "path": "modules/kgen-12345-divine-regeneration.js",
+        "loaded": true
+      },
+      "kgen-12345-core.css": {
+        "path": "modules/kgen-12345-core.css",
+        "loaded": true
+      },
+      "runtime-main.css": {
+        "path": "modules/runtime-main.css",
+        "loaded": true
+      }
+    },
+    "rollcall_required_not_loaded": [
+      "modules/runtime-core.css",
+      "modules/runtime-mother.js",
+      "modules/runtime-regeneration.js",
+      "modules/runtime-regeneration.css",
+      "modules/runtime-cell-registry.json",
+      "modules/runtime-growth-policy.json"
+    ]
   }
 }

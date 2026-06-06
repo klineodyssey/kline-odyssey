@@ -1,5 +1,8 @@
 {
-  "version": "V1.0",
+  "version": "V1.1",
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "physics_source_of_truth": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
   "dna_rules": {
     "must_have_taxonomy": true,
     "must_have_version": true,
@@ -28,6 +31,58 @@
       "HeartRuntime",
       "AutopilotRuntime",
       "NeuralRuntime"
+    ]
+  },
+  "species_12345": {
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "TempleRuntime",
+      "class": "WukongSystem",
+      "order": "HeartEngine",
+      "family": "MorphDNA",
+      "genus": "RuntimeMain",
+      "species": "12345"
+    },
+    "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+    "declared_versions": {
+      "civilization_brain": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+      "life_manifest": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+      "runtime_genome_top": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+      "runtime_genome_runtime": "V10.49.1",
+      "version_file": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+      "index_ui_runtime_main": "V10.47.1",
+      "frontend_ritual_fix": "V10.49.2_FRONTEND_RITUAL_FIX"
+    },
+    "version_drift_status": "ACTIVE_CONFLICT",
+    "dual_track_policy": {
+      "official_target_prefix": "runtime-",
+      "legacy_active_prefix": "kgen-12345-",
+      "transition_status": "DUAL_LOADED",
+      "forbidden_new_patterns": [
+        "patch",
+        "hotfix",
+        "fix",
+        "stable",
+        "v10-",
+        "v104"
+      ]
+    },
+    "source_of_truth_refs": {
+      "physics": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "universe_map": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "neural_map": "/neural/NEURAL_MAP.json",
+      "organ_index": "/neural/ORGAN_INDEX.json",
+      "runtime_dependency": "/neural/RUNTIME_DEPENDENCY.json",
+      "life_manifest": "/K線西遊記/temples/12345/LIFE_MANIFEST.json",
+      "runtime_genome": "/K線西遊記/temples/12345/RUNTIME_GENOME.json"
+    },
+    "governance_rules": [
+      "NO_TEMPLE_LOCAL_OFFICIAL_PHYSICS_COPY",
+      "NO_TEMPLE_LOCAL_OFFICIAL_UNIVERSE_MAP_COPY",
+      "USE_DOCS_PHYSICS_AS_SOURCE_OF_TRUTH",
+      "USE_DOCS_MAPS_AS_SOURCE_OF_TRUTH",
+      "NO_PATCH_FIX_STABLE_IN_OFFICIAL_MODULES"
     ]
   }
 }

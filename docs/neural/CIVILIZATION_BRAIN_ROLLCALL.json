@@ -3,6 +3,8 @@
   "version": "V10.49.1",
   "status": "ACTIVE",
   "code_sync": true,
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
   "read_order": [
     "BOOT",
     "SOP",
@@ -17,8 +19,29 @@
     "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
     "maps": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
     "neural_map": "neural/NEURAL_MAP.json",
+    "organ_index": "neural/ORGAN_INDEX.json",
+    "runtime_dependency": "neural/RUNTIME_DEPENDENCY.json",
     "civilization_graph": "neural/CIVILIZATION_GRAPH.json",
-    "target_runtime": "K線西遊記/temples/12345/index.html"
+    "dna_relations": "neural/DNA_RELATIONS.json",
+    "missing_neural_link_report": "neural/MISSING_NEURAL_LINK_REPORT.md",
+    "life_manifest": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+    "runtime_genome": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+    "target_runtime": "K線西遊記/temples/12345/index.html",
+    "target_modules": "K線西遊記/temples/12345/modules/"
   },
-  "generated_at_utc": "2026-06-01T06:08:50Z"
+  "physics_policy": {
+    "official": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "superseded": "docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
+    "boot_still_cites_v1_2": true,
+    "boot_upgrade_pending": true,
+    "note": "Neural layer unified to V1_6 in Phase 0. Boot file not modified."
+  },
+  "temple_12345_dual_track": {
+    "status": "TRANSITION",
+    "official_target_prefix": "runtime-",
+    "legacy_active_prefix": "kgen-12345-",
+    "see": "neural/ORGAN_INDEX.json#species_12345"
+  },
+  "generated_at_utc": "2026-06-01T06:08:50Z",
+  "phase0_updated_at_utc": "2026-06-07T00:00:00Z"
 }
