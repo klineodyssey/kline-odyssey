@@ -1,5 +1,8 @@
 {
-  "version": "V1.0",
+  "version": "V1.1",
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "physics_source_of_truth": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
   "civilizations": {
     "12345": {
       "name": "五指山悟空財神殿",
@@ -12,7 +15,36 @@
         "16888",
         "runtime-heart",
         "runtime-boundary"
-      ]
+      ],
+      "runtime_paths": {
+        "index": "/K線西遊記/temples/12345/index.html",
+        "life_manifest": "/K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "runtime_genome": "/K線西遊記/temples/12345/RUNTIME_GENOME.json",
+        "modules": "/K線西遊記/temples/12345/modules/"
+      },
+      "actual_mounts_phase0": {
+        "boot": "modules/runtime-bootstrap.js",
+        "core_runtime": "modules/runtime-main.js",
+        "legacy_runtime": "modules/kgen-12345-runtime.js",
+        "mother": "modules/kgen-12345-mother-runtime.js",
+        "regeneration": "modules/kgen-12345-divine-regeneration.js",
+        "core_skin": "modules/kgen-12345-core.css",
+        "runtime_skin": "modules/runtime-main.css",
+        "brain_rollcall": "inline:kgen-civilization-brain-rollcall-v10-49-1"
+      },
+      "neural_organ_refs": [
+        "runtime-bootstrap",
+        "runtime-main",
+        "runtime-main-css",
+        "runtime-core-css",
+        "runtime-mother",
+        "runtime-regeneration",
+        "runtime-heart",
+        "runtime-brain",
+        "runtime-boundary"
+      ],
+      "dual_track_status": "TRANSITION",
+      "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC"
     },
     "16888": {
       "name": "廣寒宮",

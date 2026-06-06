@@ -1,21 +1,34 @@
 {
-  "version": "V1.0",
+  "version": "V1.1",
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
   "source_of_truth": true,
   "root": "/",
+  "physics_source_of_truth": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
   "must_read_order": [
     "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
     "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
     "/docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md",
-    "/docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
+    "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
     "/docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
     "/docs/runtime/KGEN_UFO_Runtime_Control_System_V3_0.md",
-    "/docs/neural/KGEN_Universe_Neural_System_V1_0.md"
+    "/docs/neural/KGEN_Universe_Neural_System_V1_0.md",
+    "/docs/neural/CIVILIZATION_BRAIN_ROLLCALL.json",
+    "/neural/NEURAL_MAP.json",
+    "/neural/CIVILIZATION_GRAPH.json",
+    "/neural/ORGAN_INDEX.json",
+    "/neural/RUNTIME_DEPENDENCY.json",
+    "/neural/DNA_RELATIONS.json",
+    "/K線西遊記/temples/12345/LIFE_MANIFEST.json",
+    "/K線西遊記/temples/12345/RUNTIME_GENOME.json",
+    "/K線西遊記/temples/12345/index.html"
   ],
   "nodes": {
     "boot": {
       "path": "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
       "type": "core_boot",
-      "must_read": true
+      "must_read": true,
+      "note": "Boot §3.4 still cites Physics V1_2; neural layer overrides to V1_6 per V10.49.1. Boot file unchanged in Phase 0."
     },
     "ancestor_boot": {
       "path": "/archive/boot/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_0.md",
@@ -38,9 +51,18 @@
       "must_read": true
     },
     "physics": {
+      "path": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "type": "physics_constitution",
+      "must_read": true,
+      "source_of_truth": true,
+      "supersedes": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md"
+    },
+    "physics_v1_2_archive_ref": {
       "path": "/docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
       "type": "physics_constitution",
-      "must_read": true
+      "must_read": false,
+      "status": "SUPERSEDED_BY_V1_6",
+      "note": "Historical reference only. Do not use for 12345 or new runtime construction."
     },
     "biology": {
       "path": "/docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
@@ -51,6 +73,74 @@
       "path": "/docs/neural/KGEN_Universe_Neural_System_V1_0.md",
       "type": "neural_constitution",
       "must_read": true
+    },
+    "civilization_brain_rollcall": {
+      "path": "/docs/neural/CIVILIZATION_BRAIN_ROLLCALL.json",
+      "type": "neural_rollcall",
+      "must_read": true
+    },
+    "universe_map": {
+      "path": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "type": "civilization_map",
+      "must_read": true
+    },
+    "neural_map": {
+      "path": "/neural/NEURAL_MAP.json",
+      "type": "neural_index",
+      "must_read": true
+    },
+    "organ_index": {
+      "path": "/neural/ORGAN_INDEX.json",
+      "type": "neural_index",
+      "must_read": true
+    },
+    "runtime_dependency": {
+      "path": "/neural/RUNTIME_DEPENDENCY.json",
+      "type": "neural_index",
+      "must_read": true
+    },
+    "civilization_graph": {
+      "path": "/neural/CIVILIZATION_GRAPH.json",
+      "type": "neural_index",
+      "must_read": true
+    },
+    "dna_relations": {
+      "path": "/neural/DNA_RELATIONS.json",
+      "type": "neural_index",
+      "must_read": true
+    },
+    "missing_neural_link_report": {
+      "path": "/neural/MISSING_NEURAL_LINK_REPORT.md",
+      "type": "neural_report",
+      "must_read": true
+    },
+    "temple_12345_index": {
+      "path": "/K線西遊記/temples/12345/index.html",
+      "type": "temple_runtime",
+      "species": "12345",
+      "must_read": true,
+      "role": "Primary Portal Shell / Heart UI entry"
+    },
+    "temple_12345_life_manifest": {
+      "path": "/K線西遊記/temples/12345/LIFE_MANIFEST.json",
+      "type": "temple_dna",
+      "species": "12345",
+      "must_read": true,
+      "role": "Life manifest / required file rollcall"
+    },
+    "temple_12345_runtime_genome": {
+      "path": "/K線西遊記/temples/12345/RUNTIME_GENOME.json",
+      "type": "temple_dna",
+      "species": "12345",
+      "must_read": true,
+      "role": "Runtime genome / version DNA"
+    },
+    "temple_12345_modules": {
+      "path": "/K線西遊記/temples/12345/modules/",
+      "type": "temple_organ_housing",
+      "species": "12345",
+      "must_read": true,
+      "role": "Official and legacy runtime organs. See ORGAN_INDEX.json species_12345."
     }
   }
 }

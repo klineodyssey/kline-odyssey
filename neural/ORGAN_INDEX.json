@@ -1,5 +1,20 @@
 {
-  "version": "V1.0",
+  "version": "V1.1",
+  "phase": "PHASE_0_NEURAL_SYNC",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "organ_naming_policy": {
+    "official_target": "runtime-* permanent organ filenames",
+    "legacy_alias": "kgen-12345-* current active alias during dual-track transition",
+    "version_in_filename": false,
+    "forbidden_patterns": [
+      "patch",
+      "hotfix",
+      "fix",
+      "stable",
+      "v10-",
+      "v104"
+    ]
+  },
   "organs": {
     "runtime-main": {
       "file": "runtime-main.js",
@@ -48,6 +63,150 @@
       "type": "vision-organ",
       "role": "HUD / Player Interface",
       "required": true
+    }
+  },
+  "species_12345": {
+    "temple": "五指山悟空財神殿",
+    "modules_root": "/K線西遊記/temples/12345/modules/",
+    "index_entry": "/K線西遊記/temples/12345/index.html",
+    "dual_track_status": "TRANSITION",
+    "organs": {
+      "runtime-bootstrap": {
+        "official_file": "runtime-bootstrap.js",
+        "legacy_alias": "kgen-12345-boot-runtime.js",
+        "type": "boot-organ",
+        "role": "Boot immune / life manifest check",
+        "index_loaded": true,
+        "status": "OFFICIAL_ACTIVE"
+      },
+      "runtime-main": {
+        "official_file": "runtime-main.js",
+        "legacy_alias": "kgen-12345-runtime.js",
+        "type": "core-organ",
+        "role": "Universe loop / layout / holy cup / festival clock thin layer",
+        "index_loaded": true,
+        "legacy_also_loaded": true,
+        "status": "DUAL_LOADED",
+        "note": "kgen-12345-runtime.js still carries primary Web3/K-line/Heart TX logic"
+      },
+      "runtime-main-css": {
+        "official_file": "runtime-main.css",
+        "legacy_alias": null,
+        "type": "skin-organ",
+        "role": "Core runtime visual skin overlay",
+        "index_loaded": true,
+        "status": "OFFICIAL_ACTIVE"
+      },
+      "runtime-core-css": {
+        "official_file": "runtime-core.css",
+        "legacy_alias": "kgen-12345-core.css",
+        "type": "skin-organ",
+        "role": "Full layout / HUD skin",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE",
+        "note": "Rollcall requires runtime-core.css; index still loads kgen-12345-core.css"
+      },
+      "runtime-mother": {
+        "official_file": "runtime-mother.js",
+        "legacy_alias": "kgen-12345-mother-runtime.js",
+        "type": "observer-organ",
+        "role": "Mother runtime observer",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-regeneration": {
+        "official_file": "runtime-regeneration.js",
+        "legacy_alias": "kgen-12345-divine-regeneration.js",
+        "type": "regeneration-organ",
+        "role": "Divine regeneration / recording",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-regeneration-css": {
+        "official_file": "runtime-regeneration.css",
+        "legacy_alias": "kgen-12345-divine-regeneration.css",
+        "type": "skin-organ",
+        "role": "Regeneration skin",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-cell-registry": {
+        "official_file": "runtime-cell-registry.json",
+        "legacy_alias": "kgen-12345-cell-registry.json",
+        "type": "dna-organ",
+        "role": "Cell registry",
+        "index_loaded": false,
+        "status": "OFFICIAL_PENDING_ABSORPTION"
+      },
+      "runtime-growth-policy": {
+        "official_file": "runtime-growth-policy.json",
+        "legacy_alias": "kgen-12345-growth-policy.json",
+        "type": "dna-organ",
+        "role": "Growth policy",
+        "index_loaded": false,
+        "status": "OFFICIAL_PENDING_ABSORPTION"
+      },
+      "runtime-heart": {
+        "official_file": "runtime-heart.js",
+        "legacy_alias": null,
+        "nearest_active": [
+          "kgen-12345-runtime.js",
+          "index.html#kgen-heart-live-panel"
+        ],
+        "type": "heart-organ",
+        "role": "Temple Heart / Web3 TX",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME",
+        "note": "Neural generic organ not materialized as runtime-heart.js in 12345 modules"
+      },
+      "runtime-brain": {
+        "official_file": "runtime-brain.js",
+        "legacy_alias": "kgen-12345-panel-router.js",
+        "nearest_active": [
+          "kgen-12345-civilization-brain-rollcall.js",
+          "inline index brain rollcall script"
+        ],
+        "type": "brain-organ",
+        "role": "Decision / AI routing / civilization brain",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-boundary": {
+        "official_file": "runtime-boundary.js",
+        "legacy_alias": "kgen-12345-immune-runtime.js",
+        "type": "immune-organ",
+        "role": "Boundary / immune runtime",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-autopilot": {
+        "official_file": "runtime-autopilot.js",
+        "legacy_alias": "kgen-12345-watchdog-runtime.js",
+        "type": "navigation-organ",
+        "role": "AutoPilot / watchdog",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-sphere": {
+        "official_file": "runtime-sphere.js",
+        "legacy_alias": "kgen-12345-sphere-runtime.js",
+        "type": "geometry-organ",
+        "role": "Sphere timeline renderer",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-hud": {
+        "official_file": "runtime-hud.js",
+        "legacy_alias": "kgen-12345-ui-runtime.js",
+        "type": "vision-organ",
+        "role": "HUD / player interface",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      }
     }
   }
 }
