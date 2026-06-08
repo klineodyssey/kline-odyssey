@@ -1,0 +1,293 @@
+{
+  "id": "CIVILIZATION_18888_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + repo grep",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507,
+    "temple_folder_tracked": 0,
+    "direct_repo_artifacts": 1,
+    "note": "No K線西遊記/temples/18888/ folder — graph-only + contract-primary civilization"
+  },
+  "species": {
+    "id": "18888",
+    "name": "靈霄寶殿神明銀行",
+    "name_alt": "靈霄寶殿",
+    "name_en": "Lingxiao Deity Bank",
+    "life_id": null,
+    "biology_type": "Divine Treasury Civilization",
+    "role": "Divine Treasury / Civilization Mass",
+    "status": "GRAPH_ONLY",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "TempleRuntime",
+      "class": "TreasurySystem",
+      "order": "DeityBank",
+      "family": "DivineDNA",
+      "genus": "LingxiaoBank",
+      "species": "18888",
+      "source": "neural/CIVILIZATION_GRAPH.json + SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md"
+    },
+    "physics": {
+      "k_index": 18888,
+      "coupling_c_approx": 1.433,
+      "mass_example": "18888 KGEN",
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    },
+    "depends_on": [],
+    "feeds": [
+      "12345",
+      "108000",
+      "8895"
+    ],
+    "can_mount": [
+      "runtime-heart"
+    ]
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/TEMPLE_INDEX.json",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/BANK_INDEX.json",
+      "docs/civilization/CONTRACT_INDEX.json",
+      "docs/civilization/ORGAN_MAP.json"
+    ],
+    "neural_layer": [
+      "neural/CIVILIZATION_GRAPH.json",
+      "neural/ORGAN_INDEX.json"
+    ]
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+      "role": "18888 dedicated civilization index"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/BANK_INDEX.json#lingxiao_deity_bank",
+      "role": "Dedicated LingxiaoDeityBank evidence, rules, and portal address conflict"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/CONTRACT_INDEX.json#18888",
+      "role": "Lingxiao Deity Bank contract mapping"
+    },
+    {
+      "step": 5,
+      "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "role": "On-chain deity bank source — read only; do not edit"
+    },
+    {
+      "step": 6,
+      "path": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      "role": "Species TYPE LingxiaoBank in mother SOP"
+    },
+    {
+      "step": 7,
+      "path": "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md",
+      "role": "神界治理層 civilization layer definition"
+    }
+  ],
+  "paths": {
+    "temple_root": null,
+    "frontend_entry": null,
+    "contract_source": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+    "sop_species": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md#3.3",
+    "whitepaper_constitution": "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md",
+    "physics_ref": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+  },
+  "directory_structure": {
+    "description": "18888 has no temple folder; single contract artifact in repo",
+    "zones": [
+      {
+        "id": "contract_source",
+        "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+        "tracked_count": 1,
+        "role": "Primary on-chain deity bank implementation"
+      },
+      {
+        "id": "mother_sop",
+        "path": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+        "role": "TYPE: LingxiaoBank / FUNCTION: Divine Treasury Runtime"
+      },
+      {
+        "id": "whitepaper_layer",
+        "path": "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md",
+        "role": "靈霄寶殿18888 — 神界治理層"
+      }
+    ],
+    "frontend_embed_refs": [
+      {
+        "path": "K線西遊記/temples/12345/index.html",
+        "role": "HUD panel: 靈霄寶殿神明銀行席位（500）grid-500",
+        "note": "12345 execution lock — read only; no 18888 contract address in rollcall block"
+      },
+      {
+        "path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "role": "lingxiaoBank address placeholder organ on Heart",
+        "field": "lingxiaoBank"
+      }
+    ]
+  },
+  "dna": {
+    "life_manifest": null,
+    "runtime_genome": null,
+    "manifest": null,
+    "version_file": null,
+    "temple_folder": false,
+    "note": "No PRIMEFORGE DNA quartet — civilization exists as contract + graph node"
+  },
+  "runtime": {
+    "architecture": "CONTRACT_PRIMARY",
+    "frontend_entry": null,
+    "organ_mount": "runtime-heart",
+    "organ_status": "MISSING_FILENAME in 12345 — runtime-heart.js not materialized",
+    "keeper_ops": [
+      "finalizeMonthWithAmount",
+      "setKeeper"
+    ],
+    "user_ops": [
+      "deposit",
+      "withdraw",
+      "claim"
+    ],
+    "automation_note": "Monthly payday window UTC day 5 — requires keeper finalizeMonthWithAmount(); no on-chain scheduler"
+  },
+  "contract": {
+    "species_contract_ref": "docs/civilization/CONTRACT_INDEX.json#18888",
+    "bank_detail_ref": "docs/civilization/BANK_INDEX.json#lingxiao_deity_bank",
+    "repo_source": {
+      "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "contract_name": "KGEN_LingxiaoDeityBank_V1_0_1",
+      "version": "V1_0_1",
+      "pragma": "^0.8.24",
+      "status": "SOURCE_ONLY",
+      "evidence_note": "Version verified from source header comment, Solidity declaration, and civilization/contract indices; filename is not the only evidence."
+    },
+    "spec_summary": {
+      "vault_cap": "50,000,000 KGEN",
+      "min_deity_deposit": "100,000 KGEN",
+      "dividend": "Pull claim",
+      "payday": "UTC day 5 monthly window via finalizeMonthWithAmount",
+      "early_withdraw_penalty": "5% principal — split to 11520 / 12345 / public good",
+      "tax_receiver": "Can receive KGEN Token 0.1% tax flow"
+    },
+    "wired_addresses_configurable": {
+      "brain11520": "11520 BrainExchange",
+      "heart12345": "12345 TempleHeart",
+      "publicGood": "public good treasury"
+    },
+    "heart_integration": {
+      "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "field": "lingxiaoBank",
+      "note": "Heart holds lingxiaoBank organ address placeholder"
+    },
+    "deployed_refs": {
+      "note": "No 18888 deployed address is documented in KGEN/README.md. Portal displays 0xfc522243e988a837700CaD600D6f030f5932681F as Bank, but this is not verified here as the LingxiaoDeityBank deployment.",
+      "documented_in_readme": false,
+      "portal_display_addr": "0xfc522243e988a837700CaD600D6f030f5932681F",
+      "conflict_ref": "docs/civilization/BANK_INDEX.json#portal_18888_bank_addr_vs_source_only_status"
+    },
+    "token_link": {
+      "from": "KGEN_Token_V7_5_2",
+      "mechanism": "0.1% tax receiver endpoint"
+    }
+  },
+  "dependency_graph": {
+    "upstream": [],
+    "downstream": [
+      {
+        "species": "12345",
+        "via": "12345 depends_on 18888; early penalty to heart12345",
+        "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json"
+      },
+      {
+        "species": "108000",
+        "via": "108000 depends_on 18888 per CIVILIZATION_GRAPH",
+        "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json"
+      },
+      {
+        "species": "8895",
+        "via": "8895 depends_on 18888 — graph only, no repo artifacts",
+        "status": "GRAPH_ONLY_CHILD"
+      }
+    ],
+    "sibling_roots": [
+      "11520"
+    ],
+    "note": "18888 and 11520 are graph roots feeding 12345"
+  },
+  "whitepaper_definition": {
+    "source": "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md",
+    "layer": "神界治理層",
+    "listing_example": "18888 listed as large civilization asset in whitepaper/KGEN/README.md civilization examples"
+  },
+  "relation_to_other_species": {
+    "feeds_heart": {
+      "species": "12345",
+      "graph_relation": "12345 depends_on 18888"
+    },
+    "feeds_mars": {
+      "species": "108000",
+      "graph_relation": "108000 depends_on 18888"
+    },
+    "shadow_child": {
+      "species": "8895",
+      "name": "雲棧洞地下錢莊",
+      "status": "GRAPH_ONLY — no contract or temple in repo"
+    }
+  },
+  "active_gaps": [
+    {
+      "id": "no_temple_folder",
+      "note": "No K線西遊記/temples/18888/ — no dedicated frontend runtime"
+    },
+    {
+      "id": "no_dna_quartet",
+      "note": "No LIFE_MANIFEST / RUNTIME_GENOME / MANIFEST / VERSION"
+    },
+    {
+      "id": "no_deployed_address_in_docs",
+      "note": "Deployed 18888 address not in KGEN/README.md; Portal displays 0xfc522243e988a837700CaD600D6f030f5932681F as Bank but it remains unverified against LingxiaoDeityBank source/deployment evidence."
+    },
+    {
+      "id": "runtime_heart_missing_filename",
+      "note": "runtime-heart.js not materialized; Heart logic in kgen-12345-runtime.js"
+    },
+    {
+      "id": "8895_unimplemented",
+      "note": "Child species 8895 has no repo artifacts"
+    }
+  ],
+  "governance_lock": {
+    "do_not_edit": [
+      "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "KGEN/contracts/*",
+      "scripts/*",
+      "docs/physics/*",
+      "deployed_contract_related_files",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "allowed_index_zone": "docs/civilization/*"
+  },
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "civilization_graph": "neural/CIVILIZATION_GRAPH.json",
+    "contract_readme": "KGEN/contracts/README.md"
+  }
+}

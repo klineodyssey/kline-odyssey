@@ -1,0 +1,381 @@
+{
+  "id": "CIVILIZATION_PORTAL_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + index.html parse",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "kline_zone_ref": "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+  "definition": {
+    "role": "Universe navigation shell —导流、合約索引、版本同步；不取代各神殿 runtime",
+    "primary_path": "K線西遊記/index.html",
+    "version": "Portal V2.1",
+    "tagline": "宇宙不需要解釋，只需要入口。",
+    "note": "各殿实际链上交互在各自 index.html；Portal 负责导航与状态展示"
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/PORTAL_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/FRONTEND_INDEX.json"
+    ]
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/PORTAL_INDEX.json",
+      "role": "Portal navigation index"
+    },
+    {
+      "step": 3,
+      "path": "K線西遊記/index.html",
+      "role": "Primary galaxy universe gate Portal V2.1"
+    },
+    {
+      "step": 4,
+      "path": "docs/maps/README.md",
+      "role": "Maps must be referenced from Portal/temples — no local copies"
+    }
+  ],
+  "portal_layers": {
+    "primary": {
+      "id": "kline_universe_gate",
+      "path": "K線西遊記/index.html",
+      "title": "K線西遊記｜銀河宇宙入口 Portal V2.1",
+      "version": "V2.1",
+      "architecture": "MONOLITHIC_INLINE",
+      "features": [
+        "Starfield canvas hero",
+        "Civilization node map (#map)",
+        "Cache-bust query params on temple links",
+        "Deployed contract KPI strip",
+        "LINE official link"
+      ],
+      "primary_cta": [
+        {
+          "label": "進入 12345 悟空財神殿",
+          "href": "./temples/12345/index.html?v=723"
+        },
+        {
+          "label": "進入 16888 廣寒宮",
+          "href": "./temples/16888/index.html?v=374"
+        }
+      ]
+    },
+    "repo_root": {
+      "id": "repo_index",
+      "path": "Index.html",
+      "role": "GitHub Pages root civilization landing",
+      "note": "Markdown-style HTML; links to /K線西遊記/12345.html etc. — some targets missing"
+    },
+    "whitepaper_gate": {
+      "id": "whitepaper_portal",
+      "path": "whitepaper/index.html",
+      "role": "Whitepaper / constitution document portal",
+      "permalink": "/whitepaper/"
+    },
+    "archive_portal": {
+      "id": "archive_universe_gate",
+      "path": "K線西遊記/archive/INDEX.html",
+      "version": "Portal V2.0.2",
+      "role": "Legacy galaxy gate with 16888 LIVE integration notes"
+    }
+  },
+  "portal_entry_registry": {
+    "note": "Canonical and fallback portal entrances. Portal is navigation shell only; temple runtimes remain under temples/*/index.html.",
+    "canonical": {
+      "id": "kline_universe_gate",
+      "path": "K線西遊記/index.html",
+      "title": "K線西遊記｜銀河宇宙入口 Portal V2.1",
+      "local_url": "http://localhost:8080/K線西遊記/index.html",
+      "production_url": "https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html",
+      "url_encoded_production_url": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html",
+      "frontend_ref": "docs/civilization/FRONTEND_INDEX.json#index_html_registry",
+      "kline_zone_ref": "docs/civilization/KLINE_XIYOUJI_INDEX.json"
+    },
+    "fallback_entries": [
+      {
+        "id": "repo_root_landing",
+        "path": "Index.html",
+        "role": "GitHub Pages root landing / marketing constitution",
+        "status": "ACTIVE_WITH_LINK_DRIFT",
+        "frontend_ref": "docs/civilization/FRONTEND_INDEX.json#index_html_registry"
+      },
+      {
+        "id": "social_wallet_to_portal",
+        "path": "wallet.html?to=portal",
+        "role": "Social/in-app-browser bridge to canonical Portal",
+        "status": "ACTIVE",
+        "target": "K線西遊記/index.html?v=220",
+        "frontend_ref": "docs/civilization/FRONTEND_INDEX.json#wallet_html_registry"
+      },
+      {
+        "id": "archive_portal",
+        "path": "K線西遊記/archive/INDEX.html",
+        "role": "Historical Portal V2.0.2",
+        "status": "ARCHIVE",
+        "superseded_by": "K線西遊記/index.html"
+      },
+      {
+        "id": "whitepaper_gate",
+        "path": "whitepaper/index.html",
+        "role": "Documentation portal, not runtime universe gate",
+        "status": "ACTIVE"
+      }
+    ],
+    "primary_outbound": [
+      {
+        "label": "12345",
+        "href": "./temples/12345/index.html?v=723",
+        "target_ref": "docs/civilization/TEMPLE_12345_INDEX.json"
+      },
+      {
+        "label": "16888",
+        "href": "./temples/16888/index.html?v=374",
+        "target_ref": "docs/civilization/TEMPLE_16888_INDEX.json"
+      }
+    ],
+    "non_portal_entries": [
+      {
+        "path": "12345.html",
+        "reason": "Temple bridge, not Portal"
+      },
+      {
+        "path": "wallet-12345.html",
+        "reason": "Temple wallet bridge, not Portal"
+      },
+      {
+        "path": "K線西遊記/temples/12345/index.html",
+        "reason": "Temple runtime, not Portal"
+      }
+    ]
+  },
+  "bridges": {
+    "description": "Lightweight entry shells — not primary temple runtime",
+    "entries": [
+      {
+        "id": "bridge_12345",
+        "path": "12345.html",
+        "life_type": "Bridge HyperMembrane Lifeform",
+        "taxonomy_class": "PortalShell",
+        "redirects_to": "K線西遊記/temples/12345/index.html",
+        "production_url": "https://klineodyssey.github.io/kline-odyssey/12345.html",
+        "format": "LIGHTWEIGHT_REDIRECT_BRIDGE",
+        "life_manifest_ref": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "sop_rule": "Root bridge only; formal entry is temple index.html",
+        "frontend_ref": "docs/civilization/FRONTEND_INDEX.json#bridge_12345_html_registry",
+        "inbound_link_bug": "Index.html links /K線西遊記/12345.html — actual path is /12345.html"
+      },
+      {
+        "id": "bridge_wallet",
+        "path": "wallet.html",
+        "role": "Social wallet bridge — LINE/Facebook/in-app browser relay",
+        "product_id": "KGEN-SOCIAL-WALLET-BRIDGE",
+        "version": "KGEN-SOCIAL-WALLET-BRIDGE-V1.0.0",
+        "default_target": "K線西遊記/temples/12345/index.html",
+        "query_to": [
+          "12345",
+          "portal",
+          "16888"
+        ],
+        "frontend_ref": "docs/civilization/FRONTEND_INDEX.json#wallet_html_registry"
+      },
+      {
+        "id": "bridge_wallet_12345",
+        "path": "wallet-12345.html",
+        "taxonomy_class": "PortalShell",
+        "role": "Wallet bridge at repo root"
+      },
+      {
+        "id": "bridge_wallet_temple",
+        "path": "K線西遊記/temples/12345/wallet-12345.html",
+        "role": "Wallet bridge inside temple 12345"
+      }
+    ]
+  },
+  "node_map": {
+    "source": "K線西遊記/index.html#map",
+    "nodes": [
+      {
+        "id": "12345",
+        "name": "五指山・悟空財神殿",
+        "status": "live",
+        "clickable": true,
+        "href": "./temples/12345/index.html?v=723",
+        "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+        "display_addr": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972"
+      },
+      {
+        "id": "16888",
+        "name": "廣寒宮・七仙女飛碟駕駛艙",
+        "status": "live",
+        "clickable": true,
+        "href": "./temples/16888/index.html?v=374",
+        "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json",
+        "note": "Frontend entry only — not wish-pool contract display"
+      },
+      {
+        "id": "11520",
+        "name": "花果山台灣・悟空大腦交易所",
+        "status": "live",
+        "clickable": false,
+        "index_ref": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+        "display_addr": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6"
+      },
+      {
+        "id": "108000",
+        "name": "Mars 火星席位系統",
+        "status": "live",
+        "clickable": false,
+        "href_missing_in_portal": true,
+        "actual_entry": "K線西遊記/temples/108000/index.html",
+        "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json",
+        "display_addr": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+        "addr_note": "Portal/frontend display deployed MarsSeats address; KGEN/README.md chain section does not document this deployment"
+      },
+      {
+        "id": "18888",
+        "name": "靈霄寶殿・玉帝神明銀行",
+        "status": "live",
+        "clickable": false,
+        "index_ref": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+        "display_addr": "0xfc522243e988a837700CaD600D6f030f5932681F",
+        "addr_note": "Portal labels as Bank; may differ from LingxiaoDeityBank source-only contract in repo",
+        "bank_index_ref": "docs/civilization/BANK_INDEX.json#lingxiao_deity_bank",
+        "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#18888_lingxiao_divine_treasury",
+        "conflict_ref": "docs/civilization/BANK_INDEX.json#portal_18888_bank_addr_vs_source_only_status"
+      },
+      {
+        "id": "8895",
+        "name": "雲棧洞・八戒人民銀行地下錢莊",
+        "status": "soon",
+        "clickable": false,
+        "note": "座標定案 · 前端待建"
+      },
+      {
+        "id": "8888",
+        "name": "高老莊",
+        "status": "soon",
+        "clickable": false,
+        "index_ref": "docs/civilization/TREASURY_INDEX.json#8888_gaolaozhuang_treasury",
+        "contract_ref": "docs/civilization/CONTRACT_INDEX.json#8888",
+        "addr_note": "Portal status is soon; repo contains source-only 8888 Treasury contract and 16888 fee route, but KGEN/README.md has no deployed 8888 address."
+      },
+      {
+        "id": "18921",
+        "name": "斬妖台・TaxSplitter / AutoLP",
+        "status": "soon",
+        "clickable": false,
+        "contract_ref": "KGEN/contracts/KGEN_ZhanyaoTaxSplitter_V1_0_1.sol"
+      }
+    ]
+  },
+  "kpi_strip": {
+    "source": "K線西遊記/index.html hero kpiGrid",
+    "items": [
+      {
+        "label": "KGEN Token",
+        "display": "0xBA3d...32Be",
+        "full": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+      },
+      {
+        "label": "Heart 12345",
+        "display": "已部署"
+      },
+      {
+        "label": "Brain 11520",
+        "display": "已部署"
+      },
+      {
+        "label": "Mars Seats",
+        "display": "已部署"
+      }
+    ]
+  },
+  "return_links": {
+    "description": "Temple runtimes link back to Portal",
+    "canonical_url": "https://klineodyssey.github.io/kline-odyssey/K線西遊記/index.html",
+    "temples_with_back_nav": [
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/16888/index.html",
+      "K線西遊記/temples/108000/index.html",
+      "K線西遊記/kline-app-game/index.html"
+    ]
+  },
+  "portal_shell_organ": {
+    "description": "12345 LIFE_MANIFEST registers Primary Portal Shell organ",
+    "source": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+    "organ": "Primary Portal Shell",
+    "class": "PortalShell",
+    "neural_ref": "neural/NEURAL_MAP.json — Primary Portal Shell / Heart UI entry"
+  },
+  "dev_entry": {
+    "source": "AGENTS.md",
+    "local_url": "http://localhost:8080/K線西遊記/index.html",
+    "label": "Galaxy portal"
+  },
+  "official_external": [
+    {
+      "id": "github_pages",
+      "url": "https://klineodyssey.github.io/kline-odyssey/"
+    },
+    {
+      "id": "line_official",
+      "url": "https://lin.ee/b8X18F7"
+    }
+  ],
+  "broken_or_missing_links": {
+    "note": "Index.html root landing references paths not present as tracked files",
+    "missing_targets": [
+      {
+        "linked_from": "Index.html",
+        "path": "/K線西遊記/11520.html",
+        "status": "NOT_IN_REPO"
+      },
+      {
+        "linked_from": "Index.html",
+        "path": "/K線西遊記/16888.html",
+        "status": "NOT_IN_REPO"
+      },
+      {
+        "linked_from": "Index.html",
+        "path": "/K線西遊記/18888.html",
+        "status": "NOT_IN_REPO"
+      }
+    ],
+    "portal_gap": {
+      "id": "108000",
+      "note": "Portal node map shows MarsSeats but no href to temples/108000/index.html",
+      "display_addr": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+      "addr_gap": "Address appears in Portal/108000 frontend but not KGEN/README.md chain section"
+    }
+  },
+  "governance": {
+    "maps_policy": "docs/maps/README.md — Temples/Portal must reference docs/maps; no temple-local copies",
+    "portal_role_boundary": "导流与索引 only; 不取代神殿 runtime",
+    "cache_bust": "12345 ?v=723, 16888 ?v=374 on primary CTA",
+    "do_not_edit_locked": [
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ]
+  },
+  "civilization_index_refs": {
+    "12345": "docs/civilization/TEMPLE_12345_INDEX.json",
+    "16888": "docs/civilization/TEMPLE_16888_INDEX.json",
+    "108000": "docs/civilization/TEMPLE_108000_INDEX.json",
+    "11520": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+    "18888": "docs/civilization/CIVILIZATION_18888_INDEX.json"
+  }
+}

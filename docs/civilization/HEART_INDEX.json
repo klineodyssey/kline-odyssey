@@ -1,0 +1,326 @@
+{
+  "id": "CIVILIZATION_HEART_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "content-verified contract read + civilization indices + frontend/docs cross-check",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "contract_path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+    "version_policy": "Do not infer version/status from filename alone; require contract contents, declarations, comments, authoritative docs, and existing civilization indices."
+  },
+  "parent_indices": [
+    "docs/civilization/BRAIN_INDEX.json",
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/TEMPLE_12345_INDEX.json"
+  ],
+  "sibling_indices": [
+    "docs/civilization/TOKEN_INDEX.json",
+    "docs/civilization/CIVILIZATION_11520_INDEX.json",
+    "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "docs/civilization/TEMPLE_108000_INDEX.json"
+  ],
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/HEART_INDEX.json",
+    "kgen_layer": "docs/civilization/KGEN_INDEX.json",
+    "contract_layer": "docs/civilization/CONTRACT_INDEX.json",
+    "temple_layer": "docs/civilization/TEMPLE_12345_INDEX.json",
+    "portal_layer": "docs/civilization/PORTAL_INDEX.json",
+    "chain_readme": "KGEN/README.md",
+    "contract_readme": "KGEN/contracts/README.md"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/HEART_INDEX.json",
+      "role": "Heart-focused civilization contract index"
+    },
+    {
+      "step": 2,
+      "path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "role": "TempleHeart source of implementation facts; read only"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/CONTRACT_INDEX.json#civilization_contracts.12345",
+      "role": "Cross-contract registry and known version drift"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/TEMPLE_12345_INDEX.json#contract",
+      "role": "12345 runtime contract mapping"
+    },
+    {
+      "step": 5,
+      "path": "KGEN/scripts/deploy_all.js",
+      "role": "Brain and Heart deployment/init wiring; read only"
+    },
+    {
+      "step": 6,
+      "path": "K線西遊記/temples/12345/index.html",
+      "role": "Locked 12345 frontend display claims; read only"
+    }
+  ],
+  "heart": {
+    "id": "temple_heart_12345",
+    "species_id": "12345",
+    "name": "五指山悟空財神殿",
+    "name_en": "Wukong Heart Temple",
+    "biology_type": "Heart Civilization",
+    "role": "Temple Heart — fortune, heartbeat, ignite, vow, wish, lamp, Brain blood-loop vault",
+    "contract_source": {
+      "path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "contract_name": "KGEN_TempleHeart_V3_2_3",
+      "declared_version": "V3.2.3",
+      "pragma": "^0.8.20",
+      "source_status": "SOURCE_PRESENT_LOCKED"
+    },
+    "frontend_display": {
+      "label": "TempleHeart V3.2.6",
+      "displayed_address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      "display_status": "DEPLOYED_CLAIM_IN_LOCKED_FRONTEND",
+      "sources": [
+        "K線西遊記/temples/12345/index.html",
+        "docs/civilization/PORTAL_INDEX.json#node_map.12345",
+        "docs/civilization/KGEN_INDEX.json#chain.portal_displayed_deployed"
+      ]
+    },
+    "index_status": {
+      "contract_index_status": "SOURCE_ONLY",
+      "portal_ui_status": "DEPLOYED_CLAIM",
+      "resolved_status": "CONFLICT_DOCUMENTED_NOT_EXTERNALLY_VERIFIED",
+      "note": "KGEN/README.md documents Token/LP/Genesis addresses but does not list the Heart deployed address. Portal and 12345 runtime display the Heart address as deployed."
+    }
+  },
+  "evidence": {
+    "version_evidence": [
+      {
+        "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "evidence": "Contract banner says `V3.2.3（單線定稿｜Heart ↔ 11520 Brain 循環版）`."
+      },
+      {
+        "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "evidence": "Contract declaration is `contract KGEN_TempleHeart_V3_2_3 is OwnableLite, ReentrancyGuardLite`; used as supporting evidence, not sole source."
+      },
+      {
+        "source": "docs/civilization/CONTRACT_INDEX.json",
+        "evidence": "12345 contract row records repo source version `V3_2_3`, plus UI display version `V3_2_6`."
+      },
+      {
+        "source": "K線西遊記/temples/12345/index.html",
+        "evidence": "Locked frontend displays `TempleHeart V3.2.6` and Heart address `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972`."
+      },
+      {
+        "source": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md",
+        "evidence": "SOP says `不可改 KGEN_TempleHeart_V3_2_6.sol`; no matching V3_2_6 Solidity file was found in the repo during this pass."
+      }
+    ],
+    "role_evidence": [
+      {
+        "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "evidence": "Top comments define Heart as 12345 Wukong Fortune Temple and list fortuneClaim, heartbeatClaim, igniteAndClaim, vowTo, makeWish, and lightLamp."
+      },
+      {
+        "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "evidence": "Top comments state Heart only connects to `11520 花果山台灣交易所 / 悟空大腦（Brain）` as circulation vault."
+      },
+      {
+        "source": "docs/civilization/TEMPLE_12345_INDEX.json",
+        "evidence": "Species 12345 is `Heart Civilization`, role `Universe Core / Heart Runtime`, and contract repo source is TempleHeart."
+      },
+      {
+        "source": "docs/civilization/PORTAL_INDEX.json",
+        "evidence": "Portal node 12345 is live/clickable and displays the Heart address."
+      }
+    ],
+    "status_evidence": [
+      {
+        "source": "docs/civilization/CONTRACT_INDEX.json",
+        "evidence": "Contract index marks 12345 TempleHeart contract source as `SOURCE_ONLY`."
+      },
+      {
+        "source": "K線西遊記/temples/12345/index.html",
+        "evidence": "Frontend text says `Heart 合約已部署` at `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972`."
+      },
+      {
+        "source": "docs/civilization/KGEN_INDEX.json",
+        "evidence": "KGEN index records `portal_displayed_deployed` Heart 12345 with the same address and contract ref."
+      },
+      {
+        "source": "KGEN/README.md",
+        "evidence": "KGEN README is authoritative for Token/LP/Genesis addresses, but does not document the Heart address."
+      }
+    ],
+    "filename_inference_guard": {
+      "rule": "Filename is not the source of truth for version/status.",
+      "result": "Heart has an active conflict: repo source contents and declaration verify V3.2.3, while locked frontend/SOP labels cite V3.2.6 and no V3_2_6 Solidity source exists in repo."
+    }
+  },
+  "contract_surface": {
+    "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+    "core_token": "kgen",
+    "brain_vault": "brainVault",
+    "user_actions": [
+      {
+        "function": "fortuneClaim(uint256 amountWhole)",
+        "rules": "1..888 KGEN, 30 day cooldown, optional epoch cap of 500 claims."
+      },
+      {
+        "function": "heartbeatClaim()",
+        "rules": "Default 1 hour cooldown, default 1 KGEN reward."
+      },
+      {
+        "function": "igniteAndClaim()",
+        "rules": "UTC 00:00-00:10 once per day, default 8 KGEN reward."
+      },
+      {
+        "function": "vowTo(uint8 option, uint256 amountWhole)",
+        "rules": "transferFrom user to Heart for blood refill."
+      },
+      {
+        "function": "lightLamp(uint256 daysToAdd)",
+        "rules": "transferFrom payment, extends lamp expiration."
+      },
+      {
+        "function": "makeWish(bytes32 wishHash)",
+        "rules": "Emits hash only; no plaintext wish stored."
+      }
+    ],
+    "brain_loop_actions": [
+      {
+        "function": "injectFromBrain(uint256 amountWhole)",
+        "mechanism": "Pulls KGEN from Brain to Heart; Brain must approve Heart first."
+      },
+      {
+        "function": "sweepExcessToBrain()",
+        "mechanism": "Sends Heart balance above effective cap back to Brain."
+      },
+      {
+        "function": "autoRefillFromBrain()",
+        "mechanism": "Pulls from Brain if Heart is below effective floor; Brain must approve Heart first."
+      }
+    ],
+    "owner_controls": [
+      "setToken",
+      "setBrainVault",
+      "setOrgans",
+      "setGrowthParams",
+      "setRules",
+      "lockConfig",
+      "transferOwnership",
+      "sweepToken"
+    ]
+  },
+  "dependency_graph": {
+    "deploy_source": "KGEN/scripts/deploy_all.js",
+    "deploy_order": [
+      "KGEN_BrainExchange_V3_2_0",
+      "KGEN_TempleHeart_V3_2_3"
+    ],
+    "init_wiring": [
+      "brain.setTempleHeart(heartAddress)",
+      "heart.setToken(KGEN_TOKEN)",
+      "heart.setBrainVault(brainAddress)"
+    ],
+    "runtime_links": [
+      {
+        "from": "KGEN_Token_V7_5_2",
+        "to": "KGEN_TempleHeart_V3_2_3",
+        "via": "heart.setToken(KGEN_TOKEN); Heart transfers KGEN for rewards and accepts KGEN for vow/lamp/fund flows."
+      },
+      {
+        "from": "KGEN_BrainExchange_V3_2_0",
+        "to": "KGEN_TempleHeart_V3_2_3",
+        "via": "brain.setTempleHeart plus Heart brainVault; Brain/Heart blood-loop."
+      },
+      {
+        "from": "KGEN_TempleHeart_V3_2_3",
+        "to": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "via": "optional lingxiaoBank organ address placeholder; not enforced in this Heart version."
+      }
+    ]
+  },
+  "civilization_links": {
+    "kgen_layer": {
+      "index_ref": "docs/civilization/KGEN_INDEX.json",
+      "meaning": "KGEN chain layer records Heart as portal-displayed deployed and maps 12345 to TempleHeart."
+    },
+    "contract_layer": {
+      "index_ref": "docs/civilization/CONTRACT_INDEX.json",
+      "meaning": "Contract registry records 12345 TempleHeart source, dependency graph, and active V3.2.3/V3.2.6 conflict."
+    },
+    "temple_12345": {
+      "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+      "meaning": "12345 is the primary Heart runtime and locked UI surface."
+    },
+    "brain_11520": {
+      "index_ref": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "mechanism": "Brain deploy/init sets TempleHeart and Heart stores Brain as brainVault."
+    },
+    "portal_12345": {
+      "index_ref": "docs/civilization/PORTAL_INDEX.json#node_map.12345",
+      "mechanism": "Portal node 12345 is live/clickable and displays the Heart deployed address."
+    }
+  },
+  "active_conflicts": [
+    {
+      "id": "temple_heart_v3_2_3_source_vs_v3_2_6_ui_sop",
+      "status": "ACTIVE",
+      "repo_source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "repo_source_evidence": "Source banner, contract declaration, deploy_all.js factory, CONTRACT_INDEX, and TEMPLE_12345_INDEX all point to V3.2.3 source.",
+      "ui_sop_reference": "KGEN_TempleHeart_V3_2_6.sol / TempleHeart V3.2.6",
+      "ui_sop_evidence": [
+        "K線西遊記/temples/12345/index.html displays TempleHeart V3.2.6.",
+        "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md forbids editing KGEN_TempleHeart_V3_2_6.sol."
+      ],
+      "observed_gap": "No KGEN_TempleHeart_V3_2_6.sol file was found in repo during this pass.",
+      "action": "Do not relabel the source or runtime. Treat V3.2.6 as an unresolved UI/SOP/deployment label until a verified source, migration note, or chain verification artifact is added."
+    },
+    {
+      "id": "source_only_index_vs_deployed_frontend_claim",
+      "status": "ACTIVE",
+      "contract_index_status": "SOURCE_ONLY",
+      "frontend_portal_claim": "Heart 12345 deployed at 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      "observed_gap": "KGEN/README.md does not list Heart deployed address; this pass did not perform external chain explorer or RPC verification."
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "no_v3_2_6_source_in_repo",
+      "status": "OPEN",
+      "detail": "Frontend/SOP cite V3.2.6, but repo only contains V3.2.3 TempleHeart source."
+    },
+    {
+      "id": "heart_address_not_in_kgen_readme",
+      "status": "OPEN",
+      "detail": "Heart address is present in Portal/12345 UI and civilization indices, but not in KGEN/README.md's authoritative on-chain address list."
+    },
+    {
+      "id": "onchain_bytecode_not_verified_in_this_pass",
+      "status": "OPEN",
+      "detail": "No RPC or explorer verification was performed. Address/deployment statements are indexed as repo/frontend claims, not external proof."
+    },
+    {
+      "id": "brain_approval_state_unknown",
+      "status": "OPEN",
+      "detail": "Heart source requires Brain to approve Heart before inject/autoRefill transferFrom flows; this pass found wiring but no authoritative live allowance record."
+    }
+  ],
+  "governance_lock": {
+    "do_not_edit": [
+      "KGEN/contracts/*",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*",
+      "deployed_contract_related_files"
+    ],
+    "allowed_index_zone": "docs/civilization/*",
+    "source_of_truth_note": "This index documents evidence and conflicts only; it does not resolve runtime/source version drift."
+  }
+}

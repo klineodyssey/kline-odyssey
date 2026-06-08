@@ -1,0 +1,344 @@
+{
+  "id": "CIVILIZATION_TEMPLE_108000_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507,
+    "temple_108000_tracked": 2
+  },
+  "species": {
+    "id": "108000",
+    "name": "花果山火星齊天豪宅",
+    "name_en": "Mars Villa / Mars Seats Colony",
+    "life_id": "KGEN-108000-MARSSEATS-UI",
+    "biology_type": "Mars Seat Civilization",
+    "role": "Mars Civilization / Seat Runtime",
+    "status": "STUB",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "TempleRuntime",
+      "class": "MarsColonySystem",
+      "order": "SeatEngine",
+      "family": "MarsDNA",
+      "genus": "MarsSeats",
+      "species": "108000",
+      "source": "inferred from CIVILIZATION_GRAPH role"
+    },
+    "physics": {
+      "k_index": 108000,
+      "coupling_c_approx": 8.19,
+      "formula_note": "C = 108000 / 13180 ≈ 8.19",
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    },
+    "depends_on": [
+      "18888"
+    ],
+    "feeds": [],
+    "can_mount": [],
+    "pairs_with": [
+      "11520"
+    ]
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/TEMPLE_108000_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/TEMPLE_INDEX.json",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/FRONTEND_INDEX.json",
+      "docs/civilization/CONTRACT_INDEX.json"
+    ],
+    "neural_layer": [
+      "neural/CIVILIZATION_GRAPH.json"
+    ]
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/TEMPLE_108000_INDEX.json",
+      "role": "108000 dedicated civilization index"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/CONTRACT_INDEX.json#108000",
+      "role": "MarsSeats contract source mapping"
+    },
+    {
+      "step": 4,
+      "path": "K線西遊記/temples/108000/index.html",
+      "role": "Primary runtime — monolithic Mars colony cockpit"
+    }
+  ],
+  "paths": {
+    "root": "K線西遊記/temples/108000/",
+    "entry": "K線西遊記/temples/108000/index.html",
+    "local_ethers_lib": "K線西遊記/temples/108000/ethers-5.7.2.umd.min.js",
+    "modules": null,
+    "assets": null,
+    "docs": null,
+    "sop": null,
+    "archive": null,
+    "embryo": null
+  },
+  "directory_structure": {
+    "description": "Minimal stub — only 2 tracked files under K線西遊記/temples/108000/",
+    "zones": [
+      {
+        "id": "runtime_entry",
+        "path": "K線西遊記/temples/108000/index.html",
+        "tracked_count": 1,
+        "role": "Mars colony cockpit — monolithic inline UI + on-chain HUD"
+      },
+      {
+        "id": "local_ethers",
+        "path": "K線西遊記/temples/108000/ethers-5.7.2.umd.min.js",
+        "tracked_count": 1,
+        "role": "Local ethers v5.7.2 copy — index.html uses CDN instead",
+        "index_loaded": false
+      }
+    ],
+    "file_types": {
+      "html": 1,
+      "js": 1
+    }
+  },
+  "dna": {
+    "life_manifest": null,
+    "runtime_genome": null,
+    "manifest": null,
+    "version_file": null,
+    "note": "No PRIMEFORGE DNA quartet — version declared in index.html header comment only"
+  },
+  "version_layers": {
+    "layers": [
+      {
+        "layer": "PRODUCT_ID",
+        "value": "KGEN-108000-MARSSEATS-UI"
+      },
+      {
+        "layer": "APP_VERSION",
+        "value": "KGEN-108000-MARSSEATS-UI-V1.0.2"
+      },
+      {
+        "layer": "BUILD",
+        "value": "20260508-MARS-COLONY-COCKPIT"
+      },
+      {
+        "layer": "BASE_FROM",
+        "value": "index_108000_MarsSeats_UI_V1_0_1_mars_reactor_seat.html",
+        "note": "Base file not present in repo tracked files"
+      },
+      {
+        "layer": "repo_contract_source",
+        "value": "V2_2_1",
+        "path": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol"
+      }
+    ],
+    "drift_status": "MINOR — base_from HTML absent from repo"
+  },
+  "runtime": {
+    "architecture": "MONOLITHIC_INLINE",
+    "modules_folder": false,
+    "dual_track": null,
+    "index_external_scripts": [
+      "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js",
+      "https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js",
+      "https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap"
+    ],
+    "local_file_not_loaded": {
+      "path": "K線西遊記/temples/108000/ethers-5.7.2.umd.min.js",
+      "note": "Present in repo; index uses CDN ethers instead"
+    },
+    "features": [
+      "500 Mars Seats grid visualization",
+      "Live on-chain HUD (totalMinted, remainingSeats, seatsOf)",
+      "MetaMask / mobile injected wallet connect",
+      "approve(5000 KGEN) → mintSeat(1) → claimSeat / claimSeats",
+      "Mars Reactor θ 108000 cockpit visual",
+      "Single WebAudio engine (108Hz sawtooth)",
+      "12345 / 16888 DNA styling in HUD panels",
+      "BSC mainnet only (chainId 56)"
+    ],
+    "wallet": {
+      "metamask": true,
+      "mobile_injected": true,
+      "walletconnect": false,
+      "walletconnect_note": "WC_PROJECT_ID empty — button disabled"
+    },
+    "on_chain_ops": [
+      "approve",
+      "mintSeat",
+      "claimSeat",
+      "claimSeats"
+    ],
+    "navigation_links": [
+      "Universe gate",
+      "12345 Wukong Heart Temple",
+      "16888 Guanghan Palace",
+      "Official homepage"
+    ],
+    "design_constraints_from_header": [
+      "Retain formal on-chain approve / mint / claim",
+      "Retain single audio engine",
+      "Do not change contract addresses",
+      "No redeploy"
+    ]
+  },
+  "contract": {
+    "species_contract_ref": "docs/civilization/CONTRACT_INDEX.json#108000",
+    "repo_source": {
+      "path": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+      "contract_name": "KGEN_MarsSeats_V2_2_1",
+      "version": "V2_2_1",
+      "role": "500 Mars seats — notifyReward from Brain 11520"
+    },
+    "verified_from_source": [
+      "KGEN_MarsSeats_V2_2_1.sol inline banner marks PATCH and documents notifyReward solvency + transferSeat settlement changes",
+      "contract declaration: contract KGEN_MarsSeats_V2_2_1 is OwnableLite, ReentrancyGuardLite",
+      "pragma solidity ^0.8.24",
+      "constructor(address token) binds KGEN token; MAX_SEATS constant is 500; seatPriceWhole defaults to 5000",
+      "notifyReward(uint256) is restricted to brain and requires actual funded contract balance before accounting",
+      "BrainExchange rollPayroll transfers marsPortion to marsSeats, then calls IMarsSeats.notifyReward(marsPortion)"
+    ],
+    "frontend_refs": {
+      "note": "Addresses read from index.html — deployed contract related; do not modify without authorization",
+      "source": "K線西遊記/temples/108000/index.html",
+      "marsseats": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+      "kgen_token": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "brain_11520": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+      "templeheart_12345": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      "lp_pair": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "seat_price_kgen": "5000",
+      "total_seats": 500
+    },
+    "dependency": {
+      "brain_notify_reward": "11520",
+      "source": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol"
+    },
+    "source_vs_frontend_surface_conflicts": {
+      "status": "ACTIVE_CONFLICT_REQUIRES_DEPLOYED_ABI_CONFIRMATION",
+      "note": "Do not infer live ABI from filename. Repo source and 108000 frontend ABI labels differ; deployed bytecode was not externally verified in this indexing pass.",
+      "items": [
+        {
+          "frontend": "totalSeats() / maxSeats()",
+          "repo_source": "MAX_SEATS() public constant generated getter; remainingSeats() exists"
+        },
+        {
+          "frontend": "seatPrice()",
+          "repo_source": "seatPriceWei()"
+        },
+        {
+          "frontend": "seatsOf(address) treated as uint256[] seat ids; balanceOf(address) fallback",
+          "repo_source": "seatsOf(address) public mapping returns uint256 count; no balanceOf(address)"
+        },
+        {
+          "frontend": "pendingSeat(address), pendingSeats(address), pendingRewards(address), pendingReward(address)",
+          "repo_source": "pendingSeat(uint256 seatId), pendingSeats(uint256[] seatIds)"
+        }
+      ]
+    }
+  },
+  "relation_to_other_species": {
+    "depends_on": {
+      "species": "18888",
+      "role": "Divine Treasury / civilization mass upstream"
+    },
+    "pairs_with": {
+      "species": "11520",
+      "role": "Brain exchange — notifyReward source"
+    },
+    "dna_styling_refs": [
+      "12345",
+      "16888"
+    ],
+    "navigation_to": [
+      {
+        "species": "12345",
+        "path": "K線西遊記/temples/12345/index.html",
+        "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json"
+      },
+      {
+        "species": "16888",
+        "path": "K線西遊記/temples/16888/index.html",
+        "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json"
+      }
+    ]
+  },
+  "related_sites": {
+    "wukong_mars_villa": {
+      "path": "wukong-temple/mars-villa/index.html",
+      "note": "Separate wukong-temple Mars villa page — not under K線西遊記/temples/108000/"
+    }
+  },
+  "active_gaps": [
+    {
+      "id": "stub_minimal_files",
+      "note": "Only 2 tracked files — smallest temple folder"
+    },
+    {
+      "id": "no_dna_quartet",
+      "note": "No LIFE_MANIFEST / RUNTIME_GENOME / MANIFEST / VERSION"
+    },
+    {
+      "id": "no_modules_assets_docs",
+      "note": "No modules/, assets/, docs/, SOP/, archive/"
+    },
+    {
+      "id": "no_temple_readme",
+      "note": "No K線西遊記/temples/108000/README.md"
+    },
+    {
+      "id": "base_from_missing",
+      "note": "index_108000_MarsSeats_UI_V1_0_1_mars_reactor_seat.html not in repo"
+    },
+    {
+      "id": "local_ethers_unused",
+      "note": "ethers-5.7.2.umd.min.js tracked but index loads CDN"
+    },
+    {
+      "id": "walletconnect_unconfigured",
+      "note": "WC_PROJECT_ID empty"
+    },
+    {
+      "id": "marsseats_deployed_address_not_in_kgen_readme",
+      "note": "Portal and 108000 frontend show MarsSeats deployed address 0x3529dbFbaD465C2269F8096879A1c298d5257298; KGEN/README.md chain section does not document this address"
+    },
+    {
+      "id": "portal_href_missing",
+      "note": "Portal node map shows 108000 MarsSeats with deployed address, but the node is not clickable and has no href to K線西遊記/temples/108000/index.html"
+    },
+    {
+      "id": "frontend_abi_vs_repo_source_conflict",
+      "note": "108000 frontend ABI labels do not fully match KGEN_MarsSeats_V2_2_1.sol repo source; confirm deployed ABI before runtime changes"
+    }
+  ],
+  "governance_lock": {
+    "inherited_from_session": [
+      "KGEN/contracts/*",
+      "scripts/*",
+      "docs/physics/*",
+      "deployed_contract_related_files",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "index_header_rule": "不改合約地址，不重 deploy — from index.html changelog",
+    "note": "108000 index.html not in 12345 execution lock; ADDR block still deployed-contract-sensitive"
+  },
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "universe_map": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "civilization_graph": "neural/CIVILIZATION_GRAPH.json"
+  }
+}

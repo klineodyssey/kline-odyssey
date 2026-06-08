@@ -1,0 +1,250 @@
+{
+  "id": "CIVILIZATION_TOKEN_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "content-verified contract read + authoritative docs cross-check",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "contract_path": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "version_policy": "Do not infer version/status from filename alone; require contract contents and authoritative docs."
+  },
+  "parent_indices": [
+    "docs/civilization/BRAIN_INDEX.json",
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json"
+  ],
+  "sibling_indices": [
+    "docs/civilization/CIVILIZATION_11520_INDEX.json",
+    "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "docs/civilization/TEMPLE_12345_INDEX.json",
+    "docs/civilization/TEMPLE_16888_INDEX.json",
+    "docs/civilization/TEMPLE_108000_INDEX.json"
+  ],
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/TOKEN_INDEX.json",
+    "kgen_layer": "docs/civilization/KGEN_INDEX.json",
+    "contract_layer": "docs/civilization/CONTRACT_INDEX.json",
+    "chain_readme": "KGEN/README.md",
+    "contract_readme": "KGEN/contracts/README.md"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/TOKEN_INDEX.json",
+      "role": "Token-focused civilization index"
+    },
+    {
+      "step": 2,
+      "path": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "role": "Token contract source of implementation facts"
+    },
+    {
+      "step": 3,
+      "path": "KGEN/README.md",
+      "role": "Authoritative chain address and KGEN role docs"
+    },
+    {
+      "step": 4,
+      "path": "KGEN/contracts/README.md",
+      "role": "Core triad contract positioning"
+    },
+    {
+      "step": 5,
+      "path": "docs/civilization/CONTRACT_INDEX.json",
+      "role": "Cross-contract dependency graph"
+    }
+  ],
+  "token": {
+    "id": "kgen_token",
+    "name": "KLINE GENESIS",
+    "symbol": "KGEN",
+    "contract_name": "KGEN_Token_V7_5_2",
+    "contract_path": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "pragma": "^0.8.24",
+    "inherits": [
+      "ERC20",
+      "Ownable"
+    ],
+    "network": "BNB Smart Chain (BSC)",
+    "deployed_address": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "lp_pair_kgen_wbnb": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+    "status": "DEPLOYED",
+    "role": "KGEN main token — civilization mass substrate, supply, transfer, AMM tax routing",
+    "total_supply": {
+      "raw_constant": "72_000_000 * 1e18",
+      "whole_tokens": 72000000,
+      "decimals": 18
+    }
+  },
+  "evidence": {
+    "version_evidence": [
+      {
+        "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "evidence": "Inline banner says `KGEN Token V7.5.2 GENESIS (OZ v5)`."
+      },
+      {
+        "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "evidence": "Contract declaration is `contract KGEN_Token_V7_5_2 is ERC20, Ownable`; used as supporting evidence, not sole source."
+      },
+      {
+        "source": "KGEN/README.md",
+        "evidence": "Declares `KLINE Odyssey 宇宙唯一主幣（V7.5.2）` and current civilization version `V7.5.2`."
+      },
+      {
+        "source": "KGEN/contracts/README.md",
+        "evidence": "Title and core triad section identify `KGEN Contracts (V7.5.2)` and list `KGEN_Token_V7_5_2.sol` as Token."
+      }
+    ],
+    "role_evidence": [
+      {
+        "source": "KGEN/README.md",
+        "evidence": "Defines KGEN as the universe's only main token and core energy unit: mass, system fuel, reward share, governance power."
+      },
+      {
+        "source": "KGEN/contracts/README.md",
+        "evidence": "Defines Token as `KGEN 主幣`, responsible for supply, transfer, base permissions, reflux/tax integrations."
+      },
+      {
+        "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "evidence": "ERC20 name/symbol are `KLINE GENESIS` / `KGEN`; tax wallets and AMM-only routing are implemented in `_update`."
+      }
+    ],
+    "status_evidence": [
+      {
+        "source": "KGEN/README.md",
+        "evidence": "Documents Token Contract address `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` and LP Pair address."
+      },
+      {
+        "source": "docs/civilization/KGEN_INDEX.json",
+        "evidence": "Existing KGEN chain deployed address table maps `kgen_token` to the same address."
+      },
+      {
+        "source": "docs/civilization/CONTRACT_INDEX.json",
+        "evidence": "Existing core triad row marks `kgen_token` as `DEPLOYED` with deployed address ref `kgen_token`."
+      }
+    ],
+    "filename_inference_guard": {
+      "rule": "Filename is not the source of truth for version/status.",
+      "result": "Filename, inline contract banner, contract declaration, KGEN README, contracts README, and existing civilization indices agree on V7.5.2 / deployed KGEN Token. No version conflict found."
+    }
+  },
+  "tax_model": {
+    "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "total_tax_bps": 30,
+    "total_tax_percent": "0.30%",
+    "routes": [
+      {
+        "id": "burn",
+        "bps": 10,
+        "percent": "0.10%",
+        "destination": "address(0)"
+      },
+      {
+        "id": "bank",
+        "bps": 10,
+        "percent": "0.10%",
+        "destination": "bankWallet"
+      },
+      {
+        "id": "reward",
+        "bps": 5,
+        "percent": "0.05%",
+        "destination": "rewardWallet"
+      },
+      {
+        "id": "autolp",
+        "bps": 5,
+        "percent": "0.05%",
+        "destination": "autoLPWallet"
+      }
+    ],
+    "trigger": "Tax applies only when `from` or `to` is a registered market maker pair and neither side is tax-exempt.",
+    "no_tax_cases": [
+      "Mint, burn, and zero-value transfers pass through without tax branch.",
+      "Wallet-to-wallet transfers are no-tax unless one side is a registered AMM pair.",
+      "Tax-exempt sender or receiver is no-tax."
+    ],
+    "invariants": [
+      "TAX_BPS_BURN + TAX_BPS_BANK + TAX_BPS_REWARD + TAX_BPS_AUTOLP must equal TAX_BPS_TOTAL.",
+      "Constructor and setTaxWallets reject zero tax wallet addresses.",
+      "New tax wallets are marked tax-exempt when set."
+    ]
+  },
+  "owner_controls": {
+    "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "functions": [
+      {
+        "name": "setTaxWallets",
+        "authority": "onlyOwner",
+        "effect": "Updates bankWallet, rewardWallet, autoLPWallet and marks them tax-exempt."
+      },
+      {
+        "name": "setTaxExempt",
+        "authority": "onlyOwner",
+        "effect": "Sets per-address tax exemption."
+      },
+      {
+        "name": "setMarketMakerPair",
+        "authority": "onlyOwner",
+        "effect": "Enables or disables AMM-pair tax trigger addresses."
+      }
+    ]
+  },
+  "civilization_links": {
+    "kgen_layer": {
+      "index_ref": "docs/civilization/KGEN_INDEX.json",
+      "meaning": "KGEN is the on-chain protocol layer and main token for civilization mass."
+    },
+    "contract_layer": {
+      "index_ref": "docs/civilization/CONTRACT_INDEX.json",
+      "meaning": "Token is one member of the V7.5.2 core triad."
+    },
+    "brain_11520": {
+      "index_ref": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "mechanism": "BrainExchange docs and source describe receiving Token rewardWallet 0.05% tax flow."
+    },
+    "bank_18888": {
+      "index_ref": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "mechanism": "Lingxiao bank docs/source describe possible 0.10% Token tax receiver endpoint."
+    },
+    "heart_12345": {
+      "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "mechanism": "Deploy script wires `heart.setToken(KGEN_TOKEN)`; Heart uses KGEN as its core ERC20 token."
+    },
+    "universe_16888": {
+      "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+      "mechanism": "16888 frontend refs include the same KGEN token and LP pair addresses."
+    },
+    "mars_108000": {
+      "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json",
+      "contract_ref": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+      "mechanism": "MarsSeats constructor accepts the KGEN token and receives payroll rewards via Brain."
+    }
+  },
+  "known_gaps": [
+    {
+      "id": "tax_wallet_live_addresses_not_documented",
+      "status": "OPEN",
+      "detail": "Contract exposes bankWallet, rewardWallet, and autoLPWallet, but this indexing pass found no authoritative repo document recording the live deployed values."
+    },
+    {
+      "id": "market_maker_pair_registration_not_documented",
+      "status": "OPEN",
+      "detail": "KGEN/README.md documents the LP pair address, but this indexing pass found no authoritative repo document proving whether setMarketMakerPair(lp_pair, true) has been executed on-chain."
+    },
+    {
+      "id": "onchain_bytecode_not_verified_in_this_pass",
+      "status": "OPEN",
+      "detail": "DEPLOYED status is based on authoritative repo docs and existing civilization indices. No external chain explorer or RPC verification was performed in this Phase 1 indexing task."
+    }
+  ],
+  "active_conflicts": []
+}

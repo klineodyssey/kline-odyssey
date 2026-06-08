@@ -1,0 +1,177 @@
+{
+  "id": "CIVILIZATION_STONE_INDEX",
+  "version": "V1.0",
+  "status": "CONCEPT_ONLY",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "repo search for Stone/stone/Rock/rock/石/岩/礦/Wuzhishan/Five-Finger Mountain/五指山/悟空",
+    "scope": [
+      "KGEN/contracts/",
+      "KGEN/README.md",
+      "KGEN/contracts/README.md",
+      "docs/civilization/",
+      "neural/CIVILIZATION_GRAPH.json",
+      "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"
+    ],
+    "scanned_at_utc": "2026-06-07T00:00:00Z"
+  },
+  "parent_indices": [
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json"
+  ],
+  "definition": {
+    "requested_label": "Stone",
+    "classification": "NOT_FOUND_CONTRACT / CONCEPT_ONLY",
+    "summary": "No Stone/Rock Solidity contract, deployed Stone address, or Stone civilization node was verified in the authoritative KGEN contract sources or civilization graph. Stone-related mythology is present as Wuzhishan/Five-Finger Mountain and point-stone-to-gold concepts mapped to existing species."
+  },
+  "contract_probe": {
+    "result": "NOT_FOUND",
+    "contracts_root": "KGEN/contracts/",
+    "verified_contract_files": [
+      "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+      "KGEN/contracts/KGEN_Genesis_Inscription_V7_5_2.sol",
+      "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+      "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+      "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+      "KGEN/contracts/KGEN_ZhanyaoTaxSplitter_V1_0_1.sol",
+      "KGEN/contracts/archive/KGEN_RewardVault_V1.sol"
+    ],
+    "authoritative_contract_readme": {
+      "path": "KGEN/contracts/README.md",
+      "core_triad": [
+        "Token: KGEN main token",
+        "Bank: Galactic Bank / 五指山制度中樞",
+        "Genesis: Genesis Inscription"
+      ],
+      "stone_listed": false
+    },
+    "chain_readme": {
+      "path": "KGEN/README.md",
+      "documented_addresses": [
+        "kgen_token",
+        "lp_pair_kgen_wbnb",
+        "genesis_inscription",
+        "pinklock_lp"
+      ],
+      "stone_address_listed": false
+    }
+  },
+  "concept_refs": {
+    "wuzhishan_12345": {
+      "classification": "MYTHOLOGY_LABEL / EXISTING_SPECIES",
+      "species_id": "12345",
+      "name": "五指山悟空財神殿",
+      "name_en": "Wukong Heart Temple",
+      "contract_ref": "docs/civilization/CONTRACT_INDEX.json#civilization_contracts.12345",
+      "source_refs": [
+        {
+          "path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+          "evidence": "Header declares 五指山 12345｜悟空財神殿（Heart）"
+        },
+        {
+          "path": "docs/civilization/TEMPLE_12345_INDEX.json",
+          "evidence": "Species 12345 registered as 五指山悟空財神殿 / Wukong Heart Temple"
+        },
+        {
+          "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "evidence": "Point P_12345p0_五指山_R37 names 五指山 at coord 12345; P_12345p0_小五指山_Rjson names 小五指山"
+        }
+      ],
+      "not_a_separate_stone_contract": true
+    },
+    "galactic_bank_wuzhishan": {
+      "classification": "BANK_ROLE_LABEL / EXISTING_CORE_TRIAD_CONTRACT",
+      "contract_id": "galactic_bank",
+      "contract_ref": "docs/civilization/CONTRACT_INDEX.json#core_triad_v7_5_2",
+      "source_refs": [
+        {
+          "path": "KGEN/README.md",
+          "evidence": "五指山系統（銀行）：Galactic Bank"
+        },
+        {
+          "path": "KGEN/contracts/README.md",
+          "evidence": "Bank: Galactic Bank（五指山制度中樞）"
+        },
+        {
+          "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+          "evidence": "Contract declares deposit/withdraw vault behavior; no Stone naming in contract body"
+        }
+      ],
+      "status": "SOURCE_ONLY",
+      "not_a_separate_stone_contract": true
+    },
+    "point_stone_to_gold_108000": {
+      "classification": "MAP_CONCEPT / EXISTING_SPECIES_CONTEXT",
+      "species_id": "108000",
+      "name": "點石成金",
+      "source_refs": [
+        {
+          "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "evidence": "Point P_108000p0_點石成金_R102 at coord 108000, type gate, role 高等煉金術門檻"
+        },
+        {
+          "path": "docs/civilization/TEMPLE_108000_INDEX.json",
+          "evidence": "Species 108000 is Mars Seats / Mars Villa; not named Stone"
+        }
+      ],
+      "contract_ref": "docs/civilization/CONTRACT_INDEX.json#civilization_contracts.108000",
+      "not_a_separate_stone_contract": true
+    }
+  },
+  "negative_evidence": [
+    {
+      "id": "no_contract_declaration",
+      "note": "No Solidity declaration named Stone/Rock was found in KGEN/contracts/*.sol."
+    },
+    {
+      "id": "no_core_triad_role",
+      "note": "KGEN/contracts/README.md defines the V7.5.2 core triad as Token, Bank, Genesis only."
+    },
+    {
+      "id": "no_deployed_address",
+      "note": "KGEN/README.md documents deployed addresses for KGEN token, LP pair, PinkLock, and Genesis Inscription, but not Stone."
+    },
+    {
+      "id": "no_graph_node",
+      "note": "neural/CIVILIZATION_GRAPH.json has no Stone/Rock civilization node."
+    }
+  ],
+  "version_verification": {
+    "rule": "不可只靠檔名判斷版本",
+    "checked_sources": [
+      "KGEN/contracts/README.md core triad text",
+      "KGEN/README.md contract/address list",
+      "Solidity contract declarations in KGEN/contracts/*.sol",
+      "TempleHeart header comments for 五指山 12345",
+      "civilization indices and neural graph"
+    ],
+    "conflicts": [
+      {
+        "id": "temple_heart_v3_2_3_vs_v3_2_6",
+        "note": "Existing conflict: repo source is KGEN_TempleHeart_V3_2_3.sol; UI/SOP references V3_2_6. Stone indexing does not resolve or reinterpret this conflict.",
+        "ref": "docs/civilization/CONTRACT_INDEX.json#active_conflicts"
+      }
+    ]
+  },
+  "cross_links": {
+    "kgen_index": "docs/civilization/KGEN_INDEX.json#concept_only_indices",
+    "contract_index": "docs/civilization/CONTRACT_INDEX.json#concept_only_contract_probes",
+    "species_12345": "docs/civilization/TEMPLE_12345_INDEX.json",
+    "species_108000": "docs/civilization/TEMPLE_108000_INDEX.json"
+  },
+  "governance": {
+    "do_not_invent_contract": true,
+    "do_not_edit_without_approval": [
+      "KGEN/contracts/*",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "K線西遊記/temples/12345/*"
+    ]
+  }
+}

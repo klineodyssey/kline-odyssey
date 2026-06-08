@@ -1,0 +1,484 @@
+{
+  "id": "CIVILIZATION_TEMPLE_12345_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507,
+    "temple_12345_tracked": 190
+  },
+  "species": {
+    "id": "12345",
+    "name": "五指山悟空財神殿",
+    "name_en": "Wukong Heart Temple",
+    "life_id": "KGEN-12345-HEART-UI",
+    "biology_type": "Heart Civilization",
+    "role": "Universe Core / Heart Runtime",
+    "status": "PRIMARY_MVP",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "TempleRuntime",
+      "class": "WukongSystem",
+      "order": "HeartEngine",
+      "family": "MorphDNA",
+      "genus": "RuntimeMain",
+      "species": "12345",
+      "source": "K線西遊記/temples/12345/RUNTIME_GENOME.json"
+    },
+    "physics": {
+      "k_index": 12345,
+      "coupling_c_approx": 0.936,
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    },
+    "depends_on": [
+      "11520",
+      "18888"
+    ],
+    "feeds": [
+      "16888",
+      "20888"
+    ]
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/TEMPLE_12345_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/TEMPLE_INDEX.json",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/ORGAN_MAP.json",
+      "docs/civilization/FRONTEND_INDEX.json",
+      "docs/civilization/CONTRACT_INDEX.json"
+    ],
+    "neural_layer": [
+      "neural/NEURAL_MAP.json",
+      "neural/ORGAN_INDEX.json",
+      "neural/RUNTIME_DEPENDENCY.json",
+      "neural/CIVILIZATION_GRAPH.json",
+      "neural/DNA_RELATIONS.json",
+      "neural/MISSING_NEURAL_LINK_REPORT.md"
+    ]
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/TEMPLE_12345_INDEX.json",
+      "role": "12345 dedicated civilization index"
+    },
+    {
+      "step": 3,
+      "path": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+      "role": "Life manifest / required file rollcall"
+    },
+    {
+      "step": 4,
+      "path": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+      "role": "Runtime genome / rollcall groups"
+    },
+    {
+      "step": 5,
+      "path": "K線西遊記/temples/12345/VERSION",
+      "role": "Version DNA"
+    },
+    {
+      "step": 6,
+      "path": "K線西遊記/temples/12345/MANIFEST.json",
+      "role": "File manifest with SHA256"
+    },
+    {
+      "step": 7,
+      "path": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
+      "role": "Current AI SOP"
+    },
+    {
+      "step": 8,
+      "path": "K線西遊記/temples/12345/index.html",
+      "role": "Primary runtime — read rollcall only; do not edit without authorization"
+    }
+  ],
+  "paths": {
+    "root": "K線西遊記/temples/12345/",
+    "entry": "K線西遊記/temples/12345/index.html",
+    "bridge_root": "12345.html",
+    "bridge_root_ref": "docs/civilization/FRONTEND_INDEX.json#bridge_12345_html_registry",
+    "bridge_wallet": "K線西遊記/temples/12345/wallet-12345.html",
+    "modules": "K線西遊記/temples/12345/modules/",
+    "assets": "K線西遊記/temples/12345/assets/",
+    "docs": "K線西遊記/temples/12345/docs/",
+    "sop": "K線西遊記/temples/12345/SOP/",
+    "archive": "K線西遊記/temples/12345/archive/",
+    "embryo": "K線西遊記/temples/12345/embryo/",
+    "music": "K線西遊記/temples/12345/music/",
+    "scenes": "K線西遊記/temples/12345/scenes/"
+  },
+  "directory_structure": {
+    "description": "Tracked sub-zones under K線西遊記/temples/12345/ (git ls-files)",
+    "zones": [
+      {
+        "id": "root_governance",
+        "path": "K線西遊記/temples/12345/",
+        "tracked_count": 32,
+        "role": "DNA, VERSION, registries, governance markdown at temple root"
+      },
+      {
+        "id": "modules",
+        "path": "K線西遊記/temples/12345/modules/",
+        "tracked_count": 87,
+        "breakdown": {
+          "js_root": 54,
+          "css_root": 8,
+          "json_root": 5,
+          "archive": 19
+        },
+        "role": "Runtime organs — dual-track runtime-* + kgen-12345-*"
+      },
+      {
+        "id": "docs",
+        "path": "K線西遊記/temples/12345/docs/",
+        "tracked_count": 23,
+        "role": "Temple architecture / morph DNA / execution maps"
+      },
+      {
+        "id": "sop",
+        "path": "K線西遊記/temples/12345/SOP/",
+        "tracked_count": 12,
+        "current": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
+        "role": "AI SOP history + current rules"
+      },
+      {
+        "id": "assets",
+        "path": "K線西遊記/temples/12345/assets/",
+        "tracked_count": 10,
+        "role": "Official visual cells"
+      },
+      {
+        "id": "archive",
+        "path": "K線西遊記/temples/12345/archive/",
+        "tracked_count": 15,
+        "role": "Dead cells / legacy index versions"
+      },
+      {
+        "id": "embryo",
+        "path": "K線西遊記/temples/12345/embryo/",
+        "tracked_count": 2,
+        "role": "Regeneration embryo index"
+      },
+      {
+        "id": "music",
+        "path": "K線西遊記/temples/12345/music/",
+        "tracked_count": 4,
+        "role": "Audio cells"
+      },
+      {
+        "id": "scenes",
+        "path": "K線西遊記/temples/12345/scenes/",
+        "tracked_count": 3,
+        "role": "Scene assets"
+      },
+      {
+        "id": "runtime_entry",
+        "path": "K線西遊記/temples/12345/index.html",
+        "tracked_count": 1,
+        "role": "Primary hypermembrane lifeform"
+      },
+      {
+        "id": "wallet_bridge",
+        "path": "K線西遊記/temples/12345/wallet-12345.html",
+        "tracked_count": 1,
+        "role": "Wallet bridge inside temple"
+      },
+      {
+        "id": "verify",
+        "path": "K線西遊記/temples/12345/verify_manifest.js",
+        "tracked_count": 1,
+        "role": "Manifest verification script"
+      }
+    ],
+    "file_types": {
+      "js": 71,
+      "md": 63,
+      "json": 16,
+      "css": 12,
+      "png": 7,
+      "txt": 6,
+      "html": 4,
+      "mp3": 3
+    }
+  },
+  "repo_context": {
+    "description": "12345 within full repo zones (507 tracked files)",
+    "zones": [
+      {
+        "id": "kline_universe",
+        "path_prefix": "K線西遊記/",
+        "approx_tracked": 312,
+        "note": "Includes temples; 12345 is 190 of this"
+      },
+      {
+        "id": "neural",
+        "path_prefix": "neural/",
+        "tracked": 7
+      },
+      {
+        "id": "docs_constitution",
+        "path_prefixes": [
+          "docs/physics/",
+          "docs/biology/",
+          "docs/neural/",
+          "docs/maps/",
+          "docs/civilization/"
+        ]
+      },
+      {
+        "id": "kgen_chain",
+        "path_prefix": "KGEN/",
+        "tracked": 41
+      },
+      {
+        "id": "whitepaper",
+        "path_prefix": "whitepaper/",
+        "tracked": 37
+      },
+      {
+        "id": "wukong_temple",
+        "path_prefix": "wukong-temple/",
+        "tracked": 28,
+        "note": "Separate standalone site, not temple 12345 folder"
+      }
+    ]
+  },
+  "dna": {
+    "life_manifest": {
+      "path": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+      "version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+      "state": "ALIVE"
+    },
+    "runtime_genome": {
+      "path": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+      "version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+      "runtime_version": "V10.49.1",
+      "life_state": "ALIVE"
+    },
+    "manifest": {
+      "path": "K線西遊記/temples/12345/MANIFEST.json",
+      "version": "12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX",
+      "health_missing": 0
+    },
+    "version_file": {
+      "path": "K線西遊記/temples/12345/VERSION",
+      "value": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL"
+    },
+    "sha256sums": "K線西遊記/temples/12345/SHA256SUMS.txt",
+    "governance_docs": [
+      "K線西遊記/temples/12345/LIFE_STANDARD.md",
+      "K線西遊記/temples/12345/ORGAN_REGISTRY.md",
+      "K線西遊記/temples/12345/CELL_REGISTRY.md",
+      "K線西遊記/temples/12345/MISSING_LIFE_REPORT.md"
+    ]
+  },
+  "version_layers": {
+    "note": "Multiple version strings coexist — do not assume single version",
+    "layers": [
+      {
+        "layer": "VERSION_file",
+        "value": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL"
+      },
+      {
+        "layer": "LIFE_MANIFEST",
+        "value": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL"
+      },
+      {
+        "layer": "RUNTIME_GENOME_declared",
+        "value": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL"
+      },
+      {
+        "layer": "RUNTIME_GENOME_runtime",
+        "value": "V10.49.1"
+      },
+      {
+        "layer": "MANIFEST",
+        "value": "12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX"
+      },
+      {
+        "layer": "index_title_ui",
+        "value": "V10.47.1"
+      },
+      {
+        "layer": "civilization_brain_sync",
+        "value": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC"
+      },
+      {
+        "layer": "frontend_ritual_fix",
+        "value": "V10.49.2_FRONTEND_RITUAL_FIX"
+      },
+      {
+        "layer": "SOP_CURRENT_internal",
+        "value": "V10.40.5_MIRROR_CENTER_BULLBEAR_RESTORE",
+        "note": "SOP file header version; drift from genome"
+      }
+    ],
+    "drift_status": "ACTIVE_CONFLICT"
+  },
+  "runtime": {
+    "architecture": "MODULAR_DUAL_TRACK",
+    "dual_track": {
+      "status": "TRANSITION",
+      "official_prefix": "runtime-",
+      "legacy_prefix": "kgen-12345-",
+      "organ_map_ref": "docs/civilization/ORGAN_MAP.json#species_12345"
+    },
+    "index_load_order": {
+      "source": "neural/RUNTIME_DEPENDENCY.json#temple_12345",
+      "css": [
+        "modules/kgen-12345-core.css",
+        "modules/kgen-12345-divine-regeneration.css",
+        "modules/runtime-main.css"
+      ],
+      "scripts": [
+        "modules/kgen-12345-runtime.js",
+        "modules/kgen-12345-mother-runtime.js",
+        "modules/kgen-12345-divine-regeneration.js",
+        "modules/runtime-main.js",
+        "modules/runtime-bootstrap.js"
+      ],
+      "inline": [
+        "inline:kgen-civilization-brain-rollcall-v10-49-1",
+        "inline:kgen-v10-49-2-ritual-js"
+      ]
+    },
+    "rollcall_required_groups": {
+      "source": "K線西遊記/temples/12345/RUNTIME_GENOME.json#index_rollcall_required_groups",
+      "REQUIRED_BOOT_ORGANS": [
+        "modules/runtime-bootstrap.js"
+      ],
+      "REQUIRED_RUNTIME_ORGANS": [
+        "modules/runtime-main.js",
+        "modules/runtime-main.css",
+        "modules/runtime-core.css",
+        "modules/runtime-mother.js",
+        "modules/runtime-regeneration.js",
+        "modules/runtime-regeneration.css",
+        "modules/runtime-cell-registry.json",
+        "modules/runtime-growth-policy.json"
+      ],
+      "LEGACY_ORGANS_PRESERVED": [
+        "modules/kgen-12345-core.css",
+        "modules/kgen-12345-runtime.js",
+        "modules/kgen-12345-mother-runtime.js",
+        "modules/kgen-12345-divine-regeneration.js",
+        "modules/kgen-12345-divine-regeneration.css",
+        "modules/kgen-12345-cell-registry.json",
+        "modules/kgen-12345-growth-policy.json"
+      ],
+      "REQUIRED_CELLS": [
+        "assets/bull-front.png",
+        "assets/bear-rear.png",
+        "assets/heart.png",
+        "assets/warp-core.png"
+      ],
+      "REQUIRED_STRUCTURES": [
+        "modules/",
+        "assets/",
+        "docs/",
+        "SOP/",
+        "archive/",
+        "embryo/"
+      ]
+    },
+    "missing_generic_organs": [
+      "runtime-heart.js",
+      "runtime-brain.js",
+      "runtime-boundary.js",
+      "runtime-autopilot.js",
+      "runtime-sphere.js",
+      "runtime-hud.js"
+    ],
+    "do_not_remove": [
+      "modules/kgen-12345-runtime.js"
+    ]
+  },
+  "contract": {
+    "species_contract_ref": "docs/civilization/CONTRACT_INDEX.json#12345",
+    "heart_index_ref": "docs/civilization/HEART_INDEX.json",
+    "repo_source": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+    "ui_display": "KGEN_TempleHeart_V3_2_6.sol",
+    "pairs_with": "11520",
+    "note": "Contract source locked; UI/SOP version drift documented in HEART_INDEX and CONTRACT_INDEX"
+  },
+  "docs_catalog": {
+    "architecture": [
+      "K線西遊記/temples/12345/docs/TEMPLE_ARCHITECTURE_MASTER.md",
+      "K線西遊記/temples/12345/docs/EXECUTION_MAP.md",
+      "K線西遊記/temples/12345/docs/PANEL_CONTROL_MAP.md"
+    ],
+    "morph_dna": [
+      "K線西遊記/temples/12345/docs/KGEN_12345_V10_46_2_MORPH_DNA_ORGAN_TRANSPLANT.md",
+      "K線西遊記/temples/12345/docs/KGEN_12345_V10_46_0_MORPH_DNA_RUNTIME_GENESIS.md"
+    ],
+    "runtime_constitution": [
+      "K線西遊記/temples/12345/docs/KGEN_12345_V10_43_FINAL_RUNTIME_ARCHITECTURE_CONSTITUTION.md",
+      "K線西遊記/temples/12345/docs/KGEN_12345_V10_42_8_NERVE_CONVERGENCE.md"
+    ],
+    "tracked_count": 23
+  },
+  "sop": {
+    "current": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
+    "tracked_count": 12,
+    "key_rules": [
+      "Formal entry is index.html, not 12345.html bridge",
+      "Official assets: bull-front, bear-rear, heart, warp-core only",
+      "Do not remove V9 recorder core or MOVE joystick"
+    ]
+  },
+  "active_conflicts": {
+    "report": "neural/MISSING_NEURAL_LINK_REPORT.md",
+    "items": [
+      "physics_v1_2_vs_v1_6_boot_cite",
+      "temple_local_physics_copy",
+      "dual_track_runtime_kgen",
+      "six_missing_neural_organ_filenames",
+      "version_drift_v10_40_to_v10_49",
+      "index_rollcall_stale",
+      "cancerous_module_names",
+      "inline_v10_49_2_ritual_patch"
+    ],
+    "local_duplicate_to_archive": [
+      "K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md"
+    ]
+  },
+  "governance_lock": {
+    "do_not_edit": [
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*",
+      "KGEN/contracts/*",
+      "scripts/*",
+      "docs/physics/*",
+      "deployed_contract_related_files"
+    ],
+    "allowed_index_zone": "docs/civilization/*",
+    "allowed_neural_zone": "neural/*",
+    "forbidden_new_patterns": [
+      "patch",
+      "hotfix",
+      "fix",
+      "stable",
+      "v10-",
+      "v104"
+    ]
+  },
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "universe_map": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "civilization_brain": "docs/neural/CIVILIZATION_BRAIN_ROLLCALL.json"
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "id": "CIVILIZATION_TREASURY_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "repo search + contract source verification",
+    "scope": [
+      "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+      "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+      "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+      "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "KGEN/README.md",
+      "KGEN/contracts/README.md",
+      "KGEN/timeline/500Y_Epoch.md",
+      "KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md",
+      "docs/civilization/",
+      "neural/CIVILIZATION_GRAPH.json",
+      "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md"
+    ],
+    "scanned_at_utc": "2026-06-07T00:00:00Z"
+  },
+  "parent_indices": [
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/SPECIES_TREE.json"
+  ],
+  "definition": {
+    "requested_label": "Treasury",
+    "classification": "MULTI_LAYER_CONCEPT_WITH_CONTRACTS",
+    "summary": "Treasury is not one single authoritative artifact in this repo. It appears as 8888 Gaolaozhuang minimal treasury contract, 18888 Lingxiao Divine Treasury/Deity Bank, and the V7.5.2 Galactic Bank institutional bank role. These are kept distinct below."
+  },
+  "treasury_layers": {
+    "8888_gaolaozhuang_treasury": {
+      "species_id": "8888",
+      "name": "高老莊",
+      "name_en": "Gaolaozhuang Treasury",
+      "status": "CONTRACT_ONLY",
+      "graph_status": "ABSENT_FROM_CIVILIZATION_GRAPH",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+        "contract_name": "KGEN_8888_Treasury_V1_0_0",
+        "version": "V1_0_0",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY"
+      },
+      "source_verified_role": {
+        "header": "高老莊 8888｜凡間流通池 / 商店紅利池（最小可用金庫）",
+        "purpose": [
+          "Safely receive KGEN as mortal/shop bonus pool",
+          "Owner can withdraw to treasuryWallet",
+          "No dividend or automation logic"
+        ],
+        "state": [
+          "immutable kgen",
+          "treasuryWallet defaulting to owner when constructor wallet is zero",
+          "configLocked"
+        ],
+        "user_ops": [
+          "deposit(uint256)",
+          "balance()"
+        ],
+        "owner_ops": [
+          "setTreasuryWallet(address)",
+          "lockConfig()",
+          "withdraw(uint256)",
+          "withdrawAll()"
+        ]
+      },
+      "runtime_links": {
+        "receives_from": [
+          {
+            "species": "16888",
+            "contract": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+            "mechanism": "PoolDuel fee routing",
+            "details": "FEE_BPS_TOTAL = 500; FEE_BPS_TREASURY = 100; placeOrder transfers feeToTreasury to treasury8888 after requiring treasury8888 != address(0)."
+          }
+        ],
+        "frontend_entry": null,
+        "temple_folder": null
+      }
+    },
+    "18888_lingxiao_divine_treasury": {
+      "species_id": "18888",
+      "name": "靈霄寶殿神明銀行",
+      "name_en": "Lingxiao Deity Bank",
+      "status": "GRAPH_ONLY_WITH_SOURCE_CONTRACT",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+        "contract_name": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "version": "V1_0_1",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY"
+      },
+      "source_verified_role": {
+        "header": "18888｜靈霄寶殿・玉帝神明銀行（Deity Bank）",
+        "concept_refs": [
+          "neural/CIVILIZATION_GRAPH.json role: Divine Treasury / Civilization Mass",
+          "docs/civilization/CIVILIZATION_18888_INDEX.json biology_type: Divine Treasury Civilization"
+        ],
+        "core_rules": [
+          "VaultCap 50,000,000 KGEN",
+          "Deity threshold >= 100,000 KGEN",
+          "Pull claim dividend",
+          "Monthly UTC day 5 payday window via external finalizeMonthWithAmount",
+          "Early withdrawal penalty split to brain11520 / heart12345 / publicGood when configured",
+          "Can receive KGEN Token 0.1% tax flow"
+        ]
+      },
+      "runtime_links": {
+        "feeds_species": [
+          "12345",
+          "108000",
+          "8895"
+        ],
+        "heart_field": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol declares lingxiaoBank address placeholder",
+        "dedicated_frontend": null
+      }
+    },
+    "galactic_bank_institutional_treasury": {
+      "id": "galactic_bank",
+      "name": "Galactic Bank",
+      "name_zh": "五指山制度中樞",
+      "status": "SOURCE_ONLY",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+        "contract_name": "KGEN_GalacticBank_V7_5_2",
+        "version": "V7_5_2",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY"
+      },
+      "source_verified_role": {
+        "contract_behavior": [
+          "Receives native token via receive() and emits DepositNative",
+          "depositToken(address,uint256) transfers ERC20 into the bank and emits DepositToken",
+          "onlyOwner withdrawToken(address,address,uint256)",
+          "onlyOwner withdrawNative(address,uint256)"
+        ],
+        "docs_role": [
+          "KGEN/README.md names 五指山系統（銀行）：Galactic Bank",
+          "KGEN/contracts/README.md defines Bank as Galactic Bank（五指山制度中樞）",
+          "KGEN whitepaper says Galactic Bank is a制度銀行, not a lockbox, for reflux, construction, distribution, and governance",
+          "KGEN/timeline/500Y_Epoch.md says 500Y Epoch is not a time/fund lock and Galactic Bank supports reflux, construction, reward, distribution, and transparent on-chain records"
+        ]
+      },
+      "species_mapping_note": "Galactic Bank is a V7.5.2 core-triad contract, not species 8888 or species 18888 in the current civilization indices."
+    }
+  },
+  "version_verification": {
+    "rule": "不可只靠檔名判斷版本",
+    "checked_sources": [
+      "Solidity inline banners and contract declarations",
+      "Solidity pragma and public state/function/event declarations",
+      "KGEN/README.md on-chain address and role sections",
+      "KGEN/contracts/README.md core triad and version strategy",
+      "KGEN whitepaper/timeline Galactic Bank definitions",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/CONTRACT_INDEX.json",
+      "docs/civilization/CIVILIZATION_18888_INDEX.json",
+      "docs/civilization/TEMPLE_16888_INDEX.json",
+      "docs/civilization/PORTAL_INDEX.json",
+      "neural/CIVILIZATION_GRAPH.json"
+    ],
+    "evidence_notes": [
+      "8888 version and role are verified from the Treasury contract banner, contract declaration, state/functions, and cross-index references; not from filename alone.",
+      "16888 fee routing is verified from the Universe contract header comments, constants, treasury8888 state, SetTreasury event, constructor, setTreasury, and placeOrder transfer behavior.",
+      "18888 role is verified from Lingxiao contract comments/declaration plus graph and dedicated 18888 index, not from portal label alone.",
+      "Galactic Bank role is verified from contract behavior and KGEN README/contracts README/whitepaper/timeline docs."
+    ]
+  },
+  "deployed_address_status": {
+    "source_of_truth_for_repo_pass": "KGEN/README.md documented chain section",
+    "documented_addresses": {
+      "kgen_token": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "lp_pair_kgen_wbnb": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "genesis_inscription": "0x15fb2A5463F7873EC328BF6f2E85A115adcC3457"
+    },
+    "not_documented_in_kgen_readme": [
+      "KGEN_8888_Treasury_V1_0_0",
+      "KGEN_LingxiaoDeityBank_V1_0_1",
+      "KGEN_GalacticBank_V7_5_2"
+    ],
+    "portal_display_conflicts": [
+      {
+        "id": "portal_18888_addr_vs_lingxiao_source",
+        "portal_label": "Bank 18888",
+        "portal_address": "0xfc522243e988a837700CaD600D6f030f5932681F",
+        "repo_source": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+        "conflict": "Portal shows a Bank 18888 address, but KGEN/README.md does not document a Lingxiao/18888 deployment. Existing indices mark this as ambiguous and possibly Galactic Bank display."
+      },
+      {
+        "id": "portal_8888_status_soon",
+        "portal_label": "高老莊",
+        "portal_status": "soon",
+        "repo_source": "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+        "conflict": "Portal registers 8888 as soon/click-disabled while repo contains a source-only 8888 Treasury contract and 16888 fee route."
+      }
+    ]
+  },
+  "cross_links": {
+    "kgen_index": "docs/civilization/KGEN_INDEX.json#treasury_detail",
+    "contract_index": "docs/civilization/CONTRACT_INDEX.json#treasury_contract_detail",
+    "species_tree_8888": "docs/civilization/SPECIES_TREE.json#8888",
+    "species_18888": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "temple_16888": "docs/civilization/TEMPLE_16888_INDEX.json",
+    "portal_8888": "docs/civilization/PORTAL_INDEX.json#node_map"
+  },
+  "active_gaps": [
+    {
+      "id": "no_8888_temple_or_frontend",
+      "note": "8888 has no K線西遊記/temples/8888 folder or dedicated frontend entry in this repo."
+    },
+    {
+      "id": "8888_not_in_civilization_graph",
+      "note": "8888 is present in SPECIES_TREE as CONTRACT_ONLY and in whitepaper concept layers, but absent from neural/CIVILIZATION_GRAPH.json."
+    },
+    {
+      "id": "no_8888_deployed_address_in_kgen_readme",
+      "note": "No deployed address for KGEN_8888_Treasury_V1_0_0 is documented in KGEN/README.md."
+    },
+    {
+      "id": "galactic_bank_source_only_despite_core_triad_role",
+      "note": "Galactic Bank is a V7.5.2 core-triad contract in KGEN docs, but no deployed address is listed in KGEN/README.md."
+    },
+    {
+      "id": "treasury_word_overloaded",
+      "note": "Treasury can refer to 8888 minimal treasury, 18888 Divine Treasury/Deity Bank, publicGood treasury fields, Brain/Mars configurable treasury fields, or Galactic Bank institutional bank. Do not collapse these into one address or version."
+    }
+  ],
+  "governance": {
+    "do_not_edit_without_approval": [
+      "KGEN/contracts/*",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "K線西遊記/temples/12345/*"
+    ],
+    "allowed_index_zone": "docs/civilization/*"
+  }
+}

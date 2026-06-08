@@ -1,0 +1,494 @@
+{
+  "id": "CIVILIZATION_KGEN_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + KGEN/README.md parse",
+    "path_prefix": "KGEN/",
+    "tracked_file_count": 41,
+    "scanned_at_utc": "2026-06-07T00:00:00Z"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "child_indices": [
+    "docs/civilization/BANK_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/TOKEN_INDEX.json",
+    "docs/civilization/STONE_INDEX.json",
+    "docs/civilization/HEART_INDEX.json",
+    "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+    "docs/civilization/TREASURY_INDEX.json"
+  ],
+  "sibling_indices": [
+    "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+    "docs/civilization/PORTAL_INDEX.json",
+    "docs/civilization/TEMPLE_INDEX.json",
+    "docs/civilization/SPECIES_TREE.json"
+  ],
+  "definition": {
+    "full_name": "K-Line Genesis Energy Node",
+    "protocol_version": "V7.5.2",
+    "epoch": "Genesis Epoch",
+    "universe_name": "KLINE Odyssey",
+    "primary_entry": "KGEN/README.md",
+    "role": "On-chain protocol layer — token, bank, civilization contracts, deploy scripts, heartbeat runtime",
+    "core_law": "沒有質量，就沒有位置。"
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/KGEN_INDEX.json",
+    "bank_detail": "docs/civilization/BANK_INDEX.json",
+    "contracts_detail": "docs/civilization/CONTRACT_INDEX.json",
+    "token_detail": "docs/civilization/TOKEN_INDEX.json",
+    "stone_probe": "docs/civilization/STONE_INDEX.json",
+    "heart_detail": "docs/civilization/HEART_INDEX.json",
+    "brain_detail": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+    "treasury_detail": "docs/civilization/TREASURY_INDEX.json",
+    "chain_readme": "KGEN/README.md"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/KGEN_INDEX.json",
+      "role": "KGEN chain layer overview"
+    },
+    {
+      "step": 2,
+      "path": "KGEN/README.md",
+      "role": "On-chain addresses, heartbeat, reward tiers"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/BANK_INDEX.json",
+      "role": "Bank contract identities and 18888 address conflict"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/CONTRACT_INDEX.json",
+      "role": "Per-contract species mapping"
+    },
+    {
+      "step": 5,
+      "path": "docs/civilization/TOKEN_INDEX.json",
+      "role": "KGEN Token verified version, role, tax routing"
+    },
+    {
+      "step": 6,
+      "path": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "role": "BrainExchange 11520 verified evidence, deployment-status split, Heart/Mars wiring"
+    },
+    {
+      "step": 7,
+      "path": "docs/civilization/HEART_INDEX.json",
+      "role": "TempleHeart 12345 verified evidence, Brain wiring, version conflict"
+    },
+    {
+      "step": 8,
+      "path": "docs/civilization/TREASURY_INDEX.json",
+      "role": "Treasury layers: 8888, 18888, Galactic Bank"
+    },
+    {
+      "step": 9,
+      "path": "KGEN/contracts/README.md",
+      "role": "V7.5.2 core triad positioning"
+    },
+    {
+      "step": 10,
+      "path": "KGEN/runtime/README.md",
+      "role": "Runtime alive-ness principles"
+    }
+  ],
+  "chain": {
+    "network": "BNB Smart Chain (BSC)",
+    "documented_in": "KGEN/README.md",
+    "deployed_addresses": {
+      "kgen_token": {
+        "address": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+        "contract_ref": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "source": "KGEN/README.md"
+      },
+      "lp_pair_kgen_wbnb": {
+        "address": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+        "source": "KGEN/README.md"
+      },
+      "genesis_inscription": {
+        "address": "0x15fb2A5463F7873EC328BF6f2E85A115adcC3457",
+        "contract_ref": "KGEN/contracts/KGEN_Genesis_Inscription_V7_5_2.sol",
+        "version": "V7.5-GENESIS-01",
+        "big_bang_utc8": "2026-01-01 00:00:00",
+        "source": "KGEN/README.md"
+      },
+      "pinklock_lp": {
+        "url": "https://www.pinksale.finance/pinklock/bsc/record/1427003",
+        "source": "KGEN/README.md"
+      }
+    },
+    "portal_displayed_deployed": {
+      "note": "Addresses shown in K線西遊記/index.html KPI / node map — may not all be in KGEN/README.md",
+      "source": "docs/civilization/PORTAL_INDEX.json",
+      "items": [
+        {
+          "label": "Heart 12345",
+          "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+          "contract_ref": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+          "civilization_id": "12345"
+        },
+        {
+          "label": "Brain 11520",
+          "address": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+          "contract_ref": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+          "civilization_id": "11520",
+          "detail_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+          "status_note": "Displayed by Portal/temple UI as deployed; KGEN/README.md has no Brain deployment entry found in this pass."
+        },
+        {
+          "label": "Mars Seats 108000",
+          "address": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+          "contract_ref": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+          "civilization_id": "108000",
+          "source_conflict_note": "Portal/108000 frontend display this deployed address; KGEN/README.md chain section does not document MarsSeats deployment."
+        },
+        {
+          "label": "Bank 18888 (portal label)",
+          "address": "0xfc522243e988a837700CaD600D6f030f5932681F",
+          "contract_ref_ambiguous": "May be Galactic Bank display; repo Lingxiao source is KGEN_LingxiaoDeityBank_V1_0_1.sol",
+          "civilization_id": "18888",
+          "conflict_ref": "docs/civilization/CIVILIZATION_18888_INDEX.json"
+        }
+      ]
+    }
+  },
+  "core_triad_v7_5_2": {
+    "note": "Primary on-chain protocol per KGEN/contracts/README.md",
+    "contracts": [
+      {
+        "id": "kgen_token",
+        "path": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "role": "Main token — supply, transfer, tax routing",
+        "status": "DEPLOYED",
+        "detail_index": "docs/civilization/TOKEN_INDEX.json",
+        "evidence_note": "Version/status verified from contract banner/declaration, KGEN docs, and existing indices; not inferred from filename alone."
+      },
+      {
+        "id": "galactic_bank",
+        "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+        "role": "Galactic Bank — treasury hub, 五指山制度中樞",
+        "status": "SOURCE_ONLY",
+        "bank_index_ref": "docs/civilization/BANK_INDEX.json#galactic_bank",
+        "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#galactic_bank_institutional_treasury",
+        "evidence_note": "Treasury role verified from contract behavior and KGEN README/contracts README/whitepaper/timeline docs; not inferred from filename alone."
+      },
+      {
+        "id": "genesis_inscription",
+        "path": "KGEN/contracts/KGEN_Genesis_Inscription_V7_5_2.sol",
+        "role": "Genesis rights / inscription carrier",
+        "status": "DEPLOYED"
+      }
+    ]
+  },
+  "concept_only_indices": [
+    {
+      "id": "stone",
+      "requested_label": "Stone",
+      "status": "NOT_FOUND_CONTRACT",
+      "index_ref": "docs/civilization/STONE_INDEX.json",
+      "note": "No verified Stone/Rock contract or deployed address. 五指山 / Wuzhishan references map to existing Galactic Bank and 12345 concepts; 點石成金 appears as a 108000 map concept."
+    }
+  ],
+  "treasury_detail": {
+    "index_ref": "docs/civilization/TREASURY_INDEX.json",
+    "classification": "MULTI_LAYER_CONCEPT_WITH_CONTRACTS",
+    "layers": [
+      {
+        "id": "8888",
+        "label": "Gaolaozhuang Treasury",
+        "contract": "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+        "status": "CONTRACT_ONLY / SOURCE_ONLY",
+        "role": "Minimal KGEN receive/owner-withdraw treasury; receives 16888 PoolDuel treasury fee when configured."
+      },
+      {
+        "id": "18888",
+        "label": "Lingxiao Deity Bank / Divine Treasury",
+        "contract": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+        "status": "GRAPH_ONLY_WITH_SOURCE_CONTRACT",
+        "role": "Deity bank, vault cap, pull-claim dividends, monthly keeper settlement."
+      },
+      {
+        "id": "galactic_bank",
+        "label": "Galactic Bank",
+        "contract": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+        "status": "SOURCE_ONLY",
+        "role": "V7.5.2 institutional bank / 五指山制度中樞."
+      }
+    ],
+    "caution": "Do not collapse Treasury into one address or infer version/status from filenames; see TREASURY_INDEX for verified evidence and conflicts."
+  },
+  "zones": {
+    "contracts": {
+      "path": "KGEN/contracts/",
+      "tracked_file_count": 12,
+      "readme": "KGEN/contracts/README.md",
+      "detail_index": "docs/civilization/CONTRACT_INDEX.json",
+      "active_sol_count": 10,
+      "archive_sol_count": 1
+    },
+    "scripts": {
+      "path": "KGEN/scripts/",
+      "tracked_file_count": 11,
+      "deploy_all": "KGEN/scripts/deploy_all.js",
+      "runtime_subdir": "KGEN/scripts/runtime/",
+      "archive_subdir": "KGEN/scripts/archive/",
+      "governance": "scripts/* — do not edit without explicit authorization"
+    },
+    "runtime": {
+      "path": "KGEN/runtime/",
+      "tracked_file_count": 4,
+      "readme": "KGEN/runtime/README.md",
+      "status": {
+        "runtime_layer": "Genesis Active",
+        "emission_layer": "Disabled",
+        "reward_layer": "Not yet enabled",
+        "governance_layer": "Reserved"
+      },
+      "active_runtime": [
+        {
+          "id": "ignite_daily",
+          "label": "Daily Breath",
+          "doc": "KGEN/runtime/ignite_daily.md",
+          "script": "KGEN/scripts/runtime/ignite_daily.js"
+        },
+        {
+          "id": "ignite_hourly",
+          "label": "Hourly Heartbeat",
+          "doc": "KGEN/runtime/ignite_hourly.md",
+          "script": "KGEN/scripts/runtime/ignite_hourly.js",
+          "note": "Reserved per KGEN/runtime/README.md — not activated"
+        }
+      ],
+      "runtime_sol": "KGEN/runtime/KGEN_RewardVault_V1.sol"
+    },
+    "whitepaper": {
+      "path": "KGEN/whitepaper/",
+      "tracked_file_count": 9,
+      "index": "KGEN/whitepaper/index.md",
+      "key_docs": [
+        {
+          "path": "KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md",
+          "role": "Galactic Bank 500Y epoch whitepaper"
+        },
+        {
+          "path": "KGEN/whitepaper/GENESIS_INSCRIPTION_V7.5_GENESIS_01.md",
+          "role": "Genesis inscription full text"
+        },
+        {
+          "path": "KGEN/whitepaper/KGEN_LifeStructure_Breath_Heartbeat_Genesis.md",
+          "role": "Breath / heartbeat life structure"
+        },
+        {
+          "path": "KGEN/whitepaper/KGEN_Monthly_Payroll_V1.md",
+          "role": "Monthly payroll rules"
+        },
+        {
+          "path": "KGEN/whitepaper/SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md",
+          "role": "CTI / CHR / CBP cosmic vitals SOP"
+        },
+        {
+          "path": "KGEN/whitepaper/math/KGEN_SignedUniverse_MathLaw_V7.5-GENESIS-01.md",
+          "role": "Signed universe math law"
+        }
+      ],
+      "sibling_zone": {
+        "path": "whitepaper/KGEN/",
+        "note": "Separate tracked zone — civilization exchange whitepaper V1.2 (GitHub Pages)",
+        "entry": "whitepaper/KGEN/README.md"
+      }
+    },
+    "timeline": {
+      "path": "KGEN/timeline/",
+      "tracked_file_count": 1,
+      "entry": "KGEN/timeline/500Y_Epoch.md",
+      "definition": "500 年是文明週期（Epoch），非鎖倉"
+    },
+    "media": {
+      "path": "KGEN/media/",
+      "tracked_file_count": 2,
+      "files": [
+        "KGEN/media/voice/KGEN_Episode01_Breath_VO_EN.txt",
+        "KGEN/media/subtitles/KGEN_Episode01_Breath_EN.srt"
+      ]
+    },
+    "archive": {
+      "path": "KGEN/archive/",
+      "tracked_file_count": 1,
+      "files": [
+        "KGEN/archive/KGEN_DailyIgnite_V1.sol"
+      ],
+      "contracts_archive": "KGEN/contracts/archive/KGEN_RewardVault_V1.sol"
+    }
+  },
+  "heartbeat": {
+    "principle": "On-chain calls only — blockchain has no auto timer",
+    "hourly": {
+      "function": "igniteHourly()",
+      "script": "KGEN/scripts/runtime/ignite_hourly.js"
+    },
+    "daily": {
+      "function": "igniteDaily()",
+      "schedule_utc8": "00:00",
+      "script": "KGEN/scripts/runtime/ignite_daily.js"
+    },
+    "tick_script": "KGEN/scripts/runtime/heartbeat_tick.js",
+    "deploy_scripts": [
+      "KGEN/scripts/runtime/deploy_Heartbeat_V1.js",
+      "KGEN/scripts/runtime/deploy_DailyIgnite_V1.js",
+      "KGEN/scripts/runtime/deploy_reward_vault_v1.js"
+    ]
+  },
+  "reward_eligibility": {
+    "source": "KGEN/README.md",
+    "principle": "Holding KGEN grants eligibility, not guaranteed payout",
+    "tiers": [
+      {
+        "id": "guardian",
+        "min_kgen": 500,
+        "eligible_for": "Daily Breath caller micro-reward (ignite_daily)"
+      },
+      {
+        "id": "seat",
+        "min_kgen": 5000,
+        "eligible_for": "Periodic Rent Share (Galactic Bank / RewardPool)"
+      }
+    ],
+    "monthly_settlement": {
+      "date_utc8": "5th of each month",
+      "note": "Accounting cutoff, not guaranteed payout date"
+    }
+  },
+  "deploy_pipeline": {
+    "primary_script": "KGEN/scripts/deploy_all.js",
+    "deploy_order": [
+      "KGEN_BrainExchange_V3_2_0",
+      "KGEN_TempleHeart_V3_2_3"
+    ],
+    "init_wiring": [
+      "brain.setTempleHeart(heart)",
+      "heart.setToken(KGEN_TOKEN)",
+      "heart.setBrainVault(brain)"
+    ],
+    "env_required": [
+      "KGEN_TOKEN",
+      "TREASURY",
+      "NEW_OWNER"
+    ],
+    "env_optional": [
+      "NEXT_PAYROLL_AT",
+      "CONFIRMATIONS"
+    ],
+    "detail_ref": "docs/civilization/CONTRACT_INDEX.json#dependency_graph"
+  },
+  "civilization_contract_map": {
+    "note": "Full per-species detail in CONTRACT_INDEX",
+    "12345": {
+      "contract": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+      "heart_index_ref": "docs/civilization/HEART_INDEX.json"
+    },
+    "11520": {
+      "contract": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "index_ref": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+      "detail_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "status_note": "Source contract verified from contents and deploy wiring; deployed address is portal/temple-displayed but not found in KGEN/README.md."
+    },
+    "16888": {
+      "contract": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+      "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json"
+    },
+    "18888": {
+      "contract": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "index_ref": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+      "bank_index_ref": "docs/civilization/BANK_INDEX.json#lingxiao_deity_bank"
+    },
+    "8888": {
+      "contract": "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+      "index_ref": "docs/civilization/TREASURY_INDEX.json"
+    },
+    "108000": {
+      "contract": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+      "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json",
+      "contract_detail_ref": "docs/civilization/CONTRACT_INDEX.json#108000",
+      "status_note": "MarsSeats repo source verified from Solidity declaration/content; deployed address appears in Portal/frontend, not KGEN/README.md."
+    },
+    "18921": {
+      "contract": "KGEN/contracts/KGEN_ZhanyaoTaxSplitter_V1_0_1.sol",
+      "portal_status": "soon"
+    },
+    "graph_only_no_sol": [
+      "8895",
+      "20888"
+    ]
+  },
+  "constitution_refs": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "runtime_boot": "docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md",
+    "biology": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+    "neural": "docs/neural/KGEN_Universe_Neural_System_V1_0.md",
+    "whitepaper_constitution": "whitepaper/KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md"
+  },
+  "official_external": [
+    {
+      "id": "github_pages",
+      "url": "https://klineodyssey.github.io/kline-odyssey/"
+    },
+    {
+      "id": "github_repo",
+      "url": "https://github.com/klineodyssey/kline-odyssey"
+    },
+    {
+      "id": "line_official",
+      "url": "https://lin.ee/b8X18F7"
+    },
+    {
+      "id": "telegram",
+      "url": "https://t.me/klineodyssey"
+    }
+  ],
+  "active_conflicts": [
+    {
+      "id": "temple_heart_v3_2_3_vs_v3_2_6",
+      "repo_file": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "ui_sop_reference": "KGEN_TempleHeart_V3_2_6.sol",
+      "detail_ref": "docs/civilization/HEART_INDEX.json#active_conflicts"
+    },
+    {
+      "id": "portal_18888_addr_vs_lingxiao_source",
+      "note": "Portal shows 0xfc52... as Bank; LingxiaoDeityBank has no deployed addr in KGEN/README",
+      "detail_ref": "docs/civilization/BANK_INDEX.json#portal_18888_bank_addr_vs_source_only_status"
+    },
+    {
+      "id": "marsseats_source_status_vs_portal_deployed",
+      "note": "Portal and 108000 frontend show MarsSeats deployed address 0x3529dbFbaD465C2269F8096879A1c298d5257298; KGEN/README.md does not list it.",
+      "detail_ref": "docs/civilization/CONTRACT_INDEX.json#active_conflicts"
+    },
+    {
+      "id": "marsseats_frontend_abi_vs_repo_source",
+      "note": "108000 frontend ABI labels differ from KGEN_MarsSeats_V2_2_1.sol source; confirm deployed ABI before runtime edits.",
+      "detail_ref": "docs/civilization/TEMPLE_108000_INDEX.json#contract"
+    },
+    {
+      "id": "brain_source_only_vs_portal_deployed",
+      "note": "Portal and temple UI show Brain 11520 as deployed at 0xd0605F4EF10e5C1438F11AF9edc36926769239d6; KGEN/README.md does not list it.",
+      "detail_ref": "docs/civilization/BRAIN_CONTRACT_INDEX.json#active_conflicts"
+    }
+  ],
+  "governance": {
+    "do_not_edit_without_approval": [
+      "KGEN/contracts/*",
+      "KGEN/scripts/*"
+    ],
+    "version_policy": "New versions add new files; do not overwrite old civilization contracts",
+    "policy_source": "KGEN/contracts/README.md",
+    "sop_lock_ref": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md"
+  }
+}

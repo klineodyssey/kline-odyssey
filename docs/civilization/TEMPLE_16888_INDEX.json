@@ -1,0 +1,375 @@
+{
+  "id": "CIVILIZATION_TEMPLE_16888_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507,
+    "temple_16888_tracked": 20
+  },
+  "species": {
+    "id": "16888",
+    "name": "廣寒宮",
+    "name_en": "Guanghan Palace",
+    "life_id": null,
+    "biology_type": "UFO Civilization",
+    "role": "UFO Cockpit / Visualization Runtime",
+    "status": "ACTIVE",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "RuntimeOrganism",
+      "class": "HyperMembraneSpecies",
+      "order": "UFORuntime",
+      "family": "PrimeForgeLife",
+      "genus": "KGEN16888",
+      "species": "MoonCockpit",
+      "source": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md"
+    },
+    "physics": {
+      "k_index": 16888,
+      "coupling_c_approx": 1.2813,
+      "anchor": "Moon distance scale — 16888 = 384400 km",
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    },
+    "depends_on": [
+      "12345"
+    ],
+    "feeds": [],
+    "can_mount": [
+      "runtime-hud",
+      "runtime-sphere"
+    ],
+    "fee_routes_to": [
+      "8888"
+    ]
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/TEMPLE_16888_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/TEMPLE_INDEX.json",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/FRONTEND_INDEX.json",
+      "docs/civilization/CONTRACT_INDEX.json"
+    ],
+    "neural_layer": [
+      "neural/CIVILIZATION_GRAPH.json",
+      "neural/ORGAN_INDEX.json"
+    ],
+    "temple_readme": "K線西遊記/temples/16888/README.md"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/TEMPLE_16888_INDEX.json",
+      "role": "16888 dedicated civilization index"
+    },
+    {
+      "step": 3,
+      "path": "K線西遊記/temples/16888/README.md",
+      "role": "Temple human-readable overview"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/CONTRACT_INDEX.json#16888",
+      "role": "On-chain contract source mapping"
+    },
+    {
+      "step": 5,
+      "path": "K線西遊記/temples/16888/index.html",
+      "role": "Primary runtime — monolithic inline cockpit"
+    }
+  ],
+  "paths": {
+    "root": "K線西遊記/temples/16888/",
+    "entry": "K線西遊記/temples/16888/index.html",
+    "og_variant": "K線西遊記/temples/16888/index_16888_Guanghan_V3_1_0_OG.html",
+    "assets": "K線西遊記/temples/16888/assets/",
+    "archive": "K線西遊記/temples/16888/archive/",
+    "music": "K線西遊記/temples/16888/music/",
+    "modules": null,
+    "sop": null,
+    "embryo": null
+  },
+  "directory_structure": {
+    "description": "Tracked sub-zones under K線西遊記/temples/16888/ (git ls-files)",
+    "zones": [
+      {
+        "id": "runtime_entry",
+        "path": "K線西遊記/temples/16888/index.html",
+        "tracked_count": 1,
+        "role": "Primary monolithic UFO cockpit"
+      },
+      {
+        "id": "og_variant",
+        "path": "K線西遊記/temples/16888/index_16888_Guanghan_V3_1_0_OG.html",
+        "tracked_count": 1,
+        "role": "OG engine variant V3.1"
+      },
+      {
+        "id": "root_runtime_js",
+        "path": "K線西遊記/temples/16888/",
+        "tracked_count": 4,
+        "files": [
+          "candle_sim.js",
+          "steering.js",
+          "kline_engine_v1_0.js",
+          "sw-kill.js"
+        ],
+        "role": "Standalone engine modules — not loaded via script src in current index.html"
+      },
+      {
+        "id": "config_data",
+        "path": "K線西遊記/temples/16888/",
+        "tracked_count": 2,
+        "files": [
+          "engine_params_v1_0.json",
+          "playlist.json"
+        ],
+        "role": "Engine params + root playlist"
+      },
+      {
+        "id": "assets",
+        "path": "K線西遊記/temples/16888/assets/",
+        "tracked_count": 3,
+        "role": "Fairy sprites — fairy.png required"
+      },
+      {
+        "id": "music",
+        "path": "K線西遊記/temples/16888/music/",
+        "tracked_count": 4,
+        "role": "Built-in MP3 playlist cells"
+      },
+      {
+        "id": "archive",
+        "path": "K線西遊記/temples/16888/archive/",
+        "tracked_count": 4,
+        "role": "Legacy index, manifest, service worker"
+      },
+      {
+        "id": "readme",
+        "path": "K線西遊記/temples/16888/README.md",
+        "tracked_count": 1,
+        "role": "Temple documentation V1.4"
+      }
+    ],
+    "file_types": {
+      "js": 4,
+      "html": 2,
+      "json": 3,
+      "md": 2,
+      "png": 2,
+      "mp3": 3,
+      "archive_misc": 4
+    }
+  },
+  "dna": {
+    "life_manifest": null,
+    "runtime_genome": null,
+    "manifest": null,
+    "version_file": null,
+    "note": "No PRIMEFORGE DNA quartet — unlike 12345; governance via README + inline index headers"
+  },
+  "version_layers": {
+    "note": "README vs index header vs contract repo version may diverge",
+    "layers": [
+      {
+        "layer": "index_APP_VERSION",
+        "value": "v3.7.12",
+        "source": "K線西遊記/temples/16888/index.html"
+      },
+      {
+        "layer": "index_header_comment",
+        "value": "OG Engine V3.7.12 | Yuelao Backend Test Patch"
+      },
+      {
+        "layer": "README",
+        "value": "V1.4"
+      },
+      {
+        "layer": "assets_README",
+        "value": "V1.5"
+      },
+      {
+        "layer": "og_variant",
+        "value": "V3.1",
+        "path": "index_16888_Guanghan_V3_1_0_OG.html"
+      },
+      {
+        "layer": "repo_contract_source",
+        "value": "V5_20_0",
+        "path": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol"
+      },
+      {
+        "layer": "index_universe_contract_comment",
+        "value": "V5_2_0",
+        "note": "Inline comment in index.html ADDR block"
+      }
+    ],
+    "drift_status": "ACTIVE_CONFLICT"
+  },
+  "runtime": {
+    "architecture": "MONOLITHIC_INLINE",
+    "modules_folder": false,
+    "dual_track": null,
+    "index_external_scripts": [
+      "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+      "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js",
+      "https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js",
+      "https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap"
+    ],
+    "root_runtime_files_not_in_index_script_src": [
+      {
+        "path": "K線西遊記/temples/16888/candle_sim.js",
+        "role": "K-line candle simulator V1.0.0"
+      },
+      {
+        "path": "K線西遊記/temples/16888/steering.js",
+        "role": "Steering wheel angle module V1.0.0"
+      },
+      {
+        "path": "K線西遊記/temples/16888/kline_engine_v1_0.js",
+        "role": "Universe candle engine V1.0.0"
+      },
+      {
+        "path": "K線西遊記/temples/16888/sw-kill.js",
+        "role": "Service worker unregister utility"
+      }
+    ],
+    "config_referenced_by_runtime": [
+      {
+        "path": "K線西遊記/temples/16888/engine_params_v1_0.json",
+        "version": "V1.0.0",
+        "role": "Candle engine weights / payout clamps"
+      },
+      {
+        "path": "K線西遊記/temples/16888/playlist.json",
+        "role": "Root playlist manifest"
+      },
+      {
+        "path": "K線西遊記/temples/16888/music/playlist.json",
+        "role": "Music folder playlist"
+      }
+    ],
+    "features": [
+      "0-360 steering wheel (long/short/rest zones)",
+      "Warp engine 1-150x",
+      "Web3 wallet (MetaMask / WalletConnect / BSC)",
+      "AI voice customer service",
+      "Photo / recording / vow escrow",
+      "Pool duel UP/DOWN game",
+      "Built-in music playlist loader",
+      "Three.js starfield background"
+    ],
+    "navigation_links": [
+      "Universe portal",
+      "Official site",
+      "12345 Wukong Heart Temple"
+    ]
+  },
+  "assets_required": [
+    {
+      "path": "K線西遊記/temples/16888/assets/fairy.png",
+      "role": "Primary fairy sprite — OG image"
+    },
+    {
+      "path": "K線西遊記/temples/16888/assets/fairy_sprite_36.png",
+      "role": "36px fairy sprite"
+    }
+  ],
+  "music": {
+    "playlist_root": "K線西遊記/temples/16888/playlist.json",
+    "playlist_music": "K線西遊記/temples/16888/music/playlist.json",
+    "tracks": [
+      "K線西遊記/temples/16888/music/情難枕.mp3",
+      "K線西遊記/temples/16888/music/我曾用心愛著你.mp3",
+      "K線西遊記/temples/16888/music/我相信.mp3"
+    ]
+  },
+  "contract": {
+    "species_contract_ref": "docs/civilization/CONTRACT_INDEX.json#16888",
+    "repo_source": {
+      "path": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+      "contract_name": "KGEN_16888_Universe_V5_20_0",
+      "version": "V5_20_0"
+    },
+    "frontend_refs": {
+      "note": "Addresses read from index.html ADDR block — deployed contract related; do not modify without authorization",
+      "source": "K線西遊記/temples/16888/index.html",
+      "kgen_token": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "universe_contract": "0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63",
+      "universe_comment_version": "KGEN_16888_Universe_V5_2_0",
+      "treasury": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+      "lp_pair": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "gaolao_8888": "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9"
+    },
+    "fee_route": {
+      "to": "8888",
+      "mechanism": "5% pool duel fee to treasury8888 / Gaolaozhuang",
+      "source": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol"
+    }
+  },
+  "relation_to_12345": {
+    "depends_on_species": "12345",
+    "temple_12345_index": "docs/civilization/TEMPLE_12345_INDEX.json",
+    "entry_link": "K線西遊記/temples/12345/index.html",
+    "note": "16888 is UFO cockpit mounted under Heart core; no shared modules/ folder"
+  },
+  "archive": {
+    "path": "K線西遊記/temples/16888/archive/",
+    "tracked_count": 4,
+    "files": [
+      "index.html.v1.0",
+      "index.html.v1.1",
+      "manifest.json.v1.0",
+      "sw.js.v1.0"
+    ]
+  },
+  "active_gaps": [
+    {
+      "id": "no_dna_quartet",
+      "note": "No LIFE_MANIFEST / RUNTIME_GENOME / MANIFEST / VERSION"
+    },
+    {
+      "id": "no_modules_folder",
+      "note": "No modular organ layer; all logic inline in index.html"
+    },
+    {
+      "id": "root_js_not_loaded",
+      "note": "candle_sim.js, steering.js, kline_engine_v1_0.js exist but not in index script src"
+    },
+    {
+      "id": "contract_version_drift",
+      "note": "Repo V5_20_0 vs index comment V5_2_0 vs deployed address 0xAbF1..."
+    },
+    {
+      "id": "readme_version_drift",
+      "note": "README V1.4 vs index v3.7.12 vs assets README V1.5"
+    }
+  ],
+  "governance_lock": {
+    "inherited_from_session": [
+      "KGEN/contracts/*",
+      "scripts/*",
+      "docs/physics/*",
+      "deployed_contract_related_files"
+    ],
+    "note": "16888 index.html not in 12345 execution lock; still treat ADDR block as deployed-contract-sensitive"
+  },
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "universe_map": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "civilization_graph": "neural/CIVILIZATION_GRAPH.json"
+  }
+}

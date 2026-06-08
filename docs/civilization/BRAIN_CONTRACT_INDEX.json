@@ -1,0 +1,309 @@
+{
+  "id": "CIVILIZATION_BRAIN_CONTRACT_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "content-verified contract read + authoritative docs cross-check",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "contract_path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+    "version_policy": "Do not infer version/status from filename alone; require contract contents, declarations, comments, authoritative docs, and existing civilization indices."
+  },
+  "parent_indices": [
+    "docs/civilization/BRAIN_INDEX.json",
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/CIVILIZATION_11520_INDEX.json"
+  ],
+  "sibling_indices": [
+    "docs/civilization/TOKEN_INDEX.json",
+    "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "docs/civilization/TEMPLE_12345_INDEX.json",
+    "docs/civilization/TEMPLE_108000_INDEX.json",
+    "docs/civilization/PORTAL_INDEX.json"
+  ],
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+    "civilization_index": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+    "kgen_layer": "docs/civilization/KGEN_INDEX.json",
+    "contract_layer": "docs/civilization/CONTRACT_INDEX.json",
+    "portal_layer": "docs/civilization/PORTAL_INDEX.json",
+    "contract_readme": "KGEN/contracts/README.md",
+    "kgen_readme": "KGEN/README.md"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "role": "Brain-focused contract and civilization index"
+    },
+    {
+      "step": 2,
+      "path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "role": "BrainExchange contract source of implementation facts"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+      "role": "11520 graph-only civilization definition"
+    },
+    {
+      "step": 4,
+      "path": "KGEN/scripts/deploy_all.js",
+      "role": "Brain + Heart deploy and init wiring; locked source, read only"
+    },
+    {
+      "step": 5,
+      "path": "whitepaper/KGEN/README.md",
+      "role": "11520 Universe Brain Exchange definition"
+    },
+    {
+      "step": 6,
+      "path": "KGEN/README.md",
+      "role": "Authoritative KGEN chain address docs; no Brain address found in this pass"
+    },
+    {
+      "step": 7,
+      "path": "KGEN/contracts/README.md",
+      "role": "Core V7.5.2 triad positioning; Brain not listed in triad"
+    },
+    {
+      "step": 8,
+      "path": "docs/civilization/PORTAL_INDEX.json",
+      "role": "Portal-displayed Brain 11520 deployment status and node map"
+    }
+  ],
+  "brain": {
+    "civilization_id": "11520",
+    "name": "花果山台灣交易所",
+    "name_en": "Huaguoshan Taiwan Brain Exchange",
+    "biology_type": "Brain Civilization",
+    "role": "Universe Brain / Brain Exchange Runtime",
+    "contract_name": "KGEN_BrainExchange_V3_2_0",
+    "contract_path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+    "pragma": "^0.8.24",
+    "network": "BNB Smart Chain (BSC)",
+    "source_status": "SOURCE_ONLY_IN_KGEN_CONTRACT_INDEX",
+    "portal_deployed_address": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+    "portal_status": "DISPLAYED_AS_DEPLOYED",
+    "temple_folder_status": "GRAPH_ONLY_NO_TEMPLE_FOLDER"
+  },
+  "evidence": {
+    "version_evidence": [
+      {
+        "source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+        "evidence": "Inline contract comment names `KGEN_BrainExchange_V3_2_0.sol` and identifies `11520｜花果山台灣・悟空大腦交易所（BrainExchange）`."
+      },
+      {
+        "source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+        "evidence": "Contract declaration is `contract KGEN_BrainExchange_V3_2_0 is OwnableLite, ReentrancyGuardLite`; used as supporting evidence, not sole source."
+      },
+      {
+        "source": "KGEN/scripts/deploy_all.js",
+        "evidence": "Deploy script requests `getContractFactory(\"KGEN_BrainExchange_V3_2_0\")` before deploying Heart."
+      },
+      {
+        "source": "docs/civilization/CONTRACT_INDEX.json",
+        "evidence": "Existing civilization contract map records 11520 contract name/version as `KGEN_BrainExchange_V3_2_0` / `V3_2_0`."
+      }
+    ],
+    "role_evidence": [
+      {
+        "source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+        "evidence": "Spec comments define reward tax inflow, margin staking, monthly payroll split, supplyHeart to TempleHeart, and config locking."
+      },
+      {
+        "source": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+        "evidence": "Section 3.4 identifies Species 11520 as `TYPE: BrainExchange` and `FUNCTION: Civilization Brain / Exchange Runtime`."
+      },
+      {
+        "source": "whitepaper/KGEN/README.md",
+        "evidence": "Defines 11520 as `Universe Brain Exchange`, not a normal exchange, stock market, NFT platform, or ordinary token swap."
+      },
+      {
+        "source": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+        "evidence": "Existing dedicated index classifies 11520 as `Brain Civilization` with role `Universe Brain / Brain Exchange Runtime`."
+      }
+    ],
+    "status_evidence": [
+      {
+        "source": "docs/civilization/CONTRACT_INDEX.json",
+        "evidence": "Existing contract row marks BrainExchange as `SOURCE_ONLY`; this index keeps source status separate from portal display status."
+      },
+      {
+        "source": "KGEN/README.md",
+        "evidence": "This indexing pass found no `Brain`, `11520`, or `KGEN_BrainExchange` entry in KGEN/README.md; no authoritative KGEN README Brain address was verified."
+      },
+      {
+        "source": "K線西遊記/index.html + docs/civilization/PORTAL_INDEX.json",
+        "evidence": "Portal KPI/node map displays `Brain 11520` as deployed and shows address `0xd0605F4EF10e5C1438F11AF9edc36926769239d6`."
+      },
+      {
+        "source": "K線西遊記/temples/12345/index.html and K線西遊記/temples/108000/index.html",
+        "evidence": "Temple runtime displays repeat the same Brain address; these are frontend/runtime references, not KGEN README deployment proof."
+      }
+    ],
+    "filename_inference_guard": {
+      "rule": "Filename is not the source of truth for version/status.",
+      "result": "Version is supported by contract comments, contract declaration, deploy script factory name, and existing civilization indices. Deployment status remains split: contract indices say SOURCE_ONLY, while Portal/temple UI display the Brain address as deployed; KGEN/README does not independently document the Brain address."
+    }
+  },
+  "runtime_model": {
+    "keeper_ops": [
+      "rollPayroll",
+      "supplyHeart",
+      "sweepToTreasury"
+    ],
+    "user_ops": [
+      "depositMargin",
+      "withdrawMargin",
+      "claimProfit"
+    ],
+    "config_ops": [
+      "setKeeper",
+      "setTreasury",
+      "setPublicGoodTreasury",
+      "setTempleHeart",
+      "setMarsSeats",
+      "setSplits",
+      "setCapacityWhole",
+      "setPayroll",
+      "lockConfig"
+    ],
+    "automation_note": "Solidity has no scheduler; rollPayroll requires human, owner, keeper, or other transaction trigger."
+  },
+  "fund_flow": {
+    "tax_inflow": {
+      "from": "KGEN_Token_V7_5_2 rewardWallet",
+      "rate": "0.05%",
+      "source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol spec comments + docs/civilization/TOKEN_INDEX.json"
+    },
+    "payroll_split_defaults": {
+      "marginBps": 5000,
+      "marsBps": 2500,
+      "publicGoodBps": 500,
+      "rest": "stays in Brain and may be swept to treasury by owner"
+    },
+    "principal_protection": "rollPayroll calculates distributable as KGEN balance minus totalMargin; staked margin principal is not counted as distributable.",
+    "downstream": [
+      {
+        "to": "KGEN_TempleHeart_V3_2_3",
+        "civilization_id": "12345",
+        "mechanism": "supplyHeart / setTempleHeart"
+      },
+      {
+        "to": "KGEN_MarsSeats_V2_2_1",
+        "civilization_id": "108000",
+        "mechanism": "marsBps payroll transfer followed by notifyReward"
+      },
+      {
+        "to": "publicGoodTreasury",
+        "mechanism": "publicGoodBps payroll transfer when address is configured"
+      },
+      {
+        "to": "treasury",
+        "mechanism": "sweepToTreasury owner operation"
+      }
+    ]
+  },
+  "deploy_wiring": {
+    "source": "KGEN/scripts/deploy_all.js",
+    "order": [
+      "deploy KGEN_BrainExchange_V3_2_0 with KGEN_TOKEN, TREASURY, NEXT_PAYROLL_AT",
+      "deploy KGEN_TempleHeart_V3_2_3",
+      "brain.setTempleHeart(heart)",
+      "heart.setToken(KGEN_TOKEN)",
+      "heart.setBrainVault(brain)",
+      "verify both contracts",
+      "transfer Brain and Heart ownership to NEW_OWNER"
+    ],
+    "env_required": [
+      "KGEN_TOKEN",
+      "TREASURY",
+      "NEW_OWNER"
+    ],
+    "env_optional": [
+      "NEXT_PAYROLL_AT",
+      "CONFIRMATIONS"
+    ],
+    "not_wired_in_deploy_all": [
+      "setMarsSeats",
+      "setPublicGoodTreasury",
+      "setKeeper",
+      "lockConfig"
+    ]
+  },
+  "civilization_links": {
+    "kgen_layer": {
+      "index_ref": "docs/civilization/KGEN_INDEX.json",
+      "meaning": "BrainExchange is part of the KGEN on-chain civilization contract layer, separate from the V7.5.2 core triad."
+    },
+    "contract_layer": {
+      "index_ref": "docs/civilization/CONTRACT_INDEX.json#11520",
+      "meaning": "11520 maps to the BrainExchange contract and downstream Heart/Mars runtime links."
+    },
+    "portal_layer": {
+      "index_ref": "docs/civilization/PORTAL_INDEX.json#11520",
+      "meaning": "Portal displays Brain 11520 as live/deployed but not clickable."
+    },
+    "token": {
+      "index_ref": "docs/civilization/TOKEN_INDEX.json",
+      "mechanism": "Token rewardWallet 0.05% tax flow is the expected Brain inflow."
+    },
+    "heart_12345": {
+      "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+      "mechanism": "Brain supplies Heart via `supplyHeart`; deploy script sets Heart brainVault."
+    },
+    "mars_108000": {
+      "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json",
+      "mechanism": "Brain payroll sends Mars share and calls `notifyReward`."
+    }
+  },
+  "known_gaps": [
+    {
+      "id": "kgen_readme_missing_brain_address",
+      "status": "OPEN",
+      "detail": "KGEN/README.md documents Token, LP pair, and Genesis Inscription addresses, but this pass found no Brain 11520 address or BrainExchange deployment entry."
+    },
+    {
+      "id": "portal_deployed_status_not_rpc_verified",
+      "status": "OPEN",
+      "detail": "Portal and temple UI display Brain as deployed at 0xd0605F4EF10e5C1438F11AF9edc36926769239d6, but no external chain explorer/RPC bytecode verification was performed."
+    },
+    {
+      "id": "post_deploy_config_not_documented",
+      "status": "OPEN",
+      "detail": "deploy_all.js wires Brain to Heart, but this pass found no authoritative repo document proving live setMarsSeats, setPublicGoodTreasury, setKeeper, lockConfig, or Token rewardWallet configuration."
+    },
+    {
+      "id": "no_standalone_11520_frontend",
+      "status": "OPEN",
+      "detail": "11520 remains graph-only with no K線西遊記/temples/11520/ runtime folder or DNA quartet."
+    }
+  ],
+  "active_conflicts": [
+    {
+      "id": "brain_source_only_vs_portal_deployed",
+      "status": "DOCUMENTED",
+      "detail": "CONTRACT_INDEX classifies BrainExchange source as SOURCE_ONLY, while Portal and temple UI display Brain 11520 as deployed at 0xd0605F4EF10e5C1438F11AF9edc36926769239d6. Treat these as different evidence layers until KGEN/README or chain verification confirms deployment."
+    },
+    {
+      "id": "kgen_readme_no_brain_entry",
+      "status": "DOCUMENTED",
+      "detail": "KGEN/README.md is authoritative for Token/LP/Genesis addresses but has no Brain entry found in this pass; do not promote Brain to README-verified DEPLOYED status from portal labels alone."
+    }
+  ],
+  "governance_lock": {
+    "do_not_edit": [
+      "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "allowed_index_zone": "docs/civilization/*"
+  }
+}

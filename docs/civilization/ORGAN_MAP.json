@@ -1,0 +1,617 @@
+{
+  "id": "CIVILIZATION_ORGAN_MAP",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "neural ORGAN_INDEX + RUNTIME_DEPENDENCY + modules glob",
+    "modules_root": "K線西遊記/temples/12345/modules/",
+    "runtime_prefix_count": 25,
+    "legacy_prefix_count": 40,
+    "scanned_at_utc": "2026-06-06T22:28:48.181Z"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "sibling_indices": [
+    "docs/civilization/SPECIES_TREE.json",
+    "docs/civilization/FRONTEND_INDEX.json"
+  ],
+  "neural_refs": {
+    "organ_index": "neural/ORGAN_INDEX.json",
+    "runtime_dependency": "neural/RUNTIME_DEPENDENCY.json#temple_12345",
+    "missing_report": "neural/MISSING_NEURAL_LINK_REPORT.md"
+  },
+  "biology_constitution": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+  "organ_naming_policy": {
+    "official_target": "runtime-* permanent organ filenames",
+    "legacy_alias": "kgen-12345-*",
+    "dual_track_status": "TRANSITION",
+    "version_in_filename": false,
+    "forbidden_patterns": [
+      "patch",
+      "hotfix",
+      "fix",
+      "stable",
+      "v10-",
+      "v104"
+    ],
+    "folder_policy": "ROOT_MODULES_ONLY — no modules/organs/ deep folder",
+    "folder_policy_source": "K線西遊記/temples/12345/modules/kgen-12345-organ-registry.json"
+  },
+  "generic_ufo_organs": {
+    "description": "Universe-standard organ set from neural/ORGAN_INDEX.json#organs",
+    "required_count": 8,
+    "organs": {
+      "runtime-main": {
+        "file": "runtime-main.js",
+        "type": "core-organ",
+        "role": "Universe Loop",
+        "required": true
+      },
+      "runtime-main-css": {
+        "file": "runtime-main.css",
+        "type": "skin-organ",
+        "role": "Core Runtime Visual Skin",
+        "required": true
+      },
+      "runtime-heart": {
+        "file": "runtime-heart.js",
+        "type": "heart-organ",
+        "role": "Mass / Energy / Temple Heart",
+        "required": true
+      },
+      "runtime-brain": {
+        "file": "runtime-brain.js",
+        "type": "brain-organ",
+        "role": "Decision / Memory / AI Routing",
+        "required": true
+      },
+      "runtime-boundary": {
+        "file": "runtime-boundary.js",
+        "type": "immune-organ",
+        "role": "Boundary Pressure / Risk Shield",
+        "required": true
+      },
+      "runtime-autopilot": {
+        "file": "runtime-autopilot.js",
+        "type": "navigation-organ",
+        "role": "AutoPilot / Self-Healing",
+        "required": true
+      },
+      "runtime-sphere": {
+        "file": "runtime-sphere.js",
+        "type": "geometry-organ",
+        "role": "Sphere Timeline Renderer",
+        "required": true
+      },
+      "runtime-hud": {
+        "file": "runtime-hud.js",
+        "type": "vision-organ",
+        "role": "HUD / Player Interface",
+        "required": true
+      }
+    },
+    "dependency_tree": {
+      "source": "neural/RUNTIME_DEPENDENCY.json#dependencies",
+      "runtime-main.js": [
+        "runtime-heart.js",
+        "runtime-brain.js",
+        "runtime-boundary.js",
+        "runtime-autopilot.js",
+        "runtime-sphere.js",
+        "runtime-hud.js"
+      ],
+      "runtime-autopilot.js": [
+        "runtime-boundary.js",
+        "runtime-brain.js"
+      ],
+      "runtime-hud.js": [
+        "runtime-main.js",
+        "runtime-boundary.js",
+        "runtime-sphere.js"
+      ],
+      "runtime-sphere.js": [
+        "runtime-main.js",
+        "runtime-hud.js"
+      ]
+    }
+  },
+  "species_12345": {
+    "species_id": "12345",
+    "temple": "五指山悟空財神殿",
+    "entry": "K線西遊記/temples/12345/index.html",
+    "modules_root": "K線西遊記/temples/12345/modules/",
+    "species_tree_ref": "docs/civilization/SPECIES_TREE.json#12345",
+    "core_organs": {
+      "runtime-bootstrap": {
+        "official_file": "modules/runtime-bootstrap.js",
+        "legacy_alias": "modules/kgen-12345-boot-runtime.js",
+        "type": "boot-organ",
+        "role": "Boot immune / life manifest check",
+        "index_loaded": true,
+        "status": "OFFICIAL_ACTIVE"
+      },
+      "runtime-main": {
+        "official_file": "modules/runtime-main.js",
+        "legacy_alias": "modules/kgen-12345-runtime.js",
+        "type": "core-organ",
+        "role": "Universe loop thin layer; legacy carries Web3/K-line/Heart TX",
+        "index_loaded": true,
+        "legacy_also_loaded": true,
+        "status": "DUAL_LOADED",
+        "do_not_remove": "modules/kgen-12345-runtime.js"
+      },
+      "runtime-main-css": {
+        "official_file": "modules/runtime-main.css",
+        "legacy_alias": null,
+        "type": "skin-organ",
+        "role": "Core runtime visual skin overlay",
+        "index_loaded": true,
+        "status": "OFFICIAL_ACTIVE"
+      },
+      "runtime-core-css": {
+        "official_file": "modules/runtime-core.css",
+        "legacy_alias": "modules/kgen-12345-core.css",
+        "type": "skin-organ",
+        "role": "Full layout / HUD skin",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-mother": {
+        "official_file": "modules/runtime-mother.js",
+        "legacy_alias": "modules/kgen-12345-mother-runtime.js",
+        "type": "observer-organ",
+        "role": "Mother runtime observer",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-regeneration": {
+        "official_file": "modules/runtime-regeneration.js",
+        "legacy_alias": "modules/kgen-12345-divine-regeneration.js",
+        "type": "regeneration-organ",
+        "role": "Divine regeneration / recording",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-regeneration-css": {
+        "official_file": "modules/runtime-regeneration.css",
+        "legacy_alias": "modules/kgen-12345-divine-regeneration.css",
+        "type": "skin-organ",
+        "role": "Regeneration skin",
+        "index_loaded": false,
+        "legacy_loaded": true,
+        "status": "LEGACY_ACTIVE"
+      },
+      "runtime-cell-registry": {
+        "official_file": "modules/runtime-cell-registry.json",
+        "legacy_alias": "modules/kgen-12345-cell-registry.json",
+        "type": "dna-organ",
+        "role": "Cell registry",
+        "index_loaded": false,
+        "status": "OFFICIAL_PENDING_ABSORPTION"
+      },
+      "runtime-growth-policy": {
+        "official_file": "modules/runtime-growth-policy.json",
+        "legacy_alias": "modules/kgen-12345-growth-policy.json",
+        "type": "dna-organ",
+        "role": "Growth policy",
+        "index_loaded": false,
+        "status": "OFFICIAL_PENDING_ABSORPTION"
+      },
+      "runtime-heart": {
+        "official_file": "modules/runtime-heart.js",
+        "legacy_alias": null,
+        "nearest_active": [
+          "modules/kgen-12345-runtime.js",
+          "index.html#kgen-heart-live-panel"
+        ],
+        "type": "heart-organ",
+        "role": "Temple Heart / Web3 TX",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-brain": {
+        "official_file": "modules/runtime-brain.js",
+        "legacy_alias": "modules/kgen-12345-panel-router.js",
+        "nearest_active": [
+          "modules/kgen-12345-civilization-brain-rollcall.js",
+          "inline:kgen-civilization-brain-rollcall-v10-49-1"
+        ],
+        "type": "brain-organ",
+        "role": "Decision / AI routing / civilization brain",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-boundary": {
+        "official_file": "modules/runtime-boundary.js",
+        "legacy_alias": "modules/kgen-12345-immune-runtime.js",
+        "type": "immune-organ",
+        "role": "Boundary / immune runtime",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-autopilot": {
+        "official_file": "modules/runtime-autopilot.js",
+        "legacy_alias": "modules/kgen-12345-watchdog-runtime.js",
+        "type": "navigation-organ",
+        "role": "AutoPilot / watchdog",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-sphere": {
+        "official_file": "modules/runtime-sphere.js",
+        "legacy_alias": "modules/kgen-12345-sphere-runtime.js",
+        "type": "geometry-organ",
+        "role": "Sphere timeline renderer",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      },
+      "runtime-hud": {
+        "official_file": "modules/runtime-hud.js",
+        "legacy_alias": "modules/kgen-12345-ui-runtime.js",
+        "type": "vision-organ",
+        "role": "HUD / player interface",
+        "index_loaded": false,
+        "status": "MISSING_FILENAME"
+      }
+    },
+    "index_load_order": {
+      "css": [
+        "modules/kgen-12345-core.css",
+        "modules/kgen-12345-divine-regeneration.css",
+        "modules/runtime-main.css"
+      ],
+      "inline_head": [
+        "inline:kgen-civilization-brain-rollcall-v10-49-1"
+      ],
+      "scripts": [
+        "modules/kgen-12345-runtime.js",
+        "modules/kgen-12345-mother-runtime.js",
+        "modules/kgen-12345-divine-regeneration.js",
+        "modules/runtime-main.js",
+        "modules/runtime-bootstrap.js"
+      ],
+      "inline_body": [
+        "inline:kgen-v10-49-2-ritual-js"
+      ]
+    },
+    "rollcall_required_not_loaded": [
+      "modules/runtime-core.css",
+      "modules/runtime-mother.js",
+      "modules/runtime-regeneration.js",
+      "modules/runtime-regeneration.css",
+      "modules/runtime-cell-registry.json",
+      "modules/runtime-growth-policy.json"
+    ]
+  },
+  "extended_runtime_organs": {
+    "description": "runtime-* files in modules/ beyond generic UFO 8-pack and core 12345 mapping",
+    "organs": [
+      {
+        "id": "runtime-festival-engine",
+        "path": "modules/runtime-festival-engine.js",
+        "type": "festival-organ",
+        "role": "Festival / heart clock engine",
+        "index_loaded": false,
+        "absorb_target_for": "inline:kgen-v10-49-2-ritual-js"
+      },
+      {
+        "id": "runtime-router-engine",
+        "path": "modules/runtime-router-engine.js",
+        "type": "routing-organ",
+        "role": "Panel / route engine",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-panel-registry",
+        "path": "modules/runtime-panel-registry.js",
+        "type": "registry-organ",
+        "role": "Panel registry",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-panel-window-restore",
+        "path": "modules/runtime-panel-window-restore.js",
+        "type": "layout-organ",
+        "role": "Panel window restore",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-temple-layout",
+        "path": "modules/runtime-temple-layout.js",
+        "type": "layout-organ",
+        "role": "Temple layout engine",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-universe-axis",
+        "path": "modules/runtime-universe-axis.js",
+        "type": "geometry-organ",
+        "role": "Universe axis",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-warp-elevator",
+        "path": "modules/runtime-warp-elevator.js",
+        "type": "warp-organ",
+        "role": "Warp elevator",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-zlayer-engine",
+        "path": "modules/runtime-zlayer-engine.js",
+        "type": "geometry-organ",
+        "role": "Z-layer stacking",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-visibility-engine",
+        "path": "modules/runtime-visibility-engine.js",
+        "type": "vision-organ",
+        "role": "Visibility control",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-visual-semantic-control",
+        "path": "modules/runtime-visual-semantic-control.js",
+        "type": "vision-organ",
+        "role": "Visual semantic control",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-canvas-screen-recorder",
+        "path": "modules/runtime-canvas-screen-recorder.js",
+        "type": "recording-organ",
+        "role": "Canvas screen recorder",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-recording-engine",
+        "path": "modules/runtime-recording-engine.js",
+        "type": "recording-organ",
+        "role": "Recording engine",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-state",
+        "path": "modules/runtime-state.js",
+        "type": "state-organ",
+        "role": "Runtime state holder",
+        "index_loaded": false
+      },
+      {
+        "id": "runtime-legacy",
+        "path": "modules/runtime-legacy.js",
+        "type": "bridge-organ",
+        "role": "Legacy bridge",
+        "index_loaded": false
+      }
+    ]
+  },
+  "legacy_satellite_organs": {
+    "description": "kgen-12345-* modules not mapped to generic 8-pack; exist in modules/ root",
+    "organs": [
+      {
+        "path": "modules/kgen-12345-organ-system.js",
+        "paired_css": "modules/kgen-12345-organ-system.css",
+        "type": "organ-system",
+        "role": "Organ nerve system host"
+      },
+      {
+        "path": "modules/kgen-12345-organ-wukong-control-console.js",
+        "type": "control-console",
+        "role": "Wukong control console",
+        "registry_ref": "modules/kgen-12345-organ-registry.json"
+      },
+      {
+        "path": "modules/kgen-12345-organ-lifecycle.js",
+        "type": "lifecycle-organ",
+        "role": "Organ lifecycle rules"
+      },
+      {
+        "path": "modules/kgen-12345-morph-dna-organ-transplant.js",
+        "paired_css": "modules/kgen-12345-morph-dna-organ-transplant.css",
+        "type": "dna-organ",
+        "role": "Morph DNA organ transplant"
+      },
+      {
+        "path": "modules/kgen-12345-holy-cup.js",
+        "type": "ritual-organ",
+        "role": "Holy cup ritual"
+      },
+      {
+        "path": "modules/kgen-12345-warp-runtime.js",
+        "type": "warp-organ",
+        "role": "Warp runtime"
+      },
+      {
+        "path": "modules/kgen-12345-universe-elevator.js",
+        "type": "warp-organ",
+        "role": "Universe elevator"
+      },
+      {
+        "path": "modules/kgen-12345-layout-runtime.js",
+        "type": "layout-organ",
+        "role": "Layout runtime"
+      },
+      {
+        "path": "modules/kgen-12345-layout-engine.js",
+        "type": "layout-organ",
+        "role": "Layout engine"
+      },
+      {
+        "path": "modules/kgen-12345-world-axis.js",
+        "type": "geometry-organ",
+        "role": "World axis"
+      },
+      {
+        "path": "modules/kgen-12345-axis-c-scene.js",
+        "type": "geometry-organ",
+        "role": "Axis C scene"
+      },
+      {
+        "path": "modules/kgen-12345-2d-antigravity-engine.js",
+        "type": "physics-organ",
+        "role": "2D antigravity engine"
+      },
+      {
+        "path": "modules/kgen-12345-motion-control.js",
+        "type": "navigation-organ",
+        "role": "Motion control"
+      },
+      {
+        "path": "modules/kgen-12345-transformer-runtime.js",
+        "type": "transform-organ",
+        "role": "Transformer runtime"
+      },
+      {
+        "path": "modules/kgen-12345-death-manager.js",
+        "type": "immune-organ",
+        "role": "Death cell manager"
+      },
+      {
+        "path": "modules/kgen-12345-input-governance.js",
+        "type": "immune-organ",
+        "role": "Input governance"
+      },
+      {
+        "path": "modules/kgen-12345-manifest-runtime.js",
+        "type": "dna-organ",
+        "role": "Manifest runtime"
+      },
+      {
+        "path": "modules/kgen-12345-recursive-verify.js",
+        "type": "immune-organ",
+        "role": "Recursive verify"
+      },
+      {
+        "path": "modules/kgen-12345-install-check.js",
+        "type": "boot-organ",
+        "role": "Install check"
+      },
+      {
+        "path": "modules/kgen-12345-proto-stabilizer.js",
+        "type": "stabilizer-organ",
+        "role": "Proto stabilizer"
+      },
+      {
+        "path": "modules/kgen-12345-countdown-engine.js",
+        "type": "clock-organ",
+        "role": "Countdown engine"
+      },
+      {
+        "path": "modules/kgen-12345-stable-countdown.js",
+        "type": "clock-organ",
+        "role": "Stable countdown",
+        "note": "legacy naming; stable in filename"
+      },
+      {
+        "path": "modules/kgen-12345-version.js",
+        "type": "meta-organ",
+        "role": "Version sync"
+      }
+    ],
+    "not_index_loaded": true
+  },
+  "local_registries": {
+    "organ_registry_json": "K線西遊記/temples/12345/modules/kgen-12345-organ-registry.json",
+    "organ_registry_md": "K線西遊記/temples/12345/ORGAN_REGISTRY.md",
+    "cell_registry_json_legacy": "K線西遊記/temples/12345/modules/kgen-12345-cell-registry.json",
+    "cell_registry_json_official": "K線西遊記/temples/12345/modules/runtime-cell-registry.json",
+    "cell_registry_md": "K線西遊記/temples/12345/CELL_REGISTRY.md",
+    "future_organs_reserved": [
+      "heart-engine",
+      "warp-engine",
+      "brain-engine",
+      "immune-engine",
+      "dna-engine",
+      "marketplace-engine"
+    ],
+    "future_organs_source": "modules/kgen-12345-cell-registry.json"
+  },
+  "species_organ_mounts": {
+    "description": "Which species may mount which generic organ types",
+    "source": "neural/CIVILIZATION_GRAPH.json",
+    "mounts": {
+      "11520": [
+        "runtime-brain"
+      ],
+      "18888": [
+        "runtime-heart"
+      ],
+      "12345": [
+        "16888",
+        "runtime-heart",
+        "runtime-boundary"
+      ],
+      "16888": [
+        "runtime-hud",
+        "runtime-sphere"
+      ]
+    }
+  },
+  "cancer_zone": {
+    "description": "Forbidden-pattern modules in formal modules/ zone",
+    "formal_modules": [
+      {
+        "path": "modules/runtime-v10-40-6-stable-patch.js",
+        "violations": [
+          "v10-",
+          "stable",
+          "patch"
+        ]
+      },
+      {
+        "path": "modules/runtime-layout-fix.js",
+        "violations": [
+          "fix"
+        ]
+      },
+      {
+        "path": "modules/kgen-v1046-morph-dna-runtime.js",
+        "violations": [
+          "v104"
+        ]
+      },
+      {
+        "path": "modules/kgen-v1046-morph-dna-runtime.css",
+        "violations": [
+          "v104"
+        ]
+      }
+    ],
+    "inline_patches": [
+      {
+        "id": "inline:kgen-v10-49-2-ritual-js",
+        "location": "K線西遊記/temples/12345/index.html",
+        "status": "CANCER_INLINE_PATCH",
+        "absorb_target": "modules/runtime-main.js or modules/runtime-festival-engine.js"
+      }
+    ],
+    "archive_zone": "K線西遊記/temples/12345/modules/archive/"
+  },
+  "status_summary": {
+    "generic_ufo_required": 8,
+    "species_12345_core_mapped": 15,
+    "missing_filename_count": 6,
+    "dual_loaded_count": 1,
+    "official_active_index_loaded": 2,
+    "legacy_active_index_loaded": 5,
+    "extended_runtime_organs": 14,
+    "legacy_satellite_organs": 23,
+    "cancer_formal_modules": 4
+  },
+  "mvp_lock": {
+    "primary_species": "12345",
+    "do_not_remove": [
+      "modules/kgen-12345-runtime.js"
+    ],
+    "do_not_edit_without_rollcall": [
+      "K線西遊記/temples/12345/index.html"
+    ]
+  }
+}

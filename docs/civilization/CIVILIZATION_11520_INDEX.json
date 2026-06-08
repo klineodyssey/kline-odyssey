@@ -1,0 +1,320 @@
+{
+  "id": "CIVILIZATION_11520_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + repo grep",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "repo_total_tracked": 507,
+    "temple_folder_tracked": 0,
+    "direct_repo_artifacts": 2,
+    "note": "No K線西遊記/temples/11520/ folder — graph-only + contract-primary civilization"
+  },
+  "species": {
+    "id": "11520",
+    "name": "花果山台灣交易所",
+    "name_alt": "花果山交易所",
+    "name_en": "Huaguoshan Taiwan Brain Exchange",
+    "life_id": null,
+    "biology_type": "Brain Civilization",
+    "role": "Universe Brain / Brain Exchange Runtime",
+    "status": "GRAPH_ONLY",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "FinancialLifeform",
+      "phylum": "TempleRuntime",
+      "class": "BrainSystem",
+      "order": "BrainEngine",
+      "family": "ExchangeDNA",
+      "genus": "BrainExchange",
+      "species": "11520",
+      "source": "neural/CIVILIZATION_GRAPH.json + SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md"
+    },
+    "physics": {
+      "k_index": 11520,
+      "coupling_c_approx": 0.874,
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    },
+    "depends_on": [],
+    "feeds": [
+      "12345",
+      "108000"
+    ],
+    "can_mount": [
+      "runtime-brain"
+    ]
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+    "parent_indices": [
+      "docs/civilization/BRAIN_INDEX.json",
+      "docs/civilization/TEMPLE_INDEX.json",
+      "docs/civilization/SPECIES_TREE.json",
+      "docs/civilization/CONTRACT_INDEX.json",
+      "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "docs/civilization/ORGAN_MAP.json"
+    ],
+    "neural_layer": [
+      "neural/CIVILIZATION_GRAPH.json",
+      "neural/ORGAN_INDEX.json"
+    ]
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "Repo civilization entry"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/CIVILIZATION_11520_INDEX.json",
+      "role": "11520 dedicated civilization index"
+    },
+    {
+      "step": 3,
+      "path": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "role": "BrainExchange contract evidence, deployment-status split, and gaps"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/CONTRACT_INDEX.json#11520",
+      "role": "BrainExchange contract mapping"
+    },
+    {
+      "step": 5,
+      "path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "role": "On-chain brain source — read only; do not edit"
+    },
+    {
+      "step": 6,
+      "path": "whitepaper/KGEN/README.md",
+      "role": "11520 Universe Brain Exchange definition"
+    },
+    {
+      "step": 7,
+      "path": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      "role": "Species TYPE BrainExchange in mother SOP"
+    }
+  ],
+  "paths": {
+    "temple_root": null,
+    "frontend_entry": null,
+    "contract_source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+    "deploy_script": "KGEN/scripts/deploy_all.js",
+    "whitepaper": "whitepaper/KGEN/README.md",
+    "sop_species": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md#3.4",
+    "archive_brand": "archive/site_v0_genesis/K線西遊記_花果山品牌V1.1.md"
+  },
+  "directory_structure": {
+    "description": "11520 has no temple folder; artifacts are contract + docs + cross-references",
+    "zones": [
+      {
+        "id": "contract_source",
+        "path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+        "tracked_count": 1,
+        "role": "Primary on-chain brain exchange implementation"
+      },
+      {
+        "id": "deploy_wiring",
+        "path": "KGEN/scripts/deploy_all.js",
+        "tracked_count": 1,
+        "role": "Brain + Heart deploy and init — scripts locked"
+      },
+      {
+        "id": "whitepaper_def",
+        "path": "whitepaper/KGEN/README.md",
+        "role": "Universe Brain Exchange civilization economy definition"
+      },
+      {
+        "id": "mother_sop",
+        "path": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+        "role": "TYPE: BrainExchange / FUNCTION: Civilization Brain"
+      },
+      {
+        "id": "archive_brand",
+        "path": "archive/site_v0_genesis/K線西遊記_花果山品牌V1.1.md",
+        "tracked_count": 1,
+        "role": "Historical Huaguoshan brand reference — superseded by V1.2"
+      }
+    ],
+    "frontend_embed_refs": [
+      {
+        "path": "K線西遊記/temples/12345/index.html",
+        "role": "Heart temple displays Brain 11520 deployed address",
+        "note": "12345 execution lock — read only"
+      },
+      {
+        "path": "K線西遊記/temples/108000/index.html",
+        "role": "MarsSeats HUD references BRAIN_11520"
+      },
+      {
+        "path": "K線西遊記/kline-app-game/index.html",
+        "role": "App game runtime embeds BRAIN constant"
+      }
+    ]
+  },
+  "dna": {
+    "life_manifest": null,
+    "runtime_genome": null,
+    "manifest": null,
+    "version_file": null,
+    "temple_folder": false,
+    "note": "No PRIMEFORGE DNA quartet — civilization exists as contract + graph node"
+  },
+  "runtime": {
+    "architecture": "CONTRACT_PRIMARY",
+    "frontend_entry": null,
+    "organ_mount": "runtime-brain",
+    "organ_status": "MISSING_FILENAME in 12345 modules — see neural/ORGAN_INDEX.json",
+    "keeper_ops": [
+      "rollPayroll",
+      "supplyHeart",
+      "sweepToTreasury"
+    ],
+    "user_ops": [
+      "depositMargin",
+      "withdrawMargin",
+      "claimProfit"
+    ],
+    "automation_note": "Solidity has no scheduler — rollPayroll requires keeper/manual call"
+  },
+  "contract": {
+    "species_contract_ref": "docs/civilization/CONTRACT_INDEX.json#11520",
+    "repo_source": {
+      "path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "contract_name": "KGEN_BrainExchange_V3_2_0",
+      "version": "V3_2_0",
+      "pragma": "^0.8.24",
+      "status": "SOURCE_ONLY",
+      "detail_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+      "status_note": "Portal/temple UI display Brain 11520 as deployed, but KGEN/README.md has no Brain deployment entry found in this pass.",
+      "evidence_note": "Version/role verified from contract comments/declaration, deploy_all factory wiring, SOP, whitepaper, and existing civilization indices; filename is not used as sole evidence."
+    },
+    "spec_summary": {
+      "tax_inflow": "KGEN Token rewardWallet 0.05%",
+      "margin": "depositMargin / withdrawMargin with accRewardPerShare pull-claim",
+      "payroll": "rollPayroll splits to margin pool, MarsSeats notifyReward, public good, treasury",
+      "heart_supply": "supplyHeart → TempleHeart 12345",
+      "config": "configLocked after lockConfig()"
+    },
+    "wired_addresses": {
+      "templeHeart": "12345 TempleHeart",
+      "marsSeats": "108000 MarsSeats",
+      "treasury": "configurable",
+      "publicGoodTreasury": "configurable"
+    },
+    "deployed_refs": {
+      "note": "Address cited in other temple frontends — deployed contract related; do not modify source files",
+      "brain_exchange": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+      "sources": [
+        "K線西遊記/temples/108000/index.html#BRAIN_11520",
+        "K線西遊記/temples/12345/index.html (rollcall text)"
+      ]
+    },
+    "deploy_init": {
+      "source": "KGEN/scripts/deploy_all.js",
+      "order": [
+        "deploy KGEN_BrainExchange_V3_2_0",
+        "deploy KGEN_TempleHeart_V3_2_3",
+        "brain.setTempleHeart(heart)",
+        "heart.setBrainVault(brain)"
+      ]
+    }
+  },
+  "dependency_graph": {
+    "upstream": [],
+    "downstream": [
+      {
+        "species": "12345",
+        "via": "supplyHeart / brainVault on TempleHeart",
+        "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json"
+      },
+      {
+        "species": "108000",
+        "via": "rollPayroll marsBps → MarsSeats.notifyReward",
+        "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json"
+      }
+    ],
+    "token_link": {
+      "from": "KGEN_Token_V7_5_2",
+      "mechanism": "rewardWallet 0.05% tax flow"
+    }
+  },
+  "whitepaper_definition": {
+    "source": "whitepaper/KGEN/README.md",
+    "title": "11520 Universe Brain Exchange",
+    "not": [
+      "普通交易所",
+      "股票市場",
+      "NFT 平台"
+    ],
+    "is": "Universe Brain Exchange / Civilization Runtime Economy",
+    "future_tradable": [
+      "DNA",
+      "Organ",
+      "Runtime",
+      "Civilization",
+      "Timeline",
+      "Warp",
+      "Morph"
+    ]
+  },
+  "relation_to_other_species": {
+    "feeds_heart": {
+      "species": "12345",
+      "path": "K線西遊記/temples/12345/",
+      "role": "12345 depends_on 11520 per CIVILIZATION_GRAPH"
+    },
+    "feeds_mars": {
+      "species": "108000",
+      "role": "Payroll notifyReward to MarsSeats"
+    },
+    "sibling_roots": [
+      "18888"
+    ],
+    "note": "11520 and 18888 are graph roots feeding 12345"
+  },
+  "active_gaps": [
+    {
+      "id": "no_temple_folder",
+      "note": "No K線西遊記/temples/11520/ — no dedicated frontend runtime"
+    },
+    {
+      "id": "no_dna_quartet",
+      "note": "No LIFE_MANIFEST / RUNTIME_GENOME / MANIFEST / VERSION"
+    },
+    {
+      "id": "runtime_brain_missing_filename",
+      "note": "runtime-brain.js not materialized in 12345 modules; nearest kgen-12345-panel-router.js"
+    },
+    {
+      "id": "no_standalone_readme",
+      "note": "No temple-local README; use whitepaper/KGEN/README.md"
+    },
+    {
+      "id": "brain_source_only_vs_portal_deployed",
+      "note": "CONTRACT_INDEX keeps BrainExchange as SOURCE_ONLY while Portal/temple UI display deployed address 0xd0605F4EF10e5C1438F11AF9edc36926769239d6; KGEN/README.md has no Brain deployment entry found in this pass.",
+      "detail_ref": "docs/civilization/BRAIN_CONTRACT_INDEX.json#active_conflicts"
+    }
+  ],
+  "governance_lock": {
+    "do_not_edit": [
+      "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "deployed_contract_related_files",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "allowed_index_zone": "docs/civilization/*"
+  },
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "civilization_graph": "neural/CIVILIZATION_GRAPH.json",
+    "contract_readme": "KGEN/contracts/README.md"
+  }
+}

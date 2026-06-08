@@ -1,0 +1,375 @@
+{
+  "id": "CIVILIZATION_KLINE_XIYOUJI_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + README.md parse",
+    "path_prefix": "K線西遊記/",
+    "tracked_file_count_total": 312,
+    "tracked_file_count_temples": 212,
+    "tracked_file_count_universe": 100,
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "count_source": "docs/civilization/BRAIN_INDEX.json zones scan"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "child_indices": [
+    "docs/civilization/PORTAL_INDEX.json",
+    "docs/civilization/TEMPLE_INDEX.json",
+    "docs/civilization/FRONTEND_INDEX.json"
+  ],
+  "frontend_index_ref": "docs/civilization/FRONTEND_INDEX.json#index_html_registry",
+  "sibling_indices": [
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/SPECIES_TREE.json"
+  ],
+  "definition": {
+    "name_zh": "K線西遊記",
+    "name_en": "K-Line Journey to the West",
+    "subtitle": "創作 × 資料 × 引擎（主世界線）",
+    "primary_entry": "K線西遊記/README.md",
+    "portal_entry": "K線西遊記/index.html",
+    "role": "Galaxy frontend + data pipelines + daily creative output + temple runtimes host",
+    "brand": "花果山台灣"
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+    "human_readme": "K線西遊記/README.md",
+    "portal_detail": "docs/civilization/PORTAL_INDEX.json",
+    "temple_detail": "docs/civilization/TEMPLE_INDEX.json"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+      "role": "K線西遊記 zone overview"
+    },
+    {
+      "step": 2,
+      "path": "K線西遊記/README.md",
+      "role": "Main worldline readme — public/private boundary, daily spec"
+    },
+    {
+      "step": 3,
+      "path": "K線西遊記/index.html",
+      "role": "Galaxy universe gate Portal V2.1"
+    },
+    {
+      "step": 4,
+      "path": "docs/civilization/TEMPLE_INDEX.json",
+      "role": "Temple runtimes (12345 / 16888 / 108000)"
+    },
+    {
+      "step": 5,
+      "path": "K線西遊記/HANDBOOK_AUTOPILOT.md",
+      "role": "TX+BTC autopilot handoff"
+    }
+  ],
+  "public_private_boundary": {
+    "source": "K線西遊記/README.md",
+    "public": [
+      "轉檔結果（台指近全.xlsx 等）",
+      "轉檔引擎流程（可重現）",
+      "每日創作輸出（daily/）",
+      "kline-engine-public 入口與 output/"
+    ],
+    "private": [
+      "運算引擎策略／模型／權重",
+      "核心參數與內部決策流程",
+      "engine_bin/（Release Asset 解壓，不在 repo）"
+    ],
+    "principle": "資料透明、流程透明、判斷保留"
+  },
+  "zones": {
+    "root": {
+      "path": "K線西遊記/",
+      "role": "Universe root — portal + governance docs",
+      "key_files": [
+        {
+          "path": "K線西遊記/index.html",
+          "role": "Galaxy universe gate Portal V2.1",
+          "index_ref": "docs/civilization/PORTAL_INDEX.json"
+        },
+        {
+          "path": "K線西遊記/README.md",
+          "role": "Main worldline constitution"
+        },
+        {
+          "path": "K線西遊記/HANDBOOK_AUTOPILOT.md",
+          "role": "Autopilot TX+BTC pipeline handbook"
+        },
+        {
+          "path": "K線西遊記/README_AUTOPILOT.md",
+          "role": "Autopilot readme companion"
+        },
+        {
+          "path": "K線西遊記/INTERFACE_SPEC.md",
+          "role": "Unified status.json interface spec"
+        }
+      ]
+    },
+    "temples": {
+      "path": "K線西遊記/temples/",
+      "tracked_file_count": 212,
+      "detail_index": "docs/civilization/TEMPLE_INDEX.json",
+      "entries": [
+        {
+          "id": "12345",
+          "path": "K線西遊記/temples/12345/index.html",
+          "status": "PRIMARY_MVP",
+          "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json"
+        },
+        {
+          "id": "16888",
+          "path": "K線西遊記/temples/16888/index.html",
+          "status": "ACTIVE",
+          "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json"
+        },
+        {
+          "id": "108000",
+          "path": "K線西遊記/temples/108000/index.html",
+          "status": "STUB",
+          "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json"
+        }
+      ]
+    },
+    "kline_taifex": {
+      "path": "K線西遊記/kline-taifex/",
+      "tracked_file_count": 30,
+      "role": "TX futures daily K conversion pipeline V8.8.2",
+      "entry": "K線西遊記/kline-taifex/README.md",
+      "raw": "K線西遊記/kline-taifex/raw/",
+      "master": "K線西遊記/kline-taifex/master/台指近全.xlsx",
+      "pipeline": "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
+    },
+    "kline_btc": {
+      "path": "K線西遊記/kline-btc/",
+      "tracked_file_count": 6,
+      "role": "BTC 1D data pipeline",
+      "entry": "K線西遊記/kline-btc/README.md",
+      "frontend": "K線西遊記/kline-btc/index.html",
+      "raw": "K線西遊記/kline-btc/raw/",
+      "master": "K線西遊記/kline-btc/master/BTCUSDT_1d_1000.xlsx",
+      "fallback": "Binance public API via tools when raw missing"
+    },
+    "kline_nasdaq": {
+      "path": "K線西遊記/kline-nasdaq/",
+      "tracked_file_count": 1,
+      "role": "NASDAQ pipeline placeholder",
+      "entry": "K線西遊記/kline-nasdaq/README.md"
+    },
+    "kline_engine_public": {
+      "path": "K線西遊記/kline-engine-public/",
+      "tracked_file_count": 8,
+      "role": "Public engine entry + output only — core engine via Release Asset",
+      "entry": "K線西遊記/kline-engine-public/README.md",
+      "runner": "K線西遊記/kline-engine-public/run_public.py",
+      "status": "K線西遊記/kline-engine-public/status/status.json",
+      "output_tx": "K線西遊記/kline-engine-public/output/tx/",
+      "output_btc": "K線西遊記/kline-engine-public/output/btc/"
+    },
+    "kline_app_game": {
+      "path": "K線西遊記/kline-app-game/",
+      "tracked_file_count": 4,
+      "role": "KLINE App Game BTC 4D cockpit — forked from 12345 Heart UI",
+      "entry": "K線西遊記/kline-app-game/index.html",
+      "readme": "K線西遊記/kline-app-game/README.md",
+      "variants": [
+        "K線西遊記/kline-app-game/index_kline_app_game_btc_4d_runtime_v0_1A_from_12345.html",
+        "K線西遊記/kline-app-game/index_12345_Heart_UI_V8_5_1_audio_version_hotfix.html"
+      ]
+    },
+    "autopilot": {
+      "path": "K線西遊記/autopilot/",
+      "tracked_file_count": 9,
+      "role": "Autopilot inbox/out events interface",
+      "known_files": [
+        "K線西遊記/autopilot/inbox/20260120_manifest.json",
+        "K線西遊記/autopilot/out/events/20260120_events.json"
+      ],
+      "workflow_ref": ".github/workflows/autopilot_all.yml"
+    },
+    "engine": {
+      "path": "K線西遊記/engine/",
+      "tracked_file_count": 2,
+      "role": "Legacy/reference engine params in repo — not primary public engine",
+      "files": [
+        "K線西遊記/engine/kline_engine_v1_0.js",
+        "K線西遊記/engine/engine_params_v1_0.json"
+      ],
+      "note": "16888 temple also vendors kline_engine_v1_0.js locally"
+    },
+    "tools": {
+      "path": "K線西遊記/tools/",
+      "tracked_file_count": 5,
+      "role": "Data conversion orchestration + status writer + BTC UI",
+      "files": [
+        {
+          "path": "K線西遊記/tools/tx_btc_convert.py",
+          "role": "TX+BTC convert master orchestrator"
+        },
+        {
+          "path": "K線西遊記/tools/write_status.py",
+          "role": "Produces status.json interface"
+        },
+        {
+          "path": "K線西遊記/tools/btc_fetch_binance.py",
+          "role": "Binance BTC fetch fallback"
+        },
+        {
+          "path": "K線西遊記/tools/btc_1d_downloader_6cols.html",
+          "role": "BTC 1D downloader UI"
+        }
+      ]
+    },
+    "daily": {
+      "path": "K線西遊記/daily/",
+      "tracked_file_count": 20,
+      "role": "Daily creative output — posts, voice, subtitles",
+      "folder_pattern": "YYYY-MM-DD/ or YYYYMMDD/",
+      "triple_set_spec": [
+        "YYYY-MM-DD_post.md",
+        "YYYY-MM-DD_voice.txt",
+        "YYYY-MM-DD_subtitle.srt"
+      ],
+      "note": "Actual folders use mixed date formats; see scanned samples"
+    },
+    "assets": {
+      "path": "K線西遊記/assets/",
+      "tracked_file_count": 2,
+      "role": "Reusable visual assets — not daily timeline",
+      "readme": "K線西遊記/assets/README.md",
+      "ethers_placeholder": "K線西遊記/assets/js/PUT_ethers-5.7.2_HERE.txt"
+    },
+    "intro": {
+      "path": "K線西遊記/intro/",
+      "tracked_file_count": 2,
+      "files": [
+        "K線西遊記/intro/intro_voice_en.txt",
+        "K線西遊記/intro/intro_subtitle.srt"
+      ]
+    },
+    "archive": {
+      "path": "K線西遊記/archive/",
+      "tracked_file_count": 4,
+      "role": "Legacy universe gate and portal versions",
+      "files": [
+        "K線西遊記/archive/INDEX.html",
+        "K線西遊記/archive/index.html.v1.0",
+        "K線西遊記/archive/index.html.v1.1"
+      ],
+      "portal_archive_ref": "docs/civilization/PORTAL_INDEX.json#archive_portal"
+    }
+  },
+  "autopilot_pipeline": {
+    "handbook": "K線西遊記/HANDBOOK_AUTOPILOT.md",
+    "interface_spec": "K線西遊記/INTERFACE_SPEC.md",
+    "workflow": ".github/workflows/autopilot_all.yml",
+    "orchestrator": "K線西遊記/tools/tx_btc_convert.py",
+    "status_output": "K線西遊記/kline-engine-public/status/status.json",
+    "flow": [
+      "Drop TX CSV → kline-taifex/raw/",
+      "Drop BTC 6cols → kline-btc/raw/ (optional)",
+      "GitHub Actions runs tx_btc_convert.py",
+      "Optional: run_public.py if engine Release Asset available",
+      "write_status.py → status.json",
+      "Commit masters + output back to repo"
+    ],
+    "agents_cmd_ref": "AGENTS.md — python3 K線西遊記/tools/tx_btc_convert.py ..."
+  },
+  "events_interface": {
+    "source": "K線西遊記/README.md §5",
+    "planned_path": "K線西遊記/events/",
+    "planned_files": [
+      "gate_hit.json",
+      "burn.json",
+      "reward.json",
+      "heartbeat_daily.json"
+    ],
+    "status": "NOT_IN_REPO",
+    "note": "README documents reserved event hooks; folder not tracked yet"
+  },
+  "dev_entry": {
+    "source": "AGENTS.md",
+    "static_server": "python3 -m http.server 8080",
+    "urls": [
+      {
+        "label": "Galaxy portal",
+        "url": "http://localhost:8080/K線西遊記/index.html"
+      },
+      {
+        "label": "Temple 12345",
+        "url": "http://localhost:8080/K線西遊記/temples/12345/index.html"
+      },
+      {
+        "label": "Temple 16888",
+        "url": "http://localhost:8080/K線西遊記/temples/16888/index.html"
+      },
+      {
+        "label": "App Game",
+        "url": "http://localhost:8080/K線西遊記/kline-app-game/index.html"
+      }
+    ],
+    "production_base": "https://klineodyssey.github.io/kline-odyssey/"
+  },
+  "maps_policy": {
+    "rule": "Temples and Portal must reference docs/maps — no local universe map copies",
+    "source": "docs/maps/README.md",
+    "temple_ref_example": "K線西遊記/temples/12345/UNIVERSE_MAP_REFERENCE.md"
+  },
+  "civilization_refs": {
+    "portal": "docs/civilization/PORTAL_INDEX.json",
+    "kgen_chain": "docs/civilization/KGEN_INDEX.json",
+    "species": "docs/civilization/SPECIES_TREE.json",
+    "contracts": "docs/civilization/CONTRACT_INDEX.json"
+  },
+  "active_conflicts": [
+    {
+      "id": "readme_folder_structure_drift",
+      "readme_lists": [
+        "raw/",
+        "converter/",
+        "data/",
+        "out/"
+      ],
+      "actual_pipelines": [
+        "kline-taifex/",
+        "kline-btc/",
+        "kline-engine-public/"
+      ],
+      "note": "README §2 legacy structure vs actual autopilot layout — §A appendix is authoritative for pipelines"
+    },
+    {
+      "id": "events_folder_missing",
+      "documented": "K線西遊記/events/",
+      "status": "NOT_IN_REPO"
+    },
+    {
+      "id": "daily_filename_mixed_formats",
+      "spec": "YYYY-MM-DD_post.md triple set",
+      "actual": "Mixed YYYY-MM-DD and YYYYMMDD folder names in daily/"
+    },
+    {
+      "id": "temple_physics_local_copy",
+      "path": "K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "sot": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "policy": "No temple-local physics copy per governance"
+    }
+  ],
+  "governance": {
+    "mvp_focus": "K線西遊記/temples/12345/",
+    "do_not_edit_locked": [
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "archive_zones": [
+      "K線西遊記/archive/",
+      "K線西遊記/temples/12345/archive/",
+      "K線西遊記/temples/12345/modules/archive/",
+      "K線西遊記/temples/16888/archive/"
+    ]
+  }
+}

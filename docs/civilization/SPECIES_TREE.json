@@ -1,0 +1,874 @@
+{
+  "id": "CIVILIZATION_SPECIES_TREE",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "neural graph + DNA relations + civilization indices cross-ref",
+    "sources": [
+      "neural/CIVILIZATION_GRAPH.json",
+      "neural/DNA_RELATIONS.json",
+      "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+      "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+    ],
+    "scanned_at_utc": "2026-06-06T22:28:48.181Z"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "sibling_indices": [
+    "docs/civilization/TEMPLE_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/FRONTEND_INDEX.json"
+  ],
+  "biology_constitution": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+  "physics_source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+  "taxonomy_levels": [
+    "domain",
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "cell",
+    "organ",
+    "runtime",
+    "civilization"
+  ],
+  "domain_root": {
+    "domain": "KGENVERSE",
+    "kingdom": "FinancialLifeform",
+    "note": "12345 and 16888 have explicit taxonomy sources; other civilization-level taxonomy is derived from existing Phase 1 indices or marked UNKNOWN when no authoritative taxonomy exists"
+  },
+  "taxonomy_governance": {
+    "levels": [
+      "domain",
+      "kingdom",
+      "phylum",
+      "class",
+      "order",
+      "family",
+      "genus",
+      "species"
+    ],
+    "source_status_values": [
+      "EXPLICIT",
+      "DERIVED_FROM_EXISTING_INDEX",
+      "MISSING/UNKNOWN"
+    ],
+    "rules": [
+      "Do not infer taxonomy solely from filenames.",
+      "Prefer explicit metadata in DNA/runtime genome, life manifests, authoritative biology docs, contract declarations/comments, and existing Phase 1 civilization indices.",
+      "If an index records role-derived taxonomy without an independent DNA or authoritative taxonomy source, preserve it as DERIVED_FROM_EXISTING_INDEX rather than upgrading it to EXPLICIT.",
+      "If no source provides all eight taxonomy ranks, use UNKNOWN values and document the gap."
+    ],
+    "primary_sources_checked": [
+      "K線西遊記/temples/12345/RUNTIME_GENOME.json#taxonomy",
+      "K線西遊記/temples/12345/LIFE_MANIFEST.json#all_files.taxonomy",
+      "neural/DNA_RELATIONS.json#species_12345.taxonomy",
+      "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md#2",
+      "docs/civilization/TEMPLE_12345_INDEX.json#species.taxonomy",
+      "docs/civilization/TEMPLE_16888_INDEX.json#species.taxonomy",
+      "docs/civilization/TEMPLE_108000_INDEX.json#species.taxonomy",
+      "docs/civilization/CIVILIZATION_11520_INDEX.json#species.taxonomy",
+      "docs/civilization/CIVILIZATION_18888_INDEX.json#species.taxonomy",
+      "docs/civilization/FRONTEND_INDEX.json",
+      "docs/civilization/PORTAL_INDEX.json",
+      "docs/civilization/CONTRACT_INDEX.json",
+      "docs/civilization/KGEN_INDEX.json"
+    ]
+  },
+  "biological_taxonomy_tree": {
+    "description": "Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species tree for civilization-level lifeforms and explicit portal/frontend bridge lifeforms.",
+    "domain": "KGENVERSE",
+    "kingdoms": {
+      "FinancialLifeform": {
+        "TempleRuntime": {
+          "WukongSystem": {
+            "HeartEngine": {
+              "MorphDNA": {
+                "RuntimeMain": {
+                  "12345": {
+                    "source_status": "EXPLICIT",
+                    "sources": [
+                      "K線西遊記/temples/12345/RUNTIME_GENOME.json#taxonomy",
+                      "neural/DNA_RELATIONS.json#species_12345.taxonomy",
+                      "docs/civilization/TEMPLE_12345_INDEX.json#species.taxonomy"
+                    ],
+                    "refs": [
+                      "docs/civilization/TEMPLE_12345_INDEX.json",
+                      "docs/civilization/CONTRACT_INDEX.json#12345",
+                      "docs/civilization/FRONTEND_INDEX.json#primary_mvp_12345",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.12345"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "BrainSystem": {
+            "BrainEngine": {
+              "ExchangeDNA": {
+                "BrainExchange": {
+                  "11520": {
+                    "source_status": "DERIVED_FROM_EXISTING_INDEX",
+                    "sources": [
+                      "docs/civilization/CIVILIZATION_11520_INDEX.json#species.taxonomy",
+                      "docs/civilization/SPECIES_TREE.json#species.11520.taxonomy"
+                    ],
+                    "note": "Dedicated index cites neural/CIVILIZATION_GRAPH.json + SOP role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 11520.",
+                    "refs": [
+                      "docs/civilization/CIVILIZATION_11520_INDEX.json",
+                      "docs/civilization/CONTRACT_INDEX.json#11520",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.11520"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "TreasurySystem": {
+            "DeityBank": {
+              "DivineDNA": {
+                "LingxiaoBank": {
+                  "18888": {
+                    "source_status": "DERIVED_FROM_EXISTING_INDEX",
+                    "sources": [
+                      "docs/civilization/CIVILIZATION_18888_INDEX.json#species.taxonomy",
+                      "docs/civilization/SPECIES_TREE.json#species.18888.taxonomy"
+                    ],
+                    "note": "Dedicated index cites neural/CIVILIZATION_GRAPH.json + SOP role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 18888.",
+                    "refs": [
+                      "docs/civilization/CIVILIZATION_18888_INDEX.json",
+                      "docs/civilization/CONTRACT_INDEX.json#18888",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.18888"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "MarsColonySystem": {
+            "SeatEngine": {
+              "MarsDNA": {
+                "MarsSeats": {
+                  "108000": {
+                    "source_status": "DERIVED_FROM_EXISTING_INDEX",
+                    "sources": [
+                      "docs/civilization/TEMPLE_108000_INDEX.json#species.taxonomy",
+                      "docs/civilization/SPECIES_TREE.json#species.108000.taxonomy"
+                    ],
+                    "note": "Dedicated index marks taxonomy as inferred from CIVILIZATION_GRAPH role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 108000.",
+                    "refs": [
+                      "docs/civilization/TEMPLE_108000_INDEX.json",
+                      "docs/civilization/CONTRACT_INDEX.json#108000",
+                      "docs/civilization/FRONTEND_INDEX.json#temple_108000_frontend",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.108000"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "BridgeRuntime": {
+          "PortalShell": {
+            "EntryBridge": {
+              "PrimeForgeLife": {
+                "KGEN": {
+                  "12345.html": {
+                    "source_status": "EXPLICIT",
+                    "sources": [
+                      "K線西遊記/temples/12345/LIFE_MANIFEST.json#all_files[path=/12345.html].taxonomy",
+                      "docs/civilization/FRONTEND_INDEX.json#bridge_12345_html_registry",
+                      "docs/civilization/PORTAL_INDEX.json#bridges"
+                    ],
+                    "refs": [
+                      "docs/civilization/FRONTEND_INDEX.json#bridge_12345_html_registry",
+                      "docs/civilization/PORTAL_INDEX.json#bridges"
+                    ]
+                  },
+                  "wallet-12345.html": {
+                    "source_status": "EXPLICIT",
+                    "sources": [
+                      "K線西遊記/temples/12345/LIFE_MANIFEST.json#all_files[path=/wallet-12345.html].taxonomy",
+                      "docs/civilization/FRONTEND_INDEX.json#wallet_html_registry"
+                    ],
+                    "refs": [
+                      "docs/civilization/FRONTEND_INDEX.json#wallet_html_registry"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "UNKNOWN": {
+          "UNKNOWN": {
+            "UNKNOWN": {
+              "UNKNOWN": {
+                "UNKNOWN": {
+                  "8895": {
+                    "source_status": "MISSING/UNKNOWN",
+                    "sources": [
+                      "neural/CIVILIZATION_GRAPH.json#civilizations.8895",
+                      "docs/civilization/TEMPLE_INDEX.json#graph_only_civilizations.8895"
+                    ],
+                    "missing": [
+                      "domain/kingdom/phylum/class/order/family/genus/species from DNA or authoritative taxonomy source"
+                    ],
+                    "note": "Graph node exists, but no temple, contract, frontend, LIFE_MANIFEST, RUNTIME_GENOME, or dedicated authoritative taxonomy was found."
+                  },
+                  "20888": {
+                    "source_status": "MISSING/UNKNOWN",
+                    "sources": [
+                      "neural/CIVILIZATION_GRAPH.json#civilizations.20888",
+                      "docs/civilization/TEMPLE_INDEX.json#graph_only_civilizations.20888"
+                    ],
+                    "missing": [
+                      "domain/kingdom/phylum/class/order/family/genus/species from DNA or authoritative taxonomy source"
+                    ],
+                    "note": "Graph node exists, but no temple, contract, frontend, LIFE_MANIFEST, RUNTIME_GENOME, or dedicated authoritative taxonomy was found."
+                  },
+                  "8888": {
+                    "source_status": "MISSING/UNKNOWN",
+                    "sources": [
+                      "docs/civilization/CONTRACT_INDEX.json#8888",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.8888"
+                    ],
+                    "missing": [
+                      "domain/kingdom/phylum/class/order/family/genus/species from DNA or authoritative taxonomy source"
+                    ],
+                    "note": "Contract and fee route exist, but no explicit biological taxonomy source was found in the scanned docs/manifests."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CivilizationLifeform": {
+        "RuntimeOrganism": {
+          "HyperMembraneSpecies": {
+            "UFORuntime": {
+              "PrimeForgeLife": {
+                "KGEN16888": {
+                  "MoonCockpit": {
+                    "source_status": "EXPLICIT",
+                    "sources": [
+                      "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md#2",
+                      "docs/civilization/TEMPLE_16888_INDEX.json#species.taxonomy",
+                      "docs/civilization/SPECIES_TREE.json#species.16888.taxonomy"
+                    ],
+                    "refs": [
+                      "docs/civilization/TEMPLE_16888_INDEX.json",
+                      "docs/civilization/CONTRACT_INDEX.json#16888",
+                      "docs/civilization/FRONTEND_INDEX.json#temple_16888_frontend",
+                      "docs/civilization/KGEN_INDEX.json#civilization_contract_map.16888"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dependency_tree": {
+    "description": "Directed depends_on edges from neural/CIVILIZATION_GRAPH.json",
+    "roots": [
+      "11520",
+      "18888"
+    ],
+    "core": "12345",
+    "ascii": [
+      "11520 (Brain) ──────┐",
+      "18888 (Treasury) ───┼──→ 12345 (Heart Core / PRIMARY_MVP)",
+      "                    │         ├──→ 16888 (UFO Cockpit)",
+      "                    │         └──→ 20888 (Fire Realm)",
+      "                    ├──→ 108000 (Mars Seats)",
+      "                    └──→ 8895 (Shadow Bank)",
+      "8888 (Gaolaozhuang) — contract-only; 16888 fee routes; not in CIVILIZATION_GRAPH"
+    ],
+    "edges": [
+      {
+        "from": "11520",
+        "to": "12345",
+        "relation": "depends_on"
+      },
+      {
+        "from": "18888",
+        "to": "12345",
+        "relation": "depends_on"
+      },
+      {
+        "from": "12345",
+        "to": "16888",
+        "relation": "depends_on"
+      },
+      {
+        "from": "12345",
+        "to": "20888",
+        "relation": "depends_on"
+      },
+      {
+        "from": "18888",
+        "to": "108000",
+        "relation": "depends_on"
+      },
+      {
+        "from": "18888",
+        "to": "8895",
+        "relation": "depends_on"
+      },
+      {
+        "from": "16888",
+        "to": "8888",
+        "relation": "fee_route",
+        "source": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+        "note": "5% pool duel fee to treasury8888; 8888 not a graph node"
+      }
+    ]
+  },
+  "organ_mount_tree": {
+    "description": "Runtime organ mount permissions from CIVILIZATION_GRAPH can_mount",
+    "mounts": [
+      {
+        "species": "11520",
+        "can_mount": [
+          "runtime-brain"
+        ]
+      },
+      {
+        "species": "18888",
+        "can_mount": [
+          "runtime-heart"
+        ]
+      },
+      {
+        "species": "12345",
+        "can_mount": [
+          "16888",
+          "runtime-heart",
+          "runtime-boundary"
+        ]
+      },
+      {
+        "species": "16888",
+        "can_mount": [
+          "runtime-hud",
+          "runtime-sphere"
+        ]
+      }
+    ],
+    "generic_organs": [
+      "runtime-main",
+      "runtime-heart",
+      "runtime-brain",
+      "runtime-boundary",
+      "runtime-autopilot",
+      "runtime-sphere",
+      "runtime-hud"
+    ],
+    "species_12345_organ_ref": "neural/ORGAN_INDEX.json#species_12345"
+  },
+  "dna_compatibility": {
+    "source": "neural/DNA_RELATIONS.json#compatibility",
+    "matrix": {
+      "UFOCockpit": [
+        "HeartRuntime",
+        "BrainRuntime",
+        "BoundaryRuntime",
+        "SphereRuntime",
+        "HUDRuntime"
+      ],
+      "HeartRuntime": [
+        "BrainRuntime",
+        "TreasuryRuntime",
+        "BoundaryRuntime"
+      ],
+      "TreasuryRuntime": [
+        "HeartRuntime",
+        "BankRuntime"
+      ],
+      "BrainRuntime": [
+        "HeartRuntime",
+        "AutopilotRuntime",
+        "NeuralRuntime"
+      ]
+    }
+  },
+  "species": {
+    "12345": {
+      "id": "12345",
+      "name": "五指山悟空財神殿",
+      "name_en": "Wukong Heart Temple",
+      "biology_type": "Heart Civilization",
+      "role": "Universe Core / Heart Runtime",
+      "status": "PRIMARY_MVP",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": true,
+        "contract_file": true,
+        "frontend_entry": true,
+        "life_manifest": true,
+        "runtime_genome": true
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "TempleRuntime",
+        "class": "WukongSystem",
+        "order": "HeartEngine",
+        "family": "MorphDNA",
+        "genus": "RuntimeMain",
+        "species": "12345",
+        "source": "neural/DNA_RELATIONS.json#species_12345",
+        "source_status": "EXPLICIT",
+        "sources": [
+          "K線西遊記/temples/12345/RUNTIME_GENOME.json#taxonomy",
+          "neural/DNA_RELATIONS.json#species_12345.taxonomy",
+          "docs/civilization/TEMPLE_12345_INDEX.json#species.taxonomy"
+        ]
+      },
+      "physics": {
+        "k_index": 12345,
+        "coupling_c_approx": 0.936,
+        "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+      },
+      "depends_on": [
+        "11520",
+        "18888"
+      ],
+      "feeds": [
+        "16888",
+        "20888"
+      ],
+      "can_mount": [
+        "16888",
+        "runtime-heart",
+        "runtime-boundary"
+      ],
+      "refs": {
+        "temple": "docs/civilization/TEMPLE_INDEX.json#12345",
+        "contract": "docs/civilization/CONTRACT_INDEX.json#12345",
+        "frontend": "docs/civilization/FRONTEND_INDEX.json#primary_mvp_12345",
+        "life_manifest": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "runtime_genome": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+        "entry": "K線西遊記/temples/12345/index.html"
+      },
+      "dual_track_status": "TRANSITION",
+      "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC"
+    },
+    "16888": {
+      "id": "16888",
+      "name": "廣寒宮",
+      "name_en": "Guanghan Palace",
+      "biology_type": "UFO Civilization",
+      "role": "UFO Cockpit / Visualization Runtime",
+      "status": "ACTIVE",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": true,
+        "contract_file": true,
+        "frontend_entry": true,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "HyperMembraneSpecies",
+        "order": "UFORuntime",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN16888",
+        "species": "MoonCockpit",
+        "source": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md#2",
+        "source_status": "EXPLICIT",
+        "sources": [
+          "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md#2",
+          "docs/civilization/TEMPLE_16888_INDEX.json#species.taxonomy"
+        ]
+      },
+      "physics": {
+        "k_index": 16888,
+        "coupling_c_approx": 1.2813,
+        "anchor": "Moon distance scale — 16888 = 384400 km",
+        "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+      },
+      "depends_on": [
+        "12345"
+      ],
+      "feeds": [],
+      "can_mount": [
+        "runtime-hud",
+        "runtime-sphere"
+      ],
+      "refs": {
+        "temple": "docs/civilization/TEMPLE_INDEX.json#16888",
+        "contract": "docs/civilization/CONTRACT_INDEX.json#16888",
+        "frontend": "docs/civilization/FRONTEND_INDEX.json#temple_16888_frontend",
+        "entry": "K線西遊記/temples/16888/index.html"
+      }
+    },
+    "11520": {
+      "id": "11520",
+      "name": "花果山台灣交易所",
+      "name_en": "Huaguoshan Taiwan Brain Exchange",
+      "biology_type": "Brain Civilization",
+      "role": "Universe Brain",
+      "status": "GRAPH_ONLY",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": false,
+        "contract_file": true,
+        "frontend_entry": false,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "TempleRuntime",
+        "class": "BrainSystem",
+        "order": "BrainEngine",
+        "family": "ExchangeDNA",
+        "genus": "BrainExchange",
+        "species": "11520",
+        "source": "docs/civilization/CIVILIZATION_11520_INDEX.json#species.taxonomy",
+        "source_status": "DERIVED_FROM_EXISTING_INDEX",
+        "sources": [
+          "docs/civilization/CIVILIZATION_11520_INDEX.json#species.taxonomy"
+        ],
+        "derivation_note": "Dedicated index cites neural/CIVILIZATION_GRAPH.json + SOP role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 11520."
+      },
+      "physics": {
+        "k_index": 11520,
+        "coupling_c_approx": 0.874,
+        "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+      },
+      "depends_on": [],
+      "feeds": [
+        "12345"
+      ],
+      "can_mount": [
+        "runtime-brain"
+      ],
+      "refs": {
+        "contract": "docs/civilization/CONTRACT_INDEX.json#11520"
+      }
+    },
+    "18888": {
+      "id": "18888",
+      "name": "靈霄寶殿神明銀行",
+      "name_en": "Lingxiao Deity Bank",
+      "biology_type": "Divine Treasury Civilization",
+      "role": "Divine Treasury / Civilization Mass",
+      "status": "GRAPH_ONLY",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": false,
+        "contract_file": true,
+        "frontend_entry": false,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "TempleRuntime",
+        "class": "TreasurySystem",
+        "order": "DeityBank",
+        "family": "DivineDNA",
+        "genus": "LingxiaoBank",
+        "species": "18888",
+        "source": "docs/civilization/CIVILIZATION_18888_INDEX.json#species.taxonomy",
+        "source_status": "DERIVED_FROM_EXISTING_INDEX",
+        "sources": [
+          "docs/civilization/CIVILIZATION_18888_INDEX.json#species.taxonomy"
+        ],
+        "derivation_note": "Dedicated index cites neural/CIVILIZATION_GRAPH.json + SOP role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 18888."
+      },
+      "physics": {
+        "k_index": 18888,
+        "coupling_c_approx": 1.433,
+        "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+      },
+      "depends_on": [],
+      "feeds": [
+        "12345",
+        "108000",
+        "8895"
+      ],
+      "can_mount": [
+        "runtime-heart"
+      ],
+      "refs": {
+        "contract": "docs/civilization/CONTRACT_INDEX.json#18888",
+        "treasury": "docs/civilization/TREASURY_INDEX.json#18888_lingxiao_divine_treasury"
+      }
+    },
+    "108000": {
+      "id": "108000",
+      "name": "花果山火星齊天豪宅",
+      "name_en": "Mars Villa / Mars Seats",
+      "biology_type": "Mars Seat Civilization",
+      "role": "Mars Civilization / Seat Runtime",
+      "status": "STUB",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": true,
+        "contract_file": true,
+        "frontend_entry": true,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "TempleRuntime",
+        "class": "MarsColonySystem",
+        "order": "SeatEngine",
+        "family": "MarsDNA",
+        "genus": "MarsSeats",
+        "species": "108000",
+        "source": "docs/civilization/TEMPLE_108000_INDEX.json#species.taxonomy",
+        "source_status": "DERIVED_FROM_EXISTING_INDEX",
+        "sources": [
+          "docs/civilization/TEMPLE_108000_INDEX.json#species.taxonomy"
+        ],
+        "derivation_note": "Dedicated index marks taxonomy as inferred from CIVILIZATION_GRAPH role; no LIFE_MANIFEST/RUNTIME_GENOME taxonomy exists for 108000."
+      },
+      "physics": {
+        "k_index": 108000,
+        "coupling_c_approx": 8.19,
+        "source": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md"
+      },
+      "depends_on": [
+        "18888"
+      ],
+      "feeds": [],
+      "can_mount": [],
+      "refs": {
+        "temple": "docs/civilization/TEMPLE_INDEX.json#108000",
+        "contract": "docs/civilization/CONTRACT_INDEX.json#108000",
+        "frontend": "docs/civilization/FRONTEND_INDEX.json#temple_108000_frontend",
+        "entry": "K線西遊記/temples/108000/index.html"
+      }
+    },
+    "8895": {
+      "id": "8895",
+      "name": "雲棧洞地下錢莊",
+      "name_en": "Yunzhan Cave Shadow Bank",
+      "biology_type": "Shadow Bank Civilization",
+      "role": "Shadow Bank / Underground Liquidity",
+      "status": "GRAPH_ONLY",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": false,
+        "contract_file": false,
+        "frontend_entry": false,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "UNKNOWN",
+        "phylum": "UNKNOWN",
+        "class": "UNKNOWN",
+        "order": "UNKNOWN",
+        "family": "UNKNOWN",
+        "genus": "UNKNOWN",
+        "species": "8895",
+        "source": "neural/CIVILIZATION_GRAPH.json#civilizations.8895",
+        "source_status": "MISSING/UNKNOWN",
+        "missing": [
+          "authoritative domain/kingdom/phylum/class/order/family/genus/species taxonomy"
+        ],
+        "previous_role_based_stub": {
+          "kingdom": "FinancialLifeform",
+          "phylum": "TempleRuntime",
+          "class": "ShadowBankSystem",
+          "order": "UndergroundLiquidity",
+          "family": "ShadowDNA",
+          "genus": "YunzhanBank"
+        }
+      },
+      "physics": {
+        "k_index": 8895,
+        "coupling_c_approx": null,
+        "note": "Not listed in Physics V1_6 coupling table"
+      },
+      "depends_on": [
+        "18888"
+      ],
+      "feeds": [],
+      "can_mount": [],
+      "refs": {}
+    },
+    "20888": {
+      "id": "20888",
+      "name": "火焰山",
+      "name_en": "Flame Mountain",
+      "biology_type": "High Volatility Civilization",
+      "role": "High Volatility Fire Realm",
+      "status": "GRAPH_ONLY",
+      "presence": {
+        "civilization_graph": true,
+        "temple_folder": false,
+        "contract_file": false,
+        "frontend_entry": false,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "UNKNOWN",
+        "phylum": "UNKNOWN",
+        "class": "UNKNOWN",
+        "order": "UNKNOWN",
+        "family": "UNKNOWN",
+        "genus": "UNKNOWN",
+        "species": "20888",
+        "source": "neural/CIVILIZATION_GRAPH.json#civilizations.20888",
+        "source_status": "MISSING/UNKNOWN",
+        "missing": [
+          "authoritative domain/kingdom/phylum/class/order/family/genus/species taxonomy"
+        ],
+        "previous_role_based_stub": {
+          "kingdom": "FinancialLifeform",
+          "phylum": "TempleRuntime",
+          "class": "VolatilityRealm",
+          "order": "FireEngine",
+          "family": "FlameDNA",
+          "genus": "FlameMountain"
+        }
+      },
+      "physics": {
+        "k_index": 20888,
+        "coupling_c_approx": null,
+        "note": "Not listed in Physics V1_6 coupling table"
+      },
+      "depends_on": [
+        "12345"
+      ],
+      "feeds": [],
+      "can_mount": [],
+      "refs": {}
+    },
+    "8888": {
+      "id": "8888",
+      "name": "高老莊",
+      "name_en": "Gaolaozhuang",
+      "biology_type": "Mortal Life Layer",
+      "role": "Mortal circulation / shop bonus treasury",
+      "status": "CONTRACT_ONLY",
+      "presence": {
+        "civilization_graph": false,
+        "temple_folder": false,
+        "contract_file": true,
+        "frontend_entry": false,
+        "life_manifest": false,
+        "runtime_genome": false
+      },
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "UNKNOWN",
+        "phylum": "UNKNOWN",
+        "class": "UNKNOWN",
+        "order": "UNKNOWN",
+        "family": "UNKNOWN",
+        "genus": "UNKNOWN",
+        "species": "8888",
+        "source": "docs/civilization/CONTRACT_INDEX.json#8888",
+        "source_status": "MISSING/UNKNOWN",
+        "missing": [
+          "authoritative domain/kingdom/phylum/class/order/family/genus/species taxonomy"
+        ],
+        "previous_role_based_stub": {
+          "kingdom": "FinancialLifeform",
+          "phylum": "MortalRuntime",
+          "class": "GaolaozhuangSystem",
+          "order": "TreasuryPool",
+          "family": "MortalDNA",
+          "genus": "Treasury8888"
+        }
+      },
+      "physics": {
+        "k_index": 8888,
+        "coupling_c_approx": null,
+        "note": "Not listed in Physics V1_6 coupling table"
+      },
+      "depends_on": [],
+      "feeds": [],
+      "can_mount": [],
+      "fee_receives_from": [
+        "16888"
+      ],
+      "refs": {
+        "contract": "docs/civilization/CONTRACT_INDEX.json#8888",
+        "treasury": "docs/civilization/TREASURY_INDEX.json#8888_gaolaozhuang_treasury"
+      },
+      "note": "Registered in whitepaper and contracts; absent from neural/CIVILIZATION_GRAPH.json. Treasury detail verifies source contents and 16888 fee route; do not infer version/status from filename alone."
+    }
+  },
+  "species_count": {
+    "total_registered": 8,
+    "in_civilization_graph": 7,
+    "with_temple_folder": 3,
+    "with_contract_file": 6,
+    "with_frontend_entry": 3,
+    "with_full_dna_files": 1,
+    "graph_only": 3,
+    "contract_only": 1
+  },
+  "protocol_mass": {
+    "note": "KGEN token as civilization mass substrate — not a species node",
+    "token_contract": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "deployed_address": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "biology_ref": "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md#6"
+  },
+  "mvp_lock": {
+    "primary_species": "12345",
+    "primary_path": "K線西遊記/temples/12345/",
+    "do_not_remove": [
+      "K線西遊記/temples/12345/modules/kgen-12345-runtime.js"
+    ]
+  },
+  "active_gaps": [
+    {
+      "id": "8888_not_in_graph",
+      "species": "8888",
+      "note": "Contract + whitepaper only; missing from CIVILIZATION_GRAPH"
+    },
+    {
+      "id": "8895_20888_no_artifacts",
+      "species": [
+        "8895",
+        "20888"
+      ],
+      "note": "Graph nodes with no temple, contract, or frontend in repo"
+    },
+    {
+      "id": "species_12345_taxonomy_only",
+      "note": "12345 has verified DNA/runtime genome taxonomy; 16888 has explicit biology constitution taxonomy; 11520/18888/108000 are derived from existing Phase 1 indices; 8895/20888/8888 remain UNKNOWN."
+    },
+    {
+      "id": "six_missing_organ_filenames",
+      "species": "12345",
+      "organs": [
+        "runtime-heart.js",
+        "runtime-brain.js",
+        "runtime-boundary.js",
+        "runtime-autopilot.js",
+        "runtime-sphere.js",
+        "runtime-hud.js"
+      ],
+      "report": "neural/MISSING_NEURAL_LINK_REPORT.md"
+    }
+  ]
+}

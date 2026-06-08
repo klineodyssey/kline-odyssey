@@ -1,0 +1,389 @@
+{
+  "id": "CIVILIZATION_BRAIN_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files",
+    "total_tracked_files": 507,
+    "scanned_at_utc": "2026-06-06T22:28:48.181Z"
+  },
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "brain_index": "docs/civilization/BRAIN_INDEX.json",
+    "rollcall": "docs/neural/CIVILIZATION_BRAIN_ROLLCALL.json"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "README_AI_FIRST.md",
+      "role": "AI civilization entry / human-readable index"
+    },
+    {
+      "step": 2,
+      "path": "docs/civilization/BRAIN_INDEX.json",
+      "role": "AI civilization brain index / machine-readable map"
+    },
+    {
+      "step": 3,
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+      "role": "core boot"
+    },
+    {
+      "step": 4,
+      "path": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      "role": "mother SOP"
+    },
+    {
+      "step": 5,
+      "path": "MASTER_CONTROL.md",
+      "role": "master control rules"
+    },
+    {
+      "step": 6,
+      "path": "docs/neural/CIVILIZATION_BRAIN_ROLLCALL.json",
+      "role": "civilization brain rollcall"
+    },
+    {
+      "step": 7,
+      "path": "neural/NEURAL_MAP.json",
+      "role": "neural path map"
+    },
+    {
+      "step": 8,
+      "path": "neural/ORGAN_INDEX.json",
+      "role": "organ index"
+    },
+    {
+      "step": 9,
+      "path": "neural/RUNTIME_DEPENDENCY.json",
+      "role": "runtime dependency tree"
+    },
+    {
+      "step": 10,
+      "path": "neural/CIVILIZATION_GRAPH.json",
+      "role": "civilization graph"
+    },
+    {
+      "step": 11,
+      "path": "neural/DNA_RELATIONS.json",
+      "role": "DNA relations"
+    },
+    {
+      "step": 12,
+      "path": "neural/MISSING_NEURAL_LINK_REPORT.md",
+      "role": "missing link / conflict report"
+    },
+    {
+      "step": 13,
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "role": "physics source of truth"
+    },
+    {
+      "step": 14,
+      "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "role": "universe map"
+    },
+    {
+      "step": 15,
+      "path": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+      "role": "12345 life manifest"
+    },
+    {
+      "step": 16,
+      "path": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+      "role": "12345 runtime genome"
+    },
+    {
+      "step": 17,
+      "path": "K線西遊記/temples/12345/index.html",
+      "role": "12345 primary runtime — read rollcall before edit"
+    }
+  ],
+  "source_of_truth": {
+    "physics": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+    "physics_superseded": "docs/physics/KGEN_Universe_Physics_Runtime_V1_2.md",
+    "universe_map": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "boot": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md",
+    "sop": "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+    "primary_runtime": "K線西遊記/temples/12345/index.html",
+    "primary_life_manifest": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+    "primary_runtime_genome": "K線西遊記/temples/12345/RUNTIME_GENOME.json"
+  },
+  "neural_layer": {
+    "map": "neural/NEURAL_MAP.json",
+    "organ_index": "neural/ORGAN_INDEX.json",
+    "runtime_dependency": "neural/RUNTIME_DEPENDENCY.json",
+    "civilization_graph": "neural/CIVILIZATION_GRAPH.json",
+    "dna_relations": "neural/DNA_RELATIONS.json",
+    "missing_report": "neural/MISSING_NEURAL_LINK_REPORT.md",
+    "phase": "PHASE_0_NEURAL_SYNC",
+    "version": "V1.1"
+  },
+  "zones": {
+    "temples": {
+      "path_prefix": "K線西遊記/temples/",
+      "tracked_file_count": 212,
+      "role": "Temple runtimes"
+    },
+    "kline_universe": {
+      "path_prefix": "K線西遊記/",
+      "tracked_file_count": 100,
+      "role": "Universe gate, pipelines, tools",
+      "index_ref": "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+      "temples_index_ref": "docs/civilization/TEMPLE_INDEX.json",
+      "note": "100 = non-temples under K線西遊記/; temples (212) indexed separately"
+    },
+    "kgen_chain": {
+      "path_prefix": "KGEN/",
+      "tracked_file_count": 41,
+      "role": "Contracts, scripts, on-chain runtime",
+      "index_ref": "docs/civilization/KGEN_INDEX.json"
+    },
+    "whitepaper": {
+      "path_prefix": "whitepaper/",
+      "tracked_file_count": 37,
+      "role": "Whitepapers and governance docs"
+    },
+    "wukong_temple": {
+      "path_prefix": "wukong-temple/",
+      "tracked_file_count": 28,
+      "role": "Standalone wukong temple site"
+    },
+    "neural": {
+      "path_prefix": "neural/",
+      "tracked_file_count": 7,
+      "role": "Neural index layer"
+    },
+    "docs_constitution": {
+      "path_prefixes": [
+        "docs/runtime/",
+        "docs/physics/",
+        "docs/biology/",
+        "docs/neural/",
+        "docs/maps/",
+        "docs/civilization/"
+      ],
+      "tracked_file_count": 12,
+      "role": "Universe constitution documents",
+      "frontend_index_ref": "docs/civilization/FRONTEND_INDEX.json#index_html_registry"
+    },
+    "archive": {
+      "path_prefix": "archive/",
+      "tracked_file_count": 10,
+      "role": "Dead cells / legacy versions"
+    }
+  },
+  "civilizations": {
+    "12345": {
+      "name": "五指山悟空財神殿",
+      "role": "Universe Core / Heart Runtime",
+      "status": "PRIMARY_MVP",
+      "entry": "K線西遊記/temples/12345/index.html",
+      "tracked_file_count": 190,
+      "dna": {
+        "life_manifest": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "runtime_genome": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+        "manifest": "K線西遊記/temples/12345/MANIFEST.json",
+        "version": "K線西遊記/temples/12345/VERSION"
+      },
+      "modules": "K線西遊記/temples/12345/modules/",
+      "dual_track": {
+        "status": "TRANSITION",
+        "official_prefix": "runtime-",
+        "legacy_prefix": "kgen-12345-",
+        "organ_index_ref": "neural/ORGAN_INDEX.json#species_12345",
+        "dependency_ref": "neural/RUNTIME_DEPENDENCY.json#temple_12345"
+      }
+    },
+    "16888": {
+      "name": "廣寒宮",
+      "role": "UFO Cockpit / Visualization Runtime",
+      "status": "ACTIVE",
+      "entry": "K線西遊記/temples/16888/index.html",
+      "tracked_file_count": 20
+    },
+    "108000": {
+      "name": "花果山火星齊天豪宅",
+      "role": "Mars Civilization / Seat Runtime",
+      "status": "STUB",
+      "entry": "K線西遊記/temples/108000/index.html",
+      "tracked_file_count": 2
+    },
+    "11520": {
+      "name": "花果山台灣交易所",
+      "role": "Universe Brain",
+      "status": "GRAPH_ONLY",
+      "entry": null,
+      "note": "Registered in CIVILIZATION_GRAPH; no temple folder in repo"
+    },
+    "18888": {
+      "name": "靈霄寶殿神明銀行",
+      "role": "Divine Treasury / Civilization Mass",
+      "status": "GRAPH_ONLY",
+      "entry": null,
+      "index_ref": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+      "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#18888_lingxiao_divine_treasury",
+      "note": "Registered in CIVILIZATION_GRAPH; no temple folder in repo"
+    },
+    "8888": {
+      "name": "高老莊",
+      "role": "Mortal circulation / shop bonus treasury",
+      "status": "CONTRACT_ONLY",
+      "entry": null,
+      "index_ref": "docs/civilization/TREASURY_INDEX.json#8888_gaolaozhuang_treasury",
+      "note": "Absent from CIVILIZATION_GRAPH; source-only Treasury contract exists and 16888 routes PoolDuel treasury fee to treasury8888."
+    }
+  },
+  "entry_points": [
+    {
+      "id": "universe_gate",
+      "path": "K線西遊記/index.html",
+      "role": "Galaxy universe gate Portal V2.1",
+      "index_ref": "docs/civilization/PORTAL_INDEX.json"
+    },
+    {
+      "id": "temple_12345",
+      "path": "K線西遊記/temples/12345/index.html",
+      "role": "Wukong heart temple primary life"
+    },
+    {
+      "id": "temple_16888",
+      "path": "K線西遊記/temples/16888/index.html",
+      "role": "Guanghan palace cockpit"
+    },
+    {
+      "id": "temple_108000",
+      "path": "K線西遊記/temples/108000/index.html",
+      "role": "Mars villa stub"
+    },
+    {
+      "id": "bridge_12345",
+      "path": "12345.html",
+      "role": "ASCII root temple entry bridge",
+      "index_ref": "docs/civilization/FRONTEND_INDEX.json#bridge_12345_html_registry"
+    },
+    {
+      "id": "bridge_wallet_social",
+      "path": "wallet.html",
+      "role": "Social wallet bridge",
+      "index_ref": "docs/civilization/FRONTEND_INDEX.json#wallet_html_registry"
+    },
+    {
+      "id": "bridge_wallet",
+      "path": "wallet-12345.html",
+      "role": "Wallet bridge"
+    },
+    {
+      "id": "wukong_temple",
+      "path": "wukong-temple/index.html",
+      "role": "Standalone wukong temple"
+    },
+    {
+      "id": "whitepaper_gate",
+      "path": "whitepaper/index.html",
+      "role": "Whitepaper entry"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "kline_taifex",
+      "path": "K線西遊記/kline-taifex/",
+      "tracked_file_count": 30,
+      "entry": "K線西遊記/kline-taifex/README.md"
+    },
+    {
+      "id": "kline_btc",
+      "path": "K線西遊記/kline-btc/",
+      "tracked_file_count": 6,
+      "entry": "K線西遊記/kline-btc/README.md"
+    },
+    {
+      "id": "kline_nasdaq",
+      "path": "K線西遊記/kline-nasdaq/",
+      "tracked_file_count": 1,
+      "entry": "K線西遊記/kline-nasdaq/README.md"
+    },
+    {
+      "id": "kline_engine_public",
+      "path": "K線西遊記/kline-engine-public/",
+      "tracked_file_count": 8,
+      "entry": "K線西遊記/kline-engine-public/README.md"
+    },
+    {
+      "id": "kline_app_game",
+      "path": "K線西遊記/kline-app-game/",
+      "tracked_file_count": 4,
+      "entry": "K線西遊記/kline-app-game/README.md"
+    },
+    {
+      "id": "autopilot",
+      "path": "K線西遊記/autopilot/",
+      "tracked_file_count": 9,
+      "entry": null
+    },
+    {
+      "id": "engine",
+      "path": "K線西遊記/engine/",
+      "tracked_file_count": 2,
+      "entry": null
+    },
+    {
+      "id": "tools",
+      "path": "K線西遊記/tools/",
+      "tracked_file_count": 5,
+      "entry": null
+    },
+    {
+      "id": "daily",
+      "path": "K線西遊記/daily/",
+      "tracked_file_count": 20,
+      "entry": null
+    }
+  ],
+  "mvp_lock": {
+    "primary_focus": "K線西遊記/temples/12345/",
+    "do_not_touch_without_approval": [
+      "K線西遊記/temples/12345/modules/kgen-12345-runtime.js"
+    ],
+    "archive_zones": [
+      "archive/",
+      "K線西遊記/temples/12345/archive/",
+      "K線西遊記/temples/12345/modules/archive/",
+      "wukong-temple/archive/"
+    ]
+  },
+  "governance": {
+    "forbidden_filename_patterns": [
+      "patch",
+      "hotfix",
+      "fix",
+      "stable",
+      "v10-",
+      "v104"
+    ],
+    "no_temple_local_physics_copy": true,
+    "no_temple_local_universe_map_copy": true,
+    "missing_file_policy": "Record in neural/MISSING_NEURAL_LINK_REPORT.md; do not invent originals"
+  },
+  "active_conflicts": {
+    "report": "neural/MISSING_NEURAL_LINK_REPORT.md",
+    "items": [
+      "physics_v1_2_vs_v1_6",
+      "dual_track_runtime_kgen",
+      "six_missing_neural_organ_filenames",
+      "version_drift_v10_47_to_v10_49",
+      "index_rollcall_stale",
+      "cancerous_module_names"
+    ],
+    "pending_decisions": "D1-D8"
+  },
+  "phase_status": {
+    "phase_0": "COMMITTED — PHASE_0_NEURAL_SYNC_V10.49.1",
+    "phase_1": "IN_PROGRESS — civilization index (README_AI_FIRST + BRAIN_INDEX)",
+    "phase_2": "PENDING — index rollcall / load order",
+    "phase_3": "PENDING — dual-track convergence"
+  }
+}

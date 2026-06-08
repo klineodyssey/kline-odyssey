@@ -1,0 +1,792 @@
+{
+  "id": "CIVILIZATION_FRONTEND_INDEX",
+  "version": "V1.1",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + index.html + wallet.html parse",
+    "scanned_at_utc": "2026-06-07T00:00:00Z",
+    "index_html_count": 12,
+    "wallet_html_count": 3,
+    "bridge_12345_html_count": 1,
+    "tracked_html_count": 27,
+    "zone_counts": {
+      "temple_12345_modules": {
+        "js": 69,
+        "css": 12,
+        "html": 0
+      },
+      "temple_16888": {
+        "js": 4,
+        "css": 0,
+        "html": 2
+      },
+      "temple_108000": {
+        "js": 1,
+        "css": 0,
+        "html": 1
+      },
+      "kline_universe": {
+        "js": 79,
+        "css": 12,
+        "html": 14
+      },
+      "wukong_temple": {
+        "js": 1,
+        "css": 0,
+        "html": 7
+      },
+      "whitepaper": {
+        "js": 0,
+        "css": 0,
+        "html": 1
+      },
+      "repo_root": {
+        "js": 93,
+        "css": 12,
+        "html": 27,
+        "note": "Root counts include all tracked paths under repo"
+      }
+    }
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "kline_zone_ref": "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+  "sibling_indices": [
+    "docs/civilization/KLINE_XIYOUJI_INDEX.json",
+    "docs/civilization/PORTAL_INDEX.json",
+    "docs/civilization/TEMPLE_INDEX.json",
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json"
+  ],
+  "index_html_registry": {
+    "note": "Canonical list of every tracked index.html (case-sensitive paths). Total: 12.",
+    "count": 12,
+    "entries": [
+      {
+        "id": "repo_root_index",
+        "path": "Index.html",
+        "filename_case": "Index.html",
+        "title": "KGEN 宇宙文明生命引擎（Markdown 著陸頁）",
+        "category": "REPO_ROOT_LANDING",
+        "format": "MARKDOWN_AS_HTML",
+        "status": "ACTIVE",
+        "role": "GitHub Pages root civilization landing",
+        "broken_links": [
+          "/K線西遊記/12345.html",
+          "/K線西遊記/11520.html",
+          "/K線西遊記/16888.html",
+          "/K線西遊記/18888.html"
+        ],
+        "corrected_links": [
+          "/12345.html"
+        ]
+      },
+      {
+        "id": "whitepaper_gate",
+        "path": "whitepaper/index.html",
+        "filename_case": "index.html",
+        "title": "Whitepaper Index｜宇宙白皮書總入口",
+        "category": "WHITEPAPER_GATE",
+        "format": "JEKYLL_FRONT_MATTER",
+        "status": "ACTIVE",
+        "role": "Whitepaper / constitution document portal",
+        "permalink": "/whitepaper/"
+      },
+      {
+        "id": "wukong_temple_main",
+        "path": "wukong-temple/index.html",
+        "filename_case": "index.html",
+        "title": "悟空財神殿・五指山神殿 V4.4.3 CHAIN",
+        "category": "STANDALONE_SITE",
+        "format": "MONOLITHIC_INLINE",
+        "status": "LEGACY",
+        "role": "Standalone Wukong temple PWA site",
+        "pwa_manifest": "wukong-temple/manifest.json",
+        "ui_version": "V4.4.3 CHAIN"
+      },
+      {
+        "id": "wukong_bookstore",
+        "path": "wukong-temple/bookstore/index.html",
+        "filename_case": "index.html",
+        "title": "悟空書城｜Wukong Bookstore",
+        "category": "STANDALONE_SITE",
+        "format": "LIGHTWEIGHT_HTML",
+        "status": "ACTIVE",
+        "role": "KGEN content exchange / bookstore entry",
+        "parent_site": "wukong-temple/index.html"
+      },
+      {
+        "id": "wukong_mars_villa",
+        "path": "wukong-temple/mars-villa/index.html",
+        "filename_case": "index.html",
+        "title": "花果山火星・齊天豪宅｜Mars Villa",
+        "category": "STANDALONE_SITE",
+        "format": "LIGHTWEIGHT_HTML",
+        "status": "STUB",
+        "role": "Mars villa standalone page",
+        "parent_site": "wukong-temple/index.html"
+      },
+      {
+        "id": "kline_universe_gate",
+        "path": "K線西遊記/index.html",
+        "filename_case": "index.html",
+        "title": "K線西遊記｜銀河宇宙入口 Portal V2.1",
+        "category": "UNIVERSE_GATE",
+        "format": "MONOLITHIC_INLINE",
+        "status": "PRIMARY",
+        "role": "Galaxy universe gate — primary portal",
+        "portal_version": "V2.1",
+        "index_ref": "docs/civilization/PORTAL_INDEX.json",
+        "dev_url": "http://localhost:8080/K線西遊記/index.html"
+      },
+      {
+        "id": "kline_archive_gate",
+        "path": "K線西遊記/archive/INDEX.html",
+        "filename_case": "INDEX.html",
+        "title": "K線西遊記｜銀河宇宙入口 Portal V2.0.2",
+        "category": "ARCHIVE_GATE",
+        "format": "MONOLITHIC_INLINE",
+        "status": "ARCHIVE",
+        "role": "Legacy galaxy gate with 16888 LIVE integration notes",
+        "portal_version": "V2.0.2",
+        "superseded_by": "K線西遊記/index.html"
+      },
+      {
+        "id": "kline_btc_pipeline",
+        "path": "K線西遊記/kline-btc/index.html",
+        "filename_case": "index.html",
+        "title": "K線西遊記・比特幣篇",
+        "category": "PIPELINE_FRONTEND",
+        "format": "PLACEHOLDER_HTML",
+        "status": "STUB",
+        "role": "BTC pipeline frontend placeholder",
+        "data_readme": "K線西遊記/kline-btc/README.md"
+      },
+      {
+        "id": "kline_app_game",
+        "path": "K線西遊記/kline-app-game/index.html",
+        "filename_case": "index.html",
+        "title": "KLINE App Game BTC 4D Cockpit｜KLINE-APP-GAME-BTC-4D-V0.1A",
+        "category": "APP_GAME",
+        "format": "MONOLITHIC_INLINE",
+        "status": "ACTIVE",
+        "role": "Guest trial web game — forked from 12345 Heart UI V8.5.1",
+        "product_version": "KLINE-APP-GAME-BTC-4D-V0.1A",
+        "variants": [
+          "K線西遊記/kline-app-game/index_kline_app_game_btc_4d_runtime_v0_1A_from_12345.html",
+          "K線西遊記/kline-app-game/index_12345_Heart_UI_V8_5_1_audio_version_hotfix.html"
+        ]
+      },
+      {
+        "id": "temple_12345",
+        "path": "K線西遊記/temples/12345/index.html",
+        "filename_case": "index.html",
+        "title": "KGEN-12345-HEART-UI-V10.47.1",
+        "category": "TEMPLE_RUNTIME",
+        "format": "MODULAR_DUAL_TRACK",
+        "status": "PRIMARY_MVP",
+        "role": "Wukong Heart Temple — primary civilization runtime",
+        "civilization_id": "12345",
+        "ui_version": "KGEN-12345-HEART-UI-V10.47.1",
+        "rollcall_version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+        "index_ref": "docs/civilization/TEMPLE_12345_INDEX.json",
+        "dev_url": "http://localhost:8080/K線西遊記/temples/12345/index.html",
+        "governance": "DO_NOT_EDIT_WITHOUT_ROLLCALL"
+      },
+      {
+        "id": "temple_16888",
+        "path": "K線西遊記/temples/16888/index.html",
+        "filename_case": "index.html",
+        "title": "KGEN 16888 自我演化金融生命體｜廣寒宮｜v3.7.12",
+        "category": "TEMPLE_RUNTIME",
+        "format": "MONOLITHIC_INLINE",
+        "status": "ACTIVE",
+        "role": "Guanghan Palace UFO cockpit",
+        "civilization_id": "16888",
+        "ui_version": "v3.7.12",
+        "index_ref": "docs/civilization/TEMPLE_16888_INDEX.json",
+        "og_variant": "K線西遊記/temples/16888/index_16888_Guanghan_V3_1_0_OG.html",
+        "dev_url": "http://localhost:8080/K線西遊記/temples/16888/index.html"
+      },
+      {
+        "id": "temple_108000",
+        "path": "K線西遊記/temples/108000/index.html",
+        "filename_case": "index.html",
+        "title": "108000 火星殖民艙・齊天豪宅席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.2",
+        "category": "TEMPLE_RUNTIME",
+        "format": "MONOLITHIC_INLINE",
+        "status": "STUB",
+        "role": "Mars Seats colony cockpit",
+        "civilization_id": "108000",
+        "product_id": "KGEN-108000-MARSSEATS-UI",
+        "ui_version": "V1.0.2",
+        "index_ref": "docs/civilization/TEMPLE_108000_INDEX.json",
+        "portal_gap": "Portal node map shows MarsSeats but no href to this entry"
+      }
+    ],
+    "by_category": {
+      "UNIVERSE_GATE": 1,
+      "ARCHIVE_GATE": 1,
+      "TEMPLE_RUNTIME": 3,
+      "PIPELINE_FRONTEND": 1,
+      "APP_GAME": 1,
+      "WHITEPAPER_GATE": 1,
+      "REPO_ROOT_LANDING": 1,
+      "STANDALONE_SITE": 3
+    },
+    "by_status": {
+      "PRIMARY_MVP": 1,
+      "PRIMARY": 1,
+      "ACTIVE": 5,
+      "STUB": 3,
+      "ARCHIVE": 1,
+      "LEGACY": 1
+    }
+  },
+  "wallet_html_registry": {
+    "note": "Wallet bridge pages — ASCII root paths for LINE/Facebook/in-app browsers. Not temple runtime.",
+    "count": 3,
+    "primary_social_bridge": "wallet.html",
+    "entries": [
+      {
+        "id": "wallet_social_bridge",
+        "path": "wallet.html",
+        "title": "KGEN Wallet Bridge｜前往悟空財神殿",
+        "category": "SOCIAL_WALLET_BRIDGE",
+        "format": "LIGHTWEIGHT_BRIDGE",
+        "status": "ACTIVE",
+        "role": "Facebook / LINE / in-app browser wallet relay — ASCII root path",
+        "product_id": "KGEN-SOCIAL-WALLET-BRIDGE",
+        "version": "KGEN-SOCIAL-WALLET-BRIDGE-V1.0.0",
+        "build": "20260512-V1.0.0-SOCIAL-WALLET-TO-TEMPLE",
+        "og_url": "https://klineodyssey.github.io/kline-odyssey/wallet.html",
+        "default_target": "12345",
+        "query_params": {
+          "to": {
+            "values": [
+              "12345",
+              "portal",
+              "16888"
+            ],
+            "default": "12345",
+            "description": "Select redirect destination"
+          },
+          "manual": {
+            "value": "1",
+            "description": "Disable auto-redirect"
+          },
+          "auto": {
+            "value": "1",
+            "description": "Force auto-redirect when not in social UA"
+          }
+        },
+        "targets": {
+          "12345": {
+            "url": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?v=890",
+            "cache_bust": "v=890"
+          },
+          "portal": {
+            "url": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html?v=220",
+            "cache_bust": "v=220"
+          },
+          "16888": {
+            "url": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/16888/index.html?v=374",
+            "cache_bust": "v=374"
+          }
+        },
+        "wallet_deeplinks": [
+          "MetaMask app.link/dapp/",
+          "Trust Wallet open_url",
+          "Coinbase Wallet cb-w.com/dapp"
+        ],
+        "auto_redirect": {
+          "wallet_browser": "650ms replace if window.ethereum or wallet UA",
+          "non_social_auto": "900ms if ?auto=1"
+        },
+        "features": [
+          "No-cache meta headers",
+          "URL-encoded  K線西遊記 path for deep links",
+          "LINE official link CTA"
+        ],
+        "not_in_life_manifest": true,
+        "sop_note": "Newer than wallet-12345 SOP docs; social-first multi-destination bridge"
+      },
+      {
+        "id": "wallet_12345_root",
+        "path": "wallet-12345.html",
+        "title": "KGEN 12345 Wallet Bridge｜KGEN-12345-V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "category": "TEMPLE_WALLET_BRIDGE",
+        "format": "LIGHTWEIGHT_BRIDGE",
+        "status": "ACTIVE",
+        "role": "12345-specific ASCII root bridge — SOP-registered PortalShell",
+        "product_id": "KGEN-12345-WALLET-BRIDGE",
+        "version": "V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "build": "20260518-V10.42.0-2D-ANTIGRAVITY-DECORATION",
+        "taxonomy_class": "PortalShell",
+        "life_type": "Bridge HyperMembrane Lifeform",
+        "life_manifest_ref": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "redirects_to": "K線西遊記/temples/12345/index.html",
+        "absolute_target": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+        "sop_rule": "Root bridge only; must not duplicate temple app",
+        "sop_refs": [
+          "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md",
+          "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_CURRENT.md"
+        ],
+        "used_by_temple_runtime": "12345 index references wallet-12345.html for multi-wallet hub"
+      },
+      {
+        "id": "wallet_12345_temple",
+        "path": "K線西遊記/temples/12345/wallet-12345.html",
+        "title": "KGEN 12345 Wallet Bridge｜KGEN-12345-V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "category": "TEMPLE_WALLET_BRIDGE",
+        "format": "LIGHTWEIGHT_BRIDGE",
+        "status": "ACTIVE",
+        "role": "Temple-relative copy of root wallet-12345 bridge",
+        "product_id": "KGEN-12345-WALLET-BRIDGE",
+        "version": "V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "redirects_to": "K線西遊記/temples/12345/index.html",
+        "duplicate_of": "wallet-12345.html",
+        "diff_note": "Root copy has PRIMEFORGE_LIFE_HEADER_V1 block; temple copy omits life header"
+      }
+    ],
+    "related_docs_not_html": [
+      {
+        "path": "whitepaper/Donation_Wallet.md",
+        "role": "Donation wallet documentation"
+      },
+      {
+        "path": "whitepaper/donation/Donation_Wallet.md",
+        "role": "Donation wallet doc (subdir)"
+      }
+    ],
+    "bridge_comparison": {
+      "wallet.html": "Multi-destination social bridge; MetaMask/Trust/Coinbase deeplinks; ?to= query",
+      "wallet-12345.html": "12345-only; LIFE_MANIFEST + SOP registered; used inside 12345 runtime wallet hub"
+    },
+    "cache_bust_conflicts": [
+      {
+        "target": "12345",
+        "wallet_html": "v=890",
+        "portal_cta": "v=723",
+        "note": "wallet.html and Portal V2.1 use different cache-bust on same temple entry"
+      },
+      {
+        "target": "portal",
+        "wallet_html": "v=220",
+        "portal_current": "no query on primary gate",
+        "note": "wallet.html portal target uses v=220"
+      }
+    ]
+  },
+  "bridge_12345_html_registry": {
+    "note": "Root ASCII bridge to temple 12345 — canonical app remains temples/12345/index.html",
+    "count": 1,
+    "primary_bridge": "12345.html",
+    "entries": [
+      {
+        "id": "bridge_12345_root",
+        "path": "12345.html",
+        "title": "KGEN 12345 Bridge｜KGEN-12345-V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "category": "TEMPLE_ENTRY_BRIDGE",
+        "format": "LIGHTWEIGHT_REDIRECT_BRIDGE",
+        "status": "ACTIVE",
+        "role": "ASCII root entry bridge to 12345 Wukong Heart Temple",
+        "product_id_comment": "KGEN-12345-ROOT-BRIDGE",
+        "product_id_life_header": "KGEN-12345-HEART-UI",
+        "ui_version_title": "V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "life_header_version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
+        "build": "20260518-V10.42.0-2D-ANTIGRAVITY-DECORATION",
+        "life_header_build": "20260525-V10.48.0-LIFE-STANDARD-REGENERATION",
+        "taxonomy_class": "PortalShell",
+        "life_type": "Bridge HyperMembrane Lifeform",
+        "life_manifest_ref": "K線西遊記/temples/12345/LIFE_MANIFEST.json#12345.html",
+        "canonical_entry": "K線西遊記/temples/12345/index.html",
+        "redirect_methods": [
+          "meta http-equiv refresh 0",
+          "DOMContentLoaded setTimeout 80ms location.href",
+          "manual anchor + GitHub Pages absolute button"
+        ],
+        "relative_target": "K線西遊記/temples/12345/index.html",
+        "absolute_target": "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+        "sop_rule": "12345.html is root bridge only; must not duplicate temple app",
+        "sop_refs": [
+          "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md",
+          "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_CURRENT.md",
+          "DEPLOY_STRUCTURE.md"
+        ],
+        "production_url": "https://klineodyssey.github.io/kline-odyssey/12345.html",
+        "not_full_runtime": true,
+        "runtime_note": "Current file is redirect bridge only; archive/12345.html was historical full-embed variant"
+      }
+    ],
+    "related_bridges": {
+      "wallet_social": "wallet.html — multi-wallet deeplinks; see wallet_html_registry",
+      "wallet_12345": "wallet-12345.html — wallet-specific ASCII bridge; see wallet_html_registry"
+    },
+    "historical_archive": {
+      "path": "K線西遊記/temples/12345/archive/12345.html",
+      "status": "ARCHIVE",
+      "note": "Legacy full temple embed at root ASCII path; superseded by bridge + modular index.html"
+    },
+    "broken_inbound_links": [
+      {
+        "linked_from": "Index.html",
+        "href": "/K線西遊記/12345.html",
+        "correct_path": "/12345.html",
+        "status": "WRONG_PATH"
+      }
+    ],
+    "version_header_conflicts": [
+      {
+        "source": "PRIMEFORGE_LIFE_HEADER_V1",
+        "value": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION"
+      },
+      {
+        "source": "html_comment + title",
+        "value": "V10.42.0_2D_ANTIGRAVITY_DECORATION"
+      }
+    ],
+    "bridge_comparison": {
+      "12345.html": "General ASCII temple entry; auto-redirect; SOP root bridge pair with wallet-12345.html",
+      "wallet.html": "Social/in-app browser; optional ?to= portal/16888",
+      "wallet-12345.html": "Wallet hub companion; manual buttons; referenced inside 12345 runtime"
+    }
+  },
+  "neural_refs": {
+    "load_tree": "neural/RUNTIME_DEPENDENCY.json#temple_12345",
+    "organ_index": "neural/ORGAN_INDEX.json#species_12345",
+    "missing_report": "neural/MISSING_NEURAL_LINK_REPORT.md"
+  },
+  "shared_cdn": {
+    "three_js": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+    "ethers": "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js",
+    "walletconnect": "https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js",
+    "walletconnect_108000": "https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js",
+    "fonts": "https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Noto+Sans+TC:wght@900&display=swap"
+  },
+  "entry_points": {
+    "note": "Categorized view of index_html_registry; non-index HTML bridges/tools listed separately",
+    "primary": [
+      {
+        "id": "temple_12345",
+        "path": "K線西遊記/temples/12345/index.html",
+        "role": "PRIMARY MVP — Wukong Heart Temple runtime",
+        "status": "ACTIVE",
+        "ui_version_header": "KGEN-12345-HEART-UI-V10.47.1",
+        "temple_version_header": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
+        "brain_sync_inline": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC"
+      }
+    ],
+    "temples": [
+      {
+        "id": "temple_16888",
+        "path": "K線西遊記/temples/16888/index.html",
+        "role": "Guanghan Palace UFO cockpit",
+        "status": "ACTIVE",
+        "ui_version_header": "v3.7.12",
+        "architecture": "MONOLITHIC_INLINE",
+        "og_variant": "K線西遊記/temples/16888/index_16888_Guanghan_V3_1_0_OG.html"
+      },
+      {
+        "id": "temple_108000",
+        "path": "K線西遊記/temples/108000/index.html",
+        "role": "Mars Seats colony cockpit stub",
+        "status": "STUB",
+        "product_id": "KGEN-108000-MARSSEATS-UI",
+        "ui_version_header": "V1.0.2",
+        "architecture": "MONOLITHIC_INLINE"
+      }
+    ],
+    "universe_gate": [
+      {
+        "id": "kline_universe_gate",
+        "path": "K線西遊記/index.html",
+        "role": "Galaxy universe gate"
+      },
+      {
+        "id": "repo_index",
+        "path": "Index.html",
+        "role": "Repo root index"
+      }
+    ],
+    "bridges": [
+      {
+        "id": "bridge_12345",
+        "path": "12345.html",
+        "role": "ASCII root temple entry bridge — redirects to temples/12345/index.html",
+        "life_header_version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
+        "ui_version": "V10.42.0_2D_ANTIGRAVITY_DECORATION",
+        "taxonomy_class": "PortalShell",
+        "registry_ref": "bridge_12345_html_registry#bridge_12345_root"
+      },
+      {
+        "id": "bridge_wallet_root",
+        "path": "wallet-12345.html",
+        "role": "Wallet bridge at repo root"
+      },
+      {
+        "id": "bridge_wallet",
+        "path": "wallet.html",
+        "role": "Social wallet bridge — LINE/Facebook/MetaMask deeplinks",
+        "product_id": "KGEN-SOCIAL-WALLET-BRIDGE",
+        "version": "KGEN-SOCIAL-WALLET-BRIDGE-V1.0.0",
+        "registry_ref": "wallet_html_registry#wallet_social_bridge"
+      },
+      {
+        "id": "bridge_wallet_temple",
+        "path": "K線西遊記/temples/12345/wallet-12345.html",
+        "role": "Wallet bridge inside temple 12345"
+      }
+    ],
+    "pipelines": [
+      {
+        "id": "kline_app_game",
+        "path": "K線西遊記/kline-app-game/index.html",
+        "role": "KLINE App Game BTC 4D Cockpit public entry",
+        "patch": "KLINE-APP-GAME-BTC-4D-V0.1A",
+        "variants": [
+          "K線西遊記/kline-app-game/index_kline_app_game_btc_4d_runtime_v0_1A_from_12345.html",
+          "K線西遊記/kline-app-game/index_12345_Heart_UI_V8_5_1_audio_version_hotfix.html"
+        ]
+      },
+      {
+        "id": "kline_btc",
+        "path": "K線西遊記/kline-btc/index.html",
+        "role": "BTC pipeline frontend"
+      },
+      {
+        "id": "btc_downloader_tool",
+        "path": "K線西遊記/tools/btc_1d_downloader_6cols.html",
+        "role": "BTC 1D data downloader UI"
+      }
+    ],
+    "standalone_sites": [
+      {
+        "id": "wukong_temple",
+        "path": "wukong-temple/index.html",
+        "role": "Standalone Wukong temple site",
+        "ui_version_header": "V4.4.3 CHAIN",
+        "pwa_manifest": "wukong-temple/manifest.json",
+        "pages": [
+          "wukong-temple/bookstore.html",
+          "wukong-temple/bookstore/index.html",
+          "wukong-temple/life-forge.html",
+          "wukong-temple/mars-villa/index.html"
+        ]
+      },
+      {
+        "id": "whitepaper_gate",
+        "path": "whitepaper/index.html",
+        "role": "Whitepaper entry"
+      }
+    ],
+    "github_pages_include": [
+      {
+        "path": "_includes/head-custom.html",
+        "role": "Jekyll/GitHub Pages head injection"
+      }
+    ]
+  },
+  "primary_mvp_12345": {
+    "entry": "K線西遊記/temples/12345/index.html",
+    "temple_ref": "docs/civilization/TEMPLE_INDEX.json#12345",
+    "modules_root": "K線西遊記/temples/12345/modules/",
+    "modules_tracked_count": 87,
+    "modules_root_count": 68,
+    "modules_archive_count": 19,
+    "assets_root": "K線西遊記/temples/12345/assets/",
+    "assets_required": [
+      "assets/bull-front.png",
+      "assets/bear-rear.png",
+      "assets/heart.png",
+      "assets/warp-core.png"
+    ],
+    "architecture": "MODULAR_DUAL_TRACK",
+    "dual_track": {
+      "status": "TRANSITION",
+      "official_prefix": "runtime-",
+      "legacy_prefix": "kgen-12345-",
+      "organ_index_ref": "neural/ORGAN_INDEX.json#species_12345"
+    },
+    "index_load_order": {
+      "cdn": [
+        "three.js r128",
+        "ethers 5.7.2",
+        "walletconnect 2.12.2",
+        "google fonts Orbitron + Noto Sans TC"
+      ],
+      "css": [
+        "modules/kgen-12345-core.css",
+        "modules/kgen-12345-divine-regeneration.css",
+        "modules/runtime-main.css?v=V10.47.1"
+      ],
+      "inline_head": [
+        "inline:kgen-civilization-brain-rollcall-v10-49-1"
+      ],
+      "scripts_body": [
+        "modules/kgen-12345-runtime.js",
+        "modules/kgen-12345-mother-runtime.js",
+        "modules/kgen-12345-divine-regeneration.js",
+        "modules/runtime-main.js?v=V10.47.1",
+        "modules/runtime-bootstrap.js"
+      ],
+      "inline_body": [
+        "inline:kgen-v10-49-2-ritual-js"
+      ]
+    },
+    "rollcall_required_not_loaded": [
+      "modules/runtime-core.css",
+      "modules/runtime-mother.js",
+      "modules/runtime-regeneration.js",
+      "modules/runtime-regeneration.css",
+      "modules/runtime-cell-registry.json",
+      "modules/runtime-growth-policy.json"
+    ],
+    "generic_organs_missing_filename": [
+      {
+        "official": "runtime-heart.js",
+        "legacy_alias": "kgen-12345-runtime.js",
+        "index_loaded": true
+      },
+      {
+        "official": "runtime-brain.js",
+        "legacy_alias": "kgen-12345-panel-router.js",
+        "index_loaded": false
+      },
+      {
+        "official": "runtime-boundary.js",
+        "legacy_alias": "kgen-12345-immune-runtime.js",
+        "index_loaded": false
+      },
+      {
+        "official": "runtime-autopilot.js",
+        "legacy_alias": "kgen-12345-watchdog-runtime.js",
+        "index_loaded": false
+      },
+      {
+        "official": "runtime-sphere.js",
+        "legacy_alias": "kgen-12345-sphere-runtime.js",
+        "index_loaded": false
+      },
+      {
+        "official": "runtime-hud.js",
+        "legacy_alias": "kgen-12345-ui-runtime.js",
+        "index_loaded": false
+      }
+    ],
+    "do_not_remove": [
+      "modules/kgen-12345-runtime.js"
+    ],
+    "cancerous_modules_in_formal_zone": [
+      "modules/runtime-v10-40-6-stable-patch.js",
+      "modules/runtime-layout-fix.js",
+      "modules/kgen-v1046-morph-dna-runtime.js",
+      "modules/kgen-v1046-morph-dna-runtime.css"
+    ],
+    "cancerous_inline": [
+      "inline:kgen-v10-49-2-ritual-js"
+    ]
+  },
+  "temple_16888_frontend": {
+    "entry": "K線西遊記/temples/16888/index.html",
+    "temple_ref": "docs/civilization/TEMPLE_INDEX.json#16888",
+    "architecture": "MONOLITHIC_INLINE",
+    "external_scripts_loaded": [
+      "three.js r128",
+      "ethers 5.7.2",
+      "walletconnect 2.12.2"
+    ],
+    "root_runtime_files_not_in_index_script_src": [
+      "K線西遊記/temples/16888/candle_sim.js",
+      "K線西遊記/temples/16888/steering.js",
+      "K線西遊記/temples/16888/kline_engine_v1_0.js",
+      "K線西遊記/temples/16888/sw-kill.js"
+    ],
+    "config_data": [
+      "K線西遊記/temples/16888/engine_params_v1_0.json",
+      "K線西遊記/temples/16888/playlist.json",
+      "K線西遊記/temples/16888/music/playlist.json"
+    ],
+    "note": "Primary logic lives inline in index.html; root .js files exist but are not loaded via script src in current index"
+  },
+  "temple_108000_frontend": {
+    "entry": "K線西遊記/temples/108000/index.html",
+    "temple_ref": "docs/civilization/TEMPLE_INDEX.json#108000",
+    "architecture": "MONOLITHIC_INLINE",
+    "local_script": "K線西遊記/temples/108000/ethers-5.7.2.umd.min.js",
+    "cdn": [
+      "ethers 5.7.2",
+      "walletconnect 2.16.1"
+    ],
+    "contract_ref": "docs/civilization/CONTRACT_INDEX.json#108000"
+  },
+  "wukong_temple_frontend": {
+    "entry": "wukong-temple/index.html",
+    "tracked_html_count": 7,
+    "pwa": {
+      "manifest": "wukong-temple/manifest.json",
+      "apple_touch_icon": "https://klineodyssey.github.io/kline-odyssey/assets/wukong_caishen.png"
+    },
+    "pages": {
+      "main": "wukong-temple/index.html",
+      "bookstore": "wukong-temple/bookstore.html",
+      "bookstore_alt": "wukong-temple/bookstore/index.html",
+      "life_forge": "wukong-temple/life-forge.html",
+      "mars_villa": "wukong-temple/mars-villa/index.html"
+    },
+    "note": "Separate standalone site; not under K線西遊記/temples/"
+  },
+  "version_drift": {
+    "note": "Multiple version strings coexist in 12345 index.html header, title, and UI",
+    "layers": [
+      {
+        "layer": "title_tag",
+        "value": "V10.47.1"
+      },
+      {
+        "layer": "life_header",
+        "value": "V10.48.1-INDEX-ROLLCALL"
+      },
+      {
+        "layer": "inline_brain_rollcall",
+        "value": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC"
+      },
+      {
+        "layer": "inline_ritual_patch",
+        "value": "V10.49.2"
+      },
+      {
+        "layer": "VERSION_file",
+        "path": "K線西遊記/temples/12345/VERSION",
+        "value": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL"
+      }
+    ]
+  },
+  "governance": {
+    "forbidden_filename_patterns": [
+      "patch",
+      "hotfix",
+      "fix",
+      "stable",
+      "v10-",
+      "v104"
+    ],
+    "do_not_edit_without_rollcall": [
+      "K線西遊記/temples/12345/index.html"
+    ],
+    "phase_2_pending": [
+      "Fix index rollcall stale paths",
+      "Remove inline V10.49.2 ritual patch",
+      "Align load order to runtime-* official track"
+    ]
+  },
+  "mvp_lock": {
+    "primary_focus": "K線西遊記/temples/12345/",
+    "primary_entry": "K線西遊記/temples/12345/index.html",
+    "do_not_remove": [
+      "K線西遊記/temples/12345/modules/kgen-12345-runtime.js"
+    ]
+  }
+}

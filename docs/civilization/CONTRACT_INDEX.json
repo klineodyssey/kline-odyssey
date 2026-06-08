@@ -1,0 +1,502 @@
+{
+  "id": "CIVILIZATION_CONTRACT_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scan": {
+    "method": "git ls-files + repo glob",
+    "path_prefix": "KGEN/contracts/",
+    "tracked_file_count": 12,
+    "scanned_at_utc": "2026-06-06T22:28:48.181Z"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "sibling_indices": [
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/TEMPLE_INDEX.json",
+    "docs/civilization/BANK_INDEX.json",
+    "docs/civilization/TOKEN_INDEX.json",
+    "docs/civilization/STONE_INDEX.json",
+    "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+    "docs/civilization/HEART_INDEX.json",
+    "docs/civilization/TREASURY_INDEX.json"
+  ],
+  "kgen_layer_ref": "docs/civilization/KGEN_INDEX.json",
+  "bank_detail_ref": "docs/civilization/BANK_INDEX.json",
+  "token_detail_ref": "docs/civilization/TOKEN_INDEX.json",
+  "brain_detail_ref": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+  "heart_detail_ref": "docs/civilization/HEART_INDEX.json",
+  "treasury_detail_ref": "docs/civilization/TREASURY_INDEX.json",
+  "contracts_root": "KGEN/contracts/",
+  "readme": "KGEN/contracts/README.md",
+  "chain": {
+    "network": "BNB Smart Chain (BSC)",
+    "documented_in": "KGEN/README.md"
+  },
+  "deployed_addresses": {
+    "note": "Only addresses explicitly documented in KGEN/README.md; other contracts deploy via KGEN/scripts/",
+    "kgen_token": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "lp_pair_kgen_wbnb": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+    "genesis_inscription": "0x15fb2A5463F7873EC328BF6f2E85A115adcC3457"
+  },
+  "core_triad_v7_5_2": {
+    "note": "Primary on-chain protocol per KGEN/contracts/README.md and KGEN/README.md",
+    "contracts": [
+      {
+        "id": "kgen_token",
+        "path": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+        "contract_name": "KGEN_Token_V7_5_2",
+        "version": "V7_5_2",
+        "role": "KGEN main token — supply, transfer, tax routing",
+        "pragma": "^0.8.24",
+        "status": "DEPLOYED",
+        "deployed_address_ref": "kgen_token",
+        "detail_index": "docs/civilization/TOKEN_INDEX.json",
+        "evidence_note": "Version/status verified from inline contract banner/declaration, KGEN README, contracts README, deployed address docs, and existing indices; filename is not used as sole evidence."
+      },
+      {
+        "id": "galactic_bank",
+        "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+        "contract_name": "KGEN_GalacticBank_V7_5_2",
+        "version": "V7_5_2",
+        "role": "Galactic Bank — treasury hub, allocation, institutional reflux",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY",
+        "detail_index": "docs/civilization/BANK_INDEX.json#galactic_bank",
+        "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#galactic_bank_institutional_treasury",
+        "evidence_note": "Version verified from Solidity declaration and KGEN docs; deployment remains source-only because KGEN/README.md does not document a Bank address. Treasury role is verified from contract behavior and Galactic Bank docs, not inferred from filename."
+      },
+      {
+        "id": "genesis_inscription",
+        "path": "KGEN/contracts/KGEN_Genesis_Inscription_V7_5_2.sol",
+        "contract_name": "KGEN_Genesis_Inscription_V7_5_2",
+        "version": "V7_5_2",
+        "role": "Genesis rights / inscription carrier",
+        "pragma": "^0.8.24",
+        "status": "DEPLOYED",
+        "deployed_address_ref": "genesis_inscription"
+      }
+    ]
+  },
+  "civilization_contracts": {
+    "12345": {
+      "name": "五指山悟空財神殿",
+      "name_en": "Wukong Heart Temple",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+        "contract_name": "KGEN_TempleHeart_V3_2_3",
+        "version": "V3_2_3",
+        "role": "Temple Heart — fortune, heartbeat, ignite, vow, wish, lamp",
+        "pragma": "^0.8.20",
+        "status": "SOURCE_ONLY",
+        "detail_index": "docs/civilization/HEART_INDEX.json",
+        "evidence_note": "V3.2.3 verified from source banner, declaration, deploy script, and indices. Frontend/SOP V3.2.6 label and deployed address claim remain documented conflict, not resolved by filename."
+      },
+      "temple_ref": "docs/civilization/TEMPLE_INDEX.json#12345",
+      "pairs_with": [
+        "11520"
+      ],
+      "ui_display_version": "V3_2_6",
+      "ui_display_note": "12345 index.html and SOP cite KGEN_TempleHeart_V3_2_6.sol — file not in repo; repo source is V3_2_3"
+    },
+    "11520": {
+      "name": "花果山台灣交易所",
+      "name_en": "Brain Exchange",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+        "contract_name": "KGEN_BrainExchange_V3_2_0",
+        "version": "V3_2_0",
+        "role": "Brain exchange — margin, payroll, supplyHeart to TempleHeart",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY",
+        "detail_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+        "status_note": "Portal/temple UI display deployed Brain address, but KGEN/README has no Brain deployment entry found in this pass.",
+        "evidence_note": "Version/role verified from contract comments/declaration, deploy_all factory wiring, 11520 civilization index, SOP, and whitepaper; filename is not used as sole evidence."
+      },
+      "temple_ref": null,
+      "note": "GRAPH_ONLY civilization — no temple folder; contract exists on-chain source"
+    },
+    "16888": {
+      "name": "廣寒宮",
+      "name_en": "Guanghan Universe Pool",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol",
+        "contract_name": "KGEN_16888_Universe_V5_20_0",
+        "version": "V5_20_0",
+        "role": "Single-pool universe — round distribution, vow, pool duel",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY",
+        "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#8888_gaolaozhuang_treasury",
+        "treasury_fee_note": "Source declares FEE_BPS_TOTAL = 500 and FEE_BPS_TREASURY = 100; placeOrder transfers feeToTreasury to treasury8888."
+      },
+      "temple_ref": "docs/civilization/TEMPLE_INDEX.json#16888",
+      "fee_routes_to": [
+        "8888"
+      ]
+    },
+    "18888": {
+      "name": "靈霄寶殿神明銀行",
+      "name_en": "Lingxiao Deity Bank",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+        "contract_name": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "version": "V1_0_1",
+        "role": "Deity bank — vault cap, dividend pull-claim, monthly payroll window",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY",
+        "detail_index": "docs/civilization/BANK_INDEX.json#lingxiao_deity_bank",
+        "treasury_index_ref": "docs/civilization/TREASURY_INDEX.json#18888_lingxiao_divine_treasury",
+        "evidence_note": "Version verified from source header comment, Solidity declaration, and 18888/contract indices; not inferred from filename alone."
+      },
+      "temple_ref": null,
+      "note": "GRAPH_ONLY civilization — no temple folder",
+      "portal_conflict_ref": "docs/civilization/BANK_INDEX.json#portal_18888_bank_addr_vs_source_only_status"
+    },
+    "8888": {
+      "name": "高老莊",
+      "name_en": "Gaolaozhuang Treasury",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+        "contract_name": "KGEN_8888_Treasury_V1_0_0",
+        "version": "V1_0_0",
+        "role": "Mortal circulation / shop bonus treasury — receive and owner withdraw",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_ONLY",
+        "detail_index": "docs/civilization/TREASURY_INDEX.json",
+        "evidence_note": "Version/role verified from contract banner, declaration, state, events, and functions; filename is not used as sole evidence."
+      },
+      "temple_ref": null,
+      "note": "No temple folder; referenced by 16888 fee routing and whitepaper",
+      "verified_from": [
+        "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol header: 高老莊 8888｜凡間流通池 / 商店紅利池",
+        "Solidity source declares deposit, balance, setTreasuryWallet, lockConfig, withdraw, withdrawAll",
+        "KGEN/contracts/KGEN_16888_Universe_V5_20_0.sol declares treasury8888 and transfers PoolDuel feeToTreasury to it",
+        "docs/civilization/SPECIES_TREE.json marks 8888 CONTRACT_ONLY and fee_receives_from 16888",
+        "docs/civilization/PORTAL_INDEX.json lists 8888 as soon/click-disabled"
+      ],
+      "active_gaps": [
+        {
+          "id": "no_temple_or_frontend",
+          "note": "No K線西遊記/temples/8888 folder or dedicated frontend entry found."
+        },
+        {
+          "id": "no_deployed_address_in_kgen_readme",
+          "note": "KGEN/README.md does not document a deployed 8888 Treasury address."
+        },
+        {
+          "id": "portal_status_soon_vs_source_contract",
+          "note": "Portal shows 8888 as soon while repo has a source-only Treasury contract and 16888 fee routing."
+        }
+      ]
+    },
+    "108000": {
+      "name": "花果山火星齊天豪宅",
+      "name_en": "Mars Seats",
+      "contract": {
+        "path": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+        "contract_name": "KGEN_MarsSeats_V2_2_1",
+        "version": "V2_2_1",
+        "role": "Mars seat ownership — 500 seats, notifyReward from Brain",
+        "pragma": "^0.8.24",
+        "status": "SOURCE_WITH_FRONTEND_DEPLOYED_REF",
+        "status_note": "Repo source does not embed a deployed address and KGEN/README.md does not list MarsSeats; Portal and 108000 frontend display 0x3529dbFbaD465C2269F8096879A1c298d5257298 as deployed/formal.",
+        "deployed_address_refs": {
+          "kgen_readme": null,
+          "portal_node_map": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+          "temple_108000_frontend": "0x3529dbFbaD465C2269F8096879A1c298d5257298"
+        },
+        "source_contract_facts": {
+          "max_seats_constant": 500,
+          "seat_price_whole_default": 5000,
+          "max_mint_per_tx_default": 10,
+          "brain_only_notify_reward": true,
+          "notify_reward_requires_prefunded_balance": true,
+          "transfer_settles_pending_before_owner_change": true
+        }
+      },
+      "temple_ref": "docs/civilization/TEMPLE_INDEX.json#108000",
+      "pairs_with": [
+        "11520"
+      ],
+      "verified_from": [
+        "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol inline banner and contract declaration",
+        "Solidity source declares MAX_SEATS = 500, default seatPriceWhole = 5000, constructor(address token), setBrain(address), notifyReward(uint256), claimSeat(uint256), claimSeats(uint256[])",
+        "notifyReward is ONLY_BRAIN and includes REWARD_NOT_FUNDED solvency guard",
+        "KGEN_BrainExchange_V3_2_0.sol declares marsBps default 2500, bounds nonzero marsBps to 2000-3000, and rollPayroll transfer-then-notify wiring",
+        "K線西遊記/temples/108000/index.html declares PRODUCT_ID KGEN-108000-MARSSEATS-UI and displays the MarsSeats address",
+        "docs/civilization/TEMPLE_108000_INDEX.json records the 108000 temple/runtime mapping"
+      ],
+      "active_gaps": [
+        {
+          "id": "deployed_address_source_conflict",
+          "note": "Portal/frontend show MarsSeats deployed address; KGEN/README.md authoritative chain section only lists KGEN token, LP pair, PinkLock, and Genesis Inscription."
+        },
+        {
+          "id": "frontend_abi_vs_repo_source_conflict",
+          "note": "108000 frontend ABI labels differ from repo source function names/types; confirm deployed ABI before runtime edits. No external chain/RPC bytecode verification was performed in this indexing pass."
+        },
+        {
+          "id": "portal_href_missing",
+          "note": "Portal node map shows MarsSeats but has no href to K線西遊記/temples/108000/index.html."
+        }
+      ]
+    }
+  },
+  "token_contract_detail": {
+    "id": "kgen_token",
+    "detail_index": "docs/civilization/TOKEN_INDEX.json",
+    "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "verified_from": [
+      "KGEN/contracts/KGEN_Token_V7_5_2.sol inline banner and contract declaration",
+      "KGEN/README.md role, version, deployed address, LP pair",
+      "KGEN/contracts/README.md V7.5.2 core triad positioning",
+      "docs/civilization/KGEN_INDEX.json deployed address table"
+    ],
+    "summary": {
+      "name": "KLINE GENESIS",
+      "symbol": "KGEN",
+      "total_supply": "72,000,000 KGEN",
+      "tax_model": "0.30% AMM-only tax: 0.10% burn, 0.10% bankWallet, 0.05% rewardWallet, 0.05% autoLPWallet",
+      "no_tax_rule": "Wallet-to-wallet transfers are no-tax unless a registered AMM pair participates; tax-exempt addresses are no-tax."
+    },
+    "open_gaps": [
+      "Live bankWallet/rewardWallet/autoLPWallet addresses are not documented in repo docs scanned for Phase 1.",
+      "LP pair address is documented, but repo docs scanned here do not prove live setMarketMakerPair registration.",
+      "No external chain/RPC bytecode verification was performed in this indexing pass."
+    ]
+  },
+  "brain_contract_detail": {
+    "id": "brain_11520",
+    "detail_index": "docs/civilization/BRAIN_CONTRACT_INDEX.json",
+    "source": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+    "verified_from": [
+      "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol comments and contract declaration",
+      "KGEN/scripts/deploy_all.js getContractFactory and init wiring",
+      "SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md species 11520 BrainExchange definition",
+      "whitepaper/KGEN/README.md Universe Brain Exchange definition",
+      "docs/civilization/CIVILIZATION_11520_INDEX.json existing graph-only civilization index",
+      "docs/civilization/PORTAL_INDEX.json portal-displayed deployed address"
+    ],
+    "summary": {
+      "civilization_id": "11520",
+      "role": "Universe Brain / Brain Exchange Runtime",
+      "runtime_model": "Receives KGEN rewardWallet tax flow, manages margin staking, rolls payroll, supplies Heart 12345, and notifies MarsSeats 108000.",
+      "deploy_display_address": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6"
+    },
+    "open_gaps": [
+      "KGEN/README.md has no Brain 11520 deployment entry found in this pass.",
+      "Portal/temple UI display Brain as deployed, but no external chain/RPC bytecode verification was performed.",
+      "Live post-deploy setMarsSeats, setPublicGoodTreasury, setKeeper, lockConfig, and Token rewardWallet values are not documented in repo docs scanned for Phase 1."
+    ]
+  },
+  "treasury_contract_detail": {
+    "id": "treasury",
+    "detail_index": "docs/civilization/TREASURY_INDEX.json",
+    "classification": "MULTI_LAYER_CONCEPT_WITH_CONTRACTS",
+    "primary_contract_refs": [
+      "KGEN/contracts/KGEN_8888_Treasury_V1_0_0.sol",
+      "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol"
+    ],
+    "routing_refs": [
+      {
+        "from": "KGEN_16888_Universe_V5_20_0",
+        "to": "KGEN_8888_Treasury_V1_0_0",
+        "via": "PoolDuel feeToTreasury / treasury8888"
+      },
+      {
+        "from": "KGEN_Token_V7_5_2",
+        "to": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "via": "0.1% tax receiver endpoint per existing index notes"
+      }
+    ],
+    "caution": "Treasury is overloaded across 8888, 18888, Galactic Bank, Brain treasury/publicGoodTreasury, and MarsSeats treasury fields. Keep each address/config separate."
+  },
+  "infrastructure_contracts": [
+    {
+      "id": "zhanyao_tax_splitter",
+      "path": "KGEN/contracts/KGEN_ZhanyaoTaxSplitter_V1_0_1.sol",
+      "contract_name": "KGEN_ZhanyaoTaxSplitter_V1_0_1",
+      "version": "V1_0_1",
+      "role": "Tax splitter — 10% AutoLP + 90% to 9 demon addresses",
+      "pragma": "^0.8.24",
+      "status": "SOURCE_ONLY",
+      "civilization_id": null
+    }
+  ],
+  "concept_only_contract_probes": [
+    {
+      "id": "stone",
+      "requested_label": "Stone",
+      "status": "NOT_FOUND_CONTRACT",
+      "index_ref": "docs/civilization/STONE_INDEX.json",
+      "summary": "No Stone/Rock Solidity contract, deployed Stone address, or civilization graph node was verified. Stone-related mythology maps to existing 五指山 / Wuzhishan concepts around 12345 and Galactic Bank, not a separate contract.",
+      "verified_against": [
+        "KGEN/contracts/README.md",
+        "KGEN/README.md",
+        "KGEN/contracts/*.sol contract declarations",
+        "neural/CIVILIZATION_GRAPH.json"
+      ],
+      "related_existing_refs": [
+        "core_triad_v7_5_2.galactic_bank",
+        "civilization_contracts.12345",
+        "civilization_contracts.108000"
+      ]
+    }
+  ],
+  "archive_contracts": [
+    {
+      "id": "reward_vault_v1",
+      "path": "KGEN/contracts/archive/KGEN_RewardVault_V1.sol",
+      "contract_name": "KGEN_RewardVault_V1",
+      "version": "V1",
+      "role": "Reward pool vault — DailyIgnite micro-rewards",
+      "pragma": "^0.8.24",
+      "status": "ARCHIVED",
+      "deploy_script": "KGEN/scripts/runtime/deploy_reward_vault_v1.js"
+    }
+  ],
+  "graph_only_no_contract_file": {
+    "note": "Registered in neural/CIVILIZATION_GRAPH.json but no matching .sol in KGEN/contracts/",
+    "civilization_ids": [
+      "8895",
+      "20888"
+    ]
+  },
+  "dependency_graph": {
+    "source": "KGEN/scripts/deploy_all.js",
+    "deploy_order": [
+      "KGEN_BrainExchange_V3_2_0",
+      "KGEN_TempleHeart_V3_2_3"
+    ],
+    "init_wiring": [
+      "brain.setTempleHeart(heart)",
+      "heart.setToken(KGEN_TOKEN)",
+      "heart.setBrainVault(brain)"
+    ],
+    "runtime_links": [
+      {
+        "from": "KGEN_BrainExchange_V3_2_0",
+        "to": "KGEN_TempleHeart_V3_2_3",
+        "via": "supplyHeart / setTempleHeart"
+      },
+      {
+        "from": "KGEN_BrainExchange_V3_2_0",
+        "to": "KGEN_MarsSeats_V2_2_1",
+        "via": "marsBps payroll transfer then notifyReward (default 25%; nonzero bound 20%-30%)"
+      },
+      {
+        "from": "KGEN_Token_V7_5_2",
+        "to": "KGEN_BrainExchange_V3_2_0",
+        "via": "rewardWallet tax flow 0.05%"
+      },
+      {
+        "from": "KGEN_Token_V7_5_2",
+        "to": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "via": "0.1% tax receiver"
+      },
+      {
+        "from": "KGEN_16888_Universe_V5_20_0",
+        "to": "KGEN_8888_Treasury_V1_0_0",
+        "via": "5% pool duel fee (treasury8888)"
+      },
+      {
+        "from": "KGEN_TempleHeart_V3_2_3",
+        "to": "KGEN_LingxiaoDeityBank_V1_0_1",
+        "via": "lingxiaoBank address"
+      }
+    ]
+  },
+  "scripts": {
+    "root": "KGEN/scripts/",
+    "deploy_all": "KGEN/scripts/deploy_all.js",
+    "runtime": [
+      "KGEN/scripts/runtime/ignite_hourly.js",
+      "KGEN/scripts/runtime/ignite_daily.js",
+      "KGEN/scripts/runtime/heartbeat_tick.js",
+      "KGEN/scripts/runtime/deploy_Heartbeat_V1.js",
+      "KGEN/scripts/runtime/deploy_DailyIgnite_V1.js",
+      "KGEN/scripts/runtime/deploy_reward_vault_v1.js"
+    ],
+    "archive": [
+      "KGEN/scripts/archive/ignite_hourly.js",
+      "KGEN/scripts/archive/ignite_daily.js",
+      "KGEN/scripts/archive/deploy_runtime_v1_daily.js",
+      "KGEN/scripts/archive/approve_reward_for_dailyignite.js"
+    ]
+  },
+  "reference_docs": [
+    {
+      "path": "KGEN/contracts/README.md",
+      "role": "Contract positioning for V7.5.2 core triad"
+    },
+    {
+      "path": "KGEN/README.md",
+      "role": "On-chain addresses, heartbeat scripts, genesis inscription"
+    },
+    {
+      "path": "KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md",
+      "role": "Galactic Bank whitepaper"
+    },
+    {
+      "path": "KGEN/timeline/500Y_Epoch.md",
+      "role": "500-year epoch rules"
+    }
+  ],
+  "version_policy": {
+    "rule": "New versions add new files; do not overwrite old civilization contracts",
+    "documented_in": "KGEN/contracts/README.md"
+  },
+  "active_conflicts": [
+    {
+      "id": "temple_heart_v3_2_3_vs_v3_2_6",
+      "repo_file": "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol",
+      "ui_sop_reference": "KGEN_TempleHeart_V3_2_6.sol",
+      "detail_index": "docs/civilization/HEART_INDEX.json",
+      "affected_paths": [
+        "K線西遊記/temples/12345/index.html",
+        "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1.md",
+        "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md"
+      ]
+    },
+    {
+      "id": "portal_18888_bank_addr_vs_source_only_status",
+      "repo_status": "KGEN_GalacticBank_V7_5_2 and KGEN_LingxiaoDeityBank_V1_0_1 are source-only by authoritative KGEN/README.md address list",
+      "portal_reference": "0xfc522243e988a837700CaD600D6f030f5932681F displayed as 18888 Bank / Galactic Bank in Portal and archive references",
+      "detail_ref": "docs/civilization/BANK_INDEX.json#active_conflicts"
+    },
+    {
+      "id": "marsseats_source_status_vs_portal_deployed",
+      "repo_status": "SOURCE_WITH_FRONTEND_DEPLOYED_REF in contract index because KGEN/README.md does not document a MarsSeats deployment but Portal/frontend show a formal address",
+      "portal_frontend_reference": "0x3529dbFbaD465C2269F8096879A1c298d5257298",
+      "affected_paths": [
+        "K線西遊記/index.html",
+        "K線西遊記/temples/108000/index.html",
+        "docs/civilization/PORTAL_INDEX.json",
+        "docs/civilization/TEMPLE_108000_INDEX.json"
+      ]
+    },
+    {
+      "id": "marsseats_frontend_abi_vs_repo_source",
+      "repo_file": "KGEN/contracts/KGEN_MarsSeats_V2_2_1.sol",
+      "frontend_file": "K線西遊記/temples/108000/index.html",
+      "summary": "Frontend ABI includes totalSeats/maxSeats/seatPrice/seatsOf(address as array)/pendingSeat(address), while repo source exposes MAX_SEATS/seatPriceWei/seatsOf(address count)/pendingSeat(uint256). Do not infer deployed bytecode identity from filename or UI label alone."
+    },
+    {
+      "id": "brain_source_only_vs_portal_deployed",
+      "repo_file": "KGEN/contracts/KGEN_BrainExchange_V3_2_0.sol",
+      "contract_index_status": "SOURCE_ONLY",
+      "portal_display_status": "Brain 11520 已部署",
+      "portal_display_address": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+      "summary": "Portal and temple UI show Brain as deployed, but KGEN/README.md has no Brain deployment entry found in this pass. Do not infer README-verified deployment status from filename or portal label alone.",
+      "detail_ref": "docs/civilization/BRAIN_CONTRACT_INDEX.json#active_conflicts"
+    }
+  ],
+  "governance": {
+    "do_not_edit_without_approval": [
+      "KGEN/contracts/KGEN_TempleHeart_V3_2_3.sol"
+    ],
+    "sop_lock_ref": "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V1_1.md"
+  }
+}

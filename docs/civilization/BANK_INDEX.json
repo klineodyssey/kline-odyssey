@@ -1,0 +1,231 @@
+{
+  "id": "CIVILIZATION_BANK_INDEX",
+  "version": "V1.0",
+  "status": "ACTIVE",
+  "phase": "PHASE_1_CIVILIZATION_INDEX",
+  "alignment_target": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
+  "generated_at_utc": "2026-06-07T00:00:00Z",
+  "scope": {
+    "focus": "KGEN Bank-related contracts and civilization references",
+    "constraint": "Do not infer version or deployment status from filenames alone; verify from contract declaration, source comments, authoritative docs, and address references.",
+    "allowed_edit_zone": "docs/civilization/*"
+  },
+  "parent_index": "docs/civilization/BRAIN_INDEX.json",
+  "sibling_indices": [
+    "docs/civilization/KGEN_INDEX.json",
+    "docs/civilization/CONTRACT_INDEX.json",
+    "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "docs/civilization/PORTAL_INDEX.json"
+  ],
+  "ai_entry": {
+    "first_read": "README_AI_FIRST.md",
+    "this_index": "docs/civilization/BANK_INDEX.json",
+    "kgen_layer": "docs/civilization/KGEN_INDEX.json",
+    "contract_layer": "docs/civilization/CONTRACT_INDEX.json",
+    "lingxiao_civilization": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+    "portal_layer": "docs/civilization/PORTAL_INDEX.json"
+  },
+  "read_order": [
+    {
+      "step": 1,
+      "path": "docs/civilization/BANK_INDEX.json",
+      "role": "Bank-focused machine index and conflict register"
+    },
+    {
+      "step": 2,
+      "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+      "role": "Core V7.5.2 Galactic Bank source; read only"
+    },
+    {
+      "step": 3,
+      "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "role": "18888 Lingxiao Deity Bank source; read only"
+    },
+    {
+      "step": 4,
+      "path": "KGEN/README.md",
+      "role": "Authoritative KGEN chain info and core contract list"
+    },
+    {
+      "step": 5,
+      "path": "KGEN/contracts/README.md",
+      "role": "Authoritative V7.5.2 core triad positioning"
+    },
+    {
+      "step": 6,
+      "path": "docs/civilization/PORTAL_INDEX.json#18888",
+      "role": "Portal 18888 displayed bank label/address"
+    }
+  ],
+  "bank_contracts": {
+    "galactic_bank": {
+      "id": "galactic_bank",
+      "path": "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+      "contract_name_verified": "KGEN_GalacticBank_V7_5_2",
+      "version_verified": "V7_5_2",
+      "version_evidence": [
+        "Solidity declaration: contract KGEN_GalacticBank_V7_5_2 is Ownable",
+        "KGEN/README.md lists KGEN_GalacticBank_V7_5_2.sol under contracts (V7.5.2)",
+        "KGEN/contracts/README.md identifies Bank as Galactic Bank in the V7.5.2 core triad"
+      ],
+      "pragma": "^0.8.24",
+      "role": "Galactic Bank — 五指山制度中樞 / treasury hub for reflux, payout, allocation, and governance operations",
+      "source_summary": {
+        "native_deposit": "receive() emits DepositNative",
+        "token_deposit": "depositToken(address token, uint256 amount)",
+        "owner_withdrawals": [
+          "withdrawToken(address token, address to, uint256 amount)",
+          "withdrawNative(address payable to, uint256 amount)"
+        ],
+        "owner_model": "OpenZeppelin Ownable constructor owner_"
+      },
+      "docs": [
+        {
+          "path": "KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md",
+          "role": "Defines Galactic Bank as a civilization institution, not a locked vault"
+        },
+        {
+          "path": "KGEN/timeline/500Y_Epoch.md",
+          "role": "Defines 500Y Epoch as a civilization cycle, not a fund lock"
+        }
+      ],
+      "deployment_status": {
+        "status": "SOURCE_ONLY_BY_AUTHORITATIVE_README",
+        "evidence": "KGEN/README.md documents KGEN Token, LP Pair, PinkLock, and Genesis Inscription addresses but does not document a Galactic Bank address.",
+        "do_not_promote_portal_address_without_verification": true
+      }
+    },
+    "lingxiao_deity_bank": {
+      "id": "lingxiao_deity_bank",
+      "civilization_id": "18888",
+      "name": "靈霄寶殿神明銀行",
+      "name_en": "Lingxiao Deity Bank",
+      "path": "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol",
+      "contract_name_verified": "KGEN_LingxiaoDeityBank_V1_0_1",
+      "version_verified": "V1_0_1",
+      "version_evidence": [
+        "Header comment names KGEN_LingxiaoDeityBank_V1_0_1.sol and describes 18888｜靈霄寶殿・玉帝神明銀行（Deity Bank）",
+        "Solidity declaration: contract KGEN_LingxiaoDeityBank_V1_0_1 is OwnableLite, ReentrancyGuardLite",
+        "docs/civilization/CONTRACT_INDEX.json maps civilization 18888 to contract_name KGEN_LingxiaoDeityBank_V1_0_1 and version V1_0_1",
+        "docs/civilization/CIVILIZATION_18888_INDEX.json uses the same contract source and version mapping"
+      ],
+      "pragma": "^0.8.24",
+      "role": "18888 Deity Bank — vault cap, deity threshold, pull-claim dividends, monthly payroll finalization, early withdrawal penalty split",
+      "source_rules_verified": {
+        "vault_cap": "VAULT_CAP_WHOLE = 50,000,000 KGEN",
+        "min_deity_deposit": "minDeityDepositWhole = 100,000 KGEN; setParams requires at least 100,000",
+        "lock_term_default": "30 days",
+        "early_penalty_default": "500 bps / 5%",
+        "penalty_split_default": "40% brain11520, 40% heart12345, 20% publicGood",
+        "payday_window": "isPaydayWindowUTC() returns true when UTC day >= 5",
+        "monthly_finalize": "finalizeMonthWithAmount(uint256 yyyymm, uint256 rewardAddedWei) requires owner or keeper",
+        "tax_receiver_note": "Header comment says this contract can be the KGEN Token 0.1% tax receiver"
+      },
+      "runtime_ops": {
+        "keeper_ops": [
+          "setKeeper",
+          "finalizeMonthWithAmount"
+        ],
+        "user_ops": [
+          "deposit",
+          "withdraw",
+          "claim"
+        ],
+        "admin_ops_before_lock": [
+          "setToken",
+          "setAddresses",
+          "setParams",
+          "setPenaltySplit",
+          "lockConfig"
+        ]
+      },
+      "cross_links": {
+        "civilization_index": "docs/civilization/CIVILIZATION_18888_INDEX.json",
+        "contract_index": "docs/civilization/CONTRACT_INDEX.json#civilization_contracts.18888",
+        "kgen_index": "docs/civilization/KGEN_INDEX.json#civilization_contract_map.18888",
+        "portal_index": "docs/civilization/PORTAL_INDEX.json#node_map.18888"
+      },
+      "deployment_status": {
+        "status": "SOURCE_ONLY_BY_AUTHORITATIVE_README",
+        "evidence": "No LingxiaoDeityBank deployed address is documented in KGEN/README.md; source has configurable token and downstream addresses but no embedded deployed address.",
+        "portal_displayed_address_conflict": "docs/civilization/PORTAL_INDEX.json displays 18888 Bank address 0xfc522243e988a837700CaD600D6f030f5932681F, but this is not verified as the LingxiaoDeityBank deployment by KGEN/README.md or the contract source."
+      }
+    }
+  },
+  "portal_18888_reference": {
+    "source": "docs/civilization/PORTAL_INDEX.json",
+    "node_id": "18888",
+    "portal_name": "靈霄寶殿・玉帝神明銀行",
+    "portal_status": "live",
+    "portal_display_addr": "0xfc522243e988a837700CaD600D6f030f5932681F",
+    "portal_addr_note": "Portal labels as Bank; may differ from LingxiaoDeityBank source-only contract in repo",
+    "archive_evidence": [
+      "K線西遊記/archive/INDEX.html labels 0xfc522243e988a837700CaD600D6f030f5932681F as ADDR.BANK and drawer label Galactic Bank",
+      "K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V10_18_TRUE_LINK.md lists the same address under Galactic Bank"
+    ]
+  },
+  "address_registry": {
+    "authoritative_kgen_readme": {
+      "documented_addresses": [
+        {
+          "id": "kgen_token",
+          "address": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+        },
+        {
+          "id": "lp_pair_kgen_wbnb",
+          "address": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2"
+        },
+        {
+          "id": "genesis_inscription",
+          "address": "0x15fb2A5463F7873EC328BF6f2E85A115adcC3457"
+        }
+      ],
+      "bank_address_documented": false
+    },
+    "portal_displayed_bank": {
+      "address": "0xfc522243e988a837700CaD600D6f030f5932681F",
+      "labels_seen": [
+        "Bank 18888",
+        "靈霄寶殿・玉帝神明銀行",
+        "Galactic Bank"
+      ],
+      "verification_status": "UNVERIFIED_AGAINST_AUTHORITATIVE_KGEN_README_AND_SOURCE"
+    }
+  },
+  "active_conflicts": [
+    {
+      "id": "portal_18888_bank_addr_vs_source_only_status",
+      "severity": "HIGH_INDEXING_AMBIGUITY",
+      "summary": "Portal and archive/UI references display 0xfc522243e988a837700CaD600D6f030f5932681F as Bank / Galactic Bank for 18888, while KGEN/README.md does not document any Bank deployment address and KGEN_LingxiaoDeityBank_V1_0_1.sol contains no deployed address.",
+      "do_not_resolve_by_filename": true,
+      "affected_contracts": [
+        "KGEN/contracts/KGEN_GalacticBank_V7_5_2.sol",
+        "KGEN/contracts/KGEN_LingxiaoDeityBank_V1_0_1.sol"
+      ],
+      "affected_indices": [
+        "docs/civilization/KGEN_INDEX.json",
+        "docs/civilization/CONTRACT_INDEX.json",
+        "docs/civilization/CIVILIZATION_18888_INDEX.json",
+        "docs/civilization/PORTAL_INDEX.json"
+      ],
+      "needed_resolution": "Verify 0xfc522243e988a837700CaD600D6f030f5932681F on BscScan or deployment records and record whether it is GalacticBank V7.5.2, LingxiaoDeityBank V1.0.1, or a different Bank contract."
+    },
+    {
+      "id": "galactic_bank_vs_lingxiao_bank_semantic_overlap",
+      "severity": "MEDIUM_NAMING_AMBIGUITY",
+      "summary": "Docs use Galactic Bank as the V7.5.2 core institutional bank, while 18888 is Lingxiao Deity Bank. Portal/archive labels sometimes collapse both under Bank/Galactic Bank.",
+      "needed_resolution": "Keep both source identities separate until deployed bytecode/address evidence proves an equivalence."
+    }
+  ],
+  "governance": {
+    "do_not_edit_without_approval": [
+      "KGEN/contracts/*",
+      "KGEN/scripts/*",
+      "docs/physics/*",
+      "K線西遊記/temples/12345/index.html",
+      "K線西遊記/temples/12345/modules/*"
+    ],
+    "version_policy": "New versions add new files; do not overwrite old civilization contracts",
+    "indexing_policy": "Document conflicts explicitly when filenames, declarations, docs, portal labels, or deployed addresses disagree."
+  }
+}
