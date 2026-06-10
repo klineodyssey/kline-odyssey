@@ -1,11 +1,3 @@
-Official Project Website:
-https://klineodyssey.github.io/kline-odyssey/
-
-Official Contact:
-klineodyssey.io@gmail.com
-
-Official BSC Token:
-0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
 
 <p style="font-weight:700;">
 KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent smart contract and liquidity.
