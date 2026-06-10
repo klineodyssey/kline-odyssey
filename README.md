@@ -1,40 +1,128 @@
+<!-- =========================================================
+KLINE ODYSSEY ｜ KGEN OFFICIAL HOMEPAGE
+Purpose: Official project homepage for GitHub Pages, BscScan, CMC, CoinGecko, GeckoTerminal review.
+Last optimized: 2026-06-11
+========================================================= -->
+
 # KLINE ODYSSEY ｜ KGEN
 
-## Official Project Information
+<div style="text-align:center; margin:18px 0 22px 0;">
+  <img src="https://klineodyssey.github.io/kline-odyssey/logo.png"
+       alt="KGEN Genesis Logo"
+       style="width:140px;height:140px;border-radius:28px;display:block;margin:0 auto 14px auto;">
 
-Official Website:
-https://klineodyssey.github.io/kline-odyssey/
+  <p style="font-size:18px;font-weight:900;margin:8px 0;">
+    KGEN Genesis｜KLINE ODYSSEY Official Project
+  </p>
 
-Official Contact:
-klineodyssey.io@gmail.com
-
-Official BSC Token:
-0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
-
-Official Telegram:
-https://t.me/klineodyssey
-
-Official GitHub:
-https://github.com/klineodyssey/kline-odyssey
+  <p style="font-weight:700;margin:8px 0;">
+    KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent smart contract, public liquidity, and official project records.
+  </p>
+</div>
 
 ---
 
-<p style="font-weight:700;">
-KGEN is a verifiable on-chain token deployed on BNB Smart Chain with transparent smart contract and liquidity.
-</p>
+## Official Project Information
 
-<div style="text-align:center; margin:20px 0;">
-  <img src="https://klineodyssey.github.io/kline-odyssey/logo.png" 
-       alt="KGEN Logo" 
-       style="width:120px;height:120px;border-radius:20px;">
-  
+| Item | Official Information |
+|---|---|
+| Project Name | KGEN Genesis / KLINE ODYSSEY |
+| Official Website | https://klineodyssey.github.io/kline-odyssey/ |
+| Official Contact Email | klineodyssey.io@gmail.com |
+| BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
+| BscScan Token Page | https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be |
+| PancakeSwap Trade | https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be |
+| KGEN / WBNB LP Pair | `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2` |
+| LP Pair on BscScan | https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2 |
+| GeckoTerminal | https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2 |
+| CoinMarketCap DexScan | https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/ |
+| 32×32 SVG Logo | https://raw.githubusercontent.com/klineodyssey/kline-odyssey/refs/heads/main/kgen32.svg |
+| GitHub Repository | https://github.com/klineodyssey/kline-odyssey |
+| Official Whitepaper | https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/ |
+| Formal Whitepaper V7.5.2 | https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html |
+
+---
+
+## Official Social Links
+
+| Platform | Link |
+|---|---|
+| Telegram | https://t.me/klineodyssey |
+| X / Twitter | https://x.com/klineodyssey |
+| YouTube | https://www.youtube.com/@klineodyssey |
+| TikTok | https://www.tiktok.com/@klineodyssey |
+| Facebook | https://www.facebook.com/le.tian.di.2025 |
+| LINE Official | https://lin.ee/b8X18F7 |
+| GitHub | https://github.com/klineodyssey/kline-odyssey |
+
+---
+
+## KGEN Token Mechanism
+
+- Network: BNB Smart Chain (BSC)
+- Token Standard: BEP-20
+- Project Utility: KLINE ODYSSEY ecosystem participation, governance, and long-term development
+- Liquidity Pair: KGEN / WBNB
+- LP Lock: PinkLock record available in the official whitepaper and project links
+- Burn Mechanism: KGEN implements an on-chain burn mechanism. 0.1% of each buy and sell transaction is permanently sent to the null address (`0x0000000000000000000000000000000000000000`).
+
+Example burn transaction:
+`0x5b6a357e21c9a69ffbd466ac0ec7c09435434ae75c0d20fb255df8b6e513ee46`
+
+---
+
+## Official Quick Actions
+
+<div style="margin:14px 0 18px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+
   <a href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
-   target="_blank" rel="noopener"
-   style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#000;color:#fff;">
-  🚀 Buy KGEN（Pancake）
-  
-</a>
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#000;color:#fff;">
+    🚀 Buy KGEN（Pancake）
+  </a>
+
+  <a href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🔎 BscScan Token
+  </a>
+
+  <a href="https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    📈 GeckoTerminal
+  </a>
+
+  <a href="https://github.com/klineodyssey/kline-odyssey"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    📦 GitHub
+  </a>
+
+  <a href="https://t.me/klineodyssey"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    📢 Telegram
+  </a>
+
+  <a href="https://x.com/klineodyssey"
+     target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
+    🐦 X / Twitter
+  </a>
+
 </div>
+
+---
+
+## Legal Notice
+
+KGEN (KLINE GENESIS) is a decentralized digital asset deployed on BNB Smart Chain. This project is experimental and intended for ecosystem participation only. It does not represent financial advice, investment guarantee, or profit expectation. All users are responsible for their own decisions. Cryptocurrency involves risk, including total loss of funds.
+
+---
+
+<!-- Original KLINE ODYSSEY README content continues below. -->
+
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   
