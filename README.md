@@ -4,7 +4,7 @@ Purpose: Official project homepage for GitHub Pages, BscScan, CMC, CoinGecko, Ge
 Last optimized: 2026-06-11
 ========================================================= -->
 
-# KLINE ODYSSEY ｜ KGEN
+# KLINE ODYSSEY
 
 <div style="text-align:center; margin:18px 0 22px 0;">
   <img src="https://klineodyssey.github.io/kline-odyssey/logo.png"
@@ -12,7 +12,7 @@ Last optimized: 2026-06-11
        style="width:140px;height:140px;border-radius:28px;display:block;margin:0 auto 14px auto;">
 
   <p style="font-size:18px;font-weight:900;margin:8px 0;">
-    KGEN Genesis｜KLINE ODYSSEY Official Project
+    KLINE GENESIS (KGEN)<br/>Official Project of KLINE ODYSSEY
   </p>
 
   <p style="font-weight:700;margin:8px 0;">
@@ -26,7 +26,8 @@ Last optimized: 2026-06-11
 
 | Item | Official Information |
 |---|---|
-| Project Name | KGEN Genesis / KLINE ODYSSEY |
+| Project Name | KLINE GENESIS (KGEN) |
+| Project Ecosystem | KLINE ODYSSEY |
 | Official Website | https://klineodyssey.github.io/kline-odyssey/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
