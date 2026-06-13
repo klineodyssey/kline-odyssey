@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #K線西遊記 #KGEN #白皮書《KGEN 5D Warp Timeline Civilization》白皮書正式公開。市場不再只是價格波動。而是一個可穿越 Timeline 的五維金融文明。  
-👉 https://www.youtube.com/watch?v=z_p_cmz14UA
+▶ #悟空新文#K線西遊記 #KGEN #PrimeForge #宇宙物理引擎 #花果山台灣KGEN Universe Physics Runtime V1.7 正式發布。  
+👉 https://www.youtube.com/watch?v=dXDF9Ab1rBc
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
