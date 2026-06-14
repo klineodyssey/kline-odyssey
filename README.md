@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文#K線西遊記 #KGEN #PrimeForge #宇宙物理引擎 #花果山台灣KGEN Universe Physics Runtime V1.7 正式發布。  
-👉 https://www.youtube.com/watch?v=dXDF9Ab1rBc
+▶ 宇宙地契法則｜沒有座標，就沒有文明｜KGEN (KLINE GENESIS)｜K線西遊記  
+👉 https://www.youtube.com/watch?v=9GrHmr5ED3E
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
