@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 宇宙地契法則｜沒有座標，就沒有文明｜KGEN (KLINE GENESIS)｜K線西遊記  
-👉 https://www.youtube.com/watch?v=9GrHmr5ED3E
+▶ PrimeForge Mother EngineKGEN Universe12345 五指山悟空財神殿11520 花果山宇宙交易所  
+👉 https://www.youtube.com/watch?v=2oTn23AwJpo
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
