@@ -49,7 +49,7 @@ const DOCUMENT_DNA = {
   order: "GenesisBootSequence",
   family: "PrimeForgeLife",
   genus: "KGEN",
-  species: "PrimeForgeGenesisBootSequenceV1_3",
+  species: "PrimeForgeGenesisBootSequenceV1_4",
   life_state: "ALIVE",
   role: "Mandatory AI Runtime Initialization Shell"
 }
@@ -75,13 +75,13 @@ ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md
 
 ---
 
-# V1.3 升級記錄
+# V1.4 升級記錄
 
 V1.4 不推翻 V1.3。
 
-V1.4 導入 CURRENT Runtime Gateway，所有 AI / Cursor / Agent 必須透過 CURRENT 取得 ACTIVE Physics Runtime。
+V1.4 導入 CURRENT Runtime Gateway，所有 AI / Cursor / Agent / Runtime Loader 必須透過 CURRENT 取得 ACTIVE Physics Runtime。
 
-V1.3 只更新 AI / Cursor 開機讀取鏈，使開機檔對齊目前最新宇宙主憲章與程式實作規格。
+V1.4 只更新開機治理與 Physics Runtime 入口，不修改宇宙物理本體。
 
 新增必讀：
 
@@ -91,14 +91,16 @@ KGEN_Universe_Physics_Runtime_CURRENT.md
 KGEN_Runtime_Specification_V1_0.md
 ```
 
-V1.3 正式修正：
+V1.4 正式修正：
 
 ```text
-不得再以 KGEN_Universe_Physics_Runtime_V1_2.md 或 V1_7.md 作為最新宇宙主憲章。
+不得再以任何固定版號 Physics Runtime 作為開機主入口。
+不得再以 KGEN_Universe_Physics_Runtime_V1_2.md、V1_7.md、V3_1.md 等舊版作為最新宇宙主憲章。
 舊版物理檔只作為祖先與考古參考。
 Cursor 施工必須讀 Runtime Specification。
 宇宙常數不得硬寫在前端程式。
 LandNFT K-range 不可重複出售。
+未來 Physics Runtime 升版時，只修改 CURRENT，不修改 Boot。
 ```
 
 ---
@@ -477,13 +479,42 @@ AI 自動演化
 
 ---
 
-# 11.1 V3.1 宇宙核心定義
-
-AI / Cursor / Runtime 啟動後，必須以最新宇宙主憲章為準：
+# 11.0 CURRENT Runtime Gateway
 
 ```text
 KGEN_Universe_Physics_Runtime_CURRENT.md
 ```
+
+為唯一 Physics Runtime 入口。
+
+治理規則：
+
+```text
+Boot = 穩定層
+CURRENT = 導航層
+Physics Runtime = 演化層
+```
+
+所有 AI / Cursor / Agent / Runtime Loader：
+
+```text
+只讀 CURRENT
+不得自行選擇舊版 Physics Runtime
+未來 Physics Runtime 升版時，只修改 CURRENT，不修改 Boot
+```
+
+---
+
+# 11.1 CURRENT 宇宙核心定義
+
+AI / Cursor / Runtime 啟動後，必須以最新宇宙主憲章入口檔為準：
+
+```text
+KGEN_Universe_Physics_Runtime_CURRENT.md
+```
+
+CURRENT 為唯一 Physics Runtime 入口。
+Cursor 不得自行選擇舊版 Physics Runtime。
 
 核心定義：
 
@@ -543,7 +574,7 @@ Where the Market Becomes the Myth.
 本 Repo 啟動時，以本節路徑為準。
 
 ```text
-/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md
+/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
 /SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md
 /docs/whitepaper/PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md
 /docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md
@@ -621,7 +652,7 @@ style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;fon
 # 14. AI 開機讀取順序
 
 ```text
-1. /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md
+1. /PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
 2. /SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md
 3. /docs/whitepaper/PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md
 4. /docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md
@@ -724,7 +755,7 @@ style="display:block;width:fit-content;padding:10px 14px;border-radius:999px;fon
 
 ```text
 /
-├── PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md
+├── PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
 ├── README.md
 ├── /SOP
 ├── /docs
