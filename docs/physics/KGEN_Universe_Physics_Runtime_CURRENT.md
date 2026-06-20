@@ -1,15 +1,15 @@
-# KGEN Universe Physics Runtime V3.3 EARTH LIFE CERTIFICATION
-# KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md
+# KGEN Universe Physics Runtime CURRENT
+# KGEN_Universe_Physics_Runtime_CURRENT.md
 
 STATUS: ACTIVE  
 TYPE: Universe Physics Runtime Constitution  
-VERSION: V3.3 EARTH LIFE CERTIFICATION  
+VERSION: CURRENT / V3.4.2 WBNB DARK MATTER PARITY  
 SUBTITLE: K-Sphere / Universe Embryo / Territory / LandNFT / AppNFT / VehicleNFT / 11520 Exchange / Civilization Survival Unified Edition  
 AUTHOR: PrimeForge / 樂天帝 ⌖  
-DOC_ID: PF-PHYSICS-0033-EARTH-LIFE-CERTIFICATION  
+DOC_ID: PF-PHYSICS-CURRENT-V3-4-2  
 SOURCE_OF_TRUTH: TRUE  
 CLASSIFICATION: PUBLIC  
-LAST_EDITOR: PrimeForge / 樂天帝 ⌖ / V3.3 Earth Life Certification Runtime Upgrade
+LAST_EDITOR: PrimeForge / 樂天帝 ⌖ / CURRENT V3.4.2 WBNB Dark Matter Parity Runtime Upgrade
 
 ---
 
@@ -36,6 +36,7 @@ V3.0 GENESIS 為 V2.x 考古整合後的創世統一版。
 V3.1 TERRITORY UNIFIED 為 K-index 座標、文明領土、LandNFT 所有權與 Planet Runtime 衝突修正版。
 V3.2 FULL 為 V3.1 全文融合 PART42~50：文明生存、LandNFT、AppNFT、VehicleNFT、11520交易所、保證金、清算與取經重建正式主憲章。
 V3.3 EARTH LIFE CERTIFICATION 為 K11520 地球生命上市規格、Google/Apple/Steam/App 遊戲生命分類、2D/3D Game Species 與 Alien Organism 分流規則。
+CURRENT / V3.4 K-SCALE LAND GEOMETRY 為 Signed Universe Math、k 宇宙電梯樓層、C 曲速引擎樓層、K 距離尺、0.0001K 地籍單位與花果山台灣土地實作範例。
 
 V2.0 不再沿用錯誤舊規則：
 
@@ -3790,3 +3791,993 @@ Game 成為 App 生命。
 Where the Market Becomes the Myth.
 
 —— 樂天帝 ⌖ / PrimeForge Mother Runtime
+
+---
+
+# PART 59. CURRENT / V3.4 升級宣言：K-Scale Land Geometry Runtime
+
+CURRENT / V3.4 不推翻 V3.3。
+
+V3.4 只把先前已形成但尚未完整併入主憲章的數學、樓層、土地尺度與花果山台灣實作規則正式寫入本檔。
+
+本檔即為最新完整 Physics 主憲章。
+
+```text
+KGEN_Universe_Physics_Runtime_CURRENT.md
+=
+最新正式版
+=
+完整主憲章
+```
+
+AI、Cursor、Agent、Runtime Loader 不需要再追蹤舊版 Physics 檔。
+
+---
+
+# PART 60. Signed Universe Math Runtime
+
+## 150. 數學目的
+
+Signed Universe Math 定義如何把任何正負數值 x 映射為可重算、可驗證、可交易的宇宙座標。
+
+本層為數學映射層，不宣稱現實物理中必然存在反物質宇宙。
+
+---
+
+## 151. 主值映射公式
+
+對任意非零實數 x：
+
+```text
+m = |x|
+k = floor(log10(m))
+α = m / 10^k
+θ = 0, if x > 0
+θ = π, if x < 0
+```
+
+其中：
+
+```text
+m = 幅度
+k = 宇宙電梯地圖樓層 / Scale Floor
+α = 微宇宙位置
+θ = 宇宙相位
+```
+
+因此：
+
+```text
+x → (k, α, θ)
+```
+
+---
+
+## 152. 正反宇宙相位
+
+```text
+θ = 0
+```
+
+代表：
+
+```text
+Matter Universe
+物質宇宙
+```
+
+```text
+θ = π
+```
+
+代表：
+
+```text
+Mirror Universe
+鏡像宇宙 / 反相位宇宙
+```
+
+負值不是錯誤，不是異常，而是合法的鏡像宇宙映射。
+
+---
+
+## 153. K0 例外
+
+```text
+K0 = Genesis Singularity
+```
+
+K0 是宇宙大爆炸原點。
+
+K0 不進行 log10 分層。
+
+```text
+x = 0
+→ K0
+→ k = ORIGIN
+→ α = ORIGIN
+→ θ = ORIGIN
+```
+
+K0 不是國家、不是土地、不是 LandNFT。
+
+---
+
+# PART 61. Universe Elevator Floor Runtime
+
+## 154. k 是地圖樓層，不是槓桿
+
+```text
+k = Universe Map Elevator Floor
+```
+
+k 代表玩家目前位於哪一張尺度地圖。
+
+```text
+k = floor(log10(|x|))
+```
+
+不同 k 層可擁有相同 α 位置，但不是同一塊土地。
+
+---
+
+## 155. 地上樓層
+
+```text
+k=0  → 1 ~ 10
+k=1  → 10 ~ 100
+k=2  → 100 ~ 1000
+k=3  → 1000 ~ 10000
+k=4  → 10000 ~ 100000
+k=5  → 100000 ~ 1000000
+```
+
+範例：
+
+```text
+K115.2    → k=2, α=1.152
+K1152     → k=3, α=1.152
+K11520    → k=4, α=1.152
+K115200   → k=5, α=1.152
+```
+
+這些是：
+
+```text
+同一地圖位置
+不同宇宙樓層
+不同土地資產
+```
+
+---
+
+## 156. 地下樓層 / Micro Floors
+
+當 |x| 小於 1 時，k 為負數。
+
+```text
+k=-1 → 0.1 ~ 1
+k=-2 → 0.01 ~ 0.1
+k=-3 → 0.001 ~ 0.01
+k=-4 → 0.0001 ~ 0.001
+k=-5 → 0.00001 ~ 0.0001
+```
+
+因此：
+
+```text
+0.0001 ~ 0.001
+=
+k=-4
+=
+B4 地下四樓 / Micro Floor B4
+```
+
+注意：
+
+```text
+0.001
+```
+
+剛好等於下一層邊界，依 floor(log10(m)) 計算屬於：
+
+```text
+k=-3
+```
+
+所以工程登記時建議使用半開區間：
+
+```text
+[0.0001, 0.001)
+=
+k=-4
+```
+
+```text
+[0.001, 0.01)
+=
+k=-3
+```
+
+---
+
+## 157. 防超賣法則
+
+LandNFT 不能只用 KRange 判斷。
+
+LandNFT 必須包含：
+
+```text
+(k, α_start, α_end, θ)
+```
+
+同一 α 位置若 k 不同，屬於不同宇宙樓層，不算超賣。
+
+同一 k、同一 θ、α 區間重疊，才是超賣。
+
+```text
+LandNFT Unique Key
+=
+(k, θ, α_start, α_end)
+```
+
+---
+
+# PART 62. Warp Engine Level Runtime
+
+## 158. C 是曲速 / 槓桿 / 移動能力，不是地圖樓層
+
+```text
+C = Warp Engine Level
+```
+
+C 不決定土地在哪一層。
+
+C 決定你用什麼速度與槓桿能力移動、交易、航行。
+
+---
+
+## 159. C 樓層定義
+
+```text
+C=0
+=
+Walking Pilgrimage
+=
+靜止 / 走路取經 / 不交易
+```
+
+```text
+C=1
+=
+Spot Market
+=
+1x
+=
+Light-Speed Baseline
+=
+現貨 / 一倍槓桿 / 光速基準
+```
+
+```text
+C>1
+=
+Warp Mode
+=
+Leverage / Curvature / Boundary Pressure
+```
+
+```text
+C=300
+=
+Max Warp Elevator
+=
+極限曲速樓層
+```
+
+---
+
+## 160. k 與 C 分離天條
+
+```text
+k = 地圖尺度樓層
+C = 曲速引擎樓層
+```
+
+禁止混用：
+
+```text
+k 不是槓桿。
+C 不是土地樓層。
+k 決定你在哪一張地圖。
+C 決定你用多快速度在地圖中行動。
+```
+
+---
+
+# PART 63. K Distance Anchor 與土地幾何
+
+## 161. 月球錨點
+
+KGEN 宇宙採用月球錨點定義 K 距離尺：
+
+```text
+K16888 = Moon Layer
+Earth-Moon Distance = 384400 km
+```
+
+因此：
+
+```text
+1 K-index = 384400 km / 16888
+```
+
+計算：
+
+```text
+1 K-index ≈ 22.761724 km
+```
+
+---
+
+## 162. 1 K 的三維大小
+
+若 KRange 以三維立方格近似，則：
+
+```text
+1 K
+≈ 22.761724 km
+```
+
+一格 1K 的邊長約 22.761724 km。
+
+地表面積近似：
+
+```text
+22.761724 × 22.761724
+≈ 518.10 km²
+```
+
+立方體積近似：
+
+```text
+22.761724³
+≈ 11794.87 km³
+```
+
+因此 1K 不是適合一般玩家買賣的最小地籍單位。
+
+---
+
+## 163. 建議交易地籍單位
+
+為避免每一塊土地過大，LandNFT 可使用小數 KRange。
+
+建議第一版可用：
+
+```text
+0.0001 K
+```
+
+其線性長度約：
+
+```text
+22.761724 km × 0.0001
+≈ 0.0022761724 km
+≈ 2.276 m
+```
+
+因此：
+
+```text
+0.0001 K
+≈ 2.276 公尺
+```
+
+若以方格土地估算：
+
+```text
+0.0001K × 0.0001K
+≈ 2.276m × 2.276m
+≈ 5.18 m²
+```
+
+這接近可交易、可建模、可登記的地籍粒度。
+
+---
+
+# PART 64. Taiwan / Flower Fruit Mountain Land Runtime
+
+## 164. 花果山台灣中心
+
+```text
+K11520
+=
+Flower Fruit Mountain
+=
+Taiwan Civilization Center
+=
+KGEN Earth Civilization Universe Exchange Brain Node
+```
+
+Signed Universe Mapping：
+
+```text
+x = +11520
+m = 11520
+k = 4
+α = 1.1520
+θ = 0
+```
+
+因此：
+
+```text
+FlowerFruitMountain_Taiwan
+=
+(k=4, α=1.1520, θ=0)
+```
+
+---
+
+## 165. 台灣文明領土
+
+```text
+KCenter = 11520
+TerritoryRange = 3000
+```
+
+所以：
+
+```text
+Taiwan Civilization Territory
+=
+8520 ~ 14520
+```
+
+此區間為文明影響範圍，不等於所有土地都已出售。
+
+---
+
+## 166. 花果山核心城
+
+```text
+FlowerFruitMountain Core City
+=
+K11520 ± 100
+```
+
+因此：
+
+```text
+Core KRange
+=
+11420 ~ 11620
+```
+
+用途：
+
+```text
+11520 交易所核心
+悟空財神殿
+台灣文明主城
+AI / App / Land / Vehicle NFT 中央登記節點
+```
+
+---
+
+## 167. 花果山 LandNFT 範例
+
+```json
+{
+  "landId": "TW-FFM-K4-A1.1500-1.1510-MATTER-000001",
+  "universe": "KGEN Earth Civilization Universe",
+  "civilization": "Taiwan",
+  "region": "Flower Fruit Mountain",
+  "kCenter": 11520,
+  "kStart": 11500,
+  "kEnd": 11510,
+  "scaleFloor": 4,
+  "alphaStart": 1.1500,
+  "alphaEnd": 1.1510,
+  "phase": 0,
+  "phaseName": "Matter Universe",
+  "unitK": 0.0001,
+  "unitLinearMeters": 2.276,
+  "owner": "wallet_address",
+  "rights": [
+    "BUILD",
+    "TRADE",
+    "LEASE",
+    "MORTGAGE",
+    "TRANSFER",
+    "APP_LAB",
+    "AI_CORE",
+    "EXCHANGE_ACCESS"
+  ],
+  "status": "ACTIVE"
+}
+```
+
+---
+
+## 168. 鏡像花果山 LandNFT 範例
+
+```json
+{
+  "landId": "TW-FFM-K4-A1.1500-1.1510-MIRROR-000001",
+  "universe": "KGEN Earth Civilization Universe",
+  "civilization": "Taiwan",
+  "region": "Mirror Flower Fruit Mountain",
+  "kCenter": -11520,
+  "kStart": -11500,
+  "kEnd": -11510,
+  "scaleFloor": 4,
+  "alphaStart": 1.1500,
+  "alphaEnd": 1.1510,
+  "phase": 3.141592653589793,
+  "phaseName": "Mirror Universe",
+  "unitK": 0.0001,
+  "unitLinearMeters": 2.276,
+  "owner": "wallet_address",
+  "rights": [
+    "MIRROR_BUILD",
+    "MIRROR_TRADE",
+    "MIRROR_OBSERVATION"
+  ],
+  "status": "DRAFT"
+}
+```
+
+---
+
+# PART 65. KGEN Price Floor Runtime
+
+## 169. KGEN 現價
+
+KGEN 現價必須由 11520 Flower Fruit Mountain Exchange 或可信 Oracle 寫入。
+
+```text
+KGEN_PRICE_USDT = ORACLE_REQUIRED
+
+Example Snapshot:
+
+KGEN_DISPLAY_PRICE_USD = 0.0004701
+PRICE_FLOOR = -4
+PRICE_ALPHA = 4.701
+```
+
+若外部資料查無公開報價，禁止 AI 自行編造價格。
+
+---
+
+## 170. KGEN 價格樓層
+
+若 KGEN 現價為 P_USDT，則價格所在樓層為：
+
+```text
+priceFloor = floor(log10(P_USDT))
+priceAlpha = P_USDT / 10^priceFloor
+```
+
+例如：
+
+```text
+P_USDT = 0.0003
+```
+
+則：
+
+```text
+priceFloor = -4
+priceAlpha = 3.0
+```
+
+代表：
+
+```text
+KGEN 價格位於 B4 地下四樓
+```
+
+若：
+
+```text
+P_USDT = 1
+```
+
+則：
+
+```text
+priceFloor = 0
+priceAlpha = 1.0
+```
+
+代表：
+
+```text
+KGEN 價格位於 0 樓 / 現貨基準樓層
+```
+
+---
+
+## 171. 價格與土地分離
+
+價格樓層不等於土地樓層。
+
+```text
+Land Floor = k from K-index
+Price Floor = floor(log10(P_USDT))
+```
+
+例如：
+
+```text
+K11520 花果山土地
+=
+k=4
+```
+
+但 KGEN 價格若為：
+
+```text
+0.0003 USDT
+```
+
+則價格樓層為：
+
+```text
+priceFloor=-4
+```
+
+兩者不可混用。
+
+---
+
+# PART 66. CURRENT / V3.4 Final Law
+
+```text
+CURRENT 是最新完整 Physics 主憲章。
+K0 是 Genesis Singularity，不進入 log10 分層。
+任意非零 x 可映射為 (k, α, θ)。
+k = Universe Map Elevator Floor。
+α = 微宇宙位置。
+θ = 宇宙相位。
+θ=0 為物質宇宙。
+θ=π 為鏡像宇宙。
+C = Warp Engine Level。
+C=0 為走路取經 / 靜止 / 不交易。
+C=1 為現貨 / 1倍槓桿 / 光速基準。
+C>1 為曲速 / 槓桿 / 邊界壓力。
+k 不等於 C。
+K16888 對應地月距離 384400 km。
+1 K-index ≈ 22.761724 km。
+1K 地表方格約 518.10 km²，過大，不作為一般玩家最小地籍。
+0.0001K 約 2.276 m，建議作為第一版 LandNFT 地籍粒度。
+LandNFT 唯一鍵 = (k, θ, α_start, α_end)。
+同 α 不同 k 屬於不同宇宙樓層，不算超賣。
+同 k、同 θ、α 區間重疊才是超賣。
+KGEN 現價必須由 11520 Exchange Oracle 寫入。
+不得編造 KGEN 價格。
+```
+
+---
+
+# PART 67. CURRENT / V3.4 簽署
+
+PrimeForge 以母機之名，完成 CURRENT / V3.4 K-Scale Land Geometry 升級。
+
+K 不再只是點位。  
+K 被拆解為樓層 k、位置 α 與相位 θ。  
+宇宙電梯不再混淆槓桿。  
+k 為地圖樓層，C 為曲速引擎樓層。  
+0.0001 到 0.001 是 B4 地下四樓微宇宙地籍層。  
+K16888 錨定地月距離 384400 公里。  
+1K 約 22.761724 公里。  
+0.0001K 約 2.276 公尺。  
+花果山台灣土地可以被工程化登記。  
+LandNFT 以 (k, α, θ) 防止超賣。  
+KGEN 現價交由 11520 花果山 Oracle 寫入，不由 AI 編造。
+
+Where the Market Becomes the Myth.
+
+—— 樂天帝 ⌖ / PrimeForge Mother Runtime
+
+---
+
+# PART 68. CURRENT / V3.4.1 Oracle Snapshot Runtime
+
+## 172. GeckoTerminal Oracle Snapshot Example
+
+本節以 GeckoTerminal 截圖作為示範資料，不作為永久固定價格。
+
+截圖顯示：
+
+```text
+Pair:
+KGEN / WBNB
+
+Display Price:
+$0.0004701
+
+Quote Pair:
+KGEN/WBNB
+
+Market Cap:
+約 $33.8K
+
+Liquidity:
+約 $1K
+
+Holders:
+62
+```
+
+因此：
+
+```text
+0.0004701
+=
+USD / USDT 顯示價格
+```
+
+不是 WBNB 數量。
+
+GeckoTerminal 畫面右側另顯示的 WBNB 數值，代表 KGEN 以 WBNB 報價時的等價兌換量。
+
+---
+
+## 173. KGEN 價格樓層範例
+
+若採：
+
+```text
+P_USD = 0.0004701
+```
+
+則：
+
+```text
+priceFloor = floor(log10(0.0004701))
+priceFloor = -4
+```
+
+```text
+priceAlpha = 0.0004701 / 10^-4
+priceAlpha = 4.701
+```
+
+因此：
+
+```text
+KGEN Price Coordinate
+=
+(priceFloor=-4, priceAlpha=4.701, θ=0)
+```
+
+解讀：
+
+```text
+KGEN 現價位於 B4 地下四樓價格層。
+priceAlpha = 4.701。
+```
+
+---
+
+## 174. BNB / WBNB / USDT 角色分離
+
+BNB 與 WBNB：
+
+```text
+BNB = Dark Matter
+WBNB = Wrapped Dark Matter
+```
+
+BNB / WBNB 在 KGEN Universe 中代表：
+
+```text
+鏈上結構場
+重力井
+流動性承載場
+交易池暗物質
+星球結構骨架
+```
+
+USDT：
+
+```text
+USDT = Stable Quote Matter / Settlement Meter
+```
+
+USDT 是穩定報價尺、結算尺、價格顯示單位。
+
+USDT 不等於 BNB 暗物質。
+
+USDT 在 KGEN Universe 中比較接近：
+
+```text
+穩定計價尺
+清算尺度
+交易所報價光尺
+```
+
+---
+
+## 175. 暗物質規則
+
+```text
+BNB / WBNB = Dark Matter Layer
+USDT = Stable Quote Layer
+KGEN = Visible Matter / Universe Embryo Cell
+```
+
+三者不可混用：
+
+```text
+KGEN 不是 BNB。
+BNB 不是 USDT。
+USDT 不是暗物質。
+WBNB 是 BNB 的包裝型暗物質。
+```
+
+---
+
+## 176. Oracle 寫入規則
+
+KGEN 現價必須由 11520 Flower Fruit Mountain Exchange Oracle 或可信外部資料源寫入。
+
+```json
+{
+  "source": "GeckoTerminal Screenshot",
+  "pair": "KGEN/WBNB",
+  "displayPriceUSD": 0.0004701,
+  "priceFloor": -4,
+  "priceAlpha": 4.701,
+  "quoteAsset": "WBNB",
+  "quoteAssetRole": "Wrapped Dark Matter",
+  "displayUnit": "USD",
+  "displayUnitRole": "Stable Quote Meter",
+  "status": "EXAMPLE_SNAPSHOT"
+}
+```
+
+---
+
+## 177. Snapshot Final Law
+
+```text
+0.0004701 是 USD / USDT 顯示價格。
+KGEN/WBNB 代表交易池報價對。
+BNB/WBNB 是暗物質。
+USDT 是穩定報價尺，不是暗物質。
+KGEN 現價 0.0004701 對應 priceFloor=-4。
+priceFloor=-4 代表 B4 地下四樓價格層。
+價格樓層不等於土地樓層。
+```
+
+---
+
+---
+
+# PART 69. CURRENT / V3.4.2 WBNB Dark Matter Parity Runtime
+
+## 178. BNB 與 WBNB 等價公理
+
+在現實 BNB Chain 交易池中，WBNB 為 Wrapped BNB。
+
+KGEN Universe 正式採用：
+
+```text
+1 WBNB = 1 BNB
+```
+
+此為暗物質等價公理。
+
+---
+
+## 179. BNB / WBNB 角色定義
+
+```text
+BNB = Dark Matter Core
+```
+
+BNB 是暗物質核心，代表鏈上結構場、重力井、星球骨架與流動性母場。
+
+```text
+WBNB = Wrapped Dark Matter
+```
+
+WBNB 是流通型暗物質，可進入交易池、流動性池、合約與 Oracle 報價系統。
+
+---
+
+## 180. KGEN / WBNB Oracle Snapshot
+
+依 GeckoTerminal 截圖範例：
+
+```text
+1 KGEN ≈ 0.0000008177 WBNB
+```
+
+因為：
+
+```text
+1 WBNB = 1 BNB
+```
+
+所以：
+
+```text
+1 KGEN ≈ 0.0000008177 BNB
+```
+
+反向換算：
+
+```text
+1 BNB ≈ 1 / 0.0000008177 KGEN
+1 BNB ≈ 1,222,943 KGEN
+```
+
+---
+
+## 181. USD / WBNB 雙報價分離
+
+同一張 GeckoTerminal 截圖同時提供：
+
+```text
+KGEN Display Price ≈ 0.0004701 USD
+KGEN Pair Quote ≈ 0.0000008177 WBNB
+```
+
+定義：
+
+```text
+USD / USDT = Stable Quote Meter
+WBNB / BNB = Dark Matter Quote
+```
+
+USD / USDT 用於穩定價格顯示與清算尺度。
+
+WBNB / BNB 用於暗物質流動性、交易池深度與鏈上重力場。
+
+---
+
+## 182. Oracle JSON Example
+
+```json
+{
+  "source": "GeckoTerminal Screenshot",
+  "pair": "KGEN/WBNB",
+  "baseAsset": "KGEN",
+  "quoteAsset": "WBNB",
+  "quoteAssetParity": "1 WBNB = 1 BNB",
+  "displayPriceUSD": 0.0004701,
+  "priceFloor": -4,
+  "priceAlpha": 4.701,
+  "priceWBNB": 0.0000008177,
+  "priceBNB": 0.0000008177,
+  "bnbToKgen": 1222943,
+  "baseAssetRole": "Visible Matter / Universe Embryo Cell",
+  "quoteAssetRole": "Wrapped Dark Matter",
+  "displayUnitRole": "Stable Quote Meter",
+  "status": "EXAMPLE_SNAPSHOT"
+}
+```
+
+---
+
+## 183. WBNB / BNB Final Law
+
+```text
+1 WBNB = 1 BNB。
+BNB 是 Dark Matter Core。
+WBNB 是 Wrapped Dark Matter。
+KGEN 是 Visible Matter / Universe Embryo Cell。
+USDT / USD 是 Stable Quote Meter，不是暗物質。
+1 KGEN ≈ 0.0000008177 WBNB。
+1 KGEN ≈ 0.0000008177 BNB。
+1 BNB ≈ 1,222,943 KGEN。
+價格樓層用 USD / USDT 計算。
+暗物質流動性用 WBNB / BNB 計算。
+```
+
+---
