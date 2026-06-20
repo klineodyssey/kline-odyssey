@@ -127,7 +127,7 @@ KGEN (KLINE GENESIS) is a decentralized digital asset deployed on BNB Smart Chai
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   
-<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
+<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md"
    target="_blank"
    rel="noopener"
    style="
