@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ PrimeForge Mother EngineKGEN Universe12345 五指山悟空財神殿11520 花果山宇宙交易所  
-👉 https://www.youtube.com/watch?v=2oTn23AwJpo
+▶ #悟空新文#K線西遊記 #KGEN #PrimeForge #花果山台灣 #宇宙文明KGEN 不只是代幣。而是文明座標。K12345 五指山。K11520 花果山。市場會波動。文明將持續前行。  
+👉 https://www.youtube.com/shorts/kIZ_16PJmkw
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
