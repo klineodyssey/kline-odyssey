@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文#K線西遊記 #KGEN #PrimeForge #花果山台灣 #宇宙文明KGEN 不只是代幣。而是文明座標。K12345 五指山。K11520 花果山。市場會波動。文明將持續前行。  
-👉 https://www.youtube.com/shorts/kIZ_16PJmkw
+▶ 當108顆原子開始聚合，DNA誕生；當DNA開始演化，生命體誕生；當生命體開始學習畫線，文明就此啟動。績效只是基本分，畫線能力才是真正能力。KGEN 正在打造一個從原子到文明的市場生命宇宙。#KGEN  
+👉 https://www.youtube.com/watch?v=EpQb6PeYmxY
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
