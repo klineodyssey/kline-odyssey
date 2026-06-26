@@ -618,8 +618,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 當108顆原子開始聚合，DNA誕生；當DNA開始演化，生命體誕生；當生命體開始學習畫線，文明就此啟動。績效只是基本分，畫線能力才是真正能力。KGEN 正在打造一個從原子到文明的市場生命宇宙。#KGEN  
-👉 https://www.youtube.com/watch?v=EpQb6PeYmxY
+▶ KGEN宇宙土地不是商品，而是文明探索、建設、戰爭與交易後留下的歷史座標。真正的財富不是佔有土地，而是守護文明，讓文明跨越宇宙邊界。#KGEN #K線西遊記 #PrimeForge  
+👉 https://www.youtube.com/shorts/7EIa8akF-v4
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
