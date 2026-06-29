@@ -149,6 +149,9 @@
     "REQUIRED_LAND_DEMO_DATA": [
       "data/kgen-land-demo.json"
     ],
+    "CIVILIZATION_LAND_ENGINE": [
+      "../../modules/kgen-land-engine.js"
+    ],
     "REGENERATION_EMBRYO": [
       "embryo/FILE_EMBRYO_INDEX.json",
       "embryo/README.md"
@@ -163,7 +166,8 @@
       "modules/runtime-bootstrap.js",
       "modules/runtime-main.css",
       "modules/runtime-main.js",
-      "data/kgen-land-demo.json"
+      "data/kgen-land-demo.json",
+      "../../modules/kgen-land-engine.js"
     ]
   },
   "runtime_version": "V10.49.1",

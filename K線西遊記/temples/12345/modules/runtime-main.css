@@ -335,6 +335,121 @@ body.kgen-right-rule-closed .right-info-panel {
 #kgen-land-panel .lg-reserved { background: #b8860b !important; }
 #kgen-land-panel .lg-occupied { background: #8b3a62 !important; }
 #kgen-land-panel .lg-owned { background: #1a6b7a !important; }
+#kgen-land-panel .lg-select { background: #4a90d9 !important; }
+
+#kgen-land-panel .kgen-land-tools {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+#kgen-land-panel .kgen-land-tool {
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(127, 243, 255, 0.35) !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  color: #d9f4ff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  padding: 4px 2px !important;
+}
+
+#kgen-land-panel .kgen-land-selection-summary {
+  margin-top: 8px !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  background: rgba(74, 144, 217, 0.12) !important;
+  border: 1px solid rgba(74, 144, 217, 0.28) !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+  min-height: 56px !important;
+  box-sizing: border-box !important;
+}
+
+#kgen-land-panel .kgen-land-cell.viewing {
+  outline: 2px solid #ff9d5c !important;
+  outline-offset: -1px !important;
+}
+
+/* ===== KGEN 土地資訊面板 V1.0 ===== */
+#universe-nav #kgen-land-info-panel,
+#kgen-land-info-panel.kgen-layout-fixed {
+  position: static !important;
+  inset: auto !important;
+  width: var(--kgen-nav-width) !important;
+  max-width: var(--kgen-nav-width) !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--kgen-cell-radius) !important;
+  overflow: hidden !important;
+  z-index: 230 !important;
+  border: 1px solid rgba(255, 215, 120, 0.35) !important;
+  background: rgba(8, 10, 18, 0.92) !important;
+  color: #f5e6c8 !important;
+  font-size: 11px !important;
+}
+
+#kgen-land-info-panel .kgen-land-info-head {
+  min-height: var(--kgen-cell-height) !important;
+  height: var(--kgen-cell-height) !important;
+  line-height: var(--kgen-cell-height) !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-weight: 900 !important;
+  color: #ffd978 !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-bottom: 1px solid rgba(255, 215, 120, 0.18) !important;
+  cursor: pointer !important;
+}
+
+#kgen-land-info-panel.kgen-land-info-closed .kgen-land-info-body {
+  display: none !important;
+}
+
+#kgen-land-info-panel .kgen-land-info-body {
+  padding: 8px 10px 10px !important;
+}
+
+#kgen-land-info-panel .kgen-land-info-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 4px 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  font-size: 10px !important;
+}
+
+#kgen-land-info-panel .kgen-land-info-k {
+  opacity: 0.75 !important;
+  flex-shrink: 0 !important;
+}
+
+#kgen-land-info-panel .kgen-land-info-v {
+  text-align: right !important;
+  word-break: break-all !important;
+  color: #7ff3ff !important;
+}
+
+#kgen-land-info-panel .kgen-land-future-note {
+  margin-top: 8px !important;
+  font-size: 9px !important;
+  line-height: 1.4 !important;
+  opacity: 0.72 !important;
+  color: #c9d4e8 !important;
+}
+
+@media (max-width: 760px) {
+  #universe-nav #kgen-land-info-panel,
+  #kgen-land-info-panel.kgen-layout-fixed {
+    width: min(var(--kgen-nav-width), 86vw) !important;
+    max-width: min(var(--kgen-nav-width), 86vw) !important;
+  }
+}
 
 #kgen-land-panel .kgen-land-grid-wrap {
   overflow: auto !important;
