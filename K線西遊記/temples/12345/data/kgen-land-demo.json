@@ -1,0 +1,27 @@
+{
+  "universeId": "12345",
+  "cellSizePoint": 0.0001,
+  "cellSizeMeter": 2.276,
+  "cellAreaM2": 5.18,
+  "lands": [
+    {
+      "landId": "WUKONG-12345-L000001",
+      "owner": "temple-system",
+      "status": "reserved",
+      "cells": [
+        {"x": 1, "y": 1},
+        {"x": 2, "y": 1}
+      ]
+    },
+    {
+      "landId": "WUKONG-12345-L000002",
+      "owner": "galaxy-resident",
+      "status": "occupied",
+      "cells": [
+        {"x": 8, "y": 8},
+        {"x": 9, "y": 8},
+        {"x": 8, "y": 9}
+      ]
+    }
+  ]
+}

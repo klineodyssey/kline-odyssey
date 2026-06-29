@@ -285,9 +285,236 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     qa("button,.term-btn,.nav-btn,input,select").forEach((el,i)=>{
       if(!el.dataset.kgenCell) el.dataset.kgenCell = "cell-" + i;
     });
-    qa("#kgen-heart-live-panel,#kgen-v102-festival-panel,#coord-panel,.panel,.hud-box,.bp-panel").forEach((el,i)=>{
+    qa("#kgen-heart-live-panel,#kgen-v102-festival-panel,#kgen-land-panel,#coord-panel,.panel,.hud-box,.bp-panel").forEach((el,i)=>{
       if(!el.dataset.kgenOrgan) el.dataset.kgenOrgan = "organ-" + i;
     });
+  }
+
+  const KgenLandDemo = {
+    GRID: 20,
+    DEMO_PLAYER: "demo-player",
+    data: null,
+    occupancy: new Map(),
+    landById: new Map(),
+    selected: null,
+    nextSeq: 3,
+    inited: false,
+
+    cellKey(x, y){ return x + "," + y; },
+
+    async load(){
+      if(this.data) return this.data;
+      try{
+        const res = await fetch("data/kgen-land-demo.json", {cache:"no-store"});
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        this.data = await res.json();
+      }catch(err){
+        console.warn("[KGEN Land Demo] load failed", err);
+        this.data = {
+          universeId: "12345",
+          cellSizePoint: 0.0001,
+          cellSizeMeter: 2.276,
+          cellAreaM2: 5.18,
+          lands: []
+        };
+      }
+      this.rebuildIndex();
+      return this.data;
+    },
+
+    rebuildIndex(){
+      this.occupancy = new Map();
+      this.landById = new Map();
+      let maxSeq = 0;
+      (this.data.lands || []).forEach(land=>{
+        this.landById.set(land.landId, land);
+        const m = /L(\d+)$/.exec(land.landId || "");
+        if(m) maxSeq = Math.max(maxSeq, parseInt(m[1], 10));
+        (land.cells || []).forEach(c=>{
+          this.occupancy.set(this.cellKey(c.x, c.y), land.landId);
+        });
+      });
+      this.nextSeq = Math.max(this.nextSeq, maxSeq + 1);
+    },
+
+    areaM2(land){
+      const n = (land && land.cells) ? land.cells.length : 0;
+      return +(n * (this.data.cellAreaM2 || 5.18)).toFixed(2);
+    },
+
+    isOccupied(x, y){
+      return this.occupancy.has(this.cellKey(x, y));
+    },
+
+    landAt(x, y){
+      const id = this.occupancy.get(this.cellKey(x, y));
+      return id ? this.landById.get(id) : null;
+    },
+
+    fmtCells(cells){
+      return (cells || []).map(c=>"(" + c.x + "," + c.y + ")").join(" ");
+    },
+
+    renderDetail(land, x, y){
+      const detail = $("kgen-land-detail");
+      const buy = $("kgen-land-buy");
+      const msg = $("kgen-land-msg");
+      if(!detail || !buy) return;
+
+      if(land){
+        detail.innerHTML =
+          "<div><b>universeId</b>：" + this.data.universeId + "</div>" +
+          "<div><b>landId</b>：" + land.landId + "</div>" +
+          "<div><b>cells</b>：" + this.fmtCells(land.cells) + "</div>" +
+          "<div><b>areaM2</b>：" + this.areaM2(land) + " m²</div>" +
+          "<div><b>owner</b>：" + land.owner + "</div>" +
+          "<div><b>status</b>：" + land.status + "</div>";
+        buy.disabled = true;
+        if(msg) msg.textContent = "";
+        return;
+      }
+
+      detail.innerHTML =
+        "<div><b>universeId</b>：" + this.data.universeId + "</div>" +
+        "<div><b>landId</b>：—（待購買）</div>" +
+        "<div><b>cells</b>：(" + x + "," + y + ")</div>" +
+        "<div><b>areaM2</b>：" + (this.data.cellAreaM2 || 5.18) + " m²</div>" +
+        "<div><b>owner</b>：—</div>" +
+        "<div><b>status</b>：vacant</div>";
+      buy.disabled = false;
+      if(msg) msg.textContent = "";
+    },
+
+    renderGrid(){
+      const grid = $("kgen-land-grid");
+      if(!grid || !this.data) return;
+      grid.innerHTML = "";
+      const frag = document.createDocumentFragment();
+
+      for(let y = 1; y <= this.GRID; y++){
+        for(let x = 1; x <= this.GRID; x++){
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "kgen-land-cell";
+          btn.dataset.x = String(x);
+          btn.dataset.y = String(y);
+          btn.title = x + "," + y;
+          btn.setAttribute("aria-label", "格子 " + x + "," + y);
+
+          const land = this.landAt(x, y);
+          if(land){
+            if(land.status === "owned-by-demo-player"){
+              btn.classList.add("owned");
+            }else if(land.status === "reserved"){
+              btn.classList.add("reserved");
+            }else{
+              btn.classList.add("occupied");
+            }
+          }else{
+            btn.classList.add("empty");
+          }
+
+          if(this.selected && this.selected.x === x && this.selected.y === y){
+            btn.classList.add("selected");
+          }
+
+          btn.addEventListener("click", ()=>this.onCellClick(x, y));
+          frag.appendChild(btn);
+        }
+      }
+      grid.appendChild(frag);
+    },
+
+    onCellClick(x, y){
+      this.selected = {x, y};
+      const land = this.landAt(x, y);
+      const msg = $("kgen-land-msg");
+      this.renderDetail(land, x, y);
+      if(land && msg) msg.textContent = "土地已被占用";
+      this.renderGrid();
+    },
+
+    simulateBuy(){
+      const msg = $("kgen-land-msg");
+      const buy = $("kgen-land-buy");
+      if(!this.selected){
+        if(msg) msg.textContent = "請先點選空地";
+        return;
+      }
+      const {x, y} = this.selected;
+      if(this.isOccupied(x, y)){
+        if(msg) msg.textContent = "土地已被占用";
+        const land = this.landAt(x, y);
+        this.renderDetail(land, x, y);
+        if(buy) buy.disabled = true;
+        return;
+      }
+
+      const landId = "WUKONG-12345-L" + String(this.nextSeq).padStart(6, "0");
+      this.nextSeq += 1;
+      const land = {
+        landId,
+        owner: this.DEMO_PLAYER,
+        status: "owned-by-demo-player",
+        cells: [{x, y}]
+      };
+      this.data.lands.push(land);
+      this.rebuildIndex();
+      this.renderGrid();
+      this.renderDetail(land, x, y);
+      if(msg) msg.textContent = "模擬購買成功：" + landId;
+    },
+
+    bindBuy(){
+      const buy = $("kgen-land-buy");
+      if(!buy || buy.dataset.kgenLandBound) return;
+      buy.dataset.kgenLandBound = "1";
+      buy.addEventListener("click", (e)=>{
+        e.preventDefault();
+        this.simulateBuy();
+      });
+    },
+
+    movePanelToNav(){
+      const panel = $("kgen-land-panel");
+      const nav = $("universe-nav");
+      if(!panel || !nav) return;
+
+      panel.classList.add("kgen-layout-fixed");
+      panel.dataset.kgenOrgan = "land-registry-organ";
+
+      const festival = $("kgen-v102-festival-panel");
+      if(panel.parentElement !== nav){
+        if(festival && festival.nextSibling) nav.insertBefore(panel, festival.nextSibling);
+        else nav.appendChild(panel);
+      }
+
+      const head = panel.querySelector(".kgen-land-head");
+      if(head && !head.dataset.kgenLandToggle){
+        head.dataset.kgenLandToggle = "1";
+        head.style.cursor = "pointer";
+        head.addEventListener("click", ()=>{
+          panel.classList.toggle("kgen-land-closed");
+          const ver = head.querySelector(".kgen-land-ver");
+          if(ver) ver.textContent = panel.classList.contains("kgen-land-closed") ? "展開" : "Demo V0.1";
+        });
+      }
+      panel.classList.add("kgen-land-closed");
+    },
+
+    async init(){
+      if(this.inited) return;
+      await this.load();
+      this.movePanelToNav();
+      this.bindBuy();
+      this.renderGrid();
+      this.inited = true;
+    }
+  };
+  window.KGEN_LAND_DEMO = KgenLandDemo;
+
+  function bootLandDemo(){
+    KgenLandDemo.init().catch(err=>console.warn("[KGEN Land Demo]", err));
   }
 
   function boot(){
@@ -299,6 +526,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     HolyCup.render();
     Clock.start();
     tagCells();
+    bootLandDemo();
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
@@ -309,6 +537,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   setInterval(()=>{
     syncVersion();
     moveFestivalBelowAudio();
+    KgenLandDemo.movePanelToNav();
     bindHolyCup();
     tagCells();
   },3000);

@@ -1688,6 +1688,28 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 </div>
 </div>
 
+<div aria-label="KGEN 土地格子地籍 Demo V0.1" id="kgen-land-panel">
+<div class="kgen-land-head">
+<span>悟空土地地籍</span>
+<span class="kgen-land-ver">Demo V0.1</span>
+</div>
+<div class="kgen-land-body">
+<div class="kgen-land-spec">1 KGEN 點 = 22.76 km｜最小格 0.0001×0.0001 點｜實際 2.276m×2.276m｜≈ 5.18 m²</div>
+<div class="kgen-land-legend">
+<span class="kgen-land-legend-item"><i class="lg-empty"></i>空地</span>
+<span class="kgen-land-legend-item"><i class="lg-reserved"></i>保留</span>
+<span class="kgen-land-legend-item"><i class="lg-occupied"></i>已占用</span>
+<span class="kgen-land-legend-item"><i class="lg-owned"></i>已購買</span>
+</div>
+<div class="kgen-land-grid-wrap">
+<div class="kgen-land-grid" id="kgen-land-grid" role="grid"></div>
+</div>
+<div class="kgen-land-detail" id="kgen-land-detail">點選空地或已占用格子查看地籍</div>
+<button class="kgen-land-buy" disabled="" id="kgen-land-buy" type="button">模擬購買</button>
+<div aria-live="polite" class="kgen-land-msg" id="kgen-land-msg" role="status"></div>
+</div>
+</div>
+
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V10.47.1"></script>
