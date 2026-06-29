@@ -285,9 +285,34 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     qa("button,.term-btn,.nav-btn,input,select").forEach((el,i)=>{
       if(!el.dataset.kgenCell) el.dataset.kgenCell = "cell-" + i;
     });
-    qa("#kgen-heart-live-panel,#kgen-v102-festival-panel,#coord-panel,.panel,.hud-box,.bp-panel").forEach((el,i)=>{
+    qa("#kgen-heart-live-panel,#kgen-v102-festival-panel,#kgen-land-panel,#kgen-land-info-panel,#coord-panel,.panel,.hud-box,.bp-panel").forEach((el,i)=>{
       if(!el.dataset.kgenOrgan) el.dataset.kgenOrgan = "organ-" + i;
     });
+  }
+
+  let KgenLandRuntime = null;
+
+  function bootLandEngine(){
+    if(!window.KGEN_LAND_ENGINE){
+      console.warn("[KGEN Land] engine script missing");
+      return;
+    }
+    if(!KgenLandRuntime){
+      KgenLandRuntime = window.KGEN_LAND_ENGINE.create({
+        universeId: "12345",
+        gridSize: 20,
+        dataUrl: "data/kgen-land-demo.json",
+        demoPlayer: "demo-player",
+        landIdPrefix: "WUKONG"
+      });
+      window.KGEN_LAND_DEMO = KgenLandRuntime;
+      window.KGEN_LAND_RUNTIME = KgenLandRuntime;
+    }
+    KgenLandRuntime.init().catch(err=>console.warn("[KGEN Land Engine]", err));
+  }
+
+  function ensureLandEngine(){
+    if(KgenLandRuntime) KgenLandRuntime.ensure();
   }
 
   function boot(){
@@ -299,6 +324,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     HolyCup.render();
     Clock.start();
     tagCells();
+    bootLandEngine();
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
@@ -309,6 +335,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   setInterval(()=>{
     syncVersion();
     moveFestivalBelowAudio();
+    ensureLandEngine();
     bindHolyCup();
     tagCells();
   },3000);

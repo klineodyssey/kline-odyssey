@@ -1,0 +1,48 @@
+{
+  "engineVersion": "1.0",
+  "universeId": "12345",
+  "cellSizePoint": 0.0001,
+  "cellSizeMeter": 2.276,
+  "cellAreaM2": 5.18,
+  "nft": {
+    "enabled": false,
+    "metadataUri": null,
+    "tokenId": null,
+    "contract": null,
+    "reserved": true
+  },
+  "futureUniverses": ["11520", "13145", "16888"],
+  "futureHooks": {
+    "exchange11520": { "enabled": false, "label": "花果山交易所" },
+    "temple13145": { "enabled": false, "label": "羊神殿" }
+  },
+  "lands": [
+    {
+      "landId": "WUKONG-12345-L000001",
+      "universeId": "12345",
+      "owner": "temple-system",
+      "status": "reserved",
+      "reserved": true,
+      "areaM2": 10.36,
+      "cells": [
+        {"x": 1, "y": 1},
+        {"x": 2, "y": 1}
+      ],
+      "nft": { "metadataUri": null, "tokenId": null, "contract": null, "reserved": true }
+    },
+    {
+      "landId": "WUKONG-12345-L000002",
+      "universeId": "12345",
+      "owner": "galaxy-resident",
+      "status": "occupied",
+      "reserved": false,
+      "areaM2": 15.54,
+      "cells": [
+        {"x": 8, "y": 8},
+        {"x": 9, "y": 8},
+        {"x": 8, "y": 9}
+      ],
+      "nft": { "metadataUri": null, "tokenId": null, "contract": null, "reserved": true }
+    }
+  ]
+}

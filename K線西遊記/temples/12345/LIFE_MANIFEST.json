@@ -148,6 +148,26 @@
         "diagnosis": "生長法則 DNA 缺失"
       }
     ],
+    "land_demo_data": [
+      {
+        "path": "/K線西遊記/temples/12345/data/kgen-land-demo.json",
+        "life_layer": "MEMORY",
+        "life_type": "Land Cadastre Demo Record",
+        "sha256": "5e367ff598fa6276aaf70824e294dcc6ca45281ec48ce48995bacef4ed3c4e48",
+        "bytes": 1224,
+        "diagnosis": "土地地籍 Demo 資料缺失"
+      }
+    ],
+    "civilization_land_engine": [
+      {
+        "path": "/K線西遊記/modules/kgen-land-engine.js",
+        "life_layer": "ORGAN",
+        "life_type": "JavaScript Organ Lifeform",
+        "sha256": "34b376833a9f4a6ef461ca5bcc4712792d90b1f0a8db7c643e188a92657fd55f",
+        "bytes": 17947,
+        "diagnosis": "文明共用土地引擎缺失"
+      }
+    ],
     "legacy_organs_preserved": [
       {
         "path": "/K線西遊記/temples/12345/modules/kgen-12345-core.css",
@@ -896,6 +916,48 @@
       }
     },
     {
+      "path": "/K線西遊記/modules/kgen-land-engine.js",
+      "relative_to_life_city": "../../modules/kgen-land-engine.js",
+      "bytes": 17947,
+      "sha256": "34b376833a9f4a6ef461ca5bcc4712792d90b1f0a8db7c643e188a92657fd55f",
+      "life_layer": "ORGAN",
+      "life_type": "JavaScript Organ Lifeform",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "FinancialLifeform",
+        "phylum": "RuntimeOrganism",
+        "class": "LandCadastreEngine",
+        "order": "JavaScriptOrgan",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN",
+        "species": "kgen-land-engine.js",
+        "cell": "Function Cell Cluster",
+        "organ": "Civilization Land Engine",
+        "dna": "LAND-ENGINE-DNA"
+      }
+    },
+    {
+      "path": "/K線西遊記/temples/12345/data/kgen-land-demo.json",
+      "relative_to_life_city": "data/kgen-land-demo.json",
+      "bytes": 1224,
+      "sha256": "5e367ff598fa6276aaf70824e294dcc6ca45281ec48ce48995bacef4ed3c4e48",
+      "life_layer": "MEMORY",
+      "life_type": "Land Cadastre Demo Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "LandCadastreDemo",
+        "order": "JsonRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-land-demo.json",
+        "cell": "Memory Cell",
+        "organ": "Land Registry Demo Shell",
+        "dna": "LAND-DEMO-DNA"
+      }
+    },
+    {
       "path": "/K線西遊記/temples/12345/index.html",
       "relative_to_life_city": "index.html",
       "bytes": 83094,
@@ -1552,10 +1614,17 @@
     "REQUIRED_STRUCTURES": [
       "modules/",
       "assets/",
+      "data/",
       "docs/",
       "SOP/",
       "archive/",
       "embryo/"
+    ],
+    "REQUIRED_LAND_DEMO_DATA": [
+      "data/kgen-land-demo.json"
+    ],
+    "CIVILIZATION_LAND_ENGINE": [
+      "../../modules/kgen-land-engine.js"
     ],
     "REGENERATION_EMBRYO": [
       "embryo/FILE_EMBRYO_INDEX.json",
@@ -1570,7 +1639,9 @@
       "modules/kgen-12345-runtime.js",
       "modules/runtime-bootstrap.js",
       "modules/runtime-main.css",
-      "modules/runtime-main.js"
+      "modules/runtime-main.js",
+      "data/kgen-land-demo.json",
+      "../../modules/kgen-land-engine.js"
     ]
   },
   "version_governance": {
