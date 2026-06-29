@@ -72,14 +72,136 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   --kgen-organ-gap: 10px;
 }
 
-/* 版本銘牌 */
+/* 版本銘牌 — UI V1.0.1 短版顯示 */
 #ver-st {
-  display:block !important;
+  display: block !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  line-height: 1.2 !important;
+  line-height: 1.15 !important;
+  height: 14px !important;
+  max-height: 14px !important;
+  font-size: 11px !important;
   z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ===== HUD TOP 穩定修復 V1.0.1 ===== */
+.hud-top {
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+}
+
+.hud-top .brand-section {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  max-width: min(46vw, 380px) !important;
+  overflow: hidden !important;
+}
+
+.hud-top .brand-name {
+  font-size: clamp(14px, 2.6vw, 22px) !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-height: 26px !important;
+}
+
+.hud-top #sys-clock {
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.15 !important;
+  height: 14px !important;
+  max-height: 14px !important;
+  font-size: 11px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.hud-top .monitor-data {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  gap: 10px !important;
+  align-items: flex-start !important;
+  margin-left: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.hud-top .data-box {
+  width: 192px !important;
+  min-width: 192px !important;
+  max-width: 192px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px !important;
+  flex: 0 0 auto !important;
+}
+
+.hud-top .data-box > div:first-child {
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.hud-top .grid-500 {
+  width: 176px !important;
+  min-width: 176px !important;
+  max-width: 176px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  overflow: hidden !important;
+  grid-template-columns: repeat(25, 6px) !important;
+}
+
+@media (max-width: 760px) {
+  .hud-top {
+    width: 98% !important;
+    left: 1% !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .hud-top .brand-section {
+    max-width: 40vw !important;
+  }
+
+  .hud-top .monitor-data {
+    gap: 6px !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .hud-top .data-box {
+    width: min(44vw, 158px) !important;
+    min-width: min(44vw, 158px) !important;
+    max-width: min(44vw, 158px) !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    padding: 5px 6px !important;
+  }
+
+  .hud-top .grid-500 {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(20, 5px) !important;
+    gap: 2px !important;
+  }
 }
 
 /* 右側神規登入預設關閉 */

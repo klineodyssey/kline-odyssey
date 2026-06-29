@@ -67,8 +67,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 (function(){
   "use strict";
 
-  const VERSION = "V10.47.1";
-  const VERSION_TAG = "12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX";
+  const VERSION = "V10.49.1";
+  const VERSION_TAG = "12345-TEMPLE-V10.49.1-LAND-UI-V1.0.1";
+  const VERSION_SHORT = "V10.49.1 / LAND V1.0";
+  const UI_PATCH = "V1.0.1";
   const $ = (id)=>document.getElementById(id);
   const qa = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
 
@@ -94,11 +96,14 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   });
 
   function syncVersion(){
-    document.title = "KGEN-12345-HEART-UI-" + VERSION;
+    document.title = "KGEN-12345-HEART-UI-" + VERSION_TAG;
     const ver = $("ver-st");
     if(ver){
-      ver.textContent = "VERSION " + VERSION_TAG;
+      ver.textContent = VERSION_SHORT;
+      ver.setAttribute("data-version", VERSION_TAG);
       ver.dataset.kgenGenomeVersion = VERSION;
+      ver.dataset.kgenUiPatch = UI_PATCH;
+      ver.title = VERSION_TAG;
     }
   }
 
