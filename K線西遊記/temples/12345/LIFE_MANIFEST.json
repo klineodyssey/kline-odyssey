@@ -148,6 +148,16 @@
         "diagnosis": "生長法則 DNA 缺失"
       }
     ],
+    "land_demo_data": [
+      {
+        "path": "/K線西遊記/temples/12345/data/kgen-land-demo.json",
+        "life_layer": "MEMORY",
+        "life_type": "Land Cadastre Demo Record",
+        "sha256": "860a23414af3c3e29bf9d70c6075141ba6b34f12003ae7bb3d138425187c63d9",
+        "bytes": 526,
+        "diagnosis": "土地地籍 Demo 資料缺失"
+      }
+    ],
     "legacy_organs_preserved": [
       {
         "path": "/K線西遊記/temples/12345/modules/kgen-12345-core.css",
@@ -896,6 +906,27 @@
       }
     },
     {
+      "path": "/K線西遊記/temples/12345/data/kgen-land-demo.json",
+      "relative_to_life_city": "data/kgen-land-demo.json",
+      "bytes": 526,
+      "sha256": "860a23414af3c3e29bf9d70c6075141ba6b34f12003ae7bb3d138425187c63d9",
+      "life_layer": "MEMORY",
+      "life_type": "Land Cadastre Demo Record",
+      "taxonomy": {
+        "domain": "KGENVERSE",
+        "kingdom": "CivilizationMemory",
+        "phylum": "DocumentShell",
+        "class": "LandCadastreDemo",
+        "order": "JsonRecord",
+        "family": "PrimeForgeLife",
+        "genus": "KGEN12345",
+        "species": "kgen-land-demo.json",
+        "cell": "Memory Cell",
+        "organ": "Land Registry Demo Shell",
+        "dna": "LAND-DEMO-DNA"
+      }
+    },
+    {
       "path": "/K線西遊記/temples/12345/index.html",
       "relative_to_life_city": "index.html",
       "bytes": 83094,
@@ -1552,10 +1583,14 @@
     "REQUIRED_STRUCTURES": [
       "modules/",
       "assets/",
+      "data/",
       "docs/",
       "SOP/",
       "archive/",
       "embryo/"
+    ],
+    "REQUIRED_LAND_DEMO_DATA": [
+      "data/kgen-land-demo.json"
     ],
     "REGENERATION_EMBRYO": [
       "embryo/FILE_EMBRYO_INDEX.json",
@@ -1570,7 +1605,8 @@
       "modules/kgen-12345-runtime.js",
       "modules/runtime-bootstrap.js",
       "modules/runtime-main.css",
-      "modules/runtime-main.js"
+      "modules/runtime-main.js",
+      "data/kgen-land-demo.json"
     ]
   },
   "version_governance": {

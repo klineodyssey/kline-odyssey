@@ -140,10 +140,14 @@
     "REQUIRED_STRUCTURES": [
       "modules/",
       "assets/",
+      "data/",
       "docs/",
       "SOP/",
       "archive/",
       "embryo/"
+    ],
+    "REQUIRED_LAND_DEMO_DATA": [
+      "data/kgen-land-demo.json"
     ],
     "REGENERATION_EMBRYO": [
       "embryo/FILE_EMBRYO_INDEX.json",
@@ -158,7 +162,8 @@
       "modules/kgen-12345-runtime.js",
       "modules/runtime-bootstrap.js",
       "modules/runtime-main.css",
-      "modules/runtime-main.js"
+      "modules/runtime-main.js",
+      "data/kgen-land-demo.json"
     ]
   },
   "runtime_version": "V10.49.1",

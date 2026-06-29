@@ -299,6 +299,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     selected: null,
     nextSeq: 3,
     inited: false,
+    collapseInit: false,
 
     cellKey(x, y){ return x + "," + y; },
 
@@ -475,7 +476,20 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       });
     },
 
-    movePanelToNav(){
+    bindPanelToggle(){
+      const panel = $("kgen-land-panel");
+      const head = panel && panel.querySelector(".kgen-land-head");
+      if(!panel || !head || head.dataset.kgenLandToggle) return;
+      head.dataset.kgenLandToggle = "1";
+      head.style.cursor = "pointer";
+      head.addEventListener("click", ()=>{
+        panel.classList.toggle("kgen-land-closed");
+        const ver = head.querySelector(".kgen-land-ver");
+        if(ver) ver.textContent = panel.classList.contains("kgen-land-closed") ? "展開" : "Demo V0.1";
+      });
+    },
+
+    ensurePanelInNav(){
       const panel = $("kgen-land-panel");
       const nav = $("universe-nav");
       if(!panel || !nav) return;
@@ -489,23 +503,17 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
         else nav.appendChild(panel);
       }
 
-      const head = panel.querySelector(".kgen-land-head");
-      if(head && !head.dataset.kgenLandToggle){
-        head.dataset.kgenLandToggle = "1";
-        head.style.cursor = "pointer";
-        head.addEventListener("click", ()=>{
-          panel.classList.toggle("kgen-land-closed");
-          const ver = head.querySelector(".kgen-land-ver");
-          if(ver) ver.textContent = panel.classList.contains("kgen-land-closed") ? "展開" : "Demo V0.1";
-        });
+      this.bindPanelToggle();
+      if(!this.collapseInit){
+        panel.classList.add("kgen-land-closed");
+        this.collapseInit = true;
       }
-      panel.classList.add("kgen-land-closed");
     },
 
     async init(){
       if(this.inited) return;
       await this.load();
-      this.movePanelToNav();
+      this.ensurePanelInNav();
       this.bindBuy();
       this.renderGrid();
       this.inited = true;
@@ -537,7 +545,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   setInterval(()=>{
     syncVersion();
     moveFestivalBelowAudio();
-    KgenLandDemo.movePanelToNav();
+    KgenLandDemo.ensurePanelInNav();
     bindHolyCup();
     tagCells();
   },3000);
