@@ -72,7 +72,7 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   --kgen-organ-gap: 10px;
 }
 
-/* 版本銘牌 — UI V1.0.2 兩排顯示 */
+/* 版本銘牌 — UI V1.0.3 兩排固定、防抖動 */
 #ver-st {
   display: block !important;
   white-space: nowrap !important;
@@ -80,12 +80,106 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   text-overflow: ellipsis !important;
   line-height: 1.15 !important;
   height: 14px !important;
+  min-height: 14px !important;
   max-height: 14px !important;
   font-size: 11px !important;
   z-index: 9999 !important;
   margin: 0 !important;
   padding: 0 !important;
+  font-variant-numeric: tabular-nums !important;
 }
+
+.hud-top .brand-name {
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+}
+
+.hud-top .kgen-hud-clock,
+.hud-top #sys-clock.kgen-hud-clock {
+  display: block !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  line-height: 1.15 !important;
+  overflow: hidden !important;
+  font-variant-numeric: tabular-nums !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+}
+
+.hud-top .kgen-hud-clock .kgen-tw-main,
+#kgen-heart-live-panel .kgen-tw-main {
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.hud-top .kgen-hud-clock .kgen-utc-sub,
+#kgen-heart-live-panel .kgen-utc-sub {
+  display: block !important;
+  font-size: 10px !important;
+  opacity: 0.72 !important;
+  white-space: nowrap !important;
+}
+
+#kgen-v902-left-status.kgen-left-status-bus {
+  display: block !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  line-height: 1.35 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  font-size: 11px !important;
+}
+
+#kh-ny-slot,
+#kh-ny-countdown,
+.kh-ny-countdown,
+#cd-1231,
+#kgen-ny-countdown,
+#kgen-v102-festival-countdown {
+  font-variant-numeric: tabular-nums !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  min-width: 12ch !important;
+}
+
+#kgen-heart-live-panel .kh-cup-btns {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+#kgen-heart-live-panel .kh-cup-btn.done {
+  opacity: 0.72 !important;
+  filter: saturate(1.2) !important;
+}
+
+#kgen-heart-live-panel .kh-cup-btn.kh-cup-next {
+  box-shadow: 0 0 0 2px rgba(247, 210, 113, 0.55) !important;
+}
+
+#kgen-heart-live-panel .kh-log {
+  min-height: 52px !important;
+  max-height: 52px !important;
+  height: 52px !important;
+  overflow: hidden !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 760px) {
+  #kgen-heart-live-panel .kh-cup-btns {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  #kgen-heart-live-panel .kh-cup-btns #kh-cup-reset {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* ===== 悟空控制台 UI V1.0.2 ===== */
 
 /* ===== HUD TOP 穩定修復 V1.0.1 ===== */
 .hud-top {

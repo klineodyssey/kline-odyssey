@@ -68,10 +68,11 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   "use strict";
 
   const VERSION = "V10.49.1";
-  const VERSION_TAG = "12345-TEMPLE-V10.49.1-LAND-UI-V1.0.2";
+  const VERSION_TAG = "12345-TEMPLE-V10.49.1-LAND-UI-V1.0.3";
   const VERSION_SHORT = "V10.49.1 / LAND V1.0 / BSC56";
   const BRAND_LINE1 = "KGEN 12345 五指山悟空財神殿";
-  const UI_PATCH = "V1.0.2";
+  const UI_PATCH = "V1.0.3";
+  const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CUP_KEY = "kgen12345_cup_count_v10492";
   const CHAIN = {
     KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
@@ -100,8 +101,22 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   const ERC20_VIEW_ABI = [
     "function balanceOf(address) view returns (uint256)",
     "function allowance(address owner, address spender) view returns (uint256)",
-    "function decimals() view returns (uint8)"
+    "function decimals() view returns (uint8)",
+    "function approve(address spender, uint256 amount) external returns (bool)"
   ];
+  /* KGEN_TempleHeart_V3_2_6.sol — canonical write ABI (frontend must match) */
+  const HEART_ABI_V326 = [
+    "function fortuneClaim(uint256 amountWhole) external",
+    "function heartbeatClaim() external",
+    "function igniteAndClaim() external",
+    "function vowTo(uint8 option, uint256 amountWhole) external",
+    "function lightLamp(uint256 daysToAdd) external",
+    "function makeWish(bytes32 wishHash) external",
+    "function festivalClaim(uint8 festivalId) external",
+    "function newYearCountdownClaim() external"
+  ];
+  window.KGEN_HEART_ABI_V326 = HEART_ABI_V326;
+  window.KGEN_HEART_CONTRACT = HEART_CONTRACT;
   const $ = (id)=>document.getElementById(id);
   const qa = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
 
@@ -109,6 +124,8 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     species: "12345-WukongTemple",
     version: VERSION,
     tag: VERSION_TAG,
+    ui_patch: UI_PATCH,
+    heart_contract: HEART_CONTRACT,
     runtime_file: "modules/runtime-main.js",
     css_file: "modules/runtime-main.css",
     ancestor: "V10.42.6",
@@ -129,7 +146,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   function syncVersion(){
     document.title = "KGEN-12345-HEART-UI-" + VERSION_TAG;
     const brand = document.querySelector(".hud-top .brand-name");
-    if(brand) brand.textContent = BRAND_LINE1;
+    if(brand){
+      brand.textContent = BRAND_LINE1;
+      brand.dataset.kgenHudLock = "1";
+    }
     const ver = $("ver-st");
     if(ver){
       ver.textContent = VERSION_SHORT;
@@ -139,6 +159,113 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       ver.title = VERSION_TAG;
     }
   }
+
+  const StatusBus = {
+    lines: [],
+    maxLines: 6,
+    _mirror: "",
+    targets: ["kgen-v902-left-status", "kh-log"],
+    push(msg, opts){
+      const text = String(msg || "").trim();
+      if(!text || text === this._mirror) return;
+      this._mirror = text;
+      const stamp = formatTaipei(new Date()).slice(11);
+      const line = stamp + " " + text;
+      this.lines.unshift(line);
+      if(this.lines.length > this.maxLines) this.lines.length = this.maxLines;
+      const show = opts && opts.full ? this.lines.join(" | ") : text;
+      this.targets.forEach(id=>{
+        const el = $(id);
+        if(el && !el.dataset.kgenBusMute){
+          el.textContent = show;
+        }
+      });
+    },
+    hookExternal(){
+      const self = this;
+      [["kh-log", ""], ["kgen-land-msg", "[土地] "]].forEach(([id, prefix])=>{
+        const el = $(id);
+        if(!el || el.dataset.kgenBusHook) return;
+        el.dataset.kgenBusHook = "1";
+        new MutationObserver(()=>{
+          const t = (el.textContent || "").trim();
+          if(t && t !== self._mirror) self.push(prefix + t, {full:false});
+        }).observe(el, {characterData:true, childList:true, subtree:true});
+      });
+      window.addEventListener("kgen-status", (e)=>{
+        if(e.detail && e.detail.message) self.push(e.detail.message);
+      });
+    }
+  };
+  window.KGEN_STATUS_BUS = StatusBus;
+
+  const HudGuard = {
+    clockTimer: null,
+    init(){
+      syncVersion();
+      this.guardNode("ver-st", ()=>VERSION_SHORT, (el)=>{
+        el.setAttribute("data-version", VERSION_TAG);
+        el.title = VERSION_TAG;
+      });
+      const brand = document.querySelector(".hud-top .brand-name");
+      if(brand) this.guardNode(brand, ()=>BRAND_LINE1);
+      this.guardClockRoot("sys-clock");
+      this.guardClockRoot("kh-utc");
+      this.startClock();
+    },
+    guardClockRoot(id){
+      const root = $(id);
+      if(!root) return;
+      const fix = ()=>{
+        this.setupClockShell(id);
+        this.tickClock();
+      };
+      fix();
+      if(root.dataset.kgenClockGuard) return;
+      root.dataset.kgenClockGuard = "1";
+      new MutationObserver(fix).observe(root, {childList:true, characterData:true, subtree:true});
+    },
+    guardNode(elOrId, getText, extra){
+      const el = typeof elOrId === "string" ? $(elOrId) : elOrId;
+      if(!el || el.dataset.kgenHudGuard) return;
+      el.dataset.kgenHudGuard = "1";
+      const fix = ()=>{
+        const want = getText();
+        if(el.textContent !== want) el.textContent = want;
+        if(extra) extra(el);
+      };
+      fix();
+      new MutationObserver(fix).observe(el, {characterData:true, childList:true, subtree:true});
+    },
+    setupClockShell(id){
+      const root = $(id);
+      if(!root || root.dataset.kgenHudOwned) return;
+      root.dataset.kgenHudOwned = "1";
+      root.classList.add(id === "sys-clock" ? "kgen-hud-clock" : "kh-v-time");
+      if(!root.querySelector(".kgen-tw-main")){
+        root.innerHTML = '<span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span>';
+      }
+    },
+    tickClock(){
+      const now = new Date();
+      const tw = "台灣時間：" + formatTaipei(now);
+      const utc = "UTC：" + formatUTC(now);
+      ["sys-clock", "kh-utc"].forEach(id=>{
+        const root = $(id);
+        if(!root) return;
+        const twEl = root.querySelector(".kgen-tw-main");
+        const utcEl = root.querySelector(".kgen-utc-sub");
+        if(twEl && twEl.textContent !== tw) twEl.textContent = tw;
+        if(utcEl && utcEl.textContent !== utc) utcEl.textContent = utc;
+      });
+    },
+    startClock(){
+      if(this.clockTimer) return;
+      this.tickClock();
+      this.clockTimer = setInterval(()=>this.tickClock(), 1000);
+    }
+  };
+  window.KGEN_HUD_GUARD = HudGuard;
 
   function formatTaipei(date){
     const parts = new Intl.DateTimeFormat("en-CA", {
@@ -229,24 +356,33 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     return days + "天 " + pad(h) + "時" + pad(m) + "分";
   }
 
-  const Clock = {
+  const StableCountdown = {
     t:null,
-    last:"",
+    lastFestival:"",
+    lastNy:"",
     tick(){
       const now=Date.now();
-      const text = "跨年 " + fmt(nextLocal(12,31,23,59,59)-now) +
+      const festText = "跨年 " + fmt(nextLocal(12,31,23,59,59)-now) +
         "｜520 " + fmt(nextLocal(5,20,0,0,0)-now) +
         "｜1111 " + fmt(nextLocal(11,11,0,0,0)-now);
-      if(text !== this.last){
-        this.last = text;
+      if(festText !== this.lastFestival){
+        this.lastFestival = festText;
         const cd = $("kgen-v102-festival-countdown");
-        if(cd) cd.textContent = text;
+        if(cd) cd.textContent = festText;
       }
-      const ny = "距跨年：" + fmt(nextLocal(12,31,23,59,59)-now);
-      ["kh-ny-slot","kh-ny-countdown","cd-1231","kgen-ny-countdown"].forEach(id=>{
-        const el=$(id);
-        if(el) el.textContent = ny;
-      });
+      const nyMs = Math.max(0, nextLocal(12,31,23,59,59)-now);
+      const totalMin = Math.floor(nyMs / 60000);
+      const nyD = Math.floor(totalMin / 1440);
+      const nyH = Math.floor((totalMin % 1440) / 60);
+      const nyM = totalMin % 60;
+      const ny = "距跨年：" + pad(nyD) + "天 " + pad(nyH) + "時" + pad(nyM) + "分";
+      if(ny !== this.lastNy){
+        this.lastNy = ny;
+        ["kh-ny-slot","kh-ny-countdown","cd-1231","kgen-ny-countdown"].forEach(id=>{
+          const el=$(id);
+          if(el) el.textContent = ny;
+        });
+      }
     },
     start(){
       if(this.t) clearInterval(this.t);
@@ -254,7 +390,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       this.t = setInterval(()=>this.tick(), 1000);
     }
   };
-  window.PULSAR_HEART_RUNTIME = Clock;
+  window.PULSAR_HEART_RUNTIME = StableCountdown;
 
   function moveFestivalBelowAudio(){
     const panel = $("kgen-v102-festival-panel");
@@ -292,9 +428,9 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   const HolyCup = {
     count:0,
     max:3,
-    labels:["聖盃一","聖盃二","聖盃三"],
     load(){
-      this.count = Math.min(this.max, Number(localStorage.getItem(CUP_KEY) || "0") || 0);
+      const raw = Number(localStorage.getItem(CUP_KEY) || "0") || 0;
+      this.count = Math.min(this.max, Math.max(0, raw));
     },
     save(){
       localStorage.setItem(CUP_KEY, String(this.count));
@@ -305,42 +441,54 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     },
     statusText(){
       this.load();
-      if(this.count >= this.max) return "聖盃完成，可以領取。";
+      if(this.count >= this.max) return "聖盃完成，可以領取";
       return this.count + "/3";
     },
-    render(msg){
+    render(){
       this.load();
-      const text = this.statusText() + (msg ? "｜" + msg : "");
+      const text = this.statusText();
       ["v57-cup-status","v714-cup-status","v715-cup-status","v715-cup-log","kh-cup-status"].forEach(id=>{
         const el=$(id);
         if(el){
           el.textContent = text;
           el.dataset.kgenOrgan = "holycup-organ";
+          el.dataset.kgenCupCount = String(this.count);
         }
       });
-      qa("button,.v714-cup").forEach(btn=>{
-        const t=(btn.textContent||"").replace(/\s+/g,"");
-        if(/聖盃一|聖盃二|聖盃三/.test(t)){
-          const n = t.includes("一") ? 1 : t.includes("二") ? 2 : 3;
-          btn.classList.toggle("done", n <= this.count);
-          btn.innerHTML = "聖盃" + (n===1?"一":n===2?"二":"三") + "<br>" + (n <= this.count ? "已擲杯" : "尚未擲杯");
-        }
+      [1,2,3].forEach(n=>{
+        const btn = $("kh-cup-" + n);
+        if(!btn) return;
+        const done = this.count >= n;
+        const next = this.count === n - 1;
+        btn.classList.toggle("done", done);
+        btn.classList.toggle("kh-cup-next", next);
+        btn.disabled = done;
+        btn.textContent = "聖盃" + (n===1?"一":n===2?"二":"三") + (done ? " ✓" : "");
       });
       if(ConsoleUI.refreshFortuneStatus) ConsoleUI.refreshFortuneStatus();
     },
-    cup(){
+    cupPress(n){
       this.load();
-      if(this.count < this.max){
-        this.count++;
-        this.save();
+      if(this.count >= this.max){
+        StatusBus.push("聖盃已完成，可以領取");
+        return false;
       }
-      this.render(this.count >= this.max ? "" : "");
+      if(this.count !== n - 1){
+        StatusBus.push(this.count < n - 1 ? "請依序完成聖盃 " + (this.count + 1) + "/3" : "此聖盃已完成");
+        this.render();
+        return false;
+      }
+      this.count = n;
+      this.save();
+      StatusBus.push("聖盃進度 " + this.count + "/3");
+      this.render();
       return false;
     },
     reset(){
       this.count = 0;
       this.save();
-      this.render("已重置");
+      StatusBus.push("聖盃已重置");
+      this.render();
       return false;
     }
   };
@@ -352,49 +500,82 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     state:{ blockTs:0, address:null, chainId:null, bnbBal:null, heartData:null, readError:null },
 
     start(){
-      this.lockUtc = false;
-      this.watchUtc();
-      this.tickClock();
-      if(this.timer) clearInterval(this.timer);
-      this.timer = setInterval(()=>this.tickClock(), 250);
       this.refreshChain();
       if(this.chainTimer) clearInterval(this.chainTimer);
       this.chainTimer = setInterval(()=>this.refreshChain(), 12000);
       this.bindCupButtons();
       this.bindAmountInput();
+      this.bindFortuneGuard();
+      this.bindActionLogs();
       this.relabelButtons();
       this.fixWish();
+      this.guardCupStatus();
+      if(this.displayTimer) clearInterval(this.displayTimer);
+      this.displayTimer = setInterval(()=>{
+        this.updateHeartbeatDisplay();
+        this.updateIgniteDisplay();
+      }, 1000);
     },
 
-    watchUtc(){
-      const utcEl = $("kh-utc");
-      if(!utcEl || utcEl.dataset.kgenTwWatch) return;
-      utcEl.dataset.kgenTwWatch = "1";
-      const obs = new MutationObserver(()=>{
-        if(this.lockUtc) return;
-        const html = utcEl.innerHTML || "";
-        const text = utcEl.textContent || "";
-        if(!html.includes("台灣時間") && !text.includes("台灣時間")){
-          this.tickClock();
+    guardCupStatus(){
+      const el = $("kh-cup-status");
+      if(!el || el.dataset.kgenCupGuard) return;
+      el.dataset.kgenCupGuard = "1";
+      const fix = ()=>{
+        HolyCup.load();
+        const want = HolyCup.statusText();
+        if(el.textContent !== want) el.textContent = want;
+        if(el.dataset.kgenCupCount !== String(HolyCup.count)){
+          el.dataset.kgenCupCount = String(HolyCup.count);
         }
-      });
-      obs.observe(utcEl, { childList:true, characterData:true, subtree:true, characterDataOldValue:false });
+      };
+      fix();
+      new MutationObserver(fix).observe(el, {characterData:true, childList:true, subtree:true});
     },
 
-    tickClock(){
-      syncVersion();
-      const now = new Date();
-      const tw = "台灣時間：" + formatTaipei(now);
-      const utcEl = $("kh-utc");
-      if(utcEl){
-        this.lockUtc = true;
-        utcEl.innerHTML = tw + '<br><span class="kh-utc-sub">UTC：' + formatUTC(now) + "</span>";
-        this.lockUtc = false;
-      }
-      const sys = $("sys-clock");
-      if(sys) sys.textContent = tw;
-      this.updateHeartbeatDisplay();
-      this.updateIgniteDisplay();
+    bindActionLogs(){
+      const map = [
+        ["kh-connect", "錢包：連線 / 切換 BSC"],
+        ["kh-refresh", "錢包：刷新餘額"],
+        ["kh-approve-current", "Approve：授權目前金額"],
+        ["kh-approve-unlimited", "Approve：無限授權"],
+        ["kh-fortune", "發財金 fortuneClaim"],
+        ["kh-heartbeat", "心跳 heartbeatClaim"],
+        ["kh-ignite", "轉日 igniteAndClaim"],
+        ["kh-vow", "還願 vowTo"],
+        ["kh-lamp", "點燈 lightLamp"],
+        ["kh-wishbtn", "許願 makeWish"]
+      ];
+      map.forEach(([id, label])=>{
+        const btn = $(id);
+        if(!btn || btn.dataset.kgenBusLog) return;
+        btn.dataset.kgenBusLog = "1";
+        btn.addEventListener("click", ()=>StatusBus.push("已按下：" + label), true);
+      });
+    },
+
+    bindFortuneGuard(){
+      const btn = $("kh-fortune");
+      if(!btn || btn.dataset.kgenFortuneGuard) return;
+      btn.dataset.kgenFortuneGuard = "1";
+      btn.addEventListener("click", (e)=>{
+        if(!HolyCup.isComplete()){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          StatusBus.push("發財金：三聖盃未完成（" + HolyCup.count + "/3）");
+          alert("請先完成三聖盃（目前 " + HolyCup.count + "/3）");
+          return false;
+        }
+        const reasons = this.getFortuneBlockReasons().filter(r=>r !== "三聖盃未完成");
+        if(reasons.length){
+          StatusBus.push("發財金：鏈上條件 — " + reasons.join("；"));
+          if(!confirm("鏈上可能無法領取：\n" + reasons.join("\n") + "\n\n仍要送出交易？")){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+          }
+        }
+      }, true);
     },
 
     providerRO(){
@@ -633,27 +814,29 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 
       if(!this.state.heartData || this.state.readError){
         el.textContent = "發財金：等待鏈上資料";
-        if(btn) btn.disabled = true;
+        if(btn){ btn.disabled = false; btn.title = "等待鏈上資料"; }
         return;
       }
 
-      const reasons = this.getFortuneBlockReasons();
+      const reasons = this.getFortuneBlockReasons().filter(r=>r !== "三聖盃未完成");
       if(reasons.length === 0){
         el.textContent = "發財金：可領";
         if(btn){ btn.disabled = false; btn.title = ""; }
       }else{
-        el.textContent = "發財金：不可領 — " + reasons[0];
-        if(btn){ btn.disabled = true; btn.title = reasons.join("；"); }
+        el.textContent = "發財金：鏈上條件 — " + reasons[0];
+        if(btn){ btn.disabled = false; btn.title = reasons.join("；"); }
       }
     },
 
     bindCupButtons(){
-      const throwBtn = $("kh-cup-throw");
+      [1,2,3].forEach(n=>{
+        const btn = $("kh-cup-" + n);
+        if(btn && !btn.dataset.kgenBound){
+          btn.dataset.kgenBound = "1";
+          btn.onclick = ()=>HolyCup.cupPress(n);
+        }
+      });
       const resetBtn = $("kh-cup-reset");
-      if(throwBtn && !throwBtn.dataset.kgenBound){
-        throwBtn.dataset.kgenBound = "1";
-        throwBtn.onclick = ()=>HolyCup.cup();
-      }
       if(resetBtn && !resetBtn.dataset.kgenBound){
         resetBtn.dataset.kgenBound = "1";
         resetBtn.onclick = ()=>HolyCup.reset();
@@ -703,17 +886,23 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   function bindHolyCup(){
     const old = window.templeOps || {};
     window.templeOps = Object.assign({}, old, {
-      cup: ()=>HolyCup.cup(),
+      cup: ()=>{ HolyCup.load(); return HolyCup.cupPress(Math.min(3, HolyCup.count + 1)); },
       resetCup: ()=>HolyCup.reset()
+    });
+    [1,2,3].forEach(n=>{
+      const btn = $("kh-cup-" + n);
+      if(btn && !btn.dataset.kgenNavBound){
+        btn.dataset.kgenNavBound = "1";
+      }
     });
     qa("button,.term-btn,.nav-btn,.v714-cup").forEach(btn=>{
       const t=(btn.textContent||"").replace(/\s+/g,"");
-      if(/三次聖盃|請示聖盃|聖盃一|聖盃二|聖盃三/.test(t) && !/重置/.test(t)){
+      if(/三次聖盃|請示聖盃|聖盃一|聖盃二|聖盃三/.test(t) && !/重置/.test(t) && !btn.id.startsWith("kh-cup-")){
         btn.dataset.kgenCell = "holycup-button-cell";
         btn.onclick = function(e){
           e && e.preventDefault && e.preventDefault();
           e && e.stopPropagation && e.stopPropagation();
-          return HolyCup.cup();
+          return HolyCup.cupPress(Math.min(3, HolyCup.count + 1));
         };
       }
       if(/重置聖盃|重置/.test(t) && btn.closest && (btn.closest(".v714-cupbox") || btn.closest("#kgen-heart-live-panel"))){
@@ -761,7 +950,8 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   }
 
   function boot(){
-    syncVersion();
+    HudGuard.init();
+    StatusBus.hookExternal();
     closeRightRule();
     bindRightRuleButton();
     moveFestivalBelowAudio();
@@ -769,9 +959,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     HolyCup.load();
     HolyCup.render();
     ConsoleUI.start();
-    Clock.start();
+    StableCountdown.start();
     tagCells();
     bootLandEngine();
+    StatusBus.push("悟空財神殿 Heart V3.2.6 控制台就緒");
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
@@ -779,20 +970,22 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 
   window.addEventListener("load", ()=>{
     setTimeout(()=>{
+      HudGuard.init();
       if(window.KGEN_CONSOLE_UI) window.KGEN_CONSOLE_UI.start();
+      StatusBus.hookExternal();
     }, 900);
   });
 
   setTimeout(boot,500);
   setTimeout(boot,1800);
   setInterval(()=>{
-    syncVersion();
     moveFestivalBelowAudio();
     ensureLandEngine();
     bindHolyCup();
+    HolyCup.render();
     ConsoleUI.bindCupButtons();
     ConsoleUI.bindAmountInput();
-    ConsoleUI.relabelButtons();
+    ConsoleUI.bindFortuneGuard();
     tagCells();
   },3000);
 })();

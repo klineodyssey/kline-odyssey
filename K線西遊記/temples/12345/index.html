@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V1.0.2" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V1.0.3" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,8 +370,8 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-version="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.2" id="ver-st" title="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.2">V10.49.1 / LAND V1.0 / BSC56</div>
-<div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.3" id="ver-st" title="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.3">V10.49.1 / LAND V1.0 / BSC56</div>
+<div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
 <div class="data-box"><div>靈霄寶殿神明銀行席位（500）</div><div class="grid-500" id="g1"></div></div>
@@ -1080,8 +1080,10 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-zone kh-zone-cup">
 <div class="kh-zone-title">聖盃區</div>
 <div class="kh-cup-status" id="kh-cup-status">0/3</div>
-<div class="kh-actions kh-actions-cup">
-<button class="kh-gold kh-btn-lg" id="kh-cup-throw" type="button">擲聖盃</button>
+<div class="kh-actions kh-actions-cup kh-cup-btns">
+<button class="kh-gold kh-btn-lg kh-cup-btn" id="kh-cup-1" type="button">聖盃一</button>
+<button class="kh-gold kh-btn-lg kh-cup-btn" id="kh-cup-2" type="button">聖盃二</button>
+<button class="kh-gold kh-btn-lg kh-cup-btn" id="kh-cup-3" type="button">聖盃三</button>
 <button class="kh-cyan kh-btn-lg" id="kh-cup-reset" type="button">重置聖盃</button>
 </div>
 </div>
@@ -1095,7 +1097,7 @@ KGEN 12345 Heart Live Patch V7.3.0
 <input id="kh-amount" placeholder="發財金金額 1–888，預設 8" value="8"/>
 </div>
 <div class="kh-actions kh-actions-claim">
-<button class="kh-gold kh-btn-lg" disabled id="kh-fortune" type="button">領發財金 fortuneClaim</button>
+<button class="kh-gold kh-btn-lg" id="kh-fortune" type="button">領發財金 fortuneClaim</button>
 <button class="kh-cyan kh-btn-lg" id="kh-heartbeat" type="button">呼吸 / 心跳 heartbeatClaim</button>
 <button class="kh-gold kh-btn-lg" id="kh-ignite" type="button">轉日呼吸 igniteAndClaim</button>
 <button class="kh-cyan kh-btn-lg" id="kh-festival1" type="button">5/20 悟空生日</button>
@@ -1117,7 +1119,7 @@ KGEN 12345 Heart Live Patch V7.3.0
 </div>
 </div>
 
-<div class="kh-log" id="kh-log">待命：不會自動送出任何交易。</div>
+<div class="kh-log" id="kh-log">系統待命：交易、心跳、呼吸與聖盃訊息會顯示於此。</div>
 </section>
 
 <!-- ============================================================
@@ -1349,7 +1351,7 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 - no wallet/core contract changes
 ============================================================ -->
 
-<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
+<div aria-live="polite" class="kgen-left-status-bus" id="kgen-v902-left-status" role="status">系統待命：交易、心跳、呼吸與聖盃訊息會顯示於此。</div>
 <div aria-label="螢幕全程錄影" id="kgen-v902-rec-panel">
 <div class="rec-title">🎥 螢幕全程錄影</div>
 <div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
@@ -1529,7 +1531,6 @@ MESSAGE / RECORDER / COUNTDOWN FIX
 - no wallet/core contract changes
 ============================================================ -->
 
-<div id="kgen-v902-left-status">系統待命：交易、心跳、呼吸與客服訊息會顯示於此。</div>
 <div aria-label="螢幕全程錄影" id="kgen-v902-rec-panel">
 <div class="rec-title">🎥 螢幕全程錄影</div>
 <div class="rec-body" id="kgen-v902-rec-text">可錄製目前神殿操作畫面。手機瀏覽器若不支援螢幕錄影，請改用系統內建錄影；本功能不會送出鏈上交易。</div>
@@ -1775,7 +1776,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="../../modules/kgen-land-engine.js"></script>
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
-<script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V1.0.2"></script>
+<script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V1.0.3"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
