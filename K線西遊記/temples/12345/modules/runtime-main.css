@@ -612,6 +612,52 @@ body.kgen-right-rule-closed .right-info-panel {
   letter-spacing: 0.04em !important;
 }
 
+/* ===== V3.0 Console Cards ===== */
+#kgen-heart-live-panel.kgen-console-v3 .kh-card {
+  margin-bottom: 10px !important;
+  border: 1px solid rgba(255, 215, 120, 0.28) !important;
+  border-radius: 14px !important;
+  background: rgba(4, 12, 22, 0.82) !important;
+  overflow: hidden !important;
+}
+
+#kgen-heart-live-panel.kgen-console-v3 .kh-card-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  border-bottom: 1px solid rgba(127, 243, 255, 0.18) !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+}
+
+#kgen-heart-live-panel.kgen-console-v3 .kh-card-icon {
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+#kgen-heart-live-panel.kgen-console-v3 .kh-card-title {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  color: #f7d271 !important;
+  text-transform: uppercase !important;
+}
+
+#kgen-heart-live-panel.kgen-console-v3 .kh-card-body {
+  padding: 10px 12px 12px !important;
+}
+
+#kgen-heart-live-panel.kgen-console-v3 .kh-actions-festival,
+#kgen-heart-live-panel.kgen-console-v3 .kh-actions-wish {
+  grid-template-columns: 1fr !important;
+}
+
+.kgen-v3-dead {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 #kgen-heart-live-panel .kh-btn-lg {
   min-height: 48px !important;
   height: auto !important;

@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.3";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.3";
-  const UI_PATCH = "V2.0.3";
+  const VERSION = "V3.0.0";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V3.0.0";
+  const UI_PATCH = "V3.0.0";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -475,10 +475,161 @@
   const MirrorRuntime = {
     inited: false,
     mode: "heart",
+    move: { x: 0, y: 0, z: 100 },
     init: function(){
       if(this.inited) return;
       this.inited = true;
       window.KGEN_MIRROR_VIEW = this;
+      this.bindControls();
+    },
+    applySteer: function(deg, silent){
+      const ang = Math.max(-180, Math.min(180, Number(deg) || 0));
+      if(window.app && typeof window.app.applySteer === "function"){
+        window.app.applySteer(ang, !!silent);
+      }else{
+        const cw = $("core-window");
+        const wheel = $("wheel");
+        const steer = $("steer-input-val");
+        if(cw) cw.style.transform = "rotate(" + ang + "deg)";
+        if(wheel) wheel.style.transform = "rotate(" + ang + "deg)";
+        if(steer) steer.value = String(ang);
+      }
+      const modeLabel = ang >= -45 && ang <= 45 ? "多方" : ang >= 135 || ang <= -135 ? "空方" : "中性";
+      setNodeText($("k12345-slider-status"), "CORE 角度 " + ang + "°｜" + modeLabel + "｜縮放 " + this.move.z + "%");
+      setNodeText($("ang-val"), ang + "°");
+    },
+    bindControls: function(){
+      const steer = $("steer-input-val");
+      if(steer){
+        Events.bindOnce(steer, "input", function(event){
+          MirrorRuntime.applySteer(event.target.value, true);
+        });
+      }
+      this.bindDriveWheel();
+      this.bindJoystick();
+      this.bindMovePad();
+      this.patchAppCoord();
+    },
+    bindDriveWheel: function(){
+      if(window.app && typeof window.app.bindWheel === "function"){
+        window.app.bindWheel();
+        return;
+      }
+      const wheel = $("wheel");
+      if(!wheel) return;
+      const getAngle = function(clientX, clientY){
+        const rect = wheel.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let deg = Math.atan2(clientY - cy, clientX - cx) * 180 / Math.PI + 90;
+        if(deg > 180) deg -= 360;
+        return Math.max(-180, Math.min(180, deg));
+      };
+      let dragging = false;
+      const onDown = function(x, y){ dragging = true; MirrorRuntime.applySteer(getAngle(x, y), true); };
+      const onMove = function(x, y){ if(dragging) MirrorRuntime.applySteer(getAngle(x, y), true); };
+      const onUp = function(){ dragging = false; };
+      Events.bindOnce(wheel, "mousedown", function(e){ e.preventDefault(); onDown(e.clientX, e.clientY); });
+      Events.bindOnce(wheel, "touchstart", function(e){ e.preventDefault(); const t = e.touches[0]; onDown(t.clientX, t.clientY); }, { passive: false });
+      window.addEventListener("mousemove", function(e){ onMove(e.clientX, e.clientY); });
+      window.addEventListener("mouseup", onUp);
+      window.addEventListener("touchmove", function(e){ const t = e.touches[0]; if(t) onMove(t.clientX, t.clientY); }, { passive: true });
+      window.addEventListener("touchend", onUp, { passive: true });
+    },
+    bindJoystick: function(){
+      const base = $("move-joystick-base");
+      const knob = $("move-joystick-knob");
+      const target = $("core-window") || $("fairy-img");
+      if(!base || !knob || !target) return;
+      const max = 42;
+      const self = this;
+      const setKnob = function(dx, dy){
+        knob.style.transform = "translate(" + dx + "px," + dy + "px)";
+      };
+      const applyMove = function(dx, dy){
+        self.move.x = Math.round(dx);
+        self.move.y = Math.round(dy);
+        const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
+        target.style.transform = "translate(" + self.move.x + "px," + self.move.y + "px) rotate(" + rotate + "deg)";
+        const status = $("k12345-move-status") || $("k12345-slider-status");
+        setNodeText(status, "X " + self.move.x + " / Y " + self.move.y + " / Z " + self.move.z + "%");
+      };
+      const pointerToDelta = function(clientX, clientY){
+        const rect = base.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if(dist > max){
+          dx = dx / dist * max;
+          dy = dy / dist * max;
+        }
+        return { dx: dx, dy: dy };
+      };
+      let dragging = false;
+      const onStart = function(x, y){
+        dragging = true;
+        const delta = pointerToDelta(x, y);
+        setKnob(delta.dx, delta.dy);
+        applyMove(self.move.x + delta.dx, self.move.y + delta.dy);
+      };
+      const onDrag = function(x, y){
+        if(!dragging) return;
+        const delta = pointerToDelta(x, y);
+        setKnob(delta.dx, delta.dy);
+        applyMove(self.move.x + delta.dx, self.move.y + delta.dy);
+      };
+      const onEnd = function(){
+        dragging = false;
+        setKnob(0, 0);
+      };
+      Events.bindOnce(base, "mousedown", function(e){ e.preventDefault(); onStart(e.clientX, e.clientY); });
+      Events.bindOnce(base, "touchstart", function(e){ e.preventDefault(); const t = e.touches[0]; onStart(t.clientX, t.clientY); }, { passive: false });
+      window.addEventListener("mousemove", function(e){ onDrag(e.clientX, e.clientY); });
+      window.addEventListener("mouseup", onEnd);
+      window.addEventListener("touchmove", function(e){ const t = e.touches[0]; if(t) onDrag(t.clientX, t.clientY); }, { passive: true });
+      window.addEventListener("touchend", onEnd, { passive: true });
+      const zoomIn = $("k12345-zoom-in");
+      const zoomOut = $("k12345-zoom-out");
+      const home = $("k12345-move-home");
+      if(zoomIn) Events.bindOnce(zoomIn, "click", function(){ self.move.z = Math.min(160, self.move.z + 10); applyMove(self.move.x, self.move.y); });
+      if(zoomOut) Events.bindOnce(zoomOut, "click", function(){ self.move.z = Math.max(60, self.move.z - 10); applyMove(self.move.x, self.move.y); });
+      if(home) Events.bindOnce(home, "click", function(){ self.move = { x: 0, y: 0, z: 100 }; applyMove(0, 0); StatusRuntime.push("悟空位置已歸中"); });
+    },
+    bindMovePad: function(){
+      qa("[data-kmove]", document).forEach(function(button){
+        Events.bindOnce(button, "click", function(){
+          const parts = String(button.getAttribute("data-kmove") || "0,0").split(",");
+          const dx = Number(parts[0] || 0);
+          const dy = Number(parts[1] || 0);
+          MirrorRuntime.move.x += dx;
+          MirrorRuntime.move.y += dy;
+          const target = $("core-window") || $("fairy-img");
+          const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
+          if(target) target.style.transform = "translate(" + MirrorRuntime.move.x + "px," + MirrorRuntime.move.y + "px) rotate(" + rotate + "deg)";
+          setNodeText($("k12345-move-status"), "X " + MirrorRuntime.move.x + " / Y " + MirrorRuntime.move.y + " / Z " + MirrorRuntime.move.z + "%");
+        });
+      });
+    },
+    patchAppCoord: function(){
+      const app = window.app;
+      if(!app) return;
+      app.openCoordModal = function(){
+        LayoutRuntime.toggleRightRuleWithStatus();
+      };
+      app.closeCoordModal = function(){
+        if(!document.body.classList.contains("kgen-right-rule-closed")){
+          LayoutRuntime.toggleRightRuleWithStatus();
+        }
+      };
+      app.syncFromWheel = function(){
+        const steer = $("steer-input-val");
+        const ang = steer ? Number(steer.value || 0) : 0;
+        if(ang >= -45 && ang <= 45) MirrorRuntime.apply("front");
+        else if(ang >= 135 || ang <= -135) MirrorRuntime.apply("back");
+        else StatusRuntime.push("方向盤角度 " + ang + "°（未達多/空閾值）");
+      };
     },
     apply: function(mode){
       this.mode = mode || "heart";
@@ -504,16 +655,12 @@
       document.body.classList.remove("kgen-camera-on", "kgen-camera-front", "kgen-camera-back");
       document.body.classList.toggle("kgen-mirror-front", this.mode === "front");
       document.body.classList.toggle("kgen-mirror-back", this.mode === "back");
-      const steer = $("steer-input-val");
-      if(steer && this.mode !== "heart"){
-        const degree = this.mode === "front" ? 45 : 135;
-        steer.value = String(degree);
-        steer.dispatchEvent(new Event("input", { bubbles: true }));
+      if(this.mode !== "heart"){
+        this.applySteer(this.mode === "front" ? 45 : 135, true);
       }
       setNodeText($("cp-deg-num"), this.mode === "front" ? "45°｜多方" : this.mode === "back" ? "135°｜空方" : "待部署");
       setNodeText($("cp-side"), this.mode === "front" ? "方向：多方" : this.mode === "back" ? "方向：空方" : "循環：Heart ↔ Brain");
       setNodeText($("kc-dir"), this.mode === "front" ? "方向盤 → 多方K" : this.mode === "back" ? "方向盤 → 空方K" : "方向盤 → --方K");
-      setNodeText($("k12345-slider-status"), this.mode === "front" ? "CORE 角度 45°｜多方｜縮放 100%" : this.mode === "back" ? "CORE 角度 135°｜空方｜縮放 100%" : "CORE 角度 0°｜縮放 100%");
       setNodeText($("wish-label"), this.mode === "front" ? "悟空心臟｜前鏡多方" : this.mode === "back" ? "悟空心臟｜後鏡空方" : "悟空心臟，財氣覺醒");
       StatusRuntime.push(this.mode === "front" ? "前鏡多方：已切換 bull-front" : this.mode === "back" ? "後鏡空方：已切換 bear-rear" : "已恢復心臟核心圖");
     },
@@ -522,6 +669,10 @@
     },
     toggleBack: function(){
       this.apply(this.mode === "back" ? "heart" : "back");
+    },
+    syncFromWheel: function(){
+      this.patchAppCoord();
+      if(window.app && typeof window.app.syncFromWheel === "function") window.app.syncFromWheel();
     }
   };
 
@@ -642,6 +793,7 @@
       this.dedupeCupUI();
       this.moveFestivalBelowAudio();
       this.closeRightRule();
+      this.hideDeadPanels();
     },
     dedupeCupUI: function(){
       const panel = $("kgen-heart-live-panel");
@@ -734,6 +886,15 @@
       const toggle = panel.querySelector("h3 span");
       if(toggle) toggle.textContent = isOpen ? "收合" : "展開";
       StatusRuntime.push(isOpen ? "規則活動已展開" : "規則活動已收合");
+    },
+    hideDeadPanels: function(){
+      ["temple-audio-console", "chain-live-panel", "bet-live-panel", "board-panel", "round-history-modal", "temple-single-modal"].forEach(function(id){
+        const el = $(id);
+        if(el){
+          el.classList.add("kgen-v3-dead");
+          el.setAttribute("aria-hidden", "true");
+        }
+      });
     }
   };
 
@@ -903,37 +1064,6 @@
       if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
       if(!raw) throw new Error("請輸入許願文字或 bytes32 hash");
       return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
-    },
-    allowanceWhole: function(){
-      if(this.state.allowance == null || !hasEthers5()) return null;
-      return Number(ethers.utils.formatUnits(this.state.allowance, this.state.tokenDecimals || 18));
-    },
-    updateAllowanceStatus: function(){
-      const status = $("kh-allowance-status");
-      if(!status) return;
-      if(!this.state.address){
-        status.textContent = "Allowance：未連錢包";
-        return;
-      }
-      const current = this.allowanceWhole();
-      const currentText = current == null ? "--" : String(current);
-      const rows = ["Allowance 目前：" + currentText + " KGEN"];
-      const checks = [
-        { label: "發財金", id: "kh-fortune-amount", getter: function(){ return HeartRuntime.getFortuneAmount(); } },
-        { label: "還願", id: "kh-vow-amount", getter: function(){ return HeartRuntime.getVowAmount(); } },
-        { label: "點燈", id: "kh-lamp-days", getter: function(){ return HeartRuntime.getLampDays(); } },
-        { label: "許願", id: "kh-wish-amount", getter: function(){ return HeartRuntime.getWishAmount(); } }
-      ];
-      checks.forEach(function(entry){
-        let need = "--";
-        let ok = false;
-        try{
-          need = entry.getter();
-          ok = current != null && Number(current) >= Number(need);
-        }catch(_){ }
-        rows.push(entry.label + "需要：" + need + " KGEN" + (ok ? " ✓" : current == null ? "" : " ✗不足"));
-      });
-      status.textContent = rows.join("\n");
     },
     updateWalletDom: function(){
       setNodeText($("kh-wallet"), this.state.address ? short(this.state.address) + "｜" + this.state.address : "未連線");
@@ -1161,7 +1291,7 @@
     },
     statusTick: function(){
       this.updateWalletDom();
-      this.updateAllowanceStatus();
+      ApproveRuntime.renderStatus();
       this.updateHeartbeatStatus();
       this.updateIgniteStatus();
       this.updateFortuneStatus();
@@ -1200,63 +1330,8 @@
         StatusRuntime.push("失敗：" + label + "｜" + asErrorMessage(error));
       }
     },
-    approveCurrent: async function(){
-      try{
-        if(!this.hasInjectedWallet() && !this.state.address){
-          StatusRuntime.push("Approve 目前金額：未連錢包");
-          return;
-        }
-        await this.ensureConnected();
-        await this.refreshChainData(false);
-        const amountWhole = this.getFortuneAmount();
-        const amount = ethers.utils.parseUnits(String(amountWhole), this.state.tokenDecimals || 18);
-        if(!window.confirm("確認授權發財金金額：" + amountWhole + " KGEN")){
-          StatusRuntime.push("已取消：Approve 發財金金額");
-          return;
-        }
-        const token = new ethers.Contract(this.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, this.state.signer);
-        StatusRuntime.push("送出中：Approve 發財金金額 " + amountWhole + " KGEN");
-        const tx = await token.approve(CHAIN.HEART, amount);
-        StatusRuntime.push("Tx sent：" + tx.hash);
-        await tx.wait();
-        StatusRuntime.push("成功：Approve 發財金金額");
-        await this.refreshChainData(false);
-      }catch(error){
-        StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
-      }
-    },
-    approveUnlimited: async function(){
-      try{
-        if(!this.hasInjectedWallet() && !this.state.address){
-          StatusRuntime.push("無限授權：未連錢包");
-          return;
-        }
-        await this.ensureConnected();
-        if(!window.confirm("確認送出無限授權給 Heart 合約？")){
-          StatusRuntime.push("已取消：Approve 無限授權");
-          return;
-        }
-        const token = new ethers.Contract(this.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, this.state.signer);
-        StatusRuntime.push("送出中：Approve 無限授權");
-        const tx = await token.approve(CHAIN.HEART, ethers.constants.MaxUint256);
-        StatusRuntime.push("Tx sent：" + tx.hash);
-        await tx.wait();
-        StatusRuntime.push("成功：Approve 無限授權");
-        await this.refreshChainData(false);
-      }catch(error){
-        StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
-      }
-    },
     bindFields: function(){
-      const self = this;
-      ["kh-fortune-amount", "kh-vow-amount", "kh-lamp-days", "kh-wish-amount", "kh-wish-text", "kh-wish"].forEach(function(id){
-        const field = $(id);
-        if(!field) return;
-        Events.bindOnce(field, "input", function(){
-          self.updateFortuneStatus();
-          self.updateAllowanceStatus();
-        });
-      });
+      ApproveRuntime.bindFields();
     },
     bindButtons: function(){
       const self = this;
@@ -1301,6 +1376,129 @@
       }
       button.click();
       return true;
+    }
+  };
+
+  const ApproveRuntime = {
+    inited: false,
+    slots: [
+      { key: "fortune", label: "發財金", getter: function(){ return HeartRuntime.getFortuneAmount(); } },
+      { key: "wish", label: "許願", getter: function(){ return HeartRuntime.getWishAmount(); } },
+      { key: "vow", label: "還願", getter: function(){ return HeartRuntime.getVowAmount(); } },
+      { key: "lamp", label: "點燈", getter: function(){ return HeartRuntime.getLampDays(); } }
+    ],
+    init: function(){
+      if(this.inited) return;
+      this.inited = true;
+      window.KGEN_APPROVE_RUNTIME = this;
+      this.bindFields();
+    },
+    currentAllowance: function(){
+      if(HeartRuntime.state.allowance == null || !hasEthers5()) return null;
+      return Number(ethers.utils.formatUnits(HeartRuntime.state.allowance, HeartRuntime.state.tokenDecimals || 18));
+    },
+    getNeedAmount: function(key){
+      const slot = this.slots.find(function(entry){ return entry.key === key; });
+      if(!slot) return null;
+      return slot.getter();
+    },
+    getNeeds: function(){
+      const self = this;
+      return this.slots.map(function(slot){
+        let need = "--";
+        let ok = false;
+        const current = self.currentAllowance();
+        try{
+          need = slot.getter();
+          ok = current != null && Number(current) >= Number(need);
+        }catch(_){ }
+        return { key: slot.key, label: slot.label, need: need, ok: ok };
+      });
+    },
+    isEnough: function(key){
+      const current = this.currentAllowance();
+      if(current == null) return false;
+      try{
+        return Number(current) >= Number(this.getNeedAmount(key));
+      }catch(_){
+        return false;
+      }
+    },
+    renderStatus: function(){
+      const status = $("kh-allowance-status");
+      if(!status) return;
+      if(!HeartRuntime.state.address){
+        status.textContent = "Allowance：未連錢包";
+        return;
+      }
+      const current = this.currentAllowance();
+      const currentText = current == null ? "--" : String(current);
+      const rows = ["Allowance 目前：" + currentText + " KGEN"];
+      this.getNeeds().forEach(function(entry){
+        rows.push(entry.label + "需要：" + entry.need + " KGEN" + (entry.ok ? " ✓" : current == null ? "" : " ✗不足"));
+      });
+      status.textContent = rows.join("\n");
+    },
+    bindFields: function(){
+      const self = this;
+      ["kh-fortune-amount", "kh-vow-amount", "kh-lamp-days", "kh-wish-amount", "kh-wish-text", "kh-wish"].forEach(function(id){
+        const field = $(id);
+        if(!field) return;
+        Events.bindOnce(field, "input", function(){
+          HeartRuntime.updateFortuneStatus();
+          self.renderStatus();
+        });
+      });
+    },
+    refresh: function(){
+      return HeartRuntime.refreshChainData(true);
+    },
+    approveFortune: async function(){
+      try{
+        if(!HeartRuntime.hasInjectedWallet() && !HeartRuntime.state.address){
+          StatusRuntime.push("Approve 發財金：未連錢包");
+          return;
+        }
+        await HeartRuntime.ensureConnected();
+        await HeartRuntime.refreshChainData(false);
+        const amountWhole = HeartRuntime.getFortuneAmount();
+        const amount = ethers.utils.parseUnits(String(amountWhole), HeartRuntime.state.tokenDecimals || 18);
+        if(!window.confirm("確認授權發財金金額：" + amountWhole + " KGEN")){
+          StatusRuntime.push("已取消：Approve 發財金金額");
+          return;
+        }
+        const token = new ethers.Contract(HeartRuntime.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, HeartRuntime.state.signer);
+        StatusRuntime.push("送出中：Approve 發財金金額 " + amountWhole + " KGEN");
+        const tx = await token.approve(CHAIN.HEART, amount);
+        StatusRuntime.push("Tx sent：" + tx.hash);
+        await tx.wait();
+        StatusRuntime.push("成功：Approve 發財金金額");
+        await HeartRuntime.refreshChainData(false);
+      }catch(error){
+        StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
+      }
+    },
+    approveUnlimited: async function(){
+      try{
+        if(!HeartRuntime.hasInjectedWallet() && !HeartRuntime.state.address){
+          StatusRuntime.push("無限授權：未連錢包");
+          return;
+        }
+        await HeartRuntime.ensureConnected();
+        if(!window.confirm("確認送出無限授權給 Heart 合約？")){
+          StatusRuntime.push("已取消：Approve 無限授權");
+          return;
+        }
+        const token = new ethers.Contract(HeartRuntime.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, HeartRuntime.state.signer);
+        StatusRuntime.push("送出中：Approve 無限授權");
+        const tx = await token.approve(CHAIN.HEART, ethers.constants.MaxUint256);
+        StatusRuntime.push("Tx sent：" + tx.hash);
+        await tx.wait();
+        StatusRuntime.push("成功：Approve 無限授權");
+        await HeartRuntime.refreshChainData(false);
+      }catch(error){
+        StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
+      }
     }
   };
 
@@ -1487,11 +1685,11 @@
     },
     approveCurrent: function(){
       StatusRuntime.push("Approve 發財金金額：準備中…");
-      return HeartRuntime.approveCurrent();
+      return ApproveRuntime.approveFortune();
     },
     approveUnlimited: function(){
       StatusRuntime.push("無限授權：準備中…");
-      return HeartRuntime.approveUnlimited();
+      return ApproveRuntime.approveUnlimited();
     },
     switchWallet: function(){
       if(HeartRuntime.hasInjectedWallet()){
@@ -1703,6 +1901,95 @@
     }
   };
 
+  const LegacyBridgeRuntime = {
+    inited: false,
+    init: function(){
+      if(this.inited) return;
+      this.inited = true;
+      this.installStubs();
+      this.patchWeb3Refresh();
+    },
+    installStubs: function(){
+      const openHeart = function(tab){
+        ActionRuntime.toggleHeartPanel(true);
+        StatusRuntime.push("已開啟 Heart 控制台" + (tab ? "：" + tab : ""));
+      };
+      window.templeAudio = {
+        toggleMini: function(){
+          const panel = $("temple-audio-console");
+          if(panel) panel.classList.toggle("kgen-v3-dead");
+          if(window.app && window.app.openMusic) window.app.openMusic();
+        },
+        playBgm: function(){ if(window.app && window.app.musicPlay) window.app.musicPlay(); },
+        stopBgm: function(){ if(window.app && window.app.musicStop) window.app.musicStop(); },
+        setVolume: function(v){
+          const vol = $("music-vol") || $("ta-volume");
+          if(vol) vol.value = v;
+          if(window.app && window.app.musicSetVolume) window.app.musicSetVolume(v);
+        }
+      };
+      window.templeSingleModal = {
+        openTab: function(tab){ openHeart(tab); },
+        close: function(){ ActionRuntime.toggleHeartPanel(false); }
+      };
+      window.roundHistory = {
+        open: function(){ openHeart("claim"); },
+        close: function(){},
+        loadInput: function(){ StatusRuntime.push("名額紀錄已整合至 Heart 狀態列"); },
+        loadLatest: function(){ HeartRuntime.refreshChainData(true); },
+        prev: function(){ StatusRuntime.push("名額紀錄：示範模式"); },
+        next: function(){ StatusRuntime.push("名額紀錄：示範模式"); }
+      };
+      window.betPanel = {
+        approve: function(){ return WalletRuntime.approveCurrent(); },
+        buy: function(){ return HeartRuntime.clickAction("kh-fortune"); },
+        sell: function(){ return HeartRuntime.clickAction("kh-heartbeat"); }
+      };
+      window.chainLive = {
+        refresh: function(){ return HeartRuntime.refreshChainData(true); }
+      };
+      window.leaderboard = {
+        refresh: function(){ StatusRuntime.push("排行榜：示範模式（無後端）"); }
+      };
+      window.toggleChainLive = function(){
+        const panel = $("chain-live-panel");
+        if(panel){
+          panel.classList.toggle("kgen-v3-dead");
+          StatusRuntime.push(panel.classList.contains("kgen-v3-dead") ? "Chain Live 已隱藏" : "Chain Live 已顯示（示範）");
+        }
+      };
+      window.toggleBetPanel = function(){
+        ActionRuntime.toggleHeartPanel(true);
+        StatusRuntime.push("操作已整合至 Heart 控制台");
+      };
+      window.toggleBoardPanel = function(){
+        const panel = $("board-panel");
+        if(panel){
+          panel.classList.toggle("kgen-v3-dead");
+          StatusRuntime.push(panel.classList.contains("kgen-v3-dead") ? "排行榜已隱藏" : "排行榜已顯示（示範）");
+        }
+      };
+    },
+    patchWeb3Refresh: function(){
+      if(!window.web3) return;
+      const heartRefresh = function(){
+        return HeartRuntime.refreshChainData(true);
+      };
+      window.web3.refresh = heartRefresh;
+      window.web3.refreshUser = heartRefresh;
+      if(typeof window.web3.approve === "function"){
+        const oldApprove = window.web3.approve;
+        window.web3.approve = function(){
+          return ApproveRuntime.approveFortune().catch(function(){
+            return oldApprove.apply(window.web3, arguments);
+          });
+        };
+      }else{
+        window.web3.approve = function(){ return ApproveRuntime.approveFortune(); };
+      }
+    }
+  };
+
   const LandRuntime = {
     inited: false,
     instance: null,
@@ -1731,12 +2018,14 @@
     CountdownRuntime: CountdownRuntime,
     HolyCupRuntime: HolyCupRuntime,
     HeartRuntime: HeartRuntime,
+    ApproveRuntime: ApproveRuntime,
     WalletRuntime: WalletRuntime,
     MirrorRuntime: MirrorRuntime,
     ScreenRecorderRuntime: ScreenRecorderRuntime,
     ActionRuntime: ActionRuntime,
     LandRuntime: LandRuntime,
-    LayoutRuntime: LayoutRuntime
+    LayoutRuntime: LayoutRuntime,
+    LegacyBridgeRuntime: LegacyBridgeRuntime
   };
 
   const KGEN_RUNTIME_CORE = {
@@ -1748,11 +2037,13 @@
       this.booted = true;
       StatusRuntime.init();
       LayoutRuntime.init();
+      LegacyBridgeRuntime.init();
       HudRuntime.init();
       CountdownRuntime.init();
       HolyCupRuntime.init();
       MirrorRuntime.init();
       ScreenRecorderRuntime.init();
+      ApproveRuntime.init();
       WalletRuntime.init();
       HeartRuntime.init();
       ActionRuntime.init();
@@ -1761,7 +2052,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.3 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V3.0.0 ready");
       return this;
     }
   };
@@ -1772,6 +2063,7 @@
   window.KGEN_HOLYCUP_RUNTIME = HolyCupRuntime;
   window.KGEN_MIRROR_VIEW = MirrorRuntime;
   window.KGEN_SCREEN_REC = ScreenRecorderRuntime;
+  window.KGEN_APPROVE_RUNTIME = ApproveRuntime;
   window.KGEN_HEART_ABI_V326 = HEART_ABI_V326;
   window.KGEN_HEART_CONTRACT = HEART_CONTRACT;
   window.RUNTIME_GENOME = Object.assign({}, window.RUNTIME_GENOME || {}, {

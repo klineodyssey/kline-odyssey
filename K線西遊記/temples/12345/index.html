@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.0.3" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V3.0.0" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.3" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.3">V2.0.3 / BSC56</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V3.0.0" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V3.0.0">V3.0.0 / BSC56</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -1043,14 +1043,15 @@ KGEN 12345 Heart Live Patch V7.3.0
 ============================================================ -->
 
 <button id="kgen-heart-toggle" type="button" aria-controls="kgen-heart-live-panel" aria-expanded="false"><span class="kgen-heart-copy"><span class="kgen-heart-title">五指山悟空財神殿</span><span class="kgen-heart-sub">12345 Heart 控制台</span></span><span class="kgen-heart-state">展開</span></button>
-<section aria-hidden="true" aria-label="12345 Heart Live Panel" class="kgen-console-v102 kgen-v909-open" id="kgen-heart-live-panel">
+<section aria-hidden="true" aria-label="12345 Heart Live Panel" class="kgen-console-v102 kgen-v909-open kgen-console-v3" id="kgen-heart-live-panel">
 <div class="kh-head">
-<div class="kh-title">12345 悟空財神殿 Heart V3.2.6</div>
+<div class="kh-title">12345 悟空財神殿 DApp V3.0</div>
 <div class="kh-pill" id="kh-chain">BSC 56</div>
 </div>
 
-<div class="kh-zone kh-zone-wallet">
-<div class="kh-zone-title">錢包區</div>
+<div class="kh-card" data-kh-card="wallet">
+<div class="kh-card-head"><span class="kh-card-icon">🔌</span><span class="kh-card-title">Wallet</span></div>
+<div class="kh-card-body">
 <div class="kh-grid kh-grid-compact">
 <div class="kh-k">Wallet</div><div class="kh-v" id="kh-wallet">未連線</div>
 <div class="kh-k">時間</div><div class="kh-v kh-v-time" id="kh-utc">台灣時間：--</div>
@@ -1063,9 +1064,11 @@ KGEN 12345 Heart Live Patch V7.3.0
 <button class="kh-cyan kh-btn-lg" id="kh-download" type="button">下載收藏</button>
 </div>
 </div>
+</div>
 
-<div class="kh-zone kh-zone-assets">
-<div class="kh-zone-title">KGEN / Heart 資產區</div>
+<div class="kh-card" data-kh-card="heart">
+<div class="kh-card-head"><span class="kh-card-icon">🫀</span><span class="kh-card-title">Heart 資產</span></div>
+<div class="kh-card-body">
 <div class="kh-grid kh-grid-compact">
 <div class="kh-k">KGEN</div><div class="kh-v" id="kh-kgen-bal">--</div>
 <div class="kh-k">Heart 血庫</div><div class="kh-v" id="kh-heart-bal">--</div>
@@ -1073,16 +1076,23 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-k">Festival</div><div class="kh-v" id="kh-festival-open">--</div>
 <div class="kh-k">NY Slot</div><div class="kh-v kgen-ny-countdown-shell" data-kgen-ny-shell="1" id="kh-ny-slot"><span class="kgen-ny-prefix">距跨年：</span><span class="kgen-ny-body"><span class="ny-days" id="ny-days">--</span> 天 <span class="ny-hours" id="ny-hours">--</span>:<span class="ny-minutes" id="ny-minutes">--</span>:<span class="ny-seconds" id="ny-seconds">--</span></span></div>
 </div>
+</div>
+</div>
+
+<div class="kh-card" data-kh-card="allowance">
+<div class="kh-card-head"><span class="kh-card-icon">✅</span><span class="kh-card-title">Allowance</span></div>
+<div class="kh-card-body">
 <div class="kh-allowance-status" id="kh-allowance-status">Allowance：未連錢包</div>
 <div class="kh-actions kh-actions-approve">
 <button class="kh-gold kh-btn-lg" id="kh-approve-current" type="button">Approve 發財金金額</button>
 <button class="kh-cyan kh-btn-lg" id="kh-unlimited" type="button">無限授權</button>
 </div>
-<div class="kh-mini">Allowance 分流：發財金／許願／還願／點燈各自獨立欄位；Approve 發財金金額只授權發財金欄；無限授權＝長期 allowance。</div>
+</div>
 </div>
 
-<div class="kh-zone kh-zone-cup">
-<div class="kh-zone-title">聖盃區</div>
+<div class="kh-card" data-kh-card="cup">
+<div class="kh-card-head"><span class="kh-card-icon">🥢</span><span class="kh-card-title">Holy Cup</span></div>
+<div class="kh-card-body">
 <div class="kh-cup-status" id="kh-cup-status">聖盃狀態：0/3
 ① 聖盃一：未完成
 ② 聖盃二：未完成
@@ -1094,9 +1104,11 @@ KGEN 12345 Heart Live Patch V7.3.0
 <button class="kh-cyan kh-btn-lg" id="kh-cup-reset" type="button">重置聖盃</button>
 </div>
 </div>
+</div>
 
-<div class="kh-zone kh-zone-claim">
-<div class="kh-zone-title">領取區</div>
+<div class="kh-card" data-kh-card="claim">
+<div class="kh-card-head"><span class="kh-card-icon">🧧</span><span class="kh-card-title">Claim</span></div>
+<div class="kh-card-body">
 <div class="kh-claim-status" id="kh-heartbeat-status">心跳呼吸：等待鏈上資料</div>
 <div class="kh-claim-status" id="kh-fortune-status">發財金：等待鏈上資料</div>
 <div class="kh-claim-status" id="kh-ignite-status">轉日呼吸：等待鏈上資料</div>
@@ -1105,35 +1117,54 @@ KGEN 12345 Heart Live Patch V7.3.0
 <input id="kh-fortune-amount" placeholder="發財金金額 1–888，預設 8" value="8"/>
 </div>
 <div class="kh-actions kh-actions-claim">
-<button class="kh-gold kh-btn-lg" id="kh-fortune" type="button">領發財金 fortuneClaim</button>
-<button class="kh-cyan kh-btn-lg" id="kh-heartbeat" type="button">呼吸 / 心跳 heartbeatClaim</button>
-<button class="kh-gold kh-btn-lg" id="kh-ignite" type="button">轉日呼吸 igniteAndClaim</button>
+<button class="kh-gold kh-btn-lg" id="kh-fortune" type="button">領發財金</button>
+<button class="kh-cyan kh-btn-lg" id="kh-heartbeat" type="button">心跳呼吸</button>
+<button class="kh-gold kh-btn-lg" id="kh-ignite" type="button">轉日呼吸</button>
+</div>
+</div>
+</div>
+
+<div class="kh-card" data-kh-card="festival">
+<div class="kh-card-head"><span class="kh-card-icon">🎉</span><span class="kh-card-title">Festival</span></div>
+<div class="kh-card-body">
+<div class="kh-actions kh-actions-festival">
 <button class="kh-cyan kh-btn-lg" id="kh-festival1" type="button">5/20 悟空生日</button>
 <button class="kh-cyan kh-btn-lg" id="kh-festival2" type="button">11/11 孤勇日</button>
 <button class="kh-cyan kh-btn-lg" id="kh-newyear" type="button">12/31 倒數</button>
 </div>
 </div>
-
-<div class="kh-zone kh-zone-vow">
-<div class="kh-zone-title">許願還願區</div>
-<div class="kh-vow-row">
-<select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
-<label class="kh-field-label" for="kh-vow-amount">還願 vowTo 金額</label>
-<input id="kh-vow-amount" placeholder="還願 KGEN 整數，預設 8" value="8"/>
 </div>
+
+<div class="kh-card" data-kh-card="wish">
+<div class="kh-card-head"><span class="kh-card-icon">✨</span><span class="kh-card-title">Wish</span></div>
+<div class="kh-card-body">
 <div class="kh-amount-row">
-<label class="kh-field-label" for="kh-wish-amount">許願 makeWish 金額參考</label>
+<label class="kh-field-label" for="kh-wish-amount">許願金額參考</label>
 <input id="kh-wish-amount" placeholder="許願 KGEN 參考，預設 1" value="1"/>
 </div>
 <textarea id="kh-wish-text" placeholder="許願文字或 0x bytes32 hash" rows="2"></textarea>
+<div class="kh-actions kh-actions-wish">
+<button class="kh-gold kh-btn-lg kh-btn-wide" id="kh-wishbtn" type="button">makeWish 許願上鏈</button>
+</div>
+</div>
+</div>
+
+<div class="kh-card" data-kh-card="vow">
+<div class="kh-card-head"><span class="kh-card-icon">🙏</span><span class="kh-card-title">Vow &amp; Lamp</span></div>
+<div class="kh-card-body">
+<div class="kh-vow-row">
+<select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
+<label class="kh-field-label" for="kh-vow-amount">還願金額</label>
+<input id="kh-vow-amount" placeholder="還願 KGEN 整數，預設 8" value="8"/>
+</div>
 <div class="kh-amount-row">
-<label class="kh-field-label" for="kh-lamp-days">點燈 lightLamp 天數</label>
+<label class="kh-field-label" for="kh-lamp-days">點燈天數</label>
 <input id="kh-lamp-days" placeholder="點燈天數整數，預設 8" value="8"/>
 </div>
 <div class="kh-actions kh-actions-vow">
 <button class="kh-gold kh-btn-lg" id="kh-vow" type="button">vowTo 還願</button>
 <button class="kh-cyan kh-btn-lg" id="kh-lamp" type="button">lightLamp 點燈</button>
-<button class="kh-gold kh-btn-lg kh-btn-wide" id="kh-wishbtn" type="button">makeWish 許願上鏈</button>
+</div>
 </div>
 </div>
 
@@ -1149,19 +1180,6 @@ KGEN 12345 UI Control Patch V7.4.0
 - No Solidity / deploy logic touched. Wallet and Heart tx functions are preserved.
 ============================================================ -->
 
-<div aria-label="12345 悟空角色移動控制器" id="k12345-move-pad">
-<div class="move-title"><span>悟空移動</span><span>12345</span></div>
-<div class="move-grid">
-<span></span><button data-kmove="0,-24" type="button">前</button><span></span>
-<button data-kmove="-24,0" type="button">左</button><button id="k12345-move-home" type="button">中</button><button data-kmove="24,0" type="button">右</button>
-<span></span><button data-kmove="0,24" type="button">後</button><span></span>
-</div>
-<div class="move-row">
-<button id="k12345-zoom-out" type="button">縮小</button>
-<button id="k12345-zoom-in" type="button">放大</button>
-</div>
-<div class="move-status" id="k12345-move-status">X 0 / Y 0 / Z 100%</div>
-</div>
 <div id="k12345-slider-status">CORE 角度 0°｜縮放 100%</div>
 
 <!-- ============================================================
@@ -1788,7 +1806,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.0.3"></script>
+<script src="modules/runtime-main.js?v=V3.0.0"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
