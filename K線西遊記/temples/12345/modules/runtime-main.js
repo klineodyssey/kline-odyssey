@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.2";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.2";
-  const UI_PATCH = "V2.0.2";
+  const VERSION = "V2.0.3";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.3";
+  const UI_PATCH = "V2.0.3";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -25,6 +25,12 @@
     "KGEN_12345_V907_CUP_COUNT",
     "KGEN_12345_V908_CUP_COUNT"
   ];
+  const WALLET_BRIDGE = {
+    OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+    BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"
+  };
 
   const HEART_VIEW_ABI = [
     "function lastFortuneAt(address) view returns (uint256)",
@@ -869,17 +875,65 @@
       if(value == null || !hasEthers5()) return "--";
       return Number(ethers.utils.formatUnits(value, this.state.tokenDecimals || 18)).toFixed(4) + " KGEN";
     },
-    getAmountWhole: function(defaultValue){
-      const value = String($('kh-amount') && $('kh-amount').value || defaultValue || '8').trim();
-      if(!/^\d+$/.test(value)) throw new Error("請輸入整數金額 / 天數");
+    readWholeAmount: function(id, defaultValue, label){
+      const value = String($(id) && $(id).value || defaultValue || "8").trim();
+      if(!/^\d+$/.test(value)) throw new Error((label || "金額") + "請輸入整數");
       return String(Math.floor(Number(value)));
+    },
+    getFortuneAmount: function(){
+      const amount = Number(this.readWholeAmount("kh-fortune-amount", "8", "發財金"));
+      if(amount < 1 || amount > 888) throw new Error("發財金須 1–888");
+      return String(amount);
+    },
+    getVowAmount: function(){
+      return this.readWholeAmount("kh-vow-amount", "8", "還願");
+    },
+    getLampDays: function(){
+      return this.readWholeAmount("kh-lamp-days", "8", "點燈");
+    },
+    getWishAmount: function(){
+      return this.readWholeAmount("kh-wish-amount", "1", "許願");
+    },
+    getAmountWhole: function(defaultValue){
+      return this.getFortuneAmount();
     },
     getWishHash: function(){
       this.ensureEthers();
-      const raw = String($('kh-wish') && $('kh-wish').value || '').trim();
+      const raw = String(($("kh-wish-text") && $("kh-wish-text").value) || ($("kh-wish") && $("kh-wish").value) || "").trim();
       if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
       if(!raw) throw new Error("請輸入許願文字或 bytes32 hash");
       return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
+    },
+    allowanceWhole: function(){
+      if(this.state.allowance == null || !hasEthers5()) return null;
+      return Number(ethers.utils.formatUnits(this.state.allowance, this.state.tokenDecimals || 18));
+    },
+    updateAllowanceStatus: function(){
+      const status = $("kh-allowance-status");
+      if(!status) return;
+      if(!this.state.address){
+        status.textContent = "Allowance：未連錢包";
+        return;
+      }
+      const current = this.allowanceWhole();
+      const currentText = current == null ? "--" : String(current);
+      const rows = ["Allowance 目前：" + currentText + " KGEN"];
+      const checks = [
+        { label: "發財金", id: "kh-fortune-amount", getter: function(){ return HeartRuntime.getFortuneAmount(); } },
+        { label: "還願", id: "kh-vow-amount", getter: function(){ return HeartRuntime.getVowAmount(); } },
+        { label: "點燈", id: "kh-lamp-days", getter: function(){ return HeartRuntime.getLampDays(); } },
+        { label: "許願", id: "kh-wish-amount", getter: function(){ return HeartRuntime.getWishAmount(); } }
+      ];
+      checks.forEach(function(entry){
+        let need = "--";
+        let ok = false;
+        try{
+          need = entry.getter();
+          ok = current != null && Number(current) >= Number(need);
+        }catch(_){ }
+        rows.push(entry.label + "需要：" + need + " KGEN" + (ok ? " ✓" : current == null ? "" : " ✗不足"));
+      });
+      status.textContent = rows.join("\n");
     },
     updateWalletDom: function(){
       setNodeText($("kh-wallet"), this.state.address ? short(this.state.address) + "｜" + this.state.address : "未連線");
@@ -1017,7 +1071,7 @@
       const now = this.currentBlockTs();
       let amountWhole = null;
       try{
-        amountWhole = Number(this.getAmountWhole('8'));
+        amountWhole = Number(this.getFortuneAmount());
       }catch(_){
         amountWhole = null;
       }
@@ -1107,6 +1161,7 @@
     },
     statusTick: function(){
       this.updateWalletDom();
+      this.updateAllowanceStatus();
       this.updateHeartbeatStatus();
       this.updateIgniteStatus();
       this.updateFortuneStatus();
@@ -1153,18 +1208,18 @@
         }
         await this.ensureConnected();
         await this.refreshChainData(false);
-        const amountWhole = this.getAmountWhole('8');
+        const amountWhole = this.getFortuneAmount();
         const amount = ethers.utils.parseUnits(String(amountWhole), this.state.tokenDecimals || 18);
-        if(!window.confirm("確認授權目前金額：" + amountWhole + " KGEN")){
-          StatusRuntime.push("已取消：Approve 目前金額");
+        if(!window.confirm("確認授權發財金金額：" + amountWhole + " KGEN")){
+          StatusRuntime.push("已取消：Approve 發財金金額");
           return;
         }
         const token = new ethers.Contract(this.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, this.state.signer);
-        StatusRuntime.push("送出中：Approve 目前金額 " + amountWhole + " KGEN");
+        StatusRuntime.push("送出中：Approve 發財金金額 " + amountWhole + " KGEN");
         const tx = await token.approve(CHAIN.HEART, amount);
         StatusRuntime.push("Tx sent：" + tx.hash);
         await tx.wait();
-        StatusRuntime.push("成功：Approve 目前金額");
+        StatusRuntime.push("成功：Approve 發財金金額");
         await this.refreshChainData(false);
       }catch(error){
         StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
@@ -1193,17 +1248,24 @@
       }
     },
     bindFields: function(){
-      const amount = $("kh-amount");
-      if(amount) Events.bindOnce(amount, "input", function(){ HeartRuntime.updateFortuneStatus(); });
+      const self = this;
+      ["kh-fortune-amount", "kh-vow-amount", "kh-lamp-days", "kh-wish-amount", "kh-wish-text", "kh-wish"].forEach(function(id){
+        const field = $(id);
+        if(!field) return;
+        Events.bindOnce(field, "input", function(){
+          self.updateFortuneStatus();
+          self.updateAllowanceStatus();
+        });
+      });
     },
     bindButtons: function(){
       const self = this;
       const actions = {
-        "kh-fortune": function(){ self.sendHeart("fortuneClaim 發財金 " + self.getAmountWhole('8'), function(contract){ return contract.fortuneClaim(self.getAmountWhole('8')); }); },
+        "kh-fortune": function(){ self.sendHeart("fortuneClaim 發財金 " + self.getFortuneAmount(), function(contract){ return contract.fortuneClaim(self.getFortuneAmount()); }); },
         "kh-heartbeat": function(){ self.sendHeart("heartbeatClaim 整點心跳", function(contract){ return contract.heartbeatClaim(); }); },
         "kh-ignite": function(){ self.sendHeart("igniteAndClaim 轉日呼吸", function(contract){ return contract.igniteAndClaim(); }); },
-        "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract){ return contract.vowTo(Number($('kh-vow-option') && $('kh-vow-option').value || 1), self.getAmountWhole('8')); }); },
-        "kh-lamp": function(){ self.sendHeart("lightLamp 點燈", function(contract){ return contract.lightLamp(self.getAmountWhole('8')); }); },
+        "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract){ return contract.vowTo(Number($("kh-vow-option") && $("kh-vow-option").value || 1), self.getVowAmount()); }); },
+        "kh-lamp": function(){ self.sendHeart("lightLamp 點燈", function(contract){ return contract.lightLamp(self.getLampDays()); }); },
         "kh-wishbtn": function(){ self.sendHeart("makeWish 許願", function(contract){ return contract.makeWish(self.getWishHash()); }); },
         "kh-festival1": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }); },
         "kh-festival2": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }); },
@@ -1248,17 +1310,91 @@
       if(this.inited) return;
       this.inited = true;
       this.primeWeb3Shell();
+      this.patchWalletHub();
       const bindings = {
-        "kh-connect": function(){ WalletRuntime.connect(); },
-        "kh-refresh": function(){ WalletRuntime.refresh(); },
-        "kh-approve-current": function(){ WalletRuntime.approveCurrent(); },
-        "kh-approve-unlimited": function(){ WalletRuntime.approveUnlimited(); },
-        "kh-unlimited": function(){ WalletRuntime.approveUnlimited(); },
+        "kh-connect": function(){ return WalletRuntime.connect(); },
+        "kh-refresh": function(){ return WalletRuntime.refresh(); },
+        "kh-approve-current": function(){ return WalletRuntime.approveCurrent(); },
+        "kh-approve-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
+        "kh-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-switch": function(){ WalletRuntime.switchWallet(); },
-        "kh-download": function(){ WalletRuntime.downloadBookmark(); }
+        "kh-download": function(){ WalletRuntime.downloadBookmark(); },
+        "kh-metamask-open": function(){ WalletRuntime.openMetaMaskDeepLink(); }
       };
       Object.keys(bindings).forEach(function(id){
         WalletRuntime.bindWalletButton(id, bindings[id]);
+      });
+    },
+    isMobileBrowser: function(){
+      return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+    },
+    isDesktopBrowser: function(){
+      return !this.isMobileBrowser();
+    },
+    patchWalletHub: function(){
+      const inp = $("walletHubUrl");
+      if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      try{
+        if(window.web3){
+          window.web3.OFFICIAL_DAPP = WALLET_BRIDGE.OFFICIAL_DAPP;
+          window.web3.BRIDGE_PAGE = WALLET_BRIDGE.BRIDGE_PAGE;
+          window.web3.METAMASK_DEEPLINK = WALLET_BRIDGE.METAMASK_DEEPLINK;
+          window.web3.openWalletHub = this.openWalletHub.bind(this);
+          window.web3.deepLink = this.deepLink.bind(this);
+          window.web3.copyDappUrl = this.copyOfficialUrl.bind(this);
+        }
+      }catch(_){ }
+    },
+    openWalletHub: function(message){
+      const hub = $("walletHub");
+      const inp = $("walletHubUrl");
+      if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      if(hub){
+        hub.style.display = "flex";
+        hub.style.alignItems = "center";
+        hub.style.justifyContent = "center";
+      }
+      StatusRuntime.push(message || "已開啟多錢包入口");
+      return false;
+    },
+    closeWalletHub: function(){
+      const hub = $("walletHub");
+      if(hub) hub.style.display = "none";
+    },
+    deepLink: function(kind){
+      let link = WALLET_BRIDGE.BRIDGE_PAGE;
+      if(kind === "metamask") link = WALLET_BRIDGE.METAMASK_DEEPLINK;
+      else if(kind === "trust") link = "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
+      else if(kind === "okx") link = "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
+      else if(kind === "bitget") link = "https://web3.bitget.com/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
+      else if(kind === "binance") link = "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
+      StatusRuntime.push(kind === "metamask" ? "請用 MetaMask App 開啟" : "已開啟錢包入口");
+      try{
+        window.location.href = link;
+      }catch(_){
+        window.open(link, "_blank", "noopener");
+      }
+      return false;
+    },
+    openMetaMaskDeepLink: function(){
+      if(HeartRuntime.hasInjectedWallet()){
+        return WalletRuntime.connect();
+      }
+      StatusRuntime.push("請用 MetaMask App 開啟");
+      return this.deepLink("metamask");
+    },
+    copyOfficialUrl: function(){
+      const done = function(){
+        StatusRuntime.push("已複製官方神殿網址");
+      };
+      return navigator.clipboard.writeText(WALLET_BRIDGE.OFFICIAL_DAPP).then(done).catch(function(){
+        const inp = $("walletHubUrl");
+        if(inp){
+          inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+          inp.focus();
+          inp.select();
+        }
+        StatusRuntime.push("請手動複製官方神殿網址");
       });
     },
     primeWeb3Shell: function(){
@@ -1293,47 +1429,48 @@
       }, true);
     },
     connect: async function(){
-      if(!HeartRuntime.hasInjectedWallet()){
-        StatusRuntime.push("未偵測到錢包");
-        if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
-        return false;
-      }
-      StatusRuntime.push("準備連結錢包 / 切 BSC，請在錢包視窗確認");
-      try{
-        if(window.web3 && typeof window.web3.ensureBSC === "function"){
-          const onBsc = await window.web3.ensureBSC();
-          if(!onBsc){
+      const ethereum = HeartRuntime.getEthereum();
+      if(ethereum){
+        StatusRuntime.push("準備連結錢包 / 切 BSC，請在錢包視窗確認");
+        try{
+          await ethereum.request({ method: "eth_requestAccounts" });
+          if(window.web3 && typeof window.web3.ensureBSC === "function"){
+            const onBsc = await window.web3.ensureBSC();
+            if(!onBsc){
+              StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
+              return false;
+            }
+          }else{
+            await HeartRuntime.ensureBSC();
+          }
+          if(window.web3 && window.web3.provider && window.web3.signer && window.web3.addr){
+            HeartRuntime.syncFromWeb3();
+          }else{
+            await HeartRuntime.ensureConnected();
+          }
+          if(!HeartRuntime.state.address){
+            StatusRuntime.push("錢包連線失敗：未取得帳戶");
+            return false;
+          }
+          if(!HeartRuntime.isOnBSC()){
             StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
             return false;
           }
-        }
-        if(window.web3 && typeof window.web3.smartConnect === "function"){
-          await window.web3.smartConnect();
-          if(window.web3.demo){
-            StatusRuntime.push("未偵測到錢包，已開啟多錢包入口");
-            return false;
-          }
-          if(!HeartRuntime.syncFromWeb3()){
-            await HeartRuntime.ensureConnected();
-          }
-        }else{
-          await HeartRuntime.ensureConnected();
-        }
-        if(!HeartRuntime.state.address){
-          StatusRuntime.push("未偵測到錢包");
+          WalletRuntime.closeWalletHub();
+          StatusRuntime.push("錢包已連線：" + short(HeartRuntime.state.address));
+          await HeartRuntime.refreshChainData(true);
+          return true;
+        }catch(error){
+          StatusRuntime.push("錢包連線失敗：" + asErrorMessage(error));
           return false;
         }
-        if(!HeartRuntime.isOnBSC()){
-          StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
-          return false;
-        }
-        StatusRuntime.push("錢包已連線：" + short(HeartRuntime.state.address));
-        await HeartRuntime.refreshChainData(true);
-        return true;
-      }catch(error){
-        StatusRuntime.push("錢包連線失敗：" + asErrorMessage(error));
+      }
+      if(this.isMobileBrowser()){
+        this.openWalletHub("手機瀏覽器未偵測到錢包：請用 MetaMask App 開啟");
         return false;
       }
+      this.openWalletHub("桌機未偵測到錢包：請安裝 MetaMask");
+      return false;
     },
     refresh: async function(){
       StatusRuntime.push("刷新餘額中…");
@@ -1349,7 +1486,7 @@
       }
     },
     approveCurrent: function(){
-      StatusRuntime.push("Approve 目前金額：準備中…");
+      StatusRuntime.push("Approve 發財金金額：準備中…");
       return HeartRuntime.approveCurrent();
     },
     approveUnlimited: function(){
@@ -1357,36 +1494,22 @@
       return HeartRuntime.approveUnlimited();
     },
     switchWallet: function(){
-      if(!HeartRuntime.hasInjectedWallet()){
-        StatusRuntime.push("未偵測到錢包");
-        if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
+      if(HeartRuntime.hasInjectedWallet()){
+        this.openWalletHub("已開啟多錢包 / 切換錢包入口");
         return;
       }
-      if(window.web3 && typeof window.web3.openWalletHub === "function"){
-        window.web3.openWalletHub();
-        StatusRuntime.push("已開啟多錢包 / 切換錢包入口");
+      if(this.isMobileBrowser()){
+        this.openWalletHub("請用 MetaMask App 開啟");
         return;
       }
-      StatusRuntime.push("請在錢包中切換帳戶後，再按刷新餘額");
+      this.openWalletHub("桌機未偵測到錢包：請安裝 MetaMask");
     },
     downloadBookmark: function(){
-      const done = function(){
+      return this.copyOfficialUrl().then(function(){
         StatusRuntime.push("已複製頁面連結，可加入書籤收藏");
-      };
-      if(window.web3 && typeof window.web3.copyDappUrl === "function"){
-        Promise.resolve(window.web3.copyDappUrl()).then(done).catch(function(){
-          StatusRuntime.push("請手動將此頁加入書籤收藏");
-        });
-        return;
-      }
-      const url = String(location.href || "");
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(url).then(done).catch(function(){
-          StatusRuntime.push("請手動將此頁加入書籤收藏");
-        });
-        return;
-      }
-      StatusRuntime.push("請手動將此頁加入書籤收藏");
+      }).catch(function(){
+        StatusRuntime.push("請手動將此頁加入書籤收藏");
+      });
     }
   };
 
@@ -1638,12 +1761,13 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.2 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.3 ready");
       return this;
     }
   };
 
   window.KGEN_RUNTIME_CORE = KGEN_RUNTIME_CORE;
+  window.KGEN_WALLET_BRIDGE = WALLET_BRIDGE;
   window.KGEN_STATUS_BUS = StatusRuntime;
   window.KGEN_HOLYCUP_RUNTIME = HolyCupRuntime;
   window.KGEN_MIRROR_VIEW = MirrorRuntime;

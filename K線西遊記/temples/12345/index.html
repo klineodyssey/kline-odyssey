@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.0.2" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.0.3" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.2">V2.0.2 / BSC56</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.3" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.3">V2.0.3 / BSC56</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -723,7 +723,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <button class="term-btn" onclick="web3.closeWalletHub()" style="padding:6px 10px; font-size:12px;">✖</button>
 </div>
 <div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
-      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
+      若你現在是在 Facebook / 一般手機瀏覽器，可能沒有注入錢包。請按「MetaMask 開啟」用 MetaMask App 內建瀏覽器開本頁，再按「連結錢包」。
     </div>
 <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
 <button class="nav-btn" onclick="web3.deepLink('metamask')" style="width:100%; padding:10px 12px;">MetaMask 開啟</button>
@@ -736,7 +736,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
 <input id="walletHubUrl" readonly="" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;">
 <button class="nav-btn" onclick="web3.copyDappUrl()" style="padding:10px 12px;">複製</button>
-</input></div>
+</div>
 <div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
       通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
     </div>
@@ -1057,6 +1057,7 @@ KGEN 12345 Heart Live Patch V7.3.0
 </div>
 <div class="kh-actions kh-actions-wallet">
 <button class="kh-gold kh-btn-lg" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
+<button class="kh-cyan kh-btn-lg" id="kh-metamask-open" type="button">請用 MetaMask App 開啟</button>
 <button class="kh-cyan kh-btn-lg" id="kh-refresh" type="button">刷新餘額</button>
 <button class="kh-cyan kh-btn-lg" id="kh-switch" type="button">切換錢包</button>
 <button class="kh-cyan kh-btn-lg" id="kh-download" type="button">下載收藏</button>
@@ -1072,11 +1073,12 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-k">Festival</div><div class="kh-v" id="kh-festival-open">--</div>
 <div class="kh-k">NY Slot</div><div class="kh-v kgen-ny-countdown-shell" data-kgen-ny-shell="1" id="kh-ny-slot"><span class="kgen-ny-prefix">距跨年：</span><span class="kgen-ny-body"><span class="ny-days" id="ny-days">--</span> 天 <span class="ny-hours" id="ny-hours">--</span>:<span class="ny-minutes" id="ny-minutes">--</span>:<span class="ny-seconds" id="ny-seconds">--</span></span></div>
 </div>
+<div class="kh-allowance-status" id="kh-allowance-status">Allowance：未連錢包</div>
 <div class="kh-actions kh-actions-approve">
-<button class="kh-gold kh-btn-lg" id="kh-approve-current" type="button">Approve 目前金額</button>
-<button class="kh-cyan kh-btn-lg" id="kh-approve-unlimited" type="button">無限授權</button>
+<button class="kh-gold kh-btn-lg" id="kh-approve-current" type="button">Approve 發財金金額</button>
+<button class="kh-cyan kh-btn-lg" id="kh-unlimited" type="button">無限授權</button>
 </div>
-<div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 只授權輸入數量；無限授權＝長期 allowance。</div>
+<div class="kh-mini">Allowance 分流：發財金／許願／還願／點燈各自獨立欄位；Approve 發財金金額只授權發財金欄；無限授權＝長期 allowance。</div>
 </div>
 
 <div class="kh-zone kh-zone-cup">
@@ -1099,7 +1101,8 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-claim-status" id="kh-fortune-status">發財金：等待鏈上資料</div>
 <div class="kh-claim-status" id="kh-ignite-status">轉日呼吸：等待鏈上資料</div>
 <div class="kh-amount-row">
-<input id="kh-amount" placeholder="發財金金額 1–888，預設 8" value="8"/>
+<label class="kh-field-label" for="kh-fortune-amount">發財金 fortuneClaim（1–888）</label>
+<input id="kh-fortune-amount" placeholder="發財金金額 1–888，預設 8" value="8"/>
 </div>
 <div class="kh-actions kh-actions-claim">
 <button class="kh-gold kh-btn-lg" id="kh-fortune" type="button">領發財金 fortuneClaim</button>
@@ -1115,8 +1118,18 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-zone-title">許願還願區</div>
 <div class="kh-vow-row">
 <select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
+<label class="kh-field-label" for="kh-vow-amount">還願 vowTo 金額</label>
+<input id="kh-vow-amount" placeholder="還願 KGEN 整數，預設 8" value="8"/>
 </div>
-<input id="kh-wish" placeholder="許願文字或 0x bytes32 hash"/>
+<div class="kh-amount-row">
+<label class="kh-field-label" for="kh-wish-amount">許願 makeWish 金額參考</label>
+<input id="kh-wish-amount" placeholder="許願 KGEN 參考，預設 1" value="1"/>
+</div>
+<textarea id="kh-wish-text" placeholder="許願文字或 0x bytes32 hash" rows="2"></textarea>
+<div class="kh-amount-row">
+<label class="kh-field-label" for="kh-lamp-days">點燈 lightLamp 天數</label>
+<input id="kh-lamp-days" placeholder="點燈天數整數，預設 8" value="8"/>
+</div>
 <div class="kh-actions kh-actions-vow">
 <button class="kh-gold kh-btn-lg" id="kh-vow" type="button">vowTo 還願</button>
 <button class="kh-cyan kh-btn-lg" id="kh-lamp" type="button">lightLamp 點燈</button>
@@ -1775,7 +1788,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.0.2"></script>
+<script src="modules/runtime-main.js?v=V2.0.3"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
