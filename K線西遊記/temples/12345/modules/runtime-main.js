@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.1";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.1";
-  const UI_PATCH = "V2.0.1";
+  const VERSION = "V2.0.2";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.2";
+  const UI_PATCH = "V2.0.2";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -776,13 +776,38 @@
     syncLegacyWeb3Bridge: function(){
       try{
         if(window.web3){
+          window.web3.KGEN = CHAIN.KGEN;
+          window.web3.UNIVERSE = CHAIN.HEART;
           window.web3.provider = this.state.provider;
           window.web3.signer = this.state.signer;
           window.web3.addr = this.state.address;
           window.web3.address = this.state.address;
-          window.web3.UNIVERSE = CHAIN.HEART;
         }
       }catch(_){ }
+    },
+    syncFromWeb3: function(){
+      const w3 = window.web3;
+      if(!w3) return false;
+      if(w3.provider) this.state.provider = w3.provider;
+      if(w3.signer) this.state.signer = w3.signer;
+      if(w3.addr) this.state.address = w3.addr;
+      if(w3.provider && typeof w3.provider.getNetwork === "function"){
+        w3.provider.getNetwork().then(function(net){
+          if(net && net.chainId != null){
+            HeartRuntime.state.chainId = "0x" + Number(net.chainId).toString(16);
+            HeartRuntime.updateWalletDom();
+          }
+        }).catch(function(){ });
+      }
+      this.syncLegacyWeb3Bridge();
+      this.updateWalletDom();
+      return !!(this.state.address || w3.addr);
+    },
+    hasInjectedWallet: function(){
+      return !!(this.getEthereum());
+    },
+    isOnBSC: function(){
+      return String(this.state.chainId || "").toLowerCase() === String(CHAIN.BSC).toLowerCase();
     },
     ensureEthers: function(){
       if(!hasEthers5()) throw new Error("ethers.js 尚未載入");
@@ -830,14 +855,7 @@
       return this.state.signer;
     },
     connectWallet: async function(){
-      try{
-        StatusRuntime.push("準備連結錢包，請在錢包視窗確認");
-        await this.ensureConnected();
-        StatusRuntime.push("錢包已連線：" + short(this.state.address));
-        await this.refreshChainData(false);
-      }catch(error){
-        StatusRuntime.push("錢包連線失敗：" + asErrorMessage(error));
-      }
+      return WalletRuntime.connect();
     },
     heartContract: async function(){
       await this.ensureConnected();
@@ -1099,7 +1117,19 @@
           StatusRuntime.push("發財金：三聖盃未完成（" + HolyCupRuntime.count + "/3）");
           return;
         }
+        if(!this.hasInjectedWallet() && !this.state.address){
+          StatusRuntime.push(label + "：未連錢包");
+          if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
+          return;
+        }
+        if(!this.state.heartData && this.state.readError){
+          StatusRuntime.push(label + "：功能等待鏈上資料");
+        }
         await this.ensureConnected();
+        if(!this.isOnBSC()){
+          StatusRuntime.push(label + "：請切換至 BSC（鏈 ID 56）");
+          return;
+        }
         if(!window.confirm("確認送出交易：" + label + "\n\n會花 BNB gas，鏈上交易不可逆。")){
           StatusRuntime.push("已取消：" + label);
           return;
@@ -1117,6 +1147,10 @@
     },
     approveCurrent: async function(){
       try{
+        if(!this.hasInjectedWallet() && !this.state.address){
+          StatusRuntime.push("Approve 目前金額：未連錢包");
+          return;
+        }
         await this.ensureConnected();
         await this.refreshChainData(false);
         const amountWhole = this.getAmountWhole('8');
@@ -1138,6 +1172,10 @@
     },
     approveUnlimited: async function(){
       try{
+        if(!this.hasInjectedWallet() && !this.state.address){
+          StatusRuntime.push("無限授權：未連錢包");
+          return;
+        }
         await this.ensureConnected();
         if(!window.confirm("確認送出無限授權給 Heart 合約？")){
           StatusRuntime.push("已取消：Approve 無限授權");
@@ -1177,6 +1215,10 @@
       Object.keys(actions).forEach(function(id){
         const button = $(id);
         if(!button) return;
+        button.disabled = false;
+        button.removeAttribute("disabled");
+        button.onclick = null;
+        delete button.dataset.kgenBound;
         Events.bindOnce(button, "click", function(event){
           event.preventDefault();
           event.stopPropagation();
@@ -1205,20 +1247,146 @@
     init: function(){
       if(this.inited) return;
       this.inited = true;
+      this.primeWeb3Shell();
       const bindings = {
-        "kh-connect": function(){ HeartRuntime.connectWallet(); },
-        "kh-refresh": function(){ HeartRuntime.refreshChainData(true); },
-        "kh-approve-current": function(){ HeartRuntime.approveCurrent(); },
-        "kh-approve-unlimited": function(){ HeartRuntime.approveUnlimited(); }
+        "kh-connect": function(){ WalletRuntime.connect(); },
+        "kh-refresh": function(){ WalletRuntime.refresh(); },
+        "kh-approve-current": function(){ WalletRuntime.approveCurrent(); },
+        "kh-approve-unlimited": function(){ WalletRuntime.approveUnlimited(); },
+        "kh-unlimited": function(){ WalletRuntime.approveUnlimited(); },
+        "kh-switch": function(){ WalletRuntime.switchWallet(); },
+        "kh-download": function(){ WalletRuntime.downloadBookmark(); }
       };
       Object.keys(bindings).forEach(function(id){
-        const button = $(id);
-        if(!button) return;
-        Events.bindOnce(button, "click", function(event){
-          event.preventDefault();
-          bindings[id]();
-        }, true);
+        WalletRuntime.bindWalletButton(id, bindings[id]);
       });
+    },
+    primeWeb3Shell: function(){
+      try{
+        if(window.web3){
+          window.web3.KGEN = CHAIN.KGEN;
+          window.web3.UNIVERSE = CHAIN.HEART;
+          if(typeof window.web3.load === "function") window.web3.load();
+        }
+      }catch(_){ }
+    },
+    bindWalletButton: function(id, handler){
+      const button = $(id);
+      if(!button || typeof handler !== "function") return;
+      button.disabled = false;
+      button.removeAttribute("disabled");
+      button.onclick = null;
+      delete button.dataset.kgenBound;
+      Events.bindOnce(button, "click", function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        try{
+          const result = handler();
+          if(result && typeof result.then === "function"){
+            result.catch(function(error){
+              StatusRuntime.push(asErrorMessage(error));
+            });
+          }
+        }catch(error){
+          StatusRuntime.push(asErrorMessage(error));
+        }
+      }, true);
+    },
+    connect: async function(){
+      if(!HeartRuntime.hasInjectedWallet()){
+        StatusRuntime.push("未偵測到錢包");
+        if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
+        return false;
+      }
+      StatusRuntime.push("準備連結錢包 / 切 BSC，請在錢包視窗確認");
+      try{
+        if(window.web3 && typeof window.web3.ensureBSC === "function"){
+          const onBsc = await window.web3.ensureBSC();
+          if(!onBsc){
+            StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
+            return false;
+          }
+        }
+        if(window.web3 && typeof window.web3.smartConnect === "function"){
+          await window.web3.smartConnect();
+          if(window.web3.demo){
+            StatusRuntime.push("未偵測到錢包，已開啟多錢包入口");
+            return false;
+          }
+          if(!HeartRuntime.syncFromWeb3()){
+            await HeartRuntime.ensureConnected();
+          }
+        }else{
+          await HeartRuntime.ensureConnected();
+        }
+        if(!HeartRuntime.state.address){
+          StatusRuntime.push("未偵測到錢包");
+          return false;
+        }
+        if(!HeartRuntime.isOnBSC()){
+          StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
+          return false;
+        }
+        StatusRuntime.push("錢包已連線：" + short(HeartRuntime.state.address));
+        await HeartRuntime.refreshChainData(true);
+        return true;
+      }catch(error){
+        StatusRuntime.push("錢包連線失敗：" + asErrorMessage(error));
+        return false;
+      }
+    },
+    refresh: async function(){
+      StatusRuntime.push("刷新餘額中…");
+      try{
+        if(window.web3 && typeof window.web3.refreshUser === "function"){
+          await window.web3.refreshUser();
+          HeartRuntime.syncFromWeb3();
+        }
+        await HeartRuntime.refreshChainData(true);
+        StatusRuntime.push(HeartRuntime.state.address ? "餘額已刷新" : "未連錢包：請先連結錢包");
+      }catch(error){
+        StatusRuntime.push("刷新餘額失敗：" + asErrorMessage(error));
+      }
+    },
+    approveCurrent: function(){
+      StatusRuntime.push("Approve 目前金額：準備中…");
+      return HeartRuntime.approveCurrent();
+    },
+    approveUnlimited: function(){
+      StatusRuntime.push("無限授權：準備中…");
+      return HeartRuntime.approveUnlimited();
+    },
+    switchWallet: function(){
+      if(!HeartRuntime.hasInjectedWallet()){
+        StatusRuntime.push("未偵測到錢包");
+        if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
+        return;
+      }
+      if(window.web3 && typeof window.web3.openWalletHub === "function"){
+        window.web3.openWalletHub();
+        StatusRuntime.push("已開啟多錢包 / 切換錢包入口");
+        return;
+      }
+      StatusRuntime.push("請在錢包中切換帳戶後，再按刷新餘額");
+    },
+    downloadBookmark: function(){
+      const done = function(){
+        StatusRuntime.push("已複製頁面連結，可加入書籤收藏");
+      };
+      if(window.web3 && typeof window.web3.copyDappUrl === "function"){
+        Promise.resolve(window.web3.copyDappUrl()).then(done).catch(function(){
+          StatusRuntime.push("請手動將此頁加入書籤收藏");
+        });
+        return;
+      }
+      const url = String(location.href || "");
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(done).catch(function(){
+          StatusRuntime.push("請手動將此頁加入書籤收藏");
+        });
+        return;
+      }
+      StatusRuntime.push("請手動將此頁加入書籤收藏");
     }
   };
 
@@ -1228,30 +1396,66 @@
     init: function(){
       if(this.inited) return;
       this.inited = true;
+      this.setupHeartPanel();
       this.bindFooterButtons();
       this.bindRightRuleButtons();
-      this.bindDocumentDelegate();
+      this.bindGuideButton();
       this.bindPanelButtons();
+      this.bindConsoleButtons();
       this.exposeLegacyActions();
     },
-    toggleHeartPanel: function(forceOpen){
+    isHeartPanelOpen: function(){
+      return !document.body.classList.contains("k12345-heart-collapsed");
+    },
+    setupHeartPanel: function(){
       const panel = $("kgen-heart-live-panel");
-      if(!panel){
+      const toggle = $("kgen-heart-toggle");
+      if(panel){
+        panel.classList.add("kgen-v909-open");
+        panel.removeAttribute("style");
+      }
+      if(toggle){
+        if(!toggle.querySelector(".kgen-heart-title")){
+          toggle.innerHTML = '<span class="kgen-heart-copy"><span class="kgen-heart-title">五指山悟空財神殿</span><span class="kgen-heart-sub">12345 Heart 控制台</span></span><span class="kgen-heart-state">展開</span>';
+        }
+        toggle.setAttribute("type", "button");
+        toggle.setAttribute("aria-controls", "kgen-heart-live-panel");
+      }
+      document.body.classList.add("k12345-heart-collapsed");
+      this.setHeartPanelOpen(false, true);
+    },
+    setHeartPanelOpen: function(open, silent){
+      const panel = $("kgen-heart-live-panel");
+      const toggle = $("kgen-heart-toggle");
+      if(!panel) return;
+      document.body.classList.toggle("k12345-heart-collapsed", !open);
+      panel.setAttribute("aria-hidden", open ? "false" : "true");
+      if(toggle){
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        const state = toggle.querySelector(".kgen-heart-state");
+        if(state) state.textContent = open ? "收合" : "展開";
+      }
+      if(!silent){
+        StatusRuntime.push(open ? "悟空財神殿控制台已展開" : "悟空財神殿控制台已收合");
+      }
+    },
+    toggleHeartPanel: function(forceOpen){
+      if(!$("kgen-heart-live-panel")){
         StatusRuntime.push("找不到悟空控制台");
         return;
       }
-      const hidden = panel.style.display === "none" || getComputedStyle(panel).display === "none";
-      const willOpen = typeof forceOpen === "boolean" ? forceOpen : hidden;
-      panel.style.display = willOpen ? "block" : "none";
-      StatusRuntime.push(willOpen ? "悟空控制台已展開" : "悟空控制台已收合");
+      const willOpen = typeof forceOpen === "boolean" ? forceOpen : !this.isHeartPanelOpen();
+      this.setHeartPanelOpen(willOpen, false);
     },
     bindPanelButtons: function(){
       const toggle = $("kgen-heart-toggle");
       if(toggle){
         toggle.onclick = null;
         toggle.removeAttribute("onclick");
+        delete toggle.dataset.kgenBound;
         Events.bindOnce(toggle, "click", function(event){
           event.preventDefault();
+          event.stopPropagation();
           ActionRuntime.toggleHeartPanel();
         }, true);
       }
@@ -1262,6 +1466,36 @@
           StatusRuntime.push("活動規則：5/20、11/11、12/31 皆需手動確認交易");
         }, true);
       }
+    },
+    bindGuideButton: function(){
+      const guide = $("guideUnifiedBtn");
+      if(!guide) return;
+      guide.onclick = null;
+      guide.removeAttribute("onclick");
+      delete guide.dataset.kgenBound;
+      Events.bindOnce(guide, "click", function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        try{
+          if(window.app && typeof window.app.openUnifiedGuide === "function"){
+            window.app.openUnifiedGuide();
+            StatusRuntime.push("已開啟客服 / 悟空財神殿導覽");
+          }else{
+            StatusRuntime.push("客服導覽：功能等待鏈上資料");
+          }
+        }catch(error){
+          StatusRuntime.push("客服導覽開啟失敗：" + asErrorMessage(error));
+        }
+      }, true);
+    },
+    bindConsoleButtons: function(){
+      const claimIds = ["kh-fortune", "kh-heartbeat", "kh-ignite", "kh-vow", "kh-lamp", "kh-wishbtn", "kh-festival1", "kh-festival2", "kh-newyear"];
+      claimIds.forEach(function(id){
+        const button = $(id);
+        if(!button) return;
+        button.disabled = false;
+        button.removeAttribute("disabled");
+      });
     },
     bindFooterButtons: function(){
       const footer = document.querySelector(".footer-terminal");
@@ -1295,6 +1529,9 @@
         button.textContent = ActionRuntime.footerLabels[index] || button.textContent;
         button.onclick = null;
         button.removeAttribute("onclick");
+        button.disabled = false;
+        button.removeAttribute("disabled");
+        delete button.dataset.kgenBound;
         Events.bindOnce(button, "click", function(event){
           event.preventDefault();
           event.stopPropagation();
@@ -1309,6 +1546,7 @@
         if(!/右側神規|神規/.test(text) || /客服導覽/.test(text)) return;
         button.onclick = null;
         button.removeAttribute("onclick");
+        delete button.dataset.kgenBound;
         Events.bindOnce(button, "click", function(event){
           event.preventDefault();
           event.stopPropagation();
@@ -1317,36 +1555,10 @@
         }, true);
       });
     },
-    bindDocumentDelegate: function(){
-      Events.bindOnce(document.documentElement, "click", function(event){
-        const target = event.target && event.target.closest ? event.target.closest("#kh-fortune,#kh-heartbeat,#kh-ignite,#kh-vow,#kh-lamp,#kh-wishbtn,#kh-festival1,#kh-festival2,#kh-newyear") : null;
-        if(!target) return;
-        if(target.id === "kh-fortune" && !HolyCupRuntime.isComplete()){
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          StatusRuntime.push("發財金：三聖盃未完成（" + HolyCupRuntime.count + "/3）");
-          return false;
-        }
-        const label = {
-          "kh-fortune": "發財金 fortuneClaim",
-          "kh-heartbeat": "心跳呼吸 heartbeatClaim",
-          "kh-ignite": "轉日 igniteAndClaim",
-          "kh-vow": "還願 vowTo",
-          "kh-lamp": "點燈 lightLamp",
-          "kh-wishbtn": "許願 makeWish",
-          "kh-festival1": "5/20 悟空生日",
-          "kh-festival2": "11/11 孤勇日",
-          "kh-newyear": "12/31 倒數"
-        }[target.id];
-        if(label) StatusRuntime.push("已按下：" + label);
-        return undefined;
-      }, true);
-    },
     exposeLegacyActions: function(){
       const old = window.templeOps || {};
       window.templeOps = Object.assign({}, old, {
-        approve: function(){ HeartRuntime.approveCurrent(); },
+        approve: function(){ return WalletRuntime.approveCurrent(); },
         cup: function(){ HolyCupRuntime.load(); return HolyCupRuntime.cupPress(Math.min(HolyCupRuntime.max, HolyCupRuntime.count + 1)); },
         resetCup: function(){ return HolyCupRuntime.reset(); },
         fortune: function(){ return HeartRuntime.clickAction("kh-fortune"); },
@@ -1357,8 +1569,14 @@
         wish: function(){ return HeartRuntime.clickAction("kh-wishbtn"); },
         festival: function(id){ return HeartRuntime.clickAction(Number(id) === 2 ? "kh-festival2" : "kh-festival1"); },
         newyear: function(){ return HeartRuntime.clickAction("kh-newyear"); },
-        closeTempleModal: function(){ ActionRuntime.toggleHeartPanel(false); }
+        closeTempleModal: function(){ ActionRuntime.toggleHeartPanel(false); },
+        toggleHeartPanel: function(open){ ActionRuntime.toggleHeartPanel(open); }
       });
+      window.connectWallet = function(){ return WalletRuntime.connect(); };
+      if(window.web3){
+        window.web3.smartConnect = window.web3.smartConnect || function(){ return WalletRuntime.connect(); };
+        window.web3.connect = window.web3.connect || function(){ return WalletRuntime.connect(); };
+      }
     }
   };
 
@@ -1420,7 +1638,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.1 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.2 ready");
       return this;
     }
   };

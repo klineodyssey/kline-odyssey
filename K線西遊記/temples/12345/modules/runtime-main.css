@@ -70,6 +70,107 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   --kgen-cell-radius: 13px;
   --kgen-nav-width: 320px;
   --kgen-organ-gap: 10px;
+  --kgen-left-x: 18px;
+  --kgen-left-w: min(420px, 36vw, calc(100vw - 36px));
+  --kgen-heart-toggle-top: 72px;
+  --kgen-heart-panel-top: 222px;
+}
+
+/* V2.0.2：悟空財神殿控制台展開 / 收合（class 驅動，不用 inline display） */
+#kgen-heart-toggle {
+  position: fixed !important;
+  left: var(--kgen-left-x) !important;
+  top: var(--kgen-heart-toggle-top) !important;
+  width: var(--kgen-left-w) !important;
+  max-width: var(--kgen-left-w) !important;
+  min-height: 46px !important;
+  padding: 9px 14px !important;
+  box-sizing: border-box !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 215, 120, 0.62) !important;
+  background: linear-gradient(180deg, rgba(18, 16, 10, 0.92), rgba(0, 0, 0, 0.78)) !important;
+  color: #ffd778 !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  z-index: 2147482600 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
+#kgen-heart-toggle .kgen-heart-title {
+  display: block !important;
+  font-size: 14px !important;
+  color: #ffe39a !important;
+}
+
+#kgen-heart-toggle .kgen-heart-sub {
+  display: block !important;
+  margin-top: 2px !important;
+  font-size: 11px !important;
+  color: #8ff7ff !important;
+}
+
+#kgen-heart-toggle .kgen-heart-state {
+  flex: 0 0 auto !important;
+  border: 1px solid rgba(255, 215, 120, 0.38) !important;
+  border-radius: 999px !important;
+  padding: 5px 9px !important;
+  font-size: 12px !important;
+  color: #fff2be !important;
+}
+
+#kgen-heart-live-panel {
+  position: fixed !important;
+  left: var(--kgen-left-x) !important;
+  top: var(--kgen-heart-panel-top) !important;
+  width: var(--kgen-left-w) !important;
+  max-width: var(--kgen-left-w) !important;
+  max-height: calc(100vh - var(--kgen-heart-panel-top) - 104px) !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  z-index: 2147482550 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+body.k12345-heart-collapsed #kgen-heart-live-panel {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 2147483000 !important;
+}
+
+#kgen-heart-live-panel button,
+#kgen-heart-live-panel input,
+#kgen-heart-live-panel select {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
+#kgen-heart-live-panel .kh-actions-wallet {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --kgen-left-x: 10px;
+    --kgen-left-w: min(380px, calc(100vw - 20px));
+    --kgen-heart-toggle-top: 76px;
+    --kgen-heart-panel-top: 226px;
+  }
+
+  #kgen-heart-live-panel {
+    max-height: calc(100vh - 300px) !important;
+  }
 }
 
 /* 版本銘牌 — UI V1.0.3 兩排固定、防抖動 */

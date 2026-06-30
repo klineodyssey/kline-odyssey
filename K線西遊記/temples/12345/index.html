@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.0.1" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.0.2" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.1" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.1">V2.0.1 / BSC56</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.2">V2.0.2 / BSC56</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -1042,8 +1042,8 @@ KGEN 12345 Heart Live Patch V7.3.0
 - No automatic transactions. Every tx requires explicit button + confirm.
 ============================================================ -->
 
-<button id="kgen-heart-toggle" type="button">12345 Heart</button>
-<section aria-label="12345 Heart Live Panel" class="kgen-console-v102" id="kgen-heart-live-panel">
+<button id="kgen-heart-toggle" type="button" aria-controls="kgen-heart-live-panel" aria-expanded="false"><span class="kgen-heart-copy"><span class="kgen-heart-title">五指山悟空財神殿</span><span class="kgen-heart-sub">12345 Heart 控制台</span></span><span class="kgen-heart-state">展開</span></button>
+<section aria-hidden="true" aria-label="12345 Heart Live Panel" class="kgen-console-v102 kgen-v909-open" id="kgen-heart-live-panel">
 <div class="kh-head">
 <div class="kh-title">12345 悟空財神殿 Heart V3.2.6</div>
 <div class="kh-pill" id="kh-chain">BSC 56</div>
@@ -1058,6 +1058,8 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-actions kh-actions-wallet">
 <button class="kh-gold kh-btn-lg" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
 <button class="kh-cyan kh-btn-lg" id="kh-refresh" type="button">刷新餘額</button>
+<button class="kh-cyan kh-btn-lg" id="kh-switch" type="button">切換錢包</button>
+<button class="kh-cyan kh-btn-lg" id="kh-download" type="button">下載收藏</button>
 </div>
 </div>
 
@@ -1773,7 +1775,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.0.1"></script>
+<script src="modules/runtime-main.js?v=V2.0.2"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
