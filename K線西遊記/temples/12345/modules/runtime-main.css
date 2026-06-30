@@ -401,12 +401,11 @@ body.kgen-right-rule-closed .right-info-panel {
   text-overflow:ellipsis !important;
 }
 
-/* 聖盃：固定高度，避免 1~3 行跳動；下方訊息不得被縮起來 */
+/* 聖盃：固定高度，避免跳動；kh-cup-status 由 console 區塊規則覆寫為多行 */
 #v57-cup-status,
 #v714-cup-status,
 #v715-cup-status,
 #v715-cup-log,
-#kh-cup-status,
 .kgen-cup-status,
 [data-kgen-organ="holycup-organ"] {
   min-height: 58px !important;
@@ -417,6 +416,19 @@ body.kgen-right-rule-closed .right-info-panel {
   box-sizing:border-box !important;
   font-variant-numeric: tabular-nums !important;
   transition:none !important;
+  white-space: pre-line !important;
+}
+
+#kh-cup-status {
+  min-height: 92px !important;
+  height: auto !important;
+  max-height: none !important;
+  line-height: 1.45 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  font-variant-numeric: tabular-nums !important;
+  transition: none !important;
+  white-space: pre-line !important;
 }
 
 .v714-cupbox,
@@ -425,24 +437,39 @@ body.kgen-right-rule-closed .right-info-panel {
   overflow: visible !important;
 }
 
-/* 悟空控制台跨年倒數槽：固定一行穩定高度 */
+/* 悟空控制台跨年倒數槽：固定結構，只更新數字 span */
 #kh-ny-slot,
 #kh-ny-countdown,
 .kh-ny-countdown,
 #cd-1231,
-#kgen-ny-countdown {
-  display:block !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  max-height: 28px !important;
-  line-height: 28px !important;
-  overflow:hidden !important;
-  white-space:nowrap !important;
-  text-overflow:ellipsis !important;
+#kgen-ny-countdown,
+.kgen-ny-countdown-shell {
+  display: block !important;
+  width: 100% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  line-height: 20px !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
   font-variant-numeric: tabular-nums !important;
-  animation:none !important;
-  transition:none !important;
-  opacity:1 !important;
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.kgen-ny-countdown-shell .kgen-ny-prefix,
+.kgen-ny-countdown-shell .kgen-ny-body {
+  display: block !important;
+}
+
+.kgen-ny-countdown-shell .ny-days,
+.kgen-ny-countdown-shell .ny-hours,
+.kgen-ny-countdown-shell .ny-minutes,
+.kgen-ny-countdown-shell .ny-seconds {
+  font-variant-numeric: tabular-nums !important;
 }
 
 /* 統一面板間距 */
@@ -506,7 +533,7 @@ body.kgen-right-rule-closed .right-info-panel {
 
 #kgen-heart-live-panel .kh-claim-status,
 #kgen-heart-live-panel .kh-cup-status {
-  min-height: 24px !important;
+  min-height: 92px !important;
   height: auto !important;
   max-height: none !important;
   margin: 6px 0 !important;
@@ -517,7 +544,8 @@ body.kgen-right-rule-closed .right-info-panel {
   background: rgba(0, 0, 0, 0.35) !important;
   color: #d9f4ff !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  white-space: pre-line !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 #kgen-heart-live-panel .kh-v-time {

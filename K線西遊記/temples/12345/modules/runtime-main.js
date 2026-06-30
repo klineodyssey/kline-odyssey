@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0";
-  const UI_PATCH = "V2.0";
+  const VERSION = "V2.0.1";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.1";
+  const UI_PATCH = "V2.0.1";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -161,6 +161,44 @@
     if(el) el.textContent = text;
   }
 
+  function nyDiffParts(ms){
+    const totalSeconds = Math.max(0, Math.floor((ms || 0) / 1000));
+    return {
+      days: Math.floor(totalSeconds / 86400),
+      hours: pad(Math.floor((totalSeconds % 86400) / 3600)),
+      minutes: pad(Math.floor((totalSeconds % 3600) / 60)),
+      seconds: pad(totalSeconds % 60)
+    };
+  }
+
+  function ensureNyShell(root, useGlobalIds){
+    if(!root || root.dataset.kgenNyShell === "1") return root;
+    root.dataset.kgenNyShell = "1";
+    root.classList.add("kgen-ny-countdown-shell");
+    const dayId = useGlobalIds ? ' id="ny-days"' : "";
+    const hourId = useGlobalIds ? ' id="ny-hours"' : "";
+    const minuteId = useGlobalIds ? ' id="ny-minutes"' : "";
+    const secondId = useGlobalIds ? ' id="ny-seconds"' : "";
+    root.innerHTML = '<span class="kgen-ny-prefix">距跨年：</span><span class="kgen-ny-body"><span class="ny-days"' + dayId + '>0</span> 天 <span class="ny-hours"' + hourId + '>00</span>:<span class="ny-minutes"' + minuteId + '>00</span>:<span class="ny-seconds"' + secondId + '>00</span></span>';
+    root.style.animation = "none";
+    root.style.transition = "none";
+    root.style.opacity = "1";
+    return root;
+  }
+
+  function updateNyShell(root, parts){
+    if(!root || !parts) return;
+    const days = root.querySelector(".ny-days");
+    const hours = root.querySelector(".ny-hours");
+    const minutes = root.querySelector(".ny-minutes");
+    const seconds = root.querySelector(".ny-seconds");
+    const dayText = String(parts.days);
+    if(days && days.textContent !== dayText) days.textContent = dayText;
+    if(hours && hours.textContent !== parts.hours) hours.textContent = parts.hours;
+    if(minutes && minutes.textContent !== parts.minutes) minutes.textContent = parts.minutes;
+    if(seconds && seconds.textContent !== parts.seconds) seconds.textContent = parts.seconds;
+  }
+
   function getFestivalWindowLabel(date){
     const now = date || new Date();
     const month = now.getUTCMonth() + 1;
@@ -282,16 +320,28 @@
 
   const CountdownRuntime = {
     inited: false,
+    shells: [],
     init: function(){
       if(this.inited) return;
       this.inited = true;
+      const shells = [];
+      NY_SLOT_IDS.forEach(function(id){
+        const el = $(id);
+        if(!el) return;
+        shells.push(ensureNyShell(el, id === "kh-ny-slot"));
+      });
+      qa(".ny-countdown,.kgen-ny-countdown,.v714-ny-line,[class*='ny-count']").forEach(function(el){
+        if(!el || el.id === "kgen-v102-festival-countdown" || el.dataset.kgenNyShell === "1") return;
+        shells.push(ensureNyShell(el, false));
+      });
+      this.shells = shells;
+      this.tick();
     },
     tick: function(){
       const nowMs = Date.now();
-      const nyText = "距跨年：" + formatSpan(nextLocal(12, 31, 23, 59, 59) - nowMs);
-      setText(NY_SLOT_IDS, nyText);
-      qa(".ny-countdown,.kgen-ny-countdown,.v714-ny-line,[class*='ny-count']").forEach(function(el){
-        if(el.id !== "kgen-v102-festival-countdown") el.textContent = nyText;
+      const parts = nyDiffParts(nextLocal(12, 31, 23, 59, 59) - nowMs);
+      this.shells.forEach(function(root){
+        updateNyShell(root, parts);
       });
       setNodeText($("kgen-v102-festival-countdown"), [
         "跨年 " + formatSpan(nextLocal(12, 31, 23, 59, 59) - nowMs),
@@ -335,9 +385,20 @@
       this.load();
       return this.count >= this.max;
     },
+    cupLabels: ["一", "二", "三"],
+    cupMarks: ["①", "②", "③"],
     statusText: function(){
       this.load();
-      return this.count >= this.max ? "聖盃完成，可以領取" : this.count + "/3";
+      const count = this.count;
+      if(count >= this.max){
+        return "聖盃狀態：3/3\n✅ 聖盃完成，可以領取發財金";
+      }
+      const lines = ["聖盃狀態：" + count + "/3"];
+      for(let index = 1; index <= this.max; index++){
+        const done = count >= index;
+        lines.push(this.cupMarks[index - 1] + " 聖盃" + this.cupLabels[index - 1] + "：" + (done ? "完成" : "未完成"));
+      }
+      return lines.join("\n");
     },
     render: function(){
       this.load();
@@ -345,7 +406,7 @@
       ["v57-cup-status", "v714-cup-status", "v715-cup-status", "v715-cup-log", "kh-cup-status"].forEach(function(id){
         const el = $(id);
         if(!el) return;
-        el.textContent = text;
+        if(el.textContent !== text) el.textContent = text;
         el.dataset.kgenCupCount = String(HolyCupRuntime.count);
       });
       [1, 2, 3].forEach(function(index){
@@ -367,14 +428,15 @@
         return false;
       }
       if(index !== this.count + 1){
-        StatusRuntime.push(this.count < index - 1 ? "請依序完成聖盃 " + (this.count + 1) + "/3" : "此聖盃已完成");
+        const needLabel = "聖盃" + this.cupLabels[this.count];
+        StatusRuntime.push(this.count < index - 1 ? "請先完成" + needLabel : "此聖盃已完成");
         this.render();
         return false;
       }
       this.count = index;
       this.save();
       this.render();
-      StatusRuntime.push("聖盃進度 " + this.count + "/3");
+      StatusRuntime.push("聖盃狀態：" + this.count + "/3");
       return false;
     },
     reset: function(){
@@ -1358,7 +1420,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.1 ready");
       return this;
     }
   };

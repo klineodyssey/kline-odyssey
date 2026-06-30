@@ -296,7 +296,7 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
   }
 
   function boot(){
-    if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.version === "V2.0"){
+    if(window.KGEN_RUNTIME_CORE && /^V2\.0/.test(String(window.KGEN_RUNTIME_CORE.version || ""))){
       patchAppIdentity();
       window.KGEN_12345_RECORDING = { start, stop, rec, version:VERSION };
       log('V2.0：錄影器官已掛載，UI 由 KGEN_RUNTIME_CORE 管理。');
