@@ -68,10 +68,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   "use strict";
 
   const VERSION = "V10.49.1";
-  const VERSION_TAG = "12345-TEMPLE-V10.49.1-LAND-UI-V1.0.3";
+  const VERSION_TAG = "12345-TEMPLE-V10.49.1-LAND-UI-V1.0.4";
   const VERSION_SHORT = "V10.49.1 / LAND V1.0 / BSC56";
   const BRAND_LINE1 = "KGEN 12345 五指山悟空財神殿";
-  const UI_PATCH = "V1.0.3";
+  const UI_PATCH = "V1.0.4";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CUP_KEY = "kgen12345_cup_count_v10492";
   const CHAIN = {
@@ -313,29 +313,60 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 
   function toggleRightRule(){
     const closed = document.body.classList.contains("kgen-right-rule-closed");
+    const willOpen = closed;
     const p = $("coord-panel") || document.querySelector(".coord-panel,#right-info-panel,.right-info-panel");
-    document.body.classList.toggle("kgen-right-rule-closed", !closed);
-    document.body.classList.toggle("kgen-v10-right-info-collapsed", !closed);
-    document.body.classList.toggle("kgen-v920-right-info-collapsed", !closed);
+    document.body.classList.toggle("kgen-right-rule-closed", !willOpen);
+    document.body.classList.toggle("kgen-v10-right-info-collapsed", !willOpen);
+    document.body.classList.toggle("kgen-v920-right-info-collapsed", !willOpen);
     if(p){
-      p.style.display = closed ? "block" : "none";
-      p.style.visibility = closed ? "visible" : "hidden";
-      p.style.pointerEvents = closed ? "auto" : "none";
+      if(willOpen){
+        p.style.removeProperty("display");
+        p.style.removeProperty("visibility");
+        p.style.removeProperty("pointer-events");
+      }else{
+        p.style.display = "none";
+        p.style.visibility = "hidden";
+        p.style.pointerEvents = "none";
+      }
     }
+  }
+
+  function toggleRightRuleWithStatus(){
+    toggleRightRule();
+    const open = !document.body.classList.contains("kgen-right-rule-closed");
+    StatusBus.push(open ? "右側神規已展開" : "右側神規已收合");
+  }
+
+  function openHeartPanel(){
+    const p = $("kgen-heart-live-panel");
+    if(!p){ StatusBus.push("找不到悟空控制台"); return; }
+    const hidden = p.style.display === "none" || getComputedStyle(p).display === "none";
+    p.style.display = hidden ? "block" : "none";
+    StatusBus.push(hidden ? "悟空控制台已展開" : "悟空控制台已收合");
+  }
+
+  function openFestivalRules(){
+    const p = $("kgen-v102-festival-panel");
+    if(!p){ StatusBus.push("找不到規則活動面板"); return; }
+    p.classList.toggle("kgen-festival-closed");
+    const open = !p.classList.contains("kgen-festival-closed");
+    StatusBus.push(open ? "規則活動已展開" : "規則活動已收合");
   }
 
   function bindRightRuleButton(){
     qa("button,.term-btn,.nav-btn").forEach(btn=>{
       const t = (btn.textContent || "").replace(/\s+/g,"");
-      if(/右側神規|神規|客服導覽/.test(t)){
+      if(/右側神規|神規/.test(t) && !/客服導覽/.test(t)){
         btn.dataset.kgenCell = "right-rule-toggle-cell";
-        btn.textContent = "🛡 右側神規";
-        btn.onclick = function(e){
-          e && e.preventDefault && e.preventDefault();
-          e && e.stopPropagation && e.stopPropagation();
-          toggleRightRule();
-          return false;
-        };
+        if(!btn.dataset.kgenRightRuleBound){
+          btn.dataset.kgenRightRuleBound = "1";
+          btn.addEventListener("click", function(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toggleRightRuleWithStatus();
+            return false;
+          }, true);
+        }
       }
     });
   }
@@ -347,13 +378,28 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     if(t<=now) t=new Date(now.getFullYear()+1,m-1,d,h,min,s,0);
     return t;
   }
+  function fmtSpan(ms){
+    ms = Math.max(0, ms || 0);
+    const sec = Math.floor(ms / 1000);
+    const d = Math.floor(sec / 86400);
+    const h = Math.floor((sec % 86400) / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    const clock = pad(h) + ":" + pad(m) + ":" + pad(s);
+    return d > 0 ? (d + "天 " + clock) : clock;
+  }
   function fmt(ms){
-    ms=Math.max(0,ms||0);
-    const total=Math.floor(ms/60000);
-    const days=Math.floor(total/1440);
-    const h=Math.floor((total%1440)/60);
-    const m=total%60;
-    return days + "天 " + pad(h) + "時" + pad(m) + "分";
+    return fmtSpan(ms);
+  }
+
+  const NY_SLOT_IDS = ["kh-ny-slot","kh-ny-countdown","cd-1231","kgen-ny-countdown","human-cd-1231","v714-ny-count"];
+
+  function normalizeCountdownText(t){
+    if(!t) return "";
+    return String(t)
+      .replace(/(\d+)時(\d+)分(\d+)秒/g, (_, h, m, s) => pad(h) + ":" + pad(m) + ":" + pad(s))
+      .replace(/(\d+)時(\d+)分/g, (_, h, m) => pad(h) + ":" + pad(m) + ":00")
+      .replace(/(\d+)分(\d+)秒/g, (_, m, s) => "00:" + pad(m) + ":" + pad(s));
   }
 
   const StableCountdown = {
@@ -361,36 +407,290 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     lastFestival:"",
     lastNy:"",
     tick(){
-      const now=Date.now();
-      const festText = "跨年 " + fmt(nextLocal(12,31,23,59,59)-now) +
-        "｜520 " + fmt(nextLocal(5,20,0,0,0)-now) +
-        "｜1111 " + fmt(nextLocal(11,11,0,0,0)-now);
+      const now = Date.now();
+      const festText = "跨年 " + fmtSpan(nextLocal(12,31,23,59,59) - now) +
+        "｜520 " + fmtSpan(nextLocal(5,20,0,0,0) - now) +
+        "｜1111 " + fmtSpan(nextLocal(11,11,0,0,0) - now);
       if(festText !== this.lastFestival){
         this.lastFestival = festText;
         const cd = $("kgen-v102-festival-countdown");
         if(cd) cd.textContent = festText;
       }
-      const nyMs = Math.max(0, nextLocal(12,31,23,59,59)-now);
-      const totalMin = Math.floor(nyMs / 60000);
-      const nyD = Math.floor(totalMin / 1440);
-      const nyH = Math.floor((totalMin % 1440) / 60);
-      const nyM = totalMin % 60;
-      const ny = "距跨年：" + pad(nyD) + "天 " + pad(nyH) + "時" + pad(nyM) + "分";
+      const ny = "距跨年：" + fmtSpan(nextLocal(12,31,23,59,59) - now);
       if(ny !== this.lastNy){
         this.lastNy = ny;
-        ["kh-ny-slot","kh-ny-countdown","cd-1231","kgen-ny-countdown"].forEach(id=>{
-          const el=$(id);
+        NY_SLOT_IDS.forEach(id=>{
+          const el = $(id);
           if(el) el.textContent = ny;
         });
+        qa(".ny-countdown,.kgen-ny-countdown,.v714-ny-line,[class*='ny-count']").forEach(el=>{
+          if(el && (el.id === "kgen-v102-festival-countdown")) return;
+          if(/跨年|倒數|1231/.test(el.id || "") || /跨年|倒數/.test(el.className || "")){
+            el.textContent = ny;
+          }
+        });
       }
+    },
+    guardNy(){
+      const self = this;
+      NY_SLOT_IDS.forEach(id=>{
+        const el = $(id);
+        if(!el || el.dataset.kgenNyGuard) return;
+        el.dataset.kgenNyGuard = "1";
+        new MutationObserver(()=>{
+          const t = el.textContent || "";
+          if(/時|分/.test(t) && self.lastNy){
+            el.textContent = self.lastNy;
+          }else if(/時|分/.test(t)){
+            el.textContent = normalizeCountdownText(t);
+          }
+        }).observe(el, {characterData:true, childList:true, subtree:true});
+      });
     },
     start(){
       if(this.t) clearInterval(this.t);
       this.tick();
+      this.guardNy();
       this.t = setInterval(()=>this.tick(), 1000);
     }
   };
   window.PULSAR_HEART_RUNTIME = StableCountdown;
+
+  const MirrorView = {
+    mode:"heart",
+    assets:{ heart:"./assets/heart.png", front:"./assets/bull-front.png", back:"./assets/bear-rear.png" },
+    apply(mode){
+      this.mode = mode;
+      const img = $("fairy-img");
+      const cam = $("cam-view");
+      const app = window.app || {};
+      try{
+        if(app.stream) app.stream.getTracks().forEach(t=>t.stop());
+        app.stream = null;
+        app.isCam = false;
+        app.camMode = null;
+        app.kgenCamBusy = false;
+      }catch(e){}
+      if(cam){ cam.srcObject = null; cam.style.opacity = "0"; }
+      if(img){
+        img.src = this.assets[mode] || this.assets.heart;
+        img.style.opacity = "1";
+        img.style.visibility = "visible";
+      }
+      document.body.classList.remove("kgen-camera-on","kgen-camera-front","kgen-camera-back");
+      document.body.classList.toggle("kgen-mirror-front", mode === "front");
+      document.body.classList.toggle("kgen-mirror-back", mode === "back");
+      const steer = $("steer-input-val");
+      if(steer && mode !== "heart"){
+        const deg = mode === "front" ? 45 : 135;
+        steer.value = String(deg);
+        steer.dispatchEvent(new Event("input", {bubbles:true}));
+      }
+      const cpNum = $("cp-deg-num");
+      const cpSide = $("cp-side");
+      const kcDir = $("kc-dir");
+      const sliderSt = $("k12345-slider-status");
+      if(mode === "front"){
+        if(cpNum) cpNum.textContent = "45°｜多方";
+        if(cpSide) cpSide.textContent = "方向：多方";
+        if(kcDir) kcDir.textContent = "方向盤 → 多方K";
+        if(sliderSt) sliderSt.textContent = "CORE 角度 45°｜多方｜縮放 100%";
+      }else if(mode === "back"){
+        if(cpNum) cpNum.textContent = "135°｜空方";
+        if(cpSide) cpSide.textContent = "方向：空方";
+        if(kcDir) kcDir.textContent = "方向盤 → 空方K";
+        if(sliderSt) sliderSt.textContent = "CORE 角度 135°｜空方｜縮放 100%";
+      }
+      const label = $("wish-label");
+      if(label){
+        label.textContent = mode === "front" ? "悟空心臟｜前鏡多方" : mode === "back" ? "悟空心臟｜後鏡空方" : "悟空心臟，財氣覺醒";
+      }
+      StatusBus.push(mode === "front" ? "前鏡多方：已切換 bull-front" : mode === "back" ? "後鏡空方：已切換 bear-rear" : "已恢復心臟核心圖");
+    },
+    toggleFront(){ this.apply(this.mode === "front" ? "heart" : "front"); },
+    toggleBack(){ this.apply(this.mode === "back" ? "heart" : "back"); }
+  };
+  window.KGEN_MIRROR_VIEW = MirrorView;
+
+  const ScreenRec = {
+    state:{ stream:null, recorder:null, chunks:[], active:false },
+    openPanel(){
+      const p = $("kgen-v902-rec-panel");
+      if(p){
+        p.classList.add("active");
+        StatusBus.push("螢幕錄影面板已開啟");
+        return true;
+      }
+      StatusBus.push("找不到錄影面板");
+      return false;
+    },
+    async start(){
+      if(this.state.active && this.state.recorder){
+        try{ this.state.recorder.stop(); }catch(e){}
+        return;
+      }
+      const md = navigator.mediaDevices;
+      if(!md || !md.getDisplayMedia){
+        StatusBus.push("瀏覽器不支援螢幕錄影");
+        alert("瀏覽器不支援螢幕錄影");
+        return;
+      }
+      if(!window.MediaRecorder){
+        StatusBus.push("瀏覽器不支援 MediaRecorder");
+        return;
+      }
+      try{
+        StatusBus.push("螢幕錄影：等待瀏覽器授權…");
+        this.state.stream = await md.getDisplayMedia({ video:true, audio:true });
+        this.state.chunks = [];
+        const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : "video/webm";
+        this.state.recorder = new MediaRecorder(this.state.stream, { mimeType:mime });
+        this.state.recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) this.state.chunks.push(e.data); };
+        this.state.recorder.onstop = ()=>{
+          const blob = new Blob(this.state.chunks, { type:"video/webm" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "KGEN-12345-" + Date.now() + ".webm";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          try{ this.state.stream && this.state.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+          this.state.active = false;
+          StatusBus.push("螢幕錄影已完成並下載");
+        };
+        this.state.recorder.start(1000);
+        this.state.active = true;
+        StatusBus.push("螢幕錄影進行中");
+      }catch(e){
+        StatusBus.push("螢幕錄影未啟動：" + (e && e.message ? e.message : e));
+      }
+    },
+    wire(){
+      const map = [
+        ["kgen-v902-rec-start", ()=>this.start()],
+        ["kgen-v902-rec-stop", ()=>{ if(this.state.recorder && this.state.active) this.state.recorder.stop(); else StatusBus.push("目前沒有正在錄影"); }],
+        ["kgen-v902-rec-help", ()=>StatusBus.push("錄影說明：授權螢幕後錄製，停止自動下載 WebM")],
+        ["kgen-v902-rec-close", ()=>{ const p=$("kgen-v902-rec-panel"); if(p) p.classList.remove("active"); }]
+      ];
+      map.forEach(([id, fn])=>{
+        const el = $(id);
+        if(!el || el.dataset.kgenRecBound) return;
+        el.dataset.kgenRecBound = "1";
+        el.addEventListener("click", (e)=>{ e.preventDefault(); fn(); }, true);
+      });
+    }
+  };
+  window.KGEN_SCREEN_REC = ScreenRec;
+
+  const ActionRouter = {
+    inited:false,
+    init(){
+      if(this.inited) return;
+      this.inited = true;
+      document.addEventListener("click", (e)=>this.route(e), true);
+      ScreenRec.wire();
+      this.seizeFooterButtons();
+      this.seizeCupButtons();
+      this.syncFooterLabels();
+      setInterval(()=>{
+        this.seizeFooterButtons();
+        this.seizeCupButtons();
+        this.syncFooterLabels();
+        ConsoleUI.ensureButtonsEnabled();
+      }, 2000);
+    },
+    syncFooterLabels(){
+      const footer = document.querySelector(".footer-terminal");
+      if(!footer) return;
+      const btns = [...footer.querySelectorAll("button,.term-btn")].slice(0, 8);
+      const labels = ["📸\n拍照","🎥\n錄影","🤳\n前鏡多方","🌌\n後鏡空方","🫀\n悟空心臟","🎬\n螢幕錄影","📜\n規則活動","🛡\n右側神規"];
+      btns.forEach((b,i)=>{
+        if(labels[i]) b.innerHTML = labels[i].replace("\n","<br>");
+      });
+    },
+    seizeFooterButtons(){
+      const footer = document.querySelector(".footer-terminal");
+      if(!footer) return;
+      [...footer.querySelectorAll("button,.term-btn")].slice(0, 8).forEach((b, idx)=>{
+        if(b.dataset.kgenDockSeized === String(idx)) return;
+        b.dataset.kgenDockSeized = String(idx);
+        b.onclick = null;
+        b.removeAttribute("onclick");
+        b.addEventListener("click", (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.handleDock(idx);
+          return false;
+        }, true);
+      });
+    },
+    seizeCupButtons(){
+      ["kh-cup-1","kh-cup-2","kh-cup-3","kh-cup-reset"].forEach((id)=>{
+        const btn = $(id);
+        if(!btn || btn.dataset.kgenCupSeized === "1") return;
+        const clone = btn.cloneNode(true);
+        clone.id = id;
+        clone.dataset.kgenCupSeized = "1";
+        btn.parentNode.replaceChild(clone, btn);
+        clone.addEventListener("click", (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if(id === "kh-cup-reset") HolyCup.reset();
+          else HolyCup.cupPress(Number(id.replace("kh-cup-","")));
+          return false;
+        }, true);
+      });
+    },
+    route(e){
+      const claimLabels = {
+        "kh-fortune": "發財金 fortuneClaim",
+        "kh-heartbeat": "心跳呼吸 heartbeatClaim",
+        "kh-ignite": "轉日 igniteAndClaim",
+        "kh-vow": "還願 vowTo",
+        "kh-lamp": "點燈 lightLamp",
+        "kh-wishbtn": "許願 makeWish"
+      };
+      const claimBtn = e.target.closest && e.target.closest(Object.keys(claimLabels).join(","));
+      if(claimBtn && claimLabels[claimBtn.id]){
+        StatusBus.push("已按下：" + claimLabels[claimBtn.id]);
+        if(claimBtn.id === "kh-fortune" && !HolyCup.isComplete()){
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          StatusBus.push("發財金：三聖盃未完成（" + HolyCup.count + "/3）");
+          return;
+        }
+        if(!window.ethereum){
+          StatusBus.push(claimLabels[claimBtn.id] + "：未連錢包");
+        }
+      }
+      const cupBtn = e.target.closest && e.target.closest("#kh-cup-1,#kh-cup-2,#kh-cup-3,#kh-cup-reset");
+      if(cupBtn && cupBtn.dataset.kgenCupSeized !== "1"){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if(cupBtn.id === "kh-cup-reset") HolyCup.reset();
+        else HolyCup.cupPress(Number(cupBtn.id.replace("kh-cup-","")));
+        return;
+      }
+    },
+    handleDock(idx){
+      const actions = [
+        ()=>{ try{ window.app && window.app.capture && window.app.capture(); StatusBus.push("拍照存證"); }catch(e){ StatusBus.push("拍照：執行失敗"); }},
+        ()=>{ try{ window.app && window.app.toggleRec && window.app.toggleRec(); StatusBus.push("留影錄影切換"); }catch(e){ StatusBus.push("留影錄影：執行失敗"); }},
+        ()=>MirrorView.toggleFront(),
+        ()=>MirrorView.toggleBack(),
+        ()=>openHeartPanel(),
+        ()=>{ ScreenRec.openPanel(); ScreenRec.start(); },
+        ()=>openFestivalRules(),
+        ()=>toggleRightRuleWithStatus()
+      ];
+      if(actions[idx]) actions[idx]();
+    }
+  };
+  window.KGEN_ACTION_ROUTER = ActionRouter;
 
   function moveFestivalBelowAudio(){
     const panel = $("kgen-v102-festival-panel");
@@ -428,12 +728,18 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   const HolyCup = {
     count:0,
     max:3,
+    legacyKeys:[CUP_KEY, "KGEN_12345_V907_CUP_COUNT", "KGEN_12345_V908_CUP_COUNT"],
     load(){
-      const raw = Number(localStorage.getItem(CUP_KEY) || "0") || 0;
-      this.count = Math.min(this.max, Math.max(0, raw));
+      let n = 0;
+      this.legacyKeys.forEach(k=>{
+        n = Math.max(n, Number(localStorage.getItem(k) || "0") || 0);
+      });
+      if(window.__templeCupCount != null) n = Math.max(n, Number(window.__templeCupCount) || 0);
+      this.count = Math.min(this.max, Math.max(0, n));
     },
     save(){
-      localStorage.setItem(CUP_KEY, String(this.count));
+      this.legacyKeys.forEach(k=>localStorage.setItem(k, String(this.count)));
+      window.__templeCupCount = this.count;
     },
     isComplete(){
       this.load();
@@ -458,11 +764,12 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       [1,2,3].forEach(n=>{
         const btn = $("kh-cup-" + n);
         if(!btn) return;
+        btn.dataset.kgenCupOwned = "1";
         const done = this.count >= n;
         const next = this.count === n - 1;
         btn.classList.toggle("done", done);
         btn.classList.toggle("kh-cup-next", next);
-        btn.disabled = done;
+        btn.disabled = false;
         btn.textContent = "聖盃" + (n===1?"一":n===2?"二":"三") + (done ? " ✓" : "");
       });
       if(ConsoleUI.refreshFortuneStatus) ConsoleUI.refreshFortuneStatus();
@@ -503,18 +810,27 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       this.refreshChain();
       if(this.chainTimer) clearInterval(this.chainTimer);
       this.chainTimer = setInterval(()=>this.refreshChain(), 12000);
-      this.bindCupButtons();
       this.bindAmountInput();
-      this.bindFortuneGuard();
       this.bindActionLogs();
       this.relabelButtons();
       this.fixWish();
       this.guardCupStatus();
+      this.ensureButtonsEnabled();
       if(this.displayTimer) clearInterval(this.displayTimer);
       this.displayTimer = setInterval(()=>{
         this.updateHeartbeatDisplay();
         this.updateIgniteDisplay();
+        this.ensureButtonsEnabled();
       }, 1000);
+    },
+
+    ensureButtonsEnabled(){
+      ["kh-fortune","kh-heartbeat","kh-ignite","kh-vow","kh-lamp","kh-wishbtn","kh-cup-1","kh-cup-2","kh-cup-3"].forEach(id=>{
+        const el = $(id);
+        if(!el) return;
+        el.disabled = false;
+        el.removeAttribute("disabled");
+      });
     },
 
     guardCupStatus(){
@@ -538,13 +854,7 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
         ["kh-connect", "錢包：連線 / 切換 BSC"],
         ["kh-refresh", "錢包：刷新餘額"],
         ["kh-approve-current", "Approve：授權目前金額"],
-        ["kh-approve-unlimited", "Approve：無限授權"],
-        ["kh-fortune", "發財金 fortuneClaim"],
-        ["kh-heartbeat", "心跳 heartbeatClaim"],
-        ["kh-ignite", "轉日 igniteAndClaim"],
-        ["kh-vow", "還願 vowTo"],
-        ["kh-lamp", "點燈 lightLamp"],
-        ["kh-wishbtn", "許願 makeWish"]
+        ["kh-approve-unlimited", "Approve：無限授權"]
       ];
       map.forEach(([id, label])=>{
         const btn = $(id);
@@ -552,30 +862,6 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
         btn.dataset.kgenBusLog = "1";
         btn.addEventListener("click", ()=>StatusBus.push("已按下：" + label), true);
       });
-    },
-
-    bindFortuneGuard(){
-      const btn = $("kh-fortune");
-      if(!btn || btn.dataset.kgenFortuneGuard) return;
-      btn.dataset.kgenFortuneGuard = "1";
-      btn.addEventListener("click", (e)=>{
-        if(!HolyCup.isComplete()){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          StatusBus.push("發財金：三聖盃未完成（" + HolyCup.count + "/3）");
-          alert("請先完成三聖盃（目前 " + HolyCup.count + "/3）");
-          return false;
-        }
-        const reasons = this.getFortuneBlockReasons().filter(r=>r !== "三聖盃未完成");
-        if(reasons.length){
-          StatusBus.push("發財金：鏈上條件 — " + reasons.join("；"));
-          if(!confirm("鏈上可能無法領取：\n" + reasons.join("\n") + "\n\n仍要送出交易？")){
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            return false;
-          }
-        }
-      }, true);
     },
 
     providerRO(){
@@ -686,19 +972,17 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       const el = $("kh-heartbeat-status");
       const btn = $("kh-heartbeat");
       if(!el) return;
+      if(btn){ btn.disabled = false; btn.removeAttribute("disabled"); }
       if(!this.state.heartData || this.state.readError){
         el.textContent = "心跳呼吸：等待鏈上資料";
-        if(btn) btn.disabled = true;
         return;
       }
       if(!this.state.address){
         el.textContent = "心跳呼吸：未連錢包";
-        if(btn) btn.disabled = true;
         return;
       }
       if(String(this.state.chainId).toLowerCase() !== CHAIN.BSC){
         el.textContent = "心跳呼吸：錢包不在 BSC";
-        if(btn) btn.disabled = true;
         return;
       }
       const now = this.state.blockTs || Math.floor(Date.now() / 1000);
@@ -707,10 +991,8 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       const next = last > 0 ? last + cd : now;
       if(now >= next){
         el.textContent = "心跳呼吸：可領";
-        if(btn) btn.disabled = false;
       }else{
         el.textContent = "心跳呼吸：倒數 " + fmtCountdown(next - now);
-        if(btn) btn.disabled = true;
       }
     },
 
@@ -719,10 +1001,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       const openEl = $("kh-ignite-open");
       const btn = $("kh-ignite");
       if(!el) return;
+      if(btn){ btn.disabled = false; btn.removeAttribute("disabled"); }
       const hint = "鏈上重置：UTC 00:00｜台灣可領：每日 08:00";
       if(!this.state.heartData || this.state.readError){
         el.textContent = "轉日呼吸：等待鏈上資料";
-        if(btn) btn.disabled = true;
         return;
       }
       const d = this.state.heartData;
@@ -732,12 +1014,10 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
 
       if(!this.state.address){
         el.textContent = "轉日呼吸：未連錢包｜" + hint;
-        if(btn) btn.disabled = true;
         return;
       }
       if(String(this.state.chainId).toLowerCase() !== CHAIN.BSC){
         el.textContent = "轉日呼吸：錢包不在 BSC｜" + hint;
-        if(btn) btn.disabled = true;
         return;
       }
 
@@ -745,17 +1025,14 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       const alreadyToday = lastDay === d.dayIndex;
       if(inWindow && !alreadyToday){
         el.textContent = "轉日呼吸：可領｜" + hint;
-        if(btn) btn.disabled = false;
       }else if(inWindow && alreadyToday){
         const nextDayStart = (d.dayIndex + 1) * 86400;
         el.textContent = "轉日呼吸：倒數 " + fmtCountdown(nextDayStart - now) + "｜" + hint;
-        if(btn) btn.disabled = true;
       }else{
         const dayStart = d.dayIndex * 86400;
         const windowStart = dayStart + d.igniteStart;
         const target = now < windowStart ? windowStart : (d.dayIndex + 1) * 86400 + d.igniteStart;
         el.textContent = "轉日呼吸：倒數 " + fmtCountdown(target - now) + "｜" + hint;
-        if(btn) btn.disabled = true;
       }
     },
 
@@ -804,43 +1081,33 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
       const el = $("kh-fortune-status");
       const btn = $("kh-fortune");
       if(!el) return;
+      if(btn){ btn.disabled = false; btn.removeAttribute("disabled"); }
 
       if(!HolyCup.isComplete()){
         HolyCup.load();
         el.textContent = "發財金：需要聖盃（" + HolyCup.count + "/3）";
-        if(btn){ btn.disabled = true; btn.title = "三聖盃未完成"; }
+        if(btn) btn.title = "三聖盃未完成（仍可點擊查看原因）";
         return;
       }
 
       if(!this.state.heartData || this.state.readError){
         el.textContent = "發財金：等待鏈上資料";
-        if(btn){ btn.disabled = false; btn.title = "等待鏈上資料"; }
+        if(btn) btn.title = "等待鏈上資料";
         return;
       }
 
       const reasons = this.getFortuneBlockReasons().filter(r=>r !== "三聖盃未完成");
       if(reasons.length === 0){
         el.textContent = "發財金：可領";
-        if(btn){ btn.disabled = false; btn.title = ""; }
+        if(btn) btn.title = "";
       }else{
         el.textContent = "發財金：鏈上條件 — " + reasons[0];
-        if(btn){ btn.disabled = false; btn.title = reasons.join("；"); }
+        if(btn) btn.title = reasons.join("；");
       }
     },
 
     bindCupButtons(){
-      [1,2,3].forEach(n=>{
-        const btn = $("kh-cup-" + n);
-        if(btn && !btn.dataset.kgenBound){
-          btn.dataset.kgenBound = "1";
-          btn.onclick = ()=>HolyCup.cupPress(n);
-        }
-      });
-      const resetBtn = $("kh-cup-reset");
-      if(resetBtn && !resetBtn.dataset.kgenBound){
-        resetBtn.dataset.kgenBound = "1";
-        resetBtn.onclick = ()=>HolyCup.reset();
-      }
+      /* cup clicks owned by ActionRouter.seizeCupButtons */
     },
 
     bindAmountInput(){
@@ -949,15 +1216,42 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
     if(KgenLandRuntime) KgenLandRuntime.ensure();
   }
 
+  function dedupeCupUI(){
+    const panel = $("kgen-heart-live-panel");
+    const keep = panel && panel.querySelector(".kh-actions-cup");
+    if(keep){
+      qa("[id^='kh-cup-']", panel).forEach(el=>{
+        if(!keep.contains(el)){
+          el.id = el.id + "-legacy";
+          el.style.display = "none";
+          el.setAttribute("aria-hidden", "true");
+          el.dataset.kgenCupLegacy = "1";
+        }
+      });
+    }
+    const injected = $("kh-cupbox");
+    if(injected) injected.remove();
+    qa("[id^='kh-cup-']").forEach(el=>{
+      if(panel && !panel.contains(el)){
+        el.id = el.id + "-legacy";
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.dataset.kgenCupLegacy = "1";
+      }
+    });
+  }
+
   function boot(){
     HudGuard.init();
     StatusBus.hookExternal();
     closeRightRule();
     bindRightRuleButton();
     moveFestivalBelowAudio();
+    dedupeCupUI();
     bindHolyCup();
     HolyCup.load();
     HolyCup.render();
+    ActionRouter.init();
     ConsoleUI.start();
     StableCountdown.start();
     tagCells();
@@ -981,11 +1275,14 @@ PURPOSE: Permanent runtime-main. Version is DNA, not file name.
   setInterval(()=>{
     moveFestivalBelowAudio();
     ensureLandEngine();
+    bindRightRuleButton();
+    dedupeCupUI();
     bindHolyCup();
     HolyCup.render();
-    ConsoleUI.bindCupButtons();
-    ConsoleUI.bindAmountInput();
-    ConsoleUI.bindFortuneGuard();
+    ConsoleUI.ensureButtonsEnabled();
+    ConsoleUI.refreshFortuneStatus();
+    ActionRouter.seizeFooterButtons();
+    ActionRouter.seizeCupButtons();
     tagCells();
   },3000);
 })();

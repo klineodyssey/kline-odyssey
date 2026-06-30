@@ -871,3 +871,101 @@ body.kgen-right-rule-closed .right-info-panel {
     max-height: min(36vh, 180px) !important;
   }
 }
+
+/* ===== V1.0.4 regression fixes ===== */
+#human-cd-1231,
+.v714-ny-line {
+  font-variant-numeric: tabular-nums !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  line-height: 28px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body:not(.kgen-right-rule-closed) #coord-panel {
+  z-index: 180 !important;
+  max-height: min(52vh, 420px) !important;
+  overflow: auto !important;
+}
+
+@media (max-width: 760px) {
+  body:not(.kgen-right-rule-closed) #coord-panel {
+    right: 8px !important;
+    bottom: 200px !important;
+    width: min(340px, 92vw) !important;
+    max-height: min(40vh, 320px) !important;
+  }
+}
+
+#kgen-v902-rec-panel {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99990;
+  width: min(420px, 92vw);
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 215, 120, 0.34);
+  background: rgba(8, 12, 22, 0.96);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+#kgen-v902-rec-panel.active {
+  display: block !important;
+}
+
+#kgen-v902-rec-panel .rec-title {
+  color: #ffd778;
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+#kgen-v902-rec-panel .rec-body {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #e9f7ff;
+}
+
+#kgen-v902-rec-panel .rec-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+#kgen-v902-rec-panel button {
+  border: 1px solid rgba(255, 215, 120, 0.34);
+  border-radius: 12px;
+  background: rgba(255, 215, 120, 0.12);
+  color: #fff;
+  font-weight: 900;
+  padding: 11px;
+  cursor: pointer;
+}
+
+#kgen-v902-rec-panel button.gold {
+  background: linear-gradient(135deg, #ffdf86, #b98222);
+  color: #111;
+}
+
+body.kgen-mirror-front #fairy-img,
+body.kgen-mirror-back #fairy-img {
+  object-fit: cover !important;
+  transition: opacity 0.22s ease !important;
+}
+
+#kgen-v902-left-status {
+  min-height: 18px !important;
+  max-height: 36px !important;
+  line-height: 1.35 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
