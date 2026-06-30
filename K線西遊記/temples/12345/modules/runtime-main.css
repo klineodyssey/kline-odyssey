@@ -72,7 +72,7 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   --kgen-organ-gap: 10px;
 }
 
-/* 版本銘牌 — UI V1.0.1 短版顯示 */
+/* 版本銘牌 — UI V1.0.2 兩排顯示 */
 #ver-st {
   display: block !important;
   white-space: nowrap !important;
@@ -366,6 +366,107 @@ body.kgen-right-rule-closed .right-info-panel {
 
 [data-kgen-cell] { --kgen-cell-alive: 1; }
 [data-kgen-organ] { --kgen-organ-alive: 1; }
+
+/* ===== 悟空控制台 UI V1.0.2 ===== */
+#kgen-heart-live-panel.kgen-console-v102 {
+  padding: 12px 14px !important;
+  gap: 0 !important;
+}
+
+#kgen-heart-live-panel .kh-zone {
+  margin: 14px 0 !important;
+  padding: 12px !important;
+  border: 1px solid rgba(127, 243, 255, 0.22) !important;
+  border-radius: 12px !important;
+  background: rgba(0, 0, 0, 0.28) !important;
+  box-sizing: border-box !important;
+}
+
+#kgen-heart-live-panel .kh-zone-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #f7d271 !important;
+  margin: 0 0 10px 0 !important;
+  letter-spacing: 0.04em !important;
+}
+
+#kgen-heart-live-panel .kh-btn-lg {
+  min-height: 48px !important;
+  height: auto !important;
+  padding: 12px 14px !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+  border-radius: 12px !important;
+}
+
+#kgen-heart-live-panel .kh-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+#kgen-heart-live-panel .kh-btn-wide {
+  grid-column: 1 / -1 !important;
+}
+
+#kgen-heart-live-panel .kh-claim-status,
+#kgen-heart-live-panel .kh-cup-status {
+  min-height: 24px !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 6px 0 !important;
+  padding: 6px 8px !important;
+  line-height: 1.45 !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  color: #d9f4ff !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#kgen-heart-live-panel .kh-v-time {
+  line-height: 1.35 !important;
+  font-size: 11px !important;
+}
+
+#kgen-heart-live-panel .kh-utc-sub {
+  font-size: 10px !important;
+  opacity: 0.72 !important;
+}
+
+#kgen-heart-live-panel .kh-amount-row,
+#kgen-heart-live-panel .kh-vow-row {
+  margin-top: 8px !important;
+}
+
+#kgen-heart-live-panel .kh-amount-row input,
+#kgen-heart-live-panel #kh-wish,
+#kgen-heart-live-panel .kh-vow-row select {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  box-sizing: border-box !important;
+  border-radius: 10px !important;
+  margin-top: 6px !important;
+}
+
+#kgen-heart-live-panel .kh-grid-compact {
+  gap: 6px 10px !important;
+}
+
+#kgen-heart-live-panel button[disabled] {
+  opacity: 0.55 !important;
+  filter: grayscale(0.35) !important;
+  cursor: not-allowed !important;
+}
+
+@media (max-width: 760px) {
+  #kgen-heart-live-panel .kh-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
 
 /* ===== KGEN 土地格子地籍 Demo V0.1 ===== */
 #universe-nav #kgen-land-panel,

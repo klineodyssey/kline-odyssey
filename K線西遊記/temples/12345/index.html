@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V10.47.1" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V1.0.2" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-version="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.1" id="ver-st" title="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.1">V10.49.1 / LAND V1.0</div>
+<div class="sys-st" data-version="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.2" id="ver-st" title="12345-TEMPLE-V10.49.1-LAND-UI-V1.0.2">V10.49.1 / LAND V1.0 / BSC56</div>
 <div class="sys-st" id="sys-clock">SYSTEM ONLINE | 2026-02-25 00:00:00</div>
 </div>
 <div class="monitor-data">
@@ -1043,46 +1043,80 @@ KGEN 12345 Heart Live Patch V7.3.0
 ============================================================ -->
 
 <button id="kgen-heart-toggle" type="button">12345 Heart</button>
-<section aria-label="12345 Heart Live Panel" id="kgen-heart-live-panel">
+<section aria-label="12345 Heart Live Panel" class="kgen-console-v102" id="kgen-heart-live-panel">
 <div class="kh-head">
 <div class="kh-title">12345 悟空財神殿 Heart V3.2.6</div>
 <div class="kh-pill" id="kh-chain">BSC 56</div>
 </div>
-<div class="kh-grid">
+
+<div class="kh-zone kh-zone-wallet">
+<div class="kh-zone-title">錢包區</div>
+<div class="kh-grid kh-grid-compact">
 <div class="kh-k">Wallet</div><div class="kh-v" id="kh-wallet">未連線</div>
-<div class="kh-k">UTC</div><div class="kh-v" id="kh-utc">--</div>
+<div class="kh-k">時間</div><div class="kh-v kh-v-time" id="kh-utc">台灣時間：--</div>
+</div>
+<div class="kh-actions kh-actions-wallet">
+<button class="kh-gold kh-btn-lg" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
+<button class="kh-cyan kh-btn-lg" id="kh-refresh" type="button">刷新餘額</button>
+</div>
+</div>
+
+<div class="kh-zone kh-zone-assets">
+<div class="kh-zone-title">KGEN / Heart 資產區</div>
+<div class="kh-grid kh-grid-compact">
 <div class="kh-k">KGEN</div><div class="kh-v" id="kh-kgen-bal">--</div>
 <div class="kh-k">Heart 血庫</div><div class="kh-v" id="kh-heart-bal">--</div>
 <div class="kh-k">Ignite</div><div class="kh-v" id="kh-ignite-open">--</div>
 <div class="kh-k">Festival</div><div class="kh-v" id="kh-festival-open">--</div>
 <div class="kh-k">NY Slot</div><div class="kh-v" id="kh-ny-slot">--</div>
-<div class="kh-k">Heart</div><div class="kh-v">0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</div>
-<div class="kh-k">Brain</div><div class="kh-v">0xd0605F4EF10e5C1438F11AF9edc36926769239d6</div>
-<div class="kh-k">MarsSeats</div><div class="kh-v">0x3529dbFbaD465C2269F8096879A1c298d5257298</div>
 </div>
-<div class="kh-actions">
-<button class="kh-gold" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
-<button class="kh-cyan" id="kh-refresh" type="button">刷新餘額</button>
-<button class="kh-gold" id="kh-approve-current" type="button">Approve 目前金額</button>
-<button class="kh-cyan" id="kh-approve-unlimited" type="button">無限授權</button>
+<div class="kh-actions kh-actions-approve">
+<button class="kh-gold kh-btn-lg" id="kh-approve-current" type="button">Approve 目前金額</button>
+<button class="kh-cyan kh-btn-lg" id="kh-approve-unlimited" type="button">無限授權</button>
 </div>
-<div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 目前金額＝只授權輸入數量；無限授權＝授權官方 Heart 合約長期使用 allowance，所有鏈上交易都會先跳錢包確認視窗。</div>
-<div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px;">
-<input id="kh-amount" placeholder="金額 / 天數，例如 8 或 88" value="8"/>
+<div class="kh-mini">金額欄：發財金填整數 1–888；還願填 KGEN；點燈填天數。Approve 只授權輸入數量；無限授權＝長期 allowance。</div>
+</div>
+
+<div class="kh-zone kh-zone-cup">
+<div class="kh-zone-title">聖盃區</div>
+<div class="kh-cup-status" id="kh-cup-status">0/3</div>
+<div class="kh-actions kh-actions-cup">
+<button class="kh-gold kh-btn-lg" id="kh-cup-throw" type="button">擲聖盃</button>
+<button class="kh-cyan kh-btn-lg" id="kh-cup-reset" type="button">重置聖盃</button>
+</div>
+</div>
+
+<div class="kh-zone kh-zone-claim">
+<div class="kh-zone-title">領取區</div>
+<div class="kh-claim-status" id="kh-heartbeat-status">心跳呼吸：等待鏈上資料</div>
+<div class="kh-claim-status" id="kh-fortune-status">發財金：等待鏈上資料</div>
+<div class="kh-claim-status" id="kh-ignite-status">轉日呼吸：等待鏈上資料</div>
+<div class="kh-amount-row">
+<input id="kh-amount" placeholder="發財金金額 1–888，預設 8" value="8"/>
+</div>
+<div class="kh-actions kh-actions-claim">
+<button class="kh-gold kh-btn-lg" disabled id="kh-fortune" type="button">領發財金 fortuneClaim</button>
+<button class="kh-cyan kh-btn-lg" id="kh-heartbeat" type="button">呼吸 / 心跳 heartbeatClaim</button>
+<button class="kh-gold kh-btn-lg" id="kh-ignite" type="button">轉日呼吸 igniteAndClaim</button>
+<button class="kh-cyan kh-btn-lg" id="kh-festival1" type="button">5/20 悟空生日</button>
+<button class="kh-cyan kh-btn-lg" id="kh-festival2" type="button">11/11 孤勇日</button>
+<button class="kh-cyan kh-btn-lg" id="kh-newyear" type="button">12/31 倒數</button>
+</div>
+</div>
+
+<div class="kh-zone kh-zone-vow">
+<div class="kh-zone-title">許願還願區</div>
+<div class="kh-vow-row">
 <select id="kh-vow-option"><option value="1">還願 1</option><option value="2">還願 2</option><option value="3">還願 3</option></select>
 </div>
-<input id="kh-wish" placeholder="許願文字或 0x bytes32 hash" style="margin-top:8px;"/>
-<div class="kh-actions">
-<button id="kh-fortune" type="button">fortuneClaim</button>
-<button id="kh-heartbeat" type="button">heartbeatClaim</button>
-<button id="kh-ignite" type="button">igniteAndClaim</button>
-<button id="kh-festival1" type="button">5/20 悟空生日</button>
-<button id="kh-festival2" type="button">11/11 孤勇日</button>
-<button id="kh-newyear" type="button">12/31 倒數</button>
-<button id="kh-vow" type="button">vowTo 還願</button>
-<button id="kh-lamp" type="button">lightLamp 點燈</button>
-<button class="kh-gold" id="kh-wishbtn" style="grid-column:1 / -1;" type="button">makeWish 許願上鏈</button>
+<input id="kh-wish" placeholder="許願文字或 0x bytes32 hash"/>
+<div class="kh-actions kh-actions-vow">
+<button class="kh-gold kh-btn-lg" id="kh-vow" type="button">vowTo 還願</button>
+<button class="kh-cyan kh-btn-lg" id="kh-lamp" type="button">lightLamp 點燈</button>
+<button class="kh-gold kh-btn-lg kh-btn-wide" id="kh-wishbtn" type="button">makeWish 許願上鏈</button>
 </div>
+</div>
+
 <div class="kh-log" id="kh-log">待命：不會自動送出任何交易。</div>
 </section>
 
@@ -1741,83 +1775,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="../../modules/kgen-land-engine.js"></script>
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
-<script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V10.47.1"></script>
+<script src="modules/kgen-12345-divine-regeneration.js"></script><script src="modules/runtime-main.js?v=V1.0.2"></script>
 <script src="modules/runtime-bootstrap.js"></script>
-
-<!-- KGEN V10.49.2 FRONTEND_RITUAL_FIX｜合約不變，只修前端 -->
-<style id="kgen-v10-49-2-ritual-css">
-.kgen-cup-panel{margin:8px 0;padding:10px;border:1px solid #d9b85f;border-radius:12px;background:rgba(0,0,0,.45);color:#f7d271}
-.kgen-cup-btn,.kgen-fortune-cn{width:100%;padding:10px;border-radius:10px;border:1px solid #d9b85f;background:linear-gradient(180deg,#f7d271,#9b6b00);color:#111;font-weight:900}
-.kgen-fortune-cn[disabled]{opacity:.5;filter:grayscale(1)}
-.kgen-ny-hidden{display:none!important}
-</style>
-<script id="kgen-v10-49-2-ritual-js">
-(function(){
-  "use strict";
-  const KEY="kgen12345_cup_count_v10492";
-  function all(sel){return Array.from(document.querySelectorAll(sel));}
-  function twNow(){return new Date(Date.now()+8*3600*1000);}
-  function secToTaiwan8(){
-    const tw=twNow();
-    let targetReal=Date.UTC(tw.getUTCFullYear(),tw.getUTCMonth(),tw.getUTCDate(),8,0,0)-8*3600*1000;
-    if(Date.now()>=targetReal) targetReal+=86400000;
-    return Math.max(0,Math.floor((targetReal-Date.now())/1000));
-  }
-  function fmt(s){const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);return (d?d+"天 ":"")+h+"時"+m+"分";}
-  function relabel(){
-    all("button").forEach(b=>{
-      const t=(b.textContent||"").trim();
-      if(t==="fortuneClaim"||t.includes("fortuneClaim")) b.textContent="領發財金 fortuneClaim";
-      if(t==="heartbeatClaim"||t.includes("heartbeatClaim")) b.textContent="呼吸 / 心跳 heartbeatClaim";
-      if(t==="igniteAndClaim"||t.includes("igniteAndClaim")) b.textContent="轉日呼吸 igniteAndClaim";
-      if(t.includes("跨年倒數")){
-        const tw=twNow();
-        const ok=tw.getUTCMonth()===11&&tw.getUTCDate()===31&&tw.getUTCHours()===23&&tw.getUTCMinutes()>=50;
-        if(!ok) b.classList.add("kgen-ny-hidden");
-      }
-    });
-  }
-  function installCup(){
-    if(document.getElementById("kgen-cup-panel")) return;
-    const fortune=all("button").find(b=>(b.textContent||"").includes("fortuneClaim")||(b.textContent||"").includes("發財金"));
-    if(!fortune) return;
-    fortune.classList.add("kgen-fortune-cn");
-    fortune.disabled=true;
-    let count=Number(localStorage.getItem(KEY)||"0");
-    const panel=document.createElement("div");
-    panel.id="kgen-cup-panel";
-    panel.className="kgen-cup-panel";
-    panel.innerHTML='<b>聖盃解鎖發財金</b><div id="kgen-cup-status">聖盃：0 / 3</div><button type="button" id="kgen-cup-btn" class="kgen-cup-btn">擲聖盃</button><div id="kgen-tw8-tip"></div>';
-    fortune.parentNode.insertBefore(panel,fortune);
-    const status=document.getElementById("kgen-cup-status");
-    const cup=document.getElementById("kgen-cup-btn");
-    function up(){
-      status.textContent="聖盃："+count+" / 3";
-      document.getElementById("kgen-tw8-tip").textContent="轉日呼吸倒數顯示到台灣早上八點，剩餘："+fmt(secToTaiwan8());
-      if(count>=3){fortune.disabled=false;cup.textContent="聖盃完成，可領發財金";}
-    }
-    cup.onclick=function(){if(count<3)count++;localStorage.setItem(KEY,String(count));up();};
-    fortune.addEventListener("click",function(){if(!fortune.disabled){localStorage.setItem(KEY,"0");}},true);
-    up();
-  }
-  function fixWish(){
-    const btn=all("button").find(b=>(b.textContent||"").includes("makeWish"));
-    if(!btn||btn.dataset.kgenWishFix)return;
-    btn.dataset.kgenWishFix="1";
-    btn.addEventListener("click",function(e){
-      const input=document.querySelector("input[placeholder*='許願'],textarea[placeholder*='許願']");
-      if(input && !(input.value||"").trim()){
-        e.preventDefault();e.stopImmediatePropagation();
-        alert("請先輸入願望文字；空願望會造成 HASH_ZERO。");
-        return false;
-      }
-    },true);
-  }
-  function run(){document.documentElement.dataset.kgenFrontendFix="V10.49.2";relabel();installCup();fixWish();}
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
-  setInterval(run,30000);
-})();
-</script>
 
 </body>
 </html>
