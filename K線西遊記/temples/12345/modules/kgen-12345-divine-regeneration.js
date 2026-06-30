@@ -296,10 +296,14 @@ PURPOSE: Adds no-scar self-healing for the recording organ and festival organ. D
   }
 
   function boot(){
+    if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.version === "V2.0"){
+      patchAppIdentity();
+      window.KGEN_12345_RECORDING = { start, stop, rec, version:VERSION };
+      log('V2.0：錄影器官已掛載，UI 由 KGEN_RUNTIME_CORE 管理。');
+      return;
+    }
     patchAppIdentity(); patchButtons(); patchFestival(); startFestivalHeartClock(); hideHud();
     log('V10.44.2 神級再生器官已啟動：錄影秒數同步、節日單心跳、舊倒數神經隔離。');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-  setTimeout(boot,800);
-  setTimeout(boot,2200);
 })();

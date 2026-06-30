@@ -1,8 +1,8 @@
 {
   "schema": "PRIMEFORGE_RUNTIME_GENOME_V1",
   "product_id": "KGEN-12345-HEART-UI",
-  "version": "12345-TEMPLE-V10.48.1-INDEX-ROLLCALL",
-  "build": "20260525-V10.48.1-INDEX-ROLLCALL",
+  "version": "12345-TEMPLE-RUNTIME-CORE-V2.0",
+  "build": "20260630-RUNTIME-CORE-V2.0",
   "birth": "2026-05-25",
   "life_state": "ALIVE",
   "civilization_info": {
@@ -109,6 +109,9 @@
     "LEGACY_ORGANS_PRESERVED": [
       "modules/kgen-12345-core.css",
       "modules/kgen-12345-runtime.js",
+      "modules/kgen-12345-app-shell.js",
+      "modules/kgen-12345-web3-shell.js",
+      "modules/archive/kgen-12345-runtime.legacy.js",
       "modules/kgen-12345-mother-runtime.js",
       "modules/kgen-12345-divine-regeneration.js",
       "modules/kgen-12345-divine-regeneration.css",
@@ -170,7 +173,17 @@
       "../../modules/kgen-land-engine.js"
     ]
   },
-  "runtime_version": "V10.49.1",
+  "runtime_version": "V2.0",
+  "runtime_core": {
+    "version": "V2.0",
+    "tag": "12345-TEMPLE-RUNTIME-CORE-V2.0",
+    "owner": "modules/runtime-main.js",
+    "global": "window.KGEN_RUNTIME_CORE",
+    "timers": ["clock", "countdown", "heart", "status"],
+    "architecture_doc": "docs/RUNTIME_ARCHITECTURE.md",
+    "ai_first_readme": "README_AI_FIRST.md",
+    "legacy_quarantined": "modules/archive/kgen-12345-runtime.legacy.js"
+  },
   "civilization_brain_sync": {
     "version": "V10.49.1_CIVILIZATION_BRAIN_CODE_SYNC",
     "status": "ACTIVE",

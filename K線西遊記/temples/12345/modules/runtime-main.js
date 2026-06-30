@@ -288,7 +288,7 @@
     },
     tick: function(){
       const nowMs = Date.now();
-      const nyText = formatHMS(nextLocal(12, 31, 23, 59, 59) - nowMs);
+      const nyText = "距跨年：" + formatSpan(nextLocal(12, 31, 23, 59, 59) - nowMs);
       setText(NY_SLOT_IDS, nyText);
       qa(".ny-countdown,.kgen-ny-countdown,.v714-ny-line,[class*='ny-count']").forEach(function(el){
         if(el.id !== "kgen-v102-festival-countdown") el.textContent = nyText;
@@ -579,7 +579,7 @@
       const panel = $("kgen-heart-live-panel");
       const keep = panel ? panel.querySelector(".kh-actions-cup") : null;
       if(keep && panel){
-        qa("[id^='kh-cup-']", panel).forEach(function(node){
+        qa("button[id^='kh-cup-']", panel).forEach(function(node){
           if(keep.contains(node)) return;
           node.id = node.id + "-legacy";
           node.style.display = "none";
@@ -589,7 +589,7 @@
       }
       const injected = $("kh-cupbox");
       if(injected) injected.remove();
-      qa("[id^='kh-cup-']").forEach(function(node){
+      qa("button[id^='kh-cup-']").forEach(function(node){
         if(panel && panel.contains(node)) return;
         node.id = node.id + "-legacy";
         node.style.display = "none";
