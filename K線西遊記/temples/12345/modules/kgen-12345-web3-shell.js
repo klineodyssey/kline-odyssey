@@ -12,8 +12,8 @@ const web3 = {
   ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -574,7 +574,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       const url = location.href;
       let link = url;
       if(kind==='metamask'){
-        link = 'https://metamask.app.link/dapp/' + location.host + location.pathname + location.search + location.hash;
+        link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + (this.METAMASK_DAPP_PATH || (location.host + location.pathname + location.search + location.hash)));
       } else if(kind==='trust'){
         link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
       } else if(kind==='okx'){
