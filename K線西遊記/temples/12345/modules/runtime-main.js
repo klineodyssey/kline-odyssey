@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.8";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.8";
-  const UI_PATCH = "V2.0.8";
+  const VERSION = "V2.0.8A";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.8A";
+  const UI_PATCH = "V2.0.8A";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -346,6 +346,8 @@
       this.patchMusicPlayback();
       this.patchMusicLoadBuiltIn();
       this.patchMusicRenderList();
+      this.patchMusicSetIndex();
+      this.bindAudioDiagnostics();
       this.bindPanelControls();
       window.addEventListener("resize", function(){
         if(MediaRuntime.open) MediaRuntime.positionPanel();
@@ -355,31 +357,99 @@
       }catch(_){ }
       this.loadDefaultPlaylist();
     },
+    logAudio: function(label, payload){
+      try{
+        if(typeof payload === "undefined"){
+          console.log("[KGEN_AUDIO] " + label);
+        }else{
+          console.log("[KGEN_AUDIO] " + label, payload);
+        }
+      }catch(_){ }
+    },
+    logAudioState: function(stage){
+      const audio = (window.app && window.app._music && window.app._music.audio) || $("music-audio");
+      const err = audio && audio.error;
+      this.logAudio("Audio.src", audio ? audio.src : null);
+      this.logAudio("Audio.error", err || null);
+      this.logAudio("error code", err ? err.code : null);
+      if(stage) this.logAudio(stage, { src: audio ? audio.src : null, code: err ? err.code : null });
+    },
+    bindAudioDiagnostics: function(){
+      const audio = $("music-audio");
+      if(!audio || audio.dataset.kgenAudioDiag) return;
+      audio.dataset.kgenAudioDiag = "1";
+      const self = this;
+      audio.addEventListener("loadedmetadata", function(){
+        self.logAudio("loadedmetadata", { src: audio.src, duration: audio.duration });
+        self.logAudioState("loadedmetadata");
+      });
+      audio.addEventListener("canplay", function(){
+        self.logAudio("canplay", { src: audio.src, readyState: audio.readyState });
+        self.logAudioState("canplay");
+      });
+      audio.addEventListener("error", function(){
+        const err = audio.error;
+        self.logAudio("Audio.error", err || null);
+        self.logAudio("error code", err ? err.code : null);
+        self.logAudioState("audio-error-event");
+      });
+    },
     normalizeTrackUrl: function(url){
       const raw = String(url || "").trim();
       if(!raw) return "";
       if(/^https?:\/\//i.test(raw)) return raw;
-      if(raw.indexOf("./music/") === 0) return raw;
-      if(raw.indexOf("music/") === 0) return "./" + raw;
-      const parts = raw.split("/");
-      const fname = parts[parts.length - 1];
-      return "./music/" + fname;
+      let fname = "";
+      if(raw.indexOf("./music/") === 0){
+        fname = raw.slice("./music/".length);
+      }else if(raw.indexOf("music/") === 0){
+        fname = raw.slice("music/".length);
+      }else{
+        const parts = raw.split("/");
+        fname = parts[parts.length - 1];
+      }
+      try{
+        fname = decodeURIComponent(fname);
+      }catch(_){ }
+      return "./music/" + encodeURI(fname);
     },
     checkAudioExists: async function(url){
+      const target = this.normalizeTrackUrl(url);
       try{
-        const head = await fetch(url, { method: "HEAD", cache: "no-store" });
-        if(head.ok) return true;
-        const probe = await fetch(url, { method: "GET", cache: "no-store", headers: { Range: "bytes=0-1" } });
-        return probe.ok;
-      }catch(_){
+        const res = await fetch(target, { method: "GET", cache: "no-store", headers: { Range: "bytes=0-1" } });
+        const ok = res.ok || res.status === 206;
+        if(!ok){
+          this.logAudio("check fail", {
+            url: target,
+            status: res.status,
+            statusText: res.statusText,
+            reason: "HTTP " + res.status
+          });
+        }
+        return ok;
+      }catch(error){
+        this.logAudio("check fail", {
+          url: target,
+          status: null,
+          reason: String(error && error.message ? error.message : error)
+        });
         return false;
       }
     },
     loadDefaultPlaylist: async function(){
+      const playlistUrl = MUSIC_PLAYLIST_URL;
       try{
-        const res = await fetch(MUSIC_PLAYLIST_URL, { cache: "no-store" });
-        if(!res.ok) return false;
+        const res = await fetch(playlistUrl, { cache: "no-store" });
+        if(!res.ok){
+          this.logAudio("playlist fetch fail", {
+            url: playlistUrl,
+            status: res.status,
+            statusText: res.statusText,
+            reason: "HTTP " + res.status
+          });
+          return false;
+        }
         const json = await res.json();
+        this.logAudio("playlist", json);
         const arr = Array.isArray(json) ? json : (Array.isArray(json.tracks) ? json.tracks : []);
         const tracks = [];
         for(let i = 0; i < arr.length; i++){
@@ -393,23 +463,37 @@
             fileOk: fileOk
           });
         }
-        if(!tracks.length) return false;
+        this.logAudio("songs", tracks);
+        if(!tracks.length){
+          this.logAudio("playlist empty", { url: playlistUrl, reason: "no tracks in playlist.json" });
+          return false;
+        }
         window.app = window.app || {};
         window.app._music = window.app._music || {};
         const m = window.app._music;
         m.list = tracks;
         m.index = 0;
         if(!m.audio) m.audio = $("music-audio");
+        this.bindAudioDiagnostics();
         this.state.filesMissing = tracks.every(function(t){ return !t.fileOk; });
         this.state.playlistLoaded = true;
         if(typeof window.app.musicSetIndex === "function") window.app.musicSetIndex(0);
         if(typeof window.app.musicRenderList === "function") window.app.musicRenderList();
+        this.logAudioState("after playlist load");
         this.updateMusicStatus();
-        if(this.state.filesMissing) StatusRuntime.push("音檔尚未上傳");
-        else StatusRuntime.push("內建歌單已載入：" + tracks.length + " 首");
-        return true;
+        if(this.state.filesMissing){
+          const bad = tracks.filter(function(t){ return !t.fileOk; });
+          StatusRuntime.push("歌單載入失敗：" + (bad[0] ? bad[0].url : playlistUrl));
+        }else{
+          StatusRuntime.push("已載入歌單（" + tracks.length + " 首）");
+        }
+        return !this.state.filesMissing;
       }catch(error){
-        console.warn("[MediaRuntime] playlist", error);
+        this.logAudio("playlist fetch fail", {
+          url: playlistUrl,
+          status: null,
+          reason: String(error && error.message ? error.message : error)
+        });
         return false;
       }
     },
@@ -434,6 +518,32 @@
         window.app.musicRenderList = function(){
           const result = legacy.apply(window.app, arguments);
           MediaRuntime.updateMusicStatus();
+          return result;
+        };
+      };
+      patch();
+      if(!window.app) document.addEventListener("DOMContentLoaded", patch, { once: true });
+    },
+    patchMusicSetIndex: function(){
+      const patch = function(){
+        if(!window.app || window.app.__kgenMusicSetIndexPatched) return;
+        window.app.__kgenMusicSetIndexPatched = true;
+        const legacy = window.app.musicSetIndex && window.app.musicSetIndex.bind(window.app);
+        if(!legacy) return;
+        window.app.musicSetIndex = function(i){
+          const m = window.app._music;
+          if(m && Array.isArray(m.list)){
+            m.list = m.list.map(function(track){
+              if(!track || !track.url) return track;
+              return Object.assign({}, track, { url: MediaRuntime.normalizeTrackUrl(track.url) });
+            });
+          }
+          const result = legacy(i);
+          const audio = (m && m.audio) || $("music-audio");
+          if(audio){
+            MediaRuntime.logAudio("Audio.src", audio.src);
+            MediaRuntime.logAudioState("musicSetIndex");
+          }
           return result;
         };
       };
@@ -475,16 +585,20 @@
         if(name) name.textContent = "尚未載入音樂";
         if(status) status.textContent = "尚未載入清單";
         if(now) now.textContent = "（未選曲）";
-        if(playBtn){ playBtn.textContent = "等待音檔"; playBtn.disabled = true; }
+        if(playBtn){ playBtn.textContent = "播放"; playBtn.disabled = true; }
         return;
       }
       const currentMissing = !track || track.fileOk === false;
       const allMissing = this.state.filesMissing || list.every(function(t){ return t.fileOk === false; });
-      if(status) status.textContent = allMissing ? "示範歌單，尚未放入 MP3" : ("已載入：" + list.length + " 首");
+      if(status){
+        status.textContent = allMissing
+          ? ("載入失敗（" + list.length + " 首）")
+          : ("已載入歌單（" + list.length + " 首）");
+      }
       if(now && track) now.textContent = "目前歌曲：" + track.name;
       if(name && track) name.textContent = track.name;
       if(playBtn){
-        playBtn.textContent = (allMissing || currentMissing) ? "等待音檔" : "播放";
+        playBtn.textContent = "播放";
         playBtn.disabled = !!(allMissing || currentMissing);
       }
     },
@@ -546,7 +660,9 @@
             const idx = window.app._music && window.app._music.index != null ? window.app._music.index : 0;
             const track = list && list[idx];
             if(MediaRuntime.state.filesMissing || (track && track.fileOk === false)){
-              StatusRuntime.push("音檔尚未上傳");
+              const badUrl = track && track.url ? track.url : MUSIC_PLAYLIST_URL;
+              MediaRuntime.logAudio("play blocked", { url: badUrl, filesMissing: MediaRuntime.state.filesMissing });
+              StatusRuntime.push("播放失敗：" + badUrl);
               MediaRuntime.updateMusicStatus();
               return;
             }
@@ -2925,7 +3041,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.8 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.8A ready");
       return this;
     }
   };
