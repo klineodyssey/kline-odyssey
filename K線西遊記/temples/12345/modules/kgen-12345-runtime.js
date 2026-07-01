@@ -57,7 +57,6 @@ LEGACY: modules/archive/kgen-12345-runtime.legacy.js (quarantined, not loaded)
         }
       }catch(e){}
       try{ if(typeof this.updateWarp === "function") this.updateWarp(33); }catch(e){}
-      try{ if(typeof this.applySteer === "function") this.applySteer(76, true); }catch(e){}
       try{
         window.addEventListener("resize", ()=>{ if(typeof this.onResize === "function") this.onResize(); }, {passive:true});
         if(typeof this.onResize === "function") this.onResize();

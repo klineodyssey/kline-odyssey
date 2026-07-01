@@ -1,9 +1,10 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.4";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.4";
-  const UI_PATCH = "V2.0.4";
+  const VERSION = "V2.0.5";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.5";
+  const UI_PATCH = "V2.0.5";
+  const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -324,6 +325,302 @@
     }
   };
 
+  const MediaRuntime = {
+    inited: false,
+    open: false,
+    init: function(){
+      if(this.inited) return;
+      this.inited = true;
+      window.KGEN_MEDIA_RUNTIME = this;
+      this.patchOpenMusic();
+      this.bindPanelControls();
+      try{
+        if(window.app && typeof window.app.musicInit === "function") window.app.musicInit();
+      }catch(_){ }
+    },
+    setOpen: function(open, silent){
+      const panel = $("music-panel");
+      if(!panel) return;
+      this.open = !!open;
+      panel.style.display = this.open ? "block" : "none";
+      document.body.classList.toggle("kgen-audio-open", this.open);
+      if(!silent) StatusRuntime.push(this.open ? "音響面板已展開" : "音響面板已收合");
+    },
+    toggle: function(force){
+      const next = typeof force === "boolean" ? force : !this.open;
+      if(next){
+        try{
+          if(window.app && typeof window.app.musicInit === "function") window.app.musicInit();
+        }catch(_){ }
+      }
+      this.setOpen(next, typeof force !== "boolean");
+    },
+    patchOpenMusic: function(){
+      const self = this;
+      const patch = function(){
+        if(!window.app || window.app.__kgenMusicPatched) return;
+        window.app.__kgenMusicPatched = true;
+        window.app.openMusic = function(force){
+          if(typeof force === "boolean") self.setOpen(force, false);
+          else self.toggle();
+        };
+      };
+      patch();
+      if(!window.app){
+        document.addEventListener("DOMContentLoaded", patch, { once: true });
+      }
+    },
+    bindPanelControls: function(){
+      qa(".nav-btn.nav-music").forEach(function(button){
+        button.onclick = null;
+        button.removeAttribute("onclick");
+        delete button.dataset.kgenBound;
+        Events.bindOnce(button, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          MediaRuntime.toggle();
+        }, true);
+      });
+    }
+  };
+
+  const KlineRuntime = {
+    inited: false,
+    state: {
+      symbol: "BNBUSDT",
+      interval: "1m",
+      limit: 12,
+      source: "Demo"
+    },
+    init: function(){
+      if(this.inited) return;
+      this.inited = true;
+      window.KGEN_KLINE_RUNTIME = this;
+      this.bindSymbolSelect();
+      this.renderFallback();
+      this.refresh();
+      TimerRegistry.register("kline", function(){ KlineRuntime.refresh(); }, 15000);
+    },
+    bindSymbolSelect: function(){
+      const sel = $("ke-symbol");
+      if(!sel) return;
+      Events.bindOnce(sel, "change", function(event){
+        KlineRuntime.state.symbol = String(event.target.value || "BNBUSDT");
+        KlineRuntime.refresh();
+      });
+    },
+    demoCandles: function(){
+      const base = 612.5;
+      const now = Date.now();
+      return Array.from({ length: 12 }, function(_, index){
+        const open = base + (index - 6) * 0.85;
+        const close = open + Math.sin(index * 0.9) * 1.35;
+        const high = Math.max(open, close) + 0.55;
+        const low = Math.min(open, close) - 0.55;
+        return {
+          openTime: now - (12 - index) * 60000,
+          open: open,
+          high: high,
+          low: low,
+          close: close,
+          closeTime: now - (11 - index) * 60000
+        };
+      });
+    },
+    loadCache: function(){
+      try{
+        const raw = localStorage.getItem(KLINE_CACHE_KEY);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        if(!parsed || !Array.isArray(parsed.data) || !parsed.data.length) return null;
+        return parsed;
+      }catch(_){
+        return null;
+      }
+    },
+    saveCache: function(data, live){
+      try{
+        localStorage.setItem(KLINE_CACHE_KEY, JSON.stringify({
+          symbol: this.state.symbol,
+          data: data,
+          live: live,
+          at: Date.now()
+        }));
+      }catch(_){ }
+    },
+    renderFallback: function(){
+      const cached = this.loadCache();
+      if(cached && cached.data && cached.data.length){
+        this.state.source = "Cache";
+        this.updatePanel(cached.data, cached.live || cached.data[cached.data.length - 1].close);
+        return;
+      }
+      this.state.source = "Demo";
+      const demo = this.demoCandles();
+      this.updatePanel(demo, demo[demo.length - 1].close);
+    },
+    fmt: function(value){
+      const n = Number(value || 0);
+      if(this.state.symbol === "BNBUSDT") return n.toFixed(3);
+      if(this.state.symbol === "KGENLP") return n.toFixed(6);
+      if(this.state.symbol === "KGEN16888") return n.toFixed(2);
+      return n.toFixed(2);
+    },
+    getDeg: function(){
+      const steer = $("steer-input-val");
+      return steer ? Number(steer.value || 0) : 0;
+    },
+    sideZh: function(deg){
+      return deg >= -90 && deg <= 90 ? "多" : "空";
+    },
+    predict: function(last){
+      const deg = this.getDeg();
+      const side = this.sideZh(deg);
+      const angle = Math.round(Math.abs(deg));
+      const range = Math.max(0.000001, last.high - last.low);
+      const body = Math.abs(last.close - last.open);
+      const wick = Math.max(0.000001, range - body);
+      let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body / range) * 7) - Math.min(12, (wick / range) * 8);
+      hit = Math.max(63.5, Math.min(91.5, hit));
+      return { side: side, angle: angle, range: range, wick: wick, hit: hit };
+    },
+    draw: function(data){
+      const canvas = $("kline-canvas");
+      if(!canvas || !data || !data.length) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const padX = 12;
+      const padY = 10;
+      const maxH = Math.max.apply(null, data.map(function(d){ return d.high; }));
+      const minL = Math.min.apply(null, data.map(function(d){ return d.low; }));
+      const span = (maxH - minL) || 1;
+      const mapY = function(v){ return padY + (maxH - v) / span * (h - padY * 2); };
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.lineWidth = 1;
+      for(let gx = 0; gx < data.length; gx++){
+        const x = padX + gx * ((w - padX * 2) / data.length);
+        ctx.beginPath();
+        ctx.moveTo(x, padY);
+        ctx.lineTo(x, h - padY);
+        ctx.stroke();
+      }
+      const spacing = (w - padX * 2) / data.length;
+      const candleW = Math.min(18, spacing * 0.58);
+      data.forEach(function(d, index){
+        const x = padX + index * spacing + spacing / 2;
+        const yH = mapY(d.high);
+        const yL = mapY(d.low);
+        const yO = mapY(d.open);
+        const yC = mapY(d.close);
+        const up = d.close >= d.open;
+        ctx.strokeStyle = up ? "rgba(120,245,255,.96)" : "rgba(255,210,120,.96)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, yH);
+        ctx.lineTo(x, yL);
+        ctx.stroke();
+        ctx.fillStyle = up ? "rgba(120,245,255,.35)" : "rgba(255,210,120,.28)";
+        const top = Math.min(yO, yC);
+        const bh = Math.max(3, Math.abs(yC - yO));
+        ctx.fillRect(x - candleW / 2, top, candleW, bh);
+        ctx.strokeRect(x - candleW / 2, top, candleW, bh);
+      });
+    },
+    updatePanel: function(data, live){
+      if(!data || !data.length) return;
+      const last = data[data.length - 1];
+      const p = this.predict(last);
+      const sourceLabel = this.state.source === "Live" ? "Live" : this.state.source === "Cache" ? "Cache" : "Demo";
+      setNodeText($("ke-side"), p.side);
+      setNodeText($("ke-angle"), String(p.angle));
+      setNodeText($("ke-open"), this.fmt(last.open));
+      setNodeText($("ke-high"), this.fmt(last.high));
+      setNodeText($("ke-low"), this.fmt(last.low));
+      setNodeText($("ke-close"), this.fmt(last.close));
+      setNodeText($("ke-range"), this.fmt(p.range));
+      setNodeText($("ke-wick"), this.fmt(p.wick));
+      setNodeText($("ke-mode"), sourceLabel + "｜" + (this.state.symbol === "KGENLP" ? "真 LP 價" : this.state.symbol === "KGEN16888" ? "宇宙基準價" : "真市場"));
+      setNodeText($("ke-live-symbol"), this.state.symbol + " / " + this.state.interval);
+      setNodeText($("ke-live-price"), this.fmt(live));
+      setNodeText($("kc-predict"), "預測：" + p.side);
+      setNodeText($("kc-dir"), this.state.symbol + " → " + p.side + "方K");
+      setNodeText($("kc-hit"), "命中率：" + p.hit.toFixed(1) + "%");
+      const timeA = new Date(last.openTime).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
+      const timeB = new Date(last.closeTime).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
+      setNodeText($("moon-a"), timeA);
+      setNodeText($("moon-b"), timeB);
+      this.draw(data);
+    },
+    fetchBinanceKlines: async function(symbol){
+      const url = "https://api.binance.com/api/v3/klines?symbol=" + symbol + "&interval=" + this.state.interval + "&limit=" + this.state.limit;
+      const res = await fetch(url, { cache: "no-store" });
+      if(!res.ok) throw new Error("Binance klines " + res.status);
+      const arr = await res.json();
+      return arr.map(function(k){
+        return {
+          openTime: Number(k[0]),
+          open: Number(k[1]),
+          high: Number(k[2]),
+          low: Number(k[3]),
+          close: Number(k[4]),
+          closeTime: Number(k[6])
+        };
+      });
+    },
+    fetchBinanceTicker: async function(symbol){
+      const url = "https://api.binance.com/api/v3/ticker/price?symbol=" + symbol;
+      const res = await fetch(url, { cache: "no-store" });
+      if(!res.ok) throw new Error("Binance ticker " + res.status);
+      const json = await res.json();
+      return Number(json.price);
+    },
+    refresh: async function(){
+      const symbol = this.state.symbol;
+      try{
+        if(symbol === "KGEN16888"){
+          const base = 16888;
+          const now = Date.now();
+          const data = Array.from({ length: 12 }, function(_, index){
+            return {
+              openTime: now - (12 - index) * 60000,
+              open: base,
+              high: base,
+              low: base,
+              close: base,
+              closeTime: now - (11 - index) * 60000
+            };
+          });
+          this.state.source = "Demo";
+          this.updatePanel(data, base);
+          return;
+        }
+        if(symbol === "KGENLP"){
+          this.renderFallback();
+          setNodeText($("ke-mode"), "Demo｜真 LP 價");
+          return;
+        }
+        const data = await this.fetchBinanceKlines(symbol);
+        const live = await this.fetchBinanceTicker(symbol);
+        this.state.source = "Live";
+        this.saveCache(data, live);
+        this.updatePanel(data, live);
+      }catch(error){
+        console.warn("[KGEN Kline]", error);
+        const cached = this.loadCache();
+        if(cached && cached.data && cached.data.length){
+          this.state.source = "Cache";
+          this.updatePanel(cached.data, cached.live || cached.data[cached.data.length - 1].close);
+        }else{
+          this.state.source = "Demo";
+          const demo = this.demoCandles();
+          this.updatePanel(demo, demo[demo.length - 1].close);
+        }
+      }
+    }
+  };
+
   const CountdownRuntime = {
     inited: false,
     shells: [],
@@ -480,23 +777,53 @@
       if(this.inited) return;
       this.inited = true;
       window.KGEN_MIRROR_VIEW = this;
+      this.patchAppSteer();
       this.bindControls();
     },
-    applySteer: function(deg, silent){
-      const ang = Math.max(-180, Math.min(180, Number(deg) || 0));
-      if(window.app && typeof window.app.applySteer === "function"){
-        window.app.applySteer(ang, !!silent);
-      }else{
-        const cw = $("core-window");
-        const wheel = $("wheel");
-        const steer = $("steer-input-val");
-        if(cw) cw.style.transform = "rotate(" + ang + "deg)";
-        if(wheel) wheel.style.transform = "rotate(" + ang + "deg)";
-        if(steer) steer.value = String(ang);
+    syncCoreTransform: function(){
+      const target = $("core-window");
+      const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
+      const scale = (this.move.z || 100) / 100;
+      if(target){
+        target.style.transform = "translate(" + this.move.x + "px," + this.move.y + "px) rotate(" + rotate + "deg) scale(" + scale + ")";
       }
-      const modeLabel = ang >= -45 && ang <= 45 ? "多方" : ang >= 135 || ang <= -135 ? "空方" : "中性";
-      setNodeText($("k12345-slider-status"), "CORE 角度 " + ang + "°｜" + modeLabel + "｜縮放 " + this.move.z + "%");
-      setNodeText($("ang-val"), ang + "°");
+      const wheel = $("wheel");
+      if(wheel) wheel.style.transform = "rotate(" + rotate + "deg)";
+    },
+    patchAppSteer: function(){
+      const self = this;
+      const patch = function(){
+        const app = window.app;
+        if(!app || app.__kgenSteerPatched) return;
+        app.__kgenSteerPatched = true;
+        app.applySteer = function(v, silent){
+          const ang = Math.max(-180, Math.min(180, Number(v) || 0));
+          setNodeText($("ang-val"), ang + "°");
+          const steer = $("steer-input-val");
+          if(steer) steer.value = String(ang);
+          self.syncCoreTransform();
+          const modeLabel = ang >= -45 && ang <= 45 ? "多方" : ang >= 135 || ang <= -135 ? "空方" : "中性";
+          setNodeText($("k12345-slider-status"), "CORE 角度 " + ang + "°｜" + modeLabel + "｜縮放 " + self.move.z + "%");
+          try{
+            if(typeof app.updateCoordPanel === "function") app.updateCoordPanel();
+            if(typeof app.syncSideUI === "function") app.syncSideUI(ang);
+          }catch(_){ }
+          if(!silent) StatusRuntime.push("方向盤角度 " + ang + "°｜" + modeLabel);
+        };
+      };
+      patch();
+      if(!window.app) document.addEventListener("DOMContentLoaded", patch, { once: true });
+    },
+    applySteer: function(deg, silent){
+      if(window.app && typeof window.app.applySteer === "function"){
+        window.app.applySteer(deg, !!silent);
+        return;
+      }
+      const ang = Math.max(-180, Math.min(180, Number(deg) || 0));
+      const steer = $("steer-input-val");
+      if(steer) steer.value = String(ang);
+      this.syncCoreTransform();
+      if(!silent) StatusRuntime.push("方向盤角度 " + ang + "°");
     },
     bindControls: function(){
       const steer = $("steer-input-val");
@@ -505,36 +832,9 @@
           MirrorRuntime.applySteer(event.target.value, true);
         });
       }
-      this.bindDriveWheel();
       this.bindJoystick();
       this.bindMovePad();
       this.patchAppCoord();
-    },
-    bindDriveWheel: function(){
-      if(window.app && typeof window.app.bindWheel === "function"){
-        window.app.bindWheel();
-        return;
-      }
-      const wheel = $("wheel");
-      if(!wheel) return;
-      const getAngle = function(clientX, clientY){
-        const rect = wheel.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        let deg = Math.atan2(clientY - cy, clientX - cx) * 180 / Math.PI + 90;
-        if(deg > 180) deg -= 360;
-        return Math.max(-180, Math.min(180, deg));
-      };
-      let dragging = false;
-      const onDown = function(x, y){ dragging = true; MirrorRuntime.applySteer(getAngle(x, y), true); };
-      const onMove = function(x, y){ if(dragging) MirrorRuntime.applySteer(getAngle(x, y), true); };
-      const onUp = function(){ dragging = false; };
-      Events.bindOnce(wheel, "mousedown", function(e){ e.preventDefault(); onDown(e.clientX, e.clientY); });
-      Events.bindOnce(wheel, "touchstart", function(e){ e.preventDefault(); const t = e.touches[0]; onDown(t.clientX, t.clientY); }, { passive: false });
-      window.addEventListener("mousemove", function(e){ onMove(e.clientX, e.clientY); });
-      window.addEventListener("mouseup", onUp);
-      window.addEventListener("touchmove", function(e){ const t = e.touches[0]; if(t) onMove(t.clientX, t.clientY); }, { passive: true });
-      window.addEventListener("touchend", onUp, { passive: true });
     },
     bindJoystick: function(){
       const base = $("move-joystick-base");
@@ -549,8 +849,7 @@
       const applyMove = function(dx, dy){
         self.move.x = Math.round(dx);
         self.move.y = Math.round(dy);
-        const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
-        target.style.transform = "translate(" + self.move.x + "px," + self.move.y + "px) rotate(" + rotate + "deg)";
+        self.syncCoreTransform();
         const status = $("k12345-move-status") || $("k12345-slider-status");
         setNodeText(status, "X " + self.move.x + " / Y " + self.move.y + " / Z " + self.move.z + "%");
       };
@@ -605,9 +904,7 @@
           const dy = Number(parts[1] || 0);
           MirrorRuntime.move.x += dx;
           MirrorRuntime.move.y += dy;
-          const target = $("core-window") || $("fairy-img");
-          const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
-          if(target) target.style.transform = "translate(" + MirrorRuntime.move.x + "px," + MirrorRuntime.move.y + "px) rotate(" + rotate + "deg)";
+          MirrorRuntime.syncCoreTransform();
           setNodeText($("k12345-move-status"), "X " + MirrorRuntime.move.x + " / Y " + MirrorRuntime.move.y + " / Z " + MirrorRuntime.move.z + "%");
         });
       });
@@ -631,38 +928,95 @@
         else StatusRuntime.push("方向盤角度 " + ang + "°（未達多/空閾值）");
       };
     },
-    apply: function(mode){
+    apply: async function(mode){
       this.mode = mode || "heart";
       const image = $("fairy-img");
       const video = $("cam-view");
       const app = window.app || {};
-      try{
-        if(app.stream) app.stream.getTracks().forEach(function(track){ track.stop(); });
-        app.stream = null;
-        app.isCam = false;
-        app.camMode = null;
-        app.kgenCamBusy = false;
-      }catch(_){ }
-      if(video){
-        video.srcObject = null;
-        video.style.opacity = "0";
+      const self = this;
+
+      const stopCamera = function(){
+        try{
+          if(app.stream) app.stream.getTracks().forEach(function(track){ track.stop(); });
+          app.stream = null;
+          app.isCam = false;
+          app.camMode = null;
+          app.kgenCamBusy = false;
+        }catch(_){ }
+        if(video){
+          video.srcObject = null;
+          video.style.opacity = "0";
+        }
+        if(image) image.style.opacity = "1";
+        document.body.classList.remove("kgen-camera-on", "kgen-camera-front", "kgen-camera-back");
+      };
+
+      const startCamera = async function(facing){
+        if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+          StatusRuntime.push("瀏覽器不支援鏡頭，改顯示靜態圖");
+          if(image) image.style.opacity = "1";
+          if(video) video.style.opacity = "0";
+          return false;
+        }
+        try{
+          if(app.stream) app.stream.getTracks().forEach(function(track){ track.stop(); });
+          app.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: false });
+          if(video){
+            video.srcObject = app.stream;
+            video.style.opacity = "1";
+            video.style.transform = facing === "user" ? "scaleX(-1)" : "scaleX(1)";
+          }
+          if(image) image.style.opacity = "0";
+          app.isCam = true;
+          app.camMode = facing;
+          document.body.classList.add("kgen-camera-on");
+          document.body.classList.toggle("kgen-camera-front", facing === "user");
+          document.body.classList.toggle("kgen-camera-back", facing === "environment");
+          return true;
+        }catch(error){
+          StatusRuntime.push("鏡頭未授權：" + asErrorMessage(error) + "（改顯示靜態圖）");
+          if(image) image.style.opacity = "1";
+          if(video) video.style.opacity = "0";
+          return false;
+        }
+      };
+
+      document.body.classList.remove("kgen-mirror-front", "kgen-mirror-back");
+
+      if(this.mode === "front"){
+        if(image) image.src = ASSETS.front;
+        document.body.classList.add("kgen-mirror-front");
+        await startCamera("user");
+        this.applySteer(45, true);
+        setNodeText($("cp-deg-num"), "45°｜多方");
+        setNodeText($("cp-side"), "方向：多方｜前鏡");
+        setNodeText($("kc-dir"), "方向盤 → 多方K");
+        setNodeText($("wish-label"), "悟空心臟｜前鏡多方");
+        StatusRuntime.push("前鏡多方：前鏡頭已開啟｜bull-front｜角度 45°");
+      }else if(this.mode === "back"){
+        if(image) image.src = ASSETS.back;
+        document.body.classList.add("kgen-mirror-back");
+        await startCamera("environment");
+        this.applySteer(135, true);
+        setNodeText($("cp-deg-num"), "135°｜空方");
+        setNodeText($("cp-side"), "方向：空方｜後鏡");
+        setNodeText($("kc-dir"), "方向盤 → 空方K");
+        setNodeText($("wish-label"), "悟空心臟｜後鏡空方");
+        StatusRuntime.push("後鏡空方：後鏡頭已開啟｜bear-rear｜角度 135°");
+      }else{
+        stopCamera();
+        if(image){
+          image.src = ASSETS.heart;
+          image.style.opacity = "1";
+          image.style.visibility = "visible";
+        }
+        setNodeText($("cp-deg-num"), "待部署");
+        setNodeText($("cp-side"), "循環：Heart ↔ Brain");
+        setNodeText($("kc-dir"), "方向盤 → --方K");
+        setNodeText($("wish-label"), "悟空心臟，財氣覺醒");
+        StatusRuntime.push("已恢復心臟核心圖｜鏡頭已關閉");
       }
-      if(image){
-        image.src = this.mode === "front" ? ASSETS.front : this.mode === "back" ? ASSETS.back : ASSETS.heart;
-        image.style.opacity = "1";
-        image.style.visibility = "visible";
-      }
-      document.body.classList.remove("kgen-camera-on", "kgen-camera-front", "kgen-camera-back");
-      document.body.classList.toggle("kgen-mirror-front", this.mode === "front");
-      document.body.classList.toggle("kgen-mirror-back", this.mode === "back");
-      if(this.mode !== "heart"){
-        this.applySteer(this.mode === "front" ? 45 : 135, true);
-      }
-      setNodeText($("cp-deg-num"), this.mode === "front" ? "45°｜多方" : this.mode === "back" ? "135°｜空方" : "待部署");
-      setNodeText($("cp-side"), this.mode === "front" ? "方向：多方" : this.mode === "back" ? "方向：空方" : "循環：Heart ↔ Brain");
-      setNodeText($("kc-dir"), this.mode === "front" ? "方向盤 → 多方K" : this.mode === "back" ? "方向盤 → 空方K" : "方向盤 → --方K");
-      setNodeText($("wish-label"), this.mode === "front" ? "悟空心臟｜前鏡多方" : this.mode === "back" ? "悟空心臟｜後鏡空方" : "悟空心臟，財氣覺醒");
-      StatusRuntime.push(this.mode === "front" ? "前鏡多方：已切換 bull-front" : this.mode === "back" ? "後鏡空方：已切換 bear-rear" : "已恢復心臟核心圖");
+      self.syncCoreTransform();
     },
     toggleFront: function(){
       this.apply(this.mode === "front" ? "heart" : "front");
@@ -1066,11 +1420,59 @@
       return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
     },
     updateWalletDom: function(){
-      setNodeText($("kh-wallet"), this.state.address ? short(this.state.address) + "｜" + this.state.address : "未連線");
+      const waiting = "等待鏈上資料";
+      const hasAddr = !!this.state.address;
+      setNodeText($("kh-wallet"), hasAddr ? short(this.state.address) + "｜" + this.state.address : "未連線");
       setNodeText($("kh-chain"), String(this.state.chainId || "").toLowerCase() === String(CHAIN.BSC).toLowerCase() ? "BSC 56" : this.state.chainId || "BSC 56");
-      if(this.state.heartBal != null) setNodeText($("kh-heart-bal"), this.formatToken(this.state.heartBal));
-      if(this.state.address && this.state.kgenBal != null) setNodeText($("kh-kgen-bal"), this.formatToken(this.state.kgenBal));
-      else if(!this.state.address) setNodeText($("kh-kgen-bal"), "--");
+
+      if(this.state.heartBal != null){
+        const heartText = this.formatToken(this.state.heartBal);
+        setNodeText($("kh-heart-bal"), heartText);
+        setNodeText($("w3-bal"), heartText);
+      }else{
+        setNodeText($("kh-heart-bal"), waiting);
+        setNodeText($("w3-bal"), waiting);
+      }
+
+      if(hasAddr && this.state.kgenBal != null){
+        const kgenText = this.formatToken(this.state.kgenBal);
+        setNodeText($("kh-kgen-bal"), kgenText);
+        setNodeText($("rb-kgen-txt"), kgenText);
+        if(hasEthers5()){
+          const kNum = Number(ethers.utils.formatUnits(this.state.kgenBal, this.state.tokenDecimals || 18));
+          const kFill = $("rb-kgen-fill");
+          if(kFill) kFill.style.width = Math.min(100, Math.max(4, kNum / 1000 * 100)) + "%";
+        }
+      }else{
+        setNodeText($("kh-kgen-bal"), hasAddr ? waiting : "--");
+        setNodeText($("rb-kgen-txt"), waiting);
+        const kFill = $("rb-kgen-fill");
+        if(kFill && !kFill.style.width) kFill.style.width = "8%";
+      }
+
+      if(hasAddr && this.state.bnbBal != null && hasEthers5()){
+        const bnbNum = Number(ethers.utils.formatEther(this.state.bnbBal));
+        const bnbText = bnbNum.toFixed(4) + " BNB";
+        setNodeText($("rb-bnb-txt"), bnbText);
+        setNodeText($("userBNB"), bnbText);
+        const bFill = $("rb-bnb-fill");
+        if(bFill) bFill.style.width = Math.min(100, Math.max(4, bnbNum * 100)) + "%";
+      }else{
+        setNodeText($("rb-bnb-txt"), waiting);
+        setNodeText($("userBNB"), hasAddr ? waiting : waiting);
+        const bFill = $("rb-bnb-fill");
+        if(bFill && !bFill.style.width) bFill.style.width = "8%";
+      }
+
+      const prog = $("w3-prog");
+      if(prog){
+        if(!hasAddr) prog.textContent = waiting;
+        else if(this.state.readError) prog.textContent = waiting;
+        else if(this.state.allowance != null && hasEthers5()){
+          const allowNum = Number(ethers.utils.formatUnits(this.state.allowance, this.state.tokenDecimals || 18)).toFixed(2);
+          prog.textContent = "Allowance " + allowNum + " KGEN｜BNB gas 已同步";
+        }else prog.textContent = "Heart 血庫已同步";
+      }
     },
     refreshChainData: async function(verbose){
       if(this.readPromise) return this.readPromise;
@@ -1295,6 +1697,12 @@
       this.updateHeartbeatStatus();
       this.updateIgniteStatus();
       this.updateFortuneStatus();
+      this.updateWishOnchainStatus();
+    },
+    updateWishOnchainStatus: function(){
+      const status = $("kh-wish-onchain-status");
+      if(!status) return;
+      status.textContent = "許願原文是否上鏈：只有 hash｜合約 makeWish(bytes32) 不收 KGEN、不需 approve｜鏈上事件 WishMade(user,wishHash)｜BscScan → Contract → Events → WishMade 可查 wishHash；原文請本地保存或上 IPFS";
     },
     sendHeart: async function(label, runner){
       try{
@@ -1383,7 +1791,6 @@
     inited: false,
     slots: [
       { key: "fortune", label: "發財金", getter: function(){ return HeartRuntime.getFortuneAmount(); } },
-      { key: "wish", label: "許願", getter: function(){ return HeartRuntime.getWishAmount(); } },
       { key: "vow", label: "還願", getter: function(){ return HeartRuntime.getVowAmount(); } },
       { key: "lamp", label: "點燈", getter: function(){ return HeartRuntime.getLampDays(); } }
     ],
@@ -1438,7 +1845,6 @@
       const rows = ["Allowance 目前：" + currentText + " KGEN", ""];
       const fieldMap = {
         fortune: "kh-fortune-amount",
-        wish: "kh-wish-amount",
         vow: "kh-vow-amount",
         lamp: "kh-lamp-days"
       };
@@ -1472,7 +1878,7 @@
     },
     bindFields: function(){
       const self = this;
-      ["kh-fortune-amount", "kh-vow-amount", "kh-lamp-days", "kh-wish-amount", "kh-wish-text", "kh-wish"].forEach(function(id){
+      ["kh-fortune-amount", "kh-vow-amount", "kh-lamp-days", "kh-wish-text", "kh-wish"].forEach(function(id){
         const field = $(id);
         if(!field) return;
         Events.bindOnce(field, "input", function(){
@@ -1580,7 +1986,7 @@
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor){
         mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
-        mmAnchor.textContent = "用 MetaMask 開啟 12345";
+        mmAnchor.textContent = "用 MetaMask 開啟";
       }
       const hint = $("walletHubInAppHint");
       if(hint && this.isSocialInAppBrowser()){
@@ -1628,7 +2034,7 @@
     },
     deepLink: function(kind){
       if(kind === "metamask" && this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「用 MetaMask 開啟 12345」按鈕（勿在此內建瀏覽器直接跳轉）");
+        this.openWalletHub("請按「用 MetaMask 開啟」按鈕（勿在此內建瀏覽器直接跳轉）");
         return false;
       }
       let link = WALLET_BRIDGE.BRIDGE_PAGE;
@@ -1650,7 +2056,7 @@
         return WalletRuntime.connect();
       }
       if(this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「用 MetaMask 開啟 12345」按鈕");
+        this.openWalletHub("請按「用 MetaMask 開啟」按鈕");
         return false;
       }
       StatusRuntime.push("請用 MetaMask App 開啟");
@@ -1997,9 +2403,7 @@
       };
       window.templeAudio = {
         toggleMini: function(){
-          const panel = $("temple-audio-console");
-          if(panel) panel.classList.toggle("kgen-v3-dead");
-          if(window.app && window.app.openMusic) window.app.openMusic();
+          MediaRuntime.toggle();
         },
         playBgm: function(){ if(window.app && window.app.musicPlay) window.app.musicPlay(); },
         stopBgm: function(){ if(window.app && window.app.musicStop) window.app.musicStop(); },
@@ -2096,6 +2500,8 @@
   const modules = {
     StatusRuntime: StatusRuntime,
     HudRuntime: HudRuntime,
+    MediaRuntime: MediaRuntime,
+    KlineRuntime: KlineRuntime,
     CountdownRuntime: CountdownRuntime,
     HolyCupRuntime: HolyCupRuntime,
     HeartRuntime: HeartRuntime,
@@ -2120,6 +2526,8 @@
       LayoutRuntime.init();
       LegacyBridgeRuntime.init();
       HudRuntime.init();
+      MediaRuntime.init();
+      KlineRuntime.init();
       CountdownRuntime.init();
       HolyCupRuntime.init();
       MirrorRuntime.init();
@@ -2133,7 +2541,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.4 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.5 ready");
       return this;
     }
   };

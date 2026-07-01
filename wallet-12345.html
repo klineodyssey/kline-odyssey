@@ -30,7 +30,16 @@
       if(navigator.clipboard){ navigator.clipboard.writeText(INDEX_ABS).then(done); }
       else { done(); }
     }
-    function render(){
+    async function requestAccounts(){
+      if(!hasEthereum()) return false;
+      try{
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+    async function render(){
       var hint=document.getElementById('hint');
       var enterBtn=document.getElementById('enterBtn');
       var mmBtn=document.getElementById('mmBtn');
@@ -39,21 +48,23 @@
       if(isSocialInApp()){
         if(social) social.classList.remove('hidden');
         if(hint) hint.textContent='目前在 Facebook/LINE/Instagram 內建瀏覽器。請按下方按鈕用 MetaMask App 開啟，不要在此內建瀏覽器直接連錢包。';
-        if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='用 MetaMask 開啟 12345'; }
+        if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='用 MetaMask 開啟'; }
         return;
       }
       if(hasEthereum()){
-        if(hint) hint.textContent='已偵測到 MetaMask 內建瀏覽器。即將進入 12345 悟空財神殿…';
+        if(hint) hint.textContent='已偵測到 MetaMask 內建瀏覽器，正在請求 eth_requestAccounts…';
         if(enterBtn) enterBtn.classList.remove('hidden');
         if(noWallet) noWallet.classList.add('hidden');
-        setTimeout(goIndex, 900);
+        var ok = await requestAccounts();
+        if(hint) hint.textContent = ok ? '錢包已請求連線，即將進入 12345 悟空財神殿…' : '請在 MetaMask 確認連線後進入神殿…';
+        setTimeout(goIndex, ok ? 700 : 1400);
         return;
       }
       if(hint) hint.textContent='未偵測到 window.ethereum。請用 MetaMask App 開啟本橋接頁，再進入神殿。';
       if(noWallet) noWallet.classList.remove('hidden');
-      if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='請用 MetaMask App 開啟'; }
+      if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='用 MetaMask 開啟'; }
     }
-    window.addEventListener('DOMContentLoaded', render);
+    window.addEventListener('DOMContentLoaded', function(){ render(); });
   </script>
 </head>
 <body>
@@ -64,7 +75,7 @@
     <div id="socialBlock" class="hidden hint">目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。</div>
     <a class="hidden" href="#" id="enterBtn" onclick="goIndex();return false;">進入 12345 悟空財神殿</a>
     <div id="noWallet">
-      <a class="mm" id="mmBtn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html">用 MetaMask 開啟 12345</a>
+      <a class="mm" id="mmBtn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html">用 MetaMask 開啟</a>
     </div>
     <a href="#" onclick="goIndex();return false;">手動進入神殿</a>
     <button class="sub" id="copyBtn" onclick="copyIndex()">複製神殿網址</button>
