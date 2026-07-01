@@ -32,8 +32,8 @@
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"),
     BITGET_DEEPLINK: "bitget://openDapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html")
@@ -2399,7 +2399,12 @@
         "kh-approve-current": function(){ return WalletRuntime.approveCurrent(); },
         "kh-approve-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
-        "kh-switch": function(){ WalletRuntime.switchWallet(); },
+        "kh-switch": function(){
+          if(window.web3 && typeof window.web3.switchWallet === "function"){
+            return window.web3.switchWallet();
+          }
+          return WalletRuntime.switchWallet();
+        },
         "kh-download": function(){ WalletRuntime.downloadBookmark(); },
         "kh-metamask-open": function(){
           if(window.web3 && typeof window.web3.deepLink === "function"){
@@ -2650,6 +2655,11 @@
       if(ethereum){
         StatusRuntime.push("準備連結錢包 / 切 BSC，請在錢包視窗確認");
         try{
+          if(window.web3 && typeof window.web3.connect === "function"){
+            await window.web3.connect();
+            WalletRuntime.closeWalletHub();
+            return true;
+          }
           await ethereum.request({ method: "eth_requestAccounts" });
           if(window.web3 && typeof window.web3.ensureBSC === "function"){
             const onBsc = await window.web3.ensureBSC();
@@ -2682,13 +2692,11 @@
           return false;
         }
       }
-      if(this.isSocialInAppBrowser()){
-        this.openWalletHub("Facebook/LINE 內建瀏覽器：請用 MetaMask App 開啟");
-        return false;
-      }
-      if(this.isMobileBrowser()){
-        this.openWalletHub("手機瀏覽器未偵測到錢包：請用 MetaMask App 開啟");
-        return false;
+      if(this.isSocialInAppBrowser() || this.isMobileBrowser() || !HeartRuntime.hasInjectedWallet()){
+        if(window.web3 && typeof window.web3.deepLink === "function"){
+          StatusRuntime.push("正在用 MetaMask 開啟 12345 神殿");
+          return window.web3.deepLink("metamask");
+        }
       }
       this.openWalletHub("桌機未偵測到錢包：請安裝 MetaMask");
       return false;
@@ -2716,16 +2724,42 @@
       StatusRuntime.push("無限授權：準備中…");
       return ApproveRuntime.approveUnlimited();
     },
-    switchWallet: function(){
-      if(HeartRuntime.hasInjectedWallet()){
-        this.openWalletHub("已開啟多錢包 / 切換錢包入口");
-        return;
+    switchWallet: async function(){
+      if(window.web3 && typeof window.web3.switchWallet === "function"){
+        return window.web3.switchWallet();
       }
-      if(this.isMobileBrowser()){
-        this.openWalletHub("請用 MetaMask App 開啟");
-        return;
+      const eth = HeartRuntime.getEthereum();
+      if(!eth){
+        if(window.web3 && typeof window.web3.deepLink === "function"){
+          return window.web3.deepLink("metamask");
+        }
+        StatusRuntime.push("請用 MetaMask App 開啟 12345 神殿");
+        return false;
       }
-      this.openWalletHub("桌機未偵測到錢包：請安裝 MetaMask");
+      try{
+        try{
+          await eth.request({
+            method: "wallet_requestPermissions",
+            params: [{ eth_accounts: {} }]
+          });
+        }catch(_){
+          StatusRuntime.push("請在 MetaMask 右上角帳號切換");
+          return false;
+        }
+        await eth.request({ method: "eth_requestAccounts" });
+        if(window.web3 && typeof window.web3.connect === "function"){
+          await window.web3.connect();
+        }else{
+          await HeartRuntime.ensureConnected();
+        }
+        HeartRuntime.syncFromWeb3();
+        await HeartRuntime.refreshChainData(true);
+        StatusRuntime.push("已切換錢包帳號");
+        return true;
+      }catch(error){
+        StatusRuntime.push("切換錢包失敗：" + asErrorMessage(error));
+        return false;
+      }
     },
     downloadBookmark: function(){
       return this.copyOfficialUrl().then(function(){

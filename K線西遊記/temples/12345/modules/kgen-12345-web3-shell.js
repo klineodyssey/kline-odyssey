@@ -12,8 +12,8 @@ const web3 = {
   ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
-  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask",
+  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -263,13 +263,30 @@ async autoDetect(){
       if(window.ethereum || window.BinanceChain){
         return await this.connect();
       }
-      this.openWalletHub();
-      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
-      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
-      return;
+      try{ this.toast && this.toast('正在用 MetaMask 開啟 12345 神殿'); }catch(_){}
+      try{ app && app.speak && app.speak('正在用 MetaMask 開啟 12345 神殿'); }catch(_){}
+      try{
+        if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push('正在用 MetaMask 開啟 12345 神殿');
+      }catch(_){}
+      return this.deepLink('metamask');
     }catch(e){
       console.warn('smartConnect failed', e);
-      try{ this.openWalletHub(); }catch(_){}
+      try{ this.deepLink('metamask'); }catch(_){}
+    }
+  },
+
+  async _syncRuntimeAfterConnect(){
+    try{
+      const core = window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules;
+      if(core && core.HeartRuntime){
+        core.HeartRuntime.syncFromWeb3();
+        await core.HeartRuntime.refreshChainData(true);
+      }
+      if(window.KGEN_STATUS_BUS && this.addr){
+        window.KGEN_STATUS_BUS.push('錢包已連線：' + this.addr);
+      }
+    }catch(e){
+      console.warn('_syncRuntimeAfterConnect failed', e);
     }
   },
 
@@ -278,11 +295,10 @@ async autoDetect(){
     try{
       this.stopPolling();
       if(!window.ethereum){
-        this.openWalletHub();
-        this.demo = true;
-        this.ui();
-        if(app && app.speak) app.speak("未偵測到錢包，已開啟多錢包入口。");
-        return;
+        try{
+          if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push('正在用 MetaMask 開啟 12345 神殿');
+        }catch(_){}
+        return this.deepLink('metamask');
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
       const okChain = await this.ensureBSC();
@@ -308,12 +324,58 @@ this.ui();
       await this.refreshTreasury(); }catch(_){ }
 await this.bindEvents();
       this.startPolling();
+      await this._syncRuntimeAfterConnect();
       app.speak("錢包已連線。五指山誓約引擎已啟動。");
     }catch(e){
       console.error(e);
       this.demo = true;
       this.ui();
       alert("錢包連線失敗，已切回 Demo 模式");
+    }
+  },
+
+  async switchWallet(){
+    const eth = window.ethereum || window.BinanceChain;
+    if(!eth){
+      return this.deepLink('metamask');
+    }
+    try{
+      let permOk = false;
+      try{
+        await eth.request({
+          method: "wallet_requestPermissions",
+          params: [{ eth_accounts: {} }]
+        });
+        permOk = true;
+      }catch(permErr){
+        const hint = "請在 MetaMask 右上角帳號切換";
+        try{ this.toast && this.toast(hint); }catch(_){}
+        try{ if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push(hint); }catch(_){}
+        try{ app && app.speak && app.speak(hint); }catch(_){}
+        return;
+      }
+      await eth.request({ method: "eth_requestAccounts" });
+      const accts = await eth.request({ method: "eth_accounts" });
+      if(accts && accts.length) this.addr = accts[0];
+      await this.ensureBSC();
+      this.provider = new ethers.providers.Web3Provider(eth);
+      this.signer = this.provider.getSigner();
+      this.addr = await this.signer.getAddress();
+      const wa=document.getElementById('w3-addr'); if(wa) wa.innerText = this.addr;
+      this.demo = false;
+      this.ui();
+      await this.refreshUser();
+      await this.refresh();
+      await this._syncRuntimeAfterConnect();
+      const done = "已切換錢包帳號";
+      try{ this.toast && this.toast(done); }catch(_){}
+      try{ if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push(done); }catch(_){}
+      if(permOk){ try{ app && app.speak && app.speak(done); }catch(_){ } }
+    }catch(e){
+      console.warn('switchWallet failed', e);
+      const fail = "切換錢包失敗，請在 MetaMask 右上角帳號切換";
+      try{ this.toast && this.toast(fail); }catch(_){}
+      try{ if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push(fail); }catch(_){}
     }
   },
 
@@ -563,7 +625,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     openWalletHub(){
       const hub = document.getElementById('walletHub');
       const inp = document.getElementById('walletHubUrl');
-      if(inp) inp.value = location.href;
+      if(inp) inp.value = this.OFFICIAL_DAPP || location.href;
       if(hub){ hub.style.display='flex'; }
     },
     closeWalletHub(){
@@ -587,13 +649,17 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       window.location.href = link;
     },
     async copyDappUrl(){
-      const url = location.href;
+      const url = this.OFFICIAL_DAPP || location.href;
       try{
         await navigator.clipboard.writeText(url);
-        this.toast && this.toast('已複製連結');
+        this.toast && this.toast('已複製神殿正式網址');
       }catch(e){
         const inp = document.getElementById('walletHubUrl');
-        if(inp){ inp.focus(); inp.select(); }
+        if(inp){
+          inp.value = url;
+          inp.focus();
+          inp.select();
+        }
       }
     },
     // ===== WalletConnect v2 (Project ID) =====
