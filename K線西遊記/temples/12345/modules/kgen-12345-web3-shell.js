@@ -12,8 +12,8 @@ const web3 = {
   ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html?open=temple",
-  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?open=temple",
+  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -263,15 +263,13 @@ async autoDetect(){
       if(window.ethereum || window.BinanceChain){
         return await this.connect();
       }
-      try{ this.toast && this.toast('正在用 MetaMask 開啟 12345 神殿'); }catch(_){}
-      try{ app && app.speak && app.speak('正在用 MetaMask 開啟 12345 神殿'); }catch(_){}
-      try{
-        if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push('正在用 MetaMask 開啟 12345 神殿');
-      }catch(_){}
-      return this.deepLink('metamask');
+      this.openWalletHub();
+      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
+      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
+      return;
     }catch(e){
       console.warn('smartConnect failed', e);
-      try{ this.deepLink('metamask'); }catch(_){}
+      try{ this.openWalletHub(); }catch(_){}
     }
   },
 
@@ -295,10 +293,11 @@ async autoDetect(){
     try{
       this.stopPolling();
       if(!window.ethereum){
-        try{
-          if(window.KGEN_STATUS_BUS) window.KGEN_STATUS_BUS.push('正在用 MetaMask 開啟 12345 神殿');
-        }catch(_){}
-        return this.deepLink('metamask');
+        this.openWalletHub();
+        this.demo = true;
+        this.ui();
+        app.speak("未偵測到錢包，已開啟多錢包入口。");
+        return;
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
       const okChain = await this.ensureBSC();
@@ -337,7 +336,8 @@ await this.bindEvents();
   async switchWallet(){
     const eth = window.ethereum || window.BinanceChain;
     if(!eth){
-      return this.deepLink('metamask');
+      this.openWalletHub();
+      return;
     }
     try{
       let permOk = false;
@@ -625,7 +625,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     openWalletHub(){
       const hub = document.getElementById('walletHub');
       const inp = document.getElementById('walletHubUrl');
-      if(inp) inp.value = this.BRIDGE_PAGE || this.ROOT_ENTRY || location.href;
+      if(inp) inp.value = location.href;
       if(hub){ hub.style.display='flex'; }
     },
     closeWalletHub(){
@@ -634,32 +634,29 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     },
     deepLink(kind){
       const bridge = this.BRIDGE_PAGE || "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html";
+      const bridgeNoScheme = this.METAMASK_DAPP_PATH || "klineodyssey.github.io/kline-odyssey/wallet-12345.html";
       let link = bridge;
       if(kind==='metamask'){
-        link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + (this.METAMASK_DAPP_PATH || 'klineodyssey.github.io/kline-odyssey/12345.html?open=temple'));
+        link = 'https://metamask.app.link/dapp/' + bridgeNoScheme;
       } else if(kind==='trust'){
         link = 'https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(bridge);
       } else if(kind==='okx'){
         link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(bridge);
       } else if(kind==='bitget'){
-        link = 'bitget://openDapp?url=' + encodeURIComponent(bridge);
+        link = 'https://web3.bitget.com/dapp?url=' + encodeURIComponent(bridge);
       } else if(kind==='binance'){
         link = 'bnc://app.binance.com/cedefi/dapp?url=' + encodeURIComponent(bridge);
       }
       window.location.href = link;
     },
     async copyDappUrl(){
-      const url = this.BRIDGE_PAGE || this.ROOT_ENTRY || this.OFFICIAL_DAPP || location.href;
+      const url = location.href;
       try{
         await navigator.clipboard.writeText(url);
-        this.toast && this.toast('已複製錢包橋接網址');
+        this.toast && this.toast('已複製連結');
       }catch(e){
         const inp = document.getElementById('walletHubUrl');
-        if(inp){
-          inp.value = url;
-          inp.focus();
-          inp.select();
-        }
+        if(inp){ inp.focus(); inp.select(); }
       }
     },
     // ===== WalletConnect v2 (Project ID) =====

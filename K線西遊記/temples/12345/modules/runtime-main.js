@@ -1,8 +1,8 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.2.0 / RECOVERY";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0-RECOVERY";
+  const VERSION = "V2.2.0 / BRIDGE RECOVERY";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0-BRIDGE-RECOVERY";
   const UI_PATCH = "V2.2.0";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
@@ -32,8 +32,8 @@
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html?open=temple",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?open=temple",
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "bitget://openDapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -3116,7 +3116,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 RECOVERY ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 BRIDGE RECOVERY ready");
       return this;
     }
   };
