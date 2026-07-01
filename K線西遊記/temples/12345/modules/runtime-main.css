@@ -1173,7 +1173,7 @@ body.kgen-mirror-back #fairy-img {
   white-space: nowrap !important;
 }
 
-/* V2.0.9：五指山神殿音響面板 — 錨定音響按鈕下方 */
+/* V2.1：五指山神殿音響面板 — 錨定音響按鈕下方，最高 z-index */
 body.kgen-audio-open #music-panel,
 body.k21-audio-open #music-panel,
 body.k20-audio-open #music-panel,
@@ -1184,7 +1184,7 @@ body.k20-audio-open #music-panel.kgen-music-docked {
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  z-index: 60000 !important;
+  z-index: 2147483647 !important;
 }
 
 body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-panel {
@@ -1204,7 +1204,7 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
 
 #music-panel.kgen-music-docked {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
-  z-index: 60000 !important;
+  z-index: 2147483647 !important;
 }
 
 #music-panel .nav-music-ctl,
