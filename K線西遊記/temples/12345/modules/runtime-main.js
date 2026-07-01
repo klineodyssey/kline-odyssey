@@ -2388,22 +2388,29 @@
       if(this.inited) return;
       this.inited = true;
       this.primeWeb3Shell();
-      this.patchWalletHub();
       const bindings = {
-        "kh-connect": function(){ return WalletRuntime.connect(); },
+        "kh-connect": function(){
+          if(window.web3 && typeof window.web3.smartConnect === "function"){
+            return window.web3.smartConnect();
+          }
+          return WalletRuntime.connect();
+        },
         "kh-refresh": function(){ return WalletRuntime.refresh(); },
         "kh-approve-current": function(){ return WalletRuntime.approveCurrent(); },
         "kh-approve-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-switch": function(){ WalletRuntime.switchWallet(); },
         "kh-download": function(){ WalletRuntime.downloadBookmark(); },
-        "kh-metamask-open": function(){ WalletRuntime.openMetaMaskDeepLink(); }
+        "kh-metamask-open": function(){
+          if(window.web3 && typeof window.web3.deepLink === "function"){
+            return window.web3.deepLink("metamask");
+          }
+          return WalletRuntime.openMetaMaskDeepLink();
+        }
       };
       Object.keys(bindings).forEach(function(id){
         WalletRuntime.bindWalletButton(id, bindings[id]);
       });
-      this.bindWalletHubButtons();
-      this.maybeAutoConnectFromBridge();
     },
     walletDeepLink: function(kind){
       const labels = {
@@ -2912,11 +2919,12 @@
         closeTempleModal: function(){ ActionRuntime.toggleHeartPanel(false); },
         toggleHeartPanel: function(open){ ActionRuntime.toggleHeartPanel(open); }
       });
-      window.connectWallet = function(){ return WalletRuntime.connect(); };
-      if(window.web3){
-        window.web3.smartConnect = window.web3.smartConnect || function(){ return WalletRuntime.connect(); };
-        window.web3.connect = window.web3.connect || function(){ return WalletRuntime.connect(); };
-      }
+      window.connectWallet = function(){
+        if(window.web3 && typeof window.web3.smartConnect === "function"){
+          return window.web3.smartConnect();
+        }
+        return WalletRuntime.connect();
+      };
     }
   };
 

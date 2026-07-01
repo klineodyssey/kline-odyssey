@@ -263,11 +263,9 @@ async autoDetect(){
       if(window.ethereum || window.BinanceChain){
         return await this.connect();
       }
-      if(window.KGEN_WALLET_BRIDGE && window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-        return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.connect();
-      }
       this.openWalletHub();
-      try{ this.toast && this.toast("未偵測到注入錢包，已開啟多錢包入口"); }catch(_){}
+      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
+      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
       return;
     }catch(e){
       console.warn('smartConnect failed', e);
@@ -278,9 +276,6 @@ async autoDetect(){
 
   async connect(){
     try{
-      if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-        return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.connect();
-      }
       this.stopPolling();
       if(!window.ethereum){
         this.openWalletHub();
@@ -566,67 +561,39 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
 
     ,
     openWalletHub(){
-      if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-        return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.openWalletHub();
-      }
       const hub = document.getElementById('walletHub');
       const inp = document.getElementById('walletHubUrl');
-      if(inp) inp.value = this.OFFICIAL_DAPP || location.href;
-      if(hub){
-        hub.style.display = 'flex';
-        hub.style.alignItems = 'center';
-        hub.style.justifyContent = 'center';
-      }
+      if(inp) inp.value = location.href;
+      if(hub){ hub.style.display='flex'; }
     },
     closeWalletHub(){
       const hub = document.getElementById('walletHub');
       if(hub){ hub.style.display='none'; }
     },
     deepLink(kind){
-      if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-        return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.deepLink(kind);
-      }
-      const social = /FBAN|FBAV|Facebook|Instagram|Line\//i.test(navigator.userAgent || "");
-      if(kind === "metamask" && social){
-        if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-          return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.openWalletHub("請用 MetaMask App 開啟");
-        }
-        return false;
-      }
-      const dapp = this.BRIDGE_PAGE || this.OFFICIAL_DAPP || location.href;
-      let link = this.BRIDGE_PAGE || dapp;
+      const url = location.href;
+      let link = url;
       if(kind==='metamask'){
-        link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + this.METAMASK_DAPP_PATH);
+        link = 'https://metamask.app.link/dapp/' + location.host + location.pathname + location.search + location.hash;
       } else if(kind==='trust'){
-        link = 'https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(dapp);
+        link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
       } else if(kind==='okx'){
-        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(dapp);
+        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
       } else if(kind==='bitget'){
-        link = 'https://web3.bitget.com/dapp?url=' + encodeURIComponent(dapp);
+        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
       } else if(kind==='binance'){
-        link = 'bnc://app.binance.com/cedefi/dapp?url=' + encodeURIComponent(dapp);
+        link = 'https://www.binance.com/en/download';
       }
-      try{
-        window.location.href = link;
-      }catch(_){
-        window.open(link, '_blank', 'noopener');
-      }
+      window.location.href = link;
     },
     async copyDappUrl(){
-      if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
-        return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.copyOfficialUrl();
-      }
-      const url = this.OFFICIAL_DAPP || location.href;
+      const url = location.href;
       try{
         await navigator.clipboard.writeText(url);
-        this.toast && this.toast('已複製官方神殿網址');
+        this.toast && this.toast('已複製連結');
       }catch(e){
         const inp = document.getElementById('walletHubUrl');
-        if(inp){
-          inp.value = url;
-          inp.focus();
-          inp.select();
-        }
+        if(inp){ inp.focus(); inp.select(); }
       }
     },
     // ===== WalletConnect v2 (Project ID) =====
