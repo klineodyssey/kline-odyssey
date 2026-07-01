@@ -16,20 +16,25 @@
     var TEMPLE_REL='K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html';
     var TEMPLE_WALLET_REL=TEMPLE_REL + '?wallet=metamask';
     var TEMPLE_ABS='https://klineodyssey.github.io/kline-odyssey/' + TEMPLE_REL;
-    function goTemple(useWallet){
-      window.location.replace(useWallet ? TEMPLE_WALLET_REL : TEMPLE_REL);
+    function goTemple(withWallet){
+      window.location.replace(withWallet ? TEMPLE_WALLET_REL : TEMPLE_REL);
     }
     window.addEventListener('DOMContentLoaded', function(){
       var hint=document.getElementById('hint');
       var params=new URLSearchParams(location.search);
+      if(params.get('open') === 'temple'){
+        if(hint) hint.textContent='正在進入 12345 悟空財神殿…';
+        setTimeout(function(){ goTemple(true); }, 200);
+        return;
+      }
       if(params.get('wallet') === 'metamask'){
         if(hint) hint.textContent='MetaMask 入口：即將進入 12345 悟空財神殿…';
-        setTimeout(function(){ goTemple(true); }, 400);
+        setTimeout(function(){ goTemple(true); }, 200);
         return;
       }
       if(window.ethereum && hint){
         hint.textContent='已偵測到錢包瀏覽器，即將進入神殿…';
-        setTimeout(function(){ goTemple(false); }, 500);
+        setTimeout(function(){ goTemple(true); }, 400);
       }else if(hint){
         hint.textContent='正式入口：導向 K線西遊記/temples/12345/index.html';
       }
@@ -42,7 +47,7 @@
     <p>正式神殿：<code>K線西遊記/temples/12345/index.html</code></p>
     <div class="hint" id="hint">載入中…</div>
     <a href="K線西遊記/temples/12345/index.html">立即進入神殿</a>
-    <a class="sub" href="wallet-12345.html">錢包橋接頁 wallet-12345.html</a>
+    <a class="sub" href="wallet-12345.html">錢包橋接頁 wallet-12345.html（備用）</a>
     <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(TEMPLE_ABS);this.textContent='已複製神殿網址';">複製神殿網址</button>
   </div>
 </body>
