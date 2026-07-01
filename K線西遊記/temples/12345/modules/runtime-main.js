@@ -1,9 +1,10 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.7";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.7";
-  const UI_PATCH = "V2.0.7";
+  const VERSION = "V2.0.8";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.8";
+  const UI_PATCH = "V2.0.8";
+  const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
@@ -333,12 +334,18 @@
   const MediaRuntime = {
     inited: false,
     open: false,
+    state: {
+      filesMissing: false,
+      playlistLoaded: false
+    },
     init: function(){
       if(this.inited) return;
       this.inited = true;
       window.KGEN_MEDIA_RUNTIME = this;
       this.patchOpenMusic();
       this.patchMusicPlayback();
+      this.patchMusicLoadBuiltIn();
+      this.patchMusicRenderList();
       this.bindPanelControls();
       window.addEventListener("resize", function(){
         if(MediaRuntime.open) MediaRuntime.positionPanel();
@@ -346,55 +353,140 @@
       try{
         if(window.app && typeof window.app.musicInit === "function") window.app.musicInit();
       }catch(_){ }
+      this.loadDefaultPlaylist();
+    },
+    normalizeTrackUrl: function(url){
+      const raw = String(url || "").trim();
+      if(!raw) return "";
+      if(/^https?:\/\//i.test(raw)) return raw;
+      if(raw.indexOf("./music/") === 0) return raw;
+      if(raw.indexOf("music/") === 0) return "./" + raw;
+      const parts = raw.split("/");
+      const fname = parts[parts.length - 1];
+      return "./music/" + fname;
+    },
+    checkAudioExists: async function(url){
+      try{
+        const head = await fetch(url, { method: "HEAD", cache: "no-store" });
+        if(head.ok) return true;
+        const probe = await fetch(url, { method: "GET", cache: "no-store", headers: { Range: "bytes=0-1" } });
+        return probe.ok;
+      }catch(_){
+        return false;
+      }
+    },
+    loadDefaultPlaylist: async function(){
+      try{
+        const res = await fetch(MUSIC_PLAYLIST_URL, { cache: "no-store" });
+        if(!res.ok) return false;
+        const json = await res.json();
+        const arr = Array.isArray(json) ? json : (Array.isArray(json.tracks) ? json.tracks : []);
+        const tracks = [];
+        for(let i = 0; i < arr.length; i++){
+          const entry = arr[i] || {};
+          const url = this.normalizeTrackUrl(entry.url || entry.file || "");
+          if(!url) continue;
+          const fileOk = await this.checkAudioExists(url);
+          tracks.push({
+            name: entry.name || entry.title || ("曲目 " + (i + 1)),
+            url: url,
+            fileOk: fileOk
+          });
+        }
+        if(!tracks.length) return false;
+        window.app = window.app || {};
+        window.app._music = window.app._music || {};
+        const m = window.app._music;
+        m.list = tracks;
+        m.index = 0;
+        if(!m.audio) m.audio = $("music-audio");
+        this.state.filesMissing = tracks.every(function(t){ return !t.fileOk; });
+        this.state.playlistLoaded = true;
+        if(typeof window.app.musicSetIndex === "function") window.app.musicSetIndex(0);
+        if(typeof window.app.musicRenderList === "function") window.app.musicRenderList();
+        this.updateMusicStatus();
+        if(this.state.filesMissing) StatusRuntime.push("音檔尚未上傳");
+        else StatusRuntime.push("內建歌單已載入：" + tracks.length + " 首");
+        return true;
+      }catch(error){
+        console.warn("[MediaRuntime] playlist", error);
+        return false;
+      }
+    },
+    patchMusicLoadBuiltIn: function(){
+      const self = this;
+      const patch = function(){
+        if(!window.app) return;
+        window.app.musicLoadBuiltIn = function(){
+          return self.loadDefaultPlaylist();
+        };
+        window.app.musicLoadBuiltin = window.app.musicLoadBuiltIn;
+      };
+      patch();
+      if(!window.app) document.addEventListener("DOMContentLoaded", patch, { once: true });
+    },
+    patchMusicRenderList: function(){
+      const patch = function(){
+        if(!window.app || window.app.__kgenMusicRenderPatched) return;
+        window.app.__kgenMusicRenderPatched = true;
+        const legacy = window.app.musicRenderList && window.app.musicRenderList.bind(window.app);
+        if(!legacy) return;
+        window.app.musicRenderList = function(){
+          const result = legacy.apply(window.app, arguments);
+          MediaRuntime.updateMusicStatus();
+          return result;
+        };
+      };
+      patch();
+      if(!window.app) document.addEventListener("DOMContentLoaded", patch, { once: true });
     },
     getAnchorButton: function(){
       return document.querySelector(".nav-btn.nav-music");
     },
     positionPanel: function(){
       const panel = $("music-panel");
-      const anchor = this.getAnchorButton();
-      if(!panel || !anchor) return;
+      if(!panel) return;
       if(panel.parentElement !== document.body) document.body.appendChild(panel);
-      const rect = anchor.getBoundingClientRect();
-      const viewportW = window.innerWidth || document.documentElement.clientWidth || 390;
-      const viewportH = window.innerHeight || document.documentElement.clientHeight || 844;
-      const panelW = Math.min(340, viewportW - 24);
-      const belowTop = rect.bottom + 8;
-      const wouldClip = belowTop + 320 > viewportH - 12;
-      const overlapsNav = rect.right - panelW < 18;
-      const useModal = viewportW <= 520 || wouldClip || overlapsNav;
-      panel.classList.toggle("kgen-music-modal", useModal);
-      panel.classList.toggle("kgen-music-docked", !useModal);
-      if(useModal){
-        panel.style.setProperty("top", "10vh", "important");
-        panel.style.setProperty("left", "50%", "important");
-        panel.style.setProperty("right", "auto", "important");
-        panel.style.setProperty("transform", "translateX(-50%)", "important");
-        panel.style.setProperty("width", "min(340px, calc(100vw - 24px))", "important");
-        panel.style.setProperty("max-height", "72vh", "important");
-      }else{
-        panel.style.setProperty("top", belowTop + "px", "important");
-        panel.style.setProperty("right", Math.max(8, viewportW - rect.right) + "px", "important");
-        panel.style.setProperty("left", "auto", "important");
-        panel.style.setProperty("transform", "none", "important");
-        panel.style.setProperty("width", panelW + "px", "important");
-        panel.style.setProperty("max-height", Math.max(180, viewportH - belowTop - 12) + "px", "important");
-      }
+      panel.classList.add("kgen-music-top");
+      panel.classList.remove("kgen-music-docked");
       panel.style.setProperty("position", "fixed", "important");
-      panel.style.setProperty("z-index", "50000", "important");
+      panel.style.setProperty("top", "max(72px, env(safe-area-inset-top, 0px))", "important");
+      panel.style.setProperty("left", "50%", "important");
+      panel.style.setProperty("right", "auto", "important");
+      panel.style.setProperty("bottom", "auto", "important");
+      panel.style.setProperty("transform", "translateX(-50%)", "important");
+      panel.style.setProperty("width", "min(340px, calc(100vw - 24px))", "important");
+      panel.style.setProperty("max-width", "calc(100vw - 24px)", "important");
+      panel.style.setProperty("max-height", "min(72vh, calc(100vh - 96px))", "important");
+      panel.style.setProperty("z-index", "60000", "important");
       panel.style.setProperty("overflow-y", "auto", "important");
       panel.style.setProperty("pointer-events", "auto", "important");
     },
     updateMusicStatus: function(){
-      const audio = $("music-audio");
+      const m = window.app && window.app._music;
+      const list = m && m.list ? m.list : [];
+      const idx = m && m.index != null ? m.index : 0;
+      const track = list[idx];
       const name = $("music-name");
       const status = $("music-status");
-      const hasList = !!(window.app && window.app._music && window.app._music.list && window.app._music.list.length);
-      const hasSrc = !!(audio && audio.getAttribute("src"));
-      const empty = !hasList && !hasSrc;
-      if(name && empty) name.textContent = "尚未載入音樂";
-      if(status && empty) status.textContent = "尚未載入音樂";
-      else if(status && !empty) status.textContent = hasList ? "歌單已載入" : "音檔已載入";
+      const now = $("music-now");
+      const playBtn = $("music-play-btn");
+      if(!list.length){
+        if(name) name.textContent = "尚未載入音樂";
+        if(status) status.textContent = "尚未載入清單";
+        if(now) now.textContent = "（未選曲）";
+        if(playBtn){ playBtn.textContent = "等待音檔"; playBtn.disabled = true; }
+        return;
+      }
+      const currentMissing = !track || track.fileOk === false;
+      const allMissing = this.state.filesMissing || list.every(function(t){ return t.fileOk === false; });
+      if(status) status.textContent = allMissing ? "示範歌單，尚未放入 MP3" : ("已載入：" + list.length + " 首");
+      if(now && track) now.textContent = "目前歌曲：" + track.name;
+      if(name && track) name.textContent = track.name;
+      if(playBtn){
+        playBtn.textContent = (allMissing || currentMissing) ? "等待音檔" : "播放";
+        playBtn.disabled = !!(allMissing || currentMissing);
+      }
     },
     setOpen: function(open, silent){
       const panel = $("music-panel");
@@ -450,6 +542,14 @@
         window.app.musicPlay = function(){
           try{
             const audio = window.app._music && window.app._music.audio;
+            const list = window.app._music && window.app._music.list;
+            const idx = window.app._music && window.app._music.index != null ? window.app._music.index : 0;
+            const track = list && list[idx];
+            if(MediaRuntime.state.filesMissing || (track && track.fileOk === false)){
+              StatusRuntime.push("音檔尚未上傳");
+              MediaRuntime.updateMusicStatus();
+              return;
+            }
             if(!audio || !audio.src){
               StatusRuntime.push("尚未載入音樂");
               return legacyPlay();
@@ -457,7 +557,8 @@
             const promise = audio.play();
             if(promise && typeof promise.then === "function"){
               promise.then(function(){
-                StatusRuntime.push("音效播放中");
+                StatusRuntime.push("播放中｜" + (track ? track.name : ""));
+                MediaRuntime.updateMusicStatus();
               }).catch(function(){
                 StatusRuntime.push("請手動播放音效（瀏覽器封鎖自動播放）");
               });
@@ -516,12 +617,22 @@
           const app = window.app;
           if(!app) return;
           if(index === 5 && typeof app.musicLoadBuiltIn === "function"){
-            try{ app.musicLoadBuiltIn(true); MediaRuntime.updateMusicStatus(); StatusRuntime.push("內建歌單載入中"); }catch(_){ }
+            try{
+              app.musicLoadBuiltIn(true).then(function(){
+                MediaRuntime.updateMusicStatus();
+                StatusRuntime.push("內建歌單已重新載入");
+              });
+            }catch(_){ }
             return;
           }
           const fnName = musicActions[index] ? musicActions[index][1] : null;
           if(fnName && typeof app[fnName] === "function"){
-            try{ app[fnName](); }catch(_){ }
+            try{
+              app[fnName]();
+              if(fnName === "musicPrev" || fnName === "musicNext" || fnName === "musicPause" || fnName === "musicStop"){
+                setTimeout(function(){ MediaRuntime.updateMusicStatus(); }, 80);
+              }
+            }catch(_){ }
           }
         }, true);
       });
@@ -2241,15 +2352,11 @@
     },
     maybeAutoConnectFromBridge: function(){
       try{
-        if(!HeartRuntime.getEthereum()) return;
         const params = new URLSearchParams(location.search);
-        const fromBridge = params.get("bridge") === "1";
-        const fromReferrer = /wallet-12345\.html/i.test(document.referrer || "");
-        if(!fromBridge && !fromReferrer && !this.isMobileBrowser()) return;
-        StatusRuntime.push("錢包瀏覽器已就緒，準備 eth_requestAccounts");
-        setTimeout(function(){
-          WalletRuntime.connect();
-        }, fromBridge ? 600 : 1000);
+        if(params.get("bridge") !== "1") return;
+        if(HeartRuntime.getEthereum()){
+          StatusRuntime.push("偵測到錢包瀏覽器，請點連結錢包");
+        }
       }catch(_){ }
     },
     isMobileBrowser: function(){
@@ -2290,7 +2397,7 @@
           window.web3.METAMASK_DAPP_PATH = WALLET_BRIDGE.METAMASK_DAPP_PATH;
           window.web3.openWalletHub = this.openWalletHub.bind(this);
           window.web3.deepLink = this.deepLink.bind(this);
-          window.web3.copyDappUrl = this.copyOfficialUrl.bind(this);
+          window.web3.copyDappUrl = this.copyBridgeUrl.bind(this);
         }
       }catch(_){ }
     },
@@ -2818,7 +2925,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.7 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.8 ready");
       return this;
     }
   };

@@ -1173,17 +1173,20 @@ body.kgen-mirror-back #fairy-img {
   white-space: nowrap !important;
 }
 
-/* V2.0.7：五指山神殿音響面板 — 按鈕下方 / 浮層 modal */
+/* V2.0.8：五指山神殿音響面板 — 固定畫面上方中央 */
 body.kgen-audio-open #music-panel,
 body.k21-audio-open #music-panel,
 body.k20-audio-open #music-panel,
 body.kgen-audio-open #music-panel.kgen-music-docked,
-body.kgen-audio-open #music-panel.kgen-music-modal {
+body.kgen-audio-open #music-panel.kgen-music-modal,
+body.kgen-audio-open #music-panel.kgen-music-top,
+body.k21-audio-open #music-panel.kgen-music-top,
+body.k20-audio-open #music-panel.kgen-music-top {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  z-index: 50000 !important;
+  z-index: 60000 !important;
 }
 
 body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-panel {
@@ -1203,6 +1206,21 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
 
 #music-panel.kgen-music-docked {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+#music-panel.kgen-music-top {
+  position: fixed !important;
+  top: max(72px, env(safe-area-inset-top, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  width: min(340px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(72vh, calc(100vh - 96px)) !important;
+  overflow-y: auto !important;
+  z-index: 60000 !important;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.65);
 }
 
 #music-panel .nav-music-ctl,
