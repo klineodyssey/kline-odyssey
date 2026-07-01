@@ -1172,3 +1172,23 @@ body.kgen-mirror-back #fairy-img {
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
+
+/* V2.0.6：五指山神殿音響面板 — 覆蓋 legacy k21-audio 隱藏規則 */
+body.kgen-audio-open #music-panel,
+body.k21-audio-open #music-panel,
+body.k20-audio-open #music-panel {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 220 !important;
+}
+
+body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-panel {
+  display: none !important;
+}
+
+.nav-btn.nav-music.kgen-music-active {
+  box-shadow: 0 0 18px rgba(58, 214, 255, 0.45);
+  border-color: #7ff3ff;
+}

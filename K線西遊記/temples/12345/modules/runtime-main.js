@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.5";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.5";
-  const UI_PATCH = "V2.0.5";
+  const VERSION = "V2.0.6";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.6";
+  const UI_PATCH = "V2.0.6";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
@@ -27,7 +27,9 @@
     "KGEN_12345_V908_CUP_COUNT"
   ];
   const WALLET_BRIDGE = {
+    ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+    TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html"
@@ -333,6 +335,7 @@
       this.inited = true;
       window.KGEN_MEDIA_RUNTIME = this;
       this.patchOpenMusic();
+      this.patchMusicPlayback();
       this.bindPanelControls();
       try{
         if(window.app && typeof window.app.musicInit === "function") window.app.musicInit();
@@ -342,8 +345,15 @@
       const panel = $("music-panel");
       if(!panel) return;
       this.open = !!open;
-      panel.style.display = this.open ? "block" : "none";
+      document.body.classList.toggle("k21-audio-open", this.open);
+      document.body.classList.toggle("k20-audio-open", this.open);
       document.body.classList.toggle("kgen-audio-open", this.open);
+      panel.setAttribute("aria-hidden", this.open ? "false" : "true");
+      panel.style.setProperty("display", this.open ? "block" : "none", "important");
+      qa(".nav-btn.nav-music").forEach(function(button){
+        button.classList.toggle("kgen-music-active", MediaRuntime.open);
+        button.setAttribute("aria-expanded", MediaRuntime.open ? "true" : "false");
+      });
       if(!silent) StatusRuntime.push(this.open ? "音響面板已展開" : "音響面板已收合");
     },
     toggle: function(force){
@@ -370,6 +380,40 @@
         document.addEventListener("DOMContentLoaded", patch, { once: true });
       }
     },
+    patchMusicPlayback: function(){
+      const patch = function(){
+        if(!window.app || window.app.__kgenMusicPlayPatched) return;
+        window.app.__kgenMusicPlayPatched = true;
+        const legacyPlay = window.app.musicPlay && window.app.musicPlay.bind(window.app);
+        if(!legacyPlay) return;
+        window.app.musicPlay = function(){
+          try{
+            const audio = window.app._music && window.app._music.audio;
+            if(!audio || !audio.src){
+              StatusRuntime.push("請先載入音檔");
+              return legacyPlay();
+            }
+            const promise = audio.play();
+            if(promise && typeof promise.then === "function"){
+              promise.then(function(){
+                StatusRuntime.push("音效播放中");
+              }).catch(function(){
+                StatusRuntime.push("請手動播放音效（瀏覽器封鎖自動播放）");
+              });
+              return promise;
+            }
+            return legacyPlay();
+          }catch(_){
+            StatusRuntime.push("請手動播放音效");
+            return legacyPlay();
+          }
+        };
+      };
+      patch();
+      if(!window.app){
+        document.addEventListener("DOMContentLoaded", patch, { once: true });
+      }
+    },
     bindPanelControls: function(){
       qa(".nav-btn.nav-music").forEach(function(button){
         button.onclick = null;
@@ -378,9 +422,21 @@
         Events.bindOnce(button, "click", function(event){
           event.preventDefault();
           event.stopPropagation();
+          event.stopImmediatePropagation();
           MediaRuntime.toggle();
         }, true);
       });
+      const closeBtn = $("music-panel") && $("music-panel").querySelector(".tiny-btn");
+      if(closeBtn){
+        closeBtn.onclick = null;
+        closeBtn.removeAttribute("onclick");
+        delete closeBtn.dataset.kgenBound;
+        Events.bindOnce(closeBtn, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          MediaRuntime.setOpen(false, false);
+        }, true);
+      }
     }
   };
 
@@ -1970,6 +2026,18 @@
       Object.keys(bindings).forEach(function(id){
         WalletRuntime.bindWalletButton(id, bindings[id]);
       });
+      this.maybeAutoConnectFromBridge();
+    },
+    maybeAutoConnectFromBridge: function(){
+      try{
+        const params = new URLSearchParams(location.search);
+        if(params.get("bridge") !== "1") return;
+        if(!HeartRuntime.getEthereum()) return;
+        StatusRuntime.push("錢包橋接：準備自動連線");
+        setTimeout(function(){
+          WalletRuntime.connect();
+        }, 700);
+      }catch(_){ }
     },
     isMobileBrowser: function(){
       return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
@@ -2541,7 +2609,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.5 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.6 ready");
       return this;
     }
   };
