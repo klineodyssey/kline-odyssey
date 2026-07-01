@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.8A";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.8A";
-  const UI_PATCH = "V2.0.8A";
+  const VERSION = "V2.0.9";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.9";
+  const UI_PATCH = "V2.0.9";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -36,7 +36,8 @@
     METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
-    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html")
+    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html")
   };
 
   const HEART_VIEW_ABI = [
@@ -555,19 +556,31 @@
     },
     positionPanel: function(){
       const panel = $("music-panel");
-      if(!panel) return;
+      const anchor = this.getAnchorButton();
+      if(!panel || !anchor) return;
       if(panel.parentElement !== document.body) document.body.appendChild(panel);
-      panel.classList.add("kgen-music-top");
-      panel.classList.remove("kgen-music-docked");
+      const rect = anchor.getBoundingClientRect();
+      const viewportW = window.innerWidth || document.documentElement.clientWidth || 390;
+      const viewportH = window.innerHeight || document.documentElement.clientHeight || 844;
+      const panelW = Math.min(340, viewportW - 24);
+      const belowTop = Math.max(8, rect.bottom + 8);
+      const maxH = Math.max(160, viewportH - belowTop - 12);
+      let right = Math.max(8, viewportW - rect.right);
+      const leftEdge = viewportW - right - panelW;
+      if(leftEdge < 8){
+        right = Math.max(8, viewportW - panelW - 8);
+      }
+      panel.classList.remove("kgen-music-top", "kgen-music-modal");
+      panel.classList.add("kgen-music-docked");
       panel.style.setProperty("position", "fixed", "important");
-      panel.style.setProperty("top", "max(72px, env(safe-area-inset-top, 0px))", "important");
-      panel.style.setProperty("left", "50%", "important");
-      panel.style.setProperty("right", "auto", "important");
+      panel.style.setProperty("top", belowTop + "px", "important");
+      panel.style.setProperty("right", right + "px", "important");
+      panel.style.setProperty("left", "auto", "important");
       panel.style.setProperty("bottom", "auto", "important");
-      panel.style.setProperty("transform", "translateX(-50%)", "important");
-      panel.style.setProperty("width", "min(340px, calc(100vw - 24px))", "important");
+      panel.style.setProperty("transform", "none", "important");
+      panel.style.setProperty("width", panelW + "px", "important");
       panel.style.setProperty("max-width", "calc(100vw - 24px)", "important");
-      panel.style.setProperty("max-height", "min(72vh, calc(100vh - 96px))", "important");
+      panel.style.setProperty("max-height", maxH + "px", "important");
       panel.style.setProperty("z-index", "60000", "important");
       panel.style.setProperty("overflow-y", "auto", "important");
       panel.style.setProperty("pointer-events", "auto", "important");
@@ -2383,20 +2396,18 @@
         metamask: "MetaMask",
         trust: "Trust Wallet",
         okx: "OKX Wallet",
-        bitget: "Bitget Wallet"
+        bitget: "Bitget Wallet",
+        binance: "Binance Wallet"
       };
       const links = {
         metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
         trust: WALLET_BRIDGE.TRUST_DEEPLINK,
         okx: WALLET_BRIDGE.OKX_DEEPLINK,
-        bitget: WALLET_BRIDGE.BITGET_DEEPLINK
+        bitget: WALLET_BRIDGE.BITGET_DEEPLINK,
+        binance: WALLET_BRIDGE.BINANCE_DEEPLINK
       };
       const label = labels[kind] || kind;
       const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
-      if(this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「" + label + "」按鈕，用該錢包 App 開啟橋接頁");
-        return false;
-      }
       StatusRuntime.push("正在用 " + label + " 開啟 wallet-12345 橋接頁");
       try{
         window.location.href = link;
@@ -2409,13 +2420,31 @@
       }
       return false;
     },
+    connectWalletConnect: function(){
+      try{
+        if(window.web3 && typeof window.web3.connectWalletConnect === "function"){
+          return window.web3.connectWalletConnect();
+        }
+      }catch(_){ }
+      StatusRuntime.push("WalletConnect QR 尚未接入");
+      return false;
+    },
+    openBridgePage: function(){
+      try{
+        window.location.href = WALLET_BRIDGE.BRIDGE_PAGE;
+      }catch(_){
+        window.open(WALLET_BRIDGE.BRIDGE_PAGE, "_blank", "noopener");
+      }
+      return false;
+    },
     bindWalletHubButtons: function(){
       const self = this;
       const map = {
         walletHubMetaMaskBtn: "metamask",
         walletHubTrustBtn: "trust",
         walletHubOkxBtn: "okx",
-        walletHubBitgetBtn: "bitget"
+        walletHubBitgetBtn: "bitget",
+        walletHubBinanceBtn: "binance"
       };
       Object.keys(map).forEach(function(id){
         const el = $(id);
@@ -2425,7 +2454,8 @@
             metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
             trust: WALLET_BRIDGE.TRUST_DEEPLINK,
             okx: WALLET_BRIDGE.OKX_DEEPLINK,
-            bitget: WALLET_BRIDGE.BITGET_DEEPLINK
+            bitget: WALLET_BRIDGE.BITGET_DEEPLINK,
+            binance: WALLET_BRIDGE.BINANCE_DEEPLINK
           };
           el.href = links[map[id]] || WALLET_BRIDGE.BRIDGE_PAGE;
         }
@@ -2437,6 +2467,27 @@
           self.walletDeepLink(map[id]);
         }, true);
       });
+      const wcBtn = $("walletHubWalletConnectBtn");
+      if(wcBtn){
+        wcBtn.onclick = null;
+        delete wcBtn.dataset.kgenBound;
+        Events.bindOnce(wcBtn, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          self.connectWalletConnect();
+        }, true);
+      }
+      const openBridge = $("walletHubOpenBridgeBtn");
+      if(openBridge){
+        if(openBridge.tagName === "A") openBridge.href = WALLET_BRIDGE.BRIDGE_PAGE;
+        openBridge.onclick = null;
+        delete openBridge.dataset.kgenBound;
+        Events.bindOnce(openBridge, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          self.openBridgePage();
+        }, true);
+      }
       const copyBridge = $("walletHubCopyBridge");
       if(copyBridge){
         Events.bindOnce(copyBridge, "click", function(event){
@@ -2490,19 +2541,29 @@
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor){
         mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
-        mmAnchor.textContent = "用 MetaMask 開啟";
+        mmAnchor.textContent = "MetaMask 開啟";
       }
       [["walletHubTrustBtn", WALLET_BRIDGE.TRUST_DEEPLINK, "Trust Wallet 開啟"],
        ["walletHubOkxBtn", WALLET_BRIDGE.OKX_DEEPLINK, "OKX Wallet 開啟"],
-       ["walletHubBitgetBtn", WALLET_BRIDGE.BITGET_DEEPLINK, "Bitget Wallet 開啟"]].forEach(function(entry){
+       ["walletHubBitgetBtn", WALLET_BRIDGE.BITGET_DEEPLINK, "Bitget Wallet 開啟"],
+       ["walletHubBinanceBtn", WALLET_BRIDGE.BINANCE_DEEPLINK, "Binance Wallet 開啟"]].forEach(function(entry){
         const btn = $(entry[0]);
         if(!btn) return;
         if(btn.tagName === "A") btn.href = entry[1];
         btn.textContent = entry[2];
       });
+      const wcBtn = $("walletHubWalletConnectBtn");
+      if(wcBtn) wcBtn.textContent = "WalletConnect QR";
+      const openBridge = $("walletHubOpenBridgeBtn");
+      if(openBridge){
+        if(openBridge.tagName === "A") openBridge.href = WALLET_BRIDGE.BRIDGE_PAGE;
+        openBridge.textContent = "直接開 wallet-12345.html";
+      }
+      const copyBridgeBtn = $("walletHubCopyBridge");
+      if(copyBridgeBtn) copyBridgeBtn.textContent = "複製連結";
       const hint = $("walletHubInAppHint");
       if(hint && this.isSocialInAppBrowser()){
-        hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+        hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請選擇錢包，用該 App 開啟 wallet-12345.html 橋接頁。";
         hint.style.display = "block";
       }
       try{
@@ -2514,6 +2575,7 @@
           window.web3.openWalletHub = this.openWalletHub.bind(this);
           window.web3.deepLink = this.deepLink.bind(this);
           window.web3.copyDappUrl = this.copyBridgeUrl.bind(this);
+          window.web3.connectWalletConnect = window.web3.connectWalletConnect || this.connectWalletConnect.bind(this);
         }
       }catch(_){ }
     },
@@ -2526,7 +2588,7 @@
       const hint = $("walletHubInAppHint");
       if(hint){
         if(this.isSocialInAppBrowser()){
-          hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+          hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請選擇錢包，用該 App 開啟 wallet-12345.html 橋接頁。";
           hint.style.display = "block";
         }else{
           hint.style.display = "none";
@@ -2545,9 +2607,8 @@
       if(hub) hub.style.display = "none";
     },
     deepLink: function(kind){
-      if(kind === "metamask" && this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「用 MetaMask 開啟」按鈕（勿在此內建瀏覽器直接跳轉）");
-        return false;
+      if(kind === "walletconnect" || kind === "wc"){
+        return this.connectWalletConnect();
       }
       return this.walletDeepLink(kind || "metamask");
     },
@@ -3041,7 +3102,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.8A ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.9 ready");
       return this;
     }
   };

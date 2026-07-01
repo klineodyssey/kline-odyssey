@@ -8,6 +8,8 @@
     body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;padding:16px;box-sizing:border-box}
     .card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 0 32px rgba(255,215,120,.18)}
     a,button{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:#ffe28a;color:#111;font-weight:900;text-decoration:none;cursor:pointer;font-size:15px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .grid a,.grid button{margin-top:0;font-size:14px;padding:11px 10px}
     .sub{background:rgba(255,255,255,.06);color:#fff}
     .mm{background:#f6851b;color:#111}
     .hint{margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);color:#e8f4ff;font-size:14px;line-height:1.55}
@@ -18,7 +20,13 @@
     var BRIDGE_ABS='https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
     var INDEX_REL='K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?bridge=1';
     var INDEX_ABS='https://klineodyssey.github.io/kline-odyssey/' + INDEX_REL;
-    var METAMASK_DEEPLINK='https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html';
+    var LINKS={
+      metamask:'https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html',
+      trust:'https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(BRIDGE_ABS),
+      okx:'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(BRIDGE_ABS),
+      bitget:'https://web3.bitget.com/dapp?url=' + encodeURIComponent(BRIDGE_ABS),
+      binance:'bnc://app.binance.com/cedefi/dapp?url=' + encodeURIComponent(BRIDGE_ABS)
+    };
     var BSC_HEX='0x38';
     function ua(){ return navigator.userAgent || ''; }
     function hasEthereum(){ return !!(window.ethereum); }
@@ -36,6 +44,14 @@
       var done=function(){ var b=document.getElementById('copyBtn'); if(b) b.textContent='已複製橋接網址'; };
       if(navigator.clipboard){ navigator.clipboard.writeText(BRIDGE_ABS).then(done); }
       else { done(); }
+    }
+    function openLink(kind){
+      var link=LINKS[kind] || BRIDGE_ABS;
+      try{ window.location.href=link; }catch(_){ window.open(link,'_blank','noopener'); }
+    }
+    function walletConnectHint(){
+      var hint=document.getElementById('hint');
+      if(hint) hint.textContent='WalletConnect QR 尚未接入。請改用上方錢包 deeplink 或複製橋接連結。';
     }
     async function requestAccounts(){
       if(!hasEthereum()) return false;
@@ -96,33 +112,29 @@
     }
     function render(){
       var hint=document.getElementById('hint');
-      var enterBtn=document.getElementById('enterBtn');
       var connectBtn=document.getElementById('connectBtn');
-      var mmBtn=document.getElementById('mmBtn');
-      var noWallet=document.getElementById('noWallet');
+      var walletGrid=document.getElementById('walletGrid');
       var social=document.getElementById('socialBlock');
       var desktopHint=document.getElementById('desktopHint');
-      if(isSocialInApp()){
-        if(social) social.classList.remove('hidden');
-        if(hint) hint.textContent='目前在 Facebook/LINE/Instagram 內建瀏覽器。請按下方按鈕用 MetaMask App 開啟，不要在此內建瀏覽器直接連錢包。';
-        if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='用 MetaMask 開啟'; }
-        if(noWallet) noWallet.classList.remove('hidden');
+      if(hasEthereum()){
+        if(hint) hint.textContent='已偵測到錢包內建瀏覽器。請先點「連結錢包」，成功後會自動進入神殿。';
+        if(connectBtn) connectBtn.classList.remove('hidden');
+        if(walletGrid) walletGrid.classList.add('hidden');
         return;
       }
-      if(hasEthereum()){
-        if(hint) hint.textContent='已偵測到 MetaMask 內建瀏覽器。請先點「連結錢包」，成功後會自動進入神殿。';
-        if(connectBtn) connectBtn.classList.remove('hidden');
-        if(noWallet) noWallet.classList.add('hidden');
+      if(walletGrid) walletGrid.classList.remove('hidden');
+      if(connectBtn) connectBtn.classList.add('hidden');
+      if(isSocialInApp()){
+        if(social) social.classList.remove('hidden');
+        if(hint) hint.textContent='目前在 Facebook/LINE/Instagram 內建瀏覽器。請選擇錢包，用該 App 開啟本橋接頁，不要在此直接連錢包。';
         return;
       }
       if(!isMobile() && desktopHint){
         desktopHint.classList.remove('hidden');
-        if(hint) hint.textContent='桌機未偵測到錢包：請安裝 MetaMask 擴充功能，或用手機 MetaMask App 開啟。';
+        if(hint) hint.textContent='桌機未偵測到錢包：請選擇下方錢包入口，或安裝 MetaMask 擴充功能。';
       }else if(hint){
-        hint.textContent='未偵測到 window.ethereum。請用 MetaMask App 開啟本橋接頁，再連結錢包。';
+        hint.textContent='未偵測到 window.ethereum。請選擇下方錢包入口開啟本橋接頁，再連結錢包。';
       }
-      if(noWallet) noWallet.classList.remove('hidden');
-      if(mmBtn){ mmBtn.href=METAMASK_DEEPLINK; mmBtn.textContent='用 MetaMask 開啟'; }
     }
     window.addEventListener('DOMContentLoaded', function(){
       var connectBtn=document.getElementById('connectBtn');
@@ -131,6 +143,16 @@
           connectWalletFlow();
         });
       }
+      ['mmBtn','trustBtn','okxBtn','bitgetBtn','binanceBtn','wcBtn'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('click', function(e){
+          e.preventDefault();
+          if(id==='wcBtn'){ walletConnectHint(); return; }
+          var kind=id.replace('Btn','').replace('mm','metamask');
+          openLink(kind);
+        });
+      });
       render();
     });
   </script>
@@ -140,15 +162,21 @@
     <h1>KGEN 12345 錢包橋接</h1>
     <p>ASCII 橋接頁 → <code>wallet-12345.html</code> → 連結錢包 → 神殿</p>
     <div class="hint" id="hint">載入中…</div>
-    <div id="socialBlock" class="hidden hint">目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。</div>
+    <div id="socialBlock" class="hidden hint">目前在 Facebook/LINE 內建瀏覽器，請選擇錢包開啟本橋接頁。</div>
     <div class="hidden hint" id="desktopHint">桌機未偵測到錢包：<b>請安裝 MetaMask</b>（<a href="https://metamask.io/download/" target="_blank" rel="noopener" style="color:#8ff;">metamask.io/download</a>）</div>
     <button class="mm hidden" id="connectBtn" type="button">連結錢包</button>
     <a class="hidden" href="#" id="enterBtn" onclick="goIndex();return false;">進入 12345 悟空財神殿</a>
-    <div id="noWallet">
-      <a class="mm" id="mmBtn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html">用 MetaMask 開啟</a>
+    <div class="grid" id="walletGrid">
+      <a class="mm" id="mmBtn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html">MetaMask 開啟</a>
+      <button class="sub" id="trustBtn" type="button">Trust Wallet 開啟</button>
+      <button class="sub" id="okxBtn" type="button">OKX Wallet 開啟</button>
+      <button class="sub" id="bitgetBtn" type="button">Bitget Wallet 開啟</button>
+      <button class="sub" id="binanceBtn" type="button">Binance Wallet 開啟</button>
+      <button class="sub" id="wcBtn" type="button">WalletConnect QR</button>
     </div>
+    <a href="https://klineodyssey.github.io/kline-odyssey/wallet-12345.html">直接開 wallet-12345.html</a>
     <a href="#" onclick="goIndex();return false;">手動進入神殿</a>
-    <button class="sub" id="copyBtn" onclick="copyBridge()">複製橋接網址</button>
+    <button class="sub" id="copyBtn" onclick="copyBridge()">複製連結</button>
   </div>
 </body>
 </html>

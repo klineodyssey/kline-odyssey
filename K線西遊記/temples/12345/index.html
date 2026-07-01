@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.0.8" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.0.9" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -723,20 +723,23 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <button class="term-btn" id="walletHubClose" onclick="web3.closeWalletHub()" style="padding:6px 10px; font-size:12px;">✖</button>
 </div>
 <div style="margin-top:10px; color:#ffcc66; font-size:13px; line-height:1.5; display:none;" id="walletHubInAppHint">
-      目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。
+      目前在 Facebook/LINE 內建瀏覽器，請選擇錢包，用該 App 開啟 wallet-12345.html 橋接頁。
     </div>
 <div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
       請選擇錢包，用該 App 內建瀏覽器開啟 <b>wallet-12345.html</b> 橋接頁，再進入悟空財神殿並連線。
     </div>
-<div style="margin-top:10px; display:grid; grid-template-columns:1fr; gap:10px;">
-<a class="nav-btn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html" id="walletHubMetaMaskBtn" style="width:100%; padding:10px 12px; text-align:center; display:block; text-decoration:none;">用 MetaMask 開啟</a>
+<div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+<a class="nav-btn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html" id="walletHubMetaMaskBtn" style="width:100%; padding:10px 12px; text-align:center; display:block; text-decoration:none;">MetaMask 開啟</a>
 <button class="nav-btn" id="walletHubTrustBtn" style="width:100%; padding:10px 12px;" type="button">Trust Wallet 開啟</button>
 <button class="nav-btn" id="walletHubOkxBtn" style="width:100%; padding:10px 12px;" type="button">OKX Wallet 開啟</button>
 <button class="nav-btn" id="walletHubBitgetBtn" style="width:100%; padding:10px 12px;" type="button">Bitget Wallet 開啟</button>
+<button class="nav-btn" id="walletHubBinanceBtn" style="width:100%; padding:10px 12px;" type="button">Binance Wallet 開啟</button>
+<button class="nav-btn" id="walletHubWalletConnectBtn" style="width:100%; padding:10px 12px;" type="button">WalletConnect QR</button>
 </div>
-<div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-<input id="walletHubUrl" readonly="" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" value="https://klineodyssey.github.io/kline-odyssey/wallet-12345.html">
-<button class="nav-btn" id="walletHubCopyBridge" style="padding:10px 12px;" type="button">複製橋接連結</button>
+<div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+<input id="walletHubUrl" readonly="" style="flex:1; min-width:180px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;" value="https://klineodyssey.github.io/kline-odyssey/wallet-12345.html">
+<button class="nav-btn" id="walletHubCopyBridge" style="padding:10px 12px;" type="button">複製連結</button>
+<a class="nav-btn" href="https://klineodyssey.github.io/kline-odyssey/wallet-12345.html" id="walletHubOpenBridgeBtn" style="padding:10px 12px; text-align:center; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">直接開 wallet-12345.html</a>
 </div>
 <div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
       若 deeplink 無法開啟：複製橋接連結 → 到該錢包 App 內建瀏覽器貼上 → 進入神殿後按「連結錢包 / 切 BSC」。
@@ -1810,7 +1813,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.0.8A"></script>
+<script src="modules/runtime-main.js?v=V2.0.9"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
