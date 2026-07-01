@@ -34,9 +34,10 @@
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html?wallet=metamask",
     METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?wallet=metamask",
-    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"),
-    OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"),
-    BITGET_DEEPLINK: "bitget://openDapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html")
+    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    BITGET_DEEPLINK: "bitget://openDapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html")
   };
 
   const HEART_VIEW_ABI = [

@@ -625,7 +625,7 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     openWalletHub(){
       const hub = document.getElementById('walletHub');
       const inp = document.getElementById('walletHubUrl');
-      if(inp) inp.value = this.OFFICIAL_DAPP || location.href;
+      if(inp) inp.value = this.BRIDGE_PAGE || this.ROOT_ENTRY || location.href;
       if(hub){ hub.style.display='flex'; }
     },
     closeWalletHub(){
@@ -633,26 +633,26 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(hub){ hub.style.display='none'; }
     },
     deepLink(kind){
-      const url = location.href;
-      let link = url;
+      const bridge = this.BRIDGE_PAGE || "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html";
+      let link = bridge;
       if(kind==='metamask'){
-        link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + (this.METAMASK_DAPP_PATH || (location.host + location.pathname + location.search + location.hash)));
+        link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + (this.METAMASK_DAPP_PATH || 'klineodyssey.github.io/kline-odyssey/12345.html?wallet=metamask'));
       } else if(kind==='trust'){
-        link = 'https://link.trustwallet.com/open_url?url=' + encodeURIComponent(url);
+        link = 'https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(bridge);
       } else if(kind==='okx'){
-        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(url);
+        link = 'okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(bridge);
       } else if(kind==='bitget'){
-        link = 'bitget://openDapp?url=' + encodeURIComponent(url);
+        link = 'bitget://openDapp?url=' + encodeURIComponent(bridge);
       } else if(kind==='binance'){
-        link = 'https://www.binance.com/en/download';
+        link = 'bnc://app.binance.com/cedefi/dapp?url=' + encodeURIComponent(bridge);
       }
       window.location.href = link;
     },
     async copyDappUrl(){
-      const url = this.OFFICIAL_DAPP || location.href;
+      const url = this.BRIDGE_PAGE || this.ROOT_ENTRY || this.OFFICIAL_DAPP || location.href;
       try{
         await navigator.clipboard.writeText(url);
-        this.toast && this.toast('已複製神殿正式網址');
+        this.toast && this.toast('已複製錢包橋接網址');
       }catch(e){
         const inp = document.getElementById('walletHubUrl');
         if(inp){
