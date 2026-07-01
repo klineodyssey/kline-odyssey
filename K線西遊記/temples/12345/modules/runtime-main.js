@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.0.6";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.6";
-  const UI_PATCH = "V2.0.6";
+  const VERSION = "V2.0.7";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.7";
+  const UI_PATCH = "V2.0.7";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
@@ -32,7 +32,10 @@
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html"
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html")
   };
 
   const HEART_VIEW_ABI = [
@@ -337,9 +340,61 @@
       this.patchOpenMusic();
       this.patchMusicPlayback();
       this.bindPanelControls();
+      window.addEventListener("resize", function(){
+        if(MediaRuntime.open) MediaRuntime.positionPanel();
+      }, { passive: true });
       try{
         if(window.app && typeof window.app.musicInit === "function") window.app.musicInit();
       }catch(_){ }
+    },
+    getAnchorButton: function(){
+      return document.querySelector(".nav-btn.nav-music");
+    },
+    positionPanel: function(){
+      const panel = $("music-panel");
+      const anchor = this.getAnchorButton();
+      if(!panel || !anchor) return;
+      if(panel.parentElement !== document.body) document.body.appendChild(panel);
+      const rect = anchor.getBoundingClientRect();
+      const viewportW = window.innerWidth || document.documentElement.clientWidth || 390;
+      const viewportH = window.innerHeight || document.documentElement.clientHeight || 844;
+      const panelW = Math.min(340, viewportW - 24);
+      const belowTop = rect.bottom + 8;
+      const wouldClip = belowTop + 320 > viewportH - 12;
+      const overlapsNav = rect.right - panelW < 18;
+      const useModal = viewportW <= 520 || wouldClip || overlapsNav;
+      panel.classList.toggle("kgen-music-modal", useModal);
+      panel.classList.toggle("kgen-music-docked", !useModal);
+      if(useModal){
+        panel.style.setProperty("top", "10vh", "important");
+        panel.style.setProperty("left", "50%", "important");
+        panel.style.setProperty("right", "auto", "important");
+        panel.style.setProperty("transform", "translateX(-50%)", "important");
+        panel.style.setProperty("width", "min(340px, calc(100vw - 24px))", "important");
+        panel.style.setProperty("max-height", "72vh", "important");
+      }else{
+        panel.style.setProperty("top", belowTop + "px", "important");
+        panel.style.setProperty("right", Math.max(8, viewportW - rect.right) + "px", "important");
+        panel.style.setProperty("left", "auto", "important");
+        panel.style.setProperty("transform", "none", "important");
+        panel.style.setProperty("width", panelW + "px", "important");
+        panel.style.setProperty("max-height", Math.max(180, viewportH - belowTop - 12) + "px", "important");
+      }
+      panel.style.setProperty("position", "fixed", "important");
+      panel.style.setProperty("z-index", "50000", "important");
+      panel.style.setProperty("overflow-y", "auto", "important");
+      panel.style.setProperty("pointer-events", "auto", "important");
+    },
+    updateMusicStatus: function(){
+      const audio = $("music-audio");
+      const name = $("music-name");
+      const status = $("music-status");
+      const hasList = !!(window.app && window.app._music && window.app._music.list && window.app._music.list.length);
+      const hasSrc = !!(audio && audio.getAttribute("src"));
+      const empty = !hasList && !hasSrc;
+      if(name && empty) name.textContent = "尚未載入音樂";
+      if(status && empty) status.textContent = "尚未載入音樂";
+      else if(status && !empty) status.textContent = hasList ? "歌單已載入" : "音檔已載入";
     },
     setOpen: function(open, silent){
       const panel = $("music-panel");
@@ -349,7 +404,13 @@
       document.body.classList.toggle("k20-audio-open", this.open);
       document.body.classList.toggle("kgen-audio-open", this.open);
       panel.setAttribute("aria-hidden", this.open ? "false" : "true");
-      panel.style.setProperty("display", this.open ? "block" : "none", "important");
+      if(this.open){
+        this.positionPanel();
+        this.updateMusicStatus();
+        panel.style.setProperty("display", "block", "important");
+      }else{
+        panel.style.setProperty("display", "none", "important");
+      }
       qa(".nav-btn.nav-music").forEach(function(button){
         button.classList.toggle("kgen-music-active", MediaRuntime.open);
         button.setAttribute("aria-expanded", MediaRuntime.open ? "true" : "false");
@@ -390,7 +451,7 @@
           try{
             const audio = window.app._music && window.app._music.audio;
             if(!audio || !audio.src){
-              StatusRuntime.push("請先載入音檔");
+              StatusRuntime.push("尚未載入音樂");
               return legacyPlay();
             }
             const promise = audio.play();
@@ -436,6 +497,39 @@
           event.stopPropagation();
           MediaRuntime.setOpen(false, false);
         }, true);
+      }
+      const musicActions = [
+        ["musicPrev", "musicPrev"],
+        ["musicPlay", "musicPlay"],
+        ["musicPause", "musicPause"],
+        ["musicStop", "musicStop"],
+        ["musicNext", "musicNext"],
+        ["musicLoadBuiltIn", "musicLoadBuiltIn"]
+      ];
+      qa("#music-panel .nav-music-ctl").forEach(function(button, index){
+        button.onclick = null;
+        button.removeAttribute("onclick");
+        delete button.dataset.kgenBound;
+        Events.bindOnce(button, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          const app = window.app;
+          if(!app) return;
+          if(index === 5 && typeof app.musicLoadBuiltIn === "function"){
+            try{ app.musicLoadBuiltIn(true); MediaRuntime.updateMusicStatus(); StatusRuntime.push("內建歌單載入中"); }catch(_){ }
+            return;
+          }
+          const fnName = musicActions[index] ? musicActions[index][1] : null;
+          if(fnName && typeof app[fnName] === "function"){
+            try{ app[fnName](); }catch(_){ }
+          }
+        }, true);
+      });
+      const fileInput = $("music-file");
+      if(fileInput){
+        Events.bindOnce(fileInput, "change", function(){
+          setTimeout(function(){ MediaRuntime.updateMusicStatus(); }, 120);
+        });
       }
     }
   };
@@ -837,14 +931,38 @@
       this.bindControls();
     },
     syncCoreTransform: function(){
-      const target = $("core-window");
       const rotate = $("steer-input-val") ? Number($("steer-input-val").value || 0) : 0;
       const scale = (this.move.z || 100) / 100;
-      if(target){
-        target.style.transform = "translate(" + this.move.x + "px," + this.move.y + "px) rotate(" + rotate + "deg) scale(" + scale + ")";
+      const x = this.move.x || 0;
+      const y = this.move.y || 0;
+      const tf = "translate(" + x + "px," + y + "px) rotate(" + rotate + "deg) scale(" + scale + ")";
+      const core = $("core-window");
+      const figure = $("fairy-img");
+      const cam = $("cam-view");
+      if(core){
+        core.style.setProperty("--kgen-steer-deg", rotate + "deg");
+        core.style.setProperty("--kgen-tx", x + "px");
+        core.style.setProperty("--kgen-ty", y + "px");
+        core.style.setProperty("--kgen-scale", String(scale));
+        core.style.setProperty("transform", tf, "important");
+        core.style.setProperty("transform-origin", "50% 50%", "important");
+        core.dataset.kgenSteerDeg = String(rotate);
+      }
+      if(figure){
+        figure.classList.add("kgen-steer-live");
+        figure.style.setProperty("animation", "none", "important");
+        figure.style.setProperty("transform", "none", "important");
+      }
+      if(cam && (!window.app || !window.app.isCam)){
+        cam.style.setProperty("transform", "none", "important");
+      }else if(cam && window.app && window.app.camMode === "user"){
+        cam.style.setProperty("transform", "scaleX(-1)", "important");
       }
       const wheel = $("wheel");
       if(wheel) wheel.style.transform = "rotate(" + rotate + "deg)";
+    },
+    resolveMainFigure: function(){
+      return $("fairy-img") || $("core-window") || $("core-anchor");
     },
     patchAppSteer: function(){
       const self = this;
@@ -866,6 +984,10 @@
           }catch(_){ }
           if(!silent) StatusRuntime.push("方向盤角度 " + ang + "°｜" + modeLabel);
         };
+        if(typeof app.bindWheel === "function" && !app.__kgenWheelBound){
+          app.bindWheel();
+          app.__kgenWheelBound = true;
+        }
       };
       patch();
       if(!window.app) document.addEventListener("DOMContentLoaded", patch, { once: true });
@@ -2026,17 +2148,108 @@
       Object.keys(bindings).forEach(function(id){
         WalletRuntime.bindWalletButton(id, bindings[id]);
       });
+      this.bindWalletHubButtons();
       this.maybeAutoConnectFromBridge();
+    },
+    walletDeepLink: function(kind){
+      const labels = {
+        metamask: "MetaMask",
+        trust: "Trust Wallet",
+        okx: "OKX Wallet",
+        bitget: "Bitget Wallet"
+      };
+      const links = {
+        metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
+        trust: WALLET_BRIDGE.TRUST_DEEPLINK,
+        okx: WALLET_BRIDGE.OKX_DEEPLINK,
+        bitget: WALLET_BRIDGE.BITGET_DEEPLINK
+      };
+      const label = labels[kind] || kind;
+      const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
+      if(this.isSocialInAppBrowser()){
+        this.openWalletHub("請按「" + label + "」按鈕，用該錢包 App 開啟橋接頁");
+        return false;
+      }
+      StatusRuntime.push("正在用 " + label + " 開啟 wallet-12345 橋接頁");
+      try{
+        window.location.href = link;
+      }catch(_){
+        try{
+          window.open(link, "_blank", "noopener");
+        }catch(__){
+          this.copyBridgeUrl("deeplink 失敗，已改為複製橋接連結");
+        }
+      }
+      return false;
+    },
+    bindWalletHubButtons: function(){
+      const self = this;
+      const map = {
+        walletHubMetaMaskBtn: "metamask",
+        walletHubTrustBtn: "trust",
+        walletHubOkxBtn: "okx",
+        walletHubBitgetBtn: "bitget"
+      };
+      Object.keys(map).forEach(function(id){
+        const el = $(id);
+        if(!el) return;
+        if(el.tagName === "A"){
+          const links = {
+            metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
+            trust: WALLET_BRIDGE.TRUST_DEEPLINK,
+            okx: WALLET_BRIDGE.OKX_DEEPLINK,
+            bitget: WALLET_BRIDGE.BITGET_DEEPLINK
+          };
+          el.href = links[map[id]] || WALLET_BRIDGE.BRIDGE_PAGE;
+        }
+        el.onclick = null;
+        delete el.dataset.kgenBound;
+        Events.bindOnce(el, "click", function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          self.walletDeepLink(map[id]);
+        }, true);
+      });
+      const copyBridge = $("walletHubCopyBridge");
+      if(copyBridge){
+        Events.bindOnce(copyBridge, "click", function(event){
+          event.preventDefault();
+          self.copyBridgeUrl();
+        }, true);
+      }
+      const closeHub = $("walletHubClose");
+      if(closeHub){
+        Events.bindOnce(closeHub, "click", function(event){
+          event.preventDefault();
+          self.closeWalletHub();
+        }, true);
+      }
+    },
+    copyBridgeUrl: function(message){
+      const done = function(){
+        StatusRuntime.push(message || "已複製 wallet-12345 橋接連結");
+      };
+      return navigator.clipboard.writeText(WALLET_BRIDGE.BRIDGE_PAGE).then(done).catch(function(){
+        const inp = $("walletHubUrl");
+        if(inp){
+          inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
+          inp.focus();
+          inp.select();
+        }
+        StatusRuntime.push(message || "請手動複製 wallet-12345 橋接連結");
+      });
     },
     maybeAutoConnectFromBridge: function(){
       try{
-        const params = new URLSearchParams(location.search);
-        if(params.get("bridge") !== "1") return;
         if(!HeartRuntime.getEthereum()) return;
-        StatusRuntime.push("錢包橋接：準備自動連線");
+        const params = new URLSearchParams(location.search);
+        const fromBridge = params.get("bridge") === "1";
+        const fromReferrer = /wallet-12345\.html/i.test(document.referrer || "");
+        if(!fromBridge && !fromReferrer && !this.isMobileBrowser()) return;
+        StatusRuntime.push("錢包瀏覽器已就緒，準備 eth_requestAccounts");
         setTimeout(function(){
           WalletRuntime.connect();
-        }, 700);
+        }, fromBridge ? 600 : 1000);
       }catch(_){ }
     },
     isMobileBrowser: function(){
@@ -2050,12 +2263,20 @@
     },
     patchWalletHub: function(){
       const inp = $("walletHubUrl");
-      if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      if(inp) inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor){
         mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
         mmAnchor.textContent = "用 MetaMask 開啟";
       }
+      [["walletHubTrustBtn", WALLET_BRIDGE.TRUST_DEEPLINK, "Trust Wallet 開啟"],
+       ["walletHubOkxBtn", WALLET_BRIDGE.OKX_DEEPLINK, "OKX Wallet 開啟"],
+       ["walletHubBitgetBtn", WALLET_BRIDGE.BITGET_DEEPLINK, "Bitget Wallet 開啟"]].forEach(function(entry){
+        const btn = $(entry[0]);
+        if(!btn) return;
+        if(btn.tagName === "A") btn.href = entry[1];
+        btn.textContent = entry[2];
+      });
       const hint = $("walletHubInAppHint");
       if(hint && this.isSocialInAppBrowser()){
         hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
@@ -2076,7 +2297,7 @@
     openWalletHub: function(message){
       const hub = $("walletHub");
       const inp = $("walletHubUrl");
-      if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      if(inp) inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor) mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
       const hint = $("walletHubInAppHint");
@@ -2105,19 +2326,7 @@
         this.openWalletHub("請按「用 MetaMask 開啟」按鈕（勿在此內建瀏覽器直接跳轉）");
         return false;
       }
-      let link = WALLET_BRIDGE.BRIDGE_PAGE;
-      if(kind === "metamask") link = WALLET_BRIDGE.METAMASK_DEEPLINK;
-      else if(kind === "trust") link = "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
-      else if(kind === "okx") link = "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
-      else if(kind === "bitget") link = "https://web3.bitget.com/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
-      else if(kind === "binance") link = "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
-      StatusRuntime.push(kind === "metamask" ? "請用 MetaMask App 開啟" : "已開啟錢包入口");
-      try{
-        window.location.href = link;
-      }catch(_){
-        window.open(link, "_blank", "noopener");
-      }
-      return false;
+      return this.walletDeepLink(kind || "metamask");
     },
     openMetaMaskDeepLink: function(){
       if(HeartRuntime.hasInjectedWallet()){
@@ -2609,7 +2818,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.6 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.7 ready");
       return this;
     }
   };
