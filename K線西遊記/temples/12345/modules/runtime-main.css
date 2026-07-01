@@ -1233,3 +1233,79 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
 #core-anchor {
   transform: translate(-50%, -50%) !important;
 }
+
+/* ===== V2.2.0 RECOVERY：390×844 右側邊界 ===== */
+@media (max-width: 430px) {
+  :root {
+    --kgen-nav-width: min(168px, calc(100vw - 16px));
+    --kgen-left-w: min(360px, calc(100vw - 20px));
+  }
+
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  #universe-nav {
+    right: 8px !important;
+    top: 108px !important;
+    width: min(168px, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
+    align-items: flex-end !important;
+    box-sizing: border-box !important;
+  }
+
+  #universe-nav .nav-btn,
+  #universe-nav #kgenMsgCenterBtn,
+  #universe-nav > button,
+  #universe-nav #kgen-v102-festival-panel,
+  #universe-nav #kgen-land-panel {
+    width: min(168px, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
+    font-size: 11px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .warp-engine {
+    right: 4px !important;
+    width: 68px !important;
+    max-width: 68px !important;
+    bottom: calc(var(--kgen-v10-dock-h, 98px) + 210px) !important;
+    box-sizing: border-box !important;
+  }
+
+  .warp-engine .warp-rail {
+    width: 26px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #warp-thumb {
+    left: -18px !important;
+    width: 58px !important;
+  }
+
+  .ga-matrix {
+    right: 76px !important;
+    left: auto !important;
+    width: min(142px, calc(100vw - 88px)) !important;
+    max-width: min(142px, calc(100vw - 88px)) !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  .hud-top .monitor-data {
+    gap: 6px !important;
+  }
+
+  .hud-top .data-box {
+    width: 148px !important;
+    min-width: 148px !important;
+    max-width: 148px !important;
+  }
+}

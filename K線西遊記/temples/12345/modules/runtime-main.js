@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.1";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1";
-  const UI_PATCH = "V2.1";
+  const VERSION = "V2.2.0 / RECOVERY";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0-RECOVERY";
+  const UI_PATCH = "V2.2.0";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -3116,7 +3116,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 RECOVERY ready");
       return this;
     }
   };
