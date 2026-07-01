@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V3.0.0" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.0.4" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V3.0.0" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V3.0.0">V3.0.0 / BSC56</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.0.4" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.0.4">V2.0.4 / BSC56</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -722,11 +722,17 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
 <button class="term-btn" onclick="web3.closeWalletHub()" style="padding:6px 10px; font-size:12px;">✖</button>
 </div>
-<div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
-      若你現在是在 Facebook / 一般手機瀏覽器，可能沒有注入錢包。請按「MetaMask 開啟」用 MetaMask App 內建瀏覽器開本頁，再按「連結錢包」。
+<div style="margin-top:10px; color:#ffcc66; font-size:13px; line-height:1.5; display:none;" id="walletHubInAppHint">
+      目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。
     </div>
+<div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
+      一般手機瀏覽器：請用 MetaMask App 內建瀏覽器開啟橋接頁，再按「連結錢包」。
+    </div>
+<div style="margin-top:10px; display:grid; grid-template-columns:1fr; gap:10px;">
+<a class="nav-btn" href="https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html" id="walletHubMetaMaskBtn" style="width:100%; padding:10px 12px; text-align:center; display:block; text-decoration:none;">用 MetaMask 開啟 12345</a>
+</div>
 <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-<button class="nav-btn" onclick="web3.deepLink('metamask')" style="width:100%; padding:10px 12px;">MetaMask 開啟</button>
+<button class="nav-btn" onclick="web3.deepLink('metamask')" style="width:100%; padding:10px 12px;">MetaMask 開啟（其他瀏覽器）</button>
 <button class="nav-btn" onclick="web3.deepLink('trust')" style="width:100%; padding:10px 12px;">Trust Wallet 開啟</button>
 <button class="nav-btn" onclick="web3.deepLink('okx')" style="width:100%; padding:10px 12px;">OKX Wallet 開啟</button>
 <button class="nav-btn" onclick="web3.deepLink('bitget')" style="width:100%; padding:10px 12px;">Bitget Wallet 開啟</button>
@@ -1058,7 +1064,7 @@ KGEN 12345 Heart Live Patch V7.3.0
 </div>
 <div class="kh-actions kh-actions-wallet">
 <button class="kh-gold kh-btn-lg" id="kh-connect" type="button">連結錢包 / 切 BSC</button>
-<button class="kh-cyan kh-btn-lg" id="kh-metamask-open" type="button">請用 MetaMask App 開啟</button>
+<button class="kh-cyan kh-btn-lg" id="kh-metamask-open" type="button">用 MetaMask 開啟 12345</button>
 <button class="kh-cyan kh-btn-lg" id="kh-refresh" type="button">刷新餘額</button>
 <button class="kh-cyan kh-btn-lg" id="kh-switch" type="button">切換錢包</button>
 <button class="kh-cyan kh-btn-lg" id="kh-download" type="button">下載收藏</button>
@@ -1083,6 +1089,13 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-card-head"><span class="kh-card-icon">✅</span><span class="kh-card-title">Allowance</span></div>
 <div class="kh-card-body">
 <div class="kh-allowance-status" id="kh-allowance-status">Allowance：未連錢包</div>
+<label class="kh-field-label" for="kh-approve-target">Approve 目標功能</label>
+<select id="kh-approve-target">
+<option value="fortune">發財金（#kh-fortune-amount）</option>
+<option value="wish">許願（#kh-wish-amount）</option>
+<option value="vow">還願（#kh-vow-amount）</option>
+<option value="lamp">點燈（#kh-lamp-days）</option>
+</select>
 <div class="kh-actions kh-actions-approve">
 <button class="kh-gold kh-btn-lg" id="kh-approve-current" type="button">Approve 發財金金額</button>
 <button class="kh-cyan kh-btn-lg" id="kh-unlimited" type="button">無限授權</button>
@@ -1806,7 +1819,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V3.0.0"></script>
+<script src="modules/runtime-main.js?v=V2.0.4"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>

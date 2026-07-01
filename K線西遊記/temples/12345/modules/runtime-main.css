@@ -719,6 +719,7 @@ body.kgen-right-rule-closed .right-info-panel {
 
 #kgen-heart-live-panel .kh-amount-row input,
 #kgen-heart-live-panel #kh-wish-text,
+#kgen-heart-live-panel #kh-approve-target,
 #kgen-heart-live-panel .kh-vow-row select,
 #kgen-heart-live-panel .kh-vow-row input {
   width: 100% !important;

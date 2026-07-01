@@ -11,8 +11,8 @@ const web3 = {
   BSC_CHAIN_ID_HEX: "0x38",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
-  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
+  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -585,7 +585,14 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
         return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.deepLink(kind);
       }
-      const dapp = this.OFFICIAL_DAPP || location.href;
+      const social = /FBAN|FBAV|Facebook|Instagram|Line\//i.test(navigator.userAgent || "");
+      if(kind === "metamask" && social){
+        if(window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules && window.KGEN_RUNTIME_CORE.modules.WalletRuntime){
+          return window.KGEN_RUNTIME_CORE.modules.WalletRuntime.openWalletHub("請用 MetaMask App 開啟");
+        }
+        return false;
+      }
+      const dapp = this.BRIDGE_PAGE || this.OFFICIAL_DAPP || location.href;
       let link = this.BRIDGE_PAGE || dapp;
       if(kind==='metamask'){
         link = this.METAMASK_DEEPLINK || ('https://metamask.app.link/dapp/' + this.METAMASK_DAPP_PATH);

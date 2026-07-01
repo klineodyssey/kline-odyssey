@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V3.0.0";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V3.0.0";
-  const UI_PATCH = "V3.0.0";
+  const VERSION = "V2.0.4";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.0.4";
+  const UI_PATCH = "V2.0.4";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
@@ -28,8 +28,8 @@
   const WALLET_BRIDGE = {
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html"
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html"
   };
 
   const HEART_VIEW_ABI = [
@@ -1392,6 +1392,8 @@
       this.inited = true;
       window.KGEN_APPROVE_RUNTIME = this;
       this.bindFields();
+      this.bindApproveTarget();
+      this.updateApproveButtonLabel();
     },
     currentAllowance: function(){
       if(HeartRuntime.state.allowance == null || !hasEthers5()) return null;
@@ -1433,11 +1435,40 @@
       }
       const current = this.currentAllowance();
       const currentText = current == null ? "--" : String(current);
-      const rows = ["Allowance 目前：" + currentText + " KGEN"];
+      const rows = ["Allowance 目前：" + currentText + " KGEN", ""];
+      const fieldMap = {
+        fortune: "kh-fortune-amount",
+        wish: "kh-wish-amount",
+        vow: "kh-vow-amount",
+        lamp: "kh-lamp-days"
+      };
       this.getNeeds().forEach(function(entry){
-        rows.push(entry.label + "需要：" + entry.need + " KGEN" + (entry.ok ? " ✓" : current == null ? "" : " ✗不足"));
+        const fieldId = fieldMap[entry.key] || "";
+        const suffix = entry.ok ? " ✓足夠" : current == null ? "" : " ✗不足";
+        rows.push("【" + entry.label + "】" + entry.need + " KGEN" + suffix + (fieldId ? "（#" + fieldId + "）" : ""));
       });
+      const insufficient = this.getNeeds().filter(function(entry){ return !entry.ok && current != null; });
+      if(insufficient.length){
+        rows.push("", "不足項目：" + insufficient.map(function(entry){ return entry.label; }).join("、"));
+      }
       status.textContent = rows.join("\n");
+    },
+    getSelectedKey: function(){
+      const sel = $("kh-approve-target");
+      return sel && sel.value ? sel.value : "fortune";
+    },
+    updateApproveButtonLabel: function(){
+      const btn = $("kh-approve-current");
+      const slot = this.slots.find(function(entry){ return entry.key === ApproveRuntime.getSelectedKey(); });
+      if(btn && slot) btn.textContent = "Approve " + slot.label + "金額";
+    },
+    bindApproveTarget: function(){
+      const sel = $("kh-approve-target");
+      if(!sel) return;
+      Events.bindOnce(sel, "change", function(){
+        ApproveRuntime.updateApproveButtonLabel();
+        ApproveRuntime.renderStatus();
+      });
     },
     bindFields: function(){
       const self = this;
@@ -1454,29 +1485,40 @@
       return HeartRuntime.refreshChainData(true);
     },
     approveFortune: async function(){
+      return this.approveSlot("fortune");
+    },
+    approveSlot: async function(key){
+      const slot = this.slots.find(function(entry){ return entry.key === key; });
+      if(!slot){
+        StatusRuntime.push("Approve：未知功能 " + key);
+        return;
+      }
       try{
         if(!HeartRuntime.hasInjectedWallet() && !HeartRuntime.state.address){
-          StatusRuntime.push("Approve 發財金：未連錢包");
+          StatusRuntime.push("Approve " + slot.label + "：未連錢包");
           return;
         }
         await HeartRuntime.ensureConnected();
         await HeartRuntime.refreshChainData(false);
-        const amountWhole = HeartRuntime.getFortuneAmount();
+        const amountWhole = slot.getter();
         const amount = ethers.utils.parseUnits(String(amountWhole), HeartRuntime.state.tokenDecimals || 18);
-        if(!window.confirm("確認授權發財金金額：" + amountWhole + " KGEN")){
-          StatusRuntime.push("已取消：Approve 發財金金額");
+        if(!window.confirm("確認授權【" + slot.label + "】金額：" + amountWhole + " KGEN")){
+          StatusRuntime.push("已取消：Approve " + slot.label);
           return;
         }
         const token = new ethers.Contract(HeartRuntime.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, HeartRuntime.state.signer);
-        StatusRuntime.push("送出中：Approve 發財金金額 " + amountWhole + " KGEN");
+        StatusRuntime.push("送出中：Approve " + slot.label + " " + amountWhole + " KGEN");
         const tx = await token.approve(CHAIN.HEART, amount);
         StatusRuntime.push("Tx sent：" + tx.hash);
         await tx.wait();
-        StatusRuntime.push("成功：Approve 發財金金額");
+        StatusRuntime.push("成功：Approve " + slot.label + " " + amountWhole + " KGEN");
         await HeartRuntime.refreshChainData(false);
       }catch(error){
         StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
       }
+    },
+    approveSelected: async function(){
+      return this.approveSlot(this.getSelectedKey());
     },
     approveUnlimited: async function(){
       try{
@@ -1526,17 +1568,31 @@
     isMobileBrowser: function(){
       return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
     },
+    isSocialInAppBrowser: function(){
+      return /FBAN|FBAV|Facebook|Instagram|Line\//i.test(navigator.userAgent || "");
+    },
     isDesktopBrowser: function(){
       return !this.isMobileBrowser();
     },
     patchWalletHub: function(){
       const inp = $("walletHubUrl");
       if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      const mmAnchor = $("walletHubMetaMaskBtn");
+      if(mmAnchor){
+        mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
+        mmAnchor.textContent = "用 MetaMask 開啟 12345";
+      }
+      const hint = $("walletHubInAppHint");
+      if(hint && this.isSocialInAppBrowser()){
+        hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+        hint.style.display = "block";
+      }
       try{
         if(window.web3){
           window.web3.OFFICIAL_DAPP = WALLET_BRIDGE.OFFICIAL_DAPP;
           window.web3.BRIDGE_PAGE = WALLET_BRIDGE.BRIDGE_PAGE;
           window.web3.METAMASK_DEEPLINK = WALLET_BRIDGE.METAMASK_DEEPLINK;
+          window.web3.METAMASK_DAPP_PATH = WALLET_BRIDGE.METAMASK_DAPP_PATH;
           window.web3.openWalletHub = this.openWalletHub.bind(this);
           window.web3.deepLink = this.deepLink.bind(this);
           window.web3.copyDappUrl = this.copyOfficialUrl.bind(this);
@@ -1547,6 +1603,17 @@
       const hub = $("walletHub");
       const inp = $("walletHubUrl");
       if(inp) inp.value = WALLET_BRIDGE.OFFICIAL_DAPP;
+      const mmAnchor = $("walletHubMetaMaskBtn");
+      if(mmAnchor) mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
+      const hint = $("walletHubInAppHint");
+      if(hint){
+        if(this.isSocialInAppBrowser()){
+          hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+          hint.style.display = "block";
+        }else{
+          hint.style.display = "none";
+        }
+      }
       if(hub){
         hub.style.display = "flex";
         hub.style.alignItems = "center";
@@ -1560,12 +1627,16 @@
       if(hub) hub.style.display = "none";
     },
     deepLink: function(kind){
+      if(kind === "metamask" && this.isSocialInAppBrowser()){
+        this.openWalletHub("請按「用 MetaMask 開啟 12345」按鈕（勿在此內建瀏覽器直接跳轉）");
+        return false;
+      }
       let link = WALLET_BRIDGE.BRIDGE_PAGE;
       if(kind === "metamask") link = WALLET_BRIDGE.METAMASK_DEEPLINK;
-      else if(kind === "trust") link = "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
-      else if(kind === "okx") link = "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
-      else if(kind === "bitget") link = "https://web3.bitget.com/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
-      else if(kind === "binance") link = "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.OFFICIAL_DAPP);
+      else if(kind === "trust") link = "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
+      else if(kind === "okx") link = "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
+      else if(kind === "bitget") link = "https://web3.bitget.com/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
+      else if(kind === "binance") link = "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent(WALLET_BRIDGE.BRIDGE_PAGE);
       StatusRuntime.push(kind === "metamask" ? "請用 MetaMask App 開啟" : "已開啟錢包入口");
       try{
         window.location.href = link;
@@ -1577,6 +1648,10 @@
     openMetaMaskDeepLink: function(){
       if(HeartRuntime.hasInjectedWallet()){
         return WalletRuntime.connect();
+      }
+      if(this.isSocialInAppBrowser()){
+        this.openWalletHub("請按「用 MetaMask 開啟 12345」按鈕");
+        return false;
       }
       StatusRuntime.push("請用 MetaMask App 開啟");
       return this.deepLink("metamask");
@@ -1663,6 +1738,10 @@
           return false;
         }
       }
+      if(this.isSocialInAppBrowser()){
+        this.openWalletHub("Facebook/LINE 內建瀏覽器：請用 MetaMask App 開啟");
+        return false;
+      }
       if(this.isMobileBrowser()){
         this.openWalletHub("手機瀏覽器未偵測到錢包：請用 MetaMask App 開啟");
         return false;
@@ -1684,8 +1763,10 @@
       }
     },
     approveCurrent: function(){
-      StatusRuntime.push("Approve 發財金金額：準備中…");
-      return ApproveRuntime.approveFortune();
+      const key = ApproveRuntime.getSelectedKey();
+      const slot = ApproveRuntime.slots.find(function(entry){ return entry.key === key; });
+      StatusRuntime.push("Approve " + (slot ? slot.label : key) + "：準備中…");
+      return ApproveRuntime.approveSelected();
     },
     approveUnlimited: function(){
       StatusRuntime.push("無限授權：準備中…");
@@ -1985,7 +2066,7 @@
           });
         };
       }else{
-        window.web3.approve = function(){ return ApproveRuntime.approveFortune(); };
+        window.web3.approve = function(){ return ApproveRuntime.approveSelected(); };
       }
     }
   };
@@ -2052,7 +2133,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V3.0.0 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.0.4 ready");
       return this;
     }
   };
