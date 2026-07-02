@@ -66,6 +66,7 @@ Last optimized: 2026-06-11
 - Liquidity Pair: KGEN / WBNB
 - LP Lock: PinkLock record available in the official whitepaper and project links
 - Burn Mechanism: KGEN implements an on-chain burn mechanism. 0.1% of each buy and sell transaction is permanently sent to the null address (`0x0000000000000000000000000000000000000000`).
+- **Tax rate immutability:** Buy/sell tax is fixed at **0.30%** (30 bps) in `KGEN_Token_V7_5_2` via Solidity `constant` values. There is **no** `setTax` / `updateTax` / `setFees` / `updateFees`. Owner cannot change bps after deployment. See [docs/KGEN_TAX_IMMUTABILITY.md](docs/KGEN_TAX_IMMUTABILITY.md). **Do not redeploy or add tax setters for DappBay scanner labels.**
 
 Example burn transaction:
 `0x5b6a357e21c9a69ffbd466ac0ec7c09435434ae75c0d20fb255df8b6e513ee46`

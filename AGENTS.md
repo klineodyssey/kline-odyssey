@@ -55,4 +55,5 @@ There is no committed ESLint, pytest, or npm test suite. Validation is via:
 - **CORS on Binance API**: Temple 16888 and some game shells call `api.binance.com` directly; browsers on `localhost` will log CORS errors. UI still renders; live klines may fall back or fail silently.
 - **Wallet features**: Require MetaMask (or compatible) on BSC mainnet (chainId 56). No local chain is pre-wired.
 - **Hardhat/KGEN deploy**: `KGEN/scripts/*.js` expect a Hardhat project that is not scaffolded in-repo.
+- **KGEN tax immutability**: `KGEN/contracts/KGEN_Token_V7_5_2.sol` fixes tax at 0.30% via `constant` bps; there is no tax-rate setter. DappBay may show "Can Modify Tax" because of `setTaxWallets` / `setTaxExempt` / `Ownable` heuristics — see `docs/KGEN_TAX_IMMUTABILITY.md`. **稅率不可改，不得為了 DappBay 重新開 tax setter 或重新部署 token。**
 - **Pipeline side effects**: Running `tx_btc_convert.py` updates `master/*.xlsx` and may write `*_near_full_v86.xlsx` under `raw/`. Revert or commit intentionally.
