@@ -1,8 +1,8 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.1.2";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.2";
+  const VERSION = "V2.1.3 / WALLET HUB RESTORE";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.3";
   const UI_PATCH = "V2.2.0";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
@@ -32,8 +32,9 @@
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_DEEPLINK2: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -2424,17 +2425,23 @@
     walletDeepLink: function(kind){
       const labels = {
         metamask: "MetaMask",
+        metamask2: "MetaMask 備用",
         trust: "Trust Wallet",
         okx: "OKX Wallet",
         bitget: "Bitget Wallet",
-        binance: "Binance Wallet"
+        binance: "Binance Wallet",
+        direct: "直連 12345",
+        bridge: "橋接入口"
       };
       const links = {
         metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
+        metamask2: WALLET_BRIDGE.METAMASK_DEEPLINK2,
         trust: WALLET_BRIDGE.TRUST_DEEPLINK,
         okx: WALLET_BRIDGE.OKX_DEEPLINK,
         bitget: WALLET_BRIDGE.BITGET_DEEPLINK,
-        binance: WALLET_BRIDGE.BINANCE_DEEPLINK
+        binance: WALLET_BRIDGE.BINANCE_DEEPLINK,
+        direct: WALLET_BRIDGE.ROOT_ENTRY,
+        bridge: WALLET_BRIDGE.BRIDGE_PAGE
       };
       const label = labels[kind] || kind;
       const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
@@ -2458,9 +2465,12 @@
       const self = this;
       const map = {
         walletHubMetaMaskBtn: "metamask",
-        walletHubTrustBtn: "trust",
-        walletHubOkxBtn: "okx",
-        walletHubBitgetBtn: "bitget"
+        walletHubMeta2Btn:    "metamask2",
+        walletHubTrustBtn:    "trust",
+        walletHubOkxBtn:      "okx",
+        walletHubBitgetBtn:   "bitget",
+        walletHubDirectBtn:   "direct",
+        walletHubBridgeBtn:   "bridge"
       };
       Object.keys(map).forEach(function(id){
         const el = $(id);
@@ -2498,17 +2508,19 @@
       }
     },
     copyBridgeUrl: function(message){
+      // Copies the ASCII 12345.html entry (as user-facing "複製 12345.html")
+      const url = WALLET_BRIDGE.ROOT_ENTRY;
       const done = function(){
-        StatusRuntime.push(message || "已複製 wallet-12345 橋接連結");
+        StatusRuntime.push(message || "已複製 12345.html 官方入口");
       };
-      return navigator.clipboard.writeText(WALLET_BRIDGE.BRIDGE_PAGE).then(done).catch(function(){
+      return navigator.clipboard.writeText(url).then(done).catch(function(){
         const inp = $("walletHubUrl");
         if(inp){
-          inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
+          inp.value = url;
           inp.focus();
           inp.select();
         }
-        StatusRuntime.push(message || "請手動複製 wallet-12345 橋接連結");
+        StatusRuntime.push(message || "請手動複製 12345.html 官方入口");
       });
     },
     maybeAutoConnectFromBridge: function(){
@@ -2535,7 +2547,7 @@
     },
     patchWalletHub: function(){
       const inp = $("walletHubUrl");
-      if(inp) inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
+      if(inp) inp.value = WALLET_BRIDGE.ROOT_ENTRY;
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor){
         mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
@@ -2566,7 +2578,7 @@
     openWalletHub: function(message){
       const hub = $("walletHub");
       const inp = $("walletHubUrl");
-      if(inp) inp.value = WALLET_BRIDGE.BRIDGE_PAGE;
+      if(inp) inp.value = WALLET_BRIDGE.ROOT_ENTRY;
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor) mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
       const hint = $("walletHubInAppHint");
@@ -2591,10 +2603,6 @@
       if(hub) hub.style.display = "none";
     },
     deepLink: function(kind){
-      if(kind === "metamask" && this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「用 MetaMask 開啟」按鈕（勿在此內建瀏覽器直接跳轉）");
-        return false;
-      }
       return this.walletDeepLink(kind || "metamask");
     },
     openMetaMaskDeepLink: function(){
@@ -2695,13 +2703,8 @@
           return false;
         }
       }
-      if(this.isSocialInAppBrowser() || this.isMobileBrowser() || !HeartRuntime.hasInjectedWallet()){
-        if(window.web3 && typeof window.web3.deepLink === "function"){
-          StatusRuntime.push("正在用 MetaMask 開啟 wallet-12345 橋接頁");
-          return window.web3.deepLink("metamask");
-        }
-      }
-      this.openWalletHub("桌機未偵測到錢包：請安裝 MetaMask");
+      // No injected wallet: always open hub, never jump to MetaMask / Google Play
+      this.openWalletHub("未偵測到錢包：請選擇錢包入口");
       return false;
     },
     refresh: async function(){
@@ -3118,7 +3121,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.2 ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.3 WALLET HUB RESTORE ready");
       return this;
     }
   };

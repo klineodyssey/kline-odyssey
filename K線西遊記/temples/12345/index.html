@@ -282,7 +282,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<title>KGEN-12345-HEART-UI-V2.1.2</title>
+<title>KGEN-12345-HEART-UI-V2.1.3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.1.2" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.1.3" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.1.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.1.2">V2.1.2</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.1.3" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.1.3">V2.1.3 / WALLET HUB RESTORE</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -715,31 +715,29 @@ PRIMEFORGE_LIFE_HEADER_V1:
 </div>
 </div>
 
-<!-- Wallet Hub Modal -->
-<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999;">
-<div style="width:min(520px,92vw); background:#0b0f14; border:1px solid rgba(255,215,102,.45); border-radius:14px; padding:14px 14px 12px 14px; box-shadow:0 10px 40px rgba(0,0,0,.55);">
-<div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-<div style="font-weight:900; letter-spacing:.5px; color:#ffd766;">🧩 多錢包入口</div>
-<button class="term-btn" onclick="web3.closeWalletHub()" style="padding:6px 10px; font-size:12px;">✖</button>
+<!-- Wallet Hub Modal V9.0.0 -->
+<div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:99999; padding:18px; box-sizing:border-box;">
+<div style="width:min(560px,94vw); background:#0b0e14; border:1px solid rgba(255,215,120,.55); border-radius:18px; padding:16px; box-shadow:0 0 50px rgba(0,0,0,.75); color:#fff;">
+<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+<div style="font-weight:950; font-size:17px; color:#ffd778;">🧩 多錢包入口 V9.0.0</div>
+<button id="walletHubClose" type="button" style="border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#fff; border-radius:10px; padding:7px 11px; font-weight:900; cursor:pointer;">×</button>
 </div>
-<div style="margin-top:10px; color:#cfe8ff; font-size:13px; line-height:1.5;">
-      若你現在是在 Facebook / 一般瀏覽器，可能沒有注入錢包。請用「錢包內建瀏覽器」開啟本頁再按「連結錢包」。
-    </div>
-<div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-<button class="nav-btn" onclick="web3.deepLink('metamask')" style="width:100%; padding:10px 12px;">MetaMask 開啟</button>
-<button class="nav-btn" onclick="web3.deepLink('trust')" style="width:100%; padding:10px 12px;">Trust Wallet 開啟</button>
-<button class="nav-btn" onclick="web3.deepLink('okx')" style="width:100%; padding:10px 12px;">OKX Wallet 開啟</button>
-<button class="nav-btn" onclick="web3.deepLink('bitget')" style="width:100%; padding:10px 12px;">Bitget Wallet 開啟</button>
-<button class="nav-btn" onclick="web3.deepLink('binance')" style="width:100%; padding:10px 12px;">Binance 開啟</button>
-<button class="nav-btn" onclick="web3.connectWalletConnect()" style="width:100%; padding:10px 12px;">WalletConnect QR</button>
+<div id="walletHubInAppHint" style="display:none; margin-bottom:10px; color:#f99; font-size:13px; line-height:1.5;"></div>
+<div style="font-size:13px; line-height:1.7; color:#dff; margin-bottom:12px;">LINE / Facebook 請先開外部錢包，再進入 <b>12345.html</b> 英文入口。登入 MetaMask 後若沒有自動進入，請按「MetaMask 備用」或複製 12345.html 貼到 MetaMask 瀏覽器。</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+<button id="walletHubMetaMaskBtn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.55); background:linear-gradient(180deg,#ffe28a,#d5aa3d); color:#111; font-weight:950; cursor:pointer;">MetaMask 開啟</button>
+<button id="walletHubMeta2Btn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">MetaMask 備用</button>
+<button id="walletHubTrustBtn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">Trust Wallet</button>
+<button id="walletHubOkxBtn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">OKX Wallet</button>
+<button id="walletHubBitgetBtn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">Bitget Wallet</button>
+<button id="walletHubDirectBtn" type="button" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">直連 12345</button>
 </div>
-<div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-<input id="walletHubUrl" readonly="" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#0a0d12; color:#e9f4ff; font-size:12px;">
-<button class="nav-btn" onclick="web3.copyDappUrl()" style="padding:10px 12px;">複製</button>
+<input id="walletHubUrl" readonly="" value="https://klineodyssey.github.io/kline-odyssey/12345.html" style="width:100%; box-sizing:border-box; margin-top:10px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#05070b; color:#9ff; padding:10px 12px; font-size:12px;">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+<button id="walletHubCopyBridge" type="button" style="padding:11px; border-radius:12px; border:1px solid rgba(255,215,120,.55); background:rgba(255,215,120,.16); color:#ffe28a; font-weight:950; cursor:pointer;">複製 12345.html</button>
+<button id="walletHubBridgeBtn" type="button" style="padding:11px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer;">橋接入口</button>
 </div>
-<div style="margin-top:8px; color:#9fb4c9; font-size:12px;">
-      通用方式：複製連結 → 到你的錢包 App → 內建瀏覽器貼上 → 再回來按「連結錢包」。
-    </div>
+<div style="margin-top:10px; color:#8ff; font-size:12px; line-height:1.55;">正確流程：LINE / Facebook → 連結錢包 → MetaMask 開啟 → 進入 12345.html → 按「連結錢包 / 切 BSC」→ 顯示 BNB / KGEN / Allowance。</div>
 </div>
 </div>
 <!-- ===== COORD PANEL (V2.20.4) ===== -->
@@ -1809,7 +1807,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.1.2"></script>
+<script src="modules/runtime-main.js?v=V2.1.3"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
