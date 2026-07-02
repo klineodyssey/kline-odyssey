@@ -1234,7 +1234,7 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
   transform: translate(-50%, -50%) !important;
 }
 
-/* ===== V2.1.3：390×844 右側邊界 ===== */
+/* ===== V2.1.4：390×844 右側邊界 ===== */
 @media (max-width: 430px) {
   :root {
     --kgen-nav-width: min(168px, calc(100vw - 16px));
