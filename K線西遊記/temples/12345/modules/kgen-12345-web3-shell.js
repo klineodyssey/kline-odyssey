@@ -263,13 +263,12 @@ async autoDetect(){
       if(window.ethereum || window.BinanceChain){
         return await this.connect();
       }
-      this.openWalletHub();
-      try{ this.toast && this.toast('未偵測到注入錢包，已開啟多錢包入口'); }catch(_){}
-      try{ app && app.speak && app.speak('未偵測到錢包，已開啟多錢包入口。請用錢包內建瀏覽器開啟本頁後再按連結錢包。'); }catch(_){}
-      return;
+      try{ this.toast && this.toast('正在用 MetaMask 開啟 wallet-12345 橋接頁'); }catch(_){}
+      try{ app && app.speak && app.speak('正在用 MetaMask 開啟 wallet-12345 橋接頁'); }catch(_){}
+      return this.deepLink('metamask');
     }catch(e){
       console.warn('smartConnect failed', e);
-      try{ this.openWalletHub(); }catch(_){}
+      try{ this.deepLink('metamask'); }catch(_){}
     }
   },
 
@@ -293,11 +292,7 @@ async autoDetect(){
     try{
       this.stopPolling();
       if(!window.ethereum){
-        this.openWalletHub();
-        this.demo = true;
-        this.ui();
-        app.speak("未偵測到錢包，已開啟多錢包入口。");
-        return;
+        return this.deepLink('metamask');
       }
       await window.ethereum.request({ method:"eth_requestAccounts" });
       const okChain = await this.ensureBSC();
@@ -336,8 +331,7 @@ await this.bindEvents();
   async switchWallet(){
     const eth = window.ethereum || window.BinanceChain;
     if(!eth){
-      this.openWalletHub();
-      return;
+      return this.deepLink('metamask');
     }
     try{
       let permOk = false;

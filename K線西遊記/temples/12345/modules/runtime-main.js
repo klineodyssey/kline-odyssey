@@ -1,8 +1,8 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.2.0 / BRIDGE RECOVERY";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0-BRIDGE-RECOVERY";
+  const VERSION = "V2.1.2";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.2";
   const UI_PATCH = "V2.2.0";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
@@ -36,7 +36,7 @@
     METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
-    BITGET_DEEPLINK: "bitget://openDapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
+    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html")
   };
 
@@ -2417,19 +2417,24 @@
       Object.keys(bindings).forEach(function(id){
         WalletRuntime.bindWalletButton(id, bindings[id]);
       });
+      this.patchWalletHub();
+      this.bindWalletHubButtons();
+      this.maybeAutoConnectFromBridge();
     },
     walletDeepLink: function(kind){
       const labels = {
         metamask: "MetaMask",
         trust: "Trust Wallet",
         okx: "OKX Wallet",
-        bitget: "Bitget Wallet"
+        bitget: "Bitget Wallet",
+        binance: "Binance Wallet"
       };
       const links = {
         metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
         trust: WALLET_BRIDGE.TRUST_DEEPLINK,
         okx: WALLET_BRIDGE.OKX_DEEPLINK,
-        bitget: WALLET_BRIDGE.BITGET_DEEPLINK
+        bitget: WALLET_BRIDGE.BITGET_DEEPLINK,
+        binance: WALLET_BRIDGE.BINANCE_DEEPLINK
       };
       const label = labels[kind] || kind;
       const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
@@ -2555,9 +2560,6 @@
           window.web3.BRIDGE_PAGE = WALLET_BRIDGE.BRIDGE_PAGE;
           window.web3.METAMASK_DEEPLINK = WALLET_BRIDGE.METAMASK_DEEPLINK;
           window.web3.METAMASK_DAPP_PATH = WALLET_BRIDGE.METAMASK_DAPP_PATH;
-          window.web3.openWalletHub = this.openWalletHub.bind(this);
-          window.web3.deepLink = this.deepLink.bind(this);
-          window.web3.copyDappUrl = this.copyOfficialUrl.bind(this);
         }
       }catch(_){ }
     },
@@ -2695,7 +2697,7 @@
       }
       if(this.isSocialInAppBrowser() || this.isMobileBrowser() || !HeartRuntime.hasInjectedWallet()){
         if(window.web3 && typeof window.web3.deepLink === "function"){
-          StatusRuntime.push("正在用 MetaMask 開啟 12345 神殿");
+          StatusRuntime.push("正在用 MetaMask 開啟 wallet-12345 橋接頁");
           return window.web3.deepLink("metamask");
         }
       }
@@ -3116,7 +3118,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 BRIDGE RECOVERY ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.2 ready");
       return this;
     }
   };
