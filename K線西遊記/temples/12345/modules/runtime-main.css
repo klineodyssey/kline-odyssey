@@ -1234,7 +1234,7 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
   transform: translate(-50%, -50%) !important;
 }
 
-/* ===== V2.1.7 WALLET HUB BUTTON FIX ===== */
+/* ===== V2.1.8 WALLET HUB BUTTON FIX ===== */
 #walletHub {
   z-index: 2147483647 !important;
   pointer-events: auto !important;
@@ -1251,7 +1251,7 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
   cursor: pointer !important;
 }
 
-/* ===== V2.1.7：390×844 右側邊界 ===== */
+/* ===== V2.1.8：390×844 右側邊界 ===== */
 @media (max-width: 430px) {
   :root {
     --kgen-nav-width: min(168px, calc(100vw - 16px));

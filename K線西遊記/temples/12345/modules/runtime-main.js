@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.1.7 / WALLET HUB BUTTON FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.7";
-  const UI_PATCH = "V2.1.7";
+  const VERSION = "V2.1.8 / METAMASK URL FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.8";
+  const UI_PATCH = "V2.1.8";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -32,9 +32,9 @@
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_DEEPLINK2: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html"),
+    METAMASK_DEEPLINK2: "https://link.metamask.io/dapp/" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html"),
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -2571,7 +2571,7 @@
           window.web3.OFFICIAL_DAPP = WALLET_BRIDGE.OFFICIAL_DAPP;
           window.web3.BRIDGE_PAGE = WALLET_BRIDGE.BRIDGE_PAGE;
           window.web3.METAMASK_DEEPLINK = WALLET_BRIDGE.METAMASK_DEEPLINK;
-          window.web3.METAMASK_DAPP_PATH = WALLET_BRIDGE.METAMASK_DAPP_PATH;
+          window.web3.METAMASK_DAPP_URL = WALLET_BRIDGE.METAMASK_DAPP_URL;
         }
       }catch(_){ }
     },
@@ -3122,7 +3122,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.7 WALLET HUB BUTTON FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.8 METAMASK URL FIX ready");
       return this;
     }
   };
@@ -3151,12 +3151,11 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.1.7 WALLET HUB BUTTON FIX =====
+  // ===== V2.1.8 METAMASK URL FIX / WALLET HUB DELEGATE =====
   // Uses document-level capture delegation on [data-wallet-action] — no inline onclick dependency.
   (function defineWalletHubDelegate(){
-    var ASCII_URL       = 'https://klineodyssey.github.io/kline-odyssey/12345.html';
-    var ASCII_NO_SCHEME = 'klineodyssey.github.io/kline-odyssey/12345.html';
-    var BRIDGE_URL      = 'https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
+    var ASCII_URL  = 'https://klineodyssey.github.io/kline-odyssey/12345.html';
+    var BRIDGE_URL = 'https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
 
     function pushStatus(text){
       try{ if(window.KGEN_STATUS_BUS && typeof window.KGEN_STATUS_BUS.push === 'function') window.KGEN_STATUS_BUS.push(text); }catch(e){}
@@ -3170,7 +3169,7 @@
       switch(action){
         case 'metamask':
           pushStatus('點擊 MetaMask');
-          go('https://metamask.app.link/dapp/' + ASCII_NO_SCHEME);
+          go('https://metamask.app.link/dapp/' + encodeURIComponent(ASCII_URL));
           break;
         case 'metamask-backup':
           pushStatus('點擊 MetaMask 備用：請複製 12345.html 到 MetaMask 瀏覽器');

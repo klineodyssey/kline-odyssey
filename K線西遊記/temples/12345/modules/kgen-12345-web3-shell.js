@@ -12,8 +12,8 @@ const web3 = {
   ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/12345.html",
-  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+  METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
+  METAMASK_DEEPLINK: "https://metamask.app.link/dapp/https%3A%2F%2Fklineodyssey.github.io%2Fkline-odyssey%2F12345.html",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -636,11 +636,10 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     deepLink(kind){
       const bridge = this.BRIDGE_PAGE || "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html";
       const ascii = this.ROOT_ENTRY || "https://klineodyssey.github.io/kline-odyssey/12345.html";
-      const asciiNoScheme = this.METAMASK_DAPP_PATH || "klineodyssey.github.io/kline-odyssey/12345.html";
       let link = ascii;
       if(kind === 'metamask'){
-        // Primary deeplink: metamask.app.link to ASCII 12345.html (not Chinese path, not wallet-12345)
-        link = 'https://metamask.app.link/dapp/' + asciiNoScheme;
+        // Use encodeURIComponent per MetaMask official recommendation
+        link = 'https://metamask.app.link/dapp/' + encodeURIComponent(ascii);
       } else if(kind === 'metamask2'){
         // Backup deeplink format
         link = 'https://link.metamask.io/dapp/' + asciiNoScheme;
