@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.1.8 / METAMASK URL FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.8";
-  const UI_PATCH = "V2.1.8";
+  const VERSION = "V2.1.9 / METAMASK LINK FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.9";
+  const UI_PATCH = "V2.1.9";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -33,8 +33,10 @@
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_DEEPLINK: "https://metamask.app.link/dapp/" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html"),
-    METAMASK_DEEPLINK2: "https://link.metamask.io/dapp/" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html"),
+    // Official format (2026): domain+path ONLY, no https:// prefix, no encodeURIComponent
+    // Ref: https://docs.metamask.io/metamask-connect/evm/guides/metamask-exclusive/use-deeplinks/
+    METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -3122,7 +3124,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.8 METAMASK URL FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.9 METAMASK LINK FIX ready");
       return this;
     }
   };
@@ -3151,7 +3153,7 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.1.8 METAMASK URL FIX / WALLET HUB DELEGATE =====
+  // ===== V2.1.9 METAMASK LINK FIX / WALLET HUB DELEGATE =====
   // Uses document-level capture delegation on [data-wallet-action] — no inline onclick dependency.
   (function defineWalletHubDelegate(){
     var ASCII_URL  = 'https://klineodyssey.github.io/kline-odyssey/12345.html';
@@ -3169,7 +3171,16 @@
       switch(action){
         case 'metamask':
           pushStatus('點擊 MetaMask');
-          go('https://metamask.app.link/dapp/' + encodeURIComponent(ASCII_URL));
+          // Use anchor click (not window.location.href) — required for MetaMask deeplink on Android
+          // Official: https://link.metamask.io/dapp/{domain+path}, NO https:// prefix
+          (function(){
+            var a = document.createElement('a');
+            a.href = 'https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html';
+            a.target = '_self';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          })();
           break;
         case 'metamask-backup':
           pushStatus('點擊 MetaMask 備用：請複製 12345.html 到 MetaMask 瀏覽器');

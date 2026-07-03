@@ -10,8 +10,8 @@ LEGACY: modules/archive/kgen-12345-runtime.legacy.js (quarantined, not loaded)
 
   window.KGEN_12345_CONFIG = Object.freeze({
     templeId: "12345",
-    version: "V2.1.8",
-    tag: "12345-TEMPLE-RUNTIME-CORE-V2.1.8",
+    version: "V2.1.9",
+    tag: "12345-TEMPLE-RUNTIME-CORE-V2.1.9",
     chain: {
       KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
       HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
