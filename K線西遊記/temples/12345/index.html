@@ -282,7 +282,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<title>KGEN-12345-HEART-UI-V2.1.4</title>
+<title>KGEN-12345-HEART-UI-V2.1.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.1.4" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.1.5" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.1.4" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.1.4">V2.1.4 / WALLET HUB CLICK FIX</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.1.5" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.1.5">V2.1.5 / BRIDGE FIX</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -715,7 +715,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 </div>
 </div>
 
-<!-- Wallet Hub Modal V9.0.0 / V2.1.4 Click Fix -->
+<!-- Wallet Hub Modal V9.0.0 / V2.1.5 Bridge Fix -->
 <div id="walletHub" onclick="if(event.target===this)kgenHubClick('close')" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:2147483647; padding:18px; box-sizing:border-box; pointer-events:auto;">
 <div style="width:min(560px,94vw); background:#0b0e14; border:1px solid rgba(255,215,120,.55); border-radius:18px; padding:16px; box-shadow:0 0 50px rgba(0,0,0,.75); color:#fff; pointer-events:auto; position:relative; z-index:1;">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
@@ -730,14 +730,16 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <button id="walletHubTrustBtn" type="button" onclick="kgenHubClick('trust')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Trust Wallet</button>
 <button id="walletHubOkxBtn" type="button" onclick="kgenHubClick('okx')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">OKX Wallet</button>
 <button id="walletHubBitgetBtn" type="button" onclick="kgenHubClick('bitget')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Bitget Wallet</button>
+<button id="walletHubBinanceBtn" type="button" onclick="kgenHubClick('binance')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Binance Wallet</button>
 <button id="walletHubDirectBtn" type="button" onclick="kgenHubClick('direct')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">直連 12345</button>
+<button id="walletHubWCBtn" type="button" onclick="typeof web3!=='undefined'&&web3.connectWalletConnect?web3.connectWalletConnect():kgenHubClick('bridge')" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">WalletConnect</button>
 </div>
 <input id="walletHubUrl" readonly="" value="https://klineodyssey.github.io/kline-odyssey/12345.html" style="width:100%; box-sizing:border-box; margin-top:10px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:#05070b; color:#9ff; padding:10px 12px; font-size:12px; pointer-events:auto;">
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
 <button id="walletHubCopyBridge" type="button" onclick="kgenHubClick('copy')" style="padding:11px; border-radius:12px; border:1px solid rgba(255,215,120,.55); background:rgba(255,215,120,.16); color:#ffe28a; font-weight:950; cursor:pointer; pointer-events:auto;">複製 12345.html</button>
 <button id="walletHubBridgeBtn" type="button" onclick="kgenHubClick('bridge')" style="padding:11px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">橋接入口</button>
 </div>
-<div style="margin-top:10px; color:#8ff; font-size:12px; line-height:1.55;">正確流程：LINE / Facebook → 連結錢包 → MetaMask 開啟 → 進入 12345.html → 按「連結錢包 / 切 BSC」→ 顯示 BNB / KGEN / Allowance。</div>
+<div style="margin-top:10px; color:#8ff; font-size:12px; line-height:1.55;">正確流程：LINE / Facebook → 連結錢包 → MetaMask 開啟 → 進入 12345.html（800ms 後自動跳神殿）→ 按「連結錢包 / 切 BSC」→ 顯示 BNB / KGEN / Allowance。</div>
 </div>
 </div>
 <!-- ===== COORD PANEL (V2.20.4) ===== -->
@@ -1807,7 +1809,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.1.4"></script>
+<script src="modules/runtime-main.js?v=V2.1.5"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
