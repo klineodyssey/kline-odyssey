@@ -6,12 +6,12 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>K線西遊記｜銀河宇宙入口 Portal V2.1</title>
+<title>K線西遊記｜銀河宇宙入口 Portal V2.2 · 5D Universe</title>
 <style>
 :root{
   --bg:#05060b; --card:rgba(255,255,255,.075); --card2:rgba(255,215,120,.08);
-  --line:rgba(255,255,255,.16); --gold:#ffd778; --cyan:#65f5ff; --text:rgba(255,255,255,.94);
-  --muted:rgba(255,255,255,.68); --ok:#9fffd9; --warn:#ffd28c; --bad:#ff9fb2;
+  --line:rgba(255,255,255,.14); --gold:#ffd778; --cyan:#65f5ff; --text:rgba(255,255,255,.94);
+  --muted:rgba(255,255,255,.64); --ok:#9fffd9; --warn:#ffd28c; --bad:#ff9fb2;
   --r:22px; --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC",Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
@@ -24,185 +24,401 @@ body{
     linear-gradient(180deg,#05060b,#090911 52%,#05060b);
 }
 a{color:inherit;text-decoration:none}
-.wrap{max-width:1180px;margin:0 auto;padding:18px 14px 42px}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 14px 56px}
+
+/* Top bar */
 .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
-.brand h1{margin:0;font-size:30px;line-height:1.12;letter-spacing:.5px}
-.brand p{margin:8px 0 0;color:var(--muted);line-height:1.45}
+.brand h1{margin:0;font-size:28px;line-height:1.12;letter-spacing:.5px}
+.brand p{margin:8px 0 0;color:var(--muted);line-height:1.45;font-size:14px}
 .pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.pill{border:1px solid var(--line);background:rgba(255,255,255,.07);border-radius:999px;padding:8px 11px;font-weight:800;color:var(--muted);backdrop-filter:blur(8px)}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.07);border-radius:999px;padding:7px 11px;font-weight:800;color:var(--muted)}
 .pill b{color:var(--gold);font-family:var(--mono)}
-.hero{position:relative;border:1px solid var(--line);border-radius:30px;padding:22px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));box-shadow:0 24px 80px rgba(0,0,0,.45)}
+
+/* Hero */
+.hero{position:relative;border:1px solid var(--line);border-radius:30px;padding:22px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));box-shadow:0 24px 80px rgba(0,0,0,.45)}
 #stars{position:absolute;inset:0;width:100%;height:100%;opacity:.72;pointer-events:none}
-.heroIn{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
-.big{font-size:42px;font-weight:950;letter-spacing:.4px;line-height:1.08;margin:4px 0 12px}
-.desc{color:var(--muted);font-size:15px;line-height:1.7;margin:0 0 18px}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 15px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.11);font-weight:900}
-.btn.gold{background:rgba(255,215,120,.92);color:#111}
-.btn.cyan{background:rgba(101,245,255,.88);color:#071015}
-.kpiGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.kpi{border:1px solid var(--line);border-radius:18px;padding:13px;background:rgba(0,0,0,.22)}
-.kpi .k{font-size:12px;color:var(--muted);margin-bottom:6px}
-.kpi .v{font-size:18px;font-weight:950;color:var(--gold);font-family:var(--mono)}
-.section{margin-top:16px}
-.head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin:0 0 10px}
-.head h2{margin:0;font-size:20px}
-.head .s{color:var(--muted);font-size:13px}
-.nodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.node{position:relative;min-height:178px;border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--card);box-shadow:0 18px 60px rgba(0,0,0,.28);overflow:hidden}
-.node.live{background:linear-gradient(180deg,rgba(255,215,120,.11),rgba(255,255,255,.05))}
-.node.soon{opacity:.84}
-.node:before{content:"";position:absolute;right:-50px;top:-50px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,120,.22),transparent 70%)}
-.node .id{font-family:var(--mono);font-weight:950;color:var(--cyan);font-size:13px}
-.node .name{margin-top:7px;font-weight:950;font-size:18px;line-height:1.25}
-.node .p{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
-.status{display:inline-flex;margin-top:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}
-.status.ok{color:var(--ok)} .status.warn{color:var(--warn)}
-.node .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.small{padding:8px 11px;font-size:12px}
-.addrBox{margin-top:10px;padding:9px 10px;border-radius:14px;border:1px solid rgba(255,215,120,.18);background:rgba(0,0,0,.18);font-family:var(--mono);font-size:11px;color:var(--muted);word-break:break-all}
-.note{border:1px solid rgba(255,215,120,.18);border-radius:var(--r);background:rgba(255,215,120,.055);padding:14px;color:var(--muted);line-height:1.65;font-size:13px}
-.footer{margin-top:18px;color:var(--muted);font-size:13px;line-height:1.7;text-align:center}
-@media(max-width:900px){.heroIn{grid-template-columns:1fr}.nodes{grid-template-columns:repeat(2,minmax(0,1fr))}.big{font-size:34px}}
+.heroIn{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.big{font-size:38px;font-weight:950;letter-spacing:.4px;line-height:1.1;margin:4px 0 12px}
+.desc{color:var(--muted);font-size:14px;line-height:1.7;margin:0 0 16px}
+.btns{display:flex;gap:9px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(255,255,255,.11);font-weight:900;font-size:13px;white-space:nowrap;}
+.btn.gold{background:rgba(255,215,120,.92);color:#111;border-color:transparent}
+.btn.cyan{background:rgba(101,245,255,.88);color:#071015;border-color:transparent}
+.btn.green{background:rgba(124,255,197,.8);color:#041208;border-color:transparent}
+.btn.mars{background:rgba(255,90,31,.85);color:#fff;border-color:transparent}
+.btn.purple{background:rgba(192,132,252,.85);color:#fff;border-color:transparent}
+.btn.game{background:linear-gradient(135deg,rgba(255,215,120,.9),rgba(0,242,255,.85));color:#05060b;border-color:transparent}
+
+/* KPI grid in hero */
+.kpiGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.kpi{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(0,0,0,.22)}
+.kpi .k{font-size:11px;color:var(--muted);margin-bottom:5px}
+.kpi .v{font-size:17px;font-weight:950;color:var(--gold);font-family:var(--mono)}
+.kpi .v.cyan{color:var(--cyan)}
+.kpi .v.green{color:#9fffd9}
+
+/* Section header */
+.section{margin-top:22px}
+.head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin:0 0 12px}
+.head h2{margin:0;font-size:19px}
+.head .s{color:var(--muted);font-size:12px}
+
+/* Node grid — 3 columns by default */
+.nodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+/* Node card */
+.node{
+  position:relative;min-height:176px;
+  border:1px solid var(--line);
+  border-radius:var(--r);padding:16px;
+  background:var(--card);
+  box-shadow:0 12px 48px rgba(0,0,0,.28);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:border-color .25s, box-shadow .25s, transform .15s;
+}
+.node:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(0,0,0,.38)}
+.node.live{background:linear-gradient(180deg,rgba(255,215,120,.09),rgba(255,255,255,.04))}
+.node.live:hover{border-color:rgba(255,215,120,.4)}
+.node.proto{background:linear-gradient(180deg,rgba(0,242,255,.06),rgba(255,255,255,.03))}
+.node.proto:hover{border-color:rgba(0,242,255,.35)}
+.node.mars-theme{background:linear-gradient(180deg,rgba(255,90,31,.08),rgba(255,255,255,.03))}
+.node.mars-theme:hover{border-color:rgba(255,90,31,.4)}
+.node.bank-theme{background:linear-gradient(180deg,rgba(192,132,252,.08),rgba(255,255,255,.03))}
+.node.bank-theme:hover{border-color:rgba(192,132,252,.35)}
+.node.autolp-theme{background:linear-gradient(180deg,rgba(124,255,197,.08),rgba(255,255,255,.03))}
+.node.autolp-theme:hover{border-color:rgba(124,255,197,.35)}
+.node.game-theme{background:linear-gradient(135deg,rgba(255,215,120,.08),rgba(0,242,255,.06))}
+.node.game-theme:hover{border-color:rgba(255,215,120,.35)}
+.node.soon{opacity:.8}
+
+.node:before{content:"";position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,215,120,.18),transparent 70%);pointer-events:none}
+
+.node .id{font-family:var(--mono);font-weight:950;color:var(--cyan);font-size:12px}
+.node .name{margin-top:6px;font-weight:950;font-size:17px;line-height:1.25}
+.node .sub{margin-top:2px;font-size:11px;color:var(--muted)}
+.node .p{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.55;flex:1}
+.node .addr{margin-top:8px;padding:7px 9px;border-radius:10px;border:1px solid rgba(255,215,120,.15);
+  background:rgba(0,0,0,.18);font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-all}
+
+.status{display:inline-flex;margin-top:10px;border:1px solid var(--line);border-radius:999px;
+  padding:5px 10px;font-size:11px;font-weight:900;align-self:flex-start}
+.status.ok{color:var(--ok);border-color:rgba(159,255,217,.3)}
+.status.warn{color:var(--warn);border-color:rgba(255,210,140,.3)}
+.status.proto{color:var(--cyan);border-color:rgba(101,245,255,.3)}
+.status.game{color:var(--gold);border-color:rgba(255,215,120,.3)}
+
+.node .enter{
+  margin-top:10px;padding:9px 12px;
+  border-radius:999px;border:1px solid var(--line);
+  background:rgba(255,255,255,.1);
+  font-weight:900;font-size:12px;text-align:center;
+  display:block;
+  transition:background .2s;
+}
+.node:hover .enter{background:rgba(255,255,255,.18)}
+
+/* Note box */
+.note{border:1px solid rgba(255,215,120,.18);border-radius:var(--r);
+  background:rgba(255,215,120,.055);padding:14px;color:var(--muted);line-height:1.65;font-size:13px;margin-top:16px}
+
+/* Footer */
+.footer{margin-top:22px;color:var(--muted);font-size:13px;line-height:1.7;text-align:center}
+
+/* World stats bar */
+.stats-bar{
+  display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+  margin:12px 0;padding:12px 16px;
+  border:1px solid var(--line);border-radius:16px;
+  background:rgba(0,0,0,.18);font-size:12px;
+}
+.sb-item{display:flex;gap:5px;align-items:center}
+.sb-k{color:var(--muted)}
+.sb-v{color:var(--gold);font-family:var(--mono);font-weight:900}
+
+/* Mobile */
+@media(max-width:900px){
+  .heroIn{grid-template-columns:1fr}
+  .nodes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .big{font-size:32px}
+}
 @media(max-width:560px){
- .wrap{padding:14px 10px 32px}.brand h1{font-size:26px}.big{font-size:33px}
- .pills{justify-content:flex-start}.hero{padding:18px 14px;border-radius:24px}.nodes{grid-template-columns:1fr}
- .kpiGrid{grid-template-columns:1fr}.btn{width:auto}.top{margin-bottom:10px}
+  .wrap{padding:12px 10px 42px}
+  .brand h1{font-size:22px}
+  .big{font-size:28px}
+  .pills{justify-content:flex-start}
+  .hero{padding:16px 12px;border-radius:22px}
+  .nodes{grid-template-columns:1fr}
+  .kpiGrid{grid-template-columns:1fr}
+  .btn{font-size:12px;padding:9px 12px}
+  .top{margin-bottom:8px}
+}
+@media(max-width:430px){
+  html,body{overflow-x:hidden!important;max-width:100vw!important}
+  .nodes{grid-template-columns:1fr!important}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- Top bar -->
   <div class="top">
     <div class="brand">
       <h1>K線西遊記｜銀河宇宙入口</h1>
-      <p>KLINE Odyssey · Portal V2.1 · 12345 + 16888 + 11520 + Mars + 8895</p>
+      <p>KLINE Odyssey · Portal V2.2 · 5D Universe System · 六大節點全部可進入</p>
     </div>
     <div class="pills">
-      <div class="pill">版本：<b>Portal V2.1</b></div>
+      <div class="pill">版本：<b>Portal V2.2</b></div>
       <div class="pill">時間：<b id="clock">--</b></div>
+      <div class="pill">BNB：<b id="bnb-price">--</b></div>
     </div>
   </div>
 
+  <!-- Hero -->
   <section class="hero">
     <canvas id="stars"></canvas>
     <div class="heroIn">
       <div>
-        <div class="big">宇宙不需要解釋，只需要入口。</div>
+        <div class="big">宇宙不需要解釋，<br>只需要入口。</div>
         <p class="desc">
-          本版修正入口路徑與白洞地址顯示：16888 是廣寒宮前端入口，不再顯示零地址；
-          12345 入口加上版本參數，避免手機快取打開舊版。
+          六大宇宙節點全部可進入。12345 悟空財神殿主基地、11520 花果山交易所、
+          108000 火星豪宅席位、18888 靈霄寶殿神明銀行、18921 斬妖台 Auto LP、
+          K線5D峽谷推塔戰原型。
         </p>
         <div class="btns">
-          <a class="btn gold" href="./temples/12345/index.html?v=723">進入 12345 悟空財神殿</a>
-          <a class="btn cyan" href="./temples/16888/index.html?v=374">進入 16888 廣寒宮</a>
-          <a class="btn" href="#map">查看宇宙地圖</a>
-          <a class="btn" href="https://lin.ee/b8X18F7" target="_blank" rel="noreferrer">LINE 官方</a>
+          <a class="btn gold" href="./temples/12345/index.html">⚡ 12345 悟空財神殿</a>
+          <a class="btn cyan" href="./temples/16888/index.html">🌙 16888 廣寒宮</a>
+          <a class="btn green" href="./temples/11520/index.html">🌿 11520 交易所</a>
+          <a class="btn mars" href="./temples/108000/index.html">🔴 108000 豪宅</a>
+          <a class="btn purple" href="./temples/18888/index.html">🏦 18888 銀行</a>
+          <a class="btn" href="./temples/18921/index.html">🗡️ 18921 AutoLP</a>
+          <a class="btn game" href="./game/kline-5d/index.html">🎮 5D 峽谷推塔戰</a>
         </div>
       </div>
       <div class="kpiGrid">
-        <div class="kpi"><div class="k">KGEN Token</div><div class="v">0xBA3d...32Be</div></div>
-        <div class="kpi"><div class="k">Heart 12345</div><div class="v">已部署</div></div>
-        <div class="kpi"><div class="k">Brain 11520</div><div class="v">已部署</div></div>
-        <div class="kpi"><div class="k">Mars Seats</div><div class="v">已部署</div></div>
+        <div class="kpi"><div class="k">KGEN Token</div><div class="v" style="font-size:12px;">0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</div></div>
+        <div class="kpi"><div class="k">Heart 12345</div><div class="v">LIVE ✅</div></div>
+        <div class="kpi"><div class="k">BNB/USDT</div><div class="v cyan" id="hero-bnb">--</div></div>
+        <div class="kpi"><div class="k">LP TVL (est)</div><div class="v green">$12,500</div></div>
       </div>
     </div>
   </section>
 
-  <section class="section note">
-    注意：16888 廣寒宮目前是「前端入口 / 座標節點」，不是已部署許願池合約，所以這裡不再放 0x000... 白洞地址。
-    12345 若仍開到舊版，請用本頁按鈕的 <span class="mono">?v=723</span> 入口，或清手機瀏覽器快取。
-  </section>
+  <!-- World stats -->
+  <div class="stats-bar">
+    <div class="sb-item"><span class="sb-k">宇宙節點</span><span class="sb-v">6 個</span></div>
+    <div class="sb-item"><span class="sb-k">KGEN 稅率</span><span class="sb-v">0.30%（鎖死）</span></div>
+    <div class="sb-item"><span class="sb-k">Chain</span><span class="sb-v">BSC 56</span></div>
+    <div class="sb-item"><span class="sb-k">LP Lock</span><span class="sb-v">2027-01-01</span></div>
+    <div class="sb-item"><span class="sb-k">5D 遊戲</span><span class="sb-v">V0.1 原型</span></div>
+    <div class="sb-item"><span class="sb-k">最後更新</span><span class="sb-v" id="last-update">2026-07-04</span></div>
+  </div>
 
+  <!-- Nodes grid -->
   <section class="section" id="map">
     <div class="head">
       <div>
-        <h2>宇宙節點導航</h2>
-        <div class="s">入口只負責導航與狀態；各殿功能在各自 index.html。</div>
+        <h2>🌐 宇宙節點導航</h2>
+        <div class="s">六大節點全部可進入 · 讀取 kgen-5d-world-map.json</div>
       </div>
     </div>
-    <div class="nodes">
-      <a class="node live" href="./temples/12345/index.html?v=723">
-        <div class="id">12345</div>
+    <div class="nodes" id="nodes-grid">
+
+      <!-- 12345 悟空財神殿 LIVE -->
+      <a class="node live" href="./temples/12345/index.html">
+        <div class="id">🌟 12345</div>
         <div class="name">五指山・悟空財神殿</div>
-        <div class="p">Heart / 發財金 / 心跳 / 轉日呼吸 / 還願 / 點燈 / 許願</div>
-        <div class="status ok">已上線 · 新版入口</div>
-        <div class="addrBox">Heart: 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</div>
-        <div class="actions"><span class="btn small gold">開啟</span></div>
+        <div class="sub">Heart V3.2.6 · 主基地</div>
+        <div class="p">發財金 / 整點心跳 / 轉日呼吸 / 還願 / 點燈 / 許願。鏈上主神殿。</div>
+        <div class="addr">Heart: 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972</div>
+        <div class="status ok">✅ LIVE · 已上線</div>
+        <div class="enter">🚀 進入神殿</div>
       </a>
 
-      <a class="node live" href="./temples/16888/index.html?v=374">
-        <div class="id">16888</div>
-        <div class="name">廣寒宮・七仙女飛碟駕駛艙</div>
-        <div class="p">廣寒宮前端 / 音樂 / 飛碟儀表 / 七仙女座標。這裡是入口，不顯示白洞合約地址。</div>
-        <div class="status ok">前端已上線</div>
-        <div class="addrBox">Frontend: ./temples/16888/index.html</div>
-        <div class="actions"><span class="btn small cyan">開啟</span></div>
+      <!-- 16888 廣寒宮 LIVE -->
+      <a class="node live" href="./temples/16888/index.html">
+        <div class="id">🌙 16888</div>
+        <div class="name">廣寒宮・飛碟控制中心</div>
+        <div class="sub">K線宇宙引擎 V3.7.12 · 空方基地</div>
+        <div class="p">BNB / BTC K線走勢、飛碟儀表、宇宙地圖、七仙女座標。</div>
+        <div class="addr">Frontend: ./temples/16888/index.html</div>
+        <div class="status ok">✅ 前端已上線</div>
+        <div class="enter">🌙 進入廣寒宮</div>
       </a>
 
-      <div class="node live">
-        <div class="id">11520</div>
-        <div class="name">花果山台灣・悟空大腦交易所</div>
-        <div class="p">BrainExchange / Reward 稅流 / 悟空大腦容量。</div>
-        <div class="status ok">合約已部署</div>
-        <div class="addrBox">Brain: 0xd0605F4EF10e5C1438F11AF9edc36926769239d6</div>
-      </div>
+      <!-- 11520 花果山交易所 PROTOTYPE -->
+      <a class="node proto" href="./temples/11520/index.html">
+        <div class="id">🌿 11520</div>
+        <div class="name">花果山・悟空交易所</div>
+        <div class="sub">Universe Exchange V0.1 · 宇宙交易所</div>
+        <div class="p">BNB/BTC/KGEN 即時行情、K線圖、模擬掛單薄、土地地籍 listing。</div>
+        <div class="addr">Brain: 0xd0605F4EF10e5C1438F11AF9edc36926769239d6</div>
+        <div class="status proto">🔵 PROTOTYPE</div>
+        <div class="enter">🌿 進入交易所</div>
+      </a>
 
-      <div class="node live">
-        <div class="id">108000</div>
-        <div class="name">Mars 火星席位系統</div>
-        <div class="p">MarsSeats / 火星豪宅 / 席位分潤。</div>
-        <div class="status ok">合約已部署</div>
-        <div class="addrBox">MarsSeats: 0x3529dbFbaD465C2269F8096879A1c298d5257298</div>
-      </div>
+      <!-- 108000 火星豪宅 PROTOTYPE -->
+      <a class="node mars-theme" href="./temples/108000/index.html">
+        <div class="id">🔴 108000</div>
+        <div class="name">火星・齊天豪宅席位</div>
+        <div class="sub">MarsSeats V1.0.2 · 500 席位系統</div>
+        <div class="p">火星殖民艙席位展示，席位編號 / owner / status / price / rank。</div>
+        <div class="addr">MarsSeats: 0x3529dbFbaD465C2269F8096879A1c298d5257298</div>
+        <div class="status proto">🔵 PROTOTYPE</div>
+        <div class="enter">🚀 進入火星豪宅</div>
+      </a>
 
-      <div class="node live">
-        <div class="id">18888</div>
-        <div class="name">靈霄寶殿・玉帝神明銀行</div>
-        <div class="p">Bank / 0.10% 稅收承接 / 已完成底座。</div>
-        <div class="status ok">底座已完成</div>
-        <div class="addrBox">Bank: 0xfc522243e988a837700CaD600D6f030f5932681F</div>
-      </div>
+      <!-- 18888 神明銀行 PROTOTYPE -->
+      <a class="node bank-theme" href="./temples/18888/index.html">
+        <div class="id">🏦 18888</div>
+        <div class="name">靈霄寶殿・神明銀行</div>
+        <div class="sub">Divine Bank V0.1 · Treasury / Reward</div>
+        <div class="p">稅率流向圖、Treasury / Reward / Reserve 儀表板、DappBay 風險說明。</div>
+        <div class="addr">Treasury: 0xB73D6716005B37BEC742D64482fA26033eE1A4E1</div>
+        <div class="status proto">🔵 PROTOTYPE</div>
+        <div class="enter">🏦 進入神明銀行</div>
+      </a>
 
+      <!-- 18921 斬妖台 AutoLP PROTOTYPE -->
+      <a class="node autolp-theme" href="./temples/18921/index.html">
+        <div class="id">🗡️ 18921</div>
+        <div class="name">斬妖台・Auto LP</div>
+        <div class="sub">ZhanyaoTaxSplitter V0.1 · Auto LP 路由</div>
+        <div class="p">稅收路由儀表板、LP 狀態 / pair / reserve，稅率不可改原則說明。</div>
+        <div class="addr">LP Pair: 0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2</div>
+        <div class="status proto">🔵 PROTOTYPE</div>
+        <div class="enter">🗡️ 進入斬妖台</div>
+      </a>
+
+      <!-- K線 5D 峽谷推塔戰 GAME -->
+      <a class="node game-theme" href="./game/kline-5d/index.html">
+        <div class="id">🎮 5D GAME</div>
+        <div class="name">K線5D峽谷推塔戰</div>
+        <div class="sub">KGEN 5D Game V0.1 · Canvas 原型</div>
+        <div class="p">多方（牛）vs 空方（熊）。K線漲跌決定戰線。佔領 11520 / 18888 / 18921 節點。</div>
+        <div class="addr">路徑: ./game/kline-5d/index.html</div>
+        <div class="status game">🎮 PROTOTYPE · 可互動</div>
+        <div class="enter">🎮 進入峽谷推塔戰</div>
+      </a>
+
+      <!-- 8895 八戒人民銀行 SOON -->
       <div class="node soon">
-        <div class="id">8895</div>
-        <div class="name">雲棧洞・八戒人民銀行地下錢莊</div>
+        <div class="id">🐷 8895</div>
+        <div class="name">雲棧洞・八戒人民銀行</div>
+        <div class="sub">地下錢莊 · 座標保留</div>
         <div class="p">借金帳 / 還金進度 / 帳戶管理 / 一年結清後下一輪資格。</div>
-        <div class="status warn">座標定案 · 前端待建</div>
-        <div class="addrBox">品牌名固定：八戒人民銀行・地下錢莊</div>
+        <div class="status warn">⏳ 座標定案 · 前端待建</div>
       </div>
 
+      <!-- 8888 高老莊 SOON -->
       <div class="node soon">
-        <div class="id">8888</div>
+        <div class="id">🏡 8888</div>
         <div class="name">高老莊</div>
-        <div class="p">八戒風水源頭，不是五指山重生點。</div>
-        <div class="status warn">座標保留</div>
+        <div class="sub">Treasury 源頭 · 座標保留</div>
+        <div class="p">八戒風水源頭，不是五指山重生點。Treasury 8888 地址。</div>
+        <div class="addr">Treasury: 0xB73D6716005B37BEC742D64482fA26033eE1A4E1</div>
+        <div class="status warn">⏳ 座標保留</div>
       </div>
 
-      <div class="node soon">
-        <div class="id">18921</div>
-        <div class="name">斬妖台・TaxSplitter / AutoLP</div>
-        <div class="p">AutoLP 分流與稅收血管。未部署前不顯示零地址。</div>
-        <div class="status warn">待部署</div>
-      </div>
     </div>
   </section>
+
+  <!-- Note -->
+  <div class="note">
+    <strong>12345 悟空財神殿：</strong>若手機開到舊版，請清快取或直接使用本頁連結。<br>
+    <strong>11520 / 108000 / 18888 / 18921 / 5D Game：</strong>目前為前端原型（Prototype），行情為即時，不接真交易合約。<br>
+    <strong>KGEN 稅率不可改：</strong>0.30% 已鎖死在 bytecode，無任何 setter。
+    詳見 <a href="/kline-odyssey/docs/KGEN_TAX_IMMUTABILITY.md" style="color:var(--cyan);">KGEN_TAX_IMMUTABILITY.md</a>。
+  </div>
 
   <div class="footer">
     PrimeForge 以母機之名，開啟金融生命。<br>
     花果山台灣・信念不滅・市場無界。<br>
     Where the Market Becomes the Myth.<br>
-    —— 樂天帝 ⌖
+    —— 樂天帝 ⌖ · KGEN 5D Universe V0.1
   </div>
+
 </div>
+
 <script>
-function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('zh-TW',{hour12:false});}
-tick(); setInterval(tick,1000);
+/* Clock */
+function tick(){
+  var now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW',{hour12:false});
+  var d = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  var el = document.getElementById('last-update');
+  if(el) el.textContent = d;
+}
+tick(); setInterval(tick, 1000);
+
+/* Stars animation */
 (function(){
- const c=document.getElementById('stars'),ctx=c.getContext('2d'); let s=[];
- function resize(){const d=Math.min(2,devicePixelRatio||1);c.width=c.clientWidth*d;c.height=c.clientHeight*d;ctx.setTransform(d,0,0,d,0,0);s=Array.from({length:120},()=>({x:Math.random()*c.clientWidth,y:Math.random()*c.clientHeight,r:.5+Math.random()*1.6,v:.12+Math.random()*.55}));}
- function loop(){ctx.clearRect(0,0,c.clientWidth,c.clientHeight);ctx.fillStyle='rgba(255,255,255,.8)';for(const p of s){p.y+=p.v;if(p.y>c.clientHeight){p.y=0;p.x=Math.random()*c.clientWidth}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}requestAnimationFrame(loop)}
- resize(); addEventListener('resize',resize); loop();
+  var c = document.getElementById('stars');
+  var ctx = c.getContext('2d');
+  var s = [];
+  function resize(){
+    var dpr = Math.min(2, devicePixelRatio || 1);
+    c.width = c.clientWidth * dpr;
+    c.height = c.clientHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    s = Array.from({length: 130}, function(){
+      return { x: Math.random()*c.clientWidth, y: Math.random()*c.clientHeight,
+               r: .4 + Math.random()*1.5, v: .1 + Math.random()*.5 };
+    });
+  }
+  function loop(){
+    ctx.clearRect(0, 0, c.clientWidth, c.clientHeight);
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    for(var i = 0; i < s.length; i++){
+      s[i].y += s[i].v;
+      if(s[i].y > c.clientHeight){ s[i].y = 0; s[i].x = Math.random() * c.clientWidth; }
+      ctx.beginPath();
+      ctx.arc(s[i].x, s[i].y, s[i].r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  resize();
+  addEventListener('resize', resize);
+  loop();
+})();
+
+/* Live BNB price from Binance */
+(function(){
+  function updateBNB(){
+    fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BNBUSDT')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var price = '$' + parseFloat(d.lastPrice).toFixed(2);
+        var el1 = document.getElementById('bnb-price');
+        var el2 = document.getElementById('hero-bnb');
+        if(el1) el1.textContent = price;
+        if(el2) el2.textContent = price;
+      })
+      .catch(function(){ /* CORS on localhost — silent */ });
+  }
+  updateBNB();
+  setInterval(updateBNB, 20000);
+})();
+
+/* Load world map JSON and annotate nodes */
+(function(){
+  fetch('./data/kgen-5d-world-map.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      // Update stats bar with physics info
+      var tax = data.kPhysics && data.kPhysics.taxBpsTotal;
+      if(tax) {
+        var els = document.querySelectorAll('.sb-v');
+        // Already set inline; could update dynamically if needed
+      }
+      console.log('[KGEN Portal] World map loaded:', Object.keys(data.nodes || {}).length, 'nodes');
+    })
+    .catch(function(){ /* JSON load optional */ });
 })();
 </script>
 </body>
