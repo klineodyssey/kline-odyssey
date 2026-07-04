@@ -58,10 +58,10 @@ PRIMEFORGE_LIFE_HEADER_V1:
 -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>KGEN 12345 Wallet Bridge｜V2.3.0</title>
+  <title>KGEN 12345 Wallet Bridge｜V2.3.1</title>
   <!--
   PRODUCT_ID: KGEN-12345-WALLET-BRIDGE
-  VERSION: V2.1.6 / BRIDGE EXACT RESTORE
+  VERSION: V2.3.1 / BRIDGE RESTORE
   BUILD: 20260525-V10.42.0-2D-ANTIGRAVITY-DECORATION
   BASE_FROM: KGEN_12345_V10_49_2_FRONTEND_RITUAL_FIX_FULL.zip
   RULE: wallet-12345.html is root bridge only. It must not duplicate the temple app.
@@ -77,10 +77,19 @@ PRIMEFORGE_LIFE_HEADER_V1:
     const ROOT_ENTRY='12345.html';
     const ABS='https://klineodyssey.github.io/kline-odyssey/12345.html';
     function carryQuery(){
-      return location.search || '';
+      const src=new URLSearchParams(location.search);
+      const dst=new URLSearchParams();
+      ['autoconnect','wallet','source','from','bridge'].forEach(function(k){
+        const v=src.get(k);
+        if(v!==null && v!=='') dst.set(k,v);
+      });
+      if(!dst.has('bridge')) dst.set('bridge','1');
+      const q=dst.toString();
+      return q?('?'+q):'';
     }
     function goRoot(){ location.href=ROOT_ENTRY+carryQuery(); }
-    document.addEventListener('DOMContentLoaded',function(){
+    window.addEventListener('DOMContentLoaded',function(){
+      setTimeout(goRoot,80);
       const a=document.getElementById('go-root');
       if(a) a.href=ROOT_ENTRY+carryQuery();
     });
@@ -89,11 +98,11 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <body>
   <div class="card">
     <h1>KGEN 12345 錢包橋接入口</h1>
-    <p>VERSION：<code>V2.3.0 / WALLET AUTO BRIDGE</code></p>
+    <p>VERSION：<code>V2.3.1 / BRIDGE RESTORE</code></p>
     <p>橋接流程：<code>wallet-12345.html</code> → <code>12345.html</code> → 神殿</p>
     <a id="go-root" href="12345.html">進入 12345 英文入口</a>
     <button onclick="goRoot()">啟動 12345.html 英文入口</button>
-    <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(ABS+(location.search||''));this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button>
+    <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(ABS+carryQuery());this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button>
   </div>
 </body>
 </html>

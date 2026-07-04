@@ -359,7 +359,32 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
   height: 30px !important;
   max-height: 30px !important;
   overflow: hidden !important;
+  display: grid !important;
   grid-template-columns: repeat(25, 6px) !important;
+  gap: 3px !important;
+  margin-top: 4px !important;
+  contain: layout paint style !important;
+}
+
+.hud-top .grid-500 .dot {
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  min-height: 6px !important;
+  max-width: 6px !important;
+  max-height: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #1a1a00 !important;
+  border-radius: 1px !important;
+  box-sizing: border-box !important;
+  contain: strict !important;
+  transition: background 0.12s ease, filter 0.12s ease !important;
+}
+
+.hud-top .grid-500 .dot.on {
+  background: #ffcc00 !important;
+  filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.95)) drop-shadow(0 0 5px rgba(255, 204, 0, 0.55)) !important;
 }
 
 @media (max-width: 760px) {
@@ -396,6 +421,15 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
     max-width: 100% !important;
     grid-template-columns: repeat(20, 5px) !important;
     gap: 2px !important;
+  }
+
+  .hud-top .grid-500 .dot {
+    width: 5px !important;
+    height: 5px !important;
+    min-width: 5px !important;
+    min-height: 5px !important;
+    max-width: 5px !important;
+    max-height: 5px !important;
   }
 }
 

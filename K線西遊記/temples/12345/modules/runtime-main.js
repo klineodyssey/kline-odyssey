@@ -1,9 +1,10 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.0 / WALLET AUTO BRIDGE";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.0";
-  const UI_PATCH = "V2.3.0";
+  const VERSION = "V2.3.1 / BRIDGE RESTORE";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.1";
+  const UI_PATCH = "V2.3.1";
+  const BRIDGE_LOGIC_VERSION = "V10.49.2 restored logic";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -28,7 +29,7 @@
     "KGEN_12345_V908_CUP_COUNT"
   ];
   const WALLET_BRIDGE = {
-    ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
+    ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
@@ -2410,6 +2411,9 @@
       autoconnectError: "--",
       finalDappDeeplink: "--",
       bridgeSource: "--",
+      bridgeFile: "--",
+      bridgeVersion: BRIDGE_LOGIC_VERSION,
+      routeTarget: "--",
       autoconnectCarried: "--",
       currentBrowser: "--",
       deeplinkMethod: "--",
@@ -2443,6 +2447,9 @@
       this.state.isFacebookWebView = WalletRuntime.isFacebookWebView() ? "yes" : "no";
       this.state.currentBrowser = WalletRuntime.detectCurrentBrowser();
       this.state.bridgeSource = WalletRuntime.detectBridgeSource();
+      this.state.bridgeFile = WalletRuntime.detectBridgeFile();
+      this.state.bridgeVersion = BRIDGE_LOGIC_VERSION;
+      this.state.routeTarget = WalletRuntime.getRouteTarget();
       try{
         const qs = WalletRuntime.parsePageQuery();
         this.state.autoconnectParam = WalletRuntime.shouldAutoConnectFromQuery(qs) ? "yes" : "no param";
@@ -2527,6 +2534,14 @@
       this.state.bridgeSource = v || "--";
       this.render();
     },
+    setBridgeFile: function(v){
+      this.state.bridgeFile = v || "--";
+      this.render();
+    },
+    setRouteTarget: function(v){
+      this.state.routeTarget = v || "--";
+      this.render();
+    },
     setAutoconnectCarried: function(v){
       this.state.autoconnectCarried = v ? "yes" : "no";
       this.render();
@@ -2595,6 +2610,9 @@
         "wd-ac-error": this.state.autoconnectError,
         "wd-final-dapp": this.state.finalDappDeeplink,
         "wd-bridge-src": this.state.bridgeSource,
+        "wd-bridge-file": this.state.bridgeFile,
+        "wd-bridge-ver": this.state.bridgeVersion,
+        "wd-route-target": this.state.routeTarget,
         "wd-ac-carried": this.state.autoconnectCarried,
         "wd-browser": this.state.currentBrowser,
         "wd-dl-method": this.state.deeplinkMethod,
@@ -2890,6 +2908,8 @@
       const self = this;
       try{
         WalletDebugRuntime.setBridgeSource(this.detectBridgeSource());
+        WalletDebugRuntime.setBridgeFile(this.detectBridgeFile());
+        WalletDebugRuntime.setRouteTarget(this.getRouteTarget());
         WalletDebugRuntime.setCurrentBrowser(this.detectCurrentBrowser());
         const qs = this.parsePageQuery();
         const carried = qs.get("autoconnect") === "1";
@@ -2975,14 +2995,24 @@
       if(window.ethereum || window.BinanceChain) return "wallet";
       return "normal";
     },
-    detectBridgeSource: function(){
+    detectBridgeFile: function(){
       const href = location.href || "";
       const ref = document.referrer || "";
-      if(/wallet-12345\.html/i.test(href) || /wallet-12345\.html/i.test(ref)) return "wallet-12345.html";
-      if(/\/12345\.html/i.test(href) || /\/12345\.html/i.test(ref)) return "12345.html";
+      if(/wallet-12345\.html/i.test(href)) return "wallet-12345.html";
+      if(/wallet-12345\.html/i.test(ref)) return "wallet-12345.html";
+      if(/\/12345\.html/i.test(href)) return "12345.html";
+      if(/\/12345\.html/i.test(ref)) return "12345.html";
+      return "none";
+    },
+    getRouteTarget: function(){
+      return WALLET_BRIDGE.OFFICIAL_DAPP;
+    },
+    detectBridgeSource: function(){
+      const file = this.detectBridgeFile();
+      if(file !== "none") return file;
       const hub = $("walletHub");
       if(hub && hub.style.display === "flex") return "walletHub";
-      if(/temples\/12345\/index\.html/i.test(href)) return "direct";
+      if(/temples\/12345\/index\.html/i.test(location.href || "")) return "direct";
       return "direct";
     },
     isMobileBrowser: function(){
@@ -3543,6 +3573,31 @@
     }
   };
 
+  const MonitorGridRuntime = {
+    inited: false,
+    init: function(){
+      if(this.inited) return;
+      this.inited = true;
+      this.ensureDots();
+    },
+    ensureDots: function(){
+      ["g1", "g2"].forEach(function(id){
+        const container = $(id);
+        if(!container || container.children.length) return;
+        for(let i = 0; i < 100; i++){
+          const dot = document.createElement("div");
+          dot.className = "dot" + (Math.random() > 0.5 ? " on" : "");
+          container.appendChild(dot);
+        }
+      });
+    },
+    tick: function(){
+      document.querySelectorAll(".hud-top .grid-500 .dot").forEach(function(dot){
+        if(Math.random() > 0.9) dot.classList.toggle("on");
+      });
+    }
+  };
+
   const modules = {
     StatusRuntime: StatusRuntime,
     HudRuntime: HudRuntime,
@@ -3557,6 +3612,7 @@
     ScreenRecorderRuntime: ScreenRecorderRuntime,
     ActionRuntime: ActionRuntime,
     LandRuntime: LandRuntime,
+    MonitorGridRuntime: MonitorGridRuntime,
     LayoutRuntime: LayoutRuntime,
     LegacyBridgeRuntime: LegacyBridgeRuntime
   };
@@ -3583,12 +3639,14 @@
       HeartRuntime.init();
       ActionRuntime.init();
       LandRuntime.init();
+      MonitorGridRuntime.init();
       WalletDebugRuntime.init();
       TimerRegistry.register("clock", function(){ HudRuntime.tick(); }, 1000);
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.0 WALLET AUTO BRIDGE ready");
+      TimerRegistry.register("monitor-dots", function(){ MonitorGridRuntime.tick(); }, 1000);
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.1 BRIDGE RESTORE ready");
       WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
@@ -3618,7 +3676,7 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.3.0 WALLET AUTO BRIDGE / WALLET HUB DELEGATE =====
+  // ===== V2.3.1 WALLET AUTO BRIDGE / WALLET HUB DELEGATE =====
   (function defineWalletHubDelegate(){
     var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
     var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
