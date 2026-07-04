@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<!--
+PRODUCT_ID: KGEN-18888-DIVINE-BANK-UI
+VERSION: V0.1 / 5D Genesis Prototype
+BUILD: 20260704-18888-DIVINE-BANK-V0.1
+BIRTH: 2026-07-04
+ROLE: 靈霄寶殿神明銀行 / Treasury / Reward / DappBay 說明
+STATUS: PROTOTYPE — 前端原型，不改合約
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>18888 靈霄寶殿神明銀行｜KGEN Divine Bank V0.1</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+:root { --accent: #c084fc; --accent2: rgba(192,132,252,.14); }
+
+.bank-hero {
+  background: linear-gradient(135deg, rgba(192,132,252,.12), rgba(0,0,0,0) 60%),
+              linear-gradient(180deg, #07050c, #0a0712);
+  border: 1px solid rgba(192,132,252,.35);
+  border-radius: 20px; padding: 20px; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.bank-hero::before {
+  content: '18888';
+  position: absolute; right: 16px; top: 4px;
+  font-size: 58px; font-weight: 950;
+  color: rgba(192,132,252,.08); font-family: var(--kgen-mono);
+  pointer-events: none;
+}
+
+.reserve-bar { margin: 8px 0; }
+.reserve-bar .rb-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.reserve-bar .rb-name { color: var(--kgen-muted); }
+.reserve-bar .rb-val { color: var(--kgen-gold); font-family: var(--kgen-mono); font-weight: 900; }
+
+.risk-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--kgen-line); }
+.risk-row:last-child { border-bottom: none; }
+.risk-icon { font-size: 20px; flex-shrink: 0; }
+.risk-title { font-size: 14px; font-weight: 900; margin-bottom: 3px; }
+.risk-desc { font-size: 12px; color: var(--kgen-muted); line-height: 1.55; }
+
+/* Timeline of tax flow */
+.tax-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.tax-node { text-align: center; flex: 1; min-width: 80px; }
+.tax-node .tn-label { font-size: 10px; color: var(--kgen-muted); }
+.tax-node .tn-pct { font-size: 18px; font-weight: 950; color: var(--kgen-gold); font-family: var(--kgen-mono); }
+.tax-node .tn-name { font-size: 11px; color: var(--kgen-text); margin-top: 2px; }
+.tax-arrow { color: var(--kgen-gold-dim); font-size: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+
+<header class="kgen-hud">
+  <div>
+    <div class="kgen-hud-title">🏦 18888 靈霄寶殿神明銀行</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">Divine Bank V0.1 | Prototype</div>
+  </div>
+  <nav class="kgen-hud-nav">
+    <a href="../../index.html">🌌 星系</a>
+    <a href="../12345/index.html">⚡ 12345</a>
+    <a href="../11520/index.html">🌿 11520</a>
+    <a href="../18921/index.html">🗡️ 18921</a>
+    <a href="../../game/kline-5d/index.html">🎮 5D</a>
+  </nav>
+</header>
+
+<main class="kgen-page">
+<div class="kgen-wrap">
+
+  <!-- Hero -->
+  <div class="bank-hero">
+    <div style="font-size:26px;font-weight:950;color:#c084fc;">靈霄寶殿神明銀行</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">Divine Bank V0.1 · 18888 · Treasury / Reward / Reserve 系統</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="kgen-pill" style="border-color:rgba(192,132,252,.4);color:#c084fc;">PROTOTYPE</span>
+      <span class="kgen-pill gold">BSC · Chain 56</span>
+      <span class="kgen-pill">稅率永久鎖定 0.30%</span>
+    </div>
+
+    <!-- Treasury KPIs -->
+    <div class="kgen-kpi-grid col4" style="margin-top:14px;">
+      <div class="kgen-kpi">
+        <div class="k">Treasury 8888</div>
+        <div class="v" style="font-size:16px;" id="bank-treasury">8,888 KGEN</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">神殿金庫</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">Reward Pool</div>
+        <div class="v" style="font-size:16px;color:#c084fc;" id="bank-reward">16,888 KGEN</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">獎勵池</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">Temple Reserve</div>
+        <div class="v" style="font-size:16px;color:var(--kgen-cyan);" id="bank-reserve">72,000 KGEN</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">神殿準備金</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">LP Reserve</div>
+        <div class="v" style="font-size:16px;color:var(--kgen-green);" id="bank-lp">$12,500</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">流動性準備</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 稅率流向圖 -->
+  <div class="kgen-section-head"><h2>💱 KGEN 稅率流向圖（0.30% 永久鎖定）</h2></div>
+  <div class="kgen-card">
+    <div class="tax-flow">
+      <div class="tax-node">
+        <div class="tn-label">每次買賣</div>
+        <div class="tn-pct">0.30%</div>
+        <div class="tn-name">總稅率</div>
+      </div>
+      <div class="tax-arrow">→</div>
+      <div class="tax-node">
+        <div class="tn-label">銷毀</div>
+        <div class="tn-pct" style="color:#ff4444;">0.10%</div>
+        <div class="tn-name">Burn 銷毀池</div>
+      </div>
+      <div class="tax-arrow">+</div>
+      <div class="tax-node">
+        <div class="tn-label">神明銀行</div>
+        <div class="tn-pct" style="color:#c084fc;">0.10%</div>
+        <div class="tn-name">Bank 金庫</div>
+      </div>
+      <div class="tax-arrow">+</div>
+      <div class="tax-node">
+        <div class="tn-label">獎勵池</div>
+        <div class="tn-pct" style="color:var(--kgen-green);">0.05%</div>
+        <div class="tn-name">Reward</div>
+      </div>
+      <div class="tax-arrow">+</div>
+      <div class="tax-node">
+        <div class="tn-label">流動性</div>
+        <div class="tn-pct" style="color:var(--kgen-cyan);">0.05%</div>
+        <div class="tn-name">Auto LP</div>
+      </div>
+    </div>
+    <div class="kgen-notice" style="margin-top:14px;">
+      以上稅率為 Solidity <code>constant</code>，部署後無任何 setter 可修改。
+      Owner 只能更換收款錢包地址，<strong>不能調整 bps</strong>。
+      詳見 <a href="/kline-odyssey/docs/KGEN_TAX_IMMUTABILITY.md" style="color:var(--kgen-cyan);">KGEN_TAX_IMMUTABILITY.md</a>。
+    </div>
+  </div>
+
+  <!-- Reserve 進度條 -->
+  <div class="kgen-section-head"><h2>📊 資金池分佈</h2></div>
+  <div class="kgen-card">
+    <div class="reserve-bar">
+      <div class="rb-label"><span class="rb-name">🔥 Burn 銷毀（累計）</span><span class="rb-val">1,234.56 KGEN</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:17%;background:linear-gradient(90deg,#ff4444,#ff8888);"></div></div>
+    </div>
+    <div class="reserve-bar">
+      <div class="rb-label"><span class="rb-name">🏦 Bank 金庫</span><span class="rb-val">8,888 KGEN</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:38%;background:linear-gradient(90deg,#c084fc,#e0a9ff);"></div></div>
+    </div>
+    <div class="reserve-bar">
+      <div class="rb-label"><span class="rb-name">🎁 Reward Pool</span><span class="rb-val">16,888 KGEN</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:60%;background:linear-gradient(90deg,#7cffc5,#00f2ff);"></div></div>
+    </div>
+    <div class="reserve-bar">
+      <div class="rb-label"><span class="rb-name">💧 Auto LP Reserve</span><span class="rb-val">$12,500</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:45%;"></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--kgen-muted);margin-top:8px;">* 以上為前端展示數據，非即時鏈上數據。</div>
+  </div>
+
+  <!-- DappBay 說明 -->
+  <div class="kgen-section-head"><h2>⚠️ DappBay 安全說明</h2></div>
+  <div class="kgen-card">
+    <div class="kgen-notice red" style="margin-bottom:14px;">
+      <strong>DappBay 顯示「Can Modify Tax」—— 這不代表稅率真的可改</strong>
+    </div>
+
+    <div class="risk-row">
+      <div class="risk-icon">🔍</div>
+      <div>
+        <div class="risk-title">為什麼 DappBay 會顯示 Can Modify Tax？</div>
+        <div class="risk-desc">掃描器使用啟發式規則：合約含有 <code>setTaxWallets</code>、<code>setTaxExempt</code> 等名稱帶 Tax 的 onlyOwner 函式，即被歸類為「可修改稅務相關設定」。DappBay 不區分「稅率 bps」與「稅收路由/免稅/交易對設定」。</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <div class="risk-icon">🔒</div>
+      <div>
+        <div class="risk-title">稅率是否真的不可改？</div>
+        <div class="risk-desc">是。稅率以 Solidity <code>uint16 public constant</code> 鎖定，寫入 bytecode 後任何函式（含 onlyOwner）都無法修改。合約不存在 <code>setTax</code>、<code>updateTax</code>、<code>setFees</code>、<code>updateFees</code>。</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <div class="risk-icon">🏛️</div>
+      <div>
+        <div class="risk-title">Owner 未放棄 ownership 是漏洞嗎？</div>
+        <div class="risk-desc">不是。Owner 保留的唯一能力：更換稅收「收款地址」（不影響 bps）、設定免稅名單、標記 AMM 對。這是治理用途，不是稅率 setter。Owner 已設定稅收路由到透明地址。</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <div class="risk-icon">✅</div>
+      <div>
+        <div class="risk-title">驗證方法</div>
+        <div class="risk-desc">開啟 <a href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be#readContract" target="_blank" style="color:var(--kgen-cyan);">BscScan Read Contract</a>，查看 TAX_BPS_TOTAL = 30、TAX_BPS_BURN = 10 等常數。</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <a href="/kline-odyssey/docs/KGEN_TAX_IMMUTABILITY.md" class="kgen-btn">📄 閱讀完整 KGEN 稅率不可變性文件</a>
+    </div>
+  </div>
+
+  <!-- Treasury wallets -->
+  <div class="kgen-section-head"><h2>🏛️ 官方錢包地址</h2></div>
+  <div class="kgen-card">
+    <table class="kgen-table">
+      <thead><tr><th>名稱</th><th>地址</th><th>BscScan</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>KGEN Token</td>
+          <td style="font-family:var(--kgen-mono);font-size:11px;">0xBA3d…2Be</td>
+          <td><a href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" class="kgen-pill cyan" style="font-size:10px;">查看</a></td>
+        </tr>
+        <tr>
+          <td>Heart 12345</td>
+          <td style="font-family:var(--kgen-mono);font-size:11px;">0xB016…972</td>
+          <td><a href="https://bscscan.com/address/0xB016D4d8f1aED1339101b30722cad6dbA9B8C972" target="_blank" class="kgen-pill cyan" style="font-size:10px;">查看</a></td>
+        </tr>
+        <tr>
+          <td>Treasury 8888</td>
+          <td style="font-family:var(--kgen-mono);font-size:11px;">0xB73D…A4E1</td>
+          <td><a href="https://bscscan.com/address/0xB73D6716005B37BEC742D64482fA26033eE1A4E1" target="_blank" class="kgen-pill cyan" style="font-size:10px;">查看</a></td>
+        </tr>
+        <tr>
+          <td>LP Pair KGEN/WBNB</td>
+          <td style="font-family:var(--kgen-mono);font-size:11px;">0xf366…c2</td>
+          <td><a href="https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" class="kgen-pill cyan" style="font-size:10px;">查看</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Nav -->
+  <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;" id="universe-nodes"></div>
+
+</div>
+</main>
+
+<div class="kgen-status-bar">
+  <div class="kgen-status-dot"></div>
+  <span id="kgen-status-bottom">18888 靈霄寶殿神明銀行 V0.1 · 原型</span>
+</div>
+
+<script src="../../modules/kgen-game-core.js"></script>
+<script>
+(function(){
+  var status = new KGEN_StatusBus('kgen-status-text');
+
+  /* === Universe nodes === */
+  var nodesEl = document.getElementById('universe-nodes');
+  if(nodesEl && window.KGEN_5D){
+    var nodeHtml = '';
+    Object.keys(KGEN_5D.NODES).forEach(function(id){
+      if(id === '18888') return;
+      var n = KGEN_5D.NODES[id];
+      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+        + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
+        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
+        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
+        + '</a>';
+    });
+    nodesEl.innerHTML = nodeHtml;
+  }
+
+  /* Demo: animate reserve values */
+  setInterval(function(){
+    var treasury = document.getElementById('bank-treasury');
+    if(treasury){
+      var v = 8888 + Math.floor(Math.random()*100);
+      treasury.textContent = v.toLocaleString() + ' KGEN';
+    }
+  }, 12000);
+
+  status.push('18888 靈霄寶殿神明銀行 V0.1 已啟動');
+})();
+</script>
+</body>
+</html>

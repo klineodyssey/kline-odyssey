@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<!--
+PRODUCT_ID: KGEN-18921-AUTOLP-UI
+VERSION: V0.1 / 5D Genesis Prototype
+BUILD: 20260704-18921-AUTOLP-V0.1
+BIRTH: 2026-07-04
+ROLE: 斬妖台 Auto LP 儀表板 / 稅收分配 / LP Status
+STATUS: PROTOTYPE — 前端原型，不改合約
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>18921 斬妖台 Auto LP｜KGEN ZhanyaoTaxSplitter V0.1</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+:root { --accent: #7cffc5; --accent2: rgba(124,255,197,.12); }
+
+.autolp-hero {
+  background: linear-gradient(135deg, rgba(124,255,197,.1), rgba(0,0,0,0) 60%),
+              linear-gradient(180deg, #030c08, #040e0a);
+  border: 1px solid rgba(124,255,197,.3);
+  border-radius: 20px; padding: 20px; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.autolp-hero::before {
+  content: '18921';
+  position: absolute; right: 16px; top: 4px;
+  font-size: 58px; font-weight: 950;
+  color: rgba(124,255,197,.07); font-family: var(--kgen-mono);
+  pointer-events: none;
+}
+
+/* Splitter animation */
+.splitter-flow {
+  display: flex; align-items: center; gap: 4px;
+  padding: 12px 0;
+}
+.sf-source {
+  border: 1px solid rgba(255,215,120,.4);
+  border-radius: 10px; padding: 8px 14px;
+  font-size: 13px; font-weight: 900; color: var(--kgen-gold);
+  white-space: nowrap;
+}
+.sf-arrow { color: var(--kgen-gold-dim); font-size: 20px; flex: 1; text-align: center; }
+.sf-dest {
+  border: 1px solid rgba(124,255,197,.4);
+  border-radius: 10px; padding: 8px 14px;
+  font-size: 13px; font-weight: 900; color: var(--kgen-green);
+  white-space: nowrap;
+}
+
+/* Split bars */
+.split-row { margin: 6px 0; }
+.split-row .sr-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+
+/* Log table */
+.log-entry { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--kgen-line); font-size: 12px; }
+.log-entry:last-child { border-bottom: none; }
+.log-ts { color: var(--kgen-muted); font-family: var(--kgen-mono); flex-shrink: 0; }
+.log-msg { color: var(--kgen-text); }
+.log-amt { color: var(--kgen-green); font-family: var(--kgen-mono); flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+
+<header class="kgen-hud">
+  <div>
+    <div class="kgen-hud-title">🗡️ 18921 斬妖台 Auto LP</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">ZhanyaoTaxSplitter V0.1 | Prototype</div>
+  </div>
+  <nav class="kgen-hud-nav">
+    <a href="../../index.html">🌌 星系</a>
+    <a href="../12345/index.html">⚡ 12345</a>
+    <a href="../18888/index.html">🏦 18888</a>
+    <a href="../11520/index.html">🌿 11520</a>
+    <a href="../../game/kline-5d/index.html">🎮 5D</a>
+  </nav>
+</header>
+
+<main class="kgen-page">
+<div class="kgen-wrap">
+
+  <!-- Hero -->
+  <div class="autolp-hero">
+    <div style="font-size:26px;font-weight:950;color:#7cffc5;">斬妖台 Auto LP</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">ZhanyaoTaxSplitter V0.1 · 18921 · 稅收路由 / Auto LP 儀表板</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="kgen-pill green">PROTOTYPE</span>
+      <span class="kgen-pill gold">BSC · Chain 56</span>
+      <span class="kgen-pill">稅率不可改 · 只路由稅收</span>
+    </div>
+
+    <div class="kgen-kpi-grid col4" style="margin-top:14px;">
+      <div class="kgen-kpi">
+        <div class="k">Auto LP 錢包</div>
+        <div class="v" style="font-size:11px;color:var(--kgen-green);">0x0000…0000</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">待設定</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">LP 對</div>
+        <div class="v" style="font-size:14px;">KGEN/WBNB</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">PancakeSwap</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">本月 Auto LP 路由</div>
+        <div class="v" id="lp-routed">512 KGEN</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">模擬</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">LP TVL</div>
+        <div class="v" id="lp-tvl" style="color:var(--kgen-green);">$12,500</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">Pair Balance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LP Status -->
+  <div class="kgen-section-head"><h2>💧 LP 流動性狀態</h2></div>
+  <div class="kgen-card">
+    <table class="kgen-table">
+      <thead><tr><th>項目</th><th>數值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>LP Pair</td><td style="font-family:var(--kgen-mono);font-size:12px;">0xf366…74c6</td><td>KGEN/WBNB PancakeSwap</td></tr>
+        <tr><td>Reserve KGEN</td><td id="lp-res-kgen">720,000 KGEN</td><td>池內 KGEN 數量</td></tr>
+        <tr><td>Reserve WBNB</td><td id="lp-res-bnb">8.64 BNB</td><td>池內 BNB 數量</td></tr>
+        <tr><td>LP TVL</td><td id="lp-tvl-2">$12,500</td><td>等值美元（估算）</td></tr>
+        <tr><td>LP Lock</td><td><a href="https://www.pinksale.finance/pinklock/bsc/record/1427003" target="_blank" style="color:var(--kgen-cyan);">PinkLock 查看</a></td><td>2027-01-01 到期</td></tr>
+        <tr><td>Auto LP 積累</td><td style="color:var(--kgen-green);">0.05% / 每筆交易</td><td>稅收固定路由</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 稅收路由流向 -->
+  <div class="kgen-section-head"><h2>🔄 稅收路由機制</h2></div>
+  <div class="kgen-card">
+    <div class="kgen-notice" style="margin-bottom:12px;">
+      <strong>關鍵原則：稅率不可改，只能路由稅收</strong><br>
+      ZhanyaoTaxSplitter 負責將 Bank 稅收（0.10%）拆分到指定地址。<strong>稅率本身（bps）已鎖死在 Token 合約 bytecode，無任何 setter。</strong>
+    </div>
+
+    <div class="splitter-flow">
+      <div class="sf-source">每筆 Buy/Sell<br>KGEN 稅收</div>
+      <div class="sf-arrow">→→→</div>
+      <div class="sf-dest">ZhanyaoTaxSplitter<br>18921</div>
+    </div>
+
+    <!-- Split distribution bars -->
+    <div class="split-row">
+      <div class="sr-label"><span style="color:#ff4444;">🔥 Burn（銷毀）</span><span style="color:#ff4444;font-weight:900;">0.10% · 33.3%</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:33%;background:linear-gradient(90deg,#ff4444,#ff8888);"></div></div>
+    </div>
+    <div class="split-row">
+      <div class="sr-label"><span style="color:#c084fc;">🏦 Bank 金庫</span><span style="color:#c084fc;font-weight:900;">0.10% · 33.3%</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:33%;background:linear-gradient(90deg,#c084fc,#e0a9ff);"></div></div>
+    </div>
+    <div class="split-row">
+      <div class="sr-label"><span style="color:#7cffc5;">🎁 Reward Pool</span><span style="color:#7cffc5;font-weight:900;">0.05% · 16.7%</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:17%;background:linear-gradient(90deg,#7cffc5,#00f2ff);"></div></div>
+    </div>
+    <div class="split-row">
+      <div class="sr-label"><span style="color:var(--kgen-cyan);">💧 Auto LP</span><span style="color:var(--kgen-cyan);font-weight:900;">0.05% · 16.7%</span></div>
+      <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:17%;"></div></div>
+    </div>
+  </div>
+
+  <!-- 斬妖台原則 -->
+  <div class="kgen-section-head"><h2>⚔️ 斬妖台原則</h2></div>
+  <div class="kgen-card">
+    <div class="kgen-notice" style="margin-bottom:10px;">
+      斬妖台（18921）是 KGEN 宇宙的 Auto LP 路由器。功能只有「把 AutoLP 稅收加入流動性」，不決定稅率，不操控價格，不做任何 rug pull 動作。
+    </div>
+    <table class="kgen-table">
+      <thead><tr><th>原則</th><th>狀態</th></tr></thead>
+      <tbody>
+        <tr><td>稅率不可改</td><td><span class="kgen-pill green">✅ constant bps</span></td></tr>
+        <tr><td>Owner 只能路由稅收，不能修改稅率</td><td><span class="kgen-pill green">✅ 確認</span></td></tr>
+        <tr><td>Auto LP 只能加，不能移除流動性</td><td><span class="kgen-pill green">✅ 設計</span></td></tr>
+        <tr><td>LP Lock 到 2027</td><td><span class="kgen-pill cyan">✅ PinkLock</span></td></tr>
+        <tr><td>合約未重新部署</td><td><span class="kgen-pill green">✅ 不重部署</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 操作紀錄（模擬） -->
+  <div class="kgen-section-head"><h2>📜 最近路由紀錄（模擬）</h2></div>
+  <div class="kgen-card" id="lp-log">
+    <!-- generated by JS -->
+  </div>
+
+  <!-- Nav -->
+  <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;" id="universe-nodes"></div>
+
+</div>
+</main>
+
+<div class="kgen-status-bar">
+  <div class="kgen-status-dot"></div>
+  <span id="kgen-status-bottom">18921 斬妖台 Auto LP V0.1 · 原型</span>
+</div>
+
+<script src="../../modules/kgen-game-core.js"></script>
+<script>
+(function(){
+  var status = new KGEN_StatusBus('kgen-status-text');
+
+  /* === Mock log entries === */
+  var LOG = [
+    { ts: '07-04 13:42', msg: 'Auto LP 路由', amt: '+18.5 KGEN' },
+    { ts: '07-04 12:31', msg: 'Reward 分配',  amt: '+9.25 KGEN' },
+    { ts: '07-04 11:55', msg: 'Auto LP 路由', amt: '+12.0 KGEN' },
+    { ts: '07-04 10:20', msg: 'Burn 銷毀',    amt: '−37.0 KGEN' },
+    { ts: '07-04 09:08', msg: 'Bank 入庫',    amt: '+37.0 KGEN' },
+  ];
+
+  var logEl = document.getElementById('lp-log');
+  if(logEl){
+    var html = '';
+    LOG.forEach(function(l){
+      var isNeg = l.amt.startsWith('−');
+      html += '<div class="log-entry">'
+        + '<span class="log-ts">' + l.ts + '</span>'
+        + '<span class="log-msg">' + l.msg + '</span>'
+        + '<span class="log-amt" style="color:' + (isNeg ? '#ff4444' : '#7cffc5') + ';">' + l.amt + '</span>'
+        + '</div>';
+    });
+    logEl.innerHTML = html;
+  }
+
+  /* === Universe nodes === */
+  var nodesEl = document.getElementById('universe-nodes');
+  if(nodesEl && window.KGEN_5D){
+    var nodeHtml = '';
+    Object.keys(KGEN_5D.NODES).forEach(function(id){
+      if(id === '18921') return;
+      var n = KGEN_5D.NODES[id];
+      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+        + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
+        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
+        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
+        + '</a>';
+    });
+    nodesEl.innerHTML = nodeHtml;
+  }
+
+  /* === Animate LP stats === */
+  setInterval(function(){
+    var routed = document.getElementById('lp-routed');
+    if(routed){
+      var v = 500 + Math.floor(Math.random()*100);
+      routed.textContent = v + ' KGEN';
+    }
+  }, 10000);
+
+  status.push('18921 斬妖台 Auto LP V0.1 已啟動');
+})();
+</script>
+</body>
+</html>

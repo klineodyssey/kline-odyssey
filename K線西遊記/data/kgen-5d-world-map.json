@@ -1,0 +1,151 @@
+{
+  "schema": "KGEN-5D-WORLD-MAP-V0.1",
+  "version": "V0.1",
+  "created": "2026-07-04",
+  "author": "PrimeForge / 樂天帝 ⌖",
+  "description": "KGEN 5D Universe — world map data for all temples and game nodes",
+
+  "universe": {
+    "id": "KGEN-PRIME-CIVILIZATION",
+    "name": "KLINE ODYSSEY",
+    "chain": "BNB Smart Chain",
+    "chainId": 56,
+    "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "lpPair": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2"
+  },
+
+  "kPhysics": {
+    "unit": "1 KGEN = 1 kg = 1 指數點 = 1 斤",
+    "taxBpsTotal": 30,
+    "taxBpsBurn": 10,
+    "taxBpsBank": 10,
+    "taxBpsReward": 5,
+    "taxBpsAutoLP": 5,
+    "taxImmutable": true
+  },
+
+  "nodes": {
+    "12345": {
+      "id": "12345",
+      "name": "悟空財神殿",
+      "subtitle": "五指山財神殿 Heart V3.2.6",
+      "type": "Temple",
+      "role": "金融神殿 / 主基地",
+      "color": "#ffd778",
+      "coords": { "x": 0, "y": 0, "k": 0 },
+      "contracts": {
+        "heart": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+        "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+      },
+      "status": "LIVE",
+      "url": "K線西遊記/temples/12345/index.html",
+      "description": "KGEN 宇宙主神殿。發財金、整點心跳、轉日呼吸、還願、點燈。"
+    },
+    "11520": {
+      "id": "11520",
+      "name": "花果山悟空交易所",
+      "subtitle": "Universe Exchange V0.1",
+      "type": "Exchange",
+      "role": "宇宙交易所 / 土地交易所",
+      "color": "#00f2ff",
+      "coords": { "x": -1200, "y": 0, "k": -1200 },
+      "contracts": {
+        "brain": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6"
+      },
+      "status": "PROTOTYPE",
+      "url": "K線西遊記/temples/11520/index.html",
+      "description": "KGEN 宇宙第一交易所。KGEN / BNB / USDT 入口，土地地籍 listing，多宇宙資產交易入口。"
+    },
+    "108000": {
+      "id": "108000",
+      "name": "火星齊天豪宅",
+      "subtitle": "Mars Colony 500 Seats V1.0",
+      "type": "SeatSystem",
+      "role": "500 席位系統 / NFT 席位",
+      "color": "#ff5a1f",
+      "coords": { "x": 108000, "y": 0, "k": 108000 },
+      "contracts": {
+        "mars": "0x3529dbFbaD465C2269F8096879A1c298d5257298"
+      },
+      "status": "PROTOTYPE",
+      "url": "K線西遊記/temples/108000/index.html",
+      "description": "火星齊天豪宅席位系統。500 席位，編號、owner、status、price、rank 展示。"
+    },
+    "18888": {
+      "id": "18888",
+      "name": "靈霄寶殿神明銀行",
+      "subtitle": "Divine Bank V0.1",
+      "type": "Bank",
+      "role": "神明銀行 / Treasury / Reward",
+      "color": "#c084fc",
+      "coords": { "x": 18888, "y": 0, "k": 18888 },
+      "contracts": {
+        "treasury": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+        "lingxiao": "0x0000000000000000000000000000000000000000"
+      },
+      "status": "PROTOTYPE",
+      "url": "K線西遊記/temples/18888/index.html",
+      "description": "神明銀行 UI。Treasury / Reward / Temple Reserve / LP Reserve。KGEN 稅率不可改說明。"
+    },
+    "18921": {
+      "id": "18921",
+      "name": "斬妖台 Auto LP",
+      "subtitle": "ZhanyaoTaxSplitter Auto LP V0.1",
+      "type": "AutoLP",
+      "role": "Auto LP 路由 / 稅收分配",
+      "color": "#7cffc5",
+      "coords": { "x": 18921, "y": 0, "k": 18921 },
+      "contracts": {
+        "taxSplitter": "0x0000000000000000000000000000000000000000",
+        "autoLPWallet": "0x0000000000000000000000000000000000000000"
+      },
+      "status": "PROTOTYPE",
+      "url": "K線西遊記/temples/18921/index.html",
+      "description": "斬妖台 Auto LP 儀表板。顯示 autolp wallet、LP status、pair、reserve、稅收路由說明。"
+    },
+    "16888": {
+      "id": "16888",
+      "name": "廣寒宮",
+      "subtitle": "飛碟控制中心 V3.7.12",
+      "type": "Temple",
+      "role": "宇宙金融生命體 / K線引擎",
+      "color": "#ff8d35",
+      "coords": { "x": 16888, "y": 0, "k": 16888 },
+      "contracts": {},
+      "status": "LIVE",
+      "url": "K線西遊記/temples/16888/index.html",
+      "description": "廣寒宮飛碟控制中心。K線宇宙引擎，BNB / BTC 走勢，宇宙地圖。"
+    }
+  },
+
+  "game5d": {
+    "id": "KLINE-5D-GAME-V0.1",
+    "name": "K線5D峽谷推塔戰",
+    "type": "Game",
+    "status": "PROTOTYPE",
+    "url": "K線西遊記/game/kline-5d/index.html",
+    "factions": {
+      "bull": { "name": "多方陣營", "color": "#7cffc5", "base": "12345", "label": "Bull Faction" },
+      "bear": { "name": "空方陣營", "color": "#ff4444", "base": "16888", "label": "Bear Faction" }
+    },
+    "towers": [
+      { "id": "t1-bull", "name": "多方一塔", "side": "bull", "hp": 100, "maxHp": 100, "x": 5 },
+      { "id": "t2-bull", "name": "多方二塔", "side": "bull", "hp": 100, "maxHp": 100, "x": 22 },
+      { "id": "t1-bear", "name": "空方一塔", "side": "bear", "hp": 100, "maxHp": 100, "x": 75 },
+      { "id": "t2-bear", "name": "空方二塔", "side": "bear", "hp": 100, "maxHp": 100, "x": 92 }
+    ],
+    "kNodes": [
+      { "id": "kn-11520", "name": "11520 交易所", "type": "Exchange", "x": 35, "reward": "BNB Fee" },
+      { "id": "kn-18888", "name": "18888 銀行",   "type": "Bank",     "x": 50, "reward": "KGEN Reward" },
+      { "id": "kn-18921", "name": "18921 AutoLP",  "type": "AutoLP",   "x": 65, "reward": "LP Share" }
+    ]
+  },
+
+  "landData": {
+    "11520_demo": [
+      { "landId": "FL-001", "universeId": "11520", "owner": "0xaBcD...1234", "cells": [{"x":0,"y":0},{"x":1,"y":0},{"x":0,"y":1},{"x":1,"y":1}], "areaM2": 20.72, "price": 888, "status": "listed" },
+      { "landId": "FL-002", "universeId": "11520", "owner": "0xEf01...5678", "cells": [{"x":3,"y":2},{"x":4,"y":2}], "areaM2": 10.36, "price": 444, "status": "listed" },
+      { "landId": "FL-003", "universeId": "11520", "owner": "—",            "cells": [{"x":6,"y":0},{"x":7,"y":0},{"x":6,"y":1}], "areaM2": 15.54, "price": null, "status": "available" }
+    ]
+  }
+}

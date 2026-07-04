@@ -28,7 +28,7 @@ CHANGELOG:
   <meta property="og:description" content="K線西遊記 / KGEN 宇宙 · Mars Colony Cockpit · θ 108000 · 500 Seats 能量環" />
   <meta property="og:site_name" content="KLINE Odyssey" />
   <meta name="twitter:card" content="summary_large_image" />
-  <title>108000 火星殖民艙・齊天豪宅席位系統｜KGEN-108000-MARSSEATS-UI-V1.0.2</title>
+  <title>108000 火星齊天豪宅・席位系統｜KGEN-108000-MARSSEATS-V1.0.2 · 5D V0.1</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
@@ -199,5 +199,13 @@ function showMobile(name){document.querySelectorAll('.mobile-panel').forEach(p=>
 function bindUI(){ $('btnMetaMask').onclick=()=>connectMetaMask().catch(e=>setStatus(e.message||e,true)); $('btnMobile').onclick=()=>connectMobile().catch(e=>setStatus(e.message||e,true)); $('btnWalletConnect').onclick=()=>connectWalletConnect().catch(e=>setStatus(e.message||e,true)); $('btnApprove').onclick=approveKGEN; $('btnMint').onclick=mintSeat; $('btnClaimOne').onclick=claimSeat; $('btnClaimAll').onclick=claimAll; $('btnMySeats').onclick=showMySeats; $('btnRefresh').onclick=()=>refreshWalletState('manual'); $('audPlay').onclick=audioResumeOrPlay; $('audPause').onclick=audioPause; $('audStop').onclick=emergencyStopAudio; setText('marsAddr',shortAddr(MARSSEATS)); setText('kgenAddr',shortAddr(KGEN_TOKEN)); setText('brainAddr',shortAddr(BRAIN_11520)); setText('heartAddr',shortAddr(TEMPLEHEART_12345)); setText('lpAddr',shortAddr(LP_PAIR)); renderSeatGrid(TOTAL_SEATS_FALLBACK,0,[]); if(matchMedia('(max-width:980px)').matches) showMobile('core'); if(!WC_PROJECT_ID){$('btnWalletConnect').disabled=true; $('btnWalletConnect').textContent='WalletConnect 待設定';}}
 document.addEventListener('DOMContentLoaded',()=>{bindUI(); refreshWalletState('initial readonly');});
 </script>
+
+<!-- 5D 世界導覽列（固定在底部右下） -->
+<div style="position:fixed;bottom:44px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+  <a href="../../index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(255,215,120,.4);color:#ffd778;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🌌 星系入口</a>
+  <a href="../12345/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(124,255,197,.4);color:#7cffc5;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">⚡ 12345 神殿</a>
+  <a href="../11520/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(0,242,255,.4);color:#00f2ff;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🌿 11520 交易所</a>
+  <a href="../../game/kline-5d/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(255,215,120,.4);color:#ffd778;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🎮 5D 遊戲</a>
+</div>
 </body>
 </html>

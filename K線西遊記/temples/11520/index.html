@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<!--
+PRODUCT_ID: KGEN-11520-EXCHANGE-UI
+VERSION: V0.1 / 5D Genesis Prototype
+BUILD: 20260704-11520-EXCHANGE-V0.1
+BIRTH: 2026-07-04
+ROLE: 花果山悟空交易所 / Universe Exchange / 土地交易所入口
+STATUS: PROTOTYPE — 前端原型，不接真交易合約
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>11520 花果山悟空交易所｜KGEN Universe Exchange V0.1</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+/* === 11520 交易所主題：青色 K線宇宙 === */
+:root {
+  --accent: #00f2ff;
+  --accent2: rgba(0,242,255,.14);
+}
+
+.ex-hero {
+  background: linear-gradient(135deg, rgba(0,242,255,.12), rgba(0,0,0,0) 60%),
+              linear-gradient(180deg, #040810, #060d14);
+  border: 1px solid rgba(0,242,255,.3);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.ex-hero::before {
+  content: '11520';
+  position: absolute; right: 16px; top: 8px;
+  font-size: 60px; font-weight: 950;
+  color: rgba(0,242,255,.08);
+  font-family: var(--kgen-mono);
+  pointer-events: none;
+}
+
+/* K-line mini chart */
+.kline-mini {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 48px; padding: 0 2px;
+}
+.kline-mini .bar {
+  flex: 1; border-radius: 2px 2px 0 0;
+  min-width: 6px;
+  transition: height .3s ease;
+}
+.kline-mini .bar.up { background: #7cffc5; }
+.kline-mini .bar.dn { background: #ff4444; }
+
+/* Market pair row */
+.pair-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid var(--kgen-line);
+  gap: 10px; flex-wrap: wrap;
+}
+.pair-row:last-child { border-bottom: none; }
+.pair-sym { font-size: 16px; font-weight: 950; color: var(--kgen-text); }
+.pair-sub { font-size: 11px; color: var(--kgen-muted); margin-top: 2px; }
+.pair-price { font-size: 20px; font-weight: 950; color: var(--kgen-gold); font-family: var(--kgen-mono); }
+.pair-chg { font-size: 12px; font-weight: 900; padding: 4px 8px; border-radius: 999px; }
+.pair-chg.up { background: rgba(124,255,197,.15); color: #7cffc5; }
+.pair-chg.dn { background: rgba(255,68,68,.15); color: #ff4444; }
+
+/* Order book */
+.ob-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 8px; border-radius: 4px; }
+.ob-ask { color: #ff4444; background: rgba(255,68,68,.06); }
+.ob-bid { color: #7cffc5; background: rgba(124,255,197,.06); }
+.ob-mid { text-align: center; padding: 4px; color: var(--kgen-gold); font-weight: 950; font-family: var(--kgen-mono); }
+
+/* Land listing */
+.land-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px 90px;
+  gap: 8px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--kgen-line);
+  font-size: 13px;
+}
+.land-row:last-child { border-bottom: none; }
+.land-id { color: var(--kgen-cyan); font-family: var(--kgen-mono); font-weight: 900; }
+.land-owner { color: var(--kgen-muted); font-size: 12px; }
+.land-area { color: var(--kgen-gold); }
+.land-status { text-align: right; }
+
+/* Quick-trade form */
+.trade-tabs { display: flex; gap: 2px; margin-bottom: 12px; }
+.trade-tab {
+  flex: 1; padding: 9px; border-radius: 10px 10px 0 0;
+  border: 1px solid var(--kgen-line); border-bottom: none;
+  background: var(--kgen-bg2);
+  font-size: 13px; font-weight: 900; cursor: pointer;
+  color: var(--kgen-muted); transition: color .2s;
+}
+.trade-tab.active.buy { background: rgba(124,255,197,.12); color: #7cffc5; border-color: rgba(124,255,197,.3); }
+.trade-tab.active.sell { background: rgba(255,68,68,.12); color: #ff4444; border-color: rgba(255,68,68,.3); }
+
+.trade-input {
+  width: 100%; padding: 10px 12px;
+  background: var(--kgen-bg2);
+  border: 1px solid var(--kgen-line);
+  border-radius: 10px;
+  color: var(--kgen-text); font-size: 15px;
+  outline: none;
+  margin-bottom: 8px;
+}
+.trade-input:focus { border-color: var(--kgen-cyan-dim); }
+
+/* Candle canvas */
+#kline-canvas { width: 100%; height: 120px; border-radius: 10px; background: var(--kgen-bg2); display: block; }
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+
+<!-- HUD -->
+<header class="kgen-hud">
+  <div>
+    <div class="kgen-hud-title">🌿 11520 花果山悟空交易所</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">Universe Exchange V0.1 | Prototype</div>
+  </div>
+  <nav class="kgen-hud-nav">
+    <a href="../../index.html">🌌 星系</a>
+    <a href="../12345/index.html">⚡ 12345 神殿</a>
+    <a href="../16888/index.html">🌙 16888</a>
+    <a href="../18888/index.html">🏦 18888 銀行</a>
+    <a href="../../game/kline-5d/index.html">🎮 5D 遊戲</a>
+  </nav>
+</header>
+
+<main class="kgen-page">
+<div class="kgen-wrap">
+
+  <!-- Hero -->
+  <div class="ex-hero">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:26px;font-weight:950;color:var(--kgen-cyan);">花果山悟空交易所</div>
+        <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">Universe Exchange V0.1 · 11520 · KGEN 宇宙第一交易所</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="kgen-pill cyan">PROTOTYPE</span>
+          <span class="kgen-pill gold">BSC · Chain 56</span>
+          <span class="kgen-pill">前端原型 · 不接真合約</span>
+        </div>
+      </div>
+      <div class="kline-mini" id="kline-mini-hero">
+        <!-- generated by JS -->
+      </div>
+    </div>
+
+    <!-- Live KPI strip -->
+    <div class="kgen-kpi-grid col4" style="margin-top:14px;">
+      <div class="kgen-kpi">
+        <div class="k">BNB / USDT</div>
+        <div class="v cyan" id="ex-bnb-price">載入中…</div>
+        <div style="font-size:11px;margin-top:3px;" id="ex-bnb-chg">--</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">KGEN / BNB (模擬)</div>
+        <div class="v" id="ex-kgen-price">0.000012 BNB</div>
+        <div style="font-size:11px;color:#7cffc5;margin-top:3px;">▲ 2.34%</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">24H 交易量</div>
+        <div class="v" id="ex-vol">--</div>
+        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">BNB</div>
+      </div>
+      <div class="kgen-kpi">
+        <div class="k">LP TVL (模擬)</div>
+        <div class="v" style="font-size:16px;">$88,888</div>
+        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">KGEN/WBNB</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K線圖 -->
+  <div class="kgen-section-head">
+    <h2>📊 K 線走勢（BNB/USDT · 1D）</h2>
+    <span class="kgen-sub">Live from Binance · 15 sec refresh</span>
+  </div>
+  <div class="kgen-card" style="padding:12px;">
+    <canvas id="kline-canvas"></canvas>
+  </div>
+
+  <!-- 市場行情 -->
+  <div class="kgen-section-head"><h2>📈 市場行情</h2></div>
+  <div class="kgen-card">
+    <div class="pair-row">
+      <div>
+        <div class="pair-sym">BNB / USDT</div>
+        <div class="pair-sub">幣安智能鏈主幣</div>
+      </div>
+      <canvas id="sparkline-bnb" width="80" height="32" style="border-radius:4px;"></canvas>
+      <div style="text-align:right;">
+        <div class="pair-price" id="m-bnb-price">--</div>
+        <div class="pair-chg up" id="m-bnb-chg">--</div>
+      </div>
+    </div>
+    <div class="pair-row">
+      <div>
+        <div class="pair-sym">BTC / USDT</div>
+        <div class="pair-sub">比特幣</div>
+      </div>
+      <canvas id="sparkline-btc" width="80" height="32" style="border-radius:4px;"></canvas>
+      <div style="text-align:right;">
+        <div class="pair-price" id="m-btc-price">--</div>
+        <div class="pair-chg" id="m-btc-chg">--</div>
+      </div>
+    </div>
+    <div class="pair-row">
+      <div>
+        <div class="pair-sym">KGEN / BNB</div>
+        <div class="pair-sub">KGEN Token · BSC · <a href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" style="color:var(--kgen-cyan);">BscScan</a></div>
+      </div>
+      <div style="font-size:11px;color:var(--kgen-muted);">PancakeSwap LP</div>
+      <div style="text-align:right;">
+        <div class="pair-price" style="font-size:16px;">0.000012</div>
+        <div class="pair-chg up">▲ 2.34%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 交易表單 (prototype) -->
+  <div class="kgen-section-head"><h2>⚡ 快速交易入口（原型）</h2></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+    <!-- 買入 -->
+    <div class="kgen-card">
+      <div class="trade-tabs">
+        <div class="trade-tab active buy">買入 KGEN</div>
+        <div class="trade-tab sell" onclick="alert('原型版僅展示 UI，請至 PancakeSwap 實際交易')">賣出</div>
+      </div>
+      <div style="font-size:12px;color:var(--kgen-muted);margin-bottom:8px;">KGEN / WBNB · PancakeSwap</div>
+      <input class="trade-input" type="number" placeholder="BNB 數量" id="buy-bnb-input">
+      <div style="font-size:12px;color:var(--kgen-muted);margin-bottom:8px;">預估獲得：<span id="est-kgen">-- KGEN</span></div>
+      <a href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" class="kgen-btn primary full">前往 PancakeSwap 交易 ↗</a>
+    </div>
+
+    <!-- 模擬盤 (order book) -->
+    <div class="kgen-card">
+      <div style="font-size:13px;font-weight:900;color:var(--kgen-gold);margin-bottom:8px;">📋 模擬掛單薄</div>
+      <div id="ob-asks"></div>
+      <div class="ob-mid" id="ob-mid-price">--</div>
+      <div id="ob-bids"></div>
+    </div>
+  </div>
+
+  <!-- 土地交易所 -->
+  <div class="kgen-section-head"><h2>🗺️ 神殿土地地籍交易所</h2>
+    <span class="kgen-sub">連結 12345 土地地籍 · 原型展示</span>
+  </div>
+  <div class="kgen-card">
+    <div class="kgen-notice">
+      土地地籍數據來自 12345 神殿 Land Engine。本頁為 listing prototype，土地 NFT mint / 鏈上交易尚未接入。
+    </div>
+    <div style="margin-top:12px;">
+      <div style="display:grid;grid-template-columns:80px 1fr 80px 90px;gap:8px;padding:8px 0;border-bottom:1px solid var(--kgen-line);font-size:11px;color:var(--kgen-muted);font-weight:900;">
+        <span>地籍 ID</span><span>持有者</span><span>面積 m²</span><span style="text-align:right;">狀態 / 價格</span>
+      </div>
+      <div id="land-listing"></div>
+    </div>
+    <div style="margin-top:12px;">
+      <a href="../12345/index.html" class="kgen-btn full">前往 12345 神殿查看完整土地地籍 →</a>
+    </div>
+  </div>
+
+  <!-- 宇宙節點連結 -->
+  <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;" id="universe-nodes"></div>
+
+  <!-- 說明 -->
+  <div class="kgen-notice" style="margin-top:16px;">
+    <strong>11520 花果山交易所：</strong>KGEN 宇宙物理法則定義此為「Universe Exchange」。11520 是 K 軸交易場。
+    目前為前端原型（Prototype），不接真交易合約。
+    實際 KGEN 買賣請前往 PancakeSwap。
+  </div>
+
+</div>
+</main>
+
+<div class="kgen-status-bar">
+  <div class="kgen-status-dot"></div>
+  <span id="kgen-status-bottom">11520 花果山交易所 V0.1 · 原型</span>
+</div>
+
+<script src="../../modules/kgen-game-core.js"></script>
+<script>
+(function(){
+  var status = new KGEN_StatusBus('kgen-status-text');
+
+  /* === Mini hero bars === */
+  function renderHeroBars(){
+    var container = document.getElementById('kline-mini-hero');
+    if(!container) return;
+    var vals = [55,62,48,70,65,80,72,90,85,78,88,92,75,82,95];
+    var max = Math.max.apply(null, vals);
+    container.innerHTML = '';
+    vals.forEach(function(v, i){
+      var bar = document.createElement('div');
+      bar.className = 'bar ' + (vals[i] >= (vals[i-1]||v) ? 'up' : 'dn');
+      bar.style.height = (v/max*44) + 'px';
+      container.appendChild(bar);
+    });
+  }
+  renderHeroBars();
+
+  /* === Live BNB / BTC prices === */
+  function updatePair(sym, priceId, chgId, sparkId){
+    KGEN_KlineFeed.fetch(sym).then(function(d){
+      var el = document.getElementById(priceId);
+      var ce = document.getElementById(chgId);
+      if(el) el.textContent = '$' + d.price.toFixed(2);
+      if(ce){
+        var dir = KGEN_priceDir(d.change);
+        ce.textContent = dir.text;
+        ce.style.color = dir.color;
+        ce.className = 'pair-chg ' + (d.change >= 0 ? 'up' : 'dn');
+      }
+      /* sparkline (demo candles) */
+      var canvas = document.getElementById(sparkId);
+      if(canvas){
+        var candles = Array.from({length:12}, function(_, i){
+          var base = d.price;
+          var o = base + (Math.random()-0.5)*base*0.02;
+          var c = base + (Math.random()-0.5)*base*0.02;
+          return { open: o, close: c, high: Math.max(o,c)+base*0.005, low: Math.min(o,c)-base*0.005 };
+        });
+        KGEN_drawMiniCandles(canvas, candles);
+      }
+    });
+  }
+  updatePair('BNBUSDT','m-bnb-price','m-bnb-chg','sparkline-bnb');
+  updatePair('BTCUSDT','m-btc-price','m-btc-chg','sparkline-btc');
+  setInterval(function(){ updatePair('BNBUSDT','m-bnb-price','m-bnb-chg','sparkline-bnb'); }, 15000);
+  setInterval(function(){ updatePair('BTCUSDT','m-btc-price','m-btc-chg','sparkline-btc'); }, 15000);
+
+  /* Hero BNB strip */
+  function updateHeroKpi(){
+    KGEN_KlineFeed.fetch('BNBUSDT').then(function(d){
+      var p = document.getElementById('ex-bnb-price');
+      var c = document.getElementById('ex-bnb-chg');
+      var v = document.getElementById('ex-vol');
+      if(p) p.textContent = '$' + d.price.toFixed(2);
+      if(c){ var dir = KGEN_priceDir(d.change); c.textContent = dir.text; c.style.color = dir.color; }
+      if(v) v.textContent = (d.vol/1000).toFixed(0) + 'K';
+    });
+  }
+  updateHeroKpi();
+  setInterval(updateHeroKpi, 15000);
+
+  /* === K線圖 (demo candles on canvas) === */
+  function renderMainChart(){
+    var canvas = document.getElementById('kline-canvas');
+    if(!canvas) return;
+    canvas.width = canvas.offsetWidth || 600;
+    canvas.height = 120;
+    KGEN_KlineFeed.fetch('BNBUSDT').then(function(d){
+      var base = d.price;
+      var candles = Array.from({length: 30}, function(_, i){
+        var drift = (i - 15) * base * 0.003;
+        var o = base + drift + (Math.random()-0.5)*base*0.018;
+        var c = base + drift + (Math.random()-0.5)*base*0.018;
+        return { open: o, close: c, high: Math.max(o,c)+base*0.006, low: Math.min(o,c)-base*0.006 };
+      });
+      KGEN_drawMiniCandles(canvas, candles);
+    });
+  }
+  renderMainChart();
+  setInterval(renderMainChart, 20000);
+
+  /* === Order book (demo) === */
+  function renderOrderBook(){
+    KGEN_KlineFeed.fetch('BNBUSDT').then(function(d){
+      var mid = d.price;
+      var asksEl = document.getElementById('ob-asks');
+      var bidsEl = document.getElementById('ob-bids');
+      var midEl  = document.getElementById('ob-mid-price');
+      if(midEl) midEl.textContent = '$' + mid.toFixed(2);
+
+      var asksHTML = '';
+      for(var i = 4; i >= 0; i--){
+        var p = (mid + (i+1)*mid*0.001).toFixed(2);
+        var q = (Math.random()*5+1).toFixed(3);
+        asksHTML += '<div class="ob-row ob-ask"><span>$' + p + '</span><span>' + q + ' BNB</span></div>';
+      }
+      if(asksEl) asksEl.innerHTML = asksHTML;
+
+      var bidsHTML = '';
+      for(var j = 0; j < 5; j++){
+        var bp = (mid - (j+1)*mid*0.001).toFixed(2);
+        var bq = (Math.random()*5+1).toFixed(3);
+        bidsHTML += '<div class="ob-row ob-bid"><span>$' + bp + '</span><span>' + bq + ' BNB</span></div>';
+      }
+      if(bidsEl) bidsEl.innerHTML = bidsHTML;
+    });
+  }
+  renderOrderBook();
+  setInterval(renderOrderBook, 8000);
+
+  /* === Buy estimate === */
+  document.getElementById('buy-bnb-input').addEventListener('input', function(){
+    var bnb = parseFloat(this.value) || 0;
+    var kgenPerBnb = 83333;
+    var est = (bnb * kgenPerBnb).toFixed(0);
+    document.getElementById('est-kgen').textContent = bnb > 0 ? (Number(est).toLocaleString() + ' KGEN') : '-- KGEN';
+  });
+
+  /* === Land listing === */
+  var LAND = KGEN_5D ? [] : [];
+  try {
+    var landData = [
+      { landId: 'FL-001', owner: '0xaBcD…1234', areaM2: 20.72, price: 888, status: 'listed' },
+      { landId: 'FL-002', owner: '0xEf01…5678', areaM2: 10.36, price: 444, status: 'listed' },
+      { landId: 'FL-003', owner: '—',           areaM2: 15.54, price: null, status: 'available' },
+      { landId: 'FL-004', owner: '0x1A2B…abcd', areaM2: 31.08, price: 1288, status: 'listed' },
+    ];
+    var listEl = document.getElementById('land-listing');
+    if(listEl){
+      var html = '';
+      landData.forEach(function(l){
+        var statusBadge = l.status === 'listed'
+          ? '<span class="kgen-pill gold" style="font-size:11px;padding:3px 7px;">' + l.price + ' KGEN</span>'
+          : '<span class="kgen-pill green" style="font-size:11px;padding:3px 7px;">可購入</span>';
+        html += '<div class="land-row">'
+          + '<span class="land-id">' + l.landId + '</span>'
+          + '<span class="land-owner">' + l.owner + '</span>'
+          + '<span class="land-area">' + l.areaM2 + ' m²</span>'
+          + '<span class="land-status">' + statusBadge + '</span>'
+          + '</div>';
+      });
+      listEl.innerHTML = html;
+    }
+  } catch(e){}
+
+  /* === Universe nodes === */
+  var nodesEl = document.getElementById('universe-nodes');
+  if(nodesEl && window.KGEN_5D){
+    var nodeHtml = '';
+    var nodes = KGEN_5D.NODES;
+    Object.keys(nodes).forEach(function(id){
+      if(id === '11520') return;
+      var n = nodes[id];
+      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+        + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
+        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
+        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
+        + '</a>';
+    });
+    nodesEl.innerHTML = nodeHtml;
+  }
+
+  status.push('11520 花果山交易所 V0.1 已啟動 · 行情同步中');
+})();
+</script>
+</body>
+</html>

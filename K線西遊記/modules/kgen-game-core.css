@@ -1,0 +1,257 @@
+/*
+KGEN Game Core CSS V0.1
+Shared visual design system for all KGEN 5D temples and game UI.
+Pure CSS — no build required.
+*/
+
+/* ===== CSS Variables ===== */
+:root {
+  /* Brand palette */
+  --kgen-gold: #ffd778;
+  --kgen-gold-dim: rgba(255,215,120,.55);
+  --kgen-gold-glow: rgba(255,215,120,.18);
+  --kgen-cyan: #00f2ff;
+  --kgen-cyan-dim: rgba(0,242,255,.42);
+  --kgen-cyan-glow: rgba(0,242,255,.14);
+  --kgen-red: #ff4444;
+  --kgen-green: #7cffc5;
+  --kgen-mars: #ff5a1f;
+  --kgen-mars-hot: #ff8d35;
+  --kgen-purple: #c084fc;
+
+  /* Backgrounds */
+  --kgen-bg: #05060b;
+  --kgen-bg2: #0a0d14;
+  --kgen-panel: rgba(10,12,20,.96);
+  --kgen-panel2: rgba(4,6,12,.92);
+  --kgen-glass: rgba(255,255,255,.06);
+  --kgen-line: rgba(255,255,255,.12);
+  --kgen-line-gold: rgba(255,215,120,.35);
+
+  /* Text */
+  --kgen-text: rgba(255,255,255,.94);
+  --kgen-muted: rgba(255,255,255,.58);
+  --kgen-label: rgba(255,255,255,.4);
+
+  /* Spacing */
+  --kgen-r: 14px;
+  --kgen-r-lg: 20px;
+  --kgen-gap: 10px;
+  --kgen-pad: 16px;
+
+  /* Fonts */
+  --kgen-sans: system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;
+  --kgen-mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--kgen-bg);
+  color: var(--kgen-text);
+  font-family: var(--kgen-sans);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ===== Starfield background ===== */
+.kgen-stars-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(255,215,120,.12), transparent 65%),
+    radial-gradient(900px 700px at 80% 45%, rgba(0,242,255,.09), transparent 62%),
+    linear-gradient(180deg, #05060b, #08090f 52%, #05060b);
+}
+
+/* ===== Top HUD bar ===== */
+.kgen-hud {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(4,5,10,.88);
+  border-bottom: 1px solid var(--kgen-line-gold);
+  backdrop-filter: blur(12px);
+  z-index: 9000;
+}
+.kgen-hud-title {
+  font-size: 15px; font-weight: 950; color: var(--kgen-gold);
+  letter-spacing: .3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kgen-hud-ver {
+  font-size: 10px; color: var(--kgen-cyan); font-family: var(--kgen-mono);
+  opacity: .8;
+}
+.kgen-hud-nav {
+  display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.kgen-hud-nav a {
+  font-size: 12px; font-weight: 800;
+  border: 1px solid var(--kgen-line);
+  border-radius: 999px; padding: 4px 10px;
+  background: var(--kgen-glass);
+  color: var(--kgen-muted);
+  white-space: nowrap;
+  transition: color .2s, border-color .2s;
+}
+.kgen-hud-nav a:hover { color: var(--kgen-gold); border-color: var(--kgen-gold-dim); }
+
+/* ===== Page content wrapper ===== */
+.kgen-page {
+  position: relative; z-index: 1;
+  padding-top: 60px;
+  min-height: 100vh;
+}
+.kgen-wrap {
+  max-width: 900px; margin: 0 auto;
+  padding: 0 14px 60px;
+}
+
+/* ===== Section header ===== */
+.kgen-section-head {
+  margin: 20px 0 10px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+.kgen-section-head h2 {
+  margin: 0; font-size: 16px; font-weight: 950; color: var(--kgen-gold);
+}
+.kgen-section-head .kgen-sub {
+  font-size: 12px; color: var(--kgen-muted);
+}
+
+/* ===== Card ===== */
+.kgen-card {
+  border: 1px solid var(--kgen-line-gold);
+  border-radius: var(--kgen-r-lg);
+  background: var(--kgen-panel);
+  padding: var(--kgen-pad);
+  box-shadow: 0 0 32px var(--kgen-gold-glow);
+}
+.kgen-card + .kgen-card { margin-top: var(--kgen-gap); }
+
+/* ===== Grid of KPI boxes ===== */
+.kgen-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+.kgen-kpi-grid.col3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.kgen-kpi-grid.col4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.kgen-kpi {
+  border: 1px solid var(--kgen-line);
+  border-radius: var(--kgen-r);
+  padding: 12px;
+  background: var(--kgen-bg2);
+  min-width: 0;
+}
+.kgen-kpi .k { font-size: 11px; color: var(--kgen-muted); margin-bottom: 5px; }
+.kgen-kpi .v {
+  font-size: 20px; font-weight: 950;
+  color: var(--kgen-gold); font-family: var(--kgen-mono);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kgen-kpi .v.cyan { color: var(--kgen-cyan); }
+.kgen-kpi .v.green { color: var(--kgen-green); }
+.kgen-kpi .v.red { color: var(--kgen-red); }
+
+/* ===== Pill badge ===== */
+.kgen-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--kgen-line);
+  border-radius: 999px; padding: 5px 10px;
+  font-size: 12px; font-weight: 800;
+  background: var(--kgen-glass);
+}
+.kgen-pill.gold { border-color: var(--kgen-gold-dim); color: var(--kgen-gold); }
+.kgen-pill.cyan { border-color: var(--kgen-cyan-dim); color: var(--kgen-cyan); }
+.kgen-pill.green { border-color: rgba(124,255,197,.4); color: var(--kgen-green); }
+.kgen-pill.red { border-color: rgba(255,68,68,.4); color: var(--kgen-red); }
+
+/* ===== Button ===== */
+.kgen-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--kgen-line-gold);
+  background: rgba(255,215,120,.1);
+  color: var(--kgen-gold);
+  font-size: 14px; font-weight: 900;
+  cursor: pointer; white-space: nowrap;
+  transition: background .2s, box-shadow .2s;
+  touch-action: manipulation;
+}
+.kgen-btn:hover { background: rgba(255,215,120,.2); box-shadow: 0 0 18px var(--kgen-gold-glow); }
+.kgen-btn.primary { background: rgba(255,215,120,.88); color: #111; }
+.kgen-btn.primary:hover { background: var(--kgen-gold); }
+.kgen-btn.cyan { border-color: var(--kgen-cyan-dim); background: rgba(0,242,255,.1); color: var(--kgen-cyan); }
+.kgen-btn.danger { border-color: rgba(255,68,68,.4); background: rgba(255,68,68,.1); color: var(--kgen-red); }
+.kgen-btn.full { width: 100%; }
+
+/* ===== Table ===== */
+.kgen-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kgen-table th, .kgen-table td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--kgen-line);
+}
+.kgen-table th { color: var(--kgen-gold); font-size: 12px; font-weight: 900; }
+.kgen-table td { color: var(--kgen-text); }
+.kgen-table tr:last-child td { border-bottom: none; }
+.kgen-table tbody tr:hover td { background: var(--kgen-glass); }
+
+/* ===== Status bar ===== */
+.kgen-status-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 36px; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  background: rgba(4,5,10,.88);
+  border-top: 1px solid var(--kgen-line-gold);
+  backdrop-filter: blur(12px);
+  z-index: 9000;
+  font-size: 11px; color: var(--kgen-muted); font-family: var(--kgen-mono);
+}
+.kgen-status-bar .kgen-status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--kgen-green); flex-shrink: 0;
+  box-shadow: 0 0 6px var(--kgen-green);
+}
+
+/* ===== Progress bar ===== */
+.kgen-progress-track {
+  height: 8px; border-radius: 999px;
+  background: rgba(255,255,255,.1); overflow: hidden;
+}
+.kgen-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--kgen-gold), var(--kgen-cyan));
+  transition: width .5s ease;
+}
+
+/* ===== Divider ===== */
+.kgen-divider {
+  border: none; border-top: 1px solid var(--kgen-line);
+  margin: 14px 0;
+}
+
+/* ===== Warning / info box ===== */
+.kgen-notice {
+  border-left: 3px solid var(--kgen-gold);
+  background: rgba(255,215,120,.08);
+  padding: 10px 14px;
+  border-radius: 0 10px 10px 0;
+  font-size: 13px; line-height: 1.6;
+}
+.kgen-notice.cyan { border-color: var(--kgen-cyan); background: rgba(0,242,255,.08); }
+.kgen-notice.red { border-color: var(--kgen-red); background: rgba(255,68,68,.08); }
+
+/* ===== Mobile 390×844 ===== */
+@media (max-width: 430px) {
+  html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+  .kgen-kpi-grid.col3, .kgen-kpi-grid.col4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .kgen-hud-title { font-size: 13px; }
+  .kgen-wrap { padding: 0 10px 60px; }
+  .kgen-kpi .v { font-size: 16px; }
+}
