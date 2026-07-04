@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.2.2 / METAMASK AUTOCONNECT";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.2";
-  const UI_PATCH = "V2.2.2";
+  const VERSION = "V2.2.3 / AUTOCONNECT PARAM FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.3";
+  const UI_PATCH = "V2.2.3";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -2437,12 +2437,10 @@
       this.state.hasEthereum = !!(window.ethereum || window.BinanceChain);
       this.state.isFacebookWebView = WalletRuntime.isFacebookWebView() ? "yes" : "no";
       try{
-        const params = new URLSearchParams(location.search);
-        const w = params.get("wallet");
-        const a = params.get("autoconnect");
-        this.state.autoconnectParam = (w || a) ? ("wallet=" + (w || "") + "&autoconnect=" + (a || "")) : "--";
+        const qs = WalletRuntime.parsePageQuery();
+        WalletDebugRuntime.state.autoconnectParam = WalletRuntime.shouldAutoConnectFromQuery(qs) ? "yes" : "no param";
       }catch(_){
-        this.state.autoconnectParam = "--";
+        this.state.autoconnectParam = "no param";
       }
       this.state.updatedAt = new Date().toLocaleTimeString();
       this.render();
@@ -2828,8 +2826,8 @@
     maybeAutoConnectFromBridge: function(){
       try{
         if(!HeartRuntime.getEthereum()) return;
-        const params = new URLSearchParams(location.search);
-        if(params.get("wallet") === "metamask" && params.get("autoconnect") === "1") return;
+        if(this.shouldAutoConnectFromQuery()) return;
+        const params = this.parsePageQuery();
         const fromBridge = params.get("bridge") === "1";
         const fromReferrer = /wallet-12345\.html/i.test(document.referrer || "");
         if(!fromBridge && !fromReferrer && !this.isMobileBrowser()) return;
@@ -2839,44 +2837,92 @@
         }, fromBridge ? 600 : 1000);
       }catch(_){ }
     },
-    maybeAutoConnectFromMetamask: function(){
+    parsePageQuery: function(){
+      const merged = new URLSearchParams();
       try{
-        const params = new URLSearchParams(location.search);
-        const wallet = params.get("wallet");
-        const autoconnect = params.get("autoconnect");
-        WalletDebugRuntime.setAutoconnectParam("wallet=" + (wallet || "") + "&autoconnect=" + (autoconnect || ""));
-        if(wallet !== "metamask" || autoconnect !== "1"){
-          WalletDebugRuntime.setAutoconnectAttempted("no (param mismatch)");
+        const apply = function(qs){
+          if(!qs) return;
+          qs.forEach(function(value, key){
+            merged.set(key, value);
+          });
+        };
+        apply(new URLSearchParams(location.search || ""));
+        const hash = location.hash || "";
+        const hashQ = hash.indexOf("?");
+        if(hashQ >= 0){
+          apply(new URLSearchParams(hash.slice(hashQ + 1)));
+        }
+        try{
+          apply(new URL(location.href).searchParams);
+        }catch(_){ }
+      }catch(_){ }
+      return merged;
+    },
+    shouldAutoConnectFromQuery: function(qs){
+      qs = qs || this.parsePageQuery();
+      return qs.get("autoconnect") === "1" ||
+        qs.get("wallet") === "metamask" ||
+        qs.get("source") === "metamask" ||
+        qs.get("from") === "wallet" ||
+        qs.get("bridge") === "1";
+    },
+    maybeAutoConnectFromMetamask: function(){
+      const self = this;
+      try{
+        const qs = this.parsePageQuery();
+        const shouldAuto = this.shouldAutoConnectFromQuery(qs);
+        if(!shouldAuto){
+          WalletDebugRuntime.setAutoconnectParam("no param");
+          WalletDebugRuntime.setAutoconnectAttempted("no param");
+          WalletDebugRuntime.setAutoconnectResult("no param");
           return;
         }
-        if(!HeartRuntime.getEthereum()){
-          WalletDebugRuntime.setAutoconnectAttempted("no (no ethereum)");
-          WalletDebugRuntime.setAutoconnectResult("skipped");
-          WalletDebugRuntime.setAutoconnectError("not MetaMask in-app browser");
-          StatusRuntime.push("目前不是 MetaMask 內建瀏覽器，請用 MetaMask 開啟神殿。");
-          return;
-        }
-        if(this._autoconnectRan) return;
-        this._autoconnectRan = true;
+        WalletDebugRuntime.setAutoconnectParam("yes");
         WalletDebugRuntime.setAutoconnectAttempted("yes");
-        WalletDebugRuntime.setAutoconnectResult("pending");
-        StatusRuntime.push("MetaMask 神殿頁已載入，600ms 後自動連線…");
-        const self = this;
-        setTimeout(function(){
-          self.runMetaMaskAutoconnect();
-        }, 600);
+        const scheduleConnect = function(){
+          if(self._autoconnectRan) return;
+          self._autoconnectRan = true;
+          WalletDebugRuntime.setAutoconnectResult("connecting");
+          StatusRuntime.push("MetaMask 神殿頁已載入，800ms 後自動連線…");
+          setTimeout(function(){
+            self.runMetaMaskAutoconnect();
+          }, 800);
+        };
+        const tryEthereum = function(){
+          if(!HeartRuntime.getEthereum()){
+            WalletDebugRuntime.setAutoconnectResult("no ethereum");
+            WalletDebugRuntime.setAutoconnectError("no injected provider");
+            StatusRuntime.push("目前不是 MetaMask 內建瀏覽器，無法自動連錢包。");
+            return false;
+          }
+          scheduleConnect();
+          return true;
+        };
+        if(tryEthereum()) return;
+        let tries = 0;
+        const poll = setInterval(function(){
+          tries += 1;
+          if(HeartRuntime.getEthereum()){
+            clearInterval(poll);
+            WalletDebugRuntime.setAutoconnectResult("connecting");
+            tryEthereum();
+          }else if(tries >= 20){
+            clearInterval(poll);
+          }
+        }, 200);
       }catch(error){
         WalletDebugRuntime.setAutoconnectError(asErrorMessage(error));
-        WalletDebugRuntime.setAutoconnectResult("error");
+        WalletDebugRuntime.setAutoconnectResult("failed");
       }
     },
     runMetaMaskAutoconnect: async function(){
       WalletDebugRuntime.logAction("autoconnect", "eth_requestAccounts → ensureBSC → refresh");
       WalletDebugRuntime.setConnectEntered(true);
+      WalletDebugRuntime.setAutoconnectResult("connecting");
       try{
         const ok = await this.connect();
         if(ok !== false){
-          WalletDebugRuntime.setAutoconnectResult("ok");
+          WalletDebugRuntime.setAutoconnectResult("connected");
           WalletDebugRuntime.setAutoconnectError("--");
         }else{
           WalletDebugRuntime.setAutoconnectResult("failed");
@@ -3486,7 +3532,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.2 METAMASK AUTOCONNECT ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.3 AUTOCONNECT PARAM FIX ready");
       WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
@@ -3516,7 +3562,7 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.2.2 METAMASK AUTOCONNECT / WALLET HUB DELEGATE =====
+  // ===== V2.2.3 AUTOCONNECT PARAM FIX / WALLET HUB DELEGATE =====
   (function defineWalletHubDelegate(){
     var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
     var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
