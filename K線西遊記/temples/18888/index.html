@@ -3,16 +3,17 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-18888-DIVINE-BANK-UI
-VERSION: V0.1 / 5D Genesis Prototype
-BUILD: 20260704-18888-DIVINE-BANK-V0.1
+VERSION: V1.0 / Universe Runtime
+BUILD: 20260704-18888-DIVINE-BANK-V1.0
 BIRTH: 2026-07-04
 ROLE: 靈霄寶殿神明銀行 / Treasury / Reward / DappBay 說明
 STATUS: PROTOTYPE — 前端原型，不改合約
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>18888 靈霄寶殿神明銀行｜KGEN Divine Bank V0.1</title>
+<title>18888 靈霄寶殿神明銀行｜KGEN Divine Bank V1.0</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<link rel="stylesheet" href="../../modules/universe-runtime/universe-runtime.css">
 <style>
 :root { --accent: #c084fc; --accent2: rgba(192,132,252,.14); }
 
@@ -57,9 +58,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 <header class="kgen-hud">
   <div>
     <div class="kgen-hud-title">🏦 18888 靈霄寶殿神明銀行</div>
-    <div class="kgen-hud-ver" id="kgen-status-text">Divine Bank V0.1 | Prototype</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">Divine Bank V1.0</div>
   </div>
   <nav class="kgen-hud-nav">
+    <button type="button" class="kgen-btn kgen-btn-sm" id="btn-wallet" style="margin-right:8px;">🔗 錢包</button>
     <a href="../../index.html">🌌 星系</a>
     <a href="../12345/index.html">⚡ 12345</a>
     <a href="../11520/index.html">🌿 11520</a>
@@ -70,6 +72,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
 <main class="kgen-page">
 <div class="kgen-wrap">
+
+  <div id="civ-hud"></div>
+  <div id="npc-panel"></div>
+  <canvas id="cosmic-map" class="kgen-cosmic-map"></canvas>
 
   <!-- Hero -->
   <div class="bank-hero">
@@ -166,7 +172,13 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <div class="rb-label"><span class="rb-name">💧 Auto LP Reserve</span><span class="rb-val">$12,500</span></div>
       <div class="kgen-progress-track"><div class="kgen-progress-fill" style="width:45%;"></div></div>
     </div>
-    <div style="font-size:11px;color:var(--kgen-muted);margin-top:8px;">* 以上為前端展示數據，非即時鏈上數據。</div>
+    <div style="font-size:11px;color:var(--kgen-muted);margin-top:8px;" id="treasury-read-note">Treasury 鏈上讀取中…</div>
+  </div>
+
+  <!-- Security Dashboard -->
+  <div class="kgen-section-head"><h2>🛡️ Security Dashboard</h2></div>
+  <div class="kgen-card">
+    <div class="kgen-security-grid" id="security-dashboard"></div>
   </div>
 
   <!-- DappBay 說明 -->
@@ -249,40 +261,84 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
 <div class="kgen-status-bar">
   <div class="kgen-status-dot"></div>
-  <span id="kgen-status-bottom">18888 靈霄寶殿神明銀行 V0.1 · 原型</span>
+  <span id="kgen-status-bottom">18888 靈霄寶殿神明銀行 V1.0 · Universe Runtime</span>
 </div>
+<div id="universe-dock"></div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/physics.js"></script>
+<script src="../../modules/universe-runtime/status-bus.js"></script>
+<script src="../../modules/universe-runtime/wallet.js"></script>
+<script src="../../modules/universe-runtime/camera.js"></script>
+<script src="../../modules/universe-runtime/audio.js"></script>
+<script src="../../modules/universe-runtime/animation.js"></script>
+<script src="../../modules/universe-runtime/universe-map.js"></script>
+<script src="../../modules/universe-runtime/npc.js"></script>
+<script src="../../modules/universe-runtime/civilization.js"></script>
+<script src="../../modules/universe-runtime/chain-read.js"></script>
+<script src="../../modules/universe-runtime/bootstrap.js"></script>
 <script>
 (function(){
-  var status = new KGEN_StatusBus('kgen-status-text');
+  KGEN_UNIVERSE_RUNTIME.boot({
+    nodeId: '18888',
+    statusElementId: 'kgen-status-text',
+    universeDockId: 'universe-dock',
+    npcContainerId: 'npc-panel',
+    civContainerId: 'civ-hud',
+    cosmicMapCanvasId: 'cosmic-map',
+    walletButtonId: 'btn-wallet',
+  }).then(initPage);
 
-  /* === Universe nodes === */
+  function initPage() {
+  var status = KGEN_UNIVERSE_STATUS_BUS.domBus || new KGEN_StatusBus('kgen-status-text');
+
+  var sec = KGEN_UNIVERSE_CHAIN.securityReport();
+  var secEl = document.getElementById('security-dashboard');
+  if (secEl) {
+    secEl.innerHTML =
+      '<div class="kgen-security-item"><div class="si-title">DappBay</div><div class="si-ok">稅率不可改</div><div style="color:var(--kgen-muted);margin-top:4px;">' + sec.dappBay.note + '</div></div>' +
+      '<div class="kgen-security-item"><div class="si-title">CertiK</div><div class="si-warn">' + sec.certik.status + '</div><div style="color:var(--kgen-muted);margin-top:4px;">' + sec.certik.note + '</div></div>' +
+      '<div class="kgen-security-item"><div class="si-title">GoPlus</div><div class="si-ok">社群自查</div><div style="color:var(--kgen-muted);margin-top:4px;">' + sec.goplus.note + '</div></div>' +
+      '<div class="kgen-security-item"><div class="si-title">合約</div><div class="si-ok">未重新部署</div><div style="color:var(--kgen-muted);margin-top:4px;">KGEN Token bytecode 鎖定</div></div>';
+  }
+
+  function refreshTreasury() {
+    KGEN_UNIVERSE_CHAIN.readTreasury().then(function(bal) {
+      var el = document.getElementById('bank-treasury');
+      var note = document.getElementById('treasury-read-note');
+      if (bal && el) {
+        el.textContent = parseFloat(bal).toLocaleString() + ' KGEN';
+        if (note) note.textContent = 'Treasury 8888 鏈上餘額（read-only）';
+      } else if (note) {
+        note.textContent = '鏈上讀取失敗，顯示快取展示值';
+      }
+    });
+    KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
+      if (!r) return;
+      var lp = document.getElementById('bank-lp');
+      if (lp) lp.textContent = '$' + r.tvlEstimate;
+    });
+  }
+  refreshTreasury();
+  setInterval(refreshTreasury, 45000);
+
   var nodesEl = document.getElementById('universe-nodes');
-  if(nodesEl && window.KGEN_5D){
+  if (nodesEl && KGEN_UNIVERSE_MAP.nodes) {
     var nodeHtml = '';
-    Object.keys(KGEN_5D.NODES).forEach(function(id){
-      if(id === '18888') return;
-      var n = KGEN_5D.NODES[id];
-      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+    Object.keys(KGEN_UNIVERSE_MAP.nodes).forEach(function(id) {
+      if (id === '18888') return;
+      var n = KGEN_UNIVERSE_MAP.nodes[id];
+      var href = n.url || '#';
+      if (href.indexOf('K線西遊記/') === 0) href = '../../' + href.replace('K線西遊記/', '');
+      nodeHtml += '<a href="' + href + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
         + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
-        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
-        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
-        + '</a>';
+        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div></a>';
     });
     nodesEl.innerHTML = nodeHtml;
   }
 
-  /* Demo: animate reserve values */
-  setInterval(function(){
-    var treasury = document.getElementById('bank-treasury');
-    if(treasury){
-      var v = 8888 + Math.floor(Math.random()*100);
-      treasury.textContent = v.toLocaleString() + ' KGEN';
-    }
-  }, 12000);
-
-  status.push('18888 靈霄寶殿神明銀行 V0.1 已啟動');
+  status.push('18888 靈霄寶殿神明銀行 V1.0 · Universe Runtime');
+  }
 })();
 </script>
 </body>

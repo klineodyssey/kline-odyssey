@@ -3,16 +3,17 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-5D-GAME-UI
-VERSION: V0.1 / 5D Genesis Prototype
-BUILD: 20260704-5D-GAME-V0.1
+VERSION: V1.0 / Universe Runtime
+BUILD: 20260704-5D-GAME-V1.0
 BIRTH: 2026-07-04
 ROLE: K線5D峽谷推塔戰 — KGEN 原創 MOBA 概念遊戲
 STATUS: PROTOTYPE — 純前端互動原型
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>K線5D峽谷推塔戰｜KGEN 5D Game V0.1</title>
+<title>K線5D峽谷推塔戰｜KGEN 5D Game V1.0</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<link rel="stylesheet" href="../../modules/universe-runtime/universe-runtime.css">
 <style>
 /* === 遊戲主題：多方青、空方紅 === */
 .game-canvas-wrap {
@@ -117,18 +118,24 @@ canvas#game-canvas {
 <header class="kgen-hud">
   <div>
     <div class="kgen-hud-title">🎮 K線5D峽谷推塔戰</div>
-    <div class="kgen-hud-ver" id="kgen-status-text">KGEN 5D Game V0.1 · Prototype</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">KGEN 5D Game V1.0</div>
   </div>
   <nav class="kgen-hud-nav">
     <a href="../../index.html">🌌 星系</a>
-    <a href="../../../temples/12345/index.html">⚡ 12345</a>
-    <a href="../../../temples/11520/index.html">🌿 11520</a>
-    <a href="../../../temples/18888/index.html">🏦 18888</a>
+    <a href="../../temples/12345/index.html">⚡ 12345</a>
+    <a href="../../temples/11520/index.html">🌿 11520</a>
+    <a href="../../temples/18888/index.html">🏦 18888</a>
   </nav>
 </header>
 
 <main class="kgen-page">
 <div class="kgen-wrap" style="max-width:700px;">
+
+  <div id="civ-hud"></div>
+  <div id="npc-panel"></div>
+
+  <div class="kgen-section-head"><h2>🗺️ 宇宙世界地圖</h2></div>
+  <canvas id="world-map-canvas" class="kgen-cosmic-map"></canvas>
 
   <!-- Score bar -->
   <div class="score-panel">
@@ -228,13 +235,23 @@ canvas#game-canvas {
       <div class="act-btn ab-buy" onclick="gameAction('buy')">📈 做多<br><small>多方加兵</small></div>
       <div class="act-btn ab-neutral" onclick="gameAction('hold')">⏸️ 持倉<br><small>修復塔</small></div>
       <div class="act-btn ab-sell" onclick="gameAction('sell')">📉 做空<br><small>空方加兵</small></div>
-      <div class="act-btn ab-neutral" onclick="gameAction('approve')">✅ Approve<br><small>解鎖節點</small></div>
       <div class="act-btn ab-buy" onclick="gameAction('fortune')">🧧 發財金<br><small>多方大招</small></div>
-      <div class="act-btn ab-sell" onclick="gameAction('ignite')">🌬️ 轉日呼吸<br><small>空方大招</small></div>
+      <div class="act-btn ab-sell" onclick="gameAction('ignite')">🌬️ 轉日<br><small>空方大招</small></div>
+      <div class="act-btn ab-neutral" onclick="gameAction('warp')">🚀 Warp<br><small>曲速推進</small></div>
+      <div class="act-btn ab-neutral" onclick="gameAction('boss')">⛰️ Boss<br><small>五指山魔</small></div>
+      <div class="act-btn ab-buy" onclick="gameAction('skill')">⚔️ 神兵<br><small>技能攻擊</small></div>
     </div>
     <div style="margin-top:10px;text-align:center;">
       <button class="kgen-btn" onclick="newRound()">🔄 下一回合</button>
     </div>
+  </div>
+
+  <!-- Quests & Equipment -->
+  <div class="kgen-section-head"><h2>📜 任務 · 裝備 · 技能</h2></div>
+  <div class="kgen-card" id="quest-list" style="margin-bottom:10px;"></div>
+  <div class="kgen-card" style="font-size:12px;">
+    <div><strong>神兵：</strong><span id="eq-weapon">木棍</span> · <strong>飛船：</strong><span id="eq-ship">筋斗雲 Lv.1</span></div>
+    <div style="margin-top:6px;"><strong>技能：</strong>發財金 Lv.<span id="sk-fortune">1</span> · 轉日呼吸 Lv.<span id="sk-ignite">1</span> · Warp Lv.<span id="sk-warp">1</span></div>
   </div>
 
   <!-- Event Log -->
@@ -245,7 +262,7 @@ canvas#game-canvas {
 
   <!-- Lore -->
   <div class="kgen-notice" style="margin-top:16px;">
-    <strong>K線5D峽谷推塔戰：</strong><br>
+    <strong>K線5D峽谷推塔戰 V1.0：</strong><br>
     多方陣營（牛）從左方 12345 悟空財神殿出發，空方陣營（熊）從右方 16888 廣寒宮出發。
     K 線價格決定戰場位置——漲則多方推進，跌則空方反撲。
     控制中路 11520 花果山交易所、18888 靈霄寶殿、18921 斬妖台三個宇宙節點，可獲得 KGEN 獎勵加成。
@@ -261,337 +278,70 @@ canvas#game-canvas {
 
 <div class="kgen-status-bar">
   <div class="kgen-status-dot"></div>
-  <span id="kgen-status-bottom">K線5D峽谷推塔戰 V0.1 · 原型</span>
+  <span id="kgen-status-bottom">K線5D峽谷推塔戰 V1.0 · Universe Runtime</span>
 </div>
+<div id="universe-dock"></div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/physics.js"></script>
+<script src="../../modules/universe-runtime/status-bus.js"></script>
+<script src="../../modules/universe-runtime/wallet.js"></script>
+<script src="../../modules/universe-runtime/camera.js"></script>
+<script src="../../modules/universe-runtime/audio.js"></script>
+<script src="../../modules/universe-runtime/animation.js"></script>
+<script src="../../modules/universe-runtime/universe-map.js"></script>
+<script src="../../modules/universe-runtime/npc.js"></script>
+<script src="../../modules/universe-runtime/civilization.js"></script>
+<script src="../../modules/universe-runtime/chain-read.js"></script>
+<script src="../../modules/universe-runtime/bootstrap.js"></script>
+<script src="kline-5d-game-engine.js"></script>
 <script>
 (function(){
-  var status = new KGEN_StatusBus('kgen-status-text');
+  var engine;
+  KGEN_UNIVERSE_RUNTIME.boot({
+    nodeId: 'game',
+    statusElementId: 'kgen-status-text',
+    universeDockId: 'universe-dock',
+    npcContainerId: 'npc-panel',
+    civContainerId: 'civ-hud',
+    cosmicMapCanvasId: 'world-map-canvas',
+  }).then(function() {
+    engine = new KLINE_5D_GAME_ENGINE({ canvas: document.getElementById('game-canvas'), worldCanvas: document.getElementById('world-map-canvas') });
+    window.gameAction = function(a) { engine.action(a); updateEquipHUD(); };
+    window.claimNode = function(id) { engine.claimNode(id); };
+    window.newRound = function() { engine.newRound(); };
+    engine.start();
+    updateEquipHUD();
+    setInterval(updateEquipHUD, 3000);
+    renderUniverseNodes();
+  });
 
-  /* === Game State === */
-  var G = {
-    round: 1,
-    timer: 60,
-    bullBase: 100,
-    bearBase: 100,
-    towers: { 't1-bull': 100, 't2-bull': 100, 't1-bear': 100, 't2-bear': 100 },
-    bullMinions: 3,
-    bearMinions: 3,
-    nodes: { '11520': 'neutral', '18888': 'neutral', '18921': 'neutral' },
-    kPrice: 0,
-    kChange: 0,
-    events: [],
-    running: true,
-  };
-
-  /* === Event log === */
-  function addEvent(msg, color) {
-    var ts = new Date().toTimeString().slice(0,8);
-    G.events.unshift({ ts: ts, msg: msg, color: color || 'var(--kgen-muted)' });
-    if(G.events.length > 20) G.events.length = 20;
-    renderLog();
-    status.push(msg);
-  }
-
-  function renderLog() {
-    var el = document.getElementById('event-log');
-    if(!el) return;
-    el.innerHTML = G.events.map(function(e){
-      return '<div class="ev-line"><span class="ev-time">' + e.ts + '</span> <span style="color:' + e.color + ';">' + e.msg + '</span></div>';
-    }).join('');
-  }
-
-  /* === Minions render === */
-  function renderMinions() {
-    var bullEl = document.getElementById('bull-minions');
-    var bearEl = document.getElementById('bear-minions');
-    var bHtml = '', rHtml = '';
-    for(var i = 0; i < G.bullMinions; i++) bHtml += '<span class="minion-chip mc-bull">🐂 牛' + (i+1) + '</span>';
-    for(var j = 0; j < G.bearMinions; j++) rHtml += '<span class="minion-chip mc-bear">🐻 熊' + (j+1) + '</span>';
-    if(bullEl) bullEl.innerHTML = bHtml || '<span style="color:var(--kgen-muted);">無</span>';
-    if(bearEl) bearEl.innerHTML = rHtml || '<span style="color:var(--kgen-muted);">無</span>';
-  }
-
-  /* === Tower HP render === */
-  function renderTowers() {
-    var keys = Object.keys(G.towers);
-    keys.forEach(function(k) {
-      var hp = G.towers[k];
-      var bar = document.getElementById(k + '-bar');
-      var hpEl = document.getElementById(k + '-hp');
-      if(bar) bar.style.width = Math.max(0, hp) + '%';
-      if(hpEl) hpEl.textContent = Math.max(0, hp) + '/100';
-    });
-  }
-
-  /* === Score render === */
-  function renderScore() {
-    var bh = document.getElementById('bull-hp');
-    var rh = document.getElementById('bear-hp');
-    if(bh) bh.textContent = G.bullBase;
-    if(rh) rh.textContent = G.bearBase;
-    document.getElementById('game-round').textContent = G.round;
-  }
-
-  /* === Canvas — battlefield === */
-  function drawBattlefield(price, change) {
-    var canvas = document.getElementById('game-canvas');
-    if(!canvas) return;
-    canvas.width = canvas.parentElement.offsetWidth || 600;
-    var ctx = canvas.getContext('2d');
-    var W = canvas.width, H = 180;
-
-    /* Background gradient */
-    var bgGrad = ctx.createLinearGradient(0, 0, W, 0);
-    bgGrad.addColorStop(0, '#051208');
-    bgGrad.addColorStop(0.5, '#050810');
-    bgGrad.addColorStop(1, '#120505');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, W, H);
-
-    /* Grid lines */
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 1;
-    for(var gx = 0; gx <= W; gx += 60) {
-      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
-    }
-    for(var gy = 0; gy <= H; gy += 40) {
-      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
-    }
-
-    /* K-price position line: change > 0 → moves left (bear side), < 0 → moves right (bull side) */
-    var pct = 0.5 + (change / 10) * 0.3;
-    pct = Math.max(0.15, Math.min(0.85, pct));
-    var lineX = W * pct;
-
-    var lineGrad = ctx.createLinearGradient(lineX - 2, 0, lineX + 2, 0);
-    lineGrad.addColorStop(0, 'rgba(255,215,120,0)');
-    lineGrad.addColorStop(0.5, 'rgba(255,215,120,0.8)');
-    lineGrad.addColorStop(1, 'rgba(255,215,120,0)');
-    ctx.fillStyle = lineGrad;
-    ctx.fillRect(lineX - 1, 0, 2, H);
-
-    /* Label: K line */
-    ctx.fillStyle = 'rgba(255,215,120,0.6)';
-    ctx.font = 'bold 10px monospace';
-    ctx.fillText('K線 ' + (change >= 0 ? '▲' : '▼') + ' $' + (price||0).toFixed(0), lineX + 4, 16);
-
-    /* Bases */
-    function drawBase(x, y, color, label) {
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 16;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, 18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 8px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(label, x, y + 3);
-    }
-    drawBase(30, H/2, 'rgba(124,255,197,0.7)', '⚡12345');
-    drawBase(W - 30, H/2, 'rgba(255,68,68,0.7)', '🌙16888');
-
-    /* Towers */
-    function drawTower(x, y, hp, color) {
-      var h = (hp / 100) * 36;
-      ctx.fillStyle = color;
-      ctx.globalAlpha = 0.7;
-      ctx.fillRect(x - 6, y - h/2, 12, h);
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = color;
-      ctx.strokeRect(x - 6, y - 18, 12, 36);
-    }
-    drawTower(W * 0.2, H/2, G.towers['t1-bull'], '#7cffc5');
-    drawTower(W * 0.35, H/2, G.towers['t2-bull'], '#7cffc5');
-    drawTower(W * 0.65, H/2, G.towers['t1-bear'], '#ff4444');
-    drawTower(W * 0.8, H/2, G.towers['t2-bear'], '#ff4444');
-
-    /* Neutral nodes */
-    function drawNode(x, y, id, label) {
-      var st = G.nodes[id] || 'neutral';
-      var col = st === 'bull' ? '#7cffc5' : st === 'bear' ? '#ff4444' : '#ffd778';
-      ctx.fillStyle = col;
-      ctx.globalAlpha = 0.5;
-      ctx.fillRect(x - 14, y - 10, 28, 20);
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = col;
-      ctx.strokeRect(x - 14, y - 10, 28, 20);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 7px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(label, x, y + 3);
-    }
-    drawNode(W * 0.5, H/2, '18888', '18888');
-    drawNode(W * 0.42, H/2 - 28, '11520', '11520');
-    drawNode(W * 0.58, H/2 + 28, '18921', '18921');
-
-    /* Minions — bull move right, bear move left */
-    var bullX = W * 0.2 + (pct - 0.5) * W * 0.4;
-    var bearX = W * 0.8 - (pct - 0.5) * W * 0.4;
-
-    for(var mi = 0; mi < G.bullMinions; mi++) {
-      ctx.fillStyle = '#7cffc5';
-      ctx.beginPath();
-      ctx.arc(bullX + mi * 14, H/2 - 8, 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    for(var mj = 0; mj < G.bearMinions; mj++) {
-      ctx.fillStyle = '#ff4444';
-      ctx.beginPath();
-      ctx.arc(bearX - mj * 14, H/2 + 8, 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.textAlign = 'left';
-  }
-
-  /* === Live price + battle sim === */
-  function updateGame(d) {
-    G.kPrice = d.price;
-    G.kChange = d.change;
-
-    /* Price decides advantage */
-    if(d.change > 2) {
-      if(G.towers['t1-bear'] > 0) { G.towers['t1-bear'] -= 3; addEvent('K線強漲！多方進攻空方一塔！', '#7cffc5'); }
-    } else if(d.change < -2) {
-      if(G.towers['t1-bull'] > 0) { G.towers['t1-bull'] -= 3; addEvent('K線暴跌！空方反撲多方一塔！', '#ff4444'); }
-    }
-
-    /* Price display */
-    var priceEl = document.getElementById('live-price');
-    var chgEl = document.getElementById('live-chg');
-    if(priceEl) priceEl.textContent = d.price.toFixed(2);
-    if(chgEl) {
-      var dir = KGEN_priceDir(d.change);
-      chgEl.textContent = dir.text;
-      chgEl.style.color = dir.color;
-    }
-
-    drawBattlefield(G.kPrice, G.kChange);
-    renderTowers();
-    renderScore();
-  }
-
-  /* === Player actions === */
-  window.gameAction = function(act) {
-    switch(act) {
-      case 'buy':
-        G.bullMinions = Math.min(8, G.bullMinions + 1);
-        addEvent('📈 做多！多方新增一兵線（共' + G.bullMinions + '）', '#7cffc5');
-        break;
-      case 'sell':
-        G.bearMinions = Math.min(8, G.bearMinions + 1);
-        addEvent('📉 做空！空方新增一兵線（共' + G.bearMinions + '）', '#ff4444');
-        break;
-      case 'hold':
-        var repaired = 0;
-        ['t1-bull','t2-bull'].forEach(function(k){
-          if(G.towers[k] < 100){ G.towers[k] = Math.min(100, G.towers[k] + 10); repaired++; }
-        });
-        addEvent('⏸️ 持倉！修復多方塔 +10 HP', '#ffd778');
-        break;
-      case 'fortune':
-        if(G.towers['t1-bear'] > 0) G.towers['t1-bear'] -= 20;
-        if(G.towers['t2-bear'] > 0) G.towers['t2-bear'] -= 10;
-        G.bullMinions = Math.min(8, G.bullMinions + 2);
-        addEvent('🧧 多方大招！發財金！空方塔 -20 HP！', '#7cffc5');
-        break;
-      case 'ignite':
-        if(G.towers['t1-bull'] > 0) G.towers['t1-bull'] -= 20;
-        if(G.towers['t2-bull'] > 0) G.towers['t2-bull'] -= 10;
-        G.bearMinions = Math.min(8, G.bearMinions + 2);
-        addEvent('🌬️ 空方大招！轉日呼吸！多方塔 -20 HP！', '#ff4444');
-        break;
-      case 'approve':
-        addEvent('✅ Approve 解鎖！宇宙節點已激活！', '#ffd778');
-        break;
-    }
-    renderMinions();
-    renderTowers();
-    drawBattlefield(G.kPrice, G.kChange);
-    checkWin();
-  };
-
-  window.claimNode = function(id) {
-    if(!G.nodes.hasOwnProperty(id)) return;
-    G.nodes[id] = 'bull';
-    addEvent('🌿 多方佔領節點 ' + id + '！獲得加成！', '#ffd778');
-    drawBattlefield(G.kPrice, G.kChange);
-  };
-
-  window.newRound = function() {
-    G.round++;
-    G.timer = 60;
-    G.bullMinions = 3;
-    G.bearMinions = 3;
-    addEvent('🔄 新回合 #' + G.round + ' 開始！', '#ffd778');
-    renderMinions();
-    renderScore();
-  };
-
-  function checkWin() {
-    if(G.towers['t1-bear'] <= 0 && G.towers['t2-bear'] <= 0) {
-      G.bearBase = Math.max(0, G.bearBase - 10);
-      if(G.bearBase <= 0) addEvent('🏆 多方勝利！廣寒宮已攻陷！', '#7cffc5');
-    }
-    if(G.towers['t1-bull'] <= 0 && G.towers['t2-bull'] <= 0) {
-      G.bullBase = Math.max(0, G.bullBase - 10);
-      if(G.bullBase <= 0) addEvent('💀 空方勝利！悟空財神殿已攻陷！', '#ff4444');
-    }
-    renderScore();
-  }
-
-  /* === Timer === */
-  var timerInterval = setInterval(function(){
-    G.timer--;
-    var el = document.getElementById('game-timer');
-    if(el) el.textContent = G.timer + 's';
-    if(G.timer <= 0) {
-      G.timer = 60;
-      G.round++;
-      addEvent('⏰ 回合 #' + G.round + ' 自動開始', '#ffd778');
-      renderScore();
-    }
-    /* Auto simulate minion battle */
-    if(G.timer % 10 === 0) {
-      var bullDmg = G.bullMinions * 2;
-      var bearDmg = G.bearMinions * 2;
-      if(G.towers['t1-bear'] > 0) G.towers['t1-bear'] = Math.max(0, G.towers['t1-bear'] - bullDmg);
-      if(G.towers['t1-bull'] > 0) G.towers['t1-bull'] = Math.max(0, G.towers['t1-bull'] - bearDmg);
-      renderTowers();
-      drawBattlefield(G.kPrice, G.kChange);
-      checkWin();
-    }
-  }, 1000);
-
-  /* === Universe nodes === */
-  var nodesEl = document.getElementById('universe-nodes');
-  if(nodesEl && window.KGEN_5D){
+  function renderUniverseNodes() {
+    var nodesEl = document.getElementById('universe-nodes');
+    if (!nodesEl || !KGEN_UNIVERSE_MAP.nodes) return;
     var nodeHtml = '';
-    Object.keys(KGEN_5D.NODES).forEach(function(id){
-      var n = KGEN_5D.NODES[id];
-      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
-        + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
-        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
-        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
-        + '</a>';
+    Object.keys(KGEN_UNIVERSE_MAP.nodes).forEach(function(id) {
+      var n = KGEN_UNIVERSE_MAP.nodes[id];
+      var href = n.url || '#';
+      if (href.indexOf('K線西遊記/') === 0) href = '../../' + href.replace('K線西遊記/', '');
+      nodeHtml += '<a href="' + href + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;"><div style="font-size:11px;color:' + n.color + ';">' + id + '</div><div style="font-weight:950;">' + n.name + '</div></a>';
     });
     nodesEl.innerHTML = nodeHtml;
   }
 
-  /* === Init === */
-  renderMinions();
-  renderTowers();
-  renderScore();
-  drawBattlefield(600, 0);
+  function updateEquipHUD() {
+    if (!KGEN_UNIVERSE_CIVILIZATION) return;
+    var p = KGEN_UNIVERSE_CIVILIZATION.getProgress();
+    var w = document.getElementById('eq-weapon');
+    var s = document.getElementById('eq-ship');
+    if (w) w.textContent = p.equipment.weapon;
+    if (s) s.textContent = p.equipment.ship;
+    var sk = p.skills;
+    if (document.getElementById('sk-fortune')) document.getElementById('sk-fortune').textContent = sk.fortune || 1;
+    if (document.getElementById('sk-ignite')) document.getElementById('sk-ignite').textContent = sk.ignite || 1;
+    if (document.getElementById('sk-warp')) document.getElementById('sk-warp').textContent = sk.warp || 1;
+  }
 
-  KGEN_KlineFeed.poll('BNBUSDT', updateGame, 15000);
-
-  addEvent('🎮 K線5D峽谷推塔戰 V0.1 已啟動！', '#ffd778');
-  status.push('K線5D峽谷推塔戰 V0.1 — 多方 vs 空方');
 })();
 </script>
 </body>

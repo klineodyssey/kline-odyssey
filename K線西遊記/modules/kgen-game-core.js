@@ -1,14 +1,15 @@
 /*
-KGEN Game Core JS V0.1
+KGEN Game Core JS V1.0
 Shared runtime utilities for all KGEN 5D temples and game UI.
 Pure vanilla JS — no dependencies, no build required.
+Used by Universe Runtime V1.0 (see modules/universe-runtime/)
 */
 (function(global){
   'use strict';
 
   // ===== Constants =====
   var KGEN_5D = {
-    VERSION: 'V0.1',
+    VERSION: 'V1.0',
     CHAIN_ID: '0x38',
     CHAIN_NAME: 'BNB Smart Chain',
     CHAIN_RPC: 'https://bsc-dataseed.binance.org/',

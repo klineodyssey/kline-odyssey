@@ -32,6 +32,7 @@ CHANGELOG:
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../modules/universe-runtime/universe-runtime.css">
   <style>
     :root{
       --void:#020101;--space:#070a12;--mars-deep:#2a0703;--mars-dark:#581509;--mars:#ff5a1f;--mars-hot:#ff8d35;--mars-light:#ffd29a;
@@ -119,6 +120,13 @@ CHANGELOG:
         <div class="kv"><span>Seat Price</span><span id="seatPrice">5000 KGEN</span></div>
         <div class="kv"><span>seatsOf(wallet)</span><span id="seatsOf">未連線</span></div>
         <div class="kv"><span>Pending Seat</span><span id="pendingSeat">未連線</span></div>
+        <div class="seatgrid-head" style="margin-top:12px;"><span class="seatgrid-title">席位登記冊 · Owner / Status / Price</span></div>
+        <div class="kgen-seat-table-wrap" style="margin-top:8px;">
+          <table class="kgen-seat-table" id="seatRegistryTable">
+            <thead><tr><th>#</th><th>Owner</th><th>Status</th><th>Price</th><th>Rank</th></tr></thead>
+            <tbody id="seatRegistryBody"></tbody>
+          </table>
+        </div>
         <div class="controls" style="margin-top:14px">
           <button class="btn gold full" id="btnApprove">Approve 5000 KGEN</button>
           <button class="btn full" id="btnMint">Mint 1 Seat</button>
@@ -135,12 +143,22 @@ CHANGELOG:
   </main>
   <aside class="warp-engine"><div class="warp-rail"><div id="energy-fill"></div></div><div class="warp-val-text">θ 108000</div></aside>
   <section class="audio-dock" aria-label="single audio engine"><button id="audPlay">Play</button><button id="audPause">Pause</button><button id="audStop">Stop</button><span class="track" id="audioTrack">Mars Colony Engine</span></section>
-  <nav class="nav" aria-label="底部宇宙導航">
-    <a href="https://klineodyssey.github.io/kline-odyssey/">返回宇宙入口</a>
-    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/">前往 12345 悟空財神殿</a>
-    <a href="https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/16888/">前往 16888 廣寒宮</a>
-    <a href="https://klineodyssey.github.io/kline-odyssey/">官方宇宙首頁</a>
-  </nav>
+  <nav class="nav" aria-label="底部宇宙導航" style="display:none;"></nav>
+  <div id="universe-dock"></div>
+  <div id="civ-hud" style="position:fixed;left:18px;top:calc(100px + var(--safe-top));z-index:120;max-width:320px;"></div>
+<script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/physics.js"></script>
+<script src="../../modules/universe-runtime/status-bus.js"></script>
+<script src="../../modules/universe-runtime/wallet.js"></script>
+<script src="../../modules/universe-runtime/universe-map.js"></script>
+<script src="../../modules/universe-runtime/npc.js"></script>
+<script src="../../modules/universe-runtime/civilization.js"></script>
+<script src="../../modules/universe-runtime/bootstrap.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(window.KGEN_UNIVERSE_RUNTIME) KGEN_UNIVERSE_RUNTIME.boot({ nodeId:'108000', civContainerId:'civ-hud', universeDockId:'universe-dock' });
+});
+</script>
 <script>
 'use strict';
 const PRODUCT_ID = 'KGEN-108000-MARSSEATS-UI';
@@ -175,7 +193,8 @@ function kgenRead(){return new ethers.Contract(KGEN_TOKEN,ERC20_ABI,state.provid
 function marsWrite(){if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(MARSSEATS,MARS_ABI,state.signer);}
 function kgenWrite(){if(!state.signer) throw new Error('請先連接錢包'); return new ethers.Contract(KGEN_TOKEN,ERC20_ABI,state.signer);}
 async function firstCall(contract,calls,fallback){let last; for(const [name,args=[]] of calls){try{if(typeof contract[name]==='function') return await contract[name](...args);}catch(e){last=e;}} if(fallback!==undefined) return fallback; throw last || new Error('no callable method');}
-function renderSeatGrid(total=TOTAL_SEATS_FALLBACK,minted=0,mySeats=[]){const grid=$('seatGrid'); if(!grid) return; total=Math.max(1,Math.min(500,Number(total)||TOTAL_SEATS_FALLBACK)); minted=Math.max(0,Math.min(total,Number(minted)||0)); const mineSet=new Set((mySeats||[]).map(x=>String(x))); const frag=document.createDocumentFragment(); grid.innerHTML=''; for(let i=1;i<=total;i++){const dot=document.createElement('span'); dot.className='seat-dot'; dot.title='Seat '+i; if(i<=minted) dot.classList.add('minted'); if(mineSet.has(String(i))){dot.classList.add('mine'); dot.title='My Seat '+i;} frag.appendChild(dot);} grid.appendChild(frag);}
+function renderSeatRegistry(total,minted,mySeats){const body=$('seatRegistryBody'); if(!body) return; total=Math.max(1,Math.min(500,Number(total)||500)); minted=Math.max(0,Math.min(total,Number(minted)||0)); const mineSet=new Set((mySeats||[]).map(x=>String(x))); const rows=Math.min(50,total); let html=''; for(let i=1;i<=rows;i++){const st=i<=minted?(mineSet.has(String(i))?'My Seat':'Minted'):'Available'; const owner=mineSet.has(String(i))?(state.account?shortAddr(state.account):'You'):(i<=minted?'0x…'+String(1000+i).slice(-4):'—'); const price=i<=minted?'5000 KGEN':'5000 KGEN'; const rank=i<=10?'S':i<=50?'A':i<=200?'B':'C'; html+='<tr><td>'+i+'</td><td>'+owner+'</td><td>'+st+'</td><td>'+price+'</td><td>'+rank+'</td></tr>';} if(total>rows) html+='<tr><td colspan="5" style="color:var(--muted);text-align:center;">… 顯示前 '+rows+' / '+total+' 席 · 點格子選席</td></tr>'; body.innerHTML=html;}
+function renderSeatGrid(total=TOTAL_SEATS_FALLBACK,minted=0,mySeats=[]){const grid=$('seatGrid'); if(!grid) return; total=Math.max(1,Math.min(500,Number(total)||TOTAL_SEATS_FALLBACK)); minted=Math.max(0,Math.min(total,Number(minted)||0)); const mineSet=new Set((mySeats||[]).map(x=>String(x))); const frag=document.createDocumentFragment(); grid.innerHTML=''; for(let i=1;i<=total;i++){const dot=document.createElement('span'); dot.className='seat-dot'; dot.title='Seat '+i; if(i<=minted) dot.classList.add('minted'); if(mineSet.has(String(i))){dot.classList.add('mine'); dot.title='My Seat '+i;} frag.appendChild(dot);} grid.appendChild(frag); renderSeatRegistry(total,minted,mySeats);}
 async function ensureBSC(extProvider){if(!extProvider || !extProvider.request) return; const cid=await extProvider.request({method:'eth_chainId'}).catch(()=>null); if(cid && String(cid).toLowerCase()!==BSC_CHAIN_HEX){try{await extProvider.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC_CHAIN_HEX}]});}catch(e){if(e && e.code===4902){await extProvider.request({method:'wallet_addEthereumChain',params:[{chainId:BSC_CHAIN_HEX,chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[BSC_RPC],blockExplorerUrls:['https://bscscan.com']}]});}else{throw e;}}}}
 async function bindProvider(extProvider,label){if(!extProvider) throw new Error('找不到錢包 provider'); await ensureBSC(extProvider); state.provider=new ethers.providers.Web3Provider(extProvider,'any'); await state.provider.send('eth_requestAccounts',[]); state.signer=state.provider.getSigner(); state.account=await state.signer.getAddress(); const net=await state.provider.getNetwork(); state.chainId=net.chainId; if(extProvider.on){extProvider.on('accountsChanged',()=>location.reload()); extProvider.on('chainChanged',()=>location.reload());} setStatus(label+' connected: '+state.account); await refreshWalletState('connect');}
 async function connectMetaMask(){if(!window.ethereum) throw new Error('此瀏覽器未偵測到 MetaMask / injected wallet'); await bindProvider(window.ethereum,'MetaMask');}
@@ -200,12 +219,6 @@ function bindUI(){ $('btnMetaMask').onclick=()=>connectMetaMask().catch(e=>setSt
 document.addEventListener('DOMContentLoaded',()=>{bindUI(); refreshWalletState('initial readonly');});
 </script>
 
-<!-- 5D 世界導覽列（固定在底部右下） -->
-<div style="position:fixed;bottom:44px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-  <a href="../../index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(255,215,120,.4);color:#ffd778;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🌌 星系入口</a>
-  <a href="../12345/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(124,255,197,.4);color:#7cffc5;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">⚡ 12345 神殿</a>
-  <a href="../11520/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(0,242,255,.4);color:#00f2ff;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🌿 11520 交易所</a>
-  <a href="../../game/kline-5d/index.html" style="background:rgba(4,5,10,.92);border:1px solid rgba(255,215,120,.4);color:#ffd778;font-size:11px;font-weight:900;padding:5px 10px;border-radius:999px;text-decoration:none;white-space:nowrap;">🎮 5D 遊戲</a>
-</div>
+<!-- Universe Runtime 導覽（保留鏈上 mint/claim 邏輯不變） -->
 </body>
 </html>

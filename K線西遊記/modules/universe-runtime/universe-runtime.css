@@ -1,0 +1,165 @@
+/*
+ * KGEN Universe Runtime — Shared CSS V1.0
+ * Dock, NPC, Civilization HUD, cosmic map
+ */
+.kgen-universe-dock {
+  position: fixed;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9500;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 96vw;
+  padding: 6px 10px;
+  background: rgba(4, 5, 10, 0.92);
+  border: 1px solid rgba(255, 215, 120, 0.35);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+}
+.kgen-dock-galaxy,
+.kgen-dock-game,
+.kgen-dock-node {
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--kgen-gold, #ffd778);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.kgen-dock-node {
+  border-color: color-mix(in srgb, var(--node-color, #ffd778) 40%, transparent);
+  color: var(--node-color, #ffd778);
+}
+.kgen-dock-active {
+  background: rgba(255, 215, 120, 0.15);
+  box-shadow: 0 0 12px rgba(255, 215, 120, 0.25);
+}
+.kgen-dock-game {
+  border-color: rgba(0, 242, 255, 0.4);
+  color: #00f2ff;
+}
+
+.kgen-npc-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--kgen-line-gold, rgba(255, 215, 120, 0.35));
+  border-radius: 14px;
+  background: var(--kgen-panel, rgba(10, 12, 20, 0.96));
+  margin-bottom: 12px;
+}
+.kgen-npc-avatar {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+.kgen-npc-name {
+  font-weight: 950;
+  color: var(--kgen-gold, #ffd778);
+  margin-bottom: 4px;
+}
+.kgen-npc-msg {
+  font-size: 13px;
+  color: var(--kgen-muted, rgba(255, 255, 255, 0.58));
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.kgen-btn-sm {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.kgen-civ-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 900;
+  font-family: var(--kgen-mono, monospace);
+  color: var(--kgen-cyan, #00f2ff);
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  border-radius: 10px;
+  background: rgba(0, 242, 255, 0.06);
+  margin-bottom: 12px;
+}
+
+.kgen-cosmic-map {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  background: #050810;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.kgen-security-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.kgen-security-item {
+  padding: 10px;
+  border: 1px solid var(--kgen-line, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  font-size: 12px;
+}
+.kgen-security-item .si-title {
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.kgen-security-item .si-ok { color: #7cffc5; }
+.kgen-security-item .si-warn { color: #ffd778; }
+
+.kgen-seat-table-wrap {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--kgen-line, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+}
+.kgen-seat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.kgen-seat-table th,
+.kgen-seat-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+.kgen-seat-table th {
+  position: sticky;
+  top: 0;
+  background: var(--kgen-bg2, #0a0d14);
+  color: var(--kgen-gold, #ffd778);
+}
+
+.kgen-lp-anim-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin: 8px 0;
+}
+.kgen-lp-anim-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7cffc5, #00f2ff);
+  transition: width 0.6s ease;
+  animation: lpPulse 2s ease-in-out infinite;
+}
+@keyframes lpPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+@media (max-width: 480px) {
+  .kgen-universe-dock { border-radius: 16px; }
+  .kgen-dock-node { padding: 5px 8px; font-size: 10px; }
+}
