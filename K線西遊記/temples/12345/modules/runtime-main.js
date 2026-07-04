@@ -1,7 +1,7 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.2 / HOTFIX";
+  const VERSION = "V2.3.2 / TRUST FORTUNE AI FIX";
   const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.2";
   const UI_PATCH = "V2.3.2";
   const BRIDGE_LOGIC_VERSION = "V10.49.2 restored logic";
@@ -2029,10 +2029,6 @@
       if(!this.state.address) return ["未連錢包"];
       if(String(this.state.chainId || '').toLowerCase() !== String(CHAIN.BSC).toLowerCase()) return ["錢包不在 BSC"];
       if(!HolyCupRuntime.isComplete()) return ["三聖盃未完成"];
-      if(this.state.bnbBal != null && hasEthers5()){
-        const minGas = ethers.utils.parseEther("0.0003");
-        if(this.state.bnbBal.lt(minGas)) reasons.push("BNB gas 不足");
-      }
       if(!this.state.heartData) return ["等待鏈上資料"];
       const data = this.state.heartData;
       const now = this.currentBlockTs();
@@ -2046,6 +2042,10 @@
       if(bnNum(data.user.lastFortune) > 0 && now < nextFortune){
         reasons.push("合約目前不可領（冷卻倒數 " + formatHMS((nextFortune - now) * 1000) + "）");
       }
+      if(this.state.bnbBal != null && hasEthers5()){
+        const minGas = ethers.utils.parseEther("0.0003");
+        if(this.state.bnbBal.lt(minGas)) reasons.push("BNB gas 不足");
+      }
       if(!Number.isFinite(amountWhole)) reasons.push("合約目前不可領（金額格式錯誤）");
       else if(amountWhole < data.fortuneMin || amountWhole > data.fortuneMax) reasons.push("合約目前不可領（金額須 " + data.fortuneMin + "–" + data.fortuneMax + "）");
       if(data.fortuneCapEnabled && bnNum(data.user.epochClaims) >= data.fortuneEpochMax) reasons.push("已被領完 / 餘額不足");
@@ -2054,6 +2054,106 @@
         if(data.heartBal.lt(need)) reasons.push("已被領完 / 餘額不足");
       }
       return reasons;
+    },
+    evaluateFortuneClaim: function(){
+      const snap = {
+        fortuneCanClaim: "no",
+        fortuneCooldownRemain: "--",
+        fortuneRevertReason: "--",
+        gasBalance: "--",
+        txReady: "no"
+      };
+      if(!this.state.address){
+        snap.fortuneRevertReason = "未連錢包";
+        return snap;
+      }
+      if(hasEthers5() && this.state.bnbBal != null){
+        snap.gasBalance = Number(ethers.utils.formatEther(this.state.bnbBal)).toFixed(6) + " BNB";
+      }
+      if(!HolyCupRuntime.isComplete()){
+        snap.fortuneRevertReason = "三聖盃未完成";
+        return snap;
+      }
+      if(!this.state.heartData){
+        snap.fortuneRevertReason = "等待鏈上資料";
+        return snap;
+      }
+      const data = this.state.heartData;
+      const now = this.currentBlockTs();
+      const nextFortune = bnNum(data.user.lastFortune) + data.fortuneCooldown;
+      if(bnNum(data.user.lastFortune) > 0 && now < nextFortune){
+        const remainSec = nextFortune - now;
+        snap.fortuneCooldownRemain = formatHMS(remainSec * 1000);
+        snap.fortuneRevertReason = "FORTUNE_COOLDOWN";
+        return snap;
+      }
+      const reasons = this.getFortuneBlockReasons().filter(function(reason){
+        return reason !== "三聖盃未完成" && !/冷卻/.test(reason);
+      });
+      const gasReason = reasons.find(function(reason){ return /BNB gas 不足/.test(reason); });
+      if(gasReason){
+        snap.fortuneRevertReason = "BNB_GAS_LOW";
+        return snap;
+      }
+      if(reasons.length){
+        snap.fortuneRevertReason = reasons[0];
+        return snap;
+      }
+      snap.fortuneCanClaim = "yes";
+      snap.fortuneCooldownRemain = "00:00:00";
+      snap.txReady = "yes";
+      snap.fortuneRevertReason = "--";
+      return snap;
+    },
+    preflightFortuneClaim: async function(){
+      await this.refreshChainData(false);
+      let snap = this.evaluateFortuneClaim();
+      ClaimDebugRuntime.update(snap);
+      if(!HolyCupRuntime.isComplete()){
+        StatusRuntime.push("發財金：三聖盃未完成（" + HolyCupRuntime.count + "/3）");
+        return false;
+      }
+      if(snap.fortuneRevertReason === "FORTUNE_COOLDOWN"){
+        StatusRuntime.push("發財金冷卻中，剩餘 " + snap.fortuneCooldownRemain);
+        return false;
+      }
+      if(snap.fortuneRevertReason === "BNB_GAS_LOW"){
+        StatusRuntime.push("BNB Gas 不足");
+        return false;
+      }
+      if(snap.fortuneCanClaim !== "yes"){
+        StatusRuntime.push("發財金：" + (snap.fortuneRevertReason || "條件未滿足"));
+        return false;
+      }
+      try{
+        const contract = await this.heartContract();
+        await contract.callStatic.fortuneClaim(this.getFortuneAmount());
+        snap.txReady = "yes";
+        snap.fortuneRevertReason = "--";
+        ClaimDebugRuntime.update(snap);
+        return true;
+      }catch(error){
+        const msg = asErrorMessage(error);
+        snap.txReady = "no";
+        snap.fortuneRevertReason = msg;
+        if(/FORTUNE_COOLDOWN|cooldown/i.test(msg)){
+          const recheck = this.evaluateFortuneClaim();
+          snap.fortuneCooldownRemain = recheck.fortuneCooldownRemain;
+          snap.fortuneRevertReason = "FORTUNE_COOLDOWN";
+          ClaimDebugRuntime.update(snap);
+          StatusRuntime.push("發財金冷卻中，剩餘 " + recheck.fortuneCooldownRemain);
+          return false;
+        }
+        if(/insufficient funds|gas required exceeds|gas 不足/i.test(msg) && !/FORTUNE_COOLDOWN|FORTUNE_EPOCH|FORTUNE_OUT/i.test(msg)){
+          snap.fortuneRevertReason = "BNB_GAS_LOW";
+          ClaimDebugRuntime.update(snap);
+          StatusRuntime.push("BNB Gas 不足");
+          return false;
+        }
+        ClaimDebugRuntime.update(snap);
+        StatusRuntime.push("發財金：合約拒絕 — " + msg);
+        return false;
+      }
     },
     updateHeartbeatStatus: function(){
       const status = $("kh-heartbeat-status");
@@ -2126,7 +2226,20 @@
       const reasons = this.getFortuneBlockReasons().filter(function(reason){
         return reason !== "三聖盃未完成";
       });
-      status.textContent = reasons.length ? "發財金：鏈上條件 — " + reasons[0] : "發財金：可領";
+      if(reasons.length){
+        const first = reasons[0];
+        if(/冷卻/.test(first)){
+          const match = first.match(/冷卻倒數\s+([0-9:]+)/);
+          status.textContent = "發財金冷卻中，剩餘 " + (match ? match[1] : "--");
+        }else if(/BNB gas 不足/.test(first)){
+          status.textContent = "發財金：BNB Gas 不足";
+        }else{
+          status.textContent = "發財金：鏈上條件 — " + first;
+        }
+      }else{
+        status.textContent = "發財金：可領";
+      }
+      ClaimDebugRuntime.update(this.evaluateFortuneClaim());
     },
     statusTick: function(){
       this.updateWalletDom();
@@ -2172,7 +2285,18 @@
         StatusRuntime.push("成功：" + label + "｜Block " + receipt.blockNumber);
         await this.refreshChainData(false);
       }catch(error){
-        StatusRuntime.push("失敗：" + label + "｜" + asErrorMessage(error));
+        const msg = asErrorMessage(error);
+        if(/fortuneClaim/i.test(label) && /FORTUNE_COOLDOWN|cooldown/i.test(msg)){
+          const snap = this.evaluateFortuneClaim();
+          ClaimDebugRuntime.update(Object.assign(snap, { fortuneRevertReason: msg, txReady: "no" }));
+          StatusRuntime.push("發財金冷卻中，剩餘 " + snap.fortuneCooldownRemain);
+          return;
+        }
+        if(/fortuneClaim/i.test(label) && /insufficient funds|gas required exceeds/i.test(msg) && !/FORTUNE_COOLDOWN/i.test(msg)){
+          StatusRuntime.push("BNB Gas 不足");
+          return;
+        }
+        StatusRuntime.push("失敗：" + label + "｜" + msg);
       }
     },
     bindFields: function(){
@@ -2181,7 +2305,15 @@
     bindButtons: function(){
       const self = this;
       const actions = {
-        "kh-fortune": function(){ self.sendHeart("fortuneClaim 發財金 " + self.getFortuneAmount(), function(contract){ return contract.fortuneClaim(self.getFortuneAmount()); }); },
+        "kh-fortune": async function(){
+          try{
+            const ok = await self.preflightFortuneClaim();
+            if(!ok) return;
+            self.sendHeart("fortuneClaim 發財金 " + self.getFortuneAmount(), function(contract){ return contract.fortuneClaim(self.getFortuneAmount()); });
+          }catch(error){
+            StatusRuntime.push("發財金檢查失敗：" + asErrorMessage(error));
+          }
+        },
         "kh-heartbeat": function(){ self.sendHeart("heartbeatClaim 整點心跳", function(contract){ return contract.heartbeatClaim(); }); },
         "kh-ignite": function(){ self.sendHeart("igniteAndClaim 轉日呼吸", function(contract){ return contract.igniteAndClaim(); }); },
         "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract){ return contract.vowTo(Number($("kh-vow-option") && $("kh-vow-option").value || 1), self.getVowAmount()); }); },
@@ -2387,6 +2519,49 @@
     }
   };
 
+  const ClaimDebugRuntime = {
+    state: {
+      fortuneCanClaim: "--",
+      fortuneCooldownRemain: "--",
+      fortuneRevertReason: "--",
+      gasBalance: "--",
+      txReady: "--",
+      updatedAt: "--"
+    },
+    init: function(){
+      if(this._inited) return;
+      this._inited = true;
+      const toggle = $("claim-debug-toggle");
+      const body = $("claim-debug-body");
+      if(toggle && body){
+        Events.bindOnce(toggle, "click", function(){
+          const open = body.style.display !== "none";
+          body.style.display = open ? "none" : "block";
+          toggle.textContent = open ? "▶ Claim Debug" : "▼ Claim Debug";
+        }, true);
+      }
+    },
+    update: function(patch){
+      Object.assign(this.state, patch || {});
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+    },
+    render: function(){
+      const map = {
+        "cd-fortune-can": this.state.fortuneCanClaim,
+        "cd-fortune-cd": this.state.fortuneCooldownRemain,
+        "cd-fortune-revert": this.state.fortuneRevertReason,
+        "cd-gas-bal": this.state.gasBalance,
+        "cd-tx-ready": this.state.txReady,
+        "cd-time": this.state.updatedAt
+      };
+      Object.keys(map).forEach(function(id){
+        const el = $(id);
+        if(el) el.textContent = map[id];
+      });
+    }
+  };
+
   const WalletDebugRuntime = {
     state: {
       hasEthereum: false,
@@ -2419,6 +2594,7 @@
       deeplinkMethod: "--",
       connectMode: "--",
       connectResult: "--",
+      walletSelected: "--",
       updatedAt: "--"
     },
     init: function(){
@@ -2562,6 +2738,10 @@
       this.state.connectResult = v || "--";
       this.render();
     },
+    setWalletSelected: function(v){
+      this.state.walletSelected = v || "--";
+      this.render();
+    },
     async refreshChainAndAccounts(){
       const eth = HeartRuntime.getEthereum();
       this.state.hasEthereum = !!eth;
@@ -2618,6 +2798,7 @@
         "wd-dl-method": this.state.deeplinkMethod,
         "wd-conn-mode": this.state.connectMode,
         "wd-conn-result": this.state.connectResult,
+        "wd-wallet-selected": this.state.walletSelected,
         "wd-time": this.state.updatedAt
       };
       Object.keys(map).forEach(function(id){
@@ -3641,12 +3822,13 @@
       LandRuntime.init();
       MonitorGridRuntime.init();
       WalletDebugRuntime.init();
+      ClaimDebugRuntime.init();
       TimerRegistry.register("clock", function(){ HudRuntime.tick(); }, 1000);
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
       TimerRegistry.register("monitor-dots", function(){ MonitorGridRuntime.tick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.2 HOTFIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.2 TRUST FORTUNE AI FIX ready");
       WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
@@ -3705,10 +3887,28 @@
       }
       switch(action){
         case 'metamask':
-        case 'metamask-backup':
-        case 'trust':
+          try{
+            WalletDebugRuntime.setWalletSelected('metamask');
+          }catch(_){}
           pushStatus('點擊 MetaMask 橋接 → 12345.html?autoconnect=1&bridge=1');
           WalletRuntime.openMetaMaskWithFallbacks();
+          break;
+        case 'metamask-backup':
+          try{
+            WalletDebugRuntime.setWalletSelected('metamask');
+          }catch(_){}
+          pushStatus('點擊 MetaMask 備用 → 12345.html?autoconnect=1&bridge=1');
+          WalletRuntime.openMetaMaskWithFallbacks({ backup: true });
+          break;
+        case 'trust':
+          try{
+            WalletDebugRuntime.setWalletSelected('trust');
+            WalletDebugRuntime.setDeeplinkMethod('trust');
+            WalletDebugRuntime.logDeeplink(WALLET_BRIDGE.TRUST_DEEPLINK);
+            WalletDebugRuntime.logAction('trust', 'Trust deeplink bridge');
+          }catch(_){}
+          pushStatus('點擊 Trust Wallet → 12345.html?autoconnect=1&bridge=1');
+          go(WALLET_BRIDGE.TRUST_DEEPLINK);
           break;
         case 'okx':
           pushStatus('點擊 OKX Wallet');

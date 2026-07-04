@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.3.2" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.3.2-trust-fortune-ai" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.3.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.3.2">V2.3.2 / HOTFIX</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.3.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.3.2">V2.3.2 / TRUST FORTUNE AI FIX</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -727,8 +727,8 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div style="font-size:13px; line-height:1.7; color:#dff; margin-bottom:12px;">LINE / Facebook 請先開外部錢包，再進入 <b>12345.html</b> 英文入口。登入 MetaMask 後若沒有自動進入，請按「MetaMask 備用」或複製 12345.html 貼到 MetaMask 瀏覽器。</div>
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
 <button id="walletHubMetaMaskBtn" type="button" data-wallet-action="metamask" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.55); background:linear-gradient(180deg,#ffe28a,#d5aa3d); color:#111; font-weight:950; cursor:pointer; pointer-events:auto;">MetaMask 開啟</button>
-<button id="walletHubMeta2Btn" type="button" data-wallet-action="metamask" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">MetaMask 備用</button>
-<button id="walletHubTrustBtn" type="button" data-wallet-action="metamask" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Trust Wallet</button>
+<button id="walletHubMeta2Btn" type="button" data-wallet-action="metamask-backup" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">MetaMask 備用</button>
+<button id="walletHubTrustBtn" type="button" data-wallet-action="trust" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Trust Wallet</button>
 <button id="walletHubOkxBtn" type="button" data-wallet-action="okx" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">OKX Wallet</button>
 <button id="walletHubBitgetBtn" type="button" data-wallet-action="bitget" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Bitget Wallet</button>
 <button id="walletHubBinanceBtn" type="button" data-wallet-action="binance" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.4); background:rgba(255,255,255,.08); color:#fff; font-weight:950; cursor:pointer; pointer-events:auto;">Binance Wallet</button>
@@ -1098,7 +1098,21 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-k">deeplink method</div><div class="kh-v" id="wd-dl-method">--</div>
 <div class="kh-k">connect mode</div><div class="kh-v" id="wd-conn-mode">--</div>
 <div class="kh-k">connect result</div><div class="kh-v" id="wd-conn-result">--</div>
+<div class="kh-k">wallet selected</div><div class="kh-v" id="wd-wallet-selected">--</div>
 <div class="kh-k">updated</div><div class="kh-v" id="wd-time">--</div>
+</div>
+</div>
+<div class="kh-wallet-debug-wrap" style="margin-top:10px;">
+<button class="kh-cyan kh-btn-lg" id="claim-debug-toggle" type="button" style="width:100%;">▶ Claim Debug</button>
+<div class="kh-card-body" id="claim-debug-body" style="display:none; margin-top:8px; padding:10px; border:1px solid rgba(255,215,120,.22); border-radius:12px; background:rgba(0,0,0,.28);">
+<div class="kh-grid kh-grid-compact" style="font-size:11px; line-height:1.45;">
+<div class="kh-k">fortune canClaim</div><div class="kh-v" id="cd-fortune-can">--</div>
+<div class="kh-k">fortune cooldown remain</div><div class="kh-v" id="cd-fortune-cd">--</div>
+<div class="kh-k">fortune revert reason</div><div class="kh-v" id="cd-fortune-revert" style="word-break:break-all;">--</div>
+<div class="kh-k">gas balance</div><div class="kh-v" id="cd-gas-bal">--</div>
+<div class="kh-k">tx ready</div><div class="kh-v" id="cd-tx-ready">--</div>
+<div class="kh-k">updated</div><div class="kh-v" id="cd-time">--</div>
+</div>
 </div>
 </div>
 </div>
@@ -1848,7 +1862,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.3.2"></script>
+<script src="modules/kgen-12345-ai-service.js"></script>
+<script src="modules/runtime-main.js?v=V2.3.2-trust-fortune-ai"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>
