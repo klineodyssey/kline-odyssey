@@ -73,7 +73,7 @@ const web3 = {
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
   METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   // Official format (2026): domain+path ONLY, no https:// prefix, no encodeURIComponent
-  METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+  METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1",
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -749,9 +749,9 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       const asciiNoScheme = ascii.replace(/^https?:\/\//, "");
       let link = ascii;
       if(kind === 'metamask'){
-        link = this.METAMASK_DEEPLINK || ('https://link.metamask.io/dapp/' + asciiNoScheme);
+        link = this.METAMASK_DEEPLINK || ('https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1');
       } else if(kind === 'metamask2'){
-        link = 'https://metamask.app.link/dapp/' + asciiNoScheme;
+        link = 'https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1';
       } else if(kind === 'direct'){
         link = ascii;
       } else if(kind === 'bridge'){

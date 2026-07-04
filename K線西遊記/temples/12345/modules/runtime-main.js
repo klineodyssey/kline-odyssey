@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.2.1 / METAMASK FB FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.1";
-  const UI_PATCH = "V2.2.1";
+  const VERSION = "V2.2.2 / METAMASK AUTOCONNECT";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.2";
+  const UI_PATCH = "V2.2.2";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -33,11 +33,11 @@
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
     METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
-    // Official format (2026): domain+path ONLY, no https:// prefix, no encodeURIComponent
-    // Ref: https://docs.metamask.io/metamask-connect/evm/guides/metamask-exclusive/use-deeplinks/
-    METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_ANDROID_INTENT: "intent://dapp/klineodyssey.github.io/kline-odyssey/12345.html#Intent;scheme=https;package=io.metamask;end",
+    // MetaMask deeplink: domain+path only (no https), opens temple index with autoconnect
+    METAMASK_DAPP_PATH: "klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1",
+    METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1",
+    METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1",
+    METAMASK_ANDROID_INTENT: "intent://dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?wallet=metamask&autoconnect=1#Intent;scheme=https;package=io.metamask;end",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -2405,6 +2405,11 @@
       attemptedLinkMetamaskUrl: "--",
       fallbackFired: "--",
       pageVisibilityChanged: "--",
+      autoconnectParam: "--",
+      autoconnectAttempted: "--",
+      autoconnectResult: "--",
+      autoconnectError: "--",
+      finalDappDeeplink: "--",
       updatedAt: "--"
     },
     init: function(){
@@ -2431,6 +2436,14 @@
       this.state.locationHref = location.href;
       this.state.hasEthereum = !!(window.ethereum || window.BinanceChain);
       this.state.isFacebookWebView = WalletRuntime.isFacebookWebView() ? "yes" : "no";
+      try{
+        const params = new URLSearchParams(location.search);
+        const w = params.get("wallet");
+        const a = params.get("autoconnect");
+        this.state.autoconnectParam = (w || a) ? ("wallet=" + (w || "") + "&autoconnect=" + (a || "")) : "--";
+      }catch(_){
+        this.state.autoconnectParam = "--";
+      }
       this.state.updatedAt = new Date().toLocaleTimeString();
       this.render();
     },
@@ -2483,6 +2496,26 @@
       this.state.pageVisibilityChanged = document.visibilityState + " (start)";
       this.render();
     },
+    setAutoconnectParam: function(v){
+      this.state.autoconnectParam = v || "--";
+      this.render();
+    },
+    setAutoconnectAttempted: function(v){
+      this.state.autoconnectAttempted = v ? String(v) : "no";
+      this.render();
+    },
+    setAutoconnectResult: function(v){
+      this.state.autoconnectResult = v || "--";
+      this.render();
+    },
+    setAutoconnectError: function(msg){
+      this.state.autoconnectError = msg ? String(msg) : "--";
+      this.render();
+    },
+    setFinalDappDeeplink: function(url){
+      this.state.finalDappDeeplink = url || "--";
+      this.render();
+    },
     async refreshChainAndAccounts(){
       const eth = HeartRuntime.getEthereum();
       this.state.hasEthereum = !!eth;
@@ -2525,6 +2558,11 @@
         "wd-mm-link": this.state.attemptedLinkMetamaskUrl,
         "wd-fallback": this.state.fallbackFired,
         "wd-vis": this.state.pageVisibilityChanged,
+        "wd-ac-param": this.state.autoconnectParam,
+        "wd-ac-attempt": this.state.autoconnectAttempted,
+        "wd-ac-result": this.state.autoconnectResult,
+        "wd-ac-error": this.state.autoconnectError,
+        "wd-final-dapp": this.state.finalDappDeeplink,
         "wd-time": this.state.updatedAt
       };
       Object.keys(map).forEach(function(id){
@@ -2664,12 +2702,13 @@
     },
     showMetaMaskFallbackHint: function(){
       WalletDebugRuntime.setFallbackFired("yes");
+      const msg = "正在開啟 MetaMask 神殿頁，若未跳轉請按 MetaMask 備用。";
       const hint = $("walletHubMetaMaskFallbackHint");
       if(hint){
         hint.style.display = "block";
-        hint.textContent = "若未自動開啟 MetaMask，請按備用開啟或複製 12345.html 到 MetaMask 瀏覽器。";
+        hint.textContent = msg;
       }
-      StatusRuntime.push("若未自動開啟 MetaMask，請按備用開啟或複製 12345.html 到 MetaMask 瀏覽器。");
+      StatusRuntime.push(msg);
     },
     openMetaMaskWithFallbacks: function(options){
       options = options || {};
@@ -2688,6 +2727,7 @@
       const backupUrl = WALLET_BRIDGE.METAMASK_DEEPLINK2;
       WalletDebugRuntime.setAttemptedIntent(intentUrl);
       WalletDebugRuntime.setAttemptedLinkMetamask(linkUrl);
+      WalletDebugRuntime.setFinalDappDeeplink(useBackupOnly ? backupUrl : linkUrl);
       WalletDebugRuntime.logAction(useBackupOnly ? "metamask-backup" : "metamask", inApp ? "in-app multi-fallback" : "standard deeplink");
       const self = this;
       const startHref = location.href;
@@ -2701,7 +2741,7 @@
             self.showMetaMaskFallbackHint();
           }
         }, 2000);
-        StatusRuntime.push("正在用 MetaMask 備用連結開啟…");
+        StatusRuntime.push("正在開啟 MetaMask 神殿頁，若未跳轉請按 MetaMask 備用。");
         return false;
       }
       if(inApp){
@@ -2732,10 +2772,11 @@
             self.showMetaMaskFallbackHint();
           }
         }, 2000);
-        StatusRuntime.push("正在開啟 MetaMask App（Facebook 頁面不會跳轉）…");
+        StatusRuntime.push("正在開啟 MetaMask 神殿頁，若未跳轉請按 MetaMask 備用。");
         return false;
       }
       WalletDebugRuntime.logDeeplink(linkUrl);
+      WalletDebugRuntime.setFinalDappDeeplink(linkUrl);
       this.clickMetaMaskAnchor(linkUrl, false);
       setTimeout(function(){
         if(document.visibilityState === "visible" && !HeartRuntime.getEthereum()){
@@ -2788,6 +2829,7 @@
       try{
         if(!HeartRuntime.getEthereum()) return;
         const params = new URLSearchParams(location.search);
+        if(params.get("wallet") === "metamask" && params.get("autoconnect") === "1") return;
         const fromBridge = params.get("bridge") === "1";
         const fromReferrer = /wallet-12345\.html/i.test(document.referrer || "");
         if(!fromBridge && !fromReferrer && !this.isMobileBrowser()) return;
@@ -2796,6 +2838,55 @@
           WalletRuntime.connect();
         }, fromBridge ? 600 : 1000);
       }catch(_){ }
+    },
+    maybeAutoConnectFromMetamask: function(){
+      try{
+        const params = new URLSearchParams(location.search);
+        const wallet = params.get("wallet");
+        const autoconnect = params.get("autoconnect");
+        WalletDebugRuntime.setAutoconnectParam("wallet=" + (wallet || "") + "&autoconnect=" + (autoconnect || ""));
+        if(wallet !== "metamask" || autoconnect !== "1"){
+          WalletDebugRuntime.setAutoconnectAttempted("no (param mismatch)");
+          return;
+        }
+        if(!HeartRuntime.getEthereum()){
+          WalletDebugRuntime.setAutoconnectAttempted("no (no ethereum)");
+          WalletDebugRuntime.setAutoconnectResult("skipped");
+          WalletDebugRuntime.setAutoconnectError("not MetaMask in-app browser");
+          StatusRuntime.push("目前不是 MetaMask 內建瀏覽器，請用 MetaMask 開啟神殿。");
+          return;
+        }
+        if(this._autoconnectRan) return;
+        this._autoconnectRan = true;
+        WalletDebugRuntime.setAutoconnectAttempted("yes");
+        WalletDebugRuntime.setAutoconnectResult("pending");
+        StatusRuntime.push("MetaMask 神殿頁已載入，600ms 後自動連線…");
+        const self = this;
+        setTimeout(function(){
+          self.runMetaMaskAutoconnect();
+        }, 600);
+      }catch(error){
+        WalletDebugRuntime.setAutoconnectError(asErrorMessage(error));
+        WalletDebugRuntime.setAutoconnectResult("error");
+      }
+    },
+    runMetaMaskAutoconnect: async function(){
+      WalletDebugRuntime.logAction("autoconnect", "eth_requestAccounts → ensureBSC → refresh");
+      WalletDebugRuntime.setConnectEntered(true);
+      try{
+        const ok = await this.connect();
+        if(ok !== false){
+          WalletDebugRuntime.setAutoconnectResult("ok");
+          WalletDebugRuntime.setAutoconnectError("--");
+        }else{
+          WalletDebugRuntime.setAutoconnectResult("failed");
+        }
+        await WalletDebugRuntime.refreshChainAndAccounts();
+      }catch(error){
+        WalletDebugRuntime.setAutoconnectError(asErrorMessage(error));
+        WalletDebugRuntime.setAutoconnectResult("failed");
+        StatusRuntime.push("自動連線失敗：" + asErrorMessage(error));
+      }
     },
     isMobileBrowser: function(){
       return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
@@ -3395,7 +3486,8 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.1 METAMASK FB FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.2 METAMASK AUTOCONNECT ready");
+      WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
   };
@@ -3424,7 +3516,7 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.2.1 METAMASK FB FIX / WALLET HUB DELEGATE =====
+  // ===== V2.2.2 METAMASK AUTOCONNECT / WALLET HUB DELEGATE =====
   (function defineWalletHubDelegate(){
     var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
     var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
