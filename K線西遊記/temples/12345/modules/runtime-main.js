@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.2.0 / WALLET DEBUG FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0";
-  const UI_PATCH = "V2.2.0";
+  const VERSION = "V2.2.1 / METAMASK FB FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.1";
+  const UI_PATCH = "V2.2.1";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -37,6 +37,7 @@
     // Ref: https://docs.metamask.io/metamask-connect/evm/guides/metamask-exclusive/use-deeplinks/
     METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
     METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html",
+    METAMASK_ANDROID_INTENT: "intent://dapp/klineodyssey.github.io/kline-odyssey/12345.html#Intent;scheme=https;package=io.metamask;end",
     TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html"),
@@ -2399,6 +2400,11 @@
       connectEntered: "no",
       ensureBscOk: "--",
       signerAddress: "--",
+      isFacebookWebView: "--",
+      attemptedIntentUrl: "--",
+      attemptedLinkMetamaskUrl: "--",
+      fallbackFired: "--",
+      pageVisibilityChanged: "--",
       updatedAt: "--"
     },
     init: function(){
@@ -2415,11 +2421,16 @@
         }, true);
       }
       setInterval(function(){ WalletDebugRuntime.refreshChainAndAccounts(); }, 4000);
+      document.addEventListener("visibilitychange", function(){
+        WalletDebugRuntime.state.pageVisibilityChanged = document.visibilityState + " @ " + new Date().toLocaleTimeString();
+        WalletDebugRuntime.render();
+      });
     },
     refreshStatic: function(){
       this.state.userAgent = navigator.userAgent || "";
       this.state.locationHref = location.href;
       this.state.hasEthereum = !!(window.ethereum || window.BinanceChain);
+      this.state.isFacebookWebView = WalletRuntime.isFacebookWebView() ? "yes" : "no";
       this.state.updatedAt = new Date().toLocaleTimeString();
       this.render();
     },
@@ -2450,6 +2461,26 @@
     },
     setSigner: function(addr){
       this.state.signerAddress = addr || "--";
+      this.render();
+    },
+    setFbWebView: function(v){
+      this.state.isFacebookWebView = v ? "yes" : "no";
+      this.render();
+    },
+    setAttemptedIntent: function(url){
+      this.state.attemptedIntentUrl = url || "--";
+      this.render();
+    },
+    setAttemptedLinkMetamask: function(url){
+      this.state.attemptedLinkMetamaskUrl = url || "--";
+      this.render();
+    },
+    setFallbackFired: function(v){
+      this.state.fallbackFired = v ? String(v) : "no";
+      this.render();
+    },
+    resetVisibilityChanged: function(){
+      this.state.pageVisibilityChanged = document.visibilityState + " (start)";
       this.render();
     },
     async refreshChainAndAccounts(){
@@ -2489,6 +2520,11 @@
         "wd-connect": this.state.connectEntered,
         "wd-bsc": this.state.ensureBscOk,
         "wd-signer": this.state.signerAddress,
+        "wd-fb": this.state.isFacebookWebView,
+        "wd-intent": this.state.attemptedIntentUrl,
+        "wd-mm-link": this.state.attemptedLinkMetamaskUrl,
+        "wd-fallback": this.state.fallbackFired,
+        "wd-vis": this.state.pageVisibilityChanged,
         "wd-time": this.state.updatedAt
       };
       Object.keys(map).forEach(function(id){
@@ -2533,7 +2569,7 @@
             return WalletRuntime.connect();
           }
           WalletRuntime.openWalletHub("請按 MetaMask 開啟");
-          return WalletRuntime.openMetaMaskDeepLink();
+          return WalletRuntime.openMetaMaskWithFallbacks();
         }
       };
       Object.keys(bindings).forEach(function(id){
@@ -2571,15 +2607,18 @@
       };
       const label = labels[kind] || kind;
       const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
+      if(kind === "metamask"){
+        return this.openMetaMaskWithFallbacks();
+      }
+      if(kind === "metamask2"){
+        return this.openMetaMaskWithFallbacks({ backup: true });
+      }
       WalletDebugRuntime.logDeeplink(link);
       if(this.isSocialInAppBrowser()){
         this.openWalletHub("請按「" + label + "」按鈕，用該錢包 App 開啟");
         return false;
       }
       StatusRuntime.push("正在用 " + label + " 開啟");
-      if(kind === "metamask" || kind === "metamask2"){
-        return this.clickMetaMaskAnchor(link);
-      }
       try{
         window.location.href = link;
       }catch(_){
@@ -2589,19 +2628,140 @@
       }
       return false;
     },
-    clickMetaMaskAnchor: function(url){
+    isFacebookWebView: function(){
+      return /FBAN|FBAV|FB_IAB|FB4A|FBIOS|Facebook/i.test(navigator.userAgent || "");
+    },
+    isAndroidWebView: function(){
+      const ua = navigator.userAgent || "";
+      return /Android/i.test(ua) && (/wv\)|; wv|WebView/i.test(ua) || !!window.Android);
+    },
+    needsMetaMaskIntentFallback: function(){
+      return this.isSocialInAppBrowser() || this.isAndroidWebView();
+    },
+    tryOpenUrlWithoutNavigate: function(url){
       WalletDebugRuntime.logDeeplink(url);
+      try{
+        const iframe = document.createElement("iframe");
+        iframe.setAttribute("aria-hidden", "true");
+        iframe.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        setTimeout(function(){
+          try{ document.body.removeChild(iframe); }catch(_){ }
+        }, 2500);
+      }catch(_){ }
       try{
         const a = document.createElement("a");
         a.href = url;
-        a.target = "_self";
-        a.rel = "noopener";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }catch(_){ }
+      try{ window.open(url, "_blank", "noopener,noreferrer"); }catch(_){ }
+    },
+    showMetaMaskFallbackHint: function(){
+      WalletDebugRuntime.setFallbackFired("yes");
+      const hint = $("walletHubMetaMaskFallbackHint");
+      if(hint){
+        hint.style.display = "block";
+        hint.textContent = "若未自動開啟 MetaMask，請按備用開啟或複製 12345.html 到 MetaMask 瀏覽器。";
+      }
+      StatusRuntime.push("若未自動開啟 MetaMask，請按備用開啟或複製 12345.html 到 MetaMask 瀏覽器。");
+    },
+    openMetaMaskWithFallbacks: function(options){
+      options = options || {};
+      const useBackupOnly = !!options.backup;
+      const inApp = this.needsMetaMaskIntentFallback();
+      const isFb = this.isFacebookWebView();
+      WalletDebugRuntime.setFbWebView(isFb);
+      WalletDebugRuntime.resetVisibilityChanged();
+      WalletDebugRuntime.setFallbackFired("no");
+      if(HeartRuntime.getEthereum()){
+        WalletDebugRuntime.logAction(useBackupOnly ? "metamask-backup" : "metamask", "injected → connect()");
+        return this.connect();
+      }
+      const intentUrl = WALLET_BRIDGE.METAMASK_ANDROID_INTENT;
+      const linkUrl = WALLET_BRIDGE.METAMASK_DEEPLINK;
+      const backupUrl = WALLET_BRIDGE.METAMASK_DEEPLINK2;
+      WalletDebugRuntime.setAttemptedIntent(intentUrl);
+      WalletDebugRuntime.setAttemptedLinkMetamask(linkUrl);
+      WalletDebugRuntime.logAction(useBackupOnly ? "metamask-backup" : "metamask", inApp ? "in-app multi-fallback" : "standard deeplink");
+      const self = this;
+      const startHref = location.href;
+      if(useBackupOnly){
+        WalletDebugRuntime.logAction("metamask-backup", "backup URL only");
+        if(inApp) this.tryOpenUrlWithoutNavigate(backupUrl);
+        else this.clickMetaMaskAnchor(backupUrl, false);
+        setTimeout(function(){
+          const stuck = /link\.metamask\.io|metamask\.app\.link/i.test(location.href);
+          if((document.visibilityState === "visible" && !HeartRuntime.getEthereum()) || stuck){
+            self.showMetaMaskFallbackHint();
+          }
+        }, 2000);
+        StatusRuntime.push("正在用 MetaMask 備用連結開啟…");
+        return false;
+      }
+      if(inApp){
+        if(/Android/i.test(navigator.userAgent || "")){
+          WalletDebugRuntime.logAction("metamask", "1/3 Android intent");
+          this.tryOpenUrlWithoutNavigate(intentUrl);
+          try{
+            const intentFrame = document.createElement("iframe");
+            intentFrame.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;";
+            intentFrame.src = intentUrl;
+            document.body.appendChild(intentFrame);
+            setTimeout(function(){ try{ document.body.removeChild(intentFrame); }catch(_){ } }, 1500);
+          }catch(_){ }
+        }
+        setTimeout(function(){
+          WalletDebugRuntime.logAction("metamask", "2/3 link.metamask.io (no navigate)");
+          self.tryOpenUrlWithoutNavigate(linkUrl);
+        }, 350);
+        setTimeout(function(){
+          WalletDebugRuntime.logAction("metamask", "3/3 metamask.app.link (no navigate)");
+          self.tryOpenUrlWithoutNavigate(backupUrl);
+        }, 750);
+        setTimeout(function(){
+          const stuckOnMm = /link\.metamask\.io|metamask\.app\.link/i.test(location.href);
+          const stillOnStart = location.href === startHref;
+          const visible = document.visibilityState === "visible" && !HeartRuntime.getEthereum();
+          if(visible || stuckOnMm || stillOnStart){
+            self.showMetaMaskFallbackHint();
+          }
+        }, 2000);
+        StatusRuntime.push("正在開啟 MetaMask App（Facebook 頁面不會跳轉）…");
+        return false;
+      }
+      WalletDebugRuntime.logDeeplink(linkUrl);
+      this.clickMetaMaskAnchor(linkUrl, false);
+      setTimeout(function(){
+        if(document.visibilityState === "visible" && !HeartRuntime.getEthereum()){
+          self.showMetaMaskFallbackHint();
+        }
+      }, 2000);
+      StatusRuntime.push("正在用 MetaMask 開啟");
+      return false;
+    },
+    clickMetaMaskAnchor: function(url, allowSelfNavigate){
+      WalletDebugRuntime.logDeeplink(url);
+      const inApp = this.needsMetaMaskIntentFallback();
+      if(inApp || allowSelfNavigate === false){
+        return this.tryOpenUrlWithoutNavigate(url);
+      }
+      try{
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
       }catch(e){
         WalletDebugRuntime.logError(e.message || e);
-        try{ window.location.href = url; }catch(_){}
+        this.tryOpenUrlWithoutNavigate(url);
       }
     },
     bindWalletHubButtons: function(){
@@ -2663,8 +2823,11 @@
         btn.textContent = entry[2];
       });
       const hint = $("walletHubInAppHint");
-      if(hint && this.isSocialInAppBrowser()){
-        hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+      if(hint && this.isFacebookWebView()){
+        hint.textContent = "Facebook 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。";
+        hint.style.display = "block";
+      }else if(hint && this.isSocialInAppBrowser()){
+        hint.textContent = "LINE 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。";
         hint.style.display = "block";
       }
       try{
@@ -2684,9 +2847,14 @@
       const mmAnchor = $("walletHubMetaMaskBtn");
       if(mmAnchor) mmAnchor.href = WALLET_BRIDGE.METAMASK_DEEPLINK;
       const hint = $("walletHubInAppHint");
+      const fbHint = $("walletHubMetaMaskFallbackHint");
+      if(fbHint) fbHint.style.display = "none";
       if(hint){
-        if(this.isSocialInAppBrowser()){
-          hint.textContent = "目前在 Facebook/LINE 內建瀏覽器，請按下方按鈕用 MetaMask App 開啟。";
+        if(this.isFacebookWebView()){
+          hint.textContent = "Facebook 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。";
+          hint.style.display = "block";
+        }else if(this.isSocialInAppBrowser()){
+          hint.textContent = "LINE 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。";
           hint.style.display = "block";
         }else{
           hint.style.display = "none";
@@ -2710,14 +2878,7 @@
       return this.walletDeepLink(kind || "metamask");
     },
     openMetaMaskDeepLink: function(){
-      if(HeartRuntime.hasInjectedWallet()){
-        WalletDebugRuntime.logAction("openMetaMaskDeepLink", "injected → connect()");
-        return WalletRuntime.connect();
-      }
-      this.openWalletHub("請按「MetaMask 開啟」");
-      WalletDebugRuntime.logDeeplink(WALLET_BRIDGE.METAMASK_DEEPLINK);
-      StatusRuntime.push("請用 MetaMask App 開啟");
-      return this.clickMetaMaskAnchor(WALLET_BRIDGE.METAMASK_DEEPLINK);
+      return this.openMetaMaskWithFallbacks();
     },
     copyOfficialUrl: function(){
       const done = function(){
@@ -3234,7 +3395,7 @@
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 WALLET DEBUG FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.1 METAMASK FB FIX ready");
       return this;
     }
   };
@@ -3263,18 +3424,13 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.2.0 WALLET DEBUG FIX / WALLET HUB DELEGATE =====
+  // ===== V2.2.1 METAMASK FB FIX / WALLET HUB DELEGATE =====
   (function defineWalletHubDelegate(){
     var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
     var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
-    var MM_PRIMARY = WALLET_BRIDGE.METAMASK_DEEPLINK;
-    var MM_BACKUP  = WALLET_BRIDGE.METAMASK_DEEPLINK2;
 
     function dbg(action, detail){
       try{ WalletDebugRuntime.logAction(action, detail || ""); }catch(_){}
-    }
-    function dbgLink(url){
-      try{ WalletDebugRuntime.logDeeplink(url); }catch(_){}
     }
     function hasInjected(){
       return !!(window.ethereum || window.BinanceChain);
@@ -3284,15 +3440,8 @@
       try{ console.log('[WalletHub]', text); }catch(e){}
     }
     function go(url){
-      dbgLink(url);
+      try{ WalletDebugRuntime.logDeeplink(url); }catch(_){}
       try{ window.location.href = url; }catch(e){ try{ window.open(url, '_blank', 'noopener'); }catch(_){} }
-    }
-    function mmAnchor(url){
-      dbgLink(url);
-      try{ WalletRuntime.clickMetaMaskAnchor(url); }catch(e){
-        dbg('metamask-anchor-fail', String(e));
-        go(url);
-      }
     }
 
     function handleWalletAction(action){
@@ -3305,11 +3454,11 @@
       switch(action){
         case 'metamask':
           pushStatus('點擊 MetaMask');
-          mmAnchor(MM_PRIMARY);
+          WalletRuntime.openMetaMaskWithFallbacks();
           break;
         case 'metamask-backup':
           pushStatus('點擊 MetaMask 備用 deeplink');
-          mmAnchor(MM_BACKUP);
+          WalletRuntime.openMetaMaskWithFallbacks({ backup: true });
           dbg('metamask-backup-fallback', '若失敗請複製 ' + ASCII_URL);
           break;
         case 'trust':

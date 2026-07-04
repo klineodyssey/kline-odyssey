@@ -732,9 +732,17 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
         return this.connect();
       }
       const wr = walletRuntime();
-      if(wr && typeof wr.walletDeepLink === "function"){
-        const mapped = (kind === "metamask2") ? "metamask2" : kind;
-        return wr.walletDeepLink(mapped);
+      if(wr){
+        if(kind === "metamask" && typeof wr.openMetaMaskWithFallbacks === "function"){
+          return wr.openMetaMaskWithFallbacks();
+        }
+        if(kind === "metamask2" && typeof wr.openMetaMaskWithFallbacks === "function"){
+          return wr.openMetaMaskWithFallbacks({ backup: true });
+        }
+        if(typeof wr.walletDeepLink === "function"){
+          const mapped = (kind === "metamask2") ? "metamask2" : kind;
+          return wr.walletDeepLink(mapped);
+        }
       }
       const bridge = this.BRIDGE_PAGE || "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html";
       const ascii = this.ROOT_ENTRY || "https://klineodyssey.github.io/kline-odyssey/12345.html";
