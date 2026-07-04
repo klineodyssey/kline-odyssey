@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.1 / BRIDGE RESTORE";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.1";
-  const UI_PATCH = "V2.3.1";
+  const VERSION = "V2.3.2 / HOTFIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.2";
+  const UI_PATCH = "V2.3.2";
   const BRIDGE_LOGIC_VERSION = "V10.49.2 restored logic";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
@@ -29,19 +29,19 @@
     "KGEN_12345_V908_CUP_COUNT"
   ];
   const WALLET_BRIDGE = {
-    ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
+    ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
     OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     TEMPLE_REL: "K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
     BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-    METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
-    METAMASK_ASCII_PATH: "klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
-    METAMASK_SCHEME: "metamask://dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
-    METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
-    METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
-    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1"),
-    OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1"),
-    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1"),
-    BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html?autoconnect=1")
+    METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
+    METAMASK_ASCII_PATH: "klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
+    METAMASK_SCHEME: "metamask://dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
+    METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
+    METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
+    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
+    OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
+    BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
+    BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html?autoconnect=1&bridge=1")
   };
 
   const HEART_VIEW_ABI = [
@@ -3593,7 +3593,7 @@
     },
     tick: function(){
       document.querySelectorAll(".hud-top .grid-500 .dot").forEach(function(dot){
-        if(Math.random() > 0.9) dot.classList.toggle("on");
+        if(Math.random() > 0.82) dot.classList.toggle("on");
       });
     }
   };
@@ -3646,7 +3646,7 @@
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
       TimerRegistry.register("monitor-dots", function(){ MonitorGridRuntime.tick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.1 BRIDGE RESTORE ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.2 HOTFIX ready");
       WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
@@ -3676,7 +3676,7 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.3.1 WALLET AUTO BRIDGE / WALLET HUB DELEGATE =====
+  // ===== V2.3.2 WALLET HUB DELEGATE HOTFIX =====
   (function defineWalletHubDelegate(){
     var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
     var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
@@ -3705,17 +3705,10 @@
       }
       switch(action){
         case 'metamask':
-          pushStatus('點擊 MetaMask');
-          WalletRuntime.openMetaMaskWithFallbacks();
-          break;
         case 'metamask-backup':
-          pushStatus('點擊 MetaMask 備用 deeplink');
-          WalletRuntime.openMetaMaskWithFallbacks({ backup: true });
-          dbg('metamask-backup-fallback', '若失敗請複製 ' + ASCII_URL);
-          break;
         case 'trust':
-          pushStatus('點擊 Trust Wallet');
-          go(WALLET_BRIDGE.TRUST_DEEPLINK);
+          pushStatus('點擊 MetaMask 橋接 → 12345.html?autoconnect=1&bridge=1');
+          WalletRuntime.openMetaMaskWithFallbacks();
           break;
         case 'okx':
           pushStatus('點擊 OKX Wallet');

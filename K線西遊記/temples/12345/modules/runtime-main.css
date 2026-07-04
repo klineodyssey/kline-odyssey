@@ -328,7 +328,8 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
   margin-left: auto !important;
   width: auto !important;
   min-width: 0 !important;
-  overflow: visible !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
 }
 
 .hud-top .data-box {
@@ -379,12 +380,18 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
   border-radius: 1px !important;
   box-sizing: border-box !important;
   contain: strict !important;
-  transition: background 0.12s ease, filter 0.12s ease !important;
+  opacity: 0.35 !important;
+  transform: scale(1) !important;
+  transform-origin: center center !important;
+  box-shadow: none !important;
+  transition: opacity 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease, background 0.14s ease !important;
 }
 
 .hud-top .grid-500 .dot.on {
+  opacity: 1 !important;
   background: #ffcc00 !important;
-  filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.95)) drop-shadow(0 0 5px rgba(255, 204, 0, 0.55)) !important;
+  transform: scale(1.18) !important;
+  box-shadow: 0 0 3px rgba(255, 204, 0, 0.95), 0 0 7px rgba(255, 204, 0, 0.5) !important;
 }
 
 @media (max-width: 760px) {
@@ -430,6 +437,11 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
     min-height: 5px !important;
     max-width: 5px !important;
     max-height: 5px !important;
+    transform: scale(1) !important;
+  }
+
+  .hud-top .grid-500 .dot.on {
+    transform: scale(1.16) !important;
   }
 }
 
@@ -1352,11 +1364,24 @@ body:not(.kgen-audio-open):not(.k21-audio-open):not(.k20-audio-open) #music-pane
 
   .hud-top .monitor-data {
     gap: 6px !important;
+    max-width: calc(98vw - 42vw - 8px) !important;
+    overflow: hidden !important;
+    flex-shrink: 1 !important;
   }
 
   .hud-top .data-box {
-    width: 148px !important;
-    min-width: 148px !important;
-    max-width: 148px !important;
+    width: min(158px, calc((98vw - 42vw - 14px) / 2)) !important;
+    min-width: 0 !important;
+    max-width: min(158px, calc((98vw - 42vw - 14px) / 2)) !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    overflow: hidden !important;
+  }
+
+  .hud-top .grid-500 {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 }
