@@ -58,7 +58,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>KGEN 12345 Wallet Bridge｜V2.1.6</title>
+  <title>KGEN 12345 Wallet Bridge｜V2.3.0</title>
   <!--
   PRODUCT_ID: KGEN-12345-WALLET-BRIDGE
   VERSION: V2.1.6 / BRIDGE EXACT RESTORE
@@ -74,19 +74,26 @@ PRIMEFORGE_LIFE_HEADER_V1:
     code{color:#8ff}
   </style>
   <script>
-    const TARGET='K線西遊記/temples/12345/index.html';
-    const ABS='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html';
-    function go(){ location.href=TARGET; }
+    const ROOT_ENTRY='12345.html';
+    const ABS='https://klineodyssey.github.io/kline-odyssey/12345.html';
+    function carryQuery(){
+      return location.search || '';
+    }
+    function goRoot(){ location.href=ROOT_ENTRY+carryQuery(); }
+    document.addEventListener('DOMContentLoaded',function(){
+      const a=document.getElementById('go-root');
+      if(a) a.href=ROOT_ENTRY+carryQuery();
+    });
   </script>
 </head>
 <body>
   <div class="card">
     <h1>KGEN 12345 錢包橋接入口</h1>
-    <p>VERSION：<code>V2.1.6 / BRIDGE EXACT RESTORE</code></p>
-    <p>正式入口：<code>K線西遊記/temples/12345/index.html</code></p>
-    <a href="K線西遊記/temples/12345/index.html">立即進入神殿</a>
-    <button onclick="location.href=ABS">啟動 GitHub Pages 正式入口</button>
-    <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(ABS);this.textContent='已複製正式入口網址';">複製正式入口網址</button>
+    <p>VERSION：<code>V2.3.0 / WALLET AUTO BRIDGE</code></p>
+    <p>橋接流程：<code>wallet-12345.html</code> → <code>12345.html</code> → 神殿</p>
+    <a id="go-root" href="12345.html">進入 12345 英文入口</a>
+    <button onclick="goRoot()">啟動 12345.html 英文入口</button>
+    <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(ABS+(location.search||''));this.textContent='已複製 12345.html 網址';">複製 12345.html 網址</button>
   </div>
 </body>
 </html>
