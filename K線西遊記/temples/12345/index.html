@@ -282,7 +282,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<title>KGEN-12345-HEART-UI-V2.1.9</title>
+<title>KGEN-12345-HEART-UI-V2.2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.1.9" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.2.0" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.1.9" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.1.9">V2.1.9 / METAMASK LINK FIX</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.2.0" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.2.0">V2.2.0 / WALLET DEBUG FIX</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -715,7 +715,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 </div>
 </div>
 
-<!-- Wallet Hub Modal V9.0.0 / V2.1.9 MetaMask Link Fix -->
+<!-- Wallet Hub Modal V9.0.0 / V2.2.0 Wallet Debug Fix -->
 <div id="walletHub" style="position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:2147483647; padding:18px; box-sizing:border-box; pointer-events:auto;">
 <div style="width:min(560px,94vw); background:#0b0e14; border:1px solid rgba(255,215,120,.55); border-radius:18px; padding:16px; box-shadow:0 0 50px rgba(0,0,0,.75); color:#fff; pointer-events:auto; position:relative; z-index:1;">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
@@ -1062,6 +1062,25 @@ KGEN 12345 Heart Live Patch V7.3.0
 <button class="kh-cyan kh-btn-lg" id="kh-refresh" type="button">刷新餘額</button>
 <button class="kh-cyan kh-btn-lg" id="kh-switch" type="button">切換錢包</button>
 <button class="kh-cyan kh-btn-lg" id="kh-download" type="button">下載收藏</button>
+</div>
+<div class="kh-wallet-debug-wrap" style="margin-top:10px;">
+<button class="kh-cyan kh-btn-lg" id="wallet-debug-toggle" type="button" style="width:100%;">▶ Wallet Debug</button>
+<div class="kh-card-body" id="wallet-debug-body" style="display:none; margin-top:8px; padding:10px; border:1px solid rgba(255,215,120,.22); border-radius:12px; background:rgba(0,0,0,.28);">
+<div class="kh-grid kh-grid-compact" style="font-size:11px; line-height:1.45;">
+<div class="kh-k">window.ethereum</div><div class="kh-v" id="wd-has-eth">--</div>
+<div class="kh-k">userAgent</div><div class="kh-v" id="wd-ua" style="word-break:break-all;">--</div>
+<div class="kh-k">location.href</div><div class="kh-v" id="wd-href" style="word-break:break-all;">--</div>
+<div class="kh-k">chainId</div><div class="kh-v" id="wd-chain">--</div>
+<div class="kh-k">eth_accounts</div><div class="kh-v" id="wd-accounts" style="word-break:break-all;">--</div>
+<div class="kh-k">last action</div><div class="kh-v" id="wd-action" style="word-break:break-all;">--</div>
+<div class="kh-k">last deeplink</div><div class="kh-v" id="wd-deeplink" style="word-break:break-all;">--</div>
+<div class="kh-k">last error</div><div class="kh-v" id="wd-error" style="word-break:break-all;">--</div>
+<div class="kh-k">connect() entered</div><div class="kh-v" id="wd-connect">--</div>
+<div class="kh-k">ensureBSC()</div><div class="kh-v" id="wd-bsc">--</div>
+<div class="kh-k">signer address</div><div class="kh-v" id="wd-signer" style="word-break:break-all;">--</div>
+<div class="kh-k">updated</div><div class="kh-v" id="wd-time">--</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1809,7 +1828,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/runtime-main.js?v=V2.1.9"></script>
+<script src="modules/runtime-main.js?v=V2.2.0"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>

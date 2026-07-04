@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.1.9 / METAMASK LINK FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.1.9";
-  const UI_PATCH = "V2.1.9";
+  const VERSION = "V2.2.0 / WALLET DEBUG FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.2.0";
+  const UI_PATCH = "V2.2.0";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
@@ -2386,18 +2386,134 @@
     }
   };
 
+  const WalletDebugRuntime = {
+    state: {
+      hasEthereum: false,
+      userAgent: "",
+      locationHref: "",
+      chainId: "--",
+      ethAccounts: "--",
+      lastAction: "--",
+      lastDeeplink: "--",
+      lastError: "--",
+      connectEntered: "no",
+      ensureBscOk: "--",
+      signerAddress: "--",
+      updatedAt: "--"
+    },
+    init: function(){
+      if(this._inited) return;
+      this._inited = true;
+      this.refreshStatic();
+      const toggle = $("wallet-debug-toggle");
+      const body = $("wallet-debug-body");
+      if(toggle && body){
+        Events.bindOnce(toggle, "click", function(){
+          const open = body.style.display !== "none";
+          body.style.display = open ? "none" : "block";
+          toggle.textContent = open ? "▶ Wallet Debug" : "▼ Wallet Debug";
+        }, true);
+      }
+      setInterval(function(){ WalletDebugRuntime.refreshChainAndAccounts(); }, 4000);
+    },
+    refreshStatic: function(){
+      this.state.userAgent = navigator.userAgent || "";
+      this.state.locationHref = location.href;
+      this.state.hasEthereum = !!(window.ethereum || window.BinanceChain);
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+    },
+    logAction: function(action, detail){
+      this.state.lastAction = action + (detail ? (" | " + detail) : "");
+      this.state.lastError = "--";
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+      try{ StatusRuntime.push("[WalletDebug] " + this.state.lastAction); }catch(_){ }
+    },
+    logDeeplink: function(url){
+      this.state.lastDeeplink = url || "--";
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+    },
+    logError: function(msg){
+      this.state.lastError = String(msg || "unknown");
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+    },
+    setConnectEntered: function(v){
+      this.state.connectEntered = v ? "yes" : "no";
+      this.render();
+    },
+    setEnsureBsc: function(ok){
+      this.state.ensureBscOk = ok ? "yes" : "no";
+      this.render();
+    },
+    setSigner: function(addr){
+      this.state.signerAddress = addr || "--";
+      this.render();
+    },
+    async refreshChainAndAccounts(){
+      const eth = HeartRuntime.getEthereum();
+      this.state.hasEthereum = !!eth;
+      if(!eth){
+        this.state.chainId = "--";
+        this.state.ethAccounts = "--";
+        this.render();
+        return;
+      }
+      try{
+        this.state.chainId = await eth.request({ method: "eth_chainId" });
+      }catch(e){
+        this.state.chainId = "err";
+      }
+      try{
+        const accts = await eth.request({ method: "eth_accounts" });
+        this.state.ethAccounts = (accts && accts.length) ? accts.join(", ") : "(empty)";
+        if(accts && accts[0]) this.state.signerAddress = accts[0];
+      }catch(e){
+        this.state.ethAccounts = "err: " + (e.message || e);
+      }
+      this.state.updatedAt = new Date().toLocaleTimeString();
+      this.render();
+    },
+    render: function(){
+      const map = {
+        "wd-has-eth": this.state.hasEthereum ? "yes" : "no",
+        "wd-ua": this.state.userAgent,
+        "wd-href": this.state.locationHref,
+        "wd-chain": this.state.chainId,
+        "wd-accounts": this.state.ethAccounts,
+        "wd-action": this.state.lastAction,
+        "wd-deeplink": this.state.lastDeeplink,
+        "wd-error": this.state.lastError,
+        "wd-connect": this.state.connectEntered,
+        "wd-bsc": this.state.ensureBscOk,
+        "wd-signer": this.state.signerAddress,
+        "wd-time": this.state.updatedAt
+      };
+      Object.keys(map).forEach(function(id){
+        const el = $(id);
+        if(el) el.textContent = map[id];
+      });
+    }
+  };
+
   const WalletRuntime = {
     inited: false,
     init: function(){
       if(this.inited) return;
       this.inited = true;
+      WalletDebugRuntime.init();
       this.primeWeb3Shell();
       const bindings = {
         "kh-connect": function(){
-          if(window.web3 && typeof window.web3.smartConnect === "function"){
-            return window.web3.smartConnect();
+          WalletDebugRuntime.logAction("kh-connect");
+          if(HeartRuntime.getEthereum()){
+            WalletDebugRuntime.logAction("kh-connect", "injected → direct connect()");
+            return WalletRuntime.connect();
           }
-          return WalletRuntime.connect();
+          WalletDebugRuntime.logAction("kh-connect", "no injected → openWalletHub");
+          return WalletRuntime.openWalletHub("請選擇錢包入口");
         },
         "kh-refresh": function(){ return WalletRuntime.refresh(); },
         "kh-approve-current": function(){ return WalletRuntime.approveCurrent(); },
@@ -2411,9 +2527,12 @@
         },
         "kh-download": function(){ WalletRuntime.downloadBookmark(); },
         "kh-metamask-open": function(){
-          if(window.web3 && typeof window.web3.deepLink === "function"){
-            return window.web3.deepLink("metamask");
+          WalletDebugRuntime.logAction("kh-metamask-open");
+          if(HeartRuntime.getEthereum()){
+            WalletDebugRuntime.logAction("kh-metamask-open", "injected → connect()");
+            return WalletRuntime.connect();
           }
+          WalletRuntime.openWalletHub("請按 MetaMask 開啟");
           return WalletRuntime.openMetaMaskDeepLink();
         }
       };
@@ -2425,6 +2544,11 @@
       this.maybeAutoConnectFromBridge();
     },
     walletDeepLink: function(kind){
+      WalletDebugRuntime.logAction("walletDeepLink", kind);
+      if(HeartRuntime.getEthereum()){
+        WalletDebugRuntime.logAction(kind, "injected present → skip deeplink, connect()");
+        return WalletRuntime.connect();
+      }
       const labels = {
         metamask: "MetaMask",
         metamask2: "MetaMask 備用",
@@ -2447,67 +2571,42 @@
       };
       const label = labels[kind] || kind;
       const link = links[kind] || WALLET_BRIDGE.BRIDGE_PAGE;
+      WalletDebugRuntime.logDeeplink(link);
       if(this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「" + label + "」按鈕，用該錢包 App 開啟橋接頁");
+        this.openWalletHub("請按「" + label + "」按鈕，用該錢包 App 開啟");
         return false;
       }
-      StatusRuntime.push("正在用 " + label + " 開啟 wallet-12345 橋接頁");
+      StatusRuntime.push("正在用 " + label + " 開啟");
+      if(kind === "metamask" || kind === "metamask2"){
+        return this.clickMetaMaskAnchor(link);
+      }
       try{
         window.location.href = link;
       }catch(_){
-        try{
-          window.open(link, "_blank", "noopener");
-        }catch(__){
+        try{ window.open(link, "_blank", "noopener"); }catch(__){
           this.copyBridgeUrl("deeplink 失敗，已改為複製橋接連結");
         }
       }
       return false;
     },
+    clickMetaMaskAnchor: function(url){
+      WalletDebugRuntime.logDeeplink(url);
+      try{
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_self";
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }catch(e){
+        WalletDebugRuntime.logError(e.message || e);
+        try{ window.location.href = url; }catch(_){}
+      }
+    },
     bindWalletHubButtons: function(){
-      const self = this;
-      const map = {
-        walletHubMetaMaskBtn: "metamask",
-        walletHubMeta2Btn:    "metamask2",
-        walletHubTrustBtn:    "trust",
-        walletHubOkxBtn:      "okx",
-        walletHubBitgetBtn:   "bitget",
-        walletHubDirectBtn:   "direct",
-        walletHubBridgeBtn:   "bridge"
-      };
-      Object.keys(map).forEach(function(id){
-        const el = $(id);
-        if(!el) return;
-        if(el.tagName === "A"){
-          const links = {
-            metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
-            trust: WALLET_BRIDGE.TRUST_DEEPLINK,
-            okx: WALLET_BRIDGE.OKX_DEEPLINK,
-            bitget: WALLET_BRIDGE.BITGET_DEEPLINK
-          };
-          el.href = links[map[id]] || WALLET_BRIDGE.BRIDGE_PAGE;
-        }
-        el.onclick = null;
-        delete el.dataset.kgenBound;
-        Events.bindOnce(el, "click", function(event){
-          event.preventDefault();
-          event.stopPropagation();
-          self.walletDeepLink(map[id]);
-        }, true);
-      });
-      const copyBridge = $("walletHubCopyBridge");
-      if(copyBridge){
-        Events.bindOnce(copyBridge, "click", function(event){
-          event.preventDefault();
-          self.copyBridgeUrl();
-        }, true);
-      }
-      const closeHub = $("walletHubClose");
-      if(closeHub){
-        Events.bindOnce(closeHub, "click", function(event){
-          event.preventDefault();
-          self.closeWalletHub();
-        }, true);
-      }
+      // Clicks handled solely by capture delegate on [data-wallet-action].
+      // patchWalletHub() sets href labels only.
     },
     copyBridgeUrl: function(message){
       // Copies the ASCII 12345.html entry (as user-facing "複製 12345.html")
@@ -2598,6 +2697,8 @@
         hub.style.alignItems = "center";
         hub.style.justifyContent = "center";
       }
+      WalletDebugRuntime.logAction("openWalletHub", message || "");
+      WalletDebugRuntime.refreshStatic();
       StatusRuntime.push(message || "已開啟多錢包入口");
       return false;
     },
@@ -2610,14 +2711,13 @@
     },
     openMetaMaskDeepLink: function(){
       if(HeartRuntime.hasInjectedWallet()){
+        WalletDebugRuntime.logAction("openMetaMaskDeepLink", "injected → connect()");
         return WalletRuntime.connect();
       }
-      if(this.isSocialInAppBrowser()){
-        this.openWalletHub("請按「用 MetaMask 開啟」按鈕");
-        return false;
-      }
+      this.openWalletHub("請按「MetaMask 開啟」");
+      WalletDebugRuntime.logDeeplink(WALLET_BRIDGE.METAMASK_DEEPLINK);
       StatusRuntime.push("請用 MetaMask App 開啟");
-      return this.deepLink("metamask");
+      return this.clickMetaMaskAnchor(WALLET_BRIDGE.METAMASK_DEEPLINK);
     },
     copyOfficialUrl: function(){
       const done = function(){
@@ -2665,24 +2765,33 @@
       }, true);
     },
     connect: async function(){
+      WalletDebugRuntime.setConnectEntered(true);
+      WalletDebugRuntime.logAction("connect()", "entered");
       const ethereum = HeartRuntime.getEthereum();
       if(ethereum){
+        WalletDebugRuntime.logAction("connect()", "window.ethereum yes → eth_requestAccounts");
         StatusRuntime.push("準備連結錢包 / 切 BSC，請在錢包視窗確認");
         try{
           if(window.web3 && typeof window.web3.connect === "function"){
             await window.web3.connect();
+            WalletDebugRuntime.setSigner(window.web3.addr || HeartRuntime.state.address);
             WalletRuntime.closeWalletHub();
+            await WalletDebugRuntime.refreshChainAndAccounts();
             return true;
           }
           await ethereum.request({ method: "eth_requestAccounts" });
+          let onBsc = false;
           if(window.web3 && typeof window.web3.ensureBSC === "function"){
-            const onBsc = await window.web3.ensureBSC();
-            if(!onBsc){
-              StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
-              return false;
-            }
+            onBsc = await window.web3.ensureBSC();
           }else{
             await HeartRuntime.ensureBSC();
+            onBsc = HeartRuntime.isOnBSC();
+          }
+          WalletDebugRuntime.setEnsureBsc(onBsc);
+          if(!onBsc){
+            StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
+            WalletDebugRuntime.logError("ensureBSC failed");
+            return false;
           }
           if(window.web3 && window.web3.provider && window.web3.signer && window.web3.addr){
             HeartRuntime.syncFromWeb3();
@@ -2691,22 +2800,22 @@
           }
           if(!HeartRuntime.state.address){
             StatusRuntime.push("錢包連線失敗：未取得帳戶");
+            WalletDebugRuntime.logError("no account after connect");
             return false;
           }
-          if(!HeartRuntime.isOnBSC()){
-            StatusRuntime.push("請切換至 BSC（鏈 ID 56）");
-            return false;
-          }
+          WalletDebugRuntime.setSigner(HeartRuntime.state.address);
           WalletRuntime.closeWalletHub();
           StatusRuntime.push("錢包已連線：" + short(HeartRuntime.state.address));
           await HeartRuntime.refreshChainData(true);
+          await WalletDebugRuntime.refreshChainAndAccounts();
           return true;
         }catch(error){
+          WalletDebugRuntime.logError(asErrorMessage(error));
           StatusRuntime.push("錢包連線失敗：" + asErrorMessage(error));
           return false;
         }
       }
-      // No injected wallet: always open hub, never jump to MetaMask / Google Play
+      WalletDebugRuntime.logAction("connect()", "no ethereum → openWalletHub only");
       this.openWalletHub("未偵測到錢包：請選擇錢包入口");
       return false;
     },
@@ -3120,17 +3229,18 @@
       HeartRuntime.init();
       ActionRuntime.init();
       LandRuntime.init();
+      WalletDebugRuntime.init();
       TimerRegistry.register("clock", function(){ HudRuntime.tick(); }, 1000);
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.1.9 METAMASK LINK FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.2.0 WALLET DEBUG FIX ready");
       return this;
     }
   };
 
   window.KGEN_RUNTIME_CORE = KGEN_RUNTIME_CORE;
-  window.KGEN_WALLET_BRIDGE = WALLET_BRIDGE;
+  window.KGEN_WALLET_DEBUG = WalletDebugRuntime;
   window.KGEN_STATUS_BUS = StatusRuntime;
   window.KGEN_HOLYCUP_RUNTIME = HolyCupRuntime;
   window.KGEN_MIRROR_VIEW = MirrorRuntime;
@@ -3153,55 +3263,70 @@
     KGEN_RUNTIME_CORE.boot();
   }, { once: true });
 
-  // ===== V2.1.9 METAMASK LINK FIX / WALLET HUB DELEGATE =====
-  // Uses document-level capture delegation on [data-wallet-action] — no inline onclick dependency.
+  // ===== V2.2.0 WALLET DEBUG FIX / WALLET HUB DELEGATE =====
   (function defineWalletHubDelegate(){
-    var ASCII_URL  = 'https://klineodyssey.github.io/kline-odyssey/12345.html';
-    var BRIDGE_URL = 'https://klineodyssey.github.io/kline-odyssey/wallet-12345.html';
+    var ASCII_URL  = WALLET_BRIDGE.ROOT_ENTRY;
+    var BRIDGE_URL = WALLET_BRIDGE.BRIDGE_PAGE;
+    var MM_PRIMARY = WALLET_BRIDGE.METAMASK_DEEPLINK;
+    var MM_BACKUP  = WALLET_BRIDGE.METAMASK_DEEPLINK2;
 
+    function dbg(action, detail){
+      try{ WalletDebugRuntime.logAction(action, detail || ""); }catch(_){}
+    }
+    function dbgLink(url){
+      try{ WalletDebugRuntime.logDeeplink(url); }catch(_){}
+    }
+    function hasInjected(){
+      return !!(window.ethereum || window.BinanceChain);
+    }
     function pushStatus(text){
-      try{ if(window.KGEN_STATUS_BUS && typeof window.KGEN_STATUS_BUS.push === 'function') window.KGEN_STATUS_BUS.push(text); }catch(e){}
+      try{ StatusRuntime.push(text); }catch(e){}
       try{ console.log('[WalletHub]', text); }catch(e){}
     }
     function go(url){
+      dbgLink(url);
       try{ window.location.href = url; }catch(e){ try{ window.open(url, '_blank', 'noopener'); }catch(_){} }
+    }
+    function mmAnchor(url){
+      dbgLink(url);
+      try{ WalletRuntime.clickMetaMaskAnchor(url); }catch(e){
+        dbg('metamask-anchor-fail', String(e));
+        go(url);
+      }
     }
 
     function handleWalletAction(action){
+      dbg(action);
+      if(hasInjected() && action !== 'copy' && action !== 'close' && action !== 'bridge' && action !== 'walletconnect'){
+        dbg(action, 'injected → WalletRuntime.connect()');
+        WalletRuntime.connect();
+        return;
+      }
       switch(action){
         case 'metamask':
           pushStatus('點擊 MetaMask');
-          // Use anchor click (not window.location.href) — required for MetaMask deeplink on Android
-          // Official: https://link.metamask.io/dapp/{domain+path}, NO https:// prefix
-          (function(){
-            var a = document.createElement('a');
-            a.href = 'https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html';
-            a.target = '_self';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          })();
+          mmAnchor(MM_PRIMARY);
           break;
         case 'metamask-backup':
-          pushStatus('點擊 MetaMask 備用：請複製 12345.html 到 MetaMask 瀏覽器');
-          try{ navigator.clipboard.writeText(ASCII_URL).then(function(){ pushStatus('已複製 12345.html — 請貼到 MetaMask 瀏覽器'); }); }catch(e){}
-          prompt('MetaMask 備用：請複製並貼到 MetaMask 瀏覽器', ASCII_URL);
+          pushStatus('點擊 MetaMask 備用 deeplink');
+          mmAnchor(MM_BACKUP);
+          dbg('metamask-backup-fallback', '若失敗請複製 ' + ASCII_URL);
           break;
         case 'trust':
           pushStatus('點擊 Trust Wallet');
-          go('https://link.trustwallet.com/open_url?coin_id=20000714&url=' + encodeURIComponent(BRIDGE_URL));
+          go(WALLET_BRIDGE.TRUST_DEEPLINK);
           break;
         case 'okx':
           pushStatus('點擊 OKX Wallet');
-          go('okx://wallet/dapp/url?dappUrl=' + encodeURIComponent(BRIDGE_URL));
+          go(WALLET_BRIDGE.OKX_DEEPLINK);
           break;
         case 'bitget':
           pushStatus('點擊 Bitget Wallet');
-          go('https://web3.bitget.com/dapp?url=' + encodeURIComponent(BRIDGE_URL));
+          go(WALLET_BRIDGE.BITGET_DEEPLINK);
           break;
         case 'binance':
           pushStatus('點擊 Binance Wallet');
-          go('bnc://app.binance.com/cedefi/dapp?url=' + encodeURIComponent(BRIDGE_URL));
+          go(WALLET_BRIDGE.BINANCE_DEEPLINK);
           break;
         case 'direct':
           pushStatus('點擊 直連 12345');
@@ -3214,19 +3339,14 @@
               window.web3.connectWalletConnect();
             }else{
               pushStatus('WalletConnect QR 尚未接入');
-              alert('WalletConnect QR 尚未接入，請改用其他錢包入口。');
             }
-          }catch(e){ pushStatus('WalletConnect 啟動失敗'); }
+          }catch(e){
+            WalletDebugRuntime.logError(e.message || e);
+          }
           break;
         case 'copy':
           pushStatus('點擊 複製 12345.html');
-          try{
-            navigator.clipboard.writeText(ASCII_URL).then(function(){
-              pushStatus('已複製 12345.html');
-              var btn = document.getElementById('walletHubCopyBridge');
-              if(btn){ var orig = btn.textContent; btn.textContent = '✅ 已複製！'; setTimeout(function(){ btn.textContent = orig; }, 2000); }
-            }).catch(function(){ prompt('請複製 12345.html', ASCII_URL); pushStatus('剪貼簿失敗，請手動複製'); });
-          }catch(e){ prompt('請複製 12345.html', ASCII_URL); }
+          WalletRuntime.copyBridgeUrl();
           break;
         case 'bridge':
           pushStatus('點擊 橋接入口');
@@ -3234,16 +3354,12 @@
           break;
         case 'close':
           pushStatus('關閉多錢包入口');
-          var hub = document.getElementById('walletHub');
-          if(hub) hub.style.display = 'none';
+          WalletRuntime.closeWalletHub();
           break;
       }
     }
 
-    // Capture-phase delegate: fires before any target-level handler.
-    // Intercepts clicks on [data-wallet-action] elements inside #walletHub.
     document.addEventListener('click', function(e){
-      // Background overlay direct click → close
       if(e.target && e.target.id === 'walletHub'){
         e.preventDefault();
         e.stopPropagation();
@@ -3252,7 +3368,6 @@
       }
       var btn = e.target && e.target.closest ? e.target.closest('[data-wallet-action]') : null;
       if(!btn) return;
-      // Only act when inside #walletHub
       var hub = document.getElementById('walletHub');
       if(!hub || !hub.contains(btn)) return;
       e.preventDefault();
@@ -3260,10 +3375,8 @@
       handleWalletAction(btn.getAttribute('data-wallet-action'));
     }, true);
 
-    // Expose globally for backward compatibility and external calls
     window.handleWalletAction = handleWalletAction;
     window.kgenHubClick = function(kind){
-      // Map legacy kgenHubClick keys to new action names
       var map = { metamask2: 'metamask-backup' };
       handleWalletAction(map[kind] || kind);
     };
