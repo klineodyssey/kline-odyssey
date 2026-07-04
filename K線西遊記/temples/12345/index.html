@@ -293,7 +293,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
-<link href="modules/runtime-main.css?v=V2.3.2-trust-fortune-ai" rel="stylesheet"/>
+<link href="modules/runtime-main.css?v=V2.3.3-trust-voice-ui" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -370,7 +370,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div class="hud-top">
 <div class="brand-section">
 <div class="brand-name">KGEN 12345 五指山悟空財神殿</div>
-<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.3.2" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.3.2">V2.3.2 / TRUST FORTUNE AI FIX</div>
+<div class="sys-st" data-kgen-hud-owned="1" data-version="12345-TEMPLE-RUNTIME-CORE-V2.3.3" id="ver-st" title="12345-TEMPLE-RUNTIME-CORE-V2.3.3">V2.3.3 / TRUST VOICE UI FIX</div>
 <div class="sys-st kgen-hud-clock" data-kgen-hud-owned="1" id="sys-clock"><span class="kgen-tw-main">台灣時間：--</span><span class="kgen-utc-sub">UTC：--</span></div>
 </div>
 <div class="monitor-data">
@@ -724,6 +724,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 </div>
 <div id="walletHubInAppHint" style="display:none; margin-bottom:10px; color:#f99; font-size:13px; line-height:1.5;">Facebook 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。</div>
 <div id="walletHubMetaMaskFallbackHint" style="display:none; margin-bottom:10px; color:#9ff; font-size:13px; line-height:1.5; border:1px solid rgba(143,255,255,.35); border-radius:10px; padding:10px;"></div>
+<div id="walletHubTrustFallbackHint" style="display:none; margin-bottom:10px; color:#ffd978; font-size:13px; line-height:1.5; border:1px solid rgba(255,215,120,.45); border-radius:10px; padding:10px;">Trust Wallet 若未自動開啟，請複製 12345.html 到 Trust Wallet 瀏覽器。</div>
 <div style="font-size:13px; line-height:1.7; color:#dff; margin-bottom:12px;">LINE / Facebook 請先開外部錢包，再進入 <b>12345.html</b> 英文入口。登入 MetaMask 後若沒有自動進入，請按「MetaMask 備用」或複製 12345.html 貼到 MetaMask 瀏覽器。</div>
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
 <button id="walletHubMetaMaskBtn" type="button" data-wallet-action="metamask" style="padding:12px; border-radius:12px; border:1px solid rgba(255,215,120,.55); background:linear-gradient(180deg,#ffe28a,#d5aa3d); color:#111; font-weight:950; cursor:pointer; pointer-events:auto;">MetaMask 開啟</button>
@@ -1099,6 +1100,9 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-k">connect mode</div><div class="kh-v" id="wd-conn-mode">--</div>
 <div class="kh-k">connect result</div><div class="kh-v" id="wd-conn-result">--</div>
 <div class="kh-k">wallet selected</div><div class="kh-v" id="wd-wallet-selected">--</div>
+<div class="kh-k">trust method</div><div class="kh-v" id="wd-trust-method">--</div>
+<div class="kh-k">trust final url</div><div class="kh-v" id="wd-trust-final" style="word-break:break-all;">--</div>
+<div class="kh-k">trust fallback shown</div><div class="kh-v" id="wd-trust-fallback">--</div>
 <div class="kh-k">updated</div><div class="kh-v" id="wd-time">--</div>
 </div>
 </div>
@@ -1862,8 +1866,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
-<script src="modules/kgen-12345-ai-service.js"></script>
-<script src="modules/runtime-main.js?v=V2.3.2-trust-fortune-ai"></script>
+<script src="modules/kgen-12345-ai-service.js?v=V2.3.3-trust-voice-ui"></script>
+<script src="modules/runtime-main.js?v=V2.3.3-trust-voice-ui"></script>
 <script src="modules/runtime-bootstrap.js"></script>
 
 </body>

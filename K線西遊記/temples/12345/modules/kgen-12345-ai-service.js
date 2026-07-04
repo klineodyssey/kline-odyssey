@@ -1,15 +1,16 @@
 /*
 FILE: modules/kgen-12345-ai-service.js
 PRODUCT_ID: KGEN-12345-HEART-UI
-VERSION: V2.3.2-AI-SERVICE
-PURPOSE: Frontend AI customer service (FAQ + Web Speech), no external API.
+VERSION: V2.3.3-AI-SERVICE
+PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate).
 */
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.2-AI-SERVICE";
-  const WELCOME_KEY = "kgen12345_ai_welcome_v232";
+  const VERSION = "V2.3.3-AI-SERVICE";
+  const WELCOME_KEY = "kgen12345_ai_welcome_v233";
   const AVATAR_SRC = "./assets/heart.png";
+  const VOICE_DEBOUNCE_MS = 500;
 
   const FAQ = [
     {
@@ -44,6 +45,46 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech), no external API.
     }
   ];
 
+  const BUTTON_VOICE = {
+    "kh-connect": "連結錢包並切換到 B S C 主網。若在 LINE 或 Facebook，請先開啟多錢包入口。",
+    "walletHubMetaMaskBtn": "MetaMask 開啟一二三四五英文橋接頁，進入神殿後再連結錢包。",
+    "walletHubMeta2Btn": "MetaMask 備用連結，若主要入口未跳轉請使用此按鈕。",
+    "walletHubTrustBtn": "Trust Wallet 會先嘗試開啟內建瀏覽器。若未自動開啟，請複製一二三四五英文橋接頁到 Trust Wallet 瀏覽器。",
+    "walletHubOkxBtn": "OKX Wallet 開啟一二三四五英文橋接頁。",
+    "walletHubBitgetBtn": "Bitget Wallet 開啟一二三四五英文橋接頁。",
+    "walletHubBinanceBtn": "Binance Wallet 開啟錢包橋接頁。",
+    "kh-fortune": "領發財金。需先完成三次聖盃、通過冷卻並確認 B N B gas。",
+    "kh-heartbeat": "心跳呼吸領取。整點心跳獎勵，請確認鏈上條件。",
+    "kh-ignite": "轉日呼吸領取。請在轉日窗口內送出交易。",
+    "kh-cup-1": "聖盃一。完成第一次聖盃確認。",
+    "kh-cup-2": "聖盃二。完成第二次聖盃確認。",
+    "kh-cup-3": "聖盃三。完成第三次聖盃後可領發財金。",
+    "kh-cup-reset": "重置聖盃。將清除本機聖盃進度。",
+    "guideUnifiedBtn": "客服導覽。解說錢包、發財金與 Heart 控制台操作。",
+    "boardToggleBtn": "排行榜。示範模式，顯示或隱藏排行榜面板。",
+    "kgen-heart-toggle": "悟空心臟控制台。展開或收合 Heart 資產與 Claim 面板。"
+  };
+
+  const WALLET_ACTION_VOICE = {
+    metamask: "MetaMask 開啟一二三四五英文橋接頁。",
+    "metamask-backup": "MetaMask 備用連結。",
+    trust: "Trust Wallet 若未自動開啟，請複製一二三四五英文橋接頁到 Trust Wallet 瀏覽器。",
+    okx: "OKX Wallet 開啟神殿橋接頁。",
+    bitget: "Bitget Wallet 開啟神殿橋接頁。",
+    binance: "Binance Wallet 開啟錢包橋接頁。"
+  };
+
+  const FOOTER_VOICE = [
+    "拍照存證。擷取目前神殿畫面。",
+    "錄影。切換五指山神殿留影錄影。",
+    "前鏡多方。開啟前鏡頭，多方角度四十五度。",
+    "後鏡空方。開啟後鏡頭，空方角度一百三十五度。",
+    "悟空心臟。展開或收合 Heart 控制台。",
+    "螢幕錄影。使用瀏覽器螢幕錄影功能。",
+    "規則活動。展開或收合節慶活動面板。",
+    "右側神規。展開或收合右側神殿規則面板。"
+  ];
+
   const GUIDE_VOICE = "歡迎使用悟空財神殿導覽。右側可連結錢包、領發財金與查看規則。左下 Heart 控制台可查看 KGEN、Allowance 與鏈上狀態。若有問題可在 AI 客服輸入關鍵字。";
 
   function $(id){ return document.getElementById(id); }
@@ -63,17 +104,39 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech), no external API.
     return null;
   }
 
+  function cleanLabel(text){
+    return String(text || "").replace(/\s+/g, " ").trim();
+  }
+
+  function navVoiceFromText(text){
+    const t = cleanLabel(text);
+    if(/返回.*K線西遊記|銀河宇宙入口/.test(t)) return "返回 K線西遊記銀河宇宙入口。";
+    if(/官方宇宙首頁/.test(t)) return "官方宇宙首頁入口。";
+    if(/五指山神殿音響/.test(t)) return "五指山神殿音響。可播放內建或自選 M P 3 歌單。";
+    if(/名額紀錄/.test(t)) return "名額紀錄。查看發財金 epoch 名額與紀錄。";
+    if(/排行榜/.test(t)) return "排行榜。示範模式排行榜面板。";
+    if(/客服|導覽/.test(t)) return "客服導覽。解說神殿功能與錢包流程。";
+    if(/土地資訊/.test(t)) return "土地資訊。查看選取格子的地籍與狀態。";
+    if(/悟空土地|土地地籍/.test(t)) return "悟空土地地籍。可框選與查看土地格子。";
+    if(/訊息紀錄/.test(t)) return "訊息紀錄。查看系統與鏈上訊息。";
+    return "";
+  }
+
   const AiService = {
     voiceOn: true,
     inited: false,
+    lastVoiceKey: "",
+    lastVoiceAt: 0,
     init: function(){
       if(this.inited) return;
       this.inited = true;
       this.ensurePanel();
       this.bindControls();
       this.hookGuideButtons();
+      this.bindButtonVoiceDelegate();
       this.welcomeOnce();
       window.KGEN_AI_SERVICE = this;
+      window.KGEN_AI_SPEAK = this.speakAnnounce.bind(this);
     },
     ensurePanel: function(){
       if($("kgen-ai-service-panel")) return;
@@ -163,8 +226,8 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech), no external API.
       log.appendChild(row);
       log.scrollTop = log.scrollHeight;
     },
-    speak: function(text){
-      if(!this.voiceOn || !supportsSpeech() || !text) return;
+    speakRaw: function(text){
+      if(!this.voiceOn || !supportsSpeech() || !text) return false;
       try{
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(String(text));
@@ -172,42 +235,127 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech), no external API.
         u.rate = 0.95;
         u.pitch = 1;
         window.speechSynthesis.speak(u);
-      }catch(_){ }
+        return true;
+      }catch(_){
+        return false;
+      }
+    },
+    speakAnnounce: function(text, options){
+      options = options || {};
+      const msg = cleanLabel(text);
+      if(!msg) return;
+      if(!options.skipStatus){
+        try{
+          if(window.KGEN_STATUS_BUS && typeof window.KGEN_STATUS_BUS.push === "function"){
+            window.KGEN_STATUS_BUS.push(msg);
+          }
+        }catch(_){ }
+      }
+      this.appendLog("bot", msg);
+      if(!this.speakRaw(msg) && !supportsSpeech()){
+        this.appendLog("bot", "（此瀏覽器不支援語音，僅文字客服）");
+      }
+    },
+    shouldVoiceForButton: function(key){
+      const now = Date.now();
+      if(key && key === this.lastVoiceKey) return false;
+      if(now - this.lastVoiceAt < VOICE_DEBOUNCE_MS) return false;
+      this.lastVoiceKey = key || "";
+      this.lastVoiceAt = now;
+      return true;
+    },
+    resolveButtonVoice: function(btn){
+      if(!btn) return "";
+      if(btn.dataset && btn.dataset.voice) return cleanLabel(btn.dataset.voice);
+      if(btn.id && BUTTON_VOICE[btn.id]) return BUTTON_VOICE[btn.id];
+      const action = btn.getAttribute && btn.getAttribute("data-wallet-action");
+      if(action && WALLET_ACTION_VOICE[action]) return WALLET_ACTION_VOICE[action];
+      if(btn.closest && btn.closest(".kgen-land-info-head")) return "土地資訊。查看選取格子的地籍與狀態。";
+      if(btn.closest && btn.closest(".kgen-land-head")) return "悟空土地地籍。可框選與查看土地格子。";
+      const footer = btn.closest && btn.closest(".footer-terminal");
+      if(footer){
+        const buttons = Array.from(footer.querySelectorAll("button,.term-btn"));
+        const idx = buttons.indexOf(btn);
+        if(idx >= 0 && FOOTER_VOICE[idx]) return FOOTER_VOICE[idx];
+      }
+      const navText = navVoiceFromText(btn.textContent || btn.innerText || "");
+      if(navText) return navText;
+      const label = cleanLabel(btn.textContent || btn.innerText || btn.getAttribute("aria-label") || "");
+      if(label.length >= 2 && label.length <= 80) return label + "。";
+      return "";
+    },
+    isVoiceTarget: function(node){
+      if(!node || node.nodeType !== 1) return null;
+      if(node.closest && (
+        node.closest("#kgen-ai-service-panel") ||
+        node.closest("#wallet-debug-body") ||
+        node.closest("#claim-debug-body") ||
+        node.closest("input, textarea, select, label")
+      )) return null;
+      const selectors = [
+        "button",
+        ".nav-btn",
+        ".term-btn",
+        ".kh-btn-lg",
+        ".kgen-land-head",
+        ".kgen-land-info-head",
+        "[data-wallet-action]",
+        "a.nav-btn"
+      ];
+      for(let i = 0; i < selectors.length; i++){
+        const hit = node.closest ? node.closest(selectors[i]) : null;
+        if(hit) return hit;
+      }
+      return null;
+    },
+    bindButtonVoiceDelegate: function(){
+      const self = this;
+      document.addEventListener("click", function(event){
+        const btn = self.isVoiceTarget(event.target);
+        if(!btn) return;
+        const voice = self.resolveButtonVoice(btn);
+        if(!voice) return;
+        const key = btn.id || btn.getAttribute("data-wallet-action") || cleanLabel(btn.textContent || "");
+        if(!self.shouldVoiceForButton(key)) return;
+        self.speakAnnounce(voice, { skipStatus: true });
+        try{
+          if(window.KGEN_STATUS_BUS && typeof window.KGEN_STATUS_BUS.push === "function"){
+            window.KGEN_STATUS_BUS.push(voice);
+          }
+        }catch(_){ }
+      }, true);
     },
     welcomeOnce: function(){
       try{
         if(localStorage.getItem(WELCOME_KEY)) return;
         const self = this;
         setTimeout(function(){
-          self.appendLog("bot", "歡迎進入 KGEN 12345 五指山悟空財神殿");
-          self.speak("歡迎進入 KGEN 12345 五指山悟空財神殿");
+          self.speakAnnounce("歡迎進入 KGEN 12345 五指山悟空財神殿");
           localStorage.setItem(WELCOME_KEY, "1");
         }, 1400);
       }catch(_){ }
     },
     explainGuide: function(){
-      this.appendLog("bot", "已為你解說目前頁面：右側連錢包與發財金，左下 Heart 控制台可看餘額與 Claim 狀態。");
-      this.speak(GUIDE_VOICE);
+      this.speakAnnounce("已為你解說目前頁面：右側連錢包與發財金，左下 Heart 控制台可看餘額與 Claim 狀態。");
+      this.speakRaw(GUIDE_VOICE);
     },
     ask: function(question){
       const q = String(question || "").trim();
       if(!q){
-        this.appendLog("bot", "請輸入問題，例如：如何連錢包、如何領發財金。");
+        this.speakAnnounce("請輸入問題，例如：如何連錢包、如何領發財金。");
         return;
       }
       this.appendLog("user", q);
       const hit = matchFaq(q);
       if(hit){
-        this.appendLog("bot", hit.answer);
-        this.speak(hit.voice);
+        this.speakAnnounce(hit.answer);
+        this.speakRaw(hit.voice);
         return;
       }
       const fallback = "我是前端 AI 客服。可問：如何連錢包、如何領發財金、為什麼不能領、什麼是 Heart 血庫、什麼是 BSC、如何切換錢包。";
-      this.appendLog("bot", fallback);
-      if(!supportsSpeech()){
-        this.appendLog("bot", "（此瀏覽器不支援語音，僅文字客服）");
-      }else{
-        this.speak("我是前端 AI 客服，請輸入關鍵字查詢常見問題。");
+      this.speakAnnounce(fallback);
+      if(supportsSpeech()){
+        this.speakRaw("我是前端 AI 客服，請輸入關鍵字查詢常見問題。");
       }
     }
   };

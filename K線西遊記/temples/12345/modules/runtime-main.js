@@ -1,9 +1,9 @@
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.2 / TRUST FORTUNE AI FIX";
-  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.2";
-  const UI_PATCH = "V2.3.2";
+  const VERSION = "V2.3.3 / TRUST VOICE UI FIX";
+  const VERSION_TAG = "12345-TEMPLE-RUNTIME-CORE-V2.3.3";
+  const UI_PATCH = "V2.3.3";
   const BRIDGE_LOGIC_VERSION = "V10.49.2 restored logic";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
@@ -38,7 +38,8 @@
     METAMASK_SCHEME: "metamask://dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
     METAMASK_DEEPLINK2: "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
     METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
-    TRUST_DEEPLINK: "https://link.trustwallet.com/open_url?coin_id=20000714&url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
+    TRUST_SCHEME: "trust://browser_enable",
+    TRUST_OPEN_URL: "https://link.trustwallet.com/open_url?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
     OKX_DEEPLINK: "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
     BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html?autoconnect=1&bridge=1")
@@ -2595,6 +2596,9 @@
       connectMode: "--",
       connectResult: "--",
       walletSelected: "--",
+      trustMethod: "--",
+      trustFinalUrl: "--",
+      trustFallbackShown: "--",
       updatedAt: "--"
     },
     init: function(){
@@ -2742,6 +2746,18 @@
       this.state.walletSelected = v || "--";
       this.render();
     },
+    setTrustMethod: function(v){
+      this.state.trustMethod = v || "--";
+      this.render();
+    },
+    setTrustFinalUrl: function(url){
+      this.state.trustFinalUrl = url || "--";
+      this.render();
+    },
+    setTrustFallbackShown: function(v){
+      this.state.trustFallbackShown = v ? String(v) : "no";
+      this.render();
+    },
     async refreshChainAndAccounts(){
       const eth = HeartRuntime.getEthereum();
       this.state.hasEthereum = !!eth;
@@ -2799,6 +2815,9 @@
         "wd-conn-mode": this.state.connectMode,
         "wd-conn-result": this.state.connectResult,
         "wd-wallet-selected": this.state.walletSelected,
+        "wd-trust-method": this.state.trustMethod,
+        "wd-trust-final": this.state.trustFinalUrl,
+        "wd-trust-fallback": this.state.trustFallbackShown,
         "wd-time": this.state.updatedAt
       };
       Object.keys(map).forEach(function(id){
@@ -2872,7 +2891,7 @@
       const links = {
         metamask: WALLET_BRIDGE.METAMASK_DEEPLINK,
         metamask2: WALLET_BRIDGE.METAMASK_DEEPLINK2,
-        trust: WALLET_BRIDGE.TRUST_DEEPLINK,
+        trust: WALLET_BRIDGE.TRUST_OPEN_URL,
         okx: WALLET_BRIDGE.OKX_DEEPLINK,
         bitget: WALLET_BRIDGE.BITGET_DEEPLINK,
         binance: WALLET_BRIDGE.BINANCE_DEEPLINK,
@@ -2886,6 +2905,9 @@
       }
       if(kind === "metamask2"){
         return this.openMetaMaskWithFallbacks({ backup: true });
+      }
+      if(kind === "trust"){
+        return this.openTrustWithFallbacks();
       }
       WalletDebugRuntime.logDeeplink(link);
       if(this.isSocialInAppBrowser()){
@@ -3001,6 +3023,50 @@
         self.showMetaMaskFallbackHint();
       }, 1800);
       StatusRuntime.push("正在開啟 MetaMask 神殿頁，若未跳轉請按 MetaMask 備用。");
+      return false;
+    },
+    showTrustFallbackHint: function(){
+      const msg = "Trust Wallet 若未自動開啟，請複製 12345.html 到 Trust Wallet 瀏覽器。";
+      const hint = $("walletHubTrustFallbackHint");
+      if(hint){
+        hint.style.display = "block";
+        hint.textContent = msg + " 網址：" + WALLET_BRIDGE.ROOT_ENTRY;
+      }
+    },
+    openTrustWithFallbacks: function(){
+      const self = this;
+      const scheme = WALLET_BRIDGE.TRUST_SCHEME;
+      const openUrl = WALLET_BRIDGE.TRUST_OPEN_URL;
+      WalletDebugRuntime.setWalletSelected("trust");
+      WalletDebugRuntime.setTrustMethod("trust-scheme");
+      WalletDebugRuntime.setTrustFinalUrl(scheme);
+      WalletDebugRuntime.setTrustFallbackShown("no");
+      WalletDebugRuntime.setDeeplinkMethod("trust-scheme");
+      WalletDebugRuntime.logAction("trust", "trust://browser_enable → open_url fallback");
+      if(HeartRuntime.getEthereum()){
+        WalletDebugRuntime.logAction("trust", "injected → connect()");
+        return this.connect();
+      }
+      this.showTrustFallbackHint();
+      WalletDebugRuntime.logDeeplink(scheme);
+      try{
+        window.location.href = scheme;
+      }catch(_){
+        this.tryOpenUrlWithoutNavigate(scheme);
+      }
+      setTimeout(function(){
+        if(document.visibilityState !== "visible" && !HeartRuntime.getEthereum()) return;
+        WalletDebugRuntime.setTrustMethod("trust-open_url");
+        WalletDebugRuntime.setTrustFinalUrl(openUrl);
+        WalletDebugRuntime.setTrustFallbackShown("yes");
+        WalletDebugRuntime.setDeeplinkMethod("trust-open_url");
+        WalletDebugRuntime.logDeeplink(openUrl);
+        try{
+          window.location.href = openUrl;
+        }catch(_){
+          self.tryOpenUrlWithoutNavigate(openUrl);
+        }
+      }, 1200);
       return false;
     },
     clickMetaMaskAnchor: function(url, allowSelfNavigate){
@@ -3213,7 +3279,7 @@
         mmAnchor.href = WALLET_BRIDGE.METAMASK_SCHEME;
         mmAnchor.textContent = "用 MetaMask 開啟";
       }
-      [["walletHubTrustBtn", WALLET_BRIDGE.TRUST_DEEPLINK, "Trust Wallet 開啟"],
+      [["walletHubTrustBtn", WALLET_BRIDGE.TRUST_OPEN_URL, "Trust Wallet 開啟"],
        ["walletHubOkxBtn", WALLET_BRIDGE.OKX_DEEPLINK, "OKX Wallet 開啟"],
        ["walletHubBitgetBtn", WALLET_BRIDGE.BITGET_DEEPLINK, "Bitget Wallet 開啟"]].forEach(function(entry){
         const btn = $(entry[0]);
@@ -3247,7 +3313,9 @@
       if(mmAnchor) mmAnchor.href = WALLET_BRIDGE.METAMASK_SCHEME;
       const hint = $("walletHubInAppHint");
       const fbHint = $("walletHubMetaMaskFallbackHint");
+      const trustHint = $("walletHubTrustFallbackHint");
       if(fbHint) fbHint.style.display = "none";
+      if(trustHint) trustHint.style.display = "none";
       if(hint){
         if(this.isFacebookWebView()){
           hint.textContent = "Facebook 內建瀏覽器不能直接連錢包，請用 MetaMask 內建瀏覽器開啟神殿。";
@@ -3828,7 +3896,7 @@
       TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
       TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
       TimerRegistry.register("monitor-dots", function(){ MonitorGridRuntime.tick(); }, 1000);
-      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.2 TRUST FORTUNE AI FIX ready");
+      StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.3 TRUST VOICE UI FIX ready");
       WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
@@ -3901,14 +3969,8 @@
           WalletRuntime.openMetaMaskWithFallbacks({ backup: true });
           break;
         case 'trust':
-          try{
-            WalletDebugRuntime.setWalletSelected('trust');
-            WalletDebugRuntime.setDeeplinkMethod('trust');
-            WalletDebugRuntime.logDeeplink(WALLET_BRIDGE.TRUST_DEEPLINK);
-            WalletDebugRuntime.logAction('trust', 'Trust deeplink bridge');
-          }catch(_){}
-          pushStatus('點擊 Trust Wallet → 12345.html?autoconnect=1&bridge=1');
-          go(WALLET_BRIDGE.TRUST_DEEPLINK);
+          pushStatus('點擊 Trust Wallet → trust://browser_enable → 12345.html');
+          WalletRuntime.openTrustWithFallbacks();
           break;
         case 'okx':
           pushStatus('點擊 OKX Wallet');
