@@ -1,0 +1,93 @@
+name: Deploy Pages Static
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Build static site
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf _site
+          mkdir -p _site
+
+          # Force GitHub Pages to publish static files without Jekyll or Liquid.
+          touch _site/.nojekyll
+
+          copy_file() {
+            local src="$1"
+            local dest="${2:-$1}"
+            if [ -f "$src" ]; then
+              mkdir -p "_site/$(dirname "$dest")"
+              cp -a "$src" "_site/$dest"
+            fi
+          }
+
+          copy_dir() {
+            local src="$1"
+            local dest="${2:-$1}"
+            if [ -d "$src" ]; then
+              mkdir -p "_site/$(dirname "$dest")"
+              cp -a "$src" "_site/$dest"
+            fi
+          }
+
+          if [ -f "index.html" ]; then
+            copy_file "index.html"
+          elif [ -f "Index.html" ]; then
+            copy_file "Index.html" "index.html"
+          fi
+
+          copy_file "12345.html"
+          copy_file "wallet-12345.html"
+          copy_file "wallet.html"
+          copy_file "kgen32.svg"
+          copy_file "logo.png"
+          copy_file "README.md"
+          copy_file "MANIFEST.json"
+          copy_file "VERSION"
+
+          copy_dir "K線西遊記"
+          copy_dir "docs"
+          copy_dir "archive"
+          copy_dir "assets"
+          copy_dir "KGEN"
+          copy_dir "whitepaper"
+          copy_dir "wukong-temple"
+
+          echo "Static site sample:"
+          find _site -maxdepth 3 -type f | sort | sed 's#^_site/##' | head -n 200
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
