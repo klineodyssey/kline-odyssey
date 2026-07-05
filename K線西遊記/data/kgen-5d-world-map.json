@@ -1,9 +1,15 @@
 {
-  "schema": "KGEN-5D-WORLD-MAP-V0.1",
-  "version": "V0.1",
+  "schema": "KGEN-5D-WORLD-MAP-V1.0",
+  "version": "V1.0",
   "created": "2026-07-04",
+  "updated": "2026-07-04",
   "author": "PrimeForge / 樂天帝 ⌖",
-  "description": "KGEN 5D Universe — world map data for all temples and game nodes",
+  "description": "KGEN 5D Universe V1.0 — world map for Universe Runtime (all temples + game)",
+  "runtime": {
+    "name": "Universe Runtime",
+    "version": "V1.0",
+    "modules": ["physics", "wallet", "camera", "universe-map", "status-bus", "audio", "animation", "npc", "civilization", "chain-read"]
+  },
 
   "universe": {
     "id": "KGEN-PRIME-CIVILIZATION",
@@ -119,11 +125,12 @@
   },
 
   "game5d": {
-    "id": "KLINE-5D-GAME-V0.1",
+    "id": "KLINE-5D-GAME-V1.0",
     "name": "K線5D峽谷推塔戰",
     "type": "Game",
-    "status": "PROTOTYPE",
+    "status": "V1.0",
     "url": "K線西遊記/game/kline-5d/index.html",
+    "engine": "kline-5d-game-engine.js",
     "factions": {
       "bull": { "name": "多方陣營", "color": "#7cffc5", "base": "12345", "label": "Bull Faction" },
       "bear": { "name": "空方陣營", "color": "#ff4444", "base": "16888", "label": "Bear Faction" }
@@ -138,6 +145,11 @@
       { "id": "kn-11520", "name": "11520 交易所", "type": "Exchange", "x": 35, "reward": "BNB Fee" },
       { "id": "kn-18888", "name": "18888 銀行",   "type": "Bank",     "x": 50, "reward": "KGEN Reward" },
       { "id": "kn-18921", "name": "18921 AutoLP",  "type": "AutoLP",   "x": 65, "reward": "LP Share" }
+    ],
+    "boss": { "id": "boss-wuzhi", "name": "五指山封印魔", "hp": 500, "rewardXp": 200 },
+    "quests": [
+      { "id": "q-visit-11520", "name": "抵達花果山", "xp": 50 },
+      { "id": "q-game-win", "name": "峽谷推塔勝利", "xp": 120 }
     ]
   },
 

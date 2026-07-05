@@ -3,16 +3,17 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-18921-AUTOLP-UI
-VERSION: V0.1 / 5D Genesis Prototype
-BUILD: 20260704-18921-AUTOLP-V0.1
+VERSION: V1.0 / Universe Runtime
+BUILD: 20260704-18921-AUTOLP-V1.0
 BIRTH: 2026-07-04
 ROLE: 斬妖台 Auto LP 儀表板 / 稅收分配 / LP Status
 STATUS: PROTOTYPE — 前端原型，不改合約
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>18921 斬妖台 Auto LP｜KGEN ZhanyaoTaxSplitter V0.1</title>
+<title>18921 斬妖台 Auto LP｜KGEN ZhanyaoTaxSplitter V1.0</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<link rel="stylesheet" href="../../modules/universe-runtime/universe-runtime.css">
 <style>
 :root { --accent: #7cffc5; --accent2: rgba(124,255,197,.12); }
 
@@ -68,9 +69,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 <header class="kgen-hud">
   <div>
     <div class="kgen-hud-title">🗡️ 18921 斬妖台 Auto LP</div>
-    <div class="kgen-hud-ver" id="kgen-status-text">ZhanyaoTaxSplitter V0.1 | Prototype</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">ZhanyaoTaxSplitter V1.0</div>
   </div>
   <nav class="kgen-hud-nav">
+    <button type="button" class="kgen-btn kgen-btn-sm" id="btn-wallet" style="margin-right:8px;">🔗 錢包</button>
     <a href="../../index.html">🌌 星系</a>
     <a href="../12345/index.html">⚡ 12345</a>
     <a href="../18888/index.html">🏦 18888</a>
@@ -81,6 +83,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
 <main class="kgen-page">
 <div class="kgen-wrap">
+
+  <div id="civ-hud"></div>
+  <div id="npc-panel"></div>
+  <canvas id="cosmic-map" class="kgen-cosmic-map"></canvas>
 
   <!-- Hero -->
   <div class="autolp-hero">
@@ -119,6 +125,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
   <!-- LP Status -->
   <div class="kgen-section-head"><h2>💧 LP 流動性狀態</h2></div>
   <div class="kgen-card">
+    <div class="kgen-lp-anim-bar"><div class="kgen-lp-anim-fill" id="lp-anim-fill" style="width:62%;"></div></div>
     <table class="kgen-table">
       <thead><tr><th>項目</th><th>數值</th><th>說明</th></tr></thead>
       <tbody>
@@ -198,15 +205,37 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
 <div class="kgen-status-bar">
   <div class="kgen-status-dot"></div>
-  <span id="kgen-status-bottom">18921 斬妖台 Auto LP V0.1 · 原型</span>
+  <span id="kgen-status-bottom">18921 斬妖台 Auto LP V1.0 · Universe Runtime</span>
 </div>
+<div id="universe-dock"></div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/physics.js"></script>
+<script src="../../modules/universe-runtime/status-bus.js"></script>
+<script src="../../modules/universe-runtime/wallet.js"></script>
+<script src="../../modules/universe-runtime/camera.js"></script>
+<script src="../../modules/universe-runtime/audio.js"></script>
+<script src="../../modules/universe-runtime/animation.js"></script>
+<script src="../../modules/universe-runtime/universe-map.js"></script>
+<script src="../../modules/universe-runtime/npc.js"></script>
+<script src="../../modules/universe-runtime/civilization.js"></script>
+<script src="../../modules/universe-runtime/chain-read.js"></script>
+<script src="../../modules/universe-runtime/bootstrap.js"></script>
 <script>
 (function(){
-  var status = new KGEN_StatusBus('kgen-status-text');
+  KGEN_UNIVERSE_RUNTIME.boot({
+    nodeId: '18921',
+    statusElementId: 'kgen-status-text',
+    universeDockId: 'universe-dock',
+    npcContainerId: 'npc-panel',
+    civContainerId: 'civ-hud',
+    cosmicMapCanvasId: 'cosmic-map',
+    walletButtonId: 'btn-wallet',
+  }).then(initPage);
 
-  /* === Mock log entries === */
+  function initPage() {
+  var status = KGEN_UNIVERSE_STATUS_BUS.domBus || new KGEN_StatusBus('kgen-status-text');
+
   var LOG = [
     { ts: '07-04 13:42', msg: 'Auto LP 路由', amt: '+18.5 KGEN' },
     { ts: '07-04 12:31', msg: 'Reward 分配',  amt: '+9.25 KGEN' },
@@ -214,47 +243,56 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     { ts: '07-04 10:20', msg: 'Burn 銷毀',    amt: '−37.0 KGEN' },
     { ts: '07-04 09:08', msg: 'Bank 入庫',    amt: '+37.0 KGEN' },
   ];
-
   var logEl = document.getElementById('lp-log');
-  if(logEl){
-    var html = '';
-    LOG.forEach(function(l){
-      var isNeg = l.amt.startsWith('−');
-      html += '<div class="log-entry">'
-        + '<span class="log-ts">' + l.ts + '</span>'
-        + '<span class="log-msg">' + l.msg + '</span>'
-        + '<span class="log-amt" style="color:' + (isNeg ? '#ff4444' : '#7cffc5') + ';">' + l.amt + '</span>'
-        + '</div>';
-    });
-    logEl.innerHTML = html;
+  if (logEl) {
+    logEl.innerHTML = LOG.map(function(l) {
+      var isNeg = l.amt.indexOf('−') === 0;
+      return '<div class="log-entry"><span class="log-ts">' + l.ts + '</span><span class="log-msg">' + l.msg + '</span><span class="log-amt" style="color:' + (isNeg ? '#ff4444' : '#7cffc5') + ';">' + l.amt + '</span></div>';
+    }).join('');
   }
 
-  /* === Universe nodes === */
+  function refreshLP() {
+    KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
+      if (!r) return;
+      var rk = document.getElementById('lp-res-kgen');
+      var rb = document.getElementById('lp-res-bnb');
+      var tvl = document.getElementById('lp-tvl');
+      var tvl2 = document.getElementById('lp-tvl-2');
+      var fill = document.getElementById('lp-anim-fill');
+      if (rk) rk.textContent = r.reserve0 + ' KGEN';
+      if (rb) rb.textContent = r.reserve1 + ' BNB';
+      if (tvl) tvl.textContent = '$' + r.tvlEstimate;
+      if (tvl2) tvl2.textContent = '$' + r.tvlEstimate;
+      if (fill) fill.style.width = Math.min(95, 30 + parseFloat(r.tvlEstimate) / 500) + '%';
+    });
+  }
+  refreshLP();
+  setInterval(refreshLP, 30000);
+
+  var animPct = 62;
+  setInterval(function() {
+    animPct = 55 + Math.floor(Math.random() * 35);
+    var fill = document.getElementById('lp-anim-fill');
+    if (fill) fill.style.width = animPct + '%';
+  }, 4000);
+
   var nodesEl = document.getElementById('universe-nodes');
-  if(nodesEl && window.KGEN_5D){
+  if (nodesEl && KGEN_UNIVERSE_MAP.nodes) {
     var nodeHtml = '';
-    Object.keys(KGEN_5D.NODES).forEach(function(id){
-      if(id === '18921') return;
-      var n = KGEN_5D.NODES[id];
-      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+    Object.keys(KGEN_UNIVERSE_MAP.nodes).forEach(function(id) {
+      if (id === '18921') return;
+      var n = KGEN_UNIVERSE_MAP.nodes[id];
+      var href = n.url || '#';
+      if (href.indexOf('K線西遊記/') === 0) href = '../../' + href.replace('K線西遊記/', '');
+      nodeHtml += '<a href="' + href + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
         + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
-        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
-        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
-        + '</a>';
+        + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div></a>';
     });
     nodesEl.innerHTML = nodeHtml;
   }
 
-  /* === Animate LP stats === */
-  setInterval(function(){
-    var routed = document.getElementById('lp-routed');
-    if(routed){
-      var v = 500 + Math.floor(Math.random()*100);
-      routed.textContent = v + ' KGEN';
-    }
-  }, 10000);
-
-  status.push('18921 斬妖台 Auto LP V0.1 已啟動');
+  status.push('18921 斬妖台 Auto LP V1.0 · Universe Runtime');
+  }
 })();
 </script>
 </body>

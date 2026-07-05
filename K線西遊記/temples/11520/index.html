@@ -3,16 +3,17 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-11520-EXCHANGE-UI
-VERSION: V0.1 / 5D Genesis Prototype
-BUILD: 20260704-11520-EXCHANGE-V0.1
+VERSION: V1.0 / Universe Runtime
+BUILD: 20260704-11520-EXCHANGE-V1.0
 BIRTH: 2026-07-04
 ROLE: 花果山悟空交易所 / Universe Exchange / 土地交易所入口
 STATUS: PROTOTYPE — 前端原型，不接真交易合約
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>11520 花果山悟空交易所｜KGEN Universe Exchange V0.1</title>
+<title>11520 花果山悟空交易所｜KGEN Universe Exchange V1.0</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<link rel="stylesheet" href="../../modules/universe-runtime/universe-runtime.css">
 <style>
 /* === 11520 交易所主題：青色 K線宇宙 === */
 :root {
@@ -120,9 +121,10 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 <header class="kgen-hud">
   <div>
     <div class="kgen-hud-title">🌿 11520 花果山悟空交易所</div>
-    <div class="kgen-hud-ver" id="kgen-status-text">Universe Exchange V0.1 | Prototype</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">Universe Exchange V1.0</div>
   </div>
   <nav class="kgen-hud-nav">
+    <button type="button" class="kgen-btn kgen-btn-sm" id="btn-wallet" style="margin-right:8px;">🔗 錢包</button>
     <a href="../../index.html">🌌 星系</a>
     <a href="../12345/index.html">⚡ 12345 神殿</a>
     <a href="../16888/index.html">🌙 16888</a>
@@ -134,14 +136,18 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 <main class="kgen-page">
 <div class="kgen-wrap">
 
+  <div id="civ-hud"></div>
+  <div id="npc-panel"></div>
+  <canvas id="cosmic-map" class="kgen-cosmic-map"></canvas>
+
   <!-- Hero -->
   <div class="ex-hero">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
       <div>
         <div style="font-size:26px;font-weight:950;color:var(--kgen-cyan);">花果山悟空交易所</div>
-        <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">Universe Exchange V0.1 · 11520 · KGEN 宇宙第一交易所</div>
+        <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">Universe Exchange V1.0 · 11520 · KGEN 宇宙第一交易所</div>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-          <span class="kgen-pill cyan">PROTOTYPE</span>
+          <span class="kgen-pill cyan">V1.0</span>
           <span class="kgen-pill gold">BSC · Chain 56</span>
           <span class="kgen-pill">前端原型 · 不接真合約</span>
         </div>
@@ -170,7 +176,7 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
       </div>
       <div class="kgen-kpi">
         <div class="k">LP TVL (模擬)</div>
-        <div class="v" style="font-size:16px;">$88,888</div>
+        <div class="v" id="ex-lp-tvl">讀取中…</div>
         <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">KGEN/WBNB</div>
       </div>
     </div>
@@ -283,13 +289,37 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 
 <div class="kgen-status-bar">
   <div class="kgen-status-dot"></div>
-  <span id="kgen-status-bottom">11520 花果山交易所 V0.1 · 原型</span>
+  <span id="kgen-status-bottom">11520 花果山交易所 V1.0 · Universe Runtime</span>
 </div>
+<div id="universe-dock"></div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/physics.js"></script>
+<script src="../../modules/universe-runtime/status-bus.js"></script>
+<script src="../../modules/universe-runtime/wallet.js"></script>
+<script src="../../modules/universe-runtime/camera.js"></script>
+<script src="../../modules/universe-runtime/audio.js"></script>
+<script src="../../modules/universe-runtime/animation.js"></script>
+<script src="../../modules/universe-runtime/universe-map.js"></script>
+<script src="../../modules/universe-runtime/npc.js"></script>
+<script src="../../modules/universe-runtime/civilization.js"></script>
+<script src="../../modules/universe-runtime/chain-read.js"></script>
+<script src="../../modules/universe-runtime/bootstrap.js"></script>
 <script>
 (function(){
-  var status = new KGEN_StatusBus('kgen-status-text');
+  KGEN_UNIVERSE_RUNTIME.boot({
+    nodeId: '11520',
+    statusElementId: 'kgen-status-text',
+    universeDockId: 'universe-dock',
+    npcContainerId: 'npc-panel',
+    civContainerId: 'civ-hud',
+    cosmicMapCanvasId: 'cosmic-map',
+    walletButtonId: 'btn-wallet',
+    onWalletConnected: refreshLP,
+  }).then(initPage);
+
+  function initPage() {
+  var status = KGEN_UNIVERSE_STATUS_BUS.domBus || new KGEN_StatusBus('kgen-status-text');
 
   /* === Mini hero bars === */
   function renderHeroBars(){
@@ -408,51 +438,57 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
     document.getElementById('est-kgen').textContent = bnb > 0 ? (Number(est).toLocaleString() + ' KGEN') : '-- KGEN';
   });
 
-  /* === Land listing === */
-  var LAND = KGEN_5D ? [] : [];
-  try {
-    var landData = [
-      { landId: 'FL-001', owner: '0xaBcD…1234', areaM2: 20.72, price: 888, status: 'listed' },
-      { landId: 'FL-002', owner: '0xEf01…5678', areaM2: 10.36, price: 444, status: 'listed' },
-      { landId: 'FL-003', owner: '—',           areaM2: 15.54, price: null, status: 'available' },
-      { landId: 'FL-004', owner: '0x1A2B…abcd', areaM2: 31.08, price: 1288, status: 'listed' },
-    ];
+  /* === Land listing from world map === */
+  function renderLand() {
+    var land = (KGEN_UNIVERSE_MAP.landData && KGEN_UNIVERSE_MAP.landData['11520_demo']) || [];
     var listEl = document.getElementById('land-listing');
-    if(listEl){
-      var html = '';
-      landData.forEach(function(l){
-        var statusBadge = l.status === 'listed'
-          ? '<span class="kgen-pill gold" style="font-size:11px;padding:3px 7px;">' + l.price + ' KGEN</span>'
-          : '<span class="kgen-pill green" style="font-size:11px;padding:3px 7px;">可購入</span>';
-        html += '<div class="land-row">'
-          + '<span class="land-id">' + l.landId + '</span>'
-          + '<span class="land-owner">' + l.owner + '</span>'
-          + '<span class="land-area">' + l.areaM2 + ' m²</span>'
-          + '<span class="land-status">' + statusBadge + '</span>'
-          + '</div>';
-      });
-      listEl.innerHTML = html;
-    }
-  } catch(e){}
+    if (!listEl) return;
+    var html = '';
+    land.forEach(function(l) {
+      var statusBadge = l.status === 'listed'
+        ? '<span class="kgen-pill gold" style="font-size:11px;padding:3px 7px;">' + l.price + ' KGEN</span>'
+        : '<span class="kgen-pill green" style="font-size:11px;padding:3px 7px;">可購入</span>';
+      html += '<div class="land-row">'
+        + '<span class="land-id">' + l.landId + '</span>'
+        + '<span class="land-owner">' + l.owner + '</span>'
+        + '<span class="land-area">' + l.areaM2 + ' m²</span>'
+        + '<span class="land-status">' + statusBadge + '</span>'
+        + '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+  renderLand();
+
+  function refreshLP() {
+    KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
+      if (!r) return;
+      var tvl = document.getElementById('ex-lp-tvl');
+      if (tvl) tvl.textContent = '$' + r.tvlEstimate;
+    });
+  }
+  refreshLP();
+  setInterval(refreshLP, 30000);
 
   /* === Universe nodes === */
   var nodesEl = document.getElementById('universe-nodes');
-  if(nodesEl && window.KGEN_5D){
+  if (nodesEl && KGEN_UNIVERSE_MAP.nodes) {
     var nodeHtml = '';
-    var nodes = KGEN_5D.NODES;
-    Object.keys(nodes).forEach(function(id){
-      if(id === '11520') return;
-      var n = nodes[id];
-      nodeHtml += '<a href="' + n.url + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
+    Object.keys(KGEN_UNIVERSE_MAP.nodes).forEach(function(id) {
+      if (id === '11520') return;
+      var n = KGEN_UNIVERSE_MAP.nodes[id];
+      var href = n.url || '#';
+      if (href.indexOf('K線西遊記/') === 0) href = '../../' + href.replace('K線西遊記/', '');
+      nodeHtml += '<a href="' + href + '" class="kgen-card" style="border-color:' + n.color + '44;display:block;">'
         + '<div style="font-size:11px;font-family:var(--kgen-mono);color:' + n.color + ';">' + id + '</div>'
         + '<div style="font-weight:950;font-size:15px;margin-top:4px;">' + n.name + '</div>'
-        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + n.label + '</div>'
+        + '<div style="font-size:12px;color:var(--kgen-muted);margin-top:3px;">' + (n.subtitle || '') + '</div>'
         + '</a>';
     });
     nodesEl.innerHTML = nodeHtml;
   }
 
-  status.push('11520 花果山交易所 V0.1 已啟動 · 行情同步中');
+  status.push('11520 花果山交易所 V1.0 · Universe Runtime');
+  }
 })();
 </script>
 </body>

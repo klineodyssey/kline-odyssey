@@ -1,30 +1,30 @@
-# KGEN 5D 遊戲工程架構文件 V0.1
+# KGEN 5D 遊戲工程架構文件 V1.0
 
 ## 概述
 
-KGEN 5D 遊戲工程是 KLINE Odyssey 的大型宇宙遊戲系統，以 KGEN Universe 物理法則（`docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`）為世界觀，連結所有神殿節點，建立完整的 Web3 × 金融 × 敘事遊戲原型。
+KGEN 5D 遊戲工程以 **Universe Runtime V1.0** 為唯一共用執行時，連結所有神殿節點。
 
 ## 系統架構
 
 ```
 K線西遊記/
 ├── modules/
-│   ├── kgen-game-core.js     ← 共用 JS 核心（錢包、行情、工具）
-│   ├── kgen-game-core.css    ← 共用 CSS 設計系統
-│   └── kgen-land-engine.js   ← 土地地籍引擎（既有）
+│   ├── kgen-game-core.js          ← 共用底層（錢包、行情）
+│   ├── kgen-game-core.css
+│   └── universe-runtime/          ← Universe Runtime V1.0（唯一 Runtime）
+│       ├── bootstrap.js           ← KGEN_UNIVERSE_RUNTIME
+│       ├── physics.js, wallet.js, camera.js, ...
+│       └── universe-runtime.css
 ├── data/
-│   └── kgen-5d-world-map.json  ← 世界地圖資料結構
+│   └── kgen-5d-world-map.json     ← 單一世界地圖資料源 V1.0
 ├── game/
-│   ├── kline-5d/
-│   │   └── index.html        ← K線5D峽谷推塔戰 V0.1
-│   └── README_5D_GAME.md
+│   └── kline-5d/
+│       ├── index.html
+│       └── kline-5d-game-engine.js ← 5D 遊戲引擎 V1.0
 └── temples/
-    ├── 12345/  ← 悟空財神殿（既有）
-    ├── 11520/  ← 花果山悟空交易所（新）
-    ├── 108000/ ← 火星齊天豪宅席位（既有+整合）
-    ├── 18888/  ← 靈霄寶殿神明銀行（新）
-    ├── 18921/  ← 斬妖台 Auto LP（新）
-    └── 16888/  ← 廣寒宮（既有）
+    ├── 12345/  ← LIVE（runtime-main 不動）
+    ├── 11520/  ← V1.0 + Universe Runtime
+    ...
 ```
 
 ## 宇宙節點清單

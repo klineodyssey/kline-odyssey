@@ -1,20 +1,19 @@
-# README — AI First (12345 Runtime Core V2.0 + 5D System V0.1)
+# README — AI First (12345 Runtime Core V2.0 + 5D System V1.0)
 
-## 5D 新增系統（2026-07-04）
+## 5D Universe Runtime V1.0（2026-07-04）
 
-| 新增 | 路徑 |
+| 項目 | 路徑 |
 |------|------|
+| **Universe Runtime** | `K線西遊記/modules/universe-runtime/` |
 | 11520 花果山交易所 | `K線西遊記/temples/11520/index.html` |
 | 18888 靈霄寶殿神明銀行 | `K線西遊記/temples/18888/index.html` |
 | 18921 斬妖台 Auto LP | `K線西遊記/temples/18921/index.html` |
-| K線5D峽谷推塔戰 | `K線西遊記/game/kline-5d/index.html` |
-| 共用 CSS 核心 | `K線西遊記/modules/kgen-game-core.css` |
-| 共用 JS 核心 | `K線西遊記/modules/kgen-game-core.js` |
-| 世界地圖資料 | `K線西遊記/data/kgen-5d-world-map.json` |
-| 5D 遊戲說明 | `K線西遊記/game/README_5D_GAME.md` |
-| 5D 架構文件 | `docs/KGEN_5D_GAME_ARCHITECTURE.md` |
+| K線5D峽谷推塔戰 V1.0 | `K線西遊記/game/kline-5d/` + `kline-5d-game-engine.js` |
+| 共用 JS 核心 | `K線西遊記/modules/kgen-game-core.js` V1.0 |
+| 世界地圖資料 | `K線西遊記/data/kgen-5d-world-map.json` V1.0 |
+| Runtime 架構文件 | `docs/KGEN_UNIVERSE_RUNTIME_V1_0.md` |
 
-**12345 神殿本身未改動。** 新系統完全獨立，共用 kgen-game-core 而非 runtime-main。
+**12345 神殿 `runtime-main.js` 未改動。** 僅 `index.html` 新增 5D 宇宙導覽連結。
 
 ## Start Here
 
