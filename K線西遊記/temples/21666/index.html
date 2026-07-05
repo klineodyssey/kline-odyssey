@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>21666 佛光普照之地｜KGEN 5D Level Node V0.2</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+.temple-hero{background:linear-gradient(135deg,#fef08a22,transparent 60%),var(--kgen-panel);border:1px solid #fef08a55;border-radius:20px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.temple-hero::before{content:'21666';position:absolute;right:12px;top:4px;font-size:56px;font-weight:950;color:#fef08a15;font-family:var(--kgen-mono)}
+.play-btn{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+<header class="kgen-hud">
+  <div><div class="kgen-hud-title">✨ 21666 佛光普照之地</div>
+  <div class="kgen-hud-ver" id="kgen-status-text">Level Node V0.2 · Demo</div></div>
+  <nav class="kgen-hud-nav" id="hud-nav"></nav>
+</header>
+<main class="kgen-page"><div class="kgen-wrap">
+  <div class="temple-hero">
+    <div style="font-size:26px;font-weight:950;color:#fef08a">✨ 佛光普照之地</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">宇宙關卡節點 · 21666 · Production V0.2</div>
+    <div style="margin-top:10px"><span class="kgen-pill gold">PRODUCTION V0.2</span> <span class="kgen-pill">Demo 模式</span></div>
+    <p style="font-size:13px;line-height:1.65;color:var(--kgen-muted);margin-top:12px">佛光普照：淨化陰暗污染，恢復器官 HP。</p>
+    <button class="kgen-btn primary play-btn" id="play-btn">🎮 開始關卡試煉</button>
+    <div id="play-result" style="margin-top:10px;font-size:13px"></div>
+  </div>
+  <div class="kgen-section-head"><h2>🧙 NPC</h2></div>
+  <div class="kgen-card" id="npc-panel"></div>
+  <div class="kgen-section-head"><h2>📜 任務</h2></div>
+  <div class="kgen-card" id="quest-panel"></div>
+  <div class="kgen-section-head"><h2>💰 抵押</h2></div>
+  <div class="kgen-card"><div id="collateral-gauge"></div><p style="font-size:12px;color:var(--kgen-muted)">抵押：光明保證金 666 KGEN</p></div>
+  <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px" id="universe-nodes"></div>
+  <div class="kgen-notice" style="margin-top:14px">返回 <a href="../../index.html">Portal</a> · <a href="../12345/index.html">12345</a> · <a href="../../game/kline-5d/index.html">5D Game</a></div>
+</div></main>
+<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">21666 V0.2</span></div>
+<script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
+<script src="../../modules/universe-runtime/temple-shell.js"></script>
+<script>
+(function(){
+  var status = KGEN_TempleShell.init({
+    id: '21666', name: '佛光普照之地', entryCards: true,
+    npc: { avatar: '✨', name: '光明菩薩', role: '關卡守護', dialog: '佛光普照：淨化陰暗污染，恢復器官 HP。' },
+    quests: [
+      { title: '進入 佛光普照之地', desc: '完成關卡試煉', reward: '+100 KGEN', done: false },
+      { title: '返回 5D 戰場', desc: '帶回戰利品', reward: '技能點', done: false }
+    ],
+    onInit: function(s) {
+      KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'), 800, 600);
+      document.getElementById('play-btn').onclick = function() {
+        document.getElementById('play-result').innerHTML = '<span style="color:#7cffc5">✅ 試煉完成！獎勵 +100 KGEN</span>';
+        s.push('關卡試煉完成');
+      };
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>20888 火焰山｜Risk Arena V0.2</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+.hero{background:linear-gradient(180deg,rgba(255,69,0,.2),#0a0505);border:1px solid rgba(255,69,0,.5);border-radius:20px;padding:20px;margin-bottom:16px}
+.flame-arena{height:160px;border-radius:14px;background:linear-gradient(180deg,#1a0500,#3d0a00);position:relative;overflow:hidden;margin:12px 0}
+.flame-particle{position:absolute;bottom:0;width:8px;height:20px;background:orange;border-radius:50% 50% 0 0;animation:kgen-flame .8s infinite alternate}
+.burn-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:950;color:#ff4500;opacity:0;transition:opacity .3s}
+.burn-overlay.active{opacity:1;background:rgba(255,69,0,.3)}
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+<header class="kgen-hud">
+  <div><div class="kgen-hud-title">🔥 20888 火焰山</div>
+  <div class="kgen-hud-ver" id="kgen-status-text">Risk Arena V0.2</div></div>
+  <nav class="kgen-hud-nav" id="hud-nav"></nav>
+</header>
+<main class="kgen-page"><div class="kgen-wrap">
+  <div class="hero kgen-flame">
+    <div style="font-size:26px;font-weight:950;color:#ff4500">火焰山風險場</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">爆倉 · 清算 · 燃燒動畫 · 風險教育</div>
+    <div class="flame-arena" id="flame-arena">
+      <div class="burn-overlay" id="burn-overlay">🔥 爆倉清算！Organ 全燃燒分解！</div>
+    </div>
+    <div class="kgen-kpi-grid col3" style="margin-top:10px">
+      <div class="kgen-kpi"><div class="k">槓桿</div><div class="v red" id="leverage">10x</div></div>
+      <div class="kgen-kpi"><div class="k">保證金率</div><div class="v" id="margin-pct">85%</div></div>
+      <div class="kgen-kpi"><div class="k">KGEN 稅率</div><div class="v cyan">0.30% 鎖死</div></div>
+    </div>
+    <button class="kgen-btn danger full" style="margin-top:12px" id="btn-liquidate">模擬爆倉清算</button>
+    <button class="kgen-btn" style="margin-top:8px;width:100%" id="btn-risk-down">降低槓桿</button>
+  </div>
+
+  <div class="kgen-card" id="npc-panel"></div>
+
+  <div class="kgen-section-head"><h2>⚠️ KGEN 稅率不可改</h2></div>
+  <div class="kgen-notice red">
+    KGEN Token 稅率 <strong>0.30%</strong> 已鎖死在 bytecode（constant bps），無任何 setter。
+    DappBay 顯示「Can Modify Tax」為 heuristics 誤判。詳見 docs/KGEN_TAX_IMMUTABILITY.md。
+    <strong>不得為 DappBay 重新開 tax setter 或重新部署 token。</strong>
+  </div>
+
+  <div class="kgen-section-head"><h2>📚 風險教育</h2></div>
+  <div class="kgen-card" style="font-size:13px;line-height:1.7">
+    <p>🔥 <strong>爆倉</strong>：槓桿過高 + K 線逆勢 → 保證金歸零</p>
+    <p>💀 <strong>清算</strong>：18888 神明銀行觸發 Organ Decomposition</p>
+    <p>♻️ <strong>回收</strong>：燃燒後模組回流 11520 交易所</p>
+  </div>
+
+  <div id="universe-nodes" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px"></div>
+</div></main>
+<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">20888 V0.2</span></div>
+<script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
+<script>
+(function(){
+  var status=new KGEN_StatusBus('kgen-status-text');
+  document.getElementById('hud-nav').innerHTML=KGEN_TempleHub.navLinks('20888',2);
+  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'),{avatar:'🪭',name:'鐵扇公主',role:'火焰山守護',dialog:'槓桿太高？一把火燒光你的器官！'});
+  KGEN_TempleHub.renderEntryCards(document.getElementById('universe-nodes'),'20888');
+  var arena=document.getElementById('flame-arena');
+  for(var i=0;i<20;i++){var p=document.createElement('div');p.className='flame-particle';p.style.left=(Math.random()*100)+'%';p.style.animationDelay=(Math.random())+'s';arena.appendChild(p);}
+  var lev=10,margin=85;
+  document.getElementById('btn-liquidate').onclick=function(){
+    document.getElementById('burn-overlay').classList.add('active');
+    KGEN_TempleHub.showDecompositionOverlay('火焰山爆倉！全器官燃燒分解！');
+    status.push('爆倉清算動畫');
+    setTimeout(function(){document.getElementById('burn-overlay').classList.remove('active');},3000);
+  };
+  document.getElementById('btn-risk-down').onclick=function(){
+    lev=Math.max(1,lev-2); margin=Math.min(200,margin+15);
+    document.getElementById('leverage').textContent=lev+'x';
+    document.getElementById('margin-pct').textContent=margin+'%';
+    status.push('槓桿降至 '+lev+'x');
+  };
+  KGEN_Wallet.demoMode=true; status.push('20888 火焰山 V0.2 已啟動');
+})();
+</script>
+</body>
+</html>

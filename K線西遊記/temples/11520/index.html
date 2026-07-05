@@ -3,7 +3,7 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-11520-EXCHANGE-UI
-VERSION: V0.1 / 5D Genesis Prototype
+VERSION: V0.2 / Production Build
 BUILD: 20260704-11520-EXCHANGE-V0.1
 BIRTH: 2026-07-04
 ROLE: 花果山悟空交易所 / Universe Exchange / 土地交易所入口
@@ -11,7 +11,7 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>11520 花果山悟空交易所｜KGEN Universe Exchange V0.1</title>
+<title>11520 花果山悟空交易所｜KGEN Organ Exchange V0.2</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
 <style>
 /* === 11520 交易所主題：青色 K線宇宙 === */
@@ -248,6 +248,33 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
     </div>
   </div>
 
+  <!-- Depth Chart -->
+  <div class="kgen-section-head"><h2>📊 Depth 深度圖</h2></div>
+  <div class="kgen-card" style="padding:12px"><canvas id="depth-canvas" width="600" height="80" style="width:100%;border-radius:10px;background:var(--kgen-bg2)"></canvas></div>
+
+  <!-- LP 模擬 -->
+  <div class="kgen-section-head"><h2>💧 LP 流動性模擬</h2></div>
+  <div class="kgen-card">
+    <div class="kgen-kpi-grid col3">
+      <div class="kgen-kpi"><div class="k">Pair</div><div class="v" style="font-size:14px">KGEN/WBNB</div></div>
+      <div class="kgen-kpi"><div class="k">Reserve KGEN</div><div class="v" id="lp-kgen">4,200,000</div></div>
+      <div class="kgen-kpi"><div class="k">Reserve BNB</div><div class="v cyan" id="lp-bnb">50.4</div></div>
+    </div>
+    <button class="kgen-btn cyan full" style="margin-top:10px" id="btn-add-lp">模擬添加流動性</button>
+  </div>
+
+  <!-- Organ / NFT 交易所 -->
+  <div class="kgen-section-head"><h2>🫀 Organ / App 上架交易所</h2>
+    <span class="kgen-sub">App=Organism · Module=Organ</span>
+  </div>
+  <div class="kgen-card">
+    <div class="kgen-card" id="npc-panel" style="margin-bottom:12px;padding:12px"></div>
+    <div id="organ-table"></div>
+    <div id="collateral-gauge" style="margin-top:12px"></div>
+    <button class="kgen-btn primary full" style="margin-top:10px" id="btn-list-organ">上架 App / Organ（模擬）</button>
+    <button class="kgen-btn danger full" style="margin-top:8px" id="btn-decomp">保證金不足 → Organ Decomposition</button>
+  </div>
+
   <!-- 土地交易所 -->
   <div class="kgen-section-head"><h2>🗺️ 神殿土地地籍交易所</h2>
     <span class="kgen-sub">連結 12345 土地地籍 · 原型展示</span>
@@ -287,9 +314,13 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 </div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
 <script>
 (function(){
   var status = new KGEN_StatusBus('kgen-status-text');
+  var hudNav = document.querySelector('.kgen-hud-nav');
+  if (hudNav && KGEN_TempleHub) hudNav.innerHTML = KGEN_TempleHub.navLinks('11520', 2);
 
   /* === Mini hero bars === */
   function renderHeroBars(){
@@ -452,7 +483,23 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
     nodesEl.innerHTML = nodeHtml;
   }
 
-  status.push('11520 花果山交易所 V0.1 已啟動 · 行情同步中');
+  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'), { avatar:'🐵', name:'神猴交易員', role:'11520 Organ Exchange', dialog:'上架 App（Organism）或 Module（Organ）需抵押保證金。不足則分解！' });
+  KGEN_OrganEconomy.renderOrganTable(document.getElementById('organ-table'));
+  KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'), 1500, 1100);
+  document.getElementById('btn-list-organ').onclick = function(){ status.push('模擬上架 Organ · 抵押 500 KGEN'); };
+  document.getElementById('btn-decomp').onclick = function(){ KGEN_TempleHub.showDecompositionOverlay('11520：保證金不足！Organ Decomposition'); };
+  document.getElementById('btn-add-lp').onclick = function(){ status.push('模擬添加 LP 流動性 +1000 KGEN'); };
+  function renderDepth(mid) {
+    var c = document.getElementById('depth-canvas');
+    if (!c || !KGEN_depthChart) return;
+    c.width = c.offsetWidth || 600;
+    var bids = [], asks = [];
+    for (var i = 0; i < 8; i++) { bids.push({q:Math.random()*5+1}); asks.push({q:Math.random()*5+1}); }
+    KGEN_depthChart(c, bids, asks, mid);
+  }
+  KGEN_KlineFeed.fetch('BNBUSDT').then(function(d){ renderDepth(d.price); });
+  KGEN_Wallet.demoMode = true;
+  status.push('11520 花果山交易所 V0.2 Production 已啟動');
 })();
 </script>
 </body>

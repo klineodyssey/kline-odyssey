@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>8895 八戒雲棧洞｜KGEN Cloud Inn V0.2</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+.hero{background:linear-gradient(135deg,rgba(249,168,212,.12),transparent),var(--kgen-panel);border:1px solid rgba(249,168,212,.35);border-radius:20px;padding:20px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+<header class="kgen-hud">
+  <div><div class="kgen-hud-title">🐷 8895 八戒雲棧洞</div>
+  <div class="kgen-hud-ver" id="kgen-status-text">雲棧洞 V0.2 · Demo</div></div>
+  <nav class="kgen-hud-nav" id="hud-nav"></nav>
+</header>
+<main class="kgen-page"><div class="kgen-wrap">
+  <div class="hero">
+    <div style="font-size:26px;font-weight:950;color:#f9a8d4">八戒雲棧洞</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">地下金融 · 器官抵押 · 與 8888 / 11520 連動</div>
+  </div>
+  <div class="kgen-card" id="npc-panel"></div>
+  <div class="kgen-section-head"><h2>📜 任務</h2></div>
+  <div class="kgen-card" id="quest-panel"></div>
+  <div class="kgen-section-head"><h2>🫀 器官抵押</h2></div>
+  <div class="kgen-card">
+    <div id="collateral-gauge"></div>
+    <div id="organ-table" style="margin-top:12px"></div>
+    <button class="kgen-btn danger full" style="margin-top:10px" id="btn-decomp">模擬保證金不足分解</button>
+  </div>
+  <div class="kgen-section-head"><h2>🔗 連動</h2></div>
+  <div class="kgen-card" style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="../8888/index.html" class="kgen-btn">🏡 8888 人民銀行</a>
+    <a href="../11520/index.html" class="kgen-btn cyan">🌿 11520 交易所</a>
+    <a href="../../game/kline-5d/index.html" class="kgen-btn primary">🎮 5D 遊戲</a>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px" id="universe-nodes"></div>
+</div></main>
+<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">8895 V0.2</span></div>
+<script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
+<script src="../../modules/universe-runtime/temple-shell.js"></script>
+<script>
+KGEN_TempleShell.init({
+  id:'8895', name:'八戒雲棧洞', entryCards:true,
+  npc:{avatar:'🐷',name:'豬八戒',role:'雲棧洞主人',dialog:'俺老豔抵押器官換 KGEN！保證金不夠就分解，回流 11520！'},
+  quests:[
+    {title:'還清借金',desc:'從 8888 借的 KGEN 要還',reward:'+50 KGEN',done:false},
+    {title:'上架 Organ',desc:'在 11520 上架模組',reward:'交易費減免',done:false}
+  ],
+  onInit:function(s){
+    KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'),500,550);
+    KGEN_OrganEconomy.renderOrganTable(document.getElementById('organ-table'));
+    document.getElementById('btn-decomp').onclick=function(){
+      KGEN_TempleHub.showDecompositionOverlay('八戒雲棧：保證金不足！Organ Decomposition');
+      s.push('器官分解動畫觸發');
+    };
+  }
+});
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-18921-AUTOLP-UI
-VERSION: V0.1 / 5D Genesis Prototype
+VERSION: V0.2 / Production Build
 BUILD: 20260704-18921-AUTOLP-V0.1
 BIRTH: 2026-07-04
 ROLE: 斬妖台 Auto LP 儀表板 / 稅收分配 / LP Status
@@ -165,6 +165,23 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     </div>
   </div>
 
+  <!-- Auto LP 遊戲玩法 V0.2 -->
+  <div class="kgen-section-head"><h2>🎮 Auto LP 遊戲 · 斬妖淨化</h2></div>
+  <div class="kgen-card">
+    <div id="npc-panel" style="margin-bottom:12px"></div>
+    <div class="kgen-kpi-grid col4">
+      <div class="kgen-kpi"><div class="k">APR（模擬）</div><div class="v green" id="apr">12.5%</div></div>
+      <div class="kgen-kpi"><div class="k">LP 能量</div><div class="v" id="lp-energy">1,888</div></div>
+      <div class="kgen-kpi"><div class="k">妖氣</div><div class="v red" id="demon-qi">35%</div></div>
+      <div class="kgen-kpi"><div class="k">保證金</div><div class="v cyan" id="lp-margin">OK</div></div>
+    </div>
+    <input type="number" placeholder="投入 KGEN" id="lp-kgen-in" style="width:100%;padding:10px;margin-top:10px;background:var(--kgen-bg2);border:1px solid var(--kgen-line);border-radius:10px;color:#fff" />
+    <input type="number" placeholder="投入 BNB" id="lp-bnb-in" style="width:100%;padding:10px;margin-top:8px;background:var(--kgen-bg2);border:1px solid var(--kgen-line);border-radius:10px;color:#fff" />
+    <button class="kgen-btn primary full" style="margin-top:10px" id="btn-forge-lp">⚔️ 斬妖鍛造 LP</button>
+    <button class="kgen-btn danger full" style="margin-top:8px" id="btn-slay">妖氣過高 · 斬妖動畫</button>
+    <div id="collateral-gauge" style="margin-top:12px"></div>
+  </div>
+
   <!-- 斬妖台原則 -->
   <div class="kgen-section-head"><h2>⚔️ 斬妖台原則</h2></div>
   <div class="kgen-card">
@@ -198,13 +215,34 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
 <div class="kgen-status-bar">
   <div class="kgen-status-dot"></div>
-  <span id="kgen-status-bottom">18921 斬妖台 Auto LP V0.1 · 原型</span>
+  <span id="kgen-status-bottom">18921 斬妖台 Auto LP V0.2 · Production</span>
 </div>
 
 <script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
 <script>
 (function(){
   var status = new KGEN_StatusBus('kgen-status-text');
+  var hudNav = document.querySelector('.kgen-hud-nav');
+  if (hudNav && KGEN_TempleHub) hudNav.innerHTML = KGEN_TempleHub.navLinks('18921', 2);
+  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'), { avatar:'⚔️', name:'斬妖將軍', role:'Auto LP Forge', dialog:'投入 KGEN/BNB 鍛造流動性。妖氣過高需斬妖淨化！保證金不足觸發器官分解。' });
+  KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'), 2500, 2000);
+  var demonQi = 35, lpEnergy = 1888;
+  document.getElementById('btn-forge-lp').onclick = function(){
+    var k = parseFloat(document.getElementById('lp-kgen-in').value)||0;
+    var b = parseFloat(document.getElementById('lp-bnb-in').value)||0;
+    lpEnergy += k + b*1000; demonQi = Math.max(0, demonQi - 5);
+    document.getElementById('lp-energy').textContent = lpEnergy.toLocaleString();
+    document.getElementById('demon-qi').textContent = demonQi + '%';
+    status.push('斬妖鍛造 LP +' + (k+b*1000) + ' 能量');
+  };
+  document.getElementById('btn-slay').onclick = function(){
+    demonQi = 0;
+    document.getElementById('demon-qi').textContent = '0%';
+    KGEN_TempleHub.showDecompositionOverlay('妖氣淨化！斬妖台發動！');
+    status.push('斬妖動畫觸發');
+  };
 
   /* === Mock log entries === */
   var LOG = [
@@ -231,7 +269,8 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
   /* === Universe nodes === */
   var nodesEl = document.getElementById('universe-nodes');
-  if(nodesEl && window.KGEN_5D){
+  if(nodesEl && KGEN_TempleHub) KGEN_TempleHub.renderEntryCards(nodesEl, '18921');
+  else if(nodesEl && window.KGEN_5D){
     var nodeHtml = '';
     Object.keys(KGEN_5D.NODES).forEach(function(id){
       if(id === '18921') return;
@@ -254,7 +293,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     }
   }, 10000);
 
-  status.push('18921 斬妖台 Auto LP V0.1 已啟動');
+  status.push('18921 斬妖台 Auto LP V0.2 Production 已啟動');
 })();
 </script>
 </body>

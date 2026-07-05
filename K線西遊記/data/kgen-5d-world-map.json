@@ -1,9 +1,10 @@
 {
-  "schema": "KGEN-5D-WORLD-MAP-V0.1",
-  "version": "V0.1",
-  "created": "2026-07-04",
+  "schema": "KGEN-5D-WORLD-MAP-V0.2",
+  "version": "V0.2",
+  "build": "PRODUCTION",
+  "created": "2026-07-05",
   "author": "PrimeForge / 樂天帝 ⌖",
-  "description": "KGEN 5D Universe — world map data for all temples and game nodes",
+  "description": "KGEN 5D Universe — complete world map for Production Build V0.2",
 
   "universe": {
     "id": "KGEN-PRIME-CIVILIZATION",
@@ -24,128 +25,149 @@
     "taxImmutable": true
   },
 
+  "organEconomy": {
+    "app": "Organism",
+    "module": "Organ",
+    "exchange": "11520",
+    "divineBank": "18888",
+    "undergroundBank": "8888",
+    "autoLpForge": "18921",
+    "decompositionRule": "collateral_ratio < 1.0 triggers Organ Decomposition animation; organs return to 11520 exchange pool"
+  },
+
   "nodes": {
     "12345": {
-      "id": "12345",
-      "name": "悟空財神殿",
-      "subtitle": "五指山財神殿 Heart V3.2.6",
-      "type": "Temple",
-      "role": "金融神殿 / 主基地",
-      "color": "#ffd778",
-      "coords": { "x": 0, "y": 0, "k": 0 },
-      "contracts": {
-        "heart": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
-        "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
-      },
-      "status": "LIVE",
-      "url": "K線西遊記/temples/12345/index.html",
-      "description": "KGEN 宇宙主神殿。發財金、整點心跳、轉日呼吸、還願、點燈。"
-    },
-    "11520": {
-      "id": "11520",
-      "name": "花果山悟空交易所",
-      "subtitle": "Universe Exchange V0.1",
-      "type": "Exchange",
-      "role": "宇宙交易所 / 土地交易所",
-      "color": "#00f2ff",
-      "coords": { "x": -1200, "y": 0, "k": -1200 },
-      "contracts": {
-        "brain": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6"
-      },
-      "status": "PROTOTYPE",
-      "url": "K線西遊記/temples/11520/index.html",
-      "description": "KGEN 宇宙第一交易所。KGEN / BNB / USDT 入口，土地地籍 listing，多宇宙資產交易入口。"
-    },
-    "108000": {
-      "id": "108000",
-      "name": "火星齊天豪宅",
-      "subtitle": "Mars Colony 500 Seats V1.0",
-      "type": "SeatSystem",
-      "role": "500 席位系統 / NFT 席位",
-      "color": "#ff5a1f",
-      "coords": { "x": 108000, "y": 0, "k": 108000 },
-      "contracts": {
-        "mars": "0x3529dbFbaD465C2269F8096879A1c298d5257298"
-      },
-      "status": "PROTOTYPE",
-      "url": "K線西遊記/temples/108000/index.html",
-      "description": "火星齊天豪宅席位系統。500 席位，編號、owner、status、price、rank 展示。"
-    },
-    "18888": {
-      "id": "18888",
-      "name": "靈霄寶殿神明銀行",
-      "subtitle": "Divine Bank V0.1",
-      "type": "Bank",
-      "role": "神明銀行 / Treasury / Reward",
-      "color": "#c084fc",
-      "coords": { "x": 18888, "y": 0, "k": 18888 },
-      "contracts": {
-        "treasury": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
-        "lingxiao": "0x0000000000000000000000000000000000000000"
-      },
-      "status": "PROTOTYPE",
-      "url": "K線西遊記/temples/18888/index.html",
-      "description": "神明銀行 UI。Treasury / Reward / Temple Reserve / LP Reserve。KGEN 稅率不可改說明。"
-    },
-    "18921": {
-      "id": "18921",
-      "name": "斬妖台 Auto LP",
-      "subtitle": "ZhanyaoTaxSplitter Auto LP V0.1",
-      "type": "AutoLP",
-      "role": "Auto LP 路由 / 稅收分配",
-      "color": "#7cffc5",
-      "coords": { "x": 18921, "y": 0, "k": 18921 },
-      "contracts": {
-        "taxSplitter": "0x0000000000000000000000000000000000000000",
-        "autoLPWallet": "0x0000000000000000000000000000000000000000"
-      },
-      "status": "PROTOTYPE",
-      "url": "K線西遊記/temples/18921/index.html",
-      "description": "斬妖台 Auto LP 儀表板。顯示 autolp wallet、LP status、pair、reserve、稅收路由說明。"
+      "id": "12345", "kIndex": 0, "nameZh": "悟空財神殿", "type": "Temple",
+      "route": "K線西遊記/temples/12345/index.html",
+      "gameplay": "Heart V3.2.6 / 發財金 / 整點心跳 / 轉日呼吸 / 還願",
+      "npc": "悟空財神", "economyRole": "多方基地 / 文明質量核心",
+      "collateralRole": "主神殿抵押樞紐", "organDecompositionRule": "Heart 不受分解；子模組可分解",
+      "status": "LIVE", "color": "#ffd778"
     },
     "16888": {
-      "id": "16888",
-      "name": "廣寒宮",
-      "subtitle": "飛碟控制中心 V3.7.12",
-      "type": "Temple",
-      "role": "宇宙金融生命體 / K線引擎",
-      "color": "#ff8d35",
-      "coords": { "x": 16888, "y": 0, "k": 16888 },
-      "contracts": {},
-      "status": "LIVE",
-      "url": "K線西遊記/temples/16888/index.html",
-      "description": "廣寒宮飛碟控制中心。K線宇宙引擎，BNB / BTC 走勢，宇宙地圖。"
+      "id": "16888", "kIndex": 16888, "nameZh": "廣寒宮", "type": "Temple",
+      "route": "K線西遊記/temples/16888/index.html",
+      "gameplay": "K線宇宙引擎 / BNB·BTC 走勢 / 飛碟控制 / 空方基地",
+      "npc": "嫦娥", "economyRole": "空方基地 / K線引擎",
+      "collateralRole": "觀測節點", "organDecompositionRule": "引擎模組超載可分解",
+      "status": "LIVE", "color": "#ff8d35"
+    },
+    "11520": {
+      "id": "11520", "kIndex": -1200, "nameZh": "花果山悟空交易所", "type": "Exchange",
+      "route": "K線西遊記/temples/11520/index.html",
+      "gameplay": "KGEN/BNB/USDT Swap 模擬 / Order Book / Depth / LP / Land / Organ 上架",
+      "npc": "神猴交易員", "economyRole": "Organ Exchange — App=Organism, Module=Organ 交易",
+      "collateralRole": "上架抵押保證金", "organDecompositionRule": "保證金不足 → Organ Decomposition → 模組回收",
+      "status": "PRODUCTION", "color": "#00f2ff"
+    },
+    "108000": {
+      "id": "108000", "kIndex": 108000, "nameZh": "火星齊天豪宅", "type": "SeatSystem",
+      "route": "K線西遊記/temples/108000/index.html",
+      "gameplay": "500 席位格子 / owner / rank / dividend / 火星基地入口 5D",
+      "npc": "齊天大聖火星分身", "economyRole": "NFT Seat / 分紅池",
+      "collateralRole": "席位保證金", "organDecompositionRule": "席位欠費可降級",
+      "status": "PRODUCTION", "color": "#ff5a1f"
+    },
+    "18888": {
+      "id": "18888", "kIndex": 18888, "nameZh": "靈霄寶殿神明銀行", "type": "Bank",
+      "route": "K線西遊記/temples/18888/index.html",
+      "gameplay": "Treasury / Reward / Reserve / 抵押 App·Organ·Module / 風險分級 / 清算說明",
+      "npc": "神明銀行長", "economyRole": "Divine Bank — 稅收 10% 歸集",
+      "collateralRole": "全宇宙抵押清算中心", "organDecompositionRule": "清算觸發器官分解動畫",
+      "status": "PRODUCTION", "color": "#c084fc"
+    },
+    "18921": {
+      "id": "18921", "kIndex": 18921, "nameZh": "斬妖台 Auto LP", "type": "AutoLP",
+      "route": "K線西遊記/temples/18921/index.html",
+      "gameplay": "Auto LP 遊戲 / 斬妖淨化 / KGEN·BNB 模擬投入 / APR 儀表",
+      "npc": "斬妖將軍", "economyRole": "Auto LP Forge — 稅收 5% LP 路由",
+      "collateralRole": "LP 保證金池", "organDecompositionRule": "妖氣過高或 LP 不足觸發分解",
+      "status": "PRODUCTION", "color": "#7cffc5"
+    },
+    "8888": {
+      "id": "8888", "kIndex": 8888, "nameZh": "高老莊人民銀行", "type": "Bank",
+      "route": "K線西遊記/temples/8888/index.html",
+      "gameplay": "人民銀行 / 地下錢莊 / 借貸抵押利息模擬 / 與 11520 連動",
+      "npc": "高老莊莊主", "economyRole": "Underground Bank / Treasury 源頭",
+      "collateralRole": "地下借貸抵押", "organDecompositionRule": "借貸逾期 → 器官抵押分解",
+      "status": "PRODUCTION", "color": "#e8b86d"
+    },
+    "8895": {
+      "id": "8895", "kIndex": 8895, "nameZh": "八戒雲棧洞", "type": "Bank",
+      "route": "K線西遊記/temples/8895/index.html",
+      "gameplay": "八戒 NPC / 器官抵押 / 雲棧借貸 / 保證金分解",
+      "npc": "豬八戒", "economyRole": "雲棧洞地下金融 / 與 8888 連動",
+      "collateralRole": "器官級抵押", "organDecompositionRule": "八戒雲棧保證金不足分解",
+      "status": "PRODUCTION", "color": "#f9a8d4"
+    },
+    "20888": {
+      "id": "20888", "kIndex": 20888, "nameZh": "火焰山", "type": "RiskArena",
+      "route": "K線西遊記/temples/20888/index.html",
+      "gameplay": "爆倉清算燃燒動畫 / KGEN 稅率不可改教育 / 風險遊戲化",
+      "npc": "鐵扇公主", "economyRole": "風險清算場",
+      "collateralRole": "高風險槓桿區", "organDecompositionRule": "爆倉即全器官燃燒分解",
+      "status": "PRODUCTION", "color": "#ff4500"
+    },
+    "21319": {
+      "id": "21319", "kIndex": 21319, "nameZh": "雷音寺", "type": "LevelNode",
+      "route": "K線西遊記/temples/21319/index.html",
+      "gameplay": "宇宙關卡節點 / 雷音試煉 / 任務",
+      "npc": "如來使者", "economyRole": "靈山前哨",
+      "collateralRole": "試煉押金", "organDecompositionRule": "試煉失敗押金分解",
+      "status": "PRODUCTION", "color": "#fde047"
+    },
+    "21520": {
+      "id": "21520", "kIndex": 21520, "nameZh": "大雄寶殿", "type": "LevelNode",
+      "route": "K線西遊記/temples/21520/index.html",
+      "gameplay": "大雄寶殿關卡 / 佛法任務",
+      "npc": "大雄法王", "economyRole": "中階聖地",
+      "collateralRole": "佛法抵押", "organDecompositionRule": "破戒分解",
+      "status": "PRODUCTION", "color": "#fbbf24"
+    },
+    "21666": {
+      "id": "21666", "kIndex": 21666, "nameZh": "佛光普照", "type": "LevelNode",
+      "route": "K線西遊記/temples/21666/index.html",
+      "gameplay": "佛光普照之地 / 淨化任務",
+      "npc": "光明菩薩", "economyRole": "淨化節點",
+      "collateralRole": "光明保證金", "organDecompositionRule": "陰暗污染觸發分解",
+      "status": "PRODUCTION", "color": "#fef08a"
+    },
+    "21888": {
+      "id": "21888", "kIndex": 21888, "nameZh": "恐懼女鬼", "type": "LevelNode",
+      "route": "K線西遊記/temples/21888/index.html",
+      "gameplay": "恐懼試煉 / 心理風險教育",
+      "npc": "恐懼女鬼", "economyRole": "恐懼關卡",
+      "collateralRole": "恐懼押金", "organDecompositionRule": "恐懼崩潰分解",
+      "status": "PRODUCTION", "color": "#a78bfa"
+    },
+    "22188": {
+      "id": "22188", "kIndex": 22188, "nameZh": "貪婪魔影", "type": "LevelNode",
+      "route": "K線西遊記/temples/22188/index.html",
+      "gameplay": "貪婪 Boss 戰 / 5D 遊戲 Boss 原型",
+      "npc": "貪婪魔影", "economyRole": "Boss 關卡",
+      "collateralRole": "貪婪槓桿", "organDecompositionRule": "貪婪爆倉全分解",
+      "status": "PRODUCTION", "color": "#6b21a8"
+    },
+    "23333": {
+      "id": "23333", "kIndex": 23333, "nameZh": "靈山", "type": "LevelNode",
+      "route": "K線西遊記/temples/23333/index.html",
+      "gameplay": "靈山終局 / 取經完成 / 宇宙歸一",
+      "npc": "靈山守門人", "economyRole": "終極聖地",
+      "collateralRole": "功德圓滿", "organDecompositionRule": "未圓滿不得入靈山",
+      "status": "PRODUCTION", "color": "#fcd34d"
     }
   },
 
   "game5d": {
-    "id": "KLINE-5D-GAME-V0.1",
+    "id": "KLINE-5D-GAME-V0.2",
     "name": "K線5D峽谷推塔戰",
     "type": "Game",
-    "status": "PROTOTYPE",
-    "url": "K線西遊記/game/kline-5d/index.html",
+    "status": "PRODUCTION",
+    "route": "K線西遊記/game/kline-5d/index.html",
+    "features": ["canyon","towers","waves","boss","npc","skills","equipment","quests","warp","hud","mobile","demo"],
     "factions": {
-      "bull": { "name": "多方陣營", "color": "#7cffc5", "base": "12345", "label": "Bull Faction" },
-      "bear": { "name": "空方陣營", "color": "#ff4444", "base": "16888", "label": "Bear Faction" }
-    },
-    "towers": [
-      { "id": "t1-bull", "name": "多方一塔", "side": "bull", "hp": 100, "maxHp": 100, "x": 5 },
-      { "id": "t2-bull", "name": "多方二塔", "side": "bull", "hp": 100, "maxHp": 100, "x": 22 },
-      { "id": "t1-bear", "name": "空方一塔", "side": "bear", "hp": 100, "maxHp": 100, "x": 75 },
-      { "id": "t2-bear", "name": "空方二塔", "side": "bear", "hp": 100, "maxHp": 100, "x": 92 }
-    ],
-    "kNodes": [
-      { "id": "kn-11520", "name": "11520 交易所", "type": "Exchange", "x": 35, "reward": "BNB Fee" },
-      { "id": "kn-18888", "name": "18888 銀行",   "type": "Bank",     "x": 50, "reward": "KGEN Reward" },
-      { "id": "kn-18921", "name": "18921 AutoLP",  "type": "AutoLP",   "x": 65, "reward": "LP Share" }
-    ]
-  },
-
-  "landData": {
-    "11520_demo": [
-      { "landId": "FL-001", "universeId": "11520", "owner": "0xaBcD...1234", "cells": [{"x":0,"y":0},{"x":1,"y":0},{"x":0,"y":1},{"x":1,"y":1}], "areaM2": 20.72, "price": 888, "status": "listed" },
-      { "landId": "FL-002", "universeId": "11520", "owner": "0xEf01...5678", "cells": [{"x":3,"y":2},{"x":4,"y":2}], "areaM2": 10.36, "price": 444, "status": "listed" },
-      { "landId": "FL-003", "universeId": "11520", "owner": "—",            "cells": [{"x":6,"y":0},{"x":7,"y":0},{"x":6,"y":1}], "areaM2": 15.54, "price": null, "status": "available" }
-    ]
+      "bull": { "name": "多方陣營", "color": "#7cffc5", "base": "12345" },
+      "bear": { "name": "空方陣營", "color": "#ff4444", "base": "16888" }
+    }
   }
 }

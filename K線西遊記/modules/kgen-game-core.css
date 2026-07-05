@@ -1,7 +1,6 @@
 /*
-KGEN Game Core CSS V0.1
+KGEN Game Core CSS V0.2 — Production Build
 Shared visual design system for all KGEN 5D temples and game UI.
-Pure CSS — no build required.
 */
 
 /* ===== CSS Variables ===== */
@@ -247,11 +246,75 @@ a { color: inherit; text-decoration: none; }
 .kgen-notice.cyan { border-color: var(--kgen-cyan); background: rgba(0,242,255,.08); }
 .kgen-notice.red { border-color: var(--kgen-red); background: rgba(255,68,68,.08); }
 
+/* ===== Collateral gauge ===== */
+.kgen-collateral-gauge { margin: 10px 0; }
+.kgen-cg-head, .kgen-cg-foot { display: flex; justify-content: space-between; font-size: 11px; color: var(--kgen-muted); margin-bottom: 4px; }
+
+/* ===== Entry cards ===== */
+.kgen-entry-card { display: block; transition: transform .15s; min-width: 0; }
+.kgen-entry-card:hover { transform: translateY(-2px); }
+.kgen-entry-id { font-size: 11px; font-family: var(--kgen-mono); font-weight: 900; }
+.kgen-entry-name { font-weight: 950; font-size: 15px; margin-top: 4px; }
+.kgen-entry-sub { font-size: 12px; color: var(--kgen-muted); margin-top: 3px; }
+
+/* ===== NPC ===== */
+.kgen-npc { display: flex; gap: 12px; padding: 14px; border: 1px solid var(--kgen-line-gold); border-radius: var(--kgen-r-lg); background: var(--kgen-panel2); }
+.kgen-npc-avatar { font-size: 36px; flex-shrink: 0; }
+.kgen-npc-name { font-weight: 950; color: var(--kgen-gold); }
+.kgen-npc-role { font-size: 11px; color: var(--kgen-muted); }
+.kgen-npc-dialog { font-size: 13px; margin-top: 6px; line-height: 1.55; }
+
+/* ===== Quest ===== */
+.kgen-quest-list { display: flex; flex-direction: column; gap: 8px; }
+.kgen-quest { padding: 10px 12px; border: 1px solid var(--kgen-line); border-radius: var(--kgen-r); background: var(--kgen-bg2); }
+.kgen-quest.done { opacity: .65; border-color: rgba(124,255,197,.3); }
+.kgen-quest-title { font-weight: 900; font-size: 13px; }
+.kgen-quest-desc { font-size: 12px; color: var(--kgen-muted); margin-top: 3px; }
+.kgen-quest-reward { font-size: 11px; color: var(--kgen-cyan); margin-top: 4px; }
+
+/* ===== Organ decomposition overlay ===== */
+.kgen-decomp-overlay { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.75); opacity: 0; pointer-events: none; transition: opacity .3s; }
+.kgen-decomp-overlay.active { opacity: 1; pointer-events: auto; }
+.kgen-decomp-box { text-align: center; padding: 30px; border: 2px solid #ff4444; border-radius: 20px; background: rgba(20,0,0,.9); animation: kgen-shake .5s; }
+.kgen-decomp-flash { font-size: 48px; animation: kgen-pulse 1s infinite; }
+.kgen-decomp-text { font-size: 18px; font-weight: 950; color: #ff4444; margin-top: 12px; }
+@keyframes kgen-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+@keyframes kgen-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+/* ===== 5D HUD panels ===== */
+.kgen-hud-5d { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; margin-bottom: 10px; }
+.kgen-hud-stat { text-align: center; padding: 8px 4px; border: 1px solid var(--kgen-line); border-radius: 10px; background: var(--kgen-bg2); font-size: 11px; }
+.kgen-hud-stat .v { font-size: 16px; font-weight: 950; color: var(--kgen-gold); font-family: var(--kgen-mono); }
+
+/* ===== Mobile touch controls ===== */
+.kgen-mobile-pad { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.kgen-touch-btn { padding: 16px 8px; border-radius: 12px; font-weight: 900; font-size: 13px; text-align: center; border: 1px solid; touch-action: manipulation; }
+.kgen-touch-buy { border-color: rgba(124,255,197,.5); background: rgba(124,255,197,.15); color: #7cffc5; }
+.kgen-touch-mid { border-color: rgba(255,215,120,.5); background: rgba(255,215,120,.12); color: var(--kgen-gold); }
+.kgen-touch-sell { border-color: rgba(255,68,68,.5); background: rgba(255,68,68,.15); color: #ff4444; }
+
+/* ===== Seat grid ===== */
+.kgen-seat-grid { display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 3px; }
+.kgen-seat-cell { aspect-ratio: 1; border-radius: 4px; font-size: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid var(--kgen-line); cursor: pointer; }
+.kgen-seat-owned { background: rgba(255,90,31,.35); border-color: rgba(255,90,31,.5); color: #ff8d35; }
+.kgen-seat-free { background: rgba(124,255,197,.1); color: var(--kgen-muted); }
+.kgen-seat-vip { background: rgba(255,215,120,.25); border-color: var(--kgen-gold-dim); color: var(--kgen-gold); }
+
+/* ===== Flame animation ===== */
+.kgen-flame { animation: kgen-flame 1.2s ease-in-out infinite alternate; }
+@keyframes kgen-flame { from { filter: brightness(1) hue-rotate(0deg); } to { filter: brightness(1.3) hue-rotate(15deg); } }
+
 /* ===== Mobile 390×844 ===== */
 @media (max-width: 430px) {
-  html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+  html, body { overflow-x: hidden !important; max-width: 100vw !important; width: 100% !important; }
   .kgen-kpi-grid.col3, .kgen-kpi-grid.col4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .kgen-hud-title { font-size: 13px; }
-  .kgen-wrap { padding: 0 10px 60px; }
+  .kgen-hud-title { font-size: 13px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+  .kgen-hud-nav { gap: 4px; }
+  .kgen-hud-nav a { font-size: 10px; padding: 3px 7px; }
+  .kgen-wrap { padding: 0 10px 60px; max-width: 100% !important; }
   .kgen-kpi .v { font-size: 16px; }
+  .kgen-hud-5d { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .kgen-mobile-pad { display: grid; }
+  .kgen-seat-grid { grid-template-columns: repeat(5, minmax(0,1fr)); }
+  * { max-width: 100vw; }
 }

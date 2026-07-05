@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>8888 高老莊人民銀行｜Underground Bank V0.2</title>
+<link rel="stylesheet" href="../../modules/kgen-game-core.css">
+<style>
+.hero{background:linear-gradient(135deg,rgba(232,184,109,.15),transparent),var(--kgen-panel);border:1px solid rgba(232,184,109,.4);border-radius:20px;padding:20px;margin-bottom:16px}
+.loan-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--kgen-line);font-size:13px}
+</style>
+</head>
+<body>
+<div class="kgen-stars-bg"></div>
+<header class="kgen-hud">
+  <div><div class="kgen-hud-title">🏡 8888 高老莊人民銀行</div>
+  <div class="kgen-hud-ver" id="kgen-status-text">Underground Bank V0.2</div></div>
+  <nav class="kgen-hud-nav" id="hud-nav"></nav>
+</header>
+<main class="kgen-page"><div class="kgen-wrap">
+  <div class="hero">
+    <div style="font-size:26px;font-weight:950;color:#e8b86d">高老莊人民銀行 / 地下錢莊</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">Treasury 源頭 · 與 11520 交易所連動 · Demo</div>
+    <div class="kgen-kpi-grid col4" style="margin-top:14px">
+      <div class="kgen-kpi"><div class="k">人民銀行存款</div><div class="v" id="dep">88,888</div></div>
+      <div class="kgen-kpi"><div class="k">地下借出</div><div class="v red" id="loan">12,000</div></div>
+      <div class="kgen-kpi"><div class="k">利息 APR</div><div class="v cyan">8.88%</div></div>
+      <div class="kgen-kpi"><div class="k">抵押器官</div><div class="v">4</div></div>
+    </div>
+  </div>
+
+  <div class="kgen-section-head"><h2>🧙 NPC · 高老莊莊主</h2></div>
+  <div class="kgen-card" id="npc-panel"></div>
+
+  <div class="kgen-section-head"><h2>💰 借貸 / 抵押模擬</h2></div>
+  <div class="kgen-card">
+    <div id="collateral-gauge"></div>
+    <input class="kgen-btn" style="width:100%;margin-top:10px;background:var(--kgen-bg2);text-align:left" type="number" id="loan-amt" placeholder="借貸 KGEN 數量" />
+    <button class="kgen-btn primary full" style="margin-top:8px" id="btn-loan">申請借貸（模擬）</button>
+    <button class="kgen-btn danger full" style="margin-top:8px" id="btn-default">模擬逾期 → Organ Decomposition</button>
+    <div id="loan-log" style="margin-top:10px;font-size:12px;color:var(--kgen-muted)"></div>
+  </div>
+
+  <div class="kgen-section-head"><h2>🫀 器官抵押表</h2></div>
+  <div class="kgen-card" id="organ-table"></div>
+
+  <div class="kgen-section-head"><h2>🔗 11520 交易所連動</h2></div>
+  <div class="kgen-card">
+    <p style="font-size:13px;line-height:1.6">分解的 Organ 模組將回流至 <a href="../11520/index.html" style="color:var(--kgen-cyan)">11520 花果山交易所</a> 重新上架。</p>
+    <a href="../11520/index.html" class="kgen-btn cyan full" style="margin-top:10px">前往 11520 交易所 →</a>
+  </div>
+
+  <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px" id="universe-nodes"></div>
+</div></main>
+<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">8888 V0.2 Demo</span></div>
+<script src="../../modules/kgen-game-core.js"></script>
+<script src="../../modules/universe-runtime/organ-economy.js"></script>
+<script src="../../modules/universe-runtime/temple-hub.js"></script>
+<script>
+(function(){
+  var status = new KGEN_StatusBus('kgen-status-text');
+  document.getElementById('hud-nav').innerHTML = KGEN_TempleHub.navLinks('8888',2);
+  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'),{avatar:'🏡',name:'高老莊莊主',role:'人民銀行 / 地下錢莊',dialog:'借貸需抵押 Organ 模組。保證金不足，器官分解！'});
+  KGEN_TempleHub.renderEntryCards(document.getElementById('universe-nodes'),'8888');
+  var col=1200, debt=900;
+  KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'),col,debt);
+  KGEN_OrganEconomy.renderOrganTable(document.getElementById('organ-table'),null,function(id){
+    KGEN_TempleHub.showDecompositionOverlay('Organ '+id+' 分解中… 回流 11520');
+    status.push('器官分解：'+id);
+  });
+  document.getElementById('btn-loan').onclick=function(){
+    var amt=parseFloat(document.getElementById('loan-amt').value)||0;
+    debt+=amt; col-=amt*0.1;
+    KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'),col,debt);
+    document.getElementById('loan-log').textContent='已借出 '+amt+' KGEN · 總負債 '+debt;
+    status.push('借貸模擬 +'+amt);
+  };
+  document.getElementById('btn-default').onclick=function(){
+    KGEN_OrganEconomy.simulateDecomposition({id:'liver'},function(msg){status.push(msg);},function(){
+      KGEN_TempleHub.showDecompositionOverlay('保證金不足！Organ Decomposition 完成');
+    });
+  };
+  KGEN_Wallet.demoMode=true; KGEN_Wallet.connect(status);
+  status.push('8888 高老莊人民銀行 V0.2 已啟動');
+})();
+</script>
+</body>
+</html>
