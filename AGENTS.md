@@ -57,3 +57,57 @@ There is no committed ESLint, pytest, or npm test suite. Validation is via:
 - **Hardhat/KGEN deploy**: `KGEN/scripts/*.js` expect a Hardhat project that is not scaffolded in-repo.
 - **KGEN tax immutability**: `KGEN/contracts/KGEN_Token_V7_5_2.sol` fixes tax at 0.30% via `constant` bps; there is no tax-rate setter. DappBay may show "Can Modify Tax" because of `setTaxWallets` / `setTaxExempt` / `Ownable` heuristics — see `docs/KGEN_TAX_IMMUTABILITY.md`. **稅率不可改，不得為了 DappBay 重新開 tax setter 或重新部署 token。**
 - **Pipeline side effects**: Running `tx_btc_convert.py` updates `master/*.xlsx` and may write `*_near_full_v86.xlsx` under `raw/`. Revert or commit intentionally.
+
+## Permanent KGEN work rules
+
+These rules apply to every future AI / agent / runtime change in this repository.
+
+1. Before any modification, read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`.
+2. Treat every Runtime `CURRENT` file as the formal active version.
+3. Do not create duplicate folders for the same function.
+4. Do not add another versioned file for the same function.
+5. Before changing any program file, check whether the same function already exists.
+6. Any new file must be reflected in the Boot Sequence, KGEN index documents, and README, with full path and purpose.
+7. Every whitepaper update must be a full cumulative edition; do not delete old content, publish diff-only editions, or require readers to consult old versions.
+8. Do not commit or push without explicit user approval.
+9. For Whitepaper, Runtime, Boot, and Constitution updates, use full cumulative updates only.
+
+## KGEN AI work system rules
+
+This section is mandatory for every AI / agent / runtime working in this repository. It supersedes older AGENTS instructions if there is a conflict.
+
+### Mandatory read order
+
+1. Read `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`.
+2. Read `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md`.
+3. Read `C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`.
+4. Read `C:\Desktop\kline-odyssey\AGENTS.md`.
+5. Only then inspect targets and begin analysis or approved modifications.
+
+### Required checks before any program modification
+
+Before modifying any program file, first check for existing same-function files in:
+
+- `C:\Desktop\kline-odyssey\docs`
+- `C:\Desktop\kline-odyssey\KGEN`
+- `C:\Desktop\kline-odyssey\K線西遊記`
+- `C:\Desktop\kline-odyssey\K線西遊記\temples\12345`
+
+### Prohibited without explicit user approval
+
+- Do not create arbitrary new Runtime versions.
+- Do not create arbitrary patch/fix/hotfix/stable files.
+- Do not add a new bootstrap file when an existing bootstrap exists.
+- Do not add a new Universe Runtime while Runtime CURRENT governs the system.
+- Do not modify Boot V1.4 unless the user explicitly asks for a Boot update.
+- Do not commit or push without explicit user approval.
+
+### KGEN AI work-system docs
+
+- `C:\Desktop\kline-odyssey\docs\KGEN_MASTER_INDEX.md`
+- `C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md`
+- `C:\Desktop\kline-odyssey\docs\KGEN_DEPENDENCY_GRAPH.md`
+- `C:\Desktop\kline-odyssey\docs\KGEN_TEMPLE_12345_MAP.md`
+- `C:\Desktop\kline-odyssey\docs\KGEN_FRONTEND_INDEX.md`
+- `C:\Desktop\kline-odyssey\docs\KGEN_RUNTIME_RULES.md`
+
