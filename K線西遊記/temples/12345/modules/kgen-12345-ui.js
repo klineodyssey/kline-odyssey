@@ -1,5 +1,5 @@
 /*
-FILE: modules/kgen-12345-ui-v3.js
+FILE: modules/kgen-12345-ui.js
 PRODUCT_ID: KGEN-12345-HEART-UI
 VERSION: V3.0-OVERLAY-GAMEPLAY
 PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
@@ -7,7 +7,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
 (function(){
   "use strict";
 
-  const VERSION = "V3.0";
+  const VERSION = "3.0";
   const INTRO_SPEECH = "歡迎來到 KGEN 12345 五指山悟空財神殿。請先連結錢包，完成三次聖盃，再領發財金。心跳、轉日呼吸、還願、點燈與許願都在悟空控制台。";
 
   const DEMO_RANKS = {
