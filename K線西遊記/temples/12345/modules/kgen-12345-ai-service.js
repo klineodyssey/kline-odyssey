@@ -7,8 +7,8 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
 (function(){
   "use strict";
 
-  const VERSION = "V2.3.3-AI-SERVICE";
-  const WELCOME_KEY = "kgen12345_ai_welcome_v233";
+  const VERSION = "V3.0-AI-SERVICE";
+  const WELCOME_KEY = "kgen12345_ai_welcome_v30";
   const AVATAR_SRC = "./assets/heart.png";
   const VOICE_DEBOUNCE_MS = 500;
 
@@ -60,9 +60,9 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
     "kh-cup-2": "聖盃二。完成第二次聖盃確認。",
     "kh-cup-3": "聖盃三。完成第三次聖盃後可領發財金。",
     "kh-cup-reset": "重置聖盃。將清除本機聖盃進度。",
-    "guideUnifiedBtn": "客服導覽。解說錢包、發財金與 Heart 控制台操作。",
-    "boardToggleBtn": "排行榜。示範模式，顯示或隱藏排行榜面板。",
-    "kgen-heart-toggle": "悟空心臟控制台。展開或收合 Heart 資產與 Claim 面板。"
+    "guideUnifiedBtn": "客服導覽。解說錢包、發財金與悟空控制台操作。",
+    "boardToggleBtn": "排行榜。開啟五指山排行榜面板。",
+    "kgen-heart-toggle": "悟空控制台。展開或收合 Heart 資產與 Claim 面板。"
   };
 
   const WALLET_ACTION_VOICE = {
@@ -85,7 +85,7 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
     "右側神規。展開或收合右側神殿規則面板。"
   ];
 
-  const GUIDE_VOICE = "歡迎使用悟空財神殿導覽。右側可連結錢包、領發財金與查看規則。左下 Heart 控制台可查看 KGEN、Allowance 與鏈上狀態。若有問題可在 AI 客服輸入關鍵字。";
+  const GUIDE_VOICE = "歡迎來到 KGEN 12345 五指山悟空財神殿。請先連結錢包，完成三次聖盃，再領發財金。左下 AI 客服可問常見問題，悟空控制台可看 KGEN、Allowance 與鏈上狀態。";
 
   function $(id){ return document.getElementById(id); }
 
@@ -113,7 +113,7 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
     if(/返回.*K線西遊記|銀河宇宙入口/.test(t)) return "返回 K線西遊記銀河宇宙入口。";
     if(/官方宇宙首頁/.test(t)) return "官方宇宙首頁入口。";
     if(/五指山神殿音響/.test(t)) return "五指山神殿音響。可播放內建或自選 M P 3 歌單。";
-    if(/名額紀錄/.test(t)) return "名額紀錄。查看發財金 epoch 名額與紀錄。";
+    if(/名額紀錄/.test(t)) return "名額紀錄。目前顯示 Coming Soon，不會開啟其它視窗。";
     if(/排行榜/.test(t)) return "排行榜。示範模式排行榜面板。";
     if(/客服|導覽/.test(t)) return "客服導覽。解說神殿功能與錢包流程。";
     if(/土地資訊/.test(t)) return "土地資訊。查看選取格子的地籍與狀態。";
@@ -336,7 +336,7 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
       }catch(_){ }
     },
     explainGuide: function(){
-      this.speakAnnounce("已為你解說目前頁面：右側連錢包與發財金，左下 Heart 控制台可看餘額與 Claim 狀態。");
+      this.speakAnnounce("已為你解說 KGEN 12345 五指山悟空財神殿：連錢包、聖盃、發財金、還願與許願都在悟空控制台。");
       this.speakRaw(GUIDE_VOICE);
     },
     ask: function(question){

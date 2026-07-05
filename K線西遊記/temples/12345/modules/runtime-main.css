@@ -71,7 +71,7 @@ PURPOSE: Permanent 12345 layout / facade body fix. File name is permanent.
   --kgen-nav-width: min(188px, calc(100vw - 24px));
   --kgen-organ-gap: 10px;
   --kgen-left-x: 18px;
-  --kgen-left-w: min(420px, 36vw, calc(100vw - 36px));
+  --kgen-left-w: min(504px, 43.2vw, calc(50vw - 24px));
   --kgen-heart-toggle-top: 72px;
   --kgen-heart-panel-top: 222px;
 }
@@ -202,9 +202,9 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
 }
 
 .hud-top .brand-name {
-  height: 26px !important;
+  height: auto !important;
   min-height: 26px !important;
-  max-height: 26px !important;
+  max-height: none !important;
 }
 
 .hud-top .kgen-hud-clock,
@@ -443,6 +443,7 @@ body:not(.k12345-heart-collapsed) #kgen-heart-live-panel {
     min-height: 60px !important;
     max-height: 60px !important;
     padding: 5px 6px !important;
+    overflow: hidden !important;
   }
 
   .hud-top .grid-500 {
