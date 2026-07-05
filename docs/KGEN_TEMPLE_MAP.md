@@ -98,3 +98,34 @@ Direct missing references:
 | Source | Line | Reference | Status | Target |
 | --- | --- | --- | --- | --- |
 | C:\Desktop\kline-odyssey\K線西遊記\temples\18921\index.html | 239 | + n.url + | missing | C:\Desktop\kline-odyssey\K線西遊記\temples\18921\+ n.url + |
+
+## KGEN 5D Production Build V0.2 Temple Registration - 2026-07-05
+
+Portal V3.0 registers 15 temple entries plus the K-line 5D game entry. The table below records the temple nodes visible from `C:\Desktop\kline-odyssey\K線西遊記\index.html`.
+
+| File | Purpose |
+|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html` | Heart / wallet formal temple |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\16888\index.html` | Legacy financial organism temple |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\11520\index.html` | Organ Exchange V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\18888\index.html` | Divine Bank V0.2 integration shell |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\18921\index.html` | Auto LP / ZhanyaoTaxSplitter V0.2 integration shell |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\108000\index.html` | MarsSeats V0.2 integration shell |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\8888\index.html` | Underground Bank V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\8895\index.html` | Cloud Inn V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\20888\index.html` | Risk Arena V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\21319\index.html` | Leiyin level node V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\21520\index.html` | Mahavira Hall level node V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\21666\index.html` | Buddha Light level node V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\21888\index.html` | Fear trial level node V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\22188\index.html` | Greed trial level node V0.2 |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\23333\index.html` | Lingshan level node V0.2 |
+
+### Temple V0.2 Dependency Shape
+
+| Temple group | Dependencies | Modification rule |
+|---|---|---|
+| 11520 / 18888 / 18921 / 108000 | Shared core CSS/JS, Organ Economy, Temple Hub, and selected canonical links | Registered as V0.2 production integration shells. |
+| 8888 / 8895 / 20888 / 21319 / 21520 / 21666 / 21888 / 22188 / 23333 | Shared core CSS/JS plus V0.2 universe-runtime modules; level nodes may use Temple Shell | Keep as one V0.2 temple-family set; do not create duplicate same-function temple folders. |
+| 12345 | Existing wallet / bridge / Heart runtime tree | Protected; no V0.2 registration edits. |
+| 16888 | Existing Guanghan temple runtime | Existing portal-linked temple; no V0.2 registration edits required. |

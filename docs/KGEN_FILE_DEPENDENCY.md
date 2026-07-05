@@ -601,3 +601,55 @@ The following permanent KGEN knowledge-base files were created from a Boot V1.4 
 | KGEN_AI_RULES.md | C:\Desktop\kline-odyssey\KGEN_AI_RULES.md | Permanent AI rules, protected files, official versions and AI project map. |
 
 Permanent rule reaffirmed: every future Boot, Runtime, Whitepaper and Constitution update must be a full cumulative update, never a deletion-only or diff-only update.
+
+## KGEN 5D Production Build V0.2 Dependency Registration - 2026-07-05
+
+### Portal V3.0 Local Entrances
+
+| Entry | File | Registration status |
+|---|---|---|
+| 12345 - Heart / wallet formal temple | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html` | PASS: local target exists |
+| 16888 - Legacy financial organism temple | `C:\Desktop\kline-odyssey\K線西遊記\temples\16888\index.html` | PASS: local target exists |
+| 11520 - Organ Exchange V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\11520\index.html` | PASS: local target exists |
+| 18888 - Divine Bank V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\18888\index.html` | PASS: local target exists |
+| 18921 - Auto LP / ZhanyaoTaxSplitter V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\18921\index.html` | PASS: local target exists |
+| 108000 - MarsSeats V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\108000\index.html` | PASS: local target exists |
+| 8888 - Underground Bank V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\8888\index.html` | PASS: local target exists |
+| 8895 - Cloud Inn V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\8895\index.html` | PASS: local target exists |
+| 20888 - Risk Arena V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\20888\index.html` | PASS: local target exists |
+| 21319 - Leiyin level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\21319\index.html` | PASS: local target exists |
+| 21520 - Mahavira Hall level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\21520\index.html` | PASS: local target exists |
+| 21666 - Buddha Light level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\21666\index.html` | PASS: local target exists |
+| 21888 - Fear trial level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\21888\index.html` | PASS: local target exists |
+| 22188 - Greed trial level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\22188\index.html` | PASS: local target exists |
+| 23333 - Lingshan level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\23333\index.html` | PASS: local target exists |
+| kline-5d - K-line 5D game entry V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | PASS: local target exists |
+
+### V0.2 Dependency Graph
+
+```mermaid
+graph TD
+  Boot["Boot V1.4"] --> RuntimeCurrent["Universe Physics Runtime CURRENT"]
+  RuntimeCurrent --> Portal["Portal V3.0 index.html"]
+  Portal --> Game["K-line 5D game"]
+  Portal --> Temples["15 portal temple entries"]
+  Game --> CoreJS["kgen-game-core.js"]
+  Game --> CoreCSS["kgen-game-core.css"]
+  Game --> Engine["kline-5d-engine.js"]
+  Game --> Organ["organ-economy.js"]
+  Game --> Hub["temple-hub.js"]
+  Temples --> CoreJS
+  Temples --> CoreCSS
+  Temples --> Organ
+  Temples --> Hub
+  Temples --> Shell["temple-shell.js"]
+```
+
+### Protected Dependency Boundaries
+
+| Boundary | Result |
+|---|---|
+| Temple 12345 wallet / bridge / Heart runtime | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\K線西遊記\temples\12345`. |
+| Contracts | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\KGEN\contracts`. |
+| Boot V1.4 | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`. |
+| Runtime CURRENT | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md`. |

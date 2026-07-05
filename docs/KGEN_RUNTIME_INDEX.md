@@ -326,3 +326,25 @@ The following permanent KGEN knowledge-base files were created from a Boot V1.4 
 | KGEN_AI_RULES.md | C:\Desktop\kline-odyssey\KGEN_AI_RULES.md | Permanent AI rules, protected files, official versions and AI project map. |
 
 Permanent rule reaffirmed: every future Boot, Runtime, Whitepaper and Constitution update must be a full cumulative update, never a deletion-only or diff-only update.
+
+## KGEN 5D Production Build V0.2 Runtime Registration - 2026-07-05
+
+Runtime authority remains: `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md`. The V0.2 files below are registered as subordinate frontend/game runtime modules and must not be treated as a replacement CURRENT, a new Universe Runtime, or a duplicate Boot.
+
+| File | Purpose |
+|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | K-line 5D engine runtime module; game loop, rounds, scoring and runtime state. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js` | Organ Economy runtime module; organ price/state helpers used by V0.2 temples and game UI. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js` | Temple Hub runtime module; shared navigation and temple relation helpers. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-shell.js` | Temple Shell runtime module; shared level-node shell for V0.2 temple pages. |
+
+### Runtime Dependency Notes
+
+| Runtime module | Primary callers | Notes |
+|---|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | 5D gameplay engine module. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js` | V0.2 game and production temple pages | Shared organ economy state/helper module. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js` | Portal/game/temple pages | Shared temple hub relation/navigation helper. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-shell.js` | V0.2 level-node temple pages | Shared level shell. Do not duplicate with a new bootstrap. |
+
+No Runtime CURRENT file was modified by this registration pass.

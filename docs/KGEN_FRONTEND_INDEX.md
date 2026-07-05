@@ -403,3 +403,21 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 | 383 | C:\Desktop\kline-odyssey\wukong-temple\README_WUKONG_TEMPLE_AUTOPILOT_V1_6.md | Temple | Markdown documentation. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=5: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_SYSTEM_INDEX.md |
 | 384 | C:\Desktop\kline-odyssey\wukong-temple\README_Wukong_Temple_Deploy_V2_3.md | Temple | Markdown documentation. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=5: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_SYSTEM_INDEX.md |
 | 385 | C:\Desktop\kline-odyssey\wukong-temple\wukong-avatar.png | Temple | Visual asset. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=5: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_SYSTEM_INDEX.md |
+
+## KGEN 5D Production Build V0.2 Frontend Registration - 2026-07-05
+
+| File | Purpose |
+|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\index.html` | Portal V3.0; 16-entry KGEN 5D universe portal. |
+| `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | KGEN 5D game entry and gameplay screen. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.js` | Shared V0.2 frontend controller utilities. |
+| `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.css` | Shared V0.2 frontend visual system. |
+| `C:\Desktop\kline-odyssey\K線西遊記\data\kgen-5d-world-map.json` | 5D world map data consumed by V0.2 game/portal runtime. |
+
+### Frontend Dependency Notes
+
+| Frontend | Depends on | Registration status |
+|---|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\index.html` | 16 local portal targets under temples/game | PASS: 16/16 targets exist. |
+| `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.css`, `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | PASS: all local targets exist. |
+| V0.2 temple pages | Shared core CSS/JS and V0.2 universe-runtime modules | PASS: registered in temple map and dependency index. |
