@@ -7,9 +7,10 @@ PURPOSE: 12345 Temple UI V3.0 — overlay panels, layout, mobile fixes
 
 :root {
   --kgen-v30-midline: 50vw;
-  --kgen-v30-left-w: min(504px, 43.2vw, calc(var(--kgen-v30-midline) - 20px));
+  --kgen-v30-left-w: min(620px, 46vw, calc(var(--kgen-v30-midline) - 16px));
   --kgen-v30-mid-w: min(280px, calc(var(--kgen-v30-midline) - 24px));
-  --kgen-v30-overlay-z: 2147483200;
+  --kgen-v30-right-card-w: min(232px, calc((var(--kgen-v30-midline) - 40px) / 2));
+  --kgen-v30-overlay-z: 2147483500;
   --kgen-v30-scrim: rgba(0, 0, 0, 0.62);
 }
 
@@ -21,13 +22,20 @@ html.kgen-v30 body {
 
 /* ===== 左上標題完整顯示 ===== */
 html.kgen-v30 .hud-top {
-  width: min(calc(100vw - 8px), var(--kgen-v30-midline)) !important;
-  max-width: var(--kgen-v30-midline) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, calc(var(--kgen-v30-midline) - 12px)) minmax(0, calc(var(--kgen-v30-midline) - 12px)) !important;
+  gap: 8px !important;
+  align-items: start !important;
+  left: 4px !important;
+  right: auto !important;
+  width: calc(100vw - 8px) !important;
+  max-width: calc(100vw - 8px) !important;
+  box-sizing: border-box !important;
 }
 
 html.kgen-v30 .hud-top .brand-section {
   flex: 1 1 auto !important;
-  max-width: calc(var(--kgen-v30-midline) - 220px) !important;
+  max-width: calc(var(--kgen-v30-midline) - 12px) !important;
   min-width: 0 !important;
   overflow: visible !important;
 }
@@ -39,29 +47,38 @@ html.kgen-v30 .hud-top .brand-name {
   height: auto !important;
   min-height: 26px !important;
   max-height: none !important;
-  line-height: 1.2 !important;
-  font-size: clamp(11px, 2.8vw, 17px) !important;
+  line-height: 1.15 !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
   word-break: keep-all !important;
+  letter-spacing: 0 !important;
 }
 
 html.kgen-v30 #kgen-heart-toggle .kgen-heart-title {
   white-space: normal !important;
   overflow: visible !important;
   text-overflow: unset !important;
-  font-size: clamp(11px, 2.6vw, 15px) !important;
-  line-height: 1.2 !important;
+  font-size: 19px !important;
+  line-height: 1.16 !important;
+  letter-spacing: 0 !important;
 }
 
 /* ===== 神明銀行 / 齊天豪宅加寬 ===== */
 html.kgen-v30 .hud-top .monitor-data {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, var(--kgen-v30-right-card-w))) !important;
+  gap: 8px !important;
+  justify-content: start !important;
+  width: min(calc(var(--kgen-v30-midline) - 12px), calc((var(--kgen-v30-right-card-w) * 2) + 8px)) !important;
   flex-shrink: 0 !important;
-  max-width: calc(var(--kgen-v30-midline) - 8px) !important;
+  max-width: calc(var(--kgen-v30-midline) - 12px) !important;
 }
 
 html.kgen-v30 .hud-top .data-box {
-  width: min(210px, calc((var(--kgen-v30-midline) - 32px) / 2)) !important;
-  min-width: min(168px, calc((var(--kgen-v30-midline) - 32px) / 2)) !important;
-  max-width: min(210px, calc((var(--kgen-v30-midline) - 32px) / 2)) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 html.kgen-v30 .hud-top .grid-500 {
@@ -88,19 +105,22 @@ html.kgen-v30 {
 html.kgen-v30 #kgen-heart-toggle {
   width: var(--kgen-v30-left-w) !important;
   max-width: var(--kgen-v30-left-w) !important;
-  min-height: 52px !important;
-  font-size: 15px !important;
+  min-height: 64px !important;
+  font-size: 16px !important;
+  padding: 12px 16px !important;
+  box-sizing: border-box !important;
 }
 
 html.kgen-v30 #kgen-heart-live-panel {
   width: var(--kgen-v30-left-w) !important;
   max-width: var(--kgen-v30-left-w) !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
 }
 
 html.kgen-v30 #kgen-heart-live-panel .kh-title,
 html.kgen-v30 #kgen-heart-live-panel .kh-card-title {
-  font-size: 15px !important;
+  font-size: 17px !important;
+  line-height: 1.25 !important;
 }
 
 html.kgen-v30 #kgen-heart-live-panel .kh-k {
@@ -111,7 +131,7 @@ html.kgen-v30 #kgen-heart-live-panel .kh-v,
 html.kgen-v30 #kgen-heart-live-panel input,
 html.kgen-v30 #kgen-heart-live-panel select,
 html.kgen-v30 #kgen-heart-live-panel textarea {
-  font-size: 13px !important;
+  font-size: 15px !important;
 }
 
 html.kgen-v30 #kgen-heart-live-panel .kh-actions,
@@ -129,15 +149,16 @@ html.kgen-v30 #kgen-heart-live-panel .kh-cup-btns {
 
 html.kgen-v30 #kgen-heart-live-panel button {
   width: 100% !important;
-  min-height: 46px !important;
-  height: 46px !important;
-  max-height: 46px !important;
-  padding: 10px 12px !important;
-  font-size: 13px !important;
+  min-height: 50px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
 }
 
 html.kgen-v30 #kgen-heart-live-panel .kh-cup-btns #kh-cup-reset {
@@ -286,7 +307,8 @@ html.kgen-v30 #music-panel:not(.kgen-v30-overlay-open) {
 /* ===== V3 排行榜 / 名額 Overlay ===== */
 #kgen-v30-leaderboard-overlay,
 #kgen-v30-quota-overlay,
-#kgen-v30-wish-overlay {
+#kgen-v30-wish-overlay,
+#kgen-v30-status-overlay {
   position: fixed;
   inset: 0;
   z-index: calc(var(--kgen-v30-overlay-z) + 4);
@@ -300,7 +322,8 @@ html.kgen-v30 #music-panel:not(.kgen-v30-overlay-open) {
 
 #kgen-v30-leaderboard-overlay.is-open,
 #kgen-v30-quota-overlay.is-open,
-#kgen-v30-wish-overlay.is-open {
+#kgen-v30-wish-overlay.is-open,
+#kgen-v30-status-overlay.is-open {
   display: flex !important;
 }
 
@@ -412,6 +435,12 @@ html.kgen-v30 #music-panel:not(.kgen-v30-overlay-open) {
   letter-spacing: 0.08em;
 }
 
+.kgen-v30-coming-compact {
+  padding: 20px 12px !important;
+  font-size: 18px !important;
+  letter-spacing: 0 !important;
+}
+
 .kgen-v30-note {
   font-size: 11px;
   line-height: 1.5;
@@ -425,11 +454,11 @@ html.kgen-v30 #music-panel:not(.kgen-v30-overlay-open) {
   position: fixed;
   right: 12px;
   bottom: calc(var(--kgen-v10-dock-h, 98px) + 8px);
-  z-index: 2147482600;
+  z-index: calc(var(--kgen-v30-overlay-z) - 60);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  width: min(200px, calc(100vw - 24px));
+  width: min(224px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   box-sizing: border-box;
 }
@@ -440,8 +469,8 @@ html.kgen-v30 #music-panel:not(.kgen-v30-overlay-open) {
   background: linear-gradient(135deg, rgba(255, 215, 120, 0.92), rgba(255, 145, 30, 0.88));
   color: #160b00;
   font-weight: 900;
-  font-size: 12px;
-  padding: 10px 8px;
+  font-size: 14px;
+  padding: 12px 10px;
   cursor: pointer;
   min-height: 40px;
   box-shadow: 0 0 18px rgba(255, 215, 120, 0.22);
@@ -455,19 +484,21 @@ html.kgen-v30 #kgen-v860-ritual-open {
 html.kgen-v30 #kgen-ai-service-panel {
   left: 10px !important;
   bottom: calc(var(--kgen-v10-dock-h, 98px) + 8px) !important;
-  width: min(340px, calc(100vw - 20px)) !important;
+  width: min(360px, calc(100vw - 20px)) !important;
   max-width: calc(100vw - 20px) !important;
-  z-index: 2147482550 !important;
+  z-index: calc(var(--kgen-v30-overlay-z) - 70) !important;
 }
 
 /* ===== 手機版 390 / 414 / 430 ===== */
 @media (max-width: 430px) {
   :root {
-    --kgen-v30-mid-w: min(248px, calc(100vw - 180px));
-    --kgen-v30-left-w: min(calc(100vw - 20px), calc(var(--kgen-v30-midline) - 12px));
+    --kgen-v30-mid-w: calc(100vw - 16px);
+    --kgen-v30-left-w: calc(100vw - 16px);
+    --kgen-v30-right-card-w: calc((100vw - 24px) / 2);
   }
 
   html.kgen-v30 .hud-top {
+    display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
     width: calc(100vw - 8px) !important;
@@ -478,33 +509,89 @@ html.kgen-v30 #kgen-ai-service-panel {
     max-width: 100% !important;
   }
 
+  html.kgen-v30 .hud-top .brand-name {
+    font-size: 18px !important;
+    line-height: 1.18 !important;
+  }
+
   html.kgen-v30 .hud-top .monitor-data {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
-    justify-content: space-between !important;
+    justify-content: stretch !important;
   }
 
   html.kgen-v30 .hud-top .data-box {
-    width: calc(50% - 4px) !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: calc(50% - 4px) !important;
+    max-width: 100% !important;
   }
 
   html.kgen-v30 #universe-nav {
-    width: min(150px, calc(100vw - 16px)) !important;
+    width: min(172px, calc(100vw - 16px)) !important;
     max-width: calc(100vw - 16px) !important;
-    right: 4px !important;
+    left: auto !important;
+    right: 8px !important;
+    top: 244px !important;
+    max-height: calc(100vh - 388px) !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255, 215, 120, 0.38) rgba(0, 0, 0, 0.18) !important;
+    z-index: calc(var(--kgen-v30-overlay-z) - 80) !important;
+  }
+
+  html.kgen-v30 #universe-nav .nav-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html.kgen-v30 #universe-nav #guideUnifiedBtn {
+    order: -3 !important;
+  }
+
+  html.kgen-v30 #universe-nav #quotaToggleBtn {
+    order: -2 !important;
+  }
+
+  html.kgen-v30 #universe-nav #boardToggleBtn {
+    order: -1 !important;
+  }
+
+  html.kgen-v30 #universe-nav::-webkit-scrollbar {
+    width: 4px !important;
+  }
+
+  html.kgen-v30 #universe-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 120, 0.38) !important;
+    border-radius: 999px !important;
+  }
+
+  html.kgen-v30 #kgen-heart-toggle {
+    top: 154px !important;
+    left: 8px !important;
+    right: auto !important;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  html.kgen-v30 .ga-matrix {
+    top: 236px !important;
   }
 
   html.kgen-v30 #kgen-v30-ritual-dock {
     right: 8px !important;
-    width: min(188px, calc(100vw - 168px)) !important;
+    width: min(210px, calc(100vw - 158px)) !important;
     bottom: calc(var(--kgen-v10-dock-h, 98px) + 6px) !important;
   }
 
   html.kgen-v30 #kgen-ai-service-panel {
     bottom: calc(var(--kgen-v10-dock-h, 98px) + 58px) !important;
-    width: min(300px, calc(100vw - 16px)) !important;
+    width: min(318px, calc(100vw - 16px)) !important;
   }
 
   html.kgen-v30 .kgen-v30-tabs {
@@ -515,20 +602,24 @@ html.kgen-v30 #kgen-ai-service-panel {
     width: calc(100vw - 16px) !important;
     max-width: calc(100vw - 16px) !important;
   }
+
+  html.kgen-v30 #kgen-heart-toggle .kgen-heart-title {
+    font-size: 17px !important;
+  }
 }
 
 @media (max-width: 390px) {
   html.kgen-v30 .hud-top .brand-name {
-    font-size: 11px !important;
+    font-size: 17px !important;
   }
 
   html.kgen-v30 #kgen-v30-ritual-dock {
-    width: min(172px, calc(100vw - 158px)) !important;
+    width: min(196px, calc(100vw - 150px)) !important;
     gap: 6px !important;
   }
 
   html.kgen-v30 #kgen-v30-ritual-dock button {
-    font-size: 11px !important;
-    padding: 8px 6px !important;
+    font-size: 13px !important;
+    padding: 10px 8px !important;
   }
 }

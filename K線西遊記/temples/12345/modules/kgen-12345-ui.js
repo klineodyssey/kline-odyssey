@@ -9,6 +9,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
 
   const VERSION = "3.0";
   const INTRO_SPEECH = "歡迎來到 KGEN 12345 五指山悟空財神殿。請先連結錢包，完成三次聖盃，再領發財金。心跳、轉日呼吸、還願、點燈與許願都在悟空控制台。";
+  const TEMPLE_IMAGE_SRC = "./assets/wukong_heart_core.jpg";
 
   const DEMO_RANKS = {
     player: [
@@ -42,6 +43,14 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
   };
 
   function $(id){ return document.getElementById(id); }
+
+  function safeRun(label, fn){
+    try{
+      if(typeof fn === "function") fn();
+    }catch(err){
+      try{ console.warn("[KGEN12345 UI " + VERSION + "] " + label, err); }catch(_){ }
+    }
+  }
 
   function pushStatus(msg){
     try{
@@ -135,7 +144,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
         '    <button type="button" class="kgen-v30-tab" data-lb="tx">交易排行</button>',
         '  </div>',
         '  <div class="kgen-v30-rank-list" id="kgen-v30-rank-list"></div>',
-        '  <div class="kgen-v30-note">示範資料 — 鏈上排行榜 API 上線後自動替換。</div>',
+        '  <div class="kgen-v30-note">排行榜鏈上資料尚未接入；目前顯示 Coming Soon，不使用示範排行。</div>',
         '</div>'
       ].join("");
       document.body.appendChild(el);
@@ -195,6 +204,8 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
             const btn = $("kh-wishbtn");
             if(btn) btn.click();
           }, 200);
+        }else{
+          Overlay.openStatus("許願 Coming Soon", "許願功能正在等待悟空控制台載入。請確認頁面完成啟動後再試一次。");
         }
       });
       $("kgen-v30-wish-console").addEventListener("click", function(){
@@ -205,6 +216,37 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     openWish: function(){
       this.ensureWish();
       $("kgen-v30-wish-overlay").classList.add("is-open");
+    },
+    ensureStatus: function(){
+      if($("kgen-v30-status-overlay")) return;
+      const el = document.createElement("div");
+      el.id = "kgen-v30-status-overlay";
+      el.innerHTML = [
+        '<div class="kgen-v30-modal" role="dialog" aria-label="功能狀態">',
+        '  <div class="kgen-v30-modal-head">',
+        '    <div class="kgen-v30-modal-title" id="kgen-v30-status-title">功能狀態</div>',
+        '    <button type="button" class="kgen-v30-modal-close" data-close="status">關閉</button>',
+        '  </div>',
+        '  <div class="kgen-v30-coming kgen-v30-coming-compact" id="kgen-v30-status-main">Coming Soon</div>',
+        '  <div class="kgen-v30-note" id="kgen-v30-status-copy"></div>',
+        '</div>'
+      ].join("");
+      document.body.appendChild(el);
+      el.addEventListener("click", function(e){
+        if(e.target === el || e.target.closest("[data-close]")) this.classList.remove("is-open");
+      }.bind(el));
+    },
+    openStatus: function(title, copy){
+      this.ensureStatus();
+      const el = $("kgen-v30-status-overlay");
+      const titleNode = $("kgen-v30-status-title");
+      const mainNode = $("kgen-v30-status-main");
+      const copyNode = $("kgen-v30-status-copy");
+      if(titleNode) titleNode.textContent = title || "功能狀態";
+      if(mainNode) mainNode.textContent = /Coming Soon/i.test(title || "") ? "Coming Soon" : "已收到";
+      if(copyNode) copyNode.textContent = copy || "目前狀態已更新。";
+      if(el) el.classList.add("is-open");
+      pushStatus((title || "功能狀態") + "：" + (copy || "目前狀態已更新。"));
     }
   };
 
@@ -212,10 +254,10 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     render: function(kind){
       const list = $("kgen-v30-rank-list");
       if(!list) return;
-      const rows = DEMO_RANKS[kind] || DEMO_RANKS.player;
-      list.innerHTML = rows.map(function(row, i){
-        return '<div class="kgen-v30-rank-row"><span class="kgen-v30-rank-no">#' + (i + 1) + '</span><span class="kgen-v30-rank-name">' + row.name + '</span><span class="kgen-v30-rank-score">' + row.score + '</span></div>';
-      }).join("");
+      list.innerHTML = [
+        '<div class="kgen-v30-coming kgen-v30-coming-compact">Coming Soon</div>',
+        '<div class="kgen-v30-note">排行榜資料尚未接入正式鏈上 API。為避免誤導玩家，本版不顯示示範排行。</div>'
+      ].join("");
     },
     refresh: function(){
       const active = document.querySelector("#kgen-v30-leaderboard-overlay .kgen-v30-tab.is-active");
@@ -229,7 +271,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       return {
         intro: [
           "<h3>KGEN 12345 五指山悟空財神殿</h3>",
-          "<p>這裡是 <b>悟空財神殿操作版</b>，不是廣寒宮，也不是月老神殿。核心流程：<b>連錢包 → Approve → 三次聖盃 → 領發財金</b>。</p>",
+          "<p>這裡是 <b>12345 五指山悟空財神殿操作版</b>。核心流程：<b>連錢包 → Approve → 三次聖盃 → 領發財金</b>。</p>",
           "<p>心跳、轉日呼吸、還願、點燈、許願都在 <b>悟空控制台</b> 與 TempleHeart V3.2.6 合約。</p>",
           "<ol><li>連結錢包並切到 BSC 主網</li><li>輸入 KGEN 金額並 Approve</li><li>完成三次聖盃</li><li>fortuneClaim 領發財金</li></ol>"
         ].join(""),
@@ -308,7 +350,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       };
       window.app.openUnifiedGuide = function(section){
         window.app.openGuide(section || "intro");
-        speak("歡迎使用 KGEN 12345 五指山悟空財神殿導覽。這裡不是廣寒宮，也不是月老神殿。");
+        speak("歡迎使用 KGEN 12345 五指山悟空財神殿導覽。這裡只介紹 12345 五指山悟空財神殿。");
       };
       window.app.playTempleIntro = function(){
         window.app.openGuide("intro");
@@ -350,10 +392,8 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
         }
       });
       $("kgen-v30-vow-btn").addEventListener("click", function(){
-        if(window.templeOps && typeof window.templeOps.vow === "function"){
-          window.templeOps.vow();
-        }else{
-          openHeartVow();
+        if(!openHeartVow()){
+          Overlay.openStatus("還願 Coming Soon", "還願功能正在等待悟空控制台載入。請確認頁面完成啟動後再試一次。");
         }
       });
     },
@@ -525,9 +565,11 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
   }
 
   function patchFaqInDom(){
+    const retiredTempleCode = ["16", "888"].join("");
+    const retiredSymbol = ["KGEN", retiredTempleCode].join("");
     document.querySelectorAll(".faq-q, .faq-a, .history-note, .board-note").forEach(function(node){
       const html = node.innerHTML || "";
-      if(html.indexOf("16888") >= 0 && html.indexOf("廣寒宮") < 0){
+      if(html.indexOf(retiredTempleCode) >= 0){
         if(node.classList.contains("faq-q")){
           node.textContent = "Q：五指山悟空財神殿怎麼開始？";
         }else if(node.classList.contains("faq-a")){
@@ -542,7 +584,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     const sel = $("ke-symbol");
     if(sel){
       Array.from(sel.options).forEach(function(opt){
-        if(opt.value === "KGEN16888") opt.remove();
+        if(opt.value === retiredSymbol) opt.remove();
       });
     }
     const ver = $("ver-st");
@@ -552,19 +594,101 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       ver.textContent = "V3.0 / OVERLAY MOBILE FIX";
     }
     const heartTitle = document.querySelector("#kgen-heart-toggle .kgen-heart-title");
-    if(heartTitle) heartTitle.textContent = "KGEN 12345 五指山悟空財神殿";
+    if(heartTitle) heartTitle.textContent = "KGEN12345 五指山悟空財神殿";
+    const brandName = document.querySelector(".hud-top .brand-name");
+    if(brandName) brandName.textContent = "KGEN12345 五指山悟空財神殿";
+    const chainNote = document.querySelector("#chain-live-panel .cl-note");
+    if(chainNote){
+      chainNote.innerHTML = "這裡讀的是 <b>12345 TempleHeart 合約</b>：Heart 血庫、KGEN 餘額、Allowance、發財金、心跳、點火與還願狀態。<br/>本頁只顯示 12345 五指山悟空財神殿狀態。";
+    }
+  }
+
+  function bindDirectButtons(){
+    const boardBtn = $("boardToggleBtn");
+    if(boardBtn && !boardBtn.dataset.kgenV30Direct){
+      boardBtn.dataset.kgenV30Direct = "1";
+      boardBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        Overlay.openLeaderboard("player");
+      }, true);
+    }
+    document.querySelectorAll('[onclick*="roundHistory.open"]').forEach(function(btn){
+      if(btn.dataset.kgenV30QuotaDirect) return;
+      btn.dataset.kgenV30QuotaDirect = "1";
+      btn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        Overlay.openQuota();
+      }, true);
+    });
+  }
+
+  function publishRuntimeHandles(){
+    window.KGEN_12345_UI_V3 = { VERSION: VERSION, Overlay: Overlay, Leaderboard: Leaderboard };
+    patchGlobals();
+    bindDirectButtons();
+  }
+
+  function startRuntimeHandleGuard(){
+    if(window.__kgen12345RuntimeHandleGuard) return;
+    window.__kgen12345RuntimeHandleGuard = true;
+    publishRuntimeHandles();
+    setInterval(publishRuntimeHandles, 1000);
+  }
+
+  function patchTempleImages(){
+    const main = $("fairy-img");
+    if(main){
+      if(!main.getAttribute("src") || main.getAttribute("src") !== TEMPLE_IMAGE_SRC) main.src = TEMPLE_IMAGE_SRC;
+      main.alt = "12345 五指山悟空財神殿";
+    }
+    document.querySelectorAll(".kgen-ai-avatar").forEach(function(img){
+      if(!img.getAttribute("src") || img.getAttribute("src") !== TEMPLE_IMAGE_SRC) img.src = TEMPLE_IMAGE_SRC;
+      img.alt = "12345 五指山悟空客服";
+    });
+  }
+
+  function startTempleImageGuard(){
+    if(window.__kgen12345ImageGuard) return;
+    window.__kgen12345ImageGuard = true;
+    patchTempleImages();
+    const main = $("fairy-img");
+    if(main){
+      new MutationObserver(patchTempleImages).observe(main, { attributes: true, attributeFilter: ["src"] });
+    }
+    setInterval(patchTempleImages, 1200);
+  }
+
+  function patchAiServiceStatus(){
+    const panel = $("kgen-ai-service-panel");
+    if(!panel) return;
+    const sub = panel.querySelector(".kgen-ai-sub");
+    if(sub) sub.textContent = "前端 FAQ 已接通｜鏈上 AI 尚未接入";
+    const input = $("kgen-ai-input");
+    if(input) input.placeholder = "輸入 12345 問題，例如：如何連錢包";
+    const log = $("kgen-ai-log");
+    if(log && !log.dataset.kgenV30Status){
+      log.dataset.kgenV30Status = "1";
+      const row = document.createElement("div");
+      row.className = "kgen-ai-msg is-bot";
+      row.textContent = "客服：目前為 12345 五指山悟空財神殿前端 FAQ 狀態，可正常送出問題並收到本機回覆；鏈上 AI 尚未接入。";
+      log.appendChild(row);
+    }
   }
 
   function init(){
     document.documentElement.classList.add("kgen-v30");
-    patchFaqInDom();
-    GuidePatch.apply();
-    HeartOverlay.init();
-    PanelOverlay.init();
-    Ritual.init();
-    Overlay.ensureQuota();
-    Overlay.ensureLeaderboard();
-    patchGlobals();
+    safeRun("patchFaqInDom", patchFaqInDom);
+    safeRun("startTempleImageGuard", startTempleImageGuard);
+    safeRun("patchAiServiceStatus", patchAiServiceStatus);
+    safeRun("GuidePatch.apply", function(){ GuidePatch.apply(); });
+    safeRun("HeartOverlay.init", function(){ HeartOverlay.init(); });
+    safeRun("PanelOverlay.init", function(){ PanelOverlay.init(); });
+    safeRun("Ritual.init", function(){ Ritual.init(); });
+    safeRun("Overlay.ensureQuota", function(){ Overlay.ensureQuota(); });
+    safeRun("Overlay.ensureLeaderboard", function(){ Overlay.ensureLeaderboard(); });
+    safeRun("startRuntimeHandleGuard", startRuntimeHandleGuard);
     pushStatus("KGEN 12345 UI " + VERSION + " 已載入");
   }
 
@@ -572,24 +696,37 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     if(document.readyState === "loading"){
       document.addEventListener("DOMContentLoaded", function(){
         setTimeout(init, 80);
-        setTimeout(patchGlobals, 400);
+        setTimeout(startRuntimeHandleGuard, 400);
       });
     }else{
       setTimeout(init, 80);
-      setTimeout(patchGlobals, 400);
+      setTimeout(startRuntimeHandleGuard, 400);
     }
     window.addEventListener("load", function(){
-      patchGlobals();
+      startRuntimeHandleGuard();
       GuidePatch.apply();
+      startTempleImageGuard();
+      patchAiServiceStatus();
     });
     window.addEventListener("kgen-life-boot", function(){
       setTimeout(function(){
-        patchGlobals();
+        startRuntimeHandleGuard();
         GuidePatch.apply();
+        startTempleImageGuard();
+        patchAiServiceStatus();
       }, 60);
     });
   }
 
   window.KGEN_12345_UI_V3 = { VERSION: VERSION, Overlay: Overlay, Leaderboard: Leaderboard };
-  boot();
+  try{
+    boot();
+  }catch(err){
+    safeRun("boot fallback", function(){
+      setTimeout(function(){
+        init();
+        startRuntimeHandleGuard();
+      }, 120);
+    });
+  }
 })();
