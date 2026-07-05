@@ -57,11 +57,11 @@ jobs:
             fi
           }
 
-          if [ -f "index.html" ]; then
-            copy_file "index.html"
-          elif [ -f "Index.html" ]; then
-            copy_file "Index.html" "index.html"
+          if [ ! -f "index.html" ]; then
+            echo "::error::Root index.html is required for the official homepage."
+            exit 1
           fi
+          copy_file "index.html"
 
           copy_file "12345.html"
           copy_file "wallet-12345.html"

@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KLINE ODYSSEY | KGEN Universe Portal V3.0</title>
+  <meta name="description" content="KLINE ODYSSEY official KGEN Universe Portal V3.0. Where the Market Becomes the Myth.">
+  <meta property="og:title" content="KLINE ODYSSEY | KGEN Universe Portal V3.0">
+  <meta property="og:description" content="KGEN 宇宙文明生命引擎，花果山台灣・信念不滅・市場無界。">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/">
+  <meta name="theme-color" content="#070706">
+  <style>
+    :root {
+      --ink: #f7edd0;
+      --muted: #cbbf9f;
+      --gold: #f3c766;
+      --gold-2: #a87325;
+      --cyan: #48d9ff;
+      --green: #76f0b2;
+      --red: #ff6a4a;
+      --violet: #bfa7ff;
+      --panel: rgba(13, 13, 12, 0.84);
+      --panel-2: rgba(27, 23, 18, 0.92);
+      --line: rgba(243, 199, 102, 0.28);
+      --max: 1160px;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    html {
+      margin: 0;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      background: #070706;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(72, 217, 255, 0.14), transparent 32rem),
+        radial-gradient(circle at 82% 22%, rgba(243, 199, 102, 0.16), transparent 28rem),
+        linear-gradient(180deg, #070706 0%, #11100d 52%, #070706 100%);
+    }
+
+    img,
+    iframe {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    p,
+    h1,
+    h2,
+    h3,
+    a,
+    span,
+    code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(243, 199, 102, 0.2);
+      background: rgba(7, 7, 6, 0.86);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(243, 199, 102, 0.36);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+    }
+
+    .nav-links a,
+    .button {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(243, 199, 102, 0.28);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-decoration: none;
+      font-weight: 800;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .button.primary {
+      color: #130c02;
+      border-color: rgba(243, 199, 102, 0.8);
+      background: linear-gradient(135deg, #ffe59a, #f3c766 55%, #b77b2d);
+    }
+
+    .button.cyan {
+      border-color: rgba(72, 217, 255, 0.48);
+      color: #dff8ff;
+      background: rgba(72, 217, 255, 0.12);
+    }
+
+    .button.dark {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(0, 0, 0, 0.34);
+    }
+
+    .hero {
+      min-height: 88svh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      isolation: isolate;
+      background:
+        linear-gradient(90deg, rgba(7, 7, 6, 0.92), rgba(7, 7, 6, 0.62) 48%, rgba(7, 7, 6, 0.25)),
+        linear-gradient(180deg, rgba(7, 7, 6, 0.1), #070706 98%),
+        url("assets/og-cover.jpg") center / cover no-repeat;
+    }
+
+    .hero-inner,
+    .section-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 64px 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 6px 10px;
+      border: 1px solid rgba(243, 199, 102, 0.36);
+      border-radius: 8px;
+      color: #ffe59a;
+      font-weight: 900;
+      font-size: 0.82rem;
+      background: rgba(7, 7, 6, 0.52);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin-bottom: 12px;
+      font-size: 2.75rem;
+      line-height: 1.05;
+      font-weight: 950;
+      color: #fff8e1;
+      text-wrap: balance;
+    }
+
+    .hero-subtitle {
+      max-width: 720px;
+      margin: 0 0 10px;
+      font-size: 1.28rem;
+      color: var(--gold);
+      font-weight: 900;
+    }
+
+    .tagline {
+      max-width: 680px;
+      margin-bottom: 26px;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .hero-actions,
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 720px;
+      margin-top: 34px;
+    }
+
+    .stat {
+      border: 1px solid rgba(243, 199, 102, 0.22);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(7, 7, 6, 0.62);
+    }
+
+    .stat b {
+      display: block;
+      color: #fff;
+      font-size: 1.2rem;
+      line-height: 1.15;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    section {
+      border-top: 1px solid rgba(243, 199, 102, 0.14);
+    }
+
+    .band-dark {
+      background: rgba(0, 0, 0, 0.22);
+    }
+
+    .band-gold {
+      background:
+        linear-gradient(180deg, rgba(243, 199, 102, 0.08), rgba(7, 7, 6, 0.02)),
+        #0b0a08;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-heading h2 {
+      margin-bottom: 0;
+      font-size: 1.9rem;
+      line-height: 1.15;
+      color: #fff8e1;
+    }
+
+    .section-heading p {
+      max-width: 520px;
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .media-grid,
+    .feature-grid,
+    .token-grid,
+    .library-grid,
+    .community-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+      gap: 14px;
+    }
+
+    .media-card,
+    .feature-card,
+    .token-card,
+    .library-card,
+    .community-card,
+    .temple-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.24);
+    }
+
+    .media-card {
+      padding: 12px;
+    }
+
+    .video-frame {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 6px;
+      background: #000;
+    }
+
+    .video-frame.short {
+      aspect-ratio: 9 / 16;
+      max-height: 620px;
+      margin: 0 auto;
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .card-body h3,
+    .feature-card h3,
+    .token-card h3,
+    .library-card h3 {
+      margin-bottom: 6px;
+      color: #fff5d1;
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .card-body p,
+    .feature-card p,
+    .token-card p,
+    .library-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .temple-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 238px), 1fr));
+      gap: 14px;
+    }
+
+    .temple-card {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: var(--ink);
+      min-height: 100%;
+    }
+
+    .temple-image {
+      position: relative;
+      min-height: 168px;
+      background:
+        linear-gradient(135deg, rgba(243, 199, 102, 0.18), rgba(72, 217, 255, 0.08)),
+        #14110c;
+      overflow: hidden;
+    }
+
+    .temple-image img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+    }
+
+    .temple-graphic {
+      height: 190px;
+      display: grid;
+      place-items: end start;
+      padding: 16px;
+      color: #fff7df;
+      font-weight: 950;
+      font-size: 1.8rem;
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.06), transparent 42%),
+        linear-gradient(45deg, var(--c1), var(--c2));
+    }
+
+    .temple-graphic span {
+      display: block;
+      max-width: 100%;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.28);
+    }
+
+    .temple-card .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .temple-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--gold);
+      font-size: 0.86rem;
+      font-weight: 900;
+    }
+
+    .temple-card p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 0.92rem;
+    }
+
+    .feature-card,
+    .token-card,
+    .library-card,
+    .community-card {
+      padding: 16px;
+    }
+
+    .feature-card strong,
+    .token-card strong {
+      color: #fff;
+    }
+
+    .token-address {
+      display: block;
+      margin: 10px 0 12px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      color: #e9f8ff;
+      background: rgba(0, 0, 0, 0.32);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      overflow-wrap: anywhere;
+    }
+
+    .map-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .map-visual {
+      position: relative;
+      min-height: 360px;
+      border: 1px solid rgba(72, 217, 255, 0.28);
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(72, 217, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(243, 199, 102, 0.12) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(243, 199, 102, 0.32), transparent 20rem),
+        #080a0d;
+      background-size: 44px 44px, 44px 44px, auto, auto;
+    }
+
+    .axis {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255, 106, 74, 0.8), rgba(243, 199, 102, 0.9), rgba(72, 217, 255, 0.8));
+    }
+
+    .axis::before,
+    .axis::after {
+      content: "-37.63 K";
+      position: absolute;
+      top: 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .axis::after {
+      content: "+K Boundary";
+      right: 0;
+    }
+
+    .map-node {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #0b0a08;
+      background: var(--gold);
+      box-shadow: 0 0 24px rgba(243, 199, 102, 0.8);
+    }
+
+    .map-node.n1 { left: 20%; top: 45%; }
+    .map-node.n2 { left: 38%; top: 52%; background: var(--green); }
+    .map-node.n3 { left: 54%; top: 39%; background: var(--cyan); }
+    .map-node.n4 { left: 72%; top: 57%; background: var(--red); }
+    .map-node.n5 { left: 84%; top: 32%; background: var(--violet); }
+
+    .map-copy,
+    .support-copy {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: var(--panel-2);
+    }
+
+    .map-copy ul,
+    .support-copy ul {
+      margin: 12px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .link-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .link-list a,
+    .community-card a {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-decoration: none;
+      color: #f9f1d8;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .support-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 16px;
+      align-items: center;
+    }
+
+    .support-image {
+      min-height: 360px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(7, 7, 6, 0.05), rgba(7, 7, 6, 0.42)),
+        url("assets/wukong_caishen.png") center / cover no-repeat;
+    }
+
+    footer {
+      border-top: 1px solid rgba(243, 199, 102, 0.2);
+      background: #050504;
+    }
+
+    .footer-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 34px 16px;
+      color: var(--muted);
+    }
+
+    .footer-inner strong {
+      color: #fff4c8;
+    }
+
+    @media (max-width: 760px) {
+      .nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .nav-links a {
+        flex: 1 1 auto;
+      }
+
+      .hero {
+        min-height: 86svh;
+        align-items: flex-end;
+        background-position: center top;
+      }
+
+      .hero-inner,
+      .section-inner {
+        padding: 46px 14px;
+      }
+
+      h1 {
+        font-size: 2.05rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.08rem;
+      }
+
+      .tagline {
+        font-size: 0.98rem;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .hero-actions .button {
+        width: auto;
+        flex: 1 1 148px;
+      }
+
+      .hero-stats,
+      .map-panel,
+      .support-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .section-heading {
+        display: block;
+      }
+
+      .section-heading h2 {
+        margin-bottom: 8px;
+        font-size: 1.55rem;
+      }
+
+      .map-visual,
+      .support-image {
+        min-height: 280px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .hero-actions .button,
+      .nav-links a {
+        width: 100%;
+        flex-basis: 100%;
+      }
+
+      .hero-stats {
+        gap: 8px;
+      }
+
+      .stat,
+      .feature-card,
+      .token-card,
+      .library-card,
+      .community-card,
+      .map-copy,
+      .support-copy {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" aria-label="KLINE ODYSSEY primary navigation">
+    <nav class="nav">
+      <a class="brand" href="./" aria-label="KLINE ODYSSEY Home">
+        <img src="logo.png" alt="KGEN logo">
+        <span>KLINE ODYSSEY</span>
+      </a>
+      <div class="nav-links">
+        <a href="#temples">Temples</a>
+        <a href="#token">Token</a>
+        <a href="#map">Universe Map</a>
+        <a href="#library">Whitepaper</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <p class="eyebrow">Official Homepage V3.0 Universe Portal</p>
+        <h1>KLINE ODYSSEY</h1>
+        <p class="hero-subtitle">KGEN 宇宙文明生命引擎</p>
+        <p class="tagline">Where the Market Becomes the Myth. 花果山台灣以市場、信念、AI 與 Web3 構築可演化的金融文明。</p>
+        <div class="hero-actions" aria-label="Primary actions">
+          <a class="button primary" href="K線西遊記/index.html">進入宇宙</a>
+          <a class="button dark" href="https://www.youtube.com/@klineodyssey" target="_blank" rel="noopener">YouTube</a>
+          <a class="button dark" href="KGEN/whitepaper/">Whitepaper</a>
+          <a class="button cyan" href="K線西遊記/temples/12345/index.html">12345 五指山</a>
+        </div>
+        <div class="hero-stats" aria-label="Universe overview">
+          <div class="stat"><b>123</b><span>Universe Map coordinates</span></div>
+          <div class="stat"><b>13+</b><span>神殿與文明節點</span></div>
+          <div class="stat"><b>V3.0</b><span>Official portal generation</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-dark" id="youtube">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>YouTube 宇宙影像台</h2>
+          <p>保留 README 內官方影片、最新影片與 Shorts 入口，作為 KGEN 文明影像記錄。</p>
+        </div>
+        <div class="media-grid">
+          <article class="media-card">
+            <iframe class="video-frame" src="https://www.youtube.com/embed/akp4K_uzJ28?playsinline=1&rel=0" title="KLINE ODYSSEY official video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="card-body">
+              <h3>README 官方影片</h3>
+              <p>KLINE ODYSSEY 的宇宙宣言與 Genesis 影像入口。</p>
+            </div>
+          </article>
+          <article class="media-card">
+            <iframe class="video-frame short" src="https://www.youtube.com/embed/a-9JMU6uS6g?playsinline=1&rel=0" title="KLINE ODYSSEY latest video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="card-body">
+              <h3>Latest Video</h3>
+              <p>最新短影音節點，延續 README 的自動更新區塊。</p>
+            </div>
+          </article>
+          <article class="media-card">
+            <iframe class="video-frame short" src="https://www.youtube.com/embed/7EIa8akF-v4?playsinline=1&rel=0" title="KGEN Universe Shorts" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="card-body">
+              <h3>Shorts 入口</h3>
+              <p><a href="https://www.youtube.com/shorts/7EIa8akF-v4" target="_blank" rel="noopener">開啟 YouTube Shorts</a></p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="temples">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>一圖一神殿</h2>
+          <p>每座神殿都是 KGEN Universe 的獨立器官，連接金融、戰鬥、銀行、交易所與文明試煉。</p>
+        </div>
+        <div class="temple-grid">
+          <a class="temple-card" href="K線西遊記/temples/12345/index.html">
+            <div class="temple-image"><img src="assets/wukong_caishen.png" alt="12345 五指山悟空財神殿"></div>
+            <div class="card-body"><div class="temple-meta"><span>12345</span><span>Heart</span></div><h3>五指山悟空財神殿</h3><p>主生命心臟、wallet、發財金與玩家進場基地。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/16888/index.html">
+            <div class="temple-image"><img src="K線西遊記/temples/16888/assets/fairy.png" alt="16888 廣寒宮"></div>
+            <div class="card-body"><div class="temple-meta"><span>16888</span><span>Moon</span></div><h3>廣寒宮</h3><p>K 線引擎、空方基地、月面文明觀測點。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/11520/index.html">
+            <div class="temple-graphic" style="--c1:#042b38;--c2:#0c8b78"><span>11520</span></div>
+            <div class="card-body"><div class="temple-meta"><span>11520</span><span>Exchange</span></div><h3>花果山交易所</h3><p>器官交易、Swap、LP、文明資產流動市場。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/18888/index.html">
+            <div class="temple-graphic" style="--c1:#24143d;--c2:#8467d7"><span>18888</span></div>
+            <div class="card-body"><div class="temple-meta"><span>18888</span><span>Bank</span></div><h3>神明銀行</h3><p>抵押、清算、資金調度與神殿信用層。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/18921/index.html">
+            <div class="temple-graphic" style="--c1:#1c1a16;--c2:#9e7330"><span>18921</span></div>
+            <div class="card-body"><div class="temple-meta"><span>18921</span><span>Forge</span></div><h3>斬妖台</h3><p>Auto LP、斬妖淨化、風險分流與 LP 鍛造。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/20888/index.html">
+            <div class="temple-graphic" style="--c1:#300909;--c2:#d7491f"><span>20888</span></div>
+            <div class="card-body"><div class="temple-meta"><span>20888</span><span>Risk</span></div><h3>火焰山</h3><p>爆倉清算、風險教育、試煉燃燒場。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/21319/index.html">
+            <div class="temple-graphic" style="--c1:#171c38;--c2:#5670f0"><span>21319</span></div>
+            <div class="card-body"><div class="temple-meta"><span>21319</span><span>Trial</span></div><h3>雷音寺</h3><p>宇宙關卡節點，市場噪音轉化為修行回路。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/21520/index.html">
+            <div class="temple-graphic" style="--c1:#2f2607;--c2:#d1a933"><span>21520</span></div>
+            <div class="card-body"><div class="temple-meta"><span>21520</span><span>Hall</span></div><h3>大雄寶殿</h3><p>佛法任務關卡，文明秩序與精神協議中心。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/21666/index.html">
+            <div class="temple-graphic" style="--c1:#102b24;--c2:#78e0a6"><span>21666</span></div>
+            <div class="card-body"><div class="temple-meta"><span>21666</span><span>Light</span></div><h3>佛光普照</h3><p>淨化關卡，讓市場暗能量回到文明循環。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/21888/index.html">
+            <div class="temple-graphic" style="--c1:#22113a;--c2:#7d55bb"><span>21888</span></div>
+            <div class="card-body"><div class="temple-meta"><span>21888</span><span>Fear</span></div><h3>恐懼女鬼</h3><p>恐懼試煉，把波動、停損與倉位恐懼可視化。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/22188/index.html">
+            <div class="temple-graphic" style="--c1:#2a091f;--c2:#a62471"><span>22188</span></div>
+            <div class="card-body"><div class="temple-meta"><span>22188</span><span>Boss</span></div><h3>貪婪魔影</h3><p>貪婪 Boss 關卡，考驗槓桿、追高與倖存紀律。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/23333/index.html">
+            <div class="temple-graphic" style="--c1:#241a08;--c2:#efc35f"><span>23333</span></div>
+            <div class="card-body"><div class="temple-meta"><span>23333</span><span>Final</span></div><h3>靈山</h3><p>終極聖地，取經完成後的文明升維節點。</p></div>
+          </a>
+          <a class="temple-card" href="K線西遊記/temples/108000/index.html">
+            <div class="temple-graphic" style="--c1:#351209;--c2:#ff8a3c"><span>108000</span></div>
+            <div class="card-body"><div class="temple-meta"><span>108000</span><span>Mars</span></div><h3>火星豪宅</h3><p>500 席位、分紅池、火星基地與 5D 入口。</p></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-gold" id="dna">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>DNA / GA 演化中心</h2>
+          <p>從玩家試煉到銀行級操盤手聘任，KGEN 將市場行為轉成可回測、可升等、可分紅的文明 DNA。</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><h3>打怪練等 = DNA 升級</h3><p>每一次任務、回測、風險承擔與紀律執行，都沉澱為玩家 DNA。</p></article>
+          <article class="feature-card"><h3>GA100 -> GA1000</h3><p>以 Genetic Algorithm 演化模型讓策略從初階樣本走向高階族群競爭。</p></article>
+          <article class="feature-card"><h3>回測歷史績效</h3><p>策略不靠口號，必須回到歷史資料、績效曲線與最大回撤。</p></article>
+          <article class="feature-card"><h3>多空精準度</h3><p>將多方、空方、盤整、爆量與時間邊界轉為可比較的命中指標。</p></article>
+          <article class="feature-card"><h3>賺錢升等</h3><p>績效、風控、存活時間與任務完成度共同決定等級，而不是單次勝負。</p></article>
+          <article class="feature-card"><h3>銀行聘請基金操盤手</h3><p>神明銀行可依績效紀錄聘請操盤手，並依制度分配績效分紅。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="token">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>KGEN Token Dashboard</h2>
+          <p>BNB Smart Chain 上的 KLINE GENESIS，保留 README 內正式合約、交易、LP 與稅率不可變說明。</p>
+        </div>
+        <div class="token-grid">
+          <article class="token-card">
+            <h3>Contract</h3>
+            <code class="token-address">0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code>
+            <div class="action-row">
+              <a class="button primary" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">BscScan</a>
+              <a class="button dark" href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">PancakeSwap</a>
+            </div>
+          </article>
+          <article class="token-card">
+            <h3>Market Monitors</h3>
+            <p>公開流動性與價格圖表入口。</p>
+            <div class="link-list">
+              <a href="https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" rel="noopener"><span>GeckoTerminal</span><span>Open</span></a>
+              <a href="https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/" target="_blank" rel="noopener"><span>CMC DexScan</span><span>Open</span></a>
+            </div>
+          </article>
+          <article class="token-card">
+            <h3>LP Pair</h3>
+            <code class="token-address">0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2</code>
+            <p>KGEN / WBNB liquidity pair on BSC.</p>
+            <div class="link-list">
+              <a href="https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" rel="noopener"><span>LP Pair on BscScan</span><span>Open</span></a>
+            </div>
+          </article>
+          <article class="token-card">
+            <h3>Burn / Tax Immutability</h3>
+            <p><strong>Burn:</strong> 0.1% of each buy and sell is sent to the null address.</p>
+            <p><strong>Tax:</strong> Buy/sell tax is fixed at 0.30% via Solidity constant values. There is no tax-rate setter.</p>
+            <div class="link-list">
+              <a href="docs/KGEN_TAX_IMMUTABILITY.md"><span>Tax immutability note</span><span>Read</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-dark" id="map">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>Universe Map Portal</h2>
+          <p>世界觀來源：UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json。V10.2 以 123 個座標概念建立 KGEN 宇宙距離與文明點位。</p>
+        </div>
+        <div class="map-panel">
+          <div class="map-visual" role="img" aria-label="KGEN universe coordinate concept map">
+            <div class="axis"></div>
+            <span class="map-node n1"></span>
+            <span class="map-node n2"></span>
+            <span class="map-node n3"></span>
+            <span class="map-node n4"></span>
+            <span class="map-node n5"></span>
+          </div>
+          <div class="map-copy">
+            <h3>123 Coordinate Civilization</h3>
+            <p>Universe Map 將市場、土地、神殿、任務與玩家座標放進同一套 K-Sphere 世界觀。</p>
+            <ul>
+              <li>total_points: 123</li>
+              <li>scale reference: 16888 = 384400 km</li>
+              <li>runtime axes: K-Sphere, Z-KZ, X-KX, Y-KY</li>
+            </ul>
+            <div class="link-list">
+              <a href="docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"><span>Open Universe Map JSON</span><span>JSON</span></a>
+              <a href="K線西遊記/index.html"><span>Enter Galaxy Portal</span><span>Portal</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="library">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>Whitepaper Library</h2>
+          <p>PrimeForge、KGEN 制度、Universe Map、Runtime、Biology、Physics 的正式文件入口。</p>
+        </div>
+        <div class="library-grid">
+          <article class="library-card"><h3>PrimeForge Boot</h3><p>AI 與 Runtime 開工前的 Genesis Boot Sequence。</p><div class="link-list"><a href="PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"><span>Boot V1.4</span><span>Read</span></a></div></article>
+          <article class="library-card"><h3>KGEN Whitepaper</h3><p>Galactic Bank 500Y Epoch V7.5.2 與 KGEN 制度核心。</p><div class="link-list"><a href="KGEN/whitepaper/"><span>KGEN Whitepaper Hub</span><span>Open</span></a><a href="KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md"><span>Formal Whitepaper V7.5.2</span><span>Read</span></a></div></article>
+          <article class="library-card"><h3>Universe Map</h3><p>KLINE Universe V10.2 距離與座標完整資料。</p><div class="link-list"><a href="docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"><span>UniverseMap V10.2</span><span>JSON</span></a></div></article>
+          <article class="library-card"><h3>Runtime / Biology / Physics</h3><p>CURRENT Physics、Runtime Spec、Civilization Biology 與系統索引。</p><div class="link-list"><a href="docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"><span>Physics Runtime CURRENT</span><span>Read</span></a><a href="docs/spec/KGEN_Runtime_Specification_V1_0.md"><span>Runtime Specification</span><span>Read</span></a><a href="docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md"><span>Biology Runtime</span><span>Read</span></a></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-gold" id="community">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>Community</h2>
+          <p>官方社群入口依 README 保留，連接影音、社群、程式庫與 LINE 官方帳號。</p>
+        </div>
+        <div class="community-grid">
+          <div class="community-card"><a href="https://www.youtube.com/@klineodyssey" target="_blank" rel="noopener"><span>YouTube</span><span>Channel</span></a></div>
+          <div class="community-card"><a href="https://t.me/klineodyssey" target="_blank" rel="noopener"><span>Telegram</span><span>Join</span></a></div>
+          <div class="community-card"><a href="https://x.com/klineodyssey" target="_blank" rel="noopener"><span>X</span><span>Follow</span></a></div>
+          <div class="community-card"><a href="https://www.facebook.com/le.tian.di.2025" target="_blank" rel="noopener"><span>Facebook</span><span>Open</span></a></div>
+          <div class="community-card"><a href="https://www.tiktok.com/@klineodyssey" target="_blank" rel="noopener"><span>TikTok</span><span>Open</span></a></div>
+          <div class="community-card"><a href="https://lin.ee/b8X18F7" target="_blank" rel="noopener"><span>LINE</span><span>Official</span></a></div>
+          <div class="community-card"><a href="https://github.com/klineodyssey/kline-odyssey" target="_blank" rel="noopener"><span>GitHub</span><span>Repo</span></a></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="support">
+      <div class="section-inner">
+        <div class="support-layout">
+          <div class="support-image" role="img" aria-label="KGEN civilization support image"></div>
+          <div class="support-copy">
+            <p class="eyebrow">Donate / Civilization Support</p>
+            <h2>支持花果山台灣</h2>
+            <p>《花果山台灣・KLINE ODYSSEY》同時承載公益、新文創作與社會支持行動。所有捐款將用於宇宙文明建設、AI 與創作研發、公益用途與專案制社會支持。</p>
+            <ul>
+              <li>自願性支持，不構成投資、借貸或收益承諾。</li>
+              <li>公益與創作支持以專案制、公開透明方式執行。</li>
+              <li>未來若成立正式公益法人，將另行公告。</li>
+            </ul>
+            <div class="action-row" style="margin-top:16px">
+              <a class="button primary" href="whitepaper/donation/">官方捐款入口</a>
+              <a class="button dark" href="whitepaper/donation/Donation_Wallet.md">Donation Wallet</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p><strong>PrimeForge 創世碑文</strong></p>
+      <p>PrimeForge 創世，讓市場成為神話，讓文明在 K 線、AI、信念與鏈上紀錄中繼續演化。</p>
+      <p><strong>花果山台灣・信念不滅・市場無界</strong></p>
+      <p>KLINE ODYSSEY - Where the Market Becomes the Myth.</p>
+    </div>
+  </footer>
+</body>
+</html>
