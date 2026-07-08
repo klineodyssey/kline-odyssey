@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title">
+  <title id="title">K-Sphere and CT Time Market Model</title>
+  <defs>
+    <radialGradient id="sphere" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff2bc"/>
+      <stop offset="35%" stop-color="#f3c766"/>
+      <stop offset="80%" stop-color="#253b55"/>
+      <stop offset="100%" stop-color="#070706"/>
+    </radialGradient>
+  </defs>
+  <rect width="1400" height="820" rx="24" fill="#070706"/>
+  <text x="700" y="86" text-anchor="middle" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="42" font-weight="900" fill="#fff5d1">K-Sphere / CT Time Market</text>
+  <circle cx="700" cy="410" r="260" fill="url(#sphere)" opacity="0.78"/>
+  <circle cx="700" cy="410" r="260" fill="none" stroke="#f3c766" stroke-width="5"/>
+  <path d="M220 410 H1180" stroke="#48d9ff" stroke-width="5"/>
+  <path d="M700 700 V135" stroke="#f3c766" stroke-width="5"/>
+  <path d="M310 540 C490 470 910 470 1090 540" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.72"/>
+  <path d="M310 280 C490 350 910 350 1090 280" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.72"/>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" font-size="28" font-weight="800" fill="#fff5d1">
+    <text x="1188" y="402">+K</text>
+    <text x="150" y="402">-K Mirror</text>
+    <text x="720" y="148">Future Coordinate</text>
+    <text x="720" y="710">Past Settlement</text>
+    <text x="548" y="410" fill="#070706">CT Present</text>
+  </g>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" font-size="23" fill="#d8ccb0">
+    <text x="92" y="760">Rule: future coordinates may be quoted; future results must never be claimed.</text>
+  </g>
+</svg>

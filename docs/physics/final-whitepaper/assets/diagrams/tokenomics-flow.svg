@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title">
+  <title id="title">KGEN Tokenomics Tax Flow</title>
+  <rect width="1400" height="820" rx="24" fill="#070706"/>
+  <text x="700" y="90" text-anchor="middle" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="44" font-weight="900" fill="#fff5d1">KGEN Tax Flow on AMM Buy/Sell Only</text>
+  <text x="700" y="135" text-anchor="middle" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="24" fill="#d8ccb0">Wallet-to-wallet transfers are no-tax.</text>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle" font-weight="900">
+    <rect x="90" y="300" width="260" height="120" rx="14" fill="#233a52" stroke="#48d9ff" stroke-width="3"/>
+    <text x="220" y="350" font-size="30" fill="#e8f8ff">AMM Buy/Sell</text>
+    <text x="220" y="390" font-size="24" fill="#d8ccb0">Taxed Event</text>
+    <rect x="570" y="290" width="260" height="140" rx="14" fill="#f3c766" stroke="#ffe7a0" stroke-width="3"/>
+    <text x="700" y="350" font-size="36" fill="#171008">0.30%</text>
+    <text x="700" y="395" font-size="24" fill="#171008">Total Tax</text>
+    <rect x="1040" y="300" width="270" height="120" rx="14" fill="#1f3d2b" stroke="#76f0b2" stroke-width="3"/>
+    <text x="1175" y="350" font-size="30" fill="#effff5">Net Transfer</text>
+    <text x="1175" y="390" font-size="24" fill="#d8ccb0">99.70%</text>
+  </g>
+  <g stroke="#d8a84b" stroke-width="5" fill="none" marker-end="url(#arrow)">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#d8a84b"/>
+      </marker>
+    </defs>
+    <path d="M350 360 H560"/>
+    <path d="M830 360 H1030"/>
+    <path d="M700 430 V520"/>
+  </g>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle" font-weight="800">
+    <rect x="120" y="560" width="260" height="100" rx="12" fill="#301a12" stroke="#ff6a4a"/>
+    <text x="250" y="618" font-size="28" fill="#fff5d1">Burn 0.10%</text>
+    <rect x="430" y="560" width="260" height="100" rx="12" fill="#2b2410" stroke="#f3c766"/>
+    <text x="560" y="618" font-size="28" fill="#fff5d1">Bank 0.10%</text>
+    <rect x="740" y="560" width="260" height="100" rx="12" fill="#142c22" stroke="#76f0b2"/>
+    <text x="870" y="618" font-size="28" fill="#fff5d1">Reward 0.05%</text>
+    <rect x="1050" y="560" width="260" height="100" rx="12" fill="#1c2638" stroke="#48d9ff"/>
+    <text x="1180" y="618" font-size="28" fill="#fff5d1">AutoLP 0.05%</text>
+  </g>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title">
+  <title id="title">Universe Map V10.2 Portal</title>
+  <rect width="1400" height="820" rx="24" fill="#070706"/>
+  <text x="700" y="90" text-anchor="middle" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="44" font-weight="900" fill="#fff5d1">Universe Map V10.2 / 123 Coordinates</text>
+  <g stroke="#22344f" stroke-width="2">
+    <path d="M120 200 H1280"/>
+    <path d="M120 300 H1280"/>
+    <path d="M120 400 H1280"/>
+    <path d="M120 500 H1280"/>
+    <path d="M120 600 H1280"/>
+    <path d="M250 160 V660"/>
+    <path d="M450 160 V660"/>
+    <path d="M650 160 V660"/>
+    <path d="M850 160 V660"/>
+    <path d="M1050 160 V660"/>
+  </g>
+  <path d="M120 410 H1280" stroke="#f3c766" stroke-width="5"/>
+  <g fill="#48d9ff" stroke="#ffffff" stroke-width="2">
+    <circle cx="250" cy="420" r="12"/>
+    <circle cx="370" cy="360" r="10"/>
+    <circle cx="520" cy="500" r="14"/>
+    <circle cx="700" cy="410" r="24" fill="#f3c766"/>
+    <circle cx="850" cy="310" r="12"/>
+    <circle cx="990" cy="560" r="11"/>
+    <circle cx="1160" cy="380" r="15"/>
+  </g>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" font-weight="800" fill="#fff5d1">
+    <text x="720" y="402" font-size="28">K0 / Coordinate Origin</text>
+    <text x="220" y="700" font-size="25">123 coordinate concepts</text>
+    <text x="220" y="735" font-size="22" fill="#d8ccb0">Scale reference: 16888 = 384,400 km</text>
+    <text x="820" y="700" font-size="25">Runtime mapping</text>
+    <text x="820" y="735" font-size="22" fill="#d8ccb0">K-Sphere, XYZ, KX/KY/KZ, Z-KZ</text>
+  </g>
+</svg>

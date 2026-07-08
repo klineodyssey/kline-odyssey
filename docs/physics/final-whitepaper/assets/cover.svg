@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200" role="img" aria-labelledby="title desc">
+  <title id="title">KGEN Universe Physics Runtime V4.0 Official Whitepaper Final Cover</title>
+  <desc id="desc">Official black and gold cover for the KGEN Universe Physics Runtime V4.0 final whitepaper.</desc>
+  <defs>
+    <radialGradient id="core" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#f7d985" stop-opacity="0.95"/>
+      <stop offset="24%" stop-color="#b77b2d" stop-opacity="0.46"/>
+      <stop offset="58%" stop-color="#10243d" stop-opacity="0.36"/>
+      <stop offset="100%" stop-color="#050506" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0%" x2="100%">
+      <stop offset="0%" stop-color="#8f5f1e"/>
+      <stop offset="45%" stop-color="#ffe7a0"/>
+      <stop offset="100%" stop-color="#c28736"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1600" height="2200" fill="#050506"/>
+  <rect width="1600" height="2200" fill="url(#core)"/>
+  <g opacity="0.38">
+    <circle cx="800" cy="900" r="520" fill="none" stroke="#f3c766" stroke-width="3"/>
+    <circle cx="800" cy="900" r="380" fill="none" stroke="#48d9ff" stroke-width="2"/>
+    <circle cx="800" cy="900" r="245" fill="none" stroke="#ffffff" stroke-width="1"/>
+    <path d="M170 900 C420 770, 1090 770, 1430 900 C1090 1040, 420 1040, 170 900Z" fill="none" stroke="#f3c766" stroke-width="5"/>
+    <path d="M230 1060 C500 970, 1060 970, 1370 1060" fill="none" stroke="#48d9ff" stroke-width="3"/>
+  </g>
+  <g filter="url(#glow)">
+    <circle cx="800" cy="900" r="62" fill="#fff2bc"/>
+    <circle cx="800" cy="900" r="24" fill="#ffffff"/>
+  </g>
+  <g fill="#f8edcd" font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle">
+    <text x="800" y="250" font-size="46" font-weight="700" letter-spacing="5">KLINE ODYSSEY</text>
+    <text x="800" y="345" font-size="74" font-weight="900">KGEN Universe Physics Runtime</text>
+    <text x="800" y="430" font-size="54" font-weight="800" fill="url(#gold)">V4.0 OFFICIAL WHITEPAPER FINAL</text>
+    <text x="800" y="515" font-size="36" font-weight="600" fill="#d5c9aa">K-Sphere / CT Time Market / Bio-Life / Tokenomics Unified Edition</text>
+  </g>
+  <g fill="#f3c766" font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle">
+    <text x="800" y="1300" font-size="42" font-weight="900">Where the Market Becomes the Myth</text>
+    <text x="800" y="1370" font-size="34" font-weight="700">花果山台灣・信念不滅・市場無界</text>
+  </g>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle">
+    <rect x="270" y="1580" width="1060" height="260" rx="22" fill="rgba(0,0,0,0.36)" stroke="#d7a84a" stroke-width="2"/>
+    <text x="800" y="1660" font-size="34" font-weight="800" fill="#fff5d1">Author</text>
+    <text x="800" y="1725" font-size="42" font-weight="900" fill="#ffffff">PrimeForge / 樂天帝</text>
+    <text x="800" y="1800" font-size="30" fill="#d5c9aa">Release Date: 2026-07-09</text>
+  </g>
+  <g fill="#a99466" font-family="Arial, 'Noto Sans TC', sans-serif" text-anchor="middle">
+    <text x="800" y="2015" font-size="28">Official distribution-ready PDF for BscScan, CoinMarketCap, and CoinGecko review.</text>
+  </g>
+</svg>

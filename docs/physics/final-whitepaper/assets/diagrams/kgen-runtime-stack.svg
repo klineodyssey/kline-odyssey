@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title">
+  <title id="title">KGEN Universe Runtime Stack</title>
+  <rect width="1400" height="820" rx="24" fill="#070706"/>
+  <rect x="54" y="54" width="1292" height="712" rx="18" fill="#11100d" stroke="#d8a84b" stroke-width="3"/>
+  <text x="700" y="120" text-anchor="middle" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="44" font-weight="900" fill="#fff5d1">KGEN Universe Runtime Stack</text>
+  <g font-family="Arial, 'Noto Sans TC', sans-serif" font-size="28" font-weight="800" text-anchor="middle">
+    <rect x="140" y="180" width="1120" height="90" rx="12" fill="#f3c766"/>
+    <text x="700" y="237" fill="#171008">PrimeForge Boot Sequence V1.4</text>
+    <rect x="190" y="310" width="1020" height="90" rx="12" fill="#233a52" stroke="#48d9ff"/>
+    <text x="700" y="367" fill="#e8f8ff">Physics Runtime CURRENT / V3.7</text>
+    <rect x="240" y="440" width="920" height="90" rx="12" fill="#1f3d2b" stroke="#76f0b2"/>
+    <text x="700" y="497" fill="#effff5">Universe Map V10.2 / 123 Coordinates</text>
+    <rect x="290" y="570" width="820" height="90" rx="12" fill="#34203e" stroke="#bfa7ff"/>
+    <text x="700" y="627" fill="#fff1ff">Temples / Contracts / Frontend / AI Runtime</text>
+  </g>
+  <g stroke="#d8a84b" stroke-width="4" fill="none" marker-end="url(#arrow)">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#d8a84b"/>
+      </marker>
+    </defs>
+    <path d="M700 270 L700 310"/>
+    <path d="M700 400 L700 440"/>
+    <path d="M700 530 L700 570"/>
+  </g>
+</svg>
