@@ -1,43 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="KGEN">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="KGEN token icon">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
-      <stop offset="0%" stop-color="#1b1406"/>
-      <stop offset="55%" stop-color="#080808"/>
+    <radialGradient id="coinBg" cx="43%" cy="33%" r="74%">
+      <stop offset="0%" stop-color="#241806"/>
+      <stop offset="48%" stop-color="#090806"/>
       <stop offset="100%" stop-color="#000000"/>
     </radialGradient>
-    <linearGradient id="gold" x1="7" y1="5" x2="25" y2="27">
-      <stop offset="0%" stop-color="#fff1a8"/>
-      <stop offset="35%" stop-color="#f6c34a"/>
-      <stop offset="70%" stop-color="#b87312"/>
-      <stop offset="100%" stop-color="#ffe07a"/>
+    <linearGradient id="gold" x1="5" y1="4" x2="27" y2="28">
+      <stop offset="0%" stop-color="#fff6bf"/>
+      <stop offset="28%" stop-color="#f9cb4f"/>
+      <stop offset="62%" stop-color="#b97013"/>
+      <stop offset="100%" stop-color="#ffe58b"/>
     </linearGradient>
-    <linearGradient id="darkGold" x1="10" y1="8" x2="22" y2="24">
-      <stop offset="0%" stop-color="#f4c75c"/>
-      <stop offset="100%" stop-color="#8a520b"/>
+    <linearGradient id="goldDeep" x1="8" y1="7" x2="24" y2="26">
+      <stop offset="0%" stop-color="#ffeaa0"/>
+      <stop offset="42%" stop-color="#e1a42d"/>
+      <stop offset="100%" stop-color="#7b4307"/>
     </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="0.75" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
 
-  <circle cx="16" cy="16" r="15" fill="url(#bg)"/>
-  <circle cx="16" cy="16" r="14.25" fill="none" stroke="url(#gold)" stroke-width="1.6"/>
-  <circle cx="16" cy="16" r="11.35" fill="none" stroke="#9f6a16" stroke-width="0.75" opacity="0.95"/>
+  <circle cx="16" cy="16" r="14" fill="url(#gold)"/>
+  <circle cx="16" cy="16" r="12.35" fill="url(#coinBg)" stroke="#6d430c" stroke-width="0.9"/>
+  <circle cx="16" cy="16" r="9.85" fill="none" stroke="#d99b28" stroke-width="0.65" opacity="0.8"/>
+  <path d="M5.9 12.7c2.55-5.35 7.8-8.05 13.2-6.95 2.25.45 4.2 1.5 5.85 3.05-2.3-2.1-5.8-2.95-9.1-2.2-4.1.95-7.45 3.9-9.95 6.1z"
+        fill="#fff2a8" opacity="0.26"/>
 
-  <ellipse cx="16" cy="16" rx="12.5" ry="4.7" fill="none" stroke="#dca83a" stroke-width="0.65" opacity="0.8" transform="rotate(-23 16 16)"/>
-  <ellipse cx="16" cy="16" rx="12.5" ry="4.7" fill="none" stroke="#ffe082" stroke-width="0.45" opacity="0.65" transform="rotate(23 16 16)"/>
-
-  <polygon points="16,5.8 24.4,10.6 24.4,21.4 16,26.2 7.6,21.4 7.6,10.6"
-           fill="#0b0b0b" stroke="url(#gold)" stroke-width="1.15"/>
-
-  <path d="M12.1 9.1h3.15v5.15l4.6-5.15h3.55l-5.05 5.55 5.45 8.25h-3.75l-3.82-5.95-.98 1.08v4.87H12.1z"
-        fill="url(#gold)" filter="url(#glow)"/>
-
-  <circle cx="9.1" cy="9.2" r="0.85" fill="#ffe58a"/>
-  <circle cx="23.2" cy="22.9" r="0.7" fill="#f7c85a"/>
-  <path d="M16 2.4l.55 1.25 1.25.55-1.25.55L16 6l-.55-1.25-1.25-.55 1.25-.55z" fill="#fff0a1"/>
+  <path d="M7.55 6.05h6.05v8.45l7.85-8.45h5.9l-8.65 9.55 9.1 10.35h-6.35l-6.25-7.15-1.6 1.75v5.4H7.55z"
+        fill="#5f3306" opacity="0.68"/>
+  <path d="M7.25 5.55h6.1v8.55l7.95-8.55h5.95l-8.72 9.65 9.22 10.55h-6.5l-6.22-7.22-1.68 1.78v5.44h-6.1z"
+        fill="url(#goldDeep)" stroke="#fff1a8" stroke-width="0.55" stroke-linejoin="round"/>
+  <path d="M9.25 7.25h2.05v16.7H9.25zM14 15.35l7.15-7.7h1.85l-7.75 8.6 7.85 8h-1.95l-6.95-7.9z"
+        fill="#fff4b3" opacity="0.32"/>
+  <circle cx="23.4" cy="8.05" r="1.05" fill="#fff0a3" opacity="0.85"/>
+  <circle cx="7.65" cy="24.25" r="0.7" fill="#d99621" opacity="0.78"/>
 </svg>
