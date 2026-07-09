@@ -1,4 +1,4 @@
-# KGEN AI Company Automation V4.0
+# KGEN AI Company Automation V5.0
 
 **Status:** Active / Draft for Review  
 **Manager:** Codex  
@@ -42,3 +42,11 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 ## Non-Negotiable Rule
 
 Cursor does not rely on chat memory. Cursor reads GitHub WorkQueue and GitHub files. Codex reviews every report before commit or push.
+
+## Cursor Handoff Branch Workflow
+
+V5.0 formally adopts Cursor Handoff Branch Workflow. Cursor pushes only `cursor-handoff/<Task-ID>`. Codex fetches that branch, reviews the diff and report, and only Codex merges approved work into main.
+
+- Workflow: `KGEN-AI-Company/CURSOR_HANDOFF_BRANCH_WORKFLOW.md`
+- Codex dispatcher: `KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md`
+- Lifecycle: `KGEN-AI-Company/WORKORDER_LIFECYCLE.md`

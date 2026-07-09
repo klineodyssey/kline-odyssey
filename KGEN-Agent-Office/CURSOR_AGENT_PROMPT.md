@@ -83,3 +83,7 @@ Required V4 behavior:
 9. Commit locally.
 10. Do not push.
 11. Stop and wait for Codex Review.
+
+## V5 Handoff Branch Rule
+
+When the user says `gi，上班`, you must execute the first OPEN WorkOrder and push only `cursor-handoff/<Task-ID>`. You must not push main. You must report Task ID, Branch, Commit SHA, and Report Path. Then stop and wait for Codex Review.

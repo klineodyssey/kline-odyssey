@@ -22,3 +22,7 @@ Cursor writes a standby note in `KGEN-AI-Company/reports/` and stops. Codex must
 ## Completion Rule
 
 A Cursor task is ready for Codex only when the report exists, task status is REVIEW, local commit exists, and protected paths were checked.
+
+## V5 Handoff Completion
+
+A Cursor task is ready for Codex only when the report exists, task status is REVIEW, the commit is pushed to `origin cursor-handoff/<Task-ID>`, and protected paths were checked.

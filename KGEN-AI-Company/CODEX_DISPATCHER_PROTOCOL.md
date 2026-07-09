@@ -1,22 +1,37 @@
-# Codex Dispatcher Protocol
+# Codex Dispatcher Protocol V5.0
 
-Codex is the Dispatcher for KGEN AI Company V4.0. Cursor executes; Codex reviews and publishes.
+Codex is the Dispatcher. Cursor works on handoff branches. Codex reviews and publishes main.
 
-## Codex Responsibilities
+## Codex Handoff Review Steps
 
-1. Review Cursor report.
-2. Approve or reject the result.
-3. Update `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`.
-4. Change the WorkOrder status to DONE, REJECTED, or BLOCKED.
-5. Push approved changes to `origin/main`.
-6. If rejected, write exactly how Cursor should fix it next time.
-7. Keep WorkQueue clean and ordered.
-8. Keep Cursor supplied with OPEN tasks.
+1. Run `git fetch origin --prune`.
+2. Identify the Cursor branch `cursor-handoff/<Task-ID>`.
+3. Inspect `origin/cursor-handoff/<Task-ID>`.
+4. Review diff against `origin/main`.
+5. Read the report under `KGEN-AI-Company/reports/`.
+6. Check protected paths.
+7. Check Canon alignment.
+8. Decide APPROVED or REJECTED.
 
-## Review Rule
+## If Approved
 
-Codex cannot approve a Cursor task unless the Cursor commit and report are visible in the repository being reviewed. If the commit or report is missing, Codex marks the task BLOCKED with the missing evidence.
+1. Merge the handoff branch into main.
+2. Update `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`.
+3. Change the WorkOrder status from REVIEW to DONE.
+4. Push `origin main`.
 
-## No Force Rule
+## If Rejected
 
-Codex must not force push and must not reset user work to make review easier.
+1. Write the rejection reason in `CODEX_REVIEW_LOG.md`.
+2. Change the WorkOrder status from REVIEW to REJECTED.
+3. Add a new FIX task such as `FIX-001` to the WorkQueue.
+4. State exactly what Cursor must fix next time.
+5. Do not merge the handoff branch.
+
+## Dispatcher Responsibilities
+
+- Keep WorkQueue clean.
+- Keep Cursor supplied with OPEN tasks.
+- Never force push.
+- Never reset user work.
+- Never approve a task if the handoff branch, report, or commit SHA is missing.

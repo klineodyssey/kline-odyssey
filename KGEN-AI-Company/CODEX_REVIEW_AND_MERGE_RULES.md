@@ -22,3 +22,7 @@ Only approved work may be committed. Only Codex pushes to origin/main unless the
 ## Rejection Rule
 
 If work is incomplete, unsafe, or Canon-conflicting, Codex marks the task REJECTED and writes a corrected WorkOrder.
+
+## V5 Handoff Branch Review
+
+Codex reviews Cursor work from `origin/cursor-handoff/<Task-ID>`. Codex checks diff against `origin/main`, reads the report, verifies protected paths and Canon, then merges approved work into main. Rejected work is not merged and receives a FIX task.

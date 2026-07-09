@@ -5,23 +5,27 @@
 | Status | Meaning | Owner |
 |---|---|---|
 | OPEN | Ready for Cursor to accept | Codex |
-| IN_PROGRESS | Cursor accepted and is working | Cursor |
+| IN_PROGRESS | Cursor accepted and is working on `cursor-handoff/<Task-ID>` | Cursor |
 | BLOCKED | Work cannot continue without Codex or human decision | Cursor or Codex |
-| REVIEW | Cursor finished report and waits for Codex | Cursor |
-| APPROVED | Codex accepted the result | Codex |
-| REJECTED | Codex rejected the result and requires correction | Codex |
-| DONE | Codex merged, committed, pushed, or closed the task | Codex |
+| REVIEW | Cursor pushed `cursor-handoff/<Task-ID>` and waits for Codex | Cursor |
+| APPROVED | Codex accepted the handoff branch | Codex |
+| REJECTED | Codex rejected the handoff branch and requires correction | Codex |
+| DONE | Codex merged to main and pushed origin/main | Codex |
 
-## Lifecycle
+## Normal Lifecycle
 
 OPEN -> IN_PROGRESS -> REVIEW -> APPROVED -> DONE
 
-Alternative paths:
+## Handoff Branch Lifecycle
 
-- IN_PROGRESS -> BLOCKED
-- REVIEW -> REJECTED -> OPEN
-- REVIEW -> BLOCKED
+1. OPEN: Cursor sees the task.
+2. IN_PROGRESS: Cursor creates or reuses `cursor-handoff/<Task-ID>`.
+3. REVIEW: Cursor commits and pushes `origin cursor-handoff/<Task-ID>`.
+4. APPROVED: Codex reviews diff, report, protected paths, and Canon.
+5. DONE: Codex merges to main and pushes `origin main`.
 
-## Rule
+## Rejection Lifecycle
 
-Cursor can move OPEN to IN_PROGRESS and IN_PROGRESS to REVIEW or BLOCKED. Codex controls APPROVED, REJECTED, DONE, and reopening.
+REVIEW -> REJECTED -> FIX-001 OPEN
+
+If rejected, Codex creates a FIX task and states exactly what Cursor must repair. Cursor does not rewrite history or force push.

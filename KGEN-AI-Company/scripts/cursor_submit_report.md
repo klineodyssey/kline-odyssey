@@ -10,3 +10,7 @@ Before moving a task to REVIEW:
 6. List risks and blockers.
 7. Set WorkOrder status to REVIEW.
 8. Do not push.
+
+## V5 Handoff Push
+
+After completing the report, Cursor commits and pushes `origin cursor-handoff/<Task-ID>`. Cursor reports Task ID, Branch, Commit SHA, and Report Path. Cursor must not push main.

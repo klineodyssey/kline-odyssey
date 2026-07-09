@@ -45,3 +45,7 @@ Cursor must enter KGEN Dispatcher Mode:
 8. Commit locally.
 9. Do not push.
 10. Stop and wait for Codex Review.
+
+## V5 Handoff Branch Mode
+
+When Cursor receives `gi，上班`, Cursor enters Dispatcher Mode and uses Cursor Handoff Branch Workflow. Cursor creates or reuses `cursor-handoff/<Task-ID>`, commits, pushes that handoff branch, reports Task ID, Branch, Commit SHA, and Report Path, then stops. Cursor must not push main.

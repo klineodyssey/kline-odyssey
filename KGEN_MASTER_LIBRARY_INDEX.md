@@ -17,12 +17,12 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Machine-Readable Canon | `KGEN-Canon/` | JSON Canon and AI-readable governance |
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
-| KGEN AI Company Automation V4.0 | `KGEN-AI-Company/` | Codex Dispatcher, Cursor Worker automation, polling, reports, and review workflow |
+| KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, Codex review/merge, reports, and WorkQueue automation |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
 
-## AI Company Automation V4.0
+## AI Company Automation V5.0
 
 | Item | Path | Purpose |
 |---|---|---|

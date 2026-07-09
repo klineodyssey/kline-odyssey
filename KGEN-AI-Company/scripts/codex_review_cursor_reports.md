@@ -11,3 +11,7 @@ Codex review pass:
 7. Mark APPROVED, REJECTED, BLOCKED, or DONE.
 8. Update `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`.
 9. Commit and push only approved work.
+
+## V5 Handoff Branch Review
+
+Codex fetches `origin/cursor-handoff/<Task-ID>`, reviews diff/report/protected paths/Canon, then merges to main only if approved.

@@ -35,3 +35,7 @@ Cursor must execute directly. Cursor must not ask: "What do you want to do today
 - Force push.
 - Modify protected paths.
 - Work on two tasks at once.
+
+## V5 Handoff Branch Update
+
+After completing a task, Cursor must commit and push to `origin cursor-handoff/<Task-ID>`. Cursor must not push main. Cursor reports Task ID, Branch, Commit SHA, and Report Path, then stops.
