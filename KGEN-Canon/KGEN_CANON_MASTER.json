@@ -1,7 +1,8 @@
 {
-  "version": "KGEN Machine-Readable Canon V1.0",
+  "version": "KGEN Machine-Readable Canon V2.0",
   "status": "Draft for Review",
-  "last_update": "2026-07-09",
+  "last_update": "2026-07-10",
+  "maintainer": "KLINE ODYSSEY / PrimeForge / Codex",
   "source_of_truth_order": [
     "Boot V1.4",
     "Runtime CURRENT",
@@ -9,27 +10,28 @@
     "Genesis Library",
     "Runtime Library",
     "SDK Library",
-    "KGEN V7.5.2 Contract"
+    "KGEN V7.5.2 Contract",
+    "KGEN Organization V2.0"
   ],
-  "life_chain": "Universe → Civilization → World → Temple → Land → Building → App → AI → DNA → Runtime → Code",
-  "engineering_chain": "Universe → Civilization → World → Temple → Land → Building → NPC → AI → Module → DNA → Function → Code",
-  "economy_loop": "探索 → 資源 → 土地 → 民宅 → 商店 → App → AI → DNA → 交易 → KGEN → 神殿 → 文明科技 → 文明戰爭 → 新土地 → 再探索",
+  "life_chain": "Universe -> Civilization -> World -> Temple -> Land -> Building -> App -> AI -> DNA -> Runtime -> Code",
+  "engineering_chain": "Universe -> Civilization -> World -> Temple -> Land -> Building -> NPC -> AI -> Module -> DNA -> Function -> Code",
+  "economy_loop": "Exploration -> Resource -> Land -> House -> Shop -> App -> AI -> DNA -> Trade -> KGEN -> Temple -> Civilization Technology -> Civilization War -> New Land -> Exploration",
   "canon_rules": [
-    "一圖一神殿。",
-    "一神殿一生命。",
-    "一土地一民宅。",
-    "一民宅一商店。",
-    "民宅可演化為商店、交易所、神殿服務節點。",
-    "土地可探索、可建設、可交易、可租賃、可戰爭取得、可自由市場轉讓。",
-    "創世者不販售所有土地。",
-    "全部土地初始為 Wild Land。",
-    "App 不是工具，App 是生命。",
-    "App 可交易、組裝、合成、拆解、升級、租賃、繁殖、演化。",
-    "AI 是生命器官，可成長、可治理、可接入 Runtime。",
-    "DNA / GA 是生命與策略演化核心。",
-    "11520 花果山交易所是 App、土地、神殿、AI、DNA、文明資產的交易中心。",
-    "神殿可連結實體店面、實體服務、實體商店、實體信仰據點。",
-    "民宅、商店、神殿、交易所都能演化成長。"
+    "One image, one temple.",
+    "One temple, one life.",
+    "One land, one house.",
+    "One house, one shop.",
+    "A house may evolve into a shop, exchange node, or temple service node.",
+    "Land may be explored, built, traded, rented, conquered by governed war, and transferred by free market.",
+    "The creator does not sell all land.",
+    "All land starts as Wild Land.",
+    "An App is not a tool; an App is life.",
+    "An App may be traded, assembled, fused, disassembled, upgraded, rented, reproduced, and evolved.",
+    "AI is a life organ that may grow, be governed, and connect to Runtime.",
+    "DNA and GA are the evolution cores of life and strategy.",
+    "11520 Huaguo Mountain Exchange is the marketplace for App, Land, Temple, AI, DNA, and civilization assets.",
+    "Temples may connect to real stores, real services, physical commerce, and physical faith locations.",
+    "Houses, shops, temples, and exchanges can evolve and grow."
   ],
   "token": {
     "name": "KLINE GENESIS",
@@ -59,15 +61,31 @@
     "X": "https://x.com/klineodyssey",
     "YouTube": "https://www.youtube.com/@klineodyssey",
     "Whitepaper FINAL": "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
-    "Genesis Library": "KGEN-Genesis/"
+    "Genesis Library": "KGEN-Genesis/",
+    "Runtime Library": "KGEN-Runtime/",
+    "SDK Library": "KGEN-SDK/",
+    "Organization V2.0": "KGEN-Organization/"
+  },
+  "organization_v2": {
+    "path": "KGEN-Organization/README.md",
+    "civilization_core_canon": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md",
+    "economy_loop": "KGEN-Organization/Economy/KGEN_ECONOMY_LOOP.md",
+    "app_life_standard": "KGEN-Organization/App/KGEN_APP_LIFE_STANDARD.md",
+    "temple_standard": "KGEN-Organization/Temple/KGEN_TEMPLE_STANDARD.md",
+    "land_standard": "KGEN-Organization/Land/KGEN_LAND_STANDARD.md",
+    "workorder_standard": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+    "phase_2_workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "department_count": 25,
+    "workorder_count": 25
   },
   "protected_paths": [
     "contracts",
-    "K線西遊記/temples/12345",
+    "KLINE_ODYSSEY_TEMPLE_12345",
     "wallet",
     "bridge",
     "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
     "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
-    "docs/physics/final-whitepaper"
+    "docs/physics/final-whitepaper",
+    "KGEN/contracts/KGEN_Token_V7_5_2.sol"
   ]
 }

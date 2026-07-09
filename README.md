@@ -73,6 +73,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | SDK Library | [KGEN-SDK/](KGEN-SDK/) | https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md |
 | Machine-Readable Canon | [KGEN-Canon/](KGEN-Canon/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md |
 | Agent Office | [KGEN-Agent-Office/](KGEN-Agent-Office/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md |
+| Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -85,6 +86,18 @@ KGEN Agent Office is the GitHub handoff system for Codex and Cursor collaboratio
 - Cursor Work Queue: [KGEN-Agent-Office/CURSOR_WORK_QUEUE.md](KGEN-Agent-Office/CURSOR_WORK_QUEUE.md)
 - Automation Schedule: [KGEN-Agent-Office/AUTOMATION_SCHEDULE.md](KGEN-Agent-Office/AUTOMATION_SCHEDULE.md)
 
+
+### KGEN Organization V2.0
+
+KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.
+
+- Organization Index: [KGEN-Organization/README.md](KGEN-Organization/README.md)
+- Civilization Core Canon: [KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md](KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md)
+- Economy Loop: [KGEN-Organization/Economy/KGEN_ECONOMY_LOOP.md](KGEN-Organization/Economy/KGEN_ECONOMY_LOOP.md)
+- Temple Standard: [KGEN-Organization/Temple/KGEN_TEMPLE_STANDARD.md](KGEN-Organization/Temple/KGEN_TEMPLE_STANDARD.md)
+- Land Standard: [KGEN-Organization/Land/KGEN_LAND_STANDARD.md](KGEN-Organization/Land/KGEN_LAND_STANDARD.md)
+- App Life Standard: [KGEN-Organization/App/KGEN_APP_LIFE_STANDARD.md](KGEN-Organization/App/KGEN_APP_LIFE_STANDARD.md)
+- WorkOrders: [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md)
 ### BscScan / CMC / CoinGecko Submission Links
 
 - Website: https://klineodyssey.github.io/kline-odyssey/

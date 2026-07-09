@@ -112,3 +112,24 @@ Review current documentation state and propose the next Codex work batch.
 
 Do not directly change the main system, contracts, temple runtime, wallet, bridge, Boot, Runtime CURRENT, or final whitepaper.
 
+
+---
+
+## Phase 2 Organization WorkOrders
+
+**Status:** OPEN  
+**Source:** `KGEN-Organization/WorkOrders/WORK_QUEUE.md`  
+**Rule:** Cursor may execute Organization Phase 2 only after reading the Organization WorkOrder Standard and the target department README.
+
+### Required Read Order For Phase 2
+
+1. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md`
+2. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+3. `KGEN-Organization/README.md`
+4. `KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md`
+5. `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
+6. Target department `README.md`, `ROLE.md`, `RESPONSIBILITY.md`, `HANDOFF.md`, and `REPORT_TEMPLATE.md`
+
+### Phase 2 Task Count
+
+Organization V2.0 currently defines 25 OPEN WorkOrders, one for each department. Cursor must accept one task at a time, write the required report under `KGEN-Organization/Reports/`, and return the task to Codex Review.

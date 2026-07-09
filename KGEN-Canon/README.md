@@ -17,7 +17,8 @@ This directory allows ChatGPT, Codex, Cursor, and future AI agents to read offic
 | `KGEN_AI_BOOT_RULES.md` | Machine-readable or agent-readable governance file |
 | `KGEN_CURSOR_WORK_ORDER.md` | Machine-readable or agent-readable governance file |
 | `KGEN_CODEX_WORK_ORDER.md` | Machine-readable or agent-readable governance file |
+| `../KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md` | Organization V2.0 Civilization Core Canon and AI company governance reference |
 
 ## Canon Rule
 
-Any AI or tool must read `KGEN_CANON_MASTER.json` before extending Runtime, SDK, Temple, Land, App, AI, DNA, Economy, or Governance documents.
+Any AI or tool must read `KGEN_CANON_MASTER.json` before extending Runtime, SDK, Temple, Land, App, AI, DNA, Economy, or Governance documents. Organization V2.0 work must also read `../KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md`.

@@ -2,7 +2,7 @@
 
 **Version:** V1.0  
 **Status:** Draft for Review  
-**Last Update:** 2026-07-09  
+**Last Update:** 2026-07-10  
 **Maintainer:** KLINE ODYSSEY / PrimeForge
 
 This is the root cross-library index for Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, and Official Whitepaper references.
@@ -16,8 +16,23 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | SDK Library | `KGEN-SDK/` | API, Schema, and developer documentation |
 | Machine-Readable Canon | `KGEN-Canon/` | JSON Canon and AI-readable governance |
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
+| KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
+
+## Organization V2.0
+
+| Item | Path | Purpose |
+|---|---|---|
+| Organization Index | `KGEN-Organization/README.md` | AI company operating system entry |
+| Civilization Core Canon | `KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md` | L1 Canon for civilization, AI, economy, game, and blockchain loops |
+| Economy Loop | `KGEN-Organization/Economy/KGEN_ECONOMY_LOOP.md` | Wild Land to cross-universe civilization economy loop |
+| App Life Standard | `KGEN-Organization/App/KGEN_APP_LIFE_STANDARD.md` | App as life, DNA, reproduction, evolution, trade, death, rebirth, inheritance |
+| Temple Standard | `KGEN-Organization/Temple/KGEN_TEMPLE_STANDARD.md` | Temple, house, NPC, shop, bank, exchange, warehouse, Portal, and organs |
+| Land Standard | `KGEN-Organization/Land/KGEN_LAND_STANDARD.md` | Wild Land, civilization land, trade, construction, conquest, rental, future NFT layer |
+| WorkOrder Standard | `KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md` | Codex assignment, Cursor execution, report, review, commit, and push rules |
+| Phase 2 WorkQueue | `KGEN-Organization/WorkOrders/WORK_QUEUE.md` | 25 department-scoped OPEN WorkOrders |
+| Reports | `KGEN-Organization/Reports/README.md` | Organization report storage and naming rules |
 ## Runtime Documents
 
 | Document ID | Title | Level | Status | Path | UUID |
