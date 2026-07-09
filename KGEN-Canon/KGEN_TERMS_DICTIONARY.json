@@ -1,0 +1,15 @@
+{
+  "version": "KGEN Terms Dictionary V1.0",
+  "terms": {
+    "Universe": "KGEN 的最高文明容器，包含 Civilization、World、Temple、Land、App、AI、DNA、Runtime 與 Code。",
+    "Temple": "神殿不是建築，而是具備 AI、DNA、等級、服務與文明屬性的生命。",
+    "Land": "初始為 Wild Land，可探索、建設、交易、租賃、戰爭取得與自由市場轉讓。",
+    "House": "民宅是土地上的基礎生命節點，可演化為商店、交易所或神殿服務節點。",
+    "App": "App 不是工具，App 是生命，可交易、組裝、合成、拆解、升級、租賃、繁殖、演化。",
+    "AI": "AI 是生命器官，可成長、可治理、可接入 Runtime，但不得修改 Canon。",
+    "DNA": "生命與策略演化核心，記錄生命特徵、技能、適應度與演化路徑。",
+    "GA": "Genetic Algorithm，負責策略、App、AI 與文明演化搜尋。",
+    "11520": "花果山交易所，App、土地、神殿、AI、DNA、文明資產的交易中心。",
+    "KGEN": "KLINE GENESIS token，BNB Smart Chain BEP-20，總量 72,000,000 KGEN。"
+  }
+}

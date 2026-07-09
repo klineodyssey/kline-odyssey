@@ -1,0 +1,457 @@
+{
+  "version": "KGEN Dependency Graph V1.0",
+  "nodes": [
+    {
+      "id": "COS-001",
+      "path": "KGEN-Runtime/COS-001_Cosmic_OS/KGEN_Cosmic_OS_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-002",
+      "path": "KGEN-Runtime/COS-002_App_Organism/KGEN_App_Organism_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-003",
+      "path": "KGEN-Runtime/COS-003_Temple_Runtime/KGEN_Temple_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-004",
+      "path": "KGEN-Runtime/COS-004_Land_Runtime/KGEN_Land_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-005",
+      "path": "KGEN-Runtime/COS-005_AI_Runtime/KGEN_AI_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-006",
+      "path": "KGEN-Runtime/COS-006_Economy_Runtime/KGEN_Economy_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-007",
+      "path": "KGEN-Runtime/COS-007_Quest_Runtime/KGEN_Quest_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-008",
+      "path": "KGEN-Runtime/COS-008_Combat_Runtime/KGEN_Combat_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-009",
+      "path": "KGEN-Runtime/COS-009_Governance_Runtime/KGEN_Governance_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "COS-010",
+      "path": "KGEN-Runtime/COS-010_Developer_API/KGEN_Developer_API_Runtime_V1.0.md",
+      "level": "L4 Runtime"
+    },
+    {
+      "id": "SDK-001",
+      "path": "KGEN-SDK/SDK-001_Runtime_Loader/KGEN_Runtime_Loader_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-002",
+      "path": "KGEN-SDK/SDK-002_Universe_Map_API/KGEN_Universe_Map_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-003",
+      "path": "KGEN-SDK/SDK-003_Temple_API/KGEN_Temple_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-004",
+      "path": "KGEN-SDK/SDK-004_Land_API/KGEN_Land_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-005",
+      "path": "KGEN-SDK/SDK-005_App_Organism_API/KGEN_App_Organism_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-006",
+      "path": "KGEN-SDK/SDK-006_AI_Runtime_API/KGEN_AI_Runtime_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-007",
+      "path": "KGEN-SDK/SDK-007_DNA_GA_API/KGEN_DNA_GA_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-008",
+      "path": "KGEN-SDK/SDK-008_Economy_API/KGEN_Economy_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-009",
+      "path": "KGEN-SDK/SDK-009_Game_Loop_API/KGEN_Game_Loop_API_V1.0.md",
+      "level": "L5 Implementation"
+    },
+    {
+      "id": "SDK-010",
+      "path": "KGEN-SDK/SDK-010_Cursor_Codex_Agent_API/KGEN_Cursor_Codex_Agent_API_V1.0.md",
+      "level": "L5 Implementation"
+    }
+  ],
+  "edges": [
+    {
+      "from": "COS-001",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-001",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-001",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-002",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-002",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-002",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-003",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-003",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-003",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-004",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-004",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-004",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-005",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-005",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-005",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-006",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-006",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-006",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-007",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-007",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-007",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-008",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-008",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-008",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-009",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-009",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-009",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "COS-010",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "COS-010",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "COS-010",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-001",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-001",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-001",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-002",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-002",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-002",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-003",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-003",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-003",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-004",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-004",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-004",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-005",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-005",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-005",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-006",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-006",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-006",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-007",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-007",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-007",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-008",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-008",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-008",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-009",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-009",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-009",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-010",
+      "to": "GEN-001",
+      "type": "depends_on"
+    },
+    {
+      "from": "SDK-010",
+      "to": "GEN-002",
+      "type": "must_not_contradict"
+    },
+    {
+      "from": "SDK-010",
+      "to": "KGEN_CANON_MASTER.json",
+      "type": "machine_readable_canon"
+    },
+    {
+      "from": "SDK-001",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-002",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-003",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-004",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-005",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-006",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-007",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-008",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-009",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    },
+    {
+      "from": "SDK-010",
+      "to": "COS-010",
+      "type": "api_runtime_binding"
+    }
+  ]
+}
