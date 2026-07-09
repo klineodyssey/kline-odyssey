@@ -1,0 +1,22 @@
+{
+  "documentId": "COS-001",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "requiredOrder": [
+    "Boot V1.4",
+    "Runtime CURRENT",
+    "Universe Map",
+    "AGENTS"
+  ],
+  "sourcePaths": [
+    "README.md",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"
+  ],
+  "allowMutation": false
+}

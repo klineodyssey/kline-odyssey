@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-004_Land_API/schemas/sdk-004_schema.json",
+  "title": "LandRuntimeState",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "landId",
+    "origin",
+    "state",
+    "building",
+    "transferModes"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "landId": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "building": {
+      "type": "object"
+    },
+    "transferModes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

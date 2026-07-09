@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-005_App_Organism_API/schemas/sdk-005_schema.json",
+  "title": "AppOrganism",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "appId",
+    "dna",
+    "level",
+    "lifeActions"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "appId": {
+      "type": "string"
+    },
+    "dna": {
+      "type": "object"
+    },
+    "level": {
+      "type": "integer"
+    },
+    "lifeActions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

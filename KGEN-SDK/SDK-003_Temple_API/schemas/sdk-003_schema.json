@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-003_Temple_API/schemas/sdk-003_schema.json",
+  "title": "TempleLife",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "templeId",
+    "name",
+    "oneImagePolicy",
+    "runtimeRefs"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "templeId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "oneImagePolicy": {
+      "type": "boolean"
+    },
+    "runtimeRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

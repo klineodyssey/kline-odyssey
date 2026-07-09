@@ -1,0 +1,13 @@
+{
+  "documentId": "SDK-009",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "stepId": "LOOP-001",
+  "name": "探索",
+  "next": "資源",
+  "runtimeRef": "COS-007"
+}

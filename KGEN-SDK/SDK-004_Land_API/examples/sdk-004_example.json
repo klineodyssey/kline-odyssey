@@ -1,0 +1,22 @@
+{
+  "documentId": "SDK-004",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "landId": "LAND-12345-0001",
+  "origin": "Wild Land",
+  "state": "Village",
+  "building": {
+    "type": "House",
+    "evolvesTo": "Shop"
+  },
+  "transferModes": [
+    "exploration",
+    "construction",
+    "war",
+    "market"
+  ]
+}

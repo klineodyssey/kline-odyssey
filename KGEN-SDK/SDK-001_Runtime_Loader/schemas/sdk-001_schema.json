@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-001_Runtime_Loader/schemas/sdk-001_schema.json",
+  "title": "RuntimeLoadRequest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "documentId",
+    "requiredOrder",
+    "sourcePaths",
+    "allowMutation"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiredOrder": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sourcePaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowMutation": {
+      "type": "boolean"
+    }
+  }
+}

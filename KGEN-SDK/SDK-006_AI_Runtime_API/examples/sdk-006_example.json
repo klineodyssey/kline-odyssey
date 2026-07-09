@@ -1,0 +1,22 @@
+{
+  "documentId": "SDK-006",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "agentId": "Codex",
+  "readOrder": [
+    "Boot",
+    "Runtime CURRENT",
+    "Universe Map",
+    "AGENTS"
+  ],
+  "forbiddenPaths": [
+    "contracts",
+    "K線西遊記/temples/12345",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+  ],
+  "reportPath": "KGEN-Canon/KGEN_CODEX_WORK_ORDER.md"
+}

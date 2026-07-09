@@ -1,0 +1,22 @@
+{
+  "documentId": "SDK-005",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "appId": "APP-11520-MARKET-001",
+  "dna": {
+    "geneClass": "marketplace"
+  },
+  "level": 1,
+  "lifeActions": [
+    "trade",
+    "assemble",
+    "fusion",
+    "upgrade",
+    "rental",
+    "evolution"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-008_Economy_API/schemas/sdk-008_schema.json",
+  "title": "EconomyEvent",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "eventId",
+    "asset",
+    "amount",
+    "tokenFacts"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "asset": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "string"
+    },
+    "tokenFacts": {
+      "type": "object"
+    }
+  }
+}

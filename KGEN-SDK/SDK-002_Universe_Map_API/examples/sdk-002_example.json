@@ -1,0 +1,16 @@
+{
+  "documentId": "SDK-002",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "pointId": "P_16888",
+  "coord": 16888,
+  "distanceKm": 384400,
+  "runtimeMapping": {
+    "axis": "K-Sphere",
+    "mode": "PLAYER_WALK"
+  }
+}

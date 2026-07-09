@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-002_Universe_Map_API/schemas/sdk-002_schema.json",
+  "title": "UniverseMapPoint",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "pointId",
+    "coord",
+    "distanceKm",
+    "runtimeMapping"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pointId": {
+      "type": "string"
+    },
+    "coord": {
+      "type": "number"
+    },
+    "distanceKm": {
+      "type": "number"
+    },
+    "runtimeMapping": {
+      "type": "object"
+    }
+  }
+}

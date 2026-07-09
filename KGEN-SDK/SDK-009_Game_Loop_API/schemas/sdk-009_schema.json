@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-009_Game_Loop_API/schemas/sdk-009_schema.json",
+  "title": "GameLoopStep",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "stepId",
+    "name",
+    "next",
+    "runtimeRef"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stepId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "next": {
+      "type": "string"
+    },
+    "runtimeRef": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-007_DNA_GA_API/schemas/sdk-007_schema.json",
+  "title": "DNAGenome",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "genomeId",
+    "genes",
+    "fitness",
+    "generation"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "genomeId": {
+      "type": "string"
+    },
+    "genes": {
+      "type": "object"
+    },
+    "fitness": {
+      "type": "number"
+    },
+    "generation": {
+      "type": "integer"
+    }
+  }
+}

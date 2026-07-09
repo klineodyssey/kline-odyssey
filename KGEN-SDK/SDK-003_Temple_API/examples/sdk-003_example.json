@@ -1,0 +1,16 @@
+{
+  "documentId": "SDK-003",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "templeId": "12345",
+  "name": "五指山悟空財神殿",
+  "oneImagePolicy": true,
+  "runtimeRefs": [
+    "COS-003",
+    "GEN-002"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-010_Cursor_Codex_Agent_API/schemas/sdk-010_schema.json",
+  "title": "AgentWorkOrder",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "orderId",
+    "owner",
+    "checks",
+    "outputReport"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputReport": {
+      "type": "string"
+    }
+  }
+}

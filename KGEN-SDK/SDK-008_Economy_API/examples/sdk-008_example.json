@@ -1,0 +1,28 @@
+{
+  "documentId": "SDK-008",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "eventId": "ECO-001",
+  "asset": "KGEN",
+  "amount": "100",
+  "tokenFacts": {
+    "name": "KLINE GENESIS",
+    "symbol": "KGEN",
+    "chain": "BNB Smart Chain",
+    "standard": "BEP-20",
+    "total_supply": "72,000,000 KGEN",
+    "decimals": 18,
+    "contract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "tax": "0.30% only on AMM buy/sell",
+    "burn": "0.10%",
+    "bank": "0.10%",
+    "reward": "0.05%",
+    "auto_lp": "0.05%",
+    "wallet_to_wallet": "No tax",
+    "fair_launch": "No ICO / No IEO / No Presale"
+  }
+}

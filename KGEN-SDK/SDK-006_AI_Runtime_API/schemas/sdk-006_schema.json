@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/SDK-006_AI_Runtime_API/schemas/sdk-006_schema.json",
+  "title": "AIRuntimePolicy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "documentId",
+    "version",
+    "canonRefs",
+    "agentId",
+    "readOrder",
+    "forbiddenPaths",
+    "reportPath"
+  ],
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "canonRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "readOrder": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbiddenPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reportPath": {
+      "type": "string"
+    }
+  }
+}

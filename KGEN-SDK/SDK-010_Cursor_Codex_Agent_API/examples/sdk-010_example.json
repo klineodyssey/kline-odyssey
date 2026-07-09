@@ -1,0 +1,17 @@
+{
+  "documentId": "SDK-010",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "orderId": "CURSOR-001",
+  "owner": "Cursor",
+  "checks": [
+    "file existence",
+    "link integrity",
+    "canon consistency"
+  ],
+  "outputReport": "CURSOR-001_REPORT.md"
+}

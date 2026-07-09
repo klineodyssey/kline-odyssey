@@ -1,0 +1,16 @@
+{
+  "documentId": "SDK-007",
+  "version": "V1.0",
+  "canonRefs": [
+    "GEN-001",
+    "GEN-002",
+    "KGEN_CANON_MASTER.json"
+  ],
+  "genomeId": "DNA-APP-001",
+  "genes": {
+    "risk": "bounded",
+    "temple": "12345"
+  },
+  "fitness": 0.72,
+  "generation": 100
+}
