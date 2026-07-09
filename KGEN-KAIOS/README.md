@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V7.0 Genesis
-**Status:** Architecture First / Draft for Review
+**Version:** V7.1 Minimal Worker Layer
+**Status:** Architecture First / Minimal Worker Layer / Draft for Review
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -14,15 +14,17 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 
 ## Architecture First Rule
 
-V7.0 only defines architecture. It does not create worker accounts, does not create new runtime versions, does not rewrite WorkQueue, and does not modify protected systems.
+V7.0 defined the architecture. V7.1 adds only the minimum worker layer required to register AI and Human workers, claim tasks safely, detect stale handoff branches, and give Codex a pre-merge checklist.
+
+V7.1 does not rewrite AI Company, Agent Office, Organization, WorkQueue, Runtime, Canon, or protected systems. It only adds references and machine-readable worker schemas.
 
 ## Core Question
 
-Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, and Human Engineers join the same AI company without redesigning the system?
+Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, Codex, and Human Engineers join the same AI company without redesigning the system?
 
 **Architecture answer:** Yes, if each actor is registered as a Worker and communicates through KAIOS interfaces: Worker Registry, Task Dispatcher, Message Bus, Review Pipeline, Dashboard, Recovery, and Security.
 
-## V7.0 Files
+## V7.0 Architecture Files
 
 | File | Purpose |
 |---|---|
@@ -43,9 +45,34 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, and Human
 | `RECOVERY_MODEL.md` | Failure and recovery architecture |
 | `SECURITY_MODEL.md` | Role and permission architecture |
 
+## V7.1 Minimal Worker Layer Files
+
+| File | Purpose |
+|---|---|
+| `WORKER_REGISTRY.md` | Human-readable registry rules and worker field definitions |
+| `GENERIC_WORKER_PROTOCOL.md` | Shared worker protocol for Cursor, Claude, Gemini, OpenHands, Copilot, ChatGPT, Deep Research, and Human Engineer |
+| `TASK_CLAIM_LEASE_PROTOCOL.md` | Claim lease rules that prevent two workers from taking the same WorkOrder |
+| `STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for missing branches, invisible commits, missing reports, old bases, advanced main, disappeared workers, and timeout |
+| `CODEX_PRE_MERGE_CHECKLIST.md` | Required Codex checklist before merge to main |
+| `worker_registry.json` | Machine-readable worker registry seed |
+| `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
+| `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
+
+## Worker Types Supported
+
+- Codex
+- Cursor
+- Claude
+- Gemini
+- OpenHands
+- GitHub Copilot
+- ChatGPT
+- Deep Research
+- Human Engineer
+
 ## Protected Systems
 
-KAIOS V7.0 does not modify:
+KAIOS V7.1 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

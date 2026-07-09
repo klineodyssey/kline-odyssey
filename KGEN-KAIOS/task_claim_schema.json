@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/task_claim_schema.json",
+  "title": "KAIOS Task Claim Lease",
+  "type": "object",
+  "required": [
+    "task_id",
+    "worker_id",
+    "worker_type",
+    "status",
+    "branch",
+    "base_commit",
+    "claimed_at",
+    "lease_expires_at",
+    "heartbeat",
+    "report_path",
+    "reviewer"
+  ],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "worker_id": { "type": "string", "minLength": 1 },
+    "worker_type": {
+      "type": "string",
+      "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["OPEN", "CLAIMED", "IN_PROGRESS", "REVIEW", "APPROVED", "MERGED", "DONE", "REJECTED", "FIX", "BLOCKED"]
+    },
+    "branch": { "type": "string", "minLength": 1 },
+    "base_commit": { "type": "string", "minLength": 7 },
+    "claimed_at": { "type": "string" },
+    "lease_expires_at": { "type": "string" },
+    "heartbeat": { "type": ["string", "null"] },
+    "report_path": { "type": "string", "minLength": 1 },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

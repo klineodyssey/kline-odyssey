@@ -18,6 +18,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
+| KGEN AI Operating System V7.1 | `KGEN-KAIOS/` | Architecture-first AI operating system with minimal worker registry, claim lease, stale handoff policy, and pre-merge checklist |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -42,6 +43,20 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Reports | `KGEN-AI-Company/reports/README.md` | Cursor report center |
 | Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` | Codex decisions for Cursor reports |
 
+
+## KGEN AI Operating System V7.1
+
+| Item | Path | Purpose |
+|---|---|---|
+| KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture and V7.1 minimal worker layer entry |
+| Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
+| Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
+| Task Claim Lease Protocol | `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | Claim and lease rules to prevent duplicate WorkOrder execution |
+| Stale Handoff Branch Policy | `KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for stale, missing, or invalid handoff branches |
+| Codex Pre-Merge Checklist | `KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md` | Required review gates before merging any handoff branch |
+| Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
+| Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
+| Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |
 ## Organization V2.0
 
 | Item | Path | Purpose |

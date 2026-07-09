@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/worker_status_schema.json",
+  "title": "KAIOS Worker Status",
+  "type": "object",
+  "required": [
+    "worker_id",
+    "worker_type",
+    "role",
+    "permission",
+    "workspace",
+    "current_task",
+    "current_branch",
+    "status",
+    "heartbeat",
+    "last_report",
+    "allowed_branch_pattern",
+    "can_push_main",
+    "reviewer"
+  ],
+  "properties": {
+    "worker_id": { "type": "string", "minLength": 1 },
+    "worker_type": {
+      "type": "string",
+      "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
+    },
+    "role": { "type": "string", "minLength": 1 },
+    "permission": {
+      "type": "string",
+      "enum": ["ceo_reviewer", "reviewer", "worker_docs", "worker_code_limited", "research_readonly", "guest_readonly"]
+    },
+    "workspace": { "type": "string", "minLength": 1 },
+    "current_task": { "type": ["string", "null"] },
+    "current_branch": { "type": ["string", "null"] },
+    "status": {
+      "type": "string",
+      "enum": ["IDLE", "CLAIMED", "IN_PROGRESS", "REVIEW", "BLOCKED", "OFFLINE"]
+    },
+    "heartbeat": { "type": ["string", "null"] },
+    "last_report": { "type": ["string", "null"] },
+    "allowed_branch_pattern": { "type": "string", "minLength": 1 },
+    "can_push_main": { "type": "boolean" },
+    "reviewer": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}
