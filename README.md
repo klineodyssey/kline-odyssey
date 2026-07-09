@@ -44,6 +44,20 @@ Last optimized: 2026-06-11
 
 ---
 
+## KGEN Genesis Library
+
+KGEN Genesis Library V1.0 is the official canonical publication set for KLINE ODYSSEY / KLINE GENESIS.
+
+| Item | Path |
+|---|---|
+| Genesis Library | [KGEN-Genesis/README.md](KGEN-Genesis/README.md) |
+| Master Index | [KGEN-Genesis/000_INDEX/README.md](KGEN-Genesis/000_INDEX/README.md) |
+| GEN-001 Genesis Bible | [KGEN-Genesis/GEN-001_Genesis_Bible/KGEN_Genesis_Bible_V1.0.md](KGEN-Genesis/GEN-001_Genesis_Bible/KGEN_Genesis_Bible_V1.0.md) |
+| GEN-002 Canon | [KGEN-Genesis/GEN-002_Canon/KGEN_Canon_V1.0.md](KGEN-Genesis/GEN-002_Canon/KGEN_Canon_V1.0.md) |
+| GEN-003 ~ GEN-012 | [KGEN-Genesis/README.md](KGEN-Genesis/README.md) |
+
+---
+
 ## Official Social Links
 
 | Platform | Link |
