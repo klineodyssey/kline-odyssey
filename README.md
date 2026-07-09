@@ -80,7 +80,10 @@ KGEN official documentation is organized into Canon-first libraries for public r
 - Website: https://klineodyssey.github.io/kline-odyssey/
 - GitHub: https://github.com/klineodyssey/kline-odyssey
 - BscScan: https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- PancakeSwap: https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- CoinMarketCap DexScan: https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
 - GeckoTerminal: https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- CoinGecko market data: https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 - Whitepaper FINAL: https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf
 - Genesis Library: https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md
 - Runtime Library: https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md

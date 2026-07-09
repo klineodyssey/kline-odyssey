@@ -76,7 +76,10 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 - **Website:** https://klineodyssey.github.io/kline-odyssey/
 - **GitHub:** https://github.com/klineodyssey/kline-odyssey
 - **BscScan:** https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- **PancakeSwap:** https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- **CoinMarketCap DexScan:** https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
 - **GeckoTerminal:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- **CoinGecko market data:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 - **Telegram:** https://t.me/klineodyssey
 - **X:** https://x.com/klineodyssey
 - **YouTube:** https://www.youtube.com/@klineodyssey
