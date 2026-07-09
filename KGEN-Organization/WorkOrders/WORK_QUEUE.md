@@ -14,11 +14,14 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 | Status | Meaning | Controlled By |
 |---|---|---|
 | OPEN | Ready for Cursor | Codex |
+| CLAIMED | Worker lease created; task reserved for one worker | Cursor or Codex |
 | IN_PROGRESS | Cursor accepted and is working | Cursor |
 | BLOCKED | Work cannot continue without decision | Cursor or Codex |
 | REVIEW | Cursor submitted report and awaits review | Cursor |
 | APPROVED | Codex accepted result | Codex |
+| MERGED | Approved handoff branch was merged into main | Codex |
 | REJECTED | Codex rejected result | Codex |
+| FIX | Rejected task requires a correction pass | Codex then Cursor |
 | DONE | Codex closed after commit/push or no-change acceptance | Codex |
 
 ## Cursor Required Read Order
@@ -29,6 +32,54 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 4. KGEN-Agent-Office/DO_NOT_TOUCH.md
 5. KGEN-Canon/KGEN_CANON_MASTER.json
 
+
+## KAIOS V7.1 Dry Run Summary
+
+| Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
+|---|---|---|---|---|---|---|---|
+| KAIOS-DRYRUN-001 | OPEN | Cursor | Codex | P0 | KAIOS | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
+
+## KAIOS V7.1 Dry Run WorkOrders
+
+### KAIOS-DRYRUN-001 - Verify Worker Claim, Handoff Branch, and Codex Review loop
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: KAIOS
+- Branch: `cursor-handoff/KAIOS-DRYRUN-001`
+- Input files:
+  - KGEN-KAIOS/README.md
+  - KGEN-KAIOS/WORKER_REGISTRY.md
+  - KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md
+  - KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md
+  - KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md
+  - KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md
+  - KGEN-KAIOS/DRY_RUN_PROTOCOL.md
+  - KGEN-KAIOS/worker_registry.json
+  - KGEN-KAIOS/task_claim_schema.json
+  - KGEN-KAIOS/worker_status_schema.json
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+- Output report path: KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Cursor claims this task before any other OPEN task.
+  - Cursor uses only `cursor-handoff/KAIOS-DRYRUN-001` for handoff.
+  - Cursor creates `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md`.
+  - Cursor moves this task to REVIEW only after the report exists.
+  - Cursor commits and pushes the handoff branch, not main.
+  - Codex can apply `KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md` during review.
+  - No protected path is modified.
 ## Phase 2 Summary
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Output Report |

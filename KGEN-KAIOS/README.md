@@ -1,7 +1,7 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V7.1 Minimal Worker Layer
+**Version:** V7.1 Minimal Worker Layer / Dry Run Ready
 **Status:** Architecture First / Minimal Worker Layer / Draft for Review
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
@@ -58,6 +58,19 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
 | `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
 
+
+## V7.1 Dry Run Files
+
+| File | Purpose |
+|---|---|
+| `DRY_RUN_PROTOCOL.md` | Minimal V7.1 dry run procedure for Worker Claim, Cursor Handoff Branch, and Codex Review |
+| `reports/README.md` | KAIOS report storage rules and expected dry run report path |
+
+## V7.1 Dry Run Task
+
+| Task ID | Status | Owner | Reviewer | Branch | Output Report |
+|---|---|---|---|---|---|
+| KAIOS-DRYRUN-001 | OPEN | Cursor | Codex | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
 ## Worker Types Supported
 
 - Codex
