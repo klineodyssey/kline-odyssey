@@ -72,8 +72,18 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Runtime Library | [KGEN-Runtime/](KGEN-Runtime/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md |
 | SDK Library | [KGEN-SDK/](KGEN-SDK/) | https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md |
 | Machine-Readable Canon | [KGEN-Canon/](KGEN-Canon/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md |
+| Agent Office | [KGEN-Agent-Office/](KGEN-Agent-Office/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
+
+### KGEN Agent Office
+
+KGEN Agent Office is the GitHub handoff system for Codex and Cursor collaboration.
+
+- Codex Command Center: [KGEN-Agent-Office/CODEX_COMMAND_CENTER.md](KGEN-Agent-Office/CODEX_COMMAND_CENTER.md)
+- Cursor Onboarding: [KGEN-Agent-Office/CURSOR_ONBOARDING.md](KGEN-Agent-Office/CURSOR_ONBOARDING.md)
+- Cursor Work Queue: [KGEN-Agent-Office/CURSOR_WORK_QUEUE.md](KGEN-Agent-Office/CURSOR_WORK_QUEUE.md)
+- Automation Schedule: [KGEN-Agent-Office/AUTOMATION_SCHEDULE.md](KGEN-Agent-Office/AUTOMATION_SCHEDULE.md)
 
 ### BscScan / CMC / CoinGecko Submission Links
 
