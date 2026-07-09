@@ -34,7 +34,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 | Task ID | Status | Owner | Reviewer | Priority | Department | Output Report |
 |---|---|---|---|---|---|---|
 | ORG-P2-001 | REVIEW | Cursor | Codex | P0 | CEO_Codex | KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md |
-| ORG-P2-002 | OPEN | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
+| ORG-P2-002 | REVIEW | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
 | ORG-P2-003 | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
@@ -97,7 +97,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-002 - Build 72-hour milestone board from department queues
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
