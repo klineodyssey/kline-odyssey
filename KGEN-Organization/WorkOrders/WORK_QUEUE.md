@@ -35,7 +35,13 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 |---|---|---|---|---|---|---|
 | ORG-P2-001 | REVIEW | Cursor | Codex | P0 | CEO_Codex | KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md |
 | ORG-P2-002 | REVIEW | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
-| ORG-P2-003 | REVIEW | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
+| ORG-P2-003 | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
+| ORG-P2-003A | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003A_WORKQUEUE_ALIAS_PLAN.md |
+| ORG-P2-003B | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md |
+| ORG-P2-003C | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
+| ORG-P2-003D | OPEN | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
+| ORG-P2-003E | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
+| ORG-P2-003F | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -131,7 +137,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-003 - Check duplicate folders and same-function documents after Organization V2.0
 
-- Status: REVIEW
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -162,6 +168,172 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
   - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
   - No protected path is modified.
   - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-003A - Add superseded aliases for legacy WorkQueues
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Architecture
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Cursor-WorkOrders/README.md
+  - KGEN-Agent-Office/CURSOR_WORK_QUEUE.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003A_WORKQUEUE_ALIAS_PLAN.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Propose doc-only superseded/alias notes for legacy WorkQueues.
+  - Do not delete queues or move folders.
+  - Do not modify protected paths.
+
+### ORG-P2-003B - Normalize AI-Company, Agent-Office, and report routing language
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Architecture
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN-AI-Company/README.md
+  - KGEN-Agent-Office/README.md
+  - KGEN-Organization/Reports/README.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm AI-Company as live company OS and Agent-Office as daily operations/protected-path support.
+  - Confirm KGEN-AI-Company/reports as primary report path.
+  - Recommend minimal doc-only edits for Codex review.
+
+### ORG-P2-003C - Map L0/L1/L2/Machine Canon hierarchy
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: Canon
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN-Genesis/GEN-001_Genesis_Bible/
+  - KGEN-Genesis/GEN-002_Canon/
+  - KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Map L0 Genesis, L1 Canon, L2 Organization Canon, and Machine Canon.
+  - Identify wording drift only; do not rewrite Canon.
+  - Do not modify protected paths.
+
+### ORG-P2-003D - Draft legacy temple and physics-copy reference policy
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Architecture
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - wukong-temple/
+  - docs/physics/
+  - whitepaper/
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Draft policy only: Current, Legacy, Archive, Single Source of Truth.
+  - Do not edit temple code or physics runtime files.
+  - Identify where reference notes would be needed.
+
+### ORG-P2-003E - Clarify Master Index alias hierarchy
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Documentation
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN_MASTER_LIBRARY_INDEX.md
+  - docs/KGEN_MASTER_INDEX.md
+  - KGEN-Genesis/KGEN_MASTER_INDEX.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm the unique Master Index and sub-index/alias roles.
+  - Propose minimal wording changes only.
+  - Do not modify protected paths.
+
+### ORG-P2-003F - Draft 12345 module naming future migration plan
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Runtime
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - docs/KGEN_TEMPLE_12345_MAP.md
+  - docs/KGEN_RUNTIME_RULES.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Draft a migration plan only.
+  - Do not modify runtime modules or 12345 files.
+  - Include rollback and compatibility requirements.
 
 ### ORG-P2-004 - Verify Civilization Core Canon against Genesis Library and Canon JSON
 
