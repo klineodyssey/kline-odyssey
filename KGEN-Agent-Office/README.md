@@ -10,7 +10,7 @@ All work is handed off through GitHub files. Agents must not rely on oral memory
 
 ## AI Company Automation
 
-KGEN AI Company Automation V3.0 is the active Codex-managed Cursor work system. Cursor should use Agent Office for protected paths and prompt discipline, then use AI Company and Organization WorkQueue for live work.
+KGEN AI Company Automation V4.0 is the active Codex-managed Cursor work system. Cursor should use Agent Office for protected paths and prompt discipline, then use AI Company and Organization WorkQueue for live work.
 
 - AI Company: `KGEN-AI-Company/README.md`
 - Cursor employee boot: `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`

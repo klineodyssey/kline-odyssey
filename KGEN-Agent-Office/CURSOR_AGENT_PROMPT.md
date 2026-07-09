@@ -66,3 +66,20 @@ Every completed task must produce a report using `KGEN-Agent-Office/CURSOR_REPOR
 
 Do not mark a task done unless the report lists files read, files modified, checks run, risks, and whether Codex or a human must review.
 
+## V4 Dispatcher Mode
+
+If the user says $shortPhrase, you must not ask what the user wants to do today. You must enter KGEN Dispatcher Mode.
+
+Required V4 behavior:
+
+1. Read `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`.
+2. Read `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`.
+3. Read `KGEN-AI-Company/CURSOR_DISPATCHER_V4.md`.
+4. Read `KGEN-Organization/WorkOrders/WORK_QUEUE.md`.
+5. Execute the first OPEN WorkOrder from top to bottom.
+6. Do not skip OPEN tasks.
+7. Do not modify protected paths.
+8. Produce a report under `KGEN-AI-Company/reports/`.
+9. Commit locally.
+10. Do not push.
+11. Stop and wait for Codex Review.

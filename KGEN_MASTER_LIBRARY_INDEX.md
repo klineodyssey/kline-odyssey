@@ -17,12 +17,12 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Machine-Readable Canon | `KGEN-Canon/` | JSON Canon and AI-readable governance |
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
-| KGEN AI Company Automation V3.0 | `KGEN-AI-Company/` | Codex-managed Cursor automation, polling, reports, and review workflow |
+| KGEN AI Company Automation V4.0 | `KGEN-AI-Company/` | Codex Dispatcher, Cursor Worker automation, polling, reports, and review workflow |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
 
-## AI Company Automation V3.0
+## AI Company Automation V4.0
 
 | Item | Path | Purpose |
 |---|---|---|
@@ -30,6 +30,11 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Human Operator Guide | `KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md` | One-time Cursor startup instruction for the user |
 | Cursor Employee Boot | `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md` | First-day Cursor boot sequence |
 | Cursor Auto Work Protocol | `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md` | Continuous WorkQueue execution protocol |
+| Cursor Dispatcher V4 | `KGEN-AI-Company/CURSOR_DISPATCHER_V4.md` | One-command dispatcher mode and task source rule |
+| Cursor One Command Start | `KGEN-AI-Company/CURSOR_ONE_COMMAND_START.md` | Exact `gi，上班` execution procedure |
+| Codex Dispatcher Protocol | `KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md` | Codex review and dispatch responsibilities |
+| WorkQueue Execution Rules | `KGEN-AI-Company/WORKQUEUE_EXECUTION_RULES.md` | First OPEN task scanning and execution rules |
+| Dispatcher Status | `KGEN-AI-Company/reports/DISPATCHER_STATUS.md` | Current dispatcher counts, next task, and latest review result |
 | WorkOrder Lifecycle | `KGEN-AI-Company/WORKORDER_LIFECYCLE.md` | OPEN, IN_PROGRESS, BLOCKED, REVIEW, APPROVED, REJECTED, DONE |
 | Reports | `KGEN-AI-Company/reports/README.md` | Cursor report center |
 | Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` | Codex decisions for Cursor reports |

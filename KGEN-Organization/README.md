@@ -16,9 +16,9 @@ KGEN Organization V2.0 turns the repository into an AI company operating system.
 5. Canon can be extended only as a cumulative official rule; it cannot be contradicted or replaced.
 
 
-## AI Company Automation V3.0
+## AI Company Automation V4.0
 
-KGEN Organization V2.0 is now operated by KGEN AI Company Automation V3.0.
+KGEN Organization V2.0 is now operated by KGEN AI Company Automation V4.0.
 
 - Manager: Codex
 - Employee: Cursor
@@ -26,6 +26,7 @@ KGEN Organization V2.0 is now operated by KGEN AI Company Automation V3.0.
 - Cursor reports: [../KGEN-AI-Company/reports/README.md](../KGEN-AI-Company/reports/README.md)
 - Codex review log: [../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md](../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md)
 - Human guide: [../KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md](../KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md)
+- Cursor Dispatcher V4: [../KGEN-AI-Company/CURSOR_DISPATCHER_V4.md](../KGEN-AI-Company/CURSOR_DISPATCHER_V4.md)
 
 Cursor reads GitHub WorkQueue, not chat memory. Codex reviews every REVIEW task before commit or push.
 ## Department Index

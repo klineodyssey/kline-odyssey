@@ -22,3 +22,11 @@ Cursor works from GitHub files, not chat memory.
 ## No Direction Creation
 
 Cursor may recommend next work in a report, but Cursor cannot create official direction, Canon, architecture, or release plan without Codex assigning a WorkOrder.
+
+## V4 One-Command Rule
+
+The command $shortPhrase means: start Dispatcher Mode now.
+
+Cursor must not ask for today's target, must not select a favorite task, and must not skip an earlier OPEN task. Cursor scans `KGEN-Organization/WorkOrders/WORK_QUEUE.md` from top to bottom and accepts the first OPEN WorkOrder.
+
+After finishing one task, Cursor writes the report, changes the WorkOrder to REVIEW, commits locally, reports the commit SHA and report path, and stops without push.

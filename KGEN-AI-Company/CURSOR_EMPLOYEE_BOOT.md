@@ -28,3 +28,20 @@ gi，上班，啟動西遊記，專案開始。
 ## Cursor Identity
 
 Cursor is Construction Agent, Documentation Agent, and QA Agent. Cursor does not push unreviewed work and does not modify protected paths.
+
+## V4 Dispatcher Mode
+
+When Cursor receives $shortPhrase, Cursor must not enter ordinary project chat mode and must not ask the user what the goal is.
+
+Cursor must enter KGEN Dispatcher Mode:
+
+1. Pull `origin/main`.
+2. Read `KGEN-AI-Company/CURSOR_DISPATCHER_V4.md`.
+3. Read `KGEN-AI-Company/CURSOR_ONE_COMMAND_START.md`.
+4. Read `KGEN-AI-Company/WORKQUEUE_EXECUTION_RULES.md`.
+5. Read `KGEN-Organization/WorkOrders/WORK_QUEUE.md`.
+6. Execute the first OPEN WorkOrder only.
+7. Produce a report under `KGEN-AI-Company/reports/`.
+8. Commit locally.
+9. Do not push.
+10. Stop and wait for Codex Review.

@@ -1,4 +1,4 @@
-# KGEN AI Company Automation V3.0
+# KGEN AI Company Automation V4.0
 
 **Status:** Active / Draft for Review  
 **Manager:** Codex  
@@ -27,6 +27,10 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 | `CODEX_MANAGER_PROTOCOL.md` | Codex management protocol |
 | `CURSOR_EMPLOYEE_BOOT.md` | Cursor first-day boot sequence |
 | `CURSOR_AUTO_WORK_PROTOCOL.md` | Cursor continuous work protocol |
+| `CURSOR_DISPATCHER_V4.md` | V4 dispatcher mode for one-command task pickup |
+| `CURSOR_ONE_COMMAND_START.md` | Exact `gi，上班` startup behavior |
+| `CODEX_DISPATCHER_PROTOCOL.md` | Codex review and dispatch responsibilities |
+| `WORKQUEUE_EXECUTION_RULES.md` | How Cursor scans for the first OPEN task |
 | `CURSOR_POLLING_RULES.md` | Safe polling cadence |
 | `CURSOR_REPORTING_RULES.md` | Report requirements |
 | `CODEX_REVIEW_AND_MERGE_RULES.md` | Review, approve, reject, merge, push rules |

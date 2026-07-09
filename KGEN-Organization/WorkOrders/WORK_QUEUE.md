@@ -33,7 +33,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Output Report |
 |---|---|---|---|---|---|---|
-| ORG-P2-001 | OPEN | Cursor | Codex | P0 | CEO_Codex | KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md |
+| ORG-P2-001 | BLOCKED | Cursor | Codex | P0 | CEO_Codex | KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md |
 | ORG-P2-002 | OPEN | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
 | ORG-P2-003 | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
@@ -63,7 +63,8 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-001 - Review Organization V2.0 command chain and confirm Codex-only merge rule
 
-- Status: OPEN
+- Status: BLOCKED
+- Blocked reason: Cursor commit `01c8095` and report `KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md` are not present in the accessible repository state, so Codex cannot review or approve the task.
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
