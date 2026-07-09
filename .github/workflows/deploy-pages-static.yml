@@ -87,7 +87,7 @@ jobs:
           copy_dir "wukong-temple"
 
           echo "Static site sample:"
-          find _site -maxdepth 3 -type f | sort | sed 's#^_site/##' | head -n 200
+          find _site -maxdepth 3 -type f | sort | sed 's#^_site/##' | head -n 200 || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
