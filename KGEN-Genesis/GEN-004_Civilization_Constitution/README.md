@@ -1,7 +1,7 @@
 # GEN-004 KGEN Civilization Constitution / KGEN 文明憲章
 
 **Version:** V1.0  
-**Status:** Draft for Review  
+**Status:** Official V1.0 Full Canon Set  
 **Level:** L2 Constitution  
 **Author:** PrimeForge / 樂天帝 ⌖  
 **Maintainer:** KLINE ODYSSEY / PrimeForge  
@@ -9,16 +9,22 @@
 
 ## Purpose
 
-建立文明治理、文件層級、不可修改區域、AI 權限與人類治理流程。
+補完文明形成、治理、土地、戰爭、交易、文明核心、公共資源、風險與升級規則。
 
-## Files
+## Official Files
 
 | File | Purpose |
 |---|---|
-| `KGEN_Civilization_Constitution_V1.0.md` | Official Markdown source edition. |
-| `KGEN_Civilization_Constitution_V1.0.docx` | DOCX generated from the Markdown edition for publication and review. |
-| `KGEN_Civilization_Constitution_V1.0.pdf` | PDF generated from the Markdown edition for distribution and review. |
-| `assets/README.md` | Asset manifest and future diagram/cover guidance for this document. |
+| `KGEN_Civilization_Constitution_V1.0.md` | Official Markdown source edition. This is the canonical editable text for this book. |
+| `KGEN_Civilization_Constitution_V1.0.docx` | DOCX synchronized from Markdown for publication, review, and external sharing. |
+| `KGEN_Civilization_Constitution_V1.0.pdf` | PDF synchronized from Markdown for official reading and archive distribution. |
+| `assets/README.md` | Asset manifest and publication asset policy for this book. |
+
+## Required Content Coverage
+
+- Complete chapters with definitions, rules, cases, flows, restrictions, risk notice, and revision history.
+- Full Canon alignment with GEN-001, GEN-002, GEN-004, Runtime CURRENT, Universe Map, and KGEN V7.5.2 contract.
+- Independent readability and cross-reference compatibility with the other GEN books.
 
 ## Dependencies
 
@@ -50,4 +56,4 @@
 
 ## Governance
 
-This directory is part of KGEN Genesis Library V1.0. Updates must be cumulative, must preserve revision history, and must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official token contract.
+Updates must be cumulative and must preserve revision history. This book must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official KGEN token contract.

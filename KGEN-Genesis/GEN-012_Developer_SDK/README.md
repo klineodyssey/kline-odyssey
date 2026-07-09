@@ -1,7 +1,7 @@
 # GEN-012 KGEN Developer SDK / KGEN 開發者 SDK 規範
 
 **Version:** V1.0  
-**Status:** Draft for Review  
+**Status:** Official V1.0 Full Canon Set  
 **Level:** L5 Implementation  
 **Author:** PrimeForge / 樂天帝 ⌖  
 **Maintainer:** KLINE ODYSSEY / PrimeForge  
@@ -9,16 +9,22 @@
 
 ## Purpose
 
-定義開發者如何讀取 Boot、Runtime、Universe Map、AGENTS、文件索引、神殿與合約資料。
+補完開發者目錄、JSON Schema、Runtime Loader、Module 命名、App Organism、Land、Temple、AI、DNA、交易所資料格式與禁止硬寫宇宙常數規則。
 
-## Files
+## Official Files
 
 | File | Purpose |
 |---|---|
-| `KGEN_Developer_SDK_V1.0.md` | Official Markdown source edition. |
-| `KGEN_Developer_SDK_V1.0.docx` | DOCX generated from the Markdown edition for publication and review. |
-| `KGEN_Developer_SDK_V1.0.pdf` | PDF generated from the Markdown edition for distribution and review. |
-| `assets/README.md` | Asset manifest and future diagram/cover guidance for this document. |
+| `KGEN_Developer_SDK_V1.0.md` | Official Markdown source edition. This is the canonical editable text for this book. |
+| `KGEN_Developer_SDK_V1.0.docx` | DOCX synchronized from Markdown for publication, review, and external sharing. |
+| `KGEN_Developer_SDK_V1.0.pdf` | PDF synchronized from Markdown for official reading and archive distribution. |
+| `assets/README.md` | Asset manifest and publication asset policy for this book. |
+
+## Required Content Coverage
+
+- Complete chapters with definitions, rules, cases, flows, restrictions, risk notice, and revision history.
+- Full Canon alignment with GEN-001, GEN-002, GEN-004, Runtime CURRENT, Universe Map, and KGEN V7.5.2 contract.
+- Independent readability and cross-reference compatibility with the other GEN books.
 
 ## Dependencies
 
@@ -50,4 +56,4 @@
 
 ## Governance
 
-This directory is part of KGEN Genesis Library V1.0. Updates must be cumulative, must preserve revision history, and must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official token contract.
+Updates must be cumulative and must preserve revision history. This book must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official KGEN token contract.

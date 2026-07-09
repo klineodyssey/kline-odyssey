@@ -77,6 +77,7 @@ jobs:
           copy_dir "archive"
           copy_dir "assets"
           copy_dir "KGEN"
+          copy_dir "KGEN-Genesis"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
 

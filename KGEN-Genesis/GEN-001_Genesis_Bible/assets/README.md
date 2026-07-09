@@ -1,14 +1,15 @@
 # Assets for GEN-001 KGEN Genesis Bible
 
-This directory stores document-specific publication assets for `GEN-001`.
+This directory stores publication assets for `GEN-001`.
 
-Current V1.0 status:
+V1.0 Full Canon Set asset status:
 
-- No standalone binary asset is required for this book yet.
-- Future covers, diagrams, tables, screenshots, or vector assets must be listed here before publication.
-- Assets must not duplicate official token logos, temple images, or runtime diagrams unless the source path and purpose are documented.
+- This book currently uses text-first official publication format.
+- No additional image, cover, diagram, or binary asset is required inside this folder for V1.0.
+- Future assets must be listed here with source path, license / ownership note, purpose, related chapter, and whether they are official or experimental.
+- Assets must respect one image one temple, official logo governance, and the KGEN Design System.
 
-Official source document:
+Official synchronized documents:
 
 - `../KGEN_Genesis_Bible_V1.0.md`
 - `../KGEN_Genesis_Bible_V1.0.docx`

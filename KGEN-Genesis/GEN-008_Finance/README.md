@@ -1,7 +1,7 @@
 # GEN-008 KGEN Finance / KGEN 金融系統
 
 **Version:** V1.0  
-**Status:** Draft for Review  
+**Status:** Official V1.0 Full Canon Set  
 **Level:** L3 Design Bible  
 **Author:** PrimeForge / 樂天帝 ⌖  
 **Maintainer:** KLINE ODYSSEY / PrimeForge  
@@ -9,16 +9,22 @@
 
 ## Purpose
 
-整理 KGEN tokenomics、神明銀行、花果山交易所、自由市場、稅率不可變與文明金融閉環。
+補完 KGEN Token、BEP-20、Total Supply 72,000,000、Decimals 18、AMM tax 0.30%、Burn/Bank/Reward/AutoLP、Wallet-to-wallet no tax、11520 交易所、風險聲明與 Fair Launch。
 
-## Files
+## Official Files
 
 | File | Purpose |
 |---|---|
-| `KGEN_Finance_V1.0.md` | Official Markdown source edition. |
-| `KGEN_Finance_V1.0.docx` | DOCX generated from the Markdown edition for publication and review. |
-| `KGEN_Finance_V1.0.pdf` | PDF generated from the Markdown edition for distribution and review. |
-| `assets/README.md` | Asset manifest and future diagram/cover guidance for this document. |
+| `KGEN_Finance_V1.0.md` | Official Markdown source edition. This is the canonical editable text for this book. |
+| `KGEN_Finance_V1.0.docx` | DOCX synchronized from Markdown for publication, review, and external sharing. |
+| `KGEN_Finance_V1.0.pdf` | PDF synchronized from Markdown for official reading and archive distribution. |
+| `assets/README.md` | Asset manifest and publication asset policy for this book. |
+
+## Required Content Coverage
+
+- Complete chapters with definitions, rules, cases, flows, restrictions, risk notice, and revision history.
+- Full Canon alignment with GEN-001, GEN-002, GEN-004, Runtime CURRENT, Universe Map, and KGEN V7.5.2 contract.
+- Independent readability and cross-reference compatibility with the other GEN books.
 
 ## Dependencies
 
@@ -50,4 +56,4 @@
 
 ## Governance
 
-This directory is part of KGEN Genesis Library V1.0. Updates must be cumulative, must preserve revision history, and must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official token contract.
+Updates must be cumulative and must preserve revision history. This book must not contradict Genesis, Canon, Constitution, Runtime CURRENT, Universe Map, or the official KGEN token contract.

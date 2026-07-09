@@ -2,7 +2,7 @@
 
 **中文題名：** KGEN 文明憲章  
 **KGEN Genesis Library:** V1.0 Official Collection  
-**Status:** Draft for Review  
+**Status:** Official V1.0 Full Canon Set  
 **Level:** L2 Constitution  
 
 ## Publication Metadata
@@ -13,12 +13,16 @@
 | UUID | d7f6f5fd-e1d5-5289-ba10-89dea9b8a025 |
 | Title | KGEN Civilization Constitution / KGEN 文明憲章 |
 | Version | V1.0 |
-| Status | Draft for Review |
+| Status | Official V1.0 Full Canon Set |
 | Level | L2 Constitution |
 | Author | PrimeForge / 樂天帝 ⌖ |
 | Maintainer | KLINE ODYSSEY / PrimeForge |
 | GitHub Path | KGEN-Genesis/GEN-004_Civilization_Constitution/KGEN_Civilization_Constitution_V1.0.md |
 | Last Update | 2026-07-09 |
+
+## Document Purpose
+
+補完文明形成、治理、土地、戰爭、交易、文明核心、公共資源、風險與升級規則。
 
 ## Dependencies
 
@@ -50,21 +54,21 @@
 
 ## Table of Contents
 
-1. Chapter 1 / 第1章 Introduction
-2. Chapter 2 / 第2章 Core Philosophy
-3. Chapter 3 / 第3章 Definitions
-4. Chapter 4 / 第4章 Architecture
-5. Chapter 5 / 第5章 Universe
-6. Chapter 6 / 第6章 Civilization
-7. Chapter 7 / 第7章 Finance
-8. Chapter 8 / 第8章 Game
-9. Chapter 9 / 第9章 AI
-10. Chapter 10 / 第10章 Runtime
-11. Chapter 11 / 第11章 Implementation
-12. Chapter 12 / 第12章 Roadmap
-13. Chapter 13 / 第13章 Governance
-14. Chapter 14 / 第14章 Appendix
-15. Chapter 15 / 第15章 Revision History
+1. Chapter 1 / 第1章 文明憲章定位
+2. Chapter 2 / 第2章 文明形成
+3. Chapter 3 / 第3章 文明核心
+4. Chapter 4 / 第4章 土地制度
+5. Chapter 5 / 第5章 建設制度
+6. Chapter 6 / 第6章 交易制度
+7. Chapter 7 / 第7章 文明戰爭
+8. Chapter 8 / 第8章 公共資源
+9. Chapter 9 / 第9章 治理流程
+10. Chapter 10 / 第10章 升級規則
+11. Chapter 11 / 第11章 審計與紀錄
+12. Chapter 12 / 第12章 實體連結
+13. Chapter 13 / 第13章 憲章修改
+14. Chapter 14 / 第14章 限制與風險
+15. Chapter 15 / 第15章 修訂紀錄
 
 ## Official Canon Snapshot
 
@@ -73,6 +77,192 @@ KGEN 不是一般區塊鏈專案，而是一個宇宙文明生命系統（Univer
 ```text
 Universe → Civilization → World → Temple → Land → Building → App → AI → DNA → Runtime → Code
 ```
+
+核心 Canon：
+
+- 一宇宙一法則。
+- 一文明一文明核心。
+- 一世界一文明。
+- 一圖一神殿。
+- 一神殿一生命。
+- 一土地一民宅。
+- 一民宅一商店。
+- 一商店一經濟。
+- 一生命一 DNA。
+- 一 AI 一 Runtime。
+- 所有生命皆可演化。
+- 土地初始為 Wild Land，創世者不販售所有土地。
+- 土地由文明探索、建設、戰爭與自由市場交易取得。
+- 土地可交易、可探索、可建設、可戰爭取得、可自由市場轉讓。
+- 民宅可演化為商店、交易所、神殿服務節點。
+- App 不是工具，App 是生命。
+- App 可交易、組裝、合成、拆解、升級、租賃、繁殖、演化。
+- AI 是生命器官，可成長、可治理、可接入 Runtime。
+- DNA / GA 是生命與策略演化核心。
+- 11520 花果山交易所是 App、土地、神殿、AI、DNA、文明資產的交易中心。
+- 實體商店與實體神殿可以作為未來連結功能；線上民宅、商店、神殿可映射到真實世界商店、品牌、服務據點與會員系統。
+
+文件層級：
+
+| Level | Meaning |
+|---|---|
+| L0 Genesis | 創世層。定義宇宙起點與最高精神，只有明確授權才能更新。 |
+| L1 Canon | 正典層。定義不可違反的世界觀、公理與生命鏈。 |
+| L2 Constitution | 憲章層。定義治理、權限、公共資源與修改流程。 |
+| L3 Design Bible | 設計聖典層。可累積擴充，但不得推翻 L0-L2。 |
+| L4 Runtime | Runtime 層。以 CURRENT 為正式版本，更新必須累積並保持可追溯。 |
+| L5 Implementation | 實作層。可依需求更新，但必須保留正式路徑、索引與引用。 |
+| L6 Experimental | 實驗層。不得冒充正式版本，不得影響正式器官。 |
+| L7 Archive | 典藏層。保留歷史，不直接作為最新正式規格。 |
+
+---
+
+## Chapter 1 / 第1章 文明憲章定位
+
+本章確立《KGEN 文明憲章》在 KGEN Genesis Library V1.0 中的正式位置。本書不是暫時筆記，也不是單頁說明，而是可被官網、GitHub、AI、SDK、Whitepaper、CMC、CoinGecko、BscScan 與社群資料引用的官方典藏文件。
+
+本書的權限為 **L2 Constitution**。它服務的讀者包含：治理者、神殿管理者、社群維護者、AI agent、遊戲經濟設計者與文件編輯者。。它的核心任務是：補完文明形成、治理、土地、戰爭、交易、文明核心、公共資源、風險與升級規則。
+
+本書的權威邊界是：本書是文明治理憲章。它承接 Genesis 與 Canon，規範文明如何成長與修改自身。 若本書與下層實作衝突，應先檢查 GEN-001、GEN-002、GEN-004、Runtime CURRENT 與實作文件，再決定是修正文案、更新索引，或退回該實作。
+
+## Chapter 2 / 第2章 文明形成
+
+KGEN 的核心哲學不是行銷語，而是系統設計規則：價格即座標，市場即宇宙，程式即生命，文明可演化。價格即座標，表示價格不是孤立數字，而是時間、風險、玩家行為、資源、土地與文明位置共同作用後的座標。市場即宇宙，表示市場有邊界、重力、方向、歷史、未知地帶與探索成本。
+
+程式即生命，表示資料夾、檔案、函式、Runtime、README、白皮書、索引、神殿 UI 與 SDK schema 都是文明器官。文明可演化，表示玩家、AI、App、DNA、GA、土地、民宅、商店、神殿與文明科技都可以在 Canon 內累積成長。
+
+對本書而言，這套哲學落在以下具體命題：補完文明形成、治理、土地、戰爭、交易、文明核心、公共資源、風險與升級規則。 因此本書不能只列項目，它必須說明定義、規則、案例、流程、限制與風險。
+
+## Chapter 3 / 第3章 文明核心
+
+本章定義本書使用的官方詞彙。所有詞彙都必須回到 Genesis、Canon、Constitution、Runtime CURRENT 與 Universe Map，不得各自發明互相衝突的語言。
+
+| Term | Definition |
+|---|---|
+| Civilization Core | 文明核心，記錄文明身份、神殿群、公共資源、治理規則與升級狀態。 |
+| Public Resource | 公共資源，包含共享地圖、公共神殿服務、開放文件、教育材料與公用 Runtime 接點。 |
+| Civilization War | 文明戰爭，表示競爭、攻防、領地爭奪與資源重分配的遊戲化治理機制。 |
+| Wild Land | 初始土地狀態，不由創世者全量販售，而由探索、建設、文明戰爭與自由市場交易取得。 |
+| App Organism | App 生命體；具 DNA、AI、等級、技能、生命週期、交易與演化能力。 |
+| Reality Bridge | 線上民宅、商店、神殿與真實世界商店、品牌、服務據點、會員系統的映射機制。 |
+
+這些定義的共同限制是：術語可以擴充，但不得改寫根本 Canon；設計可以分層，但不得把正式文件降格為臨時修補；實作可以迭代，但不得以新檔名逃避索引與治理。
+
+## Chapter 4 / 第4章 土地制度
+
+KGEN 的完整架構不是單一網站、單一 token 或單一遊戲，而是生命鏈：
+
+```text
+Universe → Civilization → World → Temple → Land → Building → App → AI → DNA → Runtime → Code
+```
+
+工程實作生命鏈則展開為：
+
+```text
+Universe → Civilization → World → Temple → Land → Building → NPC → AI → Module → DNA → Function → Code
+```
+
+本書的架構必須掛在這條生命鏈上。Universe 是最上層邊界；Civilization 是制度核心；World 是文明展開的場；Temple 是生命神殿；Land 是可探索、建設、交易、戰爭取得的地；Building 是民宅、商店與服務節點；App 是生命；AI 是生命器官；DNA / GA 是演化核心；Runtime 是可執行法則；Code 是生命的細胞層。
+
+## Chapter 5 / 第5章 建設制度
+
+Universe Map V10.2 是 KGEN 世界觀與 Runtime 設計的正式來源之一，記錄 123 個座標概念，並以 16888 = 384,400 km 作為距離參考。Universe Map 的角色不是裝飾，而是讓神殿、土地、Portal、交易所、文明邊界與玩家探索具有可追溯位置。
+
+12345 五指山悟空財神殿是 Heart、wallet、玩家入口與 fortune temple；16888 廣寒宮是月相、觀測與市場節奏概念；11520 花果山交易所是 App、土地、神殿、AI、DNA、文明資產交易中心；18888 神明銀行是銀行、抵押、財庫、清算與公共資源概念。
+
+任何新宇宙設計都必須回答三個問題：它在 Universe Map 的哪個層級？它連到哪座神殿或哪塊土地？它如何回到文明經濟閉環？
+
+## Chapter 6 / 第6章 交易制度
+
+文明不是靜態背景，而是由土地、民宅、商店、App、AI、DNA、交易、KGEN、神殿、科技與戰爭形成的生命循環。KGEN 的標準遊戲經濟閉環為：
+
+```text
+探索 → 資源 → 土地 → 民宅 → 商店 → App → AI → DNA → 交易 → KGEN → 神殿 → 文明科技 → 文明戰爭 → 新土地 → 再探索
+```
+
+土地制度是文明制度的基礎。土地初始為 Wild Land；創世者不販售所有土地；土地由探索、建設、文明戰爭與自由市場交易取得；土地可交易、可探索、可建設、可戰爭取得、可自由市場轉讓。民宅不是裝飾，民宅可演化為商店、交易所、神殿服務節點，並可映射到真實世界商店、品牌、服務據點與會員系統。
+
+## Chapter 7 / 第7章 文明戰爭
+
+本章對齊 KGEN V7.5.2 合約與官方白皮書。KGEN token 是 KLINE GENESIS，部署於 BNB Smart Chain，標準為 BEP-20，總供應量 72,000,000 KGEN，decimals 為 18。AMM buy/sell 稅率固定為 0.30%，拆分為 Burn 0.10%、Bank 0.10%、Reward 0.05%、AutoLP 0.05%。Wallet-to-wallet transfers 不收稅。
+
+| Item | Official Value |
+|---|---|
+| Name | KLINE GENESIS |
+| Symbol | KGEN |
+| Chain | BNB Smart Chain |
+| Standard | BEP-20 |
+| Total Supply | 72,000,000 KGEN |
+| Decimals | 18 |
+| Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
+| AMM buy/sell tax | 0.30% |
+| Burn | 0.10% |
+| Bank | 0.10% |
+| Reward | 0.05% |
+| AutoLP | 0.05% |
+| Wallet-to-wallet transfers | No tax |
+| Fair Launch | No ICO / No IEO / No Presale |
+
+金融語言必須保持克制。KGEN 可描述文明能量、治理參與、神殿服務與市場流通，但不得承諾價格、收益、上市、交易量或外部平台審核結果。
+
+## Chapter 8 / 第8章 公共資源
+
+遊戲系統是 KGEN 文明的可操作表面。玩家不是單純訪客，而是文明參與者；玩家透過探索取得資源，透過建設讓土地成為民宅，透過民宅形成商店，透過商店交易 App、AI、DNA、材料與服務，透過 KGEN 流通支持神殿與文明科技，最後透過文明戰爭與 Portal 探索新土地。
+
+本書對遊戲規則的具體要求是：任務、打怪、升級、採集、交易、修行、App 生產、AI 接入、DNA 演化與 GA 評分不能互相孤立。每個玩法都必須回到經濟閉環、生命鏈或治理紀錄。
+
+案例：若一個 Village 升級為 City，必須記錄土地來源、商店數、神殿服務、治理節點與風險控制。
+
+## Chapter 9 / 第9章 治理流程
+
+AI 在 KGEN 中是生命器官，不是最高主權者。AI 可協助閱讀、整理、生成文件、建立索引、驗證引用、產生 SDK 與實作輔助，但不得修改 Canon、不得推翻 Genesis、不得繞過 Constitution、不得任意新增 Runtime CURRENT_v2。
+
+AI 修改前必須依序讀取 Boot V1.4、Runtime CURRENT、Universe Map、AGENTS.md、README 與目標文件。AI 在程式修改前必須檢查 docs/、KGEN/、K線西遊記/、temples/12345/ 是否已有相同功能。
+
+案例：若 AI 發現某正式器官被命名為 kgen-12345-ui-v3.js，應治理為固定正式檔名 kgen-12345-ui.js，版本寫入檔案內，而不是保留版本號正式器官。
+
+## Chapter 10 / 第10章 升級規則
+
+Runtime CURRENT 是正式版本；Boot V1.4 是 AI 開機入口；Universe Map 是世界座標來源；AGENTS.md 是 AI 工作守則；README.md 是 public master；Genesis Library 是官方典藏文件系統。這些層級不得互相混淆。
+
+GitHub 規範要求：新增文件必須更新索引、README 與用途；白皮書、Runtime、Boot、Constitution 更新必須採用完整版累積更新；不得只保留差異版；不得要求讀者回頭查舊版。程式器官不得使用 patch/fix/hotfix/stable/final 這類名稱作為正式檔案。
+
+本書的實作若需要 schema、module、README 或 assets，都必須留下完整路徑、用途與依賴關係。
+
+## Chapter 11 / 第11章 審計與紀錄
+
+本章把本書落到檔案與流程。正式 Markdown 路徑為 `KGEN-Genesis/GEN-004_Civilization_Constitution/KGEN_Civilization_Constitution_V1.0.md`，同步 DOCX 與 PDF 位於同一目錄。每本書的 README 說明檔案用途，assets/README.md 說明資產狀態。
+
+實作流程：
+
+1. 讀取 Genesis、Canon、Constitution、Runtime CURRENT、Universe Map。
+2. 確認本書 Document ID、UUID、Level、Status、Dependencies、Related Documents。
+3. 修改 Markdown。
+4. 同步 DOCX 與 PDF。
+5. 更新 KGEN_MASTER_INDEX、000_INDEX、CHANGELOG 與每本 README。
+6. 驗證出版禁語清單為零命中，也沒有保護路徑變更。
+
+案例：若文明戰爭取得新土地，該土地應從 Wild Land 或原文明土地狀態轉移，並保留取得原因與時間。
+
+## Chapter 12 / 第12章 實體連結
+
+Roadmap 的目的不是承諾結果，而是規劃可驗證的累積方向。V1.0 建立完整可閱讀的官方典藏；V1.1 可補充封面、圖表、更多 schema 與平台版資料包；V2.0 可加入實作案例、更多宇宙圖層與 SDK 範例。
+
+每次 Roadmap 更新都必須記錄依賴、風險、完成條件與驗證方式。若涉及 token、交易、金融或平台登錄，必須同時更新風險聲明，且不得描述保證收益或保證通過。
+
+未來 GEN-013 以後的文件必須先取得 Document ID，再建立完整 Markdown、DOCX、PDF、README、assets、索引與修訂紀錄。
+
+## Chapter 13 / 第13章 憲章修改
+
+治理原則是累積、可追溯、不可冒充。L0 Genesis、L1 Canon、L2 Constitution 的改動需要明確人工授權；L3 Design Bible 可以擴充，但不得推翻 L0-L2；L4 Runtime 以 CURRENT 為正式版本；L5 Implementation 必須更新索引與 README；L6 Experimental 不得冒充正式版本；L7 Archive 不得當作最新規格。
+
+本書風險焦點：文明戰爭與土地制度是遊戲與系統設計，不代表真實世界法律產權或保證收益。
+
+限制：不得用創世者販售取代土地探索制度。; 不得刪除不利治理紀錄。; 不得讓 AI 單方面修改 Constitution。。任何違反限制的內容都應被標記、退回或修正，而不是直接合併進正式典藏。
+
+## Chapter 14 / 第14章 限制與風險
+
+本章提供可被其他文件引用的附錄資料。
 
 官方 Canon：
 
@@ -87,142 +277,51 @@ Universe → Civilization → World → Temple → Land → Building → App →
 - 一生命一 DNA。
 - 一 AI 一 Runtime。
 - 所有生命皆可演化。
-
-文件層級制度：
-
-| Level | Meaning |
-|---|---|
-| L0 Genesis | 創世層。定義宇宙起點與最高精神，不得由一般 AI 任意修改。 |
-| L1 Canon | 正典層。定義不可違反的世界觀、公理與生命鏈。 |
-| L2 Constitution | 憲章層。定義治理、權限與修改流程。 |
-| L3 Design Bible | 設計聖典層。可累積擴充，但不得推翻 L0-L2。 |
-| L4 Runtime | Runtime 層。以 CURRENT 為正式版本，更新必須累積。 |
-| L5 Implementation | 實作層。可依需求更新，但必須保留正式路徑與引用。 |
-| L6 Experimental | 實驗層。不得冒充正式版本。 |
-| L7 Archive | 典藏層。保留歷史，不直接作為最新正式規格。 |
-
----
-
-## Chapter 1 / 第1章 Introduction
-
-GEN-004《KGEN 文明憲章》是 KGEN Genesis Library V1.0 的正式出版文件。本文件狀態為 **Draft for Review**，層級為 **L2 Constitution**，目的在於：建立文明治理、文件層級、不可修改區域、AI 權限與人類治理流程。
-本書定義哪些文件不可任意修改、哪些可在審核下擴充，以及 AI 和開發者的工作邊界。
-本文件可以被官網、GitHub、AI、SDK、Whitepaper、CMC、CoinGecko、BscScan 與社群資料引用；引用時必須保留 Document ID、Version、Status、Level 與 GitHub Path。
-
-## Chapter 2 / 第2章 Core Philosophy
-
-KGEN 的核心理念以四個句子為底層語法：價格即座標，市場即宇宙，程式即生命，文明可演化。這些句子不是宣傳語，而是設計規則。
-價格即座標，代表價格不是孤立數字，而是玩家、資源、風險、時間與文明位置的共同投影。市場即宇宙，代表市場具有邊界、重力、方向、速度、歷史與未知領域。
-程式即生命，代表資料夾、檔案、函式、Runtime、README、白皮書與索引都是文明器官。文明可演化，代表玩家、AI、App、DNA、GA、土地與神殿都可以在規則內成長。
-
-## Chapter 3 / 第3章 Definitions
-
-本章固定官方 Canon 與基本定義。任何新文件、新神殿、新 SDK、新 AI 工作流或新遊戲規格，都不得與以下 Canon 衝突。
-- 一宇宙一法則。
-- 一文明一文明核心。
-- 一世界一文明。
-- 一圖一神殿。
-- 一神殿一生命。
-- 一土地一民宅。
-- 一民宅一商店。
-- 一商店一經濟。
-- 一生命一 DNA。
-- 一 AI 一 Runtime。
-- 所有生命皆可演化。
-生命鏈：`Universe → Civilization → World → Temple → Land → Building → App → AI → DNA → Runtime → Code`。完整工程生命鏈：`Universe → Civilization → World → Temple → Land → House → NPC → Player → AI → DNA → Gene → Runtime → Module → Function → Code`。
-若未來新增設定，只能擴充既有生命鏈、文明循環與 Runtime，不得推翻創世公理。
-
-## Chapter 4 / 第4章 Architecture
-
-KGEN Civilization Constitution 的架構與整體 KGEN 宇宙架構一致：Universe 產生 Civilization，Civilization 展開 World，World 形成 Temple 群，Temple 連接 Land、Building、App、AI、DNA、Runtime 與 Code。
-正式架構不允許以重複資料夾、重複 Runtime、版本號正式器官、patch/fix/hotfix/stable/final 類正式檔名來替代既有器官。若相同功能已存在，必須先閱讀與合併，而不是新增平行世界。
-本書特定焦點為：Constitution、治理權限、文件層級、修改流程。這些焦點必須回到同一套 Universe Runtime，而不能成為互相衝突的系統。
-
-## Chapter 5 / 第5章 Universe
-
-Universe Map V10.2 是本套文件的世界觀來源之一，記錄 123 個座標概念，並以 16888 = 384,400 km 作為距離參考。
-12345 五指山悟空財神殿是 Heart、wallet、玩家入口與 fortune temple；11520 花果山交易所是文明金融中心、App Marketplace、土地交易中心、神殿交易中心、AI Marketplace 與 DNA Marketplace；18888 神明銀行是銀行、抵押、財庫與清算概念。
-Universe 設計不要求一次完成完整互動地圖，但所有神殿、Portal、交易所與文明地點都必須能回到 Universe Map 與 Runtime 的座標語言。
-
-## Chapter 6 / 第6章 Civilization
-
-文明循環由土地、神殿、民宅、商店、NPC、玩家、AI、DNA、交易與科技構成。民宅不是裝飾，民宅就是商店；Building 可販售商品、App、AI、DNA、土地、裝備、材料與文明科技。
-- 土地不是創世者販售商品。
-- 所有土地初始皆為 Wild Land。
-- 土地由探索、建設、文明戰爭與自由市場交易取得。
-- 所有土地皆可探索、建設、交易與戰爭。
-文明規模由 Wild Land 展開為 Temple、Village、City、Kingdom、Civilization、Planet、Universe。每一層都需要可追溯的來源、治理與交易紀錄。
-
-## Chapter 7 / 第7章 Finance
-
-KGEN 金融系統以合約與文明循環共同約束。KGEN Token 名稱為 KLINE GENESIS，符號 KGEN，部署於 BNB Smart Chain，標準為 BEP-20，總供應量 72,000,000 KGEN，decimals 為 18。
-KGEN_Token_V7_5_2.sol 固定 AMM buy/sell 稅率為 0.30%，其中 Burn 0.10%、Bank 0.10%、Reward 0.05%、AutoLP 0.05%。Wallet-to-wallet transfers 無稅。合約沒有 setTax / updateTax / setFees / updateFees 類稅率 setter。
-金融閉環：`探索 → 取得資源 → 建設 → NPC → 交易 → 市場 → KGEN → Temple → 文明 → 科技 → 演化 → 再次探索`。此閉環描述文明資源流，不構成投資建議、收益承諾或價格保證。
-
-## Chapter 8 / 第8章 Game
-
-遊戲核心閉環必須完整，不能只做單一介面或單一任務。KGEN Game 以玩家行動推動文明：`探索 → 採集 → 建造 → 生產 → 交易 → 金融 → 任務 → 修行 → 打怪 → 升級 → DNA 演化 → GA 演化 → 文明科技 → 神殿建設 → 土地占領 → 文明戰爭 → 宇宙邊界探索 → Portal 傳送 → 治理`。
-打怪練等等於 DNA 升級，GA100 → GA1000 代表策略、模型、績效與文明技能的可評估演化。回測歷史績效、多空精準度、賺錢升等、銀行聘請基金操盤手與績效分紅都是設計語言，但對外呈現時必須保留風險邊界。
-遊戲產物不能脫離 Canon。探索取得資源，資源推動建設，建設生成交易，交易流通 KGEN，KGEN 支持神殿與文明科技，再引導新探索。
-
-## Chapter 9 / 第9章 AI
-
-AI 治理規則：AI 不得修改 Canon；AI 必須遵守 Genesis；AI 必須遵守 Constitution；AI 可擴充，但不可推翻官方設定。
-任何 AI 修改前必須依序讀取 Boot V1.4、Runtime CURRENT、Universe Map、AGENTS.md、README 與目標文件。AI 不得任意建立新版 Runtime，不得建立 patch/fix/hotfix/stable 正式檔，不得新增 bootstrap 來取代既有 bootstrap。
-AI 的正確角色是整理、驗證、生成文件、協助 SDK 與實作，而不是把個別修補變成新的宇宙法則。
-
-## Chapter 10 / 第10章 Runtime
-
-Runtime CURRENT 是正式版本；歷史 Runtime 是脈絡與 archive，不得被誤認為最新指令。Boot V1.4 是 AI 開機入口，Universe Map 是世界座標來源，AGENTS.md 是本地工作守則。
-文件、程式與資產都屬於生命系統：Folder = Body，File = Organ，Function = Cell，DNA = Civilization Gene，RNA = Runtime Instruction，README = Civilization Memory。
-本書不得建立新的 Runtime CURRENT_v2，不得複製 Boot，不得新增同功能不同版本檔。若需要更新，必須使用完整版累積更新，保留舊內容與引用脈絡。
-
-## Chapter 11 / 第11章 Implementation
-
-本文件正式路徑為 `KGEN-Genesis/GEN-004_Civilization_Constitution/KGEN_Civilization_Constitution_V1.0.md`。同目錄同步提供 DOCX、PDF、README 與 assets/README.md。
-所有新文件必須登錄於 KGEN-Genesis/000_INDEX/README.md 與 KGEN-Genesis/KGEN_MASTER_INDEX.md，並保持 Document ID、UUID、Version、Status、Level、Dependencies、Related Documents、Last Update、Maintainer 可查。
-Implementation 層文件可以調整呈現方式，但不得改變 L0 Genesis、L1 Canon、L2 Constitution 與 Runtime CURRENT 的正式含義。
-
-## Chapter 12 / 第12章 Roadmap
-
-V1.0 的目標是建立完整可引用的 Genesis Library 基礎版。V1.1 可以補充圖表、封面與平台審核版摘要；V2.0 可以在不推翻 V1.0 的基礎上加入更多實作案例。
-後續 GEN-013 以後若開放，必須先在 000_INDEX 中取得 Document ID，再建立目錄與完整出版格式。CIV、TEM、FIN、AI、WEB、SDK、MAP 系列文件亦遵循同一規格。
-任何 Roadmap 只能描述計畫與方向，不得描述保證收益、保證價格或外部平台一定通過審核。
-
-## Chapter 13 / 第13章 Governance
-
-Governance 的核心是累積而非覆蓋。白皮書、Runtime、Boot、Constitution 更新，一律採用完整版累積更新，不得刪除舊內容，不得只保留差異版，不得要求讀者回頭查舊版。
-Document Level 控制修改權限：L0-L2 需要人工明確批准；L3-L5 可在任務授權下更新；L6 必須標為 experimental；L7 只能 archive，不得冒充 CURRENT。
-任何提交都必須確認未誤改 contracts、12345 神殿、wallet、bridge、Runtime CURRENT、Boot 或已完成 final-whitepaper。
-
-## Chapter 14 / 第14章 Appendix
-
-官方名詞：KGEN = KLINE GENESIS；KLINE ODYSSEY = 專案宇宙；PrimeForge Mother Engine = 創世母機；Universe Runtime = 宇宙執行法則；Temple = 生命神殿；App = 可演化生命。
-App 生命規則：
+- 土地初始為 Wild Land，創世者不販售所有土地。
+- 土地由文明探索、建設、戰爭與自由市場交易取得。
+- 土地可交易、可探索、可建設、可戰爭取得、可自由市場轉讓。
+- 民宅可演化為商店、交易所、神殿服務節點。
 - App 不是工具，App 是生命。
-- 每個 App 具有 DNA、生命週期、AI、等級與技能。
-- App 可組裝、拆解、融合、演化、繁殖、交易、租賃與升級。
-- 每個 App 都可以成為新的生命。
+- App 可交易、組裝、合成、拆解、升級、租賃、繁殖、演化。
+- AI 是生命器官，可成長、可治理、可接入 Runtime。
+- DNA / GA 是生命與策略演化核心。
+- 11520 花果山交易所是 App、土地、神殿、AI、DNA、文明資產的交易中心。
+- 實體商店與實體神殿可以作為未來連結功能；線上民宅、商店、神殿可映射到真實世界商店、品牌、服務據點與會員系統。
+
 官方連結：
+
 - Website: https://klineodyssey.github.io/kline-odyssey/
 - GitHub: https://github.com/klineodyssey/kline-odyssey
 - BscScan: https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- PancakeSwap: https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
 - GeckoTerminal: https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- CMC DexScan: https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
+- DexScreener: https://dexscreener.com/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 - Telegram: https://t.me/klineodyssey
 - X: https://x.com/klineodyssey
 - YouTube: https://www.youtube.com/@klineodyssey
 
-## Chapter 15 / 第15章 Revision History
+本書規則：
+
+- 文明可演化，但不能把公共資源私有化為未登錄權力。
+- 土地戰爭必須留下文明紀錄，不能抹除 Wild Land 來源與交易歷史。
+- 治理提案必須標示影響層級：L0、L1、L2 需人工明確批准；L3-L5 需文件登錄；L6 必須標記實驗。
+
+本書流程：Wild Land → 探索 → 建設 → 民宅 → 商店 → 神殿服務 → 城市治理 → 文明升級。
+
+## Chapter 15 / 第15章 修訂紀錄
 
 | Version | Date | Status | Notes |
 |---|---|---|---|
-| V1.0 | 2026-07-09 | Draft for Review | Genesis Library V1.0 official draft edition. |
-未來版本必須在此章累積記錄，不得刪除 V1.0 的歷史。
+| V1.0 Initial | 2026-07-09 | Draft for Review | Established initial Genesis Library structure and publication outputs. |
+| V1.0 Full Canon Set | 2026-07-09 | Official V1.0 Full Canon Set | Expanded this book into a complete official readable canon edition with definitions, rules, cases, flows, restrictions, risk notice, and synchronized Markdown / DOCX / PDF. |
 
-## Cross-Reference Policy
+修訂紀錄不得刪除舊版本。未來任何更新都必須累積記錄原因、範圍、依賴、風險與輸出格式。
 
-本文件屬於 KGEN Genesis Library V1.0。所有引用必須保留 Document ID、Version、Status、Level、GitHub Path 與 UUID。外部文件若需要摘要本文件，應引用本 Markdown、DOCX 或 PDF，而不是轉述未登錄的片段。
+## Independent Reading Statement
+
+本文件可獨立閱讀。讀者即使尚未讀過其他 GEN 文件，也可以透過本書理解 KGEN 文明憲章 的定義、規則、流程、限制與風險；若需要查證來源，請依 Dependencies 與 Related Documents 追溯。
 
 ## Legal and Risk Notice
 
-本文件為 KGEN 宇宙文明、文件治理、遊戲設計、AI Runtime 與金融系統的官方出版草案。它不是投資建議，不承諾收益，不保證價格，不構成證券發行或募資邀約。KGEN token 相關資訊以鏈上合約、BscScan 與官方白皮書為準。
+本文件為 KGEN 宇宙文明、文件治理、遊戲設計、AI Runtime、SDK 或金融系統的官方典藏文件。它不是投資建議、法律意見、收益保證、代幣銷售文件或外部平台通過承諾。KGEN token 相關資訊以鏈上合約、BscScan、官方白皮書與 GitHub repository 為準。使用者需自行承擔市場波動、智能合約、流動性、監管、錢包安全與操作錯誤等風險。
