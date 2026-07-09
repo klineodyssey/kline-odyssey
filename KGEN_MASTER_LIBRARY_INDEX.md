@@ -1,8 +1,8 @@
 # KGEN Master Library Index
 
-**Version:** V1.0  
-**Status:** Draft for Review  
-**Last Update:** 2026-07-10  
+**Version:** V1.0
+**Status:** Draft for Review
+**Last Update:** 2026-07-10
 **Maintainer:** KLINE ODYSSEY / PrimeForge
 
 This is the root cross-library index for Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, and Official Whitepaper references.
@@ -17,7 +17,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Machine-Readable Canon | `KGEN-Canon/` | JSON Canon and AI-readable governance |
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
-| KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, Codex review/merge, reports, and WorkQueue automation |
+| KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -36,8 +36,12 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | WorkQueue Execution Rules | `KGEN-AI-Company/WORKQUEUE_EXECUTION_RULES.md` | First OPEN task scanning and execution rules |
 | Dispatcher Status | `KGEN-AI-Company/reports/DISPATCHER_STATUS.md` | Current dispatcher counts, next task, and latest review result |
 | WorkOrder Lifecycle | `KGEN-AI-Company/WORKORDER_LIFECYCLE.md` | OPEN, IN_PROGRESS, BLOCKED, REVIEW, APPROVED, REJECTED, DONE |
+| Workspace Policy | `KGEN-AI-Company/WORKSPACE_POLICY.md` | Human Main isolation, Cursor handoff branch, and Codex clean review workspace |
+| Worktree Setup | `KGEN-AI-Company/WORKTREE_SETUP.md` | Minimum workspace layout and review checklist |
+| Worktree Recovery | `KGEN-AI-Company/WORKTREE_RECOVERY.md` | Recovery rules for missing branch, invisible commit, dirty tree, conflict, wrong push, incomplete handoff, and missing report |
 | Reports | `KGEN-AI-Company/reports/README.md` | Cursor report center |
 | Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` | Codex decisions for Cursor reports |
+
 ## Organization V2.0
 
 | Item | Path | Purpose |
@@ -51,6 +55,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | WorkOrder Standard | `KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md` | Codex assignment, Cursor execution, report, review, commit, and push rules |
 | Phase 2 WorkQueue | `KGEN-Organization/WorkOrders/WORK_QUEUE.md` | 25 department-scoped OPEN WorkOrders |
 | Reports | `KGEN-Organization/Reports/README.md` | Organization report storage and naming rules |
+
 ## Runtime Documents
 
 | Document ID | Title | Level | Status | Path | UUID |

@@ -1,23 +1,23 @@
 # KGEN AI Company Automation V5.0
 
-**Status:** Active / Draft for Review  
-**Manager:** Codex  
-**Employee:** Cursor  
-**Primary Queue:** `KGEN-Organization/WorkOrders/WORK_QUEUE.md`  
-**Report Center:** `KGEN-AI-Company/reports/`  
+**Status:** Active / Draft for Review
+**Manager:** Codex
+**Employee:** Cursor
+**Primary Queue:** `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
+**Report Center:** `KGEN-AI-Company/reports/`
 **Review Log:** `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
 
 KGEN AI Company turns KGEN Organization V2.0 from a document organization into a working AI company. Codex manages the company. Cursor works as the execution employee. GitHub files are the only handoff center.
 
 ## First Day Startup
 
-The human operator only needs to paste this once into Cursor Agent:
+The human operator only needs to paste this into Cursor Agent:
 
 ```text
-gi，上班，啟動西遊記，專案開始。
+gi，上班
 ```
 
-After that, Cursor must pull `origin/main`, read the AI Company boot files, find the first OPEN WorkOrder, move it to IN_PROGRESS, execute it, write a report, move it to REVIEW, and wait for Codex.
+After that, Cursor must pull `origin/main`, read the AI Company boot files, find the first OPEN WorkOrder, move it to IN_PROGRESS, execute it, write a report, push `cursor-handoff/<Task-ID>`, move it to REVIEW, and wait for Codex.
 
 ## Operating Files
 
@@ -35,6 +35,9 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 | `CURSOR_REPORTING_RULES.md` | Report requirements |
 | `CODEX_REVIEW_AND_MERGE_RULES.md` | Review, approve, reject, merge, push rules |
 | `WORKORDER_LIFECYCLE.md` | OPEN to DONE lifecycle |
+| `WORKSPACE_POLICY.md` | Human Main, Cursor Worker, and Codex Review workspace rules |
+| `WORKTREE_SETUP.md` | Minimum worktree layout and checklist |
+| `WORKTREE_RECOVERY.md` | Recovery steps for missing branches, dirty trees, conflicts, and incomplete handoffs |
 | `HUMAN_OPERATOR_GUIDE.md` | Short human instructions |
 | `reports/README.md` | Cursor and Codex report center |
 | `scripts/` | Copy-paste operating scripts for Cursor and Codex |
@@ -50,3 +53,17 @@ V5.0 formally adopts Cursor Handoff Branch Workflow. Cursor pushes only `cursor-
 - Workflow: `KGEN-AI-Company/CURSOR_HANDOFF_BRANCH_WORKFLOW.md`
 - Codex dispatcher: `KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md`
 - Lifecycle: `KGEN-AI-Company/WORKORDER_LIFECYCLE.md`
+
+## Workspace Policy
+
+KGEN AI Company uses the minimum workspace governance model:
+
+- Human Main Workspace: `C:\Desktop\kline-odyssey`, reserved for human daily work. AI agents do not commit, merge, reset, stash, push, or delete files there by default.
+- Cursor Worker Workspace: Cursor executes one WorkOrder and pushes only `cursor-handoff/<Task-ID>`.
+- Codex Review Workspace: `C:\Desktop\kline-odyssey-codex-review`, kept clean for fetch, review, merge, and push.
+
+If Human Main has uncommitted files, agents list them and continue from the Codex Review Workspace. If Cursor forgets to push a handoff branch, Codex does not review and the task remains BLOCKED until `cursor-handoff/<Task-ID>` is visible on origin.
+
+- Policy: `KGEN-AI-Company/WORKSPACE_POLICY.md`
+- Setup: `KGEN-AI-Company/WORKTREE_SETUP.md`
+- Recovery: `KGEN-AI-Company/WORKTREE_RECOVERY.md`
