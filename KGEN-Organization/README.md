@@ -15,6 +15,19 @@ KGEN Organization V2.0 turns the repository into an AI company operating system.
 4. Protected paths remain protected unless a human explicitly authorizes a scoped task.
 5. Canon can be extended only as a cumulative official rule; it cannot be contradicted or replaced.
 
+
+## AI Company Automation V3.0
+
+KGEN Organization V2.0 is now operated by KGEN AI Company Automation V3.0.
+
+- Manager: Codex
+- Employee: Cursor
+- Live WorkQueue: [WorkOrders/WORK_QUEUE.md](WorkOrders/WORK_QUEUE.md)
+- Cursor reports: [../KGEN-AI-Company/reports/README.md](../KGEN-AI-Company/reports/README.md)
+- Codex review log: [../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md](../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md)
+- Human guide: [../KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md](../KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md)
+
+Cursor reads GitHub WorkQueue, not chat memory. Codex reviews every REVIEW task before commit or push.
 ## Department Index
 
 | Department | Position |

@@ -1,49 +1,916 @@
-# KGEN Organization V2.0 Second Stage WorkQueue
+# KGEN Organization V2.0 WorkQueue
 
-**Queue Version:** V2.0  
+**Queue Version:** V3.0 Cursor Execution Edition  
 **Status:** Active  
-**Owner:** Codex  
+**Manager:** Codex  
 **Worker:** Cursor  
-**Rule:** Cursor accepts one OPEN task at a time, produces the listed report, then moves the task to REVIEW for Codex.
+**Primary Reports Path:** KGEN-AI-Company/reports/  
+**Codex Review Log:** KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md
 
-## Status Model
+Cursor reads this file from GitHub. Cursor does not wait for repeated human chat prompts. Cursor accepts one OPEN task at a time, changes it to IN_PROGRESS, creates the required report, completes the task, changes it to REVIEW, and waits for Codex.
 
-- OPEN: Ready for Cursor.
-- IN_PROGRESS: Cursor is executing this task.
-- REVIEW: Cursor has submitted a report and Codex must review.
-- DONE: Codex accepted the work.
-- BLOCKED: Requires human or Codex decision.
+## Status Rules
 
-## Phase 2 WorkOrders
+| Status | Meaning | Controlled By |
+|---|---|---|
+| OPEN | Ready for Cursor | Codex |
+| IN_PROGRESS | Cursor accepted and is working | Cursor |
+| BLOCKED | Work cannot continue without decision | Cursor or Codex |
+| REVIEW | Cursor submitted report and awaits review | Cursor |
+| APPROVED | Codex accepted result | Codex |
+| REJECTED | Codex rejected result | Codex |
+| DONE | Codex closed after commit/push or no-change acceptance | Codex |
 
-| Task ID | Status | Department | Title | Required Report |
-|---|---|---|---|---|
-| ORG-P2-001 | OPEN | CEO_Codex | Review Organization V2.0 command chain and confirm Codex-only merge rule | `KGEN-Organization/Reports/ORG-P2-001_CEO_COMMAND_REVIEW.md` |
-| ORG-P2-002 | OPEN | PMO | Build 72-hour milestone board from department queues | `KGEN-Organization/Reports/ORG-P2-002_PMO_MILESTONE_BOARD.md` |
-| ORG-P2-003 | OPEN | Architecture | Check duplicate folders and same-function documents after Organization V2.0 | `KGEN-Organization/Reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md` |
-| ORG-P2-004 | OPEN | Canon | Verify Civilization Core Canon against Genesis Library and Canon JSON | `KGEN-Organization/Reports/ORG-P2-004_CANON_ALIGNMENT.md` |
-| ORG-P2-005 | OPEN | Universe | Check Universe Map references in Organization standards | `KGEN-Organization/Reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md` |
-| ORG-P2-006 | OPEN | Civilization | Map civilization upgrade stages to economy and game loops | `KGEN-Organization/Reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md` |
-| ORG-P2-007 | OPEN | Economy | Validate Wild Land to cross-universe economy loop | `KGEN-Organization/Reports/ORG-P2-007_ECONOMY_LOOP_QA.md` |
-| ORG-P2-008 | OPEN | Temple | Check temple organ naming rules and one image one temple references | `KGEN-Organization/Reports/ORG-P2-008_TEMPLE_STANDARD_QA.md` |
-| ORG-P2-009 | OPEN | Land | Validate land acquisition, rental, conquest, and NFT future language | `KGEN-Organization/Reports/ORG-P2-009_LAND_STANDARD_QA.md` |
-| ORG-P2-010 | OPEN | Building | Map house to shop, bank, warehouse, exchange, temple service node evolution | `KGEN-Organization/Reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md` |
-| ORG-P2-011 | OPEN | NPC | Define NPC evolution constraints without changing runtime code | `KGEN-Organization/Reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md` |
-| ORG-P2-012 | OPEN | App | Validate App life rules: DNA, pairing, reproduction, assembly, fusion, disassembly, death, rebirth | `KGEN-Organization/Reports/ORG-P2-012_APP_LIFE_QA.md` |
-| ORG-P2-013 | OPEN | Game | Map exploration, quests, combat, upgrades, civilization war, and Portal loop | `KGEN-Organization/Reports/ORG-P2-013_GAME_LOOP_MAP.md` |
-| ORG-P2-014 | OPEN | Runtime | Check Organization V2.0 does not create duplicate Runtime CURRENT or bootstrap | `KGEN-Organization/Reports/ORG-P2-014_RUNTIME_GOVERNANCE.md` |
-| ORG-P2-015 | OPEN | SDK | Check future SDK schemas needed for Organization standards | `KGEN-Organization/Reports/ORG-P2-015_SDK_SCHEMA_GAP.md` |
-| ORG-P2-016 | OPEN | Frontend | Verify Organization README and Pages entry links from root README | `KGEN-Organization/Reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md` |
-| ORG-P2-017 | OPEN | Backend | Define backend boundary assumptions without adding services | `KGEN-Organization/Reports/ORG-P2-017_BACKEND_BOUNDARY.md` |
-| ORG-P2-018 | OPEN | QA | Run protected path, local link, and JSON validity check after Organization changes | `KGEN-Organization/Reports/ORG-P2-018_QA_VALIDATION.md` |
-| ORG-P2-019 | OPEN | Security | Audit DO_NOT_TOUCH and protected path consistency | `KGEN-Organization/Reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md` |
-| ORG-P2-020 | OPEN | DevOps | Verify Pages workflow publishes KGEN-Organization without Jekyll | `KGEN-Organization/Reports/ORG-P2-020_DEVOPS_PAGES_QA.md` |
-| ORG-P2-021 | OPEN | Research | List research inputs needed for Organization V2.1 without changing Canon | `KGEN-Organization/Reports/ORG-P2-021_RESEARCH_INPUTS.md` |
-| ORG-P2-022 | OPEN | Documentation | Check README and Master Index coverage for Organization V2.0 | `KGEN-Organization/Reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md` |
-| ORG-P2-023 | OPEN | Publishing | Check GitHub Pages URLs for Organization standards | `KGEN-Organization/Reports/ORG-P2-023_PUBLISHING_URL_QA.md` |
-| ORG-P2-024 | OPEN | WorkOrders | Review WorkOrder status and report path consistency | `KGEN-Organization/Reports/ORG-P2-024_WORKORDER_QA.md` |
-| ORG-P2-025 | OPEN | Reports | Create final Organization V2.0 report checklist | `KGEN-Organization/Reports/ORG-P2-025_REPORTS_CHECKLIST.md` |
+## Cursor Required Read Order
 
-## Protected Paths
+1. KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+2. KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+3. KGEN-Organization/WorkOrders/WORK_QUEUE.md
+4. KGEN-Agent-Office/DO_NOT_TOUCH.md
+5. KGEN-Canon/KGEN_CANON_MASTER.json
 
-No Organization V2.0 WorkOrder may modify contracts, `K線西遊記/temples/12345`, wallet, bridge, Boot, Runtime CURRENT, final-whitepaper, or any unconfirmed user files unless a human gives a separate explicit instruction.
+## Phase 2 Summary
+
+| Task ID | Status | Owner | Reviewer | Priority | Department | Output Report |
+|---|---|---|---|---|---|---|
+| ORG-P2-001 | OPEN | Cursor | Codex | P0 | CEO_Codex | KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md |
+| ORG-P2-002 | OPEN | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
+| ORG-P2-003 | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
+| ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
+| ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
+| ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
+| ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
+| ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
+| ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
+| ORG-P2-010 | OPEN | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
+| ORG-P2-011 | OPEN | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
+| ORG-P2-012 | OPEN | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
+| ORG-P2-013 | OPEN | Cursor | Codex | P1 | Game | KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md |
+| ORG-P2-014 | OPEN | Cursor | Codex | P0 | Runtime | KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md |
+| ORG-P2-015 | OPEN | Cursor | Codex | P2 | SDK | KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md |
+| ORG-P2-016 | OPEN | Cursor | Codex | P1 | Frontend | KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md |
+| ORG-P2-017 | OPEN | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
+| ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
+| ORG-P2-019 | OPEN | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
+| ORG-P2-020 | OPEN | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
+| ORG-P2-021 | OPEN | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
+| ORG-P2-022 | OPEN | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
+| ORG-P2-023 | OPEN | Cursor | Codex | P1 | Publishing | KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md |
+| ORG-P2-024 | OPEN | Cursor | Codex | P1 | WorkOrders | KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md |
+| ORG-P2-025 | OPEN | Cursor | Codex | P2 | Reports | KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md |
+
+## Phase 2 Cursor Execution WorkOrders
+
+### ORG-P2-001 - Review Organization V2.0 command chain and confirm Codex-only merge rule
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: CEO_Codex
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/CEO_Codex/README.md
+  - KGEN-Organization/CEO_Codex/ROLE.md
+  - KGEN-Organization/CEO_Codex/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm Codex-only merge, push, and review authority.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-002 - Build 72-hour milestone board from department queues
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: PMO
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/PMO/README.md
+  - KGEN-Organization/PMO/ROLE.md
+  - KGEN-Organization/PMO/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Create milestone summary from existing queues without modifying core systems.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-003 - Check duplicate folders and same-function documents after Organization V2.0
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Architecture
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Architecture/README.md
+  - KGEN-Organization/Architecture/ROLE.md
+  - KGEN-Organization/Architecture/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - List duplicates, same-function risk, and merge candidates.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-004 - Verify Civilization Core Canon against Genesis Library and Canon JSON
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: Canon
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Canon/README.md
+  - KGEN-Organization/Canon/ROLE.md
+  - KGEN-Organization/Canon/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm no Canon conflict and list any wording risk.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-005 - Check Universe Map references in Organization standards
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Universe
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Universe/README.md
+  - KGEN-Organization/Universe/ROLE.md
+  - KGEN-Organization/Universe/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm Organization references Universe Map without creating duplicate runtime.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-006 - Map civilization upgrade stages to economy and game loops
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Civilization
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Civilization/README.md
+  - KGEN-Organization/Civilization/ROLE.md
+  - KGEN-Organization/Civilization/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Produce stage map and identify missing dependencies.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-007 - Validate Wild Land to cross-universe economy loop
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Economy
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Economy/README.md
+  - KGEN-Organization/Economy/ROLE.md
+  - KGEN-Organization/Economy/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm economy loop is complete and consistent with KGEN facts.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-008 - Check temple organ naming rules and one image one temple references
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Temple
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Temple/README.md
+  - KGEN-Organization/Temple/ROLE.md
+  - KGEN-Organization/Temple/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm no versioned official organ naming rule conflict.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-009 - Validate land acquisition, rental, conquest, and NFT future language
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Land
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Land/README.md
+  - KGEN-Organization/Land/ROLE.md
+  - KGEN-Organization/Land/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm land rules do not imply creator total land sale.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-010 - Map house to shop, bank, warehouse, exchange, temple service node evolution
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Building
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Building/README.md
+  - KGEN-Organization/Building/ROLE.md
+  - KGEN-Organization/Building/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Map building evolution with no core code changes.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-011 - Define NPC evolution constraints without changing runtime code
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: NPC
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/NPC/README.md
+  - KGEN-Organization/NPC/ROLE.md
+  - KGEN-Organization/NPC/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - List NPC evolution limits and risks.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-012 - Validate App life rules: DNA, pairing, reproduction, assembly, fusion, disassembly, death, rebirth
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: App
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/App/README.md
+  - KGEN-Organization/App/ROLE.md
+  - KGEN-Organization/App/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm App life rules are complete and Canon-aligned.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-013 - Map exploration, quests, combat, upgrades, civilization war, and Portal loop
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Game
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Game/README.md
+  - KGEN-Organization/Game/ROLE.md
+  - KGEN-Organization/Game/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Map full game loop and missing docs.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-014 - Check Organization V2.0 does not create duplicate Runtime CURRENT or bootstrap
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: Runtime
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Runtime/README.md
+  - KGEN-Organization/Runtime/ROLE.md
+  - KGEN-Organization/Runtime/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm no duplicate Runtime CURRENT or bootstrap creation.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-015 - Check future SDK schemas needed for Organization standards
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: SDK
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/SDK/README.md
+  - KGEN-Organization/SDK/ROLE.md
+  - KGEN-Organization/SDK/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - List schema gaps without changing SDK implementation.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-016 - Verify Organization README and Pages entry links from root README
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Frontend
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Frontend/README.md
+  - KGEN-Organization/Frontend/ROLE.md
+  - KGEN-Organization/Frontend/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm Pages and README links resolve.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-017 - Define backend boundary assumptions without adding services
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Backend
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Backend/README.md
+  - KGEN-Organization/Backend/ROLE.md
+  - KGEN-Organization/Backend/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - State backend boundaries without creating services.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-018 - Run protected path, local link, and JSON validity check after Organization changes
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: QA
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/QA/README.md
+  - KGEN-Organization/QA/ROLE.md
+  - KGEN-Organization/QA/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Run validation and list exact command results.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-019 - Audit DO_NOT_TOUCH and protected path consistency
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P0
+- Department: Security
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Security/README.md
+  - KGEN-Organization/Security/ROLE.md
+  - KGEN-Organization/Security/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm protected path consistency across docs.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-020 - Verify Pages workflow publishes KGEN-Organization without Jekyll
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: DevOps
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/DevOps/README.md
+  - KGEN-Organization/DevOps/ROLE.md
+  - KGEN-Organization/DevOps/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm static Pages workflow includes relevant folders.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-021 - List research inputs needed for Organization V2.1 without changing Canon
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P3
+- Department: Research
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Research/README.md
+  - KGEN-Organization/Research/ROLE.md
+  - KGEN-Organization/Research/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - List research inputs and label them non-Canon.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-022 - Check README and Master Index coverage for Organization V2.0
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Documentation
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Documentation/README.md
+  - KGEN-Organization/Documentation/ROLE.md
+  - KGEN-Organization/Documentation/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm index coverage and missing links.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-023 - Check GitHub Pages URLs for Organization standards
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: Publishing
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Publishing/README.md
+  - KGEN-Organization/Publishing/ROLE.md
+  - KGEN-Organization/Publishing/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Check public URLs and report 200/404.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-024 - Review WorkOrder status and report path consistency
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P1
+- Department: WorkOrders
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/WorkOrders/README.md
+  - KGEN-Organization/WorkOrders/ROLE.md
+  - KGEN-Organization/WorkOrders/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Confirm every WorkOrder has required fields.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+### ORG-P2-025 - Create final Organization V2.0 report checklist
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Reports
+- Input files:
+  - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
+  - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
+  - KGEN-AI-Company/CURSOR_REPORTING_RULES.md
+  - KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md
+  - KGEN-Organization/WorkOrders/WORK_QUEUE.md
+  - KGEN-Organization/Reports/README.md
+  - KGEN-Organization/Reports/ROLE.md
+  - KGEN-Organization/Reports/RESPONSIBILITY.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - KGEN-Canon/KGEN_CANON_MASTER.json
+- Output report path: KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md
+- Protected paths:
+  - contracts
+  - K線西遊記/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Create checklist for future final reports.
+  - Report includes files read, files modified, checks run, risks, blockers, and recommendation.
+  - No protected path is modified.
+  - Task is moved to REVIEW only after the report exists.
+
+## Company Rule
+
+Cursor cannot push unreviewed work. Codex reviews every REVIEW task and writes decisions to KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md.

@@ -74,6 +74,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Machine-Readable Canon | [KGEN-Canon/](KGEN-Canon/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md |
 | Agent Office | [KGEN-Agent-Office/](KGEN-Agent-Office/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md |
 | Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
+| AI Company Automation V3.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -87,6 +88,17 @@ KGEN Agent Office is the GitHub handoff system for Codex and Cursor collaboratio
 - Automation Schedule: [KGEN-Agent-Office/AUTOMATION_SCHEDULE.md](KGEN-Agent-Office/AUTOMATION_SCHEDULE.md)
 
 
+
+### KGEN AI Company Automation V3.0
+
+KGEN AI Company Automation V3.0 is the Codex-managed Cursor work system. The user starts Cursor once, then Cursor reads GitHub WorkQueue and reports back through files.
+
+- AI Company Index: [KGEN-AI-Company/README.md](KGEN-AI-Company/README.md)
+- Human Operator Guide: [KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md](KGEN-AI-Company/HUMAN_OPERATOR_GUIDE.md)
+- Cursor Boot: [KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md](KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md)
+- Cursor Auto Work Protocol: [KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md](KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md)
+- WorkQueue: [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md)
+- Reports: [KGEN-AI-Company/reports/README.md](KGEN-AI-Company/reports/README.md)
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

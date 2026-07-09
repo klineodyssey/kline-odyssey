@@ -84,6 +84,7 @@ jobs:
           copy_dir "KGEN-Cursor-WorkOrders"
           copy_dir "KGEN-Agent-Office"
           copy_dir "KGEN-Organization"
+          copy_dir "KGEN-AI-Company"
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
