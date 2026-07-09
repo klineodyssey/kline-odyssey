@@ -106,3 +106,20 @@ Universe → Civilization → World → Temple → Land → Building → App →
 - Runtime CURRENT remains the formal active Runtime.
 - Updates must be cumulative and preserve revision history.
 - The library does not modify contracts, 12345 temple runtime, wallet, bridge, Boot, Runtime CURRENT, or final-whitepaper source.
+
+
+<!-- KGEN_RELATED_LIBRARIES_V1_START -->
+
+## Related Official Libraries
+
+Genesis Library remains the Canon source. The following libraries extend it without replacing GEN-001 through GEN-012:
+
+| Library | Path | Purpose |
+|---|---|---|
+| Runtime Library | `KGEN-Runtime/` | L4 Runtime rules for Cosmic OS, App, Temple, Land, AI, Economy, Quest, Combat, Governance, and Developer API |
+| SDK Library | `KGEN-SDK/` | SDK/API documents with JSON Schema examples and TypeScript interface drafts |
+| Machine-Readable Canon | `KGEN-Canon/` | JSON Canon, document indexes, dependency graph, and AI boot rules |
+| Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA work orders coordinated by Codex |
+| Master Library Index | `KGEN_MASTER_LIBRARY_INDEX.md` | Cross-library lookup table |
+
+<!-- KGEN_RELATED_LIBRARIES_V1_END -->

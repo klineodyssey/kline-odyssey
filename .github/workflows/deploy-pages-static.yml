@@ -78,6 +78,11 @@ jobs:
           copy_dir "assets"
           copy_dir "KGEN"
           copy_dir "KGEN-Genesis"
+          copy_dir "KGEN-Runtime"
+          copy_dir "KGEN-SDK"
+          copy_dir "KGEN-Canon"
+          copy_dir "KGEN-Cursor-WorkOrders"
+          copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
 

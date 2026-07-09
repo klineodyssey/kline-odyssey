@@ -58,6 +58,39 @@ KGEN Genesis Library V1.0 is the official canonical publication set for KLINE OD
 
 ---
 
+<!-- KGEN_LIBRARY_V1_START -->
+
+---
+
+## KGEN Official Libraries V1.0
+
+KGEN official documentation is organized into Canon-first libraries for public review, AI governance, Runtime development, SDK planning, and listing submission.
+
+| Library | GitHub Path | GitHub Pages |
+|---|---|---|
+| Genesis Library | [KGEN-Genesis/](KGEN-Genesis/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md |
+| Runtime Library | [KGEN-Runtime/](KGEN-Runtime/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md |
+| SDK Library | [KGEN-SDK/](KGEN-SDK/) | https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md |
+| Machine-Readable Canon | [KGEN-Canon/](KGEN-Canon/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md |
+| Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
+| Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
+
+### BscScan / CMC / CoinGecko Submission Links
+
+- Website: https://klineodyssey.github.io/kline-odyssey/
+- GitHub: https://github.com/klineodyssey/kline-odyssey
+- BscScan: https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- GeckoTerminal: https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- Whitepaper FINAL: https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf
+- Genesis Library: https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md
+- Runtime Library: https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md
+- SDK Library: https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md
+- Machine-Readable Canon: https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/KGEN_CANON_MASTER.json
+
+<!-- KGEN_LIBRARY_V1_END -->
+
+---
+
 ## Official Social Links
 
 | Platform | Link |
