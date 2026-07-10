@@ -270,6 +270,29 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Dry Run Report | `KGEN-KAIOS/V9.3/reports/V9_3_DRYRUN_001_REPORT.md` | Release, pause, re-hold and R4 tests |
 | QA Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_QA_REPORT.md` | V9.3 QA result |
 | Release Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_RELEASE_REPORT.md` | V9.3 release summary |
+
+## KAIOS V10.0 Operating System
+
+| Item | Path | Purpose |
+|---|---|---|
+| V10 Index | `KGEN-KAIOS/V10/README.md` | V10 overview and file map |
+| V10 Entry | `KGEN-KAIOS/V10/index.html` | Read-only V10 public entry |
+| V10 Dashboard | `KGEN-KAIOS/V10/dashboard/index.html` | Read-only operating dashboard |
+| OS Standard | `KGEN-KAIOS/V10/KAIOS_OPERATING_SYSTEM.md` | KAIOS Operating System constitution |
+| System Architecture | `KGEN-KAIOS/V10/SYSTEM_ARCHITECTURE.md` | Browser to AI Company architecture |
+| Microservice Standard | `KGEN-KAIOS/V10/MICROSERVICE_STANDARD.md` | Logical service boundary standard |
+| API Gateway | `KGEN-KAIOS/V10/API_GATEWAY_STANDARD.md` | API ingress and secret boundary |
+| Frontend / Backend | `KGEN-KAIOS/V10/FRONTEND_STANDARD.md`, `KGEN-KAIOS/V10/BACKEND_STANDARD.md` | UI and service layer standards |
+| Membership / Wallet / Payment | `KGEN-KAIOS/V10/MEMBERSHIP_STANDARD.md`, `KGEN-KAIOS/V10/WALLET_STANDARD.md`, `KGEN-KAIOS/V10/PAYMENT_STANDARD.md` | Identity, wallet and payment boundaries |
+| Blockchain / Token / NFT | `KGEN-KAIOS/V10/BLOCKCHAIN_STANDARD.md`, `KGEN-KAIOS/V10/TOKEN_STANDARD.md`, `KGEN-KAIOS/V10/NFT_STANDARD.md` | Chain and token boundaries |
+| Marketplace / App / Plugin | `KGEN-KAIOS/V10/MARKETPLACE_STANDARD.md`, `KGEN-KAIOS/V10/APP_RUNTIME_STANDARD.md`, `KGEN-KAIOS/V10/PLUGIN_STANDARD.md` | Market and extension standards |
+| Security / Audit / Deployment | `KGEN-KAIOS/V10/SECURITY_STANDARD.md`, `KGEN-KAIOS/V10/AUDIT_STANDARD.md`, `KGEN-KAIOS/V10/DEPLOYMENT_STANDARD.md` | Operating safety standards |
+| Schemas | `KGEN-KAIOS/V10/schemas/` | Twelve V10 JSON Schemas |
+| Examples | `KGEN-KAIOS/V10/examples/` | Twelve parseable examples |
+| Runtime Maps | `KGEN-KAIOS/V10/runtime/` | Nine runtime maps |
+| Dry Run | `KGEN-KAIOS/V10/reports/V10_DRYRUN_001_REPORT.md` | V10 operating dry run |
+| QA Report | `KGEN-KAIOS/V10/reports/KAIOS_V10_QA_REPORT.md` | V10 QA result |
+| Release Report | `KGEN-KAIOS/V10/reports/KAIOS_V10_RELEASE_REPORT.md` | V10 release summary |
 ## Organization V2.0
 
 | Item | Path | Purpose |

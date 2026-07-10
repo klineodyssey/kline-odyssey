@@ -254,6 +254,24 @@ KAIOS V9.3 adds the Codex-only release gate for tasks that are already `OPEN` bu
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/
 
 V9.3 released `AI-ECONOMY-2026-0001` to `Dispatch Hold: false`, `dispatch_status: RELEASED`, `claimable: true`. It does not auto-execute or merge the task.
+
+### KAIOS V10.0 KAIOS Operating System
+
+KAIOS V10.0 defines KGEN as one operating system across Universe, Temple, Land, Residence, Citizen, Business, Market, Exchange, Bank, Wallet, Membership, AI Company, Codex, Cursor, Portal, Game, App, Frontend, Backend, API, GitHub and Blockchain.
+
+- V10 Entry: [KGEN-KAIOS/V10/index.html](KGEN-KAIOS/V10/index.html)
+- Operating Dashboard: [KGEN-KAIOS/V10/dashboard/index.html](KGEN-KAIOS/V10/dashboard/index.html)
+- OS Standard: [KGEN-KAIOS/V10/KAIOS_OPERATING_SYSTEM.md](KGEN-KAIOS/V10/KAIOS_OPERATING_SYSTEM.md)
+- System Architecture: [KGEN-KAIOS/V10/SYSTEM_ARCHITECTURE.md](KGEN-KAIOS/V10/SYSTEM_ARCHITECTURE.md)
+- Schemas: [KGEN-KAIOS/V10/schemas/](KGEN-KAIOS/V10/schemas/)
+- Examples: [KGEN-KAIOS/V10/examples/](KGEN-KAIOS/V10/examples/)
+- Runtime Maps: [KGEN-KAIOS/V10/runtime/](KGEN-KAIOS/V10/runtime/)
+- Dry Run: [KGEN-KAIOS/V10/reports/V10_DRYRUN_001_REPORT.md](KGEN-KAIOS/V10/reports/V10_DRYRUN_001_REPORT.md)
+- QA Report: [KGEN-KAIOS/V10/reports/KAIOS_V10_QA_REPORT.md](KGEN-KAIOS/V10/reports/KAIOS_V10_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/
+
+V10 is architecture and runtime standard only. It does not implement real membership, banking, KYC, payment, token transfer, GitHub token usage, MetaMask signing or contract deployment.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

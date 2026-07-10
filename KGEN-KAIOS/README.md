@@ -312,9 +312,40 @@ V9.3 adds the Codex-only release layer for tasks that are already synced into th
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/
+
+## V10.0 KAIOS Operating System
+
+V10 defines KAIOS as the operating system for all KGEN modules: Universe, Temple, Land, Residence, Citizen, Business, Market, Exchange, Bank, Wallet, Membership, AI Company, Portal, Game, App, Frontend, Backend, API, GitHub and Blockchain.
+
+| File | Purpose |
+|---|---|
+| `V10/README.md` | V10 overview and file map |
+| `V10/index.html` | Read-only V10 entry page |
+| `V10/dashboard/index.html` | Read-only operating dashboard |
+| `V10/KAIOS_OPERATING_SYSTEM.md` | OS constitution |
+| `V10/SYSTEM_ARCHITECTURE.md` | Browser to AI Company architecture |
+| `V10/MICROSERVICE_STANDARD.md` | Logical service boundary standard |
+| `V10/API_GATEWAY_STANDARD.md` | API Gateway standard |
+| `V10/FRONTEND_STANDARD.md` | Portal, UI and dashboard standard |
+| `V10/BACKEND_STANDARD.md` | Service layer standard |
+| `V10/MEMBERSHIP_STANDARD.md` | Membership role model |
+| `V10/WALLET_STANDARD.md` | Wallet prototype boundary |
+| `V10/PAYMENT_STANDARD.md` | Payment concept/prototype boundary |
+| `V10/SECURITY_STANDARD.md` | Identity, secrets, rate limit and risk |
+| `V10/AUDIT_STANDARD.md` | System-wide audit standard |
+| `V10/schemas/` | Twelve JSON Schemas |
+| `V10/examples/` | Twelve parseable examples |
+| `V10/runtime/` | Nine runtime maps |
+| `V10/reports/V10_DRYRUN_001_REPORT.md` | Operating dry run |
+| `V10/reports/KAIOS_V10_QA_REPORT.md` | V10 QA report |
+| `V10/reports/KAIOS_V10_RELEASE_REPORT.md` | V10 release report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/
 ## Protected Systems
 
-KAIOS V9.2 does not modify:
+KAIOS V10 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`
