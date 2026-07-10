@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/transaction.schema.json",
+  "title": "KAIOS V8.2 Transaction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["transaction_id", "transaction_type", "from_entity", "to_entity", "asset_id", "amount", "currency", "market_id", "settlement_state", "risk_boundary", "created_at"],
+  "properties": {
+    "transaction_id": { "type": "string", "pattern": "^KGEN-TX-[A-Z0-9-]+$" },
+    "transaction_type": { "enum": ["Buy", "Sell", "Rent", "Wage", "Tax", "DepositSimulation", "WithdrawSimulation", "TransferSimulation", "ListingFee", "GovernanceReward"] },
+    "from_entity": { "type": "string" },
+    "to_entity": { "type": "string" },
+    "asset_id": { "type": "string" },
+    "amount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string" },
+    "market_id": { "type": "string" },
+    "settlement_state": { "enum": ["Created", "Reviewed", "SimulatedSettled", "Disputed", "Rejected", "Archived"] },
+    "risk_boundary": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

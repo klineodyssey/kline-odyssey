@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/resource.schema.json",
+  "title": "KAIOS V8.2 Resource",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resource_id", "resource_type", "unit", "quantity", "source", "owner", "status"],
+  "properties": {
+    "resource_id": { "type": "string", "pattern": "^KGEN-RESRC-[A-Z0-9-]+$" },
+    "resource_type": { "enum": ["Food", "Wood", "Stone", "Metal", "Energy", "Knowledge", "Data", "AI Compute", "Gold", "KGEN", "Temple Point", "Civilization Point"] },
+    "unit": { "type": "string" },
+    "quantity": { "type": "number", "minimum": 0 },
+    "source": { "type": "string" },
+    "owner": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] }
+  }
+}

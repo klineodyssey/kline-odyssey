@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/market.schema.json",
+  "title": "KAIOS V8.2 Market",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["market_id", "economy_id", "market_type", "operations", "listings", "liquidity_mode", "price_discovery", "status"],
+  "properties": {
+    "market_id": { "type": "string", "pattern": "^KGEN-MKT-[A-Z0-9-]+$" },
+    "economy_id": { "type": "string" },
+    "market_type": { "enum": ["Local", "Temple", "City", "Civilization", "CrossUniverse"] },
+    "operations": {
+      "type": "array",
+      "items": { "enum": ["Buy", "Sell", "AuctionConcept", "OrderBookConcept", "PriceDiscovery", "LiquidityConcept"] }
+    },
+    "listings": { "type": "array", "items": { "type": "string" } },
+    "liquidity_mode": { "enum": ["None", "SimulatedPool", "ConceptualAMM", "ManualReview"] },
+    "price_discovery": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] }
+  }
+}

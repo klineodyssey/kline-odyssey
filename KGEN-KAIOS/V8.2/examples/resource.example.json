@@ -1,0 +1,9 @@
+{
+  "resource_id": "KGEN-RESRC-KGEN-000001",
+  "resource_type": "KGEN",
+  "unit": "KGEN",
+  "quantity": 72000000,
+  "source": "KLINE GENESIS BEP-20 contract reference",
+  "owner": "KGEN-CIV-HUAGUO-000001",
+  "status": "Production"
+}

@@ -1,0 +1,13 @@
+{
+  "transaction_id": "KGEN-TX-SIM-000001",
+  "transaction_type": "Wage",
+  "from_entity": "KGEN-BUS-12345-CONVENIENCE-000001",
+  "to_entity": "KGEN-CIT-K12345-000001",
+  "asset_id": "KGEN-RESRC-KGEN-000001",
+  "amount": 12.5,
+  "currency": "KGEN",
+  "market_id": "KGEN-MKT-12345-000001",
+  "settlement_state": "SimulatedSettled",
+  "risk_boundary": "Simulation event; not an on-chain transfer or payment instruction.",
+  "created_at": "2026-07-10T00:00:00Z"
+}

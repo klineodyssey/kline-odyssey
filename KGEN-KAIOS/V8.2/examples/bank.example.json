@@ -1,0 +1,10 @@
+{
+  "bank_id": "KGEN-BANK-12345-000001",
+  "bank_type": "Temple Treasury",
+  "temple_id": "KGEN-TEM-12345-000001",
+  "treasury_id": "KGEN-TREASURY-12345-000001",
+  "functions": ["DepositSimulation", "WithdrawSimulation", "Reserve", "LoanConcept", "InterestConcept", "Treasury", "Audit"],
+  "reserve_model": "Temple treasury simulation with reserve ratio signals and no real deposit custody.",
+  "risk_boundary": "Prototype / Simulation only; not a licensed financial institution.",
+  "status": "Simulation"
+}

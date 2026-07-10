@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/economy.schema.json",
+  "title": "KAIOS V8.2 Economy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "economy_id",
+    "temple_id",
+    "civilization_id",
+    "status",
+    "stage",
+    "resources",
+    "businesses",
+    "markets",
+    "banks",
+    "governance_signals",
+    "risk_boundary",
+    "updated_at"
+  ],
+  "properties": {
+    "economy_id": { "type": "string", "pattern": "^KGEN-ECO-[A-Z0-9-]+$" },
+    "temple_id": { "type": "string" },
+    "civilization_id": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] },
+    "stage": { "enum": ["Temple", "Land", "Residence", "Citizen", "Profession", "Production", "Business", "Market", "Exchange", "Bank", "Investment", "Governance", "CivilizationGrowth"] },
+    "resources": { "type": "array", "items": { "type": "string" } },
+    "businesses": { "type": "array", "items": { "type": "string" } },
+    "markets": { "type": "array", "items": { "type": "string" } },
+    "banks": { "type": "array", "items": { "type": "string" } },
+    "governance_signals": { "type": "array", "items": { "type": "string" } },
+    "risk_boundary": { "type": "string" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

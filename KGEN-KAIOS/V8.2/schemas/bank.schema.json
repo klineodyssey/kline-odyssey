@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/bank.schema.json",
+  "title": "KAIOS V8.2 Bank",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bank_id", "bank_type", "temple_id", "treasury_id", "functions", "reserve_model", "risk_boundary", "status"],
+  "properties": {
+    "bank_id": { "type": "string", "pattern": "^KGEN-BANK-[A-Z0-9-]+$" },
+    "bank_type": { "enum": ["Temple Treasury", "Civilization Treasury", "Simulation Bank", "Prototype Bank"] },
+    "temple_id": { "type": "string" },
+    "treasury_id": { "type": "string" },
+    "functions": {
+      "type": "array",
+      "items": { "enum": ["DepositSimulation", "WithdrawSimulation", "Reserve", "LoanConcept", "InterestConcept", "Treasury", "Audit"] }
+    },
+    "reserve_model": { "type": "string" },
+    "risk_boundary": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "exchange_id": "KGEN-EXC-11520-000001",
+  "name": "Huaguo Mountain Exchange 11520",
+  "exchange_type": "Huaguo Mountain Exchange 11520",
+  "supported_assets": ["Land", "Temple", "App", "AI", "DNA", "Game Item", "NFT Concept", "Token Concept"],
+  "settlement_boundary": "Prototype exchange model for KGEN civilization assets; regulated assets require future authorization and compliance.",
+  "review_required": ["Legal", "Security", "Governance", "Compliance", "Treasury"],
+  "status": "Prototype"
+}

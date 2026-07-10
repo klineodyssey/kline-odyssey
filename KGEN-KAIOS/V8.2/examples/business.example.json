@@ -1,0 +1,21 @@
+{
+  "business_id": "KGEN-BUS-12345-CONVENIENCE-000001",
+  "business_type": "Convenience Store",
+  "owner": "KGEN-CIT-K12345-000001",
+  "employees": ["KGEN-CIT-K12345-000001", "KGEN-CIT-K12345-000002"],
+  "required_profession": ["Merchant", "Logistics Operator"],
+  "required_building": ["Residence", "Store"],
+  "production": ["Retail service", "Membership service", "Temple supply distribution"],
+  "consumption": ["Food", "Energy", "Data"],
+  "inventory": {
+    "Food": 320,
+    "Energy": 80,
+    "Temple Point": 45
+  },
+  "revenue": 1280,
+  "expense": 760,
+  "growth": 0.18,
+  "level": 3,
+  "upgrade_path": ["Temple Service Node", "City Retail Node"],
+  "status": "Simulation"
+}

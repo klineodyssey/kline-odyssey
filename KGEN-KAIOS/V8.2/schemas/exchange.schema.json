@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/exchange.schema.json",
+  "title": "KAIOS V8.2 Exchange",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["exchange_id", "name", "exchange_type", "supported_assets", "settlement_boundary", "review_required", "status"],
+  "properties": {
+    "exchange_id": { "type": "string", "pattern": "^KGEN-EXC-[A-Z0-9-]+$" },
+    "name": { "type": "string" },
+    "exchange_type": {
+      "enum": ["Huaguo Mountain Exchange 11520", "Civilization Exchange", "Land Trading", "Temple Trading", "App Marketplace", "NFT Concept", "Token Concept", "Game Item"]
+    },
+    "supported_assets": { "type": "array", "items": { "type": "string" } },
+    "settlement_boundary": { "type": "string" },
+    "review_required": { "type": "array", "items": { "enum": ["Legal", "Security", "Governance", "Compliance", "Treasury"] } },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] }
+  }
+}

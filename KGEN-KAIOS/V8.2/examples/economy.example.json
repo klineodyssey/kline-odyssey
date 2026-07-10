@@ -1,0 +1,14 @@
+{
+  "economy_id": "KGEN-ECO-12345-000001",
+  "temple_id": "KGEN-TEM-12345-000001",
+  "civilization_id": "KGEN-CIV-HUAGUO-000001",
+  "status": "Simulation",
+  "stage": "CivilizationGrowth",
+  "resources": ["KGEN-RESRC-FOOD-000001", "KGEN-RESRC-KGEN-000001"],
+  "businesses": ["KGEN-BUS-12345-CONVENIENCE-000001", "KGEN-BUS-12345-BANK-000001"],
+  "markets": ["KGEN-MKT-12345-000001"],
+  "banks": ["KGEN-BANK-12345-000001"],
+  "governance_signals": ["KGEN-GOVSIG-HUAGUO-000001"],
+  "risk_boundary": "Simulation only; no live custody, lending, securities, payment processing or regulated exchange.",
+  "updated_at": "2026-07-10T00:00:00Z"
+}

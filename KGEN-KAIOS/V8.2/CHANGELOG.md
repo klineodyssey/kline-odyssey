@@ -17,3 +17,9 @@
 
 - Added Bank Standard with deposit, withdraw, reserve, loan concept, interest concept and treasury simulation boundaries.
 - Added Exchange Standard for Huaguo Mountain Exchange 11520, civilization exchange, land, temple, App marketplace, NFT concept, Token concept and game item scopes.
+
+## V8.2 Schemas and Runtime
+
+- Added 8 JSON Schemas for economy, business, market, exchange, bank, resource, transaction and governance signal records.
+- Added 8 parseable examples for the schema set.
+- Added runtime documents for civilization economy, business, market, bank, exchange and governance signal processing.

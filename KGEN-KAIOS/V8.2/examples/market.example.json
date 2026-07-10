@@ -1,0 +1,10 @@
+{
+  "market_id": "KGEN-MKT-12345-000001",
+  "economy_id": "KGEN-ECO-12345-000001",
+  "market_type": "Temple",
+  "operations": ["Buy", "Sell", "AuctionConcept", "OrderBookConcept", "PriceDiscovery", "LiquidityConcept"],
+  "listings": ["KGEN-LIST-APP-000001", "KGEN-LIST-FOOD-000001"],
+  "liquidity_mode": "SimulatedPool",
+  "price_discovery": "Simulation uses demand, inventory, activity and governance signals; it does not execute real orders.",
+  "status": "Simulation"
+}

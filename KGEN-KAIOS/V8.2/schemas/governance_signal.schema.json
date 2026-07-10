@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/schemas/governance_signal.schema.json",
+  "title": "KAIOS V8.2 Governance Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["signal_id", "civilization_id", "snapshot_at", "gdp", "population", "employment", "temple_activity", "market_activity", "civilization_health", "ai_activity", "status"],
+  "properties": {
+    "signal_id": { "type": "string", "pattern": "^KGEN-GOVSIG-[A-Z0-9-]+$" },
+    "civilization_id": { "type": "string" },
+    "snapshot_at": { "type": "string", "format": "date-time" },
+    "gdp": { "type": "number", "minimum": 0 },
+    "population": { "type": "integer", "minimum": 0 },
+    "employment": { "type": "number", "minimum": 0, "maximum": 1 },
+    "temple_activity": { "type": "number", "minimum": 0 },
+    "market_activity": { "type": "number", "minimum": 0 },
+    "civilization_health": { "type": "number", "minimum": 0, "maximum": 100 },
+    "ai_activity": { "type": "number", "minimum": 0 },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Regulated", "Archived"] }
+  }
+}

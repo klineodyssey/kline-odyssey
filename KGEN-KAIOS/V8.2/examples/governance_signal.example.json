@@ -1,0 +1,13 @@
+{
+  "signal_id": "KGEN-GOVSIG-HUAGUO-000001",
+  "civilization_id": "KGEN-CIV-HUAGUO-000001",
+  "snapshot_at": "2026-07-10T00:00:00Z",
+  "gdp": 128800,
+  "population": 12345,
+  "employment": 0.72,
+  "temple_activity": 88.5,
+  "market_activity": 76.4,
+  "civilization_health": 83.2,
+  "ai_activity": 64.8,
+  "status": "Simulation"
+}
