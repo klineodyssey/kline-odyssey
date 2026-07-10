@@ -1,0 +1,33 @@
+{
+  "kaios_version": "V9.3",
+  "readiness_score": 91,
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "dashboard_mode": "read-only",
+  "sources": {
+    "workqueue": "../../../KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "worker_registry": "../../worker_registry.json",
+    "release_request": "../release/AI-ECONOMY-2026-0001_release_request.json",
+    "release_validation": "../release/AI-ECONOMY-2026-0001_release_validation.json",
+    "release_result": "../release/AI-ECONOMY-2026-0001_release_result.json",
+    "worker_eligibility": "../release/AI-ECONOMY-2026-0001_worker_eligibility.json",
+    "dependency_gate": "../release/AI-ECONOMY-2026-0001_dependency_gate.json",
+    "risk_gate": "../release/AI-ECONOMY-2026-0001_risk_gate.json",
+    "audit_log": "../reports/V9_3_DISPATCH_AUDIT_LOG.md",
+    "dry_run": "../reports/V9_3_DRYRUN_001_REPORT.md",
+    "release_review": "../reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md"
+  },
+  "states": [
+    "OPEN + HOLD",
+    "RELEASE_REVIEW",
+    "RELEASE_VALIDATING",
+    "RELEASE_READY",
+    "OPEN + RELEASED",
+    "CLAIMABLE",
+    "CLAIMED",
+    "IN_PROGRESS",
+    "RELEASE_REJECTED",
+    "HUMAN_PAUSED",
+    "REHOLD_PENDING",
+    "RELEASE_ROLLBACK"
+  ]
+}

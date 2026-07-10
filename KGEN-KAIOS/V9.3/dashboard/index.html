@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.3 Dispatch Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">KAIOS V9.3</p>
+      <h1>Dispatch Hold Release Dashboard</h1>
+      <p>唯讀顯示 Codex release gate、Worker eligibility、Dependency / Risk / Human Pause / Re-Hold 狀態。</p>
+      <nav class="actions" aria-label="V9.3 links">
+        <a href="../README.md">Spec</a>
+        <a href="../CODEX_RELEASE_PROTOCOL.md">Release Protocol</a>
+        <a href="../reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md">Release Review</a>
+      </nav>
+    </header>
+
+    <section id="health" class="card-grid" aria-label="System health"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Release Pipeline</h2>
+        <span class="badge">Read Only</span>
+      </div>
+      <div id="pipeline" class="timeline"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Gate Results</h2>
+        <span class="badge">Codex Only</span>
+      </div>
+      <div id="gates" class="card-grid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Worker Eligibility</h2>
+        <span class="badge">No Auto Claim</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Worker ID</th>
+              <th>Type</th>
+              <th>Result</th>
+              <th>Can Push Main</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="workers"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Alerts</h2>
+        <span class="badge">WARN only</span>
+      </div>
+      <ul id="alerts" class="alerts"></ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Audit Preview</h2>
+        <span class="badge">Markdown Source</span>
+      </div>
+      <pre id="audit"></pre>
+    </section>
+  </main>
+  <script src="dashboard.js"></script>
+</body>
+</html>
