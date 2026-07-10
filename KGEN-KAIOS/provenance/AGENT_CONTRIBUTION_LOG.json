@@ -73,6 +73,66 @@
         "KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md"
       ],
       "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "30b8e1266256f37ceebf30d47d165391a2ad958b",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json",
+        "KGEN-KAIOS/provenance/FILE_OWNERSHIP_REGISTRY.json",
+        "KGEN-KAIOS/provenance/AGENT_CONTRIBUTION_LOG.json",
+        "KGEN-KAIOS/provenance/HUMAN_CONTRIBUTION_LOG.json",
+        "KGEN-KAIOS/examples/organisms/"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "84f4c4009c2dce480bd890eadd3738ee9543321a",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "evolution-governance/index.html",
+        "operating-center/index.html",
+        "index.html",
+        ".github/workflows/deploy-pages-static.yml",
+        "README.md",
+        "KGEN_MASTER_LIBRARY_INDEX.md",
+        "KGEN-KAIOS/README.md",
+        "KGEN-AI-Company/README.md"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "acc57f918a8053f2250f1b50cfa136efef16ab79",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
     }
   ]
 }
