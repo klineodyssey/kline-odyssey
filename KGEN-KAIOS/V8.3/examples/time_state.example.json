@@ -1,0 +1,15 @@
+{
+  "entity_id": "KGEN-CIT-K12345-000001",
+  "entity_type": "Citizen",
+  "time_state": "Working",
+  "last_tick": "KGEN-TICK-000012344",
+  "next_tick": "KGEN-TICK-000012346",
+  "age": 28.42,
+  "cycle": "Hour",
+  "activity_state": "Store service shift",
+  "energy_state": 72,
+  "decay_state": 4,
+  "event_state": ["KGEN-EVT-FESTIVAL-000001"],
+  "governance_signal": "Normal",
+  "status": "Simulation"
+}

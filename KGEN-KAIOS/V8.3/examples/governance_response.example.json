@@ -1,0 +1,18 @@
+{
+  "response_id": "KGEN-GOVRESP-HUAGUO-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "civilization_id": "KGEN-CIV-HUAGUO-000001",
+  "signals": {
+    "gdp": 128800,
+    "population": 12360,
+    "unemployment": 0.08,
+    "resource_reserve": 0.71,
+    "temple_activity": 86.5,
+    "market_activity": 77.2
+  },
+  "risk_class": "Watch",
+  "response_type": "Recommend",
+  "report_path": "KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md",
+  "codex_review_required": true,
+  "status": "Simulation"
+}

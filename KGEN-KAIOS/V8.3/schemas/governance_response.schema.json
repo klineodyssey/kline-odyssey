@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/governance_response.schema.json",
+  "title": "KAIOS V8.3 Governance Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["response_id", "tick_id", "civilization_id", "signals", "risk_class", "response_type", "report_path", "codex_review_required", "status"],
+  "properties": {
+    "response_id": { "type": "string", "pattern": "^KGEN-GOVRESP-[A-Z0-9-]+$" },
+    "tick_id": { "type": "string" },
+    "civilization_id": { "type": "string" },
+    "signals": { "type": "object", "additionalProperties": { "type": "number" } },
+    "risk_class": { "enum": ["Normal", "Watch", "Warning", "Critical"] },
+    "response_type": { "enum": ["Observe", "Warn", "Recommend", "OpenWorkOrder", "PauseSimulation", "RequestCodexReview", "ArchiveSnapshot"] },
+    "report_path": { "type": "string" },
+    "codex_review_required": { "type": "boolean" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Reviewed", "Archived"] }
+  }
+}

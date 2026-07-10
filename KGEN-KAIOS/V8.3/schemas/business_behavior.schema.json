@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/business_behavior.schema.json",
+  "title": "KAIOS V8.3 Business Behavior",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["business_id", "tick_id", "production_delta", "inventory_delta", "revenue_delta", "expense_delta", "employee_delta", "growth_delta", "risk_warning", "status"],
+  "properties": {
+    "business_id": { "type": "string" },
+    "tick_id": { "type": "string" },
+    "production_delta": { "type": "number" },
+    "inventory_delta": { "type": "object", "additionalProperties": { "type": "number" } },
+    "revenue_delta": { "type": "number" },
+    "expense_delta": { "type": "number" },
+    "employee_delta": { "type": "integer" },
+    "growth_delta": { "type": "number" },
+    "risk_warning": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

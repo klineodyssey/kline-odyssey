@@ -1,0 +1,14 @@
+{
+  "resource_id": "KGEN-RESRC-FOOD-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "current_quantity": 1200,
+  "natural_recovery": 35,
+  "production": 80,
+  "recycling": 8,
+  "consumption": 96,
+  "decay": 5,
+  "event_modifier": 1.1,
+  "next_quantity": 1223.2,
+  "scarcity_signal": false,
+  "status": "Simulation"
+}

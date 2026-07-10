@@ -1,0 +1,10 @@
+{
+  "citizen_id": "KGEN-CIT-K12345-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "actions": ["Work", "Consume", "Learn", "Trade"],
+  "energy_delta": -8,
+  "skill_delta": 1.5,
+  "reputation_delta": 0.8,
+  "transactions": ["KGEN-TX-SIM-000001"],
+  "status": "Simulation"
+}

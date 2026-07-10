@@ -16,3 +16,9 @@
 - Added resource regeneration and population growth standards.
 - Added Event Engine with Festival, War concept, Disaster, Discovery, Technology, Migration, Economic Boom and Recession.
 - Added Disaster Standard and Governance Response model.
+
+## V8.3 Schemas and Runtime
+
+- Added Simulation Runtime.
+- Added 10 JSON Schemas for world clock, tick, time state, citizen behavior, business behavior, temple activity, resource regeneration, population growth, event and governance response.
+- Added 10 parseable examples for the schema set.

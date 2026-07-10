@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/temple_activity.schema.json",
+  "title": "KAIOS V8.3 Temple Activity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["temple_id", "tick_id", "service_activity", "faith_value", "population_attraction", "civilization_influence", "festival_readiness", "status"],
+  "properties": {
+    "temple_id": { "type": "string" },
+    "tick_id": { "type": "string" },
+    "service_activity": { "type": "number", "minimum": 0 },
+    "faith_value": { "type": "number", "minimum": 0 },
+    "population_attraction": { "type": "number" },
+    "civilization_influence": { "type": "number" },
+    "festival_readiness": { "type": "number", "minimum": 0, "maximum": 1 },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

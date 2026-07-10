@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/world_clock.schema.json",
+  "title": "KAIOS V8.3 World Clock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["clock_id", "clock_scope", "parent_clock", "epoch", "tick_index", "tick_rate", "local_time", "cycle", "timezone_model", "status"],
+  "properties": {
+    "clock_id": { "type": "string", "pattern": "^KGEN-CLOCK-[A-Z0-9-]+$" },
+    "clock_scope": { "enum": ["Universe", "Civilization", "World", "Temple", "Business", "Citizen"] },
+    "parent_clock": { "type": ["string", "null"] },
+    "epoch": { "type": "string" },
+    "tick_index": { "type": "integer", "minimum": 0 },
+    "tick_rate": { "enum": ["Realtime", "Accelerated", "Paused", "ReviewOnly"] },
+    "local_time": { "type": "string", "format": "date-time" },
+    "cycle": { "enum": ["Tick", "Minute", "Hour", "Day", "Week", "Month", "Season", "Year"] },
+    "timezone_model": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

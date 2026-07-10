@@ -1,0 +1,13 @@
+{
+  "tick_id": "KGEN-TICK-000012345",
+  "clock_id": "KGEN-CLOCK-CIV-HUAGUO-000001",
+  "tick_index": 12345,
+  "tick_scale": "Hour",
+  "phase": "Day",
+  "started_at": "2026-07-10T00:00:00Z",
+  "completed_at": "2026-07-10T00:01:00Z",
+  "updated_entities": ["KGEN-CIT-K12345-000001", "KGEN-BUS-12345-CONVENIENCE-000001", "KGEN-TEM-12345-000001"],
+  "event_count": 1,
+  "governance_required": true,
+  "status": "Completed"
+}

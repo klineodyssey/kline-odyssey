@@ -1,0 +1,12 @@
+{
+  "civilization_id": "KGEN-CIV-HUAGUO-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "population_before": 12345,
+  "migration_delta": 12,
+  "training_delta": 5,
+  "residence_capacity_delta": 8,
+  "retirement_delta": -2,
+  "population_after": 12360,
+  "resource_pressure": 0.42,
+  "status": "Simulation"
+}

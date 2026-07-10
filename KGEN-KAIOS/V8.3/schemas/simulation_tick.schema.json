@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/simulation_tick.schema.json",
+  "title": "KAIOS V8.3 Simulation Tick",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tick_id", "clock_id", "tick_index", "tick_scale", "phase", "started_at", "completed_at", "updated_entities", "event_count", "governance_required", "status"],
+  "properties": {
+    "tick_id": { "type": "string", "pattern": "^KGEN-TICK-[A-Z0-9-]+$" },
+    "clock_id": { "type": "string" },
+    "tick_index": { "type": "integer", "minimum": 0 },
+    "tick_scale": { "enum": ["Tick", "Minute", "Hour", "Day", "Week", "Month", "Season", "Year"] },
+    "phase": { "enum": ["Day", "Night", "Dawn", "Dusk", "SeasonShift", "EventWindow"] },
+    "started_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "updated_entities": { "type": "array", "items": { "type": "string" } },
+    "event_count": { "type": "integer", "minimum": 0 },
+    "governance_required": { "type": "boolean" },
+    "status": { "enum": ["Created", "Running", "Completed", "Paused", "Failed", "Archived"] }
+  }
+}

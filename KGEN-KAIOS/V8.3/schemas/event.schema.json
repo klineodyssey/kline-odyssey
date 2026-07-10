@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/event.schema.json",
+  "title": "KAIOS V8.3 Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "scope", "start_tick", "end_tick", "severity", "affected_entities", "modifiers", "governance_required", "status"],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^KGEN-EVT-[A-Z0-9-]+$" },
+    "event_type": { "enum": ["Festival", "WarConcept", "Disaster", "Discovery", "Technology", "Migration", "EconomicBoom", "Recession"] },
+    "scope": { "enum": ["Temple", "World", "Civilization", "Universe"] },
+    "start_tick": { "type": "string" },
+    "end_tick": { "type": "string" },
+    "severity": { "enum": ["Low", "Medium", "High", "Critical"] },
+    "affected_entities": { "type": "array", "items": { "type": "string" } },
+    "modifiers": { "type": "object", "additionalProperties": { "type": "number" } },
+    "governance_required": { "type": "boolean" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Resolved", "Archived"] }
+  }
+}

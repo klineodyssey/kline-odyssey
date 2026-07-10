@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/time_state.schema.json",
+  "title": "KAIOS V8.3 Time State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entity_id", "entity_type", "time_state", "last_tick", "next_tick", "age", "cycle", "activity_state", "energy_state", "decay_state", "event_state", "governance_signal", "status"],
+  "properties": {
+    "entity_id": { "type": "string" },
+    "entity_type": { "enum": ["Temple", "Land", "Residence", "Citizen", "Profession", "Business", "Market", "Exchange", "Bank", "Player", "NPC", "AI", "App"] },
+    "time_state": { "enum": ["Awake", "Resting", "Working", "Producing", "Trading", "Learning", "Recovering", "Paused", "Archived"] },
+    "last_tick": { "type": "string" },
+    "next_tick": { "type": "string" },
+    "age": { "type": "number", "minimum": 0 },
+    "cycle": { "enum": ["Tick", "Minute", "Hour", "Day", "Week", "Month", "Season", "Year"] },
+    "activity_state": { "type": "string" },
+    "energy_state": { "type": "number", "minimum": 0, "maximum": 100 },
+    "decay_state": { "type": "number", "minimum": 0, "maximum": 100 },
+    "event_state": { "type": "array", "items": { "type": "string" } },
+    "governance_signal": { "type": "string" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

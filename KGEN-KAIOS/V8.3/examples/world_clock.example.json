@@ -1,0 +1,12 @@
+{
+  "clock_id": "KGEN-CLOCK-CIV-HUAGUO-000001",
+  "clock_scope": "Civilization",
+  "parent_clock": "KGEN-CLOCK-UNIVERSE-000001",
+  "epoch": "KAIOS-V8.3-GENESIS",
+  "tick_index": 12345,
+  "tick_rate": "ReviewOnly",
+  "local_time": "2026-07-10T00:00:00Z",
+  "cycle": "Day",
+  "timezone_model": "KGEN Simulation Time",
+  "status": "Simulation"
+}

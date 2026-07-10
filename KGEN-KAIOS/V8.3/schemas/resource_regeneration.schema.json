@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/resource_regeneration.schema.json",
+  "title": "KAIOS V8.3 Resource Regeneration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resource_id", "tick_id", "current_quantity", "natural_recovery", "production", "recycling", "consumption", "decay", "event_modifier", "next_quantity", "scarcity_signal", "status"],
+  "properties": {
+    "resource_id": { "type": "string" },
+    "tick_id": { "type": "string" },
+    "current_quantity": { "type": "number", "minimum": 0 },
+    "natural_recovery": { "type": "number" },
+    "production": { "type": "number" },
+    "recycling": { "type": "number" },
+    "consumption": { "type": "number" },
+    "decay": { "type": "number" },
+    "event_modifier": { "type": "number" },
+    "next_quantity": { "type": "number", "minimum": 0 },
+    "scarcity_signal": { "type": "boolean" },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

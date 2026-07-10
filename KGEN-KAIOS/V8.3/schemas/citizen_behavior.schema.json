@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/citizen_behavior.schema.json",
+  "title": "KAIOS V8.3 Citizen Behavior",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["citizen_id", "tick_id", "actions", "energy_delta", "skill_delta", "reputation_delta", "transactions", "status"],
+  "properties": {
+    "citizen_id": { "type": "string" },
+    "tick_id": { "type": "string" },
+    "actions": { "type": "array", "items": { "enum": ["Work", "Consume", "Rest", "Move", "Learn", "Trade", "Upgrade"] } },
+    "energy_delta": { "type": "number" },
+    "skill_delta": { "type": "number" },
+    "reputation_delta": { "type": "number" },
+    "transactions": { "type": "array", "items": { "type": "string" } },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/schemas/population_growth.schema.json",
+  "title": "KAIOS V8.3 Population Growth",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["civilization_id", "tick_id", "population_before", "migration_delta", "training_delta", "residence_capacity_delta", "retirement_delta", "population_after", "resource_pressure", "status"],
+  "properties": {
+    "civilization_id": { "type": "string" },
+    "tick_id": { "type": "string" },
+    "population_before": { "type": "integer", "minimum": 0 },
+    "migration_delta": { "type": "integer" },
+    "training_delta": { "type": "integer" },
+    "residence_capacity_delta": { "type": "integer" },
+    "retirement_delta": { "type": "integer" },
+    "population_after": { "type": "integer", "minimum": 0 },
+    "resource_pressure": { "type": "number", "minimum": 0 },
+    "status": { "enum": ["Concept", "Prototype", "Simulation", "Production", "Archived"] }
+  }
+}

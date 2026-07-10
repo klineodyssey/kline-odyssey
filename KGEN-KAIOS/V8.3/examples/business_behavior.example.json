@@ -1,0 +1,16 @@
+{
+  "business_id": "KGEN-BUS-12345-CONVENIENCE-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "production_delta": 18,
+  "inventory_delta": {
+    "Food": -12,
+    "Energy": -3,
+    "Temple Point": 2
+  },
+  "revenue_delta": 92,
+  "expense_delta": 41,
+  "employee_delta": 0,
+  "growth_delta": 0.03,
+  "risk_warning": "None",
+  "status": "Simulation"
+}

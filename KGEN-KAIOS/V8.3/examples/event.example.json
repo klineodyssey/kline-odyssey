@@ -1,0 +1,16 @@
+{
+  "event_id": "KGEN-EVT-FESTIVAL-000001",
+  "event_type": "Festival",
+  "scope": "Temple",
+  "start_tick": "KGEN-TICK-000012345",
+  "end_tick": "KGEN-TICK-000012360",
+  "severity": "Low",
+  "affected_entities": ["KGEN-TEM-12345-000001", "KGEN-BUS-12345-CONVENIENCE-000001"],
+  "modifiers": {
+    "temple_activity": 1.2,
+    "market_activity": 1.08,
+    "citizen_energy_cost": 1.05
+  },
+  "governance_required": false,
+  "status": "Simulation"
+}

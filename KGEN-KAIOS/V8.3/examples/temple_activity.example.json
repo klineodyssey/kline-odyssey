@@ -1,0 +1,10 @@
+{
+  "temple_id": "KGEN-TEM-12345-000001",
+  "tick_id": "KGEN-TICK-000012345",
+  "service_activity": 86.5,
+  "faith_value": 72.4,
+  "population_attraction": 4.2,
+  "civilization_influence": 8.8,
+  "festival_readiness": 0.64,
+  "status": "Simulation"
+}
