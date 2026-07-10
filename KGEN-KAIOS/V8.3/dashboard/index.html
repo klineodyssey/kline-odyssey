@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V8.3 Time Dashboard</title>
+  <meta name="description" content="Read-only KAIOS V8.3 Civilization Time Engine dashboard.">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="Back to KAIOS V8.3">
+      <span class="brand-mark">K</span>
+      <span><strong>KAIOS V8.3 Dashboard</strong><small>Read-only Time Engine</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Dashboard links">
+      <a href="../">Viewer</a>
+      <a href="../README.md">README</a>
+      <a href="../reports/KAIOS_V8_3_QA_REPORT.md">QA</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="dashboard-hero">
+      <div>
+        <p class="eyebrow">World Clock / Simulation Tick / Timeline</p>
+        <h1>文明時間唯讀控制台</h1>
+        <p>Dashboard 讀取公開 JSON 與 schema，顯示時間健康、行為更新、事件與治理回應。它不推進 production clock，也不寫入 repo。</p>
+      </div>
+      <aside class="health-card">
+        <span>Time Health</span>
+        <strong id="healthScore">Loading</strong>
+        <small id="healthText">Reading public files</small>
+      </aside>
+    </section>
+
+    <section id="summary" class="summary-grid" aria-label="Time dashboard summary"></section>
+
+    <section class="dashboard-grid">
+      <article class="panel" id="worldClock"></article>
+      <article class="panel" id="tickStatus"></article>
+      <article class="panel" id="timelineHealth"></article>
+      <article class="panel" id="citizenBehavior"></article>
+      <article class="panel" id="businessBehavior"></article>
+      <article class="panel" id="templeActivity"></article>
+      <article class="panel wide" id="eventEngine"></article>
+      <article class="panel wide" id="governanceResponse"></article>
+      <article class="panel wide" id="alerts"></article>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Prototype / Simulation / Read Only</span>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -22,3 +22,9 @@
 - Added Simulation Runtime.
 - Added 10 JSON Schemas for world clock, tick, time state, citizen behavior, business behavior, temple activity, resource regeneration, population growth, event and governance response.
 - Added 10 parseable examples for the schema set.
+
+## V8.3 Simulation Viewer
+
+- Added read-only Simulation, Timeline and World Clock Viewer at `KGEN-KAIOS/V8.3/`.
+- Added read-only Time Dashboard at `KGEN-KAIOS/V8.3/dashboard/`.
+- Added dashboard configuration and public data-source model.

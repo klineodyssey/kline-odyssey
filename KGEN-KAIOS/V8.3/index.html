@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V8.3 Civilization Time Engine</title>
+  <meta name="description" content="KAIOS V8.3 Civilization Time Engine read-only Simulation Viewer, Timeline Viewer and World Clock Viewer.">
+  <link rel="stylesheet" href="v83.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="KAIOS V8.3 Home">
+      <span class="brand-mark">K</span>
+      <span>
+        <strong>KAIOS V8.3</strong>
+        <small>Civilization Time Engine</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="V8.3 links">
+      <a href="README.md">README</a>
+      <a href="TIME_ENGINE.md">Time Engine</a>
+      <a href="schemas/world_clock.schema.json">Schema</a>
+      <a href="dashboard/">Dashboard</a>
+      <a href="../V8.2/">V8.2</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">One Civilization -> One Clock -> Many Ticks</p>
+        <h1>文明時間引擎</h1>
+        <p>V8.3 讓 Temple、Land、Residence、Citizen、Profession、Business、Market、Exchange、Bank、Player、NPC、AI 與 App 都具有 Time State。這是唯讀 Prototype，不推進真實交易、不操作錢包、不修改任何 GitHub 工作狀態。</p>
+        <div class="hero-actions">
+          <a class="primary-link" href="dashboard/">Open Time Dashboard</a>
+          <a class="secondary-link" href="examples/world_clock.example.json">Open World Clock JSON</a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="Time engine status">
+        <dl>
+          <div><dt>Version</dt><dd>V8.3</dd></div>
+          <div><dt>Status</dt><dd>Prototype / Simulation</dd></div>
+          <div><dt>Mode</dt><dd>Read Only</dd></div>
+          <div><dt>Event Types</dt><dd>8</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="time-chain" aria-label="Clock layers">
+      <span>Universe Time</span>
+      <span>Civilization Time</span>
+      <span>World Time</span>
+      <span>Temple Time</span>
+      <span>Business Time</span>
+      <span>Citizen Time</span>
+    </section>
+
+    <section class="toolbar" aria-label="Viewer controls">
+      <div class="tabs" role="tablist" aria-label="Time viewer tabs">
+        <button type="button" class="tab active" data-view="simulation">Simulation</button>
+        <button type="button" class="tab" data-view="timeline">Timeline</button>
+        <button type="button" class="tab" data-view="clock">World Clock</button>
+        <button type="button" class="tab" data-view="citizen">Citizen</button>
+        <button type="button" class="tab" data-view="business">Business</button>
+        <button type="button" class="tab" data-view="event">Event</button>
+        <button type="button" class="tab" data-view="governance">Governance</button>
+      </div>
+      <label class="search-box">
+        <span>Search</span>
+        <input id="searchInput" type="search" aria-label="Search time records" autocomplete="off">
+      </label>
+    </section>
+
+    <section class="metric-grid" aria-label="Time engine summary">
+      <article class="metric"><span>Time Layers</span><strong>6</strong></article>
+      <article class="metric"><span>Tick Scales</span><strong>8</strong></article>
+      <article class="metric"><span>Event Types</span><strong>8</strong></article>
+      <article class="metric"><span>Schemas</span><strong>10</strong></article>
+      <article class="metric"><span>Mode</span><strong>Read Only</strong></article>
+    </section>
+
+    <section id="viewer" class="viewer" aria-live="polite"></section>
+
+    <section class="notice">
+      <h2>Prototype Boundary</h2>
+      <p>V8.3 的 War、Disaster、Market、Bank、Exchange、Governance Response 都是 Concept / Prototype / Simulation。它不代表真實戰爭、災害預警、金融服務、交易執行、法律狀態或公共安全系統。</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Where the Market Becomes the Myth</span>
+  </footer>
+
+  <script src="v83.js"></script>
+</body>
+</html>

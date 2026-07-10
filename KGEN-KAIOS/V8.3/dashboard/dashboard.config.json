@@ -1,0 +1,31 @@
+{
+  "version": "KAIOS V8.3",
+  "readiness_score": 88,
+  "mode": "Read Only",
+  "dashboard_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/",
+  "viewer_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/",
+  "data_sources": [
+    "../examples/world_clock.example.json",
+    "../examples/simulation_tick.example.json",
+    "../examples/time_state.example.json",
+    "../examples/citizen_behavior.example.json",
+    "../examples/business_behavior.example.json",
+    "../examples/temple_activity.example.json",
+    "../examples/resource_regeneration.example.json",
+    "../examples/population_growth.example.json",
+    "../examples/event.example.json",
+    "../examples/governance_response.example.json"
+  ],
+  "schema_sources": [
+    "../schemas/world_clock.schema.json",
+    "../schemas/simulation_tick.schema.json",
+    "../schemas/time_state.schema.json",
+    "../schemas/citizen_behavior.schema.json",
+    "../schemas/business_behavior.schema.json",
+    "../schemas/temple_activity.schema.json",
+    "../schemas/resource_regeneration.schema.json",
+    "../schemas/population_growth.schema.json",
+    "../schemas/event.schema.json",
+    "../schemas/governance_response.schema.json"
+  ]
+}
