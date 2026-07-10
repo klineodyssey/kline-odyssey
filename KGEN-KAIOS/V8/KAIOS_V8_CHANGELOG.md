@@ -13,3 +13,8 @@
 - Added Huaguo Mountain Exchange 11520 runtime.
 - Added security and legal boundary.
 - Added schemas, examples, frontend demo, WorkOrders and QA report in later V8 commits.
+## V8.0 WorkOrders and QA baseline
+
+- Added V8-P0 through V8-P15 executable WorkOrders.
+- Added V8 report directory and baseline QA report.
+- Added release report for Draft for Review / Prototype scope.
