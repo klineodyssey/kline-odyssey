@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Define Cursor R&D suggestion report requirements.",
+    "ancestor": "KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md",
+    "source_of_truth": true
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KGEN Cursor R&D Report",
+  "type": "object",
+  "required": [
+    "task_result",
+    "files_read",
+    "files_modified",
+    "tests_run",
+    "problems_found",
+    "risks",
+    "technical_debt",
+    "evolution_opportunities",
+    "research_direction",
+    "suggested_workorders",
+    "do_not_do",
+    "need_human_decision",
+    "need_codex_review"
+  ],
+  "properties": {
+    "task_result": { "type": "string" },
+    "files_read": { "type": "array", "items": { "type": "string" } },
+    "files_modified": { "type": "array", "items": { "type": "string" } },
+    "tests_run": { "type": "array", "items": { "type": "string" } },
+    "problems_found": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "technical_debt": { "type": "array", "items": { "type": "string" } },
+    "evolution_opportunities": { "type": "array", "items": { "type": "string" } },
+    "research_direction": { "type": "array", "items": { "type": "string" } },
+    "suggested_workorders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "reason", "status"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "reason": { "type": "string" },
+          "status": { "const": "PROPOSED" }
+        }
+      }
+    },
+    "do_not_do": { "type": "array", "items": { "type": "string" } },
+    "need_human_decision": { "type": "boolean" },
+    "need_codex_review": { "type": "boolean" }
+  }
+}

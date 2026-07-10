@@ -2,6 +2,17 @@
   "version": "KGEN Machine-Readable Canon V2.0",
   "status": "Draft for Review",
   "last_update": "2026-07-10",
+  "metadata": {
+    "revision": "2026-07-11.provenance-baseline",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Add provenance, versioning, and biological evolution governance references.",
+    "ancestor": "KGEN-Canon/KGEN_CANON_MASTER.json",
+    "source_of_truth": true
+  },
   "maintainer": "KLINE ODYSSEY / PrimeForge / Codex",
   "source_of_truth_order": [
     "Boot CURRENT",
@@ -33,6 +44,59 @@
     "Temples may connect to real stores, real services, physical commerce, and physical faith locations.",
     "Houses, shops, temples, and exchanges can evolve and grow."
   ],
+  "provenance_governance": {
+    "workorder_source_required": true,
+    "suggested_workorder_initial_status": "PROPOSED",
+    "formal_filename_versions_forbidden": true,
+    "formal_file_metadata_required": [
+      "VERSION",
+      "REVISION",
+      "STATUS",
+      "LAST_UPDATED",
+      "UPDATED_BY",
+      "REVIEWED_BY",
+      "SOURCE_COMMIT",
+      "TASK_ID",
+      "CHANGE_REASON",
+      "ANCESTOR",
+      "SOURCE_OF_TRUTH"
+    ],
+    "author_registry": "KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json",
+    "file_ownership_registry": "KGEN-KAIOS/provenance/FILE_OWNERSHIP_REGISTRY.json",
+    "change_provenance_schema": "KGEN-KAIOS/provenance/CHANGE_PROVENANCE_SCHEMA.json",
+    "workorder_provenance_schema": "KGEN-KAIOS/provenance/WORKORDER_PROVENANCE_SCHEMA.json"
+  },
+  "biological_governance": {
+    "taxonomy_required": [
+      "domain",
+      "kingdom",
+      "phylum",
+      "class",
+      "order",
+      "family",
+      "genus",
+      "species"
+    ],
+    "species_requires_canonical_file": true,
+    "species_requires_runtime_entry": true,
+    "organism_manifest_standard": "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
+    "organism_manifest_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+    "evolution_lineage_standard": "KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md",
+    "evolution_event_schema": "KGEN-KAIOS/provenance/EVOLUTION_EVENT_SCHEMA.json",
+    "allowed_events": [
+      "CREATE",
+      "MUTATE",
+      "UPGRADE",
+      "FORK",
+      "MERGE",
+      "FUSION",
+      "SPLIT",
+      "REPRODUCE",
+      "DEPRECATE",
+      "ARCHIVE",
+      "REVIVE"
+    ]
+  },
   "token": {
     "name": "KLINE GENESIS",
     "symbol": "KGEN",

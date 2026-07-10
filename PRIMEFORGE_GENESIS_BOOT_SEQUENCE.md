@@ -22,6 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
+REVISION: 2026-07-11.PROVENANCE_BASELINE  
+LAST_UPDATED: 2026-07-11  
+UPDATED_BY: Codex  
+REVIEWED_BY: Codex  
+SOURCE_COMMIT: e0acc39c6c1b5d5dead5b619ad48c85a85743262  
+TASK_ID: KGEN-GOV-BIO-2026-0001  
+CHANGE_REASON: Add R&D provenance, file versioning, biological taxonomy, and evolution governance as Boot-indexed gates.  
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -118,6 +125,40 @@ Human operators should read:
 5. New workers must link to the CURRENT file first and may cite V1.4 only as ancestor context.
 6. This Boot is an index and launch manifest; it must not embed every governed document in full.
 7. Boot updates are full cumulative updates. Do not delete prior rules, publish diff-only editions, or require readers to reconstruct the current rule from older files.
+
+## R&D Provenance And Biological Evolution Governance
+
+KGEN work is now governed by provenance and biological evolution gates. These gates extend existing KAIOS, AI Company, WorkOrder, Report, Review, Runtime, and Boot flows. They do not create a second company system.
+
+### Required Governance Index
+
+| Area | Formal Source |
+|---|---|
+| File versioning | `KGEN-KAIOS/VERSIONING_STANDARD.md` |
+| File headers | `KGEN-KAIOS/FILE_HEADER_STANDARD.md` |
+| Changelogs | `KGEN-KAIOS/CHANGELOG_STANDARD.md` |
+| Biological taxonomy | `KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md` |
+| Evolution lineage | `KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md` |
+| Organism manifest | `KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md` |
+| Author / change provenance | `KGEN-KAIOS/provenance/` |
+| Organism examples | `KGEN-KAIOS/examples/organisms/` |
+| Audit baseline | `KGEN_BIOLOGICAL_VERSIONING_AUDIT.md` |
+
+### WorkOrder Source Rule
+
+Codex must not create a source-less WorkOrder. Every WorkOrder must declare `task_source_type`, `task_source_id`, `task_source_actor`, `task_source_file`, `task_source_commit`, `task_source_reason`, `created_by`, `created_at`, `owner`, `reviewer`, `priority`, `risk_level`, `dependencies`, and `status`.
+
+### Report R&D Rule
+
+Cursor and other Workers may propose research directions and future work, but Suggested WorkOrders begin as `PROPOSED`. Only Codex review may move them to `DRAFT`, and only the approved promotion flow may move them to `OPEN`.
+
+### Formal Organ Version Rule
+
+Formal organ filenames remain fixed. Version, revision, source commit, task ID, author, reviewer, reason, ancestor, and source-of-truth status must live inside file metadata, not in the active filename.
+
+### Biological Classification Rule
+
+Formal KGEN life organisms must identify Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species and map `species` to a real `canonical_file` and `runtime_entry`. Concept-only classifications without canonical files are not formal organisms.
 
 ## Inherited V1.4 Canon Body
 

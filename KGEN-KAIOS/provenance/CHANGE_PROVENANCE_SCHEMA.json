@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Define formal change provenance evidence.",
+    "ancestor": "KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md",
+    "source_of_truth": true
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KGEN Change Provenance",
+  "type": "object",
+  "required": [
+    "human_owner",
+    "author_agent",
+    "author_worker_id",
+    "reviewer_agent",
+    "reviewer_worker_id",
+    "task_id",
+    "branch",
+    "commit_sha",
+    "base_commit",
+    "report_path",
+    "changed_files",
+    "timestamp"
+  ],
+  "properties": {
+    "human_owner": { "type": "string" },
+    "author_agent": { "type": "string" },
+    "author_worker_id": { "type": "string" },
+    "reviewer_agent": { "type": "string" },
+    "reviewer_worker_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "branch": { "type": "string" },
+    "commit_sha": { "type": "string" },
+    "base_commit": { "type": "string" },
+    "report_path": { "type": "string" },
+    "changed_files": { "type": "array", "items": { "type": "string" } },
+    "timestamp": { "type": "string" }
+  }
+}

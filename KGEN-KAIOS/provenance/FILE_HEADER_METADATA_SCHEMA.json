@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Define formal organ metadata schema.",
+    "ancestor": "KGEN-KAIOS/FILE_HEADER_STANDARD.md",
+    "source_of_truth": true
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KGEN Formal File Metadata",
+  "type": "object",
+  "required": [
+    "VERSION",
+    "REVISION",
+    "STATUS",
+    "LAST_UPDATED",
+    "UPDATED_BY",
+    "REVIEWED_BY",
+    "SOURCE_COMMIT",
+    "TASK_ID",
+    "CHANGE_REASON",
+    "ANCESTOR",
+    "SOURCE_OF_TRUTH"
+  ],
+  "properties": {
+    "VERSION": { "type": "string" },
+    "REVISION": { "type": "string" },
+    "STATUS": { "type": "string" },
+    "LAST_UPDATED": { "type": "string" },
+    "UPDATED_BY": { "type": "string" },
+    "REVIEWED_BY": { "type": "string" },
+    "SOURCE_COMMIT": { "type": "string" },
+    "TASK_ID": { "type": "string" },
+    "CHANGE_REASON": { "type": "string" },
+    "ANCESTOR": { "type": "string" },
+    "SOURCE_OF_TRUTH": { "type": ["boolean", "string"] }
+  }
+}

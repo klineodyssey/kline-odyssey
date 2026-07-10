@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Define required task source fields.",
+    "ancestor": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+    "source_of_truth": true
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KGEN WorkOrder Provenance",
+  "type": "object",
+  "required": [
+    "task_id",
+    "task_source_type",
+    "task_source_id",
+    "task_source_actor",
+    "task_source_reason",
+    "created_by",
+    "created_at",
+    "owner",
+    "reviewer",
+    "priority",
+    "risk_level",
+    "dependencies",
+    "status"
+  ],
+  "properties": {
+    "task_id": { "type": "string" },
+    "task_source_type": {
+      "enum": [
+        "HUMAN_REQUEST",
+        "AI_RECOMMENDATION",
+        "CURSOR_REPORT",
+        "CODEX_REVIEW",
+        "QA_FINDING",
+        "RUNTIME_ALERT",
+        "CANON_GAP",
+        "ROADMAP",
+        "SECURITY_FINDING",
+        "LEGAL_FINDING"
+      ]
+    },
+    "task_source_id": { "type": "string" },
+    "task_source_actor": { "type": "string" },
+    "task_source_file": { "type": "string" },
+    "task_source_commit": { "type": "string" },
+    "task_source_reason": { "type": "string" },
+    "created_by": { "type": "string" },
+    "created_at": { "type": "string" },
+    "owner": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "priority": { "type": "string" },
+    "risk_level": { "type": "string" },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "status": { "type": "string" }
+  }
+}
