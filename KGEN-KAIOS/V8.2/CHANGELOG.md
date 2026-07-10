@@ -29,3 +29,8 @@
 - Added read-only Economy Viewer at `KGEN-KAIOS/V8.2/`.
 - Added read-only Dashboard at `KGEN-KAIOS/V8.2/dashboard/`.
 - Added dashboard configuration and public data-source model.
+
+## V8.2 QA and Release
+
+- Added QA report with JSON, JavaScript, read-only and protected path validation.
+- Added release report with deliverable counts, URLs and V8.3 recommendation.
