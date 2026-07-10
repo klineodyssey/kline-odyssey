@@ -88,7 +88,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 | ORG-P2-002 | REVIEW | Cursor | Codex | P1 | PMO | KGEN-AI-Company/reports/ORG-P2-002_PMO_MILESTONE_BOARD.md |
 | ORG-P2-003 | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DUPLICATE_CHECK.md |
 | ORG-P2-003A | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003A_WORKQUEUE_ALIAS_PLAN.md |
-| ORG-P2-003B | OPEN | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md |
+| ORG-P2-003B | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md |
 | ORG-P2-003C | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
 | ORG-P2-003D | OPEN | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
 | ORG-P2-003E | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
@@ -250,7 +250,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-003B - Normalize AI-Company, Agent-Office, and report routing language
 
-- Status: OPEN
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1

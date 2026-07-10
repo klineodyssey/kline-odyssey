@@ -44,7 +44,9 @@ No force push. No reset hard. No deletion of unconfirmed files. No overwrite of 
 
 ## 10. Report Path
 
-Reports go under `KGEN-Organization/Reports/` for Organization work or `KGEN-Agent-Office/reports/` for Agent Office work.
+**Primary report intake:** `KGEN-AI-Company/reports/` (ORG-P2-003 D3 ALIAS).
+
+Cursor writes WorkOrder reports to the output path listed in the live WorkQueue, which is normally under `KGEN-AI-Company/reports/`. `KGEN-Organization/Reports/` holds department templates and local scaffolding. `KGEN-Agent-Office/reports/` is a legacy alias for historical Agent Office TASK reports only.
 
 ## 11. Evidence Rule
 

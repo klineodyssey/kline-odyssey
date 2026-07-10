@@ -1,12 +1,15 @@
 # KGEN Agent Office Reports
 
-All Cursor reports belong in this directory.
+> **ALIAS — Legacy / archaeology report path (ORG-P2-003 D3)**
+> **Primary report intake:** [`KGEN-AI-Company/reports/`](../../KGEN-AI-Company/reports/README.md)
+
+This directory keeps historical Agent Office TASK reports. New Phase 2 / AI Company WorkOrder reports must go to `KGEN-AI-Company/reports/` unless Codex explicitly assigns an Agent Office path.
 
 ## Required Report Rule
 
-Every report must use `KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md` unless Codex assigns a more specific template.
+For live WorkOrders, follow the output path in `KGEN-Organization/WorkOrders/WORK_QUEUE.md` (normally under `KGEN-AI-Company/reports/`). Legacy Agent Office tasks may still use `KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md`.
 
-## Current Assigned Reports
+## Current Assigned Reports (Legacy)
 
 - `TASK-001_UNCOMMITTED_FILES_REVIEW.md`
 - `TASK-002_LINK_CHECK_REPORT.md`

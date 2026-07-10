@@ -1,6 +1,10 @@
 # KGEN Agent Office
 
-KGEN Agent Office is the official GitHub handoff system for Codex and Cursor work inside the KLINE ODYSSEY repository.
+KGEN Agent Office is the **daily operations desk** for Codex and Cursor inside the KLINE ODYSSEY repository. It owns protected-path discipline (`DO_NOT_TOUCH.md`), onboarding prompts, and legacy handoff templates.
+
+> **Routing (ORG-P2-003 D2 KEEP):**
+> Live company operating system = [`KGEN-AI-Company/`](../KGEN-AI-Company/README.md)
+> Agent Office does **not** replace AI Company. Agent Office supports protected paths, prompts, and archaeology.
 
 Codex is the command controller. Codex owns task planning, specification alignment, review, GitHub commits, and pushes.
 
@@ -10,13 +14,13 @@ All work is handed off through GitHub files. Agents must not rely on oral memory
 
 ## AI Company Automation
 
-KGEN AI Company Automation V4.0 is the active Codex-managed Cursor work system. Cursor should use Agent Office for protected paths and prompt discipline, then use AI Company and Organization WorkQueue for live work.
+Live Codex-managed Cursor work runs through **KGEN AI Company Automation V5.0+**. Cursor uses Agent Office for protected paths and prompt discipline, then uses AI Company and Organization WorkQueue for live work.
 
-- AI Company: `KGEN-AI-Company/README.md`
+- AI Company (live OS): `KGEN-AI-Company/README.md`
 - Cursor employee boot: `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
 - Auto work protocol: `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
 - Live WorkQueue: `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
-- Cursor reports: `KGEN-AI-Company/reports/`
+- Primary reports: `KGEN-AI-Company/reports/`
 - Codex review log: `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
 
 ## Cursor Start Order
@@ -26,12 +30,13 @@ Every time Cursor starts work, it must read these files in order:
 1. `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
 2. `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
 3. `KGEN-AI-Company/CURSOR_POLLING_RULES.md`
-4. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md`
-5. `KGEN-Agent-Office/CURSOR_WORK_QUEUE.md`
-6. `KGEN-Agent-Office/CURSOR_DAILY_WORKFLOW.md`
-7. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
-8. `KGEN-Canon/KGEN_CANON_MASTER.json`
-9. `KGEN_MASTER_LIBRARY_INDEX.md`
+4. `KGEN-Organization/WorkOrders/WORK_QUEUE.md` *(live queue)*
+5. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+6. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md` *(prompt discipline)*
+7. `KGEN-Canon/KGEN_CANON_MASTER.json`
+8. `KGEN_MASTER_LIBRARY_INDEX.md`
+
+Do **not** treat `CURSOR_WORK_QUEUE.md` as a live task source. It is SUPERSEDED (ORG-P2-003A).
 
 ## Office Files
 
@@ -41,13 +46,13 @@ Every time Cursor starts work, it must read these files in order:
 | `CURSOR_ONBOARDING.md` | Human-facing Cursor startup instructions |
 | `CURSOR_DAILY_WORKFLOW.md` | Cursor daily and periodic workflow |
 | `CURSOR_AGENT_PROMPT.md` | Full Cursor agent prompt |
-| `CURSOR_WORK_QUEUE.md` | Current task queue for Cursor |
+| `CURSOR_WORK_QUEUE.md` | SUPERSEDED legacy queue — see Organization WorkQueue |
 | `CURSOR_HANDOFF_LOG.md` | Shared handoff log format and active log |
-| `CURSOR_REPORT_TEMPLATE.md` | Standard Cursor report template |
+| `CURSOR_REPORT_TEMPLATE.md` | Legacy report template (primary intake is AI-Company/reports) |
 | `CODEX_REVIEW_PROTOCOL.md` | Codex review protocol for Cursor output |
 | `AUTOMATION_SCHEDULE.md` | Suggested automation cadence |
 | `DO_NOT_TOUCH.md` | Protected paths and forbidden operations |
-| `reports/README.md` | Report folder policy |
+| `reports/README.md` | Legacy report alias — primary path is AI-Company/reports |
 
 ## Governance
 
