@@ -1165,7 +1165,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 - Released by: Codex
 - Released at: `2026-07-11T00:00:00Z`
 - Release review ID: `KAIOS-V9.3-RELEASE-REVIEW-0001`
-- Release commit SHA: `pending`
+- Release commit SHA: `142aeb6f218a7180460fd483d5bad4c5d57ec3f8`
 - Recommended Worker: `cursor-01`
 - Cursor Auto-Claim: Enabled only through normal `gi，上班` WorkQueue claim; no automatic merge or main push
 - Human Pause Allowed: true
