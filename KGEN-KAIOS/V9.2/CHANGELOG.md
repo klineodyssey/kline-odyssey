@@ -20,3 +20,6 @@
 - Added sync request, validation, allocation and result artifacts.
 - Added V9.2 dry run for successful sync, ID conflict, Human pause and rollback.
 - Added V9.2 sync audit log.
+- Backfilled the WorkQueue insertion commit SHA into sync records.
+- Added QA report.
+- Added release report.

@@ -1156,7 +1156,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 - Sync validation: `KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_validation.json`
 - Sync result: `KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json`
 - Inserted at: `2026-07-11T00:00:00Z`
-- Sync commit SHA: `PENDING_TEST_COMMIT_SHA`
+- Sync commit SHA: `5e65b8542bb5d476bcde4e66829bcba26e8d0fd7`
 - Branch: `cursor-handoff/V9-DRYRUN-001A`
 - Dispatch Hold: true
 - Cursor Auto-Claim: Disabled until Codex explicitly releases hold

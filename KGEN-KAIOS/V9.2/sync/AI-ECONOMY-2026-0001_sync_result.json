@@ -7,6 +7,6 @@
   "inserted_at": "2026-07-11T00:00:00Z",
   "target_workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
   "dispatch_hold": true,
-  "sync_commit_sha": "PENDING_TEST_COMMIT_SHA",
+  "sync_commit_sha": "5e65b8542bb5d476bcde4e66829bcba26e8d0fd7",
   "reviewer": "Codex"
 }
