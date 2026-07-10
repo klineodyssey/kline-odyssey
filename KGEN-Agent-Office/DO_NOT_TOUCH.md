@@ -8,7 +8,8 @@ Cursor and other worker agents must not modify these paths unless Codex and the 
 - `K線西遊記/temples/12345`
 - `wallet`
 - `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, unless the task explicitly says to update Boot
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`, unless the task explicitly says to update Boot
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, preserved ancestor unless the task explicitly says to update Boot history
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper/`
 - KGEN Token contract files
@@ -30,4 +31,3 @@ Stop and report:
 ```text
 BLOCKED: protected path requires Codex and human approval.
 ```
-

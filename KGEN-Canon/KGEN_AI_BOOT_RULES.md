@@ -2,7 +2,7 @@
 
 ## Mandatory Read Order
 
-1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` (CURRENT / SOURCE_OF_TRUTH)
 2. `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 3. `docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`
 4. `KGEN-Canon/KGEN_CANON_MASTER.json`
@@ -32,7 +32,8 @@
 - `K線西遊記/temples/12345`
 - `wallet`
 - `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` (preserved ancestor)
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper`
 

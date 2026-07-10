@@ -11,7 +11,7 @@ This protocol converts the Cursor-only workflow into a worker-neutral KAIOS work
 
 A worker must read, in order:
 
-1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 2. `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 3. `docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`
 4. `AGENTS.md`
