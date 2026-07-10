@@ -8,4 +8,8 @@
 - Added the DRAFT WorkOrder standard.
 - Added the R0-R4 Risk Promotion Matrix.
 - Added the Audit Log Standard.
-
+- Added Codex Promotion Protocol with the 15-point checklist.
+- Added Codex Rejection and Revision protocols.
+- Added the Human Review Gate.
+- Added Duplicate Task Detection and Dependency Validation.
+- Added WorkOrder Archive Standard.
