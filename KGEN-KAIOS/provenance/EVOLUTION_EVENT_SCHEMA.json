@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Define evolution event schema.",
+    "ancestor": "KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md",
+    "source_of_truth": true
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KGEN Evolution Event",
+  "type": "object",
+  "required": [
+    "evolution_event_id",
+    "organism_id",
+    "event_type",
+    "from_version",
+    "to_version",
+    "parent_species",
+    "child_species",
+    "source_task",
+    "source_commit",
+    "author_agent",
+    "reviewer_agent",
+    "compatibility_result",
+    "migration_required",
+    "rollback_path"
+  ],
+  "properties": {
+    "evolution_event_id": { "type": "string" },
+    "organism_id": { "type": "string" },
+    "event_type": {
+      "enum": ["CREATE", "MUTATE", "UPGRADE", "FORK", "MERGE", "FUSION", "SPLIT", "REPRODUCE", "DEPRECATE", "ARCHIVE", "REVIVE"]
+    },
+    "from_version": { "type": "string" },
+    "to_version": { "type": "string" },
+    "parent_species": { "type": ["string", "null"] },
+    "child_species": { "type": ["string", "null"] },
+    "source_task": { "type": "string" },
+    "source_commit": { "type": "string" },
+    "author_agent": { "type": "string" },
+    "reviewer_agent": { "type": "string" },
+    "compatibility_result": { "type": "string" },
+    "migration_required": { "type": "boolean" },
+    "rollback_path": { "type": "string" }
+  }
+}
