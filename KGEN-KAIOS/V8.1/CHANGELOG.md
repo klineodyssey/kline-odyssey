@@ -27,3 +27,9 @@
 - Added pure static read-only Universe Viewer.
 - Added views for graph, entities, citizen, profession, economy, and relationships.
 - Viewer reads V8.1 example graph and falls back to seed data without writing any file or calling a backend.
+
+## V8.1 Runtime and QA
+
+- Added Runtime Relationship Map.
+- Added Temple, Citizen, Economy, Player and AI runtime documents.
+- Added V8.1 QA and release reports.
