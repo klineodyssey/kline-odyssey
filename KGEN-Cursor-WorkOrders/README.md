@@ -1,7 +1,11 @@
 # KGEN Cursor WorkOrders
 
+> **SUPERSEDED — Not a live WorkQueue**  
+> **Live queue:** [`KGEN-Organization/WorkOrders/WORK_QUEUE.md`](../KGEN-Organization/WorkOrders/WORK_QUEUE.md)  
+> **Decision:** ORG-P2-003 D1 (MERGE). This folder remains as historical Cursor QA WorkOrders (CURSOR-001..010).
+
 **Version:** V1.0  
-**Status:** Draft for Review  
+**Status:** Superseded / Archaeology Only  
 **Coordinator:** Codex  
 **Worker:** Cursor
 

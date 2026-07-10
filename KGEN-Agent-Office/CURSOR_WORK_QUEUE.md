@@ -1,5 +1,9 @@
 # Cursor Work Queue
 
+> **SUPERSEDED — Not a live WorkQueue**  
+> **Live queue:** [`KGEN-Organization/WorkOrders/WORK_QUEUE.md`](../KGEN-Organization/WorkOrders/WORK_QUEUE.md)  
+> **Decision:** ORG-P2-003 D1 (MERGE). This file remains as legacy Agent Office task history.
+
 **Queue Version:** V1.0  
 **Maintainer:** Codex  
 **Worker:** Cursor  
