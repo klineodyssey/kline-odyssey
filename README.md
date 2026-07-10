@@ -77,6 +77,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | AI Company Automation V5.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
 | KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
+| KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -133,6 +134,22 @@ KAIOS V8.0 turns the official Canon into a practical player asset roadmap: a pla
 - Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/
 
 V8.0 is a Draft for Review / Prototype system. Bank, listing, real-world business, and regulated asset modules remain subject to legal authorization, business agreement, security review, and regulatory compliance before Production use.
+
+### KAIOS V8.1 Universe Data Layer
+
+KAIOS V8.1 establishes the living data layer for KGEN Universe Graph records. Every civilization, temple, land, residence, citizen, profession, player, NPC, AI, App, bank, exchange, market, listing, transaction and governance record receives a stable identity, lifecycle and relationship model.
+
+- Universe Viewer: [KGEN-KAIOS/V8.1/index.html](KGEN-KAIOS/V8.1/index.html)
+- Universe Data Layer: [KGEN-KAIOS/V8.1/UNIVERSE_DATA_LAYER.md](KGEN-KAIOS/V8.1/UNIVERSE_DATA_LAYER.md)
+- Universe Graph: [KGEN-KAIOS/V8.1/UNIVERSE_GRAPH.md](KGEN-KAIOS/V8.1/UNIVERSE_GRAPH.md)
+- Citizen Standard: [KGEN-KAIOS/V8.1/CITIZEN_STANDARD.md](KGEN-KAIOS/V8.1/CITIZEN_STANDARD.md)
+- Profession Standard: [KGEN-KAIOS/V8.1/PROFESSION_STANDARD.md](KGEN-KAIOS/V8.1/PROFESSION_STANDARD.md)
+- Entity Graph Schema: [KGEN-KAIOS/V8.1/schemas/entity_graph.schema.json](KGEN-KAIOS/V8.1/schemas/entity_graph.schema.json)
+- Runtime Relationship Map: [KGEN-KAIOS/V8.1/runtime/RUNTIME_RELATIONSHIP_MAP.md](KGEN-KAIOS/V8.1/runtime/RUNTIME_RELATIONSHIP_MAP.md)
+- V8.1 QA Report: [KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_QA_REPORT.md](KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/
+
+V8.1 is a Draft for Review / Data Layer Prototype. It stores and displays relationships; it does not mint assets, run wallets, execute trades, operate a bank or create regulated rights.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

@@ -20,6 +20,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
+| KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -83,6 +84,31 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | WorkOrders | `KGEN-KAIOS/V8/workorders/V8_WORKORDERS.md` | V8-P0 through V8-P15 executable Cursor handoff WorkOrders |
 | QA Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_QA_REPORT.md` | Baseline QA result |
 | Release Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_RELEASE_REPORT.md` | V8 release summary and next phase |
+
+## KAIOS V8.1 Universe Data Layer
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.1 Index | `KGEN-KAIOS/V8.1/README.md` | V8.1 overview and file map |
+| Universe Viewer | `KGEN-KAIOS/V8.1/index.html` | Read-only Universe Graph viewer |
+| Universe Data Layer | `KGEN-KAIOS/V8.1/UNIVERSE_DATA_LAYER.md` | Master data-layer specification |
+| Universe Graph | `KGEN-KAIOS/V8.1/UNIVERSE_GRAPH.md` | Canonical graph backbone and entity roles |
+| Entity Relationship | `KGEN-KAIOS/V8.1/ENTITY_RELATIONSHIP.md` | Entity envelope and relationship records |
+| Unique ID Standard | `KGEN-KAIOS/V8.1/UNIQUE_ID_STANDARD.md` | Stable ID rules and prefixes |
+| World State Model | `KGEN-KAIOS/V8.1/WORLD_STATE_MODEL.md` | Snapshot models and metrics |
+| Citizen Standard | `KGEN-KAIOS/V8.1/CITIZEN_STANDARD.md` | Citizen fields and lifecycle |
+| Profession Standard | `KGEN-KAIOS/V8.1/PROFESSION_STANDARD.md` | Profession library, income, skill, building, upgrade and output rules |
+| Life Cycle Standard | `KGEN-KAIOS/V8.1/LIFE_CYCLE_STANDARD.md` | Life stages and runtime hooks |
+| Player Standard | `KGEN-KAIOS/V8.1/PLAYER_STANDARD.md` | Player boundary and relation to citizens |
+| NPC Standard | `KGEN-KAIOS/V8.1/NPC_STANDARD.md` | NPC life and service role |
+| AI Standard | `KGEN-KAIOS/V8.1/AI_STANDARD.md` | AI as life organ and Canon-locked runtime assistant |
+| App Organism Standard | `KGEN-KAIOS/V8.1/APP_ORGANISM_STANDARD.md` | App as lifeform lifecycle actions |
+| Runtime Relationship Map | `KGEN-KAIOS/V8.1/runtime/RUNTIME_RELATIONSHIP_MAP.md` | Runtime-to-entity responsibility model |
+| Runtime Documents | `KGEN-KAIOS/V8.1/runtime/` | Temple, Citizen, Economy, Player and AI runtime specifications |
+| Schemas | `KGEN-KAIOS/V8.1/schemas/` | Eight V8.1 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.1/examples/` | Eight parseable examples |
+| QA Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | Baseline V8.1 QA report |
+| Release Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_RELEASE_REPORT.md` | V8.1 release summary and V8.2 recommendation |
 ## Organization V2.0
 
 | Item | Path | Purpose |

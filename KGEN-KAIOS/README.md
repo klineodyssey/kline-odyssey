@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V8.0 One Picture One Temple Economy System
-**Status:** Draft for Review / Prototype Application Layer
+**Version:** V8.1 Universe Data Layer
+**Status:** Draft for Review / Data Layer Prototype
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -121,9 +121,32 @@ V8.0 adds the first KAIOS application layer for one picture one temple, land, re
 | `V8/reports/KAIOS_V8_QA_REPORT.md` | V8 baseline QA report |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/
+
+## V8.1 Universe Data Layer
+
+V8.1 adds the living data layer for the KGEN Universe. It defines unique IDs, entity relationships, citizen and profession records, lifecycle events, world state snapshots, runtime relationship maps, parseable JSON Schemas, examples and a read-only Universe Viewer.
+
+| File | Purpose |
+|---|---|
+| `V8.1/README.md` | V8.1 entry and file map |
+| `V8.1/index.html` | Read-only Universe Viewer |
+| `V8.1/UNIVERSE_DATA_LAYER.md` | Master data-layer specification |
+| `V8.1/UNIVERSE_GRAPH.md` | Universe Graph backbone and entity roles |
+| `V8.1/ENTITY_RELATIONSHIP.md` | Entity relationship envelope and relationship record rules |
+| `V8.1/UNIQUE_ID_STANDARD.md` | Stable ID format for all Universe entities |
+| `V8.1/WORLD_STATE_MODEL.md` | Snapshot model for world, civilization, temple, economy, citizen and market state |
+| `V8.1/CITIZEN_STANDARD.md` | Citizen as civilization life standard |
+| `V8.1/PROFESSION_STANDARD.md` | Profession library and economic output model |
+| `V8.1/LIFE_CYCLE_STANDARD.md` | Create, Grow, Learn, Work, Trade, Build, Upgrade, Reproduce, Retire, Archive and Delete stages |
+| `V8.1/runtime/` | Runtime Relationship Map, Temple, Citizen, Economy, Player and AI runtime documents |
+| `V8.1/schemas/` | Eight JSON Schemas |
+| `V8.1/examples/` | Eight parseable examples |
+| `V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | V8.1 QA report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/
 ## Protected Systems
 
-KAIOS V8.0 does not modify:
+KAIOS V8.1 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`
