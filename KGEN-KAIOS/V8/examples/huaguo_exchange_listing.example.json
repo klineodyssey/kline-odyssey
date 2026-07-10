@@ -1,0 +1,42 @@
+{
+    "listing_id":  "listing-demo-001",
+    "asset_type":  "Land",
+    "asset_id":  "land-demo-001",
+    "seller":  "player-demo-land-001",
+    "ownership_proof":  "demo-proof",
+    "metadata":  {
+                     "name":  "Demo Mixed Land",
+                     "stage":  "Claimed Land"
+                 },
+    "valuation":  {
+                      "method":  "simulation",
+                      "value":  11520
+                  },
+    "pricing_model":  {
+                          "type":  "fixed",
+                          "price":  11520,
+                          "currency":  "KGEN"
+                      },
+    "disclosure":  "Game market prototype listing",
+    "risk":  [
+                 "Prototype only"
+             ],
+    "transfer_rules":  [
+                           "Codex review required"
+                       ],
+    "rental_rules":  [
+                         "Allowed in simulation"
+                     ],
+    "delisting":  [
+                      "Owner request",
+                      "fraud flag"
+                  ],
+    "dispute":  [
+                    "Codex review"
+                ],
+    "legal_restrictions":  [
+                               "No real property claim"
+                           ],
+    "market_class":  "A",
+    "status":  "review"
+}

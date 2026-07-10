@@ -1,0 +1,36 @@
+{
+    "task_id":  "V8-P1-TEMPLE-BLUEPRINT",
+    "parent_asset_id":  "pic-demo-001",
+    "owner":  "Cursor",
+    "reviewer":  "Codex",
+    "priority":  "P0",
+    "dependencies":  [
+                         "V8-P0"
+                     ],
+    "input_files":  [
+                        "KGEN-KAIOS/V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md"
+                    ],
+    "expected_outputs":  [
+                             "Temple blueprint report"
+                         ],
+    "acceptance_criteria":  [
+                                "No protected paths",
+                                "Concept/Runtime/Production boundary stated"
+                            ],
+    "protected_paths":  [
+                            "contracts",
+                            "K線西遊記/temples/12345",
+                            "wallet",
+                            "bridge",
+                            "Boot",
+                            "Runtime CURRENT",
+                            "final-whitepaper",
+                            "KGEN Token contract"
+                        ],
+    "branch":  "cursor-handoff/V8-P1-TEMPLE-BLUEPRINT",
+    "base_commit":  "latest-origin-main",
+    "report_path":  "KGEN-KAIOS/V8/reports/V8-P1_TEMPLE_BLUEPRINT_REPORT.md",
+    "legal_review_required":  false,
+    "security_review_required":  false,
+    "status":  "OPEN"
+}

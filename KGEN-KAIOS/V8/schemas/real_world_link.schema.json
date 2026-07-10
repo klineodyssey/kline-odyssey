@@ -1,0 +1,76 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Real World Link",
+    "type":  "object",
+    "required":  [
+                     "virtual_twin_id",
+                     "business_owner",
+                     "authorization_status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "virtual_twin_id":  {
+                                               "type":  "string",
+                                               "description":  "Virtual twin identifier"
+                                           },
+                       "business_owner":  {
+                                              "type":  "string",
+                                              "description":  "Business owner"
+                                          },
+                       "legal_entity":  {
+                                            "type":  "string",
+                                            "description":  "Legal entity"
+                                        },
+                       "store_address":  {
+                                             "type":  "string",
+                                             "description":  "Store address or service area"
+                                         },
+                       "catalog_adapter":  {
+                                               "type":  "string",
+                                               "description":  "Catalog adapter"
+                                           },
+                       "inventory_adapter":  {
+                                                 "type":  "string",
+                                                 "description":  "Inventory adapter"
+                                             },
+                       "pricing_adapter":  {
+                                               "type":  "string",
+                                               "description":  "Pricing adapter"
+                                           },
+                       "payment_adapter":  {
+                                               "type":  "string",
+                                               "description":  "Payment adapter"
+                                           },
+                       "order_adapter":  {
+                                             "type":  "string",
+                                             "description":  "Order adapter"
+                                         },
+                       "delivery_adapter":  {
+                                                "type":  "string",
+                                                "description":  "Delivery adapter"
+                                            },
+                       "membership_adapter":  {
+                                                  "type":  "string",
+                                                  "description":  "Membership adapter"
+                                              },
+                       "loyalty_adapter":  {
+                                               "type":  "string",
+                                               "description":  "Loyalty adapter"
+                                           },
+                       "tax_adapter":  {
+                                           "type":  "string",
+                                           "description":  "Tax adapter"
+                                       },
+                       "audit_log":  {
+                                         "description":  "Audit log entries",
+                                         "items":  {
+                                                       "type":  "string"
+                                                   },
+                                         "type":  "array"
+                                     },
+                       "authorization_status":  {
+                                                    "type":  "string",
+                                                    "description":  "unauthorized, pending, approved, suspended"
+                                                }
+                   }
+}

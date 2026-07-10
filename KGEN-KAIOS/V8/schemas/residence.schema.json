@@ -1,0 +1,40 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Residence",
+    "type":  "object",
+    "required":  [
+                     "residence_id",
+                     "building_id",
+                     "evolution_options"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "residence_id":  {
+                                            "type":  "string",
+                                            "description":  "Residence identifier"
+                                        },
+                       "building_id":  {
+                                           "type":  "string",
+                                           "description":  "Linked building"
+                                       },
+                       "resident":  {
+                                        "type":  "string",
+                                        "description":  "Resident or owner"
+                                    },
+                       "evolution_options":  {
+                                                 "description":  "Store, bank branch, warehouse, factory, temple service node",
+                                                 "items":  {
+                                                               "type":  "string"
+                                                           },
+                                                 "type":  "array"
+                                             },
+                       "rental_state":  {
+                                            "type":  "string",
+                                            "description":  "none, rentable, rented"
+                                        },
+                       "service_node_ready":  {
+                                                  "type":  "boolean",
+                                                  "description":  "Can become temple service node"
+                                              }
+                   }
+}

@@ -1,0 +1,84 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Bank",
+    "type":  "object",
+    "required":  [
+                     "bank_id",
+                     "runtime_mode",
+                     "risk_status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "bank_id":  {
+                                       "type":  "string",
+                                       "description":  "Bank identifier"
+                                   },
+                       "owner":  {
+                                     "type":  "string",
+                                     "description":  "Owner"
+                                 },
+                       "balance":  {
+                                       "type":  "number",
+                                       "description":  "Simulated balance"
+                                   },
+                       "treasury":  {
+                                        "additionalProperties":  true,
+                                        "description":  "Treasury state",
+                                        "type":  "object"
+                                    },
+                       "deposit":  {
+                                       "additionalProperties":  true,
+                                       "description":  "Deposit simulation",
+                                       "type":  "object"
+                                   },
+                       "loan":  {
+                                    "additionalProperties":  true,
+                                    "description":  "Loan simulation",
+                                    "type":  "object"
+                                },
+                       "collateral":  {
+                                          "additionalProperties":  true,
+                                          "description":  "Collateral simulation",
+                                          "type":  "object"
+                                      },
+                       "interest":  {
+                                        "additionalProperties":  true,
+                                        "description":  "Interest model",
+                                        "type":  "object"
+                                    },
+                       "credit":  {
+                                      "additionalProperties":  true,
+                                      "description":  "Credit model",
+                                      "type":  "object"
+                                  },
+                       "insurance":  {
+                                         "additionalProperties":  true,
+                                         "description":  "Insurance simulation",
+                                         "type":  "object"
+                                     },
+                       "reserve":  {
+                                       "additionalProperties":  true,
+                                       "description":  "Reserve model",
+                                       "type":  "object"
+                                   },
+                       "audit":  {
+                                     "description":  "Audit event IDs",
+                                     "items":  {
+                                                   "type":  "string"
+                                               },
+                                     "type":  "array"
+                                 },
+                       "kyc_aml_boundary":  {
+                                                "type":  "string",
+                                                "description":  "KYC/AML boundary"
+                                            },
+                       "risk_status":  {
+                                           "type":  "string",
+                                           "description":  "low, medium, high, blocked"
+                                       },
+                       "runtime_mode":  {
+                                            "type":  "string",
+                                            "description":  "simulation only, regulated future"
+                                        }
+                   }
+}

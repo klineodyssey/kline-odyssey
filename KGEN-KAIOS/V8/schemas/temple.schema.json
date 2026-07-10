@@ -1,0 +1,58 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Temple",
+    "type":  "object",
+    "required":  [
+                     "temple_id",
+                     "picture_id",
+                     "level",
+                     "runtime_status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "temple_id":  {
+                                         "type":  "string",
+                                         "description":  "Temple identifier"
+                                     },
+                       "picture_id":  {
+                                          "type":  "string",
+                                          "description":  "Source picture"
+                                      },
+                       "land_id":  {
+                                       "type":  "string",
+                                       "description":  "Linked land"
+                                   },
+                       "ai_id":  {
+                                     "type":  "string",
+                                     "description":  "AI organ"
+                                 },
+                       "dna_id":  {
+                                      "type":  "string",
+                                      "description":  "DNA record"
+                                  },
+                       "level":  {
+                                     "type":  "number",
+                                     "description":  "Temple level"
+                                 },
+                       "skills":  {
+                                      "description":  "Skill list",
+                                      "items":  {
+                                                    "type":  "string"
+                                                },
+                                      "type":  "array"
+                                  },
+                       "governance":  {
+                                          "additionalProperties":  true,
+                                          "description":  "Governance state",
+                                          "type":  "object"
+                                      },
+                       "runtime_status":  {
+                                              "type":  "string",
+                                              "description":  "concept, prototype, production"
+                                          },
+                       "real_world_link_id":  {
+                                                  "type":  "string",
+                                                  "description":  "Optional real-world link"
+                                              }
+                   }
+}

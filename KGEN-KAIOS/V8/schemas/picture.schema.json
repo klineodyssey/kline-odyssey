@@ -1,0 +1,53 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Picture",
+    "type":  "object",
+    "required":  [
+                     "picture_id",
+                     "image_hash",
+                     "visual_description",
+                     "suggested_temple_type"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "picture_id":  {
+                                          "type":  "string",
+                                          "description":  "Picture identifier"
+                                      },
+                       "image_hash":  {
+                                          "type":  "string",
+                                          "description":  "Image content hash"
+                                      },
+                       "ipfs_uri":  {
+                                        "type":  "string",
+                                        "description":  "Optional IPFS URI"
+                                    },
+                       "arweave_uri":  {
+                                           "type":  "string",
+                                           "description":  "Optional Arweave URI"
+                                       },
+                       "visual_description":  {
+                                                  "type":  "string",
+                                                  "description":  "Human-readable description"
+                                              },
+                       "suggested_temple_type":  {
+                                                     "type":  "string",
+                                                     "description":  "Temple suggestion"
+                                                 },
+                       "suggested_civilization_attribute":  {
+                                                                "type":  "string",
+                                                                "description":  "Civilization attribute"
+                                                            },
+                       "suggested_land_requirement":  {
+                                                          "type":  "string",
+                                                          "description":  "Land requirement"
+                                                      },
+                       "generated_workorders":  {
+                                                    "description":  "Generated WorkOrder IDs",
+                                                    "items":  {
+                                                                  "type":  "string"
+                                                              },
+                                                    "type":  "array"
+                                                }
+                   }
+}

@@ -1,0 +1,19 @@
+{
+    "virtual_twin_id":  "rwl-demo-001",
+    "business_owner":  "demo-owner",
+    "legal_entity":  "Fictional Demo Entity Ltd.",
+    "store_address":  "Fictional Address, KGEN Demo City",
+    "catalog_adapter":  "demo-catalog-json",
+    "inventory_adapter":  "demo-inventory-json",
+    "pricing_adapter":  "demo-pricing-json",
+    "payment_adapter":  "simulation-only",
+    "order_adapter":  "demo-order-json",
+    "delivery_adapter":  "demo-delivery-json",
+    "membership_adapter":  "demo-member-json",
+    "loyalty_adapter":  "demo-loyalty-json",
+    "tax_adapter":  "not-connected",
+    "audit_log":  [
+                      "audit-demo-001"
+                  ],
+    "authorization_status":  "pending"
+}

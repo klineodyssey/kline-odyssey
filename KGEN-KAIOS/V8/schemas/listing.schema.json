@@ -1,0 +1,105 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Listing",
+    "type":  "object",
+    "required":  [
+                     "listing_id",
+                     "asset_type",
+                     "asset_id",
+                     "seller",
+                     "market_class",
+                     "status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "listing_id":  {
+                                          "type":  "string",
+                                          "description":  "Listing identifier"
+                                      },
+                       "asset_type":  {
+                                          "type":  "string",
+                                          "description":  "Land, Temple, Building, Store, App, AI, DNA, Membership, VirtualBusinessTwin"
+                                      },
+                       "asset_id":  {
+                                        "type":  "string",
+                                        "description":  "Asset identifier"
+                                    },
+                       "seller":  {
+                                      "type":  "string",
+                                      "description":  "Seller"
+                                  },
+                       "ownership_proof":  {
+                                               "type":  "string",
+                                               "description":  "Proof reference"
+                                           },
+                       "metadata":  {
+                                        "additionalProperties":  true,
+                                        "description":  "Metadata",
+                                        "type":  "object"
+                                    },
+                       "valuation":  {
+                                         "additionalProperties":  true,
+                                         "description":  "Valuation",
+                                         "type":  "object"
+                                     },
+                       "pricing_model":  {
+                                             "additionalProperties":  true,
+                                             "description":  "Pricing",
+                                             "type":  "object"
+                                         },
+                       "disclosure":  {
+                                          "type":  "string",
+                                          "description":  "Disclosure"
+                                      },
+                       "risk":  {
+                                    "description":  "Risks",
+                                    "items":  {
+                                                  "type":  "string"
+                                              },
+                                    "type":  "array"
+                                },
+                       "transfer_rules":  {
+                                              "description":  "Transfer rules",
+                                              "items":  {
+                                                            "type":  "string"
+                                                        },
+                                              "type":  "array"
+                                          },
+                       "rental_rules":  {
+                                            "description":  "Rental rules",
+                                            "items":  {
+                                                          "type":  "string"
+                                                      },
+                                            "type":  "array"
+                                        },
+                       "delisting":  {
+                                         "description":  "Delisting rules",
+                                         "items":  {
+                                                       "type":  "string"
+                                                   },
+                                         "type":  "array"
+                                     },
+                       "dispute":  {
+                                       "description":  "Dispute process",
+                                       "items":  {
+                                                     "type":  "string"
+                                                 },
+                                       "type":  "array"
+                                   },
+                       "legal_restrictions":  {
+                                                  "description":  "Legal restrictions",
+                                                  "items":  {
+                                                                "type":  "string"
+                                                            },
+                                                  "type":  "array"
+                                              },
+                       "market_class":  {
+                                            "type":  "string",
+                                            "description":  "A/B/C/D"
+                                        },
+                       "status":  {
+                                      "type":  "string",
+                                      "description":  "draft, review, listed, suspended, delisted"
+                                  }
+                   }
+}

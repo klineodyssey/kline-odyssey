@@ -1,0 +1,54 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Land",
+    "type":  "object",
+    "required":  [
+                     "land_id",
+                     "owner",
+                     "coordinates",
+                     "development_stage"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "land_id":  {
+                                       "type":  "string",
+                                       "description":  "Land identifier"
+                                   },
+                       "owner":  {
+                                     "type":  "string",
+                                     "description":  "Owner"
+                                 },
+                       "coordinates":  {
+                                           "additionalProperties":  true,
+                                           "description":  "x/y/z/c/t/ct coordinate object",
+                                           "type":  "object"
+                                       },
+                       "land_type":  {
+                                         "type":  "string",
+                                         "description":  "Wild, Claimed, Developed"
+                                     },
+                       "zoning":  {
+                                      "type":  "string",
+                                      "description":  "Residential, Commercial, Temple, Industrial, Mixed"
+                                  },
+                       "build_permissions":  {
+                                                 "description":  "Allowed build types",
+                                                 "items":  {
+                                                               "type":  "string"
+                                                           },
+                                                 "type":  "array"
+                                             },
+                       "market_value":  {
+                                            "type":  "number",
+                                            "description":  "Game market value"
+                                        },
+                       "rental_state":  {
+                                            "type":  "string",
+                                            "description":  "none, rentable, rented"
+                                        },
+                       "development_stage":  {
+                                                 "type":  "string",
+                                                 "description":  "Lifecycle stage"
+                                             }
+                   }
+}

@@ -1,0 +1,62 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Exchange",
+    "type":  "object",
+    "required":  [
+                     "exchange_id",
+                     "name",
+                     "supported_assets"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "exchange_id":  {
+                                           "type":  "string",
+                                           "description":  "Exchange identifier"
+                                       },
+                       "name":  {
+                                    "type":  "string",
+                                    "description":  "Exchange official name"
+                                },
+                       "supported_assets":  {
+                                                "description":  "Supported asset classes",
+                                                "items":  {
+                                                              "type":  "string"
+                                                          },
+                                                "type":  "array"
+                                            },
+                       "order_modes":  {
+                                           "description":  "OrderBook, AMM, FixedPrice, Auction, Rental",
+                                           "items":  {
+                                                         "type":  "string"
+                                                     },
+                                           "type":  "array"
+                                       },
+                       "fee_model":  {
+                                         "additionalProperties":  true,
+                                         "description":  "Fee model",
+                                         "type":  "object"
+                                     },
+                       "escrow":  {
+                                      "additionalProperties":  true,
+                                      "description":  "Escrow boundary",
+                                      "type":  "object"
+                                  },
+                       "settlement":  {
+                                          "additionalProperties":  true,
+                                          "description":  "Settlement boundary",
+                                          "type":  "object"
+                                      },
+                       "dispute":  {
+                                       "additionalProperties":  true,
+                                       "description":  "Dispute process",
+                                       "type":  "object"
+                                   },
+                       "legal_boundary":  {
+                                              "description":  "Legal boundary notes",
+                                              "items":  {
+                                                            "type":  "string"
+                                                        },
+                                              "type":  "array"
+                                          }
+                   }
+}

@@ -1,0 +1,63 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Business",
+    "type":  "object",
+    "required":  [
+                     "business_id",
+                     "business_type",
+                     "authorization_status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "business_id":  {
+                                           "type":  "string",
+                                           "description":  "Business identifier"
+                                       },
+                       "building_id":  {
+                                           "type":  "string",
+                                           "description":  "Linked building"
+                                       },
+                       "business_type":  {
+                                             "type":  "string",
+                                             "description":  "Clothing, Restaurant, ConvenienceStoreType, Mall, BankBranch, ServiceCounter"
+                                         },
+                       "legal_entity":  {
+                                            "type":  "string",
+                                            "description":  "Legal entity"
+                                        },
+                       "brand":  {
+                                     "type":  "string",
+                                     "description":  "Brand or fictional demo brand"
+                                 },
+                       "catalog":  {
+                                       "description":  "Product or service list",
+                                       "items":  {
+                                                     "type":  "string"
+                                                 },
+                                       "type":  "array"
+                                   },
+                       "inventory_adapter":  {
+                                                 "type":  "string",
+                                                 "description":  "Inventory adapter"
+                                             },
+                       "payment_adapter":  {
+                                               "type":  "string",
+                                               "description":  "Payment adapter"
+                                           },
+                       "membership_adapter":  {
+                                                  "type":  "string",
+                                                  "description":  "Membership adapter"
+                                              },
+                       "authorization_status":  {
+                                                    "type":  "string",
+                                                    "description":  "unauthorized, pending, approved, suspended"
+                                                },
+                       "compliance_notes":  {
+                                                "description":  "Legal and regulatory notes",
+                                                "items":  {
+                                                              "type":  "string"
+                                                          },
+                                                "type":  "array"
+                                            }
+                   }
+}

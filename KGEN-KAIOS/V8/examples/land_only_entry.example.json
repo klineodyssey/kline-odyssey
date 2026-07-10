@@ -1,0 +1,22 @@
+{
+    "land_id":  "land-demo-001",
+    "owner":  "player-demo-land-001",
+    "coordinates":  {
+                        "x":  12345,
+                        "y":  0,
+                        "z":  1,
+                        "c":  "KGEN",
+                        "t":  "T0",
+                        "ct":  "CT0"
+                    },
+    "land_type":  "Claimed",
+    "zoning":  "Mixed",
+    "build_permissions":  [
+                              "Residence",
+                              "Store",
+                              "Temple"
+                          ],
+    "market_value":  11520,
+    "rental_state":  "rentable",
+    "development_stage":  "Claimed Land"
+}

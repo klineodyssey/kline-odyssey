@@ -1,0 +1,95 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Task Generator WorkOrder",
+    "type":  "object",
+    "required":  [
+                     "task_id",
+                     "parent_asset_id",
+                     "owner",
+                     "reviewer",
+                     "priority",
+                     "status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "task_id":  {
+                                       "type":  "string",
+                                       "description":  "Task identifier"
+                                   },
+                       "parent_asset_id":  {
+                                               "type":  "string",
+                                               "description":  "Parent asset"
+                                           },
+                       "owner":  {
+                                     "type":  "string",
+                                     "description":  "Worker owner"
+                                 },
+                       "reviewer":  {
+                                        "type":  "string",
+                                        "description":  "Reviewer"
+                                    },
+                       "priority":  {
+                                        "type":  "string",
+                                        "description":  "P0-P4"
+                                    },
+                       "dependencies":  {
+                                            "description":  "Dependencies",
+                                            "items":  {
+                                                          "type":  "string"
+                                                      },
+                                            "type":  "array"
+                                        },
+                       "input_files":  {
+                                           "description":  "Input files",
+                                           "items":  {
+                                                         "type":  "string"
+                                                     },
+                                           "type":  "array"
+                                       },
+                       "expected_outputs":  {
+                                                "description":  "Expected outputs",
+                                                "items":  {
+                                                              "type":  "string"
+                                                          },
+                                                "type":  "array"
+                                            },
+                       "acceptance_criteria":  {
+                                                   "description":  "Acceptance criteria",
+                                                   "items":  {
+                                                                 "type":  "string"
+                                                             },
+                                                   "type":  "array"
+                                               },
+                       "protected_paths":  {
+                                               "description":  "Protected paths",
+                                               "items":  {
+                                                             "type":  "string"
+                                                         },
+                                               "type":  "array"
+                                           },
+                       "branch":  {
+                                      "type":  "string",
+                                      "description":  "handoff branch"
+                                  },
+                       "base_commit":  {
+                                           "type":  "string",
+                                           "description":  "Base commit"
+                                       },
+                       "report_path":  {
+                                           "type":  "string",
+                                           "description":  "Report path"
+                                       },
+                       "legal_review_required":  {
+                                                     "type":  "boolean",
+                                                     "description":  "Legal review required"
+                                                 },
+                       "security_review_required":  {
+                                                        "type":  "boolean",
+                                                        "description":  "Security review required"
+                                                    },
+                       "status":  {
+                                      "type":  "string",
+                                      "description":  "OPEN, CLAIMED, IN_PROGRESS, REVIEW, DONE, BLOCKED, REJECTED"
+                                  }
+                   }
+}

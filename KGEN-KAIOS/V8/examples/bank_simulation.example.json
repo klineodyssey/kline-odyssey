@@ -1,0 +1,35 @@
+{
+    "bank_id":  "bank-demo-001",
+    "owner":  "temple-demo-001",
+    "balance":  72000000,
+    "treasury":  {
+                     "reserve_ratio":  0.3
+                 },
+    "deposit":  {
+                    "mode":  "simulation"
+                },
+    "loan":  {
+                 "enabled":  false
+             },
+    "collateral":  {
+                       "required":  true
+                   },
+    "interest":  {
+                     "model":  "simulation"
+                 },
+    "credit":  {
+                   "score":  "demo"
+               },
+    "insurance":  {
+                      "licensed":  false
+                  },
+    "reserve":  {
+                    "asset":  "KGEN-simulated"
+                },
+    "audit":  [
+                  "audit-bank-demo-001"
+              ],
+    "kyc_aml_boundary":  "required before regulated production",
+    "risk_status":  "medium",
+    "runtime_mode":  "simulation only"
+}

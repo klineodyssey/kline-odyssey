@@ -1,0 +1,60 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Transaction",
+    "type":  "object",
+    "required":  [
+                     "tx_id",
+                     "from",
+                     "to",
+                     "asset_type",
+                     "asset_id",
+                     "amount",
+                     "status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "tx_id":  {
+                                     "type":  "string",
+                                     "description":  "Transaction identifier"
+                                 },
+                       "from":  {
+                                    "type":  "string",
+                                    "description":  "Sender"
+                                },
+                       "to":  {
+                                  "type":  "string",
+                                  "description":  "Receiver"
+                              },
+                       "asset_type":  {
+                                          "type":  "string",
+                                          "description":  "Asset type"
+                                      },
+                       "asset_id":  {
+                                        "type":  "string",
+                                        "description":  "Asset identifier"
+                                    },
+                       "amount":  {
+                                      "type":  "number",
+                                      "description":  "Amount"
+                                  },
+                       "currency":  {
+                                        "type":  "string",
+                                        "description":  "KGEN or simulated unit"
+                                    },
+                       "settlement_state":  {
+                                                "type":  "string",
+                                                "description":  "pending, settled, disputed"
+                                            },
+                       "audit_log":  {
+                                         "description":  "Audit IDs",
+                                         "items":  {
+                                                       "type":  "string"
+                                                   },
+                                         "type":  "array"
+                                     },
+                       "status":  {
+                                      "type":  "string",
+                                      "description":  "draft, pending, completed, disputed, reversed"
+                                  }
+                   }
+}

@@ -1,0 +1,28 @@
+{
+    "player_id":  "player-demo-picture-001",
+    "wallet":  "demo-wallet-001",
+    "name":  "Picture Starter",
+    "avatar":  "",
+    "entry_assets":  [
+                         "picture"
+                     ],
+    "status":  "active",
+    "legal_boundary":  [
+                           "Concept only"
+                       ],
+    "picture":  {
+                    "picture_id":  "pic-demo-001",
+                    "image_hash":  "sha256-demo-blueprint",
+                    "ipfs_uri":  "",
+                    "arweave_uri":  "",
+                    "visual_description":  "Floating temple city with land, bank, mall, exchange and convenience-store type node",
+                    "suggested_temple_type":  "Civilization Finance Temple",
+                    "suggested_civilization_attribute":  "Commerce / Governance",
+                    "suggested_land_requirement":  "Mixed-use land with temple and commercial zoning",
+                    "generated_workorders":  [
+                                                 "V8-P0",
+                                                 "V8-P1",
+                                                 "V8-P3"
+                                             ]
+                }
+}

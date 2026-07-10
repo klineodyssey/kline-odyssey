@@ -1,0 +1,48 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Player",
+    "type":  "object",
+    "required":  [
+                     "player_id",
+                     "wallet",
+                     "entry_assets",
+                     "status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "player_id":  {
+                                         "type":  "string",
+                                         "description":  "Player identifier"
+                                     },
+                       "wallet":  {
+                                      "type":  "string",
+                                      "description":  "Wallet or account reference"
+                                  },
+                       "name":  {
+                                    "type":  "string",
+                                    "description":  "Display name"
+                                },
+                       "avatar":  {
+                                      "type":  "string",
+                                      "description":  "Avatar URI"
+                                  },
+                       "entry_assets":  {
+                                            "description":  "Initial assets owned by player",
+                                            "items":  {
+                                                          "type":  "string"
+                                                      },
+                                            "type":  "array"
+                                        },
+                       "status":  {
+                                      "type":  "string",
+                                      "description":  "active, review, suspended"
+                                  },
+                       "legal_boundary":  {
+                                              "description":  "Compliance notes",
+                                              "items":  {
+                                                            "type":  "string"
+                                                        },
+                                              "type":  "array"
+                                          }
+                   }
+}

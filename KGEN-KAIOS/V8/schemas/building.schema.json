@@ -1,0 +1,48 @@
+{
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "KAIOS V8 Building",
+    "type":  "object",
+    "required":  [
+                     "building_id",
+                     "land_id",
+                     "building_type",
+                     "status"
+                 ],
+    "additionalProperties":  true,
+    "properties":  {
+                       "building_id":  {
+                                           "type":  "string",
+                                           "description":  "Building identifier"
+                                       },
+                       "land_id":  {
+                                       "type":  "string",
+                                       "description":  "Linked land"
+                                   },
+                       "building_type":  {
+                                             "type":  "string",
+                                             "description":  "Residence, Store, Bank, Exchange, Warehouse, Factory, ServiceNode"
+                                         },
+                       "level":  {
+                                     "type":  "number",
+                                     "description":  "Building level"
+                                 },
+                       "status":  {
+                                      "type":  "string",
+                                      "description":  "concept, active, suspended"
+                                  },
+                       "organs":  {
+                                      "description":  "Functional organs",
+                                      "items":  {
+                                                    "type":  "string"
+                                                },
+                                      "type":  "array"
+                                  },
+                       "upgrade_path":  {
+                                            "description":  "Allowed upgrades",
+                                            "items":  {
+                                                          "type":  "string"
+                                                      },
+                                            "type":  "array"
+                                        }
+                   }
+}
