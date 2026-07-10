@@ -7,7 +7,7 @@
 
 | Task ID | Expected Report | Owner | Reviewer | Status |
 |---|---|---|---|---|
-| KAIOS-DRYRUN-001 | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` | Cursor | Codex | Pending Cursor execution |
+| KAIOS-DRYRUN-001 | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` | Cursor | Codex | REVIEW |
 
 ## Report Rules
 

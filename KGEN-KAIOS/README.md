@@ -70,7 +70,7 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 
 | Task ID | Status | Owner | Reviewer | Branch | Output Report |
 |---|---|---|---|---|---|
-| KAIOS-DRYRUN-001 | OPEN | Cursor | Codex | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
+| KAIOS-DRYRUN-001 | REVIEW | Cursor | Codex | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
 ## Worker Types Supported
 
 - Codex
