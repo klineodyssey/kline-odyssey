@@ -3,6 +3,6 @@
   "version": "V10.0",
   "status": "Draft for Review",
   "layers": ["Browser", "Portal", "Frontend", "API Gateway", "Service Layer", "Runtime", "Blockchain", "Storage", "Analytics", "AI Company"],
-  "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md", "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "docs/physics/final-whitepaper/", "KGEN/contracts/KGEN_Token_V7_5_2.sol"],
+  "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "docs/physics/final-whitepaper/", "KGEN/contracts/KGEN_Token_V7_5_2.sol"],
   "forbidden_actions": ["real_bank", "real_kyc", "real_payment", "token_transfer", "github_token_commit", "metamask_signing", "contract_deploy"]
 }

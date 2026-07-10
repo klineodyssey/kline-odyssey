@@ -22,7 +22,7 @@
 ## Dependencies
 
 - `README.md`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`
 - `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf`
@@ -146,7 +146,7 @@ KGEN Cosmic OS Runtime 是 KGEN Runtime Library V1.0 的正式運作文件。本
 
 ## Chapter 4 / Source Authority
 
-本 Runtime 依序服從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md、Runtime CURRENT、Universe Map、AGENTS.md、Genesis Library、V4.0 Final Whitepaper 與 KGEN V7.5.2 合約。若本冊與上層來源衝突，以上層來源為準。
+本 Runtime 依序服從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md、Runtime CURRENT、Universe Map、AGENTS.md、Genesis Library、V4.0 Final Whitepaper 與 KGEN V7.5.2 合約。若本冊與上層來源衝突，以上層來源為準。
 
 ## Chapter 5 / Architecture
 

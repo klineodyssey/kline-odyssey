@@ -500,7 +500,7 @@ Mode: AUTOPILOT V1.0 documentation only
 | C:\Desktop\kline-odyssey\neural\README.md | Markdown, Neural | Repository document/config. | NORMAL | 112 |
 | C:\Desktop\kline-odyssey\neural\RUNTIME_DEPENDENCY.json | Runtime, JSON, Neural | Runtime file/documentation. | NORMAL | 4753 |
 | C:\Desktop\kline-odyssey\PACKAGE_MANIFEST.txt | Repository | Repository document/config. | NORMAL | 7681 |
-| C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md | Boot, Markdown | ?? Boot V1.4 entry. | DO_NOT_MODIFY | 17040 |
+| C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md | Boot, Markdown | ?? Boot V1.4 entry. | DO_NOT_MODIFY | 17040 |
 | C:\Desktop\kline-odyssey\README.handbook.md | Markdown | Repository document/config. | NORMAL | 1101 |
 | C:\Desktop\kline-odyssey\README.md | Markdown | Repository document/config. | NORMAL | 27062 |
 | C:\Desktop\kline-odyssey\README_V10_30_MASTER_STABLE.md | Markdown | Repository document/config. | NORMAL | 569 |
@@ -647,7 +647,7 @@ These files are frontend/game runtime modules. They do not replace the formal Un
 
 | Formal area | Formal file/path | V0.2 registration rule |
 |---|---|---|
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | Do not modify. Boot V1.4 remains the only boot entrance. |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Do not modify. Boot V1.4 remains the only boot entrance. |
 | Universe Physics Runtime CURRENT | `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md` | Do not modify. V0.2 runtime modules are subordinate frontend/game modules only. |
 | Temple 12345 | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345` | Do not modify wallet, bridge, Heart runtime, or formal 12345 runtime files. |
 | Contracts | `C:\Desktop\kline-odyssey\KGEN\contracts` | Do not modify contracts during V0.2 documentation registration. |

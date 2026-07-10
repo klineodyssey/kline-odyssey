@@ -2,6 +2,9 @@
 
 KGEN Agent Office is the **daily operations desk** for Codex and Cursor inside the KLINE ODYSSEY repository. It owns protected-path discipline (`DO_NOT_TOUCH.md`), onboarding prompts, and legacy handoff templates.
 
+**Stable Boot Entry:** `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+**Public Operating Center:** https://klineodyssey.github.io/kline-odyssey/operating-center/
+
 > **Routing (ORG-P2-003 D2 KEEP):**
 > Live company operating system = [`KGEN-AI-Company/`](../KGEN-AI-Company/README.md)
 > Agent Office does **not** replace AI Company. Agent Office supports protected paths, prompts, and archaeology.
@@ -27,14 +30,15 @@ Live Codex-managed Cursor work runs through **KGEN AI Company Automation V5.0+**
 
 Every time Cursor starts work, it must read these files in order:
 
-1. `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
-2. `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
-3. `KGEN-AI-Company/CURSOR_POLLING_RULES.md`
-4. `KGEN-Organization/WorkOrders/WORK_QUEUE.md` *(live queue)*
-5. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
-6. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md` *(prompt discipline)*
-7. `KGEN-Canon/KGEN_CANON_MASTER.json`
-8. `KGEN_MASTER_LIBRARY_INDEX.md`
+1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+2. `KGEN-Canon/KGEN_CANON_MASTER.json`
+3. `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
+4. `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
+5. `KGEN-AI-Company/CURSOR_POLLING_RULES.md`
+6. `KGEN-Organization/WorkOrders/WORK_QUEUE.md` *(live queue)*
+7. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+8. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md` *(prompt discipline)*
+9. `KGEN_MASTER_LIBRARY_INDEX.md`
 
 Do **not** treat `CURSOR_WORK_QUEUE.md` as a live task source. It is SUPERSEDED (ORG-P2-003A).
 
@@ -56,5 +60,5 @@ Do **not** treat `CURSOR_WORK_QUEUE.md` as a live task source. It is SUPERSEDED 
 
 ## Governance
 
-Agent Office extends Genesis Library, Runtime Library, SDK Library, and Machine-Readable Canon. It does not replace Canon, Runtime CURRENT, Boot V1.4, contracts, wallet, bridge, or existing temple runtimes.
+Agent Office extends Genesis Library, Runtime Library, SDK Library, and Machine-Readable Canon. It does not replace Canon, Runtime CURRENT, Boot CURRENT, contracts, wallet, bridge, or existing temple runtimes.
 

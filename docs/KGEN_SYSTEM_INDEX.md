@@ -1,8 +1,8 @@
-﻿# KGEN System Index
+# KGEN System Index
 
 Generated: 2026-07-05 12:23:08 +08:00
 Root: C:\Desktop\kline-odyssey
-Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 This file is a global KGEN system index generated under Boot Sequence V1.4. It is an index document only; it does not change runtime behavior.
 
@@ -19,7 +19,7 @@ Rules:
 
 ## Boot Sequence Governance
 
-The only boot entry is PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md.
+The only boot entry is PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md.
 All future work must resolve system truth in this order:
 
 1. Boot V1.4
@@ -51,7 +51,7 @@ All future work must resolve system truth in this order:
 
 | 分類 | 完整路徑 | 用途 | 直接修改規則 | 唯一正式版本 |
 |---|---|---|---|---|
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
 | Runtime | `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md` | 唯一現行宇宙物理 Runtime 憲章；K-index、Territory、LandNFT、KGEN/BNB 質量規則來源。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 唯一正式 Physics Runtime CURRENT |
 | Markdown | `C:\Desktop\kline-odyssey\docs\Whitepaper\PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md` | KGEN 多重宇宙、App 生命體、Price=Coordinate、Market=Gravity 的主白皮書。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 唯一正式 PrimeForge Multiverse Whitepaper |
 | Runtime | `C:\Desktop\kline-odyssey\docs\spec\KGEN_Runtime_Specification_V1_0.md` | Cursor / 前端實作規格；JSON Runtime Loader、Territory、LandNFT、Universe Map Renderer。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 唯一正式 Runtime Specification |
@@ -200,7 +200,7 @@ All future work must resolve system truth in this order:
 | Runtime | `C:\Desktop\kline-odyssey\neural\NEURAL_MAP.json` | 全域神經地圖索引；記錄 must-read、節點與 source-of-truth 連結。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 正式 Neural Map 索引 |
 | Runtime | `C:\Desktop\kline-odyssey\neural\ORGAN_INDEX.json` | Runtime 器官索引；記錄 official runtime-* 與 legacy kgen-12345-* 的對應。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 正式 Organ Index 索引 |
 | Runtime | `C:\Desktop\kline-odyssey\neural\RUNTIME_DEPENDENCY.json` | Runtime 載入順序與 12345 Temple 實際依賴記錄。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 正式 Runtime Dependency 索引 |
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
 | Support | `C:\Desktop\kline-odyssey\SHA256SUMS.txt` | 聲音、字幕或文字內容資產。 | 不可單點直接改；需同步 manifest/genome/hash/依賴。 | 非唯一或支援檔 |
 | Support | `C:\Desktop\kline-odyssey\SHA256SUMS_V10_30_MASTER_STABLE.txt` | 聲音、字幕或文字內容資產。 | 不可單點直接改；需同步 manifest/genome/hash/依賴。 | 非唯一或支援檔 |
 | Runtime | `C:\Desktop\kline-odyssey\SOP\PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md` | PrimeForge Runtime 建造、命名、DNA、Self-Healing 與成長流程 SOP。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 唯一正式 Genesis Runtime SOP |
@@ -667,7 +667,7 @@ All future work must resolve system truth in this order:
 | Runtime | `C:\Desktop\kline-odyssey\neural\README.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Runtime | `C:\Desktop\kline-odyssey\neural\RUNTIME_DEPENDENCY.json` | Runtime 載入順序與 12345 Temple 實際依賴記錄。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 正式 Runtime Dependency 索引 |
 | JSON | `C:\Desktop\kline-odyssey\PACKAGE_MANIFEST.txt` | 聲音、字幕或文字內容資產。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
 | Markdown | `C:\Desktop\kline-odyssey\README.handbook.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Markdown | `C:\Desktop\kline-odyssey\README.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Markdown | `C:\Desktop\kline-odyssey\README_V10_30_MASTER_STABLE.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
@@ -761,7 +761,7 @@ All future work must resolve system truth in this order:
 
 ## KGEN Permanent Knowledge Base Registration - 2026-07-05
 
-Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 The following permanent KGEN knowledge-base files were created from a Boot V1.4 repository scan. They are documentation/governance files only; no program source is modified by this registration.
 

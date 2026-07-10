@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V9.0 Civilization AI Engine
-**Status:** Draft for Review / AI Decision Prototype
+**Version:** V10.0 Operating System
+**Status:** Active / Read-only Operating Center
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -11,6 +11,16 @@
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.
 
 KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machine Canon, Genesis Library, Runtime Library, and SDK Library. It does not replace them. It gives them a working operating model.
+
+## Permanent Public Entries
+
+| Entry | URL | Purpose |
+|---|---|---|
+| KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ | Stable public control center for KAIOS and AI Company |
+| KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
+| AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
+| WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
+| PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |
 
 ## Architecture First Rule
 
@@ -351,7 +361,8 @@ KAIOS V10 does not modify:
 - `K線西遊記/temples/12345`
 - `wallet`
 - `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` as preserved ancestor history
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper/`
 - `KGEN/contracts/KGEN_Token_V7_5_2.sol`

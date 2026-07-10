@@ -10,7 +10,7 @@ V8 work must not modify:
 - `K線西遊記/temples/12345`
 - `wallet`
 - `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper/`
 - `KGEN/contracts/KGEN_Token_V7_5_2.sol`

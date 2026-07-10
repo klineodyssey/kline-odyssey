@@ -14,7 +14,7 @@
       "github_path": "KGEN-Runtime/COS-001_Cosmic_OS/KGEN_Cosmic_OS_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -58,7 +58,7 @@
       "github_path": "KGEN-Runtime/COS-002_App_Organism/KGEN_App_Organism_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -102,7 +102,7 @@
       "github_path": "KGEN-Runtime/COS-003_Temple_Runtime/KGEN_Temple_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -146,7 +146,7 @@
       "github_path": "KGEN-Runtime/COS-004_Land_Runtime/KGEN_Land_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -190,7 +190,7 @@
       "github_path": "KGEN-Runtime/COS-005_AI_Runtime/KGEN_AI_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -234,7 +234,7 @@
       "github_path": "KGEN-Runtime/COS-006_Economy_Runtime/KGEN_Economy_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -278,7 +278,7 @@
       "github_path": "KGEN-Runtime/COS-007_Quest_Runtime/KGEN_Quest_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -322,7 +322,7 @@
       "github_path": "KGEN-Runtime/COS-008_Combat_Runtime/KGEN_Combat_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -366,7 +366,7 @@
       "github_path": "KGEN-Runtime/COS-009_Governance_Runtime/KGEN_Governance_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
@@ -410,7 +410,7 @@
       "github_path": "KGEN-Runtime/COS-010_Developer_API/KGEN_Developer_API_Runtime_V1.0.md",
       "dependencies": [
         "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
         "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
         "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
         "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",

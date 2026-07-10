@@ -29,6 +29,8 @@ Last optimized: 2026-06-11
 | Project Name | KLINE GENESIS (KGEN) |
 | Project Ecosystem | KLINE ODYSSEY |
 | Official Website | https://klineodyssey.github.io/kline-odyssey/ |
+| KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
+| PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
 | BscScan Token Page | https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be |
@@ -68,6 +70,10 @@ KGEN official documentation is organized into Canon-first libraries for public r
 
 | Library | GitHub Path | GitHub Pages |
 |---|---|---|
+| PrimeForge Boot CURRENT | [PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md](PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md) | https://klineodyssey.github.io/kline-odyssey/boot/ |
+| KGEN Operating Center | [operating-center/](operating-center/) | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
+| WorkQueue | [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md) | https://klineodyssey.github.io/kline-odyssey/workqueue/ |
+| AI Company | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/ai-company/ |
 | Genesis Library | [KGEN-Genesis/](KGEN-Genesis/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md |
 | Runtime Library | [KGEN-Runtime/](KGEN-Runtime/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md |
 | SDK Library | [KGEN-SDK/](KGEN-SDK/) | https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md |
@@ -83,6 +89,12 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V9.0 Civilization AI Engine | [KGEN-KAIOS/V9.0/](KGEN-KAIOS/V9.0/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/ |
 | KAIOS V9.1 AI WorkOrder Review Loop | [KGEN-KAIOS/V9.1/](KGEN-KAIOS/V9.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/ |
 | KAIOS V9.2 Approved Draft Sync | [KGEN-KAIOS/V9.2/](KGEN-KAIOS/V9.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/ |
+| Civilization | [civilization/](civilization/) | https://klineodyssey.github.io/kline-odyssey/civilization/ |
+| Economy Engine | [economy/](economy/) | https://klineodyssey.github.io/kline-odyssey/economy/ |
+| Exchange 11520 | [exchange/](exchange/) | https://klineodyssey.github.io/kline-odyssey/exchange/ |
+| Wallet | [wallet/](wallet/) | https://klineodyssey.github.io/kline-odyssey/wallet/ |
+| Membership | [membership/](membership/) | https://klineodyssey.github.io/kline-odyssey/membership/ |
+| Master Library Portal | [library/](library/) | https://klineodyssey.github.io/kline-odyssey/library/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -386,7 +398,7 @@ KGEN (KLINE GENESIS) is a decentralized digital asset deployed on BNB Smart Chai
 <!-- Official Entry (Top-Right) -->
 <div style="position:sticky; top:10px; z-index:9999; display:flex; justify-content:flex-end; margin:10px 0;">
   
-<a href="https://github.com/klineodyssey/kline-odyssey/blob/main/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+<a href="https://klineodyssey.github.io/kline-odyssey/boot/"
    target="_blank"
    rel="noopener"
    style="

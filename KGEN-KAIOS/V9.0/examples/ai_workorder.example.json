@@ -8,7 +8,7 @@
   "input_state": ["Resource State", "Governance Signals", "Event Stream"],
   "expected_output": "Draft report recommending resource reserve stabilization options.",
   "acceptance_criteria": ["No protected paths modified.", "All recommendations remain simulation-only.", "Codex Review required before OPEN."],
-  "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md", "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "docs/physics/final-whitepaper/", "KGEN/contracts/KGEN_Token_V7_5_2.sol"],
+  "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "docs/physics/final-whitepaper/", "KGEN/contracts/KGEN_Token_V7_5_2.sol"],
   "owner_suggestion": "Cursor",
   "reviewer": "Codex",
   "branch_pattern": "cursor-handoff/V9-DRYRUN-001A",
