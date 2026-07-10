@@ -62,3 +62,18 @@ GitHub Pages entry:
 Read-only dashboard:
 
 `https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/`
+
+## Release Summary
+
+| Metric | Value |
+|---|---:|
+| Schemas | 9 |
+| Examples | 9 |
+| Runtime documents | 8 |
+| V9 DRAFT WorkOrders reviewed | 3 |
+| Promote decisions | 1 |
+| Revision decisions | 1 |
+| Rejected / blocked decisions | 1 |
+| Human Review Required | 0 |
+
+V9.1 is released as a read-only governance layer. It does not execute WorkOrders, deploy contracts, transfer tokens, modify protected paths or merge branches automatically.

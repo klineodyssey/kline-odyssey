@@ -24,6 +24,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
 | KAIOS V8.3 Civilization Time Engine | `KGEN-KAIOS/V8.3/` | World Clock, Simulation Tick, Timeline, citizen and business behavior, temple activity, resource regeneration, event engine, governance response, schemas and read-only viewer |
 | KAIOS V9.0 Civilization AI Engine | `KGEN-KAIOS/V9.0/` | AI observation, reasoning, decision, memory, policy, risk, advisors, draft WorkOrders, Codex review boundary, schemas and read-only dashboard |
+| KAIOS V9.1 AI WorkOrder Review Loop | `KGEN-KAIOS/V9.1/` | AI DRAFT WorkOrder review, promotion, revision, rejection, archive, Human Gate, audit log, schemas and read-only dashboard |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -195,6 +196,32 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Dry Run Report | `KGEN-KAIOS/V9.0/reports/V9-DRYRUN-001_REPORT.md` | AI dry run result |
 | QA Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_QA_REPORT.md` | Baseline V9.0 QA report |
 | Release Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_RELEASE_REPORT.md` | V9.0 release summary and V9.1 recommendation |
+
+## KAIOS V9.1 AI WorkOrder Review Loop
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.1 Index | `KGEN-KAIOS/V9.1/README.md` | V9.1 overview and file map |
+| V9.1 Entry | `KGEN-KAIOS/V9.1/index.html` | Read-only V9.1 public entry |
+| V9.1 Dashboard | `KGEN-KAIOS/V9.1/dashboard/index.html` | Read-only WorkOrder review dashboard |
+| AI WorkOrder Review Loop | `KGEN-KAIOS/V9.1/AI_WORKORDER_REVIEW_LOOP.md` | Formal DRAFT review lifecycle |
+| Draft WorkOrder Standard | `KGEN-KAIOS/V9.1/DRAFT_WORKORDER_STANDARD.md` | Required fields and validation standard |
+| Codex Promotion Protocol | `KGEN-KAIOS/V9.1/CODEX_PROMOTION_PROTOCOL.md` | Codex 15-point promotion checklist |
+| Codex Rejection Protocol | `KGEN-KAIOS/V9.1/CODEX_REJECTION_PROTOCOL.md` | Rejection and archive rules |
+| Codex Revision Protocol | `KGEN-KAIOS/V9.1/CODEX_REVISION_PROTOCOL.md` | Revision request and resubmission rules |
+| Human Review Gate | `KGEN-KAIOS/V9.1/HUMAN_REVIEW_GATE.md` | R3 and Human override review record |
+| Duplicate Detection | `KGEN-KAIOS/V9.1/DUPLICATE_TASK_DETECTION.md` | Duplicate and merge-candidate detection |
+| Dependency Validation | `KGEN-KAIOS/V9.1/DEPENDENCY_VALIDATION.md` | Dependency checks before promotion |
+| Risk Promotion Matrix | `KGEN-KAIOS/V9.1/RISK_PROMOTION_MATRIX.md` | R0-R4 promotion matrix |
+| WorkOrder Archive Standard | `KGEN-KAIOS/V9.1/WORKORDER_ARCHIVE_STANDARD.md` | Archive and retention rules |
+| Schemas | `KGEN-KAIOS/V9.1/schemas/` | Nine V9.1 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.1/examples/` | Nine parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.1/runtime/` | Eight review runtime documents |
+| Reviews | `KGEN-KAIOS/V9.1/reviews/` | Codex decisions for V9.0 DRAFT WorkOrders |
+| Audit Log | `KGEN-KAIOS/V9.1/reports/V9_1_AUDIT_LOG.md` | Review state-transition audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.1/reports/V9_1_DRYRUN_001_REPORT.md` | V9.1 dry run result |
+| QA Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_QA_REPORT.md` | V9.1 QA result |
+| Release Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_RELEASE_REPORT.md` | V9.1 release summary |
 ## Organization V2.0
 
 | Item | Path | Purpose |

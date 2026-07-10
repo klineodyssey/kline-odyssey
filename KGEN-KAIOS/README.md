@@ -231,9 +231,38 @@ V9.0 adds the Civilization AI Engine. It lets AI read Universe State, Civilizati
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
+
+## V9.1 AI WorkOrder Review Loop
+
+V9.1 adds the formal review loop for AI-generated DRAFT WorkOrders. It prevents AI from directly promoting DRAFT tasks to OPEN, gives Codex the required promotion checklist, gates R3 through Human review, blocks R4 execution, and records audit events for every review decision.
+
+| File | Purpose |
+|---|---|
+| `V9.1/README.md` | V9.1 overview and file map |
+| `V9.1/index.html` | Read-only V9.1 entry page |
+| `V9.1/dashboard/index.html` | Read-only WorkOrder Review Dashboard |
+| `V9.1/AI_WORKORDER_REVIEW_LOOP.md` | Formal DRAFT review state machine |
+| `V9.1/DRAFT_WORKORDER_STANDARD.md` | Required fields for AI-generated DRAFT WorkOrders |
+| `V9.1/CODEX_PROMOTION_PROTOCOL.md` | Codex 15-point promotion checklist |
+| `V9.1/CODEX_REJECTION_PROTOCOL.md` | Rejection and archive rules |
+| `V9.1/CODEX_REVISION_PROTOCOL.md` | Revision request rules |
+| `V9.1/HUMAN_REVIEW_GATE.md` | Human review and override gate |
+| `V9.1/DUPLICATE_TASK_DETECTION.md` | Duplicate and merge-candidate detection |
+| `V9.1/DEPENDENCY_VALIDATION.md` | Dependency checks before promotion |
+| `V9.1/RISK_PROMOTION_MATRIX.md` | R0-R4 promotion matrix |
+| `V9.1/schemas/` | Nine JSON Schemas |
+| `V9.1/examples/` | Nine parseable examples |
+| `V9.1/runtime/` | Eight review runtime documents |
+| `V9.1/reviews/` | Codex review decisions for V9.0 DRAFT WorkOrders |
+| `V9.1/reports/KAIOS_V9_1_QA_REPORT.md` | V9.1 QA report |
+| `V9.1/reports/KAIOS_V9_1_RELEASE_REPORT.md` | V9.1 release report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/
 ## Protected Systems
 
-KAIOS V9.0 does not modify:
+KAIOS V9.1 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

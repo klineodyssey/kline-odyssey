@@ -81,6 +81,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
 | KAIOS V8.3 Civilization Time Engine | [KGEN-KAIOS/V8.3/](KGEN-KAIOS/V8.3/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/ |
 | KAIOS V9.0 Civilization AI Engine | [KGEN-KAIOS/V9.0/](KGEN-KAIOS/V9.0/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/ |
+| KAIOS V9.1 AI WorkOrder Review Loop | [KGEN-KAIOS/V9.1/](KGEN-KAIOS/V9.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -206,6 +207,22 @@ KAIOS V9.0 lets AI read civilization, time, economy, resource and governance sta
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
 
 V9.0 is a Draft for Review / AI Decision Prototype. It can Observe, Analyze, Reason, Recommend and Generate Draft WorkOrders only.
+
+### KAIOS V9.1 AI WorkOrder Review Loop
+
+KAIOS V9.1 creates the official review loop for AI-generated DRAFT WorkOrders. AI may draft recommendations, but only Codex can promote a DRAFT toward OPEN. R3 requires Human review and R4 cannot be promoted.
+
+- V9.1 Entry: [KGEN-KAIOS/V9.1/index.html](KGEN-KAIOS/V9.1/index.html)
+- Review Dashboard: [KGEN-KAIOS/V9.1/dashboard/index.html](KGEN-KAIOS/V9.1/dashboard/index.html)
+- Review Loop: [KGEN-KAIOS/V9.1/AI_WORKORDER_REVIEW_LOOP.md](KGEN-KAIOS/V9.1/AI_WORKORDER_REVIEW_LOOP.md)
+- Codex Promotion Protocol: [KGEN-KAIOS/V9.1/CODEX_PROMOTION_PROTOCOL.md](KGEN-KAIOS/V9.1/CODEX_PROMOTION_PROTOCOL.md)
+- Risk Promotion Matrix: [KGEN-KAIOS/V9.1/RISK_PROMOTION_MATRIX.md](KGEN-KAIOS/V9.1/RISK_PROMOTION_MATRIX.md)
+- V9 Draft Review Reports: [KGEN-KAIOS/V9.1/reviews/README.md](KGEN-KAIOS/V9.1/reviews/README.md)
+- QA Report: [KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_QA_REPORT.md](KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/
+
+V9.1 is a Draft for Review / WorkOrder Governance Prototype. It reviews and promotes DRAFT WorkOrders but does not execute protected actions, merge branches, transfer tokens or deploy contracts.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.
