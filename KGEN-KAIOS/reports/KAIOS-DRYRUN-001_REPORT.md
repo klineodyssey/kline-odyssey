@@ -9,7 +9,7 @@
 | Worker Type | Cursor |
 | Date | 2026-07-10 |
 | Base Commit | a7a3d21dc310aaae3d8dd7732068fa6ce8e4b053 |
-| Head Commit | *(set at commit time)* |
+| Head Commit | ba3f5c1f55e985e9c8ef33c6104ce264f9801a53 |
 | Branch | `cursor-handoff/KAIOS-DRYRUN-001` |
 | Report Path | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
 | WorkQueue Status | REVIEW |
