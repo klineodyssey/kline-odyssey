@@ -71,6 +71,8 @@ jobs:
           copy_file "README.md"
           copy_file "MANIFEST.json"
           copy_file "VERSION"
+          copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md"
+          copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
 
           copy_dir "K線西遊記"
           copy_dir "docs"
@@ -86,6 +88,18 @@ jobs:
           copy_dir "KGEN-Organization"
           copy_dir "KGEN-AI-Company"
           copy_dir "KGEN-KAIOS"
+          copy_dir "boot"
+          copy_dir "operating-center"
+          copy_dir "ai-company"
+          copy_dir "workqueue"
+          copy_dir "civilization"
+          copy_dir "economy"
+          copy_dir "exchange"
+          copy_dir "wallet"
+          copy_dir "membership"
+          copy_dir "library"
+          copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE"
+          copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4"
 
           mkdir -p "_site/KGEN-KAIOS/dashboard"
           cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
@@ -208,6 +222,13 @@ jobs:
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
+
+          for route in boot operating-center ai-company workqueue civilization economy exchange wallet membership library; do
+            if [ ! -f "_site/${route}/index.html" ]; then
+              echo "::error::Missing permanent Pages route: /${route}/"
+              exit 1
+            fi
+          done
 
           echo "Static site sample:"
           find _site -maxdepth 3 -type f | sort | sed 's#^_site/##' | head -n 200 || true
