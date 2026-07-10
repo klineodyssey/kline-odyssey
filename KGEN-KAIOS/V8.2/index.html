@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V8.2 Economy Viewer</title>
+  <meta name="description" content="KAIOS V8.2 Civilization Economy Engine read-only viewer for Temple economy, business, market, bank, exchange and governance signals.">
+  <link rel="stylesheet" href="v82.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="KAIOS V8.2 Home">
+      <span class="brand-mark">K</span>
+      <span>
+        <strong>KAIOS V8.2</strong>
+        <small>Civilization Economy Engine</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="V8.2 links">
+      <a href="README.md">README</a>
+      <a href="ECONOMY_ENGINE.md">Engine</a>
+      <a href="schemas/economy.schema.json">Schema</a>
+      <a href="dashboard/">Dashboard</a>
+      <a href="../V8.1/">V8.1</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">One Temple -> One Economy -> One Civilization</p>
+        <h1>KGEN 文明經濟引擎</h1>
+        <p>V8.2 將 Temple、Land、Residence、Citizen、Profession、Business、Market、Exchange、Bank 與 Governance 串成可觀測的經濟循環。這是唯讀展示，不建立真實交易、不接金流、不提供金融服務。</p>
+        <div class="hero-actions">
+          <a class="primary-link" href="dashboard/">Open Dashboard</a>
+          <a class="secondary-link" href="examples/economy.example.json">Open Economy JSON</a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="Engine status">
+        <dl>
+          <div><dt>Version</dt><dd>V8.2</dd></div>
+          <div><dt>Status</dt><dd>Prototype / Simulation</dd></div>
+          <div><dt>Mode</dt><dd>Read Only</dd></div>
+          <div><dt>Business Types</dt><dd id="businessTypeCount">23</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="canon-strip" aria-label="Economy canon">
+      <span>Temple</span>
+      <span>Land</span>
+      <span>Residence</span>
+      <span>Citizen</span>
+      <span>Profession</span>
+      <span>Production</span>
+      <span>Business</span>
+      <span>Market</span>
+      <span>Exchange</span>
+      <span>Bank</span>
+      <span>Investment</span>
+      <span>Governance</span>
+      <span>Civilization Growth</span>
+    </section>
+
+    <section class="toolbar" aria-label="Viewer controls">
+      <div class="tabs" role="tablist" aria-label="Economy viewer tabs">
+        <button type="button" class="tab active" data-view="economy">Economy</button>
+        <button type="button" class="tab" data-view="business">Business</button>
+        <button type="button" class="tab" data-view="market">Market</button>
+        <button type="button" class="tab" data-view="citizen">Citizen Economy</button>
+        <button type="button" class="tab" data-view="temple">Temple Economy</button>
+        <button type="button" class="tab" data-view="compliance">Boundary</button>
+      </div>
+      <label class="search-box">
+        <span>Search</span>
+        <input id="searchInput" type="search" aria-label="Search economy records" autocomplete="off">
+      </label>
+    </section>
+
+    <section class="metric-grid" aria-label="Economy summary">
+      <article class="metric"><span>Business Library</span><strong>23</strong></article>
+      <article class="metric"><span>Resources</span><strong>12</strong></article>
+      <article class="metric"><span>Schemas</span><strong>8</strong></article>
+      <article class="metric"><span>Runtime Docs</span><strong>6</strong></article>
+      <article class="metric"><span>Mode</span><strong>Read Only</strong></article>
+    </section>
+
+    <section id="viewer" class="viewer" aria-live="polite"></section>
+
+    <section class="notice">
+      <h2>合規邊界</h2>
+      <p>V8.2 的銀行、交易所、投資、貸款、利息、NFT、Token 與上市買賣均為 Concept / Prototype / Simulation。任何 Production 或 Regulated 模組都必須先經法律、資安、治理、財務與消費者保護審查。</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Where the Market Becomes the Myth</span>
+  </footer>
+
+  <script src="v82.js"></script>
+</body>
+</html>

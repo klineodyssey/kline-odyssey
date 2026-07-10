@@ -23,3 +23,9 @@
 - Added 8 JSON Schemas for economy, business, market, exchange, bank, resource, transaction and governance signal records.
 - Added 8 parseable examples for the schema set.
 - Added runtime documents for civilization economy, business, market, bank, exchange and governance signal processing.
+
+## V8.2 Economy Dashboard
+
+- Added read-only Economy Viewer at `KGEN-KAIOS/V8.2/`.
+- Added read-only Dashboard at `KGEN-KAIOS/V8.2/dashboard/`.
+- Added dashboard configuration and public data-source model.

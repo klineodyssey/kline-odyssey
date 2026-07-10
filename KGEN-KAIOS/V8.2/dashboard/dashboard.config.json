@@ -1,0 +1,28 @@
+{
+  "version": "KAIOS V8.2",
+  "readiness_score": 86,
+  "mode": "Read Only",
+  "main_commit_source": "KGEN-KAIOS/V8.2/build-info.json",
+  "dashboard_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/",
+  "economy_viewer_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/",
+  "data_sources": [
+    "../examples/economy.example.json",
+    "../examples/business.example.json",
+    "../examples/market.example.json",
+    "../examples/exchange.example.json",
+    "../examples/bank.example.json",
+    "../examples/resource.example.json",
+    "../examples/transaction.example.json",
+    "../examples/governance_signal.example.json"
+  ],
+  "schema_sources": [
+    "../schemas/economy.schema.json",
+    "../schemas/business.schema.json",
+    "../schemas/market.schema.json",
+    "../schemas/exchange.schema.json",
+    "../schemas/bank.schema.json",
+    "../schemas/resource.schema.json",
+    "../schemas/transaction.schema.json",
+    "../schemas/governance_signal.schema.json"
+  ]
+}
