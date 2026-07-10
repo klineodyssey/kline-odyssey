@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/schemas/dependency_check.schema.json",
+  "title": "KAIOS V9.1 Dependency Check",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "check_id",
+    "task_id",
+    "timestamp",
+    "dependencies_exist",
+    "dependencies_done",
+    "dependency_cycles",
+    "blocked_dependencies",
+    "stale_dependencies",
+    "missing_reports",
+    "missing_branches",
+    "result"
+  ],
+  "properties": {
+    "check_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "dependencies_exist": { "type": "boolean" },
+    "dependencies_done": { "type": "boolean" },
+    "dependency_cycles": { "type": "boolean" },
+    "blocked_dependencies": { "type": "array", "items": { "type": "string" } },
+    "stale_dependencies": { "type": "array", "items": { "type": "string" } },
+    "missing_reports": { "type": "array", "items": { "type": "string" } },
+    "missing_branches": { "type": "array", "items": { "type": "string" } },
+    "result": { "type": "string", "enum": ["PASS", "WARN", "FAIL"] }
+  }
+}

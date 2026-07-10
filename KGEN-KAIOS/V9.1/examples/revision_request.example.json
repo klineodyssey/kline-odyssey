@@ -1,0 +1,14 @@
+{
+  "revision_id": "KAIOS-V9.1-REVISION-001B",
+  "task_id": "V9-DRYRUN-001B",
+  "requested_by": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "reason": "The temple support draft needs measurable acceptance criteria and a unique report path.",
+  "required_changes": [
+    "Define temple activity metrics used for review.",
+    "Assign a unique report path.",
+    "State that no real religious authority or partnership is claimed."
+  ],
+  "risk_level": "R2",
+  "due_status": "REVISED_DRAFT"
+}

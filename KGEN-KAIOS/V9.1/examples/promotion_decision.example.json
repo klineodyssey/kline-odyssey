@@ -1,0 +1,15 @@
+{
+  "promotion_id": "KAIOS-V9.1-PROMOTE-001A",
+  "task_id": "V9-DRYRUN-001A",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "APPROVED_FOR_OPEN",
+  "risk_level": "R2",
+  "promote_to_open": true,
+  "reason": "The draft has traceable source state, clear simulation-only scope, valid dependencies and no protected path violation.",
+  "required_follow_up": [
+    "Codex may create an OPEN WorkQueue item with a unique report path before Cursor execution."
+  ]
+}

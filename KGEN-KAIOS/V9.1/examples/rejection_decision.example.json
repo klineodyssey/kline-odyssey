@@ -1,0 +1,11 @@
+{
+  "rejection_id": "KAIOS-V9.1-REJECT-001C",
+  "task_id": "V9-DRYRUN-001C",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "risk_level": "R2",
+  "reason": "The draft is too broad for one worker task and mixes citizen support, training, employment and identity-adjacent concerns.",
+  "final_status": "REJECTED",
+  "replacement_recommended": true
+}

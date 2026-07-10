@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/schemas/rejection_decision.schema.json",
+  "title": "KAIOS V9.1 Rejection Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rejection_id",
+    "task_id",
+    "decision_id",
+    "reviewer",
+    "timestamp",
+    "risk_level",
+    "reason",
+    "final_status",
+    "replacement_recommended"
+  ],
+  "properties": {
+    "rejection_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "decision_id": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "risk_level": { "type": "string", "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "reason": { "type": "string" },
+    "final_status": { "type": "string", "enum": ["REJECTED", "ARCHIVED", "BLOCKED"] },
+    "replacement_recommended": { "type": "boolean" }
+  }
+}

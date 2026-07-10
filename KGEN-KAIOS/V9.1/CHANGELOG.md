@@ -13,3 +13,6 @@
 - Added the Human Review Gate.
 - Added Duplicate Task Detection and Dependency Validation.
 - Added WorkOrder Archive Standard.
+- Added 9 machine-readable JSON Schemas.
+- Added 9 JSON examples.
+- Added 8 review runtime module specifications.

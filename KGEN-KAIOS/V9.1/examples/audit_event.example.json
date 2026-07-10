@@ -1,0 +1,18 @@
+{
+  "audit_id": "KAIOS-V9.1-AUDIT-001A",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "actor": "Codex",
+  "actor_role": "Codex",
+  "related_decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "related_workorder_id": "V9-DRYRUN-001A",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "APPROVED_FOR_OPEN",
+  "risk_level": "R2",
+  "decision": "PROMOTE",
+  "reason": "Simulation-only resource reserve review passed V9.1 checks.",
+  "evidence": [
+    "KGEN-KAIOS/V9.1/reviews/V9-DRYRUN-001A_REVIEW_REPORT.md"
+  ],
+  "requires_human_review": false,
+  "requires_codex_review": true
+}

@@ -1,0 +1,12 @@
+{
+  "review_id": "KAIOS-V9.1-HUMAN-EXAMPLE",
+  "reviewer": "Human Operator",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "decision": "PAUSE",
+  "reason": "Example R3 gate record for future real-world business tasks.",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "BLOCKED",
+  "risk_level": "R3",
+  "related_decision_id": "KGEN-AIDEC-EXAMPLE",
+  "related_workorder_id": "V9-EXAMPLE-R3"
+}

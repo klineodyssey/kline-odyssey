@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/schemas/promotion_decision.schema.json",
+  "title": "KAIOS V9.1 Promotion Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "promotion_id",
+    "task_id",
+    "decision_id",
+    "reviewer",
+    "timestamp",
+    "previous_status",
+    "new_status",
+    "risk_level",
+    "promote_to_open",
+    "reason",
+    "required_follow_up"
+  ],
+  "properties": {
+    "promotion_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "decision_id": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "previous_status": { "type": "string", "enum": ["DRAFT", "UNDER_REVIEW", "REVISED_DRAFT"] },
+    "new_status": { "type": "string", "enum": ["APPROVED_FOR_OPEN", "OPEN", "NEEDS_REVISION", "REJECTED", "BLOCKED", "ARCHIVED"] },
+    "risk_level": { "type": "string", "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "promote_to_open": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "required_follow_up": { "type": "array", "items": { "type": "string" } }
+  }
+}

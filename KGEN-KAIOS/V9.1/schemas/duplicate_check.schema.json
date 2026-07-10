@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/schemas/duplicate_check.schema.json",
+  "title": "KAIOS V9.1 Duplicate Check",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "check_id",
+    "task_id",
+    "timestamp",
+    "same_target",
+    "same_output_path",
+    "same_protected_path",
+    "same_decision_source",
+    "same_asset",
+    "same_unresolved_dependency",
+    "same_branch_pattern",
+    "result"
+  ],
+  "properties": {
+    "check_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "same_target": { "type": "boolean" },
+    "same_output_path": { "type": "boolean" },
+    "same_protected_path": { "type": "boolean" },
+    "same_decision_source": { "type": "boolean" },
+    "same_asset": { "type": "boolean" },
+    "same_unresolved_dependency": { "type": "boolean" },
+    "same_branch_pattern": { "type": "boolean" },
+    "result": { "type": "string", "enum": ["UNIQUE", "DUPLICATE", "MERGE_CANDIDATE"] }
+  }
+}

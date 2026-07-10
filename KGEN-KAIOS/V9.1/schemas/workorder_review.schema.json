@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/schemas/workorder_review.schema.json",
+  "title": "KAIOS V9.1 WorkOrder Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_id",
+    "task_id",
+    "decision_id",
+    "reviewer",
+    "timestamp",
+    "source_state_traceable",
+    "reasoning_complete",
+    "canon_conflict",
+    "protected_path_violation",
+    "risk_level",
+    "required_reviews",
+    "result",
+    "evidence"
+  ],
+  "properties": {
+    "review_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "decision_id": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source_state_traceable": { "type": "boolean" },
+    "reasoning_complete": { "type": "boolean" },
+    "canon_conflict": { "type": "boolean" },
+    "protected_path_violation": { "type": "boolean" },
+    "risk_level": { "type": "string", "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "required_reviews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codex", "human", "legal", "security"],
+      "properties": {
+        "codex": { "type": "boolean" },
+        "human": { "type": "boolean" },
+        "legal": { "type": "boolean" },
+        "security": { "type": "boolean" }
+      }
+    },
+    "result": { "type": "string", "enum": ["APPROVED_FOR_OPEN", "NEEDS_REVISION", "REJECTED", "BLOCKED", "ARCHIVED"] },
+    "evidence": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+  }
+}

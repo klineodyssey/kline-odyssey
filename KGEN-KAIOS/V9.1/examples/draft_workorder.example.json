@@ -1,0 +1,41 @@
+{
+  "task_id": "V9-DRYRUN-001A",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reason": "Resource shortage and recession signals require a reserve review draft.",
+  "priority": "P1",
+  "risk_level": "R2",
+  "dependencies": [
+    "KGEN-KAIOS/V8.2/examples/resource.example.json",
+    "KGEN-KAIOS/V8.3/examples/resource_regeneration.example.json"
+  ],
+  "input_state": [
+    "Resource State",
+    "Governance Signals",
+    "Event Stream"
+  ],
+  "expected_output": "Simulation-only resource reserve stabilization report.",
+  "acceptance_criteria": [
+    "No protected paths modified.",
+    "All recommendations remain simulation-only.",
+    "Codex Review completed before OPEN."
+  ],
+  "protected_paths": [
+    "contracts",
+    "K線西遊記/temples/12345",
+    "wallet",
+    "bridge",
+    "Boot",
+    "Runtime CURRENT",
+    "final-whitepaper",
+    "KGEN Token contract"
+  ],
+  "owner_suggestion": "Cursor",
+  "reviewer": "Codex",
+  "branch_pattern": "cursor-handoff/V9-DRYRUN-001A",
+  "report_path": "KGEN-KAIOS/V9.1/reviews/V9-DRYRUN-001A_REVIEW_REPORT.md",
+  "legal_review_required": false,
+  "security_review_required": false,
+  "human_review_required": false,
+  "codex_review_required": true,
+  "status": "DRAFT"
+}

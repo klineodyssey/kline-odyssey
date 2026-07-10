@@ -1,0 +1,23 @@
+{
+  "review_id": "KAIOS-V9.1-REVIEW-001A",
+  "task_id": "V9-DRYRUN-001A",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "source_state_traceable": true,
+  "reasoning_complete": true,
+  "canon_conflict": false,
+  "protected_path_violation": false,
+  "risk_level": "R2",
+  "required_reviews": {
+    "codex": true,
+    "human": false,
+    "legal": false,
+    "security": false
+  },
+  "result": "APPROVED_FOR_OPEN",
+  "evidence": [
+    "KGEN-KAIOS/V9.0/workorders/V9_DRAFT_WORKORDERS.md",
+    "KGEN-KAIOS/V8.2/examples/resource.example.json"
+  ]
+}
