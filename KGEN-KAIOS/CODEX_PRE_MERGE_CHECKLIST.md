@@ -20,6 +20,9 @@ This checklist defines the minimum evidence Codex must review before merging any
 | Pages deploy | Public Pages paths are not broken by doc or site changes |
 | WorkQueue status | Task state is valid and moved according to lifecycle |
 | Review Log | Decision is recorded in `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` |
+| Provenance | Source, author, reviewer, branch, commit, task ID, report path, and changed files are traceable |
+| R&D suggestions | Suggested WorkOrders remain `PROPOSED` until Codex promotes them |
+| Formal file metadata | Changed formal organs include required version metadata or an explicit follow-up risk |
 
 ## Approve Conditions
 
@@ -32,6 +35,9 @@ Codex may approve only when:
 5. Stale branch policy passes.
 6. WorkQueue state is correct.
 7. Merge is clean.
+8. Author is registered in `KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json`.
+9. Changed files match the reported `changed_files`.
+10. Formal organism or runtime changes satisfy versioning and taxonomy gates when applicable.
 
 ## Reject / Block Conditions
 
@@ -46,6 +52,9 @@ Codex rejects or blocks when:
 - JSON is invalid
 - required PDF/DOCX artifact is damaged
 - WorkQueue state is inconsistent
+- provenance is incomplete
+- a worker promotes its own suggestion past `PROPOSED`
+- a formal organism has no canonical file or runtime entry
 
 ## Output
 

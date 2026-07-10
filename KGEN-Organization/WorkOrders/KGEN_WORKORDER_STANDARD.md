@@ -14,6 +14,26 @@ This standard defines how Codex assigns work, how Cursor accepts work, how Curso
 
 Codex checks origin/main, protected paths, active Canon, current WorkQueue, and dependency impact. Codex then writes a scoped WorkOrder with target files, allowed actions, forbidden actions, output report, and acceptance criteria.
 
+Every WorkOrder must have a traceable source. Codex must not create a source-less WorkOrder. Required provenance fields:
+
+- `task_id`
+- `task_source_type`
+- `task_source_id`
+- `task_source_actor`
+- `task_source_file`
+- `task_source_commit`
+- `task_source_reason`
+- `created_by`
+- `created_at`
+- `owner`
+- `reviewer`
+- `priority`
+- `risk_level`
+- `dependencies`
+- `status`
+
+Allowed `task_source_type` values are `HUMAN_REQUEST`, `AI_RECOMMENDATION`, `CURSOR_REPORT`, `CODEX_REVIEW`, `QA_FINDING`, `RUNTIME_ALERT`, `CANON_GAP`, `ROADMAP`, `SECURITY_FINDING`, and `LEGAL_FINDING`.
+
 ## 3. Cursor Acceptance
 
 Cursor reads the Cursor Agent Prompt, WorkQueue, Daily Workflow, DO_NOT_TOUCH, Canon Master JSON, Master Library Index, and assigned WorkOrder. Cursor accepts only one OPEN task at a time.
@@ -26,13 +46,26 @@ Cursor states purpose before modifying files, performs only allowed changes, run
 
 Delivery includes files read, files modified, checks run, risks, blockers, recommendation, and whether Codex or human review is required.
 
+Cursor reports must also include `Problems Found`, `Technical Debt`, `Evolution Opportunities`, `Research Direction`, `Suggested WorkOrders`, and `Do Not Do`. Cursor may propose future work, but every Suggested WorkOrder starts as `PROPOSED`. Cursor cannot promote suggestions to `DRAFT` or `OPEN`.
+
 ## 6. Codex Review
 
 Codex checks diff, protected paths, Canon conflict, JSON validity, Pages deployment impact, report completeness, and commit scope. Codex may accept, revise, or return the task.
 
+Codex also checks provenance before merge:
+
+- commit is visible
+- branch matches the WorkOrder branch pattern
+- report exists
+- author is registered
+- `task_id` exists
+- `changed_files` match the diff
+- protected paths are not modified without explicit approval
+- provenance fields are complete
+
 ## 7. Status Model
 
-OPEN means available. IN_PROGRESS means Cursor is working. REVIEW means Codex must inspect. DONE means Codex accepted the result. BLOCKED means the task cannot continue without explicit input.
+PROPOSED means a worker suggested future work but Codex has not reviewed it. DRAFT means Codex accepted the suggestion into review planning. OPEN means available. IN_PROGRESS means Cursor is working. REVIEW means Codex must inspect. DONE means Codex accepted the result. BLOCKED means the task cannot continue without explicit input.
 
 ## 8. Commit Rule
 
@@ -68,4 +101,5 @@ A task is complete only when the report exists, checks pass or risks are recorde
 
 | Version | Date | Description |
 |---|---|---|
+| V2.1 | 2026-07-11 | Added source provenance, R&D suggestion, PROPOSED status, and Codex provenance gate. |
 | V2.0 | 2026-07-10 | Established WorkOrder standard for Organization V2.0. |

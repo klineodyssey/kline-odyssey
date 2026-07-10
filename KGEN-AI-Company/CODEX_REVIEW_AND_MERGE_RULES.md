@@ -12,8 +12,10 @@ Codex reviews every Cursor task before commit or push.
 6. Check JSON validity if JSON changed.
 7. Check local links if Markdown changed.
 8. Check Pages impact if public docs changed.
-9. Decide APPROVED, REJECTED, BLOCKED, or DONE.
-10. Write the decision to `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`.
+9. Check provenance: visible commit, correct branch, existing report, registered author, existing task ID, diff-aligned changed files, protected path result, and complete provenance fields.
+10. Check whether any Suggested WorkOrders remain `PROPOSED`.
+11. Decide APPROVED, REJECTED, BLOCKED, or DONE.
+12. Write the decision to `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`.
 
 ## Merge Rule
 
@@ -22,6 +24,8 @@ Only approved work may be committed. Only Codex pushes to origin/main unless the
 ## Rejection Rule
 
 If work is incomplete, unsafe, or Canon-conflicting, Codex marks the task REJECTED and writes a corrected WorkOrder.
+
+If provenance is incomplete, Codex must reject or block the merge until the report, author record, task source, branch, commit, and changed-file evidence are complete.
 
 ## V5 Handoff Branch Review
 
