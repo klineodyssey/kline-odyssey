@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/sync_validation.schema.json",
+  "title": "KAIOS V9.2 Sync Validation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validation_id",
+    "sync_request_id",
+    "validated_at",
+    "validated_by",
+    "checklist",
+    "result"
+  ],
+  "properties": {
+    "validation_id": { "type": "string" },
+    "sync_request_id": { "type": "string" },
+    "validated_at": { "type": "string", "format": "date-time" },
+    "validated_by": { "type": "string", "enum": ["Codex"] },
+    "checklist": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "result": { "type": "string", "enum": ["SYNC_READY", "SYNC_REJECTED", "SYNC_CONFLICT", "HUMAN_PAUSED"] }
+  }
+}

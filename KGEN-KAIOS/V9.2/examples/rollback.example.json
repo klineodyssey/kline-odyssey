@@ -1,0 +1,10 @@
+{
+  "rollback_id": "KAIOS-V9.2-ROLLBACK-DRYRUN-0001",
+  "reason": "Dry run rollback example; no live WorkQueue rollback executed.",
+  "previous_status": "OPEN",
+  "new_status": "APPROVED_FOR_OPEN",
+  "affected_workorder": "AI-ECONOMY-2026-DRYRUN",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "related_commit": "DRY_RUN_ONLY"
+}

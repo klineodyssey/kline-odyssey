@@ -1,0 +1,10 @@
+{
+  "conflict_id": "KAIOS-V9.2-CONFLICT-DRYRUN-0001",
+  "source_draft_id": "V9-DRYRUN-001A",
+  "formal_workorder_id": "AI-ECONOMY-2026-0001",
+  "checked_at": "2026-07-11T00:00:00Z",
+  "conflicts": [
+    "duplicate formal_workorder_id dry-run case"
+  ],
+  "result": "SYNC_CONFLICT"
+}

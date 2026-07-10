@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/sync_request.schema.json",
+  "title": "KAIOS V9.2 Sync Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sync_request_id",
+    "source_draft_id",
+    "formal_workorder_id",
+    "promotion_decision_path",
+    "review_report_path",
+    "requested_by",
+    "requested_at",
+    "target_workqueue",
+    "status"
+  ],
+  "properties": {
+    "sync_request_id": { "type": "string" },
+    "source_draft_id": { "type": "string" },
+    "formal_workorder_id": { "type": "string", "pattern": "^AI-[A-Z]+-[0-9]{4}-[0-9]{4}$" },
+    "promotion_decision_path": { "type": "string" },
+    "review_report_path": { "type": "string" },
+    "requested_by": { "type": "string", "enum": ["Codex"] },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "target_workqueue": { "type": "string" },
+    "status": { "type": "string", "enum": ["SYNC_PENDING"] }
+  }
+}

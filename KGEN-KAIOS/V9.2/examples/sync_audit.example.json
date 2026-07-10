@@ -1,0 +1,15 @@
+{
+  "sync_audit_id": "KAIOS-V9.2-AUDIT-0001",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "actor": "Codex",
+  "source_draft_id": "V9-DRYRUN-001A",
+  "formal_workorder_id": "AI-ECONOMY-2026-0001",
+  "previous_status": "APPROVED_FOR_OPEN",
+  "new_status": "OPEN",
+  "promotion_decision": "KGEN-KAIOS/V9.1/reviews/V9-DRYRUN-001A_promotion_decision.json",
+  "sync_result": "KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json",
+  "workqueue_path": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  "sync_commit_sha": "RECORDED_IN_RELEASE_REPORT",
+  "reason": "Codex-only sync passed all validation checks.",
+  "reviewer": "Codex"
+}

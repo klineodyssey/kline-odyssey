@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/human_pause.schema.json",
+  "title": "KAIOS V9.2 Human Pause",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "human_decision_id",
+    "reviewer",
+    "reason",
+    "timestamp",
+    "previous_status",
+    "new_status",
+    "related_workorder"
+  ],
+  "properties": {
+    "human_decision_id": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "reason": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "previous_status": { "type": "string" },
+    "new_status": { "type": "string", "enum": ["HUMAN_PAUSED", "SYNC_REJECTED", "ARCHIVED", "CHANGE_PRIORITY"] },
+    "related_workorder": { "type": "string" }
+  }
+}

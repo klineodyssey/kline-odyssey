@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/sync_audit.schema.json",
+  "title": "KAIOS V9.2 Sync Audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sync_audit_id",
+    "timestamp",
+    "actor",
+    "source_draft_id",
+    "formal_workorder_id",
+    "previous_status",
+    "new_status",
+    "promotion_decision",
+    "sync_result",
+    "workqueue_path",
+    "sync_commit_sha",
+    "reason",
+    "reviewer"
+  ],
+  "properties": {
+    "sync_audit_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "actor": { "type": "string" },
+    "source_draft_id": { "type": "string" },
+    "formal_workorder_id": { "type": "string" },
+    "previous_status": { "type": "string" },
+    "new_status": { "type": "string" },
+    "promotion_decision": { "type": "string" },
+    "sync_result": { "type": "string" },
+    "workqueue_path": { "type": "string" },
+    "sync_commit_sha": { "type": "string" },
+    "reason": { "type": "string" },
+    "reviewer": { "type": "string" }
+  }
+}

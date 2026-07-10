@@ -1,0 +1,12 @@
+{
+  "sync_result_id": "KAIOS-V9.2-SYNC-RESULT-0001",
+  "source_draft_id": "V9-DRYRUN-001A",
+  "formal_workorder_id": "AI-ECONOMY-2026-0001",
+  "previous_status": "SYNC_READY",
+  "new_status": "OPEN",
+  "inserted_at": "2026-07-11T00:00:00Z",
+  "target_workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  "dispatch_hold": true,
+  "sync_commit_sha": "RECORDED_IN_RELEASE_REPORT",
+  "reviewer": "Codex"
+}

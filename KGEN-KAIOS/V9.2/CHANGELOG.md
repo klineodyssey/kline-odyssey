@@ -11,3 +11,6 @@
 - Added WorkQueue Conflict Policy.
 - Added WorkQueue Insertion Policy.
 - Added WorkQueue Rollback Policy.
+- Added 8 machine-readable JSON Schemas.
+- Added 8 JSON examples.
+- Added 8 sync runtime module specifications.

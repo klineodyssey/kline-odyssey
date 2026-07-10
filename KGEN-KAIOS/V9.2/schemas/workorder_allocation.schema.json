@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/workorder_allocation.schema.json",
+  "title": "KAIOS V9.2 WorkOrder Allocation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "allocation_id",
+    "source_draft_id",
+    "formal_workorder_id",
+    "domain",
+    "year",
+    "sequence",
+    "collision_check",
+    "allocated_by"
+  ],
+  "properties": {
+    "allocation_id": { "type": "string" },
+    "source_draft_id": { "type": "string" },
+    "formal_workorder_id": { "type": "string", "pattern": "^AI-[A-Z]+-[0-9]{4}-[0-9]{4}$" },
+    "domain": { "type": "string" },
+    "year": { "type": "integer" },
+    "sequence": { "type": "integer" },
+    "collision_check": { "type": "string", "enum": ["PASS", "FAIL"] },
+    "allocated_by": { "type": "string", "enum": ["Codex"] }
+  }
+}

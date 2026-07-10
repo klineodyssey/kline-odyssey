@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/workqueue_conflict.schema.json",
+  "title": "KAIOS V9.2 WorkQueue Conflict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conflict_id",
+    "source_draft_id",
+    "formal_workorder_id",
+    "checked_at",
+    "conflicts",
+    "result"
+  ],
+  "properties": {
+    "conflict_id": { "type": "string" },
+    "source_draft_id": { "type": "string" },
+    "formal_workorder_id": { "type": "string" },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "conflicts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "result": { "type": "string", "enum": ["NO_CONFLICT", "SYNC_CONFLICT"] }
+  }
+}

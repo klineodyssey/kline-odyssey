@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/schemas/sync_result.schema.json",
+  "title": "KAIOS V9.2 Sync Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sync_result_id",
+    "source_draft_id",
+    "formal_workorder_id",
+    "previous_status",
+    "new_status",
+    "inserted_at",
+    "target_workqueue",
+    "dispatch_hold",
+    "sync_commit_sha",
+    "reviewer"
+  ],
+  "properties": {
+    "sync_result_id": { "type": "string" },
+    "source_draft_id": { "type": "string" },
+    "formal_workorder_id": { "type": "string" },
+    "previous_status": { "type": "string", "enum": ["APPROVED_FOR_OPEN", "SYNC_READY"] },
+    "new_status": { "type": "string", "enum": ["OPEN"] },
+    "inserted_at": { "type": "string", "format": "date-time" },
+    "target_workqueue": { "type": "string" },
+    "dispatch_hold": { "type": "boolean" },
+    "sync_commit_sha": { "type": "string" },
+    "reviewer": { "type": "string", "enum": ["Codex"] }
+  }
+}

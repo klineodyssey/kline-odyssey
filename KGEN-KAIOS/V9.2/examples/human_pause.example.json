@@ -1,0 +1,9 @@
+{
+  "human_decision_id": "KAIOS-V9.2-HUMAN-PAUSE-DRYRUN-0001",
+  "reviewer": "Human Operator",
+  "reason": "Dry run pause before execution.",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "previous_status": "APPROVED_FOR_OPEN",
+  "new_status": "HUMAN_PAUSED",
+  "related_workorder": "AI-ECONOMY-2026-DRYRUN"
+}
