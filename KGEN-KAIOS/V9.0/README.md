@@ -104,6 +104,30 @@ Every AI decision must output:
 
 https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/
 
+## Dashboard URL
+
+https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
+
+## Core Counts
+
+| Item | Count |
+|---|---:|
+| AI Decision Types | 12 |
+| Risk Levels | 5 |
+| JSON Schemas | 8 |
+| JSON Examples | 8 |
+| Advisor Runtime documents | 8 |
+| Dry Runs | 1 |
+| Draft WorkOrders | 3 |
+
+## Primary Entry Files
+
+- AI Viewer: `index.html`
+- AI Dashboard: `dashboard/index.html`
+- Dry Run Report: `reports/V9-DRYRUN-001_REPORT.md`
+- QA Report: `reports/KAIOS_V9_0_QA_REPORT.md`
+- Release Report: `reports/KAIOS_V9_0_RELEASE_REPORT.md`
+
 ## Boundary
 
 V9.0 is an AI decision-support layer. It does not perform real transactions, deployments, legal commitments, partnership claims, human account actions or main branch merges. All real changes require Codex Review, and high-risk decisions also require Human Review.

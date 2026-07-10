@@ -80,6 +80,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
 | KAIOS V8.3 Civilization Time Engine | [KGEN-KAIOS/V8.3/](KGEN-KAIOS/V8.3/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/ |
+| KAIOS V9.0 Civilization AI Engine | [KGEN-KAIOS/V9.0/](KGEN-KAIOS/V9.0/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -188,6 +189,23 @@ KAIOS V8.3 adds World Clock, Simulation Tick, Timeline, Citizen Behavior, Busine
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
 
 V8.3 is a Draft for Review / Time Simulation Prototype. War, disaster, bank, exchange, market and governance terms are simulation language only.
+
+### KAIOS V9.0 Civilization AI Engine
+
+KAIOS V9.0 lets AI read civilization, time, economy, resource and governance state, then produce explainable decisions and DRAFT WorkOrders. AI cannot execute high-risk actions; Codex Review is required before real work begins.
+
+- AI Viewer: [KGEN-KAIOS/V9.0/index.html](KGEN-KAIOS/V9.0/index.html)
+- AI Dashboard: [KGEN-KAIOS/V9.0/dashboard/index.html](KGEN-KAIOS/V9.0/dashboard/index.html)
+- Civilization AI Engine: [KGEN-KAIOS/V9.0/CIVILIZATION_AI_ENGINE.md](KGEN-KAIOS/V9.0/CIVILIZATION_AI_ENGINE.md)
+- AI Decision Model: [KGEN-KAIOS/V9.0/AI_DECISION_MODEL.md](KGEN-KAIOS/V9.0/AI_DECISION_MODEL.md)
+- AI Risk Model: [KGEN-KAIOS/V9.0/AI_RISK_MODEL.md](KGEN-KAIOS/V9.0/AI_RISK_MODEL.md)
+- AI WorkOrder Generator: [KGEN-KAIOS/V9.0/AI_WORKORDER_GENERATOR.md](KGEN-KAIOS/V9.0/AI_WORKORDER_GENERATOR.md)
+- Dry Run Report: [KGEN-KAIOS/V9.0/reports/V9-DRYRUN-001_REPORT.md](KGEN-KAIOS/V9.0/reports/V9-DRYRUN-001_REPORT.md)
+- QA Report: [KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_QA_REPORT.md](KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
+
+V9.0 is a Draft for Review / AI Decision Prototype. It can Observe, Analyze, Reason, Recommend and Generate Draft WorkOrders only.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

@@ -23,6 +23,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
 | KAIOS V8.3 Civilization Time Engine | `KGEN-KAIOS/V8.3/` | World Clock, Simulation Tick, Timeline, citizen and business behavior, temple activity, resource regeneration, event engine, governance response, schemas and read-only viewer |
+| KAIOS V9.0 Civilization AI Engine | `KGEN-KAIOS/V9.0/` | AI observation, reasoning, decision, memory, policy, risk, advisors, draft WorkOrders, Codex review boundary, schemas and read-only dashboard |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -163,6 +164,37 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Examples | `KGEN-KAIOS/V8.3/examples/` | Ten parseable examples |
 | QA Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md` | Baseline V8.3 QA report |
 | Release Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_RELEASE_REPORT.md` | V8.3 release summary and V9.0 recommendation |
+
+## KAIOS V9.0 Civilization AI Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.0 Index | `KGEN-KAIOS/V9.0/README.md` | V9.0 overview and file map |
+| AI Viewer | `KGEN-KAIOS/V9.0/index.html` | Read-only Civilization AI Viewer |
+| AI Dashboard | `KGEN-KAIOS/V9.0/dashboard/index.html` | Read-only AI decisions, risk, WorkOrders and review dashboard |
+| Civilization AI Engine | `KGEN-KAIOS/V9.0/CIVILIZATION_AI_ENGINE.md` | Master AI Engine specification |
+| Observation Model | `KGEN-KAIOS/V9.0/AI_OBSERVATION_MODEL.md` | Observation sources and quality |
+| Reasoning Model | `KGEN-KAIOS/V9.0/AI_REASONING_MODEL.md` | Explainable reasoning procedure |
+| Decision Model | `KGEN-KAIOS/V9.0/AI_DECISION_MODEL.md` | Decision output contract and decision types |
+| Memory Model | `KGEN-KAIOS/V9.0/AI_MEMORY_MODEL.md` | Traceable memory model |
+| Policy Model | `KGEN-KAIOS/V9.0/AI_POLICY_MODEL.md` | Allowed and prohibited AI actions |
+| Risk Model | `KGEN-KAIOS/V9.0/AI_RISK_MODEL.md` | R0 to R4 risk levels |
+| Event Interpreter | `KGEN-KAIOS/V9.0/AI_EVENT_INTERPRETER.md` | Event stream interpretation |
+| Governance Advisor | `KGEN-KAIOS/V9.0/AI_GOVERNANCE_ADVISOR.md` | Governance signal advisor |
+| Economy Advisor | `KGEN-KAIOS/V9.0/AI_ECONOMY_ADVISOR.md` | Economy advisor |
+| Temple Advisor | `KGEN-KAIOS/V9.0/AI_TEMPLE_ADVISOR.md` | Temple advisor |
+| Land Advisor | `KGEN-KAIOS/V9.0/AI_LAND_ADVISOR.md` | Land advisor |
+| Citizen Advisor | `KGEN-KAIOS/V9.0/AI_CITIZEN_ADVISOR.md` | Citizen advisor |
+| WorkOrder Generator | `KGEN-KAIOS/V9.0/AI_WORKORDER_GENERATOR.md` | Draft WorkOrder rules |
+| Human Override | `KGEN-KAIOS/V9.0/AI_HUMAN_OVERRIDE.md` | Human override audit model |
+| Codex Review Boundary | `KGEN-KAIOS/V9.0/AI_CODEX_REVIEW_BOUNDARY.md` | Codex review checks |
+| Runtime Documents | `KGEN-KAIOS/V9.0/runtime/` | Eight advisor runtime documents |
+| Schemas | `KGEN-KAIOS/V9.0/schemas/` | Eight V9.0 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.0/examples/` | Eight parseable examples |
+| Draft WorkOrders | `KGEN-KAIOS/V9.0/workorders/V9_DRAFT_WORKORDERS.md` | V9-DRYRUN-001A/B/C draft tasks |
+| Dry Run Report | `KGEN-KAIOS/V9.0/reports/V9-DRYRUN-001_REPORT.md` | AI dry run result |
+| QA Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_QA_REPORT.md` | Baseline V9.0 QA report |
+| Release Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_RELEASE_REPORT.md` | V9.0 release summary and V9.1 recommendation |
 ## Organization V2.0
 
 | Item | Path | Purpose |

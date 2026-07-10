@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V8.3 Civilization Time Engine
-**Status:** Draft for Review / Time Simulation Prototype
+**Version:** V9.0 Civilization AI Engine
+**Status:** Draft for Review / AI Decision Prototype
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -200,9 +200,40 @@ V8.3 adds time to the KGEN civilization stack. It defines World Clock, Simulatio
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
+
+## V9.0 Civilization AI Engine
+
+V9.0 adds the Civilization AI Engine. It lets AI read Universe State, Civilization State, World Clock, Citizen State, Profession State, Business State, Market State, Exchange State, Bank State, Resource State, Temple Activity, Land Development, Governance Signals, Event Stream, Worker Reports and Codex Review Log, then produce explainable decisions and Draft WorkOrders.
+
+| File | Purpose |
+|---|---|
+| `V9.0/README.md` | V9.0 overview and file map |
+| `V9.0/index.html` | Read-only Civilization AI Viewer |
+| `V9.0/dashboard/index.html` | Read-only Civilization AI Dashboard |
+| `V9.0/CIVILIZATION_AI_ENGINE.md` | Master AI Engine specification |
+| `V9.0/AI_OBSERVATION_MODEL.md` | Observation sources and source quality |
+| `V9.0/AI_REASONING_MODEL.md` | Explainable reasoning procedure |
+| `V9.0/AI_DECISION_MODEL.md` | Decision contract and decision types |
+| `V9.0/AI_MEMORY_MODEL.md` | Short-Term, Task, Civilization, Canon, Decision, Failure and Review Memory |
+| `V9.0/AI_POLICY_MODEL.md` | Allowed and prohibited AI actions |
+| `V9.0/AI_RISK_MODEL.md` | R0 to R4 risk levels |
+| `V9.0/AI_WORKORDER_GENERATOR.md` | Draft WorkOrder generation rules |
+| `V9.0/AI_HUMAN_OVERRIDE.md` | Human override record model |
+| `V9.0/AI_CODEX_REVIEW_BOUNDARY.md` | Codex review checks before work proceeds |
+| `V9.0/runtime/` | Eight advisor runtime documents |
+| `V9.0/schemas/` | Eight JSON Schemas |
+| `V9.0/examples/` | Eight parseable examples |
+| `V9.0/workorders/V9_DRAFT_WORKORDERS.md` | Three V9 dry run Draft WorkOrders |
+| `V9.0/reports/V9-DRYRUN-001_REPORT.md` | V9 dry run report |
+| `V9.0/reports/KAIOS_V9_0_QA_REPORT.md` | V9.0 QA report |
+| `V9.0/reports/KAIOS_V9_0_RELEASE_REPORT.md` | V9.0 release report and V9.1 recommendation |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
 ## Protected Systems
 
-KAIOS V8.3 does not modify:
+KAIOS V9.0 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`
