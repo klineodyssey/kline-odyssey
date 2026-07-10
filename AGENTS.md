@@ -62,7 +62,7 @@ There is no committed ESLint, pytest, or npm test suite. Validation is via:
 
 These rules apply to every future AI / agent / runtime change in this repository.
 
-1. Before any modification, read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`.
+1. Before any modification, read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`.
 2. Treat every Runtime `CURRENT` file as the formal active version.
 3. Do not create duplicate folders for the same function.
 4. Do not add another versioned file for the same function.
@@ -78,7 +78,7 @@ This section is mandatory for every AI / agent / runtime working in this reposit
 
 ### Mandatory read order
 
-1. Read `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`.
+1. Read `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`.
 2. Read `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md`.
 3. Read `C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`.
 4. Read `C:\Desktop\kline-odyssey\AGENTS.md`.
@@ -99,7 +99,7 @@ Before modifying any program file, first check for existing same-function files 
 - Do not create arbitrary patch/fix/hotfix/stable files.
 - Do not add a new bootstrap file when an existing bootstrap exists.
 - Do not add a new Universe Runtime while Runtime CURRENT governs the system.
-- Do not modify Boot V1.4 unless the user explicitly asks for a Boot update.
+- Do not modify Boot CURRENT or preserved Boot ancestors unless the user explicitly asks for a Boot update.
 - Do not commit or push without explicit user approval.
 
 ### KGEN AI work-system docs
