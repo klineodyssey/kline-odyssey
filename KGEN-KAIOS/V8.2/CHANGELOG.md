@@ -6,3 +6,9 @@
 - Added Canon extension from One Temple to One Civilization through economy, business, citizen, transaction and market.
 - Added resource, production, consumption, tax, governance signal, supply chain and economy runtime standards.
 - Established Concept / Prototype / Simulation / Production / Regulated boundary.
+## V8.2 Business Library
+
+- Added Business Standard with 23 business types.
+- Added Market Standard.
+- Added Listing Standard.
+- Added Transaction Standard.
