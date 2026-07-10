@@ -37,13 +37,13 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
-| KAIOS-DRYRUN-001 | REVIEW | Cursor | Codex | P0 | KAIOS | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
+| KAIOS-DRYRUN-001 | DONE | Cursor | Codex | P0 | KAIOS | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
 
 ## KAIOS V7.1 Dry Run WorkOrders
 
 ### KAIOS-DRYRUN-001 - Verify Worker Claim, Handoff Branch, and Codex Review loop
 
-- Status: REVIEW
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
