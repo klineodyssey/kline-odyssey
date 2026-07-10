@@ -23,3 +23,5 @@
 - Returned one DRAFT to `NEEDS_REVISION`.
 - Rejected one overbroad DRAFT.
 - Added V9.1 Dry Run 001 and audit log.
+- Added QA report.
+- Added release report.
