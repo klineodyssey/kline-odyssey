@@ -28,3 +28,8 @@
 - Added read-only Simulation, Timeline and World Clock Viewer at `KGEN-KAIOS/V8.3/`.
 - Added read-only Time Dashboard at `KGEN-KAIOS/V8.3/dashboard/`.
 - Added dashboard configuration and public data-source model.
+
+## V8.3 QA and Release
+
+- Added QA report with JSON, JavaScript, read-only and protected path validation.
+- Added release report with deliverable counts, public URLs and V9.0 Civilization AI Engine recommendation.
