@@ -9,6 +9,11 @@
 
 KGEN AI Company turns KGEN Organization V2.0 from a document organization into a working AI company. Codex manages the company. Cursor works as the execution employee. GitHub files are the only handoff center.
 
+> **Routing (ORG-P2-003 D2/D3):**  
+> This folder is the **live company operating system**.  
+> `KGEN-Agent-Office/` is the daily operations desk (protected paths, prompts, legacy templates).  
+> Primary report intake is `KGEN-AI-Company/reports/`.
+
 ## First Day Startup
 
 The human operator only needs to paste this into Cursor Agent:
