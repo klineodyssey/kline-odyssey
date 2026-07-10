@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V8.2 Civilization Economy Engine
-**Status:** Draft for Review / Economy Simulation Prototype
+**Version:** V8.3 Civilization Time Engine
+**Status:** Draft for Review / Time Simulation Prototype
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -170,9 +170,39 @@ V8.2 adds the first full civilization economy layer on top of the V8.1 Universe 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
+
+## V8.3 Civilization Time Engine
+
+V8.3 adds time to the KGEN civilization stack. It defines World Clock, Simulation Tick, Day/Night Cycle, Season System, Citizen Behavior, Business Behavior, Temple Activity, Resource Regeneration, Population Growth, Event Engine, Disaster Standard, Governance Response and a read-only Simulation Viewer.
+
+| File | Purpose |
+|---|---|
+| `V8.3/README.md` | V8.3 overview and file map |
+| `V8.3/index.html` | Read-only Simulation, Timeline and World Clock Viewer |
+| `V8.3/dashboard/index.html` | Read-only Time Dashboard |
+| `V8.3/TIME_ENGINE.md` | Master Civilization Time Engine specification |
+| `V8.3/WORLD_CLOCK_STANDARD.md` | Universe, Civilization, World, Temple, Business and Citizen time layers |
+| `V8.3/SIMULATION_TICK_STANDARD.md` | Tick scale and execution order |
+| `V8.3/DAY_NIGHT_CYCLE.md` | Day and night behavior model |
+| `V8.3/SEASON_SYSTEM.md` | Season cycle and economy impact |
+| `V8.3/CITIZEN_BEHAVIOR.md` | Citizen actions per Tick |
+| `V8.3/BUSINESS_BEHAVIOR.md` | Business actions per Tick |
+| `V8.3/TEMPLE_ACTIVITY.md` | Temple services, faith value, population attraction and civilization impact |
+| `V8.3/RESOURCE_REGENERATION.md` | Natural recovery, consumption and regeneration |
+| `V8.3/EVENT_ENGINE.md` | Festival, War concept, Disaster, Discovery, Technology, Migration, Economic Boom and Recession |
+| `V8.3/GOVERNANCE_RESPONSE.md` | Governance signal evaluation and response |
+| `V8.3/SIMULATION_RUNTIME.md` | Runtime flow from clock to timeline snapshot |
+| `V8.3/schemas/` | Ten JSON Schemas |
+| `V8.3/examples/` | Ten parseable examples |
+| `V8.3/reports/KAIOS_V8_3_QA_REPORT.md` | V8.3 QA report |
+| `V8.3/reports/KAIOS_V8_3_RELEASE_REPORT.md` | V8.3 release report and V9.0 recommendation |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
 ## Protected Systems
 
-KAIOS V8.2 does not modify:
+KAIOS V8.3 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

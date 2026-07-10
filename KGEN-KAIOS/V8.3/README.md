@@ -78,6 +78,28 @@ Every V8.3 time-aware entity must define:
 
 https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/
 
+## Dashboard URL
+
+https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
+
+## Core Counts
+
+| Item | Count |
+|---|---:|
+| Time layers | 6 |
+| Tick scales | 8 |
+| Event types | 8 |
+| JSON Schemas | 10 |
+| JSON Examples | 10 |
+| Simulation Runtime documents | 1 |
+
+## Primary Entry Files
+
+- Simulation Viewer: `index.html`
+- Time Dashboard: `dashboard/index.html`
+- QA Report: `reports/KAIOS_V8_3_QA_REPORT.md`
+- Release Report: `reports/KAIOS_V8_3_RELEASE_REPORT.md`
+
 ## Boundary
 
 V8.3 is Concept / Prototype / Simulation unless future governed releases promote a module to Production. It does not operate live markets, wallets, real banking, regulated services, emergency systems or real-world disaster response. War, disaster, investment, bank and exchange terms are simulation vocabulary only.

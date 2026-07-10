@@ -22,6 +22,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
+| KAIOS V8.3 Civilization Time Engine | `KGEN-KAIOS/V8.3/` | World Clock, Simulation Tick, Timeline, citizen and business behavior, temple activity, resource regeneration, event engine, governance response, schemas and read-only viewer |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -136,6 +137,32 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Examples | `KGEN-KAIOS/V8.2/examples/` | Eight parseable examples |
 | QA Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_QA_REPORT.md` | Baseline V8.2 QA report |
 | Release Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_RELEASE_REPORT.md` | V8.2 release summary and V8.3 recommendation |
+
+## KAIOS V8.3 Civilization Time Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.3 Index | `KGEN-KAIOS/V8.3/README.md` | V8.3 overview and file map |
+| Simulation Viewer | `KGEN-KAIOS/V8.3/index.html` | Read-only Simulation, Timeline and World Clock Viewer |
+| Time Dashboard | `KGEN-KAIOS/V8.3/dashboard/index.html` | Read-only time health and event dashboard |
+| Time Engine | `KGEN-KAIOS/V8.3/TIME_ENGINE.md` | Master Civilization Time Engine specification |
+| World Clock Standard | `KGEN-KAIOS/V8.3/WORLD_CLOCK_STANDARD.md` | Universe, Civilization, World, Temple, Business and Citizen clocks |
+| Simulation Tick Standard | `KGEN-KAIOS/V8.3/SIMULATION_TICK_STANDARD.md` | Tick scale, configurable tick rate and execution order |
+| Day Night Cycle | `KGEN-KAIOS/V8.3/DAY_NIGHT_CYCLE.md` | Daily activity rhythm |
+| Season System | `KGEN-KAIOS/V8.3/SEASON_SYSTEM.md` | Seasonal resource and economy modifiers |
+| Citizen Behavior | `KGEN-KAIOS/V8.3/CITIZEN_BEHAVIOR.md` | Work, consume, rest, move, learn, trade and upgrade actions |
+| Business Behavior | `KGEN-KAIOS/V8.3/BUSINESS_BEHAVIOR.md` | Production, restock, income, expense and employee changes |
+| Temple Activity | `KGEN-KAIOS/V8.3/TEMPLE_ACTIVITY.md` | Service, faith value, population attraction and civilization influence |
+| Resource Regeneration | `KGEN-KAIOS/V8.3/RESOURCE_REGENERATION.md` | Natural recovery, consumption and regeneration |
+| Population Growth | `KGEN-KAIOS/V8.3/POPULATION_GROWTH.md` | Migration, training, residence expansion and archive signals |
+| Event Engine | `KGEN-KAIOS/V8.3/EVENT_ENGINE.md` | Festival, War concept, Disaster, Discovery, Technology, Migration, Economic Boom and Recession |
+| Disaster Standard | `KGEN-KAIOS/V8.3/DISASTER_STANDARD.md` | Negative shock classification and recovery boundary |
+| Governance Response | `KGEN-KAIOS/V8.3/GOVERNANCE_RESPONSE.md` | GDP, population, unemployment, resource, temple and market response model |
+| Simulation Runtime | `KGEN-KAIOS/V8.3/SIMULATION_RUNTIME.md` | Runtime flow from clock to governance response and timeline snapshot |
+| Schemas | `KGEN-KAIOS/V8.3/schemas/` | Ten V8.3 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.3/examples/` | Ten parseable examples |
+| QA Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md` | Baseline V8.3 QA report |
+| Release Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_RELEASE_REPORT.md` | V8.3 release summary and V9.0 recommendation |
 ## Organization V2.0
 
 | Item | Path | Purpose |

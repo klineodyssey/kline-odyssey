@@ -79,6 +79,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
+| KAIOS V8.3 Civilization Time Engine | [KGEN-KAIOS/V8.3/](KGEN-KAIOS/V8.3/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -169,6 +170,24 @@ KAIOS V8.2 builds the Civilization Economy Engine on top of the V8.1 Universe Da
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
 
 V8.2 is a Draft for Review / Economy Simulation Prototype. Bank, exchange, market, investment, lending, interest, NFT, token and listing operations remain Concept / Prototype / Simulation until future legal, security, governance and compliance review.
+
+### KAIOS V8.3 Civilization Time Engine
+
+KAIOS V8.3 adds World Clock, Simulation Tick, Timeline, Citizen Behavior, Business Behavior, Temple Activity, Resource Regeneration, Event Engine and Governance Response to the KGEN civilization stack.
+
+- Simulation Viewer: [KGEN-KAIOS/V8.3/index.html](KGEN-KAIOS/V8.3/index.html)
+- Time Dashboard: [KGEN-KAIOS/V8.3/dashboard/index.html](KGEN-KAIOS/V8.3/dashboard/index.html)
+- Time Engine: [KGEN-KAIOS/V8.3/TIME_ENGINE.md](KGEN-KAIOS/V8.3/TIME_ENGINE.md)
+- World Clock Standard: [KGEN-KAIOS/V8.3/WORLD_CLOCK_STANDARD.md](KGEN-KAIOS/V8.3/WORLD_CLOCK_STANDARD.md)
+- Simulation Tick Standard: [KGEN-KAIOS/V8.3/SIMULATION_TICK_STANDARD.md](KGEN-KAIOS/V8.3/SIMULATION_TICK_STANDARD.md)
+- Event Engine: [KGEN-KAIOS/V8.3/EVENT_ENGINE.md](KGEN-KAIOS/V8.3/EVENT_ENGINE.md)
+- Governance Response: [KGEN-KAIOS/V8.3/GOVERNANCE_RESPONSE.md](KGEN-KAIOS/V8.3/GOVERNANCE_RESPONSE.md)
+- Schemas: [KGEN-KAIOS/V8.3/schemas/world_clock.schema.json](KGEN-KAIOS/V8.3/schemas/world_clock.schema.json)
+- QA Report: [KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md](KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
+
+V8.3 is a Draft for Review / Time Simulation Prototype. War, disaster, bank, exchange, market and governance terms are simulation language only.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.
