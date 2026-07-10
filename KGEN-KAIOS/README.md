@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V8.1 Universe Data Layer
-**Status:** Draft for Review / Data Layer Prototype
+**Version:** V8.2 Civilization Economy Engine
+**Status:** Draft for Review / Economy Simulation Prototype
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -144,9 +144,35 @@ V8.1 adds the living data layer for the KGEN Universe. It defines unique IDs, en
 | `V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | V8.1 QA report |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/
+
+## V8.2 Civilization Economy Engine
+
+V8.2 adds the first full civilization economy layer on top of the V8.1 Universe Data Layer. It defines how Temple, Land, Residence, Citizen, Profession, Production, Business, Market, Exchange, Bank, Investment, Governance and Civilization Growth form a readable simulation loop.
+
+| File | Purpose |
+|---|---|
+| `V8.2/README.md` | V8.2 overview and file map |
+| `V8.2/index.html` | Read-only Economy Viewer |
+| `V8.2/dashboard/index.html` | Read-only Civilization Economy Dashboard |
+| `V8.2/ECONOMY_ENGINE.md` | Master economy engine specification |
+| `V8.2/RESOURCE_STANDARD.md` | Food, Wood, Stone, Metal, Energy, Knowledge, Data, AI Compute, Gold, KGEN, Temple Point and Civilization Point model |
+| `V8.2/BUSINESS_STANDARD.md` | 23-type Business Library and business record rules |
+| `V8.2/MARKET_STANDARD.md` | Market operations and price discovery simulation |
+| `V8.2/BANK_STANDARD.md` | Bank and treasury simulation boundary |
+| `V8.2/EXCHANGE_STANDARD.md` | Huaguo Mountain Exchange 11520 and asset market boundary |
+| `V8.2/GOVERNANCE_SIGNAL_STANDARD.md` | GDP, population, employment, temple activity, market activity, civilization health and AI activity |
+| `V8.2/runtime/` | Six runtime documents for economy, business, market, bank, exchange and governance signals |
+| `V8.2/schemas/` | Eight JSON Schemas |
+| `V8.2/examples/` | Eight parseable examples |
+| `V8.2/reports/KAIOS_V8_2_QA_REPORT.md` | V8.2 QA report |
+| `V8.2/reports/KAIOS_V8_2_RELEASE_REPORT.md` | V8.2 release report and V8.3 recommendation |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
 ## Protected Systems
 
-KAIOS V8.1 does not modify:
+KAIOS V8.2 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

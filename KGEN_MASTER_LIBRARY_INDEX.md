@@ -21,6 +21,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
+| KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -109,6 +110,32 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Examples | `KGEN-KAIOS/V8.1/examples/` | Eight parseable examples |
 | QA Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | Baseline V8.1 QA report |
 | Release Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_RELEASE_REPORT.md` | V8.1 release summary and V8.2 recommendation |
+
+## KAIOS V8.2 Civilization Economy Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.2 Index | `KGEN-KAIOS/V8.2/README.md` | V8.2 overview and file map |
+| Economy Viewer | `KGEN-KAIOS/V8.2/index.html` | Read-only Economy Viewer |
+| Economy Dashboard | `KGEN-KAIOS/V8.2/dashboard/index.html` | Read-only Temple, Citizen, Market, Business, Resource and Civilization Health dashboard |
+| Economy Engine | `KGEN-KAIOS/V8.2/ECONOMY_ENGINE.md` | Master Civilization Economy Engine specification |
+| Resource Standard | `KGEN-KAIOS/V8.2/RESOURCE_STANDARD.md` | Resource classes and accounting |
+| Production Standard | `KGEN-KAIOS/V8.2/PRODUCTION_STANDARD.md` | Profession-to-business output model |
+| Consumption Standard | `KGEN-KAIOS/V8.2/CONSUMPTION_STANDARD.md` | Citizen, business and civilization consumption model |
+| Business Standard | `KGEN-KAIOS/V8.2/BUSINESS_STANDARD.md` | 23-type Business Library and business record requirements |
+| Market Standard | `KGEN-KAIOS/V8.2/MARKET_STANDARD.md` | Buy, sell, auction concept, order book concept, price discovery and liquidity concept |
+| Exchange Standard | `KGEN-KAIOS/V8.2/EXCHANGE_STANDARD.md` | Huaguo Mountain Exchange 11520 and civilization marketplace boundary |
+| Bank Standard | `KGEN-KAIOS/V8.2/BANK_STANDARD.md` | Deposit simulation, withdraw simulation, reserve, loan concept, interest concept and treasury boundary |
+| Tax Standard | `KGEN-KAIOS/V8.2/TAX_STANDARD.md` | Citizen, business, temple and civilization tax signals |
+| Listing Standard | `KGEN-KAIOS/V8.2/LISTING_STANDARD.md` | Listing rules for simulated economy objects |
+| Transaction Standard | `KGEN-KAIOS/V8.2/TRANSACTION_STANDARD.md` | Transaction event model and settlement boundary |
+| Governance Signal Standard | `KGEN-KAIOS/V8.2/GOVERNANCE_SIGNAL_STANDARD.md` | GDP, population, employment, temple activity, market activity, civilization health and AI activity |
+| Supply Chain Standard | `KGEN-KAIOS/V8.2/SUPPLY_CHAIN_STANDARD.md` | Producer, logistics, warehouse, retail, consumer and recycling flow |
+| Runtime Documents | `KGEN-KAIOS/V8.2/runtime/` | Six runtime documents for economy, business, market, bank, exchange and governance signal processing |
+| Schemas | `KGEN-KAIOS/V8.2/schemas/` | Eight V8.2 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.2/examples/` | Eight parseable examples |
+| QA Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_QA_REPORT.md` | Baseline V8.2 QA report |
+| Release Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_RELEASE_REPORT.md` | V8.2 release summary and V8.3 recommendation |
 ## Organization V2.0
 
 | Item | Path | Purpose |

@@ -67,6 +67,27 @@ Temple
 
 https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/
 
+## Dashboard URL
+
+https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
+
+## Core Counts
+
+| Item | Count |
+|---|---:|
+| Business Library types | 23 |
+| Resource types | 12 |
+| JSON Schemas | 8 |
+| JSON Examples | 8 |
+| Runtime documents | 6 |
+
+## Primary Entry Files
+
+- Economy Viewer: `index.html`
+- Dashboard: `dashboard/index.html`
+- QA Report: `reports/KAIOS_V8_2_QA_REPORT.md`
+- Release Report: `reports/KAIOS_V8_2_RELEASE_REPORT.md`
+
 ## Boundary
 
 V8.2 is Concept / Prototype / Simulation unless a future file explicitly promotes a module to Production after legal, security, governance and compliance review. It does not operate real banking, lending, securities, regulated exchange, payment processing or real asset custody.

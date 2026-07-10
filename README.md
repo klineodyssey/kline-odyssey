@@ -78,6 +78,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
+| KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -150,6 +151,24 @@ KAIOS V8.1 establishes the living data layer for KGEN Universe Graph records. Ev
 - Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/
 
 V8.1 is a Draft for Review / Data Layer Prototype. It stores and displays relationships; it does not mint assets, run wallets, execute trades, operate a bank or create regulated rights.
+
+### KAIOS V8.2 Civilization Economy Engine
+
+KAIOS V8.2 builds the Civilization Economy Engine on top of the V8.1 Universe Data Layer. It defines how Temple, Land, Residence, Citizen, Profession, Business, Market, Exchange, Bank, Investment and Governance form a simulated civilization economy loop.
+
+- Economy Viewer: [KGEN-KAIOS/V8.2/index.html](KGEN-KAIOS/V8.2/index.html)
+- Read-only Dashboard: [KGEN-KAIOS/V8.2/dashboard/index.html](KGEN-KAIOS/V8.2/dashboard/index.html)
+- Economy Engine: [KGEN-KAIOS/V8.2/ECONOMY_ENGINE.md](KGEN-KAIOS/V8.2/ECONOMY_ENGINE.md)
+- Business Standard: [KGEN-KAIOS/V8.2/BUSINESS_STANDARD.md](KGEN-KAIOS/V8.2/BUSINESS_STANDARD.md)
+- Bank Standard: [KGEN-KAIOS/V8.2/BANK_STANDARD.md](KGEN-KAIOS/V8.2/BANK_STANDARD.md)
+- Exchange Standard: [KGEN-KAIOS/V8.2/EXCHANGE_STANDARD.md](KGEN-KAIOS/V8.2/EXCHANGE_STANDARD.md)
+- Runtime Documents: [KGEN-KAIOS/V8.2/runtime/README.md](KGEN-KAIOS/V8.2/runtime/README.md)
+- Schemas: [KGEN-KAIOS/V8.2/schemas/economy.schema.json](KGEN-KAIOS/V8.2/schemas/economy.schema.json)
+- QA Report: [KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_QA_REPORT.md](KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
+
+V8.2 is a Draft for Review / Economy Simulation Prototype. Bank, exchange, market, investment, lending, interest, NFT, token and listing operations remain Concept / Prototype / Simulation until future legal, security, governance and compliance review.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.
