@@ -239,6 +239,21 @@ KAIOS V9.2 creates the Codex-only sync layer from V9.1 `APPROVED_FOR_OPEN` decis
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/
 
 V9.2 synced `V9-DRYRUN-001A` into WorkQueue as `AI-ECONOMY-2026-0001` with `Dispatch Hold: true`. It does not auto-execute the new OPEN task.
+
+### KAIOS V9.3 Dispatch Hold Release Protocol
+
+KAIOS V9.3 adds the Codex-only release gate for tasks that are already `OPEN` but still dispatch-held. It validates sync evidence, risk, dependencies, Worker eligibility, Human Pause and audit records before a task becomes claimable.
+
+- V9.3 Entry: [KGEN-KAIOS/V9.3/index.html](KGEN-KAIOS/V9.3/index.html)
+- Dispatch Dashboard: [KGEN-KAIOS/V9.3/dashboard/index.html](KGEN-KAIOS/V9.3/dashboard/index.html)
+- Release Protocol: [KGEN-KAIOS/V9.3/CODEX_RELEASE_PROTOCOL.md](KGEN-KAIOS/V9.3/CODEX_RELEASE_PROTOCOL.md)
+- Release Review: [KGEN-KAIOS/V9.3/reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md](KGEN-KAIOS/V9.3/reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md)
+- Release Result: [KGEN-KAIOS/V9.3/release/AI-ECONOMY-2026-0001_release_result.json](KGEN-KAIOS/V9.3/release/AI-ECONOMY-2026-0001_release_result.json)
+- QA Report: [KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_QA_REPORT.md](KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/
+
+V9.3 released `AI-ECONOMY-2026-0001` to `Dispatch Hold: false`, `dispatch_status: RELEASED`, `claimable: true`. It does not auto-execute or merge the task.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

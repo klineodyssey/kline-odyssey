@@ -248,6 +248,28 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Dry Run Report | `KGEN-KAIOS/V9.2/reports/V9_2_DRYRUN_001_REPORT.md` | Successful sync, conflict, Human pause and rollback tests |
 | QA Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_QA_REPORT.md` | V9.2 QA result |
 | Release Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_RELEASE_REPORT.md` | V9.2 release summary |
+
+## KAIOS V9.3 Dispatch Hold Release Protocol
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.3 Index | `KGEN-KAIOS/V9.3/README.md` | V9.3 overview and file map |
+| V9.3 Entry | `KGEN-KAIOS/V9.3/index.html` | Read-only V9.3 public entry |
+| V9.3 Dashboard | `KGEN-KAIOS/V9.3/dashboard/index.html` | Read-only dispatch dashboard |
+| Dispatch Hold Standard | `KGEN-KAIOS/V9.3/DISPATCH_HOLD_STANDARD.md` | `OPEN + HOLD` meaning and release boundary |
+| Codex Release Protocol | `KGEN-KAIOS/V9.3/CODEX_RELEASE_PROTOCOL.md` | 20-point release checklist |
+| Worker Eligibility | `KGEN-KAIOS/V9.3/WORKER_ELIGIBILITY_PROTOCOL.md` | Worker claim eligibility rules |
+| Dependency Gate | `KGEN-KAIOS/V9.3/DISPATCH_DEPENDENCY_GATE.md` | Dependency validation |
+| Risk Gate | `KGEN-KAIOS/V9.3/DISPATCH_RISK_GATE.md` | R0-R4 release authority |
+| Schemas | `KGEN-KAIOS/V9.3/schemas/` | Nine V9.3 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.3/examples/` | Nine parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.3/runtime/` | Nine dispatch runtime documents |
+| Release Artifacts | `KGEN-KAIOS/V9.3/release/` | `AI-ECONOMY-2026-0001` release request, validation, result and gates |
+| Release Review | `KGEN-KAIOS/V9.3/reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md` | Actual release review |
+| Dispatch Audit Log | `KGEN-KAIOS/V9.3/reports/V9_3_DISPATCH_AUDIT_LOG.md` | Release audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.3/reports/V9_3_DRYRUN_001_REPORT.md` | Release, pause, re-hold and R4 tests |
+| QA Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_QA_REPORT.md` | V9.3 QA result |
+| Release Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_RELEASE_REPORT.md` | V9.3 release summary |
 ## Organization V2.0
 
 | Item | Path | Purpose |

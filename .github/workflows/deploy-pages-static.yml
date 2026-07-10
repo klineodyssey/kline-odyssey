@@ -181,6 +181,18 @@ jobs:
             "kaios_version": "V9.2"
           }
           EOF
+
+          mkdir -p "_site/KGEN-KAIOS/V9.3"
+          cat > "_site/KGEN-KAIOS/V9.3/build-info.json" <<EOF
+          {
+            "main_commit": "${GITHUB_SHA}",
+            "branch": "${GITHUB_REF_NAME}",
+            "workflow": "deploy-pages-static.yml",
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "mode": "read-only",
+            "kaios_version": "V9.3"
+          }
+          EOF
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"

@@ -287,6 +287,31 @@ V9.2 adds the Codex-only sync layer that converts V9.1 `APPROVED_FOR_OPEN` decis
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/
+
+## V9.3 Dispatch Hold Release Protocol
+
+V9.3 adds the Codex-only release layer for tasks that are already synced into the WorkQueue as `OPEN` but remain protected by `Dispatch Hold: true`. It releases the task only after dependency, risk, worker eligibility, human pause and audit gates pass.
+
+| File | Purpose |
+|---|---|
+| `V9.3/README.md` | V9.3 overview and file map |
+| `V9.3/index.html` | Read-only V9.3 entry page |
+| `V9.3/dashboard/index.html` | Read-only dispatch dashboard |
+| `V9.3/DISPATCH_HOLD_STANDARD.md` | Meaning of dispatch hold and release |
+| `V9.3/CODEX_RELEASE_PROTOCOL.md` | Codex 20-point release checklist |
+| `V9.3/WORKER_ELIGIBILITY_PROTOCOL.md` | Worker eligibility rules |
+| `V9.3/DISPATCH_DEPENDENCY_GATE.md` | Dependency gate |
+| `V9.3/DISPATCH_RISK_GATE.md` | R0-R4 risk gate |
+| `V9.3/schemas/` | Nine JSON Schemas |
+| `V9.3/examples/` | Nine parseable examples |
+| `V9.3/runtime/` | Nine dispatch runtime documents |
+| `V9.3/release/` | Actual release artifacts for `AI-ECONOMY-2026-0001` |
+| `V9.3/reports/KAIOS_V9_3_QA_REPORT.md` | V9.3 QA report |
+| `V9.3/reports/KAIOS_V9_3_RELEASE_REPORT.md` | V9.3 release report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/
 ## Protected Systems
 
 KAIOS V9.2 does not modify:
