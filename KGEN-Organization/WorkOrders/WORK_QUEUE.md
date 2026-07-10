@@ -90,7 +90,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 | ORG-P2-003A | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003A_WORKQUEUE_ALIAS_PLAN.md |
 | ORG-P2-003B | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md |
 | ORG-P2-003C | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
-| ORG-P2-003D | OPEN | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
+| ORG-P2-003D | REVIEW | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
 | ORG-P2-003E | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
@@ -306,7 +306,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-003D - Draft legacy temple and physics-copy reference policy
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
