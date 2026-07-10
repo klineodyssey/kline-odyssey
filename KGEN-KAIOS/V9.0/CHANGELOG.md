@@ -25,3 +25,9 @@
 - Added read-only Civilization AI Viewer at `KGEN-KAIOS/V9.0/`.
 - Added read-only Civilization AI Dashboard at `KGEN-KAIOS/V9.0/dashboard/`.
 - Added dashboard configuration and public data-source model.
+
+## V9.0 Dry Run
+
+- Added V9-DRYRUN-001 for Economic Recession, Resource Shortage, Temple Activity Decline and Unemployment Increase.
+- Added three Draft WorkOrders: V9-DRYRUN-001A, V9-DRYRUN-001B and V9-DRYRUN-001C.
+- Confirmed dry run waits for Codex Review and does not execute actions.
