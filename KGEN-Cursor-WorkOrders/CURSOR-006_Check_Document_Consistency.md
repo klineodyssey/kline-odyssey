@@ -23,7 +23,7 @@
 - `K線西遊記/temples/12345`
 - `wallet`
 - `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - Existing files under `docs/physics/final-whitepaper`
 

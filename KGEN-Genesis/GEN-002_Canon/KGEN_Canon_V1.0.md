@@ -27,7 +27,7 @@
 ## Dependencies
 
 - [Root Master README](../../README.md)
-- [PrimeForge Genesis Boot Sequence V1.4](../../PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md)
+- [PrimeForge Genesis Boot Sequence V1.4](../../PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md)
 - [Runtime CURRENT](../../docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md)
 - [Official V4.0 Final Whitepaper](../../docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.md)
 - [Universe Map V10.2](../../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json)

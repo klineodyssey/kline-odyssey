@@ -6,6 +6,8 @@
 **Primary Queue:** `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
 **Report Center:** `KGEN-AI-Company/reports/`
 **Review Log:** `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
+**Boot Entry:** `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+**Public Entry:** https://klineodyssey.github.io/kline-odyssey/ai-company/
 
 KGEN AI Company turns KGEN Organization V2.0 from a document organization into a working AI company. Codex manages the company. Cursor works as the execution employee. GitHub files are the only handoff center.
 
@@ -23,6 +25,17 @@ gi，上班
 ```
 
 After that, Cursor must pull `origin/main`, read the AI Company boot files, find the first OPEN WorkOrder, move it to IN_PROGRESS, execute it, write a report, push `cursor-handoff/<Task-ID>`, move it to REVIEW, and wait for Codex.
+
+## Stable Boot and Public Routes
+
+| Entry | Path |
+|---|---|
+| PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` |
+| Public Boot Portal | `boot/` |
+| Operating Center | `operating-center/` |
+| AI Company Portal | `ai-company/` |
+| WorkQueue Portal | `workqueue/` |
+| Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` |
 
 ## Operating Files
 

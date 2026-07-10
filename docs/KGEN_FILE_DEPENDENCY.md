@@ -1,7 +1,7 @@
-﻿# KGEN File Dependency
+# KGEN File Dependency
 
 Generated: 2026-07-05 12:23:08 +08:00
-Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 This file records the currently observed dependency graph. It is an index document only and does not execute or modify runtime code.
 
@@ -19,11 +19,11 @@ Rules:
 ## Dependency Graph
 | Source | Depends On | Type | Notes |
 |---|---|---|---|
-| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | `C:\Desktop\kline-odyssey\docs\Whitepaper\PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md` | Governance | Boot requires Multiverse Whitepaper as primary civilization context. |
-| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md` | Governance | Boot V1.4 makes CURRENT the active Physics Runtime gateway. |
-| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | `C:\Desktop\kline-odyssey\docs\spec\KGEN_Runtime_Specification_V1_0.md` | Governance | Implementation must follow Runtime Specification. |
-| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | `C:\Desktop\kline-odyssey\SOP\PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md` | Governance | Runtime building and self-healing SOP. |
-| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | `C:\Desktop\kline-odyssey\neural\NEURAL_MAP.json` | Index | Neural map is lower-priority than Boot but required for dependency awareness. |
+| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | `C:\Desktop\kline-odyssey\docs\Whitepaper\PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md` | Governance | Boot requires Multiverse Whitepaper as primary civilization context. |
+| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md` | Governance | Boot V1.4 makes CURRENT the active Physics Runtime gateway. |
+| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | `C:\Desktop\kline-odyssey\docs\spec\KGEN_Runtime_Specification_V1_0.md` | Governance | Implementation must follow Runtime Specification. |
+| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | `C:\Desktop\kline-odyssey\SOP\PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md` | Governance | Runtime building and self-healing SOP. |
+| `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | `C:\Desktop\kline-odyssey\neural\NEURAL_MAP.json` | Index | Neural map is lower-priority than Boot but required for dependency awareness. |
 | `C:\Desktop\kline-odyssey\docs\spec\KGEN_Runtime_Specification_V1_0.md` | `C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json` | Data | Universe Map Renderer and JSON Runtime Loader consume map data. |
 | `C:\Desktop\kline-odyssey\K線西遊記\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\data\kgen-5d-world-map.json` | Frontend Data | Galaxy portal fetches 5D world map. |
 | `C:\Desktop\kline-odyssey\K線西遊記\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html` | Navigation | Galaxy portal links to 12345 Universe Core. |
@@ -495,7 +495,7 @@ Rules:
 | Runtime | `C:\Desktop\kline-odyssey\neural\README.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Runtime | `C:\Desktop\kline-odyssey\neural\RUNTIME_DEPENDENCY.json` | Runtime 載入順序與 12345 Temple 實際依賴記錄。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 正式 Runtime Dependency 索引 |
 | JSON | `C:\Desktop\kline-odyssey\PACKAGE_MANIFEST.txt` | 聲音、字幕或文字內容資產。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
 | Markdown | `C:\Desktop\kline-odyssey\README.handbook.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Markdown | `C:\Desktop\kline-odyssey\README.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Markdown | `C:\Desktop\kline-odyssey\README_V10_30_MASTER_STABLE.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
@@ -588,7 +588,7 @@ Rules:
 
 ## KGEN Permanent Knowledge Base Registration - 2026-07-05
 
-Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 The following permanent KGEN knowledge-base files were created from a Boot V1.4 repository scan. They are documentation/governance files only; no program source is modified by this registration.
 
@@ -651,5 +651,5 @@ graph TD
 |---|---|
 | Temple 12345 wallet / bridge / Heart runtime | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\K線西遊記\temples\12345`. |
 | Contracts | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\KGEN\contracts`. |
-| Boot V1.4 | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`. |
+| Boot V1.4 | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`. |
 | Runtime CURRENT | PASS: registration commit does not modify `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md`. |

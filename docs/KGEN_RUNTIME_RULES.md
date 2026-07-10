@@ -4,7 +4,7 @@ Generated: 2026-07-05
 Purpose: enforce KGEN AI operating rules before any runtime or program work.
 
 ## Mandatory Read Order
-1. Read Boot V1.4: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+1. Read Boot V1.4: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 2. Read Runtime CURRENT: C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md
 3. Read Universe Map: C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json
 4. Read AGENTS: C:\Desktop\kline-odyssey\AGENTS.md
@@ -38,7 +38,7 @@ Purpose: enforce KGEN AI operating rules before any runtime or program work.
 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html | Protected source of truth; update only with explicit approval and Boot-aligned process. |
 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\modules\runtime-bootstrap.js | Protected source of truth; update only with explicit approval and Boot-aligned process. |
 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\modules\runtime-main.js | Protected source of truth; update only with explicit approval and Boot-aligned process. |
-| C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md | Do not modify Boot unless user explicitly authorizes a Boot update. |
+| C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md | Do not modify Boot unless user explicitly authorizes a Boot update. |
 | C:\Desktop\kline-odyssey\SOP\PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md | Protected source of truth; update only with explicit approval and Boot-aligned process. |
 | C:\Desktop\kline-odyssey\docs\biology\KGEN_Civilization_Biology_Runtime_V1_0.md | Protected source of truth; update only with explicit approval and Boot-aligned process. |
 | C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json | Protected source of truth; update only with explicit approval and Boot-aligned process. |
@@ -88,7 +88,7 @@ Purpose: enforce KGEN AI operating rules before any runtime or program work.
 | 30 | C:\Desktop\kline-odyssey\docs\runtime\KGEN_Runtime_Boot_Sequence_V1_0.md | Runtime | Markdown documentation. | formal/current | Protected source of truth; update only with explicit approval and Boot-aligned process. | count=26: KGEN_AI_RULES.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>KGEN_RUNTIME_TREE.md<br>... |
 | 31 | C:\Desktop\kline-odyssey\docs\runtime\KGEN_UFO_Runtime_Control_System_V3_0.md | Runtime | Markdown documentation. | formal/current | Protected source of truth; update only with explicit approval and Boot-aligned process. | count=15: KGEN_AI_RULES.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>KGEN_RUNTIME_TREE.md<br>... |
 | 32 | C:\Desktop\kline-odyssey\docs\spec\KGEN_Runtime_Specification_V1_0.md | Runtime | Markdown documentation. | formal/current | Protected source of truth; update only with explicit approval and Boot-aligned process. | count=10: KGEN_AI_RULES.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>KGEN_RUNTIME_TREE.md<br>... |
-| 33 | C:\Desktop\kline-odyssey\docs\Whitepaper\PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md | Whitepaper | Markdown documentation. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=8: KGEN_AI_RULES.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md<br>... |
+| 33 | C:\Desktop\kline-odyssey\docs\Whitepaper\PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md | Whitepaper | Markdown documentation. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=8: KGEN_AI_RULES.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md<br>... |
 | 34 | C:\Desktop\kline-odyssey\KGEN\archive\KGEN_DailyIgnite_V1.sol | Contract | Historical archive; do not use as current entry. | historical/archive | Historical archive; do not rewrite. | count=5: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_SYSTEM_INDEX.md |
 | 35 | C:\Desktop\kline-odyssey\KGEN\contracts\archive\KGEN_RewardVault_V1.sol | Contract | KGEN Solidity contract source. | historical/archive | Historical archive; do not rewrite. | count=6: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_RUNTIME_INDEX.md<br>... |
 | 36 | C:\Desktop\kline-odyssey\KGEN\contracts\archive\KGEN_TempleHeart_V3_2_3.sol | Contract | KGEN Solidity contract source. | historical/archive | Historical archive; do not rewrite. | count=6: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>docs/KGEN_FILE_DEPENDENCY.md<br>docs/KGEN_RUNTIME_INDEX.md<br>... |

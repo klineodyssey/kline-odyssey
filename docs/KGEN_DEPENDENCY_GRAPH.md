@@ -23,7 +23,7 @@ Generated: 2026-07-05
 | C:\Desktop\kline-odyssey\docs\KGEN_TEMPLE_12345_MAP.md | 18 | str | C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-land-engine.js | C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-land-engine.js |
 | C:\Desktop\kline-odyssey\KGEN\README.md | 107 | md | whitepaper/SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md | C:\Desktop\kline-odyssey\KGEN\whitepaper\SOP\KGEN_Cosmic_Vitals_SOP_V1_0.md |
 | C:\Desktop\kline-odyssey\KGEN\whitepaper\README.md | 52 | md | SOP/KGEN_Cosmic_Vitals_SOP_V1_0.md | C:\Desktop\kline-odyssey\KGEN\whitepaper\SOP\KGEN_Cosmic_Vitals_SOP_V1_0.md |
-| C:\Desktop\kline-odyssey\KGEN_BOOT_GRAPH.md | 9 | str | PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md | C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md |
+| C:\Desktop\kline-odyssey\KGEN_BOOT_GRAPH.md | 9 | str | PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md | C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md |
 | C:\Desktop\kline-odyssey\KGEN_MODULE_MAP.md | 602 | str | C:\Desktop\kline-odyssey\K線西遊記\index.html | C:\Desktop\kline-odyssey\K線西遊記\index.html |
 | C:\Desktop\kline-odyssey\KGEN_MODULE_MAP.md | 602 | str | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html |
 | C:\Desktop\kline-odyssey\KGEN_MODULE_MAP.md | 610 | str | C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-land-engine.js | C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-land-engine.js |
@@ -656,7 +656,7 @@ Generated: 2026-07-05
 | C:\Desktop\kline-odyssey\archive\site_v0_genesis\index.md | 28 | md | disclaimer.html | C:\Desktop\kline-odyssey\archive\site_v0_genesis\disclaimer.html |
 | C:\Desktop\kline-odyssey\archive\site_v0_genesis\README2.md | 194 | md | whitepaper/GENESIS_INSCRIPTION_V7.5_GENESIS_01.md | C:\Desktop\kline-odyssey\archive\site_v0_genesis\whitepaper\GENESIS_INSCRIPTION_V7.5_GENESIS_01.md |
 | C:\Desktop\kline-odyssey\assets\ethers-5.7.2.umd.min.js | 1 | str | ethers.js | C:\Desktop\kline-odyssey\assets\ethers.js |
-| C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md | 9 | str | 1. Read Boot V1.4\nC:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md | C:\Desktop\kline-odyssey\docs\1. Read Boot V1.4\nC:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md |
+| C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md | 9 | str | 1. Read Boot V1.4\nC:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md | C:\Desktop\kline-odyssey\docs\1. Read Boot V1.4\nC:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md |
 | C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md | 9 | str | 2. Read Runtime CURRENT\nC:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md | C:\Desktop\kline-odyssey\docs\2. Read Runtime CURRENT\nC:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md |
 | C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md | 10 | str | 3. Read Universe Map\nC:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json | C:\Desktop\kline-odyssey\docs\3. Read Universe Map\nC:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json |
 | C:\Desktop\kline-odyssey\docs\KGEN_BOOT_FLOW.md | 11 | str | 4. Read AGENTS\nC:\Desktop\kline-odyssey\AGENTS.md | C:\Desktop\kline-odyssey\docs\4. Read AGENTS\nC:\Desktop\kline-odyssey\AGENTS.md |

@@ -5,12 +5,23 @@
 **Last Update:** 2026-07-10
 **Maintainer:** KLINE ODYSSEY / PrimeForge
 
-This is the root cross-library index for Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, and Official Whitepaper references.
+This is the root cross-library index for the stable PrimeForge Boot entry, Operating Center, Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, KAIOS, and Official Whitepaper references.
 
 ## Libraries
 
 | Library | Path | Purpose |
 |---|---|---|
+| PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Stable source-of-truth boot entry; public route `/boot/`; ancestor `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` remains preserved |
+| KGEN Operating Center | `operating-center/` | Permanent public control center linking KAIOS, AI Company, WorkQueue, Review Log, Civilization, Economy, Exchange, Wallet, Membership and Library |
+| Public Boot Portal | `boot/` | GitHub Pages entry for Boot CURRENT and V1.4 compatibility |
+| AI Company Portal | `ai-company/` | Public entry for Codex / Cursor company operating files |
+| WorkQueue Portal | `workqueue/` | Public entry for official WorkQueue, Worker Registry, and Codex review records |
+| Civilization Portal | `civilization/` | Permanent user-facing entry for assets, Universe Data Layer, Time Engine and Civilization AI |
+| Economy Portal | `economy/` | Permanent user-facing entry for Economy Engine, Business, Market, Bank and Tax standards |
+| Exchange Portal | `exchange/` | Permanent user-facing entry for Huaguo Mountain Exchange 11520 and listing standards |
+| Wallet Portal | `wallet/` | Permanent user-facing entry for wallet shell and V10 wallet/payment standards |
+| Membership Portal | `membership/` | Permanent user-facing entry for membership, authentication, player and security standards |
+| Library Portal | `library/` | Permanent user-facing entry for Master Library, Canon and Whitepaper |
 | Genesis Library | `KGEN-Genesis/` | Official Canon publication set |
 | Runtime Library | `KGEN-Runtime/` | Runtime rules and operation documents |
 | SDK Library | `KGEN-SDK/` | API, Schema, and developer documentation |

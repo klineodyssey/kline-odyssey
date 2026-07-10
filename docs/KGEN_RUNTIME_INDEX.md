@@ -1,7 +1,7 @@
-﻿# KGEN Runtime Index
+# KGEN Runtime Index
 
 Generated: 2026-07-05 12:23:08 +08:00
-Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot Entry: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 This index is scoped to Boot, Runtime, Universe Map, Constitution, Temple runtime, shared frontend runtime, and KGEN on-chain runtime.
 
@@ -41,7 +41,7 @@ Rules:
 | Boot Sequence | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\archive\BOOT_REPORT.md` | 封存歷史版本；僅供考古、比對與回溯。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 非正式：archive historical reference |
 | Boot Sequence | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\modules\kgen-12345-boot-runtime.js` | 12345 Temple Runtime 模組、CSS 皮膚、DNA 或 legacy organ。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Boot Sequence | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\modules\runtime-bootstrap.js` | 12345 boot immune runtime；檢查 manifest / genome / required files。 | 受保護；修改前需讀 Boot V1.4，採完整版累積更新並同步依賴索引。 | 12345 正式 Boot Immune Runtime |
-| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
+| Boot Sequence | `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | 唯一開機入口；所有 AI / Runtime / 修改流程必須先讀取並遵守。 | 不可直接改；需明確批准，且必須完整版累積更新。 | 唯一正式 Boot Sequence |
 | Constitution | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345\docs\KGEN_12345_V10_43_FINAL_RUNTIME_ARCHITECTURE_CONSTITUTION.md` | Markdown 文件、白皮書、README、SOP 或報告。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Constitution | `C:\Desktop\kline-odyssey\whitepaper\KGEN_Cosmic_Land_Civilization_Warfare_Constitution_V1.0.md` | 白皮書 / 制度 / 敘事 / 法務或研究文件。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
 | Constitution | `C:\Desktop\kline-odyssey\whitepaper\KGEN_Universe_Civilization_Life_Engine_Whitepaper_V2_0_FULL_ARCHIVE_CONSTITUTION.md` | 白皮書 / 制度 / 敘事 / 法務或研究文件。 | 可依任務修改；仍需遵守 Boot V1.4 與現有依賴。 | 非唯一或支援檔 |
@@ -313,7 +313,7 @@ Rules:
 
 ## KGEN Permanent Knowledge Base Registration - 2026-07-05
 
-Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md
+Boot basis: C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 
 The following permanent KGEN knowledge-base files were created from a Boot V1.4 repository scan. They are documentation/governance files only; no program source is modified by this registration.
 

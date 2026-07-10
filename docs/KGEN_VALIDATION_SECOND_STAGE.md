@@ -225,7 +225,7 @@ Representative formal-chain candidates:
 - `C:\Desktop\kline-odyssey\AGENTS.md` if the permanent AI rules update is accepted.
 
 ### Temporarily Should Not Commit
-- `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`: Boot edits require explicit Boot approval.
+- `C:\Desktop\kline-odyssey\PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`: Boot edits require explicit Boot approval.
 - `C:\Desktop\kline-odyssey\README.md`: review against the no-Boot-change/no-program-change boundary before committing.
 - `C:\Desktop\kline-odyssey\8q1232@gmail.com - Google Drive (H) - 捷徑.lnk`: local shortcut; should not be committed.
 
