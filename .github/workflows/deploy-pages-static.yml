@@ -85,6 +85,18 @@ jobs:
           copy_dir "KGEN-Agent-Office"
           copy_dir "KGEN-Organization"
           copy_dir "KGEN-AI-Company"
+          copy_dir "KGEN-KAIOS"
+
+          mkdir -p "_site/KGEN-KAIOS/dashboard"
+          cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
+          {
+            "main_commit": "${GITHUB_SHA}",
+            "branch": "${GITHUB_REF_NAME}",
+            "workflow": "deploy-pages-static.yml",
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "mode": "read-only"
+          }
+          EOF
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"

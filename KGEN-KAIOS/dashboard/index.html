@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V7.2 Read-Only Operations Dashboard</title>
+  <meta name="description" content="KGEN KAIOS V7.2 read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts.">
+  <link rel="stylesheet" href="./dashboard.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">KGEN AI Operating System</p>
+      <h1>KAIOS V7.2 唯讀營運儀表板</h1>
+      <p class="subhead">讀取公開 Repository 檔案，顯示 Worker、WorkQueue、Review、Reports 與 Alerts。此頁不寫入 GitHub，不 claim 任務，不 merge。</p>
+    </div>
+    <div class="header-actions" aria-label="Dashboard links">
+      <a href="../README.md">KAIOS</a>
+      <a href="../../KGEN-Organization/WorkOrders/WORK_QUEUE.md">WorkQueue</a>
+      <a href="../../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md">Review Log</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="notice" id="readonlyNotice">
+      <strong>Readonly Mode</strong>
+      <span>Dashboard 僅讀取檔案與顯示狀態，不會修改 WorkQueue、建立 branch、寫入 report、執行 merge 或推送 main。</span>
+    </section>
+
+    <section class="grid health-grid" aria-labelledby="healthTitle">
+      <div class="section-title">
+        <p class="eyebrow">System Health</p>
+        <h2 id="healthTitle">系統健康</h2>
+      </div>
+      <div class="metric-card"><span>KAIOS version</span><strong id="kaiosVersion">Loading</strong></div>
+      <div class="metric-card"><span>Readiness Score</span><strong id="readinessScore">Loading</strong></div>
+      <div class="metric-card"><span>Main commit</span><strong id="mainCommit">Loading</strong></div>
+      <div class="metric-card"><span>Last review result</span><strong id="lastReviewResult">Loading</strong></div>
+      <div class="metric-card"><span>Last successful merge</span><strong id="lastMerge">Loading</strong></div>
+    </section>
+
+    <section class="panel" aria-labelledby="workersTitle">
+      <div class="section-title inline-title">
+        <div>
+          <p class="eyebrow">Worker Status</p>
+          <h2 id="workersTitle">Worker 狀態</h2>
+        </div>
+        <span class="pill" id="workerCount">0 Workers</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Worker ID</th><th>Worker Type</th><th>Role</th><th>Current Task</th><th>Current Branch</th><th>Status</th><th>Last Heartbeat</th><th>Can Push Main</th><th>Reviewer</th>
+            </tr>
+          </thead>
+          <tbody id="workerRows"><tr><td colspan="9">Loading</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="queueTitle">
+      <div class="section-title inline-title">
+        <div>
+          <p class="eyebrow">WorkQueue Summary</p>
+          <h2 id="queueTitle">任務統計</h2>
+        </div>
+        <span class="pill" id="taskCount">0 Tasks</span>
+      </div>
+      <div class="status-grid" id="statusGrid"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="currentTasksTitle">
+      <div class="section-title inline-title">
+        <div>
+          <p class="eyebrow">Current Tasks</p>
+          <h2 id="currentTasksTitle">目前任務</h2>
+        </div>
+        <span class="pill" id="nextTaskPill">Next: Loading</span>
+      </div>
+      <div id="nextRecommended" class="next-task">Loading next recommended task</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Task ID</th><th>Priority</th><th>Owner</th><th>Reviewer</th><th>Branch</th><th>Base Commit</th><th>Current Status</th><th>Report Path</th><th>Acceptance Criteria</th>
+            </tr>
+          </thead>
+          <tbody id="taskRows"><tr><td colspan="9">Loading</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid two-col">
+      <div class="panel" aria-labelledby="pipelineTitle">
+        <div class="section-title">
+          <p class="eyebrow">Review Pipeline</p>
+          <h2 id="pipelineTitle">審核流程</h2>
+        </div>
+        <dl class="kv-list" id="pipelineList"></dl>
+      </div>
+      <div class="panel" aria-labelledby="alertsTitle">
+        <div class="section-title inline-title">
+          <div>
+            <p class="eyebrow">Alerts</p>
+            <h2 id="alertsTitle">警示</h2>
+          </div>
+          <span class="pill danger" id="alertCount">0 Alerts</span>
+        </div>
+        <ul class="alert-list" id="alertsList"><li>Loading</li></ul>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="reportsTitle">
+      <div class="section-title">
+        <p class="eyebrow">Reports</p>
+        <h2 id="reportsTitle">報告中心</h2>
+      </div>
+      <div class="report-grid" id="reportGrid"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="sourcesTitle">
+      <div class="section-title">
+        <p class="eyebrow">Data Sources</p>
+        <h2 id="sourcesTitle">資料來源</h2>
+      </div>
+      <div class="source-list" id="sourceList"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>KAIOS V7.2 Read-Only Dashboard</span>
+    <span>GitHub Pages 靜態部署</span>
+  </footer>
+
+  <script src="./dashboard.js" defer></script>
+</body>
+</html>

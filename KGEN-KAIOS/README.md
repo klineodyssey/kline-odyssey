@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V7.1 Minimal Worker Layer / Dry Run Ready
-**Status:** Architecture First / Minimal Worker Layer / Draft for Review
+**Version:** V7.2 Read-Only Operations Dashboard
+**Status:** Read-Only Dashboard / Draft for Review
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -59,6 +59,20 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
 
 
+
+## V7.2 Read-Only Operations Dashboard
+
+| File | Purpose |
+|---|---|
+| `dashboard/index.html` | GitHub Pages dashboard entry |
+| `dashboard/dashboard.js` | Read-only data loader and renderer |
+| `dashboard/dashboard.css` | Responsive operations dashboard styling |
+| `dashboard/dashboard.config.json` | Source paths, status order, readiness score, protected paths |
+| `dashboard/README.md` | Dashboard purpose, data sources, and read-only rules |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/
+
+The dashboard reads Worker Registry, WorkQueue, Codex Review Log, KAIOS reports, AI Company reports, and KAIOS schemas. It does not write to GitHub, does not claim tasks, does not merge, and does not use a GitHub token.
 ## V7.1 Dry Run Files
 
 | File | Purpose |

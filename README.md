@@ -75,7 +75,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Agent Office | [KGEN-Agent-Office/](KGEN-Agent-Office/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md |
 | Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
 | AI Company Automation V5.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
-| KAIOS V7.1 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
+| KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -103,11 +103,12 @@ KGEN AI Company Automation V5.0 is the Codex-managed Cursor work system. The use
 - WorkQueue: [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md)
 - Reports: [KGEN-AI-Company/reports/README.md](KGEN-AI-Company/reports/README.md)
 
-### KGEN AI Operating System V7.1
+### KGEN AI Operating System V7.2
 
-KAIOS V7.1 is the minimal worker layer for managing Codex, Cursor, Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, and Human Engineers through a shared worker registry, task claim lease, stale handoff policy, and Codex pre-merge checklist.
+KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer for Codex, Cursor, Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, and Human Engineers. It reads public repo files only and never writes, claims, merges, or pushes.
 
 - KAIOS Index: [KGEN-KAIOS/README.md](KGEN-KAIOS/README.md)
+- KAIOS Dashboard: [KGEN-KAIOS/dashboard/index.html](KGEN-KAIOS/dashboard/index.html)
 - Worker Registry: [KGEN-KAIOS/WORKER_REGISTRY.md](KGEN-KAIOS/WORKER_REGISTRY.md)
 - Generic Worker Protocol: [KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md](KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md)
 - Task Claim Lease Protocol: [KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md](KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md)

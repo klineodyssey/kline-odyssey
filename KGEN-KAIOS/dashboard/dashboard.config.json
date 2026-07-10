@@ -1,0 +1,42 @@
+{
+  "dashboard_id": "KAIOS-V7.2-READONLY-DASHBOARD",
+  "version": "KAIOS V7.2",
+  "mode": "read-only",
+  "readiness_score": 86,
+  "base_main_commit": "d2584127b621546cad576d94bc976fbf88a2debc",
+  "pages_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/",
+  "repository": "https://github.com/klineodyssey/kline-odyssey",
+  "refresh_interval_seconds": 0,
+  "sources": {
+    "build_info": "./build-info.json",
+    "worker_registry": "../worker_registry.json",
+    "work_queue": "../../KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "codex_review_log": "../../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+    "kaios_reports_readme": "../reports/README.md",
+    "ai_company_reports_readme": "../../KGEN-AI-Company/reports/README.md",
+    "task_claim_schema": "../task_claim_schema.json",
+    "worker_status_schema": "../worker_status_schema.json"
+  },
+  "status_order": [
+    "OPEN",
+    "CLAIMED",
+    "IN_PROGRESS",
+    "REVIEW",
+    "APPROVED",
+    "MERGED",
+    "DONE",
+    "REJECTED",
+    "FIX",
+    "BLOCKED"
+  ],
+  "protected_paths": [
+    "contracts",
+    "K線西遊記/temples/12345",
+    "wallet",
+    "bridge",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/physics/final-whitepaper/",
+    "KGEN/contracts/KGEN_Token_V7_5_2.sol"
+  ]
+}

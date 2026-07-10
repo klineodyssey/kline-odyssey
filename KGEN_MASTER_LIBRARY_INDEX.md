@@ -18,7 +18,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Cursor WorkOrders | `KGEN-Cursor-WorkOrders/` | Cursor QA instructions |
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
-| KGEN AI Operating System V7.1 | `KGEN-KAIOS/` | Architecture-first AI operating system with minimal worker registry, claim lease, stale handoff policy, and pre-merge checklist |
+| KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -44,11 +44,12 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` | Codex decisions for Cursor reports |
 
 
-## KGEN AI Operating System V7.1
+## KGEN AI Operating System V7.2
 
 | Item | Path | Purpose |
 |---|---|---|
-| KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture and V7.1 minimal worker layer entry |
+| KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture, V7.1 worker layer, and V7.2 dashboard entry |
+| KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
 | Task Claim Lease Protocol | `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | Claim and lease rules to prevent duplicate WorkOrder execution |
