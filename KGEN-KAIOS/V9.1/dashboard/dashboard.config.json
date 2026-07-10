@@ -1,0 +1,32 @@
+{
+  "version": "V9.1",
+  "readiness_score": 91,
+  "mode": "read-only",
+  "data_sources": {
+    "drafts": "../examples/draft_workorder.example.json",
+    "review_example": "../examples/workorder_review.example.json",
+    "audit_example": "../examples/audit_event.example.json",
+    "audit_log": "../reports/V9_1_AUDIT_LOG.md"
+  },
+  "review_decisions": [
+    "../reviews/V9-DRYRUN-001A_promotion_decision.json",
+    "../reviews/V9-DRYRUN-001B_promotion_decision.json",
+    "../reviews/V9-DRYRUN-001C_promotion_decision.json"
+  ],
+  "review_reports": [
+    "../reviews/V9-DRYRUN-001A_REVIEW_REPORT.md",
+    "../reviews/V9-DRYRUN-001B_REVIEW_REPORT.md",
+    "../reviews/V9-DRYRUN-001C_REVIEW_REPORT.md"
+  ],
+  "risk_levels": ["R0", "R1", "R2", "R3", "R4"],
+  "statuses": [
+    "DRAFT",
+    "UNDER_REVIEW",
+    "APPROVED_FOR_OPEN",
+    "OPEN",
+    "NEEDS_REVISION",
+    "REJECTED",
+    "BLOCKED",
+    "ARCHIVED"
+  ]
+}

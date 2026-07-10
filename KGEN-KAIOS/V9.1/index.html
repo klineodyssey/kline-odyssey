@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.1 AI WorkOrder Review Loop</title>
+  <link rel="stylesheet" href="v91.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">KGEN AI Operating System</p>
+    <h1>KAIOS V9.1<br>AI WorkOrder Review Loop</h1>
+    <p class="lede">AI 可以產生 DRAFT WorkOrder，但不得自行 Promote。Codex 負責審核、退回、封存、核准與提升為 OPEN；R3 以上進入 Human Review Gate，R4 禁止執行。</p>
+    <nav class="actions" aria-label="V9.1 navigation">
+      <a href="dashboard/">Review Dashboard</a>
+      <a href="AI_WORKORDER_REVIEW_LOOP.md">Review Loop</a>
+      <a href="CODEX_PROMOTION_PROTOCOL.md">Promotion Protocol</a>
+      <a href="schemas/draft_workorder.schema.json">Draft Schema</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="band">
+      <div>
+        <h2>正式狀態機</h2>
+        <p>DRAFT 必須經過 Codex Review 才能進入 OPEN。所有狀態轉換都必須留下 audit event。</p>
+      </div>
+      <ol class="timeline">
+        <li>DRAFT</li>
+        <li>UNDER_REVIEW</li>
+        <li>APPROVED_FOR_OPEN</li>
+        <li>OPEN</li>
+        <li>CLAIMED</li>
+        <li>IN_PROGRESS</li>
+        <li>REVIEW</li>
+        <li>APPROVED</li>
+        <li>MERGED</li>
+        <li>DONE</li>
+      </ol>
+    </section>
+
+    <section class="grid" aria-label="V9.1 modules">
+      <article>
+        <h2>Promotion</h2>
+        <p>Codex 執行 15 點檢查：Decision、Source State、Reasoning、Risk、Canon、Duplicate、Dependencies、Protected Paths、Owner、Reviewer、Branch、Report、Legal、Security、Human Gate。</p>
+      </article>
+      <article>
+        <h2>Revision</h2>
+        <p>若任務方向成立但範圍、驗收條件、依賴或 report path 不清楚，狀態進入 NEEDS_REVISION。</p>
+      </article>
+      <article>
+        <h2>Rejection</h2>
+        <p>若任務違反 Canon、重複、過大、不可驗收或混入不合法承諾，Codex 可 REJECT 並 ARCHIVE。</p>
+      </article>
+      <article>
+        <h2>Human Gate</h2>
+        <p>R3 必須 Codex + Human Review；R4 禁止 Promote，只能 BLOCKED 或 ARCHIVED。</p>
+      </article>
+    </section>
+
+    <section class="band">
+      <div>
+        <h2>V9.0 DRAFT Review</h2>
+        <p>V9.1 會正式審查 V9.0 Dry Run 產生的三個 DRAFT WorkOrders，並產出 Review Report、Risk Decision、Duplicate Check、Dependency Check、Promotion Decision 與 Audit Log。</p>
+      </div>
+      <div id="statusCards" class="cards" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>KLINE ODYSSEY · KAIOS V9.1 · Read-only GitHub Pages entry</p>
+  </footer>
+
+  <script src="v91.js"></script>
+</body>
+</html>

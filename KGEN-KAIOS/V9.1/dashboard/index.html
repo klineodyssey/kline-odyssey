@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.1 WorkOrder Review Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Read-only Operations</p>
+      <h1>KAIOS V9.1 WorkOrder Review Dashboard</h1>
+      <p>展示 DRAFT、UNDER_REVIEW、APPROVED_FOR_OPEN、NEEDS_REVISION、REJECTED、BLOCKED、ARCHIVED 與 Codex Review 歷史。此頁不寫入 GitHub、不 Promote、不使用 token。</p>
+    </div>
+    <a class="home" href="../">V9.1 Entry</a>
+  </header>
+
+  <main>
+    <section class="cards" id="healthCards" aria-label="system health"></section>
+
+    <section class="panel">
+      <h2>Draft WorkOrders</h2>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Task ID</th>
+              <th>Risk</th>
+              <th>Status</th>
+              <th>Promote</th>
+              <th>Human Review</th>
+            </tr>
+          </thead>
+          <tbody id="draftRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Risk Distribution</h2>
+        <div id="riskList" class="list"></div>
+      </article>
+      <article class="panel">
+        <h2>Alerts</h2>
+        <div id="alerts" class="list"></div>
+      </article>
+      <article class="panel">
+        <h2>Codex Review History</h2>
+        <div id="history" class="list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
