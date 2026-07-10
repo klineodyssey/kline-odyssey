@@ -17,6 +17,7 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 | Entry | URL | Purpose |
 |---|---|---|
 | KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ | Stable public control center for KAIOS and AI Company |
+| Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ | Read-only portal for organism registry, lineage, provenance, contribution, and R&D suggestions |
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
@@ -68,7 +69,20 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
 | `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
 
+## R&D Provenance And Biological Evolution Governance
 
+KAIOS includes a first-stage governance layer for task source tracing, AI / Human authorship, formal file metadata, biological taxonomy, organism manifests, evolution lineage, and Cursor R&D suggestions.
+
+| File | Purpose |
+|---|---|
+| `VERSIONING_STANDARD.md` | Stable formal filename and metadata version rules |
+| `FILE_HEADER_STANDARD.md` | Metadata header formats for Markdown, JSON, HTML, JS, and CSS |
+| `CHANGELOG_STANDARD.md` | Changelog evidence requirements |
+| `BIOLOGICAL_TAXONOMY_STANDARD.md` | Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species |
+| `EVOLUTION_LINEAGE_STANDARD.md` | Governed evolution event rules |
+| `ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields |
+| `provenance/` | Author registry, file ownership registry, contribution logs, and schemas |
+| `examples/organisms/` | Temple, App, and Land organism examples |
 
 ## V7.2 Read-Only Operations Dashboard
 

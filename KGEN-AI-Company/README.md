@@ -6,6 +6,7 @@
 **Primary Queue:** `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
 **Report Center:** `KGEN-AI-Company/reports/`
 **Review Log:** `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
+**Provenance Registry:** `KGEN-KAIOS/provenance/`
 **Boot Entry:** `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 **Public Entry:** https://klineodyssey.github.io/kline-odyssey/ai-company/
 
@@ -63,6 +64,12 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 ## Non-Negotiable Rule
 
 Cursor does not rely on chat memory. Cursor reads GitHub WorkQueue and GitHub files. Codex reviews every report before commit or push.
+
+## Provenance And R&D Suggestions
+
+Every WorkOrder must have a traceable source. Every Cursor report must include problems found, risks, technical debt, evolution opportunities, research direction, suggested WorkOrders, and do-not-do notes. Suggested WorkOrders begin as `PROPOSED`; Cursor may not promote them to `DRAFT` or `OPEN`.
+
+Codex review checks author registration, visible commits, branch correctness, report existence, task ID, changed files, protected paths, and provenance completeness before merge.
 
 ## Cursor Handoff Branch Workflow
 

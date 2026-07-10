@@ -30,6 +30,7 @@ Last optimized: 2026-06-11
 | Project Ecosystem | KLINE ODYSSEY |
 | Official Website | https://klineodyssey.github.io/kline-odyssey/ |
 | KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
+| Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -72,6 +73,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 |---|---|---|
 | PrimeForge Boot CURRENT | [PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md](PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md) | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | KGEN Operating Center | [operating-center/](operating-center/) | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
+| Evolution Governance | [evolution-governance/](evolution-governance/) | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
 | WorkQueue | [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md) | https://klineodyssey.github.io/kline-odyssey/workqueue/ |
 | AI Company | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/ai-company/ |
 | Genesis Library | [KGEN-Genesis/](KGEN-Genesis/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md |
@@ -134,6 +136,20 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Stale Handoff Branch Policy: [KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md](KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md)
 - Codex Pre-Merge Checklist: [KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md](KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md)
 - Worker Registry JSON: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
+
+### KGEN R&D Provenance And Biological Evolution Governance
+
+KGEN now tracks task source, AI / Human authorship, file metadata, biological taxonomy, organism manifests, evolution lineage, and R&D suggestions through KAIOS provenance governance.
+
+- Public portal: [evolution-governance/](evolution-governance/)
+- Versioning: [KGEN-KAIOS/VERSIONING_STANDARD.md](KGEN-KAIOS/VERSIONING_STANDARD.md)
+- File headers: [KGEN-KAIOS/FILE_HEADER_STANDARD.md](KGEN-KAIOS/FILE_HEADER_STANDARD.md)
+- Biological taxonomy: [KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md](KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md)
+- Evolution lineage: [KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md](KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md)
+- Organism manifest: [KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md](KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md)
+- Provenance registry: [KGEN-KAIOS/provenance/](KGEN-KAIOS/provenance/)
+- Organism examples: [KGEN-KAIOS/examples/organisms/](KGEN-KAIOS/examples/organisms/)
+- Audit baseline: [KGEN_BIOLOGICAL_VERSIONING_AUDIT.md](KGEN_BIOLOGICAL_VERSIONING_AUDIT.md)
 
 ### KAIOS V8.0 One Picture One Temple Economy System
 

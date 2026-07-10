@@ -13,6 +13,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 |---|---|---|
 | PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Stable source-of-truth boot entry; public route `/boot/`; ancestor `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` remains preserved |
 | KGEN Operating Center | `operating-center/` | Permanent public control center linking KAIOS, AI Company, WorkQueue, Review Log, Civilization, Economy, Exchange, Wallet, Membership and Library |
+| Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
 | Public Boot Portal | `boot/` | GitHub Pages entry for Boot CURRENT and V1.4 compatibility |
 | AI Company Portal | `ai-company/` | Public entry for Codex / Cursor company operating files |
 | WorkQueue Portal | `workqueue/` | Public entry for official WorkQueue, Worker Registry, and Codex review records |
@@ -76,6 +77,20 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
 | Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
 | Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |
+
+## KAIOS Provenance And Biological Evolution Governance
+
+| Document | Path | Purpose |
+|---|---|---|
+| Versioning Standard | `KGEN-KAIOS/VERSIONING_STANDARD.md` | Formal filename, version metadata, and revision rules |
+| File Header Standard | `KGEN-KAIOS/FILE_HEADER_STANDARD.md` | Markdown / JSON / HTML / JS / CSS metadata formats |
+| Changelog Standard | `KGEN-KAIOS/CHANGELOG_STANDARD.md` | Required changelog evidence for formal organs |
+| Biological Taxonomy Standard | `KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md` | Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species rules |
+| Evolution Lineage Standard | `KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md` | Governed evolution events and rollback paths |
+| Organism Manifest Standard | `KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields and canonical file mapping |
+| Provenance Registry | `KGEN-KAIOS/provenance/` | Author registry, file ownership, contribution logs, and schemas |
+| Organism Examples | `KGEN-KAIOS/examples/organisms/` | Temple, App, and Land organism examples |
+| Biological Versioning Audit | `KGEN_BIOLOGICAL_VERSIONING_AUDIT.md` | P0-P3 baseline audit and next-stage remediation map |
 
 ## KAIOS V8.0 One Picture One Temple Economy System
 

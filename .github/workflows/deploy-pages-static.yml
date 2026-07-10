@@ -98,6 +98,7 @@ jobs:
           copy_dir "wallet"
           copy_dir "membership"
           copy_dir "library"
+          copy_dir "evolution-governance"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4"
 
@@ -223,7 +224,7 @@ jobs:
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
 
-          for route in boot operating-center ai-company workqueue civilization economy exchange wallet membership library; do
+          for route in boot operating-center ai-company workqueue civilization economy exchange wallet membership library evolution-governance; do
             if [ ! -f "_site/${route}/index.html" ]; then
               echo "::error::Missing permanent Pages route: /${route}/"
               exit 1
