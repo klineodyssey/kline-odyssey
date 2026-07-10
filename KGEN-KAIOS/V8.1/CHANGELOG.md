@@ -10,3 +10,9 @@
 - Added Unique ID Standard.
 - Added World State Model.
 - Noted that the legacy Universe Map source remains preserved but is not directly parseable as JSON in local validation due existing encoding and quoting damage.
+## V8.1 Citizen and Profession Standards
+
+- Added Citizen Standard.
+- Added Profession Standard with income, skill, building, upgrade path, AI capability, and output fields.
+- Added Life Cycle Standard.
+- Added Player, NPC, AI, and App Organism standards.
