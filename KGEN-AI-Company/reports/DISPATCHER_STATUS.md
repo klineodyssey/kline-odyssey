@@ -1,33 +1,35 @@
 # Dispatcher Status
 
-**Updated:** 2026-07-10  
-**Dispatcher:** Codex  
+**Updated:** 2026-07-11
+**Dispatcher:** Codex
 **Worker:** Cursor
 
 ## Git State
 
-- Latest origin/main commit before V4 dispatcher update: `7a74e0e01d64ead20f47c3f4105523556543ca00`
-- Cursor claimed commit under review: `01c8095`
-- Review finding: `01c8095` is not present in local worktrees, fetched origin refs, branches, or reflog.
+- Latest origin/main commit during handoff closeout: `4eda58112035c83effcaa1326d0197f1ab0c7769`
+- Codex review workspace: `C:\Desktop\kline-odyssey-kgen12345-ui-fix`
+- Review finding: ORG-P2-001 and ORG-P2-002 reports are now present on main through earlier handoff history and have been reviewed directly from the clean Codex review workspace.
 
 ## Current REVIEW Tasks
 
-- None visible in repository after Codex inspection.
+- None after ORG-P2-001 and ORG-P2-002 closeout.
 
 ## Counts
 
-- OPEN tasks: 24
-- DONE tasks: 0
-- BLOCKED tasks: 1
+- OPEN tasks: 27
+- REVIEW tasks: 0
+- DONE tasks: 6
+- BLOCKED tasks: 0
 
 ## Next Cursor Task
 
-- `ORG-P2-002` is the next OPEN WorkOrder.
+- `ORG-P2-003C` is the next top-down OPEN WorkOrder.
 
 ## Latest Codex Review Result
 
-- `ORG-P2-001`: BLOCKED. Codex cannot approve because the referenced Cursor commit `01c8095` and report `KGEN-AI-Company/reports/ORG-P2-001_CEO_COMMAND_REVIEW.md` are not present in the accessible repository state.
+- `ORG-P2-001`: APPROVED. Report is visible on main and confirms Codex-only merge / push / review authority.
+- `ORG-P2-002`: APPROVED. Report is visible on main and provides the PMO 72-hour milestone board from department queues.
 
 ## Required Cursor Behavior
 
-Next time the user enters `gi，上班`, Cursor must scan the WorkQueue from top to bottom, ignore BLOCKED and REVIEW tasks, accept `ORG-P2-002`, commit locally, and stop without push.
+Next time the user enters `gi，上班`, Cursor must scan the WorkQueue from top to bottom, ignore DONE / REVIEW / BLOCKED tasks, accept `ORG-P2-003C`, push only to `cursor-handoff/ORG-P2-003C`, and stop for Codex review.
