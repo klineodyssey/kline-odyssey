@@ -3,11 +3,12 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-18888-DIVINE-BANK-UI
-VERSION: V1.0 / Universe Runtime
-BUILD: 20260704-18888-DIVINE-BANK-V1.0
+VERSION: V1.1 / Chain-Read Public RPC
+BUILD: 20260710-18888-DIVINE-BANK-V1.1
 BIRTH: 2026-07-04
-ROLE: 靈霄寶殿神明銀行 / Treasury / Reward / DappBay 說明
-STATUS: PROTOTYPE — 前端原型，不改合約
+UPDATE: 2026-07-10
+ROLE: 靈霄寶殿神明銀行 / Treasury 鏈上即時餘額 / LP TVL 鏈上讀取
+STATUS: PROTOTYPE — 前端原型，不改合約；Treasury/LP 為真實 BSC 鏈上讀取
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -90,24 +91,24 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <!-- Treasury KPIs -->
     <div class="kgen-kpi-grid col4" style="margin-top:14px;">
       <div class="kgen-kpi">
-        <div class="k">Treasury 8888</div>
-        <div class="v" style="font-size:16px;" id="bank-treasury">8,888 KGEN</div>
-        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">神殿金庫</div>
+        <div class="k">Treasury 8888（鏈上）</div>
+        <div class="v" style="font-size:14px;" id="bank-treasury">讀取中…</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">BSC public RPC</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">Reward Pool</div>
-        <div class="v" style="font-size:16px;color:#c084fc;" id="bank-reward">16,888 KGEN</div>
-        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">獎勵池</div>
+        <div class="k">LP KGEN 儲量（鏈上）</div>
+        <div class="v" style="font-size:14px;color:var(--kgen-cyan);" id="bank-reserve">讀取中…</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">PancakeSwap Pool</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">Temple Reserve</div>
-        <div class="v" style="font-size:16px;color:var(--kgen-cyan);" id="bank-reserve">72,000 KGEN</div>
-        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">神殿準備金</div>
+        <div class="k">LP TVL（估算）</div>
+        <div class="v" style="font-size:14px;color:var(--kgen-green);" id="bank-lp">讀取中…</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">KGEN/WBNB USD</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">LP Reserve</div>
-        <div class="v" style="font-size:16px;color:var(--kgen-green);" id="bank-lp">$12,500</div>
-        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">流動性準備</div>
+        <div class="k">已銷毀 KGEN（鏈上）</div>
+        <div class="v" style="font-size:14px;color:#ff4444;" id="bank-burn">讀取中…</div>
+        <div style="font-size:10px;color:var(--kgen-muted);margin-top:2px;">0xdead 地址</div>
       </div>
     </div>
   </div>
@@ -303,20 +304,32 @@ STATUS: PROTOTYPE — 前端原型，不改合約
   }
 
   function refreshTreasury() {
+    /* Treasury KGEN balance */
     KGEN_UNIVERSE_CHAIN.readTreasury().then(function(bal) {
-      var el = document.getElementById('bank-treasury');
+      var el   = document.getElementById('bank-treasury');
       var note = document.getElementById('treasury-read-note');
-      if (bal && el) {
-        el.textContent = parseFloat(bal).toLocaleString() + ' KGEN';
-        if (note) note.textContent = 'Treasury 8888 鏈上餘額（read-only）';
+      if (bal && parseFloat(bal) >= 0 && el) {
+        el.textContent = parseFloat(bal).toLocaleString(undefined, {maximumFractionDigits:2}) + ' KGEN';
+        if (note) note.textContent = '✅ Treasury 8888 鏈上即時餘額（BSC public RPC）';
       } else if (note) {
-        note.textContent = '鏈上讀取失敗，顯示快取展示值';
+        note.textContent = '⏳ 連接 BSC RPC 中…';
       }
     });
+
+    /* LP TVL + KGEN reserve */
     KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
       if (!r) return;
-      var lp = document.getElementById('bank-lp');
-      if (lp) lp.textContent = '$' + r.tvlEstimate;
+      var lp   = document.getElementById('bank-lp');
+      var res  = document.getElementById('bank-reserve');
+      if (lp)  lp.textContent  = '$' + Number(r.tvlUSD || r.tvlEstimate).toLocaleString();
+      if (res) res.textContent = Number(r.kgenReserve).toLocaleString(undefined,{maximumFractionDigits:0}) + ' KGEN (LP)';
+    });
+
+    /* Burn total */
+    KGEN_UNIVERSE_CHAIN.readBurnTotal().then(function(burned) {
+      if (!burned) return;
+      var el = document.getElementById('bank-burn');
+      if (el) el.textContent = parseFloat(burned).toLocaleString(undefined,{maximumFractionDigits:2}) + ' KGEN';
     });
   }
   refreshTreasury();

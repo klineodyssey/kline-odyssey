@@ -1,12 +1,13 @@
 /*
- * KLINE 5D Game Engine V1.0
+ * KLINE 5D Game Engine V1.1
  * Full game: world map, NPC, Boss, quests, equipment, skills, warp, K-line battlefield
+ * V1.1: win/lose overlay, score accumulation, faster tower regen, better auto-battle
  * Requires: kgen-game-core.js + Universe Runtime modules
  */
 (function(global) {
   'use strict';
 
-  var ENGINE_VERSION = 'V1.0';
+  var ENGINE_VERSION = 'V1.1';
 
   function GameEngine(opts) {
     opts = opts || {};
@@ -33,6 +34,10 @@
       bossActive: false,
       playerHp: 100,
       warpCooldown: 0,
+      bullScore: 0,
+      bearScore: 0,
+      gameOver: false,
+      gameWinner: null,
     };
 
     this.boss = {
@@ -269,18 +274,72 @@
 
   GameEngine.prototype.checkWin = function() {
     var G = this.state;
-    if (G.towers['t1-bear'] <= 0 && G.towers['t2-bear'] <= 0) {
+    if (G.gameOver) return;
+
+    var bullTowersDown = G.towers['t1-bear'] <= 0 && G.towers['t2-bear'] <= 0;
+    var bearTowersDown = G.towers['t1-bull'] <= 0 && G.towers['t2-bull'] <= 0;
+
+    if (bullTowersDown) {
       G.bearBase = Math.max(0, G.bearBase - 15);
+      G.bullScore += 10;
       if (G.bearBase <= 0) {
-        this.log('🏆 多方勝利！16888 廣寒宮陷落！', '#7cffc5');
+        G.gameOver = true;
+        G.gameWinner = 'bull';
+        this.log('🏆 多方大勝！16888 廣寒宮陷落！最終比分：多方 ' + G.bullScore + ' : 空方 ' + G.bearScore, '#7cffc5');
         if (this.civ) this.civ.completeQuest('q-game-win');
+        this._showGameOver('bull');
+        return;
       }
     }
-    if (G.towers['t1-bull'] <= 0 && G.towers['t2-bull'] <= 0) {
+    if (bearTowersDown) {
       G.bullBase = Math.max(0, G.bullBase - 15);
-      if (G.bullBase <= 0) this.log('💀 空方勝利！12345 神殿陷落！', '#ff4444');
+      G.bearScore += 10;
+      if (G.bullBase <= 0) {
+        G.gameOver = true;
+        G.gameWinner = 'bear';
+        this.log('💀 空方大勝！12345 神殿陷落！最終比分：多方 ' + G.bullScore + ' : 空方 ' + G.bearScore, '#ff4444');
+        this._showGameOver('bear');
+        return;
+      }
     }
     this.renderScore();
+  };
+
+  GameEngine.prototype._showGameOver = function(winner) {
+    var overlay = document.getElementById('game-over-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'game-over-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+      document.body.appendChild(overlay);
+    }
+    var G = this.state;
+    var isBull = winner === 'bull';
+    var self = this;
+    overlay.innerHTML =
+      '<div style="font-size:56px;">' + (isBull ? '🏆' : '⚔️') + '</div>' +
+      '<div style="font-size:28px;font-weight:950;color:' + (isBull ? '#7cffc5' : '#ff4444') + ';">' +
+        (isBull ? '多方勝利！' : '空方勝利！') +
+      '</div>' +
+      '<div style="font-size:16px;color:#ffd778;">回合 ' + G.round + ' · 比分 多方 ' + G.bullScore + ' — 空方 ' + G.bearScore + '</div>' +
+      '<button style="margin-top:10px;padding:14px 32px;border-radius:999px;border:1px solid #ffd778;background:rgba(255,215,120,.2);color:#ffd778;font-size:16px;font-weight:900;cursor:pointer;" id="btn-restart-game">🔄 重新開始</button>';
+    overlay.querySelector('#btn-restart-game').onclick = function() {
+      overlay.remove();
+      self.resetGame();
+    };
+  };
+
+  GameEngine.prototype.resetGame = function() {
+    var G = this.state;
+    G.round = 1; G.timer = 90;
+    G.bullBase = 100; G.bearBase = 100;
+    G.bullScore = 0; G.bearScore = 0;
+    G.bullMinions = 4; G.bearMinions = 4;
+    G.gameOver = false; G.gameWinner = null;
+    G.nodes = { '11520': 'neutral', '18888': 'neutral', '18921': 'neutral' };
+    this._initFromMap();
+    this.log('🔄 遊戲重新開始！', '#ffd778');
+    this.renderAll();
   };
 
   GameEngine.prototype.renderTowers = function() {
@@ -346,25 +405,44 @@
   GameEngine.prototype.start = function() {
     var self = this;
     this.renderAll();
-    this.log('🎮 K線5D峽谷 V1.0 引擎啟動', '#ffd778');
+    this.log('🎮 K線5D峽谷 V1.1 引擎啟動 · 勝負系統 / 分數累計', '#ffd778');
 
     if (global.KGEN_KlineFeed) {
       global.KGEN_KlineFeed.poll('BNBUSDT', function(d) { self.updateFromKline(d); }, 15000);
     }
 
     setInterval(function() {
+      if (self.state.gameOver) return;
       self.state.timer--;
       if (self.state.warpCooldown > 0) self.state.warpCooldown--;
+
       if (self.state.timer <= 0) {
         self.state.timer = 90;
         self.state.round++;
-        self.log('⏰ 自動新回合 #' + self.state.round, '#ffd778');
+        self.log('⏰ 新回合 #' + self.state.round + ' · 比分 多方 ' + self.state.bullScore + ' — 空方 ' + self.state.bearScore, '#ffd778');
+        /* Passive tower regen each round */
+        ['t1-bull','t2-bull'].forEach(function(k) {
+          if (self.state.towers[k] > 0 && self.state.towers[k] < 100)
+            self.state.towers[k] = Math.min(100, self.state.towers[k] + 5);
+        });
       }
-      if (self.state.timer % 12 === 0) {
-        var bd = self.state.bullMinions * 2;
-        var rd = self.state.bearMinions * 2;
+
+      /* Auto battle every 10s */
+      if (self.state.timer % 10 === 0) {
+        var kFactor = self.state.kChange > 0 ? 1.3 : 0.8;
+        var bd = Math.ceil(self.state.bullMinions * 2 * kFactor);
+        var rd = Math.ceil(self.state.bearMinions * 2 / kFactor);
+
+        /* Node bonuses */
+        if (self.state.nodes['18888'] === 'bull') bd += 3;
+        if (self.state.nodes['11520'] === 'bull') bd += 2;
+        if (self.state.nodes['18921'] === 'bull') bd += 2;
+
         if (self.state.towers['t1-bear'] > 0) self.state.towers['t1-bear'] = Math.max(0, self.state.towers['t1-bear'] - bd);
+        else if (self.state.towers['t2-bear'] > 0) self.state.towers['t2-bear'] = Math.max(0, self.state.towers['t2-bear'] - bd);
         if (self.state.towers['t1-bull'] > 0) self.state.towers['t1-bull'] = Math.max(0, self.state.towers['t1-bull'] - rd);
+        else if (self.state.towers['t2-bull'] > 0) self.state.towers['t2-bull'] = Math.max(0, self.state.towers['t2-bull'] - rd);
+
         self.checkWin();
       }
       self.renderAll();

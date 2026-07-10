@@ -3,8 +3,8 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-18921-AUTOLP-UI
-VERSION: V1.0 / Universe Runtime
-BUILD: 20260704-18921-AUTOLP-V1.0
+VERSION: V1.1 / Chain-Read Public RPC
+BUILD: 20260710-18921-AUTOLP-V1.1
 BIRTH: 2026-07-04
 ROLE: 斬妖台 Auto LP 儀表板 / 稅收分配 / LP Status
 STATUS: PROTOTYPE — 前端原型，不改合約
@@ -254,16 +254,17 @@ STATUS: PROTOTYPE — 前端原型，不改合約
   function refreshLP() {
     KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
       if (!r) return;
-      var rk = document.getElementById('lp-res-kgen');
-      var rb = document.getElementById('lp-res-bnb');
-      var tvl = document.getElementById('lp-tvl');
+      var rk   = document.getElementById('lp-res-kgen');
+      var rb   = document.getElementById('lp-res-bnb');
+      var tvl  = document.getElementById('lp-tvl');
       var tvl2 = document.getElementById('lp-tvl-2');
       var fill = document.getElementById('lp-anim-fill');
-      if (rk) rk.textContent = r.reserve0 + ' KGEN';
-      if (rb) rb.textContent = r.reserve1 + ' BNB';
-      if (tvl) tvl.textContent = '$' + r.tvlEstimate;
-      if (tvl2) tvl2.textContent = '$' + r.tvlEstimate;
-      if (fill) fill.style.width = Math.min(95, 30 + parseFloat(r.tvlEstimate) / 500) + '%';
+      var tvlUSD = r.tvlUSD || r.tvlEstimate;
+      if (rk)  rk.textContent  = Number(r.kgenReserve).toLocaleString(undefined,{maximumFractionDigits:0}) + ' KGEN';
+      if (rb)  rb.textContent  = r.bnbReserve + ' BNB';
+      if (tvl)  tvl.textContent  = '$' + Number(tvlUSD).toLocaleString();
+      if (tvl2) tvl2.textContent = '$' + Number(tvlUSD).toLocaleString();
+      if (fill) fill.style.width = Math.min(95, 30 + parseFloat(tvlUSD) / 500) + '%';
     });
   }
   refreshLP();

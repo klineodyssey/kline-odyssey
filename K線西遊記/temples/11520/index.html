@@ -3,11 +3,12 @@
 <head>
 <!--
 PRODUCT_ID: KGEN-11520-EXCHANGE-UI
-VERSION: V1.0 / Universe Runtime
-BUILD: 20260704-11520-EXCHANGE-V1.0
+VERSION: V1.1 / Chain-Read Public RPC
+BUILD: 20260710-11520-EXCHANGE-V1.1
 BIRTH: 2026-07-04
-ROLE: 花果山悟空交易所 / Universe Exchange / 土地交易所入口
-STATUS: PROTOTYPE — 前端原型，不接真交易合約
+UPDATE: 2026-07-10
+ROLE: 花果山悟空交易所 / Universe Exchange / LP 即時鏈上數據
+STATUS: PROTOTYPE — 前端原型，不接真交易合約；LP/Treasury 為真實 BSC 鏈上讀取
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -165,19 +166,19 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
         <div style="font-size:11px;margin-top:3px;" id="ex-bnb-chg">--</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">KGEN / BNB (模擬)</div>
-        <div class="v" id="ex-kgen-price">0.000012 BNB</div>
-        <div style="font-size:11px;color:#7cffc5;margin-top:3px;">▲ 2.34%</div>
+        <div class="k">KGEN 儲量（鏈上）</div>
+        <div class="v" id="ex-kgen-reserve" style="font-size:14px;">讀取中…</div>
+        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">LP Pool KGEN</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">24H 交易量</div>
-        <div class="v" id="ex-vol">--</div>
-        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">BNB</div>
+        <div class="k">WBNB 儲量（鏈上）</div>
+        <div class="v" id="ex-bnb-reserve" style="font-size:14px;">讀取中…</div>
+        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">LP Pool BNB</div>
       </div>
       <div class="kgen-kpi">
-        <div class="k">LP TVL (模擬)</div>
+        <div class="k">LP TVL（估算）</div>
         <div class="v" id="ex-lp-tvl">讀取中…</div>
-        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">KGEN/WBNB</div>
+        <div style="font-size:11px;color:var(--kgen-muted);margin-top:3px;">BSC 鏈上即時</div>
       </div>
     </div>
   </div>
@@ -461,9 +462,19 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
 
   function refreshLP() {
     KGEN_UNIVERSE_CHAIN.readLPPairReserves().then(function(r) {
-      if (!r) return;
-      var tvl = document.getElementById('ex-lp-tvl');
-      if (tvl) tvl.textContent = '$' + r.tvlEstimate;
+      if (!r) {
+        var tvl = document.getElementById('ex-lp-tvl');
+        if (tvl) tvl.textContent = '公開 RPC 連線中…';
+        return;
+      }
+      var tvl  = document.getElementById('ex-lp-tvl');
+      var kgen = document.getElementById('ex-kgen-reserve');
+      var bnb  = document.getElementById('ex-bnb-reserve');
+      var kgenPerBnb = document.getElementById('ex-kgen-price');
+      if (tvl)  tvl.textContent  = '$' + Number(r.tvlUSD || r.tvlEstimate).toLocaleString();
+      if (kgen) kgen.textContent = Number(r.kgenReserve).toLocaleString() + ' KGEN';
+      if (bnb)  bnb.textContent  = r.bnbReserve + ' BNB';
+      if (kgenPerBnb) kgenPerBnb.textContent = r.kgenPerBnb + ' KGEN/BNB';
     });
   }
   refreshLP();
@@ -487,7 +498,7 @@ STATUS: PROTOTYPE — 前端原型，不接真交易合約
     nodesEl.innerHTML = nodeHtml;
   }
 
-  status.push('11520 花果山交易所 V1.0 · Universe Runtime');
+  status.push('11520 花果山交易所 V1.1 · 公開 BSC RPC · LP 即時讀取');
   }
 })();
 </script>
