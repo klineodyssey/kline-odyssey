@@ -1,0 +1,10 @@
+{
+  "observation_id": "KGEN-AIOBS-V9-DRYRUN-001",
+  "timestamp": "2026-07-10T00:00:00Z",
+  "source_path": "KGEN-KAIOS/V8.3/examples/governance_response.example.json",
+  "source_type": "GovernanceSignals",
+  "observation_quality": "Verified",
+  "summary": "Governance response marks risk as Watch and requires Codex review for the simulated civilization state.",
+  "confidence": 0.86,
+  "status": "Draft"
+}

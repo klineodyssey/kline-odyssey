@@ -1,0 +1,13 @@
+{
+  "risk_id": "KGEN-AIRISK-V9-DRYRUN-001",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "risk_level": "R2",
+  "risk_reasons": [
+    "Recommendation affects WorkOrder priorities.",
+    "Governance response requires Codex Review.",
+    "Scenario includes recession and resource shortage signals."
+  ],
+  "required_review": ["Codex"],
+  "blocked": false,
+  "status": "Draft"
+}

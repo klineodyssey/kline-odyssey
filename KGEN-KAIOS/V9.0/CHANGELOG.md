@@ -13,3 +13,9 @@
 - Added Observation Model, Reasoning Model and Memory Model.
 - Added Event Interpreter, Governance Advisor, Economy Advisor, Temple Advisor, Land Advisor and Citizen Advisor.
 - Added AI WorkOrder Generator, Human Override and Codex Review Boundary documents.
+
+## V9.0 Advisor Runtimes and Schemas
+
+- Added 8 JSON Schemas for AI observation, decision, memory, risk, policy, draft WorkOrder, human override and Codex review.
+- Added 8 parseable examples.
+- Added 8 advisor runtime documents.

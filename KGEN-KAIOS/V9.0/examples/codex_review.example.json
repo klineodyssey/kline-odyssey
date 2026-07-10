@@ -1,0 +1,10 @@
+{
+  "review_id": "KGEN-CODEXREV-V9-DEMO-001",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "checks": ["Canon", "Risk", "ProtectedPaths", "StateValidity", "DecisionEvidence", "WorkOrderQuality", "LegalBoundary", "SecurityBoundary", "DuplicateTask", "DependencyConflict"],
+  "result": "RequestRevision",
+  "notes": "Demo review record. Actual dry run awaits Codex review before DRAFT WorkOrders become OPEN.",
+  "timestamp": "2026-07-10T00:00:00Z",
+  "status": "Draft"
+}

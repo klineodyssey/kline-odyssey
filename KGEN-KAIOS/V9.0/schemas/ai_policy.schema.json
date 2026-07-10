@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/ai_policy.schema.json",
+  "title": "KAIOS V9.0 AI Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_id", "allowed_actions", "prohibited_actions", "source_rule", "review_rule", "status"],
+  "properties": {
+    "policy_id": { "type": "string", "pattern": "^KGEN-AIPOL-[A-Z0-9-]+$" },
+    "allowed_actions": { "type": "array", "items": { "enum": ["Observe", "Analyze", "Reason", "Recommend", "GenerateDraftWorkOrders"] } },
+    "prohibited_actions": { "type": "array", "items": { "enum": ["RealFinancialTransaction", "TokenTransfer", "ContractDeployment", "ProtectedPathModification", "LegalCommitment", "BrandPartnershipClaim", "HumanAccountAction", "MainBranchMerge", "ProductionDeployment"] } },
+    "source_rule": { "type": "string" },
+    "review_rule": { "type": "string" },
+    "status": { "enum": ["Draft", "Active", "Archived"] }
+  }
+}

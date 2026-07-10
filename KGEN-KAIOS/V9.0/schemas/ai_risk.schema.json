@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/ai_risk.schema.json",
+  "title": "KAIOS V9.0 AI Risk",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["risk_id", "decision_id", "risk_level", "risk_reasons", "required_review", "blocked", "status"],
+  "properties": {
+    "risk_id": { "type": "string", "pattern": "^KGEN-AIRISK-[A-Z0-9-]+$" },
+    "decision_id": { "type": "string" },
+    "risk_level": { "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "risk_reasons": { "type": "array", "items": { "type": "string" } },
+    "required_review": { "type": "array", "items": { "enum": ["None", "Codex", "Human", "Legal", "Security"] } },
+    "blocked": { "type": "boolean" },
+    "status": { "enum": ["Draft", "Reviewed", "Blocked", "Archived"] }
+  }
+}

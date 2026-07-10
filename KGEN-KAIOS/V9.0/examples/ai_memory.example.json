@@ -1,0 +1,10 @@
+{
+  "memory_id": "KGEN-AIMEM-V9-DRYRUN-001",
+  "memory_type": "DecisionHistory",
+  "source_path": "KGEN-KAIOS/V9.0/examples/ai_decision.example.json",
+  "source_commit": "6868c1166d8ae16c6a43b21aa1fc0875ea017328",
+  "evidence_summary": "Dry run recession decision requires Codex Review and proposes three draft WorkOrders.",
+  "confidence": 0.82,
+  "archive_rule": "Archive after Codex Review or superseding V9 decision.",
+  "status": "Active"
+}

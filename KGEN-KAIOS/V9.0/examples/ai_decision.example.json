@@ -1,0 +1,31 @@
+{
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "timestamp": "2026-07-10T00:00:00Z",
+  "source_state": [
+    "KGEN-KAIOS/V8.2/examples/governance_signal.example.json",
+    "KGEN-KAIOS/V8.3/examples/event.example.json",
+    "KGEN-KAIOS/V8.3/examples/governance_response.example.json"
+  ],
+  "observations": [
+    "Economic recession scenario increases market risk.",
+    "Resource shortage reduces reserve confidence.",
+    "Temple activity decline may reduce population attraction.",
+    "Unemployment increase requires citizen support planning."
+  ],
+  "assumptions": [
+    "Dry run data is simulation-only.",
+    "No production assets are modified."
+  ],
+  "risks": ["R2 medium risk due WorkOrder priority and governance response impact."],
+  "confidence": 0.82,
+  "recommended_action": "Generate draft stabilization WorkOrders for resource reserve review, temple activity support and citizen employment support.",
+  "rejected_alternatives": [
+    { "alternative": "Direct market intervention", "reason": "Prohibited because V9.0 cannot execute financial or market actions." },
+    { "alternative": "Ignore recession signal", "reason": "Rejected because multiple V8.2 and V8.3 signals indicate risk." },
+    { "alternative": "Immediate production deployment", "reason": "Rejected because Codex Review is required." }
+  ],
+  "required_human_review": false,
+  "required_codex_review": true,
+  "proposed_workorders": ["V9-DRYRUN-001A", "V9-DRYRUN-001B", "V9-DRYRUN-001C"],
+  "status": "CodexReviewRequired"
+}

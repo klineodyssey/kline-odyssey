@@ -1,0 +1,9 @@
+{
+  "override_id": "KGEN-HOVR-V9-DEMO-001",
+  "who": "Human Operator",
+  "when": "2026-07-10T00:00:00Z",
+  "reason": "Demo override record showing how a human can pause an AI recommendation.",
+  "previous_state": "CodexReviewRequired",
+  "new_state": "Pause",
+  "status": "Draft"
+}

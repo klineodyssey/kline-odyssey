@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/ai_workorder.schema.json",
+  "title": "KAIOS V9.0 AI Draft WorkOrder",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "decision_id", "reason", "priority", "risk_level", "dependencies", "input_state", "expected_output", "acceptance_criteria", "protected_paths", "owner_suggestion", "reviewer", "branch_pattern", "report_path", "human_review_required", "codex_review_required", "status"],
+  "properties": {
+    "task_id": { "type": "string", "pattern": "^V9-[A-Z0-9-]+$" },
+    "decision_id": { "type": "string" },
+    "reason": { "type": "string" },
+    "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+    "risk_level": { "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "input_state": { "type": "array", "items": { "type": "string" } },
+    "expected_output": { "type": "string" },
+    "acceptance_criteria": { "type": "array", "items": { "type": "string" } },
+    "protected_paths": { "type": "array", "items": { "type": "string" } },
+    "owner_suggestion": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "branch_pattern": { "type": "string" },
+    "report_path": { "type": "string" },
+    "human_review_required": { "type": "boolean" },
+    "codex_review_required": { "type": "boolean" },
+    "status": { "const": "DRAFT" }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/codex_review.schema.json",
+  "title": "KAIOS V9.0 Codex Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["review_id", "decision_id", "reviewer", "checks", "result", "notes", "timestamp", "status"],
+  "properties": {
+    "review_id": { "type": "string", "pattern": "^KGEN-CODEXREV-[A-Z0-9-]+$" },
+    "decision_id": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "checks": { "type": "array", "items": { "enum": ["Canon", "Risk", "ProtectedPaths", "StateValidity", "DecisionEvidence", "WorkOrderQuality", "LegalBoundary", "SecurityBoundary", "DuplicateTask", "DependencyConflict"] } },
+    "result": { "enum": ["ApproveAsWorkOrder", "RequestRevision", "Reject", "Block", "Archive"] },
+    "notes": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["Draft", "Completed", "Archived"] }
+  }
+}

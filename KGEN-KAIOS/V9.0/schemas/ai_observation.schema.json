@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/ai_observation.schema.json",
+  "title": "KAIOS V9.0 AI Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["observation_id", "timestamp", "source_path", "source_type", "observation_quality", "summary", "confidence", "status"],
+  "properties": {
+    "observation_id": { "type": "string", "pattern": "^KGEN-AIOBS-[A-Z0-9-]+$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source_path": { "type": "string" },
+    "source_type": { "enum": ["UniverseState", "CivilizationState", "WorldClock", "CitizenState", "ProfessionState", "BusinessState", "MarketState", "ExchangeState", "BankState", "ResourceState", "TempleActivity", "LandDevelopment", "GovernanceSignals", "EventStream", "WorkerReports", "CodexReviewLog"] },
+    "observation_quality": { "enum": ["Verified", "Partial", "Inferred", "Unverified"] },
+    "summary": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "status": { "enum": ["Draft", "Reviewed", "Archived"] }
+  }
+}

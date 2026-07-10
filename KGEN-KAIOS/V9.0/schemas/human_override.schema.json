@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/human_override.schema.json",
+  "title": "KAIOS V9.0 Human Override",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["override_id", "who", "when", "reason", "previous_state", "new_state", "status"],
+  "properties": {
+    "override_id": { "type": "string", "pattern": "^KGEN-HOVR-[A-Z0-9-]+$" },
+    "who": { "type": "string" },
+    "when": { "type": "string", "format": "date-time" },
+    "reason": { "type": "string" },
+    "previous_state": { "type": "string" },
+    "new_state": { "enum": ["Approve", "Reject", "Pause", "ChangePriority", "Block", "Archive"] },
+    "status": { "enum": ["Draft", "Applied", "Archived"] }
+  }
+}

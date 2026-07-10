@@ -1,0 +1,8 @@
+{
+  "policy_id": "KGEN-AIPOL-V9-CORE-001",
+  "allowed_actions": ["Observe", "Analyze", "Reason", "Recommend", "GenerateDraftWorkOrders"],
+  "prohibited_actions": ["RealFinancialTransaction", "TokenTransfer", "ContractDeployment", "ProtectedPathModification", "LegalCommitment", "BrandPartnershipClaim", "HumanAccountAction", "MainBranchMerge", "ProductionDeployment"],
+  "source_rule": "GitHub documents and machine-readable state are formal sources; hidden chat memory cannot be the only evidence.",
+  "review_rule": "R2 requires Codex Review, R3 requires Codex and Human Review, R4 is blocked.",
+  "status": "Active"
+}

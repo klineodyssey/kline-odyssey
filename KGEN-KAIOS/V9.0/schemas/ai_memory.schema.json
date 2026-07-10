@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/schemas/ai_memory.schema.json",
+  "title": "KAIOS V9.0 AI Memory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["memory_id", "memory_type", "source_path", "source_commit", "evidence_summary", "confidence", "archive_rule", "status"],
+  "properties": {
+    "memory_id": { "type": "string", "pattern": "^KGEN-AIMEM-[A-Z0-9-]+$" },
+    "memory_type": { "enum": ["ShortTermMemory", "TaskMemory", "CivilizationMemory", "CanonMemory", "DecisionHistory", "FailureMemory", "ReviewMemory"] },
+    "source_path": { "type": "string" },
+    "source_commit": { "type": "string" },
+    "evidence_summary": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "archive_rule": { "type": "string" },
+    "status": { "enum": ["Active", "Expired", "Archived"] }
+  }
+}
