@@ -1,0 +1,11 @@
+{
+  "sync_request_id": "KAIOS-V9.2-SYNC-REQ-0001",
+  "source_draft_id": "V9-DRYRUN-001A",
+  "formal_workorder_id": "AI-ECONOMY-2026-0001",
+  "promotion_decision_path": "KGEN-KAIOS/V9.1/reviews/V9-DRYRUN-001A_promotion_decision.json",
+  "review_report_path": "KGEN-KAIOS/V9.1/reviews/V9-DRYRUN-001A_REVIEW_REPORT.md",
+  "requested_by": "Codex",
+  "requested_at": "2026-07-11T00:00:00Z",
+  "target_workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  "status": "SYNC_PENDING"
+}
