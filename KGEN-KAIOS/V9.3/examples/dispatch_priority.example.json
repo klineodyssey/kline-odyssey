@@ -1,0 +1,14 @@
+{
+  "priority_id": "KAIOS-V9.3-PRIORITY-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "priority": "P1",
+  "domain": "Economy",
+  "tie_breakers": {
+    "dependencies_done": true,
+    "risk_lower_first": true,
+    "oldest_approved_first": true,
+    "asset_conflict_free": true,
+    "worker_available": true
+  },
+  "result": "RELEASE_CANDIDATE"
+}

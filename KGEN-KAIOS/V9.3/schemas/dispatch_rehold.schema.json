@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_rehold.schema.json",
+  "title": "KAIOS V9.3 Dispatch Re-Hold",
+  "type": "object",
+  "required": ["rehold_id", "workorder_id", "reason", "previous_dispatch_state", "new_dispatch_state", "actor", "timestamp"],
+  "properties": {
+    "rehold_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "reason": { "type": "string" },
+    "previous_dispatch_state": { "type": "string" },
+    "new_dispatch_state": { "type": "string", "enum": ["OPEN + HOLD", "BLOCKED"] },
+    "actor": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

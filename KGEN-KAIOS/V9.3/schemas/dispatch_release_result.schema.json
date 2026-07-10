@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_release_result.schema.json",
+  "title": "KAIOS V9.3 Dispatch Release Result",
+  "type": "object",
+  "required": ["release_result_id", "workorder_id", "previous_dispatch_hold", "new_dispatch_hold", "dispatch_status", "claimable", "released_by", "released_at", "release_review_id"],
+  "properties": {
+    "release_result_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "previous_dispatch_hold": { "type": "boolean", "const": true },
+    "new_dispatch_hold": { "type": "boolean", "const": false },
+    "dispatch_status": { "type": "string", "enum": ["RELEASED"] },
+    "claimable": { "type": "boolean", "const": true },
+    "recommended_worker": { "type": "string" },
+    "released_by": { "type": "string" },
+    "released_at": { "type": "string", "format": "date-time" },
+    "release_review_id": { "type": "string" },
+    "release_commit_sha": { "type": "string" }
+  },
+  "additionalProperties": false
+}

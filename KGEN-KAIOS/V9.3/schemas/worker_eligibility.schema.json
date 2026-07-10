@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/worker_eligibility.schema.json",
+  "title": "KAIOS V9.3 Worker Eligibility",
+  "type": "object",
+  "required": ["eligibility_id", "workorder_id", "worker_id", "checks", "result"],
+  "properties": {
+    "eligibility_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "worker_id": { "type": "string" },
+    "worker_type": { "type": "string" },
+    "checks": {
+      "type": "object",
+      "required": ["registered", "workspace_defined", "branch_pattern_valid", "can_push_main_false", "no_active_claim", "role_domain_match", "permission_risk_match", "not_suspended"],
+      "additionalProperties": { "type": "boolean" }
+    },
+    "status_note": { "type": "string" },
+    "result": { "type": "string", "enum": ["ELIGIBLE", "ELIGIBLE_AFTER_HEARTBEAT", "INELIGIBLE"] }
+  },
+  "additionalProperties": false
+}

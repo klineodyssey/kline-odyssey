@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_priority.schema.json",
+  "title": "KAIOS V9.3 Dispatch Priority",
+  "type": "object",
+  "required": ["priority_id", "workorder_id", "priority", "domain", "tie_breakers", "result"],
+  "properties": {
+    "priority_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3", "P4"] },
+    "domain": { "type": "string" },
+    "tie_breakers": {
+      "type": "object",
+      "properties": {
+        "dependencies_done": { "type": "boolean" },
+        "risk_lower_first": { "type": "boolean" },
+        "oldest_approved_first": { "type": "boolean" },
+        "asset_conflict_free": { "type": "boolean" },
+        "worker_available": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "result": { "type": "string", "enum": ["RELEASE_CANDIDATE", "DEFER"] }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_release_validation.schema.json",
+  "title": "KAIOS V9.3 Dispatch Release Validation",
+  "type": "object",
+  "required": ["validation_id", "release_request_id", "validated_by", "validated_at", "checklist", "result"],
+  "properties": {
+    "validation_id": { "type": "string" },
+    "release_request_id": { "type": "string" },
+    "validated_by": { "type": "string" },
+    "validated_at": { "type": "string", "format": "date-time" },
+    "checklist": {
+      "type": "object",
+      "required": [
+        "workorder_exists",
+        "sync_audit_exists",
+        "promotion_decision_exists",
+        "dispatch_hold_true",
+        "risk_level_releasable",
+        "human_review_complete_or_not_required",
+        "dependencies_satisfied",
+        "owner_valid",
+        "reviewer_valid",
+        "eligible_worker_exists",
+        "branch_pattern_correct",
+        "report_path_correct",
+        "protected_paths_correct",
+        "acceptance_criteria_executable",
+        "output_path_no_conflict",
+        "no_same_asset_in_progress",
+        "no_stale_handoff_branch",
+        "no_blocked_or_paused_signal",
+        "base_commit_not_too_stale",
+        "human_pause_false"
+      ],
+      "additionalProperties": { "type": "boolean" }
+    },
+    "result": { "type": "string", "enum": ["RELEASE_READY", "RELEASE_REJECTED", "HUMAN_PAUSED", "REHOLD_PENDING"] }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "rehold_id": "KAIOS-V9.3-REHOLD-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "reason": "Dry run: human pause after release readiness.",
+  "previous_dispatch_state": "OPEN + RELEASED",
+  "new_dispatch_state": "OPEN + HOLD",
+  "actor": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z"
+}

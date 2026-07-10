@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_audit.schema.json",
+  "title": "KAIOS V9.3 Dispatch Audit",
+  "type": "object",
+  "required": ["audit_id", "workorder_id", "previous_dispatch_state", "new_dispatch_state", "dispatch_hold_before", "dispatch_hold_after", "actor", "reason", "timestamp", "related_report"],
+  "properties": {
+    "audit_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "previous_dispatch_state": { "type": "string" },
+    "new_dispatch_state": { "type": "string" },
+    "dispatch_hold_before": { "type": "boolean" },
+    "dispatch_hold_after": { "type": "boolean" },
+    "actor": { "type": "string" },
+    "reason": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "related_report": { "type": "string" },
+    "commit_sha": { "type": "string" }
+  },
+  "additionalProperties": false
+}

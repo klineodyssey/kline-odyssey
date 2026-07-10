@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/schemas/dispatch_dependency_gate.schema.json",
+  "title": "KAIOS V9.3 Dispatch Dependency Gate",
+  "type": "object",
+  "required": ["dependency_gate_id", "workorder_id", "dependencies", "checks", "result"],
+  "properties": {
+    "dependency_gate_id": { "type": "string" },
+    "workorder_id": { "type": "string" },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "object",
+      "required": ["dependencies_exist", "dependencies_done", "no_cycle", "no_blocked_dependency", "no_stale_dependency", "required_reports_exist", "required_branches_exist"],
+      "additionalProperties": { "type": "boolean" }
+    },
+    "result": { "type": "string", "enum": ["PASS", "FAIL"] }
+  },
+  "additionalProperties": false
+}
