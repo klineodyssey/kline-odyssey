@@ -82,6 +82,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V8.3 Civilization Time Engine | [KGEN-KAIOS/V8.3/](KGEN-KAIOS/V8.3/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/ |
 | KAIOS V9.0 Civilization AI Engine | [KGEN-KAIOS/V9.0/](KGEN-KAIOS/V9.0/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/ |
 | KAIOS V9.1 AI WorkOrder Review Loop | [KGEN-KAIOS/V9.1/](KGEN-KAIOS/V9.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/ |
+| KAIOS V9.2 Approved Draft Sync | [KGEN-KAIOS/V9.2/](KGEN-KAIOS/V9.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -223,6 +224,21 @@ KAIOS V9.1 creates the official review loop for AI-generated DRAFT WorkOrders. A
 - Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/
 
 V9.1 is a Draft for Review / WorkOrder Governance Prototype. It reviews and promotes DRAFT WorkOrders but does not execute protected actions, merge branches, transfer tokens or deploy contracts.
+
+### KAIOS V9.2 Approved Draft to OPEN WorkQueue Sync
+
+KAIOS V9.2 creates the Codex-only sync layer from V9.1 `APPROVED_FOR_OPEN` decisions into the official WorkQueue. It allocates formal `AI-<DOMAIN>-<YEAR>-<SEQUENCE>` IDs, validates conflicts, inserts OPEN tasks, supports Human Pause and keeps rollback audit records.
+
+- V9.2 Entry: [KGEN-KAIOS/V9.2/index.html](KGEN-KAIOS/V9.2/index.html)
+- Sync Dashboard: [KGEN-KAIOS/V9.2/dashboard/index.html](KGEN-KAIOS/V9.2/dashboard/index.html)
+- Sync Standard: [KGEN-KAIOS/V9.2/APPROVED_DRAFT_SYNC_STANDARD.md](KGEN-KAIOS/V9.2/APPROVED_DRAFT_SYNC_STANDARD.md)
+- Codex Sync Protocol: [KGEN-KAIOS/V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md](KGEN-KAIOS/V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md)
+- WorkQueue Sync Result: [KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json](KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json)
+- Sync QA Report: [KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_QA_REPORT.md](KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/
+- Dashboard URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/
+
+V9.2 synced `V9-DRYRUN-001A` into WorkQueue as `AI-ECONOMY-2026-0001` with `Dispatch Hold: true`. It does not auto-execute the new OPEN task.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.

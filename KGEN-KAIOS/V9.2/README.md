@@ -71,3 +71,17 @@ V9.2 does not modify:
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper/`
 - `KGEN/contracts/KGEN_Token_V7_5_2.sol`
+
+## Release Summary
+
+| Metric | Value |
+|---|---:|
+| Schemas | 8 |
+| Examples | 8 |
+| Runtime documents | 8 |
+| Synced WorkOrders | 1 |
+| Conflict dry-run tests | 1 |
+| Human pause dry-run tests | 1 |
+| Rollback dry-run tests | 1 |
+
+V9.2 is released as a Codex-only sync layer. It creates an OPEN WorkQueue task with dispatch hold, but it does not execute the task or allow automatic Cursor claim.

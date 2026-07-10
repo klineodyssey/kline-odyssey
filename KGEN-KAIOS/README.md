@@ -260,9 +260,36 @@ V9.1 adds the formal review loop for AI-generated DRAFT WorkOrders. It prevents 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/
+
+## V9.2 Approved Draft to OPEN WorkQueue Sync
+
+V9.2 adds the Codex-only sync layer that converts V9.1 `APPROVED_FOR_OPEN` decisions into official `OPEN` WorkQueue tasks. It validates promotion records, allocates formal `AI-<DOMAIN>-<YEAR>-<SEQUENCE>` IDs, checks conflicts, inserts WorkQueue blocks, supports Human Pause and records rollback/audit events.
+
+| File | Purpose |
+|---|---|
+| `V9.2/README.md` | V9.2 overview and file map |
+| `V9.2/index.html` | Read-only V9.2 entry page |
+| `V9.2/dashboard/index.html` | Read-only sync dashboard |
+| `V9.2/APPROVED_DRAFT_SYNC_STANDARD.md` | Sync state machine and boundaries |
+| `V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md` | Codex 17-point sync checklist |
+| `V9.2/WORKORDER_ID_ALLOCATION_STANDARD.md` | Formal AI WorkOrder ID rules |
+| `V9.2/WORKQUEUE_CONFLICT_POLICY.md` | Conflict detection rules |
+| `V9.2/WORKQUEUE_INSERTION_POLICY.md` | Safe WorkQueue insertion rules |
+| `V9.2/WORKQUEUE_ROLLBACK_POLICY.md` | Rollback from OPEN to APPROVED_FOR_OPEN |
+| `V9.2/HUMAN_PAUSE_GATE.md` | Human pause, reject, archive and priority gate |
+| `V9.2/schemas/` | Eight JSON Schemas |
+| `V9.2/examples/` | Eight parseable examples |
+| `V9.2/runtime/` | Eight sync runtime documents |
+| `V9.2/sync/` | Actual sync artifacts for `AI-ECONOMY-2026-0001` |
+| `V9.2/reports/KAIOS_V9_2_QA_REPORT.md` | V9.2 QA report |
+| `V9.2/reports/KAIOS_V9_2_RELEASE_REPORT.md` | V9.2 release report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/
+
+**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/
 ## Protected Systems
 
-KAIOS V9.1 does not modify:
+KAIOS V9.2 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

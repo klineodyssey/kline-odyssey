@@ -25,6 +25,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KAIOS V8.3 Civilization Time Engine | `KGEN-KAIOS/V8.3/` | World Clock, Simulation Tick, Timeline, citizen and business behavior, temple activity, resource regeneration, event engine, governance response, schemas and read-only viewer |
 | KAIOS V9.0 Civilization AI Engine | `KGEN-KAIOS/V9.0/` | AI observation, reasoning, decision, memory, policy, risk, advisors, draft WorkOrders, Codex review boundary, schemas and read-only dashboard |
 | KAIOS V9.1 AI WorkOrder Review Loop | `KGEN-KAIOS/V9.1/` | AI DRAFT WorkOrder review, promotion, revision, rejection, archive, Human Gate, audit log, schemas and read-only dashboard |
+| KAIOS V9.2 Approved Draft Sync | `KGEN-KAIOS/V9.2/` | Codex-only approved draft to OPEN WorkQueue sync, ID allocation, conflict detection, Human Pause, rollback, schemas and read-only dashboard |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -222,6 +223,31 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Dry Run Report | `KGEN-KAIOS/V9.1/reports/V9_1_DRYRUN_001_REPORT.md` | V9.1 dry run result |
 | QA Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_QA_REPORT.md` | V9.1 QA result |
 | Release Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_RELEASE_REPORT.md` | V9.1 release summary |
+
+## KAIOS V9.2 Approved Draft to OPEN WorkQueue Sync
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.2 Index | `KGEN-KAIOS/V9.2/README.md` | V9.2 overview and file map |
+| V9.2 Entry | `KGEN-KAIOS/V9.2/index.html` | Read-only V9.2 public entry |
+| V9.2 Dashboard | `KGEN-KAIOS/V9.2/dashboard/index.html` | Read-only sync dashboard |
+| Approved Draft Sync Standard | `KGEN-KAIOS/V9.2/APPROVED_DRAFT_SYNC_STANDARD.md` | Sync state machine |
+| Codex WorkQueue Sync Protocol | `KGEN-KAIOS/V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md` | 17-point sync checklist |
+| WorkOrder ID Allocation | `KGEN-KAIOS/V9.2/WORKORDER_ID_ALLOCATION_STANDARD.md` | Formal AI WorkOrder ID rules |
+| WorkQueue Conflict Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_CONFLICT_POLICY.md` | Conflict detection |
+| WorkQueue Insertion Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_INSERTION_POLICY.md` | Safe insertion rules |
+| WorkQueue Rollback Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_ROLLBACK_POLICY.md` | Rollback rules |
+| Sync Audit Standard | `KGEN-KAIOS/V9.2/SYNC_AUDIT_STANDARD.md` | Sync audit fields |
+| Human Pause Gate | `KGEN-KAIOS/V9.2/HUMAN_PAUSE_GATE.md` | Human pause, reject, archive and priority changes |
+| Schemas | `KGEN-KAIOS/V9.2/schemas/` | Eight V9.2 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.2/examples/` | Eight parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.2/runtime/` | Eight sync runtime documents |
+| Sync Artifacts | `KGEN-KAIOS/V9.2/sync/` | `AI-ECONOMY-2026-0001` sync request, validation, allocation and result |
+| Sync Report | `KGEN-KAIOS/V9.2/reports/V9_2_SYNC_REPORT.md` | Actual V9.2 sync report |
+| Sync Audit Log | `KGEN-KAIOS/V9.2/reports/V9_2_SYNC_AUDIT_LOG.md` | Sync audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.2/reports/V9_2_DRYRUN_001_REPORT.md` | Successful sync, conflict, Human pause and rollback tests |
+| QA Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_QA_REPORT.md` | V9.2 QA result |
+| Release Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_RELEASE_REPORT.md` | V9.2 release summary |
 ## Organization V2.0
 
 | Item | Path | Purpose |
