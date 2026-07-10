@@ -31,3 +31,8 @@
 - Added V9-DRYRUN-001 for Economic Recession, Resource Shortage, Temple Activity Decline and Unemployment Increase.
 - Added three Draft WorkOrders: V9-DRYRUN-001A, V9-DRYRUN-001B and V9-DRYRUN-001C.
 - Confirmed dry run waits for Codex Review and does not execute actions.
+
+## V9.0 QA and Release
+
+- Added QA report with JSON, JavaScript, dry run, read-only and protected path validation.
+- Added release report with deliverable counts, public URLs and V9.1 recommendation.
