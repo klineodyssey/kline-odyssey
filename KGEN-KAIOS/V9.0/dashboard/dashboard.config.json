@@ -1,0 +1,27 @@
+{
+  "version": "KAIOS V9.0",
+  "readiness_score": 90,
+  "mode": "Read Only",
+  "dashboard_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/",
+  "viewer_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/",
+  "data_sources": [
+    "../examples/ai_observation.example.json",
+    "../examples/ai_decision.example.json",
+    "../examples/ai_memory.example.json",
+    "../examples/ai_risk.example.json",
+    "../examples/ai_policy.example.json",
+    "../examples/ai_workorder.example.json",
+    "../examples/human_override.example.json",
+    "../examples/codex_review.example.json"
+  ],
+  "schema_sources": [
+    "../schemas/ai_observation.schema.json",
+    "../schemas/ai_decision.schema.json",
+    "../schemas/ai_memory.schema.json",
+    "../schemas/ai_risk.schema.json",
+    "../schemas/ai_policy.schema.json",
+    "../schemas/ai_workorder.schema.json",
+    "../schemas/human_override.schema.json",
+    "../schemas/codex_review.schema.json"
+  ]
+}

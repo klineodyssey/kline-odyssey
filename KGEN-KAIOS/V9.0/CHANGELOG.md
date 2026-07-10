@@ -19,3 +19,9 @@
 - Added 8 JSON Schemas for AI observation, decision, memory, risk, policy, draft WorkOrder, human override and Codex review.
 - Added 8 parseable examples.
 - Added 8 advisor runtime documents.
+
+## V9.0 Read-Only Dashboard
+
+- Added read-only Civilization AI Viewer at `KGEN-KAIOS/V9.0/`.
+- Added read-only Civilization AI Dashboard at `KGEN-KAIOS/V9.0/dashboard/`.
+- Added dashboard configuration and public data-source model.

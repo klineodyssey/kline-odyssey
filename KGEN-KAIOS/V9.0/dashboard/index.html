@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.0 Civilization AI Dashboard</title>
+  <meta name="description" content="Read-only KAIOS V9.0 Civilization AI dashboard.">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="Back to KAIOS V9.0">
+      <span class="brand-mark">K</span>
+      <span><strong>KAIOS V9.0 Dashboard</strong><small>Read-only AI Decisions</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Dashboard links">
+      <a href="../">Viewer</a>
+      <a href="../README.md">README</a>
+      <a href="../reports/KAIOS_V9_0_QA_REPORT.md">QA</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="dashboard-hero">
+      <div>
+        <p class="eyebrow">AI Decisions / Risk Alerts / Draft WorkOrders</p>
+        <h1>文明 AI 唯讀控制台</h1>
+        <p>Dashboard 讀取公開 JSON 與 schema，顯示 AI 決策與審查邊界。它不自動執行、不寫入 repo、不使用真實 token。</p>
+      </div>
+      <aside class="health-card">
+        <span>AI Readiness</span>
+        <strong id="healthScore">Loading</strong>
+        <small id="healthText">Reading public files</small>
+      </aside>
+    </section>
+
+    <section id="summary" class="summary-grid" aria-label="AI dashboard summary"></section>
+
+    <section class="dashboard-grid">
+      <article class="panel" id="aiDecisions"></article>
+      <article class="panel" id="riskAlerts"></article>
+      <article class="panel" id="recommendedWorkorders"></article>
+      <article class="panel" id="civilizationHealth"></article>
+      <article class="panel" id="economySignals"></article>
+      <article class="panel" id="templeSignals"></article>
+      <article class="panel" id="citizenSignals"></article>
+      <article class="panel" id="humanOverrides"></article>
+      <article class="panel" id="codexReviews"></article>
+      <article class="panel wide" id="alerts"></article>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Prototype / Review First / Read Only</span>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

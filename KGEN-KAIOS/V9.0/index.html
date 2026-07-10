@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.0 Civilization AI Engine</title>
+  <meta name="description" content="KAIOS V9.0 Civilization AI Engine read-only viewer for decisions, risk, memory, draft WorkOrders and review boundaries.">
+  <link rel="stylesheet" href="v90.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="KAIOS V9.0 Home">
+      <span class="brand-mark">K</span>
+      <span>
+        <strong>KAIOS V9.0</strong>
+        <small>Civilization AI Engine</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="V9.0 links">
+      <a href="README.md">README</a>
+      <a href="CIVILIZATION_AI_ENGINE.md">AI Engine</a>
+      <a href="schemas/ai_decision.schema.json">Schema</a>
+      <a href="dashboard/">Dashboard</a>
+      <a href="../V8.3/">V8.3</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Observe -> Analyze -> Reason -> Recommend -> Draft WorkOrders</p>
+        <h1>文明 AI 決策引擎</h1>
+        <p>V9.0 讓 AI 讀取文明、時間、經濟、資源與治理狀態，產生可解釋的建議與 DRAFT WorkOrders。AI 不直接部署、不交易、不改 protected paths、不合併 main。</p>
+        <div class="hero-actions">
+          <a class="primary-link" href="dashboard/">Open AI Dashboard</a>
+          <a class="secondary-link" href="examples/ai_decision.example.json">Open Decision JSON</a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="AI engine status">
+        <dl>
+          <div><dt>Version</dt><dd>V9.0</dd></div>
+          <div><dt>Status</dt><dd>Prototype / Review First</dd></div>
+          <div><dt>Mode</dt><dd>Read Only</dd></div>
+          <div><dt>Risk Levels</dt><dd>R0-R4</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="ai-chain" aria-label="AI chain">
+      <span>Observe</span>
+      <span>Analyze</span>
+      <span>Reason</span>
+      <span>Recommend</span>
+      <span>Draft WorkOrders</span>
+      <span>Codex Review</span>
+      <span>Human Override</span>
+    </section>
+
+    <section class="toolbar" aria-label="Viewer controls">
+      <div class="tabs" role="tablist" aria-label="AI viewer tabs">
+        <button type="button" class="tab active" data-view="decision">Decision</button>
+        <button type="button" class="tab" data-view="risk">Risk</button>
+        <button type="button" class="tab" data-view="memory">Memory</button>
+        <button type="button" class="tab" data-view="workorder">Draft WorkOrders</button>
+        <button type="button" class="tab" data-view="review">Review</button>
+        <button type="button" class="tab" data-view="policy">Policy</button>
+      </div>
+      <label class="search-box">
+        <span>Search</span>
+        <input id="searchInput" type="search" aria-label="Search AI records" autocomplete="off">
+      </label>
+    </section>
+
+    <section class="metric-grid" aria-label="AI engine summary">
+      <article class="metric"><span>Decision Types</span><strong>12</strong></article>
+      <article class="metric"><span>Risk Levels</span><strong>5</strong></article>
+      <article class="metric"><span>Schemas</span><strong>8</strong></article>
+      <article class="metric"><span>Runtimes</span><strong>8</strong></article>
+      <article class="metric"><span>Mode</span><strong>Read Only</strong></article>
+    </section>
+
+    <section id="viewer" class="viewer" aria-live="polite"></section>
+
+    <section class="notice">
+      <h2>Review Boundary</h2>
+      <p>V9.0 只能產生建議與 DRAFT WorkOrders。R2 需要 Codex Review，R3 需要 Codex + Human Review，R4 禁止執行，只可建立 BLOCKED draft 或警示。</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Where the Market Becomes the Myth</span>
+  </footer>
+
+  <script src="v90.js"></script>
+</body>
+</html>
