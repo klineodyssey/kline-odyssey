@@ -201,22 +201,23 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="kpiGrid">
         <div class="kpi"><div class="k">KGEN Token</div><div class="v" style="font-size:12px;">0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</div></div>
-        <div class="kpi"><div class="k">Heart 12345</div><div class="v">LIVE ✅</div></div>
-        <div class="kpi"><div class="k">BNB/USDT</div><div class="v cyan" id="hero-bnb">--</div></div>
-        <div class="kpi"><div class="k">LP TVL (est)</div><div class="v green">$12,500</div></div>
+        <div class="kpi"><div class="k">BNB/USDT（即時）</div><div class="v cyan" id="hero-bnb">--</div></div>
+        <div class="kpi"><div class="k">LP TVL（鏈上）</div><div class="v green" id="hero-lp-tvl">讀取中…</div></div>
+        <div class="kpi"><div class="k">KGEN/BNB（LP）</div><div class="v" id="hero-kgen-per-bnb">讀取中…</div></div>
       </div>
     </div>
   </section>
 
   <!-- World stats -->
   <div class="stats-bar">
-    <div class="sb-item"><span class="sb-k">宇宙節點</span><span class="sb-v">6 個</span></div>
+    <div class="sb-item"><span class="sb-k">🌿 LP KGEN</span><span class="sb-v" id="sb-lp-kgen">讀取中…</span></div>
+    <div class="sb-item"><span class="sb-k">💧 LP BNB</span><span class="sb-v" id="sb-lp-bnb">讀取中…</span></div>
+    <div class="sb-item"><span class="sb-k">🔥 已銷毀</span><span class="sb-v" id="sb-burn">讀取中…</span></div>
     <div class="sb-item"><span class="sb-k">KGEN 稅率</span><span class="sb-v">0.30%（鎖死）</span></div>
     <div class="sb-item"><span class="sb-k">Chain</span><span class="sb-v">BSC 56</span></div>
     <div class="sb-item"><span class="sb-k">LP Lock</span><span class="sb-v">2027-01-01</span></div>
-    <div class="sb-item"><span class="sb-k">5D 遊戲</span><span class="sb-v">V1.0</span></div>
-    <div class="sb-item"><span class="sb-k">Runtime</span><span class="sb-v">Universe V1.0</span></div>
-    <div class="sb-item"><span class="sb-k">最後更新</span><span class="sb-v" id="last-update">2026-07-04</span></div>
+    <div class="sb-item"><span class="sb-k">Runtime</span><span class="sb-v">Universe V1.1</span></div>
+    <div class="sb-item"><span class="sb-k">最後更新</span><span class="sb-v" id="last-update">2026-07-10</span></div>
   </div>
 
   <!-- Nodes grid -->
@@ -406,20 +407,90 @@ tick(); setInterval(tick, 1000);
   setInterval(updateBNB, 20000);
 })();
 
-/* Load world map JSON and annotate nodes */
+/* Load world map JSON */
 (function(){
   fetch('./data/kgen-5d-world-map.json')
     .then(function(r){ return r.json(); })
     .then(function(data){
-      // Update stats bar with physics info
-      var tax = data.kPhysics && data.kPhysics.taxBpsTotal;
-      if(tax) {
-        var els = document.querySelectorAll('.sb-v');
-        // Already set inline; could update dynamically if needed
-      }
       console.log('[KGEN Portal] World map loaded:', Object.keys(data.nodes || {}).length, 'nodes');
     })
-    .catch(function(){ /* JSON load optional */ });
+    .catch(function(){});
+})();
+
+/* Live BSC chain data — public RPC, no wallet needed */
+(function(){
+  var BSC_RPC = 'https://bsc-dataseed.binance.org/';
+  var KGEN    = '0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  var LP_PAIR = '0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2';
+  var TREASURY= '0xB73D6716005B37BEC742D64482fA26033eE1A4E1';
+  var DEAD    = '0x000000000000000000000000000000000000dead';
+
+  function bscCall(to, data) {
+    return fetch(BSC_RPC, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:to,data:data},'latest']})
+    }).then(function(r){ return r.json(); }).then(function(j){ return j.result||null; }).catch(function(){ return null; });
+  }
+
+  function parseU256(hex, dec) {
+    if(!hex || hex==='0x') return null;
+    try {
+      var big = BigInt('0x'+(hex.startsWith('0x')?hex.slice(2):hex)||'0');
+      var d = BigInt(Math.pow(10, dec||18));
+      return Number(big / d) + Number(big % d) / Math.pow(10, dec||18);
+    } catch(e) { return parseInt(hex,16) / Math.pow(10, dec||18); }
+  }
+
+  function balanceOf(token, holder) {
+    var sig = '0x70a08231';
+    var pad = '000000000000000000000000' + holder.replace('0x','').toLowerCase();
+    return bscCall(token, sig+pad).then(function(r){ return parseU256(r,18); });
+  }
+
+  function getReserves() {
+    return bscCall(LP_PAIR, '0x0902f1ac').then(function(res) {
+      if(!res || res.length < 130) return null;
+      try {
+        var d = res.startsWith('0x') ? res.slice(2) : res;
+        var r0 = Number(BigInt('0x'+d.slice(0,64)));
+        var r1 = Number(BigInt('0x'+d.slice(64,128)));
+        var KGEN_IS_T0 = KGEN.toLowerCase() < '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c';
+        return {
+          kgen: (KGEN_IS_T0 ? r0 : r1) / 1e18,
+          bnb:  (KGEN_IS_T0 ? r1 : r0) / 1e18
+        };
+      } catch(e) { return null; }
+    });
+  }
+
+  function fmtK(n) {
+    if(n == null) return '…';
+    if(n >= 1e6) return (n/1e6).toFixed(2)+'M';
+    if(n >= 1e3) return (n/1e3).toFixed(1)+'K';
+    return n.toFixed(2);
+  }
+
+  function setText(id, v) { var el=document.getElementById(id); if(el) el.textContent=v; }
+
+  function refresh() {
+    /* LP reserves */
+    getReserves().then(function(r) {
+      if(!r) return;
+      setText('sb-lp-kgen', fmtK(r.kgen)+' KGEN');
+      setText('sb-lp-bnb',  r.bnb.toFixed(2)+' BNB');
+      setText('hero-lp-tvl', '$'+fmtK(r.bnb * 300 * 2));
+      if(r.bnb > 0) setText('hero-kgen-per-bnb', fmtK(r.kgen/r.bnb)+' KGEN/BNB');
+    });
+
+    /* Burn total */
+    balanceOf(KGEN, DEAD).then(function(burned) {
+      if(burned == null) return;
+      setText('sb-burn', fmtK(burned)+' KGEN');
+    });
+  }
+
+  refresh();
+  setInterval(refresh, 60000);
 })();
 </script>
 </body>
