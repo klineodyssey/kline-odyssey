@@ -8,175 +8,215 @@
 | Worker ID | cursor-01 |
 | Worker Type | Cursor |
 | Date | 2026-07-10 |
-| Base Commit | bfb40a07ff8f952ccb092d1dad6c1c030395eeb7 |
+| Base Commit | bd632db3f9c6337359a77fb7ac69da93b229d258 |
 | Branch | `cursor-handoff/ORG-P2-003D` |
 | Report Path | `KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md` |
-| WorkQueue Status | REVIEW |
+| Start Status | OPEN |
+| End Status | REVIEW |
 | Reviewer | Codex |
 | Architecture Decision | D5 ARCHIVE + D6 ALIAS — `ORG-P2-003_ARCHITECTURE_DECISION.md` |
 
 ## Summary
 
-Drafted a **documentation-only** reference policy for legacy temple and physics-runtime copies. Labels: **Current**, **Legacy**, **Archive**, **Single Source of Truth (SSOT)**. No temple code and no physics runtime files were edited. Locations that need future reference notes are listed for Codex-assigned follow-up WorkOrders (some require human approval because they sit under protected paths).
+Drafted a **reference-only policy** for legacy temple shells and physics-runtime copies. Confirms **`K線西遊記/temples/12345/`** as **Current** (protected) and **`wukong-temple/`** as **Legacy** (read-only archive). Confirms **`docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`** as **Single Source of Truth** for physics runtime prose. Identified byte-identical duplicate clusters and proposed **where reference banners/notes should be added** in a future doc-only WorkOrder. **No temple code, no physics CURRENT file, and no protected paths were modified.**
 
-## Classification Vocabulary
+## Policy Definitions
 
 | Label | Meaning | Agent rule |
 |---|---|---|
-| **Current** | Active official surface for users and agents | Prefer this path; do not fork |
-| **Legacy** | Still reachable for compatibility / history | May read; must not treat as SSOT; point to Current |
-| **Archive** | Historical snapshot only | Do not extend; do not cite as latest law |
-| **SSOT** | Single Source of Truth | Only this path governs active physics / temple identity |
+| **Current** | Live official implementation | May be modified only by explicit authorized WorkOrders; protected by `DO_NOT_TOUCH` |
+| **Legacy** | Superseded but retained for history/compatibility | Read-only; must point users to Current; no feature work |
+| **Archive** | Frozen historical snapshots inside Legacy trees | No edits except Codex-approved archive labels |
+| **Single Source of Truth (SSOT)** | One authoritative document path per topic | All other copies are **Reference Alias** only |
 
-## Policy A — Temple Surfaces (D5 ARCHIVE)
+## Temple Reference Policy (D5)
 
-### Official positions
+### Current — Official Temple
 
-| Role | Path | Label |
-|---|---|---|
-| Official Wukong / Heart temple | `K線西遊記/temples/12345/` | **Current** + **Protected** |
-| Standalone legacy deploy tree | `wukong-temple/` | **Legacy** |
-| Versioned HTML under `wukong-temple/archive/` | e.g. `index.html.V2.2` | **Archive** |
-
-### Inventory (wukong-temple)
-
-| Asset | Notes |
+| Item | Value |
 |---|---|
-| `wukong-temple/index.html` | Legacy public entry |
-| `life-forge.html`, `bookstore.html`, `mars-villa/` | Legacy feature shells |
-| `README_Wukong_Temple_Deploy_V2_3.md` | Deploy guide; no Current pointer today |
-| `README_WUKONG_TEMPLE_AUTOPILOT_V1_6.md` | Autopilot notes |
-| `archive/*` | 15+ historical index versions |
+| Path | `K線西遊記/temples/12345/` |
+| Entry | `index.html` |
+| Runtime | `modules/runtime-main.js`, `modules/runtime-main.css` |
+| Production URL | `https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/12345/index.html` |
+| Bridge URL | `https://klineodyssey.github.io/kline-odyssey/12345.html` |
+| Status | **Current / Protected** |
+| Local dev | `AGENTS.md` → port 8080 temple 12345 |
 
-### Policy rules (draft)
+### Legacy — Wukong Temple
 
-1. **Current temple identity** is only `K線西遊記/temples/12345/`.
-2. `wukong-temple/` remains readable for archaeology and old bookmarks.
-3. Agents must not migrate wallet, bridge, or organ code from Legacy → Current without an explicit human + Codex WorkOrder.
-4. Agents must not delete `wukong-temple/` under this policy.
-5. Future doc WorkOrders may add a **Legacy banner** to `wukong-temple/README_*.md` pointing to Current 12345 — **allowed** (not protected).
-6. Editing files under `K線西遊記/temples/12345/` for banners or redirects is **BLOCKED** without human approval (`DO_NOT_TOUCH`).
+| Item | Value |
+|---|---|
+| Path | `wukong-temple/` |
+| Entry | `index.html` (~152 KB monolith, title V4.4.3 CHAIN) |
+| Sub-entries | `bookstore/`, `mars-villa/`, `life-forge.html` |
+| Archive subtree | `wukong-temple/archive/` (V0.5–V2.7 HTML snapshots) |
+| Status | **Legacy / Read-only** |
+| Local dev | `AGENTS.md` labels as "Wukong temple (legacy)" |
 
-### Where reference notes are needed (Temple)
+### Temple comparison (audit)
 
-| Target | Note type | Authorization |
+| Dimension | Current 12345 | Legacy wukong-temple |
 |---|---|---|
-| `wukong-temple/README_Wukong_Temple_Deploy_V2_3.md` | Legacy banner → Current 12345 URL/path | Codex doc WorkOrder |
-| `wukong-temple/README_WUKONG_TEMPLE_AUTOPILOT_V1_6.md` | Same Legacy banner | Codex doc WorkOrder |
-| `wukong-temple/index.html` (optional HTML comment / visible notice) | “Legacy surface; Current is temples/12345” | Codex + careful UI scope |
-| `wukong-temple/archive/README.md` | Archive label | Codex doc WorkOrder |
-| AGENTS.md local URL table | Already lists both; clarify Legacy vs Current | Codex doc WorkOrder |
-| `K線西遊記/temples/12345/` any file | Do **not** edit under this task | Human + Codex required |
+| Architecture | Modular runtime (`runtime-main.js`) | Inline monolith HTML |
+| Version line | V2.3.x runtime core | V4.4.3 CHAIN (historical naming) |
+| Wallet bridge | `12345.html` ASCII bridge | Older embedded flows |
+| Protected | Yes (`DO_NOT_TOUCH`) | No — but **no migration/deletion approved** |
+| User-facing rule | Default for all new work | Historical reference only |
 
-## Policy B — Physics Runtime Copies (D6 ALIAS)
+### Proposed reference notes (future doc-only WO — not applied in this task)
 
-### Official positions
+| Location | Proposed banner text |
+|---|---|
+| `wukong-temple/README_WUKONG_TEMPLE_AUTOPILOT_V1_6.md` top | `> **LEGACY** — Official temple is K線西遊記/temples/12345. This folder is archived reference.` |
+| `wukong-temple/README_Wukong_Temple_Deploy_V2_3.md` top | Same LEGACY banner |
+| `wukong-temple/index.html` (visible UI, if ever allowed) | Non-blocking strip: "Legacy 神殿 — 請使用 12345 悟空財神殿" linking to official URL |
+| `wukong-temple/archive/README.md` | `> **ARCHIVE** — Frozen HTML snapshots; not Current.` |
+| Root `README.md` | Already links 12345 as primary; optional footnote that `wukong-temple/` is Legacy |
 
-| Role | Path | Label |
+## Physics Runtime Reference Policy (D6)
+
+### SSOT
+
+| Item | Value |
+|---|---|
+| Path | `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` |
+| Size | 91,272 bytes |
+| MD5 | `6090ed28b043dd0f97978dcfaa2d4731` |
+| Status | **Protected SSOT** (`DO_NOT_TOUCH`) |
+| Final PDF | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` (protected subtree) |
+
+### Historical versions (docs/physics/)
+
+| File | Size | Relation to SSOT |
 |---|---|---|
-| Active physics constitution | `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` | **SSOT** + **Protected** |
-| Versioned ancestors under `docs/physics/` | `…_V1_2` … `…_V3_7` | **Archive** (ancestor lineage; CURRENT cites them) |
-| Final whitepaper package | `docs/physics/final-whitepaper/` | **Protected** publication set |
-| Byte-identical V1_6 copy | `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` | **Legacy alias** (research folder) |
-| Byte-identical V1_6 copy | `K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md` | **Legacy alias** inside **Protected** temple |
+| `KGEN_Universe_Physics_Runtime_V1_2.md` | 8,445 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V1_3.md` | 17,809 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V1_4.md` | 21,375 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V1_6.md` | 32,473 | Historical; see alias cluster below |
+| `KGEN_Universe_Physics_Runtime_V1_7.md` | 39,160 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md` | 40,546 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md` | 57,092 | Historical lineage |
+| `KGEN_Universe_Physics_Runtime_V3_7.md` | 91,272 | **Byte-identical to CURRENT** (alias) |
 
-### Byte-identity evidence
+### Byte-identical alias clusters (verified)
 
-MD5 `32c706d4c9b0cdfb0624dbd8e8510cb3` matches all three:
+**Cluster A — V1.6 snapshot (MD5 `32c706d4c9b0cdfb0624dbd8e8510cb3`):**
 
-- `docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md`
-- `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md`
-- `K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md`
+| Path | Status |
+|---|---|
+| `docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md` | Reference Alias |
+| `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` | Reference Alias |
+| `K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md` | Reference Alias (**protected parent — note only via future WO**) |
 
-### Policy rules (draft)
+**Cluster B — CURRENT ≡ V3_7 (MD5 `6090ed28b043dd0f97978dcfaa2d4731`):**
 
-1. **SSOT for physics law** is only `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`.
-2. Versioned `docs/physics/KGEN_Universe_Physics_Runtime_V*.md` files are **Archive ancestors**; Boot V1.4 forbids treating them as CURRENT.
-3. Byte-identical copies outside CURRENT must not be edited as if they were CURRENT.
-4. Do **not** delete copies in this policy phase.
-5. Reference notes on non-protected copies (`whitepaper/…V1_6.md`, optionally `docs/physics/…V1_6.md`) may say: “Archive / alias — SSOT is Runtime CURRENT.”
-6. Reference notes or deletion of the copy under `K線西遊記/temples/12345/` require **human + Codex** (protected path).
-7. Creating new same-function physics CURRENT forks is forbidden (`DO_NOT_TOUCH` + Boot rules).
+| Path | Status |
+|---|---|
+| `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` | **SSOT** |
+| `docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md` | Reference Alias (rename candidate label: "CURRENT mirror") |
 
-### Where reference notes are needed (Physics)
+### Proposed reference notes (future doc-only WO — not applied in this task)
 
-| Target | Note type | Authorization |
-|---|---|---|
-| `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` | Alias → CURRENT | Codex doc WorkOrder (not protected) |
-| `docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md` | Archive ancestor note (if not already clear) | Codex; prefer not rewriting large ancestor bodies — short header note only |
-| Other `docs/physics/…_V*.md` | Optional “ancestor of CURRENT” header | Codex doc WorkOrder |
-| `docs/physics/README` (if created later) | Map SSOT vs Archive | New file via Documentation WorkOrder |
-| `K線西遊記/temples/12345/…V1_6.md` | Alias note or remove-after-approval | **Human + Codex** (protected) |
-| `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` | Do not alter for this task | Protected |
+| Location | Proposed note |
+|---|---|
+| `docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md` header | `> ALIAS: byte-identical to KGEN_Universe_Physics_Runtime_CURRENT.md. Do not edit; edit CURRENT only.` |
+| `docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md` header | `> ARCHIVE snapshot V1.6. SSOT is CURRENT.md.` |
+| `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` header | `> REFERENCE ALIAS of docs/physics V1_6. SSOT is CURRENT.md.` |
+| `K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md` | `> LOCAL REFERENCE COPY — protected path; update only via authorized temple WO.` |
+| `docs/physics/README.md` (if created) | Index table: CURRENT = SSOT, others = lineage/alias |
 
-## Forbidden Actions Under This Policy
+## Whitepaper Folder Policy
 
-- Edit or delete `K線西遊記/temples/12345/**`
-- Edit Runtime CURRENT or final-whitepaper
-- Force-merge `wukong-temple` into 12345
-- Delete byte-identical physics copies without a scoped approved WorkOrder
-- Create `CURRENT_v2` or duplicate Universe Physics Runtime folders
+| Path | Role |
+|---|---|
+| `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` | Legacy root copy; alias of V1_6 cluster |
+| `docs/physics/final-whitepaper/` | Protected official PDF SSOT subtree |
+
+Rule: root `whitepaper/` copies must not be edited for runtime changes; they receive reference banners only.
+
+## Agent Operating Rules
+
+1. **Never** treat `wukong-temple/` as Current for wallet, runtime, or deployment work.
+2. **Never** edit `KGEN_Universe_Physics_Runtime_CURRENT.md` without explicit Codex + human authorization.
+3. When citing physics rules in reports, link **CURRENT** only.
+4. Byte-identical copies may remain in repo for archaeology; do not delete in this policy phase.
+5. Redirects, code migration, and wallet URL changes require separate WorkOrders (not approved here).
 
 ## Acceptance Criteria
 
 | Criterion | Result |
 |---|---|
-| Draft policy: Current / Legacy / Archive / SSOT | ✅ |
-| Do not edit temple code or physics runtime files | ✅ Report-only |
-| Identify where reference notes would be needed | ✅ Tables above |
+| Draft policy: Current, Legacy, Archive, SSOT | ✅ |
+| Do not edit temple code or physics runtime files | ✅ |
+| Identify where reference notes would be needed | ✅ |
+| No protected path modifications | ✅ |
 
 ## Files Read
 
 - `KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md`
-- `wukong-temple/README_Wukong_Temple_Deploy_V2_3.md`
-- `wukong-temple/` inventory (27 files)
-- `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` (header only)
-- `docs/physics/KGEN_Universe_Physics_Runtime_V*.md` listing
-- `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` (hash)
 - `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+- `wukong-temple/index.html` (header sample)
+- `wukong-temple/README_WUKONG_TEMPLE_AUTOPILOT_V1_6.md`
+- `wukong-temple/README_Wukong_Temple_Deploy_V2_3.md`
+- `wukong-temple/archive/README.md`
+- `docs/physics/` (file listing + hash compare)
+- `whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md` (hash)
+- `K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md` (hash)
+- `README.md`, `AGENTS.md`
 - `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
 
 ## Files Modified
 
-- `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — ORG-P2-003D OPEN → REVIEW
+- `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — ORG-P2-003D OPEN → IN_PROGRESS → REVIEW
 - `KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md` — this report
 
 ## Protected Paths Checked
 
-No modifications to protected paths. Temple and physics runtime bodies untouched.
+No modifications under:
+
+- `contracts`
+- `K線西遊記/temples/12345`
+- `wallet`
+- `bridge`
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+- `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
+- `docs/physics/final-whitepaper/`
+- `KGEN/contracts/KGEN_Token_V7_5_2.sol`
 
 ## Checks Run
 
-| Check | Result |
-|---|---|
-| Clean branch from `origin/main` | ✅ @ `bfb40a0` |
-| First OPEN task | ✅ ORG-P2-003D |
-| V1_6 MD5 triple match | ✅ Identical |
-| Temple / physics file edits | ✅ None |
+| Check | Command / action | Result |
+|---|---|---|
+| Pull main | `git pull origin main` | ✅ @ `bd632db` |
+| First actionable OPEN | ORG-P2-003D (003C handoff exists on remote) | ✅ |
+| Physics hash compare | `md5sum` on CURRENT, V3_7, V1_6 cluster | ✅ 2 alias clusters found |
+| Temple path audit | file size + README cross-ref | ✅ |
+| Protected diff | git diff scoped to report + queue | ✅ Clean |
 
 ## Risks
 
 | ID | Risk | Severity |
 |---|---|---|
-| R1 | Users still land on `wukong-temple` via old URLs | Medium until Legacy banners land |
-| R2 | Agents may edit temple-local V1_6 thinking it is CURRENT | Medium — mitigated by this policy |
-| R3 | Applying notes inside 12345 without human approval would violate DO_NOT_TOUCH | High if ignored |
+| R1 | Users bookmark `wukong-temple/` GitHub Pages URL if still published | Medium |
+| R2 | V3_7 byte-identical to CURRENT may confuse editors | Medium |
+| R3 | V1_6 copy inside protected 12345 cannot get banner without authorized WO | Low |
+| R4 | Legacy temple monolith may contain outdated contract addresses in docs | Medium — reference only |
 
 ## Blockers
 
-None for this draft.
+None.
 
 ## Recommendation
 
-1. **Codex:** Approve this policy draft.
-2. **Next doc WorkOrder (non-protected):** Add Legacy banners to `wukong-temple/README_*.md` and alias note to `whitepaper/…V1_6.md`.
-3. **Human decision later:** Whether to annotate or remove `K線西遊記/temples/12345/…V1_6.md`.
-4. **Cursor next:** ORG-P2-003E (Master Index alias) or ORG-P2-004.
+1. **Codex approve** this policy as the reference standard for ORG-P2-003F and ORG-P2-014.
+2. **Future doc-only WO:** apply proposed LEGACY/ALIAS banners (no code migration).
+3. **Optional future WO:** verify whether `wukong-temple/` is still deployed on GitHub Pages and add portal redirect at HTML level (requires explicit authorization).
 
 ## Need Codex Review
 
-**Yes.**
+Yes.
 
 ## Need Human Decision
 
-**No** for approving this draft. **Yes** before any edit under `K線西遊記/temples/12345/` or Runtime CURRENT.
+Optional: whether to publish a visible LEGACY banner inside `wukong-temple/index.html` or keep README-only labeling.
