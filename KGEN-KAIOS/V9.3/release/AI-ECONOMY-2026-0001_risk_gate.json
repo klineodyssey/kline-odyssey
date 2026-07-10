@@ -1,0 +1,8 @@
+{
+  "risk_gate_id": "KAIOS-V9.3-RISK-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "risk_level": "R2",
+  "human_review_required": false,
+  "codex_review_required": true,
+  "result": "RELEASE_ALLOWED"
+}

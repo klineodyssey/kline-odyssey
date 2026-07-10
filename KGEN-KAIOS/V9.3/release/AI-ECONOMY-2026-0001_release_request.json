@@ -1,0 +1,11 @@
+{
+  "release_request_id": "KAIOS-V9.3-REL-REQ-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "requested_by": "Codex",
+  "requested_at": "2026-07-11T00:00:00Z",
+  "current_status": "OPEN",
+  "dispatch_hold": true,
+  "source_sync_result": "KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json",
+  "human_pause": false,
+  "status": "RELEASE_REVIEW"
+}

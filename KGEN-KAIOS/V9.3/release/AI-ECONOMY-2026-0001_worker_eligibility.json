@@ -1,0 +1,18 @@
+{
+  "eligibility_id": "KAIOS-V9.3-WORKER-ELIG-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "checks": {
+    "registered": true,
+    "workspace_defined": true,
+    "branch_pattern_valid": true,
+    "can_push_main_false": true,
+    "no_active_claim": true,
+    "role_domain_match": true,
+    "permission_risk_match": true,
+    "not_suspended": true
+  },
+  "status_note": "cursor-01 is registered and may claim after a fresh git pull and heartbeat. Registry status is IDLE, so this release recommends Cursor but does not assign the claim.",
+  "result": "ELIGIBLE_AFTER_HEARTBEAT"
+}

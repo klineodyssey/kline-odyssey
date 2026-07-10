@@ -1,0 +1,13 @@
+{
+  "release_result_id": "KAIOS-V9.3-REL-RESULT-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "previous_dispatch_hold": true,
+  "new_dispatch_hold": false,
+  "dispatch_status": "RELEASED",
+  "claimable": true,
+  "recommended_worker": "cursor-01",
+  "released_by": "Codex",
+  "released_at": "2026-07-11T00:00:00Z",
+  "release_review_id": "KAIOS-V9.3-RELEASE-REVIEW-0001",
+  "release_commit_sha": "pending"
+}

@@ -1138,7 +1138,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Dispatch Hold | Output Report |
 |---|---|---|---|---|---|---|---|
-| AI-ECONOMY-2026-0001 | OPEN | Cursor | Codex | P1 | Economy | true | KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md |
+| AI-ECONOMY-2026-0001 | OPEN | Cursor | Codex | P1 | Economy | false | KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md |
 
 ## KAIOS V9.2 AI-Synced WorkOrders
 
@@ -1157,9 +1157,17 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 - Sync result: `KGEN-KAIOS/V9.2/sync/AI-ECONOMY-2026-0001_sync_result.json`
 - Inserted at: `2026-07-11T00:00:00Z`
 - Sync commit SHA: `5e65b8542bb5d476bcde4e66829bcba26e8d0fd7`
-- Branch: `cursor-handoff/V9-DRYRUN-001A`
-- Dispatch Hold: true
-- Cursor Auto-Claim: Disabled until Codex explicitly releases hold
+- Branch: `cursor-handoff/AI-ECONOMY-2026-0001`
+- Source draft branch pattern: `cursor-handoff/V9-DRYRUN-001A`
+- Dispatch Hold: false
+- Dispatch Status: RELEASED
+- Claimable: true
+- Released by: Codex
+- Released at: `2026-07-11T00:00:00Z`
+- Release review ID: `KAIOS-V9.3-RELEASE-REVIEW-0001`
+- Release commit SHA: `pending`
+- Recommended Worker: `cursor-01`
+- Cursor Auto-Claim: Enabled only through normal `gi，上班` WorkQueue claim; no automatic merge or main push
 - Human Pause Allowed: true
 - Input files:
   - KGEN-KAIOS/V9.0/workorders/V9_DRAFT_WORKORDERS.md

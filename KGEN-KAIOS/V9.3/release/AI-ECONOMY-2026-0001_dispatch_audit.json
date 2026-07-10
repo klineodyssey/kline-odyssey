@@ -1,0 +1,13 @@
+{
+  "audit_id": "KAIOS-V9.3-AUDIT-0001",
+  "workorder_id": "AI-ECONOMY-2026-0001",
+  "previous_dispatch_state": "OPEN + HOLD",
+  "new_dispatch_state": "OPEN + RELEASED",
+  "dispatch_hold_before": true,
+  "dispatch_hold_after": false,
+  "actor": "Codex",
+  "reason": "All V9.3 release gates passed. Cursor is recommended but not auto-assigned.",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "related_report": "KGEN-KAIOS/V9.3/reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md",
+  "commit_sha": "pending"
+}

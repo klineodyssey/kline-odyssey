@@ -1,0 +1,29 @@
+{
+  "validation_id": "KAIOS-V9.3-REL-VAL-0001",
+  "release_request_id": "KAIOS-V9.3-REL-REQ-0001",
+  "validated_by": "Codex",
+  "validated_at": "2026-07-11T00:00:00Z",
+  "checklist": {
+    "workorder_exists": true,
+    "sync_audit_exists": true,
+    "promotion_decision_exists": true,
+    "dispatch_hold_true": true,
+    "risk_level_releasable": true,
+    "human_review_complete_or_not_required": true,
+    "dependencies_satisfied": true,
+    "owner_valid": true,
+    "reviewer_valid": true,
+    "eligible_worker_exists": true,
+    "branch_pattern_correct": true,
+    "report_path_correct": true,
+    "protected_paths_correct": true,
+    "acceptance_criteria_executable": true,
+    "output_path_no_conflict": true,
+    "no_same_asset_in_progress": true,
+    "no_stale_handoff_branch": true,
+    "no_blocked_or_paused_signal": true,
+    "base_commit_not_too_stale": true,
+    "human_pause_false": true
+  },
+  "result": "RELEASE_READY"
+}
