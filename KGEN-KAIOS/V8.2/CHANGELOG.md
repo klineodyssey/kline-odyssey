@@ -12,3 +12,8 @@
 - Added Market Standard.
 - Added Listing Standard.
 - Added Transaction Standard.
+
+## V8.2 Bank and Exchange Standards
+
+- Added Bank Standard with deposit, withdraw, reserve, loan concept, interest concept and treasury simulation boundaries.
+- Added Exchange Standard for Huaguo Mountain Exchange 11520, civilization exchange, land, temple, App marketplace, NFT concept, Token concept and game item scopes.
