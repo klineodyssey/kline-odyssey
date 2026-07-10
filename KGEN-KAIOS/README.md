@@ -1,8 +1,8 @@
 # KGEN AI Operating System
 
 **System ID:** KAIOS
-**Version:** V7.2 Read-Only Operations Dashboard
-**Status:** Read-Only Dashboard / Draft for Review
+**Version:** V8.0 One Picture One Temple Economy System
+**Status:** Draft for Review / Prototype Application Layer
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
@@ -97,9 +97,33 @@ The dashboard reads Worker Registry, WorkQueue, Codex Review Log, KAIOS reports,
 - Deep Research
 - Human Engineer
 
+
+## V8.0 One Picture One Temple Economy System
+
+V8.0 adds the first KAIOS application layer for one picture one temple, land, residence, commerce, bank simulation, 11520 exchange, and real-world link standards. It lets Codex read a player's current asset state and generate a governed construction roadmap while preserving Concept / Prototype / Runtime / Production / Regulated boundaries.
+
+| File | Purpose |
+|---|---|
+| `V8/README.md` | V8 entry and file map |
+| `V8/index.html` | Read-only player roadmap demo |
+| `V8/KAIOS_V8_MASTER_SPEC.md` | Official V8 master specification |
+| `V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md` | Picture, Land, Residence, Temple, App, Real Business and Civilization Node entry rules |
+| `V8/KAIOS_V8_ASSET_LIFECYCLE.md` | Wild Land to Cross-Universe Node lifecycle |
+| `V8/KAIOS_V8_TASK_GENERATOR.md` | Codex task generator and WorkOrder fields |
+| `V8/KAIOS_V8_ECONOMY_RUNTIME.md` | Civilization economy runtime and bank concept boundary |
+| `V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md` | Real-world business virtual twin adapters and compliance gates |
+| `V8/KAIOS_V8_LISTING_STANDARD.md` | Land, temple, building, App, AI, DNA, membership, and regulated listing boundary |
+| `V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md` | Huaguo Mountain Exchange 11520 runtime |
+| `V8/runtime/KAIOS_V8_BANK_RUNTIME.md` | Bank simulation runtime |
+| `V8/schemas/` | Thirteen JSON Schemas |
+| `V8/examples/` | Six JSON examples |
+| `V8/workorders/V8_WORKORDERS.md` | V8-P0 through V8-P15 Cursor handoff WorkOrders |
+| `V8/reports/KAIOS_V8_QA_REPORT.md` | V8 baseline QA report |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/
 ## Protected Systems
 
-KAIOS V7.1 does not modify:
+KAIOS V8.0 does not modify:
 
 - `contracts`
 - `K線西遊記/temples/12345`

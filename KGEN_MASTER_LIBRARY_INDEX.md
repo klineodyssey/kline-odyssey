@@ -19,6 +19,7 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
+| KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | Official Whitepaper FINAL | `docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf` | BscScan / CMC / CoinGecko ready whitepaper |
 
 
@@ -58,6 +59,30 @@ This is the root cross-library index for Genesis Library, Runtime Library, SDK L
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
 | Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
 | Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |
+
+## KAIOS V8.0 One Picture One Temple Economy System
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8 Index | `KGEN-KAIOS/V8/README.md` | V8 overview and file map |
+| V8 Demo | `KGEN-KAIOS/V8/index.html` | Read-only player asset roadmap demo |
+| Official Blueprint | `KGEN-KAIOS/V8/assets/KAIOS_V8_ONE_PICTURE_ONE_TEMPLE_BLUEPRINT.png` | Official visual specification source copied from the supplied concept image |
+| Original Blueprint Copy | `KGEN-KAIOS/V8/assets/KAIOS_V8_ONE_PICTURE_ONE_TEMPLE_BLUEPRINT_ORIGINAL.jpg` | Preserved original image without cropping |
+| Master Spec | `KGEN-KAIOS/V8/KAIOS_V8_MASTER_SPEC.md` | V8 system architecture and scope |
+| Player Entry Model | `KGEN-KAIOS/V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md` | Picture, Land, Residence, Temple, App, Real Business and Civilization Node entry models |
+| Asset Lifecycle | `KGEN-KAIOS/V8/KAIOS_V8_ASSET_LIFECYCLE.md` | Wild Land to Cross-Universe Node stages |
+| Task Generator | `KGEN-KAIOS/V8/KAIOS_V8_TASK_GENERATOR.md` | Codex-generated WorkOrder roadmap rules |
+| Economy Runtime | `KGEN-KAIOS/V8/KAIOS_V8_ECONOMY_RUNTIME.md` | Economy loop and bank simulation context |
+| Bank Runtime | `KGEN-KAIOS/V8/runtime/KAIOS_V8_BANK_RUNTIME.md` | Bank account, treasury, loan, collateral, reserve, audit, and KYC/AML boundary |
+| Huaguo Exchange 11520 Runtime | `KGEN-KAIOS/V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md` | Asset listing, order, auction, rental, escrow, settlement, dispute, fee, and delisting model |
+| Real-World Link Standard | `KGEN-KAIOS/V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md` | Virtual twin adapters and legal authorization gate |
+| Listing Standard | `KGEN-KAIOS/V8/KAIOS_V8_LISTING_STANDARD.md` | Listing eligibility, pricing, disclosure, risk, transfer, rental, delisting, dispute, and legal restrictions |
+| Security and Legal Boundary | `KGEN-KAIOS/V8/KAIOS_V8_SECURITY_AND_LEGAL_BOUNDARY.md` | Concept, Prototype, Runtime, Production, Regulated and brand/finance/legal boundaries |
+| Schemas | `KGEN-KAIOS/V8/schemas/` | Thirteen JSON Schemas for V8 data objects |
+| Examples | `KGEN-KAIOS/V8/examples/` | Six JSON examples for player entry and runtime records |
+| WorkOrders | `KGEN-KAIOS/V8/workorders/V8_WORKORDERS.md` | V8-P0 through V8-P15 executable Cursor handoff WorkOrders |
+| QA Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_QA_REPORT.md` | Baseline QA result |
+| Release Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_RELEASE_REPORT.md` | V8 release summary and next phase |
 ## Organization V2.0
 
 | Item | Path | Purpose |

@@ -97,6 +97,18 @@ jobs:
             "mode": "read-only"
           }
           EOF
+
+          mkdir -p "_site/KGEN-KAIOS/V8"
+          cat > "_site/KGEN-KAIOS/V8/build-info.json" <<EOF
+          {
+            "main_commit": "${GITHUB_SHA}",
+            "branch": "${GITHUB_REF_NAME}",
+            "workflow": "deploy-pages-static.yml",
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "mode": "read-only",
+            "kaios_version": "V8.0"
+          }
+          EOF
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"

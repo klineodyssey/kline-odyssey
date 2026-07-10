@@ -76,6 +76,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
 | AI Company Automation V5.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
 | KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
+| KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | Master Library Index | [KGEN_MASTER_LIBRARY_INDEX.md](KGEN_MASTER_LIBRARY_INDEX.md) | https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md |
 | Official Whitepaper FINAL | [PDF](docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf) | https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf |
 
@@ -115,6 +116,23 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Stale Handoff Branch Policy: [KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md](KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md)
 - Codex Pre-Merge Checklist: [KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md](KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md)
 - Worker Registry JSON: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
+
+### KAIOS V8.0 One Picture One Temple Economy System
+
+KAIOS V8.0 turns the official Canon into a practical player asset roadmap: a player may start with one picture, land, residence, temple, App, real business, or complete civilization node, and Codex can generate the missing construction WorkOrders for the full economy loop.
+
+- V8 Demo: [KGEN-KAIOS/V8/index.html](KGEN-KAIOS/V8/index.html)
+- V8 Master Spec: [KGEN-KAIOS/V8/KAIOS_V8_MASTER_SPEC.md](KGEN-KAIOS/V8/KAIOS_V8_MASTER_SPEC.md)
+- Player Entry Model: [KGEN-KAIOS/V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md](KGEN-KAIOS/V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md)
+- Task Generator: [KGEN-KAIOS/V8/KAIOS_V8_TASK_GENERATOR.md](KGEN-KAIOS/V8/KAIOS_V8_TASK_GENERATOR.md)
+- Huaguo Mountain Exchange 11520 Runtime: [KGEN-KAIOS/V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md](KGEN-KAIOS/V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md)
+- Real-World Link Standard: [KGEN-KAIOS/V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md](KGEN-KAIOS/V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md)
+- Listing Standard: [KGEN-KAIOS/V8/KAIOS_V8_LISTING_STANDARD.md](KGEN-KAIOS/V8/KAIOS_V8_LISTING_STANDARD.md)
+- V8 WorkOrders: [KGEN-KAIOS/V8/workorders/V8_WORKORDERS.md](KGEN-KAIOS/V8/workorders/V8_WORKORDERS.md)
+- V8 QA Report: [KGEN-KAIOS/V8/reports/KAIOS_V8_QA_REPORT.md](KGEN-KAIOS/V8/reports/KAIOS_V8_QA_REPORT.md)
+- Public URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/
+
+V8.0 is a Draft for Review / Prototype system. Bank, listing, real-world business, and regulated asset modules remain subject to legal authorization, business agreement, security review, and regulatory compliance before Production use.
 ### KGEN Organization V2.0
 
 KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. It defines departments, protected boundaries, WorkOrders, reports, and Canon-first review flow.
