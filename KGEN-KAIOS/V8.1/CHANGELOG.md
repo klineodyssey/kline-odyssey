@@ -21,3 +21,9 @@
 
 - Added 8 JSON Schemas for citizen, profession, lifecycle, world state, entity graph, relationship, mission, and quest.
 - Added 8 parseable examples for V8.1 Universe Data Layer records.
+
+## V8.1 Universe Viewer
+
+- Added pure static read-only Universe Viewer.
+- Added views for graph, entities, citizen, profession, economy, and relationships.
+- Viewer reads V8.1 example graph and falls back to seed data without writing any file or calling a backend.

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V8.1 Universe Viewer</title>
+  <meta name="description" content="KAIOS V8.1 Universe Data Layer read-only viewer for KGEN Universe Graph, citizens, professions, land and economy relationships.">
+  <link rel="stylesheet" href="v81.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="KAIOS V8.1 Home">
+      <span class="brand-mark">K</span>
+      <span>
+        <strong>KAIOS V8.1</strong>
+        <small>Universe Data Layer</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="V8.1 links">
+      <a href="README.md">README</a>
+      <a href="UNIVERSE_GRAPH.md">Graph Spec</a>
+      <a href="schemas/entity_graph.schema.json">Schema</a>
+      <a href="../V8/">V8.0</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">One Picture -> One Temple -> One Universe</p>
+        <h1>KGEN 宇宙生命資料層</h1>
+        <p>查看 Universe Graph、Temple、Land、Citizen、Profession、Economy、Market 與 Governance 的唯一 ID、生命週期與關聯。此頁為純前端唯讀 Viewer，不寫入 GitHub、不連接錢包、不執行交易。</p>
+        <div class="hero-actions">
+          <a class="primary-link" href="examples/entity_graph.example.json">Open Entity Graph JSON</a>
+          <a class="secondary-link" href="reports/KAIOS_V8_1_QA_REPORT.md">QA Report</a>
+        </div>
+      </div>
+      <div class="hero-panel" aria-label="System status">
+        <dl>
+          <div><dt>Version</dt><dd>V8.1</dd></div>
+          <div><dt>Status</dt><dd>Draft for Review</dd></div>
+          <div><dt>Mode</dt><dd>Read Only</dd></div>
+          <div><dt>Entities</dt><dd id="entityCount">Loading</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="canon-strip" aria-label="Canon chain">
+      <span>One Picture</span>
+      <span>One Temple</span>
+      <span>One Life</span>
+      <span>One Land</span>
+      <span>One Residence</span>
+      <span>One Citizen</span>
+      <span>One Profession</span>
+      <span>One Economy</span>
+      <span>One Civilization</span>
+      <span>One Universe</span>
+    </section>
+
+    <section class="toolbar" aria-label="Viewer controls">
+      <div class="tabs" role="tablist" aria-label="Universe viewer tabs">
+        <button type="button" class="tab active" data-view="graph">Graph</button>
+        <button type="button" class="tab" data-view="entities">Entities</button>
+        <button type="button" class="tab" data-view="citizens">Citizen</button>
+        <button type="button" class="tab" data-view="professions">Profession</button>
+        <button type="button" class="tab" data-view="economy">Economy</button>
+        <button type="button" class="tab" data-view="relationships">Relationship</button>
+      </div>
+      <label class="search-box">
+        <span>Search</span>
+        <input id="searchInput" type="search" aria-label="Search Temple Citizen Market" autocomplete="off">
+      </label>
+    </section>
+
+    <section class="status-grid" aria-label="Snapshot summary">
+      <article class="metric"><span>Universe Entity</span><strong id="metricEntities">0</strong></article>
+      <article class="metric"><span>Relationship</span><strong id="metricRelationships">0</strong></article>
+      <article class="metric"><span>Citizen</span><strong id="metricCitizens">0</strong></article>
+      <article class="metric"><span>Profession</span><strong id="metricProfessions">0</strong></article>
+      <article class="metric"><span>Economy Loop</span><strong>Prototype</strong></article>
+    </section>
+
+    <section id="viewer" class="viewer" aria-live="polite"></section>
+
+    <section class="read-only-box">
+      <h2>Read-only Boundary</h2>
+      <p>V8.1 Viewer 只讀取 repo 內公開資料與內建示範資料。它不產生鏈上交易、不操作真實銀行、不執行上市買賣、不建立法律權利。任何 Production 或 Regulated 模組都必須經法律、資安、治理與人工審查。</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>KLINE ODYSSEY / KGEN</span>
+    <span>Where the Market Becomes the Myth</span>
+  </footer>
+
+  <script src="v81.js"></script>
+</body>
+</html>
