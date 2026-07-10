@@ -1,0 +1,11 @@
+# KAIOS V9.1 Changelog
+
+## V9.1 Draft for Review
+
+- Established the AI WorkOrder Review Loop.
+- Defined the official DRAFT to OPEN promotion state machine.
+- Added revision, rejection, blocking and archive flows.
+- Added the DRAFT WorkOrder standard.
+- Added the R0-R4 Risk Promotion Matrix.
+- Added the Audit Log Standard.
+
