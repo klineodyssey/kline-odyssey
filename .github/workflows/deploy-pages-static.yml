@@ -221,6 +221,7 @@ jobs:
           }
           EOF
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
+          copy_file "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
 
