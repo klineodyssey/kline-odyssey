@@ -1,0 +1,17 @@
+{
+  "mission_id": "KGEN-MIS-V81-000001",
+  "name": "Activate Residence Citizen Economy",
+  "owner": "KGEN-TEM-12345-000001",
+  "parent": "KGEN-CIV-20260710-000001",
+  "children": ["KGEN-QST-V81-000001"],
+  "runtime": "Mission Runtime",
+  "state": { "stage": "Prototype", "goal": "Connect residence, citizen, profession and business." },
+  "version": "1.0.0",
+  "create_time": "2026-07-10T00:00:00Z",
+  "update_time": "2026-07-10T00:00:00Z",
+  "dependencies": ["KGEN-KAIOS/V8.1/UNIVERSE_GRAPH.md"],
+  "permissions": { "read": ["public"], "upgrade": ["Codex"] },
+  "status": "Prototype",
+  "quest_ids": ["KGEN-QST-V81-000001"],
+  "reward_model": { "xp": 120, "reputation": 5 }
+}

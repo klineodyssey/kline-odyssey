@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/life_cycle.schema.json",
+  "title": "KAIOS V8.1 Life Cycle Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "entity_id", "from_stage", "to_stage", "actor", "timestamp", "runtime", "reason", "dependencies", "risk_level", "recovery_path", "status"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "entity_id": { "type": "string" },
+    "from_stage": { "enum": ["None", "Create", "Grow", "Learn", "Work", "Trade", "Build", "Upgrade", "Reproduce", "Retire", "Archive", "Delete"] },
+    "to_stage": { "enum": ["Create", "Grow", "Learn", "Work", "Trade", "Build", "Upgrade", "Reproduce", "Retire", "Archive", "Delete"] },
+    "actor": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "runtime": { "type": "string" },
+    "reason": { "type": "string" },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "enum": ["Low", "Medium", "High", "Regulated"] },
+    "recovery_path": { "type": "string" },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Archived"] }
+  }
+}

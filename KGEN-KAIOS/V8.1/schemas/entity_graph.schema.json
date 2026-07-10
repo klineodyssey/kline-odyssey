@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/entity_graph.schema.json",
+  "title": "KAIOS V8.1 Entity Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["graph_id", "version", "root_entity_id", "entities", "relationships", "created_at", "updated_at", "status"],
+  "properties": {
+    "graph_id": { "type": "string" },
+    "version": { "type": "string" },
+    "root_entity_id": { "type": "string" },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "entity_type", "owner", "parent", "children", "runtime", "state", "version", "create_time", "update_time", "dependencies", "permissions", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "entity_type": { "enum": ["Universe", "Civilization", "World", "Temple", "Land", "Building", "Residence", "Citizen", "Profession", "Business", "Exchange", "Bank", "Player", "NPC", "AI", "App", "DNA", "Mission", "Item", "Quest", "Market", "Listing", "Transaction", "Governance"] },
+          "owner": { "type": "string" },
+          "parent": { "type": ["string", "null"] },
+          "children": { "type": "array", "items": { "type": "string" } },
+          "runtime": { "type": "string" },
+          "state": { "type": "object" },
+          "version": { "type": "string" },
+          "create_time": { "type": "string", "format": "date-time" },
+          "update_time": { "type": "string", "format": "date-time" },
+          "dependencies": { "type": "array", "items": { "type": "string" } },
+          "permissions": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+          "status": { "enum": ["Draft", "Prototype", "Active", "Dormant", "Locked", "Retired", "Archived", "Deleted", "Disputed"] }
+        }
+      }
+    },
+    "relationships": { "type": "array", "items": { "$ref": "relationship.schema.json" } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Archived"] }
+  }
+}

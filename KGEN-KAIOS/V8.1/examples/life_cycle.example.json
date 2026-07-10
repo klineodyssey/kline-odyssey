@@ -1,0 +1,14 @@
+{
+  "event_id": "KGEN-LIFE-EVENT-000001",
+  "entity_id": "KGEN-CIT-K12345-000001",
+  "from_stage": "Learn",
+  "to_stage": "Work",
+  "actor": "KGEN-PLY-DEMO-000001",
+  "timestamp": "2026-07-10T00:00:00Z",
+  "runtime": "Citizen Runtime",
+  "reason": "Citizen completed merchant training and started store operation.",
+  "dependencies": ["KGEN-PRO-MERCHANT-000001", "KGEN-RES-K12345-000001"],
+  "risk_level": "Low",
+  "recovery_path": "Revert to Learn stage through governance review if profession assignment is invalid.",
+  "status": "Prototype"
+}

@@ -16,3 +16,8 @@
 - Added Profession Standard with income, skill, building, upgrade path, AI capability, and output fields.
 - Added Life Cycle Standard.
 - Added Player, NPC, AI, and App Organism standards.
+
+## V8.1 Entity Graph and Schemas
+
+- Added 8 JSON Schemas for citizen, profession, lifecycle, world state, entity graph, relationship, mission, and quest.
+- Added 8 parseable examples for V8.1 Universe Data Layer records.

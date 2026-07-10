@@ -1,0 +1,81 @@
+{
+  "graph_id": "KGEN-GRAPH-V81-000001",
+  "version": "8.1.0",
+  "root_entity_id": "KGEN-UNI-20260710-000001",
+  "created_at": "2026-07-10T00:00:00Z",
+  "updated_at": "2026-07-10T00:00:00Z",
+  "status": "Prototype",
+  "entities": [
+    {
+      "id": "KGEN-UNI-20260710-000001",
+      "entity_type": "Universe",
+      "owner": "KGEN-System",
+      "parent": null,
+      "children": ["KGEN-CIV-20260710-000001"],
+      "runtime": "Universe Data Layer",
+      "state": { "name": "KGEN Universe" },
+      "version": "1.0.0",
+      "create_time": "2026-07-10T00:00:00Z",
+      "update_time": "2026-07-10T00:00:00Z",
+      "dependencies": ["PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"],
+      "permissions": { "read": ["public"], "govern": ["Codex"] },
+      "status": "Prototype"
+    },
+    {
+      "id": "KGEN-CIV-20260710-000001",
+      "entity_type": "Civilization",
+      "owner": "KGEN-System",
+      "parent": "KGEN-UNI-20260710-000001",
+      "children": ["KGEN-WRD-20260710-000001"],
+      "runtime": "Civilization Runtime",
+      "state": { "name": "KLINE ODYSSEY" },
+      "version": "1.0.0",
+      "create_time": "2026-07-10T00:00:00Z",
+      "update_time": "2026-07-10T00:00:00Z",
+      "dependencies": ["KGEN-Genesis/"],
+      "permissions": { "read": ["public"], "upgrade": ["Codex"] },
+      "status": "Prototype"
+    },
+    {
+      "id": "KGEN-TEM-12345-000001",
+      "entity_type": "Temple",
+      "owner": "KGEN-System",
+      "parent": "KGEN-WRD-20260710-000001",
+      "children": ["KGEN-LND-K12345-000001"],
+      "runtime": "Temple Runtime",
+      "state": { "name": "Temple 12345", "life": true },
+      "version": "1.0.0",
+      "create_time": "2026-07-10T00:00:00Z",
+      "update_time": "2026-07-10T00:00:00Z",
+      "dependencies": ["KGEN-KAIOS/V8/KAIOS_V8_MASTER_SPEC.md"],
+      "permissions": { "read": ["public"], "govern": ["Codex"] },
+      "status": "Prototype"
+    },
+    {
+      "id": "KGEN-CIT-K12345-000001",
+      "entity_type": "Citizen",
+      "owner": "KGEN-PLY-DEMO-000001",
+      "parent": "KGEN-RES-K12345-000001",
+      "children": ["KGEN-PRO-MERCHANT-000001"],
+      "runtime": "Citizen Runtime",
+      "state": { "level": 7, "profession": "Merchant" },
+      "version": "1.0.0",
+      "create_time": "2026-07-10T00:00:00Z",
+      "update_time": "2026-07-10T00:00:00Z",
+      "dependencies": ["KGEN-KAIOS/V8.1/CITIZEN_STANDARD.md"],
+      "permissions": { "read": ["public"], "trade": ["owner"] },
+      "status": "Prototype"
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "KGEN-REL-000001",
+      "source_id": "KGEN-CIT-K12345-000001",
+      "target_id": "KGEN-PRO-MERCHANT-000001",
+      "relationship_type": "works_as",
+      "status": "Prototype",
+      "create_time": "2026-07-10T00:00:00Z",
+      "update_time": "2026-07-10T00:00:00Z"
+    }
+  ]
+}

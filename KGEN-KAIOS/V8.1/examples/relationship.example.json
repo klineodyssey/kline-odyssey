@@ -1,0 +1,9 @@
+{
+  "relationship_id": "KGEN-REL-000001",
+  "source_id": "KGEN-CIT-K12345-000001",
+  "target_id": "KGEN-PRO-MERCHANT-000001",
+  "relationship_type": "works_as",
+  "status": "Prototype",
+  "create_time": "2026-07-10T00:00:00Z",
+  "update_time": "2026-07-10T00:00:00Z"
+}

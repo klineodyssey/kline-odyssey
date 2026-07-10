@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/relationship.schema.json",
+  "title": "KAIOS V8.1 Relationship",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["relationship_id", "source_id", "target_id", "relationship_type", "status", "create_time", "update_time"],
+  "properties": {
+    "relationship_id": { "type": "string" },
+    "source_id": { "type": "string" },
+    "target_id": { "type": "string" },
+    "relationship_type": { "enum": ["contains", "owns", "resides_in", "works_as", "employed_by", "serves", "listed_on", "settles", "governs", "depends_on"] },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Dormant", "Archived", "Disputed"] },
+    "create_time": { "type": "string", "format": "date-time" },
+    "update_time": { "type": "string", "format": "date-time" }
+  }
+}

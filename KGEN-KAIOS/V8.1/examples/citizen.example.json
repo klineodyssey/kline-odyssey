@@ -1,0 +1,31 @@
+{
+  "citizen_id": "KGEN-CIT-K12345-000001",
+  "citizen_name": "Wukong Temple Merchant Citizen",
+  "age": 28,
+  "race": "KGEN Civilization Human",
+  "faction": "Temple 12345",
+  "residence": "KGEN-RES-K12345-000001",
+  "profession": "KGEN-PRO-MERCHANT-000001",
+  "inventory": ["KGEN-ITM-CLOTH-000001", "KGEN-APP-HASH-4F8C2A91"],
+  "wallet": {
+    "wallet_id": "KGEN-WALLET-SIM-000001",
+    "type": "Simulated",
+    "chain": "BNB Smart Chain",
+    "address_reference": "public-demo-address-reference"
+  },
+  "temple": "KGEN-TEM-12345-000001",
+  "health": { "current": 95, "max": 100 },
+  "energy": { "current": 72, "max": 100 },
+  "skill": { "negotiation": 42, "inventory": 35, "temple_service": 18 },
+  "experience": 1280,
+  "level": 7,
+  "job": "Store Operator",
+  "employer": "KGEN-BUS-K12345-000001",
+  "business": "KGEN-BUS-K12345-000001",
+  "tax": { "model": "CivilizationContribution", "rate": 0.03 },
+  "reputation": 82,
+  "dna": "KGEN-DNA-CIT-000001",
+  "ai_link": "KGEN-AI-CIT-000001",
+  "app_link": "KGEN-APP-HASH-4F8C2A91",
+  "status": "Prototype"
+}

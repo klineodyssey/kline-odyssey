@@ -1,0 +1,12 @@
+{
+  "quest_id": "KGEN-QST-V81-000001",
+  "mission_id": "KGEN-MIS-V81-000001",
+  "name": "Assign Citizen Profession",
+  "actor": "KGEN-CIT-K12345-000001",
+  "target": "KGEN-PRO-MERCHANT-000001",
+  "requirements": ["Residence exists", "Citizen exists", "Profession exists"],
+  "steps": ["Verify residence", "Link citizen", "Assign merchant profession", "Create relationship record"],
+  "reward": { "xp": 50, "skill": "negotiation" },
+  "runtime": "Quest Runtime",
+  "status": "Prototype"
+}

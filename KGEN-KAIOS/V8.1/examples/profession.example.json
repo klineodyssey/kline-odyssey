@@ -1,0 +1,11 @@
+{
+  "profession_id": "KGEN-PRO-MERCHANT-000001",
+  "name": "Merchant",
+  "income_model": ["margin", "commission", "service_fee"],
+  "skills": ["negotiation", "inventory", "pricing", "listing"],
+  "required_building": ["Store", "Market", "Exchange Node"],
+  "upgrade_path": ["Merchant", "Broker", "Trade House Master"],
+  "ai_capability": ["price comparison", "listing optimizer", "risk warning"],
+  "economic_output": ["goods flow", "liquidity", "market data"],
+  "status": "Prototype"
+}

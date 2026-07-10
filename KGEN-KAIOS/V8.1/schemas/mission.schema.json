@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/mission.schema.json",
+  "title": "KAIOS V8.1 Mission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mission_id", "name", "owner", "parent", "children", "runtime", "state", "version", "create_time", "update_time", "dependencies", "permissions", "status", "quest_ids", "reward_model"],
+  "properties": {
+    "mission_id": { "type": "string" },
+    "name": { "type": "string" },
+    "owner": { "type": "string" },
+    "parent": { "type": "string" },
+    "children": { "type": "array", "items": { "type": "string" } },
+    "runtime": { "type": "string" },
+    "state": { "type": "object" },
+    "version": { "type": "string" },
+    "create_time": { "type": "string", "format": "date-time" },
+    "update_time": { "type": "string", "format": "date-time" },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "permissions": { "type": "object" },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Dormant", "Archived"] },
+    "quest_ids": { "type": "array", "items": { "type": "string" } },
+    "reward_model": { "type": "object" }
+  }
+}

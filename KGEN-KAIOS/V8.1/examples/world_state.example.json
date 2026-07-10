@@ -1,0 +1,16 @@
+{
+  "snapshot_id": "KGEN-SNAP-WRD-20260710-000001",
+  "snapshot_type": "World Snapshot",
+  "source_graph_id": "KGEN-GRAPH-V81-000001",
+  "root_entity_id": "KGEN-WRD-20260710-000001",
+  "created_at": "2026-07-10T00:00:00Z",
+  "entities": ["KGEN-UNI-20260710-000001", "KGEN-CIV-20260710-000001", "KGEN-TEM-12345-000001", "KGEN-CIT-K12345-000001"],
+  "relationships": ["KGEN-REL-000001"],
+  "metrics": {
+    "active_citizen_count": 1,
+    "active_profession_count": 1,
+    "market_listing_count": 0,
+    "economy_loop_completion_score": 0.42
+  },
+  "status": "Prototype"
+}

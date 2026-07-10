@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/quest.schema.json",
+  "title": "KAIOS V8.1 Quest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["quest_id", "mission_id", "name", "actor", "target", "requirements", "steps", "reward", "runtime", "status"],
+  "properties": {
+    "quest_id": { "type": "string" },
+    "mission_id": { "type": "string" },
+    "name": { "type": "string" },
+    "actor": { "type": "string" },
+    "target": { "type": "string" },
+    "requirements": { "type": "array", "items": { "type": "string" } },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "reward": { "type": "object" },
+    "runtime": { "type": "string" },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Completed", "Failed", "Archived"] }
+  }
+}

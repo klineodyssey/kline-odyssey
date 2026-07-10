@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/schemas/world_state.schema.json",
+  "title": "KAIOS V8.1 World State Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "snapshot_type", "source_graph_id", "root_entity_id", "created_at", "entities", "relationships", "metrics", "status"],
+  "properties": {
+    "snapshot_id": { "type": "string" },
+    "snapshot_type": { "enum": ["World Snapshot", "Civilization Snapshot", "Temple Snapshot", "Economy Snapshot", "Citizen Snapshot", "Market Snapshot"] },
+    "source_graph_id": { "type": "string" },
+    "root_entity_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "entities": { "type": "array", "items": { "type": "string" } },
+    "relationships": { "type": "array", "items": { "type": "string" } },
+    "metrics": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean"] } },
+    "status": { "enum": ["Draft", "Prototype", "Active", "Archived"] }
+  }
+}
