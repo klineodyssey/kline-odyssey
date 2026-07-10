@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V8.0 一圖一神殿元宇宙經濟系統</title>
+  <meta name="description" content="KAIOS V8.0 read-only demo for one-picture-one-temple, land, residence, temple, app, real business, bank, exchange and listing roadmap.">
+  <link rel="stylesheet" href="./v8.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">KGEN AI Operating System</p>
+      <h1>KAIOS V8.0 一圖一神殿元宇宙經濟系統</h1>
+      <p class="subhead">選擇玩家目前擁有的資產，系統會唯讀顯示缺少模組、WorkOrder Roadmap、經濟閉環與合規邊界。</p>
+    </div>
+    <nav aria-label="V8 links">
+      <a href="./KAIOS_V8_MASTER_SPEC.md">Spec</a>
+      <a href="./schemas/player.schema.json">Schemas</a>
+      <a href="./workorders/V8_WORKORDERS.md">WorkOrders</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-grid">
+      <figure class="blueprint">
+        <img src="./assets/KAIOS_V8_ONE_PICTURE_ONE_TEMPLE_BLUEPRINT.png" alt="KAIOS V8.0 一圖一神殿元宇宙經濟系統官方概念圖">
+        <figcaption>官方概念圖：Concept / Prototype 規格，不代表圖中品牌、金融、上市或實體交易已正式上線。</figcaption>
+      </figure>
+      <section class="selector" aria-labelledby="entryTitle">
+        <p class="eyebrow">Player Entry</p>
+        <h2 id="entryTitle">玩家目前擁有什麼？</h2>
+        <div class="asset-grid" id="assetGrid"></div>
+        <div class="readonly-note">Readonly Demo：不寫入 GitHub，不接真金流，不建立真交易，不自動 claim WorkOrder。</div>
+      </section>
+    </section>
+
+    <section class="panel" aria-labelledby="gapTitle">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow">Gap Analysis</p>
+          <h2 id="gapTitle">缺少模組</h2>
+        </div>
+        <span id="entrySummary" class="pill">未選擇</span>
+      </div>
+      <div class="module-grid" id="missingModules"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="roadmapTitle">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow">WorkOrder Roadmap</p>
+          <h2 id="roadmapTitle">Codex 建議派工路線</h2>
+        </div>
+        <span class="pill">Display Only</span>
+      </div>
+      <div class="timeline" id="roadmap"></div>
+    </section>
+
+    <section class="grid two">
+      <section class="panel" aria-labelledby="loopTitle">
+        <p class="eyebrow">Economy Loop</p>
+        <h2 id="loopTitle">完整經濟閉環</h2>
+        <div class="loop" id="economyLoop"></div>
+      </section>
+      <section class="panel" aria-labelledby="exchangeTitle">
+        <p class="eyebrow">Exchange 11520</p>
+        <h2 id="exchangeTitle">花果山交易所</h2>
+        <div class="exchange-list" id="exchangeList"></div>
+      </section>
+    </section>
+
+    <section class="grid three">
+      <section class="panel compact" aria-labelledby="bankTitle">
+        <p class="eyebrow">Bank Runtime</p>
+        <h2 id="bankTitle">銀行系統</h2>
+        <ul id="bankList"></ul>
+      </section>
+      <section class="panel compact" aria-labelledby="realTitle">
+        <p class="eyebrow">Real-World Link</p>
+        <h2 id="realTitle">實體連線</h2>
+        <ul id="realWorldList"></ul>
+      </section>
+      <section class="panel compact" aria-labelledby="legalTitle">
+        <p class="eyebrow">Compliance</p>
+        <h2 id="legalTitle">合規狀態</h2>
+        <ul id="complianceList"></ul>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span>KAIOS V8.0 Prototype Demo</span>
+    <span>Concept / Runtime / Production / Regulated boundaries enforced</span>
+  </footer>
+
+  <script src="./v8.js" defer></script>
+</body>
+</html>
