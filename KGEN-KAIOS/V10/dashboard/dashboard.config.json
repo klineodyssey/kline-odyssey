@@ -1,0 +1,38 @@
+{
+  "kaios_version": "V10.0",
+  "mode": "read-only",
+  "architecture_score": 94,
+  "service_count": 15,
+  "schema_count": 12,
+  "runtime_count": 9,
+  "sources": {
+    "operating_system": "../examples/operating_system.example.json",
+    "service": "../examples/service.example.json",
+    "membership": "../examples/membership.example.json",
+    "player": "../examples/player.example.json",
+    "wallet": "../examples/wallet.example.json",
+    "payment": "../examples/payment.example.json",
+    "marketplace": "../examples/marketplace.example.json",
+    "plugin": "../examples/plugin.example.json",
+    "ai_agent": "../examples/ai_agent.example.json",
+    "audit": "../examples/audit_event.example.json",
+    "dry_run": "../examples/dry_run.example.json"
+  },
+  "service_domains": [
+    "Gateway",
+    "Identity",
+    "Membership",
+    "Player",
+    "Citizen",
+    "Temple",
+    "Business",
+    "Market",
+    "Exchange",
+    "Wallet",
+    "Bank",
+    "Notification",
+    "Analytics",
+    "Audit",
+    "AI Runtime"
+  ]
+}

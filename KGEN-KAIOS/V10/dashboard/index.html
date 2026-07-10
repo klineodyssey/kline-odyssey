@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V10 Operating Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">KAIOS V10.0</p>
+      <h1>Operating System Dashboard</h1>
+      <p>唯讀總覽 KGEN OS：Frontend、Backend、Membership、Wallet、Marketplace、AI Company、Bank、Blockchain。</p>
+      <nav class="actions" aria-label="V10 links">
+        <a href="../README.md">README</a>
+        <a href="../SYSTEM_ARCHITECTURE.md">Architecture</a>
+        <a href="../reports/V10_DRYRUN_001_REPORT.md">Dry Run</a>
+        <a href="../reports/KAIOS_V10_QA_REPORT.md">QA</a>
+      </nav>
+    </header>
+
+    <section id="health" class="card-grid" aria-label="System health"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Service Status</h2>
+        <span class="badge">Prototype Map</span>
+      </div>
+      <div id="services" class="service-grid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Runtime Boundaries</h2>
+        <span class="badge">No Real Execution</span>
+      </div>
+      <div id="boundaries" class="card-grid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Dry Run</h2>
+        <span class="badge">Simulation</span>
+      </div>
+      <ol id="dryrun" class="steps"></ol>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Alerts</h2>
+        <span class="badge">WARN only</span>
+      </div>
+      <ul id="alerts" class="alerts"></ul>
+    </section>
+  </main>
+  <script src="dashboard.js"></script>
+</body>
+</html>

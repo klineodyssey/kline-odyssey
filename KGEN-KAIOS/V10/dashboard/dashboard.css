@@ -1,0 +1,94 @@
+:root {
+  color-scheme: dark;
+  --bg: #070b13;
+  --panel: #101a2a;
+  --panel-2: #15243a;
+  --ink: #f8f2df;
+  --muted: #b9c4d6;
+  --gold: #d7b35a;
+  --green: #76e4ad;
+  --warn: #ffd166;
+  --line: rgba(255, 255, 255, 0.14);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: radial-gradient(circle at top left, #12335b, var(--bg) 48%);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.55;
+}
+
+a { color: var(--gold); }
+
+.shell {
+  width: min(1180px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 30px 0 52px;
+}
+
+.hero { padding: 28px 0 18px; }
+.eyebrow { margin: 0 0 8px; color: var(--gold); font-weight: 800; }
+h1, h2, p { margin-top: 0; }
+h1 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; margin-bottom: 14px; }
+h2 { font-size: 1.12rem; margin-bottom: 0; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.actions a,
+.badge {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+}
+
+.badge { color: var(--gold); font-size: 0.84rem; }
+
+.card-grid,
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.card,
+.service,
+.panel {
+  background: linear-gradient(180deg, var(--panel), rgba(16, 26, 42, 0.82));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card strong,
+.service strong {
+  display: block;
+  font-size: 1.35rem;
+  margin-top: 8px;
+}
+
+.panel { margin-top: 14px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.ok { color: var(--green); }
+.warn { color: var(--warn); }
+.muted { color: var(--muted); }
+.alerts { padding-left: 18px; margin-bottom: 0; }
+.steps { margin-bottom: 0; }
+.steps li { margin: 8px 0; }
+
+@media (max-width: 520px) {
+  .shell { width: min(100% - 20px, 430px); }
+  .panel-head { align-items: flex-start; flex-direction: column; }
+  .actions a { flex: 1 1 100%; text-align: center; }
+}
