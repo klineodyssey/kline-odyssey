@@ -7,4 +7,7 @@
 - Added WorkOrder ID allocation standard.
 - Added Sync Audit Standard.
 - Added Human Pause Gate.
-
+- Added Codex WorkQueue Sync Protocol with the 17-point checklist.
+- Added WorkQueue Conflict Policy.
+- Added WorkQueue Insertion Policy.
+- Added WorkQueue Rollback Policy.
