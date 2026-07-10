@@ -1,0 +1,17 @@
+{
+  "promotion_id": "KAIOS-V9.1-PROMOTE-001A",
+  "task_id": "V9-DRYRUN-001A",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "APPROVED_FOR_OPEN",
+  "risk_level": "R2",
+  "promote_to_open": true,
+  "reason": "The draft is traceable, simulation-only, dependency-complete and does not touch protected paths.",
+  "required_follow_up": [
+    "Create an OPEN WorkQueue entry only after Codex records the promotion.",
+    "Use cursor-handoff/V9-DRYRUN-001A for worker execution.",
+    "Use a unique execution report path before Cursor work begins."
+  ]
+}

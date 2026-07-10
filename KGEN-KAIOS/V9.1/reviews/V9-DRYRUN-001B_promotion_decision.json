@@ -1,0 +1,17 @@
+{
+  "promotion_id": "KAIOS-V9.1-PROMOTE-001B",
+  "task_id": "V9-DRYRUN-001B",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "NEEDS_REVISION",
+  "risk_level": "R2",
+  "promote_to_open": false,
+  "reason": "The draft is valid in direction but lacks measurable acceptance criteria and uses a shared report path without grouping.",
+  "required_follow_up": [
+    "Revise temple activity metrics.",
+    "Assign a unique report path.",
+    "Declare no real religious authority or partnership claim."
+  ]
+}

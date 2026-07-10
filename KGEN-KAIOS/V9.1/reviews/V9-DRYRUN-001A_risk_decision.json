@@ -1,0 +1,13 @@
+{
+  "risk_decision_id": "KAIOS-V9.1-RISK-001A",
+  "task_id": "V9-DRYRUN-001A",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "original_risk_level": "R2",
+  "confirmed_risk_level": "R2",
+  "human_review_required": false,
+  "codex_review_required": true,
+  "legal_review_required": false,
+  "security_review_required": false,
+  "reason": "The task is simulation-only and advisory, but affects resource governance recommendations, so R2 is correct.",
+  "result": "PASS"
+}

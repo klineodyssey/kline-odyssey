@@ -1,0 +1,16 @@
+{
+  "promotion_id": "KAIOS-V9.1-PROMOTE-001C",
+  "task_id": "V9-DRYRUN-001C",
+  "decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "reviewer": "Codex",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "previous_status": "UNDER_REVIEW",
+  "new_status": "REJECTED",
+  "risk_level": "R2",
+  "promote_to_open": false,
+  "reason": "The draft is too broad for one worker task and should be split into narrower simulation-only drafts.",
+  "required_follow_up": [
+    "Archive the rejected DRAFT review.",
+    "Create smaller DRAFT WorkOrders if the AI repeats this recommendation with narrower scope."
+  ]
+}

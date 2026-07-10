@@ -1,0 +1,13 @@
+{
+  "check_id": "KAIOS-V9.1-DUP-001B",
+  "task_id": "V9-DRYRUN-001B",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "same_target": false,
+  "same_output_path": true,
+  "same_protected_path": false,
+  "same_decision_source": true,
+  "same_asset": false,
+  "same_unresolved_dependency": false,
+  "same_branch_pattern": false,
+  "result": "MERGE_CANDIDATE"
+}
