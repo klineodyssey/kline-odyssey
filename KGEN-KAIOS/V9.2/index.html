@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS V9.2 Approved Draft Sync</title>
+  <link rel="stylesheet" href="v92.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">KGEN AI Operating System</p>
+    <h1>KAIOS V9.2<br>Approved Draft to OPEN WorkQueue Sync</h1>
+    <p class="lede">Codex-only synchronization from V9.1 `APPROVED_FOR_OPEN` decisions into the official WorkQueue. AI and Cursor cannot sync. Human may pause, reject, archive or change priority before execution.</p>
+    <nav class="actions" aria-label="V9.2 navigation">
+      <a href="dashboard/">Sync Dashboard</a>
+      <a href="APPROVED_DRAFT_SYNC_STANDARD.md">Sync Standard</a>
+      <a href="CODEX_WORKQUEUE_SYNC_PROTOCOL.md">Codex Protocol</a>
+      <a href="schemas/sync_request.schema.json">Sync Schema</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="band">
+      <div>
+        <h2>正式同步狀態機</h2>
+        <p>V9.2 只處理已通過 V9.1 的 `APPROVED_FOR_OPEN` 草案。同步成功後可寫入 `OPEN`，但不自動派工、不自動 claim。</p>
+      </div>
+      <ol class="timeline">
+        <li>APPROVED_FOR_OPEN</li>
+        <li>SYNC_PENDING</li>
+        <li>SYNC_VALIDATING</li>
+        <li>SYNC_READY</li>
+        <li>OPEN</li>
+      </ol>
+    </section>
+
+    <section class="grid">
+      <article>
+        <h2>Codex-only</h2>
+        <p>只有 Codex 可以執行 17 點同步檢查並插入 WorkQueue。AI、Cursor、其他 worker 不得直接同步。</p>
+      </article>
+      <article>
+        <h2>Conflict Guard</h2>
+        <p>相同 ID、branch、report path、output path、asset、source decision 或 unresolved dependency 都會變成 `SYNC_CONFLICT`。</p>
+      </article>
+      <article>
+        <h2>Human Pause</h2>
+        <p>Human 可在執行前 PAUSE、REJECT、CHANGE_PRIORITY 或 ARCHIVE。V9.2 會留下 human decision record。</p>
+      </article>
+      <article>
+        <h2>No Auto Claim</h2>
+        <p>V9.2 實測同步的 OPEN 任務使用 `Dispatch Hold: true`，不會讓 Cursor 立即自動 claim。</p>
+      </article>
+    </section>
+
+    <section class="band">
+      <div>
+        <h2>V9-DRYRUN-001A Sync</h2>
+        <p>正式 WorkOrder ID: <strong>AI-ECONOMY-2026-0001</strong></p>
+      </div>
+      <div id="syncCards" class="cards" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>KLINE ODYSSEY · KAIOS V9.2 · Read-only GitHub Pages entry</p>
+  </footer>
+
+  <script src="v92.js"></script>
+</body>
+</html>

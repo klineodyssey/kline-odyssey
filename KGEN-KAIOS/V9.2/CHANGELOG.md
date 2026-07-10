@@ -14,3 +14,5 @@
 - Added 8 machine-readable JSON Schemas.
 - Added 8 JSON examples.
 - Added 8 sync runtime module specifications.
+- Added the V9.2 read-only Sync Dashboard.
+- Added the V9.2 GitHub Pages entry page.
