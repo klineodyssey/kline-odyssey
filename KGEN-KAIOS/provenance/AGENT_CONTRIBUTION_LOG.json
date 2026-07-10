@@ -1,0 +1,78 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Seed AI contribution log for provenance governance baseline.",
+    "ancestor": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+    "source_of_truth": true
+  },
+  "contributions": [
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "b8645f50d83fd282648cd60bbf074785d3eef24e",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+        "KGEN-Canon/KGEN_CANON_MASTER.json",
+        "KGEN-KAIOS/VERSIONING_STANDARD.md",
+        "KGEN-KAIOS/FILE_HEADER_STANDARD.md",
+        "KGEN-KAIOS/CHANGELOG_STANDARD.md",
+        "KGEN-KAIOS/provenance/"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "a1f9dc009ef305de0783a9bebb42a1e7e61ca80a",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md",
+        "KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md",
+        "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
+        "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "KGEN-KAIOS/provenance/EVOLUTION_EVENT_SCHEMA.json"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-01",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "branch": "codex/provenance-biology-governance",
+      "commit_sha": "73638fdb2c105230fe05d6330f9d8ebe2038235b",
+      "base_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+      "report_path": "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md",
+      "changed_files": [
+        "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+        "KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md",
+        "KGEN-AI-Company/CURSOR_REPORTING_RULES.md",
+        "KGEN-AI-Company/CODEX_REVIEW_AND_MERGE_RULES.md",
+        "KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    }
+  ]
+}

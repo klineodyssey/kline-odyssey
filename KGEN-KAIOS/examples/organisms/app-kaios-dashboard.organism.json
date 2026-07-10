@@ -1,0 +1,42 @@
+{
+  "organism_id": "organism-app-kaios-dashboard",
+  "life_type": "App",
+  "domain": "KGEN-Universe",
+  "kingdom": "App",
+  "phylum": "OperatingCenter",
+  "class": "ReadOnlyDashboard",
+  "order": "KAIOSControl",
+  "family": "KAIOSDashboard",
+  "genus": "KAIOS",
+  "species": "KAIOS.ReadOnlyOperationsDashboard",
+  "canonical_file": "KGEN-KAIOS/dashboard/index.html",
+  "runtime_entry": "KGEN-KAIOS/dashboard/dashboard.js",
+  "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+  "parent_species": "KAIOS.OperatingCenter",
+  "ancestor_versions": [
+    "KGEN-KAIOS/KAIOS_ARCHITECTURE.md"
+  ],
+  "compatible_mates": [
+    "KAIOS.WorkerRegistry",
+    "KAIOS.WorkQueue"
+  ],
+  "mutation_rules": [
+    "Read-only UI changes must preserve no-write behavior.",
+    "No GitHub token or write endpoint may be added."
+  ],
+  "fusion_rules": [
+    "May display provenance and organism registry feeds after schema validation."
+  ],
+  "split_rules": [
+    "May split views into read-only subpages if fixed routes remain stable."
+  ],
+  "upgrade_path": [
+    "Add provenance read-only cards",
+    "Add organism registry viewer"
+  ],
+  "status": "REFERENCE_EXAMPLE",
+  "version": "1.0",
+  "author_agent": "Codex",
+  "reviewer_agent": "Codex",
+  "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262"
+}

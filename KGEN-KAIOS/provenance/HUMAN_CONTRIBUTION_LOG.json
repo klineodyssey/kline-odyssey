@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Seed Human contribution log for governance source tracking.",
+    "ancestor": "README.md",
+    "source_of_truth": true
+  },
+  "contributions": [
+    {
+      "human_owner": "human-primeforge",
+      "actor": "PrimeForge / 樂天帝 ⌖",
+      "task_id": "KGEN-GOV-BIO-2026-0001",
+      "source_type": "HUMAN_REQUEST",
+      "source_file": "Chat instruction in Codex session",
+      "source_reason": "Request provenance, author tracking, versioning, biological taxonomy, lineage, and R&D suggestion governance.",
+      "timestamp": "2026-07-11T00:00:00+08:00"
+    }
+  ]
+}

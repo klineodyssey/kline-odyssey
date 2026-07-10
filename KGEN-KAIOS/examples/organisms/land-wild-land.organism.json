@@ -1,0 +1,47 @@
+{
+  "organism_id": "organism-land-wild-land",
+  "life_type": "Land",
+  "domain": "KGEN-Universe",
+  "kingdom": "Land",
+  "phylum": "CivilizationAsset",
+  "class": "WildLand",
+  "order": "LandLifecycle",
+  "family": "OneLandOneResidence",
+  "genus": "KGENLand",
+  "species": "KGENLand.WildLand.Baseline",
+  "canonical_file": "KGEN-KAIOS/V8/KAIOS_V8_ASSET_LIFECYCLE.md",
+  "runtime_entry": "KGEN-KAIOS/V8/KAIOS_V8_TASK_GENERATOR.md",
+  "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+  "parent_species": null,
+  "ancestor_versions": [
+    "KGEN-Genesis/GEN-003_Universe_Design/KGEN_Universe_Design_V1.0.md"
+  ],
+  "compatible_mates": [
+    "KGENResidence.Baseline",
+    "KGENTemple.ServiceNode"
+  ],
+  "mutation_rules": [
+    "Land begins as Wild Land.",
+    "Development requires WorkOrder, zoning, ownership, and governance checks."
+  ],
+  "fusion_rules": [
+    "May connect to Residence, Store, Temple Service Node, Bank, Exchange, or Real-World Link after review."
+  ],
+  "split_rules": [
+    "Subdivision requires land policy, ownership proof, and rollback plan."
+  ],
+  "upgrade_path": [
+    "Wild Land",
+    "Claimed Land",
+    "Developed Land",
+    "Residence",
+    "Store",
+    "Temple Service Node",
+    "Civilization Node"
+  ],
+  "status": "REFERENCE_EXAMPLE",
+  "version": "1.0",
+  "author_agent": "Codex",
+  "reviewer_agent": "Codex",
+  "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262"
+}

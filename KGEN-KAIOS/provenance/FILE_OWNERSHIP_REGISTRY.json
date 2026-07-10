@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Register P0/P1 ownership for first-stage provenance governance.",
+    "ancestor": "KGEN_MASTER_LIBRARY_INDEX.md",
+    "source_of_truth": true
+  },
+  "file_owners": [
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "tier": "P0",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": true,
+      "classification": "Boot CURRENT"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+      "tier": "P0",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "Machine Canon"
+    },
+    {
+      "path": "KGEN-KAIOS/",
+      "tier": "P1",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "KAIOS Operating Standards"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "tier": "P1",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "Live WorkQueue"
+    }
+  ]
+}

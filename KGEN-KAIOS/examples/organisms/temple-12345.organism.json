@@ -1,0 +1,42 @@
+{
+  "organism_id": "organism-temple-12345",
+  "life_type": "Temple",
+  "domain": "KGEN-Universe",
+  "kingdom": "Temple",
+  "phylum": "CivilizationService",
+  "class": "WukongFortuneTemple",
+  "order": "Temple12345",
+  "family": "HuaguoshanTemple",
+  "genus": "KGEN12345",
+  "species": "KGEN12345.WukongFortuneTemple.Current",
+  "canonical_file": "K線西遊記/temples/12345/index.html",
+  "runtime_entry": "K線西遊記/temples/12345/modules/runtime-main.js",
+  "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+  "parent_species": null,
+  "ancestor_versions": [
+    "wukong-temple/"
+  ],
+  "compatible_mates": [
+    "KGEN12345.TempleServiceNode",
+    "KGEN.HuaguoExchange11520"
+  ],
+  "mutation_rules": [
+    "Protected path: no direct mutation without Human approval.",
+    "All UI/runtime changes require Codex review and provenance."
+  ],
+  "fusion_rules": [
+    "May connect with App, AI, Bank, Exchange, and Real-World Link organisms through reviewed WorkOrders."
+  ],
+  "split_rules": [
+    "No split allowed without migration plan."
+  ],
+  "upgrade_path": [
+    "Reference-only manifest baseline",
+    "Future reviewed organism registry entry"
+  ],
+  "status": "REFERENCE_EXAMPLE",
+  "version": "1.0",
+  "author_agent": "Codex",
+  "reviewer_agent": "Codex",
+  "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262"
+}

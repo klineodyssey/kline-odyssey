@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-11.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
+    "task_id": "KGEN-GOV-BIO-2026-0001",
+    "change_reason": "Register KGEN human and AI authors for provenance records.",
+    "ancestor": "KGEN-KAIOS/WORKER_REGISTRY.md",
+    "source_of_truth": true
+  },
+  "authors": [
+    {
+      "author_id": "human-primeforge",
+      "display_name": "PrimeForge / 樂天帝 ⌖",
+      "author_type": "Human",
+      "role": "Founder / Human Owner",
+      "can_authorize_protected_paths": true,
+      "status": "ACTIVE"
+    },
+    {
+      "author_id": "agent-codex",
+      "display_name": "Codex",
+      "author_type": "AI",
+      "worker_id": "codex-01",
+      "role": "General Manager / Dispatcher / Reviewer",
+      "can_push_main": true,
+      "status": "ACTIVE"
+    },
+    {
+      "author_id": "agent-cursor",
+      "display_name": "Cursor",
+      "author_type": "AI",
+      "worker_id": "cursor-01",
+      "role": "Construction / Documentation / QA Worker",
+      "can_push_main": false,
+      "status": "ACTIVE"
+    }
+  ]
+}
