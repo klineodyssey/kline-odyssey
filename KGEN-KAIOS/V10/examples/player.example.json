@@ -1,0 +1,8 @@
+{
+  "player_id": "player-demo-001",
+  "member_id": "member-demo-001",
+  "display_name": "KGEN Demo Player",
+  "linked_wallet_profiles": ["wallet-profile-demo-001"],
+  "owned_assets": ["temple-demo-001", "business-demo-001"],
+  "status": "SIMULATED"
+}

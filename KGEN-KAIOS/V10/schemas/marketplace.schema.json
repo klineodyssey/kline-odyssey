@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/marketplace.schema.json",
+  "title": "KAIOS V10 Marketplace Listing",
+  "type": "object",
+  "required": ["listing_id", "asset_id", "asset_type", "owner", "status", "legal_boundary"],
+  "properties": {
+    "listing_id": { "type": "string" },
+    "asset_id": { "type": "string" },
+    "asset_type": { "type": "string" },
+    "owner": { "type": "string" },
+    "status": { "type": "string" },
+    "legal_boundary": { "type": "string" }
+  },
+  "additionalProperties": false
+}

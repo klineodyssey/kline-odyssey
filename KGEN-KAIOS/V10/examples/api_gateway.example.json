@@ -1,0 +1,8 @@
+{
+  "gateway_id": "KAIOS-GATEWAY-001",
+  "supported_styles": ["REST", "JSON Schema", "OpenAPI Draft"],
+  "rate_limit": "prototype-standard",
+  "auth_required": true,
+  "schema_validation": true,
+  "audit_required": true
+}

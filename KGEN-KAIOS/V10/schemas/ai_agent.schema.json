@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/ai_agent.schema.json",
+  "title": "KAIOS V10 AI Agent",
+  "type": "object",
+  "required": ["agent_id", "agent_type", "role", "can_push_main", "workqueue_required", "reviewer"],
+  "properties": {
+    "agent_id": { "type": "string" },
+    "agent_type": { "type": "string" },
+    "role": { "type": "string" },
+    "can_push_main": { "type": "boolean" },
+    "workqueue_required": { "type": "boolean" },
+    "reviewer": { "type": "string" }
+  },
+  "additionalProperties": false
+}

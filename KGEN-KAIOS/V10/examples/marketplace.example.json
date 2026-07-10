@@ -1,0 +1,8 @@
+{
+  "listing_id": "listing-demo-001",
+  "asset_id": "business-demo-001",
+  "asset_type": "Virtual Business Twin",
+  "owner": "member-demo-001",
+  "status": "DRAFT_ONLY",
+  "legal_boundary": "Requires legal authorization before real listing"
+}

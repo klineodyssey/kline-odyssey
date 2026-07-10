@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/operating_system.schema.json",
+  "title": "KAIOS V10 Operating System",
+  "type": "object",
+  "required": ["kos_id", "version", "status", "layers", "protected_paths", "forbidden_actions"],
+  "properties": {
+    "kos_id": { "type": "string" },
+    "version": { "type": "string" },
+    "status": { "type": "string" },
+    "layers": { "type": "array", "items": { "type": "string" } },
+    "protected_paths": { "type": "array", "items": { "type": "string" } },
+    "forbidden_actions": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

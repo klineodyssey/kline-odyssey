@@ -1,0 +1,7 @@
+{
+  "payment_id": "payment-demo-001",
+  "payment_type": "Temple Donation",
+  "status": "Concept",
+  "regulated": true,
+  "no_real_settlement": true
+}

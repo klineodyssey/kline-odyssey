@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/membership.schema.json",
+  "title": "KAIOS V10 Membership",
+  "type": "object",
+  "required": ["member_id", "roles", "permissions", "verification", "reputation", "status"],
+  "properties": {
+    "member_id": { "type": "string" },
+    "roles": { "type": "array", "items": { "type": "string" } },
+    "permissions": { "type": "array", "items": { "type": "string" } },
+    "verification": { "type": "string" },
+    "reputation": { "type": "number" },
+    "status": { "type": "string" }
+  },
+  "additionalProperties": false
+}

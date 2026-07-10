@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/audit_event.schema.json",
+  "title": "KAIOS V10 Audit Event",
+  "type": "object",
+  "required": ["audit_id", "actor", "action", "previous_state", "new_state", "timestamp", "risk_level", "reviewer"],
+  "properties": {
+    "audit_id": { "type": "string" },
+    "actor": { "type": "string" },
+    "action": { "type": "string" },
+    "previous_state": { "type": "string" },
+    "new_state": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "risk_level": { "type": "string" },
+    "reviewer": { "type": "string" }
+  },
+  "additionalProperties": false
+}

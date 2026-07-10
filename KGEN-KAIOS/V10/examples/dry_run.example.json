@@ -1,0 +1,7 @@
+{
+  "dry_run_id": "V10-DRYRUN-001",
+  "scenario": "Player login, membership, wallet, temple, shop, marketplace, AI recommendation, Codex review and WorkQueue simulation",
+  "steps": ["login", "create_membership", "create_wallet_profile", "get_temple", "create_store", "join_marketplace", "ai_recommendation", "codex_review", "workqueue_draft"],
+  "result": "PASS",
+  "no_real_execution": true
+}

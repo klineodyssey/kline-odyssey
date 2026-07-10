@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/payment.schema.json",
+  "title": "KAIOS V10 Payment",
+  "type": "object",
+  "required": ["payment_id", "payment_type", "status", "regulated", "no_real_settlement"],
+  "properties": {
+    "payment_id": { "type": "string" },
+    "payment_type": { "type": "string" },
+    "status": { "type": "string", "enum": ["Concept", "Prototype", "Production", "Regulated"] },
+    "regulated": { "type": "boolean" },
+    "no_real_settlement": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

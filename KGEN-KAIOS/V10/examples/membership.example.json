@@ -1,0 +1,8 @@
+{
+  "member_id": "member-demo-001",
+  "roles": ["Registered", "Temple Owner"],
+  "permissions": ["read_temple", "edit_own_profile", "submit_marketplace_draft"],
+  "verification": "Prototype",
+  "reputation": 72,
+  "status": "ACTIVE"
+}

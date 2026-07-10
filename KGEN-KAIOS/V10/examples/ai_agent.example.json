@@ -1,0 +1,8 @@
+{
+  "agent_id": "cursor-01",
+  "agent_type": "Cursor",
+  "role": "Worker",
+  "can_push_main": false,
+  "workqueue_required": true,
+  "reviewer": "codex-gm-01"
+}

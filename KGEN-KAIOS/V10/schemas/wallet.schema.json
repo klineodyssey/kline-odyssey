@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/wallet.schema.json",
+  "title": "KAIOS V10 Wallet Profile",
+  "type": "object",
+  "required": ["wallet_profile_id", "member_id", "chain", "wallet_address", "status", "prototype_only"],
+  "properties": {
+    "wallet_profile_id": { "type": "string" },
+    "member_id": { "type": "string" },
+    "chain": { "type": "string" },
+    "wallet_address": { "type": "string" },
+    "asset_viewer": { "type": "boolean" },
+    "transaction_history": { "type": "boolean" },
+    "status": { "type": "string" },
+    "prototype_only": { "type": "boolean", "const": true }
+  },
+  "additionalProperties": false
+}

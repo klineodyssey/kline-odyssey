@@ -1,0 +1,10 @@
+{
+  "audit_id": "KAIOS-V10-AUDIT-0001",
+  "actor": "Codex",
+  "action": "DRY_RUN_REVIEW",
+  "previous_state": "SIMULATION_STARTED",
+  "new_state": "SIMULATION_PASS",
+  "timestamp": "2026-07-11T00:00:00Z",
+  "risk_level": "R2",
+  "reviewer": "Codex"
+}

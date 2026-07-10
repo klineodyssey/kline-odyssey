@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/service.schema.json",
+  "title": "KAIOS V10 Service",
+  "type": "object",
+  "required": ["service_id", "domain", "owner", "status", "inputs", "outputs", "permissions", "risk_level", "audit_events"],
+  "properties": {
+    "service_id": { "type": "string" },
+    "domain": { "type": "string" },
+    "owner": { "type": "string" },
+    "status": { "type": "string", "enum": ["Concept", "Prototype", "Production", "Regulated"] },
+    "inputs": { "type": "array", "items": { "type": "string" } },
+    "outputs": { "type": "array", "items": { "type": "string" } },
+    "permissions": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "type": "string", "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "audit_events": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

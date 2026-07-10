@@ -1,0 +1,10 @@
+{
+  "wallet_profile_id": "wallet-profile-demo-001",
+  "member_id": "member-demo-001",
+  "chain": "BSC",
+  "wallet_address": "0x0000000000000000000000000000000000000000",
+  "asset_viewer": true,
+  "transaction_history": true,
+  "status": "PROTOTYPE_VIEW_ONLY",
+  "prototype_only": true
+}

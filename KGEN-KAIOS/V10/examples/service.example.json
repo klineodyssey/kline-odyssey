@@ -1,0 +1,11 @@
+{
+  "service_id": "KAIOS-SVC-MEMBERSHIP",
+  "domain": "Membership",
+  "owner": "KGEN-Organization/Membership",
+  "status": "Prototype",
+  "inputs": ["membership.schema.json"],
+  "outputs": ["audit_event.schema.json"],
+  "permissions": ["Registered", "Operator", "Administrator"],
+  "risk_level": "R2",
+  "audit_events": ["MEMBERSHIP_CREATED", "ROLE_CHANGED"]
+}

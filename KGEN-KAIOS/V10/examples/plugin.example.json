@@ -1,0 +1,8 @@
+{
+  "plugin_id": "plugin-demo-inventory-adapter",
+  "host_type": "Business",
+  "host_id": "business-demo-001",
+  "permissions": ["read_catalog", "read_inventory"],
+  "risk_level": "R2",
+  "install_state": "DRAFT"
+}

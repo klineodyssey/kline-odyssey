@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/plugin.schema.json",
+  "title": "KAIOS V10 Plugin",
+  "type": "object",
+  "required": ["plugin_id", "host_type", "host_id", "permissions", "risk_level", "install_state"],
+  "properties": {
+    "plugin_id": { "type": "string" },
+    "host_type": { "type": "string" },
+    "host_id": { "type": "string" },
+    "permissions": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "type": "string" },
+    "install_state": { "type": "string" }
+  },
+  "additionalProperties": false
+}

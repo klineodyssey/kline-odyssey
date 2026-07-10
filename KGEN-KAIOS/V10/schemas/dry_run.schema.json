@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/schemas/dry_run.schema.json",
+  "title": "KAIOS V10 Dry Run",
+  "type": "object",
+  "required": ["dry_run_id", "scenario", "steps", "result", "no_real_execution"],
+  "properties": {
+    "dry_run_id": { "type": "string" },
+    "scenario": { "type": "string" },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "result": { "type": "string" },
+    "no_real_execution": { "type": "boolean", "const": true }
+  },
+  "additionalProperties": false
+}
