@@ -278,7 +278,7 @@ Cursor reads this file from GitHub. Cursor does not wait for repeated human chat
 
 ### ORG-P2-003C - Map L0/L1/L2/Machine Canon hierarchy
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
