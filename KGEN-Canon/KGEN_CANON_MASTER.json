@@ -97,6 +97,53 @@
       "REVIVE"
     ]
   },
+  "workforce_governance": {
+    "formal_employee_required": true,
+    "registry": "KGEN-KAIOS/worker_registry.json",
+    "workforce_folder": "KGEN-KAIOS/workforce/",
+    "unverified_worker_output": "REGISTRATION_REQUIRED",
+    "formal_employee_requirements": [
+      "worker_id exists in registry",
+      "employee_status is ACTIVE, TRUSTED, or SENIOR_TRUSTED",
+      "trust_level is T2 or higher",
+      "role, permission, workspace, allowed_branch_pattern, and reviewer are defined",
+      "can_push_main is false unless worker is Codex / system maintainer",
+      "Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledgments are true",
+      "no active suspension, revocation, expired credential, or blocking violation exists"
+    ],
+    "trust_levels": {
+      "T0": "Unregistered",
+      "T1": "Onboarding",
+      "T2": "Active",
+      "T3": "Trusted",
+      "T4": "Senior Trusted",
+      "T5": "System Maintainer"
+    },
+    "never_autonomous": [
+      "contracts",
+      "KGEN Token contract",
+      "wallet",
+      "bridge",
+      "payment",
+      "membership permissions",
+      "KYC / AML",
+      "authentication",
+      "secrets",
+      "protected paths",
+      "main merge",
+      "production deploy",
+      "Runtime CURRENT",
+      "Canon",
+      "Boot",
+      "final-whitepaper",
+      "land ownership",
+      "exchange settlement",
+      "bank reserve",
+      "legal or brand partnership claims",
+      "file deletion or large migration"
+    ],
+    "audit_report": "KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md"
+  },
   "token": {
     "name": "KLINE GENESIS",
     "symbol": "KGEN",

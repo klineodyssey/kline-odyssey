@@ -22,6 +22,8 @@ Live Codex-managed Cursor work runs through **KGEN AI Company Automation V5.0+**
 - AI Company (live OS): `KGEN-AI-Company/README.md`
 - Cursor employee boot: `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
 - Auto work protocol: `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
+- Worker registry: `KGEN-KAIOS/worker_registry.json`
+- Workforce governance: `KGEN-KAIOS/workforce/README.md`
 - Live WorkQueue: `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
 - Primary reports: `KGEN-AI-Company/reports/`
 - Codex review log: `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
@@ -32,13 +34,17 @@ Every time Cursor starts work, it must read these files in order:
 
 1. `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 2. `KGEN-Canon/KGEN_CANON_MASTER.json`
-3. `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
-4. `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
-5. `KGEN-AI-Company/CURSOR_POLLING_RULES.md`
-6. `KGEN-Organization/WorkOrders/WORK_QUEUE.md` *(live queue)*
-7. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
-8. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md` *(prompt discipline)*
-9. `KGEN_MASTER_LIBRARY_INDEX.md`
+3. `KGEN-KAIOS/worker_registry.json`
+4. `KGEN-KAIOS/workforce/README.md`
+5. `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`
+6. `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
+7. `KGEN-AI-Company/CURSOR_POLLING_RULES.md`
+8. `KGEN-Organization/WorkOrders/WORK_QUEUE.md` *(live queue)*
+9. `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+10. `KGEN-Agent-Office/CURSOR_AGENT_PROMPT.md` *(prompt discipline)*
+11. `KGEN_MASTER_LIBRARY_INDEX.md`
+
+If worker registration cannot be verified, Cursor must output `REGISTRATION_REQUIRED` and stop.
 
 Do **not** treat `CURSOR_WORK_QUEUE.md` as a live task source. It is SUPERSEDED (ORG-P2-003A).
 

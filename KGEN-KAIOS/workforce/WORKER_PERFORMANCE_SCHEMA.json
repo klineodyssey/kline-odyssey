@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json",
+  "title": "KGEN Worker Performance Score",
+  "type": "object",
+  "required": [
+    "worker_id",
+    "quality_score",
+    "review_pass_rate",
+    "rejection_rate",
+    "rollback_rate",
+    "protected_path_violations",
+    "missing_report_count",
+    "missing_provenance_count",
+    "task_completion_rate",
+    "test_pass_rate",
+    "documentation_quality",
+    "canon_compliance",
+    "security_compliance",
+    "handoff_quality",
+    "average_review_cycles",
+    "suggestion_acceptance_rate"
+  ],
+  "properties": {
+    "worker_id": { "type": "string" },
+    "quality_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "review_pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rejection_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rollback_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "protected_path_violations": { "type": "integer", "minimum": 0 },
+    "missing_report_count": { "type": "integer", "minimum": 0 },
+    "missing_provenance_count": { "type": "integer", "minimum": 0 },
+    "task_completion_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "test_pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "documentation_quality": { "type": "number", "minimum": 0, "maximum": 100 },
+    "canon_compliance": { "type": "number", "minimum": 0, "maximum": 100 },
+    "security_compliance": { "type": "number", "minimum": 0, "maximum": 100 },
+    "handoff_quality": { "type": "number", "minimum": 0, "maximum": 100 },
+    "average_review_cycles": { "type": "number", "minimum": 0 },
+    "suggestion_acceptance_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "additionalProperties": false
+}
+

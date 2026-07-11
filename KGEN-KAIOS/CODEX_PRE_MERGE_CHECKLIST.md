@@ -23,6 +23,8 @@ This checklist defines the minimum evidence Codex must review before merging any
 | Provenance | Source, author, reviewer, branch, commit, task ID, report path, and changed files are traceable |
 | R&D suggestions | Suggested WorkOrders remain `PROPOSED` until Codex promotes them |
 | Formal file metadata | Changed formal organs include required version metadata or an explicit follow-up risk |
+| Workforce credential | Worker is registered, active, trusted enough for task risk, and not suspended |
+| Branch authority | Branch matches the worker's allowed branch pattern and does not bundle unrelated tasks |
 
 ## Approve Conditions
 
@@ -38,6 +40,8 @@ Codex may approve only when:
 8. Author is registered in `KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json`.
 9. Changed files match the reported `changed_files`.
 10. Formal organism or runtime changes satisfy versioning and taxonomy gates when applicable.
+11. Worker is present in `KGEN-KAIOS/worker_registry.json` with valid `employee_status`, `trust_level`, reviewer, branch pattern, and boot acknowledgments.
+12. Worker has no active suspension, revocation, or blocking violation.
 
 ## Reject / Block Conditions
 
@@ -55,6 +59,10 @@ Codex rejects or blocks when:
 - provenance is incomplete
 - a worker promotes its own suggestion past `PROPOSED`
 - a formal organism has no canonical file or runtime entry
+- worker is missing from the registry or is `PENDING_REGISTRATION`, `SUSPENDED`, `REVOKED`, or `ARCHIVED`
+- worker branch does not match `allowed_branch_pattern`
+- handoff mixes multiple WorkOrders without explicit Codex authorization
+- worker pushes main or force pushes
 
 ## Output
 
@@ -68,3 +76,5 @@ Every review must produce or update a review log entry with:
 - Decision
 - Protected path result
 - Notes
+- Worker credential result
+- Trust level result

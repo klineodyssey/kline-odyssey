@@ -1,0 +1,15 @@
+1
+00:00:00,000 --> 00:00:06,000
+KLINE ODYSSEY 的宇宙，不只是一個網站。
+
+2
+00:00:06,000 --> 00:00:14,000
+本集主題是：AI 公司。
+
+3
+00:00:14,000 --> 00:00:24,000
+KGEN AI Company 透過 GitHub WorkQueue、handoff branch、Report、Review Log 與 Codex merge 管理 AI 員工，不靠聊天記憶。
+
+4
+00:00:24,000 --> 00:00:32,000
+所有內容都必須從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md 開機。

@@ -99,6 +99,8 @@ jobs:
           copy_dir "membership"
           copy_dir "library"
           copy_dir "evolution-governance"
+          copy_dir "workforce"
+          copy_dir "video"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4"
 
@@ -222,10 +224,11 @@ jobs:
           EOF
           copy_file "KGEN_MASTER_LIBRARY_INDEX.md"
           copy_file "KGEN_BIOLOGICAL_VERSIONING_AUDIT.md"
+          copy_file "KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md"
           copy_dir "whitepaper"
           copy_dir "wukong-temple"
 
-          for route in boot operating-center ai-company workqueue civilization economy exchange wallet membership library evolution-governance; do
+          for route in boot operating-center ai-company workqueue civilization economy exchange wallet membership library evolution-governance workforce video; do
             if [ ! -f "_site/${route}/index.html" ]; then
               echo "::error::Missing permanent Pages route: /${route}/"
               exit 1

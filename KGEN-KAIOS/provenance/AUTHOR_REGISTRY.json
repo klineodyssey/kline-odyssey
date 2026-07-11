@@ -25,7 +25,7 @@
       "author_id": "agent-codex",
       "display_name": "Codex",
       "author_type": "AI",
-      "worker_id": "codex-01",
+      "worker_id": "codex-gm-01",
       "role": "General Manager / Dispatcher / Reviewer",
       "can_push_main": true,
       "status": "ACTIVE"

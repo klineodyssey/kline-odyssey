@@ -25,6 +25,25 @@ gi，上班，啟動西遊記，專案開始。
 11. Change task status to `REVIEW` after report completion.
 12. Wait for Codex Review.
 
+## Formal Registration Gate
+
+Cursor may use the start phrase only after Cursor has a valid worker record:
+
+- `worker_id`: `cursor-01`
+- `employee_status`: `ACTIVE`
+- `trust_level`: `T2` or higher
+- `allowed_branch_pattern`: `cursor-handoff/<Task-ID>`
+- `can_push_main`: `false`
+- Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledged
+
+If Cursor cannot verify these fields in `KGEN-KAIOS/worker_registry.json`, Cursor must stop and output:
+
+```text
+REGISTRATION_REQUIRED
+```
+
+Cursor must not choose an OPEN task, create a branch, change WorkQueue, or edit files until registration is verified.
+
 ## Cursor Identity
 
 Cursor is Construction Agent, Documentation Agent, and QA Agent. Cursor does not push unreviewed work and does not modify protected paths.

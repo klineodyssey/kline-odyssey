@@ -1,0 +1,15 @@
+1
+00:00:00,000 --> 00:00:06,000
+KLINE ODYSSEY 的宇宙，不只是一個網站。
+
+2
+00:00:06,000 --> 00:00:14,000
+本集主題是：KAIOS Dashboard。
+
+3
+00:00:14,000 --> 00:00:24,000
+Dashboard 是唯讀控制中心，呈現 Worker、Review、Claim、Report、Governance，不寫入 GitHub、不自動 claim、不自動 merge。
+
+4
+00:00:24,000 --> 00:00:32,000
+所有內容都必須從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md 開機。

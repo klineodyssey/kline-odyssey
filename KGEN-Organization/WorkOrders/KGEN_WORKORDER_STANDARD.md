@@ -38,6 +38,8 @@ Allowed `task_source_type` values are `HUMAN_REQUEST`, `AI_RECOMMENDATION`, `CUR
 
 Cursor reads the Cursor Agent Prompt, WorkQueue, Daily Workflow, DO_NOT_TOUCH, Canon Master JSON, Master Library Index, and assigned WorkOrder. Cursor accepts only one OPEN task at a time.
 
+Before acceptance, Cursor must pass the formal worker gate in `KGEN-KAIOS/worker_registry.json`. If Cursor cannot verify `worker_id`, `employee_status`, `trust_level`, acknowledgments, branch pattern, and reviewer, Cursor must output `REGISTRATION_REQUIRED` and stop.
+
 ## 4. Cursor Execution
 
 Cursor states purpose before modifying files, performs only allowed changes, runs checks, produces a report, and moves the task to REVIEW.
@@ -62,6 +64,10 @@ Codex also checks provenance before merge:
 - `changed_files` match the diff
 - protected paths are not modified without explicit approval
 - provenance fields are complete
+- worker is registered and active
+- worker trust level is sufficient for task risk
+- worker is not suspended, revoked, archived, or in pending registration
+- branch matches the worker allowed branch pattern
 
 ## 7. Status Model
 
@@ -101,5 +107,6 @@ A task is complete only when the report exists, checks pass or risks are recorde
 
 | Version | Date | Description |
 |---|---|---|
+| V2.2 | 2026-07-11 | Added formal workforce registration, trust level, and credential gates. |
 | V2.1 | 2026-07-11 | Added source provenance, R&D suggestion, PROPOSED status, and Codex provenance gate. |
 | V2.0 | 2026-07-10 | Established WorkOrder standard for Organization V2.0. |

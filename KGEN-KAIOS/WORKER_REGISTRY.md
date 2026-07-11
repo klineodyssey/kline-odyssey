@@ -72,6 +72,63 @@ A worker can join KAIOS when all conditions are true:
 5. Worker agrees to stop after one task and wait for review.
 6. Worker does not push main unless `can_push_main` is true.
 
+## Formal Employee Gate
+
+KGEN now distinguishes "registered in a file" from "authorized to work." A worker is a formal employee only when the machine-readable registry marks:
+
+- `employee_status` as `ACTIVE`, `TRUSTED`, or `SENIOR_TRUSTED`
+- `trust_level` as `T2` or higher
+- `boot_acknowledged`, `canon_acknowledged`, `workspace_policy_acknowledged`, and `do_not_touch_acknowledged` as true
+- no suspension, ban, expired credential, or blocking violation exists
+
+If any field is missing or false, the worker is treated as `UNREGISTERED_WORKER`. The only valid output for an unverified worker is:
+
+```text
+REGISTRATION_REQUIRED
+```
+
+The worker must not claim a task, modify formal files, create a handoff branch, push a task result, change WorkQueue, change Review Log, change Canon, or push main.
+
+## Worker Status
+
+| Status | Meaning | Work Permission |
+|---|---|---|
+| `PENDING_REGISTRATION` | Entry exists but onboarding is incomplete | No formal work |
+| `ONBOARDING` | Boot and dry-run training stage | Dry run only |
+| `ACTIVE` | Normal worker | Regular scoped WorkOrders |
+| `PROBATION` | Worker violated a rule | Limited work, full review |
+| `TRUSTED` | Strong review record | Broader low-risk work, still reviewed |
+| `SENIOR_TRUSTED` | Human + Codex approved senior worker | Limited whitelist autonomy only |
+| `SUSPENDED` | Temporary stop | No work |
+| `REVOKED` | Employee status removed | No work |
+| `ARCHIVED` | Historical worker | No active work |
+
+## Trust Levels
+
+| Trust | Name | Work Boundary |
+|---|---|---|
+| `T0` | Unregistered | Cannot work |
+| `T1` | Onboarding | Dry run / docs / sandbox, 100% review |
+| `T2` | Active | General WorkOrders, 100% review |
+| `T3` | Trusted | More concurrent low-risk tasks; R0/R1 may use fast review |
+| `T4` | Senior Trusted | Limited whitelist autonomy for low-risk changes only |
+| `T5` | System Maintainer | Codex or approved maintainer; still bound by protected paths and legal/security review |
+
+No trust level grants permanent exemption from review. Senior Trusted autonomy is limited by `KGEN-KAIOS/workforce/WORKER_AUTONOMY_SCOPE_SCHEMA.json` and never applies to protected paths, contracts, wallet, bridge, Runtime CURRENT, Boot, Canon, final whitepaper, secrets, authentication, production deploys, land ownership, exchange settlement, bank reserves, or legal / brand claims.
+
+## Workforce Machine Sources
+
+| File | Purpose |
+|---|---|
+| `KGEN-KAIOS/workforce/README.md` | Human-readable workforce governance entry |
+| `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` | Required start-day and claim credential fields |
+| `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` | Trust level and review mode schema |
+| `KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json` | Performance score schema |
+| `KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event schema |
+| `KGEN-KAIOS/workforce/WORKER_AUTONOMY_SCOPE_SCHEMA.json` | Limited autonomy schema |
+| `KGEN-KAIOS/workforce/WORKER_SUSPENSION_SCHEMA.json` | Suspension / revocation schema |
+| `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` | Baseline workforce audit log |
+
 ## Non-Goal
 
 V7.1 does not create live worker accounts. It defines the minimal registry layer needed to add them safely.

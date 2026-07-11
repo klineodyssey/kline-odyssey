@@ -133,6 +133,28 @@
         "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md"
       ],
       "timestamp": "2026-07-11T00:00:00+08:00"
+    },
+    {
+      "human_owner": "human-primeforge",
+      "author_agent": "Codex",
+      "author_worker_id": "codex-gm-01",
+      "reviewer_agent": "Codex",
+      "reviewer_worker_id": "codex-gm-01",
+      "task_id": "KGEN-WORKFORCE-2026-0001",
+      "branch": "codex/workforce-video-governance",
+      "commit_sha": "PENDING_RELEASE_COMMIT",
+      "base_commit": "1ce29b4cb53fcba77213d7792e2ad66e4498eb80",
+      "report_path": "KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md",
+      "changed_files": [
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+        "KGEN-Canon/KGEN_CANON_MASTER.json",
+        "KGEN-KAIOS/worker_registry.json",
+        "KGEN-KAIOS/workforce/",
+        "KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md",
+        "workforce/index.html",
+        "video/"
+      ],
+      "timestamp": "2026-07-11T00:00:00+08:00"
     }
   ]
 }

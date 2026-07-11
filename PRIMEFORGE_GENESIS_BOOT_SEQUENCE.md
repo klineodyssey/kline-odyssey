@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-07-11.PROVENANCE_BASELINE
+REVISION: 2026-07-11.WORKFORCE_GOVERNANCE
 LAST_UPDATED: 2026-07-11
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: e0acc39c6c1b5d5dead5b619ad48c85a85743262
-TASK_ID: KGEN-GOV-BIO-2026-0001
-CHANGE_REASON: Add R&D provenance, file versioning, biological taxonomy, and evolution governance as Boot-indexed gates.
+SOURCE_COMMIT: 1ce29b4cb53fcba77213d7792e2ad66e4498eb80
+TASK_ID: KGEN-WORKFORCE-2026-0001
+CHANGE_REASON: Add formal workforce registration, trust levels, violation handling, and unauthorized contribution audit gates.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -143,6 +143,11 @@ KGEN work is now governed by provenance and biological evolution gates. These ga
 | Author / change provenance | `KGEN-KAIOS/provenance/` |
 | Organism examples | `KGEN-KAIOS/examples/organisms/` |
 | Audit baseline | `KGEN_BIOLOGICAL_VERSIONING_AUDIT.md` |
+| Workforce governance | `KGEN-KAIOS/workforce/README.md` |
+| Worker credential schema | `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` |
+| Worker trust schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` |
+| Worker audit log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` |
+| Unauthorized contribution audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` |
 
 ### WorkOrder Source Rule
 
@@ -159,6 +164,45 @@ Formal organ filenames remain fixed. Version, revision, source commit, task ID, 
 ### Biological Classification Rule
 
 Formal KGEN life organisms must identify Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species and map `species` to a real `canonical_file` and `runtime_entry`. Concept-only classifications without canonical files are not formal organisms.
+
+## Formal Workforce Governance
+
+KGEN now requires formal worker registration before any AI or Human worker may claim tasks or modify formal files. This extends the existing KAIOS, AI Company, WorkQueue, Report, Review, and provenance flows. It does not create a second company system.
+
+### Formal Employee Rule
+
+A worker is a formal KGEN employee only when all conditions are true:
+
+1. `worker_id` exists in `KGEN-KAIOS/worker_registry.json`.
+2. `employee_status` is `ACTIVE`, `TRUSTED`, or `SENIOR_TRUSTED`.
+3. `trust_level` is `T2` or higher.
+4. `role`, `permission`, `workspace`, `allowed_branch_pattern`, and `reviewer` are defined.
+5. `can_push_main` is false unless the worker is Codex / system maintainer.
+6. Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledgments are recorded.
+7. No active suspension, revocation, expired credential, or blocking violation exists.
+
+If verification fails, the worker is `UNREGISTERED_WORKER` and may only output:
+
+```text
+REGISTRATION_REQUIRED
+```
+
+### Trust Levels
+
+| Trust | Name | Rule |
+|---|---|---|
+| T0 | Unregistered | Cannot work |
+| T1 | Onboarding | Dry run / docs / sandbox only; 100% review |
+| T2 | Active | General WorkOrders; 100% review |
+| T3 | Trusted | Low-risk fast review may be allowed |
+| T4 | Senior Trusted | Limited whitelist autonomy only |
+| T5 | System Maintainer | Codex or approved maintainer; still bound by protected paths |
+
+No worker receives permanent review exemption. Protected paths, contracts, wallet, bridge, Runtime CURRENT, Canon, Boot, final whitepaper, secrets, authentication, production deploys, land ownership, exchange settlement, banking reserves, and legal / brand claims always require proper review.
+
+### Violation Governance
+
+Unauthorized work is handled as auditable engineering governance, not emotional punishment. Events such as unregistered work, unauthorized claim, wrong branch, multi-task branch, missing report, missing provenance, protected path change, push to main, force push, secret exposure, or false completion report must be logged with evidence and final disposition.
 
 ## Inherited V1.4 Canon Body
 

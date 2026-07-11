@@ -7,6 +7,7 @@
 **Report Center:** `KGEN-AI-Company/reports/`
 **Review Log:** `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md`
 **Provenance Registry:** `KGEN-KAIOS/provenance/`
+**Workforce Registry:** `KGEN-KAIOS/worker_registry.json`
 **Boot Entry:** `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 **Public Entry:** https://klineodyssey.github.io/kline-odyssey/ai-company/
 
@@ -27,6 +28,8 @@ gi，上班
 
 After that, Cursor must pull `origin/main`, read the AI Company boot files, find the first OPEN WorkOrder, move it to IN_PROGRESS, execute it, write a report, push `cursor-handoff/<Task-ID>`, move it to REVIEW, and wait for Codex.
 
+Before Cursor may scan for OPEN tasks, Cursor must validate `cursor-01` in `KGEN-KAIOS/worker_registry.json`. If the worker is missing, pending registration, suspended, revoked, under an incompatible trust level, or lacks Boot / Canon / Workspace / DO_NOT_TOUCH acknowledgments, Cursor must output `REGISTRATION_REQUIRED` and stop.
+
 ## Stable Boot and Public Routes
 
 | Entry | Path |
@@ -37,6 +40,8 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 | AI Company Portal | `ai-company/` |
 | WorkQueue Portal | `workqueue/` |
 | Codex Review Log | `KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md` |
+| Workforce Governance | `workforce/` |
+| Worker Registry | `KGEN-KAIOS/worker_registry.json` |
 
 ## Operating Files
 
@@ -64,6 +69,8 @@ After that, Cursor must pull `origin/main`, read the AI Company boot files, find
 ## Non-Negotiable Rule
 
 Cursor does not rely on chat memory. Cursor reads GitHub WorkQueue and GitHub files. Codex reviews every report before commit or push.
+
+No unregistered worker may claim tasks, edit formal files, create handoff branches, modify WorkQueue, modify Review Log, or push main. Senior Trusted workers may receive limited low-risk autonomy only inside a written whitelist; protected paths and main merge always require review.
 
 ## Provenance And R&D Suggestions
 

@@ -12,6 +12,12 @@ Commit SHA:
 
 Author Worker ID:
 
+Worker Status:
+
+Trust Level:
+
+Credential Check:
+
 Files Read:
 
 Files Modified:
@@ -35,6 +41,17 @@ Suggested WorkOrders:
 - Task ID:
   Reason:
   Status: PROPOSED
+
+Changed Files:
+
+Protected Paths Checked:
+
+Provenance:
+
+- Task Source:
+- Base Commit:
+- Branch Pattern:
+- Reviewer:
 
 Do Not Do:
 

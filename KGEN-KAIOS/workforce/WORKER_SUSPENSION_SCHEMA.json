@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/workforce/WORKER_SUSPENSION_SCHEMA.json",
+  "title": "KGEN Worker Suspension",
+  "type": "object",
+  "required": [
+    "suspension_id",
+    "worker_id",
+    "previous_status",
+    "new_status",
+    "reason",
+    "related_violation_id",
+    "issued_by",
+    "issued_at",
+    "review_required",
+    "reinstatement_conditions"
+  ],
+  "properties": {
+    "suspension_id": { "type": "string" },
+    "worker_id": { "type": "string" },
+    "previous_status": { "type": "string" },
+    "new_status": { "type": "string", "enum": ["PROBATION", "SUSPENDED", "REVOKED", "ARCHIVED"] },
+    "reason": { "type": "string" },
+    "related_violation_id": { "type": "string" },
+    "issued_by": { "type": "string" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "review_required": { "type": "boolean" },
+    "reinstatement_conditions": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
+

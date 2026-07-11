@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json",
+  "title": "KGEN Worker Trust Profile",
+  "type": "object",
+  "required": [
+    "worker_id",
+    "employee_status",
+    "trust_level",
+    "max_active_tasks",
+    "max_risk_level",
+    "can_suggest_workorders",
+    "review_mode",
+    "audit_sampling_rate",
+    "promotion_requirements",
+    "demotion_triggers"
+  ],
+  "properties": {
+    "worker_id": { "type": "string" },
+    "employee_status": {
+      "type": "string",
+      "enum": [
+        "PENDING_REGISTRATION",
+        "ONBOARDING",
+        "ACTIVE",
+        "PROBATION",
+        "TRUSTED",
+        "SENIOR_TRUSTED",
+        "SUSPENDED",
+        "REVOKED",
+        "ARCHIVED"
+      ]
+    },
+    "trust_level": { "type": "string", "enum": ["T0", "T1", "T2", "T3", "T4", "T5"] },
+    "max_active_tasks": { "type": "integer", "minimum": 0 },
+    "max_risk_level": { "type": "string", "enum": ["R0", "R1", "R2", "R3", "R4"] },
+    "can_suggest_workorders": { "type": "boolean" },
+    "can_use_fast_review": { "type": "boolean" },
+    "can_modify_runtime": { "type": "boolean" },
+    "review_mode": { "type": "string", "enum": ["FULL", "FAST_R0_R1", "SAMPLING_LOW_RISK", "BLOCKED"] },
+    "audit_sampling_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "promotion_requirements": { "type": "array", "items": { "type": "string" } },
+    "demotion_triggers": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
+

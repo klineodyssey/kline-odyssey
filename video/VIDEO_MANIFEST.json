@@ -1,0 +1,119 @@
+{
+    "metadata":  {
+                     "version":  "1.0",
+                     "status":  "DRAFT_FOR_REVIEW",
+                     "primary_boot_entry":  "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+                     "updated":  "2026-07-11",
+                     "source_commit":  "1ce29b4cb53fcba77213d7792e2ad66e4498eb80"
+                 },
+    "unified_spec":  [
+                         "16:9",
+                         "4K",
+                         "60fps",
+                         "Traditional Chinese subtitles",
+                         "Traditional Chinese voiceover",
+                         "Official logo",
+                         "Official music",
+                         "Official ending",
+                         "No infringing assets",
+                         "No real brand logo without authorization"
+                     ],
+    "episodes":  [
+                     {
+                         "id":  "EP001",
+                         "title":  "KAIOS 是什麼？",
+                         "slug":  "KAIOS_Introduction",
+                         "folder":  "video/EP001_KAIOS_Introduction/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "KAIOS is AI Operating System"
+                     },
+                     {
+                         "id":  "EP002",
+                         "title":  "一圖一神殿",
+                         "slug":  "One_Image_One_Temple",
+                         "folder":  "video/EP002_One_Image_One_Temple/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "One Picture, One Temple"
+                     },
+                     {
+                         "id":  "EP003",
+                         "title":  "土地系統",
+                         "slug":  "Land_System",
+                         "folder":  "video/EP003_Land_System/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Land Evolution"
+                     },
+                     {
+                         "id":  "EP004",
+                         "title":  "生命演化",
+                         "slug":  "Life_Evolution",
+                         "folder":  "video/EP004_Life_Evolution/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Biological Taxonomy and App Organism"
+                     },
+                     {
+                         "id":  "EP005",
+                         "title":  "KGEN 經濟閉環",
+                         "slug":  "KGEN_Economy_Loop",
+                         "folder":  "video/EP005_KGEN_Economy_Loop/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Civilization Economy Loop"
+                     },
+                     {
+                         "id":  "EP006",
+                         "title":  "AI 公司",
+                         "slug":  "AI_Company",
+                         "folder":  "video/EP006_AI_Company/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Codex x Cursor Work System"
+                     },
+                     {
+                         "id":  "EP007",
+                         "title":  "悟空花果山交易所 11520",
+                         "slug":  "Huaguo_Exchange_11520",
+                         "folder":  "video/EP007_Huaguo_Exchange_11520/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Huaguo Mountain Exchange"
+                     },
+                     {
+                         "id":  "EP008",
+                         "title":  "KGEN Wallet",
+                         "slug":  "KGEN_Wallet",
+                         "folder":  "video/EP008_KGEN_Wallet/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Identity and Asset Viewer"
+                     },
+                     {
+                         "id":  "EP009",
+                         "title":  "文明模擬",
+                         "slug":  "Civilization_Simulation",
+                         "folder":  "video/EP009_Civilization_Simulation/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Citizen, Profession, Business, AI Decision"
+                     },
+                     {
+                         "id":  "EP010",
+                         "title":  "KAIOS Dashboard",
+                         "slug":  "KAIOS_Dashboard",
+                         "folder":  "video/EP010_KAIOS_Dashboard/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Operations Dashboard"
+                     },
+                     {
+                         "id":  "EP011",
+                         "title":  "未來世界",
+                         "slug":  "Future_World_Link",
+                         "folder":  "video/EP011_Future_World_Link/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Real-World Link"
+                     },
+                     {
+                         "id":  "EP012",
+                         "title":  "KGEN 宇宙藍圖",
+                         "slug":  "KGEN_Universe_Blueprint",
+                         "folder":  "video/EP012_KGEN_Universe_Blueprint/",
+                         "status":  "DRAFT_FOR_REVIEW",
+                         "theme":  "Season One Summary"
+                     }
+                 ]
+}

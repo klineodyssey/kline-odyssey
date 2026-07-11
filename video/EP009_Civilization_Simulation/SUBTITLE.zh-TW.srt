@@ -1,0 +1,15 @@
+1
+00:00:00,000 --> 00:00:06,000
+KLINE ODYSSEY 的宇宙，不只是一個網站。
+
+2
+00:00:06,000 --> 00:00:14,000
+本集主題是：文明模擬。
+
+3
+00:00:14,000 --> 00:00:24,000
+V8.1 到 V9 讓 Citizen、NPC、Profession、Business、Temple、Market 與 AI Decision 在時間與經濟狀態中被觀察與建議。
+
+4
+00:00:24,000 --> 00:00:32,000
+所有內容都必須從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md 開機。

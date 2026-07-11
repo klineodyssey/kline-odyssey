@@ -14,6 +14,8 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Stable source-of-truth boot entry; public route `/boot/`; ancestor `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` remains preserved |
 | KGEN Operating Center | `operating-center/` | Permanent public control center linking KAIOS, AI Company, WorkQueue, Review Log, Civilization, Economy, Exchange, Wallet, Membership and Library |
 | Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
+| Workforce Governance | `workforce/` | Permanent public entry for formal worker registration, trust levels, active claims, violations, suspensions, and contribution history |
+| Official Video Library | `video/` | Official KAIOS / KGEN / KLINE Odyssey video planning library |
 | Public Boot Portal | `boot/` | GitHub Pages entry for Boot CURRENT and V1.4 compatibility |
 | AI Company Portal | `ai-company/` | Public entry for Codex / Cursor company operating files |
 | WorkQueue Portal | `workqueue/` | Public entry for official WorkQueue, Worker Registry, and Codex review records |
@@ -91,6 +93,30 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Provenance Registry | `KGEN-KAIOS/provenance/` | Author registry, file ownership, contribution logs, and schemas |
 | Organism Examples | `KGEN-KAIOS/examples/organisms/` | Temple, App, and Land organism examples |
 | Biological Versioning Audit | `KGEN_BIOLOGICAL_VERSIONING_AUDIT.md` | P0-P3 baseline audit and next-stage remediation map |
+
+## KAIOS Workforce Governance
+
+| Document | Path | Purpose |
+|---|---|---|
+| Workforce Portal | `workforce/` | Public read-only workforce governance entry |
+| Workforce README | `KGEN-KAIOS/workforce/README.md` | Formal employee rule and file map |
+| Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker status, trust level and branch authority |
+| Worker Credential Schema | `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` | Start-day and claim credential requirements |
+| Worker Trust Schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust profile schema |
+| Worker Performance Schema | `KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker performance score schema |
+| Worker Violation Schema | `KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event schema |
+| Worker Audit Log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` | Baseline workforce audit log |
+| Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
+
+## KAIOS Official Video Library
+
+| Document | Path | Purpose |
+|---|---|---|
+| Video Portal | `video/` | Public entry for official video plan |
+| Video README | `video/README.md` | Unified video specification and season list |
+| Video Manifest | `video/VIDEO_MANIFEST.json` | Machine-readable episode manifest |
+| Video Library | `video/VIDEO_LIBRARY.md` | Episode overview |
+| Video Asset Index | `video/VIDEO_ASSET_INDEX.md` | Approved and prohibited asset sources |
 
 ## KAIOS V8.0 One Picture One Temple Economy System
 

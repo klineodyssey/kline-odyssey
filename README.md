@@ -31,6 +31,8 @@ Last optimized: 2026-06-11
 | Official Website | https://klineodyssey.github.io/kline-odyssey/ |
 | KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
 | Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
+| Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
+| Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -74,6 +76,8 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | PrimeForge Boot CURRENT | [PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md](PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md) | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | KGEN Operating Center | [operating-center/](operating-center/) | https://klineodyssey.github.io/kline-odyssey/operating-center/ |
 | Evolution Governance | [evolution-governance/](evolution-governance/) | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
+| Workforce Governance | [workforce/](workforce/) | https://klineodyssey.github.io/kline-odyssey/workforce/ |
+| Official Video Library | [video/](video/) | https://klineodyssey.github.io/kline-odyssey/video/ |
 | WorkQueue | [KGEN-Organization/WorkOrders/WORK_QUEUE.md](KGEN-Organization/WorkOrders/WORK_QUEUE.md) | https://klineodyssey.github.io/kline-odyssey/workqueue/ |
 | AI Company | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/ai-company/ |
 | Genesis Library | [KGEN-Genesis/](KGEN-Genesis/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md |
@@ -150,6 +154,23 @@ KGEN now tracks task source, AI / Human authorship, file metadata, biological ta
 - Provenance registry: [KGEN-KAIOS/provenance/](KGEN-KAIOS/provenance/)
 - Organism examples: [KGEN-KAIOS/examples/organisms/](KGEN-KAIOS/examples/organisms/)
 - Audit baseline: [KGEN_BIOLOGICAL_VERSIONING_AUDIT.md](KGEN_BIOLOGICAL_VERSIONING_AUDIT.md)
+
+### KGEN Workforce Governance
+
+KGEN now requires formal worker registration, trust level checks, credential evidence, branch authorization, report provenance, and Codex review before any AI or Human worker may claim official tasks.
+
+- Public portal: [workforce/](workforce/)
+- Worker Registry: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
+- Workforce schemas: [KGEN-KAIOS/workforce/](KGEN-KAIOS/workforce/)
+- Unauthorized contribution audit: [KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md](KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md)
+
+### KAIOS Official Video Library
+
+KAIOS official video planning lives under `/video/`. All episodes use `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` as the formal boot entry and follow Draft -> Review -> Release.
+
+- Video entry: [video/](video/)
+- Video manifest: [video/VIDEO_MANIFEST.json](video/VIDEO_MANIFEST.json)
+- Video library: [video/VIDEO_LIBRARY.md](video/VIDEO_LIBRARY.md)
 
 ### KAIOS V8.0 One Picture One Temple Economy System
 

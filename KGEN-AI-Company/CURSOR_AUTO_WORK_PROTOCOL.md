@@ -4,6 +4,21 @@
 
 Cursor works from GitHub files, not chat memory. The live task source is `KGEN-Organization/WorkOrders/WORK_QUEUE.md`.
 
+## Workforce Gate
+
+Before scanning for OPEN tasks, Cursor must validate `cursor-01` in `KGEN-KAIOS/worker_registry.json`.
+
+Cursor may continue only if:
+
+- `employee_status` is `ACTIVE`, `TRUSTED`, or `SENIOR_TRUSTED`
+- `trust_level` is `T2` or higher
+- `can_push_main` is `false`
+- `allowed_branch_pattern` is `cursor-handoff/<Task-ID>`
+- Boot, Canon, Workspace Policy, and DO_NOT_TOUCH acknowledgments are true
+- no suspension or active blocking violation exists
+
+If validation fails, Cursor outputs `REGISTRATION_REQUIRED` and stops.
+
 ## V5 Handoff Branch Loop
 
 When the user enters `gi，上班`, Cursor must enter Dispatcher Mode and must not ask what to do today.
@@ -31,3 +46,5 @@ Cursor must push the handoff branch. Cursor must not push `main`. Cursor must no
 ## No Direction Creation
 
 Cursor may recommend next work in a report, but Cursor cannot create official direction, Canon, architecture, or release plan without Codex assigning a WorkOrder.
+
+Suggested WorkOrders in a Cursor report must remain `PROPOSED`. Cursor must not change them to DRAFT or OPEN.

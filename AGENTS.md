@@ -84,6 +84,10 @@ This section is mandatory for every AI / agent / runtime working in this reposit
 4. Read `C:\Desktop\kline-odyssey\AGENTS.md`.
 5. Only then inspect targets and begin analysis or approved modifications.
 
+### Formal workforce gate
+
+Every AI / Human worker must validate `C:\Desktop\kline-odyssey\KGEN-KAIOS\worker_registry.json` before claiming work. If the worker is not registered, not active, below the required trust level, missing acknowledgments, suspended, revoked, or using a wrong branch pattern, it must output `REGISTRATION_REQUIRED` and stop.
+
 ### Required checks before any program modification
 
 Before modifying any program file, first check for existing same-function files in:

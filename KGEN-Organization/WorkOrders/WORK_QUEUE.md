@@ -9,6 +9,18 @@
 
 Cursor reads this file from GitHub. Cursor does not wait for repeated human chat prompts. Cursor accepts one OPEN task at a time, changes it to IN_PROGRESS, creates the required report, completes the task, changes it to REVIEW, and waits for Codex.
 
+## Formal Workforce Gate
+
+Before any worker scans for OPEN tasks, the worker must validate its registry entry in `KGEN-KAIOS/worker_registry.json`.
+
+If `employee_status`, `trust_level`, boot acknowledgment, Canon acknowledgment, Workspace Policy acknowledgment, DO_NOT_TOUCH acknowledgment, branch pattern, reviewer, or suspension state fails validation, the worker must output:
+
+```text
+REGISTRATION_REQUIRED
+```
+
+The worker must then stop without changing WorkQueue, creating a branch, editing files, or pushing any result.
+
 ## Status Rules
 
 | Status | Meaning | Controlled By |

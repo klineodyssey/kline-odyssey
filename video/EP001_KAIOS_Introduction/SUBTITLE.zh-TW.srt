@@ -1,0 +1,15 @@
+1
+00:00:00,000 --> 00:00:06,000
+KLINE ODYSSEY 的宇宙，不只是一個網站。
+
+2
+00:00:06,000 --> 00:00:14,000
+本集主題是：KAIOS 是什麼？。
+
+3
+00:00:14,000 --> 00:00:24,000
+KAIOS 不是遊戲、不是交易所、不是錢包，而是讓 Human、Codex、Cursor、Worker 與 Civilization 協作的 AI Operating System。
+
+4
+00:00:24,000 --> 00:00:32,000
+所有內容都必須從 PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md 開機。

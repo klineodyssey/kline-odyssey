@@ -18,6 +18,8 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 |---|---|---|
 | KGEN Operating Center | https://klineodyssey.github.io/kline-odyssey/operating-center/ | Stable public control center for KAIOS and AI Company |
 | Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ | Read-only portal for organism registry, lineage, provenance, contribution, and R&D suggestions |
+| Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ | Read-only portal for formal worker registration, trust, violations, suspensions, and contribution history |
+| Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ | KAIOS / KGEN official video planning library |
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
@@ -83,6 +85,28 @@ KAIOS includes a first-stage governance layer for task source tracing, AI / Huma
 | `ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields |
 | `provenance/` | Author registry, file ownership registry, contribution logs, and schemas |
 | `examples/organisms/` | Temple, App, and Land organism examples |
+
+## Workforce Governance
+
+KAIOS now requires formal worker registration before any AI or Human worker can claim a task or edit official files. Worker authorization is decided by `KGEN-KAIOS/worker_registry.json` plus the machine-readable schemas under `KGEN-KAIOS/workforce/`.
+
+| File | Purpose |
+|---|---|
+| `workforce/README.md` | Formal employee rule and governance overview |
+| `worker_registry.json` | Active worker status, trust level, branch and reviewer registry |
+| `workforce/WORKER_CREDENTIAL_SCHEMA.json` | Required start-day and task-claim credential |
+| `workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust level profile |
+| `workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker quality and promotion metrics |
+| `workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event record |
+| `workforce/WORKER_AUDIT_LOG.json` | Baseline audit log |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
+
+## Official Video Library
+
+KAIOS video planning is stored under `video/`. It defines the first official season of KAIOS / KGEN / KLINE Odyssey videos, including storyboard, shot list, voiceover, subtitles, cover, end card, BGM, assets, review and release records.
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/video/
 
 ## V7.2 Read-Only Operations Dashboard
 

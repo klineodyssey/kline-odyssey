@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json",
+  "title": "KGEN Worker Violation Event",
+  "type": "object",
+  "required": [
+    "violation_id",
+    "violation_type",
+    "worker_id",
+    "task_id",
+    "branch",
+    "commit_sha",
+    "files_changed",
+    "detected_by",
+    "detected_at",
+    "severity",
+    "evidence",
+    "immediate_action",
+    "review_result",
+    "final_disposition"
+  ],
+  "properties": {
+    "violation_id": { "type": "string" },
+    "violation_type": {
+      "type": "string",
+      "enum": [
+        "UNREGISTERED_WORK",
+        "UNAUTHORIZED_CLAIM",
+        "UNAUTHORIZED_COMMIT",
+        "UNAUTHORIZED_PUSH",
+        "PUSH_TO_MAIN",
+        "FORCE_PUSH",
+        "PROTECTED_PATH_CHANGE",
+        "MISSING_REPORT",
+        "MISSING_PROVENANCE",
+        "WRONG_BRANCH",
+        "MULTI_TASK_BRANCH",
+        "BYPASS_REVIEW",
+        "CANON_VIOLATION",
+        "SECRET_EXPOSURE",
+        "UNAUTHORIZED_DELETE",
+        "FALSE_COMPLETION_REPORT",
+        "STALE_BASE",
+        "WORKQUEUE_TAMPERING"
+      ]
+    },
+    "worker_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "branch": { "type": "string" },
+    "commit_sha": { "type": "string" },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "detected_by": { "type": "string" },
+    "detected_at": { "type": "string", "format": "date-time" },
+    "severity": { "type": "string", "enum": ["V0", "V1", "V2", "V3", "V4", "V5"] },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "immediate_action": { "type": "string" },
+    "review_result": { "type": "string" },
+    "final_disposition": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+

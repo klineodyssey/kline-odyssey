@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/workforce/WORKER_AUTONOMY_SCOPE_SCHEMA.json",
+  "title": "KGEN Worker Autonomy Scope",
+  "type": "object",
+  "required": [
+    "scope_id",
+    "worker_id",
+    "trust_level_required",
+    "allowed_change_types",
+    "forbidden_change_types",
+    "max_risk_level",
+    "review_mode",
+    "expires_at"
+  ],
+  "properties": {
+    "scope_id": { "type": "string" },
+    "worker_id": { "type": "string" },
+    "trust_level_required": { "type": "string", "enum": ["T3", "T4", "T5"] },
+    "allowed_change_types": { "type": "array", "items": { "type": "string" } },
+    "forbidden_change_types": { "type": "array", "items": { "type": "string" } },
+    "max_risk_level": { "type": "string", "enum": ["R0", "R1", "R2"] },
+    "review_mode": { "type": "string", "enum": ["FAST_REVIEW", "POST_REVIEW_SAMPLE", "FULL_REVIEW"] },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "approved_by": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+

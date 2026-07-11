@@ -48,6 +48,33 @@
       "required_reviewer": "agent-codex",
       "protected": false,
       "classification": "Live WorkQueue"
+    },
+    {
+      "path": "KGEN-KAIOS/workforce/",
+      "tier": "P1",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "Workforce Governance"
+    },
+    {
+      "path": "workforce/",
+      "tier": "P2",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "Public Workforce Portal"
+    },
+    {
+      "path": "video/",
+      "tier": "P2",
+      "owner": "human-primeforge",
+      "maintainer": "agent-codex",
+      "required_reviewer": "agent-codex",
+      "protected": false,
+      "classification": "Official Video Planning Library"
     }
   ]
 }
