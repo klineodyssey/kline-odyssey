@@ -49,6 +49,23 @@ Last optimized: 2026-06-11
 
 ---
 
+## Official Public Information Center
+
+Root `index.html` is the public website. `README.md` is the GitHub project and review index. Public links are governed by the machine-readable single source:
+
+- Official Links Manifest: [KGEN-OFFICIAL-LINKS.json](KGEN-OFFICIAL-LINKS.json)
+- Official Information Route: https://klineodyssey.github.io/kline-odyssey/official/
+- Markets and Contract Route: https://klineodyssey.github.io/kline-odyssey/markets/
+- Security Notice Route: https://klineodyssey.github.io/kline-odyssey/security/
+- Liquidity Lock Route: https://klineodyssey.github.io/kline-odyssey/liquidity-lock/
+- Community Route: https://klineodyssey.github.io/kline-odyssey/community/
+- Public Information Audit: [KGEN_PUBLIC_INFORMATION_AUDIT.md](KGEN_PUBLIC_INFORMATION_AUDIT.md)
+- LP Lock Public Proof: [KGEN_LP_LOCK_PUBLIC_PROOF.md](KGEN_LP_LOCK_PUBLIC_PROOF.md)
+
+X and Telegram are not shown as official homepage buttons until a current official source verifies them.
+
+---
+
 ## KGEN Genesis Library
 
 KGEN Genesis Library V1.0 is the official canonical publication set for KLINE ODYSSEY / KLINE GENESIS.
@@ -355,8 +372,8 @@ KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. 
 
 | Platform | Link |
 |---|---|
-| Telegram | https://t.me/klineodyssey |
-| X / Twitter | https://x.com/klineodyssey |
+| Telegram | UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json` |
+| X / Twitter | UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json` |
 | YouTube | https://www.youtube.com/@klineodyssey |
 | TikTok | https://www.tiktok.com/@klineodyssey |
 | Facebook | https://www.facebook.com/le.tian.di.2025 |
@@ -408,13 +425,13 @@ Example burn transaction:
     📦 GitHub
   </a>
 
-  <a href="https://t.me/klineodyssey"
+  <a href="community/"
      target="_blank" rel="noopener"
      style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     📢 Telegram
   </a>
 
-  <a href="https://x.com/klineodyssey"
+  <a href="community/"
      target="_blank" rel="noopener"
      style="display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🐦 X / Twitter
@@ -517,7 +534,7 @@ Homepage Quick Actions (Production Block)
     💬 LINE 官方
   </a>
 
-  <a href="https://t.me/klineodyssey"
+  <a href="community/"
      target="_blank" rel="noopener"
      style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     📢 Telegram
@@ -880,11 +897,10 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 - 🌐 [官網／白皮書](https://klineodyssey.github.io/kline-odyssey/)
 - 📦 [GitHub 原始資料庫](https://github.com/klineodyssey/kline-odyssey)
 - 📲 [LINE 官方帳號](https://lin.ee/b8X18F7)
-- 📡 [Telegram 官方通道](https://t.me/klineodyssey)
 - 📺 [YouTube](https://www.youtube.com/@klineodyssey)
 - 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
 - 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
-- 🐦 [X（Twitter）](https://x.com/klineodyssey)
+- Telegram / X: UNVERIFIED legacy candidates; see `KGEN-OFFICIAL-LINKS.json`
 ---
 
 ## Investor Documents
@@ -945,7 +961,7 @@ Where the Market Becomes the Myth.
     <li><b>Founder:</b> 樂天帝 (KLINE Odyssey)</li>
     <li><b>Email:</b> klineodyssey.io@gmail.com</li>
     <li><b>GitHub:</b> https://github.com/klineodyssey/kline-odyssey</li>
-    <li><b>Telegram:</b> https://t.me/klineodyssey</li>
+    <li><b>Telegram:</b> UNVERIFIED legacy candidate; see KGEN-OFFICIAL-LINKS.json</li>
   </ul>
 
 </div>
@@ -957,8 +973,8 @@ Where the Market Becomes the Myth.
   <ul style="line-height:1.8;">
     <li><b>Official Website:</b> https://klineodyssey.github.io/kline-odyssey/</li>
     <li><b>Email:</b> klineodyssey.io@gmail.com</li>
-    <li><b>Telegram:</b> https://t.me/klineodyssey</li>
-    <li><b>X (Twitter):</b> https://x.com/klineodyssey</li>
+    <li><b>Telegram:</b> UNVERIFIED legacy candidate; see KGEN-OFFICIAL-LINKS.json</li>
+    <li><b>X (Twitter):</b> UNVERIFIED legacy candidate; see KGEN-OFFICIAL-LINKS.json</li>
     <li><b>GitHub:</b> https://github.com/klineodyssey/kline-odyssey</li>
   </ul>
 

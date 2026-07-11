@@ -16,6 +16,12 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
 | Workforce Governance | `workforce/` | Permanent public entry for formal worker registration, trust levels, active claims, violations, suspensions, and contribution history |
 | Official Video Library | `video/` | Official KAIOS / KGEN / KLINE Odyssey video planning library |
+| Official Links Manifest | `KGEN-OFFICIAL-LINKS.json` | Single machine-readable source for public website, token, market, security, liquidity and community links |
+| Official Information Portal | `official/` | Permanent public route for KGEN token facts and source links |
+| Markets Portal | `markets/` | Permanent public route for contract, trade, LP and market data |
+| Security Portal | `security/` | Permanent public security warning route |
+| Liquidity Lock Portal | `liquidity-lock/` | Permanent public LP lock proof route |
+| Community Portal | `community/` | Permanent public verified community route |
 | Public Boot Portal | `boot/` | GitHub Pages entry for Boot CURRENT and V1.4 compatibility |
 | AI Company Portal | `ai-company/` | Public entry for Codex / Cursor company operating files |
 | WorkQueue Portal | `workqueue/` | Public entry for official WorkQueue, Worker Registry, and Codex review records |
@@ -425,8 +431,8 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 - **CoinMarketCap DexScan:** https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
 - **GeckoTerminal:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 - **CoinGecko market data:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
-- **Telegram:** https://t.me/klineodyssey
-- **X:** https://x.com/klineodyssey
+- **Telegram:** UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json`
+- **X:** UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json`
 - **YouTube:** https://www.youtube.com/@klineodyssey
 - **Whitepaper FINAL:** docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf
 - **Genesis Library:** KGEN-Genesis/
