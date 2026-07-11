@@ -9,6 +9,17 @@
 
 This is the root cross-library index for the stable PrimeForge Boot entry, Operating Center, Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, KAIOS, and Official Whitepaper references.
 
+This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*MASTER_INDEX*` files are scoped sub-indexes or inventories; they must not be treated as competing library masters.
+
+## Index Hierarchy (D7)
+
+| Role | Path | Scope |
+|---|---|---|
+| **Master Library Index** (unique root) | `KGEN_MASTER_LIBRARY_INDEX.md` | Cross-library navigation and official library portals |
+| Repo inventory sub-index | `docs/KGEN_MASTER_INDEX.md` | AUTOPILOT-generated full repository file inventory |
+| Genesis sub-index | `KGEN-Genesis/KGEN_MASTER_INDEX.md` | GEN-001 through GEN-012 lookup table |
+| Genesis portal index | `KGEN-Genesis/000_INDEX/README.md` | Same Genesis table; public portal entry |
+
 ## Libraries
 
 | Library | Path | Purpose |

@@ -8,7 +8,7 @@
 
 This index is the official lookup table for GEN-001 through GEN-012 and reserves GEN-013 through GEN-099 for future Genesis publications.
 
-## Genesis Publication Index
+## Genesis Document Index
 
 | UUID | Document ID | Title | GitHub Path | Version | Status | Level | Dependencies | Related Documents | Last Update | Maintainer |
 |---|---|---|---|---|---|---|---|---|---|---|
