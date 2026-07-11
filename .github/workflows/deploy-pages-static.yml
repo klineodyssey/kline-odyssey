@@ -73,6 +73,9 @@ jobs:
           copy_file "VERSION"
           copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md"
           copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+          copy_file "KGEN-OFFICIAL-LINKS.json"
+          copy_file "KGEN_PUBLIC_INFORMATION_AUDIT.md"
+          copy_file "KGEN_LP_LOCK_PUBLIC_PROOF.md"
 
           copy_dir "K線西遊記"
           copy_dir "docs"
@@ -101,6 +104,11 @@ jobs:
           copy_dir "evolution-governance"
           copy_dir "workforce"
           copy_dir "video"
+          copy_dir "official"
+          copy_dir "community"
+          copy_dir "markets"
+          copy_dir "security"
+          copy_dir "liquidity-lock"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4"
 
