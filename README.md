@@ -942,8 +942,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ KGEN宇宙土地不是商品，而是文明探索、建設、戰爭與交易後留下的歷史座標。真正的財富不是佔有土地，而是守護文明，讓文明跨越宇宙邊界。#KGEN #K線西遊記 #PrimeForge  
-👉 https://www.youtube.com/shorts/7EIa8akF-v4
+▶ KAIOS 是 KGEN AI Operating System，不是遊戲、不是交易所、不是錢包，而是串聯 AI、文明與市場的作業系統。《K線西遊記》只是第一個文明，更多內容請見官方網站。#KAIOS  
+👉 https://www.youtube.com/watch?v=LyVOgcQ4BWQ
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
