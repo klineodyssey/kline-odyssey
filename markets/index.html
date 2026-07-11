@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KGEN Markets and Contract | KLINE ODYSSEY</title>
+  <style>
+    :root{color-scheme:dark;--line:rgba(243,199,102,.32);--gold:#f3c766;--ink:#fff7df;--muted:#cabd9b}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080706;color:var(--ink);line-height:1.65}a{color:inherit}.wrap{width:min(100%,1080px);margin:0 auto;padding:28px 16px 56px}.top{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px}.brand{font-weight:950;text-decoration:none}.pill{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--gold);font-weight:900}h1{font-size:clamp(2rem,7vw,4.5rem);line-height:1}.table{width:100%;border-collapse:collapse}.table th,.table td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}.button{display:inline-flex;min-height:42px;align-items:center;justify-content:center;padding:9px 12px;border-radius:8px;text-decoration:none;font-weight:900;border:1px solid var(--line);background:rgba(255,255,255,.06);margin:2px}.button.primary{background:linear-gradient(135deg,#ffe59a,#f3c766,#a87325);color:#170d02}.muted{color:var(--muted)}code{word-break:break-all;color:#ffe59a}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><a class="brand" href="../">KLINE ODYSSEY</a><a class="button" href="../">返回首頁</a></div>
+    <p class="pill">Market Data / Source Code</p>
+    <h1>Markets & Contract</h1>
+    <p class="muted">Token Contract、Liquidity Pool、Trade 與 Market Data 必須分開標示，不得互相替代。</p>
+    <table class="table">
+      <tr><th>Label</th><th>Value</th><th>Action</th></tr>
+      <tr><td>TOKEN CONTRACT</td><td><code>0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code></td><td><a class="button primary" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">BscScan</a></td></tr>
+      <tr><td>TRADE</td><td>PancakeSwap outputCurrency uses token contract</td><td><a class="button" href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">Trade</a></td></tr>
+      <tr><td>LIQUIDITY POOL</td><td><code>0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2</code></td><td><a class="button" href="https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" rel="noopener">LP BscScan</a></td></tr>
+      <tr><td>MARKET DATA</td><td>GeckoTerminal / CMC DexScan</td><td><a class="button" href="https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2" target="_blank" rel="noopener">GeckoTerminal</a> <a class="button" href="https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/" target="_blank" rel="noopener">CMC DexScan</a></td></tr>
+    </table>
+    <p><a class="button" href="../KGEN-OFFICIAL-LINKS.json">Official Links JSON</a><a class="button" href="../KGEN_LP_LOCK_PUBLIC_PROOF.md">LP Lock Proof</a></p>
+  </main>
+</body>
+</html>
