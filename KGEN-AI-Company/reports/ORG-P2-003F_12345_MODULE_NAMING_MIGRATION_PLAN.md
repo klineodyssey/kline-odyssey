@@ -18,7 +18,7 @@
 
 ## Summary
 
-Drafted a **future-only migration plan** for Temple 12345 module naming per ORG-P2-003 D8. Audited **67 active modules** under `K線西遊記/temples/12345/modules/` across three live naming families (`runtime-*`, `kgen-12345-*`, `kgen-v*`). Mapped **index.html boot load order** and identified **functional overlap** between legacy `kgen-12345-*` shells and newer `runtime-*` core. **No runtime modules, index.html, manifests, or protected 12345 files were modified.**
+Drafted a **future-only migration plan** for Temple 12345 module naming per ORG-P2-003 D8. Audited **72 active modules** under `K線西遊記/temples/12345/modules/` across three live naming families (`runtime-*`, `kgen-12345-*`, `kgen-v*`) plus **20** frozen files under `modules/archive/`. Mapped **index.html boot load order** and identified **functional overlap** between legacy `kgen-12345-*` shells and newer `runtime-*` core. **No runtime modules, index.html, manifests, or protected 12345 files were modified.**
 
 ## D8 Constraint
 
@@ -35,9 +35,9 @@ Drafted a **future-only migration plan** for Temple 12345 module naming per ORG-
 | Family | Active count | Era / role | Examples |
 |---|---:|---|---|
 | `runtime-*` | 25 | V2.3 modular runtime core | `runtime-main.js`, `runtime-bootstrap.js`, `runtime-panel-registry.js` |
-| `kgen-12345-*` | 41 | V10.x organ/feature modules | `kgen-12345-app-shell.js`, `kgen-12345-organ-system.js` |
+| `kgen-12345-*` | 45 | V10.x organ/feature modules | `kgen-12345-app-shell.js`, `kgen-12345-organ-system.js` |
 | `kgen-v*` | 2 | Version-pinned morph DNA | `kgen-v1046-morph-dna-runtime.js` |
-| `modules/archive/*` | 17+ | Frozen legacy | `kgen-12345-runtime.legacy.js`, `runtime-legacy.js` |
+| `modules/archive/*` | 20 | Frozen legacy | `kgen-12345-runtime.legacy.js`, `kgen-v109-*` |
 
 ### Protected core (DO_NOT_TOUCH / RUNTIME_RULES)
 
@@ -52,20 +52,22 @@ Drafted a **future-only migration plan** for Temple 12345 module naming per ORG-
 
 Order from `K線西遊記/temples/12345/index.html` (read-only audit):
 
-1. External: three.js, ethers, WalletConnect
+1. External: three.js, ethers, WalletConnect, Orbitron/Noto fonts
 2. CSS: `kgen-12345-core.css`, `kgen-12345-divine-regeneration.css`, `runtime-main.css`
-3. `../../modules/kgen-land-engine.js` (parent galaxy module)
-4. `kgen-12345-app-shell.js`
-5. `kgen-12345-web3-shell.js`
-6. `kgen-12345-runtime.js` (legacy runtime shim)
-7. `kgen-12345-mother-runtime.js`
-8. `kgen-12345-divine-regeneration.js`
-9. `kgen-12345-ai-service.js`
-10. `runtime-main.js` ← **protected core**
-11. `runtime-bootstrap.js` ← **protected core**
-12. `kgen-12345-ui.css`, `kgen-12345-ui.js`
+3. Inline: civilization brain rollcall script block
+4. `../../modules/kgen-land-engine.js` (parent galaxy module)
+5. `kgen-12345-app-shell.js`
+6. `kgen-12345-web3-shell.js`
+7. `kgen-12345-runtime.js` (legacy runtime shim)
+8. `kgen-12345-mother-runtime.js`
+9. `kgen-12345-divine-regeneration.js`
+10. `kgen-12345-ai-service.js`
+11. `runtime-main.js` ← **protected core**
+12. `kgen-12345-ui.css`
+13. `runtime-bootstrap.js` ← **protected core**
+14. `kgen-12345-ui.js`
 
-**Observation:** Legacy `kgen-12345-runtime.js` loads **before** `runtime-main.js`. Any migration must preserve this ordering until legacy shim is formally retired.
+**Observation:** Legacy `kgen-12345-runtime.js` loads **before** `runtime-main.js`. `runtime-bootstrap.js` loads **after** `runtime-main.js` and between UI CSS/JS. Any migration must preserve this ordering until legacy shim is formally retired.
 
 ## Functional Overlap Map (Rename Risk)
 
@@ -74,8 +76,11 @@ Order from `K線西遊記/temples/12345/index.html` (read-only audit):
 | `kgen-12345-runtime.js` | `runtime-main.js` | **High** — dual runtime entry |
 | `kgen-12345-mother-runtime.js` | `runtime-mother.js` | Medium — name collision intent |
 | `kgen-12345-boot-runtime.js` | `runtime-bootstrap.js` | **High** — boot chain |
+| `kgen-12345-divine-regeneration.js` / `.css` | `runtime-regeneration.js` / `.css` | Medium — dual regen path |
 | `kgen-12345-layout-runtime.js` | `runtime-temple-layout.js`, `runtime-layout-fix.js` | Medium |
 | `kgen-12345-ui-runtime.js` | `runtime-panel-registry.js`, `runtime-router-engine.js` | Medium |
+| `kgen-12345-universe-elevator.js` / `warp-runtime.js` | `runtime-warp-elevator.js` | Medium |
+| `kgen-12345-world-axis.js` | `runtime-universe-axis.js` | Medium |
 | `kgen-12345-cell-registry.json` | `runtime-cell-registry.json` | Medium — JSON manifest drift |
 | `kgen-12345-growth-policy.json` | `runtime-growth-policy.json` | Low — policy twins |
 
@@ -99,6 +104,7 @@ temple-12345-<organ>-<function>.{js,css,json}
 - `modules/archive/` never renamed — add `LEGACY` metadata only.
 - Version numbers move to `VERSION_GOVERNANCE.json`, not filenames (`kgen-v1046-*` → deprecate version-in-name).
 - JSON registries keep paired JS/CSS basename stems.
+- Do not invent a second parallel prefix (`runtime-*` stays frozen until Phase 4 maps into `temple-12345-runtime-*`).
 
 ## Migration Phases (Future WorkOrders)
 
@@ -122,7 +128,7 @@ Create machine-readable registry **outside** protected path:
 Migrate modules **not** in index.html boot chain and not protected:
 
 - Candidates: `kgen-12345-2d-antigravity-engine.js`, `kgen-12345-sphere-runtime.js`, `kgen-12345-watchdog-runtime.js`, most organ/feature leaves.
-- For each: copy → new name → update dynamic imports only → keep old path as **compat symlink or re-export stub** for one release cycle.
+- For each: copy → new name → update dynamic imports only → keep old path as **compat re-export stub** for one release cycle.
 
 ### Phase 3 — Boot-adjacent shells
 
@@ -145,7 +151,7 @@ Migrate shells loaded in index.html but not protected core:
 | **Dynamic import safety** | Grep all `import(`, `src=`, `fetch(` under temple before each phase |
 | **Manifest integrity** | Update `MANIFEST.json`, `LIFE_MANIFEST.json`, `RUNTIME_GENOME.json`, `SHA256SUMS.txt` in same WorkOrder as renames |
 | **External references** | Check `12345.html` bridge, `K線西遊記/modules/`, docs cross-links |
-| **Cache busting** | Preserve `?v=` query pattern on `runtime-main.css` / `runtime-main.js` |
+| **Cache busting** | Preserve `?v=` query pattern on `runtime-main.css` / `runtime-main.js` / UI assets |
 
 ## Rollback Plan
 
@@ -164,19 +170,23 @@ Per phase:
 | Boot console error on localhost:8080 | Revert index.html changes first |
 | Wallet/Web3 regression | Freeze at Phase 2; do not proceed to shells |
 
-## Module Registry Snapshot (Active, Abbreviated)
+## Module Registry Snapshot (Active)
 
 ### `runtime-*` (25)
 
 `runtime-bootstrap.js`, `runtime-canvas-screen-recorder.js`, `runtime-cell-registry.json`, `runtime-core.css`, `runtime-festival-engine.js`, `runtime-growth-policy.json`, `runtime-layout-fix.js`, `runtime-legacy.js`, `runtime-main.css`, `runtime-main.js`, `runtime-mother.js`, `runtime-panel-registry.js`, `runtime-panel-window-restore.js`, `runtime-recording-engine.js`, `runtime-regeneration.css`, `runtime-regeneration.js`, `runtime-router-engine.js`, `runtime-state.js`, `runtime-temple-layout.js`, `runtime-universe-axis.js`, `runtime-v10-40-6-stable-patch.js`, `runtime-visibility-engine.js`, `runtime-visual-semantic-control.js`, `runtime-warp-elevator.js`, `runtime-zlayer-engine.js`
 
-### `kgen-12345-*` (41)
+### `kgen-12345-*` (45)
 
-`kgen-12345-2d-antigravity-engine.js` … `kgen-12345-world-axis.js` (full list in audit command output; all under `modules/`)
+`kgen-12345-2d-antigravity-engine.js`, `kgen-12345-ai-service.js`, `kgen-12345-app-shell.js`, `kgen-12345-axis-c-scene.js`, `kgen-12345-boot-runtime.js`, `kgen-12345-cell-registry.json`, `kgen-12345-civilization-brain-rollcall.js`, `kgen-12345-core.css`, `kgen-12345-countdown-engine.js`, `kgen-12345-death-manager.js`, `kgen-12345-divine-regeneration.css`, `kgen-12345-divine-regeneration.js`, `kgen-12345-growth-policy.json`, `kgen-12345-holy-cup.js`, `kgen-12345-immune-runtime.js`, `kgen-12345-input-governance.js`, `kgen-12345-install-check.js`, `kgen-12345-layout-engine.js`, `kgen-12345-layout-runtime.js`, `kgen-12345-manifest-runtime.js`, `kgen-12345-morph-dna-organ-transplant.css`, `kgen-12345-morph-dna-organ-transplant.js`, `kgen-12345-mother-runtime.js`, `kgen-12345-motion-control.js`, `kgen-12345-organ-lifecycle.js`, `kgen-12345-organ-registry.json`, `kgen-12345-organ-system.css`, `kgen-12345-organ-system.js`, `kgen-12345-organ-wukong-control-console.js`, `kgen-12345-panel-router.js`, `kgen-12345-proto-stabilizer.js`, `kgen-12345-recursive-verify.js`, `kgen-12345-runtime.js`, `kgen-12345-sphere-runtime.js`, `kgen-12345-stable-countdown.js`, `kgen-12345-transformer-runtime.js`, `kgen-12345-ui.css`, `kgen-12345-ui.js`, `kgen-12345-ui-runtime.js`, `kgen-12345-universe-elevator.js`, `kgen-12345-version.js`, `kgen-12345-warp-runtime.js`, `kgen-12345-watchdog-runtime.js`, `kgen-12345-web3-shell.js`, `kgen-12345-world-axis.js`
 
-### Other active
+### Other active (2)
 
 `kgen-v1046-morph-dna-runtime.js`, `kgen-v1046-morph-dna-runtime.css`
+
+### `modules/archive/` (20, frozen — do not rename)
+
+`kgen-12345-runtime.legacy.js`, `kgen-12345-v10.10-*` (5), `kgen-12345-v10.11-*` (5), `kgen-12345-v10.26-autopilot-fix.js`, `kgen-12345-v10.27-stable-organ-check.js`, `kgen-12345-xyz-state-engine.css`, `kgen-12345-xyz-state-engine.js`, `kgen-v109-*` (5)
 
 ## Recommended Official Pattern (Decision)
 
@@ -188,13 +198,14 @@ Per phase:
 - `KGEN-Agent-Office/DO_NOT_TOUCH.md`
 - `docs/KGEN_TEMPLE_12345_MAP.md`
 - `docs/KGEN_RUNTIME_RULES.md`
-- `K線西遊記/temples/12345/index.html` (read-only grep)
+- `K線西遊記/temples/12345/index.html` (read-only)
+- `K線西遊記/temples/12345/modules/` (read-only inventory)
 - `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
 
 ## Files Modified
 
-- `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — ORG-P2-003F OPEN → IN_PROGRESS → REVIEW
-- `KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md` — this report (created)
+- `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — ORG-P2-003F OPEN → REVIEW (summary + detail)
+- `KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md` — this report
 
 ## Protected Paths Checked
 
@@ -204,10 +215,10 @@ No modifications under protected paths. Temple 12345 audited read-only.
 
 | Check | Result |
 |---|---|
-| Worker registry `cursor-01` gate | ✅ ACTIVE, T2 |
+| Worker registry `cursor-01` gate | ✅ ACTIVE, T2+ |
 | Branch from `origin/main` @ `761f0e1` | ✅ |
-| Module inventory | ✅ 25 runtime + 41 kgen-12345 + 2 kgen-v |
-| Boot order documented | ✅ From index.html |
+| Module inventory | ✅ 25 runtime + 45 kgen-12345 + 2 kgen-v + 20 archive |
+| Boot order documented | ✅ From index.html (ui.css between main and bootstrap) |
 | Protected path diff | ✅ Clean |
 | No 12345 file edits | ✅ |
 
@@ -218,7 +229,8 @@ No modifications under protected paths. Temple 12345 audited read-only.
 | P1 | Dual runtime entry (`kgen-12345-runtime.js` + `runtime-main.js`) | High |
 | P2 | Twin JSON registries (`*-cell-registry.json`, `*-growth-policy.json`) | Medium |
 | P3 | Version in filename (`kgen-v1046-*`) conflicts with governance-in-JSON rule | Medium |
-| P4 | 41 legacy-prefixed modules vs 25 runtime-prefixed — no single namespace | High |
+| P4 | 45 legacy-prefixed modules vs 25 runtime-prefixed — no single namespace | High |
+| P5 | Parallel regen/warp/axis modules under both families | Medium |
 
 ## Risks
 

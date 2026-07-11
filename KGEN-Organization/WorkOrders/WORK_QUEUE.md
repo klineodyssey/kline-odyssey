@@ -373,7 +373,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### ORG-P2-003F - Draft 12345 module naming future migration plan
 
-- Status: IN_PROGRESS
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
