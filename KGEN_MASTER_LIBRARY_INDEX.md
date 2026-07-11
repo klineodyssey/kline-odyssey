@@ -1,5 +1,7 @@
 # KGEN Master Library Index
 
+> **LIBRARY MASTER INDEX** — Unique cross-library Master Index per ORG-P2-003 D7. Sub-indexes: `docs/KGEN_MASTER_INDEX.md` (repo file inventory), `KGEN-Genesis/KGEN_MASTER_INDEX.md` (Genesis publications GEN-001..GEN-012). Machine-readable indexes live under `KGEN-Canon/`.
+
 **Version:** V1.0
 **Status:** Draft for Review
 **Last Update:** 2026-07-10
