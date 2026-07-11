@@ -73,6 +73,8 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
+| Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Visible BOOT, MUST READ, protected path, task plan, execution, and final report process for every worker task |
+| Worker Execution Report Template | `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Standard task report template used by Codex, Cursor, Generic Workers, and Human Engineers |
 | Task Claim Lease Protocol | `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | Claim and lease rules to prevent duplicate WorkOrder execution |
 | Stale Handoff Branch Policy | `KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for stale, missing, or invalid handoff branches |
 | Codex Pre-Merge Checklist | `KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md` | Required review gates before merging any handoff branch |
@@ -100,6 +102,8 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 |---|---|---|
 | Workforce Portal | `workforce/` | Public read-only workforce governance entry |
 | Workforce README | `KGEN-KAIOS/workforce/README.md` | Formal employee rule and file map |
+| Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Required visible start-of-work procedure for every KGEN / KAIOS worker task |
+| Worker Execution Report Template | `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Required execution report structure, including verification-only tasks |
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker status, trust level and branch authority |
 | Worker Credential Schema | `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` | Start-day and claim credential requirements |
 | Worker Trust Schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust profile schema |

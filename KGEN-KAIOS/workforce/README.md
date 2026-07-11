@@ -33,6 +33,8 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 
 | File | Purpose |
 |---|---|
+| `WORKER_BOOT_SOP.md` | Required visible BOOT, MUST READ, protected path, task plan, execution, and final report flow for every worker task |
+| `WORKER_EXECUTION_REPORT_TEMPLATE.md` | Standard report template that every Codex, Cursor, Generic Worker, and Human Engineer task must use |
 | `WORKER_CREDENTIAL_SCHEMA.json` | Required fields for each start-day credential and task claim |
 | `WORKER_TRUST_SCHEMA.json` | Trust levels, status, promotion, demotion, and review requirements |
 | `WORKER_PERFORMANCE_SCHEMA.json` | Performance scoring and promotion evidence |
@@ -44,4 +46,3 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 ## Non-Negotiable Rule
 
 No worker, including Senior Trusted workers, may bypass protected paths, contract review, wallet / bridge safety, Runtime CURRENT governance, Canon, Boot, legal review, security review, or Codex-controlled main merge.
-
