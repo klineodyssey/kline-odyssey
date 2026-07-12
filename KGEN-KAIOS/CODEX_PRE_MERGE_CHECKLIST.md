@@ -25,6 +25,7 @@ This checklist defines the minimum evidence Codex must review before merging any
 | Formal file metadata | Changed formal organs include required version metadata or an explicit follow-up risk |
 | Workforce credential | Worker is registered, active, trusted enough for task risk, and not suspended |
 | Branch authority | Branch matches the worker's allowed branch pattern and does not bundle unrelated tasks |
+| Worker Boot SOP evidence | Report includes BOOT, MUST READ, PROTECTED PATH CHECK, TASK PLAN, EXECUTION, and FINAL REPORT sections |
 
 ## Approve Conditions
 
@@ -42,6 +43,7 @@ Codex may approve only when:
 10. Formal organism or runtime changes satisfy versioning and taxonomy gates when applicable.
 11. Worker is present in `KGEN-KAIOS/worker_registry.json` with valid `employee_status`, `trust_level`, reviewer, branch pattern, and boot acknowledgments.
 12. Worker has no active suspension, revocation, or blocking violation.
+13. Worker report follows `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` or contains equivalent visible SOP evidence.
 
 ## Reject / Block Conditions
 
@@ -63,6 +65,7 @@ Codex rejects or blocks when:
 - worker branch does not match `allowed_branch_pattern`
 - handoff mixes multiple WorkOrders without explicit Codex authorization
 - worker pushes main or force pushes
+- worker omits required Boot SOP evidence and the missing evidence affects authorization, protected paths, provenance, WorkQueue state, or merge safety
 
 ## Output
 

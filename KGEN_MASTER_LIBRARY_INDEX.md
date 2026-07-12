@@ -29,6 +29,12 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
 | Workforce Governance | `workforce/` | Permanent public entry for formal worker registration, trust levels, active claims, violations, suspensions, and contribution history |
 | Official Video Library | `video/` | Official KAIOS / KGEN / KLINE Odyssey video planning library |
+| Official Links Manifest | `KGEN-OFFICIAL-LINKS.json` | Single machine-readable source for public website, token, market, security, liquidity and community links |
+| Official Information Portal | `official/` | Permanent public route for KGEN token facts and source links |
+| Markets Portal | `markets/` | Permanent public route for contract, trade, LP and market data |
+| Security Portal | `security/` | Permanent public security warning route |
+| Liquidity Lock Portal | `liquidity-lock/` | Permanent public LP lock proof route |
+| Community Portal | `community/` | Permanent public verified community route |
 | Public Boot Portal | `boot/` | GitHub Pages entry for Boot CURRENT and V1.4 compatibility |
 | AI Company Portal | `ai-company/` | Public entry for Codex / Cursor company operating files |
 | WorkQueue Portal | `workqueue/` | Public entry for official WorkQueue, Worker Registry, and Codex review records |
@@ -86,6 +92,8 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
+| Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Visible BOOT, MUST READ, protected path, task plan, execution, and final report process for every worker task |
+| Worker Execution Report Template | `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Standard task report template used by Codex, Cursor, Generic Workers, and Human Engineers |
 | Task Claim Lease Protocol | `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | Claim and lease rules to prevent duplicate WorkOrder execution |
 | Stale Handoff Branch Policy | `KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for stale, missing, or invalid handoff branches |
 | Codex Pre-Merge Checklist | `KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md` | Required review gates before merging any handoff branch |
@@ -113,6 +121,8 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 |---|---|---|
 | Workforce Portal | `workforce/` | Public read-only workforce governance entry |
 | Workforce README | `KGEN-KAIOS/workforce/README.md` | Formal employee rule and file map |
+| Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Required visible start-of-work procedure for every KGEN / KAIOS worker task |
+| Worker Execution Report Template | `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Required execution report structure, including verification-only tasks |
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker status, trust level and branch authority |
 | Worker Credential Schema | `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` | Start-day and claim credential requirements |
 | Worker Trust Schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust profile schema |
@@ -434,8 +444,8 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 - **CoinMarketCap DexScan:** https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
 - **GeckoTerminal:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
 - **CoinGecko market data:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
-- **Telegram:** https://t.me/klineodyssey
-- **X:** https://x.com/klineodyssey
+- **Telegram:** UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json`
+- **X:** UNVERIFIED legacy candidate; see `KGEN-OFFICIAL-LINKS.json`
 - **YouTube:** https://www.youtube.com/@klineodyssey
 - **Whitepaper FINAL:** docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf
 - **Genesis Library:** KGEN-Genesis/

@@ -93,6 +93,8 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 | File | Purpose |
 |---|---|
 | `workforce/README.md` | Formal employee rule and governance overview |
+| `workforce/WORKER_BOOT_SOP.md` | Required visible BOOT, MUST READ, protected path, task plan, execution, and final report flow for every task |
+| `workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Standard execution report template for Codex, Cursor, Generic Worker, and Human Engineer tasks |
 | `worker_registry.json` | Active worker status, trust level, branch and reviewer registry |
 | `workforce/WORKER_CREDENTIAL_SCHEMA.json` | Required start-day and task-claim credential |
 | `workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust level profile |

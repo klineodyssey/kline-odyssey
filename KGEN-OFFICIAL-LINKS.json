@@ -1,0 +1,276 @@
+{
+  "metadata": {
+    "status": "ACTIVE",
+    "version": "1.0",
+    "revision": "2026-07-11.official-public-links",
+    "last_updated": "2026-07-11",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "761f0e199506a5f622f331289601650c5ff1c352",
+    "task_id": "KGEN-PUBLIC-LINKS-2026-0001",
+    "change_reason": "Restore official public homepage data and create a single-source public links manifest.",
+    "source_of_truth": true,
+    "canonical_file": "KGEN-OFFICIAL-LINKS.json",
+    "taxonomy": {
+      "domain": "KGEN Governance",
+      "kingdom": "Public Information",
+      "phylum": "Official Links",
+      "class": "Manifest",
+      "order": "Single Source",
+      "family": "KGEN Public Links",
+      "genus": "OfficialLinks",
+      "species": "KGENOfficialLinksManifest"
+    }
+  },
+  "token": {
+    "project": "KLINE GENESIS",
+    "symbol": "KGEN",
+    "chain": "BNB Smart Chain",
+    "standard": "BEP-20",
+    "contract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "total_supply": "72,000,000 KGEN",
+    "decimals": 18,
+    "tax": "0.30% only on AMM buy / sell",
+    "burn": "0.10%",
+    "bank": "0.10%",
+    "reward": "0.05%",
+    "auto_lp": "0.05%",
+    "wallet_to_wallet": "No tax",
+    "launch": "Fair Launch / No ICO / No IEO / No Presale",
+    "lp_pair": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2"
+  },
+  "links": {
+    "website": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; index.html",
+      "notes": "Official homepage served by root index.html."
+    },
+    "github": {
+      "url": "https://github.com/klineodyssey/kline-odyssey",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md",
+      "notes": "Official source repository."
+    },
+    "whitepaper": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "docs/physics/final-whitepaper/",
+      "notes": "Official final whitepaper PDF."
+    },
+    "boot": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/boot/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "notes": "Stable Boot CURRENT route."
+    },
+    "contract": {
+      "url": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "KGEN/contracts/KGEN_Token_V7_5_2.sol; final-whitepaper",
+      "notes": "Token contract address. Not the LP pair."
+    },
+    "bscscan": {
+      "url": "https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; final-whitepaper",
+      "notes": "TOKEN CONTRACT."
+    },
+    "pancakeswap": {
+      "url": "https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; final-whitepaper",
+      "notes": "TRADE route using token contract as outputCurrency."
+    },
+    "lp_pair_bscscan": {
+      "url": "https://bscscan.com/address/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; final-whitepaper",
+      "notes": "LIQUIDITY POOL pair address. Not token contract."
+    },
+    "geckoterminal": {
+      "url": "https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; final-whitepaper",
+      "notes": "MARKET DATA for KGEN / WBNB pool."
+    },
+    "coinmarketcap_dexscan": {
+      "url": "https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; final-whitepaper",
+      "notes": "MARKET DATA for KGEN / WBNB pool."
+    },
+    "coinmarketcap_asset_page": {
+      "url": null,
+      "status": "NOT_OFFICIAL",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "Repo audit",
+      "notes": "No verified formal CoinMarketCap asset page found in repo."
+    },
+    "coingecko": {
+      "url": null,
+      "status": "NOT_OFFICIAL",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "Repo audit",
+      "notes": "No verified formal CoinGecko asset page found in repo. GeckoTerminal pool is present."
+    },
+    "liquidity_lock": {
+      "url": "https://www.pinksale.finance/pinklock/bsc/record/1427003",
+      "status": "VERIFYING",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "archive/README_old_20260611.md; archive/site_v0_genesis/README.md",
+      "notes": "PinkLock historical proof candidate. Start/unlock time not present in repo; do not state a lock duration without external confirmation."
+    },
+    "tiktok": {
+      "url": "https://www.tiktok.com/@klineodyssey",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry; archive README",
+      "notes": "Official social link."
+    },
+    "youtube": {
+      "url": "https://youtube.com/@klineodyssey",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry; README/archive",
+      "notes": "Official social link."
+    },
+    "facebook_page": {
+      "url": "https://www.facebook.com/profile.php?id=61583248810891",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry",
+      "notes": "Official Facebook Page."
+    },
+    "facebook_community": {
+      "url": "https://www.facebook.com/le.tian.di.2025",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry; archive README",
+      "notes": "Official Facebook community / personal entry."
+    },
+    "instagram": {
+      "url": "https://www.instagram.com/klineodyssey/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry",
+      "notes": "Official social link."
+    },
+    "line_official": {
+      "url": "https://lin.ee/b8X18F7",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "User-confirmed official entry; README/archive",
+      "notes": "Official LINE entry."
+    },
+    "x": {
+      "url": null,
+      "status": "UNVERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "archive/README_old_20260611.md candidate x.com/klineodyssey",
+      "notes": "Candidate exists only in historical docs. Not shown as official homepage button until verified."
+    },
+    "telegram": {
+      "url": null,
+      "status": "UNVERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "archive/README_old_20260611.md candidate t.me/klineodyssey",
+      "notes": "Candidate exists only in historical docs. Not shown as official homepage button until verified."
+    },
+    "contact": {
+      "url": "mailto:klineodyssey.io@gmail.com",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md",
+      "notes": "Public cooperation contact email."
+    },
+    "logo": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/logo.png",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "README.md; repo root logo.png",
+      "notes": "Official logo asset."
+    },
+    "official": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/official/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "official/index.html",
+      "notes": "Permanent public official information route."
+    },
+    "community": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/community/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "community/index.html",
+      "notes": "Permanent official community route."
+    },
+    "markets": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/markets/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "markets/index.html",
+      "notes": "Permanent market and contract route."
+    },
+    "security": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/security/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "security/index.html",
+      "notes": "Permanent security notice route."
+    },
+    "liquidity_lock_route": {
+      "url": "https://klineodyssey.github.io/kline-odyssey/liquidity-lock/",
+      "status": "VERIFIED",
+      "verified_at": "2026-07-11",
+      "verified_by": "Codex",
+      "source": "liquidity-lock/index.html",
+      "notes": "Permanent liquidity lock route."
+    }
+  },
+  "forbidden": [
+    "GitHub Token",
+    "API Key",
+    "Private Key",
+    "Wallet Seed",
+    "Private Credential",
+    "Unpublished Personal Data"
+  ]
+}

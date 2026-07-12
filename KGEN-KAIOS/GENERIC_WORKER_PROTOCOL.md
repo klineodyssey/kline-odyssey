@@ -19,6 +19,21 @@ A worker must read, in order:
 6. `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md`
 7. `KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md`
 8. `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
+9. `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md`
+10. `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md`
+
+## Visible Boot SOP Rule
+
+Every worker task must visibly report the six required execution sections defined in `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md`:
+
+1. BOOT
+2. MUST READ
+3. PROTECTED PATH CHECK
+4. TASK PLAN
+5. EXECUTION
+6. FINAL REPORT
+
+Verification-only work is not exempt. The Execution section must explicitly state `Verification Only / No File Change`.
 
 ## Worker Operating Loop
 
@@ -47,6 +62,12 @@ Each worker report must include:
 - Task ID
 - Worker ID
 - Worker Type
+- BOOT evidence
+- MUST READ evidence
+- Protected path check evidence
+- Task plan
+- Execution mode
+- Final pass / fail result
 - Branch
 - Base Commit
 - Head Commit
