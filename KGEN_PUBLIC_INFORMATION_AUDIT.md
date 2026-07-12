@@ -28,7 +28,7 @@
 
 This audit compares `index.html`, `README.md`, `KGEN/README.md`, archive README / legacy homepage records, `KGEN-Canon/KGEN_CANON_MASTER.json`, `KGEN_MASTER_LIBRARY_INDEX.md`, final whitepaper and listing-ready references.
 
-`index.html` is the public homepage. `README.md` is GitHub project documentation. `KGEN-OFFICIAL-LINKS.json` is the single machine-readable source for public links.
+`index.html` is the public homepage. `README.md` is GitHub project documentation. `OfficialLinks.json` is the single machine-readable source for public links.
 
 ## Audit Table
 
@@ -62,8 +62,8 @@ This audit compares `index.html`, `README.md`, `KGEN/README.md`, archive README 
 | 26 | Facebook Personal / Community Entry | PRESENT_AND_VISIBLE | Homepage old Facebook link and user-confirmed URL | Kept as community entry |
 | 27 | Instagram | MISSING | User-confirmed official URL not visible in homepage | Added official community button |
 | 28 | LINE Official Account | PRESENT_AND_VISIBLE | Homepage and README/archive | Kept official community button |
-| 29 | X | UNVERIFIED | Candidate exists only in archive as x.com/klineodyssey | Removed from formal homepage buttons until verified |
-| 30 | Telegram | UNVERIFIED | Candidate exists only in archive as t.me/klineodyssey | Removed from formal homepage buttons until verified |
+| 29 | X | PRESENT_AND_VISIBLE | Human-confirmed canonical official entry: https://x.com/klineodyssey / @klineodyssey | Restored through OfficialLinks.json and homepage/community/portal renderers |
+| 30 | Telegram | PRESENT_AND_VISIBLE | Human-confirmed canonical official entry: https://t.me/KLINEODYSSEY / @KLINEODYSSEY | Restored through OfficialLinks.json and homepage/community/portal renderers |
 | 31 | Contact / Cooperation | PRESENT_BUT_HIDDEN | README: klineodyssey.io@gmail.com | Added to official route and manifest |
 | 32 | Official Logo | PRESENT_AND_VISIBLE | README and root logo.png | Kept in manifest |
 | 33 | Security Notice | PRESENT_BUT_HIDDEN | Final whitepaper risk notes | Added homepage and `/security/` route |
@@ -71,12 +71,14 @@ This audit compares `index.html`, `README.md`, `KGEN/README.md`, archive README 
 ## Key Findings
 
 - The current homepage kept core contract and market cards, but it did not expose full supply, decimals, Fair Launch and wallet-to-wallet no-tax facts in a single official block.
-- The homepage exposed Telegram and X as active buttons even though current task rules require treating them as unverified candidates. They are now removed from the formal social button row until verified.
+- X and Telegram are now human-confirmed official canonical entries and are visible through `OfficialLinks.json`; website pages render them from the manifest instead of maintaining page-local social URLs.
 - Historical README files include PinkLock proof URL `https://www.pinksale.finance/pinklock/bsc/record/1427003`, but no reliable lock start time, unlock time, transaction hash or locker address was found in repo. The public page must show VERIFYING, not a fabricated duration.
-- Official community links now include TikTok, YouTube, Facebook Page, Facebook Community / Personal Entry, Instagram, LINE and GitHub.
+- Official community links now include X, Telegram, TikTok, YouTube, Facebook Page, Facebook Community / Personal Entry, Instagram, LINE and GitHub.
 
 ## Single Source
 
 Official public links are now normalized in:
 
-`KGEN-OFFICIAL-LINKS.json`
+`OfficialLinks.json`
+
+`KGEN-OFFICIAL-LINKS.json` is retained only as a compatibility mirror.
