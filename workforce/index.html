@@ -8,61 +8,125 @@
   <style>
     .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
     .metric{border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:14px;background:rgba(0,0,0,.24)}
-    .metric b{display:block;font-size:24px}.table-wrap{overflow:auto}.status{font-weight:800}.ok{color:#7dffb2}.warn{color:#ffd36a}.bad{color:#ff8b8b}
+    .metric span{display:block;color:#d8c98a;font-size:13px}.metric b{display:block;font-size:24px;margin-top:5px}
+    .table-wrap{overflow:auto}.status{font-weight:800}.ok{color:#7dffb2}.warn{color:#ffd36a}.bad{color:#ff8b8b}
     table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid rgba(255,255,255,.14);text-align:left;vertical-align:top}code{white-space:nowrap}
+    .notice{border:1px solid rgba(255,211,106,.35);background:rgba(255,211,106,.08);border-radius:10px;padding:12px;margin:14px 0;color:#ffe7a4}
   </style>
 </head>
 <body>
   <main class="shell">
     <nav class="topbar">
       <a class="brand" href="../">KLINE ODYSSEY</a>
-      <a class="home-link" href="../operating-center/">返回 Operating Center</a>
+      <a class="home-link" href="../operating-center/">Operating Center</a>
     </nav>
+
     <section class="hero">
       <p class="eyebrow">KGEN Workforce Dashboard</p>
-      <h1>正式員工名冊、出勤與辦公桌</h1>
-      <p>唯讀入口。此頁只讀取公開 JSON，不寫入 GitHub，不保存 Token，不顯示真實本機路徑或私人憑證。</p>
-      <div class="tag-row"><span class="tag">Read-only</span><span class="tag">No secrets</span><span class="tag">Codex Review Required</span></div>
+      <h1>KAIOS 員工、薪資、8888 人民銀行與 Robo 風控</h1>
+      <p>唯讀公開儀表板。資料來自 GitHub 內的 JSON / JSONL ledger，不寫入 GitHub，不保存私鑰、Token、Email、IP、密碼或助記詞。</p>
+      <div class="tag-row">
+        <span class="tag">Read-only</span>
+        <span class="tag">Prototype / Simulation</span>
+        <span class="tag">Human Approval Required</span>
+      </div>
+      <div class="notice">8888 人民銀行目前是 Prototype / Internal Ledger，不是真實銀行，不是投資建議，不保證收益。任何真實金流、KGEN 發薪、銀行、證券、KYC / AML 或不可逆轉移都必須經 Human approval。</div>
     </section>
+
     <section class="metric-grid" id="metrics"></section>
+
     <section class="grid">
-      <article class="card"><h2>員工卡片</h2><div class="table-wrap"><table id="employees"><thead><tr><th>Worker</th><th>Status</th><th>Trust</th><th>Desk</th><th>Task</th></tr></thead><tbody></tbody></table></div></article>
-      <article class="card"><h2>辦公桌健康</h2><div class="table-wrap"><table id="desks"><thead><tr><th>Desk</th><th>Worker</th><th>Health</th><th>Namespace</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>員工名冊</h2><div class="table-wrap"><table id="agents"><thead><tr><th>Employee</th><th>Agent</th><th>Status</th><th>Department</th><th>Desk</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>辦公桌</h2><div class="table-wrap"><table id="desks"><thead><tr><th>Desk</th><th>Worker</th><th>Health</th><th>Branch</th></tr></thead><tbody></tbody></table></div></article>
       <article class="card"><h2>工具權限</h2><div class="table-wrap"><table id="tools"><thead><tr><th>Worker</th><th>Push Main</th><th>Merge</th><th>Handoff</th><th>Secrets</th></tr></thead><tbody></tbody></table></div></article>
-      <article class="card"><h2>招聘候選</h2><div class="table-wrap"><table id="recruit"><thead><tr><th>Candidate</th><th>Role</th><th>Status</th><th>Trial</th></tr></thead><tbody></tbody></table></div></article>
-      <article class="card"><h2>V2 Agent 員工</h2><div class="table-wrap"><table id="agents"><thead><tr><th>Employee</th><th>Agent</th><th>Status</th><th>Department</th><th>Desk</th></tr></thead><tbody></tbody></table></div></article>
       <article class="card"><h2>部門統計</h2><div class="table-wrap"><table id="departments"><thead><tr><th>Department</th><th>Total</th><th>On Duty</th><th>Waiting</th><th>Offline</th></tr></thead><tbody></tbody></table></div></article>
     </section>
+
     <section class="grid">
-      <article class="card"><h2>來源檔案</h2><div class="links">
-        <a href="../KGEN-KAIOS/workforce/employee_roster.json"><span>employee_roster.json</span><span>JSON</span></a>
-        <a href="../KGEN-KAIOS/workforce/attendance_snapshot.json"><span>attendance_snapshot.json</span><span>JSON</span></a>
-        <a href="../KGEN-KAIOS/workforce/daily_attendance.json"><span>daily_attendance.json</span><span>JSON</span></a>
-        <a href="../KGEN-KAIOS/workforce/office_desks.json"><span>office_desks.json</span><span>JSON</span></a>
-        <a href="../KGEN-KAIOS/workforce/tool_access_matrix.json"><span>tool_access_matrix.json</span><span>JSON</span></a>
+      <article class="card"><h2>Payroll Summary</h2><div class="table-wrap"><table id="payroll"><thead><tr><th>Unit</th><th>Approved</th><th>Claimed</th><th>Paid</th><th>Withheld</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>8888 Bank Reserve</h2><div class="table-wrap"><table id="reserve"><thead><tr><th>Unit</th><th>Balance</th><th>Allocated</th><th>Available</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>Employee Accounts</h2><div class="table-wrap"><table id="accounts"><thead><tr><th>Account</th><th>Worker</th><th>Status</th><th>Merit</th><th>Permission</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>Human Approval Queue</h2><div class="table-wrap"><table id="claims"><thead><tr><th>Claim</th><th>Worker</th><th>Option</th><th>Status</th></tr></thead><tbody></tbody></table></div></article>
+    </section>
+
+    <section class="grid">
+      <article class="card"><h2>Game Reward</h2><div class="table-wrap"><table id="missions"><thead><tr><th>Wallet</th><th>Worker</th><th>Status</th><th>Daily Budget</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>Robo Simulation</h2><div class="table-wrap"><table id="robos"><thead><tr><th>Robo</th><th>Status</th><th>Mode</th><th>Risk</th><th>Approval</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>Risk Alerts</h2><div class="table-wrap"><table id="risk"><thead><tr><th>Area</th><th>Status</th><th>Note</th></tr></thead><tbody></tbody></table></div></article>
+    </section>
+
+    <section class="grid">
+      <article class="card"><h2>資料來源</h2><div class="links">
         <a href="../KGEN-KAIOS/workforce/agent_registry.json"><span>agent_registry.json</span><span>V2</span></a>
-        <a href="../KGEN-KAIOS/workforce/desk_registry.json"><span>desk_registry.json</span><span>V2</span></a>
-        <a href="../KGEN-KAIOS/workforce/agent_daily_report.json"><span>agent_daily_report.json</span><span>V2</span></a>
+        <a href="../KGEN-KAIOS/workforce/payroll_snapshot.json"><span>payroll_snapshot.json</span><span>V3</span></a>
+        <a href="../KGEN-KAIOS/bank/8888/employee_accounts.json"><span>employee_accounts.json</span><span>8888</span></a>
+        <a href="../KGEN-KAIOS/bank/8888/payroll_reserve.json"><span>payroll_reserve.json</span><span>8888</span></a>
+        <a href="../KGEN-KAIOS/bank/8888/robo_registry.json"><span>robo_registry.json</span><span>Robo</span></a>
+        <a href="../KGEN-KAIOS/game/mission_wallets.json"><span>mission_wallets.json</span><span>Game</span></a>
       </div></article>
     </section>
   </main>
+
   <script>
-    const source = p => '../KGEN-KAIOS/workforce/' + p;
+    const wf = p => '../KGEN-KAIOS/workforce/' + p;
+    const bank = p => '../KGEN-KAIOS/bank/8888/' + p;
+    const game = p => '../KGEN-KAIOS/game/' + p;
     const td = v => `<td>${v ?? '-'}</td>`;
-    const cls = s => s === 'ACTIVE_ON_DUTY' ? 'ok' : s === 'REGISTERED_NOT_ACTIVATED' ? 'warn' : s === 'SUSPENDED' || s === 'REVOKED' ? 'bad' : '';
-    async function loadJson(path){ const r = await fetch(source(path)); if(!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
-    Promise.all(['employee_roster.json','office_desks.json','tool_access_matrix.json','recruitment_queue.json','agent_registry.json','department_registry.json','agent_daily_report.json'].map(loadJson)).then(([roster, desks, tools, recruitment, agents, departments, agentDaily]) => {
-      const s = roster.summary;
-      const d = agentDaily.totals;
-      const metrics = [['總員工數',agents.summary.total_agents],['今日上班',d.on_duty],['今日待命',d.standby],['今日休假',d.off_duty],['目前 Commit',d.commit_count],['目前 PR',d.pr_count],['工作中 Agent',d.working_agents],['錯誤數',d.error_count]];
-      document.getElementById('metrics').innerHTML = metrics.map(([k,v]) => `<div class="metric"><span>${k}</span><b>${v}</b></div>`).join('');
-      document.querySelector('#employees tbody').innerHTML = roster.employees.map(e => `<tr>${td('<code>'+e.worker_id+'</code><br>'+e.display_name)}<td class="status ${cls(e.status)}">${e.status}</td>${td(e.trust_level)}${td(e.workspace_name || 'Not assigned')}${td(e.current_task_id || '-')}</tr>`).join('');
-      document.querySelector('#desks tbody').innerHTML = desks.desks.map(d => `<tr>${td('<code>'+d.desk_id+'</code>')}${td(d.worker_id)}${td(d.health_status)}${td(d.handoff_namespace || '-')}</tr>`).join('');
-      document.querySelector('#tools tbody').innerHTML = tools.workers.map(w => `<tr>${td(w.worker_id)}${td(w.access['Git push main'])}${td(w.access['Git merge'])}${td(w.access['Git push handoff'])}${td(w.access['Secrets'])}</tr>`).join('');
-      document.querySelector('#recruit tbody').innerHTML = recruitment.candidates.map(c => `<tr>${td(c.candidate_id)}${td(c.role)}${td(c.status)}${td(c.recommended_trial)}</tr>`).join('');
+    const safe = v => v == null ? '-' : String(v);
+    const cls = s => s === 'ACTIVE_ON_DUTY' || s === 'ACTIVE' || s === 'APPROVED_SIMULATION' ? 'ok' : /AUDIT|PENDING|WAITING|SANDBOX|PAPER/.test(s || '') ? 'warn' : /SUSPENDED|REVOKED|FROZEN/.test(s || '') ? 'bad' : '';
+    async function loadJson(path){ const r = await fetch(path); if(!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
+    function rowsEmpty(cols, msg){ return `<tr><td colspan="${cols}">${msg}</td></tr>`; }
+
+    Promise.all([
+      loadJson(wf('agent_registry.json')),
+      loadJson(wf('desk_registry.json')),
+      loadJson(wf('department_registry.json')),
+      loadJson(wf('agent_daily_report.json')),
+      loadJson(wf('tool_access_matrix.json')),
+      loadJson(wf('payroll_snapshot.json')),
+      loadJson(bank('employee_accounts.json')),
+      loadJson(bank('payroll_reserve.json')),
+      loadJson(bank('claim_queue.json')),
+      loadJson(game('mission_wallets.json')),
+      loadJson(bank('robo_registry.json')),
+      loadJson(bank('robo_risk_limits.json'))
+    ]).then(([agents, desks, departments, daily, tools, payroll, accounts, reserve, claims, missions, robos, roboRisk]) => {
+      const m = [
+        ['總員工數', agents.summary.total_agents],
+        ['今日上班', daily.totals.on_duty],
+        ['今日待命', daily.totals.standby],
+        ['目前 Commit', daily.totals.commit_count],
+        ['目前 PR', daily.totals.pr_count],
+        ['工作中 Agent', daily.totals.working_agents],
+        ['Approved Salary', payroll.approved_salary_count],
+        ['Human Approval Queue', payroll.human_approval_queue_count],
+        ['Frozen Accounts', payroll.frozen_accounts],
+        ['Robo Count', robos.robo_count]
+      ];
+      document.getElementById('metrics').innerHTML = m.map(([k,v]) => `<div class="metric"><span>${k}</span><b>${safe(v)}</b></div>`).join('');
+
       document.querySelector('#agents tbody').innerHTML = agents.agents.map(a => `<tr>${td('<code>'+a.employee_uuid+'</code>')}${td('<code>'+a.agent_id+'</code><br>'+a.name)}<td class="status ${cls(a.status)}">${a.status}</td>${td(a.department)}${td(a.office_desk)}</tr>`).join('');
+      document.querySelector('#desks tbody').innerHTML = desks.desks.map(d => `<tr>${td('<code>'+d.desk_id+'</code>')}${td(d.agent_id)}<td class="status ${cls(d.health_status)}">${d.health_status}</td>${td(d.git_branch)}</tr>`).join('');
+      document.querySelector('#tools tbody').innerHTML = tools.workers.map(w => `<tr>${td(w.worker_id)}${td(w.access['Git push main'])}${td(w.access['Git merge'])}${td(w.access['Git push handoff'])}${td(w.access['Secrets'])}</tr>`).join('');
       document.querySelector('#departments tbody').innerHTML = departments.departments.map(dep => `<tr>${td(dep.department)}${td(dep.total_agents)}${td(dep.on_duty)}${td(dep.waiting)}${td(dep.offline)}</tr>`).join('');
-    }).catch(err => { document.getElementById('metrics').innerHTML = `<div class="metric"><b>WARN</b><span>${err.message}</span></div>`; });
+
+      document.querySelector('#payroll tbody').innerHTML = Object.entries(payroll.totals_by_unit).map(([unit,v]) => `<tr>${td(unit)}${td(v.approved)}${td(v.claimed)}${td(v.paid)}${td(v.withheld)}</tr>`).join('');
+      document.querySelector('#reserve tbody').innerHTML = Object.keys(reserve.balances).map(unit => `<tr>${td(unit)}${td(reserve.balances[unit])}${td((reserve.allocated || {})[unit] || 0)}${td((reserve.available || {})[unit] || 0)}</tr>`).join('');
+      document.querySelector('#accounts tbody').innerHTML = accounts.accounts.map(a => `<tr>${td(a.account_id)}${td(a.worker_id)}<td class="status ${cls(a.account_status)}">${a.account_status}</td>${td(a.merit_points)}${td(a.investment_permission)}</tr>`).join('');
+      document.querySelector('#claims tbody').innerHTML = claims.claims.length ? claims.claims.map(c => `<tr>${td(c.claim_id)}${td(c.worker_id)}${td(c.claim_option)}${td(c.status)}</tr>`).join('') : rowsEmpty(4, 'No pending Human approval claim.');
+
+      document.querySelector('#missions tbody').innerHTML = missions.wallets.map(w => `<tr>${td(w.mission_wallet_id)}${td(w.worker_id)}<td class="status ${cls(w.status)}">${w.status}</td>${td(JSON.stringify(w.daily_budget))}</tr>`).join('');
+      document.querySelector('#robos tbody').innerHTML = robos.robos.map(r => `<tr>${td(r.robo_id)}<td class="status ${cls(r.status)}">${r.status}</td>${td(r.market_scope)}${td(r.risk_level)}${td(r.approval_required)}</tr>`).join('');
+      const riskRows = [
+        ['Real-money autonomous trading', roboRisk.global_limits.real_money_autonomous_trading ? 'WARN' : 'DENIED', 'Robo cannot trade real money autonomously.'],
+        ['Private key access', roboRisk.global_limits.private_key_access ? 'WARN' : 'DENIED', 'No private key, seed phrase or signing authority in repo.'],
+        ['Guaranteed return', roboRisk.global_limits.guaranteed_return ? 'WARN' : 'DENIED', 'No guaranteed return claim allowed.'],
+        ['Human kill switch', roboRisk.global_limits.human_kill_switch_required ? 'REQUIRED' : 'WARN', 'Human approval and kill switch remain mandatory.']
+      ];
+      document.querySelector('#risk tbody').innerHTML = riskRows.map(r => `<tr>${td(r[0])}<td class="status ${r[1] === 'DENIED' || r[1] === 'REQUIRED' ? 'ok' : 'bad'}">${r[1]}</td>${td(r[2])}</tr>`).join('');
+    }).catch(err => {
+      document.getElementById('metrics').innerHTML = `<div class="metric"><b>WARN</b><span>${err.message}</span></div>`;
+    });
   </script>
 </body>
 </html>

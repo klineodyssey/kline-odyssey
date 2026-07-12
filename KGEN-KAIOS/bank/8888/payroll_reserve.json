@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_INTERNAL_LEDGER",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING",
+    "legal_notice": "Prototype reserve record only. It does not prove custody of real assets."
+  },
+  "reserve_id": "8888-PAYROLL-RESERVE-0001",
+  "reserve_status": "PROTOTYPE_LEDGER_ONLY",
+  "balances": {
+    "KGEN_TOKEN": 0,
+    "GAME_CREDIT": 0,
+    "TEMPLE_ENERGY": 0,
+    "MERIT_POINT": 100000,
+    "FIAT_REFERENCE_ONLY": 0
+  },
+  "allocated": {
+    "MERIT_POINT": 220
+  },
+  "available": {
+    "MERIT_POINT": 99780
+  },
+  "chain_vault_enabled": false,
+  "human_approval_required": true,
+  "private_key_storage": "FORBIDDEN_IN_REPOSITORY",
+  "notes": [
+    "Payroll reserve may not be used to cover simulation investment losses.",
+    "No real token transfer has been made by this ledger.",
+    "Future KGEN Payroll Vault distribution requires Human approval."
+  ]
+}
+

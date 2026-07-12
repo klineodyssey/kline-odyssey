@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_QUEUE",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING"
+  },
+  "default_claim_option": "HOLD_IN_BANK",
+  "human_approval_required_for": [
+    "CLAIM_KGEN",
+    "SIMULATION_INVESTMENT",
+    "REAL_TRANSFER",
+    "EXTERNAL_PAYMENT",
+    "IRREVERSIBLE_ACTION"
+  ],
+  "queue_count": 0,
+  "claims": []
+}
+

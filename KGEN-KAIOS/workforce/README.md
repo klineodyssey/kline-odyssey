@@ -64,6 +64,11 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 | `department_registry.json` | V2 department registry and staffing counts |
 | `agent_runtime_status.json` | V2 runtime status snapshot for current working agents, commits, PRs and errors |
 | `agent_daily_report.json` | V2 daily workforce report |
+| `COMPENSATION_STANDARD.md` | V3 salary, reward, penalty, 8888 bank and Human approval compensation rules |
+| `payroll_policy.json` | V3 machine-readable payroll policy, units, claim options and approval matrix |
+| `salary_ledger.jsonl` | V3 append-only prototype payroll ledger |
+| `payroll_snapshot.json` | V3 current payroll summary for dashboard display |
+| `bonus_penalty_rules.json` | V3 quality bonus, research bonus, bug bounty, withholding and penalty rules |
 
 ## Non-Negotiable Rule
 
@@ -76,3 +81,17 @@ The current roster is maintained in `employee_roster.json`. As of this baseline,
 ## Workforce V2 Agent Model
 
 V2 preserves the V1 files and adds `agent_registry.json` as the current Agent-per-employee source. `cursor-01` is not deleted; it is mapped as the legacy worker ID for `cursor-agent-0001`. New Cursor work units must use `cursor-agent-0002`, `cursor-agent-0003`, and so on. Candidates remain `WAITING` or `OFFLINE` until Boot, desk, claim, branch, report and review evidence exists.
+
+## Workforce V3 Compensation And Bank Model
+
+V3 keeps 12345 as the civilization heart and reward source, while 8888 People Bank is the prototype internal salary ledger. Payroll evidence flows through Codex review before being posted to an employee account. KGEN token payout is future-only and always requires Human approval.
+
+Related records:
+
+- `KGEN-KAIOS/bank/8888/employee_accounts.json`
+- `KGEN-KAIOS/bank/8888/payroll_reserve.json`
+- `KGEN-KAIOS/bank/8888/claim_queue.json`
+- `KGEN-KAIOS/game/mission_wallets.json`
+- `KGEN-KAIOS/bank/8888/robo_registry.json`
+
+All V3 payroll, game mission and Robo records are Prototype / Simulation / Internal Ledger records. They are not banking, investment advice, guaranteed return, KYC / AML service, securities service or autonomous real-money trading.

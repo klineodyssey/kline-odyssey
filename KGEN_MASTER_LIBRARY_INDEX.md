@@ -128,6 +128,20 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Department Registry | `KGEN-KAIOS/workforce/department_registry.json` | V2 department staffing registry |
 | Agent Runtime Status | `KGEN-KAIOS/workforce/agent_runtime_status.json` | V2 current Agent runtime snapshot |
 | Agent Daily Report | `KGEN-KAIOS/workforce/agent_daily_report.json` | V2 daily workforce operating report |
+| Compensation Standard | `KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md` | V3 payroll, task reward, bonus, penalty and claim boundary standard |
+| Payroll Policy | `KGEN-KAIOS/workforce/payroll_policy.json` | V3 machine-readable salary types, units, claim options and approval matrix |
+| Salary Ledger | `KGEN-KAIOS/workforce/salary_ledger.jsonl` | V3 append-only prototype salary ledger |
+| Payroll Snapshot | `KGEN-KAIOS/workforce/payroll_snapshot.json` | V3 current payroll summary for dashboard display |
+| Bonus Penalty Rules | `KGEN-KAIOS/workforce/bonus_penalty_rules.json` | V3 bonus, withholding, penalty and reversal rules |
+| 8888 Employee Account Standard | `KGEN-KAIOS/bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype internal employee account rules |
+| 8888 Employee Accounts | `KGEN-KAIOS/bank/8888/employee_accounts.json` | Prototype payroll, game balance, merit and claim account ledger |
+| 8888 Payroll Reserve | `KGEN-KAIOS/bank/8888/payroll_reserve.json` | Prototype payroll reserve record; not proof of custody |
+| 8888 Claim Queue | `KGEN-KAIOS/bank/8888/claim_queue.json` | Human approval queue for claim requests |
+| Auto Mission Reward Standard | `KGEN-KAIOS/game/AUTO_MISSION_REWARD_STANDARD.md` | Game mission budget, reward and stop-condition rules |
+| Mission Wallets | `KGEN-KAIOS/game/mission_wallets.json` | Prototype game mission budget wallets |
+| 8888 Robo Advisor Standard | `KGEN-KAIOS/bank/8888/ROBO_ADVISOR_STANDARD.md` | Robo simulation, backtest, paper trading and advisory-only limits |
+| 8888 Robo Registry | `KGEN-KAIOS/bank/8888/robo_registry.json` | Registered Robo simulation advisors and risk status |
+| GitHub Connectivity Runbook | `KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443, fetch, push and remote-ahead diagnostic flow |
 | Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
 
 ## KAIOS Official Video Library

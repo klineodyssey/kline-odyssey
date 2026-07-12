@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "revision": "2026-07-13.WORKFORCE_V3",
+    "status": "ACTIVE_PROTOTYPE_INTERNAL_LEDGER",
+    "last_updated": "2026-07-13",
+    "updated_by": "Codex",
+    "reviewed_by": "Codex",
+    "source_commit": "PENDING",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "change_reason": "Define payroll policy for Workforce V3.",
+    "source_of_truth": true,
+    "legal_notice": "Prototype / Simulation / Internal Ledger. Not a bank, not investment advice, no guaranteed return, human approval required for irreversible transfers."
+  },
+  "salary_types": [
+    "BASE_SALARY",
+    "TASK_REWARD",
+    "QUALITY_BONUS",
+    "REVIEW_BONUS",
+    "RESEARCH_BONUS",
+    "BUG_BOUNTY",
+    "TEMPLE_REWARD",
+    "GAME_REWARD",
+    "LEADERSHIP_BONUS",
+    "PENALTY",
+    "REVERSAL",
+    "WITHHELD",
+    "CLAIMED",
+    "PAID"
+  ],
+  "units": [
+    "KGEN_TOKEN",
+    "GAME_CREDIT",
+    "TEMPLE_ENERGY",
+    "MERIT_POINT",
+    "FIAT_REFERENCE_ONLY"
+  ],
+  "master_flow": [
+    "Work Evidence",
+    "Codex Review",
+    "Payroll Calculation",
+    "8888 Bank Employee Account",
+    "Human-approved Claim",
+    "Optional KGEN Payroll Vault Distribution"
+  ],
+  "default_claim_option": "HOLD_IN_BANK",
+  "claim_options": [
+    "HOLD_IN_BANK",
+    "CLAIM_KGEN",
+    "CONVERT_TO_GAME_CREDIT",
+    "CONVERT_TO_TEMPLE_ENERGY",
+    "BUY_GAME_ITEM",
+    "FUND_GAME_MISSION",
+    "SIMULATION_INVESTMENT",
+    "DONATE_TO_CIVILIZATION",
+    "MANUAL_REVIEW"
+  ],
+  "calculation_rules": {
+    "verified_evidence_required": true,
+    "self_report_only_allowed": false,
+    "rejected_task_full_reward_allowed": false,
+    "duplicate_commit_double_pay_allowed": false,
+    "protected_path_violation_freezes_salary": true,
+    "chain_payment_requires_human_approval": true,
+    "fixed_token_value_guarantee": false
+  },
+  "system_roles": {
+    "temple_12345": "Civilization life core and game reward source; not formal salary treasury.",
+    "bank_8888": "Prototype internal salary ledger, employee account and claim queue.",
+    "kgen_payroll_vault": "Future human-approved KGEN distribution reconciliation layer."
+  },
+  "approval_matrix": {
+    "HOLD_IN_BANK": "CODEX_REVIEW_REQUIRED",
+    "CONVERT_TO_GAME_CREDIT": "CODEX_REVIEW_REQUIRED",
+    "CONVERT_TO_TEMPLE_ENERGY": "CODEX_REVIEW_REQUIRED",
+    "CLAIM_KGEN": "HUMAN_APPROVAL_REQUIRED",
+    "SIMULATION_INVESTMENT": "HUMAN_APPROVAL_REQUIRED",
+    "REAL_TRANSFER": "HUMAN_APPROVAL_REQUIRED"
+  }
+}
+

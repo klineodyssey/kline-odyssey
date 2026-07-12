@@ -1,0 +1,4 @@
+{"performance_id":"ROBO-PERF-20260713-0001","timestamp":"2026-07-13T00:00:00+08:00","robo_id":"ROBO-8888-RISK-0001","mode":"SIMULATION","pnl_unit":"MERIT_POINT","pnl":0,"drawdown":0,"risk_alerts":0,"status":"PASS","notes":"Baseline only. No real funds, private keys, external transfer or guaranteed return."}
+{"performance_id":"ROBO-PERF-20260713-0002","timestamp":"2026-07-13T00:00:00+08:00","robo_id":"ROBO-8888-BACKTEST-0001","mode":"PAPER_TRADING","pnl_unit":"GAME_CREDIT","pnl":0,"drawdown":0,"risk_alerts":0,"status":"PAPER_ONLY","notes":"No execution authority."}
+{"performance_id":"ROBO-PERF-20260713-0003","timestamp":"2026-07-13T00:00:00+08:00","robo_id":"ROBO-GAME-MARKET-0001","mode":"GAME_MARKET","pnl_unit":"GAME_CREDIT","pnl":0,"drawdown":0,"risk_alerts":0,"status":"SANDBOX","notes":"Game-market simulation only."}
+

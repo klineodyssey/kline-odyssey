@@ -111,8 +111,19 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 | `workforce/department_registry.json` | Workforce V2 department staffing registry |
 | `workforce/agent_runtime_status.json` | Workforce V2 runtime status snapshot |
 | `workforce/agent_daily_report.json` | Workforce V2 daily status report |
+| `workforce/COMPENSATION_STANDARD.md` | Workforce V3 salary, reward, penalty and Human approval standard |
+| `workforce/payroll_policy.json` | Workforce V3 payroll unit, claim option and approval policy |
+| `workforce/payroll_snapshot.json` | Workforce V3 payroll dashboard summary |
+| `bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype employee account rules |
+| `bank/8888/employee_accounts.json` | 8888 prototype employee account ledger |
+| `bank/8888/payroll_reserve.json` | 8888 prototype payroll reserve record |
+| `bank/8888/ROBO_ADVISOR_STANDARD.md` | 8888 Robo simulation and advisory-only limits |
+| `game/AUTO_MISSION_REWARD_STANDARD.md` | Workforce game mission budget and reward boundary |
+| `operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443 / fetch / push diagnostic runbook |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
+
+Workforce V3 keeps 12345 as civilization heart and reward source, and uses 8888 People Bank as a prototype internal payroll ledger. It does not enable real banking, real investment, autonomous token transfer, private-key access, or guaranteed return.
 
 ## Official Video Library
 
