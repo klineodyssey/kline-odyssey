@@ -7,18 +7,19 @@
 | Task ID | ORG-P2-003E |
 | Worker ID | cursor-01 |
 | Worker Type | Cursor |
-| Date | 2026-07-11 |
-| Base Commit | 16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d |
+| Date | 2026-07-12 |
+| Base Commit | fcf948f62e0619041896a004ce2efa10666d3ec1 |
 | Branch | `cursor-handoff/ORG-P2-003E` |
 | Report Path | `KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md` |
 | Start Status | OPEN |
 | End Status | REVIEW |
 | Reviewer | codex-gm-01 |
 | Architecture Decision | D7 ALIAS — `ORG-P2-003_ARCHITECTURE_DECISION.md` |
+| Reissue | Merged current `origin/main` into prior handoff; D7 banners preserved with new portal rows |
 
 ## Summary
 
-Confirmed **one unique library-level Master Index** and scoped sub-indexes per ORG-P2-003 D7. Applied **doc-only alias banners** so workers no longer treat `docs/KGEN_MASTER_INDEX.md` or Genesis indexes as competing masters. Extended labeling to **`KGEN-Genesis/000_INDEX/README.md`** and **`README.md`**. Identified **stale inventory drift** (root `KGEN_MASTER_INDEX.md` listed in inventory but absent). **No protected paths modified.**
+Confirmed **one unique library-level Master Index** and scoped sub-indexes per ORG-P2-003 D7. Applied **doc-only alias banners** so workers no longer treat `docs/KGEN_MASTER_INDEX.md` or Genesis indexes as competing masters. Extended labeling to **`KGEN-Genesis/000_INDEX/README.md`** and **`README.md`**. Identified **stale inventory drift** (root `KGEN_MASTER_INDEX.md` listed in inventory but absent). Reissued against current `main` (`fcf948f`). **No protected paths modified.**
 
 ## D7 Hierarchy (Confirmed)
 
@@ -102,18 +103,19 @@ No modifications under protected paths (contracts, temple 12345, wallet, bridge,
 
 ## Task Result
 
-D7 Master Index alias hierarchy is **confirmed and labeled**. One library master, prose sub-indexes scoped by domain, machine JSON indexes as projections.
+D7 Master Index alias hierarchy is **confirmed and labeled**. One library master, prose sub-indexes scoped by domain, machine JSON indexes as projections. Handoff rebased onto current `main` via merge (no force-push).
 
 ## Checks Run
 
 | Check | Result |
 |---|---|
-| `git pull origin main` | ✅ Up to date @ `16a384f` |
+| `git fetch origin main` | ✅ Tip `fcf948f` |
 | Worker registry `cursor-01` gate | ✅ ACTIVE, T2 |
-| First OPEN task | ✅ ORG-P2-003E |
-| Protected path diff | ✅ Clean |
+| First OPEN task on main | ✅ ORG-P2-003E |
+| Merge `origin/main` into handoff | ✅ Clean; banners + new portal rows retained |
+| Protected path diff vs main | ✅ Clean |
 | Root `KGEN_MASTER_INDEX.md` exists | ❌ Missing (inventory drift) |
-| Sub-index banners applied | ✅ 4 files |
+| Sub-index banners applied | ✅ 4 files + README label |
 
 ## Problems Found
 
@@ -165,7 +167,7 @@ None.
 
 ## Recommendation
 
-**APPROVE** ORG-P2-003E. Merge `cursor-handoff/ORG-P2-003E` into `main`. Next OPEN task: **ORG-P2-003F**.
+**APPROVE** ORG-P2-003E. Merge `cursor-handoff/ORG-P2-003E` into `main`. Next OPEN task after merge: **ORG-P2-003F** (or ORG-P2-004 if 003F already merged).
 
 ## Need Codex Review
 
