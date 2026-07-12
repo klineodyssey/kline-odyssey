@@ -118,7 +118,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-012 | OPEN | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
 | ORG-P2-013 | OPEN | Cursor | Codex | P1 | Game | KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md |
 | ORG-P2-014 | OPEN | Cursor | Codex | P0 | Runtime | KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md |
-| ORG-P2-015 | OPEN | Cursor | Codex | P2 | SDK | KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md |
+| ORG-P2-015 | REVIEW | Cursor | Codex | P2 | SDK | KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md |
 | ORG-P2-016 | OPEN | Cursor | Codex | P1 | Frontend | KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md |
 | ORG-P2-017 | OPEN | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
 | ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
