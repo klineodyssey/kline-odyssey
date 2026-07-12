@@ -104,7 +104,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-003C | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
 | ORG-P2-003D | DONE | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
 | ORG-P2-003E | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
-| ORG-P2-003F | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F | REVIEW | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -373,7 +373,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### ORG-P2-003F - Draft 12345 module naming future migration plan
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
