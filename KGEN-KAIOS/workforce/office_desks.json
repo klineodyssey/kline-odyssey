@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-12",
+    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001",
+    "privacy": "Logical paths only; no real local paths or secrets."
+  },
+  "desks": [
+    {
+      "desk_id": "desk-human-main",
+      "worker_id": "human-primeforge",
+      "workspace_type": "HUMAN_MAIN",
+      "workspace_path": "LOCAL_ONLY://human-main",
+      "base_branch": "main",
+      "handoff_namespace": null,
+      "allowed_paths": ["Human-controlled workspace only"],
+      "protected_paths": ["all AI write actions denied by default"],
+      "available_tools": ["Human decision", "local environment control"],
+      "restricted_tools": ["automated AI merge", "secret publication"],
+      "current_task": null,
+      "claim_expires_at": null,
+      "health_status": "HUMAN_CONTROLLED",
+      "last_clean_check": null,
+      "last_sync_commit": null
+    },
+    {
+      "desk_id": "desk-codex-review-01",
+      "worker_id": "codex-gm-01",
+      "workspace_type": "CODEX_REVIEW_WORKTREE",
+      "workspace_path": "WORKTREE://codex-review",
+      "base_branch": "origin/main",
+      "handoff_namespace": "codex/<Task-ID>",
+      "allowed_paths": ["documentation", "indexes", "dashboards", "reports", "approved source files only"],
+      "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "Runtime CURRENT", "final-whitepaper", "KGEN Token contract", "secrets"],
+      "available_tools": ["Git read", "Git commit", "Git merge", "Git push main", "Filesystem read/write", "Terminal", "Python", "Node", "Browser verification", "GitHub Actions", "Pages verification"],
+      "restricted_tools": ["force push", "secret access", "protected path modification without explicit Human approval"],
+      "current_task": "KGEN-WORKFORCE-ROSTER-2026-0001",
+      "claim_expires_at": null,
+      "health_status": "CLEAN_AT_START",
+      "last_clean_check": "2026-07-12",
+      "last_sync_commit": "0f256afa969dbf834df1eb1a6036e639ab2b5cd3"
+    },
+    {
+      "desk_id": "desk-cursor-01",
+      "worker_id": "cursor-01",
+      "workspace_type": "CURSOR_WORKER_WORKSPACE",
+      "workspace_path": "WORKSPACE://cursor-worker-01",
+      "base_branch": "origin/main",
+      "handoff_namespace": "cursor-handoff/<Task-ID>",
+      "allowed_paths": ["assigned WorkOrder paths only"],
+      "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "Runtime CURRENT", "final-whitepaper", "KGEN Token contract", "secrets"],
+      "available_tools": ["Git read", "Git commit", "Git push handoff", "Filesystem read/write for assigned files", "Browser", "Terminal", "Python", "Node", "Testing"],
+      "restricted_tools": ["Git merge", "Git push main", "force push", "protected paths", "secrets", "production deploy"],
+      "current_task": null,
+      "claim_expires_at": null,
+      "health_status": "IDLE_REQUIRES_CHECKIN",
+      "last_clean_check": null,
+      "last_sync_commit": null
+    }
+  ],
+  "unassigned_workers": ["cursor-generic-01", "claude-01", "gemini-01", "openhands-01", "copilot-01", "chatgpt-01", "deep-research-01", "human-engineer-01"]
+}

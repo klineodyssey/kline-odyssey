@@ -3,8 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KGEN Workforce Governance</title>
+  <title>KGEN Workforce Dashboard</title>
   <link rel="stylesheet" href="../assets/portal-entry.css">
+  <style>
+    .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+    .metric{border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:14px;background:rgba(0,0,0,.24)}
+    .metric b{display:block;font-size:24px}.table-wrap{overflow:auto}.status{font-weight:800}.ok{color:#7dffb2}.warn{color:#ffd36a}.bad{color:#ff8b8b}
+    table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid rgba(255,255,255,.14);text-align:left;vertical-align:top}code{white-space:nowrap}
+  </style>
 </head>
 <body>
   <main class="shell">
@@ -13,72 +19,42 @@
       <a class="home-link" href="../operating-center/">返回 Operating Center</a>
     </nav>
     <section class="hero">
-      <p class="eyebrow">KGEN Workforce Governance</p>
-      <h1>正式員工制度與 Worker 信任等級</h1>
-      <p>這是 KAIOS 的唯讀員工治理入口。所有 AI / Human Worker 必須先註冊、完成 Boot acknowledgment、通過信任等級與任務風險檢查，才可 claim 正式 WorkOrder。</p>
-      <div class="tag-row">
-        <span class="tag">Read-only</span>
-        <span class="tag">No token</span>
-        <span class="tag">Codex Review Required</span>
-      </div>
+      <p class="eyebrow">KGEN Workforce Dashboard</p>
+      <h1>正式員工名冊、出勤與辦公桌</h1>
+      <p>唯讀入口。此頁只讀取公開 JSON，不寫入 GitHub，不保存 Token，不顯示真實本機路徑或私人憑證。</p>
+      <div class="tag-row"><span class="tag">Read-only</span><span class="tag">No secrets</span><span class="tag">Codex Review Required</span></div>
     </section>
-
+    <section class="metric-grid" id="metrics"></section>
     <section class="grid">
-      <article class="card">
-        <h2>Workforce Registry</h2>
-        <p>正式 Worker 清單、employee_status、trust_level、allowed branch、reviewer 與 main push 權限。</p>
-        <div class="links">
-          <a href="../KGEN-KAIOS/worker_registry.json"><span>worker_registry.json</span><span>JSON</span></a>
-          <a href="../KGEN-KAIOS/WORKER_REGISTRY.md"><span>Worker Registry</span><span>Read</span></a>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Trust Level</h2>
-        <p>T0 不得工作；T1 onboarding；T2 active；T3 trusted；T4 senior trusted；T5 system maintainer。沒有任何等級可永久免審。</p>
-        <div class="links">
-          <a href="../KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json"><span>Trust Schema</span><span>JSON</span></a>
-          <a href="../KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json"><span>Performance Schema</span><span>JSON</span></a>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Active Claims</h2>
-        <p>Worker 開工必須提出 credential：worker_id、trust_level、claim_id、task_id、base_commit、branch 與 lease_expires_at。</p>
-        <div class="links">
-          <a href="../KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json"><span>Credential Schema</span><span>JSON</span></a>
-          <a href="../KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md"><span>Claim Lease</span><span>Read</span></a>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Violations / Suspensions</h2>
-        <p>未註冊施工、錯誤分支、多任務混包、缺報告、缺 provenance、push main、force push、protected path change 都必須保留證據。</p>
-        <div class="links">
-          <a href="../KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json"><span>Violation Schema</span><span>JSON</span></a>
-          <a href="../KGEN-KAIOS/workforce/WORKER_SUSPENSION_SCHEMA.json"><span>Suspension Schema</span><span>JSON</span></a>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Contribution History</h2>
-        <p>所有正式改動必須追蹤 human_owner、author_agent、reviewer_agent、task_id、branch、commit、report 與 changed_files。</p>
-        <div class="links">
-          <a href="../KGEN-KAIOS/provenance/AGENT_CONTRIBUTION_LOG.json"><span>Agent Contributions</span><span>JSON</span></a>
-          <a href="../KGEN-KAIOS/provenance/HUMAN_CONTRIBUTION_LOG.json"><span>Human Contributions</span><span>JSON</span></a>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Unauthorized Audit</h2>
-        <p>既有可疑或未完整登錄的 handoff / commit 不回滾、不刪除；先分類、保留證據，再由 Codex / Human 決定處置。</p>
-        <div class="links">
-          <a href="../KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md"><span>Audit Report</span><span>Read</span></a>
-          <a href="../KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json"><span>Audit Log</span><span>JSON</span></a>
-        </div>
-      </article>
+      <article class="card"><h2>員工卡片</h2><div class="table-wrap"><table id="employees"><thead><tr><th>Worker</th><th>Status</th><th>Trust</th><th>Desk</th><th>Task</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>辦公桌健康</h2><div class="table-wrap"><table id="desks"><thead><tr><th>Desk</th><th>Worker</th><th>Health</th><th>Namespace</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>工具權限</h2><div class="table-wrap"><table id="tools"><thead><tr><th>Worker</th><th>Push Main</th><th>Merge</th><th>Handoff</th><th>Secrets</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>招聘候選</h2><div class="table-wrap"><table id="recruit"><thead><tr><th>Candidate</th><th>Role</th><th>Status</th><th>Trial</th></tr></thead><tbody></tbody></table></div></article>
+    </section>
+    <section class="grid">
+      <article class="card"><h2>來源檔案</h2><div class="links">
+        <a href="../KGEN-KAIOS/workforce/employee_roster.json"><span>employee_roster.json</span><span>JSON</span></a>
+        <a href="../KGEN-KAIOS/workforce/attendance_snapshot.json"><span>attendance_snapshot.json</span><span>JSON</span></a>
+        <a href="../KGEN-KAIOS/workforce/daily_attendance.json"><span>daily_attendance.json</span><span>JSON</span></a>
+        <a href="../KGEN-KAIOS/workforce/office_desks.json"><span>office_desks.json</span><span>JSON</span></a>
+        <a href="../KGEN-KAIOS/workforce/tool_access_matrix.json"><span>tool_access_matrix.json</span><span>JSON</span></a>
+      </div></article>
     </section>
   </main>
+  <script>
+    const source = p => '../KGEN-KAIOS/workforce/' + p;
+    const td = v => `<td>${v ?? '-'}</td>`;
+    const cls = s => s === 'ACTIVE_ON_DUTY' ? 'ok' : s === 'REGISTERED_NOT_ACTIVATED' ? 'warn' : s === 'SUSPENDED' || s === 'REVOKED' ? 'bad' : '';
+    async function loadJson(path){ const r = await fetch(source(path)); if(!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
+    Promise.all(['employee_roster.json','office_desks.json','tool_access_matrix.json','recruitment_queue.json'].map(loadJson)).then(([roster, desks, tools, recruitment]) => {
+      const s = roster.summary;
+      const metrics = [['員工記錄',s.total_roster_records],['今日上班',s.today_on_duty],['正在施工',s.working_now],['等待 Review',s.waiting_review],['Blocked',s.blocked],['Suspended',s.suspended],['未啟用',s.registered_not_activated]];
+      document.getElementById('metrics').innerHTML = metrics.map(([k,v]) => `<div class="metric"><span>${k}</span><b>${v}</b></div>`).join('');
+      document.querySelector('#employees tbody').innerHTML = roster.employees.map(e => `<tr>${td('<code>'+e.worker_id+'</code><br>'+e.display_name)}<td class="status ${cls(e.status)}">${e.status}</td>${td(e.trust_level)}${td(e.workspace_name || 'Not assigned')}${td(e.current_task_id || '-')}</tr>`).join('');
+      document.querySelector('#desks tbody').innerHTML = desks.desks.map(d => `<tr>${td('<code>'+d.desk_id+'</code>')}${td(d.worker_id)}${td(d.health_status)}${td(d.handoff_namespace || '-')}</tr>`).join('');
+      document.querySelector('#tools tbody').innerHTML = tools.workers.map(w => `<tr>${td(w.worker_id)}${td(w.access['Git push main'])}${td(w.access['Git merge'])}${td(w.access['Git push handoff'])}${td(w.access['Secrets'])}</tr>`).join('');
+      document.querySelector('#recruit tbody').innerHTML = recruitment.candidates.map(c => `<tr>${td(c.candidate_id)}${td(c.role)}${td(c.status)}${td(c.recommended_trial)}</tr>`).join('');
+    }).catch(err => { document.getElementById('metrics').innerHTML = `<div class="metric"><b>WARN</b><span>${err.message}</span></div>`; });
+  </script>
 </body>
 </html>
-

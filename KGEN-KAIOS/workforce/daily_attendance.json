@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "date": "2026-07-12",
+    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+  },
+  "summary": {
+    "formal_roster_records": 11,
+    "today_on_duty": 1,
+    "working_now": 1,
+    "waiting_review": 0,
+    "blocked": 0,
+    "registered_not_activated": 8,
+    "suspended": 0,
+    "revoked": 0
+  },
+  "today_outputs": [
+    "Created formal employee roster",
+    "Created office desk registry",
+    "Created tool access matrix",
+    "Created attendance standard and snapshot",
+    "Created conflict, performance and recruitment standards",
+    "Updated read-only workforce portal"
+  ],
+  "review_results": [],
+  "violations": [],
+  "tomorrow_recommendations": [
+    "Onboard cursor-02 as QA route validation worker",
+    "Run sandbox trial for security-auditor-01",
+    "Require fresh Boot evidence before cursor-01 claims next task"
+  ]
+}

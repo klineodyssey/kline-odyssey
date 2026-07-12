@@ -116,6 +116,12 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Worker Performance Schema | `KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker performance score schema |
 | Worker Violation Schema | `KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event schema |
 | Worker Audit Log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` | Baseline workforce audit log |
+| Employee Roster | `KGEN-KAIOS/workforce/employee_roster.json` | Current formal employee, candidate, workspace, status and authority source |
+| Office Desks | `KGEN-KAIOS/workforce/office_desks.json` | Logical workspaces, worktrees, branch namespaces and desk health |
+| Tool Access Matrix | `KGEN-KAIOS/workforce/tool_access_matrix.json` | Per-worker tool permission matrix |
+| Attendance Snapshot | `KGEN-KAIOS/workforce/attendance_snapshot.json` | Current duty and attendance state |
+| Daily Attendance | `KGEN-KAIOS/workforce/daily_attendance.json` | Human-readable daily status source for reporting |
+| Recruitment Queue | `KGEN-KAIOS/workforce/recruitment_queue.json` | Candidate hiring queue and sandbox trial status |
 | Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
 
 ## KAIOS Official Video Library

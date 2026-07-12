@@ -42,7 +42,27 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 | `WORKER_AUTONOMY_SCOPE_SCHEMA.json` | Limited autonomy whitelist and forbidden areas |
 | `WORKER_SUSPENSION_SCHEMA.json` | Suspension, revocation, and reinstatement format |
 | `WORKER_AUDIT_LOG.json` | Current baseline workforce audit log |
+| `EMPLOYEE_ROSTER.md` | Human-readable formal employee roster, status and assignment summary |
+| `employee_roster.json` | Machine-readable source of truth for worker identity, status, workspace, task and authority |
+| `OFFICE_DESK_STANDARD.md` | Logical workspace / worktree / branch namespace desk rules |
+| `office_desks.json` | Machine-readable office desk registry |
+| `TOOL_ACCESS_MATRIX.md` | Human-readable tool and permission matrix |
+| `tool_access_matrix.json` | Machine-readable tool access matrix |
+| `ATTENDANCE_STANDARD.md` | Worker check-in, heartbeat, report and check-out event rules |
+| `attendance_log.jsonl` | Append-only attendance event baseline |
+| `attendance_snapshot.json` | Current duty status snapshot |
+| `DAILY_ATTENDANCE_REPORT.md` | Human-readable daily attendance report |
+| `daily_attendance.json` | Machine-readable daily attendance summary |
+| `WORKER_CONFLICT_PROTOCOL.md` | Conflict, duplicate work and unauthorized change handling protocol |
+| `PERFORMANCE_AND_DISCIPLINE_STANDARD.md` | Performance, discipline and reward rules |
+| `RECRUITMENT_STANDARD.md` | Recruitment and sandbox trial workflow |
+| `recruitment_queue.json` | Machine-readable candidate queue |
+| `EMPLOYEE_APPLICATION_TEMPLATE.md` | Application template for new AI or Human workers |
 
 ## Non-Negotiable Rule
 
 No worker, including Senior Trusted workers, may bypass protected paths, contract review, wallet / bridge safety, Runtime CURRENT governance, Canon, Boot, legal review, security review, or Codex-controlled main merge.
+
+## Current Workforce Snapshot
+
+The current roster is maintained in `employee_roster.json`. As of this baseline, Codex is on duty, `cursor-01` is registered but idle, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists.

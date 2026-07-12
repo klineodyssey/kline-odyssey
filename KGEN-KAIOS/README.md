@@ -101,6 +101,11 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 | `workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker quality and promotion metrics |
 | `workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event record |
 | `workforce/WORKER_AUDIT_LOG.json` | Baseline audit log |
+| `workforce/employee_roster.json` | Current employee roster and duty status |
+| `workforce/office_desks.json` | Logical workspace and desk registry |
+| `workforce/tool_access_matrix.json` | Tool permission matrix |
+| `workforce/attendance_snapshot.json` | Current attendance snapshot |
+| `workforce/recruitment_queue.json` | Candidate hiring queue |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
 

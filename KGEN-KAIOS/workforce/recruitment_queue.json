@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-12",
+    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+  },
+  "workflow": ["APPLIED", "IDENTITY_CHECK", "CAPABILITY_TEST", "SANDBOX_TRIAL", "CODEX_REVIEW", "PROBATION", "ACTIVE_EMPLOYEE", "REJECTED", "SUSPENDED"],
+  "candidates": [
+    {"candidate_id":"cursor-02","role":"QA / route validation worker","status":"APPLIED","recommended_trial":"Validate Pages routes and JSON parse without editing protected paths","risk_limit":"R0-R1"},
+    {"candidate_id":"security-auditor-01","role":"Security, secrets and protected path auditor","status":"APPLIED","recommended_trial":"Read-only protected path and secret scan","risk_limit":"R0 read-only"},
+    {"candidate_id":"data-engineer-01","role":"JSON, Schema, Universe Map and data pipeline worker","status":"APPLIED","recommended_trial":"Validate schema/example consistency","risk_limit":"R0-R1"},
+    {"candidate_id":"frontend-agent-01","role":"Portal, mobile and Pages frontend worker","status":"APPLIED","recommended_trial":"Fix one non-protected visual issue on handoff branch","risk_limit":"R0-R1"},
+    {"candidate_id":"research-agent-01","role":"Research, specification and R&D suggestion worker","status":"APPLIED","recommended_trial":"Produce research report only; no code edits","risk_limit":"R0"},
+    {"candidate_id":"human-engineer-01","role":"Human environment, network and deployment assistant","status":"IDENTITY_CHECK","recommended_trial":"Assist with local environment verification under Human control","risk_limit":"Human-approved only"}
+  ]
+}
