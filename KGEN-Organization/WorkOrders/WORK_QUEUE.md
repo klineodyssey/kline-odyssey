@@ -110,7 +110,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
 | ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
 | ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
-| ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
+| ORG-P2-009 | REVIEW | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
 | ORG-P2-010 | OPEN | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
 | ORG-P2-011 | OPEN | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
 | ORG-P2-012 | OPEN | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
