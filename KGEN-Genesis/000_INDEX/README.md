@@ -6,7 +6,11 @@
 
 This index is the official lookup table for GEN-001 through GEN-012 and reserves GEN-013 through GEN-099 for future Genesis publications.
 
-## Master Index
+> **SUB-INDEX — Genesis Library Portal**
+> Library-level Master Index: [`KGEN_MASTER_LIBRARY_INDEX.md`](../../KGEN_MASTER_LIBRARY_INDEX.md)
+> Decision: ORG-P2-003 D7 (ALIAS). Mirrors `KGEN-Genesis/KGEN_MASTER_INDEX.md`; not the cross-library master.
+
+## Genesis Document Index
 
 | UUID | Document ID | Title | GitHub Path | Version | Status | Level | Dependencies | Related Documents | Last Update | Maintainer |
 |---|---|---|---|---|---|---|---|---|---|---|

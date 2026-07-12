@@ -1,5 +1,9 @@
 # KGEN MASTER_INDEX
 
+> **SUB-INDEX — Repository File Inventory**
+> Library-level Master Index: [`KGEN_MASTER_LIBRARY_INDEX.md`](../KGEN_MASTER_LIBRARY_INDEX.md)
+> Decision: ORG-P2-003 D7 (ALIAS). This file is an AUTOPILOT-generated full repo inventory, not the cross-library master.
+
 Generated: 2026-07-05
 Mode: AUTOPILOT V1.0 documentation only
 
