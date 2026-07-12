@@ -108,7 +108,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
-| ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
+| ORG-P2-007 | REVIEW | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
 | ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
 | ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
 | ORG-P2-010 | OPEN | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
@@ -502,7 +502,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### ORG-P2-007 - Validate Wild Land to cross-universe economy loop
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
