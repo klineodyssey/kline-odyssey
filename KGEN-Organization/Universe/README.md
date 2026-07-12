@@ -9,6 +9,17 @@
 
 Universe 負責 Universe Map、座標、Portal、跨宇宙文明邊界。
 
+## Universe Map Single Source of Truth
+
+| Role | Path | Rule |
+|---|---|---|
+| **Formal Universe Map** | `docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json` | Coordinate SSOT; do not duplicate into Organization folders |
+| Map governance | `docs/maps/README.md` | Shared map layer rules |
+| Map index doc | `docs/KGEN_UNIVERSE_MAP.md` | Inventory and mermaid reference |
+| Physics law (separate) | `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` | Runtime CURRENT — not a map replacement |
+
+Organization standards reference Universe Map by concept; implementations must load coordinates from the formal path above, not invent parallel map files under `KGEN-Organization/`.
+
 ## Cooperation Model
 
 This department receives tasks from Codex or PMO, checks related Canon and indexes, performs only the assigned scope, writes a handoff note, and sends the result to QA and Codex Review. Cross-department work must link the source department and the report path.
