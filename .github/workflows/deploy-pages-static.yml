@@ -73,6 +73,7 @@ jobs:
           copy_file "VERSION"
           copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md"
           copy_file "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+          copy_file "OfficialLinks.json"
           copy_file "KGEN-OFFICIAL-LINKS.json"
           copy_file "KGEN_PUBLIC_INFORMATION_AUDIT.md"
           copy_file "KGEN_LP_LOCK_PUBLIC_PROOF.md"

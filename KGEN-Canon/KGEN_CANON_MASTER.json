@@ -3,13 +3,13 @@
   "status": "Draft for Review",
   "last_update": "2026-07-10",
   "metadata": {
-    "revision": "2026-07-11.provenance-baseline",
-    "last_updated": "2026-07-11",
+    "revision": "2026-07-12.official-social-canonical",
+    "last_updated": "2026-07-12",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
-    "task_id": "KGEN-GOV-BIO-2026-0001",
-    "change_reason": "Add provenance, versioning, and biological evolution governance references.",
+    "source_commit": "d5d784cd97b50afc2e33f5de2a5a16674de50358",
+    "task_id": "KGEN-OFFICIAL-SOCIAL-2026-0001",
+    "change_reason": "Update canonical official links to OfficialLinks.json and restore X / Telegram official entries.",
     "ancestor": "KGEN-Canon/KGEN_CANON_MASTER.json",
     "source_of_truth": true
   },
@@ -161,7 +161,7 @@
     "fair_launch": "No ICO / No IEO / No Presale"
   },
   "official_links": {
-    "manifest": "KGEN-OFFICIAL-LINKS.json",
+    "manifest": "OfficialLinks.json",
     "website": "https://klineodyssey.github.io/kline-odyssey/",
     "github": "https://github.com/klineodyssey/kline-odyssey",
     "boot_current": "https://klineodyssey.github.io/kline-odyssey/boot/",
@@ -180,9 +180,14 @@
     "facebook_community": "https://www.facebook.com/le.tian.di.2025",
     "instagram": "https://www.instagram.com/klineodyssey/",
     "line_official": "https://lin.ee/b8X18F7",
-    "x_status": "UNVERIFIED",
-    "telegram_status": "UNVERIFIED",
-    "whitepaper_final": "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf"
+    "x_status": "VERIFIED",
+    "telegram_status": "VERIFIED",
+    "whitepaper_final": "docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
+    "compatibility_manifest": "KGEN-OFFICIAL-LINKS.json",
+    "x": "https://x.com/klineodyssey",
+    "x_account": "@klineodyssey",
+    "telegram": "https://t.me/KLINEODYSSEY",
+    "telegram_account": "@KLINEODYSSEY"
   },
   "organization_v2": {
     "path": "KGEN-Organization/README.md",

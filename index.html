@@ -699,7 +699,7 @@
         <p class="tagline">Where the Market Becomes the Myth. 花果山台灣以市場、信念、AI 與 Web3 構築可演化的金融文明。</p>
         <div class="hero-actions" aria-label="Primary actions">
           <a class="button primary" href="K線西遊記/index.html">進入宇宙</a>
-          <a class="button dark" href="https://www.youtube.com/@klineodyssey" target="_blank" rel="noopener">YouTube</a>
+          <a class="button dark" href="community/" data-official-link="youtube" data-official-link-replace="true">YouTube</a>
           <a class="button dark" href="KGEN/whitepaper/">Whitepaper</a>
           <a class="button cyan" href="K線西遊記/temples/12345/index.html">12345 五指山</a>
         </div>
@@ -719,7 +719,7 @@
         </div>
         <div class="library-grid">
           <article class="library-card"><h3>宇宙入口</h3><p>KLINE ODYSSEY Universe Portal。</p><div class="link-list"><a href="./"><span>Universe Portal</span><span>V3.0</span></a></div></article>
-          <article class="library-card"><h3>神殿地圖</h3><p>Galaxy Portal 與一圖一神殿入口。</p><div class="link-list"><a href="K蝺正??/index.html"><span>Temple Map</span><span>Portal</span></a></div></article>
+          <article class="library-card"><h3>神殿地圖</h3><p>Galaxy Portal 與一圖一神殿入口。</p><div class="link-list"><a href="K線西遊記/index.html"><span>Temple Map</span><span>Portal</span></a></div></article>
           <article class="library-card"><h3>KAIOS 控制中心</h3><p>Workers、Tasks、Review、Health 唯讀總覽。</p><div class="link-list"><a href="operating-center/"><span>KGEN Operating Center</span><span>Open</span></a><a href="KGEN-KAIOS/dashboard/"><span>KAIOS Dashboard</span><span>V7.2</span></a></div></article>
           <article class="library-card"><h3>AI 公司</h3><p>Codex Dispatcher 與 Cursor handoff 工作制度。</p><div class="link-list"><a href="ai-company/"><span>AI Company</span><span>Open</span></a><a href="KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md"><span>Codex Review</span><span>Log</span></a></div></article>
           <article class="library-card"><h3>生命體演化治理</h3><p>Organism Registry、Evolution Lineage、Version / Provenance、Agent Contribution 與 R&D Suggestions。</p><div class="link-list"><a href="evolution-governance/"><span>Evolution Governance</span><span>Open</span></a><a href="KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json"><span>Author Registry</span><span>JSON</span></a></div></article>
@@ -900,7 +900,7 @@
       <div class="section-inner">
         <div class="section-heading">
           <h2>KGEN OFFICIAL INFORMATION</h2>
-          <p>正式公開資料由 <code>KGEN-OFFICIAL-LINKS.json</code> 統一維護；首頁提供玩家、持有人、合作方與審核方可直接確認的核心資訊。</p>
+          <p>正式公開資料由 <code>OfficialLinks.json</code> 統一維護；首頁提供玩家、持有人、合作方與審核方可直接確認的核心資訊。</p>
         </div>
         <div class="token-grid">
           <article class="token-card">
@@ -934,7 +934,7 @@
               <a href="markets/"><span>Market & Contract</span><span>Open</span></a>
               <a href="liquidity-lock/"><span>Liquidity Lock</span><span>VERIFYING</span></a>
               <a href="security/"><span>Security Notice</span><span>Read</span></a>
-              <a href="KGEN-OFFICIAL-LINKS.json"><span>Official Links Manifest</span><span>JSON</span></a>
+              <a href="OfficialLinks.json"><span>Official Links Manifest</span><span>JSON</span></a>
             </div>
           </article>
         </div>
@@ -1004,18 +1004,9 @@
       <div class="section-inner">
         <div class="section-heading">
           <h2>Official Community</h2>
-          <p>正式社群入口由 KGEN-OFFICIAL-LINKS.json 統一維護。X / Telegram 目前只保留為 UNVERIFIED 候選，不顯示為正式按鈕。</p>
+          <p>正式社群入口由 <code>OfficialLinks.json</code> 統一維護。X 與 Telegram 已列入官方固定入口，所有按鈕由 manifest 讀取。</p>
         </div>
-        <div class="community-grid">
-          <div class="community-card"><a href="https://www.tiktok.com/@klineodyssey" target="_blank" rel="noopener"><span>TikTok</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://youtube.com/@klineodyssey" target="_blank" rel="noopener"><span>YouTube</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://www.facebook.com/profile.php?id=61583248810891" target="_blank" rel="noopener"><span>Facebook Page</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://www.facebook.com/le.tian.di.2025" target="_blank" rel="noopener"><span>Facebook Community</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://www.instagram.com/klineodyssey/" target="_blank" rel="noopener"><span>Instagram</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://lin.ee/b8X18F7" target="_blank" rel="noopener"><span>LINE</span><span>Official</span></a></div>
-          <div class="community-card"><a href="https://github.com/klineodyssey/kline-odyssey" target="_blank" rel="noopener"><span>GitHub</span><span>Source</span></a></div>
-          <div class="community-card"><a href="community/"><span>Community Center</span><span>Open</span></a></div>
-        </div>
+        <div class="community-grid" data-official-links="x,telegram,tiktok,youtube,facebook_page,facebook_community,instagram,line_official,github,community"></div>
       </div>
     </section>
 
@@ -1048,7 +1039,9 @@
       <p>PrimeForge 創世，讓市場成為神話，讓文明在 K 線、AI、信念與鏈上紀錄中繼續演化。</p>
       <p><strong>花果山台灣・信念不滅・市場無界</strong></p>
       <p>KLINE ODYSSEY - Where the Market Becomes the Myth.</p>
+      <div class="community-grid" style="margin-top:16px" data-official-links="x,telegram,youtube,tiktok,facebook_page,instagram,line_official,github" data-official-links-show-status="false"></div>
     </div>
   </footer>
+  <script src="assets/official-links.js" data-manifest="OfficialLinks.json"></script>
 </body>
 </html>
