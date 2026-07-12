@@ -106,6 +106,11 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 | `workforce/tool_access_matrix.json` | Tool permission matrix |
 | `workforce/attendance_snapshot.json` | Current attendance snapshot |
 | `workforce/recruitment_queue.json` | Candidate hiring queue |
+| `workforce/agent_registry.json` | Workforce V2 Agent-per-employee registry |
+| `workforce/desk_registry.json` | Workforce V2 logical desk registry |
+| `workforce/department_registry.json` | Workforce V2 department staffing registry |
+| `workforce/agent_runtime_status.json` | Workforce V2 runtime status snapshot |
+| `workforce/agent_daily_report.json` | Workforce V2 daily status report |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
 

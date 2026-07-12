@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V2-2026-0001",
+    "base_commit": "3e236b33dc1265a5343f0ed241564f00492adcd4",
+    "source_of_truth": true,
+    "purpose": "Every Agent is represented as one employee with permanent Employee UUID and desk assignment. V1 files are preserved as compatibility records.",
+    "privacy": "Logical workspaces only; no real local paths, tokens, IPs, secrets or private credentials."
+  },
+  "snapshot_at": "2026-07-13",
+  "status_summary": {
+    "ACTIVE_ON_DUTY": 1,
+    "ACTIVE_IDLE": 2,
+    "WAITING": 6,
+    "OFFLINE": 6,
+    "SUSPENDED": 0,
+    "ARCHIVED": 0
+  },
+  "currently_working_agents": [
+    {
+      "employee_uuid": "EMP-000001",
+      "agent_id": "codex-agent-0001",
+      "legacy_worker_id": "codex-gm-01",
+      "name": "Codex General Manager",
+      "agent_type": "Codex",
+      "status": "ACTIVE_ON_DUTY",
+      "activation_state": "ACTIVE",
+      "department": "Operations",
+      "office_desk": "Desk-001",
+      "project": "KGEN Workforce V2",
+      "git_branch": "codex/workforce-roster",
+      "tool_profile": "codex-system-maintainer",
+      "current_workorder": "KGEN-WORKFORCE-V2-2026-0001",
+      "creation_time": "2026-07-11",
+      "last_activity_at": "2026-07-13",
+      "last_commit": "3e236b3",
+      "performance_score": 98,
+      "work_log": "KGEN-KAIOS/workforce/DAILY_ATTENDANCE_REPORT.md"
+    }
+  ],
+  "current_commits": [
+    {
+      "agent_id": "codex-agent-0001",
+      "commit_sha": "3e236b3",
+      "message": "docs(workforce): add employee roster and attendance system",
+      "status": "LOCAL_AHEAD_READY_FOR_PUSH"
+    }
+  ],
+  "current_prs": [],
+  "errors": [
+    {
+      "type": "NETWORK_PUSH_BLOCKED",
+      "status": "OBSERVED_PREVIOUSLY",
+      "notes": "Prior git push failed because github.com:443 was unreachable from local environment."
+    }
+  ]
+}

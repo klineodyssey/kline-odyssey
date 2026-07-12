@@ -178,9 +178,14 @@ KGEN now tracks task source, AI / Human authorship, file metadata, biological ta
 KGEN now requires formal worker registration, trust level checks, credential evidence, branch authorization, report provenance, and Codex review before any AI or Human worker may claim official tasks.
 
 - Public portal: [workforce/](workforce/)
+- Workforce V2 Agent Registry: [KGEN-KAIOS/workforce/agent_registry.json](KGEN-KAIOS/workforce/agent_registry.json)
+- Workforce V2 Desk Registry: [KGEN-KAIOS/workforce/desk_registry.json](KGEN-KAIOS/workforce/desk_registry.json)
+- Workforce V2 Department Registry: [KGEN-KAIOS/workforce/department_registry.json](KGEN-KAIOS/workforce/department_registry.json)
 - Worker Registry: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
 - Workforce schemas: [KGEN-KAIOS/workforce/](KGEN-KAIOS/workforce/)
 - Unauthorized contribution audit: [KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md](KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md)
+
+Workforce V2 maps every Agent work unit to one permanent employee UUID. `cursor-01` is preserved as a legacy worker ID and mapped to `cursor-agent-0001`; future Cursor workers use `cursor-agent-0002` through `cursor-agent-9999`.
 
 ### KAIOS Official Video Library
 

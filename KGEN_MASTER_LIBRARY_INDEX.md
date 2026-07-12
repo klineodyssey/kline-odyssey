@@ -122,6 +122,12 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Attendance Snapshot | `KGEN-KAIOS/workforce/attendance_snapshot.json` | Current duty and attendance state |
 | Daily Attendance | `KGEN-KAIOS/workforce/daily_attendance.json` | Human-readable daily status source for reporting |
 | Recruitment Queue | `KGEN-KAIOS/workforce/recruitment_queue.json` | Candidate hiring queue and sandbox trial status |
+| Agent Workforce V2 Standard | `KGEN-KAIOS/workforce/AGENT_WORKFORCE_V2_STANDARD.md` | Agent-per-employee identity, UUID, desk and concurrency rules |
+| Agent Registry | `KGEN-KAIOS/workforce/agent_registry.json` | V2 Agent employee registry with permanent employee UUIDs |
+| Desk Registry | `KGEN-KAIOS/workforce/desk_registry.json` | V2 per-Agent desk registry |
+| Department Registry | `KGEN-KAIOS/workforce/department_registry.json` | V2 department staffing registry |
+| Agent Runtime Status | `KGEN-KAIOS/workforce/agent_runtime_status.json` | V2 current Agent runtime snapshot |
+| Agent Daily Report | `KGEN-KAIOS/workforce/agent_daily_report.json` | V2 daily workforce operating report |
 | Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
 
 ## KAIOS Official Video Library

@@ -30,6 +30,8 @@
       <article class="card"><h2>辦公桌健康</h2><div class="table-wrap"><table id="desks"><thead><tr><th>Desk</th><th>Worker</th><th>Health</th><th>Namespace</th></tr></thead><tbody></tbody></table></div></article>
       <article class="card"><h2>工具權限</h2><div class="table-wrap"><table id="tools"><thead><tr><th>Worker</th><th>Push Main</th><th>Merge</th><th>Handoff</th><th>Secrets</th></tr></thead><tbody></tbody></table></div></article>
       <article class="card"><h2>招聘候選</h2><div class="table-wrap"><table id="recruit"><thead><tr><th>Candidate</th><th>Role</th><th>Status</th><th>Trial</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>V2 Agent 員工</h2><div class="table-wrap"><table id="agents"><thead><tr><th>Employee</th><th>Agent</th><th>Status</th><th>Department</th><th>Desk</th></tr></thead><tbody></tbody></table></div></article>
+      <article class="card"><h2>部門統計</h2><div class="table-wrap"><table id="departments"><thead><tr><th>Department</th><th>Total</th><th>On Duty</th><th>Waiting</th><th>Offline</th></tr></thead><tbody></tbody></table></div></article>
     </section>
     <section class="grid">
       <article class="card"><h2>來源檔案</h2><div class="links">
@@ -38,6 +40,9 @@
         <a href="../KGEN-KAIOS/workforce/daily_attendance.json"><span>daily_attendance.json</span><span>JSON</span></a>
         <a href="../KGEN-KAIOS/workforce/office_desks.json"><span>office_desks.json</span><span>JSON</span></a>
         <a href="../KGEN-KAIOS/workforce/tool_access_matrix.json"><span>tool_access_matrix.json</span><span>JSON</span></a>
+        <a href="../KGEN-KAIOS/workforce/agent_registry.json"><span>agent_registry.json</span><span>V2</span></a>
+        <a href="../KGEN-KAIOS/workforce/desk_registry.json"><span>desk_registry.json</span><span>V2</span></a>
+        <a href="../KGEN-KAIOS/workforce/agent_daily_report.json"><span>agent_daily_report.json</span><span>V2</span></a>
       </div></article>
     </section>
   </main>
@@ -46,14 +51,17 @@
     const td = v => `<td>${v ?? '-'}</td>`;
     const cls = s => s === 'ACTIVE_ON_DUTY' ? 'ok' : s === 'REGISTERED_NOT_ACTIVATED' ? 'warn' : s === 'SUSPENDED' || s === 'REVOKED' ? 'bad' : '';
     async function loadJson(path){ const r = await fetch(source(path)); if(!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
-    Promise.all(['employee_roster.json','office_desks.json','tool_access_matrix.json','recruitment_queue.json'].map(loadJson)).then(([roster, desks, tools, recruitment]) => {
+    Promise.all(['employee_roster.json','office_desks.json','tool_access_matrix.json','recruitment_queue.json','agent_registry.json','department_registry.json','agent_daily_report.json'].map(loadJson)).then(([roster, desks, tools, recruitment, agents, departments, agentDaily]) => {
       const s = roster.summary;
-      const metrics = [['員工記錄',s.total_roster_records],['今日上班',s.today_on_duty],['正在施工',s.working_now],['等待 Review',s.waiting_review],['Blocked',s.blocked],['Suspended',s.suspended],['未啟用',s.registered_not_activated]];
+      const d = agentDaily.totals;
+      const metrics = [['總員工數',agents.summary.total_agents],['今日上班',d.on_duty],['今日待命',d.standby],['今日休假',d.off_duty],['目前 Commit',d.commit_count],['目前 PR',d.pr_count],['工作中 Agent',d.working_agents],['錯誤數',d.error_count]];
       document.getElementById('metrics').innerHTML = metrics.map(([k,v]) => `<div class="metric"><span>${k}</span><b>${v}</b></div>`).join('');
       document.querySelector('#employees tbody').innerHTML = roster.employees.map(e => `<tr>${td('<code>'+e.worker_id+'</code><br>'+e.display_name)}<td class="status ${cls(e.status)}">${e.status}</td>${td(e.trust_level)}${td(e.workspace_name || 'Not assigned')}${td(e.current_task_id || '-')}</tr>`).join('');
       document.querySelector('#desks tbody').innerHTML = desks.desks.map(d => `<tr>${td('<code>'+d.desk_id+'</code>')}${td(d.worker_id)}${td(d.health_status)}${td(d.handoff_namespace || '-')}</tr>`).join('');
       document.querySelector('#tools tbody').innerHTML = tools.workers.map(w => `<tr>${td(w.worker_id)}${td(w.access['Git push main'])}${td(w.access['Git merge'])}${td(w.access['Git push handoff'])}${td(w.access['Secrets'])}</tr>`).join('');
       document.querySelector('#recruit tbody').innerHTML = recruitment.candidates.map(c => `<tr>${td(c.candidate_id)}${td(c.role)}${td(c.status)}${td(c.recommended_trial)}</tr>`).join('');
+      document.querySelector('#agents tbody').innerHTML = agents.agents.map(a => `<tr>${td('<code>'+a.employee_uuid+'</code>')}${td('<code>'+a.agent_id+'</code><br>'+a.name)}<td class="status ${cls(a.status)}">${a.status}</td>${td(a.department)}${td(a.office_desk)}</tr>`).join('');
+      document.querySelector('#departments tbody').innerHTML = departments.departments.map(dep => `<tr>${td(dep.department)}${td(dep.total_agents)}${td(dep.on_duty)}${td(dep.waiting)}${td(dep.offline)}</tr>`).join('');
     }).catch(err => { document.getElementById('metrics').innerHTML = `<div class="metric"><b>WARN</b><span>${err.message}</span></div>`; });
   </script>
 </body>

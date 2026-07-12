@@ -58,6 +58,12 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 | `RECRUITMENT_STANDARD.md` | Recruitment and sandbox trial workflow |
 | `recruitment_queue.json` | Machine-readable candidate queue |
 | `EMPLOYEE_APPLICATION_TEMPLATE.md` | Application template for new AI or Human workers |
+| `AGENT_WORKFORCE_V2_STANDARD.md` | V2 rule: every Agent work unit is one employee with permanent UUID |
+| `agent_registry.json` | V2 machine-readable Agent employee registry |
+| `desk_registry.json` | V2 per-Agent office desk registry |
+| `department_registry.json` | V2 department registry and staffing counts |
+| `agent_runtime_status.json` | V2 runtime status snapshot for current working agents, commits, PRs and errors |
+| `agent_daily_report.json` | V2 daily workforce report |
 
 ## Non-Negotiable Rule
 
@@ -66,3 +72,7 @@ No worker, including Senior Trusted workers, may bypass protected paths, contrac
 ## Current Workforce Snapshot
 
 The current roster is maintained in `employee_roster.json`. As of this baseline, Codex is on duty, `cursor-01` is registered but idle, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists.
+
+## Workforce V2 Agent Model
+
+V2 preserves the V1 files and adds `agent_registry.json` as the current Agent-per-employee source. `cursor-01` is not deleted; it is mapped as the legacy worker ID for `cursor-agent-0001`. New Cursor work units must use `cursor-agent-0002`, `cursor-agent-0003`, and so on. Candidates remain `WAITING` or `OFFLINE` until Boot, desk, claim, branch, report and review evidence exists.
