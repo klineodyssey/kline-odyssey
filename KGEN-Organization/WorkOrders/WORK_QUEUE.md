@@ -114,7 +114,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
 | ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
 | ORG-P2-010 | OPEN | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
-| ORG-P2-011 | OPEN | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
+| ORG-P2-011 | REVIEW | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
 | ORG-P2-012 | OPEN | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
 | ORG-P2-013 | OPEN | Cursor | Codex | P1 | Game | KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md |
 | ORG-P2-014 | OPEN | Cursor | Codex | P0 | Runtime | KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md |
@@ -710,7 +710,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### ORG-P2-011 - Define NPC evolution constraints without changing runtime code
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
