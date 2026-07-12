@@ -9,7 +9,7 @@
     "source_commit": "d5d784cd97b50afc2e33f5de2a5a16674de50358",
     "task_id": "KGEN-OFFICIAL-SOCIAL-2026-0001",
     "change_reason": "Promote X and Telegram to official canonical entries and make OfficialLinks.json the public link source of truth.",
-    "source_of_truth": false,
+    "source_of_truth": true,
     "canonical_file": "OfficialLinks.json",
     "taxonomy": {
       "domain": "KGEN Governance",
@@ -23,9 +23,7 @@
     },
     "compatibility_aliases": [
       "KGEN-OFFICIAL-LINKS.json"
-    ],
-    "alias_file": "KGEN-OFFICIAL-LINKS.json",
-    "alias_note": "Compatibility mirror only. New website code reads OfficialLinks.json."
+    ]
   },
   "token": {
     "project": "KLINE GENESIS",

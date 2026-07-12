@@ -13,16 +13,10 @@
     <div class="top"><a class="brand" href="../">KLINE ODYSSEY</a><a class="button" href="../">返回首頁</a></div>
     <p class="pill">Community / Verified Channels</p>
     <h1>Official Community</h1>
-    <p class="muted">以下是目前可公開顯示的正式社群入口。X 與 Telegram 只在歷史文件中出現候選網址，未確認前不列為正式按鈕。</p>
-    <div class="grid">
-      <section class="card"><h2>TikTok</h2><a class="button primary" href="https://www.tiktok.com/@klineodyssey" target="_blank" rel="noopener">Open TikTok</a></section>
-      <section class="card"><h2>YouTube</h2><a class="button primary" href="https://youtube.com/@klineodyssey" target="_blank" rel="noopener">Open YouTube</a></section>
-      <section class="card"><h2>Facebook Page</h2><a class="button primary" href="https://www.facebook.com/profile.php?id=61583248810891" target="_blank" rel="noopener">Open Page</a></section>
-      <section class="card"><h2>Facebook Community</h2><a class="button" href="https://www.facebook.com/le.tian.di.2025" target="_blank" rel="noopener">Open Community</a></section>
-      <section class="card"><h2>Instagram</h2><a class="button" href="https://www.instagram.com/klineodyssey/" target="_blank" rel="noopener">Open Instagram</a></section>
-      <section class="card"><h2>LINE Official</h2><a class="button" href="https://lin.ee/b8X18F7" target="_blank" rel="noopener">Open LINE</a></section>
-    </div>
-    <div class="card warn"><b>X / Telegram:</b> 尚未啟用為正式社群入口。候選網址存在於 archive，只能標記 UNVERIFIED。</div>
+    <p class="muted">以下正式社群入口由 <code>OfficialLinks.json</code> 讀取。X / Telegram 已列入 Canonical official links。</p>
+    <div class="grid" data-official-links="x,telegram,tiktok,youtube,facebook_page,facebook_community,instagram,line_official,github,website" data-official-links-card-class="card" data-official-links-anchor-class="button primary"></div>
+    <div class="card warn"><b>Source of Truth:</b> OfficialLinks.json 是唯一官方連結來源；頁面不再硬寫社群網址。</div>
   </main>
+  <script src="../assets/official-links.js" data-manifest="../OfficialLinks.json"></script>
 </body>
 </html>

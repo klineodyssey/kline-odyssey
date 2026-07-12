@@ -120,6 +120,10 @@ a{color:inherit;text-decoration:none}.wrap{max-width:1180px;margin:0 auto;paddin
     <strong>KGEN 5D Production V0.2：</strong>全部前端成品，Demo 模式可玩。App=Organism · Module=Organ · 保證金不足=Organ Decomposition。<br>
     <strong>未修改：</strong>contracts · 12345 wallet/bridge · Boot V1.4 · Runtime CURRENT。
   </div>
+  <div class="note">
+    <strong>Official Links：</strong>本 Portal 的 Website / X / Telegram / YouTube / 社群入口由 <code>../OfficialLinks.json</code> 統一讀取。
+    <div class="btns" style="margin-top:10px" data-official-links="website,x,telegram,youtube,tiktok,facebook_page,instagram,line_official,github" data-official-links-card-class="" data-official-links-anchor-class="btn" data-official-links-show-status="false"></div>
+  </div>
   <div class="footer">KGEN 5D Universe Production Build V0.2 · 樂天帝 ⌖</div>
 </div>
 <script>
@@ -129,5 +133,6 @@ tick();setInterval(tick,1000);
 fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BNBUSDT').then(function(r){return r.json()}).then(function(d){var p='$'+parseFloat(d.lastPrice).toFixed(2);document.getElementById('bnb-price').textContent=p;document.getElementById('hero-bnb').textContent=p}).catch(function(){});
 fetch('./data/kgen-5d-world-map.json').then(function(r){return r.json()}).then(function(d){console.log('[Portal] nodes:',Object.keys(d.nodes||{}).length)}).catch(function(){});
 </script>
+<script src="../assets/official-links.js" data-manifest="../OfficialLinks.json"></script>
 </body>
 </html>
