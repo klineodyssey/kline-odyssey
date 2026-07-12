@@ -103,8 +103,10 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | ORG-P2-003B | DONE | Cursor | Codex | P1 | Architecture | KGEN-AI-Company/reports/ORG-P2-003B_AGENT_REPORT_ROUTING.md |
 | ORG-P2-003C | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
 | ORG-P2-003D | DONE | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
-| ORG-P2-003E | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
-| ORG-P2-003F | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
+| ORG-P2-003E-FIX1 | OPEN | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
+| ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -346,7 +348,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### ORG-P2-003E - Clarify Master Index alias hierarchy
 
-- Status: OPEN
+- Status: REJECTED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -370,10 +372,45 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Confirm the unique Master Index and sub-index/alias roles.
   - Propose minimal wording changes only.
   - Do not modify protected paths.
+- Codex review result:
+  - REJECTED on 2026-07-12.
+  - Handoff branch `origin/cursor-handoff/ORG-P2-003E` was based on stale main `16a384f` and would delete current public route / manifest / workforce files from main.
+  - Do not merge that branch. Rework as `ORG-P2-003E-FIX1` from latest `origin/main`.
+
+### ORG-P2-003E-FIX1 - Rebase Master Index alias hierarchy on current main
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Documentation
+- Branch: `cursor-handoff/ORG-P2-003E-FIX1`
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003E_CODEX_REVIEW.md
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN_MASTER_LIBRARY_INDEX.md
+  - docs/KGEN_MASTER_INDEX.md
+  - KGEN-Genesis/KGEN_MASTER_INDEX.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md
+- Protected paths:
+  - contracts
+  - K蝺正??/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Start from latest `origin/main`.
+  - Preserve all current official public routes and manifests.
+  - Do not delete files added after `761f0e1`.
+  - Submit one WorkOrder only on `cursor-handoff/ORG-P2-003E-FIX1`.
+  - Include full Worker Boot SOP evidence in the report.
 
 ### ORG-P2-003F - Draft 12345 module naming future migration plan
 
-- Status: OPEN
+- Status: REJECTED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -397,6 +434,41 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Draft a migration plan only.
   - Do not modify runtime modules or 12345 files.
   - Include rollback and compatibility requirements.
+- Codex review result:
+  - REJECTED on 2026-07-12.
+  - Handoff branch `origin/cursor-handoff/ORG-P2-003F` was based on stale main `761f0e1` and would delete current public route / manifest files from main.
+  - Do not merge that branch. Rework as `ORG-P2-003F-FIX1` from latest `origin/main`.
+
+### ORG-P2-003F-FIX1 - Rebase 12345 module naming migration plan on current main
+
+- Status: OPEN
+- Owner: Cursor
+- Reviewer: Codex
+- Priority: P2
+- Department: Runtime
+- Branch: `cursor-handoff/ORG-P2-003F-FIX1`
+- Input files:
+  - KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md
+  - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
+  - KGEN-Agent-Office/DO_NOT_TOUCH.md
+  - docs/KGEN_TEMPLE_12345_MAP.md
+  - docs/KGEN_RUNTIME_RULES.md
+- Output report path: KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md
+- Protected paths:
+  - contracts
+  - K蝺正??/temples/12345
+  - wallet
+  - bridge
+  - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
+  - docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+  - docs/physics/final-whitepaper/
+  - KGEN/contracts/KGEN_Token_V7_5_2.sol
+- Acceptance criteria:
+  - Start from latest `origin/main`.
+  - Plan/report only; do not edit `K線西遊記/temples/12345/`.
+  - Preserve all current official public routes and manifests.
+  - Submit one WorkOrder only on `cursor-handoff/ORG-P2-003F-FIX1`.
+  - Include full Worker Boot SOP evidence in the report.
 
 ### ORG-P2-004 - Verify Civilization Core Canon against Genesis Library and Canon JSON
 
