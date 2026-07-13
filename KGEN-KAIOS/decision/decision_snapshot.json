@@ -1,28 +1,31 @@
 {
   "metadata": {
-    "version": "4.0",
+    "version": "4.1",
     "status": "ACTIVE",
-    "updated_at": "2026-07-13T05:54:31+08:00",
+    "updated_at": "2026-07-13T11:45:00+08:00",
     "manager": "codex-gm-01",
-    "task_id": "KAIOS-GM-V4-2026-0001",
-    "source_commit": "fcba675",
+    "task_id": "KAIOS-V11-READINESS-RECOVERY-20260713",
+    "source_commit": "aaf76bedc1ed8c19b2fb083826d23dee69c4faab",
     "source_of_truth": true
   },
   "daily_operation": {
     "date": "2026-07-13",
     "completed": true,
-    "ready_for_human_task": true,
-    "blocking_reasons": [],
+    "ready_for_human_task": false,
+    "v11_readiness": "NOT_READY",
+    "v11_development_started": false,
+    "implementation_workqueue_created": false,
+    "blocking_reasons": ["GitHub TCP 443 and HTTPS unavailable during final closeout"],
     "pending_handoff": 0,
     "pending_review": 0,
     "pending_push": 0,
     "protected_path_alerts": 0
   },
   "decisions": {
-    "today": 5,
+    "today": 10,
     "pending": 0,
-    "approved": 4,
-    "rejected": 1,
+    "approved_or_closed": 8,
+    "rejected": 2,
     "rollback_history": 0
   },
   "attendance": {
@@ -33,13 +36,23 @@
     "blocked": 0
   },
   "workqueue": {
-    "total": 36,
+    "total": 37,
     "open": 25,
     "review": 0,
     "approved": 0,
     "done": 9,
     "rejected": 2,
-    "blocked": 0
+    "blocked": 1
   },
-  "main_commit": "bac1587f586befbcbc31a350e30ed781bcd50b78"
+  "reconciliation": {
+    "visible_handoff_evidence_branches": 21,
+    "pending_handoff_decisions": 0,
+    "local_only_commits": 0,
+    "pending_push_patches": 0,
+    "unapproved_v11_draft_isolated": true
+  },
+  "main_commit": "aaf76bedc1ed8c19b2fb083826d23dee69c4faab",
+  "pages_workflow_run": 29222281458,
+  "pages_result": "success",
+  "network_closeout": "BLOCKED"
 }

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "updated_at": "2026-07-13T12:45:00+08:00",
+    "updated_by": "codex-gm-01",
+    "task_id": "KAIOS-V11-READINESS-RECOVERY-20260713",
+    "source_commit": "PENDING_CLOSEOUT",
+    "source_of_truth": true
+  },
+  "current_mode": "CLOSEOUT_READY",
+  "initial_mode": "NETWORK_WAIT",
+  "network_status": "RECOVERED",
+  "last_github_check": "2026-07-13T12:44:37+08:00",
+  "last_dns_check": "2026-07-13T12:44:37+08:00",
+  "last_pages_check": "2026-07-13T12:44:37+08:00",
+  "health": {
+    "github_tcp_443": "HEALTHY",
+    "github_https": "HEALTHY",
+    "github_https_status": 200,
+    "git_remote": "HEALTHY",
+    "dns": "HEALTHY",
+    "pages": "HEALTHY"
+  },
+  "remote": {
+    "origin_main": "aaf76bedc1ed8c19b2fb083826d23dee69c4faab",
+    "recorded_handoff_tips": 21,
+    "unchanged_handoff_tips": 21,
+    "changed_handoff_tips": 0,
+    "missing_handoff_tips": 0
+  },
+  "pending_closeout_files": 13,
+  "closeout_ready": true,
+  "readiness": "CLOSEOUT_PENDING",
+  "v11_development_started": false,
+  "implementation_workqueue_created": false,
+  "next_action": "Commit declared closeout records, push main, verify Pages, rerun readiness gate, then wait for Human approval."
+}
+

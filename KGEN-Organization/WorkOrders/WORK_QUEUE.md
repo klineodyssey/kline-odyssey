@@ -49,7 +49,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
-| KAIOS-V11-READINESS-RECOVERY-20260713 | IN_PROGRESS | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
+| KAIOS-V11-READINESS-RECOVERY-20260713 | BLOCKED | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -79,7 +79,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### KAIOS-V11-READINESS-RECOVERY-20260713 - Reconcile V11 readiness blockers
 
-- Status: IN_PROGRESS
+- Status: BLOCKED
 - Owner: Codex / codex-gm-01
 - Reviewer: Human / PrimeForge
 - Priority: P0
