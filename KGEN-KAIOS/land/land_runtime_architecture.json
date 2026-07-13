@@ -1,0 +1,83 @@
+{
+  "package": "LAND_RUNTIME_V1",
+  "version": "LAND-RUNTIME-V1.0",
+  "decision_id": "HUMAN-CIV-ECONOMY-BASELINE-001",
+  "architecture_status": "APPROVED",
+  "implementation_status": "NOT_STARTED",
+  "implementation_planning": "HOLD",
+  "workqueue_created": false,
+  "deployment": "DOCUMENTATION_ONLY",
+  "runtime_entities": "ZERO_STATE_PROTOTYPE_ONLY",
+  "player_land_separation": true,
+  "player_land_fields": [
+    "home_parcel",
+    "residence_id",
+    "owned_parcels",
+    "leased_parcels",
+    "farmland_rights",
+    "commercial_rights",
+    "airspace_rights",
+    "orbital_rights",
+    "underground_rights"
+  ],
+  "authority_fields": [
+    "owner_id",
+    "governor_id",
+    "tax_authority_id",
+    "defense_authority_id",
+    "airspace_authority_id",
+    "orbital_authority_id"
+  ],
+  "rights_separation_required": true,
+  "territory_zones": [
+    "CIVIL_ZONE",
+    "RESIDENTIAL_SAFE_ZONE",
+    "NON_WAR_ZONE",
+    "BORDER_ZONE",
+    "CONTESTED_ZONE",
+    "WAR_ELIGIBLE_ZONE",
+    "FRONTIER_ZONE",
+    "WILDERNESS",
+    "RESOURCE_ZONE",
+    "MYTHIC_REALM"
+  ],
+  "residence_protection": {
+    "CORE_HOMELAND": "non_permanent_transfer_by_single_conflict",
+    "RESIDENTIAL_PROTECTED": "non_permanent_transfer_by_single_conflict"
+  },
+  "zone_change_flow": [
+    "Proposal",
+    "Resident Impact Review",
+    "Governance Review",
+    "Human Approval",
+    "Registry Update"
+  ],
+  "war_reallocates": [
+    "governance_right",
+    "tax_collection_right",
+    "customs_right",
+    "transit_right",
+    "resource_quota",
+    "airspace_right",
+    "orbital_slot",
+    "border_control",
+    "outpost_license"
+  ],
+  "war_does_not_confiscate_private_homes": true,
+  "space_path": [
+    "K280",
+    "K411",
+    "K1852",
+    "Orbital Infrastructure",
+    "Lunar Gate",
+    "Moon/K16888"
+  ],
+  "lunar_independent_registry": true,
+  "does_not_redefine_in_civilization_runtime": [
+    "K280",
+    "Parcel",
+    "Coordinate",
+    "Land Ownership Geometry"
+  ],
+  "created_at": "2026-07-13T19:30:00Z"
+}
