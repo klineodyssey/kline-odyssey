@@ -1,0 +1,400 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-13.1",
+    "status": "DRAFT_FOR_HUMAN_REVIEW",
+    "architecture": "RESEARCH_ONLY",
+    "implementation": "NOT_STARTED",
+    "deployment": "NOT_AUTHORIZED",
+    "last_updated": "2026-07-13",
+    "updated_by": {
+      "agent": "Codex",
+      "worker_id": "codex-gm-01"
+    },
+    "reviewed_by": "HUMAN_REVIEW_REQUIRED",
+    "source_commit": "2160366a7f62fd87da243594b1b55a0d8021786c",
+    "task_id": "KAIOS-KERNEL-V1-DESIGN-20260713",
+    "human_decision_id": "HUMAN-KERNEL-V1-001",
+    "change_reason": "Define a machine-readable single-Agent Kernel V1 architecture.",
+    "ancestor": "KGEN-KAIOS/constitution/constitution.json",
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/kernel/kernel_runtime.json",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "RuntimeArchitecture",
+      "class": "AgentKernel",
+      "order": "SingleAgentRuntime",
+      "family": "KAIOS",
+      "genus": "Kernel",
+      "species": "KernelV1RuntimeModel"
+    }
+  },
+  "kernel_id": "KAIOS-KERNEL-V1",
+  "kernel_name": "KAIOS Single-Agent Kernel V1",
+  "runtime_mode": "DESIGN_ONLY",
+  "runtime_instance_limit": 1,
+  "mission_concurrency_limit": 1,
+  "agent": {
+    "agent_id": "KAIOS-AGENT-WUKONG-001",
+    "display_name": "悟空001",
+    "human_owner": "PrimeForge / 樂天帝",
+    "manager_worker_id": "codex-gm-01",
+    "provider_binding": "UNASSIGNED",
+    "runtime_role": "SINGLE_AGENT_KERNEL_PIONEER",
+    "current_state": "OFFLINE",
+    "can_self_assign_mission": false,
+    "can_self_review": false,
+    "can_push_main": false,
+    "can_modify_protected_runtime": false,
+    "can_transfer_real_assets": false
+  },
+  "scope": {
+    "allowed": [
+      "SINGLE_AGENT",
+      "SINGLE_MISSION",
+      "BOOT_VALIDATION",
+      "MEMORY_LOAD",
+      "MISSION_EXECUTION_BOUNDARY",
+      "EVIDENCE_PACKAGE",
+      "INDEPENDENT_REVIEW",
+      "PROTOTYPE_REWARD_RECORD",
+      "SLEEP_CHECKPOINT",
+      "NEXT_DAY_RECOVERY"
+    ],
+    "excluded": [
+      "MULTI_AGENT",
+      "DEPARTMENT_SCHEDULER",
+      "PROVIDER_MARKETPLACE",
+      "AGENT_HIRING",
+      "AUTONOMOUS_WORKORDER_PROMOTION",
+      "PRODUCTION_DEPLOYMENT",
+      "REAL_KGEN_TRANSFER",
+      "REAL_BANKING",
+      "CONTRACT_DEPLOYMENT",
+      "PROTECTED_RUNTIME_MODIFICATION",
+      "V11_IMPLEMENTATION"
+    ]
+  },
+  "states": [
+    {
+      "state": "BOOT",
+      "purpose": "Validate identity, policy, workspace, health and memory sources.",
+      "allows_execution": false
+    },
+    {
+      "state": "READY",
+      "purpose": "Wait for one valid assigned mission.",
+      "allows_execution": false
+    },
+    {
+      "state": "WORKING",
+      "purpose": "Execute actions permitted by the active mission.",
+      "allows_execution": true
+    },
+    {
+      "state": "WAITING",
+      "purpose": "Pause for input, dependency, decision or recoverable resource.",
+      "allows_execution": false
+    },
+    {
+      "state": "REVIEW",
+      "purpose": "Submit evidence to an independent reviewer.",
+      "allows_execution": false
+    },
+    {
+      "state": "REWARD",
+      "purpose": "Record an approved prototype reward event.",
+      "allows_execution": false
+    },
+    {
+      "state": "SLEEP",
+      "purpose": "Checkpoint memory, release claims and close the workday.",
+      "allows_execution": false
+    },
+    {
+      "state": "OFFLINE",
+      "purpose": "Hold no active mission, tools or execution authority.",
+      "allows_execution": false
+    }
+  ],
+  "events": [
+    "WAKE_REQUESTED",
+    "BOOT_PASSED",
+    "BOOT_FAILED",
+    "MISSION_ACCEPTED",
+    "NO_MISSION",
+    "INPUT_REQUIRED",
+    "INPUT_RECEIVED",
+    "EVIDENCE_READY",
+    "REVISION_REQUIRED",
+    "APPROVED",
+    "REJECTED_OR_BLOCKED",
+    "REWARD_RECORDED",
+    "CHECKPOINT_COMPLETE",
+    "EMERGENCY_STOP"
+  ],
+  "transitions": [
+    {
+      "from": "OFFLINE",
+      "event": "WAKE_REQUESTED",
+      "to": "BOOT",
+      "guard": "human_approved_runtime_window"
+    },
+    {
+      "from": "BOOT",
+      "event": "BOOT_PASSED",
+      "to": "READY",
+      "guard": "identity_policy_workspace_memory_health_valid"
+    },
+    {
+      "from": "BOOT",
+      "event": "BOOT_FAILED",
+      "to": "OFFLINE",
+      "guard": "mandatory_gate_failed"
+    },
+    {
+      "from": "READY",
+      "event": "MISSION_ACCEPTED",
+      "to": "WORKING",
+      "guard": "one_valid_assigned_mission"
+    },
+    {
+      "from": "READY",
+      "event": "NO_MISSION",
+      "to": "SLEEP",
+      "guard": "no_claimable_assigned_mission"
+    },
+    {
+      "from": "WORKING",
+      "event": "INPUT_REQUIRED",
+      "to": "WAITING",
+      "guard": "recoverable_wait"
+    },
+    {
+      "from": "WAITING",
+      "event": "INPUT_RECEIVED",
+      "to": "WORKING",
+      "guard": "dependency_revalidated"
+    },
+    {
+      "from": "WORKING",
+      "event": "EVIDENCE_READY",
+      "to": "REVIEW",
+      "guard": "output_and_evidence_complete"
+    },
+    {
+      "from": "WAITING",
+      "event": "EVIDENCE_READY",
+      "to": "REVIEW",
+      "guard": "execution_stopped_and_evidence_complete"
+    },
+    {
+      "from": "REVIEW",
+      "event": "REVISION_REQUIRED",
+      "to": "WORKING",
+      "guard": "reviewer_supplied_scoped_revision"
+    },
+    {
+      "from": "REVIEW",
+      "event": "APPROVED",
+      "to": "REWARD",
+      "guard": "independent_review_passed"
+    },
+    {
+      "from": "REVIEW",
+      "event": "REJECTED_OR_BLOCKED",
+      "to": "SLEEP",
+      "guard": "decision_and_evidence_preserved"
+    },
+    {
+      "from": "REWARD",
+      "event": "REWARD_RECORDED",
+      "to": "SLEEP",
+      "guard": "prototype_ledger_entry_complete"
+    },
+    {
+      "from": "SLEEP",
+      "event": "CHECKPOINT_COMPLETE",
+      "to": "OFFLINE",
+      "guard": "memory_sealed_and_resources_released"
+    },
+    {
+      "from": "WORKING",
+      "event": "EMERGENCY_STOP",
+      "to": "OFFLINE",
+      "guard": "emergency_checkpoint_preserved"
+    },
+    {
+      "from": "WAITING",
+      "event": "EMERGENCY_STOP",
+      "to": "OFFLINE",
+      "guard": "emergency_checkpoint_preserved"
+    }
+  ],
+  "forbidden_transitions": [
+    "OFFLINE->WORKING",
+    "BOOT->WORKING",
+    "READY->REWARD",
+    "WORKING->REWARD",
+    "REVIEW->READY",
+    "SLEEP->WORKING"
+  ],
+  "daily_sequence": [
+    "BOOT",
+    "LOAD_MEMORY",
+    "READ_MISSION",
+    "EXECUTE",
+    "EVIDENCE",
+    "REVIEW",
+    "REWARD",
+    "SLEEP",
+    "NEXT_DAY"
+  ],
+  "timeline": [
+    {
+      "sequence": "T00",
+      "phase": "WAKE_REQUEST",
+      "state": "OFFLINE"
+    },
+    {
+      "sequence": "T01",
+      "phase": "BOOT_VALIDATION",
+      "state": "BOOT"
+    },
+    {
+      "sequence": "T02",
+      "phase": "MEMORY_LOAD",
+      "state": "BOOT"
+    },
+    {
+      "sequence": "T03",
+      "phase": "MISSION_READ",
+      "state": "READY"
+    },
+    {
+      "sequence": "T04",
+      "phase": "MISSION_EXECUTION",
+      "state": "WORKING"
+    },
+    {
+      "sequence": "T05",
+      "phase": "CONTROLLED_WAIT",
+      "state": "WAITING"
+    },
+    {
+      "sequence": "T06",
+      "phase": "INDEPENDENT_REVIEW",
+      "state": "REVIEW"
+    },
+    {
+      "sequence": "T07",
+      "phase": "REWARD_RECORDING",
+      "state": "REWARD"
+    },
+    {
+      "sequence": "T08",
+      "phase": "DAILY_CLOSEOUT",
+      "state": "SLEEP"
+    },
+    {
+      "sequence": "T09",
+      "phase": "POWERED_DOWN",
+      "state": "OFFLINE"
+    }
+  ],
+  "invariants": [
+    {
+      "invariant_id": "KERNEL-V1-INV-001",
+      "rule": "active_agent_count <= 1"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-002",
+      "rule": "active_mission_count <= 1"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-003",
+      "rule": "reward_requires_review_approval"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-004",
+      "rule": "next_day_requires_completed_sleep_or_emergency_checkpoint"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-005",
+      "rule": "every_transition_requires_event_and_evidence"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-006",
+      "rule": "protected_runtime_authority_is_always_false"
+    },
+    {
+      "invariant_id": "KERNEL-V1-INV-007",
+      "rule": "implementation_remains_not_started_until_new_human_approval"
+    }
+  ],
+  "memory_layers": [
+    "IDENTITY_MEMORY",
+    "CANON_MEMORY",
+    "CONSTITUTION_MEMORY",
+    "MISSION_MEMORY",
+    "WORKING_MEMORY",
+    "EVIDENCE_MEMORY",
+    "REVIEW_MEMORY",
+    "REWARD_MEMORY",
+    "FAILURE_MEMORY"
+  ],
+  "review": {
+    "self_review_allowed": false,
+    "default_reviewer": "Codex",
+    "human_gate": "PrimeForge / 樂天帝",
+    "outcomes": [
+      "APPROVED",
+      "NEEDS_REVISION",
+      "REJECTED",
+      "BLOCKED"
+    ],
+    "reward_requires": "APPROVED"
+  },
+  "reward": {
+    "mode": "PROTOTYPE_INTERNAL_LEDGER",
+    "allowed_units": [
+      "MERIT_POINT",
+      "TEMPLE_ENERGY",
+      "GAME_CREDIT"
+    ],
+    "real_kgen_transfer": false,
+    "real_money_transfer": false,
+    "human_approval_required_for_irreversible_transfer": true
+  },
+  "protected_paths": [
+    "contracts/",
+    "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+    "wallet/",
+    "bridge/",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "K線西遊記/temples/12345/",
+    "docs/physics/final-whitepaper/"
+  ],
+  "design_files": [
+    "KGEN-KAIOS/kernel/KERNEL_V1.md",
+    "KGEN-KAIOS/kernel/kernel_runtime.json",
+    "KGEN-KAIOS/kernel/kernel_boot_sequence.md",
+    "KGEN-KAIOS/kernel/kernel_memory_model.md",
+    "KGEN-KAIOS/kernel/kernel_sleep_cycle.md",
+    "KGEN-KAIOS/kernel/kernel_task_runtime.md",
+    "KGEN-KAIOS/kernel/kernel_reward_runtime.md",
+    "KGEN-KAIOS/kernel/kernel_review_runtime.md"
+  ],
+  "review_gate": {
+    "required": true,
+    "reviewer": "Human Final Authority",
+    "next_allowed_decisions": [
+      "APPROVE_KERNEL_V1_ARCHITECTURE",
+      "REQUEST_KERNEL_V1_REVISION",
+      "REJECT_KERNEL_V1_ARCHITECTURE",
+      "HOLD_KERNEL_V1"
+    ],
+    "architecture_approval_implies_implementation_approval": false
+  }
+}

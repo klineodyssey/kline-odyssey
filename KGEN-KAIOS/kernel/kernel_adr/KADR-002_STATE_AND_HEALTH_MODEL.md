@@ -1,0 +1,56 @@
+---
+KADR: "KADR-002"
+TITLE: "State and Health Model"
+VERSION: "1.0"
+REVISION: "2026-07-13.1"
+STATUS: "PROPOSED"
+CLASSIFICATION: "PARTIAL_ACCEPT"
+TARGET: "KERNEL_V1 / KERNEL_V1_1"
+IMPLEMENTATION: "NOT_STARTED"
+HUMAN_REVIEW: "REQUIRED"
+SOURCE_REVIEW_ID: "GROK-KERNEL-INDEPENDENT-REVIEW-20260713"
+LAST_UPDATED: "2026-07-13"
+UPDATED_BY: "Codex / codex-gm-01"
+REVIEWED_BY: "HUMAN_REVIEW_REQUIRED"
+SOURCE_COMMIT: "2160366a7f62fd87da243594b1b55a0d8021786c"
+TASK_ID: "KAIOS-KERNEL-V1-REVIEW-RESOLUTION-20260713"
+CHANGE_REASON: "Separate lifecycle state from health and administrative state."
+ANCESTOR: "KGEN-KAIOS/kernel/KERNEL_ARCHITECTURE_REVIEW_RESOLUTION.md"
+SOURCE_OF_TRUTH: false
+DOMAIN: KGENVERSE
+KINGDOM: CivilizationLifeform
+PHYLUM: ArchitectureGovernance
+CLASS: KernelADR
+ORDER: SingleAgentKernel
+FAMILY: KAIOS
+GENUS: KernelADR
+SPECIES: StateAndHealthDecision
+CANONICAL_FILE: "KGEN-KAIOS/kernel/kernel_adr/KADR-002_STATE_AND_HEALTH_MODEL.md"
+---
+
+# KADR-002: State and Health Model
+
+## Context
+
+Grok 建議新增 ERROR、FAILED、CRASHED、RECOVERING、SUSPENDED、TERMINATED。這些詞同時包含 lifecycle、health、administration 與 terminal semantics。
+
+## Decision
+
+保留八態：
+
+`BOOT READY WORKING WAITING REVIEW REWARD SLEEP OFFLINE`
+
+不將六個建議詞加入 lifecycle state machine。
+
+V1.1 可研究兩個正交欄位：
+
+- `health_state`: HEALTHY、DEGRADED、ERROR、CRASHED、RECOVERING。
+- `administrative_state`: ACTIVE、SUSPENDED、TERMINATED。
+
+## Rationale
+
+正交模型可表達「WORKING + DEGRADED」或「OFFLINE + SUSPENDED」，不需要複製大量 transition。
+
+## Consequences
+
+V1 保持可讀與 deterministic；V1.1 必須定義欄位交互 guard，不能讓 SUSPENDED Agent 進入 WORKING。

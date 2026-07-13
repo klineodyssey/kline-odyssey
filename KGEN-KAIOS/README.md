@@ -24,6 +24,26 @@ Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.
 
 Constitution status is `ACTIVE / READY`. V11 Phase 1, Implementation and Deployment remain `NOT STARTED / HOLD`; this governance publication does not create an Implementation WorkQueue.
 
+## Kernel V1 Design
+
+Human Decision `HUMAN-KERNEL-V1-001` authorizes research and design for the first single-Agent KAIOS Kernel. The sole Agent is `悟空001`; its daily lifecycle is Boot, Load Memory, Read Mission, Execute, Evidence, Review, Reward, Sleep and Next Day.
+
+| File | Purpose |
+|---|---|
+| `kernel/KERNEL_V1.md` | Kernel timeline, lifecycle, state machine, scope and Human review gate |
+| `kernel/kernel_runtime.json` | Machine-readable single-Agent states, transitions and invariants |
+| `kernel/kernel_boot_sequence.md` | Daily identity, policy, workspace, memory and health gates |
+| `kernel/kernel_memory_model.md` | Traceable memory layers, retention and recovery |
+| `kernel/kernel_task_runtime.md` | One-Mission admission, execution, evidence and stop rules |
+| `kernel/kernel_review_runtime.md` | Independent Review before Reward |
+| `kernel/kernel_reward_runtime.md` | Prototype / Internal Ledger reward boundary |
+| `kernel/kernel_sleep_cycle.md` | Mandatory checkpoint, shutdown and next-day recovery |
+| `kernel/KERNEL_ARCHITECTURE_REVIEW_RESOLUTION.md` | Grok review resolution, readiness and V1 / V1.1 / V2 roadmap |
+| `kernel/kernel_architecture_review_resolution.json` | Machine-readable topic classifications and Human gate |
+| `kernel/kernel_adr/` | KADR-001 through KADR-010 |
+
+Kernel V1 is `UNDER_REVIEW / RESEARCH_ONLY`. The independent Review Resolution is ready for Human decision. Implementation and Deployment are `NOT_STARTED`; no executable, service, scheduler, database or Implementation WorkQueue has been created.
+
 ## Permanent Public Entries
 
 | Entry | URL | Purpose |

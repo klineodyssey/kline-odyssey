@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "version": "1.0",
-    "revision": "2026-07-13.1",
+    "version": "1.1",
+    "revision": "2026-07-13.2",
     "status": "ACTIVE_APPROVED",
-    "last_updated": "2026-07-13T00:00:00+08:00",
+    "last_updated": "2026-07-13T17:15:00+08:00",
     "updated_by": "codex-gm-01",
     "reviewed_by": "human-primeforge / HUMAN-AGB-APPROVAL-001",
-    "source_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
-    "base_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
-    "task_id": "KAIOS-AGB-20260713",
-    "change_reason": "Register architecture review identities, authority boundaries and evidence requirements.",
+    "source_commit": "2160366a7f62fd87da243594b1b55a0d8021786c",
+    "base_commit": "2160366a7f62fd87da243594b1b55a0d8021786c",
+    "task_id": "KAIOS-KERNEL-V1-REVIEW-RESOLUTION-20260713",
+    "change_reason": "Register the Human-transmitted Grok Kernel review and pending Human resolution evidence.",
     "ancestor": "KGEN-KAIOS/V11/architecture_review_resolution.json",
     "source_of_truth": true,
     "canonical_file": "KGEN-KAIOS/governance/architecture_review_registry.json",
@@ -29,6 +29,9 @@
     "PARTIAL_ACCEPT",
     "REJECT",
     "DEFERRED",
+    "DEFER_KERNEL_V1_1",
+    "DEFER_KERNEL_V2",
+    "ALREADY_COVERED",
     "OUT_OF_SCOPE"
   ],
   "reviewers": [
@@ -223,6 +226,54 @@
       "ingested_by": "codex-gm-01",
       "resolution_commit": "cab345b31c05301b7a9f0e749e87650a4869230a",
       "resolution_branch": "origin/codex/v11-genesis-design",
+      "status": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "review_id": "GROK-KERNEL-INDEPENDENT-REVIEW-20260713",
+      "proposal_id": "KAIOS-KERNEL-V1-DESIGN-20260713",
+      "reviewer_id": "grok-independent-review",
+      "reviewer_type": "EXTERNAL_AI_REVIEW_SOURCE",
+      "reviewer_role": "Independent Architecture Reviewer",
+      "workforce_status": "NOT_REGISTERED",
+      "repository_authority": false,
+      "merge_authority": false,
+      "implementation_authority": false,
+      "source": "Human-transmitted Grok Independent Kernel Architecture Review",
+      "source_commit": "2160366a7f62fd87da243594b1b55a0d8021786c",
+      "review_scope": [
+        "supervisor tree",
+        "kernel state machine",
+        "memory",
+        "mission queue",
+        "evidence",
+        "review",
+        "reward",
+        "sleep",
+        "observability",
+        "kernel modules"
+      ],
+      "findings": 10,
+      "risks": [
+        "unbounded restart",
+        "state explosion",
+        "memory provenance",
+        "queue overengineering",
+        "evidence validation gap",
+        "automatic review authority",
+        "reward gaming",
+        "sleep mutation",
+        "telemetry privacy"
+      ],
+      "scalability": [
+        1
+      ],
+      "classification": "INDEPENDENT_REVIEW_COMPLETE",
+      "recommendation": "Retain the single-Agent eight-state Kernel, add minimal safety and evidence contracts, and defer queue, supervisor tree and dream infrastructure.",
+      "conflict_of_interest": "No repository or merge authority; external advisory evidence transmitted by Human.",
+      "submitted_at": "2026-07-13T17:00:00+08:00",
+      "ingested_by": "codex-gm-01",
+      "resolution_commit": null,
+      "resolution_branch": "codex/kernel-v1-design",
       "status": "PENDING_HUMAN_REVIEW"
     }
   ],

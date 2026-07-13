@@ -14,6 +14,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Stable source-of-truth boot entry; public route `/boot/`; ancestor `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` remains preserved |
 | KGEN Operating Center | `operating-center/` | Permanent public control center linking KAIOS, AI Company, WorkQueue, Review Log, Civilization, Economy, Exchange, Wallet, Membership and Library |
 | KAIOS Constitution | `KGEN-KAIOS/constitution/` | Active V1.0 permanent KAIOS governance below Human Final Authority |
+| KAIOS Kernel V1 Design | `KGEN-KAIOS/kernel/` | Research-only single-Agent architecture for 悟空001; Implementation not started |
 | Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
 | Workforce Governance | `workforce/` | Permanent public entry for formal worker registration, trust levels, active claims, violations, suspensions, and contribution history |
 | Official Video Library | `video/` | Official KAIOS / KGEN / KLINE Odyssey video planning library |
@@ -97,6 +98,12 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | KAIOS Constitution | `KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md` | Active ten-chapter KAIOS Constitution V1.0 |
 | KAIOS Constitution JSON | `KGEN-KAIOS/constitution/constitution.json` | Machine-readable authority hierarchy, principles, protected Runtime and current HOLD state |
 | KAIOS Constitution History | `KGEN-KAIOS/constitution/constitution_history.jsonl` | Append-only governance ancestry, ratification and future amendment history |
+| KAIOS Kernel V1 Design | `KGEN-KAIOS/kernel/KERNEL_V1.md` | Single-Agent timeline, lifecycle, state machine and Human review boundary |
+| KAIOS Kernel Runtime Model | `KGEN-KAIOS/kernel/kernel_runtime.json` | Machine-readable eight-state design for 悟空001 |
+| KAIOS Kernel Sub-Runtimes | `KGEN-KAIOS/kernel/` | Boot, Memory, Task, Review, Reward and Sleep research specifications |
+| Kernel Review Resolution | `KGEN-KAIOS/kernel/KERNEL_ARCHITECTURE_REVIEW_RESOLUTION.md` | Codex resolution of the Human-transmitted Grok Kernel review |
+| Kernel Review Resolution JSON | `KGEN-KAIOS/kernel/kernel_architecture_review_resolution.json` | Machine-readable classifications, readiness and roadmap |
+| Kernel ADR | `KGEN-KAIOS/kernel/kernel_adr/` | KADR-001 through KADR-010; all pending Human approval |
 | Architecture Governance Board | `KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md` | Human-approved Board mandate, members, quorum and architecture-to-release flow |
 | Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
 | Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
