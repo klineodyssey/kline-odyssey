@@ -12,6 +12,18 @@ KAIOS is the KGEN AI Operating System. It is not another document library and it
 
 KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machine Canon, Genesis Library, Runtime Library, and SDK Library. It does not replace them. It gives them a working operating model.
 
+## KAIOS Constitution
+
+Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.0 as the permanent highest KAIOS governance document below Human Final Authority. It governs the Architecture Governance Board, ADRs, WorkQueue, Implementation and evolution process without silently rewriting KGEN Official Canon or protected Runtime.
+
+| File | Purpose |
+|---|---|
+| `constitution/KAIOS_CONSTITUTION.md` | Formal ten-chapter Constitution and permanent Human-led governance principles |
+| `constitution/constitution.json` | Machine-readable authority hierarchy, principles, chapters, protected runtime and current state |
+| `constitution/constitution_history.jsonl` | Append-only ratification and amendment lineage |
+
+Constitution status is `ACTIVE / READY`. V11 Phase 1, Implementation and Deployment remain `NOT STARTED / HOLD`; this governance publication does not create an Implementation WorkQueue.
+
 ## Permanent Public Entries
 
 | Entry | URL | Purpose |
@@ -22,6 +34,7 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ | KAIOS / KGEN official video planning library |
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
 | General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
+| KAIOS Constitution | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md | Permanent KAIOS governance below Human Final Authority |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |

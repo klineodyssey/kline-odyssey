@@ -33,6 +33,7 @@ Last optimized: 2026-06-11
 | Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
+| KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
@@ -108,6 +109,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
 | AI Company Automation V5.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
 | KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
+| KAIOS Constitution | [KGEN-KAIOS/constitution/](KGEN-KAIOS/constitution/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md |
 | Architecture Governance Board | [KGEN-KAIOS/governance/](KGEN-KAIOS/governance/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/](KGEN-KAIOS/V11/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
@@ -164,10 +166,15 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Stale Handoff Branch Policy: [KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md](KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md)
 - Codex Pre-Merge Checklist: [KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md](KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md)
 - Worker Registry JSON: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
+- KAIOS Constitution: [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md)
+- Constitution JSON: [KGEN-KAIOS/constitution/constitution.json](KGEN-KAIOS/constitution/constitution.json)
+- Constitution History: [KGEN-KAIOS/constitution/constitution_history.jsonl](KGEN-KAIOS/constitution/constitution_history.jsonl)
 - Architecture Governance Board: [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md)
 - Architecture Review Registry: [KGEN-KAIOS/governance/architecture_review_registry.json](KGEN-KAIOS/governance/architecture_review_registry.json)
 
-The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only. V11 Phase 1 and Implementation remain `NOT STARTED` until a separate Human decision selects `APPROVE_FOR_PHASE_1_PLANNING` or `HOLD_V11`.
+The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only.
+
+Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.0 as `ACTIVE / READY` below Human Final Authority and above WorkQueue, Implementation, ADR and Architecture Proposal.
 
 Human Decision `HUMAN-V11-BASELINE-001` selected `HOLD_V11_FOR_ARCHITECTURE_BASELINE`. V11.0 is now the frozen Architecture baseline; Phase 1 Planning, Implementation and Deployment remain `HOLD`, and no Implementation WorkQueue has been created.
 

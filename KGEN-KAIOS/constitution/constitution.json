@@ -1,0 +1,296 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "constitution_version": "V1.0",
+    "revision": "2026-07-13.1",
+    "status": "ACTIVE",
+    "constitution_readiness": "READY",
+    "last_updated": "2026-07-13",
+    "updated_by": {
+      "agent": "Codex",
+      "worker_id": "codex-gm-01"
+    },
+    "reviewed_by": {
+      "human": "PrimeForge / 樂天帝",
+      "decision_id": "HUMAN-KAIOS-CONSTITUTION-001"
+    },
+    "source_commit": "c619a19955c8c5d39ef83d01c9bbd35f9c7cc0b8",
+    "task_id": "KAIOS-CONSTITUTION-20260713",
+    "change_reason": "Establish the permanent highest KAIOS governance document below Human Final Authority.",
+    "ancestor": "KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md",
+    "source_of_truth": true,
+    "canonical_file": "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "GovernanceDocument",
+      "class": "ConstitutionalGovernance",
+      "order": "HumanLedOperatingSystem",
+      "family": "KAIOS",
+      "genus": "Constitution",
+      "species": "KAIOSConstitution"
+    }
+  },
+  "constitution_id": "KAIOS-CONSTITUTION",
+  "title": "KAIOS Constitution",
+  "human_decision": {
+    "decision_id": "HUMAN-KAIOS-CONSTITUTION-001",
+    "decision": "ESTABLISH_KAIOS_CONSTITUTION",
+    "authority": "Human Final Authority",
+    "authority_holder": "PrimeForge / 樂天帝",
+    "effective_date": "2026-07-13"
+  },
+  "authority": {
+    "highest_authority": "HUMAN_FINAL_AUTHORITY",
+    "constitution_scope": "Highest permanent KAIOS governance below Human Final Authority",
+    "supersedes": [
+      "WORKQUEUE",
+      "IMPLEMENTATION_PLAN",
+      "ARCHITECTURE_DECISION_RECORD",
+      "ARCHITECTURE_PROPOSAL"
+    ],
+    "does_not_silently_rewrite": [
+      "KGEN_OFFICIAL_CANON",
+      "PROTECTED_RUNTIME",
+      "APPROVED_ARCHITECTURE_BASELINE"
+    ],
+    "conflict_resolution": "STOP_AND_ESCALATE_TO_HUMAN_FINAL_AUTHORITY"
+  },
+  "governance_hierarchy": [
+    {
+      "rank": 1,
+      "authority": "HUMAN_FINAL_AUTHORITY",
+      "evidence_required": "Traceable Human Decision"
+    },
+    {
+      "rank": 2,
+      "authority": "KAIOS_CONSTITUTION",
+      "evidence_required": "Active Constitution version and history"
+    },
+    {
+      "rank": 3,
+      "authority": "OFFICIAL_CANON_AND_HUMAN_APPROVED_BASELINES",
+      "evidence_required": "Canon source or Human approval record"
+    },
+    {
+      "rank": 4,
+      "authority": "ARCHITECTURE_RESOLUTION_AND_ADR",
+      "evidence_required": "Review resolution and ADR"
+    },
+    {
+      "rank": 5,
+      "authority": "WORKQUEUE_IMPLEMENTATION_AND_RUNTIME_SPECIFICATION",
+      "evidence_required": "Authorized task and implementation evidence"
+    },
+    {
+      "rank": 6,
+      "authority": "WORKER_AND_AI_OUTPUT",
+      "evidence_required": "Proposal, report, branch, commit and review"
+    }
+  ],
+  "permanent_principles": [
+    {
+      "principle_id": "KAIOS-CONST-001",
+      "name": "Human Final Authority",
+      "rule": "No AI, Agent, Worker, model, board or automation may replace Human final authority."
+    },
+    {
+      "principle_id": "KAIOS-CONST-002",
+      "name": "Architecture Before Implementation",
+      "rule": "Material capability requires reviewed architecture and Human approval before implementation planning or execution."
+    },
+    {
+      "principle_id": "KAIOS-CONST-003",
+      "name": "Review Before Merge",
+      "rule": "No formal modification may merge without applicable evidence, tests and review."
+    },
+    {
+      "principle_id": "KAIOS-CONST-004",
+      "name": "Protected Runtime",
+      "rule": "Protected runtime cannot be modified without explicit scoped Human authorization."
+    },
+    {
+      "principle_id": "KAIOS-CONST-005",
+      "name": "Evidence First",
+      "rule": "Every material modification requires Evidence, ADR and Decision records."
+    },
+    {
+      "principle_id": "KAIOS-CONST-006",
+      "name": "Provider Neutrality",
+      "rule": "KAIOS interfaces describe capabilities and contracts rather than depending on one AI provider."
+    },
+    {
+      "principle_id": "KAIOS-CONST-007",
+      "name": "Civilization Ownership",
+      "rule": "Within Canon, law and external rights, players govern their own civilizations, AI, Agents and data relationships."
+    },
+    {
+      "principle_id": "KAIOS-CONST-008",
+      "name": "Security First",
+      "rule": "Secrets, private keys, seed phrases and credentials never enter the repository."
+    },
+    {
+      "principle_id": "KAIOS-CONST-009",
+      "name": "Backward Compatibility",
+      "rule": "Material versions preserve history and require migration, deprecation and rollback evidence for incompatibility."
+    },
+    {
+      "principle_id": "KAIOS-CONST-010",
+      "name": "Evolution Through Governance",
+      "rule": "Material evolution follows Proposal, Independent Review, Resolution, ADR and Human Approval."
+    }
+  ],
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Mission",
+      "articles": [
+        "Human-led, evidence-based, provider-neutral civilization operating system",
+        "Coordinated system responsibility without transferring final authority",
+        "Public benefit, portability, traceability, safety and long-term compatibility"
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Vision",
+      "articles": [
+        "Player-owned multi-Agent civilization",
+        "Provider-neutral ecosystem",
+        "Governed evolution"
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Core Principles",
+      "articles": [
+        "Human Final Authority",
+        "Architecture Before Implementation",
+        "Review Before Merge",
+        "Evidence First",
+        "Backward Compatibility"
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Architecture Principles",
+      "articles": [
+        "Baseline discipline",
+        "Separation of concerns",
+        "Provider neutrality",
+        "State integrity",
+        "Reversible change"
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "AI Governance Principles",
+      "articles": [
+        "Registered identity",
+        "Least authority",
+        "Explainability",
+        "Human override",
+        "No autonomous high-risk execution"
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Human Authority",
+      "articles": [
+        "Final approval",
+        "Scoped delegation",
+        "Decision accountability",
+        "Human-approved Constitution amendment"
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Protected Runtime",
+      "articles": [
+        "Permanent protection",
+        "No implied authorization",
+        "Evidence-preserving incident handling"
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Security Principles",
+      "articles": [
+        "Security first",
+        "Defense in depth",
+        "Financial and legal boundary",
+        "Fail closed"
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Civilization Principles",
+      "articles": [
+        "Civilization ownership",
+        "Canonical civilization",
+        "Data dignity",
+        "Fair participation"
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Evolution Principles",
+      "articles": [
+        "Evolution Through Governance",
+        "Version and lineage",
+        "Controlled experimentation",
+        "Deprecation and archive",
+        "Current V11 hold"
+      ]
+    }
+  ],
+  "protected_runtime": {
+    "default_policy": "DENY_UNLESS_EXPLICIT_HUMAN_AUTHORIZATION",
+    "paths": [
+      "contracts/",
+      "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "wallet/",
+      "bridge/",
+      "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "K線西遊記/temples/12345/",
+      "docs/physics/final-whitepaper/"
+    ],
+    "secret_classes": [
+      "PRIVATE_KEY",
+      "SEED_PHRASE",
+      "PASSWORD",
+      "API_KEY",
+      "GITHUB_TOKEN",
+      "UNPUBLISHED_CREDENTIAL"
+    ],
+    "incident_action": "BLOCK_PRESERVE_EVIDENCE_AND_ESCALATE"
+  },
+  "architecture_evolution": {
+    "required_flow": [
+      "PROPOSAL",
+      "INDEPENDENT_REVIEW",
+      "ARCHITECTURE_RESOLUTION",
+      "ADR",
+      "HUMAN_APPROVAL",
+      "BASELINE_UPDATE_OR_AUTHORIZED_IMPLEMENTATION"
+    ],
+    "constitution_amendment_requires": [
+      "PROPOSAL",
+      "INDEPENDENT_REVIEW",
+      "ARCHITECTURE_RESOLUTION",
+      "ADR",
+      "HUMAN_APPROVAL",
+      "CONSTITUTION_HISTORY_APPEND"
+    ],
+    "silent_rewrite_allowed": false
+  },
+  "current_state": {
+    "constitution": "READY",
+    "constitution_status": "ACTIVE",
+    "v11_architecture": "ARCHITECTURE_BASELINE_FROZEN",
+    "v11_phase_1": "NOT_STARTED",
+    "implementation": "NOT_STARTED",
+    "deployment": "HOLD",
+    "implementation_workqueue_created": false,
+    "next_gate": "EXPLICIT_HUMAN_DECISION"
+  }
+}

@@ -2,7 +2,7 @@
 
 **Version:** V1.0
 **Status:** Draft for Review
-**Last Update:** 2026-07-10
+**Last Update:** 2026-07-13
 **Maintainer:** KLINE ODYSSEY / PrimeForge
 
 This is the root cross-library index for the stable PrimeForge Boot entry, Operating Center, Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, KAIOS, and Official Whitepaper references.
@@ -13,6 +13,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 |---|---|---|
 | PrimeForge Boot CURRENT | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | Stable source-of-truth boot entry; public route `/boot/`; ancestor `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` remains preserved |
 | KGEN Operating Center | `operating-center/` | Permanent public control center linking KAIOS, AI Company, WorkQueue, Review Log, Civilization, Economy, Exchange, Wallet, Membership and Library |
+| KAIOS Constitution | `KGEN-KAIOS/constitution/` | Active V1.0 permanent KAIOS governance below Human Final Authority |
 | Evolution Governance | `evolution-governance/` | Permanent public entry for organism registry, evolution lineage, version/provenance, agent contribution, and R&D suggestions |
 | Workforce Governance | `workforce/` | Permanent public entry for formal worker registration, trust levels, active claims, violations, suspensions, and contribution history |
 | Official Video Library | `video/` | Official KAIOS / KGEN / KLINE Odyssey video planning library |
@@ -93,6 +94,9 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
 | Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
 | Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |
+| KAIOS Constitution | `KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md` | Active ten-chapter KAIOS Constitution V1.0 |
+| KAIOS Constitution JSON | `KGEN-KAIOS/constitution/constitution.json` | Machine-readable authority hierarchy, principles, protected Runtime and current HOLD state |
+| KAIOS Constitution History | `KGEN-KAIOS/constitution/constitution_history.jsonl` | Append-only governance ancestry, ratification and future amendment history |
 | Architecture Governance Board | `KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md` | Human-approved Board mandate, members, quorum and architecture-to-release flow |
 | Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
 | Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
