@@ -40,6 +40,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
+| KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
@@ -96,6 +97,9 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
 | Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
 | Architecture Review History | `KGEN-KAIOS/governance/architecture_review_history.jsonl` | Append-only review, resolution and Human approval events |
+| V11 Architecture Baseline | `KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md` | Human-frozen V11.0 Architecture scope and Phase 1 HOLD boundary |
+| V11 Architecture Baseline JSON | `KGEN-KAIOS/V11/architecture_baseline.json` | SHA-256 manifest for the 11 Architecture documents, ADRs and review evidence |
+| V11 Architecture Evolution Log | `KGEN-KAIOS/V11/architecture_evolution_log.jsonl` | Append-only Architecture version, proposal, reason, ADR and approval lineage |
 
 ## KAIOS Provenance And Biological Evolution Governance
 

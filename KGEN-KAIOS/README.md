@@ -45,6 +45,19 @@ Human Approval `HUMAN-AGB-APPROVAL-001` establishes the KAIOS Architecture Gover
 
 AGB is approved, while V11 Phase 1 and Implementation remain `NOT STARTED`. ChatGPT is an advisory architect without repository write authority; Grok is an external reviewer without merge authority; Codex remains the Implementation Architect; PrimeForge remains the final Human authority.
 
+## V11.0 Architecture Baseline
+
+Human Decision `HUMAN-V11-BASELINE-001` freezes the reviewed V11 Genesis Design as the V11.0 Architecture Baseline. The baseline includes 11 Architecture documents, ADR-001 through ADR-010, the independent review, Architecture Resolution and AGB Review Registry.
+
+| File | Purpose |
+|---|---|
+| `V11/ARCHITECTURE_BASELINE.md` | Frozen Architecture scope, evolution flow and HOLD boundary |
+| `V11/architecture_baseline.json` | SHA-256 manifest for Architecture documents, ADRs and review evidence |
+| `V11/architecture_evolution_log.jsonl` | Append-only V11 Architecture lineage |
+| `V11/V11_MASTER_INDEX.md` | Frozen Genesis Design index |
+
+V11 Phase 1 Planning, Implementation and Deployment are all `HOLD`. No V11 Implementation WorkQueue exists. Only Architecture Review, Research, Prototype and Sandbox activity is allowed within existing governance and protected-path boundaries.
+
 ## Core Question
 
 Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, Codex, and Human Engineers join the same AI company without redesigning the system?

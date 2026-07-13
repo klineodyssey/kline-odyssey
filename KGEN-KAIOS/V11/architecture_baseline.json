@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "version": "V11.0",
+    "revision": "2026-07-13.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN",
+    "baseline_readiness": "READY",
+    "last_updated": "2026-07-13T16:00:00+08:00",
+    "updated_by": "codex-gm-01",
+    "reviewed_by": "human-primeforge",
+    "source_commit": "feca7da0cb9d2b05de777a7c6612ee113adaf1b3",
+    "design_commit": "fbb40b5fc28fc01a8062ed1ddd2e672db123e46c",
+    "resolution_commit": "cab345b31c05301b7a9f0e749e87650a4869230a",
+    "review_publication_commit": "84d1f30c573e5a18e8d56cbec0ce485426b4782c",
+    "independent_review_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+    "agb_commit": "feca7da0cb9d2b05de777a7c6612ee113adaf1b3",
+    "task_id": "KAIOS-V11-ARCHITECTURE-BASELINE-20260713",
+    "human_decision_id": "HUMAN-V11-BASELINE-001",
+    "change_reason": "Freeze reviewed V11 Genesis Design as the V11.0 Architecture Baseline before Phase 1 planning.",
+    "ancestor": "KGEN-KAIOS/V11/V11_MASTER_INDEX.md",
+    "source_of_truth": true,
+    "canonical_file": "KGEN-KAIOS/V11/architecture_baseline.json",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "ArchitectureGovernance",
+      "class": "FrozenBaseline",
+      "order": "MultiAgentCivilization",
+      "family": "KAIOS",
+      "genus": "V11",
+      "species": "ArchitectureBaselineV11_0"
+    }
+  },
+  "baseline_id": "KAIOS-V11-BASELINE-001",
+  "architecture_version": "V11.0",
+  "v11_status": "ARCHITECTURE_BASELINE_FROZEN",
+  "human_decision": {
+    "decision_id": "HUMAN-V11-BASELINE-001",
+    "decision": "HOLD_V11_FOR_ARCHITECTURE_BASELINE",
+    "approver": "human-primeforge",
+    "approved_scope": "ARCHITECTURE_BASELINE_PUBLICATION_ONLY",
+    "phase_1_planning": "HOLD",
+    "implementation": "HOLD",
+    "deployment": "HOLD",
+    "implementation_workqueue_created": false
+  },
+  "component_counts": {
+    "architecture_documents": 11,
+    "adrs": 10,
+    "adr_indexes": 1,
+    "review_resolution_artifacts": 2,
+    "independent_reviews": 1,
+    "architecture_review_registries": 1
+  },
+  "hash_algorithm": "SHA-256",
+  "architecture_documents": [
+    {
+      "path": "KGEN-KAIOS/V11/SYSTEM_ARCHITECTURE.md",
+      "sha256": "61eec0d40f4b3fc6bac137f713cd5304678d322ed407cef47306fedad783a74a"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/MULTI_AGENT_RUNTIME.md",
+      "sha256": "3b9ddb4d0fad37f3424ec082294ec4f8de2e46b06e2c086361696ba2e89da59e"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/PLAYER_AI_STANDARD.md",
+      "sha256": "58c6ca9adcd7dd11a242144c41d1291f2adcb5a4ed2b2563bdd1da60c1b5dd33"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/PLUGIN_FRAMEWORK.md",
+      "sha256": "e61eed40f4bcb77db97ef82a201cd1e1ec5c880c8a209d29cc6abdc290785cdd"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/PLUGIN_API_DRAFT.md",
+      "sha256": "98ba9d8add54329b3dd27d85bb277744a8fcf348219ea07f538bcfc0358bdef6"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/PLUGIN_MANIFEST_STANDARD.md",
+      "sha256": "a5a64151849cdccd4728c58a1ac677ef7b64f200caa3b6a4c4528894c348465f"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/CIVILIZATION_RUNTIME.md",
+      "sha256": "a7f659f8f094d0cbca06adc4c4a34afd3a75bda57b27ce1fee6c9f83e9922b0b"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/AGENT_RUNTIME.md",
+      "sha256": "5b9a9651c29b2f1398c6c3c21de6fec34b44a5988f408cbf92b7ca02b8bf757d"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/ROADMAP.md",
+      "sha256": "d453204663c5ec887afbbed027300dad5d8591878819dd3f8ceb2ba834f30dcb"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/IMPLEMENTATION_PHASES.md",
+      "sha256": "84166458c8a1dd2b3afa4965100f912b36ff2caabceeef34562214048618c923"
+    },
+    {
+      "path": "KGEN-KAIOS/V11/V11_MASTER_INDEX.md",
+      "sha256": "ca3bf38522aea9d4100ef557af7d62d00f406321e44027edac83c3efbc908dcd"
+    }
+  ],
+  "adrs": [
+    {
+      "adr_id": "ADR-001",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-001_REVIEW_LAYER.md",
+      "sha256": "96ece148338858ddb3bc3a653b55b69cee9221fc9dcfd112f69e093238bc2aa0"
+    },
+    {
+      "adr_id": "ADR-002",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-002_TENANT_ISOLATION.md",
+      "sha256": "625f9a6379c1923070d319cba457b915ac2a8b1329b910550326157fb02f0c58"
+    },
+    {
+      "adr_id": "ADR-003",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-003_STATE_VERSIONING.md",
+      "sha256": "8c60633bedb8f007ff1266a24e3b7075ba2471ddc57362e42fdbd207404ecfc2"
+    },
+    {
+      "adr_id": "ADR-004",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-004_PLUGIN_FRAMEWORK.md",
+      "sha256": "a62ce15f8564182406c33616b4cedb765f3a722527fb08fffdaef1735adc60c9"
+    },
+    {
+      "adr_id": "ADR-005",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-005_OBSERVABILITY.md",
+      "sha256": "e2bc42483ecd5f9bf5744d6448cfbe9fc85d79eb627ff6c43e4a7de679c0aeae"
+    },
+    {
+      "adr_id": "ADR-006",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-006_DISTRIBUTED_ORCHESTRATION.md",
+      "sha256": "83dcc11b649c926296ee1ceed9325e844061a3da952f0e05ef28a346a4090255"
+    },
+    {
+      "adr_id": "ADR-007",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-007_RESOURCE_MANAGEMENT.md",
+      "sha256": "ee13d7b640f0cc886f8f2caff3f70c84c3de725cb7e05d73a950438258279bf7"
+    },
+    {
+      "adr_id": "ADR-008",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-008_PROVIDER_RUNTIME.md",
+      "sha256": "eba98029406f8a5070f450a3086acca84da89f029e162de34ce00b5d1de31c8c"
+    },
+    {
+      "adr_id": "ADR-009",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-009_SECURITY_BOUNDARY.md",
+      "sha256": "e09dfc483fcf8cd57454effc2589356fb3b42048e664c7a53c4444a946440909"
+    },
+    {
+      "adr_id": "ADR-010",
+      "path": "KGEN-KAIOS/V11/ADR/ADR-010_FUTURE_SCALE.md",
+      "sha256": "fe6710e9e3debb1d7193d0062f551423b086978fdcceaa8c919911f334885dfb"
+    }
+  ],
+  "review_evidence": [
+    {
+      "type": "ARCHITECTURE_REVIEW_RESOLUTION",
+      "path": "KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md",
+      "sha256": "21e4d521836387496ca51afc3ec591f4e91b70e13c07a48d7cbef8665ab1f6b7"
+    },
+    {
+      "type": "ARCHITECTURE_REVIEW_RESOLUTION_JSON",
+      "path": "KGEN-KAIOS/V11/architecture_review_resolution.json",
+      "sha256": "f2ed53667d65a56aace79142157ab778e3abd4c47fdd62da38085153a09509a5"
+    },
+    {
+      "type": "INDEPENDENT_ARCHITECTURE_REVIEW",
+      "path": "KGEN-KAIOS/V11/reviews/GROK_INDEPENDENT_ARCHITECTURE_REVIEW.md",
+      "sha256": "0112dc47fc26afe6e1577d33a5a07625ed128933d848dce854d6700f45b57f4c"
+    },
+    {
+      "type": "ARCHITECTURE_REVIEW_REGISTRY",
+      "path": "KGEN-KAIOS/governance/architecture_review_registry.json",
+      "sha256": "ee26d38338a351e394aad9240ce85df544b716a4848a751c70e7dd804e9f082a"
+    }
+  ],
+  "frozen_rules": {
+    "direct_genesis_design_modification": false,
+    "in_place_baseline_rewrite": false,
+    "implementation_workqueue_allowed": false,
+    "phase_1_planning_allowed": false,
+    "implementation_allowed": false,
+    "deployment_allowed": false,
+    "allowed_non_production_activity": [
+      "ARCHITECTURE_REVIEW",
+      "RESEARCH",
+      "PROTOTYPE",
+      "SANDBOX"
+    ],
+    "required_evolution_flow": [
+      "PROPOSAL",
+      "INDEPENDENT_REVIEW",
+      "ARCHITECTURE_RESOLUTION",
+      "ADR",
+      "HUMAN_ARCHITECTURE_APPROVAL",
+      "BASELINE_UPDATE"
+    ]
+  },
+  "future_versions": {
+    "V11.1": "Must evolve from V11.0 through AGB and preserve compatibility evidence.",
+    "V11.2": "Must identify all baseline ancestors, migration impact and rollback.",
+    "V12": "Must preserve lineage and explicitly govern breaking changes."
+  },
+  "protected_paths_modified": false,
+  "next_human_gate": "A new explicit AGB decision is required before Phase 1 Planning."
+}

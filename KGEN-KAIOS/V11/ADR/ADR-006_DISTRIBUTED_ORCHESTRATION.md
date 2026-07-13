@@ -1,0 +1,45 @@
+---
+VERSION: "11.0-review-resolution"
+REVISION: "2026-07-13.1"
+STATUS: "UNDER_REVIEW"
+LAST_UPDATED: "2026-07-13"
+UPDATED_BY: "Codex / codex-gm-01"
+REVIEWED_BY: "PENDING_HUMAN_REVIEW"
+SOURCE_COMMIT: "cab345b"
+TASK_ID: "KAIOS-V11-ARCH-REVIEW-RESOLUTION-20260713"
+CHANGE_REASON: "Resolve the independent distributed-orchestration comment."
+ANCESTOR: "KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md"
+SOURCE_OF_TRUTH: false
+Domain: "KGENVERSE"
+Kingdom: "CivilizationLifeform"
+Phylum: "GovernanceDocument"
+Class: "ArchitectureDecisionRecord"
+Order: "ReviewResolution"
+Family: "KAIOS"
+Genus: "V11"
+Species: "ADR006DistributedOrchestration"
+canonical_file: "KGEN-KAIOS/V11/ADR/ADR-006_DISTRIBUTED_ORCHESTRATION.md"
+---
+
+# ADR-006: Distributed Orchestration
+
+- Status: **UNDER_REVIEW**
+- Classification: **PARTIAL_ACCEPT**
+- Target: **V11.1 DESIGN / PHASE 4+ IMPLEMENTATION**
+- Implementation: **NOT_STARTED**
+
+## Context
+
+V11 defines a deterministic dispatcher, department queues, priority, claim leases, sharding, worker patterns, backpressure and stale recovery. It intentionally does not select a broker, scheduler topology or distributed coordinator.
+
+## Decision
+
+Design queue partitions, priority fairness, scheduler ownership, durable lease authority, worker pools, retries, dead-letter handling, shard rebalancing, idempotency and recovery before selecting technology.
+
+## Consequences
+
+The logical state machine stays stable while infrastructure can evolve. No broker, cluster or production scheduler is authorized by this ADR.
+
+## Rejected Alternative
+
+Reject a global scheduler that scans every Agent and reject concurrent primary ownership of one mission.
