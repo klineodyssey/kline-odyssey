@@ -84,6 +84,23 @@ Each worker report must include:
 
 A worker stops after one task. A worker does not continue to the next task without a new claim cycle.
 
+## Visible Completion State
+
+Every worker report must show this state sequence and the evidence for each completed state:
+
+```text
+BOOT
+-> CLAIM
+-> WORK
+-> TEST
+-> REPORT
+-> REVIEW
+-> READY_FOR_PUSH
+-> DONE
+```
+
+Workers may report `READY_FOR_PUSH` only after their branch, commit, report, tests, and protected-path result are visible. Workers do not self-assign `DONE`; Codex closes the task after review and required merge/push completion.
+
 ## Protected Path Rule
 
 Workers must not modify protected paths without explicit WorkOrder permission and human approval.

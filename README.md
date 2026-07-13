@@ -152,6 +152,8 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 
 - KAIOS Index: [KGEN-KAIOS/README.md](KGEN-KAIOS/README.md)
 - KAIOS Dashboard: [KGEN-KAIOS/dashboard/index.html](KGEN-KAIOS/dashboard/index.html)
+- General Manager Decision Center: [KGEN-KAIOS/decision/index.html](KGEN-KAIOS/decision/index.html)
+- Decision Center URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
 - Worker Registry: [KGEN-KAIOS/WORKER_REGISTRY.md](KGEN-KAIOS/WORKER_REGISTRY.md)
 - Generic Worker Protocol: [KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md](KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md)
 - Task Claim Lease Protocol: [KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md](KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md)

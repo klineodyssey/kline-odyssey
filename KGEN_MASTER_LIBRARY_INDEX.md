@@ -77,6 +77,9 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 |---|---|---|
 | KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture, V7.1 worker layer, and V7.2 dashboard entry |
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
+| General Manager Decision Center | `KGEN-KAIOS/decision/index.html` | Read-only Daily Operation, decisions, health, attendance, WorkQueue and readiness center |
+| Decision Engine Standard | `KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md` | Codex General Manager daily gate, decision evidence, risk and rollback rules |
+| Decision Log | `KGEN-KAIOS/decision/decision_log.jsonl` | Append-only manager decisions for approve, reject, merge, rollback, workforce and payroll actions |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
 | Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Visible BOOT, MUST READ, protected path, task plan, execution, and final report process for every worker task |

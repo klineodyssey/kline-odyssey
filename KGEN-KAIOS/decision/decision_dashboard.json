@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "version": "4.0",
+    "status": "READ_ONLY",
+    "updated_at": "2026-07-13T05:54:31+08:00",
+    "source_commit": "fcba675",
+    "task_id": "KAIOS-GM-V4-2026-0001"
+  },
+  "title": "KAIOS General Manager Decision Center",
+  "ready_for_human_task": false,
+  "health": [
+    {"service":"GitHub","status":"HEALTHY","evidence":"TCP 443 true; HTTPS 200"},
+    {"service":"OpenAI","status":"NOT_MONITORED","evidence":"No public service probe configured"},
+    {"service":"Cursor","status":"NOT_MONITORED","evidence":"Worker activity is evidenced by branch/report, not platform ping"},
+    {"service":"Claude","status":"NOT_ACTIVATED","evidence":"Registry candidate only"},
+    {"service":"Gemini","status":"NOT_ACTIVATED","evidence":"Registry candidate only"},
+    {"service":"Pages","status":"HEALTHY","evidence":"Deploy Pages Static run 29209727583 succeeded"},
+    {"service":"Remote","status":"HEALTHY","evidence":"git fetch and push origin succeeded"},
+    {"service":"DNS","status":"HEALTHY","evidence":"github.com resolved"},
+    {"service":"Proxy","status":"HEALTHY","evidence":"HTTPS request completed"},
+    {"service":"Firewall","status":"HEALTHY","evidence":"Outbound TCP 443 allowed"},
+    {"service":"VPN","status":"NOT_REQUIRED","evidence":"GitHub reachable on current network"}
+  ],
+  "pages_checks": [
+    {"name":"Homepage","url":"https://klineodyssey.github.io/kline-odyssey/","status":200},
+    {"name":"Workforce","url":"https://klineodyssey.github.io/kline-odyssey/workforce/","status":200},
+    {"name":"KAIOS Dashboard","url":"https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/","status":200},
+    {"name":"Operating Center","url":"https://klineodyssey.github.io/kline-odyssey/operating-center/","status":200}
+  ],
+  "data_sources": [
+    "decision_snapshot.json",
+    "decision_queue.json",
+    "decision_log.jsonl",
+    "../workforce/attendance_snapshot.json",
+    "../../KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "../../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md"
+  ]
+}

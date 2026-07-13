@@ -44,6 +44,38 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 4. KGEN-Agent-Office/DO_NOT_TOUCH.md
 5. KGEN-Canon/KGEN_CANON_MASTER.json
 
+## General Manager WorkOrders
+
+| Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
+|---|---|---|---|---|---|---|---|
+| KAIOS-GM-V4-2026-0001 | APPROVED | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
+
+### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
+
+- Status: APPROVED
+- Owner: Codex / codex-gm-01
+- Reviewer: Human / PrimeForge
+- Priority: P1
+- Risk Level: R1
+- Department: CEO_Codex
+- Branch: `codex/workforce-roster`
+- Base Commit: `fcba675`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: KAIOS-V4-GENERAL-MANAGER-DECISION-ENGINE
+- Task Source Actor: human-primeforge
+- Task Source File: `KGEN-KAIOS/decision/decision_log.jsonl`
+- Task Source Commit: `fcba675`
+- Task Source Reason: Require Daily Operation before new Human work and make all manager decisions traceable.
+- Dependencies: Workforce V3 published; GitHub health green; pending handoffs adjudicated.
+- Output report path: `KGEN-KAIOS/decision/decision_snapshot.json`
+- Protected paths: contracts, Temple 12345 Runtime, wallet, bridge, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets.
+- Acceptance criteria:
+  - Daily Operation gate is documented and machine-readable.
+  - Major manager decisions are stored in valid JSONL.
+  - Decision Dashboard is read-only and uses no GitHub token.
+  - Worker reporting follows BOOT through DONE with Codex-controlled closeout.
+  - JSON, JavaScript, Pages, and protected-path checks pass.
+
 
 ## KAIOS V7.1 Dry Run Summary
 

@@ -1,9 +1,9 @@
 # KGEN Daily Attendance Report
 
-**Status:** ACTIVE  
-**Version:** 1.0  
-**Date:** 2026-07-12  
-**Task ID:** KGEN-WORKFORCE-ROSTER-2026-0001  
+**Status:** ACTIVE
+**Version:** 1.1
+**Date:** 2026-07-13
+**Task ID:** KAIOS-GM-V4-2026-0001
 **Source:** `KGEN-KAIOS/workforce/daily_attendance.json`
 
 ## Summary
@@ -22,8 +22,8 @@
 
 | Worker ID | Name | Department | Status | Task | Branch | Last Activity | Violations |
 |---|---|---|---|---|---|---|---:|
-| `codex-gm-01` | Codex-General-Manager | CEO_Codex | ACTIVE_ON_DUTY | KGEN-WORKFORCE-ROSTER-2026-0001 | codex/workforce-roster | 2026-07-12 | 0 |
-| `cursor-01` | Cursor Primary Worker | Construction / Documentation / QA | ACTIVE_IDLE | - | - | - | 0 |
+| `codex-gm-01` | Codex-General-Manager | CEO_Codex | ACTIVE_ON_DUTY | KAIOS-GM-V4-2026-0001 | codex/workforce-roster | 2026-07-13 | 0 |
+| `cursor-01` | Cursor Primary Worker | Construction / Documentation / QA | OFF_DUTY | - | - | 2026-07-12 | 1 |
 | `cursor-generic-01` | Cursor Generic Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
 | `claude-01` | Claude Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
 | `gemini-01` | Gemini Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
@@ -32,27 +32,25 @@
 | `chatgpt-01` | ChatGPT Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
 | `deep-research-01` | Deep Research Candidate | Research | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
 | `human-engineer-01` | Human Engineer Candidate | Engineering | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
-| `human-primeforge` | Father / Human Operator | Founder / Human Decision Gate | HUMAN_OPERATOR | - | - | 2026-07-12 | 0 |
+| `human-primeforge` | Father / Human Operator | Founder / Human Decision Gate | HUMAN_OPERATOR | - | - | 2026-07-13 | 0 |
 
 ## Today Output
 
-- Formal employee roster.
-- Logical office desk registry.
-- Tool access matrix.
-- Attendance standard and machine-readable snapshot.
-- Conflict, performance, discipline and recruitment standards.
-- Read-only Workforce portal update.
+- Pushed pending Workforce V3 commit `8241a9a` to main.
+- Reviewed and rejected thirteen unclaimed concurrent handoff submissions.
+- Verified GitHub network, Pages, Workforce, KAIOS Dashboard and Operating Center health.
+- Established KAIOS General Manager Decision Engine V4.
 
 ## Review Results
 
-No official master WorkQueue item is currently in `REVIEW`. Existing remote handoff branches without matching REVIEW status are not merged by this report.
+No official master WorkQueue item is currently in `REVIEW`. Thirteen unclaimed concurrent handoff submissions were rejected; their WorkOrders remain OPEN for authorized rerun.
 
 ## Violations
 
-No new violation recorded by this task.
+`cursor-01` submitted concurrent handoffs without claim lease evidence. ORG-P2-003F-FIX1 also had a force-update and inconsistent WorkQueue state. Evidence is preserved; no branch was deleted.
 
 ## Tomorrow Recommendations
 
-1. Onboard `cursor-02` for QA and route validation.
-2. Run a read-only sandbox trial for `security-auditor-01`.
-3. Require fresh Boot evidence before `cursor-01` claims another task.
+1. Require a valid claim lease before `cursor-01` reruns any OPEN task.
+2. Review Decision Engine health at the next Daily Operation.
+3. Onboard a read-only security auditor after Human approval.

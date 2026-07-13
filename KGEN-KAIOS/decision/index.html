@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS General Manager Decision Center</title>
+  <meta name="description" content="KAIOS 唯讀總經理決策中心：Daily Operation、決策、健康、出勤與 WorkQueue 狀態。">
+  <link rel="stylesheet" href="./decision.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">KGEN AI COMPANY · GENERAL MANAGER</p>
+      <h1>總經理決策中心</h1>
+      <p class="lede">Daily Operation 完成後，Codex 才能接受新的 Human 任務。所有重大決策保留可追溯證據。</p>
+    </div>
+    <nav aria-label="主要入口">
+      <a href="../../index.html">官網</a>
+      <a href="../dashboard/">KAIOS Dashboard</a>
+      <a href="../../workqueue/">WorkQueue</a>
+      <a href="./DECISION_ENGINE_STANDARD.md">Standard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="ready-band" id="readyBand" aria-live="polite">
+      <span>Ready for Human Task</span>
+      <strong id="readyValue">LOADING</strong>
+      <small id="updatedAt">讀取狀態中</small>
+    </section>
+
+    <section aria-labelledby="summaryTitle">
+      <div class="section-heading">
+        <p class="eyebrow">TODAY</p>
+        <h2 id="summaryTitle">營運摘要</h2>
+      </div>
+      <div class="metric-grid">
+        <article><span>Today's Decisions</span><strong id="decisionCount">0</strong></article>
+        <article><span>Pending Decisions</span><strong id="pendingCount">0</strong></article>
+        <article><span>Approved</span><strong id="approvedCount">0</strong></article>
+        <article><span>Rejected</span><strong id="rejectedCount">0</strong></article>
+        <article><span>Worker Attendance</span><strong id="attendanceCount">0</strong></article>
+        <article><span>Open Tasks</span><strong id="openTaskCount">0</strong></article>
+      </div>
+    </section>
+
+    <section class="split" aria-label="Daily Operation 與系統健康">
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">DAILY OPERATION</p>
+          <h2>開工閘門</h2>
+        </div>
+        <dl class="gate-list" id="gateList"></dl>
+      </div>
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">NETWORK CENTER</p>
+          <h2>服務健康</h2>
+        </div>
+        <div class="health-list" id="healthList"><p>Loading</p></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="decisionsTitle">
+      <div class="section-heading inline">
+        <div>
+          <p class="eyebrow">DECISION TRANSPARENCY</p>
+          <h2 id="decisionsTitle">今日決策</h2>
+        </div>
+        <span class="readonly">READ ONLY</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Decision ID</th><th>Type</th><th>Status</th><th>Reason</th><th>Chosen Option</th><th>Risk</th><th>Rollback</th></tr></thead>
+          <tbody id="decisionRows"><tr><td colspan="7">Loading</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="split" aria-label="Decision Queue 與 Pages Health">
+      <div>
+        <div class="section-heading"><p class="eyebrow">DECISION QUEUE</p><h2>待決事項</h2></div>
+        <div class="empty-state" id="decisionQueue">Loading</div>
+      </div>
+      <div>
+        <div class="section-heading"><p class="eyebrow">PAGES HEALTH</p><h2>公開入口</h2></div>
+        <div class="pages-list" id="pagesList"><p>Loading</p></div>
+      </div>
+    </section>
+
+    <section class="sources" aria-labelledby="sourcesTitle">
+      <div class="section-heading"><p class="eyebrow">SOURCE EVIDENCE</p><h2 id="sourcesTitle">資料來源</h2></div>
+      <ul id="sourceList"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>KAIOS Decision Engine V4.0</span>
+    <span>唯讀 · 無 GitHub Token · 不自動執行</span>
+  </footer>
+  <script src="./decision.js" defer></script>
+</body>
+</html>

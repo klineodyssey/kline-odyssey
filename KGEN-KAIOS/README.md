@@ -21,6 +21,7 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ | Read-only portal for formal worker registration, trust, violations, suspensions, and contribution history |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ | KAIOS / KGEN official video planning library |
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
+| General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |
@@ -124,6 +125,21 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
 
 Workforce V3 keeps 12345 as civilization heart and reward source, and uses 8888 People Bank as a prototype internal payroll ledger. It does not enable real banking, real investment, autonomous token transfer, private-key access, or guaranteed return.
+
+## General Manager Decision Engine V4
+
+Decision Engine V4 is a subsystem of the current KAIOS operating system; it does not replace or downgrade KAIOS V10. Codex completes Daily Operation before starting new Human work and records every Approve, Reject, Merge, Rollback, Suspend, Promote, Recruit, and Payroll decision in a GitHub-visible log.
+
+| File | Purpose |
+|---|---|
+| `decision/DECISION_ENGINE_STANDARD.md` | Daily Operation, blocking gate, risk, rollback and decision-record standard |
+| `decision/decision_log.jsonl` | Append-only manager decision history |
+| `decision/decision_snapshot.json` | Current readiness, attendance, WorkQueue and blocking state |
+| `decision/decision_queue.json` | Pending manager decisions only |
+| `decision/decision_dashboard.json` | Read-only network, Pages and dashboard status source |
+| `decision/index.html` | General Manager Decision Center |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
 
 ## Official Video Library
 

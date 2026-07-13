@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "version": "4.0",
+    "status": "ACTIVE",
+    "updated_at": "2026-07-13T05:54:31+08:00",
+    "manager": "codex-gm-01",
+    "task_id": "KAIOS-GM-V4-2026-0001"
+  },
+  "queue_status": "READY_FOR_MANAGER",
+  "allowed_statuses": [
+    "PENDING",
+    "UNDER_REVIEW",
+    "HUMAN_REQUIRED",
+    "BLOCKED",
+    "READY_FOR_MANAGER"
+  ],
+  "items": [
+    {
+      "decision_id": "DEC-20260713-0004",
+      "status": "READY_FOR_MANAGER",
+      "action": "Push approved V4 implementation, verify Pages, then close WorkOrder as DONE.",
+      "risk": "R1",
+      "reviewer": "codex-gm-01"
+    }
+  ]
+}
