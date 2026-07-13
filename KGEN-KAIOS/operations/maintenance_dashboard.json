@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "status": "READ_ONLY",
-    "updated_at": "2026-07-13T12:49:00+08:00",
-    "task_id": "KAIOS-V11-READINESS-RECOVERY-20260713",
+    "updated_at": "2026-07-13T13:14:00+08:00",
+    "task_id": "KAIOS-V11-GENESIS-DESIGN-20260713",
     "source": "KGEN-KAIOS/operations/maintenance_snapshot.json"
   },
-  "current_mode": "HUMAN_APPROVAL_WAIT",
+  "current_mode": "NORMAL_OPERATION",
   "network_status": "RECOVERED",
   "last_github_check": "2026-07-13T12:44:37+08:00",
   "last_dns_check": "2026-07-13T12:44:37+08:00",
@@ -20,8 +20,11 @@
     "dns": "HEALTHY",
     "protected_paths": "PASS"
   },
-  "next_action": "Wait for Human START V11 approval.",
-  "human_action_required": "Explicit START V11 approval is required before any V11 design or implementation.",
+  "next_action": "Review KGEN-KAIOS/V11/V11_MASTER_INDEX.md and the ten linked design documents.",
+  "human_action_required": "Record APPROVE_FOR_PHASE_1_PLANNING, NEEDS_REVISION or REJECT_AND_ARCHIVE.",
+  "v11_phase": "GENESIS_DESIGN",
+  "v11_design_status": "PENDING_HUMAN_REVIEW",
+  "v11_implementation_status": "NOT_STARTED",
   "write_capability": false,
   "contains_secrets": false
 }

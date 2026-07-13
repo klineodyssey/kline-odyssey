@@ -50,6 +50,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
 | KAIOS-V11-READINESS-RECOVERY-20260713 | DONE | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
+| KAIOS-V11-GENESIS-DESIGN-20260713 | REVIEW | Codex | Human PrimeForge | P1 | Architecture | `codex/v11-genesis-design` | `KGEN-KAIOS/V11/V11_MASTER_INDEX.md` |
+| KAIOS-V11-ARCH-REVIEW-RESOLUTION-20260713 | REVIEW | Codex | Human PrimeForge | P1 | Architecture | `codex/v11-genesis-design` | `KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -108,6 +110,66 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Closeout commit `90d7283c8b6880255e1176b4ebba1f54da35da21` reached main.
   - Deploy Pages Static run `29224741774` succeeded.
   - Final readiness result is `V11 READY`; explicit Human approval remains required.
+
+### KAIOS-V11-GENESIS-DESIGN-20260713 - V11 Multi-Agent Civilization Genesis Design
+
+- Status: REVIEW
+- Owner: Codex / codex-gm-01
+- Reviewer: Human / PrimeForge
+- Priority: P1
+- Risk Level: R1 design-only
+- Department: Architecture
+- Branch: `codex/v11-genesis-design`
+- Base Commit: `1d6de8cb3b16983f923fb2a88514cef54328f2c5`
+- Human Approval ID: `HUMAN-V11-GENESIS-001`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: HUMAN-V11-GENESIS-001
+- Task Source Actor: human-primeforge
+- Task Source File: `KGEN-KAIOS/V11/V11_MASTER_INDEX.md`
+- Task Source Commit: `1d6de8cb3b16983f923fb2a88514cef54328f2c5`
+- Task Source Reason: Authorize the V11 Genesis Design phase after a READY gate, without authorizing implementation or deployment.
+- Dependencies: V11 Readiness READY; Daily Operation PASS; no pending review/handoff/push; GitHub and Pages healthy.
+- Output report path: `KGEN-KAIOS/V11/V11_MASTER_INDEX.md`
+- Protected paths: contracts, Temple 12345 Runtime, wallet, bridge, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets.
+- Acceptance criteria:
+  - All eleven requested V11 design documents exist and contain substantive architecture.
+  - Player-owned AI, provider-neutral plugins, Agent lifecycle, departments and civilization governance are defined.
+  - API and database designs remain drafts and deploy nothing.
+  - V10 compatibility, migration, risks and future implementation phases are explicit.
+  - Implementation remains `NOT_STARTED` and no Implementation WorkQueue is created.
+  - Protected-path violations are zero.
+- Current result: Genesis Design committed as `fbb40b5` on the review branch. Branch publication is pending; no deployment or implementation authorization is implied.
+
+### KAIOS-V11-ARCH-REVIEW-RESOLUTION-20260713 - Independent Architecture Review Resolution
+
+- Status: REVIEW
+- Owner: Codex / codex-gm-01
+- Reviewer: Human / PrimeForge
+- Priority: P1
+- Risk Level: R1 design-only
+- Department: Architecture
+- Branch: `codex/v11-genesis-design`
+- Base Commit: `1d6de8cb3b16983f923fb2a88514cef54328f2c5`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: `GROK-INDEPENDENT-CTO-REVIEW-20260713`
+- Task Source Actor: human-primeforge / independent-review-source
+- Task Source File: `KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md`
+- Task Source Commit: `1d6de8cb3b16983f923fb2a88514cef54328f2c5`
+- Task Source Reason: Classify ten independent architecture review topics without directly rewriting or implementing V11.
+- Dependencies: `KAIOS-V11-GENESIS-DESIGN-20260713` commit `fbb40b5` remains in Human review; no implementation authorization exists.
+- Output report path: `KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md`
+- Machine-readable output: `KGEN-KAIOS/V11/architecture_review_resolution.json`
+- ADR path: `KGEN-KAIOS/V11/ADR/`
+- Protected paths: contracts, Temple 12345 Runtime, wallet, bridge, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets.
+- Acceptance criteria:
+  - All ten review topics state current coverage, classification, decision, reason and target phase.
+  - Resolution classifications use only ACCEPT, PARTIAL_ACCEPT, REJECT, DEFER_TO_V12 or OUT_OF_SCOPE.
+  - ADR-001 through ADR-010 exist and remain design decisions only.
+  - Existing V11 architecture documents are not rewritten.
+  - V11.1 and V12 roadmap items do not become OPEN implementation WorkOrders.
+  - Architecture remains `UNDER_REVIEW`; implementation remains `NOT_STARTED`.
+  - JSON parses and protected-path violations are zero.
+- Current result: Resolution package submitted for Human review; deployment is not allowed.
 
 ## V11 Readiness Handoff Dispositions
 

@@ -1,9 +1,9 @@
 {
   "metadata": {
     "report_id": "KAIOS-V11-READINESS-20260713-RECOVERY",
-    "version": "1.2",
+    "version": "1.3",
     "status": "ACTIVE",
-    "generated_at": "2026-07-13T12:49:00+08:00",
+    "generated_at": "2026-07-13T13:00:00+08:00",
     "generated_by": "codex-gm-01",
     "mode": "GOVERNANCE_CLEANUP_ONLY",
     "source_of_truth": true
@@ -109,7 +109,13 @@
     "approval_inferred": false
   },
   "blocking_reasons": [],
-  "v11_development_started": false,
+  "human_approval": {
+    "approval_id": "HUMAN-V11-GENESIS-001",
+    "decision": "START_V11_GENESIS_DESIGN",
+    "implementation_authorized": false
+  },
+  "current_phase": "V11_GENESIS_DESIGN",
+  "v11_development_started": true,
   "implementation_workqueue_created": false,
-  "human_command_required_for_next_step": "開始 V11 設計"
+  "human_command_required_for_next_step": "APPROVE_FOR_PHASE_1_PLANNING / NEEDS_REVISION / REJECT_AND_ARCHIVE"
 }
