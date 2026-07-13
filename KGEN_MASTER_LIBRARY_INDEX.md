@@ -88,6 +88,9 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 |---|---|---|
 | KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture, V7.1 worker layer, and V7.2 dashboard entry |
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
+| General Manager Decision Center | `KGEN-KAIOS/decision/index.html` | Read-only Daily Operation, decisions, health, attendance, WorkQueue and readiness center |
+| Decision Engine Standard | `KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md` | Codex General Manager daily gate, decision evidence, risk and rollback rules |
+| Decision Log | `KGEN-KAIOS/decision/decision_log.jsonl` | Append-only manager decisions for approve, reject, merge, rollback, workforce and payroll actions |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
 | Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Visible BOOT, MUST READ, protected path, task plan, execution, and final report process for every worker task |
@@ -127,6 +130,32 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Worker Performance Schema | `KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker performance score schema |
 | Worker Violation Schema | `KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event schema |
 | Worker Audit Log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` | Baseline workforce audit log |
+| Employee Roster | `KGEN-KAIOS/workforce/employee_roster.json` | Current formal employee, candidate, workspace, status and authority source |
+| Office Desks | `KGEN-KAIOS/workforce/office_desks.json` | Logical workspaces, worktrees, branch namespaces and desk health |
+| Tool Access Matrix | `KGEN-KAIOS/workforce/tool_access_matrix.json` | Per-worker tool permission matrix |
+| Attendance Snapshot | `KGEN-KAIOS/workforce/attendance_snapshot.json` | Current duty and attendance state |
+| Daily Attendance | `KGEN-KAIOS/workforce/daily_attendance.json` | Human-readable daily status source for reporting |
+| Recruitment Queue | `KGEN-KAIOS/workforce/recruitment_queue.json` | Candidate hiring queue and sandbox trial status |
+| Agent Workforce V2 Standard | `KGEN-KAIOS/workforce/AGENT_WORKFORCE_V2_STANDARD.md` | Agent-per-employee identity, UUID, desk and concurrency rules |
+| Agent Registry | `KGEN-KAIOS/workforce/agent_registry.json` | V2 Agent employee registry with permanent employee UUIDs |
+| Desk Registry | `KGEN-KAIOS/workforce/desk_registry.json` | V2 per-Agent desk registry |
+| Department Registry | `KGEN-KAIOS/workforce/department_registry.json` | V2 department staffing registry |
+| Agent Runtime Status | `KGEN-KAIOS/workforce/agent_runtime_status.json` | V2 current Agent runtime snapshot |
+| Agent Daily Report | `KGEN-KAIOS/workforce/agent_daily_report.json` | V2 daily workforce operating report |
+| Compensation Standard | `KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md` | V3 payroll, task reward, bonus, penalty and claim boundary standard |
+| Payroll Policy | `KGEN-KAIOS/workforce/payroll_policy.json` | V3 machine-readable salary types, units, claim options and approval matrix |
+| Salary Ledger | `KGEN-KAIOS/workforce/salary_ledger.jsonl` | V3 append-only prototype salary ledger |
+| Payroll Snapshot | `KGEN-KAIOS/workforce/payroll_snapshot.json` | V3 current payroll summary for dashboard display |
+| Bonus Penalty Rules | `KGEN-KAIOS/workforce/bonus_penalty_rules.json` | V3 bonus, withholding, penalty and reversal rules |
+| 8888 Employee Account Standard | `KGEN-KAIOS/bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype internal employee account rules |
+| 8888 Employee Accounts | `KGEN-KAIOS/bank/8888/employee_accounts.json` | Prototype payroll, game balance, merit and claim account ledger |
+| 8888 Payroll Reserve | `KGEN-KAIOS/bank/8888/payroll_reserve.json` | Prototype payroll reserve record; not proof of custody |
+| 8888 Claim Queue | `KGEN-KAIOS/bank/8888/claim_queue.json` | Human approval queue for claim requests |
+| Auto Mission Reward Standard | `KGEN-KAIOS/game/AUTO_MISSION_REWARD_STANDARD.md` | Game mission budget, reward and stop-condition rules |
+| Mission Wallets | `KGEN-KAIOS/game/mission_wallets.json` | Prototype game mission budget wallets |
+| 8888 Robo Advisor Standard | `KGEN-KAIOS/bank/8888/ROBO_ADVISOR_STANDARD.md` | Robo simulation, backtest, paper trading and advisory-only limits |
+| 8888 Robo Registry | `KGEN-KAIOS/bank/8888/robo_registry.json` | Registered Robo simulation advisors and risk status |
+| GitHub Connectivity Runbook | `KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443, fetch, push and remote-ahead diagnostic flow |
 | Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
 
 ## KAIOS Official Video Library

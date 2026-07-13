@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_GAME_LEDGER",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING",
+    "legal_notice": "Game balances only. No private keys, real funds or unclaimed KGEN are available to game agents."
+  },
+  "wallet_count": 2,
+  "wallets": [
+    {
+      "mission_wallet_id": "MISSION-WALLET-0001",
+      "worker_id": "codex-agent-0001",
+      "status": "ACTIVE_SIMULATION",
+      "allowed_units": ["GAME_CREDIT", "TEMPLE_ENERGY"],
+      "daily_budget": {"GAME_CREDIT": 0, "TEMPLE_ENERGY": 0},
+      "max_loss": {"GAME_CREDIT": 0, "TEMPLE_ENERGY": 0},
+      "mission_limit": 0,
+      "allowed_game": ["KLINE_ODYSSEY_SIMULATION"],
+      "stop_condition": ["human_pause", "risk_alert", "budget_exhausted"],
+      "reward_distribution": {
+        "employee_share": 50,
+        "bank_reserve_share": 10,
+        "civilization_share": 20,
+        "risk_reserve_share": 10,
+        "maintenance_share": 5,
+        "burn_or_sink_share": 5
+      },
+      "audit_log": "KGEN-KAIOS/game/mission_results.jsonl"
+    },
+    {
+      "mission_wallet_id": "MISSION-WALLET-0002",
+      "worker_id": "cursor-agent-0001",
+      "status": "PENDING_AUTHORIZATION",
+      "allowed_units": ["GAME_CREDIT", "TEMPLE_ENERGY"],
+      "daily_budget": {"GAME_CREDIT": 0, "TEMPLE_ENERGY": 0},
+      "max_loss": {"GAME_CREDIT": 0, "TEMPLE_ENERGY": 0},
+      "mission_limit": 0,
+      "allowed_game": ["KLINE_ODYSSEY_SIMULATION"],
+      "stop_condition": ["human_pause", "risk_alert", "budget_exhausted"],
+      "reward_distribution": {
+        "employee_share": 50,
+        "bank_reserve_share": 10,
+        "civilization_share": 20,
+        "risk_reserve_share": 10,
+        "maintenance_share": 5,
+        "burn_or_sink_share": 5
+      },
+      "audit_log": "KGEN-KAIOS/game/mission_results.jsonl"
+    }
+  ],
+  "distribution_rule": "All reward_distribution values must sum to 100."
+}
+

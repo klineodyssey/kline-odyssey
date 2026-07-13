@@ -1,14 +1,14 @@
 # KGEN Worker Execution Report Template
 
 **Status:** ACTIVE
-**Version:** 1.0
-**Revision:** 2026-07-11.1
-**Last Updated:** 2026-07-11
+**Version:** 1.1
+**Revision:** 2026-07-13.1
+**Last Updated:** 2026-07-13
 **Updated By:** Codex
 **Reviewed By:** Codex
-**Source Commit:** 16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d
-**Task ID:** KGEN-WORKER-SOP-2026-0001
-**Change Reason:** Provide the required visible report format for every Codex, Cursor, and Worker task.
+**Source Commit:** fcba675
+**Task ID:** KAIOS-GM-V4-2026-0001
+**Change Reason:** Add the visible BOOT to DONE state chain and prevent Worker self-close without Codex review.
 **Ancestor:** KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md
 **Source Of Truth:** TRUE
 
@@ -31,6 +31,17 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 
 ```markdown
 # Worker Execution Report
+
+## State Progress
+
+- BOOT:
+- CLAIM:
+- WORK:
+- TEST:
+- REPORT:
+- REVIEW:
+- READY_FOR_PUSH:
+- DONE: Codex controlled / not yet / completed
 
 ## 1. BOOT
 
@@ -112,6 +123,10 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 - Codex review needed:
 - Next recommended action:
 ```
+
+## State Authority
+
+A Worker may reach `READY_FOR_PUSH` after its handoff evidence is visible. Only Codex may mark `DONE` after review and required merge/push completion. A report that says only "Done" is incomplete.
 
 ## Verification-Only Rule
 

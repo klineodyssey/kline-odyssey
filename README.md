@@ -152,6 +152,8 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 
 - KAIOS Index: [KGEN-KAIOS/README.md](KGEN-KAIOS/README.md)
 - KAIOS Dashboard: [KGEN-KAIOS/dashboard/index.html](KGEN-KAIOS/dashboard/index.html)
+- General Manager Decision Center: [KGEN-KAIOS/decision/index.html](KGEN-KAIOS/decision/index.html)
+- Decision Center URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
 - Worker Registry: [KGEN-KAIOS/WORKER_REGISTRY.md](KGEN-KAIOS/WORKER_REGISTRY.md)
 - Generic Worker Protocol: [KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md](KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md)
 - Task Claim Lease Protocol: [KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md](KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md)
@@ -178,9 +180,21 @@ KGEN now tracks task source, AI / Human authorship, file metadata, biological ta
 KGEN now requires formal worker registration, trust level checks, credential evidence, branch authorization, report provenance, and Codex review before any AI or Human worker may claim official tasks.
 
 - Public portal: [workforce/](workforce/)
+- Workforce V2 Agent Registry: [KGEN-KAIOS/workforce/agent_registry.json](KGEN-KAIOS/workforce/agent_registry.json)
+- Workforce V2 Desk Registry: [KGEN-KAIOS/workforce/desk_registry.json](KGEN-KAIOS/workforce/desk_registry.json)
+- Workforce V2 Department Registry: [KGEN-KAIOS/workforce/department_registry.json](KGEN-KAIOS/workforce/department_registry.json)
+- Workforce V3 Compensation Standard: [KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md](KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md)
+- Workforce V3 Payroll Snapshot: [KGEN-KAIOS/workforce/payroll_snapshot.json](KGEN-KAIOS/workforce/payroll_snapshot.json)
+- 8888 People Bank Employee Accounts: [KGEN-KAIOS/bank/8888/employee_accounts.json](KGEN-KAIOS/bank/8888/employee_accounts.json)
+- Auto Mission Reward Standard: [KGEN-KAIOS/game/AUTO_MISSION_REWARD_STANDARD.md](KGEN-KAIOS/game/AUTO_MISSION_REWARD_STANDARD.md)
+- 8888 Robo Advisor Standard: [KGEN-KAIOS/bank/8888/ROBO_ADVISOR_STANDARD.md](KGEN-KAIOS/bank/8888/ROBO_ADVISOR_STANDARD.md)
 - Worker Registry: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
 - Workforce schemas: [KGEN-KAIOS/workforce/](KGEN-KAIOS/workforce/)
 - Unauthorized contribution audit: [KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md](KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md)
+
+Workforce V2 maps every Agent work unit to one permanent employee UUID. `cursor-01` is preserved as a legacy worker ID and mapped to `cursor-agent-0001`; future Cursor workers use `cursor-agent-0002` through `cursor-agent-9999`.
+
+Workforce V3 defines payroll, 8888 People Bank prototype employee accounts, game reward budgets, Robo simulation risk limits, and Human approval boundaries. It is Prototype / Simulation / Internal Ledger only: not a real bank, not investment advice, no guaranteed return, no autonomous real-money transfer, and no private-key access.
 
 ### KAIOS Official Video Library
 

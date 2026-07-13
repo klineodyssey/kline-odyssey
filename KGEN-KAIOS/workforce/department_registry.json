@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V2-2026-0001",
+    "base_commit": "3e236b33dc1265a5343f0ed241564f00492adcd4",
+    "source_of_truth": true,
+    "purpose": "Every Agent is represented as one employee with permanent Employee UUID and desk assignment. V1 files are preserved as compatibility records.",
+    "privacy": "Logical workspaces only; no real local paths, tokens, IPs, secrets or private credentials."
+  },
+  "departments": [
+    {
+      "department": "Frontend",
+      "total_agents": 2,
+      "on_duty": 0,
+      "waiting": 1,
+      "offline": 1,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Backend",
+      "total_agents": 1,
+      "on_duty": 0,
+      "waiting": 0,
+      "offline": 1,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Runtime",
+      "total_agents": 1,
+      "on_duty": 0,
+      "waiting": 1,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "GitHub",
+      "total_agents": 0,
+      "on_duty": 0,
+      "waiting": 0,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Documentation",
+      "total_agents": 2,
+      "on_duty": 0,
+      "waiting": 0,
+      "offline": 1,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Testing",
+      "total_agents": 1,
+      "on_duty": 0,
+      "waiting": 1,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Temple",
+      "total_agents": 0,
+      "on_duty": 0,
+      "waiting": 0,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "KGEN",
+      "total_agents": 0,
+      "on_duty": 0,
+      "waiting": 0,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "AI Research",
+      "total_agents": 4,
+      "on_duty": 0,
+      "waiting": 1,
+      "offline": 3,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    },
+    {
+      "department": "Operations",
+      "total_agents": 4,
+      "on_duty": 1,
+      "waiting": 2,
+      "offline": 0,
+      "primary_outputs": "WorkOrders, reports, reviews and handoff branches within department scope."
+    }
+  ]
+}

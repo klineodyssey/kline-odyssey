@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-12",
+    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+  },
+  "allowed_values": ["ALLOWED", "REVIEW_REQUIRED", "DENIED", "HUMAN_APPROVAL_REQUIRED"],
+  "categories": ["Git read", "Git commit", "Git push handoff", "Git merge", "Git push main", "Filesystem read", "Filesystem write", "Browser", "Terminal", "Python", "Node", "Testing", "GitHub Actions", "Pages", "Contracts", "Wallet", "Secrets", "Production deployment"],
+  "workers": [
+    {
+      "worker_id": "codex-gm-01",
+      "display_name": "Codex-General-Manager",
+      "status": "ACTIVE_ON_DUTY",
+      "trust_level": "T5",
+      "access": {
+        "Git read": "ALLOWED",
+        "Git commit": "ALLOWED",
+        "Git push handoff": "DENIED",
+        "Git merge": "ALLOWED",
+        "Git push main": "ALLOWED",
+        "Filesystem read": "ALLOWED",
+        "Filesystem write": "ALLOWED",
+        "Browser": "ALLOWED",
+        "Terminal": "ALLOWED",
+        "Python": "ALLOWED",
+        "Node": "ALLOWED",
+        "Testing": "ALLOWED",
+        "GitHub Actions": "ALLOWED",
+        "Pages": "ALLOWED",
+        "Contracts": "HUMAN_APPROVAL_REQUIRED",
+        "Wallet": "HUMAN_APPROVAL_REQUIRED",
+        "Secrets": "DENIED",
+        "Production deployment": "HUMAN_APPROVAL_REQUIRED"
+      }
+    },
+    {
+      "worker_id": "cursor-01",
+      "display_name": "Cursor Primary Worker",
+      "status": "ACTIVE_IDLE",
+      "trust_level": "T2",
+      "access": {
+        "Git read": "ALLOWED",
+        "Git commit": "ALLOWED",
+        "Git push handoff": "ALLOWED",
+        "Git merge": "DENIED",
+        "Git push main": "DENIED",
+        "Filesystem read": "ALLOWED",
+        "Filesystem write": "ALLOWED",
+        "Browser": "ALLOWED",
+        "Terminal": "ALLOWED",
+        "Python": "ALLOWED",
+        "Node": "ALLOWED",
+        "Testing": "ALLOWED",
+        "GitHub Actions": "DENIED",
+        "Pages": "REVIEW_REQUIRED",
+        "Contracts": "DENIED",
+        "Wallet": "DENIED",
+        "Secrets": "DENIED",
+        "Production deployment": "DENIED"
+      }
+    },
+    {
+      "worker_id": "human-primeforge",
+      "display_name": "Father / Human Operator",
+      "status": "HUMAN_OPERATOR",
+      "trust_level": "T5",
+      "access": {
+        "Git read": "HUMAN_APPROVAL_REQUIRED",
+        "Git commit": "HUMAN_APPROVAL_REQUIRED",
+        "Git push handoff": "DENIED",
+        "Git merge": "HUMAN_APPROVAL_REQUIRED",
+        "Git push main": "HUMAN_APPROVAL_REQUIRED",
+        "Filesystem read": "ALLOWED",
+        "Filesystem write": "HUMAN_APPROVAL_REQUIRED",
+        "Browser": "ALLOWED",
+        "Terminal": "HUMAN_APPROVAL_REQUIRED",
+        "Python": "HUMAN_APPROVAL_REQUIRED",
+        "Node": "HUMAN_APPROVAL_REQUIRED",
+        "Testing": "HUMAN_APPROVAL_REQUIRED",
+        "GitHub Actions": "HUMAN_APPROVAL_REQUIRED",
+        "Pages": "HUMAN_APPROVAL_REQUIRED",
+        "Contracts": "HUMAN_APPROVAL_REQUIRED",
+        "Wallet": "HUMAN_APPROVAL_REQUIRED",
+        "Secrets": "DENIED",
+        "Production deployment": "HUMAN_APPROVAL_REQUIRED"
+      }
+    },
+    {
+      "worker_id": "REGISTERED_NOT_ACTIVATED",
+      "display_name": "All unactivated candidates",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "trust_level": "T0",
+      "access": {
+        "Git read": "DENIED",
+        "Git commit": "DENIED",
+        "Git push handoff": "DENIED",
+        "Git merge": "DENIED",
+        "Git push main": "DENIED",
+        "Filesystem read": "DENIED",
+        "Filesystem write": "DENIED",
+        "Browser": "DENIED",
+        "Terminal": "DENIED",
+        "Python": "DENIED",
+        "Node": "DENIED",
+        "Testing": "DENIED",
+        "GitHub Actions": "DENIED",
+        "Pages": "DENIED",
+        "Contracts": "DENIED",
+        "Wallet": "DENIED",
+        "Secrets": "DENIED",
+        "Production deployment": "DENIED"
+      }
+    }
+  ]
+}

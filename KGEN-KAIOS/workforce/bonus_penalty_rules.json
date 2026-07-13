@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_RULES",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING"
+  },
+  "bonus_rules": [
+    {
+      "rule_id": "BONUS-QUALITY-001",
+      "salary_type": "QUALITY_BONUS",
+      "condition": "Review pass with complete report, valid JSON, no protected path violation and clean branch.",
+      "unit": "MERIT_POINT",
+      "multiplier": 1.1,
+      "approval_required": "CODEX_REVIEW"
+    },
+    {
+      "rule_id": "BONUS-RESEARCH-001",
+      "salary_type": "RESEARCH_BONUS",
+      "condition": "Accepted R&D suggestion converted by Codex into a formal WorkOrder.",
+      "unit": "MERIT_POINT",
+      "multiplier": 1.05,
+      "approval_required": "CODEX_REVIEW"
+    },
+    {
+      "rule_id": "BONUS-BUG-001",
+      "salary_type": "BUG_BOUNTY",
+      "condition": "Verified bug, security gap, broken link, invalid JSON or protected path risk reported with evidence.",
+      "unit": "MERIT_POINT",
+      "multiplier": 1.15,
+      "approval_required": "CODEX_REVIEW"
+    }
+  ],
+  "penalty_rules": [
+    {
+      "rule_id": "PENALTY-PROTECTED-001",
+      "salary_type": "PENALTY",
+      "condition": "Unauthorized protected path modification.",
+      "effect": "Freeze related account and require Human review.",
+      "unit": "MERIT_POINT",
+      "penalty_amount": "REVIEW_DECISION"
+    },
+    {
+      "rule_id": "PENALTY-MISSING-REPORT-001",
+      "salary_type": "WITHHELD",
+      "condition": "Missing report, missing provenance or invisible commit.",
+      "effect": "Withhold task reward until evidence is corrected.",
+      "unit": "MERIT_POINT",
+      "penalty_amount": "TASK_REWARD_HELD"
+    },
+    {
+      "rule_id": "PENALTY-DUPLICATE-001",
+      "salary_type": "REVERSAL",
+      "condition": "Duplicate commit or repeated task evidence submitted for additional pay.",
+      "effect": "Reverse duplicate payroll entry.",
+      "unit": "MERIT_POINT",
+      "penalty_amount": "DUPLICATE_NET_AMOUNT"
+    }
+  ],
+  "non_negotiable": [
+    "No guaranteed return.",
+    "No automatic real-money investment.",
+    "No AI access to private keys, seed phrases or signing authority.",
+    "No mixed-unit settlement without explicit reviewed conversion."
+  ]
+}
+

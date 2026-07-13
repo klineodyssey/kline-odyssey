@@ -11,6 +11,14 @@
 **Boot Entry:** `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
 **Public Entry:** https://klineodyssey.github.io/kline-odyssey/ai-company/
 
+## General Manager Decision Gate
+
+Codex must complete KAIOS Daily Operation before accepting new Human work. Current readiness and all material Approve, Reject, Merge, Rollback, Suspend, Promote, Recruit, and Payroll decisions are recorded under `KGEN-KAIOS/decision/`.
+
+- Standard: `KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md`
+- Decision Log: `KGEN-KAIOS/decision/decision_log.jsonl`
+- Decision Center: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
+
 KGEN AI Company turns KGEN Organization V2.0 from a document organization into a working AI company. Codex manages the company. Cursor works as the execution employee. GitHub files are the only handoff center.
 
 > **Routing (ORG-P2-003 D2/D3):**

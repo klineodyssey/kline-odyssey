@@ -1,14 +1,14 @@
 {
   "metadata": {
-    "version": "1.0",
-    "revision": "2026-07-11.1",
+    "version": "1.1",
+    "revision": "2026-07-13.1",
     "status": "ACTIVE",
-    "last_updated": "2026-07-11",
+    "last_updated": "2026-07-13",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "1ce29b4cb53fcba77213d7792e2ad66e4498eb80",
-    "task_id": "KGEN-WORKFORCE-2026-0001",
-    "change_reason": "Baseline formal workforce audit log.",
+    "source_commit": "fcba675",
+    "task_id": "KAIOS-GM-V4-2026-0001",
+    "change_reason": "Record concurrent handoffs without claim lease evidence and a force-updated branch.",
     "source_of_truth": true
   },
   "summary": {
@@ -17,7 +17,8 @@
     "suspended_worker_count": 0,
     "revoked_worker_count": 0,
     "limited_autonomy_worker_count": 0,
-    "protected_path_violation_count": 0
+    "protected_path_violation_count": 0,
+    "governance_violation_event_count": 1
   },
   "events": [
     {
@@ -27,12 +28,30 @@
       "detected_by": "codex-gm-01",
       "result": "Formal workforce gate established. Historical questionable handoff branches are retained as evidence and not deleted.",
       "related_report": "KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md"
+    },
+    {
+      "event_id": "WORKFORCE-VIOLATION-2026-0001",
+      "event_type": "UNAUTHORIZED_CLAIM_AND_MULTI_TASK_BRANCH_SET",
+      "timestamp": "2026-07-13T05:46:00+08:00",
+      "worker_id": "cursor-01",
+      "detected_by": "codex-gm-01",
+      "severity": "V1_REVIEW_REQUIRED",
+      "result": "Thirteen handoff submissions rejected; underlying WorkOrders remain OPEN for authorized rerun. No protected path change was found.",
+      "evidence": [
+        "No report contained claim_id, claimed_at, or lease_expires_at",
+        "Multiple concurrent task branches were submitted by one worker",
+        "ORG-P2-003F-FIX1 remote branch was force-updated",
+        "ORG-P2-003F-FIX1 summary/detail WorkQueue status disagreed"
+      ],
+      "immediate_action": "Reject handoff submissions; require one-task claim lease and no-force-push rerun.",
+      "final_disposition": "WARNING_AND_MANDATORY_REVIEW",
+      "related_report": "KGEN-AI-Company/reports/DAILY_HANDOFF_REVIEW_2026-07-13.md"
     }
   ],
   "open_items": [
     {
       "item_id": "WF-OPEN-001",
-      "description": "Require fresh clean handoff branches for ORG-P2-004, ORG-P2-005, and ORG-P2-006.",
+      "description": "Require fresh claim lease evidence and one-task handoff branches for any rerun rejected by DAILY_HANDOFF_REVIEW_2026-07-13.md.",
       "status": "OPEN"
     }
   ]

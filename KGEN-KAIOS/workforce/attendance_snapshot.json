@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "version": "1.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-07-13",
+    "task_id": "KAIOS-GM-V4-2026-0001"
+  },
+  "snapshot_at": "2026-07-13T05:54:31+08:00",
+  "summary": {
+    "total_roster_records": 11,
+    "today_on_duty": 1,
+    "working_now": 0,
+    "waiting_review": 0,
+    "blocked": 0,
+    "registered_not_activated": 8,
+    "suspended": 0,
+    "revoked": 0
+  },
+  "evidence_rule": "Registry presence alone is not attendance; duty requires visible Boot, workspace, claim/task, branch/commit/report and recent activity evidence.",
+  "status_by_worker": [
+    {"worker_id":"codex-gm-01","display_name":"Codex-General-Manager","department":"CEO_Codex","status":"ACTIVE_IDLE","current_task_id":null,"current_branch":null,"last_activity_at":"2026-07-13T09:25:04+08:00","last_report_path":"KGEN-KAIOS/decision/decision_snapshot.json","violation_count":0},
+    {"worker_id":"cursor-01","display_name":"Cursor Primary Worker","department":"Construction / Documentation / QA","status":"OFF_DUTY","current_task_id":null,"current_branch":null,"last_activity_at":"2026-07-12","last_report_path":"KGEN-AI-Company/reports/DAILY_HANDOFF_REVIEW_2026-07-13.md","violation_count":1},
+    {"worker_id":"cursor-generic-01","display_name":"Cursor Generic Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"claude-01","display_name":"Claude Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"gemini-01","display_name":"Gemini Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"openhands-01","display_name":"OpenHands Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"copilot-01","display_name":"GitHub Copilot Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"chatgpt-01","display_name":"ChatGPT Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"deep-research-01","display_name":"Deep Research Candidate","department":"Research","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"human-engineer-01","display_name":"Human Engineer Candidate","department":"Engineering","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
+    {"worker_id":"human-primeforge","display_name":"Father / Human Operator","department":"Founder / Human Decision Gate","status":"HUMAN_OPERATOR","current_task_id":null,"current_branch":null,"last_activity_at":"2026-07-13","last_report_path":null,"violation_count":0}
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "version": "4.0",
+    "status": "ACTIVE",
+    "updated_at": "2026-07-13T05:54:31+08:00",
+    "manager": "codex-gm-01",
+    "task_id": "KAIOS-GM-V4-2026-0001",
+    "source_commit": "fcba675",
+    "source_of_truth": true
+  },
+  "daily_operation": {
+    "date": "2026-07-13",
+    "completed": true,
+    "ready_for_human_task": true,
+    "blocking_reasons": [],
+    "pending_handoff": 0,
+    "pending_review": 0,
+    "pending_push": 0,
+    "protected_path_alerts": 0
+  },
+  "decisions": {
+    "today": 5,
+    "pending": 0,
+    "approved": 4,
+    "rejected": 1,
+    "rollback_history": 0
+  },
+  "attendance": {
+    "roster_records": 11,
+    "on_duty": 1,
+    "working_now": 0,
+    "waiting_review": 0,
+    "blocked": 0
+  },
+  "workqueue": {
+    "total": 36,
+    "open": 25,
+    "review": 0,
+    "approved": 0,
+    "done": 9,
+    "rejected": 2,
+    "blocked": 0
+  },
+  "main_commit": "bac1587f586befbcbc31a350e30ed781bcd50b78"
+}

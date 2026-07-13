@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_INTERNAL_LEDGER",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING",
+    "legal_notice": "Prototype / Simulation / Internal Ledger. Not a bank, not investment advice, no guaranteed return."
+  },
+  "period": {
+    "start": "2026-07-13",
+    "end": "2026-07-13"
+  },
+  "totals_by_unit": {
+    "KGEN_TOKEN": {
+      "approved": 0,
+      "claimed": 0,
+      "paid": 0,
+      "withheld": 0
+    },
+    "GAME_CREDIT": {
+      "approved": 0,
+      "claimed": 0,
+      "paid": 0,
+      "withheld": 0
+    },
+    "TEMPLE_ENERGY": {
+      "approved": 0,
+      "claimed": 0,
+      "paid": 0,
+      "withheld": 0
+    },
+    "MERIT_POINT": {
+      "approved": 220,
+      "claimed": 0,
+      "paid": 0,
+      "withheld": 0
+    },
+    "FIAT_REFERENCE_ONLY": {
+      "approved": 0,
+      "claimed": 0,
+      "paid": 0,
+      "withheld": 0
+    }
+  },
+  "pending_salary_count": 0,
+  "approved_salary_count": 2,
+  "claimed_salary_count": 0,
+  "human_approval_queue_count": 0,
+  "frozen_accounts": 0,
+  "payroll_vault_status": "FUTURE_HUMAN_APPROVAL_REQUIRED",
+  "notes": [
+    "No chain payment has been executed.",
+    "Approved salary is held in 8888 internal ledger accounts.",
+    "KGEN token payout requires Human approval and wallet signing outside the repository."
+  ]
+}
+

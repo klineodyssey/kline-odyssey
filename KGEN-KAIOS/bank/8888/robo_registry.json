@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_ROBO_REGISTRY",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING",
+    "legal_notice": "Simulation, backtest, paper trading, game market and advisory-only. Not investment advice."
+  },
+  "robo_count": 3,
+  "robos": [
+    {
+      "robo_id": "ROBO-8888-RISK-0001",
+      "owner": "Codex",
+      "mandate": "Risk alert and payroll reserve guardrail advisor.",
+      "market_scope": "INTERNAL_LEDGER",
+      "capital_type": "MERIT_POINT_SIMULATION",
+      "risk_level": "R0",
+      "max_position": 0,
+      "max_drawdown": 0,
+      "daily_loss_limit": 0,
+      "stop_loss": "ZERO_REAL_FUNDS",
+      "allowed_assets": ["MERIT_POINT", "GAME_CREDIT", "TEMPLE_ENERGY"],
+      "prohibited_assets": ["PRIVATE_KEY", "REAL_BANK_FUNDS", "PAYROLL_RESERVE_REAL_FUNDS", "UNCLAIMED_KGEN"],
+      "approval_required": "CODEX_REVIEW",
+      "human_kill_switch": true,
+      "performance_benchmark": "No unauthorized movement and no protected path violation.",
+      "status": "APPROVED_SIMULATION"
+    },
+    {
+      "robo_id": "ROBO-8888-BACKTEST-0001",
+      "owner": "data-engineer-0001",
+      "mandate": "Backtest internal game market signals with no execution authority.",
+      "market_scope": "BACKTEST_ONLY",
+      "capital_type": "PAPER_BALANCE",
+      "risk_level": "R1",
+      "max_position": 0,
+      "max_drawdown": 0,
+      "daily_loss_limit": 0,
+      "stop_loss": "PAPER_ONLY",
+      "allowed_assets": ["GAME_CREDIT", "TEMPLE_ENERGY"],
+      "prohibited_assets": ["KGEN_TOKEN_REAL_TRANSFER", "PRIVATE_KEY", "REAL_MARKET_ORDER"],
+      "approval_required": "CODEX_REVIEW",
+      "human_kill_switch": true,
+      "performance_benchmark": "Benchmark report only; no execution.",
+      "status": "PAPER_TRADING"
+    },
+    {
+      "robo_id": "ROBO-GAME-MARKET-0001",
+      "owner": "research-agent-0001",
+      "mandate": "Advise simulated game mission reward allocation.",
+      "market_scope": "GAME_MARKET",
+      "capital_type": "GAME_CREDIT_SIMULATION",
+      "risk_level": "R1",
+      "max_position": 0,
+      "max_drawdown": 0,
+      "daily_loss_limit": 0,
+      "stop_loss": "BUDGET_ZERO_BASELINE",
+      "allowed_assets": ["GAME_CREDIT", "TEMPLE_ENERGY"],
+      "prohibited_assets": ["PRIVATE_KEY", "REAL_BANK_FUNDS", "PAYROLL_RESERVE", "UNCLAIMED_KGEN"],
+      "approval_required": "HUMAN_APPROVAL_FOR_IRREVERSIBLE_ACTION",
+      "human_kill_switch": true,
+      "performance_benchmark": "Simulation P&L and risk alert only.",
+      "status": "SANDBOX"
+    }
+  ]
+}
+

@@ -21,6 +21,7 @@ KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machi
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ | Read-only portal for formal worker registration, trust, violations, suspensions, and contribution history |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ | KAIOS / KGEN official video planning library |
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
+| General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |
@@ -101,8 +102,44 @@ KAIOS now requires formal worker registration before any AI or Human worker can 
 | `workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker quality and promotion metrics |
 | `workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event record |
 | `workforce/WORKER_AUDIT_LOG.json` | Baseline audit log |
+| `workforce/employee_roster.json` | Current employee roster and duty status |
+| `workforce/office_desks.json` | Logical workspace and desk registry |
+| `workforce/tool_access_matrix.json` | Tool permission matrix |
+| `workforce/attendance_snapshot.json` | Current attendance snapshot |
+| `workforce/recruitment_queue.json` | Candidate hiring queue |
+| `workforce/agent_registry.json` | Workforce V2 Agent-per-employee registry |
+| `workforce/desk_registry.json` | Workforce V2 logical desk registry |
+| `workforce/department_registry.json` | Workforce V2 department staffing registry |
+| `workforce/agent_runtime_status.json` | Workforce V2 runtime status snapshot |
+| `workforce/agent_daily_report.json` | Workforce V2 daily status report |
+| `workforce/COMPENSATION_STANDARD.md` | Workforce V3 salary, reward, penalty and Human approval standard |
+| `workforce/payroll_policy.json` | Workforce V3 payroll unit, claim option and approval policy |
+| `workforce/payroll_snapshot.json` | Workforce V3 payroll dashboard summary |
+| `bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype employee account rules |
+| `bank/8888/employee_accounts.json` | 8888 prototype employee account ledger |
+| `bank/8888/payroll_reserve.json` | 8888 prototype payroll reserve record |
+| `bank/8888/ROBO_ADVISOR_STANDARD.md` | 8888 Robo simulation and advisory-only limits |
+| `game/AUTO_MISSION_REWARD_STANDARD.md` | Workforce game mission budget and reward boundary |
+| `operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443 / fetch / push diagnostic runbook |
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
+
+Workforce V3 keeps 12345 as civilization heart and reward source, and uses 8888 People Bank as a prototype internal payroll ledger. It does not enable real banking, real investment, autonomous token transfer, private-key access, or guaranteed return.
+
+## General Manager Decision Engine V4
+
+Decision Engine V4 is a subsystem of the current KAIOS operating system; it does not replace or downgrade KAIOS V10. Codex completes Daily Operation before starting new Human work and records every Approve, Reject, Merge, Rollback, Suspend, Promote, Recruit, and Payroll decision in a GitHub-visible log.
+
+| File | Purpose |
+|---|---|
+| `decision/DECISION_ENGINE_STANDARD.md` | Daily Operation, blocking gate, risk, rollback and decision-record standard |
+| `decision/decision_log.jsonl` | Append-only manager decision history |
+| `decision/decision_snapshot.json` | Current readiness, attendance, WorkQueue and blocking state |
+| `decision/decision_queue.json` | Pending manager decisions only |
+| `decision/decision_dashboard.json` | Read-only network, Pages and dashboard status source |
+| `decision/index.html` | General Manager Decision Center |
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
 
 ## Official Video Library
 

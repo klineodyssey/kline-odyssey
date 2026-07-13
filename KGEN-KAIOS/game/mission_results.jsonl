@@ -1,0 +1,2 @@
+{"mission_result_id":"MISSION-RESULT-20260713-0001","timestamp":"2026-07-13T00:00:00+08:00","mission_wallet_id":"MISSION-WALLET-0001","worker_id":"codex-agent-0001","mission_type":"SIMULATION_BASELINE","allowed_game":"KLINE_ODYSSEY_SIMULATION","budget_used":{"GAME_CREDIT":0,"TEMPLE_ENERGY":0},"reward":{"GAME_CREDIT":0,"TEMPLE_ENERGY":0,"MERIT_POINT":0},"result":"NO_MISSION_EXECUTED","risk_status":"PASS","notes":"Baseline only. No automatic mission, real funds, private keys, unclaimed KGEN or Payroll Reserve used."}
+

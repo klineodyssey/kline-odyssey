@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_RISK_LIMITS",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING"
+  },
+  "global_limits": {
+    "real_money_autonomous_trading": false,
+    "private_key_access": false,
+    "unlimited_loss": false,
+    "guaranteed_return": false,
+    "unreviewed_external_transfer": false,
+    "leverage_without_human_approval": false,
+    "human_kill_switch_required": true
+  },
+  "reward_distribution_rules": {
+    "employee_share": 50,
+    "bank_reserve_share": 10,
+    "civilization_share": 20,
+    "risk_reserve_share": 10,
+    "maintenance_share": 5,
+    "burn_or_sink_share": 5,
+    "must_sum_to": 100
+  },
+  "loss_rules": [
+    "Losses must not be covered by other employee salary.",
+    "Payroll Reserve must not cover investment loss.",
+    "Future salary must not be used as automatic leverage collateral."
+  ]
+}
+

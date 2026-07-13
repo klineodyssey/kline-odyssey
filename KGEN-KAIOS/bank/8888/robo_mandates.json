@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "status": "ACTIVE_PROTOTYPE_MANDATES",
+    "last_updated": "2026-07-13",
+    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
+    "source_commit": "PENDING"
+  },
+  "mandates": [
+    {
+      "mandate_id": "MANDATE-ROBO-8888-RISK-0001",
+      "robo_id": "ROBO-8888-RISK-0001",
+      "allowed_modes": ["SIMULATION", "ADVISORY_ONLY"],
+      "forbidden_modes": ["REAL_MONEY_AUTONOMOUS_TRADING", "PRIVATE_KEY_ACCESS", "GUARANTEED_RETURN"],
+      "human_approval_required": true
+    },
+    {
+      "mandate_id": "MANDATE-ROBO-8888-BACKTEST-0001",
+      "robo_id": "ROBO-8888-BACKTEST-0001",
+      "allowed_modes": ["BACKTEST", "PAPER_TRADING"],
+      "forbidden_modes": ["REAL_MONEY_AUTONOMOUS_TRADING", "UNREVIEWED_EXTERNAL_TRANSFER"],
+      "human_approval_required": true
+    },
+    {
+      "mandate_id": "MANDATE-ROBO-GAME-MARKET-0001",
+      "robo_id": "ROBO-GAME-MARKET-0001",
+      "allowed_modes": ["GAME_MARKET", "SIMULATION", "ADVISORY_ONLY"],
+      "forbidden_modes": ["PRIVATE_KEY_ACCESS", "UNLIMITED_LOSS", "LEVERAGE_WITHOUT_HUMAN_APPROVAL"],
+      "human_approval_required": true
+    }
+  ]
+}
+
