@@ -8,7 +8,7 @@
   "summary": {
     "formal_roster_records": 11,
     "today_on_duty": 1,
-    "working_now": 1,
+    "working_now": 0,
     "waiting_review": 0,
     "blocked": 0,
     "registered_not_activated": 8,
@@ -19,10 +19,11 @@
     "Pushed pending Workforce V3 commit 8241a9a to main",
     "Reviewed and rejected thirteen unclaimed concurrent handoff submissions",
     "Verified GitHub network, Pages, Workforce, KAIOS Dashboard and Operating Center health",
-    "Established KAIOS General Manager Decision Engine V4"
+    "Established and published KAIOS General Manager Decision Engine V4"
   ],
   "review_results": [
-    "13 handoff submissions rejected; underlying WorkOrders remain OPEN for authorized rerun"
+    "13 handoff submissions rejected; underlying WorkOrders remain OPEN for authorized rerun",
+    "KAIOS-GM-V4-2026-0001 approved, pushed and closed DONE after Pages success"
   ],
   "violations": [
     "cursor-01 submitted concurrent handoffs without claim lease evidence; ORG-P2-003F-FIX1 also showed a force-update and inconsistent queue state"

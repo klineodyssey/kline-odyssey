@@ -12,7 +12,7 @@
 |---|---:|
 | Formal roster records | 11 |
 | Today on duty | 1 |
-| Working now | 1 |
+| Working now | 0 |
 | Waiting review | 0 |
 | Blocked | 0 |
 | Registered not activated | 8 |
@@ -22,7 +22,7 @@
 
 | Worker ID | Name | Department | Status | Task | Branch | Last Activity | Violations |
 |---|---|---|---|---|---|---|---:|
-| `codex-gm-01` | Codex-General-Manager | CEO_Codex | ACTIVE_ON_DUTY | KAIOS-GM-V4-2026-0001 | codex/workforce-roster | 2026-07-13 | 0 |
+| `codex-gm-01` | Codex-General-Manager | CEO_Codex | ACTIVE_IDLE | - | - | 2026-07-13 | 0 |
 | `cursor-01` | Cursor Primary Worker | Construction / Documentation / QA | OFF_DUTY | - | - | 2026-07-12 | 1 |
 | `cursor-generic-01` | Cursor Generic Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
 | `claude-01` | Claude Candidate | Worker Pool | REGISTERED_NOT_ACTIVATED | - | - | - | 0 |
@@ -39,11 +39,11 @@
 - Pushed pending Workforce V3 commit `8241a9a` to main.
 - Reviewed and rejected thirteen unclaimed concurrent handoff submissions.
 - Verified GitHub network, Pages, Workforce, KAIOS Dashboard and Operating Center health.
-- Established KAIOS General Manager Decision Engine V4.
+- Established and published KAIOS General Manager Decision Engine V4.
 
 ## Review Results
 
-No official master WorkQueue item is currently in `REVIEW`. Thirteen unclaimed concurrent handoff submissions were rejected; their WorkOrders remain OPEN for authorized rerun.
+No official master WorkQueue item is currently in `REVIEW`. Thirteen unclaimed concurrent handoff submissions were rejected; their WorkOrders remain OPEN for authorized rerun. KAIOS-GM-V4-2026-0001 was approved, pushed, deployed and closed DONE.
 
 ## Violations
 

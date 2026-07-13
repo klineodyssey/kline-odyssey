@@ -48,11 +48,11 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
-| KAIOS-GM-V4-2026-0001 | APPROVED | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
+| KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
-- Status: APPROVED
+- Status: DONE
 - Owner: Codex / codex-gm-01
 - Reviewer: Human / PrimeForge
 - Priority: P1

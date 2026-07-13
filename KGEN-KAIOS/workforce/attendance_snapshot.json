@@ -9,7 +9,7 @@
   "summary": {
     "total_roster_records": 11,
     "today_on_duty": 1,
-    "working_now": 1,
+    "working_now": 0,
     "waiting_review": 0,
     "blocked": 0,
     "registered_not_activated": 8,
@@ -18,7 +18,7 @@
   },
   "evidence_rule": "Registry presence alone is not attendance; duty requires visible Boot, workspace, claim/task, branch/commit/report and recent activity evidence.",
   "status_by_worker": [
-    {"worker_id":"codex-gm-01","display_name":"Codex-General-Manager","department":"CEO_Codex","status":"ACTIVE_ON_DUTY","current_task_id":"KAIOS-GM-V4-2026-0001","current_branch":"codex/workforce-roster","last_activity_at":"2026-07-13T05:54:31+08:00","last_report_path":"KGEN-KAIOS/decision/decision_snapshot.json","violation_count":0},
+    {"worker_id":"codex-gm-01","display_name":"Codex-General-Manager","department":"CEO_Codex","status":"ACTIVE_IDLE","current_task_id":null,"current_branch":null,"last_activity_at":"2026-07-13T09:25:04+08:00","last_report_path":"KGEN-KAIOS/decision/decision_snapshot.json","violation_count":0},
     {"worker_id":"cursor-01","display_name":"Cursor Primary Worker","department":"Construction / Documentation / QA","status":"OFF_DUTY","current_task_id":null,"current_branch":null,"last_activity_at":"2026-07-12","last_report_path":"KGEN-AI-Company/reports/DAILY_HANDOFF_REVIEW_2026-07-13.md","violation_count":1},
     {"worker_id":"cursor-generic-01","display_name":"Cursor Generic Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},
     {"worker_id":"claude-01","display_name":"Claude Candidate","department":"Worker Pool","status":"REGISTERED_NOT_ACTIVATED","current_task_id":null,"current_branch":null,"last_activity_at":null,"last_report_path":null,"violation_count":0},

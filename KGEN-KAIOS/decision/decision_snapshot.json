@@ -11,24 +11,24 @@
   "daily_operation": {
     "date": "2026-07-13",
     "completed": true,
-    "ready_for_human_task": false,
-    "blocking_reasons": ["V4 implementation is approved and waiting for push."],
+    "ready_for_human_task": true,
+    "blocking_reasons": [],
     "pending_handoff": 0,
     "pending_review": 0,
-    "pending_push": 1,
+    "pending_push": 0,
     "protected_path_alerts": 0
   },
   "decisions": {
-    "today": 4,
-    "pending": 1,
-    "approved": 3,
+    "today": 5,
+    "pending": 0,
+    "approved": 4,
     "rejected": 1,
     "rollback_history": 0
   },
   "attendance": {
     "roster_records": 11,
     "on_duty": 1,
-    "working_now": 1,
+    "working_now": 0,
     "waiting_review": 0,
     "blocked": 0
   },
@@ -36,10 +36,10 @@
     "total": 36,
     "open": 25,
     "review": 0,
-    "approved": 1,
-    "done": 8,
+    "approved": 0,
+    "done": 9,
     "rejected": 2,
     "blocked": 0
   },
-  "main_commit": "fcba675"
+  "main_commit": "bac1587f586befbcbc31a350e30ed781bcd50b78"
 }
