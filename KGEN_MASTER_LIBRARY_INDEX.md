@@ -39,6 +39,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | KGEN Organization V2.0 | `KGEN-Organization/` | AI company operating system, departments, WorkOrders, reports, and standards |
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
+| KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
@@ -91,6 +92,10 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
 | Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
 | Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |
+| Architecture Governance Board | `KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md` | Human-approved Board mandate, members, quorum and architecture-to-release flow |
+| Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
+| Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
+| Architecture Review History | `KGEN-KAIOS/governance/architecture_review_history.jsonl` | Append-only review, resolution and Human approval events |
 
 ## KAIOS Provenance And Biological Evolution Governance
 

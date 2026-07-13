@@ -1,0 +1,230 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-13.1",
+    "status": "ACTIVE_APPROVED",
+    "board_readiness": "APPROVED",
+    "implementation_status": "NOT_STARTED",
+    "production_status": "NOT_AUTHORIZED",
+    "human_review": "APPROVED_FOR_GOVERNANCE_PUBLICATION_ONLY",
+    "last_updated": "2026-07-13T00:00:00+08:00",
+    "updated_by": "codex-gm-01",
+    "reviewed_by": "human-primeforge",
+    "source_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+    "base_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+    "task_id": "KAIOS-AGB-20260713",
+    "change_reason": "Establish the Architecture Governance Board before implementation begins.",
+    "ancestor": "KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md",
+    "source_of_truth": true,
+    "canonical_file": "KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "GovernanceDocument",
+      "class": "ArchitectureGovernance",
+      "order": "ArchitectureReviewBoard",
+      "family": "KAIOS",
+      "genus": "Governance",
+      "species": "ArchitectureGovernanceBoard"
+    }
+  },
+  "board_id": "KAIOS-AGB",
+  "name": "KAIOS Architecture Governance Board",
+  "mandate": "Govern material architecture proposals through independent review, resolution, ADR, Human approval and separately approved implementation planning.",
+  "final_authority": "human-primeforge",
+  "human_approval": {
+    "human_approval_id": "HUMAN-AGB-APPROVAL-001",
+    "approver": "human-primeforge",
+    "decision": "APPROVE_AGB",
+    "approved_scope": "GOVERNANCE_PUBLICATION_ONLY",
+    "architecture_governance_board": "APPROVED",
+    "v11_phase_1": "NOT_STARTED",
+    "implementation": "NOT_STARTED",
+    "production": "NOT_AUTHORIZED"
+  },
+  "members": [
+    {
+      "member_id": "human-primeforge",
+      "display_name": "PrimeForge / 樂天帝",
+      "member_type": "HUMAN",
+      "role": "Chief Architect",
+      "authority": [
+        "FINAL_APPROVAL",
+        "HUMAN_IMPLEMENTATION_APPROVAL",
+        "PRODUCTION_APPROVAL"
+      ],
+      "membership_status": "ACTIVE_FINAL_AUTHORITY",
+      "workforce_status": "HUMAN_OPERATOR",
+      "can_merge": false,
+      "can_approve_architecture": true,
+      "can_approve_implementation": true
+    },
+    {
+      "member_id": "chatgpt-01",
+      "display_name": "ChatGPT",
+      "member_type": "AI",
+      "role": "System Architect",
+      "authority": [
+        "ARCHITECTURE_PROPOSAL",
+        "WORLD_MODEL",
+        "GOVERNANCE_DESIGN",
+        "RUNTIME_DESIGN"
+      ],
+      "membership_status": "ACTIVE_ADVISORY_ARCHITECT",
+      "workforce_status": "ADVISORY_NO_REPOSITORY_ACCESS",
+      "trust_level": "T0",
+      "can_merge": false,
+      "can_approve_architecture": false,
+      "can_approve_implementation": false
+    },
+    {
+      "member_id": "codex-gm-01",
+      "display_name": "Codex",
+      "member_type": "AI",
+      "role": "Implementation Architect",
+      "authority": [
+        "IMPLEMENTATION_PLANNING",
+        "ADR_AUTHORING",
+        "SCHEMA_DESIGN",
+        "RUNTIME_DESIGN_TRANSLATION",
+        "REVIEW_EVIDENCE_INTEGRATION"
+      ],
+      "membership_status": "ACTIVE_IMPLEMENTATION_ARCHITECT",
+      "workforce_status": "ACTIVE",
+      "trust_level": "T5",
+      "can_merge": true,
+      "can_approve_architecture": false,
+      "can_approve_implementation": false,
+      "merge_boundary": "May merge only after all applicable AGB, Human, WorkOrder and protected-path gates pass."
+    },
+    {
+      "member_id": "grok-independent-review",
+      "display_name": "Grok",
+      "member_type": "EXTERNAL_AI_REVIEW_SOURCE",
+      "role": "Independent Architecture Reviewer",
+      "authority": [
+        "INDEPENDENT_TECHNICAL_REVIEW",
+        "RISK_ASSESSMENT",
+        "SCALABILITY_REVIEW"
+      ],
+      "membership_status": "ACTIVE_EXTERNAL_REVIEWER",
+      "workforce_status": "NOT_REGISTERED",
+      "trust_level": "T0",
+      "can_merge": false,
+      "can_approve_architecture": false,
+      "can_approve_implementation": false,
+      "repository_write": false
+    }
+  ],
+  "future_members": [
+    {
+      "member_id": "claude-01",
+      "display_name": "Claude",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_required": true
+    },
+    {
+      "member_id": "gemini-01",
+      "display_name": "Gemini",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_required": true
+    },
+    {
+      "member_id": "openhands-01",
+      "display_name": "OpenHands",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_required": true
+    },
+    {
+      "member_id": "copilot-01",
+      "display_name": "GitHub Copilot",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_required": true
+    },
+    {
+      "member_id": "research-ai-future",
+      "display_name": "Research AI",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_required": true
+    }
+  ],
+  "required_flow": [
+    "PROPOSAL_SUBMITTED",
+    "INDEPENDENT_REVIEW",
+    "ARCHITECTURE_RESOLUTION",
+    "ADR_RECORDED",
+    "HUMAN_ARCHITECTURE_APPROVAL",
+    "APPROVED_FOR_IMPLEMENTATION_PLANNING",
+    "IMPLEMENTATION_PLANNING",
+    "HUMAN_IMPLEMENTATION_APPROVAL",
+    "IMPLEMENTATION",
+    "EVIDENCE",
+    "REVIEW",
+    "MERGE_RELEASE"
+  ],
+  "terminal_or_return_states": [
+    "NEEDS_REVISION",
+    "REJECTED",
+    "DEFERRED"
+  ],
+  "minimum_quorum": {
+    "proposal_author": 1,
+    "independent_reviewer": 1,
+    "resolution_and_adr_owner": 1,
+    "human_final_approver": 1,
+    "independence_rule": "The independent reviewer must not be the proposal author."
+  },
+  "adr_required_fields": [
+    "adr_id",
+    "proposal",
+    "reviewer",
+    "resolution",
+    "accepted",
+    "rejected",
+    "deferred",
+    "human_approval",
+    "implementation_phase",
+    "risk",
+    "compatibility",
+    "migration",
+    "rollback",
+    "affected_files",
+    "source_commit",
+    "status"
+  ],
+  "separation_of_duties": [
+    "Proposal author cannot be the only independent reviewer.",
+    "Independent reviewer cannot merge the reviewed proposal.",
+    "Codex may prepare a resolution and ADR but cannot grant final architecture approval.",
+    "Architecture approval does not authorize implementation.",
+    "Implementation approval does not automatically authorize production.",
+    "Workers cannot alter approved architecture while implementing a WorkOrder."
+  ],
+  "prohibited_actions": [
+    "AI_DIRECT_ARCHITECTURE_MODIFICATION",
+    "AI_DIRECT_PRODUCTION_START",
+    "REVIEW_AS_HUMAN_APPROVAL",
+    "UNREGISTERED_WORKER_REPOSITORY_WRITE",
+    "UNAPPROVED_PROTECTED_PATH_CHANGE",
+    "UNAPPROVED_SECRET_OR_WALLET_ACCESS",
+    "DELETION_OF_REVIEW_EVIDENCE"
+  ],
+  "protected_paths": [
+    "contracts",
+    "K線西遊記/temples/12345",
+    "wallet",
+    "bridge",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/physics/final-whitepaper",
+    "KGEN/contracts/KGEN_Token_V7_5_2.sol"
+  ],
+  "current_declaration": {
+    "architecture_governance_board": "APPROVED",
+    "implementation": "NOT_STARTED",
+    "v11_phase_1": "NOT_STARTED",
+    "human_review": "APPROVED_FOR_GOVERNANCE_PUBLICATION_ONLY",
+    "implementation_workqueue_created": false
+  }
+}

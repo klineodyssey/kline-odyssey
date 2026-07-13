@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "revision": "2026-07-13.1",
+    "status": "ACTIVE_APPROVED",
+    "last_updated": "2026-07-13T00:00:00+08:00",
+    "updated_by": "codex-gm-01",
+    "reviewed_by": "human-primeforge / HUMAN-AGB-APPROVAL-001",
+    "source_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+    "base_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+    "task_id": "KAIOS-AGB-20260713",
+    "change_reason": "Register architecture review identities, authority boundaries and evidence requirements.",
+    "ancestor": "KGEN-KAIOS/V11/architecture_review_resolution.json",
+    "source_of_truth": true,
+    "canonical_file": "KGEN-KAIOS/governance/architecture_review_registry.json",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "CivilizationLifeform",
+      "phylum": "GovernanceRegistry",
+      "class": "ArchitectureReview",
+      "order": "ReviewerRegistry",
+      "family": "KAIOS",
+      "genus": "Governance",
+      "species": "ArchitectureReviewRegistry"
+    }
+  },
+  "review_classifications": [
+    "ACCEPT",
+    "PARTIAL_ACCEPT",
+    "REJECT",
+    "DEFERRED",
+    "OUT_OF_SCOPE"
+  ],
+  "reviewers": [
+    {
+      "reviewer_id": "human-primeforge",
+      "display_name": "PrimeForge / 樂天帝",
+      "reviewer_type": "HUMAN",
+      "board_role": "Chief Architect",
+      "workforce_status": "HUMAN_OPERATOR",
+      "review_authority": [
+        "FINAL_APPROVAL",
+        "HUMAN_IMPLEMENTATION_APPROVAL",
+        "PRODUCTION_APPROVAL"
+      ],
+      "can_submit_review": true,
+      "can_final_approve": true,
+      "can_merge": false,
+      "status": "ACTIVE_FINAL_AUTHORITY"
+    },
+    {
+      "reviewer_id": "chatgpt-01",
+      "display_name": "ChatGPT",
+      "reviewer_type": "AI",
+      "board_role": "System Architect",
+      "workforce_status": "ADVISORY_NO_REPOSITORY_ACCESS",
+      "review_authority": [
+        "ARCHITECTURE_PROPOSAL",
+        "WORLD_MODEL_REVIEW",
+        "GOVERNANCE_REVIEW",
+        "RUNTIME_DESIGN_REVIEW"
+      ],
+      "can_submit_review": "HUMAN_TRANSFER_AND_CODEX_INGESTION_REQUIRED",
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "ACTIVE_ADVISORY_ARCHITECT"
+    },
+    {
+      "reviewer_id": "codex-gm-01",
+      "display_name": "Codex",
+      "reviewer_type": "AI",
+      "board_role": "Implementation Architect",
+      "workforce_status": "ACTIVE",
+      "trust_level": "T5",
+      "review_authority": [
+        "IMPLEMENTATION_FEASIBILITY_REVIEW",
+        "ADR_AUTHORING",
+        "SCHEMA_REVIEW",
+        "RUNTIME_REVIEW",
+        "EVIDENCE_INTEGRATION"
+      ],
+      "can_submit_review": true,
+      "can_final_approve": false,
+      "can_merge": true,
+      "status": "ACTIVE_IMPLEMENTATION_ARCHITECT"
+    },
+    {
+      "reviewer_id": "grok-independent-review",
+      "display_name": "Grok",
+      "reviewer_type": "EXTERNAL_AI_REVIEW_SOURCE",
+      "board_role": "Independent Architecture Reviewer",
+      "workforce_status": "NOT_REGISTERED",
+      "review_authority": [
+        "INDEPENDENT_TECHNICAL_REVIEW",
+        "RISK_ASSESSMENT",
+        "SCALABILITY_REVIEW"
+      ],
+      "can_submit_review": "HUMAN_OR_CODEX_INGESTED_EVIDENCE_ONLY",
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "ACTIVE_EXTERNAL_REVIEWER"
+    },
+    {
+      "reviewer_id": "claude-01",
+      "display_name": "Claude",
+      "reviewer_type": "AI",
+      "board_role": "Future Reviewer",
+      "workforce_status": "PENDING_REGISTRATION",
+      "review_authority": [],
+      "can_submit_review": false,
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "REGISTERED_NOT_ACTIVATED"
+    },
+    {
+      "reviewer_id": "gemini-01",
+      "display_name": "Gemini",
+      "reviewer_type": "AI",
+      "board_role": "Future Reviewer",
+      "workforce_status": "PENDING_REGISTRATION",
+      "review_authority": [],
+      "can_submit_review": false,
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "REGISTERED_NOT_ACTIVATED"
+    },
+    {
+      "reviewer_id": "openhands-01",
+      "display_name": "OpenHands",
+      "reviewer_type": "AI",
+      "board_role": "Future Reviewer",
+      "workforce_status": "PENDING_REGISTRATION",
+      "review_authority": [],
+      "can_submit_review": false,
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "REGISTERED_NOT_ACTIVATED"
+    },
+    {
+      "reviewer_id": "copilot-01",
+      "display_name": "GitHub Copilot",
+      "reviewer_type": "AI",
+      "board_role": "Future Reviewer",
+      "workforce_status": "PENDING_REGISTRATION",
+      "review_authority": [],
+      "can_submit_review": false,
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "REGISTERED_NOT_ACTIVATED"
+    },
+    {
+      "reviewer_id": "research-ai-future",
+      "display_name": "Research AI",
+      "reviewer_type": "AI",
+      "board_role": "Future Research Reviewer",
+      "workforce_status": "NOT_REGISTERED",
+      "review_authority": [],
+      "can_submit_review": false,
+      "can_final_approve": false,
+      "can_merge": false,
+      "status": "REGISTERED_NOT_ACTIVATED"
+    }
+  ],
+  "review_record_required_fields": [
+    "review_id",
+    "proposal_id",
+    "reviewer_id",
+    "reviewer_type",
+    "reviewer_role",
+    "workforce_status",
+    "source",
+    "source_commit",
+    "review_scope",
+    "findings",
+    "risks",
+    "scalability",
+    "classification",
+    "recommendation",
+    "conflict_of_interest",
+    "submitted_at",
+    "ingested_by",
+    "status"
+  ],
+  "registered_reviews": [
+    {
+      "review_id": "GROK-V11-INDEPENDENT-CTO-REVIEW-20260713",
+      "proposal_id": "KAIOS-V11-GENESIS-DESIGN-20260713",
+      "reviewer_id": "grok-independent-review",
+      "reviewer_type": "EXTERNAL_AI_REVIEW_SOURCE",
+      "reviewer_role": "Independent Architecture Reviewer",
+      "workforce_status": "NOT_REGISTERED",
+      "source": "KGEN-KAIOS/V11/reviews/GROK_INDEPENDENT_ARCHITECTURE_REVIEW.md",
+      "source_commit": "0bb29a46bbe163ef0eb8c36bb8f1c81b0087746f",
+      "review_scope": [
+        "review bottleneck",
+        "tenant isolation",
+        "state versioning",
+        "plugin framework",
+        "observability",
+        "distributed orchestration",
+        "resource management",
+        "provider runtime",
+        "security",
+        "future scale"
+      ],
+      "findings": 10,
+      "risks": [
+        "review bottleneck",
+        "distributed scale",
+        "tenant and state isolation",
+        "observability gaps"
+      ],
+      "scalability": [
+        100,
+        1000,
+        10000,
+        100000
+      ],
+      "classification": "INDEPENDENT_REVIEW_COMPLETE",
+      "recommendation": "Resolve each finding without direct implementation and defer large-scale production infrastructure to later phases.",
+      "conflict_of_interest": "No repository or merge authority; external advisory evidence only.",
+      "submitted_at": "2026-07-13T00:00:00+08:00",
+      "ingested_by": "codex-gm-01",
+      "resolution_commit": "cab345b31c05301b7a9f0e749e87650a4869230a",
+      "resolution_branch": "origin/codex/v11-genesis-design",
+      "status": "PENDING_HUMAN_REVIEW"
+    }
+  ],
+  "activation_rule": "A reviewer name in this registry does not grant employee or repository authority. AI activation requires Worker Registry registration, Boot acknowledgment, permissions, reviewer assignment and Human/Codex approval as applicable.",
+  "history_file": "KGEN-KAIOS/governance/architecture_review_history.jsonl"
+}

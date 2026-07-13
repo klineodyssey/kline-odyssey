@@ -33,6 +33,7 @@ Last optimized: 2026-06-11
 | Evolution Governance | https://klineodyssey.github.io/kline-odyssey/evolution-governance/ |
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
+| Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -106,6 +107,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | Organization V2.0 | [KGEN-Organization/](KGEN-Organization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md |
 | AI Company Automation V5.0 | [KGEN-AI-Company/](KGEN-AI-Company/) | https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md |
 | KAIOS V7.2 | [KGEN-KAIOS/](KGEN-KAIOS/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md |
+| Architecture Governance Board | [KGEN-KAIOS/governance/](KGEN-KAIOS/governance/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
@@ -160,6 +162,10 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Stale Handoff Branch Policy: [KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md](KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md)
 - Codex Pre-Merge Checklist: [KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md](KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md)
 - Worker Registry JSON: [KGEN-KAIOS/worker_registry.json](KGEN-KAIOS/worker_registry.json)
+- Architecture Governance Board: [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md)
+- Architecture Review Registry: [KGEN-KAIOS/governance/architecture_review_registry.json](KGEN-KAIOS/governance/architecture_review_registry.json)
+
+The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only. V11 Phase 1 and Implementation remain `NOT STARTED` until a separate Human decision selects `APPROVE_FOR_PHASE_1_PLANNING` or `HOLD_V11`.
 
 ### KGEN R&D Provenance And Biological Evolution Governance
 

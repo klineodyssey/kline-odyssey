@@ -32,6 +32,19 @@ V7.0 defined the architecture. V7.1 adds only the minimum worker layer required 
 
 V7.1 does not rewrite AI Company, Agent Office, Organization, WorkQueue, Runtime, Canon, or protected systems. It only adds references and machine-readable worker schemas.
 
+## Architecture Governance Board
+
+Human Approval `HUMAN-AGB-APPROVAL-001` establishes the KAIOS Architecture Governance Board for governance publication only. Every material architecture change must pass Proposal, Independent Review, Architecture Resolution, ADR, Human Architecture Approval, Implementation Planning, Human Implementation Approval, Implementation, Evidence, Review, and Merge / Release.
+
+| File | Purpose |
+|---|---|
+| `governance/ARCHITECTURE_GOVERNANCE_BOARD.md` | Formal AGB authority, flow, quorum and Human approval gates |
+| `governance/architecture_governance_board.json` | Machine-readable Board roles, status and approval scope |
+| `governance/architecture_review_registry.json` | Architecture reviewer identities, authority boundaries and review evidence |
+| `governance/architecture_review_history.jsonl` | Append-only Architecture review and Human approval history |
+
+AGB is approved, while V11 Phase 1 and Implementation remain `NOT STARTED`. ChatGPT is an advisory architect without repository write authority; Grok is an external reviewer without merge authority; Codex remains the Implementation Architect; PrimeForge remains the final Human authority.
+
 ## Core Question
 
 Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, Codex, and Human Engineers join the same AI company without redesigning the system?
