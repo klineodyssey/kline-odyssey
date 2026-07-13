@@ -56,6 +56,8 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
 | KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
+| LAND RUNTIME V1 Architecture Baseline | `KGEN-KAIOS/land/` | Frozen K280 / Land Runtime V1 architecture: parcel geometry, rights separation, territory zones, residence protection, lunar registry (docs only) |
+| Civilization Economy Runtime V1 Baseline | `KGEN-KAIOS/civilization/` | Frozen CIV-ECONOMY-V1.0 architecture: biology mapping, payroll, zones, economic conflict, border margin, title/seat/realm (docs only) |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
@@ -124,6 +126,12 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | V11 Architecture Baseline | `KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md` | Human-frozen V11.0 Architecture scope and Phase 1 HOLD boundary |
 | V11 Architecture Baseline JSON | `KGEN-KAIOS/V11/architecture_baseline.json` | SHA-256 manifest for the 11 Architecture documents, ADRs and review evidence |
 | V11 Architecture Evolution Log | `KGEN-KAIOS/V11/architecture_evolution_log.jsonl` | Append-only Architecture version, proposal, reason, ADR and approval lineage |
+| Land Runtime Architecture Baseline | `KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md` | Human-frozen LAND-RUNTIME-V1.0 scope; Implementation NOT_STARTED |
+| Land Runtime Baseline JSON | `KGEN-KAIOS/land/land_runtime_architecture_baseline.json` | SHA-256 manifest for Land Runtime V1 architecture package |
+| Land Runtime Evolution Log | `KGEN-KAIOS/land/land_runtime_architecture_evolution_log.jsonl` | Append-only Land Runtime architecture evolution lineage |
+| Civilization Economy Architecture Baseline | `KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md` | Human-frozen CIV-ECONOMY-V1.0 scope; Implementation NOT_STARTED; WorkQueue NOT_CREATED |
+| Civilization Economy Baseline JSON | `KGEN-KAIOS/civilization/civilization_economy_architecture_baseline.json` | SHA-256 manifest covering README, main spec, 25 sub-standards, 2 JSON, baseline, evolution log |
+| Civilization Economy Evolution Log | `KGEN-KAIOS/civilization/civilization_economy_architecture_evolution_log.jsonl` | Append-only Civilization Economy architecture evolution lineage |
 
 ## KAIOS Provenance And Biological Evolution Governance
 

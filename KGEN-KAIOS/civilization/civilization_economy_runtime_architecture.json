@@ -1,0 +1,244 @@
+{
+  "package": "CIVILIZATION_ECONOMY_RUNTIME_V1",
+  "version": "CIV-ECONOMY-V1.0",
+  "decision_id": "HUMAN-CIV-ECONOMY-BASELINE-001",
+  "architecture_status": "APPROVED",
+  "baseline_status": "ARCHITECTURE_BASELINE_FROZEN",
+  "implementation_status": "NOT_STARTED",
+  "implementation_planning": "HOLD",
+  "workqueue_created": false,
+  "deployment": "DOCUMENTATION_ONLY",
+  "runtime_entities": "ZERO_STATE_PROTOTYPE_ONLY",
+  "cites_land_runtime": "KGEN-KAIOS/land/LAND-RUNTIME-V1.0",
+  "must_not_redefine": [
+    "K280",
+    "Parcel",
+    "Coordinate",
+    "Land Ownership Geometry"
+  ],
+  "economy_flow": [
+    "Universe",
+    "Planet",
+    "Land",
+    "Building",
+    "Citizen",
+    "AI Employee",
+    "Mission",
+    "Evidence",
+    "Review",
+    "Salary",
+    "Bank",
+    "Market",
+    "Asset",
+    "Civilization Growth"
+  ],
+  "biology_layers": [
+    "Domain",
+    "Kingdom",
+    "Phylum",
+    "Class",
+    "Order",
+    "Family",
+    "Genus",
+    "Species",
+    "Individual",
+    "OrganSystem",
+    "Organ",
+    "Tissue",
+    "Cell",
+    "Organelle",
+    "Genome",
+    "DNA",
+    "RNA",
+    "Gene",
+    "Expression"
+  ],
+  "species_program_mapping": [
+    "program_entry",
+    "manifest",
+    "schema",
+    "runtime_adapter",
+    "capability_set",
+    "version",
+    "lineage"
+  ],
+  "individual_worker_mapping": [
+    "worker_id",
+    "owner_id",
+    "desk_id",
+    "current_task",
+    "runtime_state",
+    "attendance",
+    "payroll_account"
+  ],
+  "reproduction_pipeline": [
+    "Parent Selection",
+    "Compatibility Check",
+    "Trait Selection",
+    "Sandbox Birth",
+    "Test",
+    "Review",
+    "Species Registration",
+    "Human Approval",
+    "Activation"
+  ],
+  "payroll_formula": [
+    "Base Salary",
+    "Mission Reward",
+    "Performance Bonus",
+    "Promotion Bonus",
+    "Civilization Contribution",
+    "Special Reward",
+    "Penalty",
+    "Withholding"
+  ],
+  "payroll_requires": [
+    "Evidence",
+    "Review",
+    "Pricing Unit",
+    "Ledger Entry",
+    "Approval Status"
+  ],
+  "promotion_factors": [
+    "Skill",
+    "Mission",
+    "Attendance",
+    "Contribution",
+    "Performance"
+  ],
+  "territory_zones": [
+    "CIVIL_ZONE",
+    "RESIDENTIAL_SAFE_ZONE",
+    "NON_WAR_ZONE",
+    "BORDER_ZONE",
+    "CONTESTED_ZONE",
+    "WAR_ELIGIBLE_ZONE",
+    "FRONTIER_ZONE",
+    "WILDERNESS",
+    "RESOURCE_ZONE",
+    "MYTHIC_REALM"
+  ],
+  "authority_fields": [
+    "owner_id",
+    "governor_id",
+    "tax_authority_id",
+    "defense_authority_id",
+    "airspace_authority_id",
+    "orbital_authority_id"
+  ],
+  "conflict_forms": [
+    "TARIFF_WAR",
+    "TRADE_RESTRICTION",
+    "PORT_FEE_COMPETITION",
+    "RESOURCE_QUOTA_CONFLICT",
+    "MARKET_ACCESS_RESTRICTION",
+    "BANK_CLEARING_RESTRICTION",
+    "LOGISTICS_BLOCKADE_SIM",
+    "SANCTION_SIM",
+    "BORDER_TAX_CONFLICT"
+  ],
+  "tax_types": [
+    "income_tax",
+    "land_tax",
+    "transaction_tax",
+    "customs_tax",
+    "port_fee",
+    "market_fee",
+    "resource_royalty",
+    "airspace_fee",
+    "orbital_fee"
+  ],
+  "tax_constraints": [
+    "tax_cap",
+    "resident_protection",
+    "minimum_living_standard",
+    "appeal_rule",
+    "audit",
+    "expiry",
+    "Human Governance Policy"
+  ],
+  "border_margin": {
+    "LONG_BORDER_MARGIN": [
+      "construction",
+      "settlement",
+      "infrastructure",
+      "population_capacity",
+      "border_prosperity"
+    ],
+    "SHORT_BORDER_MARGIN": [
+      "blockade",
+      "suppression",
+      "risk_control",
+      "expansion_restraint",
+      "defense_commitment"
+    ],
+    "outcomes": [
+      "RETURNED",
+      "PARTIALLY_SLASHED",
+      "FULLY_SLASHED",
+      "TRANSFERRED_TO_RECONSTRUCTION",
+      "REWARDED",
+      "FROZEN_FOR_REVIEW"
+    ],
+    "ledger": "PROTOTYPE_ONLY"
+  },
+  "title_seat_realm_fields": [
+    "realm_id",
+    "k_anchor",
+    "seat_id",
+    "title_id",
+    "title_name",
+    "governor_id",
+    "authority_scope",
+    "tax_scope",
+    "defense_scope",
+    "appointment_method",
+    "challenge_rule",
+    "term_rule",
+    "succession_rule",
+    "revocation_rule"
+  ],
+  "example_titles": [
+    {
+      "k_anchor": "K11520",
+      "realm": "花果山",
+      "seat": "水簾洞",
+      "title": "美猴王",
+      "authority_type": [
+        "CAVE_LORD",
+        "REALM_GOVERNOR"
+      ]
+    },
+    {
+      "k_anchor": "K12345",
+      "realm": "五指山",
+      "seat": "悟空居所",
+      "title": "守山者或山主"
+    },
+    {
+      "k_anchor": "K18888",
+      "realm": "凌霄寶殿",
+      "seat": "天界治理席",
+      "title": "天帝類稱號"
+    },
+    {
+      "k_anchor": "K23333",
+      "realm": "靈山",
+      "seat": "佛門治理席",
+      "title": "宗教文明稱號"
+    }
+  ],
+  "weapons": {
+    "tiers": [
+      "T0",
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5"
+    ],
+    "nature": "Game/Civilization Simulation Abstraction",
+    "priority": "BUILD_MORE_THAN_DESTROY"
+  },
+  "created_at": "2026-07-13T19:30:00Z"
+}

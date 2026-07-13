@@ -37,6 +37,8 @@ Last optimized: 2026-06-11
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
+| LAND RUNTIME V1 Architecture Baseline | [KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md) |
+| Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -114,6 +116,8 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/](KGEN-KAIOS/kernel/) | Research only; pending Human Architecture Review |
 | Architecture Governance Board | [KGEN-KAIOS/governance/](KGEN-KAIOS/governance/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/](KGEN-KAIOS/V11/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md |
+| LAND RUNTIME V1 | [KGEN-KAIOS/land/](KGEN-KAIOS/land/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md |
+| Civilization Economy Runtime V1 | [KGEN-KAIOS/civilization/](KGEN-KAIOS/civilization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |

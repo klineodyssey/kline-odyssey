@@ -1,0 +1,14 @@
+# Economic War Standard
+
+Formal priority conflict modes:
+- `TARIFF_WAR`
+- `TRADE_RESTRICTION`
+- `PORT_FEE_COMPETITION`
+- `RESOURCE_QUOTA_CONFLICT`
+- `MARKET_ACCESS_RESTRICTION`
+- `BANK_CLEARING_RESTRICTION`
+- `LOGISTICS_BLOCKADE_SIM`
+- `SANCTION_SIM`
+- `BORDER_TAX_CONFLICT`
+
+Simulation / prototype only.

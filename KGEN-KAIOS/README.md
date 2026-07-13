@@ -91,6 +91,30 @@ Human Decision `HUMAN-V11-BASELINE-001` freezes the reviewed V11 Genesis Design 
 
 V11 Phase 1 Planning, Implementation and Deployment are all `HOLD`. No V11 Implementation WorkQueue exists. Only Architecture Review, Research, Prototype and Sandbox activity is allowed within existing governance and protected-path boundaries.
 
+## LAND RUNTIME V1 Architecture Baseline
+
+Human Decision `HUMAN-CIV-ECONOMY-BASELINE-001` freezes K280 / LAND RUNTIME V1 as documentation-only architecture. Civilization Economy Runtime must cite this package and must not redefine K280, Parcel, Coordinate, or Land Ownership Geometry.
+
+| Path | Purpose |
+|---|---|
+| `land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md` | Frozen LAND-RUNTIME-V1.0 scope and HOLD boundary |
+| `land/land_runtime_architecture_baseline.json` | SHA-256 manifest |
+| `land/land_runtime_architecture_evolution_log.jsonl` | Append-only Land Runtime lineage |
+
+Implementation, WorkQueue, real land trade, and Land NFT remain `NOT_STARTED` / unauthorized.
+
+## Civilization Economy Runtime V1 Architecture Baseline
+
+Same Decision freezes `CIV-ECONOMY-V1.0` under `civilization/`: biology 19-layer mapping, economy flow, payroll, territory governance, economic conflict, border defense margin, title/seat/realm, and space/moon architecture — documentation only.
+
+| Path | Purpose |
+|---|---|
+| `civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md` | Frozen CIV-ECONOMY-V1.0 scope and HOLD boundary |
+| `civilization/civilization_economy_architecture_baseline.json` | SHA-256 manifest (README, main spec, 25 sub-standards, 2 JSON, baseline, evolution log) |
+| `civilization/civilization_economy_architecture_evolution_log.jsonl` | Append-only Civilization Economy lineage |
+
+Implementation Planning, WorkQueue, real KGEN settlement, real tax, and real military remain unauthorized.
+
 ## Core Question
 
 Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, Codex, and Human Engineers join the same AI company without redesigning the system?
