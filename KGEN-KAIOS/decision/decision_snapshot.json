@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "version": "4.4",
+    "version": "4.5",
     "status": "ACTIVE",
-    "updated_at": "2026-07-13T14:00:00+08:00",
+    "updated_at": "2026-07-13T14:10:00+08:00",
     "manager": "codex-gm-01",
     "task_id": "KAIOS-V11-ARCH-REVIEW-RESOLUTION-20260713",
-    "source_commit": "1d6de8cb3b16983f923fb2a88514cef54328f2c5",
+    "source_commit": "cab345b",
     "source_of_truth": true
   },
   "daily_operation": {
@@ -22,9 +22,9 @@
     "protected_path_alerts": 0
   },
   "decisions": {
-    "today": 15,
+    "today": 16,
     "pending": 2,
-    "approved_or_closed": 11,
+    "approved_or_closed": 12,
     "rejected": 2,
     "rollback_history": 0
   },
@@ -64,6 +64,9 @@
     "independent_review_status": "PENDING_HUMAN_REVIEW",
     "independent_review_source": "Grok Independent CTO Review",
     "architecture_review_resolution": "KGEN-KAIOS/V11/ARCHITECTURE_REVIEW_RESOLUTION.md",
+    "review_branch": "origin/codex/v11-genesis-design",
+    "design_commit": "fbb40b5",
+    "resolution_commit": "cab345b",
     "implementation_status": "NOT_STARTED",
     "implementation_workqueue_created": false,
     "design_index": "KGEN-KAIOS/V11/V11_MASTER_INDEX.md"

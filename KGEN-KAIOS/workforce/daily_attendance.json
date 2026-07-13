@@ -23,7 +23,8 @@
     "Recovered GitHub connectivity without repeating handoff cleanup",
     "Verified closeout main and Deploy Pages Static run 29224741774",
     "Completed eleven V11 Genesis Design documents after Human Approval HUMAN-V11-GENESIS-001",
-    "Resolved ten Independent CTO Review topics into four ACCEPT and six PARTIAL_ACCEPT decisions with ten ADRs"
+    "Resolved ten Independent CTO Review topics into four ACCEPT and six PARTIAL_ACCEPT decisions with ten ADRs",
+    "Published the Genesis Design and review resolution to origin/codex/v11-genesis-design without touching main or deployment"
   ],
   "review_results": [
     "16 handoffs classified ARCHIVE_EVIDENCE_ONLY",

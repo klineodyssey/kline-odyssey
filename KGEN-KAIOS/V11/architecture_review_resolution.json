@@ -10,7 +10,7 @@
     "updated_at": "2026-07-13T00:00:00+08:00",
     "updated_by": "codex-gm-01",
     "reviewed_by": null,
-    "source_commit": "PENDING_REVIEW_RESOLUTION_COMMIT",
+    "source_commit": "cab345b",
     "base_commit": "1d6de8cb3b16983f923fb2a88514cef54328f2c5",
     "design_commit": "fbb40b5",
     "task_id": "KAIOS-V11-ARCH-REVIEW-RESOLUTION-20260713",
