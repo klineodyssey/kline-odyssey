@@ -136,4 +136,21 @@ LIBRARY MASTER → KGEN_MASTER_LIBRARY_INDEX.md
 
 ## Need Codex Review
 
-Yes.
+Completed.
+
+## Codex Review Result
+
+| Field | Result |
+|---|---|
+| Decision | APPROVED |
+| Review Date | 2026-07-13 |
+| Remote Handoff Tip | `ce910e82e53999470fa9a8694301c149c1d23b9c` |
+| Integrated Source Commit | `5c9d7438ca9ae4b93815887526882e9cc5b708a4` |
+| Tree Equality | PASS: both resolve to `f6d730361a1c4f87166d7696b0bd7b270050e40f` |
+| Worker Credential | PASS: `cursor-01`, ACTIVE, T2 |
+| Single-Task Purity | PASS |
+| Canon | PASS |
+| Protected Paths | PASS / 0 violations |
+| Main Push | Codex-controlled closeout |
+
+Codex selected the clean commit directly based on current main instead of importing the handoff merge history. This preserves the exact approved file tree while keeping earlier rejected evidence outside main history.

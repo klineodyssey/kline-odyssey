@@ -119,6 +119,7 @@ These rows classify remote submissions, not the underlying OPEN WorkOrders. Visi
 | ORG-P2-003B | `481fb782` | ARCHIVE_EVIDENCE_ONLY | DONE |
 | ORG-P2-003E | `238880e8` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
 | ORG-P2-003E-FIX1 | `5cd4cf3b` | REJECT_UNAUTHORIZED | OPEN |
+| ORG-P2-003E-FIX1 (authorized resubmission) | `ce910e8` | APPROVED_CLEAN_TREE_EQUIVALENT | DONE |
 | ORG-P2-003F | `e9429d66` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
 | ORG-P2-003F-FIX1 | `dbdd905c` | REJECT_NO_CLAIM | OPEN |
 | ORG-P2-004 | `7fdb716f` | ARCHIVE_EVIDENCE_ONLY | OPEN |
@@ -199,7 +200,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003C | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-003C_CANON_HIERARCHY_MAP.md |
 | ORG-P2-003D | DONE | Cursor | Codex | P2 | Architecture | KGEN-AI-Company/reports/ORG-P2-003D_LEGACY_REFERENCE_POLICY.md |
 | ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
-| ORG-P2-003E-FIX1 | REVIEW | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
+| ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
@@ -474,7 +475,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-003E-FIX1 - Rebase Master Index alias hierarchy on current main
 
-- Status: REVIEW
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -502,6 +503,11 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
   - Do not delete files added after `761f0e1`.
   - Submit one WorkOrder only on `cursor-handoff/ORG-P2-003E-FIX1`.
   - Include full Worker Boot SOP evidence in the report.
+- Codex review result:
+  - APPROVED on 2026-07-13.
+  - Remote handoff tip `ce910e82e53999470fa9a8694301c149c1d23b9c` and clean current-main child commit `5c9d7438ca9ae4b93815887526882e9cc5b708a4` have the same Git tree `f6d730361a1c4f87166d7696b0bd7b270050e40f`.
+  - Codex integrated the clean child commit so the earlier rejected branch history did not enter main.
+  - Full diff, Worker credential, single-task purity, Canon, links, and protected paths passed.
 
 ### ORG-P2-003F - Draft 12345 module naming future migration plan
 
