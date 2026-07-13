@@ -5,7 +5,7 @@ STATUS: "ACTIVE"
 LAST_UPDATED: "2026-07-13"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex / codex-gm-01"
-SOURCE_COMMIT: "PENDING_CLOSEOUT"
+SOURCE_COMMIT: "90d7283c8b6880255e1176b4ebba1f54da35da21"
 TASK_ID: "KAIOS-V11-READINESS-RECOVERY-20260713"
 CHANGE_REASON: "Define the bounded network maintenance loop for the V11 readiness closeout."
 ANCESTOR: "KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md"
@@ -80,4 +80,3 @@ The machine-readable source for current maintenance state is `maintenance_snapsh
 ## Safety Boundary
 
 No maintenance action may modify contracts, wallet Runtime, bridge, Temple 12345 Runtime, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets, or uncommitted Human files. No force push is permitted.
-
