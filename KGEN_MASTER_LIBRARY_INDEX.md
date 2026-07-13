@@ -87,6 +87,7 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 | Task Claim Lease Protocol | `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | Claim and lease rules to prevent duplicate WorkOrder execution |
 | Stale Handoff Branch Policy | `KGEN-KAIOS/STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for stale, missing, or invalid handoff branches |
 | Codex Pre-Merge Checklist | `KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md` | Required review gates before merging any handoff branch |
+| KAIOS Readiness Standard | `KGEN-KAIOS/READINESS_STANDARD.md` | System/report dirty-state separation, handoff reconciliation, pending-push evidence, and READY gates |
 | Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker registry seed |
 | Task Claim Schema | `KGEN-KAIOS/task_claim_schema.json` | JSON Schema for claim and lease records |
 | Worker Status Schema | `KGEN-KAIOS/worker_status_schema.json` | JSON Schema for worker status records |

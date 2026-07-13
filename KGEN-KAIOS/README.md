@@ -68,6 +68,7 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `TASK_CLAIM_LEASE_PROTOCOL.md` | Claim lease rules that prevent two workers from taking the same WorkOrder |
 | `STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for missing branches, invisible commits, missing reports, old bases, advanced main, disappeared workers, and timeout |
 | `CODEX_PRE_MERGE_CHECKLIST.md` | Required Codex checklist before merge to main |
+| `READINESS_STANDARD.md` | Distinguishes SYSTEM_DIRTY, REPORT_GENERATION_DIRTY, isolated Human Main, handoff disposition, and READY gates |
 | `worker_registry.json` | Machine-readable worker registry seed |
 | `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
 | `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |

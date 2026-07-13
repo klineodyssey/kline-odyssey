@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "report_id": "KAIOS-V11-READINESS-20260713-RECOVERY",
+    "version": "1.1",
+    "status": "ACTIVE",
+    "generated_at": "2026-07-13T11:20:00+08:00",
+    "generated_by": "codex-gm-01",
+    "mode": "GOVERNANCE_CLEANUP_ONLY",
+    "source_of_truth": true
+  },
+  "result": "V11_READY",
+  "daily_operation": "PASS",
+  "checks": {
+    "boot": "PASS",
+    "canon": "PASS",
+    "workspace_policy": "PASS",
+    "worker_registry": "PASS",
+    "attendance": "PASS",
+    "workqueue": "PASS",
+    "review_log": "PASS",
+    "pending_reviews": "PASS",
+    "pending_handoffs": "PASS",
+    "pending_commits": "PASS",
+    "pending_push": "PASS",
+    "github_status": "PASS",
+    "github_pages": "PASS",
+    "protected_paths": "PASS",
+    "working_tree": "PASS",
+    "decision_log": "PASS"
+  },
+  "workspace": {
+    "system_dirty": false,
+    "system_worktree_state": "CLEAN",
+    "report_generation_dirty": true,
+    "report_generation_state": "DECLARED_GOVERNANCE_CLOSEOUT_ONLY",
+    "human_main_state": "HUMAN_MAIN_ISOLATED",
+    "human_main_modified_by_ai": false,
+    "unapproved_v11_draft_isolated": true,
+    "unapproved_v11_draft_branch": "draft/v11-unapproved-20260713",
+    "unapproved_v11_draft_commit": "44e1dfa2e5f164298d13be37a6a46c95a88ad233"
+  },
+  "pending": {
+    "local_only_commit_count": 0,
+    "pending_push_unique_patch_count": 0,
+    "pending_review_count": 0,
+    "pending_handoff_count": 0,
+    "visible_handoff_evidence_branch_count": 21,
+    "handoff_disposition_count": 21,
+    "blocked_needs_human_count": 0
+  },
+  "handoff_classification": {
+    "APPROVE": 0,
+    "REJECT_STALE": 0,
+    "REJECT_NO_CLAIM": 4,
+    "REJECT_DUPLICATE": 0,
+    "REJECT_UNAUTHORIZED": 1,
+    "BLOCK_NEEDS_HUMAN": 0,
+    "ARCHIVE_EVIDENCE_ONLY": 16
+  },
+  "pending_patch_resolution": {
+    "original_commit": "d83d800f8f5f311221650ac4b0f4fb9d1fe4c586",
+    "decision": "REJECT",
+    "evidence_branch": "archive-evidence/phase-1-civilization-index-v10-49-1",
+    "merged_to_main": false,
+    "protected_path_impact": 0
+  },
+  "workforce": {
+    "active_employee_count": 2,
+    "active_agent_count": 1,
+    "active_human_count": 1,
+    "workforce_version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1",
+    "attendance_status": "ACTIVE",
+    "attendance_version": "1.1"
+  },
+  "network": {
+    "github_tcp_443": "HEALTHY",
+    "github_https": "HEALTHY",
+    "github_https_status": 200,
+    "dns": "HEALTHY",
+    "fetch_origin": "PASS"
+  },
+  "pages": {
+    "status": "HEALTHY",
+    "workflow_name": "Deploy Pages Static",
+    "workflow_run_id": 29217562316,
+    "workflow_status": "completed",
+    "workflow_conclusion": "success",
+    "workflow_head_sha": "bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7",
+    "routes": {
+      "homepage": 200,
+      "kaios_dashboard": 200,
+      "decision_center": 200,
+      "workforce": 200
+    }
+  },
+  "system": {
+    "evaluated_main_sha": "bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7",
+    "governance_closeout_commit": "PENDING",
+    "kaios_version": "V10.0 Operating System",
+    "decision_engine_status": "ACTIVE",
+    "decision_engine_version": "4.0",
+    "queue_status": "ACTIVE_RECONCILED",
+    "queue_version": "V3.0 Cursor Execution Edition"
+  },
+  "protected_paths": {
+    "violation_count": 0,
+    "governance_diff": "PASS",
+    "handoff_name_scan": "PASS",
+    "approval_inferred": false
+  },
+  "blocking_reasons": [],
+  "v11_development_started": false,
+  "implementation_workqueue_created": false,
+  "human_command_required_for_next_step": "開始 V11 設計"
+}

@@ -49,6 +49,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
+| KAIOS-V11-READINESS-RECOVERY-20260713 | IN_PROGRESS | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -75,6 +76,62 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Decision Dashboard is read-only and uses no GitHub token.
   - Worker reporting follows BOOT through DONE with Codex-controlled closeout.
   - JSON, JavaScript, Pages, and protected-path checks pass.
+
+### KAIOS-V11-READINESS-RECOVERY-20260713 - Reconcile V11 readiness blockers
+
+- Status: IN_PROGRESS
+- Owner: Codex / codex-gm-01
+- Reviewer: Human / PrimeForge
+- Priority: P0
+- Risk Level: R1 governance-only
+- Department: Operations
+- Branch: `codex/v11-readiness`
+- Base Commit: `bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: KAIOS-V11-READINESS-RECOVERY
+- Task Source Actor: human-primeforge
+- Task Source File: `KGEN-KAIOS/reports/V11_READINESS_REPORT.md`
+- Task Source Commit: `bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7`
+- Task Source Reason: Reconcile visible handoffs, pending local commits, and the unapproved V11 draft before rerunning the readiness gate.
+- Output report path: `KGEN-KAIOS/reports/V11_READINESS_REPORT.md`
+- Protected paths: contracts, Temple 12345 Runtime, wallet, bridge, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets.
+- Acceptance criteria:
+  - Every visible handoff tip has one evidence-backed disposition.
+  - Pending push patches are zero without deleting evidence.
+  - The unapproved V11 proposal is isolated from main and active review worktrees.
+  - SYSTEM_DIRTY and REPORT_GENERATION_DIRTY are evaluated separately.
+  - JSON, Markdown, GitHub, Pages, WorkQueue, Decision Log, and protected-path checks pass.
+  - V11 development remains false and no implementation WorkQueue is created.
+
+## V11 Readiness Handoff Dispositions
+
+These rows classify remote submissions, not the underlying OPEN WorkOrders. Visible evidence branches are retained and are not pending after a Codex decision is recorded.
+
+| Task ID | Branch Tip | Submission Decision | Official Task Status |
+|---|---|---|---|
+| ORG-P2-003A | `b8438063` | ARCHIVE_EVIDENCE_ONLY | DONE |
+| ORG-P2-003B | `481fb782` | ARCHIVE_EVIDENCE_ONLY | DONE |
+| ORG-P2-003E | `238880e8` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
+| ORG-P2-003E-FIX1 | `5cd4cf3b` | REJECT_UNAUTHORIZED | OPEN |
+| ORG-P2-003F | `e9429d66` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
+| ORG-P2-003F-FIX1 | `dbdd905c` | REJECT_NO_CLAIM | OPEN |
+| ORG-P2-004 | `7fdb716f` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-005 | `b7c7e864` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-006 | `1b6ed85e` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-007 | `c8ca9ea1` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-008 | `dd0fb087` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-009 | `2628061c` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-010 | `848d9464` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-011 | `2a449222` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-012 | `152bd1e1` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-013 | `6313aad2` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-014 | `10646e15` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-015 | `29bf03c0` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-016 | `e81971a1` | REJECT_NO_CLAIM | OPEN |
+| ORG-P2-017 | `1ca1d6f1` | REJECT_NO_CLAIM | OPEN |
+| ORG-P2-018 | `124b1081` | REJECT_NO_CLAIM | OPEN |
+
+Full branch, claim, base, report, purity, protected-path, and age evidence is recorded in `KGEN-AI-Company/reports/V11_READINESS_HANDOFF_RECONCILIATION.md`.
 
 
 ## KAIOS V7.1 Dry Run Summary
