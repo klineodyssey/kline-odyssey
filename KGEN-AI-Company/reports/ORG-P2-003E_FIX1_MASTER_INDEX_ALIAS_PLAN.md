@@ -68,27 +68,29 @@ Exactly **one** OPEN WorkOrder claimed: `ORG-P2-003E-FIX1`.
 
 ```json
 {
+  "claim_id": "CLAIM-ORG-P2-003E-FIX1-20260713T0257-cursor-01",
   "task_id": "ORG-P2-003E-FIX1",
   "worker_id": "cursor-01",
   "worker_type": "Cursor",
   "status": "REVIEW",
   "branch": "cursor-handoff/ORG-P2-003E-FIX1",
   "base_commit": "bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7",
-  "claimed_at": "2026-07-13T02:28:00Z",
-  "lease_expires_at": "2026-07-13T06:28:00Z",
-  "heartbeat": "2026-07-13T02:30:00Z",
+  "claimed_at": "2026-07-13T02:57:00Z",
+  "lease_expires_at": "2026-07-13T06:57:00Z",
+  "heartbeat": "2026-07-13T02:57:00Z",
   "report_path": "KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md",
   "reviewer": "codex-gm-01",
-  "notes": "Authorized one-task rerun after DAILY_HANDOFF_REVIEW_2026-07-13 REJECTED_HANDOFF; merge origin/main into handoff; no force-push; no concurrent tasks"
+  "concurrent_tasks": [],
+  "notes": "Authorized one-task rerun; fix WORK_QUEUE summary/detail REVIEW mismatch; no force-push; no concurrent tasks"
 }
 ```
 
 | Claim field | Value |
 |---|---|
-| `claim_id` | `CLAIM-ORG-P2-003E-FIX1-20260713-cursor-01` |
-| `claimed_at` | 2026-07-13T02:28:00Z |
-| `lease_expires_at` | 2026-07-13T06:28:00Z |
-| `heartbeat` | 2026-07-13T02:30:00Z |
+| `claim_id` | `CLAIM-ORG-P2-003E-FIX1-20260713T0257-cursor-01` |
+| `claimed_at` | 2026-07-13T02:57:00Z |
+| `lease_expires_at` | 2026-07-13T06:57:00Z |
+| `heartbeat` | 2026-07-13T02:57:00Z |
 | Concurrent other tasks | **NONE** |
 
 Lifecycle: OPEN → CLAIMED → IN_PROGRESS → REVIEW
