@@ -1,0 +1,39 @@
+{
+  "baseline_id": "LAND-RUNTIME-V1.0",
+  "status": "ARCHITECTURE_BASELINE_FROZEN",
+  "decision_id": "HUMAN-CIV-ECONOMY-BASELINE-001",
+  "architecture": "APPROVED",
+  "implementation": "NOT_STARTED",
+  "implementation_planning": "HOLD",
+  "workqueue_created": false,
+  "deployment": "DOCUMENTATION_ONLY",
+  "frozen_at": "2026-07-13T19:30:00Z",
+  "file_count": 18,
+  "sha256": {
+    "AIRSPACE_ORBITAL_STANDARD.md": "e6d152db4f9a37885861e86b280bb8dc6b772eb43e5628609cede9b91747e1f4",
+    "COORDINATE_GEOMETRY_STANDARD.md": "f69f0820c0cf4c7ad079804010846a50adbca1c0ccd88bcdf6a53d24a84c0157",
+    "FARMLAND_STANDARD.md": "a2c559d3dc9125d12548e26fe73bce2fb01713316908c87050e17cdf17da66a5",
+    "K280_STANDARD.md": "5676e787b4d626a008fddd411a0189ac139e7f03739a38915bcd32f378c06bab",
+    "LAND_REGISTRY_STANDARD.md": "bbed4cd4c8aab0a3c5b213600d002881cecadbbf82ed758c711a672572515377",
+    "LAND_RUNTIME_ARCHITECTURE.md": "68b84aff88598fd4b962457bdac27787685155c810ff55d1c7ce1466c3535a5b",
+    "LAND_RUNTIME_ARCHITECTURE_BASELINE.md": "eeb29187769d6edcf4a21faaba833cbcfd0ae609b8c904232d05795c2fc0e53f",
+    "LUNAR_LAND_STANDARD.md": "ca8edd31a0d1972db853e7f9782c4761d51fe975002bd65a9356a13506ea0cb4",
+    "OWNERSHIP_STANDARD.md": "6faf23eef89a6496be87132135f4b7ffb45d7c9d10b6506a6b58d951f1845e29",
+    "PARCEL_STANDARD.md": "0ca7737674d6150695f74561421bb5e73820b68779a095fd9aba7ad178f84485",
+    "README.md": "796ef2038404f6094c20abdf41543b542d0bed1a6ea9638395547bfed7dea66a",
+    "RESIDENCE_STANDARD.md": "586979b6bb667ef1ee7df253429c6ecfedb46eddc5ba768c69810fe35a0b2f6d",
+    "RIGHTS_AUTHORITY_STANDARD.md": "bae6c7be9cd8016bd191c10f2b80c167898f5910b4e2cc302bad5e5dda48dbb9",
+    "TERRITORY_ZONE_STANDARD.md": "eb6c8c9d3bcb4b883b36959287aa3e4ee4e529c6c2357ee20df914244587fcd7",
+    "ZERO_STATE_PROTOTYPE_STANDARD.md": "d647400e1de01fc28bcae4be2698d66bf59bc3cdf7e0aa535eedfe3d874550af",
+    "land_runtime_architecture.json": "870be253dc31ae58c3cc23e56b3e769643e9055559cc353b3936bc972eae33fa",
+    "land_runtime_architecture_evolution_log.jsonl": "408252f7305c84926b9008dd03f25a6325b781364fcd992caf27a64e7880d856"
+  },
+  "change_control": [
+    "Proposal",
+    "Independent Review",
+    "Resolution",
+    "ADR",
+    "Human Approval",
+    "Baseline Update"
+  ]
+}

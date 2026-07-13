@@ -2,7 +2,7 @@
 
 **Decision ID:** `HUMAN-CIV-ECONOMY-BASELINE-001`  
 **Architecture Status:** `APPROVED`  
-**Baseline Status:** `TO_BE_FROZEN`  
+**Baseline Status:** `ARCHITECTURE_BASELINE_FROZEN`  
 **Implementation:** `NOT_STARTED`  
 **Deployment:** `DOCUMENTATION_ONLY`  
 **Runtime Entities:** `ZERO_STATE / PROTOTYPE_ONLY`
@@ -40,6 +40,9 @@ Civilization Economy Runtime V1 **must cite** this Land Runtime and **must not**
 | `LUNAR_LAND_STANDARD.md` | Moon independent land registry |
 | `LAND_REGISTRY_STANDARD.md` | Registry & proposal flow |
 | `ZERO_STATE_PROTOTYPE_STANDARD.md` | Zero-state / prototype ledger rules |
+| `LAND_RUNTIME_ARCHITECTURE_BASELINE.md` | Frozen baseline declaration |
+| `land_runtime_architecture_baseline.json` | SHA-256 baseline manifest |
+| `land_runtime_architecture_evolution_log.jsonl` | Evolution log |
 
 ## Change Control
 
