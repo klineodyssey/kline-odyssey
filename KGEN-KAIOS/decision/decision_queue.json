@@ -6,7 +6,7 @@
     "manager": "codex-gm-01",
     "task_id": "KAIOS-GM-V4-2026-0001"
   },
-  "queue_status": "CLEAR",
+  "queue_status": "UNDER_REVIEW",
   "allowed_statuses": [
     "PENDING",
     "UNDER_REVIEW",
@@ -14,5 +14,14 @@
     "BLOCKED",
     "READY_FOR_MANAGER"
   ],
-  "items": []
+  "items": [
+    {
+      "decision_id": "DEC-20260713-0006",
+      "status": "UNDER_REVIEW",
+      "action": "Review KAIOS V11 design proposal and decide whether implementation Phase 1 may begin.",
+      "risk": "R1",
+      "reviewer": "human-primeforge",
+      "related_workorder": "KAIOS-V11-MULTI-AGENT-CIVILIZATION"
+    }
+  ]
 }

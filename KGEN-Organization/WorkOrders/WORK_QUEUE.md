@@ -49,6 +49,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
+| KAIOS-V11-MULTI-AGENT-CIVILIZATION | REVIEW | Codex | Human PrimeForge | P1 | Architecture | `codex/workforce-roster` | `KGEN-KAIOS/V11/V11_ARCHITECTURE_REVIEW.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -75,6 +76,32 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Decision Dashboard is read-only and uses no GitHub token.
   - Worker reporting follows BOOT through DONE with Codex-controlled closeout.
   - JSON, JavaScript, Pages, and protected-path checks pass.
+
+### KAIOS-V11-MULTI-AGENT-CIVILIZATION - Multi-Agent Civilization Runtime Design
+
+- Status: REVIEW
+- Owner: Codex / codex-gm-01
+- Reviewer: Human / PrimeForge
+- Priority: P1 / HIGH
+- Risk Level: R1 (design-only)
+- Department: Architecture
+- Branch: `codex/workforce-roster`
+- Base Commit: `bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: KAIOS-V11-MULTI-AGENT-CIVILIZATION
+- Task Source Actor: human-primeforge
+- Task Source File: `KGEN-KAIOS/V11/SYSTEM_OVERVIEW.md`
+- Task Source Commit: `bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7`
+- Task Source Reason: Design KAIOS V11 as a player-owned multi-agent civilization platform before implementation.
+- Dependencies: KAIOS V10 Operating System; Worker Registry; Claim Lease; Workforce Attendance and Compensation; V9 Decision and WorkOrder review loops.
+- Output report path: `KGEN-KAIOS/V11/V11_ARCHITECTURE_REVIEW.md`
+- Protected paths: contracts, Temple 12345 Runtime, wallet, bridge, Runtime CURRENT, final-whitepaper, KGEN Token contract, secrets.
+- Acceptance criteria:
+  - Eleven requested V11 proposal documents exist and contain substantive design.
+  - Architecture review covers advantages, risks, V10 compatibility, migration, and implementation phases.
+  - All marketplace, payroll, wallet, and autonomy functions remain Concept or Prototype with Human/Codex gates.
+  - No implementation, deployment, Pages change, schema, runtime code, or protected-path change is introduced.
+  - Final status is REVIEW pending explicit Human approval.
 
 
 ## KAIOS V7.1 Dry Run Summary
