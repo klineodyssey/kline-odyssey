@@ -24,7 +24,7 @@
   },
   "sha256": {
     "BANK_LEDGER_STANDARD.md": "e42bdb6e5432285e86ef3ebf54769f13fe915ddc5aad1867ec2b7e66b97df213",
-    "BIOLOGY_TAXONOMY_STANDARD.md": "ccecb69ed0b414505ec82d75d00a6baa0403e75f52cde49c3c224d5e56725c24",
+    "BIOLOGY_TAXONOMY_STANDARD.md": "9cdc1777fddbb6a5562e0821797f0c471bc76b6b0e43276cec8357876e519a57",
     "BORDER_DEFENSE_MARGIN_STANDARD.md": "122782b9246113e41a98112f54aa21b34ae65212ee9dd0d8e5fb9469a5003e23",
     "CIVILIZATION_CONFLICT_STANDARD.md": "2ce19001d4fe803de4700ba5776fe88ac89d9970f16bae59c64f5f627b0d469f",
     "CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md": "cc939f247618dc6048ab5d1108fae30a520dceea4aae4fc53e79140f40f8b44a",
@@ -52,10 +52,20 @@
     "ZERO_STATE_PROTOTYPE_STANDARD.md": "fe063c7a01f080394b563d034bfdaa4be307f1718d7f627382280afa6f930f27",
     "ZONE_CHANGE_GOVERNANCE_STANDARD.md": "a83089768322bdf968c6143f12f0911ee699700ef67dfb83d6c7a4086867ca39",
     "civilization_economy_architecture.json": "2f103d56099ce940b1723b16426cbfb51135304d42ce67f2ab4e61da847b4f57",
-    "civilization_economy_architecture_evolution_log.jsonl": "41f9e9acf59465f88c34a2d41bfa59b63ae94cac3732e06419f2154c4c0e46db",
+    "civilization_economy_architecture_evolution_log.jsonl": "595bb254de3ed54e0ee47d769e424afd59227ce3a82193c6ea496ed6e921656b",
     "civilization_economy_runtime_architecture.json": "a1cba6f6d72ea8b12e79bfdc3d7dd1ce68d2865b0cb355bc69b4c514047f050a"
   },
   "file_count_hashed": 31,
+  "manifest_verification": {
+    "algorithm": "SHA-256",
+    "text_canonicalization": "UTF-8 with LF line endings",
+    "package_file_count": 32,
+    "full_file_hash_entries": 31,
+    "manifest_self_integrity": "ANCHORED_BY_CONTAINING_GIT_COMMIT_TO_AVOID_RECURSIVE_SELF_HASH",
+    "validated_by": "Codex / codex-gm-01",
+    "validated_at": "2026-07-14T15:16:26+08:00",
+    "result": "PASS"
+  },
   "change_control": [
     "Proposal",
     "Independent Review",

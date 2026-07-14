@@ -22,4 +22,4 @@ Formal 19 layers:
 - `Gene`
 - `Expression`
 
-Adopted by `{DECISION}`. Architecture only.
+Adopted by `HUMAN-CIV-ECONOMY-BASELINE-001`. Architecture only.
