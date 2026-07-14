@@ -202,7 +202,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
-| ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F-FIX1 | REVIEW | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -542,7 +542,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-003F-FIX1 - Rebase 12345 module naming migration plan on current main
 
-- Status: OPEN
+- Status: IN_PROGRESS
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
