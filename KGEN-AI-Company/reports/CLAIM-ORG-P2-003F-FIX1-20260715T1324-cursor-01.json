@@ -1,0 +1,14 @@
+{
+  "task_id": "ORG-P2-003F-FIX1",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "REVIEW",
+  "branch": "cursor-handoff/ORG-P2-003F-FIX1-20260715r2",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T13:24:37Z",
+  "lease_expires_at": "2026-07-15T17:24:37Z",
+  "heartbeat": "2026-07-15T13:25:05Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
+  "reviewer": "codex-gm-01",
+  "notes": "claim_id=CLAIM-ORG-P2-003F-FIX1-20260715T1324-cursor-01; prior lease expired; single-task reclaim; clean branch avoids force-push; temple read-only"
+}
