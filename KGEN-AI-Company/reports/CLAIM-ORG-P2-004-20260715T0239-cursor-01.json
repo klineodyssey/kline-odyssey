@@ -1,0 +1,14 @@
+{
+  "task_id": "ORG-P2-004",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "REVIEW",
+  "branch": "cursor-handoff/ORG-P2-004-20260715",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T02:39:02Z",
+  "lease_expires_at": "2026-07-15T06:39:02Z",
+  "heartbeat": "2026-07-15T02:40:09Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md",
+  "reviewer": "codex-gm-01",
+  "notes": "clean branch avoids force-push over ARCHIVE_EVIDENCE tip; claim_id=CLAIM-ORG-P2-004-20260715T0239-cursor-01; skipped ORG-P2-003F-FIX1 due to active REVIEW lease; single execution this turn; no Canon rewrites"
+}
