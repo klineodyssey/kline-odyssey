@@ -10,7 +10,7 @@
 | Date | 2026-07-15 |
 | Base Commit | 7a692c34df50861ab10f8bd80959d95251b1071c |
 | Branch | `cursor-handoff/ORG-P2-005` |
-| Commit SHA | recorded at push (handoff tip) |
+| Commit SHA | `48c1ef8` (task work) + `e39bf79` (archive-evidence merge, ours strategy, tree identical to `48c1ef8`) |
 | Report Path | `KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md` |
 | Start Status | OPEN |
 | End Status | REVIEW |
