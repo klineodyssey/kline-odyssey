@@ -121,7 +121,7 @@ These rows classify remote submissions, not the underlying OPEN WorkOrders. Visi
 | ORG-P2-003E-FIX1 | `5cd4cf3b` | REJECT_UNAUTHORIZED | OPEN |
 | ORG-P2-003E-FIX1 (authorized resubmission) | `ce910e8` | APPROVED_CLEAN_TREE_EQUIVALENT | DONE |
 | ORG-P2-003F | `e9429d66` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
-| ORG-P2-003F-FIX1 | `dbdd905c` | REJECT_NO_CLAIM | OPEN |
+| ORG-P2-003F-FIX1 | `dbdd905c` | REJECT_NO_CLAIM | CLAIMED |
 | ORG-P2-004 | `7fdb716f` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-005 | `b7c7e864` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-006 | `1b6ed85e` | ARCHIVE_EVIDENCE_ONLY | OPEN |
@@ -202,7 +202,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
-| ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F-FIX1 | CLAIMED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -542,12 +542,19 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-003F-FIX1 - Rebase 12345 module naming migration plan on current main
 
-- Status: OPEN
-- Owner: Cursor
+- Status: CLAIMED
+- Owner: Cursor / cursor-01
 - Reviewer: Codex
 - Priority: P2
 - Department: Runtime
-- Branch: `cursor-handoff/ORG-P2-003F-FIX1`
+- Branch: `cursor/org-p2-003f-fix1-claim-f2d4`
+- Claim ID: `CLAIM-ORG-P2-003F-FIX1-20260715T023835-cursor-01`
+- Worker ID: `cursor-01`
+- Worker Type: `Cursor`
+- Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
+- Claimed At: `2026-07-15T02:38:35Z`
+- Lease Expires At: `2026-07-15T06:38:35Z`
+- Heartbeat: `2026-07-15T02:38:35Z`
 - Input files:
   - KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md
   - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
