@@ -205,7 +205,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
-| ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
+| ORG-P2-006 | IN_PROGRESS | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
 | ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
 | ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
 | ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
@@ -641,11 +641,19 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-006 - Map civilization upgrade stages to economy and game loops
 
-- Status: OPEN
+- Status: IN_PROGRESS
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
 - Department: Civilization
+- Branch: `cursor-handoff/ORG-P2-006`
+- Claim ID: `CLAIM-ORG-P2-006-20260715T0314-cursor-01`
+- Worker ID: `cursor-01`
+- Claimed At: `2026-07-15T03:14:20Z`
+- Lease Expires At: `2026-07-15T07:14:20Z`
+- Heartbeat: `2026-07-15T03:14:20Z`
+- Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
+- Claim lease file: `KGEN-AI-Company/reports/claims/ORG-P2-006_claim.json`
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md

@@ -1,0 +1,14 @@
+{
+  "task_id": "ORG-P2-006",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "CLAIMED",
+  "branch": "cursor-handoff/ORG-P2-006",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T03:14:20Z",
+  "lease_expires_at": "2026-07-15T07:14:20Z",
+  "heartbeat": "2026-07-15T03:14:20Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md",
+  "reviewer": "codex-gm-01",
+  "notes": "claim_id=CLAIM-ORG-P2-006-20260715T0314-cursor-01. Single-task claim. First OPEN WorkOrder without an active lease: ORG-P2-003F-FIX1 (e6e5d2f), ORG-P2-004 (91f9736), ORG-P2-005 (d4de14e), ORG-P2-019 (fa22c12) are at REVIEW; ORG-P2-020 (af6220b), ORG-P2-021, ORG-P2-022 hold fresh leases on their own branches. Prior ORG-P2-006 tip 1b6ed85 (2026-07-09, bundled 004/005/006) was dispositioned ARCHIVE_EVIDENCE_ONLY on 2026-07-13; WorkOrder remained OPEN for a lawful single-task re-claim. Reissue from current main 7a692c3."
+}
