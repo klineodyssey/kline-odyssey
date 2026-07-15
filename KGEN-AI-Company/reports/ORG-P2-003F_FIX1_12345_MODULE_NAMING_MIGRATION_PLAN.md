@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Task ID | ORG-P2-003F-FIX1 |
-| Trigger | `KAIOS BOOT` → `Claim one task` |
+| Trigger | `Claim one task` (2026-07-15 session 2) |
 | Worker ID | cursor-01 |
 | Worker Type | Cursor |
 | Date | 2026-07-15 |
@@ -73,18 +73,18 @@ Result: **PASS**
   "status": "REVIEW",
   "branch": "cursor/org-p2-003f-fix1-a008",
   "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
-  "claimed_at": "2026-07-15T02:10:00Z",
-  "lease_expires_at": "2026-07-15T06:10:00Z",
-  "heartbeat": "2026-07-15T02:15:00Z",
+  "claimed_at": "2026-07-15T13:22:00Z",
+  "lease_expires_at": "2026-07-15T17:22:00Z",
+  "heartbeat": "2026-07-15T13:23:00Z",
   "report_path": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
   "reviewer": "codex-gm-01",
-  "notes": "KAIOS BOOT single-task claim; report-only; no 12345 edits"
+  "notes": "Claim one task session 2; report-only; no 12345 edits; canonical handoff cursor/org-p2-003f-fix1-a008"
 }
 ```
 
 | Field | Value |
 |---|---|
-| claim_id | `CLAIM-ORG-P2-003F-FIX1-20260715T0210-cursor-01` |
+| claim_id | `CLAIM-ORG-P2-003F-FIX1-20260715T1322-cursor-01` |
 | Concurrent tasks | **NONE** |
 
 Lifecycle: BOOT → CLAIM → WORK → REPORT → REVIEW
