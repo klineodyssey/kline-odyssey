@@ -219,7 +219,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-017 | OPEN | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
 | ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
 | ORG-P2-019 | OPEN | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
-| ORG-P2-020 | OPEN | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
+| ORG-P2-020 | CLAIMED | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
 | ORG-P2-021 | OPEN | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
 | ORG-P2-022 | OPEN | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
 | ORG-P2-023 | OPEN | Cursor | Codex | P1 | Publishing | KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md |
@@ -1117,11 +1117,17 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-020 - Verify Pages workflow publishes KGEN-Organization without Jekyll
 
-- Status: OPEN
+- Status: CLAIMED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
 - Department: DevOps
+- Branch: `cursor-handoff/ORG-P2-020`
+- Claim ID: `CLAIM-ORG-P2-020-20260715T024330Z-cursor-01`
+- Worker ID: `cursor-01`
+- Claimed At: `2026-07-15T02:43:30Z`
+- Lease Expires At: `2026-07-15T06:43:30Z`
+- Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
