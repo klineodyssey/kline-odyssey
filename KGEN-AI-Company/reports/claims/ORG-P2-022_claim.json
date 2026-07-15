@@ -1,0 +1,15 @@
+{
+  "claim_id": "CLAIM-ORG-P2-022-20260715T024640Z-cursor-01",
+  "task_id": "ORG-P2-022",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "REVIEW",
+  "branch": "cursor-handoff/ORG-P2-022",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T02:46:40Z",
+  "lease_expires_at": "2026-07-15T06:46:40Z",
+  "heartbeat": "2026-07-15T02:46:40Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md",
+  "reviewer": "codex-gm-01",
+  "notes": "First OPEN WorkOrder without remote handoff and without active lease after ORG-P2-003F-FIX1 through ORG-P2-021 were already claimed by concurrent cursor-01 sessions. Single-task claim, no concurrent WorkOrders."
+}
