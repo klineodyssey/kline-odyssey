@@ -220,7 +220,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
 | ORG-P2-019 | OPEN | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
 | ORG-P2-020 | OPEN | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
-| ORG-P2-021 | OPEN | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
+| ORG-P2-021 | REVIEW | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
 | ORG-P2-022 | OPEN | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
 | ORG-P2-023 | OPEN | Cursor | Codex | P1 | Publishing | KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md |
 | ORG-P2-024 | OPEN | Cursor | Codex | P1 | WorkOrders | KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md |
@@ -1151,11 +1151,15 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-021 - List research inputs needed for Organization V2.1 without changing Canon
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P3
 - Department: Research
+- Branch: `cursor-handoff/ORG-P2-021`
+- Claimed by: `cursor-01`
+- Claimed at: `2026-07-15T02:43:30Z`
+- Lease expires at: `2026-07-15T06:43:30Z`
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
