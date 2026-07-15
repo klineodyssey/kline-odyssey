@@ -1,0 +1,14 @@
+{
+  "task_id": "ORG-P2-003F-FIX1",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "CLAIMED",
+  "branch": "cursor-handoff/ORG-P2-003F-FIX1",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T02:05:59Z",
+  "lease_expires_at": "2026-07-15T06:05:59Z",
+  "heartbeat": "2026-07-15T02:05:59Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
+  "reviewer": "codex-gm-01",
+  "notes": "claim_id=CLAIM-ORG-P2-003F-FIX1-20260715T0205-cursor-01. Single-task claim per HUMAN request 'Claim one task'. No concurrent WorkOrders. Prior handoff REJECT_NO_CLAIM; reissue from latest origin/main."
+}
