@@ -5,7 +5,8 @@
 | Field | Value |
 |---|---|
 | Task ID | ORG-P2-003F-FIX1 |
-| Prior Task | ORG-P2-003F (REJECTED — stale handoff) |
+| Prior Task | ORG-P2-003F (REJECTED — stale handoff `e9429d6`) |
+| Prior FIX1 tip | `dbdd905c` (REJECT_NO_CLAIM) — superseded by lawful claim on `7a692c3` |
 | Codex Review | `KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md` |
 | Worker ID | cursor-01 |
 | Worker Type | Cursor |
@@ -15,58 +16,107 @@
 | Base Commit | `7a692c34df50861ab10f8bd80959d95251b1071c` (`origin/main`) |
 | Branch | `cursor-handoff/ORG-P2-003F-FIX1` |
 | Report Path | `KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md` |
-| Start Status | OPEN |
+| Claim File | `KGEN-AI-Company/reports/claims/ORG-P2-003F-FIX1_claim.json` |
+| Start Status | OPEN → CLAIMED |
 | End Status | REVIEW |
 | Reviewer | codex-gm-01 |
 | Architecture Decision | D8 FUTURE MIGRATION — `ORG-P2-003_ARCHITECTURE_DECISION.md` |
+| Concurrent WorkOrders | **NONE** |
 
 ## Summary
 
-Reissued D8 **report-only** 12345 module naming migration plan from current `origin/main` (`7a692c3`). Temple 12345 audited read-only. Inventoried **25** `runtime-*` and **45** `kgen-12345-*` active modules. `RUNTIME_GENOME.json` owner = `modules/runtime-main.js`. Documented dual-load boot order, four-phase migration, and rollback rules. **Zero protected-path edits.** Handoff diff = claim file, report, registry heartbeat, and `WORK_QUEUE.md`.
+Resumed the lawful single-task claim for ORG-P2-003F-FIX1 and completed the D8 **report-only** 12345 module naming migration plan from current `origin/main` (`7a692c3`). Temple 12345 was audited read-only. **Zero protected-path edits.** Official public routes and manifests remain present. Handoff scope is claim lease + WorkQueue status + this report + worker heartbeat only.
 
 ---
 
-# Worker Execution Report (Boot SOP + Claim Lease)
+# Worker Execution Report (Boot SOP)
+
+## State Progress
+
+- BOOT: PASS
+- CLAIM: PASS (`CLAIM-ORG-P2-003F-FIX1-20260715T0205-cursor-01`)
+- WORK: PASS (plan/report only)
+- TEST: PASS (public-route presence + module inventory + pair differ checks)
+- REPORT: PASS
+- REVIEW: submitted — awaiting Codex
+- READY_FOR_PUSH: handoff branch only
+- DONE: Codex controlled / not yet
 
 ## 1. BOOT
 
 | Check | Result |
 |---|---|
 | Boot file read | `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` — YES |
-| CURRENT / OFFICIAL / RUNTIME entry | Boot CURRENT confirmed; Temple 12345 cited as protected |
-| User request | `Claim one task` — within Cursor worker scope |
-| Worker role | Cursor construction worker; Codex review required |
+| CURRENT / OFFICIAL / RUNTIME entry | Boot CURRENT confirmed; Temple 12345 cited as protected runtime |
+| Request in scope | YES — human `Claim one task`; Cursor executes first OPEN WorkOrder |
+| Worker role | Cursor construction / documentation worker; Codex review required |
 | **Result** | **PASS** |
 
-## 2. MUST READ / CREDENTIALS
+## 2. MUST READ
 
-| Check | Result |
+| File | Read |
 |---|---|
-| `worker_id` | cursor-01 |
-| `employee_status` | ACTIVE |
-| `trust_level` | T2 |
-| `allowed_branch_pattern` | `cursor-handoff/<Task-ID>` |
-| `can_push_main` | false |
-| `reviewer` | codex-gm-01 |
-| Boot / Canon / Workspace / DO_NOT_TOUCH ack | true |
-| Suspension | none |
-| **Credential result** | **PASS** |
+| `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | ✅ |
+| `KGEN-Canon/KGEN_CANON_MASTER.json` | ✅ |
+| `KGEN_MASTER_LIBRARY_INDEX.md` | ✅ |
+| `KGEN-AI-Company/WORKSPACE_POLICY.md` | ✅ |
+| `KGEN-Organization/WorkOrders/WORK_QUEUE.md` | ✅ |
+| `KGEN-KAIOS/worker_registry.json` | ✅ |
+| `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | ✅ |
+| `KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md` | ✅ |
+| `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md` | ✅ |
+| `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md` | ✅ |
+| `KGEN-AI-Company/CURSOR_HANDOFF_BRANCH_WORKFLOW.md` | ✅ |
+| `KGEN-Agent-Office/DO_NOT_TOUCH.md` | ✅ |
+| `ORG-P2-003F_CODEX_REVIEW.md` | ✅ |
+| `ORG-P2-003_ARCHITECTURE_DECISION.md` (D8) | ✅ |
+| `docs/KGEN_TEMPLE_12345_MAP.md` | ✅ |
+| `docs/KGEN_RUNTIME_RULES.md` | ✅ |
 
-Files read: Boot CURRENT, WORK_QUEUE, worker_registry, TASK_CLAIM_LEASE_PROTOCOL, WORKER_BOOT_SOP, DO_NOT_TOUCH, ORG-P2-003F_CODEX_REVIEW, D8 architecture decision, `docs/KGEN_TEMPLE_12345_MAP.md`, `docs/KGEN_RUNTIME_RULES.md`, `K線西遊記/temples/12345/index.html` (script tags), `RUNTIME_GENOME.json`, modules directory listing.
+**Workforce gate (`cursor-01`):**
+
+| Field | Value | Gate |
+|---|---|---|
+| employee_status | ACTIVE | ✅ |
+| trust_level | T2 | ✅ |
+| can_push_main | false | ✅ |
+| allowed_branch_pattern | `cursor-handoff/<Task-ID>` | ✅ |
+| boot/canon/workspace/do_not_touch acknowledged | true | ✅ |
+| suspension | null | ✅ |
+
+**Credential result:** **PASS** — not `REGISTRATION_REQUIRED`.
 
 ## 3. PROTECTED PATH CHECK
 
-| Path | Modified |
+| Protected path | In scope? | Modified? |
+|---|---|---|
+| `contracts` | No | No |
+| `K線西遊記/temples/12345` | Audit read-only | **No** |
+| `wallet` / `bridge` | No | No |
+| `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` | No | No |
+| `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` | No | No |
+| `docs/physics/final-whitepaper/` | No | No |
+| `KGEN/contracts/KGEN_Token_V7_5_2.sol` | No | No |
+
+**Result:** **PASS** — no protected path touched. Explicit authorization for 12345 edits: **not present** and **not required** for this plan-only WorkOrder.
+
+## 4. TASK PLAN
+
+| Item | Plan |
 |---|---|
-| `K線西遊記/temples/12345/` | **NO** (read-only audit) |
-| contracts / wallet / bridge | NO |
-| Boot CURRENT / Runtime CURRENT / final-whitepaper / token | NO |
+| Task ID | ORG-P2-003F-FIX1 |
+| Task source | `KGEN-Organization/WorkOrders/WORK_QUEUE.md` first OPEN (after prior CLAIM) |
+| What will be done | Complete D8 12345 module naming migration plan on base `7a692c3` |
+| Files to read | Codex rejection, D8 decision, temple map, runtime rules, `index.html` boot order, modules inventory |
+| Files to modify | WorkQueue status, claim lease, worker heartbeat, this report |
+| Files NOT touched | All `K線西遊記/temples/12345/` files, public routes, manifests, Boot, Runtime CURRENT |
+| Expected outputs | Full SOP report + claim → REVIEW |
+| Validation | Public files present; module family counts; overlapping pairs differ; handoff has no deletions |
+| Commit / push | Commit on `cursor-handoff/ORG-P2-003F-FIX1`; push handoff; **no main push** |
 
-**Result:** PASS
+## 5. TASK CLAIM LEASE
 
-## 4. TASK CLAIM LEASE
-
-Exactly **one** OPEN WorkOrder claimed: `ORG-P2-003F-FIX1`.
+Exactly **one** WorkOrder claimed: `ORG-P2-003F-FIX1`. No concurrent claims.
 
 ```json
 {
@@ -79,162 +129,245 @@ Exactly **one** OPEN WorkOrder claimed: `ORG-P2-003F-FIX1`.
   "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
   "claimed_at": "2026-07-15T02:05:59Z",
   "lease_expires_at": "2026-07-15T06:05:59Z",
-  "heartbeat": "2026-07-15T02:10:00Z",
+  "heartbeat": "2026-07-15T02:37:08Z",
   "report_path": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
   "reviewer": "codex-gm-01",
-  "concurrent_tasks": [],
-  "notes": "Claim reserved in b654066; execution completed in same lease window."
+  "concurrent_tasks": []
 }
 ```
 
-| Field | Value |
-|---|---|
-| `claim_id` | `CLAIM-ORG-P2-003F-FIX1-20260715T0205-cursor-01` |
-| Machine claim file | `KGEN-AI-Company/reports/claims/ORG-P2-003F-FIX1_claim.json` |
-| Concurrent tasks | **NONE** |
+Machine claim file: `KGEN-AI-Company/reports/claims/ORG-P2-003F-FIX1_claim.json` (`claim_id` carried in `notes` to satisfy schema `additionalProperties: false`).
 
-Lifecycle: OPEN → CLAIMED → IN_PROGRESS → REVIEW
+## 6. EXECUTION
 
-## 5. TASK PLAN / EXECUTION
+```text
+Resume CLAIM ORG-P2-003F-FIX1
+-> branch cursor-handoff/ORG-P2-003F-FIX1 from origin/main @ 7a692c3
+-> IN_PROGRESS
+-> read-only module inventory under modules/
+-> verify public-route preservation
+-> write FIX1 report with full Boot SOP + claim lease
+-> REVIEW
+-> commit + push handoff
+-> stop for Codex Review
+```
 
-| Item | Plan |
-|---|---|
-| What will be done | D8 migration plan from `7a692c3` |
-| Files to modify | claim JSON, `WORK_QUEUE.md`, this report, worker registry heartbeat |
-| Files NOT touched | All `K線西遊記/temples/12345/` modules, public routes |
-| Validation | Public-route presence; zero deletions vs main |
+**Verification Only / No File Change** applies to Temple 12345 and all runtime modules.
 
----
+### Public route preservation
 
-## D8 Module Inventory (read-only, 2026-07-15)
+Codex rejected ORG-P2-003F because stale base `761f0e1` would delete public files. This FIX1 branch preserves all of the following (verified on `7a692c3`):
 
-| Family | Count | Genome owner |
-|---|---:|---|
-| `runtime-*` | **25** | `modules/runtime-main.js` |
-| `kgen-12345-*` | **45** | legacy parallel layer |
-| **Total named** | **70** | — |
-
-### Production boot order (`index.html` script tags)
-
-| # | Module | Role |
-|---:|---|---|
-| 1 | `kgen-12345-app-shell.js` | App shell |
-| 2 | `kgen-12345-web3-shell.js` | Web3 shell |
-| 3 | `kgen-12345-runtime.js` | Legacy runtime facade |
-| 4 | `kgen-12345-mother-runtime.js` | Legacy mother runtime |
-| 5 | `kgen-12345-divine-regeneration.js` | Legacy regeneration |
-| 6 | `kgen-12345-ai-service.js` | AI service overlay |
-| 7 | `runtime-main.js` | **Genome owner / primary runtime** |
-| 8 | `runtime-bootstrap.js` | Boot immune organ |
-| 9 | `kgen-12345-ui.js` | UI overlay |
-
-CSS dual-load: `kgen-12345-core.css`, `kgen-12345-divine-regeneration.css`, `runtime-main.css`.
-
-### Known dual-load pairs (compatibility-critical)
-
-| `runtime-*` (target) | `kgen-12345-*` (legacy parallel) |
-|---|---|
-| `runtime-main.js` | `kgen-12345-runtime.js` |
-| `runtime-mother.js` | `kgen-12345-mother-runtime.js` |
-| `runtime-regeneration.js` | `kgen-12345-divine-regeneration.js` |
-| `runtime-bootstrap.js` | `kgen-12345-boot-runtime.js` (exists; not in bottom script block) |
-
-### Official naming target (proposed, not applied)
-
-**Pattern:** `runtime-<organ>.{js,css,json}` under `modules/`, with `runtime-main.js` as sole genome owner entry.
-
-Legacy `kgen-12345-*` files become **deprecated aliases** until Phase 4 removal. No new `kgen-12345-*` modules after migration freeze.
-
----
-
-## Four-Phase Migration Plan
-
-### Phase 0 — Inventory freeze (this WorkOrder)
-
-- Publish module registry and boot order (this report).
-- Codex approves plan before any 12345 file edit.
-- **Status:** complete in report.
-
-### Phase 1 — Shim documentation (future scoped WO)
-
-- Add read-only `MODULE_NAMING_REGISTRY.md` inside 12345 (requires separate Codex-scoped WO).
-- Document alias map; no renames.
-
-### Phase 2 — Compatibility loaders (future scoped WO)
-
-- Introduce thin re-export shims: `kgen-12345-runtime.js` → delegates to `runtime-main.js`.
-- Keep **both** script tags in `index.html` during validation.
-- Run `verify_manifest.js` / temple health checks after each shim.
-
-### Phase 3 — Boot order consolidation (future scoped WO)
-
-- Collapse dual script tags one pair at a time.
-- Update `RUNTIME_GENOME.json` module list only after boot proof.
-- Human + Codex gate per pair.
-
-### Phase 4 — Deprecation (future scoped WO)
-
-- Move unused `kgen-12345-*` to `modules/archive/`.
-- Minimum 30-day alias retention per `docs/KGEN_RUNTIME_RULES.md` convention.
-
----
-
-## Rollback Rules
-
-1. Any boot failure → revert last script-tag or shim change immediately.
-2. Never remove `runtime-bootstrap.js` from boot chain.
-3. Never rename `runtime-main.js` (genome owner).
-4. Keep git tag of last known-good `index.html` before each phase.
-5. Rollback does not require public-route or manifest changes outside 12345.
-
----
-
-## Public Route Preservation
-
-| Asset | Present on branch |
+| File | Present |
 |---|---|
 | `KGEN-OFFICIAL-LINKS.json` | ✅ |
-| `community/`, `official/`, `markets/`, `security/`, `liquidity-lock/` | ✅ |
-| Workforce / KAIOS Kernel docs from `7a692c3` | ✅ |
+| `KGEN_PUBLIC_INFORMATION_AUDIT.md` | ✅ |
+| `KGEN_LP_LOCK_PUBLIC_PROOF.md` | ✅ |
+| `community/index.html` | ✅ |
+| `official/index.html` | ✅ |
+| `markets/index.html` | ✅ |
+| `security/index.html` | ✅ |
+| `liquidity-lock/index.html` | ✅ |
+| `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | ✅ |
+| `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | ✅ |
 
-**Diff vs main:** claim + report + registry + `WORK_QUEUE.md`. **Zero deletions.**
+**Handoff diff scope:** WorkQueue + claim lease + worker registry heartbeat + this report. No public-route deletions.
 
 ---
 
-## 6. FINAL REPORT
+## D8 Migration Plan
 
-| Field | Value |
-|---|---|
-| Final result | **PASS** (awaiting Codex) |
-| WorkQueue | OPEN → CLAIMED → IN_PROGRESS → REVIEW |
-| Protected path violation | NO |
-| Codex review needed | YES |
+### Module inventory (read-only audit @ `7a692c3`)
+
+| Family | Count | Role |
+|---|---:|---|
+| `runtime-*` | 25 | Core shell, life-standard organs, engines (not all HTML-loaded) |
+| `kgen-12345-*` | 45 | Config/boot, web3, AI, organs — **primary HTML load chain** |
+| `kgen-v*` | 2 | Versioned morph-DNA (`kgen-v1046-morph-dna-runtime.*`) |
+| `modules/archive/*` | 20 | Frozen legacy — out of rename scope |
+| other | 1 | `README.md` |
+
+Location: `K線西遊記/temples/12345/modules/`
+
+### Live boot order (`index.html` — read only)
+
+1. CSS: `kgen-12345-core.css`, `kgen-12345-divine-regeneration.css`, `runtime-main.css`
+2. Parent galaxy: `../../modules/kgen-land-engine.js`
+3. Scripts: `kgen-12345-app-shell.js`, `kgen-12345-web3-shell.js`, `kgen-12345-runtime.js`, `kgen-12345-mother-runtime.js`, `kgen-12345-divine-regeneration.js`, `kgen-12345-ai-service.js`
+4. `runtime-main.js` — protected UI/runtime owner
+5. `kgen-12345-ui.css`
+6. `runtime-bootstrap.js` — protected bootstrap
+7. `kgen-12345-ui.js`
+
+**Observation:** Legacy `kgen-12345-runtime.js` loads before protected `runtime-main.js`. `runtime-bootstrap.js` loads after `runtime-main.js` and between UI CSS/JS. Any migration must preserve this ordering until legacy shims are formally retired.
+
+### Parallel pairs (merge before rename)
+
+| runtime-* | kgen-12345-* | Byte-identical? | HTML-loaded |
+|---|---|---|---|
+| `runtime-main.*` | — | n/a | ✅ runtime |
+| `runtime-bootstrap.js` | — | n/a | ✅ |
+| `runtime-mother.js` | `kgen-12345-mother-runtime.js` | **DIFFER** | kgen |
+| `runtime-regeneration.*` | `kgen-12345-divine-regeneration.*` | **DIFFER** | kgen |
+| `runtime-cell-registry.json` | `kgen-12345-cell-registry.json` | **DIFFER** | — |
+| `runtime-growth-policy.json` | `kgen-12345-growth-policy.json` | **DIFFER** | — |
+
+All checked overlapping pairs **differ** in content — rename-only migration will break references without behavior merge.
+
+### Target convention (future authorized WorkOrders)
+
+```text
+temple-12345-<domain>-<role>.<ext>
+```
+
+Examples:
+
+- `temple-12345-core-runtime.js`
+- `temple-12345-config-boot.js`
+- `temple-12345-mother-engine.js`
+
+**Rules:**
+
+- Protected cores rename last (Phase 4 only, with Codex + human WorkOrder).
+- `modules/archive/` never renamed — add LEGACY metadata only.
+- Version numbers move to `VERSION_GOVERNANCE.json`, not filenames (`kgen-v1046-*` deprecate version-in-name).
+- Do not invent a second parallel prefix while `runtime-*` remains live.
+
+### Phases (future — requires separate protected-path WorkOrders)
+
+| Phase | Action | Protected edit? |
+|---|---|---|
+| 0 | Registry JSON under `docs/` (proposed: `docs/temple-12345/MODULE_NAMING_REGISTRY.json`) | No |
+| 1 | Behavior merge per overlapping pair | Yes |
+| 2 | Shims + `index.html` script switch | Yes |
+| 3 | `LIFE_MANIFEST` / SHA256 atomic update | Yes |
+| 4 | Archive deprecated shims | Yes + human gate |
+
+### Rollback
+
+- Tag `temple-12345-modules-pre-migration` before Phase 1
+- Shims retained ≥2 release tags
+- Backup `LIFE_MANIFEST.json.pre-migration` in archive
+- Revert `index.html` script list to rollback
+
+### Compatibility
+
+- `12345.html` bridge URLs unchanged
+- Preserve `?v=` cache-bust on script URLs
+- Preserve `window.KGEN_RUNTIME_CORE`, `KGEN_12345_CONFIG`, `KGEN_AI_SPEAK` ≥2 releases
+- Exclude `modules/archive/` from rename scope
 
 ## Acceptance Criteria
 
 | Criterion | Result |
 |---|---|
 | Start from latest `origin/main` | ✅ `7a692c3` |
-| Plan/report only; no 12345 edits | ✅ |
-| Preserve public routes | ✅ |
-| One WorkOrder only | ✅ |
-| Full Worker Boot SOP + claim lease | ✅ |
-| Rollback requirements documented | ✅ |
+| Plan only; no 12345 edits | ✅ |
+| Preserve public routes and manifests | ✅ evidence table |
+| Do not delete files after stale `761f0e1` base | ✅ no public deletions |
+| One WorkOrder on handoff branch | ✅ ORG-P2-003F-FIX1 only |
+| Full Worker Boot SOP evidence | ✅ sections 1–6 |
+| Claim lease recorded with claim_id | ✅ |
+| D8 future migration documented | ✅ |
+| Rollback + compatibility | ✅ |
+
+## Files Read
+
+- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
+- `KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md`
+- `KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md`
+- `KGEN-Agent-Office/DO_NOT_TOUCH.md`
+- `docs/KGEN_TEMPLE_12345_MAP.md`
+- `docs/KGEN_RUNTIME_RULES.md`
+- `K線西遊記/temples/12345/index.html` (boot order)
+- `K線西遊記/temples/12345/modules/` (inventory + pair diffs)
+- `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md`
+- `KGEN-KAIOS/worker_registry.json`
+- `KGEN-Organization/WorkOrders/WORK_QUEUE.md`
+
+## Files Modified
+
+- `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — ORG-P2-003F-FIX1 CLAIMED → REVIEW
+- `KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md` — completed plan
+- `KGEN-AI-Company/reports/claims/ORG-P2-003F-FIX1_claim.json` — status REVIEW + heartbeat
+- `KGEN-KAIOS/worker_registry.json` — cursor-01 heartbeat / last_report
+
+## Files Intentionally Not Modified
+
+All Temple 12345 modules, `index.html`, Canon, Boot, Runtime CURRENT, public HTML routes, `KGEN-OFFICIAL-LINKS.json`, and other protected paths.
+
+## Checks Run
+
+- Module family counts on `7a692c3`
+- `index.html` module reference order extraction
+- Overlapping pair byte comparison (all DIFFER)
+- Public route / manifest presence table
+- Workforce registration gate for `cursor-01`
+
+## Problems Found
+
+- Dual live naming families (`runtime-*` and `kgen-12345-*`) plus `kgen-v*` create rename risk.
+- Prior ORG-P2-003F handoff remains REJECTED evidence only — must not be merged.
+- Prior FIX1 tip `dbdd905c` remains REJECT_NO_CLAIM evidence — this branch supersedes it from current main.
 
 ## Risks
 
 | ID | Risk | Severity |
 |---|---|---|
-| R1 | Removing legacy script before shim validation breaks boot | High |
-| R2 | 45 legacy modules have uneven load coverage | Medium |
-| R3 | Dual CSS load order affects UI regression | Medium |
+| R1 | Dual `runtime-*` / `kgen-12345-*` families confuse ownership | High |
+| R2 | Rename without merge breaks boot chain | Critical |
+| R3 | `kgen-v*` parallel naming adds third family | Medium |
+
+## Technical Debt
+
+- Overlapping mother/regeneration/registry/policy twins differ and need merge WorkOrders before any rename.
+- Boot order mixes legacy `kgen-12345-*` and protected `runtime-*` cores.
+
+## Evolution Opportunities
+
+- Phase 0 registry under `docs/` enables machine-readable migration without touching 12345.
+- Future WorkOrders can retire version-in-filename (`kgen-v*`) into governance JSON.
+
+## Research Direction
+
+- Map every HTML-loaded vs deferred module before Phase 1 merges.
+- Confirm which globals must remain stable across shim windows.
+
+## Suggested WorkOrders
+
+| Suggested ID | Status | Purpose |
+|---|---|---|
+| ORG-P2-003F-REG0 | PROPOSED | Create `docs/temple-12345/MODULE_NAMING_REGISTRY.json` (non-protected) |
+| ORG-P2-004 | Already OPEN | Canon alignment — next eligible OPEN after this REVIEW |
+
+Cursor must not promote PROPOSED suggestions to OPEN.
+
+## Do Not Do
+
+- Do not merge `origin/cursor-handoff/ORG-P2-003F`.
+- Do not edit `K線西遊記/temples/12345/` from this plan.
+- Do not rename modules without Codex + human protected-path WorkOrders.
+- Do not claim concurrent WorkOrders while this lease is active.
+
+## Blockers
+
+None for plan delivery. Protected-path edits blocked until future authorized WorkOrders.
 
 ## Recommendation
 
-1. **Codex:** Approve FIX1 if diff is additive-only vs `origin/main`.
-2. **Do not merge** rejected `origin/cursor-handoff/ORG-P2-003F`.
-3. **Next:** Scoped implementation WOs for Phase 1–4 after Human + Codex approval.
+1. **Codex:** Approve FIX1 if diff stays report/queue/claim/registry-only and public routes intact.
+2. **Do not merge** rejected `ORG-P2-003F` or REJECT_NO_CLAIM tip `dbdd905c`.
+3. **Do not authorize** protected 12345 edits from this plan alone.
+4. **Next OPEN after FIX reviews:** ORG-P2-004 (P0 Canon alignment — fresh single-task claim required).
+
+## Need Codex Review
+
+YES
+
+## Need Human Decision
+
+Only if Codex proposes authorizing Phase 1+ protected 12345 edits; not required to accept this plan report.
 
 ## Worker Sign-off
 
-Task ORG-P2-003F-FIX1 claimed and complete. Status **REVIEW**. Awaiting Codex.
+Task ORG-P2-003F-FIX1 complete. Status **REVIEW**. Awaiting Codex decision.

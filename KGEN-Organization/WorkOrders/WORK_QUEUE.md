@@ -552,6 +552,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Worker ID: `cursor-01`
 - Claimed At: `2026-07-15T02:05:59Z`
 - Lease Expires At: `2026-07-15T06:05:59Z`
+- Heartbeat: `2026-07-15T02:38:29Z`
 - Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
 - Input files:
   - KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md
@@ -562,7 +563,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Output report path: KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md
 - Protected paths:
   - contracts
-  - K蝺正??/temples/12345
+  - K線西遊記/temples/12345
   - wallet
   - bridge
   - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
