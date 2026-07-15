@@ -202,7 +202,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
-| ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F-FIX1 | REVIEW | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -542,12 +542,18 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-003F-FIX1 - Rebase 12345 module naming migration plan on current main
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
 - Department: Runtime
 - Branch: `cursor-handoff/ORG-P2-003F-FIX1`
+- Claim ID: `CLAIM-ORG-P2-003F-FIX1-20260715T0205-cursor-01`
+- Worker ID: `cursor-01`
+- Claimed At: `2026-07-15T02:05:59Z`
+- Lease Expires At: `2026-07-15T06:05:59Z`
+- Heartbeat: `2026-07-15T02:38:29Z`
+- Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
 - Input files:
   - KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md
   - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
@@ -557,7 +563,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Output report path: KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md
 - Protected paths:
   - contracts
-  - K蝺正??/temples/12345
+  - K線西遊記/temples/12345
   - wallet
   - bridge
   - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
