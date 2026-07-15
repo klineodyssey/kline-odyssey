@@ -1,0 +1,14 @@
+{
+  "task_id": "ORG-P2-005",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "REVIEW",
+  "branch": "cursor-handoff/ORG-P2-005",
+  "base_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+  "claimed_at": "2026-07-15T02:56:00Z",
+  "lease_expires_at": "2026-07-15T06:56:00Z",
+  "heartbeat": "2026-07-15T02:56:00Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md",
+  "reviewer": "codex-gm-01",
+  "notes": "claim_id=CLAIM-ORG-P2-005-20260715T0256-cursor-01. Single-task claim; reissue from current main after prior stale tip b7c7e86 was dispositioned ARCHIVE_EVIDENCE_ONLY. No concurrent WorkOrders in this session."
+}

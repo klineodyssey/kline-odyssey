@@ -204,7 +204,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-003F-FIX1 | OPEN | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
-| ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
+| ORG-P2-005 | REVIEW | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
 | ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
 | ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
@@ -607,11 +607,18 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-005 - Check Universe Map references in Organization standards
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
 - Department: Universe
+- Branch: `cursor-handoff/ORG-P2-005`
+- Claim ID: `CLAIM-ORG-P2-005-20260715T0256-cursor-01`
+- Worker ID: `cursor-01`
+- Claimed At: `2026-07-15T02:56:00Z`
+- Lease Expires At: `2026-07-15T06:56:00Z`
+- Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
+- Prior submission: stale tip `b7c7e864` (base `fcf948f`) was dispositioned ARCHIVE_EVIDENCE_ONLY in the V11 readiness reconciliation; this is a fresh reissue from current main.
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
