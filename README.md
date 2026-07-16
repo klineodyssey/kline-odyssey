@@ -166,6 +166,7 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - KAIOS Dashboard: [KGEN-KAIOS/dashboard/index.html](KGEN-KAIOS/dashboard/index.html)
 - General Manager Decision Center: [KGEN-KAIOS/decision/index.html](KGEN-KAIOS/decision/index.html)
 - Decision Center URL: https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
+- Company Decision Center V1 Architecture: [company/README.md](company/README.md)
 - Worker Registry: [KGEN-KAIOS/WORKER_REGISTRY.md](KGEN-KAIOS/WORKER_REGISTRY.md)
 - Generic Worker Protocol: [KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md](KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md)
 - Task Claim Lease Protocol: [KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md](KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md)
@@ -183,6 +184,8 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Architecture Review Registry: [KGEN-KAIOS/governance/architecture_review_registry.json](KGEN-KAIOS/governance/architecture_review_registry.json)
 
 The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only.
+
+Human Decision `HUMAN-COMPANY-DECISION-CENTER-001` authorizes the Architecture Proposal for a future single company command control plane. The existing General Manager Decision Center remains the active Daily Operation dashboard and decision evidence source; `company/` is not active, dispatch is disabled, and cutover requires a later Human Architecture decision.
 
 Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.0 as `ACTIVE / READY` below Human Final Authority and above WorkQueue, Implementation, ADR and Architecture Proposal.
 
