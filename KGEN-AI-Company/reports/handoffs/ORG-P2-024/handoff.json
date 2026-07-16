@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-024",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0004",
+  "session_id": "SESSION-20260716-03-EPHEMERAL",
+  "claim_id": "CLAIM-ORG-P2-024-20260716T062543Z-cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch": "cursor-handoff/ORG-P2-024-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "head_sha": "219dcfce5f2b88d8b88a7f0d21b9d51f916894bf",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T06:25:43Z",
+  "lease_expires_at": "2026-07-16T10:25:43Z",
+  "status": "REVIEW",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "preflight_result": "PASS",
+  "concurrent_sessions_acknowledged": true,
+  "atomic_claim_service": "NOT_IMPLEMENTED",
+  "workqueue_modified": false,
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md",
+  "task_result": "PASS_WITH_DRIFT",
+  "summary_detail_mismatches": 0,
+  "missing_report_paths": 0,
+  "protected_path_violations": 0,
+  "recommended_next_action": "Codex batch closeout for 005-023; dispatch ORG-P2-025",
+  "codex_coordination": {
+    "recent_closeouts": [
+      "ORG-P2-003F-FIX1",
+      "ORG-P2-004"
+    ],
+    "pending_handoff_backlog": 21
+  },
+  "handoff_submitted_at": "2026-07-16T06:26:30Z"
+}
