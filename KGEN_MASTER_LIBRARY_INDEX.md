@@ -137,6 +137,21 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
 | Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
 | World Viewer Architecture Baseline | `KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md` | Frozen `WORLD-VIEWER-V1.0` Architecture and synthetic-only sandbox boundary |
+| UI Governor Package | `KGEN-KAIOS/ui-governor/README.md` | Source audit, 80-cell daily matrix and architecture enablement boundary |
+| UI Governor Runtime | `KGEN-KAIOS/ui-governor/UI_GOVERNOR_RUNTIME.md` | Permanent inspection control-plane, evidence and release-gate proposal |
+| UI Health Report | `KGEN-KAIOS/ui-governor/UI_HEALTH_REPORT.md` | Pre-automation route, source, health and readiness baseline |
+| Screenshot Diff Runtime | `KGEN-KAIOS/ui-governor/SCREENSHOT_DIFF_RUNTIME.md` | Deterministic screenshot artifacts, masks and comparison contract |
+| Visual Regression Runtime | `KGEN-KAIOS/ui-governor/VISUAL_REGRESSION_RUNTIME.md` | Visual baseline lifecycle, coverage and regression decisions |
+| Responsive Layout Runtime | `KGEN-KAIOS/ui-governor/RESPONSIVE_LAYOUT_RUNTIME.md` | Eight daily Desktop, Tablet, Android, iPhone, orientation and theme profiles |
+| Accessibility Runtime | `KGEN-KAIOS/ui-governor/ACCESSIBILITY_RUNTIME.md` | Automated and manual accessibility evidence architecture |
+| UI Performance Runtime | `KGEN-KAIOS/ui-governor/PERFORMANCE_RUNTIME.md` | Loading, FPS, resource, console and broken-link budgets |
+| Automatic UI Issue Generator | `KGEN-KAIOS/ui-governor/AUTOMATIC_ISSUE_GENERATOR.md` | Deduplicated evidence-to-Issue architecture; disabled |
+| Automatic UI WorkQueue Generator | `KGEN-KAIOS/ui-governor/AUTOMATIC_WORKQUEUE_GENERATOR.md` | Issue-to-proposed-WorkOrder architecture; disabled |
+| Cursor UI Worker Dispatch | `KGEN-KAIOS/ui-governor/CURSOR_UI_WORKER_DISPATCH.md` | Canonical-Claim-gated isolated UI remediation contract; disabled |
+| UI Style Canon V1 Candidate | `KGEN-KAIOS/ui-governor/UI_STYLE_CANON_V1.md` | Shared component geometry, overlay, safe-area, motion and typography rules |
+| UI Governor JSON | `KGEN-KAIOS/ui-governor/ui_governor_runtime.json` | Machine-readable surfaces, profiles, checks, evidence and boundaries |
+| UI Health JSON | `KGEN-KAIOS/ui-governor/ui_health_report.json` | Machine-readable 31/100 pre-automation health evidence |
+| UI Style Canon JSON | `KGEN-KAIOS/ui-governor/ui_style_canon_v1.json` | Machine-readable Style Canon candidate tokens and six P0 amendments |
 | V11 Architecture Baseline | `KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md` | Human-frozen V11.0 Architecture scope and Phase 1 HOLD boundary |
 | V11 Architecture Baseline JSON | `KGEN-KAIOS/V11/architecture_baseline.json` | SHA-256 manifest for the 11 Architecture documents, ADRs and review evidence |
 | V11 Architecture Evolution Log | `KGEN-KAIOS/V11/architecture_evolution_log.jsonl` | Append-only Architecture version, proposal, reason, ADR and approval lineage |

@@ -90,8 +90,33 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
 | `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
 | `world-viewer/` | `WORLD-VIEWER-V1.0` frozen Architecture | Reviewed 2D Web-first World Viewer and synthetic sandbox plan; no runtime implementation yet |
+| `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
+
+## UI Governor Architecture
+
+Human Decision `HUMAN-UI-GOVERNOR-001` is a repository-assigned trace ID for the unnumbered Human architecture instruction that requests permanent UI inspection. The package is architecture only: it creates no browser runner, screenshot, Issue, WorkOrder, Claim, Cursor dispatch, UI fix or deployment.
+
+| File | Purpose |
+|---|---|
+| `ui-governor/README.md` | Source audit, package index, 80-cell matrix and enablement boundary |
+| `ui-governor/UI_GOVERNOR_RUNTIME.md` | Inspection lifecycle, evidence, priority and release gates |
+| `ui-governor/UI_HEALTH_REPORT.md` | Current pre-automation UI health and readiness score |
+| `ui-governor/SCREENSHOT_DIFF_RUNTIME.md` | Deterministic capture inputs, masks, artifacts and comparison result |
+| `ui-governor/VISUAL_REGRESSION_RUNTIME.md` | Baseline lifecycle, coverage and visual release policy |
+| `ui-governor/RESPONSIVE_LAYOUT_RUNTIME.md` | Desktop, Tablet, Android, iPhone, orientation and theme profiles |
+| `ui-governor/ACCESSIBILITY_RUNTIME.md` | Automated and manual accessibility evidence architecture |
+| `ui-governor/PERFORMANCE_RUNTIME.md` | Loading, FPS, resource, console and link budgets |
+| `ui-governor/AUTOMATIC_ISSUE_GENERATOR.md` | Finding fingerprint, deduplication and Issue state machine |
+| `ui-governor/AUTOMATIC_WORKQUEUE_GENERATOR.md` | Bounded proposed-WorkOrder generation; current automation disabled |
+| `ui-governor/CURSOR_UI_WORKER_DISPATCH.md` | Canonical-Claim-gated Cursor UI task and Handoff evidence |
+| `ui-governor/UI_STYLE_CANON_V1.md` | Shared structural tokens and six mandatory mobile amendments |
+| `ui-governor/ui_governor_runtime.json` | Machine-readable Governor architecture and boundaries |
+| `ui-governor/ui_health_report.json` | Machine-readable current health evidence and coverage |
+| `ui-governor/ui_style_canon_v1.json` | Machine-readable Style Canon candidate |
+
+UI Governor architecture readiness is 86/100. Current runtime automation coverage and visual regression coverage are both 0 percent because implementation is not started. Temple 12345 findings remain report-only until an exact protected-path authorization exists.
 
 ## V11.0 Architecture Baseline
 
