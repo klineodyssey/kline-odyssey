@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-016",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0015",
+  "session_id": "SESSION-20260716-16-EPHEMERAL",
+  "spawned_by": "本尊",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-016-20260716T0627-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-016-20260716",
+  "evidence_branch": "cursor-handoff/ORG-P2-016-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T06:27:17Z",
+  "lease_expires_at": "2026-07-16T10:27:17Z",
+  "heartbeat": "2026-07-16T06:27:17Z",
+  "handoff_submitted_at": "2026-07-16T06:27:17Z",
+  "supersedes_archive_tips": [
+    "e81971a1"
+  ],
+  "prior_reject_reason": "REJECT_NO_CLAIM",
+  "implementation_scope": "report_only_no_workqueue",
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md",
+    "KGEN-AI-Company/reports/claims/ORG-P2-016_claim.json",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-016/handoff.json",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-016/HANDOFF.md"
+  ],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "ROOT_README_LOCAL_LINK_SCAN",
+    "ORG_README_LOCAL_LINK_SCAN",
+    "ORG_FOLDER_LOCAL_LINK_SCAN",
+    "PAGES_PERMANENT_ROUTE_CHECK",
+    "GOVERNANCE_FILE_EXISTENCE",
+    "PROTECTED_PATH_DIFF",
+    "CLAIM_LEASE_SCHEMA_FIELDS"
+  ],
+  "test_results": "ALL_PASS",
+  "task_result": "PASS",
+  "protected_path_violations": 0,
+  "workqueue_modified": false,
+  "review_status": "PENDING_CODEX",
+  "recommended_next_action": "Codex review; update WORK_QUEUE OPEN→REVIEW on main if accepted."
+}
