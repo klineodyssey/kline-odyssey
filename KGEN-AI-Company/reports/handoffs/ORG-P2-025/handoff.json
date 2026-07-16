@@ -11,7 +11,7 @@
   "branch": "cursor-handoff/ORG-P2-025-20260716",
   "worktree": "cursor/monkey-boot-gap-fill-025",
   "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
-  "head_sha": "3b9b4077ce6494cc012106f3e97b2e9698ac6195",
+  "head_sha": "dca21ab9f54c58f6508ba96fa37923cd85c264f6",
   "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
   "claimed_at": "2026-07-16T06:37:05Z",
   "lease_expires_at": "2026-07-16T10:37:05Z",
