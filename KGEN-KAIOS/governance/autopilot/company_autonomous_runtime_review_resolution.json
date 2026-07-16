@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "resolution_id": "AGB-COMPANY-AUTONOMOUS-RUNTIME-001",
+    "version": "1.0.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_REVISION_P0",
+    "human_final_authority": "PrimeForge",
+    "manager": "Codex / KAIOS Company General Manager",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "source_of_truth": false,
+    "independent_review_required": true
+  },
+  "review_inputs": [
+    {
+      "reviewer": "Gemini",
+      "review_type": "EXTERNAL_PRODUCT_REVIEW",
+      "decision": "APPROVE_WITH_AMENDMENTS",
+      "provenance": "HUMAN_TRANSMITTED_REVIEW_SUMMARY"
+    },
+    {
+      "reviewer": "Grok",
+      "review_type": "EXTERNAL_CTO_REVIEW",
+      "decision": "MAJOR_REVISION_REQUIRED",
+      "provenance": "HUMAN_TRANSMITTED_REVIEW_SUMMARY"
+    },
+    {
+      "reviewer": "Codex",
+      "review_type": "ARCHITECTURE_PROPOSAL",
+      "decision": "PROPOSED_NOT_ENABLED",
+      "provenance": "LOCAL_PROPOSAL_PACKAGE"
+    }
+  ],
+  "decision": {
+    "result": "MAJOR_REVISION_REQUIRED_BEFORE_ENABLEMENT",
+    "company_autonomous_runtime_v1": "MAJOR_REVISION_IN_PROGRESS",
+    "fully_autonomous": "DISABLED",
+    "baseline_freeze": "DENIED",
+    "auto_dispatch": "DISABLED_UNTIL_CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "maximum_autonomous_level": 2,
+    "implementation_started": false
+  },
+  "gemini_amendments": [
+    {
+      "amendment_id": "GEMINI-001",
+      "title": "Tribe and Settlement UX Bridge",
+      "decision": "ACCEPT"
+    },
+    {
+      "amendment_id": "GEMINI-002",
+      "title": "Progressive Disclosure",
+      "decision": "ACCEPT"
+    },
+    {
+      "amendment_id": "GEMINI-003",
+      "title": "Symbiosis and Parasitism",
+      "decision": "ACCEPT"
+    },
+    {
+      "amendment_id": "GEMINI-004",
+      "title": "Environmental Carrying Capacity",
+      "decision": "ACCEPT"
+    },
+    {
+      "amendment_id": "GEMINI-005",
+      "title": "Ecological Backlash",
+      "decision": "ACCEPT"
+    }
+  ],
+  "rejected_claims": [
+    "V1_SUPPORTS_100_MILLION_WORKERS",
+    "V1_IS_A_HUNDRED_YEAR_AUTONOMOUS_CIVILIZATION",
+    "V1_IS_FULLY_DISTRIBUTED",
+    "V1_IS_AN_UNSUPERVISED_AUTONOMOUS_COMPANY"
+  ],
+  "scale_classes": [
+    {
+      "scale": "S0",
+      "workers_min": 1,
+      "workers_max": 10,
+      "scope": "LOCAL_DEVELOPMENT",
+      "v1_status": "ARCHITECTURE_TARGET"
+    },
+    {
+      "scale": "S1",
+      "workers_min": 11,
+      "workers_max": 1000,
+      "scope": "SINGLE_COMPANY_OR_SINGLE_REGION",
+      "v1_status": "ARCHITECTURE_TARGET"
+    },
+    {
+      "scale": "S2",
+      "workers_min": 1001,
+      "workers_max": 1000000,
+      "scope": "HIERARCHICAL_FEDERATION",
+      "v1_status": "FUTURE"
+    },
+    {
+      "scale": "S3",
+      "workers_min": 1000001,
+      "workers_max": 100000000,
+      "scope": "PLANETARY_DISTRIBUTED_RUNTIME",
+      "v1_status": "NOT_SUPPORTED"
+    }
+  ],
+  "p0_risks": [
+    {
+      "risk_id": "P0-001",
+      "title": "Central Dispatcher Bottleneck",
+      "description": "A single Dispatcher cannot safely coordinate all Workers.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "SYSTEM_WIDE_STALL_OR_OVERLOAD",
+      "affected_modules": ["DISPATCHER", "CLAIM_AUTHORITY"],
+      "mitigation": "HIERARCHICAL_CONTROLLERS_AND_BOUNDED_FANOUT",
+      "owner_role": "CODEX_GENERAL_MANAGER",
+      "evidence": "HIERARCHICAL_MONKEY_SWARM_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-002",
+      "title": "Clone Registry State Explosion",
+      "description": "Unbounded Clone and Session records can exhaust registry capacity.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "REGISTRY_UNAVAILABLE",
+      "affected_modules": ["CLONE_REGISTRY", "COMPANY_MEMORY"],
+      "mitigation": "PARTITION_RETENTION_COMPACTION_AND_ARCHIVE",
+      "owner_role": "COMPANY_CONTROLLER",
+      "evidence": "COMPANY_MEMORY_RETENTION_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-003",
+      "title": "Heartbeat Storm",
+      "description": "Direct periodic writes from every Clone overload central state.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "CONTROL_PLANE_OVERLOAD",
+      "affected_modules": ["HEARTBEAT", "OBSERVABILITY"],
+      "mitigation": "ADAPTIVE_BATCHED_HIERARCHICAL_HEALTH_SUMMARIES_WITH_JITTER",
+      "owner_role": "DEPARTMENT_DISPATCHER",
+      "evidence": "HIERARCHICAL_MONKEY_SWARM_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-004",
+      "title": "Monkey Swarm Collusion",
+      "description": "Related Clones can coordinate false evidence or reviews.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "FALSE_APPROVAL_AND_QUEUE_CAPTURE",
+      "affected_modules": ["IDENTITY", "REVIEW", "EVIDENCE"],
+      "mitigation": "ATTESTATION_REVIEW_SEPARATION_ROTATION_AND_ANOMALY_SIGNALS",
+      "owner_role": "SECURITY_REVIEWER",
+      "evidence": "SWARM_SECURITY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-005",
+      "title": "Infinite Clone Spawning",
+      "description": "A parent can create unbounded child Clones and resource cost.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "RESOURCE_EXHAUSTION",
+      "affected_modules": ["DISPATCHER", "CLONE_REGISTRY"],
+      "mitigation": "MANDATORY_CLONE_SPAWN_BUDGET_AND_QUOTAS",
+      "owner_role": "COMPANY_CONTROLLER",
+      "evidence": "HIERARCHICAL_MONKEY_SWARM_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-006",
+      "title": "State Divergence",
+      "description": "Replicas or projections can disagree on authoritative state.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "DOUBLE_CLAIM_OR_INCORRECT_AUTHORITY",
+      "affected_modules": ["STATE_STORE", "CLAIM_AUTHORITY"],
+      "mitigation": "DOMAIN_SPECIFIC_CONSISTENCY_REVISIONS_AND_REPLAY",
+      "owner_role": "IMPLEMENTATION_ARCHITECT",
+      "evidence": "DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-007",
+      "title": "Company Memory Version Conflict",
+      "description": "Memory schemas and snapshots can conflict during evolution.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "INVALID_REPLAY_OR_LOST_CONTEXT",
+      "affected_modules": ["COMPANY_MEMORY"],
+      "mitigation": "SCHEMA_VERSION_MIGRATION_SNAPSHOT_AND_CONFLICT_RESOLUTION",
+      "owner_role": "MEMORY_CUSTODIAN",
+      "evidence": "COMPANY_MEMORY_RETENTION_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-008",
+      "title": "Life OS Boundary Leakage",
+      "description": "Life OS can accidentally receive company or economic authority.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "CROSS_RUNTIME_AUTHORITY_BREACH",
+      "affected_modules": ["LIFE_OS", "COMPANY_OS", "EVENT_BUS"],
+      "mitigation": "EXPLICIT_BOUNDARIES_NEGATIVE_TESTS_AND_DOMAIN_EVENTS",
+      "owner_role": "ARCHITECTURE_GOVERNANCE_BOARD",
+      "evidence": "DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-009",
+      "title": "Evidence Tampering",
+      "description": "Workers can overwrite or substitute historical evidence.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "UNTRUSTWORTHY_REVIEW",
+      "affected_modules": ["EVIDENCE", "REVIEW"],
+      "mitigation": "HASH_CHAIN_IMMUTABLE_HISTORY_AND_REVIEW_SIGNATURE",
+      "owner_role": "CODEX_QUALITY_GATE",
+      "evidence": "CANONICAL_CLAIM_AUTHORITY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-010",
+      "title": "Autonomous Authority Drift",
+      "description": "Automation can gradually exceed approved authority.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "UNAUTHORIZED_ACTION",
+      "affected_modules": ["AUTONOMY", "DISPATCH", "REPOSITORY"],
+      "mitigation": "FIXED_LEVELS_HUMAN_ANCHOR_AND_DRIFT_DETECTION",
+      "owner_role": "HUMAN_FINAL_AUTHORITY",
+      "evidence": "AUTONOMY_LEVEL_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-011",
+      "title": "Legacy Rule Re-entry",
+      "description": "Stale prompts or protocols can regain execution influence.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "POLICY_BYPASS",
+      "affected_modules": ["BOOT", "CURSOR", "CLAIM"],
+      "mitigation": "VERSION_GATE_SUPPRESSION_AND_DRIFT_BLOCK",
+      "owner_role": "CODEX_GENERAL_MANAGER",
+      "evidence": "ARCHITECTURE_DRIFT_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-012",
+      "title": "Review and Human Decision Deadlock",
+      "description": "Queues can wait on each other forever.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "COMPANY_OPERATION_STALL",
+      "affected_modules": ["REVIEW_QUEUE", "DECISION_QUEUE", "REPAIR_QUEUE"],
+      "mitigation": "TIMEOUT_ESCALATION_REPAIR_LIMIT_AND_SAFE_HOLD",
+      "owner_role": "CODEX_GENERAL_MANAGER",
+      "evidence": "COMPANY_AUTONOMOUS_RUNTIME_REVIEW_RESOLUTION.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-013",
+      "title": "Session Recovery Cascade",
+      "description": "Recovery can recursively create more failures and Sessions.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "RESOURCE_AND_CUSTODY_CASCADE",
+      "affected_modules": ["RECOVERY", "SESSION", "DISPATCHER"],
+      "mitigation": "RECOVERY_QUOTA_CIRCUIT_BREAKER_AND_FAILURE_DOMAINS",
+      "owner_role": "RECOVERY_CONTROLLER",
+      "evidence": "DISASTER_RECOVERY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-014",
+      "title": "Identity Persistence Failure",
+      "description": "Clone or Session identity can be reused or lost after restart.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "CLAIM_IMPERSONATION",
+      "affected_modules": ["IDENTITY", "CLONE_REGISTRY", "SESSION"],
+      "mitigation": "IMMUTABLE_LINEAGE_ATTESTATION_AND_FENCING",
+      "owner_role": "IDENTITY_CUSTODIAN",
+      "evidence": "SWARM_SECURITY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-015",
+      "title": "Security Key Rotation Missing",
+      "description": "Compromised or expired identity keys cannot be safely replaced.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "PERSISTENT_IMPERSONATION",
+      "affected_modules": ["IDENTITY", "HUMAN_ANCHOR", "EVIDENCE"],
+      "mitigation": "KEY_LIFECYCLE_ROTATION_REVOCATION_AND_COMPROMISE_RESPONSE",
+      "owner_role": "SECURITY_CUSTODIAN",
+      "evidence": "SWARM_SECURITY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-016",
+      "title": "Long-term Archival Missing",
+      "description": "Historical evidence and decisions lack durable archival policy.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "LOSS_OF_AUDITABILITY",
+      "affected_modules": ["COMPANY_MEMORY", "AUDIT"],
+      "mitigation": "HOT_WARM_COLD_IMMUTABLE_AND_DISPOSABLE_TIERS",
+      "owner_role": "ARCHIVE_CUSTODIAN",
+      "evidence": "COMPANY_MEMORY_RETENTION_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-017",
+      "title": "State Pruning Missing",
+      "description": "Temporary state grows forever without safe deletion rules.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "STORAGE_EXHAUSTION_AND_SLOW_REPLAY",
+      "affected_modules": ["COMPANY_MEMORY", "TELEMETRY"],
+      "mitigation": "RETENTION_COMPACTION_TOMBSTONES_AND_REPLAY_ANCHORS",
+      "owner_role": "MEMORY_CUSTODIAN",
+      "evidence": "COMPANY_MEMORY_RETENTION_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-018",
+      "title": "Disaster Recovery Missing",
+      "description": "The architecture lacks failure-specific recovery contracts.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "UNRECOVERABLE_COMPANY_STATE",
+      "affected_modules": ["ALL_COMPANY_RUNTIME"],
+      "mitigation": "FAILURE_MATRIX_RPO_RTO_CLASSES_ROLLBACK_AND_DRILLS",
+      "owner_role": "RECOVERY_CONTROLLER",
+      "evidence": "DISASTER_RECOVERY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-019",
+      "title": "Architecture Drift Missing",
+      "description": "Implementation can diverge from CURRENT, ADR and approved contracts.",
+      "severity": "P0",
+      "likelihood": "HIGH",
+      "impact": "UNAUTHORIZED_RUNTIME_BEHAVIOR",
+      "affected_modules": ["ARCHITECTURE", "BOOT", "IMPLEMENTATION"],
+      "mitigation": "DRIFT_DETECTOR_BLOCK_REPORT_AND_PROPOSE_RESOLUTION",
+      "owner_role": "ARCHITECTURE_GOVERNANCE_BOARD",
+      "evidence": "ARCHITECTURE_DRIFT_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    },
+    {
+      "risk_id": "P0-020",
+      "title": "Cross-runtime Event Bus Expansion",
+      "description": "A global event bus can leak data and authority across runtimes.",
+      "severity": "P0",
+      "likelihood": "MEDIUM",
+      "impact": "CROSS_DOMAIN_DATA_AND_AUTHORITY_LEAK",
+      "affected_modules": ["EVENT_BUS", "LIFE_OS", "COMPANY_OS"],
+      "mitigation": "DOMAIN_NAMESPACES_ACL_RATE_LIMIT_RETENTION_AND_NO_WILDCARDS",
+      "owner_role": "RUNTIME_ARCHITECT",
+      "evidence": "DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md",
+      "review_status": "OPEN_MITIGATION_DESIGNED"
+    }
+  ],
+  "risk_counts": {
+    "p0_open": 20,
+    "p0_resolved": 0,
+    "p0_mitigations_designed": 20,
+    "p1": 6,
+    "p2": 4
+  },
+  "scores": {
+    "architecture": 82,
+    "scalability": 68,
+    "security": 77,
+    "maintainability": 76,
+    "fault_tolerance": 69,
+    "state_integrity": 80,
+    "governance": 91,
+    "human_control": 95,
+    "s0_readiness": 84,
+    "s1_readiness": 72,
+    "s2_readiness": 40,
+    "s3_readiness": 18,
+    "hundred_year_readiness": 32,
+    "p0_override_allowed": false
+  },
+  "enablement_gates": [
+    "INDEPENDENT_REVIEW_COMPLETE",
+    "P0_EXIT_CRITERIA_REVIEWED",
+    "CANONICAL_CLAIM_AUTHORITY_CONFORMANCE_PLAN_PASS",
+    "S0_FAILURE_SECURITY_EVIDENCE_AND_HUMAN_ANCHOR_SCENARIOS_PASS",
+    "NEW_HUMAN_ARCHITECTURE_DECISION"
+  ],
+  "boundaries": {
+    "runtime_current_modified": false,
+    "universe_map_current_modified": false,
+    "token_contract_modified": false,
+    "frozen_baseline_modified": false,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "auto_dispatch_enabled": false,
+    "production_database_created": false,
+    "deployment_started": false,
+    "private_artifacts_included": false
+  },
+  "next_gate": "INDEPENDENT_ARCHITECTURE_REVIEW",
+  "next_human_decision": "HOLD_FOR_P0_REVISION_OR_APPROVE_REVISED_ARCHITECTURE_FOR_S0_BASELINE_REVIEW"
+}

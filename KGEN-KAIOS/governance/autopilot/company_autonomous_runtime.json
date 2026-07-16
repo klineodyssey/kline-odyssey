@@ -1,0 +1,1220 @@
+{
+  "metadata": {
+    "title": "PrimeForge Company Fully Autonomous Runtime V1 Architecture",
+    "version": "0.3.0",
+    "revision": "2026-07-16.3",
+    "status": "ARCHITECTURE_REVISION_P0",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "AGB / MAJOR_REVISION_REQUIRED_BEFORE_ENABLEMENT; next independent review required",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "AGB-COMPANY-AUTONOMOUS-RUNTIME-001",
+    "decision_ids": [
+      "HUMAN-COMPANY-AUTONOMOUS-001",
+      "HUMAN-COMPANY-AUTONOMOUS-002",
+      "AGB-COMPANY-AUTONOMOUS-RUNTIME-001"
+    ],
+    "source_of_truth": false,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "deployment_started": false
+  },
+  "agb_resolution": {
+    "decision": "MAJOR_REVISION_REQUIRED_BEFORE_ENABLEMENT",
+    "company_autonomous_runtime_v1": "MAJOR_REVISION_IN_PROGRESS",
+    "fully_autonomous": "DISABLED",
+    "baseline_freeze": "DENIED",
+    "auto_dispatch": "DISABLED_UNTIL_CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "maximum_autonomous_level": 2,
+    "architecture_target_scales": [
+      "S0",
+      "S1"
+    ],
+    "future_scales": [
+      "S2"
+    ],
+    "unsupported_scales": [
+      "S3",
+      "100_MILLION_WORKERS"
+    ],
+    "p0_open": 20,
+    "p0_resolved": 0
+  },
+  "source_documents": [
+    "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+    "KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md",
+    "KGEN-KAIOS/governance/autopilot/PRIMEFORGE_COMPANY_AUTOPILOT.md",
+    "KGEN-KAIOS/governance/autopilot/COMPANY_DAILY_OPERATION.md",
+    "KGEN-KAIOS/governance/autopilot/CURSOR_HANDOFF_AUTO_REVIEW.md",
+    "KGEN-KAIOS/governance/autopilot/CLAIM_AND_LEASE_CONTROLLER.md",
+    "KGEN-KAIOS/governance/autopilot/worker-swarm/WORKER_SWARM_RUNTIME.md",
+    "KGEN-KAIOS/governance/autopilot/worker-swarm/COMPANY_DISPATCHER.md",
+    "KGEN-KAIOS/governance/autopilot/worker-swarm/MASTER_REGISTRY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/worker-swarm/RECOVERY_RUNTIME.md",
+    "KGEN-KAIOS/governance/autopilot/COMPANY_AUTONOMOUS_RUNTIME_REVIEW_RESOLUTION.md",
+    "KGEN-KAIOS/governance/autopilot/HIERARCHICAL_MONKEY_SWARM_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/CANONICAL_CLAIM_AUTHORITY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/SWARM_SECURITY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/COMPANY_MEMORY_RETENTION_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/LONG_TERM_COMPATIBILITY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/AUTONOMY_LEVEL_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/HUMAN_ANCHOR_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/DISASTER_RECOVERY_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/ARCHITECTURE_DRIFT_STANDARD.md",
+    "KGEN-KAIOS/governance/autopilot/PRODUCT_EVOLUTION_AMENDMENTS.md"
+  ],
+  "source_precedence": [
+    "HUMAN_DECISION",
+    "CURRENT_CONSTITUTION",
+    "COMPANY_OS_BOOT",
+    "CURRENT_REGISTRIES_AND_CLAIM_AUTHORITY",
+    "APPROVED_BASELINE_AND_ADR",
+    "THIS_INTEGRATION_PROPOSAL",
+    "CANDIDATE",
+    "HISTORICAL"
+  ],
+  "roles": [
+    {
+      "actor": "PrimeForge",
+      "role": "HUMAN_FINAL_AUTHORITY",
+      "allowed": [
+        "FINAL_ARCHITECTURE_DECISION",
+        "FINAL_IMPLEMENTATION_DECISION",
+        "HUMAN_OVERRIDE"
+      ]
+    },
+    {
+      "actor": "Codex",
+      "role": "KAIOS_COMPANY_GENERAL_MANAGER_CEO_AND_CHIEF_IMPLEMENTATION_OFFICER",
+      "allowed": [
+        "COMPANY_BOOT",
+        "DAILY_OPERATION",
+        "DISPATCH",
+        "REVIEW",
+        "QUALITY_MANAGEMENT",
+        "VERSION_MANAGEMENT",
+        "GITHUB_MANAGEMENT",
+        "CURSOR_WORKER_MANAGEMENT",
+        "EVIDENCE_MANAGEMENT",
+        "HUMAN_DECISION_EXECUTION",
+        "REPAIR_INSTRUCTION",
+        "CLAIM_CLOSE_AND_RELEASE",
+        "ARCHITECTURE_RESOLUTION",
+        "DELEGATED_INTEGRATION"
+      ],
+      "denied": [
+        "REPLACE_HUMAN_FINAL_AUTHORITY",
+        "LEVEL_C_SELF_APPROVAL"
+      ]
+    },
+    {
+      "actor": "Cursor Master",
+      "role": "CHIEF_WORKER",
+      "allowed": [
+        "RECEIVE_CODEX_PARENT_TASK",
+        "CREATE_AUTHORIZED_CLONE_WORK_UNITS",
+        "ALLOCATE_BOUNDED_SUBWORK",
+        "COLLECT_RAW_EVIDENCE",
+        "REPORT_TO_CODEX"
+      ],
+      "denied": [
+        "CREATE_WORKORDER",
+        "EXPAND_SCOPE",
+        "REVIEW",
+        "MERGE",
+        "PUSH",
+        "RELEASE",
+        "DEPLOY"
+      ]
+    },
+    {
+      "actor": "Cursor Clone",
+      "role": "MONKEY_CLONE_WORKER",
+      "allowed": [
+        "BOOT",
+        "CLAIM",
+        "CODING",
+        "TEST",
+        "EVIDENCE",
+        "CHECKPOINT",
+        "HANDOFF"
+      ],
+      "denied": [
+        "REVIEW",
+        "MERGE",
+        "PUSH",
+        "RELEASE",
+        "DEPLOY",
+        "SELF_DISPATCH",
+        "PROTECTED_PATH_WRITE"
+      ]
+    },
+    {
+      "actor": "ChatGPT",
+      "role": "CHIEF_SYSTEM_ARCHITECT",
+      "allowed": [
+        "ARCHITECTURE_PROPOSAL",
+        "ADVISORY_ANALYSIS"
+      ],
+      "denied": [
+        "REPOSITORY_WRITE",
+        "MERGE",
+        "PUSH",
+        "IMPLEMENTATION_START"
+      ]
+    }
+  ],
+  "permanent_company_boot_sequence": [
+    "COMPANY_BOOT",
+    "COMPANY_SESSION_RESUME",
+    "COMPANY_HEALTH_CHECK",
+    "REPOSITORY_HEALTH",
+    "COMPANY_INBOX",
+    "CURSOR_REVIEW",
+    "PENDING_REVIEW",
+    "ARCHITECTURE_QUEUE",
+    "HUMAN_DECISION_QUEUE",
+    "REVIEW_QUEUE",
+    "PROCESS_CURRENT_HUMAN_MESSAGE"
+  ],
+  "daily_autonomous_sequence": [
+    "COMPANY_BOOT",
+    "GIT_HEALTH",
+    "PAGES_HEALTH",
+    "REVIEW_QUEUE",
+    "CURSOR_QUEUE",
+    "REPAIR",
+    "ARCHITECTURE_QUEUE",
+    "HUMAN_INBOX",
+    "AUTHORIZED_DISPATCH",
+    "CHECKPOINT",
+    "DAILY_REVIEW",
+    "COMPANY_CLOSE"
+  ],
+  "identity_model": {
+    "rule": "ONE_CURSOR_CHAT_WINDOW_EQUALS_ONE_MONKEY_CLONE",
+    "required_fields": [
+      "master_clone_id",
+      "clone_id",
+      "session_id",
+      "claim_id",
+      "worker_id",
+      "handoff_id",
+      "review_target",
+      "parent_clone",
+      "workspace",
+      "checkpoint",
+      "heartbeat"
+    ],
+    "lineage": [
+      "CURSOR_MASTER",
+      "MONKEY_CLONE",
+      "SESSION",
+      "CLAIM",
+      "EVIDENCE",
+      "HANDOFF",
+      "CODEX_REVIEW"
+    ],
+    "cardinality": {
+      "active_session_per_clone": 1,
+      "active_review_or_repair_claim_per_session": 1,
+      "primary_owner_per_task": 1
+    },
+    "recovery_rule": "FENCE_OLD_SESSION_BEFORE_OPENING_RECOVERY_SESSION",
+    "legacy_amendment": {
+      "old_candidate_rule": "A new window is normally a new Session for an existing Clone",
+      "proposed_rule": "Every Cursor chat window is a new Clone",
+      "effective_after": "HUMAN_ARCHITECTURE_APPROVAL_AND_IMPLEMENTATION",
+      "pre_cutover_behavior": "STRICT_LEGACY_REGISTRY_AND_NO_RETROACTIVE_AUTHORITY"
+    }
+  },
+  "cursor_master_envelope": {
+    "required": [
+      "codex_parent_task_envelope",
+      "clone_budget",
+      "clone_spawn_budget_id",
+      "controller_lineage",
+      "max_workers",
+      "max_sessions",
+      "max_active_claims",
+      "max_spawn_rate",
+      "max_compute_budget",
+      "max_memory",
+      "max_event_rate",
+      "max_retry_rate",
+      "max_recovery_rate",
+      "authorized_paths",
+      "coordination_boundaries",
+      "child_task_ids",
+      "expected_evidence",
+      "review_owner",
+      "stop_conditions",
+      "lease"
+    ],
+    "review_owner": "CODEX",
+    "raw_child_evidence_visible_to_codex": true,
+    "summary_replaces_raw_evidence": false
+  },
+  "clone_states": [
+    "REGISTERED",
+    "BOOTING",
+    "READY",
+    "CLAIM_ACTIVE",
+    "EXECUTING",
+    "HANDOFF_SUBMITTED",
+    "WAITING_REVIEW",
+    "REPAIR",
+    "BLOCKED",
+    "RECOVERY_PENDING",
+    "RECOVERING",
+    "CLOSED",
+    "OFFLINE",
+    "SUSPENDED",
+    "ARCHIVED"
+  ],
+  "runtime_modules": [
+    {
+      "module": "COMPANY_OS_BOOT",
+      "source": "EXISTING",
+      "self_start_allowed": false
+    },
+    {
+      "module": "COMPANY_SESSION",
+      "source": "EXISTING",
+      "self_start_allowed": false
+    },
+    {
+      "module": "COMPANY_DISPATCHER",
+      "source": "EXISTING_PROPOSAL",
+      "self_start_allowed": false
+    },
+    {
+      "module": "MONKEY_SWARM_REVIEW_RUNTIME",
+      "source": "THIS_PROPOSAL",
+      "self_start_allowed": false
+    },
+    {
+      "module": "AUTO_CURSOR_REVIEW_RUNTIME",
+      "source": "THIS_PROPOSAL",
+      "self_start_allowed": false
+    },
+    {
+      "module": "REVIEW_RECOVERY_RUNTIME",
+      "source": "THIS_PROPOSAL",
+      "self_start_allowed": false
+    },
+    {
+      "module": "COMPANY_CLOSING_RUNTIME",
+      "source": "THIS_PROPOSAL",
+      "self_start_allowed": false
+    },
+    {
+      "module": "COMPANY_MEMORY",
+      "source": "THIS_AMENDMENT",
+      "self_start_allowed": false
+    },
+    {
+      "module": "MONKEY_QUEUE",
+      "source": "THIS_AMENDMENT",
+      "self_start_allowed": false
+    },
+    {
+      "module": "HEARTBEAT_RUNTIME",
+      "source": "THIS_AMENDMENT",
+      "self_start_allowed": false
+    },
+    {
+      "module": "HIERARCHICAL_SWARM_CONTROL",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    },
+    {
+      "module": "DISTRIBUTED_STATE_CONSISTENCY",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    },
+    {
+      "module": "CANONICAL_CLAIM_AUTHORITY",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    },
+    {
+      "module": "SWARM_SECURITY",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    },
+    {
+      "module": "HUMAN_ANCHOR",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    },
+    {
+      "module": "ARCHITECTURE_DRIFT_DETECTOR",
+      "source": "AGB_P0_REVISION",
+      "self_start_allowed": false
+    }
+  ],
+  "review_triggers": [
+    "COMPANY_BOOT",
+    "SESSION_RESUME",
+    "HANDOFF_SIGNAL",
+    "PRE_DISPATCH",
+    "LONG_OPERATION_CHECKPOINT",
+    "END_SESSION",
+    "HEARTBEAT_TIMEOUT"
+  ],
+  "long_running_contract": {
+    "threshold_minutes": 30,
+    "checkpoint_required": true,
+    "rescan_interval_max_minutes": 30,
+    "final_full_rescan_required": true,
+    "background_service_currently_exists": false
+  },
+  "review_queue_priority": [
+    "HUMAN_STOP_OR_LEVEL_C",
+    "UNCLASSIFIED_HANDOFF",
+    "REPAIR",
+    "EXPIRING_LEASE",
+    "ORPHAN_CLAIM",
+    "PENDING_DECISION",
+    "APPROVED_CLOSE_AND_RELEASE",
+    "ARCHITECTURE_REVIEW",
+    "IMPLEMENTATION_PLANNING",
+    "HUMAN_INBOX",
+    "ROUTINE_MAINTENANCE"
+  ],
+  "company_inbox_router": {
+    "multiple_labels_allowed": true,
+    "implementation_authority_created_by_classification": false,
+    "classifications": {
+      "A": "ARCHITECTURE",
+      "B": "REVIEW",
+      "C": "REPAIR",
+      "D": "BUG",
+      "E": "PROPOSAL",
+      "F": "DECISION",
+      "G": "QUESTION",
+      "H": "IDEA",
+      "I": "EMERGENCY",
+      "J": "KERNEL",
+      "K": "LIFE",
+      "L": "ECONOMY",
+      "M": "LAND",
+      "N": "UNIVERSE",
+      "O": "COMPANY"
+    },
+    "current_decision_classification": {
+      "decision_id": "AGB-COMPANY-AUTONOMOUS-RUNTIME-001",
+      "primary": "F",
+      "secondary": [
+        "A",
+        "O"
+      ],
+      "authorization": "ARCHITECTURE_ONLY"
+    }
+  },
+  "monkey_communication_runtime": {
+    "human_as_dispatch_transport": false,
+    "path": [
+      "HUMAN_FINAL_AUTHORITY",
+      "CODEX_GENERAL_MANAGER",
+      "FEDERATION_CONTROLLER",
+      "REGION_CONTROLLER",
+      "COMPANY_CONTROLLER",
+      "DEPARTMENT_DISPATCHER",
+      "MONKEY_SQUAD_LEADER",
+      "CLONE_REGISTRY",
+      "MONKEY_QUEUE",
+      "SESSION_RUNTIME",
+      "ASSIGNED_MONKEY_CLONE",
+      "CHECKPOINT_AND_HANDOFF",
+      "CODEX_REVIEW",
+      "ATOMIC_CLOSE_AND_RELEASE"
+    ],
+    "missing_machine_channel_result": "PENDING_DISPATCH_CHANNEL",
+    "cursor_self_dispatch_allowed": false,
+    "cursor_master_bypass_dispatcher_allowed": false
+  },
+  "heartbeat_runtime": {
+    "mode": "ADAPTIVE_HIERARCHICAL_AGGREGATION",
+    "nominal_active_interval_seconds": 300,
+    "direct_central_registry_write": false,
+    "path": [
+      "CLONE_HEARTBEAT",
+      "SQUAD_AGGREGATOR",
+      "DEPARTMENT_AGGREGATOR",
+      "REGIONAL_HEALTH_SUMMARY",
+      "COMPANY_HEALTH"
+    ],
+    "mechanisms": [
+      "ADAPTIVE_INTERVAL",
+      "BATCH_HEARTBEAT",
+      "HEALTH_SUMMARY",
+      "FAILURE_SUSPICION",
+      "BACKOFF",
+      "JITTER",
+      "LEASE_EXPIRY",
+      "FENCING_TOKEN"
+    ],
+    "required_fields": [
+      "clone_id",
+      "session_id",
+      "claim_id",
+      "worker_id",
+      "workspace",
+      "checkpoint_id",
+      "current_task",
+      "progress_state",
+      "fencing_token",
+      "observed_at"
+    ],
+    "timeout_actions": [
+      "STOP_ACCEPTING_STALE_SESSION_WRITES",
+      "INCREMENT_FENCING_TOKEN",
+      "PRESERVE_CHECKPOINT_AND_EVIDENCE",
+      "ENTER_RECOVERY_PENDING",
+      "VALIDATE_CUSTODY",
+      "OPEN_RECOVERY_SESSION"
+    ],
+    "heartbeat_proves_quality": false,
+    "raw_heartbeat_retention": "DISPOSABLE_TELEMETRY",
+    "duplicate_execution_allowed": false,
+    "runtime_implemented": false
+  },
+  "auto_dispatch_policy": {
+    "enabled_in_architecture": false,
+    "status": "DISABLED_UNTIL_CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "maximum_autonomous_level": 2,
+    "runtime_implemented": false,
+    "required_conditions": [
+      "REVIEW_REPAIR_RECOVERY_EXPIRED_CLAIM_AND_PENDING_DECISION_CLASSIFIED",
+      "WORKQUEUE_STATUS_APPROVED_FOR_IMPLEMENTATION",
+      "NOT_ARCHITECTURE_ONLY",
+      "COMPLETE_TASK_ENVELOPE",
+      "ELIGIBLE_CLONE_HAS_NO_ACTIVE_CLAIM",
+      "CANONICAL_ATOMIC_CLAIM_ALLOCATED",
+      "ISOLATED_WORKSPACE_AND_PATHS",
+      "PROTECTED_PATH_CHECK_PASS",
+      "REVIEWER_AND_ROLLBACK_ASSIGNED"
+    ],
+    "open_equals_approved": false,
+    "architecture_only_auto_coding_allowed": false
+  },
+  "company_memory": {
+    "purpose": "DURABLE_PROVENANCE_FIRST_OPERATING_MEMORY",
+    "categories": [
+      "IMMUTABLE_DECISIONS",
+      "APPROVED_BASELINES",
+      "ACTIVE_STATE",
+      "WORKING_MEMORY",
+      "HISTORICAL_ARCHIVE",
+      "LESSONS_LEARNED",
+      "PRIVATE_DATA",
+      "HEAVEN_SECRET",
+      "DIVINE_VAULT_REFERENCES"
+    ],
+    "required_fields": [
+      "memory_id",
+      "memory_type",
+      "source",
+      "source_sha",
+      "decision_id",
+      "created_at",
+      "supersedes",
+      "status",
+      "visibility",
+      "evidence_refs",
+      "retention_rule",
+      "schema_version",
+      "migration_id",
+      "snapshot_ref",
+      "archival_class",
+      "privacy_class",
+      "restore_priority",
+      "destruction_policy",
+      "next_action"
+    ],
+    "append_only": true,
+    "single_unbounded_json_allowed": false,
+    "supports_snapshot_replay_compaction_pruning": true,
+    "chat_memory_is_source_of_truth": false,
+    "forbidden_content": [
+      "SECRETS",
+      "CREDENTIALS",
+      "HUMAN_PRIVATE_WORKSPACE_CONTENT",
+      "PRIVATE_KYC",
+      "EXACT_PRIVATE_GPS"
+    ],
+    "drift_rule": "REMOTE_EVIDENCE_OVERRIDES_STALE_SNAPSHOT_STATUS_WITHOUT_ERASING_HISTORY",
+    "runtime_implemented": false
+  },
+  "runtime_separation": {
+    "life_os": "LIFE_MAINTENANCE_AND_LIFECYCLE",
+    "company_os": "COMPANY_GOVERNANCE_AND_OPERATIONS",
+    "monkey_runtime": "WORKER_IDENTITY_SESSION_CLAIM_HEARTBEAT_AND_HANDOFF",
+    "mind_runtime": "REASONING_AND_BEHAVIOR",
+    "citizen_runtime": "SOCIAL_ROLE",
+    "life_os_forbidden": [
+      "COMPANY_DISPATCH",
+      "WORKQUEUE",
+      "PAYROLL",
+      "LAND_REGISTRY",
+      "MARKETPLACE_SETTLEMENT",
+      "GIT",
+      "REVIEW_AUTHORITY",
+      "COMPANY_MEMORY"
+    ],
+    "boundary_tests_required": true,
+    "shared_mutable_authority_allowed": false
+  },
+  "hierarchical_swarm": {
+    "control_path": [
+      "HUMAN_PRIMEFORGE",
+      "CODEX_GENERAL_MANAGER",
+      "FEDERATION_CONTROLLER",
+      "REGION_CONTROLLER",
+      "COMPANY_CONTROLLER",
+      "DEPARTMENT_DISPATCHER",
+      "MONKEY_SQUAD_LEADER",
+      "MONKEY_CLONE"
+    ],
+    "required_quotas": [
+      "max_workers",
+      "max_sessions",
+      "max_active_claims",
+      "max_spawn_rate",
+      "max_compute_budget",
+      "max_memory",
+      "max_event_rate",
+      "max_retry_rate",
+      "max_recovery_rate"
+    ],
+    "clone_spawn_budget_required": true,
+    "no_quota_result": "SPAWN_DENIED",
+    "unbounded_single_dispatcher_allowed": false
+  },
+  "state_consistency": {
+    "strong_consistency": [
+      "CLAIM_OWNERSHIP",
+      "MONEY_LEDGER",
+      "LAND_OWNERSHIP",
+      "HUMAN_DECISION",
+      "AUTHORIZATION"
+    ],
+    "eventual_consistency": [
+      "HEARTBEAT",
+      "WORKER_PRESENCE",
+      "UI_STATUS",
+      "ANALYTICS",
+      "OBSERVABILITY"
+    ],
+    "append_only_immutable": [
+      "EVIDENCE",
+      "DECISION_LOG",
+      "REVIEW_LOG",
+      "HANDOFF_HISTORY",
+      "AUDIT_HISTORY"
+    ],
+    "patterns": [
+      "EVENT_SOURCING",
+      "APPEND_ONLY_LEDGER",
+      "SNAPSHOT_AND_REPLAY",
+      "PARTITIONED_STATE_STORE"
+    ],
+    "crdt_scope": "LOW_RISK_APPROVED_PRESENCE_OR_COUNTERS_ONLY",
+    "generic_last_write_wins_for_authority": false
+  },
+  "canonical_claim_authority": {
+    "status": "STANDARD_UNDER_REVIEW_NOT_IMPLEMENTED",
+    "required": [
+      "atomic_compare_and_swap",
+      "unique_claim_id",
+      "fencing_token",
+      "lease_expiry",
+      "worker_id",
+      "session_id",
+      "task_id",
+      "review_custody",
+      "repair_owner",
+      "close_state",
+      "release_state"
+    ],
+    "branch_local_claim_authority_allowed": false,
+    "auto_dispatch_blocked": true
+  },
+  "evidence_chain": {
+    "append_only": true,
+    "worker_overwrite_allowed": false,
+    "required_fields": [
+      "evidence_id",
+      "task_id",
+      "claim_id",
+      "worker_id",
+      "session_id",
+      "artifact_hash",
+      "commit_sha",
+      "test_hash",
+      "timestamp",
+      "causation_id",
+      "previous_evidence_hash",
+      "authorization",
+      "review_signature",
+      "tamper_status"
+    ]
+  },
+  "human_anchor": {
+    "check_required_for_major_session": true,
+    "check_required_for_autonomy_change": true,
+    "required_fields": [
+      "human_authority_id",
+      "decision_signature",
+      "decision_scope",
+      "decision_expiry",
+      "revocation",
+      "emergency_stop",
+      "override",
+      "appeal",
+      "audit"
+    ],
+    "human_silence_is_approval": false,
+    "secret_key_in_repository_allowed": false
+  },
+  "cross_runtime_event_bus": {
+    "global_unrestricted_bus_allowed": false,
+    "domains": [
+      "LIFE_EVENTS",
+      "MIND_EVENTS",
+      "CITIZEN_EVENTS",
+      "COMPANY_EVENTS",
+      "ECONOMY_EVENTS",
+      "LAND_EVENTS",
+      "WORKER_EVENTS",
+      "AUDIT_EVENTS"
+    ],
+    "required_contract_fields": [
+      "namespace",
+      "schema",
+      "version",
+      "retention",
+      "rate_limit",
+      "authorization",
+      "consumer_list",
+      "dead_letter_policy"
+    ],
+    "wildcard_subscription_allowed": false
+  },
+  "deadlock_prevention": {
+    "mechanisms": [
+      "DECISION_TIMEOUT",
+      "REVIEW_ESCALATION",
+      "REPAIR_LIMIT",
+      "CLAIM_EXPIRY",
+      "QUEUE_PRIORITY",
+      "HUMAN_ESCALATION",
+      "SAFE_HOLD"
+    ],
+    "timeout_grants_approval": false
+  },
+  "disaster_recovery": {
+    "failure_scenarios": [
+      "SINGLE_CLONE_FAILURE",
+      "SQUAD_FAILURE",
+      "DISPATCHER_FAILURE",
+      "REGISTRY_FAILURE",
+      "REGION_FAILURE",
+      "NETWORK_PARTITION",
+      "CORRUPT_SNAPSHOT",
+      "BAD_DEPLOYMENT",
+      "CREDENTIAL_COMPROMISE",
+      "EVIDENCE_CORRUPTION"
+    ],
+    "required_response_fields": [
+      "detection",
+      "containment",
+      "failover",
+      "recovery",
+      "rollback",
+      "human_escalation",
+      "rpo_class",
+      "rto_priority"
+    ],
+    "recovery_service_implemented": false
+  },
+  "observability": {
+    "hierarchy": [
+      "CLONE_TELEMETRY",
+      "SQUAD_SUMMARY",
+      "DEPARTMENT_SUMMARY",
+      "REGION_SUMMARY",
+      "COMPANY_DASHBOARD"
+    ],
+    "metrics": [
+      "active_workers",
+      "claim_latency",
+      "review_latency",
+      "failure_rate",
+      "recovery_rate",
+      "heartbeat_health",
+      "queue_depth",
+      "evidence_integrity",
+      "resource_usage",
+      "authority_level",
+      "architecture_drift"
+    ],
+    "retain_all_raw_telemetry_forever": false
+  },
+  "product_evolution_amendments": {
+    "commit_separation_required": true,
+    "items": [
+      "TRIBE_TRANSITION_STAGE",
+      "SETTLEMENT_TRANSITION_STAGE",
+      "PROGRESSIVE_UI_DISCLOSURE",
+      "SYMBIOSIS_PARASITISM_COMPETITION_PREDATION_COOPERATION_MUTUALISM",
+      "ENVIRONMENTAL_CARRYING_CAPACITY",
+      "ECOLOGICAL_BACKLASH"
+    ],
+    "frozen_domain_baselines_modified": false,
+    "implementation_started": false
+  },
+  "wukong_law": {
+    "principle": "EACH_MONKEY_HAIR_IS_ONE_INDEPENDENT_WORKER_WITHIN_HUMAN_AND_CODEX_GOVERNANCE",
+    "authority_path": [
+      "HUMAN_FINAL_AUTHORITY",
+      "CODEX_GENERAL_MANAGER",
+      "FEDERATION_REGION_COMPANY_CONTROLLERS",
+      "DEPARTMENT_DISPATCHER",
+      "MONKEY_SQUAD_LEADER",
+      "MONKEY_CLONE",
+      "TASK",
+      "EVIDENCE",
+      "CODEX_REVIEW",
+      "HUMAN_GATE_WHEN_REQUIRED"
+    ],
+    "reverse_bypass_allowed": false
+  },
+  "legacy_suppression": {
+    "validated_versions": [
+      "boot_version",
+      "sop_version",
+      "queue_revision",
+      "claim_schema_version",
+      "handoff_schema_version",
+      "baseline_reference"
+    ],
+    "conflict_result": "STALE_PROTOCOL_BLOCKED",
+    "reload_current_required": true,
+    "repeat_preflight_required": true,
+    "retroactive_authority_allowed": false
+  },
+  "repository_drift_detection": {
+    "automatic_checks": [
+      "FETCH",
+      "COMPARE",
+      "REPOSITORY_HEALTH",
+      "CURRENT_VS_RUNTIME",
+      "APPROVED_ADR_VS_IMPLEMENTATION",
+      "PROTECTED_PATHS",
+      "LEGACY_RULES",
+      "SCHEMA_VERSIONS",
+      "WORKER_BOOT_VERSIONS",
+      "AUTONOMOUS_LEVEL",
+      "EVENT_CONTRACT",
+      "CLAIM_CONTRACT",
+      "VERSION_GAP",
+      "ARCHITECTURE_GAP",
+      "PROPOSAL_GAP"
+    ],
+    "architecture_gap_action": "CREATE_PROPOSAL",
+    "core_drift_action": [
+      "BLOCK",
+      "REPORT",
+      "PROPOSE_RESOLUTION"
+    ],
+    "automatic_core_architecture_repair_allowed": false,
+    "runtime_current_gap_action": "HUMAN_DECISION_REQUIRED",
+    "observed_stale_architecture_backlog_pending_push_records": 7,
+    "formal_registry_modified_in_this_task": false
+  },
+  "review_item_required_fields": [
+    "review_item_id",
+    "discovered_at",
+    "trigger",
+    "master_clone_id",
+    "clone_id",
+    "session_id",
+    "worker_id",
+    "task_id",
+    "claim_id",
+    "handoff_id",
+    "branch",
+    "base_sha",
+    "head_sha",
+    "task_envelope_ref",
+    "evidence_refs",
+    "test_refs",
+    "protected_path_report",
+    "identity_status",
+    "authority_status",
+    "custody_status",
+    "priority",
+    "recommended_gate"
+  ],
+  "review_gates": [
+    "G0_IDENTITY",
+    "G1_AUTHORITY",
+    "G2_CLAIM_AND_FENCING",
+    "G3_BASE_AND_HEAD_INTEGRITY",
+    "G4_SCOPE_AND_SINGLE_TASK_PURITY",
+    "G5_PROTECTED_PATHS_AND_SECRETS",
+    "G6_EVIDENCE_COMPLETENESS",
+    "G7_TESTS_AND_REPRODUCIBILITY",
+    "G8_ARCHITECTURE_AND_RUNTIME_BOUNDARY",
+    "G9_RISK_CLASSIFICATION",
+    "G10_DECISION_AND_ATOMIC_DISPOSITION"
+  ],
+  "review_decisions": [
+    "APPROVE",
+    "APPROVE_WITH_WARNINGS",
+    "REPAIR_REQUIRED",
+    "REJECT_UNAUTHORIZED",
+    "REJECT_DUPLICATE",
+    "REJECT",
+    "BLOCKED",
+    "HUMAN_REVIEW_REQUIRED",
+    "EVIDENCE_ONLY"
+  ],
+  "review_invariants": [
+    "HANDOFF_DEDUPLICATED_BY_HANDOFF_CLAIM_AND_HEAD",
+    "BRANCH_LOCAL_CLAIM_IS_EVIDENCE_NOT_AUTHORITY",
+    "TASK_ENVELOPE_MUST_PREDATE_EXECUTION",
+    "HANDOFF_TRANSFERS_REVIEW_CUSTODY_BUT_DOES_NOT_RELEASE",
+    "REPAIR_RETAINS_TASK_AND_CLAIM_LINEAGE",
+    "CLOSE_RELEASE_AND_LOG_UPDATES_MUST_BE_ATOMIC",
+    "CLONE_CANNOT_REVIEW_CLONE",
+    "MISSING_AUTHORITY_FAILS_CLOSED",
+    "HUMAN_MAIN_IS_NOT_AN_EXECUTION_WORKSPACE",
+    "HUMAN_FINAL_AUTHORITY_REMAINS_AVAILABLE"
+  ],
+  "end_of_day": {
+    "runs_on_every_session_close": true,
+    "freeze_new_dispatch": true,
+    "required_scans": [
+      "CLONE_REGISTRY",
+      "SESSION_REGISTRY",
+      "CLAIM_REGISTRY",
+      "HANDOFF_QUEUE",
+      "REVIEW_QUEUE",
+      "REPAIR_QUEUE",
+      "EXPIRING_LEASES",
+      "ORPHAN_CLAIMS",
+      "HEARTBEATS",
+      "HIERARCHICAL_HEALTH_SUMMARIES",
+      "LEGACY_PROTOCOL_VERSIONS",
+      "COMPANY_MEMORY_CURSOR",
+      "DISASTER_RECOVERY_POINTERS",
+      "ARCHITECTURE_DRIFT",
+      "HUMAN_ANCHOR",
+      "PROTECTED_PATHS"
+    ],
+    "close_requires": [
+      "ALL_DISCOVERED_HANDOFFS_CLASSIFIED",
+      "PENDING_REVIEWS_HAVE_DURABLE_CUSTODY",
+      "ACTIVE_CLAIMS_HAVE_RECOVERY_POINTERS",
+      "NO_HIDDEN_PROTECTED_ALERT",
+      "ARCHITECTURE_ONLY_NOT_DISPATCHED",
+      "MEMORY_REFERENCES_QUEUED",
+      "CHECKPOINT_PERSISTED",
+      "CLOSING_REPORT_GENERATED"
+    ],
+    "failure_code": "SESSION_CLOSE_BLOCKED_CHECKPOINT_REQUIRED"
+  },
+  "review_recovery": {
+    "restores": "REVIEW_CUSTODY",
+    "does_not_restore": "UNAUTHORIZED_EXECUTION_AUTHORITY",
+    "steps": [
+      "DETECT_INTERRUPTED_REVIEW",
+      "LOAD_DURABLE_CHECKPOINT",
+      "VALIDATE_CLAIM_AND_HANDOFF",
+      "FENCE_STALE_REVIEWER_SESSION",
+      "OPEN_RECOVERY_SESSION",
+      "REPLAY_EVIDENCE_REFERENCES",
+      "RESUME_FIRST_INCOMPLETE_GATE",
+      "WRITE_SUPERSEDING_REVIEW_EVENT"
+    ],
+    "stale_writes_allowed": false,
+    "submitted_evidence_mutable": false
+  },
+  "observed_handoff_incident": {
+    "observed_at": "2026-07-16",
+    "source_main_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "worker_id": "cursor-01",
+    "common_result": "REJECT_UNAUTHORIZED",
+    "preservation": "EVIDENCE_ONLY",
+    "reason": "No Codex Task Envelope or canonical dispatch; concurrent ephemeral Sessions used one legacy worker identity",
+    "durable_main_ledger_updated": false,
+    "branches_deleted": false,
+    "workorders_remain_open": true,
+    "items": [
+      {
+        "task_id": "ORG-P2-005",
+        "branch": "cursor-handoff/ORG-P2-005-20260716",
+        "tip_sha": "c66cfc05",
+        "session_id": "SESSION-20260716-01-EPHEMERAL",
+        "declared_head_match": false,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-006",
+        "branch": "cursor-handoff/ORG-P2-006-20260716",
+        "tip_sha": "5cae8265",
+        "session_id": "SESSION-20260716-03-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-007",
+        "branch": "cursor-handoff/ORG-P2-007-20260716",
+        "tip_sha": "ab2a0371",
+        "session_id": "SESSION-20260716-04-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-008",
+        "branch": "cursor-handoff/ORG-P2-008-20260716",
+        "tip_sha": "ca5a1bdb",
+        "session_id": "SESSION-20260716-08-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-014",
+        "branch": "cursor-handoff/ORG-P2-014-20260716",
+        "tip_sha": "bfde85e3",
+        "session_id": "SESSION-20260716-05-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-018",
+        "branch": "cursor-handoff/ORG-P2-018-20260716",
+        "tip_sha": "7d28ebc1",
+        "session_id": "SESSION-20260716-06-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-019",
+        "branch": "cursor-handoff/ORG-P2-019-20260716",
+        "tip_sha": "90ac61c0",
+        "session_id": "SESSION-20260716-07-EPHEMERAL",
+        "declared_head_match": true,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      },
+      {
+        "task_id": "ORG-P2-020",
+        "branch": "cursor-handoff/ORG-P2-020-20260716",
+        "tip_sha": "cec35404",
+        "session_id": "SESSION-20260716-02-EPHEMERAL",
+        "declared_head_match": false,
+        "result": "REJECT_UNAUTHORIZED_EVIDENCE_ONLY"
+      }
+    ]
+  },
+  "compliance_tests": [
+    {
+      "test_id": "CAR-001",
+      "scenario": "Boot discovers unseen handoff",
+      "expected": "ENQUEUE_FOR_REVIEW"
+    },
+    {
+      "test_id": "CAR-002",
+      "scenario": "Resume discovers changed handoff head",
+      "expected": "NEW_REVIEW_ITEM"
+    },
+    {
+      "test_id": "CAR-003",
+      "scenario": "End Session discovers unseen handoff",
+      "expected": "CLASSIFY_BEFORE_CLOSE"
+    },
+    {
+      "test_id": "CAR-004",
+      "scenario": "Long Codex task exceeds 30 minutes",
+      "expected": "CHECKPOINT_AND_RESCAN"
+    },
+    {
+      "test_id": "CAR-005",
+      "scenario": "Task Envelope missing",
+      "expected": "REJECT_UNAUTHORIZED"
+    },
+    {
+      "test_id": "CAR-006",
+      "scenario": "One Clone requests a second active Claim",
+      "expected": "BLOCKED_CLAIM_CONFLICT"
+    },
+    {
+      "test_id": "CAR-007",
+      "scenario": "Distinct authorized Clones use non-overlapping paths",
+      "expected": "ALLOW_PARALLEL_EXECUTION"
+    },
+    {
+      "test_id": "CAR-008",
+      "scenario": "Clone attempts review, merge, push or release",
+      "expected": "DENIED"
+    },
+    {
+      "test_id": "CAR-009",
+      "scenario": "Claim has no live Session",
+      "expected": "QUEUE_ORPHAN_RECOVERY"
+    },
+    {
+      "test_id": "CAR-010",
+      "scenario": "Lease approaches expiry",
+      "expected": "QUEUE_LEASE_ACTION"
+    },
+    {
+      "test_id": "CAR-011",
+      "scenario": "Declared handoff head mismatches observed head",
+      "expected": "NO_APPROVAL"
+    },
+    {
+      "test_id": "CAR-012",
+      "scenario": "Stale Session writes after recovery fencing",
+      "expected": "BLOCKED_STALE_SESSION"
+    },
+    {
+      "test_id": "CAR-013",
+      "scenario": "Final checkpoint cannot be persisted",
+      "expected": "SESSION_CLOSE_BLOCKED_CHECKPOINT_REQUIRED"
+    },
+    {
+      "test_id": "CAR-014",
+      "scenario": "Interrupted review has valid checkpoint",
+      "expected": "RESUME_FIRST_INCOMPLETE_GATE"
+    },
+    {
+      "test_id": "CAR-015",
+      "scenario": "Architecture-only task with idle Clone",
+      "expected": "NO_IMPLEMENTATION_DISPATCH"
+    },
+    {
+      "test_id": "CAR-016",
+      "scenario": "Stale Boot, SOP, Queue, Claim or Handoff",
+      "expected": "STALE_PROTOCOL_BLOCKED"
+    },
+    {
+      "test_id": "CAR-017",
+      "scenario": "Heartbeat misses three intervals",
+      "expected": "FENCE_THEN_RECOVERY"
+    },
+    {
+      "test_id": "CAR-018",
+      "scenario": "Human is asked to relay a Cursor instruction",
+      "expected": "POLICY_FAILURE_QUEUE_ASSIGNMENT_INSTEAD"
+    },
+    {
+      "test_id": "CAR-019",
+      "scenario": "Backlog says pending push but commit is in origin main",
+      "expected": "STALE_METADATA"
+    },
+    {
+      "test_id": "CAR-020",
+      "scenario": "Review or Repair queue has blocking item",
+      "expected": "DISPATCH_BLOCKED_REVIEW_FIRST"
+    },
+    {
+      "test_id": "CAR-021",
+      "scenario": "Clone spawn has no quota or Spawn Budget",
+      "expected": "SPAWN_DENIED"
+    },
+    {
+      "test_id": "CAR-022",
+      "scenario": "All Clones write heartbeat directly to central Registry",
+      "expected": "ARCHITECTURE_VIOLATION_USE_HIERARCHICAL_AGGREGATION"
+    },
+    {
+      "test_id": "CAR-023",
+      "scenario": "Branch-local Claim is presented as canonical",
+      "expected": "REJECT_UNAUTHORIZED"
+    },
+    {
+      "test_id": "CAR-024",
+      "scenario": "Evidence hash chain is broken",
+      "expected": "QUARANTINE_AND_BLOCK_REVIEW"
+    },
+    {
+      "test_id": "CAR-025",
+      "scenario": "Same Owner Clones review each other",
+      "expected": "DENIED_CONFLICT_OF_INTEREST"
+    },
+    {
+      "test_id": "CAR-026",
+      "scenario": "Autonomy attempts to rise above Level 2",
+      "expected": "HUMAN_DECISION_REQUIRED"
+    },
+    {
+      "test_id": "CAR-027",
+      "scenario": "Human Anchor is expired or revoked",
+      "expected": "SAFE_HOLD"
+    },
+    {
+      "test_id": "CAR-028",
+      "scenario": "Life OS subscribes to Company Dispatch events",
+      "expected": "DENIED_BOUNDARY_TEST"
+    },
+    {
+      "test_id": "CAR-029",
+      "scenario": "Corrupt snapshot is selected for restore",
+      "expected": "QUARANTINE_AND_REPLAY_PREVIOUS_VERIFIED_STATE"
+    },
+    {
+      "test_id": "CAR-030",
+      "scenario": "Architecture drift is detected in CURRENT or autonomy contract",
+      "expected": "BLOCK_REPORT_PROPOSE_RESOLUTION"
+    }
+  ],
+  "protected_paths": [
+    "contracts",
+    "wallet",
+    "bridge",
+    "Runtime CURRENT",
+    "K\u7dda\u897f\u904a\u8a18/temples/12345",
+    "final-whitepaper",
+    "KGEN Token Contract"
+  ],
+  "boundaries": {
+    "architecture": "ARCHITECTURE_REVISION_P0",
+    "company_autonomous_runtime": "MAJOR_REVISION_IN_PROGRESS",
+    "company_fully_autonomous_runtime_v1": "DISABLED",
+    "baseline_freeze": "DENIED",
+    "monkey_swarm": "ACTIVE_ARCHITECTURE_NOT_ENABLED",
+    "codex": "KAIOS_COMPANY_GENERAL_MANAGER",
+    "cursor": "MONKEY_CLONE_WORKER",
+    "human": "FINAL_AUTHORITY",
+    "maximum_autonomous_level": 2,
+    "auto_dispatch": "DISABLED_UNTIL_CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "supported_architecture_target": [
+      "S0",
+      "S1"
+    ],
+    "future_scale": "S2",
+    "unsupported_scale": "S3_100_MILLION_WORKERS",
+    "p0_open": 20,
+    "p0_resolved": 0,
+    "implementation": "NOT_STARTED",
+    "workqueue": "NOT_CREATED",
+    "workqueue_modified": false,
+    "deployment": "NOT_STARTED",
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "token_contract_modified": false,
+    "frozen_baseline_modified": false,
+    "commit_allowed_this_task": true,
+    "push_allowed_this_task": true,
+    "production_deployment_allowed": false,
+    "human_final_authority_preserved": true
+  },
+  "next_gate": "INDEPENDENT_ARCHITECTURE_REVIEW",
+  "next_human_decision": "HOLD_FOR_P0_REVISION_OR_APPROVE_REVISED_ARCHITECTURE_FOR_S0_BASELINE_REVIEW"
+}

@@ -141,6 +141,28 @@ These rows classify remote submissions, not the underlying OPEN WorkOrders. Visi
 
 Full branch, claim, base, report, purity, protected-path, and age evidence is recorded in `KGEN-AI-Company/reports/V11_READINESS_HANDOFF_RECONCILIATION.md`.
 
+## 2026-07-16 Canonical Claim Gate Intake
+
+These remote submissions appeared after the AGB resolution established that branch-local Claims are not canonical and that Auto Dispatch remains disabled. Branch existence and a self-declared `PENDING_CODEX_REVIEW` state do not create Review custody. All tips remain remote evidence; no branch was merged or deleted, no underlying OPEN WorkOrder was closed, and Pending Review is zero after this intake decision.
+
+| Task ID | Branch Tip | Task Envelope | Canonical Claim | Intake Decision | Official Task Status |
+|---|---|---|---|---|---|
+| KAIOS-WV-SBX-001 | `598a985a` | Candidate only; not dispatched | NONE | REJECT_NO_CANONICAL_CLAIM / EVIDENCE_ONLY | NEXT_TASK_CANDIDATE |
+| ORG-P2-009 | `4e5f0c17` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-010 | `9b516ea8` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-011 | `b43282e0` | NONE | NONE | REJECT_NO_CLAIM_AND_NO_HANDOFF / EVIDENCE_ONLY | OPEN |
+| ORG-P2-012 | `e32a0d2c` | NONE | Branch-local record ignored | REJECT_NO_CANONICAL_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-013 | `cf43083a` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-015 | `ab09eb58` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-016 | `1b10173d` | NONE | Branch-local record has no `claim_id` | REJECT_NO_CANONICAL_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-017 | `d709c62e` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-022 | `5ad27b1e` | NONE | Branch-local record ignored | REJECT_NO_CANONICAL_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-023 | `4c49e312` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-024 | `afb77d09` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+| ORG-P2-025 | `1b1f436a` | NONE | NONE | REJECT_NO_CLAIM / EVIDENCE_ONLY | OPEN |
+
+Intake evidence: all 13 branches use base `89f3c351c488a0705f514adba974dd6c3dd3cb3a`; 12 include parseable Handoff JSON, one has no Handoff, eight record a head SHA that differs from the preserved tip, and all changed-path scans report zero Protected Path changes. ORG-P2-023 also reports two HTTP 404 results, so it would not pass a technical publication gate even with valid authority.
+
 
 ## KAIOS V7.1 Dry Run Summary
 

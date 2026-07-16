@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Company Autopilot Architecture Package"
-VERSION: "0.4.0"
-REVISION: "2026-07-16.1"
-STATUS: "OPERATIONALLY_DELEGATED_GOVERNANCE_ARCHITECTURE"
+VERSION: "0.5.0"
+REVISION: "2026-07-16.2"
+STATUS: "OPERATIONALLY_DELEGATED_GOVERNANCE_WITH_AUTONOMOUS_V1_ENABLEMENT_HOLD"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
-REVIEWED_BY: "Human PrimeForge / HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-SOURCE_COMMIT: "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c"
-TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Record bounded Level A/B operational delegation, protected Human workspace handling, proposal backlog governance, and the canonical atomic Claim authority direction."
+REVIEWED_BY: "Human PrimeForge / AGB-COMPANY-AUTONOMOUS-RUNTIME-001"
+SOURCE_COMMIT: "ORIGIN_MAIN_89f3c351c488a0705f514adba974dd6c3dd3cb3a"
+TASK_ID: "AGB-COMPANY-AUTONOMOUS-RUNTIME-001"
+CHANGE_REASON: "Record the AGB P0 revision, cap the proposed autonomous runtime at Level 2 and S0/S1 architecture targets, and keep auto dispatch disabled pending a canonical atomic Claim authority."
 ANCESTOR: "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md; KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md"
 SOURCE_OF_TRUTH: true
 ---
@@ -34,9 +34,12 @@ This directory is an **architecture proposal and integration profile**, not a se
 
 | Field | Status |
 |---|---|
-| Human Decisions | `HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001`; `HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001`; `HUMAN-COMPANY-OS-BOOT-001`; `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` |
+| Human Decisions | `HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001`; `HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001`; `HUMAN-COMPANY-OS-BOOT-001`; `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001`; `AGB-COMPANY-AUTONOMOUS-RUNTIME-001` |
 | Design | `AUTHORIZED` |
-| Architecture | `OPERATIONALLY_DELEGATED / ACTIVE OPERATOR PROTOCOL` |
+| Existing bounded operations | `OPERATIONALLY_DELEGATED / ACTIVE OPERATOR PROTOCOL` |
+| Company Autonomous Runtime V1 | `MAJOR_REVISION_IN_PROGRESS / DISABLED` |
+| Maximum autonomous level | `LEVEL_2`; automatic dispatch remains disabled |
+| Scale claim | `S0 / S1 ARCHITECTURE TARGET`; `S2 FUTURE`; `S3 NOT_SUPPORTED` |
 | Runtime implementation | `NOT_STARTED` |
 | Background automation | `NOT_RUNNING` |
 | WorkQueue implementation task | `NOT_CREATED` |
@@ -46,7 +49,7 @@ This directory is an **architecture proposal and integration profile**, not a se
 
 ## Source Freshness Notice
 
-Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+08:00`. DNS, GitHub TCP 443, HTTPS, remote Git, Actions and required Pages checks passed. `origin/main` and the primary handoff tip remained unchanged.
+Codex reran Company Boot and `git fetch origin --prune` on `2026-07-16`. DNS, GitHub TCP 443, HTTPS, remote Git and required Pages checks passed. The revision branch was based on `origin/main` at `89f3c351c488a0705f514adba974dd6c3dd3cb3a`; freshness is rechecked before publication.
 
 ## Package Map
 
@@ -84,6 +87,31 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `architecture_backlog_registry.json` | Machine-readable proposal backlog |
 | `canonical_atomic_claim_authority.json` | Machine-readable Claim authority proposal |
 | `company_autopilot_architecture_review.json` | Machine-readable review score and gates |
+
+## AGB P0 Revision Package
+
+The following files revise the proposed Company Autonomous Runtime V1. They do not enable a runtime, freeze a baseline, create a production service, or supersede the active Company Boot authorities above.
+
+| File | Purpose |
+|---|---|
+| `COMPANY_AUTONOMOUS_RUNTIME.md` | Revised S0/S1-only autonomous company architecture with enablement held |
+| `MONKEY_SWARM_REVIEW_RUNTIME.md` | Hierarchical, quota-bound swarm review architecture |
+| `COMPANY_END_OF_DAY_REVIEW.md` | Session-closing review, recovery, drift and retention checks |
+| `AUTO_CURSOR_REVIEW_RUNTIME.md` | Claim-bound, independent and evidence-chain-aware Cursor review architecture |
+| `company_autonomous_runtime.json` | Machine-readable proposed runtime state, boundaries and conformance tests |
+| `COMPANY_AUTONOMOUS_RUNTIME_REVIEW_RESOLUTION.md` | AGB resolution, P0 risk disposition, scale limits and review scores |
+| `company_autonomous_runtime_review_resolution.json` | Machine-readable AGB resolution and twenty-risk register |
+| `HIERARCHICAL_MONKEY_SWARM_STANDARD.md` | Federation-to-Clone hierarchy, quotas and aggregated heartbeat rules |
+| `DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md` | Per-domain strong, eventual and immutable state contracts |
+| `CANONICAL_CLAIM_AUTHORITY_STANDARD.md` | Atomic compare-and-swap Claim, fencing, lease and Evidence Chain contract |
+| `SWARM_SECURITY_STANDARD.md` | Sandbox, identity, credential, Sybil and collusion controls |
+| `COMPANY_MEMORY_RETENTION_STANDARD.md` | Partitioned memory, retention, pruning, archive and replay rules |
+| `LONG_TERM_COMPATIBILITY_STANDARD.md` | Schema and protocol evolution without a hundred-year readiness claim |
+| `AUTONOMY_LEVEL_STANDARD.md` | Levels 0-5, current Level 2 ceiling and non-escalation rules |
+| `HUMAN_ANCHOR_STANDARD.md` | Verifiable Human authority, scope, expiry, revocation and emergency stop |
+| `DISASTER_RECOVERY_STANDARD.md` | Failure matrix, containment, recovery, rollback and target classes |
+| `ARCHITECTURE_DRIFT_STANDARD.md` | Block-report-resolve drift detection contract |
+| `PRODUCT_EVOLUTION_AMENDMENTS.md` | Isolated Tribe, disclosure and ecology domain amendments |
 
 ## Imported Authorities
 

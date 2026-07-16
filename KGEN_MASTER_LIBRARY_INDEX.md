@@ -2,9 +2,9 @@
 
 > **LIBRARY MASTER INDEX** — Unique cross-library Master Index per ORG-P2-003 D7. Sub-indexes: `docs/KGEN_MASTER_INDEX.md` (repo file inventory), `KGEN-Genesis/KGEN_MASTER_INDEX.md` (Genesis publications GEN-001..GEN-012). Machine-readable indexes live under `KGEN-Canon/`.
 
-**Version:** V1.0
+**Version:** V1.1
 **Status:** Draft for Review
-**Last Update:** 2026-07-13
+**Last Update:** 2026-07-16
 **Maintainer:** KLINE ODYSSEY / PrimeForge
 
 This is the root cross-library index for the stable PrimeForge Boot entry, Operating Center, Genesis Library, Runtime Library, SDK Library, Machine-Readable Canon, Cursor WorkOrders, KAIOS, and Official Whitepaper references.
@@ -133,6 +133,24 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Architecture Backlog Registry | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal dependencies, review scores, risk, commit state and next action |
 | Canonical Claim Authority Proposal | `KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional claim, fencing token and lease authority architecture; implementation not started |
 | Worker Swarm Architecture | `KGEN-KAIOS/governance/autopilot/worker-swarm/README.md` | Multi-session Worker coordination proposal with explicit non-atomic pre-cutover boundary |
+| Company Autonomous Runtime V1 Proposal | `KGEN-KAIOS/governance/autopilot/COMPANY_AUTONOMOUS_RUNTIME.md` | Revised S0/S1 architecture; enablement, baseline freeze and auto dispatch remain disabled |
+| Monkey Swarm Review Runtime | `KGEN-KAIOS/governance/autopilot/MONKEY_SWARM_REVIEW_RUNTIME.md` | Hierarchical quota and review architecture for proposed Monkey squads |
+| Company End-of-Day Review | `KGEN-KAIOS/governance/autopilot/COMPANY_END_OF_DAY_REVIEW.md` | Session-close recovery, drift, queue and retention checks |
+| Auto Cursor Review Runtime | `KGEN-KAIOS/governance/autopilot/AUTO_CURSOR_REVIEW_RUNTIME.md` | Independent Claim-bound review and evidence-chain requirements |
+| Company Autonomous Runtime JSON | `KGEN-KAIOS/governance/autopilot/company_autonomous_runtime.json` | Machine-readable boundaries, hierarchy and conformance tests |
+| Company Autonomous Review Resolution | `KGEN-KAIOS/governance/autopilot/COMPANY_AUTONOMOUS_RUNTIME_REVIEW_RESOLUTION.md` | AGB P0 decision, twenty-risk disposition, scale limits and scores |
+| Company Autonomous Review Resolution JSON | `KGEN-KAIOS/governance/autopilot/company_autonomous_runtime_review_resolution.json` | Machine-readable AGB resolution and risk register |
+| Hierarchical Monkey Swarm Standard | `KGEN-KAIOS/governance/autopilot/HIERARCHICAL_MONKEY_SWARM_STANDARD.md` | Federation-to-Clone hierarchy, quotas and heartbeat aggregation |
+| Distributed State Consistency Standard | `KGEN-KAIOS/governance/autopilot/DISTRIBUTED_STATE_CONSISTENCY_STANDARD.md` | Strong, eventual and append-only state classes by domain |
+| Canonical Claim Authority Standard | `KGEN-KAIOS/governance/autopilot/CANONICAL_CLAIM_AUTHORITY_STANDARD.md` | Atomic compare-and-swap Claim and fencing contract; implementation absent |
+| Swarm Security Standard | `KGEN-KAIOS/governance/autopilot/SWARM_SECURITY_STANDARD.md` | Clone sandbox, least privilege, identity, Sybil and collusion controls |
+| Company Memory Retention Standard | `KGEN-KAIOS/governance/autopilot/COMPANY_MEMORY_RETENTION_STANDARD.md` | Partitioned state, retention, pruning, archive and replay architecture |
+| Long-term Compatibility Standard | `KGEN-KAIOS/governance/autopilot/LONG_TERM_COMPATIBILITY_STANDARD.md` | Schema evolution, compatibility, migration and replay rules |
+| Autonomy Level Standard | `KGEN-KAIOS/governance/autopilot/AUTONOMY_LEVEL_STANDARD.md` | Levels 0-5 with current Level 2 ceiling and no automatic escalation |
+| Human Anchor Standard | `KGEN-KAIOS/governance/autopilot/HUMAN_ANCHOR_STANDARD.md` | Human authority scope, expiry, revocation, override and emergency-stop contract |
+| Disaster Recovery Standard | `KGEN-KAIOS/governance/autopilot/DISASTER_RECOVERY_STANDARD.md` | Failure containment, recovery, rollback and target classes |
+| Architecture Drift Standard | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_DRIFT_STANDARD.md` | CURRENT, ADR, schema, boot and authority drift detection |
+| Product Evolution Amendments | `KGEN-KAIOS/governance/autopilot/PRODUCT_EVOLUTION_AMENDMENTS.md` | Isolated Tribe, progressive disclosure and ecological domain amendments |
 | Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
 | Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
 | Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
