@@ -2,13 +2,38 @@ export const UNKNOWN_VALUE = "UNKNOWN";
 
 export const LIFE_OS_FORBIDDEN_DOMAINS = Object.freeze([
   "payroll",
+  "salary",
   "market",
+  "marketplace",
   "bank",
+  "wallet",
+  "land",
   "land_authority",
+  "occupation",
+  "family",
+  "marriage",
+  "property",
+  "attendance",
   "mission",
+  "company",
+  "government",
+  "military",
+  "temple",
   "review",
   "kernel",
-  "company_dispatch"
+  "company_dispatch",
+  "workqueue",
+  "civilization_policy",
+  "memory",
+  "learning",
+  "emotion",
+  "reasoning",
+  "personality",
+  "dream",
+  "faith",
+  "knowledge",
+  "behavior",
+  "decision"
 ]);
 
 const ENTITY_COLLECTIONS = Object.freeze([
@@ -17,6 +42,7 @@ const ENTITY_COLLECTIONS = Object.freeze([
   ["PARCEL", "parcels"],
   ["BUILDING", "buildings"],
   ["ROOM", "rooms"],
+  ["LIFE_PROFILE", "lifeProfiles"],
   ["AI_WORKER", "aiWorkers"],
   ["NPC", "npcs"],
   ["ENTITY", "entities"]
@@ -199,6 +225,7 @@ export function resolveLifeProfiles({
 
   const relation = entityRelation(target, world);
   const resolved = [
+    ...(profileIndex.get(profileIdentifier(target)) === target ? [target] : []),
     ...directProfiles(target),
     ...directProfileReferences(target).map((id) => profileIndex.get(id)).filter(Boolean),
     ...registryProfiles.filter((profile) => relationMatches(profile, relation))
@@ -215,109 +242,207 @@ export function resolveLifeProfiles({
   return deduplicateProfiles(resolved);
 }
 
-function metricValue(metric) {
-  if (!isKnown(metric)) return UNKNOWN_VALUE;
-  if (!isRecord(metric)) return String(metric);
+const LIFE_LAYER_DEFINITIONS = Object.freeze([
+  Object.freeze({ key: "body", label: "Body" }),
+  Object.freeze({ key: "speciesOs", sourceKey: "species_os", label: "Species OS" }),
+  Object.freeze({ key: "individualLifeOs", sourceKey: "individual_life_os", label: "Individual Life OS" }),
+  Object.freeze({ key: "mindRuntime", sourceKey: "mind_runtime", label: "Mind Runtime" }),
+  Object.freeze({ key: "citizenRuntime", sourceKey: "citizen_runtime", label: "Citizen Runtime" })
+]);
 
-  const value = firstKnown(
-    metric.value,
-    metric.current,
-    metric.percent,
-    metric.level,
-    metric.status,
-    metric.state
-  );
-  if (!isKnown(value)) return UNKNOWN_VALUE;
-  return metric.unit ? `${value} ${metric.unit}` : String(value);
+function nestedLayerSource(profile) {
+  if (isRecord(profile.life_stack)) return profile.life_stack;
+  if (isRecord(profile.lifeStack)) return profile.lifeStack;
+  if (isRecord(profile.layers)) return profile.layers;
+  return {};
 }
 
-function normalizeOrganSystems(profile) {
-  const body = isRecord(profile.body) ? profile.body : {};
+function layerRecord(profile, definition) {
+  const sourceKey = definition.sourceKey ?? definition.key;
+  const nested = nestedLayerSource(profile);
+  const direct = firstKnown(
+    profile[sourceKey],
+    profile[definition.key],
+    nested[sourceKey],
+    nested[definition.key]
+  );
+  return isRecord(direct) ? direct : {};
+}
+
+function normalizeLayer(profile, definition) {
+  const source = layerRecord(profile, definition);
+  const sourceKey = definition.sourceKey ?? definition.key;
+  return Object.freeze({
+    key: definition.key,
+    sourceKey,
+    label: definition.label,
+    id: String(firstKnown(
+      source.id,
+      source[`${sourceKey}_id`],
+      source.life_os_id,
+      UNKNOWN_VALUE
+    )),
+    status: String(firstKnown(source.status, source.state, UNKNOWN_VALUE)),
+    version: String(firstKnown(
+      source.version,
+      source[`${sourceKey}_version`],
+      UNKNOWN_VALUE
+    )),
+    reason: String(firstKnown(source.reason, UNKNOWN_VALUE))
+  });
+}
+
+function metricNumber(metric) {
+  const source = isRecord(metric)
+    ? firstKnown(metric.value, metric.current, metric.percent, metric.level)
+    : metric;
+  const value = typeof source === "number" ? source : Number(source);
+  return Number.isFinite(value) && value >= 0 && value <= 100
+    ? value
+    : UNKNOWN_VALUE;
+}
+
+function metricValue(metric) {
+  const value = metricNumber(metric);
+  return value === UNKNOWN_VALUE ? UNKNOWN_VALUE : String(value);
+}
+
+function normalizeOrganSystems(profile, body) {
   const systems = firstKnown(
-    profile.organ_systems,
-    profile.organSystems,
     body.organ_systems,
-    body.organSystems
+    body.organSystems,
+    profile.organ_systems,
+    profile.organSystems
   );
 
   return asArray(systems).map((system, index) => {
     if (!isRecord(system)) {
       const name = isKnown(system) ? String(system) : UNKNOWN_VALUE;
-      return {
+      return Object.freeze({
         id: name === UNKNOWN_VALUE ? `ORGAN_SYSTEM_${index + 1}` : name,
         name,
         status: UNKNOWN_VALUE,
         integrity: UNKNOWN_VALUE
-      };
+      });
     }
 
-    return {
+    return Object.freeze({
       id: String(firstKnown(system.organ_system_id, system.id, `ORGAN_SYSTEM_${index + 1}`)),
       name: String(firstKnown(system.name, system.label, system.organ_system_id, system.id, UNKNOWN_VALUE)),
       status: String(firstKnown(system.status, system.state, UNKNOWN_VALUE)),
       integrity: metricValue(firstKnown(system.integrity, system.integrity_state))
-    };
+    });
   });
 }
 
-/** Create a privacy-minimized, read-only Life OS V1 projection. */
+function normalizeDnaSummary(profile, body) {
+  const source = isRecord(body.dna_summary)
+    ? body.dna_summary
+    : isRecord(body.dnaSummary)
+      ? body.dnaSummary
+      : isRecord(profile.dna_summary)
+        ? profile.dna_summary
+        : {};
+  const traits = Object.freeze(
+    asArray(source.traits)
+      .filter((trait) => typeof trait === "string" && trait.length > 0)
+      .map(String)
+  );
+  const traitCount = Number.isInteger(source.trait_count)
+    ? source.trait_count
+    : Number.isInteger(source.traitCount)
+      ? source.traitCount
+      : traits.length || UNKNOWN_VALUE;
+
+  return Object.freeze({
+    summaryId: String(firstKnown(source.summary_id, source.summaryId, UNKNOWN_VALUE)),
+    classification: String(firstKnown(source.classification, UNKNOWN_VALUE)),
+    traitCount,
+    traits,
+    disclosure: String(firstKnown(source.disclosure, UNKNOWN_VALUE))
+  });
+}
+
+function dnaSummaryText(summary) {
+  if (summary.classification === UNKNOWN_VALUE) return UNKNOWN_VALUE;
+  const count = summary.traitCount === UNKNOWN_VALUE
+    ? "unknown traits"
+    : `${summary.traitCount} public traits`;
+  return `${summary.classification} / ${count}`;
+}
+
+/** Create an allowlisted, privacy-minimized, read-only Life stack projection. */
 export function projectLifeProfile(profile = {}) {
   const safeProfile = isRecord(profile) ? profile : {};
-  const species = isRecord(safeProfile.species_os)
-    ? safeProfile.species_os
-    : isRecord(safeProfile.speciesOs)
-      ? safeProfile.speciesOs
+  const layerEntries = LIFE_LAYER_DEFINITIONS.map((definition) => [
+    definition.key,
+    normalizeLayer(safeProfile, definition)
+  ]);
+  const layers = Object.freeze(Object.fromEntries(layerEntries));
+  const lifeStack = Object.freeze(layerEntries.map(([, layer]) => layer));
+  const body = layerRecord(safeProfile, LIFE_LAYER_DEFINITIONS[0]);
+  const species = layerRecord(safeProfile, LIFE_LAYER_DEFINITIONS[1]);
+  const individual = layerRecord(safeProfile, LIFE_LAYER_DEFINITIONS[2]);
+  const mind = layerRecord(safeProfile, LIFE_LAYER_DEFINITIONS[3]);
+  const citizen = layerRecord(safeProfile, LIFE_LAYER_DEFINITIONS[4]);
+  const vitalsSource = isRecord(safeProfile.vitals)
+    ? safeProfile.vitals
+    : isRecord(safeProfile.public_vitals)
+      ? safeProfile.public_vitals
       : {};
-  const speciesOsValue = firstKnown(safeProfile.species_os, safeProfile.speciesOs);
-  const state = isRecord(safeProfile.runtime_state)
-    ? safeProfile.runtime_state
-    : isRecord(safeProfile.runtimeState)
-      ? safeProfile.runtimeState
-      : isRecord(safeProfile.state)
-        ? safeProfile.state
-        : {};
-  const runtimeStateValue = firstKnown(
-    state.existence,
-    state.runtime_state,
-    isRecord(safeProfile.runtime_state) ? undefined : safeProfile.runtime_state,
-    isRecord(safeProfile.runtimeState) ? undefined : safeProfile.runtimeState,
-    safeProfile.life_state,
-    safeProfile.status
-  );
-  const vitals = isRecord(safeProfile.public_vitals)
-    ? safeProfile.public_vitals
-    : isRecord(safeProfile.publicVitals)
-      ? safeProfile.publicVitals
-      : isRecord(safeProfile.vitals)
-        ? safeProfile.vitals
-        : {};
+  const vitals = Object.freeze({
+    health: metricNumber(firstKnown(vitalsSource.health, safeProfile.health)),
+    energy: metricNumber(firstKnown(vitalsSource.energy, safeProfile.energy)),
+    food: metricNumber(firstKnown(vitalsSource.food, safeProfile.food)),
+    water: metricNumber(firstKnown(vitalsSource.water, safeProfile.water))
+  });
+  const dnaSummary = normalizeDnaSummary(safeProfile, body);
   const heartbeat = isRecord(safeProfile.heartbeat) ? safeProfile.heartbeat : {};
   const resolvedProfileId = firstKnown(profileIdentifier(safeProfile), UNKNOWN_VALUE);
+  const gaSource = isRecord(safeProfile.ga) ? safeProfile.ga : {};
+  const gaCountValue = firstKnown(safeProfile.ga_count, safeProfile.gaCount, gaSource.count);
+  const gaCount = Number.isInteger(gaCountValue) ? gaCountValue : UNKNOWN_VALUE;
 
   return Object.freeze({
     profileId: String(resolvedProfileId),
     lifeId: String(firstKnown(safeProfile.life_id, safeProfile.lifeId, resolvedProfileId)),
-    individualId: String(firstKnown(safeProfile.individual_id, safeProfile.individualId, UNKNOWN_VALUE)),
+    individualId: String(firstKnown(safeProfile.individual_id, safeProfile.individualId, layers.individualLifeOs.id)),
     displayName: String(firstKnown(safeProfile.display_name, safeProfile.name, safeProfile.label, UNKNOWN_VALUE)),
-    speciesCode: String(firstKnown(safeProfile.species_code, safeProfile.life_type, species.species_code, UNKNOWN_VALUE)),
-    speciesOsId: String(firstKnown(
-      safeProfile.species_os_id,
-      isRecord(speciesOsValue) ? undefined : speciesOsValue,
-      species.species_os_id,
-      UNKNOWN_VALUE
-    )),
-    speciesOsVersion: String(firstKnown(safeProfile.species_os_version, species.species_os_version, UNKNOWN_VALUE)),
-    runtimeState: String(firstKnown(runtimeStateValue, UNKNOWN_VALUE)),
-    activityState: String(firstKnown(state.activity, safeProfile.activity_state, UNKNOWN_VALUE)),
-    lifeStage: String(firstKnown(state.life_stage, safeProfile.life_stage, UNKNOWN_VALUE)),
-    health: metricValue(firstKnown(safeProfile.health, state.health, state.health_state, vitals.health)),
-    energy: metricValue(firstKnown(safeProfile.energy, state.energy, safeProfile.energy_state, vitals.energy)),
-    rest: metricValue(firstKnown(safeProfile.rest, state.rest, state.activity, vitals.rest)),
-    integrity: metricValue(firstKnown(safeProfile.integrity, safeProfile.integrity_state, state.integrity, vitals.integrity)),
+    lifeType: String(firstKnown(safeProfile.life_type, safeProfile.lifeType, UNKNOWN_VALUE)),
+    speciesCode: String(firstKnown(species.species_code, safeProfile.species_code, safeProfile.life_type, UNKNOWN_VALUE)),
+    bodyId: layers.body.id,
+    bodyProfile: String(firstKnown(body.profile, body.body_type, UNKNOWN_VALUE)),
+    speciesOsId: layers.speciesOs.id,
+    speciesOsVersion: layers.speciesOs.version,
+    individualLifeOsId: layers.individualLifeOs.id,
+    mindRuntimeId: layers.mindRuntime.id,
+    mindProfile: String(firstKnown(mind.profile, UNKNOWN_VALUE)),
+    citizenRuntimeId: layers.citizenRuntime.id,
+    citizenProfile: String(firstKnown(citizen.profile, UNKNOWN_VALUE)),
+    lifeState: String(firstKnown(individual.life_state, individual.existence_state, UNKNOWN_VALUE)),
+    runtimeState: String(firstKnown(individual.life_state, individual.existence_state, UNKNOWN_VALUE)),
+    activityState: String(firstKnown(individual.activity_state, UNKNOWN_VALUE)),
+    healthState: String(firstKnown(individual.health_state, UNKNOWN_VALUE)),
+    lifeStage: String(firstKnown(individual.life_stage, UNKNOWN_VALUE)),
+    stateVersion: String(firstKnown(individual.state_version, UNKNOWN_VALUE)),
+    health: metricValue(vitals.health),
+    energy: metricValue(vitals.energy),
+    food: metricValue(vitals.food),
+    water: metricValue(vitals.water),
+    rest: metricValue(firstKnown(vitalsSource.rest, safeProfile.rest)),
+    integrity: metricValue(firstKnown(vitalsSource.integrity, safeProfile.integrity)),
+    occupation: String(firstKnown(citizen.occupation, UNKNOWN_VALUE)),
+    gaCount,
+    gaProfile: String(firstKnown(safeProfile.ga_profile, safeProfile.gaProfile, gaSource.profile, UNKNOWN_VALUE)),
+    dnaSummary,
+    dnaSummaryText: dnaSummaryText(dnaSummary),
     heartbeatStatus: String(firstKnown(heartbeat.status, heartbeat.state, safeProfile.heartbeat_status, UNKNOWN_VALUE)),
     heartbeatAt: String(firstKnown(heartbeat.last_at, heartbeat.recorded_at, safeProfile.last_heartbeat_at, safeProfile.heartbeat_at, UNKNOWN_VALUE)),
     heartbeatSequence: String(firstKnown(heartbeat.sequence, safeProfile.heartbeat_sequence, UNKNOWN_VALUE)),
-    organSystems: Object.freeze(normalizeOrganSystems(safeProfile).map(Object.freeze))
+    vitals,
+    layers,
+    lifeStack,
+    organSystems: Object.freeze(normalizeOrganSystems(safeProfile, body))
   });
 }
 
@@ -331,22 +456,142 @@ function createElement(documentRef, tagName, className, text) {
 function appendRows(documentRef, parent, rows) {
   const list = createElement(documentRef, "dl", "life-os-viewer__data");
   rows.forEach(([label, value]) => {
+    const displayValue = isKnown(value) ? value : UNKNOWN_VALUE;
+    const valueState = displayValue === UNKNOWN_VALUE
+      ? " life-os-viewer__value--unknown"
+      : displayValue === "NOT_APPLICABLE"
+        ? " life-os-viewer__value--not-applicable"
+        : "";
     const term = createElement(documentRef, "dt", "life-os-viewer__label", label);
     const detail = createElement(
       documentRef,
       "dd",
-      value === UNKNOWN_VALUE
-        ? "life-os-viewer__value life-os-viewer__value--unknown"
-        : "life-os-viewer__value",
-      value
+      `life-os-viewer__value${valueState}`,
+      displayValue
     );
     list.append(term, detail);
   });
   parent.appendChild(list);
 }
 
+function layerRows(projection, layer) {
+  const rows = [
+    ["ID", layer.id],
+    ["Status", layer.status],
+    ["Version", layer.version]
+  ];
+
+  if (layer.key === "body") {
+    rows.push(
+      ["Body profile", projection.bodyProfile],
+      ["DNA summary", projection.dnaSummaryText],
+      ["Body systems", projection.organSystems.map(({ name }) => name).join(", ") || UNKNOWN_VALUE]
+    );
+  } else if (layer.key === "speciesOs") {
+    rows.push(["Species", projection.speciesCode]);
+  } else if (layer.key === "individualLifeOs") {
+    rows.push(
+      ["Life State", projection.lifeState],
+      ["Activity", projection.activityState],
+      ["Health State", projection.healthState],
+      ["Life stage", projection.lifeStage],
+      ["State version", projection.stateVersion],
+      ["Heartbeat", projection.heartbeatStatus]
+    );
+  } else if (layer.key === "mindRuntime") {
+    rows.push(["Mind profile", projection.mindProfile]);
+  } else if (layer.key === "citizenRuntime") {
+    rows.push(
+      ["Citizen profile", projection.citizenProfile],
+      ["Occupation", projection.occupation]
+    );
+  }
+
+  if (layer.status === "NOT_APPLICABLE") rows.push(["Reason", layer.reason]);
+  return rows;
+}
+
+function renderLifeStack(documentRef, projection) {
+  const section = createElement(documentRef, "section", "life-os-viewer__stack-section inspector-section");
+  section.appendChild(createElement(documentRef, "h5", "life-os-viewer__section-title", "Five-layer stack"));
+  const stack = createElement(documentRef, "ol", "life-os-viewer__stack");
+  stack.setAttribute("data-layer-count", String(projection.lifeStack.length));
+
+  projection.lifeStack.forEach((layer, index) => {
+    const item = createElement(documentRef, "li", "life-os-viewer__layer");
+    item.setAttribute("data-life-layer", layer.sourceKey);
+    item.appendChild(createElement(
+      documentRef,
+      "h6",
+      "life-os-viewer__layer-title",
+      `${index + 1}. ${layer.label}`
+    ));
+    appendRows(documentRef, item, layerRows(projection, layer));
+    stack.appendChild(item);
+  });
+
+  section.appendChild(stack);
+  return section;
+}
+
+function renderVitalRow(documentRef, label, value) {
+  const row = createElement(documentRef, "div", "vital-row life-os-viewer__vital");
+  row.appendChild(createElement(documentRef, "span", "life-os-viewer__vital-label", label));
+  const track = createElement(documentRef, "div", "vital-track");
+  track.setAttribute("role", "meter");
+  track.setAttribute("aria-label", label);
+  track.setAttribute("aria-valuemin", "0");
+  track.setAttribute("aria-valuemax", "100");
+  const numericValue = typeof value === "number" ? value : null;
+  if (numericValue === null) {
+    track.setAttribute("aria-valuetext", UNKNOWN_VALUE);
+  } else {
+    track.setAttribute("aria-valuenow", String(numericValue));
+  }
+  const fill = createElement(documentRef, "div", "vital-fill");
+  fill.style.width = `${numericValue ?? 0}%`;
+  track.appendChild(fill);
+  row.appendChild(track);
+  row.appendChild(createElement(
+    documentRef,
+    "output",
+    numericValue === null
+      ? "life-os-viewer__vital-value life-os-viewer__value--unknown"
+      : "life-os-viewer__vital-value",
+    numericValue ?? UNKNOWN_VALUE
+  ));
+  return row;
+}
+
+function renderVitals(documentRef, projection) {
+  const section = createElement(documentRef, "section", "life-os-viewer__vitals inspector-section");
+  section.appendChild(createElement(documentRef, "h5", "life-os-viewer__section-title", "Vitals"));
+  for (const [key, label] of [
+    ["health", "Health"],
+    ["energy", "Energy"],
+    ["food", "Food"],
+    ["water", "Water"]
+  ]) {
+    section.appendChild(renderVitalRow(documentRef, label, projection.vitals[key]));
+  }
+  return section;
+}
+
+function renderPublicCapabilities(documentRef, projection) {
+  const section = createElement(documentRef, "section", "life-os-viewer__capabilities inspector-section");
+  section.appendChild(createElement(documentRef, "h5", "life-os-viewer__section-title", "Public capability profile"));
+  appendRows(documentRef, section, [
+    ["DNA class", projection.dnaSummary.classification],
+    ["DNA traits", projection.dnaSummary.traits.join(", ") || UNKNOWN_VALUE],
+    ["GA count", projection.gaCount],
+    ["GA profile", projection.gaProfile]
+  ]);
+  return section;
+}
+
 function renderProjectedProfile(documentRef, projection) {
   const article = createElement(documentRef, "article", "life-os-viewer__profile");
+  article.setAttribute("data-life-profile", projection.profileId);
   const heading = createElement(
     documentRef,
     "h4",
@@ -357,42 +602,11 @@ function renderProjectedProfile(documentRef, projection) {
 
   appendRows(documentRef, article, [
     ["Life ID", projection.lifeId],
-    ["Individual", projection.individualId],
-    ["Species", projection.speciesCode],
-    ["Species OS", projection.speciesOsId],
-    ["Species OS version", projection.speciesOsVersion],
-    ["Runtime state", projection.runtimeState],
-    ["Activity", projection.activityState],
-    ["Life stage", projection.lifeStage],
-    ["Health", projection.health],
-    ["Energy", projection.energy],
-    ["Rest", projection.rest],
-    ["Integrity", projection.integrity],
-    ["Heartbeat", projection.heartbeatStatus],
-    ["Heartbeat at", projection.heartbeatAt],
-    ["Heartbeat sequence", projection.heartbeatSequence]
+    ["Life type", projection.lifeType]
   ]);
-
-  const organSection = createElement(documentRef, "section", "life-os-viewer__organs");
-  organSection.appendChild(createElement(documentRef, "h5", null, "Organ systems"));
-  if (projection.organSystems.length === 0) {
-    organSection.appendChild(
-      createElement(documentRef, "p", "life-os-viewer__unknown", UNKNOWN_VALUE)
-    );
-  } else {
-    const list = createElement(documentRef, "ul", "life-os-viewer__organ-list");
-    projection.organSystems.forEach((system) => {
-      const item = createElement(documentRef, "li", "life-os-viewer__organ");
-      appendRows(documentRef, item, [
-        ["System", system.name],
-        ["Status", system.status],
-        ["Integrity", system.integrity]
-      ]);
-      list.appendChild(item);
-    });
-    organSection.appendChild(list);
-  }
-  article.appendChild(organSection);
+  article.appendChild(renderLifeStack(documentRef, projection));
+  article.appendChild(renderVitals(documentRef, projection));
+  article.appendChild(renderPublicCapabilities(documentRef, projection));
   return article;
 }
 
@@ -418,8 +632,14 @@ export function renderLifeOsViewer(container, input = {}) {
   const projections = rawProfiles.filter(isRecord).map(projectLifeProfile);
 
   const root = createElement(documentRef, "section", "life-os-viewer");
-  root.setAttribute("aria-label", "Life OS V1 status");
-  root.appendChild(createElement(documentRef, "h3", "life-os-viewer__title", "Life OS V1"));
+  root.setAttribute("aria-label", "Life OS Alpha read-only public synthetic status");
+  root.appendChild(createElement(documentRef, "h3", "life-os-viewer__title", "Life OS Alpha"));
+  root.appendChild(createElement(
+    documentRef,
+    "p",
+    "life-os-viewer__privacy",
+    "Read-only PUBLIC_SYNTHETIC projection. No private DNA, health, identity, GPS, or write authority."
+  ));
 
   if (projections.length === 0) {
     root.appendChild(

@@ -2,10 +2,10 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-001",
-    "schema_version": "1.1.0",
-    "snapshot_id": "WV-SYNTHETIC-20260716-001",
-    "source_revision": "HUMAN-PHASE-SHIFT-001",
+    "fixture_id": "KAIOS-WV-SPRINT-002",
+    "schema_version": "2.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260716-002",
+    "source_revision": "HUMAN-SPRINT-002-001",
     "generated_at": "2026-07-16T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
@@ -444,48 +444,194 @@
       "id": "life-wukong-001",
       "label": "Wukong 001",
       "life_type": "AI_WORKER",
-      "species_os": "PLAYER_OWNED_AI_OS",
-      "individual_life_os": "WUKONG_LIFE_OS_V1",
-      "runtime_state": "READY",
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
       "parcel_id": "parcel-001",
       "building_id": "building-home-001",
       "room_id": "room-workshop-001",
       "view": { "shape": "circle", "bounds": [535, 300, 130, 130] },
-      "heartbeat_at": "2026-07-16T00:00:00Z",
-      "vitals": { "health": 96, "energy": 82, "rest": 74, "integrity": 100 },
-      "organ_systems": ["MEMORY_SYSTEM", "SENSOR_SYSTEM", "MOVEMENT_SYSTEM", "REPAIR_SYSTEM"],
+      "body": {
+        "id": "body-wukong-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_COMPUTE_BODY",
+        "dna_summary": {
+          "summary_id": "dna-summary-wukong-001",
+          "classification": "DIGITAL_COMPUTE_BLUEPRINT",
+          "trait_count": 4,
+          "traits": ["ADAPTIVE_INTERFACE", "SENSOR_FUSION", "SELF_REPAIR", "MOBILITY"],
+          "disclosure": "PUBLIC_SAFE_SUMMARY"
+        },
+        "organ_systems": ["COMPUTE_SYSTEM", "SENSOR_SYSTEM", "MOVEMENT_SYSTEM", "REPAIR_SYSTEM"]
+      },
+      "species_os": {
+        "id": "species-os-player-owned-ai",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "species_code": "PLAYER_OWNED_AI"
+      },
+      "individual_life_os": {
+        "id": "individual-life-os-wukong-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "state_version": 42,
+        "life_state": "ALIVE",
+        "activity_state": "AWAKE",
+        "health_state": "HEALTHY",
+        "life_stage": "MATURE"
+      },
+      "mind_runtime": {
+        "id": "mind-runtime-wukong-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "AI_REASONING_PUBLIC_V1"
+      },
+      "citizen_runtime": {
+        "id": "citizen-runtime-wukong-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "AI_CITIZEN_PUBLIC_V1",
+        "occupation": "World Cartographer"
+      },
+      "vitals": { "health": 96, "energy": 82, "food": 74, "water": 88 },
+      "ga_count": 72,
+      "ga_profile": "GA_COUNT_72",
+      "heartbeat": {
+        "status": "CURRENT_SYNTHETIC",
+        "last_at": "2026-07-16T00:00:00Z",
+        "sequence": 42
+      },
       "source": "SYNTHETIC_LIFE_FIXTURE"
     },
     {
       "id": "life-npc-guide-001",
       "label": "Market Guide",
       "life_type": "NPC",
-      "species_os": "NPC_OS",
-      "individual_life_os": "NPC_LIFE_OS_V1",
-      "runtime_state": "ACTIVE",
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
       "parcel_id": "parcel-007",
       "building_id": "building-market-001",
       "room_id": "room-market-001",
       "view": { "shape": "circle", "bounds": [535, 300, 130, 130] },
-      "heartbeat_at": "2026-07-16T00:00:00Z",
-      "vitals": { "health": 88, "energy": 68, "rest": 81, "integrity": 97 },
-      "organ_systems": ["SENSOR_SYSTEM", "COMMUNICATION_SYSTEM", "MOVEMENT_SYSTEM"],
+      "body": {
+        "id": "body-npc-guide-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_NPC_BODY",
+        "dna_summary": {
+          "summary_id": "dna-summary-npc-guide-001",
+          "classification": "SIMULATED_HUMANOID_BLUEPRINT",
+          "trait_count": 3,
+          "traits": ["WAYFINDING", "PUBLIC_COMMUNICATION", "MOBILITY"],
+          "disclosure": "PUBLIC_SAFE_SUMMARY"
+        },
+        "organ_systems": ["SENSOR_SYSTEM", "COMMUNICATION_SYSTEM", "MOVEMENT_SYSTEM"]
+      },
+      "species_os": {
+        "id": "species-os-npc-guide",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "species_code": "NPC_GUIDE"
+      },
+      "individual_life_os": {
+        "id": "individual-life-os-npc-guide-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "state_version": 18,
+        "life_state": "ALIVE",
+        "activity_state": "AWAKE",
+        "health_state": "HEALTHY",
+        "life_stage": "MATURE"
+      },
+      "mind_runtime": {
+        "id": "mind-runtime-npc-guide-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "NPC_GUIDE_MIND_PUBLIC_V1"
+      },
+      "citizen_runtime": {
+        "id": "citizen-runtime-npc-guide-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "NPC_SERVICE_CITIZEN_PUBLIC_V1",
+        "occupation": "Market Guide"
+      },
+      "vitals": { "health": 88, "energy": 68, "food": 79, "water": 83 },
+      "ga_count": 12,
+      "ga_profile": "GUIDE_SERVICE_GA_12",
+      "heartbeat": {
+        "status": "CURRENT_SYNTHETIC",
+        "last_at": "2026-07-16T00:00:00Z",
+        "sequence": 18
+      },
       "source": "SYNTHETIC_LIFE_FIXTURE"
     },
     {
       "id": "life-forest-001",
       "label": "Reserve Tree Cluster",
       "life_type": "PLANT",
-      "species_os": "PLANT_OS",
-      "individual_life_os": "PLANT_LIFE_OS_V1",
-      "runtime_state": "GROWING",
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
       "parcel_id": "parcel-003",
       "building_id": null,
       "room_id": null,
       "view": { "shape": "circle", "bounds": [535, 300, 130, 130] },
-      "heartbeat_at": "2026-07-16T00:00:00Z",
-      "vitals": { "health": 91, "energy": 76, "rest": "NOT_APPLICABLE", "integrity": 95 },
-      "organ_systems": ["ROOT_SYSTEM", "WATER_BALANCE", "GROWTH_SYSTEM", "REPAIR_SYSTEM"],
+      "body": {
+        "id": "body-forest-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_PLANT_CLUSTER_BODY",
+        "dna_summary": {
+          "summary_id": "dna-summary-forest-001",
+          "classification": "SIMULATED_PLANT_BLUEPRINT",
+          "trait_count": 4,
+          "traits": ["ROOT_NETWORK", "WATER_BALANCE", "GROWTH", "SELF_REPAIR"],
+          "disclosure": "PUBLIC_SAFE_SUMMARY"
+        },
+        "organ_systems": ["ROOT_SYSTEM", "WATER_BALANCE", "GROWTH_SYSTEM", "REPAIR_SYSTEM"]
+      },
+      "species_os": {
+        "id": "species-os-reserve-plant",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "species_code": "RESERVE_PLANT_CLUSTER"
+      },
+      "individual_life_os": {
+        "id": "individual-life-os-forest-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "state_version": 27,
+        "life_state": "ALIVE",
+        "activity_state": "RESTING",
+        "health_state": "HEALTHY",
+        "life_stage": "MATURE"
+      },
+      "mind_runtime": {
+        "id": "mind-runtime-na-forest-001",
+        "status": "NOT_APPLICABLE",
+        "version": "1.0.0",
+        "profile": "NOT_APPLICABLE",
+        "reason": "Plant profile has no Mind Runtime"
+      },
+      "citizen_runtime": {
+        "id": "citizen-runtime-na-forest-001",
+        "status": "NOT_APPLICABLE",
+        "version": "1.0.0",
+        "profile": "NOT_APPLICABLE",
+        "occupation": "NOT_APPLICABLE",
+        "reason": "Plant profile has no Citizen Runtime"
+      },
+      "vitals": { "health": 91, "energy": 76, "food": 86, "water": 92 },
+      "ga_count": 4,
+      "ga_profile": "PLANT_ADAPTATION_GA_4",
+      "heartbeat": {
+        "status": "CURRENT_SYNTHETIC",
+        "last_at": "2026-07-16T00:00:00Z",
+        "sequence": 27
+      },
       "source": "SYNTHETIC_LIFE_FIXTURE"
     }
   ],
@@ -496,7 +642,7 @@
     { "id": "FACTORY", "label": "Factory" },
     { "id": "MARKETPLACE", "label": "Marketplace" },
     { "id": "TEMPLE", "label": "Temple" },
-    { "id": "MINE", "label": "Mine" },
-    { "id": "ROAD", "label": "Road" }
+    { "id": "RESEARCH", "label": "Research" },
+    { "id": "PUBLIC_FACILITY", "label": "Public Facility" }
   ]
 }

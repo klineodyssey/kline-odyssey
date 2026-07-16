@@ -219,6 +219,19 @@ function formatCollection(value) {
   return formatScalar(value);
 }
 
+function formatLinkedCollection(value, candidates = [], { includeCount = false } = {}) {
+  if (!isKnown(value)) return UNKNOWN_VALUE;
+  if (!Array.isArray(value)) return formatCollection(value);
+  if (value.length === 0) return "0";
+  const labels = value.map((entry) => {
+    if (isRecord(entry)) return formatScalar(firstKnown(entry.label, entry.display_name, entry.name, entry.id));
+    const id = normalizeId(entry);
+    const match = candidates.find((candidate) => normalizeId(candidate?.id) === id);
+    return formatScalar(firstKnown(match?.label, match?.display_name, match?.name, match?.id, entry));
+  });
+  return includeCount ? `${value.length} / ${labels.join(", ")}` : labels.join(", ");
+}
+
 function surfaceK(entity, world) {
   const canonical = isRecord(entity?.canonical) ? entity.canonical : {};
   const direct = firstKnown(
@@ -271,18 +284,28 @@ function dataFreshness(entity, meta) {
 }
 
 function relatedBuildings(world, resolved) {
+  const buildings = asArray(world.buildings).filter(isRecord);
   const explicit = firstKnown(resolved.entity.buildings, resolved.entity.building_ids);
-  if (isKnown(explicit)) return formatCollection(explicit);
+  if (isKnown(explicit)) return formatLinkedCollection(explicit, buildings, { includeCount: true });
   if (resolved.type === "BUILDING") return formatCollection([resolved.entity]);
+  if (resolved.type === "ROOM") {
+    const buildingId = normalizeId(resolved.entity.building_id);
+    const building = buildings.find((candidate) => normalizeId(candidate.id) === buildingId);
+    return building ? formatCollection([building]) : UNKNOWN_VALUE;
+  }
   if (resolved.type !== "PARCEL") return UNKNOWN_VALUE;
 
-  const matches = asArray(world.buildings).filter(
+  const matches = buildings.filter(
     (building) => isRecord(building) && normalizeId(building.parcel_id) === resolved.id
   );
-  return matches.length ? formatCollection(matches) : UNKNOWN_VALUE;
+  return matches.length ? `${matches.length} / ${formatCollection(matches)}` : "0";
 }
 
 function relatedAiWorkers(world, resolved) {
+  const profiles = [
+    ...asArray(world.lifeProfiles),
+    ...asArray(world.aiWorkers)
+  ].filter(isRecord);
   const explicit = firstKnown(
     resolved.entity.ai_workers,
     resolved.entity.aiWorkers,
@@ -291,7 +314,9 @@ function relatedAiWorkers(world, resolved) {
     resolved.entity.ai_worker_count
   );
   if (isKnown(explicit)) {
-    return Array.isArray(explicit) ? String(explicit.length) : formatScalar(explicit);
+    return Array.isArray(explicit)
+      ? formatLinkedCollection(explicit, profiles, { includeCount: true })
+      : formatScalar(explicit);
   }
 
   const relationField = resolved.type === "PARCEL"
@@ -303,10 +328,13 @@ function relatedAiWorkers(world, resolved) {
         : null;
   if (!relationField) return UNKNOWN_VALUE;
 
-  const matches = asArray(world.aiWorkers).filter(
-    (worker) => isRecord(worker) && normalizeId(worker[relationField]) === resolved.id
+  const matches = profiles.filter(
+    (worker) => normalizeId(worker[relationField]) === resolved.id
+      && String(firstKnown(worker.life_type, worker.species_code, "")).toUpperCase().includes("AI")
   );
-  return matches.length ? String(matches.length) : UNKNOWN_VALUE;
+  return matches.length
+    ? `${matches.length} / ${formatCollection(matches)}`
+    : "0";
 }
 
 function canonicalCoordinate(entity) {
@@ -349,10 +377,20 @@ export function createInspectorProjection({
   const draft = matchingProposal(proposal, resolved.id);
   const parcel = parentParcel(world, resolved);
   const parcelCanonical = isRecord(parcel?.canonical) ? parcel.canonical : {};
+  const entityCoordinate = canonicalCoordinate(entity);
+  const coordinate = entityCoordinate === UNKNOWN_VALUE && parcel && parcel !== entity
+    ? canonicalCoordinate(parcel)
+    : entityCoordinate;
 
   const canonicalRows = [
-    ["Owner", formatScalar(firstKnown(entity.owner_id, entity.owner))],
-    ["Governor", formatScalar(firstKnown(entity.viewer_governor, entity.governor_id, entity.governor))],
+    ["Owner", formatScalar(firstKnown(entity.owner_id, entity.owner, parcel?.owner_id, parcel?.owner))],
+    ["Governor", formatScalar(firstKnown(
+      entity.viewer_governor,
+      entity.governor_id,
+      entity.governor,
+      parcel?.governor_id,
+      parcel?.governor
+    ))],
     ["Parcel ID", formatScalar(firstKnown(
       canonical.parcel_id,
       parcelCanonical.parcel_id,
@@ -360,15 +398,20 @@ export function createInspectorProjection({
       resolved.type === "PARCEL" ? entity.id : undefined
     ))],
     ["Global UID", formatScalar(firstKnown(canonical.global_uid, entity.global_uid, parcelCanonical.global_uid))],
-    ["Coordinate", canonicalCoordinate(entity)],
+    ["Coordinate", coordinate],
     ["Surface K", surfaceK(entity, world)],
-    ["Area", formatArea(firstKnown(entity.area_m2, canonical.area_m2, canonical.ground_m2))],
-    ["Current Land Use", formatScalar(firstKnown(entity.current_land_use, entity.land_use))],
-    ["Protection Zone", formatScalar(firstKnown(entity.protection_zone, entity.zone_type))],
-    ["Tax Authority", formatScalar(firstKnown(entity.tax_authority_id, entity.tax_authority))],
-    ["Defense Authority", formatScalar(firstKnown(entity.defense_authority_id, entity.defense_authority))],
-    ["Airspace Authority", formatScalar(firstKnown(entity.airspace_authority_id, entity.airspace_authority))],
-    ["Source", formatScalar(firstKnown(entity.source, canonical.source, meta.source))]
+    ["Area", formatArea(firstKnown(entity.area_m2, canonical.area_m2, canonical.ground_m2, parcel?.area_m2))],
+    ["Current Land Use", formatScalar(firstKnown(
+      entity.current_land_use,
+      entity.land_use,
+      parcel?.current_land_use,
+      parcel?.land_use
+    ))],
+    ["Protection Zone", formatScalar(firstKnown(entity.protection_zone, entity.zone_type, parcel?.protection_zone))],
+    ["Tax Authority", formatScalar(firstKnown(entity.tax_authority_id, entity.tax_authority, parcel?.tax_authority_id))],
+    ["Defense Authority", formatScalar(firstKnown(entity.defense_authority_id, entity.defense_authority, parcel?.defense_authority_id))],
+    ["Airspace Authority", formatScalar(firstKnown(entity.airspace_authority_id, entity.airspace_authority, parcel?.airspace_authority_id))],
+    ["Source", formatScalar(firstKnown(entity.source, canonical.source, parcel?.source, meta.source))]
   ];
 
   const viewerRows = [
@@ -378,7 +421,7 @@ export function createInspectorProjection({
     ["LOD", formatScalar(firstKnown(viewerState.lod, viewerState.lod_level, entity.lod))],
     ["Visibility", formatScalar(firstKnown(viewerState.visibility, entity.visibility, entity.status))],
     ["Buildings", relatedBuildings(world, resolved)],
-    ["Population", formatScalar(firstKnown(entity.population, entity.population_count))],
+    ["Population", formatScalar(firstKnown(entity.population, entity.population_count, parcel?.population))],
     ["AI Workers", relatedAiWorkers(world, resolved)],
     ["Data Freshness", dataFreshness(entity, meta)],
     ["Source Revision", formatScalar(firstKnown(entity.source_revision, canonical.source_revision, meta.source_revision))]
@@ -408,7 +451,8 @@ export function createInspectorProjection({
     viewerData: Object.freeze(rowsToObject(viewerRows)),
     proposalData: Object.freeze(rowsToObject(proposalRows)),
     unknownData: Object.freeze(rowsToObject(unknownRows)),
-    lifeProfiles: Object.freeze(lifeProfiles.map(projectLifeProfile))
+    lifeProfiles: Object.freeze(lifeProfiles.map(projectLifeProfile)),
+    lifeProfileSources: Object.freeze([...lifeProfiles])
   });
 }
 
@@ -441,6 +485,41 @@ function renderDataGroup(documentRef, title, values, modifier) {
     list.append(term, detail);
   });
 
+  section.appendChild(list);
+  return section;
+}
+
+function renderLandLifeSummary(documentRef, projection) {
+  const lifeNames = projection.lifeProfiles.map((profile) => (
+    profile.displayName === UNKNOWN_VALUE ? profile.lifeId : profile.displayName
+  ));
+  const rows = [
+    ["Owner", projection.canonicalData.Owner],
+    ["Parcel ID", projection.canonicalData["Parcel ID"]],
+    ["K280", projection.canonicalData["Surface K"]],
+    ["Coordinate", projection.canonicalData.Coordinate],
+    ["Land Use", projection.canonicalData["Current Land Use"]],
+    ["Building", projection.viewerData.Buildings],
+    ["Life", lifeNames.length ? `${lifeNames.length} / ${lifeNames.join(", ")}` : "0"],
+    ["AI Worker", projection.viewerData["AI Workers"]]
+  ];
+  const section = createElement(documentRef, "section", "inspector-view__summary");
+  section.setAttribute("aria-label", "Land and life summary");
+  section.appendChild(createElement(documentRef, "h3", "inspector-view__group-title", "Land and Life"));
+  const list = createElement(documentRef, "dl", "inspector-view__summary-data");
+  rows.forEach(([label, value]) => {
+    list.append(
+      createElement(documentRef, "dt", "inspector-view__summary-label", label),
+      createElement(
+        documentRef,
+        "dd",
+        value === UNKNOWN_VALUE
+          ? "inspector-view__summary-value inspector-view__value--unknown"
+          : "inspector-view__summary-value",
+        value
+      )
+    );
+  });
   section.appendChild(list);
   return section;
 }
@@ -513,10 +592,11 @@ export function renderInspectorView(container, input = {}, callbacks = {}) {
   }
 
   root.append(
-    renderDataGroup(documentRef, "Canonical Data", projection.canonicalData, "canonical"),
-    renderDataGroup(documentRef, "Viewer Data", projection.viewerData, "viewer"),
-    renderDataGroup(documentRef, "Proposal Data", projection.proposalData, "proposal"),
-    renderDataGroup(documentRef, "Unknown Data", projection.unknownData, "unknown")
+    renderLandLifeSummary(documentRef, projection),
+    renderDataGroup(documentRef, "Land Record (Read Only)", projection.canonicalData, "canonical"),
+    renderDataGroup(documentRef, "Viewer Context", projection.viewerData, "viewer"),
+    renderDataGroup(documentRef, "Local Proposal (Proposal Only)", projection.proposalData, "proposal"),
+    renderDataGroup(documentRef, "Unavailable Fields", projection.unknownData, "unknown")
   );
 
   const lifeSection = createElement(documentRef, "section", "inspector-view__life");
@@ -530,7 +610,7 @@ export function renderInspectorView(container, input = {}, callbacks = {}) {
       { disabled: true }
     ));
   } else {
-    projection.lifeProfiles.forEach((profile) => {
+    projection.lifeProfiles.forEach((profile, index) => {
       const label = profile.displayName === UNKNOWN_VALUE
         ? `Life ${profile.lifeId}`
         : profile.displayName;
@@ -538,7 +618,7 @@ export function renderInspectorView(container, input = {}, callbacks = {}) {
         documentRef,
         label,
         "inspector-view__life-action",
-        () => callbacks.onOpenLife?.(profile, projection),
+        () => callbacks.onOpenLife?.(profile, projection, projection.lifeProfileSources[index]),
         { ariaLabel: `Open Life OS status for ${label}` }
       ));
     });

@@ -15,6 +15,12 @@ export function createShell(callbacks = {}) {
     loading: byId("loading-state"),
     fatal: byId("fatal-error"),
     login: byId("login-button"),
+    consentDialog: byId("mock-consent-dialog"),
+    consentInput: byId("mock-location-consent"),
+    consentAccept: byId("mock-consent-accept"),
+    starterStatus: byId("starter-parcel-status"),
+    starterState: byId("starter-parcel-state"),
+    starterDetail: byId("starter-parcel-detail"),
     inspector: byId("inspector-panel"),
     inspectorToggle: byId("inspector-toggle"),
     proposalBar: byId("proposal-bar"),
@@ -36,6 +42,21 @@ export function createShell(callbacks = {}) {
   listen("zoom-in-button", "click", () => callbacks.onZoomIn?.());
   listen("zoom-out-button", "click", () => callbacks.onZoomOut?.());
   listen("login-button", "click", () => callbacks.onLogin?.());
+  listen("mock-location-consent", "change", () => {
+    elements.consentAccept.disabled = !elements.consentInput.checked;
+  });
+  listen("mock-consent-dialog", "close", () => {
+    elements.login.setAttribute("aria-expanded", "false");
+    const decision = elements.consentDialog.returnValue;
+    const accepted = decision === "with-location" && elements.consentInput.checked;
+    if (decision === "without-location" || accepted) {
+      callbacks.onMockSession?.({ locationConsent: accepted });
+    } else {
+      callbacks.onMockConsentCancel?.();
+    }
+    elements.consentInput.checked = false;
+    elements.consentAccept.disabled = true;
+  });
   listen("inspector-close", "click", () => setInspectorOpen(false));
   listen("inspector-toggle", "click", () => setInspectorOpen(!elements.inspector.classList.contains("is-open")));
   listen("proposal-discard", "click", () => callbacks.onDiscardProposal?.());
@@ -111,18 +132,53 @@ export function createShell(callbacks = {}) {
   function setProposal(proposal) {
     elements.proposalBar.hidden = !proposal;
     elements.proposalSummary.textContent = proposal
-      ? `${proposal.requested_land_use} / ${proposal.parcel_id} / ${proposal.review_status}`
+      ? `${proposal.requested_land_use} / ${proposal.parcel_id} / ${proposal.review_status} / local only`
       : "";
   }
 
   function setLoggedIn(player) {
-    elements.login.textContent = player ? player.display_name : "Mock login";
+    elements.login.textContent = player ? "End mock session" : "Mock login";
     elements.login.classList.toggle("is-authenticated", Boolean(player));
+    elements.login.setAttribute("aria-label", player
+      ? `End mock session for ${player.display_name}`
+      : "Open mock login and voluntary location consent");
+    elements.login.setAttribute("aria-expanded", "false");
+  }
+
+  function setStarterParcel({ sessionActive = false, parcelId = null, status = null, locationConsent = false } = {}) {
+    const state = sessionActive ? (status || "UNKNOWN") : "NOT LOADED";
+    elements.starterStatus.dataset.state = state;
+    elements.starterState.textContent = parcelId && sessionActive ? `${state} / ${parcelId}` : state;
+    elements.starterDetail.textContent = sessionActive
+      ? `Synthetic fixture / mock location ${locationConsent ? "consented" : "not used"} / no GPS or KYC`
+      : "Mock login required / no GPS or KYC";
+  }
+
+  function openMockConsent() {
+    if (elements.consentDialog.open) return false;
+    elements.consentDialog.returnValue = "cancel";
+    elements.consentInput.checked = false;
+    elements.consentAccept.disabled = true;
+    elements.login.setAttribute("aria-expanded", "true");
+    if (typeof elements.consentDialog.showModal === "function") {
+      elements.consentDialog.showModal();
+    } else {
+      elements.consentDialog.setAttribute("open", "");
+    }
+    requestAnimationFrame(() => elements.consentInput.focus({ preventScroll: true }));
+    return true;
+  }
+
+  function closeMockConsent() {
+    if (!elements.consentDialog.open) return false;
+    elements.consentDialog.close("cancel");
+    return true;
   }
 
   function setReady(ready) {
     elements.loading.hidden = ready;
     elements.shell.classList.toggle("is-ready", ready);
+    elements.login.disabled = !ready;
   }
 
   elements.shell.dataset.theme = theme;
@@ -136,6 +192,9 @@ export function createShell(callbacks = {}) {
     setInspectorOpen,
     setProposal,
     setLoggedIn,
+    setStarterParcel,
+    openMockConsent,
+    closeMockConsent,
     setReady,
     announce,
     showToast,
@@ -147,6 +206,7 @@ export function createShell(callbacks = {}) {
     },
     destroy() {
       cleanup.forEach((fn) => fn());
+      if (elements.consentDialog.open) elements.consentDialog.close("cancel");
       clearTimeout(toastTimer);
     }
   };

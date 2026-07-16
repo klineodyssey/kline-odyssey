@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.1.0"
-REVISION: "2026-07-16.2"
-STATUS: "SPRINT_001_IMPLEMENTED"
+VERSION: "1.2.0"
+REVISION: "2026-07-16.3"
+STATUS: "SPRINT_002_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "SYNTHETIC_VIEWER_V1"
-WORKQUEUE: "KAIOS-WV-SPRINT-001_DONE"
+IMPLEMENTATION: "WORLD_VIEWER_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-002_REVIEW"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
 SOURCE_COMMIT: "ORIGIN_MAIN_16f15981673e8dd2678db985b7a35486f130cafd"
-TASK_ID: "KAIOS-WV-SPRINT-001"
-HUMAN_DECISION_ID: "HUMAN-WORLD-VIEWER-001; HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001; HUMAN-PHASE-SHIFT-001"
-CHANGE_REASON: "Implement the approved synthetic World Viewer Sprint 001 while preserving the frozen architecture and read-only land boundary."
+TASK_ID: "KAIOS-WV-SPRINT-002"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-002-001"
+CHANGE_REASON: "Deliver the first World Viewer Alpha with complete Life projection, explicit mock location consent, approved land proposals and repeatable Product QA."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,10 +33,10 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-WORLD-VIEWER-001` |
+| Human Decision | `HUMAN-SPRINT-002-001` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_001_SYNTHETIC_VIEWER_COMPLETE` |
-| Sprint Task Envelope | `DONE` |
+| Implementation | `SPRINT_002_WORLD_VIEWER_ALPHA_COMPLETE` |
+| Sprint Task Envelope | `REVIEW` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
 | Art / 3D / animation | `OUT_OF_SCOPE` |
@@ -123,6 +123,8 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `WORLD_VIEWER_V1_SANDBOX_IMPLEMENTATION_PLAN.md` | Bounded synthetic-demo plan |
 | `tasks/KAIOS-WV-SBX-001.task-envelope.json` | Single-task Cursor execution envelope |
 | `tasks/KAIOS-WV-SPRINT-001.task-envelope.json` | Sprint 001 execution and closeout envelope |
+| `tasks/KAIOS-WV-SPRINT-002.task-envelope.json` | Sprint 002 Alpha execution and closeout envelope |
+| `SPRINT_002_ALPHA_REPORT.md` | Alpha, architecture diff, implementation diff, QA, performance and Sprint 003 recommendation |
 | `index.html` | Unique executable World Viewer entry |
 | `app.js` | Application orchestration and read-only proposal flow |
 | `camera/`, `renderer/`, `lod/` | Bounded camera, Canvas renderer and six-level semantic navigation |
@@ -131,7 +133,9 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `ui/` | Responsive shell, context menu and visual system |
 | `data/` | Validated synthetic world fixture and loader |
 | `tests/acceptance_static.py` | Offline package, fixture and safety validation |
-| `tests/evidence/` | Reviewed desktop and mobile screenshots for Sprint 001 |
+| `tests/product_qa.py` | Browser, responsive, accessibility, interaction and performance gate |
+| `tests/evidence/sprint-002/` | Alpha screenshots plus machine-readable QA and performance reports |
+| `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
 
@@ -139,10 +143,10 @@ GitHub Pages can safely serve public snapshots and the read-only interaction she
 
 Until that gate exists, context-menu actions produce a previewable `LAND_USE_PROPOSAL` intent only.
 
-## 8. Sprint 001 Result
+## 8. Sprint 002 Alpha Result
 
-Sprint 001 implements Earth K280 through Room navigation, Canvas drag and zoom, desktop and mobile input, a responsive Inspector, local `LAND_USE_PROPOSAL` drafts, Mock Login/GPS focus, and a first Life OS Viewer. Browser verification covers desktop and mobile interactions, Canvas pixels, overlay layout and console errors.
+Sprint 002 preserves Earth K280 through Room navigation and adds an explicit mock-location consent flow, a complete Body-to-Citizen Life stack, the approved eight-option land proposal set, a richer Parcel Inspector and automated Product QA. The final local gate reports `93 PASS`, `0 FAIL` and eight initial visual-baseline skips across desktop, tablet, Android and iPhone profiles.
 
-The next product gate is Land Runtime integration through a separately authorized, non-authoritative adapter. Real ownership, KYC, GPS, backend writes and settlement remain outside this implementation.
+See `SPRINT_002_ALPHA_REPORT.md` for the Alpha demo, architecture diff, implementation diff, QA report, performance report and Sprint 003 recommendation. Real ownership, KYC, GPS, backend writes and settlement remain outside this implementation.
 
 No decision in this package authorizes real land, KYC, GPS, ownership mutation, backend write service, financial settlement or production authority.
