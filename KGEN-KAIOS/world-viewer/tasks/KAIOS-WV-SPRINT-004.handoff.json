@@ -1,0 +1,57 @@
+{
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-004-CODEX-GM-01",
+  "task_id": "KAIOS-WV-SPRINT-004",
+  "human_decision_id": "HUMAN-SPRINT-004-001",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-004-20260717-CODEX-GM-01",
+  "branch": "codex/world-viewer-sprint-004-civilization",
+  "worktree": "C:\\Desktop\\kline-odyssey-world-viewer-sprint-004",
+  "base_sha": "a388d79420941a772397869218d2a737915c1960",
+  "head_sha": "50962bf7005126589a3edc3a781aa75c21b36bd6",
+  "implementation_commit_sha": "50962bf7005126589a3edc3a781aa75c21b36bd6",
+  "files_changed": 54,
+  "tests_run": [
+    "STATIC_CIVILIZATION_ACCEPTANCE",
+    "DIGITAL_EARTH_RUNTIME_INTEGRITY",
+    "CIVILIZATION_RUNTIME_INTEGRITY",
+    "BROWSER_PRODUCT_QA",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "MEMORY_BOUND",
+    "SECRET_SCAN",
+    "PROTECTED_PATH_DIFF"
+  ],
+  "test_results": {
+    "static_acceptance": "PASS",
+    "digital_earth_integrity": "PASS",
+    "civilization_integrity": "PASS",
+    "browser_product_qa": {
+      "passed": 128,
+      "failed": 0,
+      "skipped": 0
+    },
+    "visual_profiles": 8,
+    "performance": "PASS",
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    "KGEN-KAIOS/world-viewer/SPRINT_004_CIVILIZATION_ALPHA_REPORT.md",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-004/qa-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-004/performance-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-004/civilization-integrity-report.json"
+  ],
+  "known_issues": [],
+  "risks": [
+    "All persistence and credits are local synthetic prototypes.",
+    "The client is not an authoritative land, identity or settlement registry."
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "frozen_baseline_modified": false,
+  "implementation_scope": "SYNTHETIC_CIVILIZATION_ALPHA",
+  "recommended_next_action": "PUSH_REVIEWED_BRANCH_AND_MERGE_PR",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED"
+}
