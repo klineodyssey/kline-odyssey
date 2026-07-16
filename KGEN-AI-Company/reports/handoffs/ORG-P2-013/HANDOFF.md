@@ -20,7 +20,7 @@
 | Field | Value |
 |---|---|
 | base_sha | 89f3c351c488a0705f514adba974dd6c3dd3cb3a |
-| source_tip_sha | 3e588c4a705d0fb7df83b0f7dc8f535ba8771935 |
+| source_tip_sha | 8abd7391dc38aa56168421cc994e73eb46c879f1 |
 | supersedes_archive_tips | 6313aad2 |
 
 ## Task Result
