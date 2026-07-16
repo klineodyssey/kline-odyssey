@@ -38,7 +38,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | Kernel V1 | MAIN_ARCHITECTURE_PRESENT | null | HOLD | Freeze deferred | Wait for Kernel Law Layer review |
 | V11 Baseline | FROZEN | 100 | Level C core | Implementation hold | Human decision required for core change |
 | Canonical Atomic Claim Authority | PROPOSAL | 87 | Level B planning | Local commit `6936d6f`; implementation not started | Independent security/consistency review |
-| Genesis DNA Evolution | SOURCE_AUDIT_COMPLETE | null | Level B R2 architecture | Review candidate `e6d7a96`; implementation not started | Independent architecture review before resolution or baseline |
+| Genesis DNA Evolution | SOURCE_AUDIT_COMPLETE | null | Level B R2 architecture | Published review candidate `e6d7a96`; implementation not started | Independent architecture review before resolution or baseline |
 
 ## Current Decisions
 
