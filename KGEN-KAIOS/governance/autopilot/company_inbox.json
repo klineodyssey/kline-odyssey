@@ -94,6 +94,25 @@
       "status": "IN_REVIEW",
       "decision_record": "HUMAN-COMPANY-OS-BOOT-001",
       "closed_at": null
+    },
+    {
+      "inbox_id": "INBOX-HUMAN-GENESIS-DNA-20260716-001",
+      "source_message_id": "HUMAN-GENESIS-DNA-EVOLUTION-001",
+      "human_decision_id": "HUMAN-GENESIS-DNA-EVOLUTION-001",
+      "received_at": "2026-07-16T11:20:00+08:00",
+      "classification": "ARCHITECTURE_DECISION",
+      "priority_class": "HUMAN_DECISION",
+      "summary": "Create a governed 12-domain, 108-atom Genesis DNA evolution and player creator architecture while keeping private engine artifacts outside public Git.",
+      "dependencies": ["LIFE_OS_BASELINE", "SPECIES_OS_PROPOSAL", "LIFE_INTEGRITY_PROPOSAL", "CIVILIZATION_ECONOMY_BASELINE"],
+      "related_workorders": [],
+      "related_workers": ["codex-gm-01"],
+      "remote_dependency": false,
+      "active_task_conflict": false,
+      "authorization_state": "ARCHITECTURE_ONLY",
+      "routed_target": "KGEN-KAIOS/genesis-dna/",
+      "status": "IN_REVIEW",
+      "decision_record": "HUMAN-GENESIS-DNA-EVOLUTION-001",
+      "closed_at": null
     }
   ]
 }

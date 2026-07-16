@@ -1,7 +1,7 @@
 ---
 TITLE: "PrimeForge Architecture Backlog Registry"
 VERSION: "1.0.0"
-REVISION: "2026-07-16.2"
+REVISION: "2026-07-16.3"
 STATUS: "ACTIVE_MANAGED_REGISTRY"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
@@ -38,6 +38,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | Kernel V1 | MAIN_ARCHITECTURE_PRESENT | null | HOLD | Freeze deferred | Wait for Kernel Law Layer review |
 | V11 Baseline | FROZEN | 100 | Level C core | Implementation hold | Human decision required for core change |
 | Canonical Atomic Claim Authority | PROPOSAL | 87 | Level B planning | Local commit `6936d6f`; implementation not started | Independent security/consistency review |
+| Genesis DNA Evolution | SOURCE_AUDIT_COMPLETE | null | Level B R2 architecture | Proposal under review; implementation not started | Independent architecture review before resolution or baseline |
 
 ## Current Decisions
 
@@ -48,6 +49,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 - Life OS is reconciled with Species OS at Architecture level; external review remains required before implementation.
 - Cursor Control is published only as a proposal and does not replace CURRENT Worker rules.
 - Distributed automatic Cursor dispatch remains disabled until the canonical Claim authority exists.
+- Genesis DNA normalizes legacy GA levels without changing Physics CURRENT or GEN-007; private engine artifacts remain outside Git.
 
 ## Commit Isolation
 

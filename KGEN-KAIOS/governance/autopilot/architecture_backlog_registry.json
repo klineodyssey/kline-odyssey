@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "revision": "2026-07-16.2",
+    "revision": "2026-07-16.3",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
@@ -256,6 +256,25 @@
       "push_status": "DONE",
       "baseline_status": "FROZEN",
       "next_action": "HUMAN_DECISION_REQUIRED_FOR_CORE_CHANGE"
+    },
+    {
+      "proposal_id": "GENESIS-DNA-EVOLUTION-001",
+      "decision_ids": ["HUMAN-GENESIS-DNA-EVOLUTION-001"],
+      "worktree": "WORKTREE-CODEX-GENESIS-DNA",
+      "base_sha": "b3eabe50e84206f66503853cba95e508eae512cc",
+      "files": ["KGEN-KAIOS/genesis-dna/"],
+      "dependencies": ["LIFE-OS-001", "BOOT-LIFE-INTEGRITY-001", "CIVILIZATION-ECONOMY-001"],
+      "internal_review": "SOURCE_AUDIT_COMPLETE",
+      "external_review": "REQUIRED",
+      "review_score": null,
+      "amendments": ["LEGACY_GA_LEVEL_SEMANTIC_ADAPTER", "PRIVATE_ARTIFACT_SEPARATION"],
+      "risk_level": "LEVEL_B_R2_ARCHITECTURE",
+      "protected_path_status": "PASS_ZERO",
+      "implementation_status": "NOT_STARTED",
+      "commit_status": "LOCAL_PROPOSAL",
+      "push_status": "PENDING_SESSION_VALIDATION",
+      "baseline_status": "NOT_FROZEN",
+      "next_action": "INDEPENDENT_ARCHITECTURE_REVIEW"
     },
     {
       "proposal_id": "CANONICAL-CLAIM-AUTHORITY-001",

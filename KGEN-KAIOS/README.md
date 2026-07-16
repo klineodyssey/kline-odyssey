@@ -529,6 +529,22 @@ V10 defines KAIOS as the operating system for all KGEN modules: Universe, Temple
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/
 
 **Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/
+
+## Genesis DNA Evolution Architecture
+
+`genesis-dna/` contains the architecture-only proposal authorized by `HUMAN-GENESIS-DNA-EVOLUTION-001`. It separates Genesis Capability Atom count (`0..108`) from Evolution XP, Genome Generation, DNA Quality Grade and Training Level (`LV1..LV1000`).
+
+| File | Purpose |
+|---|---|
+| `genesis-dna/README.md` | Proposal entry, package index and authorization boundary |
+| `genesis-dna/SOURCE_AUDIT.md` | Existing DNA/GA source classification and semantic conflicts |
+| `genesis-dna/GENESIS_DNA_EVOLUTION_RUNTIME.md` | Cross-layer Species Genome and DNA evolution architecture |
+| `genesis-dna/GENESIS_ATOM_001_108_CATALOG.md` | Public 12-domain, 108-atom catalog |
+| `genesis-dna/genesis_atom_catalog.json` | Machine-readable atom catalog |
+| `genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md` | Public/private/Heaven Secret boundary |
+
+Status is `ARCHITECTURE_PROPOSAL_UNDER_REVIEW`; implementation, WorkQueue and deployment are not started.
+
 ## Protected Systems
 
 KAIOS V10 does not modify:

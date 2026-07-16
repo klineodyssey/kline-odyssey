@@ -1,0 +1,581 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-GENESIS-DNA-EVOLUTION-ARCH-001",
+    "title": "Genesis DNA Evolution Runtime Architecture",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "architecture_only": true,
+    "implementation_started": false,
+    "implementation_planning": "NOT_AUTHORIZED",
+    "workqueue_created": false,
+    "deployment_started": false,
+    "human_decision_id": "HUMAN-GENESIS-DNA-EVOLUTION-001",
+    "author_agent": "codex-gm-01",
+    "reviewer_agent": "HUMAN_REVIEW_REQUIRED",
+    "source_commit": "b3eabe50e84206f66503853cba95e508eae512cc",
+    "source_of_truth": false,
+    "classification": "PUBLIC_ARCHITECTURE",
+    "real_genetic_engineering": "FORBIDDEN"
+  },
+  "architecture_chain": [
+    "UNIVERSE_PHYSICS",
+    "SPECIES_GENOME",
+    "DNA_BLUEPRINT",
+    "BODY",
+    "LIFE_OS",
+    "MIND_RUNTIME",
+    "GENESIS_CAPABILITY_ATOMS",
+    "CITIZEN_RUNTIME",
+    "CIVILIZATION_RUNTIME"
+  ],
+  "identity": {
+    "is_seventh_kernel": false,
+    "is_life_os": false,
+    "is_mind_runtime": false,
+    "type": "CROSS_LAYER_ARCHITECTURE",
+    "ga_expansion": "Genesis Capability Atom"
+  },
+  "measurement_axes": {
+    "atom_count": {
+      "minimum": 0,
+      "maximum": 108,
+      "meaning": "ACTIVE_VERIFIED_CAPABILITY_SET"
+    },
+    "evolution_xp": {
+      "minimum": 0,
+      "maximum": null,
+      "meaning": "UNBOUNDED_VERIFIED_EXPERIENCE"
+    },
+    "genome_generation": {
+      "format": "G[0-9]+",
+      "meaning": "LINEAGE_DEPTH_NOT_QUALITY"
+    },
+    "dna_quality_grade": [
+      "D",
+      "C",
+      "B",
+      "A",
+      "S",
+      "SS",
+      "GENESIS"
+    ],
+    "training_level": {
+      "minimum": 1,
+      "maximum": 1000,
+      "format": "LV[1-1000]"
+    }
+  },
+  "machine_objects": {
+    "AtomDomain": {
+      "required": [
+        "domain_id",
+        "name",
+        "range_start",
+        "range_end",
+        "atom_count",
+        "purpose",
+        "version",
+        "status"
+      ]
+    },
+    "GenesisAtom": {
+      "required": [
+        "ga_id",
+        "domain_id",
+        "name",
+        "purpose",
+        "capability_type",
+        "required_species",
+        "required_body",
+        "required_life_os",
+        "required_mind_runtime",
+        "dependencies",
+        "incompatible_atoms",
+        "unlock_conditions",
+        "training_requirements",
+        "evidence_requirements",
+        "test_requirements",
+        "risk_class",
+        "energy_cost",
+        "maintenance_cost",
+        "mutation_rules",
+        "inheritance_rules",
+        "license_class",
+        "visibility_class",
+        "version",
+        "status"
+      ]
+    },
+    "SpeciesGenome": {
+      "required": [
+        "species_code",
+        "taxonomy",
+        "genome_id",
+        "genome_generation",
+        "genome_hash",
+        "body_profile",
+        "species_os_profile",
+        "inherent_capabilities",
+        "eligible_atom_domains",
+        "species_limits",
+        "environment_limits",
+        "resource_budgets",
+        "reproduction_rules",
+        "mutation_envelope",
+        "parent_lineage",
+        "compatibility_version",
+        "owner",
+        "reviewer",
+        "status"
+      ]
+    },
+    "DNABlueprint": {
+      "required": [
+        "blueprint_id",
+        "species_code",
+        "revision",
+        "genome_generation",
+        "creator",
+        "owner",
+        "parent_blueprints",
+        "mutation_set",
+        "capability_modules",
+        "genes",
+        "expected_expressions",
+        "organ_manifest",
+        "cell_manifest",
+        "program_entry",
+        "schema",
+        "runtime_adapter",
+        "atom_profile",
+        "integrity_policy",
+        "balance_policy",
+        "license",
+        "royalty_rule",
+        "classification",
+        "hashes",
+        "evidence",
+        "status"
+      ]
+    },
+    "Gene": {
+      "required": [
+        "gene_id",
+        "blueprint_id",
+        "purpose",
+        "capability_fragment",
+        "parameters_classification",
+        "version",
+        "status"
+      ]
+    },
+    "Expression": {
+      "required": [
+        "expression_id",
+        "gene_id",
+        "blueprint_revision",
+        "environment",
+        "observed_behavior",
+        "evidence",
+        "confidence",
+        "status"
+      ]
+    },
+    "CapabilityModule": {
+      "required": [
+        "module_id",
+        "purpose",
+        "inputs",
+        "outputs",
+        "permissions",
+        "resource_budget",
+        "risk_class",
+        "tests",
+        "classification",
+        "status"
+      ]
+    },
+    "LifeProfile": {
+      "required": [
+        "individual_id",
+        "species_code",
+        "blueprint_revision",
+        "body_profile",
+        "life_os_profile",
+        "mind_runtime_profile",
+        "active_atoms",
+        "state",
+        "owner",
+        "operator"
+      ]
+    },
+    "EvolutionXP": {
+      "required": [
+        "xp_record_id",
+        "individual_id",
+        "amount",
+        "source_type",
+        "evidence",
+        "anti_cheat_result",
+        "review",
+        "created_at"
+      ]
+    },
+    "TrainingLevel": {
+      "required": [
+        "training_record_id",
+        "individual_id",
+        "curriculum_id",
+        "level",
+        "evidence",
+        "review",
+        "updated_at"
+      ]
+    },
+    "GenomeGeneration": {
+      "required": [
+        "generation_id",
+        "species_code",
+        "generation",
+        "parents",
+        "birth_event",
+        "lineage_hash"
+      ]
+    },
+    "Mutation": {
+      "required": [
+        "mutation_id",
+        "parent_blueprint",
+        "purpose",
+        "changes",
+        "expected_expressions",
+        "risk_class",
+        "resource_delta",
+        "rollback",
+        "creator",
+        "status"
+      ]
+    },
+    "ParentLineage": {
+      "required": [
+        "lineage_id",
+        "child_id",
+        "parent_ids",
+        "mutation_ids",
+        "generation",
+        "evidence",
+        "hash"
+      ]
+    },
+    "CompatibilityReport": {
+      "required": [
+        "report_id",
+        "candidate_id",
+        "species",
+        "body",
+        "life_os",
+        "mind_runtime",
+        "organs",
+        "atoms",
+        "result",
+        "findings",
+        "reviewer"
+      ]
+    },
+    "SandboxBirth": {
+      "required": [
+        "birth_id",
+        "candidate_id",
+        "sandbox_id",
+        "parent_lineage",
+        "created_at",
+        "expiry",
+        "result",
+        "evidence"
+      ]
+    },
+    "IntegrityReport": {
+      "required": [
+        "report_id",
+        "candidate_id",
+        "checks",
+        "findings",
+        "severity",
+        "result",
+        "rollback",
+        "reviewer"
+      ]
+    },
+    "BalanceReport": {
+      "required": [
+        "report_id",
+        "candidate_id",
+        "species",
+        "energy",
+        "resources",
+        "environment",
+        "population",
+        "economy",
+        "result",
+        "reviewer"
+      ]
+    },
+    "CreatorLicense": {
+      "required": [
+        "license_id",
+        "blueprint_id",
+        "licensor",
+        "licensee",
+        "class",
+        "scope",
+        "duration",
+        "derivatives",
+        "fees",
+        "royalty_rule",
+        "revocation",
+        "status"
+      ]
+    },
+    "RoyaltyRule": {
+      "required": [
+        "royalty_rule_id",
+        "event_type",
+        "unit",
+        "gross_basis",
+        "formula_class",
+        "cap",
+        "beneficiaries",
+        "expiry",
+        "audit"
+      ]
+    },
+    "ActivationDecision": {
+      "required": [
+        "decision_id",
+        "candidate_id",
+        "authority",
+        "evidence",
+        "review_results",
+        "risk_class",
+        "chosen_state",
+        "reason",
+        "rollback",
+        "time"
+      ]
+    },
+    "RoleCapabilityProfile": {
+      "required": [
+        "profile_id",
+        "name",
+        "active_atom_count",
+        "atom_ids",
+        "eligibility",
+        "maintenance",
+        "role_only",
+        "version",
+        "status"
+      ]
+    },
+    "HeavenSecretArtifact": {
+      "required": [
+        "artifact_id",
+        "file_name",
+        "classification",
+        "sha256",
+        "owner",
+        "access_policy",
+        "content_inspected",
+        "git_tracked",
+        "public_artifact",
+        "audit_status"
+      ]
+    }
+  },
+  "role_anchors": {
+    "ZHU_BAJIE_36": {
+      "active_atom_count": 36,
+      "model": "CURATED_TIANGANG_CAPABILITY_PROFILE",
+      "fixed_for_all_individuals": false
+    },
+    "SUN_WUKONG_72": {
+      "active_atom_count": 72,
+      "model": "CURATED_HIGH_ADAPTATION_CAPABILITY_PROFILE",
+      "fixed_for_all_individuals": false
+    },
+    "YUDI_107": {
+      "active_atom_count": 107,
+      "model": "ALL_CANONICAL_ATOMS_EXCEPT_GA108",
+      "missing_atom": "GA108",
+      "authority_exclusions": [
+        "CONSTITUTION",
+        "HUMAN_AUTHORITY",
+        "REAL_ASSET",
+        "PROTECTED_PATH"
+      ]
+    },
+    "RULAI_108": {
+      "active_atom_count": 108,
+      "model": "ALL_CANONICAL_ATOMS_WITH_WHOLE_SYSTEM_INTEGRATION",
+      "reachable": true,
+      "rare_long_term_state": true,
+      "evidence_maintained": true,
+      "authority_exclusions": [
+        "CONSTITUTION",
+        "HUMAN_AUTHORITY",
+        "REAL_ASSET",
+        "PROTECTED_PATH"
+      ]
+    }
+  },
+  "role_model_recommendations": {
+    "ORDINARY_MORTAL": {"model": "SPECIES_GENOME_PLUS_VARIABLE_PROFILE", "fixed_atom_count": false},
+    "SHA_WUJING": {"model": "SERVICE_ENDURANCE_LOGISTICS_STEWARDSHIP_PROFILE", "fixed_atom_count": false},
+    "BULL_DEMON": {"model": "BULL_DEMON_ARCHETYPE", "fixed_atom_count": false},
+    "DRAGON_LINEAGE": {"model": "APPROVED_TAXONOMY_OR_ROLE_PROFILE", "fixed_atom_count": false},
+    "TWELVE_ZODIAC": {"model": "OPT_IN_CULTURAL_ROLE_PROFILE", "fixed_atom_count": false},
+    "TRANSFORMING_ROBOT_CONCEPT": {"model": "TRANSFORMING_MECHA_GENERIC_ARCHETYPE_OR_LICENSED_FICTION_ADAPTER", "fixed_atom_count": false},
+    "SOLAR_SUPERHUMAN_CONCEPT": {"model": "SOLAR_SUPERHUMAN_GENERIC_ARCHETYPE_OR_LICENSED_FICTION_ADAPTER", "fixed_atom_count": false},
+    "skin_grants_capability": false
+  },
+  "inherent_life_capabilities": {
+    "source_layers": [
+      "SPECIES_GENOME",
+      "LIFE_OS"
+    ],
+    "counted_as_genesis_atoms": false,
+    "examples": [
+      "RESPIRATION_OR_ENERGY_EXCHANGE",
+      "METABOLISM",
+      "GROWTH",
+      "REPAIR",
+      "REPRODUCTION",
+      "FEEDING_OR_UPTAKE",
+      "DANGER_AVOIDANCE"
+    ]
+  },
+  "unlock_flow": [
+    "TRAINING_LEVEL_THRESHOLD",
+    "EVIDENCE",
+    "ANTI_CHEAT",
+    "SANDBOX_EVOLUTION",
+    "COMPATIBILITY_TEST",
+    "INTEGRITY_TEST",
+    "BALANCE_TEST",
+    "QUALITY_REVIEW",
+    "ACTIVATION_DECISION"
+  ],
+  "creator_flow": [
+    "CREATE",
+    "DECLARE_PURPOSE",
+    "SELECT_PARENT_GENOME",
+    "MUTATION_DESIGN",
+    "SANDBOX_BIRTH",
+    "INTEGRITY_CHECK",
+    "BALANCE_TEST",
+    "ENVIRONMENT_TEST",
+    "ETHICS_SAFETY_REVIEW",
+    "CODEX_QUALITY_GATE",
+    "HUMAN_GOVERNANCE_APPROVAL_WHEN_HIGH_RISK",
+    "REGISTRATION",
+    "LICENSE",
+    "ACTIVATION"
+  ],
+  "permitted_creation_types": [
+    "DNA_BLUEPRINT",
+    "SPECIES_VARIANT",
+    "ORGAN_VARIANT",
+    "BEHAVIOR_PACKAGE",
+    "FARM_YIELD_PACKAGE",
+    "AI_STRATEGY_PACKAGE",
+    "BUILDING_ORGANISM_PACKAGE"
+  ],
+  "information_classification": {
+    "PUBLIC": [
+      "GENESIS_ATOM_NAMES",
+      "SAFE_PUBLIC_EFFECTS",
+      "PUBLIC_ARCHITECTURE"
+    ],
+    "INTERNAL": [
+      "UNLOCK_THRESHOLDS",
+      "DETAILED_TESTS",
+      "ANTI_CHEAT_RULES"
+    ],
+    "CONFIDENTIAL": [
+      "COMPLETE_DNA_BLUEPRINT",
+      "PRIVATE_TRAINING_DATA"
+    ],
+    "HEAVEN_SECRET": [
+      "YUDI_ENGINE_FORMULAS",
+      "WEIGHTS",
+      "PROPRIETARY_BACKTESTS",
+      "PRIVATE_ENGINE_ARCHIVES"
+    ],
+    "DIVINE_VAULT": [
+      "PRIVATE_KEYS",
+      "WALLET_SEEDS",
+      "API_KEYS",
+      "KYC",
+      "EXACT_PRIVATE_GPS"
+    ]
+  },
+  "legacy_semantic_adapter": {
+    "source": "PHYSICS_CURRENT_PART_81_AND_GEN_007",
+    "legacy_ga_level_range": "0_1000",
+    "normalized_as": [
+      "TRAINING_LEVEL",
+      "EVOLUTION_XP"
+    ],
+    "automatic_current_rewrite": false,
+    "protected_runtime_amendment_required": true,
+    "human_approval_required": true
+  },
+  "integrity_patterns": [
+    "UNAUTHORIZED_MUTATION",
+    "UNCONTROLLED_CELL_GROWTH_PATTERN",
+    "RESOURCE_OVERCONSUMPTION",
+    "ORGAN_INCOMPATIBILITY",
+    "SPECIES_MISMATCH",
+    "CIRCULAR_DEPENDENCY",
+    "CORRUPT_EXPRESSION",
+    "UNBOUNDED_REPRODUCTION",
+    "ECONOMIC_EXPLOIT",
+    "HIDDEN_PRIVILEGE",
+    "MALICIOUS_CAPABILITY",
+    "VERSION_MISMATCH",
+    "SECRET_INHERITANCE",
+    "CROSS_TENANT_CONTAMINATION"
+  ],
+  "integrations": {
+    "K11520": {
+      "mode": "RIGHTS_AND_LICENSE_LISTING_ELIGIBILITY_ONLY",
+      "automatic_listing": false,
+      "automatic_security_classification": false,
+      "required": [
+        "OWNER_AUTHORITY",
+        "LINEAGE",
+        "INTEGRITY",
+        "QUALITY",
+        "RISK_DISCLOSURE",
+        "LICENSE_SCOPE"
+      ]
+    },
+    "K8888": {
+      "mode": "PROTOTYPE_LEDGER_INTENT_ONLY",
+      "real_bank": false,
+      "real_transfer": false,
+      "human_approval_for_irreversible_transfer": true
+    }
+  },
+  "boundaries": {
+    "can_modify_runtime_current": false,
+    "can_modify_universe_map_current": false,
+    "can_modify_token_contract": false,
+    "can_create_implementation_workqueue": false,
+    "can_deploy": false,
+    "can_publish_private_artifacts": false,
+    "real_biology": "FORBIDDEN",
+    "human_final_authority": true
+  },
+  "next_gate": "INDEPENDENT_ARCHITECTURE_REVIEW"
+}

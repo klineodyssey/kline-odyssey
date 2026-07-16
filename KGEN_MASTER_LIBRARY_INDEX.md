@@ -454,6 +454,19 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Phase 2 WorkQueue | `KGEN-Organization/WorkOrders/WORK_QUEUE.md` | 25 department-scoped OPEN WorkOrders |
 | Reports | `KGEN-Organization/Reports/README.md` | Organization report storage and naming rules |
 
+## Genesis DNA Evolution Proposal
+
+| Item | Path | Purpose | Status |
+|---|---|---|---|
+| Proposal index | `KGEN-KAIOS/genesis-dna/README.md` | Cross-layer genome, DNA, capability and creator architecture entry | UNDER_REVIEW |
+| Source audit | `KGEN-KAIOS/genesis-dna/SOURCE_AUDIT.md` | Classifies CURRENT, frozen, candidate, historical and conflicting sources | COMPLETE |
+| Runtime architecture | `KGEN-KAIOS/genesis-dna/GENESIS_DNA_EVOLUTION_RUNTIME.md` | Separates Species Genome, DNA Blueprint, Life OS, Mind and GA | UNDER_REVIEW |
+| Atom catalog | `KGEN-KAIOS/genesis-dna/GENESIS_ATOM_001_108_CATALOG.md` | Twelve domains and 108 Genesis Capability Atoms | DESIGN_FOR_REVIEW |
+| Machine catalog | `KGEN-KAIOS/genesis-dna/genesis_atom_catalog.json` | Parseable GA001-GA108 records with required fields | PROPOSAL |
+| Privacy policy | `KGEN-KAIOS/genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md` | Keeps private engine formulas and artifacts out of public Git/Pages | ACTIVE_FOR_PROPOSAL |
+
+The package is architecture only and does not modify Runtime CURRENT, Universe Map CURRENT, Token Contract or any frozen baseline.
+
 ## Runtime Documents
 
 | Document ID | Title | Level | Status | Path | UUID |
