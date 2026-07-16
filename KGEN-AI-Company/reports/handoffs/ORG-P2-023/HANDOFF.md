@@ -20,7 +20,7 @@
 | Field | Value |
 |---|---|
 | base_sha | 89f3c351c488a0705f514adba974dd6c3dd3cb3a |
-| head_sha | d3257cd710ce972f291d343ca545e75cc2bab1f8 |
+| head_sha | f24f625d1e9ab0ba3df25a6124afb23d717e9e45 |
 
 ## Task Result
 

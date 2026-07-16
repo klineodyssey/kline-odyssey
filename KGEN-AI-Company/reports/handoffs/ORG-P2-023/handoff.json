@@ -11,7 +11,7 @@
   "evidence_branch": "cursor-handoff/ORG-P2-023-20260716",
   "worktree": "cursor-task-ORG-P2-023",
   "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
-  "head_sha": "d3257cd710ce972f291d343ca545e75cc2bab1f8",
+  "head_sha": "f24f625d1e9ab0ba3df25a6124afb23d717e9e45",
   "claimed_at": "2026-07-16T06:24:00Z",
   "handoff_submitted_at": "2026-07-16T06:28:00Z",
   "files_changed": [
