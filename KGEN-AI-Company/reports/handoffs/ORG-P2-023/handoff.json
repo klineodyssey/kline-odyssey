@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-023",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0012",
+  "session_id": "SESSION-20260716-13-EPHEMERAL",
+  "spawned_by": "本尊",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-023-20260716T0624-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-023-20260716",
+  "evidence_branch": "cursor-handoff/ORG-P2-023-20260716",
+  "worktree": "cursor-task-ORG-P2-023",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "head_sha": "d3257cd710ce972f291d343ca545e75cc2bab1f8",
+  "claimed_at": "2026-07-16T06:24:00Z",
+  "handoff_submitted_at": "2026-07-16T06:28:00Z",
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/handoff.json",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/url_check_results.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/handoff.json",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-023/url_check_results.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "PUBLISHING_DOCS_READ",
+    "OFFICIALLINKS_MANIFEST_CROSSCHECK",
+    "DEPLOY_PAGES_ROUTE_GATE_ALIGNMENT",
+    "README_LIBRARY_URL_SWEEP",
+    "KAIOS_README_URL_SWEEP",
+    "CURL_HTTP_STATUS_67_PATHS",
+    "PROTECTED_PATH_DIFF",
+    "REPORT_SECTION_COMPLETENESS"
+  ],
+  "test_results": {
+    "urls_checked": 67,
+    "http_200": 65,
+    "http_404": 2,
+    "other_non_2xx": 0,
+    "protected_path_violations": 0
+  },
+  "task_result": "PASS_WITH_WARNINGS",
+  "findings_count": 4,
+  "failures": [
+    {
+      "id": "F1",
+      "url": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html",
+      "http_code": "404",
+      "alternate_200": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.md"
+    },
+    {
+      "id": "F2",
+      "url": "https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/",
+      "http_code": "404",
+      "alternate_200": "https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/index.md"
+    }
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "report_only_publishing_url_qa",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "WORK_QUEUE_MODIFY_FORBIDDEN_FOR_CURSOR",
+    "TWO_DOCUMENTED_URLS_RETURN_404"
+  ],
+  "risks": [
+    "R1_whitepaper_html_link_404",
+    "R2_donation_index_html_missing"
+  ],
+  "recommended_next_action": "Codex review; optional PROPOSED WorkOrders for F1/F2 link or publish fixes.",
+  "review_status": "REVIEW",
+  "review": {
+    "reviewer": "codex-gm-01",
+    "decision": null,
+    "claim_status": "OPEN"
+  }
+}

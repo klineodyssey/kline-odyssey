@@ -1,0 +1,471 @@
+[
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/",
+    "time_s": "0.128562",
+    "sources": "OfficialLinks.json; README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/12345.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/12345.html",
+    "time_s": "0.075086",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-AI-Company/README.md",
+    "time_s": "0.071829",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Agent-Office/README.md",
+    "time_s": "0.063179",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/KGEN_CANON_MASTER.json",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/KGEN_CANON_MASTER.json",
+    "time_s": "0.060310",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Canon/README.md",
+    "time_s": "0.099722",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Genesis/README.md",
+    "time_s": "0.061401",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/README.md",
+    "time_s": "0.091109",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/",
+    "time_s": "0.063811",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/",
+    "time_s": "0.081058",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md",
+    "time_s": "0.129326",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/",
+    "time_s": "0.061182",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/",
+    "time_s": "0.073756",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/",
+    "time_s": "0.063948",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/",
+    "time_s": "0.059197",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/",
+    "time_s": "0.151477",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/",
+    "time_s": "0.077673",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/",
+    "time_s": "0.065982",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/",
+    "time_s": "0.073325",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/",
+    "time_s": "0.075452",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/",
+    "time_s": "0.089374",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/",
+    "time_s": "0.068076",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/",
+    "time_s": "0.088644",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/",
+    "time_s": "0.061115",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/",
+    "time_s": "0.085821",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md",
+    "time_s": "0.063065",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "time_s": "0.065568",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/",
+    "time_s": "0.060991",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/",
+    "time_s": "0.065390",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md",
+    "time_s": "0.063737",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md",
+    "time_s": "0.067213",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-OFFICIAL-LINKS.json",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-OFFICIAL-LINKS.json",
+    "time_s": "0.062462",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Organization/README.md",
+    "time_s": "0.063239",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-Runtime/README.md",
+    "time_s": "0.062229",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-SDK/README.md",
+    "time_s": "0.063001",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/",
+    "time_s": "0.063473",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html",
+    "http_code": "404",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html",
+    "time_s": "0.073604",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/KGEN_MASTER_LIBRARY_INDEX.md",
+    "time_s": "0.089509",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/index.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/index.html",
+    "time_s": "0.057871",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/temples/12345/index.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/temples/12345/index.html",
+    "time_s": "0.119062",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/temples/16888/index.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/K\u7dda\u897f\u904a\u8a18/temples/16888/index.html",
+    "time_s": "0.089723",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/OfficialLinks.json",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/OfficialLinks.json",
+    "time_s": "0.063599",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "time_s": "0.061324",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/ai-company/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/ai-company/",
+    "time_s": "0.065361",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg",
+    "time_s": "0.266999",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/boot/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/boot/",
+    "time_s": "0.061939",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/civilization/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/civilization/",
+    "time_s": "0.061342",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/community/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/community/",
+    "time_s": "0.061443",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf",
+    "time_s": "0.165559",
+    "sources": "OfficialLinks.json; README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/economy/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/economy/",
+    "time_s": "0.058598",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/evolution-governance/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/evolution-governance/",
+    "time_s": "0.062069",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/exchange/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/exchange/",
+    "time_s": "0.062751",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/index.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/index.html",
+    "time_s": "0.086496",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/library/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/library/",
+    "time_s": "0.061920",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/liquidity-lock/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/liquidity-lock/",
+    "time_s": "0.063750",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/logo.png",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/logo.png",
+    "time_s": "0.264185",
+    "sources": "OfficialLinks.json; README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/markets/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/markets/",
+    "time_s": "0.063581",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/membership/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/membership/",
+    "time_s": "0.077935",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/official/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/official/",
+    "time_s": "0.063083",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/operating-center/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/operating-center/",
+    "time_s": "0.079276",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/security/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/security/",
+    "time_s": "0.073208",
+    "sources": "OfficialLinks.json; deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/video/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/video/",
+    "time_s": "0.064071",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
+    "time_s": "0.070318",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/wallet/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/wallet/",
+    "time_s": "0.059980",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/",
+    "http_code": "404",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/",
+    "time_s": "0.075755",
+    "sources": "README.md"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/workforce/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/workforce/",
+    "time_s": "0.072443",
+    "sources": "deploy-pages-static.yml"
+  },
+  {
+    "url": "https://klineodyssey.github.io/kline-odyssey/workqueue/",
+    "http_code": "200",
+    "effective_url": "https://klineodyssey.github.io/kline-odyssey/workqueue/",
+    "time_s": "0.061758",
+    "sources": "deploy-pages-static.yml"
+  }
+]
