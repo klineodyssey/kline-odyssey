@@ -51,6 +51,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
 | KAIOS-V11-READINESS-RECOVERY-20260713 | DONE | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
 | KAIOS-WV-SPRINT-001 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-001` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md` |
+| KAIOS-WV-SPRINT-002 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-002-alpha` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-002/HANDOFF.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -125,6 +126,27 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Task Source ID: `HUMAN-PHASE-SHIFT-001`
 - Output report: `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md`
 - Acceptance: Six-level Viewer, desktop/mobile input, Inspector, local proposal, Life OS, synthetic fixture, JSON/modules/browser/visual/safety gates all PASS.
+- Protected paths: 0 changes.
+- Claim: CLOSED.
+- Lease: RELEASED.
+- Real ownership, GPS, KYC, wallet, payment and backend writes: NOT IMPLEMENTED.
+
+### KAIOS-WV-SPRINT-002 - Deliver KAIOS World Viewer Alpha
+
+- Status: DONE
+- Owner: Codex / `codex-gm-01` with three isolated Worker Clones
+- Reviewer: Codex / `codex-gm-01`
+- Priority: P0
+- Risk Level: R1 synthetic Alpha UI
+- Department: Frontend
+- Branch: `codex/world-viewer-sprint-002-alpha`
+- Base Commit: `dff1108c072629c6a40e0badc6f71be1c24f018f`
+- Product Commit: `151b14433d94e264661941ab977e3735fe8e03eb`
+- Task Source Type: HUMAN_IMPLEMENTATION_AUTHORIZATION
+- Task Source ID: `HUMAN-SPRINT-002-001`
+- Output report: `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-002/HANDOFF.md`
+- Acceptance: Alpha login/consent, Starter Parcel, eight Proposal Only actions, five-layer Life projection, responsive Product QA and performance gates all PASS.
+- Product QA: 93 PASS / 0 FAIL / 8 initial visual-baseline SKIP.
 - Protected paths: 0 changes.
 - Claim: CLOSED.
 - Lease: RELEASED.

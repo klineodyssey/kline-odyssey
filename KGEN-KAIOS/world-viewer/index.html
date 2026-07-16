@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#111512">
-  <meta name="description" content="KAIOS World Viewer V1 synthetic K280 land interface">
+  <meta name="description" content="KAIOS World Viewer Alpha synthetic K280 land interface">
   <link rel="icon" href="data:,">
-  <title>KAIOS World Viewer</title>
+  <title>KAIOS World Viewer Alpha</title>
   <link rel="stylesheet" href="./ui/styles.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <header class="topbar">
       <div class="brand-block" aria-label="KAIOS World Viewer">
         <span class="brand-mark" aria-hidden="true">K</span>
-        <span><strong>KAIOS</strong><small>World Viewer</small></span>
+        <span><strong>KAIOS</strong><small>World Viewer Alpha</small></span>
       </div>
 
       <nav class="breadcrumbs" id="breadcrumbs" aria-label="World hierarchy"></nav>
@@ -40,7 +40,15 @@
         <button class="icon-button" id="theme-button" type="button" aria-label="Toggle color theme" title="Theme">
           <span aria-hidden="true">&#9680;</span>
         </button>
-        <button class="login-button" id="login-button" type="button">Mock login</button>
+        <button
+          class="login-button"
+          id="login-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="mock-consent-dialog"
+          aria-expanded="false"
+          disabled
+        >Mock login</button>
       </div>
     </header>
 
@@ -78,6 +86,12 @@
           <span class="synthetic-badge">SYNTHETIC</span>
         </div>
 
+        <div class="starter-status" id="starter-parcel-status" role="status" aria-live="polite">
+          <span class="starter-status__label">Starter Parcel</span>
+          <strong id="starter-parcel-state">NOT LOADED</strong>
+          <span id="starter-parcel-detail">Mock login required / no GPS or KYC</span>
+        </div>
+
         <div class="entity-access-list visually-hidden" id="entity-access-list" role="listbox" aria-label="Visible map objects"></div>
         <div id="context-menu-host"></div>
       </section>
@@ -94,12 +108,57 @@
           </button>
         </header>
         <div class="inspector-content" id="inspector-content"></div>
-        <footer class="proposal-bar" id="proposal-bar" hidden>
-          <div><strong>Local proposal</strong><span id="proposal-summary"></span></div>
+        <footer class="proposal-bar" id="proposal-bar" aria-label="Proposal Only local draft" hidden>
+          <div><strong>Proposal Only</strong><span id="proposal-summary"></span></div>
           <button type="button" id="proposal-discard">Discard</button>
         </footer>
       </aside>
     </main>
+
+    <dialog
+      class="consent-dialog"
+      id="mock-consent-dialog"
+      aria-labelledby="mock-consent-title"
+      aria-describedby="mock-consent-purpose mock-consent-privacy"
+    >
+      <form method="dialog" class="consent-dialog__form">
+        <header class="consent-dialog__header">
+          <div>
+            <span class="eyebrow">VOLUNTARY MOCK LOCATION</span>
+            <h2 id="mock-consent-title">Start a synthetic player session</h2>
+          </div>
+          <button class="icon-button consent-dialog__close" type="submit" value="cancel" aria-label="Cancel mock login">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+
+        <div class="consent-dialog__body">
+          <p id="mock-consent-purpose">
+            A coarse synthetic location can focus this demo session. It is optional and used only in memory.
+          </p>
+          <dl class="consent-dialog__facts" id="mock-consent-privacy">
+            <div><dt>Device GPS</dt><dd>Not requested</dd></div>
+            <div><dt>KYC or identity check</dt><dd>Not performed</dd></div>
+            <div><dt>Land ownership</dt><dd>Not granted or changed</dd></div>
+            <div><dt>Storage</dt><dd>Session only</dd></div>
+          </dl>
+
+          <label class="consent-choice" for="mock-location-consent">
+            <input id="mock-location-consent" type="checkbox">
+            <span>
+              <strong>I voluntarily consent</strong>
+              <small>Use one coarse synthetic mock location for this session.</small>
+            </span>
+          </label>
+          <p class="consent-dialog__note">Declining location still starts the mock session and opens the Starter Parcel fixture.</p>
+        </div>
+
+        <footer class="consent-dialog__footer">
+          <button class="secondary-button" type="submit" value="without-location">Continue without location</button>
+          <button class="primary-button" id="mock-consent-accept" type="submit" value="with-location" disabled>Use mock location</button>
+        </footer>
+      </form>
+    </dialog>
 
     <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
     <div class="visually-hidden" id="a11y-live" aria-live="polite" aria-atomic="true"></div>

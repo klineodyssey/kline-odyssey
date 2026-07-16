@@ -1,0 +1,83 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-002",
+  "human_decision_id": "HUMAN-SPRINT-002-001",
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-002-20260716",
+  "branch": "codex/world-viewer-sprint-002-alpha",
+  "worktree": "C:/Desktop/kline-odyssey-world-viewer-sprint-002",
+  "base_sha": "dff1108c072629c6a40e0badc6f71be1c24f018f",
+  "head_sha": "151b14433d94e264661941ab977e3735fe8e03eb",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-002-20260716-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-002-001",
+  "worker_id": "codex-gm-01",
+  "review_owner": "codex-gm-01",
+  "worker_clones": [
+    "CLONE-WV-LIFE-04",
+    "CLONE-WV-INTERACTION-05",
+    "CLONE-WV-QA-06"
+  ],
+  "files_changed": [
+    "KGEN-KAIOS/world-viewer/",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-002/",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "KGEN-KAIOS/decision/decision_log.jsonl",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "tests_run": [
+    "STATIC_ALPHA_ACCEPTANCE",
+    "STRICT_JSON_AND_JSONL_PARSE",
+    "ES_MODULE_SYNTAX",
+    "SIX_LEVEL_NAVIGATION",
+    "DESKTOP_POINTER_INPUT",
+    "MOBILE_TOUCH_INPUT",
+    "MOCK_LOCATION_CONSENT",
+    "LAND_PROPOSAL_PERMISSION",
+    "LIFE_STACK_PROJECTION",
+    "RESPONSIVE_SCREENSHOT_MATRIX",
+    "SAFE_AREA_AND_OVERFLOW",
+    "ACCESSIBILITY_BASICS",
+    "PERFORMANCE_BUDGET",
+    "BROKEN_LINK_AND_CONSOLE_CHECK",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "test_results": {
+    "status": "PASS",
+    "passed": 93,
+    "failed": 0,
+    "skipped_initial_visual_baselines": 8,
+    "responsive_profiles": 8,
+    "console_errors": 0,
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    {
+      "path": "KGEN-KAIOS/world-viewer/tests/evidence/sprint-002/qa-report.json",
+      "sha256": "9BF193E0278DBF1092FCD2A94489BB7E100957BA39B9FFE25F5439E195180628"
+    },
+    {
+      "path": "KGEN-KAIOS/world-viewer/tests/evidence/sprint-002/performance-report.json",
+      "sha256": "05B76BE1BA340B793149E6A35E6E0BD2928287440ED16B3CE3AFF9074D01369A"
+    }
+  ],
+  "known_issues": [
+    "Initial visual-diff baseline is not yet versioned",
+    "Synthetic static data only",
+    "No authoritative Land Registry adapter",
+    "No real identity, GPS, payment or persistence"
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "frozen_baseline_modified": false,
+  "token_contract_modified": false,
+  "human_main_modified": false,
+  "implementation_scope": "WORLD_VIEWER_SPRINT_002_ALPHA_STATIC_UI",
+  "recommended_next_action": "PUSH_REVIEWED_BRANCH_CREATE_PR_MERGE_AND_VERIFY_PAGES",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "created_at": "2026-07-16T23:02:00+08:00"
+}

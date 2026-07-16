@@ -1,0 +1,2080 @@
+{
+  "base_url": "http://127.0.0.1:8082/KGEN-KAIOS/world-viewer/index.html",
+  "browser_engine": "chromium",
+  "checks": [
+    {
+      "case": "android-landscape-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "android-landscape-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "android-landscape-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "android-landscape-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "browser-errors",
+      "id": "android-landscape-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 412,
+        "document_width": 915,
+        "offenders": [],
+        "viewport_height": 412,
+        "viewport_width": 915
+      },
+      "id": "android-landscape-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "android-landscape-light",
+        "metrics": {
+          "dom_content_loaded_ms": 124.8,
+          "first_contentful_paint_ms": 132,
+          "first_usable_ms": 467.5,
+          "heap_bytes": 3157449,
+          "load_event_ms": 129.9,
+          "renderer_fps": 60.2,
+          "renderer_ms": 0.4,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "android-landscape-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 412,
+          "left": 555,
+          "right": 915,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 412,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 489.546875,
+          "right": 892,
+          "top": 26.5
+        },
+        "viewport_height": 412,
+        "viewport_width": 915
+      },
+      "id": "android-landscape-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1830,
+          824
+        ],
+        "case": "android-landscape-light",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1830,
+          824
+        ],
+        "path": "screenshots/android-landscape-light.png",
+        "pixel_variance": 1100.049,
+        "sha256": "25087e371761f449d70fc05eed7dcdd138e87175500be2c53c45f85db9e1d56e",
+        "visual_range": 248
+      },
+      "id": "android-landscape-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "android-landscape-light.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "android-landscape-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 11,
+        "violations": []
+      },
+      "id": "android-landscape-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "android-portrait-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "android-portrait-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "android-portrait-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "browser-errors",
+      "id": "android-portrait-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 915,
+        "document_width": 412,
+        "offenders": [],
+        "viewport_height": 915,
+        "viewport_width": 412
+      },
+      "id": "android-portrait-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "android-portrait-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 138.1,
+          "first_contentful_paint_ms": 180,
+          "first_usable_ms": 467.1,
+          "heap_bytes": 3171478,
+          "load_event_ms": 138.4,
+          "renderer_fps": 54.1,
+          "renderer_ms": 0.5,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "android-portrait-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1444,
+          "left": 13,
+          "right": 401,
+          "top": 824
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 179,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 255,
+          "right": 393,
+          "top": 22.5
+        },
+        "viewport_height": 915,
+        "viewport_width": 412
+      },
+      "id": "android-portrait-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          824,
+          1830
+        ],
+        "case": "android-portrait-dark",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          824,
+          1830
+        ],
+        "path": "screenshots/android-portrait-dark.png",
+        "pixel_variance": 7160.69,
+        "sha256": "6a4c190b91e3e08b9df8e74fc90b395b85594431a5c5e30cfccfb00a11014249",
+        "visual_range": 232
+      },
+      "id": "android-portrait-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "android-portrait-dark.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "android-portrait-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 9,
+        "violations": []
+      },
+      "id": "android-portrait-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "consent-login",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "consent-login",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "consent-login.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "desktop-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "desktop-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "desktop-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "browser-errors",
+      "id": "desktop-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 900,
+        "document_width": 1440,
+        "offenders": [],
+        "viewport_height": 900,
+        "viewport_width": 1440
+      },
+      "id": "desktop-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 268435456,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "desktop-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 136.1,
+          "first_contentful_paint_ms": 416,
+          "first_usable_ms": 648.2,
+          "heap_bytes": 3119514,
+          "load_event_ms": 136.4,
+          "renderer_fps": 60.6,
+          "renderer_ms": 0.5,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "desktop-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 900,
+          "left": 1080,
+          "right": 1440,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 900,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 1014.546875,
+          "right": 1417,
+          "top": 26.5
+        },
+        "viewport_height": 900,
+        "viewport_width": 1440
+      },
+      "id": "desktop-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1440,
+          900
+        ],
+        "case": "desktop-dark",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1440,
+          900
+        ],
+        "path": "screenshots/desktop-dark.png",
+        "pixel_variance": 9600.015,
+        "sha256": "2d6c07bea6b63dfc42c3f3e583d86ad092e45bd8927898de83eecb0d11dea466",
+        "visual_range": 231
+      },
+      "id": "desktop-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "desktop-dark.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "desktop-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "desktop-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "desktop-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "desktop-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "browser-errors",
+      "id": "desktop-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 800,
+        "document_width": 1280,
+        "offenders": [],
+        "viewport_height": 800,
+        "viewport_width": 1280
+      },
+      "id": "desktop-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 268435456,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "desktop-light",
+        "metrics": {
+          "dom_content_loaded_ms": 132.8,
+          "first_contentful_paint_ms": 132,
+          "first_usable_ms": 495.5,
+          "heap_bytes": 3115191,
+          "load_event_ms": 139.8,
+          "renderer_fps": 59.9,
+          "renderer_ms": 0.5,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "desktop-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 800,
+          "left": 920,
+          "right": 1280,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 800,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 854.546875,
+          "right": 1257,
+          "top": 26.5
+        },
+        "viewport_height": 800,
+        "viewport_width": 1280
+      },
+      "id": "desktop-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1280,
+          800
+        ],
+        "case": "desktop-light",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1280,
+          800
+        ],
+        "path": "screenshots/desktop-light.png",
+        "pixel_variance": 822.256,
+        "sha256": "9e2d23cbcc189490111c115f1f408cf91987bb3410f89c8ad1d6c0f119d28f1d",
+        "visual_range": 248
+      },
+      "id": "desktop-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "desktop-light.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "desktop-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "iphone-landscape-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "iphone-landscape-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "iphone-landscape-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "browser-errors",
+      "id": "iphone-landscape-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 390,
+        "document_width": 844,
+        "offenders": [],
+        "viewport_height": 390,
+        "viewport_width": 844
+      },
+      "id": "iphone-landscape-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "iphone-landscape-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 127.2,
+          "first_contentful_paint_ms": 116,
+          "first_usable_ms": 479.5,
+          "heap_bytes": 3160304,
+          "load_event_ms": 127.7,
+          "renderer_fps": 60.2,
+          "renderer_ms": 0.6,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "iphone-landscape-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 579.796875,
+          "left": 13,
+          "right": 833,
+          "top": 299
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 179,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 687,
+          "right": 825,
+          "top": 22.5
+        },
+        "viewport_height": 390,
+        "viewport_width": 844
+      },
+      "id": "iphone-landscape-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1688,
+          780
+        ],
+        "case": "iphone-landscape-dark",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1688,
+          780
+        ],
+        "path": "screenshots/iphone-landscape-dark.png",
+        "pixel_variance": 9851.85,
+        "sha256": "59ca0f0b364338c30f6b79b611957cfa5dc48dc8140441a63cbba0be33f9ff75",
+        "visual_range": 232
+      },
+      "id": "iphone-landscape-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "iphone-landscape-dark.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "iphone-landscape-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 9,
+        "violations": []
+      },
+      "id": "iphone-landscape-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "iphone-portrait-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "iphone-portrait-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "iphone-portrait-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "browser-errors",
+      "id": "iphone-portrait-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 844,
+        "document_width": 390,
+        "offenders": [],
+        "viewport_height": 844,
+        "viewport_width": 390
+      },
+      "id": "iphone-portrait-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "iphone-portrait-light",
+        "metrics": {
+          "dom_content_loaded_ms": 129.2,
+          "first_contentful_paint_ms": 184,
+          "first_usable_ms": 481.7,
+          "heap_bytes": 3169720,
+          "load_event_ms": 136.4,
+          "renderer_fps": 59.9,
+          "renderer_ms": 0.5,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "iphone-portrait-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1360.671875,
+          "left": 13,
+          "right": 379,
+          "top": 753
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 179,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 233,
+          "right": 371,
+          "top": 22.5
+        },
+        "viewport_height": 844,
+        "viewport_width": 390
+      },
+      "id": "iphone-portrait-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          780,
+          1688
+        ],
+        "case": "iphone-portrait-light",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          780,
+          1688
+        ],
+        "path": "screenshots/iphone-portrait-light.png",
+        "pixel_variance": 545.795,
+        "sha256": "6f6b3c995b96476d5670e2df7c29667804b8e516b36b0fd8e4c2e99d6523d90d",
+        "visual_range": 248
+      },
+      "id": "iphone-portrait-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "iphone-portrait-light.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "iphone-portrait-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 9,
+        "violations": []
+      },
+      "id": "iphone-portrait-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "life-stack",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "life-stack",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "life-stack.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "expected_profile": "Wukong 001",
+        "selection": {
+          "mechanism": "context-selection",
+          "options": 1
+        }
+      },
+      "id": "life.chosen-profile",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "layers": {
+          "Body": true,
+          "Citizen": true,
+          "Individual Life OS": true,
+          "Mind": true,
+          "Species OS": true
+        }
+      },
+      "id": "life.five-layer-view",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "field_labels": [
+          "Life ID",
+          "Life type",
+          "ID",
+          "Status",
+          "Version",
+          "Body profile",
+          "DNA summary",
+          "Body systems",
+          "ID",
+          "Status",
+          "Version",
+          "Species",
+          "ID",
+          "Status",
+          "Version",
+          "Life State",
+          "Activity",
+          "Health State",
+          "Life stage",
+          "State version",
+          "Heartbeat",
+          "ID",
+          "Status",
+          "Version",
+          "Mind profile",
+          "ID",
+          "Status",
+          "Version",
+          "Citizen profile",
+          "Occupation",
+          "DNA class",
+          "DNA traits",
+          "GA count",
+          "GA profile"
+        ],
+        "privacy_marked": true,
+        "privacy_safe": true,
+        "write_controls": []
+      },
+      "id": "life.privacy-read-only",
+      "status": "PASS"
+    },
+    {
+      "category": "links",
+      "details": {
+        "checked": [
+          {
+            "status": 200,
+            "tag": "script",
+            "url": "/KGEN-KAIOS/world-viewer/app.js"
+          },
+          {
+            "status": 200,
+            "tag": "link",
+            "url": "/KGEN-KAIOS/world-viewer/ui/styles.css"
+          }
+        ],
+        "external": []
+      },
+      "id": "local-links",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "starter_status": "STARTER PARCEL ACTIVE / parcel-001 Synthetic fixture / mock location consented / no GPS or KYC"
+      },
+      "id": "location.allow-mock-coarse",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "starter_status": "STARTER PARCEL ACTIVE / parcel-001 Synthetic fixture / mock location not used / no GPS or KYC"
+      },
+      "id": "location.decline",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "dialog_text": "VOLUNTARY MOCK LOCATION Start a synthetic player session \u00d7 A coarse synthetic location can focus this demo session. It is optional and used only in memory. Device GPS Not requested KYC or identity check Not performed Land ownership Not granted or changed Storage Session only I voluntarily consent Use one coarse synthetic mock location for this session. Declining location still starts the mock session and opens the Starter Parcel fixture. Continue without location Use mock location"
+      },
+      "id": "location.explicit-prompt",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "id": "login.initial",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "id": "login.logout",
+      "status": "PASS"
+    },
+    {
+      "case": "mouse-navigation",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "mouse-navigation",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "mouse-navigation.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "mouse-interaction",
+      "details": {
+        "camera_changed": true,
+        "zoom_after": 1.52,
+        "zoom_before": 0.76
+      },
+      "id": "mouse.pan-and-zoom",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "navigation",
+      "id": "navigation.back",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "navigation",
+      "details": {
+        "levels": [
+          "EARTH",
+          "REGION",
+          "CITY",
+          "LAND_PARCEL",
+          "BUILDING",
+          "ROOM"
+        ]
+      },
+      "id": "navigation.six-level",
+      "status": "PASS"
+    },
+    {
+      "case": "proposal-permissions",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "proposal-permissions",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "proposal-permissions.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "created": [
+          "RESIDENTIAL",
+          "FARM",
+          "FOREST",
+          "FACTORY",
+          "MARKETPLACE",
+          "TEMPLE",
+          "RESEARCH",
+          "PUBLIC_FACILITY"
+        ],
+        "fixture_land_use_unchanged": true,
+        "mutating_requests": []
+      },
+      "id": "proposal.all-eight-local-only",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "disabled": 8
+      },
+      "id": "proposal.logged-out",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "disabled": 8
+      },
+      "id": "proposal.non-owner-denied",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "enabled": 8
+      },
+      "id": "proposal.owner-enabled",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "tablet-landscape-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "tablet-landscape-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "tablet-landscape-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "browser-errors",
+      "id": "tablet-landscape-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 820,
+        "document_width": 1180,
+        "offenders": [],
+        "viewport_height": 820,
+        "viewport_width": 1180
+      },
+      "id": "tablet-landscape-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "tablet-landscape-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 136.1,
+          "first_contentful_paint_ms": 160,
+          "first_usable_ms": 477.4,
+          "heap_bytes": 3165885,
+          "load_event_ms": 136.5,
+          "renderer_fps": 59.9,
+          "renderer_ms": 0.4,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "tablet-landscape-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 820,
+          "left": 820,
+          "right": 1180,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 820,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 754.546875,
+          "right": 1157,
+          "top": 26.5
+        },
+        "viewport_height": 820,
+        "viewport_width": 1180
+      },
+      "id": "tablet-landscape-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1180,
+          820
+        ],
+        "case": "tablet-landscape-dark",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1180,
+          820
+        ],
+        "path": "screenshots/tablet-landscape-dark.png",
+        "pixel_variance": 10192.4,
+        "sha256": "75940c9350d057ae1cdadfefbf8d3c0e9c817240e853222378c409632ddfc758",
+        "visual_range": 231
+      },
+      "id": "tablet-landscape-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "tablet-landscape-dark.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "tablet-landscape-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 11,
+        "violations": []
+      },
+      "id": "tablet-landscape-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS World Viewer Alpha"
+      },
+      "id": "tablet-portrait-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "tablet-portrait-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "tablet-portrait-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "browser-errors",
+      "id": "tablet-portrait-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 1180,
+        "document_width": 820,
+        "offenders": [],
+        "viewport_height": 1180,
+        "viewport_width": 820
+      },
+      "id": "tablet-portrait-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "tablet-portrait-light",
+        "metrics": {
+          "dom_content_loaded_ms": 153.2,
+          "first_contentful_paint_ms": 320,
+          "first_usable_ms": 633,
+          "heap_bytes": 3151423,
+          "load_event_ms": 160,
+          "renderer_fps": 59.5,
+          "renderer_ms": 0.4,
+          "resource_count": 13,
+          "transfer_bytes": 235932
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "tablet-portrait-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1709,
+          "left": 13,
+          "right": 809,
+          "top": 1089
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 179,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 663,
+          "right": 801,
+          "top": 22.5
+        },
+        "viewport_height": 1180,
+        "viewport_width": 820
+      },
+      "id": "tablet-portrait-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          820,
+          1180
+        ],
+        "case": "tablet-portrait-light",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          820,
+          1180
+        ],
+        "path": "screenshots/tablet-portrait-light.png",
+        "pixel_variance": 442.175,
+        "sha256": "812ebd7b4f4eb54b874c6cdd6a46ac9ca4b47b690f68654ee0684776e5c0047a",
+        "visual_range": 248
+      },
+      "id": "tablet-portrait-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "id": "tablet-portrait-light.screenshot-diff",
+      "status": "SKIP"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "tablet-portrait-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 9,
+        "violations": []
+      },
+      "id": "tablet-portrait-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "touch-interaction",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "touch-interaction",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "touch-interaction.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-interaction",
+      "details": {
+        "actions": 8
+      },
+      "id": "touch.long-press",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-interaction",
+      "details": {
+        "camera_changed": true
+      },
+      "id": "touch.pan",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    {
+      "bad_responses": [],
+      "case": "android-landscape-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "android-portrait-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "consent-login",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "desktop-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "desktop-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "iphone-landscape-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "iphone-portrait-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "life-stack",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "mouse-navigation",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "proposal-permissions",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "tablet-landscape-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "tablet-portrait-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "touch-interaction",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    }
+  ],
+  "gate": "KAIOS_WORLD_VIEWER_PRODUCT_QA",
+  "matrix": [
+    {
+      "device_scale_factor": 1,
+      "family": "desktop",
+      "height": 900,
+      "orientation": "landscape",
+      "slug": "desktop-dark",
+      "theme": "dark",
+      "touch": false,
+      "user_agent": null,
+      "width": 1440
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "desktop",
+      "height": 800,
+      "orientation": "landscape",
+      "slug": "desktop-light",
+      "theme": "light",
+      "touch": false,
+      "user_agent": null,
+      "width": 1280
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "tablet",
+      "height": 1180,
+      "orientation": "portrait",
+      "slug": "tablet-portrait-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": null,
+      "width": 820
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "tablet",
+      "height": 820,
+      "orientation": "landscape",
+      "slug": "tablet-landscape-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": null,
+      "width": 1180
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "android",
+      "height": 915,
+      "orientation": "portrait",
+      "slug": "android-portrait-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36",
+      "width": 412
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "android",
+      "height": 412,
+      "orientation": "landscape",
+      "slug": "android-landscape-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36",
+      "width": 915
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "iphone",
+      "height": 844,
+      "orientation": "portrait",
+      "slug": "iphone-portrait-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+      "width": 390
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "iphone",
+      "height": 390,
+      "orientation": "landscape",
+      "slug": "iphone-landscape-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+      "width": 844
+    }
+  ],
+  "schema": "KAIOS_WORLD_VIEWER_PRODUCT_QA_V1",
+  "screenshots": [
+    {
+      "actual_size": [
+        1830,
+        824
+      ],
+      "case": "android-landscape-light",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1830,
+        824
+      ],
+      "path": "screenshots/android-landscape-light.png",
+      "pixel_variance": 1100.049,
+      "sha256": "25087e371761f449d70fc05eed7dcdd138e87175500be2c53c45f85db9e1d56e",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        824,
+        1830
+      ],
+      "case": "android-portrait-dark",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        824,
+        1830
+      ],
+      "path": "screenshots/android-portrait-dark.png",
+      "pixel_variance": 7160.69,
+      "sha256": "6a4c190b91e3e08b9df8e74fc90b395b85594431a5c5e30cfccfb00a11014249",
+      "visual_range": 232
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "case": "desktop-dark",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/desktop-dark.png",
+      "pixel_variance": 9600.015,
+      "sha256": "2d6c07bea6b63dfc42c3f3e583d86ad092e45bd8927898de83eecb0d11dea466",
+      "visual_range": 231
+    },
+    {
+      "actual_size": [
+        1280,
+        800
+      ],
+      "case": "desktop-light",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1280,
+        800
+      ],
+      "path": "screenshots/desktop-light.png",
+      "pixel_variance": 822.256,
+      "sha256": "9e2d23cbcc189490111c115f1f408cf91987bb3410f89c8ad1d6c0f119d28f1d",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        1688,
+        780
+      ],
+      "case": "iphone-landscape-dark",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1688,
+        780
+      ],
+      "path": "screenshots/iphone-landscape-dark.png",
+      "pixel_variance": 9851.85,
+      "sha256": "59ca0f0b364338c30f6b79b611957cfa5dc48dc8140441a63cbba0be33f9ff75",
+      "visual_range": 232
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "case": "iphone-portrait-light",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/iphone-portrait-light.png",
+      "pixel_variance": 545.795,
+      "sha256": "6f6b3c995b96476d5670e2df7c29667804b8e516b36b0fd8e4c2e99d6523d90d",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        1180,
+        820
+      ],
+      "case": "tablet-landscape-dark",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1180,
+        820
+      ],
+      "path": "screenshots/tablet-landscape-dark.png",
+      "pixel_variance": 10192.4,
+      "sha256": "75940c9350d057ae1cdadfefbf8d3c0e9c817240e853222378c409632ddfc758",
+      "visual_range": 231
+    },
+    {
+      "actual_size": [
+        820,
+        1180
+      ],
+      "case": "tablet-portrait-light",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        820,
+        1180
+      ],
+      "path": "screenshots/tablet-portrait-light.png",
+      "pixel_variance": 442.175,
+      "sha256": "812ebd7b4f4eb54b874c6cdd6a46ac9ca4b47b690f68654ee0684776e5c0047a",
+      "visual_range": 248
+    }
+  ],
+  "status": "PASS",
+  "summary": {
+    "failed": 0,
+    "passed": 93,
+    "skipped": 8,
+    "total": 101
+  }
+}
