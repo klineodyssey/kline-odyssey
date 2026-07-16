@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Company Autopilot Architecture Package"
-VERSION: "0.4.0"
-REVISION: "2026-07-16.1"
+VERSION: "0.4.1"
+REVISION: "2026-07-16.2"
 STATUS: "OPERATIONALLY_DELEGATED_GOVERNANCE_ARCHITECTURE"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Human PrimeForge / HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-SOURCE_COMMIT: "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c"
-TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Record bounded Level A/B operational delegation, protected Human workspace handling, proposal backlog governance, and the canonical atomic Claim authority direction."
+SOURCE_COMMIT: "89f3c351c488a0705f514adba974dd6c3dd3cb3a"
+TASK_ID: "HUMAN-CODEX-SWARM-001"
+CHANGE_REASON: "Index the Architecture-only Codex Swarm internal organization without enabling Clones or changing existing authority."
 ANCESTOR: "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md; KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md"
 SOURCE_OF_TRUTH: true
 ---
@@ -84,6 +84,7 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `architecture_backlog_registry.json` | Machine-readable proposal backlog |
 | `canonical_atomic_claim_authority.json` | Machine-readable Claim authority proposal |
 | `company_autopilot_architecture_review.json` | Machine-readable review score and gates |
+| `codex-swarm/README.md` | Codex Chief Engineering Organization source audit, boundaries and package index |
 
 ## Imported Authorities
 

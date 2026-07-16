@@ -181,8 +181,11 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 - Kernel ADR Index: [KGEN-KAIOS/kernel/kernel_adr/README.md](KGEN-KAIOS/kernel/kernel_adr/README.md)
 - Architecture Governance Board: [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md)
 - Architecture Review Registry: [KGEN-KAIOS/governance/architecture_review_registry.json](KGEN-KAIOS/governance/architecture_review_registry.json)
+- Codex Swarm Runtime V1 Architecture: [KGEN-KAIOS/governance/autopilot/codex-swarm/README.md](KGEN-KAIOS/governance/autopilot/codex-swarm/README.md)
 
 The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only.
+
+Human Decision `HUMAN-CODEX-SWARM-001` authorizes the Architecture Proposal for a bounded Codex Chief Engineering Organization. Internal role Clones remain inactive, use no second WorkQueue or Governance system, and require independent review plus atomic Claim/session/worktree controls before enablement.
 
 Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.0 as `ACTIVE / READY` below Human Final Authority and above WorkQueue, Implementation, ADR and Architecture Proposal.
 

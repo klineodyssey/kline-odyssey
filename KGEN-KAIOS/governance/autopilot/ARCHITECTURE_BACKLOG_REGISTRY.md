@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Architecture Backlog Registry"
-VERSION: "1.0.0"
-REVISION: "2026-07-16.3"
+VERSION: "1.0.1"
+REVISION: "2026-07-16.4"
 STATUS: "ACTIVE_MANAGED_REGISTRY"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "CODEX_DELEGATED_GM"
-SOURCE_COMMIT: "299d2759328f6eddeb6db3f4e767e945e2722ccb"
-TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Inventory isolated proposals, dependencies, review scores and safe next actions without combining unrelated commits."
+SOURCE_COMMIT: "89f3c351c488a0705f514adba974dd6c3dd3cb3a"
+TASK_ID: "HUMAN-CODEX-SWARM-001"
+CHANGE_REASON: "Register the Codex Swarm Runtime V1 Architecture Proposal and its enablement gates."
 ANCESTOR: "Company Inbox; Priority Scheduler; Architecture Governance Board"
 SOURCE_OF_TRUTH: true
 ---
@@ -26,6 +26,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | Proposal | Review | Score | Risk | Baseline / implementation | Next action |
 |---|---|---:|---|---|---|
 | Company Autopilot / Company OS | APPROVED_BY_DELEGATION | 93 | Level B | Documentation baseline; local commit `6936d6f` | Validate and publish integration branch |
+| Codex Swarm Runtime V1 | PROPOSAL_COMPLETE | 90 | Level B R2 Architecture | Proposal commit `b24c936`; Clones inactive | Independent review before any registry or runtime enablement |
 | Worker Swarm | INTERNAL_REVIEW_READY | 90 | Level B | Proposal; local commit `8ed6fc6` | External review before baseline |
 | Boot / Life Integrity | INTERNAL_REVIEW_READY | 91 | Level B | Proposal; local commit `190d8d5` | Independent review before baseline |
 | World Viewer | APPROVE_WITH_AMENDMENTS_RESOLVED | 88 | Level B | `WORLD-VIEWER-V1.0` frozen; local commit `780ffee` | Offer Synthetic Demo after current queue priority |
@@ -49,6 +50,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 - Life OS is reconciled with Species OS at Architecture level; external review remains required before implementation.
 - Cursor Control is published only as a proposal and does not replace CURRENT Worker rules.
 - Distributed automatic Cursor dispatch remains disabled until the canonical Claim authority exists.
+- Codex Swarm is a scoped internal-identity amendment to Worker Swarm; it creates no second Governance, Dispatcher or WorkQueue and activates no Clone.
 - Genesis DNA normalizes legacy GA levels without changing Physics CURRENT or GEN-007; private engine artifacts remain outside Git.
 
 ## Commit Isolation

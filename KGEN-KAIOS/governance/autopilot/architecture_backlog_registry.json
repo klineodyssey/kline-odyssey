@@ -1,11 +1,12 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "revision": "2026-07-16.3",
+    "version": "1.0.1",
+    "revision": "2026-07-16.4",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
-    "source_commit": "299d2759328f6eddeb6db3f4e767e945e2722ccb",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "last_decision_id": "HUMAN-CODEX-SWARM-001",
     "source_of_truth": true,
     "private_local_paths_published": false
   },
@@ -42,6 +43,42 @@
       "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "DOCUMENTATION_BASELINE",
       "next_action": "VALIDATE_AND_PUSH_INTEGRATION_BRANCH"
+    },
+    {
+      "proposal_id": "CODEX-SWARM-001",
+      "decision_ids": ["HUMAN-CODEX-SWARM-001"],
+      "worktree": "WORKTREE-CODEX-SWARM-ARCHITECTURE",
+      "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+      "files": ["KGEN-KAIOS/governance/autopilot/codex-swarm/"],
+      "dependencies": [
+        "COMPANY-AUTOPILOT-001",
+        "WORKER-SWARM-001",
+        "CANONICAL-CLAIM-AUTHORITY-001",
+        "COMPANY-SESSION",
+        "HUMAN-ANCHOR",
+        "COMPANY-DECISION-CENTER-CANDIDATE"
+      ],
+      "internal_review": "SOURCE_AUDIT_AND_PROPOSAL_COMPLETE",
+      "external_review": "REQUIRED_BEFORE_ENABLEMENT",
+      "review_score": 90,
+      "amendments": [
+        "UNIQUE_DERIVED_CODEX_ACTORS",
+        "TEN_ROLE_CLASSES",
+        "ONE_SESSION_ONE_CLAIM_ONE_WORKTREE",
+        "WRITE_SET_RESERVATION",
+        "AUTHOR_REVIEWER_GIT_SEPARATION",
+        "DISPATCHER_CLONE_CURSOR_ONLY",
+        "S0_GLOBAL_QUOTA_TEN"
+      ],
+      "risk_level": "LEVEL_B_R2_ARCHITECTURE",
+      "protected_path_status": "PASS_ZERO",
+      "implementation_status": "NOT_STARTED",
+      "commit_status": "PROPOSAL_COMMITTED",
+      "commit_sha": "b24c936e84b09e6e2116e391981606fde949ac7d",
+      "push_status": "PENDING_PROPOSAL_PUBLICATION",
+      "baseline_status": "NOT_FROZEN",
+      "runtime_enablement": "DISABLED",
+      "next_action": "INDEPENDENT_ARCHITECTURE_REVIEW_BEFORE_DERIVED_ACTOR_OR_RUNTIME_ENABLEMENT"
     },
     {
       "proposal_id": "WORKER-SWARM-001",

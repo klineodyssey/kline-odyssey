@@ -56,6 +56,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
 | PrimeForge Company Autopilot | `KGEN-KAIOS/governance/autopilot/` | Human-delegated Company OS Boot, Session, Inbox, scheduler, repository maintenance, architecture backlog and claim authority proposal |
+| Codex Swarm Runtime V1 Proposal | `KGEN-KAIOS/governance/autopilot/codex-swarm/` | Codex internal engineering organization with ten role classes, isolated identity/session/claim/worktree and separation of duties |
 | KAIOS Cursor Control Proposal | `KGEN-KAIOS/governance/cursor/` | Controlled Cursor preflight, Task Envelope, protected path, handoff, stop and legacy suppression proposal |
 | KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
 | KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
@@ -133,6 +134,9 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Architecture Backlog Registry | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal dependencies, review scores, risk, commit state and next action |
 | Canonical Claim Authority Proposal | `KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional claim, fencing token and lease authority architecture; implementation not started |
 | Worker Swarm Architecture | `KGEN-KAIOS/governance/autopilot/worker-swarm/README.md` | Multi-session Worker coordination proposal with explicit non-atomic pre-cutover boundary |
+| Codex Swarm Architecture | `KGEN-KAIOS/governance/autopilot/codex-swarm/README.md` | Scoped multi-Clone amendment for the Codex Chief Engineering Organization; implementation not started |
+| Codex Internal Organization | `KGEN-KAIOS/governance/autopilot/codex-swarm/CODEX_INTERNAL_ORGANIZATION.md` | Architecture, Review, Dispatcher, domain, Git, Documentation, Testing and Company role boundaries |
+| Codex Clone Governance | `KGEN-KAIOS/governance/autopilot/codex-swarm/CODEX_CLONE_GOVERNANCE_STANDARD.md` | Derived actor, Session, Claim, worktree, write-set, fencing and quota rules |
 | Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
 | Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
 | Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
