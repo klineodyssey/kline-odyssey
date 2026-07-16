@@ -122,6 +122,7 @@
   "branch_name": "codex/world-viewer-sprint-002-alpha",
   "worktree_name": "kline-odyssey-world-viewer-sprint-002",
   "base_sha": "dff1108c072629c6a40e0badc6f71be1c24f018f",
+  "product_commit_sha": "151b14433d94e264661941ab977e3735fe8e03eb",
   "commit_allowed": true,
   "push_allowed": true,
   "merge_allowed": true,
@@ -137,8 +138,9 @@
     "LEVEL_C_CHANGE_REQUIRED"
   ],
   "created_at": "2026-07-16T22:13:33+08:00",
-  "updated_at": "2026-07-16T22:59:00+08:00",
-  "claim_state": "REVIEW",
-  "lease_state": "REVIEW_CUSTODY",
-  "status": "READY_FOR_REVIEW"
+  "updated_at": "2026-07-16T23:02:00+08:00",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
 }

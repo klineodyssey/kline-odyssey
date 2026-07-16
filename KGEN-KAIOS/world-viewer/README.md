@@ -5,12 +5,12 @@ REVISION: "2026-07-16.3"
 STATUS: "SPRINT_002_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
 IMPLEMENTATION: "WORLD_VIEWER_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-002_REVIEW"
+WORKQUEUE: "KAIOS-WV-SPRINT-002_DONE"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "ORIGIN_MAIN_16f15981673e8dd2678db985b7a35486f130cafd"
+SOURCE_COMMIT: "151b14433d94e264661941ab977e3735fe8e03eb"
 TASK_ID: "KAIOS-WV-SPRINT-002"
 HUMAN_DECISION_ID: "HUMAN-SPRINT-002-001"
 CHANGE_REASON: "Deliver the first World Viewer Alpha with complete Life projection, explicit mock location consent, approved land proposals and repeatable Product QA."
@@ -36,7 +36,7 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 | Human Decision | `HUMAN-SPRINT-002-001` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
 | Implementation | `SPRINT_002_WORLD_VIEWER_ALPHA_COMPLETE` |
-| Sprint Task Envelope | `REVIEW` |
+| Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
 | Art / 3D / animation | `OUT_OF_SCOPE` |
