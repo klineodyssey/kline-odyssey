@@ -130,4 +130,433 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Constitution | `KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md` | Active ten-chapter KAIOS Constitution V1.0 |
 | KAIOS Constitution JSON | `KGEN-KAIOS/constitution/constitution.json` | Machine-readable authority hierarchy, principles, protected Runtime and current HOLD state |
 | KAIOS Constitution History | `KGEN-KAIOS/constitution/constitution_history.jsonl` | Append-only governance ancestry, ratification and future amendment history |
-| KAIOS Kernel V1 Design | `KGEN-KAIOS/kernel/KERNEL_V1.md` | Single-Agent timeóž5¶‰žËkºwµçQ•à€ÄÔµÁ½¥¹ÐÁÉ½µ½Ñ¥½¸¡•­±¥ÍÐð4)ð½‘•àI•©•Ñ¥½¸AÉ½Ñ½½°ð-8µ-%=L½Xä¸Ä½=a}I)Q%=9}AI=Q==0¹µ‘€ðI•©•Ñ¥½¸…¹…É¡¥Ù”ÉÕ±•Ìð4)ð½‘•àI•Ù¥Í¥½¸AÉ½Ñ½½°ð-8µ-%=L½Xä¸Ä½=a}IY%M%=9}AI=Q==0¹µ‘€ðI•Ù¥Í¥½¸É•ÅÕ•ÍÐ…¹É•ÍÕ‰µ¥ÍÍ¥½¸ÉÕ±•Ìð4)ð!Õµ…¸I•Ù¥•Ü…Ñ”ð-8µ-%=L½Xä¸Ä½!U59}IY%]}Q¹µ‘€ðHÌ…¹!Õµ…¸½Ù•ÉÉ¥‘”É•Ù¥•ÜÉ•½Éð4)ðÕÁ±¥…Ñ”•Ñ•Ñ¥½¸ð-8µ-%=L½Xä¸Ä½UA1%Q}QM-}QQ%=8¹µ‘€ðÕÁ±¥…Ñ”…¹µ•É”µ…¹‘¥‘…Ñ”‘•Ñ•Ñ¥½¸ð4)ð•Á•¹‘•¹äY…±¥‘…Ñ¥½¸ð-8µ-%=L½Xä¸Ä½A99e}Y1%Q%=8¹µ‘€ð•Á•¹‘•¹ä¡•­Ì‰•™½É”ÁÉ½µ½Ñ¥½¸ð4)ðI¥Í¬AÉ½µ½Ñ¥½¸5…ÑÉ¥àð-8µ-%=L½Xä¸Ä½I%M-}AI=5=Q%=9}5QI%`¹µ‘€ðHÀµHÐÁÉ½µ½Ñ¥½¸µ…ÑÉ¥àð4)ð]½É­=É‘•ÈÉ¡¥Ù”MÑ…¹‘…Éð-8µ-%=L½Xä¸Ä½]=I-=II}I!%Y}MQ9I¹µ‘€ðÉ¡¥Ù”…¹É•Ñ•¹Ñ¥½¸ÉÕ±•Ìð4)ðM¡•µ…Ìð-8µ-%=L½Xä¸Ä½Í¡•µ…Ì½€ð9¥¹”Xä¸Ä)M=8M¡•µ…Ìð4)ðá…µÁ±•Ìð-8µ-%=L½Xä¸Ä½•á…µÁ±•Ì½€ð9¥¹”Á…ÉÍ•…‰±”•á…µÁ±•Ìð4)ðIÕ¹Ñ¥µ”½Õµ•¹ÑÌð-8µ-%=L½Xä¸Ä½ÉÕ¹Ñ¥µ”½€ð¥¡ÐÉ•Ù¥•ÜÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌð4)ðI•Ù¥•ÝÌð-8µ-%=L½Xä¸Ä½É•Ù¥•ÝÌ½€ð½‘•à‘•¥Í¥½¹Ì™½ÈXä¸ÀIP]½É­=É‘•ÉÌð4)ðÕ‘¥Ð1½œð-8µ-%=L½Xä¸Ä½É•Á½ÉÑÌ½Xå|Å}U%Q}1=¹µ‘€ðI•Ù¥•ÜÍÑ…Ñ”µÑÉ…¹Í¥Ñ¥½¸…Õ‘¥Ð±½œð4)ðÉäIÕ¸I•Á½ÉÐð-8µ-%=L½Xä¸Ä½É•Á½ÉÑÌ½Xå|Å}IeIU9|ÀÀÅ}IA=IP¹µ‘€ðXä¸Ä‘ÉäÉÕ¸É•ÍÕ±Ðð4)ðEI•Á½ÉÐð-8µ-%=L½Xä¸Ä½É•Á½ÉÑÌ½-%=M}Xå|Å}E}IA=IP¹µ‘€ðXä¸ÄEÉ•ÍÕ±Ðð4)ðI•±•…Í”I•Á½ÉÐð-8µ-%=L½Xä¸Ä½É•Á½ÉÑÌ½-%=M}Xå|Å}I1M}IA=IP¹µ‘€ðXä¸ÄÉ•±•…Í”ÍÕµµ…Éäð4(4(ŒŒ-%=LXä¸ÈÁÁÉ½Ù•É…™ÐÑ¼=A8]½É­EÕ•Õ”Må¹Œ4(4)ð%Ñ•´ðA…Ñ ðAÕÉÁ½Í”ð4)ð´´µð´´µð´´µð4)ðXä¸È%¹‘•àð-8µ-%=L½Xä¸È½I5¹µ‘€ðXä¸È½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àð4)ðXä¸È¹ÑÉäð-8µ-%=L½Xä¸È½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±äXä¸ÈÁÕ‰±¥Œ•¹ÑÉäð4)ðXä¸È…Í¡‰½…Éð-8µ-%=L½Xä¸È½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±äÍå¹Œ‘…Í¡‰½…Éð4)ðÁÁÉ½Ù•É…™ÐMå¹ŒMÑ…¹‘…Éð-8µ-%=L½Xä¸È½AAI=Y}IQ}Me9}MQ9I¹µ‘€ðMå¹ŒÍÑ…Ñ”µ…¡¥¹”ð4)ð½‘•à]½É­EÕ•Õ”Må¹ŒAÉ½Ñ½½°ð-8µ-%=L½Xä¸È½=a}]=I-EUU}Me9}AI=Q==0¹µ‘€ð€ÄÜµÁ½¥¹ÐÍå¹Œ¡•­±¥ÍÐð4)ð]½É­=É‘•È%±±½…Ñ¥½¸ð-8µ-%=L½Xä¸È½]=I-=II}%}11=Q%=9}MQ9I¹µ‘€ð½Éµ…°$]½É­=É‘•È%ÉÕ±•Ìð4)ð]½É­EÕ•Õ”½¹™±¥ÐA½±¥äð-8µ-%=L½Xä¸È½]=I-EUU}=91%Q}A=1%d¹µ‘€ð½¹™±¥Ð‘•Ñ•Ñ¥½¸ð4)ð]½É­EÕ•Õ”%¹Í•ÉÑ¥½¸A½±¥äð-8µ-%=L½Xä¸È½]=I-EUU}%9MIQ%=9}A=1%d¹µ‘€ðM…™”¥¹Í•ÉÑ¥½¸ÉÕ±•Ìð4)ð]½É­EÕ•Õ”I½±±‰…¬A½±¥äð-8µ-%=L½Xä¸È½]=I-EUU}I=11	-}A=1%d¹µ‘€ðI½±±‰…¬ÉÕ±•Ìð4)ðMå¹ŒÕ‘¥ÐMÑ…¹‘…Éð-8µ-%=L½Xä¸È½Me9}U%Q}MQ9I¹µ‘€ðMå¹Œ…Õ‘¥Ð™¥•±‘Ìð4)ð!Õµ…¸A…ÕÍ”…Ñ”ð-8µ-%=L½Xä¸È½!U59}AUM}Q¹µ‘€ð!Õµ…¸Á…ÕÍ”°É•©•Ð°…É¡¥Ù”…¹ÁÉ¥½É¥Ñä¡…¹•Ìð4)ðM¡•µ…Ìð-8µ-%=L½Xä¸È½Í¡•µ…Ì½€ð¥¡ÐXä¸È)M=8M¡•µ…Ìð4)ðá…µÁ±•Ìð-8µ-%=L½Xä¸È½•á…µÁ±•Ì½€ð¥¡ÐÁ…ÉÍ•…‰±”•á…µÁ±•Ìð4)ðIÕ¹Ñ¥µ”½Õµ•¹ÑÌð-8µ-%=L½Xä¸È½ÉÕ¹Ñ¥µ”½€ð¥¡ÐÍå¹ŒÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌð4)ðMå¹ŒÉÑ¥™…ÑÌð-8µ-%=L½Xä¸È½Íå¹Œ½€ð$µ=9=5d´ÈÀÈØ´ÀÀÀÅ€Íå¹ŒÉ•ÅÕ•ÍÐ°Ù…±¥‘…Ñ¥½¸°…±±½…Ñ¥½¸…¹É•ÍÕ±Ðð4)ðMå¹ŒI•Á½ÉÐð-8µ-%=L½Xä¸È½É•Á½ÉÑÌ½Xå|É}Me9}IA=IP¹µ‘€ðÑÕ…°Xä¸ÈÍå¹ŒÉ•Á½ÉÐð4)ðMå¹ŒÕ‘¥Ð1½œð-8µ-%=L½Xä¸È½É•Á½ÉÑÌ½Xå|É}Me9}U%Q}1=¹µ‘€ðMå¹Œ…Õ‘¥Ð±½œð4)ðÉäIÕ¸I•Á½ÉÐð-8µ-%=L½Xä¸È½É•Á½ÉÑÌ½Xå|É}IeIU9|ÀÀÅ}IA=IP¹µ‘€ðMÕ•ÍÍ™Õ°Íå¹Œ°½¹™±¥Ð°!Õµ…¸Á…ÕÍ”…¹É½±±‰…¬Ñ•ÍÑÌð4)ðEI•Á½ÉÐð-8µ-%=L½Xä¸È½É•Á½ÉÑÌ½-%=M}Xå|É}E}IA=IP¹µ‘€ðXä¸ÈEÉ•ÍÕ±Ðð4)ðI•±•…Í”I•Á½ÉÐð-8µ-%=L½Xä¸È½É•Á½ÉÑÌ½-%=M}Xå|É}I1M}IA=IP¹µ‘€ðXä¸ÈÉ•±•…Í”ÍÕµµ…Éäð4(4(ŒŒ-%=LXä¸Ì¥ÍÁ…Ñ !½±I•±•…Í”AÉ½Ñ½½°4(4)ð%Ñ•´ðA…Ñ ðAÕÉÁ½Í”ð4)ð´´µð´´µð´´µð4)ðXä¸Ì%¹‘•àð-8µ-%=L½Xä¸Ì½I5¹µ‘€ðXä¸Ì½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àð4)ðXä¸Ì¹ÑÉäð-8µ-%=L½Xä¸Ì½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±äXä¸ÌÁÕ‰±¥Œ•¹ÑÉäð4)ðXä¸Ì…Í¡‰½…Éð-8µ-%=L½Xä¸Ì½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±ä‘¥ÍÁ…Ñ ‘…Í¡‰½…Éð4)ð¥ÍÁ…Ñ !½±MÑ…¹‘…Éð-8µ-%=L½Xä¸Ì½%MAQ!}!=1}MQ9I¹µ‘€ð=A8€¬!=1€µ•…¹¥¹œ…¹É•±•…Í”‰½Õ¹‘…Éäð4)ð½‘•àI•±•…Í”AÉ½Ñ½½°ð-8µ-%=L½Xä¸Ì½=a}I1M}AI=Q==0¹µ‘€ð€ÈÀµÁ½¥¹ÐÉ•±•…Í”¡•­±¥ÍÐð4)ð]½É­•È±¥¥‰¥±¥Ñäð-8µ-%=L½Xä¸Ì½]=I-I}1%%	%1%Qe}AI=Q==0¹µ‘€ð]½É­•È±…¥´•±¥¥‰¥±¥ÑäÉÕ±•Ìð4)ð•Á•¹‘•¹ä…Ñ”ð-8µ-%=L½Xä¸Ì½%MAQ!}A99e}Q¹µ‘€ð•Á•¹‘•¹äÙ…±¥‘…Ñ¥½¸ð4)ðI¥Í¬…Ñ”ð-8µ-%=L½Xä¸Ì½%MAQ!}I%M-}Q¹µ‘€ðHÀµHÐÉ•±•…Í”…ÕÑ¡½É¥Ñäð4)ðM¡•µ…Ìð-8µ-%=L½Xä¸Ì½Í¡•µ…Ì½€ð9¥¹”Xä¸Ì)M=8M¡•µ…Ìð4)ðá…µÁ±•Ìð-8µ-%=L½Xä¸Ì½•á…µÁ±•Ì½€ð9¥¹”Á…ÉÍ•…‰±”•á…µÁ±•Ìð4)ðIÕ¹Ñ¥µ”½Õµ•¹ÑÌð-8µ-%=L½Xä¸Ì½ÉÕ¹Ñ¥µ”½€ð9¥¹”‘¥ÍÁ…Ñ ÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌð4)ðI•±•…Í”ÉÑ¥™…ÑÌð-8µ-%=L½Xä¸Ì½É•±•…Í”½€ð$µ=9=5d´ÈÀÈØ´ÀÀÀÅ€É•±•…Í”É•ÅÕ•ÍÐ°Ù…±¥‘…Ñ¥½¸°É•ÍÕ±Ð…¹…Ñ•Ìð4)ðI•±•…Í”I•Ù¥•Üð-8µ-%=L½Xä¸Ì½É•Á½ÉÑÌ½$µ=9=5d´ÈÀÈØ´ÀÀÀÅ}I1M}IY%\¹µ‘€ðÑÕ…°É•±•…Í”É•Ù¥•Üð4)ð¥ÍÁ…Ñ Õ‘¥Ð1½œð-8µ-%=L½Xä¸Ì½É•Á½ÉÑÌ½Xå|Í}%MAQ!}U%Q}1=¹µ‘€ðI•±•…Í”…Õ‘¥Ð±½œð4)ðÉäIÕ¸I•Á½ÉÐð-8µ-%=L½Xä¸Ì½É•Á½ÉÑÌ½Xå|Í}IeIU9|ÀÀÅ}IA=IP¹µ‘€ðI•±•…Í”°Á…ÕÍ”°É”µ¡½±…¹HÐÑ•ÍÑÌð4)ðEI•Á½ÉÐð-8µ-%=L½Xä¸Ì½É•Á½ÉÑÌ½-%=M}Xå|Í}E}IA=IP¹µ‘€ðXä¸ÌEÉ•ÍÕ±Ðð4)ðI•±•…Í”I•Á½ÉÐð-8µ-%=L½Xä¸Ì½É•Á½ÉÑÌ½-%=M}Xå|Í}I1M}IA=IP¹µ‘€ðXä¸ÌÉ•±•…Í”ÍÕµµ…Éäð4(4(ŒŒ-%=LXÄÀ¸À=Á•É…Ñ¥¹œMåÍÑ•´4(4)ð%Ñ•´ðA…Ñ ðAÕÉÁ½Í”ð4)ð´´µð´´µð´´µð4)ðXÄÀ%¹‘•àð-8µ-%=L½XÄÀ½I5¹µ‘€ðXÄÀ½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àð4)ðXÄÀ¹ÑÉäð-8µ-%=L½XÄÀ½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±äXÄÀÁÕ‰±¥Œ•¹ÑÉäð4)ðXÄÀ…Í¡‰½…Éð-8µ-%=L½XÄÀ½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ðI•…µ½¹±ä½Á•É…Ñ¥¹œ‘…Í¡‰½…Éð4)ð=LMÑ…¹‘…Éð-8µ-%=L½XÄÀ½-%=M}=AIQ%9}MeMQ4¹µ‘€ð-%=L=Á•É…Ñ¥¹œMåÍÑ•´½¹ÍÑ¥ÑÕÑ¥½¸ð4)ðMåÍÑ•´É¡¥Ñ•ÑÕÉ”ð-8µ-%=L½XÄÀ½MeMQ5}I!%QQUI¹µ‘€ð	É½ÝÍ•ÈÑ¼$½µÁ…¹ä…É¡¥Ñ•ÑÕÉ”ð4)ð5¥É½Í•ÉÙ¥”MÑ…¹‘…Éð-8µ-%=L½XÄÀ½5%I=MIY%}MQ9I¹µ‘€ð1½¥…°Í•ÉÙ¥”‰½Õ¹‘…ÉäÍÑ…¹‘…Éð4)ðA$…Ñ•Ý…äð-8µ-%=L½XÄÀ½A%}Q]e}MQ9I¹µ‘€ðA$¥¹É•ÍÌ…¹Í•É•Ð‰½Õ¹‘…Éäð4)ðÉ½¹Ñ•¹€¼	…­•¹ð-8µ-%=L½XÄÀ½I=9Q9}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½	-9}MQ9I¹µ‘€ðU$…¹Í•ÉÙ¥”±…å•ÈÍÑ…¹‘…É‘Ìð4)ð5•µ‰•ÉÍ¡¥À€¼]…±±•Ð€¼A…åµ•¹Ðð-8µ-%=L½XÄÀ½55	IM!%A}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½]11Q}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½Ae59Q}MQ9I¹µ‘€ð%‘•¹Ñ¥Ñä°Ý…±±•Ð…¹Á…åµ•¹Ð‰½Õ¹‘…É¥•Ìð4)ð	±½­¡…¥¸€¼Q½­•¸€¼9Pð-8µ-%=L½XÄÀ½	1=-!%9}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½Q=-9}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½9Q}MQ9I¹µ‘€ð¡…¥¸…¹Ñ½­•¸‰½Õ¹‘…É¥•Ìð4)ð5…É­•ÑÁ±…”€¼ÁÀ€¼A±Õ¥¸ð-8µ-%=L½XÄÀ½5I-QA1}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½AA}IU9Q%5}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½A1U%9}MQ9I¹µ‘€ð5…É­•Ð…¹•áÑ•¹Í¥½¸ÍÑ…¹‘…É‘Ìð4)ðM•ÕÉ¥Ñä€¼Õ‘¥Ð€¼•Á±½åµ•¹Ðð-8µ-%=L½XÄÀ½MUI%Qe}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½U%Q}MQ9I¹µ‘€°-8µ-%=L½XÄÀ½A1=e59Q}MQ9I¹µ‘€ð=Á•É…Ñ¥¹œÍ…™•ÑäÍÑ…¹‘…É‘Ìð4)ðM¡•µ…Ìð-8µ-%=L½XÄÀ½Í¡•µ…Ì½€ðQÝ•±Ù”XÄÀ)M=8M¡•µ…Ìð4)ðá…µÁ±•Ìð-8µ-%=L½XÄÀ½•á…µÁ±•Ì½€ðQÝ•±Ù”Á…ÉÍ•…‰±”•á…µÁ±•Ìð4)ðIÕ¹Ñ¥µ”5…ÁÌð-8µ-%=L½XÄÀ½ÉÕ¹Ñ¥µ”½€ð9¥¹”ÉÕ¹Ñ¥µ”µ…ÁÌð4)ðÉäIÕ¸ð-8µ-%=L½XÄÀ½É•Á½ÉÑÌ½XÄÁ}IeIU9|ÀÀÅ}IA=IP¹µ‘€ðXÄÀ½Á•É…Ñ¥¹œ‘ÉäÉÕ¸ð4)ðEI•Á½ÉÐð-8µ-%=L½XÄÀ½É•Á½ÉÑÌ½-%=M}XÄÁ}E}IA=IP¹µ‘€ðXÄÀEÉ•ÍÕ±Ðð4)ðI•±•…Í”I•Á½ÉÐð-8µ-%=L½XÄÀ½É•Á½ÉÑÌ½-%=M}XÄÁ}I1M}IA=IP¹µ‘€ðXÄÀÉ•±•…Í”ÍÕµµ…Éäð4(ŒŒ=É…¹¥é…Ñ¥½¸XÈ¸À4(4)ð%Ñ•´ðA…Ñ ðAÕÉÁ½Í”ð4)ð´´µð´´µð´´µð4)ð=É…¹¥é…Ñ¥½¸%¹‘•àð-8µ=É…¹¥é…Ñ¥½¸½I5¹µ‘€ð$½µÁ…¹ä½Á•É…Ñ¥¹œÍåÍÑ•´•¹ÑÉäð4)ð¥Ù¥±¥é…Ñ¥½¸½É”…¹½¸ð-8µ=É…¹¥é…Ñ¥½¸½…¹½¸½-9}%Y%1%iQ%=9}=I}9=8¹µ‘€ð0Ä…¹½¸™½È¥Ù¥±¥é…Ñ¥½¸°$°•½¹½µä°…µ”°…¹‰±½­¡…¥¸±½½ÁÌð4)ð½¹½µä1½½Àð-8µ=É…¹¥é…Ñ¥½¸½½¹½µä½-9}=9=5e}1==@¹µ‘€ð]¥±1…¹Ñ¼É½ÍÌµÕ¹¥Ù•ÉÍ”¥Ù¥±¥é…Ñ¥½¸•½¹½µä±½½Àð4)ðÁÀ1¥™”MÑ…¹‘…Éð-8µ=É…¹¥é…Ñ¥½¸½ÁÀ½-9}AA}1%}MQ9I¹µ‘€ðÁÀ…Ì±¥™”°9°É•ÁÉ½‘ÕÑ¥½¸°•Ù½±ÕÑ¥½¸°ÑÉ…‘”°‘•…Ñ °É•‰¥ÉÑ °¥¹¡•É¥Ñ…¹”ð4)ðQ•µÁ±”MÑ…¹‘…Éð-8µ=É…¹¥é…Ñ¥½¸½Q•µÁ±”½-9}Q5A1}MQ9I¹µ‘€ðQ•µÁ±”°¡½ÕÍ”°9A°Í¡½À°‰…¹¬°•á¡…¹”°Ý…É•¡½ÕÍ”°A½ÉÑ…°°…¹½É…¹Ìð4)ð1…¹MÑ…¹‘…Éð-8µ=É…¹¥é…Ñ¥½¸½1…¹½-9}19}MQ9I¹µ‘€ð]¥±1…¹°¥Ù¥±¥é…Ñ¥½¸±…¹°ÑÉ…‘”°½¹ÍÑÉÕÑ¥½¸°½¹ÅÕ•ÍÐ°É•¹Ñ…°°™ÕÑÕÉ”9P±…å•Èð4)ð]½É­=É‘•ÈMÑ…¹‘…Éð-8µ=É…¹¥é…Ñ¥½¸½]½É­=É‘•ÉÌ½-9}]=I-=II}MQ9I¹µ‘€ð½‘•à…ÍÍ¥¹µ•¹Ð°ÕÉÍ½È•á•ÕÑ¥½¸°É•Á½ÉÐ°É•Ù¥•Ü°½µµ¥Ð°…¹ÁÕÍ ÉÕ±•Ìð4)ðA¡…Í”€È]½É­EÕ•Õ”ð-8µ=É…¹¥é…Ñ¥½¸½]½É­=É‘•ÉÌ½]=I-}EUU¹µ‘€ð€ÈÔ‘•Á…ÉÑµ•¹ÐµÍ½Á•=A8]½É­=É‘•ÉÌð4)ðI•Á½ÉÑÌð-8µ=É…¹¥é…Ñ¥½¸½I•Á½ÉÑÌ½I5¹µ‘€ð=É…¹¥é…Ñ¥½¸É•Á½ÉÐÍÑ½É…”…¹¹…µ¥¹œÉÕ±•Ìð4(4(ŒŒ•¹•Í¥Ì9Ù½±ÕÑ¥½¸AÉ½Á½Í…°4(4)ð%Ñ•´ðA…Ñ ðAÕÉÁ½Í”ðMÑ…ÑÕÌð4)ð´´µð´´µð´´µð´´µð4)ðAÉ½Á½Í…°¥¹‘•àð-8µ-%=L½•¹•Í¥Ìµ‘¹„½I5¹µ‘€ðÉ½ÍÌµ±…å•È•¹½µ”°9°…Á…‰¥±¥Ñä…¹É•…Ñ½È…É¡¥Ñ•ÑÕÉ”•¹ÑÉäðU9I}IY%\ð4)ðM½ÕÉ”…Õ‘¥Ðð-8µ-%=L½•¹•Í¥Ìµ‘¹„½M=UI}U%P¹µ‘€ð±…ÍÍ¥™¥•ÌUII9P°™É½é•¸°…¹‘¥‘…Ñ”°¡¥ÍÑ½É¥…°…¹½¹™±¥Ñ¥¹œÍ½ÕÉ•Ìð=5A1Qð4)ðIÕ¹Ñ¥µ”…É¡¥Ñ•ÑÕÉ”ð-8µ-%=L½•¹•Í¥Ìµ‘¹„½9M%M}9}Y=1UQ%=9}IU9Q%5¹µ‘€ðM•Á…É…Ñ•ÌMÁ•¥•Ì•¹½µ”°9	±Õ•ÁÉ¥¹Ð°1¥™”=L°5¥¹…¹ðU9I}IY%\ð4)ðÑ½´…Ñ…±½œð-8µ-%=L½•¹•Í¥Ìµ‘¹„½9M%M}Q=5|ÀÀÅ|ÄÀá}Q1=¹µ‘€ðQÝ•±Ù”‘½µ…¥¹Ì…¹€ÄÀà•¹•Í¥Ì…Á…‰¥±¥ÑäÑ½µÌðM%9}=I}IY%\ð4)ð5…¡¥¹”…Ñ…±½œð-8µ-%=L½•¹•Í¥Ìµ‘¹„½•¹•Í¥Í}…Ñ½µ}…Ñ…±½œ¹©Í½¹€ðA…ÉÍ•…‰±”ÀÀÄµÄÀàÉ•½É‘ÌÝ¥Ñ É•ÅÕ¥É•™¥•±‘ÌðAI=A=M0ð4)ðAÉ¥Ù…äÁ½±¥äð-8µ-%=L½•¹•Í¥Ìµ‘¹„½9}AI%Ye}9}!Y9}MIP¹µ‘€ð-••ÁÌÁÉ¥Ù…Ñ”•¹¥¹”™½ÉµÕ±…Ì…¹…ÉÑ¥™…ÑÌ½ÕÐ½˜ÁÕ‰±¥Œ¥Ð½A…•ÌðQ%Y}=I}AI=A=M0ð4(4)Q¡”Á…­…”¥Ì…É¡¥Ñ•ÑÕÉ”½¹±ä…¹‘½•Ì¹½Ðµ½‘¥™äIÕ¹Ñ¥µ”UII9P°U¹¥Ù•ÉÍ”5…ÀUII9P°Q½­•¸½¹ÑÉ…Ð½È…¹ä™É½é•¸‰…Í•±¥¹”¸4(4(ŒŒIÕ¹Ñ¥µ”½Õµ•¹ÑÌ4(4)ð½Õµ•¹Ð%ðQ¥Ñ±”ð1•Ù•°ðMÑ…ÑÕÌðA…Ñ ðUU%ð4)ð´´µð´´µð´´µð´´µð´´µð´´µð4)ð=L´ÀÀÄð-8½Íµ¥Œ=LIÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÅ}½Íµ¥}=L½-9}½Íµ¥}=M}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð˜ÝÝ‰…”µ…ˆÜÜ´ÔÁ„ÄµˆÜÅ˜µ˜ÅˆàÍ…•…„á˜ð4)ð=L´ÀÀÈð-8ÁÀ=É…¹¥Í´IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÉ}ÁÁ}=É…¹¥Í´½-9}ÁÁ}=É…¹¥Íµ}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð€ÔÄÐáá˜àµŒÕ˜´ÔÉ„µ…™ˆÜ´Ý‰”ÁˆàäÌÔÙÌð4)ð=L´ÀÀÌð-8Q•µÁ±”IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÍ}Q•µÁ±•}IÕ¹Ñ¥µ”½-9}Q•µÁ±•}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ðŒÁ˜ØØÜÐÄ´ÄØÕˆ´Õ‰µ„Ý…Œ´ØÄÄÁ™”å•ˆØäÈð4)ð=L´ÀÀÐð-81…¹IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÑ}1…¹‘}IÕ¹Ñ¥µ”½-9}1…¹‘}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð”ààÁ‘˜Í´ÜàØÈ´Õ„ÄÜ´å…˜Ôµ•Èá™™„äÙ…ˆØð4)ð=L´ÀÀÔð-8$IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÕ}%}IÕ¹Ñ¥µ”½-9}%}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð€ÐÄÅ…ŒÕ‰Œµ”ÔØÐ´ÕäÌµ…•ˆà´àá‘‘áˆÝá„ð4)ð=L´ÀÀØð-8½¹½µäIÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÙ}½¹½µå}IÕ¹Ñ¥µ”½-9}½¹½µå}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð”ÜÑ”åˆÈà´áˆÔà´Ôå‘ˆµˆÅ”Ð´á‰ˆÝ‰„ÐÕ™‰ˆÌð4)ð=L´ÀÀÜð-8EÕ•ÍÐIÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀÝ}EÕ•ÍÑ}IÕ¹Ñ¥µ”½-9}EÕ•ÍÑ}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð€Ý”É„àÜä´Íˆàà´ÔÉŒÔµˆØÔä´àäÅ”ÐÁ™å˜Á”ð4)ð=L´ÀÀàð-8½µ‰…ÐIÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀá}½µ‰…Ñ}IÕ¹Ñ¥µ”½-9}½µ‰…Ñ}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð€ÌÄÔÀÀÈÄà´Õ™ŒØ´Õ•‰´äÀáµŒÀØäÁ˜ØàÅ‰…ˆð4)ð=L´ÀÀäð-8½Ù•É¹…¹”IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÀå}½Ù•É¹…¹•}IÕ¹Ñ¥µ”½-9}½Ù•É¹…¹•}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð™„ÔÙ‘™ˆÀ´ÁˆÁ”´ÔÀÐàµ…ˆÈÔ´Ñ‘•”á…Ñ•ŒÐð4)ð=L´ÀÄÀð-8•Ù•±½Á•ÈA$IÕ¹Ñ¥µ”ð0ÐIÕ¹Ñ¥µ”ðÉ…™Ð™½ÈI•Ù¥•Üð-8µIÕ¹Ñ¥µ”½=L´ÀÄÁ}•Ù•±½Á•É}A$½-9}•Ù•±½Á•É}A%}IÕ¹Ñ¥µ•}XÄ¸À¹µ‘€ð€åŒÈÄÔØÉ´áˆÝ”´ÕˆÔÈµ„É™„µ„ÜÈàÉ…ŒÜäÑ‰”ð4(4(ŒŒM,½Õµ•¹ÑÌ4(4)ð½Õµ•¹Ð%ðQ¥Ñ±”ð1•Ù•°ðMÑ…ÑÕÌðA…Ñ ðUU%ð4)ð´´µð´´µð´´µð´´µð´´µð´´µð4)ðM,´ÀÀÄð-8IÕ¹Ñ¥µ”1½…‘•ÈA$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÅ}IÕ¹Ñ¥µ•}1½…‘•È½-9}IÕ¹Ñ¥µ•}1½…‘•É}A%}XÄ¸À¹µ‘€ðŒÔÉˆäÔÈÄ´ÕÔÔ´ÔåØ´àÉ˜Ð´É˜ààÌÐÁ”Ù”ð4)ðM,´ÀÀÈð-8U¹¥Ù•ÉÍ”5…ÀA$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÉ}U¹¥Ù•ÉÍ•}5…Á}A$½-9}U¹¥Ù•ÉÍ•}5…Á}A%}XÄ¸À¹µ‘€ð€Üå„Äàá”Ð´ÐÌáŒ´ÔÄÁ´àäØÀµŒÀá˜ØÅ™‘„Ù„ð4)ðM,´ÀÀÌð-8Q•µÁ±”A$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÍ}Q•µÁ±•}A$½-9}Q•µÁ±•}A%}XÄ¸À¹µ‘€ð€ÈØäØÐÌÅˆµ˜ÈÑ˜´ÔÁ„à´äÕ˜àµ™‰ŒÉ‘‰•ˆÈØÐð4)ðM,´ÀÀÐð-81…¹A$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÑ}1…¹‘}A$½-9}1…¹‘}A%}XÄ¸À¹µ‘€ð™”Á”ÐÜÜÐ´ÙŒÜà´ÔÄÈäµˆÐÕˆ´Ôå„Ñ•ˆØÁ„ÐÄÔð4)ðM,´ÀÀÔð-8ÁÀ=É…¹¥Í´A$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÕ}ÁÁ}=É…¹¥Íµ}A$½-9}ÁÁ}=É…¹¥Íµ}A%}XÄ¸À¹µ‘€ð€äÁäÍ‰ŒÜµ˜ààÜ´Ôå‘ˆµ‰ŒÜä´ÄÝ™˜Ñ‰™˜Á˜Àð4)ðM,´ÀÀØð-8$IÕ¹Ñ¥µ”A$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÙ}%}IÕ¹Ñ¥µ•}A$½-9}%}IÕ¹Ñ¥µ•}A%}XÄ¸À¹µ‘€ð€ÝŒÑ™˜Äàä´ÌÅŒÀ´ÔÈá˜´á…Üµ”Å˜ÀÄÕ‘ŒÀÄÌð4)ðM,´ÀÀÜð-89€¼A$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀÝ}9}}A$½-9}9}}A%}XÄ¸À¹µ‘€ð„ÝŒÜØÔÔÀ´Õ„Í”´Õ”ÐÀµˆàÝˆ´ÝÁ•ÁŒÈÍ˜ÔÔð4)ðM,´ÀÀàð-8½¹½µäA$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀá}½¹½µå}A$½-9}½¹½µå}A%}XÄ¸À¹µ‘€ð”ÜÝÜÔÀØ´ÄÈàà´Õ„Üà´àÍˆÔ´Í…˜Á‰…„ÜÔÜØð4)ðM,´ÀÀäð-8…µ”1½½ÀA$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÀå}…µ•}1½½Á}A$½-9}…µ•}1½½Á}A%}XÄ¸À¹µ‘€ð€ÈÔÑ™…ŒÄµ”ÀÍ”´ÔÍ„Ü´á”Ü´ØàÙ‘ŒÀåÜäÐð4)ðM,´ÀÄÀð-8ÕÉÍ½È€¼½‘•à•¹ÐA$ð0Ô%µÁ±•µ•¹Ñ…Ñ¥½¸ðÉ…™Ð™½ÈI•Ù¥•Üð-8µM,½M,´ÀÄÁ}ÕÉÍ½É}½‘•á}•¹Ñ}A$½-9}ÕÉÍ½É}½‘•á}•¹Ñ}A%}XÄ¸À¹µ‘€ð€ÀÐÄåÀÙˆµ…Œäà´ÕÌÀµ„ÔÕ„´äÄÉÁ˜ÈÄÐØØäð4(4(ŒŒ5…¡¥¹”µI•…‘…‰±”…¹½¸4(4(´-8µ…¹½¸½-9}9=9}5MQH¹©Í½¹€4(´-8µ…¹½¸½-9}=U59Q}%9`¹©Í½¹€4(´-8µ…¹½¸½-9}IU9Q%5}%9`¹©Í½¹€4(´-8µ…¹½¸½-9}M-}%9`¹©Í½¹€4(´-8µ…¹½¸½-9}QI5M}%Q%=9Id¹©Í½¹€4(´-8µ…¹½¸½-9}A99e}IA ¹©Í½¹€4(4(ŒŒQ½­•¸¹1¥ÍÑ¥¹œ…ÑÌ4(4)ð%Ñ•´ðY…±Õ”ð4)ð´´µð´´µð4)ð9…µ”ð-1%99M%Lð4)ðMåµ‰½°ð-8ð4)ð¡…¥¸ð	9Mµ…ÉÐ¡…¥¸ð4)ðMÑ…¹‘…Éð	@´ÈÀð4)ðQ½Ñ…°MÕÁÁ±äð€ÜÈ°ÀÀÀ°ÀÀÀ-8ð4)ð•¥µ…±Ìð€Äàð4)ð½¹ÑÉ…Ðð€Áá	ÍÌàÄÁ”ÔàÜÌÕˆØàÄÍ‰ÅŒÔÐÔáÁÜÄÐÌÉ	•€ð4)ðQ…àð€À¸ÌÀ”½¹±ä½¸54‰Õä½Í•±°ð4)ð…¥È1…Õ¹ ð9¼%<€¼9¼%<€¼9¼AÉ•Í…±”ð4(4(ŒŒ=™™¥¥…°1¥¹­Ì4(4(´€¨©]•‰Í¥Ñ”è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä¼4(´€¨©¥Ñ!Õˆè¨¨¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­±¥¹•½‘åÍÍ•ä½­±¥¹”µ½‘åÍÍ•ä4(´€¨©	ÍM…¸è¨¨¡ÑÑÁÌè¼½‰ÍÍ…¸¹½´½Ñ½­•¸¼Áá	ÍÌàÄÁ”ÔàÜÌÕˆØàÄÍ‰ÅŒÔÐÔáÁÜÄÐÌÉ	”4(´€¨©A…¹…­•MÝ…Àè¨¨¡ÑÑÁÌè¼½Á…¹…­•ÍÝ…À¹™¥¹…¹”½ÍÝ…Àý½ÕÑÁÕÑÕÉÉ•¹äôÁá	ÍÌàÄÁ”ÔàÜÌÕˆØàÄÍ‰ÅŒÔÐÔáÁÜÄÐÌÉ	”4(´€¨©½¥¹5…É­•Ñ…À•áM…¸è¨¨¡ÑÑÁÌè¼½½¥¹µ…É­•Ñ…À¹½´½‘•áÍ…¸½‰ÍŒ¼Áá˜ÌØØÐÁÜÌÈÝˆÔÍ‰„ÍÝ™ŒÅäá‘™ŒÅˆàÔÔÜÑˆÙŒÈ¼4(´€¨©•­½Q•Éµ¥¹…°è¨¨¡ÑÑÁÌè¼½ÝÝÜ¹•­½Ñ•Éµ¥¹…°¹½´½‰ÍŒ½Á½½±Ì¼Áá˜ÌØØÐÁÜÌÈÝˆÔÍ‰„ÍÝ™ŒÅäá‘™ŒÅˆàÔÔÜÑˆÙŒÈ4(´€¨©½¥¹•­¼µ…É­•Ð‘…Ñ„è¨¨¡ÑÑÁÌè¼½ÝÝÜ¹•­½Ñ•Éµ¥¹…°¹½´½‰ÍŒ½Á½½±Ì¼Áá˜ÌØØÐÁÜÌÈÝˆÔÍ‰„ÍÝ™ŒÅäá‘™ŒÅˆàÔÔÜÑˆÙŒÈ4(´€¨©Q•±•É…´è¨¨¡ÑÑÁÌè¼½Ð¹µ”½-1%9=eMMd4(´€¨©`è¨¨¡ÑÑÁÌè¼½à¹½´½­±¥¹•½‘åÍÍ•ä4(´€¨©e½ÕQÕ‰”è¨¨¡ÑÑÁÌè¼½ÝÝÜ¹å½ÕÑÕ‰”¹½´½­±¥¹•½‘åÍÍ•ä4(´€¨©]¡¥Ñ•Á…Á•È%90è¨¨‘½Ì½Á¡åÍ¥Ì½™¥¹…°µÝ¡¥Ñ•Á…Á•È½-9}U¹¥Ù•ÉÍ•}A¡åÍ¥Í}IÕ¹Ñ¥µ•}XÐ¸Á}=%%1}]!%QAAI}%90¹Á‘˜4(´€¨©•¹•Í¥Ì1¥‰É…Éäè¨¨-8µ•¹•Í¥Ì¼4(
+| KAIOS Kernel V1 Design | `KGEN-KAIOS/kernel/KERNEL_V1.md` | Single-Agent timeline, lifecycle, state machine and Human review boundary |
+| KAIOS Kernel Runtime Model | `KGEN-KAIOS/kernel/kernel_runtime.json` | Machine-readable eight-state design for æ‚Ÿç©º001 |
+| KAIOS Kernel Sub-Runtimes | `KGEN-KAIOS/kernel/` | Boot, Memory, Task, Review, Reward and Sleep research specifications |
+| Kernel Review Resolution | `KGEN-KAIOS/kernel/KERNEL_ARCHITECTURE_REVIEW_RESOLUTION.md` | Codex resolution of the Human-transmitted Grok Kernel review |
+| Kernel Review Resolution JSON | `KGEN-KAIOS/kernel/kernel_architecture_review_resolution.json` | Machine-readable classifications, readiness and roadmap |
+| Kernel ADR | `KGEN-KAIOS/kernel/kernel_adr/` | KADR-001 through KADR-010; all pending Human approval |
+| Architecture Governance Board | `KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md` | Human-approved Board mandate, members, quorum and architecture-to-release flow |
+| Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
+| Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
+| Architecture Review History | `KGEN-KAIOS/governance/architecture_review_history.jsonl` | Append-only review, resolution and Human approval events |
+| Company Autopilot | `KGEN-KAIOS/governance/autopilot/README.md` | Delegated General Manager boundaries, Company OS Boot and operating package index |
+| Architecture Backlog Registry | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal dependencies, review scores, risk, commit state and next action |
+| Canonical Claim Authority Proposal | `KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional claim, fencing token and lease authority architecture; implementation not started |
+| Worker Swarm Architecture | `KGEN-KAIOS/governance/autopilot/worker-swarm/README.md` | Multi-session Worker coordination proposal with explicit non-atomic pre-cutover boundary |
+| Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
+| Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
+| Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
+| World Viewer Architecture Baseline | `KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md` | Frozen `WORLD-VIEWER-V1.0` Architecture and synthetic-only sandbox boundary |
+| UI Governor Package | `KGEN-KAIOS/ui-governor/README.md` | Source audit, 80-cell daily matrix and architecture enablement boundary |
+| UI Governor Runtime | `KGEN-KAIOS/ui-governor/UI_GOVERNOR_RUNTIME.md` | Permanent inspection control-plane, evidence and release-gate proposal |
+| UI Health Report | `KGEN-KAIOS/ui-governor/UI_HEALTH_REPORT.md` | Pre-automation route, source, health and readiness baseline |
+| Screenshot Diff Runtime | `KGEN-KAIOS/ui-governor/SCREENSHOT_DIFF_RUNTIME.md` | Deterministic screenshot artifacts, masks and comparison contract |
+| Visual Regression Runtime | `KGEN-KAIOS/ui-governor/VISUAL_REGRESSION_RUNTIME.md` | Visual baseline lifecycle, coverage and regression decisions |
+| Responsive Layout Runtime | `KGEN-KAIOS/ui-governor/RESPONSIVE_LAYOUT_RUNTIME.md` | Eight daily Desktop, Tablet, Android, iPhone, orientation and theme profiles |
+| Accessibility Runtime | `KGEN-KAIOS/ui-governor/ACCESSIBILITY_RUNTIME.md` | Automated and manual accessibility evidence architecture |
+| UI Performance Runtime | `KGEN-KAIOS/ui-governor/PERFORMANCE_RUNTIME.md` | Loading, FPS, resource, console and broken-link budgets |
+| Automatic UI Issue Generator | `KGEN-KAIOS/ui-governor/AUTOMATIC_ISSUE_GENERATOR.md` | Deduplicated evidence-to-Issue architecture; disabled |
+| Automatic UI WorkQueue Generator | `KGEN-KAIOS/ui-governor/AUTOMATIC_WORKQUEUE_GENERATOR.md` | Issue-to-proposed-WorkOrder architecture; disabled |
+| Cursor UI Worker Dispatch | `KGEN-KAIOS/ui-governor/CURSOR_UI_WORKER_DISPATCH.md` | Canonical-Claim-gated isolated UI remediation contract; disabled |
+| UI Style Canon V1 Candidate | `KGEN-KAIOS/ui-governor/UI_STYLE_CANON_V1.md` | Shared component geometry, overlay, safe-area, motion and typography rules |
+| UI Governor JSON | `KGEN-KAIOS/ui-governor/ui_governor_runtime.json` | Machine-readable surfaces, profiles, checks, evidence and boundaries |
+| UI Health JSON | `KGEN-KAIOS/ui-governor/ui_health_report.json` | Machine-readable 31/100 pre-automation health evidence |
+| UI Style Canon JSON | `KGEN-KAIOS/ui-governor/ui_style_canon_v1.json` | Machine-readable Style Canon candidate tokens and six P0 amendments |
+| V11 Architecture Baseline | `KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md` | Human-frozen V11.0 Architecture scope and Phase 1 HOLD boundary |
+| V11 Architecture Baseline JSON | `KGEN-KAIOS/V11/architecture_baseline.json` | SHA-256 manifest for the 11 Architecture documents, ADRs and review evidence |
+| V11 Architecture Evolution Log | `KGEN-KAIOS/V11/architecture_evolution_log.jsonl` | Append-only Architecture version, proposal, reason, ADR and approval lineage |
+| Land Runtime Architecture Baseline | `KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md` | Human-frozen LAND-RUNTIME-V1.0 scope; Implementation NOT_STARTED |
+| Land Runtime Baseline JSON | `KGEN-KAIOS/land/land_runtime_architecture_baseline.json` | SHA-256 manifest for Land Runtime V1 architecture package |
+| Land Runtime Evolution Log | `KGEN-KAIOS/land/land_runtime_architecture_evolution_log.jsonl` | Append-only Land Runtime architecture evolution lineage |
+| Civilization Economy Architecture Baseline | `KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md` | Human-frozen CIV-ECONOMY-V1.0 scope; Implementation NOT_STARTED; WorkQueue NOT_CREATED |
+| Civilization Economy Baseline JSON | `KGEN-KAIOS/civilization/civilization_economy_architecture_baseline.json` | SHA-256 manifest covering README, main spec, 25 sub-standards, 2 JSON, baseline, evolution log |
+| Civilization Economy Evolution Log | `KGEN-KAIOS/civilization/civilization_economy_architecture_evolution_log.jsonl` | Append-only Civilization Economy architecture evolution lineage |
+
+## KAIOS Provenance And Biological Evolution Governance
+
+| Document | Path | Purpose |
+|---|---|---|
+| Versioning Standard | `KGEN-KAIOS/VERSIONING_STANDARD.md` | Formal filename, version metadata, and revision rules |
+| File Header Standard | `KGEN-KAIOS/FILE_HEADER_STANDARD.md` | Markdown / JSON / HTML / JS / CSS metadata formats |
+| Changelog Standard | `KGEN-KAIOS/CHANGELOG_STANDARD.md` | Required changelog evidence for formal organs |
+| Biological Taxonomy Standard | `KGEN-KAIOS/BIOLOGICAL_TAXONOMY_STANDARD.md` | Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species rules |
+| Evolution Lineage Standard | `KGEN-KAIOS/EVOLUTION_LINEAGE_STANDARD.md` | Governed evolution events and rollback paths |
+| Organism Manifest Standard | `KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields and canonical file mapping |
+| Provenance Registry | `KGEN-KAIOS/provenance/` | Author registry, file ownership, contribution logs, and schemas |
+| Organism Examples | `KGEN-KAIOS/examples/organisms/` | Temple, App, and Land organism examples |
+| Biological Versioning Audit | `KGEN_BIOLOGICAL_VERSIONING_AUDIT.md` | P0-P3 baseline audit and next-stage remediation map |
+
+## KAIOS Workforce Governance
+
+| Document | Path | Purpose |
+|---|---|---|
+| Workforce Portal | `workforce/` | Public read-only workforce governance entry |
+| Workforce README | `KGEN-KAIOS/workforce/README.md` | Formal employee rule and file map |
+| Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Required visible start-of-work procedure for every KGEN / KAIOS worker task |
+| Worker Execution Report Template | `KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Required execution report structure, including verification-only tasks |
+| Worker Registry JSON | `KGEN-KAIOS/worker_registry.json` | Machine-readable worker status, trust level and branch authority |
+| Worker Credential Schema | `KGEN-KAIOS/workforce/WORKER_CREDENTIAL_SCHEMA.json` | Start-day and claim credential requirements |
+| Worker Trust Schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust profile schema |
+| Worker Performance Schema | `KGEN-KAIOS/workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker performance score schema |
+| Worker Violation Schema | `KGEN-KAIOS/workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event schema |
+| Worker Audit Log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` | Baseline workforce audit log |
+| Employee Roster | `KGEN-KAIOS/workforce/employee_roster.json` | Current formal employee, candidate, workspace, status and authority source |
+| Office Desks | `KGEN-KAIOS/workforce/office_desks.json` | Logical workspaces, worktrees, branch namespaces and desk health |
+| Tool Access Matrix | `KGEN-KAIOS/workforce/tool_access_matrix.json` | Per-worker tool permission matrix |
+| Attendance Snapshot | `KGEN-KAIOS/workforce/attendance_snapshot.json` | Current duty and attendance state |
+| Daily Attendance | `KGEN-KAIOS/workforce/daily_attendance.json` | Human-readable daily status source for reporting |
+| Recruitment Queue | `KGEN-KAIOS/workforce/recruitment_queue.json` | Candidate hiring queue and sandbox trial status |
+| Agent Workforce V2 Standard | `KGEN-KAIOS/workforce/AGENT_WORKFORCE_V2_STANDARD.md` | Agent-per-employee identity, UUID, desk and concurrency rules |
+| Agent Registry | `KGEN-KAIOS/workforce/agent_registry.json` | V2 Agent employee registry with permanent employee UUIDs |
+| Desk Registry | `KGEN-KAIOS/workforce/desk_registry.json` | V2 per-Agent desk registry |
+| Department Registry | `KGEN-KAIOS/workforce/department_registry.json` | V2 department staffing registry |
+| Agent Runtime Status | `KGEN-KAIOS/workforce/agent_runtime_status.json` | V2 current Agent runtime snapshot |
+| Agent Daily Report | `KGEN-KAIOS/workforce/agent_daily_report.json` | V2 daily workforce operating report |
+| Compensation Standard | `KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md` | V3 payroll, task reward, bonus, penalty and claim boundary standard |
+| Payroll Policy | `KGEN-KAIOS/workforce/payroll_policy.json` | V3 machine-readable salary types, units, claim options and approval matrix |
+| Salary Ledger | `KGEN-KAIOS/workforce/salary_ledger.jsonl` | V3 append-only prototype salary ledger |
+| Payroll Snapshot | `KGEN-KAIOS/workforce/payroll_snapshot.json` | V3 current payroll summary for dashboard display |
+| Bonus Penalty Rules | `KGEN-KAIOS/workforce/bonus_penalty_rules.json` | V3 bonus, withholding, penalty and reversal rules |
+| 8888 Employee Account Standard | `KGEN-KAIOS/bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype internal employee account rules |
+| 8888 Employee Accounts | `KGEN-KAIOS/bank/8888/employee_accounts.json` | Prototype payroll, game balance, merit and claim account ledger |
+| 8888 Payroll Reserve | `KGEN-KAIOS/bank/8888/payroll_reserve.json` | Prototype payroll reserve record; not proof of custody |
+| 8888 Claim Queue | `KGEN-KAIOS/bank/8888/claim_queue.json` | Human approval queue for claim requests |
+| Auto Mission Reward Standard | `KGEN-KAIOS/game/AUTO_MISSION_REWARD_STANDARD.md` | Game mission budget, reward and stop-condition rules |
+| Mission Wallets | `KGEN-KAIOS/game/mission_wallets.json` | Prototype game mission budget wallets |
+| 8888 Robo Advisor Standard | `KGEN-KAIOS/bank/8888/ROBO_ADVISOR_STANDARD.md` | Robo simulation, backtest, paper trading and advisory-only limits |
+| 8888 Robo Registry | `KGEN-KAIOS/bank/8888/robo_registry.json` | Registered Robo simulation advisors and risk status |
+| GitHub Connectivity Runbook | `KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443, fetch, push and remote-ahead diagnostic flow |
+| Unauthorized Contribution Audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` | Historical unauthorized / attribution audit |
+
+## KAIOS Official Video Library
+
+| Document | Path | Purpose |
+|---|---|---|
+| Video Portal | `video/` | Public entry for official video plan |
+| Video README | `video/README.md` | Unified video specification and season list |
+| Video Manifest | `video/VIDEO_MANIFEST.json` | Machine-readable episode manifest |
+| Video Library | `video/VIDEO_LIBRARY.md` | Episode overview |
+| Video Asset Index | `video/VIDEO_ASSET_INDEX.md` | Approved and prohibited asset sources |
+
+## KAIOS V8.0 One Picture One Temple Economy System
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8 Index | `KGEN-KAIOS/V8/README.md` | V8 overview and file map |
+| V8 Demo | `KGEN-KAIOS/V8/index.html` | Read-only player asset roadmap demo |
+| Official Blueprint | `KGEN-KAIOS/V8/assets/KAIOS_V8_ONE_PICTURE_ONE_TEMPLE_BLUEPRINT.png` | Official visual specification source copied from the supplied concept image |
+| Original Blueprint Copy | `KGEN-KAIOS/V8/assets/KAIOS_V8_ONE_PICTURE_ONE_TEMPLE_BLUEPRINT_ORIGINAL.jpg` | Preserved original image without cropping |
+| Master Spec | `KGEN-KAIOS/V8/KAIOS_V8_MASTER_SPEC.md` | V8 system architecture and scope |
+| Player Entry Model | `KGEN-KAIOS/V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md` | Picture, Land, Residence, Temple, App, Real Business and Civilization Node entry models |
+| Asset Lifecycle | `KGEN-KAIOS/V8/KAIOS_V8_ASSET_LIFECYCLE.md` | Wild Land to Cross-Universe Node stages |
+| Task Generator | `KGEN-KAIOS/V8/KAIOS_V8_TASK_GENERATOR.md` | Codex-generated WorkOrder roadmap rules |
+| Economy Runtime | `KGEN-KAIOS/V8/KAIOS_V8_ECONOMY_RUNTIME.md` | Economy loop and bank simulation context |
+| Bank Runtime | `KGEN-KAIOS/V8/runtime/KAIOS_V8_BANK_RUNTIME.md` | Bank account, treasury, loan, collateral, reserve, audit, and KYC/AML boundary |
+| Huaguo Exchange 11520 Runtime | `KGEN-KAIOS/V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md` | Asset listing, order, auction, rental, escrow, settlement, dispute, fee, and delisting model |
+| Real-World Link Standard | `KGEN-KAIOS/V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md` | Virtual twin adapters and legal authorization gate |
+| Listing Standard | `KGEN-KAIOS/V8/KAIOS_V8_LISTING_STANDARD.md` | Listing eligibility, pricing, disclosure, risk, transfer, rental, delisting, dispute, and legal restrictions |
+| Security and Legal Boundary | `KGEN-KAIOS/V8/KAIOS_V8_SECURITY_AND_LEGAL_BOUNDARY.md` | Concept, Prototype, Runtime, Production, Regulated and brand/finance/legal boundaries |
+| Schemas | `KGEN-KAIOS/V8/schemas/` | Thirteen JSON Schemas for V8 data objects |
+| Examples | `KGEN-KAIOS/V8/examples/` | Six JSON examples for player entry and runtime records |
+| WorkOrders | `KGEN-KAIOS/V8/workorders/V8_WORKORDERS.md` | V8-P0 through V8-P15 executable Cursor handoff WorkOrders |
+| QA Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_QA_REPORT.md` | Baseline QA result |
+| Release Report | `KGEN-KAIOS/V8/reports/KAIOS_V8_RELEASE_REPORT.md` | V8 release summary and next phase |
+
+## KAIOS V8.1 Universe Data Layer
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.1 Index | `KGEN-KAIOS/V8.1/README.md` | V8.1 overview and file map |
+| Universe Viewer | `KGEN-KAIOS/V8.1/index.html` | Read-only Universe Graph viewer |
+| Universe Data Layer | `KGEN-KAIOS/V8.1/UNIVERSE_DATA_LAYER.md` | Master data-layer specification |
+| Universe Graph | `KGEN-KAIOS/V8.1/UNIVERSE_GRAPH.md` | Canonical graph backbone and entity roles |
+| Entity Relationship | `KGEN-KAIOS/V8.1/ENTITY_RELATIONSHIP.md` | Entity envelope and relationship records |
+| Unique ID Standard | `KGEN-KAIOS/V8.1/UNIQUE_ID_STANDARD.md` | Stable ID rules and prefixes |
+| World State Model | `KGEN-KAIOS/V8.1/WORLD_STATE_MODEL.md` | Snapshot models and metrics |
+| Citizen Standard | `KGEN-KAIOS/V8.1/CITIZEN_STANDARD.md` | Citizen fields and lifecycle |
+| Profession Standard | `KGEN-KAIOS/V8.1/PROFESSION_STANDARD.md` | Profession library, income, skill, building, upgrade and output rules |
+| Life Cycle Standard | `KGEN-KAIOS/V8.1/LIFE_CYCLE_STANDARD.md` | Life stages and runtime hooks |
+| Player Standard | `KGEN-KAIOS/V8.1/PLAYER_STANDARD.md` | Player boundary and relation to citizens |
+| NPC Standard | `KGEN-KAIOS/V8.1/NPC_STANDARD.md` | NPC life and service role |
+| AI Standard | `KGEN-KAIOS/V8.1/AI_STANDARD.md` | AI as life organ and Canon-locked runtime assistant |
+| App Organism Standard | `KGEN-KAIOS/V8.1/APP_ORGANISM_STANDARD.md` | App as lifeform lifecycle actions |
+| Runtime Relationship Map | `KGEN-KAIOS/V8.1/runtime/RUNTIME_RELATIONSHIP_MAP.md` | Runtime-to-entity responsibility model |
+| Runtime Documents | `KGEN-KAIOS/V8.1/runtime/` | Temple, Citizen, Economy, Player and AI runtime specifications |
+| Schemas | `KGEN-KAIOS/V8.1/schemas/` | Eight V8.1 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.1/examples/` | Eight parseable examples |
+| QA Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | Baseline V8.1 QA report |
+| Release Report | `KGEN-KAIOS/V8.1/reports/KAIOS_V8_1_RELEASE_REPORT.md` | V8.1 release summary and V8.2 recommendation |
+
+## KAIOS V8.2 Civilization Economy Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.2 Index | `KGEN-KAIOS/V8.2/README.md` | V8.2 overview and file map |
+| Economy Viewer | `KGEN-KAIOS/V8.2/index.html` | Read-only Economy Viewer |
+| Economy Dashboard | `KGEN-KAIOS/V8.2/dashboard/index.html` | Read-only Temple, Citizen, Market, Business, Resource and Civilization Health dashboard |
+| Economy Engine | `KGEN-KAIOS/V8.2/ECONOMY_ENGINE.md` | Master Civilization Economy Engine specification |
+| Resource Standard | `KGEN-KAIOS/V8.2/RESOURCE_STANDARD.md` | Resource classes and accounting |
+| Production Standard | `KGEN-KAIOS/V8.2/PRODUCTION_STANDARD.md` | Profession-to-business output model |
+| Consumption Standard | `KGEN-KAIOS/V8.2/CONSUMPTION_STANDARD.md` | Citizen, business and civilization consumption model |
+| Business Standard | `KGEN-KAIOS/V8.2/BUSINESS_STANDARD.md` | 23-type Business Library and business record requirements |
+| Market Standard | `KGEN-KAIOS/V8.2/MARKET_STANDARD.md` | Buy, sell, auction concept, order book concept, price discovery and liquidity concept |
+| Exchange Standard | `KGEN-KAIOS/V8.2/EXCHANGE_STANDARD.md` | Huaguo Mountain Exchange 11520 and civilization marketplace boundary |
+| Bank Standard | `KGEN-KAIOS/V8.2/BANK_STANDARD.md` | Deposit simulation, withdraw simulation, reserve, loan concept, interest concept and treasury boundary |
+| Tax Standard | `KGEN-KAIOS/V8.2/TAX_STANDARD.md` | Citizen, business, temple and civilization tax signals |
+| Listing Standard | `KGEN-KAIOS/V8.2/LISTING_STANDARD.md` | Listing rules for simulated economy objects |
+| Transaction Standard | `KGEN-KAIOS/V8.2/TRANSACTION_STANDARD.md` | Transaction event model and settlement boundary |
+| Governance Signal Standard | `KGEN-KAIOS/V8.2/GOVERNANCE_SIGNAL_STANDARD.md` | GDP, population, employment, temple activity, market activity, civilization health and AI activity |
+| Supply Chain Standard | `KGEN-KAIOS/V8.2/SUPPLY_CHAIN_STANDARD.md` | Producer, logistics, warehouse, retail, consumer and recycling flow |
+| Runtime Documents | `KGEN-KAIOS/V8.2/runtime/` | Six runtime documents for economy, business, market, bank, exchange and governance signal processing |
+| Schemas | `KGEN-KAIOS/V8.2/schemas/` | Eight V8.2 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.2/examples/` | Eight parseable examples |
+| QA Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_QA_REPORT.md` | Baseline V8.2 QA report |
+| Release Report | `KGEN-KAIOS/V8.2/reports/KAIOS_V8_2_RELEASE_REPORT.md` | V8.2 release summary and V8.3 recommendation |
+
+## KAIOS V8.3 Civilization Time Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V8.3 Index | `KGEN-KAIOS/V8.3/README.md` | V8.3 overview and file map |
+| Simulation Viewer | `KGEN-KAIOS/V8.3/index.html` | Read-only Simulation, Timeline and World Clock Viewer |
+| Time Dashboard | `KGEN-KAIOS/V8.3/dashboard/index.html` | Read-only time health and event dashboard |
+| Time Engine | `KGEN-KAIOS/V8.3/TIME_ENGINE.md` | Master Civilization Time Engine specification |
+| World Clock Standard | `KGEN-KAIOS/V8.3/WORLD_CLOCK_STANDARD.md` | Universe, Civilization, World, Temple, Business and Citizen clocks |
+| Simulation Tick Standard | `KGEN-KAIOS/V8.3/SIMULATION_TICK_STANDARD.md` | Tick scale, configurable tick rate and execution order |
+| Day Night Cycle | `KGEN-KAIOS/V8.3/DAY_NIGHT_CYCLE.md` | Daily activity rhythm |
+| Season System | `KGEN-KAIOS/V8.3/SEASON_SYSTEM.md` | Seasonal resource and economy modifiers |
+| Citizen Behavior | `KGEN-KAIOS/V8.3/CITIZEN_BEHAVIOR.md` | Work, consume, rest, move, learn, trade and upgrade actions |
+| Business Behavior | `KGEN-KAIOS/V8.3/BUSINESS_BEHAVIOR.md` | Production, restock, income, expense and employee changes |
+| Temple Activity | `KGEN-KAIOS/V8.3/TEMPLE_ACTIVITY.md` | Service, faith value, population attraction and civilization influence |
+| Resource Regeneration | `KGEN-KAIOS/V8.3/RESOURCE_REGENERATION.md` | Natural recovery, consumption and regeneration |
+| Population Growth | `KGEN-KAIOS/V8.3/POPULATION_GROWTH.md` | Migration, training, residence expansion and archive signals |
+| Event Engine | `KGEN-KAIOS/V8.3/EVENT_ENGINE.md` | Festival, War concept, Disaster, Discovery, Technology, Migration, Economic Boom and Recession |
+| Disaster Standard | `KGEN-KAIOS/V8.3/DISASTER_STANDARD.md` | Negative shock classification and recovery boundary |
+| Governance Response | `KGEN-KAIOS/V8.3/GOVERNANCE_RESPONSE.md` | GDP, population, unemployment, resource, temple and market response model |
+| Simulation Runtime | `KGEN-KAIOS/V8.3/SIMULATION_RUNTIME.md` | Runtime flow from clock to governance response and timeline snapshot |
+| Schemas | `KGEN-KAIOS/V8.3/schemas/` | Ten V8.3 JSON Schemas |
+| Examples | `KGEN-KAIOS/V8.3/examples/` | Ten parseable examples |
+| QA Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_QA_REPORT.md` | Baseline V8.3 QA report |
+| Release Report | `KGEN-KAIOS/V8.3/reports/KAIOS_V8_3_RELEASE_REPORT.md` | V8.3 release summary and V9.0 recommendation |
+
+## KAIOS V9.0 Civilization AI Engine
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.0 Index | `KGEN-KAIOS/V9.0/README.md` | V9.0 overview and file map |
+| AI Viewer | `KGEN-KAIOS/V9.0/index.html` | Read-only Civilization AI Viewer |
+| AI Dashboard | `KGEN-KAIOS/V9.0/dashboard/index.html` | Read-only AI decisions, risk, WorkOrders and review dashboard |
+| Civilization AI Engine | `KGEN-KAIOS/V9.0/CIVILIZATION_AI_ENGINE.md` | Master AI Engine specification |
+| Observation Model | `KGEN-KAIOS/V9.0/AI_OBSERVATION_MODEL.md` | Observation sources and quality |
+| Reasoning Model | `KGEN-KAIOS/V9.0/AI_REASONING_MODEL.md` | Explainable reasoning procedure |
+| Decision Model | `KGEN-KAIOS/V9.0/AI_DECISION_MODEL.md` | Decision output contract and decision types |
+| Memory Model | `KGEN-KAIOS/V9.0/AI_MEMORY_MODEL.md` | Traceable memory model |
+| Policy Model | `KGEN-KAIOS/V9.0/AI_POLICY_MODEL.md` | Allowed and prohibited AI actions |
+| Risk Model | `KGEN-KAIOS/V9.0/AI_RISK_MODEL.md` | R0 to R4 risk levels |
+| Event Interpreter | `KGEN-KAIOS/V9.0/AI_EVENT_INTERPRETER.md` | Event stream interpretation |
+| Governance Advisor | `KGEN-KAIOS/V9.0/AI_GOVERNANCE_ADVISOR.md` | Governance signal advisor |
+| Economy Advisor | `KGEN-KAIOS/V9.0/AI_ECONOMY_ADVISOR.md` | Economy advisor |
+| Temple Advisor | `KGEN-KAIOS/V9.0/AI_TEMPLE_ADVISOR.md` | Temple advisor |
+| Land Advisor | `KGEN-KAIOS/V9.0/AI_LAND_ADVISOR.md` | Land advisor |
+| Citizen Advisor | `KGEN-KAIOS/V9.0/AI_CITIZEN_ADVISOR.md` | Citizen advisor |
+| WorkOrder Generator | `KGEN-KAIOS/V9.0/AI_WORKORDER_GENERATOR.md` | Draft WorkOrder rules |
+| Human Override | `KGEN-KAIOS/V9.0/AI_HUMAN_OVERRIDE.md` | Human override audit model |
+| Codex Review Boundary | `KGEN-KAIOS/V9.0/AI_CODEX_REVIEW_BOUNDARY.md` | Codex review checks |
+| Runtime Documents | `KGEN-KAIOS/V9.0/runtime/` | Eight advisor runtime documents |
+| Schemas | `KGEN-KAIOS/V9.0/schemas/` | Eight V9.0 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.0/examples/` | Eight parseable examples |
+| Draft WorkOrders | `KGEN-KAIOS/V9.0/workorders/V9_DRAFT_WORKORDERS.md` | V9-DRYRUN-001A/B/C draft tasks |
+| Dry Run Report | `KGEN-KAIOS/V9.0/reports/V9-DRYRUN-001_REPORT.md` | AI dry run result |
+| QA Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_QA_REPORT.md` | Baseline V9.0 QA report |
+| Release Report | `KGEN-KAIOS/V9.0/reports/KAIOS_V9_0_RELEASE_REPORT.md` | V9.0 release summary and V9.1 recommendation |
+
+## KAIOS V9.1 AI WorkOrder Review Loop
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.1 Index | `KGEN-KAIOS/V9.1/README.md` | V9.1 overview and file map |
+| V9.1 Entry | `KGEN-KAIOS/V9.1/index.html` | Read-only V9.1 public entry |
+| V9.1 Dashboard | `KGEN-KAIOS/V9.1/dashboard/index.html` | Read-only WorkOrder review dashboard |
+| AI WorkOrder Review Loop | `KGEN-KAIOS/V9.1/AI_WORKORDER_REVIEW_LOOP.md` | Formal DRAFT review lifecycle |
+| Draft WorkOrder Standard | `KGEN-KAIOS/V9.1/DRAFT_WORKORDER_STANDARD.md` | Required fields and validation standard |
+| Codex Promotion Protocol | `KGEN-KAIOS/V9.1/CODEX_PROMOTION_PROTOCOL.md` | Codex 15-point promotion checklist |
+| Codex Rejection Protocol | `KGEN-KAIOS/V9.1/CODEX_REJECTION_PROTOCOL.md` | Rejection and archive rules |
+| Codex Revision Protocol | `KGEN-KAIOS/V9.1/CODEX_REVISION_PROTOCOL.md` | Revision request and resubmission rules |
+| Human Review Gate | `KGEN-KAIOS/V9.1/HUMAN_REVIEW_GATE.md` | R3 and Human override review record |
+| Duplicate Detection | `KGEN-KAIOS/V9.1/DUPLICATE_TASK_DETECTION.md` | Duplicate and merge-candidate detection |
+| Dependency Validation | `KGEN-KAIOS/V9.1/DEPENDENCY_VALIDATION.md` | Dependency checks before promotion |
+| Risk Promotion Matrix | `KGEN-KAIOS/V9.1/RISK_PROMOTION_MATRIX.md` | R0-R4 promotion matrix |
+| WorkOrder Archive Standard | `KGEN-KAIOS/V9.1/WORKORDER_ARCHIVE_STANDARD.md` | Archive and retention rules |
+| Schemas | `KGEN-KAIOS/V9.1/schemas/` | Nine V9.1 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.1/examples/` | Nine parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.1/runtime/` | Eight review runtime documents |
+| Reviews | `KGEN-KAIOS/V9.1/reviews/` | Codex decisions for V9.0 DRAFT WorkOrders |
+| Audit Log | `KGEN-KAIOS/V9.1/reports/V9_1_AUDIT_LOG.md` | Review state-transition audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.1/reports/V9_1_DRYRUN_001_REPORT.md` | V9.1 dry run result |
+| QA Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_QA_REPORT.md` | V9.1 QA result |
+| Release Report | `KGEN-KAIOS/V9.1/reports/KAIOS_V9_1_RELEASE_REPORT.md` | V9.1 release summary |
+
+## KAIOS V9.2 Approved Draft to OPEN WorkQueue Sync
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.2 Index | `KGEN-KAIOS/V9.2/README.md` | V9.2 overview and file map |
+| V9.2 Entry | `KGEN-KAIOS/V9.2/index.html` | Read-only V9.2 public entry |
+| V9.2 Dashboard | `KGEN-KAIOS/V9.2/dashboard/index.html` | Read-only sync dashboard |
+| Approved Draft Sync Standard | `KGEN-KAIOS/V9.2/APPROVED_DRAFT_SYNC_STANDARD.md` | Sync state machine |
+| Codex WorkQueue Sync Protocol | `KGEN-KAIOS/V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md` | 17-point sync checklist |
+| WorkOrder ID Allocation | `KGEN-KAIOS/V9.2/WORKORDER_ID_ALLOCATION_STANDARD.md` | Formal AI WorkOrder ID rules |
+| WorkQueue Conflict Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_CONFLICT_POLICY.md` | Conflict detection |
+| WorkQueue Insertion Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_INSERTION_POLICY.md` | Safe insertion rules |
+| WorkQueue Rollback Policy | `KGEN-KAIOS/V9.2/WORKQUEUE_ROLLBACK_POLICY.md` | Rollback rules |
+| Sync Audit Standard | `KGEN-KAIOS/V9.2/SYNC_AUDIT_STANDARD.md` | Sync audit fields |
+| Human Pause Gate | `KGEN-KAIOS/V9.2/HUMAN_PAUSE_GATE.md` | Human pause, reject, archive and priority changes |
+| Schemas | `KGEN-KAIOS/V9.2/schemas/` | Eight V9.2 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.2/examples/` | Eight parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.2/runtime/` | Eight sync runtime documents |
+| Sync Artifacts | `KGEN-KAIOS/V9.2/sync/` | `AI-ECONOMY-2026-0001` sync request, validation, allocation and result |
+| Sync Report | `KGEN-KAIOS/V9.2/reports/V9_2_SYNC_REPORT.md` | Actual V9.2 sync report |
+| Sync Audit Log | `KGEN-KAIOS/V9.2/reports/V9_2_SYNC_AUDIT_LOG.md` | Sync audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.2/reports/V9_2_DRYRUN_001_REPORT.md` | Successful sync, conflict, Human pause and rollback tests |
+| QA Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_QA_REPORT.md` | V9.2 QA result |
+| Release Report | `KGEN-KAIOS/V9.2/reports/KAIOS_V9_2_RELEASE_REPORT.md` | V9.2 release summary |
+
+## KAIOS V9.3 Dispatch Hold Release Protocol
+
+| Item | Path | Purpose |
+|---|---|---|
+| V9.3 Index | `KGEN-KAIOS/V9.3/README.md` | V9.3 overview and file map |
+| V9.3 Entry | `KGEN-KAIOS/V9.3/index.html` | Read-only V9.3 public entry |
+| V9.3 Dashboard | `KGEN-KAIOS/V9.3/dashboard/index.html` | Read-only dispatch dashboard |
+| Dispatch Hold Standard | `KGEN-KAIOS/V9.3/DISPATCH_HOLD_STANDARD.md` | `OPEN + HOLD` meaning and release boundary |
+| Codex Release Protocol | `KGEN-KAIOS/V9.3/CODEX_RELEASE_PROTOCOL.md` | 20-point release checklist |
+| Worker Eligibility | `KGEN-KAIOS/V9.3/WORKER_ELIGIBILITY_PROTOCOL.md` | Worker claim eligibility rules |
+| Dependency Gate | `KGEN-KAIOS/V9.3/DISPATCH_DEPENDENCY_GATE.md` | Dependency validation |
+| Risk Gate | `KGEN-KAIOS/V9.3/DISPATCH_RISK_GATE.md` | R0-R4 release authority |
+| Schemas | `KGEN-KAIOS/V9.3/schemas/` | Nine V9.3 JSON Schemas |
+| Examples | `KGEN-KAIOS/V9.3/examples/` | Nine parseable examples |
+| Runtime Documents | `KGEN-KAIOS/V9.3/runtime/` | Nine dispatch runtime documents |
+| Release Artifacts | `KGEN-KAIOS/V9.3/release/` | `AI-ECONOMY-2026-0001` release request, validation, result and gates |
+| Release Review | `KGEN-KAIOS/V9.3/reports/AI-ECONOMY-2026-0001_RELEASE_REVIEW.md` | Actual release review |
+| Dispatch Audit Log | `KGEN-KAIOS/V9.3/reports/V9_3_DISPATCH_AUDIT_LOG.md` | Release audit log |
+| Dry Run Report | `KGEN-KAIOS/V9.3/reports/V9_3_DRYRUN_001_REPORT.md` | Release, pause, re-hold and R4 tests |
+| QA Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_QA_REPORT.md` | V9.3 QA result |
+| Release Report | `KGEN-KAIOS/V9.3/reports/KAIOS_V9_3_RELEASE_REPORT.md` | V9.3 release summary |
+
+## KAIOS V10.0 Operating System
+
+| Item | Path | Purpose |
+|---|---|---|
+| V10 Index | `KGEN-KAIOS/V10/README.md` | V10 overview and file map |
+| V10 Entry | `KGEN-KAIOS/V10/index.html` | Read-only V10 public entry |
+| V10 Dashboard | `KGEN-KAIOS/V10/dashboard/index.html` | Read-only operating dashboard |
+| OS Standard | `KGEN-KAIOS/V10/KAIOS_OPERATING_SYSTEM.md` | KAIOS Operating System constitution |
+| System Architecture | `KGEN-KAIOS/V10/SYSTEM_ARCHITECTURE.md` | Browser to AI Company architecture |
+| Microservice Standard | `KGEN-KAIOS/V10/MICROSERVICE_STANDARD.md` | Logical service boundary standard |
+| API Gateway | `KGEN-KAIOS/V10/API_GATEWAY_STANDARD.md` | API ingress and secret boundary |
+| Frontend / Backend | `KGEN-KAIOS/V10/FRONTEND_STANDARD.md`, `KGEN-KAIOS/V10/BACKEND_STANDARD.md` | UI and service layer standards |
+| Membership / Wallet / Payment | `KGEN-KAIOS/V10/MEMBERSHIP_STANDARD.md`, `KGEN-KAIOS/V10/WALLET_STANDARD.md`, `KGEN-KAIOS/V10/PAYMENT_STANDARD.md` | Identity, wallet and payment boundaries |
+| Blockchain / Token / NFT | `KGEN-KAIOS/V10/BLOCKCHAIN_STANDARD.md`, `KGEN-KAIOS/V10/TOKEN_STANDARD.md`, `KGEN-KAIOS/V10/NFT_STANDARD.md` | Chain and token boundaries |
+| Marketplace / App / Plugin | `KGEN-KAIOS/V10/MARKETPLACE_STANDARD.md`, `KGEN-KAIOS/V10/APP_RUNTIME_STANDARD.md`, `KGEN-KAIOS/V10/PLUGIN_STANDARD.md` | Market and extension standards |
+| Security / Audit / Deployment | `KGEN-KAIOS/V10/SECURITY_STANDARD.md`, `KGEN-KAIOS/V10/AUDIT_STANDARD.md`, `KGEN-KAIOS/V10/DEPLOYMENT_STANDARD.md` | Operating safety standards |
+| Schemas | `KGEN-KAIOS/V10/schemas/` | Twelve V10 JSON Schemas |
+| Examples | `KGEN-KAIOS/V10/examples/` | Twelve parseable examples |
+| Runtime Maps | `KGEN-KAIOS/V10/runtime/` | Nine runtime maps |
+| Dry Run | `KGEN-KAIOS/V10/reports/V10_DRYRUN_001_REPORT.md` | V10 operating dry run |
+| QA Report | `KGEN-KAIOS/V10/reports/KAIOS_V10_QA_REPORT.md` | V10 QA result |
+| Release Report | `KGEN-KAIOS/V10/reports/KAIOS_V10_RELEASE_REPORT.md` | V10 release summary |
+## Organization V2.0
+
+| Item | Path | Purpose |
+|---|---|---|
+| Organization Index | `KGEN-Organization/README.md` | AI company operating system entry |
+| Civilization Core Canon | `KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md` | L1 Canon for civilization, AI, economy, game, and blockchain loops |
+| Economy Loop | `KGEN-Organization/Economy/KGEN_ECONOMY_LOOP.md` | Wild Land to cross-universe civilization economy loop |
+| App Life Standard | `KGEN-Organization/App/KGEN_APP_LIFE_STANDARD.md` | App as life, DNA, reproduction, evolution, trade, death, rebirth, inheritance |
+| Temple Standard | `KGEN-Organization/Temple/KGEN_TEMPLE_STANDARD.md` | Temple, house, NPC, shop, bank, exchange, warehouse, Portal, and organs |
+| Land Standard | `KGEN-Organization/Land/KGEN_LAND_STANDARD.md` | Wild Land, civilization land, trade, construction, conquest, rental, future NFT layer |
+| WorkOrder Standard | `KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md` | Codex assignment, Cursor execution, report, review, commit, and push rules |
+| Phase 2 WorkQueue | `KGEN-Organization/WorkOrders/WORK_QUEUE.md` | 25 department-scoped OPEN WorkOrders |
+| Reports | `KGEN-Organization/Reports/README.md` | Organization report storage and naming rules |
+
+## Genesis DNA Evolution Proposal
+
+| Item | Path | Purpose | Status |
+|---|---|---|---|
+| Proposal index | `KGEN-KAIOS/genesis-dna/README.md` | Cross-layer genome, DNA, capability and creator architecture entry | UNDER_REVIEW |
+| Source audit | `KGEN-KAIOS/genesis-dna/SOURCE_AUDIT.md` | Classifies CURRENT, frozen, candidate, historical and conflicting sources | COMPLETE |
+| Runtime architecture | `KGEN-KAIOS/genesis-dna/GENESIS_DNA_EVOLUTION_RUNTIME.md` | Separates Species Genome, DNA Blueprint, Life OS, Mind and GA | UNDER_REVIEW |
+| Atom catalog | `KGEN-KAIOS/genesis-dna/GENESIS_ATOM_001_108_CATALOG.md` | Twelve domains and 108 Genesis Capability Atoms | DESIGN_FOR_REVIEW |
+| Machine catalog | `KGEN-KAIOS/genesis-dna/genesis_atom_catalog.json` | Parseable GA001-GA108 records with required fields | PROPOSAL |
+| Privacy policy | `KGEN-KAIOS/genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md` | Keeps private engine formulas and artifacts out of public Git/Pages | ACTIVE_FOR_PROPOSAL |
+
+The package is architecture only and does not modify Runtime CURRENT, Universe Map CURRENT, Token Contract or any frozen baseline.
+
+## Runtime Documents
+
+| Document ID | Title | Level | Status | Path | UUID |
+|---|---|---|---|---|---|
+| COS-001 | KGEN Cosmic OS Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-001_Cosmic_OS/KGEN_Cosmic_OS_Runtime_V1.0.md` | f7d7cbae-ab77-50a1-b71f-f1cb83aeaa8f |
+| COS-002 | KGEN App Organism Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-002_App_Organism/KGEN_App_Organism_Runtime_V1.0.md` | 5148d8f8-cc5f-52ca-afb7-7be0b89356d3 |
+| COS-003 | KGEN Temple Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-003_Temple_Runtime/KGEN_Temple_Runtime_V1.0.md` | c0f66741-165b-5bcd-a7ac-6110fe9eb692 |
+| COS-004 | KGEN Land Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-004_Land_Runtime/KGEN_Land_Runtime_V1.0.md` | e880df3d-7862-5a17-9af5-ed28ffa96ab6 |
+| COS-005 | KGEN AI Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-005_AI_Runtime/KGEN_AI_Runtime_V1.0.md` | 411ac5bc-e564-5d93-aeb8-88cddd8b7d8a |
+| COS-006 | KGEN Economy Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-006_Economy_Runtime/KGEN_Economy_Runtime_V1.0.md` | e74e9b28-8b58-59db-b1e4-8bb7ba45fbb3 |
+| COS-007 | KGEN Quest Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-007_Quest_Runtime/KGEN_Quest_Runtime_V1.0.md` | 7e2ca879-3b88-52c5-b659-891e40fd9f0e |
+| COS-008 | KGEN Combat Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-008_Combat_Runtime/KGEN_Combat_Runtime_V1.0.md` | 31500218-5fc6-5ebd-908d-c0690f681bab |
+| COS-009 | KGEN Governance Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-009_Governance_Runtime/KGEN_Governance_Runtime_V1.0.md` | fa56dfb0-0b0e-5048-ab25-4dee8ad4cec4 |
+| COS-010 | KGEN Developer API Runtime | L4 Runtime | Draft for Review | `KGEN-Runtime/COS-010_Developer_API/KGEN_Developer_API_Runtime_V1.0.md` | 9c21562d-8b7e-5b52-a2fa-a7282ac794be |
+
+## SDK Documents
+
+| Document ID | Title | Level | Status | Path | UUID |
+|---|---|---|---|---|---|
+| SDK-001 | KGEN Runtime Loader API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-001_Runtime_Loader/KGEN_Runtime_Loader_API_V1.0.md` | c52b9521-5d55-59d6-82f4-2f88340e6cce |
+| SDK-002 | KGEN Universe Map API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-002_Universe_Map_API/KGEN_Universe_Map_API_V1.0.md` | 79a188e4-438c-510d-8960-c08f61cfda6a |
+| SDK-003 | KGEN Temple API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-003_Temple_API/KGEN_Temple_API_V1.0.md` | 2696431b-f24f-50a8-95f8-fbc2cdbeb264 |
+| SDK-004 | KGEN Land API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-004_Land_API/KGEN_Land_API_V1.0.md` | fe0e4774-6c78-5129-b45b-59a4eb60a415 |
+| SDK-005 | KGEN App Organism API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-005_App_Organism_API/KGEN_App_Organism_API_V1.0.md` | 90d93bc7-f887-59db-bc79-17ff4bfcf0f0 |
+| SDK-006 | KGEN AI Runtime API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-006_AI_Runtime_API/KGEN_AI_Runtime_API_V1.0.md` | 7c4ff189-31c0-528f-8ad7-ce1f015dc013 |
+| SDK-007 | KGEN DNA / GA API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-007_DNA_GA_API/KGEN_DNA_GA_API_V1.0.md` | a7c76550-5a3e-5e40-b87b-7d0ed0c23f55 |
+| SDK-008 | KGEN Economy API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-008_Economy_API/KGEN_Economy_API_V1.0.md` | e77d7506-1288-5a78-83b5-3af0bcaa7576 |
+| SDK-009 | KGEN Game Loop API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-009_Game_Loop_API/KGEN_Game_Loop_API_V1.0.md` | 254fcac1-e03e-53a7-8ce7-686cdc09d794 |
+| SDK-010 | KGEN Cursor / Codex Agent API | L5 Implementation | Draft for Review | `KGEN-SDK/SDK-010_Cursor_Codex_Agent_API/KGEN_Cursor_Codex_Agent_API_V1.0.md` | 0419d06b-ac98-5d30-a55a-912d0f214669 |
+
+## Machine-Readable Canon
+
+- `KGEN-Canon/KGEN_CANON_MASTER.json`
+- `KGEN-Canon/KGEN_DOCUMENT_INDEX.json`
+- `KGEN-Canon/KGEN_RUNTIME_INDEX.json`
+- `KGEN-Canon/KGEN_SDK_INDEX.json`
+- `KGEN-Canon/KGEN_TERMS_DICTIONARY.json`
+- `KGEN-Canon/KGEN_DEPENDENCY_GRAPH.json`
+
+## Token And Listing Facts
+
+| Item | Value |
+|---|---|
+| Name | KLINE GENESIS |
+| Symbol | KGEN |
+| Chain | BNB Smart Chain |
+| Standard | BEP-20 |
+| Total Supply | 72,000,000 KGEN |
+| Decimals | 18 |
+| Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
+| Tax | 0.30% only on AMM buy/sell |
+| Fair Launch | No ICO / No IEO / No Presale |
+
+## Official Links
+
+- **Website:** https://klineodyssey.github.io/kline-odyssey/
+- **GitHub:** https://github.com/klineodyssey/kline-odyssey
+- **BscScan:** https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- **PancakeSwap:** https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be
+- **CoinMarketCap DexScan:** https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/
+- **GeckoTerminal:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- **CoinGecko market data:** https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2
+- **Telegram:** https://t.me/KLINEODYSSEY
+- **X:** https://x.com/klineodyssey
+- **YouTube:** https://www.youtube.com/@klineodyssey
+- **Whitepaper FINAL:** docs/physics/final-whitepaper/KGEN_Universe_Physics_Runtime_V4.0_OFFICIAL_WHITEPAPER_FINAL.pdf
+- **Genesis Library:** KGEN-Genesis/
